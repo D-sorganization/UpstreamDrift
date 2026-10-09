@@ -1,0 +1,117 @@
+# Native Moving-Path Force and Length Consistency
+
+F07 child #11856 isolates a native path-work discrepancy found during #11834.
+This original fixture and its diagnostic gate establish implementation facts
+only. They do not qualify donor anatomy, physiological force capacity, muscle
+fitting, capture reconstruction, or independent full-state muscle replay.
+
+## Original Mechanism and Units
+
+The executable reference is `scripts/diagnostics/native_path_work.py`. It creates
+one body of mass 1 kg, centre of mass at its pin, and isotropic inertia
+$I=0.02\,\mathrm{kg\,m^2}$. The pin rotates about the world $z$ axis. Gravity is
+zero. One native `PathActuator` has optimal force 1 N and receives native control
+1, with no controller, contact, coupler, wrapping surface, or donor resource.
+
+The ground point is $(-0.2,0.2,0)$ m. The body-local via point is
+$(0.1+0.03q,0.05,0)$ m and the insertion is $(0.2,0.05,0)$ m. A fixed-point
+control replaces the via point with $(0.1,0.05,0)$ m. These are original
+diagnostic dimensions, not anatomical estimates. Both terminal points share
+the same body. The moving-point coordinate sockets all reference the pin;
+the $y$ and $z$ functions are constant.
+
+For the tested $q\in\{-0.2,0,0.2\}$ rad, the terminal segment has length
+$l_s=0.1-0.03q$ m and therefore $-dl_s/dq=0.03$ m/rad. There is no singular
+segment, clamp, or assembly constraint in this interval. No extrapolation
+outside this interval or physiological coordinate-domain claim is made.
+
+## Native Force, Geometry, and Numerical Check
+
+The assay reloads each serialized original model and copies its native initial
+state for each independent sample. At zero speed, native unit-tension
+acceleration gives the generalized force $Q=I\ddot q$. Separately, at unit
+speed, native path lengthening gives $\dot l$. For a consistent unit-tension
+path, the expected identities are
+
+$$
+r=-\frac{\partial l}{\partial q},\qquad Q=T r,\qquad
+Q\dot q=-T\dot l.
+$$
+
+The existing public `compute_path_length_finite_difference_moment_arm` and
+`validate_moment_arm_consistency` providers are reused. Central stencils use
+$h\in\{10^{-3},10^{-4},10^{-5}\}$ rad; achieved coordinate spans are recorded.
+The 1e-7 m consistency threshold is a numerical diagnostic threshold, not a
+measured physiological or instrument uncertainty. Coarse fixed-path stencil
+error is about 1e-8 m and decreases on refinement. Finest-stencil tests require
+the fixed discrepancy and moving discrepancy minus 0.03 m to be below 1e-10 m.
+
+On OpenSim `4.6-2026-06-22-85aaf64`, all nine fixed-path samples pass and all
+nine moving-path samples fail the diagnostic gate. At $q=0$ the moving case
+has native moment arm 0.06260990337 m, native $\ddot q=3.1304951685$
+rad/s² under 1 N tension, but full geometric derivative moment arm
+0.09260990337 m. Native lengthening speed is -0.09260990337 m/s at unit
+coordinate speed. The 0.03 m discrepancy agrees with the terminal segment
+derivative and persists across step refinement. Actual applied-force dynamics
+therefore agree with the native moment arm rather than the full path-length
+derivative. This is not merely disagreement between two reporting functions.
+
+Nonfinite moment arms, sampled lengths, coordinates, steps, tolerances and
+derivative results are rejected. Unresolvable stencils and nonpositive
+tolerances are rejected. These checks use explicit exceptions so disabling
+optional `DBC_LEVEL` diagnostics cannot admit invalid scientific evidence.
+The driver always emits `scientific_status="unqualified"`, including for the
+fixed control; sample agreement cannot qualify a whole model or replay.
+
+## Source and Runtime Identity
+
+The reviewed official source revision is
+`85aaf6450a2f22457dac4d1ab35adfed9d3a8e43`:
+
+- [GeometryPath.cpp](https://github.com/opensim-org/opensim-core/blob/85aaf6450a2f22457dac4d1ab35adfed9d3a8e43/OpenSim/Simulation/Model/GeometryPath.cpp):
+  SHA-256 `dbb13642bb2db9a46e6cc02653692f20e414d1a69f521ea106ecfd5bd2ccced5`.
+- [MomentArmSolver.cpp](https://github.com/opensim-org/opensim-core/blob/85aaf6450a2f22457dac4d1ab35adfed9d3a8e43/OpenSim/Simulation/MomentArmSolver.cpp):
+  SHA-256 `42b6614770f04354b597fecfa8c166a6c4b3e2d9a72cd780682bbad1a0c40ad3`.
+
+In that source, `GeometryPath::produceForces` applies moving-point generalized
+work inside the condition that the next path point belongs to a different
+mobilized body. Its length calculation includes same-body segments.
+`MomentArmSolver` obtains unit-tension path forces and projects generalized
+force through the coordinate coupling vector. This source structure explains
+the original fixture observation; no runtime patch is included.
+
+Receipts record actual native version, Python version, loaded extension
+hashes, original XML hashes, native loaded serialization hashes, numerical
+settings, probe and gate-provider hashes, and unchanged source/loaded-model
+checks. The reviewed source pin is distinguished from the executing binary:
+source-to-binary reproducibility and complete dependent-DLL closure remain
+explicitly unverified. Missing verification is never a zero or a pass.
+
+## Reproduction and Follow-Up Gates
+
+From the repository root, with the actual native provider selected:
+
+```powershell
+& C:/Users/diete/Repositories/.venv-feedback-opensim/Scripts/python.exe -m scripts.diagnostics.native_path_work --output C:/Users/diete/Repositories/docs/development/feedback_controls_planning/native_model_evaluation/original_path_work_11856
+& C:/Users/diete/Repositories/.venv-feedback-opensim/Scripts/python.exe -m pytest tests/opensim/test_native_path_work.py -o addopts='' -q
+python3 -m scripts.check_design_manual_governance
+```
+
+The output contains only original fixtures and observations. It does not
+download or redistribute donor assets. Native tests skip explicitly without
+the bindings; skipped tests cannot substantiate a native result.
+
+Before choosing a remedy, review three distinct alternatives: a verified native
+force implementation that retains the moving path; a validated alternative
+anatomical path with independent source and calibration evidence; or leaving
+the affected model ineligible for physiological fitting. Replacing native
+moment arms by geometric gradients in an optimizer without changing and
+validating the actual force plant would create a different model and would
+not resolve replay consistency. Removing the terminal segment, freezing the
+moving point, or altering donor couplers to hide the failure is inadmissible.
+Any native patch needs independent regression, exact runtime provenance,
+power/force checks and review before donor reuse. No third-party outreach is
+part of this child. The donor ECRL wrapping discrepancy, anatomical input
+bounds, notice conditions, grip/contact, force capacity and full-capture
+full-state replay remain open. The existing milestone DAG and model parity
+denominator are unchanged. Manual release remains blocked.
