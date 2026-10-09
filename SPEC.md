@@ -10385,3 +10385,18 @@ inputs. Baselines must include independent polynomial, computed torque,
 MOSAIC+TVLQR, and selected OCP under one observation identity, horizon, and
 budget. This is an admission contract, not a successful native replay or
 scientific match; numerical gate qualification belongs to follow-on issues.
+
+## Distributed Task and Phase Feedback (F02, #11786)
+
+`src/shared/python/motion_matching/distributed_feedback.py` consumes MOSAIC
+time-varying LQR gains, a frozen nominal feedforward trajectory, and explicit
+tangent-model and task adapters. Named pelvis/feet, trunk, arms, wrists/hands,
+and club tasks have phase masks, priorities, framed targets, and a single
+post-allocation actuator boundary. Exact simulated-state information, channel
+order, unit-constant transmission, unactuated roots, native contact dynamics
+and step-wise zero-order hold are checked; unsupported mappings fail closed.
+The controller records nominal, feedback, requested and applied torques
+separately. Existing contact/grip QP reactions are predictions, never hidden
+inputs to a native plant. The analytic sign/stability, rate, conflict,
+permutation, manifold and native one-joint tests are local evidence only;
+native six-engine and muscle capture qualification remain open.
