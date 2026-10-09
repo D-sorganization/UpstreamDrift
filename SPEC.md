@@ -10554,3 +10554,32 @@ deadline, state/anatomical limit, contact, muscle, private capture,
 full-body or six-engine qualification is claimed. The provisional manual
 calculation is chapter 26; turnover is
 `docs/development/feedback_controls/F05D_NATIVE_MANIFOLD_BOX_FDDP_TURNOVER.md`.
+
+## Native Activation-Aware Manifold Boundary (F05e, #11958)
+
+Both native manifold adapters share difference/retraction Jacobians and
+Gauss–Newton tracking derivatives in `native_manifold_calculus.py`. Model-specific
+state admission and native stepping remain at each boundary. Activation replay
+identity binds adapter and shared-helper bytes; mutation rejects the previous
+identity. The F05e receipt is regenerated against this closure. Existing F05d
+paired timings retain their pre-extraction hashes and historical scope, distinct
+from the twenty native regression cases run after extraction.
+
+`native_activation_manifold.py` admits a self-contained, contact-free
+MuJoCo 3.8.0 Euler floating-root model with built-in joint muscles,
+bounded dimensionless actuator commands, and disabled warmstart/autoreset.
+It defines the Crocoddyl physical state $(q,v,a)$ and local tangent
+$(\delta q,\delta v,\delta a)$, preserving quaternion manifold operations
+and native activation dynamics. Complete `mjSTATE_INTEGRATION` is a separate
+restart artifact rather than an undifferentiated optimizer axis. Native
+`mjd_transitionFD` activation-aware derivatives are independently checked
+at interior states and source/model/compiled-law identities are bound.
+The actual held command history and complete initial state are frozen in
+the pinned Tools T01 bundle and replayed by a fresh native model without
+feedback. The source-hashed supported-provider diagnostic receipt is
+`docs/development/feedback_controls/F05E_NATIVE_ACTIVATION_RECEIPT_MJ38.json`;
+the provisional canonical calculation is chapter 36. The fixture has no
+contact, golfer anatomy, measured capture, mixed production actuation,
+optimal-control acceptance, hard timing claim or six-engine qualification.
+F05 #11789 and manual publication remain open. Turnover is
+`docs/development/feedback_controls/F05E_NATIVE_ACTIVATION_TURNOVER.md`.

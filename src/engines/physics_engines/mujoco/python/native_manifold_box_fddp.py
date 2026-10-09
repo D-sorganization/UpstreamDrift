@@ -22,6 +22,11 @@ from numpy.typing import NDArray
 from src.engines.physics_engines.mujoco.python.box_fddp_tracking import (
     classify_native_box_candidate,
 )
+from src.engines.physics_engines.mujoco.python.native_manifold_calculus import (
+    difference_jacobians,
+    integration_jacobians,
+    set_tracking_cost_derivatives,
+)
 from src.engines.physics_engines.mujoco.python.native_nmpc_tracking import (
     NativeNMPCTracking,
     run_native_direct_torque_tracking,
@@ -90,36 +95,14 @@ class NativeManifoldState(crocoddyl.StateAbstract):
         before = self._checked(x0)
         after = self._checked(x1)
 
-        def first(d: Array) -> Array:
-            return self.diff(self.integrate(before, d), after)
-
-        def second(d: Array) -> Array:
-            return self.diff(before, self.integrate(after, d))
-
-        if firstsecond == crocoddyl.Jcomponent.first:
-            return [self._jacobian(first)]
-        if firstsecond == crocoddyl.Jcomponent.second:
-            return [self._jacobian(second)]
-        return [self._jacobian(first), self._jacobian(second)]
+        return difference_jacobians(self, before, after, firstsecond)
 
     def Jintegrate(
         self, x: Array, dx: Array, firstsecond: Any = crocoddyl.Jcomponent.both
     ) -> list[Array]:
         base = self._checked(x)
         tangent = _vector(dx, self.ndx, "native tangent")
-        output = self.integrate(base, tangent)
-
-        def first(d: Array) -> Array:
-            return self.diff(output, self.integrate(self.integrate(base, d), tangent))
-
-        def second(d: Array) -> Array:
-            return self.diff(output, self.integrate(base, tangent + d))
-
-        if firstsecond == crocoddyl.Jcomponent.first:
-            return [self._jacobian(first)]
-        if firstsecond == crocoddyl.Jcomponent.second:
-            return [self._jacobian(second)]
-        return [self._jacobian(first), self._jacobian(second)]
+        return integration_jacobians(self, base, tangent, firstsecond)
 
     def JintegrateTransport(
         self, x: Array, dx: Array, Jin: Array, firstsecond: Any
@@ -222,18 +205,14 @@ class NativeManifoldAction(crocoddyl.ActionModelAbstract):
             raise ValueError("native action and discrete derivative disagree")
         data.Fx = discrete.A
         data.Fu = discrete.B
-        error = self.native_state.diff(self.reference, data.xnext)
-        jacobian = self.native_state.Jdiff(
-            self.reference, data.xnext, crocoddyl.Jcomponent.second
-        )[0]
-        weighted = self.state_weights * error
-        gradient = 2 * jacobian.T @ weighted
-        curvature = 2 * jacobian.T @ np.diag(self.state_weights) @ jacobian
-        data.Lx = data.Fx.T @ gradient
-        data.Lu = data.Fu.T @ gradient + 2 * self.input_weights * command
-        data.Lxx = data.Fx.T @ curvature @ data.Fx
-        data.Lxu = data.Fx.T @ curvature @ data.Fu
-        data.Luu = data.Fu.T @ curvature @ data.Fu + 2 * np.diag(self.input_weights)
+        set_tracking_cost_derivatives(
+            data,
+            self.native_state,
+            self.reference,
+            self.state_weights,
+            command,
+            self.input_weights,
+        )
 
 
 class NativeManifoldTerminal(crocoddyl.ActionModelAbstract):
