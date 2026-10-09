@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 import hashlib
+import json
 from pathlib import Path
 
 import numpy as np
@@ -13,6 +14,7 @@ from src.engines.feedback_comparison import DriveMode, FeedbackComparisonRegistr
 from src.engines.feedback_native_execution import (
     NativeAdapterBinding,
     NativeReplayRequest,
+    _validate_command_evidence_row,
     build_native_replay_report,
     execute_native_replay,
     validate_native_replay_output,
@@ -30,11 +32,17 @@ from sidekick.lab.mocap import (
     InitialStateSchema,
     InputChannel,
     InputInterpolation,
+    DriveMode as T02DriveMode,
     ModelIdentity,
     ReplayExecutionPolicy,
     ReplayMode,
     StateComponentRole,
     StateComponentSpec,
+    ComparisonEvidenceRow,
+    EvidenceArtifactKind,
+    EvidenceArtifactReference,
+    ImplementationEvidence,
+    ImplementationEvidenceKind,
     build_experiment_replay_bundle,
 )
 
@@ -190,6 +198,81 @@ def test_receipt_rejects_changed_native_initial_numerical_state(
         validate_native_replay_output(row, binding, bundle, output)
 
 
+def test_pinocchio_qv_state_is_validated_without_fabricated_cache_state(
+    registry: FeedbackComparisonRegistry,
+) -> None:
+    from src.engines.physics_engines.pinocchio.python.native_torque_replay import (
+        NativePinocchioTorqueReplay,
+    )
+
+    inventory_row = registry.get("pinocchio/driver", "default", DriveMode.TORQUE)
+    _, source_bundle, _ = _bundle(registry)
+    source_model = replace(
+        source_bundle.model,
+        engine_id="pinocchio",
+        provider_id="pinocchio-native-torque-replay",
+        state_schema=InitialStateSchema(
+            "test-pinocchio-qv-state",
+            "1.0.0",
+            source_bundle.model.state_schema.components[:2],
+        ),
+    )
+    bundle = build_experiment_replay_bundle(
+        source_bundle.experiment_id,
+        source_model,
+        source_bundle.capabilities,
+        tuple(
+            (item.component_id, item.values) for item in source_bundle.initial_state[:2]
+        ),
+        source_bundle.input_history.channels,
+        source_bundle.input_history.input_kind,
+        source_bundle.input_history.interpolation,
+        source_bundle.input_history.time_seconds,
+        source_bundle.input_history.values,
+        source_bundle.policy,
+    )
+    source_sha = source_model.source_model_sha256
+    row = replace(
+        inventory_row,
+        source_model_sha256=source_sha,
+        provider_id="synthetic-inventory-provider",
+        provider_sha256="e" * 64,
+        availability="available",
+    )
+    registry.rows = (row,)
+    binding = NativeAdapterBinding(
+        package_id=row.package_id,
+        variant_id=row.variant_id,
+        drive_mode=row.drive_mode,
+        native_model_id=source_model.model_id,
+        native_variant_id=source_model.variant_id,
+        native_execution_provider_id=source_model.provider_id,
+        native_execution_provider_sha256=source_model.provider_sha256,
+        source_model_sha256=source_model.source_model_sha256,
+        loaded_native_model_sha256=source_model.loaded_native_model_sha256,
+        state_schema_sha256=bundle.state_schema_sha256,
+        input_channel_schema_sha256=bundle.input_channel_schema_sha256,
+        ordered_input_channel_ids=source_model.ordered_input_channel_ids,
+    )
+    output = NativePinocchioTorqueReplay(
+        time_seconds=np.asarray(bundle.input_history.time_seconds),
+        qpos=np.array([[0.0], [0.001], [0.003]]),
+        qvel=np.array([[0.0], [0.1], [0.2]]),
+        applied_actuator_torques=np.asarray(bundle.input_history.values[:-1]),
+        generalized_actuator_torques=np.array([[0.1], [0.2]]),
+        input_sha256=bundle.applied_input_sha256,
+        policy_sha256=bundle.policy_sha256,
+    )
+
+    receipt = validate_native_replay_output(row, binding, bundle, output)
+
+    assert receipt.engine == "pinocchio"
+    assert receipt.nq == receipt.nv == 1
+    assert receipt.full_state and receipt.full_horizon
+    assert receipt.initial_state_sha256 == bundle.integrity.initial_state_sha256
+    assert receipt.state_reset_count is None
+
+
 @pytest.mark.parametrize(
     ("binding_field", "value", "message"),
     [
@@ -269,6 +352,86 @@ def test_request_references_bundle_model_path_without_serializing_it(
         f"{row.package_id}/{row.variant_id}/{row.drive_mode.value}"
     )
     assert request.as_dict()["bundle_schema"] == bundle.schema_version
+
+
+def test_command_admission_requires_matching_t02_profile_artifact(
+    registry: FeedbackComparisonRegistry,
+) -> None:
+    from sidekick.lab.mocap import COMPILED_ACTUATOR_PROFILE_SCHEMA_VERSION
+
+    f01_row = registry.get("myosuite/driver", "default", DriveMode.MUSCLE_EXCITATION)
+    _, source_bundle, _ = _bundle(registry)
+    bundle = build_experiment_replay_bundle(
+        source_bundle.experiment_id,
+        source_bundle.model,
+        source_bundle.capabilities,
+        tuple((item.component_id, item.values) for item in source_bundle.initial_state),
+        source_bundle.input_history.channels,
+        ActuationInputKind.ACTUATOR_COMMAND,
+        InputInterpolation.ZERO_ORDER_HOLD,
+        source_bundle.input_history.time_seconds,
+        source_bundle.input_history.values,
+        source_bundle.policy,
+    )
+    profile_bytes = json.dumps(
+        {"schema_version": COMPILED_ACTUATOR_PROFILE_SCHEMA_VERSION},
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode()
+    profile_sha = hashlib.sha256(profile_bytes).hexdigest()
+    reference = "opaque:test-compiled-profile"
+    from sidekick.lab.mocap import (
+        COMPILED_ACTUATOR_PROFILE_ID,
+        COMPILED_ACTUATOR_PROFILE_VERSION,
+    )
+
+    t02_row = ComparisonEvidenceRow(
+        "myosuite/driver/default/muscle_excitation",
+        "myosuite/driver",
+        "default",
+        T02DriveMode.MUSCLE_EXCITATION,
+        bundle,
+        CapabilitySupport.SUPPORTED,
+        CapabilityAvailability.AVAILABLE,
+        (
+            ImplementationEvidence(
+                ImplementationEvidenceKind.ACTUATOR,
+                COMPILED_ACTUATOR_PROFILE_ID,
+                COMPILED_ACTUATOR_PROFILE_VERSION,
+                profile_sha,
+                True,
+                CapabilitySupport.SUPPORTED,
+                CapabilityAvailability.AVAILABLE,
+                evidence_reference_id=reference,
+            ),
+        ),
+        (
+            EvidenceArtifactReference(
+                EvidenceArtifactKind.ACTUATOR, reference, profile_sha
+            ),
+        ),
+    )
+    binding = NativeAdapterBinding(
+        f01_row.package_id,
+        f01_row.variant_id,
+        f01_row.drive_mode,
+        bundle.model.model_id,
+        bundle.model.variant_id,
+        bundle.model.provider_id,
+        bundle.model.provider_sha256,
+        f01_row.source_model_sha256,
+        bundle.model.loaded_native_model_sha256 or "",
+        bundle.state_schema_sha256,
+        bundle.input_channel_schema_sha256,
+        bundle.model.ordered_input_channel_ids,
+    )
+    request = NativeReplayRequest(binding, bundle, Path("synthetic.xml"))
+
+    parsed = _validate_command_evidence_row(request, t02_row, profile_bytes)
+
+    assert parsed["schema_version"] == COMPILED_ACTUATOR_PROFILE_SCHEMA_VERSION
+    with pytest.raises(ValueError, match="artifact digest"):
+        _validate_command_evidence_row(request, t02_row, profile_bytes + b" ")
 
 
 def test_execution_calls_native_mujoco_adapter_on_independent_synthetic_model(

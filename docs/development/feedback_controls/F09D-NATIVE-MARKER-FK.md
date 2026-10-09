@@ -12,14 +12,16 @@ native body/frame and one finite body-local point in metres. The map SHA binds
 the ordered labels, frames, offsets, output world frame, timebase, source and
 loaded-model digests, and native adapter provider identity.
 
-The MuJoCo consumer restores each actual replay `qpos` into a fresh native data
-object and uses `mj_forward` plus native body transforms. The Drake consumer
-loads the exact bound plant, sets each actual replay configuration in a native
-context, and queries native frame point positions in world. Both require a
-strictly increasing complete simulation-relative output grid, exact loaded
-model identity, known frame names, unique ordered labels, and finite arrays.
-They never step a second simulation or inspect measured observations. F09c
-remains the sole input/replay authority.
+The initial MuJoCo consumer restores each actual replay `qpos` into a fresh
+native data object and uses `mj_forward` plus native body transforms. The Drake
+consumer loads the exact bound plant, sets each actual replay configuration in
+a native context, and queries native frame point positions in world. F09e
+#11914 adds the actual Pinocchio frozen-replay output and the public
+`PinocchioPhysicsEngine` frame transforms. All require the complete
+simulation-relative output grid, exact loaded-model identity, known frame
+names, unique ordered labels, and finite arrays. They never step a second
+simulation or inspect measured observations. F09c remains the sole
+input/replay authority.
 
 `NativeMarkerReplayEvidence` includes the native execution receipt and digest,
 marker-map digest, native marker position digest and typed
@@ -38,9 +40,9 @@ Tests include an independent MuJoCo floating-base and hinge transform fixture,
 a Drake `nq != nv` floating-base fixture, a nonzero body-local offset, changed
 mapping digest, stale model rejection, and unknown native frame rejection.
 The tests establish only the FK software boundary. Current six-engine
-availability remains unchanged: MuJoCo and Drake expose this torque-only
-adapter path; OpenSim waits for its separate F07 geometry/full-state seam, and
-Pinocchio, MyoSuite and Simscape remain required but unimplemented here. No
+availability remains unchanged: MuJoCo, Drake and Pinocchio expose this
+torque-only adapter path; OpenSim waits for its separate F07 geometry/full-state
+seam, and MyoSuite and Simscape remain required but unimplemented here. No
 anatomical mapping, tolerance, physiology, contact, or cross-engine claim is
 introduced.
 

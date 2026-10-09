@@ -8323,6 +8323,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-09 | #11914 | Extend frozen native replay receipts and model-owned marker FK to actual Pinocchio q/v output, with frame-local marker transforms and nq=8/nv=7 identity-bound synthetic verification. |
 | 2026-10-07 | #11692 | Protect `.yml` and Related Filenames in the Title-Case Checker |
 | 2026-10-07 | #11666 | Register latex-references.yml in the workflow inventory so the inventory gate passes on main |
 | 2026-10-07 | #11598 | Commit recovered Crocoddyl G1 warm-start IK and 0.60 s FDDP stage inputs beside the rk45, rtol6 and b100 receipts, plus the w030r chain-root candidate, with sha256 provenance |
@@ -10416,9 +10417,10 @@ authoritative F01 comparison row. Its `NativeAdapterBinding` keeps the F01
 inventory provider/source identity separate from the T01 native adapter,
 loaded model, state-schema, and ordered input-channel identities. No provider
 or model variant is inferred from a package name. The current supported
-execution pairs are the reviewed MuJoCo and Drake direct-torque adapters;
-other required engines remain in the six-engine denominator as unsupported or
-unavailable until an explicit adapter exists.
+execution pairs are the reviewed MuJoCo and Drake direct-torque adapters and
+the Pinocchio native torque adapter. Other required engines remain in the
+six-engine denominator as unsupported or unavailable until an explicit
+adapter exists.
 
 The executor accepts only a complete `experiment-replay/1.0.0` bundle with
 native-own-contact policy, no observation/state-feedback access, reset policy
@@ -10448,18 +10450,28 @@ identity. No marker is synthesized from generalized coordinates, quaternion
 components, or native integration-state arrays.
 
 The initial public FK consumers are the existing MuJoCo and Drake direct-torque
-adapters. Their frame loading rechecks the exact Tools bundle model identity and
-uses native FK for every full-horizon output configuration. The output retains
+adapters and the existing Pinocchio frozen-replay adapter. Their frame loading
+rechecks the exact Tools bundle model identity and uses native FK for every
+full-horizon output configuration. Pinocchio retains complete `qpos` and
+`qvel` with distinct `nq` and `nv`; derived frame placements use the public
+`PinocchioPhysicsEngine` path. Its cache initialization policy is bound without
+inventing a cache payload or claiming a measured reset count. The output retains
 native sample times and ordered 3-D points; its unqualified receipt binds the
 F09c execution receipt, state-output digest, marker-map digest, and position
 output digest. It contains no local model path. OpenSim marker geometry is
 owned by F07 #11903 and is consumed only once a matching full-state replay
-interface is available. Pinocchio, MyoSuite, Simscape, and unavailable
-providers remain explicit in the six-engine denominator. Marker FK does not
+interface is available. MyoSuite, Simscape, and unavailable providers remain
+explicit in the six-engine denominator. Marker FK does not
 score observations or qualify anatomy, muscle physiology, contact, or model
 equivalence. `NativeMarkerReplayReport` keeps all inventory rows and six
 required engines visible; FK coverage is not qualification. Canonical note:
 `manuals/upstreamdrift/chapters/28-native-marker-forward-kinematics.qmd`.
+
+## Pinocchio Native Marker Forward Kinematics (F09e, #11914)
+
+F09e extends the F09d marker-output boundary with Pinocchio's existing native replay adapter and `PinocchioPhysicsEngine`. It evaluates only the actual q trajectory emitted by a validated, uninterrupted frozen torque replay. The complete state is Pinocchio configuration and tangent velocity (`nq` and `nv` remain distinct); cached frame poses are derived by the engine and are not fabricated extra state. Each ordered marker is an explicitly named native frame plus a finite local offset in metres, mapped by the frame's world transform.
+
+The F01 inventory package/variant/drive provider remains distinct from the T01/F06 native model, adapter provider, loaded-model, state-schema, input, and executed-policy identities. The mapping binds both namespaces and rejects mismatches. Synthetic Pinocchio 4.1 fixtures use an actual floating base (`nq=8`, `nv=7`), nonzero base translation/rotation, hinge configuration, and marker offset; expected points are computed from independent transform equations. A successful marker result remains unqualified and does not establish model physics, observation fit, contact, anatomy, or parity. The six-engine and all registered model/drive rows remain in the readiness denominator.
 
 ## Controlled-Swing Comparison Admission (F01, #11785)
 
@@ -10511,3 +10523,12 @@ cold/warm starts, failures, timing and Python-tracked peak memory. The shooting
 fixture uses one constant torque while the spike uses one input per interval,
 so no production backend is selected from these results. Native F06 replay,
 private protocol D02, contact and full-body engine evidence remain open.
+
+## Native Pinocchio Frozen Torque Replay (#11900)
+
+The F06c adapter uses the existing public native ABA/RK4 integration kernel with complete configuration/tangent velocity, explicit unit motor scattering and immutable uninterrupted replay evidence. Canonical chapter25 and F06_PINOCCHIO_NATIVE_TURNOVER record source/model/provider identity, actual native RED/GREEN, fixture refinement and all remaining contact, muscle, capture and required-model parity gates. Tools owns the replay schema; common native admission is shared with Drake/MuJoCo and remains provider-hashed.
+## MyoSuite Native Muscle-Excitation Replay (F09f, #11918)
+
+`src/engines/physics_engines/myosuite/python/native_excitation_replay.py` consumes the versioned Tools T01 experiment bundle through a direct native MyoSuite/MuJoCo plant. Its input is normalized post-mapping muscle excitation written to ordered native `data.ctrl`; a Gym `[-1, 1]` action is not excitation and is never inverse-transformed. The fixed policy binds the registered environment, source and loaded model, provider/runtime identity, solver/integrator, frame skip, wrapper chain, state schema, time grid, applied inputs, and policy. It checks actual control readback and restores q/v, muscle activation, actuator controls, full `mjSTATE_INTEGRATION`, and the explicitly supported wrapper state before a fixed-horizon ZOH replay. The adapter does not call Gym `step`, task observation, reward, termination, tracking, or reset paths.
+
+An actual MyoSuite 3.0.0/MuJoCo 3.6.0 smoke on the public elbow pose fixture validates only the native excitation adapter seam. It does not bind the required MyoSuite golfer driver or iron rows. Both remain unqualified; all six engines and every registered model row stay in the denominator. No physiology, marker accuracy, production support, cross-engine equivalence, or scientific gate verdict follows from a successful receipt. The generic engine's legacy four-value Gym step path is unaffected and needs its own separately scoped compatibility test if supported. Canonical note: `manuals/upstreamdrift/chapters/31-myosuite-native-excitation-replay.qmd`.

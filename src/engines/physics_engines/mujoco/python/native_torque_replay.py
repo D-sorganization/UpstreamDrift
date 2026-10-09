@@ -19,6 +19,8 @@ from numpy.typing import NDArray
 
 from src.engines.native_replay_contracts import (
     native_replay_admission_bytes,
+    native_replay_contract_types,
+    require_no_global_mujoco_callbacks,
     validate_native_replay_bundle,
 )
 
@@ -26,16 +28,6 @@ if TYPE_CHECKING:
     from sidekick.lab.mocap import ExperimentReplayBundle
 
 _VERSION = "1.0.0"
-_CALLBACKS = (
-    "control",
-    "passive",
-    "act_dyn",
-    "act_gain",
-    "act_bias",
-    "sensor",
-    "contactfilter",
-    "time",
-)
 
 
 @dataclass(frozen=True)
@@ -53,25 +45,13 @@ class NativeTorqueReplay:
 
 
 def _contracts() -> Any:
-    """Resolve the single Tools authority, requiring its implemented T01 API."""
-    from src.shared.python._seam_redirect import extend_sidekick_lab_path
-
-    extend_sidekick_lab_path()
-    from sidekick.lab import mocap
-
-    if not hasattr(mocap, "ExperimentReplayBundle"):
-        raise RuntimeError(
-            "Native replay requires the Tools T01 experiment-replay contract"
-        )
-    return mocap
+    return native_replay_contract_types()
 
 
 def _load_native(path: Path) -> tuple[Any, Any]:
     import mujoco as mj
 
-    for name in _CALLBACKS:
-        if getattr(mj, "get_mjcb_" + name)() is not None:
-            raise ValueError("native callbacks are forbidden in independent replay")
+    require_no_global_mujoco_callbacks(mj)
     source_hash = hashlib.sha256(path.read_bytes()).digest()
     model = mj.MjModel.from_xml_path(str(path))
     if hashlib.sha256(path.read_bytes()).digest() != source_hash:
@@ -388,7 +368,9 @@ def native_marker_positions_from_replay(
         if body_id < 0:
             raise ValueError(f"unknown native marker body: {body_name}")
         resolved.append((body_id, local))
-    positions = np.empty((len(times), len(attachments), 3), dtype=np.float64)
+    positions: NDArray[np.float64] = np.empty(
+        (len(times), len(attachments), 3), dtype=np.float64
+    )
     for sample, configuration in enumerate(qpos):
         data.qpos[:] = configuration
         mj.mj_forward(model, data)

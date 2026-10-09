@@ -29,8 +29,10 @@ closed.
 
 MuJoCo computes each position with the loaded model's forward pass and body
 pose. Drake sets each replay configuration in its loaded plant context and
-evaluates named frame points in world. Both use the same loaded model identity
-that was admitted by the native replay bundle. A separate native output
+evaluates named frame points in world. Pinocchio F09e uses the existing native
+replay adapter and `PinocchioPhysicsEngine` frame transforms, retaining complete
+q/v with distinct `nq` and `nv`. All use the same loaded model identity that
+was admitted by the native replay bundle. A separate native output
 receipt binds F09c state/input/policy evidence to the marker-map and position
 digests. This receipt remains unqualified.
 
@@ -42,7 +44,7 @@ qualification or establish observation agreement.
 
 OpenSim geometry mapping belongs to F07 (#11903) and may be consumed here only
 when its adapter supports the same complete replay state and model identity.
-Other required engines remain visible and blocking until native providers are
+MyoSuite and Simscape remain visible and blocking until native providers are
 implemented. No synthetic marker map is inferred from `q`, quaternions, mesh
 vertices, coordinate names, or a capture.
 
@@ -53,6 +55,9 @@ configuration, and nonzero body-local marker offset. The MuJoCo fixture uses
 analytic quaternion and hinge rotations for the expected world point. The
 Drake fixture compares its point result against the independent composition
 of the native body's world pose and local offset while preserving $n_q\ne n_v$.
+The Pinocchio 4.1 fixture independently composes a nonzero free-flyer pose,
+revolute hinge, joint-origin transform, and frame-local marker offset while
+preserving $n_q=8$, $n_v=7$.
 These fixtures test software integration and identity checks only; they do not
 establish anatomical marker attachment, observation fit, contact behavior,
 muscle physiology, or scientific acceptance.
