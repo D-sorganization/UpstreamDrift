@@ -57,6 +57,8 @@ export interface LegendSpec {
   scale_mode?: ScaleMode;
   /** Labels whose arrow was shortened to the maximum length (double tip). */
   clamped_labels?: string[];
+  /** How the left/right grip split was obtained; absent without grip data (GCV-10). */
+  grip_split_method?: string;
 }
 
 /** Arrow scaling (GCV-4, #11710); mirrors `ForceGlyphStyle.scale_mode`. */

@@ -25,6 +25,8 @@ from typing import Any, NamedTuple, Protocol, runtime_checkable
 import numpy as np
 from numpy.typing import NDArray
 
+from src.shared.python.biomechanics.grip_extraction import unavailable_analysis
+from src.shared.python.biomechanics.grip_wrench import GripAnalysis
 from src.shared.python.biomechanics.ground_reaction_wrenches import (
     ground_reaction_overlay,
 )
@@ -34,6 +36,7 @@ from src.shared.python.force_overlay.contracts import (
     WrenchKind,
 )
 from src.shared.python.force_overlay.conversions import joint_torque_wrench
+from src.shared.python.force_overlay.grip_frame import grip_wrenches_and_metadata
 from src.shared.python.force_overlay.series import ForceTorqueSeries
 from src.shared.python.motion_matching.same_input import InputBundle
 
@@ -87,6 +90,23 @@ def _tuple3(vec: Sequence[float] | Array) -> Vec3:
     return (float(vec[0]), float(vec[1]), float(vec[2]))
 
 
+@runtime_checkable
+class GripSource(Protocol):
+    """An engine adapter that can report the hands' wrench on the club (GCV-8)."""
+
+    def grip_analysis(
+        self,
+        coordinates: Mapping[str, float],
+        rates: Mapping[str, float],
+        primitive_efforts: Mapping[str, float],
+    ) -> GripAnalysis:
+        """Per-hand wrenches ON THE CLUB at the given state."""
+        ...
+
+
+_GRIP_FAILURES = (ValueError, ArithmeticError, RuntimeError, np.linalg.LinAlgError)
+
+
 class BundleOverlayProvider:
     """Time series of overlay frames for one bundle (or a replay of it).
 
@@ -113,6 +133,9 @@ class BundleOverlayProvider:
             )
         if not engine:
             raise ValueError("engine must be a non-empty string")
+        self._grip: GripSource | None = None
+        self._grip_cache: dict[int, GripAnalysis] = {}
+        self._grip_source = f"{engine}:grip"
         if not (math.isfinite(torque_floor_nm) and torque_floor_nm >= 0.0):
             raise ValueError("torque_floor_nm must be finite and non-negative")
         expected = bundle.reference_q.shape
@@ -134,6 +157,23 @@ class BundleOverlayProvider:
             s["name"]: s["body"] for s in spec.get("contact", {}).get("spheres", ())
         }
 
+    def with_grip(
+        self, grip: GripSource, source: str | None = None
+    ) -> BundleOverlayProvider:
+        """Add the hands' wrench on the club (GCV-10); returns ``self``.
+
+        ``source`` labels where the extraction came from (frame metadata
+        ``grip_source``).  Raises ``TypeError`` if ``grip`` has no
+        ``grip_analysis``.
+        """
+        if not isinstance(grip, GripSource):
+            raise TypeError("grip must provide grip_analysis(coords, rates, efforts)")
+        self._grip = grip
+        self._grip_cache.clear()
+        if source:
+            self._grip_source = source
+        return self
+
     def __len__(self) -> int:
         return int(self._q.shape[0])
 
@@ -145,20 +185,55 @@ class BundleOverlayProvider:
         coords = dict(zip(names, map(float, self._q[index]), strict=True))
         rates = dict(zip(names, map(float, self._v[index]), strict=True))
         efforts = self._bundle.efforts[min(index, self._bundle.steps - 1)]
+        named_efforts = dict(zip(names, efforts, strict=True))
         wrenches = [
             *self._contact_wrenches(coords, rates),
-            *self._torque_wrenches(coords, dict(zip(names, efforts, strict=True))),
+            *self._torque_wrenches(coords, named_efforts),
             *self._weight_wrenches(coords),
         ]
+        metadata: dict[str, Any] = {
+            "source": "same_input_bundle",
+            "spec_sha256": self._bundle.spec_sha256,
+        }
+        grip_wrenches, grip_meta = self._grip_wrenches(
+            index, coords, rates, named_efforts
+        )
+        wrenches.extend(grip_wrenches)
+        metadata.update(grip_meta)
         return ForceTorqueFrame(
             time_s=float(index * self._bundle.dt_s),
             engine=self._engine,
             wrenches=tuple(wrenches),
-            metadata={
-                "source": "same_input_bundle",
-                "spec_sha256": self._bundle.spec_sha256,
-            },
+            metadata=metadata,
         )
+
+    def grip_analyses(self, indices: Sequence[int]) -> list[GripAnalysis]:
+        """Grip analyses at ``indices`` (cached; needs a ``grip`` source)."""
+        if self._grip is None:
+            raise ValueError("this provider was built without a grip source")
+        for k in indices:
+            self.frame_at(k)
+        return [self._grip_cache[k] for k in indices]
+
+    def _grip_wrenches(
+        self,
+        index: int,
+        coords: Mapping[str, float],
+        rates: Mapping[str, float],
+        efforts: Mapping[str, float],
+    ) -> tuple[tuple[OverlayWrench, ...], dict[str, Any]]:
+        """Grip wrenches and metadata; a failed solve is unavailable with a reason."""
+        if self._grip is None:
+            return (), {}
+        analysis = self._grip_cache.get(index)
+        if analysis is None:
+            try:
+                analysis = self._grip.grip_analysis(coords, rates, efforts)
+            except _GRIP_FAILURES as exc:
+                analysis = unavailable_analysis(f"grip solve failed: {exc}")
+            self._grip_cache[index] = analysis
+        wrenches, meta = grip_wrenches_and_metadata(analysis, source=self._grip_source)
+        return wrenches, {**meta, "grip_source": self._grip_source}
 
     def series(self, stride: int = 1) -> ForceTorqueSeries:
         """Frames at every ``stride``-th state."""

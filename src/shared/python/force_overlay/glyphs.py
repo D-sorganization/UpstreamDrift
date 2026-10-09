@@ -15,6 +15,7 @@ from src.shared.python.force_overlay.contracts import (
     WrenchKind,
     validate_vec3,
 )
+from src.shared.python.force_overlay.palette import label_variant_hex
 from src.shared.python.plot_style import FORCE_KIND_PALETTE
 
 __all__ = [
@@ -457,10 +458,18 @@ class LegendSpec:
     source_labels: tuple[str, ...] = ()
     scale_mode: str = "fixed"
     clamped_labels: tuple[str, ...] = ()
+    #: How the left/right grip split was obtained (``None`` without grip data).
+    grip_split_method: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         """Convert legend spec to JSON dictionary."""
+        extra = (
+            {"grip_split_method": self.grip_split_method}
+            if self.grip_split_method is not None
+            else {}
+        )
         return {
+            **extra,
             "force_reference_n": self.force_reference_n,
             "force_reference_length_m": self.force_reference_length_m,
             "torque_reference_nm": self.torque_reference_nm,
@@ -505,6 +514,11 @@ class LegendSpec:
             source_labels=tuple(str(src) for src in d["source_labels"]),
             scale_mode=str(d.get("scale_mode", "fixed")),
             clamped_labels=tuple(str(c) for c in d.get("clamped_labels", ())),
+            grip_split_method=(
+                str(d["grip_split_method"])
+                if d.get("grip_split_method") is not None
+                else None
+            ),
         )
 
 
@@ -697,6 +711,26 @@ def _group_visible(label: str, groups: frozenset[str], has_aggregate: bool) -> b
     return group in groups
 
 
+def _grip_annotations(
+    frame: ForceTorqueFrame, style: ForceGlyphStyle, has_aggregate: bool
+) -> tuple[str | None, list[str]]:
+    """Grip split label and visible-group unavailable labels from frame metadata.
+
+    ``grip_frame`` records ``grip_split_method`` and
+    ``grip_unavailable_labels`` (labels it could not emit).  They are shown only
+    while the grip kind is enabled, and only for groups that are toggled on.
+    """
+    meta = frame.metadata
+    if WrenchKind.GRIP not in style.kinds or "grip_split_method" not in meta:
+        return None, []
+    missing = [
+        str(lbl)
+        for lbl in meta.get("grip_unavailable_labels", ())
+        if _group_visible(str(lbl), style.groups, has_aggregate)
+    ]
+    return str(meta["grip_split_method"]), missing
+
+
 def build_glyphs(frame: ForceTorqueFrame, style: ForceGlyphStyle) -> GlyphSet:
     """Pure, deterministic builder turning a ForceTorqueFrame into renderer-neutral glyphs."""
     sorted_wrenches = sorted(frame.wrenches, key=lambda w: w.label)
@@ -715,8 +749,9 @@ def build_glyphs(frame: ForceTorqueFrame, style: ForceGlyphStyle) -> GlyphSet:
         if not _group_visible(w.label, style.groups, has_aggregate):
             continue
         source_labels_set.add(w.source)
-        color = style.palette.get(
-            w.kind.value, style.palette.get(str(w.kind), "#888888")
+        color = label_variant_hex(
+            w.label,
+            style.palette.get(w.kind.value, style.palette.get(str(w.kind), "#888888")),
         )
 
         if w.force_n is None:
@@ -737,6 +772,9 @@ def build_glyphs(frame: ForceTorqueFrame, style: ForceGlyphStyle) -> GlyphSet:
                 arc = _build_torque_arc(w, style, color)
                 torque_arcs.append(arc)
                 kinds_present_set.add(w.kind)
+
+    grip_split, grip_missing = _grip_annotations(frame, style, has_aggregate)
+    unavailable.extend(x for x in grip_missing if x not in unavailable)
 
     # Reference values for legend
     force_ref_n: float | None = None
@@ -773,6 +811,7 @@ def build_glyphs(frame: ForceTorqueFrame, style: ForceGlyphStyle) -> GlyphSet:
                 | {t.label for t in torque_arcs if t.clamped}
             )
         ),
+        grip_split_method=grip_split,
     )
 
     return GlyphSet(

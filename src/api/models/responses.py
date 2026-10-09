@@ -935,3 +935,25 @@ class ImpactParametersResponse(BaseModel):
     frame: dict[str, Any] = Field(default_factory=dict)
     rows: list[ImpactParameterRow] = Field(default_factory=list)
     d_plane: dict[str, float | None] = Field(default_factory=dict)
+
+
+class GripWrenchResponse(BaseModel):
+    """Per-hand grip force, net force and midpoint couple time series (GCV-10, #11716)."""
+
+    run_id: str | None = None
+    engine: str | None = None
+    available: bool = Field(..., description="False when no grip data exists")
+    reason: str | None = Field(None, description="Why the series is unavailable")
+    time_s: list[float] = Field(default_factory=list)
+    split_method: str = Field(
+        "unavailable", description="How the left/right split was obtained"
+    )
+    split_method_by_sample: list[str] = Field(default_factory=list)
+    unavailable_reasons: list[str] = Field(default_factory=list)
+    events: dict[str, float] = Field(default_factory=dict)
+    units: dict[str, str] = Field(default_factory=dict)
+    labels: dict[str, str] = Field(default_factory=dict)
+    traces: dict[str, dict[str, list[float | None]]] = Field(
+        default_factory=dict,
+        description="Per-trace x/y/z/magnitude lists; null marks unavailable samples",
+    )

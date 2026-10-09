@@ -64,32 +64,32 @@ def _labels(frame) -> dict:
 
 
 def _mujoco(_tmp: Path):
+    mod = _load("mujoco")  # skips before the engine-specific import below
     from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.force_torque_source import (
         MujocoForceTorqueSource,
     )
 
-    mod = _load("mujoco")
     model, data = mod.build_stance()
     return _labels(MujocoForceTorqueSource(model).sample(data)), mod.WEIGHT_N
 
 
 def _drake(_tmp: Path):
+    mod = _load("drake")
     from src.engines.physics_engines.drake.python.drake_force_torque import (
         DrakeForceTorqueSource,
     )
 
-    mod = _load("drake")
     plant, diagram, pctx = mod.build_stance()
     frame = DrakeForceTorqueSource(plant, diagram).sample(pctx)
     return _labels(frame), mod.WEIGHT_N
 
 
 def _opensim(tmp: Path):
+    mod = _load("opensim")
     from src.engines.physics_engines.opensim.python.opensim_force_torque import (
         OpenSimForceTorqueSource,
     )
 
-    mod = _load("opensim")
     model, state = mod.build_stance(tmp)
     return _labels(OpenSimForceTorqueSource(model).sample(state)), mod.WEIGHT_N
 

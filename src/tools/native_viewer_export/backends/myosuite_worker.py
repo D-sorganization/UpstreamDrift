@@ -146,6 +146,7 @@ def main(job_path: str) -> None:
         data.qpos[adr] = q[k]
         mujoco.mj_forward(model, data)
         for view in job.views:
+            cams[view].lookat[:] = job.lookat_for(view, pos)
             renderer.update_scene(data, camera=cams[view], scene_option=option)
             if glyph_sets is not None:
                 add_glyphs_to_scene(renderer.scene, glyph_sets[pos])

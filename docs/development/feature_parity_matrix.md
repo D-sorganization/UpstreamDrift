@@ -7,14 +7,14 @@ Generated from [`src/config/feature_parity.json`](../../src/config/feature_parit
 The PyQt6 desktop app is the canonical model; the web app must match
 (epic #7462, registry mechanism #7445).
 
-**Summary:** 25 parity · 18 gap · 16 exempt (12 pending decision in #7460).
+**Summary:** 26 parity · 17 gap · 16 exempt (12 pending decision in #7460).
 
 | Feature | Status | PyQt6 | API | Web | Tracking |
 | --- | --- | --- | --- | --- | --- |
 | `analysis.analysis_tools_api`<br>Analysis Tools REST endpoints (swing metrics, biomechanics) | 🔴 gap | — | `src/api/routes/analysis_tools.py` | `ui/src/pages/AnalysisTools.tsx` | #7448 |
 | `analysis.counterfactuals`<br>ZTCF/ZVCF + induced-acceleration counterfactuals | 🔴 gap | `src/shared/python/biomechanics/ztcf.py` | — | — | #7450 |
 | `analysis.cross_engine_robustness`<br>Cross-engine robustness dashboard (perturbation/CV) | ✅ parity | `src/launchers/cross_engine_dashboard.py` | `src/api/routes/cross_engine.py` | `ui/src/pages/CrossEngineDashboard.tsx` | — |
-| `analysis.grip_wrench`<br>Per-hand grip wrench on the club (weld multipliers and efc_force) emitted as GRIP overlay frames | 🔴 gap | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/force_torque_source.py` | — | — | #11716 |
+| `analysis.grip_wrench`<br>Per-hand grip wrench on the club (weld multipliers and efc_force): overlay glyphs and force/couple plots | ✅ parity | `src/tools/grip_wrench_plots/gui.py` | `src/api/routes/analysis.py` | `ui/src/components/analysis/GripWrenchCharts.tsx` | — |
 | `analysis.ground_reaction`<br>Per-foot and net ground-reaction force, centre of pressure, free moment and moment about the CoM from every engine's contact output | 🔴 gap | `src/shared/python/biomechanics/ground_reaction_wrenches.py` | — | — | #11711 |
 | `analysis.impact_parameters`<br>Impact parameters panel (speed, attack angle, path, face, face-to-path, dynamic loft, spin loft) relative to a target line | ✅ parity | `src/tools/impact_parameters_panel/gui.py` | `src/api/routes/analysis.py` | `ui/src/components/analysis/ImpactParametersPanel.tsx` | — |
 | `analysis.static_plots`<br>Static analysis plots (20+ plot types) | ✅ parity | `vendor/ud-tools/src/shared/python/plot_engine/pyqt6_widget.py` | `src/api/routes/analysis_plots.py` | `ui/src/components/analysis/PlotsSection.tsx` | — |
@@ -96,6 +96,7 @@ Tiles from `src/config/launcher_manifest.json` mapped to registry entries:
 | `force_overlays` | `simulation.controls_wiring` |
 | `golf_simulation_suite` | `simulation.golf_suite_batch` |
 | `golf_simulator` | `tools.golf_simulator` |
+| `grip_wrench_plots` | `analysis.grip_wrench` |
 | `impact_parameters` | `analysis.impact_parameters` |
 | `injury_analysis` | `biomech.exercise_injury_dashboards` |
 | `launch_monitor_analytics` | `tools.launch_monitor_analytics` |

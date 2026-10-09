@@ -199,14 +199,13 @@
       "notes": "FTO-10 (#11295): the PyQt6 MuJoCo GUI renders shaded 3D force arrows and torque arcs from the engine provider through add_glyphs_to_scene and MeshcatGlyphRenderer. The web Three.js renderer is FTO-23 (#11308). GCV-4 (#11710): the Visualization tab and the web ForceOverlayPanel share scale-mode (fixed, body weight, peak), reference-length and group controls; clamped arrows draw a distinct tip."
     },
     "analysis.grip_wrench": {
-      "title": "Per-hand grip wrench on the club (weld multipliers and efc_force) emitted as GRIP overlay frames",
-      "pyqt": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/force_torque_source.py",
-      "api": null,
-      "web": null,
-      "status": "gap",
-      "issue": 11716,
-      "tiles": [],
-      "notes": "GCV-8 (#11714): MuJoCo, MyoSuite and Drake emit per-hand WrenchKind.GRIP frames, Pinocchio the allocation net, OpenSim reports unavailable. The club force and torque overlays and plots in PyQt, web and video are GCV-10 (#11716); the web surface lands there."
+      "title": "Per-hand grip wrench on the club (weld multipliers and efc_force): overlay glyphs and force/couple plots",
+      "pyqt": "src/tools/grip_wrench_plots/gui.py",
+      "api": "src/api/routes/analysis.py",
+      "web": "ui/src/components/analysis/GripWrenchCharts.tsx",
+      "status": "parity",
+      "tiles": ["grip_wrench_plots"],
+      "notes": "GCV-8 (#11714): MuJoCo, MyoSuite and Drake emit per-hand WrenchKind.GRIP frames, Pinocchio the allocation net, OpenSim reports unavailable. GCV-10 (#11716): one glyph frame (force_overlay.grip_frame) and one plot series (biomechanics.grip_plot_model) feed the PyQt6 plot tool and Visualization-tab group toggles, GET /api/analysis/grip-wrench with the web charts and ForceOverlayPanel group toggles, and the native video export (per-hand arrows at each grip point, net arrow and couple arc at the midpoint, hands close-up camera). The split_method is labelled on the legend, the plots and the HUD; an unavailable split is listed as unavailable, never drawn as zero."
     },
     "analysis.ground_reaction": {
       "title": "Per-foot and net ground-reaction force, centre of pressure, free moment and moment about the CoM from every engine's contact output",

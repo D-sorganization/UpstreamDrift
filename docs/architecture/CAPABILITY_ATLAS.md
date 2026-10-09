@@ -4,7 +4,7 @@
 
 [Open the Interactive Reference](../../ui/public/capability-atlas/index.html)
 
-**65 launcher tiles · 59 feature contracts.**
+**66 launcher tiles · 59 feature contracts.**
 This catalog follows the existing launcher and parity registries. A registry
 status is not a runtime health check or scientific validation.
 
@@ -195,7 +195,7 @@ flowchart LR
 | Analysis Tools REST endpoints (swing metrics, biomechanics) | gap | [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/analysis_tools.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/AnalysisTools.tsx) |
 | ZTCF/ZVCF + induced-acceleration counterfactuals | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/biomechanics/ztcf.py) |
 | Cross-engine robustness dashboard (perturbation/CV) | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/cross_engine_dashboard.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/cross_engine.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/CrossEngineDashboard.tsx) |
-| Per-hand grip wrench on the club (weld multipliers and efc_force) emitted as GRIP overlay frames | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/force_torque_source.py) |
+| Per-hand grip wrench on the club (weld multipliers and efc_force): overlay glyphs and force/couple plots | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/grip_wrench_plots/gui.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/analysis.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/components/analysis/GripWrenchCharts.tsx) |
 | Per-foot and net ground-reaction force, centre of pressure, free moment and moment about the CoM from every engine's contact output | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/biomechanics/ground_reaction_wrenches.py) |
 | Impact parameters panel (speed, attack angle, path, face, face-to-path, dynamic loft, spin loft) relative to a target line | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/impact_parameters_panel/gui.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/analysis.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/components/analysis/ImpactParametersPanel.tsx) |
 | Static analysis plots (20+ plot types) | parity | [pyqt](https://github.com/D-sorganization/Tools/blob/main/src/shared/python/plot_engine/pyqt6_widget.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/analysis_plots.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/components/analysis/PlotsSection.tsx) |
