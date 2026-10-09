@@ -185,6 +185,14 @@ def _add_maintenance_subparsers(subparsers: Any) -> None:
     p_native.add_argument("--output-dir", type=Path, required=True)
     p_native.add_argument("--prepare-only", action="store_true")
 
+    p_guess = subparsers.add_parser(
+        "moco-native-guess", help="Materialize a source-bound numerical Moco seed"
+    )
+    p_guess.add_argument("--model", type=Path, required=True)
+    p_guess.add_argument("--source-sha256", required=True)
+    p_guess.add_argument("--trc", type=Path, required=True)
+    p_guess.add_argument("--output-dir", type=Path, required=True)
+
 
 def build_parser() -> argparse.ArgumentParser:
     """Build the unified CLI parser for OpenSim tour matching operations."""
@@ -333,6 +341,21 @@ def cmd_moco_native(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_moco_native_guess(args: argparse.Namespace) -> int:
+    """Generate only a native source-state numerical seed on the original clock."""
+    from .native_moco_guess import materialize_native_moco_guess
+    from .trc import read_trc
+
+    capture = read_trc(args.trc)
+    materialize_native_moco_guess(
+        args.model,
+        args.source_sha256,
+        capture.time_s,
+        args.output_dir,
+    )
+    return 0
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     """Entrypoint for OpenSim tour matching CLI."""
     parser = build_parser()
@@ -347,6 +370,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         "compare": cmd_compare,
         "resume": cmd_resume,
         "moco-native": cmd_moco_native,
+        "moco-native-guess": cmd_moco_native_guess,
     }
     handler = handlers.get(args.command)
     if handler is None:

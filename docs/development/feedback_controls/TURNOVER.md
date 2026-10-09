@@ -1,5 +1,14 @@
 # Feedback Controls Planning Turnover
 
+## F07 Source-Bound Native Moco Numerical Guess Handoff
+
+Issue #11990 adds a byte-bound numerical seed for the maintained native Moco
+runner. Actual unchanged 520-muscle driver/iron preparation now has six rather
+than seven blockers; only the absent guess-file blocker was removed. This is
+not measured or physiologically accepted state. See
+`F07_NATIVE_MOCO_GUESS_TURNOVER.md` and canonical chapter 39 for the native
+readback, exact clocks, remaining policies and private receipt location.
+
 ## F07 Native Offline Muscle Matching Handoff
 
 Issue #11968 adds a maintained OpenSim Moco prepare/solve/T01 export/fresh

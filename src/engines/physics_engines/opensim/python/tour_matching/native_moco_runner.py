@@ -336,6 +336,22 @@ def prepare_native_moco(
             request, directory
         )
         blockers.extend(capture_blockers)
+    if (
+        actual["guess"] == request.states_guess_sha256
+        and actual["model"] == request.model_sha256
+        and capture is not None
+    ):
+        from .native_moco_guess import audit_native_moco_guess
+
+        try:
+            audit_native_moco_guess(
+                request.model_path,
+                request.states_guess_path,
+                request.model_sha256,
+                capture.time_s,
+            )
+        except (OSError, ValueError, RuntimeError):
+            blockers.append("native-guess-invalid")
     if request.registration is None:
         blockers.append("capture-registration-unavailable")
     elif capture is not None and "irregular-observation-clock" not in blockers:

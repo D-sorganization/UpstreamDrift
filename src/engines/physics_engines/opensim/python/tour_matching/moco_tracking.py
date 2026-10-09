@@ -320,7 +320,16 @@ def build_moco_study(
     # Seed with IK initial guess trajectory
     guess = solver.createGuess()
     states_table = opensim.TimeSeriesTable(states_guess_path)
+    if initial_bindings is not None and set(states_table.getColumnLabels()) != set(
+        initial_bindings.state_bounds
+    ):
+        raise ValueError("Native numerical guess state names are incomplete")
     guess.insertStatesTrajectory(states_table, True)
+    if initial_bindings is not None and (
+        set(guess.getStateNames()) != set(initial_bindings.state_bounds)
+        or set(guess.getControlNames()) != set(initial_bindings.control_bounds)
+    ):
+        raise ValueError("Native Moco guess state/control names differ from problem")
     solver.setGuess(guess)
 
     return study
