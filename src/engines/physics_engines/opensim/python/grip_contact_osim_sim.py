@@ -35,6 +35,9 @@ from src.engines.physics_engines.opensim.python.full_body_grip_contact import (
     ContactGripConfig,
     pad_name,
 )
+from src.engines.physics_engines.opensim.python.full_body_grip_topology import (
+    CLUB_FREE_COORDINATES,
+)
 from src.engines.physics_engines.opensim.python.full_body_osim import (
     export_full_body_osim,
 )
@@ -45,6 +48,7 @@ from src.engines.physics_engines.opensim.python.grip_bushing_sim import (
     _inv,
     _osim,
     _transform_to_rt,
+    _vec,
 )
 from src.shared.python.grip_contact import GripInterface
 from src.shared.python.grip_contact.contact_run import ContactRun
@@ -336,6 +340,42 @@ class ContactGripSimulator(BushingGripSimulator):
                 np.arctan2(rel_rot[2, 1] - rel_rot[1, 2], rel_rot[1, 1] + rel_rot[2, 2])
             ),
         }
+
+    def _init_club_pose(self) -> None:
+        """Pose as the bushing runner, and the club moving with the hand.
+
+        A stiff frictional contact turns a release at rest against moving hands
+        into a large artificial impulse, so the club starts with the velocity
+        of the rigid (weld) club: the velocity of the left hand body carried to
+        the club origin.  The free joint's rotational speeds are the angular
+        velocity components in the ground frame (verified by the postcondition
+        below, not assumed).  Postcondition (checked): OpenSim's club-body linear and
+        angular velocity equal the weld velocity.
+        """
+        super()._init_club_pose()
+        osim, model, state = self._osim, self._model, self._state
+        state.setTime(float(self.time_s[0]))
+        model.realizePosition(state)
+        model.realizeVelocity(state)
+        hand = model.getBodySet().get("LGrip")
+        _, pos = self._weld_pose0
+        r_h, p_h = _transform_to_rt(hand.getTransformInGround(state))
+        station = osim.Vec3(*(float(x) for x in r_h.T @ (pos - p_h)))
+        omega = _vec(hand.getAngularVelocityInGround(state))
+        v_origin = _vec(hand.findStationVelocityInGround(state, station))
+        coords = model.updCoordinateSet()
+        for name, value in zip(CLUB_FREE_COORDINATES, [*omega, *v_origin], strict=True):
+            coords.get(name).setSpeedValue(state, float(value))
+        model.realizeVelocity(state)
+        club = model.getBodySet().get(CLUB_BODY)
+        got_w = _vec(club.getAngularVelocityInGround(state))
+        got_v = _vec(club.getLinearVelocityInGround(state))
+        scale = max(1.0, float(np.linalg.norm(omega)), float(np.linalg.norm(v_origin)))
+        if (
+            max(np.abs(got_w - omega).max(), np.abs(got_v - v_origin).max())
+            > 1e-6 * scale
+        ):
+            raise RuntimeError("club initial velocity does not match the weld velocity")
 
     def run(
         self,

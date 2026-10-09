@@ -113,6 +113,32 @@ def test_pad_on_a_fixed_grip_supports_the_expected_load(foundation, mesh):
 
 
 # ------------------------------------------------------------- full-model holds
+def test_club_is_released_with_the_weld_velocity(pads):
+    """No release impulse: the free club starts moving with the (moving) hand."""
+    spec_bytes = (MODELS / "full_body_spec_anthro_driver.json").read_bytes()
+    spec = json.loads(spec_bytes)
+    names = spec["coordinate_order"]
+    swing = load_coordinate_swing(
+        FIXTURES / "swing_q_driver.npz",
+        FIXTURES / "address_poses.json",
+        "driver",
+        names,
+    )
+    k = 150  # mid-downswing: the hands move quickly
+    sim = ContactGripSimulator(
+        spec_bytes,
+        names,
+        swing.time_s[k : k + 10],
+        swing.q[k : k + 10],
+        pads,
+        GripInterface.from_spec(spec),
+    )
+    row = sim._sample(sim._state)
+    rigid = row["rigid"]
+    assert np.linalg.norm(rigid["w"]) > 1.0
+    np.testing.assert_allclose(row["w"], rigid["w"], atol=1e-6)
+
+
 def _hold(friction: float | None = None, pads=None):
     spec_bytes = (MODELS / "full_body_spec_anthro_driver.json").read_bytes()
     spec = json.loads(spec_bytes)
