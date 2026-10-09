@@ -83,12 +83,17 @@ def head_glyph_arrows(
 BUNDLE_INPUTS = ("full_body_spec_hipcal_scaled.json", "ik_trajectory.npz")
 
 
+def is_current(target: Path, sources: Sequence[Path]) -> bool:
+    """True when ``target`` exists and is at least as new as every source."""
+    if not target.is_file():
+        return False
+    built = target.stat().st_mtime
+    return all(src.stat().st_mtime <= built for src in sources)
+
+
 def bundle_is_current(run: Path, out_npz: Path) -> bool:
     """True when ``out_npz`` exists and is newer than every bundle input in ``run``."""
-    if not out_npz.is_file():
-        return False
-    built = out_npz.stat().st_mtime
-    return all((run / name).stat().st_mtime <= built for name in BUNDLE_INPUTS)
+    return is_current(out_npz, [run / name for name in BUNDLE_INPUTS])
 
 
 def build_bundle(run: Path, out_npz: Path) -> Path:
@@ -183,7 +188,11 @@ def export_run(run: Path, out: Path, label: str, engines: Sequence[str]) -> None
 
 
 def pair_clips(off_dir: Path, on_dir: Path, out: Path, capture: str) -> list[Path]:
-    """Side-by-side (gaze off | gaze on) clip per engine and view, same frame count."""
+    """Side-by-side (gaze off | gaze on) clip per engine and view, same frame count.
+
+    A pair newer than both of its clips is kept, so re-pairing after one
+    engine's re-render only re-encodes that engine.
+    """
     import cv2
     import imageio.v2 as imageio
 
@@ -194,6 +203,9 @@ def pair_clips(off_dir: Path, on_dir: Path, out: Path, capture: str) -> list[Pat
             LOG.warning("no matching gaze-on clip for %s", clip_off.name)
             continue
         dest = out / clip_off.name.replace("gaze0", "gaze_off_vs_on")
+        if is_current(dest, [clip_off, clip_on]):
+            written.append(dest)
+            continue
         out.mkdir(parents=True, exist_ok=True)
         with (
             imageio.get_reader(str(clip_off)) as ra,

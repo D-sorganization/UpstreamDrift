@@ -13,6 +13,7 @@ from scripts.render_head_gaze_engines import (
     BUNDLE_INPUTS,
     bundle_is_current,
     head_glyph_arrows,
+    is_current,
 )
 from scripts.summarize_gaze_sweep import load_rows, summarize
 from scripts.sweep_gaze_weight import _fixed_scales, row_from
@@ -151,6 +152,19 @@ def test_bundle_is_reused_only_when_newer_than_its_inputs(tmp_path: Path) -> Non
     assert bundle_is_current(run, npz)
     os.utime(run / BUNDLE_INPUTS[1], (300.0, 300.0))
     assert not bundle_is_current(run, npz)
+
+
+def test_is_current_needs_the_target_no_older_than_any_source(tmp_path: Path) -> None:
+    a, b, target = tmp_path / "a.mp4", tmp_path / "b.mp4", tmp_path / "pair.mp4"
+    for path, stamp in ((a, 100.0), (b, 200.0)):
+        path.write_bytes(b"x")
+        os.utime(path, (stamp, stamp))
+    assert not is_current(target, [a, b])
+    target.write_bytes(b"x")
+    os.utime(target, (150.0, 150.0))
+    assert not is_current(target, [a, b])
+    os.utime(target, (200.0, 200.0))
+    assert is_current(target, [a, b])
 
 
 def _clip_times() -> np.ndarray:
