@@ -246,8 +246,7 @@ class FeedbackObservationReport:
                 or (
                     row.status == "scored"
                     and row.qualification == "qualified"
-                    and row.score is not None
-                    and row.score.acceptance_verdict.is_physically_accepted
+                    and _row_is_physically_accepted(row)
                 )
                 for row in self.rows
             )
@@ -423,11 +422,21 @@ def comparison_key(package_id: str, variant_id: str, drive_mode: str) -> str:
 
 
 def _case_key(case: NativeObservationCase) -> str:
+    evidence = case.evidence
+    drive_mode = evidence.drive_mode
     return comparison_key(
-        case.evidence.package_id,
-        case.evidence.variant_id,
-        case.evidence.drive_mode.value,
+        evidence.package_id,
+        evidence.variant_id,
+        drive_mode.value,
     )
+
+
+def _row_is_physically_accepted(row: FeedbackObservationRow) -> bool:
+    score = row.score
+    if score is None:
+        return False
+    verdict = score.acceptance_verdict
+    return verdict.is_physically_accepted
 
 
 def _metrics_and_yaw(
@@ -584,15 +593,19 @@ def _build_score_receipt(
     metrics = aligned.metrics
     pelvis_yaw_diff_deg = aligned.pelvis_yaw_diff_deg
     evidence = case.evidence
+    bundle = case.replay_bundle
+    integrity = bundle.integrity
+    initial_state_sha256 = integrity.initial_state_sha256
+    drive_mode = row.drive_mode
     evidence_sha256 = _canonical_sha256(_evidence_payload(evidence))
     receipt_payload = {
         "schema_version": FEEDBACK_OBSERVATION_SCHEMA_VERSION,
         "source_replay_identity_sha256": replay_identity,
         "evidence_identity_sha256": evidence_sha256,
-        "initial_state_sha256": case.replay_bundle.integrity.initial_state_sha256,
+        "initial_state_sha256": initial_state_sha256,
         "package_id": row.package_id,
         "variant_id": row.variant_id,
-        "drive_mode": row.drive_mode.value,
+        "drive_mode": drive_mode.value,
         "engine": row.engine,
         "bundle_schema": evidence.bundle_schema,
         "capture": declared_capture,
@@ -620,10 +633,10 @@ def _build_score_receipt(
         receipt_sha256=receipt_sha256,
         source_replay_identity_sha256=replay_identity,
         evidence_identity_sha256=evidence_sha256,
-        initial_state_sha256=case.replay_bundle.integrity.initial_state_sha256,
+        initial_state_sha256=initial_state_sha256,
         package_id=row.package_id,
         variant_id=row.variant_id,
-        drive_mode=row.drive_mode.value,
+        drive_mode=drive_mode.value,
         engine=row.engine,
         bundle_schema=evidence.bundle_schema,
         capture=declared_capture,
@@ -742,10 +755,7 @@ def build_feedback_observation_report(
         engine for engine in required_engine_ids if engine not in observed_engine_ids
     )
     score_count = sum(row.status == "scored" for row in required_rows)
-    accepted_count = sum(
-        row.score is not None and row.score.acceptance_verdict.is_physically_accepted
-        for row in required_rows
-    )
+    accepted_count = sum(_row_is_physically_accepted(row) for row in required_rows)
     timestamp = generated_at or datetime.now(timezone.utc).strftime(
         "%Y-%m-%dT%H:%M:%SZ"
     )
