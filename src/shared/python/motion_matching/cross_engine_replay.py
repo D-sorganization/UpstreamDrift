@@ -417,6 +417,16 @@ def validate_frame_size(size_px: tuple[int, int]) -> tuple[int, int]:
     return int(size_px[0]), int(size_px[1])
 
 
+_ENGINE_MARKER_COLORS = {
+    "mujoco": "#d62728",
+    "pinocchio": "#1f77b4",
+    "drake": "#2ca02c",
+    "opensim": "#9467bd",
+    "myosuite": "#8c564b",
+    "matlab": "#17becf",
+}
+
+
 def render_replay_frames(
     time_s: Array,
     target_markers_m: Array,
@@ -444,15 +454,7 @@ def render_replay_frames(
 
     n_frames = len(time_s)
     frames: list[np.ndarray] = []
-    color_map = {
-        "mujoco": "#d62728",
-        "pinocchio": "#1f77b4",
-        "drake": "#2ca02c",
-        "opensim": "#9467bd",
-        "myosuite": "#8c564b",
-        "matlab": "#17becf",
-    }
-    m_color = color_map.get(engine_name.lower(), "#ff7f0e")
+    m_color = _ENGINE_MARKER_COLORS.get(engine_name.lower(), "#ff7f0e")
 
     dpi = height / 6.0
     fig = plt.figure(figsize=(width / dpi, height / dpi), dpi=dpi)
