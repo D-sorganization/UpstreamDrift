@@ -1,0 +1,16 @@
+{
+  "status": "exact_saved_and_randomized_report_parity_pass",
+  "old_source_sha256": "63b0a5ade8531e136b94ab7a2af2ec7fd166d3e419b26cc77d1cdea9a0dffe8d",
+  "current_sha256": {
+    "src/tools/shot_pattern_analysis/scenario_scoring.py": "5b472bfde3663f6d9c9904e95f247e2d7babe0d6c0ff5da79ddecf3636e2f12b",
+    "src/tools/shot_pattern_analysis/course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a",
+    "src/tools/shot_pattern_analysis/provenance.py": "d9d11feb69179fbf9ead9875ec1a45a08f1f6c0a914c865e53ff1e669faf6609",
+    "tests/tools/shot_pattern_analysis/data/legacy_course_reports.json": "8a9266c334029f823f03bbaddad4da38eb2b1918e6cd7d49fa667e2e0b2e654c"
+  },
+  "saved_reports": 6,
+  "randomized_reports": 30,
+  "exact_error_cases": 3,
+  "seed": 12006,
+  "script_sha256": "02a7bd8dba746466ffca25d28c6ab3c17a36778890ce026ec236f2991e9e9547",
+  "scope": "Course scoring refactor, no flight execution"
+}
