@@ -12,11 +12,15 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass
 import time
-from typing import TypeAlias, cast
+from typing import TYPE_CHECKING, TypeAlias, cast
 
 import numpy as np
 from numpy.typing import NDArray
 from scipy.optimize import Bounds, OptimizeResult, minimize
+
+if TYPE_CHECKING:
+    from scipy.optimize._minimize import _MinimizeOptions
+    from scipy.optimize._typing import _ConstraintDict
 
 Array: TypeAlias = NDArray[np.float64]
 StepFunction: TypeAlias = Callable[[Array, Array], Array]
@@ -376,21 +380,27 @@ class BoundedNMPC:
                     index, state, np.asarray(flat).reshape(horizon, -1), previous
                 )
 
+            def constraint_margin(flat: Array) -> Array:
+                return evaluate(flat)[1]
+
             try:
                 lower = np.tile(self.problem.input_lower, horizon)
                 upper = np.tile(self.problem.input_upper, horizon)
+                options: _MinimizeOptions = {
+                    "maxiter": self.config.solver_max_iterations,
+                    "ftol": 1e-7,
+                }
+                constraint: _ConstraintDict = {
+                    "type": "ineq",
+                    "fun": constraint_margin,
+                }
                 result = minimize(
                     lambda flat: evaluate(flat)[0],
                     initial.ravel(),
                     method="SLSQP",
                     bounds=Bounds(lower, upper),
-                    constraints=[
-                        {"type": "ineq", "fun": lambda flat: evaluate(flat)[1]}
-                    ],
-                    options={
-                        "maxiter": self.config.solver_max_iterations,
-                        "ftol": 1e-7,
-                    },
+                    constraints=[constraint],
+                    options=options,
                 )
                 check_budget()
                 status, objective, accepted = self._candidate_outcome(
