@@ -147,3 +147,36 @@ def test_calibrated_pads_carry_the_shared_law_force() -> None:
     assert len(force) == 2 * pads.layout.pad_count
     for key, f in force.items():
         assert f == pytest.approx(pads.law.stiffness_n_m * depth[key], rel=1e-3)
+
+
+def test_friction_time_and_hand_mode_reach_the_model() -> None:
+    """Issue #11986 diagnostics: the knobs are validated and change the model."""
+    module = _engine("mujoco")
+    spec_bytes, _, names, swing, interface, pads = _setup()
+    with pytest.raises(ValueError, match="hand_mode"):
+        module.ClubInHands(spec_bytes, names, interface, pads, hand_mode="both")
+    with pytest.raises(ValueError, match="friction_time_s"):
+        module.ClubInHands(spec_bytes, names, interface, pads, friction_time_s=0.0)
+    q0 = np.asarray(swing.q[0], float)
+    sim = module.ClubInHands(spec_bytes, names, interface, pads, friction_time_s=2e-3)
+    assert sim.calibrate(q0) < 1e-3
+    assert float(sim.model.pair_solreffriction[0][0]) == pytest.approx(2e-3)
+    lead = module.ClubInHands(spec_bytes, names, interface, pads, hand_mode="lead_only")
+    assert lead.calibrate(q0) < 1e-3
+    assert len(lead.model.pair_geom1) == pads.layout.pad_count
+
+
+@pytest.mark.timeout(600)
+@pytest.mark.parametrize("mode", ["trail_follows_club", "lead_only"])
+def test_diagnostic_hand_modes_support_the_club_weight(mode: str) -> None:
+    module = _engine("mujoco")
+    spec_bytes, spec, names, swing, interface, pads = _setup()
+    q0 = np.asarray(swing.q[0], float)
+    sim = module.ClubInHands(spec_bytes, names, interface, pads, hand_mode=mode)
+    sim.calibrate(q0)
+    run = module.hold_run(sim, q0, 0.1)
+    gravity = np.asarray(spec["gravity_m_s2"], float)
+    weight = ClubDynamics.from_spec(spec).mass_kg * float(np.linalg.norm(gravity))
+    up = -gravity / np.linalg.norm(gravity)
+    total = run.series.force_on_club_n["L"][-1] + run.series.force_on_club_n["R"][-1]
+    assert float(total @ up) == pytest.approx(weight, rel=WEIGHT_TOLERANCE)
