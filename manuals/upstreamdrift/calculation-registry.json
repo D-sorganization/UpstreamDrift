@@ -46,6 +46,11 @@
       "resolution": "Inventory the F02 phase/task controller in src/shared/python/motion_matching/distributed_feedback.py and the provisional chapter 16: current-minus-reference nv tangent error, reused MOSAIC TVLQR gains, prioritized task Jacobians and phase masks, exact full simulated-state information pattern, unit-constant actuator-only mapping, bounded post-allocation applied torques and one-step ZOH sampling. Contact/grip QP output is predicted feasibility only and is not injected as a native reaction. Synthetic restoration and native one-joint MuJoCo checks do not qualify full-body contact, six-engine parity, capture matching, continuous open-loop replay, muscle input or scientific runtime. Full calculation coverage and publication remain blocked."
     },
     {
+      "id": "UP-D1-coupled-loop-tuning-inventory",
+      "owner": "UpstreamDrift issue #11788",
+      "resolution": "Inventory the provisional chapter 21 and control_loop_tuning.py: bounded F02 gain/task-weight block-coordinate initialization and joint refinement, exact stage rollout limits, heldout full/reduced reports, frozen phase/group loss Jacobian and objective cross-Hessian, descriptive covariance, rank checks, and separately labeled frozen-versus-refit perturbation. The feedforward is frozen and gain/feedforward identifiability is not inferred. Synthetic two-coordinate coupled-plant tests do not qualify native full-body contact, six-engine parity, private motion capture, human control causation or scientific runtime. Full calculation coverage and publication remain blocked."
+    },
+    {
       "id": "UP-D1-inventory-required",
       "owner": "UpstreamDrift issue #9067",
       "resolution": "Inventory and classify every in-scope calculation and module before any coverage or release claim."

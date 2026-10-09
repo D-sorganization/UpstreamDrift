@@ -1,0 +1,87 @@
+# Coupled Control-Loop Tuning and Diagnosis (Provisional)
+
+## Scope and Model Boundary
+
+F04 (#11788) tunes gain and task-weight parameters of the F02 distributed
+controller over multiple forward-dynamics trials. The current implementation
+is a bounded **synthetic** method demonstration. It calls the actual F02
+controller at every integration boundary in a two-coordinate mass-coupled
+plant, but does not yet fit a measured swing or qualify a native engine. The
+nominal feedforward, reference trajectory, state estimator, actuator map,
+contact policy, model parameters, phase boundaries, and observation protocol
+must be frozen before tuning. The controller's information pattern in this
+fixture is exact simulated state, not delayed or noisy measured motion.
+
+For phase $p$, group $g$, trial $r$, and gain/weight vector $x$, the evaluator
+returns a nonnegative squared tracking loss $L_{rpg}(x)$, applied-input effort
+$E_r(x)$, robustness penalty $R_r(x)$, constraint violation $C_r(x)$ and
+saturation fraction $S_r(x)$. The training objective is
+
+$$
+J(x)=\sum_g\operatorname{mean}_{r,p}L_{rpg}(x)
+ + w_E\operatorname{mean}_r E_r(x)
+ + w_R\operatorname{mean}_r R_r(x)
+ + w_0\left\|D^{-1}(x-x_0)\right\|_2^2,
+$$
+
+where $D$ contains declared positive parameter scales. Each parameter has a
+finite lower/upper bound. The evaluator is responsible for integrating the
+same coupled plant, applying the post-limit actuator commands and measuring
+the declared contact, tracking and disturbance outputs. In particular, a
+contact reaction is a plant output unless a run is explicitly externally
+forced; it is never silently added as an independently controlled input.
+
+## Bounded Optimization and Acceptance
+
+The algorithm takes bounded L-BFGS-B steps group by group as an initialization,
+then performs one bounded joint refinement. Every stage has a finite function
+evaluation budget and a scaled trust region. A checkpoint records its solver
+status, attempted parameters, objective, per-group loss, constraint violation,
+saturation fraction, evaluations and accept/reject reason. Nonconvergence,
+constraint violation, cross-group regression and lack of objective improvement
+prevent promotion. Joint refinement is needed because block independence is a
+hypothesis; a group can improve alone while degrading the coupled plant.
+
+Training and holdout trials are declared separately. The holdout report
+contains the full coupled controller and each declared reduced grouping,
+including tracking RMSE, effort, robustness, constraint violation,
+saturation and wall time. A single training trial is explicitly labeled
+insufficient for generalization. These metrics do not establish native
+runtime speed: Python objective evaluations, preprocessing, warm starts,
+failed starts and native solver budgets must be counted under F03/F09 before
+comparative claims. The seed tags the deterministic protocol; the current
+L-BFGS-B stages do not use random starts.
+
+## Coupling, Perturbation and Identifiability
+
+At the accepted **frozen** controller, centered or bound-aware one-sided finite
+differences estimate the scaled phase/group response
+$A_{pgi}=D_{ii}\partial L_{pg}/\partial x_i$. Off-diagonal blocks of $A$
+measure how a parameter group changes another group's loss. The reported
+cross-Hessian blocks are finite differences of the *scalar training objective*
+$D\nabla_x^2J D$, not a Gram surrogate. SVD of the response Jacobian flags
+locally rank-deficient gain directions. A bounded diagnostic evaluation budget
+prevents an accidental quadratic explosion in expensive plant rollouts.
+
+Pooled covariance and within-phase covariance are reported separately because
+phase shifts can create apparent cross-system correlation without within-phase
+coupling. Neither covariance nor a local loss derivative identifies a causal
+human neural loop. Gain, feedforward and unmeasured disturbances can compensate
+one another; feedforward stays frozen and is not jointly identified here.
+Perturbation evidence first evaluates the **same frozen controller** on altered
+trials, then labels a separate refit and its scaled parameter shift. Matching
+after refit is compensation evidence, not robustness of the frozen controller.
+Parameter order, group, kind and scale must match before comparing a perturbation.
+
+## Reproduction and Release Boundary
+
+Run `python -m pytest tests/unit/motion_matching/test_control_loop_tuning.py -q --no-cov`
+for the analytic coupled/uncoupled Hessian, phase-confounded
+covariance, cross-block rejection, constraint and solver-failure retention,
+heldout reduced/full, and actual F02 two-coordinate plant checks. Coordinates
+are radians, speeds radians/second, time seconds and direct actuator efforts
+N m in the synthetic fixture. The native model topology, frames, units,
+capture timing, contact/force observations, full-horizon replay, and independent
+muscle evidence remain prerequisites. No calibration, six-engine parity,
+biomechanical validity or design-manual publication approval follows from this
+software demonstration; the calculation registry remains blocked.

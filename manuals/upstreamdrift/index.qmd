@@ -21,3 +21,5 @@ UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
 {{< include chapters/13-feedback-comparison.qmd >}}
 
 {{< include chapters/16-distributed-feedback.qmd >}}
+
+{{< include chapters/21-control-loop-tuning.qmd >}}

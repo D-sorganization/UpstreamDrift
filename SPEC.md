@@ -10400,3 +10400,19 @@ separately. Existing contact/grip QP reactions are predictions, never hidden
 inputs to a native plant. The analytic sign/stability, rate, conflict,
 permutation, manifold and native one-joint tests are local evidence only;
 native six-engine and muscle capture qualification remain open.
+
+## Coupled Distributed Loop Tuning (F04, #11788)
+
+`src/shared/python/motion_matching/control_loop_tuning.py` bounds F02 gain and
+task-weight fitting by declared parameter limits, scaled trust regions,
+per-stage rollout budgets, cross-group regression and constraint gates. It
+retains accepted and rejected block-coordinate and joint-refinement attempts,
+then evaluates full and reduced controllers on distinct heldout trials. A
+frozen-controller phase/group Jacobian and finite-difference objective
+cross-Hessian quantify local associations; SVD exposes rank-deficient gain
+directions, while pooled/within-phase covariance stays explicitly noncausal.
+Perturbation comparison reports the frozen policy before a separately labeled
+refit, with exact parameter identity and feedforward held fixed. The tests use
+an actual F02 controller driving a synthetic coupled two-coordinate plant;
+native full-body, real capture, muscle and scientific runtime claims remain
+open under the same blocked calculation registry.
