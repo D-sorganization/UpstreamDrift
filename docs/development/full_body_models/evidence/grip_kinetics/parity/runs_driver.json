@@ -1,0 +1,7 @@
+{
+  "opensim": {
+    "engine": "opensim",
+    "accuracy": 1e-05,
+    "wall_time_s": 411.1558714630082
+  }
+}

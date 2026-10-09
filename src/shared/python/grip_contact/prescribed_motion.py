@@ -23,7 +23,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from src.shared.python.grip_contact.bushing_law import BushingState
+from src.shared.python.grip_contact.bushing_law import BushingState, cross3
 from src.shared.python.grip_contact.interface import GripInterface
 
 __all__ = [
@@ -137,7 +137,7 @@ class RigidBodyState:
         return BushingState(
             rotation=self.rotation @ off[:3, :3],
             position_m=self.position_m + arm,
-            velocity_m_s=self.velocity_m_s + np.cross(self.omega_rad_s, arm),
+            velocity_m_s=self.velocity_m_s + cross3(self.omega_rad_s, arm),
             omega_rad_s=self.omega_rad_s,
         )
 

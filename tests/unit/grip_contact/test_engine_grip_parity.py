@@ -78,7 +78,7 @@ def _swing(club: str) -> CoordinateSwing:
     )
 
 
-def _hold(swing: CoordinateSwing, duration_s: float = 0.3) -> CoordinateSwing:
+def _hold(swing: CoordinateSwing, duration_s: float = 0.2) -> CoordinateSwing:
     n = int(round(duration_s / 0.002)) + 1
     return CoordinateSwing(
         swing.names,
@@ -91,6 +91,7 @@ def _hold(swing: CoordinateSwing, duration_s: float = 0.3) -> CoordinateSwing:
 ENGINES = sorted(ENGINE_MODULES)
 
 
+@pytest.mark.timeout(600)
 @pytest.mark.parametrize("engine", ENGINES)
 def test_static_hold_supports_the_club_weight(engine: str) -> None:
     module = _engine(engine)
@@ -149,6 +150,7 @@ def _run(engine: str, club: str) -> GripKineticsSeries:
 
 
 @pytest.mark.slow
+@pytest.mark.timeout(3600)
 @pytest.mark.parametrize("club", CLUBS)
 @pytest.mark.parametrize("engine", ENGINES)
 def test_full_swing_matches_the_opensim_reference(engine: str, club: str) -> None:

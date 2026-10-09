@@ -41,6 +41,7 @@ from src.shared.python.grip_contact.parameters import BushingParameters
 
 #: Refuse middle angles within this margin of the X-Y-Z gimbal lock (rad).
 GIMBAL_MARGIN_RAD = 1e-3
+_EYE = np.eye(3)
 
 __all__ = [
     "GIMBAL_MARGIN_RAD",
@@ -49,7 +50,19 @@ __all__ = [
     "body_xyz_angles",
     "body_xyz_n_matrix",
     "bushing_wrench",
+    "cross3",
 ]
+
+
+def cross3(a: np.ndarray, b: np.ndarray) -> np.ndarray:
+    """``a x b`` for two 3-vectors (``np.cross`` is ~50x slower per call).
+
+    The law runs inside every integrator stage of every engine, so its
+    per-call cost matters.
+    """
+    a0, a1, a2 = float(a[0]), float(a[1]), float(a[2])
+    b0, b1, b2 = float(b[0]), float(b[1]), float(b[2])
+    return np.array([a1 * b2 - a2 * b1, a2 * b0 - a0 * b2, a0 * b1 - a1 * b0])
 
 
 @dataclass(frozen=True)
@@ -68,14 +81,14 @@ class BushingState:
 
     def __post_init__(self) -> None:
         rot = np.asarray(self.rotation, dtype=float)
-        if rot.shape != (3, 3) or not np.all(np.isfinite(rot)):
+        if rot.shape != (3, 3) or not np.isfinite(rot).all():
             raise ValueError("rotation must be a finite 3x3 matrix")
-        if not np.allclose(rot.T @ rot, np.eye(3), atol=1e-6):
+        if not np.abs(rot.T @ rot - _EYE).max() <= 1e-6:
             raise ValueError("rotation must be orthonormal")
         object.__setattr__(self, "rotation", rot)
         for name in ("position_m", "velocity_m_s", "omega_rad_s"):
             vec = np.asarray(getattr(self, name), dtype=float)
-            if vec.shape != (3,) or not np.all(np.isfinite(vec)):
+            if vec.shape != (3,) or not np.isfinite(vec).all():
                 raise ValueError(f"{name} must be a finite 3-vector")
             object.__setattr__(self, name, vec)
 
@@ -151,7 +164,7 @@ def bushing_wrench(
     arm = club.position_m - hand.position_m
     translation = r1.T @ arm
     translation_rate = r1.T @ (
-        club.velocity_m_s - hand.velocity_m_s - np.cross(hand.omega_rad_s, arm)
+        club.velocity_m_s - hand.velocity_m_s - cross3(hand.omega_rad_s, arm)
     )
     angles = body_xyz_angles(r1.T @ r2)
     n_matrix = body_xyz_n_matrix(angles)
