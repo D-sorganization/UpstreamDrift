@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 import hashlib
+import json
 from pathlib import Path
 
 import numpy as np
@@ -13,6 +14,7 @@ from src.engines.feedback_comparison import DriveMode, FeedbackComparisonRegistr
 from src.engines.feedback_native_execution import (
     NativeAdapterBinding,
     NativeReplayRequest,
+    _validate_command_evidence_row,
     build_native_replay_report,
     execute_native_replay,
     validate_native_replay_output,
@@ -30,11 +32,17 @@ from sidekick.lab.mocap import (
     InitialStateSchema,
     InputChannel,
     InputInterpolation,
+    DriveMode as T02DriveMode,
     ModelIdentity,
     ReplayExecutionPolicy,
     ReplayMode,
     StateComponentRole,
     StateComponentSpec,
+    ComparisonEvidenceRow,
+    EvidenceArtifactKind,
+    EvidenceArtifactReference,
+    ImplementationEvidence,
+    ImplementationEvidenceKind,
     build_experiment_replay_bundle,
 )
 
@@ -344,6 +352,86 @@ def test_request_references_bundle_model_path_without_serializing_it(
         f"{row.package_id}/{row.variant_id}/{row.drive_mode.value}"
     )
     assert request.as_dict()["bundle_schema"] == bundle.schema_version
+
+
+def test_command_admission_requires_matching_t02_profile_artifact(
+    registry: FeedbackComparisonRegistry,
+) -> None:
+    from sidekick.lab.mocap import COMPILED_ACTUATOR_PROFILE_SCHEMA_VERSION
+
+    f01_row = registry.get("myosuite/driver", "default", DriveMode.MUSCLE_EXCITATION)
+    _, source_bundle, _ = _bundle(registry)
+    bundle = build_experiment_replay_bundle(
+        source_bundle.experiment_id,
+        source_bundle.model,
+        source_bundle.capabilities,
+        tuple((item.component_id, item.values) for item in source_bundle.initial_state),
+        source_bundle.input_history.channels,
+        ActuationInputKind.ACTUATOR_COMMAND,
+        InputInterpolation.ZERO_ORDER_HOLD,
+        source_bundle.input_history.time_seconds,
+        source_bundle.input_history.values,
+        source_bundle.policy,
+    )
+    profile_bytes = json.dumps(
+        {"schema_version": COMPILED_ACTUATOR_PROFILE_SCHEMA_VERSION},
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode()
+    profile_sha = hashlib.sha256(profile_bytes).hexdigest()
+    reference = "opaque:test-compiled-profile"
+    from sidekick.lab.mocap import (
+        COMPILED_ACTUATOR_PROFILE_ID,
+        COMPILED_ACTUATOR_PROFILE_VERSION,
+    )
+
+    t02_row = ComparisonEvidenceRow(
+        "myosuite/driver/default/muscle_excitation",
+        "myosuite/driver",
+        "default",
+        T02DriveMode.MUSCLE_EXCITATION,
+        bundle,
+        CapabilitySupport.SUPPORTED,
+        CapabilityAvailability.AVAILABLE,
+        (
+            ImplementationEvidence(
+                ImplementationEvidenceKind.ACTUATOR,
+                COMPILED_ACTUATOR_PROFILE_ID,
+                COMPILED_ACTUATOR_PROFILE_VERSION,
+                profile_sha,
+                True,
+                CapabilitySupport.SUPPORTED,
+                CapabilityAvailability.AVAILABLE,
+                evidence_reference_id=reference,
+            ),
+        ),
+        (
+            EvidenceArtifactReference(
+                EvidenceArtifactKind.ACTUATOR, reference, profile_sha
+            ),
+        ),
+    )
+    binding = NativeAdapterBinding(
+        f01_row.package_id,
+        f01_row.variant_id,
+        f01_row.drive_mode,
+        bundle.model.model_id,
+        bundle.model.variant_id,
+        bundle.model.provider_id,
+        bundle.model.provider_sha256,
+        f01_row.source_model_sha256,
+        bundle.model.loaded_native_model_sha256 or "",
+        bundle.state_schema_sha256,
+        bundle.input_channel_schema_sha256,
+        bundle.model.ordered_input_channel_ids,
+    )
+    request = NativeReplayRequest(binding, bundle, Path("synthetic.xml"))
+
+    parsed = _validate_command_evidence_row(request, t02_row, profile_bytes)
+
+    assert parsed["schema_version"] == COMPILED_ACTUATOR_PROFILE_SCHEMA_VERSION
+    with pytest.raises(ValueError, match="artifact digest"):
+        _validate_command_evidence_row(request, t02_row, profile_bytes + b" ")
 
 
 def test_execution_calls_native_mujoco_adapter_on_independent_synthetic_model(

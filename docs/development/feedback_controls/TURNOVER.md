@@ -328,3 +328,35 @@ the receipts; driver, iron and MyoArm replay tests pass. The Windows symlink
 test skips because this account lacks symlink privilege. The official MyoSuite
 SDK/provider and production physiology/contact/capture gates remain open. See
 [`F09H-NATIVE-RESOURCE-CLOSURE.md`](F09H-NATIVE-RESOURCE-CLOSURE.md).
+
+## F01f Compiled Actuator Command Admission (#11955)
+
+Branch `feat/f01f-compiled-command-admission-11955` adds a native-bound
+compiled command pathway across the existing T02 structural profile row, F09
+execution, and F01 comparison admission. T02 artifact bytes are resolved by
+reference and digest, then recomputed against the loaded MuJoCo model and T01
+bundle. The typed native receipt binds source/loaded model, inventory and
+execution providers, runtime, full initial state, ordered actuator laws,
+input/policy/time grid, resource closure and output-state digest. F01's
+`feedback-comparison/1.2.0` path admits matched within-engine replay and refuses
+muscle-only claims for mixed `ACTUATOR_COMMAND` input. Cross-engine comparison
+still needs a reviewed semantic mapping.
+
+The integrity receipt is not a signature: serialized external receipts need
+independent lineage verification or native replay. Current tests use an
+independent synthetic model on MuJoCo 3.8.0. The native engine remains MuJoCo
+even when the inventory source row is MyoSuite; official MyoSuite runtime and
+production driver/iron binding remain unqualified. All six-engine and
+physiological acceptance gates stay open. See
+[`F01F-COMPILED-COMMAND-ADMISSION.md`](F01F-COMPILED-COMMAND-ADMISSION.md) and
+[`manuals/upstreamdrift/chapters/37-compiled-actuator-command-admission.qmd`](../../../../manuals/upstreamdrift/chapters/37-compiled-actuator-command-admission.qmd).
+
+The exact Tools feature pin adds nine `sidekick.lab` API files to the
+shared-tools divergence inventory. The supported generator also corrected
+stale prior last-touch entries: for example, the unchanged Tools root
+`src/shared/python/__init__.py` has the same blob at the T01 base pin and this
+feature pin, and `git log` reports the same historical commit for both, while
+the old generated report incorrectly listed the T01 pin commit as its last
+touch. The submodule contains complete history and the old/new feature commits
+share their expected merge base. The complete generated JSON/Markdown output
+is retained; no generated authorship values were edited manually.

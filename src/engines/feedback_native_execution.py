@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import hashlib
+import json
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Iterable
 
@@ -26,6 +27,9 @@ if TYPE_CHECKING:
     )
     from src.engines.physics_engines.myosuite.python.native_excitation_replay import (
         NativeMyoSuiteExcitationReplay,
+    )
+    from src.engines.physics_engines.myosuite.python.native_direct_model_replay import (
+        NativeDirectModelReplay,
     )
     from src.engines.physics_engines.pinocchio.python.native_torque_replay import (
         NativePinocchioTorqueReplay,
@@ -127,6 +131,49 @@ class NativeExecutionReceipt:
 
 
 @dataclass(frozen=True)
+class NativeActuatorCommandReceipt:
+    """Actual direct-MuJoCo command replay with separate inventory provenance."""
+
+    schema_version: str
+    package_id: str
+    variant_id: str
+    inventory_engine: str
+    native_engine: str
+    native_model_id: str
+    native_variant_id: str
+    native_provider_id: str
+    native_provider_sha256: str
+    native_source_model_sha256: str
+    loaded_native_model_sha256: str
+    compiled_actuator_profile_sha256: str
+    actuator_law_manifest_sha256: str
+    state_schema_sha256: str
+    initial_state_sha256: str
+    input_channel_schema_sha256: str
+    applied_input_sha256: str
+    policy_sha256: str
+    time_grid_sha256: str
+    resource_closure_sha256: str
+    output_state_sha256: str
+    ordered_channel_ids: tuple[str, ...]
+    horizon_s: float
+    state_sample_count: int
+    input_sample_count: int
+    nq: int
+    nv: int
+    full_state: bool
+    full_horizon: bool
+    state_reset_count: int
+    qualification: str = "unqualified"
+
+
+@dataclass(frozen=True)
+class NativeActuatorCommandExecution:
+    receipt: NativeActuatorCommandReceipt
+    output: NativeDirectModelReplay
+
+
+@dataclass(frozen=True)
 class NativeReplayRowResult:
     package_id: str
     variant_id: str
@@ -180,6 +227,8 @@ def _binding_row(row: ComparisonRow, binding: NativeAdapterBinding) -> None:
         binding.drive_mode,
     ):
         raise ValueError("binding does not identify the declared inventory row")
+    if row.source_model_sha256 != binding.source_model_sha256:
+        raise ValueError("binding inventory source model identity differs")
     if row.engine not in TARGET_ENGINES:
         raise ValueError("inventory engine is outside the required parity set")
     if row.support != "supported":
@@ -584,6 +633,238 @@ def execute_native_replay(
 ) -> NativeExecutionReceipt:
     """Execute one frozen bundle through its exact reviewed native adapter."""
     return execute_native_replay_with_output(request, registry).receipt
+
+
+def _validate_command_evidence_row(
+    request: NativeReplayRequest, evidence_row: Any, profile_bytes: bytes
+) -> Any:
+    """Validate T02's structural link before resolving native model semantics."""
+    from sidekick.lab.mocap import (
+        ActuationInputKind,
+        CapabilityAvailability,
+        CapabilitySupport,
+        COMPILED_ACTUATOR_PROFILE_ID,
+        COMPILED_ACTUATOR_PROFILE_SCHEMA_VERSION,
+        COMPILED_ACTUATOR_PROFILE_VERSION,
+        EvidenceArtifactKind,
+        ImplementationEvidenceKind,
+    )
+
+    if evidence_row.replay_bundle != request.bundle:
+        raise ValueError("T02 evidence row does not contain this exact T01 bundle")
+    binding = request.binding
+    binding_drive_mode = binding.drive_mode
+    if (
+        evidence_row.package_id != binding.package_id
+        or evidence_row.variant_id != binding.variant_id
+        or evidence_row.drive_mode.value != binding_drive_mode.value
+    ):
+        raise ValueError("T02 evidence row differs from the F01 inventory binding")
+    if (
+        evidence_row.support is not CapabilitySupport.SUPPORTED
+        or evidence_row.availability is not CapabilityAvailability.AVAILABLE
+    ):
+        raise ValueError("T02 command evidence is not supported and available")
+    bundle = request.bundle
+    if bundle.input_history.input_kind is not ActuationInputKind.ACTUATOR_COMMAND:
+        raise ValueError("compiled profile admission requires ACTUATOR_COMMAND input")
+    if evidence_row.drive_mode.value != "muscle_excitation":
+        raise ValueError("compiled command profile applies only to the muscle row")
+    implementations = tuple(
+        item
+        for item in evidence_row.implementation_evidence
+        if item.kind is ImplementationEvidenceKind.ACTUATOR
+    )
+    artifacts = tuple(
+        item
+        for item in evidence_row.artifacts
+        if item.kind is EvidenceArtifactKind.ACTUATOR
+    )
+    if len(implementations) != 1 or len(artifacts) != 1:
+        raise ValueError("T02 must provide exactly one actuator profile reference")
+    implementation = implementations[0]
+    artifact = artifacts[0]
+    if (
+        not implementation.required
+        or not implementation.is_available
+        or implementation.implementation_id != COMPILED_ACTUATOR_PROFILE_ID
+        or implementation.version != COMPILED_ACTUATOR_PROFILE_VERSION
+        or implementation.evidence_reference_id != artifact.reference_id
+        or implementation.sha256 != artifact.sha256
+    ):
+        raise ValueError("T02 actuator implementation reference is stale or invalid")
+    if not isinstance(profile_bytes, bytes):
+        raise TypeError("resolved compiled actuator profile must be immutable bytes")
+    actual_digest = hashlib.sha256(profile_bytes).hexdigest()
+    if actual_digest != artifact.sha256:
+        raise ValueError("resolved profile bytes differ from the T02 artifact digest")
+    try:
+        profile = json.loads(profile_bytes)
+    except (UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise ValueError(
+            "resolved compiled actuator profile is invalid JSON"
+        ) from error
+    if (
+        not isinstance(profile, dict)
+        or profile.get("schema_version") != COMPILED_ACTUATOR_PROFILE_SCHEMA_VERSION
+        or json.dumps(profile, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        != profile_bytes
+    ):
+        raise ValueError("resolved compiled actuator profile is not canonical v1")
+    return profile
+
+
+def _validate_direct_command_binding(
+    request: NativeReplayRequest, registration: Any
+) -> None:
+    binding = request.binding
+    bundle = request.bundle
+    if registration.engine_id != "mujoco":
+        raise ValueError("ACTUATOR_COMMAND direct execution requires native MuJoCo")
+    if request.model_path.resolve(strict=True) != registration.model_path.resolve(
+        strict=True
+    ):
+        raise ValueError("request model path differs from its direct registration")
+    if (
+        binding.native_model_id != registration.model_id
+        or binding.native_variant_id != registration.variant_id
+        or binding.native_execution_provider_id != registration.provider_id
+        or binding.native_execution_provider_sha256 != registration.provider_sha256
+        or binding.loaded_native_model_sha256 != registration.loaded_native_model_sha256
+    ):
+        raise ValueError("direct model identity differs from the explicit binding")
+    if (
+        bundle.model.engine_id != registration.engine_id
+        or bundle.model.model_id != registration.model_id
+        or bundle.model.variant_id != registration.variant_id
+        or bundle.model.source_model_sha256 != registration.source_model_sha256
+        or bundle.model.provider_id != registration.provider_id
+        or bundle.model.provider_sha256 != registration.provider_sha256
+        or bundle.model.loaded_native_model_sha256
+        != registration.loaded_native_model_sha256
+    ):
+        raise ValueError("T01 native identity differs from its direct registration")
+    channel_ids = tuple(channel.channel_id for channel in bundle.input_history.channels)
+    if (
+        bundle.state_schema_sha256 != registration.state_schema_sha256
+        or binding.state_schema_sha256 != bundle.state_schema_sha256
+        or bundle.input_channel_schema_sha256
+        != registration.input_channel_schema_sha256
+        or binding.input_channel_schema_sha256 != bundle.input_channel_schema_sha256
+        or channel_ids != registration.ordered_channel_ids
+        or binding.ordered_input_channel_ids != channel_ids
+    ):
+        raise ValueError("T01 schemas or ordered command channels differ from binding")
+
+
+def _direct_command_output_digest(output: NativeDirectModelReplay) -> str:
+    digest = hashlib.sha256()
+    for name in (
+        "time_seconds",
+        "qpos",
+        "qvel",
+        "actuator_activation",
+        "actuator_controls",
+        "integration_states",
+        "applied_actuator_commands",
+    ):
+        values = np.asarray(getattr(output, name), dtype="<f8")
+        if not np.isfinite(values).all():
+            raise ValueError("direct command output contains nonfinite state")
+        digest.update(name.encode("ascii") + b"\0")
+        digest.update(np.asarray(values.shape, dtype="<u8").tobytes())
+        digest.update(values.tobytes(order="C"))
+    return digest.hexdigest()
+
+
+def execute_native_actuator_command_replay(
+    request: NativeReplayRequest,
+    registry: Any,
+    evidence_row: Any,
+    resolved_profile_bytes: bytes,
+    registration: Any,
+    factory: Any,
+    *,
+    claim_native_muscle: bool = False,
+) -> NativeActuatorCommandExecution:
+    """Resolve a structural T02 profile and validate it against native MuJoCo.
+
+    ACTUATOR_COMMAND can contain mixed motor, muscle, filter or other compiled
+    actuator laws. It therefore never proves a muscle-only assistance claim.
+    Inventory/provider provenance remains separate from the native executor.
+    """
+    if claim_native_muscle:
+        raise ValueError(
+            "mixed compiled actuator commands cannot claim muscle-only drive"
+        )
+    row = registry.get(
+        request.binding.package_id,
+        request.binding.variant_id,
+        request.binding.drive_mode,
+    )
+    _binding_row(row, request.binding)
+    if request.binding.drive_mode is not DriveMode.MUSCLE_EXCITATION:
+        raise ValueError("compiled actuator command row must be muscle-classified")
+    bundle = request.bundle
+    replay_policy = bundle.policy.replay_mode
+    input_kind = bundle.input_history.input_kind
+    bundle_integrity = bundle.integrity
+    initial_state_sha256 = bundle_integrity.initial_state_sha256
+    if replay_policy.value != "native_own_contact":
+        raise ValueError("compiled actuator command replay requires native contact")
+    if input_kind.value != "actuator_command":
+        raise ValueError("compiled actuator command replay requires ACTUATOR_COMMAND")
+    _validate_command_evidence_row(request, evidence_row, resolved_profile_bytes)
+    _validate_direct_command_binding(request, registration)
+    from src.engines.physics_engines.myosuite.python.native_direct_model_replay import (
+        replay_direct_model_actuator_commands,
+    )
+
+    output = replay_direct_model_actuator_commands(
+        request.bundle,
+        registration,
+        factory,
+        compiled_profile_bytes=resolved_profile_bytes,
+    )
+    if (
+        output.compiled_actuator_profile_sha256
+        != hashlib.sha256(resolved_profile_bytes).hexdigest()
+    ):
+        raise ValueError("native executor did not bind the resolved profile bytes")
+    times = np.asarray(output.time_seconds, dtype=np.float64)
+    receipt = NativeActuatorCommandReceipt(
+        "native-actuator-command/1.0.0",
+        row.package_id,
+        row.variant_id,
+        row.engine,
+        registration.engine_id,
+        registration.model_id,
+        registration.variant_id,
+        registration.provider_id,
+        registration.provider_sha256,
+        registration.source_model_sha256,
+        registration.loaded_native_model_sha256,
+        output.compiled_actuator_profile_sha256,
+        output.actuator_law_manifest_sha256,
+        request.bundle.state_schema_sha256,
+        initial_state_sha256,
+        request.bundle.input_channel_schema_sha256,
+        request.bundle.applied_input_sha256,
+        request.bundle.policy_sha256,
+        request.bundle.time_grid_sha256,
+        output.resource_closure_sha256,
+        _direct_command_output_digest(output),
+        tuple(registration.ordered_channel_ids),
+        float(times[-1] - times[0]),
+        len(times),
+        len(times) - 1,
+        int(output.qpos.shape[1]),
+        int(output.qvel.shape[1]),
+        True,
+        True,
+        0,
+    )
+    return NativeActuatorCommandExecution(receipt, output)
 
 
 def execute_native_replay_with_output(
