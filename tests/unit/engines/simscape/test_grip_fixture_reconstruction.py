@@ -1,15 +1,13 @@
 """GCV-9 (#11715): Simscape per-hand grip wrench against an R2025b fixture.
 
 The fixture was exported by ``scripts/matlab/export_grip_wrench_fixture.m``
-on MATLAB R2025b (receipt alongside). It is simulation output, not measured
-data. The test checks that the shared two-contact reduction
-(:func:`analyze_grip`) applied to the per-hand columns reproduces the
-model's own logged net hand force and equivalent midpoint couple.
-
-Software consistency only: the model-workspace coefficients drive a swing
-that diverges after ~0.26 s (loads reach ~1e7 N), so the fixture values are
-not physically meaningful and must not be used as reference magnitudes
-(tracked in #11778).
+(``source="run102"``) on MATLAB R2025b (receipt alongside): the qualified
+run-102 replay, an 0.85 s window of the slow early swing.  It is simulation
+output, not measured data. The test checks that the shared two-contact
+reduction (:func:`analyze_grip`) applied to the per-hand columns reproduces
+the model's own logged net hand force and equivalent midpoint couple, and
+that the run is physically plausible (the model-workspace coefficients
+diverge to ~1e7 N, #11778, and must never back this fixture).
 """
 
 from __future__ import annotations
@@ -57,6 +55,22 @@ def test_receipt_is_r2025b_and_matches_fixture() -> None:
     assert receipt["issue"] == "#11715"
     digest = hashlib.sha256(CSV_PATH.read_bytes()).hexdigest()
     assert digest == receipt["fixture_sha256"]
+
+
+#: Plausibility ceilings for a human swing (#11778): grip loads stay in the
+#: low kN range and the clubhead below ~70 m/s even at impact.
+MAX_HAND_FORCE_N = 5_000.0
+MAX_CLUBHEAD_SPEED_MPS = 100.0
+
+
+def test_fixture_is_a_plausible_swing_not_the_divergent_default() -> None:
+    receipt = _receipt()
+    assert receipt["coefficient_source"] == "run102"
+    assert receipt["hand_force_max_n"] < MAX_HAND_FORCE_N
+    assert receipt["clubhead_speed_max_mps"] < MAX_CLUBHEAD_SPEED_MPS
+    c = _columns()
+    for prefix in ("LWLogs_LHonClubFGlobal_", "RWLogs_RHonClubFGlobal_"):
+        assert np.linalg.norm(_vec(c, prefix), axis=1).max() < MAX_HAND_FORCE_N
 
 
 def test_analyze_grip_reproduces_logged_net_force_and_couple() -> None:
