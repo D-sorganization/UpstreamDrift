@@ -128,3 +128,67 @@ The generic MyoSuite engine's handling of legacy Gym four-value step results
 is outside this provider because it never calls `env.step`. That wrapper path
 needs its own regression test and issue if a legacy environment is supported;
 it is not silently certified by this native replay.
+
+## Direct Model-Path Replay Kernel
+
+The F09g direct replay kernel in
+`src/engines/physics_engines/myosuite/python/native_direct_model_replay.py`
+reuses the T01 `ACTUATOR_COMMAND` bundle with an inspected, source-bound native
+model factory. The factory receives the original model path so relative MJCF
+includes and mesh/texture paths retain their declared resource root. The
+kernel binds the caller-declared resource set, compiled actuator laws/channel
+order, full numerical state and contact/solver/step policy. It restores full
+integration state, checks the caller-declared resource files, and rejects
+callbacks, plugins, wrappers, warnings, resets and nonfinite or off-clock
+output. It calls only native MuJoCo stepping and forward evaluation. It does
+not convert the input into torque or Gym actions, call environment `step`, or
+create a qualification receipt. A bounded MuJoCo 3.8.0 disk-MJCF audit follows
+tested include resolution and native MjSpec mesh/texture/cube-face metadata;
+each discovered source and asset must be hash-matched in the supplied
+inventory before the preflight compiled MJB is checked against the expected
+loaded-model identity. This admits the current XML, STL/MSH and PNG route only.
+
+The public driver and iron command fixtures replayed exactly against all saved
+native state samples on MuJoCo 3.8.0. Those runs used the underlying MuJoCo XML
+loader and do not establish official MyoSuite `MujocoEnv` constructor
+compatibility or MyoSuite 3.6 execution. No golfer production binding is
+registered by the direct kernel; the required MyoSuite driver/iron rows and
+all six engine variants stay in the denominator. The reviewed execution
+boundary and opt-in validation command are recorded in
+`docs/development/feedback_controls/F09G-DIRECT-MODEL-REPLAY.md`.
+The kernel accepts only `engine_id="mujoco"`; all other IDs fail before factory
+invocation. The source admission is version- and loader-specific, not a general
+MJCF closure parser: it rejects absolute/URI paths, URDF, VFS, `strippath`,
+hfields, skins, attach/flexcomp, plugins, content-type overrides and other
+unreviewed file loaders before native parsing. The official MyoSuite path
+remains closed until its exact supported SDK constructor and runtime are
+inspected and pinned. The bounded direct MuJoCo evidence does not qualify that
+SDK route or the production capture models.
+
+An additional opt-in diagnostic uses the pinned public MyoSim `arm/myoarm.xml`
+donor under MuJoCo 3.8.0. It compiles 63 native muscle/tendon actuators and
+replays a short unitless `ACTUATOR_COMMAND` pulse exactly from full integration
+state. This is a muscle-only upper-limb candidate, not a golfer model or an
+official MyoSuite runtime result. Its unmodified default state has two
+penetrating contacts and a large humerus/thorax contact force, so this run does
+not establish an admissible equilibrium or capture result. The model's
+`na=63` activation states also expose why F05's current two-motor torque
+tangent derivative cannot be reused: a muscle tangent state must include
+activation dynamics in addition to manifold configuration and velocity. The
+source, hashes, command, and exact limits are recorded in
+`docs/development/feedback_controls/F09G-MYOARM-DIAGNOSTIC.md`. An exploratory
+one-step centered finite difference produced finite `139 x 139` state and
+`139 x 63` input matrices. The apparent derivative blow-up is traced to the
+stock `md3_flexion` coordinate starting exactly at its lower joint limit:
+central perturbations place one trial inside and the other outside the
+compiled range. A diagnostic in-memory copy with only joint limits disabled
+stabilizes this derivative; disabling equality constraints or contacts alone
+does not. Muscle force, tendon length and estimated moment arms vary smoothly,
+while the generalized constraint force changes from zero to about `0.412 N`.
+This isolates a derivative problem at a nonsmooth limit boundary; it does not
+qualify the altered model or the stock state for control. The full audit
+script and source-hashed receipt are in
+`docs/development/feedback_controls/f09g_myoarm_fd_audit.py.txt` and
+`docs/development/feedback_controls/F09G-MYOARM-FD-AUDIT-MJ38.json`.
+The bounded source/resource admission extension is tracked in F09h (#11950); see
+`docs/development/feedback_controls/F09H-NATIVE-RESOURCE-CLOSURE.md`.

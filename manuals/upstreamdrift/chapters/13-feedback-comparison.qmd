@@ -253,3 +253,40 @@ path is executed, and the receipt does not claim physiology, marker accuracy,
 muscle-model validity, or cross-engine equivalence. See
 `manuals/upstreamdrift/chapters/31-myosuite-native-excitation-replay.qmd` for
 the canonical implementation boundary and evidence limits.
+
+## F09g Direct Model-Path Replay Kernel
+
+F09g adds a reusable Tools T01 `ACTUATOR_COMMAND` consumer for direct MuJoCo
+models. The registered factory receives the unchanged model path; source files
+and each caller-declared resource file are verified without relocating
+relative MJCF includes or geometry assets. The bounded MuJoCo 3.8.0 preflight
+resolves native-tested XML include priority, then enumerates mesh, texture, and
+cube-face resources through `MjSpec`. Every discovered source/resource must
+be contained and match the caller's declared hashes before the expected
+compiled MJB identity is checked. This is a version- and loader-specific
+closure admission, not a general MJCF parser. The native actuator-law manifest
+binds each ordered T01 `actuator:<name>` channel to its full compiled law and
+limits. Initialization restores the complete native state, and the kernel
+rejects wrapper, callback, plugin, reset, warning, timing, and state-integrity
+violations.
+
+This kernel is an underlying MuJoCo execution seam, not an official MyoSuite
+environment adapter or F09 qualification authority. Its public driver/iron
+fixture test matches all saved native samples on MuJoCo 3.8.0. It does not
+establish MyoSuite 3.6 package execution, model readiness, physiology, marker
+accuracy, or equivalence; required engine/model rows remain visible. See
+`manuals/upstreamdrift/chapters/31-myosuite-native-excitation-replay.qmd` and
+`docs/development/feedback_controls/F09G-DIRECT-MODEL-REPLAY.md`.
+Only `engine_id="mujoco"` is admitted; all other IDs fail before factory
+invocation. A bounded MuJoCo 3.8.0 disk-MJCF audit follows native-tested
+include selection and asks `MjSpec` for mesh, texture and cube-face assets. It
+requires each discovered file to be contained and hash-matched in the supplied
+inventory, then checks the preflight compiled MJB against the registered
+loaded-model digest. The admitted formats are XML, STL/MSH and PNG; absolute
+or URI references, URDF, VFS, `strippath`, hfields, skins, attach/flexcomp,
+plugins, content-type overrides and unreviewed file loaders fail closed. This
+is version- and loader-specific, not a general MJCF closure parser. It covers
+the current driver/iron underlying MuJoCo 3.8 route, but establishes neither
+official MyoSuite SDK execution nor qualification. The implementation and
+adversarial resource-closure scope are tracked in F09h (#11950); see
+`docs/development/feedback_controls/F09H-NATIVE-RESOURCE-CLOSURE.md`.
