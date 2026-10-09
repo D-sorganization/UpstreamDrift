@@ -3,12 +3,17 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 import numpy as np
 import pytest
 
-from scripts.render_head_gaze_engines import head_glyph_arrows
+from scripts.render_head_gaze_engines import (
+    BUNDLE_INPUTS,
+    bundle_is_current,
+    head_glyph_arrows,
+)
 from scripts.summarize_gaze_sweep import load_rows, summarize
 from scripts.sweep_gaze_weight import _fixed_scales, row_from
 
@@ -132,6 +137,20 @@ def test_head_glyphs_reject_degenerate_input() -> None:
         head_glyph_arrows([0, 0, 1], [0, 0, 0], [1, 0, 0])
     with pytest.raises(ValueError):
         head_glyph_arrows([0, 0, 1], [1, 0, 0], [0, 0, 1])
+
+
+def test_bundle_is_reused_only_when_newer_than_its_inputs(tmp_path: Path) -> None:
+    run, npz = tmp_path / "run", tmp_path / "bundle.npz"
+    run.mkdir()
+    for name in BUNDLE_INPUTS:
+        (run / name).write_bytes(b"x")
+        os.utime(run / name, (100.0, 100.0))
+    assert not bundle_is_current(run, npz)
+    npz.write_bytes(b"x")
+    os.utime(npz, (200.0, 200.0))
+    assert bundle_is_current(run, npz)
+    os.utime(run / BUNDLE_INPUTS[1], (300.0, 300.0))
+    assert not bundle_is_current(run, npz)
 
 
 def _clip_times() -> np.ndarray:

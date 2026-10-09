@@ -80,12 +80,30 @@ def head_glyph_arrows(
     return tuple(out)
 
 
+BUNDLE_INPUTS = ("full_body_spec_hipcal_scaled.json", "ik_trajectory.npz")
+
+
+def bundle_is_current(run: Path, out_npz: Path) -> bool:
+    """True when ``out_npz`` exists and is newer than every bundle input in ``run``."""
+    if not out_npz.is_file():
+        return False
+    built = out_npz.stat().st_mtime
+    return all((run / name).stat().st_mtime <= built for name in BUNDLE_INPUTS)
+
+
 def build_bundle(run: Path, out_npz: Path) -> Path:
-    """Same-input bundle that replays the run's ``q_ref`` (closed loop in MuJoCo)."""
+    """Same-input bundle that replays the run's ``q_ref`` (closed loop in MuJoCo).
+
+    The closed-loop replay takes minutes, so a bundle newer than its inputs
+    is reused (one bundle serves every engine pass of a run).
+    """
     from src.shared.python.motion_matching.same_input import (
         generate_reference_bundle,
     )
 
+    if bundle_is_current(run, out_npz):
+        LOG.info("reusing bundle %s", out_npz)
+        return out_npz
     spec_bytes = (run / "full_body_spec_hipcal_scaled.json").read_bytes()
     with np.load(run / "ik_trajectory.npz") as ik:
         times, q_ref = ik["time_s"], ik["q_ref"]
