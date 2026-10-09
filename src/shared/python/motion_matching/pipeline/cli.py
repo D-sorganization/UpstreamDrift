@@ -103,6 +103,9 @@ from src.shared.python.motion_matching.pipeline.reference import (
     smooth_lane,
     smooth_reference,
 )
+from src.shared.python.motion_matching.pipeline.weld_projection import (
+    weld_consistent_track,
+)
 from src.shared.python.motion_matching.pipeline.plant import (
     get_plant,
 )
@@ -887,6 +890,7 @@ def _simulate_and_receipt(
                 tracking_backend=tracking,
             ),
         )
+    q_track, weld_report = weld_consistent_track(kin, cal_res.scaled_spec, q_track)
     record, sim_q = replay(sim, lane, q_track, tracking_backend=tracking)
     finish = finish_feasibility_report(
         sim,
@@ -944,6 +948,7 @@ def _simulate_and_receipt(
     )
     receipt["engine"] = ctx.engine
     receipt["head_gaze"] = head_gaze_receipt(lane, kin, q_ref)
+    receipt["tracking_weld_projection"] = weld_report
     _apply_trajectory_optimiser(args, out_dir, receipt, lane=lane, kin=kin, sim=sim)
     _write_receipt(out_dir, receipt)
     log_pipeline_summary(
