@@ -46,11 +46,16 @@ Workspace planning retains actual MyoSuite 3.0/MuJoCo 3.6 evidence:
   driver and iron twenty-step cost agreement with full guarded promotion and
   independent native replay. These finite-state test criteria do not establish
   contact feasibility or motion matching.
-- `f09m-native-full-campaign.xml`: final seven-module campaign passes 146 tests
+- `f09m-native-full-campaign.xml`: first seven-module campaign passes 146 tests
   with zero failures, errors or skips in 152.81 seconds. All sixteen executed
-  source/test hashes match (`f09m-native-source-hashes-final.json`). The first
+  source/test hashes match (`f09m-native-source-hashes-first.json`). The first
   post-test hash collector failed to decode an older JSON file; a separate
   explicit-list collector recovered hashes without editing executed source.
+- `f09m-native-full-campaign-typed.xml`: 146 passes in 213.95 seconds after an
+  explicit TypeAlias fixes the actual pre-push mypy compatibility failure.
+- `f09m-native-full-campaign-final.xml`: 146 passes, zero failures/errors/skips,
+  in 179.14 seconds after clarifying native mixed-command scale units. All
+  sixteen final source/test hashes match `f09m-native-source-hashes-final.json`.
 
 Run the prior six-module F09l native campaign plus
 `tests/unit/engines/myosuite/test_project_task_tracking.py` using the existing
@@ -63,6 +68,12 @@ attempt encountered duplicate `engines`/`src.engines` discovery. An unrestricted
 transitive mypy run found one existing nullable multiplication error in
 `validation_pkg/kaggle_validation.py:327`; no tracking-file error remained.
 Keep these diagnostics separate from scoped checks and actual SDK execution.
+The actual pre-push mypy hook subsequently rejected the implicit NumPy type
+alias despite the scoped gate passing. Explicit TypeAlias passes that exact
+hook; preserve the failed push and final full native rerun. An external static
+review incorrectly asserted integration states exclude controls: actual pinned
+native flags are INTEGRATION=16383 and CTRL=64, with a nonzero bit intersection.
+Never overwrite decoded scratch controls to conceal a correspondence failure.
 
 ## Next Integration and Scientific Gates
 

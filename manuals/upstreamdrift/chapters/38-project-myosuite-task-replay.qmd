@@ -384,5 +384,5 @@ full twenty-step guarded promotion plus independent replay. These tests use
 hold references and finite-state admission, not private-capture physical gates.
 See F09m turnover for final combined evidence and bounded-search integration.
 The final seven-module actual SDK campaign passes 146 tests with zero failures,
-errors or skips in 152.81 seconds; all sixteen executed source/test hashes match.
+errors or skips in 179.14 seconds; all sixteen executed source/test hashes match.
 All seventeen production rows, six ecosystems and muscular OpenSim remain open.

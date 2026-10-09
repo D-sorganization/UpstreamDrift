@@ -12,7 +12,7 @@ import hashlib
 import json
 from pathlib import Path
 from threading import Lock
-from typing import Any, Iterator
+from typing import Iterator, TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
@@ -40,7 +40,7 @@ from src.engines.physics_engines.myosuite.python.native_direct_model_replay impo
     _require_normalized_quaternions,
 )
 
-Array = NDArray[np.float64]
+Array: TypeAlias = NDArray[np.float64]
 
 
 def _source_sha256() -> str:
@@ -77,8 +77,9 @@ class NativeTrackingScales:
     """Positive physical magnitudes, not inverse weights or learned tolerances.
 
     Position scales use each native tangent DOF's m/rad units; velocity scales
-    use m/s or rad/s. Activation and post-mapping command slew use native
-    dimensionless units. Empty activation vectors are allowed for motor models.
+    use m/s or rad/s. Activation is dimensionless; post-mapping command slew
+    scales use each native control channel's units. Empty activation vectors
+    are allowed for motor models.
     """
 
     position: Array

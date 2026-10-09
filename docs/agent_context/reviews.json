@@ -73,14 +73,14 @@
       "rationale": "Reviewed canonical pose ownership and MuJoCo adapter protocol, explicit coordinate conventions and capability limits. Existing test_mujoco_protocol.py passed in the 41-test boundary run on 2026-09-09; no scientific validity assertion is added."
     },
     "project-task-native-replay": {
-      "fingerprint": "04fa5aab32ae6e9922b433410ec6db4c4eb93b2d9422fb6681f96ba8dd02ccd4",
+      "fingerprint": "55bf5d25d6ec9728dfb6ea71285a6172361949d38f1f83c3720140c263cbde37",
       "inputs": {
         "docs/agent_context/contracts/project-task-native-replay.md": "d47df94f1644489aaa5711c5427736bbd7225ab03620ffabebb8dd1f82af02fe",
         "src/engines/myosuite_project_feedback.py": "c0d4f3f2e2f5ec0fac1c0cb9861d1e02e2d7cc6012c66d38283ac1aec864f7c5",
         "src/engines/myosuite_project_forecast.py": "b07b9f00d98f4b27e60be0de2ec255b294875255198f9a010ff12a67e13ab45f",
         "src/engines/myosuite_project_native_search.py": "3195899213ca1b48dc8cfe040f5fd82ca7742bc9e4b92eeff96ef64da4939105",
         "src/engines/myosuite_project_task_producer.py": "59e63dca8f2c178d9dbc92adcc0047c70feac1052967f7055f8d5b8d77a074d1",
-        "src/engines/myosuite_project_tracking.py": "79596d8c6e8e321364df7927a8a1a539896f71f5a3985f9a3097e31f0aab4a7d",
+        "src/engines/myosuite_project_tracking.py": "46be8b4b606893e0c3a7c29dfef6dcb76a4cb4fcf0f38557d01d7d0ded608648",
         "src/engines/native_direct_model_provider.py": "053927847888280af9a0d6271d9f8a74ecb00b6d90cd6142fee884f4cb49b149",
         "src/engines/native_replay_contracts.py": "a8da8d7080b9cfc3c3452dccb05a69428a3502fa348bf33c2290caa4b52626d2",
         "src/engines/physics_engines/myosuite/python/native_direct_model_replay.py": "daa670e49f3d3e4b2940d321ef8104f0e9aef0ff8524659b1b65bd6cec08b719",
@@ -93,7 +93,7 @@
         "tests/unit/engines/myosuite/test_project_task_producer.py": "ead3c9f3eb031cf78bc63e011b8a9e1fe203a6b16af3c3e8f3120950f81f6faf",
         "tests/unit/engines/myosuite/test_project_task_tracking.py": "8b329a3e676b28906e3c5a0f7439d483625ce071400f949420be0021488c0dc4"
       },
-      "rationale": "F09m12023: reviewed frozen source-bound native manifold objective, native qvel discrete residual semantics, immutable physical scales/reference, complete initial anchor and clock/control binding. Actual SDK API RED10; first GREEN10/18.92s; corrected genuine source/producer lineage RED2 then implemented. Expanded16 including original driver/iron20step guarded promotion and independent replay PASS56.23s. Final seven-module actual MyoSuite3.0/MuJoCo3.6 campaign146PASS0F/E/S152.81s, all16 executed source/test hashes independently verified. Soft slew is separate from hard bounds. No private capture, physiology, contact feasibility, online deadline or full-epic acceptance."
+      "rationale": "F09m12023 frozen source-bound native manifold objective; native qvel-coordinate discrete sums with physical scales, immutable reference, exact complete initial anchor and clock/control lineage. API RED10; corrected genuine lineage RED2; original driver/iron20step guarded promotion and independent replay pass. Actual pre-push mypy required explicit TypeAlias; exact hook now passes. Final seven-module MyoSuite3.0/MuJoCo3.6 campaign146PASS0F/E/S179.14s and all16 executed hashes match final source. Actual INTEGRATION16383 includes CTRL64; retain decoded control correspondence. No capture/contact/physiology/online/all-epic acceptance. Soft slew remains separate from physical hard criteria."
     }
   },
   "version": 1
