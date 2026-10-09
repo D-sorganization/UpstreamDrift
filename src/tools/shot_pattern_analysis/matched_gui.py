@@ -49,6 +49,7 @@ class MatchedStudyWidget(QtWidgets.QWidget):
         self._closed = False
         self.club_config = matched_preset("driver")
         self._applying_config = False
+        self._correlation_implicit_identity = False
         self._build_ui()
 
     def _build_ui(self) -> None:
@@ -85,8 +86,9 @@ class MatchedStudyWidget(QtWidgets.QWidget):
         self.curve_scale.setDecimals(1)
         self.curve_scale.setValue(1.0)
         self.target_distance = QtWidgets.QDoubleSpinBox()
-        self.target_distance.setRange(0.0, 400.0)
-        self.target_distance.setDecimals(1)
+        self.target_distance.setRange(0.0, 1_000_000.0)
+        self.target_distance.setDecimals(15)
+        self.target_distance.setSingleStep(0.1)
         self.target_distance.setValue(0.0)
         self.target_distance.setSpecialValueText("Match Within Lean")
         self.match_tolerance = QtWidgets.QDoubleSpinBox()
@@ -384,6 +386,7 @@ class MatchedStudyWidget(QtWidgets.QWidget):
     def _correlation_edited(self, item: QtWidgets.QTableWidgetItem) -> None:
         if self._setting_correlation or item.row() == item.column():
             return
+        self._correlation_implicit_identity = False
         try:
             value = float(item.text())
             if not -1 <= value <= 1:
@@ -407,6 +410,7 @@ class MatchedStudyWidget(QtWidgets.QWidget):
             raise ValueError("unknown noise field")
         if field_a == field_b or not -1 <= value <= 1:
             raise ValueError("off-diagonal correlations must be within [-1,1]")
+        self._correlation_implicit_identity = False
         i, j = NOISE_FIELDS.index(field_a), NOISE_FIELDS.index(field_b)
         self._setting_correlation = True
         self._correlation_cell(i, j).setText(f"{value:.3f}")
@@ -442,7 +446,9 @@ class MatchedStudyWidget(QtWidgets.QWidget):
             for field in NOISE_FIELDS
         )
         corr = tuple(tuple(float(v) for v in row) for row in self.correlation_matrix())
-        noise = NoiseSpec(deviations, corr)
+        noise = NoiseSpec(
+            deviations, None if self._correlation_implicit_identity else corr
+        )
         target = self.target_distance.value() or None
         return ExperimentConfig(
             club=self.club_config,
@@ -502,6 +508,7 @@ class MatchedStudyWidget(QtWidgets.QWidget):
         self._apply_request(request)
 
     def _apply_request(self, request: Any) -> None:
+        self._validate_import_display(request)
         self._applying_config = True
         self.club_choice.setCurrentIndex(
             self.club_choice.findData(request.club.club_id)
@@ -520,6 +527,8 @@ class MatchedStudyWidget(QtWidgets.QWidget):
         self.seed.setValue(request.seed)
         self.curve_scale.setValue(request.curve_scale)
         self.target_distance.setValue(request.target_x_m or 0.0)
+        if self.target_distance.value() != (request.target_x_m or 0.0):
+            raise ValueError("target distance cannot display exactly in GUI")
         self.match_tolerance.setValue(request.match_tolerance_m)
         self.target_radius.setValue(request.target_radius_m)
         bounds = request.match_face_bounds_deg
@@ -549,7 +558,52 @@ class MatchedStudyWidget(QtWidgets.QWidget):
             for j in range(7):
                 self._correlation_cell(i, j).setText(f"{corr[i, j]:.3f}")
         self._setting_correlation = False
+        self._correlation_implicit_identity = request.noise.correlation is None
         self._update_assumption()
+
+    def _validate_import_display(self, request: Any) -> None:
+        """Reject controls that would silently change a loaded experiment."""
+        if (
+            not self.shot_count.minimum()
+            <= request.n_shots
+            <= self.shot_count.maximum()
+        ):
+            raise ValueError("shot count cannot display exactly in GUI")
+        if not self.seed.minimum() <= request.seed <= self.seed.maximum():
+            raise ValueError("random seed cannot display exactly in GUI")
+
+        def require_exact(control: QtWidgets.QDoubleSpinBox, value: float) -> None:
+            probe = QtWidgets.QDoubleSpinBox()
+            probe.setRange(control.minimum(), control.maximum())
+            probe.setDecimals(control.decimals())
+            probe.setValue(value)
+            if probe.value() != value:
+                raise ValueError("study control cannot display exactly in GUI")
+
+        for control, value in (
+            (self.curve_scale, request.curve_scale),
+            (self.target_distance, request.target_x_m or 0.0),
+            (self.match_tolerance, request.match_tolerance_m),
+            (self.target_radius, request.target_radius_m),
+            (self.speed_factor_min, request.match_speed_factors[0]),
+            (self.speed_factor_max, request.match_speed_factors[1]),
+        ):
+            require_exact(control, value)
+        if request.match_face_bounds_deg is not None:
+            require_exact(self.face_bound_min, request.match_face_bounds_deg[0])
+            require_exact(self.face_bound_max, request.match_face_bounds_deg[1])
+        for field, value in zip(
+            NOISE_FIELDS, request.noise.standard_deviations, strict=True
+        ):
+            require_exact(self.noise_inputs[field], value / self._SCALE_TO_SI[field])
+        if request.noise.correlation is not None:
+            matrix = request.noise.correlation_matrix()
+            if any(
+                float(f"{matrix[i, j]:.3f}") != float(matrix[i, j])
+                for i in range(7)
+                for j in range(7)
+            ):
+                raise ValueError("correlation cannot display exactly in GUI")
 
     def run_analysis(self) -> None:
         output_text = self.output_edit.text().strip()

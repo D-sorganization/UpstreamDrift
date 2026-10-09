@@ -239,6 +239,53 @@ def test_imported_bound_beyond_control_precision_fails_explicitly(
     assert widget.cleanup()
 
 
+def test_exact_supplement_config_preserves_target_and_implicit_identity_noise(
+    qapp, tmp_path: Path
+) -> None:  # noqa: ANN001
+    from src.tools.shot_pattern_analysis.matched_matrix import matched_matrix_cells
+
+    widget = _study(qapp)
+    _, request = matched_matrix_cells(
+        n_shots=32,
+        common_targets={"driver": 178.94875782337786},
+        profiles=("combined2",),
+        selected_cell_names=("driver_lean5_curve2_rotation2_combined2",),
+        match_face_bounds_deg=(-6.0, 6.0),
+        match_speed_factors=(0.75, 1.30),
+    )[0]
+    path = tmp_path / "driver-supplement.json"
+    widget.export_config(path, request)
+    widget.load_config(path)
+
+    assert widget.build_experiment() == request
+    assert widget.noise_inputs["shaft_rotation_deg"].value() == pytest.approx(2.0)
+    assert widget.target_distance.value() == request.target_x_m
+    assert widget.cleanup()
+
+
+def test_import_precision_rejection_leaves_existing_gui_request_unchanged(
+    qapp, tmp_path: Path
+) -> None:  # noqa: ANN001
+    widget = _study(qapp)
+    original = widget.build_experiment()
+    request = replace(
+        original,
+        target_x_m=178.94875782337786,
+        noise=replace(
+            original.noise,
+            standard_deviations=(1.234567, *original.noise.standard_deviations[1:]),
+        ),
+    )
+    path = tmp_path / "precision.json"
+    widget.export_config(path, request)
+
+    with pytest.raises(ValueError, match="cannot display exactly"):
+        widget.load_config(path)
+
+    assert widget.build_experiment() == original
+    assert widget.cleanup()
+
+
 def test_invalid_correlation_prevents_worker_start(qapp, tmp_path, monkeypatch) -> None:  # noqa: ANN001
     widget = _study(qapp)
     widget.output_edit.setText(str(tmp_path))
