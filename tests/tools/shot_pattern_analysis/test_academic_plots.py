@@ -160,7 +160,9 @@ def test_academic_dispersion_figure_exports_all_formats_with_scenario_labels(
 
 
 @pytest.mark.slow
-def test_density_metadata_caption_does_not_overlap_scenario(tmp_path, monkeypatch) -> None:
+def test_density_metadata_caption_does_not_overlap_scenario(
+    tmp_path, monkeypatch
+) -> None:
     write_dispersion, _ = _plot_api()
     import src.tools.shot_pattern_analysis.academic_plots as plots
 
@@ -260,7 +262,9 @@ def test_overhead_figure_uses_raw_trajectories_and_exports_all_formats(
 
 
 @pytest.mark.slow
-def test_overhead_pilot_footer_remains_inside_figure_bounds(tmp_path, monkeypatch) -> None:
+def test_overhead_pilot_footer_remains_inside_figure_bounds(
+    tmp_path, monkeypatch
+) -> None:
     _, write_overhead = _plot_api()
     import src.tools.shot_pattern_analysis.academic_plots as plots
 

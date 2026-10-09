@@ -274,9 +274,7 @@ class MatchedStudyWidget(QtWidgets.QWidget):
         self.shaft_lean.setValue(config.shaft_lean_deg)
         self.attack_angle.setValue(config.attack_angle_deg)
         self.club_mass.setValue(config.clubhead_mass_kg)
-        self.contact_law.setCurrentIndex(
-            self.contact_law.findData(config.contact_law)
-        )
+        self.contact_law.setCurrentIndex(self.contact_law.findData(config.contact_law))
         self.static_loft_label.setText(
             "Nominal Static Loft: The same face baseline is used for every pattern; delivery lean can change dynamic loft."
         )

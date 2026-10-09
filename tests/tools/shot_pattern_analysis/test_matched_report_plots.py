@@ -86,7 +86,9 @@ def test_metric_extraction_distinguishes_physics_support_and_conditional_sg() ->
     assert metric_value(cell, "supported_fraction", "Fade") == pytest.approx(11 / 12)
     assert metric_value(cell, "radial_p95_m", "Straight") == pytest.approx(8.0)
     assert metric_value(cell, "conditional_sg", "Draw") == pytest.approx(0.02)
-    unavailable = next(item for item in _synthetic_cells() if item["status"] == "unavailable")
+    unavailable = next(
+        item for item in _synthetic_cells() if item["status"] == "unavailable"
+    )
     assert metric_value(unavailable, "target_rmse_m", "Draw") is None
 
 
