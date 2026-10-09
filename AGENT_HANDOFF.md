@@ -17,6 +17,10 @@ production probes cover resource closure, T01/profile freeze and full-state
 uninterrupted/suffix/changed-future replay. Preserve original source bytes,
 separate SDK/helper/native-provider identities and all-model/full-horizon gates.
 Native evidence does not qualify anatomy, capture fit or muscle-only OpenSim.
+Read-only diagnosis found active grip-site gaps and no native foot contact at
+reset. Initial assembly must preserve source and distinguish reference-derived
+from optimizer-assembled poses; qualify named constraints/support and full-state
+reload before fitting. Tools-main ancestry is the current completed CI hold.
 
 # Active: MeshCat Camera Framing - NV-9 #11697
 

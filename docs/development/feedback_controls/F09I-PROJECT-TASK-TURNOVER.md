@@ -89,3 +89,27 @@ contact/grip calibration, measured motion fit, muscle-only assistance and the
 ultimate fully muscular OpenSim solve plus independent excitation replay remain
 required. The 520-muscle OpenSim source's passive-force readiness remains a
 separate scientific blocker; a numerical seed does not resolve it.
+
+## Initial Assembly Findings and Next Implementation
+
+The saved reset is exactly source `qpos0` in both variants. Read-only native
+forward diagnosis places the largest mixed constraint residual at reset in an
+active grip weld, with right/left grip-site separations about 1.1703/0.9940 m.
+MuJoCo permits separated site welds to align during simulation; this finding
+does not prove source invalidity or assembly infeasibility. Native foot contacts
+are absent at reset. Later skull/platform penetration and right-ankle limit
+excess are separate events observed in the uncontrolled rollouts.
+
+Before fitting, qualify bounded native initial assembly with explicit provenance,
+named grip/body-weld residuals, joint limits, actual collision support and full
+integration-state independent reload. Preserve the original default. An
+optimizer-assembled pose cannot inherit a captured-reference label without a
+qualified marker/frame correspondence. Kinematic support is not dynamic force
+balance. Planning receipts in `constraint_diagnostics` bind XML/MJB/history;
+they do not independently recheck the full resource closure, and the included
+Desk scene differs from local scene bytes. See chapter 38 for limitations.
+
+Current protected CI passes architecture, source contracts, Rust quickstart and
+Python 3.11/3.12 tests. Its completed agent-context failure is now the intentional
+Tools-main ancestry gate: the feature gitlink is still unmerged. Retain the
+draft/unarmed dependency hold.

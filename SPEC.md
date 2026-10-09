@@ -13,6 +13,10 @@ variants but retain unqualified contact/constraint diagnostics. Invocation-local
 zero-filled fingerprint scratch preserves all per-step integrity checks while
 avoiding allocation/copy overhead. Python/Rust installs must match the actual
 vendored Tools revision, with feature-pin authority stated explicitly.
+Read-only reset diagnosis requires explicit initial assembly and physical support
+admission before fitting. Preserve default/reference/assembled provenance and
+independently reload full state; a mixed constraint norm does not qualify grip,
+joint limits or contact. Pose assembly alone does not prove capture correspondence.
 
 ## Native Muscle Replay Development Boundary (F07, #11791)
 

@@ -156,6 +156,43 @@ native warnings and exact complete-state, command and clock replay through the
 serialized T01 pathway. These were executed with the original producer, before
 the scratch-buffer optimization. They use capture duration only and contain no
 feedback fit. Maximum observed contact penetration was about 0.0317 m; the
-maximum absolute native constraint residual was about 1.0471 in mixed native
+maximum absolute native constraint residual was about 1.0498 in mixed native
 units and must not be interpreted as a distance or an accepted equality error.
 These diagnostics preserve the unresolved contact/constraint readiness gate.
+
+### Initial Assembly and Support Admission
+
+Read-only native forward evaluation of all 1,815 driver and 1,829 iron saved
+states located the largest weld residual at reset, before the later collapse.
+Both saved reset poses exactly equal compiled `qpos0`. Right and left
+hand-to-club grip-site origins start about 1.1703 m and 0.9940 m apart, with
+active site welds. MuJoCo permits site welds to start separated and align during
+simulation ([MuJoCo 3.6 weld reference](https://mujoco.readthedocs.io/en/3.6.0/XMLreference.html#equality-weld)).
+This identifies an initial-assembly admission concern; it does not prove a
+defective source model or an infeasible assembled pose.
+
+The auxiliary foot welds join bodies with declared relative poses. Their
+body-origin separation is not a weld error, and collision-disabled auxiliary
+spheres do not establish floor support. Native `ncon` is zero at reset. Later
+maximum penetration is skull against the included scene's cylinder platform,
+approximately 0.0317 m, distinct from the named floor plane. Site-frame closure,
+body-weld relative pose, joint limits and named physical contact pairs require
+separate units and acceptance criteria. One mixed `efc_pos` norm cannot qualify
+all of them.
+
+Before controller fitting, freeze an explicit initial-pose and support policy.
+Preserve the original complete state and distinguish `source_default`,
+`reference_derived` and `optimizer_assembled` provenance. Assembly must use
+bounded native tangent-space motion on the unchanged compiled model, retain
+source ranges and equality activation, and independently reload complete
+integration state before checking grip closure, joint feasibility, support
+identity, penetration and allowed displacement. An assembled pose alone does
+not prove capture correspondence or dynamic force balance. No qualified
+MyoSuite capture-marker map or assembled production initial state is
+demonstrated by the present nominal experiment.
+
+Diagnostic scripts rechecked entry XML, compiled MJB and saved-history hashes;
+they did not independently revalidate the entire transitive resource closure.
+The observed Desk scene bytes differ from local scene bytes. The producer's
+separate full resource-closure evidence remains separate. Desktop previews
+restore saved states and render without integration, labeled **No Mocap Fit**.
