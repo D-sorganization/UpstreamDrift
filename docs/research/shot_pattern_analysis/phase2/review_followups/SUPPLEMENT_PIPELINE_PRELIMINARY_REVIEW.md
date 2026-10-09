@@ -1,0 +1,17 @@
+# Supplemental Pipeline Preliminary Review
+
+This is a read-only review of the uncommitted pipeline while implementation is moving. It is not acceptance; no tests were run against the changing files. The separately qualified explicit-pair API remains the numerical/statistical comparison boundary.
+
+## Required Follow-Ups
+
+1. **Original Protocol Qualification:** Checking `final`, 324/72 rows, and 10,000 shots does not establish the original factorial protocol. Require the exact cell inventory, target-request modes, club/lean/curve/shaft-SD/profile configurations and seed, or a bound canonical plan contract. A coherent arbitrary matrix must not receive an original-study label.
+2. **Original Unavailable Inventory:** Retain a user-visible all-396-original-cell inventory with source protocol, status and reason. Aggregate counts and root paths alone do not show every unavailable original condition. Never rewrite original artifacts when presenting supplemental resolutions.
+3. **Actual Density Population:** Standalone cell rendering calls `_supported_endpoints`, which returns the intersection across three patterns, but metadata reads each pattern's individual `supported_n`. Choose and label one population consistently. Test differing invalid masks so the displayed count equals the plotted sample count. Pair density must continue using the six-population intersection.
+4. **Standalone Condition Labels:** Shaft-SD comparison panels must explicitly identify actual 1°/2° shaft SD; curve and lean alone produce indistinguishable condition labels. Include club/profile, common count and total denominator, and conditional-support wording. Overhead saved trajectory samples are a separate illustrative population and need that distinction in both caption and ledger.
+5. **Publication Integrity:** Run all input, transition-evidence and reporting-source rechecks before emitting the final pipeline receipt. Prefer staging and atomic publication; otherwise a failure must leave no artifact claiming successful final publication. Keep fresh-output/refuse-overwrite behavior.
+6. **Distinct Figure Assets:** Preserve density and overhead as separate ledger paths/formats rather than overwriting identical `png/pdf/svg` dictionary keys. Parent identified this defect before this review; require the regression to remain green. Shared axes and density normalization across six paired panels are appropriate; equal metric aspect or explicit magnification is preferable for shape interpretation.
+7. **Maintainability and Provenance:** Keep canonical density/trajectory renderers and the qualified pair API authoritative. Split presentation code before crossing the 1,200-line repository budget. Bind every active postprocessing/scoring/provider source separately from the immutable execution snapshots.
+
+## Coverage Assessment
+
+The current selector groups by club, profile, physical target and held conditions; it plans curve 1→2, shaft SD 1→2, and ordered 0→5/0→10/5→10 lean comparisons. It excludes incomplete nominal cells and deduplicates source/alias identities. The final review must verify source precedence does not silently drop intended original-versus-supplement comparisons, all original unavailable cells remain visible, and four aliases never count as unique simulations. Actual final acceptance awaits a stable commit, focused contracts, representative rendered review, and complete independently audited datasets.
