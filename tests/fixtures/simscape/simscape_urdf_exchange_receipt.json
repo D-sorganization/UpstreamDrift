@@ -1,0 +1,1240 @@
+{
+  "schema": "simscape-urdf-exchange/v1",
+  "issue": 11569,
+  "matlab_release": "2025b",
+  "matlab_version": "25.2.0.3177638 (R2025b) Update 5",
+  "smexport_available": false,
+  "canonical": {
+    "model": "GolfSwing3D_Kinetic",
+    "model_file": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/model/GolfSwing3D_Kinetic.slx",
+    "model_sha256": "daca9a90ad0ab819c7d61641ed594b8f230f8658f2a5f4ce34026db44b52ddc9",
+    "inventory": {
+      "joints": [
+        {
+          "path": "GolfSwing3D_Kinetic/Club/Weld Joint",
+          "type": "Weld Joint",
+          "dof": 0
+        },
+        {
+          "path": "GolfSwing3D_Kinetic/Grip/LeftHandOnClubForce",
+          "type": "Weld Joint",
+          "dof": 0
+        },
+        {
+          "path": "GolfSwing3D_Kinetic/Grip/RightHandOnClubForce",
+          "type": "Weld Joint",
+          "dof": 0
+        },
+        {
+          "path": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Hip Kinetically Driven/Hip Joint",
+          "type": "Bushing Joint",
+          "dof": 6
+        },
+        {
+          "path": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Spine Tilt Kinetically Driven/Universal Joint/Kinetically Driven Universal Joint",
+          "type": "Universal Joint",
+          "dof": 2
+        },
+        {
+          "path": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Torso Kinetically Driven/Revolute Joint/Kinetically Driven Revolute",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "GolfSwing3D_Kinetic/Left Elbow Joint/Revolute Joint/Kinetically Driven Revolute",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "GolfSwing3D_Kinetic/Left Forearm/Revolute Joint/Kinetically Driven Revolute",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "GolfSwing3D_Kinetic/Left Scapula Joint/Universal Joint/Kinetically Driven Universal Joint",
+          "type": "Universal Joint",
+          "dof": 2
+        },
+        {
+          "path": "GolfSwing3D_Kinetic/Left Shoulder Joint/Gimbal Joint/Kinetically Driven",
+          "type": "Gimbal Joint",
+          "dof": 3
+        },
+        {
+          "path": "GolfSwing3D_Kinetic/Left Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint",
+          "type": "Universal Joint",
+          "dof": 2
+        },
+        {
+          "path": "GolfSwing3D_Kinetic/Right Elbow Joint/Revolute Joint/Kinetically Driven Revolute",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "GolfSwing3D_Kinetic/Right Forearm/Revolute Joint/Kinetically Driven Revolute",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "GolfSwing3D_Kinetic/Right Scapula Joint/Universal Joint/Kinetically Driven Universal Joint",
+          "type": "Universal Joint",
+          "dof": 2
+        },
+        {
+          "path": "GolfSwing3D_Kinetic/Right Shoulder Joint/Gimbal Joint/Kinetically Driven",
+          "type": "Gimbal Joint",
+          "dof": 3
+        },
+        {
+          "path": "GolfSwing3D_Kinetic/Right Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint",
+          "type": "Universal Joint",
+          "dof": 2
+        }
+      ],
+      "bodies": [
+        {
+          "path": "GolfSwing3D_Kinetic/Club/Clubface Vector",
+          "kind": "Cylindrical Solid",
+          "shape": "cylinder",
+          "mass_kg": 0,
+          "moments_kgm2": [0, 0, 0],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "GolfSwing3D_Kinetic/Club/Clubhead",
+          "kind": "Spherical Solid",
+          "shape": "sphere",
+          "mass_kg": 0.25,
+          "moments_kgm2": [
+            0.00040322500000000006, 0.00040322500000000006,
+            0.00040322500000000006
+          ],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "GolfSwing3D_Kinetic/Club/Rigid Shaft/Rigid Shaft",
+          "kind": "Cylindrical Solid",
+          "shape": "cylinder",
+          "mass_kg": 0.0802566,
+          "moments_kgm2": [
+            0.0066900564149999994, 0.0066900564149999994, 4.01283e-6
+          ],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "GolfSwing3D_Kinetic/Grip/1.5\" Bottom",
+          "kind": "Cylindrical Solid",
+          "shape": "cylinder",
+          "mass_kg": 0.01,
+          "moments_kgm2": [
+            2.1169312499999992e-6, 2.1169312499999992e-6, 1.8145124999999996e-6
+          ],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "GolfSwing3D_Kinetic/Grip/1.5\" Top",
+          "kind": "Cylindrical Solid",
+          "shape": "cylinder",
+          "mass_kg": 0.01,
+          "moments_kgm2": [
+            2.1169312499999992e-6, 2.1169312499999992e-6, 1.8145124999999996e-6
+          ],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "GolfSwing3D_Kinetic/Grip/2.5\" Butt",
+          "kind": "Cylindrical Solid",
+          "shape": "cylinder",
+          "mass_kg": 0.016667,
+          "moments_kgm2": [
+            7.1125832210416676e-6, 7.1125832210416676e-6, 3.0242479837499997e-6
+          ],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "GolfSwing3D_Kinetic/Grip/GhostGripSegment",
+          "kind": "Cylindrical Solid",
+          "shape": "cylinder",
+          "mass_kg": 0,
+          "moments_kgm2": [0, 0, 0],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "GolfSwing3D_Kinetic/Grip/LHand",
+          "kind": "Spherical Solid",
+          "shape": "sphere",
+          "mass_kg": 0.54913578534726148,
+          "moments_kgm2": [
+            0.00056684870923942273, 0.00056684870923942273,
+            0.00056684870923942273
+          ],
+          "mass_basis": "density"
+        },
+        {
+          "path": "GolfSwing3D_Kinetic/Grip/LHandStandoff",
+          "kind": "Cylindrical Solid",
+          "shape": "cylinder",
+          "mass_kg": 0.01,
+          "moments_kgm2": [
+            9.4085833333333331e-7, 9.4085833333333331e-7, 8.0645e-7
+          ],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "GolfSwing3D_Kinetic/Grip/RHand",
+          "kind": "Spherical Solid",
+          "shape": "sphere",
+          "mass_kg": 0.54913578534726148,
+          "moments_kgm2": [
+            0.00056684870923942273, 0.00056684870923942273,
+            0.00056684870923942273
+          ],
+          "mass_basis": "density"
+        },
+        {
+          "path": "GolfSwing3D_Kinetic/Grip/RHandStandoff",
+          "kind": "Cylindrical Solid",
+          "shape": "cylinder",
+          "mass_kg": 0.01,
+          "moments_kgm2": [
+            9.4085833333333331e-7, 9.4085833333333331e-7, 8.0645e-7
+          ],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod",
+          "kind": "Cylindrical Solid",
+          "shape": "cylinder",
+          "mass_kg": 0,
+          "moments_kgm2": [0, 0, 0],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Head",
+          "kind": "Spherical Solid",
+          "shape": "sphere",
+          "mass_kg": 4.9895160700000005,
+          "moments_kgm2": [
+            0.032190361877212005, 0.032190361877212005, 0.032190361877212005
+          ],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso",
+          "kind": "Cylindrical Solid",
+          "shape": "cylinder",
+          "mass_kg": 20,
+          "moments_kgm2": [
+            0.27096719999999991, 0.27096719999999991, 0.23225759999999995
+          ],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Neck",
+          "kind": "Cylindrical Solid",
+          "shape": "cylinder",
+          "mass_kg": 2.0592591950522308,
+          "moments_kgm2": [
+            0.012399815514612373, 0.012399815514612373, 0.0026571033245597945
+          ],
+          "mass_basis": "density"
+        },
+        {
+          "path": "GolfSwing3D_Kinetic/Hips and Torso Inputs/UpperTorsoBase",
+          "kind": "Cylindrical Solid",
+          "shape": "cylinder",
+          "mass_kg": 4,
+          "moments_kgm2": [
+            0.024464467199999992, 0.024464467199999992, 0.046451519999999989
+          ],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "GolfSwing3D_Kinetic/Hips and Torso Inputs/UpperTorsoTop",
+          "kind": "Cylindrical Solid",
+          "shape": "cylinder",
+          "mass_kg": 16,
+          "moments_kgm2": [0.1721803008, 0.1721803008, 0.18580607999999996],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "GolfSwing3D_Kinetic/Hips and Torso Inputs/ZeroMassHipReference",
+          "kind": "Cylindrical Solid",
+          "shape": "cylinder",
+          "mass_kg": 0,
+          "moments_kgm2": [0, 0, 0],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "GolfSwing3D_Kinetic/Hips and Torso Inputs/ZeroMassShoulderReference",
+          "kind": "Cylindrical Solid",
+          "shape": "cylinder",
+          "mass_kg": 0,
+          "moments_kgm2": [0, 0, 0],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "GolfSwing3D_Kinetic/HubtoLS",
+          "kind": "Cylindrical Solid",
+          "shape": "cylinder",
+          "mass_kg": 10,
+          "moments_kgm2": [
+            0.068279433333333334, 0.068279433333333334, 0.029032199999999994
+          ],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "GolfSwing3D_Kinetic/HubtoRS",
+          "kind": "Cylindrical Solid",
+          "shape": "cylinder",
+          "mass_kg": 10,
+          "moments_kgm2": [
+            0.068279433333333334, 0.068279433333333334, 0.029032199999999994
+          ],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "GolfSwing3D_Kinetic/LUpperArm",
+          "kind": "Cylindrical Solid",
+          "shape": "cylinder",
+          "mass_kg": 2.2679618500000003,
+          "moments_kgm2": [
+            0.018678640379035653, 0.018678640379035653, 0.0022405223465673126
+          ],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "GolfSwing3D_Kinetic/Left Elbow Joint/Spherical Solid",
+          "kind": "Spherical Solid",
+          "shape": "sphere",
+          "mass_kg": 0,
+          "moments_kgm2": [0, 0, 0],
+          "mass_basis": "density"
+        },
+        {
+          "path": "GolfSwing3D_Kinetic/Left Forearm/LLowerForearm",
+          "kind": "Cylindrical Solid",
+          "shape": "cylinder",
+          "mass_kg": 1.1339809250000001,
+          "moments_kgm2": [
+            0.0035474937153982451, 0.0035474937153982451, 0.0011202611732836563
+          ],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "GolfSwing3D_Kinetic/Left Forearm/LUpperForearm",
+          "kind": "Cylindrical Solid",
+          "shape": "cylinder",
+          "mass_kg": 1.1339809250000001,
+          "moments_kgm2": [
+            0.0035474937153982451, 0.0035474937153982451, 0.0011202611732836563
+          ],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "GolfSwing3D_Kinetic/Left Shoulder Joint/Spherical Solid1",
+          "kind": "Spherical Solid",
+          "shape": "sphere",
+          "mass_kg": 0,
+          "moments_kgm2": [0, 0, 0],
+          "mass_basis": "density"
+        },
+        {
+          "path": "GolfSwing3D_Kinetic/RUpperArm",
+          "kind": "Cylindrical Solid",
+          "shape": "cylinder",
+          "mass_kg": 2.2679618500000003,
+          "moments_kgm2": [
+            0.018678640379035653, 0.018678640379035653, 0.0022405223465673126
+          ],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "GolfSwing3D_Kinetic/Right Elbow Joint/Spherical Solid1",
+          "kind": "Spherical Solid",
+          "shape": "sphere",
+          "mass_kg": 0,
+          "moments_kgm2": [0, 0, 0],
+          "mass_basis": "density"
+        },
+        {
+          "path": "GolfSwing3D_Kinetic/Right Forearm/RLowerForearm",
+          "kind": "Cylindrical Solid",
+          "shape": "cylinder",
+          "mass_kg": 1.1339809250000001,
+          "moments_kgm2": [
+            0.0035474937153982451, 0.0035474937153982451, 0.0011202611732836563
+          ],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "GolfSwing3D_Kinetic/Right Forearm/RUpperForearm",
+          "kind": "Cylindrical Solid",
+          "shape": "cylinder",
+          "mass_kg": 1.1339809250000001,
+          "moments_kgm2": [
+            0.0035474937153982451, 0.0035474937153982451, 0.0011202611732836563
+          ],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "GolfSwing3D_Kinetic/Right Shoulder Joint/Spherical Solid1",
+          "kind": "Spherical Solid",
+          "shape": "sphere",
+          "mass_kg": 0,
+          "moments_kgm2": [0, 0, 0],
+          "mass_basis": "density"
+        }
+      ],
+      "n_coordinates": 27
+    }
+  },
+  "spec_urdf": {
+    "urdf_file": "src/engines/physics_engines/pinocchio/models/generated/golfer.urdf",
+    "urdf_sha256_lf": "1a91720cd7539fb009b2ab42b62526213152d78cf7af5bb1865913c2d6e9f824",
+    "smimport_ok": true,
+    "smimport_error": "",
+    "inventory": {
+      "joints": [
+        {
+          "path": "ud_spec_urdf_import/club_shaft_to_club_head",
+          "type": "Weld Joint",
+          "dof": 0
+        },
+        {
+          "path": "ud_spec_urdf_import/forearm_left_intermediate_to_forearm_left",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "ud_spec_urdf_import/forearm_left_to_hand_left_intermediate",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "ud_spec_urdf_import/forearm_right_intermediate_to_forearm_right",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "ud_spec_urdf_import/forearm_right_to_hand_right_intermediate",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "ud_spec_urdf_import/hand_left_intermediate_to_hand_left",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "ud_spec_urdf_import/hand_left_to_fingers_left",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "ud_spec_urdf_import/hand_right_intermediate_to_hand_right",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "ud_spec_urdf_import/hand_right_to_fingers_right",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "ud_spec_urdf_import/left_foot_intermediate_to_left_foot",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "ud_spec_urdf_import/left_foot_to_left_toes",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "ud_spec_urdf_import/left_shank_to_left_foot_intermediate",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "ud_spec_urdf_import/left_thigh_gimbal_y_to_left_thigh",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "ud_spec_urdf_import/left_thigh_gimbal_z_to_left_thigh_gimbal_y",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "ud_spec_urdf_import/left_thigh_to_left_shank",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "ud_spec_urdf_import/lumbar1_intermediate_to_lumbar1",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "ud_spec_urdf_import/lumbar1_to_lumbar2_intermediate",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "ud_spec_urdf_import/lumbar2_intermediate_to_lumbar2",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "ud_spec_urdf_import/lumbar2_to_lumbar3_intermediate",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "ud_spec_urdf_import/lumbar3_intermediate_to_lumbar3",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "ud_spec_urdf_import/lumbar3_to_thorax1",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "ud_spec_urdf_import/mid_hands_to_club_shaft",
+          "type": "Weld Joint",
+          "dof": 0
+        },
+        {
+          "path": "ud_spec_urdf_import/pelvis_to_left_thigh_gimbal_z",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "ud_spec_urdf_import/pelvis_to_lumbar1_intermediate",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "ud_spec_urdf_import/pelvis_to_right_thigh_gimbal_z",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "ud_spec_urdf_import/right_foot_intermediate_to_right_foot",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "ud_spec_urdf_import/right_foot_to_right_toes",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "ud_spec_urdf_import/right_shank_to_right_foot_intermediate",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "ud_spec_urdf_import/right_thigh_gimbal_y_to_right_thigh",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "ud_spec_urdf_import/right_thigh_gimbal_z_to_right_thigh_gimbal_y",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "ud_spec_urdf_import/right_thigh_to_right_shank",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "ud_spec_urdf_import/scapula_left_intermediate_to_scapula_left",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "ud_spec_urdf_import/scapula_left_to_upper_arm_left_gimbal_z",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "ud_spec_urdf_import/scapula_right_intermediate_to_scapula_right",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "ud_spec_urdf_import/scapula_right_to_upper_arm_right_gimbal_z",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "ud_spec_urdf_import/thorax1_to_thorax2",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "ud_spec_urdf_import/thorax2_to_thorax3",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "ud_spec_urdf_import/thorax3_to_head",
+          "type": "Weld Joint",
+          "dof": 0
+        },
+        {
+          "path": "ud_spec_urdf_import/thorax3_to_mid_hands",
+          "type": "Weld Joint",
+          "dof": 0
+        },
+        {
+          "path": "ud_spec_urdf_import/thorax3_to_scapula_left_intermediate",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "ud_spec_urdf_import/thorax3_to_scapula_right_intermediate",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "ud_spec_urdf_import/upper_arm_left_gimbal_y_to_upper_arm_left",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "ud_spec_urdf_import/upper_arm_left_gimbal_z_to_upper_arm_left_gimbal_y",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "ud_spec_urdf_import/upper_arm_left_to_forearm_left_intermediate",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "ud_spec_urdf_import/upper_arm_right_gimbal_y_to_upper_arm_right",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "ud_spec_urdf_import/upper_arm_right_gimbal_z_to_upper_arm_right_gimbal_y",
+          "type": "Revolute Joint",
+          "dof": 1
+        },
+        {
+          "path": "ud_spec_urdf_import/upper_arm_right_to_forearm_right_intermediate",
+          "type": "Revolute Joint",
+          "dof": 1
+        }
+      ],
+      "bodies": [
+        {
+          "path": "ud_spec_urdf_import/club_head/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 0.23,
+          "moments_kgm2": [0.025, 0.025, 0.0001],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/club_head/Visual",
+          "kind": "Brick Solid",
+          "shape": "brick",
+          "mass_kg": 0,
+          "moments_kgm2": [0, 0, 0],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/club_shaft/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 0.12,
+          "moments_kgm2": [0.02, 0.02, 0.0001],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/club_shaft/Visual",
+          "kind": "Cylindrical Solid",
+          "shape": "cylinder",
+          "mass_kg": 0,
+          "moments_kgm2": [0, 0, 0],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/fingers_left/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 0.2,
+          "moments_kgm2": [0.0003, 0.0003, 0.0001],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/fingers_left/Visual",
+          "kind": "Brick Solid",
+          "shape": "brick",
+          "mass_kg": 0,
+          "moments_kgm2": [0, 0, 0],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/fingers_right/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 0.2,
+          "moments_kgm2": [0.0003, 0.0003, 0.0001],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/fingers_right/Visual",
+          "kind": "Brick Solid",
+          "shape": "brick",
+          "mass_kg": 0,
+          "moments_kgm2": [0, 0, 0],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/forearm_left/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 1.5,
+          "moments_kgm2": [0.008, 0.008, 0.0015],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/forearm_left/Visual",
+          "kind": "Cylindrical Solid",
+          "shape": "cylinder",
+          "mass_kg": 0,
+          "moments_kgm2": [0, 0, 0],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/forearm_left_intermediate/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 0.001,
+          "moments_kgm2": [0.0001, 0.0001, 0.0001],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/forearm_right/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 1.5,
+          "moments_kgm2": [0.008, 0.008, 0.0015],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/forearm_right/Visual",
+          "kind": "Cylindrical Solid",
+          "shape": "cylinder",
+          "mass_kg": 0,
+          "moments_kgm2": [0, 0, 0],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/forearm_right_intermediate/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 0.001,
+          "moments_kgm2": [0.0001, 0.0001, 0.0001],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/hand_left/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 0.5,
+          "moments_kgm2": [0.001, 0.001, 0.0005],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/hand_left/Visual",
+          "kind": "Cylindrical Solid",
+          "shape": "cylinder",
+          "mass_kg": 0,
+          "moments_kgm2": [0, 0, 0],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/hand_left_intermediate/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 0.001,
+          "moments_kgm2": [0.0001, 0.0001, 0.0001],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/hand_right/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 0.5,
+          "moments_kgm2": [0.001, 0.001, 0.0005],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/hand_right/Visual",
+          "kind": "Cylindrical Solid",
+          "shape": "cylinder",
+          "mass_kg": 0,
+          "moments_kgm2": [0, 0, 0],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/hand_right_intermediate/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 0.001,
+          "moments_kgm2": [0.0001, 0.0001, 0.0001],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/head/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 5,
+          "moments_kgm2": [0.03, 0.03, 0.03],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/head/Visual",
+          "kind": "Spherical Solid",
+          "shape": "sphere",
+          "mass_kg": 0,
+          "moments_kgm2": [0, 0, 0],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/left_foot/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 1.37,
+          "moments_kgm2": [0.0034, 0.009, 0.009],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/left_foot/Visual",
+          "kind": "Brick Solid",
+          "shape": "brick",
+          "mass_kg": 0,
+          "moments_kgm2": [0, 0, 0],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/left_foot_intermediate/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 0.001,
+          "moments_kgm2": [0.0001, 0.0001, 0.0001],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/left_shank/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 3.53,
+          "moments_kgm2": [0.0401, 0.0401, 0.0042],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/left_shank/Visual",
+          "kind": "Cylindrical Solid",
+          "shape": "cylinder",
+          "mass_kg": 0,
+          "moments_kgm2": [0, 0, 0],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/left_thigh/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 7.05,
+          "moments_kgm2": [0.1058, 0.1058, 0.0203],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/left_thigh/Visual",
+          "kind": "Cylindrical Solid",
+          "shape": "cylinder",
+          "mass_kg": 0,
+          "moments_kgm2": [0, 0, 0],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/left_thigh_gimbal_y/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 0.001,
+          "moments_kgm2": [0.0001, 0.0001, 0.0001],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/left_thigh_gimbal_z/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 0.001,
+          "moments_kgm2": [0.0001, 0.0001, 0.0001],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/left_toes/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 0.3,
+          "moments_kgm2": [0.0005, 0.0005, 0.0002],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/left_toes/Visual",
+          "kind": "Brick Solid",
+          "shape": "brick",
+          "mass_kg": 0,
+          "moments_kgm2": [0, 0, 0],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/lumbar1/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 2,
+          "moments_kgm2": [0.015, 0.015, 0.002],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/lumbar1/Visual",
+          "kind": "Cylindrical Solid",
+          "shape": "cylinder",
+          "mass_kg": 0,
+          "moments_kgm2": [0, 0, 0],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/lumbar1_intermediate/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 0.001,
+          "moments_kgm2": [0.0001, 0.0001, 0.0001],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/lumbar2/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 2,
+          "moments_kgm2": [0.015, 0.015, 0.002],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/lumbar2/Visual",
+          "kind": "Cylindrical Solid",
+          "shape": "cylinder",
+          "mass_kg": 0,
+          "moments_kgm2": [0, 0, 0],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/lumbar2_intermediate/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 0.001,
+          "moments_kgm2": [0.0001, 0.0001, 0.0001],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/lumbar3/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 2,
+          "moments_kgm2": [0.015, 0.015, 0.002],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/lumbar3/Visual",
+          "kind": "Cylindrical Solid",
+          "shape": "cylinder",
+          "mass_kg": 0,
+          "moments_kgm2": [0, 0, 0],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/lumbar3_intermediate/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 0.001,
+          "moments_kgm2": [0.0001, 0.0001, 0.0001],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/pelvis/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 11.7,
+          "moments_kgm2": [0.1337, 0.1337, 0.1337],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/pelvis/Visual",
+          "kind": "Cylindrical Solid",
+          "shape": "cylinder",
+          "mass_kg": 0,
+          "moments_kgm2": [0, 0, 0],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/right_foot/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 1.37,
+          "moments_kgm2": [0.0034, 0.009, 0.009],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/right_foot/Visual",
+          "kind": "Brick Solid",
+          "shape": "brick",
+          "mass_kg": 0,
+          "moments_kgm2": [0, 0, 0],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/right_foot_intermediate/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 0.001,
+          "moments_kgm2": [0.0001, 0.0001, 0.0001],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/right_shank/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 3.53,
+          "moments_kgm2": [0.0401, 0.0401, 0.0042],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/right_shank/Visual",
+          "kind": "Cylindrical Solid",
+          "shape": "cylinder",
+          "mass_kg": 0,
+          "moments_kgm2": [0, 0, 0],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/right_thigh/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 7.05,
+          "moments_kgm2": [0.1058, 0.1058, 0.0203],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/right_thigh/Visual",
+          "kind": "Cylindrical Solid",
+          "shape": "cylinder",
+          "mass_kg": 0,
+          "moments_kgm2": [0, 0, 0],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/right_thigh_gimbal_y/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 0.001,
+          "moments_kgm2": [0.0001, 0.0001, 0.0001],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/right_thigh_gimbal_z/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 0.001,
+          "moments_kgm2": [0.0001, 0.0001, 0.0001],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/right_toes/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 0.3,
+          "moments_kgm2": [0.0005, 0.0005, 0.0002],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/right_toes/Visual",
+          "kind": "Brick Solid",
+          "shape": "brick",
+          "mass_kg": 0,
+          "moments_kgm2": [0, 0, 0],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/scapula_left/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 1.5,
+          "moments_kgm2": [0.005, 0.005, 0.002],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/scapula_left/Visual",
+          "kind": "Brick Solid",
+          "shape": "brick",
+          "mass_kg": 0,
+          "moments_kgm2": [0, 0, 0],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/scapula_left_intermediate/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 0.001,
+          "moments_kgm2": [0.0001, 0.0001, 0.0001],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/scapula_right/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 1.5,
+          "moments_kgm2": [0.005, 0.005, 0.002],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/scapula_right/Visual",
+          "kind": "Brick Solid",
+          "shape": "brick",
+          "mass_kg": 0,
+          "moments_kgm2": [0, 0, 0],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/scapula_right_intermediate/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 0.001,
+          "moments_kgm2": [0.0001, 0.0001, 0.0001],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/thorax1/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 6,
+          "moments_kgm2": [0.0733, 0.0667, 0.0333],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/thorax1/Visual",
+          "kind": "Cylindrical Solid",
+          "shape": "cylinder",
+          "mass_kg": 0,
+          "moments_kgm2": [0, 0, 0],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/thorax2/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 6,
+          "moments_kgm2": [0.0733, 0.0667, 0.0333],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/thorax2/Visual",
+          "kind": "Cylindrical Solid",
+          "shape": "cylinder",
+          "mass_kg": 0,
+          "moments_kgm2": [0, 0, 0],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/thorax3/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 6,
+          "moments_kgm2": [0.0734, 0.0666, 0.0334],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/thorax3/Visual",
+          "kind": "Cylindrical Solid",
+          "shape": "cylinder",
+          "mass_kg": 0,
+          "moments_kgm2": [0, 0, 0],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/upper_arm_left/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 2.5,
+          "moments_kgm2": [0.018, 0.018, 0.004],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/upper_arm_left/Visual",
+          "kind": "Cylindrical Solid",
+          "shape": "cylinder",
+          "mass_kg": 0,
+          "moments_kgm2": [0, 0, 0],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/upper_arm_left_gimbal_y/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 0.001,
+          "moments_kgm2": [0.0001, 0.0001, 0.0001],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/upper_arm_left_gimbal_z/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 0.001,
+          "moments_kgm2": [0.0001, 0.0001, 0.0001],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/upper_arm_right/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 2.5,
+          "moments_kgm2": [0.018, 0.018, 0.004],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/upper_arm_right/Visual",
+          "kind": "Cylindrical Solid",
+          "shape": "cylinder",
+          "mass_kg": 0,
+          "moments_kgm2": [0, 0, 0],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/upper_arm_right_gimbal_y/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 0.001,
+          "moments_kgm2": [0.0001, 0.0001, 0.0001],
+          "mass_basis": "mass"
+        },
+        {
+          "path": "ud_spec_urdf_import/upper_arm_right_gimbal_z/Inertia",
+          "kind": "Inertia",
+          "shape": "none",
+          "mass_kg": 0.001,
+          "moments_kgm2": [0.0001, 0.0001, 0.0001],
+          "mass_basis": "mass"
+        }
+      ],
+      "n_coordinates": 43
+    }
+  }
+}
