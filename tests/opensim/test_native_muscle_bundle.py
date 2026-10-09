@@ -51,7 +51,19 @@ def test_native_modeling_options_are_explicit_initial_state(
 ) -> None:
     bundle = _bundle(muscle_fixture)
     values = {v.component_id: v.values for v in bundle.initial_state}
-    assert values["/forceset/flexor/native-options"] == (0.0, 0.0, 1.0, 0.0, 0.0)
+    assert values["/forceset/flexor/native-options"] == (0.0, 1.0, 0.0, 0.0)
+
+
+def test_native_schema_preserves_physical_units(muscle_fixture: NativeFixture) -> None:
+    bundle = _bundle(muscle_fixture)
+    units = {
+        item.component_id: item.unit for item in bundle.model.state_schema.components
+    }
+    assert units["/jointset/slider/slide/value"] == "m"
+    assert units["/jointset/slider/slide/speed"] == "m/s"
+    assert units["/forceset/flexor/activation"] == "1"
+    assert units["/forceset/flexor/fiber_length"] == "m"
+    assert units["registered-discrete:/forceset/flexor/override_actuation"] == "N"
 
 
 def test_missing_compliant_fiber_state_is_rejected(
@@ -88,6 +100,35 @@ def test_changed_source_model_is_rejected(muscle_fixture: NativeFixture) -> None
     _, replay = _api()
     with pytest.raises(ValueError):
         replay(bundle, path)
+
+
+def test_execution_uses_owned_frozen_source_bytes(
+    muscle_fixture: NativeFixture,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from src.engines.physics_engines.opensim.python.tour_matching import muscle_replay
+
+    bundle = _bundle(muscle_fixture)
+    path, _ = muscle_fixture
+    _, replay = _api()
+    reference = replay(bundle, path)
+    original = muscle_replay.replay_muscle_excitations
+
+    def mutate_caller_source(frozen_path: Path, *args: Any, **kwargs: Any) -> Any:
+        assert frozen_path != path
+        path.write_bytes(
+            path.read_bytes().replace(
+                b"synthetic_native_muscle_fixture", b"changed_during_execution"
+            )
+        )
+        return original(frozen_path, *args, **kwargs)
+
+    monkeypatch.setattr(
+        muscle_replay, "replay_muscle_excitations", mutate_caller_source
+    )
+    result = replay(bundle, path)
+    assert result.model_sha256 == bundle.model.source_model_sha256
+    np.testing.assert_array_equal(result.states, reference.states)
 
 
 def test_unreviewed_native_component_is_rejected(muscle_fixture: NativeFixture) -> None:

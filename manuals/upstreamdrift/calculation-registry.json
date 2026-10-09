@@ -114,6 +114,11 @@
       "id": "UP-D1-native-muscle-replay-inventory",
       "owner": "UpstreamDrift issue #11791",
       "resolution": "Inventory the provisional native continuous-state excitation replay in tour_matching/muscle_replay.py and chapters/13-native-muscle-replay.qmd. Actual OpenSim 4.6 one-DOF compliant-muscle tests establish bounded input playback, continuous initialization and uninterrupted native stepping only. Discrete/plugin state, external-resource identity, passive/contact force policy, full-body anatomy, capture accuracy and full-horizon independent muscle/contact replay remain unqualified. Preserve cold-start policy and forbid weaker shared rigid-body/restarted/external-force evidence from qualifying the endpoint."
+    },
+    {
+      "id": "UP-D1-native-muscle-bundle-inventory",
+      "owner": "UpstreamDrift issue #11908",
+      "resolution": "Inventory the reviewed cold-start Tools T01 muscle bundle seam and chapter27. Registered discrete/modeling options and physical units are explicit; native continuous Y coverage alone is insufficient. Synthetic adapter tests do not qualify arbitrary SimTK State serialization, anatomy, contact/constraints, capture accuracy, or all-model parity."
     }
   ],
   "calculations": []

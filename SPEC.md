@@ -10432,3 +10432,7 @@ private protocol D02, contact and full-body engine evidence remain open.
 ## Native Pinocchio Frozen Torque Replay (#11900)
 
 The F06c adapter uses the existing public native ABA/RK4 integration kernel with complete configuration/tangent velocity, explicit unit motor scattering and immutable uninterrupted replay evidence. Canonical chapter25 and F06_PINOCCHIO_NATIVE_TURNOVER record source/model/provider identity, actual native RED/GREEN, fixture refinement and all remaining contact, muscle, capture and required-model parity gates. Tools owns the replay schema; common native admission is shared with Drake/MuJoCo and remains provider-hashed.
+
+## Native Muscle Experiment Bundle (#11908)
+
+The native OpenSim T01 seam binds all admitted continuous state, registered discrete/modeling options, physical units, source/loaded/provider identity and cold-start policy. A reviewed fixed-path Millard/Slider-or-Pin subset executes owned frozen model bytes through the existing kernel. Canonical chapter27 and F07_MUSCLE_BUNDLE_TURNOVER preserve exclusions; native geometry, full-body constraints/contact, capture matching and required parity remain unqualified.
