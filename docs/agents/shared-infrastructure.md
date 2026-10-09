@@ -57,6 +57,15 @@ for the golf double-pendulum behind one Protocol. See
 copy flight equations. See the [Experiment Reference](../research/shot_pattern_analysis/README.md)
 for frames, aiming, uncertainty and the simplified-impact limitation.
 
+The matched-delivery extension exposes `MatchedConfig`, `ExperimentConfig`,
+`run_matched_analysis`, and `execute_and_export` from its named modules.
+Reuse `club_geometry.club_delivery`, `noise.NoiseSpec`, and the shared
+`physics.incremental_contact.solve_incremental_contact` rather than copying
+rotation, covariance, or impulse logic. The [Matched Study Design](../research/shot_pattern_analysis/phase2/DESIGN.md)
+documents raw-target matching, energetic restitution, conditional populations,
+and empirical limitations. The full-tensor Newton impulse solver remains an
+explicit comparator.
+
 ### Tools Ground-Model Consumer Boundary
 
 `src/shared/python/ground_model/` is UpstreamDrift's thin, headless gateway to

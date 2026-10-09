@@ -5,6 +5,21 @@ The reusable Python package delegates impact and flight to the existing
 UpstreamDrift solvers; it does not duplicate their physics. It is a Python
 submodule within this repository, rather than a separately hosted Git submodule.
 
+## Matched Delivery Extension
+
+The **Matched Study** GUI tab compares raw nominal landings without post-flight
+aiming. It exposes static loft, shaft lean, shaft-twist/path/speed/strike SDs,
+and a validated seven-variable correlation matrix. Nominal face, path and
+speed are solved and displayed. The primary contact law is incremental Coulomb
+with energetic restitution; the Newton impulse law is a separate comparator.
+Install optional acceleration with `pip install -e '.[shot-pattern-acceleration]'`.
+All head properties beyond documented loft/lie remain research assumptions.
+
+See the [Matched Study Design](../../../docs/research/shot_pattern_analysis/phase2/DESIGN.md)
+and [Turnover](../../../docs/research/shot_pattern_analysis/phase2/TURNOVER.md).
+The commands and results below describe the historical phase-one controls.
+Phase-two final results remain pending the documented pilot and review gates.
+
 ## Run an Analysis
 
 From the repository root, with the native `upstream-physics` wheel installed,

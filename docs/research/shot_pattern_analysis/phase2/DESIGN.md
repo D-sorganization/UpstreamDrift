@@ -6,7 +6,7 @@ This extension compares straight, draw, and fade patterns with a common **physic
 
 The study estimates changes in landing spread, bias, supported-shot probability, and conditional course scoring under explicit equipment and delivery assumptions. It does not identify a universal preferred shape, a measured human variability distribution, or the performance of a particular commercial club.
 
-This is an editable research reference, separate from the governed engineering manual. The [Astra Design Review](ASTRA_REVIEW.md), [Phase-One Reference](../README.md), issue records in [issues/](issues/), executable tests, and immutable result receipts form its evidence chain. Implementation and results remain under development until their acceptance evidence is recorded.
+This is an editable research reference, separate from the governed engineering manual. Its [Standalone LaTeX Version](matched_delivery_reference.tex) is regenerated from this research Markdown with Pandoc, not from the engineering manual. The [Astra Design Review](ASTRA_REVIEW.md), [Phase-One Reference](../README.md), issue records in [issues/](issues/), executable tests, and immutable result receipts form its evidence chain. Implementation and results remain under development until their acceptance evidence is recorded.
 
 ## Experimental Controls
 
