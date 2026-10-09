@@ -104,6 +104,8 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+# Pandoc is an external CLI; this extra supplies the Python PDF renderer.
+shot-pattern-report = ["reportlab>=4,<5", "pypdf>=6,<7", "matplotlib>=3.10.8,<4"]
 # Optional JIT for the profiled incremental contact loop; Python reference remains available.
 shot-pattern-acceleration = ["numba>=0.68,<0.69"]
 # Default extras policy:
