@@ -80,3 +80,11 @@ remaining engine-specific state/input adapters against the same contract.
 Then feed candidates from F03 through independent replay with step-refinement,
 held-out observations and the required capability denominator intact. Native
 muscle/contact and real private capture acceptance remain separate milestones.
+
+## Current Main Integration
+
+The October 9 main merge preserves both the torque-replay and newly merged
+Thelen-replay SPEC sections and manual inventory blockers. No torque adapter
+behavior changed. The actual MuJoCo 3.8.0/OpenSim 4.6 SDK run passed 119 tests;
+two ignored-mode cases were inapplicable. This integration does not qualify
+full-body dynamics or a motion-capture match.
