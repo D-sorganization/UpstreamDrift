@@ -96,9 +96,12 @@ The task-owned MyoSuite 3.0.0 distribution metadata reports
 `License-Expression: Apache-2.0`; the upstream [MyoSuite source
 repository](https://github.com/MyoHub/myosuite) publishes that license. The
 [MyoSuite 3.0.0 release page](https://pypi.org/project/MyoSuite/3.0.0/)
-documents the pinned `myo-sim==0.2.3` model package used by this runtime. This
-is provenance for the public test environment only; no model or license claim
-is made for the required golf variants or any capture data.
+documents the pinned `myo-sim==0.2.3` model package used by this runtime. The
+installed `myo-sim` metadata reports `License: Apache 2.0`; its [0.2.3 PyPI
+release](https://pypi.org/project/myo-sim/0.2.3/) identifies the packaged
+musculoskeletal model library. This is provenance for the public test
+environment only; no model or license claim is made for the required golf
+variants or any capture data.
 
 F01's `myosuite/driver` and `myosuite/iron` remain required, supported at the
 package-surface level, availability unknown, and qualification unqualified

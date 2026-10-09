@@ -60,9 +60,11 @@ The installed MyoSuite 3.0.0 distribution metadata reports
 The upstream [MyoSuite source repository](https://github.com/MyoHub/myosuite)
 publishes its Apache-2.0 license; the [3.0.0 PyPI release page](https://pypi.org/project/MyoSuite/3.0.0/)
 identifies this release and documents the `myo-sim==0.2.3` model-package pin.
-This records the software and model-package provenance for the public test
-lane; it makes no license or provenance claim about future golf models or
-captured data.
+The installed `myo-sim` 0.2.3 metadata reports `License: Apache 2.0`; its
+[PyPI release page](https://pypi.org/project/myo-sim/0.2.3/) identifies the
+model package. This records the software and model-package provenance for the
+public test lane; it makes no license or provenance claim about future golf
+models or captured data.
 
 ## Follow-Up
 
