@@ -43,6 +43,7 @@ from src.shared.python.grip_contact import (
 )
 
 CLUB_BODY = "Clubhead"
+DEFAULT_INTEGRATOR = "RungeKuttaMerson"
 TRACKED_BODIES = ("LF", "RF", "LGrip", "Grip")
 _SIDES = (("L", "left"), ("R", "right"))
 
@@ -399,10 +400,13 @@ class BushingGripSimulator:
         t_end: float | None = None,
         accuracy: float = 1e-5,
         on_sample: Callable[[float], None] | None = None,
+        method: str = DEFAULT_INTEGRATOR,
     ) -> BushingRun:
         """Integrate to ``t_end`` and sample at the trajectory times.
 
-        ``on_sample(t)`` (optional) is called after each sample, for progress.
+        ``method`` names an ``opensim.Manager`` integrator (``CPodes``,
+        ``RungeKuttaMerson``, ``SemiExplicitEuler2``, ...).  ``on_sample(t)``
+        (optional) is called after each sample, for progress.
         """
         osim = self._osim
         model, state = self._model, self._state
@@ -411,6 +415,7 @@ class BushingGripSimulator:
             raise ValueError("t_end must lie inside the trajectory time range")
         state.setTime(float(self.time_s[0]))
         manager = osim.Manager(model)
+        manager.setIntegratorMethod(getattr(osim.Manager, f"IntegratorMethod_{method}"))
         manager.setIntegratorAccuracy(accuracy)
         manager.initialize(state)
         samples = self.time_s[self.time_s <= stop + 1e-12]
