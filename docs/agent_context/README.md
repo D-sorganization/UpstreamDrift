@@ -2,7 +2,7 @@
 
 Generated from catalog.json and current source evidence. Edit the sources and regenerate.
 
-Source fingerprint: `0972e2c523f04cb20d687992a55048fa87ef61d52b97379619eebe1574a1a572`.
+Source fingerprint: `eee10528ad46054c08a9fafb37687c34331368725725df438227ee832a07bf43`.
 
 This map covers registered components. A source match is not scientific approval or proof that tests passed.
 
@@ -200,7 +200,7 @@ flowchart LR
 ## Existing Inventories
 
 - [Launcher Metadata](../../src/config/launcher_manifest.json): 58 records at `tiles`; registry remains authoritative.
-- [Feature Parity](../../src/config/feature_parity.json): 59 records at `features`; registry remains authoritative.
+- [Feature Parity](../../src/config/feature_parity.json): 60 records at `features`; registry remains authoritative.
 - [Capability Architecture Nodes](../../src/config/capability_connections.json): 26 records at `nodes`; registry remains authoritative.
 
 ## Provenance and Limits
