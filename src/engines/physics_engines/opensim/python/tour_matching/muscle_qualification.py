@@ -22,10 +22,12 @@ Implements qualification gates for muscle/tendon extensions:
    - Audits activation bounds [a_min, 1.0].
    - Solves and audits static equilibrium (F_fiber * cos(alpha) = F_tendon) before forward simulation.
    - Raises UninitializedTendonStateError if state is uninitialized or non-equilibrated.
-6. Short Replay & Residuals Reporting:
-   - Native short replay receipt capturing reserve actuator torques and pelvic residuals (Fx, Fy, Fz, Mx, My, Mz).
-   - Reports receipt with muscle_complete_status="IN_PROGRESS_QUALIFICATION" and
-     independent_validation_status="PENDING_10375".
+6. Evidence Boundaries:
+   - Parameter-only orchestration runs anatomy and parameter checks only.
+   - Native replay and unperformed model/state audits remain unqualified;
+     no illustrative residuals or activations are reported as native evidence.
+   - muscle_complete_status remains "IN_PROGRESS_QUALIFICATION" and
+     independent_validation_status remains "PENDING_10375".
 """
 
 from __future__ import annotations
@@ -246,7 +248,12 @@ class MuscleEquilibriumState:
 
 @dataclass(frozen=True)
 class NativeShortReplayReceipt:
-    """Evidence receipt for short integration replay auditing reserve actuators and pelvic residuals."""
+    """Metrics container requiring independent native verification.
+
+    Constructing this object does not execute a simulator or establish that its
+    supplied measurements are native evidence. Qualification belongs to the
+    external verification authority; the default status is unverified.
+    """
 
     variant_id: str
     start_time_s: float
@@ -255,12 +262,16 @@ class NativeShortReplayReceipt:
     reserve_actuator_torques_rms: dict[str, float]
     pelvic_residual_forces_rms: tuple[float, float, float]
     pelvic_residual_moments_rms: tuple[float, float, float]
-    status: str = "QUALIFIED_SHORT_REPLAY"
+    status: str = "UNVERIFIED_NATIVE_REPLAY"
 
 
 @dataclass(frozen=True)
 class MuscleQualificationReceipt:
-    """Governing acceptance receipt for muscle/tendon extension qualification."""
+    """Partial muscle/tendon audit results, not automatic acceptance.
+
+    A false audit field means the audit has not established a pass; it includes
+    checks not performed. Missing native evidence is None, never zero metrics.
+    """
 
     model_variant_id: str
     base_model_sha256: str
@@ -572,7 +583,17 @@ def qualify_muscle_extensions(
     omission_notes: Mapping[str, str] | None = None,
     short_replay_duration_s: float = 0.05,
 ) -> MuscleQualificationReceipt:
-    """Orchestrate qualification audit of muscle/tendon extensions for OpenSim golf models."""
+    """Run anatomy and parameter audits without inventing model/runtime evidence.
+
+    Inputs contain no native model, path geometry, state trajectory or verified
+    replay receipt. Postcondition: only the checks actually performed can pass;
+    all other audit fields are false and short_replay_receipt is None.
+
+    short_replay_duration_s remains a compatibility argument describing a
+    requested future experiment; this function does not execute that experiment.
+    Actual native evidence must be evaluated through the F07/F08 verification
+    boundary rather than synthesized from parameter records.
+    """
     names = [m.muscle_name for m in muscles]
     coverage = audit_anatomy_coverage(
         muscle_names=names,
@@ -584,37 +605,16 @@ def qualify_muscle_extensions(
     param_report = validate_muscle_parameters(muscles)
     param_passed = bool(param_report["valid"])
 
-    # Audit activation bounds on baseline activations
-    base_acts = [0.05 for _ in muscles]
-    audit_activation_dynamics(base_acts)
-    activation_passed = True
-
-    # Construct mock/pilot short replay receipt reporting reserve torques & pelvic residuals
-    reserve_torques = {f"{m.muscle_name}_reserve": 0.05 for m in muscles}
-    pelvic_forces = (0.2, 0.4, 0.1)  # RMS Fx, Fy, Fz [N]
-    pelvic_moments = (0.05, 0.08, 0.03)  # RMS Mx, My, Mz [N*m]
-
-    short_replay = NativeShortReplayReceipt(
-        variant_id=model_variant_id,
-        start_time_s=0.0,
-        end_time_s=short_replay_duration_s,
-        num_steps=max(1, int(short_replay_duration_s / 0.001)),
-        reserve_actuator_torques_rms=reserve_torques,
-        pelvic_residual_forces_rms=pelvic_forces,
-        pelvic_residual_moments_rms=pelvic_moments,
-        status="QUALIFIED_SHORT_REPLAY",
-    )
-
     return MuscleQualificationReceipt(
         model_variant_id=model_variant_id,
         base_model_sha256=base_model_sha256,
         coverage_scope=coverage,
         parameter_audit_passed=param_passed,
-        path_wrapping_audit_passed=True,
-        moment_arm_validation_passed=True,
-        equilibrium_audit_passed=True,
-        activation_bounds_audit_passed=activation_passed,
-        short_replay_receipt=short_replay,
+        path_wrapping_audit_passed=False,
+        moment_arm_validation_passed=False,
+        equilibrium_audit_passed=False,
+        activation_bounds_audit_passed=False,
+        short_replay_receipt=None,
         muscle_complete_status="IN_PROGRESS_QUALIFICATION",
         independent_validation_status="PENDING_10375",
     )
