@@ -15,6 +15,80 @@ pytestmark = pytest.mark.unit
 
 
 @pytest.fixture
+def contact_muscle_fixture(
+    muscle_fixture: tuple[Path, dict[str, float]],
+) -> tuple[Path, dict[str, float]]:
+    """Add native compliant contact opposing the slider's muscle force."""
+    osim = pytest.importorskip("opensim")
+    path, initial = muscle_fixture
+    model = osim.Model(str(path))
+    floor = osim.ContactHalfSpace(
+        osim.Vec3(0.3, 0, 0), osim.Vec3(0, 0, np.pi), model.getGround(), "floor"
+    )
+    sphere = osim.ContactSphere(
+        0.01, osim.Vec3(0), model.getBodySet().get("load"), "load_contact"
+    )
+    model.addContactGeometry(floor)
+    model.addContactGeometry(sphere)
+    contact = osim.SmoothSphereHalfSpaceForce()
+    contact.setName("native_contact")
+    contact.connectSocket_sphere(sphere)
+    contact.connectSocket_half_space(floor)
+    contact.set_stiffness(1e7)
+    contact.set_dissipation(1.0)
+    model.addForce(contact)
+    model.finalizeConnections()
+    model.printToXML(str(path))
+    return path, initial
+
+
+def test_native_contact_is_explicit_and_recorded_without_external_drive(
+    contact_muscle_fixture: tuple[Path, dict[str, float]],
+) -> None:
+    path, initial = contact_muscle_fixture
+    times = np.linspace(0, 0.04, 17)
+    kwargs = {"contact_force_paths": ("/forceset/native_contact",)}
+    first = replay_muscle_excitations(
+        path, initial, times, {"flexor": times * 0 + 0.4}, **kwargs
+    )
+    repeat = replay_muscle_excitations(
+        path, initial, times, {"flexor": times * 0 + 0.4}, **kwargs
+    )
+    assert first.policy["force_policy"] == "muscle-gravity-and-listed-native-contact"
+    assert first.policy["contact_frame"] == "world-z-up"
+    assert len(first.contact_wrenches) == len(times)
+    assert all(len(frame) == 1 for frame in first.contact_wrenches)
+    assert first.contact_wrenches[-1][0].force_n[0] > 0
+    assert first.contact_wrenches[-1][0].label == "contact:native_contact"
+    assert first.contact_wrenches == repeat.contact_wrenches
+    np.testing.assert_allclose(first.states, repeat.states, atol=1e-10, rtol=0)
+
+
+def test_native_contact_remains_forbidden_without_explicit_policy(
+    contact_muscle_fixture: tuple[Path, dict[str, float]],
+) -> None:
+    path, initial = contact_muscle_fixture
+    with pytest.raises(ValueError, match="non-muscle force"):
+        replay_muscle_excitations(
+            path, initial, np.array([0, 0.02]), {"flexor": np.array([0.4, 0.4])}
+        )
+
+
+def test_contact_policy_rejects_nonexistent_force_paths(
+    muscle_fixture: tuple[Path, dict[str, float]],
+) -> None:
+    path, initial = muscle_fixture
+    with pytest.raises(ValueError, match="contact.*paths"):
+        replay_muscle_excitations(
+            path,
+            initial,
+            np.array([0, 0.02]),
+            {"flexor": np.array([0.4, 0.4])},
+            contact_force_paths=("/forceset/missing",),
+        )
+
+
+@pytest.fixture
 def muscle_fixture(tmp_path: Path) -> tuple[Path, dict[str, float]]:
     """Create an actual one-DOF compliant-tendon model, not a golf substitute."""
     osim = pytest.importorskip("opensim")
