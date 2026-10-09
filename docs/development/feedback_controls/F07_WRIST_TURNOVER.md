@@ -43,8 +43,14 @@ default Python environment lacks OpenSim and must report native skips explicitly
 The manual source-count guard uses the actual canonical QMD set while retaining
 critical authority-file and blocked-release assertions.
 
-Next: isolate native moving-path/wrap/generalized-force contributions to FPL
-and ECRL discrepancies with fixed numerical policy, then compare a reviewed
+FPL follow-up decomposition found its same-hand moving P5 to fixed P6 segment
+accounts for the full gap at all three poses to below 1.7e-11 m. Canonical
+chapter 20 links the runtime-reported GeometryPath source and force pathway;
+this is a concrete consistency concern requiring an original native reproducer,
+not authorization to edit donor anatomy or patch the runtime.
+
+Next: reproduce native same-body moving-path work and isolate remaining wrap/
+generalized-force contributions with fixed numerical policy, then compare a reviewed
 registered donor derivative against the intact donor. Source notices, donor
 version equivalence, anatomy, capacities, all drives and full-state contact/replay
 remain required gates. Preserve the parent milestone graph and full denominator.

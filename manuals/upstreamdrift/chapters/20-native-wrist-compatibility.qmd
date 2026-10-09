@@ -127,6 +127,19 @@ step refinement. These are unresolved geometry/generalized-force/derivative
 gates, not proof of a particular runtime bug. The complete receipts remain in
 the local planning evaluation folder; no foreign asset is redistributed here.
 
+A subsequent native decomposition isolates FPL's moving `FPL-P5` to fixed
+`FPL-P6` segment, both attached to the hand. Its length derivative accounts for
+the entire FPL gap at the three poses, with unexplained residuals below
+$1.7\times10^{-11}$ m. The runtime-reported source revision's
+[GeometryPath force path](https://github.com/opensim-org/opensim-core/blob/85aaf64/OpenSim/Simulation/Model/GeometryPath.cpp)
+adds moving-point generalized work within its different-body segment branch,
+whereas total length includes same-body segments. The
+[MomentArmSolver](https://github.com/opensim-org/opensim-core/blob/4.6/OpenSim/Simulation/MomentArmSolver.cpp)
+uses the unit-tension force path. This supports a specific force/length
+consistency concern; an original small native same-body moving-point reproducer
+is required before choosing a donor rewrite or native patch. It does not explain
+ECRL or establish a physiological input domain. Donor source remains intact.
+
 Before anatomical splicing, compare the preserved donor and proposed derivative
 under explicit frame registration, all coordinate/coupler conventions, native
 hand transforms, path lengths, analytic wraps, moment arms and capacity over a
