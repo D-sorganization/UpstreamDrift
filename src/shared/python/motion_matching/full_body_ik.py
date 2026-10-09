@@ -260,8 +260,13 @@ def solve_full_body_ik_trajectory(
     closure_weight: float = 10.0,
     reg_weight: float = 1e-3,
     max_nfev: int = 50,
+    coordinate_bounds: tuple[Array, Array] | None = None,
 ) -> Array:
-    """Solve inverse kinematics across all frames of a capture trajectory."""
+    """Solve trajectory IK; explicit finite source bounds opt into bounded TRF.
+
+    Omission preserves the original LM solver. Bounds never clip the seed or
+    widen source anatomy. Finite output is not an optimization acceptance test.
+    """
     q0 = np.asarray(initial_q, dtype=float)
     if q0.ndim != 1 or not np.isfinite(q0).all():
         raise ValueError("initial_q must be a finite 1D array")
@@ -274,6 +279,7 @@ def solve_full_body_ik_trajectory(
         raise ValueError("closure_weight must be non-negative")
     if reg_weight < 0:
         raise ValueError("reg_weight must be non-negative")
+    low, high = _trajectory_bounds(q0, coordinate_bounds)
 
     n_coords = q0.size
     q_out = np.zeros((capture.frames, n_coords), dtype=float)
@@ -317,12 +323,43 @@ def solve_full_body_ik_trajectory(
                 res = np.concatenate([res, reg_weight * (q_eval - ref_q)])
             return res
 
-        sol = least_squares(residual, q_curr, method="lm", max_nfev=max_nfev)
+        sol = least_squares(
+            residual,
+            q_curr,
+            method="lm" if coordinate_bounds is None else "trf",
+            bounds=(low, high),
+            max_nfev=max_nfev,
+            # As in _run_trf_loop, a tiny first step from a bound is not convergence.
+            ftol=1e-8 if coordinate_bounds is None else None,
+        )
         if np.isfinite(sol.x).all():
             q_curr = sol.x.copy()
         q_out[f] = q_curr
 
     return q_out
+
+
+def _trajectory_bounds(
+    initial_q: Array,
+    bounds: tuple[Array, Array] | None,
+) -> tuple[Array, Array]:
+    """Validate explicit finite bounds before any engine geometry evaluation."""
+    if bounds is None:
+        return np.full_like(initial_q, -np.inf), np.full_like(initial_q, np.inf)
+    low, high = (np.asarray(values, dtype=float) for values in bounds)
+    if (
+        low.shape != initial_q.shape
+        or high.shape != initial_q.shape
+        or not np.isfinite(low).all()
+        or not np.isfinite(high).all()
+        or np.any(low >= high)
+        or np.any(initial_q < low)
+        or np.any(initial_q > high)
+    ):
+        raise ValueError(
+            "Coordinate bounds must be finite, ordered and contain initial_q"
+        )
+    return low.copy(), high.copy()
 
 
 def compute_marker_rms_trajectory(
