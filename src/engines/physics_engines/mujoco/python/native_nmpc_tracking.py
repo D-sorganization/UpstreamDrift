@@ -8,9 +8,10 @@ torques. Its separate native replay receives no controller or observations.
 from __future__ import annotations
 
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Protocol
 
 import numpy as np
 from numpy.typing import NDArray
@@ -21,12 +22,47 @@ from src.engines.physics_engines.mujoco.python.native_torque_replay import (
     replay_native_torque_bundle,
 )
 from src.shared.python.motion_matching.bounded_nmpc import (
-    BoundedNMPC,
     MPCCommandReceipt,
+    MPCProblem,
 )
 
 if TYPE_CHECKING:
     from sidekick.lab.mocap import ExperimentReplayBundle
+
+
+class NativeStepController(Protocol):
+    """The common applied-command boundary for native torque controllers."""
+
+    @property
+    def problem(self) -> MPCProblem: ...
+
+    @property
+    def applied_history(self) -> tuple[MPCCommandReceipt, ...]: ...
+
+    def command_for_step(
+        self,
+        index: int,
+        observed_state: NDArray[np.float64],
+        *,
+        observation_time_s: float,
+        current_time_s: float,
+    ) -> MPCCommandReceipt: ...
+
+
+class NativeTorqueStepController(Protocol):
+    """Controller contract at the exact native post-limit torque boundary."""
+
+    @property
+    def applied_history(self) -> tuple[MPCCommandReceipt, ...]: ...
+
+    def command_for_step(
+        self,
+        index: int,
+        observed_state: NDArray[np.float64],
+        *,
+        observation_time_s: float,
+        current_time_s: float,
+    ) -> MPCCommandReceipt: ...
 
 
 def _frozen(values: NDArray[np.float64]) -> NDArray[np.float64]:
@@ -57,7 +93,7 @@ class NativeNMPCTracking:
             object.__setattr__(self, name, _frozen(getattr(self, name)))
 
 
-def _admit_native_model(path: Path, controller: BoundedNMPC) -> Any:
+def _admit_native_model(path: Path, controller: NativeStepController) -> Any:
     """Reject any topology or channel outside the direct hinge fixture."""
     import mujoco as mj
 
@@ -89,7 +125,7 @@ def _admit_native_model(path: Path, controller: BoundedNMPC) -> Any:
 def run_native_nmpc_tracking(
     model_path: str | Path,
     initial_integration_state: NDArray[np.float64],
-    controller: BoundedNMPC,
+    controller: NativeStepController,
     *,
     steps: int,
     experiment_id: str,
@@ -100,15 +136,37 @@ def run_native_nmpc_tracking(
     validates the loaded model, complete native state, channel semantics and
     exact ZOH policy before and after the controlled run.
     """
+    path = Path(model_path)
+    model = _admit_native_model(path, controller)
+    return run_native_direct_torque_tracking(
+        path,
+        model,
+        initial_integration_state,
+        controller,
+        lambda data: np.array([data.qpos[0], data.qvel[0]], dtype=np.float64),
+        steps=steps,
+        experiment_id=experiment_id,
+    )
+
+
+def run_native_direct_torque_tracking(
+    path: Path,
+    model: Any,
+    initial_integration_state: NDArray[np.float64],
+    controller: NativeTorqueStepController,
+    observe_state: Callable[[Any], NDArray[np.float64]],
+    *,
+    steps: int,
+    experiment_id: str,
+) -> NativeNMPCTracking:
+    """Execute, export and independently replay direct unit motor commands."""
     import mujoco as mj
 
-    path = Path(model_path)
     if steps < 1 or not experiment_id or controller.applied_history:
         raise ValueError("native run needs positive steps, ID and fresh controller")
-    model = _admit_native_model(path, controller)
     dt = float(model.opt.timestep)
     times = np.arange(steps + 1, dtype=np.float64) * dt
-    zeros = np.zeros((steps + 1, 1), dtype=np.float64)
+    zeros = np.zeros((steps + 1, model.nu), dtype=np.float64)
     preflight = build_native_torque_bundle(
         path, initial_integration_state, times, zeros, experiment_id=experiment_id
     )
@@ -124,9 +182,9 @@ def run_native_nmpc_tracking(
         raise ValueError("native initial state contains time or external load")
     integration_size = mj.mj_stateSize(model, mj.mjtState.mjSTATE_INTEGRATION)
     full = np.empty((steps + 1, integration_size), dtype=np.float64)
-    qpos = np.empty((steps + 1, 1), dtype=np.float64)
-    qvel = np.empty((steps + 1, 1), dtype=np.float64)
-    applied = np.empty((steps + 1, 1), dtype=np.float64)
+    qpos = np.empty((steps + 1, model.nq), dtype=np.float64)
+    qvel = np.empty((steps + 1, model.nv), dtype=np.float64)
+    applied = np.empty((steps + 1, model.nu), dtype=np.float64)
     control_wall_s = np.empty(steps, dtype=np.float64)
     commands: list[MPCCommandReceipt] = []
     for row in range(steps + 1):
@@ -138,7 +196,7 @@ def run_native_nmpc_tracking(
         started = time.perf_counter()
         receipt = controller.command_for_step(
             row,
-            np.array([data.qpos[0], data.qvel[0]], dtype=np.float64),
+            observe_state(data),
             observation_time_s=current,
             current_time_s=current,
         )

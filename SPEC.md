@@ -10490,3 +10490,122 @@ provider selection retains TVLQR and rejects this SciPy shooting prototype;
 the one-hinge result does not qualify contact, muscle, capture, six-engine
 equivalence or a full swing. The canonical calculation is provisional chapter
 23, and turnover is `docs/development/feedback_controls/F05A_NATIVE_NMPC_TURNOVER.md`.
+
+## Derivative-Aware Native BoxFDDP Candidate (F05b, #11910; Parent #11789)
+
+`native_box_fddp_hinge.py` admits only an exact-state one-hinge, direct
+unit-motor, no-gravity/no-contact native MuJoCo RK4 plant. It computes the
+analytic discrete RK4 derivative of that linear plant and checks it against
+native steps and finite differences. `box_fddp_tracking.py` binds nominal and
+perturbed loaded-model derivative identities, solves a two-scenario bounded
+Crocoddyl BoxFDDP problem, and independently admits only a finite,
+state/input-feasible improvement over a verified fallback. The native
+execution adapter exports actual post-limit per-step ZOH torque through Tools
+T01, then checks a fresh complete-initial-state replay at 1e-12 tolerance.
+The two source-controlled supported-provider paired receipts retain all
+predeclared solver statuses, source/runtime identities, common cold bootstrap,
+derivative setup and controlled execution/export/replay time. The internal
+BoxFDDP mean-scenario objective differs from F05a's max-scenario shooting
+objective; both use the max-scenario postcheck. BoxFDDP is a restricted
+one-hinge candidate, while F02 TVLQR remains the broader default. Contact,
+manifold, muscle, private capture, six-engine and full-swing gates remain
+unqualified and F05 #11789 stays open. The provisional canonical calculation
+is chapter 24 and turnover is
+`docs/development/feedback_controls/F05B_NATIVE_BOX_FDDP_TURNOVER.md`.
+
+## Native Multi-DOF Manifold Derivative Boundary (F05c, #11920)
+
+`native_tangent_derivative.py` admits a gravity-free, contact-free floating
+root with two connected hinges and two bounded direct unit motors. Its
+$n_q=9$, $n_v=8$ state requires a quaternion configuration tangent: native
+MuJoCo Euler `mjd_transitionFD` produces $A\in\mathbb R^{16\times16}$ and
+$B\in\mathbb R^{16\times2}$, checked against independently perturbed native
+steps using `mj_integratePos` and `mj_differentiatePos`. RK4, hidden gravity
+compensation, invalid motor topology/order and out-of-limit commands reject.
+The pinned F06/Tools T01 path binds a complete native integration state,
+ordered post-limit ZOH torque history, model and policy; a fresh native model
+replays the same full integration-state trajectory to 1e-12. The supported
+MuJoCo 3.8 source-hashed receipt retains all four predeclared tests and
+derivative/bundle/replay wall times. This is a plant derivative and input
+reproduction slice, not an optimized multi-DOF controller, measured capture
+fit, hard-real-time bound, contact/muscle or full-body six-engine gate. F05
+parent #11789 remains open. The provisional canonical calculation is chapter
+25 and turnover is
+`docs/development/feedback_controls/F05C_NATIVE_TANGENT_TURNOVER.md`.
+
+## Native Multi-DOF Manifold BoxFDDP Candidate (F05d, #11932)
+
+`native_manifold_box_fddp.py` builds a Crocoddyl `StateAbstract` with physical
+$n_x=17$ and tangent $n_{dx}=16$ for F05c's contact-free floating-root,
+two-hinge MuJoCo model. MuJoCo manifold difference/retraction and the actual
+Euler `mj_step`/`mjd_transitionFD` keep the optimizer's quaternion and
+native-step conventions aligned. The bounded direct-motor BoxFDDP plan is
+admitted only after whole-plan nonlinear native scoring improves a verified
+fallback within the cooperative wall budget. Loaded model/callback/order
+and observation-clock mismatches reject. The common native torque executor
+exports actual post-limit ZOH commands through Tools T01 and verifies a
+fresh full `mjSTATE_INTEGRATION` replay to 1e-12. A matched SciPy SLSQP
+native-shooting comparator shares exactly the nonlinear score, reference,
+truth plant, input bounds and budget. The supported-provider receipt keeps
+both ordered starts, all accepted/fallback statuses, source hashes and
+cold/common plus per-method end-to-end timing. This small synthetic test
+retains F02 TVLQR as the broad default and F05 #11789 open; no hard 10 ms
+deadline, state/anatomical limit, contact, muscle, private capture,
+full-body or six-engine qualification is claimed. The provisional manual
+calculation is chapter 26; turnover is
+`docs/development/feedback_controls/F05D_NATIVE_MANIFOLD_BOX_FDDP_TURNOVER.md`.
+
+## Native Activation-Aware Manifold Boundary (F05e, #11958)
+
+Both native manifold adapters share difference/retraction Jacobians and
+Gauss–Newton tracking derivatives in `native_manifold_calculus.py`. Model-specific
+state admission and native stepping remain at each boundary. Activation replay
+identity binds adapter and shared-helper bytes; mutation rejects the previous
+identity. The F05e receipt is regenerated against this closure. Existing F05d
+paired timings retain their pre-extraction hashes and historical scope, distinct
+from the twenty native regression cases run after extraction.
+
+`native_activation_manifold.py` admits a self-contained, contact-free
+MuJoCo 3.8.0 Euler floating-root model with built-in joint muscles,
+bounded dimensionless actuator commands, and disabled warmstart/autoreset.
+It defines the Crocoddyl physical state $(q,v,a)$ and local tangent
+$(\delta q,\delta v,\delta a)$, preserving quaternion manifold operations
+and native activation dynamics. Complete `mjSTATE_INTEGRATION` is a separate
+restart artifact rather than an undifferentiated optimizer axis. Native
+`mjd_transitionFD` activation-aware derivatives are independently checked
+at interior states and source/model/compiled-law identities are bound.
+The actual held command history and complete initial state are frozen in
+the pinned Tools T01 bundle and replayed by a fresh native model without
+feedback. The source-hashed supported-provider diagnostic receipt is
+`docs/development/feedback_controls/F05E_NATIVE_ACTIVATION_RECEIPT_MJ38.json`;
+the provisional canonical calculation is chapter 36. The fixture has no
+contact, golfer anatomy, measured capture, mixed production actuation,
+optimal-control acceptance, hard timing claim or six-engine qualification.
+F05 #11789 and manual publication remain open. Turnover is
+`docs/development/feedback_controls/F05E_NATIVE_ACTIVATION_TURNOVER.md`.
+
+## Native Floating-Root F02 Feedback Baseline (#11946)
+
+`src/engines/physics_engines/mujoco/python/native_distributed_feedback.py`
+provides the first actual floating-root native F02 baseline. It reuses F05c
+native tangent/plant admission, MuJoCo's current-minus-reference
+`mj_differentiatePos` and native inverse mass for $n_q=9$, $n_v=8$, rather
+than applying Euclidean quaternion subtraction. The F02 law reads exact
+simulated $(q,v)$ at each native Euler boundary, maps only to the two named
+direct hinge motors, and saves the post-limit held torque. The F06 common
+runner builds a pinned Tools T01 bundle from complete
+`mjSTATE_INTEGRATION` and independently replays each full state within
+$10^{-12}$. Native MuJoCo 3.8 tests demonstrate quaternion sign equivalence,
+synthetic perturbation correction, saturation and negative contact/channel
+admission. Provisional manual chapter 27 and the source-hashed F02 native
+receipt govern this child. It does not qualify a golfer, marker fit, contact,
+muscle input, multi-engine parity or a hard runtime deadline; F02 remains open.
+The native nominal-policy builder consumes a pinned T01 time-only torque
+replay with nonconstant model-derived states and inputs. It verifies each
+autonomous native successor, computes F05c tangent $A_k,B_k$ and MOSAIC
+TVLQR gains, then supplies F02 a frozen nominal feedforward schedule.
+A held-out native perturbation produces separate frozen-input and total-
+feedback bundles with matched model/initial-state/policy/grid identities,
+different applied-input hashes and exact full-state independent replay.
+This is not an F03 optimizer-to-native handoff: F03 currently exports only
+the one-dimensional synthetic sparse-collocation result.
