@@ -261,6 +261,7 @@ class _Residual:
     ) -> None:
         self.probe, self.names, self.targets, self.grips = probe, names, targets, grips
         self.shaft = targets.club_in_ground[:3, 1]
+        self.landmarks = targets.landmarks
         self.rotational = np.array([not n.startswith("pelvis_t") for n in names])
 
     def __call__(self, q: np.ndarray) -> np.ndarray:
@@ -272,7 +273,7 @@ class _Residual:
             parts.append((point - self.grips[side][:3, 3]) / GRIP_WEIGHT_M)
             thumb = pose[:3, :3] @ THUMB_AXIS[side]
             parts.append(np.array([(1.0 - float(thumb @ self.shaft)) / THUMB_WEIGHT]))
-        for body, target in self.targets.landmarks.items():
+        for body, target in self.landmarks.items():
             residual = self.probe.body(body)[:3, 3] - target
             parts.append(residual / landmark_weight(body))
         parts.append(np.asarray(q)[self.rotational] / NEUTRAL_WEIGHT_RAD)
