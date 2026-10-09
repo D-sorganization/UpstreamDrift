@@ -42,3 +42,12 @@ steps include full-body anatomy and wrist coverage, calibrated native contact,
 bilateral grip, private protocol and full-horizon muscle excitation replay.
 The native law permits compliant deformation and smooth off-contact leakage;
 their acceptance budgets must be measured explicitly.
+
+# Stacked CI Follow-Up
+
+Actual run 37880578384 passed 22,546 tests and failed the ownership guard because
+the stacked feature base was fetched only into FETCH_HEAD; origin/main was
+missing. The unit lane now fetches the default branch explicitly into its
+remote-tracking ref, matching the F02 repair. No check is skipped or weakened.
+The actual parent/manual conflict after F01 merged is resolved by retaining
+comparison, native replay and contact chapters together.
