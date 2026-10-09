@@ -123,7 +123,7 @@
       "source_spec": null,
       "source_sha256": null,
       "generated_model": "src/engines/physics_engines/mujoco/models/generated/golfer.xml",
-      "generated_sha256": "d69b9276a779ae65ea09d68957993ee788571ed3965e1c5997fedebaaae025f1",
+      "generated_sha256": "cc72b94365764bac27ff03efc6d637811961c1d06d7c498703cce7bfec486d7f",
       "generator": null,
       "generator_version": null,
       "units": "SI",
