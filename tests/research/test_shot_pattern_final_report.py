@@ -393,7 +393,7 @@ def test_verified_original_figures_require_both_presentations(tmp_path):
     report["cells"][0]["config"]["noise"]["standard_deviations"][0] = 2.0
     report["cell_manifest_sha256"] = {cell: "b" * 64}
     links = build_final_report.verified_original_figure_links(
-        figure_root, report, report_root=tmp_path
+        figure_root, report, report_root=tmp_path, protocol="original_primary"
     )
     assert {(item["kind"], item["presentation"]) for item in links} == {
         ("density", "academic"),
@@ -403,20 +403,145 @@ def test_verified_original_figures_require_both_presentations(tmp_path):
     }
     assert (
         build_final_report.verified_original_figure_inventory(
-            figure_root, report, report_root=tmp_path
+            figure_root, report, report_root=tmp_path, protocol="original_primary"
         )
         == "final_figures_v1/availability.csv"
     )
     (figure_root / paths[-1]).write_bytes(b"changed")
     with pytest.raises(ValueError, match="figure availability inventory changed"):
         build_final_report.verified_original_figure_inventory(
-            figure_root, report, report_root=tmp_path
+            figure_root, report, report_root=tmp_path, protocol="original_primary"
         )
     (figure_root / paths[0]).write_bytes(b"changed")
     with pytest.raises(ValueError, match="figure artifact changed"):
         build_final_report.verified_original_figure_links(
-            figure_root, report, report_root=tmp_path
+            figure_root, report, report_root=tmp_path, protocol="original_primary"
         )
+
+
+def test_control_final_stage_assets_keep_control_protocol(tmp_path):
+    import hashlib
+    import json
+
+    cell = "driver_lean0_curve1_rotation2_combined2"
+    root = tmp_path / "control_final_figures_v1"
+    outputs = {}
+    for prefix in ("", "social/"):
+        for kind in ("density", "overhead"):
+            relative = f"{prefix}details/{cell}/{kind}.png"
+            path = root / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(relative.encode())
+            outputs[relative] = hashlib.sha256(path.read_bytes()).hexdigest()
+    (root / "figure_manifest.json").write_text(
+        json.dumps(
+            {
+                "schema": "matched-study-figure-production/1",
+                "kind": "final",
+                "source_stage": "final",
+                "plan_sha256": "a" * 64,
+                "cell_manifest_sha256": {cell: "b" * 64},
+                "outputs": outputs,
+            }
+        )
+    )
+    report = _matrix([_detailed_cell()], "final")
+    report["cells"][0]["config"]["noise"]["standard_deviations"][0] = 2.0
+    report["cell_manifest_sha256"] = {cell: "b" * 64}
+    links = build_final_report.verified_original_figure_links(
+        root, report, report_root=tmp_path, protocol="original_control"
+    )
+    assert {item["source_protocol"] for item in links} == {"original_control"}
+
+
+@pytest.mark.slow
+@pytest.mark.integration
+def test_publication_boundary_rejects_mutated_png_and_supplement_receipt(
+    tmp_path, monkeypatch
+):
+    import hashlib
+    import json
+
+    from src.tools.shot_pattern_analysis import matched_supplement_pipeline
+
+    cell = _detailed_cell()
+    cell["config"]["noise"]["standard_deviations"][0] = 2.0
+    name = cell["cell"]
+    reports = []
+    figure_roots = []
+    originals = []
+    manifest_hashes = {}
+    for label in ("primary", "control"):
+        root = tmp_path / label
+        (root / name).mkdir(parents=True)
+        (root / "matrix_plan.json").write_bytes(b"plan")
+        (root / name / "manifest.json").write_bytes(b"manifest")
+        report = _matrix([cell], "final")
+        report["plan_sha256"] = hashlib.sha256(b"plan").hexdigest()
+        report["cell_manifest_sha256"] = {name: hashlib.sha256(b"manifest").hexdigest()}
+        reports.append((root, report))
+        figure_root = tmp_path / f"{label}_figures"
+        outputs = {}
+        for relative in (
+            f"details/{name}/density.png",
+            f"details/{name}/overhead.png",
+            f"social/details/{name}/density.png",
+            f"social/details/{name}/overhead.png",
+            "availability.csv",
+        ):
+            path = figure_root / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(relative.encode())
+            outputs[relative] = hashlib.sha256(path.read_bytes()).hexdigest()
+        (figure_root / "figure_manifest.json").write_text(
+            json.dumps(
+                {
+                    "schema": "matched-study-figure-production/1",
+                    "kind": "final",
+                    "source_stage": "final",
+                    "plan_sha256": report["plan_sha256"],
+                    "cell_manifest_sha256": report["cell_manifest_sha256"],
+                    "availability_ledger": "availability.csv",
+                    "outputs": outputs,
+                }
+            )
+        )
+        manifest_hashes[figure_root] = hashlib.sha256(
+            (figure_root / "figure_manifest.json").read_bytes()
+        ).hexdigest()
+        figure_roots.append(figure_root)
+        originals.append((figure_root / f"details/{name}/density.png").read_bytes())
+    supplement_dir = tmp_path / "supplement"
+    supplement_dir.mkdir()
+    receipt_path = supplement_dir / "REPORT_SUPPLEMENT_PIPELINE.json"
+    receipt_path.write_bytes(b"receipt")
+    receipt_sha = hashlib.sha256(receipt_path.read_bytes()).hexdigest()
+    monkeypatch.setattr(
+        matched_supplement_pipeline, "load_verified_supplement_artifacts", lambda _: {}
+    )
+    arguments = {
+        "primary_root": reports[0][0],
+        "primary": reports[0][1],
+        "control_root": reports[1][0],
+        "control": reports[1][1],
+        "primary_figures": figure_roots[0],
+        "control_figures": figure_roots[1],
+        "figure_manifest_sha256": manifest_hashes,
+        "supplement_dir": supplement_dir,
+        "supplement_receipt_sha256": receipt_sha,
+        "source_sha256": build_final_report._report_source_hashes(),
+        "report_root": tmp_path,
+    }
+    build_final_report.assert_publication_inputs_unchanged(**arguments)
+    png = figure_roots[0] / f"details/{name}/density.png"
+    png.write_bytes(b"replaced during aggregation")
+    with pytest.raises(ValueError, match="figure artifact changed"):
+        build_final_report.assert_publication_inputs_unchanged(**arguments)
+    png.write_bytes(originals[0])
+    receipt_path.write_bytes(b"coherently replaced receipt")
+    with pytest.raises(RuntimeError, match="supplement receipt changed"):
+        build_final_report.assert_publication_inputs_unchanged(**arguments)
+    assert not (tmp_path / "REPORT.md").exists()
 
 
 def test_final_publication_receipt_binds_report_and_supplement(tmp_path):

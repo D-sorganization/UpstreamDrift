@@ -852,6 +852,59 @@ def final_publication_receipt(
     }
 
 
+def assert_publication_inputs_unchanged(
+    *,
+    primary_root: Path,
+    primary: dict,
+    control_root: Path,
+    control: dict,
+    primary_figures: Path,
+    control_figures: Path,
+    figure_manifest_sha256: dict[Path, str],
+    supplement_dir: Path,
+    supplement_receipt_sha256: str,
+    source_sha256: dict[str, str],
+    report_root: Path,
+) -> None:
+    """Revalidate long-running aggregation inputs immediately before writing."""
+    from src.tools.shot_pattern_analysis.matched_supplement_pipeline import (
+        load_verified_supplement_artifacts,
+    )
+
+    for root, report in ((primary_root, primary), (control_root, control)):
+        assert_matrix_inputs_unchanged(root, report)
+    if _report_source_hashes() != source_sha256:
+        raise RuntimeError("report interpretation source changed during assembly")
+    if any(
+        hashlib.sha256((root / "figure_manifest.json").read_bytes()).hexdigest()
+        != digest
+        for root, digest in figure_manifest_sha256.items()
+    ):
+        raise RuntimeError("figure manifest changed during report assembly")
+    for root, report, protocol in (
+        (primary_figures, primary, "original_primary"),
+        (control_figures, control, "original_control"),
+    ):
+        verified_original_figure_links(
+            root, report, report_root=report_root, protocol=protocol
+        )
+        verified_original_figure_inventory(
+            root, report, report_root=report_root, protocol=protocol
+        )
+    load_verified_supplement_artifacts(supplement_dir)
+    if (
+        hashlib.sha256(
+            (supplement_dir / "REPORT_SUPPLEMENT_PIPELINE.json").read_bytes()
+        ).hexdigest()
+        != supplement_receipt_sha256
+    ):
+        raise RuntimeError("supplement receipt changed during report assembly")
+    if _report_source_hashes() != source_sha256:
+        raise RuntimeError(
+            "report interpretation source changed during final validation"
+        )
+
+
 def build_final_report(
     primary_root: Path,
     control_root: Path,
@@ -928,32 +981,19 @@ def build_final_report(
     rendered = render_final_report(
         primary, control, lean, sensitivity, interpretation=interpretation
     )
-    # Recheck plan identity after potentially long read-only sensitivity scoring.
-    for root, report in ((primary_root, primary), (control_root, control)):
-        assert_matrix_inputs_unchanged(root, report)
-    if _report_source_hashes() != sources_before:
-        raise RuntimeError("report interpretation source changed during assembly")
-    if any(
-        hashlib.sha256((root / "figure_manifest.json").read_bytes()).hexdigest()
-        != digest
-        for root, digest in figure_manifests_before.items()
-    ):
-        raise RuntimeError("figure manifest changed during report assembly")
-    for root, report in ((primary_figures, primary), (control_figures, control)):
-        verified_original_figure_links(root, report, report_root=report_root)
-        verified_original_figure_inventory(root, report, report_root=report_root)
-    # The verified supplement facade rechecks every source and figure byte;
-    # rerun it after the longer across-lean and sensitivity aggregation.
-    load_verified_supplement_artifacts(supplement_dir)
-    if (
-        hashlib.sha256(supplement_receipt_path.read_bytes()).hexdigest()
-        != supplement_receipt_before
-    ):
-        raise RuntimeError("supplement receipt changed during report assembly")
-    if _report_source_hashes() != sources_before:
-        raise RuntimeError(
-            "report interpretation source changed during final validation"
-        )
+    assert_publication_inputs_unchanged(
+        primary_root=primary_root,
+        primary=primary,
+        control_root=control_root,
+        control=control,
+        primary_figures=primary_figures,
+        control_figures=control_figures,
+        figure_manifest_sha256=figure_manifests_before,
+        supplement_dir=supplement_dir,
+        supplement_receipt_sha256=supplement_receipt_before,
+        source_sha256=sources_before,
+        report_root=report_root,
+    )
     cell_inventory_path = destination.with_name("REPORT_CELLS.csv")
     lean_inventory_path = destination.with_name("REPORT_LEAN.csv")
     _write_atomic(cell_inventory_path, render_cell_inventory(primary, control))

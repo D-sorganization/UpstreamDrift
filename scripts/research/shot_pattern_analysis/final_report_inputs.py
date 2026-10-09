@@ -18,9 +18,17 @@ def profile_from_cell(name: str) -> str:
 
 
 def verified_original_figure_links(
-    figure_root: Path, report: dict, *, report_root: Path
+    figure_root: Path, report: dict, *, report_root: Path, protocol: str
 ) -> list[dict]:
     """Select real academic/social detail assets bound to the final matrix."""
+    if protocol not in ("original_primary", "original_control"):
+        raise ValueError("unknown original figure protocol")
+    expected_cells = 324 if protocol == "original_primary" else 72
+    if (
+        report["planned_cells"] in (324, 72)
+        and report["planned_cells"] != expected_cells
+    ):
+        raise ValueError("figure protocol disagrees with matrix plan")
     figure_root = Path(figure_root).resolve()
     report_root = Path(report_root).resolve()
     manifest_path = figure_root / "figure_manifest.json"
@@ -75,9 +83,7 @@ def verified_original_figure_links(
                         "club": club,
                         "kind": kind,
                         "presentation": presentation,
-                        "source_protocol": "original_primary"
-                        if report["stage"] == "final"
-                        else "original_control",
+                        "source_protocol": protocol,
                         "source_kind": "individual_supported_endpoints"
                         if kind == "density"
                         else "saved_illustrative_trajectory_samples",
@@ -88,13 +94,15 @@ def verified_original_figure_links(
 
 
 def verified_original_figure_inventory(
-    figure_root: Path, report: dict, *, report_root: Path
+    figure_root: Path, report: dict, *, report_root: Path, protocol: str
 ) -> str:
     """Return the hash-bound full availability index for one original matrix."""
     figure_root = Path(figure_root).resolve()
     report_root = Path(report_root).resolve()
     # The same strict manifest and selected-asset validation guards this index.
-    verified_original_figure_links(figure_root, report, report_root=report_root)
+    verified_original_figure_links(
+        figure_root, report, report_root=report_root, protocol=protocol
+    )
     manifest = json.loads((figure_root / "figure_manifest.json").read_text())
     relative = manifest.get("availability_ledger")
     if relative != "availability.csv":
@@ -184,18 +192,30 @@ def assemble_qualified_interpretation(
                 representative_effects.append(chosen)
     links = [
         *verified_original_figure_links(
-            primary_figures, primary, report_root=report_root
+            primary_figures,
+            primary,
+            report_root=report_root,
+            protocol="original_primary",
         ),
         *verified_original_figure_links(
-            control_figures, control, report_root=report_root
+            control_figures,
+            control,
+            report_root=report_root,
+            protocol="original_control",
         ),
     ]
     figure_inventories = [
         verified_original_figure_inventory(
-            primary_figures, primary, report_root=report_root
+            primary_figures,
+            primary,
+            report_root=report_root,
+            protocol="original_primary",
         ),
         verified_original_figure_inventory(
-            control_figures, control, report_root=report_root
+            control_figures,
+            control,
+            report_root=report_root,
+            protocol="original_control",
         ),
     ]
     ledger = supplement["figure_ledger"]
