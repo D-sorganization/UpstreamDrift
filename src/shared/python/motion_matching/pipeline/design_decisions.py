@@ -9,6 +9,12 @@ from typing import Sequence
 
 DECISION_HEADING_PATTERN = re.compile(r"^##\s+(\d+)\.\s+(.+)$", re.MULTILINE)
 
+# The record is split into volumes to stay under the documentation size budget
+# (scripts/config/doc_size_budget.json): DESIGN_DECISIONS.md, then
+# DESIGN_DECISIONS_2.md, DESIGN_DECISIONS_3.md, ... with numbering continued.
+FIRST_VOLUME = "DESIGN_DECISIONS.md"
+LATER_VOLUME_PATTERN = re.compile(r"^DESIGN_DECISIONS_(\d+)\.md$")
+
 REQUIRED_FIELDS = ("what", "why", "receipt", "rejected")
 
 EXPECTED_DECISION_TITLES = [
@@ -94,6 +100,40 @@ def parse_design_decisions(markdown_text: str) -> list[DesignDecision]:
             )
         )
 
+    return decisions
+
+
+def decision_volumes(doc_dir: Path) -> list[Path]:
+    """Return the record's volume files in reading order.
+
+    DbC Preconditions:
+    - ``doc_dir`` contains ``DESIGN_DECISIONS.md``.
+
+    DbC Postconditions:
+    - The first entry is ``DESIGN_DECISIONS.md``; later volumes follow in
+      ascending numeric order, and their numbers run 2, 3, ... without gaps.
+    """
+    first = doc_dir / FIRST_VOLUME
+    if not first.is_file():
+        raise ValueError(f"{first} does not exist")
+    later = {}
+    for path in doc_dir.iterdir():
+        match = LATER_VOLUME_PATTERN.match(path.name)
+        if match:
+            later[int(match.group(1))] = path
+    expected = list(range(2, len(later) + 2))
+    if sorted(later) != expected:
+        raise ValueError(
+            f"Design decision volumes must be numbered {expected}, got {sorted(later)}"
+        )
+    return [first, *(later[n] for n in expected)]
+
+
+def load_design_decisions(doc_dir: Path) -> list[DesignDecision]:
+    """Parse every volume of the record in ``doc_dir`` into one ordered list."""
+    decisions: list[DesignDecision] = []
+    for volume in decision_volumes(doc_dir):
+        decisions.extend(parse_design_decisions(volume.read_text(encoding="utf-8")))
     return decisions
 
 

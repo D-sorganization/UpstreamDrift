@@ -3,8 +3,8 @@
 Start with the [maintained LaTeX reference](myosuite_retarget_map.tex). It is an
 editable standalone research source (see `AGENTS.md`, Modeling Reference
 Documentation) for #11729. The engineering design manual source remains
-`manuals/upstreamdrift`, and the decision record is sections 16 and 17 of
-[`DESIGN_DECISIONS.md`](../../development/full_body_models/DESIGN_DECISIONS.md).
+`manuals/upstreamdrift`, and the decision record is sections 18 and 19 of
+[`DESIGN_DECISIONS_2.md`](../../development/full_body_models/DESIGN_DECISIONS_2.md).
 
 | Item                                                      | Status                      |
 | --------------------------------------------------------- | --------------------------- |
