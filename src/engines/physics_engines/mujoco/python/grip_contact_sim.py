@@ -375,8 +375,13 @@ def simulate_grip_contact(
     interface: GripInterface | None = None,
     timestep_s: float = DEFAULT_TIMESTEP_S,
     t_end_s: float | None = None,
+    t_start_s: float | None = None,
 ) -> ContactRun:
     """Integrate the free club held by pads over the prescribed swing.
+
+    ``t_start_s`` starts the run at the first sample at or after that time,
+    with the club moving as the weld (a window of the swing for diagnosis and
+    cross-engine comparison).
 
     The club starts at the weld pose and with the weld velocity of the first
     sample: unlike a bushing, a stiff frictional contact would turn a start at
@@ -391,6 +396,8 @@ def simulate_grip_contact(
     sim.calibrate(np.asarray(swing.q[0], float))
     spline = CoordinateSpline(swing.time_s, swing.q)
     times = swing.time_s
+    if t_start_s is not None:
+        times = times[times >= t_start_s - 1e-12]
     if t_end_s is not None:
         times = times[times <= t_end_s + 1e-12]
     steps = np.diff(times) / timestep_s
