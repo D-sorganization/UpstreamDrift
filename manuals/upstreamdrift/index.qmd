@@ -14,3 +14,5 @@ UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
 {{< include chapters/00-governance.qmd >}}
 
 {{< include chapters/10-ground-reaction.qmd >}}
+
+{{< include chapters/11-grip-wrench.qmd >}}
