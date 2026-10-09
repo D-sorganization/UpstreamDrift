@@ -235,11 +235,10 @@ def _draw_metric(
                 )
             axis.set_xticks(range(len(curves)), [f"×{curve:g}" for curve in curves])
             axis.set_yticks(range(len(leans)), [f"{lean:g}°" for lean in leans])
-            axis.set_xlabel("Curve Scale")
             if col_index == 0:
                 axis.set_ylabel(f"{pattern}\nShaft Lean")
-            else:
-                axis.set_ylabel("Shaft Lean")
+            if row_index == len(PATTERNS) - 1:
+                axis.set_xlabel("Curve Scale")
             axis.set_title(
                 f"{_CLUB_LABELS[club]} — {pattern}",
                 fontsize=11,
@@ -328,10 +327,18 @@ def _draw_metric(
         fontsize=9,
         color="#333333",
     )
+    fig.subplots_adjust(
+        left=0.08,
+        right=0.89 if images else 0.98,
+        top=0.84,
+        bottom=0.12,
+        hspace=0.48,
+        wspace=0.28,
+    )
     if images:
-        colorbar = fig.colorbar(images[0], ax=axes.ravel().tolist(), shrink=0.78, pad=0.025)
+        colorbar_axis = fig.add_axes((0.93, 0.23, 0.016, 0.56))
+        colorbar = fig.colorbar(images[0], cax=colorbar_axis)
         colorbar.set_label(colorbar_label)
-    fig.subplots_adjust(left=0.08, right=0.92 if images else 0.98, top=0.84, bottom=0.12, hspace=0.48, wspace=0.28)
     outputs: dict[str, Path] = {}
     output_stem.parent.mkdir(parents=True, exist_ok=True)
     for extension in formats:
