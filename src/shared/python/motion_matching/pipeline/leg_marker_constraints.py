@@ -61,22 +61,42 @@ def preserve_azimuth(offset: Sequence[float], seed: Sequence[float]) -> Offset:
     return (float(length * unit[0]), float(p[1]), float(length * unit[1]))
 
 
-def square_forefoot(offsets: Mapping[str, tuple[str, Offset]], side: str) -> Offsets:
+def square_forefoot(
+    offsets: Mapping[str, tuple[str, Offset]],
+    side: str,
+    mid_z: float | None = None,
+) -> Offsets:
     """Copy of ``offsets`` whose ``<side>ToeIn``/``<side>ToeOut`` share one ``x``.
 
     The shared ``x`` is their mean, which is the equal-weight least-squares
-    placement under the constraint. Raises ``ValueError`` if either is missing.
+    placement under the constraint. With ``mid_z`` the pair is also shifted
+    sideways (spacing kept) so its midpoint sits at ``z = mid_z``: a sideways
+    shift of the pair is foot yaw about the ankle in disguise. Raises
+    ``ValueError`` if either marker is missing or ``mid_z`` is not finite.
     """
     inner, outer = f"{side}ToeIn", f"{side}ToeOut"
     for label in (inner, outer):
         if label not in offsets:
             raise ValueError(f"offsets must contain {label}")
+    if mid_z is not None and not np.isfinite(mid_z):
+        raise ValueError("mid_z must be finite")
     mean_x = 0.5 * (offsets[inner][1][0] + offsets[outer][1][0])
+    shift_z = (
+        0.0
+        if mid_z is None
+        else mid_z - 0.5 * (offsets[inner][1][2] + offsets[outer][1][2])
+    )
     out: Offsets = dict(offsets)
     for label in (inner, outer):
         body, (_, y, z) = offsets[label]
-        out[label] = (body, (float(mean_x), float(y), float(z)))
+        out[label] = (body, (float(mean_x), float(y), float(z + shift_z)))
     return out
+
+
+def _seed_mid_z(seeds: Mapping[str, tuple[str, Sequence[float]]], side: str) -> float:
+    return 0.5 * (
+        float(seeds[f"{side}ToeIn"][1][2]) + float(seeds[f"{side}ToeOut"][1][2])
+    )
 
 
 def anatomical_leg_constraint(
@@ -105,8 +125,11 @@ def anatomical_leg_constraint(
                 )
             out[label] = (body, preserve_azimuth(offset, seeds[label][1]))
         for side in ("R", "L"):
-            if f"{side}ToeIn" in out and f"{side}ToeOut" in out:
-                out = square_forefoot(out, side)
+            pair = (f"{side}ToeIn", f"{side}ToeOut")
+            if all(label in out for label in pair):
+                pinned = all(label in seeds for label in pair)
+                mid_z = _seed_mid_z(seeds, side) if pinned else None
+                out = square_forefoot(out, side, mid_z=mid_z)
         return out
 
     return constrain

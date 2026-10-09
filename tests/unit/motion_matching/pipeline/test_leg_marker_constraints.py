@@ -64,6 +64,20 @@ def test_square_forefoot_shares_one_forward_offset_and_keeps_the_midpoint() -> N
     assert out["LToeIn"][0] == "calcn_l"
 
 
+def test_square_forefoot_can_pin_the_lateral_midpoint() -> None:
+    # A toe pair shifted sideways in the calcn frame is foot yaw in disguise:
+    # 6 cm at 18 cm forward is about 18 degrees. Pinning the midpoint's z keeps
+    # the spacing and removes the shift.
+    offsets = {
+        "LToeIn": ("calcn_l", (0.1355, -0.0014, 0.0883)),
+        "LToeOut": ("calcn_l", (0.1828, -0.0033, 0.0005)),
+    }
+    out = square_forefoot(offsets, "L", mid_z=-0.015)
+    z_in, z_out = out["LToeIn"][1][2], out["LToeOut"][1][2]
+    assert 0.5 * (z_in + z_out) == pytest.approx(-0.015)
+    assert z_in - z_out == pytest.approx(0.0883 - 0.0005)
+
+
 def test_square_forefoot_requires_both_toe_markers() -> None:
     with pytest.raises(ValueError, match="RToeOut"):
         square_forefoot({"RToeIn": ("calcn_r", (0.2, 0.0, 0.0))}, "R")
@@ -90,7 +104,10 @@ def test_anatomical_constraint_projects_every_leg_marker_and_leaves_others() -> 
             _azimuth_deg(seeds[label][1]), abs=1e-9
         )
     for side in ("R", "L"):
-        assert out[f"{side}ToeIn"][1][0] == pytest.approx(out[f"{side}ToeOut"][1][0])
+        toe_in, toe_out = out[f"{side}ToeIn"][1], out[f"{side}ToeOut"][1]
+        assert toe_in[0] == pytest.approx(toe_out[0])
+        seed_mid = 0.5 * (seeds[f"{side}ToeIn"][1][2] + seeds[f"{side}ToeOut"][1][2])
+        assert 0.5 * (toe_in[2] + toe_out[2]) == pytest.approx(seed_mid)
 
 
 def test_anatomical_constraint_rejects_a_marker_moved_to_another_body() -> None:
