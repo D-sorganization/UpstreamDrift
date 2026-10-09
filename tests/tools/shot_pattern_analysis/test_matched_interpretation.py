@@ -62,6 +62,39 @@ def _cell(status="completed", supported_n=9_000):
     return cell
 
 
+def _pair():
+    return {
+        "schema": "matched-explicit-source-pair/1",
+        "comparison_kind": "curve_strength",
+        "status": "conditional_only",
+        "conditioning": "same_indices_supported_in_all_six_populations",
+        "common_supported_n": 8_000,
+        "total_n_per_population": 10_000,
+        "source_protocols": ["original", "pw-primary-face-bounds/1"],
+        "sources": [
+            {
+                "protocol_id": "original",
+                "cell": "first",
+                "source_plan_sha256": "a" * 64,
+                "source_cell_manifest_sha256": "b" * 64,
+                "source_csv_sha256": "c" * 64,
+            },
+            {
+                "protocol_id": "pw-primary-face-bounds/1",
+                "cell": "second",
+                "source_plan_sha256": "d" * 64,
+                "source_cell_manifest_sha256": "e" * 64,
+                "source_csv_sha256": "f" * 64,
+            },
+        ],
+        "analysis_source_sha256": {"matched_lean_control.py": "1" * 64},
+        "course_scoring_effect_modification": {
+            "Draw": {"estimate": 0.02, "lower_95": -0.01, "upper_95": 0.05},
+            "Fade": {"estimate": -0.01, "lower_95": -0.03, "upper_95": 0.01},
+        },
+    }
+
+
 def test_completed_cell_reports_spread_bias_quadrants_and_optional_geometry():
     rows = {
         name: [{"face_deg": 1.0, "loft_deg": 11.0}, {"face_deg": 2.0, "loft_deg": 12.0}]
@@ -95,10 +128,20 @@ def test_unavailable_cell_is_not_mislabeled_as_zero_supported_shots():
     assert result["patterns"]["Straight"]["supported_n"] is None
 
 
+def test_completed_cell_with_one_supported_shot_has_no_estimable_spread():
+    cell = _cell(supported_n=1)
+    item = cell["summary"]["Straight"]
+    item["statistics"] = None
+    item["joint_delivery_outcome_diagnostics"] = None
+    result = describe_cell(cell)
+    assert result["patterns"]["Straight"]["status"] == "Insufficient Supported Shots"
+    assert result["patterns"]["Straight"]["supported_n"] == 1
+
+
 def test_scoring_keeps_absolute_means_and_population_distinct():
     cell = _cell()
     cell["course_scoring"] = {
-        "status": "available",
+        "status": "conditional_only",
         "scenario_id": "tee_fairway_rough",
         "start_lie": "tee",
         "hole_distance_m": 400.0,
@@ -107,28 +150,35 @@ def test_scoring_keeps_absolute_means_and_population_distinct():
         "paired_n": 8500,
         "total_n": 10000,
         "patterns": {
-            name: {"n": 9000, "mean_strokes_gained": -0.4}
+            name: {"n": 8500, "mean_strokes_gained": -0.4}
             for name in ("Straight", "Draw", "Fade")
         },
     }
     result = describe_scoring(cell)
-    assert result["status"] == "available"
+    assert result["status"] == "conditional_only"
     assert result["paired_n"] == 8500
     assert result["patterns"]["Draw"]["absolute_mean_strokes_gained"] == -0.4
-    assert result["patterns"]["Draw"]["individual_supported_n"] == 9000
+    assert result["patterns"]["Draw"]["individual_endpoint_supported_n"] == 9000
+    assert result["patterns"]["Draw"]["common_three_scored_n"] == 8500
     assert result["context"]["fairway_half_width_m"] == 15.0
 
 
 def test_conditional_scoring_remains_reportable_with_its_population():
     cell = _cell()
     cell["course_scoring"] = {
-        "status": "conditional_only", "scenario_id": "fairway_green",
-        "start_lie": "fairway", "start_distance_m": 128.0,
-        "hole_distance_m": None, "fairway_half_width_m": None,
-        "green_radius_m": 15.0, "paired_n": 8_500,
+        "status": "conditional_only",
+        "scenario_id": "fairway_green",
+        "start_lie": "fairway",
+        "start_distance_m": 128.0,
+        "hole_distance_m": None,
+        "fairway_half_width_m": None,
+        "green_radius_m": 15.0,
+        "paired_n": 8_500,
         "total_n": 10_000,
-        "patterns": {name: {"n": 9_000, "mean_strokes_gained": 0.1}
-                     for name in ("Straight", "Draw", "Fade")},
+        "patterns": {
+            name: {"n": 8_500, "mean_strokes_gained": 0.1}
+            for name in ("Straight", "Draw", "Fade")
+        },
     }
     result = describe_scoring(cell)
     assert result["status"] == "conditional_only"
@@ -136,37 +186,37 @@ def test_conditional_scoring_remains_reportable_with_its_population():
 
 
 def test_effect_modification_requires_common_six_pair_and_explicit_scope():
-    pair = {
-        "schema": "matched-explicit-source-pair/1",
-        "comparison_kind": "shaft_rotation_sd",
-        "status": "conditional_only",
-        "conditioning": "same_indices_supported_in_all_six_populations",
-        "common_supported_n": 8000,
-        "total_n_per_population": 10000,
-        "source_protocols": ["original", "supplement"],
-        "course_scoring_effect_modification": {
-            "Draw": {"estimate": 0.02, "lower_95": -0.01, "upper_95": 0.05},
-            "Fade": {"estimate": -0.01, "lower_95": -0.03, "upper_95": 0.01},
-        },
-    }
+    pair = _pair()
     result = describe_effect_modification(pair)
     assert result["common_six_n"] == 8000
     assert result["draw_minus_straight_change"]["estimate"] == 0.02
     assert "pointwise" in result["inference_limit"]
     with pytest.raises(ValueError, match="six-population"):
         describe_effect_modification({**pair, "conditioning": "individual means"})
+    with pytest.raises(ValueError, match="source evidence"):
+        describe_effect_modification({**pair, "sources": []})
+    with pytest.raises(ValueError, match="population"):
+        describe_effect_modification({**pair, "status": "available"})
+    assert "first" in render_effect_table([result])
+    assert "second" in render_effect_table([result])
 
 
 def test_assets_must_be_in_manifest_and_exist(tmp_path):
     import hashlib
 
-    image = tmp_path / "density.png"
+    (tmp_path / "social").mkdir()
+    image = tmp_path / "social" / "density.png"
     image.write_bytes(b"png")
     entries = [
-        {"club": "driver", "cell": "c", "png": "density.png", "status": "completed"}
+        {
+            "club": "driver",
+            "cell": "c",
+            "png": "social/density.png",
+            "status": "completed",
+        }
     ]
     manifest = {
-        "outputs": {"density.png": hashlib.sha256(b"png").hexdigest()},
+        "outputs": {"social/density.png": hashlib.sha256(b"png").hexdigest()},
         "cell_manifest_sha256": {"c": "a" * 64},
     }
     result = select_verified_assets(
@@ -178,6 +228,15 @@ def test_assets_must_be_in_manifest_and_exist(tmp_path):
         presentation="social",
     )
     assert result == [{"kind": "density", "presentation": "social", "path": image}]
+    with pytest.raises(ValueError, match="presentation"):
+        select_verified_assets(
+            tmp_path,
+            entries,
+            manifest,
+            club="driver",
+            kind="density",
+            presentation="academic",
+        )
     image.unlink()
     with pytest.raises(ValueError, match="missing"):
         select_verified_assets(
@@ -234,6 +293,7 @@ def test_saved_cell_means_use_only_supported_rows(monkeypatch, tmp_path):
         matched_interpretation, "load_validated_cell", lambda _: _cell(supported_n=1)
     )
     monkeypatch.setattr(matched_interpretation, "manifest_files_match", lambda _: True)
+    (tmp_path / "manifest.json").write_text("original")
     with gzip.open(tmp_path / "shots.csv.gz", "wt", newline="") as stream:
         writer = csv.DictWriter(
             stream, fieldnames=("pattern", "status", "face_deg", "loft_deg")
@@ -261,6 +321,44 @@ def test_saved_cell_means_use_only_supported_rows(monkeypatch, tmp_path):
     assert result["patterns"]["Draw"]["delivered_mean_n"] == 1
 
 
+def test_saved_cell_rejects_coherent_manifest_replacement_during_read(
+    monkeypatch, tmp_path
+):
+    import csv
+    import gzip
+
+    from src.tools.shot_pattern_analysis import matched_interpretation
+
+    monkeypatch.setattr(
+        matched_interpretation, "load_validated_cell", lambda _: _cell(supported_n=1)
+    )
+    (tmp_path / "manifest.json").write_text("original")
+    with gzip.open(tmp_path / "shots.csv.gz", "wt", newline="") as stream:
+        writer = csv.DictWriter(
+            stream, fieldnames=("pattern", "status", "face_deg", "loft_deg")
+        )
+        writer.writeheader()
+        for name in ("Straight", "Draw", "Fade"):
+            writer.writerow(
+                {
+                    "pattern": name,
+                    "status": "supported",
+                    "face_deg": 1.0,
+                    "loft_deg": 10.0,
+                }
+            )
+
+    def replace_at_final_check(_):
+        (tmp_path / "manifest.json").write_text("replacement")
+        return True
+
+    monkeypatch.setattr(
+        matched_interpretation, "manifest_files_match", replace_at_final_check
+    )
+    with pytest.raises(ValueError, match="changed during"):
+        describe_saved_cell(tmp_path)
+
+
 def test_saved_unavailable_cell_does_not_read_nonexistent_csv(monkeypatch, tmp_path):
     from src.tools.shot_pattern_analysis import matched_interpretation
 
@@ -278,20 +376,7 @@ def test_report_tables_keep_denominators_and_noncausal_scope():
     assert "[89.0%, 91.0%]" in table
     assert "X Bias / SD" in table
     assert "Not Attempted" in render_cell_table([describe_cell(_cell("unavailable"))])
-    pair = {
-        "schema": "matched-explicit-source-pair/1",
-        "comparison_kind": "curve_strength",
-        "status": "conditional_only",
-        "conditioning": "same_indices_supported_in_all_six_populations",
-        "common_supported_n": 8_000,
-        "total_n_per_population": 10_000,
-        "source_protocols": ["original", "pw-primary-face-bounds/1"],
-        "course_scoring_effect_modification": {
-            "Draw": {"estimate": 0.02, "lower_95": -0.01, "upper_95": 0.05},
-            "Fade": {"estimate": -0.01, "lower_95": -0.03, "upper_95": 0.01},
-        },
-    }
-    effect_table = render_effect_table([describe_effect_modification(pair)])
+    effect_table = render_effect_table([describe_effect_modification(_pair())])
     assert "8,000 / 10,000" in effect_table
     assert "+0.0200" in effect_table
     assert "not a causal" in effect_table
@@ -300,7 +385,7 @@ def test_report_tables_keep_denominators_and_noncausal_scope():
 def test_scoring_table_states_absolute_context_and_individual_population():
     cell = _cell()
     cell["course_scoring"] = {
-        "status": "available",
+        "status": "conditional_only",
         "scenario_id": "tee_fairway_rough",
         "start_lie": "tee",
         "hole_distance_m": 400.0,
@@ -309,7 +394,7 @@ def test_scoring_table_states_absolute_context_and_individual_population():
         "paired_n": 8_500,
         "total_n": 10_000,
         "patterns": {
-            name: {"n": 9_000, "mean_strokes_gained": -0.4}
+            name: {"n": 8_500, "mean_strokes_gained": -0.4}
             for name in ("Straight", "Draw", "Fade")
         },
     }
@@ -319,6 +404,7 @@ def test_scoring_table_states_absolute_context_and_individual_population():
     assert "15.0 m" in table
     assert "-0.4000" in table
     assert "9,000" in table and "8,500" in table
+    assert "Common-Three Scored" in table
 
 
 def test_geometry_table_does_not_claim_face_causes_long_left():

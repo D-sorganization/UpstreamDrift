@@ -10,6 +10,7 @@ import math
 import hashlib
 import csv
 import gzip
+import re
 from pathlib import Path
 from statistics import fmean
 from typing import Any, Iterable, Mapping
@@ -27,6 +28,11 @@ def _finite(value: Any, label: str) -> float:
     if not math.isfinite(number):
         raise ValueError(f"{label} must be finite")
     return number
+
+
+def _sha256_file(path: Path) -> str:
+    with path.open("rb") as stream:
+        return hashlib.file_digest(stream, "sha256").hexdigest()
 
 
 def _delivered_means(rows: Iterable[Mapping[str, Any]]) -> dict[str, float | int]:
@@ -90,10 +96,6 @@ def describe_cell(
     result["target_x_m"] = target
     for name in PATTERNS:
         item = cell["summary"][name]
-        statistics = item["statistics"]
-        quadrants = statistics["quadrant_fractions"]
-        if any(key not in quadrants for key in _QUADRANTS):
-            raise ValueError("all four endpoint quadrants are required")
         supported = int(item["supported_n"])
         attempted = int(item["total_n"])
         if attempted != planned or not 0 <= supported <= attempted:
@@ -104,6 +106,32 @@ def describe_cell(
         if len(interval) != 2 or not 0 <= interval[0] <= interval[1] <= 1:
             raise ValueError("invalid support interval")
         nominal = cell["nominals"][name]
+        if supported < 2:
+            low_support: dict[str, Any] = {
+                "status": "Insufficient Supported Shots",
+                "supported_n": supported,
+                "attempted_n": attempted,
+                "supported_fraction_ci95": interval,
+                "nominal_face_deg": _finite(nominal["face_deg"], "nominal face"),
+                "nominal_path_deg": _finite(nominal["path_deg"], "nominal path"),
+                "nominal_speed_mps": _finite(nominal["speed_mps"], "nominal speed"),
+            }
+            if delivered_rows is not None:
+                if name not in delivered_rows:
+                    raise ValueError(f"missing delivered rows for {name}")
+                values = list(delivered_rows[name])
+                if len(values) != supported:
+                    raise ValueError(
+                        "delivered geometry population differs from supported endpoints"
+                    )
+                if values:
+                    low_support.update(_delivered_means(values))
+            result["patterns"][name] = low_support
+            continue
+        statistics = item["statistics"]
+        quadrants = statistics["quadrant_fractions"]
+        if any(key not in quadrants for key in _QUADRANTS):
+            raise ValueError("all four endpoint quadrants are required")
         pattern: dict[str, Any] = {
             "status": "Completed",
             "supported_n": supported,
@@ -154,8 +182,11 @@ def describe_saved_cell(directory: Path) -> dict[str, Any]:
     cell = {**load_validated_cell(directory), "cell": directory.name}
     if cell["status"] != "completed":
         return describe_cell(cell)
+    manifest_path = directory / "manifest.json"
+    csv_path = directory / "shots.csv.gz"
+    before = (_sha256_file(manifest_path), _sha256_file(csv_path))
     rows: dict[str, list[dict[str, str]]] = {name: [] for name in PATTERNS}
-    with gzip.open(directory / "shots.csv.gz", "rt", newline="") as stream:
+    with gzip.open(csv_path, "rt", newline="") as stream:
         for row in csv.DictReader(stream):
             name = row["pattern"]
             if name not in rows:
@@ -164,7 +195,10 @@ def describe_saved_cell(directory: Path) -> dict[str, Any]:
                 rows[name].append(row)
             elif not row["status"]:
                 raise ValueError("saved shot has an empty support status")
-    if not manifest_files_match(directory / "manifest.json"):
+    if not manifest_files_match(manifest_path) or before != (
+        _sha256_file(manifest_path),
+        _sha256_file(csv_path),
+    ):
         raise ValueError("cell manifest changed during delivered-geometry reading")
     return describe_cell(cell, delivered_rows=rows)
 
@@ -178,9 +212,13 @@ def describe_scoring(cell: Mapping[str, Any]) -> dict[str, Any]:
         return {"status": "Unavailable", "reason": scoring.get("reason", "")}
     paired = int(scoring["paired_n"])
     total = int(scoring["total_n"])
-    individual = {name: int(scoring["patterns"][name]["n"]) for name in PATTERNS}
-    if not 0 <= paired <= min(individual.values()) or any(
-        not 0 <= value <= total for value in individual.values()
+    individual = {name: int(cell["summary"][name]["supported_n"]) for name in PATTERNS}
+    scored = {name: int(scoring["patterns"][name]["n"]) for name in PATTERNS}
+    if (
+        not 2 <= paired <= total
+        or any(scored[name] != paired for name in PATTERNS)
+        or any(not paired <= value <= total for value in individual.values())
+        or (scoring["status"] == "available") != (paired == total)
     ):
         raise ValueError("course scoring populations disagree")
     context = {
@@ -202,7 +240,8 @@ def describe_scoring(cell: Mapping[str, Any]) -> dict[str, Any]:
         "total_n_per_pattern": total,
         "patterns": {
             name: {
-                "individual_supported_n": individual[name],
+                "individual_endpoint_supported_n": individual[name],
+                "common_three_scored_n": scored[name],
                 "absolute_mean_strokes_gained": _finite(
                     scoring["patterns"][name]["mean_strokes_gained"],
                     "mean strokes gained",
@@ -233,15 +272,55 @@ def describe_effect_modification(pair: Mapping[str, Any]) -> dict[str, Any]:
         raise ValueError("unknown paired status")
     common = int(pair["common_supported_n"])
     total = int(pair["total_n_per_population"])
-    if not 0 <= common <= total:
-        raise ValueError("invalid common six-population count")
+    if not 0 <= common <= total or (
+        (status == "available" and common != total)
+        or (status == "conditional_only" and not 2 <= common < total)
+        or (status == "unavailable" and common >= 2)
+    ):
+        raise ValueError("paired status and population disagree")
+    source_protocols = pair.get("source_protocols")
+    sources = pair.get("sources")
+    analysis_hashes = pair.get("analysis_source_sha256")
+    if (
+        not isinstance(source_protocols, list)
+        or len(source_protocols) != 2
+        or not isinstance(sources, list)
+        or len(sources) != 2
+        or not isinstance(analysis_hashes, dict)
+        or not analysis_hashes
+        or any(
+            not isinstance(value, str) or re.fullmatch(r"[0-9a-f]{64}", value) is None
+            for value in analysis_hashes.values()
+        )
+    ):
+        raise ValueError("qualified source evidence is required")
+    for protocol, source in zip(source_protocols, sources, strict=True):
+        if (
+            not isinstance(source, dict)
+            or source.get("protocol_id") != protocol
+            or not isinstance(source.get("cell"), str)
+            or not source["cell"]
+            or any(
+                not isinstance(source.get(key), str)
+                or re.fullmatch(r"[0-9a-f]{64}", source[key]) is None
+                for key in (
+                    "source_plan_sha256",
+                    "source_cell_manifest_sha256",
+                    "source_csv_sha256",
+                )
+            )
+        ):
+            raise ValueError("qualified source evidence is incomplete")
     effects = pair.get("course_scoring_effect_modification", {})
+    if status == "unavailable" and any(name in effects for name in ("Draw", "Fade")):
+        raise ValueError("unavailable pair cannot retain effect estimates")
     result = {
         "comparison_kind": kind,
         "status": status,
         "common_six_n": common,
         "total_n_per_population": total,
-        "source_protocols": tuple(pair.get("source_protocols", ())),
+        "source_protocols": tuple(source_protocols),
+        "source_cells": tuple(source["cell"] for source in sources),
         "draw_minus_straight_change": effects.get("Draw"),
         "fade_minus_straight_change": effects.get("Fade"),
         "inference_limit": (
@@ -291,6 +370,15 @@ def select_verified_assets(
         relative = Path(str(relative_value))
         if relative.is_absolute() or ".." in relative.parts:
             raise ValueError("asset path must remain inside its inventory root")
+        indexed_presentation = entry.get("presentation")
+        if indexed_presentation is None:
+            indexed_presentation = (
+                "social" if relative.parts[0] == "social" else "academic"
+            )
+        if indexed_presentation != presentation:
+            raise ValueError("asset presentation differs from indexed path")
+        if (relative.parts[0] == "social") != (presentation == "social"):
+            raise ValueError("asset presentation differs from folder convention")
         path = (root / relative).resolve()
         if not path.is_relative_to(root) or not path.is_file():
             raise ValueError(f"indexed asset is missing: {relative}")
@@ -310,18 +398,23 @@ def select_verified_assets(
     return selected
 
 
+def _condition_label(cell: Mapping[str, Any]) -> str:
+    # Matrix cell IDs encode club, lean, curve, shaft-twist SD, and noise profile.
+    return str(cell["cell"])
+
+
 def render_cell_table(cells: Iterable[Mapping[str, Any]]) -> str:
     """Compact conditional outcome table for selected, labeled cells."""
     lines = [
-        "| Club / Lean | Pattern | Mean Carry / Target X (m) | X Bias / SD (m) | Y Bias / SD (m) | Target RMSE (m) | Supported / Attempted [95% CI] |",
+        "| Condition ID | Pattern | Mean Carry / Target X (m) | X Bias / SD (m) | Y Bias / SD (m) | Target RMSE (m) | Supported / Attempted [95% CI] |",
         "| --- | --- | ---: | ---: | ---: | ---: | ---: |",
     ]
     for cell in cells:
-        label = f"{cell['club_id']} / {cell['shaft_lean_deg']:g}°"
+        label = _condition_label(cell)
         for name in PATTERNS:
             item = cell["patterns"][name]
             if item["status"] != "Completed":
-                lines.append(f"| {label} | {name} | Not Attempted | — | — | — | — |")
+                lines.append(f"| {label} | {name} | {item['status']} | — | — | — | — |")
                 continue
             lines.append(
                 f"| {label} | {name} | {item['mean_carry_m']:.2f} / {cell['target_x_m']:.2f} | "
@@ -338,11 +431,16 @@ def render_cell_table(cells: Iterable[Mapping[str, Any]]) -> str:
 def render_effect_table(effects: Iterable[Mapping[str, Any]]) -> str:
     """Show direct paired curve interactions, never marginal mean subtraction."""
     lines = [
-        "| Contrast | Curved Pattern | B − A Relative SG (95% MC Interval) | Common Six / Attempted | Protocols |",
+        "| Contrast | Curved Pattern | B − A Relative SG (95% MC Interval) | Common Six / Attempted | Source Conditions (A → B) |",
         "| --- | --- | ---: | ---: | --- |",
     ]
     for effect in effects:
-        protocols = " → ".join(effect["source_protocols"])
+        conditions = " → ".join(
+            f"{protocol}: {cell}"
+            for protocol, cell in zip(
+                effect["source_protocols"], effect["source_cells"], strict=True
+            )
+        )
         for name, key in (
             ("Draw", "draw_minus_straight_change"),
             ("Fade", "fade_minus_straight_change"),
@@ -359,7 +457,7 @@ def render_effect_table(effects: Iterable[Mapping[str, Any]]) -> str:
             lines.append(
                 f"| {effect['comparison_kind']} | {name} | {interval} | "
                 f"{effect['common_six_n']:,} / {effect['total_n_per_population']:,} | "
-                f"{protocols} |"
+                f"{conditions} |"
             )
     lines.extend(
         (
@@ -378,7 +476,7 @@ def render_scoring_table(
 ) -> str:
     """Report hypothetical course context and absolute conditional SG means."""
     lines = [
-        "| Cell | Course Context | Pattern | Absolute Mean SG | Individual Scored / Attempted | Common Paired / Attempted |",
+        "| Cell | Course Context | Pattern | Absolute Mean SG (Common Three) | Individual Endpoint Supported / Attempted | Common-Three Scored / Attempted |",
         "| --- | --- | --- | ---: | ---: | ---: |",
     ]
     for cell_name, score in named_scores:
@@ -404,16 +502,17 @@ def render_scoring_table(
             lines.append(
                 f"| {cell_name} | {course} | {name} | "
                 f"{item['absolute_mean_strokes_gained']:+.4f} | "
-                f"{item['individual_supported_n']:,} / {total:,} | "
-                f"{score['paired_n']:,} / {total:,} |"
+                f"{item['individual_endpoint_supported_n']:,} / {total:,} | "
+                f"{item['common_three_scored_n']:,} / {total:,} |"
             )
     lines.extend(
         (
             "",
             "Absolute SG is a conditional simulated endpoint score against a historical-tour "
             "baseline. Driver tee and iron/wedge approach contexts are different "
-            "opportunities. The individual and common paired populations are distinct; "
-            "no values here are measured player strokes gained or per-round effects.",
+            "opportunities. The absolute SG mean uses the common three-pattern "
+            "intersection; individual endpoint support can be larger. "
+            "No values here are measured player strokes gained or per-round effects.",
         )
     )
     return "\n".join(lines)
@@ -423,15 +522,15 @@ def render_geometry_table(cells: Iterable[Mapping[str, Any]]) -> str:
     """Separate delivered geometry covariance from simulated endpoint quadrants."""
     selected = list(cells)
     lines = [
-        "| Club / Lean | Pattern | Nominal Face / Path (°) | Mean Delivered Face / Loft (°) | Face–Loft Covariance (°²) | Mean Population |",
+        "| Condition ID | Pattern | Nominal Face / Path (°) | Mean Delivered Face / Loft (°) | Face–Loft Covariance (°²) | Mean Population |",
         "| --- | --- | ---: | ---: | ---: | ---: |",
     ]
     for cell in selected:
-        label = f"{cell['club_id']} / {cell['shaft_lean_deg']:g}°"
+        label = _condition_label(cell)
         for name in PATTERNS:
             item = cell["patterns"][name]
             if item["status"] != "Completed":
-                lines.append(f"| {label} | {name} | Not Attempted | — | — | — |")
+                lines.append(f"| {label} | {name} | {item['status']} | — | — | — |")
                 continue
             face, loft = (
                 item["mean_delivered_face_deg"],
@@ -455,16 +554,16 @@ def render_geometry_table(cells: Iterable[Mapping[str, Any]]) -> str:
     lines.extend(
         (
             "",
-            "| Club / Lean | Pattern | Left-Long | Left-Short | Right-Long | Right-Short |",
+            "| Condition ID | Pattern | Left-Long | Left-Short | Right-Long | Right-Short |",
             "| --- | --- | ---: | ---: | ---: | ---: |",
         )
     )
     for cell in selected:
-        label = f"{cell['club_id']} / {cell['shaft_lean_deg']:g}°"
+        label = _condition_label(cell)
         for name in PATTERNS:
             item = cell["patterns"][name]
             if item["status"] != "Completed":
-                lines.append(f"| {label} | {name} | Not Attempted | — | — | — |")
+                lines.append(f"| {label} | {name} | {item['status']} | — | — | — |")
                 continue
             quadrants = item["quadrant_fractions"]
             lines.append(
