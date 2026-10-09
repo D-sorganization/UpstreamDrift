@@ -1,3 +1,8 @@
+# Active: MeshCat Camera Framing - NV-9 #11697
+
+- Branch `claude/nv-9-meshcat-framing-11697`; epic #11673. MeshCat kept the 75 deg three.js default FOV; `MeshcatPage` now sets the shared `golf_view_presets.VIEWER_FOV_Y_RAD` (0.7 rad, OpenSim's value) on entry and raises if the page has no viewer camera. New `golf_view_presets.framing`: `projected_extent` and `fit_distance_m` (15 % margin) with unit tests.
+- Open (engine host): verify the Drake/Pinocchio renders at 720p, feed the per-swing body bounding box from engine FK into `fit_distance_m` per view, and judge glyph legibility.
+
 # Active: Feedback Controls Planning — #11784
 
 Documentation branch `docs/feedback-controls-11784`; commit `SELF`. Read [Design](docs/development/feedback_controls/DESIGN.md), [Issue Dependencies](docs/development/feedback_controls/IMPLEMENTATION_PLAN.md) and [Turnover](docs/development/feedback_controls/TURNOVER.md). Goal: all-model six-engine parity culminating in muscle-driven OpenSim and independent excitation replay. Planning only; no new model/video is qualified. Next: F01 inventory/gate freeze, coordinate MOSAIC #11532 and parity #11605.
@@ -588,3 +593,50 @@ See the separate editable research reference and the extended aggregate `tangent
 ### Impact Parameters Package (GCV-15, 2026-10-07)
 
 `src/shared/python/impact_parameters/` extracts speed, attack angle, club path, face angle, face-to-path, dynamic and spin loft, swing plane and low point relative to an explicit `TargetFrame` (default recorded: Z-up, target -Y, ADR-0041). Definitions are in the package docstring for design-manual transfer via GCV-18. Tools delivery and D-plane are reached only through the fail-closed `tools_gateway.py` and agree with the UD definitions within 0.01 deg. Open: launch direction has no Tools provider; toe/high needs GCV-11 face geometry and GCV-13 ball; smash factor needs an impact model with calibration status; `rate_of_closure` `delivery_at` is not called directly.
+
+### F09b Native Observation Scoring (#11837)
+
+`src/engines/feedback_observation_qualification.py` scores supplied native
+marker positions against exact measured observations using F01's registry,
+F09a's position-only sampler, and the existing acceptance evaluator. A case
+requires a validated T01 `ExperimentReplayBundle`; identity includes its
+actual complete initial-state payload SHA-256, model-identity digest, and
+capability-declaration digest. Input values/grid and executed policy are
+cross-checked against F01 evidence before scoring. Reports preserve every
+required comparison row and all six required engines; scores do not promote
+unqualified rows or missing evidence.
+
+The focused synthetic suite covers all-six denominator retention, measured
+clock scoring, gate/configuration identity, stale-input rejection, and full
+initial-state payload binding. It does not establish native replay,
+cross-engine parity, muscle physiology, or private-capture acceptance. Resume
+from `docs/development/feedback_controls/F09B-OBSERVATION-QUALIFICATION.md`;
+rerun the focused command recorded there with the pinned Tools submodule.
+
+## Native Pinocchio Replay Handoff (#11900)
+
+Native RED f273e45f2f precedes implementation; twelve actual Pinocchio4.1 tests pass including saturated torque reproduction and fixture refinement. See docs/development/feedback_controls/F06_PINOCCHIO_NATIVE_TURNOVER.md and canonical chapter25 for equations, commands, failed setups, resource ownership and remaining full-model/capture gates. Shared native admission changes require actual Drake/MuJoCo regression evidence before publication. This child does not close F06 or the full matching epic.
+
+## F09e Pinocchio Native Marker FK (#11914)
+
+Branch `feat/11914-f09e-pinocchio-marker-fk` is stacked on F09d #11913 and
+merges the exact native replay provider head from #11906. Actual Pinocchio 4.1
+`nq=8`, `nv=7` marker FK passes with independent nonzero floating-base and
+frame-offset transforms. The public `PinocchioPhysicsEngine.get_link_transforms`
+frame index was made compatible with Pinocchio 4.1. Native receipts retain
+separate inventory and adapter identities, complete q/v, and unknown reset
+count; marker results remain unqualified. See
+`docs/development/feedback_controls/F09E-NATIVE-MARKER-FK.md` and chapter30.
+
+## F09f MyoSuite Native Excitation Replay (#11918)
+
+Branch `feat/11918-f09f-myosuite-native-replay` adds a distinct MyoSuite
+muscle-excitation consumer to the F09 native execution path. It writes exact
+post-mapping normalized excitation directly to native `data.ctrl`; it never
+calls Gym `step` or treats `[-1, 1]` actions as muscle excitation. MyoSuite
+3.0.0/MuJoCo 3.6.0 public elbow fixture passes in the owned Python 3.12 runtime.
+The built-in fixture does not bind required production driver/iron models;
+those rows and the six-engine denominator remain unqualified. See
+`docs/development/feedback_controls/F09F-MYOSUITE-NATIVE-EXCITATION.md` and
+canonical chapter31. The generic legacy four-value Gym step issue remains
+separate because this provider uses native plant stepping only.
