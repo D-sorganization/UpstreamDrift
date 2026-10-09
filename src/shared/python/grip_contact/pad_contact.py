@@ -107,6 +107,21 @@ class PadContactModel:
             raise ValueError("patch radius >= 0 and spin transition > 0 required")
 
 
+def grip_axis(
+    interface: GripInterface, pads: PadContactModel
+) -> tuple[np.ndarray, np.ndarray]:
+    """World grip-cylinder axis direction and the axis point nearest the right hand.
+
+    Postcondition: the direction is a unit vector (the right grip frame's x axis).
+    """
+    rot_r = np.asarray(interface.right.rotation, dtype=float)
+    axis = rot_r[:, 0]
+    point = np.asarray(interface.right.position_m) + rot_r @ (
+        pads.layout.axis_offset_grip_frame("R")
+    )
+    return axis, point
+
+
 #: Friction transition speed [m/s] of the regularised Coulomb law.
 FRICTION_TRANSITION_M_S = 1.0e-3
 

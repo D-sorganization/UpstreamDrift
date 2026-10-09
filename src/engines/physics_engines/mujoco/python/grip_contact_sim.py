@@ -42,7 +42,7 @@ from src.shared.python.grip_contact import (
     hand_frame_states,
 )
 from src.shared.python.grip_contact.contact_run import ContactRun, slip_from_frames
-from src.shared.python.grip_contact.pad_contact import PadContactModel
+from src.shared.python.grip_contact.pad_contact import PadContactModel, grip_axis
 from src.shared.python.grip_contact.parity import GripKineticsSeries
 
 ENGINE = "mujoco_contact"
@@ -79,11 +79,7 @@ def contact_mjcf(
         raise ValueError("friction_time_s must be positive")
     i = club.inertia_com_kg_m2
     full = (i[0, 0], i[1, 1], i[2, 2], i[0, 1], i[0, 2], i[1, 2])
-    rot_r = np.asarray(interface.right.rotation, dtype=float)
-    axis = rot_r[:, 0]
-    axis_point = np.asarray(interface.right.position_m) + rot_r @ (
-        pads.layout.axis_offset_grip_frame("R")
-    )
+    axis, axis_point = grip_axis(interface, pads)
     lo, hi = pads.cylinder.axial_range_m
     a0, a1 = axis_point + lo * axis, axis_point + hi * axis
     mu = pads.law.static_friction

@@ -100,7 +100,71 @@ class WeldClubKinematics:
         )
 
 
-class ClubOnBushings:
+class FreeClubPlantMixin:
+    """Shared hand and club state access for the free-club Drake plants.
+
+    Hosts provide ``plant``, ``context``, ``hand``, ``club``, ``_math``,
+    ``_mpl``, ``_q0`` and ``_v0``.
+    """
+
+    plant: Any
+    context: Any
+    hand: Any
+    club: Any
+    _math: Any
+    _mpl: Any
+    _q0: int
+    _v0: int
+
+    def set_hand(self, weld: RigidBodyState) -> None:
+        """Place the hand body at the weld club pose with its spatial velocity."""
+        pose = self._math.RigidTransform(
+            self._math.RotationMatrix(weld.rotation), weld.position_m
+        )
+        self.plant.SetFreeBodyPose(self.context, self.hand, pose)
+        self.plant.SetFreeBodySpatialVelocity(
+            self.context,
+            self.hand,
+            self._mpl.SpatialVelocity(weld.omega_rad_s, weld.velocity_m_s),
+        )
+
+    def set_club(self, x: np.ndarray) -> None:
+        """Set the club's 13 floating states (quaternion normalised)."""
+        q = np.array(x[:7], float)
+        q[:4] /= np.linalg.norm(q[:4])
+        positions = self.plant.GetPositions(self.context)
+        velocities = self.plant.GetVelocities(self.context)
+        positions[self._q0 : self._q0 + 7] = q
+        velocities[self._v0 : self._v0 + 6] = x[7:13]
+        self.plant.SetPositions(self.context, positions)
+        self.plant.SetVelocities(self.context, velocities)
+
+    def club_state(self) -> np.ndarray:
+        """The club's 13 floating states."""
+        q = self.plant.GetPositions(self.context)[self._q0 : self._q0 + 7]
+        v = self.plant.GetVelocities(self.context)[self._v0 : self._v0 + 6]
+        return np.concatenate([q, v])
+
+    def club_derivatives(self) -> np.ndarray:
+        """Time derivatives of the club's 13 floating states."""
+        xdot = self.plant.EvalTimeDerivatives(self.context).CopyToVector()
+        nq = self.plant.num_positions()
+        return np.concatenate(
+            [
+                xdot[self._q0 : self._q0 + 7],
+                xdot[nq + self._v0 : nq + self._v0 + 6],
+            ]
+        )
+
+    def place_club_at(self, weld: RigidBodyState) -> None:
+        """Place the free club at the weld pose (velocities are left unchanged)."""
+        pose = self._math.RigidTransform(
+            self._math.RotationMatrix(weld.rotation), weld.position_m
+        )
+        self.plant.SetFreeBodyPose(self.context, self.club, pose)
+
+
+class ClubOnBushings(FreeClubPlantMixin):
     """Dynamics plant: free hand body, free club, two native bushings."""
 
     def __init__(self, spec: dict[str, Any], interface: GripInterface) -> None:
@@ -154,46 +218,6 @@ class ClubOnBushings:
         self._mpl = _module("pydrake.multibody.math")
         self._q0 = body.floating_positions_start()
         self._v0 = body.floating_velocities_start_in_v()
-
-    def set_hand(self, weld: RigidBodyState) -> None:
-        """Place the hand body at the weld club pose with its spatial velocity."""
-        pose = self._math.RigidTransform(
-            self._math.RotationMatrix(weld.rotation), weld.position_m
-        )
-        self.plant.SetFreeBodyPose(self.context, self.hand, pose)
-        self.plant.SetFreeBodySpatialVelocity(
-            self.context,
-            self.hand,
-            self._mpl.SpatialVelocity(weld.omega_rad_s, weld.velocity_m_s),
-        )
-
-    def set_club(self, x: np.ndarray) -> None:
-        """Set the club's 13 floating states (quaternion normalised)."""
-        q = np.array(x[:7], float)
-        q[:4] /= np.linalg.norm(q[:4])
-        positions = self.plant.GetPositions(self.context)
-        velocities = self.plant.GetVelocities(self.context)
-        positions[self._q0 : self._q0 + 7] = q
-        velocities[self._v0 : self._v0 + 6] = x[7:13]
-        self.plant.SetPositions(self.context, positions)
-        self.plant.SetVelocities(self.context, velocities)
-
-    def club_state(self) -> np.ndarray:
-        """The club's 13 floating states."""
-        q = self.plant.GetPositions(self.context)[self._q0 : self._q0 + 7]
-        v = self.plant.GetVelocities(self.context)[self._v0 : self._v0 + 6]
-        return np.concatenate([q, v])
-
-    def club_derivatives(self) -> np.ndarray:
-        """Time derivatives of the club's 13 floating states."""
-        xdot = self.plant.EvalTimeDerivatives(self.context).CopyToVector()
-        nq = self.plant.num_positions()
-        return np.concatenate(
-            [
-                xdot[self._q0 : self._q0 + 7],
-                xdot[nq + self._v0 : nq + self._v0 + 6],
-            ]
-        )
 
     def wrench(self, side: str) -> tuple[np.ndarray, np.ndarray]:
         """Native bushing force on the club and moment about the club frame origin."""
@@ -253,11 +277,7 @@ def simulate_grip_bushing(
         times = times[times <= t_end_s + 1e-12]
     weld0 = kin.state(*spline.evaluate(float(times[0])))
     sim.set_hand(weld0)
-    pose = sim._math.RigidTransform(  # noqa: SLF001
-        sim._math.RotationMatrix(weld0.rotation),  # noqa: SLF001
-        weld0.position_m,
-    )
-    sim.plant.SetFreeBodyPose(sim.context, sim.club, pose)
+    sim.place_club_at(weld0)
     x0 = sim.club_state()
     x0[7:] = 0.0
     system = _system(sim, kin, spline)
