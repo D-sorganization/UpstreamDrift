@@ -1,0 +1,72 @@
+# Native Muscle Contact Replay
+
+## Scope and Evidence
+
+F07b (#11815, parent #11791) extends `replay_muscle_excitations` with an
+explicit `contact_force_paths` tuple. Default replay remains muscle and gravity
+only. Each listed absolute native component path must identify a registered
+`HuntCrossleyForce` or `SmoothSphereHalfSpaceForce`; arbitrary external forces,
+reserves, existing controllers and prescribed motion remain forbidden.
+
+The OpenSim model owns the contact calculation. The replay neither adds
+external contact inputs nor substitutes a shared rigid-body law. Complete named
+continuous initialization, the single cold-start Runge-Kutta-Merson integrator
+and time-only bounded excitation playback follow the native replay chapter.
+
+## Wrench Extraction and Identity
+
+The existing `OpenSimForceTorqueSource` reads native record values and transforms
+forces, moments and application points into its world Z-up frame. Returned
+`contact_wrenches` are immutable tuples of frozen wrench records, one tuple per
+output time. Each listed force must produce exactly one supported sphere/half-space
+wrench on the sphere body; the plane must be fixed to ground and the sphere
+must belong to a moving body. HuntCrossley parameters must reference exactly
+that pair, without additional silently omitted geometry. Body-to-body contact
+needs a separate policy with both affected bodies' evidence. Omitted geometry,
+ambiguous names, missing torque or nonfinite values
+cause failure; they do not become zero contact evidence.
+
+Policy version `native-muscle-replay/1.1.0` records the sorted path allowlist,
+native force class, contact frame, integrator accuracy and all prior drive
+policies. Model-byte identity covers material, friction, dissipation, smoothing,
+geometry and socket settings serialized in the model. Referenced resources and
+plugin/discrete state completeness still require separate qualification.
+
+## Synthetic Native Validation
+
+The regression model contains one compliant Millard muscle, a slider load and
+native smooth or HuntCrossley sphere/half-space contact opposing muscle contraction. Tests check
+positive native reaction direction, complete wrench evidence, deterministic
+repeat integration, a different trajectory when contact is removed, and state
+agreement within `2e-5` for integrator accuracy `1e-6` versus `1e-9` over `0.08 s`.
+These are fixture-specific numerical checks, not physiological acceptance limits.
+
+The fixture allows bounded compliant indentation. Smooth contact can exert
+small forces outside geometric contact because of its native smoothing law;
+full-body acceptance must quantify that leakage against a declared budget.
+The synthetic smooth fixture explicitly uses `constant_contact_force=1e-12`,
+`hertz_smoothing=5e4`, `hunt_crossley_smoothing=50`, `stiffness=1e7` and
+`dissipation=1`; native force at initial touch and gaps of `10`, `20`, `100`
+and `1000` micrometres is required below the fixture-specific `0.01 N` budget.
+The native smooth law's force at touch is about `0.000236 N`, but the
+`20` micrometre gap gives about `0.00504 N`; the gap sweep matters because
+leakage is nonmonotone.
+With the default regularizer `1e-5`, the same fixture produced about `41.9 N`
+at touch. Changing only smoothing slopes did not remove that bias. These
+failed trials are retained here to prevent treating native defaults as
+validated material parameters.
+The regularizer also affects near-zero-slip friction and native reported
+potential energy is an approximation across smoothing. Future friction and
+energy acceptance must check the executed law and integrated force/work;
+this zero-slip fixture does not qualify those properties.
+Strict zero force outside contact or rigid zero penetration cannot qualify a
+compliant law. Neither matching a force class name nor passing these tests
+establishes native HuntCrossley/smooth/shared-law parity.
+
+## Remaining Qualification
+
+Full-body muscle paths, region and wrist coverage, force/length/moment-arm
+validation, model-owned ground and grip mechanics, contact calibration and
+full-horizon private mocap matching remain open. Recorded diagnostic wrenches
+are outputs, never additional injected contact forces. Replay results do not
+constitute a scientific acceptance certificate.

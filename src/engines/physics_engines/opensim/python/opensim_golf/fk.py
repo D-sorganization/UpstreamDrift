@@ -112,12 +112,18 @@ def _ensure_position_realised(model: Any, state: Any) -> None:
     state has been realised at least to ``Position``. This helper is
     idempotent (re-realising is cheap) and isolates the SWIG call.
 
+    The OpenSim Python ``State`` binding has no ``isValid`` (issue #11796),
+    so an uninitialised state is detected by its empty subsystem list.
+
     Raises:
-        RuntimeError: If realisation fails. The most common cause is a
-            state that was not produced by ``model.initSystem()``.
+        RuntimeError: If the state has no subsystems or realisation fails.
+            The most common cause is a state that was not produced by
+            ``model.initSystem()``.
     """
-    if not state.isValid():
-        raise RuntimeError("provided state is not valid")
+    if state.getNumSubsystems() < 1:
+        raise RuntimeError(
+            "provided state has no subsystems; create it with model.initSystem()"
+        )
     try:
         model.realizePosition(state)
     except Exception as exc:  # noqa: BLE001 — surface OpenSim errors uniformly

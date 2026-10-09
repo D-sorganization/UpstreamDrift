@@ -15,9 +15,15 @@ function receipt = export_grip_wrench_fixture(repo, out_dir, opts)
 %     M_M = sum_h (r_h - r_M) x F_h + tau_L + tau_R,  r_M = (r_L + r_R) / 2
 %   against the logged MomentandCoupleLogs.EquivalentMidpointCoupleGlobal.
 %
-%   OPTS fields: stop_time (default 0.30 s), n_rows (default 31).
-%   Coefficients are the model workspace's own polynomial values, run through
-%   simulate_with_coefficients (the single sanctioned forward call).
+%   OPTS fields: n_rows (default 31), source and stop_time:
+%     source "model_workspace" (default): the model workspace's own
+%       polynomial values through simulate_with_coefficients for stop_time
+%       (default 0.30 s).  Those coefficients are out of the documented
+%       bounds and the run diverges (#11778): software consistency only.
+%     source "run102": the qualified run-102 replay
+%       (replay_returned102_r2025b with write_outputs=false, 0.85 s).
+%   The receipt records plausibility figures (peak hand force, clubhead
+%   speed) so a divergent run cannot pass as a physical swing.
 %
 %   Preconditions:
 %     - MATLAB R2025b only (asserted).
@@ -33,6 +39,10 @@ function receipt = export_grip_wrench_fixture(repo, out_dir, opts)
     end
     if ~isfield(opts, 'stop_time'); opts.stop_time = 0.30; end
     if ~isfield(opts, 'n_rows');    opts.n_rows    = 31;   end
+    if ~isfield(opts, 'source');    opts.source    = "model_workspace"; end
+    opts.source = string(opts.source);
+    assert(any(opts.source == ["model_workspace", "run102"]), ...
+        'BadSource: source must be "model_workspace" or "run102"');
     assert(opts.stop_time > 0, 'BadStopTime: stop_time must be > 0');
     assert(opts.n_rows >= 2, 'BadRows: n_rows must be >= 2');
 
@@ -50,20 +60,34 @@ function receipt = export_grip_wrench_fixture(repo, out_dir, opts)
     Simulink.fileGenControl('set', 'CacheFolder', cache, ...
         'CodeGenFolder', cache, 'createDir', true);
 
-    % The single sanctioned forward call (simulate_with_coefficients), fed
-    % the model workspace's own polynomial coefficients (its designed swing).
     model = 'GolfSwing3D_Kinetic';
-    load_system(model);
-    sim_opts = default_sim_options();
-    sim_opts.simulation_time = opts.stop_time;
-    sim_opts.fast_restart = false;
-    sim_opts.retain_raw_output = true;
-    sim_opts.stop_on_error = true;
-    sim_opts.verbosity = 'Silent';
-    theta = local_model_theta(model);
-    tic;
-    sim_out = simulate_with_coefficients(theta, sim_opts);
-    elapsed_s = toc;
+    if opts.source == "run102"
+        % The qualified run-102 replay (committed candidate, seed and solver
+        % settings, 60 um marker parity); evidence files are not rewritten.
+        evidence = fullfile(repo, 'docs', 'development', 'simscape_tour_matching', ...
+            'native_evidence', 'two_window_fit_9967_102');
+        addpath(evidence);
+        tic;
+        [run_report, sim_out] = replay_returned102_r2025b(repo, false);
+        elapsed_s = toc;
+        source_sha256 = local_sha256(fullfile(evidence, 'returned-candidate.json'));
+    else
+        % The single sanctioned forward call (simulate_with_coefficients), fed
+        % the model workspace's own polynomial coefficients.  These are out of
+        % the documented bounds and the run diverges (#11778).
+        load_system(model);
+        sim_opts = default_sim_options();
+        sim_opts.simulation_time = opts.stop_time;
+        sim_opts.fast_restart = false;
+        sim_opts.retain_raw_output = true;
+        sim_opts.stop_on_error = true;
+        sim_opts.verbosity = 'Silent';
+        theta = local_model_theta(model);
+        tic;
+        sim_out = simulate_with_coefficients(theta, sim_opts);
+        elapsed_s = toc;
+        source_sha256 = local_sha256_bytes(typecast(theta(:), 'uint8'));
+    end
     assert(sim_out.solver_status == "success", 'SimFailed: %s', sim_out.solver_status);
 
     csb = sim_out.raw_output.CombinedSignalBus;
@@ -116,9 +140,15 @@ function receipt = export_grip_wrench_fixture(repo, out_dir, opts)
     receipt.matlab_version = version;
     receipt.model = model;
     receipt.model_sha256 = local_sha256(fullfile(model_dir, [model '.slx']));
-    receipt.coefficient_source = 'model_workspace';
-    receipt.theta_sha256 = local_sha256_bytes(typecast(theta(:), 'uint8'));
-    receipt.stop_time_s = opts.stop_time;
+    receipt.coefficient_source = char(opts.source);
+    receipt.source_sha256 = source_sha256;
+    receipt.stop_time_s = table_all.time(end);
+    if opts.source == "run102"
+        receipt.run102_whole_rms_mm = run_report.metrics.whole_rms_mm;
+    end
+    % Plausibility figures: a divergent run must not pass as a swing.
+    receipt.hand_force_max_n = max(vecnorm([f_l; f_r], 2, 2));
+    receipt.clubhead_speed_max_mps = max(vecnorm(sim_out.v_clubhead, 2, 2));
     receipt.sim_wall_clock_s = elapsed_s;
     receipt.samples_logged = n_all;
     receipt.fixture_rows = numel(idx);
@@ -135,7 +165,7 @@ function receipt = export_grip_wrench_fixture(repo, out_dir, opts)
     cleaner = onCleanup(@() fclose(fid));
     fprintf(fid, '%s\n', jsonencode(receipt, 'PrettyPrint', true));
     fprintf('%s\n', jsonencode(receipt, 'PrettyPrint', true));
-    close_system(model, 0);
+    if bdIsLoaded(model); close_system(model, 0); end
 end
 
 function theta = local_model_theta(model)

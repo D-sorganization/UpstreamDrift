@@ -20,6 +20,7 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 
 from ._recorder_analysis import _AnalysisMixin
 from ._recorder_buffers import _BuffersMixin
+from ._recorder_ground_reaction import _GroundReactionMixin
 from ._recorder_playback import _PlaybackMixin
 from ._recorder_recording import _RecordingMixin
 
@@ -36,6 +37,7 @@ class GenericPhysicsRecorder(
     _RecordingMixin,
     _AnalysisMixin,
     _PlaybackMixin,
+    _GroundReactionMixin,
 ):
     """Records simulation data from a PhysicsEngine.
 
@@ -192,6 +194,7 @@ class GenericPhysicsRecorder(
             # Legacy/Post-hoc storage
             "counterfactuals": {},  # Map name -> (times, data)
         }
+        self._reset_ground_reaction()
 
     def _initialize_array_buffers(self, q: np.ndarray, v: np.ndarray) -> None:
         """Initialize array buffers with proper dimensions on first record.

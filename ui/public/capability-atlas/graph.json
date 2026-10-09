@@ -79,7 +79,7 @@
       "tiles": [
         "ground_reaction_plots"
       ],
-      "notes": "GCV-5 (#11711): one plot series (biomechanics.ground_reaction_plot_model, built from the GCV-1 GroundReactionSeries) feeds the PyQt6 Ground Reaction Plots tile (six-panel sheet from plotting.renderers.ground_reaction), GET /api/analysis/ground-reaction and the web GroundReactionCharts on the Analysis Tools page, so both surfaces draw the same panels with address/top/impact/finish markers. CoP and load share are null below 10 N of vertical load; an engine without ground reaction (Simscape until GCV-3) is shown as unavailable with its reason, never as zero.",
+      "notes": "GCV-5 (#11711): one plot series (biomechanics.ground_reaction_plot_model, built from the GCV-1 GroundReactionSeries) feeds the PyQt6 Ground Reaction Plots tile (six-panel sheet from plotting.renderers.ground_reaction), GET /api/analysis/ground-reaction and the web GroundReactionCharts on the Analysis Tools page, so both surfaces draw the same panels with address/top/impact/finish markers. CoP and load share are null below 10 N of vertical load; an engine without ground reaction (Simscape until GCV-3) is shown as unavailable with its reason, never as zero. GCV-2 (#11708): MuJoCo, MyoSuite, Drake and OpenSim emit the contact:grf_/free_moment_/moment_com_ breakdown from their native contacts, Pinocchio from caller-supplied shared-contact-law samples, Simscape reports unavailable; GCV-6 (#11712): every CoP routes through biomechanics.ground_reaction.",
       "id": "analysis.ground_reaction"
     },
     {
@@ -774,13 +774,13 @@
       "title": "Frankenstein drag-and-drop assembly with typed attachment ports",
       "status": "gap",
       "pyqt": "src/tools/model_explorer/frankenstein_editor/assembly_panel.py",
-      "api": null,
+      "api": "src/api/routes/model_explorer_assembly.py",
       "web": null,
       "issue": 11661,
       "reason": null,
       "pending_decision": false,
       "tiles": [],
-      "notes": "PyQt6 library tree + assembly canvas: drop parts on compatible typed ports with live composition validation, undo/redo and 3D preview refresh (CMB-9, #11660; ports and catalog CMB-8, #11659). Web drag-and-drop is CMB-10 (#11661).",
+      "notes": "PyQt6 library tree + assembly canvas: drop parts on compatible typed ports with live composition validation, undo/redo and 3D preview refresh (CMB-9, #11660; ports and catalog CMB-8, #11659). Stateless REST over the same AssemblySession (parts, plan replay + drop evaluation, URDF/MJCF export) landed in CMB-10 slice 1; the web drag-and-drop canvas is still open (CMB-10, #11661).",
       "id": "tools.model_explorer.frankenstein_assembly"
     },
     {
@@ -3132,7 +3132,7 @@
   "inputs": {
     "src/config/models.yaml": "e11682df79d7467f1eba9579d835f5d7019bfd7eb09cf81c14e22bd08d0bf844",
     "src/config/launcher_manifest.json": "1ae28f872b54c237440fcaacec40b735b93a7b80d710adc9228ef671b7831032",
-    "src/config/feature_parity.json": "8266dad1c1ecff21acda1890fa9068d6e6fea1000c0ff8d3c13a49e1a2d6a9af",
+    "src/config/feature_parity.json": "78d2ce935fc24bbdc7b3978ff9f82f68c2354deb495e861220d5c69d72386268",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }
