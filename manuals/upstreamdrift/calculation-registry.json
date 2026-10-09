@@ -139,6 +139,11 @@
       "id": "UP-D1-native-muscle-contact-inventory",
       "owner": "UpstreamDrift issue #11815",
       "resolution": "Inventory explicit native contact policies in tour_matching/muscle_replay.py and chapters/17-native-muscle-contact.qmd. Actual synthetic OpenSim smooth sphere/half-space tests establish native wrench direction, independent replay repeatability, contact-dependent motion and numerical refinement only. Contact calibration, smoothing leakage budgets, HuntCrossley law parity, full-body anatomy/grip and full-horizon private mocap qualification remain open."
+    },
+    {
+      "id": "UP-D1-native-moco-initial-bindings-inventory",
+      "owner": "UpstreamDrift issue #11791",
+      "resolution": "Inventory explicit immutable Moco continuous-state/initial/scalar-control bounds before solver initialization and guess creation in moco_initial_bindings.py, moco_tracking.py and chapter35. Actual OpenSim4.6 native tests and publicAPI 10/20/40/80-mesh optimization with independent F06 replay, tighter integration and control-knot-preserving common101-probe native teacher diagnostics and serialized T01 bundles establish a synthetic executable bridge only. Activation collocation-versus-replay disagreement remains .0000929729 at80 intervals despite small marker error; position and marker error are not monotone. Earlier dense diagnostics are superseded while original-grid state errors remain valid; teacher state/control recovery is a distinct unqualified identification claim. Existing controllers, prescribed PositionMotion and multichannel actuators require separate policies. Complete native state, production anatomy/passive physiology, capture calibration/heldout validation, own contact/grip, full-horizon replay, all required model variants and six-engine parity remain open. Canonical coverage and publication remain blocked."
     }
   ],
   "calculations": []

@@ -10452,3 +10452,17 @@ The F06c adapter uses the existing public native ABA/RK4 integration kernel with
 ## Native Muscle Experiment Bundle (#11908)
 
 The native OpenSim T01 seam binds all admitted continuous state, registered discrete/modeling options, physical units, source/loaded/provider identity and cold-start policy. A reviewed fixed-path Millard/Slider-or-Pin subset executes owned frozen model bytes through the existing kernel. Canonical chapter27 and F07_MUSCLE_BUNDLE_TURNOVER preserve exclusions; native geometry, full-body constraints/contact, capture matching and required parity remain unqualified.
+
+## Native Moco Initial-State Bindings (#11949)
+
+The optional `MocoInitialBindings` contract in the existing OpenSim tracking
+provider binds complete caller-declared continuous state, scalar-control bounds
+and fixed initial values before native solver initialization and guess creation.
+Unknown/omitted states or controls, nonfinite/boolean values, unsupported existing
+controllers/PositionMotion and multi-control actuators fail before optimization.
+Existing callers retain their previous API behavior. Canonical chapter35 and
+`docs/development/moco_state_binding_11791` preserve actual OpenSim4.6 native tests,
+four-mesh collocation versus independent replay evidence, exact control knots,
+failed attempts and input nonidentifiability. Discrete/hidden native state,
+production anatomy, contact/grip, capture and physiological acceptance remain
+separate open gates. The per-child fragment owns later PR-keyed log collation.
