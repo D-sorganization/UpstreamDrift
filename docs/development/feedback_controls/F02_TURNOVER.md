@@ -1,9 +1,10 @@
 # F02 Distributed Feedback Turnover (#11786)
 
 F02 adds a phase-gated controller core on `feat/f02-distributed-feedback-11786`
-in the isolated `UpstreamDrift-f02-11786` worktree. This branch is stacked on
-F01 commit `f994983da9` and PR #11808 until F01 merges. The F02 PR body is
-the authoritative record of final commit, checks and handoff state.
+in the isolated `UpstreamDrift-f02-11786` worktree. F01 PR #11808 has merged;
+F02 PR #11816 now targets main. This integration includes main through the
+constraint-observer squash `2e3c79b4808f334b06dab5828db0d22dd7f2f80a`.
+The F02 PR body is the authoritative final commit/checks/handoff record.
 
 The controller consumes an existing MOSAIC TVLQR gain sequence and frozen
 nominal actuator torques. It records feedforward, feedback, requested and
@@ -33,3 +34,14 @@ Tools T01 and independently replayed under F01/F09 gates. State-dependent
 transmission and muscle excitation require dedicated controllers/input
 schemas; do not relabel this direct torque path as muscle control. The
 calculation registry remains blocked for release.
+
+## Main Integration Validation
+
+The main integration preserves the controller and its behavior-test bytes.
+Both SPEC sections and all canonical manual chapters/inventory blockers were
+retained; the governance test uses main's live canonical-source count. The
+vendored Tools checkout matches the merged-main gitlink `2e7665111b06f92ffbfe178b92d74d6a81c95388`.
+The canonical divergence inventory is regenerated without attribution edits.
+Twenty-seven focused tests passed in the installed native MuJoCo environment,
+including the real hinge step and eleven manual-governance cases. This does not
+extend the original synthetic/one-joint scope or qualify full-model parity.

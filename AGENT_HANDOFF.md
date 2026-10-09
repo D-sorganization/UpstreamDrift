@@ -1,3 +1,18 @@
+# Active: Native OpenSim Geometry — #11903
+
+Scoped F07/F08 branch `feat/feedback-native-markers-11903`. Read canonical
+`manuals/upstreamdrift/chapters/26-native-opensim-geometry.qmd` and
+`docs/development/feedback_controls/F07_NATIVE_GEOMETRY_TURNOVER.md` before
+continuing. Explicit native frame/station geometry and bounded shared IK are
+implemented; metadata-only physical placeholders fail closed. The unchanged
+520-muscle candidate's three-pose pelvis probe remains unqualified and reaches
+its source rotation bound. Preserve native replay, anatomy and registration gates.
+
+# Active: MeshCat Camera Framing - NV-9 #11697
+
+- Branch `claude/nv-9-meshcat-framing-11697`; epic #11673. MeshCat kept the 75 deg three.js default FOV; `MeshcatPage` now sets the shared `golf_view_presets.VIEWER_FOV_Y_RAD` (0.7 rad, OpenSim's value) on entry and raises if the page has no viewer camera. New `golf_view_presets.framing`: `projected_extent` and `fit_distance_m` (15 % margin) with unit tests.
+- Open (engine host): verify the Drake/Pinocchio renders at 720p, feed the per-swing body bounding box from engine FK into `fit_distance_m` per view, and judge glyph legibility.
+
 # Active: Feedback Controls Planning — #11784
 
 Documentation branch `docs/feedback-controls-11784`; commit `SELF`. Read [Design](docs/development/feedback_controls/DESIGN.md), [Issue Dependencies](docs/development/feedback_controls/IMPLEMENTATION_PLAN.md) and [Turnover](docs/development/feedback_controls/TURNOVER.md). Goal: all-model six-engine parity culminating in muscle-driven OpenSim and independent excitation replay. Planning only; no new model/video is qualified. Next: F01 inventory/gate freeze, coordinate MOSAIC #11532 and parity #11605.
