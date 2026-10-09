@@ -33,6 +33,7 @@ from src.tools.native_viewer_export.core import (
     Image8,
     OverlayFeed,
     SwingInput,
+    view_lookats,
 )
 
 _CAPSULE_RGBA = [0.75, 0.78, 0.85, 1.0]
@@ -181,13 +182,14 @@ class PinocchioMeshcatBackend:
             else None
         )
         with MeshcatPage(node.url(), settings.width, settings.height, 3000) as page:
-            for k in indices:
+            looks = view_lookats(settings, indices, overlay)
+            for pos, k in enumerate(indices):
                 set_state(k)
                 if glyphs is not None and overlay is not None:
                     glyphs.update(overlay.glyphs_at(k))
                 tiles: dict[str, Image8] = {}
                 for view in settings.views:
-                    cam = meshcat_camera(view, settings.lookat_m, settings.distance_m)
+                    cam = meshcat_camera(view, looks[view][pos], settings.distance_m)
                     node["/Cameras/default/rotated/<object>"].set_property(
                         "position", list(cam.position_three)
                     )

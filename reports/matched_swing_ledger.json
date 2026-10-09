@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-08T12:33:16Z",
+  "generated_at": "2026-10-09T01:18:33Z",
   "rows": [
     {
       "acceptance": null,
@@ -414,6 +414,52 @@
       "reason": "Unrecognized directory path structure",
       "receipt_path": "docs/development/full_body_models/evidence/grip_kinetics/receipt_before_fix.json",
       "sha256": "1fdb758db8d68462a28990d3e6f56c315a8cb1c341a31ec58a07876f922a563d"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": "docs/development/full_body_models/evidence/grip_kinetics/driver_bushing_series.npz"
+      },
+      "candidate_sha": "a376e6889b2b9d3b05a0b2f110f386c83f17f4ec0c94c9f4b9289a887ba4643e",
+      "capture": "a",
+      "engine": "unknown",
+      "horizon_s": null,
+      "lane": "unclassified",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": "Unrecognized directory path structure",
+      "receipt_path": "docs/development/full_body_models/evidence/grip_kinetics/receipt_full_swing_driver.json",
+      "sha256": "d1f8891bee7f104c97968c96122028b1af32dab53e16dfdaabcbe3ca27a2e468"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": "docs/development/full_body_models/evidence/grip_kinetics/driver_bushing_series.npz"
+      },
+      "candidate_sha": "b75a9c056633c41cc400fe1a0b64253669028abb8edb27d6fe26735b10659c5a",
+      "capture": "b",
+      "engine": "unknown",
+      "horizon_s": null,
+      "lane": "unclassified",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": "Unrecognized directory path structure",
+      "receipt_path": "docs/development/full_body_models/evidence/grip_kinetics/receipt_full_swing_iron7.json",
+      "sha256": "4833e8757e5c4d90d6c57c37d667e2d365f81dfffbf3bc3b33dbf5988df2c24b"
     },
     {
       "acceptance": null,
@@ -5680,5 +5726,5 @@
     }
   ],
   "schema_version": "1.0.0",
-  "total_receipts": 145
+  "total_receipts": 147
 }

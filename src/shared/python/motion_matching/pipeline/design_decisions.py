@@ -28,6 +28,7 @@ EXPECTED_DECISION_TITLES = [
     "MJX Differentiable Optimisation (Windowed)",
     "Address Foot Progression (OSV-4, #11730)",
     "Compliant Bushing Grip Model (OSV-7 Phase 1)",
+    "Impact-Phase Bushing Grip From the Closure-Consistent Fits (OSV-7)",
 ]
 
 
