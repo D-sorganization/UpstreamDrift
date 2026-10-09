@@ -8,6 +8,11 @@ independent executor. Initialization 1.1 preserves absolute native epochs with
 measured relative clocks for suffix replay. Chapter 38 and F09i turnover govern
 the pathway. Three-step production probes do not qualify full capture,
 physiology, muscle-only drive, six-engine parity or the muscular OpenSim endpoint.
+Separate original-source nominal full-duration rollouts replay exactly for both
+variants but retain unqualified contact/constraint diagnostics. Invocation-local
+zero-filled fingerprint scratch preserves all per-step integrity checks while
+avoiding allocation/copy overhead. Python/Rust installs must match the actual
+vendored Tools revision, with feature-pin authority stated explicitly.
 
 ## Native Muscle Replay Development Boundary (F07, #11791)
 

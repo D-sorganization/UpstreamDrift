@@ -30,7 +30,7 @@ repository = "https://github.com/D-sorganization/UpstreamDrift"
 # Shared kernel from D-sorganization/Tools repository.
 # Pin the git revision so a clean UpstreamDrift clone can build Rust crates
 # without requiring a sibling Tools checkout or ad hoc CI symlinks.
-tools-core = { git = "https://github.com/D-sorganization/Tools.git", rev = "2e7665111b06f92ffbfe178b92d74d6a81c95388" }
+tools-core = { git = "https://github.com/D-sorganization/Tools.git", rev = "e775bce870690bba1b56f3d6297513003fb7dbac" }
 pyo3 = { version = "0.24", features = ["extension-module"] }
 wasm-bindgen = "0.2"
 serde-wasm-bindgen = "0.6"

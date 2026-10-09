@@ -52,7 +52,37 @@ in the workspace's feedback-controls planning evidence directory.
 
 ## Remaining Acceptance
 
-These native probes cover three production steps, not full swing motion.
+An additional original-source nominal viability experiment completed all 1,814
+driver and 1,828 iron native steps with zero motor commands and constant 0.05
+muscle commands. Both serialized T01 replays matched complete states, commands
+and clocks exactly, with no native warnings. This uses capture duration only.
+Contact penetration near 0.032 m and large mixed-unit native constraint
+residuals remain unqualified. Retained receipts are in planning's
+`f09i_native_horizon_viability` folder; the initial three-step test campaign and
+these full-duration nominal experiments remain distinct.
+
+The driver exposed substantial fingerprint cost: its native MJB is 29,487,449
+bytes and is checked before and after every step. Invocation-local zero-filled
+scratch and immediate memory-view hashing preserve every check while avoiding
+allocation and bytes-copy overhead. An actual native serialization-only
+microbenchmark measured 0.9078 s versus 0.5152 s for twenty operations with
+identical hashes; no full-run speedup is inferred. Six native 3.8 regression
+cases followed API RED to GREEN for external-byte equivalence, mutation
+detection and invalid storage. Existing full-duration receipts used the original
+producer, before this optimization. Current actual MyoSuite 3.0/MuJoCo 3.6
+revalidation after the optimization and exporter refactor passed 76 tests with
+zero failures, errors or skips.
+
+PR #11996 CI exposed inherited Python and Rust install pins that disagreed with
+the vendored Tools source and two export architecture-budget violations. Both
+pins now match the existing feature gitlink; this does not claim main authority.
+Resource admission is extracted into a single helper and registration imports
+the reviewed native module directly. The initial local architecture check ran
+before commit and therefore did not inspect the uncommitted exporter. The exact
+CI failures and locally reproduced dependency RED are retained in planning.
+
+The integration test campaign covers three production steps; the separate
+full-duration nominal experiments do not fit the captured swing motion.
 Close neither F09 nor the epic from them. All six ecosystems and all 17 required
 rows remain in scope. Complete capture horizon, trustworthy anatomical source,
 contact/grip calibration, measured motion fit, muscle-only assistance and the

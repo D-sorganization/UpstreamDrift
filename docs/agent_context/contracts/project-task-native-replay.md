@@ -36,6 +36,9 @@ commands, then freeze and verify existing interchange artifacts. A fresh native
 provider independently restores the admitted state; callbacks, changed source,
 wrong native fields/identities and mismatched state histories fail admission.
 Do not call SDK hooks or introduce another solver inside independent replay.
+Model fingerprint scratch is owned by one recording invocation, zero-filled
+before every save, and hashed immediately. Exact size, dtype, contiguous layout
+and write access are required; buffer reuse does not remove a per-step check.
 
 ## Evidence
 
@@ -44,6 +47,8 @@ and iron probes, independent full-state replay and adversarial provenance.
 Portable/native-unavailable skips do not qualify provider availability. The
 canonical calculation reference is manual chapter 38. All 17 rows, six
 ecosystems, full capture horizon and muscular OpenSim acceptance remain open.
+Separate original-source nominal full-duration driver/iron runs replay exactly,
+but do not fit capture motion or qualify contact/constraint readiness.
 
 ## Rationale
 

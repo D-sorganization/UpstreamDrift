@@ -52,23 +52,12 @@ def freeze_project_task_history(
     from src.engines.myosuite_project_task_producer import _admit_task
     from src.engines.physics_engines.myosuite.python.native_direct_model_replay import (
         compiled_actuator_profile_bytes,
-        resource_closure_sha256,
     )
 
     _admit_task(task, mj)
     _validate_history(task, history, mj)
     contracts = native_replay_contract_types()
-    path = Path(task.model_path).resolve(strict=True)
-    closure = resource_closure_sha256(
-        resource_root,
-        path,
-        resources,
-        expected_loaded_native_model_sha256=history.loaded_native_model_sha256,
-    )
-    if closure != history.resource_closure_sha256:
-        raise ValueError(
-            "export source resource closure differs from the executed producer"
-        )
+    path, closure = _validated_resource_closure(task, history, resource_root, resources)
     environment = create_native_direct_model(str(path))
     try:
         model, data = environment.model, environment.data
@@ -89,7 +78,6 @@ def freeze_project_task_history(
             closure,
             model_id,
             variant_id,
-            mj,
         )
         schema, values = _initial_state(data, history.integration_states[0], contracts)
         identity = contracts.ModelIdentity(
@@ -139,6 +127,31 @@ def freeze_project_task_history(
         return artifact
     finally:
         environment.close()
+
+
+def _validated_resource_closure(
+    task: Any,
+    history: ProjectTaskCommandHistory,
+    resource_root: Path,
+    resources: tuple[Any, ...],
+) -> tuple[Path, str]:
+    """Require the exported resources to match the producer's original closure."""
+    from src.engines.physics_engines.myosuite.python.native_direct_model_replay import (
+        resource_closure_sha256,
+    )
+
+    path = Path(task.model_path).resolve(strict=True)
+    closure = resource_closure_sha256(
+        resource_root,
+        path,
+        resources,
+        expected_loaded_native_model_sha256=history.loaded_native_model_sha256,
+    )
+    if closure != history.resource_closure_sha256:
+        raise ValueError(
+            "export source resource closure differs from the executed producer"
+        )
+    return path, closure
 
 
 def _validate_history(task: Any, history: ProjectTaskCommandHistory, mj: Any) -> None:
@@ -241,8 +254,9 @@ def _registration(
     closure: str,
     model_id: str,
     variant_id: str,
-    mj: Any,
 ) -> Any:
+    import mujoco as mj
+
     from src.engines.physics_engines.myosuite.python.native_direct_model_replay import (
         DirectModelRegistration,
         actuator_law_manifest_sha256,

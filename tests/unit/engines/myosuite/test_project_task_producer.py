@@ -23,6 +23,62 @@ from src.engines.myosuite_project_task_producer import (
 pytestmark = pytest.mark.unit
 
 
+def _fingerprint_native_runtime() -> Any:
+    mj = pytest.importorskip("mujoco")
+    if mj.__version__ not in ("3.6.0", "3.8.0"):
+        pytest.skip("native fingerprint evidence requires reviewed MuJoCo 3.6/3.8")
+    return mj
+
+
+def test_native_fingerprint_reuse_preserves_external_bytes_and_detects_mutation() -> (
+    None
+):
+    mj = _fingerprint_native_runtime()
+    from src.engines.myosuite_project_task_producer import _model_sha256
+
+    model = mj.MjModel.from_xml_string(
+        '<mujoco><worldbody><body><joint/><geom type="sphere" size=".1" mass="1"/>'
+        "</body></worldbody></mujoco>"
+    )
+    size = mj.mj_sizeModel(model)
+    scratch = np.full(size, 255, dtype=np.uint8)
+    reference = np.zeros(size, dtype=np.uint8)
+    mj.mj_saveModel(model, buffer=reference)
+    original = hashlib.sha256(reference.tobytes()).hexdigest()
+    assert _model_sha256(mj, model, scratch) == original
+    assert _model_sha256(mj, model) == original
+    model.body_mass[1] = 2.0
+    reference.fill(0)
+    mj.mj_saveModel(model, buffer=reference)
+    changed = hashlib.sha256(reference.tobytes()).hexdigest()
+    assert changed != original
+    assert _model_sha256(mj, model, scratch) == changed
+    model.body_mass[1] = 1.0
+    assert _model_sha256(mj, model, scratch) == original
+
+
+@pytest.mark.parametrize("invalid", ["short", "dtype", "rank", "strided", "readonly"])
+def test_native_fingerprint_rejects_unsafe_scratch_storage(invalid: str) -> None:
+    mj = _fingerprint_native_runtime()
+    from src.engines.myosuite_project_task_producer import _model_sha256
+
+    model = mj.MjModel.from_xml_string("<mujoco/>")
+    size = mj.mj_sizeModel(model)
+    scratch = np.zeros(size, dtype=np.uint8)
+    if invalid == "short":
+        scratch = scratch[:-1]
+    elif invalid == "dtype":
+        scratch = np.zeros(size, dtype=np.int8)
+    elif invalid == "rank":
+        scratch = scratch.reshape(1, -1)
+    elif invalid == "strided":
+        scratch = np.zeros(size * 2, dtype=np.uint8)[::2]
+    else:
+        scratch.setflags(write=False)
+    with pytest.raises(ValueError, match="scratch"):
+        _model_sha256(mj, model, scratch)
+
+
 def test_mixed_action_bounds_preserve_unlimited_motors_and_limited_muscles() -> None:
     model = SimpleNamespace(
         nu=3,

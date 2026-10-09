@@ -241,7 +241,8 @@ def record_project_task_commands(
         raise ValueError("actions must contain nonempty ordered native actuator rows")
     if not np.isfinite(actions).all():
         raise ValueError("all project task actions must be finite")
-    model_digest = _model_sha256(mj, model)
+    fingerprint_scratch = np.zeros(mj.mj_sizeModel(model), dtype=np.uint8)
+    model_digest = _model_sha256(mj, model, fingerprint_scratch)
     initial = _read_native_state(mj, model, data)
     states = [initial]
     times = [float(data.time)]
@@ -250,7 +251,7 @@ def record_project_task_commands(
     for action in actions:
         _admit_task(task, mj)
         require_no_global_mujoco_callbacks(mj)
-        if _model_sha256(mj, model) != model_digest:
+        if _model_sha256(mj, model, fingerprint_scratch) != model_digest:
             raise ValueError("project task changed the admitted native model")
         expected = np.clip(action, low, high)
         task.step(action)
@@ -261,7 +262,7 @@ def record_project_task_commands(
         _require_native_step_clock(
             times[-1], float(data.time), float(model.opt.timestep)
         )
-        if _model_sha256(mj, model) != model_digest:
+        if _model_sha256(mj, model, fingerprint_scratch) != model_digest:
             raise ValueError("SDK task mutated the admitted native model")
         applied.append(data.ctrl.copy())
         states.append(_read_native_state(mj, model, data))
@@ -317,10 +318,24 @@ def _admit_task(task: Any, mj: Any) -> None:
         raise ValueError("project action bounds differ from compiled native limits")
 
 
-def _model_sha256(mj: Any, model: Any) -> str:
-    payload = np.zeros(mj.mj_sizeModel(model), dtype=np.uint8)
+def _model_sha256(mj: Any, model: Any, payload: NDArray[np.uint8] | None = None) -> str:
+    """Hash zero-initialized native bytes, optionally using invocation-local scratch."""
+    size = mj.mj_sizeModel(model)
+    if payload is None:
+        payload = np.zeros(size, dtype=np.uint8)
+    elif (
+        not isinstance(payload, np.ndarray)
+        or payload.dtype != np.uint8
+        or payload.shape != (size,)
+        or not payload.flags.c_contiguous
+        or not payload.flags.writeable
+        or payload.nbytes != size
+    ):
+        raise ValueError("native model fingerprint scratch has unsafe storage")
+    else:
+        payload.fill(0)
     mj.mj_saveModel(model, buffer=payload)
-    return hashlib.sha256(payload.tobytes()).hexdigest()
+    return hashlib.sha256(payload.data).hexdigest()
 
 
 def _verify_source_files(binding: ProjectModelSourceBinding) -> None:

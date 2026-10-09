@@ -1,5 +1,14 @@
 # Active: Project MyoSuite Task and Independent Replay — F09i #11983
 
+Draft PR #11996 is based on surviving parent #11857 after intermediate parent
+merges; it remains unarmed. Exact original-source nominal driver/iron duration
+replay now passes with poor contact/constraint diagnostics retained. CI exposed
+install-pin mismatches and two exporter architecture-budget violations; those
+are corrected locally. The fingerprint scratch optimization retains every
+per-step check and has six native 3.8 RED-to-GREEN storage/hash regressions.
+Actual SDK revalidation after these local changes passed 76 tests with zero
+failures, errors or skips; all five central pre-PR gates also pass.
+
 Branch `feat/f09i-myosuite-task-producer-11983` stacks on published F01f source
 `73319871c74dbafeefc6548081e606cadc61de54`; parent merges and actual Tools main
 authority remain required. Read canonical chapter 38 and

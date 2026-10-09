@@ -98,6 +98,23 @@ Only 3.6 omits its nonexistent `actuator_armature`, `actuator_damping` and
 absent values are never manufactured. Shared schema identity does not imply
 that different native runtimes or compiled models are physically interchangeable.
 
+### Model Fingerprint Scratch Ownership
+
+Every pre-step and post-step compiled-model check remains in place. Recording
+owns one writable, contiguous, one-dimensional `uint8` scratch array of exactly
+the current native serialized-model size. It zeros the array before every save
+and hashes its memory view immediately after serialization. Scratch is neither
+shared across runs nor retained in history. The optional buffer rejects invalid
+storage instead of silently copying it. This preserves zero-padding semantics
+and avoids repeated allocation and the extra bytes copy.
+
+A production-driver serialization microbenchmark on MuJoCo 3.6 used a
+29,487,449-byte model. Twenty original allocation/save/copy/hash operations took
+0.9078 s; twenty zero-fill/save/view/hash operations took 0.5152 s, with identical
+digests throughout. This measures fingerprint overhead only. It does not
+establish full-rollout or optimization speed. Native regression checks compare
+prefilled scratch against external MJB bytes and detect model-mass changes.
+
 ## Evidence and Reproduction
 
 The 2026-10-09 actual MyoSuite 3.0.0/MuJoCo 3.6.0 campaign passed 70 tests with
@@ -108,6 +125,10 @@ law/channel mutations, malformed histories, unexecuted transitions and large
 epoch clock failures. Earlier RED attempts are retained. Separate MuJoCo 3.8
 regression evidence is 44 passes and three explicitly unavailable fixture or
 environment skips; it is not substituted for the actual SDK runtime.
+After the exporter architecture refactor and scratch optimization, the current
+actual SDK campaign passed 76 tests with zero failures, errors or skips. This
+includes six buffer-equivalence, mutation and storage-contract regressions in
+addition to the original integration/adversarial cases.
 
 Run with the reviewed actual SDK/native pair, exact Tools pin and retained
 complete public production resource root:
@@ -127,3 +148,14 @@ changed future are correspondingly short. This is not a full-capture fit,
 physiological force validation, convergence study, muscle-only assistance
 qualification or parity completion. Complete capture horizon, calibration,
 anatomy, contact/grip and fully muscle-driven OpenSim acceptance remain open.
+
+A separate nominal viability experiment completed 1,814 driver and 1,828 iron
+native steps, spanning the respective capture durations, using zero motor
+commands and constant 0.05 muscle commands. Both original producer runs had no
+native warnings and exact complete-state, command and clock replay through the
+serialized T01 pathway. These were executed with the original producer, before
+the scratch-buffer optimization. They use capture duration only and contain no
+feedback fit. Maximum observed contact penetration was about 0.0317 m; the
+maximum absolute native constraint residual was about 1.0471 in mixed native
+units and must not be interpreted as a distance or an accepted equality error.
+These diagnostics preserve the unresolved contact/constraint readiness gate.
