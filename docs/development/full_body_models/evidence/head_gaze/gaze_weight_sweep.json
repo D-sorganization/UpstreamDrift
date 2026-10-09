@@ -13,19 +13,19 @@
      "marker_rms_mm": 32.55595798849723,
      "closure_error_max_mm": 4.469079111536078,
      "face_fit_rms_deg": 0.762975784377546,
-     "theta_gaze_rms_deg": 29.80856593039472,
-     "theta_gaze_max_deg": 79.82108439382009,
+     "theta_gaze_rms_deg": 20.230408613051225,
+     "theta_gaze_max_deg": 37.05950663395908,
      "eye_translation_range_mm": [
-      93.06639276254336,
-      242.35262286262298,
-      100.40895863349265
+      48.18973195473974,
+      112.96503058131928,
+      25.3579504055077
      ],
      "head_yaw_pitch_roll_range_deg": [
-      104.90666168226957,
-      50.01370584430963,
-      91.1204985370819
+      49.06396437208474,
+      10.785395191725186,
+      74.97571719344289
      ],
-     "neck_ik_frames_with_clamping": 12
+     "neck_ik_frames_with_clamping": 15
     },
     {
      "gaze_weight": 0.1,
@@ -178,6 +178,25 @@
       18.083130510691948
      ],
      "neck_ik_frames_with_clamping": 13
+    },
+    {
+     "gaze_weight": 10.0,
+     "marker_rms_mm": 38.399737469109056,
+     "closure_error_max_mm": 7.095677886704621,
+     "face_fit_rms_deg": 0.8338955331578753,
+     "theta_gaze_rms_deg": 0.5352050024022478,
+     "theta_gaze_max_deg": 1.4326189526383222,
+     "eye_translation_range_mm": [
+      47.19435014025897,
+      112.12212536584602,
+      28.0054882785703
+     ],
+     "head_yaw_pitch_roll_range_deg": [
+      27.83635684942473,
+      3.6022231776830758,
+      17.504660887609987
+     ],
+     "neck_ik_frames_with_clamping": 13
     }
    ],
    "feasible_weights": [
@@ -197,8 +216,8 @@
      "marker_rms_mm": 30.804850938858362,
      "closure_error_max_mm": 2.848788424371954,
      "face_fit_rms_deg": 0.5778769923967089,
-     "theta_gaze_rms_deg": 18.549959125119024,
-     "theta_gaze_max_deg": 32.63437410887948,
+     "theta_gaze_rms_deg": 18.547725548514524,
+     "theta_gaze_max_deg": 32.63387072327194,
      "eye_translation_range_mm": [
       59.9621905476623,
       125.06178093801987,
@@ -324,6 +343,44 @@
       4.186521833877944
      ],
      "neck_ik_frames_with_clamping": 13
+    },
+    {
+     "gaze_weight": 3.0,
+     "marker_rms_mm": 37.126834140205226,
+     "closure_error_max_mm": 4.760812333258917,
+     "face_fit_rms_deg": 0.6461028243676105,
+     "theta_gaze_rms_deg": 0.48370911796893795,
+     "theta_gaze_max_deg": 0.9790822577447499,
+     "eye_translation_range_mm": [
+      49.52951722450455,
+      72.05479466167813,
+      35.55265705105937
+     ],
+     "head_yaw_pitch_roll_range_deg": [
+      31.81409166886567,
+      2.238468950418195,
+      4.421863489372694
+     ],
+     "neck_ik_frames_with_clamping": 14
+    },
+    {
+     "gaze_weight": 5.0,
+     "marker_rms_mm": 37.71571654361164,
+     "closure_error_max_mm": 4.195078693058178,
+     "face_fit_rms_deg": 0.8260759125815494,
+     "theta_gaze_rms_deg": 0.5582371756489785,
+     "theta_gaze_max_deg": 1.102904149136741,
+     "eye_translation_range_mm": [
+      53.18716833487214,
+      75.42486287563008,
+      35.143226206070025
+     ],
+     "head_yaw_pitch_roll_range_deg": [
+      32.86545565957849,
+      2.3938449154954,
+      4.497710177112003
+     ],
+     "neck_ik_frames_with_clamping": 14
     }
    ],
    "feasible_weights": [

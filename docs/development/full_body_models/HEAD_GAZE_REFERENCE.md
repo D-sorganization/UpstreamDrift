@@ -141,7 +141,7 @@ translation range, head yaw/pitch/roll range and the feasibility flag.
 
 | Capture | w | Marker RMS (mm) | Face RMS (deg) | theta_gaze RMS / max (deg) | Eye range x / y / z (mm) | Yaw / pitch / roll (deg) | Feasible |
 |---|---|---|---|---|---|---|---|
-| capture-A driver | 0 | 32.6 | 0.76 | 29.81 / 79.82 | 93 / 242 / 100 | 105 / 50 / 91 | yes |
+| capture-A driver | 0 | 32.6 | 0.76 | 20.23 / 37.06 | 48 / 113 / 25 | 49 / 11 / 75 | yes |
 | capture-A driver | 0.1 | 33.2 | 0.82 | 8.54 / 20.11 | 44 / 104 / 24 | 23 / 9 / 37 | yes |
 | capture-A driver | 0.2 | 34.7 | 0.75 | 6.45 / 15.77 | 48 / 104 / 23 | 22 / 8 / 30 | yes |
 | capture-A driver | 0.3 | 35.4 | 0.84 | 5.45 / 14.13 | 48 / 107 / 31 | 24 / 7 / 25 | yes |
@@ -150,6 +150,7 @@ translation range, head yaw/pitch/roll range and the feasibility flag.
 | capture-A driver | 2 | 37.7 | 0.91 | 1.40 / 4.79 | 49 / 107 / 26 | 27 / 4 / 18 | no |
 | capture-A driver | 3 | 37.6 | 0.82 | 1.24 / 4.70 | 46 / 127 / 25 | 27 / 4 / 18 | no |
 | capture-A driver | 5 | 38.4 | 0.87 | 0.90 / 3.39 | 49 / 126 / 27 | 28 / 4 / 18 | no |
+| capture-A driver | 10 | 38.4 | 0.83 | 0.54 / 1.43 | 47 / 112 / 28 | 28 / 4 / 18 | no |
 | capture-B iron | 0 | 30.8 | 0.58 | 18.55 / 32.63 | 60 / 125 / 38 | 45 / 8 / 66 | yes |
 | capture-B iron | 0.1 | 32.1 | 0.66 | 6.12 / 11.09 | 54 / 82 / 37 | 19 / 9 / 16 | yes |
 | capture-B iron | 0.2 | 33.3 | 0.64 | 4.10 / 8.02 | 53 / 76 / 36 | 24 / 7 / 11 | yes |
@@ -157,14 +158,17 @@ translation range, head yaw/pitch/roll range and the feasibility flag.
 | capture-B iron | 0.5 | 34.8 | 0.62 | 1.96 / 4.12 | 51 / 78 / 36 | 30 / 4 / 7 | no |
 | capture-B iron | 1 | 37.0 | 0.76 | 0.94 / 1.95 | 55 / 81 / 36 | 32 / 2 / 6 | no |
 | capture-B iron | 2 | 37.4 | 0.65 | 0.50 / 0.95 | 50 / 70 / 36 | 30 / 2 / 4 | no |
+| capture-B iron | 3 | 37.1 | 0.65 | 0.48 / 0.98 | 50 / 72 / 36 | 32 / 2 / 4 | no |
+| capture-B iron | 5 | 37.7 | 0.83 | 0.56 / 1.10 | 53 / 75 / 35 | 33 / 2 / 4 | no |
 
 Result: the knee is 0.1 in both captures and the common feasible set is
 {0, 0.1, 0.2}, so `REPORTING_GAZE_WEIGHT = 0.1`. At 0.1 the address-to-impact
-gaze error RMS falls from 29.8 to 8.5 degrees (driver) and from 18.6 to 6.1
+gaze error RMS falls from 20.2 to 8.5 degrees (driver) and from 18.6 to 6.1
 degrees (iron), for a marker RMS cost of 0.6 and 1.3 mm. The marker-faithful
-head swings widely (driver yaw range 105 degrees, eye y range 242 mm); the
-smallest weight already removes most of that motion. Iron w=0.3 misses the
-marker limit by 0.01 mm (33.89 against 33.88 mm); the rule is applied as
+head rolls and turns widely (yaw / roll range 49 / 75 degrees driver, 45 / 66
+degrees iron); the smallest weight already halves that motion. Iron w=0.3
+misses the marker limit by 0.01 mm (33.893 against a 33.885 mm limit); the
+rule is applied as
 written, with no tolerance widened. The face fit stays below 1 degree at every
 weight. Qualified receipts keep `--gaze-weight 0`. A regression test
 (`tests/scripts/test_head_gaze_sweep_scripts.py`) recomputes the selection

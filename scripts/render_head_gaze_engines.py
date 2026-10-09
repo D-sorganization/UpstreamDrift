@@ -30,6 +30,9 @@ SHAFT_RADIUS_M = 0.006
 CONE_LENGTH_M = 0.07
 HEAD_FORWARD_RGBA = (0.95, 0.1, 0.1, 1.0)
 SIGHT_RGBA = (0.2, 0.9, 0.3, 1.0)
+# One panel of the gaze off | gaze on pair, so the paired clip is 1920x1080.
+PANEL_WIDTH = 960
+PANEL_HEIGHT = 1080
 LOG = logging.getLogger("head_gaze_engines")
 
 
@@ -146,8 +149,8 @@ def export_run(run: Path, out: Path, label: str, engines: Sequence[str]) -> None
         impact_s = float(plan["impact_time_s"] - ik["time_s"][0])
     settings = replace(
         ExportSettings(),
-        width=1920,
-        height=1080,
+        width=PANEL_WIDTH,
+        height=PANEL_HEIGHT,
         fps=60,
         speeds=(1.0, 0.5),
         impact_time_s=impact_s,
