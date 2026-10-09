@@ -144,6 +144,11 @@
       "id": "UP-D1-native-muscle-contact-inventory",
       "owner": "UpstreamDrift issue #11815",
       "resolution": "Inventory explicit native contact policies in tour_matching/muscle_replay.py and chapters/17-native-muscle-contact.qmd. Actual synthetic OpenSim smooth sphere/half-space tests establish native wrench direction, independent replay repeatability, contact-dependent motion and numerical refinement only. Contact calibration, smoothing leakage budgets, HuntCrossley law parity, full-body anatomy/grip and full-horizon private mocap qualification remain open."
+    },
+    {
+      "id": "UP-D1-owned-native-simscape-replay-inventory",
+      "owner": "UpstreamDrift issue #11942",
+      "resolution": "Inventory chapter34 verified owned Tools native envelope admission, trusted R2025b complete-state decoder, explicit simulation/configuration bindings, strict restoration diagnostics and full-interval same/changed-future native physical/discrete/input evidence. Source-bound diagnostic receipts do not qualify production variants, transitive libraries, physiology, capture accuracy or six-engine parity. The merged Tools pin is exact and byte-equivalent to the executed source; scientific release remains blocked."
     }
   ],
   "calculations": []

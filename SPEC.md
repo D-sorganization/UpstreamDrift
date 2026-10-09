@@ -10452,3 +10452,15 @@ The F06c adapter uses the existing public native ABA/RK4 integration kernel with
 ## Native Muscle Experiment Bundle (#11908)
 
 The native OpenSim T01 seam binds all admitted continuous state, registered discrete/modeling options, physical units, source/loaded/provider identity and cold-start policy. A reviewed fixed-path Millard/Slider-or-Pin subset executes owned frozen model bytes through the existing kernel. Canonical chapter27 and F07_MUSCLE_BUNDLE_TURNOVER preserve exclusions; native geometry, full-body constraints/contact, capture matching and required parity remain unqualified.
+
+## Owned Native Simscape Diagnostic Replay
+
+F06d2 (#11942, parent #11921) consumes the separate Tools native-state envelope
+through immutable owned bytes. Actual R2025b class/clock/configuration and
+explicit simulation-checksum bindings precede strict complete-state restore.
+Native tests cover suffix-only and changed-future forces, independent full-run
+outputs, conflicting workspace inputs, byte identity and failure cleanup.
+Canonical reference: `manuals/upstreamdrift/chapters/34-owned-native-simscape-replay.qmd`;
+turnover and source-hashed receipt: `docs/development/feedback_controls/F06D2_OWNED_SIMSCAPE_TURNOVER.md`
+and `F06D2_NATIVE_OWNED_RECEIPT.json`. This trusted synthetic diagnostic does not
+qualify production variants, muscle physiology, private capture or parity.

@@ -1,0 +1,109 @@
+# Owned Native Simscape Replay Boundary
+
+## Scope and Authority
+
+F06d2 (#11942, parent #11921) consumes the separate Tools
+`native-state-replay/1.1.0` declaration and verified owned opaque bytes. The
+merged Tools PR5471 source is pinned exactly at
+`89415ee859d6fcfe3384b95e5a53691e68bf9c1b`. Its complete Git tree is identical
+to the `f52a856e0853de6bae6b5ec9bc1bcd7007ab44b0` source used during native
+execution; this equivalence is recorded in the receipt. Chapter30 records an
+actual R2025b restart diagnostic. The new owned transport has executed the
+synthetic diagnostic in R2025b Update 5, including different future forces;
+this does not qualify a production golf model.
+
+## Immutable Ownership and Time
+
+`owned_simscape_replay_files` revalidates Tools integrity and required
+capabilities, checks the independent producer binding, and freezes model and
+opaque operating-point bytes before exposing a temporary native file boundary.
+The decoder receives owned files; it must not reopen the caller's model or MAT
+paths. Files are cleaned after normal completion or decoder failure. A digest
+identifies bytes, not trustworthy serialized executable behavior.
+
+Native input times are the saved snapshot time plus interval-relative input
+times, with Tools' interval-precision gate retained. The snapshot is not
+retimed. The request records both producer input prehistory and the separate
+replay input-file digest: future controls may differ after the saved state.
+The complete envelope digest binds the ordered future inputs and policy.
+
+## Supported Input and Numerical Policy
+
+The current file boundary admits one held actuator-force channel, in N, at
+`native_force_input` on the diagnostic's declared translational axis. It admits
+the externally forced diagnostic mode, adaptive `ode23t`, the explicit native
+operating-point initialization policy and the ZOH From Workspace player. This
+is a narrow diagnostic interface, not a general production control map.
+The axis ID names the force source's scalar input convention; native mechanical
+port wiring determines its sign relative to the measured position. Positive
+source input and negative sensor displacement are therefore not relabeled as
+world-frame force equivalence.
+The native consumer verifies actual tolerances, maximum step, block reduction,
+simulation mode, input-player settings, conversion settings and physical solver
+dialog parameters. Its configuration digest excludes temporary paths. An
+explicit simulation compile supplies a separate structural checksum; native
+operating-point restoration remains the compatibility authority. The interface,
+contents and release mismatch diagnostics must all read back `error`, because
+warning-based partial restoration is forbidden.
+
+## Validation and Remaining Gates
+
+The missing-module test failed before implementation. Fifteen synthetic byte
+tests now cover caller mutation, absolute-time export, source and binding
+mismatch, path traversal, required unavailable capabilities, wrong policy/frame,
+tampered inputs or owned payloads, and cleanup after a decoder exception.
+An inconsistent external-load declaration also failed before its fix: that
+identity must match the exact force CSV that will execute, and additional
+contact policy declarations are unsupported. Two additional RED/GREEN cases
+reject production driver/iron identifiers on diagnostic bytes: the file boundary
+requires the exact fixture ID, diagnostic variant and model version. Focused Ruff and source typing
+pass. Synthetic byte payloads are not valid MAT
+or SLX files and supply no native physics evidence.
+
+Actual native tests bind the R2025b class, unmodified clock, loaded source bytes,
+effective configuration and compatibility before replaying the entire
+0.2--0.4 s interval. Same-input position error is $7.46\times10^{-17}$ m;
+changed-future position error is $1.28\times10^{-7}$ m, both below the declared
+$10^{-5}$ m diagnostic bound. Discrete error is $1.11\times10^{-16}$ against
+$10^{-12}$, and force-injection error is zero in both cases. These bounds
+describe this fixture and solver, not general production accuracy.
+
+The independent full runs share the original prehistory and each chosen future.
+Replay uses only the suffix, with no prehistory integration or clock reset.
+Conflicting base/model-workspace sentinels, compile termination, workspace
+restoration, configuration drift, wrong request bytes, failure cleanup and
+post-execution byte identity are checked. Complete source and output hashes are
+recorded in `docs/development/feedback_controls/F06D2_NATIVE_OWNED_RECEIPT.json`.
+The seven-file MATLAB provider digest has a bounded scope; it does not attest
+every transitive library or qualify the Python runtime. Native
+MAT producers must be explicitly trusted; metadata and hashes cannot make an
+arbitrary MAT file safe. Production models, all required variants, contact,
+muscle physiology, private capture registration and six-engine parity remain
+open. Scientific/manual release remains blocked.
+
+Astra review reproduced capture-wall-clock admission and missing full envelope
+retention before fixes. Native admission now requires simulation_absolute and
+retains the complete validated envelope with its file hash, alongside the
+compact request. Loaded-model identity, solver version and declared frame and
+contact/load policies survive materialization for actual decoder comparison.
+
+## Reproduction
+
+Use the required R2025b executable and the exact reviewed Tools dependency.
+Run `run_native_simscape_restart(producer_dir)` and
+`test_native_simscape_execution_binding(producer_dir)` with `scripts/matlab`
+on the MATLAB path. Package the immutable files using:
+
+```text
+python3 docs/development/feedback_controls/prepare_f06d2_native_fixture.py PRODUCER_DIR OUTPUT.zip
+python3 docs/development/feedback_controls/prepare_f06d2_native_fixture.py PRODUCER_DIR CHANGED.zip --changed-future
+```
+
+Retain each printed request SHA-256 outside its archive. Extract each archive
+to a fresh owned directory and run
+`test_owned_native_simscape_replay(owned_dir, request_sha256, producer_dir)`.
+The executed MATLAB sources must match the committed receipt's native hashes.
+Later Python admission-only guards retain separate unit-test provenance and
+reproduce both executed request hashes under the merged Tools dependency.
+Any change to the native sources, runtime or executed request bytes requires
+fresh native evidence; an old receipt does not qualify changed execution.
