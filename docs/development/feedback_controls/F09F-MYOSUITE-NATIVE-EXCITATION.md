@@ -55,6 +55,15 @@ and a short native horizon. This validates the actual provider seam only; it
 does not establish a MyoSuite golfer mapping, private-data result, physiology,
 or scientific acceptance.
 
+The installed MyoSuite 3.0.0 distribution metadata reports
+`License-Expression: Apache-2.0` and homepage `https://www.myosuite.org`.
+The upstream [MyoSuite source repository](https://github.com/MyoHub/myosuite)
+publishes its Apache-2.0 license; the [3.0.0 PyPI release page](https://pypi.org/project/MyoSuite/3.0.0/)
+identifies this release and documents the `myo-sim==0.2.3` model-package pin.
+This records the software and model-package provenance for the public test
+lane; it makes no license or provenance claim about future golf models or
+captured data.
+
 ## Follow-Up
 
 The generic MyoSuite engine's legacy four-tuple `step()` interpretation remains
