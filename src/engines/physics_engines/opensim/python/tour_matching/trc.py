@@ -50,11 +50,13 @@ def write_trc(
     ]
     rows = []
     for frame in range(capture.frames):
-        cells = [str(frame + 1), f"{capture.time_s[frame]:.9f}"]
+        # Round-trip the original binary clock exactly; 9 decimals silently
+        # move 360 Hz observations by as much as 0.5 ns.
+        cells = [str(frame + 1), f"{capture.time_s[frame]:.17g}"]
         for marker in range(n):
             if capture.valid[frame, marker]:
                 cells.extend(
-                    f"{value * scale:.6f}" for value in capture.points_m[frame, marker]
+                    f"{value * scale:.17g}" for value in capture.points_m[frame, marker]
                 )
             else:
                 # Explicit NaN cells: OpenSim's TRCFileAdapter trims trailing

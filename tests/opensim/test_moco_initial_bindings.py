@@ -61,7 +61,9 @@ def test_rejects_invalid_explicit_bindings(
 
 
 def _native_inputs(
-    fixture: tuple[Path, dict[str, float]], tmp_path: Path
+    fixture: tuple[Path, dict[str, float]],
+    tmp_path: Path,
+    times: np.ndarray | None = None,
 ) -> tuple[Path, Path, Path, MocoInitialBindings]:
     osim = pytest.importorskip("opensim")
     path, initial = fixture
@@ -71,11 +73,15 @@ def _native_inputs(
     )
     model.finalizeConnections()
     model.printToXML(str(path))
-    times = np.array([0.0, 0.005, 0.01])
-    points = np.zeros((3, 1, 3))
+    times = np.array([0.0, 0.005, 0.01]) if times is None else times
+    points = np.zeros((len(times), 1, 3))
     points[:, 0, 0] = initial["/jointset/slider/slide/value"]
-    capture = TourCapture(times, ("load_marker",), points, np.ones((3, 1), bool))
-    trc = write_trc(capture, tmp_path / "target.trc", rate_hz=200)
+    capture = TourCapture(
+        times, ("load_marker",), points, np.ones((len(times), 1), bool)
+    )
+    trc = write_trc(
+        capture, tmp_path / "target.trc", rate_hz=1.0 / float(np.diff(times)[0])
+    )
     table = osim.TimeSeriesTable()
     labels = osim.StdVectorString()
     for name in initial:

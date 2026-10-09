@@ -1,0 +1,114 @@
+# Native Offline Muscle Matching and Independent Replay
+
+This provisional F07/F08 calculation note covers #11968 under #11791 and
+#11784. The maintained entry point is `tour_matching.cli moco-native`; it
+joins the existing `build_moco_study`, native marker geometry, constraint and
+passive observers, Tools T01 serializer, and native muscle replay. It does not
+approve human anatomy, clinical effort limits, contact/grip, or a measured
+golf-swing fit.
+
+## Prepared Experiment and Fail-Closed Boundaries
+
+The request names immutable source XML, original TRC and native state-guess
+bytes by SHA-256. It declares the complete native named continuous initial
+state, state/control bounds, capture-to-world rigid transform, marker-to-native
+frame placements and positive marker weights. The native preparation checks
+exact source/clock/mask and marker coverage, loaded marker placement, named
+state/control coverage, passive policy, native constraints/assistance and
+independent replay availability before construction of a solver. It collects
+available blockers in one receipt. A post-`initSystem` named state is not a
+complete SimTK numerical restart; native initialization itself can assemble
+coordinates. No reserve, lock, tendon, source force law, body frame or marker
+attachment is changed to make a solve succeed. Missing scientific policy is
+recorded as unavailable rather than replaced with a favorable default.
+The current cold-start T01 provider requires simulation-relative time zero;
+nonzero native start clocks block before solving. Relative request file paths
+resolve against the request JSON directory, never the caller's current
+working directory.
+
+`moco-native --request REQUEST.json --output-dir OUT --prepare-only` writes
+`preparation.json` and exits with status 2 when blocked. The same command
+without `--prepare-only` runs solve, export, replay and score in order only if
+preparation is clear. Every native solver attempt writes a numbered immutable
+`solve_attempts/*.json` receipt as well as the latest `solve.json`; failures
+remain visible after later successes. Output files remain local to the
+declared output directory. Private input coordinates and marker identities are
+not committed to this public repository.
+
+## Native Objective, Inputs, and Execution
+
+For state $x$, native muscle excitation $u$, marker geometry $h_j(x)$,
+registered observation $y_j$ and positive selected weight $w_j$, Moco solves
+the configured direct-collocation problem with marker and effort terms of the
+form
+
+$$
+\min_{x,u}\;\sum_{j,k}w_j\|h_j(x_k)-y_{jk}\|^2
++\lambda\sum_k\|u_k\|^2,
+\qquad\dot x=f_{\mathrm{OpenSim}}(x,u),
+$$
+
+subject to exact caller-declared native state/control bounds and initial
+values. The expression describes the goal terms, not a claim that Moco's
+actual quadrature equals this simple sum. The builder sets
+`allow_unused_references=False`, applies an explicit `SetMarkerWeights`, and
+reads back exact selected weights from the native goal before solving.
+Initial guesses derive from caller files; an IK trajectory is a guess, not
+measured full-state truth.
+
+The successful native solution is saved and reloaded. Every original control
+knot is retained. The runner forms the ordered union of original knots and
+original observation times, linearly samples the saved excitation knot values
+on that execution grid and records that interpolation in the T01 policy. The
+linear playback is a separately defined executed input; Moco's internal
+collocation polynomial is not silently declared identical to it. Tools
+serializes and reloads exact model, named initial state, input order, clock,
+interpolation and execution policy. A fresh native model integrates with only
+this frozen time-only input. Observations are accessed only after integration
+for scoring. The same-input claim compares this execution against its own
+serialized input payload; a different control policy keeps its own input
+digest even when model, initial state and observation clock are common.
+
+## Scoring and Interpretation
+
+Let $a_{jk}$ be the original valid-observation mask. On exact original
+observation times, the executed weighted marker error is
+
+$$
+\mathrm{RMSE}_{\mathrm{obs}}
+=\sqrt{\frac{\sum_{j,k}a_{jk}w_j
+\|h_j(x_k^{\mathrm{replay}})-y_{jk}\|^2}
+{\sum_{j,k}a_{jk}w_j}}.
+$$
+
+No observed support is not a zero score. This physical replay error,
+Moco's objective and the maximum optimized-versus-replayed complete named
+state difference at original knots are separate receipt fields. Neither a
+small optimizer objective nor a native process exit qualifies physiology,
+uncertainty, held-out capture accuracy, or full-swing own-contact replay.
+
+## Executed Evidence and Remaining Gates
+
+OpenSim 4.6 synthetic Millard and Thelen fixtures pass end-to-end. A separate
+two-DOF, two-muscle fixture reverses state-table order and has native control
+paths `zeta` then `alpha`, demonstrating name-bound multi-input export rather
+than an assumed single actuator or coordinate. On the same 11-time observation
+grid, two and four mesh intervals produce 5 and 9 saved collocation knots,
+respectively. All original knots and observations survive the union grid;
+the resulting physical score is finite, with no new acceptance threshold.
+Recorded wall/CPU, optimized/replayed state disagreement, failed attempts and
+native output hashes reside in the turnover receipt. A separate accuracy
+diagnostic compares native Runge–Kutta–Merson tolerances $10^{-8}$ and
+$10^{-9}$ under identical synthetic inputs and clocks; this is explicitly a
+different numerical policy, not a same-policy T01 equivalence claim.
+
+The unchanged pinned 520-muscle XML and both frozen private reference captures
+were prepared without a solver call. Original 654/657-frame clocks and validity
+masks round-trip exactly. The diagnostic exposes missing source-valid guess,
+registration, marker correspondence, passive limits, full prepared native
+state, assistance and constraint policies. It cannot certify anatomical
+attachments from shared names or derive physiological bounds from source
+defaults. No capture tracking solve, qualified contact/grip or independent
+muscle-driven golf replay has occurred. Detailed private marker arrays and
+source paths remain in local private staging; the public turnover retains only
+counts, blocker kinds and reviewed aggregate evidence.

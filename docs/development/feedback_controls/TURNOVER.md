@@ -1,5 +1,15 @@
 # Feedback Controls Planning Turnover
 
+## F07 Native Offline Muscle Matching Handoff
+
+Issue #11968 adds a maintained OpenSim Moco prepare/solve/T01 export/fresh
+replay/physical scoring route. The executable design and exact reproduction
+commands are in `F07_NATIVE_MOCO_RUNNER_TURNOVER.md` and canonical chapter 39.
+Synthetic two-muscle OpenSim runs pass, while unchanged 520-muscle source plus
+frozen private driver/iron reference preparation reports seven blocker kinds
+and performs no solve. The earlier planning-only status below remains the
+history of the initial packet, not the status of this implementation slice.
+
 ## Current State
 
 Repository: UpstreamDrift. Topic branch: `docs/feedback-controls-11784`. Commit: `SELF` (resolve with `git rev-parse HEAD`). Documentation PR: not created at packet preparation; the governing epic records its final URL/state. Epic: https://github.com/D-sorganization/UpstreamDrift/issues/11784.

@@ -41,3 +41,5 @@ UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
 
 {{< include chapters/38-native-reference-conventions.qmd >}}
 {{< include chapters/26-native-opensim-geometry.qmd >}}
+
+{{< include chapters/39-native-offline-muscle-matching.qmd >}}
