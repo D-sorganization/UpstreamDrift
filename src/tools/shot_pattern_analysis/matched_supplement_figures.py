@@ -35,6 +35,7 @@ def _profile(cell_name: str) -> str:
     found = [profile for profile in PROFILES if cell_name.endswith("_" + profile)]
     return found[0] if len(found) == 1 else ""
 
+
 def _condition(ref: dict[str, Any]) -> dict[str, Any]:
     config = ref["config"]
     club = config["club"]
@@ -55,13 +56,32 @@ def _condition(ref: dict[str, Any]) -> dict[str, Any]:
         "target": round(float(target), 12),
     }
 
+
 def _condition_caption(ref: dict[str, Any]) -> str:
     condition = _condition(ref)
     club = str(condition["club"]).replace("_", " ").title()
+    profile = re.sub(r"([A-Za-z])([0-9])", r"\1 \2", condition["profile"])
+    profile = profile.replace("_", " ").title()
     return (
-        f"{club} · {condition['profile']} · Lean {condition['lean']:g}° · "
+        f"{club} · {profile} · Lean {condition['lean']:g}° · "
         f"Curve ×{condition['curve']:g} · Shaft Twist SD {condition['rotation']:g}°"
     )
+
+
+def _pair_condition_label(comparison: str, ref: dict[str, Any]) -> str:
+    condition = _condition(ref)
+    if comparison == "shaft_rotation_sd":
+        return f"Rotation SD {condition['rotation']:g}°"
+    if comparison == "curve_strength":
+        return f"Curve ×{condition['curve']:g}"
+    if comparison == "across_lean":
+        return f"Lean {condition['lean']:g}°"
+    return f"{_comparison_title(comparison)} · {_condition_caption(ref)}"
+
+
+def _comparison_title(comparison: str) -> str:
+    return comparison.replace("_", " ").title().replace("Sd", "SD")
+
 
 def _plot_metadata(
     ref: dict[str, Any], label: str, valid_counts: dict[str, int]
@@ -82,6 +102,7 @@ def _plot_metadata(
         "total_shots_by_pattern": total,
         "conditioning": "individually supported endpoints by physical pattern",
     }
+
 
 def _render_cell_figures(ref: dict[str, Any], output_dir: Path) -> list[dict[str, Any]]:
     if ref.get("status") != "completed":
@@ -171,11 +192,13 @@ def _render_cell_figures(ref: dict[str, Any], output_dir: Path) -> list[dict[str
             )
     return ledger
 
+
 def _slug(value: str) -> str:
     clean = re.sub(r"[^A-Za-z0-9._-]+", "_", value).strip("_.-")
     if not clean:
         raise ValueError("figure label has no safe filename characters")
     return f"{clean[:160]}_{hashlib.sha256(value.encode()).hexdigest()[:10]}"
+
 
 def _save_figure(figure: Any, stem: Path) -> dict[str, Path]:
     stem.parent.mkdir(parents=True, exist_ok=True)
@@ -187,13 +210,6 @@ def _save_figure(figure: Any, stem: Path) -> dict[str, Path]:
             options["dpi"] = dpi
         figure.savefig(path, **options)
         outputs[suffix] = path
-    social_path = stem.with_name(stem.name + "_social.png")
-    figure.savefig(
-        social_path,
-        dpi=120,
-        facecolor="white",
-    )
-    outputs["social_png"] = social_path
     return outputs
 
 
@@ -212,12 +228,15 @@ def _displayed_sample_indices(point_count: int, maximum: int = 600) -> np.ndarra
         raise ValueError("point_count and maximum must both be positive")
     return np.linspace(0, point_count - 1, min(point_count, maximum), dtype=int)
 
+
 def _write_pair_density_figure(
     point_sets: dict[str, list[tuple[float, float]]],
     *,
     first: dict,
     second: dict,
     comparison: str,
+    first_label: str,
+    second_label: str,
     target_x: float,
     common_n: int,
     output_stem: Path,
@@ -235,7 +254,7 @@ def _write_pair_density_figure(
         2, 3, left=0.06, right=0.91, top=0.76, bottom=0.13, hspace=0.24, wspace=0.24
     )
     first_condition, second_condition = _condition(first), _condition(second)
-    row_conditions = (("First", first_condition), ("Second", second_condition))
+    row_conditions = ((first_label, first_condition), (second_label, second_condition))
     norm = Normalize(vmin=0.0, vmax=estimate.density_vmax_per_m2)
     color_mesh = None
     pattern_colors = {"Straight": "#286090", "Draw": "#c66a19", "Fade": "#7b4a9e"}
@@ -348,13 +367,13 @@ def _write_pair_density_figure(
     figure.text(
         0.06,
         0.895,
-        f"First: {_condition_caption(first)} · {first['source_protocol']}",
+        f"{first_label}: {_condition_caption(first)} · {first['source_protocol']}",
         fontsize=7.7,
     )
     figure.text(
         0.06,
         0.875,
-        f"Second: {_condition_caption(second)} · {second['source_protocol']}",
+        f"{second_label}: {_condition_caption(second)} · {second['source_protocol']}",
         fontsize=7.7,
     )
     figure.text(
@@ -367,16 +386,18 @@ def _write_pair_density_figure(
     plt.close(figure)
     return outputs
 
-def _write_pair_overhead_figure(
+
+def _create_pair_overhead_figure(
     trajectory_sets: dict[str, list[Any]],
     *,
     first: dict,
     second: dict,
     comparison: str,
+    first_label: str,
+    second_label: str,
     target_x: float,
-    output_stem: Path,
-) -> dict[str, Path]:
-    """Compare raw saved trajectory samples in a shared two-row layout."""
+    social: bool,
+):
     import matplotlib.pyplot as plt
     from matplotlib.lines import Line2D
 
@@ -390,102 +411,159 @@ def _write_pair_overhead_figure(
     padding = np.maximum((highs - lows) * 0.05, 0.25)
     lows -= padding
     highs += padding
+
+    font_scale = 1.0 if social else 0.92
     figure, axes = plt.subplots(
-        2, 3, figsize=(16, 9), sharex=True, sharey=True, facecolor="white"
+        1,
+        3,
+        figsize=(16, 9),
+        sharex=True,
+        sharey=True,
+        squeeze=False,
+        facecolor="white",
     )
-    figure.subplots_adjust(
-        top=0.77, bottom=0.12, left=0.07, right=0.98, wspace=0.16, hspace=0.28
-    )
-    conditions = (("First", first), ("Second", second))
+    figure.subplots_adjust(top=0.70, bottom=0.19, left=0.085, right=0.98, wspace=0.13)
     colors = {"Straight": "#286090", "Draw": "#c66a19", "Fade": "#7b4a9e"}
-    for row, (condition_name, ref) in enumerate(conditions):
-        condition = _condition(ref)
-        for col, pattern in enumerate(_PATTERNS):
-            axis = axes[row, col]
-            key = f"{pattern} · {condition_name}"
-            trajectories = trajectory_sets.get(key, [])
-            for path in trajectories:
+    conditions: tuple[
+        tuple[str, dict[str, Any], Literal["solid", "dashed"]],
+        tuple[str, dict[str, Any], Literal["solid", "dashed"]],
+    ] = ((first_label, first, "solid"), (second_label, second, "dashed"))
+    for col, pattern in enumerate(_PATTERNS):
+        axis = axes[0][col]
+        for condition_name, _ref, style in conditions:
+            paths = trajectory_sets[f"{pattern} · {condition_name}"]
+            for path in paths:
                 array = np.asarray(path, dtype=float)
                 axis.plot(
                     array[:, 0],
                     array[:, 1],
                     color=colors[pattern],
-                    alpha=0.4,
-                    linewidth=0.8,
+                    linestyle=style,
+                    alpha=0.46 if style == "solid" else 0.72,
+                    linewidth=1.0,
                     rasterized=True,
                 )
-            axis.scatter([target_x], [0.0], marker="+", color="black", s=32)
-            axis.axvline(target_x, color="#444444", linestyle=":", linewidth=0.7)
-            axis.axhline(0.0, color="#444444", linewidth=0.5)
-            axis.set_xlim(float(lows[0]), float(highs[0]))
-            axis.set_ylim(float(lows[1]), float(highs[1]))
-            axis.set_title(
-                f"{pattern} · {condition_name}",
-                fontsize=10,
+        axis.scatter([target_x], [0.0], marker="+", color="black", s=34, zorder=4)
+        axis.axvline(target_x, color="#444444", linestyle=":", linewidth=0.7)
+        axis.axhline(0.0, color="#444444", linewidth=0.5)
+        axis.set_xlim(float(lows[0]), float(highs[0]))
+        axis.set_ylim(float(lows[1]), float(highs[1]))
+        axis.set_title(pattern, fontsize=12 * font_scale, fontweight="bold")
+        axis.set_xlabel("Downrange Position (m)", fontsize=10 * font_scale)
+        if col == 0:
+            axis.set_ylabel(
+                "Lateral Position (m; Right Positive)", fontsize=10 * font_scale
             )
-            axis.set_xlabel("Downrange Position (m)")
-            if col == 0:
-                axis.set_ylabel("Lateral Position (m; Right Positive)")
-            axis.grid(alpha=0.2, linewidth=0.4)
-            axis.set_aspect("equal", adjustable="box")
+        axis.grid(alpha=0.2, linewidth=0.4)
+        # A disclosed 6× vertical display magnification keeps long carry paths legible.
+        axis.set_aspect(6.0, adjustable="box")
+
     figure.suptitle(
-        "Raw Overhead Flight Samples by Matched Condition",
+        "Saved Raw Flight Paths by Pattern and Matched Condition",
         x=0.06,
-        y=0.97,
+        y=0.965,
         ha="left",
-        fontsize=16,
+        fontsize=17 * font_scale,
         fontweight="bold",
     )
     figure.text(
         0.06,
-        0.925,
-        f"{comparison} · saved illustrative trajectories by condition · target {target_x:.3f} m",
-        fontsize=8.5,
+        0.92,
+        f"{_comparison_title(comparison)} · Target {target_x:.3f} m",
+        fontsize=10 * font_scale,
     )
     figure.text(
         0.06,
-        0.905,
-        f"First: {_condition_caption(first)} · {first['source_protocol']}",
-        fontsize=7.7,
+        0.895,
+        f"{first_label}: {_condition_caption(first)} · {first['source_protocol']}",
+        fontsize=8.5 * font_scale,
     )
     figure.text(
         0.06,
-        0.885,
-        f"Second: {_condition_caption(second)} · {second['source_protocol']}",
-        fontsize=7.7,
+        0.87,
+        f"{second_label}: {_condition_caption(second)} · {second['source_protocol']}",
+        fontsize=8.5 * font_scale,
     )
     path_counts = {key: len(value) for key, value in trajectory_sets.items()}
     first_counts = ", ".join(
-        f"{pattern} {path_counts[f'{pattern} · First']}" for pattern in _PATTERNS
+        f"{pattern} {path_counts[f'{pattern} · {first_label}']}"
+        for pattern in _PATTERNS
     )
     second_counts = ", ".join(
-        f"{pattern} {path_counts[f'{pattern} · Second']}" for pattern in _PATTERNS
+        f"{pattern} {path_counts[f'{pattern} · {second_label}']}"
+        for pattern in _PATTERNS
     )
     figure.text(
         0.06,
-        0.865,
-        f"Saved trajectory paths (not paired by index): First {first_counts} | Second {second_counts}",
-        fontsize=8,
+        0.84,
+        f"Saved paths (not paired by shot index): {first_label} {first_counts} · {second_label} {second_counts}",
+        fontsize=8.5 * font_scale,
     )
     figure.text(
         0.06,
-        0.845,
-        "Illustrative Simulation | Assumed Head Properties | Carry Only · Raw paths are shown by condition, not paired by shot index.",
-        fontsize=8.5,
+        0.815,
+        "Illustrative Simulation | Assumed Head Properties | Carry Only · Lateral display magnified 6×; physical axis limits are shared.",
+        fontsize=8.5 * font_scale,
     )
-    handles = [
+    pattern_handles = [
         Line2D([0], [0], color=colors[pattern], label=pattern) for pattern in _PATTERNS
     ]
+    condition_handles = [
+        Line2D([0], [0], color="#333333", linestyle=style, label=condition)
+        for condition, _, style in conditions
+    ]
     figure.legend(
-        handles=handles,
+        handles=pattern_handles + condition_handles,
         loc="upper center",
-        bbox_to_anchor=(0.48, 0.825),
-        ncol=3,
+        bbox_to_anchor=(0.57, 0.785),
+        ncol=5,
         frameon=False,
+        fontsize=9 * font_scale,
+    )
+    return plt, figure
+
+
+def _write_pair_overhead_figure(
+    trajectory_sets: dict[str, list[Any]],
+    *,
+    first: dict,
+    second: dict,
+    comparison: str,
+    first_label: str,
+    second_label: str,
+    target_x: float,
+    output_stem: Path,
+) -> dict[str, Path]:
+    """Write academic and dedicated 16:9 paired overhead exports."""
+    plt, figure = _create_pair_overhead_figure(
+        trajectory_sets,
+        first=first,
+        second=second,
+        comparison=comparison,
+        first_label=first_label,
+        second_label=second_label,
+        target_x=target_x,
+        social=False,
     )
     outputs = _save_figure(figure, output_stem)
     plt.close(figure)
+
+    plt, social_figure = _create_pair_overhead_figure(
+        trajectory_sets,
+        first=first,
+        second=second,
+        comparison=comparison,
+        first_label=first_label,
+        second_label=second_label,
+        target_x=target_x,
+        social=True,
+    )
+    social_path = output_stem.with_name(output_stem.name + "_social.png")
+    social_figure.savefig(social_path, dpi=120, facecolor="white")
+    plt.close(social_figure)
+    outputs["social_png"] = social_path
     return outputs
+
 
 def _render_pair_figures(
     pair: dict[str, Any], output_dir: Path
@@ -510,13 +588,17 @@ def _render_pair_figures(
         )
     )
     comparison = pair["comparison_kind"]
+    first_label = _pair_condition_label(comparison, first)
+    second_label = _pair_condition_label(comparison, second)
     label = f"{comparison}_{first['cell']}_vs_{second['cell']}"
     stem = output_dir / "comparisons" / _slug(label)
     target = pair["target_x_m"]
     ledger: list[dict[str, Any]] = []
     if len(common) >= 2:
         point_sets: dict[str, list[tuple[float, float]]] = {}
-        for condition_label, endpoint_map in zip(("First", "Second"), loaded, strict=True):
+        for condition_label, endpoint_map in zip(
+            (first_label, second_label), loaded, strict=True
+        ):
             by_pattern = {
                 name: {idx: (x, y) for idx, x, y in endpoint_map[name]}
                 for name in _PATTERNS
@@ -531,6 +613,8 @@ def _render_pair_figures(
                 first=first,
                 second=second,
                 comparison=comparison,
+                first_label=first_label,
+                second_label=second_label,
                 target_x=target,
                 common_n=len(common),
                 output_stem=stem.with_name(stem.name + "_density"),
@@ -567,7 +651,9 @@ def _render_pair_figures(
             }
         )
     trajectory_sets: dict[str, list[Any]] = {}
-    for label_condition, ref in zip(("First", "Second"), (first, second), strict=True):
+    for label_condition, ref in zip(
+        (first_label, second_label), (first, second), strict=True
+    ):
         directory = Path(ref["source_root"]) / ref["cell"]
         flight = json.loads((directory / "flight_samples.json").read_text())
         paths_by_pattern = flight.get("trajectories", {})
@@ -590,12 +676,14 @@ def _render_pair_figures(
         overhead_paths = namespace_figure_paths(
             "overhead",
             _write_pair_overhead_figure(
-            trajectory_sets,
-            first=first,
-            second=second,
-            comparison=comparison,
-            target_x=target,
-            output_stem=stem.with_name(stem.name + "_overhead"),
+                trajectory_sets,
+                first=first,
+                second=second,
+                comparison=comparison,
+                first_label=first_label,
+                second_label=second_label,
+                target_x=target,
+                output_stem=stem.with_name(stem.name + "_overhead"),
             ),
         )
         ledger.extend(

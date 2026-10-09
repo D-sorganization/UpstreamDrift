@@ -65,6 +65,31 @@ def _report_source_hashes() -> dict[str, str]:
     return {name: _sha256(package / name) for name in names}
 
 
+def _source_cell_hashes(refs: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    """Capture execution-time identities for every materialized source cell."""
+    hashes = {}
+    for ref in refs:
+        key = f"{ref['source_protocol']}:{ref['cell']}"
+        if key in hashes:
+            raise ValueError(f"duplicate source cell identity: {key}")
+        hashes[key] = {
+            "source_root": str(Path(ref["source_root"]).resolve()),
+            "status": ref["status"],
+            "config": ref["config"],
+            "manifest_sha256": ref.get("source_cell_manifest_sha256"),
+            "summary_sha256": ref.get("source_summary_sha256"),
+            "csv_sha256": ref.get("source_csv_sha256"),
+        }
+    return hashes
+
+
+def _assert_source_cell_hashes(
+    refs: list[dict[str, Any]], expected: dict[str, dict[str, Any]]
+) -> None:
+    if _source_cell_hashes(refs) != expected:
+        raise ValueError("source-cell artifacts changed during verification")
+
+
 def validate_final_matrix_report(
     report: dict[str, Any], *, expected_cells: int
 ) -> None:
@@ -111,7 +136,8 @@ def render_original_source_inventory(reports: dict[str, dict]) -> str:
                     "cell": cell.get("cell", ""),
                     "status": cell.get("status", ""),
                     "unavailable_reason": cell.get(
-                        "unavailable_reason", cell.get("reason", summary.get("reason", ""))
+                        "unavailable_reason",
+                        cell.get("reason", summary.get("reason", "")),
                     ),
                     "target_x_m": cell.get("target_x_m", ""),
                     "n_shots": cell.get("config", {}).get("n_shots", ""),
@@ -132,9 +158,7 @@ def _load_original_sources(root_value: Path, protocol: str) -> tuple[dict, list[
     reviewed_targets, target_provenance = load_reviewed_common_targets(root.parent)
     if protocol == "original_control":
         targets = reviewed_targets
-    validate_original_matrix_protocol(
-        report, protocol=protocol, common_targets=targets
-    )
+    validate_original_matrix_protocol(report, protocol=protocol, common_targets=targets)
     report["common_targets_path"] = str(targets_path.resolve())
     report["common_targets_sha256"] = _sha256(targets_path)
     report["common_target_provenance"] = target_provenance
@@ -158,17 +182,16 @@ def _load_original_sources(root_value: Path, protocol: str) -> tuple[dict, list[
                 "summary": cell,
                 "source_plan_sha256": report["plan_sha256"],
                 "source_cell_manifest_sha256": report["cell_manifest_sha256"].get(name),
+                "source_summary_sha256": (
+                    _sha256(cell_dir / "summary.json")
+                    if (cell_dir / "summary.json").is_file()
+                    else None
+                ),
                 "source_csv_sha256": _sha256(csv_path) if csv_path.is_file() else None,
                 "_execution": plan["execution"],
             }
         )
     return report, references
-
-
-
-
-
-
 
 
 def select_explicit_pairs(cells: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -259,8 +282,6 @@ def _pair_result(
     )
 
 
-
-
 def _recheck_source_inputs(
     refs: list[dict[str, Any]],
     plan_hashes: dict[str, str],
@@ -276,17 +297,41 @@ def _recheck_source_inputs(
         if not plan_path.is_file() or _sha256(plan_path) != expected_hash:
             raise ValueError("a source matrix plan changed during report generation")
     for ref in refs:
-        if ref.get("status") != "completed":
+        status = ref.get("status")
+        if status == "not_run":
             continue
         name = ref.get("alias_of_primary", ref["cell"])
         cell_dir = Path(ref["source_root"]) / name
         manifest = cell_dir / "manifest.json"
-        csv_path = cell_dir / "shots.csv.gz"
+        summary = cell_dir / "summary.json"
+        if status not in {"completed", "unavailable"}:
+            raise ValueError(f"invalid source status during report generation: {name}")
+        if not manifest.is_file() or not manifest_files_match(manifest):
+            raise ValueError(
+                f"source cell manifest changed during report generation: {name}"
+            )
+        if _sha256(manifest) != ref.get("source_cell_manifest_sha256"):
+            raise ValueError(
+                f"source cell manifest changed during report generation: {name}"
+            )
+        expected_summary_hash = ref.get("source_summary_sha256")
         if (
-            not manifest_files_match(manifest)
-            or _sha256(manifest) != ref.get("source_cell_manifest_sha256")
-            or _sha256(csv_path) != ref.get("source_csv_sha256")
+            expected_summary_hash is None
+            or not summary.is_file()
+            or _sha256(summary) != expected_summary_hash
         ):
+            raise ValueError(
+                f"source cell summary changed during report generation: {name}"
+            )
+        summary_record = json.loads(summary.read_text(encoding="utf-8"))
+        if summary_record.get("status") != status or summary_record.get(
+            "config"
+        ) != ref.get("config"):
+            raise ValueError(f"source cell summary status/config changed: {name}")
+        if status != "completed":
+            continue
+        csv_path = cell_dir / "shots.csv.gz"
+        if not csv_path.is_file() or _sha256(csv_path) != ref.get("source_csv_sha256"):
             raise ValueError(f"source cell changed during report generation: {name}")
     if _sha256(inventory_path) != inventory_sha256:
         raise ValueError("supplement inventory changed during report generation")
@@ -295,7 +340,9 @@ def _recheck_source_inputs(
         or not common_targets_path.is_file()
         or _sha256(common_targets_path) != common_targets_sha256
     ):
-        raise ValueError("original control common targets changed during report generation")
+        raise ValueError(
+            "original control common targets changed during report generation"
+        )
     if reviewed_targets_root is not None:
         if reviewed_target_sources is None:
             raise ValueError("reviewed target source hashes are required")
@@ -331,14 +378,149 @@ def _recheck_transition_evidence(receipt_path: Path, expected_sha256: str) -> No
             )
 
 
+def _recheck_receipt_sources(receipt: dict[str, Any]) -> None:
+    """Reload original and supplement sources named by a final receipt."""
+    roots = receipt.get("original_sources", {})
+    required = {"original_primary", "original_control"}
+    if set(roots) != required:
+        raise ValueError("pipeline receipt has an incomplete original source map")
+    reports: dict[str, dict[str, Any]] = {}
+    refs: list[dict[str, Any]] = []
+    plan_hashes: dict[str, str] = {}
+    for key in sorted(required):
+        root = Path(roots[key]["root"]).resolve()
+        report, source_refs = _load_original_sources(root, key)
+        if report["plan_sha256"] != roots[key].get("plan_sha256"):
+            raise ValueError(f"original {key} plan differs from pipeline receipt")
+        reports[key] = report
+        refs.extend(source_refs)
+        plan_hashes[str(root)] = report["plan_sha256"]
+
+    protocol_records = receipt.get("supplement_protocols", {})
+    protocol_roots = {
+        protocol: Path(record["source_root"])
+        for protocol, record in protocol_records.items()
+    }
+    if len(protocol_roots) != 3:
+        raise ValueError("pipeline receipt must name all three supplement protocols")
+    supplement = load_supplement_sources(
+        protocol_roots, Path(receipt["inventory_path"]), stage="final"
+    )
+    if supplement["inventory_sha256"] != receipt.get("supplement_inventory_sha256"):
+        raise ValueError("supplement inventory differs from pipeline receipt")
+    for protocol, record in supplement["protocols"].items():
+        expected = protocol_records.get(protocol, {})
+        if record.get("plan_sha256") != expected.get("plan_sha256"):
+            raise ValueError(
+                f"supplement {protocol} plan differs from pipeline receipt"
+            )
+        plan_hashes[str(Path(record["source_root"]).resolve())] = record["plan_sha256"]
+    refs.extend(supplement["unique_cells"])
+    expected_source_cells = receipt.get("source_cells_sha256")
+    if not isinstance(expected_source_cells, dict):
+        raise ValueError("pipeline receipt has no source-cell artifact inventory")
+    _assert_source_cell_hashes(refs, expected_source_cells)
+    control = reports["original_control"]
+    _recheck_source_inputs(
+        refs,
+        plan_hashes,
+        Path(receipt["inventory_path"]),
+        supplement["inventory_sha256"],
+        Path(control["common_targets_path"]),
+        control["common_targets_sha256"],
+        Path(roots["original_control"]["root"]).resolve().parent,
+        control["common_target_provenance"],
+    )
+    # Reload after the byte checks so a source cannot change during receipt
+    # validation and still be returned under an earlier snapshot.
+    second_refs: list[dict[str, Any]] = []
+    for key in sorted(required):
+        _, source_refs = _load_original_sources(Path(roots[key]["root"]), key)
+        second_refs.extend(source_refs)
+    second_supplement = load_supplement_sources(
+        protocol_roots, Path(receipt["inventory_path"]), stage="final"
+    )
+    second_refs.extend(second_supplement["unique_cells"])
+    _assert_source_cell_hashes(second_refs, expected_source_cells)
+    _recheck_transition_evidence(
+        Path(receipt["source_transition_receipt_path"]),
+        receipt["source_transition_receipt_sha256"],
+    )
 
 
-
-
-
-
-
-
+def load_verified_supplement_artifacts(output_dir: Path) -> dict[str, Any]:
+    """Return final additive report data only after verifying saved inputs."""
+    output_dir = Path(output_dir).resolve()
+    receipt_path = output_dir / "REPORT_SUPPLEMENT_PIPELINE.json"
+    if not receipt_path.is_file():
+        raise ValueError("supplement pipeline receipt is missing")
+    receipt_sha256 = _sha256(receipt_path)
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    if (
+        receipt.get("schema") != "matched-supplement-pipeline-receipt/1"
+        or receipt.get("stage") != "final"
+    ):
+        raise ValueError("supplement pipeline receipt is not final")
+    artifact_hashes = receipt.get("artifact_sha256")
+    if not isinstance(artifact_hashes, dict):
+        raise ValueError("pipeline receipt has no bound report artifacts")
+    artifact_paths = {
+        "report": "REPORT_SUPPLEMENT.json",
+        "inventory": "REPORT_SUPPLEMENT.csv",
+        "control_aliases": "control_aliases.json",
+        "comparisons_json": "REPORT_SUPPLEMENT_COMPARISONS.json",
+        "comparisons_csv": "REPORT_SUPPLEMENT_COMPARISONS.csv",
+        "comparison_markdown": "REPORT_SUPPLEMENT_COMPARISONS.md",
+        "original_source_inventory": "REPORT_ORIGINAL_SOURCE_INVENTORY.csv",
+        "figure_ledger": "REPORT_SUPPLEMENT_FIGURES.json",
+    }
+    if set(artifact_hashes) != set(artifact_paths):
+        raise ValueError("pipeline receipt artifact inventory is incomplete")
+    for key, relative in artifact_paths.items():
+        path = (output_dir / relative).resolve()
+        if not path.is_relative_to(output_dir) or not path.is_file():
+            raise ValueError(f"report artifact is missing or unsafe: {key}")
+        if _sha256(path) != artifact_hashes[key]:
+            raise ValueError(f"report artifact changed: {key}")
+    if receipt.get("postprocessing_source_sha256") != _report_source_hashes():
+        raise ValueError("reporting or figure source changed after generation")
+    ledger = json.loads(
+        (output_dir / artifact_paths["figure_ledger"]).read_text(encoding="utf-8")
+    )
+    if ledger.get("schema") != "matched-supplement-figure-ledger/1":
+        raise ValueError("supplement figure ledger has an unexpected schema")
+    figure_root = (output_dir / "figures").resolve()
+    for item in ledger.get("figures", []):
+        path = (figure_root / item["relative_path"]).resolve()
+        if not path.is_relative_to(figure_root) or not path.is_file():
+            raise ValueError("supplement figure artifact is missing or unsafe")
+        if _sha256(path) != item.get("sha256"):
+            raise ValueError("supplement figure artifact changed")
+    _recheck_receipt_sources(receipt)
+    for key, relative in artifact_paths.items():
+        if _sha256(output_dir / relative) != artifact_hashes[key]:
+            raise ValueError(f"report artifact changed during verification: {key}")
+    if _report_source_hashes() != receipt.get("postprocessing_source_sha256"):
+        raise ValueError("reporting or figure source changed during verification")
+    if _sha256(receipt_path) != receipt_sha256:
+        raise ValueError("supplement pipeline receipt changed during verification")
+    artifact_bytes = {
+        key: (output_dir / relative).read_bytes()
+        for key, relative in artifact_paths.items()
+    }
+    if any(
+        hashlib.sha256(artifact_bytes[key]).hexdigest() != artifact_hashes[key]
+        for key in artifact_paths
+    ):
+        raise ValueError("report artifact changed while reading verified outputs")
+    if _sha256(receipt_path) != receipt_sha256:
+        raise ValueError("supplement pipeline receipt changed while reading outputs")
+    return {
+        "report": json.loads(artifact_bytes["report"]),
+        "comparisons": json.loads(artifact_bytes["comparisons_json"]),
+        "figure_ledger": json.loads(artifact_bytes["figure_ledger"]),
+        "receipt": receipt,
+    }
 
 
 def render_comparison_markdown(results: list[dict[str, Any]]) -> str:
@@ -392,8 +574,6 @@ def _estimate_ci(value: dict[str, Any], unit: str) -> str:
         f"{float(value['estimate']):+.4f}{unit} "
         f"[{float(value['lower_95']):+.4f}, {float(value['upper_95']):+.4f}]"
     )
-
-
 
 
 def build_final_supplement_report(
@@ -527,6 +707,22 @@ def build_final_supplement_report(
         raise RuntimeError(
             "reporting or figure source changed during output generation"
         )
+    artifact_names = {
+        "report": "REPORT_SUPPLEMENT.json",
+        "inventory": "REPORT_SUPPLEMENT.csv",
+        "control_aliases": "control_aliases.json",
+        "comparisons_json": "REPORT_SUPPLEMENT_COMPARISONS.json",
+        "comparisons_csv": "REPORT_SUPPLEMENT_COMPARISONS.csv",
+        "comparison_markdown": "REPORT_SUPPLEMENT_COMPARISONS.md",
+        "original_source_inventory": "REPORT_ORIGINAL_SOURCE_INVENTORY.csv",
+        "figure_ledger": "REPORT_SUPPLEMENT_FIGURES.json",
+    }
+    artifact_sha256 = {
+        key: _sha256(output_dir / relative) for key, relative in artifact_names.items()
+    }
+    source_cells_sha256 = _source_cell_hashes(
+        [*original_cells, *supplement["unique_cells"]]
+    )
     pipeline_path = output_dir / "REPORT_SUPPLEMENT_PIPELINE.json"
     pipeline_path.write_text(
         json.dumps(
@@ -553,10 +749,13 @@ def build_final_supplement_report(
                     )
                 },
                 "supplement_inventory_sha256": supplement["inventory_sha256"],
-                "original_source_inventory_sha256": _sha256(
-                    original_inventory_path
-                ),
+                "original_source_inventory_sha256": _sha256(original_inventory_path),
                 "source_transition_receipt_path": str(transition_path),
+                "inventory_path": str(Path(inventory_path).resolve()),
+                "artifact_sha256": artifact_sha256,
+                "artifact_paths": artifact_names,
+                "source_cells_sha256": source_cells_sha256,
+                "report_source_sha256": report_sources,
                 "supplement_protocols": supplement["protocols"],
                 "unique_executed_cells": supplement["unique_executed_cells"],
                 "verified_control_aliases": [

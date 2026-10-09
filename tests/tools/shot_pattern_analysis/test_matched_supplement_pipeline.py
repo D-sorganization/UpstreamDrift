@@ -60,6 +60,22 @@ def test_selects_curve_lean_and_sd_pairs_without_reflection_or_deduping_patterns
     )
 
 
+def test_pair_figure_labels_keep_sd_acronym_and_humanize_profile():
+    from src.tools.shot_pattern_analysis.matched_supplement_figures import (
+        _comparison_title,
+        _condition_caption,
+        _pair_condition_label,
+    )
+
+    ref = _ref("driver-cell", "driver", 5, 2, 1)
+    ref["cell"] = "driver_lean5_curve2_rotation1_combined2"
+    caption = _condition_caption(ref)
+    assert "Combined 2" in caption
+    assert "Shaft Twist SD 1°" in caption
+    assert _pair_condition_label("shaft_rotation_sd", ref) == "Rotation SD 1°"
+    assert _comparison_title("shaft_rotation_sd") == "Shaft Rotation SD"
+
+
 def test_final_root_validation_requires_final_stage_expected_population_and_10k(
     tmp_path,
 ):
@@ -142,9 +158,7 @@ def test_original_protocol_validation_checks_exact_factorial_configs():
         {"cell": name, "config": json.loads(json.dumps(asdict(config)))}
         for name, config in matched_matrix_cells(n_shots=10_000, seed=20261009)
     ]
-    validate_original_matrix_protocol(
-        {"cells": cells}, protocol="original_primary"
-    )
+    validate_original_matrix_protocol({"cells": cells}, protocol="original_primary")
     altered = [dict(cell) for cell in cells]
     altered[0] = {**altered[0], "config": {**altered[0]["config"], "seed": 17}}
     with pytest.raises(ValueError, match="differ from the reviewed protocol"):
@@ -261,6 +275,211 @@ def test_density_dot_overlay_uses_deterministic_cap_without_truncating_density_d
     assert (indices[1:] > indices[:-1]).all()
 
 
+def test_unavailable_source_manifest_and_summary_are_rechecked_after_load(
+    tmp_path, monkeypatch
+):
+    import hashlib
+    from src.tools.shot_pattern_analysis import matched_supplement_pipeline as pipeline
+
+    root = tmp_path / "matrix"
+    cell_dir = root / "cell_unavailable"
+    cell_dir.mkdir(parents=True)
+    plan = root / "matrix_plan.json"
+    plan.write_text('{"cells": {"cell_unavailable": {}}}')
+    config = {"n_shots": 12, "seed": 5}
+    summary = cell_dir / "summary.json"
+    summary_bytes = json.dumps(
+        {"status": "unavailable", "config": config, "reason": "nonairborne"}
+    ).encode()
+    summary.write_bytes(summary_bytes)
+
+    def digest(data):
+        return hashlib.sha256(data).hexdigest()
+
+    manifest = cell_dir / "manifest.json"
+    manifest.write_text(
+        json.dumps({"files_sha256": {"summary.json": digest(summary_bytes)}})
+    )
+    inventory = tmp_path / "inventory.json"
+    inventory.write_text("{}")
+    ref = {
+        "cell": "alias_cell",
+        "alias_cell": "alias_cell",
+        "alias_of_primary": "cell_unavailable",
+        "execution_kind": "provenance_alias",
+        "status": "unavailable",
+        "source_root": str(root),
+        "config": config,
+        "requested_config": {**config, "target_x_m": 77.4},
+        "source_cell_manifest_sha256": digest(manifest.read_bytes()),
+        "source_summary_sha256": digest(summary_bytes),
+    }
+    hashes = {str(root): digest(plan.read_bytes())}
+
+    pipeline._recheck_source_inputs(
+        [ref], hashes, inventory, digest(inventory.read_bytes())
+    )
+    summary.write_text('{"status": "completed"}')
+    monkeypatch.setattr(pipeline, "manifest_files_match", lambda path: True)
+    with pytest.raises(ValueError, match="summary changed"):
+        pipeline._recheck_source_inputs(
+            [ref], hashes, inventory, digest(inventory.read_bytes())
+        )
+    summary.write_bytes(summary_bytes)
+    manifest.write_text('{"files_sha256": {}}')
+    monkeypatch.undo()
+    with pytest.raises(ValueError, match="manifest changed"):
+        pipeline._recheck_source_inputs(
+            [ref], hashes, inventory, digest(inventory.read_bytes())
+        )
+
+
+def test_verified_supplement_loader_rejects_changed_report_artifacts(
+    tmp_path, monkeypatch
+):
+    import hashlib
+    from src.tools.shot_pattern_analysis import matched_supplement_pipeline as pipeline
+
+    output = tmp_path / "supplement"
+    output.mkdir()
+    files = {
+        "report": "REPORT_SUPPLEMENT.json",
+        "inventory": "REPORT_SUPPLEMENT.csv",
+        "control_aliases": "control_aliases.json",
+        "comparisons_json": "REPORT_SUPPLEMENT_COMPARISONS.json",
+        "comparisons_csv": "REPORT_SUPPLEMENT_COMPARISONS.csv",
+        "comparison_markdown": "REPORT_SUPPLEMENT_COMPARISONS.md",
+        "original_source_inventory": "REPORT_ORIGINAL_SOURCE_INVENTORY.csv",
+        "figure_ledger": "REPORT_SUPPLEMENT_FIGURES.json",
+    }
+    figure = output / "figures" / "demo.png"
+    figure.parent.mkdir()
+    figure.write_bytes(b"fixture-image")
+    for name in files.values():
+        payload = (
+            {
+                "schema": "matched-supplement-figure-ledger/1",
+                "figures": [
+                    {
+                        "relative_path": "demo.png",
+                        "sha256": hashlib.sha256(figure.read_bytes()).hexdigest(),
+                    }
+                ],
+            }
+            if name == "REPORT_SUPPLEMENT_FIGURES.json"
+            else {}
+        )
+        (output / name).write_text(json.dumps(payload) + "\n")
+    receipt = {
+        "schema": "matched-supplement-pipeline-receipt/1",
+        "stage": "final",
+        "artifact_sha256": {
+            key: hashlib.sha256((output / path).read_bytes()).hexdigest()
+            for key, path in files.items()
+        },
+        "postprocessing_source_sha256": {},
+        "source_transition_receipt_path": str(output / "transition.json"),
+        "source_transition_receipt_sha256": "transition",
+    }
+    (output / "REPORT_SUPPLEMENT_PIPELINE.json").write_text(json.dumps(receipt))
+    monkeypatch.setattr(pipeline, "_report_source_hashes", dict)
+    monkeypatch.setattr(pipeline, "_recheck_transition_evidence", lambda *args: None)
+    monkeypatch.setattr(pipeline, "_recheck_receipt_sources", lambda *args: None)
+    loaded = pipeline.load_verified_supplement_artifacts(output)
+    assert set(loaded) == {"report", "comparisons", "figure_ledger", "receipt"}
+    assert loaded["figure_ledger"]["figures"][0]["relative_path"] == "demo.png"
+    report_path = output / files["report"]
+    original_report = report_path.read_bytes()
+
+    def mutate_report_during_source_check(_receipt):
+        report_path.write_text('{"changed_during_check": true}\n')
+
+    monkeypatch.setattr(
+        pipeline, "_recheck_receipt_sources", mutate_report_during_source_check
+    )
+    with pytest.raises(ValueError, match="report artifact changed during verification"):
+        pipeline.load_verified_supplement_artifacts(output)
+    report_path.write_bytes(original_report)
+
+    receipt_path = output / "REPORT_SUPPLEMENT_PIPELINE.json"
+    original_receipt = receipt_path.read_bytes()
+
+    def mutate_receipt_during_source_check(_receipt):
+        receipt_path.write_bytes(original_receipt + b" ")
+
+    monkeypatch.setattr(
+        pipeline, "_recheck_receipt_sources", mutate_receipt_during_source_check
+    )
+    with pytest.raises(
+        ValueError, match="pipeline receipt changed during verification"
+    ):
+        pipeline.load_verified_supplement_artifacts(output)
+    receipt_path.write_bytes(original_receipt)
+    monkeypatch.setattr(pipeline, "_recheck_receipt_sources", lambda *args: None)
+
+    figure.write_bytes(b"changed-image")
+    with pytest.raises(ValueError, match="figure artifact changed"):
+        pipeline.load_verified_supplement_artifacts(output)
+    figure.write_bytes(b"fixture-image")
+    (output / "REPORT_SUPPLEMENT.json").write_text('{"tampered": true}\n')
+    with pytest.raises(ValueError, match="report artifact changed: report"):
+        pipeline.load_verified_supplement_artifacts(output)
+
+
+def test_source_snapshot_covers_unavailable_summary_manifest_and_executed_config(
+    tmp_path,
+):
+    import hashlib
+    from src.tools.shot_pattern_analysis.matched_supplement_pipeline import (
+        _assert_source_cell_hashes,
+        _source_cell_hashes,
+    )
+
+    root = tmp_path / "matrix"
+    cell_root = root / "cell-unavailable"
+    cell_root.mkdir(parents=True)
+    summary = cell_root / "summary.json"
+    summary.write_text('{"status":"unavailable","config":{"seed":5}}')
+    manifest = cell_root / "manifest.json"
+    manifest.write_text("{}")
+    ref = {
+        "source_protocol": "original_primary",
+        "cell": "cell-unavailable",
+        "source_root": str(root),
+        "status": "unavailable",
+        "config": {"seed": 5},
+        "requested_config": {"seed": 5, "target_x_m": 77.4},
+        "source_cell_manifest_sha256": hashlib.sha256(
+            manifest.read_bytes()
+        ).hexdigest(),
+        "source_summary_sha256": hashlib.sha256(summary.read_bytes()).hexdigest(),
+        "source_csv_sha256": None,
+    }
+    snapshot = _source_cell_hashes([ref])
+    _assert_source_cell_hashes([ref], snapshot)
+    summary.write_text(
+        '{"status":"unavailable","config":{"seed":5},"reason":"changed"}'
+    )
+    changed = {
+        **ref,
+        "source_summary_sha256": hashlib.sha256(summary.read_bytes()).hexdigest(),
+    }
+    with pytest.raises(ValueError, match="source-cell artifacts changed"):
+        _assert_source_cell_hashes([changed], snapshot)
+    summary.write_text('{"status":"unavailable","config":{"seed":5}}')
+    manifest.write_text('{"files_sha256": {}}')
+    changed_manifest = {
+        **ref,
+        "source_cell_manifest_sha256": hashlib.sha256(
+            manifest.read_bytes()
+        ).hexdigest(),
+    }
+    with pytest.raises(ValueError, match="source-cell artifacts changed"):
+        _assert_source_cell_hashes([changed_manifest], snapshot)
+    with pytest.raises(ValueError, match="source-cell artifacts changed"):
+        _assert_source_cell_hashes([{**ref, "config": {"seed": 6}}], snapshot)
+
+
 def test_cell_figure_ledger_keeps_density_and_overhead_exports_distinct(
     tmp_path, monkeypatch
 ):
@@ -279,9 +498,19 @@ def test_cell_figure_ledger_keeps_density_and_overhead_exports_distinct(
         writer.writerow(("pattern", "shot_index", "status", "carry_x_m", "carry_y_m"))
         for pattern, supported_n in (("Straight", 8), ("Draw", 9), ("Fade", 10)):
             for index in range(10):
-                writer.writerow((pattern, index, "supported" if index < supported_n else "off_face", 1.0, 2.0))
+                writer.writerow(
+                    (
+                        pattern,
+                        index,
+                        "supported" if index < supported_n else "off_face",
+                        1.0,
+                        2.0,
+                    )
+                )
     (cell_dir / "flight_samples.json").write_text(
-        json.dumps({"trajectories": {p: [[0.0, 0.0]] for p in ("Straight", "Draw", "Fade")}})
+        json.dumps(
+            {"trajectories": {p: [[0.0, 0.0]] for p in ("Straight", "Draw", "Fade")}}
+        )
     )
     ref = _ref(cell, "pitching_wedge", 0, 2, 1, protocol="pw-primary-face-bounds/1")
     ref["source_root"] = str(root)
@@ -305,18 +534,28 @@ def test_cell_figure_ledger_keeps_density_and_overhead_exports_distinct(
     monkeypatch.setattr(
         figures,
         "write_academic_dispersion_figure",
-        lambda *args, **kwargs: density_metadata.append(kwargs["metadata"]) or write_group(args[1]),
+        lambda *args, **kwargs: (
+            density_metadata.append(kwargs["metadata"]) or write_group(args[1])
+        ),
     )
-    monkeypatch.setattr(figures, "write_overhead_trajectory_figure", lambda *args, **kwargs: write_group(args[1]))
+    monkeypatch.setattr(
+        figures,
+        "write_overhead_trajectory_figure",
+        lambda *args, **kwargs: write_group(args[1]),
+    )
     ledger = module._render_cell_figures(ref, tmp_path / "figures")
 
     kinds = [entry["figure_kind"] for entry in ledger]
     assert len(ledger) == 6
     assert len(set(kinds)) == 6
     assert {kind.split("_")[0] for kind in kinds} == {"density", "overhead"}
-    density_entry = next(item for item in ledger if item["figure_kind"] == "density_png")
+    density_entry = next(
+        item for item in ledger if item["figure_kind"] == "density_png"
+    )
     assert density_entry["valid_n_by_pattern"] == {"Straight": 8, "Draw": 9, "Fade": 10}
-    overhead_entry = next(item for item in ledger if item["figure_kind"] == "overhead_png")
+    overhead_entry = next(
+        item for item in ledger if item["figure_kind"] == "overhead_png"
+    )
     assert overhead_entry["source_kind"] == "saved_illustrative_trajectories"
     assert overhead_entry["valid_n_by_pattern"] is None
 
@@ -346,15 +585,13 @@ def test_pair_figure_ledger_keeps_overhead_when_common_density_support_is_missin
     monkeypatch.setattr(
         figures,
         "_supported_endpoints",
-            lambda *args: (
-                {
-                    pattern: [(pattern_index, 1.0, 0.0)]
-                    for pattern_index, pattern in enumerate(
-                        ("Straight", "Draw", "Fade")
-                    )
-                },
-                {},
-            ),
+        lambda *args: (
+            {
+                pattern: [(pattern_index, 1.0, 0.0)]
+                for pattern_index, pattern in enumerate(("Straight", "Draw", "Fade"))
+            },
+            {},
+        ),
     )
 
     def write_overhead(*args, **kwargs):
@@ -570,16 +807,20 @@ def test_pair_density_and_overhead_render_shared_condition_panels(
     first = _ref("a", "pitching_wedge", 0, 1, 1, target=12.0)
     second = _ref("b", "pitching_wedge", 0, 2, 1, target=12.0)
     rng = np.random.default_rng(3)
+    first_label = "Rotation SD 1°"
+    second_label = "Rotation SD 2°"
     point_sets = {
         f"{pattern} · {condition}": rng.normal(size=(40, 2)).tolist()
         for pattern in ("Straight", "Draw", "Fade")
-        for condition in ("First", "Second")
+        for condition in (first_label, second_label)
     }
     density_paths = _write_pair_density_figure(
         point_sets,
         first=first,
         second=second,
         comparison="curve_strength",
+        first_label=first_label,
+        second_label=second_label,
         target_x=12.0,
         common_n=40,
         output_stem=tmp_path / "curve-density",
@@ -590,25 +831,26 @@ def test_pair_density_and_overhead_render_shared_condition_panels(
             [[0.0, 0.0], [6.0, -0.2], [12.0, 0.0]],
         ]
         for pattern in ("Straight", "Draw", "Fade")
-        for condition in ("First", "Second")
+        for condition in (first_label, second_label)
     }
     overhead_paths = _write_pair_overhead_figure(
         trajectories,
         first=first,
         second=second,
         comparison="curve_strength",
+        first_label=first_label,
+        second_label=second_label,
         target_x=12.0,
         output_stem=tmp_path / "curve-overhead",
     )
-    assert {"png", "pdf", "svg", "social_png"} <= density_paths.keys()
+    assert {"png", "pdf", "svg"} == density_paths.keys()
+    assert "social_png" not in density_paths
     assert {"png", "pdf", "svg", "social_png"} <= overhead_paths.keys()
     namespaced = {
         **namespace_figure_paths("density", density_paths),
         **namespace_figure_paths("overhead", overhead_paths),
     }
-    assert len(namespaced) == 8
+    assert len(namespaced) == 7
     assert {key.split("_", 1)[0] for key in namespaced} == {"density", "overhead"}
-    with Image.open(density_paths["social_png"]) as image:
-        assert image.size == (1920, 1080)
     with Image.open(overhead_paths["social_png"]) as image:
         assert image.size == (1920, 1080)

@@ -254,6 +254,11 @@ def _cell_reference(
         "summary": cell,
         "source_plan_sha256": report["plan_sha256"],
         "source_cell_manifest_sha256": report["cell_manifest_sha256"].get(name),
+        "source_summary_sha256": (
+            _sha256(cell_root / "summary.json")
+            if (cell_root / "summary.json").is_file()
+            else None
+        ),
         "source_csv_sha256": _sha256(csv_path) if csv_path.is_file() else None,
     }
 
@@ -663,9 +668,7 @@ def render_supplement_comparisons(results: list[dict[str, Any]]) -> str:
                     "radial_difference_m": radial.get("estimate", ""),
                     "radial_difference_lower_95_m": radial.get("lower_95", ""),
                     "radial_difference_upper_95_m": radial.get("upper_95", ""),
-                    "course_sg_paired_change_strokes": course_sg.get(
-                        "estimate", ""
-                    ),
+                    "course_sg_paired_change_strokes": course_sg.get("estimate", ""),
                     "course_sg_paired_change_lower_95_strokes": course_sg.get(
                         "lower_95", ""
                     ),
