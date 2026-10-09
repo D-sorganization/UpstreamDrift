@@ -13,11 +13,12 @@ def _load_api():
     except (ImportError, OSError) as exc:
         pytest.skip(f"matplotlib unavailable: {exc}")
     from src.tools.shot_pattern_analysis.matched_report_plots import (
+        _format_cell_metric,
         export_matched_matrix_heatmaps,
         metric_value,
     )
 
-    return export_matched_matrix_heatmaps, metric_value
+    return export_matched_matrix_heatmaps, metric_value, _format_cell_metric
 
 
 def _synthetic_cells():
@@ -78,7 +79,7 @@ def _synthetic_cells():
 
 
 def test_metric_extraction_distinguishes_physics_support_and_conditional_sg() -> None:
-    _, metric_value = _load_api()
+    _, metric_value, _ = _load_api()
     cell = _synthetic_cells()[0]
 
     assert metric_value(cell, "target_rmse_m", "Draw") == pytest.approx(5.0)
@@ -89,11 +90,22 @@ def test_metric_extraction_distinguishes_physics_support_and_conditional_sg() ->
     assert metric_value(unavailable, "target_rmse_m", "Draw") is None
 
 
+def test_conditional_sg_annotation_uses_common_paired_population() -> None:
+    _, _, format_cell_metric = _load_api()
+    cell = _synthetic_cells()[0]
+    cell["course_scoring"].update({"paired_n": 8, "total_n": 12})
+
+    assert format_cell_metric(cell, "conditional_sg", "Draw", 0.02) == (
+        "+0.02\nconditional n=8/12"
+    )
+    assert format_cell_metric(cell, "target_rmse_m", "Draw", 5.0) == "5.00\nn=11/12"
+
+
 @pytest.mark.slow
 def test_report_exports_supported_metric_heatmaps_and_marks_unavailable_cells(
     tmp_path,
 ) -> None:
-    export, _ = _load_api()
+    export, _, _ = _load_api()
     paths = export(
         _synthetic_cells(),
         tmp_path,
@@ -112,7 +124,7 @@ def test_report_exports_supported_metric_heatmaps_and_marks_unavailable_cells(
 
 
 def test_export_rejects_unknown_metric_or_format(tmp_path) -> None:
-    export, _ = _load_api()
+    export, _, _ = _load_api()
     with pytest.raises(ValueError, match="known metric"):
         export(_synthetic_cells(), tmp_path, selection_label="Pilot", metrics=("bad",))
     with pytest.raises(ValueError, match="png, pdf, svg"):
@@ -120,7 +132,7 @@ def test_export_rejects_unknown_metric_or_format(tmp_path) -> None:
 
 
 def test_report_rejects_duplicate_or_incomplete_matrix_axes(tmp_path) -> None:
-    export, _ = _load_api()
+    export, _, _ = _load_api()
     cells = _synthetic_cells()
 
     with pytest.raises(ValueError, match="duplicate matrix cell"):

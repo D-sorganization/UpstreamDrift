@@ -157,6 +157,36 @@ def _format_metric(metric: str, value: float, stats: Mapping[str, Any]) -> str:
     return f"{value:.2f}" + (f"\nn={count}" if count else "")
 
 
+def _format_cell_metric(
+    cell: Mapping[str, Any], metric: str, pattern: str, value: float
+) -> str:
+    """Format one annotation with the population used by that metric."""
+    summary = cell.get("summary")
+    pattern_stats = summary.get(pattern) if isinstance(summary, Mapping) else None
+    if not isinstance(pattern_stats, Mapping):
+        pattern_stats = {}
+    if metric != "conditional_sg":
+        return _format_metric(metric, value, pattern_stats)
+
+    scoring = cell.get("course_scoring")
+    if not isinstance(scoring, Mapping):
+        return _format_metric(metric, value, {})
+    paired_n = scoring.get("paired_n")
+    total_n = scoring.get("total_n")
+    if (
+        isinstance(paired_n, int)
+        and not isinstance(paired_n, bool)
+        and isinstance(total_n, int)
+        and not isinstance(total_n, bool)
+    ):
+        return _format_metric(
+            metric,
+            value,
+            {"supported_n": paired_n, "total_n": total_n},
+        )
+    return _format_metric(metric, value, {})
+
+
 def _draw_metric(
     cells: Sequence[Mapping[str, Any]],
     leans: tuple[float, ...],
@@ -275,9 +305,7 @@ def _draw_metric(
                         )
                         annotation = f"{label}\n{textwrap.fill(str(reason), width=18)}"
                     else:
-                        annotation = _format_metric(
-                            metric, value, stats if isinstance(stats, Mapping) else {}
-                        )
+                        annotation = _format_cell_metric(cell, metric, pattern, value)
                         axis.text(
                             j,
                             i,
