@@ -1,0 +1,81 @@
+"""Contract checks for condition-pair social figures using canonical density."""
+
+from pathlib import Path
+
+import numpy as np
+import pytest
+
+from src.tools.shot_pattern_analysis import matched_pair_social as social
+
+
+def _points():
+    return {
+        f"{pattern} · {condition}": np.array([(1.0, 2.0), (3.0, 4.0)])
+        for pattern in ("Straight", "Draw", "Fade")
+        for condition in ("SD 1°", "SD 2°")
+    }
+
+
+def _render(points, tmp_path):
+    return social.write_pair_social_density(
+        points,
+        tmp_path / "comparison",
+        condition_labels=("SD 1°", "SD 2°"),
+        scenario="Lean 5° · Curve ×1 · Combined 2",
+        social_club="Driver",
+        target_point_m=(180.0, 0.0),
+        total_n=10,
+    )
+
+
+def test_social_pairs_reuse_canonical_density_without_changing_coordinates(
+    monkeypatch, tmp_path
+):
+    calls = []
+
+    def capture(points, stem, **kwargs):
+        calls.append((points, stem, kwargs))
+        return {kind: Path(f"{stem}.{kind}") for kind in ("png", "pdf", "svg")}
+
+    monkeypatch.setattr(social, "write_academic_dispersion_figure", capture)
+    points = _points()
+    outputs = _render(points, tmp_path)
+    assert len(outputs) == len(set(outputs.values())) == 9
+    for pattern, (plotted, _, kwargs) in zip(
+        ("Straight", "Draw", "Fade"), calls, strict=True
+    ):
+        assert tuple(plotted) == ("SD 1°", "SD 2°")
+        for condition in plotted:
+            np.testing.assert_array_equal(
+                plotted[condition], points[f"{pattern} · {condition}"]
+            )
+        assert kwargs["presentation"] == "social"
+        assert kwargs["target_point_m"] == (180.0, 0.0)
+        assert pattern in kwargs["scenario"]
+        metadata = kwargs["metadata"]
+        assert metadata["valid_shots_by_pattern"] == {"SD 1°": 2, "SD 2°": 2}
+        assert metadata["total_shots_by_pattern"] == {"SD 1°": 10, "SD 2°": 10}
+        assert "All Six" in metadata["Population"]
+        assert "Within This Figure" in metadata["Scales"]
+
+
+@pytest.mark.parametrize("mutation", ["missing", "extra", "unequal", "nan"])
+def test_invalid_six_population_data_fails_before_any_export(
+    monkeypatch, tmp_path, mutation
+):
+    calls = []
+    monkeypatch.setattr(
+        social, "write_academic_dispersion_figure", lambda *a, **k: calls.append(a)
+    )
+    points = _points()
+    if mutation == "missing":
+        points.pop("Straight · SD 1°")
+    elif mutation == "extra":
+        points["Unknown"] = points["Straight · SD 1°"]
+    elif mutation == "unequal":
+        points["Straight · SD 1°"] = np.array([(1.0, 2.0)])
+    else:
+        points["Straight · SD 1°"][0, 0] = np.nan
+    with pytest.raises(ValueError):
+        _render(points, tmp_path)
+    assert not calls
