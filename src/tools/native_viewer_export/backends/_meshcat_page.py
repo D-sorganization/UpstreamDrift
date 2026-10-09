@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from importlib.util import find_spec
+import math
 import os
 from pathlib import Path
 from types import TracebackType
@@ -10,6 +11,8 @@ from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
+
+from src.shared.python.golf_view_presets import VIEWER_FOV_Y_RAD
 
 Image8 = NDArray[np.uint8]
 CHROMIUM_ARGS = (
@@ -30,6 +33,12 @@ _HIDE_FIXED_JS = (
     "e.style.display='none';}}"
 )
 _ONE_FRAME_JS = "()=>new Promise(r=>requestAnimationFrame(r))"
+# three.js defaults to 75 deg, which left the golfer at about a quarter of the
+# frame height (NV-9, #11697); every viewer uses the shared field of view.
+_SET_FOV_JS = (
+    "d=>{if(typeof viewer==='undefined'||!viewer.camera)return false;"
+    "viewer.camera.fov=d;viewer.camera.updateProjectionMatrix();return true;}"
+)
 
 
 def preferred_chromium() -> str | None:
@@ -70,14 +79,26 @@ def playwright_unavailable_reason() -> str | None:
 
 
 class MeshcatPage:
-    """Context manager around a headless Chromium page showing a MeshCat URL."""
+    """Context manager around a headless Chromium page showing a MeshCat URL.
+
+    The viewer camera gets the vertical field of view ``fov_y_rad`` (default
+    the shared ``VIEWER_FOV_Y_RAD``) on entry.
+    """
 
     def __init__(
-        self, url: str, width: int, height: int, settle_ms: int = 2500
+        self,
+        url: str,
+        width: int,
+        height: int,
+        settle_ms: int = 2500,
+        fov_y_rad: float = VIEWER_FOV_Y_RAD,
     ) -> None:
         if width < 1 or height < 1:
             raise ValueError("width and height must be positive")
+        if not (math.isfinite(fov_y_rad) and 0.0 < fov_y_rad < math.pi):
+            raise ValueError(f"fov_y_rad must lie in (0, pi), got {fov_y_rad}")
         self._url, self._w, self._h, self._settle = url, width, height, settle_ms
+        self.fov_y_rad = fov_y_rad
         self._pw: Any = None
         self._browser: Any = None
         self._page: Any = None
@@ -97,6 +118,7 @@ class MeshcatPage:
         self._page.wait_for_timeout(self._settle)
         self._page.add_style_tag(content=_HIDE_CONTROLS_CSS)
         self._page.evaluate(_HIDE_FIXED_JS)
+        self.apply_fov()
         return self
 
     def __exit__(
@@ -111,6 +133,14 @@ class MeshcatPage:
         ):
             if closer is not None:
                 closer()
+
+    def apply_fov(self) -> None:
+        """Set the viewer camera's vertical field of view to ``fov_y_rad``.
+
+        Raises ``RuntimeError`` when the page has no MeshCat viewer camera.
+        """
+        if not self._page.evaluate(_SET_FOV_JS, math.degrees(self.fov_y_rad)):
+            raise RuntimeError("the MeshCat page has no viewer camera to set")
 
     def look_at(self, target_three: tuple[float, float, float]) -> None:
         """Aim the orbit controls at ``target_three`` (viewer Y-up coordinates)."""
