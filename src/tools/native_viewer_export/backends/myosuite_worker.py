@@ -30,6 +30,9 @@ from src.shared.python.golf_view_presets import mujoco_camera_params
 from src.shared.python.motion_matching.same_input import InputBundle
 from src.shared.python.motion_matching.visual_skeleton import derive_visual_skeleton
 from src.tools.native_viewer_export.backends._worker_job import WorkerJob
+from src.tools.native_viewer_export.backends.myosuite_compat import (
+    import_mj_renderer,
+)
 
 SCENE_FILE = ("simhive", "myo_sim", "scene", "myosuite_quad.xml")
 
@@ -122,7 +125,8 @@ def make_camera(mujoco: Any, view: str, job: WorkerJob) -> Any:
 def main(job_path: str) -> None:
     os.environ.setdefault("MUJOCO_GL", "egl")
     import mujoco
-    from myosuite.envs.env_base import MujocoEnv
+
+    mj_renderer_cls = import_mj_renderer()
 
     job = WorkerJob.load(Path(job_path))
     bundle = InputBundle.load(Path(job.bundle_path))
@@ -133,13 +137,14 @@ def main(job_path: str) -> None:
     with tempfile.TemporaryDirectory() as tmp:
         path = Path(tmp) / "scene.xml"
         path.write_text(scene_xml, encoding="utf-8")
-        env = MujocoEnv(str(path))
-    model, data = env.mj_model, env.mj_data
+        model = mujoco.MjModel.from_xml_path(str(path))
+    data = mujoco.MjData(model)
+    myo_renderer = mj_renderer_cls(model, data)
     adr = [model.joint(n).qposadr[0] for n in bundle.coordinate_order]
     # warm up MyoSuite's own renderer, then render through it with glyphs added
-    env.mj_renderer.render_offscreen(width=job.width, height=job.height, camera_id=-1)
-    renderer = env.mj_renderer._renderer  # noqa: SLF001 - the env's mujoco.Renderer
-    option = env.mj_renderer._scene_option  # noqa: SLF001
+    myo_renderer.render_offscreen(width=job.width, height=job.height, camera_id=-1)
+    renderer = myo_renderer._renderer  # noqa: SLF001 - the env's mujoco.Renderer
+    option = myo_renderer._scene_option  # noqa: SLF001
     glyph_sets = job.load_glyph_sets()
     cams = {v: make_camera(mujoco, v, job) for v in job.views}
     for pos, k in enumerate(job.indices):
