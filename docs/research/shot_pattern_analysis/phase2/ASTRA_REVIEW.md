@@ -565,3 +565,34 @@ supported population. The regression distinguishes SG n=8/12 from geometric
 n=11/12. Independent source inspection confirms the change affects presentation
 only. The refreshed full frozen test receipt and immutable run-acceptance note
 are the remaining administrative record of this pre-run gate.
+
+## Archive Integrity Review: Issue #11988 Follow-Up
+
+Independent review of `scripts/research/shot_pattern_analysis/archive_data.py`
+confirmed deterministic timestamps/permissions and ZIP_STORED size accounting:
+76 bytes of local/central headers plus twice the UTF-8 member-name length per
+file, and 22 bytes of end record for the supported non-ZIP64 bundles. All seven
+existing tests passed. Packaging is a byte-preservation mechanism, not physical
+or statistical acceptance.
+
+Two missing contracts were reproduced and reported under the existing #11988
+scope. First, mutating an already copied source file and adding another file
+while a later file was copied still published an archive whose inventory no
+longer matched the complete source. Per-file before/after checks did not detect
+this; the final whole-tree inventory and hashes must be rechecked before publish.
+Second, a crafted ZIP with a Unix symlink member and self-consistent manifest
+passed verification. Verification must reject nonregular ZIP metadata rather
+than relying only on safe member names and payload hashes. No payload was
+extracted in this test. The existing regular-file pilot bundles are not invalidated
+by these reproductions. The owner is adding three red-to-green regressions and
+the narrow checks before final packaging; independent follow-up remains pending.
+
+All three archive findings are now resolved. A further platform-portability check
+identified Windows drive-qualified names (`C:/escape` and `C:escape`), which
+PurePosixPath alone did not reject; the verifier now rejects Windows drives too.
+Independent execution confirms 12 tests pass. The final verifier rechecked all
+2,178 primary-pilot and 426 control-pilot payloads without changing any bundle.
+`validation/independent_archive_review.json` binds the reviewed implementation,
+tests and bundle manifests. This accepts byte-preserving packaging under a
+quiescent source and trusted manifest; it is not a filesystem snapshot lock,
+independent authenticity guarantee, or scientific acceptance.
