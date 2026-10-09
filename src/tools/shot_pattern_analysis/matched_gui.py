@@ -126,6 +126,19 @@ class MatchedStudyWidget(QtWidgets.QWidget):
         self.club_mass = QtWidgets.QDoubleSpinBox()
         self.club_mass.setRange(0.05, 1.0)
         self.club_mass.setDecimals(3)
+        self.contact_law = QtWidgets.QComboBox()
+        self.contact_law.addItem(
+            "Incremental Coulomb (Energetic Restitution)",
+            "incremental_coulomb_energetic",
+        )
+        self.contact_law.addItem(
+            "Maximum-Dissipation Impulse (Newton Restitution)",
+            "maximum_dissipation_newton",
+        )
+        self.contact_law_help = QtWidgets.QLabel(
+            "Contact-law alternatives are numerical model assumptions; neither has been validated against measured club-ball impacts."
+        )
+        self.contact_law_help.setWordWrap(True)
         for widget in (
             self.club_speed_mph,
             self.loft,
@@ -134,6 +147,7 @@ class MatchedStudyWidget(QtWidgets.QWidget):
             self.club_mass,
         ):
             widget.valueChanged.connect(self._mark_custom)
+        self.contact_law.currentIndexChanged.connect(self._mark_custom)
         self.static_loft_label = QtWidgets.QLabel()
         self.assumption_label = QtWidgets.QLabel()
         self.assumption_label.setWordWrap(True)
@@ -143,6 +157,8 @@ class MatchedStudyWidget(QtWidgets.QWidget):
         club_form.addRow("Nominal Shaft Lean (°)", self.shaft_lean)
         club_form.addRow("Nominal Attack Angle (°)", self.attack_angle)
         club_form.addRow("Head Mass (kg)", self.club_mass)
+        club_form.addRow("Contact Law", self.contact_law)
+        club_form.addRow(self.contact_law_help)
         club_form.addRow(self.static_loft_label)
         club_form.addRow(self.assumption_label)
         root.addWidget(club_box)
@@ -258,6 +274,9 @@ class MatchedStudyWidget(QtWidgets.QWidget):
         self.shaft_lean.setValue(config.shaft_lean_deg)
         self.attack_angle.setValue(config.attack_angle_deg)
         self.club_mass.setValue(config.clubhead_mass_kg)
+        self.contact_law.setCurrentIndex(
+            self.contact_law.findData(config.contact_law)
+        )
         self.static_loft_label.setText(
             "Nominal Static Loft: The same face baseline is used for every pattern; delivery lean can change dynamic loft."
         )
@@ -283,6 +302,7 @@ class MatchedStudyWidget(QtWidgets.QWidget):
             shaft_lean_deg=self.shaft_lean.value(),
             attack_angle_deg=self.attack_angle.value(),
             clubhead_mass_kg=self.club_mass.value(),
+            contact_law=str(self.contact_law.currentData()),
         )
         self._update_assumption()
 
@@ -435,6 +455,9 @@ class MatchedStudyWidget(QtWidgets.QWidget):
         self.shaft_lean.setValue(request.club.shaft_lean_deg)
         self.attack_angle.setValue(request.club.attack_angle_deg)
         self.club_mass.setValue(request.club.clubhead_mass_kg)
+        self.contact_law.setCurrentIndex(
+            self.contact_law.findData(request.club.contact_law)
+        )
         self._applying_config = False
         self.shot_count.setValue(request.n_shots)
         self.seed.setValue(request.seed)

@@ -73,6 +73,20 @@ def test_modified_preset_keeps_club_scoring_context_and_custom_is_explicit(
     assert widget.cleanup()
 
 
+def test_contact_law_selector_records_the_selected_model_and_limitations(qapp) -> None:  # noqa: ANN001
+    widget = _study(qapp)
+    widget.contact_law.setCurrentIndex(
+        widget.contact_law.findData("maximum_dissipation_newton")
+    )
+
+    request = widget.build_experiment()
+
+    assert request.club.contact_law == "maximum_dissipation_newton"
+    assert "maximum-dissipation" in widget.contact_law.currentText().lower()
+    assert "neither has been validated" in widget.contact_law_help.text().lower()
+    assert widget.cleanup()
+
+
 def test_inputs_convert_units_and_approximate_face_path_rho_sign(qapp) -> None:  # noqa: ANN001
     widget = _study(qapp)
     widget.noise_inputs["shaft_rotation_deg"].setValue(1.7)
