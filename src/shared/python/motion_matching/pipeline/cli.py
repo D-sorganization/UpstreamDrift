@@ -954,7 +954,6 @@ def _simulate_and_receipt(
     return receipt
 
 
-@precondition(lambda args: args is not None, "args must not be None")
 @dataclass(frozen=True)
 class CalibratedRun:
     """Pipeline state after hip calibration, the address solve and leg scaling."""
@@ -966,6 +965,7 @@ class CalibratedRun:
     cal_res: _CalibrateAndScaleResult
 
 
+@precondition(lambda args: args is not None, "args must not be None")
 def calibrate_run(args: argparse.Namespace) -> CalibratedRun:
     """Run the pipeline through the calibrated address (no trajectory or dynamics)."""
     ctx = _init_pipeline(args)
@@ -1018,6 +1018,7 @@ def run_address_stage(args: argparse.Namespace) -> dict[str, Any]:
     return report
 
 
+@precondition(lambda args: args is not None, "args must not be None")
 def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
     """Execute the full-body ground support matching pipeline."""
     run = calibrate_run(args)
