@@ -13,6 +13,18 @@ This page restates it for review; the JSON is authoritative.
 
 ## Model-Capability Matrix
 
+### Current T01 Pin Reconciliation
+
+On 2026-10-09, the exact merged Tools pin
+`2e7665111b06f92ffbfe178b92d74d6a81c95388` was rechecked from UpstreamDrift
+`62951330bb` before advancing JSON reconciliation metadata. All 26 applicable
+matrix/capability checks passed, followed by a clean web build and actual
+served-bundle verification: 76 assets, five JavaScript assets, 2,801,426 bytes,
+the declared mount/revision and a missing-artifact 404. The receipt is
+`docs/development/feedback_controls/T01_IMPACT_SERVED_RECEIPT.json`.
+This updates exact-pin software evidence; predictive accuracy, physical
+reference data and cross-runtime numerical scenario parity remain open.
+
 Library: `src/shared/python/physics/impact_model` (SI units; caller's frame,
 face normal `n`; friction spin axis `t x n`). Each row is probed against the
 shipping code by the gate, so the table cannot describe a model that no
