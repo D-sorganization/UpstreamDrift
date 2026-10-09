@@ -48,7 +48,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `control_interface.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `core` | 0 | 0 | 0 | 23 | 0 | 0 |
 | `cors.py` | 0 | 0 | 0 | 0 | 1 | 0 |
-| `dashboard` | 0 | 0 | 0 | 14 | 0 | 0 |
+| `dashboard` | 0 | 0 | 0 | 15 | 0 | 0 |
 | `data_io` | 0 | 0 | 0 | 30 | 0 | 0 |
 | `data_processing` | 0 | 0 | 0 | 0 | 4 | 0 |
 | `data_processor` | 0 | 0 | 0 | 2 | 0 | 0 |
@@ -142,7 +142,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `video_timing` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 36 | 0 | 0 |
-| **Total** | **400** | **273** | **121** | **1735** | **796** | **673** |
+| **Total** | **400** | **273** | **121** | **1739** | **796** | **673** |
 
 ## Diverged Files by Package
 
