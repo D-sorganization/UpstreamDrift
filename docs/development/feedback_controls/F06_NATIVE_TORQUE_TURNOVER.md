@@ -34,6 +34,14 @@ commit, and rerun from this worktree without the override. Do not duplicate
 the schema or silently skip the dependency. Missing native bindings are an
 explicit provider skip, not physics evidence.
 
+The first standard pre-PR run passed four gates but failed all 12 native
+tests because the old pin lacks T01 and the local lab package shadows Tools.
+A test-first namespace regression (`433365b896`) reproduces the latter issue.
+The local lab namespace now appends the existing centrally resolved vendor
+lab paths, keeping the actual mocap implementation in Tools. That standalone
+namespace regression passes without an override. The native suite still
+requires the merged T01 pin; the failed standard gate is not reported green.
+
 ## Operational and Scientific Limits
 
 Exclusive process ownership is required because MuJoCo callbacks are global.
