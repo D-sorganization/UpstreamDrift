@@ -326,7 +326,8 @@ def solve_sparse_collocation(
     def gradient(variables: Array) -> Array:
         return np.asarray(cost.T @ (cost @ variables - target), dtype=float)
 
-    result = minimize(
+    # SciPy accepts a sparse Hessian here; its mypy overload omits that type.
+    result = minimize(  # type: ignore[call-overload]
         objective,
         initial,
         jac=gradient,
