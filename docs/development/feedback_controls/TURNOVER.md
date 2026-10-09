@@ -360,3 +360,7 @@ the old generated report incorrectly listed the T01 pin commit as its last
 touch. The submodule contains complete history and the old/new feature commits
 share their expected merge base. The complete generated JSON/Markdown output
 is retained; no generated authorship values were edited manually.
+
+## Exact Tools Main Pin Alignment
+
+This parent-branch repair aligns the `vendor/ud-tools` gitlink, `Cargo.toml` tools-core revision, and `requirements-tools.txt` source pin to the actual merged Tools main commit `86d0f28b1cc5acf61185e07e320c816c2d005512` (PR #5475). It changes dependency identity only; it does not add qualification evidence. Validate the three surfaces with `scripts/shared_tools/check_tools_pins.py`.
