@@ -27,6 +27,12 @@ report retains all inventory rows and
 the six required engines; it does not convert adapter execution into model,
 observation, physiological, or cross-engine qualification.
 
+Native output validation is split into bounded state-validation and receipt
+construction helpers so the public validator stays within the repository
+function budget. This structural refactor preserves the exact-state, input,
+policy, and horizon checks. Regression coverage mutates the first native
+numerical integration state and confirms that receipt construction is rejected.
+
 ## TDD and Validation
 
 RED: `python -m pytest -q tests/unit/engines/test_feedback_native_execution.py`
@@ -35,7 +41,8 @@ failed during collection because the strict F09c module did not exist.
 GREEN: the focused suite passes using independent synthetic bundle fixtures
 and an independently generated one-hinge MJCF executed through the actual
 MuJoCo native adapter. The fixture tests identity mismatch, tampered applied
-input, private model-path omission, unqualified receipts, and missing rows.
+input, tampered initial numerical state, private model-path omission,
+unqualified receipts, and missing rows.
 The native smoke exercises adapter wiring only; it is not production-model or
 physics qualification.
 

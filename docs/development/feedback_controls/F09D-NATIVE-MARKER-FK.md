@@ -48,3 +48,15 @@ introduced.
 
 The canonical design note is
 `manuals/upstreamdrift/chapters/28-native-marker-forward-kinematics.qmd`.
+
+## Updated F09c Parent Contract
+
+The branch now includes the F09c parent update by a real merge. Native replay
+output validation keeps bounded, separate state-validation and receipt
+construction helpers, preserving the exact numerical-state, input, policy,
+model, and horizon checks. The Tools mocap seam is extended only when the
+bundle type is consumed, so importing observation qualification does not alter
+the independent capture-tool availability probe. The combined focused
+replay, observation, capture, and marker suite passes on this merged branch;
+two Drake-specific cases skip in the local Windows environment because its
+optional `pydrake` bindings are absent.

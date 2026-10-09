@@ -224,5 +224,10 @@ See `docs/development/feedback_controls/F09F-MYOSUITE-NATIVE-EXCITATION.md`
 for exact validation and limits, and
 `manuals/upstreamdrift/chapters/31-myosuite-native-excitation-replay.qmd` for
 the canonical boundary note. Keep the pull request stacked/unarmed until its
-F09c, T01, and runtime-provider dependencies are in the required ancestry;
-none of this work closes F09 or F10.
+F09c, T01, F09e marker handling, and runtime-provider dependencies are in the
+required ancestry; none of this work closes F09 or F10. The integrated branch
+also contains the actual F09c ancestry merge and the F09e q/v-only Pinocchio
+state check. Combined replay, observation, capture, and marker tests pass; two
+Drake cases skip on local Windows because its optional `pydrake` bindings are
+absent. F09c's lazy Tools seam and bounded replay receipt validators preserve
+source behavior.

@@ -373,18 +373,84 @@ def _validate_myo_output(
         raise ValueError("MyoSuite wrapper state changed during wrapper-free replay")
 
 
-def _validate_output_state(
+def validate_native_replay_output(
+    row: ComparisonRow,
+    binding: NativeAdapterBinding,
+    bundle: Any,
+    output: NativeTorqueReplay
+    | NativeDrakeTorqueReplay
+    | NativePinocchioTorqueReplay
+    | NativeMyoSuiteExcitationReplay,
+) -> NativeExecutionReceipt:
+    """Validate the adapter's complete actual output against the frozen bundle."""
+    _validate_output_type(row, output)
+    _validate_bundle(row, binding, bundle)
+    times = np.asarray(output.time_seconds, dtype=np.float64)
+    expected_times = np.asarray(bundle.input_history.time_seconds, dtype=np.float64)
+    applied_field = (
+        "applied_muscle_excitations"
+        if row.engine == "myosuite"
+        else "applied_actuator_torques"
+    )
+    inputs = np.asarray(getattr(output, applied_field), dtype=np.float64)
+    expected_inputs = np.asarray(bundle.input_history.values[:-1], dtype=np.float64)
+    qpos = np.asarray(output.qpos, dtype=np.float64)
+    qvel = np.asarray(output.qvel, dtype=np.float64)
+    if times.shape != expected_times.shape or not np.array_equal(times, expected_times):
+        raise ValueError("native output does not cover the exact full time grid")
+    if inputs.shape != expected_inputs.shape or not np.array_equal(
+        inputs, expected_inputs
+    ):
+        raise ValueError("native output actual inputs differ from frozen bundle")
+    if row.engine != "myosuite":
+        generalized_effort = np.asarray(output.generalized_actuator_torques)
+        if generalized_effort.shape != (
+            len(inputs),
+            qvel.shape[1] if qvel.ndim == 2 else -1,
+        ):
+            raise ValueError("native generalized actuator effort dimensions differ")
+    _validate_native_output_state(row, bundle, output, times, inputs, qpos, qvel)
+    if (
+        output.input_sha256 != bundle.applied_input_sha256
+        or output.policy_sha256 != bundle.policy_sha256
+    ):
+        raise ValueError("native output input or executed policy digest differs")
+    output_sha = _output_digest(output)
+    return _native_execution_receipt(
+        row, binding, bundle, times, inputs, qpos, qvel, output_sha
+    )
+
+
+def _validate_native_output_state(
     row: ComparisonRow,
     bundle: Any,
-    output: Any,
+    output: NativeTorqueReplay
+    | NativeDrakeTorqueReplay
+    | NativePinocchioTorqueReplay
+    | NativeMyoSuiteExcitationReplay,
     times: NDArray[np.float64],
     inputs: NDArray[np.float64],
     qpos: NDArray[np.float64],
     qvel: NDArray[np.float64],
 ) -> None:
-    """Compare the complete native output state with T01's initial payload."""
+    """Check full physical and numerical state against the frozen bundle."""
+    if (
+        qpos.ndim != 2
+        or qvel.ndim != 2
+        or qpos.shape[0] != len(times)
+        or qvel.shape[0] != len(times)
+    ):
+        raise ValueError("native output state does not cover the full horizon")
+    if qpos.shape[1] <= 0 or qvel.shape[1] <= 0:
+        raise ValueError("native qpos and qvel dimensions must be positive")
     state_component = {item.component_id: item.values for item in bundle.initial_state}
     if row.engine == "myosuite":
+        from src.engines.physics_engines.myosuite.python.native_excitation_replay import (
+            NativeMyoSuiteExcitationReplay,
+        )
+
+        if not isinstance(output, NativeMyoSuiteExcitationReplay):
+            raise ValueError("MyoSuite native adapter returned an unknown output type")
         _validate_myo_output(output, times, inputs)
         expected_components = (
             "qpos",
@@ -457,61 +523,20 @@ def _validate_output_state(
         )
 
 
-def validate_native_replay_output(
+def _native_execution_receipt(
     row: ComparisonRow,
     binding: NativeAdapterBinding,
     bundle: Any,
-    output: NativeTorqueReplay
-    | NativeDrakeTorqueReplay
-    | NativePinocchioTorqueReplay
-    | NativeMyoSuiteExcitationReplay,
+    times: NDArray[np.float64],
+    inputs: NDArray[np.float64],
+    qpos: NDArray[np.float64],
+    qvel: NDArray[np.float64],
+    output_sha: str,
 ) -> NativeExecutionReceipt:
-    """Validate the adapter's complete actual output against the frozen bundle."""
-    _validate_output_type(row, output)
-    _validate_bundle(row, binding, bundle)
-    times = np.asarray(output.time_seconds, dtype=np.float64)
-    expected_times = np.asarray(bundle.input_history.time_seconds, dtype=np.float64)
-    applied_field = (
-        "applied_muscle_excitations"
-        if row.engine == "myosuite"
-        else "applied_actuator_torques"
-    )
-    inputs = np.asarray(getattr(output, applied_field), dtype=np.float64)
-    expected_inputs = np.asarray(bundle.input_history.values[:-1], dtype=np.float64)
-    qpos = np.asarray(output.qpos, dtype=np.float64)
-    qvel = np.asarray(output.qvel, dtype=np.float64)
-    if times.shape != expected_times.shape or not np.array_equal(times, expected_times):
-        raise ValueError("native output does not cover the exact full time grid")
-    if inputs.shape != expected_inputs.shape or not np.array_equal(
-        inputs, expected_inputs
-    ):
-        raise ValueError("native output actual inputs differ from frozen bundle")
-    if (
-        qpos.ndim != 2
-        or qvel.ndim != 2
-        or qpos.shape[0] != len(times)
-        or qvel.shape[0] != len(times)
-    ):
-        raise ValueError("native output state does not cover the full horizon")
-    if qpos.shape[1] <= 0 or qvel.shape[1] <= 0:
-        raise ValueError("native qpos and qvel dimensions must be positive")
-    if row.engine != "myosuite":
-        generalized_effort = getattr(output, "generalized_actuator_torques", None)
-        if generalized_effort is None or np.asarray(generalized_effort).shape != (
-            len(inputs),
-            qvel.shape[1],
-        ):
-            raise ValueError("native generalized actuator effort dimensions differ")
-    _validate_output_state(row, bundle, output, times, inputs, qpos, qvel)
-    if (
-        output.input_sha256 != bundle.applied_input_sha256
-        or output.policy_sha256 != bundle.policy_sha256
-    ):
-        raise ValueError("native output input or executed policy digest differs")
-    output_sha = _output_digest(output)
-    drive_mode = binding.drive_mode
+    """Build an unqualified integrity receipt from validated native samples."""
     input_history = bundle.input_history
     replay_policy = bundle.policy
+    drive_mode = binding.drive_mode
     return NativeExecutionReceipt(
         "native-execution/1.0.0",
         row.package_id,
