@@ -47,10 +47,11 @@ adding the pinned Tools `src` path fixed setup without fake packages.
 
 Keep the PR stacked on actual native Drake/shared admission ancestry until
 dependencies merge. Eleven actual Drake1.57 regressions pass on this shared
-helper revision. Thirteen MuJoCo3.3.4 regressions pass as development evidence;
-repeat on the project-supported >=3.6 provider before qualification. All five
+helper revision. Thirteen MuJoCo regressions also pass on supported native3.8.0 after an
+earlier development-only3.3.4 run. The owned Python3.12 environment received
+MuJoCo3.8 without changing existing NumPy2.5.3 or SciPy1.18.1. All five
 central pre-PR gates, scoped mypy, DRY, LoD and architecture checks pass.
-Complete normal push hooks before publication.
+All normal commit and push hooks passed on implementation39341c76d9.
 Then bind the real model inventory and F09 executor, extend constrained native
 contact and muscle policies, and qualify the full private-capture horizon.
 No private matching, new video, physiological validity or full parity claim
