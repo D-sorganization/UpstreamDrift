@@ -58,6 +58,14 @@ The full initial-state payload contains, in fixed order:
 - supported wrapper state: TimeLimit elapsed steps, order-enforcement reset
   flag, passive-checker flags, and the MyoSuite instability-termination flag.
 
+For the pinned MuJoCo 3.6 runtime, `mjSTATE_INTEGRATION` combines full physics,
+user state, and warm-start state. It therefore includes native time,
+configuration/velocity/activation/history, controls and applied loads,
+constraint activation, mocap state, user data, and solver warm-start state;
+MuJoCo plugin state is separately rejected by this adapter. See the
+[MuJoCo 3.6 state API](https://mujoco.readthedocs.io/en/3.6.0/APIreference/APItypes.html).
+This native payload is distinct from Gym wrapper state and any task RNG.
+
 State-schema identity and the actual payload digest are both checked. Wrapper
 state is frozen and preserved because Gym stepping is not part of this policy;
 it does not stand in for task RNG state or establish wrapper behavior during a
