@@ -19,8 +19,7 @@ from .matched_report import load_validated_cell
 from .matched_sensitivity import _source_hashes, _supported_endpoints
 from .provenance import manifest_files_match
 from .scenario_scoring import score_course_endpoints
-from .scoring import YARDS_PER_METRE, build_broadie_approx_baseline
-from .scoring_cache import source_backed_score_cache
+from .course_score_vectors import score_course_endpoint_vectors
 from .uncertainty import paired_mean_difference
 
 PATTERNS = ("Straight", "Draw", "Fade")
@@ -64,8 +63,8 @@ def _paired_pattern_metrics(
     radius_m: float,
     seed: int,
 ) -> dict:
-    a = np.asarray([(x, y) for _, x, y in before], dtype=float)
-    b = np.asarray([(x, y) for _, x, y in after], dtype=float)
+    a: np.ndarray = np.asarray([(x, y) for _, x, y in before], dtype=float)
+    b: np.ndarray = np.asarray([(x, y) for _, x, y in after], dtype=float)
     radial_a = np.hypot(a[:, 0] - target_x_m, a[:, 1])
     radial_b = np.hypot(b[:, 0] - target_x_m, b[:, 1])
     result = {
@@ -131,6 +130,23 @@ _PAIR_ERROR_FIELDS = (
     "shaft_lean_deg",
     "attack_angle_deg",
 )
+_TRANSITION_NONPROJECTION_PATHS = {
+    f"src/tools/shot_pattern_analysis/{name}"
+    for name in (
+        "matched_runner.py",
+        "matched_matrix.py",
+        "matched_supplement.py",
+        "matched_export.py",
+        "nominal_matching.py",
+        "density.py",
+        "academic_plots.py",
+        "matched_report_plots.py",
+        "provenance.py",
+        "scenario_scoring.py",
+        "course_score_vectors.py",
+    )
+}
+_TRANSITION_LEGACY_PATH = "src/shared/python/physics/impact_model/utils.py"
 
 
 def _verify_actual_nominal_target(
@@ -169,9 +185,135 @@ def _config_differences(first: dict, second: dict, prefix: str = "") -> set[str]
             differences.add(name)
         elif isinstance(first[key], dict) and isinstance(second[key], dict):
             differences.update(_config_differences(first[key], second[key], name))
+        elif isinstance(first[key], list) and isinstance(second[key], list):
+            if len(first[key]) != len(second[key]):
+                differences.add(name)
+            else:
+                for index, (left, right) in enumerate(
+                    zip(first[key], second[key], strict=True)
+                ):
+                    if left != right:
+                        differences.add(f"{name}[{index}]")
         elif first[key] != second[key]:
             differences.add(name)
     return differences
+
+
+def _comparison_config(config: dict) -> dict:
+    """Normalize known pre-bounds defaults while retaining raw source configs."""
+    normalized = json.loads(json.dumps(config))
+    if "match_face_bounds_deg" not in normalized:
+        normalized["match_face_bounds_deg"] = (
+            "legacy_reference_centered_plus_minus_3_deg"
+        )
+    if "match_speed_factors" not in normalized:
+        normalized["match_speed_factors"] = [0.75, 1.25]
+    return normalized
+
+
+def _speed_factors(config: dict) -> list[float]:
+    return [float(value) for value in config.get("match_speed_factors", [0.75, 1.25])]
+
+
+def _is_reviewed_driver_speed_control(
+    first_config: dict, second_config: dict, first_plan: dict, second_plan: dict
+) -> bool:
+    """Allow only the predeclared driver 0→5° and 1.25→1.30 control pair."""
+    first_club, second_club = first_config["club"], second_config["club"]
+    return (
+        first_club["club_id"] == second_club["club_id"] == "driver"
+        and (float(first_club["shaft_lean_deg"]), float(second_club["shaft_lean_deg"]))
+        == (0.0, 5.0)
+        and _speed_factors(first_config) == [0.75, 1.25]
+        and _speed_factors(second_config) == [0.75, 1.30]
+        and first_plan.get("supplement_protocol") is None
+        and second_plan.get("supplement_protocol") == "driver-control-speed-bounds/1"
+    )
+
+
+def _execution_transition(
+    first: dict,
+    second: dict,
+    receipt_path: Path | None,
+    expected_sha256: str | None,
+) -> str | None:
+    """Validate an independently accepted, hash-bound source transition."""
+    if first == second:
+        if receipt_path is not None or expected_sha256 is not None:
+            raise ValueError(
+                "transition receipt is unnecessary for identical executions"
+            )
+        return None
+    if receipt_path is None or expected_sha256 is None:
+        raise ValueError(
+            "cross-snapshot comparison requires an accepted source-transition receipt"
+        )
+    receipt_path = Path(receipt_path).resolve()
+    if not receipt_path.is_file() or _sha256(receipt_path) != expected_sha256:
+        raise ValueError("source-transition receipt hash mismatch")
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    if (
+        receipt.get("schema") != "matched-delivery-source-transition/1"
+        or receipt.get("status") != "independently_accepted"
+        or receipt.get("qualified_scope") != "matched-delivery-comparisons"
+    ):
+        raise ValueError(
+            "source-transition receipt is not accepted for matched comparisons"
+        )
+    old, new = receipt.get("old_execution"), receipt.get("new_execution")
+    if not ((old == first and new == second) or (old == second and new == first)):
+        raise ValueError(
+            "source-transition receipt does not bind both source executions"
+        )
+    old_sources, new_sources = old.get("source_sha256"), new.get("source_sha256")
+    if not isinstance(old_sources, dict) or not isinstance(new_sources, dict):
+        raise ValueError("source-transition receipt lacks source hash maps")
+    if {key: value for key, value in old.items() if key != "source_sha256"} != {
+        key: value for key, value in new.items() if key != "source_sha256"
+    }:
+        raise ValueError(
+            "source-transition receipt changes runtime or backend metadata"
+        )
+    changed = {
+        path
+        for path in old_sources.keys() | new_sources.keys()
+        if old_sources.get(path) != new_sources.get(path)
+    }
+    classifications = receipt.get("changed_sources")
+    if not isinstance(classifications, dict) or set(classifications) != changed:
+        raise ValueError(
+            "source-transition changed-source inventory is incomplete or has extras"
+        )
+    for path, record in classifications.items():
+        old_hash, new_hash = old_sources.get(path), new_sources.get(path)
+        if record.get("old_sha256") != old_hash or record.get("new_sha256") != new_hash:
+            raise ValueError(f"source-transition hash pair differs for {path}")
+        classification = record.get("classification")
+        expected_class = (
+            "unreachable_legacy"
+            if path == _TRANSITION_LEGACY_PATH
+            else "approved_nonprojection"
+        )
+        allowed = _TRANSITION_NONPROJECTION_PATHS | {_TRANSITION_LEGACY_PATH}
+        if path not in allowed or classification != expected_class:
+            raise ValueError(
+                f"source-transition includes an unapproved source change: {path}"
+            )
+    evidence_files = receipt.get("evidence_files")
+    if not isinstance(evidence_files, dict) or not evidence_files:
+        raise ValueError("source-transition receipt lacks hash-bound review evidence")
+    for relative, expected_hash in evidence_files.items():
+        evidence_path = (receipt_path.parent / relative).resolve()
+        if (
+            not evidence_path.is_relative_to(receipt_path.parent)
+            or not evidence_path.is_file()
+        ):
+            raise ValueError(
+                "source-transition evidence file is missing or escapes its directory"
+            )
+        if _sha256(evidence_path) != expected_hash:
+            raise ValueError("source-transition evidence file hash mismatch")
+    return expected_sha256
 
 
 def _reload_explicit_source(reference: dict) -> tuple[Path, dict, dict, dict]:
@@ -223,6 +365,19 @@ def _reload_explicit_source(reference: dict) -> tuple[Path, dict, dict, dict]:
                 "control alias request differs beyond the target-mode reference"
             )
     return directory, config, summary, plan
+
+
+def _recheck_explicit_source(reference: dict, directory: Path) -> None:
+    root = Path(reference["source_root"]).resolve()
+    if _sha256(root / "matrix_plan.json") != reference["source_plan_sha256"]:
+        raise ValueError("explicit comparison source plan changed during analysis")
+    manifest = directory / "manifest.json"
+    if (
+        not manifest_files_match(manifest)
+        or _sha256(manifest) != reference["source_cell_manifest_sha256"]
+        or _sha256(directory / "shots.csv.gz") != reference["source_csv_sha256"]
+    ):
+        raise ValueError("explicit comparison source changed during analysis")
 
 
 def _primitive_errors_by_pattern(
@@ -339,6 +494,11 @@ def _normalized_rotation_errors(
     }
 
 
+def _require_rotation_sd_order(first_sd: float, second_sd: float) -> None:
+    if (first_sd, second_sd) != (1.0, 2.0):
+        raise ValueError("shaft-SD pair must order 1 degree before 2 degrees")
+
+
 def _paired_effect_modification(
     straight_a: np.ndarray,
     curved_a: np.ndarray,
@@ -363,47 +523,14 @@ def _paired_effect_modification(
     return paired_mean_difference(interaction_b, interaction_a, seed=seed)
 
 
-def _source_scored_vectors(
-    endpoints: dict[str, list[tuple[int, float, float]]],
-    *,
-    club_id: str,
-    target_x_m: float,
-    radius_m: float,
-) -> dict[str, np.ndarray]:
-    """Return per-shot scores interpolated from the canonical public API cache."""
-    driver = club_id == "driver"
-    start_lie = "tee" if driver else "fairway"
-    start_distance = 400.0 if driver else target_x_m
-    primary_lie = "fairway" if driver else "green"
-    cache = source_backed_score_cache(
-        build_broadie_approx_baseline(),
-        start_lie=start_lie,
-        start_distance_yards=start_distance * YARDS_PER_METRE,
-        finish_lies=(primary_lie, "rough"),
-    )
-    result: dict[str, np.ndarray] = {}
-    for pattern, shots in endpoints.items():
-        xy = np.asarray([(x, y) for _, x, y in shots], dtype=float)
-        distance_m = (
-            np.hypot(400.0 - xy[:, 0], xy[:, 1])
-            if driver
-            else np.hypot(xy[:, 0] - target_x_m, xy[:, 1])
-        )
-        primary = np.abs(xy[:, 1]) <= 15.0 if driver else distance_m <= radius_m
-        scores = np.empty(len(shots), dtype=float)
-        for lie, mask in ((primary_lie, primary), ("rough", ~primary)):
-            if np.any(mask):
-                scores[mask] = cache.score_many(lie, distance_m[mask] * YARDS_PER_METRE)
-        result[pattern] = scores
-    return result
-
-
 def analyze_explicit_source_pair(
     first_source: dict,
     second_source: dict,
     *,
     comparison_kind: str,
     target_x_m: float,
+    transition_receipt_path: Path | None = None,
+    transition_receipt_sha256: str | None = None,
 ) -> dict:
     """Pair two validated source cells without conflating their protocols.
 
@@ -422,22 +549,51 @@ def analyze_explicit_source_pair(
         raise ValueError("comparison target must be finite and positive")
     directory_a, config_a, summary_a, plan_a = _reload_explicit_source(first_source)
     directory_b, config_b, summary_b, plan_b = _reload_explicit_source(second_source)
-    differences = _config_differences(config_a, config_b)
+    execution_a = plan_a.get("execution")
+    execution_b = plan_b.get("execution")
+    if not isinstance(execution_a, dict) or not isinstance(execution_b, dict):
+        raise ValueError("paired source plans must bind execution snapshots")
+    transition_sha = _execution_transition(
+        execution_a,
+        execution_b,
+        transition_receipt_path,
+        transition_receipt_sha256,
+    )
+    differences = _config_differences(
+        _comparison_config(config_a), _comparison_config(config_b)
+    )
     if differences - _PAIR_ALLOWED_CONFIG_DIFFERENCES:
         raise ValueError(
             f"source config differences are not allowed: {sorted(differences)}"
         )
     if comparison_kind == "across_lean":
-        expected_differences = {"club.shaft_lean_deg", "target_x_m"}
+        expected_differences = {
+            "club.shaft_lean_deg",
+            "target_x_m",
+            "match_face_bounds_deg",
+            "match_speed_factors",
+        }
     elif comparison_kind == "curve_strength":
         expected_differences = {"curve_scale", "target_x_m", "match_face_bounds_deg"}
     elif comparison_kind == "shaft_rotation_sd":
         expected_differences = {"noise.standard_deviations[0]", "target_x_m"}
     else:
-        expected_differences = {"match_speed_factors", "target_x_m"}
+        expected_differences = {
+            "match_speed_factors",
+            "target_x_m",
+            "match_face_bounds_deg",
+        }
     if not differences.issubset(expected_differences):
         raise ValueError(
             f"source config differences are not valid for {comparison_kind}: {sorted(differences)}"
+        )
+    if (
+        comparison_kind == "across_lean"
+        and "match_speed_factors" in differences
+        and not _is_reviewed_driver_speed_control(config_a, config_b, plan_a, plan_b)
+    ):
+        raise ValueError(
+            "speed bounds differ outside the declared driver control protocol"
         )
     club_a, club_b = config_a["club"], config_b["club"]
     if comparison_kind == "across_lean":
@@ -448,15 +604,18 @@ def analyze_explicit_source_pair(
             raise ValueError(
                 "across-lean pair must change lean and hold curve scale fixed"
             )
-        if {float(club_a["shaft_lean_deg"]), float(club_b["shaft_lean_deg"])} != {
-            0.0,
-            5.0,
-        }:
-            raise ValueError("across-lean supplement pair must compare 0 and 5 degrees")
+        if (float(club_a["shaft_lean_deg"]), float(club_b["shaft_lean_deg"])) not in (
+            (0.0, 5.0),
+            (0.0, 10.0),
+            (5.0, 10.0),
+        ):
+            raise ValueError(
+                "across-lean pair must order supported leans 0, 5, and 10 ascending"
+            )
     else:
         if comparison_kind == "curve_strength" and (
             club_a["shaft_lean_deg"] != club_b["shaft_lean_deg"]
-            or {config_a["curve_scale"], config_b["curve_scale"]} != {1.0, 2.0}
+            or (config_a["curve_scale"], config_b["curve_scale"]) != (1.0, 2.0)
         ):
             raise ValueError(
                 "curve-strength pair must hold lean and compare curve scales 1 and 2"
@@ -469,22 +628,16 @@ def analyze_explicit_source_pair(
                 or config_a["curve_scale"] != config_b["curve_scale"]
             ):
                 raise ValueError("shaft-SD pair must hold lean and curve scale fixed")
-            if {sd_a, sd_b} != {1.0, 2.0}:
-                raise ValueError(
-                    "shaft-SD pair must compare 1 and 2 degree rotation SD"
-                )
+            _require_rotation_sd_order(sd_a, sd_b)
         if comparison_kind == "speed_bound":
-            speed_a, speed_b = (
-                config_a["match_speed_factors"],
-                config_b["match_speed_factors"],
-            )
+            speed_a, speed_b = _speed_factors(config_a), _speed_factors(config_b)
             if (
                 len(speed_a) != 2
                 or len(speed_b) != 2
                 or not math.isclose(
                     float(speed_a[0]), float(speed_b[0]), rel_tol=0.0, abs_tol=1e-12
                 )
-                or {float(speed_a[1]), float(speed_b[1])} != {1.25, 1.30}
+                or (float(speed_a[1]), float(speed_b[1])) != (1.25, 1.30)
             ):
                 raise ValueError(
                     "speed-bound pair must compare the shared lower bound and 1.25/1.30 upper factors"
@@ -556,6 +709,7 @@ def analyze_explicit_source_pair(
         "input_error_max_abs_difference": max_error,
         "input_error_comparison": input_error_note,
         "source_protocols": [protocol_a, protocol_b],
+        "source_transition_receipt_sha256": transition_sha,
         "sources": [
             {
                 "protocol_id": protocol_a,
@@ -591,6 +745,18 @@ def analyze_explicit_source_pair(
         "limitations": "Paired conditional geometric simulation; matched-condition changes include nominal re-matching and do not isolate causal curvature; no inference of mirrored outcome symmetry; source protocols remain separate.",
     }
     if n_common >= 2:
+        endpoint_maps = []
+        for endpoints in (endpoints_a, endpoints_b):
+            endpoint_maps.append(
+                {
+                    pattern: [
+                        (index, x, y)
+                        for index, x, y in sorted(endpoints[pattern])
+                        if index in common_indices
+                    ]
+                    for pattern in PATTERNS
+                }
+            )
         for pattern in PATTERNS:
             map_a = {index: (x, y) for index, x, y in endpoints_a[pattern]}
             map_b = {index: (x, y) for index, x, y in endpoints_b[pattern]}
@@ -605,55 +771,66 @@ def analyze_explicit_source_pair(
                 seed=int(config_a["seed"]),
             )
             metrics["physical_pattern"] = pattern
-            metrics["first_lean_deg"] = club_a["shaft_lean_deg"]
-            metrics["second_lean_deg"] = club_b["shaft_lean_deg"]
+            metrics["first_condition"] = {
+                "shaft_lean_deg": club_a["shaft_lean_deg"],
+                "curve_scale": config_a["curve_scale"],
+                "shaft_rotation_sd_deg": config_a["noise"]["standard_deviations"][0],
+            }
+            metrics["second_condition"] = {
+                "shaft_lean_deg": club_b["shaft_lean_deg"],
+                "curve_scale": config_b["curve_scale"],
+                "shaft_rotation_sd_deg": config_b["noise"]["standard_deviations"][0],
+            }
+            metrics["role_mapping"] = {
+                "Straight": "physical pattern at first condition",
+                "Draw": "same physical pattern at second condition",
+                "Fade": "duplicate of first condition for paired scorer shape only; not an observation",
+            }
             metrics["first_curve_scale"] = config_a["curve_scale"]
             metrics["second_curve_scale"] = config_b["curve_scale"]
             result["patterns"][pattern] = metrics
-        if comparison_kind == "shaft_rotation_sd":
+        if comparison_kind in ("curve_strength", "shaft_rotation_sd"):
             try:
-                endpoint_maps = []
-                for endpoints in (endpoints_a, endpoints_b):
-                    endpoint_maps.append(
-                        {
-                            pattern: [
-                                (index, x, y)
-                                for index, x, y in endpoints[pattern]
-                                if index in common_indices
-                            ]
-                            for pattern in PATTERNS
-                        }
-                    )
-                score_a = _source_scored_vectors(
+                score_a = score_course_endpoint_vectors(
                     endpoint_maps[0],
                     club_id=club_a["club_id"],
                     target_x_m=target_x_m,
-                    radius_m=float(config_a["target_radius_m"]),
+                    green_radius_m=float(config_a["target_radius_m"]),
                 )
-                score_b = _source_scored_vectors(
+                score_b = score_course_endpoint_vectors(
                     endpoint_maps[1],
                     club_id=club_b["club_id"],
                     target_x_m=target_x_m,
-                    radius_m=float(config_b["target_radius_m"]),
+                    green_radius_m=float(config_b["target_radius_m"]),
                 )
-                result["course_scoring_effect_modification"] = {
+                effects = {
                     pattern: _paired_effect_modification(
-                        score_a["Straight"],
-                        score_a[pattern],
-                        score_b["Straight"],
-                        score_b[pattern],
+                        score_a.scores["Straight"],
+                        score_a.scores[pattern],
+                        score_b.scores["Straight"],
+                        score_b.scores[pattern],
                         seed=int(config_a["seed"]),
                     )
                     for pattern in ("Draw", "Fade")
                 }
+                result["course_scoring_effect_modification"] = effects
                 result["course_scoring_effect_modification_scope"] = (
-                    "(curve−Straight) at 2° SD minus (curve−Straight) at 1° SD; same six-population indices; positive means increased relative benefit"
+                    "(curve−Straight) in the second condition minus (curve−Straight) in the first; paired on the same six-population shot-index intersection; positive means increased relative benefit"
                 )
+                result["course_scoring_provenance"] = {
+                    "source_backed_status": "available",
+                    "scenario_id": score_a.scenario_id,
+                    "baseline": score_a.baseline,
+                    "api_evaluated_states_per_condition": score_a.api_evaluated_states,
+                    "index_order": "ascending_common_shot_index",
+                }
             except ValueError as exc:
                 result["course_scoring_effect_modification"] = {
                     "status": "unavailable",
                     "reason": str(exc),
                 }
+    _recheck_explicit_source(first_source, directory_a)
+    _recheck_explicit_source(second_source, directory_b)
     return result
 
 

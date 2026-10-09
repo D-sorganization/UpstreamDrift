@@ -50,6 +50,255 @@ def test_rotation_sd_pairing_compares_standardized_rotation_draws() -> None:
     )
 
 
+def test_comparison_normalizes_only_documented_legacy_bound_defaults() -> None:
+    from src.tools.shot_pattern_analysis.matched_lean_control import _comparison_config
+
+    legacy = {"club": {"club_id": "driver"}}
+    normalized = _comparison_config(legacy)
+    assert "match_face_bounds_deg" not in legacy
+    assert (
+        normalized["match_face_bounds_deg"]
+        == "legacy_reference_centered_plus_minus_3_deg"
+    )
+    assert normalized["match_speed_factors"] == [0.75, 1.25]
+
+
+def test_rotation_sd_interaction_requires_ascending_source_order() -> None:
+    from src.tools.shot_pattern_analysis.matched_lean_control import (
+        _require_rotation_sd_order,
+    )
+
+    _require_rotation_sd_order(1.0, 2.0)
+    with pytest.raises(ValueError, match="order 1 degree before 2"):
+        _require_rotation_sd_order(2.0, 1.0)
+
+
+def test_driver_speed_bound_exception_is_protocol_specific() -> None:
+    from src.tools.shot_pattern_analysis.matched_lean_control import (
+        _is_reviewed_driver_speed_control,
+    )
+
+    first = {
+        "club": {"club_id": "driver", "shaft_lean_deg": 0.0},
+        "match_speed_factors": [0.75, 1.25],
+    }
+    second = {
+        "club": {"club_id": "driver", "shaft_lean_deg": 5.0},
+        "match_speed_factors": [0.75, 1.30],
+    }
+    old_plan = {"supplement_protocol": None}
+    supplement_plan = {"supplement_protocol": "driver-control-speed-bounds/1"}
+    assert _is_reviewed_driver_speed_control(first, second, old_plan, supplement_plan)
+    assert not _is_reviewed_driver_speed_control(
+        second, first, supplement_plan, old_plan
+    )
+    second["match_speed_factors"] = [0.75, 1.35]
+    assert not _is_reviewed_driver_speed_control(
+        first, second, old_plan, supplement_plan
+    )
+
+
+def test_cross_snapshot_requires_hash_bound_accepted_transition(tmp_path) -> None:
+    from src.tools.shot_pattern_analysis.matched_lean_control import (
+        _execution_transition,
+    )
+
+    old = {
+        "source_sha256": {"src/tools/shot_pattern_analysis/matched_runner.py": "a"},
+        "native_binary_sha256": "same",
+    }
+    new = {
+        "source_sha256": {"src/tools/shot_pattern_analysis/matched_runner.py": "b"},
+        "native_binary_sha256": "same",
+    }
+    with pytest.raises(ValueError, match="requires an accepted source-transition"):
+        _execution_transition(old, new, None, None)
+
+    evidence = tmp_path / "review.json"
+    evidence.write_text('{"approved": true}\n')
+    receipt = tmp_path / "transition.json"
+    receipt.write_text(
+        json.dumps(
+            {
+                "schema": "matched-delivery-source-transition/1",
+                "status": "independently_accepted",
+                "qualified_scope": "matched-delivery-comparisons",
+                "old_execution": old,
+                "new_execution": new,
+                "changed_sources": {
+                    "src/tools/shot_pattern_analysis/matched_runner.py": {
+                        "old_sha256": "a",
+                        "new_sha256": "b",
+                        "classification": "approved_nonprojection",
+                    }
+                },
+                "evidence_files": {
+                    "review.json": hashlib.sha256(evidence.read_bytes()).hexdigest()
+                },
+            }
+        )
+        + "\n"
+    )
+    receipt_sha = hashlib.sha256(receipt.read_bytes()).hexdigest()
+    assert _execution_transition(old, new, receipt, receipt_sha) == receipt_sha
+
+    tampered = json.loads(receipt.read_text())
+    tampered["changed_sources"][
+        "src/tools/shot_pattern_analysis/matched_physics.py"
+    ] = {
+        "old_sha256": "a",
+        "new_sha256": "b",
+        "classification": "approved_nonprojection",
+    }
+    receipt.write_text(json.dumps(tampered) + "\n")
+    with pytest.raises(ValueError, match="receipt hash mismatch"):
+        _execution_transition(old, new, receipt, receipt_sha)
+
+
+def test_across_lean_pair_supports_5_to_10_degrees(tmp_path, monkeypatch) -> None:
+    from src.tools.shot_pattern_analysis import matched_lean_control as module
+
+    monkeypatch.setattr(module, "score_course_endpoints", _stub_scorer)
+    before = _write_cell(
+        tmp_path / "lean5",
+        lean=5,
+        target_request=77.40247724866299,
+        protocol="pw-control-face-bounds/1",
+    )
+    after = _write_cell(
+        tmp_path / "lean10",
+        lean=10,
+        target_request=77.40247724866299,
+        protocol="pw-control-face-bounds/1",
+    )
+    result = module.analyze_explicit_source_pair(
+        before,
+        after,
+        comparison_kind="across_lean",
+        target_x_m=77.40247724866299,
+    )
+    assert result["patterns"]["Draw"]["first_condition"]["shaft_lean_deg"] == 5
+    assert result["patterns"]["Draw"]["second_condition"]["shaft_lean_deg"] == 10
+
+
+def test_rotation_sd_pair_reports_common_index_sg_difference_of_differences(
+    tmp_path, monkeypatch
+) -> None:
+    from types import SimpleNamespace
+
+    from src.tools.shot_pattern_analysis import matched_lean_control as module
+
+    monkeypatch.setattr(module, "score_course_endpoints", _stub_scorer)
+    first = _write_cell(
+        tmp_path / "sd1",
+        lean=0,
+        target_request=None,
+        protocol="pw-primary-face-bounds/1",
+        rotation_sd=1.0,
+    )
+    second = _write_cell(
+        tmp_path / "sd2",
+        lean=0,
+        target_request=None,
+        protocol="pw-primary-face-bounds/1",
+        rotation_sd=2.0,
+    )
+    vectors = [
+        {
+            "Straight": np.array([10.0, 11.0, 12.0, 13.0]),
+            "Draw": np.array([11.0, 12.0, 13.0, 14.0]),
+            "Fade": np.array([9.0, 10.0, 11.0, 12.0]),
+        },
+        {
+            "Straight": np.array([10.0, 11.0, 12.0, 13.0]),
+            "Draw": np.array([13.0, 14.0, 15.0, 16.0]),
+            "Fade": np.array([8.0, 9.0, 10.0, 11.0]),
+        },
+    ]
+    calls = 0
+
+    def score_vectors(endpoints, **kwargs):
+        nonlocal calls
+        result = SimpleNamespace(
+            scores=vectors[calls],
+            scenario_id="approach_green_rough",
+            baseline={"id": "fixture"},
+            api_evaluated_states=10,
+        )
+        calls += 1
+        return result
+
+    monkeypatch.setattr(module, "score_course_endpoint_vectors", score_vectors)
+    result = module.analyze_explicit_source_pair(
+        first,
+        second,
+        comparison_kind="shaft_rotation_sd",
+        target_x_m=77.40247724866299,
+    )
+    assert result["course_scoring_effect_modification"]["Draw"]["estimate"] == 2.0
+    assert result["course_scoring_effect_modification"]["Fade"]["estimate"] == -1.0
+    assert result["common_supported_n"] == 4
+    assert "same six-population" in result["course_scoring_effect_modification_scope"]
+
+
+def test_curve_strength_pair_reports_paired_sg_interaction(
+    tmp_path, monkeypatch
+) -> None:
+    from types import SimpleNamespace
+
+    from src.tools.shot_pattern_analysis import matched_lean_control as module
+
+    monkeypatch.setattr(module, "score_course_endpoints", _stub_scorer)
+    first = _write_cell(
+        tmp_path / "curve1",
+        lean=0,
+        target_request=None,
+        protocol="original-primary/1",
+        curve_scale=1.0,
+    )
+    second = _write_cell(
+        tmp_path / "curve2",
+        lean=0,
+        target_request=None,
+        protocol="pw-primary-face-bounds/1",
+        curve_scale=2.0,
+    )
+    vectors = [
+        {
+            "Straight": np.array([10.0, 10.0, 10.0, 10.0]),
+            "Draw": np.array([11.0, 11.0, 11.0, 11.0]),
+            "Fade": np.array([9.0, 9.0, 9.0, 9.0]),
+        },
+        {
+            "Straight": np.array([10.0, 10.0, 10.0, 10.0]),
+            "Draw": np.array([12.0, 12.0, 12.0, 12.0]),
+            "Fade": np.array([8.0, 8.0, 8.0, 8.0]),
+        },
+    ]
+    calls = 0
+
+    def score_vectors(endpoints, **kwargs):
+        nonlocal calls
+        result = SimpleNamespace(
+            scores=vectors[calls],
+            scenario_id="approach_green_rough",
+            baseline={"id": "fixture"},
+            api_evaluated_states=10,
+        )
+        calls += 1
+        return result
+
+    monkeypatch.setattr(module, "score_course_endpoint_vectors", score_vectors)
+    result = module.analyze_explicit_source_pair(
+        first,
+        second,
+        comparison_kind="curve_strength",
+        target_x_m=77.40247724866299,
+    )
+    assert result["course_scoring_effect_modification"]["Draw"]["estimate"] == 1.0
+    assert result["course_scoring_effect_modification"]["Fade"]["estimate"] == -1.0
+
+
 def _write_cell(
     root: Path,
     *,
@@ -57,22 +306,26 @@ def _write_cell(
     target_request: float | None,
     protocol: str,
     invalid: tuple[str, int] | None = None,
+    rotation_sd: float = 1.0,
+    curve_scale: float = 2.0,
 ) -> dict:
     root.mkdir(parents=True)
     club = replace(matched_preset("pitching_wedge"), shaft_lean_deg=lean)
     config = {
         "club": asdict(club),
-        "noise": asdict(NoiseSpec((1.0, 0.5, 0.44704, 0.00635, 0.00635, 0.0, 0.0))),
+        "noise": asdict(
+            NoiseSpec((rotation_sd, 0.5, 0.44704, 0.00635, 0.00635, 0.0, 0.0))
+        ),
         "n_shots": 4,
         "seed": 20261009,
-        "curve_scale": 2.0,
+        "curve_scale": curve_scale,
         "target_x_m": target_request,
         "match_tolerance_m": 0.05,
         "target_radius_m": 15.0,
         "match_face_bounds_deg": [-6.0, 6.0],
         "match_speed_factors": [0.75, 1.25],
     }
-    cell = f"pitching_wedge_lean{lean:g}_curve2_rotation1_shaft_only"
+    cell = f"pitching_wedge_lean{lean:g}_curve{curve_scale:g}_rotation{rotation_sd:g}_shaft_only"
     execution = {"source_sha256": {"frozen.py": "fixture"}}
     target = 77.40247724866299
     nominals = {}
@@ -125,7 +378,7 @@ def _write_cell(
                         "pattern": pattern,
                         "shot_index": index,
                         "status": "off_face" if is_invalid else "supported",
-                        "shaft_rotation_deg": (index + 1) * 0.1,
+                        "shaft_rotation_deg": (index + 1) * 0.1 * rotation_sd,
                         "path_deg": nominals[pattern]["path_deg"] + (index + 1) * 0.05,
                         "speed_mps": nominals[pattern]["speed_mps"] + (index + 1) * 0.1,
                         "contact_horizontal_m": index * 0.001,
@@ -321,4 +574,90 @@ def test_explicit_pair_rejects_centered_input_mismatch(tmp_path) -> None:
     with pytest.raises(ValueError, match="primitive input error mismatch"):
         analyze_explicit_source_pair(
             before, after, comparison_kind="across_lean", target_x_m=77.40247724866299
+        )
+
+
+def test_explicit_pair_rechecks_source_bytes_after_analysis(
+    tmp_path, monkeypatch
+) -> None:
+    from src.tools.shot_pattern_analysis import matched_lean_control as module
+
+    before = _write_cell(
+        tmp_path / "pw0",
+        lean=0,
+        target_request=None,
+        protocol="pw-primary-face-bounds/1",
+    )
+    after = _write_cell(
+        tmp_path / "pw5",
+        lean=5,
+        target_request=77.40247724866299,
+        protocol="pw-control-face-bounds/1",
+    )
+    original = module._paired_pattern_metrics
+    changed = False
+
+    def tampering_metrics(*args, **kwargs):
+        nonlocal changed
+        result = original(*args, **kwargs)
+        if not changed:
+            csv_path = Path(after["source_root"]) / after["cell"] / "shots.csv.gz"
+            csv_path.write_bytes(csv_path.read_bytes() + b"t")
+            changed = True
+        return result
+
+    monkeypatch.setattr(module, "_paired_pattern_metrics", tampering_metrics)
+    with pytest.raises(ValueError, match="changed during analysis"):
+        module.analyze_explicit_source_pair(
+            before,
+            after,
+            comparison_kind="across_lean",
+            target_x_m=77.40247724866299,
+        )
+
+
+def test_explicit_pair_rejects_coherently_valid_different_execution(tmp_path) -> None:
+    from src.tools.shot_pattern_analysis.matched_lean_control import (
+        analyze_explicit_source_pair,
+    )
+
+    before = _write_cell(
+        tmp_path / "pw0",
+        lean=0,
+        target_request=None,
+        protocol="pw-primary-face-bounds/1",
+    )
+    after = _write_cell(
+        tmp_path / "pw5",
+        lean=5,
+        target_request=77.40247724866299,
+        protocol="pw-control-face-bounds/1",
+    )
+    root = Path(after["source_root"])
+    cell_dir = root / after["cell"]
+    plan_path = root / "matrix_plan.json"
+    plan = json.loads(plan_path.read_text())
+    execution = {"source_sha256": {"frozen.py": "different-but-coherent"}}
+    plan["execution"] = execution
+    run_start_path = cell_dir / "run_start.json"
+    run_start = json.loads(run_start_path.read_text())
+    run_start["execution"] = execution
+    run_start_path.write_text(json.dumps(run_start))
+    manifest_path = cell_dir / "manifest.json"
+    manifest = json.loads(manifest_path.read_text())
+    manifest["files_sha256"]["run_start.json"] = hashlib.sha256(
+        run_start_path.read_bytes()
+    ).hexdigest()
+    manifest_path.write_text(json.dumps(manifest))
+    plan_path.write_text(json.dumps(plan))
+    after["source_plan_sha256"] = hashlib.sha256(plan_path.read_bytes()).hexdigest()
+    after["source_cell_manifest_sha256"] = hashlib.sha256(
+        manifest_path.read_bytes()
+    ).hexdigest()
+    with pytest.raises(ValueError, match="accepted source-transition receipt"):
+        analyze_explicit_source_pair(
+            before,
+            after,
+            comparison_kind="across_lean",
+            target_x_m=77.40247724866299,
         )

@@ -320,6 +320,7 @@ def load_supplement_sources(
         )
     reports: dict[str, Any] = {}
     unique_cells: list[dict[str, Any]] = []
+    shared_execution: dict[str, Any] | None = None
     expected_by_protocol: dict[str, set[str]] = {
         _PROTOCOLS[category]: {
             name
@@ -360,6 +361,10 @@ def load_supplement_sources(
             entry["n_shots"] = 32 if stage == "pilot" else 10_000
             _validate_cell_config(name, entry, cells[name])
         report = load_matrix_report(root, require_complete=True)
+        if shared_execution is None:
+            shared_execution = report["execution"]
+        elif report["execution"] != shared_execution:
+            raise ValueError("supplement protocols do not share one execution snapshot")
         if report["plan_sha256"] != _sha256(plan_path):
             raise ValueError(f"supplement report plan hash mismatch: {protocol_id}")
         report_cells = {cell["cell"]: cell for cell in report["cells"]}
@@ -458,6 +463,7 @@ def load_supplement_sources(
     return {
         "schema": "matched-supplement-report/1",
         "stage": stage,
+        "execution": shared_execution,
         "issue": 12000,
         "inventory_sha256": inventory_hash,
         "unique_executed_cells": len(unique_cells),
@@ -595,3 +601,110 @@ def write_supplement_artifacts(
         encoding="utf-8",
     )
     return {"inventory": inventory_path, "control_aliases": aliases_path}
+
+
+def render_supplement_comparisons(results: list[dict[str, Any]]) -> str:
+    """Export paired results separately, retaining source and support scope."""
+    fields = (
+        "comparison_kind",
+        "status",
+        "physical_pattern",
+        "first_protocol",
+        "second_protocol",
+        "first_cell",
+        "second_cell",
+        "first_source_plan_sha256",
+        "first_manifest_sha256",
+        "first_csv_sha256",
+        "second_source_plan_sha256",
+        "second_manifest_sha256",
+        "second_csv_sha256",
+        "source_transition_receipt_sha256",
+        "target_x_m",
+        "common_supported_n",
+        "total_n_per_population",
+        "conditioning",
+        "input_error_max_abs_difference",
+        "radial_difference_m",
+        "radial_difference_lower_95_m",
+        "radial_difference_upper_95_m",
+        "sg_effect_modification_strokes",
+        "sg_effect_lower_95_strokes",
+        "sg_effect_upper_95_strokes",
+        "limitations",
+    )
+    output = io.StringIO()
+    writer = csv.DictWriter(output, fieldnames=fields, lineterminator="\n")
+    writer.writeheader()
+    for result in results:
+        sources = result.get("sources", [{}, {}])
+        effects = result.get("course_scoring_effect_modification", {})
+        patterns = result.get("patterns") or {"": {}}
+        for pattern, metrics in patterns.items():
+            effect = effects.get(pattern, {}) if isinstance(effects, dict) else {}
+            radial = metrics.get("radial_error_difference_m", {})
+            writer.writerow(
+                {
+                    "comparison_kind": result.get("comparison_kind", ""),
+                    "status": result.get("status", ""),
+                    "physical_pattern": pattern,
+                    "first_protocol": sources[0].get("protocol_id", ""),
+                    "second_protocol": sources[1].get("protocol_id", ""),
+                    "first_cell": sources[0].get("cell", ""),
+                    "second_cell": sources[1].get("cell", ""),
+                    "first_source_plan_sha256": sources[0].get(
+                        "source_plan_sha256", ""
+                    ),
+                    "first_manifest_sha256": sources[0].get(
+                        "source_cell_manifest_sha256", ""
+                    ),
+                    "first_csv_sha256": sources[0].get("source_csv_sha256", ""),
+                    "second_source_plan_sha256": sources[1].get(
+                        "source_plan_sha256", ""
+                    ),
+                    "second_manifest_sha256": sources[1].get(
+                        "source_cell_manifest_sha256", ""
+                    ),
+                    "second_csv_sha256": sources[1].get("source_csv_sha256", ""),
+                    "source_transition_receipt_sha256": result.get(
+                        "source_transition_receipt_sha256", ""
+                    ),
+                    "target_x_m": result.get("target_x_m", ""),
+                    "common_supported_n": result.get("common_supported_n", ""),
+                    "total_n_per_population": result.get("total_n_per_population", ""),
+                    "conditioning": result.get("conditioning", ""),
+                    "input_error_max_abs_difference": result.get(
+                        "input_error_max_abs_difference", ""
+                    ),
+                    "radial_difference_m": radial.get("estimate", ""),
+                    "radial_difference_lower_95_m": radial.get("lower_95", ""),
+                    "radial_difference_upper_95_m": radial.get("upper_95", ""),
+                    "sg_effect_modification_strokes": effect.get("estimate", ""),
+                    "sg_effect_lower_95_strokes": effect.get("lower_95", ""),
+                    "sg_effect_upper_95_strokes": effect.get("upper_95", ""),
+                    "limitations": result.get("limitations", ""),
+                }
+            )
+    return output.getvalue()
+
+
+def write_supplement_comparisons(
+    results: list[dict[str, Any]], output_dir: Path
+) -> dict[str, Path]:
+    """Write paired supplement outputs without touching original inventories."""
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    csv_path = output_dir / "REPORT_SUPPLEMENT_COMPARISONS.csv"
+    json_path = output_dir / "REPORT_SUPPLEMENT_COMPARISONS.json"
+    if csv_path.exists() or json_path.exists():
+        raise FileExistsError("supplement comparison report already exists")
+    csv_path.write_text(render_supplement_comparisons(results), encoding="utf-8")
+    json_path.write_text(
+        json.dumps(
+            {"schema": "matched-supplement-comparisons/1", "comparisons": results},
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    return {"csv": csv_path, "json": json_path}

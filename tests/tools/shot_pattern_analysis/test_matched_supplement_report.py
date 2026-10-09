@@ -284,3 +284,73 @@ def test_loader_rejects_nonfinite_nominal_coordinates(tmp_path) -> None:
     manifest_path.write_text(json.dumps(manifest))
     with pytest.raises(ValueError, match="nonfinite"):
         load_supplement_sources(roots, INVENTORY)
+
+
+def test_loader_requires_one_shared_execution_snapshot_across_protocol_roots(
+    tmp_path,
+) -> None:
+    from src.tools.shot_pattern_analysis.matched_supplement_report import (
+        load_supplement_sources,
+    )
+
+    roots, _ = _make_roots(tmp_path)
+    root = roots[PROTOCOLS["pw_fixed_target_face"]]
+    plan_path = root / "matrix_plan.json"
+    plan = json.loads(plan_path.read_text())
+    changed_execution = {"source_sha256": {"frozen.py": "other-snapshot"}}
+    plan["execution"] = changed_execution
+    for name in plan["cells"]:
+        cell_dir = root / name
+        run_start_path = cell_dir / "run_start.json"
+        run_start = json.loads(run_start_path.read_text())
+        run_start["execution"] = changed_execution
+        run_start_path.write_text(json.dumps(run_start))
+        manifest_path = cell_dir / "manifest.json"
+        manifest = json.loads(manifest_path.read_text())
+        manifest["files_sha256"]["run_start.json"] = _sha(run_start_path)
+        manifest_path.write_text(json.dumps(manifest))
+    plan_path.write_text(json.dumps(plan))
+    with pytest.raises(ValueError, match="do not share one execution snapshot"):
+        load_supplement_sources(roots, INVENTORY)
+
+
+def test_comparison_report_exports_each_actual_pattern_and_refuses_overwrite(
+    tmp_path,
+) -> None:
+    from src.tools.shot_pattern_analysis.matched_supplement_report import (
+        write_supplement_comparisons,
+    )
+
+    result = {
+        "comparison_kind": "curve_strength",
+        "status": "conditional_only",
+        "common_supported_n": 8,
+        "total_n_per_population": 10,
+        "conditioning": "same_indices_supported_in_all_six_populations",
+        "input_error_max_abs_difference": 0.0,
+        "limitations": "Matched conditions do not isolate causal curvature.",
+        "sources": [
+            {"protocol_id": "original-primary", "cell": "curve1"},
+            {"protocol_id": "pw-primary-face-bounds/1", "cell": "curve2"},
+        ],
+        "patterns": {
+            "Straight": {
+                "physical_pattern": "Straight",
+                "radial_error_difference_m": {"estimate": 0.0},
+            },
+            "Draw": {
+                "physical_pattern": "Draw",
+                "radial_error_difference_m": {"estimate": -0.2},
+            },
+            "Fade": {
+                "physical_pattern": "Fade",
+                "radial_error_difference_m": {"estimate": 0.3},
+            },
+        },
+    }
+    paths = write_supplement_comparisons([result], tmp_path / "report")
+    rows = list(csv.DictReader(paths["csv"].open(newline="")))
+    assert [row["physical_pattern"] for row in rows] == ["Straight", "Draw", "Fade"]
+    assert rows[1]["second_protocol"] == "pw-primary-face-bounds/1"
+    with pytest.raises(FileExistsError):
+        write_supplement_comparisons([result], tmp_path / "report")
