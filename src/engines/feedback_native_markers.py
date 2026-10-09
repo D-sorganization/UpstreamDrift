@@ -310,6 +310,17 @@ def execute_native_marker_replay(
         marker_output = drake_marker_positions(
             bundle, request.model_path, execution.output, attachments
         )
+    elif receipt.engine == "pinocchio":
+        from src.engines.physics_engines.pinocchio.python.native_torque_replay import (
+            NativePinocchioTorqueReplay,
+            native_marker_positions_from_replay as pinocchio_marker_positions,
+        )
+
+        if not isinstance(execution.output, NativePinocchioTorqueReplay):
+            raise ValueError("Pinocchio replay returned an unknown native output type")
+        marker_output = pinocchio_marker_positions(
+            bundle, request.model_path, execution.output, attachments
+        )
     else:
         raise ValueError("no native marker FK provider is registered for this engine")
     times = np.asarray(marker_output.time_s, dtype=np.float64)
@@ -361,7 +372,7 @@ def build_native_marker_replay_report(
         reason = "no explicit native marker request"
         evidence: NativeMarkerReplayEvidence | None = None
         if request is not None:
-            if row.engine not in {"mujoco", "drake"}:
+            if row.engine not in {"mujoco", "drake", "pinocchio"}:
                 status, reason = (
                     "unsupported_marker_fk",
                     "no reviewed native FK provider",

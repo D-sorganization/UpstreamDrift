@@ -154,8 +154,8 @@ translation, a nonzero local offset and distinct `nq=8`, `nv=7`; expected
 positions use the body's world pose applied to the local point. Unknown frame
 and stale loaded-model mappings fail closed. These tests prove the FK seam and
 identity checks only. OpenSim reuses F07 #11903's separate geometry provider
-only after its full-state replay seam is available; Pinocchio, MyoSuite and
-Simscape remain blocking denominator rows. No observation threshold,
+only after its full-state replay seam is available; MyoSuite and Simscape
+remain blocking denominator rows. No observation threshold,
 physiology, contact qualification or cross-engine result is asserted.
 
 Focused validation: `python -m pytest -q --confcutdir=tests/unit/engines
@@ -166,3 +166,29 @@ repository config disabled because that environment lacks pytest-asyncio;
 its only warning is the unregistered `unit` mark in that isolated invocation.
 The canonical calculation note is
 `manuals/upstreamdrift/chapters/28-native-marker-forward-kinematics.qmd`.
+
+## F09e Pinocchio Native Marker Forward Kinematics
+
+F09e #11914 extends the F09d marker contract with actual Pinocchio replay
+output from F06c #11900. It reuses the exact Pinocchio native replay adapter
+through merge ancestry and passes its q trajectory to the existing
+`PinocchioPhysicsEngine` frame-transform API. The `NativeAdapterBinding`
+continues to distinguish F01 package/variant/drive inventory identity from
+native model/variant, provider, loaded-model, state-schema, channel and policy
+identities. Local marker mappings bind frame names, ordered labels, offsets in
+metres, output frame and timebase.
+
+The executor admits Pinocchio's q/v state schema without inventing a native
+cache payload. Its `nq=8`, `nv=7` free-flyer fixture preserves distinct
+configuration and tangent dimensions. Policy forbids reset; the receipt leaves
+the uninstrumented reset count unknown. All model/drive rows and all six engine
+IDs remain visible, and every generated marker result stays unqualified.
+MyoSuite, OpenSim and Simscape remain blockers without reviewed providers.
+
+The native Pinocchio 4.1 integration fixture passed in the owned Ubuntu 24.04
+environment. Its independent analytic expected position includes nonzero
+floating-base translation/yaw, hinge angle, joint origin and marker-local
+offset. See `docs/development/feedback_controls/F09E-NATIVE-MARKER-FK.md` for
+the exact command, environment, observed API incompatibility, and validation
+limits. The canonical calculation note is
+`manuals/upstreamdrift/chapters/30-pinocchio-native-marker-forward-kinematics.qmd`.

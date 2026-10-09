@@ -23,6 +23,9 @@ if TYPE_CHECKING:
     from src.engines.physics_engines.mujoco.python.native_torque_replay import (
         NativeTorqueReplay,
     )
+    from src.engines.physics_engines.pinocchio.python.native_torque_replay import (
+        NativePinocchioTorqueReplay,
+    )
 
 
 @dataclass(frozen=True)
@@ -66,7 +69,7 @@ class NativeReplayExecution:
     """Validated receipt and actual output from one native replay invocation."""
 
     receipt: NativeExecutionReceipt
-    output: NativeTorqueReplay | NativeDrakeTorqueReplay
+    output: NativeTorqueReplay | NativeDrakeTorqueReplay | NativePinocchioTorqueReplay
 
 
 @dataclass(frozen=True)
@@ -267,7 +270,7 @@ def _validate_bundle(
 
 
 def _output_digest(
-    output: NativeTorqueReplay | NativeDrakeTorqueReplay,
+    output: NativeTorqueReplay | NativeDrakeTorqueReplay | NativePinocchioTorqueReplay,
 ) -> str:
     digest = hashlib.sha256()
     for name in (
@@ -294,7 +297,7 @@ def validate_native_replay_output(
     row: ComparisonRow,
     binding: NativeAdapterBinding,
     bundle: Any,
-    output: NativeTorqueReplay | NativeDrakeTorqueReplay,
+    output: NativeTorqueReplay | NativeDrakeTorqueReplay | NativePinocchioTorqueReplay,
 ) -> NativeExecutionReceipt:
     """Validate the adapter's complete actual output against the frozen bundle."""
     if row.engine == "mujoco":
@@ -311,6 +314,13 @@ def validate_native_replay_output(
 
         if not isinstance(output, NativeDrakeTorqueReplay):
             raise ValueError("Drake native adapter returned an unknown output type")
+    elif row.engine == "pinocchio":
+        from src.engines.physics_engines.pinocchio.python.native_torque_replay import (
+            NativePinocchioTorqueReplay,
+        )
+
+        if not isinstance(output, NativePinocchioTorqueReplay):
+            raise ValueError("Pinocchio native adapter returned an unknown output type")
     else:
         raise ValueError("no native output contract is registered for this engine")
     _validate_bundle(row, binding, bundle)
@@ -341,36 +351,48 @@ def validate_native_replay_output(
     ):
         raise ValueError("native generalized actuator effort dimensions differ")
     state_component = {item.component_id: item.values for item in bundle.initial_state}
-    auxiliary_name = (
-        "integration_states"
-        if hasattr(output, "integration_states")
-        else "discrete_states"
-    )
-    expected_auxiliary_name = (
-        "integration" if auxiliary_name == "integration_states" else "discrete"
-    )
-    if tuple(state_component) != ("qpos", "qvel", expected_auxiliary_name):
-        raise ValueError(
-            "native adapter cannot preserve every declared state component"
+    if row.engine == "pinocchio":
+        if tuple(state_component) != ("qpos", "qvel"):
+            raise ValueError(
+                "Pinocchio adapter cannot preserve undeclared native cache state"
+            )
+        if hasattr(output, "integration_states") or hasattr(output, "discrete_states"):
+            raise ValueError("Pinocchio output declares unsupported cache state")
+    else:
+        auxiliary_name = (
+            "integration_states"
+            if hasattr(output, "integration_states")
+            else "discrete_states"
         )
-    if auxiliary_name not in ("integration_states", "discrete_states"):
-        raise ValueError("native replay output lacks its complete numerical state")
-    auxiliary = np.asarray(getattr(output, auxiliary_name), dtype=np.float64)
-    if (
-        auxiliary.ndim != 2
-        or auxiliary.shape[0] != len(times)
-        or auxiliary.shape[1] <= 0
-    ):
-        raise ValueError("native output lacks full integration initialization state")
-    if auxiliary.shape[1] != len(state_component.get(expected_auxiliary_name, ())):
-        raise ValueError("native output auxiliary state differs from T01 state schema")
+        expected_auxiliary_name = (
+            "integration" if auxiliary_name == "integration_states" else "discrete"
+        )
+        if tuple(state_component) != ("qpos", "qvel", expected_auxiliary_name):
+            raise ValueError(
+                "native adapter cannot preserve every declared state component"
+            )
+        if auxiliary_name not in ("integration_states", "discrete_states"):
+            raise ValueError("native replay output lacks its complete numerical state")
+        auxiliary = np.asarray(getattr(output, auxiliary_name), dtype=np.float64)
+        if (
+            auxiliary.ndim != 2
+            or auxiliary.shape[0] != len(times)
+            or auxiliary.shape[1] <= 0
+        ):
+            raise ValueError(
+                "native output lacks full integration initialization state"
+            )
+        if auxiliary.shape[1] != len(state_component.get(expected_auxiliary_name, ())):
+            raise ValueError(
+                "native output auxiliary state differs from T01 state schema"
+            )
     if not np.array_equal(
         qpos[0], state_component.get("qpos", ())
     ) or not np.array_equal(qvel[0], state_component.get("qvel", ())):
         raise ValueError(
             "native output initial physical state differs from frozen bundle"
         )
-    if not np.array_equal(
+    if row.engine != "pinocchio" and not np.array_equal(
         auxiliary[0], state_component.get(expected_auxiliary_name, ())
     ):
         raise ValueError(
@@ -441,7 +463,7 @@ def execute_native_replay_with_output(
         request.binding.drive_mode,
     )
     _validate_bundle(row, request.binding, request.bundle)
-    output: NativeTorqueReplay | NativeDrakeTorqueReplay
+    output: NativeTorqueReplay | NativeDrakeTorqueReplay | NativePinocchioTorqueReplay
     if (
         row.engine == "mujoco"
         and request.binding.native_execution_provider_id
@@ -461,6 +483,18 @@ def execute_native_replay_with_output(
         )
 
         output = replay_native_drake_torque_bundle(request.bundle, request.model_path)
+    elif (
+        row.engine == "pinocchio"
+        and request.binding.native_execution_provider_id
+        == "pinocchio-native-torque-replay"
+    ):
+        from src.engines.physics_engines.pinocchio.python.native_torque_replay import (
+            replay_native_pinocchio_torque_bundle,
+        )
+
+        output = replay_native_pinocchio_torque_bundle(
+            request.bundle, request.model_path
+        )
     else:
         raise ValueError("no reviewed native adapter is registered for this row")
     receipt = validate_native_replay_output(
@@ -500,7 +534,7 @@ def build_native_replay_report(
                 _row_result(row, "missing_binding", "no explicit adapter binding")
             )
             continue
-        if row.engine not in {"mujoco", "drake"}:
+        if row.engine not in {"mujoco", "drake", "pinocchio"}:
             results.append(
                 _row_result(row, "unsupported_adapter", "no reviewed native adapter")
             )

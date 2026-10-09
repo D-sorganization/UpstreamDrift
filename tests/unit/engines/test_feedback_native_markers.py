@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 import math
+import os
 from pathlib import Path
 
 import numpy as np
@@ -13,10 +14,12 @@ from src.engines.feedback_comparison import DriveMode, FeedbackComparisonRegistr
 from src.engines.feedback_native_execution import (
     NativeAdapterBinding,
     NativeReplayRequest,
+    build_native_replay_report,
 )
 from src.engines.feedback_native_markers import (
     NativeMarkerAttachment,
     NativeMarkerMap,
+    NativeMarkerRequest,
     build_native_marker_replay_report,
     execute_native_marker_replay,
 )
@@ -27,7 +30,11 @@ pytestmark = pytest.mark.unit
 
 @pytest.fixture()
 def registry() -> FeedbackComparisonRegistry:
-    root = Path(__file__).resolve().parents[3]
+    root = Path(
+        os.environ.get(
+            "UPSTREAMDRIFT_REPO_ROOT", str(Path(__file__).resolve().parents[3])
+        )
+    )
     return FeedbackComparisonRegistry(EngineModelInventory.load(repo_root=root))
 
 
@@ -44,7 +51,17 @@ def _registry_binding(
         provider_sha256="e" * 64,
         availability="available",
     )
-    registry.rows = (row,)
+    registry.rows = tuple(
+        row
+        if (
+            existing.package_id,
+            existing.variant_id,
+            existing.drive_mode,
+        )
+        == (row.package_id, row.variant_id, row.drive_mode)
+        else existing
+        for existing in registry.rows
+    )
     return registry, NativeAdapterBinding(
         row.package_id,
         row.variant_id,
@@ -120,6 +137,12 @@ def test_mujoco_markers_use_native_fk_with_floating_base_and_local_offset(
         bundle.input_history.timebase_id,
         (NativeMarkerAttachment("marker-a", "arm", offset),),
     )
+    with pytest.raises(ValueError, match="model or provider identity differs"):
+        execute_native_marker_replay(
+            request,
+            registry,
+            replace(marker_map, native_model_id="mujoco/driver"),
+        )
 
     evidence = execute_native_marker_replay(request, registry, marker_map)
 
@@ -291,6 +314,8 @@ def test_drake_markers_use_native_fk_with_floating_base_and_local_offset(
     positions = np.asarray(evidence.native_output.positions_m)
     assert evidence.native_execution_receipt.nq == 8
     assert evidence.native_execution_receipt.nv == 7
+    assert evidence.native_execution_receipt.state_reset_allowed is False
+    assert evidence.native_execution_receipt.state_reset_count is None
     assert np.all(np.linalg.norm(positions[:, 0], axis=1) > 0)
     frame = plant.GetFrameByName("arm")
     replayed = replay_native_drake_torque_bundle(bundle, model_path)
@@ -298,4 +323,132 @@ def test_drake_markers_use_native_fk_with_floating_base_and_local_offset(
         plant.SetPositions(context, qpos)
         pose = frame.CalcPoseInWorld(context)
         expected = pose.translation() + pose.rotation().matrix() @ offset
+        np.testing.assert_allclose(positions[sample, 0], expected, atol=1e-10)
+
+
+def test_pinocchio_markers_use_native_fk_with_floating_base_and_local_offset(
+    registry: FeedbackComparisonRegistry,
+    tmp_path: Path,
+) -> None:
+    pin = pytest.importorskip("pinocchio")
+    version = getattr(pin, "__version__", None)
+    if not isinstance(version, str):
+        pytest.skip("real Pinocchio runtime is unavailable")
+    assert version.startswith("4.1")
+    from src.engines.physics_engines.pinocchio.python import native_torque_replay
+    from src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
+        PinocchioPhysicsEngine,
+    )
+
+    urdf = """<robot name="floating_marker_fk">
+<link name="world"/>
+<link name="base"><inertial><mass value="2"/><inertia ixx="0.2" iyy="0.2" izz="0.2" ixy="0" ixz="0" iyz="0"/></inertial></link>
+<joint name="root" type="floating"><parent link="world"/><child link="base"/></joint>
+<link name="arm"><inertial><mass value="1"/><inertia ixx="0.1" iyy="0.1" izz="0.1" ixy="0" ixz="0" iyz="0"/></inertial></link>
+<joint name="hinge" type="revolute"><parent link="base"/><child link="arm"/><origin xyz="0.1 0 0.3"/><axis xyz="0 1 0"/><limit lower="-3" upper="3" effort="2" velocity="100"/></joint>
+<transmission name="motor"><type>transmission_interface/SimpleTransmission</type><joint name="hinge"><hardwareInterface>EffortJointInterface</hardwareInterface></joint><actuator name="motor"><hardwareInterface>EffortJointInterface</hardwareInterface><mechanicalReduction>1</mechanicalReduction></actuator></transmission>
+</robot>"""
+    model_path = tmp_path / "floating_marker.urdf"
+    model_path.write_text(urdf, encoding="utf-8")
+    engine = PinocchioPhysicsEngine()
+    engine.load_from_path(str(model_path))
+    assert engine.model.nq == 8 and engine.model.nv == 7
+    initial_q = pin.neutral(engine.model)
+    initial_q[:3] = [0.3, -0.2, 0.5]
+    initial_q[3:7] = [0.0, 0.0, math.sin(0.35), math.cos(0.35)]
+    initial_q[7] = 0.4
+    initial_v = np.zeros(engine.model.nv)
+    initial_v[5] = 0.2
+    bundle = native_torque_replay.build_native_pinocchio_torque_bundle(
+        model_path,
+        initial_q,
+        initial_v,
+        np.asarray([0.0, 0.001, 0.002]),
+        np.zeros((3, 1)),
+    )
+    registry, binding = _registry_binding(registry, bundle, "pinocchio")
+    request = NativeReplayRequest(binding, bundle, model_path)
+    offset = (0.2, 0.1, -0.05)
+    marker_map = NativeMarkerMap(
+        "pinocchio",
+        bundle.model.model_id,
+        bundle.model.variant_id,
+        bundle.model.provider_id,
+        bundle.model.provider_sha256,
+        bundle.model.source_model_sha256,
+        bundle.model.loaded_native_model_sha256,
+        "world",
+        bundle.input_history.timebase_id,
+        (NativeMarkerAttachment("marker-a", "arm", offset),),
+    )
+    with pytest.raises(ValueError, match="model or provider identity differs"):
+        execute_native_marker_replay(
+            request,
+            registry,
+            replace(marker_map, native_model_id="pinocchio/driver"),
+        )
+
+    evidence = execute_native_marker_replay(request, registry, marker_map)
+
+    output = evidence.native_output
+    positions = np.asarray(output.positions_m)
+    assert positions.shape == (3, 1, 3)
+    assert evidence.qualification == "unqualified"
+    assert evidence.native_execution_receipt.nq == 8
+    assert evidence.native_execution_receipt.nv == 7
+    assert evidence.native_execution_receipt.package_id == "pinocchio/driver"
+    assert evidence.native_execution_receipt.native_model_id == "native-model"
+    report = build_native_marker_replay_report(
+        registry, (NativeMarkerRequest(request, marker_map),)
+    )
+    assert len(report.rows) == len(registry.rows)
+    pinocchio_row = next(
+        row
+        for row in report.rows
+        if (row.package_id, row.variant_id) == ("pinocchio/driver", "default")
+    )
+    assert pinocchio_row.status == "marker_output_generated"
+    execution_report = build_native_replay_report(registry, (request,))
+    assert len(execution_report.rows) == len(registry.rows)
+    assert execution_report.required_engine_ids == report.required_engine_ids
+    assert execution_report.executed_row_count == 1
+    assert not execution_report.is_complete
+    assert report.missing_engine_ids == (
+        "drake",
+        "mujoco",
+        "myosuite",
+        "opensim",
+        "simscape",
+    )
+    assert not report.has_full_required_fk_coverage
+    replay = native_torque_replay.replay_native_pinocchio_torque_bundle(
+        bundle, model_path
+    )
+    with pytest.raises(ValueError, match="unknown or ambiguous native marker frame"):
+        native_torque_replay.native_marker_positions_from_replay(
+            bundle,
+            model_path,
+            replay,
+            (("marker-a", "unknown-frame", offset),),
+        )
+    for sample, qpos in enumerate(replay.qpos):
+        yaw = 2.0 * math.atan2(qpos[5], qpos[6])
+        hinge = qpos[7]
+        rz = np.asarray(
+            [
+                [math.cos(yaw), -math.sin(yaw), 0.0],
+                [math.sin(yaw), math.cos(yaw), 0.0],
+                [0.0, 0.0, 1.0],
+            ]
+        )
+        ry = np.asarray(
+            [
+                [math.cos(hinge), 0.0, math.sin(hinge)],
+                [0.0, 1.0, 0.0],
+                [-math.sin(hinge), 0.0, math.cos(hinge)],
+            ]
+        )
+        expected = qpos[:3] + rz @ (
+            np.asarray([0.1, 0.0, 0.3]) + ry @ np.asarray(offset)
+        )
         np.testing.assert_allclose(positions[sample, 0], expected, atol=1e-10)

@@ -29,6 +29,10 @@ from src.engines.native_replay_contracts import (
 if TYPE_CHECKING:
     from sidekick.lab.mocap import ExperimentReplayBundle
 
+    from src.shared.python.motion_matching.replay_metrics import (
+        NativeMarkerPositionOutput,
+    )
+
 _VERSION = "1.0.0"
 _SOURCE_TAGS = frozenset(
     "robot link inertial origin mass inertia visual geometry mesh material color "
@@ -279,6 +283,96 @@ def replay_native_pinocchio_torque_bundle(
         raise ValueError("execution native model/provider identity differs")
     _restore(engine, state["qpos"], state["qvel"])
     return _step(engine, motors, bundle)
+
+
+def native_marker_positions_from_replay(
+    bundle: ExperimentReplayBundle,
+    model_path: str | Path,
+    replay: NativePinocchioTorqueReplay,
+    attachments: tuple[tuple[str, str, tuple[float, float, float]], ...],
+) -> NativeMarkerPositionOutput:
+    """Evaluate explicit frame-local points at every actual replay q state."""
+    from src.shared.python.motion_matching.replay_metrics import (
+        NativeMarkerPositionOutput,
+    )
+
+    contracts = native_replay_contract_types()
+    bundle = validate_native_replay_bundle(bundle, contracts)
+    times = np.asarray(replay.time_seconds, dtype=np.float64)
+    expected_times = np.asarray(bundle.input_history.time_seconds, dtype=np.float64)
+    q_history = np.asarray(replay.qpos, dtype=np.float64)
+    v_history = np.asarray(replay.qvel, dtype=np.float64)
+    state = {
+        item.component_id: np.asarray(item.values) for item in bundle.initial_state
+    }
+    if tuple(state) != ("qpos", "qvel"):
+        raise ValueError("Pinocchio FK requires complete native qpos and qvel state")
+    if (
+        not np.array_equal(times, expected_times)
+        or q_history.shape != (len(times), len(state["qpos"]))
+        or v_history.shape != (len(times), len(state["qvel"]))
+        or not np.isfinite(times).all()
+        or not np.isfinite(q_history).all()
+        or not np.isfinite(v_history).all()
+    ):
+        raise ValueError("Pinocchio FK requires the exact complete native output")
+    if (
+        replay.input_sha256 != bundle.applied_input_sha256
+        or replay.policy_sha256 != bundle.policy_sha256
+    ):
+        raise ValueError("Pinocchio FK replay input or policy identity differs")
+    if not np.array_equal(q_history[0], state["qpos"]) or not np.array_equal(
+        v_history[0], state["qvel"]
+    ):
+        raise ValueError("Pinocchio FK initial state differs from frozen bundle")
+    if not attachments:
+        raise ValueError("Pinocchio FK requires explicit marker attachments")
+    labels = tuple(item[0] for item in attachments)
+    if any(not label.strip() for label in labels) or len(labels) != len(set(labels)):
+        raise ValueError("Pinocchio marker labels must be non-empty and unique")
+    frame_ids = tuple(item[1] for item in attachments)
+    if any(not frame_id.strip() for frame_id in frame_ids):
+        raise ValueError("Pinocchio marker frame names must be explicit")
+    offsets = np.asarray([item[2] for item in attachments], dtype=np.float64)
+    if offsets.shape != (len(attachments), 3) or not np.isfinite(offsets).all():
+        raise ValueError("Pinocchio marker offsets must be finite local 3-vectors")
+
+    engine, motors = _load(Path(model_path))
+    if _identity(engine, Path(model_path), motors, contracts) != bundle.model:
+        raise ValueError("Pinocchio marker FK model/provider identity differs")
+    if engine.model is None:
+        raise RuntimeError("Pinocchio native model failed to initialize")
+    for frame_id in frame_ids:
+        matches = [
+            index
+            for index, frame in enumerate(engine.model.frames)
+            if frame.name == frame_id
+        ]
+        if len(matches) != 1:
+            raise ValueError("unknown or ambiguous native marker frame")
+
+    positions = np.empty((len(times), len(attachments), 3), dtype=np.float64)
+    for sample, (q, v) in enumerate(zip(q_history, v_history, strict=True)):
+        _restore(engine, q, v)
+        transforms = engine.get_link_transforms()
+        for marker_index, (frame_id, local_offset) in enumerate(
+            zip(frame_ids, offsets, strict=True)
+        ):
+            transform = transforms[frame_id]
+            positions[sample, marker_index] = (
+                transform[:3, 3] + transform[:3, :3] @ local_offset
+            )
+    if not np.isfinite(positions).all():
+        raise RuntimeError("Pinocchio native marker FK produced nonfinite positions")
+    for array in (times, positions):
+        array.setflags(write=False)
+    return NativeMarkerPositionOutput(
+        times,
+        positions,
+        labels,
+        "world",
+        bundle.input_history.timebase_id,
+    )
 
 
 def _step(

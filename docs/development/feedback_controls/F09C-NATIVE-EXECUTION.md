@@ -11,9 +11,10 @@ separately in the receipt. The executor refuses unsupported or unavailable
 inventory rows, mixed drive semantics, missing required capabilities, stale
 bundle integrity, unexpected replay modes, state observation or feedback,
 reset-enabled policy, non-relative time, and inputs outside the current direct
-actuator-torque/ZOH adapters. The registered implementation currently invokes
-the reviewed MuJoCo and Drake adapters only. Other engines and muscle
-excitation remain represented and blocking.
+actuator-torque/ZOH adapters. The initial F09c adapters were MuJoCo and Drake;
+F09e #11914 adds the published Pinocchio native torque adapter without changing
+the bundle or inventory authority. Other engines and muscle excitation remain
+represented and blocking.
 
 Post-step validation checks the exact initial physical and numerical state,
 full native time grid, applied torque samples, state/input/policy/model
@@ -46,10 +47,11 @@ are reconciled.
 
 ## Limitations and Next Handoff
 
-T01 v1 currently has reviewed direct torque paths for MuJoCo and Drake. The
-executor does not yet admit excitation, force, generalized-effort, externally
-forced, or shared-rigid-body-emulation rows. It does not execute Pinocchio,
-OpenSim, MyoSuite, or Simscape. These rows remain required and unqualified.
+T01 v1 currently has reviewed direct torque paths for MuJoCo, Drake, and
+Pinocchio. The executor does not yet admit excitation, force, generalized-
+effort, externally forced, or shared-rigid-body-emulation rows. It does not
+execute OpenSim, MyoSuite, or Simscape. These rows remain required and
+unqualified.
 Actual native marker forward kinematics and anatomical attachment mapping
 belong to a following F09 child. Do not interpret `qpos`, `qvel`, or native
 integration-state arrays as marker positions.

@@ -181,10 +181,11 @@ The two provider identities are not interchangeable. Bindings are explicit;
 the executor never infers a full-body mapping from the adapter's synthetic
 unit-hinge test identifiers.
 
-Current execution support is limited to the reviewed MuJoCo and Drake
-direct-torque adapter pairs. The report retains every inventory row and all
-six required engines, marking rows without an adapter or with unavailable
-runtime evidence as blocking. Before stepping, the bundle must declare
+Current execution support includes the reviewed MuJoCo and Drake direct-torque
+adapter pairs and the Pinocchio direct-torque adapter added in F09e (#11914).
+The report retains every inventory row and all six required engines, marking
+rows without an adapter or with unavailable runtime evidence as blocking.
+Before stepping, the bundle must declare
 native-own-contact replay, no observation or state-feedback access, reset
 policy forbidden, simulation-relative time, and zero-order-held actuator
 torque. The executor calls only the adapter selected by the binding and checks
@@ -210,3 +211,11 @@ ordered local-point map and source/loaded-model/provider identities are
 content-addressed; generalized coordinates are never treated as marker
 positions. See
 `manuals/upstreamdrift/chapters/28-native-marker-forward-kinematics.qmd`.
+
+F09e (#11914) extends this output boundary to the existing Pinocchio native
+replay adapter. It uses complete `qpos` and `qvel` with distinct `nq` and
+`nv`; frame placements are derived by `PinocchioPhysicsEngine`. The fresh
+cache-initialization policy is bound, but the adapter does not claim a measured
+reset count or introduce a synthetic cache-state payload. Native output
+remains unqualified. See
+`manuals/upstreamdrift/chapters/30-pinocchio-native-marker-forward-kinematics.qmd`.
