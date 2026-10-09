@@ -20,6 +20,7 @@ from src.shared.python.force_overlay.glyphs import (
     GlyphSet,
     LegendSpec,
     TorqueArcGlyph,
+    clamped_tip_shift,
 )
 from src.shared.python.force_overlay.palette import FORCE_KIND_PALETTE
 
@@ -254,7 +255,8 @@ def clamped_chevron_poly(
     """
     poly = np.asarray(head_poly, dtype=float)
     tip, b1, b2 = poly[0], poly[1], poly[2]
-    shift = (0.5 * (b1 + b2) - tip) * 0.6
+    base_center = tuple(0.5 * (b1 + b2))
+    shift = np.array(clamped_tip_shift(tuple(tip), base_center))
     return poly + shift
 
 
