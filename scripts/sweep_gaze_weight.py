@@ -74,9 +74,10 @@ def main(argv: list[str] | None = None) -> None:
 
     captured: dict[str, Any] = {}
 
-    def stub(  # noqa: ANN202
-        ctx, lane, kin, _sim, _adapter, _labels, q_ref, _cal, _spec, ik_report
-    ):
+    def stub(_ctx, lane, kin, *rest):  # noqa: ANN001, ANN202
+        # rest = (sim, adapter, labels, q_ref, calibration, spec, ik_report), the
+        # positional tail of cli._simulate_and_receipt.
+        q_ref, ik_report = rest[3], rest[-1]
         captured["row"] = row_from(ik_report, head_gaze_receipt(lane, kin, q_ref))
         return {}
 
