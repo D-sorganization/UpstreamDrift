@@ -337,3 +337,32 @@ def test_native_activation_domain_violation_during_replay_is_not_clipped(
             np.array([0.0, 0.005, 0.01]),
             {"flexor": np.array([0.0, 0.0, 0.0])},
         )
+
+
+def test_muscle_outside_native_actuator_registry_is_not_silently_undriven(
+    muscle_fixture: tuple[Path, dict[str, float]],
+) -> None:
+    osim = pytest.importorskip("opensim")
+    path, initial = muscle_fixture
+    model = osim.Model(str(path))
+    nested = osim.Millard2012EquilibriumMuscle(
+        "unregistered_flexor", 10.0, 0.1, 0.2, 0.0
+    )
+    nested.addNewPathPoint("origin", model.getGround(), osim.Vec3(0))
+    nested.addNewPathPoint("insertion", model.getBodySet().get("load"), osim.Vec3(0))
+    model.addComponent(nested)
+    model.finalizeConnections()
+    state = model.initSystem()
+    model.equilibrateMuscles(state)
+    names = model.getStateVariableNames()
+    initial = {
+        names.get(i): float(model.getStateVariableValue(state, names.get(i)))
+        for i in range(names.getSize())
+    }
+    assert model.getMuscles().getSize() == 1
+    assert any("unregistered_flexor" in name for name in initial)
+    model.printToXML(str(path))
+    with pytest.raises(ValueError, match="muscle registry"):
+        replay_muscle_excitations(
+            path, initial, np.array([0.0, 0.01]), {"flexor": np.array([0.1, 0.1])}
+        )

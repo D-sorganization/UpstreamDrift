@@ -9,7 +9,8 @@ supports muscle forces and gravity only. Non-muscle actuators, other forces
 (including contact forces pending their explicit policy), pre-existing
 controllers, prescribed motion/coordinates, locks and unsupported constraints
 are rejected through recursive component auditing, including components outside
-legacy ForceSet/ControllerSet containers. The early muscle-law domain policy
+legacy ForceSet/ControllerSet containers. Recursively owned muscle paths must
+match the native muscle registry, preventing an undeclared undriven muscle. The early muscle-law domain policy
 supports Millard2012EquilibriumMuscle; other laws require explicit domain
 qualification. Initial and sampled trajectory activation/fiber state must
 respect native model-specific minima without clipping. Contact geometry counts

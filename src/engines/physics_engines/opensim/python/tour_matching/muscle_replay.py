@@ -71,12 +71,13 @@ def _validated_inputs(
     return grid, controls, initial
 
 
-def _audit_drive_components(model: Any, osim: Any) -> None:
+def _audit_drive_components(model: Any, osim: Any) -> set[str]:
     """Audit recursive native components, including those outside legacy sets.
 
     SWIG exposes heterogeneous Component proxies without Python type stubs;
     native safeDownCast is the runtime type authority at this boundary.
     """
+    muscle_paths = set()
     # Exhaust SWIG's iterator before raising; early generator close in 4.6 can
     # otherwise emit an unraisable GeneratorExit warning.
     for component in tuple(model.getComponentsList()):
@@ -87,6 +88,7 @@ def _audit_drive_components(model: Any, osim: Any) -> None:
         if osim.Constraint.safeDownCast(component) is not None:
             raise ValueError("constraint needs a qualified initialization policy")
         if osim.Muscle.safeDownCast(component) is not None:
+            muscle_paths.add(component.getAbsolutePathString())
             continue
         if osim.Actuator.safeDownCast(component) is not None:
             raise ValueError("non-muscle actuator is forbidden in muscle-only replay")
@@ -94,6 +96,7 @@ def _audit_drive_components(model: Any, osim: Any) -> None:
             raise ValueError(
                 "non-muscle force requires a separate qualified passive/contact policy"
             )
+    return muscle_paths
 
 
 def _muscle_state_domains(model: Any, osim: Any) -> dict[str, tuple[float, float]]:
@@ -155,9 +158,14 @@ def replay_muscle_excitations(
     path = Path(model_path)
     model_digest = hashlib.sha256(path.read_bytes()).hexdigest()
     model = osim.Model(str(path))
-    _audit_drive_components(model, osim)
+    recursive_muscle_paths = _audit_drive_components(model, osim)
     muscles = model.getMuscles()
     muscle_names = tuple(muscles.get(i).getName() for i in range(muscles.getSize()))
+    registered_paths = {
+        muscles.get(i).getAbsolutePathString() for i in range(muscles.getSize())
+    }
+    if recursive_muscle_paths != registered_paths:
+        raise ValueError("native muscle registry omits recursively owned muscles")
     if not muscle_names or len(set(muscle_names)) != len(muscle_names):
         raise ValueError("model must contain uniquely named muscles")
     coordinates = model.getCoordinateSet()
