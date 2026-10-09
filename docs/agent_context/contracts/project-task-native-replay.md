@@ -85,3 +85,16 @@ Actual SDK task execution and independent native reproduction are different
 boundaries. Retain separate provenance for both while reusing canonical Tools
 contracts and one native executor. Physical agreement cannot authenticate
 source lineage or establish physiological acceptance on its own.
+
+## Frozen Tracking Cost Boundary
+
+`ProjectTaskTrackingObjective` decodes saved complete states on owned scratch
+data without native integration. Position residuals use native manifold
+differences; velocities compare native qvel coordinates without twist transport.
+Explicit positive physical scales yield dimensionless discrete sums on a frozen
+absolute grid. Bind reference declaration, scales, complete initial state,
+previous controls, ordered actuators and model/source/implementation identities.
+Reject stale anchors and changed lineage. Command slew cost is a soft penalty.
+Provisional scores remain provisional; guarded promotion recomputes the same
+objective from its full SDK history before independent serialized T01 replay.
+No objective digest authenticates anatomical correspondence or scientific fit.

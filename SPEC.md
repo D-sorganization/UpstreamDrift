@@ -1,3 +1,17 @@
+## Project MyoSuite Native Tracking Objective (F09m)
+
+F09m #12023 adds source-bound frozen native tracking costs shared by provisional
+search and guarded SDK histories. Decode complete states only on owned scratch
+data. Native configuration differences handle quaternion antipodes; native
+qvel differences, activation and exact command increments use explicit positive
+physical scales. Bind reference declaration, scales, absolute grid, complete
+initial state, previous controls, actuator order and source identities.
+Reject stale/changed lineage, clocks, bounds and solve parameters. The discrete
+cost does not grant physical feasibility, timestep-invariant integration or
+capture/physiological validity. Recompute selected commands through guarded
+promotion and independent full-horizon native replay. Chapter 38 and F09m
+turnover retain the evidence and remaining all-model muscular OpenSim endpoint.
+
 ## Project MyoSuite Native Search, Forecast, Feedback and Independent Replay (F09i–F09l)
 
 F09l #12014 adds `ProjectTaskNativeSearch`, a persistent separately owned native

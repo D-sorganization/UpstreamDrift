@@ -348,3 +348,41 @@ accepted optimizer. Full capture, calibrated markers/ground, contact/grip,
 physiological validity, all seventeen model rows and six ecosystems remain
 required, with muscular OpenSim and full-horizon independent excitation replay
 as the final endpoint.
+
+## Frozen Native Tracking Objective
+
+`myosuite_project_tracking.py` adds frozen native reference and physical-scale
+objects plus a source-bound `ProjectTaskTrackingObjective`. It uses owned scratch
+MjData and native `mj_differentiatePos` to compare positions on the configuration
+manifold. It never forwards, integrates, resets or commands the live task.
+Velocity residuals compare native qvel coordinates without transporting twists.
+Activation and exact post-mapping command increments retain native units.
+Positive physical scales make each squared residual dimensionless. These costs
+are discrete sums on one frozen grid, not timestep-invariant integrals. Slew
+cost is a soft penalty; the optimizer must separately enforce hard slew bounds.
+
+Freeze absolute reference clocks, reference provenance declaration, all scales,
+complete initial integration state, previous native controls, ordered actuators,
+compiled/source/resource-closure identities and implementation hashes. Reject
+changed parameters, live anchors, clocks, command bounds and model/source/SDK/
+producer lineage. Preserve bytes-backed immutable reference arrays. A digest
+binds a declaration; it does not authenticate anatomy, measured subject identity
+or arbitrary provisional arrays. Callers serialize live task mutation.
+
+Use the same scorer for provisional native predictions and fully guarded SDK
+histories. `history_cost` is admissible as the existing promotion objective:
+source/full-state live guards can nest, while the scorer owns its own scratch
+lock. Guarded promotion recomputes commands and independently replays complete
+serialized/reloaded T01 histories. Numerical costs cannot override hard physical
+admission. A validated future plan is separate from an executed live prefix.
+
+Actual API-absence RED contains ten failures; first native GREEN has ten passes
+in 18.92 seconds. Two additional genuine lineage regressions fail before their
+checks are added. The expanded sixteen-case actual SDK campaign passes in
+56.23 seconds, including both unchanged original production golfer models and
+full twenty-step guarded promotion plus independent replay. These tests use
+hold references and finite-state admission, not private-capture physical gates.
+See F09m turnover for final combined evidence and bounded-search integration.
+The final seven-module actual SDK campaign passes 146 tests with zero failures,
+errors or skips in 152.81 seconds; all sixteen executed source/test hashes match.
+All seventeen production rows, six ecosystems and muscular OpenSim remain open.

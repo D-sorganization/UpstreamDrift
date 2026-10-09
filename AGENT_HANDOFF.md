@@ -1,3 +1,13 @@
+# Active: Native Tracking Objective — F09m #12023
+
+Branch `feat/f09m-native-tracking-objective-12023` starts at published F09l
+`d5f003614426aef0ec6fdf2c0ed203942e25101c`, draft PR #12017. Read
+`docs/development/feedback_controls/F09M-NATIVE-TRACKING-TURNOVER.md` for frozen
+objective semantics, TDD and promotion boundaries. Cost scales are physical
+magnitudes; command slew cost does not enforce hard slew. No fitted private
+motion or physiological acceptance is claimed. All seventeen models and six
+ecosystems remain required, ending in muscular OpenSim and independent replay.
+
 # Active: Persistent Project MyoSuite Native Search — F09l #12014
 
 Branch `feat/f09l-persistent-native-search-12014` starts at published F09k
