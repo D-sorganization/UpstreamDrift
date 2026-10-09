@@ -52,9 +52,47 @@ def test_unit_gate_kernel_step_installs_into_venv_and_probes_fail_closed() -> No
 
 
 @pytest.mark.unit
-def test_unit_gate_uses_workspace_cargo_home() -> None:
-    env = _unit_gate_job().get("env", {})
-    assert env.get("CARGO_HOME") == "${{ github.workspace }}/.cargo-home"
+def test_unit_gate_prepares_fresh_rust_homes_before_installation() -> None:
+    job = _unit_gate_job()
+    assert _uses_fresh_rust_homes(job)
+    names = _step_names(job)
+    assert names.index("Install Unit Test Dependencies") < names.index(
+        "Prepare job-owned Rust environment"
+    )
+    assert names.index("Verify Rust toolchain") < names.index(BUILD_STEP)
+
+
+def _uses_fresh_rust_homes(job: dict[str, Any]) -> bool:
+    """Recognize the tested preparation command only before toolchain setup."""
+    env = job.get("env") or {}
+    if "RUSTUP_HOME" in env or "CARGO_HOME" in env:
+        return False
+    for step in job.get("steps") or []:
+        if str(step.get("uses", "")).startswith(RUST_TOOLCHAIN_ACTION):
+            return False
+        if step.get("run") == "python scripts/ci/prepare_rust_environment.py":
+            return not any(
+                name in (step.get("env") or {})
+                for name in ("RUNNER_TEMP", "GITHUB_ENV", "RUSTUP_HOME", "CARGO_HOME")
+            )
+    return False
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("mutation", ["late", "wrong-command", "override", "missing"])
+def test_fresh_rust_preparation_cannot_bypass_isolation_contract(mutation: str) -> None:
+    job = _unit_gate_job()
+    steps = job["steps"]
+    prepare = steps.pop(_step_names(job).index("Prepare job-owned Rust environment"))
+    if mutation == "late":
+        steps.append(prepare)
+    elif mutation == "wrong-command":
+        prepare["run"] = "echo prepared"
+        steps.insert(0, prepare)
+    elif mutation == "override":
+        prepare["env"] = {"RUNNER_TEMP": "shared-state"}
+        steps.insert(0, prepare)
+    assert not _uses_fresh_rust_homes(job)
 
 
 RUST_TOOLCHAIN_ACTION = "dtolnay/rust-toolchain@"
@@ -81,9 +119,8 @@ def test_every_rust_toolchain_job_uses_an_isolated_rustup_home() -> None:
 
     rustup upgrading the runner image's partially recorded ``stable`` in place
     aborts with ``detected conflict: 'bin/cargo'`` before any test runs
-    (#11595). A per-job RUSTUP_HOME in the workspace starts empty because
-    actions/checkout cleans untracked files; job-level env cannot use the
-    runner context.
+    (#11595). Accept workspace isolation or the tested fresh runtime
+    preparation (#11977); job-level env cannot use the runner context.
     """
     jobs = _rust_toolchain_jobs()
     assert jobs, "expected at least one job that installs Rust"
@@ -91,6 +128,7 @@ def test_every_rust_toolchain_job_uses_an_isolated_rustup_home() -> None:
         f"{workflow}:{job_id}"
         for workflow, job_id, job in jobs
         if (job.get("env") or {}).get("RUSTUP_HOME") != ISOLATED_RUSTUP_HOME
+        and not _uses_fresh_rust_homes(job)
     ]
     assert not offenders, (
         f"jobs without RUSTUP_HOME={ISOLATED_RUSTUP_HOME}: {offenders}"
@@ -119,8 +157,8 @@ def _cargo_home(job: dict[str, Any]) -> object:
 def test_every_rust_toolchain_job_uses_an_isolated_cargo_home() -> None:
     """Concurrent jobs sharing ~/.cargo can delete binaries from one another.
 
-    Every Rust job must pin both RUSTUP_HOME and CARGO_HOME to the exact
-    per-workspace paths (RM#2021).
+    Every Rust job must isolate both homes through workspace bindings
+    (RM#2021) or tested fresh runtime preparation (#11977).
     """
     jobs = _rust_toolchain_jobs()
     assert jobs, "expected at least one job that installs Rust"
@@ -128,6 +166,7 @@ def test_every_rust_toolchain_job_uses_an_isolated_cargo_home() -> None:
         f"{workflow}:{job_id}"
         for workflow, job_id, job in jobs
         if (workflow, job_id) not in CARGO_HOME_EXEMPT_JOBS
+        and not _uses_fresh_rust_homes(job)
         and (
             _cargo_home(job) != ISOLATED_CARGO_HOME
             or (job.get("env") or {}).get("RUSTUP_HOME") != ISOLATED_RUSTUP_HOME

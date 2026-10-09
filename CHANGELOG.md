@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Allocate fresh job-owned Rust homes before the unit-gate toolchain install,
+  avoiding reuse of incomplete workspace toolchains in merge groups (#11977).
+
 ## [2.1.3] - 2026-09-07
 
 Supersedes `v2.1.2`, which published nothing. Its `release.yml` run built a
