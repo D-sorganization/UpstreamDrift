@@ -41,6 +41,11 @@
       "resolution": "Inventory prefix_fit.py normalized/Bernstein polynomial conversion, weighted growing-prefix least squares, resample_logged_signal.m physical-clock interpolation, extract_golf_joint_kinematics.m direct-sensor unit conversion build_golf_kinematics.m native-frame snapshot, capture_fit_sim_options.m complete-horizon torque gating and repaired referenced-joint initialization pathways before a manual coverage claim. Native workspace, timestamp, joint mapping and initialization tests and a 20 ms live baseline are recorded; geometric calibration and qualified full-swing replay remain outstanding."
     },
     {
+      "id": "UP-D1-feedback-comparison-admission-inventory",
+      "owner": "UpstreamDrift issue #11785",
+      "resolution": "Inventory F01 controlled-swing admission in src/engines/feedback_comparison.py and manuals/upstreamdrift/chapters/13-feedback-comparison.qmd: all 16 registered packages plus declared OpenSim torque/muscle variants stay required; support, availability and qualification remain separate; exact model/provider/state/policy/input/physics/contact/integrator/actuator identities and time-only full-state no-reset replay guard comparison levels. The existing Euclidean same-input-bundle/v1 lacks policy/input hash binding and cannot qualify native muscle or manifold replay. Common-model, externally forced and restarted short-horizon evidence cannot qualify native own-contact muscle full-swing physics. Unit admission tests and source hashes do not establish matching accuracy, measured contact or EMG agreement, runtime speed, or native six-engine qualification. Full calculation coverage and publication remain blocked."
+    },
+    {
       "id": "UP-D1-inventory-required",
       "owner": "UpstreamDrift issue #9067",
       "resolution": "Inventory and classify every in-scope calculation and module before any coverage or release claim."
