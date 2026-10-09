@@ -170,7 +170,7 @@ class ClubInHands:
         self.delta0 = delta0
         self.hand_source: Any = None
         #: diagnostic drift of the trail hand, in its grip frame (issue #11986)
-        self.trail_shift_m = np.zeros(3)
+        self.trail_shift_m: np.ndarray = np.zeros(3)
 
     def _solref(self, k_solref: float) -> tuple[float, float]:
         damping = k_solref * IMPEDANCE * self._preload_m * self._dissipation_s_m

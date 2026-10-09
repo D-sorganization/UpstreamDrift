@@ -31,6 +31,8 @@ from src.engines.physics_engines.drake.python.grip_bushing import (
     FreeClubPlantMixin,
     WeldClubKinematics,
     _module,
+    continuous_state,
+    start_simulation,
 )
 from src.shared.python.grip_contact import (
     ClubDynamics,
@@ -256,20 +258,14 @@ def simulate_grip_contact(
         ),
         simulator,
     )
-    context = simulator.get_mutable_context()
-    context.SetTime(float(times[0]))
-    context.SetContinuousState(x0)
-    simulator.Initialize()
-    wrench: dict[str, tuple[list, list]] = {s: ([], []) for s in SIDES}
-    hand_pose: dict[str, tuple[list, list]] = {s: ([], []) for s in SIDES}
-    club_pose: dict[str, tuple[list, list]] = {s: ([], []) for s in SIDES}
+    wrench, hand_pose, club_pose = start_simulation(simulator, float(times[0]), x0)
     normal: dict[str, list] = {s: [] for s in SIDES}
     club_rot = []
     for t in times:
         if t > times[0]:
             simulator.AdvanceTo(float(t))
         sim.set_hand(kin.state(*source(float(t))))
-        sim.set_club(context.get_continuous_state_vector().CopyToVector())
+        sim.set_club(continuous_state(simulator))
         poses = sim.frame_poses()
         for s, (force, moment, pad_force) in sim.wrenches().items():
             wrench[s][0].append(force)

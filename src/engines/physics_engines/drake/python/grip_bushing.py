@@ -100,6 +100,29 @@ class WeldClubKinematics:
         )
 
 
+_FrameLog = dict[str, tuple[list, list]]
+
+
+def continuous_state(simulator: Any) -> np.ndarray:
+    """The simulator's current continuous state vector as a numpy array."""
+    context = simulator.get_mutable_context()
+    return np.asarray(context.get_continuous_state_vector().CopyToVector())
+
+
+def start_simulation(
+    simulator: Any, t0: float, x0: np.ndarray
+) -> tuple[_FrameLog, _FrameLog, _FrameLog]:
+    """Initialise ``simulator`` at ``t0`` with state ``x0``; return empty frame logs."""
+    context = simulator.get_mutable_context()
+    context.SetTime(t0)
+    context.SetContinuousState(x0)
+    simulator.Initialize()
+    wrench: _FrameLog = {s: ([], []) for s in SIDES}
+    hand_pose: _FrameLog = {s: ([], []) for s in SIDES}
+    club_pose: _FrameLog = {s: ([], []) for s in SIDES}
+    return wrench, hand_pose, club_pose
+
+
 class FreeClubPlantMixin:
     """Shared hand and club state access for the free-club Drake plants.
 
@@ -290,19 +313,13 @@ def simulate_grip_bushing(
         start_time=float(times[0]),
     )
     analysis.ApplySimulatorConfig(config, simulator)
-    context = simulator.get_mutable_context()
-    context.SetTime(float(times[0]))
-    context.SetContinuousState(x0)
-    simulator.Initialize()
-    wrench: dict[str, tuple[list, list]] = {s: ([], []) for s in SIDES}
-    hand_pose: dict[str, tuple[list, list]] = {s: ([], []) for s in SIDES}
-    club_pose: dict[str, tuple[list, list]] = {s: ([], []) for s in SIDES}
+    wrench, hand_pose, club_pose = start_simulation(simulator, float(times[0]), x0)
     club_rot = []
     for t in times:
         if t > times[0]:
             simulator.AdvanceTo(float(t))
         sim.set_hand(kin.state(*spline.evaluate(float(t))))
-        sim.set_club(context.get_continuous_state_vector().CopyToVector())
+        sim.set_club(continuous_state(simulator))
         for s in SIDES:
             force, moment = sim.wrench(s)
             wrench[s][0].append(force)
