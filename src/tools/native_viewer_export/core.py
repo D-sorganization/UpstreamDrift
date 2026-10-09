@@ -42,12 +42,13 @@ from src.tools.native_viewer_export.compositor import (
 )
 
 Image8 = NDArray[np.uint8]
-ENGINES = ("drake", "pinocchio", "opensim", "myosuite")
+ENGINES = ("drake", "pinocchio", "opensim", "myosuite", "mujoco")
 VIEWER_NAMES = {
     "drake": "Drake MeshCat",
     "pinocchio": "Pinocchio MeshcatVisualizer",
     "opensim": "OpenSim simbody-visualizer",
     "myosuite": "MyoSuite MJRenderer arena",
+    "mujoco": "MuJoCo Renderer",
 }
 GRID_VIEW = "2x2"
 DEFAULT_SPEEDS = SPEED_VARIANTS
