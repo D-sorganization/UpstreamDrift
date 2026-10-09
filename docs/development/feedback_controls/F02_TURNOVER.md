@@ -56,3 +56,11 @@ Latest-main integration also preserves the controller/test bytes, incorporates
 the already merged shared ground-reaction work, and resolves only generated
 divergence inventories. The installed-native controller/governance suite passed
 all 27 tests again on that combined tree.
+
+The latest-main push hook exposed 50 array-type errors in its isolated mypy
+runtime, which lacked NumPy entirely. Annotation-only probing did not resolve
+the imported array types and was reverted. The maintained correction adds the
+existing `requirements-dev.lock` NumPy pin (`2.2.6`) to the mypy hook environment.
+The original physics annotations and runtime behavior are preserved; no typing
+ignore or validation bypass is introduced. The two initially failing modules
+pass the corrected isolated hook. Full push checks remain mandatory.
