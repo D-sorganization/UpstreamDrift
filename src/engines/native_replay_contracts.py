@@ -55,10 +55,9 @@ def native_replay_admission_bytes() -> bytes:
 
 def native_replay_contract_types() -> Any:
     """Load the implemented Tools authority through the governed UD seam."""
-    from src.shared.python._seam_redirect import extend_sidekick_lab_path
+    from src.shared.python._seam_redirect import load_pinned_tools_package
 
-    extend_sidekick_lab_path()
-    from sidekick.lab import mocap
+    mocap = load_pinned_tools_package("sidekick.lab.mocap")
 
     if not hasattr(mocap, "ExperimentReplayBundle"):
         raise RuntimeError("native replay requires the merged Tools T01 contract")

@@ -23,25 +23,22 @@ from src.engines.physics_engines.myosuite.python.native_direct_model_replay impo
     replay_direct_model_actuator_commands,
     resource_closure_sha256,
 )
-from src.shared.python._seam_redirect import extend_sidekick_lab_path
+from src.engines.native_replay_contracts import native_replay_contract_types
 
-extend_sidekick_lab_path()
-
-from sidekick.lab.mocap import (
-    ActuationInputKind,
-    CapabilityAvailability,
-    CapabilityDeclaration,
-    CapabilitySupport,
-    InitialStateSchema,
-    InputChannel,
-    InputInterpolation,
-    ModelIdentity,
-    ReplayExecutionPolicy,
-    ReplayMode,
-    StateComponentRole,
-    StateComponentSpec,
-    build_experiment_replay_bundle,
-)
+_mocap = native_replay_contract_types()
+ActuationInputKind = _mocap.ActuationInputKind
+CapabilityAvailability = _mocap.CapabilityAvailability
+CapabilityDeclaration = _mocap.CapabilityDeclaration
+CapabilitySupport = _mocap.CapabilitySupport
+InitialStateSchema = _mocap.InitialStateSchema
+InputChannel = _mocap.InputChannel
+InputInterpolation = _mocap.InputInterpolation
+ModelIdentity = _mocap.ModelIdentity
+ReplayExecutionPolicy = _mocap.ReplayExecutionPolicy
+ReplayMode = _mocap.ReplayMode
+StateComponentRole = _mocap.StateComponentRole
+StateComponentSpec = _mocap.StateComponentSpec
+build_experiment_replay_bundle = _mocap.build_experiment_replay_bundle
 
 pytestmark = pytest.mark.unit
 _FACTORY_MODEL_PATHS: list[str] = []
@@ -635,16 +632,15 @@ def test_f09_command_executor_binds_t02_row_without_relabeling_native_engine(
         compiled_actuator_profile_bytes,
     )
 
-    from sidekick.lab.mocap import (
-        COMPILED_ACTUATOR_PROFILE_ID,
-        COMPILED_ACTUATOR_PROFILE_VERSION,
-        ComparisonEvidenceRow,
-        DriveMode as T02DriveMode,
-        EvidenceArtifactKind,
-        EvidenceArtifactReference,
-        ImplementationEvidence,
-        ImplementationEvidenceKind,
-    )
+    contracts = native_replay_contract_types()
+    COMPILED_ACTUATOR_PROFILE_ID = contracts.COMPILED_ACTUATOR_PROFILE_ID
+    COMPILED_ACTUATOR_PROFILE_VERSION = contracts.COMPILED_ACTUATOR_PROFILE_VERSION
+    ComparisonEvidenceRow = contracts.ComparisonEvidenceRow
+    T02DriveMode = contracts.DriveMode
+    EvidenceArtifactKind = contracts.EvidenceArtifactKind
+    EvidenceArtifactReference = contracts.EvidenceArtifactReference
+    ImplementationEvidence = contracts.ImplementationEvidence
+    ImplementationEvidenceKind = contracts.ImplementationEvidenceKind
 
     registration, bundle, closure = _case(tmp_path)
     environment = _DirectModelFixture(str(registration.model_path))
