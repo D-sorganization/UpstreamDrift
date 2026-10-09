@@ -41,6 +41,18 @@ Rigid contact uses formulation-appropriate unilateral and complementarity checks
 
 ## OpenSim Muscle Endpoint
 
+Before any controller or muscle parameter tuning, run the F07f native source
+reference observer on each exact source artifact and a declared post-initSystem
+or complete named continuous state at the initialized clock. Record achieved
+versus serialized coordinate defaults because OpenSim `initSystem()` itself
+assembles. Preserve frame transforms, joint/coupler coordinate paths, moving and
+conditional muscle path points, native wrap curves, concrete law/options and
+source/loaded/runtime identities. Cross-source diagnostics require explicit
+candidate path pairs and a declared rigid frame registration; scalar coordinate
+sign/axis equivalence and anatomical correspondence require separate evidence.
+This observer is read-only and cannot substitute for source-resource closure,
+physiological limits, native full-state replay, contact/grip or capture fit.
+
 Pin OpenSim/Moco versions and subject-specific muscle geometry, maximum isometric force, fiber/tendon lengths, activation constants and tendon-compliance choice. Sensitivity-test plausible parameter ranges; rank-deficient parameters retain priors. Reserve and root-residual actuators have separately frozen bounds and effort reports. No muscle-only claim if hidden reserves do substantial work. EMG, when actually present and synchronized, can constrain an uncertain recruitment objective; lack of EMG limits physiology validation and does not justify invented excitation truth.
 
 Export excitation histories **and** complete initial activations/fiber/tendon/other model states, actuator order and unit conventions, equilibrium procedure if used, final fitted parameters, contact model, external loads, solver and interpolation. Audit resulting activation, muscle force, tendon/fiber trajectories, generalized muscle torque, reserves and reaction forces. A fresh OpenSim forward simulation must reproduce the fit within ratified numerical tolerances; independently compare markers, club motion/events, contact and muscle/actuator bounds. The strongest gate uses the model's own ground contact without recorded GRF forcing. If unavailable, retain a separately labeled externally forced milestone and leave autonomous muscle-driven matching open.

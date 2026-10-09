@@ -1,5 +1,24 @@
 # Feedback Controls Planning Turnover
 
+## F07 Source-Bound Native Moco Numerical Guess Handoff
+
+Issue #11990 adds a byte-bound numerical seed for the maintained native Moco
+runner. Actual unchanged 520-muscle driver/iron preparation now has six rather
+than seven blockers; only the absent guess-file blocker was removed. This is
+not measured or physiologically accepted state. See
+`F07_NATIVE_MOCO_GUESS_TURNOVER.md` and canonical chapter 39 for the native
+readback, exact clocks, remaining policies and private receipt location.
+
+## F07 Native Offline Muscle Matching Handoff
+
+Issue #11968 adds a maintained OpenSim Moco prepare/solve/T01 export/fresh
+replay/physical scoring route. The executable design and exact reproduction
+commands are in `F07_NATIVE_MOCO_RUNNER_TURNOVER.md` and canonical chapter 39.
+Synthetic two-muscle OpenSim runs pass, while unchanged 520-muscle source plus
+frozen private driver/iron reference preparation reports seven blocker kinds
+and performs no solve. The earlier planning-only status below remains the
+history of the initial packet, not the status of this implementation slice.
+
 ## Current State
 
 Repository: UpstreamDrift. Topic branch: `docs/feedback-controls-11784`. Commit: `SELF` (resolve with `git rev-parse HEAD`). Documentation PR: not created at packet preparation; the governing epic records its final URL/state. Epic: https://github.com/D-sorganization/UpstreamDrift/issues/11784.
@@ -71,3 +90,12 @@ registry remains empty because its release is explicitly blocked pending the
 owner program; this slice does not register or imply an approved manual
 calculation. `python3 -m scripts.check_design_manual_governance` verifies the
 unchanged blocked registry/governance envelope.
+
+## F07f Native Reference-Conventions Handoff
+
+The scoped read-only OpenSim source audit is tracked under #11962; exact native
+TDD, bounded public-source diagnostics, correction of post-initSystem assembly
+semantics, reproduction and remaining donor/resource/anatomy gates are in
+`F07_REFERENCE_CONVENTIONS_TURNOVER.md`. Canonical calculation detail is in
+chapter 38. Neither the previous 520-muscle source nor Pose2Sim is qualified
+for capture-matched muscle-driven forward dynamics by this diagnostic.

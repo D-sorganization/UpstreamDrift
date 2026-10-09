@@ -10480,3 +10480,84 @@ four-mesh collocation versus independent replay evidence, exact control knots,
 failed attempts and input nonidentifiability. Discrete/hidden native state,
 production anatomy, contact/grip, capture and physiological acceptance remain
 separate open gates. The per-child fragment owns later PR-keyed log collation.
+## Native Source Reference-Conventions Audit (F07f, #11962)
+
+`tour_matching.native_reference_conventions` observes exact XML/loaded OpenSim
+model identity, the declared post-`initSystem` reference frame and clock,
+achieved versus serialized coordinate defaults, joint/coupler dependencies,
+concrete muscle geometry paths, moving/conditional points, engaged wrap-curve
+readback and law/options. OpenSim `initSystem()` includes native initialization
+assembly; complete named continuous restoration afterward does not trigger a
+second assembly and is not a complete native restart. Explicit candidate
+correspondence binds both observation hashes and a proper rigid frame
+registration. Scalar coordinate mappings are existence-checked only; equal
+names, pelvis registration and path-length differences do not certify anatomy.
+The bounded unchanged 520-muscle Wilkinson and 318-muscle Pose2Sim diagnostics
+are unqualified for source-resource closure, physiology, contact/grip, capture
+matching or independent excitation replay. Canonical method is provisional
+chapter 38 and the source/turnover receipt remains local.
+
+## Native OpenSim Marker Geometry (F07/F08, #11903)
+
+Explicit native model/frame/station bindings supply actual OpenSim geometry to
+shared calibration and trajectory IK. Selected coordinates must be independent;
+native assembly must achieve them, preserve other independent coordinates and
+respect every source range, including dependent coordinates. Metadata-only
+geometry, zero closure and no-op dynamics are rejected. Explicit finite bounds
+opt into TRF in the existing shared trajectory solver; default LM is unchanged.
+The three-sample pelvis diagnostic retains source clock, hashes, native identity,
+residuals and failures through existing frozen-loader/TRC contracts. Its source
+candidate reaches a pelvis rotation bound and remains unqualified: fixed frame
+registration and anatomical calibration are unresolved. Canonical authority is
+chapter26; no capture, whole-body or full-state replay acceptance is claimed.
+
+## Native Offline OpenSim Muscle Matching (#11968)
+
+The maintained `tour_matching.cli moco-native` command consumes a strict,
+file-driven request binding native source, marker reference, state/control
+bounds, exact source and observation hashes, selected marker correspondence,
+weights, units, registration, passive policy and native exclusions. Preparation
+retains every independent blocker before solver construction. The solve stage
+revalidates source and registered observation bytes, calls the existing Moco
+builder, reads back native marker weights, rejects incomplete state/control
+names, and retains numbered attempts including failed solves.
+
+A successful native solution is exported at every original control knot plus
+each original observation time to the versioned T01 excitation bundle. The
+saved bundle is serialized and reloaded before a fresh observation-free native
+model replay; its exact state and input identities remain separate from the
+Moco transcription. Scoring uses original observation times and validity
+masks, while optimized objective, independent replay marker error and
+optimized-versus-replayed full-state disagreement remain distinct quantities.
+The tested two-DOF/two-muscle synthetic fixtures support ordered controls and
+two mesh refinements; native integration refinement was measured at common
+times under distinct declared numerical policies. No solver-success or
+synthetic result qualifies whole-body biomechanics or the private capture.
+
+The unchanged pinned 520-muscle source and frozen driver/iron references were
+prepared without constructing a solve. Missing source-valid guess, registration,
+marker placements, passive policy, nonmuscle-assistance policy, native
+constraint policy and complete prepared native state remain explicit blockers.
+Private marker arrays and identities stay outside the public repository.
+Canonical chapter39 and `F07_NATIVE_MOCO_RUNNER_TURNOVER.md` hold equations,
+tests, exact diagnostic scope and continuation instructions. All six engines
+and 17 required production rows remain in the acceptance denominator.
+
+## Source-Bound Native Moco Numerical Guess (#11990)
+
+The `moco-native-guess` command reads exact source XML and the existing frozen
+TRC clock, initializes the source through native OpenSim assembly and muscle
+equilibration, and writes every native named continuous state at every original
+time in a 17-digit STO table. Native readback must preserve complete ordered
+names, values and clock exactly. The receipt hashes source, loaded model,
+runtime/provider, state order/values, clock and serialized artifact, while
+declaring external-resource closure unavailable. The existing Moco builder
+checks complete state-table names and actual created state/control guess
+channels before accepting caller bindings; no control bounds are inferred.
+
+This is a numerical optimization seed only. It is not observed motion,
+physiological readiness, static equilibrium or a complete SimTK restart. The
+unchanged 520-muscle source produced 1,348 finite states at the driver and
+iron clocks. Both #11968 private preparations then lost exactly the artificial
+guess-file blocker, retaining six scientific/native blockers and doing no solve.
+Canonical chapter39 and the child turnover preserve the proof and limits.
