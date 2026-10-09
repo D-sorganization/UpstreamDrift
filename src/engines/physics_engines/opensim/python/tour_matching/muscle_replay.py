@@ -82,7 +82,8 @@ def _audit_drive_components(
     """Audit recursive native components, including those outside legacy sets.
 
     SWIG exposes heterogeneous Component proxies without Python type stubs;
-    native safeDownCast is the runtime type authority at this boundary.
+    Native casts establish inheritance; exact concrete-law identity separately
+    restricts muscles to the explicitly tested state and force policies.
     """
     muscle_paths = set()
     found_contacts = set()
@@ -95,7 +96,20 @@ def _audit_drive_components(
             raise ValueError("prescribed motion is forbidden in independent replay")
         if osim.Constraint.safeDownCast(component) is not None:
             raise ValueError("constraint needs a qualified initialization policy")
-        if osim.Muscle.safeDownCast(component) is not None:
+        muscle = osim.Muscle.safeDownCast(component)
+        if muscle is not None:
+            if muscle.getConcreteClassName() not in (
+                "Millard2012EquilibriumMuscle",
+                "Thelen2003Muscle",
+            ):
+                raise ValueError(
+                    "concrete muscle law needs an explicit qualified state/force policy"
+                )
+            if (
+                muscle.get_ignore_activation_dynamics()
+                or muscle.get_ignore_tendon_compliance()
+            ):
+                raise ValueError("ignored muscle dynamics need a separate state policy")
             muscle_paths.add(component.getAbsolutePathString())
             continue
         if osim.Actuator.safeDownCast(component) is not None:
@@ -174,14 +188,16 @@ def _muscle_state_domains(model: Any, osim: Any) -> dict[str, tuple[float, float
         muscle = osim.Muscle.safeDownCast(component)
         if muscle is None:
             continue
-        millard = osim.Millard2012EquilibriumMuscle.safeDownCast(component)
-        if millard is None:
+        law = osim.Millard2012EquilibriumMuscle.safeDownCast(component)
+        if law is None:
+            law = osim.Thelen2003Muscle.safeDownCast(component)
+        if law is None:
             raise ValueError(
                 "muscle type needs an explicit qualified state-domain policy"
             )
         prefix = muscle.getAbsolutePathString()
-        domains[prefix + "/activation"] = (millard.getMinimumActivation(), 1.0)
-        domains[prefix + "/fiber_length"] = (millard.getMinimumFiberLength(), np.inf)
+        domains[prefix + "/activation"] = (law.getMinimumActivation(), 1.0)
+        domains[prefix + "/fiber_length"] = (law.getMinimumFiberLength(), np.inf)
     return domains
 
 
@@ -190,9 +206,12 @@ def _validate_muscle_state(
 ) -> None:
     """Reject model-domain violations without silently clamping native state."""
     for name, (lower, upper) in domains.items():
-        if name in values and not lower <= values[name] <= upper:
+        if name in values and (
+            not lower <= values[name] <= upper
+            or (name.endswith("/fiber_length") and values[name] <= 0)
+        ):
             raise ValueError(
-                f"muscle state domain violated: {name} outside [{lower}, {upper}]"
+                f"muscle state domain violated: {name}; bounds [{lower}, {upper}], positive fiber length required"
             )
 
 
@@ -328,8 +347,9 @@ def _native_replay_policy(
     """Identify executed drive, native force and numerical policies."""
     import opensim as osim
 
+    muscles = model.getMuscles()
     return {
-        "adapter": "native-muscle-replay/1.1.0",
+        "adapter": "native-muscle-replay/1.3.1",
         "input_boundary": "muscle_excitation",
         "interpolation": "linear",
         "state_resets": False,
@@ -352,7 +372,12 @@ def _native_replay_policy(
         ),
         "contact_frame": "world-z-up",
         "constraint_policy": "unconstrained-unlocked-only",
-        "muscle_domain_policy": "Millard2012EquilibriumMuscle-native-minima",
+        "muscle_domain_policy": "explicit-equilibrium-muscle-native-minima/1.1.0",
+        "muscle_class_policy": "exact-supported-concrete-law/1.0.0",
+        "muscle_laws": json.dumps(
+            [muscles.get(i).getConcreteClassName() for i in range(muscles.getSize())],
+            separators=(",", ":"),
+        ),
     }
 
 

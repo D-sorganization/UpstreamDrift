@@ -17,6 +17,8 @@ import numpy as np
 
 from src.shared.python.contracts import postcondition, precondition
 
+from .moco_initial_bindings import MocoInitialBindings, apply_moco_initial_bindings
+
 logger = logging.getLogger(__name__)
 
 
@@ -235,8 +237,8 @@ def _write_sanitized_trc(
 
 
 @precondition(
-    lambda model_path, trc_path, states_guess_path, config: isinstance(
-        config, MocoTrackingConfig
+    lambda model_path, trc_path, states_guess_path, config, initial_bindings=None: (
+        isinstance(config, MocoTrackingConfig)
     ),
     "config must be MocoTrackingConfig",
 )
@@ -245,6 +247,8 @@ def build_moco_study(
     trc_path: str,
     states_guess_path: str,
     config: MocoTrackingConfig,
+    *,
+    initial_bindings: MocoInitialBindings | None = None,
 ) -> Any:
     """Build a MocoStudy problem configured for marker tracking with initial guess.
 
@@ -263,6 +267,8 @@ def build_moco_study(
     problem = study.updProblem()
     problem.setModelProcessor(opensim.ModelProcessor(model_path))
     problem.setTimeBounds(config.t_start_s, config.horizon_s)
+    if initial_bindings is not None:
+        apply_moco_initial_bindings(problem, model_path, initial_bindings, opensim)
 
     # Effort minimization goal
     effort = opensim.MocoControlGoal("effort")

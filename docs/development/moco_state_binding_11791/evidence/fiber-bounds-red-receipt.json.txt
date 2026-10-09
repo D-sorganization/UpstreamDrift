@@ -1,0 +1,11 @@
+{
+  "scope": "synthetic one-DOF compliant Millard muscle; no capture/production qualification",
+  "runtime": "4.6",
+  "executable": "C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Scripts\\python.exe",
+  "source_sha256": "1e109d8c7a314add0412fc40d6a9bd997d19b0af1b24adfc9db829c722c3b82e",
+  "model_sha256": "feb75b88e290ef0c90fc41c6e39ffd9c8c031ff1129b19b0b059230d0bdb0f32",
+  "error": "std::exception in 'OpenSim::MocoTrajectory OpenSim::MocoCasADiSolver::createGuess() const': No info available for state '/forceset/flexor/fiber_length'.\n\tThrown at MocoProblemRep.cpp:890 in getStateInfo().",
+  "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\moco_native_bridge\\experiment.py\", line 41, in <module>\n    study=build_moco_study(str(path),str(trc),str(guess),config)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\diete\\Repositories\\Worktrees\\feedback-opensim-bundle-11908\\src\\shared\\python\\contracts.py\", line 346, in wrapper\n    return func(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\diete\\Repositories\\Worktrees\\feedback-opensim-bundle-11908\\src\\engines\\physics_engines\\opensim\\python\\tour_matching\\moco_tracking.py\", line 288, in build_moco_study\n    guess = solver.createGuess()\n            ^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\opensim\\moco.py\", line 9106, in createGuess\n    return _moco.MocoCasADiSolver_createGuess(self, *args)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: std::exception in 'OpenSim::MocoTrajectory OpenSim::MocoCasADiSolver::createGuess() const': No info available for state '/forceset/flexor/fiber_length'.\n\tThrown at MocoProblemRep.cpp:890 in getStateInfo().\n",
+  "qualification": "failed; no optimization/replay acceptance",
+  "total_elapsed_s": 0.27336180000565946
+}

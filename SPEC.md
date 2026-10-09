@@ -1,5 +1,7 @@
 ## Native Muscle Replay Development Boundary (F07, #11791)
 
+Child #11867 restricts recursive native admission before `initSystem` to exact `Millard2012EquilibriumMuscle` and `Thelen2003Muscle` concrete identities. Inheritance-compatible unknown laws fail closed; supported native casts still supply model-owned state limits. Adapter `native-muscle-replay/1.3.0` hashes an explicit exact-class policy. The negative identity-proxy test is not compiled-plugin qualification, and neither this guard nor the positive native fixtures establish full-body/capture acceptance.
+
 `tour_matching.replay_muscle_excitations` restores complete named continuous state, plays bounded linear native muscle excitation inputs, and cold-starts Runge-Kutta-Merson once without observations, feedback or resets. It audits actual native applied excitations and binds state/input/model/policy identities. Existing controllers, prescribed coordinates, non-muscle actuators and undeclared non-muscle forces fail closed. This early fixture does not qualify discrete/plugin initialization, contact, full-body anatomy or mocap matching; #11791 remains open. The revised feedback-controls milestone DAG separates schema/provider readiness from scientific acceptance and private evidence delivery.
 
 ## Native Muscle Contact Replay (F07b, #11815)
@@ -10387,6 +10389,16 @@ Turnover: `docs/development/feedback_controls/F06_NATIVE_TORQUE_TURNOVER.md`.
 Tools T01 is consumed through merged pin
 `2e7665111b06f92ffbfe178b92d74d6a81c95388` and the UD-owned seam helper.
 Six-engine and muscular OpenSim real-capture gates remain open.
+
+## Native Thelen Replay Boundary (F07b, #11826)
+
+Early native excitation replay explicitly admits compliant Thelen2003Muscle
+alongside Millard2012EquilibriumMuscle. Model-owned state minima, positive fiber
+length, complete restoration, ordered law identity and ignored-mode refusal
+are required. Canonical reference: native muscle replay chapter; turnover:
+`docs/development/feedback_controls/F07_THELEN_REPLAY_TURNOVER.md`. Full-body,
+contact/grip, licensing and real-capture scientific gates remain open.
+
 ## Controlled-Swing Comparison Admission (F01, #11785)
 
 `src/engines/feedback_comparison.py` projects the authoritative
@@ -10436,3 +10448,21 @@ private protocol D02, contact and full-body engine evidence remain open.
 ## Native Pinocchio Frozen Torque Replay (#11900)
 
 The F06c adapter uses the existing public native ABA/RK4 integration kernel with complete configuration/tangent velocity, explicit unit motor scattering and immutable uninterrupted replay evidence. Canonical chapter25 and F06_PINOCCHIO_NATIVE_TURNOVER record source/model/provider identity, actual native RED/GREEN, fixture refinement and all remaining contact, muscle, capture and required-model parity gates. Tools owns the replay schema; common native admission is shared with Drake/MuJoCo and remains provider-hashed.
+
+## Native Muscle Experiment Bundle (#11908)
+
+The native OpenSim T01 seam binds all admitted continuous state, registered discrete/modeling options, physical units, source/loaded/provider identity and cold-start policy. A reviewed fixed-path Millard/Slider-or-Pin subset executes owned frozen model bytes through the existing kernel. Canonical chapter27 and F07_MUSCLE_BUNDLE_TURNOVER preserve exclusions; native geometry, full-body constraints/contact, capture matching and required parity remain unqualified.
+
+## Native Moco Initial-State Bindings (#11949)
+
+The optional `MocoInitialBindings` contract in the existing OpenSim tracking
+provider binds complete caller-declared continuous state, scalar-control bounds
+and fixed initial values before native solver initialization and guess creation.
+Unknown/omitted states or controls, nonfinite/boolean values, unsupported existing
+controllers/PositionMotion and multi-control actuators fail before optimization.
+Existing callers retain their previous API behavior. Canonical chapter35 and
+`docs/development/moco_state_binding_11791` preserve actual OpenSim4.6 native tests,
+four-mesh collocation versus independent replay evidence, exact control knots,
+failed attempts and input nonidentifiability. Discrete/hidden native state,
+production anatomy, contact/grip, capture and physiological acceptance remain
+separate open gates. The per-child fragment owns later PR-keyed log collation.

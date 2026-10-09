@@ -6,6 +6,11 @@
   "inventory_commit": null,
   "blockers": [
     {
+      "id": "UP-D1-native-simscape-restart-inventory",
+      "owner": "UpstreamDrift issue #11921",
+      "resolution": "Inventory native R2025b complete ModelOperatingPoint hidden physical/discrete restart, saved-input injection readback and snapshot/runtime/model/solver/config identity in chapter30 and scripts/matlab. Native synthetic mass-spring-damper and Unit Delay tests are prerequisites only; exact Tools5470 consumption, production variants, full-horizon frozen-input replay, contact, refinement, private capture accuracy and six-engine parity remain unqualified."
+    },
+    {
       "id": "UP-D1-native-pinocchio-torque-replay-inventory",
       "owner": "UpstreamDrift issue #11900",
       "resolution": "Inventory existing public PinocchioPhysicsEngine ABA/RK4 manifold integration, complete q/v restoration, explicit unit generalized motor mapping, source/native model/provider identity and fixed post-limit inputs in chapter25. Twelve actual native Pinocchio4.1 synthetic checks establish independent replay and fixture-specific refinement. Native contact/grip, physiological actuation, required production models, private capture accuracy and all-model six-engine parity remain unqualified. Shared Tools contract/history/identity admission remains canonical and provider-bound."
@@ -111,19 +116,39 @@
       "resolution": "Inventory the GCV-15 (#11721) impact-parameter extractor in src/shared/python/impact_parameters/ (target_frame.py, clubhead_series.py, extract.py, tools_gateway.py) documented provisionally in chapters/12-impact-parameters.qmd: the explicit target frame (x_t target, z_t up, y_t = z_t x x_t, ADR-0041 default, handedness mirrors lateral signs only, recorded with every result), the impact state (last pre-contact sample, explicit index or peak clubhead speed), clubhead speed, attack angle, club path, face angle, face-to-path, dynamic loft, 3-D spin loft, the +/-20 ms least-squares swing plane, low point, toe/high face location, smash factor and the fail-closed Tools D-plane estimates labelled as model estimates. Unavailable values are None/null with a reason, never zero; face-derived values are unavailable when club axial rotation is unobservable. tests/unit/impact_parameters/test_extract.py and test_adapters.py establish agreement with constructed series of known angles, rotation invariance, the handedness mirror and Tools agreement within 0.01 deg; they do not qualify any engine clubhead kinematics or impact detection, compare against launch-monitor measurements, or establish an uncertainty. The 1 m/s speed floor, +/-20 ms plane window and collinearity ratio are numerical guards, not measured limits."
     },
     {
-      "id": "UP-D1-lift-pack-audit-inventory",
-      "owner": "UpstreamDrift issue #11751",
-      "resolution": "Inventory the LIFT-1 (#11741) cross-engine lift model pack audit in src/shared/python/lifting/pack_audit/ (frames.py, geometry.py, poses.py, baseline.py, analysis.py, gaps.py and the per-engine adapters) documented provisionally in chapters/15-lift-pack-audit.qmd: the OpenSim Y-up to canonical Z-up rotation, the sleeve-defined bar axis, per-hand lateral offset and perpendicular hand-to-bar distance, foot-midpoint pose summaries, pelvis-relative same-input pairwise parity over the standard and generic lift-shape poses, the lifter-only CoM with bar and bench removed (zero mass-centre offset assumed), segment mass and joint-limit deviation against the biomech parity standard, grip half-width mismatch, start-pose bar height above the lowest foot contact against the 0.225 m plate radius, reference FK error and the measured discrepancy list mapped to per-pack issues. Unavailable values (Drake/Pinocchio contact force and closure, lifter CoM without lifter mass, bar height without foot geometry) are None with a reason, never zero. tests/unit/lifting/pack_audit/ and docs/development/lifting/PACK_PARITY_BASELINE.md establish software parity between the packs at recorded commits; they do not simulate a lift, compute joint moments, spine loads or muscle forces, compare against measured lifts, or establish an uncertainty. The 0.01 m grip and 0.05 m floor-height thresholds are audit flags, not acceptance limits."
-    },
-    {
       "id": "UP-D1-native-muscle-replay-inventory",
       "owner": "UpstreamDrift issue #11791",
       "resolution": "Inventory the provisional native continuous-state excitation replay in tour_matching/muscle_replay.py and chapters/13-native-muscle-replay.qmd. Actual OpenSim 4.6 one-DOF compliant-muscle tests establish bounded input playback, continuous initialization and uninterrupted native stepping only. Discrete/plugin state, external-resource identity, passive/contact force policy, full-body anatomy, capture accuracy and full-horizon independent muscle/contact replay remain unqualified. Preserve cold-start policy and forbid weaker shared rigid-body/restarted/external-force evidence from qualifying the endpoint."
     },
     {
+      "id": "UP-D1-native-muscle-bundle-inventory",
+      "owner": "UpstreamDrift issue #11908",
+      "resolution": "Inventory the reviewed cold-start Tools T01 muscle bundle seam and chapter27. Registered discrete/modeling options and physical units are explicit; native continuous Y coverage alone is insufficient. Synthetic adapter tests do not qualify arbitrary SimTK State serialization, anatomy, contact/constraints, capture accuracy, or all-model parity."
+    },
+    {
+      "id": "UP-D1-native-thelen-replay-inventory",
+      "owner": "UpstreamDrift issue #11826",
+      "resolution": "Inventory explicit compliant Thelen2003Muscle and Millard2012EquilibriumMuscle native state minima, ordered concrete-law identity, independent restored force and ignored-mode refusal in muscle_replay.py and chapters/13-native-muscle-replay.qmd. Native fixture tests do not establish full-body anatomy, physiological parameters, external-resource identity, ignored-state modes, contact/grip or real capture acceptance. Keep F07/F08 gates open."
+    },
+    {
+      "id": "UP-D1-native-exact-muscle-law-inventory",
+      "owner": "UpstreamDrift issue #11867",
+      "resolution": "Inventory exact concrete Millard2012EquilibriumMuscle/Thelen2003Muscle admission before native initialization in muscle_replay.py and chapter13. Native casts remain necessary for state-domain getters but inheritance is not qualification of an unknown derived law. Proxy identity negative tests preserve native cast success and trap initialization; they do not validate a compiled plugin. Adapter1.3.0 hashes the exact-class admission policy. All anatomy, path consistency, contact, full-state full-capture and manual-release gates remain open."
+    },
+    {
+      "id": "UP-D1-lift-pack-audit-inventory",
+      "owner": "UpstreamDrift issue #11751",
+      "resolution": "Inventory the LIFT-1 (#11741) cross-engine lift model pack audit in src/shared/python/lifting/pack_audit/ (frames.py, geometry.py, poses.py, baseline.py, analysis.py, gaps.py and the per-engine adapters) documented provisionally in chapters/15-lift-pack-audit.qmd: the OpenSim Y-up to canonical Z-up rotation, the sleeve-defined bar axis, per-hand lateral offset and perpendicular hand-to-bar distance, foot-midpoint pose summaries, pelvis-relative same-input pairwise parity over the standard and generic lift-shape poses, the lifter-only CoM with bar and bench removed (zero mass-centre offset assumed), segment mass and joint-limit deviation against the biomech parity standard, grip half-width mismatch, start-pose bar height above the lowest foot contact against the 0.225 m plate radius, reference FK error and the measured discrepancy list mapped to per-pack issues. Unavailable values (Drake/Pinocchio contact force and closure, lifter CoM without lifter mass, bar height without foot geometry) are None with a reason, never zero. tests/unit/lifting/pack_audit/ and docs/development/lifting/PACK_PARITY_BASELINE.md establish software parity between the packs at recorded commits; they do not simulate a lift, compute joint moments, spine loads or muscle forces, compare against measured lifts, or establish an uncertainty. The 0.01 m grip and 0.05 m floor-height thresholds are audit flags, not acceptance limits."
+    },
+    {
       "id": "UP-D1-native-muscle-contact-inventory",
       "owner": "UpstreamDrift issue #11815",
       "resolution": "Inventory explicit native contact policies in tour_matching/muscle_replay.py and chapters/17-native-muscle-contact.qmd. Actual synthetic OpenSim smooth sphere/half-space tests establish native wrench direction, independent replay repeatability, contact-dependent motion and numerical refinement only. Contact calibration, smoothing leakage budgets, HuntCrossley law parity, full-body anatomy/grip and full-horizon private mocap qualification remain open."
+    },
+    {
+      "id": "UP-D1-native-moco-initial-bindings-inventory",
+      "owner": "UpstreamDrift issue #11791",
+      "resolution": "Inventory explicit immutable Moco continuous-state/initial/scalar-control bounds before solver initialization and guess creation in moco_initial_bindings.py, moco_tracking.py and chapter35. Actual OpenSim4.6 native tests and publicAPI 10/20/40/80-mesh optimization with independent F06 replay, tighter integration and control-knot-preserving common101-probe native teacher diagnostics and serialized T01 bundles establish a synthetic executable bridge only. Activation collocation-versus-replay disagreement remains .0000929729 at80 intervals despite small marker error; position and marker error are not monotone. Earlier dense diagnostics are superseded while original-grid state errors remain valid; teacher state/control recovery is a distinct unqualified identification claim. Existing controllers, prescribed PositionMotion and multichannel actuators require separate policies. Complete native state, production anatomy/passive physiology, capture calibration/heldout validation, own contact/grip, full-horizon replay, all required model variants and six-engine parity remain open. Canonical coverage and publication remain blocked."
     }
   ],
   "calculations": []
