@@ -407,6 +407,16 @@ def render_marker_overlay_animation(
     return out_p
 
 
+def validate_frame_size(size_px: tuple[int, int]) -> tuple[int, int]:
+    """Return ``(width, height)``; raises ``ValueError`` unless positive ints."""
+    ok = len(size_px) == 2 and all(
+        isinstance(v, int) and not isinstance(v, bool) and v > 0 for v in size_px
+    )
+    if not ok:
+        raise ValueError(f"size_px must be two positive ints, got {size_px!r}")
+    return int(size_px[0]), int(size_px[1])
+
+
 def render_replay_frames(
     time_s: Array,
     target_markers_m: Array,
@@ -415,8 +425,15 @@ def render_replay_frames(
     engine_name: str = "engine",
     stride: int = 5,
     valid_mask: BoolArray | None = None,
+    size_px: tuple[int, int] = (480, 480),
 ) -> list[np.ndarray]:
-    """Render 3D marker overlay frames comparing target and model markers."""
+    """Render 3D marker overlay frames comparing target and model markers.
+
+    ``size_px`` is the ``(width, height)`` of every frame; text scales with
+    the height (a 480 px frame keeps the original 6 in at 80 dpi layout).
+    Raises ``ValueError`` unless both are positive integers.
+    """
+    width, height = validate_frame_size(size_px)
     import matplotlib
 
     matplotlib.use("Agg")
@@ -434,7 +451,8 @@ def render_replay_frames(
     }
     m_color = color_map.get(engine_name.lower(), "#ff7f0e")
 
-    fig = plt.figure(figsize=(6, 6), dpi=80)
+    dpi = height / 6.0
+    fig = plt.figure(figsize=(width / dpi, height / dpi), dpi=dpi)
     ax: Any = fig.add_subplot(111, projection="3d")
     t0 = target_markers_m[0]
     center = np.nanmean(t0, axis=0) if np.isnan(t0).any() else np.mean(t0, axis=0)

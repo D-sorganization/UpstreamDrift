@@ -72,6 +72,7 @@ def _render_video_frames(
     candidate: MatchedSwingCandidate,
     engine: str,
     stride: int,
+    size_px: tuple[int, int] = (480, 480),
 ) -> list[np.ndarray]:
     """Render 3D marker overlay frames comparing target vs model markers."""
     from src.shared.python.motion_matching.cross_engine_replay import (
@@ -88,6 +89,7 @@ def _render_video_frames(
         engine_name=engine,
         stride=stride,
         valid_mask=candidate.marker_validity,
+        size_px=size_px,
     )
 
 
@@ -151,6 +153,7 @@ def export_video(
     stride: int = 5,
     view: str = "marker_overlay",
     speed: float | None = None,
+    size_px: tuple[int, int] = (480, 480),
 ) -> Path:
     """Export 3D marker overlay trajectory animation as GIF or MP4.
 
@@ -164,10 +167,16 @@ def export_video(
         speed: Playback speed relative to real time (0.5 is half speed). When
             given, ``stride`` is derived from ``fps`` and the swing ``dt`` so
             playback is time-based (GCV-14); ``stride`` is then ignored.
+        size_px: Frame ``(width, height)`` in pixels; positive ints.
 
     Returns:
         Resolved output Path.
     """
+    from src.shared.python.motion_matching.cross_engine_replay import (
+        validate_frame_size,
+    )
+
+    validate_frame_size(size_px)
     out_p = Path(path).resolve()
     cand = _validate_candidate_for_video(candidate)
     dt_s = cand.time_s[1] - cand.time_s[0] if len(cand.time_s) > 1 else 0.05
@@ -176,7 +185,7 @@ def export_video(
         if speed is not None
         else max(1, stride)
     )
-    frames = _render_video_frames(cand, engine, stride_safe)
+    frames = _render_video_frames(cand, engine, stride_safe, size_px)
 
     ext = out_p.suffix.lower()
     if ext == ".gif":

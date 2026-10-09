@@ -207,6 +207,48 @@ class TestExportVideo:
         cap.release()
         assert count == 5
 
+    def test_export_video_mp4_honours_frame_size(
+        self, tmp_path: Path, mock_candidate: MatchedSwingCandidate
+    ) -> None:
+        import cv2
+
+        out_mp4 = tmp_path / "hd.mp4"
+        export_video(
+            mock_candidate, "simscape", out_mp4, stride=5, fps=60, size_px=(1280, 720)
+        )
+        cap = cv2.VideoCapture(str(out_mp4))
+        shape = (
+            int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
+            int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)),
+            int(cap.get(cv2.CAP_PROP_FRAME_COUNT)),
+        )
+        fps = cap.get(cv2.CAP_PROP_FPS)
+        cap.release()
+        assert shape == (1280, 720, 2)
+        assert fps == pytest.approx(60.0)
+
+    def test_replay_frames_default_size_is_unchanged(
+        self, mock_candidate: MatchedSwingCandidate
+    ) -> None:
+        from src.shared.python.motion_matching.cross_engine_replay import (
+            render_replay_frames,
+        )
+
+        frames = render_replay_frames(
+            mock_candidate.time_s,
+            mock_candidate.target_markers_m,
+            mock_candidate.model_markers_m,
+            stride=10,
+        )
+        assert frames[0].shape == (480, 480, 3)
+
+    @pytest.mark.parametrize("size", [(0, 720), (1280, -1), (12.5, 720)])
+    def test_export_video_rejects_bad_frame_size(
+        self, tmp_path: Path, mock_candidate: MatchedSwingCandidate, size: Any
+    ) -> None:
+        with pytest.raises(ValueError, match="size_px"):
+            export_video(mock_candidate, "mujoco", tmp_path / "x.mp4", size_px=size)
+
     def test_export_video_fails_closed_on_missing_markers(self, tmp_path: Path) -> None:
         meta = CandidateMetadata(
             schema_version=CANDIDATE_SCHEMA_VERSION,
