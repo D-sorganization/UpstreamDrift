@@ -203,4 +203,12 @@ def test_trimmed_simscape_force_fixture_carries_channels() -> None:
     assert len(series.frames) == t_rows
     # 26 wrenches per frame (all joints and external wrenches except the 2 with missing actuators)
     assert len(series.frames[0].wrenches) == 26
-    assert missing == ("joint_actuator:LF:torque", "joint_actuator:RF:torque")
+    # The trimmed fixture carries no per-hand columns: unavailable (#11715).
+    assert missing == (
+        "joint_actuator:LF:torque",
+        "joint_actuator:RF:torque",
+        "grip:hand_left:force",
+        "grip:hand_left:torque",
+        "grip:hand_right:force",
+        "grip:hand_right:torque",
+    )

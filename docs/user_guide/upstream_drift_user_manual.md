@@ -6443,7 +6443,9 @@ the ground. Key metrics:
 
 - **Peak vertical force**: Maximum $F_z$ during the swing (typically 1.0-1.5 body weight
   during the downswing)
-- **Loading rate**: $\dot{F}_z = dF_z/dt$, measuring how rapidly force builds
+
+The loading rate $\dot{F}_z = dF_z/dt$ is a common force-plate metric, but
+`compute_grf_metrics` does not compute it.
 
 ### 12.4.2 Shear Forces
 
@@ -6454,10 +6456,17 @@ $$F_{shear} = \sqrt{F_x^2 + F_y^2}$$
 
 ### 12.4.3 Centre of Pressure
 
-The centre of pressure (CoP) is the point on the ground surface where the resultant
-GRF acts:
+The centre of pressure (CoP) is the point on the ground plane $z = z_g$ where the
+resultant GRF acts. With contact forces $F_i$ at points $p_i$ (and optional contact
+torques $\tau_i$), the resultant is $F = \sum F_i$ and its moment about the world
+origin is $M_O = \sum (p_i \times F_i + \tau_i)$. Then, for $F_z > 0$:
 
-$$\text{CoP} = \frac{\sum F_i \times p_i}{\sum F_i}$$
+$$x_{cop} = \frac{z_g F_x - M_{O,y}}{F_z}, \qquad y_{cop} = \frac{M_{O,x} + z_g F_y}{F_z}$$
+
+The shared ground-reaction core (`src/shared/python/biomechanics/ground_reaction.py`,
+GCV-1) evaluates this per foot and for both feet together, and reports the CoP as
+unavailable (`None`, never zero) while $F_z$ is below 10 N. `compute_grf_metrics`
+below does not compute the CoP; it summarizes a CoP series supplied by the caller.
 
 For a two-foot stance, the CoP moves between the feet during the swing, reflecting
 weight transfer patterns.
@@ -6514,8 +6523,16 @@ swing. A typical golf swing shows:
 
 ### 12.4.5 Free Moment Analysis
 
-The free moment (vertical torque) about the CoP is computed from the ground contact forces.
-It represents the rotational resistance the ground provides to the golfer's axial rotation.
+The free moment is the vertical torque the ground applies about the CoP. It represents
+the rotational resistance the ground provides to the golfer's axial rotation.
+`compute_grf_metrics` does not compute it. The shared ground-reaction core (GCV-1)
+does, per foot and for both feet together, from the same resultant wrench as the CoP:
+
+$$T_z = M_{O,z} - (x_{cop} F_y - y_{cop} F_x)$$
+
+It is unavailable whenever the CoP is. The net free moment is taken about the net
+CoP, so it is in general not the sum of the two feet's free moments: the shear forces
+acting at the offset foot CoPs add a vertical moment.
 
 ### 12.4.6 Implementation Notes
 
@@ -6769,7 +6786,9 @@ if impact_time is not None:
 ## 12.7 Stability Metrics (`stability_metrics.py`)
 
 The `StabilityMetricsMixin` computes balance and postural stability metrics essential
-for golf swing analysis.
+for golf swing analysis. It computes the CoM-CoP distance and the inclination angle
+(12.7.2 and 12.7.5). The base of support, time-to-boundary and dynamic balance index
+(12.7.1, 12.7.3 and 12.7.4) are described for context only; they are not computed.
 
 ### 12.7.1 Base of Support
 

@@ -33,7 +33,7 @@ def test_repository_adopts_one_qmd_authority_and_blocks_release() -> None:
     summary = verify_repository(REPO_ROOT)
 
     assert summary.manual_id == "upstreamdrift"
-    assert summary.canonical_qmd_count == 2
+    assert summary.canonical_qmd_count == 4
     assert summary.calculation_count == 0
     assert summary.release_status == "blocked-inventory-required"
     assert summary.public_projection_allowed is False

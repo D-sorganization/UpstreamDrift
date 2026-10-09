@@ -52,17 +52,35 @@
     },
     {
       "feature_id": "analysis.grip_wrench",
-      "title": "Per-hand grip wrench on the club (weld multipliers and efc_force) emitted as GRIP overlay frames",
-      "status": "gap",
-      "pyqt": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/force_torque_source.py",
-      "api": null,
-      "web": null,
-      "issue": 11716,
+      "title": "Per-hand grip wrench on the club (weld multipliers and efc_force): overlay glyphs and force/couple plots",
+      "status": "parity",
+      "pyqt": "src/tools/grip_wrench_plots/gui.py",
+      "api": "src/api/routes/analysis.py",
+      "web": "ui/src/components/analysis/GripWrenchCharts.tsx",
+      "issue": null,
       "reason": null,
       "pending_decision": false,
-      "tiles": [],
-      "notes": "GCV-8 (#11714): MuJoCo, MyoSuite and Drake emit per-hand WrenchKind.GRIP frames, Pinocchio the allocation net, OpenSim reports unavailable. The club force and torque overlays and plots in PyQt, web and video are GCV-10 (#11716); the web surface lands there.",
+      "tiles": [
+        "grip_wrench_plots"
+      ],
+      "notes": "GCV-8 (#11714): MuJoCo, MyoSuite and Drake emit per-hand WrenchKind.GRIP frames, Pinocchio the allocation net, OpenSim reports unavailable. GCV-10 (#11716): one glyph frame (force_overlay.grip_frame) and one plot series (biomechanics.grip_plot_model) feed the PyQt6 plot tool and Visualization-tab group toggles, GET /api/analysis/grip-wrench with the web charts and ForceOverlayPanel group toggles, and the native video export (per-hand arrows at each grip point, net arrow and couple arc at the midpoint, hands close-up camera). The split_method is labelled on the legend, the plots and the HUD; an unavailable split is listed as unavailable, never drawn as zero.",
       "id": "analysis.grip_wrench"
+    },
+    {
+      "feature_id": "analysis.ground_reaction",
+      "title": "Ground reaction plots: per-foot and net force (N and body weights), vertical load share, CoP path, free moment and moment about CoM",
+      "status": "parity",
+      "pyqt": "src/tools/ground_reaction_plots/gui.py",
+      "api": "src/api/routes/analysis.py",
+      "web": "ui/src/components/analysis/GroundReactionCharts.tsx",
+      "issue": null,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [
+        "ground_reaction_plots"
+      ],
+      "notes": "GCV-5 (#11711): one plot series (biomechanics.ground_reaction_plot_model, built from the GCV-1 GroundReactionSeries) feeds the PyQt6 Ground Reaction Plots tile (six-panel sheet from plotting.renderers.ground_reaction), GET /api/analysis/ground-reaction and the web GroundReactionCharts on the Analysis Tools page, so both surfaces draw the same panels with address/top/impact/finish markers. CoP and load share are null below 10 N of vertical load; an engine without ground reaction (Simscape until GCV-3) is shown as unavailable with its reason, never as zero.",
+      "id": "analysis.ground_reaction"
     },
     {
       "feature_id": "analysis.impact_parameters",
@@ -1497,6 +1515,34 @@
         "impact_parameters",
         "launch_monitor",
         "target_line"
+      ]
+    },
+    {
+      "id": "grip_wrench_plots",
+      "title": "Grip Wrench Plots",
+      "description": "Hand force on the club per hand, net force and equivalent couple at the grip midpoint over time, with the left/right split method",
+      "path": "src/tools/grip_wrench_plots/__main__.py",
+      "launch_target": "src/tools/grip_wrench_plots/__main__.py",
+      "category": "tool",
+      "status": "ready",
+      "capabilities": [
+        "grip_wrench",
+        "club_forces",
+        "force_plots"
+      ]
+    },
+    {
+      "id": "ground_reaction_plots",
+      "title": "Ground Reaction Plots",
+      "description": "Ground reaction under each foot and in total over time: vertical force in body weights, load share, centre-of-pressure path, free moment and moment about the centre of mass",
+      "path": "src/tools/ground_reaction_plots/__main__.py",
+      "launch_target": "src/tools/ground_reaction_plots/__main__.py",
+      "category": "tool",
+      "status": "ready",
+      "capabilities": [
+        "ground_reaction",
+        "foot_forces",
+        "force_plots"
       ]
     },
     {
@@ -3084,9 +3130,9 @@
     ]
   },
   "inputs": {
-    "src/config/models.yaml": "948ce17feb5638b2f0d75ee4911d7b67b93c89646311a306a320efd676ae85d5",
-    "src/config/launcher_manifest.json": "b30567afc0dc4662be92e0b308a9ba0b0e70c53047a99068df25d4977f15409b",
-    "src/config/feature_parity.json": "684d1f45325c871ae2c5a74fb337c3ddaad719aa2f58f83cce0e2f06c92b0852",
+    "src/config/models.yaml": "e11682df79d7467f1eba9579d835f5d7019bfd7eb09cf81c14e22bd08d0bf844",
+    "src/config/launcher_manifest.json": "1ae28f872b54c237440fcaacec40b735b93a7b80d710adc9228ef671b7831032",
+    "src/config/feature_parity.json": "8266dad1c1ecff21acda1890fa9068d6e6fea1000c0ff8d3c13a49e1a2d6a9af",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }
