@@ -56,14 +56,16 @@ RED: with the pinned Tools submodule initially absent, collection first failed
 at the repository's existing submodule guard; after initializing only the
 already pinned local Tools commit, the new test failed to import the missing
 F09a API. GREEN: all 12 focused synthetic tests pass. The submodule pointer and
-Tools pin are unchanged. Tests use only generated marker trajectories; no
-private capture or acceptance threshold is involved.
+Tools pin were unchanged at the F09a slice. F09b below advances the pin to
+merged T01 so observation scoring consumes the versioned replay bundle. Tests
+use only generated marker trajectories; no private capture or acceptance
+threshold is involved.
 
 The slice does not integrate T01/T02 receipts with an engine, establish replay
 reproduction, score collocation feasibility, or qualify any model. Full F09
-remains open. Next: consume native replay output from F06/F07 through this
-sampling boundary, map the resulting observation receipt into the T02/F01
-comparison levels, and preserve every required unavailable/unqualified row.
+remained open at that point. The next step from F09a was to consume native
+replay output, map observations into F01 comparison levels, and preserve each
+required unavailable/unqualified row; F09b implements that scoring boundary.
 
 The method is also documented in the canonical
 `manuals/upstreamdrift/chapters/13-feedback-comparison.qmd`. The calculation
@@ -71,3 +73,31 @@ registry remains empty because its release is explicitly blocked pending the
 owner program; this slice does not register or imply an approved manual
 calculation. `python3 -m scripts.check_design_manual_governance` verifies the
 unchanged blocked registry/governance envelope.
+
+## F09b Native Observation Scoring
+
+Child issue #11837 adds `src/engines/feedback_observation_qualification.py`
+and uses the F01 `FeedbackComparisonRegistry`, F09a position sampler,
+canonical replay metrics, pelvis-yaw calculation, and existing acceptance
+gates. Each scored case carries the actual Tools T01
+`ExperimentReplayBundle`. The adapter checks the complete ordered initial
+state and binds its actual `initial_state_sha256` with the model and capability
+payload hashes; it does not infer state identity from a schema digest. It also
+checks the model/provider, state schema, channel ordering/schema, actual input
+history and grid, policy, evidence mode, timebase, and horizon against F01.
+An altered full state or input cannot be rebound to stale comparison evidence.
+
+The report preserves every required registry cell and all six engine IDs.
+Missing evidence remains missing, unavailable stays in the denominator, and
+score computation cannot promote an unqualified registry row. The workflow
+uses frozen gate IDs/configuration without inventing or relaxing tolerances.
+The canonical calculation description is in
+`manuals/upstreamdrift/chapters/13-feedback-comparison.qmd`; implementation
+limits and commands are in
+`docs/development/feedback_controls/F09B-OBSERVATION-QUALIFICATION.md`.
+
+The F09b focused suite has eight passing synthetic tests, including full
+initial-state identity binding and applied-input tamper rejection. These tests
+do not provide a native run, private capture acceptance, model qualification,
+or physiology evidence. F09 remains open for the native consumer and further
+per-engine qualification workflow.

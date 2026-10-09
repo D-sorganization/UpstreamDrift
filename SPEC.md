@@ -10368,6 +10368,30 @@ Enables owner capture (`capture-O`) resolution through the MuJoCo native ground-
 - Contact ground calibration via `prepare_hip_spec` aligns toe contact boundaries to meet ground-support specification tolerances.
 - Timeline samples past capture durations are skipped cleanly rather than clamped; short capture root errors report `None` safely.
 - Divergence inventory and matched swing ledger reconciled with full unit test coverage.
+
+## Native Feedback Observation Scoring and Full-State Identity (F09b, #11837)
+
+`src/engines/feedback_observation_qualification.py` consumes F01's existing
+comparison registry, a validated Tools `ExperimentReplayBundle` v1, native
+marker-position outputs, and measured marker positions. Admission cross-checks
+the bundle against F01 model/provider, state schema, ordered channel mapping,
+applied-input history and grid, integration policy, replay mode, horizon, and
+timebase. Replay identity also binds T01's actual full `initial_state_sha256`,
+model-identity digest, and capability-declaration digest; state-schema-only or
+partial-coordinate identity is insufficient. Changes to the full initial
+state, applied inputs, or executed policy invalidate a reused identity.
+
+Native 3-D positions are sampled at the exact observation clock through the
+F09a positions-only interpolation API, with no extrapolation. The workflow
+reuses canonical replay metrics and `motion_matching.acceptance.evaluate`,
+retaining the output and observation clocks, score receipt hashes, exact
+criterion identifiers/configuration, and existing verdict. It introduces no
+new tolerance. Reports preserve all required registry rows and the six-engine
+denominator; unavailable/missing evidence remains visible, and scoring never
+promotes F01 qualification. Synthetic tests prove contract integrity only;
+they are not native physics, private-capture, physiology, or cross-engine
+acceptance evidence. Canonical calculation notes are in
+`manuals/upstreamdrift/chapters/13-feedback-comparison.qmd`.
 ## Controlled-Swing Comparison Admission (F01, #11785)
 
 `src/engines/feedback_comparison.py` projects the authoritative

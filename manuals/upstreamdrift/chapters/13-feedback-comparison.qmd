@@ -110,3 +110,47 @@ Provider/model hashes identify code and files, not physical validity. Model
 parameters, observation clocks, camera/marker registration, contact forces,
 muscle redundancy, and EMG coverage remain unqualified until independent
 measured evidence and native replay receipts establish a bounded scope.
+
+## F09b Native Observation Scoring and Full-State Identity
+
+The F09b observation workflow in
+`src/engines/feedback_observation_qualification.py` consumes the validated
+Tools `ExperimentReplayBundle` schema `experiment-replay/1.0.0` together with
+the F01 `ComparisonEvidence`, native marker positions, and measured positions.
+Before scoring, the workflow checks that model, provider, full state schema,
+ordered channels, input kind/interpolation, timebase, full applied-input
+history, input grid, execution policy, replay mode, horizon, and contact
+policy agree between the two authorities. The bundle validator independently
+checks the complete ordered initial state and all T01 integrity hashes.
+Generalized position and velocity dimensions are checked separately against
+F01's `nq` and `nv`; no Euclidean `nq=nv` assumption is made.
+
+F01 does not yet carry a digest field for the physical initial-state payload.
+Therefore the F09 source replay identity includes T01's actual
+`initial_state_sha256`, model-identity digest, and capability-declaration
+digest in addition to the existing F01 identity fields. Replacing the initial
+state while keeping its schema fixed changes the source identity; changing an
+input or policy without changing the F01 evidence is rejected. No identity is
+constructed from only the state schema or from selected coordinates.
+
+The workflow samples only native 3-D marker positions onto the retained
+observation clock through the F09a positions-only interpolation helper, then
+uses the existing `compute_replay_five_metrics`, pelvis-yaw metric, and
+`motion_matching.acceptance.evaluate` gate contract. The receipt binds T01's
+initial-state digest, F01 evidence identity, native and observed positions,
+both clocks, retained observation times, alignment, metric results, frozen
+criterion identifiers, and acceptance verdict. It does not add thresholds or
+interpret a transport-valid bundle as a physics result. The content-addressed
+native acceptance receipt and explicit capture are bound into the score and
+criterion identities; raw paths or private receipt fields are not copied to
+the public summary.
+
+The report retains each registered required model/variant/drive row and the
+six-engine denominator. Missing native output, unavailable capability, or an
+unqualified F01 row remains visible and cannot become a pass or zero score.
+Observation scoring does not set the registry qualification field. A passing
+numerical gate is only reported as accepted by the existing gate evaluator;
+campaign qualification remains false until every required registry row is
+qualified and every existing gate passes. Synthetic contract fixtures prove
+identity binding and sampling behavior but provide no physiological or
+cross-engine acceptance evidence.

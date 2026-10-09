@@ -588,3 +588,22 @@ See the separate editable research reference and the extended aggregate `tangent
 ### Impact Parameters Package (GCV-15, 2026-10-07)
 
 `src/shared/python/impact_parameters/` extracts speed, attack angle, club path, face angle, face-to-path, dynamic and spin loft, swing plane and low point relative to an explicit `TargetFrame` (default recorded: Z-up, target -Y, ADR-0041). Definitions are in the package docstring for design-manual transfer via GCV-18. Tools delivery and D-plane are reached only through the fail-closed `tools_gateway.py` and agree with the UD definitions within 0.01 deg. Open: launch direction has no Tools provider; toe/high needs GCV-11 face geometry and GCV-13 ball; smash factor needs an impact model with calibration status; `rate_of_closure` `delivery_at` is not called directly.
+
+### F09b Native Observation Scoring (#11837)
+
+`src/engines/feedback_observation_qualification.py` scores supplied native
+marker positions against exact measured observations using F01's registry,
+F09a's position-only sampler, and the existing acceptance evaluator. A case
+requires a validated T01 `ExperimentReplayBundle`; identity includes its
+actual complete initial-state payload SHA-256, model-identity digest, and
+capability-declaration digest. Input values/grid and executed policy are
+cross-checked against F01 evidence before scoring. Reports preserve every
+required comparison row and all six required engines; scores do not promote
+unqualified rows or missing evidence.
+
+The focused synthetic suite covers all-six denominator retention, measured
+clock scoring, gate/configuration identity, stale-input rejection, and full
+initial-state payload binding. It does not establish native replay,
+cross-engine parity, muscle physiology, or private-capture acceptance. Resume
+from `docs/development/feedback_controls/F09B-OBSERVATION-QUALIFICATION.md`;
+rerun the focused command recorded there with the pinned Tools submodule.
