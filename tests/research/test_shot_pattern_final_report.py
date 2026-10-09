@@ -111,6 +111,9 @@ def test_report_shows_completed_and_unavailable_without_fabricating_effects():
     assert "0.0200 [0.0100, 0.0300]" in text
     assert "conditional" in text.lower()
     assert "Phase One" in text
+    assert "Missing Metric in Completed Cells" in text
+    assert "1 unavailable planned cell" in text
+    assert "| Mean Radial Error Difference | Draw | 1 | 0 | 0 | 0 |" in text
 
 
 def test_report_rejects_incomplete_or_wrong_study_population():
@@ -184,6 +187,24 @@ def test_main_report_uses_compact_tables_and_separate_complete_inventory():
     assert len(rows) == 6
     assert {row["pattern"] for row in rows} == {"Straight", "Draw", "Fade"}
     assert rows[1]["nominal_speed_mps"] == "45.0"
+    assert rows[1]["planned_n_per_pattern"] == "10000"
+    assert rows[1]["attempted_n_per_pattern"] == "10000"
+
+
+def test_unavailable_inventory_separates_planned_from_attempted_shots():
+    unavailable = _cell(
+        "driver_lean10_curve1_rotation1_shaft_only", status="unavailable"
+    )
+    matrix = _matrix([unavailable], "final")
+    rows = list(
+        csv.DictReader(
+            io.StringIO(build_final_report.render_cell_inventory(matrix, matrix))
+        )
+    )
+    assert len(rows) == 6
+    assert all(row["planned_n_per_pattern"] == "10000" for row in rows)
+    assert all(row["attempted_n_per_pattern"] == "0" for row in rows)
+    assert all(row["supported_n"] == "" for row in rows)
 
 
 def test_matrix_input_change_is_rejected_before_publication(tmp_path):

@@ -80,7 +80,8 @@ def render_cell_inventory(primary: dict, control: dict) -> str:
         "seed",
         "target_x_m",
         "pattern",
-        "total_n",
+        "planned_n_per_pattern",
+        "attempted_n_per_pattern",
         "supported_n",
         "paired_n",
         "nominal_face_deg",
@@ -126,7 +127,8 @@ def render_cell_inventory(primary: dict, control: dict) -> str:
                         "seed": config.get("seed", ""),
                         "target_x_m": cell.get("target_x_m", ""),
                         "pattern": pattern,
-                        "total_n": summary.get("total_n", config["n_shots"]),
+                        "planned_n_per_pattern": config["n_shots"],
+                        "attempted_n_per_pattern": summary.get("total_n", 0),
                         "supported_n": summary.get("supported_n", ""),
                         "paired_n": paired.get("paired_n", ""),
                         "nominal_face_deg": nominal.get("face_deg", ""),
@@ -175,10 +177,14 @@ def _direction_counts(cells: list[dict], key: str) -> dict[str, Counter]:
 
 
 def _effect_summary(report: dict, label: str) -> list[str]:
+    unavailable_cells = report["counts"]["unavailable"]
+    suffix = "cell" if unavailable_cells == 1 else "cells"
     lines = [
         f"### {label} Direction Counts",
         "",
-        "| Metric | Pattern | Positive Interval | Negative Interval | Crosses Zero | Unavailable |",
+        f"Counts below cover only {report['counts']['completed']} completed cells; {unavailable_cells} unavailable planned {suffix} have no interval and remain in the complete inventory.",
+        "",
+        "| Metric | Pattern | Positive Interval | Negative Interval | Crosses Zero | Missing Metric in Completed Cells |",
         "| --- | --- | ---: | ---: | ---: | ---: |",
     ]
     for key, metric in (
