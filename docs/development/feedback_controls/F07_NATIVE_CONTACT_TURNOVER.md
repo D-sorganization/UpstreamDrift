@@ -51,3 +51,11 @@ missing. The unit lane now fetches the default branch explicitly into its
 remote-tracking ref, matching the F02 repair. No check is skipped or weakened.
 The actual parent/manual conflict after F01 merged is resolved by retaining
 comparison, native replay and contact chapters together.
+
+## Workflow Ref Validation Follow-Up
+
+CI run `37883919617` passed 22,561 unit tests but failed the workflow test
+that still expected FETCH_HEAD-only PR-base fetching. The corrected test
+requires the default branch explicitly in `refs/remotes/origin/<default>`,
+matching the unchanged fail-closed child-copy guard. Its focused regression
+passes locally. The assertion was updated, not removed.
