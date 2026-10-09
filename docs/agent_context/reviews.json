@@ -19,24 +19,24 @@
       "rationale": "Preserve capture boundary review under baseline capability inventory ORG-01"
     },
     "launcher-atlas": {
-      "fingerprint": "978ff83e3ffba74242a6336256c9181c2232a4bd314bf223a56a161685b14df2",
+      "fingerprint": "46dd977091a2a684bcbb591486e514a56fcc51e97a90047d5d5a1cb3674ec9fb",
       "inputs": {
         "docs/agent_context/contracts/launcher-atlas.md": "f5976baa4ef78bcf71ede27afb4e7a85f3f72cfedbb3cdbe9b40e48d4016ae94",
         "scripts/capability_atlas/goals.py": "a4c449dbd07dc398530d7c85eefc697d36b6acaee48b7953b7e060fb413cc131",
         "scripts/capability_atlas/model.py": "ecca5889caad0e087c895f6c56c0fcd966b646bda5c3ab5a87a65c4694eb41cf",
         "scripts/capability_atlas/render.py": "7981df3ea262536a2c847b693c104e9600ce2aad85d17d4e0f3048e80ee066a5",
         "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
-        "src/config/feature_parity.json": "4e1ab51b32ae79beddc70d7ecdb9f2565421ea23f7390d143f173498ff14a267",
-        "src/config/launcher_manifest.json": "2c1c60c07fbdc12466c114065a0a2ca1a839f58995850097b9648a9ac2d8f792",
+        "src/config/feature_parity.json": "175efe0624320b8cd6a149029ad5cc848834ccc5a27aef9f3fe243dae7fe50da",
+        "src/config/launcher_manifest.json": "1ae28f872b54c237440fcaacec40b735b93a7b80d710adc9228ef671b7831032",
         "src/config/launcher_manifest_loader.py": "aed6769fbdfc595400d0bd5d15bb75e8fbfda80243a586894d73d36b2d056a00",
-        "src/config/models.yaml": "dece91b25bf128054b74ac90562668cf18dc75bc042360e96b3d4f42801c5414",
+        "src/config/models.yaml": "e11682df79d7467f1eba9579d835f5d7019bfd7eb09cf81c14e22bd08d0bf844",
         "src/tools/capture_rig/goal_catalog.py": "0461380a7c083812bed54c56e28a763a70679e083767303167b0ce07ef43d4e5",
         "src/tools/capture_rig/goal_planner.py": "3bb60b46953b477d13fc358baf6fad5fecdcf4860ce840998d325bff0bec3121",
         "tests/scripts/test_capability_atlas.py": "1d06a18c83571769b61d9b02cc86bbff3e22a089a9a8f11f7944fca44d72cc5b",
         "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
         "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414"
       },
-      "rationale": "CMB-10 #11661 slice 1: feature_parity.json tools.model_explorer.frankenstein_assembly gains api=src/api/routes/model_explorer_assembly.py (status stays gap, web still null). Reviewed the regenerated atlas: one added api link in CAPABILITY_ATLAS.md, graph.json and index.html; no tile, connection or goal change. Atlas, goal catalog and goal planner tests pass."
+      "rationale": "CMB-10 #11661 slice 1 (re-recorded after merging main with GCV-5): feature_parity.json tools.model_explorer.frankenstein_assembly gains api=src/api/routes/model_explorer_assembly.py (status stays gap, web still null). Atlas regenerated: one added api link in CAPABILITY_ATLAS.md, graph.json and index.html on top of main; no tile, connection or goal change from this PR."
     },
     "model-backends": {
       "fingerprint": "da739fcd3c56f6c4a3923b4f31202e515023487a49d54ca449090d33186a9685",

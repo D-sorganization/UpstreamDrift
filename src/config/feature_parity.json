@@ -207,6 +207,15 @@
       "tiles": ["grip_wrench_plots"],
       "notes": "GCV-8 (#11714): MuJoCo, MyoSuite and Drake emit per-hand WrenchKind.GRIP frames, Pinocchio the allocation net, OpenSim reports unavailable. GCV-10 (#11716): one glyph frame (force_overlay.grip_frame) and one plot series (biomechanics.grip_plot_model) feed the PyQt6 plot tool and Visualization-tab group toggles, GET /api/analysis/grip-wrench with the web charts and ForceOverlayPanel group toggles, and the native video export (per-hand arrows at each grip point, net arrow and couple arc at the midpoint, hands close-up camera). The split_method is labelled on the legend, the plots and the HUD; an unavailable split is listed as unavailable, never drawn as zero."
     },
+    "analysis.ground_reaction": {
+      "title": "Ground reaction plots: per-foot and net force (N and body weights), vertical load share, CoP path, free moment and moment about CoM",
+      "pyqt": "src/tools/ground_reaction_plots/gui.py",
+      "api": "src/api/routes/analysis.py",
+      "web": "ui/src/components/analysis/GroundReactionCharts.tsx",
+      "status": "parity",
+      "tiles": ["ground_reaction_plots"],
+      "notes": "GCV-5 (#11711): one plot series (biomechanics.ground_reaction_plot_model, built from the GCV-1 GroundReactionSeries) feeds the PyQt6 Ground Reaction Plots tile (six-panel sheet from plotting.renderers.ground_reaction), GET /api/analysis/ground-reaction and the web GroundReactionCharts on the Analysis Tools page, so both surfaces draw the same panels with address/top/impact/finish markers. CoP and load share are null below 10 N of vertical load; an engine without ground reaction (Simscape until GCV-3) is shown as unavailable with its reason, never as zero."
+    },
     "analysis.counterfactuals": {
       "title": "ZTCF/ZVCF + induced-acceleration counterfactuals",
       "pyqt": "src/shared/python/biomechanics/ztcf.py",
