@@ -209,3 +209,18 @@ def test_nonfinite_solver_candidate_keeps_verified_fallback(
     assert receipt.status == "fallback_solver_failure"
     assert receipt.applied.tolist() == [0.0]
     assert len(controller.applied_history) == 1
+
+
+def test_vector_constraint_preparation_counts_against_evaluation_budget() -> None:
+    controller = BoundedNMPC(
+        _problem(),
+        MPCConfig(horizon_steps=3, max_evaluations=1, max_wall_s=1.0),
+        fallback=lambda state, time_s: np.array([0.0]),
+    )
+    receipt = controller.command_for_step(
+        0, np.zeros(2), observation_time_s=0.0, current_time_s=0.0
+    )
+    assert receipt.status == "fallback_timeout"
+    assert receipt.evaluations == 1
+    assert receipt.applied.tolist() == [0.0]
+    assert receipt.fallback_objective is not None
