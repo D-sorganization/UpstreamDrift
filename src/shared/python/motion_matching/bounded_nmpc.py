@@ -16,15 +16,18 @@ from typing import TYPE_CHECKING, TypeAlias, cast
 
 import numpy as np
 from numpy.typing import NDArray
-from scipy.optimize import Bounds, OptimizeResult, minimize
+from scipy.optimize import Bounds, NonlinearConstraint, OptimizeResult, minimize
 
 if TYPE_CHECKING:
     from scipy.optimize._minimize import _MinimizeOptions
-    from scipy.optimize._typing import _ConstraintDict
 
 Array: TypeAlias = NDArray[np.float64]
 StepFunction: TypeAlias = Callable[[Array, Array], Array]
 FallbackFunction: TypeAlias = Callable[[Array, float], Array]
+
+
+def _slsqp_options(max_iterations: int) -> _MinimizeOptions:
+    return {"maxiter": max_iterations, "ftol": 1e-7}
 
 
 def _frozen(values: Array) -> Array:
@@ -386,21 +389,14 @@ class BoundedNMPC:
             try:
                 lower = np.tile(self.problem.input_lower, horizon)
                 upper = np.tile(self.problem.input_upper, horizon)
-                options: _MinimizeOptions = {
-                    "maxiter": self.config.solver_max_iterations,
-                    "ftol": 1e-7,
-                }
-                constraint: _ConstraintDict = {
-                    "type": "ineq",
-                    "fun": constraint_margin,
-                }
+                constraint = NonlinearConstraint(constraint_margin, lb=0.0, ub=np.inf)
                 result = minimize(
                     lambda flat: evaluate(flat)[0],
                     initial.ravel(),
                     method="SLSQP",
                     bounds=Bounds(lower, upper),
-                    constraints=[constraint],
-                    options=options,
+                    constraints=constraint,
+                    options=_slsqp_options(self.config.solver_max_iterations),
                 )
                 check_budget()
                 status, objective, accepted = self._candidate_outcome(
