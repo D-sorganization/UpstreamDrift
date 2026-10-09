@@ -77,14 +77,14 @@ which is exactly OpenSim's coefficient $-1$ on adduction and rotation. At
 $q = 0$ the transform is unchanged, so the zero pose, every body and every
 marker are as before.
 
-\paragraph{Zero-twist calibration.} \texttt{hip\_rotation\_zero} measures a
+\paragraph{Zero-Twist Calibration.} \texttt{hip\_rotation\_zero} measures a
 twist $\theta$ about the thigh's long axis pointing up. It is applied as
 $B \leftarrow B R_z(s\theta)$, where $s = -1$ when the hip's $R_z$ axis
 ($F$'s third column, in the femur frame) points down the femur
 ($F_{2,3} < -0.5$), and $s = +1$ otherwise. A stored offset thus gives the
 same femur pose with and without the mirror.
 
-\paragraph{Symmetry property (tested).} With $S_p = \mathrm{diag}(1,-1,1)$ in
+\paragraph{Symmetry Property (Tested).} With $S_p = \mathrm{diag}(1,-1,1)$ in
 the pelvis \texttt{Hip} frame and $S_f = \mathrm{diag}(1,1,-1)$ in the
 OpenSim femur frame, equal coordinates on both sides now give mirror-image
 femurs:
@@ -173,7 +173,7 @@ the driver with MuJoCo. Pinocchio's full-body IK requires 41 coordinates
 (the anthro document has 44), and MyoSuite is not a ground-support pipeline
 plant. Neither is reported on this pathway; neither is reported as zero.
 
-\paragraph{Owner capture O.} Malleolus-corrected toe-out at address (33-frame
+\paragraph{Owner Capture O.} Malleolus-corrected toe-out at address (33-frame
 window): lead $6.1^\circ$, trail $1.6^\circ$. Its forefoot-line cross-check
 reads $16.2^\circ$ / $11.7^\circ$, a disagreement of about $10^\circ$ (2 to
 $5^\circ$ on the tour captures), so the headline is provisional.
