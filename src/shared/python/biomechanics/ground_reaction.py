@@ -66,6 +66,7 @@ __all__ = [
     "GroundReactionBreakdown",
     "GroundReactionSeries",
     "analyze_ground_reaction",
+    "center_of_pressure",
     "foot_reaction",
     "grf_overlay_wrench",
     "overlay_label_part",
@@ -179,6 +180,40 @@ class GroundReactionBreakdown:
     ground_height_m: float
 
 
+def center_of_pressure(
+    force: ArrayLike,
+    moment_about_origin: ArrayLike,
+    ground_height_m: float = 0.0,
+    min_fz: float = COP_MIN_FZ_N,
+) -> Array | None:
+    """Canonical centre of pressure of a wrench on the plane ``z = ground_height_m``.
+
+    ``force`` is the ground force on the body and ``moment_about_origin`` its
+    moment about the world origin (definition 2 in the module docstring).
+
+    Preconditions: both are finite 3-vectors; ``ground_height_m`` is finite;
+    ``min_fz`` is finite and non-negative.
+    Postconditions: returns ``None`` (never zero) when ``F_z < min_fz``;
+    otherwise a world point with ``z == ground_height_m``.
+    """
+    f = _vec3(force, "force")
+    m = _vec3(moment_about_origin, "moment_about_origin")
+    zg = _finite_scalar(ground_height_m, "ground_height_m")
+    thr = _finite_scalar(min_fz, "min_fz")
+    if thr < 0.0:
+        raise ValueError(f"min_fz must be non-negative, got {thr}")
+    return _cop(f, m, zg, thr)
+
+
+def _cop(force: Array, moment: Array, zg: float, thr: float) -> Array | None:
+    fz = float(force[2])
+    if fz < thr:
+        return None
+    return np.array(
+        [(zg * force[0] - moment[1]) / fz, (moment[0] + zg * force[1]) / fz, zg]
+    )
+
+
 def _resultant(
     label: str,
     force: Array,
@@ -190,12 +225,10 @@ def _resultant(
 ) -> FootReaction:
     """Apply definitions 2-3 to a resultant wrench about the world origin."""
     cop = free = None
-    fx, fy, fz = force
-    if in_contact and fz >= cop_min_fz_n:
-        x = (ground_height_m * fx - moment[1]) / fz
-        y = (moment[0] + ground_height_m * fy) / fz
-        cop = np.array([x, y, ground_height_m])
-        free = (moment[2] - (x * fy - y * fx)) * _ZHAT
+    if in_contact:
+        cop = _cop(force, moment, ground_height_m, cop_min_fz_n)
+    if cop is not None:
+        free = (moment[2] - (cop[0] * force[1] - cop[1] * force[0])) * _ZHAT
     return FootReaction(label, force, moment, cop, free, in_contact, centroid)
 
 
