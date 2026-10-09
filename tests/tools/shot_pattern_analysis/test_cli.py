@@ -62,9 +62,16 @@ def test_headless_cli_writes_complete_analysis_bundle(tmp_path: Path) -> None:
         "dispersion.png",
         "dispersion_equal_range.png",
         "receipt.json",
+        "run_start.json",
         "strokes_gained.json",
     }
     assert expected <= {path.name for path in tmp_path.iterdir()}
+    execution = json.loads((tmp_path / "run_start.json").read_text())
+    receipt = json.loads((tmp_path / "receipt.json").read_text())
+    assert execution["config"]["n_shots"] == 20
+    assert receipt["execution_source_sha256"] == execution["source_sha256"]
+    assert receipt["execution_native_binary_sha256"] == execution["native_binary_sha256"]
+    assert receipt["source_unchanged_during_run"] is True
     with (tmp_path / "shots.csv").open(newline="", encoding="utf-8") as stream:
         shots = list(csv.DictReader(stream))
     assert len(shots) == 60

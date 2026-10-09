@@ -6,6 +6,7 @@ import pytest
 
 from src.tools.launch_monitor_model import (
     CourseStateColumnsV1,
+    ExpectedStrokesBaselineV2,
     StrokesGainedRequestV1,
     analyze_source_backed_strokes_gained,
 )
@@ -105,12 +106,15 @@ def test_cached_means_match_preserved_full_api_historical_bundles(bundle):
     root = Path(__file__).resolve().parents[3]
     directory = root / "docs/research/shot_pattern_analysis" / bundle
     report = json.loads((directory / "strokes_gained.json").read_text())
+    historical_baseline = ExpectedStrokesBaselineV2.model_validate(
+        json.loads((directory / "strokes_gained_baseline.json").read_text())["baseline"]
+    )
     assert report["api_scored_shots"] == 30000
     samples = pd.read_csv(directory / "shots.csv")
     target = report["target_distance_m"]
     radius = report["green_radius_m"]
     cache = source_backed_score_cache(
-        build_broadie_approx_baseline(),
+        historical_baseline,
         start_lie="fairway",
         start_distance_yards=target * YARDS_PER_METRE,
         finish_lies=("green", "rough"),

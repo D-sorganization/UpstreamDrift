@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from dataclasses import asdict
 from pathlib import Path
 from typing import TypedDict
 
@@ -107,6 +108,12 @@ def main(argv: list[str] | None = None) -> int:
     from src.tools.shot_pattern_analysis.core import AnalysisConfig, run_analysis
     from src.tools.shot_pattern_analysis.reporting import export_analysis
     from src.tools.shot_pattern_analysis.scoring import score_saved_bundle
+    from src.tools.shot_pattern_analysis.provenance import (
+        assert_source_unchanged,
+        source_snapshot,
+        stamp_execution_receipt,
+        write_run_start,
+    )
 
     config = AnalysisConfig(
         n_shots=args.shots,
@@ -121,9 +128,13 @@ def main(argv: list[str] | None = None) -> int:
         if completed == total or completed % max(1, total // 10) == 0:
             sys.stderr.write(f"Simulated {completed}/{total} shots.\n")
 
+    execution = source_snapshot()
+    start_path = write_run_start(args.output, asdict(config), execution)
     result = run_analysis(config, progress_callback=progress)
     paths = export_analysis(result, args.output)
     scoring_path = score_saved_bundle(args.output)
+    assert_source_unchanged(execution, source_snapshot())
+    stamp_execution_receipt(args.output, execution)
     score_summary = json.loads(scoring_path.read_text(encoding="utf-8"))
     scoring_available = score_summary.get("status", "unavailable") == "available"
     for name, summary in result.summary.items():
@@ -140,7 +151,7 @@ def main(argv: list[str] | None = None) -> int:
                 "; model-conditional strokes gained unavailable for this configuration"
             )
         sys.stdout.write(line + "\n")
-    for path in (*paths.values(), scoring_path):
+    for path in (*paths.values(), scoring_path, start_path):
         sys.stdout.write(f"{path}\n")
     return 0
 

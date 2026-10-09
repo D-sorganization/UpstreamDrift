@@ -66,8 +66,8 @@ def build_refinement(
                             "dt_010_vs_005_m": differences[1],
                         }
                     )
-    coarse = max(row["dt_020_vs_010_m"] for row in cases)
-    fine = max(row["dt_010_vs_005_m"] for row in cases)
+    coarse = max(float(row["dt_020_vs_010_m"]) for row in cases)
+    fine = max(float(row["dt_010_vs_005_m"]) for row in cases)
     return {
         "schema": "shot-pattern-timestep-refinement/1",
         "status": "passed"

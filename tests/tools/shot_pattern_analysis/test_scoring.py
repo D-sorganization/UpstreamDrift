@@ -41,6 +41,20 @@ def test_published_putting_anchors_and_verified_baseline() -> None:
     )
 
 
+def test_unholed_tap_in_has_at_least_one_expected_stroke() -> None:
+    """A zero-distance endpoint on the green is unholed, not a made shot."""
+    assert green_expected_strokes(0.0) == 1.0
+    assert all(
+        green_expected_strokes(distance_yards) >= 1.0
+        for distance_yards in (0.00001, 0.01, 0.053975, 0.1, 1.0)
+    )
+    baseline = build_broadie_approx_baseline()
+    green = [state for state in baseline.states if state.lie == "green"]
+    assert green[0].distance_yards == 0.0
+    assert green[0].expected_strokes == 1.0
+    assert baseline.version == "table9-full-plus-anchor-reconciled-putting/2"
+
+
 def test_source_backed_scoring_respects_green_and_pair_indices() -> None:
     endpoints = {
         "Straight": [(0, 200.0, 0.0), (1, 200.0, 10.0), (2, 200.0, 20.0)],

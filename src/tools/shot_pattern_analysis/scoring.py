@@ -170,11 +170,11 @@ def putt_probabilities(distance_yards: float) -> tuple[float, float]:
 
 
 def green_expected_strokes(distance_yards: float) -> float:
-    """Equation 7, with the disclosed approximate three-putt curve."""
+    """Equation 7 for an unholed ball, with the approximate three-putt curve."""
     if not math.isfinite(distance_yards) or distance_yards < 0:
         raise ValueError("putt distance must be finite and nonnegative")
     if distance_yards == 0:
-        return 0.0  # Ball already holed.
+        return 1.0  # The endpoint is an unholed tap-in, not a made shot.
     one_putt, three_putt = putt_probabilities(distance_yards)
     return 2 - one_putt + three_putt
 
@@ -224,7 +224,7 @@ def build_broadie_approx_baseline() -> ExpectedStrokesBaselineV2:
     points = tuple(states)
     return ExpectedStrokesBaselineV2(
         baseline_id="broadie-2011-historical-tour-approx",
-        version="table9-plus-anchor-reconciled-putting/1",
+        version="table9-full-plus-anchor-reconciled-putting/2",
         source_url=SOURCE_URL,
         license="Factual values transcribed for analysis; no publication license asserted",
         table_sha256=baseline_table_sha256(points),
@@ -361,7 +361,9 @@ def score_saved_bundle(output_dir: Path) -> Path:
     summary_path = output_dir / "summary.json"
     summary = json.loads(summary_path.read_text())
     if summary.get("config", {}).get("club_id") in {
-        "driver", "seven_iron", "pitching_wedge"
+        "driver",
+        "seven_iron",
+        "pitching_wedge",
     }:
         from .scenario_scoring import score_corrected_bundle
 

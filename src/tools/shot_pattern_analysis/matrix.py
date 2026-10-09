@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-import importlib.util
 import json
 import logging
 from dataclasses import asdict
@@ -13,57 +12,16 @@ from pathlib import Path
 from .core import AnalysisConfig, run_analysis
 from .presets import CLUB_PRESETS
 from .reporting import export_analysis
+from .provenance import (
+    assert_source_unchanged,
+    manifest_files_match,
+    source_snapshot,
+    stamp_execution_receipt,
+    write_run_start,
+)
 from .scoring import score_saved_bundle
 
 LOGGER = logging.getLogger(__name__)
-
-
-def source_snapshot() -> dict:
-    """Hash the numerical/scoring sources and loaded native binary before a cell."""
-    root = Path(__file__).resolve().parents[3]
-    package = Path(__file__).parent
-    files = [
-        package / name
-        for name in (
-            "core.py", "physics.py", "delivery_geometry.py", "presets.py",
-            "reporting.py", "scoring.py", "scoring_cache.py",
-            "scenario_scoring.py", "dispersion_stats.py", "range_control.py",
-            "uncertainty.py", "matrix.py",
-        )
-    ]
-    files += [
-        root / name
-        for name in (
-            "src/shared/python/physics/impact_model/models.py",
-            "src/shared/python/physics/impact_model/solver.py",
-            "src/shared/python/physics/impact_model/types.py",
-            "src/shared/python/physics/ball_simulator.py",
-            "src/shared/python/physics/ball_launch_conditions.py",
-            "src/shared/python/physics/ball_properties.py",
-            "src/shared/python/core/physics_constants.py",
-            "rust_core/upstream-physics/Cargo.toml", "Cargo.lock",
-            "vendor/ud-tools/src/shared/python/launch_monitor/strokes_gained.py",
-        )
-    ]
-    files.extend(sorted((root / "rust_core/upstream-physics/src").glob("*.rs")))
-    rust_spec = importlib.util.find_spec("upstream_physics")
-    if rust_spec is None or rust_spec.origin is None:
-        raise RuntimeError("native upstream_physics must be installed")
-    rust_package = Path(rust_spec.origin)
-    binaries = (
-        [rust_package] if rust_package.suffix == ".so"
-        else sorted(rust_package.parent.glob("*.so"))
-    )
-    if len(binaries) != 1:
-        raise RuntimeError("expected exactly one native upstream_physics binary")
-    return {
-        "source_sha256": {
-            str(path.relative_to(root)): hashlib.sha256(path.read_bytes()).hexdigest()
-            for path in files
-        },
-        "native_binary_path": str(binaries[0]),
-        "native_binary_sha256": hashlib.sha256(binaries[0].read_bytes()).hexdigest(),
-    }
 
 
 def corrected_matrix() -> tuple[tuple[str, AnalysisConfig], ...]:
@@ -103,7 +61,9 @@ def matrix_shard(
     """Partition immutable cells deterministically across independent workers."""
     if count < 1 or not 0 <= index < count:
         raise ValueError("shard index must be within positive shard count")
-    return tuple(cell for position, cell in enumerate(cells) if position % count == index)
+    return tuple(
+        cell for position, cell in enumerate(cells) if position % count == index
+    )
 
 
 def run_corrected_matrix(
@@ -116,21 +76,27 @@ def run_corrected_matrix(
     """Run every full Monte Carlo cell, preserving each cell's own receipt."""
     output_root = Path(output_root)
     output_root.mkdir(parents=True, exist_ok=True)
-    chosen = {name for name, _ in matrix_shard(corrected_matrix(), index=shard_index, count=shard_count)}
+    chosen = {
+        name
+        for name, _ in matrix_shard(
+            corrected_matrix(), index=shard_index, count=shard_count
+        )
+    }
     for number, (name, config) in enumerate(corrected_matrix(), start=1):
         if name not in chosen:
             continue
         destination = output_root / name
         finished = destination / "manifest.json"
         if skip_complete and finished.exists():
+            if not manifest_files_match(finished):
+                raise RuntimeError(
+                    f"completed manifest invalid for {name}; inspect before rerun"
+                )
             LOGGER.info("[%s/24] Skipped complete %s", number, name)
             continue
         LOGGER.info("[%s/24] Running %s", number, name)
-        destination.mkdir(parents=True, exist_ok=True)
         execution = source_snapshot()
-        (destination / "run_start.json").write_text(
-            json.dumps({"config": asdict(config), **execution}, indent=2) + "\n"
-        )
+        write_run_start(destination, asdict(config), execution)
 
         def on_progress(
             done: int, total: int, cell_number: int = number, cell_name: str = name
@@ -144,30 +110,32 @@ def run_corrected_matrix(
         )
         paths = export_analysis(result, destination)
         scoring_path = score_saved_bundle(destination)
-        if source_snapshot() != execution:
-            raise RuntimeError(f"scientific source changed during {name}; discard and rerun")
-        receipt_path = destination / "receipt.json"
-        receipt = json.loads(receipt_path.read_text())
-        receipt["execution_source_sha256"] = execution["source_sha256"]
-        receipt["execution_native_binary_sha256"] = execution["native_binary_sha256"]
-        receipt["source_unchanged_during_run"] = True
-        receipt["source_sha256_timing"] = "at_export; verified identical to run_start.json"
-        receipt_path.write_text(json.dumps(receipt, indent=2) + "\n")
+        assert_source_unchanged(execution, source_snapshot())
+        receipt_path = stamp_execution_receipt(destination, execution)
         manifest = {
             "scenario": name,
             "config": asdict(config),
             "files_sha256": {
                 path.name: hashlib.sha256(path.read_bytes()).hexdigest()
-                for path in (*paths.values(), scoring_path, destination / "strokes_gained_baseline.json", destination / "run_start.json")
+                for path in (
+                    *paths.values(),
+                    scoring_path,
+                    destination / "strokes_gained_baseline.json",
+                    destination / "run_start.json",
+                )
             },
         }
-        (destination / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
+        (destination / "manifest.json").write_text(
+            json.dumps(manifest, indent=2) + "\n"
+        )
         LOGGER.info("[%s/24] Finished %s", number, name)
 
 
 def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
-    parser = argparse.ArgumentParser(description="Run 24 corrected shot-pattern scenarios")
+    parser = argparse.ArgumentParser(
+        description="Run 24 corrected shot-pattern scenarios"
+    )
     parser.add_argument("output_root", type=Path)
     parser.add_argument("--shard-index", type=int, default=0)
     parser.add_argument("--shard-count", type=int, default=1)
