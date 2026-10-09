@@ -32,6 +32,24 @@ UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
 
 {{< include chapters/17-sparse-collocation-benchmark.qmd >}}
 
+{{< include chapters/20-native-candidate-benchmark.qmd >}}
+
+{{< include chapters/21-control-loop-tuning.qmd >}}
+
+{{< include chapters/23-native-bounded-nmpc.qmd >}}
+
+{{< include chapters/24-native-box-fddp-candidate.qmd >}}
+
+{{< include chapters/25-native-manifold-derivative.qmd >}}
+
+{{< include chapters/26-native-manifold-box-fddp.qmd >}}
+
+{{< include chapters/36-native-activation-manifold.qmd >}}
+
+{{< include chapters/27-native-manifold-feedback.qmd >}}
+
+{{< include chapters/28-native-marker-fit.qmd >}}
+
 {{< include chapters/26-native-opensim-geometry.qmd >}}
 
 {{< include chapters/32-native-constrained-state.qmd >}}
