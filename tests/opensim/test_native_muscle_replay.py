@@ -14,8 +14,10 @@ from src.engines.physics_engines.opensim.python.tour_matching import (
 pytestmark = pytest.mark.unit
 
 
-@pytest.fixture
-def muscle_fixture(tmp_path: Path) -> tuple[Path, dict[str, float]]:
+@pytest.fixture(params=["Millard2012EquilibriumMuscle", "Thelen2003Muscle"])
+def muscle_fixture(
+    tmp_path: Path, request: pytest.FixtureRequest
+) -> tuple[Path, dict[str, float]]:
     """Create an actual one-DOF compliant-tendon model, not a golf substitute."""
     osim = pytest.importorskip("opensim")
     model = osim.Model()
@@ -36,7 +38,7 @@ def muscle_fixture(tmp_path: Path) -> tuple[Path, dict[str, float]]:
     coordinate.setName("slide")
     coordinate.setDefaultValue(0.31)
     model.addJoint(joint)
-    muscle = osim.Millard2012EquilibriumMuscle("flexor", 10.0, 0.1, 0.2, 0.0)
+    muscle = getattr(osim, request.param)("flexor", 10.0, 0.1, 0.2, 0.0)
     muscle.addNewPathPoint("origin", model.getGround(), osim.Vec3(0))
     muscle.addNewPathPoint("insertion", body, osim.Vec3(0))
     model.addForce(muscle)
@@ -79,6 +81,9 @@ def test_native_replay_preserves_complete_nonzero_initial_state(
     assert first.policy["input_boundary"] == "muscle_excitation"
     assert first.policy["interpolation"] == "linear"
     assert first.policy["state_resets"] is False
+    native_model = pytest.importorskip("opensim").Model(str(path))
+    actual_law = native_model.getMuscles().get(0).getConcreteClassName()
+    assert actual_law in first.policy["muscle_laws"]
 
 
 def test_excitation_changes_native_motion_not_just_recorded_controls(
