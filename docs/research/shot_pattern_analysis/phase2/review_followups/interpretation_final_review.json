@@ -1,0 +1,45 @@
+{
+  "common_three_sg_n": 9933,
+  "exclusions": [
+    "builder_integration",
+    "full_data_acceptance",
+    "final_narrative_acceptance",
+    "empirical_validation",
+    "final_rendered_visual_acceptance"
+  ],
+  "focused_tests": 16,
+  "real_cell": "docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean5_curve1_rotation2_cov_facepath_negative",
+  "real_cell_manifest_sha256": "98b3da8c37e259fb9c26e05bb3b7104c90e1e426056b41edea0a80dc343cb687",
+  "reviewed_commit": "8083f4d4c6f78a8d8517a886a1a5615fcd572cf4",
+  "saved_pair_compatibility": [
+    {
+      "common_six_n": 10000,
+      "input": "docs/research/shot_pattern_analysis/phase2/validation/real_driver_lean0_pair_review.json",
+      "sha256": "f9fd92332b0240ff3eaf74b67abe8227544b033622d17f97aa4a74d772a45bdd",
+      "source_cells": [
+        "driver_lean0_curve1_rotation1_combined2",
+        "driver_lean0_curve1_rotation2_combined2"
+      ],
+      "status": "available"
+    },
+    {
+      "common_six_n": 9939,
+      "input": "docs/research/shot_pattern_analysis/phase2/validation/real_driver_lean5_pair_review.json",
+      "sha256": "e5769567813210d955838317a5fe0734c30e8e92973c3a3329bd4bb3b6f601dd",
+      "source_cells": [
+        "driver_lean5_curve1_rotation1_combined2",
+        "driver_lean5_curve1_rotation2_combined2"
+      ],
+      "status": "conditional_only"
+    }
+  ],
+  "schema": "independent-interpretation-module-review/1",
+  "source_sha256": {
+    "src/tools/shot_pattern_analysis/matched_interpretation.py": "5c9364f6f8917a0c11beb97f00a341be53c6604dfdabc7556d49f8a0db490634",
+    "tests/tools/shot_pattern_analysis/test_matched_interpretation.py": "b123050238d86f61f517565c782038bcdf1145b21ccdb113e9b344f7304ce767"
+  },
+  "status": "accepted_for_validated_input_report_integration",
+  "straight_endpoint_n": 9934,
+  "test_exit_code": 0,
+  "test_log_sha256": "cfdd2a7186cec55cc69eea14c1c9d6b154fefbc04466d27dd78f942703e95c38"
+}
