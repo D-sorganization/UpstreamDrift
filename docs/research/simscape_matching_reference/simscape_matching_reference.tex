@@ -5296,6 +5296,113 @@ python3 -m scripts.regenerate_club_face_fixtures --work RUNS --capture iron
 python3 -m pytest tests/unit/model_appearance/test_clubface_square_at_address.py
 \end{verbatim}
 
+\section{Two-Hand Grip Pose and Lead-Hand Closure (OSV-2)}
+This section records the shared grip definition and the closure correction of
+issue \#11728 (epic \#11726, slice 1: definition, closure and orientation
+routing; finger meshes, stills and clips are slice 2). The definition lives in
+\texttt{src/shared/python/model\_appearance/grip\_pose.py}; no engine carries
+its own copy.
+
+\subsection{Definition and Conventions}
+Distances are measured down the shaft from the butt end. The OpenSim club body
+has its origin at the butt and the shaft along $-y$, so a hand at distance
+$d$ below the butt has club coordinate $y=-d$; the MyoSuite club body has its
+origin at the head, so the same hand sits at $y=-(L-d)$ for club length $L$.
+Angles are rotations about the grip axis $g$ (butt toward head), measured in
+the plane perpendicular to the shaft with $n$ the face normal (toward the
+target) and $t$ the toe axis. Azimuth $0$ is the direction $-n$ and grows
+toward $-t$, that is toward the golfer and the trail shoulder.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{llll}
+\hline
+Quantity & Symbol & Value & Basis \\
+\hline
+Lead-hand centre below butt & $d_L$ & 0.015 m & Issue scope, butt minus 1.5 cm \\
+Hand-centre spacing & $s$ & 0.0762 m & Native Simscape spec (below) \\
+Trail-hand centre below butt & $d_T=d_L+s$ & 0.0912 m & Derived \\
+Lead V (thumb/index crease) & $\psi_L$ & 20 deg & Between chin (about 10) and trail shoulder (about 35) \\
+Trail V relative to lead V & $\Delta\psi$ & 0 deg & Parallel V angles \\
+Lead thumb offset to trail side & $\theta_T$ & 10 deg & Short thumb, slightly trail of centre \\
+Finger link & --- & overlap & Trail little finger over the lead index/middle gap \\
+\hline
+\end{tabular}
+\caption{Neutral Grip Parameters for a Right-Handed Golfer}
+\end{table}
+
+The angle values are coaching-convention nominals, not measurements: the
+captures carry no hand markers, so only the hand roll that the markers
+constrain is fitted (\texttt{grip\_fit}). A reference figure for every angle
+is part of the slice-2 stills and is not yet produced.
+
+\subsection{Reconciling the Hand Spacing}
+\texttt{club\_geometry.py} previously placed the hands 0.035 m apart
+($-0.025$ and $-0.06$ m) while the native spec places them 0.0762 m apart.
+In \texttt{full\_body\_spec\_v2.json} the trail closure \texttt{placement\_b}
+has $y=-1.0000$ m and the lead joint \texttt{child\_to\_follower} has
+$y=-1.0762$ m in the club frame (shaft toward the grip along $-y$), so the lead
+hand is nearer the butt and the spacing is $s=0.0762$ m (3 in). That is the
+single value; \texttt{LEAD\_HAND\_OFFSET\_M} and \texttt{TRAIL\_HAND\_OFFSET\_M}
+are now derived from it, and the MyoSuite scene sites no longer carry the
+reversed $-0.95$ / $-0.88$ m pair (trail above lead).
+
+\subsection{Golf Humanoid Closure}
+The Rajagopal hands share axes with the left mesh mirrored, so the same hand
+anchor (0, $-0.06$, 0) m and an identity relative rotation put the two palms
+on opposite sides of the shaft; this was checked at the neutral pose
+(identical ground orientations of \texttt{hand\_r} and \texttt{hand\_l}).
+\texttt{scripts/build\_humanoid\_osim.py} now (i) places the club-side frame of
+the trail \texttt{WeldJoint} at $y=-d_T$ instead of the butt, which moves the
+club 0.0912 m along the shaft relative to the trail hand, and (ii) adds the
+\texttt{WeldConstraint} \texttt{hand\_l\_to\_club} at $y=-d_L$
+(\texttt{point\_pair} gives two \texttt{PointConstraint}s 0.05 m apart). The
+compliant-attachment research option keeps both hands soft. Reproduce:
+\texttt{python3 scripts/build\_humanoid\_osim.py}.
+
+\subsection{Closure Residual on the Canned Swing}
+Residual $=\lVert p_a-p_b\rVert$ of the two grip frames the closure ties, per
+frame of the closure-consistent fitted swings
+(\texttt{tests/fixtures/club\_face/swing\_q\_*.npz}, 908 and 914 frames at
+2 ms), against the frozen 5 mm tolerance of
+\texttt{tour\_matching.address}. Reproduce:
+\texttt{python3 -m scripts.grip\_closure\_report}.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lll}
+\hline
+Engine & Driver maximum (m) & 7-Iron Maximum (m) \\
+\hline
+MuJoCo & $5.0\times10^{-8}$ & $1.7\times10^{-7}$ \\
+Pinocchio & $5.0\times10^{-8}$ & $1.7\times10^{-7}$ \\
+OpenSim (generated full-body weld) & $5.0\times10^{-8}$ & $1.7\times10^{-7}$ \\
+Drake & unavailable & unavailable \\
+MyoSuite & unavailable & unavailable \\
+\hline
+\end{tabular}
+\caption{Maximum Closure Residual over the Canned Swing}
+\end{table}
+
+\subsection{Limitations and Open Items}
+\begin{itemize}
+\item These swings were fitted with the closure enforced, so a residual near
+ zero confirms engine consistency of the closure frames, not an independent
+ reachability test of the hand geometry.
+\item Drake is unavailable on the execution host: the plant import fails on a
+ missing \texttt{shared.python.model\_generation.inertia.result} in the pinned
+ Tools tree (a Tools gap). It is reported unavailable, never zero.
+\item MyoSuite is unavailable: the pinned \texttt{myo\_sim} assets and a swing
+ in the retargeted coordinate space are not committed. Its shaft capsule is
+ drawn only half the club length, which predates this change.
+\item \texttt{golf\_humanoid.osim} has no closure-consistent swing in
+ Rajagopal coordinates. The committed tour IK states for the scaled model do
+ not satisfy the new lead weld (hands about 1 m from the club), so no
+ \texttt{golf\_humanoid} residual series is claimed.
+\item \texttt{golf\_humanoid\_scaled.osim} and \texttt{musculoskeletal\_swing}
+ have no builder path in this change and still weld only the trail hand.
+\end{itemize}
+
 \section{Dynamics-Informed Motion Estimation (DIME): Shared Reports, GUI Strategy Selection and Methods}
 \label{sec:dime_reports_methods}
 
