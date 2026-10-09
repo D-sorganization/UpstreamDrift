@@ -142,6 +142,7 @@ def test_calibrated_pads_carry_the_shared_law_force() -> None:
     q0 = np.asarray(swing.q[0], float)
     sim = module.ClubInHands(spec_bytes, names, interface, pads)
     assert sim.calibrate(q0) < 1e-3
+    sim.hold_pose(q0)
     force, depth = sim.pad_forces_and_penetrations()
     assert len(force) == 2 * pads.layout.pad_count
     for key, f in force.items():
