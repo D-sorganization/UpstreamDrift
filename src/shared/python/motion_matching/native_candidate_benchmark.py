@@ -280,6 +280,7 @@ def validate_candidate_native(
         model_path, initial, native_times, values, experiment_id="f03b-native"
     )
     replay = replay_native_torque_bundle(bundle, model_path)
+    replay_policy = bundle.policy
     native_states = np.column_stack((replay.qpos[:, 0], replay.qvel[:, 0]))
     exact = exact_held_solution(
         problem.fixture, native_times, problem.initial_state, held
@@ -324,7 +325,7 @@ def validate_candidate_native(
         time_grid_sha256=bundle.time_grid_sha256,
         native_step_seconds=native_dt,
         applied_torque_rows=len(replay.applied_actuator_torques),
-        native_replay_mode=bundle.policy.replay_mode.value,
+        native_replay_mode=replay_policy.replay_mode.value,
         native_contact_present=False,
     )
 
