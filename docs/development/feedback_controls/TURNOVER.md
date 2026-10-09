@@ -71,3 +71,12 @@ registry remains empty because its release is explicitly blocked pending the
 owner program; this slice does not register or imply an approved manual
 calculation. `python3 -m scripts.check_design_manual_governance` verifies the
 unchanged blocked registry/governance envelope.
+
+## F05B Derivative-Aware Native Candidate
+
+The bounded one-hinge MuJoCo RK4 BoxFDDP candidate, exact derivative and
+independent frozen-torque replay are described in
+`F05B_NATIVE_BOX_FDDP_TURNOVER.md` and the provisional design-manual chapter 24. The source-controlled paired receipt records supported MuJoCo/Crocoddyl
+runtime, all predeclared statuses, execution/setup/replay timing and source
+hashes. F02 TVLQR remains the broader default; F05 full-body and capture
+qualification stay open.

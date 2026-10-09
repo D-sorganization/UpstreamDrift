@@ -10,7 +10,7 @@ from __future__ import annotations
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Protocol
 
 import numpy as np
 from numpy.typing import NDArray
@@ -21,12 +21,31 @@ from src.engines.physics_engines.mujoco.python.native_torque_replay import (
     replay_native_torque_bundle,
 )
 from src.shared.python.motion_matching.bounded_nmpc import (
-    BoundedNMPC,
     MPCCommandReceipt,
+    MPCProblem,
 )
 
 if TYPE_CHECKING:
     from sidekick.lab.mocap import ExperimentReplayBundle
+
+
+class NativeStepController(Protocol):
+    """The common applied-command boundary for native torque controllers."""
+
+    @property
+    def problem(self) -> MPCProblem: ...
+
+    @property
+    def applied_history(self) -> tuple[MPCCommandReceipt, ...]: ...
+
+    def command_for_step(
+        self,
+        index: int,
+        observed_state: NDArray[np.float64],
+        *,
+        observation_time_s: float,
+        current_time_s: float,
+    ) -> MPCCommandReceipt: ...
 
 
 def _frozen(values: NDArray[np.float64]) -> NDArray[np.float64]:
@@ -57,7 +76,7 @@ class NativeNMPCTracking:
             object.__setattr__(self, name, _frozen(getattr(self, name)))
 
 
-def _admit_native_model(path: Path, controller: BoundedNMPC) -> Any:
+def _admit_native_model(path: Path, controller: NativeStepController) -> Any:
     """Reject any topology or channel outside the direct hinge fixture."""
     import mujoco as mj
 
@@ -89,7 +108,7 @@ def _admit_native_model(path: Path, controller: BoundedNMPC) -> Any:
 def run_native_nmpc_tracking(
     model_path: str | Path,
     initial_integration_state: NDArray[np.float64],
-    controller: BoundedNMPC,
+    controller: NativeStepController,
     *,
     steps: int,
     experiment_id: str,

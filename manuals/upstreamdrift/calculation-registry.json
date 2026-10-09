@@ -6,6 +6,11 @@
   "inventory_commit": null,
   "blockers": [
     {
+      "id": "UP-D1-native-box-fddp-candidate-inventory",
+      "owner": "UpstreamDrift issue #11910",
+      "resolution": "Inventory the provisional chapter 24 and F05b source: strict native one-hinge RK4 analytic discrete Jacobians checked against native MuJoCo steps, loaded-model derivative identity, two-scenario Crocoddyl BoxFDDP with direct torque bounds, independent max-scenario and state-bound acceptance, labeled verified fallback, exact full-initial-state ZOH input export and native replay. The supported MuJoCo 3.8/Crocoddyl 3.2.1 paired receipt times every accepted/fallback call and separately charges common T01 bootstrap, solver setup, execution, export and replay. The internal mean-scenario objective differs from the F05a shooting max objective. This small exact-state fixture does not qualify native contact/grip, manifold dynamics, muscle excitation, private capture, six engines, hard real-time deadlines or full-swing model matching. Full calculation coverage and publication remain blocked."
+    },
+    {
       "id": "UP-D1-native-bounded-nmpc-inventory",
       "owner": "UpstreamDrift issue #11904",
       "resolution": "Inventory F05a bounded robust SciPy shooting NMPC in bounded_nmpc.py, native_nmpc_tracking.py and provisional chapter 23: named Euclidean exact-state task, hard torque/state/slew bounds, nominal plus perturbed prediction, cooperative solve budget, verified fallback and post-limit applied commands. The paired one-hinge native MuJoCo test exports complete initial state and actual ZOH torque through the pinned Tools T01 bundle, then independently replays NMPC and F02 TVLQR. The source-controlled supported-provider receipt retains both predeclared initial states, fallback/failure counts, applied-input identities, tracking, effort and observed call latency. The prototype is rejected for 10 ms native-step real-time selection; no contact, anatomy, manifold, muscle, private capture, six-engine parity or full-swing qualification follows. Full calculation coverage and publication remain blocked."

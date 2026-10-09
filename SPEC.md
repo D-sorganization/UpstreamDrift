@@ -10490,3 +10490,25 @@ provider selection retains TVLQR and rejects this SciPy shooting prototype;
 the one-hinge result does not qualify contact, muscle, capture, six-engine
 equivalence or a full swing. The canonical calculation is provisional chapter
 23, and turnover is `docs/development/feedback_controls/F05A_NATIVE_NMPC_TURNOVER.md`.
+
+## Derivative-Aware Native BoxFDDP Candidate (F05b, #11910; Parent #11789)
+
+`native_box_fddp_hinge.py` admits only an exact-state one-hinge, direct
+unit-motor, no-gravity/no-contact native MuJoCo RK4 plant. It computes the
+analytic discrete RK4 derivative of that linear plant and checks it against
+native steps and finite differences. `box_fddp_tracking.py` binds nominal and
+perturbed loaded-model derivative identities, solves a two-scenario bounded
+Crocoddyl BoxFDDP problem, and independently admits only a finite,
+state/input-feasible improvement over a verified fallback. The native
+execution adapter exports actual post-limit per-step ZOH torque through Tools
+T01, then checks a fresh complete-initial-state replay at 1e-12 tolerance.
+The two source-controlled supported-provider paired receipts retain all
+predeclared solver statuses, source/runtime identities, common cold bootstrap,
+derivative setup and controlled execution/export/replay time. The internal
+BoxFDDP mean-scenario objective differs from F05a's max-scenario shooting
+objective; both use the max-scenario postcheck. BoxFDDP is a restricted
+one-hinge candidate, while F02 TVLQR remains the broader default. Contact,
+manifold, muscle, private capture, six-engine and full-swing gates remain
+unqualified and F05 #11789 stays open. The provisional canonical calculation
+is chapter 24 and turnover is
+`docs/development/feedback_controls/F05B_NATIVE_BOX_FDDP_TURNOVER.md`.
