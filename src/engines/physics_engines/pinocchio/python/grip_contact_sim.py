@@ -136,10 +136,10 @@ def simulate_grip_contact(
     )
     if not sol.success:
         raise RuntimeError(f"pinocchio contact integration failed: {sol.message}")
-    wrench = {s: ([], []) for s in SIDES}
-    hand_pose = {s: ([], []) for s in SIDES}
-    club_pose = {s: ([], []) for s in SIDES}
-    normal = {s: [] for s in SIDES}
+    wrench: dict[str, tuple[list, list]] = {s: ([], []) for s in SIDES}
+    hand_pose: dict[str, tuple[list, list]] = {s: ([], []) for s in SIDES}
+    club_pose: dict[str, tuple[list, list]] = {s: ([], []) for s in SIDES}
+    normal: dict[str, list] = {s: [] for s in SIDES}
     club_rot = []
     for k, t in enumerate(times):
         y = sol.y[:, k]

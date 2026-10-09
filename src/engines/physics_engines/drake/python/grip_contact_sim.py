@@ -21,12 +21,14 @@ plant's contact results, attributed to hands by collision geometry.
 from __future__ import annotations
 
 import json
+from collections.abc import Callable
 from typing import Any
 
 import numpy as np
 
 from src.engines.physics_engines.drake.python.grip_bushing import (
     SIDES,
+    FreeClubPlantMixin,
     WeldClubKinematics,
     _module,
 )
@@ -35,11 +37,10 @@ from src.shared.python.grip_contact import (
     CoordinateSpline,
     CoordinateSwing,
     GripInterface,
-    RigidBodyState,
 )
 from src.shared.python.grip_contact.bushing_law import cross3
 from src.shared.python.grip_contact.contact_run import ContactRun, slip_from_frames
-from src.shared.python.grip_contact.pad_contact import PadContactModel
+from src.shared.python.grip_contact.pad_contact import PadContactModel, grip_axis
 from src.shared.python.grip_contact.parity import GripKineticsSeries
 
 ENGINE = "drake_contact"
@@ -50,7 +51,7 @@ SCHEME = "implicit_euler"
 HAND_MASS_KG = 100.0
 
 
-class ClubInHands:
+class ClubInHands(FreeClubPlantMixin):
     """Drake plant with scene graph: free hand body (pads) and free club."""
 
     def __init__(
@@ -100,11 +101,7 @@ class ClubInHands:
             )
             return props
 
-        rot_r = np.asarray(interface.right.rotation, dtype=float)
-        axis = rot_r[:, 0]
-        axis_point = np.asarray(interface.right.position_m) + rot_r @ (
-            pads.layout.axis_offset_grip_frame("R")
-        )
+        axis, axis_point = grip_axis(interface, pads)
         lo, hi = pads.cylinder.axial_range_m
         centre = axis_point + 0.5 * (lo + hi) * axis
         helper = np.array([1.0, 0.0, 0.0]) if abs(axis[0]) < 0.9 else np.eye(3)[1]
@@ -145,46 +142,6 @@ class ClubInHands:
         self._offsets = {s: interface.frame(s).matrix() for s in SIDES}
         self._q0 = body.floating_positions_start()
         self._v0 = body.floating_velocities_start_in_v()
-
-    def set_hand(self, weld: RigidBodyState) -> None:
-        """Place the hand body at the weld club pose with its spatial velocity."""
-        pose = self._math.RigidTransform(
-            self._math.RotationMatrix(weld.rotation), weld.position_m
-        )
-        self.plant.SetFreeBodyPose(self.context, self.hand, pose)
-        self.plant.SetFreeBodySpatialVelocity(
-            self.context,
-            self.hand,
-            self._mpl.SpatialVelocity(weld.omega_rad_s, weld.velocity_m_s),
-        )
-
-    def set_club(self, x: np.ndarray) -> None:
-        """Set the club's 13 floating states (quaternion normalised)."""
-        q = np.array(x[:7], float)
-        q[:4] /= np.linalg.norm(q[:4])
-        positions = self.plant.GetPositions(self.context)
-        velocities = self.plant.GetVelocities(self.context)
-        positions[self._q0 : self._q0 + 7] = q
-        velocities[self._v0 : self._v0 + 6] = x[7:13]
-        self.plant.SetPositions(self.context, positions)
-        self.plant.SetVelocities(self.context, velocities)
-
-    def club_state(self) -> np.ndarray:
-        """The club's 13 floating states."""
-        q = self.plant.GetPositions(self.context)[self._q0 : self._q0 + 7]
-        v = self.plant.GetVelocities(self.context)[self._v0 : self._v0 + 6]
-        return np.concatenate([q, v])
-
-    def club_derivatives(self) -> np.ndarray:
-        """Time derivatives of the club's 13 floating states."""
-        xdot = self.plant.EvalTimeDerivatives(self.context).CopyToVector()
-        nq = self.plant.num_positions()
-        return np.concatenate(
-            [
-                xdot[self._q0 : self._q0 + 7],
-                xdot[nq + self._v0 : nq + self._v0 + 6],
-            ]
-        )
 
     def club_pose(self) -> tuple[np.ndarray, np.ndarray]:
         """World rotation and origin of the club body."""
@@ -272,20 +229,19 @@ def simulate_grip_contact(
     if t_end_s is not None:
         times = times[times <= t_end_s + 1e-12]
     q0 = np.asarray(swing.q[0], float)
+    source: Callable[[float], tuple[np.ndarray, np.ndarray]]
     if hold:
         still = np.zeros_like(q0)
 
-        def source(_t: float) -> tuple[np.ndarray, np.ndarray]:
+        def held(_t: float) -> tuple[np.ndarray, np.ndarray]:
             return q0, still
+
+        source = held
     else:
         source = CoordinateSpline(swing.time_s, swing.q).evaluate
     weld0 = kin.state(*source(float(times[0])))
     sim.set_hand(weld0)
-    pose = sim._math.RigidTransform(  # noqa: SLF001
-        sim._math.RotationMatrix(weld0.rotation),  # noqa: SLF001
-        weld0.position_m,
-    )
-    sim.plant.SetFreeBodyPose(sim.context, sim.club, pose)
+    sim.place_club_at(weld0)
     x0 = sim.club_state()
     x0[7:10] = weld0.velocity_m_s  # world linear velocity of the origin
     x0[10:13] = weld0.omega_rad_s
@@ -304,10 +260,10 @@ def simulate_grip_contact(
     context.SetTime(float(times[0]))
     context.SetContinuousState(x0)
     simulator.Initialize()
-    wrench = {s: ([], []) for s in SIDES}
-    hand_pose = {s: ([], []) for s in SIDES}
-    club_pose = {s: ([], []) for s in SIDES}
-    normal = {s: [] for s in SIDES}
+    wrench: dict[str, tuple[list, list]] = {s: ([], []) for s in SIDES}
+    hand_pose: dict[str, tuple[list, list]] = {s: ([], []) for s in SIDES}
+    club_pose: dict[str, tuple[list, list]] = {s: ([], []) for s in SIDES}
+    normal: dict[str, list] = {s: [] for s in SIDES}
     club_rot = []
     for t in times:
         if t > times[0]:
