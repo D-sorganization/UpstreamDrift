@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import hashlib
 import json
-import platform
 import time
 import tracemalloc
 from collections.abc import Sequence
@@ -27,6 +26,7 @@ from src.shared.python.motion_matching.sparse_collocation_spike import (
     CollocationResult,
     SecondOrderFixture,
     SparseCollocationProblem,
+    capture_benchmark_hardware,
 )
 
 Array: TypeAlias = NDArray[np.float64]
@@ -187,16 +187,11 @@ def _ensure_native_model(path: Path, source: str) -> None:
 
 
 def _native_initial_state(path: Path, initial_state: Array) -> Array:
-    import mujoco as mj
+    from src.engines.physics_engines.mujoco.python.native_torque_replay import (
+        native_initial_state_from_joint_state,
+    )
 
-    model = mj.MjModel.from_xml_path(str(path))
-    if model.nq != 1 or model.nv != 1 or model.nu != 1:
-        raise ValueError("native fixture must have one hinge and one unit motor")
-    data = mj.MjData(model)
-    data.qpos[0], data.qvel[0] = initial_state
-    values = np.empty(mj.mj_stateSize(model, mj.mjtState.mjSTATE_INTEGRATION))
-    mj.mj_getState(model, data, values, mj.mjtState.mjSTATE_INTEGRATION)
-    return values
+    return native_initial_state_from_joint_state(path, initial_state)
 
 
 def _failure_reason(
@@ -523,8 +518,6 @@ def benchmark_native_candidates(
     output_dir: Path,
 ) -> NativeBenchmarkReport:
     """Serial bounded benchmark with no hidden warmups or dropped failures."""
-    from scipy import __version__ as scipy_version
-
     if (
         not backends
         or not starts
@@ -537,14 +530,7 @@ def benchmark_native_candidates(
         or not output_dir.is_dir()
     ):
         raise ValueError("native benchmark needs bounded unique starts and output dir")
-    hardware = BenchmarkHardware(
-        host=platform.node() or "unknown-host",
-        machine=platform.machine(),
-        processor=platform.processor(),
-        python_version=platform.python_version(),
-        numpy_version=np.__version__,
-        scipy_version=scipy_version,
-    )
+    hardware = capture_benchmark_hardware()
     attempts = tuple(
         _run_native_attempt(
             problem,

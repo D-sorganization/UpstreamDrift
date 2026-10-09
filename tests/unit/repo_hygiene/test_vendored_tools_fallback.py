@@ -199,16 +199,10 @@ def test_retired_clusters_resolve_to_the_pinned_tree(module_name: str) -> None:
 def test_the_fallback_declines_gaps_inside_a_cluster_upstreamdrift_owns() -> None:
     """A missing submodule of an owned cluster must stay missing.
 
-    ``sidekick`` is UpstreamDrift-owned and has no ``lab/mocap``; the pinned
-    tree does. An earlier form of the finder answered for it, silently building
-    a package half UpstreamDrift and half Tools. That flipped
-    ``probe_tools_schema()`` from ``unavailable`` to ``ready`` and broke
-    ``test_cli_record_dry_run_then_session_check`` and
-    ``test_cli_capture_synthetic_writes_manifest_and_exits_zero``, which assert
-    the module is absent.
-
-    The absence of a submodule inside an owned cluster is a fact about this
-    repository, not a gap for the fallback to paper over.
+    The broad fallback must still decline gaps in this owned cluster. F06 has
+    since added an explicit, narrowly scoped lab path for the pinned T01
+    contract; resolving that one known module does not authorize a broad
+    fallback for arbitrary sidekick children.
     """
     assert (_UD_SHARED / "sidekick").is_dir(), (
         "fixture assumption: sidekick is still an UpstreamDrift-owned cluster"
@@ -224,4 +218,6 @@ def test_the_fallback_declines_gaps_inside_a_cluster_upstreamdrift_owns() -> Non
 
     assert finder.find_spec("src.shared.python.sidekick.lab.mocap") is None
     assert finder.find_spec("shared.python.sidekick.lab.mocap") is None
-    assert importlib.util.find_spec("sidekick.lab.mocap") is None
+    resolved = importlib.util.find_spec("sidekick.lab.mocap")
+    assert resolved is not None and resolved.origin is not None
+    assert Path(resolved.origin).resolve().is_relative_to(_VENDORED_SHARED.resolve())
