@@ -660,3 +660,13 @@ MuJoCo `overlay_source` supplies its contact and kinematics. Epic #11673.
 ### Lift Pack Parity Audit
 
 `src/shared/python/lifting/pack_audit/` loads the OpenSim, MuJoCo, Drake and Pinocchio lift model packs behind one `EngineAdapter` (canonical frame, FK, CoM, closure), and reduces the receipt to tables and gap rules (`analysis.py`, `gaps.py`, `report.py`). Reuse it for same-input lift parity (LIFT-2 onward) instead of writing another per-engine loader. Entry point: `scripts/lifting/run_pack_parity_baseline.py`; record: `docs/development/lifting/PACK_PARITY_BASELINE.md`.
+
+## Native OpenSim Marker Geometry
+
+`tour_matching/native_marker_geometry.py` supplies explicit native body-attached
+frame poses and station positions for `OpensimMatchingPlant` and existing shared
+calibration/trajectory IK. It validates actual native assembly and all source
+coordinate ranges; it does not supply dynamics or grip closure. Reuse the existing
+`full_body_ik.solve_full_body_ik_trajectory` optional finite `coordinate_bounds`
+for bounded TRF. See canonical chapter26 and #11903; do not reintroduce metadata
+placeholders or revive the retired OpenSim IK backend.

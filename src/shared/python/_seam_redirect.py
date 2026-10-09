@@ -41,6 +41,7 @@ __all__ = [
     "SeamRedirectFinder",
     "SeamResolutionError",
     "extend_shared_python_path",
+    "extend_sidekick_lab_path",
     "install",
     "installed_tools_distribution",
     "vendor_search_paths",
@@ -91,6 +92,16 @@ def vendor_search_paths(vendor_root: Path = _VENDOR_ROOT) -> tuple[str, ...]:
         str(src),
         str(src / "python" / "src"),
     )
+
+
+def extend_sidekick_lab_path() -> None:
+    """Expose pinned Tools lab modules alongside UD-owned split extensions."""
+    lab = importlib.import_module("sidekick.lab")
+    for root in vendor_search_paths():
+        candidate = Path(root) / "sidekick" / "lab"
+        if candidate.is_dir() and str(candidate) not in lab.__path__:
+            lab.__path__.append(str(candidate))
+    importlib.invalidate_caches()
 
 
 def installed_tools_distribution() -> str | None:
@@ -180,6 +191,8 @@ class SeamRedirectFinder(MetaPathFinder):
         """
         for attempt in (0, 1):
             try:
+                # The import hook admits only REDIRECTED_ROOTS in _canonical.
+                # nosemgrep: python.lang.security.audit.non-literal-import.non-literal-import
                 module = importlib.import_module(canonical_name)
             except ModuleNotFoundError as exc:
                 if exc.name in {"shared", "shared.python", _CANONICAL_PREFIX + root}:
@@ -191,7 +204,10 @@ class SeamRedirectFinder(MetaPathFinder):
                 if attempt == 1 or REDIRECTED_ROOTS.get(root) is None:
                     return None
                 _extend_split_path(
-                    root, importlib.import_module(_CANONICAL_PREFIX + root)
+                    # root is selected from the explicit REDIRECTED_ROOTS allowlist.
+                    root,
+                    # nosemgrep: python.lang.security.audit.non-literal-import.non-literal-import
+                    importlib.import_module(_CANONICAL_PREFIX + root),
                 )
                 continue
             if "." not in canonical_name[len(_CANONICAL_PREFIX) :]:
