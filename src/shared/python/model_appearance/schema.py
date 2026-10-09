@@ -15,6 +15,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import math
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 from functools import lru_cache
@@ -74,6 +75,31 @@ class Environment:
     lighting: str = "studio"
 
 
+BALL_SOURCES = ("address_geometry", "measured", "model_estimate")
+
+
+@dataclass(frozen=True)
+class BallSettings:
+    """Decorative golf ball at address, visual only (GCV-13, #11719).
+
+    ``position_m`` overrides the computed face-centre-plus-radius address
+    placement, e.g. for a mocap-matched swing that holds a measured ball;
+    ``source`` labels which it is and must be one of :data:`BALL_SOURCES`.
+    """
+
+    enabled: bool = True
+    position_m: tuple[float, float, float] | None = None
+    source: str = "address_geometry"
+
+    def __post_init__(self) -> None:
+        if self.source not in BALL_SOURCES:
+            raise ValueError(f"ball source must be one of {BALL_SOURCES}")
+        if self.position_m is not None:
+            pos = tuple(float(c) for c in self.position_m)
+            if len(pos) != 3 or not all(math.isfinite(c) for c in pos):
+                raise ValueError("ball position_m must be a finite 3-vector")
+
+
 HEAD_AXES = ("+x", "-x", "+y", "-y", "+z", "-z")
 HEADWEAR = ("none", "hair", "cap")
 BODY_MODELS = ("ellipsoid", "meshes")
@@ -125,6 +151,7 @@ class AppearanceDocument:
     spec_sha256: str | None = None
     head: HeadSettings = field(default_factory=HeadSettings)
     body_model: str = "ellipsoid"
+    ball: BallSettings = field(default_factory=BallSettings)
 
 
 @lru_cache(maxsize=1)
@@ -222,6 +249,23 @@ def _head_to_dict(head: HeadSettings) -> dict[str, Any]:
     return out
 
 
+def _ball_settings(raw: Mapping[str, Any]) -> BallSettings:
+    defaults = BallSettings()
+    position = raw.get("position_m")
+    return BallSettings(
+        bool(raw.get("enabled", defaults.enabled)),
+        None if position is None else tuple(float(c) for c in position),
+        raw.get("source", defaults.source),
+    )
+
+
+def _ball_to_dict(ball: BallSettings) -> dict[str, Any]:
+    out: dict[str, Any] = {"enabled": ball.enabled, "source": ball.source}
+    if ball.position_m is not None:
+        out["position_m"] = list(ball.position_m)
+    return out
+
+
 def document_from_dict(data: Mapping[str, Any]) -> AppearanceDocument:
     """Validate and parse a document. Unknown library names are rejected."""
     from src.shared.python.model_appearance import library
@@ -255,6 +299,7 @@ def document_from_dict(data: Mapping[str, Any]) -> AppearanceDocument:
         spec_sha256=data.get("spec_sha256"),
         head=_head_settings(data.get("head", {})),
         body_model=data.get("body_model", "ellipsoid"),
+        ball=_ball_settings(data.get("ball", {})),
     )
     library.check_references(doc)
     return doc
@@ -313,6 +358,7 @@ def document_to_dict(doc: AppearanceDocument) -> dict[str, Any]:
         },
         "head": _head_to_dict(doc.head),
         "body_model": doc.body_model,
+        "ball": _ball_to_dict(doc.ball),
     }
     if doc.spec_sha256 is not None:
         out["spec_sha256"] = doc.spec_sha256
