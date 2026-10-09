@@ -14,14 +14,279 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass
+from enum import Enum
+import hashlib
+import json
 from pathlib import Path
 from typing import Any, TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
 
+from src.shared.python.motion_matching.evidence_integrity import is_real_sha256
+
 Array: TypeAlias = NDArray[np.float64]
 BoolArray: TypeAlias = NDArray[np.bool_]
+
+
+class PositionInterpolation(str, Enum):
+    """Declared interpolation for marker positions, never generalized state."""
+
+    LINEAR_POSITION = "linear_position/v1"
+
+
+@dataclass(frozen=True)
+class ReplayObservationAlignment:
+    """Native marker positions sampled on the exact measured observation clock.
+
+    Input-policy and native integration clocks remain separate from the
+    observation clock. This record contains positions only; it does not
+    interpolate generalized coordinates, velocities, quaternions, or engine
+    state.
+    """
+
+    native_output_time_s: Array
+    observation_time_s: Array
+    predicted_positions_m: Array
+    observation_positions_m: Array
+    observation_valid: BoolArray
+    marker_labels: tuple[str, ...]
+    frame_id: str
+    timebase_id: str
+    interpolation: PositionInterpolation
+    source_identity_sha256: str
+    output_identity_sha256: str
+    observation_identity_sha256: str
+    native_output_time_grid_sha256: str
+    observation_time_grid_sha256: str
+    alignment_identity_sha256: str
+
+    def compute_replay_five_metrics(
+        self, *, early_cutoff_s: float = 0.60
+    ) -> ReplayFiveMetrics:
+        """Reuse canonical replay metrics without changing the observation clock."""
+        return compute_replay_five_metrics(
+            time_s=self.observation_time_s,
+            pred_markers_m=self.predicted_positions_m,
+            target_markers_m=self.observation_positions_m,
+            valid=self.observation_valid,
+            marker_labels=self.marker_labels,
+            early_cutoff_s=early_cutoff_s,
+        )
+
+
+def _canonical_array_sha256(values: np.ndarray) -> str:
+    """Hash a contiguous little-endian numeric array with shape and dtype."""
+    array = np.asarray(values)
+    canonical = np.ascontiguousarray(array.astype(array.dtype.newbyteorder("<")))
+    digest = hashlib.sha256()
+    metadata = json.dumps(
+        {"dtype": canonical.dtype.str, "shape": canonical.shape},
+        separators=(",", ":"),
+    ).encode("ascii")
+    digest.update(metadata)
+    digest.update(b"\0")
+    digest.update(canonical.tobytes())
+    return digest.hexdigest()
+
+
+def _update_digest_text(digest: Any, value: str) -> None:
+    encoded = value.encode("utf-8")
+    digest.update(len(encoded).to_bytes(8, "little"))
+    digest.update(encoded)
+
+
+def _position_payload_sha256(
+    *,
+    prefix: str,
+    identity_sha256: str,
+    times_s: Array,
+    positions_m: Array,
+    marker_labels: tuple[str, ...],
+    frame_id: str,
+    timebase_id: str,
+    valid: BoolArray | None = None,
+) -> str:
+    digest = hashlib.sha256()
+    _update_digest_text(digest, prefix)
+    _update_digest_text(digest, identity_sha256)
+    _update_digest_text(digest, frame_id)
+    _update_digest_text(digest, timebase_id)
+    _update_digest_text(
+        digest, json.dumps(marker_labels, separators=(",", ":"), ensure_ascii=True)
+    )
+    digest.update(bytes.fromhex(_canonical_array_sha256(times_s)))
+    canonical_positions = np.array(positions_m, dtype=np.float64, copy=True)
+    if valid is not None:
+        canonical_positions[~valid] = 0.0
+        digest.update(bytes.fromhex(_canonical_array_sha256(valid)))
+    digest.update(bytes.fromhex(_canonical_array_sha256(canonical_positions)))
+    return digest.hexdigest()
+
+
+def _validated_times(values: Array | Sequence[float], field: str) -> Array:
+    times = np.asarray(values, dtype=np.float64)
+    if times.ndim != 1 or len(times) < 2:
+        raise ValueError(f"{field} must be a one-dimensional clock with two samples")
+    if not np.isfinite(times).all() or not np.all(np.diff(times) > 0.0):
+        raise ValueError(f"{field} must be finite and strictly increasing")
+    return np.array(times, dtype=np.float64, copy=True)
+
+
+def _readonly_copy(values: np.ndarray, *, dtype: Any | None = None) -> np.ndarray:
+    copied = np.array(values, dtype=dtype, copy=True)
+    copied.setflags(write=False)
+    return copied
+
+
+def align_native_positions_to_observations(
+    *,
+    native_output_time_s: Array | Sequence[float],
+    native_output_positions_m: Array,
+    observation_time_s: Array | Sequence[float],
+    observation_positions_m: Array,
+    observation_valid: BoolArray | Array,
+    native_marker_labels: Sequence[str],
+    observation_marker_labels: Sequence[str],
+    interpolation: PositionInterpolation,
+    source_identity_sha256: str,
+    native_frame_id: str,
+    observation_frame_id: str,
+    native_timebase_id: str,
+    observation_timebase_id: str,
+) -> ReplayObservationAlignment:
+    """Sample native 3-D marker positions at observations without extrapolation.
+
+    The exact observation clock is retained for metric evaluation. Output and
+    observation arrays must already share an explicit marker ordering, frame,
+    and timebase. Missing observations follow the existing ``valid`` mask
+    contract; native output positions and valid observations must be finite.
+    """
+    try:
+        method = PositionInterpolation(interpolation)
+    except (TypeError, ValueError) as exc:
+        raise ValueError("unsupported marker-position interpolation") from exc
+    if method is not PositionInterpolation.LINEAR_POSITION:
+        raise ValueError("unsupported marker-position interpolation")
+    if (
+        not is_real_sha256(source_identity_sha256)
+        or source_identity_sha256 != str(source_identity_sha256).lower()
+    ):
+        raise ValueError("source_identity_sha256 must be a lowercase SHA-256 digest")
+
+    for field, value in (
+        ("native_frame_id", native_frame_id),
+        ("observation_frame_id", observation_frame_id),
+        ("native_timebase_id", native_timebase_id),
+        ("observation_timebase_id", observation_timebase_id),
+    ):
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError(f"{field} must be non-empty")
+    if native_frame_id != observation_frame_id:
+        raise ValueError("native output and observations must share a frame")
+    if native_timebase_id != observation_timebase_id:
+        raise ValueError("native output and observations must share a timebase")
+
+    native_times = _validated_times(native_output_time_s, "native_output_time_s")
+    observation_times = _validated_times(observation_time_s, "observation_time_s")
+    if (
+        observation_times[0] < native_times[0]
+        or observation_times[-1] > native_times[-1]
+    ):
+        raise ValueError(
+            "observation clock requires extrapolation outside native output"
+        )
+
+    labels = tuple(native_marker_labels)
+    observed_labels = tuple(observation_marker_labels)
+    if (
+        not labels
+        or any(not isinstance(label, str) or not label.strip() for label in labels)
+        or len(labels) != len(set(labels))
+    ):
+        raise ValueError("native_marker_labels must be non-empty unique identities")
+    if labels != observed_labels:
+        raise ValueError("native and observation marker identities or order differ")
+    native_positions = np.asarray(native_output_positions_m, dtype=np.float64)
+    observed_positions = np.asarray(observation_positions_m, dtype=np.float64)
+    valid = np.asarray(observation_valid, dtype=bool)
+    marker_count = len(labels)
+    if native_positions.shape != (len(native_times), marker_count, 3):
+        raise ValueError(
+            "native output must contain three-dimensional marker positions"
+        )
+    if observed_positions.shape != (len(observation_times), marker_count, 3):
+        raise ValueError("observations must contain three-dimensional marker positions")
+    if valid.shape != (len(observation_times), marker_count):
+        raise ValueError("observation_valid shape must match observation markers")
+    if not np.isfinite(native_positions).all():
+        raise ValueError("native output marker positions must be finite")
+    if not np.isfinite(observed_positions[valid]).all():
+        raise ValueError("valid observation marker positions must be finite")
+
+    right = np.searchsorted(native_times, observation_times, side="left")
+    right = np.minimum(right, len(native_times) - 1)
+    exact = native_times[right] == observation_times
+    left = np.where(exact, right, np.maximum(right - 1, 0))
+    interval = native_times[right] - native_times[left]
+    fraction = np.zeros(len(observation_times), dtype=np.float64)
+    interpolated = ~exact
+    fraction[interpolated] = (
+        observation_times[interpolated] - native_times[left[interpolated]]
+    ) / interval[interpolated]
+    aligned_positions = native_positions[left] + fraction[:, None, None] * (
+        native_positions[right] - native_positions[left]
+    )
+
+    frame_id = native_frame_id
+    timebase_id = native_timebase_id
+    native_clock_sha256 = _canonical_array_sha256(native_times)
+    observation_clock_sha256 = _canonical_array_sha256(observation_times)
+    output_identity = _position_payload_sha256(
+        prefix="native-position-output/1.0.0",
+        identity_sha256=source_identity_sha256,
+        times_s=native_times,
+        positions_m=native_positions,
+        marker_labels=labels,
+        frame_id=frame_id,
+        timebase_id=timebase_id,
+    )
+    observation_identity = _position_payload_sha256(
+        prefix="observation-position-set/1.0.0",
+        identity_sha256=source_identity_sha256,
+        times_s=observation_times,
+        positions_m=observed_positions,
+        marker_labels=labels,
+        frame_id=frame_id,
+        timebase_id=timebase_id,
+        valid=valid,
+    )
+    alignment_digest = hashlib.sha256()
+    _update_digest_text(alignment_digest, "replay-observation-alignment/1.0.0")
+    _update_digest_text(alignment_digest, method.value)
+    _update_digest_text(alignment_digest, output_identity)
+    _update_digest_text(alignment_digest, observation_identity)
+    _update_digest_text(alignment_digest, native_clock_sha256)
+    _update_digest_text(alignment_digest, observation_clock_sha256)
+    alignment_digest.update(bytes.fromhex(_canonical_array_sha256(aligned_positions)))
+    return ReplayObservationAlignment(
+        native_output_time_s=_readonly_copy(native_times),
+        observation_time_s=_readonly_copy(observation_times),
+        predicted_positions_m=_readonly_copy(aligned_positions),
+        observation_positions_m=_readonly_copy(observed_positions),
+        observation_valid=_readonly_copy(valid, dtype=np.bool_),
+        marker_labels=labels,
+        frame_id=frame_id,
+        timebase_id=timebase_id,
+        interpolation=method,
+        source_identity_sha256=source_identity_sha256,
+        output_identity_sha256=output_identity,
+        observation_identity_sha256=observation_identity,
+        native_output_time_grid_sha256=native_clock_sha256,
+        observation_time_grid_sha256=observation_clock_sha256,
+        alignment_identity_sha256=alignment_digest.hexdigest(),
+    )
+
 
 # Canonical club-cluster label tags (Marker_2 / Marker_3 clubhead-shaft pairs,
 # plus any explicit 'club' naming). Single source of truth for every replay

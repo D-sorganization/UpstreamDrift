@@ -38,3 +38,26 @@ Next bounded step: F01 capability/gate baseline and F07 muscle/contact capabilit
 - `git diff --cached --check`: passed.
 - Packet validation: nine documents and thirteen implementation-issue payloads passed structure, local-link, engineering-contract and public path/privacy checks.
 - `python3 scripts/check_document_title_case.py --staged`: five documents checked, zero violations. The pinned Tools submodule was initialized for the unchanged divergence-inventory check; no provider pin or source was modified.
+
+## F09A Observation Sampling Readiness
+
+The F09a slice adds `align_native_positions_to_observations` to the public
+`motion_matching` facade. It samples actual native 3-D marker positions onto
+the exact observation clock with an explicit position interpolation version,
+matching frame/timebase and marker order, path-free source/output/observation
+hashes, and no extrapolation. It retains the native output and observation
+clocks separately and delegates scoring to the existing
+`compute_replay_five_metrics` implementation.
+
+RED: with the pinned Tools submodule initially absent, collection first failed
+at the repository's existing submodule guard; after initializing only the
+already pinned local Tools commit, the new test failed to import the missing
+F09a API. GREEN: all 12 focused synthetic tests pass. The submodule pointer and
+Tools pin are unchanged. Tests use only generated marker trajectories; no
+private capture or acceptance threshold is involved.
+
+The slice does not integrate T01/T02 receipts with an engine, establish replay
+reproduction, score collocation feasibility, or qualify any model. Full F09
+remains open. Next: consume native replay output from F06/F07 through this
+sampling boundary, map the resulting observation receipt into the T02/F01
+comparison levels, and preserve every required unavailable/unqualified row.

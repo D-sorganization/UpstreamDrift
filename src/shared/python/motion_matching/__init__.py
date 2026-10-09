@@ -68,6 +68,11 @@ if TYPE_CHECKING:
     )
     from .plot_trajectory_overlay import plot_trajectory_overlay
     from .polynomial_torque import POLY_DEGREE, evaluate_polynomial_torque
+    from .replay_metrics import (
+        PositionInterpolation,
+        ReplayObservationAlignment,
+        align_native_positions_to_observations,
+    )
     from .named_state import (
         NAMED_STATE_SCHEMA_VERSION,
         NamedStateManifest,
@@ -169,6 +174,9 @@ __all__ = [
     "plot_error_timecourse",
     "plot_fit_quality_card",
     "plot_trajectory_overlay",
+    "PositionInterpolation",
+    "ReplayObservationAlignment",
+    "align_native_positions_to_observations",
     "NAMED_STATE_SCHEMA_VERSION",
     "NamedStateConformanceAdapter",
     "NamedStateManifest",
@@ -223,6 +231,9 @@ _LAZY_EXPORTS = {
     "fit_quality_summary": ".plot_fit_quality_card",
     "plot_fit_quality_card": ".plot_fit_quality_card",
     "plot_trajectory_overlay": ".plot_trajectory_overlay",
+    "PositionInterpolation": ".replay_metrics",
+    "ReplayObservationAlignment": ".replay_metrics",
+    "align_native_positions_to_observations": ".replay_metrics",
     "POLY_DEGREE": ".polynomial_torque",
     "evaluate_polynomial_torque": ".polynomial_torque",
     "FitResult": ".sim_out",
