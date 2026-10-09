@@ -13,7 +13,7 @@
   "totals": {
     "identical": 401,
     "diverged": 272,
-    "ud-only": 1732,
+    "ud-only": 1734,
     "tools-only": 777,
     "spelling-only": 121
   },
@@ -399,7 +399,7 @@
     "grip_contact": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 7,
+      "ud-only": 9,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -10197,7 +10197,7 @@
       "classification": "ud-only",
       "package": "grip_contact",
       "subpackage": "",
-      "ud_bytes": 1183,
+      "ud_bytes": 1798,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -10210,6 +10210,18 @@
       "package": "grip_contact",
       "subpackage": "",
       "ud_bytes": 2801,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "grip_contact/couple_check.py",
+      "classification": "ud-only",
+      "package": "grip_contact",
+      "subpackage": "",
+      "ud_bytes": 9233,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -10258,6 +10270,18 @@
       "package": "grip_contact",
       "subpackage": "",
       "ud_bytes": 7441,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "grip_contact/swing_input.py",
+      "classification": "ud-only",
+      "package": "grip_contact",
+      "subpackage": "",
+      "ud_bytes": 3859,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -16077,7 +16101,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "pipeline",
-      "ud_bytes": 6422,
+      "ud_bytes": 6496,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
