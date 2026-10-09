@@ -20,6 +20,12 @@ from typing import Any
 
 PATTERNS = ("Straight", "Draw", "Fade")
 _COMBINED_NOISE = (0.5, 0.89408, 0.00635, 0.00635, 0.0, 0.0)
+_MATCHED_RAW_LANDING = "Matched Raw Landing"
+
+
+def _delivery_mode_label(config: dict[str, Any]) -> str:
+    """Describe saved matched runs whose schema has no explicit mode field."""
+    return str(config.get("delivery_mode") or _MATCHED_RAW_LANDING)
 
 
 def _detail_profile(standard_deviations: list[float]) -> str | None:
@@ -54,7 +60,7 @@ def _facebook_key(cell: dict[str, Any]) -> tuple[Any, ...]:
         tuple(noise.get("standard_deviations", ())),
         json.dumps(noise.get("correlation"), sort_keys=True),
         config.get("curve_scale"),
-        config.get("delivery_mode"),
+        _delivery_mode_label(config),
         club.get("contact_law"),
     )
 
@@ -118,7 +124,7 @@ def _stratum_key(cell: dict[str, Any]) -> tuple[str, ...]:
     club = _club_config(cell)
     noise = config.get("noise", {})
     return (
-        str(config.get("delivery_mode", "unspecified")),
+        _delivery_mode_label(config),
         str(club.get("contact_law", "unspecified")),
         _json_hash(noise.get("standard_deviations", [])),
         _json_hash(noise.get("correlation")),
@@ -138,7 +144,7 @@ def _stratum_name(group: list[dict[str, Any]]) -> str:
         for label, value in zip(labels, noise, strict=False)
     )
     return (
-        f"{config.get('delivery_mode', 'mode-unknown')}__{law}__"
+        f"{_delivery_mode_label(config).lower().replace(' ', '-')}__{law}__"
         f"{noise_label}__corr-{_json_hash(config.get('noise', {}).get('correlation'))[:8]}__"
         f"n{config.get('n_shots', 'unknown')}"
     )
@@ -162,7 +168,7 @@ def _comparison_group_key(cell: dict[str, Any]) -> tuple[str, ...] | None:
     return (
         str(club.get("club_id")),
         profile,
-        str(config.get("delivery_mode", "unspecified")),
+        _delivery_mode_label(config),
         str(club.get("contact_law", "unspecified")),
         _json_hash(club),
         _json_hash(standard_deviations[1:]),
@@ -255,9 +261,16 @@ def _cell_metadata(
         ),
         default=0.0,
     )
+    nominal_solutions = "; ".join(
+        f"{pattern}: face {float(values['face_deg']):+0.3f}°, "
+        f"path {float(values['path_deg']):+0.3f}°, "
+        f"speed {float(values['speed_mps']):0.3f} m/s"
+        for pattern, values in cell.get("nominals", {}).items()
+        if all(key in values for key in ("face_deg", "path_deg", "speed_mps"))
+    )
     return {
         "club": club.get("club_id"),
-        "delivery mode": config.get("delivery_mode", "unspecified"),
+        "delivery mode": _delivery_mode_label(config),
         "contact law": club.get("contact_law", "unspecified"),
         "reference club speed mps": club.get("club_speed_mps"),
         "static loft deg": club.get("loft_deg"),
@@ -266,6 +279,7 @@ def _cell_metadata(
         "random seed": config.get("seed"),
         "attempts per pattern": config.get("n_shots"),
         "target residual max m": f"{max_residual:.3g}",
+        "nominal pattern solutions": nominal_solutions or "not recorded",
         "noise SDs": ", ".join(
             f"{field}={float(value):g}"
             for field, value in zip(fields, standard_deviations, strict=False)
@@ -294,7 +308,7 @@ def _render_detail(
     target_x = float(cell["target_x_m"])
     config = cell["config"]
     club = _club_config(cell)
-    mode = str(config.get("delivery_mode", "unspecified"))
+    mode = _delivery_mode_label(config)
     profile = _detail_profile(config.get("noise", {}).get("standard_deviations", []))
     scenario = (
         f"{'PILOT PREVIEW — ' if preview else ''}{cell['cell']} — {club.get('club_id')} — {profile}; "
@@ -660,7 +674,7 @@ def build_final_figures(
             output_root / "matrix" / name,
             selection_label=(
                 f"{'PILOT PREVIEW' if preview else 'FINAL'}; source={source_root.name}; "
-                f"delivery={group[0]['config'].get('delivery_mode', 'unspecified')}; "
+                f"delivery={_delivery_mode_label(group[0]['config'])}; "
                 f"contact={_club_config(group[0]).get('contact_law')}; "
                 f"noise SDs={group[0]['config'].get('noise', {}).get('standard_deviations')}"
             ),

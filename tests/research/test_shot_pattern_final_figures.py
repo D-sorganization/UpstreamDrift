@@ -289,3 +289,24 @@ def test_publication_rejects_changed_saved_bytes_even_with_new_manifest(tmp_path
         write_manifest()
     with pytest.raises((ValueError, RuntimeError)):
         _assert_inputs_unchanged(tmp_path, report, preview=True)
+
+
+def test_detail_metadata_names_matched_raw_landing_and_pattern_nominals() -> None:
+    from scripts.research.shot_pattern_analysis.build_final_figures import _cell_metadata
+
+    cell = {
+        "config": {"club": {"club_id": "driver", "loft_deg": 10.0}},
+        "nominals": {
+            "Straight": {"face_deg": 0.0, "path_deg": 0.0, "speed_mps": 45.0},
+            "Draw": {"face_deg": 2.1, "path_deg": 3.6, "speed_mps": 45.2},
+            "Fade": {"face_deg": -2.1, "path_deg": -3.6, "speed_mps": 45.2},
+        },
+    }
+
+    metadata = _cell_metadata(cell, {}, {})
+
+    assert metadata["delivery mode"] == "Matched Raw Landing"
+    assert "Straight" in metadata["nominal pattern solutions"]
+    assert "face +2.100°" in metadata["nominal pattern solutions"]
+    assert "path +3.600°" in metadata["nominal pattern solutions"]
+    assert "speed 45.200 m/s" in metadata["nominal pattern solutions"]
