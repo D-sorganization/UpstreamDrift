@@ -1,7 +1,7 @@
 """Compare contact-grip diagnostic runs against the bushing (issue #11986).
 
 Reproduce after the diagnostic runs of ``run_grip_contact.py`` (tags
-``_ft1e-3``, ``_ft5e-3``, ``_trail``, ``_lead``) exist in ``contact/``::
+``_ft1e-3``, ``_ft5e-3``, ``_trail``, ``_lead``, ``_sx0.001`` ... ``_sz0.01``) exist in ``contact/``::
 
     PYTHONPATH=.:src python3 \\
         docs/development/full_body_models/evidence/grip_kinetics/run_grip_internal_force_compare.py
@@ -38,6 +38,11 @@ RUNS = {
     "solreffriction_5e-3_s": "_ft5e-3",
     "trail_hand_follows_club": "_trail",
     "lead_hand_only": "_lead",
+    "trail_shift_x_0.001_mm": "_sx0.001",
+    "trail_shift_x_0.01_mm": "_sx0.01",
+    "trail_shift_x_0.1_mm": "_sx0.1",
+    "trail_shift_y_0.01_mm": "_sy0.01",
+    "trail_shift_z_0.01_mm": "_sz0.01",
 }
 
 
