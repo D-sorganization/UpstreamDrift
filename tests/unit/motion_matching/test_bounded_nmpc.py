@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 from dataclasses import replace
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
+
+import src.shared.python.motion_matching.bounded_nmpc as bounded_nmpc_module
 
 from src.shared.python.motion_matching.bounded_nmpc import (
     BoundedNMPC,
@@ -185,3 +188,24 @@ def test_unavoidable_horizon_constraint_reports_infeasible_fallback() -> None:
     )
     assert receipt.status == "fallback_infeasible"
     assert receipt.applied.tolist() == [0.0]
+
+
+def test_nonfinite_solver_candidate_keeps_verified_fallback(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        bounded_nmpc_module,
+        "minimize",
+        lambda *args, **kwargs: SimpleNamespace(success=True, x=np.full(3, np.nan)),
+    )
+    controller = BoundedNMPC(
+        _problem(),
+        MPCConfig(horizon_steps=3, max_evaluations=100, max_wall_s=1.0),
+        fallback=lambda state, time_s: np.array([0.0]),
+    )
+    receipt = controller.command_for_step(
+        0, np.zeros(2), observation_time_s=0.0, current_time_s=0.0
+    )
+    assert receipt.status == "fallback_solver_failure"
+    assert receipt.applied.tolist() == [0.0]
+    assert len(controller.applied_history) == 1

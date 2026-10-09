@@ -10470,3 +10470,23 @@ preprocessing, D02/D03 frozen protocol, F09 observation-clock alignment,
 full-body/contact resources and muscle/six-engine gates remain open. Canonical
 calculation: `manuals/upstreamdrift/chapters/20-native-candidate-benchmark.qmd`.
 Turnover: `docs/development/feedback_controls/F03B_NATIVE_CANDIDATE_TURNOVER.md`.
+
+## Bounded Native NMPC Evaluation (F05a, #11904; Parent #11789)
+
+`bounded_nmpc.py` is an optional finite-budget robust shooting controller with
+explicit state/input channel identity, units, Euclidean tangent-state semantics,
+hard state/torque/slew bounds, nominal and perturbation prediction models, and
+a verified fallback. Solver timeout, cancellation, stale observation,
+infeasibility, failure and no benefit remain labeled in per-step receipts. It
+does not promise a hard real-time deadline. `native_nmpc_tracking.py` drives a
+contact-free native MuJoCo hinge at one controller call per integration step,
+exports only actual post-limit ZOH torques through the F06/Tools T01 bundle,
+and checks an independent fresh native replay of position, speed and complete
+integration state. A paired test does the same for F02 TVLQR on predeclared
+0.4/0.7 rad starts and a 40% execution-mass perturbation, retaining solve
+failures and fallback counts. Its source-controlled receipt reports measured
+controller-call latency, replay identities, tracking and effort. Native-step
+provider selection retains TVLQR and rejects this SciPy shooting prototype;
+the one-hinge result does not qualify contact, muscle, capture, six-engine
+equivalence or a full swing. The canonical calculation is provisional chapter
+23, and turnover is `docs/development/feedback_controls/F05A_NATIVE_NMPC_TURNOVER.md`.

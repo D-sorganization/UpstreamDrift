@@ -31,3 +31,5 @@ UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
 {{< include chapters/20-native-candidate-benchmark.qmd >}}
 
 {{< include chapters/21-control-loop-tuning.qmd >}}
+
+{{< include chapters/23-native-bounded-nmpc.qmd >}}

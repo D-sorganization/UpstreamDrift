@@ -16,7 +16,7 @@ from typing import TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
-from scipy.optimize import Bounds, minimize
+from scipy.optimize import Bounds, OptimizeResult, minimize
 
 Array: TypeAlias = NDArray[np.float64]
 StepFunction: TypeAlias = Callable[[Array, Array], Array]
@@ -282,6 +282,44 @@ class BoundedNMPC:
                 raise ValueError("fallback violates next-state bounds")
         return command
 
+    def _validate_step_clock(
+        self, index: int, observation_time_s: float, current_time_s: float
+    ) -> None:
+        targets = self.problem.target_states
+        if (
+            index < 0
+            or index + self.config.horizon_steps >= targets.shape[0]
+            or not np.isfinite(observation_time_s)
+            or not np.isfinite(current_time_s)
+            or current_time_s < observation_time_s
+            or abs(current_time_s - index * self.problem.time_step_s) > 1e-9
+        ):
+            raise ValueError("step index, state clock or observation clock invalid")
+
+    def _candidate_outcome(
+        self,
+        index: int,
+        state: Array,
+        previous: Array | None,
+        result: OptimizeResult,
+        horizon: int,
+        fallback_objective: float,
+    ) -> tuple[str, float | None, Array | None]:
+        candidate = np.asarray(result.x, dtype=float).reshape(horizon, -1)
+        if (
+            candidate.shape != (horizon, self.problem.nu)
+            or not np.isfinite(candidate).all()
+        ):
+            return "fallback_solver_failure", None, None
+        objective, margins = self._rollout(index, state, candidate, previous)
+        if np.min(margins) < -self.config.feasibility_tolerance:
+            return "fallback_infeasible", objective, None
+        if not result.success:
+            return "fallback_solver_failure", objective, None
+        if objective >= fallback_objective - 1e-9:
+            return "fallback_no_benefit", objective, None
+        return "optimized", objective, candidate
+
     def command_for_step(
         self,
         index: int,
@@ -295,15 +333,7 @@ class BoundedNMPC:
         """Optimize one step; return only a verified post-limit actuator input."""
         started = float(self.clock())
         state = _vector(observed_state, self.problem.nx, "observed_state")
-        if (
-            index < 0
-            or index + self.config.horizon_steps >= self.problem.target_states.shape[0]
-            or not np.isfinite(observation_time_s)
-            or not np.isfinite(current_time_s)
-            or current_time_s < observation_time_s
-            or abs(current_time_s - index * self.problem.time_step_s) > 1e-9
-        ):
-            raise ValueError("step index, state clock or observation clock invalid")
+        self._validate_step_clock(index, observation_time_s, current_time_s)
         previous = self._history[-1].applied if self._history else None
         safe = self._safe_fallback(state, current_time_s, previous)
         warm = self._prior_plan is not None
@@ -362,18 +392,12 @@ class BoundedNMPC:
                     },
                 )
                 check_budget()
-                candidate = np.asarray(result.x, dtype=float).reshape(horizon, -1)
-                objective, margins = self._rollout(index, state, candidate, previous)
-                if np.min(margins) < -self.config.feasibility_tolerance:
-                    status = "fallback_infeasible"
-                elif not result.success:
-                    status = "fallback_solver_failure"
-                elif objective >= fallback_objective - 1e-9:
-                    status = "fallback_no_benefit"
-                else:
-                    status = "optimized"
-                    applied = candidate[0]
-                    self._prior_plan = _frozen(candidate)
+                status, objective, accepted = self._candidate_outcome(
+                    index, state, previous, result, horizon, fallback_objective
+                )
+                if accepted is not None:
+                    applied = accepted[0]
+                    self._prior_plan = _frozen(accepted)
             except _BudgetExpired:
                 status = "fallback_timeout"
             except _SolveCancelled:

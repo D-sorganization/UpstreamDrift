@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 from pathlib import Path
+import os
+import time
+from typing import Callable
 
 import numpy as np
 import pytest
@@ -10,6 +13,9 @@ import pytest
 from src.engines.physics_engines.mujoco.python.native_torque_replay import (
     build_native_torque_bundle,
     replay_native_torque_bundle,
+)
+from src.engines.physics_engines.mujoco.python.native_nmpc_tracking import (
+    run_native_nmpc_tracking,
 )
 from src.shared.python.estimation.mosaic.local_policy import (
     LinearizedDynamics,
@@ -98,9 +104,16 @@ def _tvlqr_controller(step: object) -> DistributedFeedbackController:
     )
 
 
+@pytest.mark.parametrize("start_q", (0.4, 0.7))
 def test_native_robust_nmpc_and_tvlqr_replay_same_executed_inputs(
     tmp_path: Path,
+    start_q: float,
+    record_property: Callable[[str, object], None],
 ) -> None:
+    def record(name: str, value: object) -> None:
+        if os.environ.get("F05_BENCHMARK_RECEIPT") == "1":
+            record_property(name, value)
+
     mj = pytest.importorskip("mujoco")
     nominal_path = _model_path(tmp_path, 0.3, "nominal.xml")
     perturbed_path = _model_path(tmp_path, 0.42, "perturbed.xml")
@@ -132,26 +145,72 @@ def test_native_robust_nmpc_and_tvlqr_replay_same_executed_inputs(
     )
     tvlqr = _tvlqr_controller(predictor)
 
-    for name, controller in (("nmpc", nmpc), ("tvlqr", tvlqr)):
+    nmpc_data = mj.MjData(perturbed)
+    nmpc_data.qpos[0] = start_q
+    nmpc_initial = np.empty(mj.mj_stateSize(perturbed, mj.mjtState.mjSTATE_INTEGRATION))
+    mj.mj_getState(perturbed, nmpc_data, nmpc_initial, mj.mjtState.mjSTATE_INTEGRATION)
+    native_nmpc = run_native_nmpc_tracking(
+        perturbed_path,
+        nmpc_initial,
+        nmpc,
+        steps=_STEPS,
+        experiment_id=f"f05-nmpc-mass-perturbation-{start_q:.1f}",
+    )
+    assert native_nmpc.bundle.input_history.input_kind.value == "actuator_torque"
+    assert len(native_nmpc.commands) == _STEPS
+    assert all(
+        row.status == "optimized" or row.status.startswith("fallback_")
+        for row in native_nmpc.commands
+    )
+    assert all(row.elapsed_s >= 0.0 for row in native_nmpc.commands)
+    assert native_nmpc.control_wall_s.shape == (_STEPS,)
+    assert not native_nmpc.control_wall_s.flags.writeable
+    np.testing.assert_allclose(
+        native_nmpc.replay.qpos, native_nmpc.native_qpos, atol=1e-12, rtol=0
+    )
+    nmpc_rmse = float(np.sqrt(np.mean(native_nmpc.native_qpos[:, 0] ** 2)))
+    assert np.isfinite(nmpc_rmse)
+    assert np.isfinite(max(row.elapsed_s for row in native_nmpc.commands))
+    nmpc_latencies = native_nmpc.control_wall_s
+    record("nmpc_q_rmse_rad", nmpc_rmse)
+    record("nmpc_final_q_rad", float(native_nmpc.native_qpos[-1, 0]))
+    record(
+        "nmpc_effort_l1_nm",
+        float(np.abs(native_nmpc.replay.applied_actuator_torques).sum()),
+    )
+    record("nmpc_latency_p50_s", float(np.percentile(nmpc_latencies, 50)))
+    record("nmpc_latency_p95_s", float(np.percentile(nmpc_latencies, 95)))
+    record("nmpc_latency_worst_s", float(nmpc_latencies.max()))
+    record(
+        "nmpc_evaluations_total", sum(row.evaluations for row in native_nmpc.commands)
+    )
+    record("nmpc_statuses", ",".join(row.status for row in native_nmpc.commands))
+    record(
+        "nmpc_optimized_steps",
+        sum(row.status == "optimized" for row in native_nmpc.commands),
+    )
+    record("nmpc_input_sha256", native_nmpc.bundle.applied_input_sha256)
+    record("native_model_sha256", native_nmpc.bundle.model.source_model_sha256)
+    record(
+        "nmpc_initial_state_sha256", native_nmpc.bundle.integrity.initial_state_sha256
+    )
+    record("nmpc_policy_sha256", native_nmpc.bundle.policy_sha256)
+
+    for name, controller in (("tvlqr", tvlqr),):
         data = mj.MjData(perturbed)
-        data.qpos[0] = 0.4
+        data.qpos[0] = start_q
         initial = np.empty(mj.mj_stateSize(perturbed, mj.mjtState.mjSTATE_INTEGRATION))
         mj.mj_getState(perturbed, data, initial, mj.mjtState.mjSTATE_INTEGRATION)
         direct_q = [float(data.qpos[0])]
         applied = []
+        latencies = []
         for index in range(_STEPS):
             now = index * _DT
-            if name == "nmpc":
-                receipt = controller.command_for_step(
-                    index,
-                    np.array([data.qpos[0], data.qvel[0]]),
-                    observation_time_s=now,
-                    current_time_s=now,
-                )
-            else:
-                receipt = controller.command_for_step(
-                    now, data.qpos.copy(), data.qvel.copy(), _DT
-                )
+            started = time.perf_counter()
+            receipt = controller.command_for_step(
+                now, data.qpos.copy(), data.qvel.copy(), _DT
+            )
+            latencies.append(time.perf_counter() - started)
             effort = float(receipt.applied[0])
             assert -2.0 <= effort <= 2.0
             applied.append((effort,))
@@ -164,12 +223,20 @@ def test_native_robust_nmpc_and_tvlqr_replay_same_executed_inputs(
             initial,
             np.arange(_STEPS + 1) * _DT,
             np.array(applied),
-            experiment_id=f"f05-{name}-mass-perturbation",
+            experiment_id=f"f05-{name}-mass-perturbation-{start_q:.1f}",
         )
         replay = replay_native_torque_bundle(bundle, perturbed_path)
         np.testing.assert_allclose(replay.qpos[:, 0], direct_q, atol=1e-12, rtol=0)
         np.testing.assert_array_equal(replay.applied_actuator_torques, applied[:-1])
         assert bundle.input_history.input_kind.value == "actuator_torque"
-        if name == "nmpc":
-            assert any(row.status == "optimized" for row in nmpc.applied_history)
-            assert all(row.elapsed_s >= 0.0 for row in nmpc.applied_history)
+        tvlqr_rmse = float(np.sqrt(np.mean(np.asarray(direct_q) ** 2)))
+        assert np.isfinite(tvlqr_rmse)
+        record("tvlqr_q_rmse_rad", tvlqr_rmse)
+        record("tvlqr_final_q_rad", float(direct_q[-1]))
+        record(
+            "tvlqr_effort_l1_nm", float(np.abs(replay.applied_actuator_torques).sum())
+        )
+        record("tvlqr_latency_p50_s", float(np.percentile(latencies, 50)))
+        record("tvlqr_latency_p95_s", float(np.percentile(latencies, 95)))
+        record("tvlqr_latency_worst_s", float(np.max(latencies)))
+        record("tvlqr_input_sha256", bundle.applied_input_sha256)
