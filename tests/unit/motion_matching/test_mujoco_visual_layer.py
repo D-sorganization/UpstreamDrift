@@ -73,7 +73,7 @@ def _ball_geom_id(mujoco, model) -> int:  # noqa: ANN001
 
 def _club_body_and_offsets():  # noqa: ANN202
     """The real driver club assembly plus the exporter's own reference offsets."""
-    import xml.etree.ElementTree as ET
+    import xml.etree.ElementTree as ET  # nosec B405 # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml - construction only; parsing is defused
 
     from src.engines.physics_engines.mujoco.python import full_body_mjcf as exp
     from src.shared.python.model_appearance import club_assembly as ca
@@ -100,7 +100,7 @@ def test_club_face_world_transforms_club_frame_into_world() -> None:
 
 def test_attach_decorative_ball_computes_grounded_address_geometry() -> None:
     """A club body coincident with the world frame is a grounded reference pose."""
-    import xml.etree.ElementTree as ET
+    import xml.etree.ElementTree as ET  # nosec B405 # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml - construction only; parsing is defused
 
     from src.engines.physics_engines.mujoco.python import visual_layer
     from src.shared.python.model_appearance import club_assembly as ca
@@ -155,7 +155,7 @@ def test_attach_decorative_ball_override_position_bypasses_groundedness_check() 
     """An explicit ``position_m`` (e.g. a measured ball) is trusted verbatim,
     even though this spec's reference pose is not itself grounded.
     """
-    import xml.etree.ElementTree as ET
+    import xml.etree.ElementTree as ET  # nosec B405 # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml - construction only; parsing is defused
 
     from src.engines.physics_engines.mujoco.python import visual_layer
     from src.shared.python.model_appearance.schema import BallSettings
