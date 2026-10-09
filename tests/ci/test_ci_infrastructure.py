@@ -1085,14 +1085,16 @@ class TestCIEnvironmentCompatibility:
         fetch_step = steps[fetch_index]
 
         assert fetch_index < unit_index
-        # merge_group runs need origin/<default> too (RM#1900).
+        # PR and merge_group runs need a real origin/<default> ref, not only
+        # FETCH_HEAD, including when a PR is stacked on a feature branch.
         assert fetch_step["if"] == (
             "github.event_name == 'pull_request' || github.event_name == 'merge_group'"
         )
         assert (
-            'git fetch --no-tags --depth=1 origin "${{ '
-            "github.event.repository.default_branch }}:refs/remotes/origin/${{ "
-            'github.event.repository.default_branch }}"' in fetch_step["run"]
+            "git fetch --no-tags --depth=1 origin "
+            '"${{ github.event.repository.default_branch }}:'
+            'refs/remotes/origin/${{ github.event.repository.default_branch }}"'
+            in fetch_step["run"]
         )
 
     def test_unit_gate_sparse_checks_out_pinned_tools_for_ownership_guard(self) -> None:
