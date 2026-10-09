@@ -81,7 +81,10 @@ def test_native_pinocchio_reproduces_frozen_saturated_feedback(
     assert not replay.qpos.flags.writeable
 
 
-@pytest.mark.parametrize("defect", ["missing_state", "quaternion", "limit", "grid"])
+@pytest.mark.parametrize(
+    "defect",
+    ["missing_state", "quaternion", "nonfinite_state", "limit", "grid", "sentinel"],
+)
 def test_native_pinocchio_rejects_unqualified_state_and_inputs(
     native_fixture: tuple[Path, Any, Any], defect: str
 ) -> None:
@@ -92,10 +95,14 @@ def test_native_pinocchio_rejects_unqualified_state_and_inputs(
         v = v[:-1]
     elif defect == "quaternion":
         q[3:7] = 0
+    elif defect == "nonfinite_state":
+        v[-1] = np.nan
     elif defect == "limit":
         values[:] = 3
-    else:
+    elif defect == "grid":
         times[1] = 0.0005
+    else:
+        values[-1] = 0.5
     with pytest.raises(ValueError):
         adapter.build_native_pinocchio_torque_bundle(path, q, v, times, values)
 
@@ -127,3 +134,28 @@ def test_native_pinocchio_rejects_model_replacement(
     path.write_text(URDF.replace('mass value="0.5"', 'mass value="0.7"'))
     with pytest.raises(ValueError, match="identity|model|policy"):
         adapter.replay_native_pinocchio_torque_bundle(bundle, path)
+
+
+def test_native_pinocchio_refinement_reduces_independent_terminal_error(
+    native_fixture: tuple[Path, Any, Any],
+) -> None:
+    import pinocchio as pin
+
+    path, engine, adapter = native_fixture
+    endpoints = []
+    for dt in (0.016, 0.008, 0.004, 0.001):
+        times = np.arange(round(0.256 / dt) + 1) * dt
+        values = np.full((len(times), 1), 1.5)
+        bundle = adapter.build_native_pinocchio_torque_bundle(
+            path, engine.q, engine.v, times, values, time_step=dt
+        )
+        replay = adapter.replay_native_pinocchio_torque_bundle(bundle, path)
+        endpoints.append((replay.qpos[-1], replay.qvel[-1]))
+    reference_q, reference_v = endpoints[-1]
+    errors = [
+        np.linalg.norm(pin.difference(engine.model, q, reference_q))
+        + np.linalg.norm(v - reference_v)
+        for q, v in endpoints[:-1]
+    ]
+    assert errors[0] > errors[1] > errors[2]
+    assert errors[2] < errors[0] / 4

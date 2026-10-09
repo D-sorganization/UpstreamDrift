@@ -21,6 +21,9 @@ from numpy.typing import NDArray
 
 from src.engines.native_replay_contracts import (
     native_replay_admission_bytes,
+    native_replay_contract_types,
+    require_native_replay_equivalence,
+    validate_frozen_torque_history,
     validate_native_replay_bundle,
 )
 
@@ -45,14 +48,7 @@ class NativeDrakeTorqueReplay:
 
 
 def _contracts() -> Any:
-    from src.shared.python._seam_redirect import extend_sidekick_lab_path
-
-    extend_sidekick_lab_path()
-    from sidekick.lab import mocap
-
-    if not hasattr(mocap, "ExperimentReplayBundle"):
-        raise RuntimeError("native replay requires the merged Tools T01 contract")
-    return mocap
+    return native_replay_contract_types()
 
 
 def _admit_source(raw: bytes) -> None:
@@ -283,24 +279,12 @@ def _policy(plant: Any, identity: Any, contracts: Any) -> Any:
 def _history(
     plant: Any, times: NDArray[np.float64], values: NDArray[np.float64]
 ) -> None:
-    if (
-        times.ndim != 1
-        or len(times) < 2
-        or times[0] != 0
-        or not np.isfinite(times).all()
-        or not np.allclose(np.diff(times), plant.time_step(), atol=1e-12, rtol=0)
-    ):
-        raise ValueError("time grid must begin at zero and match native timestep")
-    if (
-        values.shape != (len(times), plant.num_actuated_dofs())
-        or not np.isfinite(values).all()
-    ):
-        raise ValueError("finite torque rows must match ordered native motors")
-    if not np.array_equal(values[-1], values[-2]):
-        raise ValueError("terminal ZOH sentinel must equal the last executed input")
-    limits = np.array([a.effort_limit() for a in _actuators(plant)])
-    if np.any(np.abs(values) > limits):
-        raise ValueError("saved torque must already satisfy native effort limits")
+    validate_frozen_torque_history(
+        times,
+        values,
+        float(plant.time_step()),
+        np.array([a.effort_limit() for a in _actuators(plant)]),
+    )
 
 
 def build_native_drake_torque_bundle(
@@ -367,26 +351,7 @@ def replay_native_drake_torque_bundle(
         time_step=bundle.policy.step_size_seconds,
         experiment_id=bundle.experiment_id,
     )
-    if (
-        bundle.model,
-        bundle.initial_state,
-        bundle.input_history.channels,
-        bundle.policy,
-    ) != (
-        expected.model,
-        expected.initial_state,
-        expected.input_history.channels,
-        expected.policy,
-    ):
-        raise ValueError(
-            "native model, state, channel or executed policy identity differs"
-        )
-    if (
-        bundle.input_history.input_kind != contracts.ActuationInputKind.ACTUATOR_TORQUE
-        or bundle.input_history.interpolation
-        != contracts.InputInterpolation.ZERO_ORDER_HOLD
-    ):
-        raise ValueError("native replay requires held actuator torque")
+    require_native_replay_equivalence(bundle, expected, contracts)
     return _step_native(bundle, Path(model_path))
 
 
