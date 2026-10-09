@@ -41,3 +41,25 @@ Normal hooks and protected CI remain to be recorded after execution. The fleet
 inbox returned incomplete evidence with its known malformed/page-limit warnings;
 direct root coordination preserves the ownership partition. Generated manual
 release remains blocked.
+
+## Main Integration After the Constraint Observer Merged
+
+The prerequisite constrained-state observer #11931 merged to main as
+`2e3c79b4808f334b06dab5828db0d22dd7f2f80a` on 2026-10-09. This branch
+genuinely merged that main commit. Conflicts were limited to the pre-existing
+constrained-state turnover, the calculation registry, the manual chapter index,
+and the subprocess observer test: the resolution retained main's prior native
+torque and geometry entries, this branch's passive chapter and registry blocker,
+main's observer integration history, and the explicit repository cwd in the
+subprocess regression. The observer source blob is identical in parent and
+main (`589c0108a2995d7f118fe686c585180ba8b2c473`). The pinned Tools
+submodule remains `2e7665111b06f92ffbfe178b92d74d6a81c95388`.
+
+On the merged tree, 60 actual OpenSim 4.6 observer, passive-readiness and native
+marker-geometry tests pass. The OpenSim environment lacks `cv2`; that native
+test process appended the existing Python 3.12 host site-packages only after
+loading its own NumPy 2.5.3. No package or physics provider was changed.
+Tests remain software/native-boundary evidence; physiological policy and
+capture matching are still unavailable. Eleven manual governance tests and all
+five scoped central pre-PR gates passed on the merged tree. Normal hooks,
+protected CI and final PR disposition follow the integration commit.

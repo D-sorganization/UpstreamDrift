@@ -44,3 +44,23 @@ was rerun on the unchanged candidate with matching source/loaded/prepared-state
 identities. Protected CI and publication remain pending until recorded; no
 bypass or scientific completion is implied. The current change-fragment workflow
 satisfies SPEC/central handoff freshness without editing shared queue hotspots.
+
+## Main Integration After Native Geometry and Torque Replay
+
+The October 9 merge of `origin/main` at
+`5b21b80a9ce7f1b088ec73c38d19314666738958` retained this observer's
+source and test bytes, plus the already merged native torque replay (#11836)
+and native OpenSim geometry (#11911). The only content conflicts were the
+calculation registry and manual index; both now retain all three provisional
+references. The pinned Tools T01 submodule is
+`2e7665111b06f92ffbfe178b92d74d6a81c95388`.
+
+On the integrated tree, 18 actual OpenSim observer cases and 11 manual
+governance cases passed under the owned Python 3.12/OpenSim 4.6 runtime with
+the checkout on `PYTHONPATH`. Thirteen native MuJoCo replay cases passed
+separately. Twenty native OpenSim geometry cases passed when the existing
+Python 3.12 host `cv2` was appended only for that test process, after the
+owned runtime's NumPy had loaded. The five scoped central gates passed;
+their default Python 3.13 test mapper skipped all 18 OpenSim cases and is
+not counted as native evidence. No observer behavior, model threshold,
+anatomical result or physical acceptance was changed by this integration.
