@@ -2,7 +2,12 @@
 
 - Branch `claude/gcv-2-grf-wiring`. MuJoCo, MyoSuite, Drake and OpenSim emit `contact:grf_/free_moment_/moment_com_` per foot and net from native contacts; Pinocchio from shared-contact-law `ContactSample`s (else `ground_reaction_unavailable`); Simscape is unavailable (GCV-3 #11709). `BundleOverlayProvider` uses `ground_reaction_overlay`, so the native videos show per-foot and net GRF.
 - Every CoP goes through `biomechanics.ground_reaction.center_of_pressure`; legacy helpers are `DeprecationWarning` shims. Tests: `tests/integration/cross_engine/test_ground_reaction_parity.py` plus per-engine `*ground_reaction*` tests (static stance net Fz = weight within 2 %).
-- Next: GCV-5 (#11711) plots, API and web display (`analysis.ground_reaction` is a parity gap until then).
+- GCV-5 (#11711) plots, API and web display landed in #11781; the remaining #11711 item is the real-MuJoCo-run plot sheet. Open for GCV-2: Pinocchio GRF render (1x + 0.5x) on an engine host.
+
+# Active: Ground Reaction Design Manual Slice - GCV-18 #11724
+
+- Branch `claude/gcv-18-grf-design-manual`. Provisional QMD chapter `manuals/upstreamdrift/chapters/10-ground-reaction.qmd` (GCV-1 equations, conventions, unavailable values, symbols, tests, limitations) and registry blocker `UP-D1-ground-reaction-breakdown-inventory`; the registry stays `blocked-inventory-required` with no calculations. User manual §12.4/§12.7 now state what `grf_metrics.py`/`stability_metrics.py` do not compute and give the correct CoP and free-moment equations.
+- Open in #11724: grip wrench (GCV-7) and impact parameters (GCV-15) chapters, ADR-0052, force-overlay and native-export user guides, shared-infrastructure and C4 entries.
 
 # Active: Club Force and Torque Overlays - GCV-10 #11716
 

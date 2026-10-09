@@ -490,6 +490,18 @@
       "evidence": "src/tools/grip_wrench_plots/gui.py",
       "acceptance_owner": "tests/config/test_launcher_registry_parity.py"
     },
+    "ground_reaction_plots": {
+      "id": "ground_reaction_plots",
+      "name": "Ground Reaction Plots",
+      "entity_kind": "tile",
+      "primary_workspace": "analysis",
+      "secondary_links": ["simulation"],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/tools/ground_reaction_plots/gui.py",
+      "acceptance_owner": "tests/config/test_launcher_registry_parity.py"
+    },
     "force_overlays": {
       "id": "force_overlays",
       "name": "Force Overlays",
@@ -1548,15 +1560,15 @@
     },
     "analysis.ground_reaction": {
       "id": "analysis.ground_reaction",
-      "name": "Per-foot and net ground-reaction breakdown emitted from engine contacts",
+      "name": "Ground reaction plots per foot and net",
       "entity_kind": "feature",
       "primary_workspace": "analysis",
-      "secondary_links": [],
+      "secondary_links": ["simulation"],
       "provider_authority": "core",
-      "lifecycle": "planned",
+      "lifecycle": "active_feature",
       "alias_target": null,
-      "evidence": "src/shared/python/biomechanics/ground_reaction_wrenches.py",
-      "acceptance_owner": "tests/integration/cross_engine/test_ground_reaction_parity.py"
+      "evidence": "src/tools/ground_reaction_plots/gui.py",
+      "acceptance_owner": "tests/unit/biomechanics/test_ground_reaction_plot_model.py"
     },
     "analysis.static_plots": {
       "id": "analysis.static_plots",

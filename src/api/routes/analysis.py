@@ -8,8 +8,9 @@ No module-level mutable state.
 
 from __future__ import annotations
 
-import uuid
+from collections.abc import Callable
 from datetime import datetime
+import uuid
 from typing import TYPE_CHECKING, Any
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
@@ -31,9 +32,11 @@ from ..models.requests import (
 from ..models.responses import (
     AnalysisResponse,
     GripWrenchResponse,
+    GroundReactionResponse,
     ImpactParametersResponse,
 )
 from ..services.grip_wrench_service import compute_grip_plot
+from ..services.ground_reaction_service import compute_ground_reaction_plot
 from ..services.impact_parameters_service import compute_impact_card
 from ..utils.datetime_compat import UTC
 
@@ -305,6 +308,27 @@ async def get_impact_parameters(
     )
 
 
+def _run_plot_payload(
+    service: SimulationService,
+    run_id: str | None,
+    compute: Callable[..., dict[str, Any]],
+    **kwargs: Any,
+) -> tuple[Any, dict[str, Any]]:
+    """Look up ``run_id`` and build its plot payload with ``compute``.
+
+    Raises:
+        HTTPException: 404 for an unknown run, 400 when ``compute`` rejects
+            the run data (``ValueError`` or ``TypeError``).
+    """
+    run = service.get_run(run_id)
+    if run is None:
+        raise HTTPException(status_code=404, detail="No such simulation run")
+    try:
+        return run, compute(run, **kwargs)
+    except (ValueError, TypeError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
 # ──────────────────────────────────────────────────────────────
 #  Grip wrench plots (GCV-10, #11716)
 # ──────────────────────────────────────────────────────────────
@@ -323,11 +347,30 @@ async def get_grip_wrench(
     left/right split was obtained.  404 for an unknown run, 400 for malformed
     grip data.
     """
-    run = service.get_run(run_id)
-    if run is None:
-        raise HTTPException(status_code=404, detail="No such simulation run")
-    try:
-        payload = compute_grip_plot(run, impact_time_s=impact_time_s)
-    except (ValueError, TypeError) as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    run, payload = _run_plot_payload(
+        service, run_id, compute_grip_plot, impact_time_s=impact_time_s
+    )
     return GripWrenchResponse(run_id=run.run_id, engine=run.engine_type, **payload)
+
+
+# ──────────────────────────────────────────────────────────────
+#  Ground-reaction plots (GCV-5, #11711)
+# ──────────────────────────────────────────────────────────────
+
+
+@router.get("/analysis/ground-reaction", response_model=GroundReactionResponse)
+async def get_ground_reaction(
+    run_id: str | None = Query(None, description="Run id; defaults to the active run"),
+    impact_time_s: float | None = Query(None, description="Impact event marker (s)"),
+    service: SimulationService = Depends(get_simulation_service),
+) -> GroundReactionResponse:
+    """Per-foot and net ground reaction on the body (world frame) over time.
+
+    Force (N and body weights), centre of pressure, free moment, moment about
+    the centre of mass and vertical load share.  Unavailable samples are
+    ``null``, never zero.  404 for an unknown run, 400 for malformed data.
+    """
+    run, payload = _run_plot_payload(
+        service, run_id, compute_ground_reaction_plot, impact_time_s=impact_time_s
+    )
+    return GroundReactionResponse(run_id=run.run_id, engine=run.engine_type, **payload)

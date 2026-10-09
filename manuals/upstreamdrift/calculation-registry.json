@@ -69,6 +69,11 @@
       "id": "UP-D1-contact-derivatives-inventory",
       "owner": "UpstreamDrift issue #10254",
       "resolution": "Inventory the shared contact-force derivatives and full-body Pinocchio chain rule delivered in #10255 before manual coverage or physical qualification. Local directional derivative checks establish algebraic agreement with the implemented piecewise contact plant; they do not establish physiological force identification, valid contact parameters, full-swing fitting, or differentiability at activation and clipping boundaries."
+    },
+    {
+      "id": "UP-D1-ground-reaction-breakdown-inventory",
+      "owner": "UpstreamDrift issue #11724",
+      "resolution": "Inventory the GCV-1 (#11707) ground-reaction core in src/shared/python/biomechanics/ground_reaction.py documented provisionally in chapters/10-ground-reaction.qmd: per-foot resultant force and moment about the world origin, centre of pressure on the plane z = z_g and free moment about it (unavailable below COP_MIN_FZ_N = 10 N, never zero), net wrench with its own CoP and free moment, and moments about the whole-body CoM (net exactly the sum of the feet), plus the GCV-5 (#11711) plot series and vertical load share derived from it. tests/unit/biomechanics/test_ground_reaction.py establishes algebraic agreement with hand-computed wrenches and the stated invariants; it does not qualify any engine contact model, compare against measured force-plate data, or establish an uncertainty. The 10 N threshold is a numerical guard, not an instrument or physiological limit."
     }
   ],
   "calculations": []

@@ -654,6 +654,22 @@ models:
       status: "ready"
       default_launch: "dock"
 
+  - id: "ground_reaction_plots"
+    help: "docs/help/ground_reaction_plots.md"
+    name: "Ground Reaction Plots"
+    description: "Ground reaction under each foot and in total over time: vertical force in body weights, load share, centre-of-pressure path, free moment and moment about the centre of mass"
+    type: "special_app"
+    path: "src/tools/ground_reaction_plots/__main__.py"
+    capabilities:
+      - "ground_reaction"
+      - "foot_forces"
+      - "force_plots"
+    launcher:
+      category: "tool"
+      logo: "assets/ground_reaction_plots.png"
+      status: "ready"
+      default_launch: "dock"
+
   - id: "data_explorer"
     help: "docs/help/data_explorer.md"
     name: "Data Explorer (Import & Visualize)"

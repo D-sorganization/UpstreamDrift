@@ -1226,6 +1226,26 @@
         "mode": "route",
         "route": "/tools/analysis"
       }
+    },
+    {
+      "id": "ground_reaction_plots",
+      "name": "Ground Reaction Plots",
+      "description": "Ground reaction under each foot and in total over time: vertical force in body weights, load share, centre-of-pressure path, free moment and moment about the centre of mass",
+      "category": "tool",
+      "type": "special_app",
+      "path": "src/tools/ground_reaction_plots/__main__.py",
+      "logo": "ground_reaction_plots.svg",
+      "status": "gui_ready",
+      "capabilities": [
+        "ground_reaction",
+        "foot_forces",
+        "force_plots"
+      ],
+      "order": 54,
+      "web": {
+        "mode": "route",
+        "route": "/tools/analysis"
+      }
     }
   ]
 }
