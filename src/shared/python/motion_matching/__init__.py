@@ -70,6 +70,8 @@ if TYPE_CHECKING:
     from .polynomial_torque import POLY_DEGREE, evaluate_polynomial_torque
     from .replay_metrics import (
         PositionInterpolation,
+        NativeMarkerPositionOutput,
+        ObservedMarkerPositions,
         ReplayObservationAlignment,
         align_native_positions_to_observations,
     )
@@ -175,6 +177,8 @@ __all__ = [
     "plot_fit_quality_card",
     "plot_trajectory_overlay",
     "PositionInterpolation",
+    "NativeMarkerPositionOutput",
+    "ObservedMarkerPositions",
     "ReplayObservationAlignment",
     "align_native_positions_to_observations",
     "NAMED_STATE_SCHEMA_VERSION",
@@ -232,6 +236,8 @@ _LAZY_EXPORTS = {
     "plot_fit_quality_card": ".plot_fit_quality_card",
     "plot_trajectory_overlay": ".plot_trajectory_overlay",
     "PositionInterpolation": ".replay_metrics",
+    "NativeMarkerPositionOutput": ".replay_metrics",
+    "ObservedMarkerPositions": ".replay_metrics",
     "ReplayObservationAlignment": ".replay_metrics",
     "align_native_positions_to_observations": ".replay_metrics",
     "POLY_DEGREE": ".polynomial_torque",

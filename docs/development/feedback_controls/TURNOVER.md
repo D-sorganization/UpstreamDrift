@@ -41,8 +41,11 @@ Next bounded step: F01 capability/gate baseline and F07 muscle/contact capabilit
 
 ## F09A Observation Sampling Readiness
 
-The F09a slice adds `align_native_positions_to_observations` to the public
-`motion_matching` facade. It samples actual native 3-D marker positions onto
+The F09a slice adds `NativeMarkerPositionOutput`,
+`ObservedMarkerPositions`, and `align_native_positions_to_observations` to the
+public `motion_matching` facade. Separate typed records keep actual native
+3-D marker positions and observations on their own clocks. The sampler maps
+native positions onto
 the exact observation clock with an explicit position interpolation version,
 matching frame/timebase and marker order, path-free source/output/observation
 hashes, and no extrapolation. It retains the native output and observation
@@ -61,3 +64,10 @@ reproduction, score collocation feasibility, or qualify any model. Full F09
 remains open. Next: consume native replay output from F06/F07 through this
 sampling boundary, map the resulting observation receipt into the T02/F01
 comparison levels, and preserve every required unavailable/unqualified row.
+
+The method is also documented in the canonical
+`manuals/upstreamdrift/chapters/13-feedback-comparison.qmd`. The calculation
+registry remains empty because its release is explicitly blocked pending the
+owner program; this slice does not register or imply an approved manual
+calculation. `python3 -m scripts.check_design_manual_governance` verifies the
+unchanged blocked registry/governance envelope.

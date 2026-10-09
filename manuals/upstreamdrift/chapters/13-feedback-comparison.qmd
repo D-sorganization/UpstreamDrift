@@ -65,6 +65,42 @@ compared. No F01 test measures tracking error, pass rate, energy, GRF, grip
 load, muscle physiology, or runtime. `tests/unit/engines/test_feedback_comparison.py`
 checks admission failures; F09 and later native lanes own numerical receipts.
 
+## F09a Positions-Only Sampling on the Observation Clock
+
+The provisional observation boundary in
+`src/shared/python/motion_matching/replay_metrics.py` samples native output
+positions at measured-observation times before the existing replay metrics are
+evaluated. The native output clock $t_i^n$ and observation clock $t_k^o$ are
+separate evidence. For ordered native 3-D marker positions $p_{ij}^n$, the
+declared method `linear_position/v1` defines
+
+$$
+\hat p_{kj} = (1-\alpha_k)p_{ij}^n + \alpha_k p_{i+1,j}^n,
+\qquad
+\alpha_k = \frac{t_k^o - t_i^n}{t_{i+1}^n - t_i^n},
+\qquad t_i^n \le t_k^o \le t_{i+1}^n.
+$$
+
+Both clocks must be finite, strictly increasing, and contain at least two
+samples. The observation interval must be contained by the native-output
+interval; the sampler rejects extrapolation. Native and measured positions
+must declare the same frame, timebase, and ordered marker identities. The
+interpolation applies only to 3-D marker positions. It is not a generalized
+coordinate, velocity, quaternion, or engine-state integrator. Missing measured
+positions retain the existing validity mask; only valid measured entries must
+be finite. The exact observation clock is passed to
+`compute_replay_five_metrics`, keeping early-window and terminal metrics tied
+to the measured clock.
+
+The helper records source, native-output, observation, and alignment hashes so
+downstream receipts can identify the arrays and both clocks. These hashes are
+content identities, not evidence that a producer is authentic or that the
+motion is physically correct. This F09a implementation adds no tolerance,
+acceptance threshold, capture approval, engine qualification, or physiology
+claim. The calculation inventory remains empty and manual release remains
+blocked pending its owner program; this provisional calculation note does not
+register or approve a released engineering calculation.
+
 ## Uncertainty and Release Boundary
 
 The inventory declares a flexible-club requirement but currently records its

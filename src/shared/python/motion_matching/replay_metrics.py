@@ -36,6 +36,29 @@ class PositionInterpolation(str, Enum):
 
 
 @dataclass(frozen=True)
+class NativeMarkerPositionOutput:
+    """A native replay's ordered marker positions and output clock."""
+
+    time_s: Array | Sequence[float]
+    positions_m: Array
+    marker_labels: Sequence[str]
+    frame_id: str
+    timebase_id: str
+
+
+@dataclass(frozen=True)
+class ObservedMarkerPositions:
+    """Measured marker positions, exact observation clock, and validity mask."""
+
+    time_s: Array | Sequence[float]
+    positions_m: Array
+    valid: BoolArray | Array
+    marker_labels: Sequence[str]
+    frame_id: str
+    timebase_id: str
+
+
+@dataclass(frozen=True)
 class ReplayObservationAlignment:
     """Native marker positions sampled on the exact measured observation clock.
 
@@ -139,29 +162,26 @@ def _readonly_copy(values: np.ndarray, *, dtype: Any | None = None) -> np.ndarra
     return copied
 
 
-def align_native_positions_to_observations(
-    *,
-    native_output_time_s: Array | Sequence[float],
-    native_output_positions_m: Array,
-    observation_time_s: Array | Sequence[float],
-    observation_positions_m: Array,
-    observation_valid: BoolArray | Array,
-    native_marker_labels: Sequence[str],
-    observation_marker_labels: Sequence[str],
+@dataclass(frozen=True)
+class _ValidatedPositionAlignment:
+    method: PositionInterpolation
+    source_identity_sha256: str
+    native_times: Array
+    observation_times: Array
+    native_positions: Array
+    observation_positions: Array
+    observation_valid: BoolArray
+    marker_labels: tuple[str, ...]
+    frame_id: str
+    timebase_id: str
+
+
+def _validate_position_alignment(
+    native_output: NativeMarkerPositionOutput,
+    observations: ObservedMarkerPositions,
     interpolation: PositionInterpolation,
     source_identity_sha256: str,
-    native_frame_id: str,
-    observation_frame_id: str,
-    native_timebase_id: str,
-    observation_timebase_id: str,
-) -> ReplayObservationAlignment:
-    """Sample native 3-D marker positions at observations without extrapolation.
-
-    The exact observation clock is retained for metric evaluation. Output and
-    observation arrays must already share an explicit marker ordering, frame,
-    and timebase. Missing observations follow the existing ``valid`` mask
-    contract; native output positions and valid observations must be finite.
-    """
+) -> _ValidatedPositionAlignment:
     try:
         method = PositionInterpolation(interpolation)
     except (TypeError, ValueError) as exc:
@@ -174,21 +194,21 @@ def align_native_positions_to_observations(
     ):
         raise ValueError("source_identity_sha256 must be a lowercase SHA-256 digest")
 
-    for field, value in (
-        ("native_frame_id", native_frame_id),
-        ("observation_frame_id", observation_frame_id),
-        ("native_timebase_id", native_timebase_id),
-        ("observation_timebase_id", observation_timebase_id),
+    for value, name in (
+        (native_output.frame_id, "native_output.frame_id"),
+        (observations.frame_id, "observations.frame_id"),
+        (native_output.timebase_id, "native_output.timebase_id"),
+        (observations.timebase_id, "observations.timebase_id"),
     ):
         if not isinstance(value, str) or not value.strip():
-            raise ValueError(f"{field} must be non-empty")
-    if native_frame_id != observation_frame_id:
+            raise ValueError(f"{name} must be non-empty")
+    if native_output.frame_id != observations.frame_id:
         raise ValueError("native output and observations must share a frame")
-    if native_timebase_id != observation_timebase_id:
+    if native_output.timebase_id != observations.timebase_id:
         raise ValueError("native output and observations must share a timebase")
 
-    native_times = _validated_times(native_output_time_s, "native_output_time_s")
-    observation_times = _validated_times(observation_time_s, "observation_time_s")
+    native_times = _validated_times(native_output.time_s, "native_output.time_s")
+    observation_times = _validated_times(observations.time_s, "observations.time_s")
     if (
         observation_times[0] < native_times[0]
         or observation_times[-1] > native_times[-1]
@@ -197,8 +217,8 @@ def align_native_positions_to_observations(
             "observation clock requires extrapolation outside native output"
         )
 
-    labels = tuple(native_marker_labels)
-    observed_labels = tuple(observation_marker_labels)
+    labels = tuple(native_output.marker_labels)
+    observed_labels = tuple(observations.marker_labels)
     if (
         not labels
         or any(not isinstance(label, str) or not label.strip() for label in labels)
@@ -207,9 +227,9 @@ def align_native_positions_to_observations(
         raise ValueError("native_marker_labels must be non-empty unique identities")
     if labels != observed_labels:
         raise ValueError("native and observation marker identities or order differ")
-    native_positions = np.asarray(native_output_positions_m, dtype=np.float64)
-    observed_positions = np.asarray(observation_positions_m, dtype=np.float64)
-    valid = np.asarray(observation_valid, dtype=bool)
+    native_positions = np.asarray(native_output.positions_m, dtype=np.float64)
+    observed_positions = np.asarray(observations.positions_m, dtype=np.float64)
+    valid = np.asarray(observations.valid, dtype=bool)
     marker_count = len(labels)
     if native_positions.shape != (len(native_times), marker_count, 3):
         raise ValueError(
@@ -224,6 +244,23 @@ def align_native_positions_to_observations(
     if not np.isfinite(observed_positions[valid]).all():
         raise ValueError("valid observation marker positions must be finite")
 
+    return _ValidatedPositionAlignment(
+        method=method,
+        source_identity_sha256=source_identity_sha256,
+        native_times=native_times,
+        observation_times=observation_times,
+        native_positions=native_positions,
+        observation_positions=observed_positions,
+        observation_valid=valid,
+        marker_labels=labels,
+        frame_id=native_output.frame_id,
+        timebase_id=native_output.timebase_id,
+    )
+
+
+def _sample_positions_on_clock(
+    native_times: Array, native_positions: Array, observation_times: Array
+) -> Array:
     right = np.searchsorted(native_times, observation_times, side="left")
     right = np.minimum(right, len(native_times) - 1)
     exact = native_times[right] == observation_times
@@ -237,49 +274,70 @@ def align_native_positions_to_observations(
     aligned_positions = native_positions[left] + fraction[:, None, None] * (
         native_positions[right] - native_positions[left]
     )
+    return aligned_positions
 
-    frame_id = native_frame_id
-    timebase_id = native_timebase_id
-    native_clock_sha256 = _canonical_array_sha256(native_times)
-    observation_clock_sha256 = _canonical_array_sha256(observation_times)
+
+def align_native_positions_to_observations(
+    native_output: NativeMarkerPositionOutput,
+    observations: ObservedMarkerPositions,
+    *,
+    interpolation: PositionInterpolation,
+    source_identity_sha256: str,
+) -> ReplayObservationAlignment:
+    """Sample native 3-D marker positions at observations without extrapolation.
+
+    The exact observation clock is retained for metric evaluation. Output and
+    observation arrays must already share an explicit marker ordering, frame,
+    and timebase. Missing observations follow the existing ``valid`` mask
+    contract; native output positions and valid observations must be finite.
+    """
+    inputs = _validate_position_alignment(
+        native_output, observations, interpolation, source_identity_sha256
+    )
+    aligned_positions = _sample_positions_on_clock(
+        inputs.native_times, inputs.native_positions, inputs.observation_times
+    )
+
+    native_clock_sha256 = _canonical_array_sha256(inputs.native_times)
+    observation_clock_sha256 = _canonical_array_sha256(inputs.observation_times)
     output_identity = _position_payload_sha256(
         prefix="native-position-output/1.0.0",
-        identity_sha256=source_identity_sha256,
-        times_s=native_times,
-        positions_m=native_positions,
-        marker_labels=labels,
-        frame_id=frame_id,
-        timebase_id=timebase_id,
+        identity_sha256=inputs.source_identity_sha256,
+        times_s=inputs.native_times,
+        positions_m=inputs.native_positions,
+        marker_labels=inputs.marker_labels,
+        frame_id=inputs.frame_id,
+        timebase_id=inputs.timebase_id,
     )
     observation_identity = _position_payload_sha256(
         prefix="observation-position-set/1.0.0",
-        identity_sha256=source_identity_sha256,
-        times_s=observation_times,
-        positions_m=observed_positions,
-        marker_labels=labels,
-        frame_id=frame_id,
-        timebase_id=timebase_id,
-        valid=valid,
+        identity_sha256=inputs.source_identity_sha256,
+        times_s=inputs.observation_times,
+        positions_m=inputs.observation_positions,
+        marker_labels=inputs.marker_labels,
+        frame_id=inputs.frame_id,
+        timebase_id=inputs.timebase_id,
+        valid=inputs.observation_valid,
     )
     alignment_digest = hashlib.sha256()
     _update_digest_text(alignment_digest, "replay-observation-alignment/1.0.0")
-    _update_digest_text(alignment_digest, method.value)
+    _update_digest_text(alignment_digest, inputs.method.value)
     _update_digest_text(alignment_digest, output_identity)
     _update_digest_text(alignment_digest, observation_identity)
     _update_digest_text(alignment_digest, native_clock_sha256)
     _update_digest_text(alignment_digest, observation_clock_sha256)
     alignment_digest.update(bytes.fromhex(_canonical_array_sha256(aligned_positions)))
     return ReplayObservationAlignment(
-        native_output_time_s=_readonly_copy(native_times),
-        observation_time_s=_readonly_copy(observation_times),
+        native_output_time_s=_readonly_copy(inputs.native_times),
+        observation_time_s=_readonly_copy(inputs.observation_times),
         predicted_positions_m=_readonly_copy(aligned_positions),
-        observation_positions_m=_readonly_copy(observed_positions),
-        observation_valid=_readonly_copy(valid, dtype=np.bool_),
-        marker_labels=labels,
-        frame_id=frame_id,
-        timebase_id=timebase_id,
-        interpolation=method,
-        source_identity_sha256=source_identity_sha256,
+        observation_positions_m=_readonly_copy(inputs.observation_positions),
+        observation_valid=_readonly_copy(inputs.observation_valid, dtype=np.bool_),
+        marker_labels=inputs.marker_labels,
+        frame_id=inputs.frame_id,
+        timebase_id=inputs.timebase_id,
+        interpolation=inputs.method,
+        source_identity_sha256=inputs.source_identity_sha256,
         output_identity_sha256=output_identity,
         observation_identity_sha256=observation_identity,
         native_output_time_grid_sha256=native_clock_sha256,

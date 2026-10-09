@@ -14,9 +14,11 @@ tolerances, or qualify any model or capture.
 `motion_matching.replay_metrics.compute_replay_five_metrics` remains the
 authoritative marker metric implementation. Its current array contract requires
 prediction and target arrays to have the same frame count, and it uses the
-supplied `time_s` for the early window. The new
-`align_native_positions_to_observations` boundary samples native 3-D marker
-positions onto the observation clock before passing its result to that metric.
+supplied `time_s` for the early window. `NativeMarkerPositionOutput` and
+`ObservedMarkerPositions` keep the native-output and observation clocks
+explicit. The `align_native_positions_to_observations` boundary samples native
+3-D marker positions onto the observation clock before passing its result to
+that metric.
 The output retains both source clocks and separate SHA-256 identities for the
 native output grid, exact observation grid, native output payload, measured
 observations, and source replay identity.
