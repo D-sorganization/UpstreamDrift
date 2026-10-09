@@ -3,9 +3,7 @@
 from __future__ import annotations
 
 import csv
-import hashlib
 import importlib.metadata
-import importlib.util
 import json
 import platform
 from dataclasses import asdict, fields
@@ -20,6 +18,7 @@ from src.shared.python.physics.impact_model import ImpactParameters
 
 from .core import PATTERNS, AnalysisConfig, AnalysisResult, ShotRecord
 from .dispersion_stats import landing_dispersion
+from .provenance import source_snapshot
 from .range_control import equal_range_endpoint, equal_range_summary
 from .uncertainty import paired_hit_difference, paired_variance_ratio
 
@@ -38,10 +37,6 @@ def _scenario_footer(config: AnalysisConfig) -> str:
         f"Face SD {config.face_sd_deg:g}° | Curve ×{config.curve_scale:g} | "
         f"{config.delivery_mode}, lie {config.lie_deg:g}°, lean {config.shaft_lean_deg:g}°"
     )
-
-
-def _source_hash(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def _variance_comparisons(result: AnalysisResult) -> dict[str, dict]:
@@ -421,43 +416,7 @@ def export_analysis(result: AnalysisResult, output_dir: Path) -> dict[str, Path]
         "limitations": [_LIMITATION],
     }
     paths["summary_json"].write_text(json.dumps(summary, indent=2) + "\n")
-    package_dir = Path(__file__).parent
-    repo_root = Path(__file__).resolve().parents[3]
-    source_files: tuple[Path, ...] = (
-        package_dir / "core.py",
-        package_dir / "physics.py",
-        package_dir / "delivery_geometry.py",
-        package_dir / "presets.py",
-        package_dir / "dispersion_stats.py",
-        package_dir / "scoring.py",
-        package_dir / "scoring_cache.py",
-        package_dir / "scenario_scoring.py",
-        package_dir / "reporting.py",
-        package_dir / "range_control.py",
-        repo_root / "src/shared/python/physics/impact_model/models.py",
-        repo_root / "src/shared/python/physics/impact_model/solver.py",
-        repo_root / "src/shared/python/physics/impact_model/types.py",
-        repo_root / "src/shared/python/physics/ball_simulator.py",
-        repo_root / "src/shared/python/physics/ball_launch_conditions.py",
-        repo_root / "src/shared/python/physics/ball_properties.py",
-        repo_root / "src/shared/python/core/physics_constants.py",
-        repo_root / "rust_core/upstream-physics/Cargo.toml",
-        repo_root / "Cargo.lock",
-    )
-    source_files += tuple(
-        sorted((repo_root / "rust_core/upstream-physics/src").glob("*.rs"))
-    )
-    optional_uncertainty = package_dir / "uncertainty.py"
-    source_files += (optional_uncertainty,) if optional_uncertainty.exists() else ()
-    rust_spec = importlib.util.find_spec("upstream_physics")
-    rust_binary = None
-    if rust_spec and rust_spec.origin:
-        candidate = Path(rust_spec.origin)
-        if candidate.suffix == ".so":
-            rust_binary = candidate
-        else:
-            binaries = sorted(candidate.parent.glob("*.so"))
-            rust_binary = binaries[0] if binaries else None
+    execution = source_snapshot()
     try:
         rust_version = importlib.metadata.version("upstream-physics")
     except importlib.metadata.PackageNotFoundError:
@@ -465,6 +424,7 @@ def export_analysis(result: AnalysisResult, output_dir: Path) -> dict[str, Path]
     receipt = {
         "seed": result.config.seed,
         "shots_per_pattern": result.config.n_shots,
+        "cargo_lock_present": execution["cargo_lock_present"],
         "face_distribution": f"Independent normal deviations N(0, {result.config.face_sd_deg:g}°), paired across patterns",
         "physics": {
             "impact_model": "rigid_body",
@@ -477,9 +437,7 @@ def export_analysis(result: AnalysisResult, output_dir: Path) -> dict[str, Path]
             "contact_offset_m": [0.0, 0.0],
             "environment": "Default EnvironmentalConditions, zero wind",
             "rust_package_version": rust_version,
-            "rust_binary_sha256": _source_hash(rust_binary)
-            if rust_binary and rust_binary.is_file()
-            else None,
+            "rust_binary_sha256": execution["native_binary_sha256"],
             "impact_parameters": asdict(ImpactParameters()),
             "ball_properties": {
                 "mass_kg": BallProperties().mass,
@@ -493,9 +451,7 @@ def export_analysis(result: AnalysisResult, output_dir: Path) -> dict[str, Path]
             },
         },
         "runtime": {"python": platform.python_version(), "numpy": np.__version__},
-        "source_sha256": {
-            str(p.relative_to(repo_root)): _source_hash(p) for p in source_files
-        },
+        "source_sha256": execution["source_sha256"],
         "limitations": [
             _LIMITATION,
             "No player-specific face/path covariance, speed/loft variation, wind, or ground roll.",

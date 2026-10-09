@@ -42,10 +42,15 @@ def source_snapshot() -> dict:
             "src/shared/python/physics/ball_properties.py",
             "src/shared/python/core/physics_constants.py",
             "rust_core/upstream-physics/Cargo.toml",
-            "Cargo.lock",
             "vendor/ud-tools/src/shared/python/launch_monitor/strokes_gained.py",
         )
     ]
+    # Cargo.lock is an ignored build artifact in this repository. Hash it when
+    # available, but keep a clean checkout usable with a pinned native binary.
+    cargo_lock = root / "Cargo.lock"
+    has_cargo_lock = cargo_lock.is_file()
+    if has_cargo_lock:
+        files.append(cargo_lock)
     files.extend(sorted((root / "rust_core/upstream-physics/src").glob("*.rs")))
     rust_spec = importlib.util.find_spec("upstream_physics")
     if rust_spec is None or rust_spec.origin is None:
@@ -65,6 +70,7 @@ def source_snapshot() -> dict:
         },
         "native_binary_path": str(binaries[0]),
         "native_binary_sha256": hashlib.sha256(binaries[0].read_bytes()).hexdigest(),
+        "cargo_lock_present": has_cargo_lock,
     }
 
 
