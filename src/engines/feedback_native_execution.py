@@ -359,7 +359,7 @@ def validate_native_replay_output(
 def _validate_native_output_state(
     row: ComparisonRow,
     bundle: Any,
-    output: NativeTorqueReplay | NativeDrakeTorqueReplay,
+    output: NativeTorqueReplay | NativeDrakeTorqueReplay | NativePinocchioTorqueReplay,
     times: NDArray[np.float64],
     qpos: NDArray[np.float64],
     qvel: NDArray[np.float64],
