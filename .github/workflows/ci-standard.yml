@@ -1099,11 +1099,6 @@ jobs:
     # 25 min of pytest plus a cached-registry release build of one crate.
     timeout-minutes: 35
     env:
-      # Per-job rustup state (checkout wipes the workspace): the runner image's
-      # ~/.rustup can hold a partially installed toolchain that rustup cannot
-      # upgrade in place (#11595).
-      RUSTUP_HOME: ${{ github.workspace }}/.rustup-home
-      CARGO_HOME: ${{ github.workspace }}/.cargo-home
       CARGO_NET_GIT_FETCH_WITH_CLI: true
     steps:
       - name: Clean corrupt git objects
@@ -1181,6 +1176,10 @@ jobs:
       # quarantine ledger (#9411). Build and install exactly that one crate
       # into the unit-gate venv, mirroring rust-wheel-parity's toolchain,
       # cache and maturin invocation.
+      - name: Prepare job-owned Rust environment
+        # Fresh state after dependency setup: workspace-local homes also
+        # exhibited missing stable manifests in merge groups (#11977).
+        run: python scripts/ci/prepare_rust_environment.py
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8
       - name: Verify Rust toolchain

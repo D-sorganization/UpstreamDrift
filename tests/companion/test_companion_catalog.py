@@ -79,8 +79,8 @@ def test_catalog_reconciles_current_registries_without_schema_count_constants(
         "raw_launcher_records": 58,
         "local_model_records": 67,
         "program_records": 80,
-        "feature_records": 59,
-        "feature_surface_paths": 118,
+        "feature_records": 60,
+        "feature_surface_paths": 119,
         "workflow_records": 15,
         "executable_workflow_records": 14,
         "single_source_program_records": 35,
@@ -95,7 +95,7 @@ def test_catalog_reconciles_current_registries_without_schema_count_constants(
         "pending_screenshot_records": 74,
     }
     assert len({record["id"] for record in catalog["programs"]}) == 80
-    assert len({record["id"] for record in catalog["features"]}) == 59
+    assert len({record["id"] for record in catalog["features"]}) == 60
 
     schema_text = SCHEMA_PATH.read_text(encoding="utf-8")
     for current_count in (55, 63, 77, 51, 95):
