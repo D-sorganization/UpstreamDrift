@@ -231,7 +231,7 @@ class PinocchioForceTorqueSource:
         """
         if samples is None:
             return [], _NO_CONTACT_MODEL_REASON
-        com = pin.centerOfMass(self.model, self._data, q)
+        com = pin.centerOfMass(self.model, self._data, q)  # type: ignore[attr-defined]
         return list(ground_reaction_overlay(contacts, com, source=_CONTACT_SOURCE)), ""
 
     @staticmethod

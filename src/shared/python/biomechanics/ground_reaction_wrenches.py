@@ -64,12 +64,12 @@ def foot_contact_sets(
             continue
         rows[side].append((w.force_n, w.point_m, w.torque_nm or (0.0, 0.0, 0.0)))
     out: dict[str, ContactSet] = {}
-    for side, items in rows.items():
+    for foot, items in rows.items():
         if not items:
-            out[side] = ContactSet.empty()
+            out[foot] = ContactSet.empty()
             continue
         f, p, t = (np.array(col, dtype=float) for col in zip(*items, strict=True))
-        out[side] = ContactSet(f, p, t)
+        out[foot] = ContactSet(f, p, t)
     return out
 
 
