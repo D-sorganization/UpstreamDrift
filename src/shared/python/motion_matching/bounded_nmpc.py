@@ -12,7 +12,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass
 import time
-from typing import TypeAlias, cast
+from typing import Any, TypeAlias, cast
 
 import numpy as np
 from numpy.typing import NDArray
@@ -381,12 +381,13 @@ class BoundedNMPC:
                 upper = np.tile(self.problem.input_upper, horizon)
                 result = minimize(
                     lambda flat: evaluate(flat)[0],
-                    initial.ravel(),
+                    cast(Any, initial.ravel()),
                     method="SLSQP",
                     bounds=Bounds(lower, upper),
-                    constraints=[
-                        {"type": "ineq", "fun": lambda flat: evaluate(flat)[1]}
-                    ],
+                    constraints=cast(
+                        Any,
+                        [{"type": "ineq", "fun": lambda flat: evaluate(flat)[1]}],
+                    ),
                     options={
                         "maxiter": self.config.solver_max_iterations,
                         "ftol": 1e-7,
