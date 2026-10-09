@@ -10382,3 +10382,20 @@ Enables owner capture (`capture-O`) resolution through the MuJoCo native ground-
 - Contact ground calibration via `prepare_hip_spec` aligns toe contact boundaries to meet ground-support specification tolerances.
 - Timeline samples past capture durations are skipped cleanly rather than clamped; short capture root errors report `None` safely.
 - Divergence inventory and matched swing ledger reconciled with full unit test coverage.
+## Controlled-Swing Comparison Admission (F01, #11785)
+
+`src/engines/feedback_comparison.py` projects the authoritative
+`engine_model_inventory.json` into stable package/variant/drive rows for all
+six required engines, including both OpenSim native humanoid factories. Each
+row records required capabilities separately from declared support, runtime
+availability, and scientific qualification. Transcription feasibility,
+independent input reproduction, and observation accuracy have distinct
+receipts. Missing rows, stale model or
+provider identities, absent SHA-256 bindings, feedback-driven or reset replay,
+mixed torque/excitation, and incomparable same-input horizons/channels/policies
+fail closed. The legacy Euclidean `same-input-bundle/v1` cannot satisfy the
+new replay admission because it does not bind execution policy and applied
+inputs. Baselines must include independent polynomial, computed torque,
+MOSAIC+TVLQR, and selected OCP under one observation identity, horizon, and
+budget. This is an admission contract, not a successful native replay or
+scientific match; numerical gate qualification belongs to follow-on issues.

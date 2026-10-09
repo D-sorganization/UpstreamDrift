@@ -166,19 +166,42 @@ quantities are omitted (never zero). `grip_wrench.GripAnalysis` carries
 `split_method`, because the left/right split of two rigid welds is set by the
 solver.
 
-| Label                 | Application point | Force half            | Torque half                          |
-| :-------------------- | :---------------- | :-------------------- | :----------------------------------- |
-| `grip:hand_left`      | left grip point   | `F_L`                 | `tau_L` (omitted if not supplied)    |
-| `grip:hand_right`     | right grip point  | `F_R`                 | `tau_R` (omitted if not supplied)    |
-| `grip:net_midpoint`   | grip midpoint     | `R = F_L + F_R`       | none                                 |
-| `grip:couple_midpoint`| grip midpoint     | none                  | `M_M` = contact moment + free torque |
-| `grip:mof_left`       | grip midpoint     | none                  | `(r_L - r_M) x F_L`                  |
-| `grip:mof_right`      | grip midpoint     | none                  | `(r_R - r_M) x F_R`                  |
+| Label                  | Application point | Force half      | Torque half                          |
+| :--------------------- | :---------------- | :-------------- | :----------------------------------- |
+| `grip:hand_left`       | left grip point   | `F_L`           | `tau_L` (omitted if not supplied)    |
+| `grip:hand_right`      | right grip point  | `F_R`           | `tau_R` (omitted if not supplied)    |
+| `grip:net_midpoint`    | grip midpoint     | `R = F_L + F_R` | none                                 |
+| `grip:couple_midpoint` | grip midpoint     | none            | `M_M` = contact moment + free torque |
+| `grip:mof_left`        | grip midpoint     | none            | `(r_L - r_M) x F_L`                  |
+| `grip:mof_right`       | grip midpoint     | none            | `(r_R - r_M) x F_R`                  |
 
 The Simscape channel labels `grip:total_hand`, `grip:lh_mof`, `grip:rh_mof` and
 `grip:midpoint_couple` in `src/engines/simscape/force_channels.py` remain the
 logged-signal forms; their reference points must be confirmed from the model
 before asserting equality with the shared definitions (see GCV-9, #11715).
+GCV-9 added `grip:hand_left` and `grip:hand_right` to the Simscape channels
+from the logged hand-on-club force and torque signals (world frame); absent
+columns are unavailable, never zero. On the R2025b fixture, `analyze_grip` on
+those channels reproduces the logged `EquivalentMidpointCoupleGlobal` to
+3.7e-8 N·m on a 4.7e7 N·m peak and the net hand force exactly. That is
+software-consistency evidence only, because the run diverges after about
+0.26 s (#11778).
+
+**Derived labels on every surface (GCV-10, #11716).**
+`force_overlay/grip_frame.py` is the one place that turns a `GripAnalysis` into
+a `ForceTorqueFrame`:
+
+- A label that cannot be computed is not emitted. It is listed in the frame
+  metadata `grip_unavailable_labels`, with `grip_unavailable_reason` when one
+  is known.
+- `grip_split_method` names the left/right split so that the legend can show
+  it.
+- `grip_midpoint_m` is the focus of the hands close-up camera.
+
+All grip labels share the `GRIP` colour. `palette.label_variant_hex` lightens
+`grip:hand_left` and `grip:mof_left` and darkens `grip:hand_right` and
+`grip:mof_right`, so each hand and its moment of force stay distinguishable
+from the net. Other labels keep the kind colour.
 
 ### 3. Renderer Adapters — `src/shared/python/force_overlay/renderers/`
 
@@ -376,4 +399,3 @@ above about 600 N at the same length, so peak loads looked small and identical.
   controls. Native export defaults to `body_weight` with the model mass, so one
   body weight is 0.5 m and a 3 m ceiling avoids silent clamping in a swing.
 - The default shaft radius is now 12 mm, and the OpenCV shaft is 4 px at 1080p.
-
