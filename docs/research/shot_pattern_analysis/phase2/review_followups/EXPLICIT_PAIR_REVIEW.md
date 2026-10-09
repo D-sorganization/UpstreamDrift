@@ -19,3 +19,15 @@ Actual lean comparisons accept ordered 0→5°, 0→10°, and 5→10° pairs at 
 3. **Protected Transition Coverage:** The implementation checks the exact derived changed-path set, a closed allowlist, and all non-source execution metadata. Existing transition tests mainly demonstrate missing receipt or stale receipt hash. Add full-API tests with coherent new source manifests and correctly rehashed receipts that falsely approve protected contact/noise/native/runtime changes.
 
 The first two findings block API qualification pending actual fixes and independent re-review. The third is a required focused acceptance check. No accepted transition receipt has been manufactured. The future real receipt must bind the exact snapshots and reviewed evidence, including the scoring parity and explicit legacy-helper reachability qualification.
+
+## Follow-Up Qualification
+
+Independently re-reviewed `38a38090787612dc53ec30b5ebb7367b4a75d6e9` and its additive provenance follow-up `eac423b7337a7a8dec6c536d22df34a71f07538f`. The three findings above are resolved at the code/test boundary:
+
+- Only matcher-bound vectors use whole-field differences, so the approved driver comparison reaches its narrow protocol exception; other scientific vector differences retain indexed rejection. A complete public-API driver regression passes.
+- Scorer/provider/helper hashes and transition receipt/evidence are rechecked after calculation. The captured analysis source map is also exported in pair results and comparison CSVs. The common-index membership operation uses a set.
+- Full-API tests with internally consistent, rehashed manifests and receipts reject protected contact-source and native-runtime changes. Separate tests detect evidence mutation and scorer-source drift during analysis. The transition schema and changed-source records reject extra fields.
+
+The stable independent run passed **30 tests, exit 0**, including real public course-scoring integration, six-population exclusions, SD/curve interactions, ordered lean comparisons, and source-integrity guards. The first rerun had 29 passes and one source-drift rejection because an API edit occurred concurrently; the guard correctly stopped publication. Both logs are retained as `EXPLICIT_PAIR_REVIEW_TESTS.txt` and `EXPLICIT_PAIR_SOURCE_DRIFT_TESTS.txt`. The stable run used a coordinated source hold; source hashes and exact scope are recorded in `explicit_pair_independent_review.json`.
+
+**Disposition:** the reviewed pair API is qualified for the stated saved-data comparison contract. This does not accept the separate pipeline under development, authorize new simulations, accept any actual cross-snapshot transition receipt, or qualify incomplete final datasets. Those independent gates remain open.
