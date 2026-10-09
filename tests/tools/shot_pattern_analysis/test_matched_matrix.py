@@ -46,3 +46,16 @@ def test_final_run_requires_source_bound_accepted_review(tmp_path):
     )
     with pytest.raises(RuntimeError, match="source changed"):
         validate_final_acceptance(path, {"source_sha256": {"a": "b"}})
+
+
+def test_source_change_before_cell_prevents_execution(tmp_path, monkeypatch):
+    import src.tools.shot_pattern_analysis.matched_matrix as module
+
+    snapshots = iter([{"source_sha256": {"a": "old"}}, {"source_sha256": {"a": "new"}}])
+    monkeypatch.setattr(module, "matched_source_snapshot", lambda: next(snapshots))
+    called = []
+    monkeypatch.setattr(module, "execute_and_export", lambda *a, **k: called.append(a))
+    with pytest.raises(RuntimeError, match="source changed"):
+        module.run_matched_matrix(tmp_path)
+    assert called == []
+    assert not (tmp_path / "shard_0_receipt.json").exists()

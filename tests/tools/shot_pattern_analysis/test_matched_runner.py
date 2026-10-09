@@ -103,3 +103,52 @@ def test_numeric_physics_failure_is_not_hidden_as_unsupported():
     )
     with pytest.raises(RuntimeError, match="contact solver failed"):
         run_matched_analysis(request, physics=Broken(), include_scoring=False)
+
+
+def test_custom_approach_radius_reaches_course_scoring(monkeypatch):
+    import src.tools.shot_pattern_analysis.matched_runner as module
+
+    received = {}
+
+    def score(endpoints, **kwargs):
+        received.update(kwargs)
+        return {}
+
+    monkeypatch.setattr(module, "score_course_endpoints", score)
+    request = ExperimentConfig(
+        matched_preset("seven_iron"), NoiseSpec((0,) * 7), n_shots=4, target_radius_m=9
+    )
+    run_matched_analysis(request, physics=AnalyticPhysics())
+    assert received["green_radius_m"] == 9
+
+
+def test_joint_covariance_has_units_and_null_constant_correlations():
+    request = ExperimentConfig(
+        matched_preset("seven_iron"), NoiseSpec((1, 0.5, 0, 0, 0, 0, 0)), n_shots=32
+    )
+    result = run_matched_analysis(
+        request, physics=AnalyticPhysics(), include_scoring=False
+    )
+    joint = result.summary["Straight"]["joint_delivery_outcome_diagnostics"]
+    assert joint["n"] == 32
+    assert joint["units"]["spin_axis_tilt_deg"] == "degree; positive draw"
+    index = joint["fields"].index("speed_mps")
+    assert all(v is None for v in joint["correlation"][index])
+    assert result.shots[0].launch_azimuth_deg == 0
+
+
+def test_paired_accuracy_uncertainty_preserves_units_and_reference():
+    request = ExperimentConfig(
+        matched_preset("seven_iron"), NoiseSpec((1, 0.5, 0, 0, 0, 0, 0)), n_shots=32
+    )
+    result = run_matched_analysis(
+        request, physics=AnalyticPhysics(), include_scoring=False
+    )
+    for key in (
+        "mean_squared_target_error_difference_m2",
+        "containment_fraction_difference",
+    ):
+        for name in ("Draw", "Fade"):
+            interval = result.paired_comparisons[key][name]
+            assert interval["estimate"] == pytest.approx(0, abs=1e-5)
+            assert interval["lower_95"] <= interval["estimate"] <= interval["upper_95"]

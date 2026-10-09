@@ -14,6 +14,7 @@ from scipy.stats import binomtest
 from .core import AnalysisCancelled, PATTERNS
 from .dispersion_stats import landing_dispersion
 from .matched_config import MatchedConfig
+from .matched_diagnostics import joint_diagnostics
 from .matched_physics import MatchedDeliveryOutcome, MatchedShotPhysics, UnsupportedShot
 from .noise import NOISE_FIELDS, NoiseSpec, sample_paired_noise
 from .nominal_matching import MatchBounds, MatchedNominal, match_nominal_landing
@@ -80,6 +81,8 @@ class MatchedShotRecord:
     carry_x_m: float | None = None
     carry_y_m: float | None = None
     spin_rpm: float | None = None
+    launch_azimuth_deg: float | None = None
+    spin_axis_tilt_deg: float | None = None
     launch_elevation_deg: float | None = None
     ball_speed_mps: float | None = None
 
@@ -188,6 +191,7 @@ def _summarize_records(
     if len(good) < 2:
         summary["statistics"] = None
         return summary
+    summary["joint_delivery_outcome_diagnostics"] = joint_diagnostics(good)
     points = [_point(r) for r in good]
     summary["statistics"] = landing_dispersion(
         points, target, nominal_point=(target, 0)
@@ -259,6 +263,22 @@ def _paired_results(
             for name in ("Draw", "Fade")
         },
     }
+    for key, transform in (
+        ("mean_squared_target_error_difference_m2", lambda r: r**2),
+        (
+            "containment_fraction_difference",
+            lambda r: (r <= request.target_radius_m).astype(float),
+        ),
+    ):
+        comparisons[key] = {
+            name: paired_mean_difference(
+                transform(radii[name]), transform(radii["Straight"]), seed=request.seed
+            )
+            for name in ("Draw", "Fade")
+        }
+    comparisons["uncertainty_scope"] = (
+        "paired bootstrap; sampling only; excludes model and course uncertainty"
+    )
     if not include_scoring:
         return {**info, "status": "not_requested"}, comparisons
     try:
@@ -266,6 +286,7 @@ def _paired_results(
             endpoints,
             club_id=request.club.club_id,
             target_x_m=target,
+            green_radius_m=request.target_radius_m,
             seed=request.seed,
         )
     except ValueError as exc:
@@ -366,6 +387,12 @@ def run_matched_analysis(
                         carry_x_m=outcome.carry_x_m,
                         carry_y_m=outcome.carry_y_m,
                         spin_rpm=outcome.spin_rpm,
+                        launch_azimuth_deg=outcome.launch_azimuth_deg,
+                        spin_axis_tilt_deg=(
+                            outcome.spin_axis_tilt_deg
+                            if outcome.spin_axis_defined
+                            else None
+                        ),
                         launch_elevation_deg=outcome.launch_elevation_deg,
                         ball_speed_mps=outcome.ball_speed_mps,
                     )

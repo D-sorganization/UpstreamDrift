@@ -203,6 +203,7 @@ def run_matched_matrix(
     for index, (name, request) in enumerate(cells):
         if index % shard_count != shard_index:
             continue
+        assert_source_unchanged(execution, matched_source_snapshot())
         destination = output_root / name
         manifest = destination / "manifest.json"
         if destination.exists():
@@ -223,6 +224,9 @@ def run_matched_matrix(
             )
             LOGGER.info("[%d/%d] %s", index + 1, len(cells), name)
             execute_and_export(request, destination, figures=make_figures)
+        assert_source_unchanged(execution, matched_source_snapshot())
+        completed_start = json.loads((destination / "run_start.json").read_text())
+        assert_source_unchanged(execution, completed_start["execution"])
         summary = json.loads((destination / "summary.json").read_text())
         results.append(
             {
@@ -232,6 +236,7 @@ def run_matched_matrix(
                 "manifest_sha256": hashlib.sha256(manifest.read_bytes()).hexdigest(),
             }
         )
+    assert_source_unchanged(execution, matched_source_snapshot())
     (output_root / f"shard_{shard_index}_receipt.json").write_text(
         json.dumps(
             {"shard_count": shard_count, "shard_index": shard_index, "cells": results},
