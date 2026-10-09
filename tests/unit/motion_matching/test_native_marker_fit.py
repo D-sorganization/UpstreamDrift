@@ -77,13 +77,26 @@ def test_native_marker_cost_has_correct_tangent_gradient_and_exact_clock() -> No
     )
 
     chart = NativeManifoldState(model)
-    bump = np.zeros(16)
-    bump[7] = 1e-6
-    finite = (
-        cost.cost(chart.integrate(state, bump), 1)
-        - cost.cost(chart.integrate(state, -bump), 1)
-    ) / 2e-6
-    assert np.isclose(gradient[7], finite, atol=1e-5)
+    numerical_site_jacobian = np.zeros((3, 16))
+    for column in range(16):
+        bump = np.eye(16)[column] * 1e-6
+        plus_state = chart.integrate(state, bump)
+        minus_state = chart.integrate(state, -bump)
+        numerical_site_jacobian[:, column] = (
+            _positions(mj, model, plus_state[: model.nq])[0]
+            - _positions(mj, model, minus_state[: model.nq])[0]
+        ) / 2e-6
+        finite = (cost.cost(plus_state, 1) - cost.cost(minus_state, 1)) / 2e-6
+        assert np.isclose(gradient[column], finite, atol=1e-5)
+    np.testing.assert_allclose(
+        hessian,
+        2
+        * targets.site_weights[0]
+        * numerical_site_jacobian.T
+        @ numerical_site_jacobian,
+        atol=1e-5,
+        rtol=1e-5,
+    )
     assert np.linalg.eigvalsh(hessian).min() >= -1e-9
     from src.engines.physics_engines.mujoco.python.native_manifold_box_fddp import (
         NativeManifoldAction,
@@ -101,13 +114,13 @@ def test_native_marker_cost_has_correct_tangent_gradient_and_exact_clock() -> No
     data = action.createData()
     action.calc(data, state, command)
     action.calcDiff(data, state, command)
-    direction = np.zeros(16)
-    direction[7] = 1e-6
     plus = action.createData()
     minus = action.createData()
-    action.calc(plus, chart.integrate(state, direction), command)
-    action.calc(minus, chart.integrate(state, -direction), command)
-    assert np.isclose(data.Lx[7], (plus.cost - minus.cost) / 2e-6, atol=1e-5)
+    for column in (3, 7):  # floating-root quaternion rotation, then hinge
+        direction = np.eye(16)[column] * 1e-6
+        action.calc(plus, chart.integrate(state, direction), command)
+        action.calc(minus, chart.integrate(state, -direction), command)
+        assert np.isclose(data.Lx[column], (plus.cost - minus.cost) / 2e-6, atol=1e-5)
     step = np.array([1e-6, 0.0])
     action.calc(plus, state, command + step)
     action.calc(minus, state, command - step)

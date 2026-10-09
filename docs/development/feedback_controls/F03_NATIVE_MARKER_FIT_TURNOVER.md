@@ -19,8 +19,10 @@ direct hinge motors and two world-frame sites. A separately replayed
 native teacher creates reachable moving marker targets; only the marker
 positions, mask and exact native clock reach the optimizer. One site-time
 sample is masked. An all-missing time row, wrong clock or missing site
-fails closed. Local site and chained action input/state gradients match
-finite differences on the native manifold. Every optimized proposal is
+fails closed. Every local site-gradient column and Gauss–Newton curvature
+matches an independently finite-differenced native site Jacobian; the
+chained action gradient agrees at both floating-root quaternion and hinge
+tangent coordinates and at the motor input. Every optimized proposal is
 rechecked by a full nonlinear native plan score against the zero-torque
 fallback. The exported bundle contains actual post-limit ZOH torque and
 complete initial native integration state; a fresh model executes it.
@@ -31,7 +33,7 @@ trajectory fully accepted. Independent visible-marker RMSE is
 `1.7134288601908426e-09 m` versus `0.008878453818013436 m` for a
 zero-torque native baseline. The maximum full-integration-state replay
 error is `0.0`. The single run's total wall/CPU are approximately
-`0.78/0.24 s`: target validation, derivative preflight, all solve calls,
+`0.56/0.24 s`: target validation, derivative preflight, all solve calls,
 native execution, export, fresh replay, baseline scoring and validation
 are included. Teacher generation and process startup are excluded.
 The five-second per-call cooperative cap is diagnostic, not a native

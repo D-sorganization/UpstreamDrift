@@ -52,8 +52,11 @@ state and input gradients, and the corresponding $A_k,B_k$ sandwich of
 $H_p$ to its Gauss–Newton Hessian blocks. It also adds the marker cost to
 the independently evaluated nonlinear plan score, including the terminal
 site observation. Finite differences of `mj_integratePos` perturbations
-check both the site tangent gradient and the action's $x_{k+1}$ chain;
-the source tests cover a masked site and input derivative separately.
+check every site tangent-gradient column and the Gauss–Newton outer
+product from an independently sampled site Jacobian. The action's
+$x_{k+1}$ chain is checked for both floating-root quaternion rotation
+and a hinge coordinate, along with an input derivative. A masked site
+cannot contribute to any of these terms.
 The Gauss–Newton matrix omits second derivatives of site kinematics and
 dynamics; line search and independent nonlinear scoring decide admission.
 
@@ -79,7 +82,7 @@ coordinates the independently scored marker RMSE is
 $1.71\times10^{-9}\,\mathrm m$ versus $8.88\times10^{-3}\,\mathrm m$
 for zero torque. Complete-state replay differs by zero within a
 $10^{-12}$ acceptance tolerance. The source-bound run measured
-$0.78\,\mathrm s$ wall and $0.24\,\mathrm s$ process CPU for target
+$0.56\,\mathrm s$ wall and $0.24\,\mathrm s$ process CPU for target
 validation, controller
 construction and derivative preflight, all native solves, execution,
 baseline comparison, export, fresh replay and score validation in one local
