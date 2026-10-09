@@ -78,4 +78,6 @@ The standalone LaTeX reference is regenerated from `DESIGN.md` via `pandoc --fro
 
 ## Repository Baselines
 
+Focused phase-two title-case checks pass for 13 changed research documents; the tracked Python line-count budget check also passes. See `validation/publication_document_checks.json`. These are preliminary checks and do not replace final pre-PR at the completed publication SHA.
+
 Design-manual structural governance passes, but release remains `blocked-inventory-required`. Architecture-map contract passes. The preliminary full tracked title audit reports 2,521 violations across 1,867 documents (earlier baseline: 2,505 across 1,861); final changed-document review remains required; development-log validation has existing owner/state/WIP/size failures. Preserve unrelated handoff content; root `AGENT_HANDOFF.md` already exceeds the fleet size target. Prior baseline issues #11934/#11935/#11940 must be checked at final pre-PR validation. Do not bypass hooks, change tolerances, force-push, or edit unrelated fleet work to make the study appear accepted.

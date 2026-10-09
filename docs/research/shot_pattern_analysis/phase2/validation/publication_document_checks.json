@@ -1,0 +1,14 @@
+{
+  "scope": "Preliminary publication document and module-size checks; not final pre-PR acceptance",
+  "head": "4b98b97b4760a8ef88752743fed63ff69ab70ee8",
+  "title_case": {
+    "command": "python3 scripts/check_document_title_case.py <13 phase2 MD/TeX paths changed from phase-one base>",
+    "result": "13 documents; zero violations",
+    "log_sha256": "aee65647d31bc161a66b32f7fd6d9143f2c1a53a9c5b5a4384d78dd52bbe312f"
+  },
+  "file_size": {
+    "command": "python3 scripts/ci/check_file_size_budget.py",
+    "result": "OK: Tracked files are within line-count budget.",
+    "log_sha256": "ef0b1774684c7ae18642c51b66ef94157c5104d462152f8413ecf44f0ff09430"
+  }
+}
