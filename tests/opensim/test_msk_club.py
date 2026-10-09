@@ -67,6 +67,12 @@ def _builder() -> ModuleType:
 
 
 # ------------------------------------------------------------------ pure XML
+def test_builder_rejects_a_tree_without_a_root() -> None:
+    builder = _builder()
+    with pytest.raises(ValueError, match="no root element"):
+        builder.write_model(builder.ET.ElementTree(), ROOT / "unused.osim")
+
+
 @pytest.mark.parametrize("name", sorted(MODELS))
 def test_club_meshes_are_the_shared_assembly_files_on_disk(name: str) -> None:
     meshes = _club_body(_model(name)).findall("attached_geometry/Mesh")

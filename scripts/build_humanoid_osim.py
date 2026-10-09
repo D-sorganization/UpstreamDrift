@@ -234,10 +234,18 @@ def _indent(elem: ET.Element, level: int = 0, *, tab: str = "\t") -> None:
             elem.tail = pad
 
 
+def _root(tree: ET.ElementTree) -> ET.Element:
+    """Root element of ``tree``; raises ``ValueError`` for an empty tree."""
+    root = tree.getroot()
+    if root is None:
+        raise ValueError("XML tree has no root element")
+    return root
+
+
 def build_skeleton(base_osim: Path | None = None) -> ET.ElementTree:
     """The golf skeleton: renamed, golf coordinates unlocked, one actuator each."""
     tree = _parse(base_osim if base_osim is not None else BASE_OSIM)
-    root = tree.getroot()
+    root = _root(tree)
     if root.tag != "OpenSimDocument":
         raise ValueError(f"Unexpected root element: {root.tag}")
     model = _find_one(root, "Model")
@@ -265,7 +273,7 @@ def attach_improved_club(
     Raises ``KeyError`` when ``model_name`` has no committed grip calibration
     for ``club`` (run ``msk_club_calibration`` on the model first).
     """
-    model = _find_one(tree.getroot(), "Model")
+    model = _find_one(_root(tree), "Model")
     calibration = msk_club.load_calibration(model_name, club, calibration_path)
     msk_club.attach_club(
         model, msk_club.load_msk_club(club), calibration, grip_model=grip_model
@@ -275,7 +283,7 @@ def attach_improved_club(
 
 def write_model(tree: ET.ElementTree, output_path: Path) -> Path:
     """Write ``tree`` deterministically (tab indentation, fixed declaration)."""
-    root = tree.getroot()
+    root = _root(tree)
     for elem in root.iter():  # re-indent from scratch so rebuilds are byte-stable
         if len(elem):
             elem.text = None
