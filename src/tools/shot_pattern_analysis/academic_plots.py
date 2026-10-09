@@ -29,6 +29,7 @@ _HDR_STYLES = {
     0.80: ("dashed", "80% HDR"),
     0.95: ("dotted", "95% HDR"),
 }
+_MAX_OVERLAY_DOTS = 600
 
 
 def _validate_metadata(metadata: Mapping[str, Any]) -> str:
@@ -214,6 +215,9 @@ def write_academic_dispersion_figure(
     if valid_counts and valid_counts != actual_valid_counts:
         raise ValueError("metadata valid_shots_by_pattern differs from endpoint counts")
     population = _population_caption(names, actual_valid_counts, total_counts)
+    overlay_counts = {
+        name: min(actual_valid_counts[name], _MAX_OVERLAY_DOTS) for name in names
+    }
     plt = _matplotlib()
     figure = plt.figure(figsize=(16.5, 9.8), facecolor="white")
     outer = figure.add_gridspec(
@@ -242,12 +246,15 @@ def write_academic_dispersion_figure(
             rasterized=True,
         )
         sample = np.asarray(points_by_pattern[name], dtype=float)
+        overlay_indices = np.linspace(
+            0, len(sample) - 1, overlay_counts[name], dtype=int
+        )
         axis.scatter(
-            sample[:, 0],
-            sample[:, 1],
-            s=7,
+            sample[overlay_indices, 0],
+            sample[overlay_indices, 1],
+            s=5,
             color=color,
-            alpha=0.30,
+            alpha=0.22,
             linewidths=0,
             rasterized=True,
             zorder=3,
@@ -381,11 +388,16 @@ def write_academic_dispersion_figure(
         )
     )
     dx, dy = estimate.bin_resolution_m
+    overlay_caption = "Colored Dots Shown/Valid: " + "; ".join(
+        f"{name} {overlay_counts[name]:,}/{actual_valid_counts[name]:,}"
+        for name in names
+    )
     figure.text(
         0.06,
         0.025,
         textwrap.fill(
             f"{_PILOT_FIGURE_LABEL}. HDR mass is sample-derived from simulated endpoints. "
+            f"{overlay_caption}; density, HDR, and marginals use every valid endpoint. "
             "Histogram only; no KDE or synthetic covariance spread; not calibrated player precision. "
             f"Bin resolution: {dx:.3g} × {dy:.3g} m. {achieved_text}",
             width=210,
@@ -497,8 +509,8 @@ def write_overhead_trajectory_figure(
                 trajectory[:, 0],
                 trajectory[:, 1],
                 color=color,
-                alpha=0.24,
-                linewidth=0.8,
+                alpha=0.72,
+                linewidth=1.3,
                 rasterized=True,
             )
         axis.scatter([target_x_m], [0.0], marker="+", color="#111111", s=38, zorder=3)
@@ -538,11 +550,18 @@ def write_overhead_trajectory_figure(
         va="top",
         color="#333333",
     )
+    figure.canvas.draw()
+    axis_for_scale = axes[0][0]
+    origin_px = axis_for_scale.transData.transform((0.0, 0.0))
+    x_unit_px = axis_for_scale.transData.transform((1.0, 0.0))
+    y_unit_px = axis_for_scale.transData.transform((0.0, 1.0))
+    vertical_scale_ratio = (y_unit_px[1] - origin_px[1]) / (x_unit_px[0] - origin_px[0])
     figure.text(
         0.06,
         0.025,
         textwrap.fill(
             f"{_PILOT_FIGURE_LABEL}. Raw simulation trajectories; no aim-line rotation. "
+            f"Vertical display magnification: {vertical_scale_ratio:.1f}× versus downrange. "
             "Only the displayed sample paths are plotted; paths are sampled from supported airborne shots.",
             width=180,
             break_long_words=False,

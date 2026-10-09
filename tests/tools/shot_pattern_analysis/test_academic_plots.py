@@ -259,6 +259,74 @@ def test_overhead_figure_uses_raw_trajectories_and_exports_all_formats(
     assert "no aim-line rotation" in svg
     assert "Straight 997/1,000 valid" in svg
     assert "Illustrative Simulation • Assumed Head Properties • Carry Only" in svg
+    assert "Vertical display magnification" in svg
+
+
+def test_density_overlay_is_a_disclosed_deterministic_subset(
+    tmp_path, monkeypatch
+) -> None:
+    write_dispersion, _ = _plot_api()
+    import src.tools.shot_pattern_analysis.academic_plots as plots
+
+    captured = {}
+
+    def capture_figure(figure, _stem, *, dpi):
+        captured["figure"] = figure
+        return {}
+
+    monkeypatch.setattr(plots, "_save_formats", capture_figure)
+    points = np.column_stack(
+        (np.arange(1000, dtype=float), np.arange(1000, dtype=float))
+    )
+    write_dispersion(
+        {"Straight": points},
+        tmp_path / "disclosed_subset",
+        scenario="Synthetic Plot Subset",
+        metadata={},
+        target_point_m=(500.0, 500.0),
+        bins=32,
+        dpi=96,
+    )
+    figure = captured["figure"]
+    endpoint_axis = figure.axes[1]
+    overlay = endpoint_axis.collections[1]
+    expected = points[np.linspace(0, 999, 600, dtype=int)]
+    np.testing.assert_array_equal(overlay.get_offsets(), expected)
+    assert any("600/1,000" in artist.get_text() for artist in figure.texts)
+
+
+def test_overhead_discloses_actual_axis_magnification_and_legible_paths(
+    tmp_path, monkeypatch
+) -> None:
+    _, write_overhead = _plot_api()
+    import src.tools.shot_pattern_analysis.academic_plots as plots
+
+    captured = {}
+
+    def capture_figure(figure, _stem, *, dpi):
+        captured["figure"] = figure
+        return {}
+
+    monkeypatch.setattr(plots, "_save_formats", capture_figure)
+    write_overhead(
+        {"Straight": [np.array([[0.0, 0.0], [180.0, 10.0]])]},
+        tmp_path / "axis_magnification",
+        target_x_m=180.0,
+        scenario="Synthetic Axis Contract",
+        metadata={},
+        dpi=96,
+    )
+    figure = captured["figure"]
+    figure.canvas.draw()
+    axis = figure.axes[0]
+    origin = axis.transData.transform((0.0, 0.0))
+    x_step = axis.transData.transform((1.0, 0.0))
+    y_step = axis.transData.transform((0.0, 1.0))
+    expected = (y_step[1] - origin[1]) / (x_step[0] - origin[0])
+    assert any(f"{expected:.1f}×" in artist.get_text() for artist in figure.texts)
+    path = axis.lines[0]
+    assert path.get_alpha() >= 0.6
+    assert path.get_linewidth() >= 1.1
 
 
 @pytest.mark.slow
