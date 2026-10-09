@@ -10497,20 +10497,6 @@ are unqualified for source-resource closure, physiology, contact/grip, capture
 matching or independent excitation replay. Canonical method is provisional
 chapter 38 and the source/turnover receipt remains local.
 
-## Native OpenSim Marker Geometry (F07/F08, #11903)
-
-Explicit native model/frame/station bindings supply actual OpenSim geometry to
-shared calibration and trajectory IK. Selected coordinates must be independent;
-native assembly must achieve them, preserve other independent coordinates and
-respect every source range, including dependent coordinates. Metadata-only
-geometry, zero closure and no-op dynamics are rejected. Explicit finite bounds
-opt into TRF in the existing shared trajectory solver; default LM is unchanged.
-The three-sample pelvis diagnostic retains source clock, hashes, native identity,
-residuals and failures through existing frozen-loader/TRC contracts. Its source
-candidate reaches a pelvis rotation bound and remains unqualified: fixed frame
-registration and anatomical calibration are unresolved. Canonical authority is
-chapter26; no capture, whole-body or full-state replay acceptance is claimed.
-
 ## Native Offline OpenSim Muscle Matching (#11968)
 
 The maintained `tour_matching.cli moco-native` command consumes a strict,
@@ -10561,3 +10547,20 @@ unchanged 520-muscle source produced 1,348 finite states at the driver and
 iron clocks. Both #11968 private preparations then lost exactly the artificial
 guess-file blocker, retaining six scientific/native blockers and doing no solve.
 Canonical chapter39 and the child turnover preserve the proof and limits.
+## Owned Native Simscape Diagnostic Replay
+
+F06d2 (#11942, parent #11921) consumes the separate Tools native-state envelope
+through immutable owned bytes. Actual R2025b class/clock/configuration and
+explicit simulation-checksum bindings precede strict complete-state restore.
+Native tests cover suffix-only and changed-future forces, independent full-run
+outputs, conflicting workspace inputs, byte identity and failure cleanup.
+The v5 source boundary additionally rejects a two-ULP snapshot-clock change,
+nonfinite or nonscalar saved time, wrong/missing saved provider identity and
+loaded-SLX path mismatch before native replay. The public evidence manifest
+binds an immutable 59-file fleet-local archive of source, request, model,
+operating point, native logs and outputs. The archive is a synthetic diagnostic
+artifact, not production-model or capture evidence.
+Canonical reference: `manuals/upstreamdrift/chapters/34-owned-native-simscape-replay.qmd`;
+turnover and source-hashed receipt: `docs/development/feedback_controls/F06D2_OWNED_SIMSCAPE_TURNOVER.md`
+and `F06D2_NATIVE_OWNED_RECEIPT.json`. This trusted synthetic diagnostic does not
+qualify production variants, muscle physiology, private capture or parity.

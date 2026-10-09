@@ -179,6 +179,11 @@
       "id": "UP-D1-native-moco-numerical-guess-inventory",
       "owner": "UpstreamDrift issue #11990",
       "resolution": "Inventory the source-bound native OpenSim numerical state seed in tour_matching/native_moco_guess.py and chapter39. Exact native source/loaded/runtime, 17-digit STO readback, ordered complete continuous states and frozen observation clocks are checked; synthetic MocoGuess state/control coverage and real pinned 520-muscle driver/iron preparation remove only the missing-guess blocker. Equilibrated model defaults are not measured or physiologically approved state, source XML hash does not close external resources, and six production blockers remain before any solve."
+    },
+    {
+      "id": "UP-D1-owned-native-simscape-replay-inventory",
+      "owner": "UpstreamDrift issue #11942",
+      "resolution": "Inventory chapter34 verified owned Tools native envelope admission, trusted R2025b complete-state decoder, explicit simulation/configuration bindings, exact saved metadata clock/provider and loaded-SLX path rejection, strict restoration diagnostics and full-interval same/changed-future native physical/discrete/input evidence. A committed manifest hashes the restricted 59-file v5 source/model/request/output archive. Source-bound synthetic diagnostic receipts do not qualify production variants, transitive libraries, physiology, capture accuracy or six-engine parity. The merged Tools pin is exact and byte-equivalent to the executed source; scientific release remains blocked."
     }
   ],
   "calculations": []
