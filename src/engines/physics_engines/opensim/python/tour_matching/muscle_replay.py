@@ -213,6 +213,37 @@ def _integrate_native_replay(
     return states, forces, applied
 
 
+def _admit_native_muscles(
+    model: Any,
+    controls: Mapping[str, NDArray[np.float64]],
+) -> tuple[Any, tuple[str, ...]]:
+    """Reject hidden drive mechanisms before adding the owned input player."""
+    import opensim as osim
+
+    recursive_muscle_paths = _audit_drive_components(model, osim)
+    muscles = model.getMuscles()
+    muscle_names = tuple(muscles.get(i).getName() for i in range(muscles.getSize()))
+    registered_paths = {
+        muscles.get(i).getAbsolutePathString() for i in range(muscles.getSize())
+    }
+    if recursive_muscle_paths != registered_paths:
+        raise ValueError("native muscle registry omits recursively owned muscles")
+    if not muscle_names or len(set(muscle_names)) != len(muscle_names):
+        raise ValueError("model must contain uniquely named muscles")
+    coordinates = model.getCoordinateSet()
+    if any(
+        coordinates.get(i).getDefaultIsPrescribed()
+        for i in range(coordinates.getSize())
+    ):
+        raise ValueError("prescribed coordinate is forbidden in independent replay")
+    if any(coordinates.get(i).getDefaultLocked() for i in range(coordinates.getSize())):
+        raise ValueError("locked coordinate needs a qualified initialization policy")
+    if set(controls) != set(muscle_names):
+        raise ValueError("excitation names must exactly match native muscle names")
+
+    return muscles, muscle_names
+
+
 def replay_muscle_excitations(
     model_path: str | Path,
     initial_state: Mapping[str, float],
@@ -243,27 +274,7 @@ def replay_muscle_excitations(
     path = Path(model_path)
     model_digest = hashlib.sha256(path.read_bytes()).hexdigest()
     model = osim.Model(str(path))
-    recursive_muscle_paths = _audit_drive_components(model, osim)
-    muscles = model.getMuscles()
-    muscle_names = tuple(muscles.get(i).getName() for i in range(muscles.getSize()))
-    registered_paths = {
-        muscles.get(i).getAbsolutePathString() for i in range(muscles.getSize())
-    }
-    if recursive_muscle_paths != registered_paths:
-        raise ValueError("native muscle registry omits recursively owned muscles")
-    if not muscle_names or len(set(muscle_names)) != len(muscle_names):
-        raise ValueError("model must contain uniquely named muscles")
-    coordinates = model.getCoordinateSet()
-    if any(
-        coordinates.get(i).getDefaultIsPrescribed()
-        for i in range(coordinates.getSize())
-    ):
-        raise ValueError("prescribed coordinate is forbidden in independent replay")
-    if any(coordinates.get(i).getDefaultLocked() for i in range(coordinates.getSize())):
-        raise ValueError("locked coordinate needs a qualified initialization policy")
-    if set(controls) != set(muscle_names):
-        raise ValueError("excitation names must exactly match native muscle names")
-
+    muscles, muscle_names = _admit_native_muscles(model, controls)
     _configure_input_player(model, muscles, muscle_names, grid, controls)
     model.finalizeConnections()
     state, state_names, domains = _restore_continuous_state(
