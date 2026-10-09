@@ -113,7 +113,7 @@ def test_sliding_solution_honors_friction_cone_and_energy() -> None:
 def test_sticking_eliminates_tangential_contact_slip() -> None:
     state = _state(
         club_velocity_mps=np.array([45.0, 3.0, 1.0]),
-        club_lever_m=np.array([0.04, 0.01, -0.01]),
+        club_lever_m=np.array([0.04, 0.0, 0.0]),
         friction_coefficient=1.0,
     )
     result = solve_rigid_contact(state)
@@ -128,6 +128,65 @@ def test_sticking_eliminates_tangential_contact_slip() -> None:
     np.testing.assert_allclose(
         relative - (relative @ state.normal) * state.normal, 0.0, atol=1e-9
     )
+
+
+def test_coupled_contact_max_dissipation_remains_passive_at_unit_restitution() -> None:
+    state = _state(
+        club_velocity_mps=np.array([45.0, -3.0, -1.0]),
+        club_lever_m=np.array([0.04, 0.02, 0.01]),
+        friction_coefficient=1.0,
+        restitution=1.0,
+    )
+    result = solve_rigid_contact(state)
+    assert result.friction_regime == "cone_interior"
+    assert result.post_kinetic_energy_j <= result.pre_kinetic_energy_j + 1e-8
+
+
+def test_oblique_low_friction_contact_converges_without_fallback() -> None:
+    state = _state(
+        club_velocity_mps=np.array(
+            [45.91163670364143, -3.327665557698492, -7.915072419021829]
+        ),
+        club_angular_velocity_rad_s=np.array(
+            [-4.247835990531772, -0.1190101142975255, 1.472877586113383]
+        ),
+        ball_velocity_mps=np.array(
+            [0.48862184031169553, 1.5730498044237486, -0.5504539395498744]
+        ),
+        ball_angular_velocity_rad_s=np.array(
+            [146.9488298301136, 5.945044796291509, -111.74812844130808]
+        ),
+        normal=np.array(
+            [0.9878226349876489, 0.15425297521516768, -0.02030914678973547]
+        ),
+        club_lever_m=np.array(
+            [0.032397619356710546, 0.016916612982004493, -0.019078122813383457]
+        ),
+        club_inertia_world_kg_m2=np.array(
+            [
+                [
+                    0.00025378579526314545,
+                    -0.00002416997153885666,
+                    0.000000561531793905597,
+                ],
+                [
+                    -0.000024169971538856667,
+                    0.0004075788773620302,
+                    0.000021239971109340275,
+                ],
+                [
+                    0.0000005615317939055961,
+                    0.00002123997110934028,
+                    0.00043863532737482423,
+                ],
+            ]
+        ),
+        restitution=0.83,
+        friction_coefficient=0.02,
+    )
+    result = solve_rigid_contact(state)
+    assert result.friction_regime == "slide"
+    assert result.post_kinetic_energy_j <= result.pre_kinetic_energy_j + 1e-8
 
 
 def test_rotating_all_inputs_rotates_all_outputs() -> None:

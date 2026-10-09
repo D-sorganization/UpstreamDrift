@@ -124,14 +124,14 @@ def match_nominal_landing(
             )
         return outcome
 
+    def residuals(candidate: np.ndarray) -> np.ndarray:
+        landing = simulate(candidate)
+        return np.array(
+            [landing.carry_x_m - target_x_m, landing.carry_y_m], dtype=float
+        )
+
     result = least_squares(
-        lambda candidate: np.array(
-            [
-                (landing := simulate(candidate)).carry_x_m - target_x_m,
-                landing.carry_y_m,
-            ],
-            dtype=float,
-        ),
+        residuals,
         initial,
         bounds=(low, high),
         max_nfev=80,

@@ -1,8 +1,9 @@
 """Finite-inertia two-body point impact with a bounded tangential impulse.
 
-The normal impulse obeys a Newton restitution equality. Tangential response
-sticks when feasible; otherwise a convex maximum-dissipation impulse is found
-inside a Coulomb cone. This instantaneous law does not resolve the time history
+The normal impulse obeys a Newton restitution equality. The impulse minimizes
+post-impact kinetic energy within a Coulomb cone. An analytic interior solution
+is used when feasible; otherwise the cone boundary is optimized. This
+instantaneous law does not resolve the time history
 of a compliant ball-face contact or grooves.
 """
 
@@ -12,7 +13,7 @@ import math
 from dataclasses import dataclass
 
 import numpy as np
-from scipy.optimize import minimize
+from scipy.optimize import LinearConstraint, NonlinearConstraint, minimize
 
 from src.shared.python.core.physics_constants import (
     GOLF_BALL_MASS_KG,
@@ -114,20 +115,23 @@ def _sliding_impulse(
             np.linalg.norm(tangential(impulse))
         )
 
+    def objective(impulse: np.ndarray) -> float:
+        return 0.5 * float(impulse @ k @ impulse) - float(relative_velocity @ impulse)
+
+    def gradient(impulse: np.ndarray) -> np.ndarray:
+        return k @ impulse - relative_velocity
+
+    def cone_vector(impulse: np.ndarray) -> np.ndarray:
+        return np.array([cone(impulse)], dtype=float)
+
     solution = minimize(
-        lambda impulse: (
-            0.5 * float(impulse @ k @ impulse) - float(relative_velocity @ impulse)
-        ),
+        objective,
         pure_normal,
-        jac=lambda impulse: k @ impulse - relative_velocity,
+        jac=gradient,
         method="SLSQP",
         constraints=(
-            {
-                "type": "eq",
-                "fun": lambda impulse: float(normal @ k @ impulse) - normal_target,
-                "jac": lambda _impulse: normal @ k,
-            },
-            {"type": "ineq", "fun": cone},
+            LinearConstraint(normal @ k, normal_target, normal_target),
+            NonlinearConstraint(cone_vector, 0.0, math.inf),
         ),
         options={"ftol": 1e-12, "maxiter": 150},
     )
@@ -190,13 +194,27 @@ def solve_rigid_contact(state: RigidContactInput) -> RigidContactResult:
     if float(np.linalg.eigvalsh(effective_inverse_mass).min()) <= 0:
         raise RuntimeError("contact inverse mass must be positive definite")
     normal_target = (1.0 + state.restitution) * approach
-    desired_relative_change = relative + state.restitution * approach * normal
-    sticking_impulse = np.linalg.solve(effective_inverse_mass, desired_relative_change)
-    jn = float(sticking_impulse @ normal)
-    jt = sticking_impulse - jn * normal
+    # Equality-constrained energy minimizer. A zero-tangential-post-slip
+    # impulse is not generally the minimizer when off-center inertia couples
+    # normal and tangential response.
+    interior_impulse = (
+        np.linalg.solve(effective_inverse_mass, relative)
+        + state.restitution
+        * approach
+        / float(normal @ effective_inverse_mass @ normal)
+        * normal
+    )
+    jn = float(interior_impulse @ normal)
+    jt = interior_impulse - jn * normal
     if jn >= 0 and float(np.linalg.norm(jt)) <= state.friction_coefficient * jn + 1e-12:
-        impulse = sticking_impulse
-        regime = "stick"
+        impulse = interior_impulse
+        interior_post_relative = relative - effective_inverse_mass @ impulse
+        post_tangent = (
+            interior_post_relative - float(interior_post_relative @ normal) * normal
+        )
+        regime = (
+            "stick" if float(np.linalg.norm(post_tangent)) <= 1e-9 else "cone_interior"
+        )
     elif state.friction_coefficient == 0:
         impulse = normal * (
             normal_target / float(normal @ effective_inverse_mass @ normal)
