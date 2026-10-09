@@ -95,6 +95,39 @@ def test_summary_reports_rows_knees_and_the_common_default(tmp_path: Path) -> No
     json.dumps(summary)  # serialisable
 
 
+EVIDENCE = (
+    Path(__file__).resolve().parents[2]
+    / "docs/development/full_body_models/evidence/head_gaze"
+)
+
+
+def test_committed_sweep_evidence_reproduces_the_reporting_weight() -> None:
+    from src.shared.python.motion_matching import gaze_sweep as gs
+
+    summary = json.loads((EVIDENCE / "gaze_weight_sweep.json").read_text())
+    sweeps = {
+        capture: [
+            gs.SweepPoint(
+                r["gaze_weight"],
+                r["marker_rms_mm"],
+                r["theta_gaze_rms_deg"],
+                r["face_fit_rms_deg"],
+            )
+            for r in block["rows"]
+        ]
+        for capture, block in summary["captures"].items()
+    }
+    assert set(sweeps) == {"driver", "iron"}
+    assert gs.select_default(sweeps) == summary["selected_weight"]
+    assert summary["selected_weight"] == gs.REPORTING_GAZE_WEIGHT
+
+
+def test_qualified_receipts_stay_marker_faithful_by_default() -> None:
+    from src.shared.python.motion_matching.pipeline.cli import build_parser
+
+    assert build_parser().get_default("gaze_weight") == 0.0
+
+
 def test_load_rows_rejects_an_empty_root(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="no sweep_row"):
         load_rows(tmp_path)

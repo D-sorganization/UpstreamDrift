@@ -17,6 +17,11 @@ from typing import Any
 
 MARKER_TOLERANCE = 0.10
 FACE_CAP_DEG = 5.0
+# ``select_default`` over the committed capture-A driver and capture-B iron
+# sweep (evidence/head_gaze/gaze_weight_sweep.json). This is the weight for
+# gaze-regularised reports and clips only; qualified receipts keep
+# ``--gaze-weight 0`` (marker-faithful).
+REPORTING_GAZE_WEIGHT = 0.1
 
 
 @dataclass(frozen=True)
