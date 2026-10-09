@@ -19,7 +19,10 @@
     "passed": 29,
     "failed": 1,
     "reason": "Concurrent API file edit correctly triggered existing source-drift guard; rerun after commit and source hold passed",
-    "log_sha256": "d428564a05fea0d01ebfec248254ebb38eb571f252101cbfa03113093943a87f"
+    "log_sha256": "d428564a05fea0d01ebfec248254ebb38eb571f252101cbfa03113093943a87f",
+    "log_storage": "EXPLICIT_PAIR_SOURCE_DRIFT_TESTS.txt.gz",
+    "log_storage_sha256": "97dcc4ac2153db2d2625a9c29cc579fc14f6b5f15e39733e9b887342eac604f7",
+    "log_sha256_scope": "Uncompressed original pytest output, preserved losslessly"
   },
   "scope": "Code-level paired estimand/integrity qualification only; not source-transition, final simulation, final data, pipeline or empirical acceptance"
 }
