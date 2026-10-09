@@ -319,6 +319,145 @@ export interface ArmShotResponse {
   state: string;
 }
 
+/**
+ * The browsable part library.
+ */
+export interface AssemblyCatalogResponse {
+  categories: AssemblyCategory[];
+  parts: AssemblyPart[];
+}
+
+/**
+ * A catalog category id and its display label.
+ */
+export interface AssemblyCategory {
+  id: string;
+  label: string;
+}
+
+/**
+ * Whether the candidate drop is allowed, and why.
+ */
+export interface AssemblyDropDecision {
+  accepted: boolean;
+  reason: string;
+  part_id: string;
+  host_port: string;
+  findings: AssemblyFinding[];
+}
+
+/**
+ * An assembly to rebuild and serialize.
+ */
+export interface AssemblyExportRequest {
+  /** Base part id */
+  base_part_id: string;
+  /** Drops applied in order */
+  steps?: AssemblyStep[];
+  /** Export format */
+  format: "urdf" | "mjcf";
+  /** Export despite validation errors */
+  force: boolean;
+}
+
+/**
+ * Serialized assembly content.
+ */
+export interface AssemblyExportResponse {
+  format: "urdf" | "mjcf";
+  content: string;
+  validation: AssemblyValidation;
+}
+
+/**
+ * One composition-validation finding.
+ */
+export interface AssemblyFinding {
+  code: string;
+  severity: string;
+  message: string;
+  elements?: string[];
+  category: string;
+}
+
+/**
+ * A catalog part that can be dragged into an assembly.
+ */
+export interface AssemblyPart {
+  part_id: string;
+  name: string;
+  category: string;
+  description: string;
+  ports: AssemblyPort[];
+}
+
+/**
+ * A part instance inside the assembly (base first).
+ */
+export interface AssemblyPlacedPart {
+  instance_id: string;
+  part_id: string;
+  host_port: string | null;
+  host_instance: string | null;
+  links: string[];
+  joints: string[];
+}
+
+/**
+ * An assembly to rebuild, plus an optional drop to evaluate (drag hover).
+ */
+export interface AssemblyPlanRequest {
+  /** Base part id */
+  base_part_id: string;
+  /** Drops applied in order */
+  steps?: AssemblyStep[];
+  /** Drop to evaluate without applying it */
+  candidate?: AssemblyStep | null;
+}
+
+/**
+ * A typed attachment port (``AttachmentPoint.to_dict`` shape).
+ */
+export interface AssemblyPort {
+  name: string;
+  link_name: string;
+  role: string;
+  interface_frame?: Record<string, number[]>;
+  tags?: string[];
+  max_payload_kg?: number | null;
+  port_type?: string | null;
+  polarity?: string | null;
+}
+
+/**
+ * The rebuilt assembly: tree, placed parts, free sockets, validation.
+ */
+export interface AssemblyStateResponse {
+  model: ModelExplorerResponse;
+  placed: AssemblyPlacedPart[];
+  free_sockets: AssemblyPort[];
+  validation: AssemblyValidation;
+  drop?: AssemblyDropDecision | null;
+}
+
+/**
+ * One drop: put ``part_id`` on the host socket ``host_port``.
+ */
+export interface AssemblyStep {
+  /** Catalog part id */
+  part_id: string;
+  /** Model-level name of the host socket */
+  host_port: string;
+}
+
+/**
+ * Composition validation for the assembled model.
+ */
+export interface AssemblyValidation {
+  ok: boolean;
+  findings: AssemblyFinding[];
+}
+
 export interface AssetRequest {
   id: string;
   source_path: string;
