@@ -10512,3 +10512,23 @@ manifold, muscle, private capture, six-engine and full-swing gates remain
 unqualified and F05 #11789 stays open. The provisional canonical calculation
 is chapter 24 and turnover is
 `docs/development/feedback_controls/F05B_NATIVE_BOX_FDDP_TURNOVER.md`.
+
+## Native Multi-DOF Manifold Derivative Boundary (F05c, #11920)
+
+`native_tangent_derivative.py` admits a gravity-free, contact-free floating
+root with two connected hinges and two bounded direct unit motors. Its
+$n_q=9$, $n_v=8$ state requires a quaternion configuration tangent: native
+MuJoCo Euler `mjd_transitionFD` produces $A\in\mathbb R^{16\times16}$ and
+$B\in\mathbb R^{16\times2}$, checked against independently perturbed native
+steps using `mj_integratePos` and `mj_differentiatePos`. RK4, hidden gravity
+compensation, invalid motor topology/order and out-of-limit commands reject.
+The pinned F06/Tools T01 path binds a complete native integration state,
+ordered post-limit ZOH torque history, model and policy; a fresh native model
+replays the same full integration-state trajectory to 1e-12. The supported
+MuJoCo 3.8 source-hashed receipt retains all four predeclared tests and
+derivative/bundle/replay wall times. This is a plant derivative and input
+reproduction slice, not an optimized multi-DOF controller, measured capture
+fit, hard-real-time bound, contact/muscle or full-body six-engine gate. F05
+parent #11789 remains open. The provisional canonical calculation is chapter
+25 and turnover is
+`docs/development/feedback_controls/F05C_NATIVE_TANGENT_TURNOVER.md`.

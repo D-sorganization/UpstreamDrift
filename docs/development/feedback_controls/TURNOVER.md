@@ -80,3 +80,12 @@ independent frozen-torque replay are described in
 runtime, all predeclared statuses, execution/setup/replay timing and source
 hashes. F02 TVLQR remains the broader default; F05 full-body and capture
 qualification stay open.
+
+## F05C Native Multi-DOF Tangent Boundary
+
+`F05C_NATIVE_TANGENT_TURNOVER.md` and provisional chapter 25 document an
+unactuated floating root plus two directly torqued hinges. Supported native
+MuJoCo Euler derivatives are checked in the $n_v$ configuration tangent and
+the complete post-limit torque history independently replays through the
+pinned Tools T01 contract. The source-hashed receipt retains derivative and
+cold replay timing; it does not select a multi-DOF optimizer or promote F05.
