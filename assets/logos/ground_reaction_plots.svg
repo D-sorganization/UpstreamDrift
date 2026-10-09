@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <!-- Ground line -->
+  <line x1="8" y1="84" x2="92" y2="84" stroke="white" stroke-width="4" stroke-linecap="round" opacity="0.9" />
+  <!-- Feet -->
+  <rect x="16" y="76" width="22" height="7" rx="3" fill="white" opacity="0.9" />
+  <rect x="62" y="76" width="22" height="7" rx="3" fill="white" opacity="0.9" />
+  <!-- Left foot vertical reaction -->
+  <path d="M27,74 L27,40" stroke="#0072B2" stroke-width="3.5" fill="none" opacity="0.95" />
+  <path d="M21,46 L27,38 L33,46" stroke="#0072B2" stroke-width="3" fill="none" stroke-linejoin="round" opacity="0.95" />
+  <!-- Right foot vertical reaction (larger) -->
+  <path d="M73,74 L73,20" stroke="#E69F00" stroke-width="3.5" fill="none" opacity="0.95" />
+  <path d="M67,26 L73,18 L79,26" stroke="#E69F00" stroke-width="3" fill="none" stroke-linejoin="round" opacity="0.95" />
+  <!-- Net force trace over time -->
+  <path d="M10,62 C30,62 40,60 50,48 S66,30 90,34" stroke="#009E73" stroke-width="3" fill="none" opacity="0.95" />
+</svg>

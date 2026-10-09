@@ -14,6 +14,7 @@ import type { ExportFormat } from '@/api/useAnalysisTools';
 import { CounterfactualPanel } from '@/components/analysis/CounterfactualPanel';
 import { ImpactParametersPanel } from '@/components/analysis/ImpactParametersPanel';
 import { GripWrenchCharts } from '@/components/analysis/GripWrenchCharts';
+import { GroundReactionCharts } from '@/components/analysis/GroundReactionCharts';
 import { PlotsSection } from '@/components/analysis/PlotsSection';
 import { WorkspaceShell } from '@/components/layout/WorkspaceShell';
 export type {
@@ -190,6 +191,9 @@ export function AnalysisToolsPage() {
 
             {/* Club grip force and torque plots (GCV-10, #11716) */}
             <GripWrenchCharts />
+
+            {/* Ground reaction under the feet (GCV-5, #11711) */}
+            <GroundReactionCharts />
 
             {/* Export Section */}
             <div className="bg-gray-800 rounded-lg border border-gray-700 p-4">

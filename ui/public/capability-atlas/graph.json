@@ -67,6 +67,22 @@
       "id": "analysis.grip_wrench"
     },
     {
+      "feature_id": "analysis.ground_reaction",
+      "title": "Ground reaction plots: per-foot and net force (N and body weights), vertical load share, CoP path, free moment and moment about CoM",
+      "status": "parity",
+      "pyqt": "src/tools/ground_reaction_plots/gui.py",
+      "api": "src/api/routes/analysis.py",
+      "web": "ui/src/components/analysis/GroundReactionCharts.tsx",
+      "issue": null,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [
+        "ground_reaction_plots"
+      ],
+      "notes": "GCV-5 (#11711): one plot series (biomechanics.ground_reaction_plot_model, built from the GCV-1 GroundReactionSeries) feeds the PyQt6 Ground Reaction Plots tile (six-panel sheet from plotting.renderers.ground_reaction), GET /api/analysis/ground-reaction and the web GroundReactionCharts on the Analysis Tools page, so both surfaces draw the same panels with address/top/impact/finish markers. CoP and load share are null below 10 N of vertical load; an engine without ground reaction (Simscape until GCV-3) is shown as unavailable with its reason, never as zero.",
+      "id": "analysis.ground_reaction"
+    },
+    {
       "feature_id": "analysis.impact_parameters",
       "title": "Impact parameters panel (speed, attack angle, path, face, face-to-path, dynamic loft, spin loft) relative to a target line",
       "status": "parity",
@@ -1512,6 +1528,20 @@
       "capabilities": [
         "grip_wrench",
         "club_forces",
+        "force_plots"
+      ]
+    },
+    {
+      "id": "ground_reaction_plots",
+      "title": "Ground Reaction Plots",
+      "description": "Ground reaction under each foot and in total over time: vertical force in body weights, load share, centre-of-pressure path, free moment and moment about the centre of mass",
+      "path": "src/tools/ground_reaction_plots/__main__.py",
+      "launch_target": "src/tools/ground_reaction_plots/__main__.py",
+      "category": "tool",
+      "status": "ready",
+      "capabilities": [
+        "ground_reaction",
+        "foot_forces",
         "force_plots"
       ]
     },
@@ -3100,9 +3130,9 @@
     ]
   },
   "inputs": {
-    "src/config/models.yaml": "dece91b25bf128054b74ac90562668cf18dc75bc042360e96b3d4f42801c5414",
-    "src/config/launcher_manifest.json": "2c1c60c07fbdc12466c114065a0a2ca1a839f58995850097b9648a9ac2d8f792",
-    "src/config/feature_parity.json": "71314b8627e13e5f0f0af563e3c79150813ac61511578c5acbc711fc6dd50092",
+    "src/config/models.yaml": "e11682df79d7467f1eba9579d835f5d7019bfd7eb09cf81c14e22bd08d0bf844",
+    "src/config/launcher_manifest.json": "1ae28f872b54c237440fcaacec40b735b93a7b80d710adc9228ef671b7831032",
+    "src/config/feature_parity.json": "8266dad1c1ecff21acda1890fa9068d6e6fea1000c0ff8d3c13a49e1a2d6a9af",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }
