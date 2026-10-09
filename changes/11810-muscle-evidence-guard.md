@@ -1,8 +1,8 @@
 ---
-issue: 11791
+issue: 11810
 summary: "Prevent parameter-only muscle audits from fabricating native qualification evidence"
-dl_state: "in_progress"
-next_step: "Remove invented native replay metrics and leave unperformed audits unqualified."
+dl_state: "in_review"
+next_step: "Review evidence guard; continue genuine native qualification under F07 #11791."
 owner: "codex"
 branch: "fix/feedback-muscle-evidence-11791"
 paths: "src/engines/physics_engines/opensim/python/tour_matching/muscle_qualification.py; tests/opensim/test_muscle_cmc.py"

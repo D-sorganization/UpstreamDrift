@@ -1,6 +1,6 @@
 # Active: Muscle Qualification Evidence Guard — F07 #11791
 
-Branch `fix/feedback-muscle-evidence-11791`; current commit `SELF`; PR not created. The two new behavioral regressions fail because parameter-only orchestration invents native replay metrics and audit successes. Read [Guard Turnover](docs/development/feedback_controls/F07_MUSCLE_EVIDENCE_TURNOVER.md). Next: remove fabricated results while preserving lower-level audits; this bounded guard does not close F07 or native model qualification.
+Branch `fix/feedback-muscle-evidence-11791`; current commit `SELF`; PR not created. Scoped child #11810: parameter-only orchestration now returns no native replay and no unperformed audit successes. The test-first commit records two failures; 31 focused tests pass after correction. Read [Guard Turnover](docs/development/feedback_controls/F07_MUSCLE_EVIDENCE_TURNOVER.md). Next: publish the guard through normal PR protections; F07 and native model qualification remain open.
 
 # Active: Feedback Controls Planning — #11784
 
