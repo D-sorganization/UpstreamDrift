@@ -13,6 +13,14 @@ from src.engines.physics_engines.mujoco.python.native_torque_replay import (
 pytestmark = pytest.mark.unit
 
 
+def test_lab_namespace_exposes_pinned_tools_without_copying_contracts() -> None:
+    from sidekick import lab
+
+    root = Path(__file__).resolve().parents[3]
+    vendor_lab = root / "vendor/ud-tools/src/shared/python/sidekick/lab"
+    assert vendor_lab.resolve() in {Path(path).resolve() for path in lab.__path__}
+
+
 @pytest.fixture
 def native_fixture(tmp_path: Path) -> tuple[Path, object, object]:
     mj = pytest.importorskip("mujoco")
