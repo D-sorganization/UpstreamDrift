@@ -384,6 +384,41 @@ def solve_sparse_collocation(
     )
 
 
+def _shooting_segmented_states(
+    problem: SparseCollocationProblem,
+    torque: Array,
+    middle_index: int,
+    middle_state: Array,
+) -> Array:
+    """Reconstruct the existing shooting transcription around its restart."""
+    first = problem.fixture.forward_held(
+        problem.times_s[: middle_index + 1],
+        problem.initial_state,
+        torque[:middle_index],
+    )
+    second = problem.fixture.forward_held(
+        problem.times_s[middle_index:],
+        middle_state,
+        torque[middle_index:],
+    )
+    return np.vstack((first, second[1:]))
+
+
+def _shooting_warm_start(
+    problem: SparseCollocationProblem, initial_torque: Array
+) -> float:
+    """Validate the existing solver's one-parameter start."""
+    initial = np.asarray(initial_torque, dtype=float)
+    if initial.shape != (problem.intervals,) or not np.isfinite(initial).all():
+        raise ValueError("shooting start must cover finite input intervals")
+    if problem.intervals < 2:
+        raise ValueError("shooting fixture needs at least two intervals")
+    warm = float(np.mean(initial))
+    if not problem.torque_lower_nm <= warm <= problem.torque_upper_nm:
+        raise ValueError("shooting start violates torque bounds")
+    return warm
+
+
 def solve_existing_shooting_fixture(
     problem: SparseCollocationProblem, *, initial_torque: Array
 ) -> CollocationResult:
@@ -399,14 +434,7 @@ def solve_existing_shooting_fixture(
     )
     from src.shared.python.motion_matching.prefix_fit import MarkerTarget
 
-    initial = np.asarray(initial_torque, dtype=float)
-    if initial.shape != (problem.intervals,) or not np.isfinite(initial).all():
-        raise ValueError("shooting start must cover finite input intervals")
-    if problem.intervals < 2:
-        raise ValueError("shooting fixture needs at least two intervals")
-    warm = float(np.mean(initial))
-    if not problem.torque_lower_nm <= warm <= problem.torque_upper_nm:
-        raise ValueError("shooting start violates torque bounds")
+    warm = _shooting_warm_start(problem, initial_torque)
     middle_index = problem.intervals // 2
     middle_time = float(problem.times_s[middle_index])
     points = np.zeros((problem.intervals + 1, 1, 3))
@@ -450,17 +478,9 @@ def solve_existing_shooting_fixture(
     )
     solve_seconds = time.perf_counter() - solve_started
     torque = np.full(problem.intervals, float(fit.theta[0]))
-    first = problem.fixture.forward_held(
-        problem.times_s[: middle_index + 1],
-        problem.initial_state,
-        torque[:middle_index],
+    segmented_states = _shooting_segmented_states(
+        problem, torque, middle_index, fit.intermediate_states[middle_time]
     )
-    second = problem.fixture.forward_held(
-        problem.times_s[middle_index:],
-        fit.intermediate_states[middle_time],
-        torque[middle_index:],
-    )
-    segmented_states = np.vstack((first, second[1:]))
     replay_started = time.perf_counter()
     fresh = problem.replay(torque)
     replay_seconds = time.perf_counter() - replay_started
@@ -671,6 +691,67 @@ class BenchmarkReport:
         )
 
 
+def _run_benchmark_attempt(
+    problem: SparseCollocationProblem,
+    backend: BenchmarkBackend,
+    start: BenchmarkStart,
+    gate: BenchmarkGate,
+) -> BenchmarkAttempt:
+    """Time one declared start, retaining failed solves and replay omissions."""
+    tracemalloc.start()
+    began = time.perf_counter()
+    try:
+        result = backend.solve(problem, start.initial_torque_nm.copy())
+        if result.replay is None:
+            raise ValueError("backend omitted fresh independent replay")
+        if result.defect_kind not in gate.max_constraint_defect_by_kind:
+            raise ValueError("backend defect kind has no predeclared gate")
+        accepted = bool(
+            result.replay_accepted(
+                max_state_gap=gate.max_replay_gap,
+                max_constraint_defect=gate.max_constraint_defect_by_kind[
+                    result.defect_kind
+                ],
+                max_bound_violation=gate.max_bound_violation,
+            )
+            and result.replay.position_rmse_rad <= gate.max_observation_rmse_rad
+        )
+        failure_reason = None
+    except (ValueError, RuntimeError, FloatingPointError) as exc:
+        result = None
+        accepted = False
+        failure_reason = str(exc)
+    finally:
+        elapsed = time.perf_counter() - began
+        _, peak = tracemalloc.get_traced_memory()
+        tracemalloc.stop()
+    replay_result = None if result is None else result.replay
+    return BenchmarkAttempt(
+        backend=backend.name,
+        start=start.name,
+        warm=start.warm,
+        optimizer_converged=bool(result and result.optimizer_converged),
+        accepted=accepted,
+        failure_reason=failure_reason,
+        objective=None if result is None else result.objective,
+        max_dynamics_defect=None if result is None else result.max_dynamics_defect,
+        max_torque_violation=None if result is None else result.max_torque_violation,
+        max_rate_violation=None if result is None else result.max_rate_violation,
+        max_replay_gap=(None if replay_result is None else replay_result.max_state_gap),
+        observation_rmse_rad=(
+            None if replay_result is None else replay_result.position_rmse_rad
+        ),
+        input_degrees_of_freedom=(
+            None if result is None else result.input_degrees_of_freedom
+        ),
+        defect_kind=None if result is None else result.defect_kind,
+        solve_seconds=None if result is None else result.solve_seconds,
+        replay_seconds=None if result is None else result.replay_seconds,
+        total_seconds=elapsed,
+        peak_python_bytes=peak,
+    )
+
+
 def benchmark_backends(
     problem: SparseCollocationProblem,
     *,
@@ -707,68 +788,5 @@ def benchmark_backends(
     attempts: list[BenchmarkAttempt] = []
     for backend in backends:
         for start in starts:
-            tracemalloc.start()
-            began = time.perf_counter()
-            try:
-                result = backend.solve(problem, start.initial_torque_nm.copy())
-                if result.replay is None:
-                    raise ValueError("backend omitted fresh independent replay")
-                if result.defect_kind not in gate.max_constraint_defect_by_kind:
-                    raise ValueError("backend defect kind has no predeclared gate")
-                accepted = bool(
-                    result.replay_accepted(
-                        max_state_gap=gate.max_replay_gap,
-                        max_constraint_defect=gate.max_constraint_defect_by_kind[
-                            result.defect_kind
-                        ],
-                        max_bound_violation=gate.max_bound_violation,
-                    )
-                    and result.replay.position_rmse_rad <= gate.max_observation_rmse_rad
-                )
-                failure_reason = None
-            except (ValueError, RuntimeError, FloatingPointError) as exc:
-                result = None
-                accepted = False
-                failure_reason = str(exc)
-            finally:
-                elapsed = time.perf_counter() - began
-                _, peak = tracemalloc.get_traced_memory()
-                tracemalloc.stop()
-            replay_result = None if result is None else result.replay
-            attempts.append(
-                BenchmarkAttempt(
-                    backend=backend.name,
-                    start=start.name,
-                    warm=start.warm,
-                    optimizer_converged=bool(result and result.optimizer_converged),
-                    accepted=accepted,
-                    failure_reason=failure_reason,
-                    objective=None if result is None else result.objective,
-                    max_dynamics_defect=(
-                        None if result is None else result.max_dynamics_defect
-                    ),
-                    max_torque_violation=(
-                        None if result is None else result.max_torque_violation
-                    ),
-                    max_rate_violation=(
-                        None if result is None else result.max_rate_violation
-                    ),
-                    max_replay_gap=(
-                        None if replay_result is None else replay_result.max_state_gap
-                    ),
-                    observation_rmse_rad=(
-                        None
-                        if replay_result is None
-                        else replay_result.position_rmse_rad
-                    ),
-                    input_degrees_of_freedom=(
-                        None if result is None else result.input_degrees_of_freedom
-                    ),
-                    defect_kind=None if result is None else result.defect_kind,
-                    solve_seconds=None if result is None else result.solve_seconds,
-                    replay_seconds=None if result is None else result.replay_seconds,
-                    total_seconds=elapsed,
-                    peak_python_bytes=peak,
-                )
-            )
+            attempts.append(_run_benchmark_attempt(problem, backend, start, gate))
     return BenchmarkReport(hardware, tuple(attempts))
