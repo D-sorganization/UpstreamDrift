@@ -79,3 +79,15 @@ new native provider hash; the earlier receipt is preserved separately. The
 new change-fragment YAML metadata is validated by the complete policy/fragment
 gate. Normal publication hooks pass; the unrelated stale research receipt
 remains a disclosed broad-test failure.
+
+## Shared Native Fixture Correction
+
+PR #11916 unit CI failed because collecting the native geometry module before
+the registration module scoped its plugin-exported `native_pin` fixture to the
+first module. The two-file local collection reproduced the missing-fixture
+error. Move the single fixture to `tests/opensim/conftest.py` and remove the
+test-module plugin declaration; geometry and registration now share ordinary
+directory fixture ownership without copying the model or changing assertions.
+The native OpenSim 4.6 registration/contract run passes 17 tests. Full-suite
+protected CI remains pending after the correction; Qt canvas tracebacks in
+the prior job were not the reported failure.

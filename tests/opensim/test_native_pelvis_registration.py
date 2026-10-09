@@ -14,7 +14,6 @@ from src.shared.python.motion_matching.tour_capture_contract import (
     TourCapture,
 )
 
-pytest_plugins = ("tests.opensim.test_native_marker_geometry",)
 pytestmark = pytest.mark.unit
 
 
