@@ -87,6 +87,107 @@ def test_selected_matrix_plan_only_contains_requested_cells_and_resume_is_exact(
         )
 
 
+def test_explicit_bounded_cell_subset_is_source_recorded_and_immutable(
+    tmp_path, monkeypatch
+):
+    import json
+    import src.tools.shot_pattern_analysis.matched_matrix as module
+
+    names = (
+        "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+        "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+    )
+    selected = matched_matrix_cells(
+        n_shots=32, selected_cell_names=names, match_face_bounds_deg=(-6.0, 6.0)
+    )
+    assert [name for name, _ in selected] == list(names)
+    assert all(request.match_face_bounds_deg == (-6.0, 6.0) for _, request in selected)
+    for invalid in ((), (names[0], names[0]), ("unknown_cell",)):
+        with pytest.raises(ValueError, match="selected cell"):
+            matched_matrix_cells(selected_cell_names=invalid)
+
+    monkeypatch.setattr(
+        module, "matched_source_snapshot", lambda: {"source_sha256": {"a": "b"}}
+    )
+    monkeypatch.setattr(
+        module,
+        "execute_and_export",
+        lambda *a, **kw: pytest.fail("empty shard must not simulate"),
+    )
+    module.run_matched_matrix(
+        tmp_path,
+        selected_cell_names=names,
+        match_face_bounds_deg=(-6.0, 6.0),
+        supplement_protocol="pw-strong-curve-common-face/1",
+        shard_index=2,
+        shard_count=3,
+    )
+    plan = json.loads((tmp_path / "matrix_plan.json").read_text())
+    assert list(plan["cells"]) == list(names)
+    assert plan["supplement_protocol"] == "pw-strong-curve-common-face/1"
+    assert plan["cells"][names[0]]["match_face_bounds_deg"] == [-6.0, 6.0]
+    assert plan["cells"][names[0]]["match_speed_factors"] == [0.75, 1.25]
+    with pytest.raises(RuntimeError, match="plan differs"):
+        module.run_matched_matrix(
+            tmp_path,
+            selected_cell_names=names,
+            match_face_bounds_deg=(-6.0, 6.1),
+            supplement_protocol="pw-strong-curve-common-face/1",
+            shard_index=2,
+            shard_count=3,
+        )
+
+
+def test_cli_explicit_bounds_and_cell_selection_are_forwarded(tmp_path, monkeypatch):
+    import json
+    import sys
+    import src.tools.shot_pattern_analysis.matched_matrix as module
+
+    selection = tmp_path / "cells.json"
+    selection.write_text(
+        json.dumps(["pitching_wedge_lean0_curve2_rotation1_shaft_only"])
+    )
+    captured = []
+    monkeypatch.setattr(
+        module, "run_matched_matrix", lambda *a, **kw: captured.append(kw)
+    )
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "matched-matrix",
+            str(tmp_path / "out"),
+            "--face-bounds-deg",
+            "-6",
+            "6",
+            "--speed-factors",
+            "0.75",
+            "1.25",
+            "--cells-file",
+            str(selection),
+            "--supplement-protocol",
+            "pw-strong-curve-common-face/1",
+        ],
+    )
+    module.main()
+    assert captured[0]["match_face_bounds_deg"] == (-6.0, 6.0)
+    assert captured[0]["match_speed_factors"] == (0.75, 1.25)
+    assert captured[0]["selected_cell_names"] == (
+        "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+    )
+
+
+def test_control_subset_only_requires_target_for_selected_club():
+    names = ("pitching_wedge_lean5_curve2_rotation1_shaft_only",)
+    selected = matched_matrix_cells(
+        selected_cell_names=names,
+        common_targets={"pitching_wedge": 77.40247724866299},
+        match_face_bounds_deg=(-6.0, 6.0),
+    )
+    assert len(selected) == 1
+    assert selected[0][1].target_x_m == pytest.approx(77.40247724866299)
+
+
 def test_cli_profiles_are_forwarded(tmp_path, monkeypatch):
     import sys
     import src.tools.shot_pattern_analysis.matched_matrix as module

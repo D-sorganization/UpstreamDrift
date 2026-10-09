@@ -6,6 +6,7 @@ from src.tools.shot_pattern_analysis.matched_config import matched_preset
 from src.tools.shot_pattern_analysis.matched_physics import UnsupportedShot
 from src.tools.shot_pattern_analysis.matched_runner import (
     ExperimentConfig,
+    calibrate_patterns,
     run_matched_analysis,
 )
 from src.tools.shot_pattern_analysis.noise import NoiseSpec
@@ -152,3 +153,66 @@ def test_paired_accuracy_uncertainty_preserves_units_and_reference():
             interval = result.paired_comparisons[key][name]
             assert interval["estimate"] == pytest.approx(0, abs=1e-5)
             assert interval["lower_95"] <= interval["estimate"] <= interval["upper_95"]
+
+
+def test_nominal_search_bounds_default_and_explicit_common_box(monkeypatch):
+    import src.tools.shot_pattern_analysis.matched_runner as module
+
+    captured = []
+
+    def capture(*args, **kwargs):
+        captured.append((kwargs["reference_face_deg"], kwargs["bounds"]))
+        return object()
+
+    monkeypatch.setattr(module, "match_nominal_landing", capture)
+    base = ExperimentConfig(matched_preset("pitching_wedge"), NoiseSpec((0,) * 7))
+    calibrate_patterns(base, AnalyticPhysics())
+    assert [
+        (
+            ref,
+            (box.face_min_deg, box.face_max_deg),
+            (box.speed_min_mps, box.speed_max_mps),
+        )
+        for ref, box in captured
+    ] == [
+        (0.0, (-3.0, 3.0), (24.0, 40.0)),
+        (1.5, (-1.5, 4.5), (24.0, 40.0)),
+        (-1.5, (-4.5, 1.5), (24.0, 40.0)),
+    ]
+    captured.clear()
+    request = ExperimentConfig(
+        matched_preset("pitching_wedge"),
+        NoiseSpec((0,) * 7),
+        curve_scale=2,
+        match_face_bounds_deg=(-6.0, 6.0),
+    )
+    calibrate_patterns(request, AnalyticPhysics())
+    assert [ref for ref, _ in captured] == [0.0, 3.0, -3.0]
+    assert all(
+        (box.face_min_deg, box.face_max_deg) == (-6.0, 6.0) for _, box in captured
+    )
+    assert all(
+        (box.speed_min_mps, box.speed_max_mps) == (24.0, 40.0) for _, box in captured
+    )
+
+
+@pytest.mark.parametrize(
+    "face_bounds,speed_factors",
+    [
+        ((-6.0, -6.0), (0.75, 1.25)),
+        ((float("nan"), 6.0), (0.75, 1.25)),
+        ((-15.0, 6.0), (0.75, 1.25)),
+        ((-6.0, 6.0), (1.25, 0.75)),
+        ((-6.0, 6.0), (0.0, 1.25)),
+    ],
+)
+def test_invalid_nominal_search_bounds_fail_at_request_construction(
+    face_bounds, speed_factors
+):
+    with pytest.raises(ValueError, match="match.*bounds"):
+        ExperimentConfig(
+            matched_preset("pitching_wedge"),
+            NoiseSpec((0,) * 7),
+            match_face_bounds_deg=face_bounds,
+            match_speed_factors=speed_factors,
+        )

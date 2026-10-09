@@ -50,6 +50,7 @@ def matched_source_snapshot() -> dict:
             "matched_report_plots.py",
             "noise.py",
             "nominal_matching.py",
+            "matched_supplement.py",
             "density.py",
             "academic_plots.py",
         )
@@ -280,7 +281,7 @@ def execute_and_export(
                     "config": asdict(request),
                     "shot_rows": 0,
                     "execution": execution,
-                    "interpretation": "No Monte Carlo sampling occurred; nominal matching is infeasible in the declared domain.",
+                    "interpretation": "No Monte Carlo sampling occurred; nominal setup is unavailable under the stated model/search bounds.",
                 },
             )
             _write_manifest(staging)

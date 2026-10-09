@@ -75,6 +75,9 @@ def test_nominal_unsupported_is_a_complete_unavailable_record(
     result = json.loads((destination / "summary.json").read_text())
     assert result["status"] == "unavailable"
     assert result["reason"] == "nonairborne_launch"
+    assert (
+        "unavailable under the stated model/search bounds" in result["interpretation"]
+    )
 
 
 def test_existing_data_never_overwritten(tmp_path, request_config, snapshot):
@@ -111,6 +114,10 @@ def test_source_snapshot_records_contact_backend(monkeypatch):
     assert snapshot["numerical_runtime"]["scipy"]
     assert (
         "src/tools/shot_pattern_analysis/matched_report_plots.py"
+        in snapshot["source_sha256"]
+    )
+    assert (
+        "src/tools/shot_pattern_analysis/matched_supplement.py"
         in snapshot["source_sha256"]
     )
 

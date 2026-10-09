@@ -17,6 +17,8 @@ All head properties beyond documented loft/lie remain research assumptions.
 
 See the [Matched Study Design](../../../docs/research/shot_pattern_analysis/phase2/DESIGN.md),
 the [Reviewed Design PDF](../../../docs/research/shot_pattern_analysis/phase2/matched_delivery_reference.pdf),
+the [Nominal Matching Bounds Supplement](../../../docs/research/shot_pattern_analysis/phase2/BOUNDS_SUPPLEMENT.md)
+([editable LaTeX](../../../docs/research/shot_pattern_analysis/phase2/BOUNDS_SUPPLEMENT.tex)),
 and [Turnover](../../../docs/research/shot_pattern_analysis/phase2/TURNOVER.md).
 The commands and results below describe the historical phase-one controls.
 Phase-two pilots and execution gates have passed; the final matrices are running.
