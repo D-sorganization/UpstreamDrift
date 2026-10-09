@@ -77,7 +77,9 @@ def main() -> int:
     ap.add_argument(
         "--variant", choices=("contact", "bushing", "myosuite"), required=True
     )
+    ap.add_argument("--t-start", type=float, default=0.0)
     ap.add_argument("--t-end", type=float, default=None)
+    ap.add_argument("--tag", default="")
     args = ap.parse_args()
     spec = json.loads(
         (MODELS / f"full_body_spec_anthro_{args.club}.json").read_text(encoding="utf-8")
@@ -88,14 +90,18 @@ def main() -> int:
     analyses = series.analyses()
     t = series.time_s
     t_end = t[-1] if args.t_end is None else min(args.t_end, t[-1])
-    n_frames = int(t_end * FPS / SPEED)
+    n_frames = int((t_end - args.t_start) * FPS / SPEED)
     index = np.minimum(
-        np.searchsorted(t, np.arange(n_frames) * SPEED / FPS), t.size - 1
+        np.searchsorted(t, args.t_start + np.arange(n_frames) * SPEED / FPS), t.size - 1
     )
     style = ForceGlyphStyle(force_scale_m_per_n=1.0 / 800.0, max_length_m=0.25)
     pos_r = np.asarray(interface.right.position_m, float)
+    axis_club = np.asarray(interface.right.rotation, float)[:, 0]
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    path = OUT_DIR / f"{args.club}_{args.variant}_grip_hands_closeup_0p5x_60fps.mp4"
+    path = (
+        OUT_DIR
+        / f"{args.club}_{args.variant}_grip_hands_closeup_0p5x_60fps{args.tag}.mp4"
+    )
     ffmpeg = subprocess.run(
         [sys.executable, "-c", "import imageio_ffmpeg as i;print(i.get_ffmpeg_exe())"],
         capture_output=True,
@@ -116,9 +122,14 @@ def main() -> int:
         ax.clear()
         rot = series.club_rotation[i]
         mid = 0.5 * (series.grip_point_m["L"][i] + series.grip_point_m["R"][i])
+        # shaft: through the grip-point midpoint along the grip axis, from the
+        # butt to the head (the club body origin lies on the head side)
+        axis = rot @ axis_club
         origin = series.grip_point_m["R"][i] - rot @ pos_r
-        head = origin
-        butt = head + rot @ np.array([0.0, -length, 0.064])
+        toward_head = float((origin - mid) @ axis)
+        direction = axis if toward_head >= 0.0 else -axis
+        head = mid + direction * abs(toward_head)
+        butt = head - direction * length
         ax.plot(*zip(butt, head, strict=True), color="#444", lw=4)
         for side in "LR":
             ax.scatter(*series.grip_point_m[side][i], color=COLOURS[side], s=160)
