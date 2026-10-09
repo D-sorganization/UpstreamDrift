@@ -40,6 +40,7 @@ documented difference from the bushing, not a defect).
 from __future__ import annotations
 
 import math
+from collections.abc import Mapping
 from dataclasses import dataclass
 
 import numpy as np
@@ -59,6 +60,7 @@ __all__ = [
     "PadLayout",
     "matched_pad_parameters",
     "required_squeeze_n",
+    "squeeze_from_bushing_series",
 ]
 
 
@@ -212,3 +214,39 @@ def required_squeeze_n(
         peak_axial_torque_nm / (friction * grip_radius_m),
         2.0 * peak_transverse_force_n,
     )
+
+
+def squeeze_from_bushing_series(
+    force_on_club_n: Mapping[str, np.ndarray],
+    torque_on_club_nm: Mapping[str, np.ndarray],
+    club_rotation: np.ndarray,
+    grip_axis_club: np.ndarray,
+    friction: float,
+    grip_radius_m: float,
+) -> float:
+    """Squeeze of one hand that carries the largest per-hand demand of a run.
+
+    ``force_on_club_n`` and ``torque_on_club_nm`` are the per-hand series of a
+    bushing run (world axes), ``club_rotation`` the ``(n, 3, 3)`` club
+    rotations and ``grip_axis_club`` the grip axis in the club frame.  The
+    demand is the largest over both hands and all samples, then
+    :func:`required_squeeze_n`.
+
+    Raises:
+        ValueError: on a shape mismatch.
+    """
+    rot = np.asarray(club_rotation, dtype=float)
+    axis = np.einsum("nij,j->ni", rot, np.asarray(grip_axis_club, dtype=float))
+    f_ax = f_perp = t_ax = 0.0
+    for side in force_on_club_n:
+        f = np.asarray(force_on_club_n[side], dtype=float)
+        t = np.asarray(torque_on_club_nm[side], dtype=float)
+        if f.shape != axis.shape or t.shape != axis.shape:
+            raise ValueError("series and club_rotation must share their sample count")
+        along = np.einsum("ni,ni->n", f, axis)
+        f_ax = max(f_ax, float(np.abs(along).max()))
+        t_ax = max(t_ax, float(np.abs(np.einsum("ni,ni->n", t, axis)).max()))
+        f_perp = max(
+            f_perp, float(np.linalg.norm(f - along[:, None] * axis, axis=1).max())
+        )
+    return required_squeeze_n(f_ax, t_ax, f_perp, friction, grip_radius_m)

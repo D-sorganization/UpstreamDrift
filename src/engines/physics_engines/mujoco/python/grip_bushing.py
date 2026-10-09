@@ -54,6 +54,15 @@ ENGINE = "mujoco"
 DEFAULT_TIMESTEP_S = 1.0e-4
 SIDES = ("L", "R")
 HandSource = Callable[[float], tuple[np.ndarray, np.ndarray]]
+#: ``xml -> (MjModel, MjData)``; MyoSuite supplies the pair its runtime holds.
+ModelLoader = Callable[[str], tuple[Any, Any]]
+
+
+def default_loader(xml: str) -> tuple[Any, Any]:
+    """Compile ``xml`` with MuJoCo and allocate its data."""
+    mj = _mujoco()
+    model = mj.MjModel.from_xml_string(xml)
+    return model, mj.MjData(model)
 
 
 def _mujoco() -> Any:
@@ -91,13 +100,17 @@ def body_state(mj: Any, model: Any, data: Any, body: int) -> RigidBodyState:
 class WeldClubKinematics:
     """MuJoCo forward kinematics of the weld model's club (spec club frame)."""
 
-    def __init__(self, spec_bytes: bytes, names: list[str]) -> None:
+    def __init__(
+        self,
+        spec_bytes: bytes,
+        names: list[str],
+        loader: ModelLoader = default_loader,
+    ) -> None:
         mj = _mujoco()
         spec = json.loads(spec_bytes)
         xml, _ = export_full_body_mjcf(spec_bytes)
         self._mj = mj
-        self.model = mj.MjModel.from_xml_string(xml)
-        self.data = mj.MjData(self.model)
+        self.model, self.data = loader(xml)
         joints = [self.model.joint(n) for n in names]
         self._qpos = np.array([int(j.qposadr[0]) for j in joints])
         self._dof = np.array([int(j.dofadr[0]) for j in joints])
@@ -162,16 +175,16 @@ class ClubOnBushings:
         names: list[str],
         interface: GripInterface,
         timestep_s: float,
+        loader: ModelLoader = default_loader,
     ) -> None:
         mj = _mujoco()
         spec = json.loads(spec_bytes)
         self._mj = mj
         self.interface = interface
-        self.kinematics = WeldClubKinematics(spec_bytes, names)
+        self.kinematics = WeldClubKinematics(spec_bytes, names, loader)
         gravity = np.asarray(spec["gravity_m_s2"], float)
         xml = club_mjcf(ClubDynamics.from_spec(spec), gravity, timestep_s)
-        self.model = mj.MjModel.from_xml_string(xml)
-        self.data = mj.MjData(self.model)
+        self.model, self.data = loader(xml)
         self._body = int(self.model.body("club").id)
         self._offsets = {s: interface.frame(s).matrix() for s in SIDES}
         self.hand_source: HandSource | None = None
@@ -257,6 +270,8 @@ def simulate_grip_bushing(
     interface: GripInterface | None = None,
     timestep_s: float = DEFAULT_TIMESTEP_S,
     t_end_s: float | None = None,
+    loader: ModelLoader = default_loader,
+    engine: str = ENGINE,
 ) -> GripKineticsSeries:
     """Integrate the free club on two bushings over the prescribed swing.
 
@@ -268,7 +283,7 @@ def simulate_grip_bushing(
     """
     spec = json.loads(spec_bytes)
     interface = interface or GripInterface.from_spec(spec)
-    sim = ClubOnBushings(spec_bytes, list(swing.names), interface, timestep_s)
+    sim = ClubOnBushings(spec_bytes, list(swing.names), interface, timestep_s, loader)
     spline = CoordinateSpline(swing.time_s, swing.q)
     sim.hand_source = spline.evaluate
     times = swing.time_s
@@ -290,7 +305,7 @@ def simulate_grip_bushing(
             club_rot.append(sim.data.xmat[sim._body].reshape(3, 3).copy())  # noqa: SLF001
     rec = _record(samples, club_rot)
     return GripKineticsSeries.from_frames(
-        ENGINE,
+        engine,
         times,
         rec["wrench"],
         rec["hand_pose"],
@@ -310,6 +325,7 @@ def probe_bushing_forces(
     swing: CoordinateSwing,
     translation_hand_m: np.ndarray,
     interface: GripInterface | None = None,
+    loader: ModelLoader = default_loader,
 ) -> BushingProbe:
     """Bushing forces for the club displaced by ``translation_hand_m``.
 
@@ -319,7 +335,9 @@ def probe_bushing_forces(
     """
     spec = json.loads(spec_bytes)
     interface = interface or GripInterface.from_spec(spec)
-    sim = ClubOnBushings(spec_bytes, list(swing.names), interface, DEFAULT_TIMESTEP_S)
+    sim = ClubOnBushings(
+        spec_bytes, list(swing.names), interface, DEFAULT_TIMESTEP_S, loader
+    )
     q0 = np.asarray(swing.q[0], float)
     still = np.zeros_like(q0)
     sim.hand_source = lambda _t: (q0, still)

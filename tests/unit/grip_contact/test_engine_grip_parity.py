@@ -53,6 +53,10 @@ ENGINE_MODULES = {
         "pinocchio",
         "src.engines.physics_engines.pinocchio.python.grip_bushing",
     ),
+    "myosuite": (
+        "myosuite",
+        "src.engines.physics_engines.myosuite.python.grip_bushing",
+    ),
 }
 
 

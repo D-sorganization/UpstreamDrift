@@ -149,3 +149,27 @@ def test_moment_is_taken_about_the_club_grip_origin(interface) -> None:
     axis_point = model.layout.axis_offset_grip_frame("R")
     expected = np.cross(axis_point, w.force_n)
     np.testing.assert_allclose(w.moment_nm, expected, rtol=0.05, atol=1e-3)
+
+
+def test_squeeze_from_a_bushing_run_uses_the_largest_hand_demand() -> None:
+    from src.shared.python.grip_contact.pad_layout import squeeze_from_bushing_series
+
+    n = 3
+    rot = np.repeat(np.eye(3)[None], n, axis=0)
+    force = {"L": np.zeros((n, 3)), "R": np.zeros((n, 3))}
+    force["R"][1] = [0.0, 300.0, 0.0]  # transverse to the x grip axis
+    force["L"][2] = [90.0, 0.0, 0.0]  # along the axis
+    torque = {"L": np.zeros((n, 3)), "R": np.zeros((n, 3))}
+    got = squeeze_from_bushing_series(
+        force, torque, rot, np.array([1.0, 0.0, 0.0]), 0.9, 0.0127
+    )
+    assert got == pytest.approx(600.0)  # 2 * 300 N governs over 90 / 0.9
+    with pytest.raises(ValueError, match="sample count"):
+        squeeze_from_bushing_series(
+            {"L": np.zeros((2, 3))},
+            {"L": np.zeros((2, 3))},
+            rot,
+            np.eye(3)[0],
+            0.9,
+            0.01,
+        )
