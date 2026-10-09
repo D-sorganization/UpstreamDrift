@@ -603,3 +603,13 @@ See the separate editable research reference and the extended aggregate `tangent
 ### Impact Parameters Package (GCV-15, 2026-10-07)
 
 `src/shared/python/impact_parameters/` extracts speed, attack angle, club path, face angle, face-to-path, dynamic and spin loft, swing plane and low point relative to an explicit `TargetFrame` (default recorded: Z-up, target -Y, ADR-0041). Definitions are in the package docstring for design-manual transfer via GCV-18. Tools delivery and D-plane are reached only through the fail-closed `tools_gateway.py` and agree with the UD definitions within 0.01 deg. Open: launch direction has no Tools provider; toe/high needs GCV-11 face geometry and GCV-13 ball; smash factor needs an impact model with calibration status; `rate_of_closure` `delivery_at` is not called directly.
+
+## Frozen Training Registration (#11912)
+
+Training-only registration and the explicitly unqualified native pelvis gauge
+are documented in chapter29 and
+`docs/development/feedback_controls/F07_FROZEN_REGISTRATION_TURNOVER.md`.
+The actual source initial pelvis height is 0.93 m. Gauge radii reduce to
+0.110–0.188 m but the final residual remains 65.096 mm at a source bound.
+Anatomical correspondence, ground calibration and independent dynamics remain
+open; detailed capture receipts stay private. No holdout refitting is allowed.

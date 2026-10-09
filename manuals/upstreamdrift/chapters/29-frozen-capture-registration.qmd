@@ -1,0 +1,97 @@
+# Frozen Training Capture Registration
+
+This provisional F07/F08 pathway, child #11912, separates an explicitly authored
+coordinate gauge from anatomical marker correspondence. It extends the existing
+rigid-registration provider and the [native geometry pathway](26-native-opensim-geometry.qmd).
+It does not qualify muscle dynamics, contact or independent replay described in
+the [native replay chapter](13-native-muscle-replay.qmd).
+
+## Calculation, Inputs and Identity
+
+For explicit training anchor pairs, the existing Kabsch provider minimizes
+$\sum_i\|R p_i+t-y_i\|^2$, with $R^T R=I$ and $\det R=1$.
+Positions and translations are metres. Source and target points must both be
+non-collinear under the existing $10^{-6}$ numerical rank guard. This guard is
+not measurement uncertainty. Multiple training frames assert one static target
+arrangement; disagreement remains in the training RMS.
+
+`fit_training_registration` requires explicit, increasing original frame indices,
+observed labels, finite target points, per-anchor provenance, source/target frame
+identifiers and SHA-256 source/target geometry identities. Missing observations
+or correspondence provenance reject; no label alias, interpolation or fallback
+is invented. Only declared training observations enter fitting. The frozen
+identity binds training times, points, targets, labels, provenance, transform,
+interpretation and both reused/new provider implementations. Rotation and
+translation are immutable byte-backed arrays, including against re-enabling
+NumPy writes. `apply_frozen_registration` checks the source frame and preserves
+the original observation clock, source identity, labels and missingness.
+
+Neither `declared-unverified` nor `coordinate-gauge` qualifies anatomy.
+Providing a provenance string is not independent verification of correspondence.
+The transformed capture is accompanied by a separate registration identity;
+consumers must retain that lineage and cannot relabel transformed arrays as raw
+observations. Native execution clocks remain separate from observation clocks.
+
+## Explicit Pelvis Coordinate Gauge
+
+The diagnostic uses only original frame zero of the frozen Y-up capture. Its
+four observed waist markers define a centroid and horizontal left-minus-right
+direction. The centroid maps to the actual initialized native pelvis origin;
+capture Y-up and the horizontal direction map to the native reference body's
+Y axis and its declared local left axis. The latter is read from the unchanged
+source `lasi` minus `rasi` geometry on `/bodyset/pelvis`. This defines a native
+axis only: **waist labels are not asserted to be ASIS/PSIS landmarks**.
+
+The resulting rigid transform is frozen before later observations are evaluated.
+Existing `static_marker_offsets` then computes and freezes frame-zero local
+offsets in the registered frame. No holdout observation updates the transform,
+offsets or anthropometry. All six independent pelvis coordinates are free in
+the subsequent three-pose fit, subject to unchanged native source ranges and
+achieved-coordinate assembly checks. The driver reuses existing bounded TRF
+trajectory IK, frozen capture loading and isolated TRC exchange. No new parser,
+anatomical model, ground calibration or optimizer is introduced.
+
+The actual source initial pelvis coordinates are zero except `pelvis_ty`, which
+is approximately 0.93 m. The large offsets in the earlier unregistered probe
+therefore do not establish a zero-height initialization or axis error. Root pose,
+world registration and local attachment offsets are distinct quantities. Aligning
+a waist centroid to that source root is an authored training initialization;
+it cannot establish the capture floor or justify a later native contact plane.
+Local radii are reported without inventing physiological bounds.
+
+## Actual Evidence and Remaining Gates
+
+The unchanged hash-pinned 520-muscle candidate completes this bounded diagnostic
+under native OpenSim 4.6. Local offset radii become 0.110–0.188 m, compared with
+1.107–1.249 m before the explicit gauge. Aggregate three-pose RMS is 37.649 mm;
+the middle and final samples are 3.844 mm and 65.096 mm. The final solution still
+reaches the unchanged source coordinate bound. Native station/frame agreement
+is within $5.8\times10^{-15}$ m. The near-zero first-frame and constructed
+registration errors follow from calibration and are not independent evidence.
+Later poses are fitted separately, not independently predicted holdout motion.
+
+These results do not resolve anatomical infeasibility versus registration/model
+mismatch. Strict anatomical admission remains `missing-correspondence`.
+Nonpelvic bindings, subject anatomy, independent capture ancestry, noise/events,
+ground, wrists, grip, passive loads, reserves, couplers, contact and complete-state
+muscular replay remain unqualified. Detailed capture identifiers, transforms and
+per-frame observations remain in private receipts. Source/loaded/runtime/provider
+identities, reference pose, frozen transform, offsets, residuals and bounds are
+retained there; no source anatomical parameter is changed to obtain the result.
+
+## Reproduction and Validation
+
+```bash
+python3 -m pytest -o addopts='' tests/opensim/test_frozen_registration.py tests/opensim/test_golf_registration.py
+NATIVE_PYTHON -m pytest -o addopts='' tests/opensim/test_native_pelvis_registration.py tests/opensim/test_frozen_registration.py
+NATIVE_PYTHON -m scripts.diagnostics.native_pelvis_registration --model MODEL.osim --model-sha256 SHA256 --capture FROZEN.c3d --capture-python C3D_PYTHON --output PRIVATE_RECEIPT.json
+python3 -m scripts.check_design_manual_governance
+```
+
+The two Python processes preserve the known Windows OpenSim/ezc3d DLL isolation.
+Tests cover withheld-observation perturbations, immutable transform ownership,
+missing correspondence/observations, target degeneracy, frame mismatches and a
+real native fixture with independently generated marker motion. They establish
+the bounded software contract, not anatomical or scientific acceptance.
+Canonical inventory, generated LaTeX/PDF parity, page review and release remain
+blocked; this chapter grants no publication exemption.

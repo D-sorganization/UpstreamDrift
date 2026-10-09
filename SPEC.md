@@ -10416,3 +10416,14 @@ residuals and failures through existing frozen-loader/TRC contracts. Its source
 candidate reaches a pelvis rotation bound and remains unqualified: fixed frame
 registration and anatomical calibration are unresolved. Canonical authority is
 chapter26; no capture, whole-body or full-state replay acceptance is claimed.
+
+## Frozen Training Registration (F07/F08, #11912)
+
+Explicit training-only anchors freeze a rigid transform with immutable arrays,
+source/frame identities and original observation lineage. Missing observations
+or correspondence provenance reject. The pelvis coordinate-gauge diagnostic
+reuses native geometry and existing calibration/IK; no waist-to-donor landmark
+alias, anatomical acceptance or ground plane is inferred. Later poses use their
+own observations and are not independent predictions. Source bounds, residuals
+and missing-correspondence admission remain visible. Canonical authority is
+chapter29; complete muscle/contact replay and capture qualification remain open.
