@@ -118,3 +118,18 @@ frozen and feedback-applied histories independently replay in full and
 finish 0.07508 versus 0.02460 rad from the teacher; the teacher/frozen
 input identities match and feedback input differs. F03 does not yet export
 an optimized native trajectory into this consumer.
+
+## F04 Native Coupling Fixture
+
+`F04_NATIVE_COUPLING_TURNOVER.md`, provisional chapter 21, and the source-bound
+`F04_NATIVE_COUPLING_RECEIPT_MJ38.json` document actual MuJoCo 3.8 train-only
+feedback-row tuning plus a disjoint held-out trial on the contact-free 9/8/2
+floating-root fixture. The held-out joint-error RMSE improves 0.11917 to
+0.09647 rad; fresh complete-state replay matches at tested precision. Separate
+paired direct-motor interventions show synthetic in-model off-diagonal joint
+response, while loss covariance and human causation remain distinct and
+unclaimed. The joint stage exhausts its budget, uncertainty is unavailable,
+and F04 remains open for capture, contact, physiology and production timing.
+This slice is scoped to child #11952 under parent #11788. The child was
+checked free and leased after GitHub quota recovery; publication remains
+stacked on the F02 native manifold branch and does not close parent F04.
