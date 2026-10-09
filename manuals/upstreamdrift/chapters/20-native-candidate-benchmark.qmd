@@ -85,8 +85,8 @@ ground/grip, muscles, anatomy or any of the six-engine parity gates.
 
 Run the focused checks with
 `python -m pytest tests/unit/motion_matching/test_native_candidate_benchmark.py -q`
-after the merged Tools T01 pin and F06 consumer boundary are available.
-During development, the Tools worktree facade was preloaded explicitly; that
-override is not portable evidence. Keep this chapter and its registry entry
-provisional until a reproducible native receipt is produced under the merged
-dependency pin.
+using the pinned Tools T01 merge `2e7665111b06f92ffbfe178b92d74d6a81c95388`
+and the F06 consumer boundary. The tests write native attempt receipts to a
+temporary directory under the normal repository import path. The chapter and
+registry remain provisional because they do not test a real capture or
+full-body/contact model.

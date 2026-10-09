@@ -10406,9 +10406,10 @@ distinct `nq`/`nv`, post-limit held torque, exact model/provider/policy identity
 and uninterrupted no-reset execution are required. Canonical calculation
 reference: `manuals/upstreamdrift/chapters/19-native-torque-replay.qmd`.
 Turnover: `docs/development/feedback_controls/F06_NATIVE_TORQUE_TURNOVER.md`.
-The initial Tools development override requires a merged vendor pin before
-consumer acceptance; six-engine and muscular OpenSim real-capture gates remain
-open.
+The temporary Tools development override has been replaced by merged T01 pin
+`2e7665111b06f92ffbfe178b92d74d6a81c95388`; the native unit-hinge
+consumer tests pass under the normal import path. Six-engine and muscular
+OpenSim real-capture gates remain open.
 
 ## Independent Native Candidate Benchmark (F03b, #11824)
 

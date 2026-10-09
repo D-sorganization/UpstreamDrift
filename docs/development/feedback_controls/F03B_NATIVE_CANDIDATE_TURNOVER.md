@@ -35,10 +35,12 @@ D02/D03 capture protocol, F09 observation-clock alignment, comparable solver
 resources, native full-body/contact evidence, complete accepted-capture cost
 and production selection. Native muscle/six-engine qualification is separate.
 
-During development, Tools T01 was consumed from Luna's local Tools worktree by
-explicitly preloading `sidekick.lab.mocap` on `PYTHONPATH`. That is a temporary
-test seam, not portable evidence. Once T01 merges and F06 pins it, run the
-normal repository test path without the override:
+During early development, Tools T01 was consumed from a local Tools worktree by
+explicitly preloading `sidekick.lab.mocap` on `PYTHONPATH`. That temporary seam
+has been replaced here by the merged Tools T01 pin
+`2e7665111b06f92ffbfe178b92d74d6a81c95388` and the F06 lab namespace
+consumer. The normal repository import path now passes 38 focused tests across
+F03b, F06, F03a and manual governance:
 
 ```powershell
 python -m pytest tests/unit/motion_matching/test_native_candidate_benchmark.py -q
@@ -46,8 +48,10 @@ python scripts/ci/check_architecture_budget.py
 python -m pytest tests/scripts/test_design_manual_governance_contract.py -q
 ```
 
-Also run scoped Ruff, mypy and relevant F03a/F06 tests. Produce at least one
-reproducible native receipt with the pinned Tools SHA before claiming this
-child's portable gate is green. The public synthetic receipt must exclude
-private capture identities and must report actual hardware without inferring
-a universal speedup.
+Scoped Ruff, format, mypy, architecture and SPEC/change checks also passed.
+The F03b test writes JSON native attempt receipts in its temporary directory,
+including the failed start, accepted start and named hardware. These synthetic
+receipts are reproducible from the test command, while wall times and hashes
+of timing-bearing JSON can differ across runs. Do not infer a universal
+speedup. The code and tests must still pass protected CI and review before
+the child is complete.
