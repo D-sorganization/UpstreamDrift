@@ -29,7 +29,7 @@ environments where ``pydrake`` is unavailable. Only the loader
 from __future__ import annotations
 
 import copy
-import xml.etree.ElementTree as ET  # noqa: N817
+import xml.etree.ElementTree as ET  # noqa: N817, S405  # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml  # construction only; minidom is defusedxml
 from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
