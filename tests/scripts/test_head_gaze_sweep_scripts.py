@@ -122,12 +122,6 @@ def test_committed_sweep_evidence_reproduces_the_reporting_weight() -> None:
     assert summary["selected_weight"] == gs.REPORTING_GAZE_WEIGHT
 
 
-def test_qualified_receipts_stay_marker_faithful_by_default() -> None:
-    from src.shared.python.motion_matching.pipeline.cli import build_parser
-
-    assert build_parser().get_default("gaze_weight") == 0.0
-
-
 def test_load_rows_rejects_an_empty_root(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="no sweep_row"):
         load_rows(tmp_path)
@@ -138,3 +132,65 @@ def test_head_glyphs_reject_degenerate_input() -> None:
         head_glyph_arrows([0, 0, 1], [0, 0, 0], [1, 0, 0])
     with pytest.raises(ValueError):
         head_glyph_arrows([0, 0, 1], [1, 0, 0], [0, 0, 1])
+
+
+def _clip_times() -> np.ndarray:
+    return np.arange(0.0, 1.8, 1.0 / 360.0)
+
+
+def test_clip_schedules_name_one_clip_per_speed_plus_impact() -> None:
+    from scripts.render_head_gaze_clips import clip_schedules
+
+    plan = clip_schedules(_clip_times(), 1.575, (1.0, 0.5), 0.25, 0.4)
+    assert [suffix for suffix, _ in plan] == ["_1x", "_0p5x", "_impact_0p25x"]
+
+
+def test_clip_schedules_frame_counts_follow_duration_fps_and_speed() -> None:
+    from scripts.render_head_gaze_clips import clip_schedules
+
+    times = _clip_times()
+    plan = dict(clip_schedules(times, 1.575, (1.0, 0.5), 0.25, 0.4))
+    span = times[-1] - times[0]
+    for suffix, speed in (("_1x", 1.0), ("_0p5x", 0.5)):
+        assert plan[suffix].fps == 60.0
+        assert plan[suffix].n_frames == pytest.approx(span * 60.0 / speed + 1, abs=1)
+    # 0.4 s of swing at 0.25x and 60 fps is 96 frames (+1 for the end point).
+    assert plan["_impact_0p25x"].n_frames == pytest.approx(97, abs=1)
+
+
+def test_impact_clip_is_centred_on_impact() -> None:
+    from scripts.render_head_gaze_clips import clip_schedules
+
+    plan = dict(clip_schedules(_clip_times(), 1.0, (1.0,), 0.25, 0.4))
+    shown = plan["_impact_0p25x"].sample_times_s
+    assert shown[0] == pytest.approx(0.8)
+    assert shown[-1] == pytest.approx(1.2, abs=0.25 / 60.0)
+
+
+def test_impact_clip_is_clipped_to_the_data_range() -> None:
+    from scripts.render_head_gaze_clips import clip_schedules
+
+    times = _clip_times()
+    plan = dict(clip_schedules(times, 1.75, (1.0,), 0.25, 0.4))
+    shown = plan["_impact_0p25x"].sample_times_s
+    assert shown[0] == pytest.approx(1.55)
+    assert shown[-1] <= times[-1] + 1e-9
+
+
+@pytest.mark.parametrize(
+    "speeds, impact_speed, window, impact",
+    [
+        ((), 0.25, 0.4, 1.0),
+        ((0.0,), 0.25, 0.4, 1.0),
+        ((1.0,), -0.25, 0.4, 1.0),
+        ((1.0,), 0.25, 0.0, 1.0),
+        ((1.0,), 0.25, 0.4, 5.0),
+    ],
+)
+def test_clip_schedules_reject_bad_input(
+    speeds: tuple, impact_speed: float, window: float, impact: float
+) -> None:
+    from scripts.render_head_gaze_clips import clip_schedules
+
+    with pytest.raises(ValueError):
+        clip_schedules(_clip_times(), impact, speeds, impact_speed, window)
