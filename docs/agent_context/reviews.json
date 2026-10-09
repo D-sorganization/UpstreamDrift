@@ -19,14 +19,14 @@
       "rationale": "Preserve capture boundary review under baseline capability inventory ORG-01"
     },
     "launcher-atlas": {
-      "fingerprint": "af628956cc7f4c2a238a4f637c49b128f3143eb4fa79997c807f83457b37ac74",
+      "fingerprint": "8781115369104c37b1967026046922a844ee48e2c182fd415f991f0b98930854",
       "inputs": {
         "docs/agent_context/contracts/launcher-atlas.md": "f5976baa4ef78bcf71ede27afb4e7a85f3f72cfedbb3cdbe9b40e48d4016ae94",
         "scripts/capability_atlas/goals.py": "a4c449dbd07dc398530d7c85eefc697d36b6acaee48b7953b7e060fb413cc131",
         "scripts/capability_atlas/model.py": "ecca5889caad0e087c895f6c56c0fcd966b646bda5c3ab5a87a65c4694eb41cf",
         "scripts/capability_atlas/render.py": "7981df3ea262536a2c847b693c104e9600ce2aad85d17d4e0f3048e80ee066a5",
         "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
-        "src/config/feature_parity.json": "78d2ce935fc24bbdc7b3978ff9f82f68c2354deb495e861220d5c69d72386268",
+        "src/config/feature_parity.json": "c8177165dae9bcc28cc773a948e5134861a859c614312c93fe71c074583283b0",
         "src/config/launcher_manifest.json": "1ae28f872b54c237440fcaacec40b735b93a7b80d710adc9228ef671b7831032",
         "src/config/launcher_manifest_loader.py": "aed6769fbdfc595400d0bd5d15bb75e8fbfda80243a586894d73d36b2d056a00",
         "src/config/models.yaml": "e11682df79d7467f1eba9579d835f5d7019bfd7eb09cf81c14e22bd08d0bf844",
@@ -36,7 +36,7 @@
         "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
         "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414"
       },
-      "rationale": "Re-recorded after merging main (CMB-10 #11799 and later) into GCV-2: the only launcher-atlas input change from GCV-2 is the GCV-2/GCV-6 sentence appended to the analysis.ground_reaction parity notes in feature_parity.json; tiles, status, surfaces and capability_migration entries are main unchanged."
+      "rationale": "feature_parity.json: mujoco.force_overlays and drake.gui_force_overlay flipped gap->parity; api/web paths now point at the engine-generic force overlay route and Three.js ForceOverlay that FTO-22/23 (#11307/#11308) delivered for every ForceTorqueProvider engine. No tile, route or contract change (Refs #11710)."
     },
     "model-backends": {
       "fingerprint": "da739fcd3c56f6c4a3923b4f31202e515023487a49d54ca449090d33186a9685",
