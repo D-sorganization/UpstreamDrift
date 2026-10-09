@@ -1,3 +1,7 @@
+# Active: Feedback Controls Planning — #11784
+
+Documentation branch `docs/feedback-controls-11784`; commit `SELF`. Read [Design](docs/development/feedback_controls/DESIGN.md), [Issue Dependencies](docs/development/feedback_controls/IMPLEMENTATION_PLAN.md) and [Turnover](docs/development/feedback_controls/TURNOVER.md). Goal: all-model six-engine parity culminating in muscle-driven OpenSim and independent excitation replay. Planning only; no new model/video is qualified. Next: F01 inventory/gate freeze, coordinate MOSAIC #11532 and parity #11605.
+
 # Active: Ground Reaction Design Manual Slice - GCV-18 #11724
 
 - Branch `claude/gcv-18-grf-design-manual`. Provisional QMD chapter `manuals/upstreamdrift/chapters/10-ground-reaction.qmd` (GCV-1 equations, conventions, unavailable values, symbols, tests, limitations) and registry blocker `UP-D1-ground-reaction-breakdown-inventory`; the registry stays `blocked-inventory-required` with no calculations. User manual §12.4/§12.7 now state what `grf_metrics.py`/`stability_metrics.py` do not compute and give the correct CoP and free-moment equations.
