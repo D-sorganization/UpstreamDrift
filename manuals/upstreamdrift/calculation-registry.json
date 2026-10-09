@@ -6,6 +6,11 @@
   "inventory_commit": null,
   "blockers": [
     {
+      "id": "UP-D1-native-reference-conventions-inventory",
+      "owner": "UpstreamDrift issue #11962",
+      "resolution": "Inventory read-only tour_matching/native_reference_conventions.py and provisional chapter38: exact entrypoint source and loaded native identities, post-initSystem assembly/achieved-versus-default coordinate state, complete named continuous restoration at fixed initialized clock, reference-frame transforms, joint/coupler coordinate dependencies, concrete muscle path/wrap/law/options and explicit selective correspondence with rigid registration. Analytic native fixtures and unchanged public 520-muscle/Pose2Sim diagnostics establish only source-convention observations. Candidate same-name paths and pelvis-frame registration do not establish anatomy; entrypoint XML does not close external assets. Full native restart, official donor release, physiological policy, capture geometry, contact/grip and F07/F08 scientific qualification remain blocked."
+    },
+    {
       "id": "UP-D1-native-passive-readiness-inventory",
       "owner": "UpstreamDrift issue #11939",
       "resolution": "Inventory tour_matching/native_passive_readiness.py and provisional chapter33: native exact-law elastic/damping/net passive and tendon force observations, explicit model-bound per-muscle sourced limits and runtime flags. Native tests demonstrate equilibrium with excessive loading and damping cancellation that defeats a net-only check. Passing declared limits is only a necessary gate and always remains not-qualified-for-muscle-matching. The unchanged 520-muscle source has no approved passive policy; donor ancestry, anatomy, complete state, assistance, contact/grip, capture calibration and independent replay remain blocked. No physiological thresholds, source-law edits or publication approval are inferred."

@@ -71,3 +71,12 @@ registry remains empty because its release is explicitly blocked pending the
 owner program; this slice does not register or imply an approved manual
 calculation. `python3 -m scripts.check_design_manual_governance` verifies the
 unchanged blocked registry/governance envelope.
+
+## F07f Native Reference-Conventions Handoff
+
+The scoped read-only OpenSim source audit is tracked under #11962; exact native
+TDD, bounded public-source diagnostics, correction of post-initSystem assembly
+semantics, reproduction and remaining donor/resource/anatomy gates are in
+`F07_REFERENCE_CONVENTIONS_TURNOVER.md`. Canonical calculation detail is in
+chapter 38. Neither the previous 520-muscle source nor Pose2Sim is qualified
+for capture-matched muscle-driven forward dynamics by this diagnostic.
