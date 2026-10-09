@@ -4,12 +4,37 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass, replace
+from typing import Protocol, TypeVar
 
 import numpy as np
 from scipy.optimize import least_squares
 
-from .core import AnalysisConfig, PhysicsProtocol
+from .core import AnalysisConfig
+from .matched_config import MatchedConfig
 from .physics import ShotOutcome
+
+ConfigT = TypeVar("ConfigT", AnalysisConfig, MatchedConfig)
+ConfigContra = TypeVar(
+    "ConfigContra", AnalysisConfig, MatchedConfig, contravariant=True
+)
+
+
+class LandingPhysics(Protocol[ConfigContra]):
+    """The public endpoint needed to calibrate either scientific adapter."""
+
+    def simulate(
+        self,
+        *,
+        face_deg: float,
+        path_deg: float,
+        config: ConfigContra,
+        sample_trajectory: bool = False,
+        nominal_face_deg: float = 0.0,
+    ) -> ShotOutcome: ...
+
+
+class NominalMatchError(RuntimeError):
+    """Requested raw landing is unreachable within the stated delivery bounds."""
 
 
 @dataclass(frozen=True)
@@ -51,9 +76,9 @@ class MatchedNominal:
 
 
 def match_nominal_landing(
-    physics: PhysicsProtocol,
+    physics: LandingPhysics[ConfigT],
     *,
-    config: AnalysisConfig,
+    config: ConfigT,
     target_x_m: float,
     reference_face_deg: float,
     face_to_path_deg: float,
@@ -117,7 +142,7 @@ def match_nominal_landing(
     final = simulate(result.x)
     residual = math.hypot(final.carry_x_m - target_x_m, final.carry_y_m)
     if not result.success or residual > tolerance_m:
-        raise RuntimeError(
+        raise NominalMatchError(
             f"nominal landing unreachable within bounds: residual={residual:.6f} m"
         )
     face, speed = (float(v) for v in result.x)
