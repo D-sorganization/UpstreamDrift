@@ -11,9 +11,13 @@ controllers, prescribed motion/coordinates, locks and unsupported constraints
 are rejected through recursive component auditing, including components outside
 legacy ForceSet/ControllerSet containers. Recursively owned muscle paths must
 match the native muscle registry, preventing an undeclared undriven muscle. The early muscle-law domain policy
-supports Millard2012EquilibriumMuscle; other laws require explicit domain
-qualification. Initial and sampled trajectory activation/fiber state must
-respect native model-specific minima without clipping. Contact geometry counts
+supports Millard2012EquilibriumMuscle and Thelen2003Muscle with active activation
+and compliant tendon dynamics. Ignored activation/tendon modes fail before
+native initialization; other laws require explicit domain qualification.
+Initial and sampled trajectory activation/fiber state must respect each native
+instance's minima without clipping, and fiber length must remain positive.
+The zero-pennation Thelen fixture has a zero native minimum fiber length;
+the Millard numerical floor must not be copied to it. Contact geometry counts
 are metadata, not evidence of contact dynamics. Full anatomical/contact model
 qualification and capture matching remain open.
 
@@ -44,7 +48,16 @@ until their initialization is qualified.
 
 The receipt binds model bytes, ordered native state and muscle names, full
 continuous initial state, time grid, excitation samples, interpolation,
-integrator accuracy and installed provider version. Native applied excitations
+integrator accuracy, installed provider version and ordered concrete muscle
+laws. Adapter `native-muscle-replay/1.3.0` binds the executed subtype policy and
+`muscle_class_policy="exact-supported-concrete-law/1.0.0"`. Before native
+`initSystem`, recursive admission requires exact concrete identity
+`Millard2012EquilibriumMuscle` or `Thelen2003Muscle`. A successful base-class
+`safeDownCast` establishes inheritance compatibility only; it cannot qualify an
+unknown derived law's state or force semantics. Native casts remain in use for
+the supported laws' model-owned state bounds. This guard does not broaden the
+existing compliant-tendon, activation, force, constraint or initialization scope.
+Native applied excitations
 are checked at output times separately from native muscle forces. This local
 receipt is a development adapter; the versioned Tools bundle remains the
 durable interchange authority. The model file alone is not a complete hash of
@@ -54,11 +67,20 @@ qualification before use.
 ## Evidence and Limits
 
 `tests/opensim/test_native_muscle_replay.py` creates a genuine one-DOF native
-Millard2012EquilibriumMuscle fixture, including nonzero activation and compliant
-fiber state. Tests check restoring muscle motion, native applied commands,
+Millard2012EquilibriumMuscle and Thelen2003Muscle fixtures, including nonzero
+activation and compliant fiber state. Tests check independent restored native
+force, restoring muscle motion, native applied commands,
 same-policy reproduction, tighter-accuracy/output-grid refinement and rejection
 of invalid inputs, missing state and hidden drives. This is independent of
 capture fitting and is not a physiological parameter validation.
+
+Child #11867 adds a class-identity boundary test that substitutes an unknown
+reported class on real native Component/Muscle proxies while retaining
+successful native base casts. An initialization trap proves rejection precedes
+`initSystem`. This is explicitly proxy boundary evidence, not a loaded or
+compiled third-party C++ plugin test. Both unchanged concrete native laws retain
+their positive replay tests. New subclasses need their own reviewed state,
+force, serialization and initialization policy before admission.
 
 Executed locally with OpenSim 4.6 (2026-06-22-85aaf64), Python 3.12.10:
 

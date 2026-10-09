@@ -119,6 +119,16 @@
       "id": "UP-D1-native-muscle-bundle-inventory",
       "owner": "UpstreamDrift issue #11908",
       "resolution": "Inventory the reviewed cold-start Tools T01 muscle bundle seam and chapter27. Registered discrete/modeling options and physical units are explicit; native continuous Y coverage alone is insufficient. Synthetic adapter tests do not qualify arbitrary SimTK State serialization, anatomy, contact/constraints, capture accuracy, or all-model parity."
+    },
+    {
+      "id": "UP-D1-native-thelen-replay-inventory",
+      "owner": "UpstreamDrift issue #11826",
+      "resolution": "Inventory explicit compliant Thelen2003Muscle and Millard2012EquilibriumMuscle native state minima, ordered concrete-law identity, independent restored force and ignored-mode refusal in muscle_replay.py and chapters/13-native-muscle-replay.qmd. Native fixture tests do not establish full-body anatomy, physiological parameters, external-resource identity, ignored-state modes, contact/grip or real capture acceptance. Keep F07/F08 gates open."
+    },
+    {
+      "id": "UP-D1-native-exact-muscle-law-inventory",
+      "owner": "UpstreamDrift issue #11867",
+      "resolution": "Inventory exact concrete Millard2012EquilibriumMuscle/Thelen2003Muscle admission before native initialization in muscle_replay.py and chapter13. Native casts remain necessary for state-domain getters but inheritance is not qualification of an unknown derived law. Proxy identity negative tests preserve native cast success and trap initialization; they do not validate a compiled plugin. Adapter1.3.0 hashes the exact-class admission policy. All anatomy, path consistency, contact, full-state full-capture and manual-release gates remain open."
     }
   ],
   "calculations": []

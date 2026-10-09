@@ -1,5 +1,7 @@
 ## Native Muscle Replay Development Boundary (F07, #11791)
 
+Child #11867 restricts recursive native admission before `initSystem` to exact `Millard2012EquilibriumMuscle` and `Thelen2003Muscle` concrete identities. Inheritance-compatible unknown laws fail closed; supported native casts still supply model-owned state limits. Adapter `native-muscle-replay/1.3.0` hashes an explicit exact-class policy. The negative identity-proxy test is not compiled-plugin qualification, and neither this guard nor the positive native fixtures establish full-body/capture acceptance.
+
 `tour_matching.replay_muscle_excitations` restores complete named continuous state, plays bounded linear native muscle excitation inputs, and cold-starts Runge-Kutta-Merson once without observations, feedback or resets. It audits actual native applied excitations and binds state/input/model/policy identities. Existing controllers, prescribed coordinates, non-muscle actuators and undeclared non-muscle forces fail closed. This early fixture does not qualify discrete/plugin initialization, contact, full-body anatomy or mocap matching; #11791 remains open. The revised feedback-controls milestone DAG separates schema/provider readiness from scientific acceptance and private evidence delivery.
 
 ## Capture-O Video Companion: Error Budget, Guidance Derivation, and Public Summary (COV-11, #11279)
@@ -10383,6 +10385,16 @@ Turnover: `docs/development/feedback_controls/F06_NATIVE_TORQUE_TURNOVER.md`.
 Tools T01 is consumed through merged pin
 `2e7665111b06f92ffbfe178b92d74d6a81c95388` and the UD-owned seam helper.
 Six-engine and muscular OpenSim real-capture gates remain open.
+
+## Native Thelen Replay Boundary (F07b, #11826)
+
+Early native excitation replay explicitly admits compliant Thelen2003Muscle
+alongside Millard2012EquilibriumMuscle. Model-owned state minima, positive fiber
+length, complete restoration, ordered law identity and ignored-mode refusal
+are required. Canonical reference: native muscle replay chapter; turnover:
+`docs/development/feedback_controls/F07_THELEN_REPLAY_TURNOVER.md`. Full-body,
+contact/grip, licensing and real-capture scientific gates remain open.
+
 ## Controlled-Swing Comparison Admission (F01, #11785)
 
 `src/engines/feedback_comparison.py` projects the authoritative
