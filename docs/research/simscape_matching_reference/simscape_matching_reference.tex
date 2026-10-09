@@ -5452,6 +5452,136 @@ timing and feedback gains near impact). Evidence:
 \texttt{\textasciitilde/Videos/Parity Audit/forces\_and\_impact/clubhead\_speed\_timing/}
 on the implementing host (diagnosis plot and summary JSON).
 
+\subsection{Second Pass: Pre-Contact Release Cutoff and Weld-Consistent Tracking}
+\label{sec:gcv20_second_pass}
+The first pass left the driver replay 18 ms early and 18 \% slow and the
+7-iron replay 10 ms early and 9 \% slow. A second pass separated four causes
+by re-exporting the 1 kHz same-input bundle
+(\texttt{scripts.same\_input\_bundle export}) from the same pipeline runs with
+one change at a time. Re-exporting the unchanged runs reproduces the
+committed numbers (driver $-20.0$ ms and $-20.1$\,\%, 7-iron $-11.6$ ms and
+$-9.8$\,\% against the capture), so each row below differs from that
+baseline in the named change only. Columns are the model peak relative to
+the capture's peak (each relative to its own impact), the impact speed
+relative to the capture's, and the model-to-capture face-angle gap at impact
+(OSV-10 limit 5 deg).
+
+\paragraph{Cause 1: The 12 Hz Pre-Contact Cutoff.} With the filter split at
+impact, the pre-contact half still removes the late release. On the driver
+reference (whole pre-contact segments, against the unfiltered reference's
+$-1.4$ ms and 50.46 m/s before the split):
+\begin{center}
+\begin{tabular}{@{}rrr@{}}
+\toprule
+Pre-contact cutoff (Hz) & Peak $-$ impact (ms) & Impact (m/s) \\
+\midrule
+12 & $-13.1$ & 46.40 \\
+15 & $-7.6$ & 47.99 \\
+18 & $-4.8$ & 49.20 \\
+20 & $-4.8$ & 49.77 \\
+25 & $-2.0$ & 50.62 \\
+30 & $-2.0$ & 50.91 \\
+\bottomrule
+\end{tabular}
+\end{center}
+The pre-contact cutoff is therefore chosen per reference
+(\texttt{pipeline.release\_cutoff.release\_preserving\_cutoff}): the lowest of
+12, 15, 18, 20, 25 and 30 Hz whose filtered reference keeps the unfiltered
+reference's speed-peak time (relative to the split) within one sample and its
+last pre-contact segment speed within 1\,\%. Only the reference is used,
+never the capture, so this is a convergence criterion on the filter and not a
+fit to the acceptance target. The post-contact half keeps 12 Hz, so the
+impact-jerk reason for decision 11 is unaffected. When no candidate keeps the
+release the widest is used and the receipt says \texttt{preserved: false}.
+Both captures select 25 Hz (7-iron: 12 Hz gives $-9.7$ ms and 36.54 m/s,
+25 Hz gives $-1.4$ ms and 39.32 m/s, unfiltered $-4.2$ ms and 39.20 m/s).
+
+A failed first version measured the release at the ball passage. The segment
+that straddles the split joins the two separately filtered halves; on the
+7-iron it read 41.1 m/s where the last whole pre-contact segment was
+36.4 m/s, so the 12 Hz reference looked as though it passed. The criterion
+now uses whole pre-contact segments only.
+
+\paragraph{Cause 2: A Weld-Inconsistent Tracked Reference.} The low-pass
+acts on each coordinate separately, so the tracked reference opens the
+dual-grip weld: up to 16.1 mm (driver, 12 Hz), 10.7 mm (driver, 25 Hz) and
+8.1 mm (7-iron, 25 Hz), against 4.5 mm for the unfiltered IK reference. The
+KKT replay holds the weld exactly and spends trail-arm effort closing the
+gap through the release. Each tracked sample is now projected onto the weld
+by Gauss-Newton steps (minimum-norm, finite-difference Jacobian) over the
+nine trail-arm coordinates (right scapula, shoulder, elbow, forearm, wrist;
+\texttt{pipeline.weld\_projection.weld\_consistent\_track}), to below
+1~$\mu$m. The lead arm and body keep their filtered values; the receipt
+records the residual before and after.
+
+\paragraph{Cause 3: Ground Yaw Slip of the Unactuated Root.} Through the
+downswing the feet and pelvis turn about the vertical by 8--11 deg more than
+the reference (trail foot slides 35--46 mm); the root yaw error at impact is
+about $-0.19$ rad. This is the limitation recorded in decision 13 (the
+pelvis drift is governed by the ground yaw-moment capacity). As a diagnostic
+only, the root was made actuated; that is not a physical model and was not
+adopted.
+
+\paragraph{Cause 4: Residual Tracking Loss.} Even with an actuated root the
+replay is 4--5\,\% slow at impact.
+
+\begin{center}
+\begin{tabular}{@{}llrrr@{}}
+\toprule
+Club & Tracked reference & Peak vs capture (ms) & Impact vs capture & Face gap (deg) \\
+\midrule
+Driver & 12 Hz (baseline) & $-20.0$ & $-20.1$\,\% & -- \\
+Driver & 12 Hz + weld & $-13.6$ & $-14.6$\,\% & -- \\
+Driver & 25 Hz & $-10.2$ & $-12.5$\,\% & 1.8 \\
+Driver & 25 Hz + weld & $-4.1$ & $-8.0$\,\% & 1.7 \\
+Driver & 25 Hz + weld, actuated root (diagnostic) & $-1.4$ & $-4.9$\,\% & 0.75 \\
+7-iron & 12 Hz (baseline) & $-11.6$ & $-9.8$\,\% & -- \\
+7-iron & 12 Hz + weld & $-13.5$ & $-10.5$\,\% & 7.98 \\
+7-iron & 25 Hz & $-4.8$ & $-6.1$\,\% & 0.99 \\
+7-iron & 25 Hz + weld & $-3.7$ & $-5.4$\,\% & 1.36 \\
+7-iron & 25 Hz + weld, actuated root (diagnostic) & $-0.1$ & $-4.0$\,\% & 0.66 \\
+\bottomrule
+\end{tabular}
+\end{center}
+The 7-iron rows reuse the run's tracked reference for 12 Hz (which includes
+the zero-moment-point filter of that run) and re-filter the IK reference for
+25 Hz without it. The 12 Hz + weld 7-iron row fails the face gate, so the
+weld projection is adopted only together with the 25 Hz pre-contact cutoff.
+
+\paragraph{Other Experiments That Did Not Help.} Each was a full bundle
+re-export of both clubs.
+\begin{itemize}
+\item Stronger root regulation through the legs (balance gains 900/60 and
+root-only): no change in timing; 2500/100 diverged.
+\item Contact parameters: a 0.02 or 0.01 m/s Coulomb transition velocity made
+the face miss the ball; friction coefficient 1.5 gave the driver $-16.5$ ms
+and $-19.0$\,\% and made the 7-iron miss the ball.
+\item The wrench-QP tracking backend: driver $-17.6$ ms and $-23.0$\,\%; with
+friction 1.5, $-14.7$ ms and $-19$\,\% and the 7-iron missed the ball.
+\item KKT without the controller split at impact: driver $-17.6$ ms and
+$-22.8$\,\%; 7-iron $-2.5$ ms and $-8.6$\,\%.
+\item An actuated root with the 12 Hz reference: driver $-14.5$ ms and
+$-17.6$\,\%, 7-iron $-9.9$ ms and $-9.4$\,\%; root drift is not the only
+cause.
+\end{itemize}
+Joint tracking errors before impact stay below 0.035 rad; the large errors
+are after contact.
+
+\paragraph{Reproduction.} The pipeline change is exercised by
+\texttt{tests/unit/motion\_matching/pipeline/test\_release\_cutoff.py} and
+\texttt{test\_weld\_projection.py}. Full re-solve (writes the fixtures; run
+it only to measure, and adopt the fixtures only when the OSV-10 gate and the
+GCV-20 acceptance pass):
+\begin{verbatim}
+MUJOCO_GL=egl PYTHONPATH=.:src python3 -m scripts.regenerate_club_face_fixtures \
+    --work RUNS --capture driver     # and --capture iron
+\end{verbatim}
+The one-change-at-a-time re-exports used a scratch driver around
+\texttt{scripts.same\_input\_bundle.export} and
+\texttt{scripts.regenerate\_club\_face\_fixtures.measure\_swing} that swaps
+the run's \texttt{q\_track} before the export; the measurements are in the
+summary JSON beside the evidence plot.
+
 \section{Dynamics-Informed Motion Estimation (DIME): Shared Reports, GUI Strategy Selection and Methods}
 \label{sec:dime_reports_methods}
 

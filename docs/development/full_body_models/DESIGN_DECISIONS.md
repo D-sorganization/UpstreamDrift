@@ -284,6 +284,21 @@ Kinematic inverse kinematics re-solving introduces high-frequency frame-to-frame
 
 Tracking raw unfiltered kinematic trajectories (caused severe impact torque spikes $>2500\text{ N}\cdot\text{m}$) and 8 Hz filtering (oversmoothed transition dynamics, increasing tracking error to 188 mm).
 
+### GCV-20 Amendment (#11767): Release-Preserving Pre-Contact Cutoff and Weld-Consistent Track
+
+The post-contact half keeps 12 Hz. The pre-contact half (the filter is split at the capture impact) now uses the lowest of 12, 15, 18, 20, 25, 30 Hz that keeps the unfiltered reference's speed-peak time within one sample and its last whole pre-contact segment speed within 1 % (`pipeline.release_cutoff`); both captures select 25 Hz (driver reference at 12 Hz: peak 13.1 ms before impact, 46.40 m/s; at 25 Hz: 2.0 ms, 50.62 m/s; unfiltered 2.0 ms, 50.46 m/s). The filtered track is then projected onto the grip weld over the trail-arm coordinates (`pipeline.weld_projection`), because per-coordinate filtering opens it by up to 16.1 mm.
+
+| Club | Tracked reference | Peak vs capture (ms) | Impact speed vs capture | Face gap at impact (deg) |
+| --- | --- | --- | --- | --- |
+| Driver | 12 Hz (before) | -20.0 | -20.1 % | - |
+| Driver | 25 Hz | -10.2 | -12.5 % | 1.8 |
+| Driver | 25 Hz + weld (after) | -4.1 | -8.0 % | 1.7 |
+| 7-iron | 12 Hz (before) | -11.6 | -9.8 % | - |
+| 7-iron | 25 Hz | -4.8 | -6.1 % | 0.99 |
+| 7-iron | 25 Hz + weld (after) | -3.7 | -5.4 % | 1.36 |
+
+Measured by re-exporting the same-input bundle from the committed runs with one change at a time. Timing now meets the 5 ms acceptance; impact speed does not (3 % limit). Remaining causes: ground yaw slip of the unactuated root (decision 13; an actuated-root diagnostic gives -1.4 ms/-4.9 % and -0.1 ms/-4.0 %) and residual tracking loss. Failed experiments (12 Hz + weld fails the 7-iron face gate at 7.98 deg; a ball-passage release metric picked the straddling segment; leg root regulation, contact parameters, wrench-QP, no controller split) and reproduction commands are in the calculation reference `docs/research/simscape_matching_reference/simscape_matching_reference.tex` (GCV-20 second pass). Fixtures are not regenerated until acceptance and the OSV-10 gate pass.
+
 ### REVIEW.md Sections
 
 - [REVIEW.md Section 15: Downswing Dynamics: Compliant Sole](evidence/anthropometry/REVIEW.md#15-downswing-dynamics-compliant-sole-tracked-reference-zero-moment-point-mm-7-2026-09-14)
