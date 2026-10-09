@@ -1,3 +1,15 @@
+# Active: Owned Project MyoSuite Forecasting — F09k #12009
+
+Branch `feat/f09k-owned-sdk-forecast-12009` starts at F09j
+`43e925dd7171f12593d6c8149e3468c720048bc7` (draft PR #12005).
+The owned forecast restores complete current native state and reuses the SDK
+recorder. Read chapter 38 and
+`docs/development/feedback_controls/F09K-OWNED-FORECAST-TURNOVER.md` for lifecycle,
+actual executed evidence and remaining boundaries. Preserve the live task and
+the separate independent replay authority. All 17 model rows and six ecosystems
+remain required; the endpoint is a private-capture-matched muscular OpenSim
+model with full-state, full-horizon independent excitation/contact replay.
+
 # Active: Project MyoSuite Feedback Recording — F09j #12003
 
 Branch `feat/f09j-project-feedback-recording-12003` starts at F09i `976feaf051`.

@@ -197,6 +197,51 @@ The observed Desk scene bytes differ from local scene bytes. The producer's
 separate full resource-closure evidence remains separate. Desktop previews
 restore saved states and render without integration, labeled **No Mocap Fit**.
 
+## Owned Current-State SDK Forecasts
+
+F09k (#12009) supplies `ProjectTaskForecaster` as a reusable shooting primitive.
+Construction creates a distinct SDK task from the same original source closure
+and requires an identical compiled native model. The live task's native handles,
+source/resource lineage and SDK bindings remain pinned. Each prediction accepts
+an observation whose complete integration state and individual native fields
+exactly match the current live plant. Matching values establish consistency,
+not authenticated snapshot origin; sample index remains caller bookkeeping.
+
+Command conversion occurs inside a live-state guard. Recheck before any owned
+execution, then SDK-reset only the owned task, restore every
+`mjSTATE_INTEGRATION` field, call native forward preparation and verify exact
+readback. This includes the absolute epoch, activation, controls and warmstart.
+The existing SDK recorder executes the candidate and returns its existing
+producer history. Native contacts and actuator laws remain those of the source
+model. Independent export and replay still require the existing T01/profile
+admission and native executor; a forecast is not replay qualification.
+
+Reuse the existing replay restoration/admission check before any owned execution:
+nonzero applied external loads are refused, and native callbacks/plugins retain
+their existing restrictions. Astra's external-load review produced two actual
+SDK RED regressions before repair. The final MyoSuite 3.0/MuJoCo 3.6 combined
+campaign passes 109 cases, zero failures/errors/skips, including unchanged
+production driver/iron suffix forecasts with exact full-state independent replay.
+All twelve executed source/test hashes match. Retained source-bound evidence is
+listed in F09k turnover. Two-step production predictions do not establish a
+fitted capture, stable stance or physiological validity.
+
+Every attempt checks the live state, model/source identity and global callback
+policy on exit, including failures. No successful partial history is returned.
+The forecaster detects caller mutation without rollback. A nonblocking ownership
+lock rejects concurrent/reentrant use. Idempotent close releases only the owned
+task; constructor failures after the owned factory returns also close it. The
+factory's own pre-return failures remain governed by its existing implementation.
+The forecast adapter has a separate guarded source digest.
+
+`construction_seconds` measures allocation/admission; `last_attempt_seconds`
+includes prediction admission, conversion, restoration, stepping and final
+live validation, including failed attempts. Independent replay has its own cost.
+No online deadline, optimizer, fitted control gains or production speedup is
+established. Perfect-state prediction is distinct from state estimation and
+robustness to model error or delayed measurements. Retain uncertainty and
+capture-calibration requirements before promoting any tracking result.
+
 ## State-Dependent SDK Feedback Recording
 
 F09j (#12003) adds a feedback input source to the same admitted SDK recording

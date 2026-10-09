@@ -1,4 +1,15 @@
-## Project MyoSuite Task, Feedback and Independent Replay (F09i/F09j)
+## Project MyoSuite Task, Forecast, Feedback and Independent Replay (F09i/F09j/F09k)
+
+F09k #12009 adds a reusable owned SDK forecasting plant for current-state
+shooting. Every candidate restores complete native integration state, including
+absolute time, activation, controls and warmstart, and runs the existing command
+recorder. The live plant is never reset or stepped by the forecaster. Exact
+current-state correspondence is checked before candidate execution, including
+caller conversion side effects. Source/model/SDK identity and live state are
+checked on success and failure. Timing includes admission and restoration;
+no real-time deadline or optimization convergence is established. Forecast
+history uses the existing independent replay boundary. Chapter 38 and F09k
+turnover preserve the unresolved calibration, physiology and parity gates.
 
 F09j #12003 provides copied immutable native feedback observations and reuses the
 admitted SDK loop for state-dependent commands. Retain controller provenance

@@ -52,6 +52,15 @@ and caller-declared parameter digests do not attest hidden policy dependencies.
 
 ## Evidence
 
+`ProjectTaskForecaster` owns a separate source-identical SDK plant, restores
+complete current live state for every candidate and reuses the same producer.
+Current-state consistency, pinned handles/compiled model/source/SDK identity,
+deferred conversion checks and failure-time live validation precede promotion.
+The owned task alone is reset/stepped/closed. Candidate reuse rejects reentrancy;
+timing includes admission and restoration. Forecast adapter provenance remains
+separate. Export still requires this existing independent replay contract;
+lookahead alone does not qualify control benefit, performance or physiology.
+
 Tests exercise actual MyoSuite 3.0/MuJoCo 3.6, short unchanged production driver
 and iron probes, independent full-state replay and adversarial provenance.
 Portable/native-unavailable skips do not qualify provider availability. The

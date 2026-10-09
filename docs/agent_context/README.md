@@ -2,7 +2,7 @@
 
 Generated from catalog.json and current source evidence. Edit the sources and regenerate.
 
-Source fingerprint: `d135e355d4696a2c7fe8aaccb5488bab5a873f82e03858c12588403512dbfc28`.
+Source fingerprint: `96f7d3167091eac2a67c24dbfb91eda431a4e5526973c29561d945bbc1e40f0f`.
 
 This map covers registered components. A source match is not scientific approval or proof that tests passed.
 
@@ -172,10 +172,10 @@ ID: `project-myosuite-tasks` · Owner: UpstreamDrift: src/engines · Status: imp
 
 SDK source-bound production task histories and exact independent native replay; short integration evidence does not qualify capture or physiology.
 
-- **Sources:** [myosuite_project_task_producer.py](../../src/engines/myosuite_project_task_producer.py), [myosuite_project_feedback.py](../../src/engines/myosuite_project_feedback.py), [project_task_replay_artifacts.py](../../src/engines/project_task_replay_artifacts.py)
-- **Documentation:** [38-project-myosuite-task-replay.qmd](../../manuals/upstreamdrift/chapters/38-project-myosuite-task-replay.qmd), [F09I-PROJECT-TASK-TURNOVER.md](../../docs/development/feedback_controls/F09I-PROJECT-TASK-TURNOVER.md), [F09J-FEEDBACK-RECORDING-TURNOVER.md](../../docs/development/feedback_controls/F09J-FEEDBACK-RECORDING-TURNOVER.md)
-- **Tests:** [test_project_task_producer.py](../../tests/unit/engines/myosuite/test_project_task_producer.py), [test_project_task_feedback.py](../../tests/unit/engines/myosuite/test_project_task_feedback.py), [test_project_task_artifact_admission.py](../../tests/unit/engines/myosuite/test_project_task_artifact_admission.py), [test_native_model_resource_closure.py](../../tests/unit/engines/myosuite/test_native_model_resource_closure.py)
-- **Public Interfaces:** `create_project_golf_task` in [src/engines/myosuite_project_task_producer.py](../../src/engines/myosuite_project_task_producer.py)
+- **Sources:** [myosuite_project_task_producer.py](../../src/engines/myosuite_project_task_producer.py), [myosuite_project_feedback.py](../../src/engines/myosuite_project_feedback.py), [myosuite_project_forecast.py](../../src/engines/myosuite_project_forecast.py), [project_task_replay_artifacts.py](../../src/engines/project_task_replay_artifacts.py)
+- **Documentation:** [38-project-myosuite-task-replay.qmd](../../manuals/upstreamdrift/chapters/38-project-myosuite-task-replay.qmd), [F09I-PROJECT-TASK-TURNOVER.md](../../docs/development/feedback_controls/F09I-PROJECT-TASK-TURNOVER.md), [F09J-FEEDBACK-RECORDING-TURNOVER.md](../../docs/development/feedback_controls/F09J-FEEDBACK-RECORDING-TURNOVER.md), [F09K-OWNED-FORECAST-TURNOVER.md](../../docs/development/feedback_controls/F09K-OWNED-FORECAST-TURNOVER.md)
+- **Tests:** [test_project_task_producer.py](../../tests/unit/engines/myosuite/test_project_task_producer.py), [test_project_task_feedback.py](../../tests/unit/engines/myosuite/test_project_task_feedback.py), [test_project_task_forecast.py](../../tests/unit/engines/myosuite/test_project_task_forecast.py), [test_project_task_artifact_admission.py](../../tests/unit/engines/myosuite/test_project_task_artifact_admission.py), [test_native_model_resource_closure.py](../../tests/unit/engines/myosuite/test_native_model_resource_closure.py)
+- **Public Interfaces:** `create_project_golf_task` in [src/engines/myosuite_project_task_producer.py](../../src/engines/myosuite_project_task_producer.py), `ProjectTaskForecaster` in [src/engines/myosuite_project_forecast.py](../../src/engines/myosuite_project_forecast.py)
 - **Consumers:** native-direct-command-replay
 - **Providers:** None registered
 
@@ -235,7 +235,7 @@ flowchart LR
 
 ## Provenance and Limits
 
-- 66 source files hashed with SHA-256; UTF-8 line endings normalized.
+- 69 source files hashed with SHA-256; UTF-8 line endings normalized.
 - Generated documents omit absolute paths and commit IDs to remain reproducible across worktrees.
 - Live CLI/MCP results include checkout identity and current revision.
 - Read integration contracts and their tests before modifying a boundary.
