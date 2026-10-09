@@ -104,6 +104,11 @@
       "id": "UP-D1-impact-parameters-inventory",
       "owner": "UpstreamDrift issue #11724",
       "resolution": "Inventory the GCV-15 (#11721) impact-parameter extractor in src/shared/python/impact_parameters/ (target_frame.py, clubhead_series.py, extract.py, tools_gateway.py) documented provisionally in chapters/12-impact-parameters.qmd: the explicit target frame (x_t target, z_t up, y_t = z_t x x_t, ADR-0041 default, handedness mirrors lateral signs only, recorded with every result), the impact state (last pre-contact sample, explicit index or peak clubhead speed), clubhead speed, attack angle, club path, face angle, face-to-path, dynamic loft, 3-D spin loft, the +/-20 ms least-squares swing plane, low point, toe/high face location, smash factor and the fail-closed Tools D-plane estimates labelled as model estimates. Unavailable values are None/null with a reason, never zero; face-derived values are unavailable when club axial rotation is unobservable. tests/unit/impact_parameters/test_extract.py and test_adapters.py establish agreement with constructed series of known angles, rotation invariance, the handedness mirror and Tools agreement within 0.01 deg; they do not qualify any engine clubhead kinematics or impact detection, compare against launch-monitor measurements, or establish an uncertainty. The 1 m/s speed floor, +/-20 ms plane window and collinearity ratio are numerical guards, not measured limits."
+    },
+    {
+      "id": "UP-D1-native-muscle-replay-inventory",
+      "owner": "UpstreamDrift issue #11791",
+      "resolution": "Inventory the provisional native continuous-state excitation replay in tour_matching/muscle_replay.py and chapters/13-native-muscle-replay.qmd. Actual OpenSim 4.6 one-DOF compliant-muscle tests establish bounded input playback, continuous initialization and uninterrupted native stepping only. Discrete/plugin state, external-resource identity, passive/contact force policy, full-body anatomy, capture accuracy and full-horizon independent muscle/contact replay remain unqualified. Preserve cold-start policy and forbid weaker shared rigid-body/restarted/external-force evidence from qualifying the endpoint."
     }
   ],
   "calculations": []

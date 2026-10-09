@@ -68,4 +68,10 @@ The OpenSim backend only ever runs under `xvfb-run` and refuses to start when
 - `backends/`: one module per engine plus shared helpers.
 
 Camera presets live in `src/shared/python/golf_view_presets`; the glyph
-pipeline is `src/shared/python/force_overlay` (ADR-0052).
+pipeline is `src/shared/python/force_overlay` (ADR-0052). The OpenSim and
+MeshCat viewers use the shared vertical field of view `VIEWER_FOV_Y_RAD`
+(0.7 rad). Before NV-9 (#11697), MeshCat kept the 75 deg three.js default,
+which left the golfer at about a quarter of the frame height.
+`golf_view_presets.framing` measures the projected extent of a set of points
+(`projected_extent`). It also gives the camera distance that frames them with
+a 15 % margin (`fit_distance_m`).

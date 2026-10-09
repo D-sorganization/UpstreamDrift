@@ -66,7 +66,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `force_overlay` | 0 | 0 | 0 | 17 | 0 | 0 |
 | `golf_club` | 0 | 0 | 0 | 0 | 118 | 0 |
 | `golf_simulator` | 0 | 0 | 0 | 19 | 0 | 0 |
-| `golf_view_presets` | 0 | 0 | 0 | 3 | 0 | 0 |
+| `golf_view_presets` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `golf_viz` | 0 | 0 | 0 | 3 | 0 | 0 |
 | `grip_contact` | 0 | 0 | 0 | 9 | 0 | 0 |
 | `ground_model` | 0 | 0 | 0 | 2 | 0 | 0 |
@@ -142,7 +142,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `video_timing` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 36 | 0 | 0 |
-| **Total** | **400** | **273** | **121** | **1736** | **796** | **673** |
+| **Total** | **400** | **273** | **121** | **1737** | **796** | **673** |
 
 ## Diverged Files by Package
 
