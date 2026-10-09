@@ -22,6 +22,7 @@ from src.shared.python.motion_matching.full_body_spec import (
     validate_full_body_spec,
 )
 from src.shared.python.motion_matching.hip_calibration import (
+    LATERAL_SEEDS_M,
     apply_hip_calibration,
     functional_hip_calibration,
     hip_rotation_zero,
@@ -507,8 +508,15 @@ def prepare_hip_spec(
         for label in MARKER_SEGMENTS["pelvis"]
     }
     hip_cal = functional_hip_calibration(lane.points, lane.valid, labels, waist_offsets)
+    # Foot progression on: remove the lateral-marker tilt from the zero twist
+    # (#11737). Off: the legacy plane the canonical receipts were made with.
     zero_twist = hip_rotation_zero(
-        lane.points, lane.valid, labels, waist_offsets, calibration=hip_cal
+        lane.points,
+        lane.valid,
+        labels,
+        waist_offsets,
+        calibration=hip_cal,
+        lateral_marker_offsets_m=(0.0, 0.0) if lane.feet is None else LATERAL_SEEDS_M,
     )
     if opts.skip_hip_calibration:
         hip_spec = add_toe_spheres(dict(base_spec))

@@ -194,6 +194,7 @@ def functional_hip_calibration(
 #: ``pipeline/constants.py`` (a unit test keeps the two in step).
 KNEE_OUT_LATERAL_M: float = 0.06
 ANKLE_OUT_LATERAL_M: float = float(np.hypot(0.01, 0.055))
+LATERAL_SEEDS_M: tuple[float, float] = (KNEE_OUT_LATERAL_M, ANKLE_OUT_LATERAL_M)
 _AXIS_ITERATIONS = 50
 _MIN_FLEXION_SIN = 1.0e-3
 
@@ -204,7 +205,7 @@ def knee_flexion_axis(
     ankle_out: Sequence[float],
     *,
     side: int,
-    lateral: tuple[float, float] = (KNEE_OUT_LATERAL_M, ANKLE_OUT_LATERAL_M),
+    lateral: tuple[float, float] = LATERAL_SEEDS_M,
 ) -> Array:
     """Unit knee flexion axis, pointing to the leg's lateral side (#11737).
 
@@ -250,8 +251,15 @@ def hip_rotation_zero(
     calibration: HipCalibration | None = None,
     superior_axis: Sequence[float] = (0.0, 0.0, 1.0),
     max_frames: int = 24,
+    lateral_marker_offsets_m: tuple[float, float] = (0.0, 0.0),
 ) -> HipRotationZero:
     """Estimate the zero-twist rotation angle offsets (deg) for right and left hips.
+
+    ``lateral_marker_offsets_m`` (knee, ankle) removes the tilt the lateral
+    markers give the ankle-fallback flexion plane (:func:`knee_flexion_axis`).
+    The default ``(0, 0)`` keeps the legacy plane that the canonical receipts
+    were produced with; :data:`LATERAL_SEEDS_M` is the corrected estimate
+    (#11737).
 
     The angle measures the rotation of the thigh around its longitudinal axis in
     the anatomical pelvis frame (X forward, Y up, Z right). For each leg:
@@ -342,6 +350,7 @@ def hip_rotation_zero(
                     axes.T @ (p_k_out - c_hip),
                     axes.T @ (p_a_out - c_hip),
                     side=side,
+                    lateral=lateral_marker_offsets_m,
                 )
                 sign = 1.0 if side == 0 else -1.0
                 theta = float(np.degrees(np.arctan2(sign * v_lat[0], sign * v_lat[2])))
