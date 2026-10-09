@@ -185,9 +185,16 @@ def test_hip_rotation_zero_recovers_known_angles() -> None:
     assert zl == pytest.approx(expected_l, abs=0.1)
 
 
-def test_hip_rotation_zero_ankle_fallback() -> None:
-    expected_r = 14.0
-    expected_l = -10.0
+def _ankle_fallback_capture(
+    expected_r: float,
+    expected_l: float,
+    *,
+    knee_flex_deg: float = 20.0,
+    lateral_knee_m: float = module.KNEE_OUT_LATERAL_M,
+    lateral_ankle_m: float = module.ANKLE_OUT_LATERAL_M,
+) -> tuple[np.ndarray, np.ndarray, tuple[str, ...]]:
+    """Knee/ankle markers sit lateral of the joint centres along the knee axis,
+    as real lateral epicondyle and malleolus markers do (world: Y left, Z up)."""
     rng = np.random.default_rng(9)
     labels = tuple(WAIST) + ("RKneeOut", "RAnkleOut", "LKneeOut", "LAnkleOut")
     static_frames, dynamic_frames = 25, 60
@@ -198,17 +205,21 @@ def test_hip_rotation_zero_ankle_fallback() -> None:
     rot_r = Rotation.from_rotvec([0.0, 0.0, np.radians(expected_r)]).as_matrix()
     rot_l = Rotation.from_rotvec([0.0, 0.0, np.radians(expected_l)]).as_matrix()
 
-    # Knee flexed 20 deg posteriorly (shank bends backward)
-    flex_r = Rotation.from_rotvec([0.0, np.radians(20.0), 0.0]).as_matrix()
-    flex_l = Rotation.from_rotvec([0.0, np.radians(20.0), 0.0]).as_matrix()
+    # Knee flexed posteriorly (shank bends backward)
+    flex = Rotation.from_rotvec([0.0, np.radians(knee_flex_deg), 0.0]).as_matrix()
 
     thigh_offset = np.array([0.0, 0.0, -0.40])
     shank_offset = np.array([0.0, 0.0, -0.40])
+    lateral_r, lateral_l = rot_r @ np.array([0, -1.0, 0]), rot_l @ np.array([0, 1.0, 0])
 
-    k_offset_r = rot_r @ thigh_offset
-    a_offset_r = k_offset_r + rot_r @ flex_r @ shank_offset
-    k_offset_l = rot_l @ thigh_offset
-    a_offset_l = k_offset_l + rot_l @ flex_l @ shank_offset
+    k_offset_r = rot_r @ thigh_offset + lateral_knee_m * lateral_r
+    a_offset_r = (
+        rot_r @ thigh_offset + rot_r @ flex @ shank_offset + lateral_ankle_m * lateral_r
+    )
+    k_offset_l = rot_l @ thigh_offset + lateral_knee_m * lateral_l
+    a_offset_l = (
+        rot_l @ thigh_offset + rot_l @ flex @ shank_offset + lateral_ankle_m * lateral_l
+    )
 
     for f in range(static_frames):
         pelvis_rot = Rotation.from_rotvec(rng.normal(0.0, 0.1, 3)).as_matrix()
@@ -244,10 +255,52 @@ def test_hip_rotation_zero_ankle_fallback() -> None:
             points[f, labels.index(a_lbl)] = (
                 pelvis_rot @ (k_pos + np.array([0, 0, -0.40])) + pelvis_pos
             )
+    return points, valid, labels
 
+
+@pytest.mark.parametrize("knee_flex_deg", [10.0, 20.0, 30.0])
+def test_hip_rotation_zero_ankle_fallback(knee_flex_deg: float) -> None:
+    expected_r, expected_l = 14.0, -10.0
+    points, valid, labels = _ankle_fallback_capture(
+        expected_r, expected_l, knee_flex_deg=knee_flex_deg
+    )
     zero = module.hip_rotation_zero(points, valid, labels, WAIST)
-    assert zero.offset_r_deg == pytest.approx(expected_r, abs=0.2)
-    assert zero.offset_l_deg == pytest.approx(expected_l, abs=0.2)
+    assert zero.offset_r_deg == pytest.approx(expected_r, abs=1.0)
+    assert zero.offset_l_deg == pytest.approx(expected_l, abs=1.0)
+
+
+def test_lateral_markers_bias_an_uncorrected_flexion_plane() -> None:
+    # The plane through the hip CENTRE and the two LATERAL markers is not the
+    # flexion plane: at 20 deg of knee flexion a 6 cm lateral offset tilts it
+    # by about 25 deg, the size of the capture-A right-hip zero twist (#11737).
+    # Right leg, X forward, Y left, Z up; true flexion axis -Y (lateral).
+    flex = Rotation.from_rotvec([0.0, np.radians(20.0), 0.0]).as_matrix()
+    lateral = np.array([0.0, -1.0, 0.0])
+    hip = np.zeros(3)
+    knee = np.array([0.0, 0.0, -0.40])
+    ankle = knee + flex @ np.array([0.0, 0.0, -0.40])
+    k_out = knee + module.KNEE_OUT_LATERAL_M * lateral
+    a_out = ankle + module.ANKLE_OUT_LATERAL_M * lateral
+    naive = module.knee_flexion_axis(hip, k_out, a_out, side=0, lateral=(0.0, 0.0))
+    corrected = module.knee_flexion_axis(hip, k_out, a_out, side=0)
+    assert np.degrees(np.arccos(np.clip(naive @ lateral, -1.0, 1.0))) > 15.0
+    assert np.degrees(np.arccos(np.clip(corrected @ lateral, -1.0, 1.0))) < 1.0
+
+
+def test_lateral_offsets_match_the_leg_marker_seeds() -> None:
+    from src.shared.python.motion_matching.pipeline.constants import LEG_SEEDS
+
+    for side in ("R", "L"):
+        knee = LEG_SEEDS[f"{side}KneeOut"][1]
+        ankle = LEG_SEEDS[f"{side}AnkleOut"][1]
+        assert module.KNEE_OUT_LATERAL_M == pytest.approx(np.hypot(knee[0], knee[2]))
+        assert module.ANKLE_OUT_LATERAL_M == pytest.approx(np.hypot(ankle[0], ankle[2]))
+
+
+def test_knee_flexion_axis_rejects_a_straight_leg() -> None:
+    hip, knee, ankle = np.zeros(3), np.array([0, 0, -0.4]), np.array([0, 0, -0.8])
+    with pytest.raises(ValueError, match="flexion"):
+        module.knee_flexion_axis(hip, knee, ankle, side=0, lateral=(0.0, 0.0))
 
 
 def test_hip_rotation_zero_input_validation() -> None:

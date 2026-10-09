@@ -189,6 +189,55 @@ def functional_hip_calibration(
     )
 
 
+#: Distance of the lateral knee (epicondyle) and ankle (malleolus) markers from
+#: the femur and tibia long axes, from the ``LEG_SEEDS`` attachments in
+#: ``pipeline/constants.py`` (a unit test keeps the two in step).
+KNEE_OUT_LATERAL_M: float = 0.06
+ANKLE_OUT_LATERAL_M: float = float(np.hypot(0.01, 0.055))
+_AXIS_ITERATIONS = 50
+_MIN_FLEXION_SIN = 1.0e-3
+
+
+def knee_flexion_axis(
+    hip: Sequence[float],
+    knee_out: Sequence[float],
+    ankle_out: Sequence[float],
+    *,
+    side: int,
+    lateral: tuple[float, float] = (KNEE_OUT_LATERAL_M, ANKLE_OUT_LATERAL_M),
+) -> Array:
+    """Unit knee flexion axis, pointing to the leg's lateral side (#11737).
+
+    The flexion plane holds the hip, knee and ankle *centres*. The lateral
+    markers sit ``lateral`` metres outside the knee and ankle centres along
+    this axis, so the plane through the hip centre and the two markers is
+    tilted (about 25 degrees at 20 degrees of knee flexion). The axis is found
+    by fixed-point iteration: move the markers medially along the current
+    estimate and refit the plane. ``side`` 0 is the right leg, 1 the left.
+    Raises ``ValueError`` for a leg too straight to define the plane.
+    """
+    if side not in (0, 1):
+        raise ValueError("side must be 0 (right) or 1 (left)")
+    w_knee, w_ankle = (float(v) for v in lateral)
+    if not (np.isfinite(w_knee) and np.isfinite(w_ankle)) or min(w_knee, w_ankle) < 0:
+        raise ValueError("lateral offsets must be finite and nonnegative")
+    h, k0, a0 = (np.asarray(p, dtype=float) for p in (hip, knee_out, ankle_out))
+    k, a = k0, a0
+    axis = np.zeros(3)
+    for _ in range(_AXIS_ITERATIONS):
+        thigh, shank = k - h, a - k
+        normal = np.cross(shank, thigh) if side == 0 else np.cross(thigh, shank)
+        size = float(np.linalg.norm(normal))
+        if size <= _MIN_FLEXION_SIN * np.linalg.norm(thigh) * np.linalg.norm(shank):
+            raise ValueError("knee flexion too small to define the flexion plane")
+        new_axis = normal / size
+        if float(np.linalg.norm(new_axis - axis)) < 1.0e-12:
+            break
+        axis = new_axis
+        k, a = k0 - w_knee * axis, a0 - w_ankle * axis
+    return new_axis
+
+
 def hip_rotation_zero(
     points: Array,
     valid: NDArray[Any],
@@ -288,14 +337,14 @@ def hip_rotation_zero(
             elif a_out_cols is not None and mask[f, a_out_cols[side]]:
                 p_a_out = rotation.T @ (pts[f, a_out_cols[side]] - translation)
                 c_hip = centres[side]
-                v_thigh = axes.T @ (p_k_out - c_hip)
-                v_shank = axes.T @ (p_a_out - p_k_out)
-                if side == 0:
-                    v_lat = np.cross(v_shank, v_thigh)
-                    theta = float(np.degrees(np.arctan2(v_lat[0], v_lat[2])))
-                else:
-                    v_lat = np.cross(v_thigh, v_shank)
-                    theta = float(np.degrees(np.arctan2(-v_lat[0], -v_lat[2])))
+                v_lat = knee_flexion_axis(
+                    np.zeros(3),
+                    axes.T @ (p_k_out - c_hip),
+                    axes.T @ (p_a_out - c_hip),
+                    side=side,
+                )
+                sign = 1.0 if side == 0 else -1.0
+                theta = float(np.degrees(np.arctan2(sign * v_lat[0], sign * v_lat[2])))
                 angles_list.append(theta)
 
     if not angles_r or not angles_l:
