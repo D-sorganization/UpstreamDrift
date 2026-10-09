@@ -68,6 +68,10 @@ diagnostic under OpenSim 4.6. Aggregate RMS was 37.704 mm; the final sample was
 unbounded LM attempt was rejected for exceeding that bound and is retained.
 Native stations agreed with native frame transforms within $1.1\times10^{-14}$ m.
 Detailed capture identities, offsets and pose arrays remain private.
+The first-frame gauge offsets are 1.107–1.249 m from the native pelvis origin.
+These cannot be interpreted as anatomical pelvic attachments: the gauge absorbs
+unresolved world-frame registration into local offsets. Accordingly, the reported
+RMS is a geometry-plumbing diagnostic, not an anatomical pelvis fit.
 
 This result does not distinguish anatomical infeasibility from unresolved
 fixed capture-to-model frame/yaw registration. Any registration must be estimated

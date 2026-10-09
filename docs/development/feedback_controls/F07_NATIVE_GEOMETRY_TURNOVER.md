@@ -28,6 +28,8 @@ reached its source bound. Native station/transform consistency was within
 is retained separately. The first sample is the offset-calibration gauge, so its
 near-zero residual is constructed. Details stay in the private capture clone;
 public source assets and private observations are not committed here.
+The resulting local offset radii are 1.107–1.249 m, which exposes registration
+being absorbed into the gauge and rejects any anatomical pelvis-fit interpretation.
 
 ## Reproduction and Remaining Work
 
@@ -60,6 +62,8 @@ artifacts, semantic parity and human publication approval remain outstanding.
 - Ruff lint/format and five changed source-file mypy checks passed after two
   new typing errors were corrected. Governance reports nine QMD sources,
   zero approved calculations and blocked release.
+- Normal commit and push hooks passed without bypass, including mypy, Bandit
+  and the repository's pre-push unit-test selection.
 - The central `pre_pr.py --base-ref origin/main` broad test mapper selected
   45 OpenSim test modules: 244 passed, 57 skipped, 19 deselected and five failed
   in default Python 3.13. Two failures are the deliberate OS-0 runtime gates
