@@ -99,6 +99,11 @@
       "id": "UP-D1-native-muscle-replay-inventory",
       "owner": "UpstreamDrift issue #11791",
       "resolution": "Inventory the provisional native continuous-state excitation replay in tour_matching/muscle_replay.py and chapters/13-native-muscle-replay.qmd. Actual OpenSim 4.6 one-DOF compliant-muscle tests establish bounded input playback, continuous initialization and uninterrupted native stepping only. Discrete/plugin state, external-resource identity, passive/contact force policy, full-body anatomy, capture accuracy and full-horizon independent muscle/contact replay remain unqualified. Preserve cold-start policy and forbid weaker shared rigid-body/restarted/external-force evidence from qualifying the endpoint."
+    },
+    {
+      "id": "UP-D1-native-exact-muscle-law-inventory",
+      "owner": "UpstreamDrift issue #11867",
+      "resolution": "Inventory exact concrete Millard2012EquilibriumMuscle/Thelen2003Muscle admission before native initialization in muscle_replay.py and chapter13. Native casts remain necessary for state-domain getters but inheritance is not qualification of an unknown derived law. Proxy identity negative tests preserve native cast success and trap initialization; they do not validate a compiled plugin. Adapter1.3.0 hashes the exact-class admission policy. All anatomy, path consistency, contact, full-state full-capture and manual-release gates remain open."
     }
   ],
   "calculations": []
