@@ -9,7 +9,9 @@ integrator.
 `NativeObservationCase` binds one F01 comparison row to the actual T01 replay
 bundle, a complete native marker-position output, the exact observed-position
 clock and validity mask, and the existing native acceptance receipt/gates.
-Before the F01 replay admission call, the adapter checks T01 and F01 model,
+Before replay admission, the adapter requires F01c's
+`feedback-comparison/1.1.0` contract and the exact initial-state digest from
+the T01 bundle. It checks T01 and F01 model,
 provider, state-schema, input-channel order and schema, exact input values and
 grid, execution-policy digest, replay mode, timebase, and horizon. The content
 identity adds T01 `integrity.initial_state_sha256`; it never infers initial
@@ -20,7 +22,9 @@ schema with `nq != nv` remains representable.
 Observation scoring reuses F09a's positions-only sampler and canonical replay
 metrics, pelvis-yaw metric, and `acceptance.evaluate`. It preserves the exact
 observation times and separate native-output and observation-clock hashes.
-The receipt also carries the initial-state payload hash, criterion IDs and
+After scoring, F01c's `observation_time_grid_sha256` binds the observation-
+accuracy admission to the retained F09a alignment digest. The receipt carries
+the initial-state payload hash, criterion IDs and
 digest, output/observation/alignment identities, and existing gate verdict.
 The selected capture and a digest of the native acceptance receipt are bound
 without copying private receipt paths into the public summary.

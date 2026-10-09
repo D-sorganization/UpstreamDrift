@@ -86,6 +86,8 @@ payload hashes; it does not infer state identity from a schema digest. It also
 checks the model/provider, state schema, channel ordering/schema, actual input
 history and grid, policy, evidence mode, timebase, and horizon against F01.
 An altered full state or input cannot be rebound to stale comparison evidence.
+Replay admission requires F01c `feedback-comparison/1.1.0`; observation-
+accuracy admission receives the retained F09a observation-grid digest.
 
 The report preserves every required registry cell and all six engine IDs.
 Missing evidence remains missing, unavailable stays in the denominator, and
@@ -96,7 +98,7 @@ The canonical calculation description is in
 limits and commands are in
 `docs/development/feedback_controls/F09B-OBSERVATION-QUALIFICATION.md`.
 
-The F09b focused suite has eight passing synthetic tests, including full
+The F09b focused suite has twelve passing synthetic tests, including full
 initial-state identity binding and applied-input tamper rejection. These tests
 do not provide a native run, private capture acceptance, model qualification,
 or physiology evidence. F09 remains open for the native consumer and further

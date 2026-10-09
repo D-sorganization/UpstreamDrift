@@ -92,8 +92,6 @@ _REPLAY_IDENTITY_FIELDS = (
     "contact_sha256",
     "integrator_sha256",
     "input_channel_schema_sha256",
-    "initial_state_sha256",
-    "comparison_contract_version",
 )
 
 
@@ -111,6 +109,17 @@ class NativeObservationCase:
     interpolation: PositionInterpolation = PositionInterpolation.LINEAR_POSITION
     gates: AcceptanceGates | None = None
     capture: str | None = None
+
+
+@dataclass(frozen=True)
+class _AlignedReplay:
+    case: NativeObservationCase
+    row: ComparisonRow
+    replay_identity: str
+    output_times: np.ndarray
+    alignment: ReplayObservationAlignment
+    metrics: ReplayFiveMetrics
+    pelvis_yaw_diff_deg: float | None
 
 
 @dataclass(frozen=True)
@@ -463,9 +472,9 @@ def _criteria_identity(
     return digest, criterion_ids
 
 
-def _score_case(
+def _admit_and_align(
     registry: FeedbackComparisonRegistry, case: NativeObservationCase
-) -> tuple[ComparisonRow, ObservationScoreReceipt]:
+) -> _AlignedReplay:
     evidence = case.evidence
     row = registry.get(evidence.package_id, evidence.variant_id, evidence.drive_mode)
     _validate_replay_bundle(evidence, row, case.replay_bundle)
@@ -498,6 +507,25 @@ def _score_case(
         source_identity_sha256=replay_identity,
     )
     metrics, pelvis_yaw_diff_deg = _metrics_and_yaw(alignment)
+    return _AlignedReplay(
+        case=case,
+        row=row,
+        replay_identity=replay_identity,
+        output_times=output_times,
+        alignment=alignment,
+        metrics=metrics,
+        pelvis_yaw_diff_deg=pelvis_yaw_diff_deg,
+    )
+
+
+def _evaluate_native_acceptance(
+    aligned: _AlignedReplay,
+) -> tuple[str | None, str, tuple[str, ...], AcceptanceVerdict, str]:
+    case = aligned.case
+    row = aligned.row
+    output_times = aligned.output_times
+    metrics = aligned.metrics
+    pelvis_yaw_diff_deg = aligned.pelvis_yaw_diff_deg
     accepted_receipt = dict(case.native_acceptance_receipt)
     if accepted_receipt.get("engine", row.engine) != row.engine:
         raise ValueError("native acceptance receipt engine differs from registry row")
@@ -531,8 +559,32 @@ def _score_case(
     criteria_sha256, criterion_ids = _criteria_identity(
         case.horizon, gates, verdict, declared_capture
     )
-    evidence_sha256 = _canonical_sha256(_evidence_payload(evidence))
     native_acceptance_receipt_sha256 = _canonical_sha256(case.native_acceptance_receipt)
+    return (
+        declared_capture,
+        criteria_sha256,
+        criterion_ids,
+        verdict,
+        native_acceptance_receipt_sha256,
+    )
+
+
+def _build_score_receipt(
+    aligned: _AlignedReplay,
+    declared_capture: str | None,
+    criteria_sha256: str,
+    criterion_ids: tuple[str, ...],
+    verdict: AcceptanceVerdict,
+    native_acceptance_receipt_sha256: str,
+) -> ObservationScoreReceipt:
+    case = aligned.case
+    row = aligned.row
+    replay_identity = aligned.replay_identity
+    alignment = aligned.alignment
+    metrics = aligned.metrics
+    pelvis_yaw_diff_deg = aligned.pelvis_yaw_diff_deg
+    evidence = case.evidence
+    evidence_sha256 = _canonical_sha256(_evidence_payload(evidence))
     receipt_payload = {
         "schema_version": FEEDBACK_OBSERVATION_SCHEMA_VERSION,
         "source_replay_identity_sha256": replay_identity,
@@ -564,7 +616,7 @@ def _score_case(
         "acceptance_verdict": verdict.as_dict(),
     }
     receipt_sha256 = _canonical_sha256(receipt_payload)
-    score = ObservationScoreReceipt(
+    return ObservationScoreReceipt(
         receipt_sha256=receipt_sha256,
         source_replay_identity_sha256=replay_identity,
         evidence_identity_sha256=evidence_sha256,
@@ -592,11 +644,33 @@ def _score_case(
         criterion_ids=criterion_ids,
         acceptance_verdict=verdict,
     )
+
+
+def _score_case(
+    registry: FeedbackComparisonRegistry, case: NativeObservationCase
+) -> tuple[ComparisonRow, ObservationScoreReceipt]:
+    evidence = case.evidence
+    aligned = _admit_and_align(registry, case)
+    declared_capture, criteria_sha256, criterion_ids, verdict, acceptance_sha256 = (
+        _evaluate_native_acceptance(aligned)
+    )
+    score = _build_score_receipt(
+        aligned,
+        declared_capture,
+        criteria_sha256,
+        criterion_ids,
+        verdict,
+        acceptance_sha256,
+    )
     registry.admit(
-        replace(evidence, observation_score_receipt_sha256=receipt_sha256),
+        replace(
+            evidence,
+            observation_score_receipt_sha256=score.receipt_sha256,
+            observation_time_grid_sha256=aligned.alignment.observation_time_grid_sha256,
+        ),
         ComparisonLevel.OBSERVATION_ACCURACY,
     )
-    return row, score
+    return aligned.row, score
 
 
 def _missing_row(row: ComparisonRow) -> FeedbackObservationRow:

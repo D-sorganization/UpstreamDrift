@@ -166,14 +166,8 @@ def _evidence_and_bundle(
         contact_sha256="3" * 64,
         integrator_sha256="4" * 64,
         input_channel_schema_sha256=bundle.input_channel_schema_sha256,
-    )
-    # F01c adds these required replay-admission fields. The local test base may
-    # lag that stacked contract while the PR chain is merging.
-    object.__setattr__(
-        evidence, "initial_state_sha256", bundle.integrity.initial_state_sha256
-    )
-    object.__setattr__(
-        evidence, "comparison_contract_version", "feedback-comparison/1.1.0"
+        initial_state_sha256=bundle.integrity.initial_state_sha256,
+        comparison_contract_version="feedback-comparison/1.1.0",
     )
     return evidence, bundle
 
@@ -226,15 +220,6 @@ def _case(registry: FeedbackComparisonRegistry) -> NativeObservationCase:
         horizon=Horizon.G3,
         interpolation=PositionInterpolation.LINEAR_POSITION,
     )
-
-
-def _replace_evidence(
-    evidence: ComparisonEvidence, **changes: object
-) -> ComparisonEvidence:
-    updated = replace(evidence, **changes)
-    for name in ("initial_state_sha256", "comparison_contract_version"):
-        object.__setattr__(updated, name, getattr(evidence, name, ""))
-    return updated
 
 
 def test_campaign_keeps_all_six_engine_rows_when_no_native_output_exists(
@@ -305,7 +290,14 @@ def test_stale_initial_state_evidence_is_rejected(
     registry: FeedbackComparisonRegistry,
 ) -> None:
     case = _case(registry)
-    object.__setattr__(case.evidence, "initial_state_sha256", "0" * 64)
+    evidence = replace(case.evidence, initial_state_sha256="0" * 64)
+    case = replace(
+        case,
+        evidence=evidence,
+        source_replay_identity_sha256=feedback_replay_identity_sha256(
+            evidence, case.replay_bundle
+        ),
+    )
     with pytest.raises(ValueError, match="initial_state_payload"):
         build_feedback_observation_report(registry, (case,))
 
@@ -314,8 +306,15 @@ def test_unsupported_replay_comparison_contract_is_rejected(
     registry: FeedbackComparisonRegistry,
 ) -> None:
     case = _case(registry)
-    object.__setattr__(
-        case.evidence, "comparison_contract_version", "feedback-comparison/1.0.0"
+    evidence = replace(
+        case.evidence, comparison_contract_version="feedback-comparison/1.0.0"
+    )
+    case = replace(
+        case,
+        evidence=evidence,
+        source_replay_identity_sha256=feedback_replay_identity_sha256(
+            evidence, case.replay_bundle
+        ),
     )
     with pytest.raises(ValueError, match="comparison_contract_version"):
         build_feedback_observation_report(registry, (case,))
@@ -345,7 +344,7 @@ def test_manifold_position_and_velocity_dimensions_remain_distinct(
     registry: FeedbackComparisonRegistry,
 ) -> None:
     case = _case(registry)
-    evidence = _replace_evidence(case.evidence, nq=3)
+    evidence = replace(case.evidence, nq=3)
     mismatched_case = replace(
         case,
         evidence=evidence,
@@ -393,7 +392,7 @@ def test_duplicate_or_unregistered_native_rows_are_rejected(
     case = _case(registry)
     with pytest.raises(ValueError, match="duplicate"):
         build_feedback_observation_report(registry, (case, case))
-    bad_evidence = _replace_evidence(case.evidence, package_id="unregistered/model")
+    bad_evidence = replace(case.evidence, package_id="unregistered/model")
     bad_case = replace(
         case,
         evidence=bad_evidence,

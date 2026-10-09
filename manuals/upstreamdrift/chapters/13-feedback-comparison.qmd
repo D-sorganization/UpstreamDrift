@@ -137,13 +137,14 @@ checks the complete ordered initial state and all T01 integrity hashes.
 Generalized position and velocity dimensions are checked separately against
 F01's `nq` and `nv`; no Euclidean `nq=nv` assumption is made.
 
-F01 does not yet carry a digest field for the physical initial-state payload.
-Therefore the F09 source replay identity includes T01's actual
-`initial_state_sha256`, model-identity digest, and capability-declaration
-digest in addition to the existing F01 identity fields. Replacing the initial
-state while keeping its schema fixed changes the source identity; changing an
-input or policy without changing the F01 evidence is rejected. No identity is
-constructed from only the state schema or from selected coordinates.
+F01c's versioned `feedback-comparison/1.1.0` replay contract carries T01's
+actual `initial_state_sha256` separately from the state-schema digest. F09b
+requires that payload hash to equal the actual bundle hash before admission;
+the F09 source identity also binds model-identity and capability-declaration
+digests. Replacing the initial state while keeping its schema fixed changes
+the source identity; changing an input or policy without changing the F01
+evidence is rejected. No identity is constructed from only the state schema
+or from selected coordinates.
 
 The workflow samples only native 3-D marker positions onto the retained
 observation clock through the F09a positions-only interpolation helper, then
@@ -154,8 +155,9 @@ both clocks, retained observation times, alignment, metric results, frozen
 criterion identifiers, and acceptance verdict. It does not add thresholds or
 interpret a transport-valid bundle as a physics result. The content-addressed
 native acceptance receipt and explicit capture are bound into the score and
-criterion identities; raw paths or private receipt fields are not copied to
-the public summary.
+criterion identities. F01c observation-accuracy admission receives the exact
+F09a retained observation-time-grid digest after scoring; raw paths or private
+receipt fields are not copied to the public summary.
 
 The report retains each registered required model/variant/drive row and the
 six-engine denominator. Missing native output, unavailable capability, or an
