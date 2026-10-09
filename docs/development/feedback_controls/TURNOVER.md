@@ -98,3 +98,8 @@ native-step action. Supported MuJoCo 3.8/Crocoddyl 3.2.1 paired evidence
 retains matched native nonlinear admission, both solver orders, every
 fallback and full-state frozen-torque replay. BoxFDDP is a restricted
 candidate; F02 TVLQR remains the broader default and F05 remains open.
+PR #11944 merged only into the F05c feature branch at
+`c1e76ce91db11b257604d9ddbd227268d2e27db1`; F05c PR #11922 remains
+open against the F05b feature branch. Issue #11932 remains open and this
+stack has not reached `main`. Preserve the commit ancestry and keep later
+stacked PRs unarmed until their prerequisites land and their base is `main`.

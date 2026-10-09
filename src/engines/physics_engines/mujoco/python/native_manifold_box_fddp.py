@@ -19,6 +19,9 @@ import mujoco as mj
 import numpy as np
 from numpy.typing import NDArray
 
+from src.engines.physics_engines.mujoco.python.box_fddp_tracking import (
+    classify_native_box_candidate,
+)
 from src.engines.physics_engines.mujoco.python.native_nmpc_tracking import (
     NativeNMPCTracking,
     run_native_direct_torque_tracking,
@@ -386,7 +389,8 @@ class NativeManifoldBoxFDDP:
         state = self.state._checked(observed_state)
         if _compiled_model_sha256(self.model) != self.compiled_model_sha256:
             raise ValueError("native compiled model identity changed")
-        dt = float(self.model.opt.timestep)
+        model = self.model
+        dt = float(model.opt.timestep)
         if (
             index < 0
             or index + self.horizon_steps >= len(self.references)
@@ -420,16 +424,14 @@ class NativeManifoldBoxFDDP:
             except (RuntimeError, ValueError, TypeError, OverflowError):
                 status = "fallback_solver_exception"
             else:
-                if time.perf_counter() - started > self.max_wall_s:
-                    status = "fallback_timeout"
-                elif not solved:
-                    status = "fallback_solver_failure"
-                elif not np.isfinite(objective):
-                    status = "fallback_infeasible"
-                elif objective >= fallback_objective - 1e-9:
-                    status = "fallback_no_benefit"
-                else:
-                    status = "optimized"
+                status = classify_native_box_candidate(
+                    elapsed_s=time.perf_counter() - started,
+                    budget_s=self.max_wall_s,
+                    solved=solved,
+                    objective=objective,
+                    fallback_objective=fallback_objective,
+                )
+                if status == "optimized":
                     applied = candidate[0]
                     self._prior_plan = np.array(candidate, copy=True)
         if status != "optimized":
@@ -472,7 +474,9 @@ class NativeManifoldSciPyShooting(NativeManifoldBoxFDDP):
         bounds = Bounds(lower, upper)
         preparation_s = time.perf_counter() - started
         solve_started = time.perf_counter()
-        result = minimize(
+        # scipy-stubs 1.17.1.4 omits this valid SLSQP + Bounds overload;
+        # native provider tests exercise the exact call on supported SciPy.
+        result = minimize(  # type: ignore[call-overload]
             lambda flat: self._score(
                 index, state, np.asarray(flat).reshape(self.horizon_steps, 2)
             ),

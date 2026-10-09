@@ -612,3 +612,7 @@ a hard 10 ms deadline or golfer/contact/muscle/capture qualification.
 Read provisional manual chapter 26 and
 `docs/development/feedback_controls/F05D_NATIVE_MANIFOLD_BOX_FDDP_TURNOVER.md`.
 Parent F05 #11789, F09/F10 and manual publication remain open.
+PR #11944 merged into the F05c feature base at
+`c1e76ce91db11b257604d9ddbd227268d2e27db1`; F05c PR #11922 is
+still open on F05b, issue #11932 is still open, and this has not reached
+`main`.

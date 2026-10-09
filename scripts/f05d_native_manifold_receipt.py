@@ -50,6 +50,7 @@ _NUMERIC = (
     "call_p95_s",
 )
 _SOURCE_FILES = (
+    "src/engines/physics_engines/mujoco/python/box_fddp_tracking.py",
     "src/engines/physics_engines/mujoco/python/native_manifold_box_fddp.py",
     "src/engines/physics_engines/mujoco/python/native_tangent_derivative.py",
     "src/engines/physics_engines/mujoco/python/native_nmpc_tracking.py",

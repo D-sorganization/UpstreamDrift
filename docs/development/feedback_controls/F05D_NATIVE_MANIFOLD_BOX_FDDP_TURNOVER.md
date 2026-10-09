@@ -2,8 +2,12 @@
 
 This child extends F05c's actual MuJoCo Euler tangent derivatives into a
 receding-horizon Crocoddyl BoxFDDP controller for the same floating-root,
-two-hinge synthetic plant. It is stacked on F05c PR #11922 and keeps F05
-parent #11789 open. The physical state is 17 values, its tangent is 16,
+two-hinge synthetic plant. PR #11944 merged at feature-base commit
+`c1e76ce91db11b257604d9ddbd227268d2e27db1` into F05c PR #11922's
+branch, whose base is still the F05b feature branch. This is feature-branch
+integration only: #11932 and F05 parent #11789 remain open, and no change
+has yet reached `main` through this stack. The physical state is 17 values,
+its tangent is 16,
 and only the two compiled hinge motors can receive torque. Native manifold
 `diff`/`integrate` handle the quaternion; the action uses actual native
 `mj_step` and F05c `mjd_transitionFD`, with a Gauss–Newton tracking-cost
@@ -14,8 +18,10 @@ native plan, reference, torque bounds and effort cost beat a verified
 zero-torque fallback. It checks complete finite state, compiled-model
 identity, actuator order, hidden callbacks, contact-free policy, exact
 observation clock and cooperative solve budget. A rejected plan clears its
-warm start and records a specific fallback status. The execution path
-reuses the existing generic direct-torque runner: it records actual
+warm start and records a specific fallback status. It shares F05b's
+candidate-status decision rather than copying the
+timeout/feasibility/benefit chain. The execution path reuses the
+existing generic direct-torque runner: it records actual
 post-limit ZOH commands, freezes a pinned Tools T01 bundle from complete
 `mjSTATE_INTEGRATION`, then a fresh MuJoCo instance reproduces every full
 integration-state row within $10^{-12}$. The solver and observation data
