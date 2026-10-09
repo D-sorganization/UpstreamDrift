@@ -59,3 +59,23 @@ validation before capture-level anatomical claims. Continue nonpelvic bindings,
 muscle/contact state policy and full-state excitation replay without weakening
 passive-load, rigid-tendon, wrist/grip, reserve or coupler gates. No approved
 calculation inventory or manual release is asserted.
+
+## Native Chart Follow-Up
+
+The final rigid-cluster optimum has 6.421 mm RMS, while neither equivalent
+intrinsic Z-X-Y angle branch fits the unchanged source root ranges. Native
+three-pose convention checks agree within 6.67e-16. The principal branch exceeds
+pelvis_rotation; the other exceeds pelvis_tilt/list. This isolates a current
+gauge/source-chart restriction without declaring a physiological limit, changing
+anatomy or choosing a new registration from withheld poses. Detailed receipts
+remain private. Local reproducible diagnostic drivers and aggregate reasoning
+are in workspace staging `feedback_controls_planning/NATIVE_520_READINESS_NEXT.md`.
+
+The repaired geometry parent contributes tracking comments, simpler attribute
+access and a narrowly owned parameter-budget exception, with no numerical
+policy changes. After merging it, 28 native/contract/governance tests pass.
+The actual candidate rerun has exactly identical achieved q and RMS with the
+new native provider hash; the earlier receipt is preserved separately. The
+new change-fragment YAML metadata is validated by the complete policy/fragment
+gate. Normal publication hooks pass; the unrelated stale research receipt
+remains a disclosed broad-test failure.

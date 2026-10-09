@@ -72,12 +72,25 @@ Later poses are fitted separately, not independently predicted holdout motion.
 
 These results do not resolve anatomical infeasibility versus registration/model
 mismatch. Strict anatomical admission remains `missing-correspondence`.
+An additional fixed-offset rigid-fit diagnostic gives 6.421 mm final RMS. The
+source's intrinsic Z-X-Y root-angle convention agrees with actual native poses
+within $6.67\times10^{-16}$. Neither equivalent Euler representation of that
+final rigid optimum lies within all unchanged source root-angle bounds:
+the principal branch exceeds `pelvis_rotation`, and the other exceeds
+`pelvis_tilt`/`pelvis_list`. First/middle rigid fits each have an admitted native
+branch. Thus the current gauge/source chart excludes this cluster's rigid
+optimum; this is not proof of physiological infeasibility or global optimality
+of bounded IK. Do not widen source bounds or choose a new world yaw using
+withheld poses. Ground/target metadata and root-frame policy require independent
+qualification. The detailed chart and rigid-fit receipts remain private.
 Nonpelvic bindings, subject anatomy, independent capture ancestry, noise/events,
 ground, wrists, grip, passive loads, reserves, couplers, contact and complete-state
 muscular replay remain unqualified. Detailed capture identifiers, transforms and
 per-frame observations remain in private receipts. Source/loaded/runtime/provider
 identities, reference pose, frozen transform, offsets, residuals and bounds are
 retained there; no source anatomical parameter is changed to obtain the result.
+Repeating the actual candidate after the CI-only native-provider refactor gives
+identical achieved coordinates and RMS. Both provider-specific receipts are kept.
 
 ## Reproduction and Validation
 
