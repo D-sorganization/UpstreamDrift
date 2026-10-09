@@ -1,3 +1,11 @@
+## Unit Gate Rust Installation State (#11977)
+
+The unit-test gate allocates distinct empty Rust and Cargo homes under runtime
+`RUNNER_TEMP` and publishes them through `GITHUB_ENV` before installing Rust.
+Missing runtime paths or invalid environment destinations fail setup explicitly.
+Existing toolchains remain untouched. Toolchain verification, wheel build and
+the unit suite remain required; local preparation tests do not qualify a CI run.
+
 ## Native Muscle Replay Development Boundary (F07, #11791)
 
 Child #11867 restricts recursive native admission before `initSystem` to exact `Millard2012EquilibriumMuscle` and `Thelen2003Muscle` concrete identities. Inheritance-compatible unknown laws fail closed; supported native casts still supply model-owned state limits. Adapter `native-muscle-replay/1.3.1` hashes an explicit exact-class policy. The negative identity-proxy test is not compiled-plugin qualification, and neither this guard nor the positive native fixtures establish full-body/capture acceptance.
