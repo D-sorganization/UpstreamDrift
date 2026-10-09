@@ -43,7 +43,7 @@ def _check_vendored_tools() -> None:
         pytest.fail(
             "Vendored Tools fallback tests cannot run: "
             + message
-            + ". In CI this is a hard failure, never a skip â€” a skipped fallback test "
+            + ". In CI this is a hard failure, never a skip — a skipped fallback test "
             "reports green while the fallback mechanism is most likely broken.",
             pytrace=False,
         )
