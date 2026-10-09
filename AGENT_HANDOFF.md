@@ -1,3 +1,13 @@
+# Active: Project MyoSuite Feedback Recording — F09j #12003
+
+Branch `feat/f09j-project-feedback-recording-12003` starts at F09i `976feaf051`.
+Actual SDK campaign passes 89 tests with zero skips. The feedback source shares
+the admitted recorder loop; immutable snapshots, callback mutation rejection and
+independent replay are tested. Read chapter 38 and
+`docs/development/feedback_controls/F09J-FEEDBACK-RECORDING-TURNOVER.md`.
+Source/parameter provenance is declared, not signed. No production assembly,
+mocap fit, muscle-only physiology or all-model completion is claimed.
+
 # Active: Project MyoSuite Task and Independent Replay — F09i #11983
 
 Draft PR #11996 is based on surviving parent #11857 after intermediate parent

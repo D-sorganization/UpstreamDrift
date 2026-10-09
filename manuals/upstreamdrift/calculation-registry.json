@@ -122,8 +122,8 @@
     },
     {
       "id": "UP-D1-project-myosuite-task-replay-inventory",
-      "owner": "UpstreamDrift issue #11983",
-      "resolution": "Inventory actual MyoSuite 3.0/MuJoCo 3.6 project task lifecycle, preconstruction source closure, concrete SDK helper/distribution identity, mixed native commands, existing T01/profile freeze and independently verified full native-state replay in chapter 38. Preserve exact epoch-restored suffix and changed-future tests and interval precision. Short production probes do not establish full capture, anatomy/contact/grip, physiology, pure muscle drive or all-model parity; fully muscular OpenSim remains required."
+      "owner": "UpstreamDrift issues #11983 and #12003",
+      "resolution": "Inventory actual MyoSuite 3.0/MuJoCo 3.6 project task lifecycle, preconstruction source closure, concrete SDK helper/distribution identity, mixed native commands, existing T01/profile freeze and independently verified full native-state replay in chapter 38. Include copied immutable state-dependent feedback observations, shared admitted recording loop, pre-step callback mutation rejection and separate declared controller provenance. Preserve exact epoch-restored suffix and changed-future tests and interval precision. Short production probes do not establish full capture, anatomy/contact/grip, physiology, pure muscle drive or all-model parity; fully muscular OpenSim remains required."
     }
   ],
   "calculations": []

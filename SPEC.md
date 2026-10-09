@@ -1,4 +1,10 @@
-## Project MyoSuite Task and Independent Replay (F09i, #11983)
+## Project MyoSuite Task, Feedback and Independent Replay (F09i/F09j)
+
+F09j #12003 provides copied immutable native feedback observations and reuses the
+admitted SDK loop for state-dependent commands. Retain controller provenance
+beside actual-input artifacts; reject callback state/model/source mutations
+before integration. Independent replay has no feedback dependency. The actual
+combined SDK campaign passes 89 tests; it does not establish a captured swing.
 
 Actual MyoSuite 3.0/MuJoCo 3.6 project tasks retain mixed native action bounds and
 exercise SDK lifecycle hooks. Freeze original source/resource bytes before

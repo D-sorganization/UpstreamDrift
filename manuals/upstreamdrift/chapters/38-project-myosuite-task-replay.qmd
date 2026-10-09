@@ -196,3 +196,45 @@ they did not independently revalidate the entire transitive resource closure.
 The observed Desk scene bytes differ from local scene bytes. The producer's
 separate full resource-closure evidence remains separate. Desktop previews
 restore saved states and render without integration, labeled **No Mocap Fit**.
+
+## State-Dependent SDK Feedback Recording
+
+F09j (#12003) adds a feedback input source to the same admitted SDK recording
+loop. At sample k the policy receives immutable copied native-order qpos, qvel,
+activation, control and complete integration state, plus absolute native time
+and ordered actuator IDs. It receives no simulator handle. qpos and tangent
+velocity dimensions remain distinct. The policy computes the next ordered
+command; existing native bounds and SDK mapping determine the applied input.
+The recorder retains N actual inputs and N+1 complete states.
+
+Before integration, reject changed plant state, model fingerprints, SDK methods,
+global callbacks, changed declared policy source and malformed/nonfinite actions.
+Numeric command conversion occurs inside the callback guard, so a custom array
+conversion cannot mutate the plant after validation. Policy exceptions propagate
+without a successful partial recording; completed native steps remain and no
+rollback or retry is implied. The fixed
+action-table interface retains its pre-execution whole-table validation. Both
+interfaces use one stepping loop and the same state/clock/source admission.
+
+The feedback recording carries declared controller name/version, source-file
+digest, caller-declared parameter digest and feedback-adapter source digest.
+Separate `initial_state_array_sha256` and `applied_command_array_sha256` fields
+hash raw array bytes; these are not the schema/channel/clock-bound T01 digests.
+Preserve that provenance alongside the existing command history and
+exported T01 artifacts. It is not a new replay format or a signature; source
+guards do not attest hidden dependencies, mutable controller parameters or the
+truth of caller declarations. Native provider identity stays separate from
+controller identity. Independent replay consumes only the frozen state and
+applied commands and does not invoke feedback or SDK lifecycle hooks.
+
+The actual MyoSuite 3.0/MuJoCo 3.6 combined campaign passed 89 tests with zero
+skips, including thirteen feedback/snapshot/adversarial tests and the prior 76
+integration/resource cases. A four-step native fixture used velocity feedback
+to produce changing motor commands and independently reproduced every complete
+state. An actual native regression first reproduced a deferred-conversion state
+mutation, then passed after conversion moved inside the guard. A second-call
+exception test verifies exactly one completed step and no successful record.
+This is neither learned control tuning nor production pose, capture-fit,
+physiology, muscle-only actuation or all-model qualification. Initial assembly,
+qualified observation mapping and whole-horizon controller optimization remain
+required before the muscular OpenSim endpoint can be accepted.

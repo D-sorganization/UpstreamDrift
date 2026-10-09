@@ -9,6 +9,7 @@ The SDK adapter imports independently of the legacy GUI/engine wrapper package.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from collections.abc import Iterable
 import hashlib
 import importlib.metadata
 import inspect
@@ -241,6 +242,20 @@ def record_project_task_commands(
         raise ValueError("actions must contain nonempty ordered native actuator rows")
     if not np.isfinite(actions).all():
         raise ValueError("all project task actions must be finite")
+    return _record_project_task_actions(task, actions)
+
+
+def _record_project_task_actions(
+    task: Any, actions: Iterable[NDArray[np.float64]]
+) -> ProjectTaskCommandHistory:
+    """One admitted SDK recording loop for fixed and state-dependent inputs."""
+    import mujoco as mj
+
+    from src.engines.native_replay_contracts import require_no_global_mujoco_callbacks
+
+    _admit_task(task, mj)
+    _verify_source_files(task.project_model_source)
+    model, data = task.model, task.data
     fingerprint_scratch = np.zeros(mj.mj_sizeModel(model), dtype=np.uint8)
     model_digest = _model_sha256(mj, model, fingerprint_scratch)
     initial = _read_native_state(mj, model, data)
@@ -249,6 +264,9 @@ def record_project_task_commands(
     applied = []
     low, high = native_action_bounds(model)
     for action in actions:
+        action = np.asarray(action, dtype=np.float64).copy()
+        if action.shape != (model.nu,) or not np.isfinite(action).all():
+            raise ValueError("feedback action must be a finite ordered actuator row")
         _admit_task(task, mj)
         require_no_global_mujoco_callbacks(mj)
         if _model_sha256(mj, model, fingerprint_scratch) != model_digest:

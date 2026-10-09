@@ -39,6 +39,16 @@ Do not call SDK hooks or introduce another solver inside independent replay.
 Model fingerprint scratch is owned by one recording invocation, zero-filled
 before every save, and hashed immediately. Exact size, dtype, contiguous layout
 and write access are required; buffer reuse does not remove a per-step check.
+State-dependent feedback uses this same recording loop. Observations contain
+immutable copied native state, absolute clock and ordered actuator IDs without
+simulator handles. Callback state/model/method/source mutations and invalid
+commands reject before integration, including side effects during numeric action
+conversion. Controller failures return no successful partial history; completed
+steps remain without rollback or retry. Preserve declared controller provenance,
+feedback-adapter source identity and distinctly named raw-array hashes beside
+the canonical schema/channel/clock-bound T01 digests;
+native replay consumes the applied history without invoking feedback. Source
+and caller-declared parameter digests do not attest hidden policy dependencies.
 
 ## Evidence
 
