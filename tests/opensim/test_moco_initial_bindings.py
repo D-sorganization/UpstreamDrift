@@ -3,6 +3,7 @@
 from operator import setitem
 from pathlib import Path
 from typing import Any
+from defusedxml import ElementTree as SafeET
 
 import numpy as np
 import pytest
@@ -125,6 +126,39 @@ def test_native_compliant_guess_has_frozen_complete_initial_constraints(
     for name, expected_bounds in binding.control_bounds.items():
         bounds = representation.getControlInfo(name).getBounds()
         assert (bounds.getLower(), bounds.getUpper()) == expected_bounds
+
+
+def test_native_marker_weights_bind_every_selected_reference(
+    muscle_fixture: tuple[Path, dict[str, float]], tmp_path: Path
+) -> None:
+    path, trc, guess, binding = _native_inputs(muscle_fixture, tmp_path)
+    study = build_moco_study(
+        str(path),
+        str(trc),
+        str(guess),
+        MocoTrackingConfig(horizon_s=0.01, allow_unused_references=False),
+        initial_bindings=binding,
+        marker_weights={"load_marker": 2.5},
+    )
+    osim = pytest.importorskip("opensim")
+    goal = osim.MocoMarkerTrackingGoal.safeDownCast(
+        study.updProblem().updGoal("marker_tracking")
+    )
+    native_goal = SafeET.fromstring(goal.dump())
+    native_weights = native_goal.findall(".//MarkerWeight")
+    assert len(native_weights) == 1
+    assert native_weights[0].attrib["name"] == "load_marker"
+    assert float(native_weights[0].findtext("weight")) == 2.5
+
+    with pytest.raises(ValueError, match="reference marker"):
+        build_moco_study(
+            str(path),
+            str(trc),
+            str(guess),
+            MocoTrackingConfig(horizon_s=0.01, allow_unused_references=False),
+            initial_bindings=binding,
+            marker_weights={"unknown": 2.5},
+        )
 
 
 @pytest.mark.parametrize(
