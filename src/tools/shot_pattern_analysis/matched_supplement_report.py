@@ -12,7 +12,7 @@ from typing import Any
 
 from .matched_config import matched_preset
 from .matched_matrix import PROFILES, noise_profile
-from .matched_report import load_matrix_report
+from .matched_report import load_matrix_report, verify_nominal_deliveries_hit_target
 from .provenance import manifest_files_match
 
 _PROTOCOLS = {
@@ -261,33 +261,9 @@ def _cell_reference(
 def _verify_actual_nominal_target(
     cell: dict, expected_target: float, tolerance: float
 ) -> None:
-    if cell.get("status") != "completed":
-        raise ValueError(f"control alias source is not completed: {cell['cell']}")
-    _close(
-        cell.get("target_x_m"), expected_target, label=f"{cell['cell']} actual target"
+    verify_nominal_deliveries_hit_target(
+        cell, expected_target, tolerance, context="control alias"
     )
-    nominals = cell.get("nominals")
-    if not isinstance(nominals, dict) or set(nominals) != set(_PATTERNS):
-        raise ValueError(
-            f"control alias source lacks all nominal patterns: {cell['cell']}"
-        )
-    for pattern in _PATTERNS:
-        outcome = nominals[pattern].get("outcome", {})
-        try:
-            x = float(outcome["carry_x_m"])
-            y = float(outcome["carry_y_m"])
-        except (KeyError, TypeError, ValueError) as exc:
-            raise ValueError(
-                f"control alias nominal coordinates are invalid: {cell['cell']} {pattern}"
-            ) from exc
-        if not math.isfinite(x) or not math.isfinite(y):
-            raise ValueError(
-                f"control alias nominal coordinates are nonfinite: {cell['cell']} {pattern}"
-            )
-        if math.hypot(x - expected_target, y) > tolerance:
-            raise ValueError(
-                f"control alias nominal misses the fixed target: {cell['cell']} {pattern}"
-            )
 
 
 def load_supplement_sources(
@@ -629,6 +605,9 @@ def render_supplement_comparisons(results: list[dict[str, Any]]) -> str:
         "radial_difference_m",
         "radial_difference_lower_95_m",
         "radial_difference_upper_95_m",
+        "course_sg_paired_change_strokes",
+        "course_sg_paired_change_lower_95_strokes",
+        "course_sg_paired_change_upper_95_strokes",
         "sg_effect_modification_strokes",
         "sg_effect_lower_95_strokes",
         "sg_effect_upper_95_strokes",
@@ -644,6 +623,7 @@ def render_supplement_comparisons(results: list[dict[str, Any]]) -> str:
         for pattern, metrics in patterns.items():
             effect = effects.get(pattern, {}) if isinstance(effects, dict) else {}
             radial = metrics.get("radial_error_difference_m", {})
+            course_sg = metrics.get("course_sg_difference", {})
             writer.writerow(
                 {
                     "comparison_kind": result.get("comparison_kind", ""),
@@ -683,6 +663,15 @@ def render_supplement_comparisons(results: list[dict[str, Any]]) -> str:
                     "radial_difference_m": radial.get("estimate", ""),
                     "radial_difference_lower_95_m": radial.get("lower_95", ""),
                     "radial_difference_upper_95_m": radial.get("upper_95", ""),
+                    "course_sg_paired_change_strokes": course_sg.get(
+                        "estimate", ""
+                    ),
+                    "course_sg_paired_change_lower_95_strokes": course_sg.get(
+                        "lower_95", ""
+                    ),
+                    "course_sg_paired_change_upper_95_strokes": course_sg.get(
+                        "upper_95", ""
+                    ),
                     "sg_effect_modification_strokes": effect.get("estimate", ""),
                     "sg_effect_lower_95_strokes": effect.get("lower_95", ""),
                     "sg_effect_upper_95_strokes": effect.get("upper_95", ""),

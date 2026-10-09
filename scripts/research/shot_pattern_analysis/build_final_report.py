@@ -679,8 +679,10 @@ def assert_matrix_inputs_unchanged(root: Path, report: dict) -> None:
             raise RuntimeError(f"matrix input changed during report assembly: {name}")
 
 
-def validate_final_plans(primary: dict, control: dict) -> None:
-    """Keep a pilot or partial profile subset out of the final-report pathway."""
+def validate_final_plans(
+    primary: dict, control: dict, *, common_targets: dict[str, float]
+) -> None:
+    """Require the exact accepted primary/control factorial protocols."""
     if (
         primary.get("stage") != "final"
         or primary.get("planned_cells") != 324
@@ -693,10 +695,16 @@ def validate_final_plans(primary: dict, control: dict) -> None:
         or len(control.get("cells", [])) != 72
     ):
         raise ValueError("control final protocol requires 72 cells")
-    if any(cell["config"]["target_x_m"] is not None for cell in primary["cells"]):
-        raise ValueError("primary cells must use within-lean nominal targets")
-    if any(cell["config"]["target_x_m"] is None for cell in control["cells"]):
-        raise ValueError("control cells must declare a fixed cross-lean target")
+    from src.tools.shot_pattern_analysis.matched_report import (
+        validate_original_matrix_protocol,
+    )
+
+    validate_original_matrix_protocol(primary, protocol="original_primary")
+    validate_original_matrix_protocol(
+        control,
+        protocol="original_control",
+        common_targets=common_targets,
+    )
 
 
 def _write_atomic(destination: Path, content: str) -> None:
@@ -717,7 +725,10 @@ def build_final_report(
 ) -> Path:
     """Validate saved matrices, then atomically publish editable Markdown."""
     from src.tools.shot_pattern_analysis.matched_lean_control import analyze_across_lean
-    from src.tools.shot_pattern_analysis.matched_report import load_matrix_report
+    from src.tools.shot_pattern_analysis.matched_report import (
+        load_matrix_report,
+        load_reviewed_common_targets,
+    )
     from src.tools.shot_pattern_analysis.matched_sensitivity import (
         analyze_saved_sensitivity,
     )
@@ -727,7 +738,8 @@ def build_final_report(
     )
     primary = load_matrix_report(primary_root)
     control = load_matrix_report(control_root)
-    validate_final_plans(primary, control)
+    common_targets, _ = load_reviewed_common_targets(primary_root.parent)
+    validate_final_plans(primary, control, common_targets=common_targets)
     lean = analyze_across_lean(control_root)
     # A compact, predeclared set isolates course geometry from the main grid.
     sensitivity: dict[str, dict] = {}

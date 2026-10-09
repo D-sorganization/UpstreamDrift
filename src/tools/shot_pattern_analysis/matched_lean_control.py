@@ -15,7 +15,7 @@ from tempfile import NamedTemporaryFile
 import numpy as np
 
 from .matched_matrix import PROFILES
-from .matched_report import load_validated_cell
+from .matched_report import load_validated_cell, verify_nominal_deliveries_hit_target
 from .matched_sensitivity import _source_hashes, _supported_endpoints
 from .provenance import manifest_files_match
 from .scenario_scoring import score_course_endpoints
@@ -152,29 +152,9 @@ _TRANSITION_LEGACY_PATH = "src/shared/python/physics/impact_model/utils.py"
 def _verify_actual_nominal_target(
     summary: dict, target_x_m: float, tolerance: float
 ) -> None:
-    if summary.get("status") != "completed":
-        raise ValueError("nominal target verification requires a completed cell")
-    actual_target = summary.get("target_x_m")
-    if not isinstance(actual_target, (int, float)) or not math.isfinite(actual_target):
-        raise ValueError("nominal target must be finite")
-    if not math.isclose(float(actual_target), target_x_m, rel_tol=0.0, abs_tol=1e-12):
-        raise ValueError("nominal target differs from paired target")
-    nominals = summary.get("nominals")
-    if not isinstance(nominals, dict) or set(nominals) != set(PATTERNS):
-        raise ValueError("saved cell lacks nominal deliveries for all patterns")
-    for pattern in PATTERNS:
-        outcome = nominals[pattern].get("outcome", {})
-        try:
-            x = float(outcome["carry_x_m"])
-            y = float(outcome["carry_y_m"])
-        except (KeyError, TypeError, ValueError) as exc:
-            raise ValueError("nominal target coordinates must be finite") from exc
-        if not math.isfinite(x) or not math.isfinite(y):
-            raise ValueError("nominal target coordinates must be finite")
-        if math.hypot(x - target_x_m, y) > tolerance:
-            raise ValueError(
-                f"nominal delivery falls outside target tolerance: {pattern}"
-            )
+    verify_nominal_deliveries_hit_target(
+        summary, target_x_m, tolerance, context="paired"
+    )
 
 
 def _config_differences(first: dict, second: dict, prefix: str = "") -> set[str]:

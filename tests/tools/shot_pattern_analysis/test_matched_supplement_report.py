@@ -282,7 +282,7 @@ def test_loader_rejects_nonfinite_nominal_coordinates(tmp_path) -> None:
     manifest = json.loads(manifest_path.read_text())
     manifest["files_sha256"]["summary.json"] = _sha(summary_path)
     manifest_path.write_text(json.dumps(manifest))
-    with pytest.raises(ValueError, match="nonfinite"):
+    with pytest.raises(ValueError, match="coordinates must be finite"):
         load_supplement_sources(roots, INVENTORY)
 
 
@@ -337,6 +337,11 @@ def test_comparison_report_exports_each_actual_pattern_and_refuses_overwrite(
             "Straight": {
                 "physical_pattern": "Straight",
                 "radial_error_difference_m": {"estimate": 0.0},
+                "course_sg_difference": {
+                    "estimate": 0.05,
+                    "lower_95": 0.01,
+                    "upper_95": 0.09,
+                },
             },
             "Draw": {
                 "physical_pattern": "Draw",
@@ -352,5 +357,8 @@ def test_comparison_report_exports_each_actual_pattern_and_refuses_overwrite(
     rows = list(csv.DictReader(paths["csv"].open(newline="")))
     assert [row["physical_pattern"] for row in rows] == ["Straight", "Draw", "Fade"]
     assert rows[1]["second_protocol"] == "pw-primary-face-bounds/1"
+    assert rows[0]["course_sg_paired_change_strokes"] == "0.05"
+    assert rows[0]["course_sg_paired_change_lower_95_strokes"] == "0.01"
+    assert rows[0]["course_sg_paired_change_upper_95_strokes"] == "0.09"
     with pytest.raises(FileExistsError):
         write_supplement_comparisons([result], tmp_path / "report")

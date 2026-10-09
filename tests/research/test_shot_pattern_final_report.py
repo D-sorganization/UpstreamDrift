@@ -247,20 +247,52 @@ def test_matrix_input_change_is_rejected_before_publication(tmp_path):
 
 
 def test_final_builder_requires_full_324_and_72_cell_protocols():
+    from dataclasses import asdict
+    import json
+
+    from src.tools.shot_pattern_analysis.matched_matrix import matched_matrix_cells
+
+    targets = {
+        "driver": 178.94875782337786,
+        "seven_iron": 127.88194166336235,
+        "pitching_wedge": 77.40247724866299,
+    }
     with pytest.raises(ValueError, match="324"):
         build_final_report.validate_final_plans(
             {"planned_cells": 1, "stage": "final", "cells": []},
             {"planned_cells": 72, "stage": "final", "cells": []},
+            common_targets=targets,
         )
-    build_final_report.validate_final_plans(
-        {
-            "planned_cells": 324,
+
+    def report(configs):
+        return {
+            "planned_cells": len(configs),
             "stage": "final",
-            "cells": [{"config": {"target_x_m": None}}] * 324,
-        },
-        {
-            "planned_cells": 72,
-            "stage": "final",
-            "cells": [{"config": {"target_x_m": 179.0}}] * 72,
-        },
+            "cells": [
+                {"cell": name, "config": json.loads(json.dumps(asdict(config)))}
+                for name, config in configs
+            ],
+        }
+
+    primary = report(matched_matrix_cells(n_shots=10_000, seed=20261009))
+    control = report(
+        matched_matrix_cells(
+            n_shots=10_000,
+            seed=20261009,
+            profiles=("shaft_only", "combined2"),
+            common_targets=targets,
+        )
     )
+    build_final_report.validate_final_plans(
+        primary, control, common_targets=targets
+    )
+    altered = dict(primary)
+    altered["cells"] = list(primary["cells"])
+    altered["cells"][0] = {
+        **altered["cells"][0],
+        "config": {**altered["cells"][0]["config"], "seed": 2},
+    }
+    with pytest.raises(ValueError, match="reviewed protocol"):
+        build_final_report.validate_final_plans(
+            altered, control, common_targets=targets
+        )

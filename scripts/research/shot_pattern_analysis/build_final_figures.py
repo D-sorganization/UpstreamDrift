@@ -22,6 +22,10 @@ PATTERNS = ("Straight", "Draw", "Fade")
 _COMBINED_NOISE = (0.5, 0.89408, 0.00635, 0.00635, 0.0, 0.0)
 _MATCHED_RAW_LANDING = "Matched Raw Landing"
 
+from src.tools.shot_pattern_analysis.matched_report import (
+    load_individually_supported_endpoints,
+)
+
 
 def _delivery_mode_label(config: dict[str, Any]) -> str:
     """Describe saved matched runs whose schema has no explicit mode field."""
@@ -220,22 +224,13 @@ def _comparison_pair_specs(cells: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 
 def _supported_points(cell_dir: Path) -> tuple[dict[str, list[list[float]]], dict[str, int]]:
-    points: dict[str, list[list[float]]] = {pattern: [] for pattern in PATTERNS}
-    total = dict.fromkeys(PATTERNS, 0)
-    with gzip.open(cell_dir / "shots.csv.gz", "rt", encoding="utf-8", newline="") as stream:
-        for row in csv.DictReader(stream):
-            pattern = row.get("pattern")
-            if pattern not in points:
-                raise ValueError(f"unknown pattern in {cell_dir.name}: {pattern}")
-            total[pattern] += 1
-            if row.get("status") != "supported":
-                continue
-            x = float(row["carry_x_m"])
-            y = float(row["carry_y_m"])
-            if not math.isfinite(x) or not math.isfinite(y):
-                raise ValueError(f"non-finite supported endpoint in {cell_dir.name}")
-            points[pattern].append([x, y])
-    return points, total
+    plan = json.loads((cell_dir.parent / "matrix_plan.json").read_text())
+    config = plan.get("cells", {}).get(cell_dir.name)
+    if not isinstance(config, dict):
+        raise ValueError(f"cell is not in its matrix plan: {cell_dir.name}")
+    return load_individually_supported_endpoints(
+        cell_dir / "shots.csv.gz", int(config["n_shots"])
+    )
 
 
 def _cell_metadata(
