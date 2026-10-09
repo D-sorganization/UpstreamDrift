@@ -12,6 +12,30 @@ if TYPE_CHECKING:
     from sidekick.lab.mocap import ExperimentReplayBundle
 
 
+_MUJOCO_GLOBAL_CALLBACKS = (
+    "control",
+    "passive",
+    "act_dyn",
+    "act_gain",
+    "act_bias",
+    "sensor",
+    "contactfilter",
+    "time",
+)
+
+
+def require_no_global_mujoco_callbacks(mujoco: Any) -> None:
+    """Reject process-global MuJoCo callbacks at a frozen replay boundary."""
+    for callback_name in _MUJOCO_GLOBAL_CALLBACKS:
+        getter = getattr(mujoco, f"get_mjcb_{callback_name}", None)
+        if not callable(getter):
+            raise ValueError("MuJoCo callback inspection API is incomplete")
+        if getter() is not None:
+            raise ValueError(
+                "process-global MuJoCo callbacks are forbidden in independent replay"
+            )
+
+
 def validate_native_replay_bundle(
     bundle: ExperimentReplayBundle, contracts: Any
 ) -> ExperimentReplayBundle:

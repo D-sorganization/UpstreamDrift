@@ -22,7 +22,14 @@ wrapper chain, actuator mapping, integration, solver, frame skip and direct
 control boundary. Source bytes are hashed before/after environment creation;
 loaded model, schema, actual initial payload, applied input and executed policy
 are checked through T01/F09. Readback of `data.ctrl` must exactly equal the
-frozen normalized excitation before each step.
+frozen normalized excitation before and after each step. The common native
+replay boundary rejects process-global MuJoCo callbacks before environment
+construction and around stepping/forward evaluation, because callbacks could
+replace controls or add unbound forces. Output clocks come from observed
+`data.time` at each completed frame skip and must match the frozen clock; the
+restored full `mjSTATE_INTEGRATION` is checked against the initial payload and
+retained at each sample. Nonfinite native state and clock changes during
+`mj_forward` fail closed.
 
 F09 dispatch routes only an explicit MyoSuite binding to this adapter; it
 rejects a torque inventory row. The output receipt stays unqualified, includes
@@ -72,6 +79,13 @@ models or captured data.
 The follow-up wrapper-state refactor adds one contract test; its focused suite
 passes 7 tests, with the optional native MyoSuite runtime test skipped in the
 local Python 3.13 environment.
+
+The callback-ownership and observed-output-clock hardening is newer than the
+DeskComputer runtime execution above. Synthetic MuJoCo regressions and local
+affected suites pass, but the retained Python 3.12 MyoSuite runtime has not
+re-executed this source revision. The earlier runtime result remains evidence
+only for the exact source bytes copied into its disposable overlay; it is not
+evidence for the current adapter revision or a production golf model.
 
 ## Follow-Up
 

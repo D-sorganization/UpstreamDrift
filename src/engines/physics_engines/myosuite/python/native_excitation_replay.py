@@ -11,6 +11,7 @@ import hashlib
 import importlib
 import importlib.metadata
 import json
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, cast
@@ -21,6 +22,7 @@ from numpy.typing import NDArray
 from src.engines.native_replay_contracts import (
     native_replay_admission_bytes,
     native_replay_contract_types,
+    require_no_global_mujoco_callbacks,
     validate_native_replay_bundle,
 )
 
@@ -99,6 +101,7 @@ def _load_environment(environment_id: str) -> tuple[Any, Any, Any, Any, Path]:
     import mujoco as mj
     import myosuite  # noqa: F401
 
+    require_no_global_mujoco_callbacks(mj)
     if not environment_id or gym.spec(environment_id).id != environment_id:
         raise ValueError("a registered MyoSuite environment id is required")
     spec = gym.spec(environment_id)
@@ -109,6 +112,11 @@ def _load_environment(environment_id: str) -> tuple[Any, Any, Any, Any, Path]:
         raise ValueError("registered MyoSuite model source is not an owned file")
     source_before = hashlib.sha256(source_path.read_bytes()).digest()
     env = gym.make(environment_id)
+    try:
+        require_no_global_mujoco_callbacks(mj)
+    except ValueError:
+        env.close()
+        raise
     plant = cast(Any, env.unwrapped)
     model = getattr(plant, "model", None)
     data = getattr(plant, "data", None)
@@ -164,7 +172,9 @@ def _load_environment(environment_id: str) -> tuple[Any, Any, Any, Any, Path]:
 
 
 def _module_bytes(module_name: str) -> bytes:
-    module = importlib.import_module(module_name)
+    module = sys.modules.get(module_name)
+    if module is None:
+        raise ValueError(f"native provider module {module_name!r} is not loaded")
     path = getattr(module, "__file__", None)
     if not path:
         raise ValueError(f"native provider module {module_name!r} has no file")
@@ -635,14 +645,32 @@ def _execute_native_steps(
 ) -> NativeMyoSuiteExcitationReplay:
     import mujoco as mj
 
+    require_no_global_mujoco_callbacks(mj)
+    expected_times = np.asarray(times, dtype=np.float64)
+    if (
+        expected_times.ndim != 1
+        or expected_times.size < 2
+        or not np.isfinite(expected_times).all()
+        or not np.isclose(float(data.time), expected_times[0], atol=1e-12, rtol=0)
+    ):
+        raise ValueError("initial observed native time differs from frozen clock")
+    initial_integration = np.empty(
+        mj.mj_stateSize(model, mj.mjtState.mjSTATE_INTEGRATION), dtype=np.float64
+    )
+    mj.mj_getState(model, data, initial_integration, mj.mjtState.mjSTATE_INTEGRATION)
+    if not np.array_equal(initial_integration, states["integration"]):
+        raise ValueError("restored full integration state differs from frozen state")
+
     qpos = [data.qpos.copy()]
     qvel = [data.qvel.copy()]
     activations = [data.act.copy()]
     controls = [data.ctrl.copy()]
-    integration = [states["integration"].copy()]
+    integration = [initial_integration]
     wrapper_states = [states["wrapper_state"].copy()]
+    observed_times = [float(data.time)]
     applied = []
-    for excitation in expected_input[:-1]:
+    for index, excitation in enumerate(expected_input[:-1]):
+        require_no_global_mujoco_callbacks(mj)
         data.ctrl[:] = excitation
         actual = np.asarray(data.ctrl, dtype=np.float64).copy()
         if not np.array_equal(actual, excitation):
@@ -655,17 +683,38 @@ def _execute_native_steps(
             raise ValueError("native applied excitation violates actuator limits")
         applied.append(actual)
         mj.mj_step(model, data, nstep=int(plant.frame_skip))
+        require_no_global_mujoco_callbacks(mj)
+        if not np.array_equal(data.ctrl, excitation):
+            raise ValueError("native post-step controls differ from frozen excitation")
+        observed_time = float(data.time)
+        if not np.isfinite(observed_time) or not np.isclose(
+            observed_time, expected_times[index + 1], atol=1e-12, rtol=0
+        ):
+            raise ValueError("observed native time differs from frozen clock")
+        require_no_global_mujoco_callbacks(mj)
         mj.mj_forward(model, data)
+        require_no_global_mujoco_callbacks(mj)
+        state = np.empty(
+            mj.mj_stateSize(model, mj.mjtState.mjSTATE_INTEGRATION),
+            dtype=np.float64,
+        )
+        mj.mj_getState(model, data, state, mj.mjtState.mjSTATE_INTEGRATION)
+        if any(
+            not np.isfinite(sample).all()
+            for sample in (data.qpos, data.qvel, data.act, data.ctrl, state)
+        ):
+            raise ValueError("native replay produced nonfinite native state")
+        if not np.isclose(float(data.time), observed_time, atol=1e-12, rtol=0):
+            raise ValueError("observed native time changed during forward evaluation")
+        observed_times.append(observed_time)
         qpos.append(data.qpos.copy())
         qvel.append(data.qvel.copy())
         activations.append(data.act.copy())
         controls.append(data.ctrl.copy())
-        state = np.empty(mj.mj_stateSize(model, mj.mjtState.mjSTATE_INTEGRATION))
-        mj.mj_getState(model, data, state, mj.mjtState.mjSTATE_INTEGRATION)
         integration.append(state)
         wrapper_states.append(states["wrapper_state"].copy())
     return NativeMyoSuiteExcitationReplay(
-        times.copy(),
+        np.asarray(observed_times, dtype=np.float64),
         np.asarray(qpos),
         np.asarray(qvel),
         np.asarray(activations),
