@@ -18,6 +18,7 @@ from typing import Any
 from src.engines.physics_engines.opensim.python.tour_matching.native_constraint_state import (
     NativeConstraintStateAudit,
     audit_native_constraint_state,
+    native_muscles,
 )
 
 
@@ -167,14 +168,8 @@ class PassiveReadinessError(ValueError):
 
 
 def _muscles(model: Any, osim: Any) -> list[Any]:
-    muscles = list(model.getMuscles())
-    registered = {muscle.getAbsolutePathString() for muscle in muscles}
-    recursive = {
-        component.getAbsolutePathString()
-        for component in model.getComponentsList()
-        if osim.Muscle.safeDownCast(component) is not None
-    }
-    if not registered or recursive != registered:
+    muscles = list(native_muscles(model, osim))
+    if not muscles:
         raise ValueError("native muscle registry must cover all recursive muscles")
     supported = {"Thelen2003Muscle", "Millard2012EquilibriumMuscle"}
     if any(muscle.getConcreteClassName() not in supported for muscle in muscles):
