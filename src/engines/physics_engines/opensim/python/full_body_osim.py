@@ -865,9 +865,9 @@ def main() -> int:
     parser.add_argument(
         "--grip-model",
         type=str,
-        choices=list(GRIP_MODELS),
+        choices=[m for m in GRIP_MODELS if m != "contact"],
         default=DEFAULT_GRIP_MODEL,
-        help="Hand-club interface: rigid weld, bushing, or contact (library use only)",
+        help="Hand-club interface: rigid weld or bushing (contact is library-only)",
     )
     parser.add_argument(
         "--actuate-root",
