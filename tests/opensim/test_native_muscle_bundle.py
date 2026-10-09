@@ -29,6 +29,27 @@ def _bundle(fixture: NativeFixture) -> Any:
     return build(path, initial, np.linspace(0, 0.04, 9), {"flexor": np.full(9, 0.4)})
 
 
+def _rebuild(bundle: Any, **changes: Any) -> Any:
+    """Create valid wire integrity so admission tests reach native semantics."""
+    from src.engines.native_replay_contracts import native_replay_contract_types
+
+    contracts = native_replay_contract_types()
+    history = changes.get("history", bundle.input_history)
+    state = changes.get("state", bundle.initial_state)
+    return contracts.build_experiment_replay_bundle(
+        bundle.experiment_id,
+        changes.get("model", bundle.model),
+        changes.get("capabilities", bundle.capabilities),
+        tuple((v.component_id, v.values) for v in state),
+        history.channels,
+        history.input_kind,
+        history.interpolation,
+        history.time_seconds,
+        history.values,
+        changes.get("policy", bundle.policy),
+    )
+
+
 def test_native_bundle_replays_complete_state_and_actual_excitation(
     muscle_fixture: NativeFixture,
 ) -> None:
@@ -82,13 +103,74 @@ def test_modified_runtime_options_cannot_be_silently_defaulted(
     bundle = _bundle(muscle_fixture)
     _, replay = _api()
     values = tuple(
-        replace(v, values=(1.0, 0.0, 1.0, 0.0, 0.0))
+        replace(v, values=(1.0, 1.0, 0.0, 0.0))
         if v.component_id.endswith("native-options")
         else v
         for v in bundle.initial_state
     )
     with pytest.raises(ValueError):
-        replay(replace(bundle, initial_state=values), muscle_fixture[0])
+        replay(_rebuild(bundle, state=values), muscle_fixture[0])
+
+
+def test_required_native_capability_cannot_be_replaced(
+    muscle_fixture: NativeFixture,
+) -> None:
+    bundle = _bundle(muscle_fixture)
+    other = replace(bundle.capabilities[0], capability_id="unrelated-capability")
+    _, replay = _api()
+    with pytest.raises(ValueError, match="capability|identity"):
+        replay(_rebuild(bundle, capabilities=(other,)), muscle_fixture[0])
+
+
+@pytest.mark.parametrize("field", ["provider", "interpolation", "integrator"])
+def test_valid_wire_bundle_rejects_changed_execution_semantics(
+    muscle_fixture: NativeFixture,
+    field: str,
+) -> None:
+    bundle = _bundle(muscle_fixture)
+    if field == "provider":
+        changed = _rebuild(
+            bundle, model=replace(bundle.model, provider_sha256="0" * 64)
+        )
+    elif field == "integrator":
+        changed = _rebuild(
+            bundle, policy=replace(bundle.policy, integration_method="other-integrator")
+        )
+    else:
+        from src.engines.native_replay_contracts import native_replay_contract_types
+
+        contracts = native_replay_contract_types()
+        changed = _rebuild(
+            bundle,
+            history=replace(
+                bundle.input_history,
+                interpolation=contracts.InputInterpolation.ZERO_ORDER_HOLD,
+            ),
+        )
+    _, replay = _api()
+    with pytest.raises(ValueError, match="identity"):
+        replay(changed, muscle_fixture[0])
+
+
+def test_external_resource_reference_is_rejected_before_native_load(
+    muscle_fixture: NativeFixture,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import opensim as osim
+
+    path, initial = muscle_fixture
+    raw = path.read_bytes()
+    changed = raw.replace(b"<BodySet ", b'<BodySet file="unqualified.xml" ')
+    assert changed != raw
+    path.write_bytes(changed)
+
+    def forbidden_load(*args: Any) -> None:
+        raise AssertionError("native loader must not see external source references")
+
+    monkeypatch.setattr(osim, "Model", forbidden_load)
+    build, _ = _api()
+    with pytest.raises(ValueError, match="external|source"):
+        build(path, initial, np.array([0.0, 0.01]), {"flexor": np.array([0.1, 0.1])})
 
 
 def test_changed_source_model_is_rejected(muscle_fixture: NativeFixture) -> None:

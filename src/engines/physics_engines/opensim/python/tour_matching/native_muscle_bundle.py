@@ -15,6 +15,8 @@ from tempfile import TemporaryDirectory
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
+from defusedxml import ElementTree as SafeET
+from defusedxml.common import DefusedXmlException
 from numpy.typing import NDArray
 
 from src.engines.native_replay_contracts import (
@@ -46,6 +48,7 @@ _COMPONENTS = frozenset(
         "ConstraintSet",
         "ForceSet",
         "Millard2012EquilibriumMuscle",
+        "Thelen2003Muscle",
         "MuscleFixedWidthPennationModel",
         "MuscleFirstOrderActivationDynamicModel",
         "GeometryPath",
@@ -103,6 +106,26 @@ def _audit_components(model: Any) -> None:
             )
 
 
+def _validate_self_contained_source(raw: bytes) -> None:
+    """Require one inline model so frozen source bytes cover its dependencies."""
+    try:
+        root = SafeET.fromstring(raw, forbid_dtd=True, forbid_entities=True)
+    except (SafeET.ParseError, DefusedXmlException) as error:
+        raise ValueError("native source XML must be self-contained") from error
+    if root.tag != "OpenSimDocument" or len(root.findall("Model")) != 1:
+        raise ValueError("native source must contain one inline OpenSim Model")
+    for element in root.iter():
+        tag = element.tag.lower()
+        if tag in {"file", "filename", "file_name"} or tag.endswith("_file"):
+            raise ValueError(
+                "external source resources need a separate identity policy"
+            )
+        if any(name.lower() in {"file", "filename", "href"} for name in element.attrib):
+            raise ValueError(
+                "external source references need a separate identity policy"
+            )
+
+
 def _prepare(
     path: Path,
     initial: Mapping[str, float],
@@ -111,6 +134,7 @@ def _prepare(
     import opensim as osim
 
     raw = path.read_bytes()
+    _validate_self_contained_source(raw)
     model = osim.Model(str(path))
     if raw != path.read_bytes():
         raise ValueError("source model changed during native load")
@@ -325,6 +349,8 @@ def replay_native_muscle_bundle(
         expected = build_native_muscle_replay_bundle(
             snapshot, initial, grid, controls, experiment_id=bundle.experiment_id
         )
+        if expected.capabilities[0] not in bundle.capabilities:
+            raise ValueError("required native replay capability identity differs")
         for field in ("model", "initial_state", "policy", "input_history"):
             if getattr(bundle, field) != getattr(expected, field):
                 raise ValueError(

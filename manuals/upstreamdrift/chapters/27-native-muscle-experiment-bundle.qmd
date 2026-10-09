@@ -9,7 +9,7 @@ title: "Native Muscle Experiment Bundle"
 F07d #11908 connects the merged Tools `ExperimentReplayBundle` authority to
 the existing OpenSim native muscle excitation replay kernel. It does not add
 an integrator, muscle law, or acceptance evaluator. Initial admission is a
-reviewed cold-start subset with Millard equilibrium muscles, fixed path
+reviewed cold-start subset with Millard and Thelen equilibrium muscles, fixed path
 points, Slider/Pin joints, muscle forces and gravity. Constraints, locks,
 clamps, moving points, contact, other forces, plugins and unreviewed concrete
 components remain excluded. All excluded engines and production variants
@@ -53,13 +53,18 @@ dependency attestation. Execution requires exclusive native process ownership.
 ## Evidence and Remaining Gates
 
 Commit `a8e63b4cda` records six native missing-module RED tests before the
-implementation. Eight actual OpenSim4.6 tests pass, checking fresh
+implementation. Subsequent law and admission negatives were recorded before
+their fixes. Actual OpenSim4.6 validation passes 26 bundle and 58 kernel tests
+across both muscle laws, checking fresh
 continuous-state reproduction, native excitation readback, explicit registered
 options, missing fiber rejection, changed source rejection, and an unreviewed
-force rejection. These are synthetic development fixtures only. The source-byte ownership and explicit-unit regressions also pass. Scoped
+force rejection. Self-contained XML admission rejects external resources
+before native loading; required owned capabilities cannot be replaced. These
+are synthetic development fixtures only. The source-byte ownership and explicit-unit regressions also pass. Scoped
 mypy, all five central gates, DRY, LoD, architecture, canonical governance and
-generated-context checks pass. Additional law coverage, derivative/force
-initialization audits and publication remain pending at this checkpoint.
+generated-context checks pass. The expanded law/admission suite requires final central gates after contact
+parent integration. Derivative/force initialization audits and publication
+remain pending at this checkpoint.
 
 The 520-muscle candidate has locked coordinates, couplers and non-muscle
 actuators and is not admitted by this policy. Native position geometry and

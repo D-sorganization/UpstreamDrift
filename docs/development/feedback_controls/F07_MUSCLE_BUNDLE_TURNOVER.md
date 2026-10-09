@@ -6,13 +6,16 @@ Issue #11908 is leased by root/codex. Branch
 `feat/feedback-opensim-bundle-11908` is based on native Pinocchio PR #11906 and
 therefore inherits native Drake #11896 and MuJoCo #11836 dependencies. No PR
 has been published for this child. RED commit `a8e63b4cda` preceded implementation.
-Eight actual OpenSim4.6 tests pass, including physical units and execution
-from owned frozen source bytes. All five central pre-PR gates, scoped mypy,
+The exact-law dependency #11897 was integrated through genuine ancestry.
+Actual OpenSim4.6 validation now passes 84 tests: 26 bundle tests and 58
+native kernel tests, parameterized across Millard and Thelen muscle laws.
+Coverage includes physical units and execution from owned frozen source bytes. All five central pre-PR gates, scoped mypy,
 DRY, LoD, architecture, canonical governance and generated context pass.
 Central mypy uses MYPYPATH equal to the repository root: its default dual
 src/root path assigns two module names to the same OpenSim facade; the single
-canonical package root passes without suppressions. Eight default-Python native
-test skips are excluded from physics evidence.
+canonical package root passes without suppressions. Default-Python provider
+skips are excluded from physics evidence. The expanded suite requires final
+gates again after the native-contact parent integration.
 
 ## Native Reproduction
 
@@ -29,10 +32,11 @@ The adapter consumes Tools T01 and the existing native muscle kernel. It
 records registered discrete/modeling-option path/value sets and muscle flags;
 continuous `Y` coverage is insufficient to claim arbitrary complete State.
 The component subset is deliberately narrow. Source review does not prove
-binary equivalence. Add negative capability, input/policy, native clamp and
-runtime cases, initialization derivative/force checks, law coverage only after
-the exact-law dependency is integrated, and canonical governance gates before
-publication. Owned immutable source snapshots and the returned model digest bind actual replay.
+binary equivalence. Negative capability, input/policy, external-resource and runtime identity
+cases are now covered. Required native capabilities cannot be replaced by
+other valid capabilities. A self-contained XML audit rejects external file
+references before native loading. Initialization derivative/force checks and
+combined contact-parent integration remain pending before publication. Owned immutable source snapshots and the returned model digest bind actual replay.
 The source-replacement regression verifies that changes to the caller file after
 admission do not change executed bytes.
 
