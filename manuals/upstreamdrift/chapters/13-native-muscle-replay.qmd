@@ -1,0 +1,72 @@
+# Native Muscle Excitation Replay
+
+## Status and Scope
+
+Provisional development evidence for F07/F08 (#11791/#11792), not a qualified
+full-swing result. `tour_matching.muscle_replay` runs a fresh native OpenSim
+model from every named continuous initial state. The early implementation
+supports muscle forces and gravity only. Non-muscle actuators, other forces
+(including contact forces pending their explicit policy), pre-existing
+controllers, prescribed motion/coordinates, locks and unsupported constraints
+are rejected through recursive component auditing, including components outside
+legacy ForceSet/ControllerSet containers. The early muscle-law domain policy
+supports Millard2012EquilibriumMuscle; other laws require explicit domain
+qualification. Initial and sampled trajectory activation/fiber state must
+respect native model-specific minima without clipping. Contact geometry counts
+are metadata, not evidence of contact dynamics. Full anatomical/contact model
+qualification and capture matching remain open.
+
+## Equations and Input Boundary
+
+For excitation samples $e_{i,k}$ at physical times $t_k$ in seconds, the native
+time-only input player uses
+
+$$e_i(t)=(1-\alpha)e_{i,k}+\alpha e_{i,k+1},\qquad
+\alpha=(t-t_k)/(t_{k+1}-t_k).$$
+
+Strictly increasing finite times and finite samples in $[0,1]$ ensure bounded
+linear interpolation over the simulated interval. Excitation is dimensionless;
+it is distinct from activation and the resulting force in newtons. Native
+muscle activation and compliant-fiber dynamics evolve without state resets.
+Configuration and speed retain the model's native coordinate conventions.
+No muscle equilibration is applied after restoring supplied initial state.
+
+## Numerical Method and Provenance
+
+One native Manager cold-starts Runge-Kutta-Merson with an explicit accuracy
+parameter (default $10^{-8}$) and advances continuously across output times.
+The requested time grid is an output/input-knot grid, not the adaptive internal
+step sequence. Both reference generation and reproduction must use the same
+declared initialization policy. Named continuous states do not serialize
+discrete/plugin state or integrator history; broader models remain unsupported
+until their initialization is qualified.
+
+The receipt binds model bytes, ordered native state and muscle names, full
+continuous initial state, time grid, excitation samples, interpolation,
+integrator accuracy and installed provider version. Native applied excitations
+are checked at output times separately from native muscle forces. This local
+receipt is a development adapter; the versioned Tools bundle remains the
+durable interchange authority. The model file alone is not a complete hash of
+arbitrary external resource dependencies, so such models need additional
+qualification before use.
+
+## Evidence and Limits
+
+`tests/opensim/test_native_muscle_replay.py` creates a genuine one-DOF native
+Millard2012EquilibriumMuscle fixture, including nonzero activation and compliant
+fiber state. Tests check restoring muscle motion, native applied commands,
+same-policy reproduction, tighter-accuracy/output-grid refinement and rejection
+of invalid inputs, missing state and hidden drives. This is independent of
+capture fitting and is not a physiological parameter validation.
+
+Executed locally with OpenSim 4.6 (2026-06-22-85aaf64), Python 3.12.10:
+
+```powershell
+python3 -m pytest tests/opensim/test_native_muscle_replay.py --override-ini='addopts=' -q
+```
+
+Use an environment with the reported native provider; optional-provider skips
+in other environments do not establish native acceptance. Full-body anatomy,
+native contact force traces, grip and club dynamics, reserve audits, uncertainty,
+full-horizon mocap accuracy and clean-host reproduction remain required gates.
+See the binding [architecture review](../../../docs/development/feedback_controls/ASTRA_REVIEW.md).
