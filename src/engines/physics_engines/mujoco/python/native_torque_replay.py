@@ -49,6 +49,9 @@ class NativeTorqueReplay:
 
 def _contracts() -> Any:
     """Resolve the single Tools authority, requiring its implemented T01 API."""
+    from src.shared.python._seam_redirect import extend_sidekick_lab_path
+
+    extend_sidekick_lab_path()
     from sidekick.lab import mocap
 
     if not hasattr(mocap, "ExperimentReplayBundle"):
