@@ -38,6 +38,10 @@ from src.engines.physics_engines.opensim.python.tour_matching.moco_tracking impo
     build_moco_study,
     sanitize_trc_for_horizon,
 )
+from src.engines.physics_engines.opensim.python.tour_matching.muscle_replay import (
+    NativeMuscleReplayResult,
+    replay_muscle_excitations,
+)
 from src.engines.physics_engines.opensim.python.tour_matching.polynomial_profile import (
     Degree6PolynomialCoefficients,
     PolynomialTorqueProfile,
@@ -264,6 +268,7 @@ __all__ = [
     "audit_model_geometry",
     "body_for",
     "build_golf_view_package",
+    "NativeMuscleReplayResult",
     "build_moco_study",
     "build_parser",
     "calibrate_marker_offsets",
@@ -298,6 +303,7 @@ __all__ = [
     "qualify_full_swing_tracking",
     "qualify_muscle_extensions",
     "read_trc",
+    "replay_muscle_excitations",
     "register_points",
     "reinitialize_tracking_from_address",
     "reset_viewer_to_address",
