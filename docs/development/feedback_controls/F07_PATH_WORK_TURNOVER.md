@@ -40,6 +40,18 @@ reproducibility and dependent-DLL closure remain unverified.
 
 ## Blockers and Next Steps
 
+Primary-source interpretation correction: Sherman/Seth/Delp (2013),
+https://pmc.ncbi.nlm.nih.gov/articles/PMC4404026/, and the official
+FunctionBasedPath reference explicitly restrict tendon-excursion equality to
+workless constraints. MovingPathPoints can introduce unaccounted guide work.
+The numerical observations remain unchanged, but they alone do not prove an
+OpenSim defect. Receipts now name rejection of the workless identity rather
+than a runtime inconsistency. Retain force-defined native moment arms; an
+explicit, physically qualified guide-work/power budget is an alternative to
+path replacement. Do not prescribe a runtime or donor rewrite by default.
+The old local receipt remains historical; the separate semantics-revision
+receipt binds the clarified provider and labels. No tolerance was weakened.
+
 No donor rewrite, runtime patch, upstream message, physiological fitting,
 capture use, contact qualification or F07 closure is included. Review actual
 force-law alternatives before admitting affected moving paths; retain donor

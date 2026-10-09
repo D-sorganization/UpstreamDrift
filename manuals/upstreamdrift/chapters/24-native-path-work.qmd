@@ -30,13 +30,21 @@ outside this interval or physiological coordinate-domain claim is made.
 The assay reloads each serialized original model and copies its native initial
 state for each independent sample. At zero speed, native unit-tension
 acceleration gives the generalized force $Q=I\ddot q$. Separately, at unit
-speed, native path lengthening gives $\dot l$. For a consistent unit-tension
-path, the expected identities are
+speed, native path lengthening gives $\dot l$. Under the additional assumption
+of a workless path transmission, the expected identities are
 
 $$
 r=-\frac{\partial l}{\partial q},\qquad Q=T r,\qquad
 Q\dot q=-T\dot l.
 $$
+
+This assumption is not automatic for a `MovingPathPoint`.
+[Sherman, Seth and Delp (2013)](https://pmc.ncbi.nlm.nih.gov/articles/PMC4404026/)
+define moment arm from force effectiveness and explain that moving path points
+can introduce unaccounted guide work. Equality with tendon excursion requires
+workless constraints. The [official FunctionBasedPath reference](https://opensim-org.github.io/opensim-moco-site/docs/1.3.0/html_user/classOpenSim_1_1FunctionBasedPath.html)
+repeats this caveat. Therefore the following discrepancy does not, by itself,
+prove an OpenSim runtime defect or an erroneous force-defined moment arm.
 
 The existing public `compute_path_length_finite_difference_moment_arm` and
 `validate_moment_arm_consistency` providers are reused. Central stencils use
@@ -47,14 +55,18 @@ error is about 1e-8 m and decreases on refinement. Finest-stencil tests require
 the fixed discrepancy and moving discrepancy minus 0.03 m to be below 1e-10 m.
 
 On OpenSim `4.6-2026-06-22-85aaf64`, all nine fixed-path samples pass and all
-nine moving-path samples fail the diagnostic gate. At $q=0$ the moving case
+nine moving-path samples fail the workless-identity gate. At $q=0$ the moving case
 has native moment arm 0.06260990337 m, native $\ddot q=3.1304951685$
 rad/s² under 1 N tension, but full geometric derivative moment arm
 0.09260990337 m. Native lengthening speed is -0.09260990337 m/s at unit
 coordinate speed. The 0.03 m discrepancy agrees with the terminal segment
 derivative and persists across step refinement. Actual applied-force dynamics
-therefore agree with the native moment arm rather than the full path-length
-derivative. This is not merely disagreement between two reporting functions.
+therefore agree with the native moment arm. The difference from the full
+length derivative is a guide-work accounting question. At unit tension and
+unit coordinate speed, $-T\dot l-Q\dot q=0.03$ W in this fixture. This residual
+does not identify a physical guide mechanism or authorize adding a correction
+torque. Preserve the force-defined native moment arm and qualify the guide-work
+semantics separately.
 
 Nonfinite moment arms, sampled lengths, coordinates, steps, tolerances and
 derivative results are rejected. Unresolvable stencils and nonpositive
@@ -78,7 +90,9 @@ work inside the condition that the next path point belongs to a different
 mobilized body. Its length calculation includes same-body segments.
 `MomentArmSolver` obtains unit-tension path forces and projects generalized
 force through the coordinate coupling vector. This source structure explains
-the original fixture observation; no runtime patch is included.
+the observed partition in this source version. Historical moving-guide semantics
+and the force definition must be reviewed before diagnosing a runtime defect;
+no runtime patch is included.
 
 Receipts record actual native version, Python version, loaded extension
 hashes, original XML hashes, native loaded serialization hashes, numerical
@@ -92,7 +106,7 @@ explicitly unverified. Missing verification is never a zero or a pass.
 From the repository root, with the actual native provider selected:
 
 ```powershell
-& C:/Users/diete/Repositories/.venv-feedback-opensim/Scripts/python.exe -m scripts.diagnostics.native_path_work --output C:/Users/diete/Repositories/docs/development/feedback_controls_planning/native_model_evaluation/original_path_work_11856
+& C:/Users/diete/Repositories/.venv-feedback-opensim/Scripts/python.exe -m scripts.diagnostics.native_path_work --output C:/Users/diete/Repositories/docs/development/feedback_controls_planning/native_model_evaluation/original_path_work_11856_semantics_revision
 & C:/Users/diete/Repositories/.venv-feedback-opensim/Scripts/python.exe -m pytest tests/opensim/test_native_path_work.py -o addopts='' -q
 python3 -m scripts.check_design_manual_governance
 ```
@@ -101,10 +115,13 @@ The output contains only original fixtures and observations. It does not
 download or redistribute donor assets. Native tests skip explicitly without
 the bindings; skipped tests cannot substantiate a native result.
 
-Before choosing a remedy, review three distinct alternatives: a verified native
-force implementation that retains the moving path; a validated alternative
-anatomical path with independent source and calibration evidence; or leaving
-the affected model ineligible for physiological fitting. Replacing native
+Before choosing a model, first decide whether workless transmission is justified
+or an explicit guide-work/power budget and physical interpretation are required.
+The equality gate applies only to the former. A defensible guide-work model
+with independently declared bounds may support model qualification; an
+unexplained residual cannot silently pass as ordinary muscle-to-skeleton work.
+Alternative paths or native changes remain separate reviewed options, with
+independent source, anatomical and calibration evidence. Replacing native
 moment arms by geometric gradients in an optimizer without changing and
 validating the actual force plant would create a different model and would
 not resolve replay consistency. Removing the terminal segment, freezing the

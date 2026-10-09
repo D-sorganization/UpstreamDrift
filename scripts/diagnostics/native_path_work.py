@@ -167,9 +167,12 @@ def run_probe(output: Path) -> dict[str, Any]:
                 "native_controllers": model.getControllerSet().getSize(),
                 "inertia_kg_m2": INERTIA_KG_M2,
                 "samples": samples,
-                "gate": "force_length_inconsistent"
+                "gate": "workless_identity_not_satisfied"
                 if any(s["gate_rejected"] for s in samples)
-                else "consistent_at_tested_samples",
+                else "workless_identity_satisfied_at_tested_samples",
+                "guide_work_model": "unmodeled-moving-guide"
+                if moving
+                else "fixed-points",
             }
         )
     extensions = {
@@ -181,6 +184,7 @@ def run_probe(output: Path) -> dict[str, Any]:
     }
     return {
         "scientific_status": "unqualified",
+        "interpretation": "workless-identity-audit-not-runtime-defect-proof",
         "cases": cases,
         "tolerance_m": TOLERANCE_M,
         "runtime": {

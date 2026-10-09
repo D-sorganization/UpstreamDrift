@@ -41,6 +41,11 @@
       "resolution": "Inventory F01 controlled-swing admission in src/engines/feedback_comparison.py and manuals/upstreamdrift/chapters/13-feedback-comparison.qmd: all 16 registered packages plus declared OpenSim torque/muscle variants stay required; support, availability and qualification remain separate; exact model/provider/state/policy/input/physics/contact/integrator/actuator identities and time-only full-state no-reset replay guard comparison levels. The existing Euclidean same-input-bundle/v1 lacks policy/input hash binding and cannot qualify native muscle or manifold replay. Common-model, externally forced and restarted short-horizon evidence cannot qualify native own-contact muscle full-swing physics. Unit admission tests and source hashes do not establish matching accuracy, measured contact or EMG agreement, runtime speed, or native six-engine qualification. Full calculation coverage and publication remain blocked."
     },
     {
+      "id": "UP-D1-sparse-collocation-benchmark-inventory",
+      "owner": "UpstreamDrift issue #11787",
+      "resolution": "Inventory the F03 synthetic sparse midpoint inverse-dynamics spike and benchmark adapter in src/shared/python/motion_matching/sparse_collocation_spike.py and provisional chapter 17: exact sparse Jacobian, hard ZOH rotary torque/rate and state continuity constraints, separate node objective/defect/fresh RK45 replay/observation receipts, predeclared cold/warm starts, failure retention, named host and Python-tracked memory. Existing fit_multiple_shooting is exercised on the same toy truth with one constant input parameter versus per-interval collocation inputs, so raw defects and speed cannot establish a production winner. No early F06 native replay receipt, D02 frozen private protocol, full-body contact or six-engine comparison is supplied; full calculation coverage and publication remain blocked."
+    },
+    {
       "id": "UP-D1-inventory-required",
       "owner": "UpstreamDrift issue #9067",
       "resolution": "Inventory and classify every in-scope calculation and module before any coverage or release claim."
@@ -98,7 +103,7 @@
     {
       "id": "UP-D1-native-path-work-inventory",
       "owner": "UpstreamDrift issue #11856",
-      "resolution": "Inventory original native PathActuator fixed/moving-point force-length diagnostic in scripts/diagnostics/native_path_work.py and chapters/24-native-path-work.qmd. Actual native unit-tension acceleration agrees with native moment arm while the moving same-body segment produces a persistent geometric derivative difference. The existing consistency gate rejects nonfinite and numerically unresolved evidence; original native tests retain the inconsistency rather than changing runtime or donor anatomy. Exact source and runtime identities are separate and source-to-binary verification is unavailable. Physiological fitting, donor path/input-domain validation, contact, complete-state full-capture replay, and manual release remain blocked."
+      "resolution": "Inventory original native PathActuator fixed/moving-point force-length diagnostic in scripts/diagnostics/native_path_work.py and chapters/24-native-path-work.qmd. Actual native unit-tension acceleration agrees with native moment arm while the moving same-body segment produces a persistent geometric derivative difference. The existing consistency gate rejects nonfinite and numerically unresolved evidence; original native tests retain the inconsistency rather than changing runtime or donor anatomy. Exact source and runtime identities are separate and source-to-binary verification is unavailable. Physiological fitting, donor path/input-domain validation, contact, complete-state full-capture replay, and manual release remain blocked. Interpretation: tendon-excursion equality requires demonstrated workless transmission. Moving-guide work can account for a difference; rejection alone does not establish a runtime defect. Preserve native force-defined moment arms and qualify guide-work/power semantics before selecting any remedy."
     }
   ],
   "calculations": []

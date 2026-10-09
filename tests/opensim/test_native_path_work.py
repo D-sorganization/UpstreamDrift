@@ -35,7 +35,9 @@ def test_invalid_or_unresolved_stencil_rejected(q: float, dq: float) -> None:
         compute_path_length_finite_difference_moment_arm(lambda value: 1.0, q, dq)
 
 
-def test_original_native_probe_separates_moving_and_fixed_paths(tmp_path: Path) -> None:
+def test_original_native_probe_records_workless_identity_failure(
+    tmp_path: Path,
+) -> None:
     pytest.importorskip("opensim")
     from scripts.diagnostics.native_path_work import TOLERANCE_M, run_probe
 
@@ -45,8 +47,12 @@ def test_original_native_probe_separates_moving_and_fixed_paths(tmp_path: Path) 
     assert receipt["runtime"]["version"]
     assert receipt["runtime"]["extension_sha256"]
     fixed, moving = receipt["cases"]
-    assert fixed["gate"] == "consistent_at_tested_samples"
-    assert moving["gate"] == "force_length_inconsistent"
+    assert fixed["gate"] == "workless_identity_satisfied_at_tested_samples"
+    assert moving["gate"] == "workless_identity_not_satisfied"
+    assert (
+        receipt["interpretation"] == "workless-identity-audit-not-runtime-defect-proof"
+    )
+    assert moving["guide_work_model"] == "unmodeled-moving-guide"
     for case in (fixed, moving):
         assert len(case["source_sha256"]) == 64
         assert len(case["loaded_sha256"]) == 64

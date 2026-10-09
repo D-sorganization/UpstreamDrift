@@ -1,5 +1,7 @@
 ## Native Path-Work Consistency Diagnostic (F07 Child #11856)
 
+The length-derivative equality gate requires demonstrated workless transmission. MovingPathPoints can introduce unmodeled guide work; a rejected equality test alone is not proof of an incorrect force-defined native moment arm or runtime defect. Preserve native force observations and qualify the guide-work/power budget and physical model explicitly before physiological use. Automatic native or anatomical replacement is not required by this diagnostic.
+
 The original single-pin diagnostic in `scripts/diagnostics/native_path_work.py` observes native unit-tension force, length and lengthening speed against refined geometry derivatives, with serialized model and actual runtime identities. Existing derivative/consistency providers reject nonfinite and unresolved evidence independently of optional contract diagnostics. A moving point followed by a fixed point on the same body reproduces a force/length discrepancy; fixed-point controls agree. Receipts remain unqualified. No donor or runtime rewrite, physiological fit, native full-model acceptance, or F07 closure follows from the diagnostic. Canonical calculation reference: `manuals/upstreamdrift/chapters/24-native-path-work.qmd`.
 
 ## Native Muscle Replay Development Boundary (F07, #11791)
@@ -10393,3 +10395,16 @@ inputs. Baselines must include independent polynomial, computed torque,
 MOSAIC+TVLQR, and selected OCP under one observation identity, horizon, and
 budget. This is an admission contract, not a successful native replay or
 scientific match; numerical gate qualification belongs to follow-on issues.
+
+## Sparse Collocation and Shooting Benchmark Spike (F03, #11787)
+
+`sparse_collocation_spike.py` adds a bounded synthetic rotary fixture with
+sparse analytic midpoint inverse-dynamics defects, hard ZOH torque and slew
+constraints, and fresh adaptive forward reintegration. It also adapts the
+existing multiple-shooting solver to the same synthetic truth and target.
+Backend receipts retain input degrees of freedom, defect type, objective,
+feasibility, replay gap and observation error separately, with predeclared
+cold/warm starts, failures, timing and Python-tracked peak memory. The shooting
+fixture uses one constant torque while the spike uses one input per interval,
+so no production backend is selected from these results. Native F06 replay,
+private protocol D02, contact and full-body engine evidence remain open.
