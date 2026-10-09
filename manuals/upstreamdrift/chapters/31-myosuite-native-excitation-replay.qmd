@@ -1,0 +1,98 @@
+# MyoSuite Native Muscle-Excitation Replay (Provisional)
+
+## Scope
+
+This note specifies the MyoSuite open-loop consumer of the versioned Tools T01
+`experiment-replay/1.0.0` bundle. Its implementation is
+`src/engines/physics_engines/myosuite/python/native_excitation_replay.py` and
+its F09 integration is `src/engines/feedback_native_execution.py`. It is an
+execution adapter, not a new bundle schema, scoring rule, capability registry,
+or qualification authority.
+
+The adapter currently exercises a pinned MyoSuite 3.0.0 and MuJoCo 3.6.0
+runtime. It retains the F01 model inventory identity separately from the T01
+native model/provider identity and F06 execution binding. A bundle can run only
+when an explicit registration binds those identities, ordered channels,
+complete state schema, input schema, and loaded model. A runtime smoke using
+MyoSuite's built-in elbow task does not register or qualify a golfer model.
+
+## Applied Input and Time
+
+Let \(u_k\) denote the ordered normalized muscle-excitation vector at the
+simulation-relative controller sample \(t_k\). The frozen T01 input is the
+post-mapping value written directly to MuJoCo actuator controls:
+
+\[
+  \texttt{data.ctrl}(t) = u_k,
+  \qquad t_k \le t < t_{k+1},
+  \qquad t_{k+1}-t_k = n_f h,
+\]
+
+where \(h\) is the native MuJoCo integration step and \(n_f\) is the pinned
+MyoSuite `frame_skip`. The input uses dimensionless unit `1`, zero-order hold,
+and a terminal sentinel that repeats the final applied sample. The actual
+native controls are read back before stepping and must equal \(u_k\); native
+actuator limits are checked without clipping or modifying the frozen input.
+
+The Gym action vector is a different boundary. In the pinned environment,
+MyoSuite's action handling transforms normalized Gym commands before setting
+muscle controls. Therefore a `[-1, 1]` command cannot be labeled muscle
+excitation, and the adapter does not infer controls by inverting the wrapper
+transform. No inverse is defined at activation endpoints, and no synthetic
+endpoint values are introduced.
+
+The plant is advanced using the registered model's native MuJoCo step for the
+declared frame skip. The adapter does not call Gym `step`; consequently task
+observations, rewards, environment termination, task resets, and task RNG are
+outside this run. The policy and provider identity declare this direct-plant,
+fixed-horizon path and bind solver, integrator, source/loaded model, runtime,
+wrapper chain, actuator mapping, time step, and frame skip.
+
+## Complete Initialization and Output
+
+The full initial-state payload contains, in fixed order:
+
+- native `qpos` and `qvel`, whose dimensions remain independent;
+- MyoSuite muscle activation and the current native actuator controls;
+- MuJoCo `mjSTATE_INTEGRATION`, including its numerical warm-start state; and
+- supported wrapper state: TimeLimit elapsed steps, order-enforcement reset
+  flag, passive-checker flags, and the MyoSuite instability-termination flag.
+
+State-schema identity and the actual payload digest are both checked. Wrapper
+state is frozen and preserved because Gym stepping is not part of this policy;
+it does not stand in for task RNG state or establish wrapper behavior during a
+Gym episode. The returned trajectory includes native configuration/velocity,
+activation, controls, integration state, wrapper-state snapshot, exact applied
+input samples, and the T01 input/policy digests. It contains no marker positions
+or observation score.
+
+The loader fails closed if the registered model source changes during load,
+the wrapper chain differs, a control stage or plugin is present, muscle
+activation state does not map one-to-one to the declared actuators, a channel
+or clock differs, state restoration changes the frozen payload, or actual
+control readback does not match the bundle. Only the explicitly supported
+wrapper attributes are restored. A future environment with additional mutable
+state requires a separately versioned state and policy contract.
+
+## Evidence and Limitations
+
+The independent contract suite tests wrong drive-mode and policy rejection,
+identity binding, explicit F09 dispatch, and continued retention of all
+required rows and six engines. A separate actual-runtime smoke test builds a
+frozen excitation bundle, runs MyoSuite 3.0.0/MuJoCo 3.6.0, and verifies exact
+control readback, full-horizon state output, and digest preservation. This
+fixture is an installed public elbow task, not private capture data or a
+production golf model.
+
+F01's `myosuite/driver` and `myosuite/iron` remain required, supported at the
+package-surface level, availability unknown, and qualification unqualified
+until each has an explicit reviewed source/provider/model binding and required
+native acceptance evidence. MuJoCo 3.8 torque evidence is not MyoSuite
+excitation evidence. No physiology tolerance, observation score, reset count,
+production capability, or cross-engine equivalence is inferred by this
+adapter. All other engine and model rows remain in the denominator.
+
+The generic MyoSuite engine's handling of legacy Gym four-value step results
+is outside this provider because it never calls `env.step`. That wrapper path
+needs its own regression test and issue if a legacy environment is supported;
+it is not silently certified by this native replay.

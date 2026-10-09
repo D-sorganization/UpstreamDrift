@@ -1,0 +1,67 @@
+# F09f MyoSuite Native Excitation Replay
+
+Issue: [UpstreamDrift #11918](https://github.com/D-sorganization/UpstreamDrift/issues/11918)
+Parent: [F09 #11793](https://github.com/D-sorganization/UpstreamDrift/issues/11793)
+Dependencies: F09c strict native replay boundary, Tools T01
+`experiment-replay/1.0.0`, installed MyoSuite 3.0.0 / MuJoCo 3.6.0.
+
+## Delivered
+
+`src/engines/physics_engines/myosuite/python/native_excitation_replay.py`
+consumes an actual T01 bundle as direct normalized post-mapping excitation
+through native MyoSuite/MuJoCo. It never treats a Gym `[-1, 1]` action as
+excitation and does not invert the MyoSuite action transformation. The native
+plant is advanced for the explicit frame skip with a fixed horizon and ZOH
+input. No Gym `step`, task observation, reward, termination callback, tracking
+or reset path is reachable through this provider.
+
+The complete state binds separate q/v, activation, actuator control, full
+MuJoCo integration state, and the supported Gym/MyoSuite wrapper state. The
+provider digest binds runtime and provider sources, environment registration,
+wrapper chain, actuator mapping, integration, solver, frame skip and direct
+control boundary. Source bytes are hashed before/after environment creation;
+loaded model, schema, actual initial payload, applied input and executed policy
+are checked through T01/F09. Readback of `data.ctrl` must exactly equal the
+frozen normalized excitation before each step.
+
+F09 dispatch routes only an explicit MyoSuite binding to this adapter; it
+rejects a torque inventory row. The output receipt stays unqualified, includes
+no local paths, and cannot set F01 qualification. The two required MyoSuite
+driver/iron rows and all six engine IDs remain in the report. The built-in
+elbow task is a runtime test fixture only and does not bind either production
+golf model.
+
+## TDD and Validation
+
+The contract tests cover valid open-loop excitation, torque-row rejection,
+observation-enabled policy rejection, exact input digest and unqualified
+receipt, actual F09 dispatch, and all-engine/all-row blocker retention.
+
+Local Windows command:
+
+```powershell
+ruff check src/engines/feedback_native_execution.py src/engines/physics_engines/myosuite/python/native_excitation_replay.py tests/unit/engines/myosuite
+pytest -q tests/unit/engines/myosuite/test_native_excitation_replay_contract.py tests/unit/engines/myosuite/test_native_excitation_replay_runtime.py tests/unit/engines/test_feedback_native_execution.py
+```
+
+Result: Ruff passes; 17 tests pass and two optional tests skip locally because
+the Python 3.13 environment lacks MyoSuite and the Drake Python package. An
+isolated owned Python 3.12 environment on DeskComputer has MyoSuite 3.0.0,
+myo-sim 0.2.3, Gymnasium 1.2.3, and MuJoCo 3.6.0. Its runtime test was run
+after copying the final adapter source into a disposable task-owned test
+overlay and passed: 1 passed, 2 unknown-marker warnings in 0.72 seconds.
+The test uses `myoElbowPose1D6MFixed-v0`, six actual native muscle controls,
+and a short native horizon. This validates the actual provider seam only; it
+does not establish a MyoSuite golfer mapping, private-data result, physiology,
+or scientific acceptance.
+
+## Follow-Up
+
+The generic MyoSuite engine's legacy four-tuple `step()` interpretation remains
+untouched because the native adapter never calls Gym `step`. If a supported
+legacy Gym version is needed, fix and test that wrapper path separately. Add
+driver/iron bindings only after reviewed model/provider identity, full-state
+restore and native acceptance evidence are available; do not use the elbow
+fixture to satisfy their inventory rows.
+
+Canonical manual: `manuals/upstreamdrift/chapters/31-myosuite-native-excitation-replay.qmd`.

@@ -192,3 +192,31 @@ offset. See `docs/development/feedback_controls/F09E-NATIVE-MARKER-FK.md` for
 the exact command, environment, observed API incompatibility, and validation
 limits. The canonical calculation note is
 `manuals/upstreamdrift/chapters/30-pinocchio-native-marker-forward-kinematics.qmd`.
+
+## F09f MyoSuite Native Excitation Replay (#11918)
+
+Branch `feat/11918-f09f-myosuite-native-replay` adds a native MyoSuite 3.0.0 /
+MuJoCo 3.6.0 consumer for Tools T01 muscle-excitation bundles. The input is the
+actual normalized post-mapping excitation written to native `data.ctrl`; Gym
+`[-1, 1]` actions are not called excitation and are not inverse-mapped. The
+adapter steps the plant directly using explicit frame skip and fixed-horizon
+ZOH input and does not invoke Gym `step`, observation, reward, task termination,
+or reset. It binds full physical/numerical initial state plus supported wrapper
+flags and counters and verifies exact native control readback.
+
+Focused local validation: Ruff passes and 17 tests pass; two optional runtime
+tests skip in the local Python 3.13 environment because MyoSuite/Drake are
+absent. The actual MyoSuite runtime test passed in the isolated, task-owned
+Python 3.12 environment on DeskComputer (`MyoSuite 3.0.0`, `myo-sim 0.2.3`,
+Gymnasium 1.2.3, MuJoCo 3.6.0): 1 passed with two overlay-only unknown pytest
+mark warnings. The fixture is the public elbow pose demo and does not qualify a
+production golf model. F01's required MyoSuite driver and iron rows remain
+unqualified, and all six engine rows remain represented. The generic legacy
+Gym four-tuple path was not changed because this provider avoids `env.step()`.
+
+See `docs/development/feedback_controls/F09F-MYOSUITE-NATIVE-EXCITATION.md`
+for exact validation and limits, and
+`manuals/upstreamdrift/chapters/31-myosuite-native-excitation-replay.qmd` for
+the canonical boundary note. Keep the pull request stacked/unarmed until its
+F09c, T01, and runtime-provider dependencies are in the required ancestry;
+none of this work closes F09 or F10.

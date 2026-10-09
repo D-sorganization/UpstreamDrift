@@ -627,3 +627,16 @@ frame index was made compatible with Pinocchio 4.1. Native receipts retain
 separate inventory and adapter identities, complete q/v, and unknown reset
 count; marker results remain unqualified. See
 `docs/development/feedback_controls/F09E-NATIVE-MARKER-FK.md` and chapter30.
+
+## F09f MyoSuite Native Excitation Replay (#11918)
+
+Branch `feat/11918-f09f-myosuite-native-replay` adds a distinct MyoSuite
+muscle-excitation consumer to the F09 native execution path. It writes exact
+post-mapping normalized excitation directly to native `data.ctrl`; it never
+calls Gym `step` or treats `[-1, 1]` actions as muscle excitation. MyoSuite
+3.0.0/MuJoCo 3.6.0 public elbow fixture passes in the owned Python 3.12 runtime.
+The built-in fixture does not bind required production driver/iron models;
+those rows and the six-engine denominator remain unqualified. See
+`docs/development/feedback_controls/F09F-MYOSUITE-NATIVE-EXCITATION.md` and
+canonical chapter31. The generic legacy four-value Gym step issue remains
+separate because this provider uses native plant stepping only.
