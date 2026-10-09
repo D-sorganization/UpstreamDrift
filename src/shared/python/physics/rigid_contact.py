@@ -81,6 +81,17 @@ def _cross_matrix(vector: np.ndarray) -> np.ndarray:
     return np.array([[0.0, -z, y], [z, 0.0, -x], [-y, x, 0.0]])
 
 
+def _cross(left: np.ndarray, right: np.ndarray) -> np.ndarray:
+    """Three-vector cross product without NumPy's axis-dispatch overhead."""
+    return np.array(
+        [
+            left[1] * right[2] - left[2] * right[1],
+            left[2] * right[0] - left[0] * right[2],
+            left[0] * right[1] - left[1] * right[0],
+        ]
+    )
+
+
 def _validated_vector(value: np.ndarray, name: str) -> np.ndarray:
     array = np.asarray(value, dtype=float)
     if array.shape != (3,) or not np.isfinite(array).all():
@@ -141,7 +152,7 @@ def _prepare_contact(state: RigidContactInput) -> _ContactSystem:
     ):
         raise ValueError("mass, restitution, and friction must be physical")
     rb = -float(GOLF_BALL_RADIUS_M) * normal
-    relative = vc + np.cross(wc, rc) - vb - np.cross(wb, rb)
+    relative = vc + _cross(wc, rc) - vb - _cross(wb, rb)
     approach = float(relative @ normal)
     if approach <= 0:
         raise ValueError("club and ball must be approaching at contact")
@@ -186,12 +197,10 @@ def _finish_contact(
     """Apply the shared impulse once and enforce passivity postconditions."""
     s = system
     post_vc = s.vc - impulse / s.state.club_mass_kg
-    post_wc = s.wc - s.club_inverse_inertia @ np.cross(s.rc, impulse)
+    post_wc = s.wc - s.club_inverse_inertia @ _cross(s.rc, impulse)
     post_vb = s.vb + impulse / float(GOLF_BALL_MASS_KG)
-    post_wb = s.wb + s.ball_inverse_inertia @ np.cross(s.rb, impulse)
-    post_relative = (
-        post_vc + np.cross(post_wc, s.rc) - post_vb - np.cross(post_wb, s.rb)
-    )
+    post_wb = s.wb + s.ball_inverse_inertia @ _cross(s.rb, impulse)
+    post_relative = post_vc + _cross(post_wc, s.rc) - post_vb - _cross(post_wb, s.rb)
     pre_energy = _kinetic_energy(
         s.vc, s.wc, s.vb, s.wb, club_mass=s.state.club_mass_kg, club_inertia=s.inertia
     )

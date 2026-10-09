@@ -11,7 +11,10 @@ from src.shared.python.core.physics_constants import (
     GOLF_BALL_MASS_KG,
     GOLF_BALL_RADIUS_M,
 )
-from src.shared.python.physics.incremental_contact import solve_incremental_contact
+from src.shared.python.physics.incremental_contact import (
+    contact_backend_info,
+    solve_incremental_contact,
+)
 from src.shared.python.physics.rigid_contact import RigidContactInput
 
 pytestmark = pytest.mark.unit
@@ -193,3 +196,45 @@ def test_frictionless_offcenter_fastpath_preserves_energetic_work() -> None:
     assert exact.rebound_work_j == pytest.approx(
         0.64 * exact.compression_work_j, rel=1e-10
     )
+
+
+def test_compiled_kernel_matches_python_reference_for_offcenter_cases() -> None:
+    pytest.importorskip("numba")
+    rng = np.random.default_rng(90210)
+    for _ in range(40):
+        state = _state(
+            club_velocity_mps=np.array([45.0, *rng.uniform(-8, 8, 2)]),
+            club_angular_velocity_rad_s=rng.uniform(-4, 4, 3),
+            ball_angular_velocity_rad_s=rng.uniform(-100, 100, 3),
+            club_lever_m=np.array([0.04, *rng.uniform(-0.02, 0.02, 2)]),
+            friction_coefficient=float(rng.choice([0.05, 0.2, 0.4, 1.0])),
+        )
+        reference = solve_incremental_contact(
+            state,
+            energetic_restitution=0.8,
+            steps_per_compression=128,
+            use_analytic_fastpath=False,
+            backend="python_reference",
+        )
+        compiled = solve_incremental_contact(
+            state,
+            energetic_restitution=0.8,
+            steps_per_compression=128,
+            use_analytic_fastpath=False,
+            backend="numba",
+        )
+        np.testing.assert_allclose(
+            compiled.ball_impulse_n_s, reference.ball_impulse_n_s, atol=1e-9
+        )
+        np.testing.assert_allclose(
+            compiled.ball_velocity_mps, reference.ball_velocity_mps, atol=1e-8
+        )
+        assert compiled.compression_work_j == pytest.approx(
+            reference.compression_work_j, rel=1e-10
+        )
+        assert compiled.rebound_work_j == pytest.approx(
+            reference.rebound_work_j, rel=1e-10
+        )
+    info = contact_backend_info()
+    assert info["active_backend"] == "numba"
+    assert info["fastmath"] is False
