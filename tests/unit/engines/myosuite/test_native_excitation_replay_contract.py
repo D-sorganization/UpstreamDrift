@@ -26,25 +26,22 @@ from src.engines.physics_engines.myosuite.python.native_excitation_replay import
     _module_bytes,
     validate_myo_suite_bundle_contract,
 )
-from src.shared.python._seam_redirect import extend_sidekick_lab_path
+from src.engines.native_replay_contracts import native_replay_contract_types
 
-extend_sidekick_lab_path()
-
-from sidekick.lab.mocap import (
-    ActuationInputKind,
-    CapabilityAvailability,
-    CapabilityDeclaration,
-    CapabilitySupport,
-    InitialStateSchema,
-    InputChannel,
-    InputInterpolation,
-    ModelIdentity,
-    ReplayExecutionPolicy,
-    ReplayMode,
-    StateComponentRole,
-    StateComponentSpec,
-    build_experiment_replay_bundle,
-)
+_mocap = native_replay_contract_types()
+ActuationInputKind = _mocap.ActuationInputKind
+CapabilityAvailability = _mocap.CapabilityAvailability
+CapabilityDeclaration = _mocap.CapabilityDeclaration
+CapabilitySupport = _mocap.CapabilitySupport
+InitialStateSchema = _mocap.InitialStateSchema
+InputChannel = _mocap.InputChannel
+InputInterpolation = _mocap.InputInterpolation
+ModelIdentity = _mocap.ModelIdentity
+ReplayExecutionPolicy = _mocap.ReplayExecutionPolicy
+ReplayMode = _mocap.ReplayMode
+StateComponentRole = _mocap.StateComponentRole
+StateComponentSpec = _mocap.StateComponentSpec
+build_experiment_replay_bundle = _mocap.build_experiment_replay_bundle
 
 pytestmark = pytest.mark.unit
 

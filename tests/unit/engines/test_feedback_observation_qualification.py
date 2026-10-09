@@ -54,24 +54,22 @@ def _evidence_and_bundle(
         (0.1, 0.1),
     ),
 ) -> tuple[ComparisonEvidence, ExperimentReplayBundle]:
-    from src.shared.python._seam_redirect import extend_sidekick_lab_path
+    from src.engines.native_replay_contracts import native_replay_contract_types
 
-    extend_sidekick_lab_path()
-    from sidekick.lab.mocap import (
-        ActuationInputKind,
-        CapabilityAvailability,
-        CapabilityDeclaration,
-        CapabilitySupport,
-        InitialStateSchema,
-        InputChannel,
-        InputInterpolation,
-        ModelIdentity,
-        ReplayExecutionPolicy,
-        ReplayMode,
-        StateComponentRole,
-        StateComponentSpec,
-        build_experiment_replay_bundle,
-    )
+    contracts = native_replay_contract_types()
+    ActuationInputKind = contracts.ActuationInputKind
+    CapabilityAvailability = contracts.CapabilityAvailability
+    CapabilityDeclaration = contracts.CapabilityDeclaration
+    CapabilitySupport = contracts.CapabilitySupport
+    InitialStateSchema = contracts.InitialStateSchema
+    InputChannel = contracts.InputChannel
+    InputInterpolation = contracts.InputInterpolation
+    ModelIdentity = contracts.ModelIdentity
+    ReplayExecutionPolicy = contracts.ReplayExecutionPolicy
+    ReplayMode = contracts.ReplayMode
+    StateComponentRole = contracts.StateComponentRole
+    StateComponentSpec = contracts.StateComponentSpec
+    build_experiment_replay_bundle = contracts.build_experiment_replay_bundle
 
     row = registry.get("mujoco/driver", "default", DriveMode.TORQUE)
     channels = (

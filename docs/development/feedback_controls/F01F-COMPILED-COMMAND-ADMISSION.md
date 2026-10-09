@@ -30,6 +30,13 @@ same-input comparison also fails closed without a separately reviewed
 semantic mapping. Inventory package/provider identity is not overwritten by
 the underlying native execution identity.
 
+Runtime F09 consumers obtain T01 contract objects through
+`native_replay_contract_types()`, which loads the pinned package under the
+private `_pinned_tools__` namespace. This preserves one class/enum identity
+without extending `sidekick.lab.__path__` or publishing a second
+`sidekick.lab.mocap` module. Type-checking-only imports may use the package's
+public source name; executable code and tests use the facade.
+
 ## Validation and Limits
 
 The focused synthetic MuJoCo 3.8.0 fixture exercises the T02 opaque reference,
