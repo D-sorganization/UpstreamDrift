@@ -192,3 +192,7 @@ offset. See `docs/development/feedback_controls/F09E-NATIVE-MARKER-FK.md` for
 the exact command, environment, observed API incompatibility, and validation
 limits. The canonical calculation note is
 `manuals/upstreamdrift/chapters/30-pinocchio-native-marker-forward-kinematics.qmd`.
+The branch also contains the actual F09c parent merge. Combined replay,
+observation, capture, and marker tests pass; two Drake cases skip on local
+Windows because its optional `pydrake` bindings are absent. F09c's lazy Tools
+seam and bounded replay receipt validators preserve source behavior.

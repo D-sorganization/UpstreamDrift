@@ -62,5 +62,12 @@ Pinocchio adapter registration. After adding the native output path, it exposed
 the `.id` incompatibility; the test passed after the public frame-index fix.
 Later regressions also cover a mismatched native model ID and unknown frame.
 
+The merged replay receipt validator distinguishes Pinocchio's complete q/v
+initialization from engines whose T01 schema includes native
+integration/discrete cache. Pinocchio output must contain exactly q/v state and
+no undeclared cache; MuJoCo/Drake still require their declared numerical
+initialization state. A synthetic q/v-only bundle test verifies this contract
+without claiming production-model availability or qualification.
+
 The canonical design-manual reference is
 [`manuals/upstreamdrift/chapters/30-pinocchio-native-marker-forward-kinematics.qmd`](../../../manuals/upstreamdrift/chapters/30-pinocchio-native-marker-forward-kinematics.qmd).

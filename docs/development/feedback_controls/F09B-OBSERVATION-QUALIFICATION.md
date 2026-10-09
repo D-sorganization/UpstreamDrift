@@ -40,10 +40,11 @@ are introduced, and synthetic tests establish only software-contract behavior.
 
 The public replay-bundle facade is pinned through `vendor/ud-tools`; the
 `extend_sidekick_lab_path` seam exposes the Tools-owned `sidekick.lab.mocap`
-package without modifying its vendored source. This child does not provide
-private capture evidence, native physics results, muscle qualification, or a
-cross-engine acceptance claim. F09 remains open for native consumers and
-qualification evidence.
+package only when an actual bundle is validated. Importing the scorer does not
+mutate the Sidekick package path or change capture-rig schema availability.
+This child does not provide private capture evidence, native physics results,
+muscle qualification, or a cross-engine acceptance claim. F09 remains open for
+native consumers and qualification evidence.
 
 Validation:
 

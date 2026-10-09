@@ -179,6 +179,92 @@ def test_native_receipt_binds_bundle_and_actual_output_without_qualification(
     assert receipt.state_reset_count is None
 
 
+def test_receipt_rejects_changed_native_initial_numerical_state(
+    registry: FeedbackComparisonRegistry,
+) -> None:
+    row, bundle, binding = _bundle(registry)
+    output = _output(bundle)
+    output.integration_states[0, 0] = 1.0
+
+    with pytest.raises(ValueError, match="initial numerical state"):
+        validate_native_replay_output(row, binding, bundle, output)
+
+
+def test_pinocchio_qv_state_is_validated_without_fabricated_cache_state(
+    registry: FeedbackComparisonRegistry,
+) -> None:
+    from src.engines.physics_engines.pinocchio.python.native_torque_replay import (
+        NativePinocchioTorqueReplay,
+    )
+
+    inventory_row = registry.get("pinocchio/driver", "default", DriveMode.TORQUE)
+    _, source_bundle, _ = _bundle(registry)
+    source_model = replace(
+        source_bundle.model,
+        engine_id="pinocchio",
+        provider_id="pinocchio-native-torque-replay",
+        state_schema=InitialStateSchema(
+            "test-pinocchio-qv-state",
+            "1.0.0",
+            source_bundle.model.state_schema.components[:2],
+        ),
+    )
+    bundle = build_experiment_replay_bundle(
+        source_bundle.experiment_id,
+        source_model,
+        source_bundle.capabilities,
+        tuple(
+            (item.component_id, item.values) for item in source_bundle.initial_state[:2]
+        ),
+        source_bundle.input_history.channels,
+        source_bundle.input_history.input_kind,
+        source_bundle.input_history.interpolation,
+        source_bundle.input_history.time_seconds,
+        source_bundle.input_history.values,
+        source_bundle.policy,
+    )
+    source_sha = source_model.source_model_sha256
+    row = replace(
+        inventory_row,
+        source_model_sha256=source_sha,
+        provider_id="synthetic-inventory-provider",
+        provider_sha256="e" * 64,
+        availability="available",
+    )
+    registry.rows = (row,)
+    binding = NativeAdapterBinding(
+        package_id=row.package_id,
+        variant_id=row.variant_id,
+        drive_mode=row.drive_mode,
+        native_model_id=source_model.model_id,
+        native_variant_id=source_model.variant_id,
+        native_execution_provider_id=source_model.provider_id,
+        native_execution_provider_sha256=source_model.provider_sha256,
+        source_model_sha256=source_model.source_model_sha256,
+        loaded_native_model_sha256=source_model.loaded_native_model_sha256,
+        state_schema_sha256=bundle.state_schema_sha256,
+        input_channel_schema_sha256=bundle.input_channel_schema_sha256,
+        ordered_input_channel_ids=source_model.ordered_input_channel_ids,
+    )
+    output = NativePinocchioTorqueReplay(
+        time_seconds=np.asarray(bundle.input_history.time_seconds),
+        qpos=np.array([[0.0], [0.001], [0.003]]),
+        qvel=np.array([[0.0], [0.1], [0.2]]),
+        applied_actuator_torques=np.asarray(bundle.input_history.values[:-1]),
+        generalized_actuator_torques=np.array([[0.1], [0.2]]),
+        input_sha256=bundle.applied_input_sha256,
+        policy_sha256=bundle.policy_sha256,
+    )
+
+    receipt = validate_native_replay_output(row, binding, bundle, output)
+
+    assert receipt.engine == "pinocchio"
+    assert receipt.nq == receipt.nv == 1
+    assert receipt.full_state and receipt.full_horizon
+    assert receipt.initial_state_sha256 == bundle.integrity.initial_state_sha256
+    assert receipt.state_reset_count is None
+
+
 @pytest.mark.parametrize(
     ("binding_field", "value", "message"),
     [
@@ -254,7 +340,10 @@ def test_request_references_bundle_model_path_without_serializing_it(
 
     assert request.model_path == model_path
     assert str(model_path) not in str(request.as_dict())
-    assert row.package_id in request.as_dict()["row_key"]
+    assert request.as_dict()["row_key"] == (
+        f"{row.package_id}/{row.variant_id}/{row.drive_mode.value}"
+    )
+    assert request.as_dict()["bundle_schema"] == bundle.schema_version
 
 
 def test_execution_calls_native_mujoco_adapter_on_independent_synthetic_model(

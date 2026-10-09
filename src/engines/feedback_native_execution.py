@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Iterable
 
 import numpy as np
+from numpy.typing import NDArray
 
 from src.engines.feedback_comparison import ComparisonRow, DriveMode
 from src.engines.model_inventory import TARGET_ENGINES
@@ -58,8 +59,9 @@ class NativeReplayRequest:
         object.__setattr__(self, "model_path", Path(self.model_path))
 
     def as_dict(self) -> dict[str, str]:
+        drive_mode = self.binding.drive_mode
         return {
-            "row_key": f"{self.binding.package_id}/{self.binding.variant_id}/{self.binding.drive_mode.value}",
+            "row_key": f"{self.binding.package_id}/{self.binding.variant_id}/{drive_mode.value}",
             "bundle_schema": str(self.bundle.schema_version),
         }
 
@@ -336,6 +338,33 @@ def validate_native_replay_output(
         inputs, expected_inputs
     ):
         raise ValueError("native output actual inputs differ from frozen bundle")
+    generalized_effort = np.asarray(output.generalized_actuator_torques)
+    if generalized_effort.shape != (
+        len(inputs),
+        qvel.shape[1] if qvel.ndim == 2 else -1,
+    ):
+        raise ValueError("native generalized actuator effort dimensions differ")
+    _validate_native_output_state(row, bundle, output, times, qpos, qvel)
+    if (
+        output.input_sha256 != bundle.applied_input_sha256
+        or output.policy_sha256 != bundle.policy_sha256
+    ):
+        raise ValueError("native output input or executed policy digest differs")
+    output_sha = _output_digest(output)
+    return _native_execution_receipt(
+        row, binding, bundle, times, inputs, qpos, qvel, output_sha
+    )
+
+
+def _validate_native_output_state(
+    row: ComparisonRow,
+    bundle: Any,
+    output: NativeTorqueReplay | NativeDrakeTorqueReplay,
+    times: NDArray[np.float64],
+    qpos: NDArray[np.float64],
+    qvel: NDArray[np.float64],
+) -> None:
+    """Check full physical and numerical state against the frozen bundle."""
     if (
         qpos.ndim != 2
         or qvel.ndim != 2
@@ -345,11 +374,6 @@ def validate_native_replay_output(
         raise ValueError("native output state does not cover the full horizon")
     if qpos.shape[1] <= 0 or qvel.shape[1] <= 0:
         raise ValueError("native qpos and qvel dimensions must be positive")
-    if np.asarray(output.generalized_actuator_torques).shape != (
-        len(inputs),
-        qvel.shape[1],
-    ):
-        raise ValueError("native generalized actuator effort dimensions differ")
     state_component = {item.component_id: item.values for item in bundle.initial_state}
     if row.engine == "pinocchio":
         if tuple(state_component) != ("qpos", "qvel"):
@@ -398,12 +422,21 @@ def validate_native_replay_output(
         raise ValueError(
             "native output initial numerical state differs from frozen bundle"
         )
-    if (
-        output.input_sha256 != bundle.applied_input_sha256
-        or output.policy_sha256 != bundle.policy_sha256
-    ):
-        raise ValueError("native output input or executed policy digest differs")
-    output_sha = _output_digest(output)
+
+
+def _native_execution_receipt(
+    row: ComparisonRow,
+    binding: NativeAdapterBinding,
+    bundle: Any,
+    times: NDArray[np.float64],
+    inputs: NDArray[np.float64],
+    qpos: NDArray[np.float64],
+    qvel: NDArray[np.float64],
+    output_sha: str,
+) -> NativeExecutionReceipt:
+    """Build an unqualified integrity receipt from validated native samples."""
+    input_history = bundle.input_history
+    replay_policy = bundle.policy
     return NativeExecutionReceipt(
         "native-execution/1.0.0",
         row.package_id,
@@ -430,10 +463,10 @@ def validate_native_replay_output(
         bundle.time_grid_sha256,
         output_sha,
         tuple(binding.ordered_input_channel_ids),
-        bundle.input_history.input_kind.value,
-        bundle.input_history.interpolation.value,
-        bundle.input_history.timebase_id,
-        bundle.policy.replay_mode.value,
+        input_history.input_kind.value,
+        input_history.interpolation.value,
+        input_history.timebase_id,
+        replay_policy.replay_mode.value,
         float(times[-1] - times[0]),
         len(times),
         len(inputs),
@@ -441,7 +474,7 @@ def validate_native_replay_output(
         qvel.shape[1],
         True,
         True,
-        bundle.policy.state_reset_allowed,
+        replay_policy.state_reset_allowed,
         None,
     )
 
