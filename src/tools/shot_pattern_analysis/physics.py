@@ -38,6 +38,73 @@ class ShotOutcome:
     ball_speed_mps: float = 0.0
 
 
+def outcome_from_launch(
+    ball_velocity: np.ndarray,
+    ball_angular_velocity: np.ndarray,
+    *,
+    flight: BallFlightSimulator,
+    max_time_s: float,
+    dt_s: float,
+    sample_trajectory: bool = False,
+) -> ShotOutcome:
+    """Map native launch state to target-frame carry at first ground contact."""
+    velocity = np.asarray(ball_velocity, dtype=float)
+    angular = np.asarray(ball_angular_velocity, dtype=float)
+    if velocity.shape != (3,) or angular.shape != (3,):
+        raise ValueError("ball launch velocity and spin must be three-vectors")
+    if not np.all(np.isfinite(velocity)) or not np.all(np.isfinite(angular)):
+        raise ValueError("ball launch velocity and spin must be finite")
+    vx, vy, vz = (float(v) for v in velocity)
+    wx, wy, wz = (float(v) for v in angular)
+    speed = math.hypot(vx, vy, vz)
+    spin_rad_s = math.hypot(wx, wy, wz)
+    if speed <= 0 or spin_rad_s <= 0:
+        raise RuntimeError("impact produced invalid launch speed or spin")
+    launch = LaunchConditions(
+        velocity=speed,
+        launch_angle=math.atan2(vz, math.hypot(vx, vy)),
+        azimuth_angle=math.atan2(vy, vx),
+        spin_rate=spin_rad_s * 60 / (2 * math.pi),
+        spin_axis=angular / spin_rad_s,
+    )
+    sampled: tuple[tuple[float, float], ...] = ()
+    if sample_trajectory:
+        trajectory = flight.simulate_trajectory(launch, max_time=max_time_s, dt=dt_s)
+        if len(trajectory) < 2:
+            raise RuntimeError("flight did not produce a landing trajectory")
+        end = trajectory[-1].position
+        prev = trajectory[-2].position
+        if float(end[2]) > 0:
+            raise RuntimeError("flight exceeded max_time_s before landing")
+        fraction = float(prev[2] / (prev[2] - end[2])) if prev[2] > 0 else 1.0
+        landing = prev + fraction * (end - prev)
+        indices = np.linspace(0, len(trajectory) - 2, 40, dtype=int)
+        sampled = tuple(
+            (float(trajectory[i].position[0]), -float(trajectory[i].position[1]))
+            for i in indices
+        ) + ((float(landing[0]), -float(landing[1])),)
+    else:
+        try:
+            landing = flight.simulate_landing(launch, max_time=max_time_s, dt=dt_s)
+        except RuntimeError as exc:
+            if "exceeded max_time" not in str(exc):
+                raise
+            raise RuntimeError("flight exceeded max_time_s before landing") from exc
+    x = float(landing[0])
+    y = -float(landing[1])
+    return ShotOutcome(
+        carry_x_m=x,
+        carry_y_m=y,
+        carry_m=math.hypot(x, y),
+        launch_azimuth_deg=-math.degrees(launch.azimuth_angle),
+        spin_rpm=launch.spin_rate,
+        spin_axis_tilt_deg=math.degrees(math.atan2(wz, -wy)),
+        trajectory_xy_m=sampled,
+        launch_elevation_deg=math.degrees(launch.launch_angle),
+        ball_speed_mps=speed,
+    )
+
+
 class ShotPhysics:
     """Adapter: one impact and one aerodynamic trajectory per shot.
 
@@ -105,56 +172,11 @@ class ShotPhysics:
         post = self._impact.solve_pre_impact_state(
             timestamp=0.0, pre_state=pre, record=False
         )
-        vx, vy, vz = (float(v) for v in post.ball_velocity)
-        wx, wy, wz = (float(v) for v in post.ball_angular_velocity)
-        speed = math.hypot(vx, vy, vz)
-        spin_rad_s = math.hypot(wx, wy, wz)
-        if speed <= 0 or spin_rad_s <= 0:
-            raise RuntimeError("impact produced invalid launch speed or spin")
-        launch = LaunchConditions(
-            velocity=speed,
-            launch_angle=math.atan2(vz, math.hypot(vx, vy)),
-            azimuth_angle=math.atan2(vy, vx),
-            spin_rate=spin_rad_s * 60 / (2 * math.pi),
-            spin_axis=np.asarray(post.ball_angular_velocity, dtype=float) / spin_rad_s,
-        )
-        sampled: tuple[tuple[float, float], ...] = ()
-        if sample_trajectory:
-            trajectory = self._flight.simulate_trajectory(
-                launch, max_time=config.max_time_s, dt=config.dt_s
-            )
-            if len(trajectory) < 2:
-                raise RuntimeError("flight did not produce a landing trajectory")
-            end = trajectory[-1].position
-            prev = trajectory[-2].position
-            if float(end[2]) > 0:
-                raise RuntimeError("flight exceeded max_time_s before landing")
-            fraction = float(prev[2] / (prev[2] - end[2])) if prev[2] > 0 else 1.0
-            landing = prev + fraction * (end - prev)
-            indices = np.linspace(0, len(trajectory) - 2, 40, dtype=int)
-            sampled = tuple(
-                (float(trajectory[i].position[0]), -float(trajectory[i].position[1]))
-                for i in indices
-            ) + ((float(landing[0]), -float(landing[1])),)
-        else:
-            try:
-                landing = self._flight.simulate_landing(
-                    launch, max_time=config.max_time_s, dt=config.dt_s
-                )
-            except RuntimeError as exc:
-                if "exceeded max_time" not in str(exc):
-                    raise
-                raise RuntimeError("flight exceeded max_time_s before landing") from exc
-        x = float(landing[0])
-        y = -float(landing[1])
-        return ShotOutcome(
-            carry_x_m=x,
-            carry_y_m=y,
-            carry_m=math.hypot(x, y),
-            launch_azimuth_deg=-math.degrees(launch.azimuth_angle),
-            spin_rpm=launch.spin_rate,
-            spin_axis_tilt_deg=math.degrees(math.atan2(wz, -wy)),
-            trajectory_xy_m=sampled,
-            launch_elevation_deg=math.degrees(launch.launch_angle),
-            ball_speed_mps=speed,
+        return outcome_from_launch(
+            post.ball_velocity,
+            post.ball_angular_velocity,
+            flight=self._flight,
+            max_time_s=config.max_time_s,
+            dt_s=config.dt_s,
+            sample_trajectory=sample_trajectory,
         )
