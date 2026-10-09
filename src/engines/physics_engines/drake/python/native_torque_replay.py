@@ -19,6 +19,11 @@ import numpy as np
 from defusedxml import ElementTree as SafeET
 from numpy.typing import NDArray
 
+from src.engines.native_replay_contracts import (
+    native_replay_admission_bytes,
+    validate_native_replay_bundle,
+)
+
 if TYPE_CHECKING:
     from sidekick.lab.mocap import ExperimentReplayBundle
 
@@ -176,6 +181,7 @@ def _identity(plant: Any, context: Any, path: Path, contracts: Any) -> Any:
     from pydrake.systems import analysis
 
     provider = hashlib.sha256(Path(__file__).read_bytes())
+    provider.update(native_replay_admission_bytes())
     for module in (parsing, plant_module, tree, analysis):
         if module.__file__ is None:
             raise ValueError("native provider artifact is unavailable")
@@ -349,11 +355,7 @@ def replay_native_drake_torque_bundle(
 ) -> NativeDrakeTorqueReplay:
     """Execute frozen inputs in a fresh owned plant; no observations or resets."""
     contracts = _contracts()
-    bundle = contracts.load_experiment_replay_bundle(
-        contracts.dumps_experiment_replay_bundle(bundle)
-    )
-    if bundle.blocking_capabilities:
-        raise ValueError("required native replay capabilities are unavailable")
+    bundle = validate_native_replay_bundle(bundle, contracts)
     initial = {item.component_id: item.values for item in bundle.initial_state}
     if "discrete" not in initial or bundle.policy.step_size_seconds is None:
         raise ValueError("complete native discrete state and stepping policy required")

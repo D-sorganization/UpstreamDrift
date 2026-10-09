@@ -50,7 +50,9 @@ Finite state and output remain mandatory.
 
 Identity binds source URDF bytes, loaded topology and numeric/default-parameter
 identity, ordered native actuator channels, timestep, solver/approximation,
-adapter source and loaded parsing, plant, tree and analysis modules. A fresh
+adapter source and loaded parsing, plant, tree and analysis modules.
+Shared native admission helper bytes are included in both engine provider
+identities; Tools remains the sole replay-schema authority. A fresh
 execution plant is independently checked again after bundle validation.
 This is not complete transitive-library or source-to-binary attestation.
 

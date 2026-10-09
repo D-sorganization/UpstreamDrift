@@ -17,6 +17,11 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from numpy.typing import NDArray
 
+from src.engines.native_replay_contracts import (
+    native_replay_admission_bytes,
+    validate_native_replay_bundle,
+)
+
 if TYPE_CHECKING:
     from sidekick.lab.mocap import ExperimentReplayBundle
 
@@ -140,7 +145,7 @@ def _native_identity(model: Any, path: Path, contracts: Any) -> Any:
         raise ValueError("native provider has no hashable module artifact")
     native_bytes = Path(native_module.__file__).read_bytes()
     provider_hash = hashlib.sha256(
-        native_bytes + Path(__file__).read_bytes()
+        native_bytes + Path(__file__).read_bytes() + native_replay_admission_bytes()
     ).hexdigest()
     components = (
         contracts.StateComponentSpec(
@@ -304,11 +309,7 @@ def replay_native_torque_bundle(
     No reference states, feedback law or observation provider can be supplied.
     """
     contracts = _contracts()
-    bundle = contracts.load_experiment_replay_bundle(
-        contracts.dumps_experiment_replay_bundle(bundle)
-    )
-    if bundle.blocking_capabilities:
-        raise ValueError("required native replay capabilities are unavailable")
+    bundle = validate_native_replay_bundle(bundle, contracts)
     initial = {
         component.component_id: component.values for component in bundle.initial_state
     }

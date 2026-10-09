@@ -51,6 +51,13 @@ caching, and runs used one numerical worker with bounded timeouts.
 
 ## Remaining Work
 
+The full DRY gate subsequently found the repeated canonical bundle round-trip
+and capability check in the Drake and MuJoCo consumers. Both now delegate
+that unchanged admission step to `src/engines/native_replay_contracts.py`;
+each provider hash also binds the shared helper's executed source bytes.
+Eleven actual Drake and13actual MuJoCo replay checks remain green after the
+refactor. No schema or acceptance authority moves out of Tools.
+
 This adapter deliberately excludes collision geometry, constraint parameter
 maps with entries, external resources, nonunit transmissions and providers
 other than the reviewed1.57.0 layout. It does not accept arbitrary native
