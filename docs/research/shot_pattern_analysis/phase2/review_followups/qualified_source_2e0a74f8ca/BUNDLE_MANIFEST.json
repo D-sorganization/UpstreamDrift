@@ -1,0 +1,101 @@
+{
+  "schema": "qualified-source-evidence-bundle/1",
+  "source_worktree_commit": "2e0a74f8cad43680a3c475afbc78874bee14720d",
+  "scope": "Exact copied historical evidence retains original scopes; gzip entries preserve original bytes on decompression",
+  "copied_evidence": [
+    {
+      "original_relative_path": "docs/research/shot_pattern_analysis/phase2/review_followups/PLOT_SOURCE_EQUIVALENCE.json",
+      "original_sha256": "e362b186991a505c87e53c0535591109cffdea3bf0937d37a2ed25010ba86159",
+      "stored_file": "PLOT_SOURCE_EQUIVALENCE.json",
+      "stored_sha256": "e362b186991a505c87e53c0535591109cffdea3bf0937d37a2ed25010ba86159",
+      "encoding": "identity"
+    },
+    {
+      "original_relative_path": "docs/research/shot_pattern_analysis/phase2/review_followups/check_plot_source_equivalence.py",
+      "original_sha256": "dfcf5bb441911dcb854f84a360ff5f3c78348f56aad2d9c00b51c5973c730c62",
+      "stored_file": "check_plot_source_equivalence.py",
+      "stored_sha256": "dfcf5bb441911dcb854f84a360ff5f3c78348f56aad2d9c00b51c5973c730c62",
+      "encoding": "identity"
+    },
+    {
+      "original_relative_path": "docs/research/shot_pattern_analysis/phase2/review_followups/LEGACY_GEAR_SIGN_VALIDATION.json",
+      "original_sha256": "e78a694cdae5a86d7c18deab3da2c6cb754cd8ed4d2f7fc2321771cc7b71a11f",
+      "stored_file": "LEGACY_GEAR_SIGN_VALIDATION.json",
+      "stored_sha256": "e78a694cdae5a86d7c18deab3da2c6cb754cd8ed4d2f7fc2321771cc7b71a11f",
+      "encoding": "identity"
+    },
+    {
+      "original_relative_path": "docs/research/shot_pattern_analysis/phase2/review_followups/LEGACY_GEAR_SIGN_REFERENCE.md",
+      "original_sha256": "49a3cb4dc71025d16bfeeb21e614a5958525bd75156854376bb48eea78b78a92",
+      "stored_file": "LEGACY_GEAR_SIGN_REFERENCE.md",
+      "stored_sha256": "49a3cb4dc71025d16bfeeb21e614a5958525bd75156854376bb48eea78b78a92",
+      "encoding": "identity"
+    },
+    {
+      "original_relative_path": "docs/research/shot_pattern_analysis/phase2/review_followups/LEGACY_GEAR_SIGN_RED.txt",
+      "original_sha256": "be51fda13fa5d840e8ea75875deaf7c1c49a353d5e0752fc707946ccb02c5879",
+      "stored_file": "LEGACY_GEAR_SIGN_RED.txt.gz",
+      "stored_sha256": "d019e3ef2cd927eb14c8a9cbba33d9515df72de95471c8d6af869cf2cc0ca698",
+      "encoding": "gzip-lossless"
+    },
+    {
+      "original_relative_path": "docs/research/shot_pattern_analysis/phase2/review_followups/LEGACY_GEAR_SIGN_TESTS.txt",
+      "original_sha256": "97fcb2293532dc92a0294e08e89a9b7266d28c33a99c55ef309240e6c4325639",
+      "stored_file": "LEGACY_GEAR_SIGN_TESTS.txt.gz",
+      "stored_sha256": "dc2204b9c2606fdc7f4dc527a2b7add1fc54babe233c57bd81cfd8c0c24136c5",
+      "encoding": "gzip-lossless"
+    },
+    {
+      "original_relative_path": "docs/research/shot_pattern_analysis/phase2/validation/social_presentation_visual_review.json",
+      "original_sha256": "012c9e4d32c1df96b3e566787d9ea1a6635a3fc9844947e1dfd0fcded3f7ac49",
+      "stored_file": "social_presentation_visual_review.json",
+      "stored_sha256": "012c9e4d32c1df96b3e566787d9ea1a6635a3fc9844947e1dfd0fcded3f7ac49",
+      "encoding": "identity"
+    },
+    {
+      "original_relative_path": "docs/research/shot_pattern_analysis/phase2/validation/social_driver_density_10k_preview.png",
+      "original_sha256": "cba921a1454baeac42b6039ed87513e005b3027530260e10ec7e1610f5aedab1",
+      "stored_file": "social_driver_density_10k_preview.png",
+      "stored_sha256": "cba921a1454baeac42b6039ed87513e005b3027530260e10ec7e1610f5aedab1",
+      "encoding": "identity"
+    },
+    {
+      "original_relative_path": "docs/research/shot_pattern_analysis/phase2/validation/social_driver_overhead_10k_preview.png",
+      "original_sha256": "fd910fb27f7aef98d899864c1d29efd094c3e965869498b25c3afe2776a4a316",
+      "stored_file": "social_driver_overhead_10k_preview.png",
+      "stored_sha256": "fd910fb27f7aef98d899864c1d29efd094c3e965869498b25c3afe2776a4a316",
+      "encoding": "identity"
+    },
+    {
+      "original_relative_path": "docs/research/shot_pattern_analysis/phase2/validation/presentation_style_density_10k_v3.png",
+      "original_sha256": "5e1f06eccf86ec8b4972c7b40aefaf1885fde8bc6144b730b0e6122c6c4696ca",
+      "stored_file": "presentation_style_density_10k_v3.png",
+      "stored_sha256": "5e1f06eccf86ec8b4972c7b40aefaf1885fde8bc6144b730b0e6122c6c4696ca",
+      "encoding": "identity"
+    },
+    {
+      "original_relative_path": "docs/research/shot_pattern_analysis/phase2/validation/presentation_style_overhead_10k_v3.png",
+      "original_sha256": "1f8a286b288cfe20a7753c4eb14d6cfbad73ca1742524b274630cc06371fa93d",
+      "stored_file": "presentation_style_overhead_10k_v3.png",
+      "stored_sha256": "1f8a286b288cfe20a7753c4eb14d6cfbad73ca1742524b274630cc06371fa93d",
+      "encoding": "identity"
+    }
+  ],
+  "independent_tests": {
+    "passed": 59,
+    "exit_code": 0,
+    "log_sha256": "ce52154d0386f7e642ba9d7f0c1e2a0af5d24f507aed4848269f5cc119e3a1c0",
+    "command": "OPENBLAS_NUM_THREADS=1 QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg MUJOCO_GL=egl SDL_VIDEODRIVER=dummy /tmp/shot-pattern-validation-venv-20261009/bin/python -m pytest -o addopts= -q tests/tools/shot_pattern_analysis/test_academic_plots.py tests/research/test_shot_pattern_final_figures.py tests/tools/shot_pattern_analysis/test_matched_supplement.py tests/tools/shot_pattern_analysis/test_matched_bounds_native.py tests/tools/shot_pattern_analysis/test_course_scoring_delegation.py tests/tools/shot_pattern_analysis/test_course_score_vectors.py tests/tools/shot_pattern_analysis/test_provenance.py tests/unit/physics/test_legacy_gear_flight_direction.py"
+  },
+  "execution_snapshot_unchanged_during_tests": true,
+  "source_and_preview_hashes_verified": true,
+  "scorer_parity_hashes_current": true,
+  "density_and_report_plot_equivalence_hashes_current": true,
+  "legacy_old_git_source_sha256": "06a79b5414370f502d32f36f99ba04eabb5ff2f6dd6587f5f284ea4beba9eca9",
+  "limitations": [
+    "Only matched-delivery source transition qualified",
+    "No supplemental Monte Carlo executed",
+    "Native deterministic regression tests executed",
+    "No final datasets or supplemental pilots accepted"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "status": "passed_one_cell_visual_review",
+  "scope": "One completed 10,000-attempt-per-pattern driver cell rendered from saved data; presentation only, not full-matrix acceptance.",
+  "source_git_head_before_changes": "d849c9ead7630d8905451506e47f28887caabbab",
+  "plot_source_sha256": {
+    "src/tools/shot_pattern_analysis/academic_plots.py": "095994a4e2238c26c15a76dcb3fa6b5f694403417904ca14adc446bdf82e2cac",
+    "scripts/research/shot_pattern_analysis/build_final_figures.py": "923f7fe729d0fdacf8dba94c3bbc0641a4518dc3296fd2d83fb234a8505d05ee"
+  },
+  "input_cell": "driver_lean0_curve1_rotation2_combined2",
+  "input_sha256": {
+    "manifest.json": "8f1cbc232614a0bd538138aae01ee69ce95ab1ef165e080cb5c28c68d6ee5b19",
+    "shots.csv.gz": "c6f0a2f0ecbeeadda676333f2e7abffc89f940ec829e3a6f176643452405ea4d",
+    "flight_samples.json": "f1304903884a12c61fdf4471600d310a885214375d14c2695cfc77babca5cb2a"
+  },
+  "preview_sha256": {
+    "social_driver_density_10k_preview.png": "cba921a1454baeac42b6039ed87513e005b3027530260e10ec7e1610f5aedab1",
+    "social_driver_overhead_10k_preview.png": "fd910fb27f7aef98d899864c1d29efd094c3e965869498b25c3afe2776a4a316",
+    "presentation_style_density_10k_v3.png": "5e1f06eccf86ec8b4972c7b40aefaf1885fde8bc6144b730b0e6122c6c4696ca",
+    "presentation_style_overhead_10k_v3.png": "1f8a286b288cfe20a7753c4eb14d6cfbad73ca1742524b274630cc06371fa93d"
+  },
+  "review_findings": [
+    "Social density and overhead are 16:9 with concise Driver, lean, shaft-twist and curve titles; Protocol, Noise, Target, counts, physical axes and model-conditional carry-only caveat are legible.",
+    "All three endpoint density panels use common histogram edges/colorbar and common top/right marginal probability scales. HDRs are preserved.",
+    "Every valid endpoint contributes to histogram, HDR and marginals; exactly 600 deterministic colored overlay points are shown from each 10,000 supported shots and disclosed.",
+    "Overhead shows six stored raw trajectory samples per pattern, clearly labels their count and 6.7\u00d7 vertical display magnification; 10,000/10,000 valid per pattern is reported separately.",
+    "Academic versions remain separate with full nominal face/path/speed and calculation metadata."
+  ],
+  "validation": {
+    "plot_and_builder_tests": "29 passed including slow social visual contract",
+    "ruff": "passed",
+    "mypy": "2 source files passed"
+  },
+  "historical_source_transition": "Earlier academic plot AST-equivalence receipt remains historical; the present visual changes have a distinct source hash and must not be represented as AST-equivalent.",
+  "reproduce": "MPLBACKEND=Agg OPENBLAS_NUM_THREADS=1 PYTHONPATH=. /tmp/shot-pattern-validation-venv-20261009/bin/python -c 'from pathlib import Path; from src.tools.shot_pattern_analysis.matched_report import load_matrix_report; from scripts.research.shot_pattern_analysis.build_final_figures import _render_detail, _render_social_detail; r=Path(\"<final_v1 root>\"); c=next(x for x in load_matrix_report(r,require_complete=False)[\"cells\"] if x[\"cell\"]==\"driver_lean0_curve1_rotation2_combined2\"); o=Path(\"<output root>\"); _render_detail(c,r,o,dpi=120,preview=False); _render_social_detail(c,r,o,dpi=120,preview=False)'",
+  "limitations": "Saved-data visualization only. Final complete-matrix and supplemental assets must be regenerated and reviewed after source integration; no simulated trajectories were rerun for this preview."
+}
