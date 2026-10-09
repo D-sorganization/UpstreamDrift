@@ -214,7 +214,7 @@ def _comparison_pair_specs(cells: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 
 def _supported_points(cell_dir: Path) -> tuple[dict[str, list[list[float]]], dict[str, int]]:
-    points = {pattern: [] for pattern in PATTERNS}
+    points: dict[str, list[list[float]]] = {pattern: [] for pattern in PATTERNS}
     total = dict.fromkeys(PATTERNS, 0)
     with gzip.open(cell_dir / "shots.csv.gz", "rt", encoding="utf-8", newline="") as stream:
         for row in csv.DictReader(stream):
@@ -655,7 +655,7 @@ def build_final_figures(
     matrix_paths: list[Path] = []
     for group in groups.values():
         name = _stratum_name(group)
-        paths = export_matched_matrix_heatmaps(
+        matrix_exports = export_matched_matrix_heatmaps(
             _heatmap_cells(group),
             output_root / "matrix" / name,
             selection_label=(
@@ -667,7 +667,7 @@ def build_final_figures(
             dpi=dpi,
             formats=("png",),
         )
-        matrix_paths.extend(paths.values())
+        matrix_paths.extend(matrix_exports.values())
     availability, social_density, social_overhead = _write_ledgers(
         cells,
         output_root,

@@ -40,9 +40,22 @@ intersections, rematched speed/face/path in lean comparisons, Monte Carlo-only
 intervals, and hypothetical scoring limitations. Two report findings were sent
 to the report owner: the direction-count “Unavailable” column excluded whole
 unavailable cells, and unavailable inventory rows used planned sample count as
-`total_n`, potentially implying shots had been attempted. Their disposition is
-tracked separately by the report owner.
+`total_n`, potentially implying shots had been attempted. Both were corrected in `2de9960b77` and independently verified: the
+interval table explicitly covers completed cells, and inventory columns
+distinguish planned from attempted shots (zero attempts for unavailable cells).
 
 Final acceptance still requires complete data audit, rebuilt artifacts, and
 visual inspection of the actual final plots/PDF. This source review does not
 claim those pending gates passed or that GUI layout has been visually accepted.
+
+## Follow-Up Software Review
+
+The combined report/figure test suite passes all 20 tests. Targeted Mypy found
+three typing errors in the figure builder: an unannotated endpoint dictionary
+and a local name reused for list and dictionary results. An explicit annotation
+and local rename correct these without changing runtime calculations.
+
+Both publication builders now pass targeted Mypy under Python 3.12 and Ruff.
+The typing-only figure changes have identical normalized calculation/control-flow
+AST to the preceding revision. No new concrete scientific defect remains from
+this source review; full-data and final-render acceptance remain pending.
