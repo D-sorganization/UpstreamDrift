@@ -99,6 +99,18 @@ nominal matching exception means only that the solver did not find a match
 under its stated finite search box and starts. Runtime physics errors remain
 errors and are never silently reclassified as bounded unavailability.
 
+The reviewed final-stage receipt has `supplement_stage: "final"` and exactly
+three keys under `supplement_protocols`, one for each protocol ID above. Each
+group records `final_cells` (the complete 10,000-shot `ExperimentConfig`
+mapping), `pilot_plan` (relative path), and `pilot_plan_sha256`. Each pilot
+plan must also be hashed under the ordinary `evidence_files` receipt mapping.
+The final gate verifies all 26 exact cell configurations, the source snapshot,
+the three 32-shot pilot plans, their protocol IDs and selected names, and
+unchanged config values after replacing only `n_shots=32` by 10,000. A generic
+same-source acceptance receipt cannot authorize a different bounds protocol.
+The generic final runner also rejects custom face bounds, speed bounds, or a
+cell-name selection unless a reviewed supplement protocol is supplied.
+
 The following commands describe the pilot interface; they have **not** been
 executed to create a supplemental Monte Carlo result in this change:
 

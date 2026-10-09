@@ -188,6 +188,30 @@ def test_control_subset_only_requires_target_for_selected_club():
     assert selected[0][1].target_x_m == pytest.approx(77.40247724866299)
 
 
+def test_final_custom_bounds_or_cell_selection_require_reviewed_supplement_protocol(
+    tmp_path, monkeypatch
+):  # noqa: ANN001
+    import src.tools.shot_pattern_analysis.matched_matrix as module
+
+    monkeypatch.setattr(
+        module, "matched_source_snapshot", lambda: {"source_sha256": {}}
+    )
+    monkeypatch.setattr(module, "validate_final_acceptance", lambda *args: None)
+    for override in (
+        {"selected_cell_names": ("pitching_wedge_lean0_curve2_rotation1_shaft_only",)},
+        {"match_face_bounds_deg": (-6.0, 6.0)},
+        {"match_speed_factors": (0.75, 1.30)},
+    ):
+        with pytest.raises(ValueError, match="supplement protocol"):
+            module.run_matched_matrix(
+                tmp_path / "rejected",
+                stage="final",
+                n_shots=10000,
+                acceptance=tmp_path / "generic.json",
+                **override,
+            )
+
+
 def test_cli_profiles_are_forwarded(tmp_path, monkeypatch):
     import sys
     import src.tools.shot_pattern_analysis.matched_matrix as module

@@ -216,6 +216,18 @@ def run_matched_matrix(
         not supplement_protocol.strip() or selected_cell_names is None
     ):
         raise ValueError("supplement protocol requires selected cell names")
+    if (
+        stage == "final"
+        and supplement_protocol is None
+        and (
+            selected_cell_names is not None
+            or match_face_bounds_deg is not None
+            or match_speed_factors != (0.75, 1.25)
+        )
+    ):
+        raise ValueError(
+            "final custom bounds or cell selection require a supplement protocol"
+        )
     execution = matched_source_snapshot()
     if stage == "final":
         if n_shots != 10000:
@@ -233,6 +245,15 @@ def run_matched_matrix(
         match_face_bounds_deg=match_face_bounds_deg,
         match_speed_factors=match_speed_factors,
     )
+    if stage == "final" and supplement_protocol is not None:
+        from .matched_supplement import validate_supplement_acceptance
+
+        validate_supplement_acceptance(
+            acceptance,
+            supplement_protocol,
+            execution,
+            {name: asdict(request) for name, request in cells},
+        )
     output_root = Path(output_root)
     output_root.mkdir(parents=True, exist_ok=True)
     plan = {

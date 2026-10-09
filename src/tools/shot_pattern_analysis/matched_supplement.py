@@ -7,7 +7,9 @@ overwrite or reinterpret the original source-bound 324/72-cell matrices.
 from __future__ import annotations
 
 import argparse
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
+import hashlib
+import json
 from pathlib import Path
 
 from .matched_matrix import matched_matrix_cells, run_matched_matrix
@@ -80,6 +82,84 @@ def pw_control_alias_candidates() -> dict[str, str]:
         for name in supplement_cell_names("pw_primary_face")
         if name.endswith(("_shaft_only", "_combined2"))
     }
+
+
+def expected_supplement_final_cells() -> dict[str, dict[str, dict]]:
+    """Build the exact reviewed 26-cell authorization catalog from one source."""
+    catalog = {}
+    for protocol, spec in SUPPLEMENTS.items():
+        targets = None if spec.target_x_m is None else {spec.club_id: spec.target_x_m}
+        cells = matched_matrix_cells(
+            n_shots=10000,
+            common_targets=targets,
+            profiles=spec.profiles,
+            selected_cell_names=supplement_cell_names(protocol),
+            match_face_bounds_deg=FACE_BOUNDS_DEG,
+            match_speed_factors=spec.speed_factors,
+        )
+        catalog[spec.label] = {name: asdict(request) for name, request in cells}
+    return json.loads(json.dumps(catalog))
+
+
+def validate_supplement_acceptance(
+    path: Path | None, protocol: str, execution: dict, requested_cells: dict[str, dict]
+) -> None:
+    """Bind a final supplement to all reviewed cells and source-matched pilots.
+
+    The generic final-stage validator checks independent-review flags and all
+    evidence hashes before this protocol-specific authorization is consulted.
+    """
+    if path is None:
+        raise ValueError("supplement final stage requires an acceptance receipt")
+    receipt_path = Path(path)
+    receipt = json.loads(receipt_path.read_text())
+    catalog = expected_supplement_final_cells()
+    if protocol not in catalog:
+        raise ValueError(f"supplement protocol was not reviewed: {protocol}")
+    if json.loads(json.dumps(requested_cells)) != catalog[protocol]:
+        raise ValueError("supplement requested cells or bounds were not reviewed")
+    groups = receipt.get("supplement_protocols")
+    if (
+        receipt.get("supplement_stage") != "final"
+        or not isinstance(groups, dict)
+        or set(groups) != set(catalog)
+        or receipt.get("execution") != execution
+    ):
+        raise ValueError("supplement acceptance stage, catalog, or source differs")
+    evidence = receipt.get("evidence_files", {})
+    for protocol_id, final_cells in catalog.items():
+        group = groups[protocol_id]
+        if (
+            not isinstance(group, dict)
+            or set(group) != {"final_cells", "pilot_plan", "pilot_plan_sha256"}
+            or group["final_cells"] != final_cells
+        ):
+            raise ValueError(f"supplement final cell inventory differs: {protocol_id}")
+        pilot_relative = group["pilot_plan"]
+        expected_sha = group["pilot_plan_sha256"]
+        if not isinstance(pilot_relative, str) or not isinstance(expected_sha, str):
+            raise ValueError("supplement pilot plan reference is invalid")
+        pilot_path = (receipt_path.parent / pilot_relative).resolve()
+        if not pilot_path.is_relative_to(receipt_path.parent.resolve()):
+            raise ValueError("supplement pilot plan escapes receipt directory")
+        if (
+            evidence.get(pilot_relative) != expected_sha
+            or not pilot_path.is_file()
+            or hashlib.sha256(pilot_path.read_bytes()).hexdigest() != expected_sha
+        ):
+            raise ValueError(f"supplement pilot plan hash differs: {protocol_id}")
+        pilot = json.loads(pilot_path.read_text())
+        expected_pilot_cells = {
+            name: {**config, "n_shots": 32} for name, config in final_cells.items()
+        }
+        if (
+            pilot.get("stage") != "pilot"
+            or pilot.get("supplement_protocol") != protocol_id
+            or pilot.get("execution") != execution
+            or pilot.get("selected_cell_names") != list(final_cells)
+            or pilot.get("cells") != expected_pilot_cells
+        ):
+            raise ValueError(f"supplement pilot plan does not match: {protocol_id}")
 
 
 def run_supplement_matrix(

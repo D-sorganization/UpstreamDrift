@@ -97,6 +97,27 @@ class MatchedStudyWidget(QtWidgets.QWidget):
         self.target_radius.setRange(0.1, 100.0)
         self.target_radius.setDecimals(1)
         self.target_radius.setValue(15.0)
+        self.use_absolute_face_bounds = QtWidgets.QCheckBox(
+            "Use Absolute Face Bounds (otherwise each pattern's reference face ±3°)"
+        )
+        self.face_bound_min = QtWidgets.QDoubleSpinBox()
+        self.face_bound_max = QtWidgets.QDoubleSpinBox()
+        for control, value in ((self.face_bound_min, -6.0), (self.face_bound_max, 6.0)):
+            control.setRange(-15.0, 15.0)
+            control.setDecimals(8)
+            control.setSuffix(" °")
+            control.setValue(value)
+            control.setEnabled(False)
+            self.use_absolute_face_bounds.toggled.connect(control.setEnabled)
+        self.speed_factor_min = QtWidgets.QDoubleSpinBox()
+        self.speed_factor_max = QtWidgets.QDoubleSpinBox()
+        for control, value in (
+            (self.speed_factor_min, 0.75),
+            (self.speed_factor_max, 1.25),
+        ):
+            control.setRange(0.0, 1_000_000.0)
+            control.setDecimals(8)
+            control.setValue(value)
 
         form = QtWidgets.QFormLayout()
         form.addRow("Output Folder", self.output_edit)
@@ -106,6 +127,11 @@ class MatchedStudyWidget(QtWidgets.QWidget):
         form.addRow("Target Downrange (m; 0 = match within lean)", self.target_distance)
         form.addRow("Nominal Match Tolerance (m)", self.match_tolerance)
         form.addRow("Target Radius (m)", self.target_radius)
+        form.addRow(self.use_absolute_face_bounds)
+        form.addRow("Absolute Face Minimum (°)", self.face_bound_min)
+        form.addRow("Absolute Face Maximum (°)", self.face_bound_max)
+        form.addRow("Speed Minimum (× reference club speed)", self.speed_factor_min)
+        form.addRow("Speed Maximum (× reference club speed)", self.speed_factor_max)
         controls_layout.addLayout(form)
 
         club_box = QtWidgets.QGroupBox("Illustrative Club Assumptions")
@@ -427,6 +453,16 @@ class MatchedStudyWidget(QtWidgets.QWidget):
             target_x_m=target,
             match_tolerance_m=self.match_tolerance.value(),
             target_radius_m=self.target_radius.value(),
+            match_face_bounds_deg=(
+                self.face_bound_min.value(),
+                self.face_bound_max.value(),
+            )
+            if self.use_absolute_face_bounds.isChecked()
+            else None,
+            match_speed_factors=(
+                self.speed_factor_min.value(),
+                self.speed_factor_max.value(),
+            ),
         )
 
     @staticmethod
@@ -486,6 +522,23 @@ class MatchedStudyWidget(QtWidgets.QWidget):
         self.target_distance.setValue(request.target_x_m or 0.0)
         self.match_tolerance.setValue(request.match_tolerance_m)
         self.target_radius.setValue(request.target_radius_m)
+        bounds = request.match_face_bounds_deg
+        self.use_absolute_face_bounds.setChecked(bounds is not None)
+        bound_controls: list[tuple[QtWidgets.QDoubleSpinBox, float]] = []
+        if bounds is not None:
+            bound_controls.extend(
+                ((self.face_bound_min, bounds[0]), (self.face_bound_max, bounds[1]))
+            )
+        bound_controls.extend(
+            (
+                (self.speed_factor_min, request.match_speed_factors[0]),
+                (self.speed_factor_max, request.match_speed_factors[1]),
+            )
+        )
+        for control, value in bound_controls:
+            control.setValue(value)
+            if control.value() != value:
+                raise ValueError("nominal search bound cannot display exactly in GUI")
         for field, value in zip(
             NOISE_FIELDS, request.noise.standard_deviations, strict=True
         ):
