@@ -118,7 +118,10 @@ initial physical/numerical state, full time grid, applied input, policy,
 channel mapping, finite outputs, and complete horizon. Its receipt remains
 unqualified and excludes model paths. The report preserves every F01 row and
 the six required engines. No marker FK mapping is inferred from generalized
-coordinates or native integration states.
+coordinates or native integration states. The receipt keeps the reset policy
+(`state_reset_allowed=False`) separate from `state_reset_count=None`; the
+adapter does not instrument a reset counter, so the workflow does not invent a
+measured zero.
 
 The focused suite passes with independent contract fixtures and a generated
 one-hinge MJCF through the real MuJoCo adapter. It proves API wiring and

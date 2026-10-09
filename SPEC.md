@@ -10432,6 +10432,9 @@ but remain unqualified. A successful execution means only that the declared
 adapter replayed those bytes; it does not establish observation accuracy,
 physiological validity, or cross-engine equivalence. Contract tests use an
 independently generated one-hinge model and do not qualify production rows.
+The receipt retains `state_reset_allowed=False` separately from an unknown
+reset count when the adapter does not instrument that counter; policy is not
+reported as a measured zero.
 
 ## Controlled-Swing Comparison Admission (F01, #11785)
 
