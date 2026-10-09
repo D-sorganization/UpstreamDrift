@@ -27,6 +27,26 @@ from src.shared.python.motion_matching.bounded_nmpc import (
 Array: TypeAlias = NDArray[np.float64]
 
 
+def classify_native_box_candidate(
+    *,
+    elapsed_s: float,
+    budget_s: float,
+    solved: bool,
+    objective: float | None,
+    fallback_objective: float,
+) -> str:
+    """Share the native solver's timing, feasibility and benefit decision."""
+    if elapsed_s > budget_s:
+        return "fallback_timeout"
+    if not solved:
+        return "fallback_solver_failure"
+    if objective is None or not np.isfinite(objective):
+        return "fallback_infeasible"
+    if objective >= fallback_objective - 1e-9:
+        return "fallback_no_benefit"
+    return "optimized"
+
+
 @dataclass(frozen=True)
 class BoxFDDPConfig:
     """Predeclared horizon, iteration limit and cooperative wall budget."""
@@ -294,16 +314,14 @@ class BoxFDDPHingeController:
             except (RuntimeError, ValueError, TypeError, OverflowError):
                 status = "fallback_solver_exception"
             else:
-                if time.perf_counter() - started > self.config.max_wall_s:
-                    status = "fallback_timeout"
-                elif not solved:
-                    status = "fallback_solver_failure"
-                elif not np.isfinite(objective):
-                    status = "fallback_infeasible"
-                elif objective >= fallback_objective - 1e-9:
-                    status = "fallback_no_benefit"
-                else:
-                    status = "optimized"
+                status = classify_native_box_candidate(
+                    elapsed_s=time.perf_counter() - started,
+                    budget_s=self.config.max_wall_s,
+                    solved=bool(solved),
+                    objective=objective,
+                    fallback_objective=fallback_objective,
+                )
+                if status == "optimized":
                     applied = candidate[0]
                     self._prior_plan = np.array(candidate, copy=True)
         if status != "optimized":
