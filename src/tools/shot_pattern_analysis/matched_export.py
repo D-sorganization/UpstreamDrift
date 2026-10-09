@@ -8,10 +8,14 @@ import hashlib
 import io
 import json
 import os
+import platform
 from collections.abc import Callable
 from dataclasses import asdict
+from importlib.metadata import version
 from pathlib import Path
 from tempfile import TemporaryDirectory
+
+from src.shared.python.physics.incremental_contact import contact_backend_info
 
 from .academic_plots import (
     write_academic_dispersion_figure,
@@ -42,6 +46,7 @@ def matched_source_snapshot() -> dict:
             "matched_physics.py",
             "matched_runner.py",
             "matched_export.py",
+            "matched_diagnostics.py",
             "noise.py",
             "nominal_matching.py",
             "density.py",
@@ -58,6 +63,12 @@ def matched_source_snapshot() -> dict:
             for p in files
         }
     )
+    result["contact_backend"] = contact_backend_info()
+    result["numerical_runtime"] = {
+        "python": platform.python_version(),
+        "numpy": version("numpy"),
+        "scipy": version("scipy"),
+    }
     return result
 
 
@@ -82,6 +93,23 @@ def _write_manifest(output_dir: Path) -> None:
         output_dir / "manifest.json",
         {"schema": "matched-shot-study/1", "files_sha256": hashes},
     )
+
+
+def _contact_execution(config: ExperimentConfig) -> dict[str, str | int]:
+    """Record the selected numerical law separately from available auto backend."""
+    club = config.club
+    if club.contact_law == "maximum_dissipation_newton":
+        selected = "not_applicable"
+    elif club.contact_backend == "auto":
+        selected = str(contact_backend_info()["active_backend"])
+    else:
+        selected = club.contact_backend
+    return {
+        "contact_law": club.contact_law,
+        "requested_backend": club.contact_backend,
+        "selected_backend": selected,
+        "steps_per_compression": club.steps_per_compression,
+    }
 
 
 def _write_figures(
@@ -199,6 +227,7 @@ def export_matched_analysis(
             "execution": execution,
             "source_unchanged_during_run": True,
             "model_qualification": "conditional_geometric_research_no_empirical_accuracy_claim",
+            "contact_execution": _contact_execution(result.config),
             "shot_rows": len(result.shots),
             "all_inputs_retained": True,
         },

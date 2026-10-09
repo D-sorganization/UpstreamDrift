@@ -6,6 +6,7 @@ import math
 from dataclasses import replace
 
 import pytest
+import numpy as np
 
 from src.shared.python.physics.rust_kernel import is_rust_available
 from src.tools.shot_pattern_analysis.matched_config import matched_preset
@@ -13,6 +14,7 @@ from src.tools.shot_pattern_analysis.matched_physics import (
     MatchedShotPhysics,
     UnsupportedShot,
 )
+from src.tools.shot_pattern_analysis.physics import outcome_from_launch
 
 pytestmark = [pytest.mark.integration, pytest.mark.scientific]
 
@@ -114,3 +116,96 @@ def test_curved_contact_normal_is_reported_separately(
     )
     assert toe.delivered_face_deg == pytest.approx(0)
     assert toe.contact_face_deg > 0
+
+
+def test_contact_law_config_contract() -> None:
+    cfg = matched_preset("driver")
+    assert cfg.contact_law == "incremental_coulomb_energetic"
+    assert cfg.steps_per_compression == 128
+    assert cfg.contact_backend == "auto"
+    with pytest.raises(ValueError, match="contact law"):
+        replace(cfg, contact_law="unknown")
+    with pytest.raises(ValueError, match="compression steps"):
+        replace(cfg, steps_per_compression=0)
+    with pytest.raises(ValueError, match="contact backend"):
+        replace(cfg, contact_backend="unknown")
+
+
+def test_primary_and_comparator_contact_laws_are_explicit(
+    engine: MatchedShotPhysics, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from src.tools.shot_pattern_analysis import matched_physics
+
+    cfg = matched_preset("driver")
+    called: list[tuple[str, float | int | str]] = []
+    original_incremental = matched_physics.solve_incremental_contact
+    original_comparator = matched_physics.solve_rigid_contact
+
+    def incremental(state, **kwargs):
+        called.append(("incremental", kwargs["steps_per_compression"]))
+        assert kwargs["energetic_restitution"] == cfg.cor
+        assert kwargs["backend"] == "python_reference"
+        return original_incremental(state, **kwargs)
+
+    def comparator(state):
+        called.append(("comparator", state.restitution))
+        return original_comparator(state)
+
+    monkeypatch.setattr(matched_physics, "solve_incremental_contact", incremental)
+    monkeypatch.setattr(matched_physics, "solve_rigid_contact", comparator)
+    primary = engine.simulate_delivery(
+        0, 0, replace(cfg, contact_backend="python_reference", steps_per_compression=32)
+    )
+    assert primary.outcome.carry_x_m > 0
+    assert called == [("incremental", 32)]
+    called.clear()
+    comparison = engine.simulate_delivery(
+        0, 0, replace(cfg, contact_law="maximum_dissipation_newton")
+    )
+    assert comparison.outcome.carry_x_m > 0
+    assert called == [("comparator", cfg.cor)]
+
+
+def test_zero_spin_airborne_shot_is_supported(engine: MatchedShotPhysics) -> None:
+    from src.shared.python.physics.ball_simulator import BallFlightSimulator
+
+    direct = outcome_from_launch(
+        np.array([60.0, 0.0, 10.0]),
+        np.zeros(3),
+        flight=BallFlightSimulator(),
+        max_time_s=12.0,
+        dt_s=0.02,
+    )
+    assert direct.carry_x_m > 0
+    assert direct.spin_rpm == 0
+    assert direct.spin_axis_tilt_deg == 0
+    assert not direct.spin_axis_defined
+    zero_friction = engine.simulate_delivery(
+        0, 0, replace(matched_preset("driver"), friction_coefficient=0)
+    ).outcome
+    assert zero_friction.carry_x_m > 0
+    assert zero_friction.spin_rpm == 0
+    assert not zero_friction.spin_axis_defined
+
+
+def test_numerical_zero_spin_threshold_has_defined_axis_boundary() -> None:
+    from src.shared.python.physics.ball_simulator import BallFlightSimulator
+
+    flight = BallFlightSimulator()
+
+    def shot(spin_rad_s: float):
+        return outcome_from_launch(
+            np.array([60.0, 0.0, 10.0]),
+            np.array([0.0, -spin_rad_s, 0.0]),
+            flight=flight,
+            max_time_s=12.0,
+            dt_s=0.02,
+        )
+
+    below = shot(0.5e-10)
+    above = shot(2e-10)
+    assert below.spin_rpm == 0
+    assert not below.spin_axis_defined
+    assert above.spin_rpm > 0
+    assert above.spin_axis_defined
+    assert above.spin_axis_tilt_deg == pytest.approx(0)

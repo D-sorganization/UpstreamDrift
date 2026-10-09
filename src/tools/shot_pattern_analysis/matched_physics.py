@@ -13,6 +13,7 @@ from dataclasses import dataclass
 import numpy as np
 
 from src.shared.python.physics.ball_simulator import BallFlightSimulator
+from src.shared.python.physics.incremental_contact import solve_incremental_contact
 from src.shared.python.physics.rigid_contact import (
     RigidContactInput,
     solve_rigid_contact,
@@ -135,20 +136,27 @@ class MatchedShotPhysics:
         )
         if float(np.dot(velocity, surface_normal)) <= 0:
             raise UnsupportedShot("delivery_nonapproaching")
-        contact = solve_rigid_contact(
-            RigidContactInput(
-                club_velocity_mps=velocity,
-                club_angular_velocity_rad_s=np.zeros(3),
-                ball_velocity_mps=np.zeros(3),
-                ball_angular_velocity_rad_s=np.zeros(3),
-                normal=surface_normal,
-                club_lever_m=lever,
-                club_inertia_world_kg_m2=inertia,
-                club_mass_kg=config.clubhead_mass_kg,
-                restitution=config.cor,
-                friction_coefficient=config.friction_coefficient,
-            )
+        contact_input = RigidContactInput(
+            club_velocity_mps=velocity,
+            club_angular_velocity_rad_s=np.zeros(3),
+            ball_velocity_mps=np.zeros(3),
+            ball_angular_velocity_rad_s=np.zeros(3),
+            normal=surface_normal,
+            club_lever_m=lever,
+            club_inertia_world_kg_m2=inertia,
+            club_mass_kg=config.clubhead_mass_kg,
+            restitution=config.cor,
+            friction_coefficient=config.friction_coefficient,
         )
+        if config.contact_law == "incremental_coulomb_energetic":
+            contact = solve_incremental_contact(
+                contact_input,
+                energetic_restitution=config.cor,
+                steps_per_compression=config.steps_per_compression,
+                backend=config.contact_backend,
+            )
+        else:
+            contact = solve_rigid_contact(contact_input)
         ball_velocity = np.asarray(contact.ball_velocity_mps, dtype=float)
         if not np.all(np.isfinite(ball_velocity)):
             raise RuntimeError("contact produced nonfinite ball velocity")

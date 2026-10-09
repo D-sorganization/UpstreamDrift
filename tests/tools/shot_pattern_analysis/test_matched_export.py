@@ -96,6 +96,39 @@ def test_changed_source_aborts_publication(tmp_path, request_config, monkeypatch
     assert not (tmp_path / "result").exists()
 
 
+def test_source_snapshot_records_contact_backend(monkeypatch):
+    monkeypatch.setattr(module, "source_snapshot", lambda: {"source_sha256": {}})
+    monkeypatch.setattr(
+        module,
+        "contact_backend_info",
+        lambda: {"active_backend": "numba", "numba_version": "0.68.0"},
+    )
+    snapshot = module.matched_source_snapshot()
+    assert snapshot["contact_backend"]["active_backend"] == "numba"
+    assert snapshot["contact_backend"]["numba_version"] == "0.68.0"
+    assert snapshot["numerical_runtime"]["python"]
+    assert snapshot["numerical_runtime"]["numpy"]
+    assert snapshot["numerical_runtime"]["scipy"]
+
+
+def test_receipt_records_selected_contact_backend(tmp_path, request_config, snapshot):
+    from dataclasses import replace
+
+    club = replace(request_config.club, contact_backend="python_reference")
+    request = replace(request_config, club=club)
+    result = run_matched_analysis(
+        request, physics=AnalyticPhysics(), include_scoring=False
+    )
+    module.export_matched_analysis(result, tmp_path, execution=snapshot, figures=False)
+    receipt = json.loads((tmp_path / "receipt.json").read_text())
+    assert receipt["contact_execution"] == {
+        "contact_law": "incremental_coulomb_energetic",
+        "requested_backend": "python_reference",
+        "selected_backend": "python_reference",
+        "steps_per_compression": 128,
+    }
+
+
 @pytest.mark.slow
 def test_real_figure_export_contract(tmp_path, request_config, snapshot):
     from dataclasses import replace

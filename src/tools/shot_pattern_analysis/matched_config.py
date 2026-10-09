@@ -33,6 +33,9 @@ class MatchedConfig:
     roll_radius_m: float = 0.300
     cor: float = 0.83
     friction_coefficient: float = 0.4
+    contact_law: str = "incremental_coulomb_energetic"
+    steps_per_compression: int = 128
+    contact_backend: str = "auto"
     dt_s: float = 0.02
     max_time_s: float = 12.0
     loft_source: str = "https://www.titleist.com/golf-clubs/drivers/gt2"
@@ -61,6 +64,19 @@ class MatchedConfig:
             raise ValueError("principal inertias must satisfy triangle inequalities")
         if not 0 <= self.cor <= 1 or self.friction_coefficient < 0:
             raise ValueError("restitution must be in [0,1] and friction nonnegative")
+        if self.contact_law not in (
+            "incremental_coulomb_energetic",
+            "maximum_dissipation_newton",
+        ):
+            raise ValueError("contact law must name a supported impulse model")
+        if (
+            isinstance(self.steps_per_compression, bool)
+            or not isinstance(self.steps_per_compression, int)
+            or not 16 <= self.steps_per_compression <= 4096
+        ):
+            raise ValueError("compression steps must be an integer in [16,4096]")
+        if self.contact_backend not in ("auto", "python_reference", "numba"):
+            raise ValueError("contact backend must be auto, python_reference, or numba")
         if not 0 < self.dt_s <= 0.05 or self.max_time_s <= self.dt_s:
             raise ValueError("time step must be in (0,.05] and below flight horizon")
 

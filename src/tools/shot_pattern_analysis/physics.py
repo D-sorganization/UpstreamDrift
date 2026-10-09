@@ -36,6 +36,7 @@ class ShotOutcome:
     trajectory_xy_m: tuple[tuple[float, float], ...] = ()
     launch_elevation_deg: float = 0.0
     ball_speed_mps: float = 0.0
+    spin_axis_defined: bool = True
 
 
 def outcome_from_launch(
@@ -58,14 +59,20 @@ def outcome_from_launch(
     wx, wy, wz = (float(v) for v in angular)
     speed = math.hypot(vx, vy, vz)
     spin_rad_s = math.hypot(wx, wy, wz)
-    if speed <= 0 or spin_rad_s <= 0:
-        raise RuntimeError("impact produced invalid launch speed or spin")
+    if speed <= 0:
+        raise RuntimeError("impact produced invalid launch speed")
+    # Contact-frame arithmetic can leave ~1e-13 rad/s from an exactly
+    # frictionless zero-spin state. Below this numerical floor the axis has no
+    # physical direction; report zero spin with the simulator's unit fallback.
+    spin_axis_defined = spin_rad_s > 1e-10
     launch = LaunchConditions(
         velocity=speed,
         launch_angle=math.atan2(vz, math.hypot(vx, vy)),
         azimuth_angle=math.atan2(vy, vx),
-        spin_rate=spin_rad_s * 60 / (2 * math.pi),
-        spin_axis=angular / spin_rad_s,
+        spin_rate=(spin_rad_s * 60 / (2 * math.pi) if spin_axis_defined else 0.0),
+        spin_axis=(
+            angular / spin_rad_s if spin_axis_defined else np.array([0.0, -1.0, 0.0])
+        ),
     )
     sampled: tuple[tuple[float, float], ...] = ()
     if sample_trajectory:
@@ -98,10 +105,13 @@ def outcome_from_launch(
         carry_m=math.hypot(x, y),
         launch_azimuth_deg=-math.degrees(launch.azimuth_angle),
         spin_rpm=launch.spin_rate,
-        spin_axis_tilt_deg=math.degrees(math.atan2(wz, -wy)),
+        spin_axis_tilt_deg=(
+            math.degrees(math.atan2(wz, -wy)) if spin_axis_defined else 0.0
+        ),
         trajectory_xy_m=sampled,
         launch_elevation_deg=math.degrees(launch.launch_angle),
         ball_speed_mps=speed,
+        spin_axis_defined=spin_axis_defined,
     )
 
 
