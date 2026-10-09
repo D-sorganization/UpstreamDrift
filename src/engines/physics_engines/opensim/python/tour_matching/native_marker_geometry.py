@@ -179,6 +179,7 @@ class NativeMarkerGeometry:
     def _bindings(self, bindings: Bindings) -> list[tuple[str, Any, MarkerPlacement]]:
         if not bindings:
             raise ValueError("Explicit marker bindings are required")
+        osim = self._osim
         result = []
         for label, (path, offset) in bindings.items():
             if not isinstance(label, str) or not label.strip():
@@ -188,13 +189,8 @@ class NativeMarkerGeometry:
             placement = MarkerPlacement(path, (offset[0], offset[1], offset[2]))
             if not path.startswith("/") or not self._model.hasComponent(path):
                 raise ValueError(f"Unknown absolute native frame path: {path}")
-            frame = self._osim.PhysicalFrame.safeDownCast(
-                self._model.getComponent(path)
-            )
-            if (
-                frame is None
-                or self._osim.Body.safeDownCast(frame.findBaseFrame()) is None
-            ):
+            frame = osim.PhysicalFrame.safeDownCast(self._model.getComponent(path))
+            if frame is None or osim.Body.safeDownCast(frame.findBaseFrame()) is None:
                 raise ValueError(
                     f"Marker frame must be attached to a native body: {path}"
                 )

@@ -36,12 +36,16 @@ class OpensimFullBodyIK(BaseFullBodyIK):
     def pose_fn(self, q: np.ndarray) -> dict[str, tuple[np.ndarray, np.ndarray]]:
         """Compute world poses for bodies."""
         if self._native_geometry is None:
-            raise NotImplementedError("Native OpenSim geometry is required")
+            raise NotImplementedError(  # tracked: #11791
+                "Native OpenSim geometry is required"
+            )
         return self._native_geometry.frame_poses(self.attachments, q)
 
     def closure_residuals(self, q: np.ndarray) -> np.ndarray:
         """Evaluate loop closure residuals."""
-        raise NotImplementedError("Native grip closure is not qualified")
+        raise NotImplementedError(  # tracked: #11791
+            "Native grip closure is not qualified"
+        )
 
 
 class OpensimMatchingPlant:
@@ -66,7 +70,8 @@ class OpensimMatchingPlant:
             )
 
             self._native_geometry = NativeMarkerGeometry(native_model_path, self.coords)
-            identity = self.spec_bytes + self._native_geometry.identity_sha256.encode()
+            native_identity = self._native_geometry.identity_sha256
+            identity = self.spec_bytes + native_identity.encode()
             self._sha256 = hashlib.sha256(identity).hexdigest()
 
         gp_spec = self.spec_dict.get("ground_plane", {})
@@ -105,7 +110,9 @@ class OpensimMatchingPlant:
                 f"IK backend {ik_backend!r} is only supported on the MuJoCo plant"
             )
         if self._native_geometry is None:
-            raise NotImplementedError("Native OpenSim geometry is required")
+            raise NotImplementedError(  # tracked: #11791
+                "Native OpenSim geometry is required"
+            )
         return OpensimFullBodyIK(
             self.spec_dict,
             attachments=attachments,
@@ -123,7 +130,9 @@ class OpensimMatchingPlant:
         self, q: np.ndarray, attachments: Mapping[str, tuple[str, Sequence[float]]]
     ) -> np.ndarray:
         if self._native_geometry is None:
-            raise NotImplementedError("Native OpenSim geometry is required")
+            raise NotImplementedError(  # tracked: #11791
+                "Native OpenSim geometry is required"
+            )
         return self._native_geometry.marker_positions(q, attachments)
 
     def contact_forces(
@@ -155,11 +164,13 @@ class OpensimMatchingPlant:
         return None
 
     def closure_residuals(self, q: np.ndarray) -> np.ndarray:
-        raise NotImplementedError("Native grip closure is not qualified")
+        raise NotImplementedError(  # tracked: #11791
+            "Native grip closure is not qualified"
+        )
 
     def step(
         self, q: np.ndarray, v: np.ndarray, tau: np.ndarray, dt: float
     ) -> tuple[np.ndarray, np.ndarray]:
-        raise NotImplementedError(
+        raise NotImplementedError(  # tracked: #11792
             "Use the independent native replay provider; no placeholder step"
         )

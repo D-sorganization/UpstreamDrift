@@ -79,3 +79,14 @@ artifacts, semantic parity and human publication approval remain outstanding.
 - The incomplete fleet inbox read retains its malformed-history/page-limit
   warnings; direct ownership coordination covers this branch and shared-solver
   extension. No absence-of-peer claim is inferred from that read.
+
+## CI Remediation
+
+CI identified three avoidable attribute chains and missing tracking references
+for deliberate unsupported physical methods; these are corrected without
+changing behavior. The existing eight-parameter trajectory API gains one
+optional coordinate_bounds keyword. A focused architecture-budget exception
+owned by codex/#11903 expires2026-11-09, preserving caller compatibility pending
+coherent solver-options consolidation. It exempts no native range or scientific
+gate. Existing private receipts retain their exact earlier provider hashes;
+they are not silently relabeled after this structural refactor.
