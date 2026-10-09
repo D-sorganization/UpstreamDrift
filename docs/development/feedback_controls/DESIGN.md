@@ -26,7 +26,7 @@ Torque models use bounded applied actuator torques; muscle models use excitation
 
 Observations are `y_i = H_i(x,theta)+epsilon_i`, with declared frames, SI units, clock alignment, occlusion masks and covariance. Subject mass/inertia/marker attachment uncertainty is distinct from tracking error. Kinematics alone generally cannot identify absolute mass, contact-force distribution, muscle recruitment or a unique feedback law. Record anchors, priors, rank/observable subspaces and uncertainty; do not fit gains to compensate for arbitrary geometry errors.
 
-Contact enforces nonpenetration, unilateral normal force and friction constraints using the selected model. Grip closure and club compliance must be declared and checked. Begin with known/reviewed contact phases and existing validated contact laws. Contact-implicit methods are a benchmarked research option, not an assumed faster default. A measured-GRF-driven replay is labeled **externally forced**; it cannot pass autonomous-contact prediction.
+Rigid contact uses formulation-appropriate unilateral and complementarity checks. Compliant contact permits law-consistent bounded deformation and requires nonadhesive behavior where appropriate, friction/dissipation and numerical convergence checks. Grip closure and club compliance must be declared and checked. Begin with known/reviewed contact phases and existing validated contact laws. Contact-implicit methods are a benchmarked research option, not an assumed faster default. A measured-GRF-driven replay is labeled **externally forced**; it cannot pass autonomous-contact prediction.
 
 ## Optimization and Control Architecture
 
@@ -51,14 +51,14 @@ For torque lanes, inherit #11605: evaluate controller once per integration inter
 
 Each bundle includes schema/version, full x0, nominal/reference distinction, ordered actuator IDs, units/frames/timebase, model/provider revisions, input history, parameters/contact/loads, integration/constraint-projection policy, random seed and evidence references. Private source provenance remains private. Reject stale hashes, incompatible mappings, missing states, finite-value failures and unsupported capability combinations.
 
-| Parity Level                             | Requirement                                                                                           | Limitation                                                              |
-| ---------------------------------------- | ----------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| P0: Evidence and Model Identity          | Same observation identity, clocks, frame maps, geometry/inertia/constraints where applicable          | Different muscle/contact models must be declared                        |
-| P1: Pointwise Dynamics                   | Compare FK, M, bias, constrained acceleration and mapped effort at consistent states                  | Use existing #11605 tolerances; no silent weakening                     |
-| P2: Within-Engine Input Replay           | Exact saved torque or excitation inputs reproduce native controlled/optimized rollout                 | Fresh engine; no feedback, state reset or measurement access            |
-| P3: Cross-Engine Torque Parity           | Same mapped model and torque bundle with declared solver/contact policy                               | Distinguish numerical-policy differences from physics differences       |
-| P4: Muscle/Biomechanical Equivalence     | Match observation/events/contact/net torque and bounded effort across differing actuator formulations | Excitation equality is meaningful only for identical muscle definitions |
-| P5: Scientific and Product Qualification | Full horizon, applicable clubs, physical/physiological gates and reproducible user workflow           | Software tests and videos alone are insufficient                        |
+| Parity Level                             | Requirement                                                                                                  | Limitation                                                              |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------- |
+| P0: Evidence and Model Identity          | Same observation identity, clocks, frame maps, geometry/inertia/constraints where applicable                 | Different muscle/contact models must be declared                        |
+| P1: Pointwise Dynamics                   | Compare FK, M, bias, constrained acceleration and mapped effort at consistent states                         | Use existing #11605 tolerances; no silent weakening                     |
+| P2: Within-Engine Input Replay           | Separate input identity, same-policy reproduction, native transcription feasibility and observation accuracy | Fresh engine; no feedback, state reset or measurement access            |
+| P3: Cross-Engine Torque Parity           | Same mapped model and torque bundle with declared solver/contact policy                                      | Distinguish numerical-policy differences from physics differences       |
+| P4: Muscle/Biomechanical Equivalence     | Match observation/events/contact/net torque and bounded effort across differing actuator formulations        | Excitation equality is meaningful only for identical muscle definitions |
+| P5: Scientific and Product Qualification | Full horizon, applicable clubs, physical/physiological gates and reproducible user workflow                  | Software tests and videos alone are insufficient                        |
 
 The matrix has a row for every registered model/engine/drive-mode pair, with `unsupported`, `unavailable`, `implemented-unqualified` or `qualified` plus evidence. MyoSuite is not automatically the same musculoskeletal model as OpenSim. Maintain best defensible parity without calling nonidentical models identical.
 
@@ -125,3 +125,9 @@ First freeze the current native capability matrix, source/provider versions, exi
 ## Review Clarifications
 
 Adopt the existing canonical model/variant/capability registry and stable engine/variant/drive-mode keys; F01 freezes baseline/policy and F09 executes ongoing conformance. #11605/#11607 retain replay authority. Tools validates generic evidence interchange; UpstreamDrift decides physics and qualification. Replay APIs accept a frozen bundle and native plant, without controller/observation providers. F07 supplies the complete pinned muscle-model/state/contact/forward-API handoff to F08. Optional NMPC needs a report/disposition and does not block acceptance of a qualified simpler controller. Public preview manifests omit local paths; resolve configured artifacts through MOTION_MATCHING_PREVIEW_ROOT, and preserve shared/user-owned directories and videos.
+
+## Binding Architecture Review
+
+[Astra Architecture Review](ASTRA_REVIEW.md) refines this design and its acceptance criteria. Record dynamics/contact/integration/actuator/restart implementations; common-model parity cannot qualify native muscle/contact replay. Required capabilities remain required when unavailable. Version full state, manifold operations, input boundaries and actual executed policies rather than silently broadening Euclidean torque fixtures.
+
+An optimized collocation trajectory must pass uninterrupted native integration and refinement checks. Score frozen nominal feedforward separately from replay of total feedback-generated input. Reserve/root assistance requires peak/RMS, integrated absolute effort and separate positive/negative work; zero signed work cannot prove muscle-only operation. Declare exact versus noisy/estimated/delayed state and validate that information pattern. Gain and recruitment estimates remain nonunique and require held-out perturbation and parameter/objective sensitivity evidence.

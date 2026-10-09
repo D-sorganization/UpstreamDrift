@@ -1127,6 +1127,15 @@
       "issue": 11098,
       "reason": "Issue #11098: GUI model import_video forwards the imported-video parameter surface to the service (9 > 8 budget). Decompose at an #11127 follow-up.",
       "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/shared/python/motion_matching/full_body_ik.py",
+      "symbol": "solve_full_body_ik_trajectory",
+      "rule": "parameters",
+      "owner": "codex / F07 #11903",
+      "issue": 11903,
+      "reason": "Issue #11903: preserve the existing eight-parameter public LM API while adding one explicit optional coordinate_bounds input; consolidate trajectory solver options compatibly before this exception expires. Native source bounds and qualification gates are not exempted.",
+      "expires_on": "2026-11-09"
     }
   ]
 }

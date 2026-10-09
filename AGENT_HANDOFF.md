@@ -4,9 +4,30 @@
 - Full re-solve at `5f8ee41fe5`: peak timing passes (driver -3.7 ms, 7-iron -4.2 ms; limit 5 ms); impact speed does not (driver -7.4 %, 7-iron -4.1 %; limit 3 %). `test_clubhead_speed_peaks_with_the_capture_and_matches_it_at_impact` is a strict xfail with those numbers; tolerances unchanged; fixtures not regenerated.
 - Next: the remaining gap is the unactuated root's ground yaw slip (DESIGN_DECISIONS decision 13). It needs a foot yaw-moment / contact model change, tracked outside GCV-20. Details: calculation reference, GCV-20 "Second Pass" and "Full Re-Solve".
 
+# Active: Native OpenSim Geometry — #11903
+
+Scoped F07/F08 branch `feat/feedback-native-markers-11903`. Read canonical
+`manuals/upstreamdrift/chapters/26-native-opensim-geometry.qmd` and
+`docs/development/feedback_controls/F07_NATIVE_GEOMETRY_TURNOVER.md` before
+continuing. Explicit native frame/station geometry and bounded shared IK are
+implemented; metadata-only physical placeholders fail closed. The unchanged
+520-muscle candidate's three-pose pelvis probe remains unqualified and reaches
+its source rotation bound. Preserve native replay, anatomy and registration gates.
+
+# Active: MeshCat Camera Framing - NV-9 #11697
+
+- Branch `claude/nv-9-meshcat-framing-11697`; epic #11673. MeshCat kept the 75 deg three.js default FOV; `MeshcatPage` now sets the shared `golf_view_presets.VIEWER_FOV_Y_RAD` (0.7 rad, OpenSim's value) on entry and raises if the page has no viewer camera. New `golf_view_presets.framing`: `projected_extent` and `fit_distance_m` (15 % margin) with unit tests.
+- Open (engine host): verify the Drake/Pinocchio renders at 720p, feed the per-swing body bounding box from engine FK into `fit_distance_m` per view, and judge glyph legibility.
+
 # Active: Feedback Controls Planning — #11784
 
 Documentation branch `docs/feedback-controls-11784`; commit `SELF`. Read [Design](docs/development/feedback_controls/DESIGN.md), [Issue Dependencies](docs/development/feedback_controls/IMPLEMENTATION_PLAN.md) and [Turnover](docs/development/feedback_controls/TURNOVER.md). Goal: all-model six-engine parity culminating in muscle-driven OpenSim and independent excitation replay. Planning only; no new model/video is qualified. Next: F01 inventory/gate freeze, coordinate MOSAIC #11532 and parity #11605.
+
+# Active: Impact-Phase Bushing Grip, OSV-7 #11739
+
+- Branch `claude/osv-7-impact-grip`. The OpenSim bushing grip is driven over 0 to 1.8 s by the OSV-10 fits (`tests/fixtures/club_face/swing_q_*.npz`), mapped by name with `grip_contact.load_coordinate_swing`. Loop closure is below 0.001 mm and hand speeds are within 12 % of the measured wrist markers.
+- Deflection is 0.56 / 0.58 mm and 0.84 deg, inside the bounds. Owner decision on PR #11774: the flat 500 N internal-force bound is replaced by `grip_contact.couple_check` (squeeze at most 50 N; transverse pair equals the couple/d Newton-Euler prediction within 5 %, 2 N m noise floor). Both pass for driver and iron (squeeze 3.3 / 3.9 N), so the full-window test is no longer an xfail. The club-welded-to-hand demand is 89 / 87 N m against the realised 100 / 99 N m (bushing amplification). Grip-frame spacing is 80.3 mm, not 76. See DESIGN_DECISIONS.md section 17.
+- Next: MuJoCo (soft weld) and Drake (`LinearBushingRollPitchYaw`) bushing parity on the same fixtures. The plan is on #11739.
 
 # Active: Ground Reaction Design Manual Slice - GCV-18 #11724
 
