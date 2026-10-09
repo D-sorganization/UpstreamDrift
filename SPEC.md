@@ -10532,3 +10532,25 @@ fit, hard-real-time bound, contact/muscle or full-body six-engine gate. F05
 parent #11789 remains open. The provisional canonical calculation is chapter
 25 and turnover is
 `docs/development/feedback_controls/F05C_NATIVE_TANGENT_TURNOVER.md`.
+
+## Native Multi-DOF Manifold BoxFDDP Candidate (F05d, #11932)
+
+`native_manifold_box_fddp.py` builds a Crocoddyl `StateAbstract` with physical
+$n_x=17$ and tangent $n_{dx}=16$ for F05c's contact-free floating-root,
+two-hinge MuJoCo model. MuJoCo manifold difference/retraction and the actual
+Euler `mj_step`/`mjd_transitionFD` keep the optimizer's quaternion and
+native-step conventions aligned. The bounded direct-motor BoxFDDP plan is
+admitted only after whole-plan nonlinear native scoring improves a verified
+fallback within the cooperative wall budget. Loaded model/callback/order
+and observation-clock mismatches reject. The common native torque executor
+exports actual post-limit ZOH commands through Tools T01 and verifies a
+fresh full `mjSTATE_INTEGRATION` replay to 1e-12. A matched SciPy SLSQP
+native-shooting comparator shares exactly the nonlinear score, reference,
+truth plant, input bounds and budget. The supported-provider receipt keeps
+both ordered starts, all accepted/fallback statuses, source hashes and
+cold/common plus per-method end-to-end timing. This small synthetic test
+retains F02 TVLQR as the broad default and F05 #11789 open; no hard 10 ms
+deadline, state/anatomical limit, contact, muscle, private capture,
+full-body or six-engine qualification is claimed. The provisional manual
+calculation is chapter 26; turnover is
+`docs/development/feedback_controls/F05D_NATIVE_MANIFOLD_BOX_FDDP_TURNOVER.md`.
