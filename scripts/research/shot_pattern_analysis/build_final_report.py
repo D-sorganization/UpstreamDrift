@@ -8,7 +8,9 @@ The input cells are validated by the public matched-report and scoring APIs.
 from __future__ import annotations
 
 import argparse
+import csv
 import hashlib
+import io
 import os
 import re
 from collections import Counter
@@ -63,38 +65,88 @@ def _profile(name: str) -> str:
     return match.group(1)
 
 
-def _row(cell: dict, protocol: str) -> str:
-    config = cell["config"]
-    club = config["club"]
-    descriptor = [
-        protocol,
-        club["club_id"],
-        f"{club['shaft_lean_deg']:g}",
-        f"{config['curve_scale']:g}",
-        f"{config['noise']['standard_deviations'][0]:g}",
-        _profile(cell["cell"]),
-    ]
-    if cell["status"] != "completed":
-        reason = cell.get("reason", "unspecified")
-        return (
-            "| "
-            + " | ".join([*descriptor, "Unavailable", "—", "—", "—", reason])
-            + " |"
-        )
-    summary = cell["summary"]
-    minimum_supported = min(summary[name]["supported_n"] for name in PATTERNS)
-    paired = cell.get("paired_comparisons", {})
-    course = cell.get("course_scoring", {})
-    sg = course.get("paired_benefit_vs_straight", {})
-    radial = paired.get("mean_radial_error_difference_vs_straight", {})
-    fields = [
-        f"{minimum_supported:,}/10,000",
-        _interval(radial.get("Draw")),
-        _interval(radial.get("Fade")),
-        _interval(sg.get("Draw")),
-        _interval(sg.get("Fade")),
-    ]
-    return "| " + " | ".join([*descriptor, *fields]) + " |"
+def render_cell_inventory(primary: dict, control: dict) -> str:
+    """Export every physical pattern, including explicit unavailable cells."""
+    fields = (
+        "protocol",
+        "cell",
+        "status",
+        "reason",
+        "club",
+        "lean_deg",
+        "profile",
+        "shaft_rotation_sd_deg",
+        "curve_scale",
+        "seed",
+        "target_x_m",
+        "pattern",
+        "total_n",
+        "supported_n",
+        "paired_n",
+        "nominal_face_deg",
+        "nominal_path_deg",
+        "nominal_speed_mps",
+        "mean_carry_m",
+        "lateral_sd_m",
+        "downrange_sd_m",
+        "target_rmse_m",
+        "target_containment_fraction",
+        "realized_face_path_correlation",
+        "radial_difference_vs_straight_m",
+        "course_sg_difference_vs_straight",
+    )
+    stream = io.StringIO()
+    writer = csv.DictWriter(stream, fieldnames=fields, lineterminator="\n")
+    writer.writeheader()
+    for protocol, report in (("within_lean", primary), ("across_lean", control)):
+        for cell in report["cells"]:
+            config = cell["config"]
+            for pattern in PATTERNS:
+                summary = cell.get("summary", {}).get(pattern, {})
+                nominal = cell.get("nominals", {}).get(pattern, {})
+                paired = cell.get("paired_comparisons", {})
+                radial = paired.get("mean_radial_error_difference_vs_straight", {}).get(
+                    pattern, {}
+                )
+                course = cell.get("course_scoring", {})
+                sg = course.get("paired_benefit_vs_straight", {}).get(pattern, {})
+                writer.writerow(
+                    {
+                        "protocol": protocol,
+                        "cell": cell["cell"],
+                        "status": cell["status"],
+                        "reason": cell.get("reason", ""),
+                        "club": config["club"]["club_id"],
+                        "lean_deg": config["club"]["shaft_lean_deg"],
+                        "profile": _profile(cell["cell"]),
+                        "shaft_rotation_sd_deg": config["noise"]["standard_deviations"][
+                            0
+                        ],
+                        "curve_scale": config["curve_scale"],
+                        "seed": config.get("seed", ""),
+                        "target_x_m": cell.get("target_x_m", ""),
+                        "pattern": pattern,
+                        "total_n": summary.get("total_n", config["n_shots"]),
+                        "supported_n": summary.get("supported_n", ""),
+                        "paired_n": paired.get("paired_n", ""),
+                        "nominal_face_deg": nominal.get("face_deg", ""),
+                        "nominal_path_deg": nominal.get("path_deg", ""),
+                        "nominal_speed_mps": nominal.get("speed_mps", ""),
+                        "mean_carry_m": summary.get("mean_carry_m", ""),
+                        "lateral_sd_m": summary.get("lateral_sd_m", ""),
+                        "downrange_sd_m": summary.get("downrange_sd_m", ""),
+                        "target_rmse_m": summary.get("target_rmse_m", ""),
+                        "target_containment_fraction": summary.get(
+                            "target_containment_fraction", ""
+                        ),
+                        "realized_face_path_correlation": summary.get(
+                            "realized_face_path_correlation", ""
+                        ),
+                        "radial_difference_vs_straight_m": radial.get("estimate", ""),
+                        "course_sg_difference_vs_straight": sg.get("estimate", ""),
+                    }
+                )
+    return stream.getvalue()
 
 
 def _direction_counts(cells: list[dict], key: str) -> dict[str, Counter]:
@@ -148,6 +200,214 @@ def _effect_summary(report: dict, label: str) -> list[str]:
     return lines
 
 
+def _profile_control_lines(primary: dict) -> list[str]:
+    sample = {}
+    for cell in primary["cells"]:
+        config = cell["config"]
+        if (
+            config["club"]["club_id"] == "driver"
+            and config["club"]["shaft_lean_deg"] == 0
+            and config["curve_scale"] == 1
+            and config["noise"]["standard_deviations"][0] == 1
+        ):
+            sample[_profile(cell["cell"])] = config["noise"]
+    lines = [
+        "### Nine-Profile Input Controls",
+        "",
+        "All rows also use shaft-rotation SD 1° or 2° according to the cell. Speed SD is shown in mph; contact SD is per axis, not radial. Correlations below describe primitive shaft rotation and path errors, not the derived face/path correlation. The full seven-dimensional covariance and realized output covariance remain in the source-bound cell receipts.",
+        "",
+        "| Profile | Path SD (°) | Speed SD (mph) | Strike SD (mm Each Axis) | Primitive Shaft/Path ρ |",
+        "| --- | ---: | ---: | ---: | ---: |",
+    ]
+    for name, noise in sample.items():
+        sd = noise["standard_deviations"]
+        correlation = noise["correlation"]
+        rho = 0.0 if correlation is None else correlation[0][1]
+        lines.append(
+            f"| {name} | {sd[1]:g} | {sd[2] / 0.44704:.1f} | {sd[3] * 1000:.2f} / {sd[4] * 1000:.2f} | {rho:+.2f} |"
+        )
+    return lines + [""]
+
+
+def _experimental_control_lines(primary: dict) -> list[str]:
+    reference = primary["cells"][0]["config"]
+    clubs = {}
+    for cell in primary["cells"]:
+        config = cell["config"]
+        if config["club"]["shaft_lean_deg"] == 0:
+            clubs[config["club"]["club_id"]] = config["club"]
+    lines = [
+        "## Controlled Inputs",
+        "",
+        f"Each completed cell uses {reference['n_shots']:,} indexed errors per physical pattern with seed `{reference.get('seed', 'see cell plan')}`. Nominal matching accepts raw X/Y residual at most {reference.get('match_tolerance_m', 'see cell plan')} m. Nominal speed is searched within 75–125% of each listed reference speed; no post-simulation aiming rotation is applied. Flight timestep, contact resolution, runtime backend and exact source hashes are frozen in the per-cell execution receipts.",
+        "",
+        "| Club | Static Loft (°) | Lie at Zero Lean (°) | Reference Speed (m/s) | Attack Angle (°) | Assumed Head Mass (kg) |",
+        "| --- | ---: | ---: | ---: | ---: | ---: |",
+    ]
+    for name in ("driver", "seven_iron", "pitching_wedge"):
+        if name not in clubs:
+            continue
+        club = clubs[name]
+        lines.append(
+            f"| {name} | {club['loft_deg']:g} | {club['lie_deg']:g} | {club['club_speed_mps']:g} | {club['attack_angle_deg']:g} | {club['clubhead_mass_kg']:.3f} |"
+        )
+    lines.extend(
+        (
+            "",
+            "The static loft/lie citations and every assumed head property are listed in the [Scientific Design](DESIGN.md). The score model treats carry endpoints as final lie on hypothetical flat course geometry.",
+            "",
+        )
+    )
+    return lines
+
+
+def _anchor_lines(primary: dict) -> list[str]:
+    anchors = [
+        cell
+        for cell in primary["cells"]
+        if cell["config"]["club"]["shaft_lean_deg"] == 0
+        and cell["config"]["curve_scale"] == 1
+        and cell["config"]["noise"]["standard_deviations"][0] == 2
+        and _profile(cell["cell"]) == "combined2"
+    ]
+    lines = [
+        "### Illustrative Full-Noise Flight Outcomes",
+        "",
+        "The following three club cells use zero lean, curve scale 1, shaft-twist SD 2°, and the combined-2 profile. Each named pattern has its own nominal face, path and speed solved before noise. Mean carry, spread and RMSE are conditional on supported shots; this is one selected stratum, not the entire grid.",
+        "",
+        "| Club | Pattern | Mean Carry (m) | Downrange SD (m) | Lateral SD (m) | Target RMSE (m) | Supported / 10,000 |",
+        "| --- | --- | ---: | ---: | ---: | ---: | ---: |",
+    ]
+    for cell in anchors:
+        for pattern in PATTERNS:
+            if cell["status"] != "completed":
+                lines.append(
+                    f"| {cell['config']['club']['club_id']} | {pattern} | Unavailable | — | — | — | 0 |"
+                )
+                continue
+            item = cell["summary"][pattern]
+            lines.append(
+                f"| {cell['config']['club']['club_id']} | {pattern} | {item['mean_carry_m']:.2f} | {item['downrange_sd_m']:.2f} | {item['lateral_sd_m']:.2f} | {item['target_rmse_m']:.2f} | {item['supported_n']:,} |"
+            )
+    lines.extend(
+        (
+            "",
+            "| Club | Pattern | Nominal Face (° Right) | Nominal Path (° Right) | Nominal Speed (m/s) | Matched Target X (m) |",
+            "| --- | --- | ---: | ---: | ---: | ---: |",
+        )
+    )
+    for cell in anchors:
+        if cell["status"] != "completed":
+            continue
+        for pattern in PATTERNS:
+            nominal = cell["nominals"][pattern]
+            lines.append(
+                f"| {cell['config']['club']['club_id']} | {pattern} | {nominal['face_deg']:+.3f} | {nominal['path_deg']:+.3f} | {nominal['speed_mps']:.3f} | {cell['target_x_m']:.2f} |"
+            )
+    lines.extend(
+        (
+            "",
+            "### Long-and-Short Directional Check",
+            "",
+            "A closed-face or left-side miss is not assumed to be long. The selected combined-2/2° cells directly report mean downrange error and all four empirical endpoint quadrants. Signs are relative to the common physical target; fractions are conditional on supported shots.",
+            "",
+            "| Club | Pattern | Mean X Error (m) | Left-Long | Left-Short | Right-Long | Right-Short |",
+            "| --- | --- | ---: | ---: | ---: | ---: | ---: |",
+        )
+    )
+    for cell in anchors:
+        if cell["status"] != "completed":
+            continue
+        for pattern in PATTERNS:
+            stats = cell["summary"][pattern]["statistics"]
+            q = stats["quadrant_fractions"]
+            lines.append(
+                f"| {cell['config']['club']['club_id']} | {pattern} | {stats['mean_downrange_error_m']:+.2f} | {q['left_long']:.3f} | {q['left_short']:.3f} | {q['right_long']:.3f} | {q['right_short']:.3f} |"
+            )
+    return lines + [""]
+
+
+def _selected_comparison_lines(primary: dict) -> list[str]:
+    cells = [
+        cell
+        for cell in primary["cells"]
+        if cell["config"]["club"]["shaft_lean_deg"] == 0
+        and _profile(cell["cell"]) in ("shaft_only", "combined2")
+    ]
+    lines = [
+        "### Zero-Lean Curve and Variability Comparison",
+        "",
+        "This predeclared subset varies shaft-twist SD (1°/2°), curve strength (1×/2×), and isolated versus combined delivery errors for each club. Differences are matched shot by shot against Straight inside each cell. The common paired count may be smaller than every pattern's individual supported count. SG is per simulated opportunity; multiply by 100 for the same hypothetical effect over 100 identical opportunities, not per round.",
+        "",
+        "| Club | Profile | Twist SD (°) | Curve | Common Paired n | Draw Δ SG [95%] | Fade Δ SG [95%] |",
+        "| --- | --- | ---: | ---: | ---: | --- | --- |",
+    ]
+    for cell in cells:
+        config = cell["config"]
+        descriptor = [
+            config["club"]["club_id"],
+            _profile(cell["cell"]),
+            f"{config['noise']['standard_deviations'][0]:g}",
+            f"{config['curve_scale']:g}",
+        ]
+        if cell["status"] != "completed":
+            lines.append(
+                "| "
+                + " | ".join(
+                    [
+                        *descriptor,
+                        "Unavailable",
+                        cell.get("reason", "unavailable"),
+                        "—",
+                    ]
+                )
+                + " |"
+            )
+            continue
+        paired = cell["paired_comparisons"]
+        sg = cell.get("course_scoring", {}).get("paired_benefit_vs_straight", {})
+        lines.append(
+            "| "
+            + " | ".join(
+                [
+                    *descriptor,
+                    f"{paired['paired_n']:,}",
+                    _interval(sg.get("Draw")),
+                    _interval(sg.get("Fade")),
+                ]
+            )
+            + " |"
+        )
+    lines.extend(
+        (
+            "",
+            "For the same selected combined-2, 2° shaft variation, curve scale 1 cells, paired radial error gives the geometric endpoint comparison independently of the hypothetical score:",
+            "",
+            "| Club | Common Paired n | Draw Δ Radial Error (m) [95%] | Fade Δ Radial Error (m) [95%] |",
+            "| --- | ---: | --- | --- |",
+        )
+    )
+    for cell in cells:
+        config = cell["config"]
+        if (
+            _profile(cell["cell"]) != "combined2"
+            or config["noise"]["standard_deviations"][0] != 2
+            or config["curve_scale"] != 1
+        ):
+            continue
+        if cell["status"] != "completed":
+            lines.append(
+                f"| {config['club']['club_id']} | Unavailable | {cell.get('reason', 'unavailable')} | — |"
+            )
+            continue
+        paired = cell["paired_comparisons"]
+        radial = paired["mean_radial_error_difference_vs_straight"]
+        lines.append(
+            f"| {config['club']['club_id']} | {paired['paired_n']:,} | {_interval(radial.get('Draw'))} | {_interval(radial.get('Fade'))} |"
+        )
+    return lines + [""]
+
+
 def _sensitivity_lines(sensitivity: dict[str, dict]) -> list[str]:
     lines = ["## Course-Dimension Sensitivity", ""]
     if not sensitivity:
@@ -157,9 +417,9 @@ def _sensitivity_lines(sensitivity: dict[str, dict]) -> list[str]:
         ]
     lines.extend(
         (
-            "Each case re-scores the same validated, commonly supported endpoints; no new flights are simulated. Driver dimensions are fairway half-width and hole distance. Iron and wedge dimensions are green radius.",
+            "Each case re-scores the same validated, commonly supported endpoints from lean-0, curve-scale-1, shaft-SD-1°, combined-2 cells; no new flights are simulated. Driver dimensions are fairway half-width and hole distance. Iron and wedge dimensions are green radius. Changes in score with course dimensions do not change the flight distribution.",
             "",
-            "| Cell | Scenario | Paired n | Draw SG − Straight [95%] | Fade SG − Straight [95%] |",
+            "| Club | Scenario | Paired n | Draw SG − Straight [95%] | Fade SG − Straight [95%] |",
             "| --- | --- | ---: | --- | --- |",
         )
     )
@@ -168,7 +428,7 @@ def _sensitivity_lines(sensitivity: dict[str, dict]) -> list[str]:
         for scenario, scored in sorted(result["scenarios"].items()):
             paired = scored.get("paired_benefit_vs_straight", {})
             lines.append(
-                f"| {cell_name} | {scenario} | {population['common_supported_n']:,} | "
+                f"| {cell_name.split('_lean', 1)[0]} | {scenario} | {population['common_supported_n']:,} | "
                 f"{_interval(paired.get('Draw'))} | {_interval(paired.get('Fade'))} |"
             )
     return lines + [""]
@@ -184,15 +444,20 @@ def _lean_lines(lean: dict) -> list[str]:
         "",
         f"The fixed-target control planned {lean['population']['planned_pairs']} lean pairs: {counts['available']} fully supported, {counts['conditional_only']} conditional, and {counts['unavailable']} unavailable. All comparisons use the intersection of supported shot indices across six physical populations: three patterns at each of two lean settings. Lean differences include rematched nominal speed, face, and path; they are not an isolated causal effect of shaft lean.",
         "",
-        "| Club | Profile | Twist SD (°) | Curve Scale | Lean Pair (°) | Common n | Pattern | Radial Error Difference (m) [95%] | SG Difference [95%] |",
-        "| --- | --- | ---: | ---: | --- | ---: | --- | --- | --- |",
+        "The complete paired comparison inventory, including every unavailable pair, is in [REPORT_LEAN.csv](REPORT_LEAN.csv). The compact table below shows combined-2, 2° shaft variation, curve scale 1, for each club. Positive differences mean the later lean is higher; paired SG and radial error have different desirable signs.",
+        "",
+        "| Club | Lean Pair (°) | Common n | Pattern | Δ Radial Error (m) [95%] | Δ SG [95%] |",
+        "| --- | --- | ---: | --- | --- | --- |",
     ]
     for pair in pairs:
+        if (
+            pair["profile"] != "combined2"
+            or pair["rotation_sd_deg"] != 2
+            or pair["curve_scale"] != 1
+        ):
+            continue
         descriptor = [
             pair["club_id"],
-            pair["profile"],
-            f"{pair['rotation_sd_deg']:g}",
-            f"{pair['curve_scale']:g}",
             f"{pair['leans_deg'][0]:g}→{pair['leans_deg'][1]:g}",
         ]
         if pair["status"] == "unavailable":
@@ -228,12 +493,71 @@ def _lean_lines(lean: dict) -> list[str]:
     return lines + [""]
 
 
+def render_lean_inventory(lean: dict) -> str:
+    """Preserve every across-lean pair and physical pattern in a CSV appendix."""
+    fields = (
+        "status",
+        "reason",
+        "club",
+        "profile",
+        "shaft_rotation_sd_deg",
+        "curve_scale",
+        "lean_before_deg",
+        "lean_after_deg",
+        "target_x_m",
+        "total_per_population",
+        "common_supported_n",
+        "pattern",
+        "radial_error_difference_m",
+        "radial_lower_95",
+        "radial_upper_95",
+        "course_sg_difference",
+        "course_sg_lower_95",
+        "course_sg_upper_95",
+    )
+    stream = io.StringIO()
+    writer = csv.DictWriter(stream, fieldnames=fields, lineterminator="\n")
+    writer.writeheader()
+    for pair in lean["pairs"]:
+        for pattern in PATTERNS:
+            metric = pair.get("patterns", {}).get(pattern, {})
+            radial = metric.get("radial_error_difference_m", {})
+            sg = metric.get("course_sg_difference", {})
+            writer.writerow(
+                {
+                    "status": pair["status"],
+                    "reason": pair.get("reason", ""),
+                    "club": pair["club_id"],
+                    "profile": pair["profile"],
+                    "shaft_rotation_sd_deg": pair["rotation_sd_deg"],
+                    "curve_scale": pair["curve_scale"],
+                    "lean_before_deg": pair["leans_deg"][0],
+                    "lean_after_deg": pair["leans_deg"][1],
+                    "target_x_m": pair["target_x_m"],
+                    "total_per_population": pair["total_per_physical_population"],
+                    "common_supported_n": pair.get("common_supported_n", ""),
+                    "pattern": pattern,
+                    "radial_error_difference_m": radial.get("estimate", ""),
+                    "radial_lower_95": radial.get("lower_95", ""),
+                    "radial_upper_95": radial.get("upper_95", ""),
+                    "course_sg_difference": sg.get("estimate", ""),
+                    "course_sg_lower_95": sg.get("lower_95", ""),
+                    "course_sg_upper_95": sg.get("upper_95", ""),
+                }
+            )
+    return stream.getvalue()
+
+
 def render_final_report(
     primary: dict, control: dict, lean: dict, sensitivity: dict[str, dict]
 ) -> str:
     """Describe only integrity-checked final cells; never infer unavailable outcomes."""
     primary_total, primary_done, primary_unavailable = _count_matrix(primary, "primary")
     control_total, control_done, control_unavailable = _count_matrix(control, "control")
+    cells_digest = hashlib.sha256(
+        render_cell_inventory(primary, control).encode()
+    ).hexdigest()
+    lean_digest = hashlib.sha256(render_lean_inventory(lean).encode()).hexdigest()
     lines = [
         "# Matched Shot Patterns: Final Conditional Simulation Report",
         "",
@@ -251,41 +575,50 @@ def render_final_report(
         "",
         "### Relation to Phase One",
         "",
-        "[Phase One](../README.md) varied face angle around constant delivered loft and earlier controls. Its historical outputs remain separate. This phase pitches the complete club, matches raw nominal landings, samples shaft rotation and additional delivery errors, and uses the independently reviewed two-body incremental contact law. Numeric phase-one and phase-two effects must not be pooled as if they were the same experiment.",
-        "",
-        "## Primary Within-Lean Results",
-        "",
-        "The source-bound [Primary Matrix Plan](final_v1/matrix_plan.json) and per-cell manifests identify every input and output. Supported-shot statistics and course scores are conditional whenever a cell has unsupported deliveries. The table reports curve-minus-straight paired means and sampling-only 95% intervals, one comparison within each cell.",
+        "[Phase One](../README.md) included both a fixed-delivered-loft face-error experiment and earlier shaft-rotation geometric controls. Those historical outputs remain separate. The original face-angle SD is not interchangeable with this phase's primitive shaft-twist SD. This phase pitches the complete club, matches raw nominal landings, adds path/speed/strike noise, and uses the independently reviewed two-body incremental contact law. Numeric phase-one and phase-two effects must not be pooled as if they were the same experiment.",
         "",
     ]
-    lines.extend(_effect_summary(primary, "Primary Matrix"))
+    lines.extend(_experimental_control_lines(primary))
+    lines.extend(
+        [
+            "## Primary Within-Lean Results",
+            "",
+            "The source-bound [Primary Matrix Plan](final_v1/matrix_plan.json) and per-cell manifests identify every input and output. Every pattern in every cell, including explicit unavailable cases, appears in the [Complete Cell Inventory](REPORT_CELLS.csv). Supported-shot statistics and course scores are conditional whenever a cell has unsupported deliveries. Curves are compared against Straight on common supported shot indices within each cell, rather than pooling different target distances.",
+            "",
+        ]
+    )
+    lines.extend(_profile_control_lines(primary))
+    lines.extend(_anchor_lines(primary))
+    lines.extend(_selected_comparison_lines(primary))
     lines.extend(
         (
-            "### Complete Cell Inventory",
+            "### Matched Flight and Dispersion Graphics",
             "",
-            "| Protocol | Club | Lean (°) | Curve Scale | Twist SD (°) | Noise Profile | Minimum Supported | Draw Radial Δ (m) [95%] | Fade Radial Δ (m) [95%] | Draw SG Δ [95%] | Fade SG Δ [95%] |",
-            "| --- | --- | ---: | ---: | ---: | --- | ---: | --- | --- | --- | --- |",
+            "The [Full Figure Inventory](final_figures_v1/availability.csv) records every available panel. These direct comparison figures use shared axes and the same within-lean target; the flight shape and dispersion must be read alongside supported counts and longitudinal error.",
+            "",
+            "![Driver Matched-Pattern Overhead Flights](final_figures_v1/details/driver_lean0_curve1_rotation2_combined2/overhead.png)",
+            "",
+            "![Driver Matched-Pattern Landing Density](final_figures_v1/details/driver_lean0_curve1_rotation2_combined2/density.png)",
+            "",
+            "![Driver Draw: Shaft-Rotation Variability Comparison](final_figures_v1/comparisons/driver/combined2/Draw/shaft_rotation_sd.png)",
+            "",
+            "![7-Iron Draw: Curve-Strength Comparison](final_figures_v1/comparisons/seven_iron/combined2/Draw/curve_scale.png)",
+            "",
+            "![Pitching Wedge Fade: Shaft-Rotation Variability Comparison](final_figures_v1/comparisons/pitching_wedge/combined2/Fade/shaft_rotation_sd.png)",
+            "",
         )
     )
-    lines.extend(_row(cell, "Within Lean") for cell in primary["cells"])
+    lines.extend(_effect_summary(primary, "Primary Matrix"))
     lines.extend(
         (
             "",
             "## Across-Lean Control Cell Accounting",
             "",
-            "The [Control Matrix Plan](control_final_v1/matrix_plan.json) fixes target distance to the zero-lean reference. Infeasible cells are retained and named. This does not by itself identify a pure lean effect because the optimizer rematches delivery inputs.",
+            "The [Control Matrix Plan](control_final_v1/matrix_plan.json) fixes target distance to the zero-lean reference. Infeasible cells are retained and named in the complete CSV inventory. This does not by itself identify a pure lean effect because the optimizer rematches delivery inputs. Driver lean can shorten or eliminate the physically airborne nominal; all comparisons are conditioned on reachability.",
             "",
         )
     )
     lines.extend(_effect_summary(control, "Control Matrix"))
-    lines.extend(
-        (
-            "| Protocol | Club | Lean (°) | Curve Scale | Twist SD (°) | Noise Profile | Minimum Supported | Draw Radial Δ (m) [95%] | Fade Radial Δ (m) [95%] | Draw SG Δ [95%] | Fade SG Δ [95%] |",
-            "| --- | --- | ---: | ---: | ---: | --- | ---: | --- | --- | --- | --- |",
-        )
-    )
-    lines.extend(_row(cell, "Across Lean") for cell in control["cells"])
-    lines.extend(("",))
     lines.extend(_lean_lines(lean))
     lines.extend(_sensitivity_lines(sensitivity))
     lines.extend(
@@ -293,6 +626,8 @@ def render_final_report(
             "## Reproducibility and Limitations",
             "",
             f"Primary plan SHA-256: `{primary['plan_sha256']}`. Control plan SHA-256: `{control['plan_sha256']}`. Source and native-binary identities, numerical settings, seeds, and artifact hashes are frozen in each `run_start.json`, `receipt.json`, and `manifest.json`; the cell loader validates them before aggregation. Review the [Independent Validation Record](validation/README.md) and [Final Run Acceptance](FINAL_RUN_ACCEPTANCE.md).",
+            "",
+            f"Companion inventory SHA-256: `REPORT_CELLS.csv` `{cells_digest}`; `REPORT_LEAN.csv` `{lean_digest}`. These appendices preserve all planned and unavailable rows while the main report selects readable comparisons.",
             "",
             "An interval excluding zero is not empirical proof of a golfer's best shot shape. Course SG relies on a historical, source-backed but approximate baseline and assumed green/fairway geometry. Unsupported terminal lies prevent full-population SG; conditional estimates use common supported indices. Absolute carry and across-lean target feasibility constrain interpretation, especially at 10° driver lean.",
             "",
@@ -329,10 +664,35 @@ def assert_matrix_inputs_unchanged(root: Path, report: dict) -> None:
 
 def validate_final_plans(primary: dict, control: dict) -> None:
     """Keep a pilot or partial profile subset out of the final-report pathway."""
-    if primary.get("stage") != "final_v1" or primary.get("planned_cells") != 324:
-        raise ValueError("primary final protocol requires 324 final_v1 cells")
-    if control.get("stage") != "control_final_v1" or control.get("planned_cells") != 72:
-        raise ValueError("control final protocol requires 72 control_final_v1 cells")
+    if (
+        primary.get("stage") != "final"
+        or primary.get("planned_cells") != 324
+        or len(primary.get("cells", [])) != 324
+    ):
+        raise ValueError("primary final protocol requires 324 cells")
+    if (
+        control.get("stage") != "final"
+        or control.get("planned_cells") != 72
+        or len(control.get("cells", [])) != 72
+    ):
+        raise ValueError("control final protocol requires 72 cells")
+    if any(cell["config"]["target_x_m"] is not None for cell in primary["cells"]):
+        raise ValueError("primary cells must use within-lean nominal targets")
+    if any(cell["config"]["target_x_m"] is None for cell in control["cells"]):
+        raise ValueError("control cells must declare a fixed cross-lean target")
+
+
+def _write_atomic(destination: Path, content: str) -> None:
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    with NamedTemporaryFile(
+        "w", encoding="utf-8", dir=destination.parent, delete=False
+    ) as handle:
+        staged = Path(handle.name)
+        handle.write(content)
+    try:
+        os.replace(staged, destination)
+    finally:
+        staged.unlink(missing_ok=True)
 
 
 def build_final_report(
@@ -374,16 +734,12 @@ def build_final_report(
     # Recheck plan identity after potentially long read-only sensitivity scoring.
     for root, report in ((primary_root, primary), (control_root, control)):
         assert_matrix_inputs_unchanged(root, report)
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    with NamedTemporaryFile(
-        "w", encoding="utf-8", dir=destination.parent, delete=False
-    ) as handle:
-        staged = Path(handle.name)
-        handle.write(rendered)
-    try:
-        os.replace(staged, destination)
-    finally:
-        staged.unlink(missing_ok=True)
+    _write_atomic(
+        destination.with_name("REPORT_CELLS.csv"),
+        render_cell_inventory(primary, control),
+    )
+    _write_atomic(destination.with_name("REPORT_LEAN.csv"), render_lean_inventory(lean))
+    _write_atomic(destination, rendered)
     return destination
 
 

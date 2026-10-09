@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import csv
+import io
+
 import pytest
 
 from scripts.research.shot_pattern_analysis import build_final_report
@@ -11,11 +14,21 @@ pytestmark = pytest.mark.unit
 
 def _cell(name: str, *, status: str = "completed") -> dict:
     config = {
-        "club": {"club_id": "driver", "shaft_lean_deg": 0.0},
-        "noise": {"standard_deviations": [1.0, 0, 0, 0, 0, 0, 0]},
+        "club": {
+            "club_id": "driver",
+            "shaft_lean_deg": 0.0,
+            "loft_deg": 10.0,
+            "lie_deg": 58.5,
+            "club_speed_mps": 45.0,
+            "attack_angle_deg": -0.9,
+            "clubhead_mass_kg": 0.2,
+        },
+        "noise": {"standard_deviations": [1.0, 0, 0, 0, 0, 0, 0], "correlation": None},
         "curve_scale": 1.0,
         "n_shots": 10_000,
         "target_x_m": None,
+        "seed": 20261009,
+        "match_tolerance_m": 0.05,
     }
     result = {"cell": name, "status": status, "config": config}
     if status == "unavailable":
@@ -24,6 +37,10 @@ def _cell(name: str, *, status: str = "completed") -> dict:
     return {
         **result,
         "target_x_m": 179.0,
+        "nominals": {
+            name: {"face_deg": 0.0, "path_deg": 0.0, "speed_mps": 45.0}
+            for name in ("Straight", "Draw", "Fade")
+        },
         "summary": {
             name: {
                 "total_n": 10_000,
@@ -32,6 +49,8 @@ def _cell(name: str, *, status: str = "completed") -> dict:
                 "downrange_sd_m": 3.0,
                 "target_rmse_m": 6.0,
                 "target_containment_fraction": 0.8,
+                "mean_carry_m": 179.0,
+                "realized_face_path_correlation": 0.1,
             }
             for name in ("Straight", "Draw", "Fade")
         },
@@ -142,6 +161,31 @@ def test_course_sensitivity_is_reported_only_when_supplied():
     assert "not computed" in text.lower()
 
 
+def test_main_report_uses_compact_tables_and_separate_complete_inventory():
+    cell = _cell("driver_lean0_curve1_rotation1_combined2")
+    matrix = _matrix([cell], "final")
+    lean = {
+        "schema": "matched-across-lean/1",
+        "pairs": [],
+        "population": {"planned_pairs": 0},
+    }
+    text = build_final_report.render_final_report(matrix, matrix, lean, {})
+    assert "REPORT_CELLS.csv" in text
+    assert "9-profile" in text or "Nine-Profile" in text
+    assert "common paired" in text.lower()
+    assert "Mean Carry" in text
+    assert "final_figures_v1/comparisons/driver/combined2" in text
+    assert "### Complete Cell Inventory" not in text
+    rows = list(
+        csv.DictReader(
+            io.StringIO(build_final_report.render_cell_inventory(matrix, matrix))
+        )
+    )
+    assert len(rows) == 6
+    assert {row["pattern"] for row in rows} == {"Straight", "Draw", "Fade"}
+    assert rows[1]["nominal_speed_mps"] == "45.0"
+
+
 def test_matrix_input_change_is_rejected_before_publication(tmp_path):
     import hashlib
 
@@ -166,10 +210,18 @@ def test_matrix_input_change_is_rejected_before_publication(tmp_path):
 def test_final_builder_requires_full_324_and_72_cell_protocols():
     with pytest.raises(ValueError, match="324"):
         build_final_report.validate_final_plans(
-            {"planned_cells": 1, "stage": "final_v1"},
-            {"planned_cells": 72, "stage": "control_final_v1"},
+            {"planned_cells": 1, "stage": "final", "cells": []},
+            {"planned_cells": 72, "stage": "final", "cells": []},
         )
     build_final_report.validate_final_plans(
-        {"planned_cells": 324, "stage": "final_v1"},
-        {"planned_cells": 72, "stage": "control_final_v1"},
+        {
+            "planned_cells": 324,
+            "stage": "final",
+            "cells": [{"config": {"target_x_m": None}}] * 324,
+        },
+        {
+            "planned_cells": 72,
+            "stage": "final",
+            "cells": [{"config": {"target_x_m": 179.0}}] * 72,
+        },
     )
