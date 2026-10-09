@@ -190,7 +190,7 @@ def _overlay_figure(
         ax.set_xlabel("Time (s)")
     span = "Impact Window" if window else "Full Swing"
     fig.suptitle(
-        f"Grip Kinetics Parity vs OpenSim Bushing Reference: {club}, {span} "
+        f"Grip Kinetics Parity vs OpenSim Bushing Reference: {club.capitalize()}, {span} "
         f"(tolerance peak {100 * PEAK_TOLERANCE:.0f}%, "
         f"RMS {100 * RMS_TOLERANCE:.0f}% of peak)",
         fontsize=12,
@@ -223,7 +223,7 @@ def _error_figure(club: str, series: dict[str, GripKineticsSeries], path: Path) 
         ax.set_ylabel("% of reference peak", fontsize=9)
         ax.grid(True, alpha=0.3)
     axes[0, 0].legend(loc="upper left", fontsize=8)
-    fig.suptitle(f"Grip Kinetics Parity Error Traces: {club}", fontsize=12)
+    fig.suptitle(f"Grip Kinetics Parity Error Traces: {club.capitalize()}", fontsize=12)
     fig.tight_layout(rect=(0, 0, 1, 0.97))
     fig.savefig(path, dpi=110)
     plt.close(fig)

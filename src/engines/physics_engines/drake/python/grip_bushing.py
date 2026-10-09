@@ -213,9 +213,9 @@ class ClubOnBushings:
 
 
 def _system(sim: ClubOnBushings, kin: WeldClubKinematics, spline: Any) -> Any:
-    framework = _module("pydrake.systems.framework")
+    leaf_system: Any = _module("pydrake.systems.framework").LeafSystem
 
-    class _Club(framework.LeafSystem):
+    class _Club(leaf_system):
         def __init__(self) -> None:
             super().__init__()
             self.DeclareContinuousState(13)
