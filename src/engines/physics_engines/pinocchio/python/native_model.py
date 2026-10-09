@@ -265,6 +265,18 @@ class NativePinocchioModel:
             raise ValueError("Native coordinates must be finite")
         return q
 
+    def velocity(self, rates: Mapping[str, float]) -> NDArray[np.float64]:
+        """Generalised velocity for named coordinate rates (1-DOF primitives)."""
+        return self._velocity_vector(rates)
+
+    def body_placement(self, name: str) -> tuple[int, Any]:
+        """``(joint index, SE3 of the spec body frame in that joint frame)``.
+
+        Raises:
+            KeyError: for an unknown body name.
+        """
+        return self._bodies[name]
+
     def frame_poses(
         self, coordinates: Mapping[str, float]
     ) -> dict[str, NDArray[np.float64]]:
