@@ -51,6 +51,23 @@ caching, and runs used one numerical worker with bounded timeouts.
 
 ## Remaining Work
 
+Native MuJoCo replay merged to main in PR #11836 at
+`9d336118713d40bdec7b3652cff2f9968979439e`. This integration preserves
+that main history and its Thelen replay documentation while retaining the
+shared admission helper introduced by this Drake child. Both providers bind
+that helper's source bytes. Retarget this child to main after native and local
+integration validation; six-engine and full-body acceptance remain open.
+
+Integration validation passed 11 native Drake tests in the existing Linux
+runtime, 13 native MuJoCo replay tests in the existing Windows native runtime,
+and all 46 seam tests in the existing application runtime. The initial seam
+attempt in the minimal native runtime lacked FastAPI; rerunning in the
+application runtime passed without changing code or environments. Run
+`tests/unit/motion_matching/test_native_drake_torque_replay.py` with native
+Drake and `--noconftest -o addopts=''`; run
+`tests/unit/motion_matching/test_native_torque_replay.py` with native MuJoCo
+and `tests/unit/shared_python/test_seam_redirect.py` in the application runtime.
+
 The full DRY gate subsequently found the repeated canonical bundle round-trip
 and capability check in the Drake and MuJoCo consumers. Both now delegate
 that unchanged admission step to `src/engines/native_replay_contracts.py`;
