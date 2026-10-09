@@ -6,6 +6,11 @@
   "inventory_commit": null,
   "blockers": [
     {
+      "id": "UP-D1-native-candidate-benchmark-inventory",
+      "owner": "UpstreamDrift issue #11824",
+      "resolution": "Inventory F03b synthetic one-hinge native MuJoCo candidate validation in src/shared/python/motion_matching/native_candidate_benchmark.py and provisional chapter 20: held torque export through F06, complete initial native integration state, exact matrix-exponential truth, native RK4 mesh refinement, independently recomputed SI torque/slew residuals, distinct transcription/native/continuous/observation gaps, failure-retaining cold/warm total-cost receipts and Python allocation. The native hinge has no contact, anatomy or capture observations; parameterizations still differ, so this fixture cannot select a production solver. Merged Tools T01 pin, D02/D03 private protocol, F09 observation clocks, full-body/contact evidence and six-engine/muscle qualification remain open. Full calculation coverage and publication remain blocked."
+    },
+    {
       "id": "UP-D1-native-torque-replay-inventory",
       "owner": "UpstreamDrift issue #11823",
       "resolution": "Inventory native MuJoCo full mjSTATE_INTEGRATION restoration, distinct quaternion configuration/tangent velocity, direct unit hinge-motor post-limit ZOH input and actual native effort checks in native_torque_replay.py and chapters/19-native-torque-replay.qmd. Synthetic replay and negative admission tests establish a bounded same-provider path only. Merged Tools T01 pin, six-engine parity, refinement, anatomy, native muscle/contact/grip and real capture qualification remain open. Exclusive process ownership is required; no subprocess isolation or complete transitive-library attestation is claimed."

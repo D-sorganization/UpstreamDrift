@@ -1,0 +1,92 @@
+# Native Candidate Replay Benchmark (Provisional)
+
+## Scope and Known Rotary Plant
+
+F03b (#11824, parent F03 #11787) tests two candidate torque histories against
+F06's fresh MuJoCo direct-motor replay. The fixture has one hinge, no gravity
+and no contact geometry. It is a synthetic solver and replay-boundary check,
+not a calibrated body or full-swing result. With SI rotary inertia
+$m>0$ (kg m²), damping $c\ge0$ (N m s/rad), stiffness $k\ge0$ (N m/rad),
+position $q$ (rad), velocity $v$ (rad/s), and post-limit motor torque
+$\tau$ (N m), the intended dynamics are
+
+$$
+\dot q=v,\qquad m\dot v=\tau-cv-kq.
+$$
+
+The native XML specifies a hinge with axis $+y$, inertia tensor
+$\operatorname{diag}(m,m,m)$ about that hinge, joint damping and spring
+stiffness, a direct unit-gain motor, and RK4. Its compiled model and source
+are bound by F06. No other actuator force, root control or hidden contact
+wrench is introduced. The sole motor has the same hard control range as the
+solver's torque bounds. The validator recomputes the actual torque and slew
+residuals in their respective units, independent of solver-reported values.
+
+## Independent Truth and Native Replay
+
+For each interval $h=t_{i+1}-t_i$ with zero-order-held $\tau_i$, an
+independent matrix exponential supplies exact synthetic truth. With
+
+$$
+A=\begin{bmatrix}0&1\\-k/m&-c/m\end{bmatrix},\qquad
+B=\begin{bmatrix}0\\1/m\end{bmatrix},
+$$
+
+the augmented exponential
+$\exp\!\left(h\begin{bmatrix}A&B\\0&0\end{bmatrix}\right)$
+maps $(q_i,v_i,\tau_i)$ to $(q_{i+1},v_{i+1})$. This calculation is separate
+from the sparse midpoint defect, the F03a adaptive RK45 replay and MuJoCo
+RK4. A closed-form double-integrator case checks its sign and units.
+
+The original synthetic time grid must start at zero and have uniform
+spacing. An explicit positive integer refinement repeats each original
+post-bound torque for the corresponding native substeps. This creates the
+**executed** ZOH history at the native timestep, with an unused terminal
+sentinel; it does not interpolate a polynomial or retime observations. F06
+binds the complete initial `mjSTATE_INTEGRATION`, actual ordered actuator
+torque, model/provider, channel, input-grid and execution-policy hashes, then
+steps a fresh native model without feedback callbacks or state resets.
+
+The receipt keeps transcription defect, native-versus-exact integrator gap,
+native-versus-transcription node gap, F03a RK45-versus-exact gap, observation
+RMSE, torque residual and slew residual separate. Small node defect never
+establishes native rollout agreement: the coarse stiff fixture has a tiny
+midpoint defect but fails the independent native node-gap gate. Native
+substep refinement reduces RK4's error relative to matrix-exponential truth;
+the changed native input grid produces a distinct executed-input hash.
+Candidate observations are sampled only at the original synthetic nodes.
+Real capture clocks, marker masks and uncertainties would need explicit
+post-integration observation interpolation and their own digest; input
+sampling cannot stand in for a 240/359/360 Hz capture timebase.
+
+## Benchmark Accounting and Acceptance Boundary
+
+`benchmark_native_candidates` runs the predeclared starts serially. Each
+attempt records preparation, solver/derivative work, native model creation,
+bundle verification and replay, deterministic JSON receipt export, and total
+time. Failed starts remain in the output and in time-to-first-accepted cost.
+Cold/warm p50/p95 total time and Python-tracked peak allocation are reported
+with host, platform and library versions. The receipt digest binds each
+exported synthetic attempt. Python allocation is not process RSS or native
+MuJoCo allocation; the fixture excludes capture preprocessing, full-body
+resource loading and any private-data run. There is no hidden warmup or
+parallel candidate search.
+
+The same native validator evaluates the existing multiple-shooting adapter and
+the sparse collocation spike, but their parameterizations remain unequal:
+one constant torque versus one per-interval torque. Their native errors can
+be checked, yet these results cannot select a production backend. Tolerances
+in the tests are predeclared synthetic regression limits, not calibrated
+noise or clinical/biomechanical acceptance thresholds. F03 parent still needs
+the frozen D02/D03 capture protocol, full-body/contact model, comparable
+candidate resources, complete time-to-accepted-capture cost and a documented
+production selection. An empty-contact hinge cannot qualify native swing
+ground/grip, muscles, anatomy or any of the six-engine parity gates.
+
+Run the focused checks with
+`python -m pytest tests/unit/motion_matching/test_native_candidate_benchmark.py -q`
+after the merged Tools T01 pin and F06 consumer boundary are available.
+During development, the Tools worktree facade was preloaded explicitly; that
+override is not portable evidence. Keep this chapter and its registry entry
+provisional until a reproducible native receipt is produced under the merged
+dependency pin.

@@ -10409,3 +10409,28 @@ Turnover: `docs/development/feedback_controls/F06_NATIVE_TORQUE_TURNOVER.md`.
 The initial Tools development override requires a merged vendor pin before
 consumer acceptance; six-engine and muscular OpenSim real-capture gates remain
 open.
+
+## Independent Native Candidate Benchmark (F03b, #11824)
+
+`native_candidate_benchmark.py` extends F03's synthetic rotary comparison with
+an independent matrix-exponential solution for exact held-input truth and F06's
+fresh native MuJoCo replay. It binds the executed post-limit motor torque,
+complete initial `mjSTATE_INTEGRATION`, model and policy identities, and exact
+native step grid through the versioned Tools replay bundle. The gate keeps
+midpoint transcription defect, native-to-node gap, native-to-exact integrator
+gap, continuous RK45-to-exact gap, observation error, torque and slew residuals
+separate. Torque and slew are recomputed from applied input, not trusted from a
+solver report. A coarse stiff regression rejects low-defect transcription when
+native replay disagrees; native step refinement is checked independently.
+
+The serial benchmark retains failed and warm attempts, preparation, solve,
+native replay and receipt-export costs, cumulative time to first accepted
+attempt, p50/p95 wall time, and Python-tracked peak allocation with named
+hardware. The fixture is a no-contact one-hinge motor with synthetic node
+observations. The shooting adapter and collocation spike have unequal input
+degrees of freedom, so this is a provisional solver/replay boundary test, not a
+production backend selection or real-capture qualification. Capture
+preprocessing, D02/D03 frozen protocol, F09 observation-clock alignment,
+full-body/contact resources and muscle/six-engine gates remain open. Canonical
+calculation: `manuals/upstreamdrift/chapters/20-native-candidate-benchmark.qmd`.
+Turnover: `docs/development/feedback_controls/F03B_NATIVE_CANDIDATE_TURNOVER.md`.
