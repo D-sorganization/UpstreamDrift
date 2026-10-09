@@ -380,6 +380,9 @@ The focused local regression set completed with 81 passed and 3 skipped using
 the retained Python 3.12 environment and `--noconftest`; the skips are optional
 native/provider cases. A default Python 3.13 collection attempt faulted inside
 the installed MuJoCo plugin loader and was stopped; it is not a product-test
-failure. The exact Tools loader dependency is included as source in this child
-because that loader is not part of the merged Tools pin. Its inclusion does
-not make a pending Tools change authoritative or qualify engine physics.
+failure. The exact private-loader implementation from UpstreamDrift PR #12002
+is included as a dependency commit in this child. It belongs to UpstreamDrift's
+pinned-Tools import seam, not a pending Tools-repository change. Its inclusion
+does not establish that PR #12002 has merged or qualify engine physics. Keep
+that PR's loader authority and this consumer migration separate when
+integrating the dependency chain.
