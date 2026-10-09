@@ -13,7 +13,7 @@
   "totals": {
     "identical": 401,
     "diverged": 272,
-    "ud-only": 1730,
+    "ud-only": 1734,
     "tools-only": 777,
     "spelling-only": 121
   },
@@ -133,7 +133,7 @@
     "biomechanics": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 33,
+      "ud-only": 35,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -637,7 +637,7 @@
     "plotting": {
       "identical": 0,
       "diverged": 3,
-      "ud-only": 24,
+      "ud-only": 26,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -3881,6 +3881,18 @@
       "spelling_only": false
     },
     {
+      "path": "biomechanics/ground_reaction_plot_model.py",
+      "classification": "ud-only",
+      "package": "biomechanics",
+      "subpackage": "",
+      "ud_bytes": 8681,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "biomechanics/hill_muscle.py",
       "classification": "ud-only",
       "package": "biomechanics",
@@ -4006,6 +4018,18 @@
       "package": "biomechanics",
       "subpackage": "",
       "ud_bytes": 11614,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "biomechanics/plot_traces.py",
+      "classification": "ud-only",
+      "package": "biomechanics",
+      "subpackage": "",
+      "ud_bytes": 1281,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -24305,6 +24329,18 @@
       "spelling_only": false
     },
     {
+      "path": "plotting/renderers/ground_reaction.py",
+      "classification": "ud-only",
+      "package": "plotting",
+      "subpackage": "renderers",
+      "ud_bytes": 5158,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "plotting/renderers/kinematics.py",
       "classification": "ud-only",
       "package": "plotting",
@@ -24346,6 +24382,18 @@
       "package": "plotting",
       "subpackage": "renderers",
       "ud_bytes": 14830,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "plotting/renderers/time_panels.py",
+      "classification": "ud-only",
+      "package": "plotting",
+      "subpackage": "renderers",
+      "ud_bytes": 2672,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
