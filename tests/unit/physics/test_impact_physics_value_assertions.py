@@ -239,23 +239,23 @@ class TestComputeGearEffectSpin:
 
     @pytest.mark.unit
     def test_toe_impact_produces_draw_spin(self) -> None:
-        """Toe impact (positive h_offset) → negative Z-axis spin (draw)."""
+        """Toe impact adds +Z spin: omega cross +X velocity points left (+Y)."""
         spin = compute_gear_effect_spin(
             impact_offset=np.array([0.02, 0.0]),  # toe
             clubhead_velocity=np.array([45.0, 0.0, 0.0]),
             clubface_normal=np.array([1.0, 0.0, 0.0]),
         )
-        assert spin[2] < 0
+        assert spin[2] > 0
 
     @pytest.mark.unit
     def test_heel_impact_produces_fade_spin(self) -> None:
-        """Heel impact (negative h_offset) → positive Z-axis spin (fade)."""
+        """Heel impact adds -Z spin: omega cross +X velocity points right (-Y)."""
         spin = compute_gear_effect_spin(
             impact_offset=np.array([-0.02, 0.0]),  # heel
             clubhead_velocity=np.array([45.0, 0.0, 0.0]),
             clubface_normal=np.array([1.0, 0.0, 0.0]),
         )
-        assert spin[2] > 0
+        assert spin[2] < 0
 
     @pytest.mark.unit
     def test_toe_heel_are_opposite(self) -> None:
