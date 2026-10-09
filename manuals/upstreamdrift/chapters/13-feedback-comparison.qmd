@@ -168,3 +168,125 @@ campaign qualification remains false until every required registry row is
 qualified and every existing gate passes. Synthetic contract fixtures prove
 identity binding and sampling behavior but provide no physiological or
 cross-engine acceptance evidence.
+
+## F09c Strict Native Replay Execution
+
+The F09c execution boundary in
+`src/engines/feedback_native_execution.py` consumes one frozen Tools T01
+`ExperimentReplayBundle` and one explicit adapter binding for an existing F01
+inventory row. The binding preserves two identities: F01's inventoried
+package, variant, source and provider; and T01's native model, adapter provider,
+loaded-model digest, state schema, channel schema, and ordered actuator IDs.
+The two provider identities are not interchangeable. Bindings are explicit;
+the executor never infers a full-body mapping from the adapter's synthetic
+unit-hinge test identifiers.
+
+Current execution support includes the reviewed MuJoCo and Drake direct-torque
+adapter pairs and the Pinocchio direct-torque adapter added in F09e (#11914).
+The report retains every inventory row and all six required engines, marking
+rows without an adapter or with unavailable runtime evidence as blocking.
+Before stepping, the bundle must declare
+native-own-contact replay, no observation or state-feedback access, reset
+policy forbidden, simulation-relative time, and zero-order-held actuator
+torque. The executor calls only the adapter selected by the binding and checks
+the actual full output against exact initial-state, input, policy, channel,
+model, and time-grid identities. It also checks the complete native numerical
+initialization state, full horizon, finite values, and generalized effort
+dimensions without assuming `nq == nv`.
+
+The versioned execution receipt records content digests and execution facts,
+not a scientific verdict. Local model paths are excluded. The declared
+`state_reset_allowed=False` policy is kept separate from the unknown reset
+counter (`state_reset_count=None`); a forbidden-reset policy is not a measured
+zero. A successful receipt remains `unqualified`; it cannot establish marker accuracy,
+physiological validity, muscle/contact capability, or cross-engine
+equivalence. Contract tests execute a synthetic one-hinge model using the
+actual adapter, but do not qualify any registered production model. The
+calculation registry remains blocked; this execution interface is not a
+released matching calculation.
+
+F09d (#11907) adds the next boundary: explicit model-owned forward kinematics
+from those native output configurations to named 3-D marker positions. Its
+ordered local-point map and source/loaded-model/provider identities are
+content-addressed; generalized coordinates are never treated as marker
+positions. See
+`manuals/upstreamdrift/chapters/28-native-marker-forward-kinematics.qmd`.
+
+F09e (#11914) extends this output boundary to the existing Pinocchio native
+replay adapter. It uses complete `qpos` and `qvel` with distinct `nq` and
+`nv`; frame placements are derived by `PinocchioPhysicsEngine`. The fresh
+cache-initialization policy is bound, but the adapter does not claim a measured
+reset count or introduce a synthetic cache-state payload. Native output
+remains unqualified. See
+`manuals/upstreamdrift/chapters/30-pinocchio-native-marker-forward-kinematics.qmd`.
+
+## F09f MyoSuite Native Muscle-Excitation Replay
+
+F09f adds the MyoSuite-specific open-loop input boundary in
+`src/engines/physics_engines/myosuite/python/native_excitation_replay.py`.
+The saved input is the normalized, post-mapping muscle excitation written to
+the ordered native MuJoCo `data.ctrl` channels. It is not the Gym action in
+`[-1, 1]`: MyoSuite's action wrapper transforms that command before applying
+it. The adapter does not invert that transform or infer actuator values from
+the command. T01 channels use dimensionless unit `1`; each replay interval
+holds its exact saved control for `frame_skip` native steps, with
+`simulation_relative` time and a terminal repeated-input sentinel.
+
+The adapter advances the registered model directly with `mj_step` and never
+calls Gym `step`, task observations, rewards, termination callbacks, tracking,
+or state-reset APIs. Its fixed-horizon policy binds the MyoSuite environment
+registration, source and loaded model, provider/runtime files, wrapper chain,
+solver/integrator, frame skip, native control mapping, and input bundle. The
+complete initial state includes distinct `qpos`/`qvel`, muscle activation,
+actuator controls, MuJoCo `mjSTATE_INTEGRATION` (including warm-start state),
+and the explicitly supported wrapper flags/counters. Applied excitation is
+read back from `data.ctrl` before each native step and compared exactly with
+the frozen bundle. Unsupported wrappers, control stages, plugins, changing
+source files, invalid limits, and state or mapping mismatches fail closed.
+
+This provider demonstrates a native replay seam, not production model
+coverage. The built-in elbow test environment is only an integration fixture;
+it does not bind the required MyoSuite golfer driver or iron inventory rows.
+Both rows, every unsupported/unavailable engine cell, and the six-engine
+denominator remain visible and unqualified. No task-level reset/RNG/termination
+path is executed, and the receipt does not claim physiology, marker accuracy,
+muscle-model validity, or cross-engine equivalence. See
+`manuals/upstreamdrift/chapters/31-myosuite-native-excitation-replay.qmd` for
+the canonical implementation boundary and evidence limits.
+
+## F09g Direct Model-Path Replay Kernel
+
+F09g adds a reusable Tools T01 `ACTUATOR_COMMAND` consumer for direct MuJoCo
+models. The registered factory receives the unchanged model path; source files
+and each caller-declared resource file are verified without relocating
+relative MJCF includes or geometry assets. The bounded MuJoCo 3.8.0 preflight
+resolves native-tested XML include priority, then enumerates mesh, texture, and
+cube-face resources through `MjSpec`. Every discovered source/resource must
+be contained and match the caller's declared hashes before the expected
+compiled MJB identity is checked. This is a version- and loader-specific
+closure admission, not a general MJCF parser. The native actuator-law manifest
+binds each ordered T01 `actuator:<name>` channel to its full compiled law and
+limits. Initialization restores the complete native state, and the kernel
+rejects wrapper, callback, plugin, reset, warning, timing, and state-integrity
+violations.
+
+This kernel is an underlying MuJoCo execution seam, not an official MyoSuite
+environment adapter or F09 qualification authority. Its public driver/iron
+fixture test matches all saved native samples on MuJoCo 3.8.0. It does not
+establish MyoSuite 3.6 package execution, model readiness, physiology, marker
+accuracy, or equivalence; required engine/model rows remain visible. See
+`manuals/upstreamdrift/chapters/31-myosuite-native-excitation-replay.qmd` and
+`docs/development/feedback_controls/F09G-DIRECT-MODEL-REPLAY.md`.
+Only `engine_id="mujoco"` is admitted; all other IDs fail before factory
+invocation. A bounded MuJoCo 3.8.0 disk-MJCF audit follows native-tested
+include selection and asks `MjSpec` for mesh, texture and cube-face assets. It
+requires each discovered file to be contained and hash-matched in the supplied
+inventory, then checks the preflight compiled MJB against the registered
+loaded-model digest. The admitted formats are XML, STL/MSH and PNG; absolute
+or URI references, URDF, VFS, `strippath`, hfields, skins, attach/flexcomp,
+plugins, content-type overrides and unreviewed file loaders fail closed. This
+is version- and loader-specific, not a general MJCF closure parser. It covers
+the current driver/iron underlying MuJoCo 3.8 route, but establishes neither
+official MyoSuite SDK execution nor qualification. The implementation and
+adversarial resource-closure scope are tracked in F09h (#11950); see
+`docs/development/feedback_controls/F09H-NATIVE-RESOURCE-CLOSURE.md`.

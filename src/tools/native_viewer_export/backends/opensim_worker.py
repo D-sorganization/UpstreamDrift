@@ -21,7 +21,10 @@ import numpy as np
 
 from src.engines.physics_engines.opensim.python import club_visuals
 from src.shared.python.force_overlay.glyphs import GlyphSet
-from src.shared.python.golf_view_presets import simbody_camera_transform
+from src.shared.python.golf_view_presets import (
+    VIEWER_FOV_Y_RAD,
+    simbody_camera_transform,
+)
 from src.shared.python.motion_matching.same_input import InputBundle
 from src.shared.python.motion_matching.visual_skeleton import derive_visual_skeleton
 from src.tools.native_viewer_export.backends._club import club_parts
@@ -34,7 +37,7 @@ from src.tools.native_viewer_export.backends._worker_job import WorkerJob
 from src.tools.native_viewer_export.overlay2d import draw_glyphs_rgb, pinhole_for_view
 
 UI_STRIP_PX = 40
-FOV_Y_RAD = 0.7
+FOV_Y_RAD = VIEWER_FOV_Y_RAD
 SETTLE_S = 0.6
 _GREY = (0.75, 0.78, 0.85)
 _SHAPE_GREY = (0.7, 0.72, 0.8)

@@ -66,7 +66,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `force_overlay` | 0 | 0 | 0 | 17 | 0 | 0 |
 | `golf_club` | 0 | 0 | 0 | 0 | 118 | 0 |
 | `golf_simulator` | 0 | 0 | 0 | 19 | 0 | 0 |
-| `golf_view_presets` | 0 | 0 | 0 | 3 | 0 | 0 |
+| `golf_view_presets` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `golf_viz` | 0 | 0 | 0 | 3 | 0 | 0 |
 | `grip_contact` | 0 | 0 | 0 | 9 | 0 | 0 |
 | `ground_model` | 0 | 0 | 0 | 2 | 0 | 0 |
@@ -85,7 +85,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `math_utils` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `model_appearance` | 0 | 0 | 0 | 12 | 0 | 0 |
 | `model_generation` | 27 | 52 | 14 | 20 | 1 | 79 |
-| `motion_matching` | 0 | 0 | 0 | 277 | 0 | 0 |
+| `motion_matching` | 0 | 0 | 0 | 278 | 0 | 0 |
 | `motion_pipeline` | 0 | 0 | 0 | 60 | 0 | 0 |
 | `movement_optimizer` | 0 | 0 | 0 | 169 | 0 | 0 |
 | `myofullbody` | 0 | 0 | 0 | 14 | 0 | 0 |
@@ -120,7 +120,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `security` | 0 | 0 | 0 | 5 | 0 | 0 |
 | `sg_optimizer` | 0 | 0 | 0 | 22 | 0 | 0 |
 | `shadow_tracker` | 0 | 0 | 0 | 21 | 0 | 0 |
-| `sidekick` | 211 | 67 | 23 | 36 | 80 | 278 |
+| `sidekick` | 211 | 67 | 23 | 36 | 89 | 278 |
 | `signal_toolkit` | 21 | 6 | 2 | 1 | 0 | 27 |
 | `simulation_backends` | 0 | 0 | 0 | 21 | 0 | 0 |
 | `simulation_store` | 0 | 0 | 0 | 2 | 0 | 0 |
@@ -142,7 +142,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `video_timing` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 36 | 0 | 0 |
-| **Total** | **400** | **273** | **121** | **1734** | **796** | **673** |
+| **Total** | **400** | **273** | **121** | **1736** | **805** | **673** |
 
 ## Diverged Files by Package
 
