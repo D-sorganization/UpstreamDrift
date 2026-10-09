@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 import numpy as np
 import pytest
 
 from scripts.render_head_gaze_engines import head_glyph_arrows
+from scripts.summarize_gaze_sweep import load_rows, summarize
 from scripts.sweep_gaze_weight import _fixed_scales, row_from
 
 pytestmark = pytest.mark.unit
@@ -38,6 +42,62 @@ def test_head_glyphs_point_along_forward_and_at_the_ball() -> None:
     assert np.allclose(forward.tail_m, [0, 0, 1.5])
     assert forward.tip_m[0] > 0.5 and forward.tip_m[2] == pytest.approx(1.5)
     assert np.allclose(sight.tip_m, [0.5, 0, 0.02])
+
+
+def _row(capture: str, w: float, marker: float, gaze: float) -> dict:
+    return {
+        "capture": capture,
+        "gaze_weight": w,
+        "marker_rms_mm": marker,
+        "closure_error_max_mm": 4.0,
+        "face_fit_deg": {"rms_deg": 0.8},
+        "head_gaze": {
+            "address_to_impact": {
+                "theta_gaze_rms_deg": gaze,
+                "theta_gaze_max_deg": 2 * gaze,
+                "eye_translation_range_mm": [50.0, 100.0, 25.0],
+                "head_yaw_range_deg": 30.0,
+                "head_pitch_range_deg": 5.0,
+                "head_roll_range_deg": 20.0,
+            },
+            "neck_ik_schedule": {"frames_with_clamping": 3},
+        },
+    }
+
+
+def _write_rows(root: Path, rows: list[dict]) -> None:
+    for r in rows:
+        d = root / f"{r['capture']}_{r['gaze_weight']:g}"
+        d.mkdir(parents=True)
+        (d / "sweep_row.json").write_text(json.dumps(r), encoding="utf-8")
+
+
+def test_summary_reports_rows_knees_and_the_common_default(tmp_path: Path) -> None:
+    _write_rows(
+        tmp_path,
+        [
+            _row("driver", 0, 30.0, 20.0),
+            _row("driver", 0.5, 30.5, 2.0),
+            _row("driver", 3, 32.5, 1.4),
+            _row("driver", 1, 31.0, 1.5),
+            _row("iron", 0, 30.0, 20.0),
+            _row("iron", 0.5, 31.0, 3.0),
+            _row("iron", 1, 34.0, 1.0),
+        ],
+    )
+    summary = summarize(load_rows(tmp_path))
+    driver = summary["captures"]["driver"]
+    assert [r["gaze_weight"] for r in driver["rows"]] == [0, 0.5, 1, 3]
+    assert driver["label"] == "capture-A driver"
+    assert summary["captures"]["iron"]["feasible_weights"] == [0, 0.5]
+    assert summary["selected_weight"] == 0.5
+    assert driver["rows"][0]["head_yaw_pitch_roll_range_deg"] == [30.0, 5.0, 20.0]
+    json.dumps(summary)  # serialisable
+
+
+def test_load_rows_rejects_an_empty_root(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="no sweep_row"):
+        load_rows(tmp_path)
 
 
 def test_head_glyphs_reject_degenerate_input() -> None:
