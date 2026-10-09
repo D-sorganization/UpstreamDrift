@@ -3,6 +3,7 @@
 import hashlib
 from pathlib import Path
 import sys
+from typing import cast
 import json
 import numpy as np
 from dataclasses import replace
@@ -87,11 +88,14 @@ for i in range(100):
             )
         ),
     )
-    mx["work"] = max(mx["work"], abs(o.rebound_work_j - e * e * o.compression_work_j))
+    # The energetic incremental law always supplies both work fields.
+    compression_work = cast(float, o.compression_work_j)
+    rebound_work = cast(float, o.rebound_work_j)
+    mx["work"] = max(mx["work"], abs(rebound_work - e * e * compression_work))
     de = o.post_kinetic_energy_j - o.pre_kinetic_energy_j
     mx["energy_excess"] = max(mx["energy_excess"], de)
     mx["dissipation_deficit"] = max(
-        mx["dissipation_deficit"], de + (1 - e * e) * o.compression_work_j
+        mx["dissipation_deficit"], de + (1 - e * e) * compression_work
     )
     if i < 12:
         ref = solve_incremental_contact(

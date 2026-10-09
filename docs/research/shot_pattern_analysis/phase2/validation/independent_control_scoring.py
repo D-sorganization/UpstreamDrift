@@ -9,6 +9,7 @@ import json
 import math
 from pathlib import Path
 import sys
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -46,7 +47,7 @@ for club in ("driver", "seven_iron", "pitching_wedge"):
         name = f"{club}_lean{lean}_curve1_rotation1_combined2"
         path = root / name
         summary = json.loads((path / "summary.json").read_text())
-        item = {
+        item: dict[str, Any] = {
             "cell": name,
             "summary_sha256": hashlib.sha256(
                 (path / "summary.json").read_bytes()

@@ -37,8 +37,8 @@ def main():
     parser.add_argument("--output", required=True, type=Path)
     args = parser.parse_args()
     plan = json.loads((args.pilot / "matrix_plan.json").read_text())
-    counts = collections.Counter()
-    reasons = collections.Counter()
+    counts: collections.Counter[str] = collections.Counter()
+    reasons: collections.Counter[str] = collections.Counter()
     failures = []
     maximum = dict.fromkeys(
         ("statistics", "covariance", "noise", "nominal_residual", "direct_api_sg"), 0.0
@@ -54,8 +54,8 @@ def main():
             summary = json.loads((folder / "summary.json").read_text())
             manifest = json.loads((folder / "manifest.json").read_text())
             for name, digest in manifest["files_sha256"].items():
-                actual = hashlib.sha256((folder / name).read_bytes()).hexdigest()
-                assert actual == digest, (key, name, "hash")
+                actual_digest = hashlib.sha256((folder / name).read_bytes()).hexdigest()
+                assert actual_digest == digest, (key, name, "hash")
                 hashes_checked += 1
             cell_hashes[key] = hashlib.sha256(
                 (folder / "manifest.json").read_bytes()

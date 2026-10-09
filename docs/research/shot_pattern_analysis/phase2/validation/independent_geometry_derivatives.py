@@ -10,6 +10,7 @@ import json
 import math
 from pathlib import Path
 import sys
+from typing import Any
 
 from src.tools.shot_pattern_analysis.club_geometry import club_delivery
 from src.tools.shot_pattern_analysis.matched_config import MatchedConfig, matched_preset
@@ -23,7 +24,7 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     before = matched_source_snapshot()
-    geometry = []
+    geometry: list[dict[str, Any]] = []
     for club, lean, face in itertools.product(
         ("driver", "seven_iron", "pitching_wedge"), (0.0, 5.0, 10.0), (-3.0, 0.0, 3.0)
     ):
@@ -73,13 +74,13 @@ def main():
             fixed = replace(config, club_speed_mps=nominal["speed_mps"])
             derivatives = []
             for dt, epsilon in itertools.product((0.02, 0.005), (0.01, 0.005)):
-                plus = physics.simulate_delivery(
+                plus_shot = physics.simulate_delivery(
                     nominal["face_deg"],
                     nominal["path_deg"],
                     replace(fixed, dt_s=dt),
                     shaft_rotation_deg=epsilon,
                 ).outcome
-                minus = physics.simulate_delivery(
+                minus_shot = physics.simulate_delivery(
                     nominal["face_deg"],
                     nominal["path_deg"],
                     replace(fixed, dt_s=dt),
@@ -89,9 +90,13 @@ def main():
                     {
                         "epsilon_deg": epsilon,
                         "flight_dt_s": dt,
-                        "dx_m_per_twist_deg": (plus.carry_x_m - minus.carry_x_m)
+                        "dx_m_per_twist_deg": (
+                            plus_shot.carry_x_m - minus_shot.carry_x_m
+                        )
                         / (2 * epsilon),
-                        "dy_m_per_twist_deg": (plus.carry_y_m - minus.carry_y_m)
+                        "dy_m_per_twist_deg": (
+                            plus_shot.carry_y_m - minus_shot.carry_y_m
+                        )
                         / (2 * epsilon),
                     }
                 )
