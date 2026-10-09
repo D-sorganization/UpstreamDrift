@@ -56,16 +56,15 @@ RED: with the pinned Tools submodule initially absent, collection first failed
 at the repository's existing submodule guard; after initializing only the
 already pinned local Tools commit, the new test failed to import the missing
 F09a API. GREEN: all 12 focused synthetic tests pass. The submodule pointer and
-Tools pin were unchanged at the F09a slice. F09b below advances the pin to
-merged T01 so observation scoring consumes the versioned replay bundle. Tests
-use only generated marker trajectories; no private capture or acceptance
-threshold is involved.
+Tools pin was unchanged at the F09a slice. Tests use only generated marker
+trajectories; no private capture or acceptance threshold is involved.
 
 The slice does not integrate T01/T02 receipts with an engine, establish replay
 reproduction, score collocation feasibility, or qualify any model. Full F09
-remained open at that point. The next step from F09a was to consume native
-replay output, map observations into F01 comparison levels, and preserve each
-required unavailable/unqualified row; F09b implements that scoring boundary.
+remains open. The next step from F09a is to consume native replay output from
+F06/F07 through this sampling boundary, map observations into F01 comparison
+levels, and preserve each unavailable/unqualified row; F09b implements that
+scoring boundary.
 
 The method is also documented in the canonical
 `manuals/upstreamdrift/chapters/13-feedback-comparison.qmd`. The calculation
@@ -103,3 +102,31 @@ initial-state identity binding and applied-input tamper rejection. These tests
 do not provide a native run, private capture acceptance, model qualification,
 or physiology evidence. F09 remains open for the native consumer and further
 per-engine qualification workflow.
+
+## F09c Strict Native Replay Execution
+
+Child #11898 adds `src/engines/feedback_native_execution.py`. It requires an
+explicit binding between an existing F01 inventory row and a Tools T01 native
+bundle; it keeps the inventory provider separate from the T01 execution
+provider, loaded model, state schema, and channel schema. It refuses unsupported
+or unavailable required rows, torque/excitation mismatches, incomplete T01
+capabilities, observation/state-feedback access, reset-enabled policy, stale
+identities, and inputs outside the current reviewed direct-torque paths.
+
+The executor calls the actual MuJoCo or Drake adapter and verifies returned
+initial physical/numerical state, full time grid, applied input, policy,
+channel mapping, finite outputs, and complete horizon. Its receipt remains
+unqualified and excludes model paths. The report preserves every F01 row and
+the six required engines. No marker FK mapping is inferred from generalized
+coordinates or native integration states.
+
+The focused suite passes with independent contract fixtures and a generated
+one-hinge MJCF through the real MuJoCo adapter. It proves API wiring and
+integrity refusal only, not a production model's physics. No private capture
+data, physiological tolerance, or qualification claim was used. The canonical
+manual is `manuals/upstreamdrift/chapters/13-feedback-comparison.qmd`; the
+current API and constraints are recorded in
+`docs/development/feedback_controls/F09C-NATIVE-EXECUTION.md` and `SPEC.md`.
+Further acceptance remains in F09/F10; the next native-data slice must provide
+engine-owned FK to named 3-D marker positions before observation scoring can
+consume an execution receipt.

@@ -1,3 +1,7 @@
+## Native Muscle Replay Development Boundary (F07, #11791)
+
+`tour_matching.replay_muscle_excitations` restores complete named continuous state, plays bounded linear native muscle excitation inputs, and cold-starts Runge-Kutta-Merson once without observations, feedback or resets. It audits actual native applied excitations and binds state/input/model/policy identities. Existing controllers, prescribed coordinates, non-muscle actuators and undeclared non-muscle forces fail closed. This early fixture does not qualify discrete/plugin initialization, contact, full-body anatomy or mocap matching; #11791 remains open. The revised feedback-controls milestone DAG separates schema/provider readiness from scientific acceptance and private evidence delivery.
+
 ## Capture-O Video Companion: Error Budget, Guidance Derivation, and Public Summary (COV-11, #11279)
 
 Specifies machine-readable error budgeting, frozen-rule guidance classification, and privacy-preserving summary generation (#11268, #11279):
@@ -10368,7 +10372,6 @@ Enables owner capture (`capture-O`) resolution through the MuJoCo native ground-
 - Contact ground calibration via `prepare_hip_spec` aligns toe contact boundaries to meet ground-support specification tolerances.
 - Timeline samples past capture durations are skipped cleanly rather than clamped; short capture root errors report `None` safely.
 - Divergence inventory and matched swing ledger reconciled with full unit test coverage.
-
 ## Native Feedback Observation Scoring and Full-State Identity (F09b, #11837)
 
 `src/engines/feedback_observation_qualification.py` consumes F01's existing
@@ -10392,6 +10395,44 @@ promotes F01 qualification. Synthetic tests prove contract integrity only;
 they are not native physics, private-capture, physiology, or cross-engine
 acceptance evidence. Canonical calculation notes are in
 `manuals/upstreamdrift/chapters/13-feedback-comparison.qmd`.
+
+# Native Torque Replay Development Boundary
+
+F06a (#11823, parent #11790) consumes the Tools experiment-replay bundle through
+actual native MuJoCo stepping for unit hinge motors. Full `mjSTATE_INTEGRATION`,
+distinct `nq`/`nv`, post-limit held torque, exact model/provider/policy identity
+and uninterrupted no-reset execution are required. Canonical calculation
+reference: `manuals/upstreamdrift/chapters/19-native-torque-replay.qmd`.
+Turnover: `docs/development/feedback_controls/F06_NATIVE_TORQUE_TURNOVER.md`.
+Tools T01 is consumed through merged pin
+`2e7665111b06f92ffbfe178b92d74d6a81c95388` and the UD-owned seam helper.
+Six-engine and muscular OpenSim real-capture gates remain open.
+
+## Strict Native Replay Execution Boundary (F09c, #11898)
+
+`src/engines/feedback_native_execution.py` executes a frozen Tools T01 replay
+bundle through an explicitly selected native adapter and preserves the
+authoritative F01 comparison row. Its `NativeAdapterBinding` keeps the F01
+inventory provider/source identity separate from the T01 native adapter,
+loaded model, state-schema, and ordered input-channel identities. No provider
+or model variant is inferred from a package name. The current supported
+execution pairs are the reviewed MuJoCo and Drake direct-torque adapters;
+other required engines remain in the six-engine denominator as unsupported or
+unavailable until an explicit adapter exists.
+
+The executor accepts only a complete `experiment-replay/1.0.0` bundle with
+native-own-contact policy, no observation/state-feedback access, reset policy
+forbidden, and simulation-relative zero-order-held actuator torque. It invokes
+the adapter with the local model source and frozen bundle, then verifies exact
+model, provider, initial physical and numerical state, policy, time grid,
+applied torque, full output horizon, and finite native state/effect arrays.
+The path to a local model is not copied into public receipts. Receipts bind the
+initial-state, input, policy, grid, channel schema, and output-state digests,
+but remain unqualified. A successful execution means only that the declared
+adapter replayed those bytes; it does not establish observation accuracy,
+physiological validity, or cross-engine equivalence. Contract tests use an
+independently generated one-hinge model and do not qualify production rows.
+
 ## Controlled-Swing Comparison Admission (F01, #11785)
 
 `src/engines/feedback_comparison.py` projects the authoritative
@@ -10414,3 +10455,31 @@ inputs. Baselines must include independent polynomial, computed torque,
 MOSAIC+TVLQR, and selected OCP under one observation identity, horizon, and
 budget. This is an admission contract, not a successful native replay or
 scientific match; numerical gate qualification belongs to follow-on issues.
+
+### Native Drake Frozen Torque Replay (F06b, #11838)
+
+`src/engines/physics_engines/drake/python/native_torque_replay.py` builds and
+independently consumes the canonical Tools experiment replay bundle. An owned
+collision-free URDF plant restores complete finite numeric discrete state,
+retains native configuration/tangent dimensions, audits actual net actuator
+effort, and advances frozen bounded inputs without feedback or state resets.
+Source, loaded topology, numeric parameter bytes, reviewed factory-default
+abstract parameter policy, solver/approximation and provider identity are
+bound and revalidated. The supported policy is Drake1.57.0, unit revolute
+motors, fixed steps and unsampled outputs; unsupported modes fail closed.
+Eleven actual native synthetic tests establish deterministic same-provider
+replay only. Canonical chapter22 and turnover preserve failed native probes
+and remaining full-body, contact, convergence, muscle and capture gates.
+
+## Sparse Collocation and Shooting Benchmark Spike (F03, #11787)
+
+`sparse_collocation_spike.py` adds a bounded synthetic rotary fixture with
+sparse analytic midpoint inverse-dynamics defects, hard ZOH torque and slew
+constraints, and fresh adaptive forward reintegration. It also adapts the
+existing multiple-shooting solver to the same synthetic truth and target.
+Backend receipts retain input degrees of freedom, defect type, objective,
+feasibility, replay gap and observation error separately, with predeclared
+cold/warm starts, failures, timing and Python-tracked peak memory. The shooting
+fixture uses one constant torque while the spike uses one input per interval,
+so no production backend is selected from these results. Native F06 replay,
+private protocol D02, contact and full-body engine evidence remain open.

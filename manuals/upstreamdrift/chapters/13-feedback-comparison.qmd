@@ -168,3 +168,36 @@ campaign qualification remains false until every required registry row is
 qualified and every existing gate passes. Synthetic contract fixtures prove
 identity binding and sampling behavior but provide no physiological or
 cross-engine acceptance evidence.
+
+## F09c Strict Native Replay Execution
+
+The F09c execution boundary in
+`src/engines/feedback_native_execution.py` consumes one frozen Tools T01
+`ExperimentReplayBundle` and one explicit adapter binding for an existing F01
+inventory row. The binding preserves two identities: F01's inventoried
+package, variant, source and provider; and T01's native model, adapter provider,
+loaded-model digest, state schema, channel schema, and ordered actuator IDs.
+The two provider identities are not interchangeable. Bindings are explicit;
+the executor never infers a full-body mapping from the adapter's synthetic
+unit-hinge test identifiers.
+
+Current execution support is limited to the reviewed MuJoCo and Drake
+direct-torque adapter pairs. The report retains every inventory row and all
+six required engines, marking rows without an adapter or with unavailable
+runtime evidence as blocking. Before stepping, the bundle must declare
+native-own-contact replay, no observation or state-feedback access, reset
+policy forbidden, simulation-relative time, and zero-order-held actuator
+torque. The executor calls only the adapter selected by the binding and checks
+the actual full output against exact initial-state, input, policy, channel,
+model, and time-grid identities. It also checks the complete native numerical
+initialization state, full horizon, finite values, and generalized effort
+dimensions without assuming `nq == nv`.
+
+The versioned execution receipt records content digests and execution facts,
+not a scientific verdict. Local model paths are excluded. A successful
+receipt remains `unqualified`; it cannot establish marker accuracy,
+physiological validity, muscle/contact capability, or cross-engine
+equivalence. Contract tests execute a synthetic one-hinge model using the
+actual adapter, but do not qualify any registered production model. The
+calculation registry remains blocked; this execution interface is not a
+released matching calculation.
