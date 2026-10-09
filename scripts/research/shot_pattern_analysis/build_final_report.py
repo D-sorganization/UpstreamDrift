@@ -11,14 +11,21 @@ import argparse
 import csv
 import hashlib
 import io
+import json
 import os
-import re
 from collections import Counter
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
 
 PATTERNS = ("Straight", "Draw", "Fade")
+
+from .final_report_inputs import (
+    assemble_qualified_interpretation,
+    profile_from_cell as _profile,
+    verified_original_figure_links,
+    verified_original_figure_inventory,
+)
 
 
 def _count_matrix(report: dict, label: str) -> tuple[int, int, int]:
@@ -54,15 +61,6 @@ def _interval(data: dict | None, digits: int = 4) -> str:
     except (KeyError, TypeError, ValueError):
         return "Unavailable"
     return f"{estimate:.{digits}f} [{low:.{digits}f}, {high:.{digits}f}]"
-
-
-def _profile(name: str) -> str:
-    # The validated plan is the authority for the cell name; parse its suffix
-    # without importing the simulation runner into the pure report formatter.
-    match = re.search(r"_rotation\d+_(.+)$", name)
-    if match is None:
-        raise ValueError(f"cell name lacks a noise profile: {name}")
-    return match.group(1)
 
 
 def render_cell_inventory(primary: dict, control: dict) -> str:
@@ -554,8 +552,89 @@ def render_lean_inventory(lean: dict) -> str:
     return stream.getvalue()
 
 
+def _qualified_interpretation_lines(interpretation: dict) -> list[str]:
+    """Render only prevalidated cell, pair, and asset references."""
+    from src.tools.shot_pattern_analysis.matched_interpretation import (
+        render_cell_table,
+        render_effect_table,
+        render_geometry_table,
+        render_scoring_table,
+    )
+
+    supplement = interpretation["supplement"]
+    if supplement.get("status") != "qualified":
+        raise ValueError("additive supplement must be qualified before publication")
+    lines = [
+        "### Condition-Resolved Carry and Dispersion",
+        "",
+        "Each row names the actual cell. Mean carry, signed X/Y bias, spread, and RMSE use that pattern's individually supported endpoints. The shared nominal target removes initial range mismatch within a cell; random errors can still shift realized carry. Primary lean targets can differ, while fixed-target controls rematch face, path, and speed and do not isolate a causal distance or lean effect.",
+        "",
+        render_cell_table(interpretation["selected_cells"]),
+        "",
+        "### Delivered Face, Loft, and Simulated Directional Outcomes",
+        "",
+        render_geometry_table(interpretation["selected_cells"]),
+        "",
+        "### Absolute Course Scoring by Actual Context",
+        "",
+        render_scoring_table(interpretation["scores"]),
+        "",
+        "### Direct Curve and Shaft-Variability Interactions",
+        "",
+        "Only reviewed same-index six-population paired contrasts appear here. A shaft-twist SD of 1° or 2° is an assumed primitive input, not a measured face-angle SD or a player precision estimate. Positive interaction means the named curve gained relative to Straight in condition B versus A; this can differ from a lateral-width ranking because target bias, downrange error, and lie scoring also matter.",
+        "",
+        render_effect_table(interpretation["effects"]),
+        "",
+        "### Verified Academic and Social Figures",
+        "",
+        "Figure links below come from source-bound inventories and include their actual protocol and population type. Density contours use all supported endpoints; displayed point overlays and overhead paths are sampled, as labeled in each image. A 95% highest-density region is not a confidence interval for the mean.",
+        "",
+    ]
+    for figure in interpretation["figure_links"]:
+        path = Path(figure["relative_path"])
+        if path.is_absolute() or ".." in path.parts:
+            raise ValueError("figure link must remain relative to the report")
+        label = (
+            f"{figure['club'].replace('_', ' ').title()} "
+            f"{figure['kind'].replace('_', ' ').title()} "
+            f"({figure['presentation'].title()}, {figure['source_protocol']}, "
+            f"{figure['source_kind'].replace('_', ' ')})"
+        )
+        lines.append(f"- [{label}]({path.as_posix()})")
+    if not interpretation["figure_links"]:
+        lines.append("No qualified figure asset is available for these selected cells.")
+    for inventory_path in interpretation.get("figure_inventories", []):
+        relative = Path(inventory_path)
+        if relative.is_absolute() or ".." in relative.parts:
+            raise ValueError("figure inventory link must remain relative")
+        lines.append(
+            f"- [Complete Original Figure Availability: {relative.parent.name}]({relative.as_posix()})"
+        )
+    lines.extend(
+        (
+            "",
+            "### Separately Qualified Bounds Supplement",
+            "",
+            f"The additive supplement inventories {supplement['unique_executed_cells']} unique planned cells and verified {supplement['verified_control_aliases']} control aliases without duplicating those Monte Carlo shots. It is an adapted bounds protocol after the original bounded-search audit, not part of the original factorial preregistration. Its original-versus-supplement results retain explicit versioned protocol identities, common supported indices, and unavailable conditions. [Full Paired Comparison Inventory]("
+            + supplement["comparison_inventory"]
+            + ") and [Supplement Figure Inventory]("
+            + supplement["figure_inventory"]
+            + ") contain every reviewed result and asset.",
+            "",
+            f"Supplement pipeline receipt SHA-256: `{supplement['receipt_sha256']}`.",
+            "",
+        )
+    )
+    return lines
+
+
 def render_final_report(
-    primary: dict, control: dict, lean: dict, sensitivity: dict[str, dict]
+    primary: dict,
+    control: dict,
+    lean: dict,
+    sensitivity: dict[str, dict],
+    *,
+    interpretation: dict | None = None,
 ) -> str:
     """Describe only integrity-checked final cells; never infer unavailable outcomes."""
     primary_total, primary_done, primary_unavailable = _count_matrix(primary, "primary")
@@ -605,26 +684,30 @@ def render_final_report(
         ]
     )
     lines.extend(_profile_control_lines(primary))
-    lines.extend(_anchor_lines(primary))
+    if interpretation is None:
+        lines.extend(_anchor_lines(primary))
+    else:
+        lines.extend(_qualified_interpretation_lines(interpretation))
     lines.extend(_selected_comparison_lines(primary))
-    lines.extend(
-        (
-            "### Matched Flight and Dispersion Graphics",
-            "",
-            "The [Full Figure Inventory](final_figures_v1/availability.csv) records every available panel. These direct comparison figures use shared axes and the same within-lean target; the flight shape and dispersion must be read alongside supported counts and longitudinal error.",
-            "",
-            "![Driver Matched-Pattern Overhead Flights](final_figures_v1/details/driver_lean0_curve1_rotation2_combined2/overhead.png)",
-            "",
-            "![Driver Matched-Pattern Landing Density](final_figures_v1/details/driver_lean0_curve1_rotation2_combined2/density.png)",
-            "",
-            "![Driver Draw: Shaft-Rotation Variability Comparison](final_figures_v1/comparisons/driver/combined2/Draw/shaft_rotation_sd.png)",
-            "",
-            "![7-Iron Draw: Curve-Strength Comparison](final_figures_v1/comparisons/seven_iron/combined2/Draw/curve_scale.png)",
-            "",
-            "![Pitching Wedge Fade: Shaft-Rotation Variability Comparison](final_figures_v1/comparisons/pitching_wedge/combined2/Fade/shaft_rotation_sd.png)",
-            "",
+    if interpretation is None:
+        lines.extend(
+            (
+                "### Matched Flight and Dispersion Graphics",
+                "",
+                "The [Full Figure Inventory](final_figures_v1/availability.csv) records every available panel. These direct comparison figures use shared axes and the same within-lean target; the flight shape and dispersion must be read alongside supported counts and longitudinal error.",
+                "",
+                "![Driver Matched-Pattern Overhead Flights](final_figures_v1/details/driver_lean0_curve1_rotation2_combined2/overhead.png)",
+                "",
+                "![Driver Matched-Pattern Landing Density](final_figures_v1/details/driver_lean0_curve1_rotation2_combined2/density.png)",
+                "",
+                "![Driver Draw: Shaft-Rotation Variability Comparison](final_figures_v1/comparisons/driver/combined2/Draw/shaft_rotation_sd.png)",
+                "",
+                "![7-Iron Draw: Curve-Strength Comparison](final_figures_v1/comparisons/seven_iron/combined2/Draw/curve_scale.png)",
+                "",
+                "![Pitching Wedge Fade: Shaft-Rotation Variability Comparison](final_figures_v1/comparisons/pitching_wedge/combined2/Fade/shaft_rotation_sd.png)",
+                "",
+            )
         )
-    )
     lines.extend(_effect_summary(primary, "Primary Matrix"))
     lines.extend(
         (
@@ -720,8 +803,63 @@ def _write_atomic(destination: Path, content: str) -> None:
         staged.unlink(missing_ok=True)
 
 
+def _report_source_hashes() -> dict[str, str]:
+    """Bind the public interpretation, qualification, and builder implementations."""
+    repository = Path(__file__).resolve().parents[3]
+    sources = (
+        Path(__file__).resolve(),
+        repository / "scripts/research/shot_pattern_analysis/final_report_inputs.py",
+        repository / "src/tools/shot_pattern_analysis/matched_interpretation.py",
+        repository / "src/tools/shot_pattern_analysis/matched_report.py",
+        repository / "src/tools/shot_pattern_analysis/matched_lean_control.py",
+        repository / "src/tools/shot_pattern_analysis/matched_sensitivity.py",
+        repository / "src/tools/shot_pattern_analysis/matched_supplement_pipeline.py",
+        repository / "src/tools/shot_pattern_analysis/matched_supplement_report.py",
+        repository / "src/tools/shot_pattern_analysis/matched_supplement_figures.py",
+    )
+    return {
+        str(path.relative_to(repository)): hashlib.sha256(path.read_bytes()).hexdigest()
+        for path in sources
+    }
+
+
+def final_publication_receipt(
+    *,
+    output_paths: tuple[Path, Path, Path],
+    source_sha256: dict[str, str],
+    primary_plan_sha256: str,
+    control_plan_sha256: str,
+    figure_manifest_sha256: dict[str, str],
+    supplement_receipt_sha256: str,
+) -> dict:
+    """Bind every editable report output to its validated input identities."""
+    if len({path.parent.resolve() for path in output_paths}) != 1:
+        raise ValueError("publication outputs must share one directory")
+    for path in output_paths:
+        if not path.is_file():
+            raise ValueError(f"publication output is missing: {path.name}")
+    return {
+        "schema": "matched-final-publication-receipt/1",
+        "source_sha256": dict(source_sha256),
+        "primary_plan_sha256": primary_plan_sha256,
+        "control_plan_sha256": control_plan_sha256,
+        "figure_manifest_sha256": dict(figure_manifest_sha256),
+        "supplement_receipt_sha256": supplement_receipt_sha256,
+        "output_sha256": {
+            path.name: hashlib.sha256(path.read_bytes()).hexdigest()
+            for path in output_paths
+        },
+    }
+
+
 def build_final_report(
-    primary_root: Path, control_root: Path, destination: Path
+    primary_root: Path,
+    control_root: Path,
+    destination: Path,
+    *,
+    supplement_dir: Path | None = None,
+    primary_figures: Path | None = None,
+    control_figures: Path | None = None,
 ) -> Path:
     """Validate saved matrices, then atomically publish editable Markdown."""
     from src.tools.shot_pattern_analysis.matched_lean_control import analyze_across_lean
@@ -732,12 +870,29 @@ def build_final_report(
     from src.tools.shot_pattern_analysis.matched_sensitivity import (
         analyze_saved_sensitivity,
     )
+    from src.tools.shot_pattern_analysis.matched_supplement_pipeline import (
+        load_verified_supplement_artifacts,
+    )
 
     primary_root, control_root, destination = map(
         Path, (primary_root, control_root, destination)
     )
+    report_root = destination.parent.resolve()
+    supplement_dir = Path(supplement_dir or report_root / "supplement_report_v1")
+    primary_figures = Path(primary_figures or report_root / "final_figures_v1")
+    control_figures = Path(control_figures or report_root / "control_final_figures_v1")
+    sources_before = _report_source_hashes()
+    figure_manifests_before = {
+        root: hashlib.sha256((root / "figure_manifest.json").read_bytes()).hexdigest()
+        for root in (primary_figures, control_figures)
+    }
     primary = load_matrix_report(primary_root)
     control = load_matrix_report(control_root)
+    supplement = load_verified_supplement_artifacts(supplement_dir)
+    supplement_receipt_path = supplement_dir / "REPORT_SUPPLEMENT_PIPELINE.json"
+    supplement_receipt_before = hashlib.sha256(
+        supplement_receipt_path.read_bytes()
+    ).hexdigest()
     common_targets, _ = load_reviewed_common_targets(primary_root.parent)
     validate_final_plans(primary, control, common_targets=common_targets)
     lean = analyze_across_lean(control_root)
@@ -759,16 +914,65 @@ def build_final_report(
             sensitivity[name] = analyze_saved_sensitivity(
                 primary_root / name, primary_root / "matrix_plan.json"
             )
-    rendered = render_final_report(primary, control, lean, sensitivity)
+    interpretation = assemble_qualified_interpretation(
+        primary_root,
+        primary,
+        control_root,
+        control,
+        supplement,
+        primary_figures=primary_figures,
+        control_figures=control_figures,
+        supplement_dir=supplement_dir,
+        report_root=report_root,
+    )
+    rendered = render_final_report(
+        primary, control, lean, sensitivity, interpretation=interpretation
+    )
     # Recheck plan identity after potentially long read-only sensitivity scoring.
     for root, report in ((primary_root, primary), (control_root, control)):
         assert_matrix_inputs_unchanged(root, report)
-    _write_atomic(
-        destination.with_name("REPORT_CELLS.csv"),
-        render_cell_inventory(primary, control),
-    )
-    _write_atomic(destination.with_name("REPORT_LEAN.csv"), render_lean_inventory(lean))
+    if _report_source_hashes() != sources_before:
+        raise RuntimeError("report interpretation source changed during assembly")
+    if any(
+        hashlib.sha256((root / "figure_manifest.json").read_bytes()).hexdigest()
+        != digest
+        for root, digest in figure_manifests_before.items()
+    ):
+        raise RuntimeError("figure manifest changed during report assembly")
+    for root, report in ((primary_figures, primary), (control_figures, control)):
+        verified_original_figure_links(root, report, report_root=report_root)
+        verified_original_figure_inventory(root, report, report_root=report_root)
+    # The verified supplement facade rechecks every source and figure byte;
+    # rerun it after the longer across-lean and sensitivity aggregation.
+    load_verified_supplement_artifacts(supplement_dir)
+    if (
+        hashlib.sha256(supplement_receipt_path.read_bytes()).hexdigest()
+        != supplement_receipt_before
+    ):
+        raise RuntimeError("supplement receipt changed during report assembly")
+    if _report_source_hashes() != sources_before:
+        raise RuntimeError(
+            "report interpretation source changed during final validation"
+        )
+    cell_inventory_path = destination.with_name("REPORT_CELLS.csv")
+    lean_inventory_path = destination.with_name("REPORT_LEAN.csv")
+    _write_atomic(cell_inventory_path, render_cell_inventory(primary, control))
+    _write_atomic(lean_inventory_path, render_lean_inventory(lean))
     _write_atomic(destination, rendered)
+    publication_receipt = final_publication_receipt(
+        output_paths=(destination, cell_inventory_path, lean_inventory_path),
+        source_sha256=sources_before,
+        primary_plan_sha256=primary["plan_sha256"],
+        control_plan_sha256=control["plan_sha256"],
+        figure_manifest_sha256={
+            root.name: digest for root, digest in figure_manifests_before.items()
+        },
+        supplement_receipt_sha256=interpretation["supplement"]["receipt_sha256"],
+    )
+    _write_atomic(
+        destination.with_name("REPORT_PUBLICATION_RECEIPT.json"),
+        json.dumps(publication_receipt, indent=2, sort_keys=True) + "\n",
+    )
     return destination
 
 
@@ -777,10 +981,18 @@ def main() -> None:
     parser.add_argument("primary_root", type=Path)
     parser.add_argument("control_root", type=Path)
     parser.add_argument("destination", type=Path)
+    parser.add_argument("--supplement-dir", type=Path)
+    parser.add_argument("--primary-figures", type=Path)
+    parser.add_argument("--control-figures", type=Path)
     arguments = parser.parse_args()
     print(
         build_final_report(
-            arguments.primary_root, arguments.control_root, arguments.destination
+            arguments.primary_root,
+            arguments.control_root,
+            arguments.destination,
+            supplement_dir=arguments.supplement_dir,
+            primary_figures=arguments.primary_figures,
+            control_figures=arguments.control_figures,
         )
     )
 

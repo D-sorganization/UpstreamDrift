@@ -8,6 +8,11 @@ import io
 import pytest
 
 from scripts.research.shot_pattern_analysis import build_final_report
+from src.tools.shot_pattern_analysis.matched_interpretation import (
+    describe_cell,
+    describe_effect_modification,
+    describe_scoring,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -209,6 +214,235 @@ def test_unavailable_inventory_separates_planned_from_attempted_shots():
     assert all(row["supported_n"] == "" for row in rows)
 
 
+def _detailed_cell(*, status="completed"):
+    cell = _cell("driver_lean0_curve1_rotation2_combined2", status=status)
+    if status != "completed":
+        return cell
+    for item in cell["summary"].values():
+        item["supported_fraction_exact95"] = [0.999, 1.0]
+        item["statistics"] = {
+            "mean_downrange_error_m": -4.0,
+            "mean_lateral_error_m": 0.5,
+            "quadrant_fractions": {
+                "left_long": 0.1,
+                "left_short": 0.4,
+                "right_long": 0.3,
+                "right_short": 0.2,
+            },
+        }
+        item["joint_delivery_outcome_diagnostics"] = {
+            "fields": ["face_deg", "loft_deg"],
+            "covariance": [[1.0, 0.6], [0.6, 1.0]],
+        }
+    cell["course_scoring"].update(
+        scenario_id="tee_fairway_rough",
+        start_lie="tee",
+        start_distance_m=400.0,
+        hole_distance_m=400.0,
+        fairway_half_width_m=15.0,
+        green_radius_m=None,
+        total_n=10_000,
+        patterns={
+            name: {"n": 9_999, "mean_strokes_gained": -0.4}
+            for name in ("Straight", "Draw", "Fade")
+        },
+    )
+    return cell
+
+
+def _qualified_interpretation():
+    cell = _detailed_cell()
+    pair = {
+        "schema": "matched-explicit-source-pair/1",
+        "comparison_kind": "shaft_rotation_sd",
+        "status": "conditional_only",
+        "conditioning": "same_indices_supported_in_all_six_populations",
+        "common_supported_n": 9_998,
+        "total_n_per_population": 10_000,
+        "source_protocols": ["original_primary", "pw-primary-face-bounds/1"],
+        "sources": [
+            {
+                "protocol_id": "original_primary",
+                "cell": "before",
+                "source_plan_sha256": "a" * 64,
+                "source_cell_manifest_sha256": "b" * 64,
+                "source_csv_sha256": "c" * 64,
+            },
+            {
+                "protocol_id": "pw-primary-face-bounds/1",
+                "cell": "after",
+                "source_plan_sha256": "d" * 64,
+                "source_cell_manifest_sha256": "e" * 64,
+                "source_csv_sha256": "f" * 64,
+            },
+        ],
+        "analysis_source_sha256": {"matched_lean_control.py": "1" * 64},
+        "course_scoring_effect_modification": {
+            "Draw": {"estimate": 0.012, "lower_95": 0.006, "upper_95": 0.018},
+            "Fade": {"estimate": -0.003, "lower_95": -0.009, "upper_95": 0.003},
+        },
+    }
+    return {
+        "selected_cells": [describe_cell(cell)],
+        "scores": [(cell["cell"], describe_scoring(cell))],
+        "effects": [describe_effect_modification(pair)],
+        "figure_links": [
+            {
+                "club": "driver",
+                "kind": "density",
+                "presentation": "academic",
+                "source_protocol": "original_primary",
+                "source_kind": "individual_supported_endpoints",
+                "relative_path": "final_figures_v1/details/driver/density.png",
+            },
+            {
+                "club": "driver",
+                "kind": "density",
+                "presentation": "social",
+                "source_protocol": "original_primary",
+                "source_kind": "individual_supported_endpoints",
+                "relative_path": "final_figures_v1/social/details/driver/density.png",
+            },
+        ],
+        "supplement": {
+            "status": "qualified",
+            "unique_executed_cells": 26,
+            "verified_control_aliases": 4,
+            "receipt_sha256": "9" * 64,
+            "comparison_inventory": "supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.csv",
+            "figure_inventory": "supplement_report_v1/REPORT_SUPPLEMENT_FIGURES.json",
+        },
+    }
+
+
+def test_final_interpretation_uses_qualified_populations_and_additive_protocol():
+    cell = _detailed_cell()
+    matrix = _matrix([cell], "final")
+    lean = {
+        "schema": "matched-across-lean/1",
+        "pairs": [],
+        "population": {"planned_pairs": 0},
+    }
+    rendered = build_final_report.render_final_report(
+        matrix, matrix, lean, {}, interpretation=_qualified_interpretation()
+    )
+    assert "9,999 / 10,000" in rendered
+    assert "Common-Three Scored" in rendered
+    assert "Face–Loft Covariance" in rendered
+    assert "Left-Long" in rendered
+    assert "9,998 / 10,000" in rendered
+    assert "pw-primary-face-bounds/1" in rendered
+    assert "supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.csv" in rendered
+    assert "final_figures_v1/social/details/driver/density.png" in rendered
+    assert "not a causal" in rendered
+
+
+def test_final_interpretation_does_not_invent_unavailable_assets_or_shots():
+    unavailable = _detailed_cell(status="unavailable")
+    matrix = _matrix([unavailable], "final")
+    lean = {
+        "schema": "matched-across-lean/1",
+        "pairs": [],
+        "population": {"planned_pairs": 0},
+    }
+    interpretation = _qualified_interpretation()
+    interpretation["selected_cells"] = [describe_cell(unavailable)]
+    interpretation["scores"] = [(unavailable["cell"], describe_scoring(unavailable))]
+    interpretation["figure_links"] = []
+    rendered = build_final_report.render_final_report(
+        matrix, matrix, lean, {}, interpretation=interpretation
+    )
+    assert "Not Attempted" in rendered
+    assert (
+        "final_figures_v1/details/driver_lean0_curve1_rotation2_combined2/overhead.png"
+        not in rendered
+    )
+
+
+def test_verified_original_figures_require_both_presentations(tmp_path):
+    import hashlib
+    import json
+
+    cell = _detailed_cell()["cell"]
+    figure_root = tmp_path / "final_figures_v1"
+    figure_root.mkdir()
+    paths = (
+        f"details/{cell}/density.png",
+        f"details/{cell}/overhead.png",
+        f"social/details/{cell}/density.png",
+        f"social/details/{cell}/overhead.png",
+        "availability.csv",
+    )
+    outputs = {}
+    for relative in paths:
+        path = figure_root / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(relative.encode())
+        outputs[relative] = hashlib.sha256(path.read_bytes()).hexdigest()
+    manifest = {
+        "schema": "matched-study-figure-production/1",
+        "kind": "final",
+        "source_stage": "final",
+        "plan_sha256": "a" * 64,
+        "cell_manifest_sha256": {cell: "b" * 64},
+        "availability_ledger": "availability.csv",
+        "outputs": outputs,
+    }
+    (figure_root / "figure_manifest.json").write_text(json.dumps(manifest))
+    report = _matrix([_detailed_cell()], "final")
+    report["cells"][0]["config"]["noise"]["standard_deviations"][0] = 2.0
+    report["cell_manifest_sha256"] = {cell: "b" * 64}
+    links = build_final_report.verified_original_figure_links(
+        figure_root, report, report_root=tmp_path
+    )
+    assert {(item["kind"], item["presentation"]) for item in links} == {
+        ("density", "academic"),
+        ("overhead", "academic"),
+        ("density", "social"),
+        ("overhead", "social"),
+    }
+    assert (
+        build_final_report.verified_original_figure_inventory(
+            figure_root, report, report_root=tmp_path
+        )
+        == "final_figures_v1/availability.csv"
+    )
+    (figure_root / paths[-1]).write_bytes(b"changed")
+    with pytest.raises(ValueError, match="figure availability inventory changed"):
+        build_final_report.verified_original_figure_inventory(
+            figure_root, report, report_root=tmp_path
+        )
+    (figure_root / paths[0]).write_bytes(b"changed")
+    with pytest.raises(ValueError, match="figure artifact changed"):
+        build_final_report.verified_original_figure_links(
+            figure_root, report, report_root=tmp_path
+        )
+
+
+def test_final_publication_receipt_binds_report_and_supplement(tmp_path):
+    report = tmp_path / "REPORT.md"
+    cells = tmp_path / "REPORT_CELLS.csv"
+    lean = tmp_path / "REPORT_LEAN.csv"
+    for path in (report, cells, lean):
+        path.write_text(path.name, encoding="utf-8")
+    receipt = build_final_report.final_publication_receipt(
+        output_paths=(report, cells, lean),
+        source_sha256={"builder.py": "a" * 64},
+        primary_plan_sha256="b" * 64,
+        control_plan_sha256="c" * 64,
+        figure_manifest_sha256={"primary": "d" * 64, "control": "e" * 64},
+        supplement_receipt_sha256="f" * 64,
+    )
+    assert receipt["schema"] == "matched-final-publication-receipt/1"
+    assert receipt["source_sha256"]["builder.py"] == "a" * 64
+    assert receipt["supplement_receipt_sha256"] == "f" * 64
+    assert set(receipt["output_sha256"]) == {
+        "REPORT.md",
+        "REPORT_CELLS.csv",
+        "REPORT_LEAN.csv",
+    }
+
+
 def test_compact_comparison_table_does_not_wrap_full_optimizer_failure() -> None:
     unavailable = _cell("driver_lean0_curve2_rotation2_combined2", status="unavailable")
     unavailable["reason"] = (
@@ -283,9 +517,7 @@ def test_final_builder_requires_full_324_and_72_cell_protocols():
             common_targets=targets,
         )
     )
-    build_final_report.validate_final_plans(
-        primary, control, common_targets=targets
-    )
+    build_final_report.validate_final_plans(primary, control, common_targets=targets)
     altered = dict(primary)
     altered["cells"] = list(primary["cells"])
     altered["cells"][0] = {
