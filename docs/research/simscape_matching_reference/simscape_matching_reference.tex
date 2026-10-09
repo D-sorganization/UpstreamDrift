@@ -5582,6 +5582,33 @@ The one-change-at-a-time re-exports used a scratch driver around
 the run's \texttt{q\_track} before the export; the measurements are in the
 summary JSON beside the evidence plot.
 
+\paragraph{Full Re-Solve.} Both captures were then re-solved end to end with
+the final code (commit \texttt{5f8ee41fe5}: 25 Hz pre-contact cutoff, weld
+projection, and for the 7-iron the zero-moment-point filter that the
+re-exports above left out), measured by
+\texttt{scripts.regenerate\_club\_face\_fixtures} (model face centre by MuJoCo
+forward kinematics, capture face centre from the calibrated head triad, each
+on its own clock):
+\begin{center}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+Club & Peak vs capture (ms) & Impact (m/s) & Capture (m/s) & Impact vs capture \\
+\midrule
+Driver & $-3.7$ & 47.94 & 51.75 & $-7.4$\,\% \\
+7-iron & $-4.2$ & 39.36 & 41.05 & $-4.1$\,\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+The face at impact is 2.8 deg (driver) and 4.6 deg (7-iron) from the
+capture. The re-solve confirms the re-export: the timing acceptance (5 ms)
+is met and the impact-speed acceptance (3\,\%) is not. The GCV-20 acceptance
+test is therefore a strict expected failure carrying these numbers, with its
+tolerances unchanged, and the committed fixtures are not replaced (the
+re-solved fixtures would also fail the impact-frame check: the detected frame
+lies 0.34 m (driver) and 0.18 m (7-iron) from the ball, limit 0.15 m). The
+remaining gap is cause 3, which needs the ground yaw-moment model of
+decision 13.
+
 \section{Dynamics-Informed Motion Estimation (DIME): Shared Reports, GUI Strategy Selection and Methods}
 \label{sec:dime_reports_methods}
 
