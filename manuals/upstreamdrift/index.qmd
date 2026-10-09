@@ -39,3 +39,5 @@ UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
 {{< include chapters/25-native-manifold-derivative.qmd >}}
 
 {{< include chapters/26-native-manifold-box-fddp.qmd >}}
+
+{{< include chapters/27-native-manifold-feedback.qmd >}}

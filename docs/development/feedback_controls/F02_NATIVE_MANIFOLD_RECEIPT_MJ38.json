@@ -1,0 +1,42 @@
+{
+  "fixture": {
+    "dt_s": 0.01,
+    "nq": 9,
+    "nu": 2,
+    "nv": 8,
+    "steps": 12
+  },
+  "host_alias": "windows-owned-opensim-env",
+  "issue": 11946,
+  "native_evidence": {
+    "controlled_applied_input_sha256": "44c9f920d8780225854453402809080f3033c4fe05f212d189cf491d8e9f5e65",
+    "controlled_final_hip_error_rad": 0.1260837118981273,
+    "initial_state_sha256": "c9ed074dd08ba74b0aa4e3b1dd36bf5aaccb89e280b3e6b0e6a811145030ac8e",
+    "input_channel_schema_sha256": "d719eafa61a99d76a6f7581b7f1f13315b4ddbf78ee64d0ba7f7f61344a9a1ec",
+    "loaded_native_model_sha256": "cf37da43372e01d62a30bb975e83645d589674444feb1b830bd0a981c15e2524",
+    "max_full_state_replay_error": 0.0,
+    "nominal_applied_input_sha256": "f69310be02ede35222bd244b79827865d9a7f66ded93600f3ce65fdc01252de0",
+    "nominal_final_hip_error_rad": 0.4,
+    "policy_sha256": "ec3e92554f04bf094e97bf21517cfadb77df9b07fc1bf6d14fee9f21f7d622a8",
+    "source_model_sha256": "51cbbd32ac9b419c415bdd0eee2db6b13c87acc5b6888c249d11e3334b9d4fbf",
+    "state_schema_sha256": "3b6480658c125eb5139ba2229ae491ce0d1c0fb17297ed7d6349f9af89281604",
+    "time_grid_sha256": "d7f0a65fa6968f65831e0b7ff402d676f1fc555e719e36138b04e0a221d93b7a"
+  },
+  "provider": {
+    "mujoco": "3.8.0",
+    "numpy": "2.5.3",
+    "python": "3.12.10"
+  },
+  "qualification": "synthetic-contact-free-fixture-only",
+  "schema_version": "f02-native-manifold-feedback/1",
+  "source_sha256": {
+    "scripts/f02_native_manifold_receipt.py": "e0bd610b3d70fa57492fa64750d0ad2eebbfdc692999b75a3cad0f7e2974f6a3",
+    "src/engines/physics_engines/mujoco/python/native_distributed_feedback.py": "7a9aeb37fe1d196c092498fa445dc1140b45dd794641be621f80552a5135d3f4",
+    "src/engines/physics_engines/mujoco/python/native_nmpc_tracking.py": "b0018d3e475af8e27ffe2dc21a9d6a2a478028ab119d6a0a5068ab2a4e5c3587",
+    "src/engines/physics_engines/mujoco/python/native_tangent_derivative.py": "0ce33ffe71ee11ad7d2bb49aec0efcdf779ae2ab5fa11d3e93ffd6b86b73376e",
+    "src/engines/physics_engines/mujoco/python/native_torque_replay.py": "8908ddb4ca0ed0d98ae4cc8580315335773fd5f8d5209b3159a11f3bacde6724",
+    "src/shared/python/motion_matching/distributed_feedback.py": "947318d078b6463ca57e02d6dfcd957e2f2077aafb54a36651a0d5b45a7f401e",
+    "tests/unit/motion_matching/test_native_distributed_feedback.py": "9294e0e97ba2b3f4fc2e8fd1323ef75a7c425d2c2b44ddf1dbcf24fd083d2d8b"
+  },
+  "tools_t01_gitlink_commit": "2e7665111b06f92ffbfe178b92d74d6a81c95388"
+}

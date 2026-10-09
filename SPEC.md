@@ -10554,3 +10554,20 @@ deadline, state/anatomical limit, contact, muscle, private capture,
 full-body or six-engine qualification is claimed. The provisional manual
 calculation is chapter 26; turnover is
 `docs/development/feedback_controls/F05D_NATIVE_MANIFOLD_BOX_FDDP_TURNOVER.md`.
+
+### Native Floating-Root F02 Feedback Baseline (#11946)
+
+`src/engines/physics_engines/mujoco/python/native_distributed_feedback.py`
+provides the first actual floating-root native F02 baseline. It reuses F05c
+native tangent/plant admission, MuJoCo's current-minus-reference
+`mj_differentiatePos` and native inverse mass for $n_q=9$, $n_v=8$, rather
+than applying Euclidean quaternion subtraction. The F02 law reads exact
+simulated $(q,v)$ at each native Euler boundary, maps only to the two named
+direct hinge motors, and saves the post-limit held torque. The F06 common
+runner builds a pinned Tools T01 bundle from complete
+`mjSTATE_INTEGRATION` and independently replays each full state within
+$10^{-12}$. Native MuJoCo 3.8 tests demonstrate quaternion sign equivalence,
+synthetic perturbation correction, saturation and negative contact/channel
+admission. Provisional manual chapter 27 and the source-hashed F02 native
+receipt govern this child. It does not qualify a golfer, marker fit, contact,
+muscle input, multi-engine parity or a hard runtime deadline; F02 remains open.

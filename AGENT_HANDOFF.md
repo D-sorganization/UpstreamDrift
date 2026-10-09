@@ -611,6 +611,15 @@ cost in both starts. This does not prove
 a hard 10 ms deadline or golfer/contact/muscle/capture qualification.
 Read provisional manual chapter 26 and
 `docs/development/feedback_controls/F05D_NATIVE_MANIFOLD_BOX_FDDP_TURNOVER.md`.
+
+F02 child #11946 adds actual native MuJoCo floating-root feedback using the
+F02 law, F05c tangent derivative admission and F06 complete-state torque
+replay; see provisional manual chapter 27 and
+`docs/development/feedback_controls/F02_NATIVE_MANIFOLD_FEEDBACK_TURNOVER.md`.
+The source-hashed synthetic receipt shows 0.1261 rad final hip error versus
+0.4 rad frozen nominal over 12 steps, plus exact full-state replay. This is
+stacked on F05c #11922 and must remain unarmed until its prerequisite reaches
+`main`; F02 #11786 and full production/capture qualification remain open.
 Parent F05 #11789, F09/F10 and manual publication remain open.
 PR #11944 merged into the F05c feature base at
 `c1e76ce91db11b257604d9ddbd227268d2e27db1`; F05c PR #11922 is

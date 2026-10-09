@@ -103,3 +103,12 @@ PR #11944 merged only into the F05c feature branch at
 open against the F05b feature branch. Issue #11932 remains open and this
 stack has not reached `main`. Preserve the commit ancestry and keep later
 stacked PRs unarmed until their prerequisites land and their base is `main`.
+
+## F02 Native Floating-Root Manifold Feedback
+
+`F02_NATIVE_MANIFOLD_FEEDBACK_TURNOVER.md` and provisional chapter 27 record
+actual MuJoCo 3.8 F02 exact-state TVLQR on the 9/8/2 floating-root fixture.
+Native quaternion tangent error, physical inverse mass, direct bounded motor
+inputs and fresh complete-state frozen-torque replay pass scoped tests. The
+source-hashed receipt measures 0.1261 rad final hip error versus 0.4 rad
+frozen nominal over 12 native steps; no capture/contact/full-body claim follows.
