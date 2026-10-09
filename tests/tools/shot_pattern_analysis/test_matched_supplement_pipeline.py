@@ -401,6 +401,16 @@ def test_verified_supplement_loader_rejects_changed_report_artifacts(
         pipeline.load_verified_supplement_artifacts(output)
     report_path.write_bytes(original_report)
 
+    def mutate_figure_during_source_check(_receipt):
+        figure.write_bytes(b"changed-during-check")
+
+    monkeypatch.setattr(
+        pipeline, "_recheck_receipt_sources", mutate_figure_during_source_check
+    )
+    with pytest.raises(ValueError, match="supplement figure artifact changed"):
+        pipeline.load_verified_supplement_artifacts(output)
+    figure.write_bytes(b"fixture-image")
+
     receipt_path = output / "REPORT_SUPPLEMENT_PIPELINE.json"
     original_receipt = receipt_path.read_bytes()
 

@@ -544,6 +544,27 @@ def test_publication_boundary_rejects_mutated_png_and_supplement_receipt(
     assert not (tmp_path / "REPORT.md").exists()
 
 
+def test_supplement_loader_return_cannot_rebind_old_data_to_new_receipt(
+    tmp_path, monkeypatch
+):
+    from src.tools.shot_pattern_analysis import matched_supplement_pipeline
+
+    receipt = tmp_path / "REPORT_SUPPLEMENT_PIPELINE.json"
+    receipt.write_bytes(b"first qualified receipt")
+
+    def replaced_at_return(_directory):
+        receipt.write_bytes(b"second qualified receipt")
+        return {"report": "old qualified values"}
+
+    monkeypatch.setattr(
+        matched_supplement_pipeline,
+        "load_verified_supplement_artifacts",
+        replaced_at_return,
+    )
+    with pytest.raises(RuntimeError, match="changed during supplement loading"):
+        build_final_report.load_supplement_at_stable_receipt(tmp_path)
+
+
 def test_final_publication_receipt_binds_report_and_supplement(tmp_path):
     report = tmp_path / "REPORT.md"
     cells = tmp_path / "REPORT_CELLS.csv"

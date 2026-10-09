@@ -448,6 +448,16 @@ def _recheck_receipt_sources(receipt: dict[str, Any]) -> None:
     )
 
 
+def _verify_figure_assets(output_dir: Path, ledger: dict[str, Any]) -> None:
+    figure_root = (output_dir / "figures").resolve()
+    for item in ledger.get("figures", []):
+        path = (figure_root / item["relative_path"]).resolve()
+        if not path.is_relative_to(figure_root) or not path.is_file():
+            raise ValueError("supplement figure artifact is missing or unsafe")
+        if _sha256(path) != item.get("sha256"):
+            raise ValueError("supplement figure artifact changed")
+
+
 def load_verified_supplement_artifacts(output_dir: Path) -> dict[str, Any]:
     """Return final additive report data only after verifying saved inputs."""
     output_dir = Path(output_dir).resolve()
@@ -489,14 +499,8 @@ def load_verified_supplement_artifacts(output_dir: Path) -> dict[str, Any]:
     )
     if ledger.get("schema") != "matched-supplement-figure-ledger/1":
         raise ValueError("supplement figure ledger has an unexpected schema")
-    figure_root = (output_dir / "figures").resolve()
-    for item in ledger.get("figures", []):
-        path = (figure_root / item["relative_path"]).resolve()
-        if not path.is_relative_to(figure_root) or not path.is_file():
-            raise ValueError("supplement figure artifact is missing or unsafe")
-        if _sha256(path) != item.get("sha256"):
-            raise ValueError("supplement figure artifact changed")
     _recheck_receipt_sources(receipt)
+    _verify_figure_assets(output_dir, ledger)
     for key, relative in artifact_paths.items():
         if _sha256(output_dir / relative) != artifact_hashes[key]:
             raise ValueError(f"report artifact changed during verification: {key}")

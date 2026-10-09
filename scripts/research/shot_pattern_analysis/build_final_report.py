@@ -905,6 +905,20 @@ def assert_publication_inputs_unchanged(
         )
 
 
+def load_supplement_at_stable_receipt(directory: Path) -> tuple[dict, str]:
+    """Bind validated values to the same receipt observed before their load."""
+    from src.tools.shot_pattern_analysis.matched_supplement_pipeline import (
+        load_verified_supplement_artifacts,
+    )
+
+    receipt = Path(directory) / "REPORT_SUPPLEMENT_PIPELINE.json"
+    before = hashlib.sha256(receipt.read_bytes()).hexdigest()
+    supplement = load_verified_supplement_artifacts(directory)
+    if hashlib.sha256(receipt.read_bytes()).hexdigest() != before:
+        raise RuntimeError("receipt changed during supplement loading")
+    return supplement, before
+
+
 def build_final_report(
     primary_root: Path,
     control_root: Path,
@@ -923,9 +937,6 @@ def build_final_report(
     from src.tools.shot_pattern_analysis.matched_sensitivity import (
         analyze_saved_sensitivity,
     )
-    from src.tools.shot_pattern_analysis.matched_supplement_pipeline import (
-        load_verified_supplement_artifacts,
-    )
 
     primary_root, control_root, destination = map(
         Path, (primary_root, control_root, destination)
@@ -941,11 +952,9 @@ def build_final_report(
     }
     primary = load_matrix_report(primary_root)
     control = load_matrix_report(control_root)
-    supplement = load_verified_supplement_artifacts(supplement_dir)
-    supplement_receipt_path = supplement_dir / "REPORT_SUPPLEMENT_PIPELINE.json"
-    supplement_receipt_before = hashlib.sha256(
-        supplement_receipt_path.read_bytes()
-    ).hexdigest()
+    supplement, supplement_receipt_before = load_supplement_at_stable_receipt(
+        supplement_dir
+    )
     common_targets, _ = load_reviewed_common_targets(primary_root.parent)
     validate_final_plans(primary, control, common_targets=common_targets)
     lean = analyze_across_lean(control_root)
