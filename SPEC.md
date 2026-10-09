@@ -10436,6 +10436,31 @@ The receipt retains `state_reset_allowed=False` separately from an unknown
 reset count when the adapter does not instrument that counter; policy is not
 reported as a measured zero.
 
+## Native Marker Positions From Replay States (F09d, #11907)
+
+`src/engines/feedback_native_markers.py` executes a frozen replay through the
+existing F09c boundary and passes its actual configuration trajectory to the
+selected native model's forward-kinematics implementation. A versioned
+`NativeMarkerMap` declares ordered marker labels, exact native body/frame
+identities, finite local points in metres, world output frame, simulation
+timebase, model/source/provider identities, and a canonical SHA-256 mapping
+identity. No marker is synthesized from generalized coordinates, quaternion
+components, or native integration-state arrays.
+
+The initial public FK consumers are the existing MuJoCo and Drake direct-torque
+adapters. Their frame loading rechecks the exact Tools bundle model identity and
+uses native FK for every full-horizon output configuration. The output retains
+native sample times and ordered 3-D points; its unqualified receipt binds the
+F09c execution receipt, state-output digest, marker-map digest, and position
+output digest. It contains no local model path. OpenSim marker geometry is
+owned by F07 #11903 and is consumed only once a matching full-state replay
+interface is available. Pinocchio, MyoSuite, Simscape, and unavailable
+providers remain explicit in the six-engine denominator. Marker FK does not
+score observations or qualify anatomy, muscle physiology, contact, or model
+equivalence. `NativeMarkerReplayReport` keeps all inventory rows and six
+required engines visible; FK coverage is not qualification. Canonical note:
+`manuals/upstreamdrift/chapters/28-native-marker-forward-kinematics.qmd`.
+
 ## Controlled-Swing Comparison Admission (F01, #11785)
 
 `src/engines/feedback_comparison.py` projects the authoritative

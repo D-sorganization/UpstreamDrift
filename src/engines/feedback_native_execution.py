@@ -62,6 +62,14 @@ class NativeReplayRequest:
 
 
 @dataclass(frozen=True)
+class NativeReplayExecution:
+    """Validated receipt and actual output from one native replay invocation."""
+
+    receipt: NativeExecutionReceipt
+    output: NativeTorqueReplay | NativeDrakeTorqueReplay
+
+
+@dataclass(frozen=True)
 class NativeExecutionReceipt:
     """Integrity and run facts without a numerical acceptance verdict."""
 
@@ -420,6 +428,13 @@ def execute_native_replay(
     request: NativeReplayRequest, registry: Any
 ) -> NativeExecutionReceipt:
     """Execute one frozen bundle through its exact reviewed native adapter."""
+    return execute_native_replay_with_output(request, registry).receipt
+
+
+def execute_native_replay_with_output(
+    request: NativeReplayRequest, registry: Any
+) -> NativeReplayExecution:
+    """Execute once and return both the integrity receipt and native trajectory."""
     row = registry.get(
         request.binding.package_id,
         request.binding.variant_id,
@@ -448,7 +463,10 @@ def execute_native_replay(
         output = replay_native_drake_torque_bundle(request.bundle, request.model_path)
     else:
         raise ValueError("no reviewed native adapter is registered for this row")
-    return validate_native_replay_output(row, request.binding, request.bundle, output)
+    receipt = validate_native_replay_output(
+        row, request.binding, request.bundle, output
+    )
+    return NativeReplayExecution(receipt, output)
 
 
 def build_native_replay_report(

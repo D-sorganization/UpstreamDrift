@@ -390,6 +390,68 @@ def replay_native_drake_torque_bundle(
     return _step_native(bundle, Path(model_path))
 
 
+def native_marker_positions_from_replay(
+    bundle: ExperimentReplayBundle,
+    model_path: str | Path,
+    replay: NativeDrakeTorqueReplay,
+    attachments: tuple[tuple[str, str, tuple[float, float, float]], ...],
+) -> Any:
+    """Map replay configurations to named Drake frame points using native FK."""
+    from src.shared.python.motion_matching.replay_metrics import (
+        NativeMarkerPositionOutput,
+    )
+
+    contracts = _contracts()
+    bundle = validate_native_replay_bundle(bundle, contracts)
+    path = Path(model_path)
+    timestep = bundle.policy.step_size_seconds
+    if timestep is None:
+        raise ValueError("Drake marker FK requires the frozen native step size")
+    plant, context = _load_native(path, timestep)
+    if _identity(plant, context, path, contracts) != bundle.model:
+        raise ValueError("marker FK model identity differs from frozen replay bundle")
+    times = np.asarray(replay.time_seconds, dtype=np.float64)
+    qpos = np.asarray(replay.qpos, dtype=np.float64)
+    if (
+        qpos.shape != (len(times), plant.num_positions())
+        or not np.isfinite(times).all()
+        or not np.isfinite(qpos).all()
+        or len(times) < 2
+        or not np.all(np.diff(times) > 0)
+    ):
+        raise ValueError("marker FK requires finite full-horizon native qpos samples")
+    labels = tuple(item[0] for item in attachments)
+    if not labels or len(labels) != len(set(labels)):
+        raise ValueError("marker labels must be non-empty, unique and ordered")
+    resolved: list[tuple[Any, np.ndarray]] = []
+    for label, frame_name, offset in attachments:
+        if not label or not frame_name:
+            raise ValueError("marker labels and native frame names must be explicit")
+        local = np.asarray(offset, dtype=np.float64)
+        if local.shape != (3,) or not np.isfinite(local).all():
+            raise ValueError("marker frame-local offset must be a finite 3-vector")
+        try:
+            frame = plant.GetFrameByName(frame_name)
+        except (RuntimeError, ValueError) as error:
+            raise ValueError(f"unknown native marker frame: {frame_name}") from error
+        resolved.append((frame, local))
+    positions = np.empty((len(times), len(attachments), 3), dtype=np.float64)
+    world = plant.world_frame()
+    for sample, configuration in enumerate(qpos):
+        plant.SetPositions(context, configuration)
+        for marker, (frame, local) in enumerate(resolved):
+            positions[sample, marker] = plant.CalcPointsPositions(
+                context, frame, local.reshape(3, 1), world
+            )[:, 0]
+    return NativeMarkerPositionOutput(
+        times,
+        positions,
+        labels,
+        "world",
+        bundle.input_history.timebase_id,
+    )
+
+
 def _step_native(bundle: Any, path: Path) -> NativeDrakeTorqueReplay:
     from pydrake.systems.analysis import Simulator
 

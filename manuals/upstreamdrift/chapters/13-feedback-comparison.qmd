@@ -203,3 +203,10 @@ equivalence. Contract tests execute a synthetic one-hinge model using the
 actual adapter, but do not qualify any registered production model. The
 calculation registry remains blocked; this execution interface is not a
 released matching calculation.
+
+F09d (#11907) adds the next boundary: explicit model-owned forward kinematics
+from those native output configurations to named 3-D marker positions. Its
+ordered local-point map and source/loaded-model/provider identities are
+content-addressed; generalized coordinates are never treated as marker
+positions. See
+`manuals/upstreamdrift/chapters/28-native-marker-forward-kinematics.qmd`.

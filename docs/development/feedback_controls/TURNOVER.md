@@ -130,6 +130,39 @@ data, physiological tolerance, or qualification claim was used. The canonical
 manual is `manuals/upstreamdrift/chapters/13-feedback-comparison.qmd`; the
 current API and constraints are recorded in
 `docs/development/feedback_controls/F09C-NATIVE-EXECUTION.md` and `SPEC.md`.
-Further acceptance remains in F09/F10; the next native-data slice must provide
-engine-owned FK to named 3-D marker positions before observation scoring can
-consume an execution receipt.
+Further acceptance remains in F09/F10. F09d #11907 adds the separately scoped
+engine-owned FK bridge to named 3-D marker positions before observation scoring
+consumes a replay receipt.
+
+## F09d Native Marker Forward Kinematics
+
+Child #11907 adds `src/engines/feedback_native_markers.py` and uses the public
+native MuJoCo/Drake replay adapters to execute a frozen bundle once, then map
+each actual output configuration to explicitly attached body-local points.
+`NativeMarkerMap` binds engine/model/variant, source and loaded-model digests,
+adapter identity, world frame, simulation-relative timebase, ordered labels,
+native frame names, and finite offsets in metres. Its content digest and the
+native replay receipt/output digests travel with `NativeMarkerPositionOutput`
+in an unqualified `NativeMarkerReplayEvidence`. `NativeMarkerReplayReport`
+retains each inventory row and all six required engines; FK coverage is not
+qualification. Model paths and captured data are omitted.
+
+The independent synthetic MuJoCo fixture uses a nonzero floating base pose,
+hinge angle and marker offset; expected positions come from direct quaternion
+and hinge-transform equations. The Drake fixture uses a nonzero floating-base
+translation, a nonzero local offset and distinct `nq=8`, `nv=7`; expected
+positions use the body's world pose applied to the local point. Unknown frame
+and stale loaded-model mappings fail closed. These tests prove the FK seam and
+identity checks only. OpenSim reuses F07 #11903's separate geometry provider
+only after its full-state replay seam is available; Pinocchio, MyoSuite and
+Simscape remain blocking denominator rows. No observation threshold,
+physiology, contact qualification or cross-engine result is asserted.
+
+Focused validation: `python -m pytest -q --confcutdir=tests/unit/engines
+tests/unit/engines/test_feedback_native_markers.py` passes on Windows (with the
+optional Drake dependency skipped there). The actual Drake floating-base
+fixture passes in the owned Ubuntu 24.04 Drake environment with pytest's
+repository config disabled because that environment lacks pytest-asyncio;
+its only warning is the unregistered `unit` mark in that isolated invocation.
+The canonical calculation note is
+`manuals/upstreamdrift/chapters/28-native-marker-forward-kinematics.qmd`.
