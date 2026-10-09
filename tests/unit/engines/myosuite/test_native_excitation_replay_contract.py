@@ -5,6 +5,8 @@ from __future__ import annotations
 from dataclasses import replace
 import hashlib
 from pathlib import Path
+import sys
+from types import ModuleType, SimpleNamespace
 
 import numpy as np
 import pytest
@@ -20,6 +22,8 @@ from src.engines.feedback_native_execution import (
 from src.engines.model_inventory import EngineModelInventory, TARGET_ENGINES
 from src.engines.physics_engines.myosuite.python.native_excitation_replay import (
     NativeMyoSuiteExcitationReplay,
+    _execute_native_steps,
+    _module_bytes,
     validate_myo_suite_bundle_contract,
 )
 from src.shared.python._seam_redirect import extend_sidekick_lab_path
@@ -43,6 +47,21 @@ from sidekick.lab.mocap import (
 )
 
 pytestmark = pytest.mark.unit
+
+
+def test_provider_source_hashing_only_reads_modules_already_loaded(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    source = tmp_path / "provider.py"
+    source.write_bytes(b"frozen provider source")
+    module = ModuleType("frozen_provider_test")
+    module.__file__ = str(source)
+    monkeypatch.setitem(sys.modules, module.__name__, module)
+
+    assert _module_bytes(module.__name__) == b"frozen provider source"
+
+    with pytest.raises(ValueError, match="is not loaded"):
+        _module_bytes("provider_that_must_not_be_imported")
 
 
 def _registry() -> FeedbackComparisonRegistry:
@@ -243,6 +262,111 @@ def test_wrapper_state_restore_uses_the_explicit_supported_chain() -> None:
     )
 
 
+def _native_step_fixture():
+    mujoco = pytest.importorskip("mujoco")
+    model = mujoco.MjModel.from_xml_string(
+        """<mujoco model="native-clock-fixture">
+          <worldbody><body><joint name="hinge" type="hinge"/>
+            <geom type="sphere" size="0.05" mass="1"/>
+          </body></worldbody>
+          <actuator><motor name="motor" joint="hinge" gear="1"/></actuator>
+        </mujoco>"""
+    )
+    data = mujoco.MjData(model)
+    mujoco.mj_forward(model, data)
+    integration = np.empty(
+        mujoco.mj_stateSize(model, mujoco.mjtState.mjSTATE_INTEGRATION)
+    )
+    mujoco.mj_getState(model, data, integration, mujoco.mjtState.mjSTATE_INTEGRATION)
+    times = np.arange(3, dtype=float) * model.opt.timestep
+    controls = np.array([[0.1], [0.2], [0.2]])
+    states = {
+        "integration": integration,
+        "wrapper_state": np.zeros(7, dtype=float),
+    }
+    bundle = SimpleNamespace(
+        applied_input_sha256="input-digest", policy_sha256="policy-digest"
+    )
+    return mujoco, model, data, times, controls, states, bundle
+
+
+def test_native_myo_output_uses_observed_clock_and_complete_integration_state() -> None:
+    mj, model, data, times, controls, states, bundle = _native_step_fixture()
+    replay = _execute_native_steps(
+        SimpleNamespace(frame_skip=1), model, data, times, controls, states, bundle
+    )
+
+    assert np.array_equal(replay.time_seconds, times)
+    assert replay.integration_states.shape == (
+        len(times),
+        len(states["integration"]),
+    )
+    assert np.array_equal(replay.integration_states[0], states["integration"])
+    assert replay.integration_states[-1].shape == states["integration"].shape
+
+
+def test_native_myo_replay_rejects_global_mujoco_callbacks() -> None:
+    mj, model, data, times, controls, states, bundle = _native_step_fixture()
+    previous = mj.get_mjcb_control()
+    mj.set_mjcb_control(lambda _model, _data: None)
+    try:
+        with pytest.raises(ValueError, match="global MuJoCo callbacks"):
+            _execute_native_steps(
+                SimpleNamespace(frame_skip=1),
+                model,
+                data,
+                times,
+                controls,
+                states,
+                bundle,
+            )
+    finally:
+        mj.set_mjcb_control(previous)
+
+
+def test_native_myo_replay_rejects_clock_drift_and_nonfinite_state(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    mj, model, data, times, controls, states, bundle = _native_step_fixture()
+    native_step = mj.mj_step
+
+    def drift_clock(actual_model, actual_data, nstep=1):
+        native_step(actual_model, actual_data, nstep=nstep)
+        actual_data.time += actual_model.opt.timestep
+
+    monkeypatch.setattr(mj, "mj_step", drift_clock)
+    with pytest.raises(ValueError, match="observed native time"):
+        _execute_native_steps(
+            SimpleNamespace(frame_skip=1),
+            model,
+            data,
+            times,
+            controls,
+            states,
+            bundle,
+        )
+
+    monkeypatch.undo()
+    mj, model, data, times, controls, states, bundle = _native_step_fixture()
+    native_step = mj.mj_step
+
+    def nonfinite_state(actual_model, actual_data, nstep=1):
+        native_step(actual_model, actual_data, nstep=nstep)
+        actual_data.qpos[0] = np.nan
+
+    monkeypatch.setattr(mj, "mj_step", nonfinite_state)
+    with pytest.raises(ValueError, match="nonfinite native state"):
+        _execute_native_steps(
+            SimpleNamespace(frame_skip=1),
+            model,
+            data,
+            times,
+            controls,
+            states,
+            bundle,
+        )
+
+
 def test_t01_contract_rejects_observation_enabled_replay_policy() -> None:
     registry = _registry()
     _, bundle, _ = _case(registry)
@@ -277,6 +401,13 @@ def test_receipt_binds_exact_applied_excitation_and_keeps_unqualified() -> None:
     assert receipt.qualification == "unqualified"
     assert receipt.full_state and receipt.full_horizon
     assert receipt.state_reset_count is None
+    incomplete_state = replace(
+        replay, integration_states=replay.integration_states[:, :-1]
+    )
+    with pytest.raises(
+        ValueError, match="auxiliary state differs from T01 state schema"
+    ):
+        validate_native_replay_output(row, binding, bundle, incomplete_state)
 
 
 def test_executor_dispatches_to_explicit_myo_suite_excitation_provider(

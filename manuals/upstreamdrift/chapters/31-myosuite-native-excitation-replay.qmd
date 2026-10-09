@@ -79,8 +79,14 @@ the wrapper chain differs, a control stage or plugin is present, muscle
 activation state does not map one-to-one to the declared actuators, a channel
 or clock differs, state restoration changes the frozen payload, or actual
 control readback does not match the bundle. Only the explicitly supported
-wrapper attributes are restored. A future environment with additional mutable
-state requires a separately versioned state and policy contract.
+control readback does not match the bundle. It also rejects process-global
+MuJoCo callbacks before construction and around native stepping/forward
+evaluation, checks that post-step `data.time` matches the frozen clock, rejects
+nonfinite physical or integration state, and verifies that `mj_forward` leaves
+the observed clock unchanged. Output timestamps are observed native times, not
+a copy of requested timestamps. Only the explicitly supported wrapper
+attributes are restored. A future environment with additional mutable state
+requires a separately versioned state and policy contract.
 
 ## Evidence and Limitations
 
@@ -91,6 +97,13 @@ frozen excitation bundle, runs MyoSuite 3.0.0/MuJoCo 3.6.0, and verifies exact
 control readback, full-horizon state output, and digest preservation. This
 fixture is an installed public elbow task, not private capture data or a
 production golf model.
+
+The callback-ownership and observed-clock checks were added after the retained
+DeskComputer runtime execution. Their synthetic MuJoCo regressions pass in the
+local environment, but this exact source revision has not yet been rerun under
+the pinned MyoSuite 3.0.0/MuJoCo 3.6.0 runtime. The earlier native result applies
+only to the source bytes used by its disposable overlay; it is not evidence for
+the newer revision.
 
 The task-owned MyoSuite 3.0.0 distribution metadata reports
 `License-Expression: Apache-2.0`; the upstream [MyoSuite source

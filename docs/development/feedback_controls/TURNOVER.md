@@ -202,7 +202,10 @@ actual normalized post-mapping excitation written to native `data.ctrl`; Gym
 adapter steps the plant directly using explicit frame skip and fixed-horizon
 ZOH input and does not invoke Gym `step`, observation, reward, task termination,
 or reset. It binds full physical/numerical initial state plus supported wrapper
-flags and counters and verifies exact native control readback.
+flags and counters and verifies exact native control readback. The current
+source also rejects global MuJoCo callbacks, observes and verifies each
+post-step `data.time`, checks restored full integration state, rejects
+nonfinite output, and ensures `mj_forward` does not change the clock.
 
 Wrapper snapshot and restore now share one chain-walk helper. Focused tests
 check the explicit supported order and restoration of the captured counters
@@ -219,6 +222,12 @@ unqualified, and all six engine rows remain represented. The generic legacy
 Gym four-tuple path was not changed because this provider avoids `env.step()`.
 The wrapper-state refactor adds one contract test; its focused bundle-contract
 and runtime suite passes 7 tests with one optional runtime skip locally.
+
+The callback/clock/full-state hardening is newer than the cited DeskComputer
+runtime execution. Synthetic MuJoCo regressions and local affected tests cover
+the new checks; native MyoSuite revalidation of this exact source revision is
+pending. Keep the prior runtime receipt bound to its executed source and do not
+promote it to evidence for the current revision.
 
 See `docs/development/feedback_controls/F09F-MYOSUITE-NATIVE-EXCITATION.md`
 for exact validation and limits, and
