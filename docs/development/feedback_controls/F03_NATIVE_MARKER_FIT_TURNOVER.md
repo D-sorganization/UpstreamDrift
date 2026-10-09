@@ -1,4 +1,4 @@
-# F03 Native Marker Fit Turnover (Parent #11787)
+# F03 Native Marker Fit Turnover (Child #11948; Parent #11787)
 
 This local F03 slice extends the existing F05d BoxFDDP action with a
 MuJoCo site-marker objective and tangent derivatives. It reuses F05c
@@ -8,9 +8,10 @@ is stacked on local F02 `e8d8c5465eec4ac0ff83ff9b41bcc7e8969dcb03`,
 which itself depends on the F05c feature stack. Parent F03 #11787 remains
 open. At the October 9 GitHub rate-limit stop, no new child claim or PR
 could be created. Repository_Management/AGENTS.md's fail-open lease-check
-rule and the parent task's explicit F03 ownership authorization permit
-local work only; reconcile issue/lease and branch base before publication.
-No network calls or pushes were made for this slice.
+rule and the parent task's explicit F03 ownership authorization permitted
+local work. After quota recovery, child #11948 was created, checked free and
+leased to `codex`; the queued publication can proceed as a stacked, unarmed
+PR. This coordination event changes no native physics or receipt data.
 
 ## Actual Result and Scope
 

@@ -1,5 +1,5 @@
 ---
-issue: 11787
+issue: 11948
 summary: "Fit exact-clock masked native site markers with bounded manifold control and complete-state replay."
 branch: "feat/f03-native-marker-fit-11787"
 ---

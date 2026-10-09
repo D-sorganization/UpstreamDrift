@@ -131,5 +131,5 @@ versus full-trajectory acceptance, independent marker RMSE and total
 wall/CPU work. This is model-generated data without gravity/contact;
 real capture geometry/clock, F02 optimized-reference handoff, native
 muscles, production full swing and all-engine qualification remain open.
-GitHub quota paused child claim/publication, so this source is local
-under parent-authorized F03 ownership pending coordination recovery.
+GitHub quota initially paused child claim/publication; after recovery,
+child #11948 was created and leased to `codex` for a stacked, unarmed PR.
