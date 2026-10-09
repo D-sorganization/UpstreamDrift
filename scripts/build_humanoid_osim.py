@@ -23,7 +23,13 @@ Modifications applied
 3. Append a ``WeldJoint`` named ``hand_r_to_club`` whose parent is the
    ``hand_r`` body and whose child is the ``Club`` body. The grip frame and
    clubhead frame are exposed as ``PhysicalOffsetFrame`` components on the
-   ``Club`` body.
+   ``Club`` body. The Club-side frame sits at the shared trail-hand offset
+   (``model_appearance.grip_pose``), not at the butt.
+3b. Close the loop on the lead hand: append a ``WeldConstraint``
+   ``hand_l_to_club`` (or two ``PointConstraint``s when the closure type is
+   ``point_pair``, per ``DEFAULT_CLOSURE_TYPE``) between ``hand_l`` and the
+   ``Club`` at the shared lead-hand offset, so both hands are constrained
+   (OSV-2, #11728). Skipped for the compliant-attachment research option.
 4. Add a ``CoordinateActuator`` to the ``ForceSet`` for every ``Coordinate``
    in the model. Naming convention: ``tau_<coord_name>``. ``optimal_force=1``,
    ``min_control=-Inf``, ``max_control=+Inf`` (we control torque directly in
@@ -56,6 +62,7 @@ Notes
 
 from __future__ import annotations
 
+import argparse
 import math
 import sys
 from dataclasses import dataclass
@@ -66,6 +73,17 @@ import defusedxml.ElementTree as DefusedET
 
 # Repository root, derived from this script's location.
 REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from src.engines.physics_engines.opensim.python.full_body_osim import (  # noqa: E402
+    DEFAULT_CLOSURE_TYPE,
+)
+from src.shared.python.model_appearance.grip_pose import (  # noqa: E402
+    DEFAULT_GRIP_POSE,
+    HAND_GRIP_ANCHOR_IN_HAND_M,
+    Hand,
+)
 
 BASE_OSIM = (
     REPO_ROOT
@@ -139,7 +157,12 @@ GOLF_COORDINATE_RANGES: dict[str, tuple[float, float]] = {
 # grip sits ~6 cm distally along the hand's local +y. This is an anatomical
 # placeholder; the canonical value is set by ``coordinate_map`` once that
 # issue lands.
-HAND_R_GRIP_OFFSET = (0.0, -0.06, 0.0)
+HAND_R_GRIP_OFFSET = HAND_GRIP_ANCHOR_IN_HAND_M
+HAND_L_GRIP_OFFSET = HAND_GRIP_ANCHOR_IN_HAND_M
+LEAD_CLOSURE_NAME = "hand_l_to_club"
+CLOSURE_TYPES = ("weld", "point_pair")
+# Second grip point of the point-pair closure, along the shaft from the first.
+POINT_PAIR_SEPARATION_M = 0.05
 
 SUPPORTED_TRANSLATIONAL_UNITS = "N_per_m"
 SUPPORTED_ROTATIONAL_UNITS = "N_m_per_rad"
@@ -293,7 +316,7 @@ def _make_club_weld_joint() -> ET.Element:
         _make_offset_frame(
             "club_grip_offset",
             socket_parent="/bodyset/Club",
-            translation=(0.0, 0.0, 0.0),
+            translation=(0.0, DEFAULT_GRIP_POSE.club_y_m(Hand.TRAIL), 0.0),
         )
     )
     # Clubhead frame: distal end of the club. The cross-engine spec requires
@@ -306,6 +329,57 @@ def _make_club_weld_joint() -> ET.Element:
         )
     )
     return joint
+
+
+def _make_lead_hand_closure(closure_type: str) -> list[ET.Element]:
+    """Constraint element(s) holding the lead hand on the club at its offset.
+
+    ``weld`` is one 6-DOF ``WeldConstraint`` (identity relative rotation: the
+    Rajagopal hands share axes with the left mesh mirrored, so the lead palm
+    already faces the trail palm); ``point_pair`` is two ``PointConstraint``s a
+    fixed distance apart along the shaft.
+    """
+    if closure_type not in CLOSURE_TYPES:
+        raise ValueError(
+            f"closure_type must be one of {CLOSURE_TYPES}, got {closure_type!r}"
+        )
+    lead_y = DEFAULT_GRIP_POSE.club_y_m(Hand.LEAD)
+    if closure_type == "point_pair":
+        elements = []
+        for suffix, dy in (("proximal", 0.0), ("distal", -POINT_PAIR_SEPARATION_M)):
+            pc = ET.Element(
+                "PointConstraint", attrib={"name": f"{LEAD_CLOSURE_NAME}_{suffix}"}
+            )
+            ET.SubElement(pc, "isEnforced").text = "true"
+            ET.SubElement(pc, "socket_body1").text = "/bodyset/hand_l"
+            ET.SubElement(pc, "socket_body2").text = "/bodyset/Club"
+            hand_pt = (
+                HAND_L_GRIP_OFFSET[0],
+                HAND_L_GRIP_OFFSET[1] + dy,
+                HAND_L_GRIP_OFFSET[2],
+            )
+            ET.SubElement(pc, "point_on_body1").text = _format_vector(hand_pt)
+            ET.SubElement(pc, "point_on_body2").text = _format_vector(
+                (0.0, lead_y + dy, 0.0)
+            )
+            elements.append(pc)
+        return elements
+    weld = ET.Element("WeldConstraint", attrib={"name": LEAD_CLOSURE_NAME})
+    ET.SubElement(weld, "isEnforced").text = "true"
+    ET.SubElement(weld, "socket_frame1").text = "hand_l_grip_offset"
+    ET.SubElement(weld, "socket_frame2").text = "club_lead_grip_offset"
+    frames = ET.SubElement(weld, "frames")
+    frames.append(
+        _make_offset_frame(
+            "hand_l_grip_offset", "/bodyset/hand_l", translation=HAND_L_GRIP_OFFSET
+        )
+    )
+    frames.append(
+        _make_offset_frame(
+            "club_lead_grip_offset", "/bodyset/Club", translation=(0.0, lead_y, 0.0)
+        )
+    )
+    return [weld]
 
 
 def _format_vector(values: tuple[float, float, float]) -> str:
@@ -436,6 +510,7 @@ def build(
     *,
     output_path: Path = OUTPUT_OSIM,
     club_attachment: CompliantClubAttachmentConfig | None = None,
+    closure_type: str = DEFAULT_CLOSURE_TYPE,
 ) -> Path:
     """Build the golf_humanoid.osim file. Returns the output path."""
     tree = _parse(BASE_OSIM)
@@ -462,6 +537,16 @@ def build(
     joint_objects = _find_one(jointset, "objects")
     if club_attachment is None:
         joint_objects.append(_make_club_weld_joint())
+
+    # ------------------------------------------------------------------
+    # 2b. Constrain the lead hand to the club (rigid attachment only).
+    # ------------------------------------------------------------------
+    if club_attachment is None:
+        if "hand_l" not in _body_names(body_objects):
+            raise ValueError("Base model has no 'hand_l' body to constrain.")
+        constraint_set = _find_one(model, "ConstraintSet")
+        constraint_objects = _find_one(constraint_set, "objects")
+        constraint_objects.extend(_make_lead_hand_closure(closure_type))
 
     # ------------------------------------------------------------------
     # 3. Add compliant grip force when the research option is requested.
@@ -505,8 +590,25 @@ def _summary(coord_names: list[str], output: Path) -> str:
     )
 
 
-def main() -> int:
-    output = build()
+def main(argv: list[str] | None = None) -> int:
+    global BASE_OSIM
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument(
+        "--base",
+        type=Path,
+        default=None,
+        help="Rajagopal OpenSense .osim to build from (default: the submodule copy)",
+    )
+    parser.add_argument(
+        "--closure-type",
+        choices=CLOSURE_TYPES,
+        default=DEFAULT_CLOSURE_TYPE,
+        help="lead-hand closure: 6-DOF weld or point pair",
+    )
+    args = parser.parse_args(argv)
+    if args.base is not None:
+        BASE_OSIM = args.base
+    output = build(closure_type=args.closure_type)
     model = _find_one(_parse(output).getroot(), "Model")
     coord_names = _collect_coordinate_names(model)
     sys.stdout.write(_summary(coord_names, output) + "\n")

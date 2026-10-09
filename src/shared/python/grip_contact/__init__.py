@@ -1,5 +1,9 @@
 """Engine-agnostic grip interface description (issue #11739, OSV-7)."""
 
+from src.shared.python.grip_contact.closure_series import (
+    GripClosureSeries,
+    closure_series_from_residuals,
+)
 from src.shared.python.grip_contact.club_dynamics import ClubDynamics
 from src.shared.python.grip_contact.damping import (
     DEFAULT_DAMPING_RATIO,
@@ -39,6 +43,8 @@ from src.shared.python.grip_contact.trajectory_conditioning import (
 )
 
 __all__ = [
+    "GripClosureSeries",
+    "closure_series_from_residuals",
     "DEFAULT_COUPLE_NOISE_FLOOR_NM",
     "ClubKinematics",
     "CoupleConsistency",

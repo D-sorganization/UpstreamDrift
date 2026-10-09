@@ -32,6 +32,7 @@ def _write_minimal_base_osim(tmp_path: Path) -> Path:
 			<objects>
 				<Body name="ground_body" />
 				<Body name="hand_r" />
+				<Body name="hand_l" />
 			</objects>
 		</BodySet>
 		<JointSet name="jointset">
@@ -43,6 +44,9 @@ def _write_minimal_base_osim(tmp_path: Path) -> Path:
 				</PinJoint>
 			</objects>
 		</JointSet>
+		<ConstraintSet name="constraintset">
+			<objects />
+		</ConstraintSet>
 		<ForceSet name="forceset">
 			<objects />
 		</ForceSet>

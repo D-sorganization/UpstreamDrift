@@ -55,8 +55,8 @@ def test_hand_spacing_matches_the_spec_closure_placements() -> None:
 def test_single_source_for_the_opensim_hand_offsets() -> None:
     from src.engines.physics_engines.opensim.python.tour_matching import club_geometry
 
-    assert club_geometry.LEAD_HAND_OFFSET_M == DEFAULT_GRIP_POSE.club_y_m(Hand.LEAD)
-    assert club_geometry.TRAIL_HAND_OFFSET_M == DEFAULT_GRIP_POSE.club_y_m(Hand.TRAIL)
+    assert DEFAULT_GRIP_POSE.club_y_m(Hand.LEAD) == club_geometry.LEAD_HAND_OFFSET_M
+    assert DEFAULT_GRIP_POSE.club_y_m(Hand.TRAIL) == club_geometry.TRAIL_HAND_OFFSET_M
 
 
 def test_neutral_v_angles() -> None:
@@ -123,3 +123,32 @@ def test_placements_are_finite() -> None:
             math.isfinite(v)
             for v in (p.distance_below_butt_m, p.v_azimuth_deg, p.thumb_offset_deg)
         )
+
+
+def test_myosuite_club_sites_come_from_the_shared_pose() -> None:
+    from src.engines.physics_engines.myosuite.python import golfer_scene
+    from src.shared.python.motion_matching.club_models import CLUBS
+
+    club = CLUBS["driver"]
+    lead = golfer_scene._club_grip_site("l", club, Hand.LEAD)
+    trail = golfer_scene._club_grip_site("r", club, Hand.TRAIL)
+
+    def y(site: str) -> float:
+        return float(site.split('pos="0 ')[1].split()[0])
+
+    # Origin at the head, shaft toward -y: the lead hand is farther from the head.
+    assert y(lead) < y(trail) < 0.0
+    assert y(lead) == pytest.approx(-(club.length_m - 0.015))
+    assert y(trail) - y(lead) == pytest.approx(DEFAULT_GRIP_POSE.hand_spacing_m)
+
+
+def test_no_engine_redefines_the_hand_anchor_or_the_trail_offsets() -> None:
+    """Engines import the shared numbers; no literal copies in engine code."""
+    needles = ("(0.0, -0.06, 0.0)", "TRAIL_HAND_OFFSET_M: float = -", "-0.95 0")
+    engines = ROOT / "src/engines"
+    offenders = [
+        str(p.relative_to(ROOT))
+        for p in engines.rglob("*.py")
+        if any(n in p.read_text(encoding="utf-8", errors="ignore") for n in needles)
+    ]
+    assert not offenders, offenders

@@ -3277,7 +3277,7 @@
 								<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
 							</FrameGeometry>
 							<socket_parent>/bodyset/Club</socket_parent>
-							<translation>0.0 0.0 0.0</translation>
+							<translation>0.0 -0.0912 0.0</translation>
 							<orientation>0.0 0.0 0.0</orientation>
 						</PhysicalOffsetFrame>
 						<PhysicalOffsetFrame name="club_head_offset">
@@ -3321,6 +3321,31 @@
 					<dependent_coordinate_name>knee_angle_l_beta</dependent_coordinate_name>
 					<scale_factor>1</scale_factor>
 				</CoordinateCouplerConstraint>
+				<WeldConstraint name="hand_l_to_club">
+					<isEnforced>true</isEnforced>
+					<socket_frame1>hand_l_grip_offset</socket_frame1>
+					<socket_frame2>club_lead_grip_offset</socket_frame2>
+					<frames>
+						<PhysicalOffsetFrame name="hand_l_grip_offset">
+							<FrameGeometry name="frame_geometry">
+								<socket_frame>..</socket_frame>
+								<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
+							</FrameGeometry>
+							<socket_parent>/bodyset/hand_l</socket_parent>
+							<translation>0.0 -0.06 0.0</translation>
+							<orientation>0.0 0.0 0.0</orientation>
+						</PhysicalOffsetFrame>
+						<PhysicalOffsetFrame name="club_lead_grip_offset">
+							<FrameGeometry name="frame_geometry">
+								<socket_frame>..</socket_frame>
+								<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
+							</FrameGeometry>
+							<socket_parent>/bodyset/Club</socket_parent>
+							<translation>0.0 -0.015 0.0</translation>
+							<orientation>0.0 0.0 0.0</orientation>
+						</PhysicalOffsetFrame>
+					</frames>
+				</WeldConstraint>
 			</objects>
 			<groups />
 		</ConstraintSet>

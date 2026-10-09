@@ -35,6 +35,7 @@ import numpy as np
 from scipy.signal import butter, filtfilt
 
 from src.shared.python.contracts import ensure, require
+from src.shared.python.model_appearance.grip_pose import HAND_GRIP_ANCHOR_IN_HAND_M
 
 logger = logging.getLogger(__name__)
 
@@ -97,7 +98,7 @@ RESERVE_OPTIMAL_FORCE = 1.0
 CLUB_MASS_KG = 0.32
 CLUB_COM_M = (0.0, -0.786, 0.0)
 CLUB_INERTIA = (0.1158, 0.0001, 0.1158)
-CLUB_GRIP_OFFSET_IN_HAND_M = (0.0, -0.06, 0.0)
+CLUB_GRIP_OFFSET_IN_HAND_M = HAND_GRIP_ANCHOR_IN_HAND_M
 CLUB_HEAD_IN_CLUB_M = (0.0, -1.042, 0.0)
 
 # Muscle-name prefix -> functional group (Rajagopal naming).
