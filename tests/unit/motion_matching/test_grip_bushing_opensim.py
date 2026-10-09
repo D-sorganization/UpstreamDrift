@@ -23,8 +23,14 @@ from src.engines.physics_engines.opensim.python.grip_bushing_sim import (  # noq
     prepare_motion,
 )
 from src.shared.python.grip_contact import (  # noqa: E402
+    ClubDynamics,
+    ClubKinematics,
     GripInterface,
+    couple_consistency,
     decompose_hand_forces,
+    load_coordinate_swing,
+    peak_squeeze_n,
+    required_hand_moment_nm,
 )
 
 pytestmark = [pytest.mark.unit]
@@ -146,13 +152,22 @@ def test_analysis_uses_bushing_split_method(static_run) -> None:
         hand_power_w(run, "X")
 
 
-# Internal (antagonistic) hand force bound.  Reasoning: the two hands carry the
-# club couple as an equal and opposite force pair, F_int = M / d with d = 0.076 m,
-# so 500 N is a 38 N m couple, well above what a 0.31 kg club needs in the
-# backswing and transition and consistent with the review statement (#11765)
-# that real per-hand grip forces near impact are a few hundred newtons.
-MAX_INTERNAL_FORCE_N = 500.0
 FIRST_IK_SWITCH_S = 0.95
+
+# Physics checks replacing the flat 500 N internal-force bound (owner decision
+# on PR #11774): a flat bound cannot tell a couple-carrying force pair from the
+# fighting-hands artefact.  See grip_contact.couple_check and
+# DESIGN_DECISIONS.md section 17.
+MAX_SQUEEZE_N = 50.0
+MAX_COUPLE_RELATIVE_ERROR = 0.05
+
+
+def _hand_pairs(run):
+    return (
+        (run.force_on_club_n["L"], run.force_on_club_n["R"]),
+        (run.grip_point_m["L"], run.grip_point_m["R"]),
+        (run.torque_on_club_nm["L"], run.torque_on_club_nm["R"]),
+    )
 
 
 def _driven_run(spec_bytes, motion, t_end, valid_window):
@@ -184,28 +199,88 @@ def test_driven_swing_before_ik_switch_within_limits(spec_bytes, motion) -> None
     trans, rot, dec = _worst(run)
     assert trans <= MAX_DEFLECTION_M
     assert rot <= MAX_ROTATION_RAD
-    assert dec.peak_internal_n() <= MAX_INTERNAL_FORCE_N
+    _assert_internal_force_is_physical(run, json.loads(spec_bytes))
     peak = max(np.linalg.norm(run.force_on_club_n[s], axis=1).max() for s in "LR")
     assert peak > 20.0  # the swing genuinely loads the grip
 
 
+# ---------------------------------------------------------------------------
+# Full 0-1.8 s window, driven by the closure-consistent fitted swings shared
+# with OSV-10 (tests/fixtures/club_face, IK marker RMS about 33 mm, replayed
+# identically in every engine).  Same bounds as the valid-window test.
+FIXTURES = ROOT / "tests/fixtures/club_face"
+FULL_SWING_ACCURACY = 1e-3  # RK-Merson; 1e-5 and CPodes agree within 0.2 %
+
+
+def _fixture_swing(club: str):
+    spec_bytes = (MODELS / f"full_body_spec_anthro_{club}.json").read_bytes()
+    order = json.loads(spec_bytes)["coordinate_order"]
+    swing = load_coordinate_swing(
+        FIXTURES / f"swing_q_{club}.npz", FIXTURES / "address_poses.json", club, order
+    )
+    return spec_bytes, swing
+
+
+@pytest.fixture(scope="module", params=["driver", "iron7"])
+def full_swing_run(request):
+    # Prescribed as committed: the reference is a smooth 1 kHz dynamics replay
+    # (condition_trajectory repairs 0 frames); the 25 Hz filter of the IK
+    # candidate pipeline changes the peaks by < 4 % and would open the loop.
+    spec_bytes, swing = _fixture_swing(request.param)
+    sim = BushingGripSimulator(spec_bytes, swing.names, swing.time_s, swing.q)
+    return request.param, sim.run(None, accuracy=FULL_SWING_ACCURACY)
+
+
+@pytest.mark.parametrize("club", ["driver", "iron7"])
+def test_fixture_swing_closes_the_two_hand_loop(club: str) -> None:
+    """Input kinematics: the two-hand loop is closed and hand speeds are real."""
+    spec_bytes, swing = _fixture_swing(club)
+    rep = input_kinematics_report(spec_bytes, swing.names, swing.time_s, swing.q)
+    assert rep["closure_distance_m"].max() < 1.0e-4  # < 0.1 mm over the swing
+    assert rep["closure_angle_deg"].max() < 0.1
+    for side in ("left", "right"):
+        # measured wrist markers peak at 9.7 m/s (driver); the IK candidate
+        # reached 95 m/s
+        assert 6.0 < rep[f"{side}_hand_speed_m_s"].max() < 13.0
+
+
 @pytest.mark.slow
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "#11739: the OpenSim IK candidate (marker RMS 262 mm) switches IK "
-        "solution at 0.95 s and again later; across it the conditioned motion "
-        "gives kN-scale hand forces and mm-scale deflection. The bounds are not "
-        "loosened; a qualified IK input is required (DESIGN_DECISIONS.md "
-        "section 16)."
-    ),
-)
-def test_driven_swing_through_ik_switch_within_limits(spec_bytes, motion) -> None:
-    run = _driven_run(spec_bytes, motion, 1.3, valid_window=False)
-    trans, rot, dec = _worst(run)
+def test_full_swing_deflection_within_limits(full_swing_run) -> None:
+    _, run = full_swing_run
+    assert run.time_s[-1] > 1.8
+    trans, rot, _ = _worst(run)
     assert trans <= MAX_DEFLECTION_M
     assert rot <= MAX_ROTATION_RAD
-    assert dec.peak_internal_n() <= MAX_INTERNAL_FORCE_N
+
+
+def _assert_internal_force_is_physical(run, spec) -> None:
+    """Squeeze bound plus couple consistency (Newton-Euler of the club)."""
+    forces, points, torques = _hand_pairs(run)
+    assert peak_squeeze_n(*forces, *points) <= MAX_SQUEEZE_N
+    kinematics = ClubKinematics(
+        run.club_rotation,
+        run.club_omega_rad_s,
+        run.club_alpha_rad_s2,
+        run.club_com_m,
+        run.club_com_acceleration_m_s2,
+    )
+    required = required_hand_moment_nm(
+        kinematics,
+        ClubDynamics.from_spec(spec),
+        np.asarray(spec["gravity_m_s2"]),
+        0.5 * (points[0] + points[1]),
+    )
+    res = couple_consistency(forces, points, torques, required)
+    assert res.checked.mean() > 0.5  # the check covers the loaded swing
+    assert res.checked[int(np.argmax(res.actual_transverse_n))]
+    assert res.max_relative_error() <= MAX_COUPLE_RELATIVE_ERROR
+
+
+@pytest.mark.slow
+def test_full_swing_internal_force_is_physical(full_swing_run) -> None:
+    club, run = full_swing_run
+    spec = json.loads((MODELS / f"full_body_spec_anthro_{club}.json").read_bytes())
+    _assert_internal_force_is_physical(run, spec)
 
 
 def test_candidate_is_inconsistent_with_the_two_hand_closure(

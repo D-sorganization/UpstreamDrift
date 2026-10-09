@@ -68,7 +68,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `golf_simulator` | 0 | 0 | 0 | 19 | 0 | 0 |
 | `golf_view_presets` | 0 | 0 | 0 | 3 | 0 | 0 |
 | `golf_viz` | 0 | 0 | 0 | 3 | 0 | 0 |
-| `grip_contact` | 0 | 0 | 0 | 7 | 0 | 0 |
+| `grip_contact` | 0 | 0 | 0 | 9 | 0 | 0 |
 | `ground_model` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `gui_launcher` | 4 | 4 | 0 | 3 | 1 | 8 |
 | `gui_pkg` | 0 | 0 | 0 | 12 | 0 | 0 |
