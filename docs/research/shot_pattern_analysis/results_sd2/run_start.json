@@ -1,0 +1,12 @@
+{
+  "execution_commit": "177a742ccb4ebac3356c0c9b7759eab5b20a494c",
+  "execution_source_sha256": {
+    "src/tools/shot_pattern_analysis/core.py": "7fd8024e0f146a9589ca78c7be03caf90920f8be595034e437094e599ab57c46",
+    "src/tools/shot_pattern_analysis/physics.py": "d6a7c96e1bbb3b77ac1c9a86b5023fefbabe2ed19ebf6f39ceeae498ecb6a323",
+    "src/tools/shot_pattern_analysis/reporting.py": "cd69f40e42ba31cb1d2e41cc08ac44cd8add07f8acba1b124934a0d01d8b8abc",
+    "src/tools/shot_pattern_analysis/uncertainty.py": "b21d9c29728d8d2231681c4cc79eb92919e6368d9dfbede8db943529784748e7"
+  },
+  "seed": 20261008,
+  "face_sd_deg": 2.0,
+  "shots_per_pattern": 10000
+}

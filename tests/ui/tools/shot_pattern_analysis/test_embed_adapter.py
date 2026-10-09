@@ -124,6 +124,58 @@ def test_club_preset_switches_to_the_illustrative_iron_inputs(qapp):  # noqa: AN
     assert widget.cleanup()
 
 
+def test_custom_club_controls_reach_shaft_rotation_cli(monkeypatch, qapp, tmp_path):  # noqa: ANN001
+    from src.tools.shot_pattern_analysis.gui import MainWidget, _ProcessOutput
+
+    widget = MainWidget()
+    widget.output_edit.setText(str(tmp_path))
+    widget.club_preset.setCurrentIndex(widget.club_preset.findData("custom"))
+    widget.club_speed.setValue(33.5)
+    widget.loft.setValue(31.2)
+    widget.attack_angle.setValue(-3.5)
+    widget.clubhead_mass.setValue(0.315)
+    widget.delivery_mode.setCurrentIndex(
+        widget.delivery_mode.findData("shaft_rotation")
+    )
+    widget.lie.setValue(64.5)
+    widget.shaft_lean.setValue(12.0)
+    observed: dict[str, list[str]] = {}
+
+    class Context:
+        @staticmethod
+        def raise_if_cancelled() -> None:
+            return None
+
+        @staticmethod
+        def report(_fraction, _message) -> None:  # noqa: ANN001
+            return None
+
+    def run_command(command, _cwd, _env, _context):  # noqa: ANN001
+        observed["command"] = command
+        (tmp_path / "summary.json").write_text("{}", encoding="utf-8")
+        return _ProcessOutput(0, "")
+
+    def start(_label, worker, **_callbacks):  # noqa: ANN001
+        worker(Context())
+        return True
+
+    monkeypatch.setattr(MainWidget, "_run_command", staticmethod(run_command))
+    monkeypatch.setattr(widget.action_bar, "start", start)
+    widget.run_analysis()
+    command = observed["command"]
+
+    assert widget.club_preset.currentData() == "custom"
+    assert command[command.index("--club-preset") + 1] == "custom"
+    assert command[command.index("--delivery-mode") + 1] == "shaft_rotation"
+    assert command[command.index("--club-speed-mps") + 1] == "33.5"
+    assert command[command.index("--loft-deg") + 1] == "31.2"
+    assert command[command.index("--attack-angle-deg") + 1] == "-3.5"
+    assert command[command.index("--clubhead-mass-kg") + 1] == "0.315"
+    assert command[command.index("--lie-deg") + 1] == "64.5"
+    assert command[command.index("--shaft-lean-deg") + 1] == "12"
+    assert widget.cleanup()
+
+
 def test_unavailable_approach_scoring_keeps_gui_results_visible(qapp, tmp_path):  # noqa: ANN001
     from src.tools.shot_pattern_analysis.gui import MainWidget
 

@@ -1,0 +1,33 @@
+{
+  "scenario": "pitching_wedge_shaft_rotation_sd1_scale1",
+  "config": {
+    "club_id": "pitching_wedge",
+    "n_shots": 10000,
+    "face_sd_deg": 1.0,
+    "curve_scale": 1.0,
+    "seed": 20261008,
+    "club_speed_mps": 32.0,
+    "loft_deg": 36.7,
+    "attack_angle_deg": -5.0,
+    "clubhead_mass_kg": 0.3,
+    "delivery_mode": "shaft_rotation",
+    "lie_deg": 64.0,
+    "shaft_lean_deg": 0.0,
+    "dt_s": 0.02,
+    "max_time_s": 12.0,
+    "target_radius_m": 15.0
+  },
+  "files_sha256": {
+    "shots.csv": "74d5b3cc288c560664a3c1e1d5165f4b7cf976c3a44e2d9d6f10edd77daa0102",
+    "summary.json": "15340a0fc4818e4dacb21b58838931cf8ba53ff0ce4803d40de28f10440ad5f0",
+    "receipt.json": "68b0c58533ab547298a1becb6f1bc725ffea2deeb92470d9cf86a9a3688b5e86",
+    "overhead_flight.png": "6cc8028ca1bea915e81fcec719184e005131dfce484b4ef6e98264c7b5977c12",
+    "dispersion.png": "72a8b3a387f18c27ca378665cf6a20e0c21226061e8731ed3277a01d3a8dee03",
+    "dispersion_equal_range.png": "873905bae8943357f52b475d2da74e0fbf65283ac667285ae16f9e96816036f6",
+    "strokes_gained.json": "aff7b4b7ac730c9bf50d0050d7411fa6611e8aa4964eebb92cb05234f4c919e3",
+    "strokes_gained_baseline.json": "334d425d328c6dcbc43002d6134cfc359c2688213c2a37065c1184991103260a",
+    "run_start.json": "63be10396e7e1b93b268e38d619544e5e221399c917f7fb4c174608f8e131615"
+  },
+  "scoring_revision": "table9-full-plus-anchor-reconciled-putting/2",
+  "pre_correction_scoring_archive_sha256": "9c5130e845b91442fe427d9166a7c89c4b48655a50a849ff7abc5129df7da9ec"
+}

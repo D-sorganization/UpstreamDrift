@@ -224,27 +224,55 @@ nominal-aimed endpoint to
 \]
 It preserves landing bearing and sets every radial range to the same straight
 nominal distance. It is geometric normalization, not a new flight simulation,
-and cannot isolate a causal physical mechanism. At one degree face SD, the
-curved SD reduction falls from about 0.95\% at actual carry to 0.76\% at common
-range; therefore distance explains part, but not all, of this modeled effect.
+and cannot isolate a causal physical mechanism. The superseded historical controls suggested a small residual effect after
+normalization. Their values do not establish the corrected-model result; all
+final shape comparisons require the corrected experiment matrix.
 
-\section{Approach Scoring Estimate}
-The scoring scenario is an approach from fairway at the fixed target distance
-(about $195.334\,\mathrm m$), with the hole at the target and a circular green
-of radius $15\,\mathrm m$. Nominal-aimed carry endpoints are treated as final
-resting positions. Inside the green, the remaining-strokes benchmark depends
-on putting distance; outside, it uses unobstructed rough distance. There are
-no bunkers, water, out-of-bounds, slopes, bounce, or roll. Alternative green
-radii expose sensitivity to this synthetic layout.
+\section{Club-Appropriate Scoring Estimates}
+The driver scenario is a tee shot on a hypothetical flat $400\,\mathrm m$
+hole with a fairway corridor of total width $30\,\mathrm m$. Endpoints inside
+that corridor use the fairway benchmark; outside use rough. Remaining distance
+is $d_i=\sqrt{(400-x_i)^2+y_i^2}$. Hole distances 350 and 450 m and corridor
+widths 20 and 40 m provide layout sensitivities. The tee starting benchmark
+must come from the published tee table, not a fairway approach substitute.
+
+For the 7-iron and pitching wedge, the scenario is an approach from fairway at
+the straight nominal carry, with the hole at that target and a circular green
+of radius $15\,\mathrm m$. Inside the green the benchmark uses putting distance;
+outside it uses unobstructed rough distance. Green radii 10 and 20 m provide
+layout sensitivities. There are no bunkers, water, out-of-bounds, slopes,
+bounce, or roll. Carry endpoints are assumed final resting locations in both
+contexts; actual driver total distance and wedge stopping behavior are not
+modeled. The original approximately 195 m driver-to-green experiment is only
+a superseded historical control.
+
 For historical-tour expected strokes $J(d,\ell)$ at distance $d$ and lie
 $\ell$, the existing source-backed Tools analysis computes
 \[
- SG_i=J(x_T,\mathrm{fairway})-1-J(d_i,\ell_i).
+ SG_i=J(d_{\rm start},\ell_{\rm start})-1-J(d_i,\ell_i).
 \]
 All patterns share the starting state, so their relative benefit depends only
 on the difference in expected strokes remaining. Reported benefits are per
-approach, not per round. Multiplying by an assumed number of identical
+shot, not per round. Multiplying by an assumed number of identical
 approaches is an illustration, not a full-course simulation.
+The green benchmark represents an \emph{unholed} putting state. With valid
+one-, two-, and three-putt probabilities,
+\[
+ J_{\rm putt}=p_1+2p_2+3p_3=2-p_1+p_3\ge1,
+ \qquad \lim_{d\downarrow0}J_{\rm putt}(d)=1.
+\]
+A separately explicit already-holed terminal state has zero strokes remaining.
+No endpoint in this carry-only study is assumed holed; hole capture is not
+modeled. The original baseline incorrectly placed terminal zero in the same
+putting interpolation table. Between zero and its first positive knot at
+$5.3975\,\mathrm{cm}$, it awarded partial hole-outs. At $1\,\mathrm{cm}$ this
+produced approximately $0.815$ artificial extra SG. In the fixed-loft one-degree
+controls it inflated straight means by approximately $0.0053$ strokes for
+7-iron and $0.0103$ for PW. Direct API/cache parity reproduced this error and
+therefore did not establish physical validity. The corrected baseline uses the
+unholed tap-in anchor of one, a new version/digest, and rescoring of all saved
+endpoints. Pre-correction scoring artifacts are retained as failed experiments.
+
 The historical fairway and rough values come from Broadie's published
 benchmark table. The putting approximation and its source reconciliation are
 recorded in the scoring provenance. In the 2011 preprint, literal evaluation
@@ -264,11 +292,35 @@ explicit distance range and rejects unsupported queries rather than extrapolatin
 Sampling intervals exclude putting-model uncertainty, green-layout error,
 and impact-model discrepancy.
 
+For the corrected matrix, the public Tools API evaluates every explicit
+benchmark distance knot for each fixed starting state and finishing lie.
+Endpoint SG is reconstructed by bounded piecewise-linear interpolation of
+those returned SG values. This reuses the public API's outputs without
+copying its expected-strokes formula. Knots, midpoints, and random supported
+queries are checked against direct API evaluation to $10^{-12}$ strokes.
+Receipts distinguish shots scored from API-evaluated states. Unsupported
+states are reported unavailable; neither starts nor endpoints are extrapolated.
+
+
+\section{Corrected Monte Carlo Results}
+All 24 cells and 720,000 flights completed. Baseline version 2 re-scores identical saved landings with the unholed tap-in correction. The adjacent README provides all 24 rows and the overview retains paired 95\% sampling intervals. Representative shaft-rotation, doubled-curve, two-degree-SD results follow; columns are straight/draw/fade lateral SD in metres and draw/fade relative SG per shot.
+\begin{center}\begin{tabular}{lrrr}
+\toprule Club & Lateral SD S/D/F & Draw $\Delta SG$ & Fade $\Delta SG$\\
+\midrule
+Driver & 16.29/15.63/15.98 & -0.0046 & -0.0053\\
+PW & 3.94/4.02/3.80 & +0.0037 & -0.0061\\
+7-Iron & 8.38/8.51/7.99 & -0.0084 & +0.0096\\
+\bottomrule\end{tabular}\end{center}
+Carry is not constant. A smaller lateral SD does not necessarily improve tee scoring when carry is lost. Equal-range normalization preserves bearing and diagnoses distance scaling, not a causal mechanism. These conditional predictions do not establish a universal curvature benefit or an empirically measured player effect.
+
 \section{Interpretation and Observability Limits}
 The relevant question is whether curved patterns reduce spread or target
 error after equal aiming treatment, not whether their nominal balls curve
-back toward the line. A symmetric, still-air model cannot establish a
-physical draw-versus-fade asymmetry. A nonzero face-to-path mean also does
+back toward the line. Fixed-loft centered still-air delivery is mirror symmetric. Keeping the same
+right-handed shaft axis in coupled mode does not preserve that reflection:
+$L_d(-\delta)\ne L_d(\delta)$ in general. Thus conditional draw/fade
+differences can arise structurally from assumed face--loft covariance and aiming
+as well as finite sampling; they do not establish a player-specific preference. A nonzero face-to-path mean also does
 not eliminate opposite curvature: a $1.5$-standard-deviation offset leaves
 about $6.68\%$ probability of crossing zero face-to-path under the assumed
 normal error distribution. At two degrees SD, the theoretical crossing

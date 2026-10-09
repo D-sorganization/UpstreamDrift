@@ -1,0 +1,123 @@
+{
+  "seed": 20261008,
+  "shots_per_pattern": 10000,
+  "face_distribution": "Independent normal deviations N(0, 1\u00b0), paired across patterns",
+  "physics": {
+    "impact_model": "rigid_body",
+    "flight_model": "BallFlightSimulator (upstream_physics Rust RK4)",
+    "club_attack_deg": 0.0,
+    "contact_offset_m": [
+      0.0,
+      0.0
+    ],
+    "environment": "Default EnvironmentalConditions, zero wind",
+    "rust_package_version": "2.1.3",
+    "rust_binary_sha256": "1c072beabaffc69231538e604acb9a5731144f74cf6feb658e553eeca2f7a759",
+    "impact_parameters": {
+      "cor": 0.83,
+      "contact_duration": 0.0005,
+      "contact_stiffness": 1000000.0,
+      "contact_damping": 1000.0,
+      "friction_coefficient": 0.4,
+      "gear_effect_factor": 0.5,
+      "gear_effect_h_scale": 350.0,
+      "gear_effect_v_scale": 150.0
+    },
+    "ball_properties": {
+      "mass_kg": 0.04593,
+      "radius_m": 0.021335
+    },
+    "environment_values": {
+      "air_density_kg_m3": 1.225,
+      "gravity_m_s2": 9.80665,
+      "temperature_c": 15.0,
+      "wind_velocity_mps": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "runtime": {
+    "python": "3.12.13",
+    "numpy": "2.5.3"
+  },
+  "source_sha256": {
+    "src/tools/shot_pattern_analysis/core.py": "7fd8024e0f146a9589ca78c7be03caf90920f8be595034e437094e599ab57c46",
+    "src/tools/shot_pattern_analysis/physics.py": "d6a7c96e1bbb3b77ac1c9a86b5023fefbabe2ed19ebf6f39ceeae498ecb6a323",
+    "src/tools/shot_pattern_analysis/reporting.py": "cd69f40e42ba31cb1d2e41cc08ac44cd8add07f8acba1b124934a0d01d8b8abc",
+    "src/shared/python/physics/impact_model/models.py": "d6c005d3de0ff33e95100fe4da902cb0527e55d57d26352230ba054927fd911a",
+    "src/shared/python/physics/impact_model/types.py": "48445f0c2baa4ff4ea6c975c82a368561f36fd92ff38b787a482e99abf1dd627",
+    "src/shared/python/physics/ball_simulator.py": "c6c3e941df603af91e30ea64e0a105993c463be1c8f77b9d5cc569a50368d36a",
+    "src/shared/python/physics/ball_properties.py": "0df69e5db7db6d0822851bd48c382d87b01524df07b19e35afaea8aa82b4b6b3",
+    "src/shared/python/core/physics_constants.py": "ed1152072384caf1118f23483ec0076e1a2150332da5f2c32c966a4e67c3ed38",
+    "rust_core/upstream-physics/Cargo.toml": "62b0a0a18d2b85b9b64fe29e3ed951dc5e67779ee3a65c1f7eeeb8c1e7194d5d",
+    "Cargo.lock": "bd136e723ee90edfcf6836d73ba45213e2122372da997428f02ec3144d69dfe9",
+    "rust_core/upstream-physics/src/aero_engine.rs": "274675f38957a3bcf7adc5e8b127dae53fcf3ce7ea47cc4bb019c0c7f96558e3",
+    "rust_core/upstream-physics/src/aerodynamics.rs": "29859f3f21cbff7aa5c5113e47748216e07d88f7a4f4050d7a4633dd8613125e",
+    "rust_core/upstream-physics/src/ball_flight.rs": "37ab0ea7ed679b69cf3dfc2d2db3737f411df9ef2d4932022498b23e0c2a55be",
+    "rust_core/upstream-physics/src/contact.rs": "ea41fdc56a6d5a69baa6a8d9d60feb51064db509eb06c9e0024da2fc9390a765",
+    "rust_core/upstream-physics/src/fsp.rs": "5688801b4d416b5590beb6e5820175c14d236ed95430c1442c29aa8493cf8e5f",
+    "rust_core/upstream-physics/src/lib.rs": "dc76edb8fe8d92b69fd9317f2e1d9d76467b0481270e27a9309f11e2762f7227",
+    "rust_core/upstream-physics/src/rk4.rs": "d9edb9bc960cf48663d837116fd22aa511af8a99f1f65ba6dfc718677476e51b",
+    "rust_core/upstream-physics/src/shaft_fem.rs": "882cedc99f87c73c8c6a7f08a3c0a9b0451586c699f77ba1163702240e391e43",
+    "rust_core/upstream-physics/src/swing_plane.rs": "4630f52c5b1c46b175a80b7b3b23fe67f21e39ce8b13be76c78d2c353af32b6a",
+    "rust_core/upstream-physics/src/wind.rs": "ea7bfb94eb6227bb115212d26b21a79b36f5719a107c5fc91f2e6d8625d9225e",
+    "src/tools/shot_pattern_analysis/uncertainty.py": "b21d9c29728d8d2231681c4cc79eb92919e6368d9dfbede8db943529784748e7"
+  },
+  "limitations": [
+    "Simplified rigid-body impact sends the ball along the face normal; path changes spin but does not directly change launch direction. Results are model-conditional, not observed player performance.",
+    "No player-specific face/path covariance, speed/loft variation, wind, or ground roll."
+  ],
+  "execution_source_commit": "177a742ccb4ebac3356c0c9b7759eab5b20a494c",
+  "execution_source_sha256": {
+    "src/tools/shot_pattern_analysis/core.py": "0f7bbcc76c3c70f42b6045a86ab05cdaaa11c0e31f1b39b128f1052051d6a6f1",
+    "src/tools/shot_pattern_analysis/physics.py": "240fc0927fc907c65eb8c16464e2dd9b69b4a1518054ffd56559f1632546cb4f",
+    "src/tools/shot_pattern_analysis/reporting.py": "cd69f40e42ba31cb1d2e41cc08ac44cd8add07f8acba1b124934a0d01d8b8abc",
+    "src/shared/python/physics/impact_model/models.py": "d6c005d3de0ff33e95100fe4da902cb0527e55d57d26352230ba054927fd911a",
+    "src/shared/python/physics/impact_model/types.py": "48445f0c2baa4ff4ea6c975c82a368561f36fd92ff38b787a482e99abf1dd627",
+    "src/shared/python/physics/ball_simulator.py": "c6c3e941df603af91e30ea64e0a105993c463be1c8f77b9d5cc569a50368d36a",
+    "src/shared/python/physics/ball_properties.py": "0df69e5db7db6d0822851bd48c382d87b01524df07b19e35afaea8aa82b4b6b3",
+    "src/shared/python/core/physics_constants.py": "ed1152072384caf1118f23483ec0076e1a2150332da5f2c32c966a4e67c3ed38",
+    "rust_core/upstream-physics/Cargo.toml": "62b0a0a18d2b85b9b64fe29e3ed951dc5e67779ee3a65c1f7eeeb8c1e7194d5d",
+    "Cargo.lock": "bd136e723ee90edfcf6836d73ba45213e2122372da997428f02ec3144d69dfe9",
+    "rust_core/upstream-physics/src/aero_engine.rs": "274675f38957a3bcf7adc5e8b127dae53fcf3ce7ea47cc4bb019c0c7f96558e3",
+    "rust_core/upstream-physics/src/aerodynamics.rs": "29859f3f21cbff7aa5c5113e47748216e07d88f7a4f4050d7a4633dd8613125e",
+    "rust_core/upstream-physics/src/ball_flight.rs": "37ab0ea7ed679b69cf3dfc2d2db3737f411df9ef2d4932022498b23e0c2a55be",
+    "rust_core/upstream-physics/src/contact.rs": "ea41fdc56a6d5a69baa6a8d9d60feb51064db509eb06c9e0024da2fc9390a765",
+    "rust_core/upstream-physics/src/fsp.rs": "5688801b4d416b5590beb6e5820175c14d236ed95430c1442c29aa8493cf8e5f",
+    "rust_core/upstream-physics/src/lib.rs": "dc76edb8fe8d92b69fd9317f2e1d9d76467b0481270e27a9309f11e2762f7227",
+    "rust_core/upstream-physics/src/rk4.rs": "d9edb9bc960cf48663d837116fd22aa511af8a99f1f65ba6dfc718677476e51b",
+    "rust_core/upstream-physics/src/shaft_fem.rs": "882cedc99f87c73c8c6a7f08a3c0a9b0451586c699f77ba1163702240e391e43",
+    "rust_core/upstream-physics/src/swing_plane.rs": "4630f52c5b1c46b175a80b7b3b23fe67f21e39ce8b13be76c78d2c353af32b6a",
+    "rust_core/upstream-physics/src/wind.rs": "ea7bfb94eb6227bb115212d26b21a79b36f5719a107c5fc91f2e6d8625d9225e",
+    "src/tools/shot_pattern_analysis/uncertainty.py": "b21d9c29728d8d2231681c4cc79eb92919e6368d9dfbede8db943529784748e7"
+  },
+  "execution_local_only_files": [
+    "Cargo.lock"
+  ],
+  "source_sha256_scope": "Files read at export time; core.py received callback-only edits while the simulation was already running.",
+  "coordinate_conventions": {
+    "world_frame": "Physics world +x forward, +y left, +z up",
+    "golf_frame": "Face, path, launch azimuth, and lateral carry positive right",
+    "spin_axis_tilt_deg": "Positive is native +world-z spin component, causing draw/left curvature; opposite a right-positive TrackMan-style tilt sign."
+  },
+  "rust_build_lock_artifact": "rust_build_Cargo.lock",
+  "rust_build_lock_sha256": "bd136e723ee90edfcf6836d73ba45213e2122372da997428f02ec3144d69dfe9",
+  "scoring_postprocess": {
+    "method": "All 30,000 shot outcomes scored by pinned public Tools API at 10, 15, and 20 m green radii",
+    "baseline_artifact_sha256": "948299f1a24436ce17f0f3f09b1b488d206c67c107b148dd7bee28336e41f263",
+    "source_pdf_sha256": "f22c305ae47f3f2973882d16852b6f43dbde577c5e1c11b12bcb19d2956699e7",
+    "source_at_finalization_sha256": "d7145d3bb28c2c8a72f4df13003a845c8f6fc4ecb4fd96b00732f60ef1e5093f",
+    "source_hash_scope": "Scoring implementation was edited for metadata/status and shared bootstrap after these runs; hash is source at finalization, not an exact execution snapshot. Scoring equations and baseline were unchanged."
+  },
+  "figure_postprocess": {
+    "method": "Dispersion and geometric equal-range PNGs regenerated from saved shots.csv; no impact or flight re-simulation",
+    "source_at_finalization_sha256": {
+      "reporting.py": "07c42acaeb6df651cebb2fb23e3d5788d46582373cd056a1f6d73c2a99ad4095",
+      "range_control.py": "125bb314909427becc5988698eb89de3edd334b9d5e43353534171c9045e0987"
+    }
+  },
+  "analysis_status": "superseded_impact_approximation",
+  "supersession_reason": "Superseded impact approximation: friction spin was applied without its matching tangential translational impulse. These results are historical controls, not the corrected-model conclusions."
+}
