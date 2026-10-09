@@ -189,6 +189,34 @@ choices, not physiological limits.
 Published tour head-motion ranges are not tabulated here yet. They must be
 cited and recorded as evidence, not tuned targets; this is open.
 
+## Head-Gaze Clips
+
+Both clip scripts replay the sweep run's inverse-kinematics reference `q_ref`
+for w = 0 and w = 0.1 and pair them side by side (gaze off | gaze on), 1920x1080
+at 60 fps, at 1x, 0.5x and an impact-centred 0.25x window of 0.4 s:
+
+- `scripts.render_head_gaze_clips`: MuJoCo, head-forward axis and line of
+  sight drawn as capsules.
+- `scripts.render_head_gaze_engines`: the Drake, Pinocchio, OpenSim and
+  MyoSuite native viewers, face-on and down-the-line, through
+  `native_viewer_export` with the same two glyphs as arrows (head-forward
+  0.55 m, red; eye to ball at address, green). Each run's same-input bundle
+  (closed-loop MuJoCo replay of `q_ref`) is built once and reused while it is
+  newer than its inputs.
+
+The clips are kinematic replays, not forward dynamics. Checking their frames
+exposed two overlay defects, fixed with this work: MuJoCo draws
+`mjGEOM_ARROW` at half the `mjv_connector` length, so MuJoCo and MyoSuite
+arrows were half their scale (`force_glyphs.ARROW_RENDER_LENGTH_FRACTION`);
+Drake's MeshCat cylinder and cone run along +z while the shared renderer poses
++y shapes, so Drake shafts lay across their segment (`DrakeMeshcatSink`).
+
+```
+python3 -m scripts.render_head_gaze_engines SWEEP/driver_0 OUT/driver --label driver_gaze0
+python3 -m scripts.render_head_gaze_engines SWEEP/driver_0.1 OUT/driver --label driver_gazeon
+python3 -m scripts.render_head_gaze_engines --pair OUT/driver/driver_gaze0 OUT/driver/driver_gazeon OUT/driver/paired --capture driver
+```
+
 ## Limitations
 
 - The face normal is the clubhead impact path direction expressed in the
