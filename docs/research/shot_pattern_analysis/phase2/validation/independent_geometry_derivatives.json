@@ -1,0 +1,2907 @@
+{
+  "scope": "Local deterministic derivatives at zero twist; fixed nominal speed/path; no empirical uncertainty interpretation",
+  "angle_units": "Public angle ratios deg/deg; carry derivatives m/degree of shaft twist",
+  "geometry_tolerance": 1e-08,
+  "geometry_max_error": 4.727921387726042e-10,
+  "geometry_pass": true,
+  "execution": {
+    "source_sha256": {
+      "src/tools/shot_pattern_analysis/core.py": "f8bb33fa6d0f9a786bb52e260430806635b3c4628b8948f8b611c30a84a39478",
+      "src/tools/shot_pattern_analysis/physics.py": "cbc5af5e2e1c78a19da20b56b0396fe2fd03b625761769bbda1a8e3082179b35",
+      "src/tools/shot_pattern_analysis/delivery_geometry.py": "f8938a47b98b6057cb3e48619ab4453109f1865a74f3f45a3b40e8012b0168a9",
+      "src/tools/shot_pattern_analysis/presets.py": "5be2a521220c9dc5474baa020babbb09de037783aee8fb353656c03069ed292a",
+      "src/tools/shot_pattern_analysis/reporting.py": "bf739a50cf287bd47e16f8cb2caaf29bd5a45c60600969dc182eb05c26b18683",
+      "src/tools/shot_pattern_analysis/scoring.py": "4a536b0609a074b8f2c1bbd3d7dc628b0d4adcfcfcef7de17ca28e1f8c7f6a0b",
+      "src/tools/shot_pattern_analysis/scoring_cache.py": "3a37f836546beca416475c266f59859b40e843446411ac16fabd6580e74cd19c",
+      "src/tools/shot_pattern_analysis/scenario_scoring.py": "63b0a5ade8531e136b94ab7a2af2ec7fd166d3e419b26cc77d1cdea9a0dffe8d",
+      "src/tools/shot_pattern_analysis/dispersion_stats.py": "956eec2eefa14c6ae73c3e460d0c97dcee871299ca52fffb66c9621c92a6ce6e",
+      "src/tools/shot_pattern_analysis/range_control.py": "125bb314909427becc5988698eb89de3edd334b9d5e43353534171c9045e0987",
+      "src/tools/shot_pattern_analysis/uncertainty.py": "fb62f5b8a98208bfac3756f692a8d2eb95ce38d0d042c31faa3fea2781857265",
+      "src/tools/shot_pattern_analysis/matrix.py": "ad9e540a13b5974e34ac3a2b13ce62109be04c9e2be875489a39a45fa51f72e8",
+      "src/tools/shot_pattern_analysis/provenance.py": "70f67276f3de4d0a0934da93b0a4fc1f71cc000993cef04dde145dcb12166975",
+      "src/tools/shot_pattern_analysis/__main__.py": "267d814e6a603cc2b3f49d9eaae351fc83c694be6afd7f367430ad50eee5bf6f",
+      "src/shared/python/physics/impact_model/models.py": "121c43c4430e13c139727616b5e946c0b943a38fdad8d951fd487c4f976cbb9a",
+      "src/shared/python/physics/impact_model/solver.py": "2c8bce4fad0adc2bf8eafbfa332a8c158665af81b78ef706f972de11c32103e0",
+      "src/shared/python/physics/impact_model/types.py": "48445f0c2baa4ff4ea6c975c82a368561f36fd92ff38b787a482e99abf1dd627",
+      "src/shared/python/physics/ball_simulator.py": "98d1db42577578501187c3b6042b715f3bb2d2ff77caa4807e26af931e2b1858",
+      "src/shared/python/physics/ball_launch_conditions.py": "7a4540b99160799cf2f98b20a8e3fedb6bc0a6f73f4e72ae248c7f95bafcc253",
+      "src/shared/python/physics/ball_properties.py": "0df69e5db7db6d0822851bd48c382d87b01524df07b19e35afaea8aa82b4b6b3",
+      "src/shared/python/core/physics_constants.py": "ed1152072384caf1118f23483ec0076e1a2150332da5f2c32c966a4e67c3ed38",
+      "rust_core/upstream-physics/Cargo.toml": "62b0a0a18d2b85b9b64fe29e3ed951dc5e67779ee3a65c1f7eeeb8c1e7194d5d",
+      "vendor/ud-tools/src/shared/python/launch_monitor/strokes_gained.py": "4b3eca9d3b86e5b65f2fd073fa60b785c19186b35953b44bd143370752bb40f1",
+      "rust_core/upstream-physics/src/aero_engine.rs": "274675f38957a3bcf7adc5e8b127dae53fcf3ce7ea47cc4bb019c0c7f96558e3",
+      "rust_core/upstream-physics/src/aerodynamics.rs": "29859f3f21cbff7aa5c5113e47748216e07d88f7a4f4050d7a4633dd8613125e",
+      "rust_core/upstream-physics/src/ball_flight.rs": "7d92d7122cdce94f81d930afc70137ab57f62510d481e0ad1c62319bb65f190d",
+      "rust_core/upstream-physics/src/contact.rs": "ea41fdc56a6d5a69baa6a8d9d60feb51064db509eb06c9e0024da2fc9390a765",
+      "rust_core/upstream-physics/src/fsp.rs": "5688801b4d416b5590beb6e5820175c14d236ed95430c1442c29aa8493cf8e5f",
+      "rust_core/upstream-physics/src/lib.rs": "dc76edb8fe8d92b69fd9317f2e1d9d76467b0481270e27a9309f11e2762f7227",
+      "rust_core/upstream-physics/src/rk4.rs": "d9edb9bc960cf48663d837116fd22aa511af8a99f1f65ba6dfc718677476e51b",
+      "rust_core/upstream-physics/src/shaft_fem.rs": "882cedc99f87c73c8c6a7f08a3c0a9b0451586c699f77ba1163702240e391e43",
+      "rust_core/upstream-physics/src/swing_plane.rs": "4630f52c5b1c46b175a80b7b3b23fe67f21e39ce8b13be76c78d2c353af32b6a",
+      "rust_core/upstream-physics/src/wind.rs": "ea7bfb94eb6227bb115212d26b21a79b36f5719a107c5fc91f2e6d8625d9225e",
+      "src/tools/shot_pattern_analysis/club_geometry.py": "1bf352c6922a93abdc3f5b814fc63733dea7349bc0b3e54c80df087204c04190",
+      "src/tools/shot_pattern_analysis/matched_config.py": "4426573fb766fa02fcf2f5d247e2eb19bba97bb85a04d2224af113250d2e4814",
+      "src/tools/shot_pattern_analysis/matched_physics.py": "b18bd47a7b5998f69d417143678ffb8adfd7c6c5417b01d2f1ffb8ab29e6dd99",
+      "src/tools/shot_pattern_analysis/matched_runner.py": "53d1234b296c898a326f8ce12c50008a1a88a2abff72144dcc598c697bb89138",
+      "src/tools/shot_pattern_analysis/matched_export.py": "15725efebaee16b9d938519201d1b316f652ed016045e461ad515c78f8863b58",
+      "src/tools/shot_pattern_analysis/matched_diagnostics.py": "6336d2fa15b75afae3ac6dde3040b8377818802e77d234c73caea3d438c22fc9",
+      "src/tools/shot_pattern_analysis/matched_report_plots.py": "144eb99174229cddefe0c8f93bc5a4b22e9cb2e6365e19b5c9d36757e06821e4",
+      "src/tools/shot_pattern_analysis/noise.py": "04fac647bc650f51d71e7ea4ffc716e9f42b80b5bc94714dd91c893cb3e6f097",
+      "src/tools/shot_pattern_analysis/nominal_matching.py": "ce027af32499e9d1d1f3456fee79935c5e293a7228db16c62fd16c7d8d00487e",
+      "src/tools/shot_pattern_analysis/density.py": "127d1d249203efbddb3152e668e270dc54be5857e97377a344edc9d543c2d3ce",
+      "src/tools/shot_pattern_analysis/academic_plots.py": "ce7cb7633a9d71d0ebf2c17bd01162d8be7824daa79cc0b3a9b0b0414fe02841",
+      "src/shared/python/physics/_contact_types.py": "fbfba3bb17c2bb13501617927587c1ce7ca42b7ec4dfb0f84b139d9f7529f21c",
+      "src/shared/python/physics/contact_reaction_decomposition.py": "d2adf9456f62c0cab140ae1f5925bbee11710ba74f0d8223c1ab262286496d50",
+      "src/shared/python/physics/grip_contact_model.py": "1ec2d236af41a70e7fb15010f1d041a850caba0f07138c45bc9a3225bc7ab76e",
+      "src/shared/python/physics/incremental_contact.py": "209ad846191823dc2736a3cc26fe2722b6753c0e5581a38603c28353b03d196e",
+      "src/shared/python/physics/incremental_contact_kernel.py": "69e782795d60b54360efaf2f27e910b7f3eeb56697673b344bbd7f2a56bdb9c5",
+      "src/shared/python/physics/rigid_contact.py": "09958560e72ddce9c5c80062e13d8e7d2c98f407042e99d9ec54fb3e77ee7f2f",
+      "src/tools/shot_pattern_analysis/matched_matrix.py": "6298d852fb984df004d0679b46c05fb3bc855fe20287347dcad1ff52b2b804fe"
+    },
+    "native_binary_path": "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
+    "native_binary_sha256": "2e014290b3fe18034ab68743514806e7dea6137377ecafd8961091cdade1e2ce",
+    "cargo_lock_present": false,
+    "contact_backend": {
+      "active_backend": "numba",
+      "numba_version": "0.68.0",
+      "llvmlite_version": "0.50.0",
+      "fastmath": false
+    },
+    "numerical_runtime": {
+      "python": "3.12.13",
+      "numpy": "2.2.6",
+      "scipy": "1.18.1"
+    }
+  },
+  "source_unchanged": true,
+  "script_sha256": "d72537e5ffe8ebe3f1ed6dcda9df2735b293103bc85220febd216cc70557d855",
+  "saved_nominal_summary_sha256": {
+    "driver_lean0_curve1_rotation1_shaft_only": "d7fd1d7caf65835079b67ef5bd8d9fb2abe797fb0b2d6dd337bb6c6c768bd704",
+    "driver_lean0_curve2_rotation1_shaft_only": "c26568f0dfa586acc53698fabafdfb06b825369d21503ba87cede48352205b1d",
+    "driver_lean5_curve1_rotation1_shaft_only": "abee13607d850122834ba2391543441863a650f34ab1953e682d8e0fe31400a6",
+    "driver_lean5_curve2_rotation1_shaft_only": "b92f92f87600390510dfba9e0ae553fc759573ac62e4c8920a4383ab70f6bf32",
+    "driver_lean10_curve1_rotation1_shaft_only": "252007bbfc2400ee3960a8211da69f5ab7fd1b19d81ae5f6e27eccbdab925605",
+    "driver_lean10_curve2_rotation1_shaft_only": "7149b738f9d201110bb97c67683710e87c396cfd95683ecba5f9f1ce31c2c87e",
+    "seven_iron_lean0_curve1_rotation1_shaft_only": "56f3a78fa05235e426c522bb9d182ffaae24ad3faae4ea2c7a8665def82974f7",
+    "seven_iron_lean0_curve2_rotation1_shaft_only": "d60caadf82af02f2f0e16c4902885b99724cc9d853a34d91eb54c38f2f30ac13",
+    "seven_iron_lean5_curve1_rotation1_shaft_only": "d00e2df8eee058ac570b3f63e6891ba684a44110215ff9f62dd09eefa17e46f5",
+    "seven_iron_lean5_curve2_rotation1_shaft_only": "71b786e50eefa0d19e7ba2d7cb02d8a859531d85fbb0e364f7a91d7569338b0d",
+    "seven_iron_lean10_curve1_rotation1_shaft_only": "78cac4b3fd497d484971c8a5906c1ca10f24efab181f3c58eccaab3bead23738",
+    "seven_iron_lean10_curve2_rotation1_shaft_only": "f749d62df4020c09218a6fe152d83af9f8add3abe79468de150b4894b18770ca",
+    "pitching_wedge_lean0_curve1_rotation1_shaft_only": "19c3f3621c575510a9d19623add7cfd7ac62b6afc96a49bba1f3669c6c17cc5a",
+    "pitching_wedge_lean0_curve2_rotation1_shaft_only": "8f9bc8947e6e0c6e71a51d073550187ac0d7c3cddc52ef27032adc6ec25b72e7",
+    "pitching_wedge_lean5_curve1_rotation1_shaft_only": "91907215b06d42b4c36bba01a61d965859b3b3af802e07916bfa49a85f81c157",
+    "pitching_wedge_lean5_curve2_rotation1_shaft_only": "6528e5aedc8ed7477dcf3d3da52ae6e0aebd59390395c6eb4b63adf69c81bf5e",
+    "pitching_wedge_lean10_curve1_rotation1_shaft_only": "c59746e64ad05a4acfad64453471f5d6d8a90d2e41ece4479cf407c988fe1523",
+    "pitching_wedge_lean10_curve2_rotation1_shaft_only": "69ff5fab6f36bd7ad4e58eac36ef94226ade5611ed75e8cf08e0cab77e9f6e31"
+  },
+  "geometry": [
+    {
+      "club": "driver",
+      "lean_deg": 0.0,
+      "nominal_face_deg": -3.0,
+      "analytical_face_per_twist": -0.8526401643540922,
+      "analytical_loft_per_twist": -0.5224985647159489,
+      "analytical_loft_per_face": 0.6128007881399321,
+      "finite_differences": [
+        {
+          "epsilon_deg": 0.0001,
+          "face_per_twist": -0.8526401643527137,
+          "loft_per_twist": -0.5224985647078739
+        },
+        {
+          "epsilon_deg": 1e-05,
+          "face_per_twist": -0.8526401643393909,
+          "loft_per_twist": -0.5224985646812286
+        }
+      ]
+    },
+    {
+      "club": "driver",
+      "lean_deg": 0.0,
+      "nominal_face_deg": 0.0,
+      "analytical_face_per_twist": -0.8526401643540922,
+      "analytical_loft_per_twist": -0.5224985647159489,
+      "analytical_loft_per_face": 0.6128007881399321,
+      "finite_differences": [
+        {
+          "epsilon_deg": 0.0001,
+          "face_per_twist": -0.8526401643543398,
+          "loft_per_twist": -0.5224985647167557
+        },
+        {
+          "epsilon_deg": 1e-05,
+          "face_per_twist": -0.8526401643540946,
+          "loft_per_twist": -0.5224985646812286
+        }
+      ]
+    },
+    {
+      "club": "driver",
+      "lean_deg": 0.0,
+      "nominal_face_deg": 3.0,
+      "analytical_face_per_twist": -0.8526401643540922,
+      "analytical_loft_per_twist": -0.5224985647159489,
+      "analytical_loft_per_face": 0.6128007881399321,
+      "finite_differences": [
+        {
+          "epsilon_deg": 0.0001,
+          "face_per_twist": -0.8526401643504933,
+          "loft_per_twist": -0.5224985647078739
+        },
+        {
+          "epsilon_deg": 1e-05,
+          "face_per_twist": -0.8526401643393909,
+          "loft_per_twist": -0.5224985645924107
+        }
+      ]
+    },
+    {
+      "club": "driver",
+      "lean_deg": 5.0,
+      "nominal_face_deg": -3.0,
+      "analytical_face_per_twist": -0.8428941109543844,
+      "analytical_loft_per_twist": -0.5224985647159489,
+      "analytical_loft_per_face": 0.6198863628603823,
+      "finite_differences": [
+        {
+          "epsilon_deg": 0.0001,
+          "face_per_twist": -0.8428941109550614,
+          "loft_per_twist": -0.5224985647256375
+        },
+        {
+          "epsilon_deg": 1e-05,
+          "face_per_twist": -0.8428941109306364,
+          "loft_per_twist": -0.5224985647700464
+        }
+      ]
+    },
+    {
+      "club": "driver",
+      "lean_deg": 5.0,
+      "nominal_face_deg": 0.0,
+      "analytical_face_per_twist": -0.8428941109543844,
+      "analytical_loft_per_twist": -0.5224985647159489,
+      "analytical_loft_per_face": 0.6198863628603823,
+      "finite_differences": [
+        {
+          "epsilon_deg": 0.0001,
+          "face_per_twist": -0.8428941109546182,
+          "loft_per_twist": -0.5224985647256375
+        },
+        {
+          "epsilon_deg": 1e-05,
+          "face_per_twist": -0.8428941109543869,
+          "loft_per_twist": -0.5224985647700464
+        }
+      ]
+    },
+    {
+      "club": "driver",
+      "lean_deg": 5.0,
+      "nominal_face_deg": 3.0,
+      "analytical_face_per_twist": -0.8428941109543844,
+      "analytical_loft_per_twist": -0.5224985647159489,
+      "analytical_loft_per_face": 0.6198863628603823,
+      "finite_differences": [
+        {
+          "epsilon_deg": 0.0001,
+          "face_per_twist": -0.8428941109572818,
+          "loft_per_twist": -0.5224985647256375
+        },
+        {
+          "epsilon_deg": 1e-05,
+          "face_per_twist": -0.8428941109306364,
+          "loft_per_twist": -0.5224985647700464
+        }
+      ]
+    },
+    {
+      "club": "driver",
+      "lean_deg": 10.0,
+      "nominal_face_deg": -3.0,
+      "analytical_face_per_twist": -0.8396866443855132,
+      "analytical_loft_per_twist": -0.5224985647159489,
+      "analytical_loft_per_face": 0.6222542280618455,
+      "finite_differences": [
+        {
+          "epsilon_deg": 0.0001,
+          "face_per_twist": -0.8396866443849405,
+          "loft_per_twist": -0.522498564714511
+        },
+        {
+          "epsilon_deg": 1e-05,
+          "face_per_twist": -0.8396866444160266,
+          "loft_per_twist": -0.5224985646930135
+        }
+      ]
+    },
+    {
+      "club": "driver",
+      "lean_deg": 10.0,
+      "nominal_face_deg": 0.0,
+      "analytical_face_per_twist": -0.8396866443855132,
+      "analytical_loft_per_twist": -0.5224985647159489,
+      "analytical_loft_per_face": 0.6222542280618455,
+      "finite_differences": [
+        {
+          "epsilon_deg": 0.0001,
+          "face_per_twist": -0.8396866443857367,
+          "loft_per_twist": -0.522498564714511
+        },
+        {
+          "epsilon_deg": 1e-05,
+          "face_per_twist": -0.8396866443855154,
+          "loft_per_twist": -0.5224985646930135
+        }
+      ]
+    },
+    {
+      "club": "driver",
+      "lean_deg": 10.0,
+      "nominal_face_deg": 3.0,
+      "analytical_face_per_twist": -0.8396866443855132,
+      "analytical_loft_per_twist": -0.5224985647159489,
+      "analytical_loft_per_face": 0.6222542280618455,
+      "finite_differences": [
+        {
+          "epsilon_deg": 0.0001,
+          "face_per_twist": -0.8396866443893813,
+          "loft_per_twist": -0.522498564714511
+        },
+        {
+          "epsilon_deg": 1e-05,
+          "face_per_twist": -0.8396866443716177,
+          "loft_per_twist": -0.5224985646930135
+        }
+      ]
+    },
+    {
+      "club": "seven_iron",
+      "lean_deg": 0.0,
+      "nominal_face_deg": -3.0,
+      "analytical_face_per_twist": -0.8910065241883678,
+      "analytical_loft_per_twist": -0.4539904997395468,
+      "analytical_loft_per_face": 0.5095254494944289,
+      "finite_differences": [
+        {
+          "epsilon_deg": 0.0001,
+          "face_per_twist": -0.8910065241884979,
+          "loft_per_twist": -0.45399049977135064
+        },
+        {
+          "epsilon_deg": 1e-05,
+          "face_per_twist": -0.8910065241618524,
+          "loft_per_twist": -0.45399049994898627
+        }
+      ]
+    },
+    {
+      "club": "seven_iron",
+      "lean_deg": 0.0,
+      "nominal_face_deg": 0.0,
+      "analytical_face_per_twist": -0.8910065241883678,
+      "analytical_loft_per_twist": -0.4539904997395468,
+      "analytical_loft_per_face": 0.5095254494944289,
+      "finite_differences": [
+        {
+          "epsilon_deg": 0.0001,
+          "face_per_twist": -0.8910065241886816,
+          "loft_per_twist": -0.4539904997358235
+        },
+        {
+          "epsilon_deg": 1e-05,
+          "face_per_twist": -0.891006524188371,
+          "loft_per_twist": -0.4539904995937149
+        }
+      ]
+    },
+    {
+      "club": "seven_iron",
+      "lean_deg": 0.0,
+      "nominal_face_deg": 3.0,
+      "analytical_face_per_twist": -0.8910065241883678,
+      "analytical_loft_per_twist": -0.4539904997395468,
+      "analytical_loft_per_face": 0.5095254494944289,
+      "finite_differences": [
+        {
+          "epsilon_deg": 0.0001,
+          "face_per_twist": -0.8910065241884979,
+          "loft_per_twist": -0.4539904997358235
+        },
+        {
+          "epsilon_deg": 1e-05,
+          "face_per_twist": -0.8910065241840569,
+          "loft_per_twist": -0.45399049994898627
+        }
+      ]
+    },
+    {
+      "club": "seven_iron",
+      "lean_deg": 5.0,
+      "nominal_face_deg": -3.0,
+      "analytical_face_per_twist": -0.8445703657419418,
+      "analytical_loft_per_twist": -0.4539904997395468,
+      "analytical_loft_per_face": 0.5375401720858668,
+      "finite_differences": [
+        {
+          "epsilon_deg": 0.0001,
+          "face_per_twist": -0.844570365743369,
+          "loft_per_twist": -0.45399049977135064
+        },
+        {
+          "epsilon_deg": 1e-05,
+          "face_per_twist": -0.8445703657766755,
+          "loft_per_twist": -0.4539904995937149
+        }
+      ]
+    },
+    {
+      "club": "seven_iron",
+      "lean_deg": 5.0,
+      "nominal_face_deg": 0.0,
+      "analytical_face_per_twist": -0.8445703657419418,
+      "analytical_loft_per_twist": -0.4539904997395468,
+      "analytical_loft_per_face": 0.5375401720858668,
+      "finite_differences": [
+        {
+          "epsilon_deg": 0.0001,
+          "face_per_twist": -0.8445703657421946,
+          "loft_per_twist": -0.4539904997535871
+        },
+        {
+          "epsilon_deg": 1e-05,
+          "face_per_twist": -0.8445703657419442,
+          "loft_per_twist": -0.45399049994898627
+        }
+      ]
+    },
+    {
+      "club": "seven_iron",
+      "lean_deg": 5.0,
+      "nominal_face_deg": 3.0,
+      "analytical_face_per_twist": -0.8445703657419418,
+      "analytical_loft_per_twist": -0.4539904997395468,
+      "analytical_loft_per_face": 0.5375401720858668,
+      "finite_differences": [
+        {
+          "epsilon_deg": 0.0001,
+          "face_per_twist": -0.8445703657389281,
+          "loft_per_twist": -0.4539904997358235
+        },
+        {
+          "epsilon_deg": 1e-05,
+          "face_per_twist": -0.8445703657544711,
+          "loft_per_twist": -0.45399049994898627
+        }
+      ]
+    },
+    {
+      "club": "seven_iron",
+      "lean_deg": 10.0,
+      "nominal_face_deg": -3.0,
+      "analytical_face_per_twist": -0.8085836120842675,
+      "analytical_loft_per_twist": -0.4539904997395468,
+      "analytical_loft_per_face": 0.5614638893921011,
+      "finite_differences": [
+        {
+          "epsilon_deg": 0.0001,
+          "face_per_twist": -0.8085836120819145,
+          "loft_per_twist": -0.45399049977135064
+        },
+        {
+          "epsilon_deg": 1e-05,
+          "face_per_twist": -0.8085836120663713,
+          "loft_per_twist": -0.4539904997713506
+        }
+      ]
+    },
+    {
+      "club": "seven_iron",
+      "lean_deg": 10.0,
+      "nominal_face_deg": 0.0,
+      "analytical_face_per_twist": -0.8085836120842675,
+      "analytical_loft_per_twist": -0.4539904997395468,
+      "analytical_loft_per_face": 0.5614638893921011,
+      "finite_differences": [
+        {
+          "epsilon_deg": 0.0001,
+          "face_per_twist": -0.8085836120844722,
+          "loft_per_twist": -0.4539904997535871
+        },
+        {
+          "epsilon_deg": 1e-05,
+          "face_per_twist": -0.8085836120842695,
+          "loft_per_twist": -0.4539904995937149
+        }
+      ]
+    },
+    {
+      "club": "seven_iron",
+      "lean_deg": 10.0,
+      "nominal_face_deg": 3.0,
+      "analytical_face_per_twist": -0.8085836120842675,
+      "analytical_loft_per_twist": -0.4539904997395468,
+      "analytical_loft_per_face": 0.5614638893921011,
+      "finite_differences": [
+        {
+          "epsilon_deg": 0.0001,
+          "face_per_twist": -0.8085836120796941,
+          "loft_per_twist": -0.4539904997358235
+        },
+        {
+          "epsilon_deg": 1e-05,
+          "face_per_twist": -0.8085836120663713,
+          "loft_per_twist": -0.4539904995937149
+        }
+      ]
+    },
+    {
+      "club": "pitching_wedge",
+      "lean_deg": 0.0,
+      "nominal_face_deg": -3.0,
+      "analytical_face_per_twist": -0.898794046299167,
+      "analytical_loft_per_twist": -0.43837114678907746,
+      "analytical_loft_per_face": 0.48773258856586144,
+      "finite_differences": [
+        {
+          "epsilon_deg": 0.0001,
+          "face_per_twist": -0.8987940463045518,
+          "loft_per_twist": -0.438371146742611
+        },
+        {
+          "epsilon_deg": 1e-05,
+          "face_per_twist": -0.8987940463223153,
+          "loft_per_twist": -0.4383711463162853
+        }
+      ]
+    },
+    {
+      "club": "pitching_wedge",
+      "lean_deg": 0.0,
+      "nominal_face_deg": 0.0,
+      "analytical_face_per_twist": -0.898794046299167,
+      "analytical_loft_per_twist": -0.43837114678907746,
+      "analytical_loft_per_face": 0.48773258856586144,
+      "finite_differences": [
+        {
+          "epsilon_deg": 0.0001,
+          "face_per_twist": -0.8987940462996247,
+          "loft_per_twist": -0.438371146742611
+        },
+        {
+          "epsilon_deg": 1e-05,
+          "face_per_twist": -0.8987940462991717,
+          "loft_per_twist": -0.4383711466715567
+        }
+      ]
+    },
+    {
+      "club": "pitching_wedge",
+      "lean_deg": 0.0,
+      "nominal_face_deg": 3.0,
+      "analytical_face_per_twist": -0.898794046299167,
+      "analytical_loft_per_twist": -0.43837114678907746,
+      "analytical_loft_per_face": 0.48773258856586144,
+      "finite_differences": [
+        {
+          "epsilon_deg": 0.0001,
+          "face_per_twist": -0.8987940463023314,
+          "loft_per_twist": -0.43837114677813815
+        },
+        {
+          "epsilon_deg": 1e-05,
+          "face_per_twist": -0.8987940463223153,
+          "loft_per_twist": -0.4383711466715567
+        }
+      ]
+    },
+    {
+      "club": "pitching_wedge",
+      "lean_deg": 5.0,
+      "nominal_face_deg": -3.0,
+      "analytical_face_per_twist": -0.8272782325038639,
+      "analytical_loft_per_twist": -0.43837114678907746,
+      "analytical_loft_per_face": 0.5298956621429417,
+      "finite_differences": [
+        {
+          "epsilon_deg": 0.0001,
+          "face_per_twist": -0.8272782325025041,
+          "loft_per_twist": -0.4383711468136653
+        },
+        {
+          "epsilon_deg": 1e-05,
+          "face_per_twist": -0.8272782324958426,
+          "loft_per_twist": -0.43837114702682806
+        }
+      ]
+    },
+    {
+      "club": "pitching_wedge",
+      "lean_deg": 5.0,
+      "nominal_face_deg": 0.0,
+      "analytical_face_per_twist": -0.8272782325038639,
+      "analytical_loft_per_twist": -0.43837114678907746,
+      "analytical_loft_per_face": 0.5298956621429417,
+      "finite_differences": [
+        {
+          "epsilon_deg": 0.0001,
+          "face_per_twist": -0.8272782325041925,
+          "loft_per_twist": -0.43837114677813815
+        },
+        {
+          "epsilon_deg": 1e-05,
+          "face_per_twist": -0.8272782325038671,
+          "loft_per_twist": -0.4383711463162853
+        }
+      ]
+    },
+    {
+      "club": "pitching_wedge",
+      "lean_deg": 5.0,
+      "nominal_face_deg": 3.0,
+      "analytical_face_per_twist": -0.8272782325038639,
+      "analytical_loft_per_twist": -0.43837114678907746,
+      "analytical_loft_per_face": 0.5298956621429417,
+      "finite_differences": [
+        {
+          "epsilon_deg": 0.0001,
+          "face_per_twist": -0.8272782325047245,
+          "loft_per_twist": -0.4383711468136653
+        },
+        {
+          "epsilon_deg": 1e-05,
+          "face_per_twist": -0.8272782325180471,
+          "loft_per_twist": -0.43837114702682806
+        }
+      ]
+    },
+    {
+      "club": "pitching_wedge",
+      "lean_deg": 10.0,
+      "nominal_face_deg": -3.0,
+      "analytical_face_per_twist": -0.7717449842482099,
+      "analytical_loft_per_twist": -0.43837114678907746,
+      "analytical_loft_per_face": 0.5680259097713654,
+      "finite_differences": [
+        {
+          "epsilon_deg": 0.0001,
+          "face_per_twist": -0.7717449842514768,
+          "loft_per_twist": -0.43837114677813815
+        },
+        {
+          "epsilon_deg": 1e-05,
+          "face_per_twist": -0.7717449842736811,
+          "loft_per_twist": -0.4383711466715567
+        }
+      ]
+    },
+    {
+      "club": "pitching_wedge",
+      "lean_deg": 10.0,
+      "nominal_face_deg": 0.0,
+      "analytical_face_per_twist": -0.7717449842482099,
+      "analytical_loft_per_twist": -0.43837114678907746,
+      "analytical_loft_per_face": 0.5680259097713654,
+      "finite_differences": [
+        {
+          "epsilon_deg": 0.0001,
+          "face_per_twist": -0.7717449842484488,
+          "loft_per_twist": -0.43837114677813815
+        },
+        {
+          "epsilon_deg": 1e-05,
+          "face_per_twist": -0.7717449842482126,
+          "loft_per_twist": -0.4383711466715567
+        }
+      ]
+    },
+    {
+      "club": "pitching_wedge",
+      "lean_deg": 10.0,
+      "nominal_face_deg": 3.0,
+      "analytical_face_per_twist": -0.7717449842482099,
+      "analytical_loft_per_twist": -0.43837114678907746,
+      "analytical_loft_per_face": 0.5680259097713654,
+      "finite_differences": [
+        {
+          "epsilon_deg": 0.0001,
+          "face_per_twist": -0.7717449842470359,
+          "loft_per_twist": -0.43837114677813815
+        },
+        {
+          "epsilon_deg": 1e-05,
+          "face_per_twist": -0.7717449842736811,
+          "loft_per_twist": -0.43837114702682806
+        }
+      ]
+    }
+  ],
+  "carry": [
+    {
+      "cell": "driver_lean0_curve1_rotation1_shaft_only",
+      "pattern": "Straight",
+      "status": "evaluated",
+      "nominal": {
+        "face_deg": 0.0,
+        "path_deg": 0.0,
+        "speed_mps": 45.0,
+        "outcome": {
+          "carry_x_m": 178.94875782337786,
+          "carry_y_m": -0.0,
+          "carry_m": 178.94875782337786,
+          "launch_azimuth_deg": -0.0,
+          "spin_rpm": 2460.177815649968,
+          "spin_axis_tilt_deg": 0.0,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 8.085156270362086,
+          "ball_speed_mps": 65.79878861871785,
+          "spin_axis_defined": true
+        },
+        "residual_m": 0.0,
+        "n_evaluations": 1
+      },
+      "derivatives": [
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": -4.6180320931554775,
+          "dy_m_per_twist_deg": -6.272563697176101
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": -4.608837428406787,
+          "dy_m_per_twist_deg": -6.272571982306739
+        },
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": -4.624787572602429,
+          "dy_m_per_twist_deg": -6.2725753132060165
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": -4.622489502025928,
+          "dy_m_per_twist_deg": -6.272577780586477
+        }
+      ]
+    },
+    {
+      "cell": "driver_lean0_curve1_rotation1_shaft_only",
+      "pattern": "Draw",
+      "status": "evaluated",
+      "nominal": {
+        "face_deg": 2.0288569544207204,
+        "path_deg": 3.5288569544207204,
+        "speed_mps": 45.06347844778669,
+        "outcome": {
+          "carry_x_m": 178.94875782337806,
+          "carry_y_m": -2.0185242366466127e-14,
+          "carry_m": 178.94875782337806,
+          "launch_azimuth_deg": 2.2976874875320736,
+          "spin_rpm": 2486.558707174285,
+          "spin_axis_tilt_deg": 7.80722572087524,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 8.085012974505174,
+          "ball_speed_mps": 65.86967721957318,
+          "spin_axis_defined": true
+        },
+        "residual_m": 1.9997332019487617e-13,
+        "n_evaluations": 6
+      },
+      "derivatives": [
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": -5.20510598730084,
+          "dy_m_per_twist_deg": -6.091644765820172
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": -5.20510697171801,
+          "dy_m_per_twist_deg": -6.091645280906257
+        },
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": -5.18260459439972,
+          "dy_m_per_twist_deg": -6.092202758869345
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": -5.179112371382644,
+          "dy_m_per_twist_deg": -6.092289173404931
+        }
+      ]
+    },
+    {
+      "cell": "driver_lean0_curve1_rotation1_shaft_only",
+      "pattern": "Fade",
+      "status": "evaluated",
+      "nominal": {
+        "face_deg": -2.0288569544207204,
+        "path_deg": -3.5288569544207204,
+        "speed_mps": 45.06347844778669,
+        "outcome": {
+          "carry_x_m": 178.94875782337806,
+          "carry_y_m": 2.0185242366466127e-14,
+          "carry_m": 178.94875782337806,
+          "launch_azimuth_deg": -2.2976874875320736,
+          "spin_rpm": 2486.558707174285,
+          "spin_axis_tilt_deg": -7.80722572087524,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 8.085012974505174,
+          "ball_speed_mps": 65.86967721957318,
+          "spin_axis_defined": true
+        },
+        "residual_m": 1.9997332019487617e-13,
+        "n_evaluations": 6
+      },
+      "derivatives": [
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": -4.153356439051947,
+          "dy_m_per_twist_deg": -6.355842804458347
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": -4.1533570176056855,
+          "dy_m_per_twist_deg": -6.355843250968407
+        },
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": -4.133517567218803,
+          "dy_m_per_twist_deg": -6.355382267332341
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": -4.131353362814139,
+          "dy_m_per_twist_deg": -6.355331580273683
+        }
+      ]
+    },
+    {
+      "cell": "driver_lean0_curve2_rotation1_shaft_only",
+      "pattern": "Straight",
+      "status": "evaluated",
+      "nominal": {
+        "face_deg": 0.0,
+        "path_deg": 0.0,
+        "speed_mps": 45.0,
+        "outcome": {
+          "carry_x_m": 178.94875782337786,
+          "carry_y_m": -0.0,
+          "carry_m": 178.94875782337786,
+          "launch_azimuth_deg": -0.0,
+          "spin_rpm": 2460.177815649968,
+          "spin_axis_tilt_deg": 0.0,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 8.085156270362086,
+          "ball_speed_mps": 65.79878861871785,
+          "spin_axis_defined": true
+        },
+        "residual_m": 0.0,
+        "n_evaluations": 1
+      },
+      "derivatives": [
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": -4.6180320931554775,
+          "dy_m_per_twist_deg": -6.272563697176101
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": -4.608837428406787,
+          "dy_m_per_twist_deg": -6.272571982306739
+        },
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": -4.624787572602429,
+          "dy_m_per_twist_deg": -6.2725753132060165
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": -4.622489502025928,
+          "dy_m_per_twist_deg": -6.272577780586477
+        }
+      ]
+    },
+    {
+      "cell": "driver_lean0_curve2_rotation1_shaft_only",
+      "pattern": "Draw",
+      "status": "evaluated",
+      "nominal": {
+        "face_deg": 4.032618789547902,
+        "path_deg": 7.032618789547902,
+        "speed_mps": 45.25280973713873,
+        "outcome": {
+          "carry_x_m": 178.94875782337783,
+          "carry_y_m": 1.0576609033030593e-14,
+          "carry_m": 178.94875782337783,
+          "launch_azimuth_deg": 4.570638182526998,
+          "spin_rpm": 2564.7268565817476,
+          "spin_axis_tilt_deg": 15.408211409274589,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 8.084582436384222,
+          "ball_speed_mps": 66.08037666503384,
+          "spin_axis_defined": true
+        },
+        "residual_m": 3.0325867268454176e-14,
+        "n_evaluations": 6
+      },
+      "derivatives": [
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": -5.763223612545687,
+          "dy_m_per_twist_deg": -5.798644721905369
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": -5.763224911933662,
+          "dy_m_per_twist_deg": -5.798645067527734
+        },
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": -5.784712222339294,
+          "dy_m_per_twist_deg": -5.797642928366665
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": -5.787435809762087,
+          "dy_m_per_twist_deg": -5.797516522575931
+        }
+      ]
+    },
+    {
+      "cell": "driver_lean0_curve2_rotation1_shaft_only",
+      "pattern": "Fade",
+      "status": "evaluated",
+      "nominal": {
+        "face_deg": -4.032618789547902,
+        "path_deg": -7.032618789547902,
+        "speed_mps": 45.25280973713873,
+        "outcome": {
+          "carry_x_m": 178.94875782337783,
+          "carry_y_m": -1.0576609033030593e-14,
+          "carry_m": 178.94875782337783,
+          "launch_azimuth_deg": -4.570638182526998,
+          "spin_rpm": 2564.7268565817476,
+          "spin_axis_tilt_deg": -15.408211409274589,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 8.084582436384222,
+          "ball_speed_mps": 66.08037666503384,
+          "spin_axis_defined": true
+        },
+        "residual_m": 3.0325867268454176e-14,
+        "n_evaluations": 6
+      },
+      "derivatives": [
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": -3.704793078955504,
+          "dy_m_per_twist_deg": -6.366870912892218
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": -3.704793607491297,
+          "dy_m_per_twist_deg": -6.366871277818222
+        },
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": -3.7210959264896815,
+          "dy_m_per_twist_deg": -6.367663355475014
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": -3.723816525794632,
+          "dy_m_per_twist_deg": -6.367794156203521
+        }
+      ]
+    },
+    {
+      "cell": "driver_lean5_curve1_rotation1_shaft_only",
+      "pattern": "Straight",
+      "status": "evaluated",
+      "nominal": {
+        "face_deg": 0.0,
+        "path_deg": 0.0,
+        "speed_mps": 45.0,
+        "outcome": {
+          "carry_x_m": 108.02738606179851,
+          "carry_y_m": -0.0,
+          "carry_m": 108.02738606179851,
+          "launch_azimuth_deg": -0.0,
+          "spin_rpm": 1337.355964902268,
+          "spin_axis_tilt_deg": 0.0,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 3.9721520381559916,
+          "ball_speed_mps": 66.62624282259569,
+          "spin_axis_defined": true
+        },
+        "residual_m": 0.0,
+        "n_evaluations": 1
+      },
+      "derivatives": [
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": -10.496652625189284,
+          "dy_m_per_twist_deg": -2.976510850959058
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": -10.496644931420462,
+          "dy_m_per_twist_deg": -2.9765082626747192
+        },
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": -10.507282700865517,
+          "dy_m_per_twist_deg": -2.9765765913504776
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": -10.517677768088163,
+          "dy_m_per_twist_deg": -2.9765792544265346
+        }
+      ]
+    },
+    {
+      "cell": "driver_lean5_curve1_rotation1_shaft_only",
+      "pattern": "Draw",
+      "status": "evaluated",
+      "nominal": {
+        "face_deg": 1.293251886031206,
+        "path_deg": 2.7932518860312063,
+        "speed_mps": 45.165311779700886,
+        "outcome": {
+          "carry_x_m": 108.02738606179864,
+          "carry_y_m": -7.131881890609648e-15,
+          "carry_m": 108.02738606179864,
+          "launch_azimuth_deg": 1.5567376740492134,
+          "spin_rpm": 1385.0631792042225,
+          "spin_axis_tilt_deg": 14.303044169659099,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 3.9720560638236195,
+          "ball_speed_mps": 66.84875870107038,
+          "spin_axis_defined": true
+        },
+        "residual_m": 1.2809638351633706e-13,
+        "n_evaluations": 5
+      },
+      "derivatives": [
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": -11.734885415258134,
+          "dy_m_per_twist_deg": -2.657882217391304
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": -11.6883758844196,
+          "dy_m_per_twist_deg": -2.6583614316416586
+        },
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": -11.803644081904707,
+          "dy_m_per_twist_deg": -2.6572136829181825
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": -11.79351643412474,
+          "dy_m_per_twist_deg": -2.6573158548415883
+        }
+      ]
+    },
+    {
+      "cell": "driver_lean5_curve1_rotation1_shaft_only",
+      "pattern": "Fade",
+      "status": "evaluated",
+      "nominal": {
+        "face_deg": -1.293251886031206,
+        "path_deg": -2.7932518860312063,
+        "speed_mps": 45.165311779700886,
+        "outcome": {
+          "carry_x_m": 108.02738606179864,
+          "carry_y_m": 7.131881890609648e-15,
+          "carry_m": 108.02738606179864,
+          "launch_azimuth_deg": -1.5567376740492134,
+          "spin_rpm": 1385.0631792042225,
+          "spin_axis_tilt_deg": -14.303044169659099,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 3.9720560638236195,
+          "ball_speed_mps": 66.84875870107038,
+          "spin_axis_defined": true
+        },
+        "residual_m": 1.2809638351633706e-13,
+        "n_evaluations": 5
+      },
+      "derivatives": [
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": -9.435937821101703,
+          "dy_m_per_twist_deg": -3.1260228413734756
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": -9.415571787282317,
+          "dy_m_per_twist_deg": -3.125822193061433
+        },
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": -9.506351596648699,
+          "dy_m_per_twist_deg": -3.1267677601889496
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": -9.501255283726096,
+          "dy_m_per_twist_deg": -3.12671579137256
+        }
+      ]
+    },
+    {
+      "cell": "driver_lean5_curve2_rotation1_shaft_only",
+      "pattern": "Straight",
+      "status": "evaluated",
+      "nominal": {
+        "face_deg": 0.0,
+        "path_deg": 0.0,
+        "speed_mps": 45.0,
+        "outcome": {
+          "carry_x_m": 108.02738606179851,
+          "carry_y_m": -0.0,
+          "carry_m": 108.02738606179851,
+          "launch_azimuth_deg": -0.0,
+          "spin_rpm": 1337.355964902268,
+          "spin_axis_tilt_deg": 0.0,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 3.9721520381559916,
+          "ball_speed_mps": 66.62624282259569,
+          "spin_axis_defined": true
+        },
+        "residual_m": 0.0,
+        "n_evaluations": 1
+      },
+      "derivatives": [
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": -10.496652625189284,
+          "dy_m_per_twist_deg": -2.976510850959058
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": -10.496644931420462,
+          "dy_m_per_twist_deg": -2.9765082626747192
+        },
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": -10.507282700865517,
+          "dy_m_per_twist_deg": -2.9765765913504776
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": -10.517677768088163,
+          "dy_m_per_twist_deg": -2.9765792544265346
+        }
+      ]
+    },
+    {
+      "cell": "driver_lean5_curve2_rotation1_shaft_only",
+      "pattern": "Draw",
+      "status": "evaluated",
+      "nominal": {
+        "face_deg": 2.501641539835249,
+        "path_deg": 5.50164153983525,
+        "speed_mps": 45.61741950056062,
+        "outcome": {
+          "carry_x_m": 108.02738606179844,
+          "carry_y_m": 5.674280489920136e-15,
+          "carry_m": 108.02738606179844,
+          "launch_azimuth_deg": 3.0289641540246164,
+          "spin_rpm": 1521.1377483013202,
+          "spin_axis_tilt_deg": 27.079419620210896,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 3.9717677393928197,
+          "ball_speed_mps": 67.45054214636068,
+          "spin_axis_defined": true
+        },
+        "residual_m": 7.128048297039494e-14,
+        "n_evaluations": 6
+      },
+      "derivatives": [
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": -12.839600613391866,
+          "dy_m_per_twist_deg": -2.188205923248173
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": -12.839582129906546,
+          "dy_m_per_twist_deg": -2.1882007560311147
+        },
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": -12.934633073363955,
+          "dy_m_per_twist_deg": -2.186396435122944
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": -12.952664327440289,
+          "dy_m_per_twist_deg": -2.18604891991673
+        }
+      ]
+    },
+    {
+      "cell": "driver_lean5_curve2_rotation1_shaft_only",
+      "pattern": "Fade",
+      "status": "evaluated",
+      "nominal": {
+        "face_deg": -2.501641539835249,
+        "path_deg": -5.50164153983525,
+        "speed_mps": 45.61741950056062,
+        "outcome": {
+          "carry_x_m": 108.02738606179844,
+          "carry_y_m": -5.674280489920136e-15,
+          "carry_m": 108.02738606179844,
+          "launch_azimuth_deg": -3.0289641540246164,
+          "spin_rpm": 1521.1377483013202,
+          "spin_axis_tilt_deg": -27.079419620210896,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 3.9717677393928197,
+          "ball_speed_mps": 67.45054214636068,
+          "spin_axis_defined": true
+        },
+        "residual_m": 7.128048297039494e-14,
+        "n_evaluations": 6
+      },
+      "derivatives": [
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": -8.946288676252578,
+          "dy_m_per_twist_deg": -3.1923121388836195
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": -8.946282382241577,
+          "dy_m_per_twist_deg": -3.1923096442644767
+        },
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": -9.019144972915427,
+          "dy_m_per_twist_deg": -3.1937557619955004
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": -9.028687135828761,
+          "dy_m_per_twist_deg": -3.193940176266741
+        }
+      ]
+    },
+    {
+      "cell": "driver_lean10_curve1_rotation1_shaft_only",
+      "status": "unavailable",
+      "reason": "nonairborne_launch"
+    },
+    {
+      "cell": "driver_lean10_curve2_rotation1_shaft_only",
+      "status": "unavailable",
+      "reason": "nonairborne_launch"
+    },
+    {
+      "cell": "seven_iron_lean0_curve1_rotation1_shaft_only",
+      "pattern": "Straight",
+      "status": "evaluated",
+      "nominal": {
+        "face_deg": 0.0,
+        "path_deg": 0.0,
+        "speed_mps": 36.0,
+        "outcome": {
+          "carry_x_m": 127.88194166336235,
+          "carry_y_m": -0.0,
+          "carry_m": 127.88194166336235,
+          "launch_azimuth_deg": -0.0,
+          "spin_rpm": 6717.722843615145,
+          "spin_axis_tilt_deg": 0.0,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 26.301988322967677,
+          "ball_speed_mps": 44.818240142793236,
+          "spin_axis_defined": true
+        },
+        "residual_m": 0.0,
+        "n_evaluations": 1
+      },
+      "derivatives": [
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.1703127801894198,
+          "dy_m_per_twist_deg": -2.5782820256993286
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.1703128591918244,
+          "dy_m_per_twist_deg": -2.5782820993916387
+        },
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.1707151020239337,
+          "dy_m_per_twist_deg": -2.5782840278588486
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.1707151811151562,
+          "dy_m_per_twist_deg": -2.578284101659929
+        }
+      ]
+    },
+    {
+      "cell": "seven_iron_lean0_curve1_rotation1_shaft_only",
+      "pattern": "Draw",
+      "status": "evaluated",
+      "nominal": {
+        "face_deg": 0.44409176047323323,
+        "path_deg": 1.9440917604732333,
+        "speed_mps": 36.01354876432462,
+        "outcome": {
+          "carry_x_m": 127.88194166336247,
+          "carry_y_m": -7.322565947695536e-16,
+          "carry_m": 127.88194166336247,
+          "launch_azimuth_deg": 0.8077906444405979,
+          "spin_rpm": 6724.223688301178,
+          "spin_axis_tilt_deg": 2.0174540874550355,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 26.301155829934945,
+          "ball_speed_mps": 44.81974853110093,
+          "spin_axis_defined": true
+        },
+        "residual_m": 1.1368919592846825e-13,
+        "n_evaluations": 7
+      },
+      "derivatives": [
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.0909561657356903,
+          "dy_m_per_twist_deg": -2.61752441803014
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.0909562417211305,
+          "dy_m_per_twist_deg": -2.617524502518719
+        },
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.0911974309728123,
+          "dy_m_per_twist_deg": -2.6175281289145924
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.0911975070669655,
+          "dy_m_per_twist_deg": -2.6175282135293174
+        }
+      ]
+    },
+    {
+      "cell": "seven_iron_lean0_curve1_rotation1_shaft_only",
+      "pattern": "Fade",
+      "status": "evaluated",
+      "nominal": {
+        "face_deg": -0.44409176047323323,
+        "path_deg": -1.9440917604732333,
+        "speed_mps": 36.01354876432462,
+        "outcome": {
+          "carry_x_m": 127.88194166336247,
+          "carry_y_m": 7.322565947695536e-16,
+          "carry_m": 127.88194166336247,
+          "launch_azimuth_deg": -0.8077906444405979,
+          "spin_rpm": 6724.223688301178,
+          "spin_axis_tilt_deg": -2.0174540874550355,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 26.301155829934945,
+          "ball_speed_mps": 44.81974853110093,
+          "spin_axis_defined": true
+        },
+        "residual_m": 1.1368919592846825e-13,
+        "n_evaluations": 7
+      },
+      "derivatives": [
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.248572117705038,
+          "dy_m_per_twist_deg": -2.5314602972902627
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.2485721988966247,
+          "dy_m_per_twist_deg": -2.5314603597737184
+        },
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.249129630272705,
+          "dy_m_per_twist_deg": -2.5314544015909233
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.2491297116056899,
+          "dy_m_per_twist_deg": -2.5314544641650643
+        }
+      ]
+    },
+    {
+      "cell": "seven_iron_lean0_curve2_rotation1_shaft_only",
+      "pattern": "Straight",
+      "status": "evaluated",
+      "nominal": {
+        "face_deg": 0.0,
+        "path_deg": 0.0,
+        "speed_mps": 36.0,
+        "outcome": {
+          "carry_x_m": 127.88194166336235,
+          "carry_y_m": -0.0,
+          "carry_m": 127.88194166336235,
+          "launch_azimuth_deg": -0.0,
+          "spin_rpm": 6717.722843615145,
+          "spin_axis_tilt_deg": 0.0,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 26.301988322967677,
+          "ball_speed_mps": 44.818240142793236,
+          "spin_axis_defined": true
+        },
+        "residual_m": 0.0,
+        "n_evaluations": 1
+      },
+      "derivatives": [
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.1703127801894198,
+          "dy_m_per_twist_deg": -2.5782820256993286
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.1703128591918244,
+          "dy_m_per_twist_deg": -2.5782820993916387
+        },
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.1707151020239337,
+          "dy_m_per_twist_deg": -2.5782840278588486
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.1707151811151562,
+          "dy_m_per_twist_deg": -2.578284101659929
+        }
+      ]
+    },
+    {
+      "cell": "seven_iron_lean0_curve2_rotation1_shaft_only",
+      "pattern": "Draw",
+      "status": "evaluated",
+      "nominal": {
+        "face_deg": 0.8845055167126646,
+        "path_deg": 3.8845055167126645,
+        "speed_mps": 36.05430983292445,
+        "outcome": {
+          "carry_x_m": 127.88194166336238,
+          "carry_y_m": 9.824606406194647e-15,
+          "carry_m": 127.88194166336238,
+          "launch_azimuth_deg": 1.6124011366593323,
+          "spin_rpm": 6743.74027135958,
+          "spin_axis_tilt_deg": 4.0348550542328026,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 26.298654535774798,
+          "ball_speed_mps": 44.824359165458844,
+          "spin_axis_defined": true
+        },
+        "residual_m": 3.0071854914237616e-14,
+        "n_evaluations": 8
+      },
+      "derivatives": [
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.0105500444339555,
+          "dy_m_per_twist_deg": -2.6488962761878247
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.010550116849629,
+          "dy_m_per_twist_deg": -2.64889637118049
+        },
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.0104733455953863,
+          "dy_m_per_twist_deg": -2.6488973139417102
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.0104734178298713,
+          "dy_m_per_twist_deg": -2.6488974087910893
+        }
+      ]
+    },
+    {
+      "cell": "seven_iron_lean0_curve2_rotation1_shaft_only",
+      "pattern": "Fade",
+      "status": "evaluated",
+      "nominal": {
+        "face_deg": -0.8845055167126646,
+        "path_deg": -3.8845055167126645,
+        "speed_mps": 36.05430983292445,
+        "outcome": {
+          "carry_x_m": 127.88194166336238,
+          "carry_y_m": -9.824606406194647e-15,
+          "carry_m": 127.88194166336238,
+          "launch_azimuth_deg": -1.6124011366593323,
+          "spin_rpm": 6743.74027135958,
+          "spin_axis_tilt_deg": -4.0348550542328026,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 26.298654535774798,
+          "ball_speed_mps": 44.824359165458844,
+          "spin_axis_defined": true
+        },
+        "residual_m": 3.0071854914237616e-14,
+        "n_evaluations": 8
+      },
+      "derivatives": [
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.327787390182067,
+          "dy_m_per_twist_deg": -2.4774158758021856
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.3277874731514316,
+          "dy_m_per_twist_deg": -2.477415927118068
+        },
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.3270723649654315,
+          "dy_m_per_twist_deg": -2.47743553945049
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.3270724477649765,
+          "dy_m_per_twist_deg": -2.477435590694974
+        }
+      ]
+    },
+    {
+      "cell": "seven_iron_lean5_curve1_rotation1_shaft_only",
+      "pattern": "Straight",
+      "status": "evaluated",
+      "nominal": {
+        "face_deg": 0.0,
+        "path_deg": 0.0,
+        "speed_mps": 36.0,
+        "outcome": {
+          "carry_x_m": 139.90327962446892,
+          "carry_y_m": -0.0,
+          "carry_m": 139.90327962446892,
+          "launch_azimuth_deg": -0.0,
+          "spin_rpm": 5942.769254986506,
+          "spin_axis_tilt_deg": 0.0,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 22.58948576509013,
+          "ball_speed_mps": 47.56706561181738,
+          "spin_axis_defined": true
+        },
+        "residual_m": 0.0,
+        "n_evaluations": 1
+      },
+      "derivatives": [
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.0029762216717586,
+          "dy_m_per_twist_deg": -2.9836095880699247
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.0029763213907472,
+          "dy_m_per_twist_deg": -2.9836096872990083
+        },
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.002914902173302,
+          "dy_m_per_twist_deg": -2.9836133619663494
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.002915001700444,
+          "dy_m_per_twist_deg": -2.983613461030014
+        }
+      ]
+    },
+    {
+      "cell": "seven_iron_lean5_curve1_rotation1_shaft_only",
+      "pattern": "Draw",
+      "status": "evaluated",
+      "nominal": {
+        "face_deg": 0.6691710497909761,
+        "path_deg": 2.169171049790976,
+        "speed_mps": 36.015173126298095,
+        "outcome": {
+          "carry_x_m": 139.9032796244688,
+          "carry_y_m": 4.7553107285214224e-15,
+          "carry_m": 139.9032796244688,
+          "launch_azimuth_deg": 1.001901807878157,
+          "spin_rpm": 5950.313594985861,
+          "spin_axis_tilt_deg": 2.4057923262048853,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 22.588811137440654,
+          "ball_speed_mps": 47.57086425689868,
+          "spin_axis_defined": true
+        },
+        "residual_m": 1.1378624719739134e-13,
+        "n_evaluations": 6
+      },
+      "derivatives": [
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 0.9106195722011989,
+          "dy_m_per_twist_deg": -3.0310515860943945
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 0.9106196672348688,
+          "dy_m_per_twist_deg": -3.031051702417838
+        },
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 0.9106722930269484,
+          "dy_m_per_twist_deg": -3.0310580010091606
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 0.9106723880449863,
+          "dy_m_per_twist_deg": -3.0310581172695445
+        }
+      ]
+    },
+    {
+      "cell": "seven_iron_lean5_curve1_rotation1_shaft_only",
+      "pattern": "Fade",
+      "status": "evaluated",
+      "nominal": {
+        "face_deg": -0.6691710497909761,
+        "path_deg": -2.169171049790976,
+        "speed_mps": 36.015173126298095,
+        "outcome": {
+          "carry_x_m": 139.9032796244688,
+          "carry_y_m": -4.7553107285214224e-15,
+          "carry_m": 139.9032796244688,
+          "launch_azimuth_deg": -1.001901807878157,
+          "spin_rpm": 5950.313594985861,
+          "spin_axis_tilt_deg": -2.4057923262048853,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 22.588811137440654,
+          "ball_speed_mps": 47.57086425689868,
+          "spin_axis_defined": true
+        },
+        "residual_m": 1.1378624719739134e-13,
+        "n_evaluations": 6
+      },
+      "derivatives": [
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.0931018440018647,
+          "dy_m_per_twist_deg": -2.9245776769361305
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.093101946759134,
+          "dy_m_per_twist_deg": -2.924577758411415
+        },
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.0930143402646308,
+          "dy_m_per_twist_deg": -2.9245843614996647
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.0930144429039501,
+          "dy_m_per_twist_deg": -2.9245844429299894
+        }
+      ]
+    },
+    {
+      "cell": "seven_iron_lean5_curve2_rotation1_shaft_only",
+      "pattern": "Straight",
+      "status": "evaluated",
+      "nominal": {
+        "face_deg": 0.0,
+        "path_deg": 0.0,
+        "speed_mps": 36.0,
+        "outcome": {
+          "carry_x_m": 139.90327962446892,
+          "carry_y_m": -0.0,
+          "carry_m": 139.90327962446892,
+          "launch_azimuth_deg": -0.0,
+          "spin_rpm": 5942.769254986506,
+          "spin_axis_tilt_deg": 0.0,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 22.58948576509013,
+          "ball_speed_mps": 47.56706561181738,
+          "spin_axis_defined": true
+        },
+        "residual_m": 0.0,
+        "n_evaluations": 1
+      },
+      "derivatives": [
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.0029762216717586,
+          "dy_m_per_twist_deg": -2.9836095880699247
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.0029763213907472,
+          "dy_m_per_twist_deg": -2.9836096872990083
+        },
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.002914902173302,
+          "dy_m_per_twist_deg": -2.9836133619663494
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.002915001700444,
+          "dy_m_per_twist_deg": -2.983613461030014
+        }
+      ]
+    },
+    {
+      "cell": "seven_iron_lean5_curve2_rotation1_shaft_only",
+      "pattern": "Draw",
+      "status": "evaluated",
+      "nominal": {
+        "face_deg": 1.3327126084677798,
+        "path_deg": 4.33271260846778,
+        "speed_mps": 36.06076068431269,
+        "outcome": {
+          "carry_x_m": 139.90327962446895,
+          "carry_y_m": 8.441598114972138e-15,
+          "carry_m": 139.90327962446895,
+          "launch_azimuth_deg": 1.9986297702036153,
+          "spin_rpm": 5972.943603305557,
+          "spin_axis_tilt_deg": 4.810716609360938,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 22.586784234250494,
+          "ball_speed_mps": 47.58228062189124,
+          "spin_axis_defined": true
+        },
+        "residual_m": 2.964884729093219e-14,
+        "n_evaluations": 7
+      },
+      "derivatives": [
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 0.8159043091183094,
+          "dy_m_per_twist_deg": -3.0663132935171777
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 0.8159043978395175,
+          "dy_m_per_twist_deg": -3.066313425697266
+        },
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 0.8157823682523713,
+          "dy_m_per_twist_deg": -3.066317211918795
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 0.8157824569877903,
+          "dy_m_per_twist_deg": -3.0663173441678433
+        }
+      ]
+    },
+    {
+      "cell": "seven_iron_lean5_curve2_rotation1_shaft_only",
+      "pattern": "Fade",
+      "status": "evaluated",
+      "nominal": {
+        "face_deg": -1.3327126084677798,
+        "path_deg": -4.33271260846778,
+        "speed_mps": 36.06076068431269,
+        "outcome": {
+          "carry_x_m": 139.90327962446895,
+          "carry_y_m": -8.441598114972138e-15,
+          "carry_m": 139.90327962446895,
+          "launch_azimuth_deg": -1.9986297702036153,
+          "spin_rpm": 5972.943603305557,
+          "spin_axis_tilt_deg": -4.810716609360938,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 22.586784234250494,
+          "ball_speed_mps": 47.58228062189124,
+          "spin_axis_defined": true
+        },
+        "residual_m": 2.964884729093219e-14,
+        "n_evaluations": 7
+      },
+      "derivatives": [
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.1811306344441164,
+          "dy_m_per_twist_deg": -2.854782739524337
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.181130738504521,
+          "dy_m_per_twist_deg": -2.8547828031829416
+        },
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.181289590469703,
+          "dy_m_per_twist_deg": -2.85478514706011
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.181289694616794,
+          "dy_m_per_twist_deg": -2.854785210756124
+        }
+      ]
+    },
+    {
+      "cell": "seven_iron_lean10_curve1_rotation1_shaft_only",
+      "pattern": "Straight",
+      "status": "evaluated",
+      "nominal": {
+        "face_deg": 0.0,
+        "path_deg": 0.0,
+        "speed_mps": 36.0,
+        "outcome": {
+          "carry_x_m": 149.74419150637488,
+          "carry_y_m": -0.0,
+          "carry_m": 149.74419150637488,
+          "launch_azimuth_deg": -0.0,
+          "spin_rpm": 5122.58760398524,
+          "spin_axis_tilt_deg": 0.0,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 18.744103620848602,
+          "ball_speed_mps": 49.975339084688635,
+          "spin_axis_defined": true
+        },
+        "residual_m": 0.0,
+        "n_evaluations": 1
+      },
+      "derivatives": [
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 0.7721335093933135,
+          "dy_m_per_twist_deg": -3.4270789883153525
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 0.7721336480813079,
+          "dy_m_per_twist_deg": -3.427079130445878
+        },
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 0.7725415615496445,
+          "dy_m_per_twist_deg": -3.4270851609294204
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 0.77254170005574,
+          "dy_m_per_twist_deg": -3.4270853027933326
+        }
+      ]
+    },
+    {
+      "cell": "seven_iron_lean10_curve1_rotation1_shaft_only",
+      "pattern": "Draw",
+      "status": "evaluated",
+      "nominal": {
+        "face_deg": 0.930895770842502,
+        "path_deg": 2.430895770842502,
+        "speed_mps": 36.018528524658734,
+        "outcome": {
+          "carry_x_m": 149.7441915063749,
+          "carry_y_m": 2.1441182163073336e-15,
+          "carry_m": 149.7441915063749,
+          "launch_azimuth_deg": 1.2396721210415242,
+          "spin_rpm": 5131.650544089636,
+          "spin_axis_tilt_deg": 2.9148414942949623,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 18.74354967749582,
+          "ball_speed_mps": 49.98405078793886,
+          "spin_axis_defined": true
+        },
+        "residual_m": 2.85024702415741e-14,
+        "n_evaluations": 6
+      },
+      "derivatives": [
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 0.6536682513669234,
+          "dy_m_per_twist_deg": -3.4857195392144296
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 0.6536683810509203,
+          "dy_m_per_twist_deg": -3.4857197119250887
+        },
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 0.6539132497948685,
+          "dy_m_per_twist_deg": -3.485731294765814
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 0.6539133794518648,
+          "dy_m_per_twist_deg": -3.485731467375594
+        }
+      ]
+    },
+    {
+      "cell": "seven_iron_lean10_curve1_rotation1_shaft_only",
+      "pattern": "Fade",
+      "status": "evaluated",
+      "nominal": {
+        "face_deg": -0.930895770842502,
+        "path_deg": -2.430895770842502,
+        "speed_mps": 36.018528524658734,
+        "outcome": {
+          "carry_x_m": 149.7441915063749,
+          "carry_y_m": -2.1441182163073336e-15,
+          "carry_m": 149.7441915063749,
+          "launch_azimuth_deg": -1.2396721210415242,
+          "spin_rpm": 5131.650544089636,
+          "spin_axis_tilt_deg": -2.9148414942949623,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 18.74354967749582,
+          "ball_speed_mps": 49.98405078793886,
+          "spin_axis_defined": true
+        },
+        "residual_m": 2.85024702415741e-14,
+        "n_evaluations": 6
+      },
+      "derivatives": [
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 0.8858688457920039,
+          "dy_m_per_twist_deg": -3.349476639091737
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 0.8858689894850613,
+          "dy_m_per_twist_deg": -3.3494767493488875
+        },
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 0.8859055255186377,
+          "dy_m_per_twist_deg": -3.3494837260741357
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 0.8859056691221667,
+          "dy_m_per_twist_deg": -3.349483836258037
+        }
+      ]
+    },
+    {
+      "cell": "seven_iron_lean10_curve2_rotation1_shaft_only",
+      "pattern": "Straight",
+      "status": "evaluated",
+      "nominal": {
+        "face_deg": 0.0,
+        "path_deg": 0.0,
+        "speed_mps": 36.0,
+        "outcome": {
+          "carry_x_m": 149.74419150637488,
+          "carry_y_m": -0.0,
+          "carry_m": 149.74419150637488,
+          "launch_azimuth_deg": -0.0,
+          "spin_rpm": 5122.58760398524,
+          "spin_axis_tilt_deg": 0.0,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 18.744103620848602,
+          "ball_speed_mps": 49.975339084688635,
+          "spin_axis_defined": true
+        },
+        "residual_m": 0.0,
+        "n_evaluations": 1
+      },
+      "derivatives": [
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 0.7721335093933135,
+          "dy_m_per_twist_deg": -3.4270789883153525
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 0.7721336480813079,
+          "dy_m_per_twist_deg": -3.427079130445878
+        },
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 0.7725415615496445,
+          "dy_m_per_twist_deg": -3.4270851609294204
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 0.77254170005574,
+          "dy_m_per_twist_deg": -3.4270853027933326
+        }
+      ]
+    },
+    {
+      "cell": "seven_iron_lean10_curve2_rotation1_shaft_only",
+      "pattern": "Draw",
+      "status": "evaluated",
+      "nominal": {
+        "face_deg": 1.852575609069928,
+        "path_deg": 4.852575609069928,
+        "speed_mps": 36.07418153424952,
+        "outcome": {
+          "carry_x_m": 149.74419150637505,
+          "carry_y_m": -5.151261361913129e-15,
+          "carry_m": 149.74419150637505,
+          "launch_azimuth_deg": 2.4705503189869735,
+          "spin_rpm": 5158.822510384758,
+          "spin_axis_tilt_deg": 5.826444556385045,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 18.74188543743091,
+          "ball_speed_mps": 50.01018744127155,
+          "spin_axis_defined": true
+        },
+        "residual_m": 1.7060804173217075e-13,
+        "n_evaluations": 7
+      },
+      "derivatives": [
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 0.5306080521279455,
+          "dy_m_per_twist_deg": -3.524153178851448
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 0.5306081688132736,
+          "dy_m_per_twist_deg": -3.5241533792972035
+        },
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 0.5295459473472874,
+          "dy_m_per_twist_deg": -3.524127130446838
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 0.5295460640951433,
+          "dy_m_per_twist_deg": -3.5241273312220955
+        }
+      ]
+    },
+    {
+      "cell": "seven_iron_lean10_curve2_rotation1_shaft_only",
+      "pattern": "Fade",
+      "status": "evaluated",
+      "nominal": {
+        "face_deg": -1.852575609069928,
+        "path_deg": -4.852575609069928,
+        "speed_mps": 36.07418153424952,
+        "outcome": {
+          "carry_x_m": 149.74419150637505,
+          "carry_y_m": 5.151261361913129e-15,
+          "carry_m": 149.74419150637505,
+          "launch_azimuth_deg": -2.4705503189869735,
+          "spin_rpm": 5158.822510384758,
+          "spin_axis_tilt_deg": -5.826444556385045,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 18.74188543743091,
+          "ball_speed_mps": 50.01018744127155,
+          "spin_axis_defined": true
+        },
+        "residual_m": 1.7060804173217075e-13,
+        "n_evaluations": 7
+      },
+      "derivatives": [
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 0.9947943372409895,
+          "dy_m_per_twist_deg": -3.2547296322942003
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 0.9947944820993371,
+          "dy_m_per_twist_deg": -3.2547297109792734
+        },
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 0.9949808642829794,
+          "dy_m_per_twist_deg": -3.2547298725008194
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 0.9949810093843325,
+          "dy_m_per_twist_deg": -3.2547299513576045
+        }
+      ]
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve1_rotation1_shaft_only",
+      "pattern": "Straight",
+      "status": "evaluated",
+      "nominal": {
+        "face_deg": 0.0,
+        "path_deg": 0.0,
+        "speed_mps": 32.0,
+        "outcome": {
+          "carry_x_m": 77.40247724866299,
+          "carry_y_m": -0.0,
+          "carry_m": 77.40247724866299,
+          "launch_azimuth_deg": -0.0,
+          "spin_rpm": 7586.927854649217,
+          "spin_axis_tilt_deg": 0.0,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 34.02233536458477,
+          "ball_speed_mps": 32.67123523583977,
+          "spin_axis_defined": true
+        },
+        "residual_m": 0.0,
+        "n_evaluations": 1
+      },
+      "derivatives": [
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.1520684197598996,
+          "dy_m_per_twist_deg": -1.109554286621081
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.1520684643954837,
+          "dy_m_per_twist_deg": -1.1095543056880974
+        },
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.1524619375165912,
+          "dy_m_per_twist_deg": -1.109558248873753
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.1524619821997817,
+          "dy_m_per_twist_deg": -1.109558267945931
+        }
+      ]
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve1_rotation1_shaft_only",
+      "pattern": "Draw",
+      "status": "evaluated",
+      "nominal": {
+        "face_deg": -0.1295207136163209,
+        "path_deg": 1.370479286383679,
+        "speed_mps": 32.01146876986226,
+        "outcome": {
+          "carry_x_m": 77.402477248663,
+          "carry_y_m": -4.473960264761434e-16,
+          "carry_m": 77.402477248663,
+          "launch_azimuth_deg": 0.3522183745851676,
+          "spin_rpm": 7591.524898037976,
+          "spin_axis_tilt_deg": 1.3361299594434428,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 34.02068832708923,
+          "ball_speed_mps": 32.67150816562184,
+          "spin_axis_defined": true
+        },
+        "residual_m": 1.4217895587641852e-14,
+        "n_evaluations": 7
+      },
+      "derivatives": [
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.098137180788683,
+          "dy_m_per_twist_deg": -1.1281666625281301
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.0981372243023202,
+          "dy_m_per_twist_deg": -1.1281666850355236
+        },
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.0984927051694626,
+          "dy_m_per_twist_deg": -1.1281721865529948
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.0984927487456275,
+          "dy_m_per_twist_deg": -1.1281722090686035
+        }
+      ]
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve1_rotation1_shaft_only",
+      "pattern": "Fade",
+      "status": "evaluated",
+      "nominal": {
+        "face_deg": 0.1295207136163209,
+        "path_deg": -1.370479286383679,
+        "speed_mps": 32.01146876986226,
+        "outcome": {
+          "carry_x_m": 77.402477248663,
+          "carry_y_m": 4.473960264761434e-16,
+          "carry_m": 77.402477248663,
+          "launch_azimuth_deg": -0.3522183745851676,
+          "spin_rpm": 7591.524898037976,
+          "spin_axis_tilt_deg": -1.3361299594434428,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 34.02068832708923,
+          "ball_speed_mps": 32.67150816562184,
+          "spin_axis_defined": true
+        },
+        "residual_m": 1.4217895587641852e-14,
+        "n_evaluations": 7
+      },
+      "derivatives": [
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.2057218625223243,
+          "dy_m_per_twist_deg": -1.0890439831371648
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.2057219080048753,
+          "dy_m_per_twist_deg": -1.0890439986871132
+        },
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.2061526617102913,
+          "dy_m_per_twist_deg": -1.0890458567062753
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.2061527072390277,
+          "dy_m_per_twist_deg": -1.0890458722581988
+        }
+      ]
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+      "status": "unavailable",
+      "reason": "nominal landing unreachable within bounds: residual=0.351838 m"
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve1_rotation1_shaft_only",
+      "pattern": "Straight",
+      "status": "evaluated",
+      "nominal": {
+        "face_deg": 0.0,
+        "path_deg": 0.0,
+        "speed_mps": 32.0,
+        "outcome": {
+          "carry_x_m": 90.42961880334346,
+          "carry_y_m": -0.0,
+          "carry_m": 90.42961880334346,
+          "launch_azimuth_deg": -0.0,
+          "spin_rpm": 7022.592201232587,
+          "spin_axis_tilt_deg": 0.0,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 30.912673277909644,
+          "ball_speed_mps": 35.8320079359927,
+          "spin_axis_defined": true
+        },
+        "residual_m": 0.0,
+        "n_evaluations": 1
+      },
+      "derivatives": [
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.1223301035798272,
+          "dy_m_per_twist_deg": -1.3372873992882155
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.122330150064954,
+          "dy_m_per_twist_deg": -1.3372874258357743
+        },
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.1232004520067562,
+          "dy_m_per_twist_deg": -1.337290704874949
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.123200498639676,
+          "dy_m_per_twist_deg": -1.3372907314584421
+        }
+      ]
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve1_rotation1_shaft_only",
+      "pattern": "Draw",
+      "status": "evaluated",
+      "nominal": {
+        "face_deg": 0.03600292512193657,
+        "path_deg": 1.5360029251219365,
+        "speed_mps": 32.011774078481665,
+        "outcome": {
+          "carry_x_m": 90.42961880334366,
+          "carry_y_m": -5.412337245047638e-16,
+          "carry_m": 90.42961880334366,
+          "launch_azimuth_deg": 0.46033381297501336,
+          "spin_rpm": 7027.608366385358,
+          "spin_axis_tilt_deg": 1.5682786223556082,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 30.91139223334489,
+          "ball_speed_mps": 35.83268646389906,
+          "spin_axis_defined": true
+        },
+        "residual_m": 1.9895270220410185e-13,
+        "n_evaluations": 7
+      },
+      "derivatives": [
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.0635398574407873,
+          "dy_m_per_twist_deg": -1.3590426587461737
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.0635399025304082,
+          "dy_m_per_twist_deg": -1.3590426894977692
+        },
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.0642864160722354,
+          "dy_m_per_twist_deg": -1.3590498627654404
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.0642864612862013,
+          "dy_m_per_twist_deg": -1.3590498935624127
+        }
+      ]
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve1_rotation1_shaft_only",
+      "pattern": "Fade",
+      "status": "evaluated",
+      "nominal": {
+        "face_deg": -0.03600292512193657,
+        "path_deg": -1.5360029251219365,
+        "speed_mps": 32.011774078481665,
+        "outcome": {
+          "carry_x_m": 90.42961880334366,
+          "carry_y_m": 5.412337245047638e-16,
+          "carry_m": 90.42961880334366,
+          "launch_azimuth_deg": -0.46033381297501336,
+          "spin_rpm": 7027.608366385358,
+          "spin_axis_tilt_deg": -1.5682786223556082,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 30.91139223334489,
+          "ball_speed_mps": 35.83268646389906,
+          "spin_axis_defined": true
+        },
+        "residual_m": 1.9895270220410185e-13,
+        "n_evaluations": 7
+      },
+      "derivatives": [
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.1806760927264293,
+          "dy_m_per_twist_deg": -1.3129095534769284
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.1806761403036603,
+          "dy_m_per_twist_deg": -1.3129095757193787
+        },
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.181667200879133,
+          "dy_m_per_twist_deg": -1.3129067576816544
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.1816672486020252,
+          "dy_m_per_twist_deg": -1.3129067799499357
+        }
+      ]
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve2_rotation1_shaft_only",
+      "pattern": "Straight",
+      "status": "evaluated",
+      "nominal": {
+        "face_deg": 0.0,
+        "path_deg": 0.0,
+        "speed_mps": 32.0,
+        "outcome": {
+          "carry_x_m": 90.42961880334346,
+          "carry_y_m": -0.0,
+          "carry_m": 90.42961880334346,
+          "launch_azimuth_deg": -0.0,
+          "spin_rpm": 7022.592201232587,
+          "spin_axis_tilt_deg": 0.0,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 30.912673277909644,
+          "ball_speed_mps": 35.8320079359927,
+          "spin_axis_defined": true
+        },
+        "residual_m": 0.0,
+        "n_evaluations": 1
+      },
+      "derivatives": [
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.1223301035798272,
+          "dy_m_per_twist_deg": -1.3372873992882155
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.122330150064954,
+          "dy_m_per_twist_deg": -1.3372874258357743
+        },
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.1232004520067562,
+          "dy_m_per_twist_deg": -1.337290704874949
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.123200498639676,
+          "dy_m_per_twist_deg": -1.3372907314584421
+        }
+      ]
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve2_rotation1_shaft_only",
+      "pattern": "Draw",
+      "status": "evaluated",
+      "nominal": {
+        "face_deg": 0.07022598439199332,
+        "path_deg": 3.0702259843919935,
+        "speed_mps": 32.047137007975735,
+        "outcome": {
+          "carry_x_m": 90.42961880334362,
+          "carry_y_m": 1.684850176042474e-16,
+          "carry_m": 90.42961880334362,
+          "launch_azimuth_deg": 0.9194750452855801,
+          "spin_rpm": 7042.664411755068,
+          "spin_axis_tilt_deg": 3.1362001478569357,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 30.907543128036355,
+          "ball_speed_mps": 35.834722591418505,
+          "spin_axis_defined": true
+        },
+        "residual_m": 1.5631949266590912e-13,
+        "n_evaluations": 12
+      },
+      "derivatives": [
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.0042504292087528,
+          "dy_m_per_twist_deg": -1.3781053547092748
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.0042504725205958,
+          "dy_m_per_twist_deg": -1.3781053895084157
+        },
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.0048706076908331,
+          "dy_m_per_twist_deg": -1.3781141713185692
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.0048706511440741,
+          "dy_m_per_twist_deg": -1.3781142061719858
+        }
+      ]
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve2_rotation1_shaft_only",
+      "pattern": "Fade",
+      "status": "evaluated",
+      "nominal": {
+        "face_deg": -0.07022598439199332,
+        "path_deg": -3.0702259843919935,
+        "speed_mps": 32.047137007975735,
+        "outcome": {
+          "carry_x_m": 90.42961880334362,
+          "carry_y_m": -1.684850176042474e-16,
+          "carry_m": 90.42961880334362,
+          "launch_azimuth_deg": -0.9194750452855801,
+          "spin_rpm": 7042.664411755068,
+          "spin_axis_tilt_deg": -3.1362001478569357,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 30.907543128036355,
+          "ball_speed_mps": 35.834722591418505,
+          "spin_axis_defined": true
+        },
+        "residual_m": 1.5631949266590912e-13,
+        "n_evaluations": 12
+      },
+      "derivatives": [
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.2386340027596532,
+          "dy_m_per_twist_deg": -1.2859933112035329
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.2386340511341132,
+          "dy_m_per_twist_deg": -1.285993329093975
+        },
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.2397424349998687,
+          "dy_m_per_twist_deg": -1.285982321408912
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.2397424835342008,
+          "dy_m_per_twist_deg": -1.2859823393144092
+        }
+      ]
+    },
+    {
+      "cell": "pitching_wedge_lean10_curve1_rotation1_shaft_only",
+      "pattern": "Straight",
+      "status": "evaluated",
+      "nominal": {
+        "face_deg": 0.0,
+        "path_deg": 0.0,
+        "speed_mps": 32.0,
+        "outcome": {
+          "carry_x_m": 102.81528887494389,
+          "carry_y_m": -0.0,
+          "carry_m": 102.81528887494389,
+          "launch_azimuth_deg": -0.0,
+          "spin_rpm": 6404.810380807456,
+          "spin_axis_tilt_deg": 0.0,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 27.506270642228216,
+          "ball_speed_mps": 38.752845817691345,
+          "spin_axis_defined": true
+        },
+        "residual_m": 0.0,
+        "n_evaluations": 1
+      },
+      "derivatives": [
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.0398106880160185,
+          "dy_m_per_twist_deg": -1.5752862425649132
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.039810737852065,
+          "dy_m_per_twist_deg": -1.575286278028153
+        },
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.0396315326836714,
+          "dy_m_per_twist_deg": -1.575290962975924
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.0396315824749536,
+          "dy_m_per_twist_deg": -1.5752909984193575
+        }
+      ]
+    },
+    {
+      "cell": "pitching_wedge_lean10_curve1_rotation1_shaft_only",
+      "pattern": "Draw",
+      "status": "evaluated",
+      "nominal": {
+        "face_deg": 0.20583016390245032,
+        "path_deg": 1.7058301639024502,
+        "speed_mps": 32.01235228959431,
+        "outcome": {
+          "carry_x_m": 102.8152888749439,
+          "carry_y_m": -6.041174505089231e-16,
+          "carry_m": 102.8152888749439,
+          "launch_azimuth_deg": 0.5853469557886127,
+          "spin_rpm": 6410.3878541840395,
+          "spin_axis_tilt_deg": 1.8432366927638493,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 27.50525263859105,
+          "ball_speed_mps": 38.75433791342272,
+          "spin_axis_defined": true
+        },
+        "residual_m": 1.4223689733349375e-14,
+        "n_evaluations": 7
+      },
+      "derivatives": [
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 0.9746947518621596,
+          "dy_m_per_twist_deg": -1.600780644721708
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 0.9746947998607425,
+          "dy_m_per_twist_deg": -1.6007806857154436
+        },
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 0.9745636940920122,
+          "dy_m_per_twist_deg": -1.6007847547694638
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 0.9745637420209619,
+          "dy_m_per_twist_deg": -1.6007847957398798
+        }
+      ]
+    },
+    {
+      "cell": "pitching_wedge_lean10_curve1_rotation1_shaft_only",
+      "pattern": "Fade",
+      "status": "evaluated",
+      "nominal": {
+        "face_deg": -0.20583016390245032,
+        "path_deg": -1.7058301639024502,
+        "speed_mps": 32.01235228959431,
+        "outcome": {
+          "carry_x_m": 102.8152888749439,
+          "carry_y_m": 6.041174505089231e-16,
+          "carry_m": 102.8152888749439,
+          "launch_azimuth_deg": -0.5853469557886127,
+          "spin_rpm": 6410.3878541840395,
+          "spin_axis_tilt_deg": -1.8432366927638493,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 27.50525263859105,
+          "ball_speed_mps": 38.75433791342272,
+          "spin_axis_defined": true
+        },
+        "residual_m": 1.4223689733349375e-14,
+        "n_evaluations": 7
+      },
+      "derivatives": [
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.1041210660060585,
+          "dy_m_per_twist_deg": -1.5460500657159766
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.1041211171601617,
+          "dy_m_per_twist_deg": -1.54605009551131
+        },
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.1038953401168783,
+          "dy_m_per_twist_deg": -1.546056454976654
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.103895391223375,
+          "dy_m_per_twist_deg": -1.546056484756355
+        }
+      ]
+    },
+    {
+      "cell": "pitching_wedge_lean10_curve2_rotation1_shaft_only",
+      "pattern": "Straight",
+      "status": "evaluated",
+      "nominal": {
+        "face_deg": 0.0,
+        "path_deg": 0.0,
+        "speed_mps": 32.0,
+        "outcome": {
+          "carry_x_m": 102.81528887494389,
+          "carry_y_m": -0.0,
+          "carry_m": 102.81528887494389,
+          "launch_azimuth_deg": -0.0,
+          "spin_rpm": 6404.810380807456,
+          "spin_axis_tilt_deg": 0.0,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 27.506270642228216,
+          "ball_speed_mps": 38.752845817691345,
+          "spin_axis_defined": true
+        },
+        "residual_m": 0.0,
+        "n_evaluations": 1
+      },
+      "derivatives": [
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.0398106880160185,
+          "dy_m_per_twist_deg": -1.5752862425649132
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.039810737852065,
+          "dy_m_per_twist_deg": -1.575286278028153
+        },
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.0396315326836714,
+          "dy_m_per_twist_deg": -1.575290962975924
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.0396315824749536,
+          "dy_m_per_twist_deg": -1.5752909984193575
+        }
+      ]
+    },
+    {
+      "cell": "pitching_wedge_lean10_curve2_rotation1_shaft_only",
+      "pattern": "Draw",
+      "status": "evaluated",
+      "nominal": {
+        "face_deg": 0.40923996643082655,
+        "path_deg": 3.4092399664308264,
+        "speed_mps": 32.04945107334138,
+        "outcome": {
+          "carry_x_m": 102.81528887494409,
+          "carry_y_m": -4.453252003266961e-15,
+          "carry_m": 102.81528887494409,
+          "launch_azimuth_deg": 1.1688006506736015,
+          "spin_rpm": 6427.12509658382,
+          "spin_axis_tilt_deg": 3.685769050953662,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 27.502193977158512,
+          "ball_speed_mps": 38.758813278070456,
+          "spin_axis_defined": true
+        },
+        "residual_m": 1.990017995742101e-13,
+        "n_evaluations": 9
+      },
+      "derivatives": [
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 0.9087390315066557,
+          "dy_m_per_twist_deg": -1.622392852249167
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 0.9087390772023696,
+          "dy_m_per_twist_deg": -1.6223928985330052
+        },
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 0.9086875314487486,
+          "dy_m_per_twist_deg": -1.6223978643589283
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 0.908657361726739,
+          "dy_m_per_twist_deg": -1.622397501239251
+        }
+      ]
+    },
+    {
+      "cell": "pitching_wedge_lean10_curve2_rotation1_shaft_only",
+      "pattern": "Fade",
+      "status": "evaluated",
+      "nominal": {
+        "face_deg": -0.40923996643082655,
+        "path_deg": -3.4092399664308264,
+        "speed_mps": 32.04945107334138,
+        "outcome": {
+          "carry_x_m": 102.81528887494409,
+          "carry_y_m": 4.453252003266961e-15,
+          "carry_m": 102.81528887494409,
+          "launch_azimuth_deg": -1.1688006506736015,
+          "spin_rpm": 6427.12509658382,
+          "spin_axis_tilt_deg": -3.685769050953662,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 27.502193977158512,
+          "ball_speed_mps": 38.758813278070456,
+          "spin_axis_defined": true
+        },
+        "residual_m": 1.990017995742101e-13,
+        "n_evaluations": 9
+      },
+      "derivatives": [
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.167664520121292,
+          "dy_m_per_twist_deg": -1.5132472112233994
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.02,
+          "dx_m_per_twist_deg": 1.167664572167837,
+          "dy_m_per_twist_deg": -1.5132472353157806
+        },
+        {
+          "epsilon_deg": 0.01,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.1676140143016767,
+          "dy_m_per_twist_deg": -1.5132532000248915
+        },
+        {
+          "epsilon_deg": 0.005,
+          "flight_dt_s": 0.005,
+          "dx_m_per_twist_deg": 1.1675588793437441,
+          "dy_m_per_twist_deg": -1.5132540074824978
+        }
+      ]
+    }
+  ]
+}

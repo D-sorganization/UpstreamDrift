@@ -408,3 +408,160 @@ concise extrema and their complete case states are in
 `independent_head_sensitivity_summary.json`.
 
 Receipt SHA256: `3bd6acb1118b6cbedd03171744a09a1b810f8a77cd7e4dc72c1d609181edb558`.
+
+## Equation Traceability and Across-Lean Control Review
+
+The expanded DESIGN geometry and impulse equations agree with the implemented
+rotation order, sign conventions, full effective inverse mass, linear/angular
+impulses, energetic work convention, Newton comparator, and parabolic face normal.
+Three details should be explicit in the reference: contact relative velocity is
+`c = vc + ωc×rc − vb − ωb×rb`, the ball lever is `rb = −R n_local`, and the adapter
+sets initial club angular velocity and both ball velocity states to zero. The
+sampled shaft twist is an orientation perturbation, not a prescribed closure
+angular velocity. For tangent basis T, the finite normal increment dP uses
+`q = argmin [½qᵀ(TᵀKT)q − {Tᵀ(c−dP K n)}ᵀq]`, subject to `||q|| ≤ μ dP`.
+This states the backward implicit friction step exactly, including normal/tangent
+coupling. These are traceability clarifications, not new physics requirements.
+
+The proposed 72-cell across-lean control (shaft-only and combined-2 profiles,
+all clubs/leans/rotation SDs/curve strengths) is sufficient to examine whether
+those two profiles' conclusions persist at a common nominal target distance.
+It is not sufficient to assert the same result for every other noise profile.
+Matching also changes nominal speed, face, and path. Holding absolute speed SD
+fixed changes relative speed variability when mean speed changes. Therefore
+interpret these as **comparisons of recalibrated delivery at equal nominal
+range**, not a causal isolation of shaft lean alone. Equal nominal carry does
+not enforce equal mean carry, target bias, launch energy, or landing geometry.
+
+Use the same standardized random rows across corresponding lean cells and verify
+seed, row count, primitive order, and sample digests. For paired differences
+across lean, define a common supported intersection across every compared
+cell/pattern; ordinary cell summaries can otherwise condition on different
+populations. Report intersection counts and each cell's support fraction. A
+three-lean claim is unavailable for a club whose nominal reference is unsupported;
+do not substitute the surviving two leans without stating the restricted scope.
+Matching failures remain explicit candidates in both plans. The 32-shot common
+range pilot validates orchestration and exports, not precision of final effect
+estimates. Final 10,000-shot results require their own uncertainty and audit.
+
+## Final Acceptance Rubric and Source-Difference Rule
+
+Acceptance must bind the **new full execution snapshot**, final input plans,
+native binary, dependency/runtime identities, and evidence-file hashes. It must
+not rewrite old receipt hashes or relabel an earlier pilot as running new code.
+Older numerical evidence can be inherited only through an explicit compatibility
+receipt that records both complete snapshots and a reviewed diff:
+
+1. Compare the union of source paths. Every unlisted added, removed, or modified
+   source is a rejection pending review; do not silently drop paths from the hash
+   comparison. Declare the narrow allowed changed paths and their purpose.
+2. Require exact hash equality for contact kernels, impact/flight adapters,
+   geometry, configuration defaults, constants, native sources/binary, scoring
+   baseline/cache/API, noise generation, matching, statistics, and uncertainty.
+   Preserve runtime versions (including NumPy, SciPy, Numba, llvmlite and native
+   module), configuration values, solver tolerances, and numerical settings.
+3. A plot-layout change may inherit trajectory evidence only after verifying it
+   changes no binning, density normalization, HDR mass, statistics, scoring, or
+   population filter. Density/statistical changes require their own numerical
+   tests and regenerated affected evidence, even if they occur in a plot file.
+4. Profile selection and matrix orchestration may inherit contact/flight evidence,
+   but must establish plan equivalence for the default 324 cells, exact requested
+   membership of the 72-cell control, unchanged per-cell configuration/seed,
+   source-drift rejection, unavailable-cell retention, and correct manifests.
+   Validate these with regression tests and the new 32-shot control pilot.
+5. Regenerate and inspect representative supported, unavailable, degenerate,
+   low-support, and asymmetric density figures using the final presentation
+   sources. Include every executable report module in the full snapshot; a
+   newly added plotting module is not exempt merely because the old snapshot
+   did not enumerate it.
+6. The final acceptance record must link the original numerical receipts, their
+   exact hashes, the numerical-source equality proof, changed-source regression
+   results, complete pilot accounting, final rendered review, and this independent
+   disposition. Record inherited versus newly executed gates explicitly.
+
+A numerical-source mismatch invalidates inherited numerical acceptance until
+relevant checks are rerun. A failed or unreviewed presentation/orchestration gate
+blocks final release even when the collision solver itself is unchanged. The
+final run then needs complete planned-cell accounting, raw-data/manifest integrity,
+independent statistical/scoring recalculation, retained unsupported outcomes,
+correct conditional estimands, and a final claims/figures review. Empirical
+qualification remains deferred independently of these software acceptance gates.
+
+## Independent Full-Pilot Audit
+
+The saved within-lean pilot independently reconciles to all 324 planned cells:
+270 completed and 54 explicitly unavailable (36 nonairborne driver/10° lean;
+18 PW/0° lean strong-curve bounded-search failures). No planned cell was missing.
+All 1,770 manifest-listed artifacts matched their SHA256 values, and per-cell
+configuration/execution snapshots matched the original plan. All 25,920 saved
+rows were audited, with exactly 32 ordered indices per pattern in each completed
+cell. Every primitive input reproduced its seeded noise plus nominal offset
+exactly. Supported-row and total-row counts reconciled to the summaries.
+
+Independent NumPy recalculation found maximum summary discrepancy 5.69e−14 and
+full joint covariance discrepancy 4.37e−11 in the corresponding mixed units.
+The largest raw nominal landing residual was 2.00e−13 m, below 0.05 m. Direct
+public Tools API scoring of all 288 rows in the three clubs' lean-0, original-curve,
+rotation-SD-1, combined-2 cells agreed with saved mean SG to 2.78e−17 strokes.
+The noise, baseline builder, and pinned public SG provider source hashes matched
+the pilot's source snapshot during this check.
+
+This accepts saved-artifact integrity, pairing, nominal matching, summary
+calculations, and the stated SG spot checks. It does not infer final effects from
+32 samples, establish all-tail support, or accept changed rendering/orchestration
+without their separate gates. The original tool waits returned status 143 despite
+complete artifacts; no successful process-exit claim is made. Final execution
+requires its own explicit completion/exit receipt as well as artifact checks.
+
+Reproduction: run `validation/independent_pilot_audit.py` with the pilot directory
+and `--output` receipt path under the qualified Python runtime and `PYTHONPATH=.`.
+
+Audit receipt SHA256: `11ca90a9c77843da2adc6d2fec59dd20283792e0f37dff792dd1a675b0d9492e`.
+
+## Verified Zero-Twist Mechanism
+
+The proposed analytic derivatives are correct and passed 27 club/lean/yaw checks
+at two finite-difference steps, with maximum error 4.73e−10 deg/deg. The complete
+derivation, table, raw receipts, and approximate local carry slopes are saved in
+[Geometry Derivatives](validation/GEOMETRY_DERIVATIVES.md). Fixed small shaft-twist
+SD contributes constant first-order central-face loft SD across lean; induced
+face SD changes. Carry direction remains conditional: the tested straight driver
+closes left/short, while 7-iron/PW close left/long. Small carry finite differences
+retain discretization sensitivity, explicitly reported without an accuracy claim
+beyond the separately accepted landing-position gate.
+
+## Independent Common-Distance Control Audit
+
+The 72-cell control pilot reconciles to 52 completed and 20 unavailable cells.
+All 4,992 rows and 352 manifest-listed artifacts were checked. Inputs reproduced
+exactly; maximum nominal residual was 1.06e−12 m, scalar summary discrepancy
+2.85e−14, and joint covariance discrepancy 4.37e−11. The same audit's 288
+zero-lean direct API scoring rows agreed within 2.78e−17 strokes. An additional
+480 rows from five nonzero-lean combined-2 cells were independently scored
+through the public API with the same maximum discrepancy; driver/10° lean
+remained explicitly unavailable. Reproducible scripts and receipts are in
+`validation/independent_control_pilot_audit.json` and
+`validation/independent_control_scoring.{py,json}`.
+
+The source transition was independently compared over the union of paths. Only
+academic plotting, report plotting, matrix profile selection, and source snapshot
+enumeration changed. Native/runtime identities and the numerical source projection
+matched. The default 324-cell plan and selected 72-cell control plan reproduced
+exactly from the new public enumeration API. All 18 final figure artifact hashes
+matched; the driver density and PW overhead were visually inspected and their
+simulation/carry-only qualifications and labels were readable.
+
+A final reporting defect was found before acceptance: conditional-SG heatmap
+sample labels used each pattern's supported count instead of the common scored
+intersection count. The current fully supported pilots are unaffected. The owner
+is correcting it with a regression and refreshing the frozen software receipt.
+Final-run acceptance will be recorded separately in an immutable note after this
+remaining gate passes; later additions to this living review must not alter the
+accepted run's evidence hashes.
+
+The SG sample-count finding is resolved in `d5f59256ef`: the annotation now uses
+`course_scoring.paired_n/total_n`, while geometric metrics retain their individual
+supported population. The regression distinguishes SG n=8/12 from geometric
+n=11/12. Independent source inspection confirms the change affects presentation
+only. The refreshed full frozen test receipt and immutable run-acceptance note
+are the remaining administrative record of this pre-run gate.

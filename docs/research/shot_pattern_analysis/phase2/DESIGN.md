@@ -17,6 +17,8 @@ Two target protocols distinguish the questions:
 1. **Within-Lean Matching:** Straight, draw, and fade land at the same target for a given club and lean. The target is the zero-error straight shot at that club's reference speed and lean. Distances may differ across lean settings.
 2. **Across-Lean Matching:** Attempt the same physical target distance as the zero-lean straight reference. Report all infeasible conditions with their fixed bounds and reason. Reachability is not guaranteed by an optimizer's termination.
 
+The across-lean Monte Carlo control uses the shaft-only and combined-2-mph profiles at both twist SDs and both curve strengths (72 planned cells). It holds target distance constant where matching succeeds. It is a matched-delivery lean comparison: matching also changes nominal speed, face and path, and a fixed absolute speed SD gives a different coefficient of variation at different nominal speeds. It does not identify a pure isolated lean effect or establish results for the seven other noise profiles.
+
 Speed search bounds are fixed at 75–125% of the reference speed; nominal face bounds remain local to the intended shape. The accepted raw landing residual must be at most 0.05 m, checked independently after optimization. The frozen experiment plan records actual bounds and solved inputs. Infeasible cases remain in the matrix; neither attack angle nor static loft is silently changed to populate them.
 
 ## Equipment and Provenance
@@ -43,19 +45,60 @@ The native frame is right-handed: +X toward target, +Y toward the right-handed g
 
 Starting with the static face normal and zero-lean shaft axis, apply a rigid rotation about +Y for forward lean, then a negative world-Z rotation for positive-right nominal face direction. Apply the stochastic shaft rotation using Rodrigues' formula about that delivered shaft axis. Positive shaft rotation closes the right-handed face. Zero twist gives delivered loft = static loft − forward lean. These rotations preserve the shaft–face angle and orthonormal face frame.
 
+With static loft L, lie β, lean ℓ, nominal right-positive face f, and shaft twist θ, the geometric construction is
+
+$$\mathbf n_0=(\cos L,0,\sin L)^T,\qquad
+\mathbf s_0=(0,\cos\beta,\sin\beta)^T,$$
+
+$$Q=R_z(-f)R_y(\ell),\quad \mathbf s=Q\mathbf s_0,\quad
+\mathbf n=R_{\mathbf s}(\theta)Q\mathbf n_0.$$
+
+Rodrigues' rotation is $R_{\mathbf s}(\theta)=I\cos\theta+[\mathbf s]_\times\sin\theta+(1-\cos\theta)\mathbf s\mathbf s^T$.
+The reported face and loft are $\operatorname{atan2}(-n_y,n_x)$ and
+$\operatorname{atan2}(n_z,\sqrt{n_x^2+n_y^2})$. Internal trigonometry uses radians; public angles use degrees.
+This explicitly explains why shaft rotation can change both face and loft and why forward lean changes that coupling. It does not establish an observed player's closure trajectory.
+
+At zero shaft twist, the first-order sensitivities follow directly from $d\mathbf n/d\theta=\mathbf s\times\mathbf n$:
+
+$$\frac{df}{d\theta}=-\frac{\sin\beta\cos L}{\cos(L-\ell)},\qquad
+\frac{d\lambda}{d\theta}=-\cos\beta,\qquad
+\frac{d\lambda}{df}=\cot\beta\,\frac{\cos(L-\ell)}{\cos L}.$$
+
+Here λ is delivered loft. Ratios are unchanged when all angle increments use degrees. Consequently, fixed shaft-twist SD produces approximately the same first-order loft SD across lean settings, while face-angle SD changes. This does not mean carry must increase on every closed-face miss: launch height, spin, ball speed and flight response also change. Finite-angle results and actual landing slopes are computed by the full model; these derivatives describe local geometric sensitivity only.
+
 Unlike phase one's constant-delivered-loft sensitivity, forward lean here changes both face loft and shaft orientation. A 10° static driver at 10° lean can have zero delivered loft and a nonairborne nominal launch; that is a physical-domain limitation to report, not a missing value to interpolate.
 
 ## Two-Body Contact Law
 
 The previous off-center path combined a scalar effective mass with additive heuristic spin and omitted the corresponding club rotational impulse. It is unsuitable for claiming mechanically consistent strike dispersion. The new research path uses a full club inertia tensor and contact lever, without additive gear spin.
 
-Let c be club-minus-ball relative contact velocity, n the unit outward face normal, r_c and r_b the CG-to-contact levers, and [r]× the cross-product matrix. For impulse J applied to the ball:
+Let c be club-minus-ball relative contact velocity, n the unit outward local face normal, r_c and r_b the CG-to-contact levers, and [r]× the cross-product matrix:
 
-K = (1/m_c + 1/m_b) I − [r_c]× I_c⁻¹ [r_c]× − [r_b]× I_b⁻¹ [r_b]×,
+$$\mathbf c=\mathbf v_c+\boldsymbol\omega_c\times\mathbf r_c-\mathbf v_b-\boldsymbol\omega_b\times\mathbf r_b,\qquad \mathbf r_b=-R\mathbf n.$$
 
-c_after = c_before − K J.
+The delivery adapter assumes zero initial club angular velocity and a stationary, nonspinning ball. Shaft twist is an orientation error, not a closure angular speed. Contact-generated club rotation is retained after impact. For impulse J applied to the ball:
+
+$$K=\left(\frac{1}{m_c}+\frac{1}{m_b}\right)I
+-[\mathbf r_c]_\times I_c^{-1}[\mathbf r_c]_\times
+-[\mathbf r_b]_\times I_b^{-1}[\mathbf r_b]_\times,\qquad
+\mathbf c_{\rm after}=\mathbf c_{\rm before}-K\mathbf J.$$
+
+K has units kg⁻¹, impulse J has units N·s, and relative velocity c has units m/s. The ball is a solid sphere in this idealization. The full tensor is rotated from the specified principal frame into world coordinates before the impulse calculation.
+
+$$\Delta\mathbf v_b=\mathbf J/m_b,\quad
+\Delta\boldsymbol\omega_b=I_b^{-1}(\mathbf r_b\times\mathbf J),\quad
+\Delta\mathbf v_c=-\mathbf J/m_c,\quad
+\Delta\boldsymbol\omega_c=-I_c^{-1}(\mathbf r_c\times\mathbf J).$$
 
 The primary law integrates Coulomb contact in normal-impulse coordinates. For each positive normal increment dP, solve the tangential maximum-dissipation disk problem using the current relative contact velocity and the full coupled K. Compression ends at zero normal approach velocity. Store compression work E_c = ∫ c_n dP; restitution returns e_energy² E_c through ∫ −c_n dP. The coefficient 0.83 is therefore **energetic restitution**, not a prescribed normal velocity ratio in coupled off-center contact. Resolution is explicit and must pass refinement checks. The optional Numba implementation uses no fast-math transformations and is checked against the Python reference.
+
+For an orthonormal tangent basis T and current relative velocity c, the incremental disk problem is
+
+$$\min_{\|\Delta\mathbf J_t\|\leq\mu\,dP}
+\frac12\Delta\mathbf J_t^T(T^TKT)\Delta\mathbf J_t
+-\left[T^T(\mathbf c-dP\,K\mathbf n)\right]^T\Delta\mathbf J_t.$$
+
+The total increment is $dP\,\mathbf n+T\Delta\mathbf J_t$. Normal work uses trapezoidal integration, with bounded bisection at the compression and restitution endpoints. The primary resolution is 128 compression steps; source-bound refinement to 256/512 steps and flight dt 0.02/0.01/0.005 s is recorded in the [Independent Numerical Evidence](validation/independent_preflight_summary.json).
 
 A separate maximum-dissipation/Newton comparator minimizes ½JᵀKJ − cᵀJ subject to nᵀKJ = (1+e)c_n and the impulse friction cone. This comparator does not claim to reproduce the full slip/grip history. An earlier stick-first candidate passed simple centered checks but violated passivity in Astra's coupled elastic counterexample; that failed experiment motivated the corrected comparator and incremental primary law. It is not used in the final primary pathway.
 

@@ -44,3 +44,32 @@ four cardinal 12.7 mm strike offsets at all three club/lean combinations. It
 records raw spin/launch/endpoints, differences, unsupported states, and source
 provenance. These perturbations are not empirical parameter ranges or confidence
 intervals. No delivery is rematched after a parameter change.
+
+## Saved Pilot Audit
+
+```bash
+PYTHONPATH=. /tmp/shot-pattern-validation-venv-20261009/bin/python docs/research/shot_pattern_analysis/phase2/validation/independent_pilot_audit.py docs/research/shot_pattern_analysis/phase2/pilot_v1 --output docs/research/shot_pattern_analysis/phase2/validation/independent_pilot_audit.json
+```
+
+This reads all saved rows/manifests and recomputes input pairing, nominal
+residuals, summary statistics and joint covariance. Three representative cells
+are scored row-by-row through the public Tools API. It runs no new ball flights
+and provides no final effect inference from the pilot's sample size.
+
+## Geometry Derivatives
+
+```bash
+PYTHONPATH=. /tmp/shot-pattern-validation-venv-20261009/bin/python docs/research/shot_pattern_analysis/phase2/validation/independent_geometry_derivatives.py --pilot docs/research/shot_pattern_analysis/phase2/pilot_v1 --output docs/research/shot_pattern_analysis/phase2/validation/independent_geometry_derivatives.json
+```
+
+[Derivative Tables and Interpretation](GEOMETRY_DERIVATIVES.md) distinguish the
+verified analytic geometry from approximate local carry finite differences.
+
+## Common-Distance Control Audit
+
+```bash
+PYTHONPATH=. /tmp/shot-pattern-validation-venv-20261009/bin/python docs/research/shot_pattern_analysis/phase2/validation/independent_pilot_audit.py docs/research/shot_pattern_analysis/phase2/control_pilot_v1 --output docs/research/shot_pattern_analysis/phase2/validation/independent_control_pilot_audit.json
+PYTHONPATH=. /tmp/shot-pattern-validation-venv-20261009/bin/python docs/research/shot_pattern_analysis/phase2/validation/independent_control_scoring.py docs/research/shot_pattern_analysis/phase2/control_pilot_v1 docs/research/shot_pattern_analysis/phase2/validation/independent_control_scoring.json
+```
+
+The second check directly scores nonzero-lean controls through the public API.

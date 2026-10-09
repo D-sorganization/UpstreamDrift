@@ -2,45 +2,64 @@
 
 ## Current State
 
-The phase-two goal is active and incomplete. Worktree: `/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift`; branch: `codex/shot-pattern-matched-delivery`, based on phase-one PR [#11941](https://github.com/D-sorganization/UpstreamDrift/pull/11941) at `10c7d61aa686e456b7962f1d9aa9ecfda4e8405f`. The prior PR is open and held; this phase has not been pushed. Do not modify the primary checkout or vendor submodule.
+The phase-two goal is active and incomplete. Worktree: `/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift`; branch: `codex/shot-pattern-matched-delivery`, based on phase-one PR [#11941](https://github.com/D-sorganization/UpstreamDrift/pull/11941) at `10c7d61aa686e456b7962f1d9aa9ecfda4e8405f`. The prior PR is open and held; phase two has not been pushed. Do not edit the primary checkout or vendor submodule.
 
-Read [Design](DESIGN.md), [Astra Review](ASTRA_REVIEW.md), and [Issue Records](issues/) first. Gemini 3.8 Flash High through `agy` filed #11972–#11976 using the user's expressly authorized personal identity. Do not close them without merged evidence.
+Read [Design](DESIGN.md), [Astra Review](ASTRA_REVIEW.md), [Validation](validation/README.md), and [Issue Records](issues/). AGY Gemini 3.8 Flash High filed #11972–#11976, #11984 and #11988 with the user's authorized personal GitHub identity. #11984 is an open external measurement obligation, recorded in `docs/development/planning/DV-11984.md`; do not close it from software evidence.
 
-## Implemented and Tested
+## Implemented and Verified
 
-- Seeded paired seven-variable Gaussian noise with PSD correlation validation; immutable raw-target matching; static loft/whole-club lean geometry; documented10°/34°/46° lofts. Primitive shaft twist is not face-angle SD.
-- Full finite-head impulse bookkeeping with explicit CG/inertia and local bulge/roll geometry. The maximum-dissipation/Newton law is a **comparator**, not the planned primary grip model. Its first stick branch failed Astra's coupled e=1 passivity example and was corrected; the failed experiment remains documented.
-- Primary incremental Coulomb/energetic-restitution solver and JIT/reference parity are committed (`637f9e036f`); independent 100-contact checks pass. Do not run the final matrix or claim the contact law empirically qualified. The pure-Python reference must be genuinely independent of compiled helpers for parity.
-- Matched runner retains all unsupported samples, uses raw endpoints without aiming rotation, reports actual center-face and local contact-normal angles, and explicitly conditions statistics/scoring. Export captures sources before simulation and publishes atomically with compressed CSV, summaries, baseline, plots and hashes; source drift/cancellation prevents publication.
-- Complete324-cell candidate inventory: three clubs × three leans × two curve strengths × two shaft-rotation SDs × nine noise profiles. Infeasible candidates remain explicit. Small pilots default to32 shots/pattern; final10000-shot cells require source-bound acceptance evidence.
-- Academic density/HDR/marginal and overhead exports exist. Matched GUI and figure layout are committed (`8fa4fc80e0`); advanced law controls and overview figures are being finished. Counts and conditional density labels must remain visible.
+- Static lofts 10°/34°/46°, whole-club lean, raw endpoint face/speed matching without aiming rotation, paired seven-variable Gaussian covariance, complete unsupported-population accounting, conditional scoring and atomic source-bound exports.
+- Full finite-head incremental Coulomb contact with energetic restitution is primary; maximum-dissipation/Newton is a comparator. Numba/Python parity, momentum/work/energy/frame checks pass. Zero-spin airborne shots are supported with an undefined spin-axis flag/null serialized tilt.
+- Matched GUI, complete covariance controls, input/configuration round-trip, cancellation, nominal matching display, two contact laws, density/HDR/marginal/overhead figures and matrix overview plots are implemented. Figures explicitly identify illustrative simulation and assumed equipment.
+- Shared saved-cell integrity loading, course-geometry sensitivity and across-lean paired comparisons are implemented. Across-lean estimates use one supported-index intersection across all six physical populations in a cell pair.
+- Independent refinement: 243 deliveries, 225 supported and 18 consistently nonairborne; 128→512 contact change ≤0.00002013 m; dt 0.02→0.005 landing change ≤0.042923 m. All pass the predeclared 0.05 m gate. Ninety nominal searches produced 72 matches, 10 domain failures and 8 bounded-search failures; these are not proofs of global unreachability.
+- Independent head-parameter sensitivity and analytical geometry derivatives are saved in `validation/`. Fixed twist SD does not imply fixed face SD. Driver closure gives left/short for these low-launch presets; iron/wedge closure gives left/long. Neither is a universal player claim.
+- Broad focused suite: 256 passed. Frozen physics/GUI/figure acceptance suite: 124 passed after the SG heatmap sample-count correction. The exact current source snapshot is accepted by Astra in immutable `FINAL_RUN_ACCEPTANCE.md` and validated by `final_acceptance.json`.
 
-Initial QP-path integration41tests, export6tests, and catalog4tests pass; saved logs are in `validation/`. They are initial evidence, not final acceptance of the energetic law or full UI. Root implementation checkpoint: `81fabbc531`; follow-up scoring-radius, joint covariance, sampling uncertainty and cross-cell source-drift regressions are being committed. Astra review findings are tracked in #11988; physical qualification remains open in #11984 and `docs/development/planning/DV-11984.md`.
+## Completed Pilots
 
-## Next Actions
+`pilot_v1`: all 324 planned cells accounted for; 270 completed, 54 unavailable; all 25,920 sampled rows supported. Independent audit checked 1,770 artifact hashes, exact seeded input pairing, statistics/covariance and direct public-API scoring. Original tool sessions returned 143 despite complete artifacts; the audit accepts artifacts, not successful process exit.
 
-1. Finish and independently review incremental contact, energetic-COR semantics, pure Python/JIT parity, refinement, and profiled acceleration. Add explicit law/backend/resolution to configuration and provenance. The existing matched adapter still needs to select the primary law after acceptance.
-2. Finish GUI integration and run end-to-end cancellation/configuration/export tests. Inspect actual pilot density and flight figures.
-3. Run deterministic three-club × three-lean × two-shape-scale preflight for within-lean and common-distance feasibility. Record bounded optimizer residuals and tighter-step replay; do not force driver10°/lean10° into an airborne trial.
-4. Run small pilots, inspect all324 candidate statuses, verify every invalid input retained, and conduct Astra's second independent review. Freeze scientific sources before large jobs.
-5. Run the accepted final matrix, numerical/contact-law/head-parameter sensitivities, complete statistics/scoring, and polished linked Markdown/LaTeX/PDF report. No final results exist yet.
-6. Update discovery/registry/manual-reference records and change fragment; run focused and canonical pre-PR gates, then publish safely. Recheck the existing PR and baseline blocker state once at that breakpoint; do not poll CI.
+`control_pilot_v1`: explicit 72-cell common-distance plan using shaft-only and combined-2-mph profiles, both twist SDs/curve strengths, all clubs/leans. It completed with exit code 0 (`/tmp/p2-control-exit.json`): 52 completed and 20 unavailable. Common targets are saved in `common_targets.json`. Independent control audit and 480 additional nonzero-lean scoring checks passed.
 
-## Environment and Commands
+Numerical sources are unchanged between pilots. Only declared plotting/export-snapshot/matrix-selection sources changed; `validation/source_transition_review.json` records the exact union-of-paths diff. The new snapshot includes the final SG-count annotation fix and is independently accepted. Never rewrite historical execution hashes.
 
-Use `/tmp/shot-pattern-validation-venv-20261009/bin/python` (Python3.12.13, NumPy2.2.6, mypy1.20.1). Numba0.68.0 and llvmlite0.50.0 were installed only into this isolated environment; original project environment stays unchanged. Optional extra `shot-pattern-acceleration` is being added. Headless environment: `QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg MUJOCO_GL=egl SDL_VIDEODRIVER=dummy`.
+Pilot figure reviews are under `pilot_v1/figure_review/`. Use the final simulation-labelled rerenders; earlier layouts are explicitly superseded. Final 10,000-shot matrices are running; do not treat partial outputs as final results.
+
+## Immediate Next Steps
+
+1. Execution acceptance is complete, with 11 hashed evidence files. Keep the immutable acceptance note, evidence and all scientific snapshot sources unchanged.
+2. Run the final within-lean 324-cell matrix and 72-cell common-distance control with 10,000 shots per pattern. Expected nominally completed cells from pilots are 270 and 52, but retain every final unsupported sample and matching failure. No resampling, clipping or bounds widening.
+3. Use at most two logged detached worker processes on this four-CPU shared host. Each job must write an explicit exit receipt. Matrix resume verifies manifests, inputs and execution. Keep all hashed sources frozen while jobs run. Foreground tool-session lifetime is not a reliable long-job receipt.
+4. Recompute final statistics, common-population lean comparisons, course sensitivities and selected academic/social figures. Complete polished linked Markdown/HTML/PDF/LaTeX reporting and an independent final-data/claims audit. Keep statistical intervals separate from model and course uncertainty.
+5. Package raw results with hashes, update current handoffs/change fragment, run required gates, and publish through ready PR(s)/merge-queue guard. Do not close issues before merged acceptance evidence.
+
+## Running Jobs
+
+Started 2026-10-09 at approximately 10:22 UTC. Detached wrapper `/tmp/p2-final-worker.py`: worker 0 PID 1155177, worker 1 PID 1155178. Logs `/tmp/p2-final-worker{0,1}.log`; each worker first runs its `final_v1` shard, then its `control_final_v1` shard. Each command writes `/tmp/p2-{final_v1,control_final_v1}-shard{0,1}-exit.json`; aggregate worker receipts end in `-exit.json`. Read logs and inspect processes before resuming anything. No more than two workers. A completed manifest is authoritative only after integrity validation; any failed command must be investigated.
+
+## Environment and Reproduction
+
+Use `/tmp/shot-pattern-validation-venv-20261009/bin/python`: Python 3.12.13, NumPy 2.2.6, Numba 0.68.0, llvmlite 0.50.0. Optional acceleration extra is `shot-pattern-acceleration`. The optional `shot-pattern-report` extra and `scripts.research.shot_pattern_analysis.build_pdf` renderer are implemented and tested; they do not alter scientific simulation sources.
+
+Set `QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg MUJOCO_GL=egl SDL_VIDEODRIVER=dummy OPENBLAS_NUM_THREADS=1`. Never launch GUI processes.
 
 ```bash
-QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg MUJOCO_GL=egl SDL_VIDEODRIVER=dummy \
-/tmp/shot-pattern-validation-venv-20261009/bin/python -m pytest \
-  tests/tools/shot_pattern_analysis tests/ui/tools/shot_pattern_analysis \
-  tests/unit/physics/test_rigid_contact.py tests/unit/physics/test_incremental_contact.py \
-  -o addopts='' -q
+python -m src.tools.shot_pattern_analysis.matched_matrix OUTPUT \
+  --stage final --shots 10000 --acceptance ACCEPTANCE_JSON \
+  --shard-index 0 --shard-count 2 --figures selected
 
-# Only after the incremental adapter and source snapshot are stable:
-MPLBACKEND=Agg /tmp/shot-pattern-validation-venv-20261009/bin/python \
-  -m src.tools.shot_pattern_analysis.matched_matrix \
-  docs/research/shot_pattern_analysis/phase2/pilot_v1 --stage pilot --shots 32
+python -m src.tools.shot_pattern_analysis.matched_matrix CONTROL_OUTPUT \
+  --stage final --shots 10000 --acceptance ACCEPTANCE_JSON \
+  --profiles shaft_only combined2 --common-targets \
+  docs/research/shot_pattern_analysis/phase2/common_targets.json \
+  --shard-index 0 --shard-count 2 --figures none
 ```
 
-Review commands against current `--help` before execution. Large runs require `--stage final --shots 10000 --acceptance PATH`. Never fabricate the acceptance receipt: independent review, pilot, numerical, rendered-figure and software evidence must be hashed and verified first.
+Run the second shard with index 1. Review current `--help` before execution. Source snapshots include numerical sources, rendering/orchestration, native binary identity and scientific runtime versions. Preserve every accepted source snapshot and its evidence files unchanged during execution.
+
+The standalone LaTeX reference is regenerated from `DESIGN.md` via `pandoc --from=gfm+tex_math_dollars --to=latex --standalone`. Built-in compilation is unverified because Tectonic cannot fetch its uncached bundle; the separate ReportLab PDF must be rendered and visually reviewed before delivery.
+
+## Repository Baselines
+
+Design-manual structural governance passes, but release remains `blocked-inventory-required`. Architecture-map contract passes. Full tracked title audit has 2,505 pre-existing violations across 1,861 documents; development-log validation has existing owner/state/WIP/size failures. Preserve unrelated handoff content; root `AGENT_HANDOFF.md` already exceeds the fleet size target. Prior baseline issues #11934/#11935/#11940 must be checked at final pre-PR validation. Do not bypass hooks, change tolerances, force-push, or edit unrelated fleet work to make the study appear accepted.

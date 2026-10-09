@@ -1,0 +1,74 @@
+{
+  "scope": "Nonzero-lean direct public-API pilot check, no final inference",
+  "script_sha256": "dc2b5eaf8a6c9aa8fbc78ed7ac077bb3d520799881f9461310264e10493e99db",
+  "baseline_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+  "cells": [
+    {
+      "cell": "driver_lean5_curve1_rotation1_combined2",
+      "summary_sha256": "9c3b06499725c45f3b4035fdec0b311f59b5743efbf141353d537c0a9658ae71",
+      "status": "checked",
+      "rows": 96,
+      "mean_sg_errors": {
+        "Straight": 0.0,
+        "Draw": 0.0,
+        "Fade": 0.0
+      },
+      "pass_check": true
+    },
+    {
+      "cell": "driver_lean10_curve1_rotation1_combined2",
+      "summary_sha256": "23735249fa75ab5080c9d35fafb24ceb28e0fcef727b4e8029f8ec7d21b4970e",
+      "status": "unavailable",
+      "reason": "nonairborne_launch"
+    },
+    {
+      "cell": "seven_iron_lean5_curve1_rotation1_combined2",
+      "summary_sha256": "96b3eac6ffebcb89465d26c229215911649346ea6d95266e6432dffda31033a4",
+      "status": "checked",
+      "rows": 96,
+      "mean_sg_errors": {
+        "Straight": 0.0,
+        "Draw": 0.0,
+        "Fade": 2.7755575615628914e-17
+      },
+      "pass_check": true
+    },
+    {
+      "cell": "seven_iron_lean10_curve1_rotation1_combined2",
+      "summary_sha256": "864059c96256e8083602037d947360ae296ad5df22a71d99f3970a94b4b5f73b",
+      "status": "checked",
+      "rows": 96,
+      "mean_sg_errors": {
+        "Straight": 1.3877787807814457e-17,
+        "Draw": 1.3877787807814457e-17,
+        "Fade": 0.0
+      },
+      "pass_check": true
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve1_rotation1_combined2",
+      "summary_sha256": "f6d201f05295f1ca48a70b87e5a1929de98ba2b4c5b94b42e2bb8c79a6d33cc0",
+      "status": "checked",
+      "rows": 96,
+      "mean_sg_errors": {
+        "Straight": 0.0,
+        "Draw": 0.0,
+        "Fade": 0.0
+      },
+      "pass_check": true
+    },
+    {
+      "cell": "pitching_wedge_lean10_curve1_rotation1_combined2",
+      "summary_sha256": "df4db36c9385f2a84fd748ad54229f236ac56e0c5cecf9e57e0917e8aa9bde1f",
+      "status": "checked",
+      "rows": 96,
+      "mean_sg_errors": {
+        "Straight": 0.0,
+        "Draw": 1.3877787807814457e-17,
+        "Fade": 1.3877787807814457e-17
+      },
+      "pass_check": true
+    }
+  ],
+  "pass": true
+}
