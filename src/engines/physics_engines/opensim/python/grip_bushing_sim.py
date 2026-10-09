@@ -257,16 +257,53 @@ class BushingGripSimulator:
         self.names, self.time_s, self.q = list(names), time_s, q
         self._osim = _osim()
         self.interface = interface
-        xml, _ = export_full_body_osim(
-            spec_bytes, grip_model="bushing", grip_interface=interface
-        )
         self._weld_pose0 = weld_club_pose(spec_bytes, self.names, q[0])
-        self._model = _load(xml)
-        _strip_non_bushing_forces(self._model)
+        self._model = _load(self._export_xml(spec_bytes, interface))
+        self._strip_forces()
         self._tie_right_hand_to_left(json.loads(spec_bytes))
         self._prescribe()
         self._state = self._model.initSystem()
         self._init_club_pose()
+
+    def _export_xml(self, spec_bytes: bytes, interface: GripInterface | None) -> str:
+        """The grip-model OpenSim document (bushing topology and forces)."""
+        return export_full_body_osim(
+            spec_bytes, grip_model="bushing", grip_interface=interface
+        )[0]
+
+    def _strip_forces(self) -> None:
+        """Keep only the grip forces: the club is driven by the hands alone."""
+        _strip_non_bushing_forces(self._model)
+
+    def _add_offset_frame(self, name: str, body_name: str, matrix: np.ndarray) -> Any:
+        """Add a ``PhysicalOffsetFrame`` fixed on ``body_name`` at the 4x4 ``matrix``."""
+        osim = self._osim
+        rot = Rotation.from_matrix(matrix[:3, :3]).as_euler("XYZ")
+        body = self._model.getBodySet().get(body_name)
+        frame = osim.PhysicalOffsetFrame(
+            name,
+            body,
+            osim.Transform(
+                _rotation(osim, rot),
+                osim.Vec3(*(float(x) for x in matrix[:3, 3])),
+            ),
+        )
+        self._model.finalizeFromProperties()
+        body.addComponent(frame)
+        return frame
+
+    def _tied_right_matrix(self, spec: dict[str, Any]) -> np.ndarray:
+        """Right grip frame on the left hand body: ``T_L^-1 G_R``.
+
+        ``T_L`` is the club-side wrist frame and ``G_R`` the right grip frame;
+        this is exactly where the rigid-weld model places the right hand.
+        """
+        interface = self.interface or GripInterface.from_spec(spec)
+        club = spec["closure"]["body_b"]
+        wrist = next(j for j in spec["joints"] if j["child"] == club)
+        return _inv(np.asarray(wrist["child_to_follower"], float)) @ (
+            interface.right.matrix()
+        )
 
     def _tie_right_hand_to_left(self, spec: dict[str, Any]) -> None:
         """Attach the right bushing's hand frame rigidly to the left hand body.
@@ -280,24 +317,9 @@ class BushingGripSimulator:
         arm chain of the matched motion.
         """
         osim = self._osim
-        interface = self.interface or GripInterface.from_spec(spec)
-        club = spec["closure"]["body_b"]
-        wrist = next(j for j in spec["joints"] if j["child"] == club)
-        offset = _inv(np.asarray(wrist["child_to_follower"], float)) @ (
-            interface.right.matrix()
+        frame = self._add_offset_frame(
+            "grip_right_tied_frame", "LGrip", self._tied_right_matrix(spec)
         )
-        rot = Rotation.from_matrix(offset[:3, :3]).as_euler("XYZ")
-        hand = self._model.getBodySet().get("LGrip")
-        frame = osim.PhysicalOffsetFrame(
-            "grip_right_tied_frame",
-            hand,
-            osim.Transform(
-                _rotation(osim, rot),
-                osim.Vec3(*(float(x) for x in offset[:3, 3])),
-            ),
-        )
-        self._model.finalizeFromProperties()
-        hand.addComponent(frame)
         force = osim.BushingForce.safeDownCast(
             self._model.updForceSet().get("grip_bushing_right")
         )
@@ -435,41 +457,45 @@ class BushingGripSimulator:
         out["a_com"] = np.array([acc.get(i) for i in range(3)])
         out["rigid"] = self._rigid_sample(state)
         for side, name in _SIDES:
-            force = _downcast(
-                self._osim,
-                "BushingForce",
-                model.getForceSet().get(f"grip_bushing_{name}"),
-            )
-            rec = force.getRecordValues(state)
-            vals = np.array([rec.get(i) for i in range(rec.size())])
-            r1, p1 = _transform_to_rt(
-                self._frame(name, "hand").getTransformInGround(state)
-            )
-            r2, p2 = _transform_to_rt(
-                self._frame(name, "club").getTransformInGround(state)
-            )
-            out[side] = {
-                "record": vals,
-                "rot1": r1,
-                "point": p2,
-                "delta": r1.T @ (p2 - p1),
-                "angle": float(
-                    np.linalg.norm(Rotation.from_matrix(r1.T @ r2).as_rotvec())
-                ),
-            }
+            out[side] = self._side_sample(state, name)
         return out
+
+    def _side_sample(self, state: Any, name: str) -> dict[str, Any]:
+        """Record, frames and deflection of one hand (``name`` left or right)."""
+        model = self._model
+        force = _downcast(
+            self._osim,
+            "BushingForce",
+            model.getForceSet().get(f"grip_bushing_{name}"),
+        )
+        rec = force.getRecordValues(state)
+        vals = np.array([rec.get(i) for i in range(rec.size())])
+        r1, p1 = _transform_to_rt(self._frame(name, "hand").getTransformInGround(state))
+        r2, p2 = _transform_to_rt(self._frame(name, "club").getTransformInGround(state))
+        return {
+            "record": vals,
+            "rot1": r1,
+            "point": p2,
+            "delta": r1.T @ (p2 - p1),
+            "angle": float(np.linalg.norm(Rotation.from_matrix(r1.T @ r2).as_rotvec())),
+        }
+
+    @staticmethod
+    def _split_record(rec: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        """Force on the club and its moment about the club origin, from records."""
+        return rec[:, 6:9], rec[:, 9:12]
 
     def _assemble(self, samples: np.ndarray, rows: list[dict[str, Any]]) -> BushingRun:
         force, torque, point, delta, ang, rot1 = {}, {}, {}, {}, {}, {}
         for side, _ in _SIDES:
             rec = np.array([r[side]["record"] for r in rows])
             point[side] = np.array([r[side]["point"] for r in rows])
-            force[side] = rec[:, 6:9]
+            force[side], moment = self._split_record(rec)
             # OpenSim reports the wrench on body2 as (F, M about the body
             # origin); move it to the grip point so ``torque`` is the free
             # torque there, as :class:`HandWrench` requires.
             origin = np.array([r["club"][1] for r in rows])
-            torque[side] = rec[:, 9:12] - np.cross(point[side] - origin, force[side])
+            torque[side] = moment - np.cross(point[side] - origin, force[side])
             delta[side] = np.array([r[side]["delta"] for r in rows])
             ang[side] = np.array([r[side]["angle"] for r in rows])
             rot1[side] = np.array([r[side]["rot1"] for r in rows])

@@ -148,7 +148,10 @@ def _contact_mesh(parent: ET.Element, name: str, body: str, path: Path) -> None:
 
 
 def _foundation_force(
-    parent: ET.Element, name: str, geometry: Sequence[str], ef: ElasticFoundationParameters
+    parent: ET.Element,
+    name: str,
+    geometry: Sequence[str],
+    ef: ElasticFoundationParameters,
 ) -> None:
     force = ET.SubElement(parent, "ElasticFoundationForce", attrib={"name": name})
     pset = ET.SubElement(
@@ -195,7 +198,9 @@ def build_contact_grip(
     forces = model.find("ForceSet/objects")
     geometry = model.find("ContactGeometrySet/objects")
     if frames is None or forces is None or geometry is None:
-        raise ValueError("contact grip needs grip_bushing frames, ForceSet and geometry")
+        raise ValueError(
+            "contact grip needs grip_bushing frames, ForceSet and geometry"
+        )
     meshes = write_grip_meshes(interface, cfg)
     ef, layout = cfg.ef, cfg.ef.layout
     club = body_names[frames["L"]["club_body"]]

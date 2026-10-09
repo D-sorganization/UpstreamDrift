@@ -71,7 +71,9 @@ def test_one_force_and_sphere_per_pad_one_mesh_per_hand(exported) -> None:
         if e.get("name", "").startswith(CONTACT_FORCE_PREFIX)
     ]
     assert len(forces) == n == 24
-    spheres = [e for e in root.findall(".//ContactSphere") if "grip_pad_" in e.get("name")]
+    spheres = [
+        e for e in root.findall(".//ContactSphere") if "grip_pad_" in e.get("name")
+    ]
     assert len(spheres) == n
     assert {e.get("name") for e in root.findall(".//ContactMesh")} == {
         "grip_mesh_L",
@@ -96,10 +98,13 @@ def test_meshes_are_closed_files_on_the_club_body(exported) -> None:
     for side in "LR":
         assert cfg.mesh_path(side).is_file()
         lines = cfg.mesh_path(side).read_text().splitlines()
-        assert sum(s.startswith("f ") for s in lines) == meta["grip_contact"][
-            "meshes"
-        ][side]["faces"]
-    mesh = next(e for e in root.findall(".//ContactMesh") if e.get("name") == "grip_mesh_L")
+        assert (
+            sum(s.startswith("f ") for s in lines)
+            == meta["grip_contact"]["meshes"][side]["faces"]
+        )
+    mesh = next(
+        e for e in root.findall(".//ContactMesh") if e.get("name") == "grip_mesh_L"
+    )
     assert mesh.find("socket_frame").text == "/bodyset/Clubhead"
     assert Path(mesh.find("filename").text).is_absolute()
 
@@ -108,14 +113,18 @@ def test_pads_sit_on_the_hand_bodies_at_the_frame_positions(
     exported, spec: dict
 ) -> None:
     root, _, cfg = exported
-    pad = next(e for e in root.findall(".//ContactSphere") if e.get("name") == "grip_pad_R03")
+    pad = next(
+        e for e in root.findall(".//ContactSphere") if e.get("name") == "grip_pad_R03"
+    )
     loc = np.array(pad.find("location").text.split(), float)
     from src.engines.physics_engines.opensim.python.full_body_grip_topology import (
         build_bushing_spec,
     )
 
     interface = GripInterface.from_spec(spec)
-    frame = np.asarray(build_bushing_spec(spec, interface)["grip_bushing"]["R"]["hand_frame"])
+    frame = np.asarray(
+        build_bushing_spec(spec, interface)["grip_bushing"]["R"]["hand_frame"]
+    )
     local = cfg.ef.layout.positions_grip_frame("R")[3]
     np.testing.assert_allclose(loc, frame[:3, :3] @ local + frame[:3, 3], atol=1e-12)
     assert pad.find("radius").text and float(pad.find("radius").text) == 0.008
@@ -130,4 +139,6 @@ def test_pad_centres_rest_inside_the_grip_surface_by_the_preload(exported) -> No
             layout.positions_grip_frame(side)[:, 1:] - axis_pt[1:], axis=1
         )
         penetration = layout.grip_radius_m + layout.pad_radius_m - rho
-        np.testing.assert_allclose(penetration, cfg.ef.preload_penetration_m, atol=1e-12)
+        np.testing.assert_allclose(
+            penetration, cfg.ef.preload_penetration_m, atol=1e-12
+        )

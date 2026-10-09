@@ -19,16 +19,16 @@ X, Y, Z = np.eye(3)
 
 
 def _mesh(**kw):
-    args = dict(
-        radius_m=0.0127,
-        axis_point_m=np.array([0.1, 0.0, 0.0]),
-        axis=X,
-        radial=Y,
-        axial_range_m=(-0.05, 0.05),
-        segments=32,
-        ring_pitch_m=5e-3,
-    )
-    args.update(kw)
+    args = {
+        "radius_m": 0.0127,
+        "axis_point_m": np.array([0.1, 0.0, 0.0]),
+        "axis": X,
+        "radial": Y,
+        "axial_range_m": (-0.05, 0.05),
+        "segments": 32,
+        "ring_pitch_m": 5e-3,
+        **kw,
+    }
     return capped_cylinder_mesh(**args)
 
 
