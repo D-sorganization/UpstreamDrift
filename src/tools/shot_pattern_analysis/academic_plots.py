@@ -22,6 +22,9 @@ _COLORS = {
     "Draw": "#c66a19",
     "Fade": "#7b4a9e",
 }
+_PILOT_FIGURE_LABEL = (
+    "Illustrative Simulation • Assumed Head Properties • Carry Only"
+)
 _LineStyle = Literal["solid", "dashed", "dotted"]
 _HDR_STYLES = {
     0.50: ("solid", "50% HDR"),
@@ -366,7 +369,7 @@ def write_academic_dispersion_figure(
         bbox_to_anchor=(0.48, 0.775),
         ncol=len(hdr_handles),
         frameon=False,
-        title="Empirical Highest-Density Regions",
+        title="Simulated-Sample Highest-Density Regions",
     )
     achieved_text = (
         "Achieved HDR Mass By Pattern (Discrete Ties May Exceed Request): "
@@ -384,9 +387,10 @@ def write_academic_dispersion_figure(
         0.06,
         0.025,
         textwrap.fill(
-            f"Empirical histogram only; no KDE or synthetic covariance spread; not calibrated player precision. "
+            f"{_PILOT_FIGURE_LABEL}. HDR mass is sample-derived from simulated endpoints. "
+            "Histogram only; no KDE or synthetic covariance spread; not calibrated player precision. "
             f"Bin resolution: {dx:.3g} × {dy:.3g} m. {achieved_text}",
-            width=180,
+            width=210,
             break_long_words=False,
         ),
         fontsize=8.5,
@@ -539,7 +543,12 @@ def write_overhead_trajectory_figure(
     figure.text(
         0.06,
         0.025,
-        "Raw trajectory coordinates; no aim-line rotation. Only the displayed sample paths are plotted; paths are sampled from supported airborne shots.",
+        textwrap.fill(
+            f"{_PILOT_FIGURE_LABEL}. Raw simulation trajectories; no aim-line rotation. "
+            "Only the displayed sample paths are plotted; paths are sampled from supported airborne shots.",
+            width=180,
+            break_long_words=False,
+        ),
         fontsize=9,
         ha="left",
     )

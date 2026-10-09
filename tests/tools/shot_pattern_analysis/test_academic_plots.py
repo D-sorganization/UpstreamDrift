@@ -27,6 +27,26 @@ def _plot_api():
     return write_academic_dispersion_figure, write_overhead_trajectory_figure
 
 
+def _assert_pilot_footer_is_inside_canvas(figure) -> None:
+    from matplotlib.backends.backend_agg import FigureCanvasAgg
+
+    FigureCanvasAgg(figure)
+    figure.canvas.draw()
+    renderer = figure.canvas.get_renderer()
+    footer = next(
+        text
+        for text in figure.texts
+        if text.get_text().startswith(
+            "Illustrative Simulation • Assumed Head Properties • Carry Only"
+        )
+    )
+    bounds = footer.get_window_extent(renderer)
+    assert bounds.x0 >= 0
+    assert bounds.y0 >= 0
+    assert bounds.x1 <= figure.bbox.width
+    assert bounds.y1 <= figure.bbox.height
+
+
 def test_shared_histogram_density_normalizes_and_reports_empirical_hdr_mass() -> None:
     estimate = _density_api()(
         {
@@ -134,6 +154,8 @@ def test_academic_dispersion_figure_exports_all_formats_with_scenario_labels(
     assert "delivery mode: shaft_rotation" in svg
     assert "Target" in svg
     assert "not calibrated player precision" in svg
+    assert "Illustrative Simulation • Assumed Head Properties • Carry Only" in svg
+    assert "sample-derived from simulated endpoints" in svg
     assert "Straight 3/1,000 valid" in svg
 
 
@@ -194,6 +216,7 @@ def test_density_metadata_caption_does_not_overlap_scenario(tmp_path, monkeypatc
     assert not scenario_artist.get_window_extent(renderer).overlaps(
         metadata_artist.get_window_extent(renderer)
     )
+    _assert_pilot_footer_is_inside_canvas(figure)
 
 
 @pytest.mark.slow
@@ -233,6 +256,36 @@ def test_overhead_figure_uses_raw_trajectories_and_exports_all_formats(
     assert "Synthetic Raw-Trajectory Pilot" in svg
     assert "no aim-line rotation" in svg
     assert "Straight 997/1,000 valid" in svg
+    assert "Illustrative Simulation • Assumed Head Properties • Carry Only" in svg
+
+
+@pytest.mark.slow
+def test_overhead_pilot_footer_remains_inside_figure_bounds(tmp_path, monkeypatch) -> None:
+    _, write_overhead = _plot_api()
+    import src.tools.shot_pattern_analysis.academic_plots as plots
+
+    captured = {}
+
+    def capture_figure(figure, _stem, *, dpi):
+        captured["figure"] = figure
+        return {}
+
+    monkeypatch.setattr(plots, "_save_formats", capture_figure)
+    trajectories = {
+        name: [np.array([[0.0, 0.0], [100.0, offset], [195.0, 2 * offset]])]
+        for name, offset in (("Straight", 0.0), ("Draw", 1.0), ("Fade", -1.0))
+    }
+
+    write_overhead(
+        trajectories,
+        tmp_path / "footer_bounds",
+        target_x_m=195.0,
+        scenario="Synthetic Layout Pilot",
+        metadata={"club": "driver", "shaft_rotation_sd_deg": 1.0},
+        dpi=96,
+    )
+
+    _assert_pilot_footer_is_inside_canvas(captured["figure"])
 
 
 def test_overhead_figure_rejects_aim_adjusted_or_nontrajectory_inputs(tmp_path) -> None:
