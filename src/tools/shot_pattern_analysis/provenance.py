@@ -3,9 +3,28 @@
 from __future__ import annotations
 
 import hashlib
+import importlib.machinery
 import importlib.util
 import json
 from pathlib import Path
+
+
+def resolve_native_binary(origin: Path) -> Path:
+    """Resolve one installed extension from a module or package spec origin."""
+    origin = Path(origin)
+    suffixes = tuple({*importlib.machinery.EXTENSION_SUFFIXES, ".so", ".pyd"})
+
+    def is_native(path: Path) -> bool:
+        return path.is_file() and path.name.endswith(suffixes)
+
+    if is_native(origin):
+        return origin
+    if origin.name != "__init__.py" or not origin.is_file():
+        raise RuntimeError("expected exactly one native upstream_physics binary")
+    binaries = sorted(path for path in origin.parent.iterdir() if is_native(path))
+    if len(binaries) != 1:
+        raise RuntimeError("expected exactly one native upstream_physics binary")
+    return binaries[0]
 
 
 def source_snapshot() -> dict:
@@ -55,21 +74,14 @@ def source_snapshot() -> dict:
     rust_spec = importlib.util.find_spec("upstream_physics")
     if rust_spec is None or rust_spec.origin is None:
         raise RuntimeError("native upstream_physics must be installed")
-    rust_package = Path(rust_spec.origin)
-    binaries = (
-        [rust_package]
-        if rust_package.suffix == ".so"
-        else sorted(rust_package.parent.glob("*.so"))
-    )
-    if len(binaries) != 1:
-        raise RuntimeError("expected exactly one native upstream_physics binary")
+    native_binary = resolve_native_binary(Path(rust_spec.origin))
     return {
         "source_sha256": {
             str(path.relative_to(root)): hashlib.sha256(path.read_bytes()).hexdigest()
             for path in files
         },
-        "native_binary_path": str(binaries[0]),
-        "native_binary_sha256": hashlib.sha256(binaries[0].read_bytes()).hexdigest(),
+        "native_binary_path": str(native_binary),
+        "native_binary_sha256": hashlib.sha256(native_binary.read_bytes()).hexdigest(),
         "cargo_lock_present": has_cargo_lock,
     }
 
