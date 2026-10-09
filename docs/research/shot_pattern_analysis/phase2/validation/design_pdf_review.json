@@ -1,0 +1,19 @@
+{
+  "status": "visually_reviewed",
+  "pages": 5,
+  "reviewer": "Codex",
+  "renderer": "ReportLab via Pandoc AST; not a LaTeX compilation",
+  "source_sha256": {
+    "DESIGN.md": "24ab224682cc35f29cfc9110344fbc64e22ed26df356f3915cd7ff306c700526",
+    "matched_delivery_reference.pdf": "8da2e5831b4eea87eb91316071d46e756818c2297146a6b2d1cfe3aeb6d6e8f0",
+    "matched_delivery_reference.tex": "b278703ba5f203e0754086fbf3dc722f185f60c5734da529cdf348d604745299"
+  },
+  "render_command": "pdftoppm -scale-to 1500 -png matched_delivery_reference.pdf /tmp/p2-design-pages/page",
+  "checks": [
+    "All five rendered pages inspected",
+    "Readable tables with repeated headers",
+    "Equations render without clipping",
+    "Body, page numbers and headings remain within margins"
+  ],
+  "latex_compilation": "Unverified: built-in Tectonic bundle fetch failed; separate ReportLab PDF reviewed"
+}

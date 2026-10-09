@@ -292,3 +292,11 @@ test_event_filter.py
 # Drift Wizard knowledge pack SQLite database (#10943)
 .knowledge/
 
+
+# Source-bound shot-study datasets are packaged in verified bounded archives.
+/docs/research/shot_pattern_analysis/phase2/pilot_v1/
+/docs/research/shot_pattern_analysis/phase2/control_pilot_v1/
+/docs/research/shot_pattern_analysis/phase2/final_v1/
+/docs/research/shot_pattern_analysis/phase2/control_final_v1/
+/docs/research/shot_pattern_analysis/phase2/presentation_preview/
+!docs/research/shot_pattern_analysis/phase2/data_archives/**/*.zip

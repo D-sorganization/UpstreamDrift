@@ -64,7 +64,7 @@ $$\frac{df}{d\theta}=-\frac{\sin\beta\cos L}{\cos(L-\ell)},\qquad
 \frac{d\lambda}{d\theta}=-\cos\beta,\qquad
 \frac{d\lambda}{df}=\cot\beta\,\frac{\cos(L-\ell)}{\cos L}.$$
 
-Here λ is delivered loft. Ratios are unchanged when all angle increments use degrees. Consequently, fixed shaft-twist SD produces approximately the same first-order loft SD across lean settings, while face-angle SD changes. This does not mean carry must increase on every closed-face miss: launch height, spin, ball speed and flight response also change. Finite-angle results and actual landing slopes are computed by the full model; these derivatives describe local geometric sensitivity only.
+Here λ is delivered loft. Ratios are unchanged when all angle increments use degrees. Consequently, fixed shaft-twist SD produces approximately the same first-order loft SD across lean settings, while face-angle SD changes. This does not mean carry must increase on every closed-face miss: launch height, spin, ball speed and flight response also change. Finite-angle results and actual landing slopes are computed by the full model; these derivatives describe local geometric sensitivity only. The [Independent Geometry and Carry Derivative Checks](validation/GEOMETRY_DERIVATIVES.md) provide the analytical derivation, finite-difference evidence and club-specific limitations.
 
 Unlike phase one's constant-delivered-loft sensitivity, forward lean here changes both face loft and shaft orientation. A 10° static driver at 10° lean can have zero delivered loft and a nonairborne nominal launch; that is a physical-domain limitation to report, not a missing value to interpolate.
 
