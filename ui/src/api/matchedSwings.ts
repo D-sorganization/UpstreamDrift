@@ -12,6 +12,14 @@ export interface RunCapabilities {
   horizon_s: number | null;
 }
 
+export interface PhysicalGate {
+  name: string;
+  status: string;
+  measured: number | null;
+  threshold: number | null;
+  unit: string;
+}
+
 export interface MatchedSwingRun {
   id: string;
   engine: string;
@@ -24,6 +32,7 @@ export interface MatchedSwingRun {
   metrics: Record<string, number | null>;
   capabilities: RunCapabilities;
   reason?: string | null;
+  gates?: PhysicalGate[];
 }
 
 export interface MatchedSwingLedgerResponse {

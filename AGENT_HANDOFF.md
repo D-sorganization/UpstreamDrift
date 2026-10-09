@@ -9,6 +9,11 @@
 - Branch `claude/gcv-14-impact-evidence`. `native_viewer_export.overlay.detect_impact_time_s` called `model_appearance.club_face.impact_frame` and reported that frame's exact timestamp; on the committed driver fixture the accepted peak-speed sample sits 9.2 cm above and 9.2 cm from address (the height check alone let it through), not the true closest approach. It now returns `club_face.ball_passage`'s sub-sample `t_impact` on the same `Clubhead`-origin trajectory (one detector, OSV-10); docstring and README (`src/tools/native_viewer_export/README.md`) updated.
 - Kept the `Clubhead` frame origin rather than the true face-centre point (`club_assembly.clubface_centre`): deriving the centre here would need the club spec resolved into a `ClubAssembly` and composed with the frame's rotation, a larger change than this fix's scope.
 - Tests added/updated in `tests/unit/tools/native_viewer_export/test_grip_tracking.py`: `test_hud_impact_time_matches_ball_passage` (basic contract), `test_hud_impact_time_uses_ball_passage_not_the_peak_speed_sample` (reproduces the bug with a synthetic overshoot trajectory), `test_hud_impact_time_raises_when_the_head_never_returns_to_the_ball`, and the capture-A fixture test now compares against `ball_passage` instead of `impact_frame`.
+# Active: Simscape URDF Exchange — #11569 Task 3
+
+- Branch `claude/simscape-urdf-exchange-11569`; commit `SELF`. `smexport` is absent in R2025b, so `scripts/matlab/simscape_model_inventory.m` reads joints (type, DOF) and solid/inertia masses (unit-converted, density x volume where needed; NaN when not evaluable) from the canonical `GolfSwing3D_Kinetic` and from an `smimport` of the spec `golfer.urdf`. `export_simscape_urdf_exchange.m` writes `tests/fixtures/simscape/simscape_urdf_exchange_receipt.json`; `src/engines/simscape/urdf_exchange.py` diffs it against the URDF.
+- R2025b result: smimport round trip exact (43/43 coordinates, 77.969 kg, error 0). Canonical 27 coordinates vs spec 43; totals 77.606 vs 77.969 kg, but the Simscape model has no legs and puts +17 kg in the shoulder bars (`HubtoLS`/`HubtoRS`), +4.3 kg trunk, +2.0 kg head/neck.
+- Next: #11569 task 1 (inverse dynamics) or task 4 (run-102 playback video). The mass redistribution is a model decision for the owner.
 
 # Active: GRF Engine Wiring and CoP Consolidation - GCV-2 #11708, GCV-6 #11712
 
@@ -30,6 +35,10 @@ its source rotation bound. Preserve native replay, anatomy and registration gate
 
 - Branch `claude/nv-9-meshcat-framing-11697`; epic #11673. MeshCat kept the 75 deg three.js default FOV; `MeshcatPage` now sets the shared `golf_view_presets.VIEWER_FOV_Y_RAD` (0.7 rad, OpenSim's value) on entry and raises if the page has no viewer camera. New `golf_view_presets.framing`: `projected_extent` and `fit_distance_m` (15 % margin) with unit tests.
 - Open (engine host): verify the Drake/Pinocchio renders at 720p, feed the per-swing body bounding box from engine FK into `fit_distance_m` per view, and judge glyph legibility.
+
+# Active: Muscle Qualification Evidence Guard — F07 #11791
+
+Branch `fix/feedback-muscle-evidence-11791`; current commit `SELF`; PR #11814. Scoped child #11810: parameter-only orchestration now returns no native replay and no unperformed audit successes. The test-first commit records two failures; 31 focused tests pass after correction. Read [Guard Turnover](docs/development/feedback_controls/F07_MUSCLE_EVIDENCE_TURNOVER.md). Merged current main while preserving its impact chapter and this evidence chapter. Next: normal protected PR checks; F07 and native model qualification remain open.
 
 # Active: Feedback Controls Planning — #11784
 
