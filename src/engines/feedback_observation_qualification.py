@@ -59,6 +59,7 @@ __all__ = [
 
 FEEDBACK_OBSERVATION_SCHEMA_VERSION = "feedback-observation-qualification/1.0.0"
 _NATIVE_TIMEBASE = "simulation_relative"
+_REPLAY_COMPARISON_CONTRACT_VERSION = "feedback-comparison/1.1.0"
 _REPLAY_IDENTITY_FIELDS = (
     "package_id",
     "variant_id",
@@ -82,6 +83,8 @@ _REPLAY_IDENTITY_FIELDS = (
     "nq",
     "nv",
     "bundle_schema",
+    "initial_state_sha256",
+    "comparison_contract_version",
     "physical_model_sha256",
     "loaded_native_model_sha256",
     "time_grid_sha256",
@@ -89,6 +92,8 @@ _REPLAY_IDENTITY_FIELDS = (
     "contact_sha256",
     "integrator_sha256",
     "input_channel_schema_sha256",
+    "initial_state_sha256",
+    "comparison_contract_version",
 )
 
 
@@ -289,10 +294,16 @@ def _canonical_sha256(payload: Any) -> str:
 
 
 def _evidence_payload(evidence: ComparisonEvidence) -> dict[str, Any]:
-    return {
+    payload = {
         field.name: _json_safe(getattr(evidence, field.name))
         for field in fields(evidence)
     }
+    # F01c owns these versioned replay-admission fields. Keeping them explicit
+    # here makes a missing field fail closed even when an older registry object
+    # is present at runtime.
+    for name in ("initial_state_sha256", "comparison_contract_version"):
+        payload[name] = _json_safe(getattr(evidence, name, ""))
+    return payload
 
 
 def feedback_replay_identity_sha256(
@@ -379,6 +390,12 @@ def _validate_replay_bundle(
             policy.contact_policy_sha256 is None
             or policy.contact_policy_sha256 == evidence.contact_sha256
         ),
+        "comparison_contract_version": getattr(
+            evidence, "comparison_contract_version", ""
+        )
+        == _REPLAY_COMPARISON_CONTRACT_VERSION,
+        "initial_state_payload": getattr(evidence, "initial_state_sha256", "")
+        == bundle.integrity.initial_state_sha256,
         "initial_state_complete": bool(bundle.initial_state)
         and len(bundle.initial_state) == len(model.state_schema.components),
     }
