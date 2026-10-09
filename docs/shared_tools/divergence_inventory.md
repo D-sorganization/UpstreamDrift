@@ -30,7 +30,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `app_state` | 0 | 0 | 0 | 9 | 0 | 0 |
 | `assessment` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `biomech` | 0 | 0 | 0 | 4 | 0 | 0 |
-| `biomechanics` | 0 | 0 | 0 | 35 | 0 | 0 |
+| `biomechanics` | 0 | 0 | 0 | 37 | 0 | 0 |
 | `body_part_viz` | 0 | 0 | 0 | 35 | 0 | 0 |
 | `calc_backend` | 31 | 14 | 5 | 2 | 0 | 45 |
 | `camera` | 0 | 0 | 0 | 0 | 4 | 0 |
@@ -48,7 +48,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `control_interface.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `core` | 0 | 0 | 0 | 23 | 0 | 0 |
 | `cors.py` | 0 | 0 | 0 | 0 | 1 | 0 |
-| `dashboard` | 0 | 0 | 0 | 14 | 0 | 0 |
+| `dashboard` | 0 | 0 | 0 | 15 | 0 | 0 |
 | `data_io` | 0 | 0 | 0 | 30 | 0 | 0 |
 | `data_processing` | 0 | 0 | 0 | 0 | 4 | 0 |
 | `data_processor` | 0 | 0 | 0 | 2 | 0 | 0 |
@@ -142,7 +142,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `video_timing` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 36 | 0 | 0 |
-| **Total** | **400** | **273** | **121** | **1737** | **796** | **673** |
+| **Total** | **400** | **273** | **121** | **1740** | **796** | **673** |
 
 ## Diverged Files by Package
 
@@ -315,7 +315,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `humanoid_character_builder/generators/mesh_generator_smplx.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `humanoid_character_builder/generators/urdf_generator.py` | -442 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
 | `humanoid_character_builder/interfaces/__init__.py` | +74 |  | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
-| `humanoid_character_builder/interfaces/api.py` | +28 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
+| `humanoid_character_builder/interfaces/api.py` | +28 | yes | ? | Dieter Olson 2026-08-20 |
 | `humanoid_character_builder/mesh/__init__.py` | +16 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `humanoid_character_builder/mesh/collision_generator.py` | -6767 |  | Dieter Olson 2026-09-07 | Dieter Olson 2026-08-20 |
 | `humanoid_character_builder/mesh/inertia_calculator.py` | +60 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |

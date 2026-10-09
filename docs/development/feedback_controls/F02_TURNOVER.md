@@ -3,7 +3,7 @@
 F02 adds a phase-gated controller core on `feat/f02-distributed-feedback-11786`
 in the isolated `UpstreamDrift-f02-11786` worktree. F01 PR #11808 has merged;
 F02 PR #11816 now targets main. This integration includes main through the
-constraint-observer squash `2e3c79b4808f334b06dab5828db0d22dd7f2f80a`.
+ground-reaction integration squash `b7d4189c9470a0bdabf778e6ade584f42111a49e`.
 The F02 PR body is the authoritative final commit/checks/handoff record.
 
 The controller consumes an existing MOSAIC TVLQR gain sequence and frozen
@@ -51,3 +51,8 @@ forward here: generic fallback checks still reject owned cluster gaps, while
 an explicitly enabled Tools Lab overlay must resolve the canonical mocap leaf.
 A genuinely missing Lab module remains unavailable. This is the existing test
 correction from `8687f9222c`, with no import-loader or controller source change.
+
+Latest-main integration also preserves the controller/test bytes, incorporates
+the already merged shared ground-reaction work, and resolves only generated
+divergence inventories. The installed-native controller/governance suite passed
+all 27 tests again on that combined tree.
