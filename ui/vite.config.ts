@@ -27,8 +27,9 @@ export default defineConfig({
     strictPort: true,
     open: false,
     // The club-head STLs and provenance live in the repo-level `assets/`
-    // directory shared with the desktop adapter (issue #11717).
-    fs: { allow: [path.resolve(__dirname, '..')] },
+    // directory shared with the desktop adapter (issue #11717). Allow only
+    // that directory besides the UI root, not the whole repository.
+    fs: { allow: [path.resolve(__dirname), path.resolve(__dirname, '../assets')] },
     // Proxy API requests to the local Python API during development.
     // Override the port with VITE_API_PORT when running the API elsewhere.
     proxy: buildDevProxy(API_PORT),

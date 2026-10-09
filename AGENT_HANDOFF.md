@@ -1,3 +1,8 @@
+# Active: Web Club Head and Golfer Head - GCV-11 #11717, GCV-12 #11718
+
+- Branch `claude/gcv-11-12-web-head-club`. `ClubHead.tsx` (`clubHeadGeometry.ts`, `clubHeadAssets.ts`) draws the committed `assets/club_heads` STLs at spec loft and lie. `HeadModel.tsx` (`headModel.ts`) mirrors `model_appearance/head.py`. Both are mounted in `GolferModel.tsx`. The Vite dev server is allowed to read `../assets` only.
+- Open: the web ball (#11719) keeps `render.club_head_and_ball` at `gap`. There is no web club selector (the driver is always drawn), no WebGL stills, and the GCV-12 iron renders for Drake, Pinocchio, OpenSim and MyoSuite still need an engine host.
+
 # Active: Simscape URDF Exchange — #11569 Task 3
 
 - Branch `claude/simscape-urdf-exchange-11569`; commit `SELF`. `smexport` is absent in R2025b, so `scripts/matlab/simscape_model_inventory.m` reads joints (type, DOF) and solid/inertia masses (unit-converted, density x volume where needed; NaN when not evaluable) from the canonical `GolfSwing3D_Kinetic` and from an `smimport` of the spec `golfer.urdf`. `export_simscape_urdf_exchange.m` writes `tests/fixtures/simscape/simscape_urdf_exchange_receipt.json`; `src/engines/simscape/urdf_exchange.py` diffs it against the URDF.
