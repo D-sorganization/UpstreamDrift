@@ -1,3 +1,7 @@
+## Native Muscle Replay Development Boundary (F07, #11791)
+
+`tour_matching.replay_muscle_excitations` restores complete named continuous state, plays bounded linear native muscle excitation inputs, and cold-starts Runge-Kutta-Merson once without observations, feedback or resets. It audits actual native applied excitations and binds state/input/model/policy identities. Existing controllers, prescribed coordinates, non-muscle actuators and undeclared non-muscle forces fail closed. This early fixture does not qualify discrete/plugin initialization, contact, full-body anatomy or mocap matching; #11791 remains open. The revised feedback-controls milestone DAG separates schema/provider readiness from scientific acceptance and private evidence delivery.
+
 ## Capture-O Video Companion: Error Budget, Guidance Derivation, and Public Summary (COV-11, #11279)
 
 Specifies machine-readable error budgeting, frozen-rule guidance classification, and privacy-preserving summary generation (#11268, #11279):
@@ -10416,3 +10420,53 @@ refit, with exact parameter identity and feedforward held fixed. The tests use
 an actual F02 controller driving a synthetic coupled two-coordinate plant;
 native full-body, real capture, muscle and scientific runtime claims remain
 open under the same blocked calculation registry.
+
+## Sparse Collocation and Shooting Benchmark Spike (F03, #11787)
+
+`sparse_collocation_spike.py` adds a bounded synthetic rotary fixture with
+sparse analytic midpoint inverse-dynamics defects, hard ZOH torque and slew
+constraints, and fresh adaptive forward reintegration. It also adapts the
+existing multiple-shooting solver to the same synthetic truth and target.
+Backend receipts retain input degrees of freedom, defect type, objective,
+feasibility, replay gap and observation error separately, with predeclared
+cold/warm starts, failures, timing and Python-tracked peak memory. The shooting
+fixture uses one constant torque while the spike uses one input per interval,
+so no production backend is selected from these results. Native F06 replay,
+private protocol D02, contact and full-body engine evidence remain open.
+# Native Torque Replay Development Boundary
+
+F06a (#11823, parent #11790) consumes the Tools experiment-replay bundle through
+actual native MuJoCo stepping for unit hinge motors. Full `mjSTATE_INTEGRATION`,
+distinct `nq`/`nv`, post-limit held torque, exact model/provider/policy identity
+and uninterrupted no-reset execution are required. Canonical calculation
+reference: `manuals/upstreamdrift/chapters/19-native-torque-replay.qmd`.
+Turnover: `docs/development/feedback_controls/F06_NATIVE_TORQUE_TURNOVER.md`.
+The temporary Tools development override has been replaced by merged T01 pin
+`2e7665111b06f92ffbfe178b92d74d6a81c95388`; the native unit-hinge
+consumer tests pass under the normal import path. Six-engine and muscular
+OpenSim real-capture gates remain open.
+
+## Independent Native Candidate Benchmark (F03b, #11824)
+
+`native_candidate_benchmark.py` extends F03's synthetic rotary comparison with
+an independent matrix-exponential solution for exact held-input truth and F06's
+fresh native MuJoCo replay. It binds the executed post-limit motor torque,
+complete initial `mjSTATE_INTEGRATION`, model and policy identities, and exact
+native step grid through the versioned Tools replay bundle. The gate keeps
+midpoint transcription defect, native-to-node gap, native-to-exact integrator
+gap, continuous RK45-to-exact gap, observation error, torque and slew residuals
+separate. Torque and slew are recomputed from applied input, not trusted from a
+solver report. A coarse stiff regression rejects low-defect transcription when
+native replay disagrees; native step refinement is checked independently.
+
+The serial benchmark retains failed and warm attempts, preparation, solve,
+native replay and receipt-export costs, cumulative time to first accepted
+attempt, p50/p95 wall time, and Python-tracked peak allocation with named
+hardware. The fixture is a no-contact one-hinge motor with synthetic node
+observations. The shooting adapter and collocation spike have unequal input
+degrees of freedom, so this is a provisional solver/replay boundary test, not a
+production backend selection or real-capture qualification. Capture
+preprocessing, D02/D03 frozen protocol, F09 observation-clock alignment,
+full-body/contact resources and muscle/six-engine gates remain open. Canonical
+calculation: `manuals/upstreamdrift/chapters/20-native-candidate-benchmark.qmd`.
+Turnover: `docs/development/feedback_controls/F03B_NATIVE_CANDIDATE_TURNOVER.md`.
