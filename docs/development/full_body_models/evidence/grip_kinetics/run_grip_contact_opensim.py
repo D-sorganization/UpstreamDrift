@@ -70,6 +70,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--club", choices=("driver", "iron7"), required=True)
     ap.add_argument("--accuracy", type=float, default=DEFAULT_ACCURACY)
+    ap.add_argument("--method", default="CPodes")
     ap.add_argument("--t-end", type=float, default=None)
     ap.add_argument("--tag", default="")
     args = ap.parse_args()
@@ -103,13 +104,18 @@ def main() -> int:
             sys.stderr.write(f"t={t:.3f} s  wall={time.perf_counter() - t0:.1f} s\n")
             sys.stderr.flush()
 
-    run = sim.run(t_end=args.t_end, accuracy=args.accuracy, on_sample=progress)
+    run = sim.run(
+        t_end=args.t_end,
+        accuracy=args.accuracy,
+        on_sample=progress,
+        method=args.method,
+    )
     wall = time.perf_counter() - start
     ef = sim.contact_config.ef
     info: dict[str, Any] = {
         "club": args.club,
         "engine": "opensim_contact",
-        "integrator": "OpenSim Manager, RungeKuttaMerson, error controlled",
+        "integrator": f"OpenSim Manager, {args.method}, error controlled",
         "accuracy": args.accuracy,
         "wall_time_s": wall,
         "build_time_s": build_s,

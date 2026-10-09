@@ -22,7 +22,7 @@ from __future__ import annotations
 
 import json
 import tempfile
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -58,8 +58,10 @@ from src.shared.python.grip_contact.parity import GripKineticsSeries
 
 
 ENGINE = "opensim_contact"
+CONTACT_INTEGRATOR = "CPodes"
+CONTACT_ACCURACY = 1e-4
 _SIDES = (("L", "left"), ("R", "right"))
-_CALIBRATION_HALF_LENGTH_M = 0.02
+CALIBRATION_HALF_LENGTH_M = 0.02
 _GRAVITY_M_S2 = 9.80665
 
 
@@ -122,7 +124,7 @@ def write_calibration_mesh(ef: ElasticFoundationParameters, directory: Path) -> 
         np.zeros(3),
         np.array([0.0, 0.0, 1.0]),
         np.array([0.0, 1.0, 0.0]),
-        (-_CALIBRATION_HALF_LENGTH_M, _CALIBRATION_HALF_LENGTH_M),
+        (-CALIBRATION_HALF_LENGTH_M, CALIBRATION_HALF_LENGTH_M),
     )
     path = directory / "calibration_mesh.obj"
     write_obj(path, verts, faces)
@@ -334,6 +336,21 @@ class ContactGripSimulator(BushingGripSimulator):
                 np.arctan2(rel_rot[2, 1] - rel_rot[1, 2], rel_rot[1, 1] + rel_rot[2, 2])
             ),
         }
+
+    def run(
+        self,
+        t_end: float | None = None,
+        accuracy: float = CONTACT_ACCURACY,
+        on_sample: Callable[[float], None] | None = None,
+        method: str = CONTACT_INTEGRATOR,
+    ) -> BushingRun:
+        """Integrate with the stiff (implicit) integrator the contact needs.
+
+        The shared law's friction (transition speed 1 mm/s) makes the pads
+        stiff dampers; explicit Runge-Kutta-Merson needs steps near 1e-7 s
+        (6 ms of simulation took over 300 s), CPodes (BDF) does 20 ms in 3 s.
+        """
+        return super().run(t_end, accuracy, on_sample, method)
 
     @staticmethod
     def _split_record(rec: np.ndarray) -> tuple[np.ndarray, np.ndarray]:

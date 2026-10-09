@@ -135,7 +135,7 @@ def _hold(friction: float | None = None, pads=None):
     sim = ContactGripSimulator(
         spec_bytes, names, np.arange(n) * SAMPLE_DT_S, q, model, interface
     )
-    return spec, interface, sim.run(accuracy=1e-5).to_contact_run()
+    return spec, interface, sim.run().to_contact_run()
 
 
 @pytest.mark.slow
