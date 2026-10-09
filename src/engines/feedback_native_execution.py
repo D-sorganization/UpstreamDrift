@@ -9,12 +9,20 @@ from __future__ import annotations
 from dataclasses import dataclass
 import hashlib
 from pathlib import Path
-from typing import Any, Iterable
+from typing import TYPE_CHECKING, Any, Iterable
 
 import numpy as np
 
 from src.engines.feedback_comparison import ComparisonRow, DriveMode
 from src.engines.model_inventory import TARGET_ENGINES
+
+if TYPE_CHECKING:
+    from src.engines.physics_engines.drake.python.native_torque_replay import (
+        NativeDrakeTorqueReplay,
+    )
+    from src.engines.physics_engines.mujoco.python.native_torque_replay import (
+        NativeTorqueReplay,
+    )
 
 
 @dataclass(frozen=True)
@@ -397,6 +405,7 @@ def execute_native_replay(
         request.binding.drive_mode,
     )
     _validate_bundle(row, request.binding, request.bundle)
+    output: NativeTorqueReplay | NativeDrakeTorqueReplay
     if (
         row.engine == "mujoco"
         and request.binding.native_execution_provider_id
