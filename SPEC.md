@@ -10415,3 +10415,20 @@ cold/warm starts, failures, timing and Python-tracked peak memory. The shooting
 fixture uses one constant torque while the spike uses one input per interval,
 so no production backend is selected from these results. Native F06 replay,
 private protocol D02, contact and full-body engine evidence remain open.
+
+## Native Source Reference-Conventions Audit (F07f, #11962)
+
+`tour_matching.native_reference_conventions` observes exact XML/loaded OpenSim
+model identity, the declared post-`initSystem` reference frame and clock,
+achieved versus serialized coordinate defaults, joint/coupler dependencies,
+concrete muscle geometry paths, moving/conditional points, engaged wrap-curve
+readback and law/options. OpenSim `initSystem()` includes native initialization
+assembly; complete named continuous restoration afterward does not trigger a
+second assembly and is not a complete native restart. Explicit candidate
+correspondence binds both observation hashes and a proper rigid frame
+registration. Scalar coordinate mappings are existence-checked only; equal
+names, pelvis registration and path-length differences do not certify anatomy.
+The bounded unchanged 520-muscle Wilkinson and 318-muscle Pose2Sim diagnostics
+are unqualified for source-resource closure, physiology, contact/grip, capture
+matching or independent excitation replay. Canonical method is provisional
+chapter 38 and the source/turnover receipt remains local.
