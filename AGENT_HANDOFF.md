@@ -1,3 +1,9 @@
+# Active: Quarter-Speed Export Variants for Every Engine - GCV-14 #11720
+
+- Branch `claude/gcv-14-speed-variants`, stacked on PR #12004 (kinematic impact time). `video_timing.frame_schedule.SPEED_VARIANTS = (1, 0.5, 0.25)` is the default of `ExportSettings.speeds` and `--speeds`; `motion_matching.export.export_video_variants` writes the same three clips for any engine's candidate (MuJoCo, MyoSuite, Drake, Pinocchio, OpenSim, Simscape logs).
+- Tests: `test_speed_variants_engines.py` (frame counts from the time span for all four native engines, HUD 0 ms at the ball-passage impact) and `test_export.py` (variants per engine).
+- Evidence: only MuJoCo renders on ControlTower (stick figure, no club, 1920x1080, 60 fps). Drake and Pinocchio need `playwright` and its Chromium libraries, OpenSim needs `xwd`, MyoSuite needs `myosuite.envs.env_base` (#11997); none are in the `ud-sim` image and installing them needs root or a new image (owner action).
+
 # Active: Native Export Impact Time From Ball Passage - GCV-14 #11720
 
 - Branch `claude/gcv-14-impact-evidence`. `native_viewer_export.overlay.detect_impact_time_s` called `model_appearance.club_face.impact_frame` and reported that frame's exact timestamp; on the committed driver fixture the accepted peak-speed sample sits 9.2 cm above and 9.2 cm from address (the height check alone let it through), not the true closest approach. It now returns `club_face.ball_passage`'s sub-sample `t_impact` on the same `Clubhead`-origin trajectory (one detector, OSV-10); docstring and README (`src/tools/native_viewer_export/README.md`) updated.
