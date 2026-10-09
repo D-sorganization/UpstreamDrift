@@ -111,6 +111,16 @@ def _placements(
     return offsets
 
 
+def _constrained(offsets: Offsets, constrain: Callable[[Offsets], Offsets]) -> Offsets:
+    """Apply ``constrain`` and check it kept every label on its body."""
+    out = constrain(dict(offsets))
+    if set(out) != set(offsets) or any(
+        out[label][0] != body for label, (body, _) in offsets.items()
+    ):
+        raise ValueError("constrain must return every label on its original body")
+    return out
+
+
 def _marker_rms(
     capture: TourCapture, offsets: Offsets, poses: list[Mapping[str, Pose]]
 ) -> float:
@@ -204,13 +214,16 @@ def calibrate_marker_offsets(
     iterations: int,
     prior_offsets: Mapping[str, Sequence[float]] | None = None,
     prior_weight: float = 0.0,
+    constrain: Callable[[Offsets], Offsets] | None = None,
 ) -> CalibrationResult:
     """Alternate placement and IK; return offsets, final q and RMS history.
 
     ``prior_offsets`` (label -> body-frame point) with ``prior_weight`` (in
     frame-equivalents, nonnegative) regularise each placement toward an
     anatomical prior, which keeps the calibration identifiable when a body's
-    twist and its marker offsets could trade against each other.
+    twist and its marker offsets could trade against each other. ``constrain``
+    (optional) maps each iteration's placements onto a constraint set before
+    the IK; it must return every label on its original body.
 
     Preconditions: every capture label has a body; iterations >= 1; pose_fn
     maps a coordinate vector to world poses of every referenced body; ik_fn
@@ -249,6 +262,8 @@ def calibrate_marker_offsets(
     for iter_idx in range(1, iterations + 1):
         poses = [pose_fn(q[f]) for f in range(capture.frames)]
         offsets = _placements(capture, bodies, poses, prior_offsets, prior_weight)
+        if constrain is not None:
+            offsets = _constrained(offsets, constrain)
         q = np.asarray(ik_fn(offsets, capture), float)
         if q.shape[0] != capture.frames or q.ndim != 2 or not np.isfinite(q).all():
             raise ValueError("IK must return a finite (frames, coordinates) array")

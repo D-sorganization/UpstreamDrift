@@ -317,7 +317,16 @@ def calibrate_legs(
     seeds: Mapping[str, tuple[str, Sequence[float]]],
     q_start: np.ndarray,
 ) -> tuple[dict[str, tuple[str, tuple[float, float, float]]], Any]:
-    """Alternating marker calibration of ``seeds`` (others fixed) with stance pins."""
+    """Alternating marker calibration of ``seeds`` (others fixed) with stance pins.
+
+    With foot progression on (``lane.feet``), the lateral leg markers keep their
+    seed azimuth and the forefoot pair stays square, so hip rotation and foot
+    yaw stay observable (``leg_marker_constraints``, #11737).
+    """
+    from src.shared.python.motion_matching.pipeline.leg_marker_constraints import (
+        anatomical_leg_constraint,
+    )
+
     frames = lane.calibration_frames
     calibrated = tuple(seeds)
     cols = [lane.labels.index(m) for m in calibrated]
@@ -369,6 +378,7 @@ def calibrate_legs(
         iterations=CALIBRATION_ITERATIONS,
         prior_offsets={label: offset for label, (_, offset) in seeds.items()},
         prior_weight=CALIBRATION_PRIOR_FRAMES,
+        constrain=None if lane.feet is None else anatomical_leg_constraint(seeds),
     )
     offsets = {
         label: (
