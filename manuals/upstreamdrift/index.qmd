@@ -41,3 +41,6 @@ UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
 {{< include chapters/26-native-manifold-box-fddp.qmd >}}
 
 {{< include chapters/36-native-activation-manifold.qmd >}}
+
+{{< include chapters/27-native-manifold-feedback.qmd >}}
+{{< include chapters/28-native-marker-fit.qmd >}}

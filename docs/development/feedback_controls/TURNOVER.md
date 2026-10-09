@@ -103,3 +103,48 @@ PR #11944 merged only into the F05c feature branch at
 open against the F05b feature branch. Issue #11932 remains open and this
 stack has not reached `main`. Preserve the commit ancestry and keep later
 stacked PRs unarmed until their prerequisites land and their base is `main`.
+
+## F02 Native Floating-Root Manifold Feedback
+
+`F02_NATIVE_MANIFOLD_FEEDBACK_TURNOVER.md` and provisional chapter 27 record
+actual MuJoCo 3.8 F02 exact-state TVLQR on the 9/8/2 floating-root fixture.
+Native quaternion tangent error, physical inverse mass, direct bounded motor
+inputs and fresh complete-state frozen-torque replay pass scoped tests. The
+source-hashed receipt measures 0.1261 rad final hip error versus 0.4 rad
+frozen nominal over 12 native steps; no capture/contact/full-body claim follows.
+A native-replayed moving teacher also supplies per-step tangent Jacobians,
+MOSAIC gains and frozen feedforward. From a held-out perturbation, the
+frozen and feedback-applied histories independently replay in full and
+finish 0.07508 versus 0.02460 rad from the teacher; the teacher/frozen
+input identities match and feedback input differs. F03 does not yet export
+an optimized native trajectory into this consumer.
+
+## F04 Native Coupling Fixture
+
+`F04_NATIVE_COUPLING_TURNOVER.md`, provisional chapter 21, and the source-bound
+`F04_NATIVE_COUPLING_RECEIPT_MJ38.json` document actual MuJoCo 3.8 train-only
+feedback-row tuning plus a disjoint held-out trial on the contact-free 9/8/2
+floating-root fixture. The held-out joint-error RMSE improves 0.11917 to
+0.09647 rad; fresh complete-state replay matches at tested precision. Separate
+paired direct-motor interventions show synthetic in-model off-diagonal joint
+response, while loss covariance and human causation remain distinct and
+unclaimed. The joint stage exhausts its budget, uncertainty is unavailable,
+and F04 remains open for capture, contact, physiology and production timing.
+This slice is scoped to child #11952 under parent #11788. The child was
+checked free and leased after GitHub quota recovery; publication remains
+stacked on the F02 native manifold branch and does not close parent F04.
+
+## F03 Native Marker Fitting Boundary
+
+`F03_NATIVE_MARKER_FIT_TURNOVER.md` and provisional chapter 28 document
+exact-clock, masked site-position fitting on the same native 9/8/2
+fixture. F05c native tangent derivatives are chained through F05d's
+next-state BoxFDDP action; its bounded nonlinear admission and Tools T01
+fresh full-state torque replay are reused. The supported-provider receipt
+retains observation/model/input/source hashes, four accepted commands
+versus full-trajectory acceptance, independent marker RMSE and total
+wall/CPU work. This is model-generated data without gravity/contact;
+real capture geometry/clock, F02 optimized-reference handoff, native
+muscles, production full swing and all-engine qualification remain open.
+GitHub quota initially paused child claim/publication; after recovery,
+child #11948 was created and leased to `codex` for a stacked, unarmed PR.

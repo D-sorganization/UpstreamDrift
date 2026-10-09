@@ -611,8 +611,27 @@ cost in both starts. This does not prove
 a hard 10 ms deadline or golfer/contact/muscle/capture qualification.
 Read provisional manual chapter 26 and
 `docs/development/feedback_controls/F05D_NATIVE_MANIFOLD_BOX_FDDP_TURNOVER.md`.
+
 Parent F05 #11789, F09/F10 and manual publication remain open.
 PR #11944 merged into the F05c feature base at
 `c1e76ce91db11b257604d9ddbd227268d2e27db1`; F05c PR #11922 is
 still open on F05b, issue #11932 is still open, and this has not reached
 `main`.
+
+## F02 Native Manifold Feedback Child (#11946)
+
+F02 now has an actual MuJoCo floating-root feedback runner using the F05c
+tangent derivative admission and F06 complete-state torque replay; see
+provisional manual chapter 27 and
+`docs/development/feedback_controls/F02_NATIVE_MANIFOLD_FEEDBACK_TURNOVER.md`.
+The source-hashed static receipt shows 0.1261 rad final hip error versus
+0.4 rad frozen nominal over 12 steps. A second test consumes a varying
+native-replayed torque trajectory, derives per-step native tangent Jacobians
+and MOSAIC gains, then compares held-out frozen-feedforward and total-
+feedback replays at 0.07508 versus 0.02460 rad final hip error. Their
+post-limit input digests differ, while each fresh native replay reproduces
+the complete integration-state trajectory exactly. F03 still lacks a native
+9/8/2 optimized trajectory export; the teacher is admissible but is not
+captured or optimized. This child is stacked on F05c #11922 and must remain
+unarmed until its prerequisite reaches `main`; F02 #11786 and full
+production/capture qualification remain open.

@@ -54,6 +54,54 @@ failed starts and native solver budgets must be counted under F03/F09 before
 comparative claims. The seed tags the deterministic protocol; the current
 L-BFGS-B stages do not use random starts.
 
+## Native Floating-Root Fixture
+
+The F04 native adapter evaluates the existing F02 controller and bounded
+tuner on a contact-free MuJoCo 3.8 model with a free root, two hinges, and two
+direct torque motors ($n_q=9$, $n_v=8$, $n_u=2$). A saved, independently
+replayed torque history supplies the moving reference, frozen feedforward,
+native-step clock, and time-varying feedback gains. Two training initial
+states and one disjoint held-out initial state perturb the same model. The
+only tuned parameters are bounded hip and knee feedback-row scales in
+$[0,2]$; the controller observes the exact simulated complete state. Every
+rollout records its post-limit torques and independently replays the complete
+native integration state under the same model, time grid, and policy. Hip and
+knee errors are evaluated using the native configuration tangent, including
+the free-root quaternion, then separated into early and late phases.
+
+In the source-bound synthetic fixture, the training objective decreases from
+0.011786 to 0.007921, and held-out joint-error RMSE decreases from 0.11917
+to 0.09647 rad when the frozen row scales change from (0.3, 0.3) to
+(1.3, 1.3). Two block checkpoints are accepted; joint refinement exhausts
+its budget, so this is an accepted bounded candidate rather than converged
+joint optimization. The tuner performs 192 training and four held-out native
+evaluations, including a post-fit baseline diagnostic. It observes 174
+distinct applied-input histories and zero complete-state replay difference
+at the tested precision. Its roughly 5.96 s wall-clock measurement includes
+trial preflight, successful and failed tuner evaluations, diagnostics,
+held-out replay, and export, but excludes teacher generation and process
+startup. These numbers describe one small synthetic run, not a golf-swing
+matching latency or algorithm comparison.
+
+At a separately frozen teacher trajectory, symmetric single-motor input
+interventions produce the hip/knee joint response (rad/N m)
+
+$$
+\begin{bmatrix}
+0.16586 & -0.05492 \\
+-0.06110 & 0.31150
+\end{bmatrix}.
+$$
+
+Both off-diagonal terms demonstrate dynamic cross-response in this specified
+plant. This intervention is distinct from residual covariance and from the
+loss Jacobian with respect to feedback gains. A local two-parameter response
+Jacobian has nonzero singular values, but population-level identifiability and
+uncertainty remain unavailable without capture noise, resampling, independent
+swings, and alternate model parameters. No human neural causation is inferred.
+The receipt is `docs/development/feedback_controls/F04_NATIVE_COUPLING_RECEIPT_MJ38.json`;
+the exact reproduction command is in the associated turnover note.
+
 ## Coupling, Perturbation and Identifiability
 
 At the accepted **frozen** controller, centered or bound-aware one-sided finite

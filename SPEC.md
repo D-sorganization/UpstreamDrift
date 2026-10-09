@@ -10583,3 +10583,29 @@ contact, golfer anatomy, measured capture, mixed production actuation,
 optimal-control acceptance, hard timing claim or six-engine qualification.
 F05 #11789 and manual publication remain open. Turnover is
 `docs/development/feedback_controls/F05E_NATIVE_ACTIVATION_TURNOVER.md`.
+
+## Native Floating-Root F02 Feedback Baseline (#11946)
+
+`src/engines/physics_engines/mujoco/python/native_distributed_feedback.py`
+provides the first actual floating-root native F02 baseline. It reuses F05c
+native tangent/plant admission, MuJoCo's current-minus-reference
+`mj_differentiatePos` and native inverse mass for $n_q=9$, $n_v=8$, rather
+than applying Euclidean quaternion subtraction. The F02 law reads exact
+simulated $(q,v)$ at each native Euler boundary, maps only to the two named
+direct hinge motors, and saves the post-limit held torque. The F06 common
+runner builds a pinned Tools T01 bundle from complete
+`mjSTATE_INTEGRATION` and independently replays each full state within
+$10^{-12}$. Native MuJoCo 3.8 tests demonstrate quaternion sign equivalence,
+synthetic perturbation correction, saturation and negative contact/channel
+admission. Provisional manual chapter 27 and the source-hashed F02 native
+receipt govern this child. It does not qualify a golfer, marker fit, contact,
+muscle input, multi-engine parity or a hard runtime deadline; F02 remains open.
+The native nominal-policy builder consumes a pinned T01 time-only torque
+replay with nonconstant model-derived states and inputs. It verifies each
+autonomous native successor, computes F05c tangent $A_k,B_k$ and MOSAIC
+TVLQR gains, then supplies F02 a frozen nominal feedforward schedule.
+A held-out native perturbation produces separate frozen-input and total-
+feedback bundles with matched model/initial-state/policy/grid identities,
+different applied-input hashes and exact full-state independent replay.
+This is not an F03 optimizer-to-native handoff: F03 currently exports only
+the one-dimensional synthetic sparse-collocation result.
