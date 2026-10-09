@@ -35,6 +35,14 @@ def _sha256_file(path: Path) -> str:
         return hashlib.file_digest(stream, "sha256").hexdigest()
 
 
+def _saved_file_state(directory: Path) -> tuple[str, str | None]:
+    csv_path = directory / "shots.csv.gz"
+    return (
+        _sha256_file(directory / "manifest.json"),
+        _sha256_file(csv_path) if csv_path.is_file() else None,
+    )
+
+
 def _delivered_means(rows: Iterable[Mapping[str, Any]]) -> dict[str, float | int]:
     values = [
         (
@@ -179,12 +187,14 @@ def describe_saved_cell(directory: Path) -> dict[str, Any]:
     reading. Unavailable cells have no attempted CSV and remain Not Attempted.
     """
     directory = Path(directory)
+    before = _saved_file_state(directory)
     cell = {**load_validated_cell(directory), "cell": directory.name}
+    if before != _saved_file_state(directory):
+        raise ValueError("cell manifest or CSV changed during validation")
     if cell["status"] != "completed":
         return describe_cell(cell)
     manifest_path = directory / "manifest.json"
     csv_path = directory / "shots.csv.gz"
-    before = (_sha256_file(manifest_path), _sha256_file(csv_path))
     rows: dict[str, list[dict[str, str]]] = {name: [] for name in PATTERNS}
     with gzip.open(csv_path, "rt", newline="") as stream:
         for row in csv.DictReader(stream):
@@ -195,9 +205,8 @@ def describe_saved_cell(directory: Path) -> dict[str, Any]:
                 rows[name].append(row)
             elif not row["status"]:
                 raise ValueError("saved shot has an empty support status")
-    if not manifest_files_match(manifest_path) or before != (
-        _sha256_file(manifest_path),
-        _sha256_file(csv_path),
+    if not manifest_files_match(manifest_path) or before != _saved_file_state(
+        directory
     ):
         raise ValueError("cell manifest changed during delivered-geometry reading")
     return describe_cell(cell, delivered_rows=rows)
@@ -414,7 +423,16 @@ def render_cell_table(cells: Iterable[Mapping[str, Any]]) -> str:
         for name in PATTERNS:
             item = cell["patterns"][name]
             if item["status"] != "Completed":
-                lines.append(f"| {label} | {name} | {item['status']} | — | — | — | — |")
+                support = "—"
+                if item["status"] == "Insufficient Supported Shots":
+                    low, high = item["supported_fraction_ci95"]
+                    support = (
+                        f"{item['supported_n']:,} / {item['attempted_n']:,} "
+                        f"[{low * 100:.1f}%, {high * 100:.1f}%]"
+                    )
+                lines.append(
+                    f"| {label} | {name} | {item['status']} | — | — | — | {support} |"
+                )
                 continue
             lines.append(
                 f"| {label} | {name} | {item['mean_carry_m']:.2f} / {cell['target_x_m']:.2f} | "

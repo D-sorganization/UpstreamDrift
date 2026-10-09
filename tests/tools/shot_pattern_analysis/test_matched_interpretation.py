@@ -136,6 +136,9 @@ def test_completed_cell_with_one_supported_shot_has_no_estimable_spread():
     result = describe_cell(cell)
     assert result["patterns"]["Straight"]["status"] == "Insufficient Supported Shots"
     assert result["patterns"]["Straight"]["supported_n"] == 1
+    table = render_cell_table([result])
+    assert "1 / 10,000" in table
+    assert "Insufficient Supported Shots" in table
 
 
 def test_scoring_keeps_absolute_means_and_population_distinct():
@@ -359,12 +362,29 @@ def test_saved_cell_rejects_coherent_manifest_replacement_during_read(
         describe_saved_cell(tmp_path)
 
 
+def test_saved_cell_rejects_replacement_inside_loader(monkeypatch, tmp_path):
+    from src.tools.shot_pattern_analysis import matched_interpretation
+
+    (tmp_path / "manifest.json").write_text("initial")
+    (tmp_path / "shots.csv.gz").write_bytes(b"initial")
+
+    def changed_loader(_):
+        (tmp_path / "manifest.json").write_text("new coherent manifest")
+        (tmp_path / "shots.csv.gz").write_bytes(b"new coherent csv")
+        return _cell("unavailable")
+
+    monkeypatch.setattr(matched_interpretation, "load_validated_cell", changed_loader)
+    with pytest.raises(ValueError, match="changed during"):
+        describe_saved_cell(tmp_path)
+
+
 def test_saved_unavailable_cell_does_not_read_nonexistent_csv(monkeypatch, tmp_path):
     from src.tools.shot_pattern_analysis import matched_interpretation
 
     monkeypatch.setattr(
         matched_interpretation, "load_validated_cell", lambda _: _cell("unavailable")
     )
+    (tmp_path / "manifest.json").write_text("unavailable")
     assert (
         describe_saved_cell(tmp_path)["patterns"]["Fade"]["status"] == "Not Attempted"
     )
