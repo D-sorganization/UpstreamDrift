@@ -6,6 +6,11 @@
   "inventory_commit": null,
   "blockers": [
     {
+      "id": "UP-D1-native-simscape-restart-inventory",
+      "owner": "UpstreamDrift issue #11921",
+      "resolution": "Inventory native R2025b complete ModelOperatingPoint hidden physical/discrete restart, saved-input injection readback and snapshot/runtime/model/solver/config identity in chapter30 and scripts/matlab. Native synthetic mass-spring-damper and Unit Delay tests are prerequisites only; exact Tools5470 consumption, production variants, full-horizon frozen-input replay, contact, refinement, private capture accuracy and six-engine parity remain unqualified."
+    },
+    {
       "id": "UP-D1-native-pinocchio-torque-replay-inventory",
       "owner": "UpstreamDrift issue #11900",
       "resolution": "Inventory existing public PinocchioPhysicsEngine ABA/RK4 manifold integration, complete q/v restoration, explicit unit generalized motor mapping, source/native model/provider identity and fixed post-limit inputs in chapter25. Twelve actual native Pinocchio4.1 synthetic checks establish independent replay and fixture-specific refinement. Native contact/grip, physiological actuation, required production models, private capture accuracy and all-model six-engine parity remain unqualified. Shared Tools contract/history/identity admission remains canonical and provider-bound."
