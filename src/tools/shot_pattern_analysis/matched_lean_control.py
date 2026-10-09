@@ -188,6 +188,13 @@ def _config_differences(first: dict, second: dict, prefix: str = "") -> set[str]
         elif isinstance(first[key], list) and isinstance(second[key], list):
             if len(first[key]) != len(second[key]):
                 differences.add(name)
+            elif (
+                key in {"match_face_bounds_deg", "match_speed_factors"}
+                and first[key] != second[key]
+            ):
+                # Matcher bounds are reviewed as a single declared vector;
+                # ordinary scientific vectors retain index-level differences.
+                differences.add(name)
             else:
                 for index, (left, right) in enumerate(
                     zip(first[key], second[key], strict=True)
@@ -253,7 +260,17 @@ def _execution_transition(
         raise ValueError("source-transition receipt hash mismatch")
     receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
     if (
-        receipt.get("schema") != "matched-delivery-source-transition/1"
+        set(receipt)
+        != {
+            "schema",
+            "status",
+            "qualified_scope",
+            "old_execution",
+            "new_execution",
+            "changed_sources",
+            "evidence_files",
+        }
+        or receipt.get("schema") != "matched-delivery-source-transition/1"
         or receipt.get("status") != "independently_accepted"
         or receipt.get("qualified_scope") != "matched-delivery-comparisons"
     ):
@@ -285,6 +302,12 @@ def _execution_transition(
             "source-transition changed-source inventory is incomplete or has extras"
         )
     for path, record in classifications.items():
+        if not isinstance(record, dict) or set(record) != {
+            "old_sha256",
+            "new_sha256",
+            "classification",
+        }:
+            raise ValueError(f"source-transition record is malformed for {path}")
         old_hash, new_hash = old_sources.get(path), new_sources.get(path)
         if record.get("old_sha256") != old_hash or record.get("new_sha256") != new_hash:
             raise ValueError(f"source-transition hash pair differs for {path}")
@@ -494,6 +517,15 @@ def _normalized_rotation_errors(
     }
 
 
+def _paired_scoring_source_hashes() -> dict[str, str]:
+    """Bind the scoring adapters and uncertainty helper across pair analysis."""
+    package = Path(__file__).parent
+    hashes = _source_hashes()
+    hashes["matched_lean_control.py"] = _sha256(Path(__file__))
+    hashes["course_score_vectors.py"] = _sha256(package / "course_score_vectors.py")
+    return hashes
+
+
 def _require_rotation_sd_order(first_sd: float, second_sd: float) -> None:
     if (first_sd, second_sd) != (1.0, 2.0):
         raise ValueError("shaft-SD pair must order 1 degree before 2 degrees")
@@ -549,6 +581,7 @@ def analyze_explicit_source_pair(
         raise ValueError("comparison target must be finite and positive")
     directory_a, config_a, summary_a, plan_a = _reload_explicit_source(first_source)
     directory_b, config_b, summary_b, plan_b = _reload_explicit_source(second_source)
+    scoring_sources = _paired_scoring_source_hashes()
     execution_a = plan_a.get("execution")
     execution_b = plan_b.get("execution")
     if not isinstance(execution_a, dict) or not isinstance(execution_b, dict):
@@ -745,6 +778,7 @@ def analyze_explicit_source_pair(
         "limitations": "Paired conditional geometric simulation; matched-condition changes include nominal re-matching and do not isolate causal curvature; no inference of mirrored outcome symmetry; source protocols remain separate.",
     }
     if n_common >= 2:
+        common_index_set = set(common_indices)
         endpoint_maps = []
         for endpoints in (endpoints_a, endpoints_b):
             endpoint_maps.append(
@@ -752,7 +786,7 @@ def analyze_explicit_source_pair(
                     pattern: [
                         (index, x, y)
                         for index, x, y in sorted(endpoints[pattern])
-                        if index in common_indices
+                        if index in common_index_set
                     ]
                     for pattern in PATTERNS
                 }
@@ -831,6 +865,14 @@ def analyze_explicit_source_pair(
                 }
     _recheck_explicit_source(first_source, directory_a)
     _recheck_explicit_source(second_source, directory_b)
+    if _paired_scoring_source_hashes() != scoring_sources:
+        raise RuntimeError("paired scoring source changed during analysis")
+    _execution_transition(
+        execution_a,
+        execution_b,
+        transition_receipt_path,
+        transition_receipt_sha256,
+    )
     return result
 
 

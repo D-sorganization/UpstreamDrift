@@ -308,9 +308,11 @@ def _write_cell(
     invalid: tuple[str, int] | None = None,
     rotation_sd: float = 1.0,
     curve_scale: float = 2.0,
+    club_id: str = "pitching_wedge",
+    speed_factors: tuple[float, float] = (0.75, 1.25),
 ) -> dict:
     root.mkdir(parents=True)
-    club = replace(matched_preset("pitching_wedge"), shaft_lean_deg=lean)
+    club = replace(matched_preset(club_id), shaft_lean_deg=lean)
     config = {
         "club": asdict(club),
         "noise": asdict(
@@ -323,9 +325,9 @@ def _write_cell(
         "match_tolerance_m": 0.05,
         "target_radius_m": 15.0,
         "match_face_bounds_deg": [-6.0, 6.0],
-        "match_speed_factors": [0.75, 1.25],
+        "match_speed_factors": list(speed_factors),
     }
-    cell = f"pitching_wedge_lean{lean:g}_curve{curve_scale:g}_rotation{rotation_sd:g}_shaft_only"
+    cell = f"{club_id}_lean{lean:g}_curve{curve_scale:g}_rotation{rotation_sd:g}_shaft_only"
     execution = {"source_sha256": {"frozen.py": "fixture"}}
     target = 77.40247724866299
     nominals = {}
@@ -402,7 +404,7 @@ def _write_cell(
         "schema": "matched-shot-matrix/1",
         "stage": "supplement_final",
         "execution": execution,
-        "supplement_protocol": protocol,
+        "supplement_protocol": None if protocol == "original_primary/1" else protocol,
         "selected_cell_names": [cell],
         "cells": {cell: config},
     }
@@ -421,6 +423,41 @@ def _write_cell(
             (directory / "shots.csv.gz").read_bytes()
         ).hexdigest(),
     }
+
+
+def test_reviewed_driver_speed_bound_pair_passes_full_explicit_api(tmp_path) -> None:
+    from src.tools.shot_pattern_analysis.matched_lean_control import (
+        analyze_explicit_source_pair,
+    )
+
+    before = _write_cell(
+        tmp_path / "driver0",
+        lean=0,
+        target_request=None,
+        protocol="original_primary/1",
+        club_id="driver",
+        speed_factors=(0.75, 1.25),
+    )
+    after = _write_cell(
+        tmp_path / "driver5",
+        lean=5,
+        target_request=77.40247724866299,
+        protocol="driver-control-speed-bounds/1",
+        club_id="driver",
+        speed_factors=(0.75, 1.30),
+    )
+    result = analyze_explicit_source_pair(
+        before,
+        after,
+        comparison_kind="across_lean",
+        target_x_m=77.40247724866299,
+    )
+    assert result["comparison_kind"] == "across_lean"
+    assert result["allowed_config_differences"] == [
+        "club.shaft_lean_deg",
+        "match_speed_factors",
+        "target_x_m",
+    ]
 
 
 def _stub_scorer(endpoints, **kwargs):
@@ -660,4 +697,227 @@ def test_explicit_pair_rejects_coherently_valid_different_execution(tmp_path) ->
             after,
             comparison_kind="across_lean",
             target_x_m=77.40247724866299,
+        )
+
+
+@pytest.mark.parametrize("change", ["protected_source", "native_runtime"])
+def test_full_pair_api_rejects_coherently_rehashed_protected_execution(
+    tmp_path, change
+) -> None:
+    from src.tools.shot_pattern_analysis.matched_lean_control import (
+        analyze_explicit_source_pair,
+    )
+
+    before = _write_cell(
+        tmp_path / "pw0",
+        lean=0,
+        target_request=None,
+        protocol="pw-primary-face-bounds/1",
+    )
+    after = _write_cell(
+        tmp_path / "pw5",
+        lean=5,
+        target_request=77.40247724866299,
+        protocol="pw-control-face-bounds/1",
+    )
+    before_plan = json.loads(
+        (Path(before["source_root"]) / "matrix_plan.json").read_text()
+    )
+    old_execution = before_plan["execution"]
+    new_execution = json.loads(json.dumps(old_execution))
+    changed_sources = {}
+    if change == "protected_source":
+        path = "src/shared/python/physics/contact.py"
+        old_hash = new_execution["source_sha256"].get(path)
+        new_hash = "coherently-rehashed-contact-source"
+        new_execution["source_sha256"][path] = new_hash
+        changed_sources[path] = {
+            "old_sha256": old_hash,
+            "new_sha256": new_hash,
+            "classification": "approved_nonprojection",
+        }
+    else:
+        new_execution["native_binary_sha256"] = "different-native-binary"
+
+    root = Path(after["source_root"])
+    plan_path = root / "matrix_plan.json"
+    plan = json.loads(plan_path.read_text())
+    plan["execution"] = new_execution
+    plan_path.write_text(json.dumps(plan))
+    cell_dir = root / after["cell"]
+    run_start_path = cell_dir / "run_start.json"
+    run_start = json.loads(run_start_path.read_text())
+    run_start["execution"] = new_execution
+    run_start_path.write_text(json.dumps(run_start))
+    manifest_path = cell_dir / "manifest.json"
+    manifest = json.loads(manifest_path.read_text())
+    manifest["files_sha256"]["run_start.json"] = hashlib.sha256(
+        run_start_path.read_bytes()
+    ).hexdigest()
+    manifest_path.write_text(json.dumps(manifest))
+    after["source_plan_sha256"] = hashlib.sha256(plan_path.read_bytes()).hexdigest()
+    after["source_cell_manifest_sha256"] = hashlib.sha256(
+        manifest_path.read_bytes()
+    ).hexdigest()
+
+    evidence = tmp_path / "review.json"
+    evidence.write_text('{"accepted": true}\n')
+    receipt = tmp_path / "transition.json"
+    receipt.write_text(
+        json.dumps(
+            {
+                "schema": "matched-delivery-source-transition/1",
+                "status": "independently_accepted",
+                "qualified_scope": "matched-delivery-comparisons",
+                "old_execution": old_execution,
+                "new_execution": new_execution,
+                "changed_sources": changed_sources,
+                "evidence_files": {
+                    evidence.name: hashlib.sha256(evidence.read_bytes()).hexdigest()
+                },
+            }
+        )
+        + "\n"
+    )
+    receipt_hash = hashlib.sha256(receipt.read_bytes()).hexdigest()
+    expected = (
+        "unapproved source change"
+        if change == "protected_source"
+        else "runtime or backend"
+    )
+    with pytest.raises(ValueError, match=expected):
+        analyze_explicit_source_pair(
+            before,
+            after,
+            comparison_kind="across_lean",
+            target_x_m=77.40247724866299,
+            transition_receipt_path=receipt,
+            transition_receipt_sha256=receipt_hash,
+        )
+
+
+def test_full_pair_api_rechecks_transition_evidence_after_calculation(
+    tmp_path, monkeypatch
+) -> None:
+    from src.tools.shot_pattern_analysis import matched_lean_control as module
+
+    before = _write_cell(
+        tmp_path / "pw0",
+        lean=0,
+        target_request=None,
+        protocol="pw-primary-face-bounds/1",
+    )
+    after = _write_cell(
+        tmp_path / "pw5",
+        lean=5,
+        target_request=77.40247724866299,
+        protocol="pw-control-face-bounds/1",
+    )
+    old_execution = json.loads(
+        (Path(before["source_root"]) / "matrix_plan.json").read_text()
+    )["execution"]
+    new_execution = json.loads(json.dumps(old_execution))
+    source_path = "src/tools/shot_pattern_analysis/matched_runner.py"
+    new_execution["source_sha256"][source_path] = "approved-new-hash"
+    second_root = Path(after["source_root"])
+    plan_path = second_root / "matrix_plan.json"
+    plan = json.loads(plan_path.read_text())
+    plan["execution"] = new_execution
+    plan_path.write_text(json.dumps(plan))
+    cell_dir = second_root / after["cell"]
+    run_start_path = cell_dir / "run_start.json"
+    run_start = json.loads(run_start_path.read_text())
+    run_start["execution"] = new_execution
+    run_start_path.write_text(json.dumps(run_start))
+    manifest_path = cell_dir / "manifest.json"
+    manifest = json.loads(manifest_path.read_text())
+    manifest["files_sha256"]["run_start.json"] = hashlib.sha256(
+        run_start_path.read_bytes()
+    ).hexdigest()
+    manifest_path.write_text(json.dumps(manifest))
+    after["source_plan_sha256"] = hashlib.sha256(plan_path.read_bytes()).hexdigest()
+    after["source_cell_manifest_sha256"] = hashlib.sha256(
+        manifest_path.read_bytes()
+    ).hexdigest()
+    evidence = tmp_path / "review.json"
+    evidence.write_text("initial approved evidence\n")
+    receipt = tmp_path / "transition.json"
+    receipt.write_text(
+        json.dumps(
+            {
+                "schema": "matched-delivery-source-transition/1",
+                "status": "independently_accepted",
+                "qualified_scope": "matched-delivery-comparisons",
+                "old_execution": old_execution,
+                "new_execution": new_execution,
+                "changed_sources": {
+                    source_path: {
+                        "old_sha256": None,
+                        "new_sha256": "approved-new-hash",
+                        "classification": "approved_nonprojection",
+                    }
+                },
+                "evidence_files": {
+                    evidence.name: hashlib.sha256(evidence.read_bytes()).hexdigest()
+                },
+            }
+        )
+        + "\n"
+    )
+    receipt_hash = hashlib.sha256(receipt.read_bytes()).hexdigest()
+    original_metrics = module._paired_pattern_metrics
+    changed = False
+
+    def mutate_evidence(*args, **kwargs):
+        nonlocal changed
+        result = original_metrics(*args, **kwargs)
+        if not changed:
+            evidence.write_text("evidence changed during analysis\n")
+            changed = True
+        return result
+
+    monkeypatch.setattr(module, "_paired_pattern_metrics", mutate_evidence)
+    with pytest.raises(ValueError, match="evidence file hash mismatch"):
+        module.analyze_explicit_source_pair(
+            before,
+            after,
+            comparison_kind="across_lean",
+            target_x_m=77.40247724866299,
+            transition_receipt_path=receipt,
+            transition_receipt_sha256=receipt_hash,
+        )
+
+
+def test_full_pair_api_rechecks_course_score_helper_source_after_calculation(
+    tmp_path, monkeypatch
+) -> None:
+    from src.tools.shot_pattern_analysis import matched_lean_control as module
+
+    before = _write_cell(
+        tmp_path / "pw0",
+        lean=0,
+        target_request=None,
+        protocol="pw-primary-face-bounds/1",
+    )
+    after = _write_cell(
+        tmp_path / "pw5",
+        lean=5,
+        target_request=77.40247724866299,
+        protocol="pw-control-face-bounds/1",
+    )
+    original_hashes = module._paired_scoring_source_hashes
+    calls = 0
+
+    def changed_hashes():
+        nonlocal calls
+        calls += 1
+        values = original_hashes()
+        if calls > 1:
+            values["course_score_vectors.py"] = "changed-during-analysis"
+        return values
+
+    monkeypatch.setattr(module, "_paired_scoring_source_hashes", changed_hashes)
+    with pytest.raises(RuntimeError, match="scoring source changed during analysis"):
+        module.analyze_explicit_source_pair(
+            before, after, comparison_kind="across_lean", target_x_m=77.40247724866299
         )
