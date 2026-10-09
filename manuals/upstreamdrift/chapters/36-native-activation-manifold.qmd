@@ -1,0 +1,68 @@
+# Native Activation Manifold and Complete-State Replay (Provisional)
+
+## Admitted Physical System
+
+F05e (#11958, parent F05 #11789) admits only a self-contained MuJoCo 3.8.0
+Euler XML fixture with one floating root, hinge/slide joints, built-in
+joint-driven muscles, bounded dimensionless commands, and no collision,
+equality constraint, tendon, plugin, callback, external load, or asset
+dependency. The synthetic fixture has $n_q=8$, $n_v=7$, $n_a=n_u=1$ and
+$h=0.001\,\mathrm{s}$. Its root is unactuated. Neither its geometry nor
+its force law represents a golfer or measured motion.
+
+## State, Dynamics, and Numerical Policy
+
+The Crocoddyl physical state is $x=(q,v,a)$, with
+$n_x=n_q+n_v+n_a=16$ and tangent dimension
+$n_{\delta x}=2n_v+n_a=15$. MuJoCo's `mj_differentiatePos` and
+`mj_integratePos` define the configuration difference and retraction;
+activation difference is Euclidean within its admitted interior. No
+activation clipping is hidden in retraction. The complete
+`mjSTATE_INTEGRATION` payload has 50 values in this fixture and is carried
+**separately** as the native restart and replay state. It is not inserted
+into the optimizer manifold with zero-difference numerical axes.
+
+The admitted model disables MuJoCo warmstart and automatic reset, and the
+compiled-model/policy identity is bound to the native provider. Active
+constraints, joint-limit boundary crossings, unsupported callbacks and
+source assets reject before derivatives. For this narrow fixture,
+two different warmstart histories and clocks with the same physical
+state and command yield the same next physical state in the recorded test.
+That test is a local numerical-history check, not a general Markov proof
+for contacting or time-dependent models.
+
+Each action advances the actual native Euler map
+$x_{k+1}=F_h(x_k,u_k)$ and obtains its local tangent matrices through
+`mjd_transitionFD`, including activation sensitivity:
+
+$$
+\delta x_{k+1}\simeq A_k\delta x_k+B_k\delta u_k,
+\qquad
+A_k\in\mathbb{R}^{15\times15},\quad
+B_k\in\mathbb{R}^{15\times1}.
+$$
+
+Independent native centered directions at two interior perturbation sizes,
+quaternion sign/retraction identities, and seeded Crocoddyl state Jacobian
+checks exercise this boundary. The source-hashed diagnostic receipt records
+the actual errors and dimensions. It does not run or select an optimizer.
+
+## Frozen Command Replay and Limits
+
+The command is a compiled actuator control in unit `1`. It is not a joint
+torque, realized muscle force, or an excitation-only channel contract.
+The provider binds ordered channel IDs, native compiled law, source XML,
+loaded model, and adapter identities. After uninterrupted native execution,
+the actual held commands and complete initial integration state enter a
+pinned Tools T01 `ExperimentReplayBundle` with a time-only, zero-order-held
+policy. A fresh model reloads the bundle and independently reproduces all
+complete native state rows. Input clocks and state identities are distinct;
+there is no observation feedback in replay.
+
+The test fixture's native derivative and three-step replay are software
+boundary evidence only. No active contact or joint-limit regime, mixed
+motor/muscle production model, private capture, anatomical validity, hard
+real-time budget, full-swing tracking, six-engine comparison, or F05 solver
+selection is qualified. The compiled-command comparison profile remains
+pending its separate Tools/F01/F09 admission path. F05 and manual
+publication remain blocked.
