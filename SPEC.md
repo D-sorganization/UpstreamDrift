@@ -1,3 +1,7 @@
+## Native Path-Work Consistency Diagnostic (F07 Child #11856)
+
+The original single-pin diagnostic in `scripts/diagnostics/native_path_work.py` observes native unit-tension force, length and lengthening speed against refined geometry derivatives, with serialized model and actual runtime identities. Existing derivative/consistency providers reject nonfinite and unresolved evidence independently of optional contract diagnostics. A moving point followed by a fixed point on the same body reproduces a force/length discrepancy; fixed-point controls agree. Receipts remain unqualified. No donor or runtime rewrite, physiological fit, native full-model acceptance, or F07 closure follows from the diagnostic. Canonical calculation reference: `manuals/upstreamdrift/chapters/24-native-path-work.qmd`.
+
 ## Native Muscle Replay Development Boundary (F07, #11791)
 
 `tour_matching.replay_muscle_excitations` restores complete named continuous state, plays bounded linear native muscle excitation inputs, and cold-starts Runge-Kutta-Merson once without observations, feedback or resets. It audits actual native applied excitations and binds state/input/model/policy identities. Existing controllers, prescribed coordinates, non-muscle actuators and undeclared non-muscle forces fail closed. This early fixture does not qualify discrete/plugin initialization, contact, full-body anatomy or mocap matching; #11791 remains open. The revised feedback-controls milestone DAG separates schema/provider readiness from scientific acceptance and private evidence delivery.

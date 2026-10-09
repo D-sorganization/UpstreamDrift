@@ -94,6 +94,11 @@
       "id": "UP-D1-native-muscle-replay-inventory",
       "owner": "UpstreamDrift issue #11791",
       "resolution": "Inventory the provisional native continuous-state excitation replay in tour_matching/muscle_replay.py and chapters/13-native-muscle-replay.qmd. Actual OpenSim 4.6 one-DOF compliant-muscle tests establish bounded input playback, continuous initialization and uninterrupted native stepping only. Discrete/plugin state, external-resource identity, passive/contact force policy, full-body anatomy, capture accuracy and full-horizon independent muscle/contact replay remain unqualified. Preserve cold-start policy and forbid weaker shared rigid-body/restarted/external-force evidence from qualifying the endpoint."
+    },
+    {
+      "id": "UP-D1-native-path-work-inventory",
+      "owner": "UpstreamDrift issue #11856",
+      "resolution": "Inventory original native PathActuator fixed/moving-point force-length diagnostic in scripts/diagnostics/native_path_work.py and chapters/24-native-path-work.qmd. Actual native unit-tension acceleration agrees with native moment arm while the moving same-body segment produces a persistent geometric derivative difference. The existing consistency gate rejects nonfinite and numerically unresolved evidence; original native tests retain the inconsistency rather than changing runtime or donor anatomy. Exact source and runtime identities are separate and source-to-binary verification is unavailable. Physiological fitting, donor path/input-domain validation, contact, complete-state full-capture replay, and manual release remain blocked."
     }
   ],
   "calculations": []
