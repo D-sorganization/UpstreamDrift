@@ -13,10 +13,10 @@ import sys
 def main() -> int:
     repo_root = Path(__file__).resolve().parents[3]
     tools_root = repo_root / "vendor" / "ud-tools"
-    test_source = repo_root / "tests" / "unit" / "engines" / "test_feedback_native_markers.py"
-    output_root = (
-        Path.home() / ".codex-feedback-pinocchio-11900" / "f09e-marker-output"
+    test_source = (
+        repo_root / "tests" / "unit" / "engines" / "test_feedback_native_markers.py"
     )
+    output_root = Path.home() / ".codex-feedback-pinocchio-11900" / "f09e-marker-output"
     output_root.mkdir(parents=True, exist_ok=True)
     isolated_test = output_root / "test_feedback_native_markers.py"
     shutil.copyfile(test_source, isolated_test)
@@ -27,7 +27,11 @@ def main() -> int:
         "USER": os.environ.get("USER", ""),
         "LD_LIBRARY_PATH": os.environ.get("LD_LIBRARY_PATH", ""),
         "PYTHONPATH": os.pathsep.join(
-            (str(repo_root), str(tools_root / "src"), str(tools_root / "src" / "shared" / "python"))
+            (
+                str(repo_root),
+                str(tools_root / "src"),
+                str(tools_root / "src" / "shared" / "python"),
+            )
         ),
         "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
         "UPSTREAMDRIFT_REPO_ROOT": str(repo_root),
