@@ -138,6 +138,65 @@ def test_academic_dispersion_figure_exports_all_formats_with_scenario_labels(
 
 
 @pytest.mark.slow
+def test_density_metadata_caption_does_not_overlap_scenario(tmp_path, monkeypatch) -> None:
+    write_dispersion, _ = _plot_api()
+    import src.tools.shot_pattern_analysis.academic_plots as plots
+
+    captured = {}
+
+    def capture_figure(figure, _stem, *, dpi):
+        captured["figure"] = figure
+        return {}
+
+    monkeypatch.setattr(plots, "_save_formats", capture_figure)
+    points = {
+        "Straight": np.array([[0.0, 0.0], [1.0, 1.0], [2.0, -1.0]]),
+        "Draw": np.array([[0.0, 1.0], [1.0, 2.0], [2.0, 0.0]]),
+        "Fade": np.array([[0.0, -1.0], [1.0, -2.0], [2.0, 0.0]]),
+    }
+    metadata = {
+        "club": "seven_iron",
+        "nominal_shaft_lean_deg": 0.0,
+        "contact_law": "incremental_coulomb_energetic",
+        "club_speed_mps": 36.0,
+        "static_loft_deg": 34.0,
+        "curve_scale": 1.0,
+        "shaft_rotation_sd_deg": 1.0,
+        "path_sd_deg": 0.5,
+        "speed_sd_mps": 0.89408,
+        "contact_horizontal_sd_m": 0.00635,
+        "contact_vertical_sd_m": 0.00635,
+        "shaft_lean_sd_deg": 0.0,
+        "attack_angle_sd_deg": 0.0,
+    }
+    scenario = "PILOT V1 — 7-Iron; lean 0°; curve scale ×1; combined delivery variation; 32 attempts/pattern"
+
+    write_dispersion(
+        points,
+        tmp_path / "caption_layout",
+        scenario=scenario,
+        metadata=metadata,
+        target_point_m=(1.0, 0.0),
+        bins=8,
+        dpi=96,
+    )
+
+    figure = captured["figure"]
+    from matplotlib.backends.backend_agg import FigureCanvasAgg
+
+    FigureCanvasAgg(figure)
+    figure.canvas.draw()
+    renderer = figure.canvas.get_renderer()
+    scenario_artist = next(text for text in figure.texts if text.get_text() == scenario)
+    metadata_artist = next(
+        text for text in figure.texts if text.get_text().startswith("club: seven_iron")
+    )
+    assert not scenario_artist.get_window_extent(renderer).overlaps(
+        metadata_artist.get_window_extent(renderer)
+    )
+
+
+@pytest.mark.slow
 def test_overhead_figure_uses_raw_trajectories_and_exports_all_formats(
     tmp_path,
 ) -> None:

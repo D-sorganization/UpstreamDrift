@@ -333,6 +333,7 @@ def write_academic_dispersion_figure(
         ),
         fontsize=9,
         ha="left",
+        va="top",
         color="#333333",
     )
 
