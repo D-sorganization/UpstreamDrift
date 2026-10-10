@@ -1,4 +1,4 @@
-# Active: MyoSuite 3.x Native Export Worker - #11997 (GCV-14 #11720)
+# Active: MyoSuite Version 3 Native Export Worker - #11997 (GCV-14 #11720)
 
 - Branch `claude/myosuite-worker-3x`, stacked on PR #12026. myosuite 3.x has no `envs.env_base`, so the worker builds its own `mujoco` model and takes `MJRenderer` from `myosuite.viz.mj_renderer` (3.x) or `myosuite.renderer.mj_renderer` (2.x). The arena scene moved to the `myo_sim` package (`models/scene/myosuite_quad.xml`). Both lookups live in `backends/myosuite_compat.py`, which `MyoSuiteArenaBackend.unavailable_reason()` also probes (one import path).
 - Tests: `tests/unit/tools/native_viewer_export/test_myosuite_compat.py` (3.x preferred, 2.x fallback, unavailable reason string, scene lookup).
