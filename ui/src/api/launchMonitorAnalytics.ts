@@ -10,6 +10,7 @@
 import { apiFetch } from "./fetch";
 import type {
   AnalyzePayloadV2,
+  DispersionPayloadV2,
   FlexibleAnalysisPayload,
   LaunchMonitorAnalysisResultV2,
 } from "./generated/types";
@@ -121,6 +122,134 @@ export async function runFlexibleAnalysisV2(
     model_provenance: [],
   };
   return apiFetch<LaunchMonitorAnalysisResultV2>(`${BASE}/v2/analyze`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+/**
+ * Request body for `POST /v2/trend` (`TrendPayloadV2` in
+ * `src/api/routes/launch_monitor_analytics.py`). Mirrors the PyQt Trends tab
+ * (`_TrendParams` / `_read_trend_params` in `gui.py`): `time_column` and
+ * `rolling_window` share that widget's defaults, `"captured_at"` and `10`,
+ * and the same `[3, 500]` rolling-window bound.
+ */
+export interface TrendRequest {
+  records: Record<string, unknown>[];
+  metric: string;
+  time_column?: string;
+  rolling_window?: number;
+}
+
+/** One rolling-statistics row from `TrendResponse.rolling` (JSON-safe: never a misleading 0). */
+export interface TrendRollingPoint {
+  value: number | null;
+  rolling_mean: number | null;
+  rolling_median: number | null;
+  rolling_std: number | null;
+  ewma: number | null;
+  /** The request's `time_column`, serialized as an ISO-8601 timestamp string. */
+  [timeColumn: string]: number | string | null;
+}
+
+/** One ranked step-change candidate from `TrendResponse.change_candidates`. */
+export interface TrendChangeCandidate {
+  captured_at: string;
+  row_index: number;
+  before_mean: number | null;
+  after_mean: number | null;
+  effect_size: number | null;
+}
+
+/** Response body for `POST /v2/trend` (`_trend_result_to_dict`). */
+export interface TrendResponse {
+  metric: string;
+  sample_count: number;
+  slope_per_day: number | null;
+  robust_slope_per_day: number | null;
+  p_value: number | null;
+  earliest_mean: number | null;
+  latest_mean: number | null;
+  rolling: TrendRollingPoint[];
+  change_candidates: TrendChangeCandidate[];
+}
+
+/**
+ * Run the PyQt Trends tab's longitudinal trend analysis over caller-supplied
+ * inline records, via the same `analyze_trend` contract the desktop tab calls.
+ */
+export async function postTrend(
+  records: Record<string, unknown>[],
+  metric: string,
+  timeColumn = "captured_at",
+  rollingWindow = 10,
+): Promise<TrendResponse> {
+  const payload: TrendRequest = {
+    records,
+    metric,
+    time_column: timeColumn,
+    rolling_window: rollingWindow,
+  };
+  return apiFetch<TrendResponse>(`${BASE}/v2/trend`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+/**
+ * Group-by candidates accepted by `POST /v2/dispersion`
+ * (`DispersionPayloadV2.group_column`'s literal union).
+ */
+export type DispersionGroupColumn = NonNullable<
+  DispersionPayloadV2["group_column"]
+>;
+
+/**
+ * One group's serialized `DispersionResult` from `_dispersion_result_to_dict`
+ * (JSON-safe: NaN/infinite float fields become `null`, never a misleading 0).
+ */
+export interface DispersionGroupResult {
+  group: string;
+  sample_count: number;
+  center_forward: number | null;
+  center_lateral: number | null;
+  mean_forward: number | null;
+  mean_lateral: number | null;
+  ellipse_major: number | null;
+  ellipse_minor: number | null;
+  ellipse_angle_rad: number | null;
+  area_95: number | null;
+  radial_rmse: number | null;
+  radial_p50: number | null;
+  radial_p90: number | null;
+}
+
+/** Response body for `POST /v2/dispersion` (`analyze_dispersion_v2`). */
+export interface DispersionResponse {
+  forward: string;
+  lateral: string;
+  group_column: DispersionGroupColumn | null;
+  groups: DispersionGroupResult[];
+}
+
+/**
+ * Run the PyQt Dispersion tab's shot-dispersion analysis over caller-supplied
+ * inline records, via the same `analyze_dispersion` contract the desktop tab
+ * calls (`src/tools/launch_monitor_analytics/gui.py` `_compute_dispersion`).
+ */
+export async function analyzeDispersionV2(
+  records: Record<string, unknown>[],
+  forward = "carry_distance",
+  lateral = "lateral_carry",
+  groupColumn?: DispersionGroupColumn | null,
+): Promise<DispersionResponse> {
+  const payload: DispersionPayloadV2 = {
+    records,
+    forward,
+    lateral,
+    group_column: groupColumn ?? null,
+  };
+  return apiFetch<DispersionResponse>(`${BASE}/v2/dispersion`, {
     method: "POST",
     body: JSON.stringify(payload),
   });

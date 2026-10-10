@@ -2,6 +2,47 @@
 
 - Branch `claude/gcv-8-grip-wrench-gaps`. The MuJoCo grip-modelling tab shows the `grip_weld_l/r` wrench via `grip_efc` and reports "unavailable" for contact-only scenes. Drake URDF: `humanoid_urdf.right_hand_grip_analysis` gives the right-hand wrench from club Newton-Euler (`full_body_model.club_newton_euler`); the left hand is unavailable, with a reason. Pinocchio: `PinocchioForceAdapter.grip_analysis_from_allocation` routes `lambda_grip` through `grip_from_allocation`.
 - Open: `allocate_trajectory` does not store `q`, so callers pass it themselves. MyoSuite per-hand emission needs the pinned `myo_sim`.
+# Active: MuJoCo Native Export Backend - GCV-14 #11720
+
+- Branch `claude/gcv-14-mujoco-backend`, stacked on PR #12026 (`claude/gcv-14-speed-variants`). `native_viewer_export` has a fifth engine, `mujoco` (`backends/mujoco_native.py` + `mujoco_worker.py`): full-body MJCF with the default appearance document (body, head, club meshes, scene) rendered by `mujoco.Renderer` through the shared view presets and glyph overlay. It replaces the earlier throwaway stick-figure evidence renderer.
+- Tests: `tests/unit/tools/native_viewer_export/test_mujoco_backend.py` (registration, `unavailable_reason()`, appearance/club scene, `requires_gl` render); the speed-variant frame-count and 0 ms HUD test iterates `ENGINES`, so it covers MuJoCo.
+- Evidence: ControlTower renders `gcv14/mujoco_native` (`MUJOCO_GL=osmesa`), see the PR body for frame counts and the impact frame.
+
+# Active: OpenSim Contact Grip, OSV-7 Phase 4 #11739
+
+- Branch `claude/osv-7-opensim-contact` (stacked on #11985). `grip_model="contact"` in `export_full_body_osim` builds pad `ContactSphere`s against closed `ContactMesh` cylinders with one `ElasticFoundationForce` per pad (`opensim/python/full_body_grip_contact.py`, `grip_contact_osim_sim.py`, meshes in `grip_contact/grip_mesh.py`). Weld stays default. CPodes is required (RK-Merson needs about 1e-7 s steps); the club is released with the weld velocity.
+- Full swings (CT, accuracy 1e-8): net force peak -2.6 % (driver) and -3.1 % (7-iron) against the bushing; per-hand and internal pairs differ (hyperstatic, section 19). Evidence `evidence/grip_kinetics/contact/opensim_*_acc1e-8_*`. Slow tests run on CT with `-m 'slow or not slow'`.
+# Active: Quarter-Speed Export Variants for Every Engine - GCV-14 #11720
+
+- Branch `claude/gcv-14-speed-variants`, stacked on PR #12004 (kinematic impact time). `video_timing.frame_schedule.SPEED_VARIANTS = (1, 0.5, 0.25)` is the default of `ExportSettings.speeds` and `--speeds`; `motion_matching.export.export_video_variants` writes the same three clips for any engine's candidate (MuJoCo, MyoSuite, Drake, Pinocchio, OpenSim, Simscape logs).
+- Tests: `test_speed_variants_engines.py` (frame counts from the time span for all four native engines, HUD 0 ms at the ball-passage impact) and `test_export.py` (variants per engine).
+- Evidence: only MuJoCo renders on ControlTower (stick figure, no club, 1920x1080, 60 fps). Drake and Pinocchio need `playwright` and its Chromium libraries, OpenSim needs `xwd`, MyoSuite needs `myosuite.envs.env_base` (#11997); none are in the `ud-sim` image and installing them needs root or a new image (owner action).
+# Active: Same-Input Parity Design-Manual Chapter - SIP P-9 #11614
+
+- Branch `claude/sip-p9-manual-chapter-11614`; epic #11605. Provisional QMD chapter `manuals/upstreamdrift/chapters/16-same-input-parity.qmd` (renumbered from 14 after `14-muscle-qualification-evidence.qmd` landed) (KKT, closure projection, ZOH RK4, bundle, L0-L3 levels and results, failed experiments, limitations) and registry blocker `UP-D1-same-input-parity-inventory`; registry stays blocked with no calculations. `same_input_parity.tex` cross-links the chapter and compiles with pdflatex.
+- Open: Simscape P-8 (#11613) must update both documents when it lands.
+
+# Active: Contact Grip and MyoSuite Bushing, OSV-7 Phase 3 #11739
+
+- Branch `claude/osv-7-contact-grip` (stacked on #11963). Pad contact grip with pad stiffness matched to the bushing (`grip_contact/pad_layout.py`, `pad_contact.py`); MuJoCo full swing (dt 1e-5 s), Drake and Pinocchio holds; MyoSuite bushing parity passes (worst 0.013 % peak). Quasi-static balance closes (`static_balance.py`). See GRIP_PARITY_DECISIONS.md section 19.
+- Open and flagged: contact per-hand force is about 4x the bushing's with matching net force (indeterminacy, not tuned); no OpenSim contact variant; no full-swing Drake or Pinocchio contact run.
+- #11986 (branch `claude/grip-contact-internal-force`, stacked on `claude/osv-7-contact-grip`): the 4x is not input drift (hand-to-hand drift 4e-13 mm); it is the hyperstatic internal force of two stiff rings (26 to 44 N per micron of mismatch). Friction softening loses the grip. Section 19 "Why the Contact Grip Carries 4 Times". No default changed.
+
+# Active: Lead-Foot Address Corrections - OSV-6 #11737 (Stacked On #12031)
+
+- Branch `claude/osv-6b-leg-azimuth`. With `--foot-progression` on, two corrections apply. `hip_calibration.knee_flexion_axis` removes the lateral-marker tilt from the zero twist (it was biased by 17-43 deg). `pipeline/leg_marker_constraints.py` keeps the knee and ankle marker azimuth and keeps the forefoot square and centred.
+- MuJoCo address toe-out is within 2 deg on both captures, and so is Drake once the #12039 coordinate-order fix (PR #12047) lands. Pinocchio and MyoSuite evidence is on the stacked branch `claude/osv-6c-feet-evidence`. Canonical receipts are unchanged: the default-on correction is a recorded failed experiment (see `docs/research/hip_axis_mirroring/`). The finish-feasibility ratchet is strict-xfail on #12040.
+
+# Active: Mirrored Left Hip Axis - OSV-6 #11737
+
+- Branch `claude/osv-6-hip-mirror`. `spec_builder.hip_axis_signs` mirrors left hip adduction and rotation like OpenSim; specs regenerated by `scripts/mirror_spec_left_hip.py`. Calibrated receipts: driver 7.7/33.0/61.6 mm, 7-iron 6.5/31.1/47.0 mm. Nominal receipts were regenerated, and the old ones moved to `evidence/ground_support/anthro_*_pre_osv6/`. Reference: `docs/research/hip_axis_mirroring/`.
+- The nominal 7-iron trajectory IK (269 mm) fails on `main` without the mirror too, so the bug is pre-existing (#12030). Open for OSV-6: the lead foot is still 15-32 deg out at address in MuJoCo and Drake (`hip_rotation_l` at its limit), the heel-proxy malleolus correction, and the Pinocchio/MyoSuite stills.
+
+# Active: Native Export Impact Time From Ball Passage - GCV-14 #11720
+
+- Branch `claude/gcv-14-impact-evidence`. `native_viewer_export.overlay.detect_impact_time_s` called `model_appearance.club_face.impact_frame` and reported that frame's exact timestamp; on the committed driver fixture the accepted peak-speed sample sits 9.2 cm above and 9.2 cm from address (the height check alone let it through), not the true closest approach. It now returns `club_face.ball_passage`'s sub-sample `t_impact` on the same `Clubhead`-origin trajectory (one detector, OSV-10); docstring and README (`src/tools/native_viewer_export/README.md`) updated.
+- Kept the `Clubhead` frame origin rather than the true face-centre point (`club_assembly.clubface_centre`): deriving the centre here would need the club spec resolved into a `ClubAssembly` and composed with the frame's rotation, a larger change than this fix's scope.
+- Tests added/updated in `tests/unit/tools/native_viewer_export/test_grip_tracking.py`: `test_hud_impact_time_matches_ball_passage` (basic contract), `test_hud_impact_time_uses_ball_passage_not_the_peak_speed_sample` (reproduces the bug with a synthetic overshoot trajectory), `test_hud_impact_time_raises_when_the_head_never_returns_to_the_ball`, and the capture-A fixture test now compares against `ball_passage` instead of `impact_frame`.
 
 # Active: Shared Club in the Musculoskeletal OpenSim Models, OSV-9 #11756
 
@@ -51,6 +92,15 @@ its source rotation bound. Preserve native replay, anatomy and registration gate
 # Active: Muscle Qualification Evidence Guard — F07 #11791
 
 Branch `fix/feedback-muscle-evidence-11791`; current commit `SELF`; PR #11814. Scoped child #11810: parameter-only orchestration now returns no native replay and no unperformed audit successes. The test-first commit records two failures; 31 focused tests pass after correction. Read [Guard Turnover](docs/development/feedback_controls/F07_MUSCLE_EVIDENCE_TURNOVER.md). Merged current main while preserving its impact chapter and this evidence chapter. Next: normal protected PR checks; F07 and native model qualification remain open.
+
+# Active: Native Muscle-Model Asset Admission — #11819
+
+Branch `feat/feedback-native-admission-11819`, commit `SELF`. Source pinning and
+native structural inventory remain scientifically unqualified; caller anatomy
+maps and complete dependency closure require review. Read
+[F07 Turnover](docs/development/feedback_controls/F07_MODEL_ADMISSION_TURNOVER.md)
+and canonical manual chapter 18. F07 #11791 remains open; no external full-body
+model, raw capture, native optimizer or replay was qualified by this slice.
 
 # Active: Feedback Controls Planning — #11784
 
@@ -642,3 +692,45 @@ See the separate editable research reference and the extended aggregate `tangent
 ### Impact Parameters Package (GCV-15, 2026-10-07)
 
 `src/shared/python/impact_parameters/` extracts speed, attack angle, club path, face angle, face-to-path, dynamic and spin loft, swing plane and low point relative to an explicit `TargetFrame` (default recorded: Z-up, target -Y, ADR-0041). Definitions are in the package docstring for design-manual transfer via GCV-18. Tools delivery and D-plane are reached only through the fail-closed `tools_gateway.py` and agree with the UD definitions within 0.01 deg. Open: launch direction has no Tools provider; toe/high needs GCV-11 face geometry and GCV-13 ball; smash factor needs an impact model with calibration status; `rate_of_closure` `delivery_at` is not called directly.
+
+## F05d Native Manifold Control Candidate (#11932; 2026-10-09)
+
+The contact-free floating-root/two-hinge Crocoddyl BoxFDDP action uses the
+actual native Euler MuJoCo step and $n_x=17$, $n_{dx}=16$ manifold state.
+It checks candidate plans against a nonlinear native rollout and verified
+zero-torque fallback, then shares the direct-torque executor for post-limit
+ZOH export and independent complete-native-state replay. The supported
+MuJoCo 3.8/Crocoddyl 3.2.1 paired receipt binds two starts, common T01
+preflight, every accepted/timed-out call, cost, wall time and replay hashes.
+The reachable reference is generated by native steps. BoxFDDP accepts
+3/8 synthetic steps at the 0.2 s cooperative budget; SciPy SLSQP accepts
+0/8. All other steps use verified fallback. Neither method completes a
+fully accepted four-step run, although BoxFDDP has lower realized native
+cost in both starts. This does not prove
+a hard 10 ms deadline or golfer/contact/muscle/capture qualification.
+Read provisional manual chapter 26 and
+`docs/development/feedback_controls/F05D_NATIVE_MANIFOLD_BOX_FDDP_TURNOVER.md`.
+
+Parent F05 #11789, F09/F10 and manual publication remain open.
+PR #11944 merged into the F05c feature base at
+`c1e76ce91db11b257604d9ddbd227268d2e27db1`; F05c PR #11922 is
+still open on F05b, issue #11932 is still open, and this has not reached
+`main`.
+
+## F02 Native Manifold Feedback Child (#11946)
+
+F02 now has an actual MuJoCo floating-root feedback runner using the F05c
+tangent derivative admission and F06 complete-state torque replay; see
+provisional manual chapter 27 and
+`docs/development/feedback_controls/F02_NATIVE_MANIFOLD_FEEDBACK_TURNOVER.md`.
+The source-hashed static receipt shows 0.1261 rad final hip error versus
+0.4 rad frozen nominal over 12 steps. A second test consumes a varying
+native-replayed torque trajectory, derives per-step native tangent Jacobians
+and MOSAIC gains, then compares held-out frozen-feedforward and total-
+feedback replays at 0.07508 versus 0.02460 rad final hip error. Their
+post-limit input digests differ, while each fresh native replay reproduces
+the complete integration-state trajectory exactly. F03 still lacks a native
+9/8/2 optimized trajectory export; the teacher is admissible but is not
+captured or optimized. This child is stacked on F05c #11922 and must remain
+unarmed until its prerequisite reaches `main`; F02 #11786 and full
+production/capture qualification remain open.

@@ -166,6 +166,7 @@ def test_export_without_multiview_or_overlay(tmp_path: Path) -> None:
         writer_factory=lambda p, fps: _Writer(p, fps, sink),
     )
     assert sorted(sink) == [
+        "driver_fake_overhead_0p25x.mp4",
         "driver_fake_overhead_0p5x.mp4",
         "driver_fake_overhead_1x.mp4",
     ]
