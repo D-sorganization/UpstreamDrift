@@ -106,9 +106,11 @@ def test_academic_density_row_gutter_has_readable_positive_clearance(
     captured_figures: list[Any] = []
     original_save = msf._save_figure
 
-    def capturing_save(figure: Any, stem: Path) -> dict[str, Path]:
+    def capturing_save(
+        figure: Any, stem: Path, *args: Any, **kwargs: Any
+    ) -> dict[str, Path]:
         captured_figures.append(figure)
-        return original_save(figure, stem)
+        return original_save(figure, stem, *args, **kwargs)
 
     monkeypatch.setattr(msf, "_save_figure", capturing_save)
 

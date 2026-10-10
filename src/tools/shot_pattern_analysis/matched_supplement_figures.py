@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import textwrap
 from pathlib import Path
 from typing import Any, Literal, Mapping
 
@@ -21,6 +22,24 @@ from .matched_report import load_individually_supported_endpoints
 from .matched_sensitivity import _supported_endpoints
 from .provenance import manifest_files_match
 from .noise import NoiseSpec
+
+CLOSED_SELECTED_FIGURE_KINDS: frozenset[str] = frozenset(
+    {
+        "density_png",
+        "density_pdf",
+        "density_svg",
+        "overhead_png",
+        "overhead_pdf",
+        "overhead_svg",
+        "overhead_social_png",
+    }
+)
+
+__all__ = [
+    "CLOSED_SELECTED_FIGURE_KINDS",
+    "namespace_figure_paths",
+    "render_selected_pair_figures",
+]
 
 _PATTERNS = ("Straight", "Draw", "Fade")
 
@@ -344,10 +363,14 @@ def _slug(value: str) -> str:
     return f"{clean[:160]}_{hashlib.sha256(value.encode()).hexdigest()[:10]}"
 
 
-def _save_figure(figure: Any, stem: Path) -> dict[str, Path]:
+def _save_figure(
+    figure: Any, stem: Path, formats: tuple[str, ...] = ("png", "pdf", "svg")
+) -> dict[str, Path]:
     stem.parent.mkdir(parents=True, exist_ok=True)
     outputs = {}
     for suffix, dpi in (("png", 300), ("pdf", None), ("svg", None)):
+        if suffix not in formats:
+            continue
         path = stem.with_suffix(f".{suffix}")
         options: dict[str, Any] = {"bbox_inches": "tight", "facecolor": "white"}
         if dpi is not None:
@@ -384,18 +407,104 @@ def _write_pair_density_figure(
     target_x: float,
     common_n: int,
     output_stem: Path,
+    formats: tuple[str, ...] = ("png", "pdf", "svg"),
 ) -> dict[str, Path]:
     """Plot two conditions in six panels on common bins and density scale."""
     import matplotlib.pyplot as plt
     from matplotlib.lines import Line2D
     from matplotlib.colors import Normalize
+    from matplotlib.backends.backend_agg import FigureCanvasAgg
 
     estimate = shared_histogram_density(
         point_sets, bins=64, target_point_m=(target_x, 0.0)
     )
     figure = plt.figure(figsize=(16, 9), facecolor="white")
+    canvas = FigureCanvasAgg(figure)
+    renderer = canvas.get_renderer()
+
+    t_title = figure.text(
+        0.06,
+        0.985,
+        "Matched Endpoint Density: Two Conditions, Shared Axes and Density Scale",
+        ha="left",
+        va="top",
+        fontsize=16,
+        fontweight="bold",
+    )
+    y_cursor = t_title.get_window_extent(renderer).y0 / figure.bbox.height
+
+    def _add_density_header(
+        text: str, fontsize: float, gap_pt: float = 3.5, wrap_chars: int = 180
+    ) -> Any:
+        nonlocal y_cursor
+        gap_frac = (gap_pt / 72.0) / (figure.bbox.height / figure.dpi)
+        wrapped = textwrap.fill(text, width=wrap_chars, break_long_words=False)
+        t = figure.text(
+            0.06,
+            y_cursor - gap_frac,
+            wrapped,
+            ha="left",
+            va="top",
+            fontsize=fontsize,
+        )
+        y_cursor = t.get_window_extent(renderer).y0 / figure.bbox.height
+        return t
+
+    total_n = int(first["config"]["n_shots"])
+    comp_text = (
+        f"{comparison} · Target {target_x:.3f} m · Density uses all "
+        f"{common_n:,}/{total_n:,} shots common to six populations; "
+        f"{min(common_n, 600):,} evenly spaced dots per panel"
+    )
+    _add_density_header(comp_text, fontsize=8.5, gap_pt=5.0, wrap_chars=180)
+
+    cap1 = f"{first_label}: {_condition_caption(first)} · {first['source_protocol']}"
+    _add_density_header(cap1, fontsize=7.7, gap_pt=3.5, wrap_chars=180)
+
+    cap2 = f"{second_label}: {_condition_caption(second)} · {second['source_protocol']}"
+    _add_density_header(cap2, fontsize=7.7, gap_pt=3.5, wrap_chars=180)
+
+    disc_text = (
+        "Illustrative Simulation | Assumed Head Properties | Carry Only · "
+        "Raw coordinates; no aim correction. Matched-condition changes include nominal re-matching."
+    )
+    _add_density_header(disc_text, fontsize=9.0, gap_pt=3.5, wrap_chars=180)
+
+    leg_gap_frac = (7.0 / 72.0) / (figure.bbox.height / figure.dpi)
+    legend_top = y_cursor - leg_gap_frac
+    hdr_styles: tuple[tuple[float, Literal["solid", "dashed", "dotted"]], ...] = (
+        (0.50, "solid"),
+        (0.80, "dashed"),
+        (0.95, "dotted"),
+    )
+    hdr = [
+        Line2D(
+            [0],
+            [0],
+            color="#222222",
+            linestyle=style,
+            label=f"{mass:.0%} Simulated-Sample HDR",
+        )
+        for mass, style in hdr_styles
+    ]
+    hdr.append(
+        Line2D(
+            [0], [0], marker="+", color="black", linestyle="none", label="Common Target"
+        )
+    )
+    legend = figure.legend(
+        handles=hdr,
+        loc="upper center",
+        bbox_to_anchor=(0.48, legend_top),
+        ncol=4,
+        frameon=False,
+    )
+    leg_bottom = legend.get_window_extent(renderer).y0 / figure.bbox.height
+    margin_frac = (8.0 / 72.0) / (figure.bbox.height / figure.dpi)
+    grid_top = min(0.76, leg_bottom - margin_frac)
+
     grid = figure.add_gridspec(
-        2, 3, left=0.06, right=0.91, top=0.76, bottom=0.13, hspace=0.36, wspace=0.24
+        2, 3, left=0.06, right=0.91, top=grid_top, bottom=0.13, hspace=0.36, wspace=0.24
     )
     first_condition, second_condition = _condition(first), _condition(second)
     row_conditions = ((first_label, first_condition), (second_label, second_condition))
@@ -466,67 +575,10 @@ def _write_pair_density_figure(
             color_mesh, ax=figure.axes, fraction=0.018, pad=0.025
         )
         colorbar.set_label("Endpoint Probability Density (m⁻²); Common Scale")
-    hdr_styles: tuple[tuple[float, Literal["solid", "dashed", "dotted"]], ...] = (
-        (0.50, "solid"),
-        (0.80, "dashed"),
-        (0.95, "dotted"),
-    )
-    hdr = [
-        Line2D(
-            [0],
-            [0],
-            color="#222222",
-            linestyle=style,
-            label=f"{mass:.0%} Simulated-Sample HDR",
-        )
-        for mass, style in hdr_styles
-    ]
-    hdr.append(
-        Line2D(
-            [0], [0], marker="+", color="black", linestyle="none", label="Common Target"
-        )
-    )
-    figure.legend(
-        handles=hdr,
-        loc="upper center",
-        bbox_to_anchor=(0.48, 0.83),
-        ncol=4,
-        frameon=False,
-    )
-    figure.suptitle(
-        "Matched Endpoint Density: Two Conditions, Shared Axes and Density Scale",
-        x=0.06,
-        y=0.97,
-        ha="left",
-        fontsize=16,
-        fontweight="bold",
-    )
-    total_n = int(first["config"]["n_shots"])
-    figure.text(
-        0.06,
-        0.915,
-        f"{comparison} · Target {target_x:.3f} m · Density uses all {common_n:,}/{total_n:,} shots common to six populations; {min(common_n, 600):,} evenly spaced dots per panel",
-        fontsize=8.5,
-    )
-    figure.text(
-        0.06,
-        0.895,
-        f"{first_label}: {_condition_caption(first)} · {first['source_protocol']}",
-        fontsize=7.7,
-    )
-    figure.text(
-        0.06,
-        0.875,
-        f"{second_label}: {_condition_caption(second)} · {second['source_protocol']}",
-        fontsize=7.7,
-    )
-    figure.text(
-        0.06,
-        0.855,
-        "Illustrative Simulation | Assumed Head Properties | Carry Only · Raw coordinates; no aim correction. Matched-condition changes include nominal re-matching.",
-        fontsize=9,
-    )
-    outputs = _save_figure(figure, output_stem)
+    if formats == ("png", "pdf", "svg"):
+        outputs = _save_figure(figure, output_stem)
+    else:
+        outputs = _save_figure(figure, output_stem, formats=formats)
     plt.close(figure)
     return outputs
 
@@ -602,31 +654,57 @@ def _create_pair_overhead_figure(
         # A disclosed 6× vertical display magnification keeps long carry paths legible.
         axis.set_aspect(6.0, adjustable="box")
 
-    figure.suptitle(
+    from matplotlib.backends.backend_agg import FigureCanvasAgg
+
+    canvas = FigureCanvasAgg(figure)
+    renderer = canvas.get_renderer()
+
+    t_title = figure.text(
+        0.06,
+        0.975,
         "Saved Raw Flight Paths by Pattern and Matched Condition",
-        x=0.06,
-        y=0.965,
         ha="left",
+        va="top",
         fontsize=17 * font_scale,
         fontweight="bold",
     )
-    figure.text(
-        0.06,
-        0.92,
+    y_cursor = t_title.get_window_extent(renderer).y0 / figure.bbox.height
+
+    def _add_overhead_text(
+        text: str, fontsize: float, gap_pt: float = 3.5, wrap_chars: int = 175
+    ) -> Any:
+        nonlocal y_cursor
+        gap_frac = (gap_pt / 72.0) / (figure.bbox.height / figure.dpi)
+        wrapped = textwrap.fill(text, width=wrap_chars, break_long_words=False)
+        t = figure.text(
+            0.06,
+            y_cursor - gap_frac,
+            wrapped,
+            ha="left",
+            va="top",
+            fontsize=fontsize,
+        )
+        y_cursor = t.get_window_extent(renderer).y0 / figure.bbox.height
+        return t
+
+    wrap_w = 175 if not social else 165
+    _add_overhead_text(
         f"{_comparison_title(comparison)} · Target {target_x:.3f} m",
         fontsize=10 * font_scale,
+        gap_pt=5.0,
+        wrap_chars=wrap_w,
     )
-    figure.text(
-        0.06,
-        0.895,
+    _add_overhead_text(
         f"{first_label}: {_condition_caption(first)} · {first['source_protocol']}",
         fontsize=8.5 * font_scale,
+        gap_pt=3.5,
+        wrap_chars=wrap_w,
     )
-    figure.text(
-        0.06,
-        0.87,
+    _add_overhead_text(
         f"{second_label}: {_condition_caption(second)} · {second['source_protocol']}",
         fontsize=8.5 * font_scale,
+        gap_pt=3.5,
+        wrap_chars=wrap_w,
     )
     path_counts = {key: len(value) for key, value in trajectory_sets.items()}
     first_counts = ", ".join(
@@ -637,17 +715,17 @@ def _create_pair_overhead_figure(
         f"{pattern} {path_counts[f'{pattern} · {second_label}']}"
         for pattern in _PATTERNS
     )
-    figure.text(
-        0.06,
-        0.84,
+    _add_overhead_text(
         f"Saved paths (not paired by shot index): {first_label} {first_counts} · {second_label} {second_counts}",
         fontsize=8.5 * font_scale,
+        gap_pt=3.5,
+        wrap_chars=wrap_w,
     )
-    figure.text(
-        0.06,
-        0.815,
+    _add_overhead_text(
         "Illustrative Simulation | Assumed Head Properties | Carry Only · Lateral display magnified 6×; physical axis limits are shared.",
         fontsize=8.5 * font_scale,
+        gap_pt=3.5,
+        wrap_chars=wrap_w,
     )
     pattern_handles = [
         Line2D([0], [0], color=colors[pattern], label=pattern) for pattern in _PATTERNS
@@ -656,10 +734,12 @@ def _create_pair_overhead_figure(
         Line2D([0], [0], color="#333333", linestyle=style, label=condition)
         for condition, _, style in conditions
     ]
+    leg_gap_frac = (7.0 / 72.0) / (figure.bbox.height / figure.dpi)
+    legend_top = y_cursor - leg_gap_frac
     figure.legend(
         handles=pattern_handles + condition_handles,
         loc="upper center",
-        bbox_to_anchor=(0.57, 0.785),
+        bbox_to_anchor=(0.57, legend_top),
         ncol=5,
         frameon=False,
         fontsize=9 * font_scale,
@@ -677,40 +757,52 @@ def _write_pair_overhead_figure(
     second_label: str,
     target_x: float,
     output_stem: Path,
+    academic_formats: tuple[str, ...] = ("png", "pdf", "svg"),
+    include_social: bool = True,
 ) -> dict[str, Path]:
     """Write academic and dedicated 16:9 paired overhead exports."""
-    plt, figure = _create_pair_overhead_figure(
-        trajectory_sets,
-        first=first,
-        second=second,
-        comparison=comparison,
-        first_label=first_label,
-        second_label=second_label,
-        target_x=target_x,
-        social=False,
-    )
-    outputs = _save_figure(figure, output_stem)
-    plt.close(figure)
+    output_stem.parent.mkdir(parents=True, exist_ok=True)
+    outputs: dict[str, Path] = {}
+    if academic_formats:
+        plt, figure = _create_pair_overhead_figure(
+            trajectory_sets,
+            first=first,
+            second=second,
+            comparison=comparison,
+            first_label=first_label,
+            second_label=second_label,
+            target_x=target_x,
+            social=False,
+        )
+        if academic_formats == ("png", "pdf", "svg"):
+            outputs = _save_figure(figure, output_stem)
+        else:
+            outputs = _save_figure(figure, output_stem, formats=academic_formats)
+        plt.close(figure)
 
-    plt, social_figure = _create_pair_overhead_figure(
-        trajectory_sets,
-        first=first,
-        second=second,
-        comparison=comparison,
-        first_label=first_label,
-        second_label=second_label,
-        target_x=target_x,
-        social=True,
-    )
-    social_path = output_stem.with_name(output_stem.name + "_social.png")
-    social_figure.savefig(social_path, dpi=120, facecolor="white")
-    plt.close(social_figure)
-    outputs["social_png"] = social_path
+    if include_social:
+        plt, social_figure = _create_pair_overhead_figure(
+            trajectory_sets,
+            first=first,
+            second=second,
+            comparison=comparison,
+            first_label=first_label,
+            second_label=second_label,
+            target_x=target_x,
+            social=True,
+        )
+        social_path = output_stem.with_name(output_stem.name + "_social.png")
+        social_figure.savefig(social_path, dpi=120, facecolor="white")
+        plt.close(social_figure)
+        outputs["social_png"] = social_path
     return outputs
 
 
-def _render_pair_figures(
-    pair: dict[str, Any], output_dir: Path
+def _render_pair_figures_core(
+    pair: dict[str, Any],
+    output_dir: Path,
+    *,
+    figure_kinds: frozenset[str] | None = None,
 ) -> list[dict[str, Any]]:
     first, second = pair["first"], pair["second"]
     if first.get("status") != "completed" or second.get("status") != "completed":
@@ -728,22 +820,7 @@ def _render_pair_figures(
         raise ValueError(
             f"pair references lack source protocol: {first['cell']} vs {second['cell']}"
         )
-    loaded = []
-    for ref in (first, second):
-        directory = Path(ref["source_root"]) / ref["cell"]
-        endpoints, _ = _supported_endpoints(
-            directory / "shots.csv.gz", int(ref["config"]["n_shots"])
-        )
-        loaded.append(endpoints)
-    common = sorted(
-        set.intersection(
-            *(
-                {index for index, _, _ in endpoint_map[pattern]}
-                for endpoint_map in loaded
-                for pattern in _PATTERNS
-            )
-        )
-    )
+
     comparison = pair["comparison_kind"]
     first_label = _pair_condition_label(comparison, first)
     second_label = _pair_condition_label(comparison, second)
@@ -751,159 +828,253 @@ def _render_pair_figures(
     stem = output_dir / "comparisons" / _slug(label)
     target = pair["target_x_m"]
     ledger: list[dict[str, Any]] = []
-    if len(common) >= 2:
-        point_sets: dict[str, list[tuple[float, float]]] = {}
-        for condition_label, endpoint_map in zip(
-            (first_label, second_label), loaded, strict=True
+
+    needs_density = figure_kinds is None or bool(
+        {"density_png", "density_pdf", "density_svg"} & figure_kinds
+    )
+
+    if needs_density:
+        loaded = []
+        for ref in (first, second):
+            directory = Path(ref["source_root"]) / ref["cell"]
+            endpoints, _ = _supported_endpoints(
+                directory / "shots.csv.gz", int(ref["config"]["n_shots"])
+            )
+            loaded.append(endpoints)
+        common = sorted(
+            set.intersection(
+                *(
+                    {index for index, _, _ in endpoint_map[pattern]}
+                    for endpoint_map in loaded
+                    for pattern in _PATTERNS
+                )
+            )
+        )
+        if len(common) >= 2:
+            point_sets: dict[str, list[tuple[float, float]]] = {}
+            for condition_label, endpoint_map in zip(
+                (first_label, second_label), loaded, strict=True
+            ):
+                by_pattern = {
+                    name: {idx: (x, y) for idx, x, y in endpoint_map[name]}
+                    for name in _PATTERNS
+                }
+                for pattern in _PATTERNS:
+                    name = f"{pattern} · {condition_label}"
+                    point_sets[name] = [by_pattern[pattern][index] for index in common]
+
+            density_formats = (
+                ("png", "pdf", "svg")
+                if figure_kinds is None
+                else tuple(
+                    k.removeprefix("density_")
+                    for k in ("density_png", "density_pdf", "density_svg")
+                    if k in figure_kinds
+                )
+            )
+            if density_formats:
+                density_paths = namespace_figure_paths(
+                    "density",
+                    _write_pair_density_figure(
+                        point_sets,
+                        first=first,
+                        second=second,
+                        comparison=comparison,
+                        first_label=first_label,
+                        second_label=second_label,
+                        target_x=target,
+                        common_n=len(common),
+                        output_stem=stem.with_name(stem.name + "_density"),
+                        formats=density_formats,
+                    ),
+                )
+                for kind, path in density_paths.items():
+                    if figure_kinds is None or kind in figure_kinds:
+                        ledger.append(
+                            {
+                                "figure_kind": kind,
+                                "presentation": "academic",
+                                "physical_pattern": None,
+                                "source_kind": "six_population_common_index_comparison",
+                                "comparison_kind": comparison,
+                                "first_cell": first["cell"],
+                                "second_cell": second["cell"],
+                                "first_protocol": first["source_protocol"],
+                                "second_protocol": second["source_protocol"],
+                                "common_supported_n": len(common),
+                                "total_n_per_population": first["config"]["n_shots"],
+                                "conditioning": "same shot indices supported in all six populations",
+                                "target_x_m": target,
+                                "relative_path": str(path.relative_to(output_dir)),
+                                "sha256": _sha256(path),
+                            }
+                        )
+
+            if figure_kinds is None:
+                pair_scenario = _pair_social_scenario(comparison, first, second)
+                social_club = (
+                    str(first["config"]["club"]["club_id"]).replace("_", " ").title()
+                )
+                m0 = _cell_target_mode(first)
+                m1 = _cell_target_mode(second)
+                social_density_paths = write_pair_social_density(
+                    point_sets,
+                    stem.with_name(stem.name + "_density"),
+                    condition_labels=(first_label, second_label),
+                    scenario=pair_scenario,
+                    social_club=social_club,
+                    target_point_m=(target, 0.0),
+                    total_n=int(first["config"]["n_shots"]),
+                    delivery_noise=_noise_profile_description(
+                        _condition(first)["profile"], first["config"]["noise"]
+                    ),
+                    source_protocols=(p0, p1),
+                    target_modes=(m0, m1),
+                )
+                for key, path in social_density_paths.items():
+                    pattern_lower, ext = key.split("_", 1)
+                    pattern = pattern_lower.title()
+                    ledger.append(
+                        {
+                            "figure_kind": f"density_{pattern_lower}_social_{ext}",
+                            "presentation": "social",
+                            "physical_pattern": pattern,
+                            "source_kind": "six_population_common_index_comparison",
+                            "comparison_kind": comparison,
+                            "first_cell": first["cell"],
+                            "second_cell": second["cell"],
+                            "first_protocol": first["source_protocol"],
+                            "second_protocol": second["source_protocol"],
+                            "common_supported_n": len(common),
+                            "total_n_per_population": first["config"]["n_shots"],
+                            "conditioning": "same shot indices supported in all six populations",
+                            "target_x_m": target,
+                            "relative_path": str(path.relative_to(output_dir)),
+                            "sha256": _sha256(path),
+                        }
+                    )
+        else:
+            ledger.append(
+                {
+                    "figure_kind": "paired_density",
+                    "source_kind": "six_population_common_index_comparison",
+                    "comparison_kind": comparison,
+                    "first_cell": first["cell"],
+                    "second_cell": second["cell"],
+                    "status": "unavailable",
+                    "reason": "fewer than two indices supported in all six populations",
+                }
+            )
+
+    needs_overhead = figure_kinds is None or bool(
+        {"overhead_png", "overhead_pdf", "overhead_svg", "overhead_social_png"}
+        & figure_kinds
+    )
+
+    if needs_overhead:
+        trajectory_sets: dict[str, list[Any]] = {}
+        for label_condition, ref in zip(
+            (first_label, second_label), (first, second), strict=True
         ):
-            by_pattern = {
-                name: {idx: (x, y) for idx, x, y in endpoint_map[name]}
-                for name in _PATTERNS
-            }
+            directory = Path(ref["source_root"]) / ref["cell"]
+            flight = json.loads((directory / "flight_samples.json").read_text())
+            paths_by_pattern = flight.get("trajectories", {})
             for pattern in _PATTERNS:
-                name = f"{pattern} · {condition_label}"
-                point_sets[name] = [by_pattern[pattern][index] for index in common]
-        density_paths = namespace_figure_paths(
-            "density",
-            _write_pair_density_figure(
-                point_sets,
-                first=first,
-                second=second,
-                comparison=comparison,
-                first_label=first_label,
-                second_label=second_label,
-                target_x=target,
-                common_n=len(common),
-                output_stem=stem.with_name(stem.name + "_density"),
-            ),
-        )
-        for kind, path in density_paths.items():
+                key = f"{pattern} · {label_condition}"
+                trajectory_sets[key] = paths_by_pattern.get(pattern, [])
+        if any(not trajectory_sets[name] for name in trajectory_sets):
             ledger.append(
                 {
-                    "figure_kind": kind,
-                    "presentation": "academic",
-                    "physical_pattern": None,
-                    "source_kind": "six_population_common_index_comparison",
-                    "comparison_kind": comparison,
-                    "first_cell": first["cell"],
-                    "second_cell": second["cell"],
-                    "first_protocol": first["source_protocol"],
-                    "second_protocol": second["source_protocol"],
-                    "common_supported_n": len(common),
-                    "total_n_per_population": first["config"]["n_shots"],
-                    "conditioning": "same shot indices supported in all six populations",
-                    "target_x_m": target,
-                    "relative_path": str(path.relative_to(output_dir)),
-                    "sha256": _sha256(path),
-                }
-            )
-        pair_scenario = _pair_social_scenario(comparison, first, second)
-        social_club = str(first["config"]["club"]["club_id"]).replace("_", " ").title()
-        m0 = _cell_target_mode(first)
-        m1 = _cell_target_mode(second)
-        social_density_paths = write_pair_social_density(
-            point_sets,
-            stem.with_name(stem.name + "_density"),
-            condition_labels=(first_label, second_label),
-            scenario=pair_scenario,
-            social_club=social_club,
-            target_point_m=(target, 0.0),
-            total_n=int(first["config"]["n_shots"]),
-            delivery_noise=_noise_profile_description(
-                _condition(first)["profile"], first["config"]["noise"]
-            ),
-            source_protocols=(p0, p1),
-            target_modes=(m0, m1),
-        )
-        for key, path in social_density_paths.items():
-            pattern_lower, ext = key.split("_", 1)
-            pattern = pattern_lower.title()
-            ledger.append(
-                {
-                    "figure_kind": f"density_{pattern_lower}_social_{ext}",
-                    "presentation": "social",
-                    "physical_pattern": pattern,
-                    "source_kind": "six_population_common_index_comparison",
-                    "comparison_kind": comparison,
-                    "first_cell": first["cell"],
-                    "second_cell": second["cell"],
-                    "first_protocol": first["source_protocol"],
-                    "second_protocol": second["source_protocol"],
-                    "common_supported_n": len(common),
-                    "total_n_per_population": first["config"]["n_shots"],
-                    "conditioning": "same shot indices supported in all six populations",
-                    "target_x_m": target,
-                    "relative_path": str(path.relative_to(output_dir)),
-                    "sha256": _sha256(path),
-                }
-            )
-    else:
-        ledger.append(
-            {
-                "figure_kind": "paired_density",
-                "source_kind": "six_population_common_index_comparison",
-                "comparison_kind": comparison,
-                "first_cell": first["cell"],
-                "second_cell": second["cell"],
-                "status": "unavailable",
-                "reason": "fewer than two indices supported in all six populations",
-            }
-        )
-    trajectory_sets: dict[str, list[Any]] = {}
-    for label_condition, ref in zip(
-        (first_label, second_label), (first, second), strict=True
-    ):
-        directory = Path(ref["source_root"]) / ref["cell"]
-        flight = json.loads((directory / "flight_samples.json").read_text())
-        paths_by_pattern = flight.get("trajectories", {})
-        for pattern in _PATTERNS:
-            key = f"{pattern} · {label_condition}"
-            trajectory_sets[key] = paths_by_pattern.get(pattern, [])
-    if any(not trajectory_sets[name] for name in trajectory_sets):
-        ledger.append(
-            {
-                "figure_kind": "paired_overhead",
-                "source_kind": "saved_illustrative_trajectory_samples",
-                "comparison_kind": comparison,
-                "first_cell": first["cell"],
-                "second_cell": second["cell"],
-                "status": "unavailable",
-                "reason": "one source lacks saved raw trajectory samples",
-            }
-        )
-    else:
-        overhead_paths = namespace_figure_paths(
-            "overhead",
-            _write_pair_overhead_figure(
-                trajectory_sets,
-                first=first,
-                second=second,
-                comparison=comparison,
-                first_label=first_label,
-                second_label=second_label,
-                target_x=target,
-                output_stem=stem.with_name(stem.name + "_overhead"),
-            ),
-        )
-        for kind, path in overhead_paths.items():
-            ledger.append(
-                {
-                    "figure_kind": kind,
-                    "presentation": "social" if "social" in kind else "academic",
-                    "physical_pattern": None,
+                    "figure_kind": "paired_overhead",
                     "source_kind": "saved_illustrative_trajectory_samples",
                     "comparison_kind": comparison,
                     "first_cell": first["cell"],
                     "second_cell": second["cell"],
-                    "first_protocol": first["source_protocol"],
-                    "second_protocol": second["source_protocol"],
-                    "conditioning": "saved raw trajectories, not paired by shot index",
-                    "target_x_m": target,
-                    "saved_trajectory_samples_by_pattern": {
-                        key: len(paths) for key, paths in trajectory_sets.items()
-                    },
-                    "relative_path": str(path.relative_to(output_dir)),
-                    "sha256": _sha256(path),
+                    "status": "unavailable",
+                    "reason": "one source lacks saved raw trajectory samples",
                 }
             )
+        else:
+            acad_formats = (
+                ("png", "pdf", "svg")
+                if figure_kinds is None
+                else tuple(
+                    k.removeprefix("overhead_")
+                    for k in ("overhead_png", "overhead_pdf", "overhead_svg")
+                    if k in figure_kinds
+                )
+            )
+            inc_social = (
+                True if figure_kinds is None else "overhead_social_png" in figure_kinds
+            )
+            if acad_formats or inc_social:
+                overhead_paths = namespace_figure_paths(
+                    "overhead",
+                    _write_pair_overhead_figure(
+                        trajectory_sets,
+                        first=first,
+                        second=second,
+                        comparison=comparison,
+                        first_label=first_label,
+                        second_label=second_label,
+                        target_x=target,
+                        output_stem=stem.with_name(stem.name + "_overhead"),
+                        academic_formats=acad_formats,
+                        include_social=inc_social,
+                    ),
+                )
+                for kind, path in overhead_paths.items():
+                    if figure_kinds is None or kind in figure_kinds:
+                        ledger.append(
+                            {
+                                "figure_kind": kind,
+                                "presentation": "social"
+                                if "social" in kind
+                                else "academic",
+                                "physical_pattern": None,
+                                "source_kind": "saved_illustrative_trajectory_samples",
+                                "comparison_kind": comparison,
+                                "first_cell": first["cell"],
+                                "second_cell": second["cell"],
+                                "first_protocol": first["source_protocol"],
+                                "second_protocol": second["source_protocol"],
+                                "conditioning": "saved raw trajectories, not paired by shot index",
+                                "target_x_m": target,
+                                "saved_trajectory_samples_by_pattern": {
+                                    key: len(paths)
+                                    for key, paths in trajectory_sets.items()
+                                },
+                                "relative_path": str(path.relative_to(output_dir)),
+                                "sha256": _sha256(path),
+                            }
+                        )
+
     return ledger
+
+
+def _render_pair_figures(
+    pair: dict[str, Any], output_dir: Path
+) -> list[dict[str, Any]]:
+    return _render_pair_figures_core(pair, output_dir, figure_kinds=None)
+
+
+def render_selected_pair_figures(
+    pair: dict[str, Any],
+    output_dir: Path,
+    *,
+    figure_kinds: frozenset[str],
+) -> list[dict[str, Any]]:
+    """Export explicitly requested subset of pair figures without extra files."""
+    if not isinstance(figure_kinds, frozenset):
+        raise TypeError(
+            f"figure_kinds must be a frozenset[str], got {type(figure_kinds).__name__}"
+        )
+    if not figure_kinds:
+        raise ValueError("figure_kinds must not be empty")
+    unknown = figure_kinds - CLOSED_SELECTED_FIGURE_KINDS
+    if unknown:
+        raise ValueError(
+            f"unsupported figure_kinds: {sorted(unknown)}; "
+            f"must be a subset of {sorted(CLOSED_SELECTED_FIGURE_KINDS)}"
+        )
+    return _render_pair_figures_core(pair, output_dir, figure_kinds=figure_kinds)
