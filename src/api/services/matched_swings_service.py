@@ -22,7 +22,10 @@ from src.shared.python.motion_matching.ledger import (
     find_repo_root,
 )
 from src.shared.python.motion_matching.ledger_schema import Ledger, LedgerRow
-from src.tools.matched_swing_browser.model import MatchedSwingBrowserModel
+from src.tools.matched_swing_browser.model import (
+    MatchedSwingBrowserModel,
+    MatchedSwingFilter,
+)
 
 __all__ = [
     "MatchedSwingJobError",
@@ -107,6 +110,7 @@ class RunSummary:
     metrics: dict[str, float | None]
     capabilities: RunCapabilities
     reason: str | None = None
+    qualification_note: str | None = None
     gates: list[PhysicalGate] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
@@ -122,6 +126,7 @@ class RunSummary:
             "metrics": self.metrics,
             "capabilities": self.capabilities.to_dict(),
             "reason": self.reason,
+            "qualification_note": self.qualification_note,
             "gates": [gate.to_dict() for gate in self.gates],
         }
 
@@ -147,9 +152,10 @@ class MatchedSwingsService:
         return self._repo_root
 
     @precondition(
-        lambda self, capture=None, drive_mode=None, ranked=False: (
+        lambda self, capture=None, drive_mode=None, profile=None, ranked=False: (
             (capture is None or isinstance(capture, str))
             and (drive_mode is None or isinstance(drive_mode, str))
+            and (profile is None or isinstance(profile, str))
             and isinstance(ranked, bool)
         )
     )
@@ -159,18 +165,25 @@ class MatchedSwingsService:
         *,
         capture: str | None = None,
         drive_mode: str | None = None,
+        profile: str | None = None,
         ranked: bool = False,
     ) -> list[RunSummary]:
-        """Return ledger rows as public summaries, optionally filtered and ranked by ascending RMSE."""
+        """Return ledger rows as public summaries, optionally filtered and ranked by ascending RMSE.
+
+        ``profile`` reuses :meth:`MatchedSwingBrowserModel.filter_rows`'s
+        dynamic/kinematic rule (desktop parity, DRY) and is applied before
+        ranking, matching the desktop's filter-then-rank order
+        (``MatchedSwingBrowserWidget._apply_filters``).
+        """
         rows = self._load_rows()
+        if profile:
+            rows = self._browser.filter_rows(rows, MatchedSwingFilter(profile=profile))
         if ranked:
             ranked_rows = self._browser.rank_candidates(
                 rows, capture=capture, drive_mode=drive_mode
             )
             return [self._to_summary(row) for row in ranked_rows]
         if capture or drive_mode:
-            from src.tools.matched_swing_browser.model import MatchedSwingFilter
-
             crit = MatchedSwingFilter(
                 capture=capture or "", drive_mode=drive_mode or ""
             )
@@ -451,8 +464,25 @@ class MatchedSwingsService:
             metrics=metrics,
             capabilities=caps,
             reason=row.reason,
+            qualification_note=self._qualification_note(row),
             gates=self._extract_gates(row),
         )
+
+    @staticmethod
+    def _qualification_note(row: LedgerRow) -> str | None:
+        """Extract the acceptance qualification note.
+
+        Mirrors ``MatchedSwingBrowserWidget._populate_gates_info`` in
+        gui.py, which reads ``row.acceptance.get("qualification_note")`` for
+        the desktop rejection/qualification text only when the acceptance
+        block records gates (otherwise it shows ``reason``). Unlike the
+        desktop widget, this does not fall back to ``reason`` — ``reason``
+        stays a separate field and callers display ``note ?? reason``.
+        """
+        if not row.acceptance or "gates" not in row.acceptance:
+            return None
+        note = row.acceptance.get("qualification_note")
+        return note if isinstance(note, str) and note.strip() else None
 
     @staticmethod
     def _candidate_profile(row: LedgerRow) -> str | None:
