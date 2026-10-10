@@ -742,6 +742,9 @@ class Lane:
             prior_weight=PRIOR,
             flat_feet_per_frame=self.stance,
             plant_stance=True,
+            # Foot progression makes the address feet a receipted choice, so
+            # the swing keeps them instead of re-fitting frame 0 (#12222).
+            anchor_stance_at_init=self.feet is not None,
             bounds=self.bounds,
             marker_weights={**self.marker_weights, **self.split_marker_weights},
             prior_weights=self.prior_weights,

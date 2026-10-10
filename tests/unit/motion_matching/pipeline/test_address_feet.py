@@ -205,6 +205,40 @@ def test_lane_leg_seeds_only_square_the_forefoot_when_enabled() -> None:
     assert squared["RAnkleOut"] == LEG_SEEDS["RAnkleOut"]
 
 
+@pytest.mark.parametrize("feet", [None, _targets(16.0, 4.0)])
+def test_lane_trajectory_holds_the_address_feet_only_when_enabled(feet) -> None:
+    """With foot progression on, the swing IK keeps the calibrated address
+    feet: its stance anchors start at ``q_start`` (#12222). Off keeps the
+    first frame's own fit, so canonical ``off`` runs are unchanged."""
+    import json
+    from pathlib import Path
+    from unittest.mock import MagicMock
+
+    from src.shared.python.motion_matching.pipeline.constants import capture_path
+    from src.shared.python.motion_matching.pipeline.lane import Lane, configure_lane
+
+    root = Path(__file__).resolve().parents[4]
+    spec = json.loads(
+        (
+            root / "docs/development/full_body_models/full_body_spec_anthro_driver.json"
+        ).read_text(encoding="utf-8")
+    )
+    upper = {
+        label: a["body"]
+        for label, a in spec["marker_attachments"].items()
+        if a["offset_m"] is not None
+    }
+    lane = Lane(tuple({**upper, **LEG_SEEDS}), capture_path("driver"))
+    configure_lane(lane, spec)
+    lane.feet = feet
+    kin = MagicMock()
+    kin.solve_trajectory.return_value = (np.zeros((1, 3)), [])
+    lane.trajectory(kin, np.zeros(3), frames=[0])
+    kwargs = kin.solve_trajectory.call_args.kwargs
+    assert kwargs["plant_stance"] is True
+    assert kwargs["anchor_stance_at_init"] is (feet is not None)
+
+
 @pytest.mark.parametrize("sign_l", [-1.0, 1.0])
 def test_seed_hip_rotation_is_sign_safe_for_mirrored_and_unmirrored_left_axes(
     sign_l: float,
