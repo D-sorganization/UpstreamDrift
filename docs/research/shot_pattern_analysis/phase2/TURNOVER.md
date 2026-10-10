@@ -40,6 +40,16 @@ Supplemental v3 has written the full numeric JSON/CSV/Markdown tables and begun 
 
 The 72 PW primary supplement cell PNGs (18 cells × academic/social density/overhead) now have 12 contact-sheet and six full-size inspections, with all 72 corresponding PDF condition/support labels checked against saved records. No new defects. Provisional receipt `validation/supplement_v3_graphical_review/root_pw_primary_cells/review.json` SHA-256 `2e0e8073d483bd164a649db4df419f437d2c249bb59b1f8464bf4776960c764a`; final producer-manifest reconciliation remains required.
 
+## Supplemental Standalone Caption Finding
+
+Astra completed all 32 supplemental control-cell PNGs with four contact sheets and six full-size views; layout and counts pass provisionally. However, standalone context is incomplete: all 52 social-cell SVGs (36 primary PW, 16 controls) omit actual source protocol and numeric matched target, as do all 29 completed pair-social-density SVGs inspected at that snapshot. Pair-overhead already identifies ordered protocols/target. The prior 72-image primary review remains layout/count evidence, not acceptance of standalone context. See `validation/supplement_v3_graphical_review/astra_control_cells/`: review SHA-256 `c540d701c1678eefa1199ef3bf1a6f58223605f5dbed3360b8a121c0cfe8d04b`, scope SHA-256 `ea603e5caeab2e60e9d5a2a440cc3d146532742c9eb286dc17e9913c4a7e1494`. Root verified both receipts.
+
+AGY Gemini 3.8 Flash High is filing and fixing this narrow finding in the isolated, clean FINAL_LAYOUT checkout: `/home/dieterolson/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift`, branch `codex/shot-pattern-social-context`, based on `c46133676d`. Full `src` and relevant tests were restored; docs stay sparse. Session 80872, log `/tmp/p2-social-context-repair-agy.log`, task `/tmp/p2-social-context-repair-prompt.txt`; expected report `/tmp/p2-social-context-candidate.md`. TDD, scoped Ruff/Mypy, local candidate commit only; no pipeline/provenance changes, no push. MAIN and BOUNDS remain frozen. Astra will independently review the candidate after it is ready.
+
+No production job has been stopped for this finding. After code and actual-card qualification, use the supported fresh saved-data pipeline rather than weakening current-source verification or introducing unqualified mixed-origin receipts. Any intentional retirement of defective partial v3 graphics must first preserve input/source identity, numerical tables, outputs and an explicit terminal receipt. It is a reporting correction; do not rerun Monte Carlo or rewrite execution evidence.
+
+The original caption execution update was posted by AGY and verified through GitHub: [Issue #11975, Comment 6095889221](https://github.com/D-sorganization/UpstreamDrift/issues/11975#issuecomment-6095889221). V6 primary rendering started at 08:57:06 UTC from the qualified BOUNDS module. Both v6 and supplemental v3 were directly confirmed live at this checkpoint.
+
 ## Completed Numerical Data
 
 All simulation workers, full saved-data audits and fresh archive restorations are finished. Do not restart them.
