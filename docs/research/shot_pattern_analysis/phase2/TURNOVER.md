@@ -29,6 +29,10 @@ A separate social comparison caption omits the name of the varied SD: “SD 1° 
 
 Primary v4 rendering completed at 08:20 UTC with exit 0; its control child is PID 2931448 (revalidate). All 689 primary manifest outputs pass SHA verification, and all 288 PNGs now have contact-sheet review with selected full-size checks. The 30 comparisons have only the known shaft-SD caption finding; all 90 matrix layouts pass this visual scope. See `primary_manifest_reconciliation.json`, `root_social_comparisons/`, and `root_primary_matrix/` within `validation/original_final_graphics_independent_review_v4/`. Final acceptance still requires corrected captions and remaining control/supplemental publication.
 
+All 104 original fixed-target control detail PNGs now have provisional contact-sheet review: Driver24 and PW32 by Astra, 7-iron48 by root, with six/six/four full-size checks respectively. All saved support/config labels and fixed-target identities checked; no new detail-scope defects. Root verified Astra receipts and output hashes. Evidence: `astra_control_driver_details/` (receipt `bffba6a3d564ad24adf8f17a17f131ad8715dc72faa6c7314c7a0a9f091b6bfb`), `root_control_seven_iron_details/` (`4bcb19530ad4d9e7281d6d51a3a24981a913b50d16c9781ce974a824f5a92c38`), and `astra_control_pitching_wedge_details/` (`21259425d43323b1a04e9ba20da65769ab83c063f278e68e4d23a6e3f0279c64`) within the v4 review directory. Reconcile with final manifest after the producer ends; social/matrix control review remains pending.
+
+Supplemental v3 has written the full numeric JSON/CSV/Markdown tables and begun graphics rendering (process 2862533 confirmed live at about58minutes elapsed). Astra is comparing the current tables with preserved v2 numerical output and checking the selected fixed-target interactions. This is provisional until full pipeline receipt and source/output reconciliation pass; do not interrupt the rendering process or accept incomplete outputs.
+
 ## Completed Numerical Data
 
 All simulation workers, full saved-data audits and fresh archive restorations are finished. Do not restart them.
