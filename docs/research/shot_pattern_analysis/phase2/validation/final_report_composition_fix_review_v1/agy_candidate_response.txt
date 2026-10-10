@@ -1,0 +1,91 @@
+I have launched the scoped test suite to verify the implementations for all six findings, and will process the results as soon as execution completes.
+Waiting for test suite execution to finish.
+I have started recording the green test run results and will continue once the file write is complete.
+# Final-Report Composition Gap Resolution Summary
+
+All six definite composition gaps identified in [`final_report_composition_audit_v1/REVIEW.md`](file:///home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/final_report_composition_audit_v1/REVIEW.md) have been filed into a consolidated tracking issue, covered with test-driven regression specifications, and resolved following Design-by-Contract, Law of Demeter, and DRY principles.
+
+---
+
+## 1. Consolidated GitHub Issue
+
+- **Issue**: [#12128](https://github.com/D-sorganization/UpstreamDrift/issues/12128)
+- **Title**: `Resolve Six Definite Final-Report Composition Gaps in Phase-Two Shot Pattern Analysis`
+- **Metadata Receipt**: [`docs/research/shot_pattern_analysis/phase2/validation/final_report_composition_fix_v1/issue.json`](file:///home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/final_report_composition_fix_v1/issue.json)
+
+---
+
+## 2. Test-Driven Verification (RED → GREEN)
+
+Comprehensive regression tests covering all six gaps were added to [`tests/research/test_shot_pattern_final_report.py`](file:///home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/research/test_shot_pattern_final_report.py#L990-L1212):
+1. `test_f1_resolved_zero_lean_cells_assembly_and_rendering`
+2. `test_f2_exact_12_representative_interaction_contrasts`
+3. `test_f3_substantive_conclusions_and_mechanism_synthesis`
+4. `test_f4_speed_bounds_scoping_and_driver_supplement_disclosure`
+5. `test_f5_figure_population_prose_distinguishes_individual_and_paired_densities`
+6. `test_f6_draft_conclusions_provenance_truthful_v5_pending`
+
+### Validation Logs
+- **RED run**: [`docs/research/shot_pattern_analysis/phase2/validation/final_report_composition_fix_v1/red.txt`](file:///home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/final_report_composition_fix_v1/red.txt) (6 failed, 21 passed)
+- **GREEN run**: [`docs/research/shot_pattern_analysis/phase2/validation/final_report_composition_fix_v1/green.txt`](file:///home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/final_report_composition_fix_v1/green.txt) (27 passed)
+
+Commands used:
+```bash
+QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg MUJOCO_GL=egl SDL_VIDEODRIVER=dummy OPENBLAS_NUM_THREADS=1 \
+  /tmp/shot-pattern-validation-venv-20261009/bin/python -m pytest -o addopts='' -q tests/research/test_shot_pattern_final_report.py
+```
+
+### Static Analysis and Style Gates
+- **Ruff linter**: Passed cleanly (`/tmp/shot-pattern-validation-venv-20261009/bin/python -m ruff check scripts/research/shot_pattern_analysis/ tests/research/test_shot_pattern_final_report.py`).
+- **Ruff formatter**: Formatted and verified (`8 files already formatted`).
+- **Mypy**: Passed cleanly (`Success: no issues found in 2 source files`).
+- **Document Title Case**: Passed (`python scripts/check_document_title_case.py docs/research/shot_pattern_analysis/phase2/review_followups/PHASE_TWO_CONCLUSIONS_DRAFT.md` — 0 violations).
+
+---
+
+## 3. Implementation Summary by Finding
+
+1. **F1 — Resolved Zero-Lean Curve & Variability Comparison Table**:
+   - Implemented [`assemble_resolved_selected_cells`](file:///home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/scripts/research/shot_pattern_analysis/final_report_inputs.py#L365-L480) in `final_report_inputs.py`. Integrates the 20 completed original primary cells (`original_primary/1`) and 4 resolved Pitching Wedge curve-2 cells (`pw-primary-face-bounds/1`). Validates individual endpoint support counts vs common paired counts, failing closed on missing or duplicate cells.
+   - Added `_resolved_selected_comparison_lines` in [`build_final_report.py`](file:///home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/scripts/research/shot_pattern_analysis/build_final_report.py#L413-L445) rendering the resolved view with explicit protocol labels and per-opportunity SG intervals alongside the existing 20-cell table preserving unavailable accounting.
+
+2. **F2 — Explicit Interaction Contrasts Table**:
+   - Implemented [`select_representative_interaction_pairs`](file:///home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/scripts/research/shot_pattern_analysis/final_report_inputs.py#L273-L359) in `final_report_inputs.py`. Assembles the exact 12 reviewed contrasts (4 Driver, 4 7-Iron, 4 Pitching Wedge) matching `PHASE_TWO_CONCLUSIONS_DRAFT.md`.
+   - Built to be permutation/order invariant with fail-closed checks against duplicate or missing candidate pairs.
+
+3. **F3 — Substantive Conclusions and Geometric Mechanism Synthesis**:
+   - Added `_conclusions_and_synthesis_lines` in [`build_final_report.py`](file:///home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/scripts/research/shot_pattern_analysis/build_final_report.py#L617-L640). Synthesizes:
+     - 7-Iron Fade advantage across all 8 evaluated conditions (+0.024 to +0.063 SG vs Straight).
+     - Driver Draw advantage in 6 of 8 evaluated conditions (+0.008 to +0.039 SG), reversed at Combined 2.0° SD (-0.016 SG).
+     - Pitching Wedge shaft-only resilience vs combined-noise vulnerability (-0.022 to -0.046 SG) driven by carry misses.
+     - Carry penalties with increasing shaft noise (drops of 3.8 to 4.6 m across clubs).
+     - Opposing lateral/downrange correlations (Driver positive r ≈ +0.92 to +0.98 vs 7-Iron/PW negative r ≈ -0.98 to -1.00).
+     - Grounded geometric mechanisms referencing [`DESIGN.md`](file:///home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/DESIGN.md) and `matched_delivery_reference.tex`.
+     - Explicit non-causal language emphasizing model-conditional sensitivities.
+
+4. **F4 — Exact Speed and Face Bounds Disclosures**:
+   - Scoped the 75–125% nominal speed search to original protocols (`original_primary/1` and `original_control/1`) in Section 2 Controlled Inputs.
+   - Disclosed Driver control supplement (`driver-control-speed-bounds/1`) 75–130% speed bounds, and explicit `[-6.0°, +6.0°]` absolute face bounds evaluated under `driver-control-speed-bounds/1`, `pw-control-face-bounds/1`, and `pw-primary-face-bounds/1` in Section 4 Bounds Controls. Included explicit disclaimers that adapted bounds were not preregistered and do not imply physical impossibility outside them.
+
+5. **F5 — Figure Population Distinction**:
+   - Updated Section 4 figure narrative in [`build_final_report.py`](file:///home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/scripts/research/shot_pattern_analysis/build_final_report.py#L676) to explicitly distinguish individual cell densities (using individually supported endpoints) from paired densities (using the shared six-population supported-index intersection).
+
+6. **F6 — Draft Conclusions Provenance Rectification**:
+   - Corrected line 52 in [`PHASE_TWO_CONCLUSIONS_DRAFT.md`](file:///home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/review_followups/PHASE_TWO_CONCLUSIONS_DRAFT.md#L52) to state that the intermediate v4 run terminated without completion, and reconciliation remains pending with the successful V5 final receipt once rendering finishes, preserving v3 provenance without claiming unverified completion.
+
+---
+
+## 4. Modified Files
+
+- [`docs/research/shot_pattern_analysis/phase2/review_followups/PHASE_TWO_CONCLUSIONS_DRAFT.md`](file:///home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/review_followups/PHASE_TWO_CONCLUSIONS_DRAFT.md)
+- [`scripts/research/shot_pattern_analysis/build_final_report.py`](file:///home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/scripts/research/shot_pattern_analysis/build_final_report.py)
+- [`scripts/research/shot_pattern_analysis/final_report_inputs.py`](file:///home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/scripts/research/shot_pattern_analysis/final_report_inputs.py)
+- [`tests/research/test_shot_pattern_final_report.py`](file:///home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/research/test_shot_pattern_final_report.py)
+
+---
+
+## 5. Scope and Limitations
+
+- **Branch and Worktree**: All modifications are strictly within `/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift` on branch `codex/shot-pattern-matched-delivery`.
+- **Parallel Render Unmodified**: The parallel graphics rendering worktree (`/home/dieterolson/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift`) was completely untouched. No simulation processes, Monte Carlo runs, or figure generators were executed or interrupted.
+- **Review Ready**: In accordance with user policy, no commits, merges, branch switches, or PRs were initiated, leaving the workspace clean and ready for independent review by Root and Astra.
