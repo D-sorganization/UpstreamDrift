@@ -1,0 +1,60 @@
+{
+  "scope": "Relocated operational diagnostics helper; no visual/full publication acceptance",
+  "source_sha256": {
+    "scripts/research/shot_pattern_analysis/vector_inspection.py": "268742868c39d6d642c32ad9eae1fdda364bf66cf03ebb3a767f7d218699b51a",
+    "tests/research/test_shot_pattern_vector_inspection.py": "eb5516c1ea0bde0a83ba7ed06ade7cacbb8b03c2a707c0f55ea08d76b9391a11"
+  },
+  "checks": {
+    "ruff": {
+      "command": [
+        "/tmp/shot-pattern-validation-venv-20261009/bin/python",
+        "-m",
+        "ruff",
+        "check",
+        "scripts/research/shot_pattern_analysis/vector_inspection.py",
+        "tests/research/test_shot_pattern_vector_inspection.py"
+      ],
+      "exit_code": 0
+    },
+    "format": {
+      "command": [
+        "/tmp/shot-pattern-validation-venv-20261009/bin/python",
+        "-m",
+        "ruff",
+        "format",
+        "--check",
+        "scripts/research/shot_pattern_analysis/vector_inspection.py",
+        "tests/research/test_shot_pattern_vector_inspection.py"
+      ],
+      "exit_code": 0
+    },
+    "mypy": {
+      "command": [
+        "/tmp/shot-pattern-validation-venv-20261009/bin/python",
+        "-m",
+        "mypy",
+        "--python-version",
+        "3.12",
+        "--follow-imports=silent",
+        "scripts/research/shot_pattern_analysis/vector_inspection.py",
+        "tests/research/test_shot_pattern_vector_inspection.py"
+      ],
+      "exit_code": 0
+    },
+    "pytest": {
+      "command": [
+        "/tmp/shot-pattern-validation-venv-20261009/bin/python",
+        "-m",
+        "pytest",
+        "-o",
+        "addopts=",
+        "-q",
+        "tests/research/test_shot_pattern_vector_inspection.py"
+      ],
+      "exit_code": 0
+    }
+  },
+  "completed_sample_sha256": "4ad4803e6e4f8e0c4871cb5fc3fb1eb4a03ea568252b63394d2500e85f07d825",
+  "source_identical_to_astra": true,
+  "test_changes": "Canonical package imports, optional GUI/PDF dependency skip, unit marker and formatter only"
+}

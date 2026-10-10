@@ -82,3 +82,7 @@ For an artifact not directly viewed by a human, the final statement must say **a
 Aggregate full6,456 path/hash coverage with exact2,024 PDF,2,024 SVG and2,408 PNG counts and all410 scientific records. Keep structural/content/render success separate from visual decisions and unresolved findings. Rehash sources, terminal receipt, ledger and outputs at the end; retain seven-number-file equality. Any mutation invalidates the affected snapshot. Final prose should report actual automated and human coverage counts separately.
 
 This qualifies a graphical publication component only. It does not compile the user's editable LaTeX, accept the final assembled report PDF, validate the model empirically, or establish PR/transport completion. No additional scientific calculation, Monte Carlo run or bootstrap is necessary for this review.
+
+## Qualified Parsing Helper
+
+The canonical `scripts.research.shot_pattern_analysis.vector_inspection` module now provides hash-bound PDF/SVG parsing/resource diagnostics through `inspect_pdf`, `inspect_svg` and `inspect_vector`. See [Qualification](../vector_inspection_qualification_v1/README.md). Its 37 regression tests and completed original sample checks pass. Use it only after this plan’s terminal/strict-loader boundary; rendering, scientific label reconciliation, bounds and visual decisions remain separate. Do not add it retroactively to producer source maps or treat its `visual_approval: false` as acceptance.
