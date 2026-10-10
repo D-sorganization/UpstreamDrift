@@ -214,7 +214,7 @@
       "web": "ui/src/components/analysis/GroundReactionCharts.tsx",
       "status": "parity",
       "tiles": ["ground_reaction_plots"],
-      "notes": "GCV-5 (#11711): one plot series (biomechanics.ground_reaction_plot_model, built from the GCV-1 GroundReactionSeries) feeds the PyQt6 Ground Reaction Plots tile (six-panel sheet from plotting.renderers.ground_reaction), GET /api/analysis/ground-reaction and the web GroundReactionCharts on the Analysis Tools page, so both surfaces draw the same panels with address/top/impact/finish markers. CoP and load share are null below 10 N of vertical load; an engine without ground reaction (Simscape until GCV-3) is shown as unavailable with its reason, never as zero."
+      "notes": "GCV-5 (#11711): one plot series (biomechanics.ground_reaction_plot_model, built from the GCV-1 GroundReactionSeries) feeds the PyQt6 Ground Reaction Plots tile (six-panel sheet from plotting.renderers.ground_reaction), GET /api/analysis/ground-reaction and the web GroundReactionCharts on the Analysis Tools page, so both surfaces draw the same panels with address/top/impact/finish markers. CoP and load share are null below 10 N of vertical load; an engine without ground reaction (Simscape until GCV-3) is shown as unavailable with its reason, never as zero. GCV-2 (#11708): MuJoCo, MyoSuite, Drake and OpenSim emit the contact:grf_/free_moment_/moment_com_ breakdown from their native contacts, Pinocchio from caller-supplied shared-contact-law samples, Simscape reports unavailable; GCV-6 (#11712): every CoP routes through biomechanics.ground_reaction."
     },
     "analysis.counterfactuals": {
       "title": "ZTCF/ZVCF + induced-acceleration counterfactuals",
@@ -536,6 +536,16 @@
       "reason": "Desktop biomechanics dashboards; desktop-only candidate pending #7460.",
       "pending_decision": true,
       "tiles": ["biomech_exercise", "injury_analysis"]
+    },
+    "lifting.five_lift_viewing": {
+      "title": "Weightlifting viewing and analysis for the five lifts (squat, deadlift, bench press, snatch, clean and jerk): lift selection, barbell, hand-force and GRF overlays, plots",
+      "pyqt": "src/launchers/exercise_dashboard.py",
+      "api": null,
+      "web": null,
+      "status": "gap",
+      "issue": 11748,
+      "tiles": [],
+      "notes": "LIFT-8 (#11748, epic #11740) asks for PyQt and web parity for the five lifts. Today the PyQt Exercise Dashboard only selects an engine for one exercise name and shows that engine's dashboard (OpenSim not yet available); it has no lift selector, barbell, GCV-4/GCV-10 overlay groups or GCV-5 plots, and there is no API route or web page. The LIFT-1 pack audit (src/shared/python/lifting/pack_audit) is the data source. The desktop-only exemption of biomech.exercise_injury_dashboards stays pending #7460; this entry tracks the lifting surfaces LIFT-8 requires."
     },
     "simulation.golf_suite_batch": {
       "title": "Golf Simulation Suite (parameter sweeps, batch runs)",
