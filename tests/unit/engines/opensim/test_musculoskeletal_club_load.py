@@ -19,6 +19,8 @@ from src.engines.physics_engines.opensim.python.musculoskeletal_pipeline import 
 from src.engines.physics_engines.opensim.python.musculoskeletal_solvers import (
     SolveWindow,
     actuator_torques,
+    converged_frames,
+    parse_static_optimization_log,
 )
 
 pytestmark = pytest.mark.unit
@@ -84,7 +86,42 @@ def test_club_load_comparison_reports_the_per_frame_difference() -> None:
     assert wrist["without_club_rms"] == 0.0
     assert out["per_actuator"]["upper_elbow_flex_r"]["delta_peak"] == 0.0
     assert out["largest_delta_rms"] == "upper_wrist_flex_l"
-    assert out["n_frames"] == 5
+    assert out["n_frames"] == 5 and out["n_frames_excluded"] == 0
+
+
+def test_parse_static_optimization_log_reads_each_frame(tmp_path: Path) -> None:
+    log = tmp_path / "so.log"
+    log.write_text(
+        "[info] Loading model\n"
+        "time = 0.1 Performance = 2.5 Constraint violation = 1e-12\n"
+        "   wrist_flex_l: constraint violation = 1.5\n"
+        "time = 0.2 Performance = 3.0 Constraint violation = 14.5\n",
+        encoding="utf-8",
+    )
+    t, v = parse_static_optimization_log(log)
+    np.testing.assert_allclose(t, [0.1, 0.2])
+    np.testing.assert_allclose(v, [1e-12, 14.5])
+
+
+def test_converged_frames_match_by_time_and_treat_unlogged_as_failed() -> None:
+    times = np.array([0.1, 0.2, 0.3])
+    mask = converged_frames(times, np.array([0.1, 0.2]), np.array([1e-12, 2.0]))
+    assert mask.tolist() == [True, False, False]
+    with pytest.raises(ValueError, match="tolerance"):
+        converged_frames(times, times, times, tolerance=0.0)
+
+
+def test_club_load_comparison_uses_only_frames_valid_in_both_runs() -> None:
+    t = np.linspace(0.0, 1.0, 4)
+    without = {"upper_wrist_flex_l": np.zeros(4)}
+    with_club = {"upper_wrist_flex_l": np.array([2.0, 2.0, 9000.0, 2.0])}
+    valid = np.array([True, True, False, True])
+    out = club_load_comparison(t, with_club, t, without, valid=valid)
+    wrist = out["per_actuator"]["upper_wrist_flex_l"]
+    assert wrist["delta_peak"] == pytest.approx(2.0)
+    assert out["n_frames"] == 3 and out["n_frames_excluded"] == 1
+    with pytest.raises(ValueError, match="valid"):
+        club_load_comparison(t, with_club, t, without, valid=np.zeros(4, bool))
 
 
 def test_club_load_comparison_requires_matching_frames_and_actuators() -> None:

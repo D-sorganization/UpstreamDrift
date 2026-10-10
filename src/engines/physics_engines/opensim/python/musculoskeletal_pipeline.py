@@ -236,6 +236,25 @@ def solve_and_summarise(cfg: PipelineConfig, prep: dict[str, Any]) -> dict[str, 
             summary["phases"][name] = summarize_phase(
                 t[mask], {k: v[mask] for k, v in acts.items()}
             )
+    log_t, log_v = solvers.parse_static_optimization_log(
+        Path(act_path).parent / solvers.SO_LOG_NAME
+    )
+    converged = solvers.converged_frames(t, log_t, log_v)
+    summary["converged_mask"] = converged
+    summary["convergence"] = {
+        "criterion": "logged equality-constraint violation <= "
+        f"{solvers.SO_CONVERGED_VIOLATION:g}",
+        "frames": int(t.size),
+        "frames_converged": int(converged.sum()),
+        "first_unconverged_time_s": (
+            float(t[~converged][0]) if (~converged).any() else None
+        ),
+        "max_violation": float(log_v.max()) if log_v.size else None,
+    }
+    if int(converged.sum()) > 1:
+        summary["converged_only"] = summarize_phase(
+            t[converged], {k: v[converged] for k, v in acts.items()}
+        )
     summary["wall_clock_s"] = wall
     summary["activation_file"] = str(act_path)
     return summary
@@ -311,10 +330,13 @@ def build_receipt(
             "use_muscle_physiology": True,
             "step_interval": cfg.so_step,
             "wall_clock_s": summary["wall_clock_s"],
-            "converged": True,
+            "converged": summary["convergence"]["frames_converged"]
+            == summary["convergence"]["frames"],
+            "convergence": summary["convergence"],
             "convergence_note": (
-                "AnalyzeTool completed; per-frame optimiser failures, if any, are "
-                "visible as reserve use and saturated muscles below"
+                "results cover every frame, including frames whose optimiser did "
+                "not converge (their actuator values are not solutions); "
+                "results.converged_only repeats the summary on converged frames"
             ),
         },
         "results": {
@@ -326,6 +348,7 @@ def build_receipt(
             "muscles_saturated_fraction": summary["muscles_saturated_fraction"],
             "phases": summary["phases"],
             "phase_split_s": cfg.phase_split_s,
+            "converged_only": summary.get("converged_only"),
         },
         "moco_inverse": {
             "status": "NOT_RUN_TO_CONVERGENCE",
@@ -342,16 +365,21 @@ def club_load_comparison(
     torques_with: Mapping[str, np.ndarray],
     times_without: np.ndarray,
     torques_without: Mapping[str, np.ndarray],
+    *,
+    valid: np.ndarray | None = None,
 ) -> dict[str, Any]:
     """Per-frame actuator torque difference, with club minus without (N m).
 
     Both solves share the kinematics, so the difference isolates what the
-    club adds (its inertia and weight, plus the closed trail-hand chain).
+    club adds (its inertia and weight). ``valid`` (default: every frame)
+    selects the frames compared, normally those converged in both runs.
 
     Raises ``ValueError`` unless both runs have the same frame times (within
-    1e-9 s) and the same actuator names. Postcondition: ``per_actuator`` has
-    ``delta_rms``/``delta_peak`` and each run's RMS for every actuator, and
-    ``largest_delta_rms`` names the actuator with the largest ``delta_rms``.
+    1e-9 s) and the same actuator names, and ``valid`` matches the frames and
+    selects at least one. Postcondition: ``per_actuator`` has
+    ``delta_rms``/``delta_peak`` and each run's RMS for every actuator over
+    the valid frames, and ``largest_delta_rms`` names the actuator with the
+    largest ``delta_rms``.
     """
     tw = np.asarray(times_with, dtype=float)
     to = np.asarray(times_without, dtype=float)
@@ -363,14 +391,19 @@ def club_load_comparison(
         set(torques_with) == set(torques_without),
         "with- and without-club runs must have the same actuator names",
     )
+    keep = np.ones(tw.size, dtype=bool) if valid is None else np.asarray(valid, bool)
+    require(
+        keep.shape == tw.shape and bool(keep.any()),
+        "valid must mark at least one of the compared frames",
+    )
 
     def rms(v: np.ndarray) -> float:
         return float(np.sqrt(np.mean(v**2)))
 
     per: dict[str, dict[str, float]] = {}
     for name in sorted(torques_with):
-        a = np.asarray(torques_with[name], dtype=float)
-        b = np.asarray(torques_without[name], dtype=float)
+        a = np.asarray(torques_with[name], dtype=float)[keep]
+        b = np.asarray(torques_without[name], dtype=float)[keep]
         delta = a - b
         per[name] = {
             "delta_rms": rms(delta),
@@ -382,7 +415,8 @@ def club_load_comparison(
     return {
         "method": "per-frame difference of StaticOptimization actuator torques, "
         "same kinematics and window, with the club minus the no-club control",
-        "n_frames": int(tw.size),
+        "n_frames": int(keep.sum()),
+        "n_frames_excluded": int((~keep).sum()),
         "per_actuator": per,
         "largest_delta_rms": largest,
     }
@@ -423,12 +457,19 @@ def run_pipeline(
         control = replace(cfg, club=None, out_dir=Path(cfg.out_dir) / "no_club_control")
         prep_c = prepare_inputs(control)
         summary_c = solve_and_summarise(control, prep_c)
+        both = summary["converged_mask"] & summary_c["converged_mask"]
         comparison = club_load_comparison(
             *_upper_torque_series(prep, summary),
             *_upper_torque_series(prep_c, summary_c),
+            valid=both,
         )
-        comparison["control_reserve_rms_max"] = summary_c["reserve_rms_max"]
-        comparison["with_club_reserve_rms_max"] = summary["reserve_rms_max"]
+        comparison["frames"] = "converged in both runs"
+        comparison["control_convergence"] = summary_c["convergence"]
+        for key, run in (("with_club", summary), ("control", summary_c)):
+            converged = run.get("converged_only") or {}
+            comparison[f"{key}_converged_reserve_rms_max"] = converged.get(
+                "reserve_rms_max"
+            )
         receipt["club_load"] = comparison
     if moco_pilot is not None:
         t0, t1, mesh = moco_pilot
