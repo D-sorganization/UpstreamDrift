@@ -1,0 +1,14 @@
+{
+  "checked_utc": "2026-10-10T11:00:17.465419+00:00",
+  "pull_request": 11941,
+  "state": "open",
+  "draft": false,
+  "head_ref": "codex/shot-pattern-analysis",
+  "head_sha": "10c7d61aa686e456b7962f1d9aa9ecfda4e8405f",
+  "base_ref": "main",
+  "mergeable": null,
+  "mergeable_state": "unknown",
+  "auto_merge": null,
+  "queue_status": "not established by this REST response; check explicitly before final push",
+  "phase_two_push": "not performed"
+}

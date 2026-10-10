@@ -41,7 +41,12 @@ The supplemental caption candidate is `14f27706e4` (including parent
 `b9f1ad05b4`) in the isolated FINAL_LAYOUT checkout. Its
 [Actual-Card Qualification](validation/supplement_social_context_candidate_v1/actual_card_review.json)
 precedes the [V4 Source-Bound Preflight](validation/supplement_rendering_revision_v4/preflight.json).
-The full saved-data pipeline is still running; its start receipt is not acceptance.
+V4 later terminated without publishing its statistics or an exit receipt.
+The [Interruption Record](validation/supplement_rendering_revision_v4_interruption/interruption.json)
+confirms both processes were absent and all bound source/input hashes were unchanged.
+The [V5 Restart](validation/supplement_rendering_revision_v5/launcher.json)
+is running in an owned detached POSIX session, bound to the same immutable v4
+snapshot. Its start receipt is not acceptance; wait for its actual exit receipt.
 The retired v3 outputs are preserved under
 `presentation_preview_rejected_supplement_v3/supplement_report_v1`, with
 [Terminal and Exact-Byte Preservation Evidence](validation/supplement_v3_retirement_for_caption_revision/retirement.json).
