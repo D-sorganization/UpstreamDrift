@@ -103,3 +103,11 @@ errors; it is not validation evidence for the resolved tree. The third full cent
 gates: lint/format, diff mypy, affected tests (247 passed, 35 explicit generic
 SDK/opt-in skips), Semgrep/import policy and policy/fragment validation. The
 separate actual OpenSim regression above supplies native execution evidence.
+
+## Publication Gate Correction
+
+CI on af321fdc93 found one failing generated lifting-report freshness test.
+Inherited formatting changed the report bytes while its generator and source
+receipt stayed unchanged. Restoring the authoritative main report and excluding
+that byte-exact generated artifact from Prettier passes all11 report tests.
+The original failed log is retained; this correction changes no dynamics.
