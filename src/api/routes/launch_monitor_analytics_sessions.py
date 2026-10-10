@@ -130,6 +130,27 @@ def _manifest_payload(manifest: Any, filename: str) -> dict[str, object]:
     return payload
 
 
+async def _write_and_read_headers(
+    file: UploadFile, tmp_path: Path, filename: str
+) -> list[str]:
+    """Write the upload to ``tmp_path`` and return its column headers.
+
+    Raises:
+        HTTPException: 422 when the file's headers cannot be read; the
+            message names ``filename``, never the server temp path.
+    """
+    from src.tools.launch_monitor_analytics.import_review import read_headers
+
+    await write_upload_file_to_path(file, tmp_path)
+    try:
+        return read_headers(tmp_path)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=422,
+            detail=_sanitize_temp_path(str(exc), tmp_path, filename),
+        ) from exc
+
+
 @router.post("/v2/import/preview")
 @handle_api_errors
 async def preview_import_v2(file: UploadFile = File(...)) -> dict[str, object]:
@@ -147,7 +168,6 @@ async def preview_import_v2(file: UploadFile = File(...)) -> dict[str, object]:
         MEASUREMENT_STATUSES,
         auto_mappings,
         mapping_targets,
-        read_headers,
     )
     from src.tools.launch_monitor_model import PROFILES, detect_profile
 
@@ -155,14 +175,7 @@ async def preview_import_v2(file: UploadFile = File(...)) -> dict[str, object]:
     filename = file.filename or f"upload{suffix}"
     with tempfile.TemporaryDirectory(prefix="lm_import_preview_") as tmp_dir:
         tmp_path = Path(tmp_dir) / f"upload{suffix}"
-        await write_upload_file_to_path(file, tmp_path)
-        try:
-            headers = read_headers(tmp_path)
-        except ValueError as exc:
-            raise HTTPException(
-                status_code=422,
-                detail=_sanitize_temp_path(str(exc), tmp_path, filename),
-            ) from exc
+        headers = await _write_and_read_headers(file, tmp_path, filename)
         detection = detect_profile(headers)
         auto_mappings_by_profile = {
             profile_id: auto_mappings(profile_id, headers) for profile_id in PROFILES
@@ -198,7 +211,6 @@ async def import_session_v2(
     """
     from src.tools.launch_monitor_analytics.import_review import (
         build_import_options,
-        read_headers,
     )
     from src.tools.launch_monitor_model import (
         ImportedSession,
@@ -215,14 +227,7 @@ async def import_session_v2(
 
     with tempfile.TemporaryDirectory(prefix="lm_import_") as tmp_dir:
         tmp_path = Path(tmp_dir) / f"upload{suffix}"
-        await write_upload_file_to_path(file, tmp_path)
-        try:
-            headers = read_headers(tmp_path)
-        except ValueError as exc:
-            raise HTTPException(
-                status_code=422,
-                detail=_sanitize_temp_path(str(exc), tmp_path, filename),
-            ) from exc
+        headers = await _write_and_read_headers(file, tmp_path, filename)
 
         profile_id = request.profile_id or detect_profile(headers).profile_id
         rows = [
