@@ -82,5 +82,13 @@
       "separate_pdf_compiled": false,
       "check_context": "Compiled existing article after source-backed phase-two geometric and directional findings were added; no source diagnostics reached."
     }
-  ]
+  ],
+  "tracking_issue": {
+    "url": "https://github.com/D-sorganization/UpstreamDrift/issues/12120",
+    "state": "open",
+    "author": "dieterolson",
+    "filed_by": "AGY Gemini 3.8 Flash High",
+    "root_rest_verified": true,
+    "source_and_evidence_link_corrections_applied": true
+  }
 }
