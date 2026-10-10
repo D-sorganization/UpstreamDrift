@@ -1,8 +1,9 @@
 # Agent Handoff: Current-State Index
 
-## Active Epics and Current Study Status
+## Paused Study and Current Status
 
-- **Matched Delivery Study — Phase Two**: Full truthful current study handoff lives at [docs/research/shot_pattern_analysis/phase2/TURNOVER.md](docs/research/shot_pattern_analysis/phase2/TURNOVER.md) in the separate `shot-pattern-analysis` worktree on branch `codex/shot-pattern-matched-delivery`; the integration includes documentation checkpoint `61002c4742`; later publication updates still need to be brought forward. Do not invent final acceptance.
+- **User-Requested Stop**: Goal pursuit stops for credit conservation. Start with [Resume Handoff](docs/research/shot_pattern_analysis/phase2/RESUME_HANDOFF.md). The existing local Python export is left running; no agent monitoring is scheduled.
+- **Matched Delivery Study — Phase Two**: Full truthful current study handoff lives at [docs/research/shot_pattern_analysis/phase2/TURNOVER.md](docs/research/shot_pattern_analysis/phase2/TURNOVER.md) in the separate `shot-pattern-analysis` worktree on branch `codex/shot-pattern-matched-delivery`; the integration includes user-requested handoff checkpoint `dd2c235a0a`; later publication updates still need to be brought forward. Do not invent final acceptance.
 - **Simulation and Exporter State**: All simulation data is complete; final publication remains pending. The frozen v6 supplementary graphic exporter is still live (PID 51475) in separate presentation checkout `4023111d2a`.
 - **Graphics Qualification**: Original primary/control graphics are accepted; supplemental graphic review, report composition, remote asset delivery, and ready PR remain pending.
 - **Integration Branch Status**: Branch `codex/shot-pattern-main-integration` contains reviewed local merge `7bdb71016c` of exact `main` `fa7ee92f5cddd753099d7418fc974b142b7ebb54` into `2953c52b37001a8a3893e07943fb3cf2b6c38b45`; model registries are preserved. Final publication and pre-PR gates remain pending.
@@ -43,8 +44,8 @@
 
 - Monitor completion of live exporter PID 51475 in frozen presentation checkout `4023111d2a`.
 - Complete supplemental graphic review, report composition, and remote asset delivery.
-- Bring forward final publication updates after study documentation checkpoint `61002c4742`.
-- Conclude independent root/Astra integration review and advance ready PR.
+- Resume only when authorized; bring forward final publication updates after study checkpoint `dd2c235a0a`.
+- Retain completed root/Astra integration evidence; complete publication and final gates before a ready PR.
 
 ## Imported Peer Handoff Records Index
 
