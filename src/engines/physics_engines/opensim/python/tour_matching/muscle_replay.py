@@ -279,7 +279,10 @@ def _integrate_native_replay(
     tuple[tuple[OverlayWrench, ...], ...],
 ]:
     """Advance one native manager without reinitialization or corrections."""
-    from .native_scalar_replay import integrate_native_scalar_replay
+    from .native_scalar_replay import (
+        NativeScalarReplayPolicy,
+        integrate_native_scalar_replay,
+    )
 
     samples = integrate_native_scalar_replay(
         model,
@@ -288,8 +291,7 @@ def _integrate_native_replay(
         tuple(muscles.get(i).getAbsolutePathString() for i in range(muscles.getSize())),
         grid,
         domains,
-        accuracy,
-        contact_force_paths,
+        NativeScalarReplayPolicy(accuracy, contact_force_paths),
     )
     return (
         samples.states,

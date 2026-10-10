@@ -192,6 +192,7 @@ def export_native_moco_bundle(
             controls,
             request.mixed_actuation,
             experiment_id="offline-native-moco-mixed-independent-replay",
+            constrained_cold_start=request.constrained_cold_start,
         )
     elif request.constrained_cold_start is None:
         bundle = build_native_muscle_replay_bundle(
@@ -266,9 +267,12 @@ def replay_native_moco_bundle(
     cpu = time.process_time()
     result: NativeMuscleReplayResult | ConstrainedMuscleReplay | NativeMixedReplayResult
     if mixed_actuation is not None:
-        if constrained_cold_start is not None:
-            raise ValueError("combined constrained mixed replay is not admitted")
-        result = replay_native_mixed_bundle(bundle, model_path, mixed_actuation)
+        result = replay_native_mixed_bundle(
+            bundle,
+            model_path,
+            mixed_actuation,
+            constrained_cold_start=constrained_cold_start,
+        )
     elif constrained_cold_start is None:
         if bundle.model.variant_id != "reviewed-cold-start-muscles":
             raise ValueError("constrained replay requires its declared cold start")
@@ -297,6 +301,24 @@ def replay_native_moco_bundle(
             powers_w=result.powers_w,
             work_j=result.work_j,
         )
+        if result.constraint_audits:
+            arrays.update(
+                constraint_observation_sha256=np.asarray(
+                    [audit.observation_sha256 for audit in result.constraint_audits]
+                ),
+                constraint_position_error_max=np.asarray(
+                    [
+                        max(map(abs, audit.position_errors), default=0.0)
+                        for audit in result.constraint_audits
+                    ]
+                ),
+                constraint_velocity_error_max=np.asarray(
+                    [
+                        max(map(abs, audit.velocity_errors), default=0.0)
+                        for audit in result.constraint_audits
+                    ]
+                ),
+            )
     else:
         arrays.update(
             muscle_forces_n=result.muscle_forces_n,
