@@ -76,6 +76,23 @@ def validate_tracking_backend(name: str) -> str:
     return key
 
 
+def lane_reference_zmp(
+    sim: fs.FullBodySimulator, lane: Any, q: np.ndarray
+) -> dict[str, Any]:
+    """:func:`fs.reference_zmp` of ``q`` on the lane's times and ground, its
+    rates split at the capture impact (``lane.impact_time_s``; unsplit when
+    the lane has none) like the replay controller's (GCV-20, #12117)."""
+    from src.shared.python.motion_matching import full_body_forward_dynamics as fs
+
+    return fs.reference_zmp(
+        sim,
+        lane.times,
+        q,
+        lane.ground,
+        split_time_s=getattr(lane, "impact_time_s", None),
+    )
+
+
 def build_tracking_controller(
     sim: fs.FullBodySimulator,
     times: np.ndarray,
@@ -349,7 +366,7 @@ def shooting_fit(
         root_err = np.sqrt(
             np.einsum("ij,ij->i", diff, diff)
         )  # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is ~2.4x faster than np.linalg.norm(..., axis=1)
-        zmp = fs.reference_zmp(sim, lane.times, q_track, lane.ground)
+        zmp = lane_reference_zmp(sim, lane, q_track)
         idx_1_4s = int(round(1.4 * rate_hz))
         root_error_1_4s_m = (
             float(root_err[idx_1_4s]) if idx_1_4s < len(root_err) else None
@@ -415,7 +432,7 @@ def shooting_fit(
             axis_targets_per_frame=getattr(lane, "face_targets", None),
         )
         q_track = smooth_lane(q_fit, lane, TRACKING_CUTOFF_HZ)
-    zmp = fs.reference_zmp(sim, lane.times, best_q, lane.ground)
+    zmp = lane_reference_zmp(sim, lane, best_q)
     report = {
         "locked": list(SHOOTING_LOCKED),
         "relaxation": gain,
@@ -484,7 +501,7 @@ def zmp_filter(
             axis_targets_per_frame=getattr(lane, "face_targets", None),
         )
         q_track = smooth_lane(q_new, lane, TRACKING_CUTOFF_HZ)
-        zmp = fs.reference_zmp(sim, lane.times, q_track, lane.ground)
+        zmp = lane_reference_zmp(sim, lane, q_track)
         errors = marker_errors(kin, q_track, lane.points)
         passes.append(
             {
