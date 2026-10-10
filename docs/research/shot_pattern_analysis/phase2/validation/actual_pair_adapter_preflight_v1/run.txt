@@ -1,0 +1,12 @@
+{
+  "comparisons": 384,
+  "reconstructed": 384,
+  "unique_bound_cells": 328,
+  "counts": {
+    "across_lean": 56,
+    "curve_strength": 164,
+    "shaft_rotation_sd": 164
+  },
+  "alias_references": 16,
+  "failures": []
+}
