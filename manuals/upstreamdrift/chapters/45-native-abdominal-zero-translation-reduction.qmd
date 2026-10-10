@@ -1,0 +1,82 @@
+# Native Abdominal Zero-Translation Reduction
+
+## Scope and Mechanical Authority
+
+Issue #12161 implements recipe `buet-abdjnt-zero-translations/1` after the
+source-bound anatomy assembly in #12157. BUET's `Abdjnt` CustomJoint contains
+surviving rotation `Abs_r3` and locked zero translations `Abs_t1`/`Abs_t2`.
+Moco rejects the translation locks. Whole-joint welding would discard the
+rotation and its enforced `Abs_r3_con` coupling to `flex_extension`.
+
+The maintained operation changes only the two identity translation functions
+to `Constant(0)` with empty coordinate lists and removes their Coordinate
+properties. It creates a fresh XML artifact and reloads it natively. No source
+model, muscle parameter, passive law, preparation or surviving joint is
+repaired. Source SHA and exact reviewed native joint/coupler property digests
+constrain admission. Unknown removed-coordinate consumers in XML text,
+attributes and tails reject. Nonzero default, achieved or declared observation
+targets/speeds and prescriptions reject. Never clear native live coordinate
+properties: the earlier experiment crashed during finalization.
+
+On the locked zero manifold, each eliminated identity translation evaluates
+exactly to zero and its permitted speed is zero. Constant replacement therefore
+preserves the transform on this particular manifold. This argument does not
+apply to arbitrary nonzero targets, other axes/functions or another coupling.
+
+## State, Force and Numerical Verification
+
+The caller supplies immutable complete named continuous states for explicit
+observations. Source and derived states initialize using retained native default
+modeling options. Every declared source value must read back exactly, including
+removed zero states; every retained value must restore exactly in both models.
+The operation does not equilibrate, assemble, project or integrate. These
+observations are not complete-state replay admission.
+
+Fresh reload must preserve native body, force, constraint, marker, unrelated
+joint and retained coordinate property dumps. Exactly four named continuous
+states disappear. Reuse the reviewed zero-MTP comparison helper for transforms,
+body velocities, muscle lengths, common-coordinate and full native mass, and
+rank-complete mobility lift. Applied force is
+$J_{system}^{T} f_{body} + f_{mobility}$ before velocity bias and constraint
+reactions; direct mobility force alone is insufficient. Additional scalar
+observations compare native muscle lengthening speed and actuation, rejecting
+nonfinite readbacks before maxima accumulation.
+
+Each sampled difference has a diagnostic limit of $10^{-9}$ in its native SI
+quantity; labels distinguish transform entries, m, m/s, N, mixed-coordinate
+mass and N/Nm generalized force. These are recipe regression limits, not
+physiological tolerances. The receipt binds recipe, source, derived output,
+implementation/helper, runtime binaries and exact ordered observations. Output
+SHA is frozen before fresh reload and checked again afterward. Failed derived
+artifacts remain diagnostic outputs and cannot be overwritten.
+
+## Evidence and Reproduction
+
+Use the installed OpenSim 4.6 SDK with `CASADIPATH` pointing to its package and
+checkout-first `PYTHONPATH`. Set `BUET_REDUCTION_SOURCE` to the retained caller
+owned model and `BUET_REDUCTION_PREPARED` to its preparation receipt, then run:
+
+```powershell
+python3 -m pytest -o addopts='' tests/opensim/test_native_abdominal_reduction.py
+```
+
+The actual native 473-muscle source passes fresh-reload comparison at baseline
+and coupled flexion/extension observations. Native Moco solver initialization
+succeeds after reduction; no trajectory solve follows. Negative tests retain
+source mismatch, targets/speeds, locks, frames, coupling, unknown consumers and
+incomplete state failures. The first test used the wrong API spelling
+`setModelCopy`; the installed binding requires `setModelAsCopy`. A declared
+nonzero removed state initially escaped through native readback; explicit
+request and full source-readback validation now rejects it. Failed receipts
+remain in local planning storage. Final validation and assembled-model evidence
+are recorded in the turnover as they complete.
+
+## Remaining Qualification Gates
+
+This source retains 473 muscles, 17 couplers and all auxiliary muscle states;
+q/u drop from 54 to 52. The separately assembled 557-muscle source requires its
+own verification. Large passive psoas loading, conditional path discontinuities,
+wrist source authority, support/grip/contact, native private capture registration,
+whole-horizon muscle control and independent saved-excitation replay remain
+open. All 17 variants across six ecosystems stay in the parity denominator.
+The recipe and solver initialization do not qualify model physiology or release.
