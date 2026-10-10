@@ -269,6 +269,11 @@
       "id": "UP-D1-native-zero-mtp-reduction-inventory",
       "owner": "UpstreamDrift issue #12150",
       "resolution": "Inventory provisional chapter43 and native_mtp_reduction.py: exact source-bound bilateral zero-locked PinJoint targets, source-reference rejection, native source/default/achieved value/speed and clamp/prescription admission, separately serialized and reloaded derived model, exact common continuous-state lift and native body/velocity/muscle/constraint inventories. Compare source and reduced full native mass and total applied generalized body-plus-mobility force through a rank-complete mobility lift at initialized, ankle-varied and pelvis-varied states. Actual unchanged Rajagopal80 lower-limb source and scaled/club mixed-assisted factory diagnostic tests do not qualify source scaling/anatomy, missing upper-body muscles, contact, passive policy, native Moco, capture matching, full-horizon excitation replay or all17/six-engine parity. Keep canonical calculation coverage/publication blocked."
+    },
+    {
+      "id": "UP-D1-physical-inertia-principal-moments-inventory",
+      "owner": "UpstreamDrift issue #12183",
+      "resolution": "Inventory provisional chapter51 and estimation/dime_global_calibration.py validate_physical_inertia: finite symmetric 3x3 tensor, explicit absolute symmetry tolerance, sorted principal positivity and triangle feasibility, unchanged output values. Rotated invalid tensors and scale-masked asymmetry have failing-before/passing-after regression evidence. Helper correction does not wire native source admission or optimizer enforcement, validate body ownership/COM/units/provenance, repair tensors, or qualify physiology, contact/grip, capture matching, complete excitation replay or all17/six-engine parity. Keep calculations empty and publication blocked."
     }
   ],
   "calculations": []

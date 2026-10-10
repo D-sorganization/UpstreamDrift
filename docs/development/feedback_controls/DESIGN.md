@@ -2,6 +2,12 @@
 
 ## Status and Expanded Goal
 
+Physical inertia helper correction #12183 is documented in canonical chapter 51.
+Sorted principal moments make triangle feasibility independent of coordinate
+rotation; absolute symmetry tolerance prevents scale-dependent masking. This
+is a numerical contract fix with unchanged tensor values, not native model
+admission, anatomy validation or permission to repair imported parameters.
+
 Planning specification, 2026-10-08. Governing epic: [UpstreamDrift #11784](https://github.com/D-sorganization/UpstreamDrift/issues/11784); shared provider epic: [Tools #5460](https://github.com/D-sorganization/Tools/issues/5460). No capture, control algorithm or physiological model is qualified by this document.
 
 The program covers **all six current engines and their applicable model variants**: MuJoCo, Drake, Pinocchio/Crocoddyl, OpenSim, MyoSuite and Simscape. Track torque-driven, muscle-driven, rigid/flexible-club and reduced/full-body variants explicitly; a reduced-model success does not qualify a full-body model. New registered models inherit capability and parity conformance. The final product target is **muscle-driven OpenSim matching the available mocap**, with full-state, controller-off excitation replay and best defensible cross-engine biomechanical parity. Saved torque replay remains an essential intermediate gate.

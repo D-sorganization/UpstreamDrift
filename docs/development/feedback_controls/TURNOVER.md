@@ -1,5 +1,15 @@
 # Feedback Controls Planning Turnover
 
+## Physical Inertia Helper Handoff
+
+Issue #12183 fixes rotation-dependent acceptance and scale-masked asymmetry in
+the existing DIME validator. Canonical chapter 51 records the exact equations,
+absolute tolerances, original three failing regressions and 25 passing affected
+tests. No source admission wiring or tensor repair is included. Next integration
+must check actual per-body source tensors with declared COM/frame conventions
+and provenance; positive full-system mass alone does not qualify individual
+bodies. Keep all 17-model/six-engine scientific gates and publication blocked.
+
 ## F07 Source-Bound Native Moco Numerical Guess Handoff
 
 Issue #11990 adds a byte-bound numerical seed for the maintained native Moco

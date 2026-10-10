@@ -1,3 +1,13 @@
+# Physical Inertia Helper Handoff — #12183
+
+`validate_physical_inertia` now uses sorted principal moments instead of frame
+diagonals, and absolute symmetry tolerance with zero relative tolerance. Two
+rotated impossible tensors and a masked asymmetry failed before the fix; affected
+calibration/human-prior tests now pass 25 cases. Chapter 51 gives reproduction
+and numerical tolerances. Values are preserved on success. Native source
+admission and optimizer enforcement are separate integration work; physical
+source provenance, matching and all-model qualification remain open.
+
 # Active: MSK Retarget Turn Targets - #12042 Slice 4
 
 - Branch `claude/msk-turn-targets` (on `claude/turn-metrics-core`, #12068). `msk_club_tracking.track_swing(..., turn_targets=, feet=)` adds pelvis/upper-trunk yaw residuals (0.02 rad, relative to the calibrated address heading) from the shared marker turn lines, and feet planted from the capture's foot markers (`msk_turn_targets.py`). Opt-in; the default tracking and renders are unchanged.
