@@ -46,79 +46,7 @@ def _mod():
     return pinocchio_bar_hold
 
 
-# --------------------------------------------------------------------------
-# Synthetic tests for the pure static-equilibrium split helper (no pinocchio
-# model/data needed -- just the numeric contract).
-# --------------------------------------------------------------------------
-
-
-def test_split_symmetric_grip_balances_weight_evenly() -> None:
-    mod = _mod()
-    bar_mass_kg = 20.0
-    gravity = (0.0, 0.0, -_G)
-    bar_com = (0.0, 0.0, 1.0)
-    grip_l = (-0.3, 0.0, 1.0)
-    grip_r = (0.3, 0.0, 1.0)
-
-    result = mod._static_hold_split(bar_mass_kg, gravity, bar_com, grip_l, grip_r)
-
-    left_f = result["hand_force_n"]["L"]
-    right_f = result["hand_force_n"]["R"]
-    weight_n = bar_mass_kg * _G
-
-    assert left_f[2] == pytest.approx(weight_n / 2.0)
-    assert right_f[2] == pytest.approx(weight_n / 2.0)
-    assert (left_f[2] + right_f[2]) == pytest.approx(weight_n)
-    # Sign (ADR-0052): the wrench is exerted by the hand ON the bar -> up.
-    assert left_f[2] > 0.0
-    assert right_f[2] > 0.0
-
-
-def test_split_asymmetric_com_shifts_toward_nearer_hand() -> None:
-    """A COM shifted toward the left grip gives the left hand the larger share.
-
-    Simple-beam statics: with the load off-centre between two supports, the
-    support *closer* to the load carries proportionally more of the weight
-    (reaction = W * distance-to-far-support / span).
-    """
-    mod = _mod()
-    bar_mass_kg = 20.0
-    gravity = (0.0, 0.0, -_G)
-    grip_l = (-0.3, 0.0, 1.0)
-    grip_r = (0.3, 0.0, 1.0)
-    bar_com = (-0.1, 0.0, 1.0)  # 0.2 m from the left grip, 0.4 m from the right
-
-    result = mod._static_hold_split(bar_mass_kg, gravity, bar_com, grip_l, grip_r)
-
-    left_f = result["hand_force_n"]["L"]
-    right_f = result["hand_force_n"]["R"]
-    weight_n = bar_mass_kg * _G
-    sum_vertical = left_f[2] + right_f[2]
-
-    assert sum_vertical == pytest.approx(weight_n)
-    assert left_f[2] / sum_vertical == pytest.approx(2.0 / 3.0, abs=1e-9)
-    assert left_f[2] > right_f[2]
-
-
-@pytest.mark.parametrize(
-    ("bar_mass_kg", "gravity", "bar_com", "grip_l", "grip_r"),
-    [
-        (0.0, (0.0, 0.0, -_G), (0.0, 0.0, 1.0), (-0.3, 0.0, 1.0), (0.3, 0.0, 1.0)),
-        (-5.0, (0.0, 0.0, -_G), (0.0, 0.0, 1.0), (-0.3, 0.0, 1.0), (0.3, 0.0, 1.0)),
-        (20.0, (0.0, 0.0, 0.0), (0.0, 0.0, 1.0), (-0.3, 0.0, 1.0), (0.3, 0.0, 1.0)),
-        (20.0, (0.0, 0.0, -_G), (0.0, 0.0, 1.0), (0.0, 0.0, 1.0), (0.0, 0.0, 1.0)),
-    ],
-)
-def test_split_rejects_degenerate_inputs(
-    bar_mass_kg: float,
-    gravity: tuple[float, float, float],
-    bar_com: tuple[float, float, float],
-    grip_l: tuple[float, float, float],
-    grip_r: tuple[float, float, float],
-) -> None:
-    mod = _mod()
-    with pytest.raises(ValueError):
-        mod._static_hold_split(bar_mass_kg, gravity, bar_com, grip_l, grip_r)
+# The pure split is tested engine-free in test_bar_hold_static.py.
 
 
 def test_link_mass_and_local_com_reads_urdf_inertial() -> None:
@@ -206,7 +134,10 @@ def test_bar_hold_wrench_unavailable_when_right_grip_missing() -> None:
 
 
 def _pinocchio_lift_adapter(lift: str):
-    pytest.importorskip("pinocchio")
+    pin = pytest.importorskip("pinocchio")
+    if not hasattr(pin, "__file__"):
+        # tests/unit/conftest.py installs a MagicMock when pinocchio is absent.
+        pytest.skip("pinocchio in sys.modules is a test double, not the real package")
     from src.shared.python.lifting.pack_audit.adapters import create_adapter
     from src.shared.python.lifting.pack_audit.model import Anthropometry
     from src.shared.python.lifting.pack_audit.packs import locate_pack
