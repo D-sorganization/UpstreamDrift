@@ -221,11 +221,84 @@
         "rms_error": 1.8379517151738683e-7,
         "passes": true
       }
+    },
+    "myosuite": {
+      "force_L": {
+        "peak_reference": 515.1578323854484,
+        "peak_candidate": 515.1446783497402,
+        "peak_error": 2.5533991490172636e-5,
+        "rms_error": 1.0066547138670218e-5,
+        "passes": true
+      },
+      "force_R": {
+        "peak_reference": 564.0251922380963,
+        "peak_candidate": 564.029658855466,
+        "peak_error": 7.919180616596691e-6,
+        "rms_error": 8.649347676277589e-6,
+        "passes": true
+      },
+      "net_force": {
+        "peak_reference": 439.29195018254387,
+        "peak_candidate": 439.2719353814567,
+        "peak_error": 4.556150204637921e-5,
+        "rms_error": 2.2511577647158576e-5,
+        "passes": true
+      },
+      "internal_force": {
+        "peak_reference": 509.80903513399784,
+        "peak_candidate": 509.80749832780924,
+        "peak_error": 3.014474210314056e-6,
+        "rms_error": 1.858135408148285e-6,
+        "passes": true
+      },
+      "squeeze": {
+        "peak_reference": 3.2844880589147536,
+        "peak_candidate": 3.28486109634526,
+        "peak_error": 0.00011357551734552087,
+        "rms_error": 5.6498202155410684e-5,
+        "passes": true
+      },
+      "couple": {
+        "peak_reference": 99.50809242568974,
+        "peak_candidate": 99.50288589269547,
+        "peak_error": 5.2322709312844115e-5,
+        "rms_error": 3.752949540023925e-5,
+        "passes": true
+      },
+      "deflection_L": {
+        "peak_reference": 0.0005145951210327053,
+        "peak_candidate": 0.000514619674221761,
+        "peak_error": 4.7713606391042145e-5,
+        "rms_error": 2.5997545583474166e-5,
+        "passes": true
+      },
+      "deflection_R": {
+        "peak_reference": 0.0005640583702070978,
+        "peak_candidate": 0.0005640436293733782,
+        "peak_error": 2.6133525355109874e-5,
+        "rms_error": 2.1252281285324157e-5,
+        "passes": true
+      },
+      "rotation_L": {
+        "peak_reference": 0.014736720212406365,
+        "peak_candidate": 0.014736716972979291,
+        "peak_error": 2.1982008392083115e-7,
+        "rms_error": 1.1550342056924457e-6,
+        "passes": true
+      },
+      "rotation_R": {
+        "peak_reference": 0.014736720212406365,
+        "peak_candidate": 0.014736716972979291,
+        "peak_error": 2.1982008392083115e-7,
+        "rms_error": 1.1550342056924457e-6,
+        "passes": true
+      }
     }
   },
   "passes": {
     "mujoco": true,
     "drake": true,
-    "pinocchio": true
+    "pinocchio": true,
+    "myosuite": true
   }
 }
