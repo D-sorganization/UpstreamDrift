@@ -1,3 +1,9 @@
+# Active: Closed-Loop Gaze Neck, #11729
+
+- OSV-3d. Branch `claude/osv-3d-gaze-closed-loop` (stacked on #12154). `--fd-neck gaze-closed`: `GazeNeckFeedback` is a kkt `reference_hook(t, q, q_t, v_t)` (`tracking_controller.py`) that re-solves the neck on the simulated state once per capture frame and adds the correction and its rate to the neck position/velocity targets. Receipt: `dynamics.head_gaze.feedback`.
+- Result (`evidence/head_gaze/fd_neck_closed_loop.json`): release-window RMS 17.2→1.7 deg (driver), 8.6→1.2 deg (7-iron); driver hold window 1.1→2.9 deg (ball-impact torso transient). Position-only first version lagged (hold 4.8 deg); the rate term is required.
+- Open: MyoSuite/OpenSim neck actuation and other engines, a gaze schedule that lets the head turn with the torso (neck still at range on 93/69 updates).
+
 # Active: Forward-Dynamics Gaze Neck, #11729
 
 - Branch `claude/osv-3c-gaze-neck-tracking`. `motion_matching/pipeline/gaze_tracking.py`: `--fd-neck gaze` re-solves the tracked reference's neck to the gaze schedule (model FK, bounded, after the feasibility filters); `dynamics.head_gaze` reports schedule error per window for the tracked reference and the replay. `render_head_gaze_clips --trajectory replay` renders the replay; `scripts/summarize_fd_neck_tracking.py` writes `evidence/head_gaze/fd_neck_tracking.json`.

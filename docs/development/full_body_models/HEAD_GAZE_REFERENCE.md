@@ -251,9 +251,8 @@ Findings:
 - **What remains in the replay is torso error, not neck lag.** The neck
   reference is open loop: it is solved on the reference torso, so the replay's
   own torso error after impact passes straight into the head's world
-  orientation (release 15.4° driver, 6.3° 7-iron). Closing that loop needs a
-  gaze controller that re-solves the neck from the simulated torso at each
-  control step. That is not built yet.
+  orientation (release 15.4° driver, 6.3° 7-iron). The closed-loop neck below
+  (OSV-3d) re-solves the neck on the simulated torso during the replay.
 - **The neck range saturates.** Holding the gaze axis on the ball through the
   backswing drives `NeckInputZ` to its ±80° bounds on 213 (driver) and 114
   (7-iron) frames. The reference neck speed reaches 974°/s. Together with the
@@ -285,6 +284,74 @@ python3 -m scripts.render_head_gaze_clips RUN_IK RUN_GAZE OUT/driver_fd_ikneck_v
 Clips of the forward-dynamics replay (IK neck on the left, gaze neck on the
 right; 1920x1080, 60 fps, 1x, 0.5x and impact 0.25x) are on host brick under
 `~/Videos/Parity Audit/golfer_realism/head_gaze/osv3c/`.
+
+### Closed-Loop Gaze Neck
+
+OSV-3d. `--fd-neck gaze` solves the neck on the *tracked* torso before the replay, so
+the replay's own torso error reaches the head. `--fd-neck gaze-closed` keeps
+that neck as the feedforward and closes the loop on the simulated state:
+
+- `GazeNeckFeedback` (`pipeline/gaze_tracking.py`) is a kkt
+  `reference_hook(t, q, q_t, v_t)` (`tracking_controller.py`). Once per capture
+  frame (`1 / rate_hz`, about 2.8 ms) it repeats the bounded neck solve on the
+  *simulated* `q`, with the scheduled direction taken from the simulated eye
+  and the weak prior toward the feedforward neck.
+- Let `c` be the correction to the feedforward neck and `ċ` its backward
+  difference between updates. Until the next update the position target is
+  `clip(x̄(t) + c + ċ (t − t_j))` and the velocity target is `ẋ̄(t) + ċ`. The
+  acceleration feedforward stays the reference's. Only the three neck columns
+  change.
+- The receipt block `dynamics.head_gaze` carries `neck_reference:
+  gaze_schedule_closed_loop` and a `feedback` block: updates, clamped updates,
+  and solve residuals.
+
+| Capture | Neck | Replay schedule error RMS (deg): address→impact / hold / release / after | Replay eye range x/y/z (mm) | Replay head yaw/pitch/roll range (deg) | Neck at range | FD marker RMS (mm): whole / address→impact / head |
+|---|---|---|---|---|---|---|
+| driver | gaze (open loop) | 2.1 / 1.1 / 17.2 / 16.7 | 140 / 205 / 49 | 29 / 8 / 27 | 221 of 654 reference frames | 92.5 / 48.7 / 158.3 |
+| driver | gaze-closed | **0.4 / 2.9 / 1.7 / 2.1** | 136 / 206 / 47 | 28 / 7 / 28 | 93 of 654 updates | 90.6 / 49.3 / 146.8 |
+| 7-iron | gaze (open loop) | 0.7 / 0.9 / 8.6 / 7.6 | 70 / 142 / 44 | 19 / 4 / 10 | 92 of 657 reference frames | 64.5 / 38.2 / 104.3 |
+| 7-iron | gaze-closed | **0.1 / 0.6 / 1.2 / 0.7** | 69 / 143 / 45 | 19 / 3 / 11 | 69 of 656 updates | 64.3 / 38.4 / 99.6 |
+
+These open-loop rows are re-runs on the current base (#12145 merged), so they
+differ from the table above.
+
+Findings:
+
+- **The release error is gone.** Release-window RMS falls from 17.2° to 1.7°
+  (driver) and from 8.6° to 1.2° (7-iron); after the release it falls from 16.7°
+  to 2.1° and from 7.6° to 0.7°. Solve residuals stay under 0.004°.
+- **The rate feedforward is required.** The first version moved only the
+  position target. It lagged a fast-moving correction: release 6.7° / 4.2°, but
+  the hold window rose from 1.1° to 4.8° (driver) and from 0.9° to 1.7° (7-iron).
+  Adding `ċ` to the velocity target fixed both.
+- **The driver hold window is still worse than open loop** (2.9° against 1.1°,
+  maximum 4.0°). The ball impact disturbs the torso in that 30 ms window, and
+  the tracked reference itself is 2.0° off the schedule there.
+- **The neck range still binds.** The closed loop asks less of the neck than
+  the open-loop reference (93 and 69 updates at range), but the eyes-on-ball
+  schedule remains stricter than the published tour head rotation (see above).
+- **Body motion is essentially unchanged.** Whole-swing FD marker RMS moves by
+  −1.9 mm (driver) and −0.3 mm (7-iron), and address-to-impact RMS by under
+  1 mm. Head-marker RMS improves by 11.5 mm and 4.8 mm, but it stays above
+  the IK-neck replays in the table above (87.0 and 86.5 mm, earlier base),
+  because head markers do not drive this neck.
+
+Evidence: `evidence/head_gaze/fd_neck_closed_loop.json`. The runs were made on
+ControlTower (`ud-sim`): the open-loop rows at `c1f9ee5a56` and the
+closed-loop rows at `8a24ce41db`. The open-loop code path is the same at both
+commits, because the second commit only changes the hook. Canonical commands
+(`CANONICAL_RUN.md` §2A) plus `--fd-neck gaze` or `--fd-neck gaze-closed`:
+
+```
+python3 -m src.shared.python.motion_matching.pipeline.cli --spec docs/development/full_body_models/full_body_spec_anthro_driver.json --capture driver --static-seeds --fd-neck gaze-closed --out RUN
+python3 -m src.shared.python.motion_matching.pipeline.cli --spec docs/development/full_body_models/full_body_spec_anthro_iron7.json --capture iron --static-seeds --zmp-filter --fd-neck gaze-closed --out RUN
+python3 -m scripts.summarize_fd_neck_tracking docs/development/full_body_models/evidence/head_gaze/fd_neck_closed_loop.json RUN...
+python3 -m scripts.render_head_gaze_clips RUN_OPEN RUN_CLOSED OUT/driver_fd_gazeneck_open_vs_closed --trajectory replay --labels "FD replay, open-loop gaze neck" "FD replay, closed-loop gaze neck"
+```
+
+Clips (open loop on the left, closed loop on the right; 1920x1080, 60 fps, 1x,
+0.5x and impact 0.25x) are on host brick under
+`~/Videos/Parity Audit/golfer_realism/head_gaze/osv3d/`.
 
 ## Head-Gaze Clips
 
@@ -325,7 +392,8 @@ python3 -m scripts.render_head_gaze_engines --pair OUT/driver/driver_gaze0 OUT/d
 - The gaze-regularised result raises the marker error (see the table); the
   default stays marker-faithful.
 - The neck prior is minimal-motion; there is no head-neck dynamics.
-- The forward-dynamics gaze neck is open loop (solved on the reference torso),
-  replays in MuJoCo only, and saturates the neck yaw range; see the section
-  above. MyoSuite and OpenSim neck actuation, and the receipts of the other
-  engines, are not covered yet.
+- The forward-dynamics gaze neck replays in MuJoCo only and saturates the neck
+  yaw range; see the section above. The closed-loop mode (`gaze-closed`) runs
+  only with the kkt tracking backend, and its correction rate is a backward
+  difference over one capture frame. MyoSuite and OpenSim neck actuation, and
+  the receipts of the other engines, are not covered yet.
