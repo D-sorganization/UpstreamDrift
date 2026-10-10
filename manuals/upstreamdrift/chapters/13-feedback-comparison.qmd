@@ -83,6 +83,14 @@ error and does not certify anatomy. The artifact can seed an explicitly
 provisional native marker map without human approval, while independent
 scoring and every physical qualification gate remain separate.
 
+The MuJoCo native-marker integration test exercises calibration from a
+full-state replay pose history, artifact revalidation against the capture
+clock, map construction, and propagation of the artifact digest into the
+existing replay receipt. This is fixture-level software integration evidence;
+it does not define production attachments or qualify a model. OpenSim's
+position-level geometry provider is not a full-state replay adapter, and the
+same end-to-end handoff is not yet tested for Drake or Pinocchio.
+
 Reproduce with `python3 -m pytest -o addopts='' tests/opensim/test_frozen_marker_scoring.py tests/opensim/test_marker_calibration.py`.
 
 An independent replay uses one saved full initial physical state and a

@@ -51,6 +51,16 @@ proof that the named native pose provider executed. A consumer must preserve
 the calibration artifact and independently verify its inputs before using the
 mapping in a scored result.
 
+The native MuJoCo marker test now exercises the complete software handoff:
+full-state replay supplies the pose history, the calibration artifact is fit
+and revalidated against that history and the capture clock, and the resulting
+map is consumed by the existing native marker replay. The receipt carries the
+calibration digest. This verifies wiring and identity propagation for that
+fixture only; it does not establish production marker attachments or extend
+full-state replay support to OpenSim. OpenSim's native geometry fixture remains
+position-level, and Drake/Pinocchio calibration-to-replay are not separately
+covered by this integration test.
+
 No coordinate-retarget map is accepted as marker geometry. In particular,
 MyoSuite `coordinate_map_anthro.json` remains a coordinate map. Existing
 full-body `marker_attachments` remain seeds until their calibration evidence

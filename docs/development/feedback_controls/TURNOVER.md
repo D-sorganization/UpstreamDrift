@@ -523,3 +523,11 @@ mutation and identity rejection; one actual OpenSim 4.6 fixture confirms the
 shared calibration estimate from native frame poses. This is not production
 model, private capture, independent holdout, physics or full-engine coverage.
 Canonical equations and limitations are recorded in chapter 13.
+
+The MuJoCo native-marker integration test also fits and revalidates this
+artifact from a full-state replay pose history, converts it to the existing
+native marker map, and verifies that the replay receipt binds the calibration
+digest. This closes only the tested software handoff. It adds no production
+marker attachments and does not make the position-level OpenSim geometry
+provider a full-state replay provider; Drake/Pinocchio handoff remains without
+an equivalent end-to-end calibration test.

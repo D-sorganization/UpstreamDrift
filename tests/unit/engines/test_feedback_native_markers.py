@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
+import hashlib
 import math
 import os
 from pathlib import Path
@@ -23,7 +24,11 @@ from src.engines.feedback_native_markers import (
     build_native_marker_replay_report,
     execute_native_marker_replay,
 )
+from src.engines.feedback_marker_calibration import (
+    calibrate_static_marker_attachments,
+)
 from src.engines.model_inventory import EngineModelInventory
+from src.shared.python.motion_matching.tour_capture_contract import TourCapture
 
 pytestmark = pytest.mark.unit
 
@@ -125,17 +130,57 @@ def test_mujoco_markers_use_native_fk_with_floating_base_and_local_offset(
     registry, binding = _registry_binding(registry, bundle, "mujoco")
     request = NativeReplayRequest(binding, bundle, model_path)
     offset = (0.2, -0.1, 0.05)
-    marker_map = NativeMarkerMap(
-        "mujoco",
-        bundle.model.model_id,
-        bundle.model.variant_id,
-        bundle.model.provider_id,
-        bundle.model.provider_sha256,
+    replay = replay_native_torque_bundle(bundle, model_path)
+    native_poses = []
+    for qpos in replay.qpos:
+        data.qpos[:] = qpos
+        mujoco.mj_forward(model, data)
+        native_poses.append(
+            {
+                "arm": (
+                    np.asarray(data.xmat[model.body("arm").id]).reshape(3, 3).copy(),
+                    np.asarray(data.xpos[model.body("arm").id]).copy(),
+                )
+            }
+        )
+    capture = TourCapture(
+        np.asarray(bundle.input_history.time_seconds),
+        ("marker-a",),
+        np.asarray(
+            [
+                pose["arm"][0] @ np.asarray(offset) + pose["arm"][1]
+                for pose in native_poses
+            ]
+        )[:, None, :],
+        np.ones((len(native_poses), 1), dtype=bool),
         bundle.model.source_model_sha256,
-        bundle.model.loaded_native_model_sha256,
-        "world",
-        bundle.input_history.timebase_id,
-        (NativeMarkerAttachment("marker-a", "arm", offset),),
+    )
+    pose_provider_id = "test-mujoco-mj-forward-fullstate-fk"
+    pose_provider_sha256 = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+    calibration = calibrate_static_marker_attachments(
+        capture,
+        {"marker-a": "arm"},
+        native_poses,
+        capture.time_s,
+        binding=binding,
+        native_engine_id="mujoco",
+        pose_provider_id=pose_provider_id,
+        pose_provider_sha256=pose_provider_sha256,
+        capture_frame_id="capture-world",
+        capture_timebase_id="capture-relative",
+    )
+    calibration.validate(
+        capture=capture,
+        poses=native_poses,
+        pose_time_s=capture.time_s,
+        binding=binding,
+        pose_provider_id=pose_provider_id,
+        pose_provider_sha256=pose_provider_sha256,
+        capture_frame_id="capture-world",
+        capture_timebase_id="capture-relative",
+    )
+    marker_map = calibration.to_native_marker_map(
+        binding, output_timebase_id=bundle.input_history.timebase_id
     )
     with pytest.raises(ValueError, match="model or provider identity differs"):
         execute_native_marker_replay(
@@ -150,6 +195,7 @@ def test_mujoco_markers_use_native_fk_with_floating_base_and_local_offset(
     assert positions.shape == (3, 1, 3)
     assert evidence.qualification == "unqualified"
     assert evidence.marker_map_sha256 == marker_map.sha256
+    assert evidence.calibration_artifact_sha256 == calibration.sha256
     assert evidence.native_execution_receipt.output_state_sha256
     changed_map = replace(
         marker_map,
@@ -158,7 +204,6 @@ def test_mujoco_markers_use_native_fk_with_floating_base_and_local_offset(
         ),
     )
     assert changed_map.sha256 != marker_map.sha256
-    replay = replay_native_torque_bundle(bundle, model_path)
     for sample, state in enumerate(replay.qpos):
         angle = state[7]
         local = np.asarray(offset)
