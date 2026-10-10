@@ -40,6 +40,16 @@ Comparison caption repair is committed atcc09eec2cf (18tests/Ruff/Mypy), with ro
 
 After all findings are repaired/reviewed and activev2 producers complete, preserve the entire rejected untracked figure/report trees under ignored `presentation_preview_rejected_final_v2`, recording a relocation receipt and old manifest hashes. Regenerate corrected full outputs into canonical names so publication/rebuild links stay correct. Do not introduce a selective-refresh API or claim reused old images were newly rendered. Compare regenerated numerical tables with the preserved postprocessing tables; no Monte Carlo/data changes are planned.
 
+## Current Publication Checkpoint
+
+Both rejected original v2 figure trees are now preserved under ignored `presentation_preview_rejected_final_v2`, with exact manifest hashes and relocation paths in `validation/original_v2_figure_relocation.json` (5c64136ab4). Canonical figure directories are currently absent pending regeneration; no original render is active.
+
+The supplemental validator failure is repaired at20d462ad2b: only the reviewed Driver5° original-control curve1 to supplemented curve2 permits the exact speed-bound extension.30tests pass, all384planned source/config/nominal comparisons pass preflight, and the actual10,000-shot pair yields9,940common supported rows. See `validation/driver_curve_bounds_reporting_review_v1/`; full report statistics still require rerun.
+
+The full-production covariance header repair is integrated at56ea967f53, with eight actual previews and14passing tests in `validation/matrix_covariance_header_v1/`. Astra's `validation/matrix_independent_preview_review_v1/` verifies all eight hashes and graphics; its final finding is missing circular containment radius. Root is implementing the narrowly derived radius caption in BOUNDS, with dedicated red regression and saved-data preview.48MAIN integration tests passed before this final caption change (`validation/publication_repair_integration_v1/`). Do not start the full renderer until this last caption is independently checked and merged.
+
+The existing LaTeX reference now distinguishes current phase-two scope from historical phase-one results (c0800e2923). Its title check passes, but the built-in compiler still panics before document parsing while fetching the Tectonic bundle. See `validation/latex_editor_current_scope_check.json`. The editor remains open; no replacement PDF was produced. The PDF skill operation marker was executed once on this turn before preparing the next figure/PDF outputs; do not repeat it for the same operation.
+
 ## Reporting Revision
 
 Isolated layout `1e4d70d0dd` fixes phone readability, main/marginal ticks and footer clearance. Regression evidence is red-to-green;19tests pass. Astra inspected nine1080px previews and verified27artifact hashes across Driver/7-Iron/PW. Root also inspected the7-Iron draw. This qualifies the reviewed component, not the complete final publication.
