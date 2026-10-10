@@ -86,6 +86,10 @@ Canonical preliminary gate session `33360` ended with exit 1: 24 failed, 3,822 p
 
 Protocol guard #12169 is independently qualified and committed in isolated BOUNDS at `c7a2f41fc8`. Eight independent red cases, 48 focused green tests and static checks pass; root independently passed 29 regression cases. All 12 PNGs from four actual valid pairs are byte-identical to frozen PRESENTATION, with identical artists, labels, limits and metadata. Root rehashed all source/input/evidence bindings. All 384 actual resolved references also passed. Evidence: `validation/protocol_precondition_review_v1/independent_acceptance/`. BOUNDS editing is idle. **Do not integrate this commit into MAIN before final v6 report construction/verification under frozen `4023111d2a`; preserve historical strict source reproduction.** Whole-publication acceptance and issue closure remain pending.
 
+## Vector Inspection Helper in Progress
+
+Operational PDF/SVG inspection is being prepared by AGY Gemini 3.8 in `/tmp/p2-vector-review-agy/` only (session `34618`, PID `414060`; verify start ticks in `validation/vector_inspection_candidate_v1/start.json`). The repository, producer and live graphics are read-only to that worker. It is an unaccepted candidate; Astra is reviewing provisionally without edits. Tests must qualify hashes, parsing and resource diagnostics; these do not establish layout, scientific content or visual approval. Keep source/terminal gates in the existing qualified batch coordinator and preserve the distinction between automatic checks and visual review.
+
 ## Completed Numerical Data
 
 All simulation workers, full saved-data audits and fresh archive restorations are finished. Do not restart them.

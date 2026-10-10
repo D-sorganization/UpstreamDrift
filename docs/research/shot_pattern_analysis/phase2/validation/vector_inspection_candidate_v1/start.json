@@ -1,0 +1,13 @@
+{
+  "status": "running_unaccepted_candidate",
+  "checked_utc": "2026-10-10T17:47:45.686297+00:00",
+  "session_id": 34618,
+  "pid": 414060,
+  "process_start_ticks": 52295075,
+  "cwd": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift",
+  "model": "gemini-3.8-flash-high",
+  "write_scope": "/tmp/p2-vector-review-agy/ only; repository and production outputs read-only",
+  "prompt_sha256": "f28f8bb80fe94eae1357fb1f317dd9162b1dc6cd4adfa63b496115663fd4d944",
+  "purpose": "Qualify PDF/SVG parse/resource diagnostics; terminal and scientific/visual gates remain separate",
+  "astra_review": "Read-only provisional review; no edits until AGY terminal"
+}
