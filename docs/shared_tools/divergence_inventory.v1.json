@@ -13,7 +13,7 @@
   "totals": {
     "identical": 400,
     "diverged": 273,
-    "ud-only": 1772,
+    "ud-only": 1773,
     "tools-only": 805,
     "spelling-only": 121
   },
@@ -483,7 +483,7 @@
     "lifting": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 24,
+      "ud-only": 25,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -12609,7 +12609,7 @@
       "classification": "ud-only",
       "package": "lifting",
       "subpackage": "pack_audit",
-      "ud_bytes": 4100,
+      "ud_bytes": 6438,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -12657,7 +12657,19 @@
       "classification": "ud-only",
       "package": "lifting",
       "subpackage": "pack_audit",
-      "ud_bytes": 10679,
+      "ud_bytes": 10942,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "lifting/pack_audit/adapters/opensim_bar_hold.py",
+      "classification": "ud-only",
+      "package": "lifting",
+      "subpackage": "pack_audit",
+      "ud_bytes": 8940,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -12681,7 +12693,7 @@
       "classification": "ud-only",
       "package": "lifting",
       "subpackage": "pack_audit",
-      "ud_bytes": 9952,
+      "ud_bytes": 9141,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
