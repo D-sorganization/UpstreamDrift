@@ -15,11 +15,10 @@
       "title": "Golfer body appearance with a visible head, face and neck in every engine render",
       "pyqt": "src/shared/python/model_appearance/head.py",
       "api": null,
-      "web": null,
-      "status": "exempt",
-      "reason": "Engine-render appearance layer (MuJoCo appearance and visual layers, Drake and Pinocchio MeshCat, MyoSuite, OpenSim native viewers) that produces mp4 and PNG artefacts and has no interactive PyQt6 surface; the web GolferModel.tsx head is a follow-up under #11718 (epic #11706).",
+      "web": "ui/src/components/visualization/HeadModel.tsx",
+      "status": "parity",
       "tiles": [],
-      "notes": "Visual-only parametric head (skull, eyes, brows, nose, mouth, ears, neck, optional hair or cap) attached to the spec Head body, with a visual-only yaw/pitch/roll orientation channel for gaze (OSV-3 #11729). No mass, inertia or degree of freedom changes."
+      "notes": "Visual-only parametric head (skull, eyes, brows, nose, mouth, ears, neck, optional hair or cap) attached to the spec Head body, with a visual-only yaw/pitch/roll orientation channel for gaze (OSV-3 #11729). No mass, inertia or degree of freedom changes. The web HeadModel.tsx (headModel.ts, #11718) mirrors head.py with the same constants and is mounted on the torso of GolferModel.tsx; the web golfer has no appearance document, so the gaze orientation channel and the body_model option are not mirrored there (visual-only, no web consumer yet)."
     },
     "tools.native_viewer_export": {
       "title": "Native per-engine viewer video export (CLI)",
@@ -571,10 +570,11 @@
     "render.club_head_and_ball": {
       "title": "Realistic Club Head And Ball Rendering",
       "pyqt": "src/shared/python/model_appearance/club_head_mesh.py",
+      "web": "ui/src/components/visualization/ClubHead.tsx",
       "status": "gap",
       "issue": 11717,
       "tiles": [],
-      "notes": "The desktop engine visual layers (MuJoCo, OpenSim, Drake and Pinocchio MeshCat exports, MyoSuite) draw the parametric club head, shaft and grip from one shared adapter (#11717, #11727). GCV-13 (#11719) landed the shared address-ball geometry (src/shared/python/model_appearance/ball.py) and the MuJoCo decorative ball visual geom; OpenSim, Drake/Pinocchio MeshCat, MyoSuite, native export and the web ClubHead component (#11717) still draw no ball, so the web app still draws the placeholder head."
+      "notes": "The desktop engine visual layers (MuJoCo, OpenSim, Drake and Pinocchio MeshCat exports, MyoSuite) draw the parametric club head, shaft and grip from one shared adapter (#11717, #11727). The web ClubHead.tsx now draws the same committed assets/club_heads STL heads at the spec loft and lie with a hosel, so the head half is at parity. The gap stays open because the ball visual (#11719) has not landed on the web: GolferModel.tsx draws no ball."
     }
   }
 }
