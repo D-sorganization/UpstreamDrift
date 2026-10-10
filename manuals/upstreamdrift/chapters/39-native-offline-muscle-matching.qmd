@@ -156,3 +156,5 @@ qualification remain distinct. The turnover records broad capture-loader DLL
 failures and the unavailable opt-in Rajagopal fixture. Source registration,
 passive-load, assistance, constraint and full initial-state blockers remain
 binding before optimization. No private full-capture muscle match is established.
+The mixed Windows OpenSim/C3D runtime limitation is tracked in #12065; source-bound
+TRC preparation can run in a separate process before native Moco execution.

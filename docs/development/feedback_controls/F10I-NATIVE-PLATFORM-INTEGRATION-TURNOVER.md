@@ -71,3 +71,25 @@ before Moco construction. Numerical seeds are not observed motion. Integration,
 native fixture success, optimizer convergence and animations do not close F10.
 Reuse existing SDKs/checkouts; retain Desktop previews with their current explicit
 nominal-viability labels. No new fit video or qualified private match is claimed.
+
+## Publication Gates and Baseline Diagnostics
+
+Normal pre-push Ruff, policy, title/manual, Prettier, mypy, Bandit and configured
+unit-test hooks pass. The first mypy attempt failed with a stale-cache NumPy
+cross-reference assertion; the full hook passed with a fresh version-specific
+`MYPY_CACHE_DIR`. The existing cache was retained. No validation hook was skipped.
+The runtime manifest corresponds exactly to 4,507 Git blobs. Two unchanged loader
+test files have CRLF runtime bytes versus LF Git blobs; their code is identical
+after newline normalization, with both hashes retained explicitly. All 4,509
+runtime file bytes remained unchanged before/after the accepted campaign.
+
+The central helper's generic `cli.py` test mapping also selects unrelated CLI
+tests. Its initial broad test run returned 332 pass / 3 fail / 118 skip; two
+motion-pipeline help checks pass with `PYTHONUTF8=1`, while the unchanged shot
+optimizer test still uses an obsolete invocation. A separate UTF-8 diagnostic
+reproduces one failure and four passes. Source and tests for that optimizer are
+unchanged from the guarded-controls parent. Track that baseline in #12064;
+the OpenSim/C3D mixed-process DLL issue is #12065. The initial central helper also
+hit a Windows output-decoding failure after its affected-test run; it is not an
+all-green central-gate receipt. Preserve these failures alongside the passing
+actual native campaign and normal hooks.
