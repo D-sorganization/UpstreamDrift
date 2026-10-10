@@ -14,7 +14,7 @@
     "identical": 400,
     "diverged": 273,
     "ud-only": 1760,
-    "tools-only": 796,
+    "tools-only": 805,
     "spelling-only": 121
   },
   "packages": {
@@ -764,7 +764,7 @@
       "identical": 211,
       "diverged": 67,
       "ud-only": 36,
-      "tools-only": 80,
+      "tools-only": 89,
       "spelling-only": 23
     },
     "signal_toolkit": {
@@ -27490,7 +27490,7 @@
       "package": "sidekick",
       "subpackage": "lab",
       "ud_bytes": null,
-      "tools_bytes": 4556,
+      "tools_bytes": 7545,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -27502,7 +27502,7 @@
       "package": "sidekick",
       "subpackage": "lab",
       "ud_bytes": null,
-      "tools_bytes": 7127,
+      "tools_bytes": 10596,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -27629,6 +27629,18 @@
       "spelling_only": false
     },
     {
+      "path": "sidekick/lab/mocap/cleanup.py",
+      "classification": "tools-only",
+      "package": "sidekick",
+      "subpackage": "lab",
+      "ud_bytes": null,
+      "tools_bytes": 1787,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "sidekick/lab/mocap/cli.py",
       "classification": "tools-only",
       "package": "sidekick",
@@ -27665,12 +27677,36 @@
       "spelling_only": false
     },
     {
+      "path": "sidekick/lab/mocap/evidence_serialization.py",
+      "classification": "tools-only",
+      "package": "sidekick",
+      "subpackage": "lab",
+      "ud_bytes": null,
+      "tools_bytes": 5389,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "sidekick/lab/mocap/experiment_contracts.py",
       "classification": "tools-only",
       "package": "sidekick",
       "subpackage": "lab",
       "ud_bytes": null,
       "tools_bytes": 9144,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "sidekick/lab/mocap/experiment_evidence.py",
+      "classification": "tools-only",
+      "package": "sidekick",
+      "subpackage": "lab",
+      "ud_bytes": null,
+      "tools_bytes": 19254,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -27701,6 +27737,18 @@
       "spelling_only": false
     },
     {
+      "path": "sidekick/lab/mocap/experiment_resources.py",
+      "classification": "tools-only",
+      "package": "sidekick",
+      "subpackage": "lab",
+      "ud_bytes": null,
+      "tools_bytes": 5391,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "sidekick/lab/mocap/extrinsics.py",
       "classification": "tools-only",
       "package": "sidekick",
@@ -27725,6 +27773,42 @@
       "spelling_only": false
     },
     {
+      "path": "sidekick/lab/mocap/native_state_artifact.py",
+      "classification": "tools-only",
+      "package": "sidekick",
+      "subpackage": "lab",
+      "ud_bytes": null,
+      "tools_bytes": 5949,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "sidekick/lab/mocap/native_state_replay.py",
+      "classification": "tools-only",
+      "package": "sidekick",
+      "subpackage": "lab",
+      "ud_bytes": null,
+      "tools_bytes": 9648,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "sidekick/lab/mocap/native_state_replay_serialization.py",
+      "classification": "tools-only",
+      "package": "sidekick",
+      "subpackage": "lab",
+      "ud_bytes": null,
+      "tools_bytes": 4031,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "sidekick/lab/mocap/observations.py",
       "classification": "tools-only",
       "package": "sidekick",
@@ -27743,6 +27827,30 @@
       "subpackage": "lab",
       "ud_bytes": null,
       "tools_bytes": 12511,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "sidekick/lab/mocap/preview_artifacts.py",
+      "classification": "tools-only",
+      "package": "sidekick",
+      "subpackage": "lab",
+      "ud_bytes": null,
+      "tools_bytes": 14891,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "sidekick/lab/mocap/preview_serialization.py",
+      "classification": "tools-only",
+      "package": "sidekick",
+      "subpackage": "lab",
+      "ud_bytes": null,
+      "tools_bytes": 2391,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
