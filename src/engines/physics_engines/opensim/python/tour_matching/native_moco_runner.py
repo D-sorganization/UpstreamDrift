@@ -67,8 +67,6 @@ class NativeMocoRequest:
         if self.mixed_actuation is not None:
             if not isinstance(self.mixed_actuation, MixedActuationProfile):
                 raise TypeError("mixed Moco requires a typed actuation profile")
-            if self.constrained_cold_start is not None:
-                raise ValueError("combined constrained mixed Moco is not admitted")
             if dict(self.bindings.control_bounds) != {
                 channel.path: channel.control_bounds
                 for channel in self.mixed_actuation.channels
@@ -226,19 +224,35 @@ def _observed_marker_bindings(model: Any, request: NativeMocoRequest) -> list[st
 
 
 def _audit_native_passive(
-    model: Any, state: Any, policy: Any, mixed: MixedActuationProfile | None = None
+    model: Any,
+    state: Any,
+    policy: Any,
+    mixed: MixedActuationProfile | None = None,
+    declared: DeclaredColdStart | None = None,
 ) -> tuple[str | None, list[str]]:
     try:
+        if declared is not None:
+            from .native_prepared_state import observe_declared_native_sample
+
+            observe_declared_native_sample(model, state, declared)
         if mixed is not None:
             from .native_mixed_actuation import admit_native_mixed_profile
 
-            admit_native_mixed_profile(model, state, mixed)
+            admit_native_mixed_profile(model, state, mixed, declared)
         passive = audit_native_passive_readiness(model, state, policy)
         blockers = list(passive.blockers)
         blockers.extend(
             item
             for item in passive.native_state.blockers
             if not (mixed is not None and item == "nonmuscle-assistance-unqualified")
+            if not (
+                declared is not None
+                and item
+                in {
+                    "native-constraint-state-unqualified",
+                    "native-lock-target-unverified",
+                }
+            )
             if item
             not in {
                 "complete-native-state-unverified",
@@ -294,6 +308,7 @@ def _preview_replay_capability(
                 },
                 request.mixed_actuation,
                 experiment_id="offline-moco-mixed-replay-capability-preview",
+                constrained_cold_start=declared,
             )
         elif declared is None:
             build_native_muscle_replay_bundle(
@@ -317,6 +332,37 @@ def _preview_replay_capability(
         return ["independent-native-replay-unavailable"]
 
 
+def _declared_chart_blockers(request: NativeMocoRequest) -> list[str]:
+    """Prove caller optimizer boxes stay inside the declared coordinate chart."""
+    declared = request.constrained_cold_start
+    if declared is None:
+        return []
+    bounds = request.bindings.state_bounds
+    blockers = []
+    for coordinate, (lower, upper) in declared.chart_bounds.items():
+        interval = bounds.get(coordinate + "/value")
+        if interval is None or interval[0] < lower or interval[1] > upper:
+            blockers.append("native-moco-chart-bounds-unqualified")
+    for terms, lower, upper in declared.linear_chart_bounds.values():
+        implied_low, implied_high = 0.0, 0.0
+        for coordinate, weight in terms.items():
+            interval = bounds.get(coordinate + "/value")
+            if interval is None:
+                blockers.append("native-moco-linear-chart-bounds-unqualified")
+                break
+            endpoints = (weight * interval[0], weight * interval[1])
+            implied_low += min(endpoints)
+            implied_high += max(endpoints)
+        else:
+            if (
+                not np.isfinite((implied_low, implied_high)).all()
+                or implied_low < lower
+                or implied_high > upper
+            ):
+                blockers.append("native-moco-linear-chart-bounds-unqualified")
+    return blockers
+
+
 def _native_preparation(
     request: NativeMocoRequest,
 ) -> tuple[str | None, str | None, str | None, list[str]]:
@@ -325,7 +371,7 @@ def _native_preparation(
 
     from .muscle_replay import _restore_continuous_state
 
-    blockers: list[str] = []
+    blockers: list[str] = _declared_chart_blockers(request)
     loaded: str | None = None
     model = osim.Model(str(request.model_path))
     blockers.extend(_observed_marker_bindings(model, request))
@@ -372,7 +418,7 @@ def _native_preparation(
         blockers.append("native-control-binding-coverage")
 
     passive_sha, passive_blockers = _audit_native_passive(
-        model, state, request.passive_policy, request.mixed_actuation
+        model, state, request.passive_policy, request.mixed_actuation, declared
     )
     blockers.extend(passive_blockers)
 
