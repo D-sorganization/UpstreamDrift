@@ -202,7 +202,7 @@ export function CharacterSpecPanel() {
         {selectedPreset && (
           <div className="mt-1.5 text-xs text-gray-400 space-y-0.5">
             <p>{selectedPreset.description}</p>
-            <p className="text-gray-500">{selectedPreset.limitations}</p>
+            <p className="italic">{selectedPreset.limitations}</p>
           </div>
         )}
       </div>
@@ -345,7 +345,7 @@ export function CharacterSpecPanel() {
               type="button"
               onClick={() => void handleExport(fmt, ext)}
               disabled={exportingFmt !== null}
-              className="text-xs bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 disabled:text-gray-500 text-gray-200 px-2.5 py-1.5 rounded transition-colors"
+              className="text-xs bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 disabled:text-gray-400 text-gray-200 px-2.5 py-1.5 rounded transition-colors"
             >
               {exportingFmt === fmt ? 'Exporting…' : label}
             </button>
