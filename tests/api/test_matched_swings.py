@@ -202,6 +202,53 @@ def test_run_summary_gate_values_are_finite_floats_or_none(tmp_path: Path) -> No
     ]
 
 
+@pytest.mark.parametrize(
+    ("acceptance", "expected_note"),
+    [
+        # Gates recorded: the desktop label shows the qualification note.
+        (
+            {"gates": [], "qualification_note": "Independent uninterrupted replay"},
+            "Independent uninterrupted replay",
+        ),
+        # No acceptance block: unavailable, not a fabricated blank string.
+        (None, None),
+        # No gates block: ``_populate_gates_info`` returns early with ``reason``.
+        ({"qualification_note": "note without gates"}, None),
+    ],
+)
+def test_run_summary_qualification_note_matches_desktop_label(
+    tmp_path: Path,
+    acceptance: dict[str, object] | None,
+    expected_note: str | None,
+) -> None:
+    """qualification_note follows ``MatchedSwingBrowserWidget._populate_gates_info``
+    (gui.py); ``reason`` is always passed through unchanged."""
+    ledger_path = tmp_path / "reports" / "matched_swing_ledger.json"
+    ledger_path.parent.mkdir(parents=True)
+    row = LedgerRow(
+        receipt_path="evidence/receipt.json",
+        sha256="c" * 64,
+        engine="mujoco",
+        lane="matched",
+        acceptance=acceptance,
+        reason="the reason",
+    )
+    ledger = Ledger(
+        schema_version="1.0.0",
+        generated_at="2026-09-21T00:00:00Z",
+        total_receipts=1,
+        rows=[row],
+    )
+    ledger_path.write_text(ledger.to_json(), encoding="utf-8")
+    service = MatchedSwingsService.from_ledger_file(ledger_path, repo_root=tmp_path)
+
+    summary = service.get_run_summary(row.sha256)
+
+    assert summary.qualification_note == expected_note
+    assert summary.to_dict()["qualification_note"] == expected_note
+    assert summary.reason == "the reason"
+
+
 def test_get_receipt(client: TestClient, ledger_fixture: tuple[Path, str]) -> None:
     _, run_id = ledger_fixture
     response = client.get(f"/api/matched-swings/{run_id}")

@@ -97,16 +97,16 @@ VIEW_ORDER: tuple[str, ...] = ("face_on", "down_the_line", "overhead", "oblique"
 VIEW_PRESETS = MappingProxyType(
     {
         "face_on": ViewPreset(
-            "face_on", "Face-on (target to image right)", 0.0, -6.0, 3.2
+            "face_on", "Face-on (target to image right)", 0.0, -6.0, 3.4
         ),
         "down_the_line": ViewPreset(
-            "down_the_line", "Down-the-line (behind, on target line)", -90.0, -8.0, 3.2
+            "down_the_line", "Down-the-line (behind, on target line)", -90.0, -8.0, 3.75
         ),
         "overhead": ViewPreset(
-            "overhead", "Overhead (target to image right)", 0.0, -89.0, 3.4
+            "overhead", "Overhead (target to image right)", 0.0, -89.0, 2.28
         ),
         "oblique": ViewPreset(
-            "oblique", "Oblique (rear, target side)", 135.0, -14.0, 3.2
+            "oblique", "Oblique (rear, target side)", 135.0, -14.0, 3.95
         ),
         # Not part of VIEW_ORDER (the 2x2 grid stays four views): request it by name.
         "hands_closeup": ViewPreset(
