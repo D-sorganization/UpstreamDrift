@@ -20,7 +20,7 @@
     "recipe": "buet-abdjnt-zero-translations/1",
     "source_sha256": "8d4d349747060efbac31c707c4e01f452746a8fba32be77a425b5ac5be1d34a3",
     "derived_sha256": "44b73ebed9f23268a4e1661507cf8d1e0351e1cbf49055d0b77be81065831cbf",
-    "reducer_sha256": "c53234b7c3ba675bfde0359c797a9c15797696f445436cfe139edd13a8c8ac9d",
+    "reducer_sha256": "fa0d2a25f4a3d04d1881a07f261457f7c65e008a061d498572fd67d35ea5d779",
     "comparison_helper_sha256": "e2e01cad795e8fc2a4be703019051d4953ae059a3893de81d37fba53499a5b73",
     "observation_sha256": "d034da37989d2d673039795932b9c623b94710a0a8a338edd7262faf392b3560",
     "native_version": "version 4.6-2026-06-22-85aaf64, build date 18:27:55 Jun 22 2026",
