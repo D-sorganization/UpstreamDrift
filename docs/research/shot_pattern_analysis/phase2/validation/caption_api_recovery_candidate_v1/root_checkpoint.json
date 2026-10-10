@@ -11,7 +11,10 @@
   },
   "root_ruff_check_passed": true,
   "root_ruff_format_check_passed": true,
-  "root_tests_pending": true,
+  "root_tests_pending": false,
   "actual_saved_data_visual_review_pending": true,
-  "accepted": false
+  "accepted": false,
+  "root_tests_passed": 21,
+  "root_tests_exit_code": 0,
+  "root_tests_warnings": 6
 }
