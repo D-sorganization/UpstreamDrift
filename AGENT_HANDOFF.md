@@ -1,3 +1,9 @@
+# Active: Two-Hand Club in Tour-Matching Variants and Static Optimisation, OSV-9 Slice 2 #11756
+
+- Branch `claude/osv-9b-msk-club-variants`. `tour_matching/model_variants.equipment_from_model` reads the `Club` the model carries (shared-club hash, spec mass, weld/bushing topology, both hands, all meshes) and fails closed; both variant factories use it.
+- `run_musculoskeletal_swing.py --club driver --club-control`: SO with the club plus a no-club control. The IK does not close the two-hand loop (with the trail weld, 14 arm coordinates failed at every frame tried), so SO releases the trail weld (`release_trail_weld`; `--enforce-trail-weld` keeps it). Per-frame convergence is recorded from the native SO log (violation <= 1e-3): 234/262 with the club, 237/262 without.
+- Club load on 225 jointly converged frames: lead wrist deviation +32.9 N m RMS, lead shoulder flexion +45.0, trail arm exactly 0. Receipt `evidence/musculoskeletal/receipt.json`; the ledger is regenerated. No MyoFullBody OpenSim export exists.
+
 # Active: Contact Grip and MyoSuite Bushing, OSV-7 Phase 3 #11739
 
 - Branch `claude/osv-7-contact-grip` (stacked on #11963). Pad contact grip with pad stiffness matched to the bushing (`grip_contact/pad_layout.py`, `pad_contact.py`); MuJoCo full swing (dt 1e-5 s), Drake and Pinocchio holds; MyoSuite bushing parity passes (worst 0.013 % peak). Quasi-static balance closes (`static_balance.py`). See GRIP_PARITY_DECISIONS.md section 19.

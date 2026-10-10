@@ -5367,10 +5367,51 @@ angles (top 97.5 vs 98.8\textdegree, impact 11.1 vs 11.3\textdegree).
 The worst lead-grip error is 1.3 mm. The trail gap reaches 15 mm at the
 finish, where the trail weld constraint must close it.
 
+\subsection{Tour-Matching Variants and Static Optimisation}
+The tour-matching model variants (\texttt{tour\_matching/model\_variants.py})
+now read their equipment from the model with \texttt{equipment\_from\_model}.
+It returns the shared-club hash, the \texttt{Club} mass (checked against the
+spec to $10^{-6}$ kg), the weld or bushing topology, both hands, the lead and
+trail grip frames, and all three meshes. It fails closed when the club is
+missing, held by one hand, or stale. The previous hard-coded description named
+a nonexistent \texttt{grip\_frame}, one hand and the head mesh only.
+
+StaticOptimization on the tour-average driver swing
+(\texttt{scripts/run\_musculoskeletal\_swing.py --club driver
+--club-control}) solves the muscle model with the club and a no-club
+control, with the same kinematics.
+\begin{itemize}
+\item \textbf{Trail weld.} The marker IK does not close the two-hand loop.
+  With the trail weld enforced, all 14 arm coordinates missed their
+  accelerations at every one of the 88 frames tried. The solved model
+  therefore releases the trail weld, so the lead hand carries the club.
+\item \textbf{Convergence.} A frame converges when its logged violation is
+  at most $10^{-3}$. With the club, 234 of 262 frames converge; without it,
+  237.
+\item \textbf{Club load.} On the 225 frames converged in both runs, the
+  per-frame difference adds the following RMS load to the lead arm: wrist
+  deviation 32.9 N\,m, shoulder flexion 45.0 N\,m, shoulder rotation
+  42.9 N\,m and elbow flexion 16.3 N\,m. The trail arm differs by exactly
+  zero.
+\item \textbf{Reserves.} The pelvis residual dominates, at 520 N RMS with the
+  club and 454 N without.
+\end{itemize}
+The receipt is
+\path{docs/development/full_body_models/evidence/musculoskeletal/receipt.json}
+(\texttt{club}, \texttt{club\_load}, \texttt{solver.convergence}). This
+shows the club load reaches the arm actuators. It qualifies no muscle force,
+and the two-hand load split is not resolved.
+
 \subsection{Limitations and Reproduction}
 \begin{itemize}
-\item No MyoFullBody OpenSim export exists.
-\item Static optimisation with the two-hand club was not run.
+\item No MyoFullBody OpenSim export exists in the repository, so there is no
+  such model to convert.
+\item Static optimisation holds the club in the lead hand only, because the
+  IK does not close the two-hand loop. The load split between the hands
+  would need loop-consistent kinematics.
+\item The tour-matching evidence snapshots under
+  \path{docs/development/opensim_tour_matching/evidence/} are historical
+  inputs pinned by hash, and keep their original club.
 \item The Rajagopal hand meshes are unchanged.
 \item The tracked legs are a planted-feet assumption, not a measurement.
 \end{itemize}
