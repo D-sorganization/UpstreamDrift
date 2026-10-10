@@ -34,6 +34,7 @@ from src.tools.launch_monitor_model import (
     ExpectedStrokesBaselineV2,
     CorrelationMethod,
     CorrelationResult,
+    FilterRule,
     FlexibleAnalysisRequest,
     LaunchMonitorAnalysisResultV2,
     LongitudinalSessionRequestV1,
@@ -52,6 +53,8 @@ from src.tools.launch_monitor_model import (
     StrokesGainedAnalysisResultV1,
     StrokesGainedRequestV1,
     TemporalTrendResult,
+    TreatmentConfig,
+    TreatmentResult,
     VIFResult,
     analyze_dispersion,
     analyze_longitudinal_sessions,
@@ -61,6 +64,7 @@ from src.tools.launch_monitor_model import (
     analyze_trend,
     analyze_variables,
     analyze_variables_v2,
+    apply_treatment,
     compare_monitors,
     compute_correlations,
     compute_pca,
@@ -290,6 +294,62 @@ class ModelPayloadV2(BaseModel):
         if len(set(value)) != len(value):
             raise ValueError("features must not contain duplicates")
         return value
+
+
+FilterOperator = Literal["eq", "ne", "lt", "le", "gt", "ge", "contains", "in"]
+
+
+class FilterRulePayload(BaseModel):
+    """Serialized form of one :class:`FilterRule`.
+
+    ``operator`` is restricted to the operators :class:`FilterRule` accepts;
+    ``value`` is the raw text the desktop filter table's value cell holds
+    (``_filter_rules``), passed through verbatim.
+    """
+
+    column: str = Field(min_length=1)
+    operator: FilterOperator
+    value: str = ""
+
+
+class TreatmentPayloadV2(BaseModel):
+    """Bounded inline records and the PyQt Data Treatment tab's widget inputs.
+
+    Mirrors ``_read_treatment_config`` from
+    ``src/tools/launch_monitor_analytics/gui.py``: ``robust_z_threshold``
+    keeps the same default and ``[1, 20]`` range as the "Modified Z
+    Threshold" spinbox (``_build_treatment_tab``), and ``required_metrics``/
+    ``outlier_metrics`` behave like the comma-separated text fields —
+    whitespace-only or empty entries are dropped — so the API and desktop
+    paths accept identical inputs for :func:`apply_treatment`.
+    """
+
+    records: list[dict[str, Any]] = Field(min_length=3, max_length=20_000)
+    required_metrics: list[str] = Field(default_factory=list)
+    outlier_metrics: list[str] = Field(default_factory=list)
+    robust_z_threshold: float = Field(4.5, ge=1.0, le=20.0)
+    exclude_flagged: bool = False
+    filters: list[FilterRulePayload] = Field(default_factory=list)
+
+    @field_validator("required_metrics", "outlier_metrics")
+    @classmethod
+    def _strip_blank_metrics(cls, value: list[str]) -> list[str]:
+        """Precondition: blank/whitespace-only entries behave like the
+        desktop's comma-separated text field, which drops them."""
+        return [item.strip() for item in value if item.strip()]
+
+    def to_config(self) -> TreatmentConfig:
+        """Build the :class:`TreatmentConfig` ``_read_treatment_config`` builds."""
+        return TreatmentConfig(
+            required_metrics=tuple(self.required_metrics),
+            outlier_metrics=tuple(self.outlier_metrics),
+            robust_z_threshold=self.robust_z_threshold,
+            exclude_flagged=self.exclude_flagged,
+            filters=tuple(
+                FilterRule(rule.column, rule.operator, rule.value)
+                for rule in self.filters
+            ),
+        )
 
 
 @lru_cache(maxsize=1)
@@ -916,17 +976,21 @@ async def analyze_comparison_v2(payload: ComparisonPayloadV2) -> dict[str, objec
     }
 
 
-def _predictions_to_records(predictions: Any) -> list[dict[str, object]]:
-    """Serialize the held-out predictions frame to JSON-safe row dicts.
+def _frame_to_records(frame: Any) -> list[dict[str, object]]:
+    """Serialize a result DataFrame to JSON-safe row dicts.
 
     Postcondition: every float value is JSON-safe — NaN/infinite values
-    become ``null``, never ``0``.
+    become ``null``, never ``0``; a timestamp-like value (e.g. a
+    ``pandas.Timestamp``) becomes its ISO string, and a missing timestamp
+    (``NaT``, which is unequal to itself) becomes ``null``.
     """
-    records: list[dict[str, Any]] = predictions.to_dict(orient="records")
+    records: list[dict[str, Any]] = frame.to_dict(orient="records")
     for entry in records:
         for key, value in entry.items():
             if isinstance(value, float):
                 entry[key] = _json_safe_float(value)
+            elif hasattr(value, "isoformat"):
+                entry[key] = None if value != value else value.isoformat()
     return records
 
 
@@ -936,7 +1000,7 @@ def _model_result_to_dict(result: PredictiveModelResult) -> dict[str, object]:
     Postcondition: every float in ``metrics``/``coefficients`` is JSON-safe
     — NaN/infinite values become ``null``, never ``0`` — and
     ``predictions`` is a JSON-safe list of row dicts; see
-    :func:`_predictions_to_records`.
+    :func:`_frame_to_records`.
     """
     coefficients = result.coefficients
     return {
@@ -954,7 +1018,7 @@ def _model_result_to_dict(result: PredictiveModelResult) -> dict[str, object]:
         "random_seed": result.random_seed,
         "train_count": result.train_count,
         "test_count": result.test_count,
-        "predictions": _predictions_to_records(result.predictions),
+        "predictions": _frame_to_records(result.predictions),
     }
 
 
@@ -993,6 +1057,83 @@ async def fit_model_v2(payload: ModelPayloadV2) -> dict[str, object]:
             detail=f"Model {payload.model!r} is unavailable: {exc}",
         ) from exc
     return _model_result_to_dict(result)
+
+
+def _json_safe_action_value(value: object) -> object:
+    """Mirror ``json.dumps(..., default=str)`` for one audit-action value.
+
+    Postcondition: a float is JSON-safe (NaN/infinite becomes ``null``,
+    never ``0``); ``None``/``bool``/``int``/``str`` pass through unchanged;
+    a ``dict``/``list``/``tuple`` is converted recursively; anything else
+    (e.g. a numpy scalar row index) becomes its ``str()`` — the same
+    fallback the desktop's ``json.dumps(..., default=str)`` uses
+    (``_present_treatment``).
+    """
+    if isinstance(value, float):
+        return _json_safe_float(value)
+    if value is None or isinstance(value, (bool, int, str)):
+        return value
+    if isinstance(value, dict):
+        return {key: _json_safe_action_value(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_json_safe_action_value(item) for item in value]
+    return str(value)
+
+
+def _audit_log_to_json_safe(
+    audit_log: tuple[dict[str, object], ...],
+) -> list[dict[str, object]]:
+    """Serialize :class:`TreatmentResult` ``audit_log`` entries, action by action."""
+    return [
+        {key: _json_safe_action_value(value) for key, value in action.items()}
+        for action in audit_log
+    ]
+
+
+def _treatment_result_to_dict(result: TreatmentResult) -> dict[str, object]:
+    """Serialize :class:`TreatmentResult` to the ``/v2/treatment`` response.
+
+    Postcondition: ``data``/``flags`` are JSON-safe row dicts (see
+    :func:`_frame_to_records`); ``audit_log`` entries are JSON-safe,
+    mirroring the desktop's ``json.dumps(..., default=str)`` serialization
+    (see :func:`_audit_log_to_json_safe`); ``shot_count``/``flag_count``
+    match the desktop status line's "{flags} flags; {shots} shots in the
+    analysis view" counts (``_present_treatment``).
+    """
+    return {
+        "data": _frame_to_records(result.data),
+        "flags": _frame_to_records(result.flags),
+        "audit_log": _audit_log_to_json_safe(result.audit_log),
+        "shot_count": len(result.data),
+        "flag_count": len(result.flags),
+    }
+
+
+@router.post("/v2/treatment")
+@handle_api_errors
+async def apply_treatment_v2(payload: TreatmentPayloadV2) -> dict[str, object]:
+    """Apply reproducible data-quality treatment with the PyQt Data Treatment
+    tab's widget-derived inputs.
+
+    Calls the same :func:`apply_treatment` the desktop Data Treatment tab
+    calls (``src/tools/launch_monitor_analytics/gui.py``
+    ``_compute_treatment``), so the API and PyQt paths share one contract.
+    Precondition: ``records`` holds 3-20,000 inline rows, ``robust_z_threshold``
+    is in ``[1, 20]``, and each filter names a non-empty ``column`` with one
+    of the operators :class:`FilterRule` accepts (validated by the request
+    schema); an empty frame, an unknown required/outlier/filter column, or a
+    non-numeric filter value for a numeric operator is a domain
+    ``ValueError`` -> 400. Postcondition: the response is a JSON-safe
+    serialization of every :class:`TreatmentResult` field plus ``shot_count``
+    and ``flag_count``; see :func:`_treatment_result_to_dict`. The input
+    ``records`` are never mutated — ``apply_treatment`` works on a copy.
+    """
+
+    import pandas as pd  # deferred import: pandas must not load at API boot (issue #8943)
+
+    frame = pd.DataFrame.from_records(payload.records)
+    result = apply_treatment(frame, payload.to_config())
+    return _treatment_result_to_dict(result)
 
 
 __all__ = ["CONTRACT_VERSION", "router"]
