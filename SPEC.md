@@ -11013,6 +11013,19 @@ reduction, native Moco, contact/grip, golfer marker registration, full-state
 replay or captured full-swing matching. Scientific publication stays blocked;
 all 17 variants and six engine families remain required.
 
+## Source-Preserving Native Zero-Subtalar Reduction (#12167)
+
+An exact-source bilateral locked-zero CustomJoint reduction creates a separate
+native OpenSim artifact from the assembled 557-muscle BUET–Hamner candidate.
+The one-coordinate spatial function, source/default/achieved lock target,
+native zero frame transform and absence of external coordinate consumers are
+admitted before the native weld. Fresh reloading and four common-state
+comparisons verify a rank-complete mobility lift, native body motion, muscle
+path lengths/speeds, mass, applied forces and constraints. Canonical chapter
+46 and the F07 turnover bind source/runtime/output identity and sampled
+limits. Abdominal and MTP composition, physiological muscle state, full native
+replay, Moco and capture matching remain open.
+
 ## Assistance-Explicit OpenSim Replay (#12147)
 
 A distinct native mixed-actuation T01 profile freezes exact muscle and
