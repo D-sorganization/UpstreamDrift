@@ -19,14 +19,14 @@
       "rationale": "Preserve capture boundary review under baseline capability inventory ORG-01"
     },
     "launcher-atlas": {
-      "fingerprint": "7568b1f2340c6e22b060cb728ce78dd195859c60043015c3945c8111f7bb8d8d",
+      "fingerprint": "da22d18ea7a363528887843bbd33f2cee182aedaf6cd41343be8fde3a82328b0",
       "inputs": {
         "docs/agent_context/contracts/launcher-atlas.md": "f5976baa4ef78bcf71ede27afb4e7a85f3f72cfedbb3cdbe9b40e48d4016ae94",
         "scripts/capability_atlas/goals.py": "a4c449dbd07dc398530d7c85eefc697d36b6acaee48b7953b7e060fb413cc131",
         "scripts/capability_atlas/model.py": "ecca5889caad0e087c895f6c56c0fcd966b646bda5c3ab5a87a65c4694eb41cf",
         "scripts/capability_atlas/render.py": "7981df3ea262536a2c847b693c104e9600ce2aad85d17d4e0f3048e80ee066a5",
         "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
-        "src/config/feature_parity.json": "20c4ca22515fff238621179447c0e7daaf71c58a3229a5c7187a322d90240dab",
+        "src/config/feature_parity.json": "606f346f7a7cefb9f1375027465bcd925b43053a03260750e9a4b17cd7ff3e1b",
         "src/config/launcher_manifest.json": "1ae28f872b54c237440fcaacec40b735b93a7b80d710adc9228ef671b7831032",
         "src/config/launcher_manifest_loader.py": "aed6769fbdfc595400d0bd5d15bb75e8fbfda80243a586894d73d36b2d056a00",
         "src/config/models.yaml": "e11682df79d7467f1eba9579d835f5d7019bfd7eb09cf81c14e22bd08d0bf844",
@@ -36,7 +36,7 @@
         "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
         "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414"
       },
-      "rationale": "Merged main (knee-fix #12057 and other PRs) into GCV-13 ball-scenes: the launcher-atlas input feature_parity.json now holds both main's updates and this branch's #11717 ball-visual gap note. No tile, status or launcher-registry surface changed; tests/config/feature_parity passes and the atlas was regenerated."
+      "rationale": "CMB-7a (#11658): only the character_builder parity note changed (web page now drives the spec presets/preview/export API); capability atlas regenerated from the updated registry, no contract or path changes."
     },
     "model-backends": {
       "fingerprint": "da739fcd3c56f6c4a3923b4f31202e515023487a49d54ca449090d33186a9685",

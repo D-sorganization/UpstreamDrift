@@ -10,6 +10,8 @@ instead of assumed:
 
 * ``mujoco`` and ``pinocchio``: ``get_plant(engine, scaled_spec)`` and the plant
   body poses at the recorded coordinates.
+* ``opensim``: the Simbody FK of the exported ``.osim`` through the parity
+  adapter (``get_plant("opensim")`` needs native geometry, #11791).
 * ``myosuite``: the bundled spec-to-MyoSuite retarget map
   (``coordinate_map_anthro.json``), with the hips mapped by orientation through
   the calibrated hip frames (#12052), drives the named joints of the MyoSuite
@@ -232,6 +234,36 @@ def pinocchio_points(
     return {n: np.asarray(poses[f"probe_{n}"])[:3, 3] for n in names}, notes
 
 
+def opensim_points(
+    spec: Mapping[str, Any],
+    angles_deg: Mapping[str, float],
+    translations_m: Mapping[str, float],
+) -> tuple[dict[str, np.ndarray], list[str]]:
+    """Leg body origins from the exported ``.osim`` model's own Simbody FK.
+
+    ``get_plant("opensim")`` needs native geometry (#11791), so the parity
+    adapter (``OpenSimFullBodyParityAdapter``, the same model the native viewer
+    export shows) is evaluated instead, with an identity-placed frame added on
+    each leg body so ``frame_poses`` returns its origin.
+    """
+    from src.engines.physics_engines.opensim.python.full_body_parity import (
+        OpenSimFullBodyParityAdapter,
+    )
+
+    order = list(spec["coordinate_order"])
+    q = coordinate_vector_rad(order, angles_deg, translations_m)
+    names = [f"{b}_{s}" for b in BODIES for _, s in SIDES]
+    identity = np.eye(4).tolist()
+    probed = dict(spec)
+    probed["frames"] = list(spec["frames"]) + [
+        {"name": f"probe_{n}", "body": n, "placement": identity} for n in names
+    ]
+    adapter = OpenSimFullBodyParityAdapter(json.dumps(probed).encode("utf-8"))
+    poses = adapter.frame_poses(dict(zip(order, q, strict=True)))
+    notes = [f"OpenSim Simbody FK of the exported .osim, {len(order)} coordinates"]
+    return {n: np.asarray(poses[f"probe_{n}"])[:3, 3] for n in names}, notes
+
+
 def _myolegs_xml() -> Path:
     import myosuite
 
@@ -380,6 +412,8 @@ def evaluate(
                 points, notes = myosuite_points(spec, angles, translations)
             elif engine == "pinocchio":
                 points, notes = pinocchio_points(spec, angles, translations)
+            elif engine == "opensim":
+                points, notes = opensim_points(spec, angles, translations)
             else:
                 points, notes = plant_points(engine, spec, angles, translations)
             entry = score_engine(points, targets)

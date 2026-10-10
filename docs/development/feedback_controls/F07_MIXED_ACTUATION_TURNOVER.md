@@ -59,6 +59,15 @@ receipts, and remove only clean merged owned worktrees.
 
 ## Mixed Moco Link Validation
 
+Full-suite CI at parent head `2c636a7336` exposed two setup errors: the
+`mixed_model` fixture was unavailable through a collected test-module plugin.
+Import the shared fixture explicitly into the mixed Moco test module rather
+than relying on collection order. After this correction the actual OpenSim 4.6
+mixed-actuation/Moco suites pass 25 tests; the default interpreter with two
+xdist workers reports 25 SDK skips and no fixture errors. These are distinct
+runtime results. Full-suite CI remains the final integration check; no native
+or scientific acceptance threshold changes.
+
 Run `tests/opensim/test_native_mixed_moco.py` with the same native SDK and
 CASADIPATH. Requests bind all channel bounds and roles; JSON accepts only
 explicit typed channel declarations. Export preserves absolute mixed paths and

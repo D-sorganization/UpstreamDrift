@@ -18,6 +18,14 @@ vi.mock('@react-three/drei', () => ({
   Environment: () => <div data-testid="environment-mock" />,
 }));
 
+// CharacterSpecPanel (CMB-7a, #11658) fetches presets on mount, which would
+// otherwise consume the `mockFetch` queue these legacy-flow tests rely on.
+// It has its own test file (CharacterSpecPanel.test.tsx); here it is a stub
+// so the page's existing /generate assertions stay exact.
+vi.mock('@/components/character/CharacterSpecPanel', () => ({
+  CharacterSpecPanel: () => <div data-testid="character-spec-panel-mock" />,
+}));
+
 import { CharacterBuilderPage } from './CharacterBuilder';
 
 describe('CharacterBuilderPage', () => {
@@ -52,6 +60,12 @@ describe('CharacterBuilderPage', () => {
     expect(screen.getByLabelText(/Height/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Weight/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Build Type/i)).toBeInTheDocument();
+  });
+
+  it('renders the spec-native Character Builder panel (CMB-7a, #11658)', () => {
+    render(<CharacterBuilderPage />);
+
+    expect(screen.getByTestId('character-spec-panel-mock')).toBeInTheDocument();
   });
 
   it('has correct default slider ranges and values', () => {

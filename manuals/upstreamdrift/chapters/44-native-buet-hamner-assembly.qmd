@@ -1,0 +1,88 @@
+# Source-Preserving BUET–Hamner Native Assembly
+
+This provisional F07 calculation, issue #12157, constructs a separate native
+OpenSim candidate by retaining the BUET upper extremities, trunk, pelvis,
+femurs, and their 473 muscles, then appending eight Hamner distal-leg bodies,
+eight joints, and 84 lower-limb muscles. It is an explicit source-ownership
+decision rather than an anatomical merger inferred from names. The six Hamner
+aggregate trunk muscles and two aggregate psoas muscles are excluded because
+BUET owns the trunk and proximal region. BUET source psoas fascicles are not
+asserted force-equivalent to the excluded Hamner aggregates. No donor source
+field, muscle law, path, wrap, mass, frame, or joint is edited.
+
+## Source, Frames, and State Domain
+
+Recipe version one accepts only the reviewed BUET entrypoint XML SHA-256
+`b66a31e08087327f8756d587f471b0494a3d9d6f7f6d510de66beba4a9e79bf6`
+and Hamner XML SHA-256
+`349ce7a44f1541794f2283cab73bb954270228f2f50808de549ec5097a1687cf`.
+The sources and fresh output must be distinct paths. The assembly verifies
+matching native pelvis/femur mass, center of mass and inertia, and the right
+and left hip CustomJoint SpatialTransforms before cloning. The BUET model owns
+the shared pelvis and femurs. Hamner supplies `tibia`, `talus`, `calcn`, and
+`toes` on each side, with knee, ankle, subtalar and MTP joints. Cloning actual
+native components retains their source frame/socket, path and wrap properties.
+After serialization, a fresh OpenSim load compares each retained body, joint,
+muscle and constraint native property dump to its source. No source file or
+derived model is committed to the public repository; the hash-bound diagnostic
+receipt is retained.
+
+Native `initSystem` may assemble its initial state. The comparison uses three
+declared common hip-coordinate poses: $(0,0,0)$, $(0.2,-0.1,0.15)$ and
+$(-0.15,0.08,-0.12)$ radians for flexion/adduction/rotation on each side,
+with corresponding speeds $(0.07,-0.03,0.02)$ rad/s. This is an explicitly
+sampled common-coordinate check, not complete native-state or whole-motion
+equivalence. The default BUET upper coordinates and source path active sets
+are not exhaustively varied. Model coordinate, pelvis-frame, observation,
+anatomical attachment, and private marker registration remain uncalibrated.
+
+## Native Mechanical Comparison
+
+For a retained body $i$, compare native ground transform $X_i(q)$ and spatial
+velocity $V_i(q,u)$ against its owning source. For each retained muscle $j$,
+compare native path length $\ell_j(q)$ and lengthening speed
+$\dot\ell_j(q,u)$. The check covers three common poses and all 557 retained
+muscles; it does not infer physiological muscle work or path power from those
+two path observations. Native muscle/joint properties and all retained BUET
+constraints are compared after a fresh XML reload.
+
+The derived native mass matrix $M_d(q)$ must be finite and have positive
+minimum eigenvalue at each sample. The diagnostic records the native total
+applied generalized force
+
+$$f_d=J_{\mathrm{system}}^\mathsf{T}F_{\mathrm{body}}+f_{\mathrm{mobility}},$$
+
+reusing the source-bound zero-MTP native comparison authority. This force
+includes body forces from gravity and muscles, not merely direct mobility
+forces. It is not compared to a naive sum of two whole-model force vectors:
+the sources overlap on pelvis/femurs, and added distal masses and muscles act
+through those shared bodies. Inertial bias and constraint reactions remain
+separate. Native QErr and UErr are observed at the sampled poses. Positive
+mass and finite force are numerical diagnostics, not passive-force, balance,
+contact or dynamic-equivalence admission.
+
+## Executed Evidence and Remaining Gates
+
+OpenSim `4.6-2026-06-22-85aaf64` with exact loaded native simulation, Simbody
+and actuator binary hashes reloaded the 40-body, 557-muscle candidate. Three
+native integration tests and four portable contract tests passed. Every
+sampled retained transform, velocity, muscle length and path speed difference
+was zero; sampled QErr/UErr was zero. The minimum native mass eigenvalue was
+`1.3362969448668327e-06` in mixed native mobility units. The generalized
+force vector norm was `54563.69711509691` in mixed native generalized units,
+which must not be interpreted as a physiological force threshold. The exact
+source/output/adapter and runtime hashes are in the F07 receipt and turnover.
+Changed entrypoint XML bytes, an unreviewed digest and an existing output path
+reject. Failed native verification removes its fresh output.
+
+The XML hash covers the entrypoint artifact, not transitive visual resources;
+source loading reported missing visual meshes. This candidate retains BUET
+partial locked abdominal translations, couplers, conditional/moving path
+points, wrap objects, and any source passive-load behavior. The separately
+studied Abdjnt two-translation reduction and zero-MTP factory reduction are
+distinct derived policies, not silent steps in this assembly. Active wrap
+transitions, full-state and controller restart, source muscle physiology,
+foot/club contact, model-specific passive calibration, complete native Moco
+feasibility, matched golfer marker correspondence and independent full-horizon
+excitation replay remain open. All 17 model variants and six engine families
+remain in the required denominator. Canonical publication remains blocked.

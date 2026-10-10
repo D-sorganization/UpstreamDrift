@@ -1,0 +1,100 @@
+{
+  "engines": {
+    "drake": {
+      "available": true,
+      "error_deg": {
+        "left": 0.2705521195248295,
+        "right": 0.42785325962632514
+      },
+      "model_deg": {
+        "left": 6.388562284374341,
+        "right": 2.0411967653697762
+      },
+      "notes": [
+        "plant has 44 coordinates, report has 44"
+      ],
+      "reason": null,
+      "within_tolerance": true
+    },
+    "mujoco": {
+      "available": true,
+      "error_deg": {
+        "left": 0.27055211952482505,
+        "right": 0.42785325962635223
+      },
+      "model_deg": {
+        "left": 6.388562284374337,
+        "right": 2.0411967653698033
+      },
+      "notes": [
+        "plant has 44 coordinates, report has 44"
+      ],
+      "reason": null,
+      "within_tolerance": true
+    },
+    "myosuite": {
+      "available": true,
+      "error_deg": {
+        "left": 0.2102506469742602,
+        "right": 0.37217229458992707
+      },
+      "model_deg": {
+        "left": 6.328260811823772,
+        "right": 1.9855158003333782
+      },
+      "notes": [
+        "model myolegs.xml from the installed myosuite package",
+        "knee translation/rotation helper joints left at 0 (equality-coupled in sim)"
+      ],
+      "reason": null,
+      "within_tolerance": true
+    },
+    "opensim": {
+      "available": true,
+      "error_deg": {
+        "left": 0.27055211952484903,
+        "right": 0.42785325962634424
+      },
+      "model_deg": {
+        "left": 6.388562284374361,
+        "right": 2.0411967653697953
+      },
+      "notes": [
+        "OpenSim Simbody FK of the exported .osim, 44 coordinates"
+      ],
+      "reason": null,
+      "within_tolerance": true
+    },
+    "pinocchio": {
+      "available": true,
+      "error_deg": {
+        "left": 0.27055211952482505,
+        "right": 0.42785325962632514
+      },
+      "model_deg": {
+        "left": 6.388562284374337,
+        "right": 2.0411967653697762
+      },
+      "notes": [
+        "native FullBodyPinocchioModel, 44 primitive coordinates (PinocchioFullBodyIK needs 41 and is not used)"
+      ],
+      "reason": null,
+      "within_tolerance": true
+    }
+  },
+  "label": "capture-O",
+  "pipeline_model_deg": {
+    "left": 6.388562284374396,
+    "right": 2.041196765369777
+  },
+  "run_dir": "capture-O address solve (private input, not committed)",
+  "target_is_default": {
+    "left": false,
+    "right": false
+  },
+  "targets_deg": {
+    "left": 6.118010164849512,
+    "right": 1.613343505743451
+  },
+  "tolerance_deg": 2.0
+}

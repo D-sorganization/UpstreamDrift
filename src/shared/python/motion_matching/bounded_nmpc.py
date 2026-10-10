@@ -12,22 +12,21 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass
 import time
-from typing import TYPE_CHECKING, TypeAlias, cast
+from typing import TypeAlias, cast
 
 import numpy as np
 from numpy.typing import NDArray
-from scipy.optimize import Bounds, NonlinearConstraint, OptimizeResult, minimize
+from scipy.optimize import minimize
 
-if TYPE_CHECKING:
-    from scipy.optimize._minimize import _MinimizeOptions
+from .bounded_candidate_search import (
+    CandidateSearchPolicy,
+    CandidateSearchProblem,
+    search_bounded_candidates,
+)
 
 Array: TypeAlias = NDArray[np.float64]
 StepFunction: TypeAlias = Callable[[Array, Array], Array]
 FallbackFunction: TypeAlias = Callable[[Array, float], Array]
-
-
-def _slsqp_options(max_iterations: int) -> _MinimizeOptions:
-    return {"maxiter": max_iterations, "ftol": 1e-7}
 
 
 def _frozen(values: Array) -> Array:
@@ -188,14 +187,6 @@ class MPCCommandReceipt:
         object.__setattr__(self, "fallback", _frozen(self.fallback))
 
 
-class _BudgetExpired(Exception):
-    pass
-
-
-class _SolveCancelled(Exception):
-    pass
-
-
 class BoundedNMPC:
     """Warm-started robust direct-shooting MPC with one safe fallback path."""
 
@@ -304,30 +295,6 @@ class BoundedNMPC:
         ):
             raise ValueError("step index, state clock or observation clock invalid")
 
-    def _candidate_outcome(
-        self,
-        index: int,
-        state: Array,
-        previous: Array | None,
-        result: OptimizeResult,
-        horizon: int,
-        fallback_objective: float,
-    ) -> tuple[str, float | None, Array | None]:
-        candidate = np.asarray(result.x, dtype=float).reshape(horizon, -1)
-        if (
-            candidate.shape != (horizon, self.problem.nu)
-            or not np.isfinite(candidate).all()
-        ):
-            return "fallback_solver_failure", None, None
-        objective, margins = self._rollout(index, state, candidate, previous)
-        if np.min(margins) < -self.config.feasibility_tolerance:
-            return "fallback_infeasible", objective, None
-        if not result.success:
-            return "fallback_solver_failure", objective, None
-        if objective >= fallback_objective - 1e-9:
-            return "fallback_no_benefit", objective, None
-        return "optimized", objective, candidate
-
     def command_for_step(
         self,
         index: int,
@@ -350,6 +317,7 @@ class BoundedNMPC:
         fallback_objective: float | None = None
         applied = safe
         status: str
+        search_elapsed: float | None = None
         age = current_time_s - observation_time_s
         if age > self.config.max_observation_age_s:
             status = "fallback_stale_observation"
@@ -362,56 +330,42 @@ class BoundedNMPC:
                 if warm and self._prior_plan is not None
                 else np.tile(safe, (horizon, 1))
             )
-            fallback_objective, _ = self._rollout(
-                index, state, np.tile(safe, (horizon, 1)), previous
+            problem = CandidateSearchProblem(
+                initial_plan=initial,
+                fallback_plan=np.tile(safe, (horizon, 1)),
+                lower=self.problem.input_lower,
+                upper=self.problem.input_upper,
+                evaluate=lambda plan: self._rollout(index, state, plan, previous),
             )
-
-            def check_budget() -> None:
-                if cancel_requested is not None and cancel_requested():
-                    raise _SolveCancelled
-                if (
-                    evaluations >= self.config.max_evaluations
-                    or self.clock() - started > self.config.max_wall_s
-                ):
-                    raise _BudgetExpired
-
-            def evaluate(flat: Array) -> tuple[float, Array]:
-                nonlocal evaluations
-                check_budget()
-                evaluations += 1
-                return self._rollout(
-                    index, state, np.asarray(flat).reshape(horizon, -1), previous
-                )
-
-            def constraint_margin(flat: Array) -> Array:
-                return evaluate(flat)[1]
-
-            try:
-                lower = np.tile(self.problem.input_lower, horizon)
-                upper = np.tile(self.problem.input_upper, horizon)
-                constraint = NonlinearConstraint(constraint_margin, lb=0.0, ub=np.inf)
-                result = minimize(
-                    lambda flat: evaluate(flat)[0],
-                    initial.ravel(),
-                    method="SLSQP",
-                    bounds=Bounds(lower, upper),
-                    constraints=constraint,
-                    options=_slsqp_options(self.config.solver_max_iterations),
-                )
-                check_budget()
-                status, objective, accepted = self._candidate_outcome(
-                    index, state, previous, result, horizon, fallback_objective
-                )
-                if accepted is not None:
-                    applied = accepted[0]
-                    self._prior_plan = _frozen(accepted)
-            except _BudgetExpired:
-                status = "fallback_timeout"
-            except _SolveCancelled:
-                status = "fallback_cancelled"
+            policy = CandidateSearchPolicy(
+                self.config.max_evaluations,
+                self.config.max_wall_s,
+                self.config.solver_max_iterations,
+                self.config.feasibility_tolerance,
+            )
+            search = search_bounded_candidates(
+                problem,
+                policy,
+                clock=self.clock,
+                started=started,
+                cancel_requested=cancel_requested,
+                solver=minimize,
+            )
+            status = search.status
+            objective = search.objective
+            fallback_objective = search.fallback_objective
+            evaluations = search.evaluations
+            search_elapsed = search.elapsed_s
+            if search.candidate_plan is not None:
+                applied = search.candidate_plan[0]
+                self._prior_plan = _frozen(search.candidate_plan)
         if status != "optimized":
             self._prior_plan = None
-        elapsed = max(0.0, float(self.clock()) - started)
+        elapsed = (
+            search_elapsed
+            if search_elapsed is not None
+            else max(0.0, float(self.clock()) - started)
+        )
         receipt = MPCCommandReceipt(
             status=status,
             applied=applied,

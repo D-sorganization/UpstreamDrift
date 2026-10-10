@@ -695,43 +695,30 @@ class MatchedSwingBrowserWidget(QWidget):
         if not npz_path:
             return
 
+        from src.shared.python.motion_matching.native_viewers import (
+            ViewerUnavailableError,
+            get_supported_backends,
+        )
+        from src.tools.matched_swing_browser.native_handoff import (
+            launch_native_viewer,
+        )
+
+        backends = get_supported_backends()
+        engine_choice, ok = QtWidgets.QInputDialog.getItem(
+            self, "Select Native Viewer", "Choose backend:", backends, 0, False
+        )
+        if not ok or not engine_choice:
+            return
+
         try:
-            from src.shared.python.motion_matching.native_viewers import (
-                ViewerLaunchConfig,
-                ViewerUnavailableError,
-                get_supported_backends,
-                open_in_native_viewer,
-            )
-            from src.shared.python.motion_matching.visualization.simulation_viewer import (
-                SimulationData,
-            )
-
-            backends = get_supported_backends()
-            engine_choice, ok = QtWidgets.QInputDialog.getItem(
-                self, "Select Native Viewer", "Choose backend:", backends, 0, False
-            )
-            if not ok or not engine_choice:
-                return
-
-            import numpy as np
-
-            arr = np.load(npz_path)
-            time_s = arr.get("time_s")
-            q_coords = (
-                arr.get("coordinates")
-                if arr.get("coordinates") is not None
-                else arr.get("q")
-            )
-            sim_data = SimulationData(time_s=time_s, q=q_coords)
-            cfg = ViewerLaunchConfig(speed=1.0, view_mode="fitted")
-            res = open_in_native_viewer(sim_data, engine_choice, config=cfg)
+            res = launch_native_viewer(npz_path, engine_choice, speed=1.0)
             if res.url:
                 QMessageBox.information(
                     self, "Native Viewer", f"Viewer URL:\n{res.url}"
                 )
         except ViewerUnavailableError as exc:
             QMessageBox.warning(self, "Viewer Unavailable", str(exc))
-        except Exception as exc:
+        except (ValueError, OSError, RuntimeError, ImportError) as exc:
             logger.exception("Failed native viewer: %s", exc)
             QMessageBox.critical(
                 self, "Native Viewer Error", f"Could not launch viewer:\n{exc}"
