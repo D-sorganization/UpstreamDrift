@@ -50,3 +50,9 @@ docs/development/lifting/PACK_PARITY_BASELINE.md
 # Formatters must not rewrite the numerical receipt serialization from #12166.
 docs/development/full_body_models/evidence/ground_support/anthro_driver_seeds/receipt.json
 docs/development/full_body_models/evidence/ground_support/anthro_iron_seeds_zmp/receipt.json
+
+# #12187: likewise preserve exact native address-evidence JSON from #12175.
+docs/development/full_body_models/evidence/foot_progression/osv4_final/driver/address_report.json
+docs/development/full_body_models/evidence/foot_progression/osv4_final/driver/engines.json
+docs/development/full_body_models/evidence/foot_progression/osv4_final/iron/address_report.json
+docs/development/full_body_models/evidence/foot_progression/osv4_final/iron/engines.json

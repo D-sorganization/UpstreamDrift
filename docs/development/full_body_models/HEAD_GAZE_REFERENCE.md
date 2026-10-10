@@ -193,10 +193,10 @@ far reports eye-point translation in millimetres for tour players over a full
 swing, so the eye-translation ranges reported here have no published
 counterpart yet.
 
-| Source | Population and method | Head result |
-|---|---|---|
-| Zhang, Liu and Liu (2026), *Front. Sports Act. Living* 8:1867187, doi:10.3389/fspor.2026.1867187 | 12 female professionals, Qualisys 250 Hz, driver, 5-iron, 7-iron | Head rotation at the top of the backswing −33.6 ± 9.1° (driver) and −25.4 ± 11.1° (7-iron); forward tilt at the top 67.0 ± 8.1° (driver) and 73.9 ± 7.9° (7-iron). The head-angle reference frame is not stated in the article. |
-| Batbayar, Tserenchimed and Kim (2019), *Proc. Inst. Mech. Eng. H* 233(5):554–561, doi:10.1177/0954411919838643 | Kinematic determinants of performance (as cited by Zhang et al.) | Elite golfers change head forward tilt and rotation significantly less than amateurs (qualitative; not yet read in full). |
+| Source                                                                                                         | Population and method                                            | Head result                                                                                                                                                                                                                     |
+| -------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Zhang, Liu and Liu (2026), _Front. Sports Act. Living_ 8:1867187, doi:10.3389/fspor.2026.1867187               | 12 female professionals, Qualisys 250 Hz, driver, 5-iron, 7-iron | Head rotation at the top of the backswing −33.6 ± 9.1° (driver) and −25.4 ± 11.1° (7-iron); forward tilt at the top 67.0 ± 8.1° (driver) and 73.9 ± 7.9° (7-iron). The head-angle reference frame is not stated in the article. |
+| Batbayar, Tserenchimed and Kim (2019), _Proc. Inst. Mech. Eng. H_ 233(5):554–561, doi:10.1177/0954411919838643 | Kinematic determinants of performance (as cited by Zhang et al.) | Elite golfers change head forward tilt and rotation significantly less than amateurs (qualitative; not yet read in full).                                                                                                       |
 
 The published rotation is head rotation at the top, about 25–34°, while the
 model's numbers are yaw ranges from address to impact. The two are not the same
@@ -233,14 +233,14 @@ plus the address-to-impact head stability metrics. An empty window reports
 `null`, never zero. Both captures, MuJoCo replay, canonical commands
 (`CANONICAL_RUN.md` §2A) plus the flag shown:
 
-| Capture | Neck | Replay schedule error RMS (deg): address→impact / hold / release / after | Replay eye range x/y/z (mm) | Replay head yaw/pitch/roll range (deg) | Neck frames clamped | FD marker RMS (mm): whole / address→impact / head |
-|---|---|---|---|---|---|---|
-| driver | IK, w = 0 | 20.3 / 25.2 / 27.8 / 16.0 | 109 / 121 / 33 | 45 / 9 / 75 | — | 77.0 / 32.3 / 87.0 |
-| driver | IK, w = 0.1 | 10.6 / 10.8 / 10.6 / 12.7 | 110 / 133 / 32 | 31 / 10 / 42 | — | 72.4 / 31.8 / 88.2 |
-| driver | gaze, w = 0 | 1.8 / 5.0 / 15.4 / 9.3 | 138 / 207 / 48 | 32 / 12 / 30 | 213 of 654 | 94.7 / 49.6 / 170.4 |
-| 7-iron | IK, w = 0 | 19.0 / 24.8 / 30.2 / 34.6 | 98 / 98 / 31 | 42 / 12 / 69 | — | 71.2 / 33.3 / 86.5 |
-| 7-iron | IK, w = 0.1 | 13.5 / 16.6 / 22.5 / 39.4 | 102 / 84 / 33 | 23 / 15 / 47 | — | 88.5 / 32.2 / 107.8 |
-| 7-iron | gaze, w = 0 | 1.2 / 3.7 / 6.3 / 15.1 | 111 / 133 / 47 | 22 / 5 / 10 | 114 of 654 | 88.0 / 41.6 / 144.8 |
+| Capture | Neck        | Replay schedule error RMS (deg): address→impact / hold / release / after | Replay eye range x/y/z (mm) | Replay head yaw/pitch/roll range (deg) | Neck frames clamped | FD marker RMS (mm): whole / address→impact / head |
+| ------- | ----------- | ------------------------------------------------------------------------ | --------------------------- | -------------------------------------- | ------------------- | ------------------------------------------------- |
+| driver  | IK, w = 0   | 20.3 / 25.2 / 27.8 / 16.0                                                | 109 / 121 / 33              | 45 / 9 / 75                            | —                   | 77.0 / 32.3 / 87.0                                |
+| driver  | IK, w = 0.1 | 10.6 / 10.8 / 10.6 / 12.7                                                | 110 / 133 / 32              | 31 / 10 / 42                           | —                   | 72.4 / 31.8 / 88.2                                |
+| driver  | gaze, w = 0 | 1.8 / 5.0 / 15.4 / 9.3                                                   | 138 / 207 / 48              | 32 / 12 / 30                           | 213 of 654          | 94.7 / 49.6 / 170.4                               |
+| 7-iron  | IK, w = 0   | 19.0 / 24.8 / 30.2 / 34.6                                                | 98 / 98 / 31                | 42 / 12 / 69                           | —                   | 71.2 / 33.3 / 86.5                                |
+| 7-iron  | IK, w = 0.1 | 13.5 / 16.6 / 22.5 / 39.4                                                | 102 / 84 / 33               | 23 / 15 / 47                           | —                   | 88.5 / 32.2 / 107.8                               |
+| 7-iron  | gaze, w = 0 | 1.2 / 3.7 / 6.3 / 15.1                                                   | 111 / 133 / 47              | 22 / 5 / 10                            | 114 of 654          | 88.0 / 41.6 / 144.8                               |
 
 Findings:
 
