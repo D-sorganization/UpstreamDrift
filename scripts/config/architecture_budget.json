@@ -1199,6 +1199,15 @@
       "issue": 11739,
       "reason": "Issue #11739: OSV-7 export_full_body_osim gained the contact-grip options (9 parameters).",
       "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/visual_layer.py",
+      "symbol": "render_playback",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 11720,
+      "reason": "Issue #11720 (GCV-14) scope item 4: render_playback moved from a fixed playback_stride to FrameSchedule(rate_hz, fps, speed) timing, keeping playback_stride as a deprecated alias during the transition (10 parameters). Follow-up: group the timing knobs into a small options value once the deprecated alias is removed.",
+      "expires_on": "2026-12-31"
     }
   ]
 }
