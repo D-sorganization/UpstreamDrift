@@ -6,6 +6,11 @@
   "inventory_commit": null,
   "blockers": [
     {
+      "id": "UP-D1-muscle-qualification-evidence-inventory",
+      "owner": "UpstreamDrift issue #11791",
+      "resolution": "Inventory tour_matching/muscle_qualification.py parameter-only orchestration and the provisional chapters/14-muscle-qualification-evidence.qmd evidence contract. Anatomy/parameter checks do not establish path geometry, moment arms, equilibrium, activation trajectories or native replay. Unperformed audits remain false and native replay is absent; a metrics container defaults to unverified. Pure behavioral regressions guard against invented pilot metrics but do not qualify models, contact, physiological parameters or full-horizon excitation replay. Existing lower-level audit helpers require their own actual evidence. Keep F07/F08 scientific qualification open."
+    },
+    {
       "id": "UP-D1-native-torque-replay-inventory",
       "owner": "UpstreamDrift issue #11823",
       "resolution": "Inventory native MuJoCo full mjSTATE_INTEGRATION restoration, distinct quaternion configuration/tangent velocity, direct unit hinge-motor post-limit ZOH input and actual native effort checks in native_torque_replay.py and chapters/19-native-torque-replay.qmd. Synthetic replay and negative admission tests establish a bounded same-provider path only. Merged Tools T01 pin, six-engine parity, refinement, anatomy, native muscle/contact/grip and real capture qualification remain open. Exclusive process ownership is required; no subprocess isolation or complete transitive-library attestation is claimed."
@@ -121,9 +126,19 @@
       "resolution": "Inventory the provisional native continuous-state excitation replay in tour_matching/muscle_replay.py and chapters/13-native-muscle-replay.qmd. Actual OpenSim 4.6 one-DOF compliant-muscle tests establish bounded input playback, continuous initialization and uninterrupted native stepping only. Discrete/plugin state, external-resource identity, passive/contact force policy, full-body anatomy, capture accuracy and full-horizon independent muscle/contact replay remain unqualified. Preserve cold-start policy and forbid weaker shared rigid-body/restarted/external-force evidence from qualifying the endpoint."
     },
     {
+      "id": "UP-D1-frozen-marker-holdout-inventory",
+      "owner": "UpstreamDrift issue #11899",
+      "resolution": "Inventory score_frozen_marker_offsets and chapter 13 frozen marker scoring: supplied body-local placements and proper predicted transforms, pooled valid-sample Euclidean RMS, fail-closed missing support, and unchanged observation clock. Existing exploratory heldout placement refitting is not independent prediction. This pure scoring boundary cannot establish training-only provenance, anthropometry, anatomical attachments, independent subject/trial splits or native replay qualification; private D02 and publication remain blocked."
+    },
+    {
       "id": "UP-D1-native-muscle-contact-inventory",
       "owner": "UpstreamDrift issue #11815",
       "resolution": "Inventory explicit native contact policies in tour_matching/muscle_replay.py and chapters/17-native-muscle-contact.qmd. Actual synthetic OpenSim smooth sphere/half-space tests establish native wrench direction, independent replay repeatability, contact-dependent motion and numerical refinement only. Contact calibration, smoothing leakage budgets, HuntCrossley law parity, full-body anatomy/grip and full-horizon private mocap qualification remain open."
+    },
+    {
+      "id": "UP-D1-native-exact-muscle-law-inventory",
+      "owner": "UpstreamDrift issue #11867",
+      "resolution": "Inventory exact concrete Millard2012EquilibriumMuscle/Thelen2003Muscle admission before native initialization in muscle_replay.py and chapter13. Native casts remain necessary for state-domain getters but inheritance is not qualification of an unknown derived law. Proxy identity negative tests preserve native cast success and trap initialization; they do not validate a compiled plugin. Adapter 1.3.1 hashes the exact-class admission policy. All anatomy, path consistency, contact, full-state full-capture and manual-release gates remain open."
     },
     {
       "id": "UP-D1-native-opensim-marker-geometry-inventory",

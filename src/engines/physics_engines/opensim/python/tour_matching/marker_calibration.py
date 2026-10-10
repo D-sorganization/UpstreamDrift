@@ -23,6 +23,7 @@ from src.shared.python.motion_matching.marker_calibration import (
     calibrate_marker_offsets,
     express_in_body,
     rigid_pose_from_markers,
+    score_frozen_marker_offsets,
     static_marker_offsets,
 )
 from src.shared.python.motion_matching.tour_capture_contract import TourCapture
@@ -78,7 +79,12 @@ def calibrate_marker_offsets_with_holdout(
     iterations: int,
     holdout_labels: Sequence[str],
 ) -> tuple[CalibrationResult, float]:
-    """Perform alternating marker calibration with held-out validation markers (OG-05).
+    """Return exploratory nuisance-calibrated marker reconstruction (OG-05).
+
+    The withheld marker placements are estimated from the withheld observations.
+    This preserved exploratory behavior is not independent predictive holdout
+    evidence. Use ``score_frozen_marker_offsets`` with placements and poses frozen
+    before examining withheld observations for an independent scoring boundary.
 
     Preconditions:
     - holdout_labels must be a strict non-empty subset of capture.labels.
@@ -133,5 +139,6 @@ __all__ = [
     "calibrate_marker_offsets_with_holdout",
     "express_in_body",
     "rigid_pose_from_markers",
+    "score_frozen_marker_offsets",
     "static_marker_offsets",
 ]
