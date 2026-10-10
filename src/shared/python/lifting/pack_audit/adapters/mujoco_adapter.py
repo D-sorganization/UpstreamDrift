@@ -279,6 +279,11 @@ class MujocoAdapter(EngineAdapter):
             "reason": None,
         }
 
+    def bar_hold_wrench(self) -> dict[str, Any]:
+        from .mujoco_bar_hold import bar_hold_wrench as _bar_hold_wrench
+
+        return _bar_hold_wrench(self._xml, self._welds())
+
     def smoke_step(self) -> dict[str, Any]:
         m, d = self.model, self.data
         mujoco.mj_resetData(m, d)
