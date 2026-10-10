@@ -42,6 +42,7 @@ from src.shared.python.motion_matching.pipeline.address_feet import (
     model_feet_deg,
     record_foot_progression,
     seed_document_feet,
+    split_address_coordinates,
 )
 from src.shared.python.motion_matching.pipeline.constants import (
     BUILD_RECEIPT,
@@ -89,6 +90,13 @@ from src.shared.python.motion_matching.pipeline.lane import (
     expand_stance_for_width,
     fitted_grip,
     wrist_bounds,
+)
+from src.shared.python.motion_matching.pipeline.turn_split import (
+    DEFAULT_SHOULDER_GIRDLE_WEIGHT,
+    DEFAULT_THORAX_WEIGHT,
+    add_turn_split_arguments,
+    turn_split_active,
+    turn_split_report,
 )
 from src.shared.python.motion_matching.pipeline.receipt import (
     GroundSupportReceiptInputs,
@@ -367,6 +375,7 @@ def build_parser() -> argparse.ArgumentParser:
             "0 disables it (default)"
         ),
     )
+    add_turn_split_arguments(parser)
     return parser
 
 
@@ -1036,6 +1045,9 @@ def run_address_stage(args: argparse.Namespace) -> dict[str, Any]:
         for name in names
         if name.startswith("hip_")
     }
+    angles, translations = split_address_coordinates(names, cal_res.address2.q)
+    report["address_coordinates_deg"] = angles
+    report["address_translations_m"] = translations
     out = Path(args.out) / "address_report.json"
     out.write_text(json.dumps(report, indent=2, sort_keys=True, default=str) + "\n")
     return report
@@ -1057,6 +1069,11 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
         getattr(args, "ik_restart_policy", DEFAULT_IK_RESTART_POLICY)
     )
     lane.posture_prior_weight = getattr(args, "ik_posture_prior_weight", 0.0)
+    lane.set_turn_split(
+        cal_res.attachments,
+        getattr(args, "thorax_weight", DEFAULT_THORAX_WEIGHT),
+        getattr(args, "shoulder_girdle_weight", DEFAULT_SHOULDER_GIRDLE_WEIGHT),
+    )
 
     (
         q_ik,
@@ -1105,6 +1122,8 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
     )
     _attach_face_report(ik_report, lane, cal_res, (q_ik, q_ref), args.face_weight)
     ik_report["restart_policy"] = lane.restart_report()
+    if turn_split_active(lane):
+        ik_report["turn_split"] = turn_split_report(lane)
     np.savez(
         ctx.out_dir / "ik_trajectory.npz",
         time_s=lane.times,
