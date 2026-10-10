@@ -1,0 +1,47 @@
+{
+  "status": "accepted_isolated_default_formatter_candidate",
+  "files_sha256": {
+    "src/tools/shot_pattern_analysis/matched_supplement_pipeline.py": "f836132f5e850ea58d54c166b405487f8e4508746be466e30122d0ce5c1cdd59",
+    "tests/tools/shot_pattern_analysis/test_matched_supplement_pipeline.py": "54774eacfe13d46b7783ded552e000694591cbc5f5ebabf1f2c3ebb76a82c51e"
+  },
+  "dependency_sha256": {
+    "src/tools/shot_pattern_analysis/matched_formatting.py": "67971a489527c9bfe43d6948afc6248746a81d5124917032e56238907e1a472f"
+  },
+  "changed_top_level_functions": [
+    "_report_source_hashes",
+    "_estimate_ci"
+  ],
+  "all_other_pipeline_function_ASTs_unchanged": true,
+  "checks": {
+    "red_tests": 2,
+    "green_tests": 46,
+    "exit_code": 0,
+    "ruff": "passed",
+    "mypy": "passed2files",
+    "line_counts": {
+      "src/tools/shot_pattern_analysis/matched_supplement_pipeline.py": 853,
+      "tests/tools/shot_pattern_analysis/test_matched_supplement_pipeline.py": 943
+    }
+  },
+  "fixture_restoration": {
+    "path": "docs/research/shot_pattern_analysis/phase2/control_pilot_v1/matrix_plan.json",
+    "sha256": "491a37dd430b4de0946089b75db11db5fe17016df3b98ff32d6c819f664af073",
+    "note": "Ignored reviewed control-pilot plan restored byte-for-byte from MAIN to satisfy existing integration contract; no skip introduced."
+  },
+  "initial_broader_failures": "One absent ignored control-pilot fixture and one old fixed4-decimal string expectation. Exact fixture restored and intended numeric-display assertions updated, then full46-test run passed.",
+  "provenance": "The new formatter is now the14th postprocessing hash. Historical13-source receipts are deliberately not relabelled or made acceptable by a bypass. Fresh saved-data pipeline output required after MAIN freeze.",
+  "main_live_sources_edited": false,
+  "limitations": [
+    "No new Monte Carlo, bootstrap or complete pipeline run occurred.",
+    "Fresh post-freeze output must receive full artifact/source/data equality and visual review.",
+    "Reviewer implemented this narrow repair; no second independent implementation audit claimed."
+  ],
+  "evidence_sha256": {
+    "ruff.txt": "afa20b27dacc9bf0aba3c1d265964c21e04ab42f6e39e2dd4769718ceded003a",
+    "sensitivity_document_review.json": "9672ca82364aaae5fb6c9bae15b2645b71771089d7eda1ddce4f7c10db5c6849",
+    "red.txt": "adc5415d26303f63dfdea17c2392ab3b5ba3ba82ea138be6a23d37b6a2099d38",
+    "green.txt": "d9a3d7c16d48c4d6bd292365b2a935dfdfcf486435b9cccc7d2ea4143495d18e",
+    "initial_broader_failures.txt": "5493bd5dd3654471646c27eadd82804b20636733c3486b263c57ee54c8f27e2c",
+    "mypy.txt": "f9b031e5c45aa702cd4fef028d465551cb20a2c4698e0913c7b00766b20ac4d8"
+  }
+}
