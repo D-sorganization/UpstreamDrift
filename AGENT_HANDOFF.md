@@ -8,23 +8,30 @@
 - Branch `claude/gcv-14-speed-variants`, stacked on PR #12004 (kinematic impact time). `video_timing.frame_schedule.SPEED_VARIANTS = (1, 0.5, 0.25)` is the default of `ExportSettings.speeds` and `--speeds`; `motion_matching.export.export_video_variants` writes the same three clips for any engine's candidate (MuJoCo, MyoSuite, Drake, Pinocchio, OpenSim, Simscape logs).
 - Tests: `test_speed_variants_engines.py` (frame counts from the time span for all four native engines, HUD 0 ms at the ball-passage impact) and `test_export.py` (variants per engine).
 - Evidence: only MuJoCo renders on ControlTower (stick figure, no club, 1920x1080, 60 fps). Drake and Pinocchio need `playwright` and its Chromium libraries, OpenSim needs `xwd`, MyoSuite needs `myosuite.envs.env_base` (#11997); none are in the `ud-sim` image and installing them needs root or a new image (owner action).
+# Active: Contact Grip and MyoSuite Bushing, OSV-7 Phase 3 #11739
+
+- Branch `claude/osv-7-contact-grip` (stacked on #11963). Pad contact grip with pad stiffness matched to the bushing (`grip_contact/pad_layout.py`, `pad_contact.py`); MuJoCo full swing (dt 1e-5 s), Drake and Pinocchio holds; MyoSuite bushing parity passes (worst 0.013 % peak). Quasi-static balance closes (`static_balance.py`). See GRIP_PARITY_DECISIONS.md section 19.
+- Open and flagged: contact per-hand force is about 4x the bushing's with matching net force (indeterminacy, not tuned); no OpenSim contact variant; no full-swing Drake or Pinocchio contact run.
 
 # Active: Native Export Impact Time From Ball Passage - GCV-14 #11720
 
 - Branch `claude/gcv-14-impact-evidence`. `native_viewer_export.overlay.detect_impact_time_s` called `model_appearance.club_face.impact_frame` and reported that frame's exact timestamp; on the committed driver fixture the accepted peak-speed sample sits 9.2 cm above and 9.2 cm from address (the height check alone let it through), not the true closest approach. It now returns `club_face.ball_passage`'s sub-sample `t_impact` on the same `Clubhead`-origin trajectory (one detector, OSV-10); docstring and README (`src/tools/native_viewer_export/README.md`) updated.
 - Kept the `Clubhead` frame origin rather than the true face-centre point (`club_assembly.clubface_centre`): deriving the centre here would need the club spec resolved into a `ClubAssembly` and composed with the frame's rotation, a larger change than this fix's scope.
 - Tests added/updated in `tests/unit/tools/native_viewer_export/test_grip_tracking.py`: `test_hud_impact_time_matches_ball_passage` (basic contract), `test_hud_impact_time_uses_ball_passage_not_the_peak_speed_sample` (reproduces the bug with a synthetic overshoot trajectory), `test_hud_impact_time_raises_when_the_head_never_returns_to_the_ball`, and the capture-A fixture test now compares against `ball_passage` instead of `impact_frame`.
+
 # Active: Shared Club in the Musculoskeletal OpenSim Models, OSV-9 #11756
 
 - Branch `claude/osv-9-msk-club`, epic #11726. `golf_humanoid.osim`, `golf_humanoid_scaled.osim` and the muscle model (`musculoskeletal_swing.build_musculoskeletal_model`) hold the shared club (`msk_club.py`: spec mass/inertia, shared STLs, `GripInterface` grips) in both hands: lead `WeldJoint hand_l_to_club` plus trail `WeldConstraint hand_r_to_club`, or `--grip-model bushing`.
 - Hand frames and address pose: `msk_club_calibration.py` (IK to the generated model's FK at the captured address; feet planted because the generated feet are unobserved) into `models/msk_club_grip_calibration.json`; the muscle model is calibrated on build. `msk_club_tracking.track_swing` follows a generated swing; `scripts/render_msk_club.py` renders under xvfb.
 - Base models are not in the clone (submodule fetch failed): set `UPSTREAMDRIFT_RAJAGOPAL_OPENSENSE` / `UPSTREAMDRIFT_MSK_BASE_MODEL`.
 - Open: no MyoFullBody OpenSim export exists; static optimisation not run; scaled-model address fit is weaker (wrists at their bounds); `opensim_golf/fk.py` `State.isValid` failure predates this.
+
 # Active: Same-Input Bushing Grip Parity, OSV-7 Phase 2 #11739
 
 - Branch `claude/osv-7-grip-parity`. The shared OpenSim `BushingForce` law (`grip_contact/bushing_law.py`) and a `SimmSpline`-equivalent prescribed input (`grip_contact/prescribed_motion.py`) drive MuJoCo (`mjcb_passive`, RK4 1e-4 s), Drake (native `LinearBushingRollPitchYaw`, RK3 error controlled) and Pinocchio (`aba`, DOP853) on a free club, with each engine's own weld FK. Metrics are in `grip_contact/parity.py` (peak 5 %, RMS 2 % of peak), routed through GCV-10 `GripSeries`.
 - Driver: every engine passes every quantity. The worst case is the Drake squeeze, 0.96 % peak and 0.42 % RMS, from the RPY and midpoint convention. See GRIP_PARITY_DECISIONS.md section 18. Evidence: `evidence/grip_kinetics/parity/`. Plots: `~/Videos/Parity Audit/golfer_realism/grip_kinetics/parity/`.
 - Full-swing parity tests are `slow` (10 to 30 minutes per engine and club on a loaded host). Open: a contact-model grip, and Drake with the shared law to isolate its integrator.
+
 # Active: Simscape URDF Exchange — #11569 Task 3
 
 - Branch `claude/simscape-urdf-exchange-11569`; commit `SELF`. `smexport` is absent in R2025b, so `scripts/matlab/simscape_model_inventory.m` reads joints (type, DOF) and solid/inertia masses (unit-converted, density x volume where needed; NaN when not evaluable) from the canonical `GolfSwing3D_Kinetic` and from an `smimport` of the spec `golfer.urdf`. `export_simscape_urdf_exchange.m` writes `tests/fixtures/simscape/simscape_urdf_exchange_receipt.json`; `src/engines/simscape/urdf_exchange.py` diffs it against the URDF.
@@ -60,6 +67,15 @@ its source rotation bound. Preserve native replay, anatomy and registration gate
 # Active: Muscle Qualification Evidence Guard — F07 #11791
 
 Branch `fix/feedback-muscle-evidence-11791`; current commit `SELF`; PR #11814. Scoped child #11810: parameter-only orchestration now returns no native replay and no unperformed audit successes. The test-first commit records two failures; 31 focused tests pass after correction. Read [Guard Turnover](docs/development/feedback_controls/F07_MUSCLE_EVIDENCE_TURNOVER.md). Merged current main while preserving its impact chapter and this evidence chapter. Next: normal protected PR checks; F07 and native model qualification remain open.
+
+# Active: Native Muscle-Model Asset Admission — #11819
+
+Branch `feat/feedback-native-admission-11819`, commit `SELF`. Source pinning and
+native structural inventory remain scientifically unqualified; caller anatomy
+maps and complete dependency closure require review. Read
+[F07 Turnover](docs/development/feedback_controls/F07_MODEL_ADMISSION_TURNOVER.md)
+and canonical manual chapter 18. F07 #11791 remains open; no external full-body
+model, raw capture, native optimizer or replay was qualified by this slice.
 
 # Active: Feedback Controls Planning — #11784
 
@@ -651,3 +667,45 @@ See the separate editable research reference and the extended aggregate `tangent
 ### Impact Parameters Package (GCV-15, 2026-10-07)
 
 `src/shared/python/impact_parameters/` extracts speed, attack angle, club path, face angle, face-to-path, dynamic and spin loft, swing plane and low point relative to an explicit `TargetFrame` (default recorded: Z-up, target -Y, ADR-0041). Definitions are in the package docstring for design-manual transfer via GCV-18. Tools delivery and D-plane are reached only through the fail-closed `tools_gateway.py` and agree with the UD definitions within 0.01 deg. Open: launch direction has no Tools provider; toe/high needs GCV-11 face geometry and GCV-13 ball; smash factor needs an impact model with calibration status; `rate_of_closure` `delivery_at` is not called directly.
+
+## F05d Native Manifold Control Candidate (#11932; 2026-10-09)
+
+The contact-free floating-root/two-hinge Crocoddyl BoxFDDP action uses the
+actual native Euler MuJoCo step and $n_x=17$, $n_{dx}=16$ manifold state.
+It checks candidate plans against a nonlinear native rollout and verified
+zero-torque fallback, then shares the direct-torque executor for post-limit
+ZOH export and independent complete-native-state replay. The supported
+MuJoCo 3.8/Crocoddyl 3.2.1 paired receipt binds two starts, common T01
+preflight, every accepted/timed-out call, cost, wall time and replay hashes.
+The reachable reference is generated by native steps. BoxFDDP accepts
+3/8 synthetic steps at the 0.2 s cooperative budget; SciPy SLSQP accepts
+0/8. All other steps use verified fallback. Neither method completes a
+fully accepted four-step run, although BoxFDDP has lower realized native
+cost in both starts. This does not prove
+a hard 10 ms deadline or golfer/contact/muscle/capture qualification.
+Read provisional manual chapter 26 and
+`docs/development/feedback_controls/F05D_NATIVE_MANIFOLD_BOX_FDDP_TURNOVER.md`.
+
+Parent F05 #11789, F09/F10 and manual publication remain open.
+PR #11944 merged into the F05c feature base at
+`c1e76ce91db11b257604d9ddbd227268d2e27db1`; F05c PR #11922 is
+still open on F05b, issue #11932 is still open, and this has not reached
+`main`.
+
+## F02 Native Manifold Feedback Child (#11946)
+
+F02 now has an actual MuJoCo floating-root feedback runner using the F05c
+tangent derivative admission and F06 complete-state torque replay; see
+provisional manual chapter 27 and
+`docs/development/feedback_controls/F02_NATIVE_MANIFOLD_FEEDBACK_TURNOVER.md`.
+The source-hashed static receipt shows 0.1261 rad final hip error versus
+0.4 rad frozen nominal over 12 steps. A second test consumes a varying
+native-replayed torque trajectory, derives per-step native tangent Jacobians
+and MOSAIC gains, then compares held-out frozen-feedforward and total-
+feedback replays at 0.07508 versus 0.02460 rad final hip error. Their
+post-limit input digests differ, while each fresh native replay reproduces
+the complete integration-state trajectory exactly. F03 still lacks a native
+9/8/2 optimized trajectory export; the teacher is admissible but is not
+captured or optimized. This child is stacked on F05c #11922 and must remain
+unarmed until its prerequisite reaches `main`; F02 #11786 and full
+production/capture qualification remain open.

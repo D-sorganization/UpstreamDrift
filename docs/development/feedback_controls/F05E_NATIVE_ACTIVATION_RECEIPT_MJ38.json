@@ -1,0 +1,59 @@
+{
+  "diagnostic_kernel_wall_s": 2.027273488987703,
+  "dimensions": {
+    "integration_state_size": 50,
+    "na": 1,
+    "nq": 8,
+    "nu": 1,
+    "nv": 7,
+    "physical_nx": 16,
+    "tangent_ndx": 15
+  },
+  "identity": {
+    "adapter_sha256": "22b9136eb5375b1b1161dd09b75f680c3e594e3084cb8a122150b06aca8f66e3",
+    "compiled_law_sha256": "d9ebe755198b892d578ccfe7d44074fd6eb95ab4293988c08d13d3f8b762a1e9",
+    "history_policy": "warmstart-disabled;autoreset-disabled;time-invariant;no-constraints",
+    "input_kind": "actuator_command",
+    "loaded_native_model_sha256": "acc90b9b296baeaee7400c5ced6eaa3d3ed3bbbf157d049fe6c7188efd77fa3c",
+    "ordered_input_channel_ids": ["drive"],
+    "provider_sha256": "572e2788a8ab4988c378c75d92ed78339a769a492c65bfbd66ce2d9e120c4379",
+    "source_closure": "self_contained_xml",
+    "source_model_sha256": "1a8289b0c62bad4a9b0de1d8017ad946c1f69dc529f3585c0d10611f20aa5ba5"
+  },
+  "issue": 11958,
+  "native_derivative": {
+    "A_shape": [15, 15],
+    "B_shape": [15, 1],
+    "activation_to_hinge_velocity": -2.3677048256454114,
+    "command_to_activation": 0.10526315788461638,
+    "directional_errors": {
+      "epsilon_1e-05_max_abs": 1.4750117793838058e-10,
+      "epsilon_2e-05_max_abs": 2.557476452835772e-11
+    }
+  },
+  "native_replay": {
+    "applied_input_sha256": "70efb43780ee39f8b6b5e87aa7b1713136b4d07e1beaa9888970d766b11212bc",
+    "initial_state_sha256": "12dc333410c4c864337ec180f6b6b6628da807deeafa3a74a14df0aa97beb003",
+    "input_channel_schema_sha256": "6b2cf8e194a11701d048101aa18e73bad70c1faf96c2e215a0bd022dbd9c377d",
+    "max_independent_full_state_delta": 0.0,
+    "policy_sha256": "e05dbcc8b2ec4c1b0caf63e8f2986583f4f2ca5af1bf928073dd5d332f8c7d19",
+    "steps": 3,
+    "time_seconds": [0.0, 0.001, 0.002, 0.003]
+  },
+  "optimization_acceptance": "not_run; no F05 solver selection",
+  "runtime": {
+    "crocoddyl": "3.2.1",
+    "mujoco": "3.8.0"
+  },
+  "schema_version": "f05e-native-activation-diagnostic/1.0.0",
+  "scope": "self-contained contact-free floating-root built-in muscle; no golfer qualification",
+  "source_sha256": {
+    "scripts/f05e_native_activation_receipt.py": "eb5aa6ee82f80e837463953498dfaf83bf55c856cf397618392afd3c720853d4",
+    "src/engines/physics_engines/mujoco/python/native_activation_bundle.py": "35a472190cfc315b47de0769c8d7ced5dedcd7bf7d3483abaea3720c48261240",
+    "src/engines/physics_engines/mujoco/python/native_activation_manifold.py": "d9d3a3467229254e445be735b6b328761784b1027b9e17212bb83f1748b17aa4",
+    "src/engines/physics_engines/mujoco/python/native_manifold_calculus.py": "d72bde96a1650b004770f9ac581ee454f265920cd2d424c109cd613fea1b0c9a",
+    "tests/fixtures/feedback_controls/native_floating_muscle_11958.xml": "1a8289b0c62bad4a9b0de1d8017ad946c1f69dc529f3585c0d10611f20aa5ba5",
+    "tests/unit/motion_matching/test_native_activation_manifold.py": "386c05720b694aaf5d1439088eaa58e93e7c57b4e561fd195a9d7e2ebb094010"
+  },
+  "warmstart_clock_physical_delta": 0.0
+}

@@ -1,0 +1,1 @@
+Add a strict floating-root, two-hinge native MuJoCo tangent-derivative fixture with ordered bounded motors, quaternion-aware finite-difference checks and independent full-state replay of frozen ZOH torques. Record source-hashed supported-provider timing and keep optimal-control, contact, muscle and capture qualification open.
