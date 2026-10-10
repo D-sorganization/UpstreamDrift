@@ -809,6 +809,64 @@ class ConstrainedIkReceipt(BaseModel):
         return self
 
 
+class IkRestartPolicyReceipt(BaseModel):
+    """Trajectory IK restart policy and posture prior (#12042)."""
+
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+
+    policy: str = Field(
+        ...,
+        description="free, seeded, anchored, stable, continuous or off",
+        json_schema_extra={"unit": "text", "stage": "ik"},
+    )
+    restarts: int = Field(
+        ...,
+        ge=0,
+        description="Jittered restarts per frame above the threshold",
+        json_schema_extra={"unit": "count", "stage": "ik"},
+    )
+    threshold_m: float = Field(
+        ...,
+        ge=0,
+        description="Frame marker RMS above which restarts run",
+        json_schema_extra={"unit": "m", "stage": "ik"},
+    )
+    margin_m: float = Field(
+        ...,
+        ge=0,
+        description="Marker RMS improvement a restart must achieve",
+        json_schema_extra={"unit": "m", "stage": "ik"},
+    )
+    max_joint_speed_rad_s: float | None = Field(
+        None,
+        gt=0,
+        description="Joint speed bound of a continuous restart (null otherwise)",
+        json_schema_extra={"unit": "rad/s", "stage": "ik"},
+    )
+    max_step_rad: float | None = Field(
+        None,
+        gt=0,
+        description="Per-frame joint step bound of a continuous restart",
+        json_schema_extra={"unit": "rad", "stage": "ik"},
+    )
+    anchor_prior: bool = Field(
+        False,
+        description="Retry prior anchored to the frame start, not the jitter",
+        json_schema_extra={"unit": "bool", "stage": "ik"},
+    )
+    seed_per_frame: bool = Field(
+        False,
+        description="Restart jitter drawn from a frame-indexed generator",
+        json_schema_extra={"unit": "bool", "stage": "ik"},
+    )
+    posture_prior_weight: float = Field(
+        0.0,
+        ge=0,
+        description="Weight of the address-pose prior on toe and axial joints",
+        json_schema_extra={"unit": "m^2/rad^2", "stage": "ik"},
+    )
+
+
 class IkReceipt(BaseModel):
     """Full-capture inverse kinematics trajectory and calibration results."""
 
@@ -888,6 +946,11 @@ class IkReceipt(BaseModel):
     constrained_ik: ConstrainedIkReceipt | None = Field(
         None,
         description="Optional constrained IK execution diagnostics and provenance",
+        json_schema_extra={"unit": "compound", "stage": "ik"},
+    )
+    restart_policy: IkRestartPolicyReceipt | None = Field(
+        None,
+        description="Trajectory IK restart policy and its joint-step bound",
         json_schema_extra={"unit": "compound", "stage": "ik"},
     )
 
