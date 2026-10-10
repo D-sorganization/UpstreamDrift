@@ -103,5 +103,16 @@
     "filed_by": "AGY Gemini 3.8 Flash High",
     "root_rest_verified": true,
     "source_and_evidence_link_corrections_applied": true
+  },
+  "latest_compiler_recheck": {
+    "checked_utc": "2026-10-10T14:51:38.568258+00:00",
+    "source_sha256": "9b136fb6d73ff240ceceb250b3ba701a2c0d1db7b8b607c8febb60e8bf91d4eb",
+    "result": "compile-failed",
+    "failure_stage": "Tectonic bundle initialization before document parsing",
+    "diagnostic": "src/config.rs:154:18 Result::unwrap on Err: uncached bundle cannot be fetched from https://relay.fullyjustified.net/default_bundle_v33.tar.index.gz",
+    "source_changed": false,
+    "editor_replaced": false,
+    "separate_pdf_compiled": false,
+    "next_action": "App-level bundle/network repair is required. Do not repeatedly retry without changed compiler-environment evidence. Issue #12120 remains open."
   }
 }
