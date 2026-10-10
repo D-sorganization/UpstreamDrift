@@ -1459,6 +1459,16 @@ export interface DisarmShotRequest {
 }
 
 /**
+ * Bounded inline records and the PyQt Dispersion tab's widget-derived inputs. Mirrors ``_DispersionParams`` from ``src/tools/launch_monitor_analytics/gui.py`` (``_read_dispersion_params``): ``group_column`` is ``None`` when the Dispersion tab's "Group By" combo box reads "(all shots)" (``_build_dispersion_tab``), so the API and desktop paths accept identical inputs for :func:`analyze_dispersion`.
+ */
+export interface DispersionPayloadV2 {
+  records: Record<string, unknown>[];
+  forward: string;
+  lateral: string;
+  group_column?: "monitor_vendor" | "session_id" | "club" | null;
+}
+
+/**
  * Renderer options; science remains in the shared calculation layer.
  */
 export interface DisplayRequest {
