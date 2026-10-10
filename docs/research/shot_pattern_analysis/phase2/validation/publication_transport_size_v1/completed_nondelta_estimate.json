@@ -1,0 +1,11 @@
+{
+  "created_utc": "2026-10-10T09:44:23.057243+00:00",
+  "head": "1e6ef40343600bb61de3a78380d4a15d56ea71ef",
+  "excluded_base": "10c7d61aa686e456b7962f1d9aa9ecfda4e8405f",
+  "command": "git pack-objects --stdout --revs --threads=1 --window=0 --compression=1",
+  "pack_bytes": 1490239616,
+  "pack_sha256": "5ef3127a1f1c3476ef5264bf4fedb28e00a27682663485b33eb5654541593165",
+  "exit_code": 0,
+  "stderr": "",
+  "scope": "Committed history only; includes saved data archives and evidence, excludes untracked live publication graphics. Complete non-delta Git pack measurement, not remote push acceptance; default negotiated push may differ. No network or Git reference mutation."
+}

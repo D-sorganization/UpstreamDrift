@@ -1,0 +1,13 @@
+{
+  "created_utc": "2026-10-10T09:39:03.683611+00:00",
+  "head": "68942fe12a40f479cbc4df8e4bb9c00f38a47717",
+  "excluded_base": "10c7d61aa686e456b7962f1d9aa9ecfda4e8405f",
+  "command": "git pack-objects --stdout --revs --threads=1",
+  "pack_bytes": 178937856,
+  "pack_sha256": "6158a421e5269ded32f36f48d92851dc0f5d5491ef21560ad94e9cf6f3985541",
+  "exit_code": -15,
+  "stderr": "",
+  "scope": "Committed history only; includes saved data archives and evidence, excludes untracked live publication graphics. Local pack measurement, not remote push acceptance. No network or Git reference mutation.",
+  "status": "intentionally_cancelled_incomplete_pack_not_size_acceptance",
+  "reason": "Avoid unnecessary delta search across compressed archives; replace with a valid non-delta pack measurement."
+}
