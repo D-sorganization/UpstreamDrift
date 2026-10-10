@@ -2,6 +2,11 @@
 
 - Branch `claude/myosuite-worker-3x`, stacked on PR #12026. myosuite 3.x has no `envs.env_base`, so the worker builds its own `mujoco` model and takes `MJRenderer` from `myosuite.viz.mj_renderer` (3.x) or `myosuite.renderer.mj_renderer` (2.x). The arena scene moved to the `myo_sim` package (`models/scene/myosuite_quad.xml`). Both lookups live in `backends/myosuite_compat.py`, which `MyoSuiteArenaBackend.unavailable_reason()` also probes (one import path).
 - Tests: `tests/unit/tools/native_viewer_export/test_myosuite_compat.py` (3.x preferred, 2.x fallback, unavailable reason string, scene lookup).
+# Active: MuJoCo Native Export Backend - GCV-14 #11720
+
+- Branch `claude/gcv-14-mujoco-backend`, stacked on PR #12026 (`claude/gcv-14-speed-variants`). `native_viewer_export` has a fifth engine, `mujoco` (`backends/mujoco_native.py` + `mujoco_worker.py`): full-body MJCF with the default appearance document (body, head, club meshes, scene) rendered by `mujoco.Renderer` through the shared view presets and glyph overlay. It replaces the earlier throwaway stick-figure evidence renderer.
+- Tests: `tests/unit/tools/native_viewer_export/test_mujoco_backend.py` (registration, `unavailable_reason()`, appearance/club scene, `requires_gl` render); the speed-variant frame-count and 0 ms HUD test iterates `ENGINES`, so it covers MuJoCo.
+- Evidence: ControlTower renders `gcv14/mujoco_native` (`MUJOCO_GL=osmesa`), see the PR body for frame counts and the impact frame.
 
 # Active: OpenSim Contact Grip, OSV-7 Phase 4 #11739
 

@@ -23,6 +23,10 @@ from src.shared.python.motion_matching.ledger import (
     find_repo_root,
 )
 from src.shared.python.motion_matching.ledger_schema import Ledger, LedgerRow
+from src.tools.matched_swing_browser.gif_frames import (
+    gif_frame_info,
+    gif_frame_png,
+)
 from src.tools.matched_swing_browser.model import (
     MatchedSwingBrowserModel,
     MatchedSwingFilter,
@@ -280,6 +284,37 @@ class MatchedSwingsService:
         if path is None or not path.is_file():
             raise FileNotFoundError(f"{artifact} artefact missing for run {run_id}")
         return path
+
+    @precondition(lambda self, run_id: isinstance(run_id, str) and bool(run_id.strip()))
+    @postcondition(lambda result: isinstance(result, dict))
+    def animation_frame_info(self, run_id: str) -> dict[str, Any]:
+        """Return frame count, per-frame durations, and size for a run's GIF.
+
+        Delegates to :func:`gif_frames.gif_frame_info` on the GIF path
+        resolved via :meth:`resolve_artifact_path` (never exposing the
+        absolute path itself to callers).
+
+        Raises:
+            KeyError: ``run_id`` is not in the ledger.
+            FileNotFoundError: the run has no GIF artefact on disk.
+            ValueError: the artefact is not a readable GIF image.
+        """
+        gif_path = self.resolve_artifact_path(run_id, "gif")
+        return gif_frame_info(gif_path)
+
+    @precondition(lambda self, run_id, index: isinstance(run_id, str) and index >= 0)
+    @postcondition(lambda result: isinstance(result, bytes))
+    def animation_frame_png(self, run_id: str, index: int) -> bytes:
+        """Return one decoded GIF frame as PNG bytes.
+
+        Raises:
+            KeyError: ``run_id`` is not in the ledger.
+            FileNotFoundError: the run has no GIF artefact on disk.
+            ValueError: the artefact is not a readable GIF image.
+            IndexError: ``index`` is out of range for the GIF.
+        """
+        gif_path = self.resolve_artifact_path(run_id, "gif")
+        return gif_frame_png(gif_path, index)
 
     @precondition(
         lambda self, run_id, frame_index: isinstance(run_id, str) and frame_index >= 0
