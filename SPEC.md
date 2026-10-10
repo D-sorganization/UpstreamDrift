@@ -1,3 +1,12 @@
+## Coordinate-Invariant Physical Inertia Contract (#12183)
+
+The existing DIME inertia helper checks triangle feasibility on sorted principal
+moments and absolute symmetry tolerance. Chapter 51 records TDD evidence and
+the unchanged tensor-return contract. This helper correction introduces no native
+source-admission integration or optimizer-wide qualification. Imported body
+inertias still require explicit source/COM/frame/provenance validation; no
+automatic tensor repair or matching acceptance is authorized by this change.
+
 ## Native Feedback Platform Integration (#12060)
 
 The published native Moco preparation/seed/solve/replay path and owned Simscape
@@ -11000,6 +11009,19 @@ turnover and source-hashed receipt: `docs/development/feedback_controls/F06D2_OW
 and `F06D2_NATIVE_OWNED_RECEIPT.json`. This trusted synthetic diagnostic does not
 qualify production variants, muscle physiology, private capture or parity.
 
+## Source-Preserving BUET–Hamner OpenSim Candidate (#12157)
+
+An explicit version-one native factory now composes reviewed BUET upper/trunk
+and Hamner distal-leg source components into a separate 40-body, 557-muscle
+OpenSim artifact. Fresh XML reload, exact regional property identity and three
+sampled native body/path geometry and velocity checks establish a narrow
+mechanical source-preservation result. The entrypoint XML and loaded-runtime
+hashes are recorded in chapter 44 and the F07 turnover. This candidate has
+not passed source resource closure, passive physiology, partial abdominal lock
+reduction, native Moco, contact/grip, golfer marker registration, full-state
+replay or captured full-swing matching. Scientific publication stays blocked;
+all 17 variants and six engine families remain required.
+
 ## Assistance-Explicit OpenSim Replay (#12147)
 
 A distinct native mixed-actuation T01 profile freezes exact muscle and
@@ -11011,3 +11033,21 @@ provider, input, state and policy digests. Zero-assistance point bounds are
 supported. The original muscle-only profile remains strict. Canonical chapter
 27 and F07_MIXED_ACTUATION_TURNOVER document the calculation and limits; full
 factory topology, capture/physiology/contact/grip and 17-model parity remain open.
+
+The #12147 mixed Moco link reuses scalar bindings and chapter39's file-driven
+pipeline. Requests bind ordered roles/bounds, reject combined constrained
+profiles, and preserve every optimizer knot through independently replayed
+T01 inputs. Mixed NPZ evidence distinguishes actuations/controls and physical
+units, roles, powers and sampled work. This does not discharge anatomy,
+contact, private full-horizon or all-model qualification gates.
+The F07 #12143 versioned constrained-muscle policy extends a declared
+native OpenSim cold start to exact ordered excitation T01 export, fresh
+source replay and marker sampling without reassembly. A coupler-only
+two-Millard source solves a reachable nonzero Moco endpoint and independently
+replays within declared fixture-specific per-unit state and q/u residual
+bounds; native locked-coordinate replay remains separate because installed
+OpenSim Moco rejects locked coordinates. The source-bound component audit
+admits only reviewed CustomJoint and coordinate-linear moving path laws.
+Canonical chapter42 and `F07_CONSTRAINED_MUSCLE_MOCO_TURNOVER.md` retain
+the failed zero-force/loose-transcription experiment and all 520-muscle,
+private-capture, contact, assistance and physiology gates.

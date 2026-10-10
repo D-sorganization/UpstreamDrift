@@ -7,11 +7,15 @@ from pathlib import Path
 import pandas as pd
 from PyQt6 import QtCore, QtWidgets
 
+from src.tools.launch_monitor_analytics.import_review import (
+    RETAIN_ONLY,
+    auto_mappings,
+    build_import_options,
+    mapping_targets,
+    read_headers,
+)
 from src.tools.launch_monitor_model import (
-    IDENTITY_COLUMNS,
-    METRICS,
     PROFILES,
-    ColumnMapping,
     ImportOptions,
     detect_profile,
 )
@@ -48,28 +52,13 @@ class DataFrameTable(QtWidgets.QTableWidget):
         self.resizeColumnsToContents()
 
 
-def _read_headers(path: Path) -> list[str]:
-    suffix = path.suffix.lower()
-    if suffix == ".csv":
-        frame = pd.read_csv(path, nrows=5, sep=None, engine="python")
-    elif suffix in {".tsv", ".txt"}:
-        frame = pd.read_csv(path, nrows=5, sep="\t")
-    elif suffix in {".xlsx", ".xls"}:
-        frame = pd.read_excel(path, nrows=5)
-    elif suffix == ".json":
-        frame = pd.read_json(path)
-    else:
-        raise ValueError(f"Unsupported file extension: {suffix}")
-    return [str(column) for column in frame.columns]
-
-
 class ImportMappingDialog(QtWidgets.QDialog):
     """Preview profile detection and edit column/unit mappings before import."""
 
     def __init__(self, source: Path, parent: QtWidgets.QWidget | None = None) -> None:
         super().__init__(parent)
         self.source = source
-        self.headers = _read_headers(source)
+        self.headers = read_headers(source)
         detection = detect_profile(self.headers)
         self.setWindowTitle("Review Launch Monitor Import")
         self.resize(1240, 600)
@@ -128,11 +117,8 @@ class ImportMappingDialog(QtWidgets.QDialog):
 
     def _populate_mappings(self) -> None:
         profile_id = str(self.profile_combo.currentData())
-        auto = {
-            item.source_column: item.target_column
-            for item in PROFILES[profile_id].mappings_for(self.headers)
-        }
-        targets = ["(retain only)", *IDENTITY_COLUMNS, "date", "time", *METRICS]
+        auto = auto_mappings(profile_id, self.headers)
+        targets = mapping_targets()
         for row, header in enumerate(self.headers):
             source_item = QtWidgets.QTableWidgetItem(header)
             source_item.setFlags(
@@ -141,7 +127,7 @@ class ImportMappingDialog(QtWidgets.QDialog):
             self.mapping_table.setItem(row, 0, source_item)
             target_combo = QtWidgets.QComboBox()
             target_combo.addItems(targets)
-            target_combo.setCurrentText(auto.get(header, "(retain only)"))
+            target_combo.setCurrentText(auto.get(header, RETAIN_ONLY))
             self.mapping_table.setCellWidget(row, 1, target_combo)
             unit_edit = QtWidgets.QLineEdit()
             unit_edit.setPlaceholderText("Infer from header/profile")
@@ -159,7 +145,7 @@ class ImportMappingDialog(QtWidgets.QDialog):
 
     def import_options(self) -> ImportOptions:
         """Return the reviewed mapping configuration."""
-        mappings: list[ColumnMapping] = []
+        rows: list[tuple[str, str, str, float, str]] = []
         for row, header in enumerate(self.headers):
             target_widget = self.mapping_table.cellWidget(row, 1)
             unit_widget = self.mapping_table.cellWidget(row, 2)
@@ -168,8 +154,6 @@ class ImportMappingDialog(QtWidgets.QDialog):
             if not isinstance(target_widget, QtWidgets.QComboBox):
                 continue
             target = target_widget.currentText()
-            if target == "(retain only)":
-                continue
             unit = (
                 unit_widget.text().strip()
                 if isinstance(unit_widget, QtWidgets.QLineEdit)
@@ -185,16 +169,15 @@ class ImportMappingDialog(QtWidgets.QDialog):
                 if isinstance(status_widget, QtWidgets.QComboBox)
                 else "reported"
             )
-            mappings.append(
-                ColumnMapping(header, target, unit or None, multiplier, status)
-            )
-        return ImportOptions(
+            rows.append((header, target, unit, multiplier, status))
+        return build_import_options(
             profile_id=str(self.profile_combo.currentData()),
-            mappings=tuple(mappings),
-            session_name=self.session_edit.text().strip() or self.source.stem,
-            player=self.player_edit.text().strip() or None,
-            monitor_model=self.model_edit.text().strip() or None,
-            software_version=self.version_edit.text().strip() or None,
+            rows=rows,
+            session_name=self.session_edit.text(),
+            default_session_name=self.source.stem,
+            player=self.player_edit.text(),
+            monitor_model=self.model_edit.text(),
+            software_version=self.version_edit.text(),
         )
 
 

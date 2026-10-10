@@ -158,3 +158,48 @@ passive-load, assistance, constraint and full initial-state blockers remain
 binding before optimization. No private full-capture muscle match is established.
 The mixed Windows OpenSim/C3D runtime limitation is tracked in #12065; source-bound
 TRC preparation can run in a separate process before native Moco execution.
+
+## Assistance-Explicit Mixed Moco Link
+
+F07 #12147 adds an optional ordered `mixed_actuation` declaration to the same
+file-driven request. It reuses native Moco scalar control bindings and the
+chapter27 mixed replay policy. Request identity includes each absolute channel
+path, role and closed control bounds; those bounds must exactly equal Moco's
+bindings. Native profile admission checks source actuator order, gains, units,
+muscle modes and root topology before the software preparation gate can
+discharge the nonmuscle-assistance blocker. Passive limits, complete state,
+marker correspondence and all other blockers remain binding. A combined
+constrained/mixed profile requires separate admission and currently rejects.
+
+Every native optimized knot is retained in the union with the original
+observation clock. Piecewise-linear values at added observation times preserve
+the saved knot-linear input law. This differs from Moco's internal collocation
+polynomial; fresh replay errors measure that executed approximation. Mixed channels keep absolute component paths through
+export and fresh independent replay. The saved NPZ reports `actuations`,
+`applied_controls`, channel roles and output units, native powers and sampled
+work. Mechanical outputs are N or N m; none are labeled muscle excitations.
+The replay process receives only the frozen T01 bundle, native source and
+declared profile, with no tracking reference or optimizer callback.
+
+The synthetic 40 ms diagnostic uses two compliant Millard muscles and two
+CoordinateActuators, with a quadratic 0.2 mm translation and 0.2 mrad rotation
+target. Its numerical cost scaling is explicit: marker multiplier $10^6$ and
+effort multiplier $10^{-8}$. An initial unscaled marker cost satisfied the
+optimizer stopping criterion near zero displacement and is retained as a
+failed diagnostic. Ten mesh intervals with tightened tolerances produced
+sub-micrometre marker error but a largest raw state difference about 0.0034;
+that mixed-unit maximum is not a physical acceptance threshold. Per-state
+replay errors and mesh refinement must be assessed separately. This fixture
+does not admit a full-body model, establish muscle-only matching, or qualify
+the 17 production variants.
+
+The twenty-interval diagnostic at constraint tolerance $10^{-7}$ and optimizer
+convergence tolerance $10^{-6}$ passes separate synthetic replay limits:
+coordinate value $10^{-7}$ m or rad, speed $10^{-5}$ m/s or rad/s, activation
+$10^{-3}$, and fiber length $10^{-5}$ m. Observed maxima are about
+$9.97\times10^{-9}$ m translation, $3.85\times10^{-7}$ m/s speed,
+$6.07\times10^{-4}$ activation and $3.99\times10^{-6}$ m fiber length;
+marker RMSE is about $7.58\times10^{-7}$ m. These are fixture numerical
+checks, not biomechanical thresholds. A forty-interval attempt with tighter
+$10^{-9}/10^{-8}$ tolerances hit the configured test timeout; the failed log
+is retained and no faster-solve claim is made.
