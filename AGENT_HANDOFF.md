@@ -35,6 +35,11 @@ its source rotation bound. Preserve native replay, anatomy and registration gate
 - Branch `claude/nv-9-meshcat-framing-11697`; epic #11673. MeshCat kept the 75 deg three.js default FOV; `MeshcatPage` now sets the shared `golf_view_presets.VIEWER_FOV_Y_RAD` (0.7 rad, OpenSim's value) on entry and raises if the page has no viewer camera. New `golf_view_presets.framing`: `projected_extent` and `fit_distance_m` (15 % margin) with unit tests.
 - Open (engine host): verify the Drake/Pinocchio renders at 720p, feed the per-swing body bounding box from engine FK into `fit_distance_m` per view, and judge glyph legibility.
 
+# Active: Run-102 Simscape Playback MP4 — #11569 Task 4
+
+- Branch `claude/run102-playback-mp4-11569`; commit `SELF`. `export_video(..., size_px=(w, h))` and `cross_engine_replay.render_replay_frames(size_px=...)` set the frame size (default 480x480 unchanged; text scales with height). Run-102 marker playback rendered from the committed `two_window_fit_9967_102/candidate.npz` at 1920x1080, 60 fps, 1x / 0.5x / 0.1x into DeskComputer `~/Videos/Parity Audit/simscape/run102_playback/` (not committed).
+- This is the marker-overlay playback (capture vs Simscape markers), not a Mechanics Explorer render (a GUI window, which the headless rule excludes on agent hosts). Run-103 is still blocked (`native_gate.json`).
+
 # Active: Muscle Qualification Evidence Guard — F07 #11791
 
 Branch `fix/feedback-muscle-evidence-11791`; current commit `SELF`; PR #11814. Scoped child #11810: parameter-only orchestration now returns no native replay and no unperformed audit successes. The test-first commit records two failures; 31 focused tests pass after correction. Read [Guard Turnover](docs/development/feedback_controls/F07_MUSCLE_EVIDENCE_TURNOVER.md). Merged current main while preserving its impact chapter and this evidence chapter. Next: normal protected PR checks; F07 and native model qualification remain open.
