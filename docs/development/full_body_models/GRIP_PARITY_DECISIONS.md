@@ -242,26 +242,26 @@ The issue's hypothesis was that the prescribed hand-to-hand relative pose drifts
 
 **Drift of the prescribed input** (`run_grip_hand_drift.py`, trail frame in the lead frame, every 2 ms sample, change against sample 0): both hand frames are grip frames carried by the same weld club pose (`hand_frame_states`), so the pair is rigid by construction.
 
-| Club   | Along the grip | Across the grip | Rotation          | Hand spacing (80.32 mm) change |
-| ------ | -------------- | --------------- | ----------------- | ------------------------------ |
-| Driver | 4.2e-13 mm     | 3.6e-13 mm      | 0 deg (round-off) | 3.5e-13 mm                     |
-| 7-iron | 3.9e-13 mm     | 2.8e-13 mm      | 0 deg (round-off) | 3.9e-13 mm                     |
+| Club | Along the grip | Across the grip | Rotation | Hand spacing (80.32 mm) change |
+| --- | --- | --- | --- | --- |
+| Driver | 4.2e-13 mm | 3.6e-13 mm | 0 deg (round-off) | 3.5e-13 mm |
+| 7-iron | 3.9e-13 mm | 2.8e-13 mm | 0 deg (round-off) | 3.9e-13 mm |
 
 So projecting the trail hand onto the lead hand's pose plus the nominal offset is the identity, and a "rigid-consistent input" is what the run already used. The helper is `grip_contact.hand_drift.hand_relative_drift`.
 
 **Diagnostics on the same full swing** (MuJoCo contact, Euler, dt = 1e-5 s, peak values; driver / 7-iron; ControlTower, about 1 min per run). Bushing is the OpenSim reference of section 16.
 
-| Run                                     | Peak L / R hand force (N)       | Peak net (N) | Peak internal (N) | Peak axial squeeze (N) | Pad normal sum per hand (kN) | Peak axial slip (mm) |
-| --------------------------------------- | ------------------------------- | ------------ | ----------------- | ---------------------- | ---------------------------- | -------------------- |
-| OpenSim bushing                         | 515 / 564 and 533 / 584         | 439 and 457  | 510 and 524       | 3 and 4                | n/a                          | n/a                  |
-| Contact, baseline `solreffriction` 2·dt | 2086 / 2118 and 1667 / 1748     | 438 and 453  | 2100 and 1697     | 763 and 438            | 29.4 and 28.8                | 1.51 and 0.97        |
-| Lead hand only (trail pads removed)     | 448 / 0 and 465 / 0             | 448 and 465  | n/a (one hand)    | n/a                    | 35.5 and 30.4                | 1.59 and 1.04        |
-| `solreffriction` 1e-3 s                 | 8415 / 8507 and 11124 / 11572   | 507 and 2254 | 8442 and 11348    | 3688 and 10665         | 118.6 and 70.2               | grip lost (metres)   |
-| `solreffriction` 5e-3 s                 | 6510 / 6645 and 7252 / 7448     | 239 and 884  | 6578 and 7350     | 6537 and 6081          | 16.1 and 22.5                | grip lost (metres)   |
-| Trail hand follows the club             | 66241 / 65833 and 62190 / 61746 | 568 and 741  | 66037 and 61967   | 65273 and 61107        | 97.7 and 98.7                | 5.4 and 3.6          |
-| Trail shift 0.001 mm along the grip     | 2095 / 2126 and 1687 / 1786     | 438 and 453  | 2108 and 1724     | 772 and 444            | 29.4 and 28.8                | 1.51 and 0.97        |
-| Trail shift 0.01 mm along the grip      | 2544 / 2531 and 1974 / 2075     | 438 and 452  | 2535 and 2016     | 803 and 497            | 29.8 and 28.7                | 1.51 and 0.96        |
-| Trail shift 0.1 mm along the grip       | 4726 / 4784 and 4914 / 4904     | 438 and 444  | 4754 and 4905     | 1488 and 1105          | 31.4 and 31.2                | 1.50 and 0.96        |
+| Run | Peak L / R hand force (N) | Peak net (N) | Peak internal (N) | Peak axial squeeze (N) | Pad normal sum per hand (kN) | Peak axial slip (mm) |
+| --- | --- | --- | --- | --- | --- | --- |
+| OpenSim bushing | 515 / 564 and 533 / 584 | 439 and 457 | 510 and 524 | 3 and 4 | n/a | n/a |
+| Contact, baseline `solreffriction` 2·dt | 2086 / 2118 and 1667 / 1748 | 438 and 453 | 2100 and 1697 | 763 and 438 | 29.4 and 28.8 | 1.51 and 0.97 |
+| Lead hand only (trail pads removed) | 448 / 0 and 465 / 0 | 448 and 465 | n/a (one hand) | n/a | 35.5 and 30.4 | 1.59 and 1.04 |
+| `solreffriction` 1e-3 s | 8415 / 8507 and 11124 / 11572 | 507 and 2254 | 8442 and 11348 | 3688 and 10665 | 118.6 and 70.2 | grip lost (metres) |
+| `solreffriction` 5e-3 s | 6510 / 6645 and 7252 / 7448 | 239 and 884 | 6578 and 7350 | 6537 and 6081 | 16.1 and 22.5 | grip lost (metres) |
+| Trail hand follows the club | 66241 / 65833 and 62190 / 61746 | 568 and 741 | 66037 and 61967 | 65273 and 61107 | 97.7 and 98.7 | 5.4 and 3.6 |
+| Trail shift 0.001 mm along the grip | 2095 / 2126 and 1687 / 1786 | 438 and 453 | 2108 and 1724 | 772 and 444 | 29.4 and 28.8 | 1.51 and 0.97 |
+| Trail shift 0.01 mm along the grip | 2544 / 2531 and 1974 / 2075 | 438 and 452 | 2535 and 2016 | 803 and 497 | 29.8 and 28.7 | 1.51 and 0.96 |
+| Trail shift 0.1 mm along the grip | 4726 / 4784 and 4914 / 4904 | 438 and 444 | 4754 and 4905 | 1488 and 1105 | 31.4 and 31.2 | 1.50 and 0.96 |
 
 The across-grip shifts (0.01 mm) give internal 2576 / 2178 N (driver, y / z) and 2025 / 1860 N (7-iron), with squeeze up to 1571 N. Full numbers are in `contact/internal_force_<club>.json`.
 
@@ -293,20 +293,20 @@ Acceptance read-out for #11986: the mechanism is identified with numbers (drift 
 
 **Results (CPodes, accuracy $10^{-8}$; peak values, OpenSim contact / OpenSim bushing).**
 
-| Quantity                                                    | Driver                   | 7-iron                   |
-| ----------------------------------------------------------- | ------------------------ | ------------------------ |
-| Net force at midpoint                                       | 428.0 / 439.3 N (-2.6 %) | 442.5 / 456.7 N (-3.1 %) |
-| Net force RMS error over the swing, relative to bushing RMS | 7.1 N (7.4 %)            | 4.3 N (4.4 %)            |
-| Left hand force                                             | 697 / 515 N              | 603 / 533 N              |
-| Right hand force                                            | 804 / 564 N              | 733 / 584 N              |
-| Internal force                                              | 728 / 510 N              | 638 / 524 N              |
-| Axial squeeze (internal)                                    | 151 / 3.3 N              | 93 / 3.9 N               |
-| Couple at midpoint                                          | 129 / 99.5 N m           | 119 / 98.6 N m           |
-| Lead share at peak net                                      | 0.51 / 0.43              | 0.43 / 0.50              |
-| Pad normal force sum (per hand, peak)                       | 1365 N                   | 1353 N                   |
-| Hand-to-club deflection                                     | 0.59 mm, 0.75 deg        | 0.44 mm, 0.62 deg        |
-| Peak axial slip, roll slip                                  | 0.38 mm, 8.7 mrad        | 0.18 mm, 2.3 mrad        |
-| Wall time (ControlTower)                                    | 355 s                    | 404 s                    |
+| Quantity | Driver | 7-iron |
+| --- | --- | --- |
+| Net force at midpoint | 428.0 / 439.3 N (-2.6 %) | 442.5 / 456.7 N (-3.1 %) |
+| Net force RMS error over the swing, relative to bushing RMS | 7.1 N (7.4 %) | 4.3 N (4.4 %) |
+| Left hand force | 697 / 515 N | 603 / 533 N |
+| Right hand force | 804 / 564 N | 733 / 584 N |
+| Internal force | 728 / 510 N | 638 / 524 N |
+| Axial squeeze (internal) | 151 / 3.3 N | 93 / 3.9 N |
+| Couple at midpoint | 129 / 99.5 N m | 119 / 98.6 N m |
+| Lead share at peak net | 0.51 / 0.43 | 0.43 / 0.50 |
+| Pad normal force sum (per hand, peak) | 1365 N | 1353 N |
+| Hand-to-club deflection | 0.59 mm, 0.75 deg | 0.44 mm, 0.62 deg |
+| Peak axial slip, roll slip | 0.38 mm, 8.7 mrad | 0.18 mm, 2.3 mrad |
+| Wall time (ControlTower) | 355 s | 404 s |
 
 Convergence: driver accuracy $10^{-4}$ gives a net-force RMS error of 131 N (spikes, not converged), $10^{-6}$ gives 10.7 N and $10^{-8}$ gives 7.1 N; peak net force is 428.04 N at $10^{-6}$ and 428.00 N at $10^{-8}$.
 
