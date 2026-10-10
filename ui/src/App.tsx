@@ -113,6 +113,11 @@ const CrossEngineDashboardPage = lazy(() =>
     default: m.CrossEngineDashboardPage,
   })),
 );
+const LiftBaselinePage = lazy(() =>
+  import("./pages/LiftBaseline").then((m) => ({
+    default: m.LiftBaselinePage,
+  })),
+);
 /** Themed full-viewport fallback shown while a route chunk loads (#7433). */
 function PageLoadingFallback() {
   return (
@@ -166,6 +171,8 @@ export function RoutedContent() {
             path="/tools/cross-engine"
             element={<CrossEngineDashboardPage />}
           />
+          {/* Lift Baseline (LIFT-8 slice 3, #11748) */}
+          <Route path="/tools/lift-baseline" element={<LiftBaselinePage />} />
           <Route path="/tools/terrain" element={<TerrainPage />} />
           <Route path="/tools/dataset" element={<DatasetGeneratorPage />} />
           <Route path="/tools/analysis" element={<AnalysisToolsPage />} />
