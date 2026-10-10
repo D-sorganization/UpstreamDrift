@@ -1,6 +1,38 @@
 # Astra Review: Matched Delivery and Strike Variation
 
-## Incremental Contact Review: Current Disposition
+## Current Publication Disposition
+
+The numerical study is complete; final publication acceptance remains open.
+The original primary matrix has 324 planned cells (270 completed, 54 explicitly
+unavailable), the fixed-target control has 72 (52 completed, 20 unavailable),
+and the separate bounds supplement adds 26 executed cells. The final saved-data
+audits and fresh archive-restoration checks are recorded in
+[Study Turnover](TURNOVER.md),
+[Primary Final Audit](validation/independent_primary_final_audit.json),
+[Control Final Audit](validation/independent_control_final_audit.json), and
+[Supplemental Final Validation](validation/SUPPLEMENT_FINAL_VALIDATION.md).
+These records supersede the historical pre-run status statements below without
+changing their original evidence or the accepted execution snapshots.
+
+The current publication review covers the full primary graphical set: 288 PNGs
+received contact-sheet review with selected full-size checks, and all 689
+manifest-listed outputs passed byte verification. The remaining known primary
+finding is an ambiguous shaft-SD comparison caption; the correction passed
+19 tests and independent saved-data visual review in candidate `c9c0fb194f`.
+Corrected rendering, fixed-target control and supplemental graphical reviews,
+final narrative/PDF assembly, and repository delivery remain pending. See the
+[Primary Manifest Reconciliation](validation/original_final_graphics_independent_review_v4/primary_manifest_reconciliation.json)
+and the current [Turnover](TURNOVER.md) for live job and source-freeze constraints.
+
+The [Final Narrative Acceptance Checklist](review_followups/FINAL_NARRATIVE_ACCEPTANCE.md)
+requires explicit distance controls, population denominators, paired pattern
+benefit interactions, and model limitations. The numerical contact/refinement
+and geometric checks below support the declared model; they do not establish
+measured-player accuracy or equipment calibration. Empirical qualification
+remains deferred under issue #11984. No final pattern-benefit headline is
+accepted before the completed publication meets those gates.
+
+## Incremental Contact Review: Pre-Run Disposition
 
 The impulse-incremental Coulomb/energetic-restitution implementation supersedes
 the historical stick-first primary discussed below. Its tangential disk solve
