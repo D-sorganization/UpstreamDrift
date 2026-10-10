@@ -10,7 +10,8 @@ Routes
 - ``GET /matched-swings/{id}`` — receipt JSON
 - ``GET /matched-swings/{id}/candidate`` — NPZ stream or preview JSON
 - ``GET /matched-swings/{id}/parity`` — parity report JSON
-- ``GET /matched-swings/{id}/report`` — Markdown fit-quality report download
+- ``GET /matched-swings/{id}/report`` — fit-quality report download (Markdown or PDF)
+- ``GET /matched-swings/{id}/video`` — candidate marker-overlay video download (GIF or MP4)
 - ``GET /matched-swings/{id}/animation.gif`` — GIF stream
 - ``GET /matched-swings/{id}/animation/frames`` — GIF frame count/durations/size
 - ``GET /matched-swings/{id}/animation/frames/{index}`` — one decoded GIF frame (PNG)
@@ -21,6 +22,7 @@ from __future__ import annotations
 from functools import lru_cache
 from typing import Any, Literal, NoReturn
 
+import anyio.to_thread
 from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request
 from fastapi.responses import FileResponse, Response
 
@@ -71,6 +73,19 @@ def _raise_job_error(error: MatchedSwingJobError, status_code: int) -> NoReturn:
         status_code=status_code,
         detail={"message": error.message, "error": error.to_dict()},
     )
+
+
+def _safe_export_message(exc: Exception, fallback: str) -> str:
+    """Return an error message safe to return to API clients.
+
+    The export validation errors (e.g. missing marker trajectories) raised by
+    ``_validate_candidate_for_video`` never carry filesystem paths, so a
+    ``ValueError`` message is returned verbatim. Other failure kinds
+    (missing file, writer/OS failures) may embed an absolute path from a
+    temporary export directory, so they collapse to ``fallback``, which names
+    only the failure kind.
+    """
+    return str(exc) if isinstance(exc, ValueError) else fallback
 
 
 @router.get("")
@@ -213,22 +228,71 @@ async def get_matched_swing_parity(
 @router.get("/{run_id}/report")
 async def get_matched_swing_report(
     run_id: str,
+    format: Literal["md", "pdf"] = Query(
+        default="md", description="Report format: Markdown or PDF"
+    ),
     _local: None = Depends(require_local_client),
     service: MatchedSwingsService = Depends(get_matched_swings_service),
 ) -> Response:
-    """Download the Markdown fit-quality report for a run (desktop parity)."""
+    """Download the fit-quality report for a run, Markdown or PDF (desktop parity)."""
     try:
-        markdown, filename = service.export_report_markdown(run_id)
+        result: tuple[bytes, str, str] = await anyio.to_thread.run_sync(
+            service.export_report_file, run_id, format
+        )
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
-    except (FileNotFoundError, ValueError, RuntimeError) as exc:
+    except (FileNotFoundError, ValueError, RuntimeError, OSError) as exc:
         _raise_job_error(
-            MatchedSwingJobError(code="report_unavailable", message=str(exc)),
+            MatchedSwingJobError(
+                code="report_unavailable",
+                message=_safe_export_message(
+                    exc, "Report export is unavailable for this run."
+                ),
+            ),
             status_code=404,
         )
+    content, filename, media_type = result
     return Response(
-        content=markdown,
-        media_type="text/markdown; charset=utf-8",
+        content=content,
+        media_type=media_type,
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@router.get("/{run_id}/video")
+async def get_matched_swing_video(
+    run_id: str,
+    format: Literal["gif", "mp4"] = Query(
+        default="gif", description="Video format: GIF or MP4"
+    ),
+    _local: None = Depends(require_local_client),
+    service: MatchedSwingsService = Depends(get_matched_swings_service),
+) -> Response:
+    """Download the candidate marker-overlay video for a run (desktop parity).
+
+    Rendering is CPU-bound (matplotlib frames), so it runs off the event
+    loop via ``anyio.to_thread.run_sync``.
+    """
+    try:
+        result: tuple[bytes, str, str] = await anyio.to_thread.run_sync(
+            service.export_video_file, run_id, format
+        )
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except (FileNotFoundError, ValueError, RuntimeError, OSError) as exc:
+        _raise_job_error(
+            MatchedSwingJobError(
+                code="video_unavailable",
+                message=_safe_export_message(
+                    exc, "Video export is unavailable for this run."
+                ),
+            ),
+            status_code=404,
+        )
+    content, filename, media_type = result
+    return Response(
+        content=content,
+        media_type=media_type,
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
 
