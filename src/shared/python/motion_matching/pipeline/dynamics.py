@@ -40,6 +40,10 @@ from src.shared.python.motion_matching.pipeline.reference import (
     marker_errors,
     smooth_reference,
 )
+from src.shared.python.motion_matching.pipeline.fd_phase import (
+    fd_phase_report,
+    reference_clubhead,
+)
 from src.shared.python.motion_matching.range_of_motion import (
     HUMAN_RANGES_DEG,
     violations,
@@ -757,6 +761,9 @@ def build_dynamics_report(
             lane.frames,
             record,
             rate_hz=rate_hz,
+        ),
+        "fd_phase": fd_phase_report(
+            lane.times, sim_errors, lane.valid, reference_clubhead(kin, q_ref)
         ),
         "peak_joint_torque_n_m": float(np.abs(record.tau).max()),
         "lowest_sphere_height_min_m": float(record.lowest_sphere_height_m.min()),
