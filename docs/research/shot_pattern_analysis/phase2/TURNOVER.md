@@ -6,6 +6,8 @@ The goal is active and incomplete. MAIN is `/home/dieterolson/.codex/worktrees/s
 
 ## Reporting Regeneration Checkpoint
 
+Astra's [Report Composition Audit](validation/final_report_composition_audit_v1/REVIEW.md) identified six report-only gaps, tracked in [#12128](https://github.com/D-sorganization/UpstreamDrift/issues/12128), independently verified open under the authorized personal identity. Gemini 3.8 Flash is implementing scoped TDD fixes in MAIN; exec session `43104`, log `/tmp/shot-pattern-report-composition-agy.log`, task `/tmp/shot-pattern-report-composition-task.txt`. No push/commit authority was delegated. Root and Astra must review the changes and actual red/green evidence before committing. Do not run the production report builder against the partial supplemental pipeline.
+
 Initial paired-graphics review also passed for two completed PW across-lean comparisons only (12 PNGs, 32 total assets; common-six populations 10,000 and 9,999). See [Initial Pair Review](validation/supplement_v5_initial_pair_review_v1/REVIEW.md). Other contrasts and the full pipeline remain unaccepted until completion and reconciliation.
 
 All 26 supplemental cell graphics are complete and independently accepted by Astra: 312 assets, including 52 academic PNGs identical to the preserved v3 review and 52 revised social cards inspected. Root revalidated every asset and contact-sheet hash. Evidence: [Cell Graphics Review](validation/supplement_v5_cell_graphics_review_v1/REVIEW.md); receipt SHA256 `19c398c21416cd96f6ab796359d6e38542cbc441418b70549f8da586e44a71f6`. This is component acceptance only; paired-comparison rendering and final pipeline reconciliation remain pending.
