@@ -1,3 +1,8 @@
+# Active: MyoSuite 3.x Native Export Worker - #11997 (GCV-14 #11720)
+
+- Branch `claude/myosuite-worker-3x`, stacked on PR #12026. myosuite 3.x has no `envs.env_base`, so the worker builds its own `mujoco` model and takes `MJRenderer` from `myosuite.viz.mj_renderer` (3.x) or `myosuite.renderer.mj_renderer` (2.x). The arena scene moved to the `myo_sim` package (`models/scene/myosuite_quad.xml`). Both lookups live in `backends/myosuite_compat.py`, which `MyoSuiteArenaBackend.unavailable_reason()` also probes (one import path).
+- Tests: `tests/unit/tools/native_viewer_export/test_myosuite_compat.py` (3.x preferred, 2.x fallback, unavailable reason string, scene lookup).
+
 # Active: Quarter-Speed Export Variants for Every Engine - GCV-14 #11720
 
 - Branch `claude/gcv-14-speed-variants`, stacked on PR #12004 (kinematic impact time). `video_timing.frame_schedule.SPEED_VARIANTS = (1, 0.5, 0.25)` is the default of `ExportSettings.speeds` and `--speeds`; `motion_matching.export.export_video_variants` writes the same three clips for any engine's candidate (MuJoCo, MyoSuite, Drake, Pinocchio, OpenSim, Simscape logs).
