@@ -20,7 +20,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 SCHEMA_VERSION = "appearance-v1"
 SCHEMA_PATH = Path(__file__).with_name("appearance_v1.schema.json")
@@ -254,7 +254,9 @@ def _ball_settings(raw: Mapping[str, Any]) -> BallSettings:
     position = raw.get("position_m")
     return BallSettings(
         bool(raw.get("enabled", defaults.enabled)),
-        None if position is None else tuple(float(c) for c in position),
+        None
+        if position is None
+        else cast("tuple[float, float, float]", tuple(float(c) for c in position)),
         raw.get("source", defaults.source),
     )
 
