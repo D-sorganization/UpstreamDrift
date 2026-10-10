@@ -9,6 +9,7 @@ from __future__ import annotations
 from collections.abc import Iterator, Sequence
 from importlib.util import find_spec
 import json
+import logging
 import tempfile
 from pathlib import Path
 from typing import Any
@@ -28,6 +29,7 @@ from src.tools.native_viewer_export.backends._meshcat_page import (
     playwright_unavailable_reason,
 )
 from src.tools.native_viewer_export.backends._scene import z_axis_frame
+from src.tools.native_viewer_export.ball import AddressBall
 from src.tools.native_viewer_export.core import (
     ExportSettings,
     Image8,
@@ -36,9 +38,12 @@ from src.tools.native_viewer_export.core import (
     view_lookats,
 )
 
+logger = logging.getLogger(__name__)
+
 _CAPSULE_RGBA = [0.75, 0.78, 0.85, 1.0]
 _SHAPE_RGBA = [0.7, 0.72, 0.8, 1.0]
 _FLOOR_RGBA = [0.35, 0.45, 0.3, 1.0]
+_BALL_RGBA = [0.95, 0.95, 0.95, 1.0]
 
 
 def _bvh_mesh(coal: Any, mesh: Any) -> Any:
@@ -63,7 +68,9 @@ class PinocchioMeshcatBackend:
                 return f"{module} is not installed"
         return playwright_unavailable_reason()
 
-    def _build(self, swing: SwingInput) -> tuple[Any, Any, Any]:
+    def _build(
+        self, swing: SwingInput, *, ball: AddressBall | None = None
+    ) -> tuple[Any, Any, Any]:
 
         import coal
         import meshcat
@@ -151,6 +158,18 @@ class PinocchioMeshcatBackend:
         )
         floor.meshColor = np.array(_FLOOR_RGBA)
         geometry.addGeometryObject(floor)  # type: ignore[attr-defined]
+        if ball is not None:
+            if ball.position_m is None:
+                logger.warning("skipping decorative ball: %s", ball.reason)
+            else:
+                ball_geom = pin.GeometryObject(  # type: ignore[attr-defined]
+                    "visual_ball",
+                    0,
+                    pin.SE3(np.eye(3), ball.position_m),
+                    coal.Sphere(ball.radius_m),
+                )
+                ball_geom.meshColor = np.array(_BALL_RGBA)
+                geometry.addGeometryObject(ball_geom)  # type: ignore[attr-defined]
         viz = MeshcatVisualizer(adapter.model, geometry, geometry)
         viz.initViewer(viewer=meshcat.Visualizer(), open=False, loadModel=False)
         viz.loadViewerModel(rootNodeName="golfer")
@@ -162,8 +181,9 @@ class PinocchioMeshcatBackend:
         settings: ExportSettings,
         indices: Sequence[int],
         overlay: OverlayFeed | None,
+        ball: AddressBall | None = None,
     ) -> Iterator[dict[str, Image8]]:
-        adapter, viz, _ = self._build(swing)
+        adapter, viz, _ = self._build(swing, ball=ball)
         names = swing.bundle.coordinate_order
 
         def set_state(index: int) -> None:

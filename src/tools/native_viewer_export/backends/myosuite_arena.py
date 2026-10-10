@@ -20,6 +20,7 @@ from src.tools.native_viewer_export.backends._subprocess import (
     worker_env,
 )
 from src.tools.native_viewer_export.backends.myosuite_compat import PROBE_CODE
+from src.tools.native_viewer_export.ball import AddressBall
 from src.tools.native_viewer_export.core import (
     ExportSettings,
     Image8,
@@ -69,7 +70,12 @@ class MyoSuiteArenaBackend:
         settings: ExportSettings,
         indices: Sequence[int],
         overlay: OverlayFeed | None,
+        ball: AddressBall | None = None,
     ) -> Iterator[dict[str, Image8]]:
+        # The decorative ball is out of scope for the MyoSuite arena
+        # (GCV-13, #11719); accepted but unused, only to satisfy the shared
+        # NativeBackend.render signature.
+        del ball
         python = myosuite_python()
         if python is None:
             raise RuntimeError(

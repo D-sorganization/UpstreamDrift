@@ -16,6 +16,7 @@ from src.tools.native_viewer_export.backends._subprocess import (
     render_in_worker,
     worker_env,
 )
+from src.tools.native_viewer_export.ball import AddressBall
 from src.tools.native_viewer_export.core import (
     ExportSettings,
     Image8,
@@ -58,7 +59,13 @@ class OpenSimSimbodyBackend:
         settings: ExportSettings,
         indices: Sequence[int],
         overlay: OverlayFeed | None,
+        ball: AddressBall | None = None,
     ) -> Iterator[dict[str, Image8]]:
+        # The OpenSim visualizer draws no dynamic 3D decorations (see the
+        # module docstring); the decorative ball is out of scope here
+        # (GCV-13, #11719) and the parameter is accepted but unused, only to
+        # satisfy the shared NativeBackend.render signature.
+        del ball
         yield from render_in_worker(
             self.command(),
             swing,

@@ -14,6 +14,7 @@ from src.tools.native_viewer_export.backends.registry import (
     BACKEND_FACTORIES,
     make_backend,
 )
+from src.tools.native_viewer_export.ball import AddressBall
 from src.tools.native_viewer_export.core import (
     ENGINES,
     BackendUnavailable,
@@ -66,8 +67,8 @@ class _Backend:
     def unavailable_reason(self) -> str | None:
         return self.reason
 
-    def render(self, swing, settings, indices, overlay):
-        self.swings.append((swing, settings, overlay))
+    def render(self, swing, settings, indices, overlay, ball=None):
+        self.swings.append((swing, settings, overlay, ball))
         for _ in indices:
             yield {
                 v: np.zeros((settings.height, settings.width, 3), np.uint8)
@@ -141,7 +142,7 @@ def test_run_export_skips_unavailable_and_renders_rest(tmp_path: Path) -> None:
     )
     assert [r.engine for r in results] == ["drake", "pinocchio"]
     assert results[0].skipped and not results[1].skipped
-    swing, settings, _ = backends["pinocchio"].swings[0]
+    swing, settings, _, _ = backends["pinocchio"].swings[0]
     assert swing.rollout_engine == "pinocchio" and float(swing.q[0, 0]) == 1.0
     assert settings.lookat_m == (0.5, 0.0, 0.9)
     assert seen == ["pinocchio"]
@@ -166,6 +167,73 @@ def test_overlay_unavailable_still_renders(tmp_path: Path) -> None:
         _Writer,
     )
     assert not results[0].skipped and backend.swings[0][2] is None
+
+
+def test_impact_window_clip_reuses_the_ball_resolved_once_before_windowing(
+    tmp_path: Path,
+) -> None:
+    """GCV-13 bug (#11719): the impact-window clip must not re-resolve the
+    ball from its own (windowed) first frame -- the ball is resolved exactly
+    once, from the full swing, and passed unchanged to every clip plan."""
+    b = _bundle(steps=60)
+    bpath = tmp_path / "b.npz"
+    b.save(bpath)
+    backend = _Backend("drake")
+    resolved = AddressBall(np.zeros(3), 0.021335, "address_geometry")
+    calls: list[float] = []
+
+    def ball_resolver(swing) -> AddressBall:
+        calls.append(float(swing.q[0, 0]))
+        return resolved
+
+    job = ExportJob(bpath, tmp_path / "out", "d", "Driver", ("drake",))
+    settings = ExportSettings(
+        width=32,
+        height=32,
+        fps=20,
+        speeds=(1.0,),
+        impact_time_s=0.03,
+        impact_window_s=0.02,
+    )
+    run_export(
+        job,
+        settings,
+        lambda e: backend,
+        lambda swing, engine: (None, (0.5, 0.0, 0.9)),
+        _Writer,
+        ball_resolver=ball_resolver,
+    )
+    # One full-speed clip and one impact-window clip plan were rendered...
+    assert len(backend.swings) == 2
+    # ...but the ball was resolved exactly once, from the unwindowed swing,
+    # and the identical result reached every clip.
+    assert calls == [0.0]
+    assert all(call_ball is resolved for *_, call_ball in backend.swings)
+
+
+def test_ball_not_resolved_when_disabled(tmp_path: Path) -> None:
+    b = _bundle()
+    bpath = tmp_path / "b.npz"
+    b.save(bpath)
+    backend = _Backend("drake")
+    calls = []
+
+    def ball_resolver(swing) -> AddressBall:
+        calls.append(swing)
+        return AddressBall(np.zeros(3), 0.021335, "address_geometry")
+
+    job = ExportJob(bpath, tmp_path / "out", "d", "Driver", ("drake",))
+    settings = ExportSettings(width=32, height=32, fps=20, speeds=(1.0,), ball=False)
+    run_export(
+        job,
+        settings,
+        lambda e: backend,
+        lambda swing, engine: (None, (0.5, 0.0, 0.9)),
+        _Writer,
+        ball_resolver=ball_resolver,
+    )
+    assert calls == []
+    assert all(call_ball is None for *_, call_ball in backend.swings)
 
 
 def test_unknown_engine_rejected(tmp_path: Path) -> None:

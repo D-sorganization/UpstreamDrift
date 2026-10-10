@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#11719 · GCV-13 Slice 2: Decorative Address Ball in the Drake/Pinocchio MeshCat Native Export
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #11719 (epic #11706)
+- **Branch:** claude/gcv-13b-meshcat-ball
+- **PR:** #12114
+- **Paths:** src/tools/native_viewer_export/ball.py, src/tools/native_viewer_export/core.py, src/tools/native_viewer_export/runner.py, src/tools/native_viewer_export/cli.py, src/tools/native_viewer_export/backends/drake_meshcat.py, src/tools/native_viewer_export/backends/pinocchio_meshcat.py, src/tools/native_viewer_export/backends/opensim_simbody.py, src/tools/native_viewer_export/backends/myosuite_arena.py, tests/unit/tools/native_viewer_export/test_address_ball.py, tests/unit/tools/native_viewer_export/test_runner_cli.py, tests/unit/tools/native_viewer_export/test_core.py, tests/unit/tools/native_viewer_export/test_speed_variants.py, tests/unit/tools/native_viewer_export/test_speed_variants_engines.py
+- **Started:** 2026-10-10
+- **Last verified:** 2026-10-10 (`4d8b0533`)
+- **Summary:** Stacked on GCV-13 slice 1 (#11992, MuJoCo decorative ball + shared `ball_position_at_address`/`resolve_ball_visual`). `resolve_address_ball()` resolves the decorative address ball for a swing bundle from the address frame's (`q[0]`) MuJoCo-FK `Clubhead` pose composed with `model_appearance.club_assembly`'s clubface centre/normal, reusing the slice-1 placement rule; the Drake and Pinocchio MeshCat backends draw a white sphere there (on by default; `--no-ball`/`ExportSettings.ball=False` disables it). Fixed a real bug caught on #12114 after merge: the impact-window clip was recomputing the ball from its own windowed first frame (mid-swing, not the address), so it was reported "not grounded" and drawn missing. Now `runner.run_export` resolves the ball exactly once per engine from the full, unwindowed swing and threads the same `AddressBall` through `core.export_swing`/`_export_clip` to every clip plan's `backend.render(...)`; the `NativeBackend.render` protocol gained a `ball: AddressBall | None` parameter (OpenSim/MyoSuite accept and ignore it, out of scope).
+- **Next step:** Rebase onto main and arm auto-merge on PR #12114 once #11992 merges.
+
 ### DL-#11596 · Commit Recovered Crocoddyl G1 Warm-Start IK and 0.60 s FDDP Stage Inputs Beside the Rk45, Rtol6 and B100 Receipts, Plus the W030r Chain-Root Candidate, With Sha256 Provenance
 
 - **State:** in_review
