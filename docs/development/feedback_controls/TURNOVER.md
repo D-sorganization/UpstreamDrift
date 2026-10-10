@@ -1,5 +1,16 @@
 # Feedback Controls Planning Turnover
 
+## F07 Native Moco Physical-Body Preflight (#12205)
+
+The maintained OpenSim Moco runner now requires the existing source/native
+body-inertia audit during preparation and repeats it immediately before solve,
+export and replay. An admitted SHA-bound sidecar cannot substitute for a fresh
+native readback. Invalid or missing physical evidence becomes an explicit
+blocker without hiding independent preparation failures. See chapter53 and
+`F07_MOCO_INERTIA_PREFLIGHT_TURNOVER.md`. The unchanged 557-muscle source
+remains physically unqualified; all 17 variants/six ecosystems and the
+full-horizon captured swing remain open.
+
 ## Physical Inertia Helper Handoff
 
 Issue #12183 fixes rotation-dependent acceptance and scale-masked asymmetry in

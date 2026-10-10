@@ -198,3 +198,15 @@ clavicles and both scapulae. The gate records all failing bodies and keeps
 the #12182 short replay diagnostic separate from physical admission. Chapter52
 and the public receipt bind source/runtime/adapter identities; source anatomy,
 passive forces, contact/grip and capture matching remain unqualified.
+
+## Native Moco Physical-Body Preflight (#12205)
+
+The maintained Moco preparation now binds the complete #12191 source/native
+body audit to a versioned, hashed sidecar while retaining every independent
+capture, guess, registration, passive-force and actuator blocker. A solve must
+have an admitted audit and repeat it against a fresh native model; source,
+adapter, shared validator and runtime identities must still match. Export and
+replay share the same revalidation boundary. A missing legacy audit or changed
+sidecar fails closed. The physical test is necessary for optimization, never
+sufficient for muscle physiology, captured-motion fit or release. See
+canonical chapter53 and `F07_MOCO_INERTIA_PREFLIGHT_TURNOVER.md`.

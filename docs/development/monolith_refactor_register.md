@@ -16,8 +16,8 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1638 | `src/tools/launch_monitor_analytics/gui.py`                                                                                                                                   |
 | 1584 | `src/shared/python/motion_matching/full_body_forward_dynamics.py`                                                                                                             |
 | 1465 | `src/shared/python/motion_matching/acceptance.py`                                                                                                                             |
+| 1333 | `src/shared/python/motion_matching/pipeline/cli.py`                                                                                                                           |
 | 1319 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/scripts/dataset_generator/runSimulation.m`                                                                    |
-| 1279 | `src/shared/python/motion_matching/pipeline/cli.py`                                                                                                                           |
 | 1199 | `src/api/services/simulation_service.py`                                                                                                                                      |
 | 1199 | `src/launchers/launcher_model_handlers.py`                                                                                                                                    |
 | 1198 | `src/launchers/cross_engine_dashboard.py`                                                                                                                                     |
@@ -150,11 +150,11 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 |  874 | `src/shared/python/tour_baselines/qualification.py`                                                                                                                           |
 |  872 | `src/shared/python/pendulum_simulator/gui/base_pendulum_widget.py`                                                                                                            |
 |  870 | `src/shared/python/model_generation/cli/main.py`                                                                                                                              |
-|  868 | `src/tools/matched_swing_browser/gui.py`                                                                                                                                      |
 |  865 | `src/shared/python/signal_toolkit/fitting.py`                                                                                                                                 |
 |  864 | `src/tools/simulation_backends_launcher/gui.py`                                                                                                                               |
 |  862 | `src/shared/python/pendulum_simulator/gui/pendulum_widget.py`                                                                                                                 |
 |  859 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/functions/dataset_generator/extractAllSignalsFromBus.m`                                                       |
+|  855 | `src/tools/matched_swing_browser/gui.py`                                                                                                                                      |
 |  853 | `src/shared/python/ai/gui/assistant_panel.py`                                                                                                                                 |
 |  853 | `src/shared/python/sidekick/process_calculators/constants.py`                                                                                                                 |
 |  849 | `src/tools/training_controller/gui.py`                                                                                                                                        |
@@ -194,6 +194,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 |  806 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/MachineLearning/evaluate_matching_workflow.py`                                                                           |
 |  806 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_main_application.py`           |
 |  806 | `src/launchers/_launcher_navigation_ui.py`                                                                                                                                    |
+|  804 | `src/engines/physics_engines/opensim/python/tour_matching/native_moco_runner.py`                                                                                              |
 |  803 | `src/shared/python/ui/qt/widgets/signal_toolkit_processing_mixin.py`                                                                                                          |
 |  802 | `src/shared/python/plotting/renderers/kinetics.py`                                                                                                                            |
 |  801 | `src/engines/physics_engines/pinocchio/python/motion_matching/fit_swing.py`                                                                                                   |
