@@ -26,18 +26,23 @@ from src.shared.python.motion_matching.pipeline.constants import (
     BOUND_WIDENING,
     CALIBRATION_STRIDE,
     CONTACT_STIFFNESS_N_M,
+    DEFAULT_IK_RESTART_POLICY,
     ELBOW_PIT_MARKERS,
     ELBOW_PIT_WEIGHT,
     HEAD_MARKER_WEIGHT,
+    IK_RESTART_POLICIES,
     IK_UNBOUNDED,
     LEG_LABELS,
     LEG_SEEDS,
+    POSTURE_PRIOR_COORDINATES,
     PRIOR,
+    RESTART_MAX_JOINT_SPEED_RAD_S,
     SPIN_COORDINATES,
     SPIN_PRIOR,
     STANCE_TOLERANCE_M,
     TOE_SPHERES,
     TOE_STANDOFF_M,
+    TRACKING_CUTOFF_HZ,
     TRAJECTORY_RESTART_MARGIN_M,
     TRAJECTORY_RESTART_THRESHOLD_M,
     TRAJECTORY_RESTARTS,
@@ -368,11 +373,90 @@ class Lane:
         #: Per-frame club-face orientation targets (OSV-10); None: marker-only.
         self.face_targets: list[dict[str, Any] | None] | None = None
         self.face_weight = 0.0
+        #: Restart policy of the full-capture trajectory solve (#12042).
+        self.restart_policy = DEFAULT_IK_RESTART_POLICY
+        #: Weight of the address-pose posture prior (#12042); 0 disables it.
+        self.posture_prior_weight = 0.0
+        #: Last pre-contact capture frame (GCV-20); the reference low-pass is
+        #: split there. None filters across impact (no club triad observed).
+        self.impact_index: int | None = None
+        self.impact_split_reason = "not computed"
+        self.ball_impact: Any = None  # ImpactForce plan (GCV-20)
+        self.impact_time_s: float | None = None
+        #: Release-preserving pre-contact tracking cutoff (GCV-20); None keeps
+        #: the base cutoff on both sides of impact.
+        self.pre_contact_cutoff_hz: float | None = None
+        self.release_cutoff: dict[str, Any] | None = None
         #: Thorax / shoulder-girdle turn split (#12042 slice 7); off until set.
         self.thorax_targets: list[dict[str, Any] | None] | None = None
         self.thorax_weight = 0.0
         self.split_marker_weights: dict[str, float] = {}
         self.shoulder_girdle_weight = 1.0
+
+    def set_restart_policy(self, policy: str) -> None:
+        """Select the trajectory IK restart policy (#12042), one of
+        ``IK_RESTART_POLICIES``. It applies to full-capture solves only;
+        calibration subsets keep the legacy restarts. Raises ``ValueError``
+        for an unknown policy."""
+        if policy not in IK_RESTART_POLICIES:
+            known = ", ".join(IK_RESTART_POLICIES)
+            raise ValueError(f"Unknown restart policy {policy!r}; expected {known}")
+        self.restart_policy = policy
+
+    def restart_settings(self, consecutive: bool = True) -> dict[str, Any]:
+        """``solve_trajectory`` restart keywords for the active policy.
+
+        ``consecutive`` is False for strided calibration subsets, whose frames
+        are not one sample apart, so the joint-speed bound does not apply.
+        """
+        policy = self.restart_policy if consecutive else "free"
+        return {
+            "restarts": 0 if policy == "off" else TRAJECTORY_RESTARTS,
+            "restart_threshold_m": TRAJECTORY_RESTART_THRESHOLD_M,
+            "restart_margin_m": TRAJECTORY_RESTART_MARGIN_M,
+            "restart_max_step_rad": (
+                RESTART_MAX_JOINT_SPEED_RAD_S / self.rate_hz
+                if policy == "continuous"
+                else None
+            ),
+            "restart_anchor_prior": policy in ("anchored", "stable", "continuous"),
+            "restart_seed_per_frame": policy in ("seeded", "stable"),
+        }
+
+    def posture_prior(
+        self, kin: BaseFullBodyIK, q_address: np.ndarray
+    ) -> dict[str, tuple[float, float]] | None:
+        """Address-pose posture prior on ``POSTURE_PRIOR_COORDINATES`` the
+        model has (#12042); None while ``posture_prior_weight`` is 0."""
+        weight = float(self.posture_prior_weight)
+        if not np.isfinite(weight) or weight < 0:
+            raise ValueError(f"posture prior weight must be >= 0, got {weight}")
+        if weight == 0:
+            return None
+        order = tuple(kin.coordinate_order)
+        return {
+            name: (float(q_address[order.index(name)]), weight)
+            for name in POSTURE_PRIOR_COORDINATES
+            if name in order
+        }
+
+    def restart_report(self) -> dict[str, Any]:
+        """Receipt block naming the restart policy and its bound (#12042)."""
+        settings = self.restart_settings()
+        step = settings["restart_max_step_rad"]
+        return {
+            "policy": self.restart_policy,
+            "restarts": settings["restarts"],
+            "threshold_m": settings["restart_threshold_m"],
+            "margin_m": settings["restart_margin_m"],
+            "max_joint_speed_rad_s": (
+                RESTART_MAX_JOINT_SPEED_RAD_S if step is not None else None
+            ),
+            "max_step_rad": step,
+            "anchor_prior": settings["restart_anchor_prior"],
+            "seed_per_frame": settings["restart_seed_per_frame"],
+            "posture_prior_weight": float(self.posture_prior_weight),
+        }
 
     def set_face_targets(
         self,
@@ -393,6 +477,102 @@ class Lane:
         )
         self.face_weight = float(weight)
         self.face_targets = targets if any(targets) else None
+
+    def set_club_targets(
+        self,
+        attachments: Mapping[str, tuple[str, Sequence[float]]],
+        spec: Mapping[str, Any],
+        face_weight: float,
+    ) -> None:
+        """Face-orientation targets (OSV-10) and the capture impact (GCV-20)."""
+        self.set_face_targets(attachments, spec, face_weight)
+        self.set_impact_split(attachments, spec)
+
+    def set_impact_split(
+        self,
+        attachments: Mapping[str, tuple[str, Sequence[float]]],
+        spec: Mapping[str, Any],
+    ) -> None:
+        """Locate impact in the capture so smoothing does not cross it (GCV-20,
+        #11767). Impact is the capture face centre's ball passage; when the
+        club triad cannot be observed the split is unavailable and the reason
+        is kept for the receipt (never a guessed frame)."""
+        from src.shared.python.motion_matching.club_face_target import capture_impact
+        from src.shared.python.motion_matching.impact_force import (
+            PASSAGE_ARM_LEAD_S,
+            ImpactForce,
+        )
+
+        try:
+            hit = capture_impact(
+                self.times, self.points, self.valid, self.labels, attachments, spec
+            )
+            # Armed before the capture impact; the replay's own face passage
+            # starts the contact (``ImpactForce.at_address``).
+            self.ball_impact = ImpactForce.for_spec(
+                spec,
+                t_start_s=max(hit.time_s - PASSAGE_ARM_LEAD_S, float(self.times[0])),
+                swing_span_s=(float(self.times[0]), float(self.times[-1])),
+                ball_centre_m=hit.ball_centre_m,
+            )
+            self.impact_time_s = hit.time_s
+        except ValueError as exc:
+            self.impact_index = None
+            self.ball_impact = None
+            self.impact_time_s = None
+            self.impact_split_reason = f"unavailable: {exc}"
+        else:
+            self.impact_index = hit.frame_index
+            self.impact_split_reason = "capture face-centre ball passage"
+
+    def select_release_cutoff(
+        self, kin: Any, spec: Mapping[str, Any], q_ref: np.ndarray
+    ) -> None:
+        """Pick the pre-contact tracking cutoff that keeps the reference's
+        late release (GCV-20, #11767; DESIGN_DECISIONS section 11).
+
+        Needs the capture impact split; without it, or when the reference's
+        clubhead never passes the ball, the base cutoff stays and the reason
+        is kept for the receipt.
+        """
+        from src.shared.python.motion_matching.club_face_target import (
+            model_face_centres,
+        )
+        from src.shared.python.motion_matching.pipeline.release_cutoff import (
+            release_preserving_cutoff,
+        )
+
+        self.pre_contact_cutoff_hz = None
+        if self.impact_index is None:
+            self.release_cutoff = {"source": "no impact split"}
+            return
+        try:
+            result = release_preserving_cutoff(
+                self.times,
+                q_ref,
+                self.impact_index,
+                lambda q: model_face_centres(kin, q, spec),
+                base_cutoff_hz=TRACKING_CUTOFF_HZ,
+            )
+        except ValueError as exc:
+            self.release_cutoff = {"source": f"unavailable: {exc}"}
+            return
+        self.pre_contact_cutoff_hz = result.cutoff_hz
+        self.release_cutoff = result.to_record()
+
+    def impact_split_report(self) -> dict[str, Any]:
+        """Receipt block describing where the reference low-pass is split."""
+        report: dict[str, Any] = {"source": self.impact_split_reason}
+        if self.impact_index is not None:
+            report["frame"] = self.impact_index
+            report["time_s"] = float(self.times[self.impact_index] - self.times[0])
+        if self.impact_time_s is not None:
+            report["impact_time_s"] = float(self.impact_time_s)
+        if self.pre_contact_cutoff_hz is not None:
+            report["pre_contact_cutoff_hz"] = float(self.pre_contact_cutoff_hz)
+        if self.release_cutoff is not None:
+            report["release_cutoff"] = self.release_cutoff
+        return report
 
     def set_turn_split(
         self,
@@ -556,9 +736,8 @@ class Lane:
             axis_targets_per_frame=merge_axis_targets(
                 axis_targets, self.face_targets, self.thorax_targets
             ),
-            restarts=TRAJECTORY_RESTARTS,
-            restart_threshold_m=TRAJECTORY_RESTART_THRESHOLD_M,
-            restart_margin_m=TRAJECTORY_RESTART_MARGIN_M,
+            posture_prior=None if frames else self.posture_prior(kin, q_start),
+            **self.restart_settings(consecutive=frames is None),
         )
 
     def pinned_rms(

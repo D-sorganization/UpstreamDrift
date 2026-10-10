@@ -49,7 +49,7 @@ from src.tools.native_viewer_export.backends.opensim_worker import (  # noqa: E4
 
 logger = logging.getLogger(__name__)
 
-SWING_DT_S = 0.002
+SWING_DT_S = mt.FIXTURE_DT_S
 #: Generated-model event times (``tests/fixtures/club_face/provenance.json``).
 EVENTS_S = {"address": 0.0, "top": 1.104, "impact": 1.326}
 CLIP_FPS = 30
