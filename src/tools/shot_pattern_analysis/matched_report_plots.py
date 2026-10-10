@@ -7,6 +7,7 @@ Unavailable and not-run conditions stay visible in gray hatched matrix cells.
 from __future__ import annotations
 
 import math
+import re
 import textwrap
 from collections.abc import Mapping, Sequence
 from pathlib import Path
@@ -14,6 +15,8 @@ from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
+
+from .noise import NoiseSpec
 
 PATTERNS = ("Straight", "Draw", "Fade")
 CLUBS = ("driver", "seven_iron", "pitching_wedge")
@@ -202,6 +205,232 @@ def _format_cell_metric(
     return _format_metric(metric, value, {})
 
 
+def _cell_text_color(cmap: Any, norm: Any, value: float | None) -> str:
+    """Choose black or white using the higher linear-sRGB contrast ratio."""
+    if value is None or norm is None:
+        return "#111827"
+    try:
+        norm_val = norm(value)
+        norm_float = float(np.clip(float(norm_val), 0.0, 1.0))
+        rgba = cmap(norm_float)
+        r, g, b = float(rgba[0]), float(rgba[1]), float(rgba[2])
+        linear = [
+            channel / 12.92
+            if channel <= 0.04045
+            else ((channel + 0.055) / 1.055) ** 2.4
+            for channel in (r, g, b)
+        ]
+        luminance = sum(
+            channel * weight
+            for channel, weight in zip(linear, (0.2126, 0.7152, 0.0722), strict=True)
+        )
+        white_contrast = 1.05 / (luminance + 0.05)
+        black_contrast = (luminance + 0.05) / 0.05
+        return "#ffffff" if white_contrast >= black_contrast else "black"
+    except (TypeError, ValueError, AttributeError):
+        return "#111827"
+
+
+def _extract_noise_spec(cell: Mapping[str, Any]) -> NoiseSpec | None:
+    config = cell.get("config")
+    noise = None
+    if isinstance(config, Mapping) and "noise" in config:
+        noise = config["noise"]
+    elif "noise" in cell:
+        noise = cell["noise"]
+    if isinstance(noise, NoiseSpec):
+        return noise
+    if isinstance(noise, Mapping):
+        sds = noise.get("standard_deviations")
+        corr = noise.get("correlation")
+        if isinstance(sds, Sequence) and not isinstance(sds, (str, bytes)):
+            try:
+                corr_tuple = (
+                    tuple(tuple(float(v) for v in row) for row in corr)
+                    if isinstance(corr, Sequence) and not isinstance(corr, (str, bytes))
+                    else None
+                )
+                return NoiseSpec(tuple(float(v) for v in sds), corr_tuple)
+            except (ValueError, TypeError):
+                return None
+    return None
+
+
+def _derive_delivery_noise(cells: Sequence[Mapping[str, Any]]) -> str | None:
+    """Format readable primitive SDs and correlation; correlation is shaft-twist/path."""
+    specs = [_extract_noise_spec(cell) for cell in cells]
+    valid_specs = [item for item in specs if item is not None]
+    if not valid_specs:
+        return None
+    spec = valid_specs[0]
+    if len(valid_specs) != len(specs) or any(
+        item.standard_deviations != spec.standard_deviations
+        or not np.array_equal(item.correlation_matrix(), spec.correlation_matrix())
+        for item in valid_specs[1:]
+    ):
+        raise ValueError(
+            "selected matrix cells must use one noise profile; facet by noise"
+        )
+
+    sd = spec.standard_deviations
+    parts: list[str] = []
+    if sd[0]:
+        parts.append(f"Shaft Twist SD {sd[0]:g}°")
+    if sd[1]:
+        parts.append(f"Path SD {sd[1]:g}°")
+    if sd[2]:
+        parts.append(f"Speed SD {sd[2] / 0.44704:g} mph")
+    if sd[3] == sd[4] and sd[3]:
+        parts.append(f"Strike SD {sd[3] / 0.0254:g} in on Each Axis")
+    else:
+        for label, val in (("Horizontal", sd[3]), ("Vertical", sd[4])):
+            if val:
+                parts.append(f"{label} Strike SD {val / 0.0254:g} in")
+    for label, val in (("Shaft Lean", sd[5]), ("Attack Angle", sd[6])):
+        if val:
+            parts.append(f"{label} SD {val:g}°")
+
+    if not parts:
+        parts.append("Zero Primitive Noise")
+
+    names = (
+        "Shaft Twist",
+        "Path",
+        "Speed",
+        "Horizontal Strike",
+        "Vertical Strike",
+        "Shaft Lean",
+        "Attack Angle",
+    )
+    correlation = spec.correlation_matrix()
+    corr_parts: list[str] = []
+    if sd[0] and sd[1] and abs(correlation[0, 1]) > 1e-6:
+        corr_parts.append(f"Shaft Twist–Path Correlation r = {correlation[0, 1]:+g}")
+
+    for i in range(len(names)):
+        for j in range(i + 1, len(names)):
+            if (i, j) == (0, 1):
+                continue
+            if sd[i] and sd[j] and abs(correlation[i, j]) > 1e-6:
+                corr_parts.append(
+                    f"{names[i]}–{names[j]} Correlation r = {correlation[i, j]:+g}"
+                )
+
+    if corr_parts:
+        return f"{', '.join(parts)} · {', '.join(corr_parts)}"
+    active_sds = sum(1 for v in sd if v > 0)
+    if active_sds > 1:
+        return f"{', '.join(parts)} · Independent Delivery"
+    return ", ".join(parts)
+
+
+def _derive_target_context(cells: Sequence[Mapping[str, Any]]) -> str | None:
+    """Identify within-lean nominal targets versus fixed-target control from cell config."""
+    has_target_spec = False
+    fixed_targets: set[float] = set()
+    for cell in cells:
+        config = cell.get("config")
+        target = None
+        found = False
+        if isinstance(config, Mapping) and "target_x_m" in config:
+            target = config["target_x_m"]
+            found = True
+        elif "target_x_m" in cell:
+            target = cell["target_x_m"]
+            found = True
+        if found:
+            has_target_spec = True
+            if (
+                isinstance(target, (int, float))
+                and not isinstance(target, bool)
+                and math.isfinite(target)
+            ):
+                fixed_targets.add(float(target))
+
+    if not has_target_spec:
+        return None
+    if fixed_targets:
+        if len(fixed_targets) == 1:
+            val = next(iter(fixed_targets))
+            return f"Fixed-Target Control ({val:g} m)"
+        return "Fixed-Target Control"
+    return "Within-Lean Nominal Targets"
+
+
+def _derive_course_context(cells: Sequence[Mapping[str, Any]], club: str) -> str | None:
+    """Identify course scoring context for a club from actual course_scoring metadata."""
+    for cell in cells:
+        club_id = _config_value(cell, "club_id")
+        if club_id != club:
+            continue
+        scoring = cell.get("course_scoring")
+        if not isinstance(scoring, Mapping):
+            continue
+        start_lie = scoring.get("start_lie")
+        if not isinstance(start_lie, str):
+            continue
+        hole_dist = scoring.get("hole_distance_m")
+        if (
+            hole_dist is None
+            or isinstance(hole_dist, bool)
+            or not isinstance(hole_dist, (int, float))
+            or not math.isfinite(hole_dist)
+        ):
+            hole_dist = scoring.get("start_distance_m")
+        fw_half = scoring.get("fairway_half_width_m")
+        green_r = scoring.get("green_radius_m")
+
+        if (
+            start_lie.lower() == "tee"
+            and fw_half is not None
+            and isinstance(fw_half, (int, float))
+            and not isinstance(fw_half, bool)
+            and hole_dist is not None
+            and isinstance(hole_dist, (int, float))
+            and not isinstance(hole_dist, bool)
+        ):
+            return f"Tee, {float(hole_dist):g} m, {float(fw_half) * 2:g} m Fairway"
+        if (
+            start_lie.lower() == "fairway"
+            and green_r is not None
+            and isinstance(green_r, (int, float))
+            and not isinstance(green_r, bool)
+        ):
+            return f"Fairway Approach, {float(green_r):g} m Green Radius"
+        if (
+            green_r is not None
+            and isinstance(green_r, (int, float))
+            and not isinstance(green_r, bool)
+        ):
+            return f"{start_lie.title()} Approach, {float(green_r):g} m Green Radius"
+        if (
+            hole_dist is not None
+            and isinstance(hole_dist, (int, float))
+            and not isinstance(hole_dist, bool)
+        ):
+            return f"{start_lie.title()}, {float(hole_dist):g} m"
+    return None
+
+
+def _has_carry_as_final_lie(cells: Sequence[Mapping[str, Any]]) -> bool:
+    """Check if course scoring uses carry-as-final-lie approximation."""
+    for cell in cells:
+        scoring = cell.get("course_scoring")
+        if not isinstance(scoring, Mapping):
+            continue
+        limitations = scoring.get("limitations")
+        if isinstance(limitations, Sequence) and not isinstance(
+            limitations, (str, bytes)
+        ):
+            for lim in limitations:
+                if isinstance(lim, str) and "final lie" in lim.lower():
+                    return True
+        scenario_id = scoring.get("scenario_id")
+        if scenario_id in ("tee_fairway_rough", "approach_green_rough"):
+            return True
+    return False
+
+
 def _draw_metric(
     cells: Sequence[Mapping[str, Any]],
     leans: tuple[float, ...],
@@ -219,6 +448,11 @@ def _draw_metric(
     import matplotlib.pyplot as plt
     from matplotlib.colors import TwoSlopeNorm
     from matplotlib.patches import Rectangle
+
+    target_context = _derive_target_context(cells)
+    derived_noise = _derive_delivery_noise(cells)
+    carry_final_lie = _has_carry_as_final_lie(cells)
+    course_contexts = {club: _derive_course_context(cells, club) for club in CLUBS}
 
     by_key = {
         (
@@ -284,9 +518,16 @@ def _draw_metric(
                 axis.set_ylabel(f"{pattern}\nShaft Lean")
             if row_index == len(PATTERNS) - 1:
                 axis.set_xlabel("Curve Scale")
+
+            club_ctx = course_contexts.get(club) if metric == "conditional_sg" else None
+            title_text = (
+                f"{_CLUB_LABELS[club]} — {pattern}\n{textwrap.fill(club_ctx, width=44)}"
+                if club_ctx
+                else f"{_CLUB_LABELS[club]} — {pattern}"
+            )
             axis.set_title(
-                f"{_CLUB_LABELS[club]} — {pattern}",
-                fontsize=11,
+                title_text,
+                fontsize=10 if club_ctx else 11,
                 fontweight="bold",
             )
             axis.set_xticks(np.arange(-0.5, len(curves), 1), minor=True)
@@ -297,12 +538,6 @@ def _draw_metric(
                 for j, curve in enumerate(curves):
                     cell = by_key[(club, lean, curve)]
                     value = metric_value(cell, metric, pattern)
-                    stats_map = cell.get("summary", {})
-                    stats = (
-                        stats_map.get(pattern, {})
-                        if isinstance(stats_map, Mapping)
-                        else {}
-                    )
                     if value is None:
                         axis.add_patch(
                             Rectangle(
@@ -322,20 +557,7 @@ def _draw_metric(
                             if cell.get("status") == "not_run"
                             else "UNAVAILABLE"
                         )
-                        annotation = f"{label}\n{textwrap.fill(str(reason), width=18)}"
-                    else:
-                        annotation = _format_cell_metric(cell, metric, pattern, value)
-                        axis.text(
-                            j,
-                            i,
-                            annotation,
-                            ha="center",
-                            va="center",
-                            fontsize=8,
-                            color="#111827",
-                            zorder=4,
-                        )
-                    if value is None:
+                        annotation = f"{label}\n{textwrap.fill(str(reason), width=30)}"
                         axis.text(
                             j,
                             i,
@@ -344,6 +566,19 @@ def _draw_metric(
                             va="center",
                             fontsize=7,
                             color="#111827",
+                            zorder=4,
+                        )
+                    else:
+                        annotation = _format_cell_metric(cell, metric, pattern, value)
+                        text_color = _cell_text_color(cmap, norm, value)
+                        axis.text(
+                            j,
+                            i,
+                            annotation,
+                            ha="center",
+                            va="center",
+                            fontsize=8,
+                            color=text_color,
                             zorder=4,
                         )
             axis.set_xlim(-0.5, len(curves) - 0.5)
@@ -357,20 +592,69 @@ def _draw_metric(
         fontsize=19,
         fontweight="bold",
     )
+
+    clean_label = selection_label
+    if derived_noise and "noise SDs=" in clean_label:
+        clean_label = re.sub(r";?\s*noise SDs=\[[^\]]*\]", "", clean_label).strip()
+
+    subtitle_parts: list[str] = []
+    if clean_label:
+        subtitle_parts.append(clean_label)
+    if derived_noise:
+        subtitle_parts.append(f"Delivery Noise: {derived_noise}")
+    if target_context and not any(
+        target_context.lower() in p.lower() for p in subtitle_parts
+    ):
+        subtitle_parts.append(f"Target: {target_context}")
+
+    subtitle_text = "\n".join(
+        textwrap.fill(part, width=145, break_long_words=False)
+        for part in subtitle_parts
+    )
     fig.text(
         0.06,
         0.94,
-        textwrap.fill(selection_label, width=150, break_long_words=False),
+        subtitle_text,
         ha="left",
         va="top",
         fontsize=10,
     )
+
+    caption_notes: list[str] = [
+        "Unsupported or infeasible conditions are hatched and labeled. Landing metrics are model-conditional;",
+    ]
+    if metric == "conditional_sg":
+        caption_notes.append(
+            "strokes gained is a hypothetical scoring comparison conditional on supported endpoints, not player-score prediction."
+        )
+        if any(course_contexts.values()):
+            ctx_summary = "; ".join(
+                f"{_CLUB_LABELS[c]}: {ctx}" for c, ctx in course_contexts.items() if ctx
+            )
+            caption_notes.append(f"Course Scoring Context: {ctx_summary}.")
+        if carry_final_lie:
+            caption_notes.append(
+                "Carry-as-Final-Lie Approximation (No Roll or Hazards)."
+            )
+    else:
+        caption_notes.append(
+            "strokes gained is a hypothetical scoring comparison conditional on supported endpoints, not player-score prediction."
+        )
+
+    if target_context and not any(
+        target_context.lower() in n.lower() for n in caption_notes
+    ):
+        caption_notes.append(f"Target Context: {target_context}.")
+
+    caption_text = textwrap.fill(
+        " ".join(caption_notes), width=155, break_long_words=False
+    )
     fig.text(
         0.06,
         0.045,
-        "Unsupported or infeasible conditions are hatched and labeled. Landing metrics are model-conditional; "
-        "strokes gained is a hypothetical scoring comparison conditional on supported endpoints, not player-score prediction.",
+        caption_text,
         ha="left",
+        va="top",
         fontsize=9,
         color="#333333",
     )
@@ -447,4 +731,12 @@ def export_matched_matrix_heatmaps(
     return outputs
 
 
-__all__ = ["export_matched_matrix_heatmaps", "metric_value"]
+__all__ = [
+    "_cell_text_color",
+    "_derive_course_context",
+    "_derive_delivery_noise",
+    "_derive_target_context",
+    "_has_carry_as_final_lie",
+    "export_matched_matrix_heatmaps",
+    "metric_value",
+]
