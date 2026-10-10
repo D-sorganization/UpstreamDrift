@@ -129,7 +129,7 @@ def _load(path: Path) -> tuple[Any, tuple[tuple[str, str, int, float], ...]]:
     return engine, _motors(raw, engine.model)
 
 
-def _restore(engine: Any, q: NDArray[np.float64], v: NDArray[np.float64]) -> None:
+def _restore(engine: Any, q: Any, v: Any) -> None:
     import pinocchio as pin
 
     position, velocity = np.asarray(q, dtype=float), np.asarray(v, dtype=float)

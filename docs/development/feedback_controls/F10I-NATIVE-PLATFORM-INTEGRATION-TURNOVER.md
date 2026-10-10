@@ -1,5 +1,54 @@
 # Native Platform Integration Turnover — F10i #12060
 
+## October 10 Resumption and Main Integration
+
+The later source-bound DeskComputer MyoSuite campaign at `e7bac248` reported
+175 passed and one failure over 176 cases. All 9,236 declared source/configuration
+files and 8,122 pinned Tools files were unchanged before/after execution. The
+failure was reproduced with an ordered pair but passed in isolation: engine
+test isolation retained a stale parent-package module attribute, so the test
+patched an object different from the solver's current module. Resolve that
+test target through `importlib.import_module`; retain the failed receipt rather
+than relabeling the campaign. Separately, merged distributed feedback imported
+the removed private `_CALLBACKS` list. It now uses the shared callback guard;
+the existing actual-native rejection and feedback/coupling tests cover this
+integration regression. These repairs do not qualify private motion matching.
+
+Another fleet task closed PR #12066 as superseded by consolidated PR #12141.
+The latter preserves the stronger replay/clock and pinned-loader consumers,
+but integration and required checks must still be verified before merge.
+
+The user resumed full implementation after resetting usage. All 58 completed
+running checks on head `45ad4e372c5f32e12bd15a183ef09468b2024bd1` passed;
+eight checks were skipped. New main changes nevertheless made that head
+conflicting. Integration now includes main
+`1d50895d1874b3e0353bbe06ce3375fb08a8114d`, preserving independent controls,
+manifold feedback, candidate fitting, grip evidence and native platform work.
+Independent registry additions are merged by ID; the two overlapping entries
+retain the stricter initial-state admission and existing bushing qualification
+limits. Derived inventories and context are regenerated. Existing duplicated
+SPEC sections inherited from either parent remain historical content.
+
+The affected native regression campaign reports **296 passed, 13 skipped,
+zero failures/errors** over 309 cases on OpenSim 4.6/MuJoCo 3.8. Its retained
+receipt is `resume-20261010-native-merge.xml` in the fleet planning directory.
+The skips include unavailable Drake/Pinocchio/MyoSuite SDKs and two
+inapplicable extra-geometry cases; public entrypoint and mixed pure/native
+checks do not attest every ecosystem. This narrower campaign supplements,
+and does not replace or relabel, the earlier 328/25 source-bound receipt.
+There is no new private full-capture match or qualified preview.
+
+Astra's renewed endpoint review prioritizes declared constrained cold-start
+reconstruction, source-chart domain enforcement and independent replay on
+the retained physical humerus candidate, followed by source-coordinate muscle
+path/work admission. Sol owns child #12136. Native lock targets require an
+explicit reconstruction recipe; named continuous/discrete values alone are
+insufficient. A positive mass matrix does not admit an out-of-domain default
+pose. All seventeen production variants, six ecosystems, private target
+registration, physiology, own-contact/grip and muscular OpenSim full-horizon
+excitation replay remain required. Luna separately owns the isolated #12064
+CLI-test repair. Reuse SDK environments and retain active unmerged worktrees.
+
 ## Implementation and Preserved Authorities
 
 The owned `feat/f10i-native-platform-integration-12060` branch integrates published

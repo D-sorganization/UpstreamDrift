@@ -202,6 +202,53 @@ def test_run_summary_gate_values_are_finite_floats_or_none(tmp_path: Path) -> No
     ]
 
 
+@pytest.mark.parametrize(
+    ("acceptance", "expected_note"),
+    [
+        # Gates recorded: the desktop label shows the qualification note.
+        (
+            {"gates": [], "qualification_note": "Independent uninterrupted replay"},
+            "Independent uninterrupted replay",
+        ),
+        # No acceptance block: unavailable, not a fabricated blank string.
+        (None, None),
+        # No gates block: ``_populate_gates_info`` returns early with ``reason``.
+        ({"qualification_note": "note without gates"}, None),
+    ],
+)
+def test_run_summary_qualification_note_matches_desktop_label(
+    tmp_path: Path,
+    acceptance: dict[str, object] | None,
+    expected_note: str | None,
+) -> None:
+    """qualification_note follows ``MatchedSwingBrowserWidget._populate_gates_info``
+    (gui.py); ``reason`` is always passed through unchanged."""
+    ledger_path = tmp_path / "reports" / "matched_swing_ledger.json"
+    ledger_path.parent.mkdir(parents=True)
+    row = LedgerRow(
+        receipt_path="evidence/receipt.json",
+        sha256="c" * 64,
+        engine="mujoco",
+        lane="matched",
+        acceptance=acceptance,
+        reason="the reason",
+    )
+    ledger = Ledger(
+        schema_version="1.0.0",
+        generated_at="2026-09-21T00:00:00Z",
+        total_receipts=1,
+        rows=[row],
+    )
+    ledger_path.write_text(ledger.to_json(), encoding="utf-8")
+    service = MatchedSwingsService.from_ledger_file(ledger_path, repo_root=tmp_path)
+
+    summary = service.get_run_summary(row.sha256)
+
+    assert summary.qualification_note == expected_note
+    assert summary.to_dict()["qualification_note"] == expected_note
+    assert summary.reason == "the reason"
+
+
 def test_get_receipt(client: TestClient, ledger_fixture: tuple[Path, str]) -> None:
     _, run_id = ledger_fixture
     response = client.get(f"/api/matched-swings/{run_id}")
@@ -243,6 +290,43 @@ def test_get_parity(client: TestClient, ledger_fixture: tuple[Path, str]) -> Non
     assert response.json()["schema_version"] == "matched-swing-parity-report-v1"
 
 
+def test_get_report_markdown(
+    client: TestClient, ledger_fixture: tuple[Path, str], tmp_path: Path
+) -> None:
+    _, run_id = ledger_fixture
+    response = client.get(f"/api/matched-swings/{run_id}/report")
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/markdown")
+    assert (
+        'filename="fit_report_pinocchio_driver.md"'
+        in response.headers["content-disposition"]
+    )
+    body = response.text
+    assert run_id in body
+    assert "pinocchio" in body.lower()
+    # Public responses never expose absolute filesystem paths (service contract).
+    assert str(tmp_path) not in body
+    assert tmp_path.as_posix() not in body
+
+
+def test_get_report_unknown_run_returns_404(client: TestClient) -> None:
+    response = client.get("/api/matched-swings/not-a-real-id/report")
+    assert response.status_code == 404
+
+
+def test_get_report_missing_receipt_returns_error(
+    client: TestClient, ledger_fixture: tuple[Path, str], tmp_path: Path
+) -> None:
+    _, run_id = ledger_fixture
+    receipt_path = tmp_path / "evidence" / "matched" / "driver_test" / "receipt.json"
+    receipt_path.unlink()
+
+    response = client.get(f"/api/matched-swings/{run_id}/report")
+
+    assert response.status_code == 404
+    assert response.json()["detail"]["error"]["code"] == "report_unavailable"
+
+
 def test_get_animation_gif(
     client: TestClient, ledger_fixture: tuple[Path, str]
 ) -> None:
@@ -252,13 +336,56 @@ def test_get_animation_gif(
     assert response.headers["content-type"] == "image/gif"
 
 
+def test_get_animation_frame_info(
+    client: TestClient, ledger_fixture: tuple[Path, str]
+) -> None:
+    _, run_id = ledger_fixture
+    response = client.get(f"/api/matched-swings/{run_id}/animation/frames")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["schema_version"] == "matched-swing-animation/1"
+    assert body["frame_count"] == 1
+    assert body["durations_ms"] == [100]
+    assert body["width"] == 1
+    assert body["height"] == 1
+
+
+def test_get_animation_frame_png(
+    client: TestClient, ledger_fixture: tuple[Path, str]
+) -> None:
+    _, run_id = ledger_fixture
+    response = client.get(f"/api/matched-swings/{run_id}/animation/frames/0")
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "image/png"
+    assert response.content.startswith(b"\x89PNG")
+
+
+def test_get_animation_frame_png_out_of_range_returns_404(
+    client: TestClient, ledger_fixture: tuple[Path, str]
+) -> None:
+    _, run_id = ledger_fixture
+    response = client.get(f"/api/matched-swings/{run_id}/animation/frames/7")
+    assert response.status_code == 404
+    assert response.json()["detail"]["error"]["code"] == "animation_unavailable"
+
+
+def test_get_animation_frame_info_unknown_run_returns_404(client: TestClient) -> None:
+    response = client.get("/api/matched-swings/not-a-real-id/animation/frames")
+    assert response.status_code == 404
+
+
+def test_get_animation_frame_png_unknown_run_returns_404(client: TestClient) -> None:
+    response = client.get("/api/matched-swings/not-a-real-id/animation/frames/0")
+    assert response.status_code == 404
+
+
 def test_unknown_run_returns_404(client: TestClient) -> None:
     response = client.get("/api/matched-swings/not-a-real-id")
     assert response.status_code == 404
 
 
 def test_remote_client_blocked(ledger_fixture: tuple[Path, str]) -> None:
-    ledger_path, _ = ledger_fixture
+    ledger_path, run_id = ledger_fixture
     service = MatchedSwingsService.from_ledger_file(
         ledger_path, repo_root=ledger_path.parent.parent
     )
@@ -267,5 +394,17 @@ def test_remote_client_blocked(ledger_fixture: tuple[Path, str]) -> None:
         remote_client = TestClient(app, client=("203.0.113.1", 1234))
         response = remote_client.get("/api/matched-swings")
         assert response.status_code == 403
+        assert (
+            remote_client.get(
+                f"/api/matched-swings/{run_id}/animation/frames"
+            ).status_code
+            == 403
+        )
+        assert (
+            remote_client.get(
+                f"/api/matched-swings/{run_id}/animation/frames/0"
+            ).status_code
+            == 403
+        )
     finally:
         app.dependency_overrides.pop(get_matched_swings_service, None)

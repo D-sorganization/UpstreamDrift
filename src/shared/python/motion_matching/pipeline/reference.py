@@ -12,6 +12,10 @@ from scipy.signal import butter, filtfilt
 from src.shared.python.contracts import postcondition, precondition
 from src.shared.python.motion_matching.full_body_spec import canonical_sha256
 from src.shared.python.motion_matching.club_face_target import merge_axis_targets
+from src.shared.python.motion_matching.pipeline.turn_split import (
+    lane_axis_targets,
+    lane_split_weights,
+)
 from src.shared.python.motion_matching.tour_capture_contract import (
     MARKER_VALIDITY_POLICY,
 )
@@ -22,7 +26,6 @@ from src.shared.python.motion_matching.pipeline.constants import (
     CONSISTENCY_PRIOR,
     LEG_SEEDS,
     LOWER_LIMB_RANGES_DEG,
-    PLAYBACK_STRIDE,
     RATE_HZ,
     REFERENCE_CUTOFF_HZ,
     SCALE_GRID,
@@ -234,8 +237,9 @@ def consistency_resolve(
         prior_trajectory=q_smooth,
         bounds=lane.bounds,
         axis_targets_per_frame=merge_axis_targets(
-            lane.gaze_axis_targets_cache, lane.face_targets
+            lane.gaze_axis_targets_cache, lane_axis_targets(lane)
         ),
+        marker_weights=lane_split_weights(lane),
     )
     return q_ref, ref_fits
 
@@ -251,6 +255,9 @@ def render_playback(
 ) -> None:
     """Render animated GIF of motion from spec and joint trajectory."""
     from src.engines.physics_engines.mujoco.python.visual_layer import (
+        PlaybackTiming,
+    )
+    from src.engines.physics_engines.mujoco.python.visual_layer import (
         render_playback as _render,
     )
 
@@ -261,8 +268,7 @@ def render_playback(
         lookat=lookat,
         path=path,
         show_com=show_com,
-        playback_stride=PLAYBACK_STRIDE,
-        rate_hz=rate_hz,
+        timing=PlaybackTiming(rate_hz=rate_hz),
     )
 
 

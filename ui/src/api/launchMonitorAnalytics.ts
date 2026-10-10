@@ -10,8 +10,11 @@
 import { apiFetch } from "./fetch";
 import type {
   AnalyzePayloadV2,
+  DispersionPayloadV2,
   FlexibleAnalysisPayload,
   LaunchMonitorAnalysisResultV2,
+  MultivariatePayloadV2,
+  RelationshipsPayloadV2,
 } from "./generated/types";
 
 const BASE = "/api/tools/launch-monitor-analytics";
@@ -121,6 +124,246 @@ export async function runFlexibleAnalysisV2(
     model_provenance: [],
   };
   return apiFetch<LaunchMonitorAnalysisResultV2>(`${BASE}/v2/analyze`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+/**
+ * Request body for `POST /v2/trend` (`TrendPayloadV2` in
+ * `src/api/routes/launch_monitor_analytics.py`). Mirrors the PyQt Trends tab
+ * (`_TrendParams` / `_read_trend_params` in `gui.py`): `time_column` and
+ * `rolling_window` share that widget's defaults, `"captured_at"` and `10`,
+ * and the same `[3, 500]` rolling-window bound.
+ */
+export interface TrendRequest {
+  records: Record<string, unknown>[];
+  metric: string;
+  time_column?: string;
+  rolling_window?: number;
+}
+
+/** One rolling-statistics row from `TrendResponse.rolling` (JSON-safe: never a misleading 0). */
+export interface TrendRollingPoint {
+  value: number | null;
+  rolling_mean: number | null;
+  rolling_median: number | null;
+  rolling_std: number | null;
+  ewma: number | null;
+  /** The request's `time_column`, serialized as an ISO-8601 timestamp string. */
+  [timeColumn: string]: number | string | null;
+}
+
+/** One ranked step-change candidate from `TrendResponse.change_candidates`. */
+export interface TrendChangeCandidate {
+  captured_at: string;
+  row_index: number;
+  before_mean: number | null;
+  after_mean: number | null;
+  effect_size: number | null;
+}
+
+/** Response body for `POST /v2/trend` (`_trend_result_to_dict`). */
+export interface TrendResponse {
+  metric: string;
+  sample_count: number;
+  slope_per_day: number | null;
+  robust_slope_per_day: number | null;
+  p_value: number | null;
+  earliest_mean: number | null;
+  latest_mean: number | null;
+  rolling: TrendRollingPoint[];
+  change_candidates: TrendChangeCandidate[];
+}
+
+/**
+ * Run the PyQt Trends tab's longitudinal trend analysis over caller-supplied
+ * inline records, via the same `analyze_trend` contract the desktop tab calls.
+ */
+export async function postTrend(
+  records: Record<string, unknown>[],
+  metric: string,
+  timeColumn = "captured_at",
+  rollingWindow = 10,
+): Promise<TrendResponse> {
+  const payload: TrendRequest = {
+    records,
+    metric,
+    time_column: timeColumn,
+    rolling_window: rollingWindow,
+  };
+  return apiFetch<TrendResponse>(`${BASE}/v2/trend`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+/**
+ * Group-by candidates accepted by `POST /v2/dispersion`
+ * (`DispersionPayloadV2.group_column`'s literal union).
+ */
+export type DispersionGroupColumn = NonNullable<
+  DispersionPayloadV2["group_column"]
+>;
+
+/**
+ * One group's serialized `DispersionResult` from `_dispersion_result_to_dict`
+ * (JSON-safe: NaN/infinite float fields become `null`, never a misleading 0).
+ */
+export interface DispersionGroupResult {
+  group: string;
+  sample_count: number;
+  center_forward: number | null;
+  center_lateral: number | null;
+  mean_forward: number | null;
+  mean_lateral: number | null;
+  ellipse_major: number | null;
+  ellipse_minor: number | null;
+  ellipse_angle_rad: number | null;
+  area_95: number | null;
+  radial_rmse: number | null;
+  radial_p50: number | null;
+  radial_p90: number | null;
+}
+
+/** Response body for `POST /v2/dispersion` (`analyze_dispersion_v2`). */
+export interface DispersionResponse {
+  forward: string;
+  lateral: string;
+  group_column: DispersionGroupColumn | null;
+  groups: DispersionGroupResult[];
+}
+
+/**
+ * Run the PyQt Dispersion tab's shot-dispersion analysis over caller-supplied
+ * inline records, via the same `analyze_dispersion` contract the desktop tab
+ * calls (`src/tools/launch_monitor_analytics/gui.py` `_compute_dispersion`).
+ */
+export async function analyzeDispersionV2(
+  records: Record<string, unknown>[],
+  forward = "carry_distance",
+  lateral = "lateral_carry",
+  groupColumn?: DispersionGroupColumn | null,
+): Promise<DispersionResponse> {
+  const payload: DispersionPayloadV2 = {
+    records,
+    forward,
+    lateral,
+    group_column: groupColumn ?? null,
+  };
+  return apiFetch<DispersionResponse>(`${BASE}/v2/dispersion`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+/**
+ * Correlation-method candidates accepted by `RelationshipsPayloadV2.method`
+ * (`CorrelationMethod` in `src/tools/launch_monitor_model`); same three
+ * choices as the desktop `relationship_method` combo.
+ */
+export type RelationshipMethod = RelationshipsPayloadV2["method"];
+
+/**
+ * A matrix cell is `null` (not `0`) whenever the underlying pair is
+ * non-finite — see `_json_safe_float` / `_matrix_to_rows` in
+ * `src/api/routes/launch_monitor_analytics.py`.
+ */
+export type NullableMatrix = (number | null)[][];
+
+/**
+ * One screened dependency edge from `CorrelationResult.edges`
+ * (`DependencyEdge` in `shared.python.launch_monitor.relationships`).
+ */
+export interface RelationshipEdge {
+  source: string;
+  target: string;
+  coefficient: number | null;
+  p_value: number | null;
+  adjusted_p_value: number | null;
+  sample_count: number;
+  includes_derived_metric: boolean;
+  includes_boolean_projection: boolean;
+}
+
+/** Response body for `POST /v2/relationships` (`_relationships_result_to_dict`). */
+export interface RelationshipsResponse {
+  method: string;
+  metrics: string[];
+  coefficients: NullableMatrix;
+  p_values: NullableMatrix;
+  adjusted_p_values: NullableMatrix | null;
+  pair_counts: number[][];
+  partial_coefficients: NullableMatrix | null;
+  derived_metrics: string[];
+  boolean_projected: string[];
+  edges: RelationshipEdge[];
+}
+
+/**
+ * Run the PyQt Relationships tab's correlation/partial-correlation/dependency
+ * -network analysis over caller-supplied inline records, via the same
+ * `compute_correlations` contract the desktop tab calls
+ * (`src/tools/launch_monitor_analytics/gui.py` `_compute_relationship`).
+ * `controls` must already exclude any name also present in `metrics` — the
+ * desktop tab drops them before calling `compute_correlations`, and the API
+ * drops them again defensively (`RelationshipsPayloadV2.effective_controls`).
+ */
+export async function analyzeRelationshipsV2(
+  records: Record<string, unknown>[],
+  metrics: string[],
+  method: RelationshipMethod = "pearson",
+  controls: string[] = [],
+  edgeThreshold = 0.3,
+): Promise<RelationshipsResponse> {
+  const payload: RelationshipsPayloadV2 = {
+    records,
+    metrics,
+    controls,
+    method,
+    edge_threshold: edgeThreshold,
+  };
+  return apiFetch<RelationshipsResponse>(`${BASE}/v2/relationships`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+/** Serialized `PCAResult` from `_pca_result_to_dict` (`POST /v2/multivariate`). */
+export interface PCAResultPayload {
+  metrics: string[];
+  component_names: string[];
+  explained_variance_ratio: (number | null)[];
+  loadings: NullableMatrix;
+  scores: NullableMatrix;
+  sample_count: number;
+}
+
+/** Serialized `VIFResult` from `_vif_result_to_dict` (`POST /v2/multivariate`). */
+export interface VIFResultPayload {
+  values: Record<string, number | null>;
+  sample_count: number;
+  warning_metrics: string[];
+}
+
+/** Response body for `POST /v2/multivariate` (`analyze_multivariate_v2`). */
+export interface MultivariateResponse {
+  pca: PCAResultPayload;
+  vif: VIFResultPayload;
+}
+
+/**
+ * Run the PyQt Relationships tab's PCA/VIF diagnostics over caller-supplied
+ * inline records, via the same `compute_pca`/`compute_vif` contract the
+ * desktop tab calls (`src/tools/launch_monitor_analytics/gui.py`
+ * `_compute_multivariate`).
+ */
+export async function analyzeMultivariateV2(
+  records: Record<string, unknown>[],
+  metrics: string[],
+): Promise<MultivariateResponse> {
+  const payload: MultivariatePayloadV2 = { records, metrics };
+  return apiFetch<MultivariateResponse>(`${BASE}/v2/multivariate`, {
     method: "POST",
     body: JSON.stringify(payload),
   });

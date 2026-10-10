@@ -1,0 +1,92 @@
+# Native Floating-Root Feedback and Frozen-Torque Replay (Provisional)
+
+## Exact Native State and Controller Law
+
+F02 child #11946 connects the existing distributed-feedback law to the F05c
+MuJoCo 3.8.0 floating-root, two-hinge plant. The compiled fixture has
+$n_q=9$, $n_v=8$, $n_u=2$ and an Euler step of $0.01\,\mathrm{s}$. The six
+root tangent coordinates have no actuators; two named direct unit motors drive
+the hip and knee. This fixture is contact-free and gravity-free. The
+adapter reuses F05c native topology, motor, integrator, initial-state and
+hidden-force admission before a controller command is accepted.
+
+At each native integration boundary, the F02 controller reads the simulated
+$(q_k,v_k)$ once. Its configuration error is the MuJoCo tangent operation
+
+$$
+e_q=\operatorname{mj\_differentiatePos}(q_k^*,q_k;\Delta t=1)
+\in\mathbb R^8,
+\qquad e_v=v_k-v_k^*.
+$$
+
+The argument order is **reference then current**, yielding the F02
+current-minus-reference convention. The unit time argument makes this a
+configuration difference, rather than a physical velocity. The native
+quaternion is validated as normalized; $q$ and $-q$ produce the same rotation
+error. No four-component quaternion subtraction is used. MuJoCo's sparse
+mass matrix is expanded at the current configuration and inverted for F02's
+positive-definite tangent inverse-mass contract. The nominal gain is the
+existing MOSAIC TVLQR gain on the 16-dimensional
+$[e_q,e_v]$ tangent, with the same native Euler discrete derivative as F05c.
+
+The applied input is the existing F02 law with frozen feedforward, optional
+feedback, explicit motor map, native `ctrlrange` saturation and a declared
+per-motor rate limit. The root cannot receive a requested generalized effort.
+The code retains $u^{\rm ff}$, feedback correction, total requested effort
+and post-limit motor torque as separate per-step evidence. Disabled feedback
+executes the same frozen nominal schedule for a paired comparison; it does
+not alter the plant or nominal input.
+
+## Execution and Independent Replay
+
+The common native torque runner calls the controller once per Euler step and
+holds its **actual post-limit actuator torque** by zero-order hold. It exports
+the executed channel order, exact integration grid and complete
+`mjSTATE_INTEGRATION` initial state through pinned Tools T01. A fresh MuJoCo
+instance receives only that time-only torque history. It never calls the
+feedback controller, observes the controlled run or resets to later states.
+Every native configuration, velocity and full integration-state row must
+match the closed-loop run within $10^{-12}$ or the run fails. This is a
+same-model frozen-input reproduction result, not motion-capture accuracy.
+
+The synthetic 12-step fixture starts with a $0.4\,\mathrm{rad}$ hip error.
+The native manifold TVLQR run reduces its final hip error relative to the
+frozen-zero-input run. A separate overdrive test requests $(4,-4)$ N m but
+the compiled bounds yield exactly $(2,-1.5)$ N m in both the saved bundle
+and independent replay. Negative tests reject channel permutation,
+unnormalized quaternion and contact geometry. Tests run against actual
+MuJoCo 3.8.0, not an algebraic stand-in. The source-hashed receipt and
+reproduction command are in the F02 native turnover document.
+
+The same adapter also consumes a **moving reference** obtained by executing
+an admissible, varying two-motor ZOH history in an independent native replay.
+It differentiates each actual native Euler transition in the 16-dimensional
+tangent and runs the existing MOSAIC Riccati pass; the resulting
+`NominalTrajectory` contains the replayed $(q_k,v_k)$ and teacher
+feedforward torque. The fixture is autonomous, so local differentiation may
+normalize the otherwise complete saved state's time coordinate to zero;
+each differentiated successor is checked against the recorded native
+successor. This time normalization is not admitted for time-dependent
+callbacks or external drives.
+
+Feedback admission and independent replay use the same
+`require_no_global_mujoco_callbacks` inspection boundary. A missing callback
+getter or an installed callback rejects admission before evaluation; the
+feedback adapter does not maintain a separate private callback-name list.
+
+From one held-out $0.25\,\mathrm{rad}$ hip perturbation, a frozen-feedforward
+run and an exact-state feedback run use the **same** native model, initial
+state, input grid and policy. The frozen run's saved input hash equals the
+teacher history; the feedback run's applied-input hash differs. Their final
+hip errors against the moving teacher are $0.07508$ and $0.02460\,\mathrm{rad}$,
+respectively. Both separate complete-state replays match exactly in this
+fixture. The test retains both histories; no optimizer or fitting success
+is inferred from a teacher-created reference. F03's current sparse
+collocation spike is one-dimensional and does not export a native 9/8/2
+solution into this boundary.
+
+This only qualifies a software boundary and local synthetic fixture.
+Human anatomy, gravity/contact/grip, state-dependent transmissions, muscle
+excitation, marker observation, private capture, production perturbations,
+full swing, six-engine parity and a scientific runtime deadline remain open.
+The F02 and F05 parents and the manual release remain blocked.

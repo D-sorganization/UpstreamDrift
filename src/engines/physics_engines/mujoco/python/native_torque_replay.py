@@ -18,6 +18,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from src.engines.native_replay_contracts import (
+    _MUJOCO_GLOBAL_CALLBACKS,
     native_replay_admission_bytes,
     native_replay_contract_types,
     require_no_global_mujoco_callbacks,
@@ -28,6 +29,7 @@ if TYPE_CHECKING:
     from sidekick.lab.mocap import ExperimentReplayBundle
 
 _VERSION = "1.0.0"
+_CALLBACKS = _MUJOCO_GLOBAL_CALLBACKS
 
 
 @dataclass(frozen=True)
@@ -72,6 +74,24 @@ def _load_native(path: Path) -> tuple[Any, Any]:
     # A numerical failure must fail, never silently reset physical state.
     model.opt.disableflags |= int(mj.mjtDisableBit.mjDSBL_AUTORESET)
     return model, mj.MjData(model)
+
+
+def native_initial_state_from_joint_state(
+    model_path: Path, joint_state: NDArray[np.float64]
+) -> NDArray[np.float64]:
+    """Export the complete native fixture state without importing MuJoCo in shared code."""
+    import mujoco as mj
+
+    values = np.asarray(joint_state, dtype=np.float64)
+    if values.shape != (2,) or not np.isfinite(values).all():
+        raise ValueError("one-hinge fixture requires finite position and velocity")
+    model, data = _load_native(model_path)
+    if model.nq != 1 or model.nv != 1 or model.nu != 1:
+        raise ValueError("native fixture must have one hinge and one unit motor")
+    data.qpos[0], data.qvel[0] = values
+    state = np.empty(mj.mj_stateSize(model, mj.mjtState.mjSTATE_INTEGRATION))
+    mj.mj_getState(model, data, state, mj.mjtState.mjSTATE_INTEGRATION)
+    return state
 
 
 def _validate_unit_motors(model: Any, mj: Any) -> None:

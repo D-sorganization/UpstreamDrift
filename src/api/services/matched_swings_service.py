@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import math
+import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Literal
@@ -22,7 +23,14 @@ from src.shared.python.motion_matching.ledger import (
     find_repo_root,
 )
 from src.shared.python.motion_matching.ledger_schema import Ledger, LedgerRow
-from src.tools.matched_swing_browser.model import MatchedSwingBrowserModel
+from src.tools.matched_swing_browser.gif_frames import (
+    gif_frame_info,
+    gif_frame_png,
+)
+from src.tools.matched_swing_browser.model import (
+    MatchedSwingBrowserModel,
+    MatchedSwingFilter,
+)
 
 __all__ = [
     "MatchedSwingJobError",
@@ -107,6 +115,7 @@ class RunSummary:
     metrics: dict[str, float | None]
     capabilities: RunCapabilities
     reason: str | None = None
+    qualification_note: str | None = None
     gates: list[PhysicalGate] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
@@ -122,6 +131,7 @@ class RunSummary:
             "metrics": self.metrics,
             "capabilities": self.capabilities.to_dict(),
             "reason": self.reason,
+            "qualification_note": self.qualification_note,
             "gates": [gate.to_dict() for gate in self.gates],
         }
 
@@ -147,9 +157,10 @@ class MatchedSwingsService:
         return self._repo_root
 
     @precondition(
-        lambda self, capture=None, drive_mode=None, ranked=False: (
+        lambda self, capture=None, drive_mode=None, profile=None, ranked=False: (
             (capture is None or isinstance(capture, str))
             and (drive_mode is None or isinstance(drive_mode, str))
+            and (profile is None or isinstance(profile, str))
             and isinstance(ranked, bool)
         )
     )
@@ -159,18 +170,25 @@ class MatchedSwingsService:
         *,
         capture: str | None = None,
         drive_mode: str | None = None,
+        profile: str | None = None,
         ranked: bool = False,
     ) -> list[RunSummary]:
-        """Return ledger rows as public summaries, optionally filtered and ranked by ascending RMSE."""
+        """Return ledger rows as public summaries, optionally filtered and ranked by ascending RMSE.
+
+        ``profile`` reuses :meth:`MatchedSwingBrowserModel.filter_rows`'s
+        dynamic/kinematic rule (desktop parity, DRY) and is applied before
+        ranking, matching the desktop's filter-then-rank order
+        (``MatchedSwingBrowserWidget._apply_filters``).
+        """
         rows = self._load_rows()
+        if profile:
+            rows = self._browser.filter_rows(rows, MatchedSwingFilter(profile=profile))
         if ranked:
             ranked_rows = self._browser.rank_candidates(
                 rows, capture=capture, drive_mode=drive_mode
             )
             return [self._to_summary(row) for row in ranked_rows]
         if capture or drive_mode:
-            from src.tools.matched_swing_browser.model import MatchedSwingFilter
-
             crit = MatchedSwingFilter(
                 capture=capture or "", drive_mode=drive_mode or ""
             )
@@ -204,6 +222,45 @@ class MatchedSwingsService:
             raise ValueError("Receipt JSON must be an object")
         return data
 
+    @precondition(lambda self, run_id: isinstance(run_id, str) and bool(run_id.strip()))
+    @postcondition(
+        lambda result: (
+            isinstance(result, tuple)
+            and len(result) == 2
+            and isinstance(result[0], str)
+            and isinstance(result[1], str)
+        )
+    )
+    def export_report_markdown(self, run_id: str) -> tuple[str, str]:
+        """Render the Markdown fit-quality report for a run.
+
+        Reuses :func:`export_report` exactly as the desktop exporter does
+        (``MatchedSwingBrowserWidget._on_export_report`` in gui.py), writing
+        into a temporary directory and reading the Markdown back so the two
+        surfaces can never diverge on report formatting (DRY).
+
+        Returns:
+            Tuple of ``(markdown_text, suggested_filename)``.
+
+        Raises:
+            KeyError: ``run_id`` is not in the ledger.
+            FileNotFoundError: the run has no receipt file on disk.
+        """
+        from src.shared.python.motion_matching.export import export_report
+
+        row = self.get_row(run_id)
+        receipt_path = self._browser.resolve_artifact_path(row, "receipt")
+        if receipt_path is None or not receipt_path.is_file():
+            raise FileNotFoundError("No receipt file found for this run.")
+        npz_path = self._browser.resolve_artifact_path(row, "npz")
+
+        filename = f"fit_report_{row.engine}_{row.capture or 'swing'}.md"
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            out_path = Path(tmp_dir) / filename
+            export_report(receipt_path, out_path, candidate=npz_path)
+            markdown = out_path.read_text(encoding="utf-8")
+        return markdown, filename
+
     @precondition(
         lambda self, run_id, artifact: (
             isinstance(run_id, str)
@@ -227,6 +284,37 @@ class MatchedSwingsService:
         if path is None or not path.is_file():
             raise FileNotFoundError(f"{artifact} artefact missing for run {run_id}")
         return path
+
+    @precondition(lambda self, run_id: isinstance(run_id, str) and bool(run_id.strip()))
+    @postcondition(lambda result: isinstance(result, dict))
+    def animation_frame_info(self, run_id: str) -> dict[str, Any]:
+        """Return frame count, per-frame durations, and size for a run's GIF.
+
+        Delegates to :func:`gif_frames.gif_frame_info` on the GIF path
+        resolved via :meth:`resolve_artifact_path` (never exposing the
+        absolute path itself to callers).
+
+        Raises:
+            KeyError: ``run_id`` is not in the ledger.
+            FileNotFoundError: the run has no GIF artefact on disk.
+            ValueError: the artefact is not a readable GIF image.
+        """
+        gif_path = self.resolve_artifact_path(run_id, "gif")
+        return gif_frame_info(gif_path)
+
+    @precondition(lambda self, run_id, index: isinstance(run_id, str) and index >= 0)
+    @postcondition(lambda result: isinstance(result, bytes))
+    def animation_frame_png(self, run_id: str, index: int) -> bytes:
+        """Return one decoded GIF frame as PNG bytes.
+
+        Raises:
+            KeyError: ``run_id`` is not in the ledger.
+            FileNotFoundError: the run has no GIF artefact on disk.
+            ValueError: the artefact is not a readable GIF image.
+            IndexError: ``index`` is out of range for the GIF.
+        """
+        gif_path = self.resolve_artifact_path(run_id, "gif")
+        return gif_frame_png(gif_path, index)
 
     @precondition(
         lambda self, run_id, frame_index: isinstance(run_id, str) and frame_index >= 0
@@ -451,8 +539,25 @@ class MatchedSwingsService:
             metrics=metrics,
             capabilities=caps,
             reason=row.reason,
+            qualification_note=self._qualification_note(row),
             gates=self._extract_gates(row),
         )
+
+    @staticmethod
+    def _qualification_note(row: LedgerRow) -> str | None:
+        """Extract the acceptance qualification note.
+
+        Mirrors ``MatchedSwingBrowserWidget._populate_gates_info`` in
+        gui.py, which reads ``row.acceptance.get("qualification_note")`` for
+        the desktop rejection/qualification text only when the acceptance
+        block records gates (otherwise it shows ``reason``). Unlike the
+        desktop widget, this does not fall back to ``reason`` — ``reason``
+        stays a separate field and callers display ``note ?? reason``.
+        """
+        if not row.acceptance or "gates" not in row.acceptance:
+            return None
+        note = row.acceptance.get("qualification_note")
+        return note if isinstance(note, str) and note.strip() else None
 
     @staticmethod
     def _candidate_profile(row: LedgerRow) -> str | None:
