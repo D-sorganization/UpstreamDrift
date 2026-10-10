@@ -1,0 +1,6 @@
+{
+  "scope": "Independent Rejected Candidate Reproduction",
+  "source_sha256": "df1469a8e43f0e947cb30861bc8fb41eeeadb8ad165621d7d9814c754fe38b83",
+  "close_targets_collide": true,
+  "delimiter_ambiguity_collides": true
+}
