@@ -84,6 +84,24 @@ def test_no_unprefixed_imports_of_ud_canonical_packages_in_src() -> None:
     )
 
 
+def test_ud_canonical_submodules_import_after_shared_aliases_installed() -> None:
+    """``src.shared.python`` ud-canonical imports must not alias into Tools (#12177)."""
+    from src.shared.python.import_aliases import (
+        SharedImportAliasFinder,
+        install_shared_import_aliases,
+    )
+
+    finder = SharedImportAliasFinder()
+    assert finder._parse(
+        "src.shared.python.model_generation.editor.attachment_ports"
+    ) == (None, "")
+
+    install_shared_import_aliases()
+    from src.shared.python.model_generation.editor.attachment_ports import PortPolarity
+
+    assert PortPolarity.PLUG.value == "plug"
+
+
 @pytest.mark.timeout(120)
 def test_inertia_calculator_imports_without_src_on_sys_path(tmp_path: Path) -> None:
     """Reproduce the Drake failure: only the repo root is importable."""

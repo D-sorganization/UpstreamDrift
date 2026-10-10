@@ -89,7 +89,7 @@
       "rule": "parameters",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 12177,
-      "reason": "Issue #12177: ParametricBuilder.add_segment legacy API accepts 11 parameters (> 8 budget).",
+      "reason": "Issue #12177: pre-existing parametric segment API exceeds the parameter budget; this PR only retargets one anthropometry import to the src.shared.python spelling.",
       "expires_on": "2026-12-31"
     },
     {
