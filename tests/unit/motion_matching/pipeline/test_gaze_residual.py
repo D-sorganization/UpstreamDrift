@@ -164,6 +164,29 @@ def test_lane_plans_gaze_once_from_marker_faithful_pass() -> None:
     assert lane.gaze_plan.impact_index > 0
 
 
+def test_marker_faithful_receipt_plans_impact_from_the_smoothed_pass() -> None:
+    # A one-frame IK glitch in the follow-through (frame 52 jumps back to the
+    # frame-46 club position) is the fastest raw clubhead sample. The gaze-on
+    # lane plans from the smoothed pass; the weight-0 receipt must agree.
+    q = _q()
+    q[52, 0] = 46 / 1000.0
+
+    class FakeLane:
+        gaze_plan = None
+        gaze_weight = 0.0
+        gaze_face_offset_m = 0.0
+        times = TIMES
+        rate_hz = 100.0
+
+        class ground:  # noqa: N801
+            height_m = 0.0
+
+    raw = gr.plan_gaze(StubKin(), q, TIMES, ground_height_m=0.0, face_offset_m=0.0)
+    assert raw.impact_index == 52  # the glitch wins without smoothing
+    block = gr.head_gaze_receipt(FakeLane(), StubKin(), q)
+    assert block["plan"]["impact_index"] == 40
+
+
 def test_receipt_reports_unavailable_when_the_model_has_no_head_frame() -> None:
     class NoHead(StubKin):
         def body_poses(self, q, frames):  # noqa: ANN001
@@ -174,6 +197,7 @@ def test_receipt_reports_unavailable_when_the_model_has_no_head_frame() -> None:
         gaze_weight = 0.0
         gaze_face_offset_m = 0.0
         times = TIMES
+        rate_hz = 100.0
 
         class ground:  # noqa: N801
             height_m = 0.0
