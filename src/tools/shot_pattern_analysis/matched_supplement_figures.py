@@ -190,12 +190,12 @@ def _raw_flight_metadata(metadata: dict[str, Any]) -> dict[str, Any]:
 
 def _cell_target_mode(ref: Mapping[str, Any]) -> str:
     """Classify cell target mode to distinguish within-lean matching from controls."""
-    config = ref.get("config")
-    req_config = ref.get("requested_config")
-    if ref.get("execution_kind") == "provenance_alias" or ref.get("alias_of_primary"):
+    if ref.get("execution_kind") == "provenance_alias":
         return "Fixed-Target Control (Alias)"
+    config = ref.get("config")
     if isinstance(config, Mapping) and config.get("target_x_m") is not None:
         return "Fixed-Target Control"
+    req_config = ref.get("requested_config")
     if isinstance(req_config, Mapping) and req_config.get("target_x_m") is not None:
         return "Fixed-Target Control"
     return "Within-Lean Nominal Target"
@@ -204,6 +204,10 @@ def _cell_target_mode(ref: Mapping[str, Any]) -> str:
 def _render_cell_figures(ref: dict[str, Any], output_dir: Path) -> list[dict[str, Any]]:
     if ref.get("status") != "completed":
         return []
+    label = str(ref.get("alias_cell", ref["cell"]))
+    protocol = ref.get("source_protocol")
+    if not protocol or not isinstance(protocol, str) or not protocol.strip():
+        raise ValueError(f"cell reference lacks source protocol: {label}")
     cell_dir = Path(ref["source_root"]) / ref["cell"]
     manifest_path = cell_dir / "manifest.json"
     if not manifest_files_match(manifest_path):
@@ -213,15 +217,11 @@ def _render_cell_figures(ref: dict[str, Any], output_dir: Path) -> list[dict[str
     )
     arrays = {name: points[name] for name in _PATTERNS}
     target_x = float(ref["summary"]["target_x_m"])
-    label = str(ref.get("alias_cell", ref["cell"]))
     stem = output_dir / "cells" / _slug(label)
     valid_counts = {name: len(arrays[name]) for name in _PATTERNS}
     metadata = _plot_metadata(ref, "one-cell supported population", valid_counts)
     social_club = str(ref["config"]["club"]["club_id"]).replace("_", " ").title()
     target_mode = _cell_target_mode(ref)
-    protocol = ref.get("source_protocol") or ref.get("protocol_id")
-    if not protocol:
-        raise ValueError(f"cell reference lacks source protocol: {label}")
     social_metadata = {
         "social_club": social_club,
         "Protocol": protocol,
@@ -715,6 +715,19 @@ def _render_pair_figures(
     first, second = pair["first"], pair["second"]
     if first.get("status") != "completed" or second.get("status") != "completed":
         return []
+    p0 = first.get("source_protocol")
+    p1 = second.get("source_protocol")
+    if (
+        not p0
+        or not isinstance(p0, str)
+        or not p0.strip()
+        or not p1
+        or not isinstance(p1, str)
+        or not p1.strip()
+    ):
+        raise ValueError(
+            f"pair references lack source protocol: {first['cell']} vs {second['cell']}"
+        )
     loaded = []
     for ref in (first, second):
         directory = Path(ref["source_root"]) / ref["cell"]
@@ -786,12 +799,8 @@ def _render_pair_figures(
             )
         pair_scenario = _pair_social_scenario(comparison, first, second)
         social_club = str(first["config"]["club"]["club_id"]).replace("_", " ").title()
-        p0 = str(first.get("source_protocol") or first.get("protocol_id") or "")
-        p1 = str(second.get("source_protocol") or second.get("protocol_id") or "")
-        if not p0 or not p1:
-            raise ValueError(
-                f"pair references lack source protocol: {first['cell']} vs {second['cell']}"
-            )
+        m0 = _cell_target_mode(first)
+        m1 = _cell_target_mode(second)
         social_density_paths = write_pair_social_density(
             point_sets,
             stem.with_name(stem.name + "_density"),
@@ -804,11 +813,7 @@ def _render_pair_figures(
                 _condition(first)["profile"], first["config"]["noise"]
             ),
             source_protocols=(p0, p1),
-            context={
-                "comparison_kind": comparison,
-                "first_protocol": p0,
-                "second_protocol": p1,
-            },
+            target_modes=(m0, m1),
         )
         for key, path in social_density_paths.items():
             pattern_lower, ext = key.split("_", 1)

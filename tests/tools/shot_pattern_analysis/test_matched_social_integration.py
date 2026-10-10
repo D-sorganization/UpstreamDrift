@@ -315,6 +315,11 @@ def test_render_pair_figures_exports_canonical_social_density_with_physical_patt
         first["source_protocol"],
         second["source_protocol"],
     )
+    assert kwargs["target_modes"] == (
+        "Fixed-Target Control",
+        "Fixed-Target Control",
+    )
+    assert "context" not in kwargs
 
     # Check that point_sets passed to social wrapper use exact common coordinates
     for pattern in ("Straight", "Draw", "Fade"):
@@ -465,14 +470,14 @@ def test_render_cell_figures_social_metadata_distinguishes_within_lean_and_contr
     # 1. Primary cell: within-lean nominal target (config target_x_m is None)
     root = tmp_path / "primary_cell"
     primary_ref = _fixture_ref(
-        "pw_cell",
+        "pitching_wedge_lean0_curve2_rotation1_combined2",
         club="pitching_wedge",
         lean=0.0,
         curve=2.0,
         rotation=1.0,
         profile="combined2",
         target=77.402477248663,
-        protocol="supplement_pw_within_lean_face_v1",
+        protocol="pw-primary-face-bounds/1",
     )
     primary_ref["source_root"] = str(root)
     primary_ref["config"]["target_x_m"] = None  # Within-lean matching
@@ -494,20 +499,19 @@ def test_render_cell_figures_social_metadata_distinguishes_within_lean_and_contr
     figures._render_cell_figures(primary_ref, tmp_path / "figures_primary")
     assert len(captured_metadata) == 1
     m1 = captured_metadata[-1]
-    assert m1["Protocol"] == "supplement_pw_within_lean_face_v1"
-    assert "77.40 m downrange" in m1["Matched Target"]
-    assert "Within-Lean Nominal Target" in m1["Matched Target"]
+    assert m1["Protocol"] == "pw-primary-face-bounds/1"
+    assert m1["Matched Target"] == "77.40 m downrange (Within-Lean Nominal Target)"
 
     # 2. Control cell: fixed-target control (config target_x_m is explicitly set)
     control_ref = _fixture_ref(
-        "pw_cell_control",
+        "pitching_wedge_lean5_curve2_rotation1_combined2",
         club="pitching_wedge",
         lean=5.0,
         curve=2.0,
         rotation=1.0,
         profile="combined2",
         target=77.402477248663,
-        protocol="supplement_pw_fixed_target_face_v1",
+        protocol="pw-control-face-bounds/1",
     )
     control_ref["source_root"] = str(root)
     control_ref["config"]["target_x_m"] = 77.402477248663
@@ -529,31 +533,54 @@ def test_render_cell_figures_social_metadata_distinguishes_within_lean_and_contr
     figures._render_cell_figures(control_ref, tmp_path / "figures_control")
     assert len(captured_metadata) == 2
     m2 = captured_metadata[-1]
-    assert m2["Protocol"] == "supplement_pw_fixed_target_face_v1"
-    assert "77.40 m downrange" in m2["Matched Target"]
-    assert "Fixed-Target Control" in m2["Matched Target"]
+    assert m2["Protocol"] == "pw-control-face-bounds/1"
+    assert m2["Matched Target"] == "77.40 m downrange (Fixed-Target Control)"
 
-    # 3. Provenance alias: represents control condition via primary source
+    # 3. Provenance alias: real PW control aliases are same-cell zero-lean reuse
+    # of zero-lean primary with requested_config target set.
     alias_ref = dict(primary_ref)
     alias_ref["execution_kind"] = "provenance_alias"
     alias_ref["alias_of_primary"] = primary_ref["cell"]
-    alias_ref["alias_cell"] = "pitching_wedge_lean5_curve2_rotation1_combined2"
+    alias_ref["alias_cell"] = primary_ref["cell"]
+    alias_ref["requested_config"] = {
+        **primary_ref["config"],
+        "target_x_m": 77.402477248663,
+    }
 
     figures._render_cell_figures(alias_ref, tmp_path / "figures_alias")
     assert len(captured_metadata) == 3
     m3 = captured_metadata[-1]
-    assert m3["Protocol"] == "supplement_pw_within_lean_face_v1"
-    assert "77.40 m downrange" in m3["Matched Target"]
-    assert "Fixed-Target Control" in m3["Matched Target"]
+    assert m3["Protocol"] == "pw-primary-face-bounds/1"
+    assert m3["Matched Target"] == "77.40 m downrange (Fixed-Target Control (Alias))"
+
+    # Missing actual protocol should fail clearly without protocol_id fallback
+    bad_cell_ref = dict(primary_ref)
+    bad_cell_ref.pop("source_protocol", None)
+    bad_cell_ref["protocol_id"] = "pw-control-face-bounds/1"
+    with pytest.raises(ValueError, match="cell reference lacks source protocol"):
+        figures._render_cell_figures(bad_cell_ref, tmp_path / "figures_bad")
 
 
 def test_render_pair_figures_cross_protocol_passes_ordered_protocols(
     tmp_path, monkeypatch
 ):
-    first = _fixture_ref("cell1", rotation=1.0, protocol="original_primary/1")
-    second = _fixture_ref(
-        "cell2", rotation=2.0, protocol="supplement_pw_within_lean_face_v1"
+    first = _fixture_ref(
+        "pitching_wedge_lean0_curve2_rotation1_combined2",
+        club="pitching_wedge",
+        lean=0.0,
+        rotation=1.0,
+        protocol="original_primary/1",
     )
+    first["config"]["target_x_m"] = None  # Within-Lean Nominal Target
+
+    second = _fixture_ref(
+        "pitching_wedge_lean5_curve2_rotation1_combined2",
+        club="pitching_wedge",
+        lean=5.0,
+        rotation=2.0,
+        protocol="pw-control-face-bounds/1",
+    )
+    second["config"]["target_x_m"] = 180.0  # Fixed-Target Control
 
     for ref in (first, second):
         root = tmp_path / ref["cell"]
@@ -606,9 +633,26 @@ def test_render_pair_figures_cross_protocol_passes_ordered_protocols(
     kwargs = social_calls[0]
     assert kwargs["source_protocols"] == (
         "original_primary/1",
-        "supplement_pw_within_lean_face_v1",
+        "pw-control-face-bounds/1",
+    )
+    assert kwargs["target_modes"] == (
+        "Within-Lean Nominal Target",
+        "Fixed-Target Control",
     )
     assert kwargs["target_point_m"] == (180.0, 0.0)
-    assert "context" in kwargs
-    assert kwargs["context"]["first_protocol"] == "original_primary/1"
-    assert kwargs["context"]["second_protocol"] == "supplement_pw_within_lean_face_v1"
+    assert "context" not in kwargs
+
+    # Missing actual protocol should fail clearly without protocol_id fallback
+    bad_pair_first = dict(first)
+    bad_pair_first.pop("source_protocol", None)
+    bad_pair_first["protocol_id"] = "original_primary/1"
+    with pytest.raises(ValueError, match="pair references lack source protocol"):
+        figures._render_pair_figures(
+            {
+                "comparison_kind": "curve_strength",
+                "first": bad_pair_first,
+                "second": second,
+                "target_x_m": 180.0,
+            },
+            tmp_path / "comparisons_bad",
+        )

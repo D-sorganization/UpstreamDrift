@@ -125,22 +125,25 @@ def test_pair_social_density_includes_matched_target_and_ordered_protocols(
         social_club="Driver",
         target_point_m=(180.0, 0.0),
         total_n=10,
-        source_protocols=("original_primary/1", "supplement_pw_within_lean_face_v1"),
+        source_protocols=("pw-primary-face-bounds/1", "pw-control-face-bounds/1"),
+        target_modes=("Within-Lean Nominal Target", "Fixed-Target Control"),
     )
     assert len(calls) == 3
     for call in calls:
         meta = call["metadata"]
         assert "Matched Target" in meta
-        assert "180.00 m downrange" in meta["Matched Target"]
-        assert "Common Target" in meta["Matched Target"]
+        assert (
+            meta["Matched Target"]
+            == "180.00 m downrange (SD 1°: Within-Lean Nominal Target · SD 2°: Fixed-Target Control)"
+        )
         assert "Protocol" in meta
         assert (
-            "SD 1°: original_primary/1 · SD 2°: supplement_pw_within_lean_face_v1"
-            in meta["Protocol"]
+            meta["Protocol"]
+            == "SD 1°: pw-primary-face-bounds/1 · SD 2°: pw-control-face-bounds/1"
         )
 
 
-def test_pair_social_density_accepts_context_mapping(monkeypatch, tmp_path):
+def test_pair_social_density_supports_nonzero_lateral_target(monkeypatch, tmp_path):
     calls = []
 
     def fake_render(*args, **kwargs):
@@ -154,21 +157,19 @@ def test_pair_social_density_accepts_context_mapping(monkeypatch, tmp_path):
         condition_labels=("SD 1°", "SD 2°"),
         scenario="Lean 5° · Curve ×1",
         social_club="Driver",
-        target_point_m=(178.95, 0.0),
+        target_point_m=(180.0, 3.5),
         total_n=10,
-        context={
-            "source_protocols": ("protocol_alpha", "protocol_beta"),
-            "target_context": "Fixed-Target Control",
-        },
+        source_protocols=("pw-primary-face-bounds/1", "pw-control-face-bounds/1"),
+        target_modes=("Within-Lean Nominal Target", "Fixed-Target Control"),
     )
     assert len(calls) == 3
     for call in calls:
         meta = call["metadata"]
         assert "Matched Target" in meta
-        assert "178.95 m downrange" in meta["Matched Target"]
-        assert "Fixed-Target Control" in meta["Matched Target"]
-        assert "Protocol" in meta
-        assert "SD 1°: protocol_alpha · SD 2°: protocol_beta" in meta["Protocol"]
+        assert (
+            meta["Matched Target"]
+            == "180.00 m downrange, 3.50 m lateral (SD 1°: Within-Lean Nominal Target · SD 2°: Fixed-Target Control)"
+        )
 
 
 def test_pair_social_density_default_without_source_protocols_still_includes_target(
@@ -194,8 +195,8 @@ def test_pair_social_density_default_without_source_protocols_still_includes_tar
     for call in calls:
         meta = call["metadata"]
         assert "Matched Target" in meta
-        assert "180.00 m downrange" in meta["Matched Target"]
-        assert "Common Target" in meta["Matched Target"]
+        assert meta["Matched Target"] == "180.00 m downrange (Common Target)"
+        assert "Protocol" not in meta
 
 
 @pytest.mark.parametrize(
@@ -208,8 +209,11 @@ def test_pair_social_density_default_without_source_protocols_still_includes_tar
         (123, "valid"),
     ],
 )
-def test_pair_social_density_invalid_protocols_raises(tmp_path, invalid_protocols):
-    with pytest.raises(ValueError):
+def test_pair_social_density_invalid_protocols_raises(
+    monkeypatch, tmp_path, invalid_protocols
+):
+    monkeypatch.setattr(social, "write_academic_dispersion_figure", lambda *a, **kw: {})
+    with pytest.raises(ValueError, match="source_protocols"):
         social.write_pair_social_density(
             _points(),
             tmp_path / "comparison",
@@ -219,4 +223,59 @@ def test_pair_social_density_invalid_protocols_raises(tmp_path, invalid_protocol
             target_point_m=(180.0, 0.0),
             total_n=10,
             source_protocols=invalid_protocols,  # type: ignore[arg-type]
+        )
+
+
+@pytest.mark.parametrize(
+    "invalid_modes",
+    [
+        ("only_one",),
+        ("one", "two", "three"),
+        ("", "valid"),
+        ("valid", "   "),
+        (123, "valid"),
+    ],
+)
+def test_pair_social_density_invalid_target_modes_raises(
+    monkeypatch, tmp_path, invalid_modes
+):
+    monkeypatch.setattr(social, "write_academic_dispersion_figure", lambda *a, **kw: {})
+    with pytest.raises(ValueError, match="target_modes"):
+        social.write_pair_social_density(
+            _points(),
+            tmp_path / "comparison",
+            condition_labels=("SD 1°", "SD 2°"),
+            scenario="Lean 5° · Curve ×1",
+            social_club="Driver",
+            target_point_m=(180.0, 0.0),
+            total_n=10,
+            target_modes=invalid_modes,  # type: ignore[arg-type]
+        )
+
+
+@pytest.mark.parametrize(
+    "invalid_target",
+    [
+        (180.0,),
+        (180.0, 0.0, 1.0),
+        (float("nan"), 0.0),
+        (180.0, float("inf")),
+        (True, 0.0),
+        (180.0, False),
+        ("180", 0.0),
+    ],
+)
+def test_pair_social_density_invalid_target_point_raises(
+    monkeypatch, tmp_path, invalid_target
+):
+    monkeypatch.setattr(social, "write_academic_dispersion_figure", lambda *a, **kw: {})
+    with pytest.raises(ValueError, match="target_point_m"):
+        social.write_pair_social_density(
+            _points(),
+            tmp_path / "comparison",
+            condition_labels=("SD 1°", "SD 2°"),
+            scenario="Lean 5° · Curve ×1",
+            social_club="Driver",
+            target_point_m=invalid_target,  # type: ignore[arg-type]
+            total_n=10,
         )
