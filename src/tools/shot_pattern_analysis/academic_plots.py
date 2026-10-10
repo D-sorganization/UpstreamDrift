@@ -32,6 +32,43 @@ _HDR_STYLES = {
 _MAX_OVERLAY_DOTS = 600
 
 
+def _space_marginal_ticks(figure: Any, axes: Sequence[Any]) -> None:
+    """Keep shared density scales while reserving a four-point label gutter."""
+    if not axes:
+        return
+    limits = axes[0].get_xlim()
+    ticks = [float(t) for t in axes[0].get_xticks() if limits[0] <= t <= limits[1]]
+    while True:
+        figure.canvas.draw()
+        renderer = figure.canvas.get_renderer()
+        crowded = False
+        for axis in axes:
+            labels = [
+                text
+                for text in axis.get_xticklabels()
+                if text.get_visible() and text.get_text()
+            ]
+            boxes = sorted(
+                (text.get_window_extent(renderer) for text in labels),
+                key=lambda box: box.x0,
+            )
+            crowded |= any(
+                (right.x0 - left.x1) * 72.0 / figure.dpi < 4.0
+                for left, right in zip(boxes, boxes[1:], strict=False)
+            )
+        if not crowded:
+            return
+        # The origin and last in-range tick retain two quantitative anchors
+        # when the former interior ticks cannot fit in the narrow marginal.
+        reduced = ticks[::2] if len(ticks) > 2 else [float(limits[0]), ticks[-1]]
+        if reduced == ticks:
+            raise ValueError("marginal tick labels cannot fit with a readable gutter")
+        ticks = reduced
+        for axis in axes:
+            axis.set_xticks(ticks)
+            axis.set_xlim(limits)
+
+
 def _validate_metadata(metadata: Mapping[str, Any]) -> str:
     if not isinstance(metadata, Mapping):
         raise ValueError("metadata must be a mapping of scenario inputs")
@@ -564,6 +601,8 @@ def write_academic_dispersion_figure(
     for axis_top, axis_right in zip(top_axes, right_axes, strict=True):
         axis_top.set_ylim(0.0, common_top_max * 1.05)
         axis_right.set_xlim(0.0, common_right_max * 1.05)
+
+    _space_marginal_ticks(figure, right_axes)
 
     if is_social:
         # Reserve the actual tick/label footprint, not only the axes rectangle.
