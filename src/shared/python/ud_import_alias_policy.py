@@ -18,7 +18,6 @@ from src.shared.python.import_aliases import (
     _bind_legacy_src_namespaces,
     _coalesce_loaded_aliases,
     _DOWNSTREAM_SRC_ALIAS_ROOTS,
-    _SHARED_ROOTS,
 )
 
 __all__ = [
@@ -35,21 +34,13 @@ class UdSharedImportAliasFinder(SharedImportAliasFinder):
 
     def _parse(self, fullname: str) -> tuple[str | None, str]:
         parts = fullname.split(".")
-        if len(parts) >= 3 and parts[:2] == ["shared", "python"]:
-            return (
-                (parts[2], ".".join(parts[3:]))
-                if parts[2] in _SHARED_ROOTS
-                else (None, "")
-            )
         if len(parts) >= 4 and parts[:3] == ["src", "shared", "python"]:
             root = parts[3]
             if root in UD_CANONICAL_SRC_ROOTS:
                 return (None, "")
             allowed_roots = _DOWNSTREAM_SRC_ALIAS_ROOTS
             return (root, ".".join(parts[4:])) if root in allowed_roots else (None, "")
-        if parts and parts[0] in _SHARED_ROOTS:
-            return parts[0], ".".join(parts[1:])
-        return None, ""
+        return super()._parse(fullname)
 
 
 def install_ud_canonical_shared_import_aliases() -> None:
