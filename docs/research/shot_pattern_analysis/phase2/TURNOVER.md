@@ -6,6 +6,8 @@ The goal is active and incomplete. MAIN is `/home/dieterolson/.codex/worktrees/s
 
 ## Reporting Regeneration Checkpoint
 
+Root reviewed the initial child-publication code and withheld acceptance because final receipts could precede independent visual review. Astra is adding candidate/final separation and a hash-bound review gate, plus complete new-helper source binding. See [Contract Review](validation/child_publication_contract_root_review_v1/REVIEW.md). This is ongoing work in the presentation branch; no child publication has been accepted or generated.
+
 The density-gutter candidate is saved in presentation worktree commit `093ae7ae6c`: a single spacing change (`hspace` 0.24 → 0.36), with three meaningful clearance failures followed by three passes. Root independently passed 12 regression/layout tests and scoped lint/format. Gemini's initial process exited 143 before final checks; its evidence is preserved in `validation/density_gutter_candidate_v1/`. Actual candidate visual review remains pending and MAIN has not integrated the producer change.
 
 Caption overflow is now [#12132](https://github.com/D-sorganization/UpstreamDrift/issues/12132), AGY-filed and root REST-verified/leased. A detached Gemini worker (wrapper PID 3933875; `/tmp/run-shot-pattern-caption-api.py`, status in `/tmp/shot-pattern-caption-api-evidence/`) owns caption wrapping and a selected-pair renderer API in the presentation worktree. Astra separately owns report-only child verification/consumer modules there. Their edits are not yet accepted. Do not stage or overwrite one agent's work with the other's; numerical sources and the live FINAL_LAYOUT parent remain frozen.

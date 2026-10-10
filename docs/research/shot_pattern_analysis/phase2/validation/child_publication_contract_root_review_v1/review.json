@@ -1,0 +1,32 @@
+{
+  "checked_utc": "2026-10-10T13:37:28.227742+00:00",
+  "status": "in_progress_not_accepted",
+  "reviewed_paths": [
+    "scripts/research/shot_pattern_analysis/supplement_publication.py",
+    "scripts/research/shot_pattern_analysis/supplement_parent_verifier.py",
+    "scripts/research/shot_pattern_analysis/build_final_report.py",
+    "scripts/research/shot_pattern_analysis/final_report_inputs.py"
+  ],
+  "source_snapshot_sha256": {
+    "scripts/research/shot_pattern_analysis/supplement_publication.py": "fd4311b87eb2f843abb74941939c08be0d9a6db934c4eb0143080ff53bb5bbbf",
+    "scripts/research/shot_pattern_analysis/supplement_parent_verifier.py": "054565b77c9585d0ea6bf4c19d1d803f2509ccfc1f7659292b2b7d7235cf91ac",
+    "scripts/research/shot_pattern_analysis/build_final_report.py": "196dd522869ceaa33d63f606b016abcaeabdd0d6cd91f81a103488d225c536d3",
+    "scripts/research/shot_pattern_analysis/final_report_inputs.py": "d651e71b3eb9bf17c08d70118d6b4d9d27aadda9094956614509b987ed28119c"
+  },
+  "findings": [
+    {
+      "id": "visual_review_gate",
+      "description": "Initial create_density_revision wrote final receipt without bound independent visual qualification. Astra acknowledged and is splitting candidate rendering from finalization. Public loader must reject candidate-only directories."
+    },
+    {
+      "id": "complete_revision_source_binding",
+      "description": "Revision source binding must include every new renderer helper, CLI and pair adapter as introduced, plus exact approved old/new delta. Existing source/parent guards must remain strict."
+    }
+  ],
+  "passing_design_observations": [
+    "Original parent verifier remains unchanged and is invoked under pinned source/runtime",
+    "Child numerical artifact hashes equal parent; reused figure bytes compared",
+    "Figure semantic metadata and complete inventory checked"
+  ],
+  "validation_limit": "Working implementation under concurrent development; no final acceptance; focused new rejection tests and actual production-child visual qualification pending."
+}
