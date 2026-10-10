@@ -1,9 +1,12 @@
+# Active: OpenSim Contact Grip, OSV-7 Phase 4 #11739
+
+- Branch `claude/osv-7-opensim-contact` (stacked on #11985). `grip_model="contact"` in `export_full_body_osim` builds pad `ContactSphere`s against closed `ContactMesh` cylinders with one `ElasticFoundationForce` per pad (`opensim/python/full_body_grip_contact.py`, `grip_contact_osim_sim.py`, meshes in `grip_contact/grip_mesh.py`). Weld stays default. CPodes is required (RK-Merson needs about 1e-7 s steps); the club is released with the weld velocity.
+- Full swings (CT, accuracy 1e-8): net force peak -2.6 % (driver) and -3.1 % (7-iron) against the bushing; per-hand and internal pairs differ (hyperstatic, section 19). Evidence `evidence/grip_kinetics/contact/opensim_*_acc1e-8_*`. Slow tests run on CT with `-m 'slow or not slow'`.
 # Active: Quarter-Speed Export Variants for Every Engine - GCV-14 #11720
 
 - Branch `claude/gcv-14-speed-variants`, stacked on PR #12004 (kinematic impact time). `video_timing.frame_schedule.SPEED_VARIANTS = (1, 0.5, 0.25)` is the default of `ExportSettings.speeds` and `--speeds`; `motion_matching.export.export_video_variants` writes the same three clips for any engine's candidate (MuJoCo, MyoSuite, Drake, Pinocchio, OpenSim, Simscape logs).
 - Tests: `test_speed_variants_engines.py` (frame counts from the time span for all four native engines, HUD 0 ms at the ball-passage impact) and `test_export.py` (variants per engine).
 - Evidence: only MuJoCo renders on ControlTower (stick figure, no club, 1920x1080, 60 fps). Drake and Pinocchio need `playwright` and its Chromium libraries, OpenSim needs `xwd`, MyoSuite needs `myosuite.envs.env_base` (#11997); none are in the `ud-sim` image and installing them needs root or a new image (owner action).
-
 # Active: Same-Input Parity Design-Manual Chapter - SIP P-9 #11614
 
 - Branch `claude/sip-p9-manual-chapter-11614`; epic #11605. Provisional QMD chapter `manuals/upstreamdrift/chapters/16-same-input-parity.qmd` (renumbered from 14 after `14-muscle-qualification-evidence.qmd` landed) (KKT, closure projection, ZOH RK4, bundle, L0-L3 levels and results, failed experiments, limitations) and registry blocker `UP-D1-same-input-parity-inventory`; registry stays blocked with no calculations. `same_input_parity.tex` cross-links the chapter and compiles with pdflatex.
@@ -13,6 +16,7 @@
 
 - Branch `claude/osv-7-contact-grip` (stacked on #11963). Pad contact grip with pad stiffness matched to the bushing (`grip_contact/pad_layout.py`, `pad_contact.py`); MuJoCo full swing (dt 1e-5 s), Drake and Pinocchio holds; MyoSuite bushing parity passes (worst 0.013 % peak). Quasi-static balance closes (`static_balance.py`). See GRIP_PARITY_DECISIONS.md section 19.
 - Open and flagged: contact per-hand force is about 4x the bushing's with matching net force (indeterminacy, not tuned); no OpenSim contact variant; no full-swing Drake or Pinocchio contact run.
+- #11986 (branch `claude/grip-contact-internal-force`, stacked on `claude/osv-7-contact-grip`): the 4x is not input drift (hand-to-hand drift 4e-13 mm); it is the hyperstatic internal force of two stiff rings (26 to 44 N per micron of mismatch). Friction softening loses the grip. Section 19 "Why the Contact Grip Carries 4 Times". No default changed.
 
 # Active: Lead-Foot Address Corrections - OSV-6 #11737 (Stacked On #12031)
 
