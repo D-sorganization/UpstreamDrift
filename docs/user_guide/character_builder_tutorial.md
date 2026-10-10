@@ -176,6 +176,44 @@ This wrote a 36960-byte URDF and printed `Successfully built character and
 saved to golfer_pro_humanoid.urdf`. Use the spec-native path above for club
 swapping, appearance binding or engine export beyond URDF.
 
+## Desktop Walkthrough
+
+Steps 1, 3 and 4 also run in the desktop builder: the **Character Builder**
+launcher tile, or `python3 -m src.tools.character_builder` on its own. The
+screenshots below come from
+`python3 scripts/capture_character_builder_screenshots.py`, which drives
+the same widget offscreen and regenerates every image in this section.
+
+1. **Pick the preset.** Choose **Tour Average Male** in **Preset**. The form
+   fills with the preset's values (1.80 m, 84.0 kg, driver) and the summary
+   shows the compiled spec, its hash and the preset's limitations.
+
+   ![Desktop builder with the Tour Average Male preset selected](images/character_builder/desktop_01_preset.png)
+
+2. **Override the mass.** Set **Mass (kg)** to 90.0. Any edit switches
+   **Preset** to **Custom** and recompiles at once. The spec hash is
+   `c0e2ca45...`, the same as Step 1, so the desktop and the API compile
+   identical specs. The summary shows 86.6 kg total for the reason given in
+   Step 1 (#12199).
+
+   ![Desktop builder after the mass override, preset now Custom](images/character_builder/desktop_02_mass_override.png)
+
+3. **Swap the club.** Choose **iron7** in **Club**. The hash changes to
+   `9ac415e2...`, as in Step 3.
+
+   ![Desktop builder with the 7-iron, showing the new spec hash](images/character_builder/desktop_03_club_swap.png)
+
+4. **Export.** Each export button asks for a folder and writes one file. The
+   status line names it. Because the edited character is **Custom**, the
+   desktop names its files `custom_<sha8>`, for example
+   `custom_9ac415e2.json`, where the API in Step 4 uses the preset id. The
+   contents are byte-identical for the same hash.
+
+   ![Desktop builder after Export Spec JSON, status line naming the file](images/character_builder/desktop_04_export.png)
+
+The desktop builder has no appearance picker yet. Dress the character
+through the API or the web Appearance panel (Step 2).
+
 ## Step 5: Simulate (Requires MuJoCo)
 
 This step needs the `mujoco` package, which is not installed on every
