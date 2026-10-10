@@ -69,6 +69,9 @@ class PipelineConfig:
     #: Shared club held in both hands (``msk_club.CLUBS``); ``None`` builds
     #: the no-club control model.
     club: str | None = "driver"
+    #: Keep the trail-hand weld in the solved model. Off by default: the IK
+    #: kinematics do not close the two-hand loop (see ``release_trail_weld``).
+    enforce_trail_weld: bool = False
 
     def validate(self) -> None:
         """Raise ``ValueError``/``FileNotFoundError`` on unusable inputs."""
@@ -77,6 +80,10 @@ class PipelineConfig:
         require(
             self.club is None or self.club in msk_club.CLUBS,
             f"club must be None or one of {msk_club.CLUBS}, got {self.club!r}",
+        )
+        require(
+            not self.enforce_trail_weld or self.club is not None,
+            "enforce_trail_weld needs a club",
         )
         for p in (self.golf_model, self.states_file):
             if not Path(p).is_file():
@@ -115,6 +122,17 @@ def prepare_inputs(cfg: PipelineConfig) -> dict[str, Any]:
     model, info = swing.build_musculoskeletal_model(
         cfg.golf_model, cfg.base_model, club=cfg.club
     )
+    if info["club"] is not None:
+        require(
+            info["grip_model"] == "weld",
+            "StaticOptimization needs the weld grip: the bushing club's free "
+            "coordinates have no source kinematics",
+        )
+    released = False
+    if not cfg.enforce_trail_weld:
+        released = swing.release_trail_weld(model)
+        model.initSystem()
+    info["trail_weld_released_for_so"] = released
     model_path = out / "msk_model.osim"
     model.printToXML(str(model_path))
     times, cols = swing.read_states_table(cfg.states_file)
@@ -278,6 +296,14 @@ def build_receipt(
             "grip_model": info["grip_model"],
             "mass_kg": info["club_mass_kg"],
             "grip_calibration": info["grip_calibration"],
+            "trail_weld_released_for_so": info["trail_weld_released_for_so"],
+            "note": (
+                "The IK kinematics do not close the two-hand loop. With the "
+                "trail weld enforced, StaticOptimization could not meet any arm "
+                "coordinate's acceleration (14 arm coordinates at every one of "
+                "the 88 frames tried), so by default the solved model holds the "
+                "club with the lead hand only and the trail hand is free."
+            ),
         },
         "solver": {
             "name": "opensim.StaticOptimization (AnalyzeTool)",

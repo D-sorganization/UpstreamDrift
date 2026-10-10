@@ -67,6 +67,11 @@ def main() -> int:
         action="store_true",
         help="also solve the no-club control and record the club's upper-body load",
     )
+    parser.add_argument(
+        "--enforce-trail-weld",
+        action="store_true",
+        help="keep the trail-hand weld (the IK does not close the two-hand loop)",
+    )
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO)
     cfg = PipelineConfig(
@@ -79,6 +84,7 @@ def main() -> int:
         phase_split_s=args.phase_split,
         base_model=args.base_model,
         club=None if args.club == "none" else args.club,
+        enforce_trail_weld=args.enforce_trail_weld,
     )
     receipt = run_pipeline(
         cfg,

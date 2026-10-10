@@ -96,6 +96,27 @@ def test_club_load_comparison_requires_matching_frames_and_actuators() -> None:
         club_load_comparison(t, acts, t, {"upper_elbow_flex_r": np.zeros(5)})
 
 
+def test_pipeline_config_trail_weld_needs_a_club(tmp_path: Path) -> None:
+    cfg = _config(tmp_path, None)
+    with pytest.raises(ValueError, match="enforce_trail_weld"):
+        PipelineConfig(**{**cfg.__dict__, "enforce_trail_weld": True}).validate()
+
+
+def test_release_trail_weld_opens_the_two_hand_loop() -> None:
+    pytest.importorskip("opensim")
+    try:
+        ms.resolve_base_model()
+    except FileNotFoundError as exc:
+        pytest.skip(str(exc))
+    model, _ = ms.build_musculoskeletal_model(GOLF)
+    constraint = model.getConstraintSet().get(ms.TRAIL_GRIP_CONSTRAINT)
+    assert constraint.get_isEnforced()
+    assert ms.release_trail_weld(model) is True
+    assert not constraint.get_isEnforced()
+    control, _ = ms.build_musculoskeletal_model(GOLF, club=None)
+    assert ms.release_trail_weld(control) is False
+
+
 def test_build_model_without_club_is_the_control() -> None:
     pytest.importorskip("opensim")
     try:

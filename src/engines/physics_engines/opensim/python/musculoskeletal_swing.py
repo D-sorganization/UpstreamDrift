@@ -35,7 +35,10 @@ from typing import Any
 import numpy as np
 from scipy.signal import butter, filtfilt
 
-from src.engines.physics_engines.opensim.python.msk_club import FREE_COORDINATES
+from src.engines.physics_engines.opensim.python.msk_club import (
+    FREE_COORDINATES,
+    TRAIL_CONSTRAINT as TRAIL_GRIP_CONSTRAINT,
+)
 from src.shared.python.contracts import ensure, require
 
 logger = logging.getLogger(__name__)
@@ -425,6 +428,24 @@ def _with_golf_club(model: Any, golf_path: Path, club: str) -> tuple[Any, dict]:
             "club_mass_kg": float(shared.dynamics.mass_kg),
         }
         return osim.Model(str(path)), record
+
+
+def release_trail_weld(model: Any) -> bool:
+    """Stop enforcing the trail-hand ``WeldConstraint`` of ``model``.
+
+    StaticOptimization prescribes every coordinate from the IK kinematics,
+    which do not close the two-hand loop; with the trail weld enforced the
+    arm accelerations cannot all be met. Releasing it leaves the club on the
+    lead hand only. Returns ``True`` when a trail weld was released and
+    ``False`` when the model has none (the no-club control). Call before
+    ``initSystem``.
+    """
+    constraints = model.updConstraintSet()
+    if not constraints.contains(TRAIL_GRIP_CONSTRAINT):
+        return False
+    constraint = constraints.get(TRAIL_GRIP_CONSTRAINT)
+    constraint.set_isEnforced(False)
+    return True
 
 
 def _replace_actuators(
