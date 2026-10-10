@@ -76,14 +76,20 @@ class DrakeFullBodyIK(BaseFullBodyIK):
                 k: (b, np.asarray(off, dtype=float))
                 for k, (b, off) in attachments.items()
             }
+            self.marker_bodies = sorted({b for b, _ in self._marker_info.values()})
         else:
+            # Spec attachments carry ``offset_m``; a null offset marks an
+            # uncalibrated marker that cannot be placed on the model.
             raw = self.specification.get("marker_attachments", {})
             self._marker_info = {
-                k: (v["body"], np.asarray(v["offset"], dtype=float))
+                k: (v["body"], np.asarray(v["offset_m"], dtype=float))
                 for k, v in raw.items()
+                if v.get("offset_m") is not None
             }
+        # Without explicit attachments, ``marker_bodies`` keeps the base-class
+        # set of every spec-referenced body, so ``pose_fn`` still covers bodies
+        # whose markers are not yet calibrated.
         self.labels = tuple(self._marker_info.keys())
-        self.marker_bodies = sorted({b for b, _ in self._marker_info.values()})
 
         self._marker_frames: dict[str, tuple[Any, Array]] = {}
         for label, (body, offset) in self._marker_info.items():
