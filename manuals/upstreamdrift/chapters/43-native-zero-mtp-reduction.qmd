@@ -1,0 +1,89 @@
+# Source-Bound Native Zero-MTP Reduction
+
+This provisional F07 calculation, issue #12150 under #11791, creates a *new*
+OpenSim artifact by replacing only the right and left locked metatarsophalangeal
+(MTP) PinJoints with WeldJoints. The unchanged Rajagopal-Lai-Uhlrich source and
+the scaled, club-bearing mixed-actuation factory are separate inputs. The latter
+already changes scale, body properties, wrist/subtalar locks, grip and assistance;
+passing the reduction does not validate those earlier construction decisions.
+
+## Declared Source and State Domain
+
+`native_mtp_reduction.py` requires the exact source XML SHA-256, an absent
+output path, and the ordered target declarations
+`((mtp_angle_r, 0 rad), (mtp_angle_l, 0 rad))`. It rejects any other target,
+non-PinJoint or partial MTP replacement, source/default or achieved nonzero
+value or speed, changed lock/clamp option, prescription, and a clamped zero
+target on a range boundary. The actual Rajagopal MTP coordinates are clamped
+but zero lies strictly within both native ranges. An XML dependency scan rejects
+remaining references to either removed coordinate outside its joint; native
+model initialization and inventory checks reject dangling components. The
+operation never changes or writes the source. The output is serialized,
+freshly loaded and compared; the receipt binds source/output/reducer hashes,
+native version and loaded OpenSim extension hashes. The source XML hash covers
+the entrypoint artifact, not a transitive visual-mesh/resource closure.
+
+Both native models initialize using OpenSim's own `initSystem`, which may
+assemble. Every surviving named continuous state value from the source's
+achieved initialized state is then copied exactly to the reduced state. Two
+further comparisons separately perturb the right ankle and pelvis-tilt
+coordinates by 0.01 rad and their speeds by 0.02 rad/s, if both are unlocked
+and the perturbation stays within the source range. Actual donor and factory
+tests require all three samples. These samples do not establish equality over
+a full trajectory, wrap-route changes or all 39 source coordinates.
+
+## Mechanical Equivalence Calculation
+
+For each common coordinate name, let a native unit-speed probe define one
+column of $P_s$ in the source mobility ordering and $P_d$ in the derived
+ordering. The derived map must have full row rank. The explicitly checked
+source lift is $L=P_sP_d^+$, with $P_s=LP_d$ to numerical tolerance. Full native
+mass matrices and total applied generalized force vectors at the *same* named
+continuous state then obey the tested reductions
+
+$$M_d=L^\mathsf{T}M_sL,\qquad f_d=L^\mathsf{T}f_s.$$
+
+Here $f=J_{\mathrm{system}}^\mathsf{T}F_{\mathrm{body}}+f_{\mathrm{mobility}}$;
+native body spatial forces include gravity and muscle forces. A synthetic
+2 kg offset-mass PinJoint confirms that the mobility cache alone is zero
+while the body-force projection is about $-19.6133$ N·m. The calculation does
+not conflate total applied forces with inertial bias or constraint reactions.
+
+The code also reports common-coordinate projections $P^\mathsf{T}MP$ and
+$P^\mathsf{T}f$, body ground transforms and spatial velocities, muscle path
+lengths, and native position/velocity constraint residuals. It requires
+unchanged ordered body, muscle, actuator and constraint inventories and native
+muscle properties. Errors are reported individually in each native quantity's
+units; the fixture admission tolerance is $10^{-10}$ in those units. A sampled
+mass/force and transform agreement is mechanical evidence, not an anatomy,
+passive-force or transcription certificate. In particular the fixed MTP lock
+reaction is not separately identified as a pin mobilizer reaction and cannot
+be equated to the weld reaction without combining all source constraint loads.
+
+## Executed Native Evidence and Limits
+
+OpenSim `4.6-2026-06-22-85aaf64` passed eleven actual-native tests. A synthetic
+nonzero locked PinJoint at 0.3 rad rejects before output, consistent with a
+retained independent stock-operator counterexample showing 0.263874 transform
+component error when that target is welded. An actuator referencing a removed
+coordinate, changed source bytes, partial declaration, nonzero locked speed and
+unlocked coordinate reject. The exact retained donor source SHA-256 is
+`8708ed0d6a212080a72b9c277071ddd12939c8306efceb3ee4a9592735f43f80`.
+Its 80 Millard muscles and 17 CoordinateActuators remain. The separately
+serialized scaled/club factory uses golf-model SHA-256
+`6b314c9607433d4a37129c1150ec7d5dc37ce74d1d8094c4f334983f5ab576f5`.
+At the initialized, ankle-varied and pelvis-varied native poses, both freshly reloaded outputs
+had zero reported body-transform, spatial-velocity, muscle-length, projected
+mass/force, and full-lift mass/force differences; the scaled/club maximum
+position/velocity constraint residual was $5.55\times10^{-16}$ in native units.
+These values are source/runtime-specific diagnostic observations. The
+repository turnover records exact commands and output hashes.
+
+The original 80-muscle source still has six other locked joints, knee couplers,
+no foot contact and no golfer-calibrated arm/trunk muscles. The derived factory
+retains explicit upper/root/reserve torque assistance; it is not a pure-muscle
+endpoint. Full-state numerical restart, time-varying native controls, active
+wrap transitions, per-muscle force/power and active-wrap equivalence at multiple
+constraint-consistent velocities, actual Moco feasibility and independent full-horizon excitation
+replay remain separate gates. All 17 model variants and six engine families
+remain in the epic denominator.
