@@ -2,7 +2,7 @@
   "club": "driver",
   "engine": "opensim_contact",
   "integrator": "OpenSim Manager, CPodes, error controlled",
-  "accuracy": 1e-06,
+  "accuracy": 1e-6,
   "wall_time_s": 229.45561768999323,
   "build_time_s": 2.375724304933101,
   "squeeze_per_hand_n": 1104.2355584729612,

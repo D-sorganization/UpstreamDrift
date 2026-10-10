@@ -393,7 +393,9 @@ def simulation_history(
     weight_n = sim.mass_kg * float(np.linalg.norm(sim.gravity))
     groups = _side_groups(list(adapter._spheres))
     positions, ratios = [], []
-    for q, v in zip(record.q, record.v, strict=True):
+    for q_row, v_row in zip(record.q, record.v, strict=True):
+        q = np.asarray(q_row, dtype=float)
+        v = np.asarray(v_row, dtype=float)
         positions.append(_sphere_centres(sim, q))
         samples = adapter.evaluate_contact_samples(sim._map(q), sim._map(v))
         ratios.append(_foot_friction_ratio(samples, groups, n, weight_n))
