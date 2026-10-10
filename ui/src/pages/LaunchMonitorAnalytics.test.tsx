@@ -111,7 +111,12 @@ const SAMPLE_RESULT: LaunchMonitorAnalysisResultV2 = {
   warnings: [],
 };
 
-const { runFlexibleAnalysisV2Mock, fetchCapabilitiesMock } = vi.hoisted(() => ({
+const {
+  runFlexibleAnalysisV2Mock,
+  fetchCapabilitiesMock,
+  analyzeRelationshipsV2Mock,
+  analyzeMultivariateV2Mock,
+} = vi.hoisted(() => ({
   runFlexibleAnalysisV2Mock: vi.fn(),
   fetchCapabilitiesMock: vi.fn(async () => ({
     analysis_modes: ["comprehensive", "correlation", "regression"],
@@ -119,6 +124,8 @@ const { runFlexibleAnalysisV2Mock, fetchCapabilitiesMock } = vi.hoisted(() => ({
     missing_policies: ["pairwise", "listwise", "fail"],
     maximum_inline_records: 20_000,
   })),
+  analyzeRelationshipsV2Mock: vi.fn(),
+  analyzeMultivariateV2Mock: vi.fn(),
 }));
 
 vi.mock("@/api/launchMonitorAnalytics", async (importOriginal) => {
@@ -128,6 +135,8 @@ vi.mock("@/api/launchMonitorAnalytics", async (importOriginal) => {
     ...actual,
     fetchLaunchMonitorAnalyticsCapabilities: fetchCapabilitiesMock,
     runFlexibleAnalysisV2: runFlexibleAnalysisV2Mock,
+    analyzeRelationshipsV2: analyzeRelationshipsV2Mock,
+    analyzeMultivariateV2: analyzeMultivariateV2Mock,
   };
 });
 
@@ -146,6 +155,8 @@ describe("LaunchMonitorAnalyticsPage", () => {
   beforeEach(() => {
     runFlexibleAnalysisV2Mock.mockReset();
     fetchCapabilitiesMock.mockClear();
+    analyzeRelationshipsV2Mock.mockReset();
+    analyzeMultivariateV2Mock.mockReset();
   });
 
   it("parses a loaded CSV and shows row/column counts and numeric options", async () => {
