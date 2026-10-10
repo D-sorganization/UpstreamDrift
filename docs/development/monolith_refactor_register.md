@@ -16,7 +16,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1638 | `src/tools/launch_monitor_analytics/gui.py`                                                                                                                                   |
 | 1584 | `src/shared/python/motion_matching/full_body_forward_dynamics.py`                                                                                                             |
 | 1465 | `src/shared/python/motion_matching/acceptance.py`                                                                                                                             |
-| 1333 | `src/shared/python/motion_matching/pipeline/cli.py`                                                                                                                           |
+| 1342 | `src/shared/python/motion_matching/pipeline/cli.py`                                                                                                                           |
 | 1319 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/scripts/dataset_generator/runSimulation.m`                                                                    |
 | 1199 | `src/api/services/simulation_service.py`                                                                                                                                      |
 | 1199 | `src/launchers/launcher_model_handlers.py`                                                                                                                                    |
@@ -176,11 +176,11 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 |  830 | `src/research/deformable/objects.py`                                                                                                                                          |
 |  830 | `src/shared/python/motion_pipeline/preprocessing/gap_fill.py`                                                                                                                 |
 |  828 | `src/bunkershot3d/solvers/envelope.py`                                                                                                                                        |
+|  828 | `src/shared/python/motion_matching/pipeline/lane.py`                                                                                                                          |
 |  822 | `src/tools/capture_rig/layout_editor.py`                                                                                                                                      |
 |  820 | `src/shared/python/motion_matching/pipeline/dynamics.py`                                                                                                                      |
 |  819 | `src/shared/python/model_generation/converters/simscape/simscape_converter.py`                                                                                                |
 |  819 | `src/shared/python/motion_matching/club_only/ui_integration.py`                                                                                                               |
-|  816 | `src/shared/python/motion_matching/pipeline/lane.py`                                                                                                                          |
 |  813 | `src/engines/physics_engines/drake/python/src/drake_golf_model.py`                                                                                                            |
 |  813 | `src/robotics/control/whole_body/wbc_controller.py`                                                                                                                           |
 |  813 | `src/shared/python/gui_pkg/help_system.py`                                                                                                                                    |
