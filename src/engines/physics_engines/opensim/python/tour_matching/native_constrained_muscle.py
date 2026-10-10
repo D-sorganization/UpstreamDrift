@@ -251,7 +251,7 @@ def _bundle_for(
         names = tuple(muscles.get(i).getName() for i in range(muscles.getSize()))
         state_names = tuple(declaration.named_state)
         options = native_muscle_bundle._registered_options(model, state, muscles)
-        coupled_rotation_paths = frozenset()
+        coupled_rotation_paths: frozenset[str] = frozenset()
         if exact_557:
             from .native_exact_557_profile import COUPLED_ROTATION_PATHS
 
