@@ -1662,6 +1662,15 @@ export interface FeatureReportModel {
 }
 
 /**
+ * Serialized form of one :class:`FilterRule`. ``operator`` is restricted to the operators :class:`FilterRule` accepts; ``value`` is the raw text the desktop filter table's value cell holds (``_filter_rules``), passed through verbatim.
+ */
+export interface FilterRulePayload {
+  column: string;
+  operator: "eq" | "ne" | "lt" | "le" | "gt" | "ge" | "contains" | "in";
+  value: string;
+}
+
+/**
  * Serialized form of :class:`FlexibleAnalysisRequest`.
  */
 export interface FlexibleAnalysisPayload {
@@ -3495,6 +3504,18 @@ export interface TransformRecordV2 {
   transform_id: string;
   version: string;
   parameters_sha256: string;
+}
+
+/**
+ * Bounded inline records and the PyQt Data Treatment tab's widget inputs. Mirrors ``_read_treatment_config`` from ``src/tools/launch_monitor_analytics/gui.py``: ``robust_z_threshold`` keeps the same default and ``[1, 20]`` range as the "Modified Z Threshold" spinbox (``_build_treatment_tab``), and ``required_metrics``/ ``outlier_metrics`` behave like the comma-separated text fields — whitespace-only or empty entries are dropped — so the API and desktop paths accept identical inputs for :func:`apply_treatment`.
+ */
+export interface TreatmentPayloadV2 {
+  records: Record<string, unknown>[];
+  required_metrics?: string[];
+  outlier_metrics?: string[];
+  robust_z_threshold: number;
+  exclude_flagged: boolean;
+  filters?: FilterRulePayload[];
 }
 
 /**

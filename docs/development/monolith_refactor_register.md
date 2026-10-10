@@ -44,6 +44,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1152 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_widget.py`                                                                                                |
 | 1150 | `src/shared/python/chat/_chat_dock_widget_qt.py`                                                                                                                              |
 | 1146 | `src/tools/model_explorer/model_loader_dialog.py`                                                                                                                             |
+| 1139 | `src/api/routes/launch_monitor_analytics.py`                                                                                                                                  |
 | 1134 | `src/shared/python/shadow_tracker/segmentation.py`                                                                                                                            |
 | 1134 | `src/tools/model_explorer/model_library.py`                                                                                                                                   |
 | 1128 | `src/tools/starting_pose_matcher/gui_main_widget.py`                                                                                                                          |
@@ -82,7 +83,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1003 | `src/engines/model_inventory.py`                                                                                                                                              |
 | 1000 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/integrated_golf_gui_r0/golf_opengl_renderer.py` |
 |  999 | `src/shared/python/estimation/dime_contracts.py`                                                                                                                              |
-|  998 | `src/api/routes/launch_monitor_analytics.py`                                                                                                                                  |
 |  993 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/physics_engine.py`                                                                                            |
 |  990 | `src/engines/physics_engines/drake/python/motion_matching/simulate.py`                                                                                                        |
 |  990 | `src/shared/python/motion_matching/full_body_ik.py`                                                                                                                           |
