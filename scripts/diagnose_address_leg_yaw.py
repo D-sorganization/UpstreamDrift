@@ -30,7 +30,8 @@ from src.shared.python.motion_matching.hip_calibration import (
 )
 from src.shared.python.motion_matching.pipeline import cli
 
-LEG_BODIES = ("pelvis", "femur_r", "femur_l", "tibia_r", "tibia_l")
+PELVIS_FRAME = "Hip"  # the spec's pelvis frame (Simscape LowerTorso)
+LEG_BODIES = (PELVIS_FRAME, "femur_r", "femur_l", "tibia_r", "tibia_l")
 SIDES = (("right", "R", 0), ("left", "L", 1))
 
 
@@ -131,7 +132,7 @@ def diagnose(ns: argparse.Namespace) -> dict[str, Any]:
     cap = leg_headings(capture, hips)
     mod = leg_headings(model, hips)
     names = list(kin.coordinate_order)
-    pelvis_r = np.asarray(poses["pelvis"][0], dtype=float)
+    pelvis_r = np.asarray(poses[PELVIS_FRAME][0], dtype=float)
     report: dict[str, Any] = {
         "capture": ns.capture,
         "engine": ns.engine,
