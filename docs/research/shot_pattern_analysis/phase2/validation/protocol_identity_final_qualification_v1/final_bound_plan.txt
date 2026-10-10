@@ -1,0 +1,3 @@
+Verified 384 distinct stems and 6144 distinct figure paths.
+Summary written to: /tmp/shot-pattern-protocol-identity-final-review/inventory_384_planned_paths.json
+PASS:384 pairs,26 cells,6456 planned paths; exact seven numerical files unchanged

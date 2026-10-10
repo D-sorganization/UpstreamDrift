@@ -20,7 +20,7 @@ the [Reviewed Design PDF](../../../docs/research/shot_pattern_analysis/phase2/ma
 the [Nominal Matching Bounds Supplement](../../../docs/research/shot_pattern_analysis/phase2/BOUNDS_SUPPLEMENT.md)
 ([editable LaTeX](../../../docs/research/shot_pattern_analysis/phase2/BOUNDS_SUPPLEMENT.tex)),
 and [Turnover](../../../docs/research/shot_pattern_analysis/phase2/TURNOVER.md).
-The commands and results below describe the historical phase-one controls.
+The phase-one section below preserves the historical controls.
 The original and supplemental final matrices are complete, and their saved-data
 independent audits and archive-restoration checks have passed. Final figure
 regeneration and publication review are underway; no final study conclusion is
@@ -74,6 +74,16 @@ QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg \
 The final research matrix uses exactly 10,000 shots per pattern and requires a
 reviewed acceptance JSON matching current source, runtime and evidence hashes.
 See the phase-two Turnover for final run commands and archive restoration.
+
+### Publication Identity and Numerical Parity
+
+The supplemental publisher derives filenames from the ordered source protocols,
+cell identities and exact target distance. It rejects planned collisions before
+statistics, uses suffix-safe cell names, and verifies output hashes and path
+uniqueness before writing the final receipt. Pure naming helpers live in
+`matched_figure_identity.py` and are exposed through the figure module.
+For recovery against unchanged source locations, `--expected-numeric-hashes`
+binds all seven numerical artifacts before rendering; see the reproduction guide.
 
 ## Run a Historical Phase-One Analysis
 

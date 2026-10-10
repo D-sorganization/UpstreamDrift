@@ -1,0 +1,143 @@
+"""Guarded protocol-name recovery from saved data; never simulates new shots."""
+import argparse
+import datetime
+import hashlib
+import json
+import os
+from pathlib import Path
+import subprocess
+
+MAIN = Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift')
+WORK = Path('/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift')
+PHASE = MAIN / 'docs/research/shot_pattern_analysis/phase2'
+OUT = PHASE / 'supplement_report_v1'
+EVIDENCE = PHASE / 'validation/supplement_rendering_revision_v6'
+BASELINE = PHASE / 'validation/protocol_name_recovery_v6/frozen_snapshot.json'
+BASELINE_SHA = '707dd1406687e0ce74d0bceeb9aaacdb904974ec95d82f10450488e89d818715'
+SNAPSHOT_KEYS = ('candidate_commit', 'worktree', 'source_sha256', 'review_sha256', 'native_path', 'native_sha256', 'vendor_gitlink', 'input_sha256', 'producer_sha256', 'execution')
+
+def baseline():
+    if sha(BASELINE) != BASELINE_SHA:
+        raise ValueError('Qualified recovery snapshot changed')
+    return json.loads(BASELINE.read_text())
+
+def validate_bound_snapshot(actual, expected):
+    if set(actual) != set(SNAPSHOT_KEYS) or actual != {k: expected[k] for k in SNAPSHOT_KEYS}:
+        raise ValueError('Candidate differs from qualified recovery snapshot')
+REVIEW = PHASE / 'validation/protocol_identity_final_qualification_v1/review.json'
+CANDIDATE = '4023111d2aaf8b20449a36f8691a295f4a94ceff'
+CHANGED = {'src/tools/shot_pattern_analysis/matched_figure_identity.py', 'src/tools/shot_pattern_analysis/matched_supplement_figures.py', 'src/tools/shot_pattern_analysis/matched_supplement_pipeline.py'}
+PYTHON = '/tmp/shot-pattern-validation-venv-20261009/bin/python'
+
+MATRIX_FLAGS = {
+    '--original-primary': 'final_v1',
+    '--original-control': 'control_final_v1',
+    '--pw-primary-face-bounds': 'supplement_final_v1/pw_primary_face',
+    '--pw-control-face-bounds': 'supplement_final_v1/pw_control_face',
+    '--driver-control-speed-bounds': 'supplement_final_v1/driver_control_speed',
+}
+EXPECTED_FLAGS = {key: str(PHASE / value) for key, value in MATRIX_FLAGS.items()}
+EXPECTED_FLAGS.update({
+    '--inventory': str(PHASE / 'review_followups/SUPPLEMENTAL_EXECUTION_INVENTORY.json'),
+    '--transition-receipt': str(PHASE / 'source_transition_supplement.json'),
+    '--transition-sha256': 'cf622694964b0dc6c2ca0c24b92f9fa8ee5365721219069283aca1f6804a8981',
+    '--output-dir': str(OUT),
+    '--expected-numeric-hashes': str(PHASE / 'validation/protocol_name_recovery_v6/expected_numeric_hashes.json'),
+})
+
+def validate_command(command):
+    expected = [PYTHON, '-m', 'src.tools.shot_pattern_analysis.matched_supplement_pipeline']
+    expected.extend(part for pair in EXPECTED_FLAGS.items() for part in pair)
+    if command != expected:
+        raise ValueError('Actual CLI inputs differ from the bound canonical command')
+
+def validate_execution(actual, expected):
+    if actual != expected:
+        raise ValueError('Scientific source, native binary, contact backend or numerical runtime differs')
+
+def sha(path):
+    with path.open('rb') as f:
+        return hashlib.file_digest(f, 'sha256').hexdigest()
+
+def sources(root):
+    return {str(p.relative_to(root)): sha(p) for b in ['src/tools/shot_pattern_analysis', 'scripts/research/shot_pattern_analysis'] for p in sorted((root / b).rglob('*.py'))}
+
+def git(root, *args):
+    return subprocess.check_output(['git', '-C', str(root), *args], text=True).strip()
+
+def capture():
+    assert Path.cwd().resolve() == WORK
+    from src.tools.shot_pattern_analysis import matched_supplement_pipeline as pipeline
+    assert Path(pipeline.__file__).resolve() == WORK / 'src/tools/shot_pattern_analysis/matched_supplement_pipeline.py'
+    assert git(WORK, 'rev-parse', 'HEAD') == CANDIDATE
+    assert not git(WORK, 'status', '--porcelain')
+    bound = baseline()
+    own = sources(WORK)
+    assert own == bound['source_sha256']
+    review = json.loads(REVIEW.read_text())
+    assert review['accepted'] is True and review['candidate_commit'] == CANDIDATE
+    assert all(review['source_sha256'][p] == own[p] for p in CHANGED)
+    preflight = bound
+    from src.tools.shot_pattern_analysis.matched_export import matched_source_snapshot
+    execution = matched_source_snapshot()
+    validate_execution(execution, preflight['execution'])
+    native = Path(preflight['execution']['native_binary_path'])
+    assert sha(native) == preflight['execution']['native_binary_sha256']
+    pin = git(WORK, 'rev-parse', 'HEAD:vendor/ud-tools')
+    assert pin == '3678409fc51024150ab28970b72e3b468935f345'
+    assert git(WORK / 'vendor/ud-tools', 'rev-parse', 'HEAD') == pin
+    paths = [Path(EXPECTED_FLAGS[flag]) / 'matrix_plan.json' for flag in MATRIX_FLAGS]
+    paths += [PHASE / 'review_followups/SUPPLEMENTAL_EXECUTION_INVENTORY.json', PHASE / 'source_transition_supplement.json', PHASE / 'common_targets.json', PHASE / 'control_pilot_v1/matrix_plan.json']
+    paths.append(Path(EXPECTED_FLAGS['--expected-numeric-hashes']))
+    actual = {'candidate_commit': CANDIDATE, 'worktree': str(WORK), 'source_sha256': own, 'review_sha256': sha(REVIEW), 'native_path': str(native), 'native_sha256': sha(native), 'vendor_gitlink': pin, 'input_sha256': {str(p): sha(p) for p in paths}, 'producer_sha256': pipeline._report_source_hashes(), 'execution': execution}
+    validate_bound_snapshot(actual, bound)
+    return actual
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--preflight-only', action='store_true')
+    args = parser.parse_args()
+    assert not OUT.exists(), 'Preserve rejected output first; never overwrite it.'
+    snap = capture()
+    command = baseline()['command']
+    validate_command(command)
+    assert sha(Path(EXPECTED_FLAGS['--transition-receipt'])) == EXPECTED_FLAGS['--transition-sha256']
+    EVIDENCE.mkdir(exist_ok=True)
+    preflight = {'status': 'preflight_pass_not_launched', 'wrapper_sha256': sha(Path(__file__)), 'frozen_snapshot_sha256': BASELINE_SHA, 'command': command, **snap}
+    path = EVIDENCE / 'preflight.json'
+    if args.preflight_only:
+        path.write_text(json.dumps(preflight, indent=2)+'\n')
+        (EVIDENCE / 'executed_wrapper.py.txt').write_bytes(Path(__file__).read_bytes())
+        print('Preflight passed; no rendering launched.', flush=True)
+        return
+    assert json.loads(path.read_text()) == preflight
+    env = {**os.environ, 'PYTHONPATH': str(WORK), 'QT_QPA_PLATFORM': 'offscreen', 'MPLBACKEND': 'Agg', 'MUJOCO_GL': 'egl', 'SDL_VIDEODRIVER': 'dummy', 'OPENBLAS_NUM_THREADS': '1'}
+    record = {'status': 'running', 'started_utc': datetime.datetime.now(datetime.timezone.utc).isoformat(), 'wrapper_sha256': sha(Path(__file__)), 'preflight_sha256': sha(path), 'command': command, **snap}
+    (EVIDENCE / 'start.json').write_text(json.dumps(record, indent=2)+'\n')
+    code = 1
+    try:
+        result = subprocess.run(command, cwd=WORK, env=env)
+        record['process_exit_code'] = result.returncode
+        validate_bound_snapshot(capture(), baseline())
+        from src.tools.shot_pattern_analysis.matched_export import matched_source_snapshot
+        validate_execution(matched_source_snapshot(), snap['execution'])
+        assert sha(REVIEW) == snap['review_sha256']
+        assert sha(Path(snap['native_path'])) == snap['native_sha256']
+        assert all(sha(Path(p)) == expected for p, expected in snap['input_sha256'].items())
+        assert git(WORK / 'vendor/ud-tools', 'rev-parse', 'HEAD') == snap['vendor_gitlink']
+        if result.returncode:
+            raise RuntimeError(f'Pipeline exit {result.returncode}')
+        receipt = OUT / 'REPORT_SUPPLEMENT_PIPELINE.json'
+        assert receipt.is_file()
+        record['pipeline_receipt_sha256'] = sha(receipt)
+        record['status'] = 'completed_pending_full_independent_acceptance'
+        code = 0
+    except Exception as exc:
+        record.update(status='failed_not_accepted', error=repr(exc))
+    finally:
+        record['finished_utc'] = datetime.datetime.now(datetime.timezone.utc).isoformat()
+        (EVIDENCE / 'exit.json').write_text(json.dumps(record, indent=2)+'\n')
+    raise SystemExit(code)
+
+if __name__ == '__main__':
+    main()

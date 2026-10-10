@@ -1,0 +1,88 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+_______ test_builder_rejects_invalid_completed_figure_ledger[duplicate] ________
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2319/test_builder_rejects_invalid_c0')
+small_pipeline = ({'original_primary_root': PosixPath('/tmp/pytest-of-dieterolson/pytest-2319/test_builder_rejects_invalid_c0/primary')...ventory_path': PosixPath('/tmp/pytest-of-dieterolson/pytest-2319/test_builder_rejects_invalid_c0/inventory'), ...}, [])
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x77a7ca424d40>
+defect = 'duplicate'
+
+    @pytest.mark.parametrize("defect", ["duplicate", "wrong_hash"])
+    def test_builder_rejects_invalid_completed_figure_ledger(
+        tmp_path, small_pipeline, monkeypatch, defect
+    ):
+        args, _ = small_pipeline
+    
+        def render(ref, figure_dir):
+            figure_dir.mkdir(parents=True, exist_ok=True)
+            image = figure_dir / "one.png"
+            image.write_bytes(b"image")
+            row = {"relative_path": "one.png", "sha256": module._sha256(image)}
+            if defect == "duplicate":
+                return [row, {**row, "relative_path": "./one.png"}]
+            return [{**row, "sha256": "0" * 64}]
+    
+        monkeypatch.setattr(module, "_render_cell_figures", render)
+>       with pytest.raises(ValueError, match="duplicate|changed"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_supplement_numeric_parity_guard.py:331: Failed
+_______ test_builder_rejects_invalid_completed_figure_ledger[wrong_hash] _______
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2319/test_builder_rejects_invalid_c1')
+small_pipeline = ({'original_primary_root': PosixPath('/tmp/pytest-of-dieterolson/pytest-2319/test_builder_rejects_invalid_c1/primary')...ventory_path': PosixPath('/tmp/pytest-of-dieterolson/pytest-2319/test_builder_rejects_invalid_c1/inventory'), ...}, [])
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x77a7c98f3e90>
+defect = 'wrong_hash'
+
+    @pytest.mark.parametrize("defect", ["duplicate", "wrong_hash"])
+    def test_builder_rejects_invalid_completed_figure_ledger(
+        tmp_path, small_pipeline, monkeypatch, defect
+    ):
+        args, _ = small_pipeline
+    
+        def render(ref, figure_dir):
+            figure_dir.mkdir(parents=True, exist_ok=True)
+            image = figure_dir / "one.png"
+            image.write_bytes(b"image")
+            row = {"relative_path": "one.png", "sha256": module._sha256(image)}
+            if defect == "duplicate":
+                return [row, {**row, "relative_path": "./one.png"}]
+            return [{**row, "sha256": "0" * 64}]
+    
+        monkeypatch.setattr(module, "_render_cell_figures", render)
+>       with pytest.raises(ValueError, match="duplicate|changed"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_supplement_numeric_parity_guard.py:331: Failed
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/tools/shot_pattern_analysis/test_supplement_numeric_parity_guard.py::test_builder_rejects_invalid_completed_figure_ledger[duplicate]
+FAILED tests/tools/shot_pattern_analysis/test_supplement_numeric_parity_guard.py::test_builder_rejects_invalid_completed_figure_ledger[wrong_hash]
+2 failed, 14 deselected, 6 warnings in 4.47s

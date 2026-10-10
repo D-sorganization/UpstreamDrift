@@ -1,0 +1,11 @@
+{
+  "scope": "Rejected V5 Exact-Byte Preservation Before Fresh Recovery",
+  "relocated_utc": "2026-10-10T15:18:50.752443+00:00",
+  "original_root": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1",
+  "preserved_root": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/presentation_preview_rejected_supplement_v5/supplement_report_v1",
+  "stop_inventory_sha256": "3440f8d1d7a616814e95f7465553fdf125d809d9b47df9c8c6eceac0f5aa23bd",
+  "file_count": 2594,
+  "before_and_after_all_hashes_equal": true,
+  "canonical_output_absent": true,
+  "publication_accepted": false
+}

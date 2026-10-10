@@ -1,0 +1,545 @@
+"""Portable unit tests for deterministic protocol-qualified comparison figure identity (issue #12139).
+
+Verifies that:
+1. Two actual colliding identity fixtures (driver curve_strength across primary vs control)
+   produce distinct canonical identities and distinct stems without file overwrite.
+2. Exact full ordered identity drives slugs via unambiguous JSON serialization:
+   - Close targets (e.g. 100.0001 vs 100.0002) produce distinct slugs.
+   - Delimiter-ambiguous identities (e.g. p0="a_b", c0="c" vs p0="a", c0="b_c") produce distinct slugs.
+   - Swapped sources (first vs second) produce distinct slugs and identities.
+3. Strict validation:
+   - Non-string protocol/cell/comparison IDs rejected (no silent str coercion).
+   - Surrounding whitespace rejected (no merging of distinct identities).
+   - Non-finite and bool targets rejected.
+4. Preflight planned figure identities helper:
+   - Rejects duplicate generated stems in cells/ and comparisons/ namespaces before rendering.
+   - Rejects repeated ordered identities and colliding stems across different protocols.
+   - Validates required fields and types.
+   - Keeps cells/ and comparisons/ namespaces distinct.
+"""
+
+from __future__ import annotations
+
+import gzip
+import hashlib
+import json
+from pathlib import Path
+from typing import Any
+
+import pytest
+
+pytestmark = pytest.mark.unit
+
+
+def _write_synthetic_cell(
+    cell_dir: Path,
+    *,
+    club_id: str = "driver",
+    lean_deg: float = 5.0,
+    curve_scale: float = 1.0,
+    target_x_m: float = 108.02738606179851,
+    rotation_sd: float = 1.0,
+    profile: str = "combined2",
+    protocol_id: str = "original_primary/1",
+    n_shots: int = 10,
+) -> dict[str, Any]:
+    """Create a valid synthetic cell directory."""
+    cell_dir.mkdir(parents=True, exist_ok=True)
+    shots_file = cell_dir / "shots.csv.gz"
+    lines = ["shot_index,pattern,status,carry_x_m,carry_y_m"]
+    for i in range(n_shots):
+        for pattern in ("Straight", "Draw", "Fade"):
+            lines.append(f"{i},{pattern},supported,{target_x_m + i * 0.1},{i * 0.05}")
+    csv_bytes = "\n".join(lines).encode("utf-8")
+    with gzip.open(shots_file, "wb") as gz:
+        gz.write(csv_bytes)
+
+    flight_file = cell_dir / "flight_samples.json"
+    flight_data = {
+        "trajectories": {
+            pattern: [[[0.0, 0.0], [target_x_m * 0.5, 2.0], [target_x_m, 0.0]]]
+            for pattern in ("Straight", "Draw", "Fade")
+        }
+    }
+    flight_bytes = json.dumps(flight_data).encode("utf-8")
+    flight_file.write_bytes(flight_bytes)
+
+    manifest = {
+        "files": {
+            "shots.csv.gz": hashlib.sha256(csv_bytes).hexdigest(),
+            "flight_samples.json": hashlib.sha256(flight_bytes).hexdigest(),
+        }
+    }
+    (cell_dir / "manifest.json").write_text(json.dumps(manifest))
+
+    cell_name = f"{club_id}_lean{int(lean_deg)}_curve{int(curve_scale)}_rotation1_{profile}"
+    return {
+        "cell": cell_name,
+        "source_root": str(cell_dir.parent),
+        "source_protocol": protocol_id,
+        "status": "completed",
+        "config": {
+            "club": {"club_id": club_id, "shaft_lean_deg": lean_deg},
+            "curve_scale": curve_scale,
+            "noise": {
+                "standard_deviations": [rotation_sd, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                "correlation": None,
+            },
+            "n_shots": n_shots,
+        },
+        "summary": {"target_x_m": target_x_m},
+    }
+
+
+def _create_actual_colliding_pair_fixtures(root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Construct the two actual colliding comparison pair fixtures from the review inventory."""
+    p1_root = root / "primary"
+    c1_dir = p1_root / "driver_lean5_curve1_rotation1_combined2"
+    c2_dir = p1_root / "driver_lean5_curve2_rotation1_combined2"
+    r1_primary = _write_synthetic_cell(
+        c1_dir,
+        curve_scale=1.0,
+        protocol_id="original_primary/1",
+        target_x_m=108.02738606179851,
+    )
+    r2_primary = _write_synthetic_cell(
+        c2_dir,
+        curve_scale=2.0,
+        protocol_id="original_primary/1",
+        target_x_m=108.02738606179851,
+    )
+    primary_pair = {
+        "comparison_kind": "curve_strength",
+        "first": r1_primary,
+        "second": r2_primary,
+        "target_x_m": 108.02738606179851,
+    }
+
+    p2_root = root / "control"
+    c1_ctrl_dir = p2_root / "driver_lean5_curve1_rotation1_combined2"
+    c2_ctrl_dir = p2_root / "driver_lean5_curve2_rotation1_combined2"
+    r1_control = _write_synthetic_cell(
+        c1_ctrl_dir,
+        curve_scale=1.0,
+        protocol_id="original_control/1",
+        target_x_m=178.94875782337786,
+    )
+    r2_control = _write_synthetic_cell(
+        c2_ctrl_dir,
+        curve_scale=2.0,
+        protocol_id="driver-control-speed-bounds/1",
+        target_x_m=178.94875782337786,
+    )
+    control_pair = {
+        "comparison_kind": "curve_strength",
+        "first": r1_control,
+        "second": r2_control,
+        "target_x_m": 178.94875782337786,
+    }
+
+    return primary_pair, control_pair
+
+
+def test_colliding_fixtures_produce_distinct_identities_and_stems(tmp_path: Path) -> None:
+    """The two actual colliding comparison pairs must yield distinct identities and stems."""
+    from src.tools.shot_pattern_analysis.matched_supplement_figures import (
+        pair_comparison_identity,
+        pair_comparison_slug,
+    )
+
+    primary_pair, control_pair = _create_actual_colliding_pair_fixtures(tmp_path / "fixtures")
+
+    id1 = pair_comparison_identity(primary_pair)
+    id2 = pair_comparison_identity(control_pair)
+
+    assert id1 != id2
+    assert id1[0] == "curve_strength"
+    assert id1[1] == "original_primary/1"
+    assert id1[3] == "original_primary/1"
+    assert id1[5] == pytest.approx(108.02738606179851)
+
+    assert id2[0] == "curve_strength"
+    assert id2[1] == "original_control/1"
+    assert id2[3] == "driver-control-speed-bounds/1"
+    assert id2[5] == pytest.approx(178.94875782337786)
+
+    slug1 = pair_comparison_slug(primary_pair)
+    slug2 = pair_comparison_slug(control_pair)
+
+    assert slug1 != slug2
+    assert "original_primary" in slug1
+    assert "108p027m" in slug1
+    assert "original_control" in slug2
+    assert "driver-control-speed-bounds" in slug2
+    assert "178p949m" in slug2
+
+
+def test_colliding_fixtures_render_without_file_overwrite(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Rendering both colliding pairs into the same output_dir produces 32 distinct files and ledger entries."""
+    import src.tools.shot_pattern_analysis.matched_supplement_figures as msf
+    from src.tools.shot_pattern_analysis.matched_supplement_figures import (
+        _render_pair_figures,
+    )
+
+    recorded_saves: list[Path] = []
+
+    def lightweight_save(
+        figure: Any, stem: Path, formats: tuple[str, ...] = ("png", "pdf", "svg")
+    ) -> dict[str, Path]:
+        stem.parent.mkdir(parents=True, exist_ok=True)
+        outputs = {}
+        for fmt in formats:
+            p = stem.with_suffix(f".{fmt}")
+            p.write_bytes(f"mock-{p.name}".encode())
+            recorded_saves.append(p)
+            outputs[fmt] = p
+        return outputs
+
+    monkeypatch.setattr(msf, "_save_figure", lightweight_save)
+
+    def fake_social_density(
+        point_sets: Any, output_stem: Path, **kwargs: Any
+    ) -> dict[str, Path]:
+        out = {}
+        for pattern in ("straight", "draw", "fade"):
+            for ext in ("png", "pdf", "svg"):
+                p = output_stem.with_name(f"{output_stem.name}_{pattern}_social.{ext}")
+                p.parent.mkdir(parents=True, exist_ok=True)
+                p.write_bytes(f"{pattern}_{ext}".encode())
+                recorded_saves.append(p)
+                out[f"{pattern}_{ext}"] = p
+        return out
+
+    monkeypatch.setattr(msf, "write_pair_social_density", fake_social_density)
+
+    primary_pair, control_pair = _create_actual_colliding_pair_fixtures(tmp_path / "fixtures")
+    output_dir = tmp_path / "rendered"
+
+    ledger1 = _render_pair_figures(primary_pair, output_dir)
+    ledger2 = _render_pair_figures(control_pair, output_dir)
+
+    assert len(ledger1) == 16
+    assert len(ledger2) == 16
+
+    combined_ledger = ledger1 + ledger2
+    assert len(combined_ledger) == 32
+
+    paths1 = {row["relative_path"] for row in ledger1}
+    paths2 = {row["relative_path"] for row in ledger2}
+    assert paths1.isdisjoint(paths2), f"Overlap found in relative paths: {paths1 & paths2}"
+
+    # Verify accuracy of primary vs control metadata in ledger
+    for row in ledger1:
+        assert row["first_protocol"] == "original_primary/1"
+        assert row["second_protocol"] == "original_primary/1"
+        assert row["target_x_m"] == pytest.approx(108.02738606179851)
+
+    for row in ledger2:
+        assert row["first_protocol"] == "original_control/1"
+        assert row["second_protocol"] == "driver-control-speed-bounds/1"
+        assert row["target_x_m"] == pytest.approx(178.94875782337786)
+
+    # Verify that all 32 saved files exist on disk independently
+    for row in combined_ledger:
+        file_path = output_dir / row["relative_path"]
+        assert file_path.is_file(), f"Expected file not on disk: {file_path}"
+
+
+def test_close_targets_produce_distinct_slugs_and_identities() -> None:
+    """Two targets differing beyond 3 decimal places (e.g. 100.0001 and 100.0002) must not collide."""
+    from src.tools.shot_pattern_analysis.matched_supplement_figures import (
+        pair_comparison_identity,
+        pair_comparison_slug,
+    )
+
+    rec1 = {
+        "comparison_kind": "curve_strength",
+        "first": {"protocol_id": "original_primary/1", "cell": "cell_a"},
+        "second": {"protocol_id": "original_primary/1", "cell": "cell_b"},
+        "target_x_m": 100.0001,
+    }
+    rec2 = {
+        "comparison_kind": "curve_strength",
+        "first": {"protocol_id": "original_primary/1", "cell": "cell_a"},
+        "second": {"protocol_id": "original_primary/1", "cell": "cell_b"},
+        "target_x_m": 100.0002,
+    }
+
+    id1 = pair_comparison_identity(rec1)
+    id2 = pair_comparison_identity(rec2)
+    assert id1 != id2
+    assert id1[5] != id2[5]
+
+    slug1 = pair_comparison_slug(rec1)
+    slug2 = pair_comparison_slug(rec2)
+    assert slug1 != slug2, f"Close targets collided on slug: {slug1}"
+
+
+def test_delimiter_ambiguous_identities_produce_distinct_slugs() -> None:
+    """Ambiguous delimiter concatenation (p0='a_b', c0='c' vs p0='a', c0='b_c') must not collide."""
+    from src.tools.shot_pattern_analysis.matched_supplement_figures import (
+        pair_comparison_identity,
+        pair_comparison_slug,
+    )
+
+    rec1 = {
+        "comparison_kind": "curve",
+        "sources": [
+            {"protocol_id": "a_b", "cell": "c"},
+            {"protocol_id": "p", "cell": "c2"},
+        ],
+        "target_x_m": 100.0,
+    }
+    rec2 = {
+        "comparison_kind": "curve",
+        "sources": [
+            {"protocol_id": "a", "cell": "b_c"},
+            {"protocol_id": "p", "cell": "c2"},
+        ],
+        "target_x_m": 100.0,
+    }
+
+    id1 = pair_comparison_identity(rec1)
+    id2 = pair_comparison_identity(rec2)
+    assert id1 != id2
+
+    slug1 = pair_comparison_slug(rec1)
+    slug2 = pair_comparison_slug(rec2)
+    assert slug1 != slug2, f"Delimiter ambiguous identities collided on slug: {slug1}"
+
+
+def test_swapped_sources_produce_distinct_slugs_and_identities() -> None:
+    """Swapping first and second sources must produce distinct identities and slugs."""
+    from src.tools.shot_pattern_analysis.matched_supplement_figures import (
+        pair_comparison_identity,
+        pair_comparison_slug,
+    )
+
+    rec_ab = {
+        "comparison_kind": "curve_strength",
+        "first": {"source_protocol": "protocol_1", "cell": "cell_1"},
+        "second": {"source_protocol": "protocol_2", "cell": "cell_2"},
+        "target_x_m": 150.0,
+    }
+    rec_ba = {
+        "comparison_kind": "curve_strength",
+        "first": {"source_protocol": "protocol_2", "cell": "cell_2"},
+        "second": {"source_protocol": "protocol_1", "cell": "cell_1"},
+        "target_x_m": 150.0,
+    }
+
+    id_ab = pair_comparison_identity(rec_ab)
+    id_ba = pair_comparison_identity(rec_ba)
+    assert id_ab != id_ba
+
+    slug_ab = pair_comparison_slug(rec_ab)
+    slug_ba = pair_comparison_slug(rec_ba)
+    assert slug_ab != slug_ba, f"Swapped sources collided on slug: {slug_ab}"
+
+
+def test_pair_comparison_identity_strict_type_and_value_validation() -> None:
+    """Preflight identity validation strictly rejects malformed types, whitespace, and non-finites."""
+    from src.tools.shot_pattern_analysis.matched_supplement_figures import (
+        pair_comparison_identity,
+    )
+
+    base = {
+        "comparison_kind": "curve_strength",
+        "sources": [
+            {"protocol_id": "p1", "cell": "c1"},
+            {"protocol_id": "p2", "cell": "c2"},
+        ],
+        "target_x_m": 100.0,
+    }
+
+    # Record type
+    with pytest.raises(TypeError, match="Mapping"):
+        pair_comparison_identity(["not", "a", "mapping"])  # type: ignore[arg-type]
+
+    # Non-string comparison_kind
+    with pytest.raises(TypeError, match="comparison_kind"):
+        pair_comparison_identity({**base, "comparison_kind": 123})
+
+    # Empty comparison_kind
+    with pytest.raises(ValueError, match="comparison_kind"):
+        pair_comparison_identity({**base, "comparison_kind": ""})
+
+    # Surrounding whitespace in comparison_kind
+    with pytest.raises(ValueError, match="surrounding whitespace"):
+        pair_comparison_identity({**base, "comparison_kind": " curve_strength"})
+
+    # Missing target_x_m
+    no_target = {k: v for k, v in base.items() if k != "target_x_m"}
+    with pytest.raises(ValueError, match="target_x_m"):
+        pair_comparison_identity(no_target)
+
+    # Boolean target_x_m (bool is subclass of int in Python)
+    with pytest.raises(TypeError, match="boolean"):
+        pair_comparison_identity({**base, "target_x_m": True})
+
+    # Non-number target_x_m
+    with pytest.raises(TypeError, match="target_x_m"):
+        pair_comparison_identity({**base, "target_x_m": "100.0"})
+
+    # Non-finite target_x_m (NaN, Inf, -Inf)
+    for nonfinite in (float("nan"), float("inf"), float("-inf")):
+        with pytest.raises(ValueError, match="finite"):
+            pair_comparison_identity({**base, "target_x_m": nonfinite})
+
+    # Non-string protocol
+    with pytest.raises(TypeError, match="protocol"):
+        pair_comparison_identity({
+            **base,
+            "sources": [{"protocol_id": 999, "cell": "c1"}, {"protocol_id": "p2", "cell": "c2"}],
+        })
+
+    # Empty protocol
+    with pytest.raises(ValueError, match="empty"):
+        pair_comparison_identity({
+            **base,
+            "sources": [{"protocol_id": "", "cell": "c1"}, {"protocol_id": "p2", "cell": "c2"}],
+        })
+
+    # Surrounding whitespace in protocol
+    with pytest.raises(ValueError, match="surrounding whitespace"):
+        pair_comparison_identity({
+            **base,
+            "sources": [{"protocol_id": " p1 ", "cell": "c1"}, {"protocol_id": "p2", "cell": "c2"}],
+        })
+
+    # Non-string cell
+    with pytest.raises(TypeError, match="cell"):
+        pair_comparison_identity({
+            **base,
+            "sources": [{"protocol_id": "p1", "cell": ["c1"]}, {"protocol_id": "p2", "cell": "c2"}],
+        })
+
+    # Empty cell
+    with pytest.raises(ValueError, match="empty"):
+        pair_comparison_identity({
+            **base,
+            "sources": [{"protocol_id": "p1", "cell": ""}, {"protocol_id": "p2", "cell": "c2"}],
+        })
+
+    # Surrounding whitespace in cell
+    with pytest.raises(ValueError, match="surrounding whitespace"):
+        pair_comparison_identity({
+            **base,
+            "sources": [{"protocol_id": "p1", "cell": "c1 "}, {"protocol_id": "p2", "cell": "c2"}],
+        })
+
+
+def test_validate_planned_figure_identities_happy_path() -> None:
+    """Preflight planned figure identities helper succeeds on distinct planned pairs and cell refs."""
+    from src.tools.shot_pattern_analysis.matched_supplement_figures import (
+        validate_planned_figure_identities,
+    )
+
+    cell_refs = [
+        {"source_protocol": "protocol_1", "cell": "driver_lean0_curve1"},
+        {"source_protocol": "protocol_1", "cell": "driver_lean0_curve2"},
+        {"source_protocol": "protocol_2", "cell": "pw_lean5_curve1"},
+    ]
+    pairs = [
+        {
+            "comparison_kind": "curve_strength",
+            "first": {"source_protocol": "protocol_1", "cell": "driver_lean0_curve1"},
+            "second": {"source_protocol": "protocol_1", "cell": "driver_lean0_curve2"},
+            "target_x_m": 120.0,
+        },
+    ]
+
+    # Preflight must succeed without error
+    validate_planned_figure_identities(pairs, cell_refs)
+
+
+def test_validate_planned_figure_identities_detects_duplicate_cell_stems_across_protocols() -> None:
+    """Two different protocols sharing existing cell name must fail preflight without renaming cell output."""
+    from src.tools.shot_pattern_analysis.matched_supplement_figures import (
+        validate_planned_figure_identities,
+    )
+
+    cell_refs = [
+        {"source_protocol": "protocol_alpha", "cell": "driver_lean5_curve1_rotation1_combined2"},
+        {"source_protocol": "protocol_beta", "cell": "driver_lean5_curve1_rotation1_combined2"},
+    ]
+    with pytest.raises(ValueError, match="collision in planned cell stems"):
+        validate_planned_figure_identities([], cell_refs)
+
+
+def test_validate_planned_figure_identities_detects_repeated_cell_identity() -> None:
+    """Repeated identical cell references in planned outputs are rejected."""
+    from src.tools.shot_pattern_analysis.matched_supplement_figures import (
+        validate_planned_figure_identities,
+    )
+
+    cell_refs = [
+        {"source_protocol": "protocol_1", "cell": "cell_a"},
+        {"source_protocol": "protocol_1", "cell": "cell_a"},
+    ]
+    with pytest.raises(ValueError, match="repeated cell identity"):
+        validate_planned_figure_identities([], cell_refs)
+
+
+def test_validate_planned_figure_identities_detects_repeated_pair_identity() -> None:
+    """Repeated identical pair comparisons in planned outputs are rejected."""
+    from src.tools.shot_pattern_analysis.matched_supplement_figures import (
+        validate_planned_figure_identities,
+    )
+
+    pair = {
+        "comparison_kind": "curve_strength",
+        "first": {"source_protocol": "p1", "cell": "c1"},
+        "second": {"source_protocol": "p2", "cell": "c2"},
+        "target_x_m": 100.0,
+    }
+    with pytest.raises(ValueError, match="repeated pair comparison identity"):
+        validate_planned_figure_identities([pair, pair], [])
+
+
+def test_validate_planned_figure_identities_namespaces_are_distinct() -> None:
+    """cells/ and comparisons/ namespaces are kept distinct; matching names do not collide across namespaces."""
+    from src.tools.shot_pattern_analysis.matched_supplement_figures import (
+        validate_planned_figure_identities,
+    )
+
+    # Even if a cell ref has a name and a pair produces a slug, they reside in different namespaces
+    cell_refs = [{"source_protocol": "p1", "cell": "shared_name"}]
+    pairs = [
+        {
+            "comparison_kind": "curve_strength",
+            "first": {"source_protocol": "p1", "cell": "c1"},
+            "second": {"source_protocol": "p2", "cell": "c2"},
+            "target_x_m": 100.0,
+        }
+    ]
+    # No cross-namespace collision
+    validate_planned_figure_identities(pairs, cell_refs)
+
+
+def test_validate_planned_figure_identities_type_and_field_checks() -> None:
+    """Preflight helper enforces sequence types and valid cell/protocol fields."""
+    from src.tools.shot_pattern_analysis.matched_supplement_figures import (
+        validate_planned_figure_identities,
+    )
+
+    with pytest.raises(TypeError, match="pairs must be a Sequence"):
+        validate_planned_figure_identities("not a sequence", [])  # type: ignore[arg-type]
+
+    with pytest.raises(TypeError, match="cell_refs must be a Sequence"):
+        validate_planned_figure_identities([], 123)  # type: ignore[arg-type]
+
+    with pytest.raises(TypeError, match="cell_ref must be a Mapping"):
+        validate_planned_figure_identities([], ["not a mapping"])  # type: ignore[list-item,arg-type]
+
+    with pytest.raises(ValueError, match="cell source_protocol is missing"):
+        validate_planned_figure_identities([], [{"cell": "c1"}])
+
+    with pytest.raises(ValueError, match="cell identifier is missing"):
+        validate_planned_figure_identities([], [{"source_protocol": "p1"}])
+
+    with pytest.raises(ValueError, match="surrounding whitespace"):
+        validate_planned_figure_identities([], [{"source_protocol": " p1", "cell": "c1"}])

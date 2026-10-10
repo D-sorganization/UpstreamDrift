@@ -1,0 +1,9 @@
+{
+  "initial_exit_code": 1,
+  "initial_error": "ModuleNotFoundError: No module named 'src'",
+  "stage": "Wrapper import before preflight or production launch",
+  "cause": "A /tmp script invocation requires the producer checkout on PYTHONPATH; current working directory alone is insufficient",
+  "correction": "Set PYTHONPATH to the frozen PRESENTATION checkout for preflight and launch",
+  "source_changed": false,
+  "production_launched_by_failed_attempt": false
+}
