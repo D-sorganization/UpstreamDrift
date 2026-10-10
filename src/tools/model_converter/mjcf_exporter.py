@@ -16,13 +16,33 @@ from pathlib import Path
 import xml.etree.ElementTree as ET  # noqa: S405  # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml  # build-only
 
 from defusedxml import minidom
-from tools.model_converter.schema_validator import CanonicalModel, Segment
+from tools.model_converter.schema_validator import CanonicalModel, RootBody, Segment
 
 logger = logging.getLogger(__name__)
 
 
+#: Golfer segment geoms collide with the floor and other default-mask objects
+#: (contype/conaffinity 1, e.g. a ball) but never with each other: MuJoCo
+#: collides a pair when ``(t1 & a2) | (t2 & a1)`` is non-zero, and 2 & 1 is 0
+#: (#11811).
+SEGMENT_CONTYPE = "2"
+SEGMENT_CONAFFINITY = "1"
+
+
 def _format_floats(values: tuple[float, ...] | list[float]) -> str:
     return " ".join(f"{v:g}" for v in values)
+
+
+def _add_segment_geom(body: ET.Element, segment: Segment | RootBody) -> ET.Element:
+    """Append ``segment``'s geom to ``body`` with self-collision filtering."""
+    geom = ET.SubElement(body, "geom")
+    geom.set("name", f"{segment.name}_geom")
+    geom.set("type", segment.geometry.geom_type)
+    geom.set("size", _format_floats(segment.geometry.size))
+    geom.set("rgba", _format_floats(segment.geometry.visual_rgba))
+    geom.set("contype", SEGMENT_CONTYPE)
+    geom.set("conaffinity", SEGMENT_CONAFFINITY)
+    return geom
 
 
 def export_mjcf(model: CanonicalModel, out_path: Path | None = None) -> str:
@@ -99,7 +119,6 @@ def export_mjcf(model: CanonicalModel, out_path: Path | None = None) -> str:
     pelvis_body = ET.SubElement(worldbody, "body")
     root = model.root
     root_inertia = root.inertia
-    root_geom = root.geometry
 
     pelvis_body.set("name", root.name)
     pelvis_body.set("pos", _format_floats(root.position))
@@ -116,11 +135,7 @@ def export_mjcf(model: CanonicalModel, out_path: Path | None = None) -> str:
         f"{root_inertia.ixx:g} {root_inertia.iyy:g} {root_inertia.izz:g}",
     )
 
-    geom = ET.SubElement(pelvis_body, "geom")
-    geom.set("name", f"{root.name}_geom")
-    geom.set("type", root_geom.geom_type)
-    geom.set("size", _format_floats(root_geom.size))
-    geom.set("rgba", _format_floats(root_geom.visual_rgba))
+    _add_segment_geom(pelvis_body, root)
 
     actuator_joints: list[str] = []
 
@@ -169,12 +184,7 @@ def export_mjcf(model: CanonicalModel, out_path: Path | None = None) -> str:
                 f"{child_seg.inertia.ixx:g} {child_seg.inertia.iyy:g} {child_seg.inertia.izz:g}",
             )
 
-            # Geom element
-            g_elem = ET.SubElement(child_body, "geom")
-            g_elem.set("name", f"{child_seg.name}_geom")
-            g_elem.set("type", child_seg.geometry.geom_type)
-            g_elem.set("size", _format_floats(child_seg.geometry.size))
-            g_elem.set("rgba", _format_floats(child_seg.geometry.visual_rgba))
+            _add_segment_geom(child_body, child_seg)
 
             # Add sites for anatomical tracking
             if child_seg.name in ("hand_left", "hand_right"):
