@@ -181,11 +181,11 @@ that apply to that lift. `GET /lifting/baseline` returns receipt metadata
 read-only and serve the same committed receipt the PyQt and web lift-viewing
 surfaces (LIFT-8, GitHub issue #11748) will build on.
 
-In the web app, the Lift Baseline page (`/tools/lift-baseline`) shows the same
-data: pick a lift to see each engine's pack, structure, start pose and
-smoke test, the cross-engine pair metrics marked pass, fail or unavailable
-against the position tolerance, the phase hand-to-bar distances and the known
-gaps. A value missing from the receipt reads "unavailable", never zero.
+### Lift Baseline Viewing (PyQt and Web)
+
+The PyQt Exercise Dashboard (`src/launchers/exercise_dashboard.py`) adds a "Cross-Engine Lift Baseline" dock (`src/launchers/lift_baseline_panel.py`) for any of the five canonical lifts. The dock has a lift selector, a per-engine table (pack commit, body/coordinate counts, total mass, bar and hand-mid height above the sole, smoke-test result, phase count), a pose selector with a pair-metric table flagging each cross-engine position comparison pass/fail/unavailable against the parity tolerance, a per-engine phase table of hand-to-bar distances, and a list of the discrepancies that apply to that lift.
+
+In the web app, the Lift Baseline page (`/tools/lift-baseline`) shows the same data: pick a lift to see each engine's pack, structure, start pose and smoke test, the cross-engine pair metrics marked pass, fail or unavailable against the position tolerance, the phase hand-to-bar distances and the known gaps. A value missing from the receipt reads "unavailable", never zero.
 
 ### Where to Find Each Pack
 
