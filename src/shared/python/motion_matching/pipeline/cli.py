@@ -6,6 +6,7 @@ import argparse
 from dataclasses import dataclass
 import json
 import logging
+import os
 from pathlib import Path
 import time
 from typing import Any, Literal
@@ -937,7 +938,12 @@ def _simulate_and_receipt(
     q_track, zmp, shooting_report = _maybe_shooting_fit(
         args, (lane, kin, sim, log), q_track, q_ref, zmp, tracking
     )
-    q_track, weld_report = weld_consistent_track(kin, cal_res.scaled_spec, q_track)
+    if "weld" in os.environ.get("UD_ABLATE_12117", ""):  # throwaway diagnosis
+        weld_report = {"applied": False, "ablated": True}
+    else:
+        q_track, weld_report = weld_consistent_track(
+            kin, cal_res.scaled_spec, q_track
+        )
     record, sim_q = replay(sim, lane, q_track, tracking_backend=tracking)
     finish = finish_feasibility_report(
         sim,
@@ -1151,6 +1157,8 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
         )
     )
     lane.select_release_cutoff(cal_res.kin, cal_res.scaled_spec, q_ref)
+    if "cutoff" in os.environ.get("UD_ABLATE_12117", ""):  # throwaway diagnosis
+        lane.pre_contact_cutoff_hz = None
     _attach_face_report(ik_report, lane, cal_res, (q_ik, q_ref), args.face_weight)
     _save_ik_trajectory(ctx, lane, q_ik, q_ref, errors, ref_errors)
 
