@@ -1,0 +1,202 @@
+{
+  "club": "driver",
+  "opensim_bushing": {
+    "peak_force_L_n": 515.1578323854484,
+    "peak_force_R_n": 564.0251922380963,
+    "lead_share_at_peak_net": 0.42534172237190193,
+    "peak_net_n": 439.29195018254387,
+    "peak_internal_n": 509.80903513399784,
+    "peak_squeeze_n": 3.2844880589147536,
+    "peak_couple_nm": 99.50809242568974
+  },
+  "baseline_solreffriction_2dt": {
+    "peak_force_L_n": 2086.293146048467,
+    "peak_force_R_n": 2117.9795852401917,
+    "lead_share_at_peak_net": 0.48343873509110774,
+    "peak_net_n": 438.00649250398834,
+    "peak_internal_n": 2099.683499911663,
+    "peak_squeeze_n": 762.556615602346,
+    "peak_couple_nm": 76.33189979742947,
+    "peak_pad_normal_sum_per_hand_n": 29392.0494544116,
+    "peak_axial_slip_mm": 1.5111229067633916,
+    "peak_roll_slip_mrad": 5.214454908110544,
+    "hand_to_club_deflection": {
+      "max_translation_mm": 1.6080684643177643,
+      "max_rotation_deg": 0.29992553198912514,
+      "flag_translation_mm": 3.0,
+      "flag_rotation_deg": 2.0,
+      "exceeds_flag": false
+    }
+  },
+  "solreffriction_1e-3_s": {
+    "peak_force_L_n": 8414.69500479679,
+    "peak_force_R_n": 8506.53681646949,
+    "lead_share_at_peak_net": 0.4421369435071086,
+    "peak_net_n": 507.19306673381357,
+    "peak_internal_n": 8441.87403301328,
+    "peak_squeeze_n": 3688.2589603943816,
+    "peak_couple_nm": 1062.8831327329258,
+    "peak_pad_normal_sum_per_hand_n": 118635.38061898836,
+    "peak_axial_slip_mm": 7013.808049804629,
+    "peak_roll_slip_mrad": 3127.2386121659947,
+    "hand_to_club_deflection": {
+      "max_translation_mm": 12167.985097044291,
+      "max_rotation_deg": 179.5439663670407,
+      "flag_translation_mm": 3.0,
+      "flag_rotation_deg": 2.0,
+      "exceeds_flag": true
+    }
+  },
+  "solreffriction_5e-3_s": {
+    "peak_force_L_n": 6510.429715226497,
+    "peak_force_R_n": 6644.9620450232305,
+    "lead_share_at_peak_net": 0.0,
+    "peak_net_n": 239.43768758103243,
+    "peak_internal_n": 6577.606881669439,
+    "peak_squeeze_n": 6536.870497848922,
+    "peak_couple_nm": 145.58561894887006,
+    "peak_pad_normal_sum_per_hand_n": 16141.799996482541,
+    "peak_axial_slip_mm": 6788.587973333943,
+    "peak_roll_slip_mrad": 3121.7393382563655,
+    "hand_to_club_deflection": {
+      "max_translation_mm": 13686.373973981175,
+      "max_rotation_deg": 179.75691390839017,
+      "flag_translation_mm": 3.0,
+      "flag_rotation_deg": 2.0,
+      "exceeds_flag": true
+    }
+  },
+  "trail_hand_follows_club": {
+    "peak_force_L_n": 66240.50621427389,
+    "peak_force_R_n": 65833.39793881284,
+    "lead_share_at_peak_net": 0.5014469959504946,
+    "peak_net_n": 567.6153360279393,
+    "peak_internal_n": 66036.91039922785,
+    "peak_squeeze_n": 65272.74638419332,
+    "peak_couple_nm": 483.5418901667126,
+    "peak_pad_normal_sum_per_hand_n": 97749.49805213102,
+    "peak_axial_slip_mm": 5.361273081712189,
+    "peak_roll_slip_mrad": 81.71697192973451,
+    "hand_to_club_deflection": {
+      "max_translation_mm": 5.635931064975216,
+      "max_rotation_deg": 4.8223339332625725,
+      "flag_translation_mm": 3.0,
+      "flag_rotation_deg": 2.0,
+      "exceeds_flag": true
+    }
+  },
+  "lead_hand_only": {
+    "peak_force_L_n": 447.65607831754556,
+    "peak_force_R_n": 0.0,
+    "lead_share_at_peak_net": 1.0,
+    "peak_net_n": 447.65607831754556,
+    "peak_internal_n": 223.82803915877278,
+    "peak_squeeze_n": 212.14769925168258,
+    "peak_couple_nm": 91.0804021678939,
+    "peak_pad_normal_sum_per_hand_n": 35533.71099253869,
+    "peak_axial_slip_mm": 1.5929198163830618,
+    "peak_roll_slip_mrad": 5.941521636456796,
+    "hand_to_club_deflection": {
+      "max_translation_mm": 1.7035864654489243,
+      "max_rotation_deg": 0.34260302893415784,
+      "flag_translation_mm": 3.0,
+      "flag_rotation_deg": 2.0,
+      "exceeds_flag": false
+    }
+  },
+  "trail_shift_x_0.001_mm": {
+    "peak_force_L_n": 2094.764939795798,
+    "peak_force_R_n": 2126.463573682407,
+    "lead_share_at_peak_net": 0.4837925021035064,
+    "peak_net_n": 437.99741803440156,
+    "peak_internal_n": 2108.1715134682645,
+    "peak_squeeze_n": 771.7774052176262,
+    "peak_couple_nm": 75.69073370166365,
+    "peak_pad_normal_sum_per_hand_n": 29411.575676346132,
+    "peak_axial_slip_mm": 1.5109734187621402,
+    "peak_roll_slip_mrad": 5.1719536397481995,
+    "hand_to_club_deflection": {
+      "max_translation_mm": 1.6058194430288102,
+      "max_rotation_deg": 0.2974255482275108,
+      "flag_translation_mm": 3.0,
+      "flag_rotation_deg": 2.0,
+      "exceeds_flag": false
+    }
+  },
+  "trail_shift_x_0.01_mm": {
+    "peak_force_L_n": 2544.3338626555956,
+    "peak_force_R_n": 2530.671869966329,
+    "lead_share_at_peak_net": 0.4878193052727032,
+    "peak_net_n": 437.89667980543885,
+    "peak_internal_n": 2534.740362023384,
+    "peak_squeeze_n": 802.805264095556,
+    "peak_couple_nm": 79.34679553124519,
+    "peak_pad_normal_sum_per_hand_n": 29775.41484879593,
+    "peak_axial_slip_mm": 1.5106077102297213,
+    "peak_roll_slip_mrad": 4.842072524425521,
+    "hand_to_club_deflection": {
+      "max_translation_mm": 1.588998125436876,
+      "max_rotation_deg": 0.2781260453109846,
+      "flag_translation_mm": 3.0,
+      "flag_rotation_deg": 2.0,
+      "exceeds_flag": false
+    }
+  },
+  "trail_shift_x_0.1_mm": {
+    "peak_force_L_n": 4726.016386917778,
+    "peak_force_R_n": 4783.799825149074,
+    "lead_share_at_peak_net": 0.4966537601095947,
+    "peak_net_n": 438.14997086194103,
+    "peak_internal_n": 4753.572671615255,
+    "peak_squeeze_n": 1488.2404654062523,
+    "peak_couple_nm": 92.81575710639709,
+    "peak_pad_normal_sum_per_hand_n": 31421.5885071025,
+    "peak_axial_slip_mm": 1.4988294816390737,
+    "peak_roll_slip_mrad": 7.593660448974384,
+    "hand_to_club_deflection": {
+      "max_translation_mm": 1.5311225910993913,
+      "max_rotation_deg": 0.4354332133986786,
+      "flag_translation_mm": 3.0,
+      "flag_rotation_deg": 2.0,
+      "exceeds_flag": false
+    }
+  },
+  "trail_shift_y_0.01_mm": {
+    "peak_force_L_n": 2581.8623787950346,
+    "peak_force_R_n": 2575.9154397342954,
+    "lead_share_at_peak_net": 0.430217737298009,
+    "peak_net_n": 437.9661971712181,
+    "peak_internal_n": 2576.163669371463,
+    "peak_squeeze_n": 1238.4640253125133,
+    "peak_couple_nm": 74.45702001938231,
+    "peak_pad_normal_sum_per_hand_n": 29817.87264553581,
+    "peak_axial_slip_mm": 1.5378568702145468,
+    "peak_roll_slip_mrad": 5.0880512350630305,
+    "hand_to_club_deflection": {
+      "max_translation_mm": 1.6259236070290446,
+      "max_rotation_deg": 0.2933020582194827,
+      "flag_translation_mm": 3.0,
+      "flag_rotation_deg": 2.0,
+      "exceeds_flag": false
+    }
+  },
+  "trail_shift_z_0.01_mm": {
+    "peak_force_L_n": 2136.4377318317456,
+    "peak_force_R_n": 2223.0654500223723,
+    "lead_share_at_peak_net": 0.4157635082576352,
+    "peak_net_n": 438.01929809582987,
+    "peak_internal_n": 2177.7526853049803,
+    "peak_squeeze_n": 1570.5142477724094,
+    "peak_couple_nm": 79.53712456858872,
+    "peak_pad_normal_sum_per_hand_n": 29636.871794227576,
+    "peak_axial_slip_mm": 1.5069954946192692,
+    "peak_roll_slip_mrad": 5.489516214800012,
+    "hand_to_club_deflection": {
+      "max_translation_mm": 1.6021281401229348,
+      "max_rotation_deg": 0.3161704634471303,
+      "flag_translation_mm": 3.0,
+      "flag_rotation_deg": 2.0,
+      "exceeds_flag": false
+    }
+  }
+}
