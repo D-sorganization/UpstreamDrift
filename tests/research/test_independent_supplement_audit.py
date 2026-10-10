@@ -261,7 +261,16 @@ def _acceptance(tmp_path):
         "status": "accepted_for_conditional_simulation",
         "supplement_stage": "final",
         "execution": execution,
-        "checks": dict.fromkeys(("pilot", "numerical_refinement", "independent_review", "rendered_figures", "software_tests"), True),
+        "checks": dict.fromkeys(
+            (
+                "pilot",
+                "numerical_refinement",
+                "independent_review",
+                "rendered_figures",
+                "software_tests",
+            ),
+            True,
+        ),
         "evidence_files": evidence,
         "supplement_protocols": protocols,
     }

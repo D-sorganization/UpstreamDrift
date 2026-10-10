@@ -9,6 +9,7 @@ import json
 import re
 import sys
 from pathlib import Path
+from typing import Any
 
 from PIL import Image, ImageDraw, ImageFont
 
@@ -209,6 +210,10 @@ def main() -> None:
         )
         return
     reference = _load_numeric_parity_reference(args.expected_numeric)
+    if reference is None:
+        raise ValueError(
+            f"expected numeric parity reference could not be loaded from {args.expected_numeric}"
+        )
     _check_numeric_parity_reference(reference, args.report)
     numeric = {name: sha(args.report / name) for name in reference["artifact_sha256"]}
     if args.group == "pairs":
@@ -238,7 +243,8 @@ def main() -> None:
             for e in ("png", "pdf", "svg")
         ]
     args.output.mkdir(parents=True)
-    reviewed, pending = [], []
+    reviewed: list[dict[str, Any]] = []
+    pending: list[dict[str, Any]] = []
     font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 22)
     for index, record in enumerate(
         records[args.offset : args.offset + args.limit], args.offset

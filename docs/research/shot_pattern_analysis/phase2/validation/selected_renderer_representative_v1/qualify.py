@@ -1,13 +1,14 @@
 """Representative saved-data renderer comparison; run only after source freeze."""
 
-from pathlib import Path
 import argparse
 import dataclasses
 import hashlib
 import json
 import os
+from pathlib import Path
 import subprocess
 import sys
+import unittest.mock
 import numpy as np
 
 MAIN = Path("/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift")
@@ -48,7 +49,7 @@ def source_map(root):
 
 
 def data_value(value):
-    if dataclasses.is_dataclass(value):
+    if dataclasses.is_dataclass(value) and not isinstance(value, type):
         return data_value(dataclasses.asdict(value))
     if isinstance(value, np.ndarray):
         arr = np.asarray(value)
@@ -261,43 +262,45 @@ def worker(root, mode, out, pairs_path):
         else:
             original_save(fig, path, *args, **kwargs)
 
-    Figure.savefig = save
-    for item in json.loads(pairs_path.read_text()):
-        current = {"label": item["label"]}
-        directory = out / item["label"]
-        directory.mkdir(parents=True)
-        if mode == "baseline":
-            ledger = module._render_pair_figures(item["pair"], directory)
-        else:
-            ledger = module.render_selected_pair_figures(
-                item["pair"], directory, figure_kinds=KINDS
-            )
-        assert len(ledger) == 7 and {r["figure_kind"] for r in ledger} == KINDS
-        actual = {
-            str(p.relative_to(directory)) for p in directory.rglob("*") if p.is_file()
-        }
-        assert actual == {r["relative_path"] for r in ledger}
-        for record in ledger:
-            assert record["target_x_m"] == item["expected"]["target_x_m"]
-            for key in [
-                "first_cell",
-                "second_cell",
-                "first_protocol",
-                "second_protocol",
-            ]:
-                assert record[key] == item["expected"][key]
-            if record["source_kind"] == "six_population_common_index_comparison":
-                assert (
-                    record["common_supported_n"]
-                    == item["expected"]["common_supported_n"]
+    with unittest.mock.patch.object(Figure, "savefig", new=save):
+        for item in json.loads(pairs_path.read_text()):
+            current = {"label": item["label"]}
+            directory = out / item["label"]
+            directory.mkdir(parents=True)
+            if mode == "baseline":
+                ledger = module._render_pair_figures(item["pair"], directory)
+            else:
+                ledger = module.render_selected_pair_figures(
+                    item["pair"], directory, figure_kinds=KINDS
                 )
-                assert (
-                    record["total_n_per_population"]
-                    == item["expected"]["total_n_per_population"]
-                )
-            assert digest(directory / record["relative_path"]) == record["sha256"]
-        current["ledger"] = ledger
-        captures[item["label"]] = current
+            assert len(ledger) == 7 and {r["figure_kind"] for r in ledger} == KINDS
+            actual = {
+                str(p.relative_to(directory))
+                for p in directory.rglob("*")
+                if p.is_file()
+            }
+            assert actual == {r["relative_path"] for r in ledger}
+            for record in ledger:
+                assert record["target_x_m"] == item["expected"]["target_x_m"]
+                for key in [
+                    "first_cell",
+                    "second_cell",
+                    "first_protocol",
+                    "second_protocol",
+                ]:
+                    assert record[key] == item["expected"][key]
+                if record["source_kind"] == "six_population_common_index_comparison":
+                    assert (
+                        record["common_supported_n"]
+                        == item["expected"]["common_supported_n"]
+                    )
+                    assert (
+                        record["total_n_per_population"]
+                        == item["expected"]["total_n_per_population"]
+                    )
+                assert digest(directory / record["relative_path"]) == record["sha256"]
+            current["ledger"] = ledger
+            captures[item["label"]] = current
     (out / "capture.json").write_text(json.dumps(data_value(captures), indent=2) + "\n")
 
 

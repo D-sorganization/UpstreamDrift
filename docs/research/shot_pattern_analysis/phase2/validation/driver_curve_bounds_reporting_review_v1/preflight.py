@@ -1,5 +1,7 @@
 """Reproduce source-qualified configuration checks for every selected pair."""
 
+import logging
+import sys
 import hashlib
 import json
 from collections import Counter
@@ -89,16 +91,18 @@ for i, p in enumerate(pairs):
         _pair_result(p, transition, transition_sha)
     except ConfigReached:
         row["status"] = "configuration_and_nominal_checks_passed"
-    except Exception as exc:  # noqa: BLE001 — Record every rejected protocol for review.
+    except Exception as exc:
+        logging.getLogger(__name__).exception("Validation record rejected")
         row.update(status="failed", error=repr(exc))
     else:
         raise AssertionError("preflight did not stop at row boundary")
     results.append(row)
     if i % 25 == 0:
-        print(f"{i + 1}/{len(pairs)}", flush=True)  # noqa: T201 — Standalone audit progress.
+        sys.stdout.write(str(f"{i + 1}/{len(pairs)}") + "\n")
+        sys.stdout.flush()
 pairing._primitive_errors_by_pattern = original
-for p, h in source_hashes.items():
-    assert sha(Path(p)) == h
+for path_str, h in source_hashes.items():
+    assert sha(Path(path_str)) == h
 receipt = {
     "scope": "All selected source/config/nominal checks, deliberately stops before primitive row read/statistical computations",
     "pair_count": len(pairs),
@@ -109,4 +113,11 @@ receipt = {
     "failures": [r for r in results if r["status"] == "failed"],
 }
 (OUT / "preflight.json").write_text(json.dumps(receipt, indent=2) + "\n")
-print(json.dumps({"pair_count": len(pairs), "failures": receipt["failures"]}, indent=2))  # noqa: T201 — Audit result.
+sys.stdout.write(
+    str(
+        json.dumps(
+            {"pair_count": len(pairs), "failures": receipt["failures"]}, indent=2
+        )
+    )
+    + "\n"
+)

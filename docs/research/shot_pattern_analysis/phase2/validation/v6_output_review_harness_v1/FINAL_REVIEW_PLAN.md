@@ -4,7 +4,7 @@
 
 This is a plan, not acceptance. No live v6 graphic was read while preparing it. Wait for the source-bound successful terminal receipt; a quiet directory, complete-looking filenames, or a finished numerical stage is insufficient. Never fabricate a final receipt or rerun statistics/simulations for review.
 
-The frozen producer is PRESENTATION commit `4023111d2aaf8b20449a36f8691a295f4a94ceff`. The qualified operational harness is `/tmp/shot-pattern-v6-output-review/review_batch.py`, SHA256 `7965f518b09a31903a13e38ed7de3f831805f6e34e05b688cf1ec19a8e600b5e`. Its 22-test qualification is already complete; do not repeat tests absent a change. Its contacts are inventories, never automatic visual acceptance.
+The frozen producer is PRESENTATION commit `4023111d2aaf8b20449a36f8691a295f4a94ceff`. The qualified operational harness is `phase2/validation/v6_output_review_harness_v1/review_batch.py` in MAIN, SHA256 `1db7be642e097377afeb44874687e41639a29c32c0440f13b3055eb3457d0bf6`. Its current helper transition passes 114 tests, including all 22 original harness cases; see `validation/repository_readiness_repair_v1/independent_acceptance/`. Historical qualification remains preserved; do not repeat tests absent a change. Its contacts are inventories, never automatic visual acceptance.
 
 ## Exact Ledger Coverage
 
@@ -47,7 +47,7 @@ PY
 Then use the qualified harness for each batch below. This is the exact command template; substitute only the listed group/kind/offset/limit/output suffix. The pinned start SHA was independently read from the actual committed start, not calculated from an arbitrary new success receipt.
 
 ```bash
-"$REVIEW_PY" /tmp/shot-pattern-v6-output-review/review_batch.py \
+"$REVIEW_PY" "$STUDY_PHASE/validation/v6_output_review_harness_v1/review_batch.py" \
   --repo "$STUDY_PRODUCER" \
   --report "$STUDY_PHASE/supplement_report_v1" \
   --completion-receipt "$STUDY_PHASE/validation/supplement_rendering_revision_v6/exit.json" \

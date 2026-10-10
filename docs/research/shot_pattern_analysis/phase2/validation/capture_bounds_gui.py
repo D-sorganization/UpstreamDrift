@@ -6,6 +6,7 @@ import argparse
 import json
 import os
 from pathlib import Path
+from typing import Any
 
 from PyQt6 import QtCore, QtWidgets
 
@@ -16,7 +17,7 @@ CELL = "driver_lean5_curve2_rotation2_combined2"
 TARGET_X_M = 178.94875782337786
 
 
-def capture(output: Path) -> dict:
+def capture(output: Path) -> dict[str, Any]:
     """Save one exact supplemental config and three 1000×760 review views."""
     if os.environ.get("QT_QPA_PLATFORM") != "offscreen":
         raise RuntimeError("GUI evidence capture requires QT_QPA_PLATFORM=offscreen")
@@ -44,6 +45,8 @@ def capture(output: Path) -> dict:
         if (widget.width(), widget.height()) != (1000, 760):
             raise RuntimeError("offscreen widget did not fit 1000×760")
         scrollbar = widget.controls_scroll.verticalScrollBar()
+        if scrollbar is None:
+            raise RuntimeError("verticalScrollBar is None")
         views = (
             (0, "bounds_gui_main_1000x760.png"),
             (120, "bounds_gui_scrolled_1000x760.png"),

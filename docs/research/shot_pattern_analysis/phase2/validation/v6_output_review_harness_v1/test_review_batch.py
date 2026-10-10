@@ -7,6 +7,8 @@ import pytest
 spec = importlib.util.spec_from_file_location(
     "review_batch", Path(__file__).with_name("review_batch.py")
 )
+if spec is None or spec.loader is None:
+    raise RuntimeError("could not load review_batch spec or loader")
 m = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(m)
 
@@ -148,17 +150,21 @@ def test_main_defers_live_writes_before_any_numeric_or_asset_read(
         "src.tools.shot_pattern_analysis.matched_supplement_figures"
     )
     for name in ("_slug", "pair_comparison_identity", "pair_comparison_slug"):
-        setattr(figure, name, lambda *a: None)
+        monkeypatch.setattr(figure, name, lambda *a: None, raising=False)
     pipeline = types.ModuleType(
         "src.tools.shot_pattern_analysis.matched_supplement_pipeline"
     )
-    pipeline._report_source_hashes = dict
+    monkeypatch.setattr(pipeline, "_report_source_hashes", dict, raising=False)
 
-    def forbidden(*args):
+    def forbidden(*args: object) -> None:
         raise AssertionError("live outputs must not be read")
 
-    pipeline._check_numeric_parity_reference = forbidden
-    pipeline._load_numeric_parity_reference = forbidden
+    monkeypatch.setattr(
+        pipeline, "_check_numeric_parity_reference", forbidden, raising=False
+    )
+    monkeypatch.setattr(
+        pipeline, "_load_numeric_parity_reference", forbidden, raising=False
+    )
     monkeypatch.setitem(sys.modules, figure.__name__, figure)
     monkeypatch.setitem(sys.modules, pipeline.__name__, pipeline)
     monkeypatch.setattr(
