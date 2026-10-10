@@ -43,6 +43,20 @@
       "source_changed": false,
       "editor_replaced": false,
       "separate_pdf_compiled": false
+    },
+    {
+      "checked_utc": "2026-10-10T08:47:10.619722+00:00",
+      "source_sha256": "a4913d2c23351ce4c0a83185fb4c63895c577b1d3c195b5ebd8a350e00846a8d",
+      "result": "compile-failed",
+      "failure_stage": "Tectonic bundle initialization before document parsing",
+      "diagnostic": "thread main (2) panicked at src/config.rs:154:18: called Result::unwrap() on an Err value: this bundle is not cached, and could not be obtained from https://relay.fullyjustified.net/default_bundle_v33.tar.index.gz",
+      "official_troubleshooting": "https://learn.chatgpt.com/docs/reference/troubleshooting",
+      "supported_repair_found": false,
+      "next_action": "App-level compiler bundle/network repair is required; available compile tool exposes only a source path. After repair, compile the same source and address any document diagnostics.",
+      "source_changed": false,
+      "editor_replaced": false,
+      "separate_pdf_compiled": false,
+      "check_context": "Resumed publication checkpoint; same compiler initialization failure"
     }
   ]
 }
