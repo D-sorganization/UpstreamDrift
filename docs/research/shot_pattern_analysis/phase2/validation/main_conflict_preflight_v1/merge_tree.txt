@@ -1,0 +1,41 @@
+ac0b22ea4d746025523fdfc6a6e53312654d738e
+AGENT_HANDOFF.md
+docs/agent_context/README.md
+docs/agent_context/index.html
+docs/agent_context/reviews.json
+docs/architecture/CAPABILITY_ATLAS.md
+docs/development/ORG01_CAPABILITY_BASELINE.md
+docs/development/feature_parity_matrix.md
+docs/shared_tools/divergence_inventory.md
+docs/shared_tools/divergence_inventory.v1.json
+manuals/upstreamdrift/calculation-registry.json
+ui/public/capability-atlas/graph.json
+ui/public/capability-atlas/index.html
+
+Auto-merging AGENT_HANDOFF.md
+CONFLICT (content): Merge conflict in AGENT_HANDOFF.md
+Auto-merging docs/agent_context/README.md
+CONFLICT (content): Merge conflict in docs/agent_context/README.md
+Auto-merging docs/agent_context/index.html
+CONFLICT (content): Merge conflict in docs/agent_context/index.html
+Auto-merging docs/agent_context/reviews.json
+CONFLICT (content): Merge conflict in docs/agent_context/reviews.json
+Auto-merging docs/agents/shared-infrastructure.md
+Auto-merging docs/architecture/CAPABILITY_ATLAS.md
+CONFLICT (content): Merge conflict in docs/architecture/CAPABILITY_ATLAS.md
+Auto-merging docs/development/ORG01_CAPABILITY_BASELINE.md
+CONFLICT (content): Merge conflict in docs/development/ORG01_CAPABILITY_BASELINE.md
+Auto-merging docs/development/feature_parity_matrix.md
+CONFLICT (content): Merge conflict in docs/development/feature_parity_matrix.md
+Auto-merging docs/shared_tools/divergence_inventory.md
+CONFLICT (content): Merge conflict in docs/shared_tools/divergence_inventory.md
+Auto-merging docs/shared_tools/divergence_inventory.v1.json
+CONFLICT (content): Merge conflict in docs/shared_tools/divergence_inventory.v1.json
+Auto-merging manuals/upstreamdrift/calculation-registry.json
+CONFLICT (content): Merge conflict in manuals/upstreamdrift/calculation-registry.json
+Auto-merging src/config/capability_migration.json
+Auto-merging src/config/feature_parity.json
+Auto-merging ui/public/capability-atlas/graph.json
+CONFLICT (content): Merge conflict in ui/public/capability-atlas/graph.json
+Auto-merging ui/public/capability-atlas/index.html
+CONFLICT (content): Merge conflict in ui/public/capability-atlas/index.html

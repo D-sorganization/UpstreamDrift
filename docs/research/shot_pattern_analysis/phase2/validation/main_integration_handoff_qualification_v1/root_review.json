@@ -1,0 +1,16 @@
+{
+  "independent_receipt_sha256": "6280f368e22ec9fd1aef99cd36814ab7b0db3ee022948fd380115dfea7d356c0",
+  "files_rehashed": {
+    "AGENT_HANDOFF.md": "0de880c5f5d8b68885a9b230b5d5aac0fb48e62f3fdb72bf9c3d274d9a9d5b61",
+    "docs/agents/handoffs/shot-pattern-integration-peer-records.md": "bf292cd335b83d70a52c91ead19ff27781a857fe2d7f2513f8f5bbb5e243b564",
+    "docs/agents/handoffs/shot-pattern-integration-peer-original.zip": "ccdf76e585e6a5c43eba8a714d4d20d075ff0781b45f2f2fba694c0a7da0db54"
+  },
+  "local_merge_commit": "7bdb71016c3bffa4c35a4e461071a8ba92d148fe",
+  "clean_worktree": true,
+  "parents": [
+    "2953c52b37001a8a3893e07943fb3cf2b6c38b45",
+    "fa7ee92f5cddd753099d7418fc974b142b7ebb54"
+  ],
+  "publication_accepted": false,
+  "pushed": false
+}

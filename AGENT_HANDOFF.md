@@ -2,10 +2,10 @@
 
 ## Active Epics and Current Study Status
 
-- **Matched Delivery Study — Phase Two**: Full truthful current study handoff lives at [docs/research/shot_pattern_analysis/phase2/TURNOVER.md](docs/research/shot_pattern_analysis/phase2/TURNOVER.md) in the separate `shot-pattern-analysis` worktree on branch `codex/shot-pattern-matched-delivery`; the integration branch copy lags new documentation commits and will be brought forward. Do not invent final acceptance.
+- **Matched Delivery Study — Phase Two**: Full truthful current study handoff lives at [docs/research/shot_pattern_analysis/phase2/TURNOVER.md](docs/research/shot_pattern_analysis/phase2/TURNOVER.md) in the separate `shot-pattern-analysis` worktree on branch `codex/shot-pattern-matched-delivery`; the integration includes documentation checkpoint `61002c4742`; later publication updates still need to be brought forward. Do not invent final acceptance.
 - **Simulation and Exporter State**: All simulation data is complete; final publication remains pending. The frozen v6 supplementary graphic exporter is still live (PID 51475) in separate presentation checkout `4023111d2a`.
 - **Graphics Qualification**: Original primary/control graphics are accepted; supplemental graphic review, report composition, remote asset delivery, and ready PR remain pending.
-- **Integration Branch Status**: Branch `codex/shot-pattern-main-integration` is an uncommitted merge of exact `main` `fa7ee92f5cddd753099d7418fc974b142b7ebb54` into `2953c52b37001a8a3893e07943fb3cf2b6c38b45`; model registries are preserved.
+- **Integration Branch Status**: Branch `codex/shot-pattern-main-integration` contains reviewed local merge `7bdb71016c` of exact `main` `fa7ee92f5cddd753099d7418fc974b142b7ebb54` into `2953c52b37001a8a3893e07943fb3cf2b6c38b45`; model registries are preserved. Final publication and pre-PR gates remain pending.
 - **Validation Evidence**: Root has independently executed 282 provider/scoring/GUI/report/contact tests (all pass), and Astra 71 launcher boundary tests pass (review recorded after fingerprint verification; context render/check/evaluate pass). Do not rely on terminal merge worker report.
 - **External Blockers**: LaTeX editor compiler pre-parse bundle download failure (#12120) remains an external unresolved blocker.
 
@@ -27,7 +27,7 @@
 
 - `python scripts/check_document_title_case.py AGENT_HANDOFF.md docs/agents/handoffs/shot-pattern-integration-peer-records.md`
 - `python -m src.tools.check_markdown_links AGENT_HANDOFF.md docs/agents/handoffs/shot-pattern-integration-peer-records.md`
-- Use the exact scoped 282-test commands in `phase2/validation/main_integration_independent_runtime_v1/` and the 71-test boundary receipt in `phase2/validation/launcher_boundary_independent_review_v1/` (under the study research directory; committed on the study branch).
+- Use the exact scoped 282-test commands in `phase2/validation/main_integration_independent_runtime_v1/` and the 71-test boundary receipt in `phase2/validation/launcher_boundary_independent_review_v1/` (under the study research directory; included in this integration).
 - Before delivery, run `python -m scripts.pre_pr` with Repository_Management first on `PYTHONPATH`; preserve all reported blockers.
 
 ## Do-Not List
@@ -43,7 +43,7 @@
 
 - Monitor completion of live exporter PID 51475 in frozen presentation checkout `4023111d2a`.
 - Complete supplemental graphic review, report composition, and remote asset delivery.
-- Bring forward documentation updates from the separate study branch and its canonical `TURNOVER.md`.
+- Bring forward final publication updates after study documentation checkpoint `61002c4742`.
 - Conclude independent root/Astra integration review and advance ready PR.
 
 ## Imported Peer Handoff Records Index
