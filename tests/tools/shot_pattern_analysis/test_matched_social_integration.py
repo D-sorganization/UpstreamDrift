@@ -167,6 +167,9 @@ def test_render_cell_figures_exports_dedicated_canonical_social_assets(
 
     output_dir = tmp_path / "report_figures"
     ledger = figures._render_cell_figures(ref, output_dir)
+    for _, kwargs in calls["dispersion"] + calls["overhead"]:
+        assert "Supplement Cell" not in kwargs["scenario"]
+        assert "stage" not in kwargs["metadata"]
     for _, kwargs in calls["overhead"]:
         assert "valid_shots_by_pattern" not in kwargs["metadata"]
         assert "total_shots_by_pattern" not in kwargs["metadata"]

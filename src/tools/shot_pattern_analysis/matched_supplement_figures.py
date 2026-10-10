@@ -166,7 +166,6 @@ def _plot_metadata(
         "lean_deg": config["club"]["shaft_lean_deg"],
         "curve_scale": config["curve_scale"],
         "shaft_rotation_sd_deg": config["noise"]["standard_deviations"][0],
-        "stage": "Final Supplemental Analysis",
         "figure_scope": label,
         "valid_shots_by_pattern": valid_counts,
         "total_shots_by_pattern": total,
@@ -222,7 +221,7 @@ def _render_cell_figures(ref: dict[str, Any], output_dir: Path) -> list[dict[str
         density_paths = write_academic_dispersion_figure(
             arrays,
             stem.with_name(stem.name + "_density"),
-            scenario=f"Supplement Cell: {label}",
+            scenario=f"Cell: {label}",
             metadata=metadata,
             target_point_m=(target_x, 0.0),
             presentation="academic",
@@ -261,7 +260,7 @@ def _render_cell_figures(ref: dict[str, Any], output_dir: Path) -> list[dict[str
         trajectory_paths,
         stem.with_name(stem.name + "_overhead"),
         target_x_m=target_x,
-        scenario=f"Supplement Cell: {label}; Raw Simulator Flight Samples",
+        scenario=f"Cell: {label}; Raw Simulator Flight Samples",
         metadata=_raw_flight_metadata(metadata),
         presentation="academic",
     )
