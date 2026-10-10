@@ -2500,6 +2500,14 @@ export interface MultivariatePayloadV2 {
 }
 
 /**
+ * Request body for launching a native viewer backend on a run's NPZ.
+ */
+export interface NativeViewerLaunchRequest {
+  backend: string;
+  speed: number;
+}
+
+/**
  * Toast notification preferences.
  */
 export interface NotificationSettings {
