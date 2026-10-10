@@ -178,3 +178,6 @@
   - `mypy`: passed with 0 issues.
   - `check_architecture_budget.py`: passed (all changed functions $\le 8$ parameters, $\le 100$ lines).
 
+## Native Muscle Experiment Bundle (#11908)
+
+See feedback_controls/F07_MUSCLE_BUNDLE_TURNOVER.md and canonical chapter27. Eight native tests pass after committed RED; additional law coverage and remaining gates are pending. Continuous Y coverage alone is not a complete State contract; registered discrete/modeling options and frozen executed source are explicit.

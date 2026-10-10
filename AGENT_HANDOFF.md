@@ -1,4 +1,12 @@
-# Active: Prediction Integrity Consolidation — F09p #12055
+# Active: Native Platform Integration — F10i #12060
+
+Read `docs/development/feedback_controls/F10I-NATIVE-PLATFORM-INTEGRATION-TURNOVER.md`.
+The guarded controls and published native platform implementations now coexist.
+Preserve Tools 86d0f28, private contract class identity, preparation blockers and
+Astra's full-model qualification firewall. Actual runtime evidence and broad
+capture-runtime failures are separate; integration does not complete the goal.
+
+# Prior: Prediction Integrity Consolidation — F09p #12055
 
 Branch `feat/f09p-prediction-integrity-12055` begins at published F09o
 `98784e8374f3adf31f3b22d6bb9e54c0bfa3d081`. Read its plan and turnover.

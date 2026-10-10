@@ -33,6 +33,8 @@ UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
 {{< include chapters/17-native-muscle-contact.qmd >}}
 
 
+
+
 {{< include chapters/14-muscle-qualification-evidence.qmd >}}
 
 {{< include chapters/15-lift-pack-audit.qmd >}}
@@ -41,4 +43,18 @@ UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
 
 {{< include chapters/26-native-opensim-geometry.qmd >}}
 
+{{< include chapters/27-native-muscle-experiment-bundle.qmd >}}
+
+{{< include chapters/30-native-simscape-restart.qmd >}}
+
 {{< include chapters/32-native-constrained-state.qmd >}}
+
+{{< include chapters/35-native-moco-initial-bindings.qmd >}}
+
+{{< include chapters/33-native-passive-readiness.qmd >}}
+
+{{< include chapters/40-native-reference-conventions.qmd >}}
+
+{{< include chapters/39-native-offline-muscle-matching.qmd >}}
+
+{{< include chapters/34-owned-native-simscape-replay.qmd >}}

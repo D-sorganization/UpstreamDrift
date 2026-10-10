@@ -2,7 +2,7 @@
 
 Generated from catalog.json and current source evidence. Edit the sources and regenerate.
 
-Source fingerprint: `bfda34170b32773e53fbb59543100aeb93b3695d5e10dcdaf8fb135e35c16d72`.
+Source fingerprint: `a955cf08a21436e0e769e07f56bcc4c6b0f8b446007c873ab81efd2f0ed8450a`.
 
 This map covers registered components. A source match is not scientific approval or proof that tests passed.
 
@@ -192,6 +192,19 @@ SDK source-bound production task histories and exact independent native replay; 
 - **Consumers:** None registered
 - **Providers:** project-myosuite-tasks
 
+### Native Feedback Platform
+
+ID: `native-feedback-platform` · Owner: UpstreamDrift: src/engines · Status: implemented
+
+Maintained muscle matching and independent replay entry points coexist across six ecosystems. Availability and native fixture evidence do not qualify all models or private capture matching.
+
+- **Sources:** [cli.py](../../src/engines/physics_engines/opensim/python/tour_matching/cli.py), [native_moco_runner.py](../../src/engines/physics_engines/opensim/python/tour_matching/native_moco_runner.py), [native_moco_replay.py](../../src/engines/physics_engines/opensim/python/tour_matching/native_moco_replay.py), [native_moco_request.py](../../src/engines/physics_engines/opensim/python/tour_matching/native_moco_request.py), [native_moco_guess.py](../../src/engines/physics_engines/opensim/python/tour_matching/native_moco_guess.py), [moco_initial_bindings.py](../../src/engines/physics_engines/opensim/python/tour_matching/moco_initial_bindings.py), [native_reference_conventions.py](../../src/engines/physics_engines/opensim/python/tour_matching/native_reference_conventions.py), [native_passive_readiness.py](../../src/engines/physics_engines/opensim/python/tour_matching/native_passive_readiness.py), [native_muscle_bundle.py](../../src/engines/physics_engines/opensim/python/tour_matching/native_muscle_bundle.py), [moco_tracking.py](../../src/engines/physics_engines/opensim/python/tour_matching/moco_tracking.py), [native_owned_replay.py](../../src/engines/Simscape_Multibody_Models/python/native_owned_replay.py), [native_replay_contracts.py](../../src/engines/native_replay_contracts.py), [native_torque_replay.py](../../src/engines/physics_engines/mujoco/python/native_torque_replay.py), [native_torque_replay.py](../../src/engines/physics_engines/drake/python/native_torque_replay.py), [native_torque_replay.py](../../src/engines/physics_engines/pinocchio/python/native_torque_replay.py), [native_direct_model_replay.py](../../src/engines/physics_engines/myosuite/python/native_direct_model_replay.py)
+- **Documentation:** [39-native-offline-muscle-matching.qmd](../../manuals/upstreamdrift/chapters/39-native-offline-muscle-matching.qmd), [40-native-reference-conventions.qmd](../../manuals/upstreamdrift/chapters/40-native-reference-conventions.qmd), [ASTRA_REVIEW.md](../../docs/development/feedback_controls/ASTRA_REVIEW.md), [F10I-NATIVE-PLATFORM-INTEGRATION-PLAN.md](../../docs/development/feedback_controls/F10I-NATIVE-PLATFORM-INTEGRATION-PLAN.md), [F10I-NATIVE-PLATFORM-INTEGRATION-TURNOVER.md](../../docs/development/feedback_controls/F10I-NATIVE-PLATFORM-INTEGRATION-TURNOVER.md)
+- **Tests:** [test_native_feedback_platform.py](../../tests/integration/test_native_feedback_platform.py), [test_native_moco_runner.py](../../tests/opensim/test_native_moco_runner.py), [test_native_moco_guess.py](../../tests/opensim/test_native_moco_guess.py), [test_moco_initial_bindings.py](../../tests/opensim/test_moco_initial_bindings.py), [test_native_muscle_bundle.py](../../tests/opensim/test_native_muscle_bundle.py), [test_native_reference_conventions.py](../../tests/opensim/test_native_reference_conventions.py), [test_native_passive_readiness.py](../../tests/opensim/test_native_passive_readiness.py), [test_simscape_owned_native_replay.py](../../tests/unit/motion_matching/test_simscape_owned_native_replay.py)
+- **Public Interfaces:** `prepare_native_moco` in [src/engines/physics_engines/opensim/python/tour_matching/native_moco_runner.py](../../src/engines/physics_engines/opensim/python/tour_matching/native_moco_runner.py), `solve_native_moco` in [src/engines/physics_engines/opensim/python/tour_matching/native_moco_runner.py](../../src/engines/physics_engines/opensim/python/tour_matching/native_moco_runner.py), `replay_native_moco_bundle` in [src/engines/physics_engines/opensim/python/tour_matching/native_moco_replay.py](../../src/engines/physics_engines/opensim/python/tour_matching/native_moco_replay.py)
+- **Consumers:** None registered
+- **Providers:** None registered
+
 ## Integration Contracts
 
 | Provider | Consumer | Interaction | Contract |
@@ -219,6 +232,7 @@ flowchart LR
     n11["Canonical Core Retrieval"]
     n12["Project MyoSuite Tasks"]
     n13["Independent Native Command Replay"]
+    n14["Native Feedback Platform"]
     n2 -->|"calls"| n3
     n4 -->|"constructs"| n5
     n6 -->|"translates"| n7
@@ -235,7 +249,7 @@ flowchart LR
 
 ## Provenance and Limits
 
-- 87 source files hashed with SHA-256; UTF-8 line endings normalized.
+- 114 source files hashed with SHA-256; UTF-8 line endings normalized.
 - Generated documents omit absolute paths and commit IDs to remain reproducible across worktrees.
 - Live CLI/MCP results include checkout identity and current revision.
 - Read integration contracts and their tests before modifying a boundary.

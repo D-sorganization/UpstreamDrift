@@ -1,0 +1,73 @@
+# Native Platform Integration Turnover — F10i #12060
+
+## Implementation and Preserved Authorities
+
+The owned `feat/f10i-native-platform-integration-12060` branch integrates published
+guarded controls head `ad2cefcbe3b4f2e23dde96e04b39607ddfe379f8` and native platform
+head `f5554f91b46a27f5625f85268ed668b27f3293ef`. Existing Moco preparation, numerical
+seed, solve/export and independent muscle replay now coexist with six-engine
+replay entry points and guarded native MyoSuite command optimization. No second
+optimizer or replay-contract implementation is introduced. Keep the admitted
+Tools pin `86d0f28b1cc5acf61185e07e320c816c2d005512`, explicit private contract
+loader, concrete muscle-law restrictions and pre-execution integrity guards.
+
+Registry conflicts were merged by blocker ID, preserving independent additions
+and scientific exclusions. Generated views are regenerated from current inputs.
+Reference conventions moves from filename prefix 38 to 40; chapter 38 remains
+the project MyoSuite task reference. Historical evidence identities remain intact.
+
+## TDD and Actual Runtime Evidence
+
+The original eight-case availability contract failed four cases before integration:
+missing Moco preparation/replay, owned Simscape replay, and CLI route. Its guessed
+CLI flags were corrected to the existing provider's public `--output-dir` and
+`--source-sha256`; no provider API was altered to satisfy the guessed fixture.
+Availability proves imports only. The combined actual OpenSim 4.6/MuJoCo 3.8
+campaign passes 328 tests with 25 explicit skips and zero
+failures/errors. All 4509 declared Python source/test files have matching
+before/after hashes. SDK-dependent Drake/Pinocchio skips are not native evidence;
+Python Simscape protocol checks are not MATLAB R2025b execution.
+
+Broad initial selection: 495 passed, 10 failed, 27 skipped. One actual integration
+regression required a test correction: 17-digit TRC export can have zero rounding
+error. The corrected test checks nonnegative bounded error, original time, observed
+positions and a genuinely missing sample after independent readback. The other
+failures were missing optional C3D runtime and an intentionally opt-in absent
+Rajagopal fixture. Installing ezc3d revealed a same-process Windows DLL collision
+with OpenSim's bundled ezc3d.dll. The subsequent broad attempt retained eight
+capture-load failures; its environment changed during execution and it is not
+accepted as stable runtime attestation. Final qualified checks use a frozen
+environment and the explicit affected test selection. The SDK environment retains
+ezc3d 1.6.3; no source loader bypass, fabricated capture, SDK reinstall or relaxed
+physical criterion was used. Capture preparation must remain isolated from native
+execution until compatible DLL loading is established.
+
+The prior F09p actual MyoSuite 3.0/MuJoCo 3.6 176-test receipt remains historical:
+all 21 declared executed source/test files are byte-identical after integration.
+This comparison does not attest additional transitive modules or a fresh 3.6 run.
+
+## Reproduction and Evidence Location
+
+Use the existing Python 3.12 OpenSim environment with `CASADIPATH` pointing to its
+`Lib/site-packages/opensim`; retain the admitted Tools path and repository root in
+`PYTHONPATH`. Run `pytest --noconftest -o addopts=''` on the integration contract,
+native Moco runner/guess/initial-binding/muscle bundle/passive/reference/replay/
+constraint/marker suites, TRC and pelvis contracts, four native engine replay
+protocol modules and the pinned/private loader tests. The exact selected test
+modules are represented in retained JUnit. Runtime files live in the fleet
+workspace `docs/development/feedback_controls_planning`: `f10i-platform-red.xml`,
+`f10i-native-opensim-integration.xml`, broad failed receipts,
+`f10i-native-qualified-campaign.xml`, before/after source manifests and
+`f10i-native-integration-receipt.json`. They contain no new private motion arrays.
+
+## Scientific Scope and Next Work
+
+Keep Astra's qualification firewall and full seventeen-model/six-ecosystem
+denominator. Full private-reference muscle-driven OpenSim matching, complete-state
+independent excitation replay, anatomy, passive-load readiness, native contact/grip
+and assistance accounting remain open. Source preparation must retain registration,
+marker coverage, passive, assistance, constraint and complete bounded state blockers
+before Moco construction. Numerical seeds are not observed motion. Integration,
+native fixture success, optimizer convergence and animations do not close F10.
+Reuse existing SDKs/checkouts; retain Desktop previews with their current explicit
+nominal-viability labels. No new fit video or qualified private match is claimed.

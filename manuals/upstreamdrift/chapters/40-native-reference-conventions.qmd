@@ -1,0 +1,121 @@
+# Native Source Reference and Muscle-Path Conventions
+
+This provisional F07f chapter covers issue #11962 under #11791 and epic
+#11784. The read-only observer records source geometry and concrete muscle
+options at a declared native state. It does not repair anatomy, set control
+parameters, establish physiological limits, or qualify full-body dynamics.
+The exact calculation source is
+`tour_matching/native_reference_conventions.py`; the existing
+`native_constraint_state.py` supplies the model/runtime/state observation.
+
+## Source, State, and Frame Contract
+
+`ReferenceStateDeclaration` binds a named reference and provenance to the
+exact entrypoint XML SHA-256 and initialized native clock (this API supports
+the 0 s initial clock). `post-init-system` observes the state returned by
+`initSystem()`. **OpenSim performs native assembly during `initSystem()`**;
+serialized coordinate defaults may differ from achieved coordinates. Both are
+recorded, along with model `assembly_accuracy` and constraint residuals.
+`complete-named-state` then supplies every native named continuous state value
+and rejects ignored or incomplete assignments, without an additional assembly.
+It retains the initialized clock and native defaults for other state/options.
+Neither mode certifies the native numerical/discrete restart state. The source
+is loaded from an owned XML copy; original bytes are checked afterward.
+`audit_source_reference` invokes no additional assembly, muscle equilibrium,
+forward integration, or force override. Native realization updates caches in
+its owned State only.
+
+The caller declares an absolute reference `PhysicalFrame` path. With its
+ground transform $(R_0,p_0)$, each frame's reported position and rotation are
+
+$$p_i^{(0)}=R_0^T(p_i-p_0),\qquad R_i^{(0)}=R_0^TR_i.$$
+
+All positions and muscle paths use metres; rotations are proper native
+direction-cosine matrices. Joint records retain concrete class, parent/child
+frame paths, coordinate paths and source serialization hashes. Coupler records
+retain explicit dependent/independent coordinate paths, function class and
+current enforcement. Coordinate values, locks, prescription, constraints,
+modeling options and registered values remain in the embedded native audit.
+Equal path strings across two sources never prove equal axis meaning, joint
+limits, anatomy, or state preparation.
+
+## Muscle and Wrap Observations
+
+Every registered native muscle contributes concrete law, current geometry-path
+length, optimal fiber length, tendon slack length, pennation at optimal length,
+maximum isometric force, native activation/tendon-compliance options, source
+serialization hash, declared path-point frame/local and ground locations,
+current routed path-point class/identity/activity and native wrap-curve samples,
+and wrap-object frame/translation/rotation/class. Native wrap-curve samples
+retain their API-native coordinates; they are not silently interpreted as
+ground or reference-frame coordinates. The
+DeGrooteFregly2016 law additionally exposes passive-fiber-disable and fiber
+damping flags. The source XML and loaded native model hashes bind the
+observation. A current routed point can move with state or wrap choice; it is
+not inferred from fixed origin/insertion XML. These observations never call
+passive readiness or substitute for force-law calibration.
+
+`NativeReferenceCorrespondence` explicitly names selected left/right frame,
+joint, coordinate and muscle paths; binds both full observation digests; and
+records a declared proper rigid transform plus provenance. The transform means
+right-reference coordinates $=R_{RL}$ times left-reference coordinates plus
+$t_{RL}$. No map is generated from matching names. For a mapped frame pair the
+diagnostic displacement is
+
+$$\Delta p=p_R-(R_{RL}p_L+t_{RL}),$$
+
+and the orientation difference is the principal SO(3) angle between
+$R_i^{(R)}$ and $R_{RL}R_i^{(L)}$; for a mapped muscle pair the length difference
+is $\Delta L=L_R-L_L$. A one-to-one mapping
+with a nonexistent path, changed source/state observation, or non-rotation is
+rejected. These are coordinate diagnostics in a declared registration, not
+proof of anatomical correspondence; the result always says
+`not-qualified-for-anatomy`. Joint and coordinate pairs validate that named
+paths exist but do not assert physical equality or compute an unqualified
+parameter difference. The returned joint and coordinate pairs are explicitly
+marked `not_compared`: a Cartesian frame registration does not establish scalar
+coordinate sign, offset, axis, range or coupler equivalence.
+
+## Native Checks and Limits
+
+An actual OpenSim 4.6 SliderJoint fixture yields a 0.2 m body and muscle-path
+displacement; an explicitly restored 0.3 m named state changes the observation
+without changing source defaults. A coupled fixture has inconsistent serialized
+defaults; native initialization assembles them and the audit retains both.
+Source SHA, clock, incomplete-state, stale observation, missing correspondence
+and improper rotation regressions reject. A rotated weld with unchanged origin
+produces a 0.5 rad orientation difference rather than false zero frame error.
+An actual DeGrooteFregly2016 fixture preserves a declared cylinder wrap,
+its engaged native wrap-curve samples, passive-fiber-disable, rigid tendon and
+0.02 fiber-damping setting. A MovingPathPoint fixture changes native local and
+ground position across two declared states; a ConditionalPathPoint switches
+activity and is omitted from the current route when inactive. No source
+bytes or model law are modified by either audit.
+
+Bounded post-initSystem diagnostics observed all 520 muscles, 249 frames, 80
+joints and 76 wraps in the unchanged Wilkinson generic source (SHA-256
+`a55c64341680551fb5a41be254bdfdb3b2be0ac789336ea44902b22fc9a83913`).
+The public Pose2Sim author source (SHA-256
+`53f84b9552b1c5eceee3768fa820b75bd675daeea473f918cffeb5c6337f0c13`)
+yielded 318 muscles, 111 frames, 30 joints and 89 wraps. An explicitly named
+candidate mapping in the two native pelvis coordinate frames showed about
+43 mm shorter IL_L4_r and MF_m5_laminar_r paths in Pose2Sim; the pelvis
+frames have not been anatomically registered. The alternative source has
+different ancestry, coupling and upper-limb coverage and is not a substitute
+for the endpoint model. Full machine-readable observations and mapping live
+in the local F07f staging receipt; the raw public source XML is not committed.
+
+The SHA-256 of entrypoint XML does not close transitive resource identity.
+The source models emitted missing visual-mesh warnings when loaded from the
+owned temporary XML. This audit depends on native model/path readback, not
+visual render geometry, and retains the warning as a resource-closure gap.
+Native runtime extension hashes, loaded serialization and observer hash are
+recorded; they do not certify a donor release, capture subject, contact/grip
+law, physiology, calibrated marker frame, or complete restart. Full F07/F08
+qualification remains open.
+
+Run the actual native fixture in the pinned OpenSim environment:
+
+```text
+python -m pytest -q -o addopts= tests/opensim/test_native_reference_conventions.py
+```
