@@ -307,6 +307,28 @@ def _cell_metadata(
     }
 
 
+def _social_noise_summary(
+    standard_deviations: list[float] | tuple[float, ...],
+) -> str:
+    """Format delivery noise components with readable units for social captions."""
+    if (
+        not isinstance(standard_deviations, (list, tuple))
+        or len(standard_deviations) != 7
+    ):
+        raise ValueError("social figure requires all seven noise standard deviations")
+    if not all(
+        isinstance(v, (int, float)) and math.isfinite(float(v))
+        for v in standard_deviations
+    ):
+        raise ValueError("noise standard deviations must be finite numbers")
+    return (
+        f"Path SD {float(standard_deviations[1]):g}° • "
+        f"Speed SD {float(standard_deviations[2]) * 2.2369362921:.2g} mph • "
+        f"Strike SD {float(standard_deviations[3]) * 1000:g}/{float(standard_deviations[4]) * 1000:g} mm "
+        "horizontal/vertical"
+    )
+
+
 def _social_metadata(
     cell: dict[str, Any], valid_counts: dict[str, int], total_counts: dict[str, int]
 ) -> tuple[str, dict[str, Any]]:
@@ -331,11 +353,7 @@ def _social_metadata(
     return subtitle, {
         "social_club": _CLUB_NAMES[club_id],
         "Protocol": protocol,
-        "Noise": (
-            f"Path SD {float(noise[1]):g}° • Speed SD {float(noise[2]) * 2.2369362921:.2g} mph • "
-            f"Strike SD {float(noise[3]) * 1000:g}/{float(noise[4]) * 1000:g} mm "
-            "horizontal/vertical"
-        ),
+        "Noise": _social_noise_summary(noise),
         "Matched Target": f"{float(cell['target_x_m']):.2f} m downrange",
         "valid_shots_by_pattern": valid_counts,
         "total_shots_by_pattern": total_counts,
@@ -514,19 +532,56 @@ def _render_density_comparison(
         )
         for cell in (first, second)
     ]
-    metadata = {
+    comparison_name = str(pair.get("comparison"))
+    noise_sds = first_config.get("noise", {}).get("standard_deviations", [])
+    if comparison_name == "curve_scale":
+        if not noise_sds:
+            raise ValueError(
+                "noise standard deviations missing for curve scale comparison"
+            )
+        fixed_sd = float(noise_sds[0])
+        if not math.isfinite(fixed_sd):
+            raise ValueError("shaft twist SD must be finite")
+        fixed_control = f"Shaft Twist SD {fixed_sd:g}°"
+    elif comparison_name == "shaft_rotation_sd":
+        curve_scale = float(first_config.get("curve_scale", math.nan))
+        if not math.isfinite(curve_scale):
+            raise ValueError("curve scale must be finite")
+        fixed_control = f"Curve ×{curve_scale:g}"
+    else:
+        raise ValueError(f"unrecognized comparison type: {comparison_name}")
+
+    profile = str(pair.get("profile"))
+    if profile == "shaft_only":
+        profile_label = "Shaft Twist Only"
+    elif profile == "combined2":
+        profile_label = "Combined Delivery Noise"
+    else:
+        profile_label = profile.replace("_", " ").title()
+
+    metadata: dict[str, Any] = {
         "social_club": _CLUB_NAMES.get(str(pair["club_id"]), str(pair["club_id"])),
         "Protocol": first.get("protocol_id") or "Original Matched-Delivery Protocol",
         "Target": f"{float(target_x_values[0]):.2f} m downrange",
-        "Nominal Lean": f"{float(club.get('shaft_lean_deg', 0.0)):g}°",
-        "Match Residuals": f"{residuals[0]:.3g} vs {residuals[1]:.3g} m",
-        "valid_shots_by_pattern": valid_counts,
-        "total_shots_by_pattern": total_counts,
     }
+    if club.get("loft_deg") is not None:
+        loft_val = float(club["loft_deg"])
+        if not math.isfinite(loft_val):
+            raise ValueError("static loft must be finite")
+        metadata["Static Loft"] = f"{loft_val:g}°"
+    lean_val = float(club.get("shaft_lean_deg", 0.0))
+    if not math.isfinite(lean_val):
+        raise ValueError("nominal lean must be finite")
+    metadata["Nominal Lean"] = f"{lean_val:g}°"
+    metadata["Noise"] = _social_noise_summary(noise_sds)
+    metadata["Match Residuals"] = f"{residuals[0]:.3g} vs {residuals[1]:.3g} m"
+    metadata["valid_shots_by_pattern"] = valid_counts
+    metadata["total_shots_by_pattern"] = total_counts
+
     scenario = (
         f"{'PILOT PREVIEW — ' if preview else ''}"
         f"{pair['pattern']} • {pair['first_label']} vs {pair['second_label']} • "
-        f"{'Shaft Twist Only' if pair['profile'] == 'shaft_only' else 'Combined Delivery Noise'}"
+        f"{fixed_control} • {profile_label}"
     )
     stem = (
         output_root

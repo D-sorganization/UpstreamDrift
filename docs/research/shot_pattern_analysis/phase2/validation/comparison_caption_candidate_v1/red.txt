@@ -1,0 +1,192 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.13, pytest-9.1.1, pluggy-1.6.0
+PyQt6 6.11.0 -- Qt runtime 6.11.1 -- Qt compiled 6.11.0
+benchmark: 5.3.0 (defaults: timer=time.perf_counter disable_gc=False min_rounds=5 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)
+rootdir: /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift
+configfile: pyproject.toml
+plugins: qt-4.5.0, anyio-4.15.1, xdist-3.8.0, cov-7.1.0, asyncio-1.4.0, benchmark-5.3.0, hypothesis-6.168.5, platformdirs-4.12.3, timeout-2.4.0, mock-3.16.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+timeout: 60.0s
+timeout method: thread
+timeout func_only: False
+collected 18 items
+
+tests/research/test_shot_pattern_final_figures.py ................FF     [100%]
+
+=================================== FAILURES ===================================
+_ test_density_comparison_captures_fixed_controls_and_units_for_combined_noise _
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-1921/test_density_comparison_captur0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x731c4562b3e0>
+
+    def test_density_comparison_captures_fixed_controls_and_units_for_combined_noise(
+        tmp_path, monkeypatch
+    ) -> None:
+        from scripts.research.shot_pattern_analysis import build_final_figures as builder
+        import src.tools.shot_pattern_analysis.academic_plots as plots
+    
+        cells = [
+            {
+                "cell": f"driver_lean0_sd{sd:g}_curve{curve:g}_combined2",
+                "status": "completed",
+                "target_x_m": 180.0,
+                "config": {
+                    "club": {
+                        "club_id": "driver",
+                        "loft_deg": 10.0,
+                        "shaft_lean_deg": 0.0,
+                        "contact_law": "incremental_coulomb_energetic",
+                    },
+                    "noise": {
+                        "standard_deviations": [sd, 0.5, 0.89408, 0.00635, 0.00635, 0.0, 0.0],
+                        "correlation": None,
+                    },
+                    "curve_scale": curve,
+                    "n_shots": 100,
+                    "seed": 42,
+                },
+                "nominals": {
+                    "Draw": {"residual_m": 0.001},
+                },
+            }
+            for sd, curve in ((2.0, 1.0), (2.0, 2.0), (1.0, 1.0))
+        ]
+        monkeypatch.setattr(
+            builder,
+            "_supported_points",
+            lambda _path: (
+                {name: [[180.0, 0.0]] for name in ("Straight", "Draw", "Fade")},
+                dict.fromkeys(("Straight", "Draw", "Fade"), 100),
+            ),
+        )
+    
+        recorded_calls: list[dict[str, Any]] = []
+    
+        def fake_plot(_points, stem, **kwargs):
+            recorded_calls.append({"stem": stem, **kwargs})
+            return {"png": stem.with_suffix(".png")}
+    
+        monkeypatch.setattr(plots, "write_academic_dispersion_figure", fake_plot)
+    
+        pairs = builder._comparison_pair_specs(cells)
+        curve_pair = next(
+            p for p in pairs if p["comparison"] == "curve_scale" and p["pattern"] == "Draw"
+        )
+        row_curve, _ = builder._render_density_comparison(
+            curve_pair, tmp_path / "source", tmp_path / "output", dpi=96, preview=False
+        )
+        assert row_curve["status"] == "completed"
+        call_curve = recorded_calls[-1]
+        scenario_curve = call_curve["scenario"]
+        metadata_curve = call_curve["metadata"]
+    
+        assert "Curve ×1 vs Curve ×2" in scenario_curve
+>       assert "Shaft Twist SD 2°" in scenario_curve
+E       AssertionError: assert 'Shaft Twist SD 2°' in 'Draw • Curve ×1 vs Curve ×2 • Combined Delivery Noise'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/research/test_shot_pattern_final_figures.py:584: AssertionError
+___ test_density_comparison_captures_fixed_controls_and_units_for_shaft_only ___
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-1921/test_density_comparison_captur1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x731c456720c0>
+
+    def test_density_comparison_captures_fixed_controls_and_units_for_shaft_only(
+        tmp_path, monkeypatch
+    ) -> None:
+        from scripts.research.shot_pattern_analysis import build_final_figures as builder
+        import src.tools.shot_pattern_analysis.academic_plots as plots
+    
+        cells = [
+            {
+                "cell": f"driver_lean0_sd{sd:g}_curve{curve:g}_shaft_only",
+                "status": "completed",
+                "target_x_m": 180.0,
+                "config": {
+                    "club": {
+                        "club_id": "driver",
+                        "loft_deg": 10.0,
+                        "shaft_lean_deg": 0.0,
+                        "contact_law": "incremental_coulomb_energetic",
+                    },
+                    "noise": {
+                        "standard_deviations": [sd, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                        "correlation": None,
+                    },
+                    "curve_scale": curve,
+                    "n_shots": 100,
+                    "seed": 42,
+                },
+                "nominals": {
+                    "Draw": {"residual_m": 0.001},
+                },
+            }
+            for sd, curve in ((2.0, 1.0), (2.0, 2.0), (1.0, 1.0))
+        ]
+        monkeypatch.setattr(
+            builder,
+            "_supported_points",
+            lambda _path: (
+                {name: [[180.0, 0.0]] for name in ("Straight", "Draw", "Fade")},
+                dict.fromkeys(("Straight", "Draw", "Fade"), 100),
+            ),
+        )
+    
+        recorded_calls: list[dict[str, Any]] = []
+    
+        def fake_plot(_points, stem, **kwargs):
+            recorded_calls.append({"stem": stem, **kwargs})
+            return {"png": stem.with_suffix(".png")}
+    
+        monkeypatch.setattr(plots, "write_academic_dispersion_figure", fake_plot)
+    
+        pairs = builder._comparison_pair_specs(cells)
+        curve_pair = next(
+            p for p in pairs if p["comparison"] == "curve_scale" and p["pattern"] == "Draw"
+        )
+        row_curve, _ = builder._render_density_comparison(
+            curve_pair, tmp_path / "source", tmp_path / "output", dpi=96, preview=False
+        )
+        assert row_curve["status"] == "completed"
+        call_curve = recorded_calls[-1]
+        scenario_curve = call_curve["scenario"]
+        metadata_curve = call_curve["metadata"]
+    
+        assert "Curve ×1 vs Curve ×2" in scenario_curve
+>       assert "Shaft Twist SD 2°" in scenario_curve
+E       AssertionError: assert 'Shaft Twist SD 2°' in 'Draw • Curve ×1 vs Curve ×2 • Shaft Twist Only'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/research/test_shot_pattern_final_figures.py:681: AssertionError
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+../../../../Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487
+  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487: UserWarning: Skipping collection of '.hypothesis' directory - this usually means you've explicitly set the `norecursedirs` pytest config option, replacing rather than extending the default ignores.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/research/test_shot_pattern_final_figures.py::test_density_comparison_captures_fixed_controls_and_units_for_combined_noise
+FAILED tests/research/test_shot_pattern_final_figures.py::test_density_comparison_captures_fixed_controls_and_units_for_shaft_only
+=================== 2 failed, 16 passed, 7 warnings in 3.93s ===================
