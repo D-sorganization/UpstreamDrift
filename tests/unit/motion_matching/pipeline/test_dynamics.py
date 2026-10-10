@@ -214,7 +214,9 @@ def test_shooting_fit_runs_a_pass(monkeypatch: pytest.MonkeyPatch) -> None:
         dynamics, "marker_errors", lambda *a: np.full((frames, 2), 0.01)
     )
     zmp = {"outside_m": np.zeros(frames), "unloaded": np.zeros(frames, dtype=bool)}
-    monkeypatch.setattr(full_body_forward_dynamics, "reference_zmp", lambda *a: zmp)
+    monkeypatch.setattr(
+        full_body_forward_dynamics, "reference_zmp", lambda *a, **k: zmp
+    )
 
     best_q, out_zmp, report = dynamics.shooting_fit(
         lane,
@@ -229,3 +231,32 @@ def test_shooting_fit_runs_a_pass(monkeypatch: pytest.MonkeyPatch) -> None:
     assert best_q is q and out_zmp is zmp
     assert report["best_iteration"] == 0
     assert report["iterations"][0]["replay_marker_rms_m"] == pytest.approx(0.01)
+
+
+@pytest.mark.unit
+def test_lane_reference_zmp_splits_at_the_lane_impact(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The pipeline's reference ZMP splits its rates at the capture impact
+    like the replay controller does, and stays unsplit without one (#12117)."""
+    from types import SimpleNamespace
+
+    from src.shared.python.motion_matching import full_body_forward_dynamics
+    from src.shared.python.motion_matching.pipeline import dynamics
+
+    calls: list[tuple[tuple, dict]] = []
+    monkeypatch.setattr(
+        full_body_forward_dynamics,
+        "reference_zmp",
+        lambda *a, **k: calls.append((a, k)) or {"zmp_xy": None},
+    )
+    times, q, sim = np.arange(5) / 360.0, np.zeros((5, 3)), object()
+    split = SimpleNamespace(times=times, ground="g", impact_time_s=0.004)
+    unsplit = SimpleNamespace(times=times, ground="g")
+
+    dynamics.lane_reference_zmp(sim, split, q)
+    dynamics.lane_reference_zmp(sim, unsplit, q)
+
+    assert calls[0][0] == (sim, times, q, "g")
+    assert calls[0][1] == {"split_time_s": 0.004}
+    assert calls[1][1] == {"split_time_s": None}
