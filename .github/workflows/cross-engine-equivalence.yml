@@ -25,14 +25,20 @@ on:
       - "!src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/**"
       - "src/shared/python/engine_core/cross_engine_validator.py"
       - "src/shared/python/force_overlay/**"
+      - "src/shared/python/impact_parameters/**"
       - "shared/models/**"
       - "tests/integration/test_cross_engine_validation.py"
       - "tests/integration/cross_engine/**"
       - "tests/unit/pose_interchange/adapters/**"
+      - "tests/unit/impact_parameters/test_adapters.py"
       - "tests/motion_matching/test_cross_engine_equivalence.py"
       - "tests/cross_engine/test_jaxsim_vs_pinocchio.py"
       - "tests/cross_engine/test_jaxsim_forward_sim.py"
       - "tests/fixtures/test_poses.json"
+      - "src/shared/python/biomechanics/ground_reaction*.py"
+      - "src/shared/python/biomechanics/foot_membership.py"
+      - "tests/unit/engines/*/test_*ground_reaction*.py"
+      - "tests/engines/drake/test_drake_ground_reaction.py"
       - "scripts/jaxsim/check_jaxsim_pin.py"
       - "scripts/ci/check_pinocchio_dynamics_api.py"
       - ".jules/templates/**"
@@ -45,14 +51,20 @@ on:
       - "!src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/**"
       - "src/shared/python/engine_core/cross_engine_validator.py"
       - "src/shared/python/force_overlay/**"
+      - "src/shared/python/impact_parameters/**"
       - "shared/models/**"
       - "tests/integration/test_cross_engine_validation.py"
       - "tests/integration/cross_engine/**"
       - "tests/unit/pose_interchange/adapters/**"
+      - "tests/unit/impact_parameters/test_adapters.py"
       - "tests/motion_matching/test_cross_engine_equivalence.py"
       - "tests/cross_engine/test_jaxsim_vs_pinocchio.py"
       - "tests/cross_engine/test_jaxsim_forward_sim.py"
       - "tests/fixtures/test_poses.json"
+      - "src/shared/python/biomechanics/ground_reaction*.py"
+      - "src/shared/python/biomechanics/foot_membership.py"
+      - "tests/unit/engines/*/test_*ground_reaction*.py"
+      - "tests/engines/drake/test_drake_ground_reaction.py"
       - "scripts/jaxsim/check_jaxsim_pin.py"
       - "scripts/ci/check_pinocchio_dynamics_api.py"
       - ".jules/templates/**"
@@ -222,6 +234,7 @@ jobs:
             tests/motion_matching/test_cross_engine_equivalence.py \
             tests/cross_engine/test_jaxsim_vs_pinocchio.py \
             tests/cross_engine/test_jaxsim_forward_sim.py \
+            tests/unit/impact_parameters/test_adapters.py \
             -v -rs --tb=short -p no:xvfb \
             --junitxml=test-results/cross-engine-equivalence-junit.xml
 
@@ -234,6 +247,22 @@ jobs:
           python3 scripts/ci/require_junit_test_passed.py \
             test-results/cross-engine-equivalence-junit.xml \
             test_jaxsim_pinocchio_free_body_dynamics_terms_match
+
+      - name: Assert clubhead-series parity cases actually ran (GCV-16 #11722)
+        # Every CI lane outside this job lacks Drake/Pinocchio, so the GCV-16
+        # adapter and parity tests skip there. Require the MuJoCo, Pinocchio
+        # and Drake adapters and both parity cases to PASS here. OpenSim joins
+        # the parity comparison when its wheel installs (best-effort, as in
+        # force-overlay-parity below).
+        shell: bash
+        run: |
+          set -euo pipefail
+          junit=test-results/cross-engine-equivalence-junit.xml
+          python3 scripts/ci/require_junit_test_passed.py "$junit" test_mujoco_adapter_series_valid
+          python3 scripts/ci/require_junit_test_passed.py "$junit" test_pinocchio_adapter_series_valid
+          python3 scripts/ci/require_junit_test_passed.py "$junit" test_drake_adapter_series_valid
+          python3 scripts/ci/require_junit_test_passed.py "$junit" test_cross_engine_face_series_parity
+          python3 scripts/ci/require_junit_test_passed.py "$junit" test_cross_engine_impact_parameter_parity
 
       - name: Upload equivalence report
         if: always()
@@ -442,6 +471,7 @@ jobs:
           python3 -m pytest \
             -o addopts="" \
             tests/integration/cross_engine/test_force_overlay_parity.py \
+            tests/integration/cross_engine/test_ground_reaction_parity.py \
             -m "requires_${{ matrix.engine }}" \
             -v -rs --tb=short -p no:xvfb \
             --junitxml="test-results/force-overlay-parity-${{ matrix.engine }}-junit.xml"
@@ -454,6 +484,21 @@ jobs:
           python3 scripts/ci/require_junit_test_passed.py \
             "test-results/force-overlay-parity-${{ matrix.engine }}-junit.xml" \
             "${{ matrix.evidence }}"
+
+      - name: "Assert ${{ matrix.engine }} ground-reaction parity ran (GCV-2 #11708)"
+        # The canonical conformance gate deselects requires_<engine> rows, so
+        # the GCV-2 static-stance breakdown (net GRF = weight within 2 %,
+        # symmetric split, CoP between the feet) only executes with the engine
+        # installed here. Require it to PASS, not merely be collected.
+        shell: bash
+        run: |
+          junit="test-results/force-overlay-parity-${{ matrix.engine }}-junit.xml"
+          for case in test_net_grf_equals_body_weight \
+            test_feet_share_the_load_symmetrically \
+            test_net_cop_is_on_the_ground_between_the_feet; do
+            python3 scripts/ci/require_junit_test_passed.py \
+              "$junit" "${case}[${{ matrix.engine }}]"
+          done
 
       - name: Upload parity report
         if: always()

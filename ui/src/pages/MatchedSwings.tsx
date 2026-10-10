@@ -20,6 +20,8 @@ import { WorkspaceShell } from '@/components/layout/WorkspaceShell';
 import {
   fetchCandidatePreviewFrame,
   fetchMatchedSwingLedger,
+  fetchMatchedSwingReceipt,
+  fetchParityReport,
   formatMetric,
   matchedSwingAnimationUrl,
   verdictBadgeClass,
@@ -38,19 +40,27 @@ type LoadState = 'loading' | 'ready' | 'error';
 function filterRuns(
   runs: MatchedSwingRun[],
   engine: string,
+  capture: string,
+  lane: string,
   verdict: string,
   query: string,
 ): MatchedSwingRun[] {
   const q = query.trim().toLowerCase();
   return runs.filter((run) => {
     if (engine !== 'all' && run.engine !== engine) return false;
+    if (capture !== 'all' && (run.capture ?? '') !== capture) return false;
+    if (lane !== 'all' && run.lane !== lane) return false;
     if (verdict !== 'all' && run.verdict.toUpperCase() !== verdict.toUpperCase()) {
       return false;
     }
     if (!q) return true;
-    const haystack = `${run.engine} ${run.lane} ${run.capture ?? ''} ${run.candidate_sha256 ?? ''} ${run.id}`.toLowerCase();
+    const haystack = `${run.engine} ${run.lane} ${run.capture ?? ''} ${run.candidate_sha256 ?? ''} ${run.id} ${run.reason ?? ''}`.toLowerCase();
     return haystack.includes(q);
   });
+}
+
+function formatGateValue(value: number | null): string {
+  return value != null ? value.toFixed(4) : '—';
 }
 
 export function MatchedSwingsPage() {
@@ -59,11 +69,19 @@ export function MatchedSwingsPage() {
   const [runs, setRuns] = useState<MatchedSwingRun[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [engineFilter, setEngineFilter] = useState('all');
+  const [captureFilter, setCaptureFilter] = useState('all');
+  const [laneFilter, setLaneFilter] = useState('all');
   const [verdictFilter, setVerdictFilter] = useState('all');
+  const [driveModeFilter, setDriveModeFilter] = useState('all');
+  const [profileFilter, setProfileFilter] = useState('all');
   const [search, setSearch] = useState('');
   const [previewJoints, setPreviewJoints] = useState<MocapJoint[]>([]);
   const [previewFrame, setPreviewFrame] = useState(0);
   const [previewFrameCount, setPreviewFrameCount] = useState(0);
+  const [receiptJson, setReceiptJson] = useState<Record<string, unknown> | null>(null);
+  const [receiptError, setReceiptError] = useState<string | null>(null);
+  const [parityJson, setParityJson] = useState<Record<string, unknown> | null>(null);
+  const [parityError, setParityError] = useState<string | null>(null);
 
   const loadPreview = useCallback(async (run: MatchedSwingRun, frameIndex: number) => {
     if (!run.capabilities.has_candidate_npz) {
@@ -85,16 +103,58 @@ export function MatchedSwingsPage() {
   const handleSelectRun = useCallback(
     (run: MatchedSwingRun) => {
       setSelectedId(run.id);
+      setReceiptJson(null);
+      setReceiptError(null);
+      setParityJson(null);
+      setParityError(null);
       void Promise.resolve().then(() => loadPreview(run, 0));
     },
     [loadPreview],
   );
 
+  const handleResetFilters = useCallback(() => {
+    setEngineFilter('all');
+    setCaptureFilter('all');
+    setLaneFilter('all');
+    setVerdictFilter('all');
+    setDriveModeFilter('all');
+    setProfileFilter('all');
+    setSearch('');
+  }, []);
+
+  const handleViewReceipt = useCallback(async (runId: string) => {
+    try {
+      const data = await fetchMatchedSwingReceipt(runId);
+      setReceiptJson(data);
+      setReceiptError(null);
+    } catch (err: unknown) {
+      setReceiptJson(null);
+      setReceiptError(err instanceof Error ? err.message : 'Failed to load receipt');
+    }
+  }, []);
+
+  const handleViewParity = useCallback(async (runId: string) => {
+    try {
+      const data = await fetchParityReport(runId);
+      setParityJson(data);
+      setParityError(null);
+    } catch (err: unknown) {
+      setParityJson(null);
+      setParityError(err instanceof Error ? err.message : 'Failed to load parity report');
+    }
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
     void Promise.resolve().then(async () => {
+      if (cancelled) return;
+      setLoadState('loading');
       try {
-        const data = await fetchMatchedSwingLedger();
+        const data = await fetchMatchedSwingLedger({
+          ranked: true,
+          driveMode: driveModeFilter !== 'all' ? driveModeFilter : undefined,
+          profile: profileFilter !== 'all' ? profileFilter : undefined,
+        });
         if (cancelled) return;
         setRuns(data.runs);
         setLoadState('ready');
@@ -112,11 +172,11 @@ export function MatchedSwingsPage() {
     return () => {
       cancelled = true;
     };
-  }, [loadPreview]);
+  }, [loadPreview, driveModeFilter, profileFilter]);
 
   const filteredRuns = useMemo(
-    () => filterRuns(runs, engineFilter, verdictFilter, search),
-    [runs, engineFilter, verdictFilter, search],
+    () => filterRuns(runs, engineFilter, captureFilter, laneFilter, verdictFilter, search),
+    [runs, engineFilter, captureFilter, laneFilter, verdictFilter, search],
   );
 
   const selectedRun = useMemo(
@@ -126,6 +186,21 @@ export function MatchedSwingsPage() {
 
   const engineOptions = useMemo(
     () => ['all', ...Array.from(new Set(runs.map((run) => run.engine))).sort()],
+    [runs],
+  );
+
+  const captureOptions = useMemo(
+    () => [
+      'all',
+      ...Array.from(
+        new Set(runs.map((run) => run.capture).filter((c): c is string => Boolean(c))),
+      ).sort(),
+    ],
+    [runs],
+  );
+
+  const laneOptions = useMemo(
+    () => ['all', ...Array.from(new Set(runs.map((run) => run.lane))).sort()],
     [runs],
   );
 
@@ -154,6 +229,36 @@ export function MatchedSwingsPage() {
       </label>
 
       <label className="flex flex-col gap-1">
+        <span className="text-xs uppercase tracking-wide text-gray-400">Capture</span>
+        <select
+          className="rounded bg-gray-900 border border-gray-700 px-2 py-1"
+          value={captureFilter}
+          onChange={(e) => setCaptureFilter(e.target.value)}
+        >
+          {captureOptions.map((capture) => (
+            <option key={capture} value={capture}>
+              {capture}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <label className="flex flex-col gap-1">
+        <span className="text-xs uppercase tracking-wide text-gray-400">Lane</span>
+        <select
+          className="rounded bg-gray-900 border border-gray-700 px-2 py-1"
+          value={laneFilter}
+          onChange={(e) => setLaneFilter(e.target.value)}
+        >
+          {laneOptions.map((lane) => (
+            <option key={lane} value={lane}>
+              {lane}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <label className="flex flex-col gap-1">
         <span className="text-xs uppercase tracking-wide text-gray-400">Verdict</span>
         <select
           className="rounded bg-gray-900 border border-gray-700 px-2 py-1"
@@ -169,14 +274,48 @@ export function MatchedSwingsPage() {
       </label>
 
       <label className="flex flex-col gap-1">
+        <span className="text-xs uppercase tracking-wide text-gray-400">Drive Mode</span>
+        <select
+          className="rounded bg-gray-900 border border-gray-700 px-2 py-1"
+          value={driveModeFilter}
+          onChange={(e) => setDriveModeFilter(e.target.value)}
+        >
+          <option value="all">all</option>
+          <option value="torque_driven">torque_driven</option>
+          <option value="kinematic_prescribed">kinematic_prescribed</option>
+        </select>
+      </label>
+
+      <label className="flex flex-col gap-1">
+        <span className="text-xs uppercase tracking-wide text-gray-400">Profile</span>
+        <select
+          className="rounded bg-gray-900 border border-gray-700 px-2 py-1"
+          value={profileFilter}
+          onChange={(e) => setProfileFilter(e.target.value)}
+        >
+          <option value="all">all</option>
+          <option value="dynamic">dynamic</option>
+          <option value="kinematic">kinematic</option>
+        </select>
+      </label>
+
+      <label className="flex flex-col gap-1">
         <span className="text-xs uppercase tracking-wide text-gray-400">Search</span>
         <input
           className="rounded bg-gray-900 border border-gray-700 px-2 py-1"
-          placeholder="engine, sha, id…"
+          placeholder="engine, sha, id, reason…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
       </label>
+
+      <button
+        type="button"
+        onClick={handleResetFilters}
+        className="self-start rounded border border-gray-700 bg-gray-800 px-2 py-1 text-xs hover:border-gray-500"
+      >
+        Reset
+      </button>
 
       <p className="text-xs text-gray-400">{filteredRuns.length} run(s)</p>
 
@@ -258,11 +397,65 @@ export function MatchedSwingsPage() {
         </div>
       </dl>
 
-      {selectedRun.reason && (
+      {(selectedRun.qualification_note ?? selectedRun.reason) && (
         <p className="text-xs text-amber-300 border border-amber-700/40 rounded p-2">
-          {selectedRun.reason}
+          {selectedRun.qualification_note ?? selectedRun.reason}
         </p>
       )}
+
+      <div>
+        <h3 className="text-xs uppercase tracking-wide text-gray-400 mb-1">Physical Gates</h3>
+        {selectedRun.gates && selectedRun.gates.length > 0 ? (
+          <ul className="text-xs text-gray-300 space-y-0.5">
+            {selectedRun.gates.map((gate, idx) => (
+              <li key={`${gate.name}-${idx}`}>
+                • {gate.name} [{gate.status}]: measured={formatGateValue(gate.measured)}{' '}
+                {gate.unit} (limit={formatGateValue(gate.threshold)} {gate.unit})
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-xs text-gray-400">No physical gates evaluated for this run.</p>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => void handleViewReceipt(selectedRun.id)}
+            className="text-xs rounded border border-gray-700 bg-gray-800 px-2 py-1 hover:border-gray-500"
+          >
+            View Receipt JSON
+          </button>
+          <button
+            type="button"
+            onClick={() => void handleViewParity(selectedRun.id)}
+            disabled={!selectedRun.capabilities.has_parity_report}
+            className="text-xs rounded border border-gray-700 bg-gray-800 px-2 py-1 hover:border-gray-500 disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            View Parity Report
+          </button>
+        </div>
+        {receiptError && <p className="text-xs text-red-300">{receiptError}</p>}
+        {receiptJson && (
+          <details className="text-xs">
+            <summary className="cursor-pointer text-gray-300">Receipt JSON</summary>
+            <pre className="mt-1 max-h-48 overflow-auto rounded bg-gray-950 p-2 text-[11px] text-gray-300">
+              {JSON.stringify(receiptJson, null, 2)}
+            </pre>
+          </details>
+        )}
+        {parityError && <p className="text-xs text-red-300">{parityError}</p>}
+        {parityJson && (
+          <details className="text-xs">
+            <summary className="cursor-pointer text-gray-300">Parity Report JSON</summary>
+            <pre className="mt-1 max-h-48 overflow-auto rounded bg-gray-950 p-2 text-[11px] text-gray-300">
+              {JSON.stringify(parityJson, null, 2)}
+            </pre>
+          </details>
+        )}
+      </div>
 
       {/* Impact parameters relative to the target line (GCV-17, #11723) */}
       <ImpactParametersPanel runId={selectedRun.id} />
