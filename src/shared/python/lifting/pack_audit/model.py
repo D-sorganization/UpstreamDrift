@@ -77,6 +77,28 @@ def require_lift(lift: str) -> None:
         raise ValueError(f"unknown lift {lift!r}; use {list(LIFTS)}")
 
 
+def unavailable_bar_hold(reason: str) -> dict[str, Any]:
+    """Shared "unavailable" shape for :meth:`EngineAdapter.bar_hold_wrench`.
+
+    Every numeric field is ``None``; unavailable is never zero.
+    """
+    return {
+        "available": False,
+        "reason": reason,
+        "split_method": None,
+        "bar_mass_kg": None,
+        "bar_weight_n": None,
+        "hand_force_n": None,
+        "sum_vertical_n": None,
+        "relative_error": None,
+        "split_left_fraction": None,
+        "couple_at_midpoint_nm": None,
+        "bar_linear_accel_mps2": None,
+        "method": None,
+        "n_welds": None,
+    }
+
+
 class EngineAdapter(ABC):
     """Uniform read-only view of one lift model loaded in its own engine."""
 
@@ -116,6 +138,29 @@ class EngineAdapter(ABC):
         the reason the engine/pack cannot supply it.
         """
         return {"value_n": None, "reason": "not implemented for this engine"}
+
+    def bar_hold_wrench(self) -> dict[str, Any]:
+        """Per-hand wrench on the bar during a static hold, if obtainable.
+
+        The reference scenario is the pack's start pose held rigid (lifter
+        immobile, zero velocity): each hand's wrench on the bar is reduced
+        through the shared GCV-7 grip analysis
+        (:mod:`src.shared.python.biomechanics.grip_wrench`).
+
+        Unavailable is never zero: the default reports ``available=False``
+        with every numeric field ``None`` and the reason the engine/pack
+        cannot supply it.
+
+        Postconditions: when ``available`` is ``True`` the dict additionally
+        carries ``split_method``, ``bar_mass_kg``, ``bar_weight_n``,
+        ``hand_force_n`` (``{"L": [x, y, z], "R": [x, y, z]}`` in the world
+        frame, newtons, hand-on-bar convention), ``sum_vertical_n``,
+        ``relative_error`` (fraction of ``bar_weight_n``),
+        ``split_left_fraction``, ``couple_at_midpoint_nm``,
+        ``bar_linear_accel_mps2`` and ``method`` (one-line description of the
+        technique used).
+        """
+        return unavailable_bar_hold("not implemented for this engine")
 
     @abstractmethod
     def smoke_step(self) -> dict[str, Any]:

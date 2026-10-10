@@ -483,7 +483,7 @@
     "lifting": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 21,
+      "ud-only": 22,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -12621,7 +12621,19 @@
       "classification": "ud-only",
       "package": "lifting",
       "subpackage": "pack_audit",
-      "ud_bytes": 11817,
+      "ud_bytes": 11999,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "lifting/pack_audit/adapters/mujoco_bar_hold.py",
+      "classification": "ud-only",
+      "package": "lifting",
+      "subpackage": "pack_audit",
+      "ud_bytes": 9048,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -12717,7 +12729,7 @@
       "classification": "ud-only",
       "package": "lifting",
       "subpackage": "pack_audit",
-      "ud_bytes": 3780,
+      "ud_bytes": 5565,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
