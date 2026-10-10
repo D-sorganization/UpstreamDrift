@@ -48,6 +48,9 @@ CAPTURE_RUNS: dict[str, tuple[str, str, tuple[str, ...]]] = {
         ("--static-seeds", "--zmp-filter"),
     ),
 }
+#: Address foot progression of every fixture run: the OSV-4 capture toe-out
+#: calibration (#11730), held through the swing by the planted stance (#12222).
+FOOT_PROGRESSION = "capture"
 LOG = logging.getLogger("club_face_fixtures")
 
 
@@ -66,6 +69,8 @@ def pipeline_argv(capture: str, run_dir: Path, face_weight: float) -> list[str]:
         "--capture",
         capture,
         *flags,
+        "--foot-progression",
+        FOOT_PROGRESSION,
         "--face-weight",
         repr(float(face_weight)),
         "--out",
