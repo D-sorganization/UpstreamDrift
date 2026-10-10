@@ -131,3 +131,19 @@ def test_ledger_extracts_the_phase_columns() -> None:
         extract_metrics({"dynamics": {"marker_rms_m": 0.06}}).fd_after_impact_rmse_m
         is None
     )
+
+
+def test_an_impact_without_a_preceding_backswing_is_rejected(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A follow-through IK branch jump can make the shared detector take a
+    near-address sample as the ball passage; that must not be reported."""
+    from src.shared.python.model_appearance import club_face
+
+    t, head = _clubhead()
+    monkeypatch.setattr(club_face, "ball_passage", lambda *a, **k: (t[20], 20, 0.0))
+    errors = np.full((len(t), 2), 0.02)
+    report = fp.fd_phase_report(t, errors, np.ones_like(errors, bool), head)
+    assert report["status"] == "unavailable"
+    assert "backswing" in report["reason"]
+    assert report["fd_rms_address_to_impact_m"] is None

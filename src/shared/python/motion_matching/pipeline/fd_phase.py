@@ -25,6 +25,10 @@ import numpy as np
 
 #: Name of the impact rule recorded in the receipt.
 IMPACT_DETECTOR = "model_appearance.club_face.ball_passage(reference Clubhead)"
+#: Least share of the clubhead's height range above address that must be
+#: reached before impact. A real impact follows the backswing; a sample next to
+#: address that the detector accepts after a follow-through branch jump does not.
+MIN_BACKSWING_RISE_FRACTION = 0.5
 
 
 def phase_marker_rms(
@@ -81,9 +85,7 @@ def fd_phase_report(
     or ``unavailable`` with a reason and ``None`` values; unavailable is
     never reported as zero.
     """
-    from src.shared.python.model_appearance.club_face import (  # noqa: PLC0415
-        ball_passage,
-    )
+    from src.shared.python.model_appearance import club_face  # noqa: PLC0415
 
     base: dict[str, Any] = {
         "impact_detector": IMPACT_DETECTOR,
@@ -96,10 +98,21 @@ def fd_phase_report(
     if clubhead is None:
         return {**base, "status": "unavailable", "reason": "no reference clubhead"}
     t = np.asarray(times, dtype=float)
+    head = np.asarray(clubhead, dtype=float)
     try:
-        impact, _, _ = ball_passage(t, np.asarray(clubhead, dtype=float))
+        impact, k, _ = club_face.ball_passage(t, head)
     except ValueError as exc:
         return {**base, "status": "unavailable", "reason": str(exc)}
+    rise = head[: k + 1, 2].max() - head[0, 2]
+    if rise < MIN_BACKSWING_RISE_FRACTION * (head[:, 2].max() - head[0, 2]):
+        return {
+            **base,
+            "status": "unavailable",
+            "reason": (
+                f"detected impact at {impact:.3f} s has no backswing before it "
+                "(the reference clubhead path is discontinuous)"
+            ),
+        }
     split = phase_marker_rms(t, errors, valid, impact)
     return {
         **base,
