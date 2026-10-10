@@ -44,7 +44,14 @@ Final conclusions require the complete source-bound results and independent audi
    an exact delivered face/path correlation; inspect realized output covariance.
 5. Run into a new output directory. Review matching status and supported-shot
    counts before interpreting density or conditional strokes gained. Unsupported
-   samples remain in the export and are never replaced with extra draws.
+   samples remain in the export and are never replaced with extra draws. The
+   results view displays nominal deliveries alongside saved conditional course
+   scoring (three-pattern mean strokes gained, paired differences vs Straight with
+   95% Monte Carlo intervals, and common supported population counts) under
+   the hypothetical flat course model. Display precision adapts to the saved
+   effect and interval width so small effects and nonzero uncertainty remain
+   visible. Starting another study, failure, or cancellation clears previous SG
+   from the current-result display.
 
 Save/load configuration controls retain the full input specification. A cancelled
 or failed export does not publish a complete result directory. Both contact laws
