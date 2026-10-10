@@ -88,6 +88,16 @@ class ContactGripConfig:
         assert self.foundation is not None
         return self.foundation
 
+    @property
+    def layout(self) -> Any:
+        """The pad layout of the foundation parameters (shallow accessor)."""
+        return self.ef.layout
+
+    def axial_origin_m(self, side: str) -> float:
+        """Axial origin of ``side``'s pad cylinder (shallow accessor)."""
+        cylinder = self.pads.cylinder
+        return cylinder.origin_axial_m(side)
+
     def mesh_path(self, side: str) -> Path:
         """OBJ path of ``side``'s grip mesh."""
         return self.mesh_dir / f"grip_mesh_{side}.obj"
@@ -96,7 +106,7 @@ class ContactGripConfig:
 def _grip_axis(interface: GripInterface, cfg: ContactGripConfig) -> tuple:
     rot = np.asarray(interface.right.rotation, dtype=float)
     point = np.asarray(interface.right.position_m) + rot @ (
-        cfg.ef.layout.axis_offset_grip_frame("R")
+        cfg.layout.axis_offset_grip_frame("R")
     )
     return point, rot[:, 0], rot[:, 1]
 
@@ -104,12 +114,12 @@ def _grip_axis(interface: GripInterface, cfg: ContactGripConfig) -> tuple:
 def write_grip_meshes(interface: GripInterface, cfg: ContactGripConfig) -> dict:
     """Write the two closed grip meshes (club-body frame); return their facts."""
     point, axis, radial = _grip_axis(interface, cfg)
-    layout = cfg.ef.layout
+    layout = cfg.layout
     half = max(layout.axial_offsets_m(), key=abs)
     half = abs(half) + layout.pad_radius_m + MESH_MARGIN_M
     facts: dict[str, Any] = {}
     for side in SIDES:
-        centre = cfg.pads.cylinder.origin_axial_m(side)
+        centre = cfg.axial_origin_m(side)
         verts, faces = capped_cylinder_mesh(
             layout.grip_radius_m,
             point,
