@@ -162,7 +162,7 @@ def hip_axis_signs(osim: Path) -> dict[str, float]:
     model = ET.parse(str(osim)).getroot().find("Model")
     if model is None:
         raise ValueError(f"No Model tag found in OpenSim file {osim}")
-    signs = {}
+    signs: dict[str, float] = {}
     for side in ("r", "l"):
         joint = model.find(f"JointSet/objects/CustomJoint[@name='hip_{side}']")
         if joint is None:
@@ -177,9 +177,10 @@ def hip_axis_signs(osim: Path) -> dict[str, float]:
             coefficient.get(f"hip_adduction_{side}"),
             coefficient.get(f"hip_rotation_{side}"),
         }
-        if flexion != 1.0 or len(pair) != 1 or pair - {1.0, -1.0}:
+        sign = pair.pop() if len(pair) == 1 else None
+        if flexion != 1.0 or sign is None or sign not in (1.0, -1.0):
             raise ValueError(f"Unsupported hip_{side} coefficients: {coefficient}")
-        signs[side] = pair.pop()
+        signs[side] = sign
     return signs
 
 

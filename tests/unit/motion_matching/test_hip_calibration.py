@@ -264,9 +264,26 @@ def test_hip_rotation_zero_ankle_fallback(knee_flex_deg: float) -> None:
     points, valid, labels = _ankle_fallback_capture(
         expected_r, expected_l, knee_flex_deg=knee_flex_deg
     )
-    zero = module.hip_rotation_zero(points, valid, labels, WAIST)
+    zero = module.hip_rotation_zero(
+        points, valid, labels, WAIST, lateral_marker_offsets_m=module.LATERAL_SEEDS_M
+    )
     assert zero.offset_r_deg == pytest.approx(expected_r, abs=1.0)
     assert zero.offset_l_deg == pytest.approx(expected_l, abs=1.0)
+
+
+def test_hip_rotation_zero_default_keeps_the_legacy_marker_plane() -> None:
+    # Canonical runs keep the uncorrected plane (#11737): with markers on the
+    # segment axes the legacy estimate is exact, with lateral markers it is
+    # biased, and only the opt-in offsets remove that bias.
+    points, valid, labels = _ankle_fallback_capture(
+        14.0, -10.0, lateral_knee_m=0.0, lateral_ankle_m=0.0
+    )
+    zero = module.hip_rotation_zero(points, valid, labels, WAIST)
+    assert zero.offset_r_deg == pytest.approx(14.0, abs=0.2)
+    assert zero.offset_l_deg == pytest.approx(-10.0, abs=0.2)
+    lateral = _ankle_fallback_capture(14.0, -10.0)
+    biased = module.hip_rotation_zero(*lateral, WAIST)
+    assert abs(biased.offset_r_deg - 14.0) > 10.0
 
 
 def test_lateral_markers_bias_an_uncorrected_flexion_plane() -> None:

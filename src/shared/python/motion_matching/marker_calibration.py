@@ -204,6 +204,44 @@ def _marker_rms_and_per_marker(
     return total_rms, per_marker
 
 
+@dataclass(frozen=True)
+class PlacementPrior:
+    """Anatomical prior and optional constraint on each placement step.
+
+    ``offsets`` (label -> body-frame point) with ``weight`` (in
+    frame-equivalents, nonnegative) regularise each placement toward the
+    prior, which keeps the calibration identifiable when a body's twist and
+    its marker offsets could trade against each other. ``constrain`` maps the
+    placements onto a constraint set before the IK and must return every
+    label on its original body (#11737).
+    """
+
+    offsets: Mapping[str, Sequence[float]] | None = None
+    weight: float = 0.0
+    constrain: Callable[[Offsets], Offsets] | None = None
+
+    def __post_init__(self) -> None:
+        if not np.isfinite(self.weight) or self.weight < 0:
+            raise ValueError("prior_weight must be finite and nonnegative")
+        for label, point in (self.offsets or {}).items():
+            if np.asarray(point, float).shape != (3,):
+                raise ValueError(f"Prior offset for {label} must be a 3-vector")
+        if self.constrain is not None and not callable(self.constrain):
+            raise TypeError("constrain must be callable")
+
+    def place(
+        self,
+        capture: TourCapture,
+        bodies: Mapping[str, str],
+        poses: list[Mapping[str, Pose]],
+    ) -> Offsets:
+        """Prior-weighted placement, then the constraint if any."""
+        offsets = _placements(capture, bodies, poses, self.offsets, self.weight)
+        return (
+            offsets if self.constrain is None else _constrained(offsets, self.constrain)
+        )
+
+
 def calibrate_marker_offsets(
     capture: TourCapture,
     bodies: Mapping[str, str],
@@ -214,16 +252,13 @@ def calibrate_marker_offsets(
     iterations: int,
     prior_offsets: Mapping[str, Sequence[float]] | None = None,
     prior_weight: float = 0.0,
-    constrain: Callable[[Offsets], Offsets] | None = None,
 ) -> CalibrationResult:
     """Alternate placement and IK; return offsets, final q and RMS history.
 
     ``prior_offsets`` (label -> body-frame point) with ``prior_weight`` (in
     frame-equivalents, nonnegative) regularise each placement toward an
     anatomical prior, which keeps the calibration identifiable when a body's
-    twist and its marker offsets could trade against each other. ``constrain``
-    (optional) maps each iteration's placements onto a constraint set before
-    the IK; it must return every label on its original body.
+    twist and its marker offsets could trade against each other.
 
     Preconditions: every capture label has a body; iterations >= 1; pose_fn
     maps a coordinate vector to world poses of every referenced body; ik_fn
@@ -232,6 +267,29 @@ def calibrate_marker_offsets(
     IK with that iteration's placements. The returned offsets, q and
     per_marker_rms_m correspond to the best iteration (lowest total RMS).
     """
+    return calibrate_constrained_marker_offsets(
+        capture,
+        bodies,
+        pose_fn,
+        ik_fn,
+        initial_q=initial_q,
+        iterations=iterations,
+        prior=PlacementPrior(prior_offsets, prior_weight),
+    )
+
+
+def calibrate_constrained_marker_offsets(
+    capture: TourCapture,
+    bodies: Mapping[str, str],
+    pose_fn: PoseFn,
+    ik_fn: IkFn,
+    *,
+    initial_q: Array,
+    iterations: int,
+    prior: PlacementPrior,
+) -> CalibrationResult:
+    """:func:`calibrate_marker_offsets` with a :class:`PlacementPrior` that may
+    also constrain every placement step (same pre- and postconditions)."""
     if (
         isinstance(iterations, bool)
         or not isinstance(iterations, int)
@@ -244,12 +302,6 @@ def calibrate_marker_offsets(
     q0 = np.asarray(initial_q, float)
     if q0.ndim != 1 or not np.isfinite(q0).all():
         raise ValueError("initial_q must be a finite vector")
-    if not np.isfinite(prior_weight) or prior_weight < 0:
-        raise ValueError("prior_weight must be finite and nonnegative")
-    if prior_offsets is not None:
-        for label, point in prior_offsets.items():
-            if np.asarray(point, float).shape != (3,):
-                raise ValueError(f"Prior offset for {label} must be a 3-vector")
     q = np.tile(q0, (capture.frames, 1))
     history: list[float] = []
 
@@ -261,9 +313,7 @@ def calibrate_marker_offsets(
 
     for iter_idx in range(1, iterations + 1):
         poses = [pose_fn(q[f]) for f in range(capture.frames)]
-        offsets = _placements(capture, bodies, poses, prior_offsets, prior_weight)
-        if constrain is not None:
-            offsets = _constrained(offsets, constrain)
+        offsets = prior.place(capture, bodies, poses)
         q = np.asarray(ik_fn(offsets, capture), float)
         if q.shape[0] != capture.frames or q.ndim != 2 or not np.isfinite(q).all():
             raise ValueError("IK must return a finite (frames, coordinates) array")

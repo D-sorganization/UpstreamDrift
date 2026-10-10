@@ -123,7 +123,11 @@ of $\pm1$.
     before/after metrics and no tolerance change: met for the canonical
     calibrated runs (Table~\ref{tab:canon}).
   \item Both feet are within $2^\circ$ of the capture at address in five
-    engines: \textbf{not met} (Table~\ref{tab:feet}).
+    engines: \textbf{not met}. With the mirror alone the lead foot misses
+    by $15$ to $32^\circ$ (Table~\ref{tab:feet}). With the corrections of
+    Section~\ref{sec:zero} it is met in MuJoCo, OpenSim and, with the Drake
+    coordinate-order fix (\#12039, PR \#12047), Drake. Pinocchio and MyoSuite
+    are pending (Table~\ref{tab:feet2}).
 \end{enumerate}
 
 \section{Evidence}
@@ -178,18 +182,105 @@ window): lead $6.1^\circ$, trail $1.6^\circ$. Its forefoot-line cross-check
 reads $16.2^\circ$ / $11.7^\circ$, a disagreement of about $10^\circ$ (2 to
 $5^\circ$ on the tour captures), so the headline is provisional.
 
+\section{Address Foot Progression: Zero-Twist and Leg-Marker Corrections}
+\label{sec:zero}
+
+\paragraph{Diagnosis.} The capture stance at address is square: in the
+first 24 frames of capture-A the front-waist, back-waist, knee, ankle, toe
+and shoulder lines all lie within $5^\circ$ of the ankle line (capture-B
+the same). Yet \texttt{hip\_rotation\_zero} returned zero twists of
+$-25.7^\circ$ (right) and $+45.1^\circ$ (left) on capture-A ($-21.9$ /
+$+46.7^\circ$ on capture-B). With no medial knee markers, it takes the knee
+flexion axis as the normal of the plane through the hip \emph{centre} and
+the \emph{lateral} knee and ankle markers. Those markers sit $w_k = 0.060$ m
+and $w_a = 0.056$ m outside the joint centres along the flexion axis, which
+tilts the plane. For a hip at the origin, thigh and shank of 0.40 and
+0.42 m, and true zero twist, the plane normal is off by $43$, $25$ and
+$17^\circ$ at 10, 20 and $30^\circ$ of knee flexion. That is the size of the
+measured right-hip value, and the nearly straight lead knee explains the
+larger left value. The $\pm40^\circ$ bounds of \texttt{hip\_rotation} move
+with the biased zero, so the lead hip saturated.
+
+\paragraph{Corrected Flexion Axis.} \texttt{knee\_flexion\_axis} finds the
+axis $\hat n$ by the fixed-point iteration
+\begin{equation}
+  \hat n_{j+1} = \frac{(a - w_a \hat n_j - k + w_k \hat n_j) \times
+  (k - w_k \hat n_j - h)}{\lVert\cdot\rVert},
+\end{equation}
+with $h$ the hip centre, $k$, $a$ the lateral markers and the cross product
+ordered per side so that $\hat n$ points laterally. It stops when
+$\lVert\hat n_{j+1}-\hat n_j\rVert < 10^{-12}$ (at most 50 iterations). It
+recovers known twists to within $1^\circ$ at 10, 20 and $30^\circ$ of knee
+flexion (unit-tested). It raises an error for a leg too straight to define
+the plane.
+
+\paragraph{Leg-Marker Calibration Constraints.} The alternating leg-marker
+calibration places each marker at the prior-weighted mean of its body-frame
+observations. A single lateral marker per segment lets the segment's twist
+about its long axis trade against the marker's azimuth, and a sideways shift
+of the forefoot pair trades against foot yaw about the ankle. On capture-A
+the calibrated left forefoot line ended $28^\circ$ off square and its
+midpoint 6 cm medial (about $18^\circ$ of yaw). Because the placement is a
+weighted mean, the constrained least-squares placement is the orthogonal
+projection of the free one. \texttt{leg\_marker\_constraints} keeps
+\texttt{*KneeOut} and \texttt{*AnkleOut} on their seed azimuth (radius and
+axial position free, clamped at the axis). It also gives the forefoot pair
+one forward offset and pins its lateral midpoint to the seed's.
+
+\paragraph{Scope.} Both corrections apply only with
+\texttt{--foot-progression}, as the squared forefoot seeds already do. The
+canonical receipts keep the legacy plane: see the failed experiment below.
+
+\begin{table}[h]
+\centering
+\caption{Address Toe-Out Error (deg) and Marker RMS, \texttt{--foot-progression capture}, Lead / Trail}
+\label{tab:feet2}
+\begin{tabular}{llcc}
+\toprule
+Capture & Engine & Mirror only & With corrections \\
+\midrule
+Driver & MuJoCo & $+16.8$ / $+0.1$, 10.8 mm & $+0.2$ / $-0.3$, 8.3 mm \\
+Driver & Drake & $+15.3$ / $+0.0$, 14.5 mm & $+0.2$ / $-0.1$, 9.5 mm \\
+7-iron & MuJoCo & $+20.9$ / $+0.1$, 10.4 mm & $-0.0$ / $-1.4$, 8.1 mm \\
+7-iron & Drake & $+31.5$ / $+0.2$, 11.7 mm & $-0.1$ / $+0.3$, 9.9 mm \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The corrected zero twists are $-5.7$ / $+25.5^\circ$ (driver) and $-1.5$ /
+$+26.4^\circ$ (7-iron). Azimuth pinning alone, without midpoint pinning or
+the zero-twist correction, moved the driver lead error only from $+16.8$ to
+$+12.3^\circ$ and the 7-iron from $+20.9$ to $+20.2^\circ$.
+
+\paragraph{Drake.} The Drake columns above use the coordinate-order fix of
+\#12039 (PR \#12047). Before it, \texttt{DrakeFullBodyIK} passed spec-ordered
+coordinates in Drake joint-creation order. The upper body (spec indices
+6--29) was scrambled while the legs, which map one to one, were not: leg FK
+matched MuJoCo exactly, but the centre of mass was off by 2.7 cm at the seed.
+That gave lead-foot errors of $+5.7$ / $+9.7^\circ$ and address RMS of 17.4 /
+9.3 mm, with \texttt{hip\_flexion\_r} pinned at $-30^\circ$.
+
 \section{Limitations and Failed Experiments}
 
 \begin{itemize}
-  \item The lead foot is still too far turned out. In every engine run,
-    \texttt{hip\_rotation\_l} is pinned at its $40^\circ$ internal limit.
-    The lead hip sits about $20^\circ$ adducted and the trail hip about
-    $20^\circ$ abducted. That lateral lean of both legs was present before
-    the fix (OSV-4 recorded $14.6^\circ$ lead adduction in the old sign). The
-    calibrated foot-marker offsets make foot yaw a null mode of the marker
-    fit, so the lead foot's yaw comes from that posture. The open work,
-    trading hip adduction against stance width in the address solve, is
-    not done here.
+  \item \textbf{Default-on zero-twist correction (failed).} Applied to the
+    canonical \texttt{--static-seeds} runs, the correction gave driver
+    address / IK / dynamics of 7.35 / 36.81 / 55.06 mm (main control 7.22 /
+    33.63 / 65.00). The 7-iron gave 6.59 / 31.82 / 65.34 mm (main 6.27 /
+    31.65 / 52.97). It also cut the driver reference finish ZMP-inside
+    fraction from 0.272 to 0.061, with \texttt{hip\_rotation} reaching its
+    $\pm40^\circ$ bounds through the swing. The remaining left zero twist
+    of about $25^\circ$ still reflects the ill-conditioned plane of a nearly
+    straight lead knee. A functional knee axis estimated over the swing is
+    the open alternative.
+  \item At address the solved hip rotations still share a common component
+    (7-iron $-40$ / $+36^\circ$, driver $-37$ / $+30^\circ$, right / left).
+    The capture's square pelvis and toe-outs suggest about $-4$ / $-16^\circ$.
+    This points to the residual zero-twist error above, or to a pelvis-yaw
+    freedom in the upper-body calibration. It is not resolved here.
+  \item With the mirror alone (Table~\ref{tab:feet}), the lead foot is too
+    far turned out: \texttt{hip\_rotation\_l} is pinned at its $40^\circ$
+    internal limit in every engine run.
   \item The legacy documents \path{full_body_spec_v1.json} and
     \path{full_body_spec_v2.json}, built by
     \path{docs/development/full_body_models/build_full_body_spec.py} (a
@@ -207,7 +298,8 @@ $5^\circ$ on the tour captures), so the headline is provisional.
 \begin{verbatim}
 python3 -m pytest tests/unit/motion_matching/test_hip_mirroring.py \
   tests/unit/motion_matching/test_hip_calibration.py \
-  tests/unit/motion_matching/pipeline/test_address_feet.py -q
+  tests/unit/motion_matching/pipeline/test_address_feet.py \
+  tests/unit/motion_matching/pipeline/test_leg_marker_constraints.py -q
 python3 -m scripts.mirror_spec_left_hip \
   docs/development/full_body_models/full_body_spec_anthro_driver.json \
   docs/development/full_body_models/full_body_spec_anthro_iron7.json
