@@ -151,6 +151,7 @@ function parseCsv(text: string): ParsedCsv {
 }
 
 /** A column is a usable outcome/predictor once >=3 rows parse as numeric. */
+// eslint-disable-next-line react-refresh/only-export-components
 export function numericColumns(
   columns: string[],
   records: Record<string, CsvValue>[],
