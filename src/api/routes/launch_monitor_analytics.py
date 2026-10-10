@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
+import dataclasses
 import math
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from functools import lru_cache
-from typing import Any
+from typing import Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
@@ -29,6 +30,7 @@ from src.tools.launch_monitor_model import (
     AnalysisContextV2,
     AnalysisMode,
     ChangeCandidate,
+    DispersionResult,
     ExpectedStrokesBaselineV2,
     CorrelationMethod,
     FlexibleAnalysisRequest,
@@ -46,6 +48,7 @@ from src.tools.launch_monitor_model import (
     StrokesGainedAnalysisResultV1,
     StrokesGainedRequestV1,
     TemporalTrendResult,
+    analyze_dispersion,
     analyze_longitudinal_sessions,
     analyze_outcome_proxy,
     analyze_player_covariation_v1,
@@ -161,6 +164,22 @@ class TrendPayloadV2(BaseModel):
     metric: str = Field(min_length=1)
     time_column: str = Field("captured_at", min_length=1)
     rolling_window: int = Field(10, ge=3, le=500)
+
+
+class DispersionPayloadV2(BaseModel):
+    """Bounded inline records and the PyQt Dispersion tab's widget-derived inputs.
+
+    Mirrors ``_DispersionParams`` from
+    ``src/tools/launch_monitor_analytics/gui.py`` (``_read_dispersion_params``):
+    ``group_column`` is ``None`` when the Dispersion tab's "Group By" combo box
+    reads "(all shots)" (``_build_dispersion_tab``), so the API and desktop
+    paths accept identical inputs for :func:`analyze_dispersion`.
+    """
+
+    records: list[dict[str, Any]] = Field(min_length=3, max_length=20_000)
+    forward: str = Field("carry_distance", min_length=1)
+    lateral: str = Field("lateral_carry", min_length=1)
+    group_column: Literal["monitor_vendor", "session_id", "club"] | None = None
 
 
 @lru_cache(maxsize=1)
@@ -539,6 +558,62 @@ async def analyze_trend_v2(payload: TrendPayloadV2) -> dict[str, object]:
         rolling_window=payload.rolling_window,
     )
     return _trend_result_to_dict(result, payload.time_column)
+
+
+def _dispersion_result_to_dict(
+    name: str, result: DispersionResult
+) -> dict[str, object]:
+    """Serialize one group's :class:`DispersionResult` for ``/v2/dispersion``.
+
+    Postcondition: every float field is JSON-safe — NaN/infinite values
+    become ``null``, never ``0`` — and the result carries its group ``name``.
+    """
+    fields: dict[str, object] = dataclasses.asdict(result)
+    for key, value in fields.items():
+        if isinstance(value, float):
+            fields[key] = _json_safe_float(value)
+    return {"group": name, **fields}
+
+
+@router.post("/v2/dispersion")
+@handle_api_errors
+async def analyze_dispersion_v2(payload: DispersionPayloadV2) -> dict[str, object]:
+    """Analyze shot dispersion with the PyQt Dispersion tab's inputs.
+
+    Calls the same :func:`analyze_dispersion` the desktop Dispersion tab
+    calls (``src/tools/launch_monitor_analytics/gui.py``
+    ``_compute_dispersion``), so the API and PyQt paths share one contract.
+    Precondition: ``records`` holds 3-20,000 inline rows (validated by the
+    request schema). Grouping mirrors ``_compute_dispersion``: a single
+    "All Shots" group when ``group_column`` is ``None`` or the column is
+    absent from the frame, otherwise one group per
+    ``frame.groupby(group_column, dropna=False)`` value, named ``str(name)``.
+    Postcondition: the response is a JSON-safe serialization of every
+    :class:`DispersionResult` field per group; see
+    :func:`_dispersion_result_to_dict`.
+    """
+
+    import pandas as pd  # deferred import: pandas must not load at API boot (issue #8943)
+
+    frame = pd.DataFrame.from_records(payload.records)
+    groups: list[tuple[object, pd.DataFrame]] = [("All Shots", frame)]
+    if payload.group_column is not None and payload.group_column in frame:
+        groups = list(frame.groupby(payload.group_column, dropna=False))
+
+    return {
+        "forward": payload.forward,
+        "lateral": payload.lateral,
+        "group_column": payload.group_column,
+        "groups": [
+            _dispersion_result_to_dict(
+                str(name),
+                analyze_dispersion(
+                    group, forward=payload.forward, lateral=payload.lateral
+                ),
+            )
+            for name, group in groups
+        ],
+    }
 
 
 __all__ = ["CONTRACT_VERSION", "router"]
