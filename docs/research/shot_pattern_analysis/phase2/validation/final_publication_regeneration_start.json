@@ -1,0 +1,22 @@
+{
+  "started_utc": "2026-10-10T05:45:33.891683+00:00",
+  "source_commit": "9ea4c14bed",
+  "original_renderer": {
+    "session": 78157,
+    "wrapper_pid": 2508214,
+    "primary_child_pid": 2508443,
+    "wrapper": "/tmp/p2-render-original-final-figures-v3.py",
+    "log": "/tmp/p2-original-final-figures-v3.log",
+    "exit_receipts": "/tmp/p2-v3-{final_figures_v1,control_final_figures_v1}-exit.json"
+  },
+  "supplement_report": {
+    "session": 83056,
+    "wrapper_pid": 2509004,
+    "child_pid": 2509013,
+    "wrapper": "/tmp/p2-supplement-report-v2.py",
+    "log": "/tmp/p2-supplement-report-v2.log",
+    "exit_receipt": "/tmp/p2-supplement-report-v2-exit.json"
+  },
+  "freeze": "Do not edit MAIN Python under src/tools/shot_pattern_analysis or scripts/research/shot_pattern_analysis while either job runs; hashes are rechecked",
+  "status": "Both child processes verified live; completion and whole-set review remain unproven"
+}

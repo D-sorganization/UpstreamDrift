@@ -30,7 +30,7 @@ The independently accepted repair is committed at reporting-only `codex/shot-pat
 
 Original v2 primary and control figure producers both completed with exit0 (primary02:24:53UTC, control02:57:30UTC). Durable source/manifest binding is `validation/original_final_figures_rendering_revision_v2.json`. Publication acceptance is withheld for the reviewed defects below. No original render process remains active; FINAL_LAYOUT is no longer frozen.
 
-Supplemental report session75757 terminated with exit1 before publication: a curve-strength pair changes reviewed matching speed bounds and the comparison validator rejects it. See `validation/supplement_report_first_failure_v1/`. The13-file live postprocessing freeze is lifted. Astra is investigating a protocol-specific TDD repair in MAIN; arbitrary bound changes must remain rejected. This does not change accepted simulation data.
+Supplemental report session75757 terminated with exit1 before publication: a curve-strength pair changes reviewed matching speed bounds and the comparison validator rejects it. See `validation/supplement_report_first_failure_v1/`. That failed run released its freeze; the new active-run freeze below now takes precedence. Astra is investigating a protocol-specific TDD repair in MAIN; arbitrary bound changes must remain rejected. This does not change accepted simulation data.
 
 ## Active Final Graphics Corrections
 
@@ -42,13 +42,19 @@ After all findings are repaired/reviewed and activev2 producers complete, preser
 
 ## Current Publication Checkpoint
 
-Both rejected original v2 figure trees are now preserved under ignored `presentation_preview_rejected_final_v2`, with exact manifest hashes and relocation paths in `validation/original_v2_figure_relocation.json` (5c64136ab4). Canonical figure directories are currently absent pending regeneration; no original render is active.
+Both rejected original v2 figure trees are now preserved under ignored `presentation_preview_rejected_final_v2`, with exact manifest hashes and relocation paths in `validation/original_v2_figure_relocation.json` (5c64136ab4). The new canonical original figure sets are being regenerated as described below.
 
 The supplemental validator failure is repaired at20d462ad2b: only the reviewed Driver5° original-control curve1 to supplemented curve2 permits the exact speed-bound extension.30tests pass, all384planned source/config/nominal comparisons pass preflight, and the actual10,000-shot pair yields9,940common supported rows. See `validation/driver_curve_bounds_reporting_review_v1/`; full report statistics still require rerun.
 
-The full-production covariance header repair is integrated at56ea967f53, with eight actual previews and14passing tests in `validation/matrix_covariance_header_v1/`. Astra's `validation/matrix_independent_preview_review_v1/` verifies all eight hashes and graphics; its final finding is missing circular containment radius. Root is implementing the narrowly derived radius caption in BOUNDS, with dedicated red regression and saved-data preview.48MAIN integration tests passed before this final caption change (`validation/publication_repair_integration_v1/`). Do not start the full renderer until this last caption is independently checked and merged.
+The full-production covariance header repair is integrated at56ea967f53, with eight actual previews and14passing tests in `validation/matrix_covariance_header_v1/`. Astra's `validation/matrix_independent_preview_review_v1/` verifies all eight hashes and graphics; its final finding is missing circular containment radius. The radius caption is integrated at8820b13fd0 with15passing matrix tests/Ruff/Mypy and independently accepted actual15m preview; see `validation/matrix_radius_independent_review_v1/`.48MAIN integration tests passed before this final caption change (`validation/publication_repair_integration_v1/`). All prerequisite renderer repairs are accepted; whole-set acceptance remains pending.
 
 The existing LaTeX reference now distinguishes current phase-two scope from historical phase-one results (c0800e2923). Its title check passes, but the built-in compiler still panics before document parsing while fetching the Tectonic bundle. See `validation/latex_editor_current_scope_check.json`. The editor remains open; no replacement PDF was produced. The PDF skill operation marker was executed once on this turn before preparing the next figure/PDF outputs; do not repeat it for the same operation.
+
+## Active Regeneration and Source Freeze
+
+Both saved-data postprocessing jobs started from9ea4c14bed and are confirmed live. Original v3 renderer: session78157, wrapperPID2508214, primarychildPID2508443, `/tmp/p2-original-final-figures-v3.log`. It renders primary then control canonical figure directories and writes per-run `/tmp/p2-v3-*-exit.json`, followed by `validation/original_final_figures_rendering_revision_v3.json`. Supplemental v2 report: session83056, wrapperPID2509004, childPID2509013, `/tmp/p2-supplement-report-v2.log`; terminal receipt `/tmp/p2-supplement-report-v2-exit.json`. Revalidate actual handles; never restart live work.
+
+Freeze all MAIN Python under `src/tools/shot_pattern_analysis` and `scripts/research/shot_pattern_analysis` until both finish; renderer and pipeline recheck source hashes. Docs/evidence may be updated. Source snapshot differs from accepted numerical execution only in the two reviewed rendering modules; runtime/native identities remain unchanged. See `validation/final_publication_regeneration_start.json` and saved wrappers. No Monte Carlo rerun is involved. After terminal success, perform complete hash/inventory/graphics and supplemental statistics reviews, then assemble and review final report formats and deliver through the PR gates.
 
 ## Reporting Revision
 
