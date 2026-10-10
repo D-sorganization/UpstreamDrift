@@ -41,9 +41,9 @@ __all__ = [
     "SeamRedirectFinder",
     "SeamResolutionError",
     "extend_shared_python_path",
-    "extend_sidekick_lab_path",
     "install",
     "installed_tools_distribution",
+    "load_pinned_tools_package",
     "vendor_search_paths",
 ]
 
@@ -94,14 +94,60 @@ def vendor_search_paths(vendor_root: Path = _VENDOR_ROOT) -> tuple[str, ...]:
     )
 
 
-def extend_sidekick_lab_path() -> None:
-    """Expose pinned Tools lab modules alongside UD-owned split extensions."""
-    lab = importlib.import_module("sidekick.lab")
+#: Private top-level prefix for pinned-Tools packages loaded by
+#: :func:`load_pinned_tools_package`; never a shared namespace.
+PINNED_TOOLS_PREFIX = "_pinned_tools__"
+
+
+def load_pinned_tools_package(relative: str) -> types.ModuleType:
+    """Import a pinned-Tools package under a private name (#11994).
+
+    ``relative`` is the package's dotted path under the Tools
+    ``shared/python`` root, e.g. ``"sidekick.lab.mocap"``. The package is
+    executed as ``_pinned_tools__sidekick__lab__mocap`` so it is never grafted
+    onto UpstreamDrift's own ``sidekick`` namespace: appending the pinned tree
+    to ``sidekick.lab.__path__`` (the retired ``extend_sidekick_lab_path``)
+    built the half-UpstreamDrift, half-Tools package the vendored fallback
+    forbids, for the rest of the process. The package must be self-contained
+    (relative imports only), which ``sidekick.lab.mocap`` is.
+
+    Postconditions: the same module object is returned on every call, and no
+    ``sidekick.*`` ``__path__`` or ``sys.modules`` entry is changed.
+
+    Raises:
+        ValueError: when ``relative`` is not a dotted package path.
+        SeamResolutionError: when the package is not in the pinned tree.
+    """
+    parts = relative.split(".")
+    if not relative or not all(part.isidentifier() for part in parts):
+        raise ValueError(f"expected a dotted package path, got {relative!r}")
+    name = PINNED_TOOLS_PREFIX + "__".join(parts)
+    loaded = sys.modules.get(name)
+    if loaded is not None:
+        return loaded
     for root in vendor_search_paths():
-        candidate = Path(root) / "sidekick" / "lab"
-        if candidate.is_dir() and str(candidate) not in lab.__path__:
-            lab.__path__.append(str(candidate))
-    importlib.invalidate_caches()
+        init = Path(root).joinpath(*parts, "__init__.py")
+        if init.is_file():
+            return _exec_private_package(name, init)
+    raise SeamResolutionError(
+        f"{relative} is not in the pinned Tools tree; run: {SUBMODULE_HINT}"
+    )
+
+
+def _exec_private_package(name: str, init: Path) -> types.ModuleType:
+    spec = importlib.util.spec_from_file_location(
+        name, init, submodule_search_locations=[str(init.parent)]
+    )
+    if spec is None or spec.loader is None:
+        raise SeamResolutionError(f"cannot load {init}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[name] = module
+    try:
+        spec.loader.exec_module(module)
+    except BaseException:
+        sys.modules.pop(name, None)
+        raise
+    return module
 
 
 def installed_tools_distribution() -> str | None:
