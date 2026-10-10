@@ -80,6 +80,17 @@ admission before fitting. Preserve default/reference/assembled provenance and
 independently reload full state; a mixed constraint norm does not qualify grip,
 joint limits or contact. Pose assembly alone does not prove capture correspondence.
 
+## Native Prediction Integrity Consolidation (F09p, #12055)
+
+Provisional predictions verify provider bytes at entry, after all preparation
+before native execution, and at exit. Preserve live state, owned handles,
+source/model/kernel identity, callback exclusion, full actuator/solver/clock
+admission and independent guarded promotion/replay. Changed preparation must
+reach no native step. Controlled short-fixture evidence reduces repeated
+native-library reads by 25 percent, without a cross-call cache or real-time claim.
+Canonical chapter 38 and F09p turnover retain source-specific proof and limits.
+Full seventeen-row/six-ecosystem/private muscular OpenSim acceptance remains open.
+
 ## Native Tools Integration (F09o, #12044)
 
 The native command solve stack consumes admitted Tools main

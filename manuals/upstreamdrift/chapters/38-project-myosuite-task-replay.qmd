@@ -451,3 +451,34 @@ tracking/solve tests must be rechecked together. Neither a pin update nor an
 import identity check establishes capture correspondence, hard-contact validity,
 muscle physiology, rapid matching or all-model parity. See the F09o plan and
 turnover for exact executed evidence and remaining gates.
+
+## Prediction Integrity Boundaries and Measured Work
+
+F09p (#12055) consolidates redundant preparation checks without retaining a
+provider digest across invocations. Each successful provisional prediction
+performs three full provider verifications: invocation entry, final preparation
+before native execution, and invocation exit. The final preparation boundary
+follows supplied-command conversion, bundle construction, contract validation
+and bundle identity admission. It verifies complete live-state preservation,
+owned native handles, source bytes, native model identity, kernel identity and
+absence of global callbacks, then uses the existing native execution validator
+for actuator laws, solver, integration policy, channels, bounds and clock.
+Independent guarded SDK promotion and canonical replay remain unchanged.
+
+The genuine native RED campaign found four full provider checks and a changed
+environment data handle that was rejected only after two native steps. Moving
+verification after preparation rejects that mutation before any step. Model,
+source, callback and live-state preparation mutations must also reach no native
+step. Repeated commands still verify complete bytes on every invocation.
+No file timestamp, cross-call cache or relaxed physical tolerance is introduced.
+
+An alternating baseline/candidate/baseline/candidate measurement used the
+actual MyoSuite 3.0/MuJoCo 3.6 two-channel fixture. Fourteen predictions per run
+included two timing warmups. All fourteen full native-state digests agreed
+across the four runs. Provider verifications fell from 56 to 42 and native
+library bytes read from 623,816,704 to 467,862,528 per run, exactly 25 percent.
+Measured medians were 97.91/86.51 ms and 108.58/67.61 ms respectively. Timing
+varies with machine load; these paired observations are not a statistical
+production-speed result, real-time guarantee or full-capture matching result.
+See F09p turnover for exact source correspondence and regression evidence.
+All-model parity and muscular OpenSim private-reference matching remain open.

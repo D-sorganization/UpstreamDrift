@@ -263,7 +263,9 @@
         "docs/development/feedback_controls/F09M-NATIVE-TRACKING-TURNOVER.md",
         "docs/development/feedback_controls/F09N-NATIVE-COMMAND-SOLVE-TURNOVER.md",
         "docs/development/feedback_controls/F09O-NATIVE-TOOLS-INTEGRATION-PLAN.md",
-        "docs/development/feedback_controls/F09O-NATIVE-TOOLS-INTEGRATION-TURNOVER.md"
+        "docs/development/feedback_controls/F09O-NATIVE-TOOLS-INTEGRATION-TURNOVER.md",
+        "docs/development/feedback_controls/F09P-PREDICTION-INTEGRITY-PLAN.md",
+        "docs/development/feedback_controls/F09P-PREDICTION-INTEGRITY-TURNOVER.md"
       ],
       "tests": [
         "tests/unit/engines/myosuite/test_project_task_producer.py",
@@ -275,7 +277,8 @@
         "tests/unit/engines/myosuite/test_project_task_tracking.py",
         "tests/unit/engines/myosuite/test_project_task_command_solve.py",
         "tests/unit/motion_matching/test_bounded_candidate_search.py",
-        "tests/unit/repo_hygiene/test_pinned_tools_package_loader.py"
+        "tests/unit/repo_hygiene/test_pinned_tools_package_loader.py",
+        "tests/unit/engines/myosuite/test_prediction_integrity_boundaries.py"
       ],
       "entrypoints": [
         {
@@ -443,7 +446,8 @@
         "tests/unit/engines/myosuite/test_project_task_tracking.py",
         "tests/unit/engines/myosuite/test_project_task_command_solve.py",
         "tests/unit/motion_matching/test_bounded_candidate_search.py",
-        "tests/unit/repo_hygiene/test_pinned_tools_package_loader.py"
+        "tests/unit/repo_hygiene/test_pinned_tools_package_loader.py",
+        "tests/unit/engines/myosuite/test_prediction_integrity_boundaries.py"
       ]
     }
   ],

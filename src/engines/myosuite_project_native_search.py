@@ -208,8 +208,6 @@ class ProjectTaskNativeSearch:
         contracts = native_replay_contract_types()
         schema, state = _initial_state(live.data, initial, contracts)
         commands = np.asarray(supplied, dtype=np.float64).copy()
-        self._forecaster._verify_live(initial)
-        self._verify_native()
         if (
             commands.ndim != 2
             or not 0 < len(commands) <= self._max_steps
@@ -220,14 +218,15 @@ class ProjectTaskNativeSearch:
         bundle = self._state_bundle(state, schema, commands)
         bundle = validate_native_replay_bundle(bundle, contracts)
         direct._validate_bundle_identity(bundle, self._seed.registration, contracts)
-        bundle, times, commands = direct._validate_identity(
+        # Preparation can invoke supplied conversions or bundle construction.
+        # Verify handles, source, callbacks and live state after all such work,
+        # immediately before native admission; reuse that full provider check.
+        self._forecaster._verify_live(initial)
+        self._verify_native()
+        times, commands = direct._validate_native_execution_identity(
             bundle,
             self._model,
             self._seed.registration,
-            create_native_direct_model,
-            self._environment,
-            self._closure,
-            contracts,
         )
         profile = direct.compiled_actuator_profile_bytes(
             bundle, self._seed.registration, self._model, self._closure

@@ -1,4 +1,16 @@
-# Active: Native Tools Integration — F09o #12044
+# Active: Prediction Integrity Consolidation — F09p #12055
+
+Branch `feat/f09p-prediction-integrity-12055` begins at published F09o
+`98784e8374f3adf31f3b22d6bb9e54c0bfa3d081`. Read its plan and turnover.
+Final preparation verification follows conversion and bundle validation, rejects
+changed source/model/handles/callback/live state before stepping, and retains
+complete provider-byte checks at entry/pre-execution/exit. No cross-call cache.
+Controlled native short-fixture ABAB measurements retain identical state digests
+and 25 percent fewer native-library bytes read. No full-capture speed claim.
+Preserve original source-specific receipts; all seventeen rows, six ecosystems
+and private muscular OpenSim matching plus independent replay remain required.
+
+# Prior: Native Tools Integration — F09o #12044
 
 Branch `feat/f09o-native-tools-integration-12044` integrates F09n `df9f3b9538`
 with the admitted F01b/Tools/private-consumer stack `d232efcc69`. Read

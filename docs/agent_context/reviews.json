@@ -73,13 +73,13 @@
       "rationale": "Reviewed canonical pose ownership and MuJoCo adapter protocol, explicit coordinate conventions and capability limits. Existing test_mujoco_protocol.py passed in the 41-test boundary run on 2026-09-09; no scientific validity assertion is added."
     },
     "project-task-native-replay": {
-      "fingerprint": "92592a01d1b4aa45b53fd50bd3076e419fc578c6b8801065e703883eb97c3e2c",
+      "fingerprint": "8f3e075350cb2c315800e5ebbd2abb6b0a54b58dd48f270f97d00b62ac46ea11",
       "inputs": {
         "docs/agent_context/contracts/project-task-native-replay.md": "754359ce3d2ccfe8d80a31a1cd8867f151dc5bd63bf0023231a2cc797fc3f254",
         "src/engines/myosuite_project_command_solve.py": "a8b3168dfb20b8f94322d2b8dc1e2b8570d4e11b3d4222f8b1300e71711cd2e2",
         "src/engines/myosuite_project_feedback.py": "c0d4f3f2e2f5ec0fac1c0cb9861d1e02e2d7cc6012c66d38283ac1aec864f7c5",
         "src/engines/myosuite_project_forecast.py": "b07b9f00d98f4b27e60be0de2ec255b294875255198f9a010ff12a67e13ab45f",
-        "src/engines/myosuite_project_native_search.py": "3195899213ca1b48dc8cfe040f5fd82ca7742bc9e4b92eeff96ef64da4939105",
+        "src/engines/myosuite_project_native_search.py": "4f60b10981a97a6e0c1a7404f4cd91cecf6fb1f5faed42fe56b3866a69d782b6",
         "src/engines/myosuite_project_task_producer.py": "59e63dca8f2c178d9dbc92adcc0047c70feac1052967f7055f8d5b8d77a074d1",
         "src/engines/myosuite_project_tracking.py": "46be8b4b606893e0c3a7c29dfef6dcb76a4cb4fcf0f38557d01d7d0ded608648",
         "src/engines/native_direct_model_provider.py": "053927847888280af9a0d6271d9f8a74ecb00b6d90cd6142fee884f4cb49b149",
@@ -89,6 +89,7 @@
         "src/shared/python/_seam_redirect.py": "3446b274ae8c8ae5407c2305a9e34d31eb4824bfed362b5661dd5bc829c41448",
         "src/shared/python/motion_matching/bounded_candidate_search.py": "b1f5c83ca8bcc686d68c76c12a759dbba333efdba8422028646ee40c789dae3d",
         "tests/unit/engines/myosuite/test_native_model_resource_closure.py": "662eb43722a90a9c77fe01128ca8d22483259f6492e8d36d7b22c65460abbbef",
+        "tests/unit/engines/myosuite/test_prediction_integrity_boundaries.py": "96bbbbb810cfeae96dee33a88771cd6daf87db4677845793bbae279b3a1bf3e5",
         "tests/unit/engines/myosuite/test_project_task_artifact_admission.py": "ea9e6d1da8bd2a6725d2b675607deafba8d9eac29e956a56e113cda2765a6fe1",
         "tests/unit/engines/myosuite/test_project_task_command_solve.py": "c5c7d0c34b61ac352e279ffb635adf41e46a97f61a04838fb6d8fad0c1abb775",
         "tests/unit/engines/myosuite/test_project_task_feedback.py": "d9d8f9ae7b58e3c5fb9e641a32b1eeacf7b9873a26839d4c0724c27ad3ceff00",
@@ -99,7 +100,7 @@
         "tests/unit/motion_matching/test_bounded_candidate_search.py": "5a256b469fe1f4fdd502626f125cd50eb64a62b1ec304488eda64335ca72ee4d",
         "tests/unit/repo_hygiene/test_pinned_tools_package_loader.py": "98bf31807478472f8e15310c73d1e92552feb74a84988e32df905a80019c64c9"
       },
-      "rationale": "F09o authoritative Tools86/private loader integration: MyoSuite3/MuJoCo3.6 campaign170PASS and20 executed source/test hashes unchanged after main d3b2da0. Separate actual OpenSim4.6/MuJoCo3.8 consumer/fallback campaign209PASS5 optional skips; project-owned versus explicitly exposed Tools fresh processes preserve preexisting public resolution/namespace. Genuine RED receipts retained. Fifty-input manifest deltas metadata/OpenSim/test separately disclosed. Impact26 probes plus actual76asset served verification precede metadata27PASS. Main merge9ef64e950b normalhooksPASS; source context evaluation12of12. Full17rows/six/private muscular matching/contact qualification remains open."
+      "rationale": "F09p12055 retains complete provider bytes at entry/final preparation/exit and existing native execution/guarded promotion/replay authority. Genuine native RED four checks and post-step handle rejection; final176PASS0F/E/S with21 declared source/test hashes and8122 Tools86files matching before/after. ABAB actualSDK shortfixture14 predictions/run preserves all state digests and25percent less native-library byte work, medians97.91/86.51ms and108.58/67.61ms; no statistical production speed or realtime claim. Preparation model/source/handles/callback/live mutations reach zero native steps. Full17/six/private muscularOpenSim/contact/physiology acceptance remains open."
     }
   },
   "version": 1
