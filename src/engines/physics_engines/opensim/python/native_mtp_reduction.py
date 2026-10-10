@@ -26,6 +26,18 @@ def _sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def require_fresh_reduction_paths(
+    source: Path, source_sha256: str, output: Path
+) -> None:
+    """Require unchanged source bytes and an unused derived-model destination."""
+    if not source.is_file() or _sha(source) != source_sha256:
+        raise ValueError("source model hash mismatch or source missing")
+    if output.exists():
+        raise FileExistsError(output)
+    if not output.parent.is_dir():
+        raise ValueError("derived model parent directory missing")
+
+
 def _finite_native_array(values: np.ndarray) -> np.ndarray:
     if not np.all(np.isfinite(values)):
         raise ValueError("nonfinite native reduction observation")
@@ -508,12 +520,7 @@ def derive_zero_mtp_model(request: ZeroMtpReductionRequest) -> ZeroMtpReductionR
     source = request.source_model_path
     output = request.derived_model_path
     reducer_sha256 = _sha(Path(__file__))
-    if not source.is_file() or _sha(source) != request.source_sha256:
-        raise ValueError("source model hash mismatch or source missing")
-    if output.exists():
-        raise FileExistsError(output)
-    if not output.parent.is_dir():
-        raise ValueError("derived model parent directory missing")
+    require_fresh_reduction_paths(source, request.source_sha256, output)
     _reject_removed_coordinate_references(source)
     original = osim.Model(str(source))
     state = original.initSystem()
