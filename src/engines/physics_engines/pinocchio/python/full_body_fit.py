@@ -55,9 +55,6 @@ from src.shared.python.contracts import ensure, require
 from src.shared.python.motion_matching.acceptance import Horizon
 from src.shared.python.motion_matching.contact_law import GroundPlane
 from src.shared.python.motion_matching.ground_support import capture_to_native_world
-from src.shared.python.motion_matching.turn_receipt import (
-    attach_turn_block_from_markers,
-)
 from src.shared.python.motion_matching.pelvis_yaw import (
     compute_pelvis_yaw_residual_and_derivative,
 )
@@ -74,6 +71,9 @@ from src.shared.python.motion_matching.tour_capture_contract import (
     tracked_labels,
 )
 from src.shared.python.motion_matching.tour_metrics import compute_shared_metrics
+from src.shared.python.motion_matching.turn_receipt import (
+    attach_turn_block_from_markers,
+)
 from src.shared.python.motion_matching.two_window_fit import (
     MarkerMetricResults,
     check_acceptance,
