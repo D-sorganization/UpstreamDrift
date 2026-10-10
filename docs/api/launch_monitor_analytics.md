@@ -179,6 +179,41 @@ export's id, timestamp, file name, and SHA-256 of the CSV bytes), and
 `manifest` (the reproducibility manifest, with `sessions` always `[]` since
 the web app has no imported-session manifests).
 
+`POST /tools/launch-monitor-analytics/v2/import/preview` takes a multipart
+`file` upload and mirrors the construction half of the desktop Sessions tab's
+`ImportMappingDialog`: it reads the headers, runs `detect_profile`, and
+computes every profile's automatic mapping so a client can offer the same
+profile switcher without a second round trip. The response carries
+`filename`, `headers`, `detected_profile_id`, `detection_confidence`,
+`profiles` (`profile_id`/`vendor` pairs), `auto_mappings` (keyed by
+`profile_id`, each a source-column-to-target mapping), `targets` (the
+selectable per-header mapping targets), and `measurement_statuses`. Nothing is
+written to durable storage; the upload is parsed from a
+`tempfile.TemporaryDirectory` that is removed before the response is built. An
+unsupported file extension returns 415.
+
+`POST /tools/launch-monitor-analytics/v2/import` takes the same multipart
+`file` plus a form field `options` holding the JSON-encoded reviewed mapping
+(`profile_id`, `mappings` — each a `source_column`/`target_column` with
+optional `source_unit`, `multiplier`, `measurement_status` override —
+`session_name`, `player`, `monitor_model`, `software_version`, `tags`) and
+calls the same `import_session` the desktop Sessions tab's `import_file`
+calls, so the web and desktop import paths share one implementation. A header
+absent from `mappings` falls back to the profile's automatic mapping, exactly
+like leaving that header's dialog combo at its auto-detected value, and an
+omitted `profile_id` is auto-detected from the headers. The response carries
+`session_id`, `name`, `manifest`, `columns`, `records`, and `row_count`.
+Nothing is persisted server side: the upload is written to a
+`tempfile.TemporaryDirectory` and removed before the response is built, and
+`manifest.source_path` is the uploaded filename, never the server-side temp
+path — error messages are sanitized the same way. Missing values are `null`,
+never `0`, and timestamps are ISO strings. An unsupported file extension
+returns 415; an import producing more than 20,000 rows returns 413; an unknown
+profile, mapping target, multiplier, measurement status, or a source with no
+rows returns 422. Private-corpus loading (`load_private_corpus_sessions`,
+which needs `LAUNCH_MONITOR_DATA_ROOT`) stays desktop-only, and removing an
+imported session is client-side state on the web — neither has a web route.
+
 ## Analysis Contract V2
 
 UpstreamDrift is the canonical Python and API authority for launch-monitor
