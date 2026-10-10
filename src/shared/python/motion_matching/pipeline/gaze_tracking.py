@@ -113,8 +113,8 @@ class _FrameSolve:
                 [self._head_axis(row) - unit, self.prior_weight * (xk - ref)]
             )
 
-        x = least_squares(resid, np.clip(x0, lo, hi), bounds=(lo, hi)).x
-        x = np.clip(x, lo, hi)
+        raw_x = least_squares(resid, np.clip(x0, lo, hi), bounds=(lo, hi)).x
+        x: Array = np.clip(raw_x, lo, hi)
         row[self.cols] = x
         residual = float(_angle_deg(self._head_axis(row)[None], unit[None])[0])
         clamped = bool(np.any((x - lo < _BOUND_TOL_RAD) | (hi - x < _BOUND_TOL_RAD)))
@@ -301,8 +301,8 @@ class GazeNeckFeedback:
         self._slot: int | None = None
         self._t_update = 0.0
         self._solved = False
-        self._correction = np.zeros(len(self._cols))
-        self._rate = np.zeros(len(self._cols))
+        self._correction: Array = np.zeros(len(self._cols))
+        self._rate: Array = np.zeros(len(self._cols))
         self._residuals: list[float] = []
         self._clamped = 0
 
