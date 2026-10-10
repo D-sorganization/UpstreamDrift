@@ -5465,15 +5465,16 @@ returned 0.086 s.
 \subsection{Canonical Values}
 The canonical calibrated runs were regenerated with the documented commands
 in \texttt{evidence/ground\_support/CANONICAL\_RUN.md}. Whole-swing FD, IK and
-acceptance status are unchanged to within $10^{-9}$ m.
+acceptance status are byte-identical to the receipts regenerated for the
+right-knee sign fix (\#12057); only the \texttt{fd\_phase} block is added.
 
 \begin{center}
 \begin{tabular}{lrrrr}
 \hline
 Capture & $t_I$ (s) & Whole FD (mm) & Address$\to$impact (mm) & After impact (mm) \\
 \hline
-capture-A (driver) & 1.3228 & 61.6 & 29.9 & 108.1 \\
-capture-B (7-iron) & 1.3347 & 47.0 & 29.9 & 75.7 \\
+capture-A (driver) & 1.3228 & 77.0 & 32.3 & 138.6 \\
+capture-B (7-iron) & 1.3343 & 71.2 & 33.3 & 125.1 \\
 \hline
 \end{tabular}
 \end{center}
@@ -5481,7 +5482,9 @@ capture-B (7-iron) & 1.3347 & 47.0 & 29.9 & 75.7 \\
 \subsection{Slice-7 Turn-Split Settings Read Pre-Impact}
 The table below re-reads the saved slice-7 exploratory runs
 (\texttt{--thorax-weight}/\texttt{--shoulder-girdle-weight} lanes; \#12108,
-\#12111) with the new split. On a pre-impact basis, the 0.3/5 split is within
+\#12111) with the new split. These runs predate the \#12057 spec change, so their
+baseline is the earlier canonical receipt (61.6 and 47.0 mm whole-swing), not
+the table above. On a pre-impact basis, the 0.3/5 split is within
 2 mm of baseline on both captures (capture-A $+1.7$, capture-B $+0.5$ mm).
 Nearly all of its whole-swing regression is after impact. A null run (0.01/1),
 which should not change the swing, still moves the pre-impact FD by up to
