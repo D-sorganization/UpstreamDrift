@@ -85,6 +85,24 @@ def _load_native(path: Path) -> tuple[Any, Any]:
     return model, mj.MjData(model)
 
 
+def native_initial_state_from_joint_state(
+    model_path: Path, joint_state: NDArray[np.float64]
+) -> NDArray[np.float64]:
+    """Export the complete native fixture state without importing MuJoCo in shared code."""
+    import mujoco as mj
+
+    values = np.asarray(joint_state, dtype=np.float64)
+    if values.shape != (2,) or not np.isfinite(values).all():
+        raise ValueError("one-hinge fixture requires finite position and velocity")
+    model, data = _load_native(model_path)
+    if model.nq != 1 or model.nv != 1 or model.nu != 1:
+        raise ValueError("native fixture must have one hinge and one unit motor")
+    data.qpos[0], data.qvel[0] = values
+    state = np.empty(mj.mj_stateSize(model, mj.mjtState.mjSTATE_INTEGRATION))
+    mj.mj_getState(model, data, state, mj.mjtState.mjSTATE_INTEGRATION)
+    return state
+
+
 def _validate_unit_motors(model: Any, mj: Any) -> None:
     """Prove that saved actuator torque equals the admitted motor's input."""
     names = [mj.mj_id2name(model, mj.mjtObj.mjOBJ_ACTUATOR, i) for i in range(model.nu)]

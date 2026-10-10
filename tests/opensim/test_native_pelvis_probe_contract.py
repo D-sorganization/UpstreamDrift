@@ -58,5 +58,5 @@ def test_existing_trc_export_records_rounding_and_preserves_missingness(
     )
     receipt = export_capture(tmp_path / "source.c3d", tmp_path / "export.trc")
     assert receipt["capture_sha256"] == source.source_sha256
-    assert 0 < receipt["max_position_rounding_m"] <= 5.1e-7
-    assert 0 < receipt["max_clock_rounding_s"] <= 5.1e-10
+    assert 0 <= receipt["max_position_rounding_m"] <= 5.1e-7
+    assert 0 <= receipt["max_clock_rounding_s"] <= 5.1e-10

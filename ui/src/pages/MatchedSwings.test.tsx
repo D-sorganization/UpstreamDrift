@@ -7,7 +7,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
 import { MatchedSwingsPage } from './MatchedSwings';
-import type { MatchedSwingLedgerResponse } from '@/api/matchedSwings';
+import { fetchMatchedSwingLedger, type MatchedSwingLedgerResponse } from '@/api/matchedSwings';
 
 vi.mock('@/components/visualization/MocapSkeleton3D', () => ({
   default: () => <div data-testid="mocap-3d">3D preview</div>,
@@ -56,6 +56,7 @@ const SAMPLE_LEDGER: MatchedSwingLedgerResponse = {
         horizon_s: 0.85,
       },
       reason: 'unique_rejection_marker',
+      qualification_note: 'preferred qualification note',
       gates: [],
     },
   ],
@@ -95,6 +96,7 @@ describe('MatchedSwingsPage', () => {
     fetchCandidatePreviewFrameMock.mockClear();
     fetchMatchedSwingReceiptMock.mockClear();
     fetchParityReportMock.mockClear();
+    vi.mocked(fetchMatchedSwingLedger).mockClear();
   });
 
   it('renders run list with verdict badges', async () => {
@@ -286,6 +288,65 @@ describe('MatchedSwingsPage', () => {
     await user.click(screen.getByRole('button', { name: /opensim/i }));
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /view parity report/i })).toBeDisabled();
+    });
+  });
+
+  it('requests the ledger ranked so the best candidate is auto-selected', async () => {
+    render(
+      <MemoryRouter>
+        <MatchedSwingsPage />
+      </MemoryRouter>,
+    );
+
+    await screen.findByText('Matched Swing Results');
+    await waitFor(() => {
+      expect(fetchMatchedSwingLedger).toHaveBeenCalledWith(
+        expect.objectContaining({ ranked: true }),
+      );
+    });
+  });
+
+  it('refetches the ledger when the Drive Mode or Profile filter changes', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <MatchedSwingsPage />
+      </MemoryRouter>,
+    );
+
+    await screen.findByRole('button', { name: /drake/i });
+    vi.mocked(fetchMatchedSwingLedger).mockClear();
+
+    const driveModeSelect = screen.getAllByRole('combobox')[4];
+    await user.selectOptions(driveModeSelect, 'torque_driven');
+    await waitFor(() => {
+      expect(fetchMatchedSwingLedger).toHaveBeenCalledWith(
+        expect.objectContaining({ ranked: true, driveMode: 'torque_driven' }),
+      );
+    });
+
+    vi.mocked(fetchMatchedSwingLedger).mockClear();
+    const profileSelect = screen.getAllByRole('combobox')[5];
+    await user.selectOptions(profileSelect, 'dynamic');
+    await waitFor(() => {
+      expect(fetchMatchedSwingLedger).toHaveBeenCalledWith(
+        expect.objectContaining({ ranked: true, profile: 'dynamic' }),
+      );
+    });
+  });
+
+  it('prefers qualification_note over reason in the rejection/qualification text', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <MatchedSwingsPage />
+      </MemoryRouter>,
+    );
+
+    await user.click(await screen.findByRole('button', { name: /opensim/i }));
+    await waitFor(() => {
+      expect(screen.getByText('preferred qualification note')).toBeInTheDocument();
+      expect(screen.queryByText('unique_rejection_marker')).not.toBeInTheDocument();
     });
   });
 });
