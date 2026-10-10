@@ -42,6 +42,7 @@ from src.shared.python.motion_matching.pipeline.address_feet import (
     model_feet_deg,
     record_foot_progression,
     seed_document_feet,
+    split_address_coordinates,
 )
 from src.shared.python.motion_matching.pipeline.constants import (
     BUILD_RECEIPT,
@@ -1083,6 +1084,9 @@ def run_address_stage(args: argparse.Namespace) -> dict[str, Any]:
         for name in names
         if name.startswith("hip_")
     }
+    angles, translations = split_address_coordinates(names, cal_res.address2.q)
+    report["address_coordinates_deg"] = angles
+    report["address_translations_m"] = translations
     out = Path(args.out) / "address_report.json"
     out.write_text(json.dumps(report, indent=2, sort_keys=True, default=str) + "\n")
     return report
