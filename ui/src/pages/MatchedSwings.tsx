@@ -24,6 +24,7 @@ import {
   fetchParityReport,
   formatMetric,
   matchedSwingAnimationUrl,
+  matchedSwingReportUrl,
   verdictBadgeClass,
   type MatchedSwingRun,
 } from '@/api/matchedSwings';
@@ -436,6 +437,13 @@ export function MatchedSwingsPage() {
           >
             View Parity Report
           </button>
+          <a
+            href={matchedSwingReportUrl(selectedRun.id)}
+            download
+            className="text-xs rounded border border-gray-700 bg-gray-800 px-2 py-1 hover:border-gray-500"
+          >
+            Export Report
+          </a>
         </div>
         {receiptError && <p className="text-xs text-red-300">{receiptError}</p>}
         {receiptJson && (
