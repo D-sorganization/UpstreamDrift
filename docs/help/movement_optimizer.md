@@ -181,6 +181,23 @@ that apply to that lift. `GET /lifting/baseline` returns receipt metadata
 read-only and serve the same committed receipt the PyQt and web lift-viewing
 surfaces (LIFT-8, GitHub issue #11748) will build on.
 
+### Lift Baseline Panel (PyQt)
+
+The PyQt Exercise Dashboard (`src/launchers/exercise_dashboard.py`) shows this
+data directly: for any of the five canonical lifts it adds a "Cross-Engine
+Lift Baseline" dock built from `src/launchers/lift_baseline_panel.py`. The
+dock has a lift selector, a per-engine table (pack commit, body/coordinate
+counts, total mass, bar and hand-mid height above the sole, smoke-test
+result, phase count), a pose selector with a pair-metric table flagging each
+cross-engine position comparison pass/fail/unavailable against the parity
+tolerance, a per-engine phase table of hand-to-bar distances, and a list of
+the discrepancies that apply to that lift. Every value is read from the same
+receipt as the API above and the manual chapter: a missing or non-finite
+measurement always renders as "unavailable" (with its reason as a tooltip),
+never as a bare zero. Still open: the web page, native-viewer lift selection,
+and the barbell/hand-force/GRF overlays and plots (tracked in
+`src/config/feature_parity.json`'s `lifting.five_lift_viewing` entry).
+
 ### Where to Find Each Pack
 
 | Pack      | Repository                         | Exercises root                    | Manifest          |
