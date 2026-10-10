@@ -329,21 +329,21 @@ def derive_zero_subtalar_model(
     output = request.derived_model_path
     reducer_hash = _sha(Path(__file__))
     helper_hash = _sha(Path(comparison.__file__))
-    if not source.is_file() or _sha(source) != request.source_sha256:
-        raise ValueError("source model hash mismatch or source missing")
-    if output.exists():
-        raise FileExistsError(output)
     if not output.parent.is_dir():
         raise ValueError("derived model parent directory missing")
+    if output.exists():
+        raise FileExistsError(output)
+    if not source.is_file() or _sha(source) != request.source_sha256:
+        raise ValueError("source model hash mismatch or source missing")
     _reject_removed_coordinate_references(source)
     _source_axis_profile(source)
     original = osim.Model(str(source))
     _admit_native_joint(original, original.initSystem())
     derived = osim.Model(original)
-    names = osim.StdVectorString()
-    for joint_name in _JOINTS:
-        names.append(joint_name)
-    osim.ModOpReplaceJointsWithWelds(names).operate(derived, "")
+    weld_joint_names = osim.StdVectorString()
+    for name in _JOINTS:
+        weld_joint_names.append(name)
+    osim.ModOpReplaceJointsWithWelds(weld_joint_names).operate(derived, "")
     derived.printToXML(str(output))
     output_hash = _sha(output)
     try:
