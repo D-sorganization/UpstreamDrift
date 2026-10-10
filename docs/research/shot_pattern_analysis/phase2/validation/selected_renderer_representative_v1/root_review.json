@@ -1,0 +1,12 @@
+{
+  "root_all_28_asset_hashes_verified": true,
+  "root_pngs_visually_inspected": [
+    "pw_narrow_density",
+    "iron_narrow_density",
+    "pw_covariance_overhead_social"
+  ],
+  "visual_findings": [],
+  "type_check": "Two attr-defined errors: use concrete Agg canvas binding",
+  "accepted_for_integration": false,
+  "next_step": "Typed canvas binding correction and exact PNG/scientific parity verification"
+}
