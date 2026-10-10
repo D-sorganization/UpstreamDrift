@@ -3,6 +3,10 @@
 - Branch `claude/gcv-14-speed-variants`, stacked on PR #12004 (kinematic impact time). `video_timing.frame_schedule.SPEED_VARIANTS = (1, 0.5, 0.25)` is the default of `ExportSettings.speeds` and `--speeds`; `motion_matching.export.export_video_variants` writes the same three clips for any engine's candidate (MuJoCo, MyoSuite, Drake, Pinocchio, OpenSim, Simscape logs).
 - Tests: `test_speed_variants_engines.py` (frame counts from the time span for all four native engines, HUD 0 ms at the ball-passage impact) and `test_export.py` (variants per engine).
 - Evidence: only MuJoCo renders on ControlTower (stick figure, no club, 1920x1080, 60 fps). Drake and Pinocchio need `playwright` and its Chromium libraries, OpenSim needs `xwd`, MyoSuite needs `myosuite.envs.env_base` (#11997); none are in the `ud-sim` image and installing them needs root or a new image (owner action).
+# Active: Contact Grip and MyoSuite Bushing, OSV-7 Phase 3 #11739
+
+- Branch `claude/osv-7-contact-grip` (stacked on #11963). Pad contact grip with pad stiffness matched to the bushing (`grip_contact/pad_layout.py`, `pad_contact.py`); MuJoCo full swing (dt 1e-5 s), Drake and Pinocchio holds; MyoSuite bushing parity passes (worst 0.013 % peak). Quasi-static balance closes (`static_balance.py`). See GRIP_PARITY_DECISIONS.md section 19.
+- Open and flagged: contact per-hand force is about 4x the bushing's with matching net force (indeterminacy, not tuned); no OpenSim contact variant; no full-swing Drake or Pinocchio contact run.
 
 # Active: Native Export Impact Time From Ball Passage - GCV-14 #11720
 
@@ -58,6 +62,15 @@ its source rotation bound. Preserve native replay, anatomy and registration gate
 # Active: Muscle Qualification Evidence Guard — F07 #11791
 
 Branch `fix/feedback-muscle-evidence-11791`; current commit `SELF`; PR #11814. Scoped child #11810: parameter-only orchestration now returns no native replay and no unperformed audit successes. The test-first commit records two failures; 31 focused tests pass after correction. Read [Guard Turnover](docs/development/feedback_controls/F07_MUSCLE_EVIDENCE_TURNOVER.md). Merged current main while preserving its impact chapter and this evidence chapter. Next: normal protected PR checks; F07 and native model qualification remain open.
+
+# Active: Native Muscle-Model Asset Admission — #11819
+
+Branch `feat/feedback-native-admission-11819`, commit `SELF`. Source pinning and
+native structural inventory remain scientifically unqualified; caller anatomy
+maps and complete dependency closure require review. Read
+[F07 Turnover](docs/development/feedback_controls/F07_MODEL_ADMISSION_TURNOVER.md)
+and canonical manual chapter 18. F07 #11791 remains open; no external full-body
+model, raw capture, native optimizer or replay was qualified by this slice.
 
 # Active: Feedback Controls Planning — #11784
 
