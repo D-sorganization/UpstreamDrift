@@ -10,6 +10,7 @@ Routes
 - ``GET /matched-swings/{id}`` — receipt JSON
 - ``GET /matched-swings/{id}/candidate`` — NPZ stream or preview JSON
 - ``GET /matched-swings/{id}/parity`` — parity report JSON
+- ``GET /matched-swings/{id}/report`` — Markdown fit-quality report download
 - ``GET /matched-swings/{id}/animation.gif`` — GIF stream
 """
 
@@ -19,7 +20,7 @@ from functools import lru_cache
 from typing import Any, Literal, NoReturn
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 
 from src.api.services.matched_swings_service import (
     MatchedSwingJobError,
@@ -205,6 +206,29 @@ async def get_matched_swing_parity(
             status_code=500, detail="Parity report is not a JSON object"
         )
     return dict(data)
+
+
+@router.get("/{run_id}/report")
+async def get_matched_swing_report(
+    run_id: str,
+    _local: None = Depends(require_local_client),
+    service: MatchedSwingsService = Depends(get_matched_swings_service),
+) -> Response:
+    """Download the Markdown fit-quality report for a run (desktop parity)."""
+    try:
+        markdown, filename = service.export_report_markdown(run_id)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except (FileNotFoundError, ValueError, RuntimeError) as exc:
+        _raise_job_error(
+            MatchedSwingJobError(code="report_unavailable", message=str(exc)),
+            status_code=404,
+        )
+    return Response(
+        content=markdown,
+        media_type="text/markdown; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
 
 
 @router.get("/{run_id}/animation.gif")

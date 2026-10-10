@@ -97,6 +97,10 @@ export function matchedSwingAnimationUrl(runId: string): string {
   return apiUrl(`/api/v1/matched-swings/${encodeURIComponent(runId)}/animation.gif`);
 }
 
+export function matchedSwingReportUrl(runId: string): string {
+  return apiUrl(`/api/v1/matched-swings/${encodeURIComponent(runId)}/report`);
+}
+
 export async function fetchCandidatePreviewFrame(
   runId: string,
   frameIndex: number,

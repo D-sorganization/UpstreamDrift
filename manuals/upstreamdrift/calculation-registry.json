@@ -6,6 +6,11 @@
   "inventory_commit": null,
   "blockers": [
     {
+      "id": "UP-D1-native-muscle-asset-admission-inventory",
+      "owner": "UpstreamDrift issue #11819, F07 #11791",
+      "resolution": "Inventory tour_matching/model_admission.py and _native_model_inventory.py with provisional chapter 18-native-model-admission.qmd. Pinned XML declarations and native initialize/component/state observations remain structurally observed and scientifically unqualified. Effective muscle options, recursive component inventories and caller-declared attachment/coordinate maps do not prove anatomy, capacity, complete resources, licensing, equilibrium, contact physics or independent replay. Loaded serialization/runtime hashes do not close compiled binary/resource provenance. Synthetic native and 520-declaration source tests do not qualify an external full-body model. F07/F08 and all-model six-engine matching remain open."
+    },
+    {
       "id": "UP-D1-distributed-feedback-inventory",
       "owner": "UpstreamDrift issue #11786",
       "resolution": "Inventory the F02 phase/task controller in src/shared/python/motion_matching/distributed_feedback.py and the provisional chapter 16: current-minus-reference nv tangent error, reused MOSAIC TVLQR gains, prioritized task Jacobians and phase masks, exact full simulated-state information pattern, unit-constant actuator-only mapping, bounded post-allocation applied torques and one-step ZOH sampling. Contact/grip QP output is predicted feasibility only and is not injected as a native reaction. Synthetic restoration and native one-joint MuJoCo checks do not qualify full-body contact, six-engine parity, capture matching, continuous open-loop replay, muscle input or scientific runtime. Full calculation coverage and publication remain blocked."
