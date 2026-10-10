@@ -49,6 +49,16 @@ def _fmt(val: float | int | None, unit: str = "", decimals: int = 2) -> str:
     return f"{val:.{decimals}f}{unit}"
 
 
+def _trunk_turn_rows(m_a: Any, m_b: Any, diff: dict[str, Any]) -> list[str]:
+    """Markdown rows for shoulder-girdle and upper-trunk yaw at top and impact."""
+    return [
+        f"| Shoulder-Girdle Yaw at Top | {_fmt(m_a.segment_rotation.shoulder_girdle_yaw_top, '°')} | {_fmt(m_b.segment_rotation.shoulder_girdle_yaw_top, '°')} | {_fmt(diff.get('shoulder_girdle_yaw_top_deg'), '°')} |",
+        f"| Upper-Trunk Yaw at Top | {_fmt(m_a.segment_rotation.upper_trunk_yaw_top, '°')} | {_fmt(m_b.segment_rotation.upper_trunk_yaw_top, '°')} | {_fmt(diff.get('upper_trunk_yaw_top_deg'), '°')} |",
+        f"| Shoulder-Girdle Yaw at Impact | {_fmt(m_a.segment_rotation.shoulder_girdle_yaw_impact, '°')} | {_fmt(m_b.segment_rotation.shoulder_girdle_yaw_impact, '°')} | {_fmt(diff.get('shoulder_girdle_yaw_impact_deg'), '°')} |",
+        f"| Upper-Trunk Yaw at Impact | {_fmt(m_a.segment_rotation.upper_trunk_yaw_impact, '°')} | {_fmt(m_b.segment_rotation.upper_trunk_yaw_impact, '°')} | {_fmt(diff.get('upper_trunk_yaw_impact_deg'), '°')} |",
+    ]
+
+
 def comparison_to_markdown(
     report: ComparisonReport,
     title: str = "Swing Comparison Report",
@@ -89,10 +99,7 @@ def comparison_to_markdown(
         "| :--- | :--- | :--- | :--- |",
         f"| Pelvis Yaw at Top | {_fmt(m_a.segment_rotation.pelvis_yaw_top, '°')} | {_fmt(m_b.segment_rotation.pelvis_yaw_top, '°')} | {_fmt(diff.get('pelvis_yaw_top_deg'), '°')} |",
         f"| Pelvis Yaw at Impact | {_fmt(m_a.segment_rotation.pelvis_yaw_impact, '°')} | {_fmt(m_b.segment_rotation.pelvis_yaw_impact, '°')} | {_fmt(diff.get('pelvis_yaw_impact_deg'), '°')} |",
-        f"| Shoulder-Girdle Yaw at Top | {_fmt(m_a.segment_rotation.shoulder_girdle_yaw_top, '°')} | {_fmt(m_b.segment_rotation.shoulder_girdle_yaw_top, '°')} | {_fmt(diff.get('shoulder_girdle_yaw_top_deg'), '°')} |",
-        f"| Upper-Trunk Yaw at Top | {_fmt(m_a.segment_rotation.upper_trunk_yaw_top, '°')} | {_fmt(m_b.segment_rotation.upper_trunk_yaw_top, '°')} | {_fmt(diff.get('upper_trunk_yaw_top_deg'), '°')} |",
-        f"| Shoulder-Girdle Yaw at Impact | {_fmt(m_a.segment_rotation.shoulder_girdle_yaw_impact, '°')} | {_fmt(m_b.segment_rotation.shoulder_girdle_yaw_impact, '°')} | {_fmt(diff.get('shoulder_girdle_yaw_impact_deg'), '°')} |",
-        f"| Upper-Trunk Yaw at Impact | {_fmt(m_a.segment_rotation.upper_trunk_yaw_impact, '°')} | {_fmt(m_b.segment_rotation.upper_trunk_yaw_impact, '°')} | {_fmt(diff.get('upper_trunk_yaw_impact_deg'), '°')} |",
+        *_trunk_turn_rows(m_a, m_b, diff),
         f"| X-Factor at Address | {_fmt(m_a.segment_rotation.x_factor_address, '°')} | {_fmt(m_b.segment_rotation.x_factor_address, '°')} | {_fmt(diff.get('x_factor_address_deg'), '°')} |",
         f"| X-Factor at Top | {_fmt(m_a.segment_rotation.x_factor_top, '°')} | {_fmt(m_b.segment_rotation.x_factor_top, '°')} | {_fmt(diff.get('x_factor_top_deg'), '°')} |",
         f"| X-Factor at Impact | {_fmt(m_a.segment_rotation.x_factor_impact, '°')} | {_fmt(m_b.segment_rotation.x_factor_impact, '°')} | {_fmt(diff.get('x_factor_impact_deg'), '°')} |",
