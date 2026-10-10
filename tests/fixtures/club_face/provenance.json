@@ -4,12 +4,54 @@
    "after": {
     "faces": {
      "capture": {
-      "address_deg": 0.22340294590528312,
-      "impact_deg": 8.838922457637947,
-      "impact_time_s": 1.3229858082256876,
-      "peak_speed_gap_to_ball_m": 0.17648421931749925,
+      "address_deg": 5.498955098048745,
+      "impact_deg": 14.964779323749287,
+      "impact_time_s": 1.3229536401569004,
+      "peak_speed_gap_to_ball_m": 0.17396077494510212,
       "peak_speed_time_s": 1.3194444444444444,
-      "top_deg": 97.68413121291846,
+      "top_deg": 95.10186699414457,
+      "top_time_s": 1.1027777777777779
+     },
+     "model": {
+      "address_deg": 5.431426418430594,
+      "impact_deg": 17.64844763720228,
+      "impact_time_s": 1.3271291275539532,
+      "peak_speed_gap_to_ball_m": 0.35146747422312336,
+      "peak_speed_time_s": 1.32,
+      "top_deg": 95.5503314595742,
+      "top_time_s": 1.1
+     }
+    },
+    "speed_timing": {
+     "capture": {
+      "impact_speed_mps": 51.320635669041174,
+      "impact_time_s": 1.3229536401569004,
+      "peak_minus_impact_s": -0.0021203068235671196,
+      "peak_speed_mps": 51.320635669041174,
+      "peak_time_s": 1.3208333333333333,
+      "post_impact_drop_mps": 14.3621314080374,
+      "post_impact_speed_mps": 36.958504261003775
+     },
+     "model": {
+      "impact_speed_mps": 48.182967460078395,
+      "impact_time_s": 1.3271291275539532,
+      "peak_minus_impact_s": -0.006129127553953007,
+      "peak_speed_mps": 48.77395633185119,
+      "peak_time_s": 1.3210000000000002,
+      "post_impact_drop_mps": 9.910403977551674,
+      "post_impact_speed_mps": 38.27256348252672
+     }
+    }
+   },
+   "before": {
+    "faces": {
+     "capture": {
+      "address_deg": 5.498955098048745,
+      "impact_deg": 14.964779323749287,
+      "impact_time_s": 1.3229536401569004,
+      "peak_speed_gap_to_ball_m": 0.17396077494510212,
+      "peak_speed_time_s": 1.3194444444444444,
+      "top_deg": 95.10186699414457,
       "top_time_s": 1.1027777777777779
      },
      "model": {
@@ -21,30 +63,28 @@
       "top_deg": 98.77144978959201,
       "top_time_s": 1.104
      }
-    }
-   },
-   "before": {
-    "faces": {
+    },
+    "fixture_sha256": "41a8db49f55a12c21b6ae08f917699b5222294ddbd96a3674c9f9087e0c0ed0b",
+    "speed_timing": {
      "capture": {
-      "address_deg": 0.22340294590528312,
-      "impact_deg": 8.838922457637947,
-      "impact_time_s": 1.3229858082256876,
-      "peak_speed_gap_to_ball_m": 0.17648421931749925,
-      "peak_speed_time_s": 1.3194444444444444,
-      "top_deg": 97.68413121291846,
-      "top_time_s": 1.1027777777777779
+      "impact_speed_mps": 51.320635669041174,
+      "impact_time_s": 1.3229536401569004,
+      "peak_minus_impact_s": -0.0021203068235671196,
+      "peak_speed_mps": 51.320635669041174,
+      "peak_time_s": 1.3208333333333333,
+      "post_impact_drop_mps": 14.3621314080374,
+      "post_impact_speed_mps": 36.958504261003775
      },
      "model": {
-      "address_deg": 0.0004244928846457687,
-      "impact_deg": 29.461307064974225,
-      "impact_time_s": 1.3273887369596358,
-      "peak_speed_gap_to_ball_m": 1.034862203572416,
-      "peak_speed_time_s": 1.304,
-      "top_deg": 102.10233967394426,
-      "top_time_s": 1.104
+      "impact_speed_mps": 44.0899469102697,
+      "impact_time_s": 1.3258726215619583,
+      "peak_minus_impact_s": -0.02287262156195835,
+      "peak_speed_mps": 46.578348874985004,
+      "peak_time_s": 1.303,
+      "post_impact_drop_mps": 1.3502070908454655,
+      "post_impact_speed_mps": 42.73973981942424
      }
-    },
-    "fixture_sha256": "3874590a4ee3a6157253b68de5add0907aef073b7c8767714d581cc949059aef"
+    }
    },
    "bundle_manifest": {
     "coordinate_order": [
@@ -105,36 +145,107 @@
      "substeps": 8
     },
     "provenance": {
+     "ball_impact": {
+      "axis_in_frame": [
+       -0.15108009768730238,
+       -0.37035426441492897,
+       -0.9165219707745539
+      ],
+      "ball_centre_m": [
+       0.050021824182766086,
+       -0.005617998186084281,
+       0.1262972821907931
+      ],
+      "ball_mass_kg": 0.04593,
+      "collision": {
+       "application_point_m": [
+        0.07049547694445818,
+        0.017795061535716764,
+        0.20264760615529653
+       ],
+       "approach_speed_mps": 45.20077750553461,
+       "ball_mass_kg": 0.04593,
+       "ball_speed_mps": 65.53581580806917,
+       "club_normal_speed_change_mps": 17.18160702705915,
+       "contact_point_m": [
+        0.055565401589807446,
+        0.013400976881503266,
+        0.11837708257773889
+       ],
+       "cor": 0.83,
+       "duration_s": 0.00045,
+       "effective_mass_kg": 0.17519083141199202,
+       "face_normal": [
+        -0.2598348913541768,
+        -0.8914448121672157,
+        0.3712303544904708
+       ],
+       "face_to_ball_gap_m": 0.08569560241972538,
+       "impulse_on_club_n_s": [
+        0.7821186182830411,
+        2.6833023891985484,
+        -1.1174256482861815
+       ],
+       "model": "frictionless normal impulse, constant COR",
+       "time_s": 1.3269762219270917
+      },
+      "cor": 0.83,
+      "duration_s": 0.00045,
+      "force_world_n": [
+       1738.0413739623136,
+       5962.894198218996,
+       -2483.1681073026257
+      ],
+      "frame": "Clubhead",
+      "passage_point_m": [
+       0.05196272939442875,
+       0.014795128650381623,
+       0.1262972821907931
+      ],
+      "point_in_frame": [
+       0.0010481605339686087,
+       0.04921124092301568,
+       -0.026174281039839195
+      ],
+      "scheduled": true,
+      "swing_span_s": [
+       0.0,
+       1.8138888888888889
+      ],
+      "t_start_s": 1.3269762219270917,
+      "trigger": "passage"
+     },
      "capture": "driver",
      "capture_sha256": "cbcb4d84aca0a1f558073f0c2328c3f501c4726aaf699e382cf20c5861a0971d",
      "controller": "pipeline computed-torque (kkt), held per step",
-     "dynamics_record_sha256": "aa3d593a00f9a39cb8adbf80f22322383d22d5853d4129070b572365805cb61c",
-     "max_pose_drift_m": 2.9537013195099094e-11,
+     "dynamics_record_sha256": "c8eb488054779fb681ec37e4a5b3928ae36d4ae55ea9ee5931b739b0f7c8555a",
+     "impact_split_time_s": 1.322953640157547,
+     "max_pose_drift_m": 1.2621235916024646e-09,
      "run_dir": "driver",
      "spec_file": "full_body_spec_hipcal_scaled.json"
     },
     "reference_engine": "mujoco",
     "schema": "same-input-bundle/v1",
-    "spec_sha256": "2d36810168f90941fc786edb20e0a34eddf9d0dccd406150d0f8fbfbacc7180b",
+    "spec_sha256": "2dc8038a32a46481b83aa2b3d4b470a524bb9db7fc0278e310b05ad4450c9e65",
     "steps": 1814
    },
-   "bundle_sha256": "061c3f00ffef9561b304645d4d828c4d690de728c51b80c658166f0504f8e860",
+   "bundle_sha256": "2d57bdd789ad7519774bd09ca35bb48ee0c44bee386cd2b25116f1f494a8c8c3",
    "capture": "driver",
    "capture_triad_offsets_m": {
     "Marker_2:2:1": [
-     -6.57624833736772e-05,
-     -0.08325134132350236,
-     -0.0063159919575855655
+     0.0014236261251189483,
+     -0.07311493220309755,
+     -0.008604687430533628
     ],
     "Marker_2:2:2": [
-     0.04974814418057197,
-     -0.016134951952307176,
-     -0.045730581112637274
+     0.04934388630384107,
+     -0.010268455189889931,
+     -0.05649533212282851
     ],
     "Marker_2:2:3": [
-     0.061711191778321246,
-     -0.010888398617822552,
-     0.00464315313489838
+     0.0622866156510181,
+     0.000823910819803318,
+     -0.007326245237757357
     ]
    },
    "face_orientation": {
@@ -142,16 +253,16 @@
     "ik": {
      "frames_observed": 618,
      "frames_unobserved": 36,
-     "max_deg": 3.149464343475709,
-     "p95_deg": 2.071835195383923,
-     "rms_deg": 0.8638624875636263
+     "max_deg": 3.149899981213703,
+     "p95_deg": 1.6852160503837625,
+     "rms_deg": 0.7334647657472539
     },
     "reference": {
      "frames_observed": 618,
      "frames_unobserved": 36,
-     "max_deg": 2.9627643014561587,
-     "p95_deg": 1.85449240401566,
-     "rms_deg": 0.762975784377546
+     "max_deg": 3.4613058670255756,
+     "p95_deg": 1.6361384309672464,
+     "rms_deg": 0.7134082812184086
     },
     "targeted_frames": 618,
     "triad": [
@@ -162,36 +273,134 @@
     "weight": 3.0
    },
    "face_weight": 3.0,
-   "fixture_sha256": "41a8db49f55a12c21b6ae08f917699b5222294ddbd96a3674c9f9087e0c0ed0b",
-   "generated_at_commit": "3545b36273e9a55870005c82992f58c39b8feed0",
+   "fixture_sha256": "30391927906610017631c658edb08311a7ca7182cb5e5030647173e9572c9e87",
+   "generated_at_commit": "69d2ebf3fe4f2b9a4754a853f4a62164f180db77",
+   "impact_split": {
+    "frame": 476,
+    "impact_time_s": 1.322953640157547,
+    "pre_contact_cutoff_hz": 30.0,
+    "release_cutoff": {
+     "base_cutoff_hz": 12.0,
+     "candidates": [
+      {
+       "cutoff_hz": 12.0,
+       "last_pre_contact_speed_mps": 43.59803010583168,
+       "peak_minus_split_s": -0.01805555555555549,
+       "preserved": false
+      },
+      {
+       "cutoff_hz": 15.0,
+       "last_pre_contact_speed_mps": 44.67094392000238,
+       "peak_minus_split_s": -0.015277777777777724,
+       "preserved": false
+      },
+      {
+       "cutoff_hz": 18.0,
+       "last_pre_contact_speed_mps": 46.11982448761084,
+       "peak_minus_split_s": -0.009722222222222188,
+       "preserved": false
+      },
+      {
+       "cutoff_hz": 20.0,
+       "last_pre_contact_speed_mps": 46.94538990573285,
+       "peak_minus_split_s": -0.009722222222222188,
+       "preserved": false
+      },
+      {
+       "cutoff_hz": 25.0,
+       "last_pre_contact_speed_mps": 48.35116801662352,
+       "peak_minus_split_s": -0.004166666666666652,
+       "preserved": false
+      },
+      {
+       "cutoff_hz": 30.0,
+       "last_pre_contact_speed_mps": 49.11952965798871,
+       "peak_minus_split_s": -0.004166666666666652,
+       "preserved": false
+      }
+     ],
+     "cutoff_hz": 30.0,
+     "preserved": false,
+     "speed_tol": 0.01,
+     "timing_tol_s": 0.002777777777777768,
+     "unfiltered": {
+      "last_pre_contact_speed_mps": 49.93099281125477,
+      "peak_minus_split_s": -0.001388888888888884
+     }
+    },
+    "source": "capture face-centre ball passage",
+    "time_s": 1.3222222222222222
+   },
    "marker_rms_m": {
-    "ik": 0.033628466191190955,
-    "reference": 0.032555957988497225,
-    "tracking": 0.06500005384934877
+    "ik": 0.029543424359941572,
+    "reference": 0.029009600885079825,
+    "tracking": 0.08075503807480953
    },
    "pipeline_argv": [
     "--spec",
-    "/home/dieterolson/Repositories/UpstreamDrift-worktrees/claude-osv10/docs/development/full_body_models/full_body_spec_anthro_driver.json",
+    "/home/dieterolson/Repositories/UpstreamDrift-worktrees/claude-c145v2/docs/development/full_body_models/full_body_spec_anthro_driver.json",
     "--capture",
     "driver",
     "--static-seeds",
     "--face-weight",
     "3.0",
     "--out",
-    "/tmp/claude-1000/-home-dieterolson-Repositories-UpstreamDrift/16836c4a-59a5-46dd-92ff-37c7c6bab2f1/scratchpad/osv10/regen/driver"
+    "/home/dieterolson/fleet24/brick-sim-s26/fx/runs/driver"
    ],
-   "run_receipt_sha256": "9719c0cecc1f497a6ad79f0bb27463cd4f9d36234f2190f6182acade7b9e213a"
+   "run_receipt_sha256": "767ce7749170cc41fd6aceccda23f76ce37ca80b8865f147d34fcaa9b52fa055"
   },
   "iron7": {
    "after": {
     "faces": {
      "capture": {
-      "address_deg": -0.30175862350882926,
-      "impact_deg": 8.425239466561205,
-      "impact_time_s": 1.3340254452418927,
-      "peak_speed_gap_to_ball_m": 0.10555209709351912,
+      "address_deg": -5.345956431977208,
+      "impact_deg": 3.207699915495414,
+      "impact_time_s": 1.3340328918971296,
+      "peak_speed_gap_to_ball_m": 0.10637484042014975,
       "peak_speed_time_s": 1.3314763231197773,
-      "top_deg": 109.69555504188783,
+      "top_deg": 113.23679385606074,
+      "top_time_s": 1.0974930362116992
+     },
+     "model": {
+      "address_deg": -5.406382580011684,
+      "impact_deg": 10.974053601940463,
+      "impact_time_s": 1.3407696927699084,
+      "peak_speed_gap_to_ball_m": 0.5590245470502518,
+      "peak_speed_time_s": 1.326,
+      "top_deg": 113.6990525577131,
+      "top_time_s": 1.098
+     }
+    },
+    "speed_timing": {
+     "capture": {
+      "impact_speed_mps": 41.26353114495258,
+      "impact_time_s": 1.3340328918971296,
+      "peak_minus_impact_s": -0.0011638111171852206,
+      "peak_speed_mps": 41.55118183870019,
+      "peak_time_s": 1.3328690807799444,
+      "post_impact_drop_mps": 12.531913796031947,
+      "post_impact_speed_mps": 28.731617348920633
+     },
+     "model": {
+      "impact_speed_mps": 37.06756523002014,
+      "impact_time_s": 1.3407696927699084,
+      "peak_minus_impact_s": -0.01576969276990825,
+      "peak_speed_mps": 38.928008711001326,
+      "peak_time_s": 1.3250000000000002,
+      "post_impact_drop_mps": 6.467277061534364,
+      "post_impact_speed_mps": 30.60028816848578
+     }
+    }
+   },
+   "before": {
+    "faces": {
+     "capture": {
+      "address_deg": -5.345956431977208,
+      "impact_deg": 3.207699915495414,
+      "impact_time_s": 1.3340328918971296,
+      "peak_speed_gap_to_ball_m": 0.10637484042014975,
+      "peak_speed_time_s": 1.3314763231197773,
+      "top_deg": 113.23679385606074,
       "top_time_s": 1.0974930362116992
      },
      "model": {
@@ -203,30 +412,28 @@
       "top_deg": 110.27836038657283,
       "top_time_s": 1.1
      }
-    }
-   },
-   "before": {
-    "faces": {
+    },
+    "fixture_sha256": "2b6d382f298612c14a9ca45f5ef9543d79db553fb89121db3214aacf430843af",
+    "speed_timing": {
      "capture": {
-      "address_deg": -0.30175862350882926,
-      "impact_deg": 8.425239466561205,
-      "impact_time_s": 1.3340254452418927,
-      "peak_speed_gap_to_ball_m": 0.10555209709351912,
-      "peak_speed_time_s": 1.3314763231197773,
-      "top_deg": 109.69555504188783,
-      "top_time_s": 1.0974930362116992
+      "impact_speed_mps": 41.26353114495258,
+      "impact_time_s": 1.3340328918971296,
+      "peak_minus_impact_s": -0.0011638111171852206,
+      "peak_speed_mps": 41.55118183870019,
+      "peak_time_s": 1.3328690807799444,
+      "post_impact_drop_mps": 12.531913796031947,
+      "post_impact_speed_mps": 28.731617348920633
      },
      "model": {
-      "address_deg": 0.0016363402681265887,
-      "impact_deg": 17.880477406722743,
-      "impact_time_s": 1.3370349931330336,
-      "peak_speed_gap_to_ball_m": 0.8156401385563139,
-      "peak_speed_time_s": 1.314,
-      "top_deg": 108.02614932443625,
-      "top_time_s": 1.098
+      "impact_speed_mps": 34.545393605524275,
+      "impact_time_s": 1.3368994664598575,
+      "peak_minus_impact_s": -0.025899466459857523,
+      "peak_speed_mps": 36.72405319891603,
+      "peak_time_s": 1.311,
+      "post_impact_drop_mps": 0.7564485649890358,
+      "post_impact_speed_mps": 33.78894504053524
      }
-    },
-    "fixture_sha256": "abade2d191009ef0ad80bb272f8fa8abd0fb813a67a2225f6f33bc3d67a4328c"
+    }
    },
    "bundle_manifest": {
     "coordinate_order": [
@@ -287,36 +494,107 @@
      "substeps": 8
     },
     "provenance": {
+     "ball_impact": {
+      "axis_in_frame": [
+       -0.4960101632149362,
+       -0.3209252593949264,
+       -0.806833871295567
+      ],
+      "ball_centre_m": [
+       -0.08466194855995406,
+       0.02514820961144162,
+       0.07708301208984909
+      ],
+      "ball_mass_kg": 0.04593,
+      "collision": {
+       "application_point_m": [
+        -0.0939735051284302,
+        0.040983099639651355,
+        0.10943654277563877
+       ],
+       "approach_speed_mps": 28.12800227340109,
+       "ball_mass_kg": 0.04593,
+       "ball_speed_mps": 45.47275908076375,
+       "club_normal_speed_change_mps": 6.001485079560242,
+       "contact_point_m": [
+        -0.08138788141491837,
+        0.04291502359264632,
+        0.0657338698188637
+       ],
+       "cor": 0.83,
+       "duration_s": 0.00045,
+       "effective_mass_kg": 0.34800783420968173,
+       "face_normal": [
+        -0.1534599083682062,
+        -0.8327543464356547,
+        0.5319494853988932
+       ],
+       "face_to_ball_gap_m": 0.0455198185188068,
+       "impulse_on_club_n_s": [
+        0.3205108131411171,
+        1.7392606027268356,
+        -1.111010451707798
+       ],
+       "model": "frictionless normal impulse, constant COR",
+       "time_s": 1.3406834212418257
+      },
+      "cor": 0.83,
+      "duration_s": 0.00045,
+      "force_world_n": [
+       712.2462514247047,
+       3865.0235616151904,
+       -2468.912114906218
+      ],
+      "frame": "Clubhead",
+      "passage_point_m": [
+       -0.08652155560951258,
+       0.044797451935585014,
+       0.07708301208984909
+      ],
+      "point_in_frame": [
+       -0.0011876474581223838,
+       0.024833938754146433,
+       -0.023795020849464794
+      ],
+      "scheduled": true,
+      "swing_span_s": [
+       0.0,
+       1.8272980501392757
+      ],
+      "t_start_s": 1.3406834212418257,
+      "trigger": "passage"
+     },
      "capture": "iron",
      "capture_sha256": "00a70c1ec0a887c28f9c0397766904eb9e79dee9f6d2bbd0cbb0062445adf561",
      "controller": "pipeline computed-torque (kkt), held per step",
-     "dynamics_record_sha256": "77290505c188a383dc8296d7f46201d2f2adc3a030218a8ee4292dd591c9e652",
-     "max_pose_drift_m": 8.269586101706085e-11,
+     "dynamics_record_sha256": "856ac34c46aa3323f03bc5094623fce18766691e98f61c4e68249b96bad94e59",
+     "impact_split_time_s": 1.334032891896939,
+     "max_pose_drift_m": 9.546091891409023e-11,
      "run_dir": "iron",
      "spec_file": "full_body_spec_hipcal_scaled.json"
     },
     "reference_engine": "mujoco",
     "schema": "same-input-bundle/v1",
-    "spec_sha256": "0c1f5ca2f4f61f3fa63a7a88963aff1774f24ce89c18997922c7649387f297ce",
+    "spec_sha256": "4095618f8bfdb568559b3b4b27ea1d6d156b613048a6616233c26f323416ca2f",
     "steps": 1827
    },
-   "bundle_sha256": "cac5f537a32b831d335a7da06d8be2d704303d40972e4044ae06c4664bc06ff1",
+   "bundle_sha256": "662974808b94d0502a508c5dbae665eda7cff09ac960465c52dbf0c471fcd62e",
    "capture": "iron",
    "capture_triad_offsets_m": {
     "Marker_2:2:1": [
-     -0.005108632448239634,
-     -0.090921349428073,
-     -0.015203263362751102
+     -0.007327540324495248,
+     -0.08631616596535785,
+     -0.01714432071883919
     ],
     "Marker_2:2:2": [
-     0.03936192786275875,
-     -0.023262058373729747,
-     -0.08340855396050521
+     0.037275077966665786,
+     -0.011449684473765744,
+     -0.0772524604048805
     ],
     "Marker_2:2:3": [
-     -0.044802215312550686,
-     -0.08764420084074293,
-     -0.012424924856700088
+     -0.047068573801067694,
+     -0.08360904669160808,
+     -0.014431176458904947
     ]
    },
    "face_orientation": {
@@ -324,16 +602,16 @@
     "ik": {
      "frames_observed": 640,
      "frames_unobserved": 17,
-     "max_deg": 4.358618512955468,
-     "p95_deg": 1.216751480555939,
-     "rms_deg": 0.5764241132420801
+     "max_deg": 3.214080825644508,
+     "p95_deg": 1.3322873296660753,
+     "rms_deg": 0.6336224411829203
     },
     "reference": {
      "frames_observed": 640,
      "frames_unobserved": 17,
-     "max_deg": 3.093897491074809,
-     "p95_deg": 1.19300508919366,
-     "rms_deg": 0.5778769923967089
+     "max_deg": 3.6784226827818394,
+     "p95_deg": 1.2240907963188186,
+     "rms_deg": 0.5795587936522862
     },
     "targeted_frames": 640,
     "triad": [
@@ -344,16 +622,72 @@
     "weight": 3.0
    },
    "face_weight": 3.0,
-   "fixture_sha256": "2b6d382f298612c14a9ca45f5ef9543d79db553fb89121db3214aacf430843af",
-   "generated_at_commit": "3545b36273e9a55870005c82992f58c39b8feed0",
+   "fixture_sha256": "7a4658da1479ac0419ddcf52987668c4a021a80663a9da1ff33808f058882e30",
+   "generated_at_commit": "69d2ebf3fe4f2b9a4754a853f4a62164f180db77",
+   "impact_split": {
+    "frame": 478,
+    "impact_time_s": 1.334032891896939,
+    "pre_contact_cutoff_hz": 18.0,
+    "release_cutoff": {
+     "base_cutoff_hz": 12.0,
+     "candidates": [
+      {
+       "cutoff_hz": 12.0,
+       "last_pre_contact_speed_mps": 37.420840451106166,
+       "peak_minus_split_s": -0.009749303621169991,
+       "preserved": false
+      },
+      {
+       "cutoff_hz": 15.0,
+       "last_pre_contact_speed_mps": 38.56704625698227,
+       "peak_minus_split_s": -0.004178272980501552,
+       "preserved": false
+      },
+      {
+       "cutoff_hz": 18.0,
+       "last_pre_contact_speed_mps": 39.58790347597793,
+       "peak_minus_split_s": -0.001392757660167332,
+       "preserved": true
+      },
+      {
+       "cutoff_hz": 20.0,
+       "last_pre_contact_speed_mps": 40.068346238640785,
+       "peak_minus_split_s": -0.001392757660167332,
+       "preserved": false
+      },
+      {
+       "cutoff_hz": 25.0,
+       "last_pre_contact_speed_mps": 40.779088212179005,
+       "peak_minus_split_s": -0.001392757660167332,
+       "preserved": false
+      },
+      {
+       "cutoff_hz": 30.0,
+       "last_pre_contact_speed_mps": 40.99328151958243,
+       "peak_minus_split_s": -0.001392757660167332,
+       "preserved": false
+      }
+     ],
+     "cutoff_hz": 18.0,
+     "preserved": true,
+     "speed_tol": 0.01,
+     "timing_tol_s": 0.0027855153203342198,
+     "unfiltered": {
+      "last_pre_contact_speed_mps": 39.656563387980604,
+      "peak_minus_split_s": -0.004178272980501552
+     }
+    },
+    "source": "capture face-centre ball passage",
+    "time_s": 1.3314763231197773
+   },
    "marker_rms_m": {
-    "ik": 0.0316487650783191,
-    "reference": 0.03080485093885836,
-    "tracking": 0.0529711665173356
+    "ik": 0.0267723825399104,
+    "reference": 0.026153912745051053,
+    "tracking": 0.05447519000319136
    },
    "pipeline_argv": [
     "--spec",
-    "/home/dieterolson/Repositories/UpstreamDrift-worktrees/claude-osv10/docs/development/full_body_models/full_body_spec_anthro_iron7.json",
+    "/home/dieterolson/Repositories/UpstreamDrift-worktrees/claude-c145v2/docs/development/full_body_models/full_body_spec_anthro_iron7.json",
     "--capture",
     "iron",
     "--static-seeds",
@@ -361,9 +695,9 @@
     "--face-weight",
     "3.0",
     "--out",
-    "/tmp/claude-1000/-home-dieterolson-Repositories-UpstreamDrift/16836c4a-59a5-46dd-92ff-37c7c6bab2f1/scratchpad/osv10/regen/iron"
+    "/home/dieterolson/fleet24/brick-sim-s26/fx/runs/iron"
    ],
-   "run_receipt_sha256": "b767fcc8f6eb5afee22d1f4a24447dff10748bb0d5fbc5a93e49de36d8d7a45a"
+   "run_receipt_sha256": "74abf96cc0beafdf5442e118101943a2aab68e02546633dc71014e73d2cfe0c0"
   }
  },
  "generator": "scripts/regenerate_club_face_fixtures.py",
