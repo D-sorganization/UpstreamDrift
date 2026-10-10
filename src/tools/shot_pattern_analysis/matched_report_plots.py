@@ -611,9 +611,16 @@ def _draw_metric(
         textwrap.fill(part, width=145, break_long_words=False)
         for part in subtitle_parts
     )
+    # Preserve panel sizes while allocating physical space for covariance captions.
+    # Extra header lines must not squeeze unavailable-cell reasons or data labels.
+    base_height = 10.5
+    header_extra = max(0, len(subtitle_text.splitlines()) - 3) * 0.24
+    figure_height = base_height + header_extra
+    fig.set_size_inches(16.5, figure_height)
+    height_scale = base_height / figure_height
     fig.text(
         0.06,
-        0.94,
+        1.0 - 0.06 * height_scale,
         subtitle_text,
         ha="left",
         va="top",
@@ -651,7 +658,7 @@ def _draw_metric(
     )
     fig.text(
         0.06,
-        0.045,
+        0.045 * height_scale,
         caption_text,
         ha="left",
         va="top",
@@ -661,13 +668,15 @@ def _draw_metric(
     fig.subplots_adjust(
         left=0.08,
         right=0.89 if images else 0.98,
-        top=0.84,
-        bottom=0.12,
+        top=0.84 * height_scale,
+        bottom=0.12 * height_scale,
         hspace=0.48,
         wspace=0.28,
     )
     if images:
-        colorbar_axis = fig.add_axes((0.93, 0.23, 0.016, 0.56))
+        colorbar_axis = fig.add_axes(
+            (0.93, 0.23 * height_scale, 0.016, 0.56 * height_scale)
+        )
         colorbar = fig.colorbar(images[0], cax=colorbar_axis)
         colorbar.set_label(colorbar_label)
     outputs: dict[str, Path] = {}

@@ -449,8 +449,9 @@ def test_matrix_annotation_contrast_across_entire_palettes() -> None:
             assert (max(bg, fg) + 0.05) / (min(bg, fg) + 0.05) >= 4.5, (name, value)
 
 
+@pytest.mark.parametrize("dense_covariance", [False, True])
 def test_sg_panel_titles_and_unavailable_reasons_fit_their_cells(
-    tmp_path, monkeypatch
+    tmp_path, monkeypatch, dense_covariance
 ) -> None:
     _load_api()
     import matplotlib.pyplot as plt
@@ -459,6 +460,13 @@ def test_sg_panel_titles_and_unavailable_reasons_fit_their_cells(
     )
 
     cells = _realistic_cells()
+    if dense_covariance:
+        import numpy as np
+
+        correlation = np.full((7, 7), 0.36)
+        np.fill_diagonal(correlation, 1.0)
+        for cell in cells:
+            cell["config"]["noise"]["correlation"] = correlation.tolist()
     cells[-1].update(
         status="unavailable",
         reason="nominal landing unreachable within bounds: residual=0.351838 m",
@@ -477,6 +485,14 @@ def test_sg_panel_titles_and_unavailable_reasons_fit_their_cells(
     try:
         figure.canvas.draw()
         renderer = figure.canvas.get_renderer()
+        subtitle = next(
+            text for text in figure.texts if "Delivery Noise:" in text.get_text()
+        )
+        header_bottom = subtitle.get_window_extent(renderer).y0
+        panel_top = max(
+            axis.title.get_window_extent(renderer).y1 for axis in figure.axes[:3]
+        )
+        assert header_bottom - panel_top >= 4 * figure.dpi / 72
         for axis in figure.axes[:9]:
             bounds = axis.get_window_extent(renderer)
             title = axis.title.get_window_extent(renderer)
