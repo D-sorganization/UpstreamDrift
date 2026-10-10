@@ -531,8 +531,8 @@ existing observation scorer. The score carries the calibration-artifact,
 map, execution, marker-output, observation, and alignment identities. This
 closes only the tested software handoff. It adds no production marker
 attachments and does not make the position-level OpenSim geometry provider a
-full-state replay provider. Drake and Pinocchio FK retain separate native
-tests; their calibration-to-scoring integration is not yet verified.
+full-state replay provider. The later F09r slice now also exercises the same
+calibration-to-scoring handoff through native Drake and Pinocchio fixtures.
 
 ## F09r Calibrated Marker Replay to Observation Scoring (#12178)
 
@@ -549,11 +549,22 @@ authority was duplicated, and no private capture was used.
 The changed integration test plus calibration, marker FK, and scorer modules
 completed with 31 passed and 2 skipped in the retained Windows Python 3.13
 test environment using the exact pinned Tools donor for the uninitialized
-submodule. The two skips are optional engine runtime cases. A WSL Drake test
-attempt found the installed Drake 1.57 SDK but failed during repository module
-initialization because that SDK environment lacks `h5py`; this is not a test
-failure and no Drake scorer claim is made. Pinocchio 4.1 is installed in the
-separate WSL environment, but this scorer integration was not run there.
-OpenSim remains position-level in this pathway. Production attachments,
-private captures, held-out scoring, physics and qualification remain open.
+submodule. The two skips are optional engine runtime cases. Separate actual
+WSL runs passed the calibration-to-score native marker tests for Drake 1.57
+and Pinocchio 4.1 (one test each):
+`test_drake_markers_use_native_fk_with_floating_base_and_local_offset` and
+`test_pinocchio_markers_use_native_fk_with_floating_base_and_local_offset`.
+Both used a copied isolated test module
+outside the checkout with `UPSTREAMDRIFT_REPO_ROOT` pointing at the source
+checkout, avoiding repository-wide pytest configuration collection. The
+Pinocchio test used ordinary imports. The Drake test preloaded only namespace
+package objects for `src.engines.physics_engines.drake` and its `.python`
+submodule, each with `__path__` set to the real checkout source, before
+loading the real provider and native SDK. The minimal Drake environment lacks
+`structlog` and `simpleeval`; even a temporary 65 KB `structlog` 24.1.0
+overlay did not complete the broad repository package initializer. No native
+provider or physics code was mocked, but ordinary public package bootstrap is
+not verified. OpenSim remains position-level in this pathway. Production
+attachments, private captures, held-out scoring, physics and qualification
+remain open.
 Canonical detail is in chapter 49 and the F09q calibration note.

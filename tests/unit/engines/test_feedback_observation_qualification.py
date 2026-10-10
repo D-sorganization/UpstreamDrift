@@ -408,6 +408,7 @@ def test_observation_score_consumes_native_mujoco_marker_receipt(
         NativeReplayRequest,
     )
     from src.engines.feedback_marker_calibration import (
+        NativeMarkerCalibrationRequest,
         calibrate_static_marker_attachments,
         capture_observation_sha256,
     )
@@ -503,11 +504,11 @@ def test_observation_score_consumes_native_mujoco_marker_receipt(
     pose_provider_sha256 = hashlib.sha256(
         Path(native_torque_replay.__file__).read_bytes()
     ).hexdigest()
-    calibration = calibrate_static_marker_attachments(
-        calibration_capture,
-        {"marker-a": "arm"},
-        pose_history,
-        calibration_capture.time_s,
+    calibration_request = NativeMarkerCalibrationRequest(
+        capture=calibration_capture,
+        frame_ids_by_label={"marker-a": "arm"},
+        poses=pose_history,
+        pose_time_s=calibration_capture.time_s,
         binding=binding,
         native_engine_id="mujoco",
         pose_provider_id="mujoco-native-marker-fk-test",
@@ -515,28 +516,13 @@ def test_observation_score_consumes_native_mujoco_marker_receipt(
         capture_frame_id="world",
         capture_timebase_id="simulation_relative",
     )
-    calibration.validate(
-        capture=calibration_capture,
-        poses=pose_history,
-        pose_time_s=calibration_capture.time_s,
-        binding=binding,
-        pose_provider_id="mujoco-native-marker-fk-test",
-        pose_provider_sha256=pose_provider_sha256,
-        capture_frame_id="world",
-        capture_timebase_id="simulation_relative",
-    )
+    calibration = calibrate_static_marker_attachments(calibration_request)
+    calibration.validate(calibration_request)
     changed_pose_clock = calibration_capture.time_s.copy()
     changed_pose_clock[1] += 1e-6
     with pytest.raises(ValueError, match="pose clock differs"):
         calibration.validate(
-            capture=calibration_capture,
-            poses=pose_history,
-            pose_time_s=changed_pose_clock,
-            binding=binding,
-            pose_provider_id="mujoco-native-marker-fk-test",
-            pose_provider_sha256=pose_provider_sha256,
-            capture_frame_id="world",
-            capture_timebase_id="simulation_relative",
+            replace(calibration_request, pose_time_s=changed_pose_clock)
         )
     changed_calibration = replace(
         calibration,
@@ -545,16 +531,7 @@ def test_observation_score_consumes_native_mujoco_marker_receipt(
         ),
     )
     with pytest.raises(ValueError, match="offsets differ from frozen inputs"):
-        changed_calibration.validate(
-            capture=calibration_capture,
-            poses=pose_history,
-            pose_time_s=calibration_capture.time_s,
-            binding=binding,
-            pose_provider_id="mujoco-native-marker-fk-test",
-            pose_provider_sha256=pose_provider_sha256,
-            capture_frame_id="world",
-            capture_timebase_id="simulation_relative",
-        )
+        changed_calibration.validate(calibration_request)
     marker_map = calibration.to_native_marker_map(
         binding, output_timebase_id=bundle.input_history.timebase_id
     )

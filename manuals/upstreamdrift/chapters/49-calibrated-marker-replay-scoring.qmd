@@ -35,15 +35,19 @@ independent prediction. Digests provide integrity assertions, not signed
 execution provenance. The synthetic score does not establish anatomy,
 physiology, contact fidelity, held-out accuracy, or qualification.
 
-The end-to-end scorer integration is tested only on the MuJoCo fixture.
-Drake and Pinocchio have separate native marker-FK tests, but their calibration
-artifact-to-scoring chain remains unverified. The installed WSL Drake 1.57
-test environment lacks `h5py` required by repository module initialization;
-the integration test could not be collected there. Pinocchio 4.1 is available
-in a separate WSL environment, but the new scoring chain was not run there.
-OpenSim marker geometry remains position-level and does not provide the
-full-state replay used by this handoff. All production rows and independent
-physics and qualification gates therefore remain open.
+The end-to-end scorer integration now also passes in actual Drake 1.57 and
+Pinocchio 4.1 native marker-FK tests. The Pinocchio case used ordinary source
+imports from a copied test module outside the checkout. The Drake SDK test
+used a test-only namespace bootstrap for `src.engines.physics_engines.drake`
+and its `.python` package, pointing to the real source before loading the real
+provider. This bypassed the broad repository initializer, which still cannot
+complete in that minimal environment because `structlog` and `simpleeval` are
+missing. No native provider or physics implementation was mocked, but ordinary
+public package bootstrap was not tested. The exact test setup and limitation
+are recorded in the F09 turnover. OpenSim marker geometry remains
+position-level and does not provide the full-state replay used by this
+handoff. All production rows and independent physics and qualification gates
+remain open.
 
 ## Reproduction
 
