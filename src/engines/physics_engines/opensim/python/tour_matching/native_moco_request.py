@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import fields
+from dataclasses import MISSING, fields
 import json
 from pathlib import Path
 from typing import Any
@@ -12,6 +12,7 @@ import numpy as np
 from .moco_initial_bindings import MocoInitialBindings
 from .moco_tracking import MocoTrackingConfig
 from .native_moco_runner import NativeMocoRequest
+from .native_prepared_state import DeclaredColdStart
 from .native_passive_readiness import MusclePassiveLimits, PassiveReadinessPolicy
 from .registration import CaptureRegistration
 
@@ -32,7 +33,11 @@ def load_native_moco_request(path: Path) -> NativeMocoRequest:
     payload = _keys(
         json.loads(request_path.read_text(encoding="utf-8")),
         {field.name for field in fields(NativeMocoRequest)},
-        {field.name for field in fields(NativeMocoRequest)},
+        {
+            field.name
+            for field in fields(NativeMocoRequest)
+            if field.default is MISSING and field.default_factory is MISSING
+        },
     )
     binding = _keys(
         payload["bindings"],
@@ -96,6 +101,50 @@ def load_native_moco_request(path: Path) -> NativeMocoRequest:
             candidate = request_path.parent / candidate
         return candidate.resolve()
 
+    declared_data = payload.get("constrained_cold_start")
+    declared = None
+    if declared_data is not None:
+        declared_data = _keys(
+            declared_data,
+            {
+                "version",
+                "lock_targets",
+                "chart_bounds",
+                "linear_chart_bounds",
+                "constraint_enforcement",
+                "residual_tolerance",
+            },
+            {
+                "version",
+                "lock_targets",
+                "chart_bounds",
+                "linear_chart_bounds",
+                "constraint_enforcement",
+                "residual_tolerance",
+            },
+        )
+        if declared_data["version"] != "declared-constrained-muscles/2.0.0":
+            raise ValueError("Unknown constrained muscle policy version")
+        declared = DeclaredColdStart(
+            source_path("model_path"),
+            payload["model_sha256"],
+            binding["initial_state"],
+            float(config.get("t_start_s", 0.0)),
+            declared_data["lock_targets"],
+            {
+                name: tuple(value)
+                for name, value in declared_data["chart_bounds"].items()
+            },
+            declared_data["constraint_enforcement"],
+            declared_data["residual_tolerance"],
+            linear_chart_bounds={
+                name: (terms, lower, upper)
+                for name, (terms, lower, upper) in declared_data[
+                    "linear_chart_bounds"
+                ].items()
+            },
+        )
+
     return NativeMocoRequest(
         source_path("model_path"),
         source_path("trc_path"),
@@ -111,6 +160,7 @@ def load_native_moco_request(path: Path) -> NativeMocoRequest:
         payload["reference_frame_path"],
         policy,
         payload["excluded_markers"],
+        declared,
     )
 
 
