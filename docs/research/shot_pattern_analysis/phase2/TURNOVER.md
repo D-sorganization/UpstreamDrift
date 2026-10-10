@@ -163,6 +163,8 @@ The bounded Tools-pin preflight is complete: all 36 inspected scoring/logging/pr
 
 The exact 54-source synthetic-merge projection is reviewed in `validation/scientific_merge_preflight_v1/`: only the grip-contact facade differs from the study branch; no direct shot-study caller was identified. Root rehashed all 108 old/new Git blobs. This is not a complete transitive-dependency or runtime audit. Preserve the upstream pressure-centre semantics, run the named contact/provenance gates, and repeat the projection against the resolved tree. Frozen scientific hashes remain unchanged.
 
+Astra independently reviewed the merged launcher-atlas boundary: 71 focused tests pass with 108 retained warnings, and all source/provider hashes stayed unchanged. Root rehashed the recorded files and raw test log. Evidence: `validation/launcher_boundary_independent_review_v1/`. The proposed fingerprint is `279446322560959cce7fd7062e4f2c7864b715363053c138c38aa7e058a64d06`; record the provided rationale only after the writer is terminal and this exact fingerprint is rechecked. No review record has been renewed yet.
+
 ## Next Steps and Gates
 
 1. Monitor the verified live v6 handles without restarting. All seven numerical artifacts already have independent exact-byte reconciliation; wait for the successful terminal receipt before full graphic review.

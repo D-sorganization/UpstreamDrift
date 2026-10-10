@@ -1,0 +1,8 @@
+{
+  "result_sha256": "f9f352081f6324fc61ff5f4e22c7693e6916f9a67b2965a67bf12a3df03ef49f",
+  "files_independently_rehashed": 31,
+  "raw_test_log_sha256": "3a84593e8dec7b9e24676850c372a6040528748ce471676cdb149cf668f4f871",
+  "test_result": "71 passed, 108 warnings",
+  "review_record_written": false,
+  "condition": "Writer must be terminal and exact relation fingerprint rechecked before recording."
+}
