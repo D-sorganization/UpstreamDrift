@@ -1,3 +1,7 @@
+# Active: MyoSuite Version 3 Native Export Worker - #11997 (GCV-14 #11720)
+
+- Branch `claude/myosuite-worker-3x`, stacked on PR #12026. myosuite 3.x has no `envs.env_base`, so the worker builds its own `mujoco` model and takes `MJRenderer` from `myosuite.viz.mj_renderer` (3.x) or `myosuite.renderer.mj_renderer` (2.x). The arena scene moved to the `myo_sim` package (`models/scene/myosuite_quad.xml`). Both lookups live in `backends/myosuite_compat.py`, which `MyoSuiteArenaBackend.unavailable_reason()` also probes (one import path).
+- Tests: `tests/unit/tools/native_viewer_export/test_myosuite_compat.py` (3.x preferred, 2.x fallback, unavailable reason string, scene lookup).
 # Active: Golf Ball in Engine Scenes - GCV-13 #11719, Epic #11706
 
 - Branch `claude/gcv-13-ball-scenes`. `src/shared/python/model_appearance/ball.py` (landed in #11772) already had the regulation-radius address-geometry function; this slice adds `resolve_ball_visual` (enabled/override/computed, "unavailable" with a reason rather than a guess) and a `ball` block (`enabled`, `position_m`, `source` in `BALL_SOURCES = (address_geometry, measured, model_estimate)`) on `AppearanceDocument`/`appearance_v1.schema.json`.
