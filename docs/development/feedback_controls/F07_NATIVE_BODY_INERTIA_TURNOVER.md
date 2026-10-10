@@ -10,8 +10,9 @@ replay intentionally does not call this gate as an admission override.
 The gate parses only an explicit source `BodySet/objects/Body` inventory,
 rejects missing/duplicate/nonfinite properties, and compares every source
 mass, body-frame COM and six inertia components to a fresh OpenSim 4.6 model
-after `initSystem`. Hashes bind input source, adapter and three native
-binaries; source bytes are checked again before returning. Positive-mass
+after `initSystem`. Hashes bind input source, adapter, shared validator source
+and three native binaries; source and validator bytes are checked again
+before returning. Positive-mass
 bodies use the corrected #12183 principal-moment check. Massless routing
 carriers need zero inertia and a native topology that OpenSim itself accepts;
 the test fixture welds its carrier. No epsilon repair or tensor projection is

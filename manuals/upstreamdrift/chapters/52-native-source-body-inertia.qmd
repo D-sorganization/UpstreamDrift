@@ -20,8 +20,9 @@ I_{xx}&I_{xy}&I_{xz}\\ I_{xy}&I_{yy}&I_{yz}\\ I_{xz}&I_{yz}&I_{zz}
 The parser rejects missing, duplicate, nonfinite or malformed body properties.
 Source and freshly initialized native body names must agree exactly; every
 mass, center and inertia component must read back exactly. A source-byte
-change during admission also rejects. The receipt binds the source, adapter
-and three installed OpenSim native binary digests. This is a body-property
+change during admission also rejects. The receipt binds the source, adapter,
+shared principal-moment validator source, and three installed OpenSim native
+binary digests. Validator bytes are checked again after the audit. This is a body-property
 gate; external model assets and complete numerical restart require their
 separate source-closure and replay policies.
 
