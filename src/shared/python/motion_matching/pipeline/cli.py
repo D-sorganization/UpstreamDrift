@@ -852,6 +852,21 @@ def _attach_turn_block(
     )
 
 
+def _attach_descriptive_blocks(
+    receipt: dict[str, Any],
+    ctx: PipelineContext,
+    lane: Lane,
+    kin: Any,
+    q_ref: np.ndarray,
+    cal_res: _CalibrateAndScaleResult,
+    ik_report: dict[str, Any],
+) -> None:
+    """Record the engine, head-gaze and turn blocks on ``receipt``."""
+    receipt["engine"] = ctx.engine
+    receipt["head_gaze"] = head_gaze_receipt(lane, kin, q_ref)
+    _attach_turn_block(receipt, ctx, lane, kin, q_ref, cal_res, ik_report)
+
+
 def _apply_trajectory_optimiser(
     args: argparse.Namespace,
     out_dir: Path,
@@ -1005,9 +1020,7 @@ def _simulate_and_receipt(
             elapsed_s=time.perf_counter() - ctx.t_start,
         )
     )
-    receipt["engine"] = ctx.engine
-    receipt["head_gaze"] = head_gaze_receipt(lane, kin, q_ref)
-    _attach_turn_block(receipt, ctx, lane, kin, q_ref, cal_res, ik_report)
+    _attach_descriptive_blocks(receipt, ctx, lane, kin, q_ref, cal_res, ik_report)
     _apply_trajectory_optimiser(args, out_dir, receipt, lane=lane, kin=kin, sim=sim)
     _write_receipt(out_dir, receipt)
     log_pipeline_summary(
