@@ -187,10 +187,39 @@ def diagnose(ns: argparse.Namespace) -> dict[str, Any]:
         )
         for rot in SWEEP_DEG
     }
+    report["pelvis_axes_in_hip_frame"] = res.hip_report["pelvis_axes_in_hip_frame"]
+    report["femur_yaw_in_pelvis_at_zero_hip_deg"] = femur_yaw_at_zero_hip(
+        kin, q, np.asarray(res.hip_report["pelvis_axes_in_hip_frame"]).T, names
+    )
     return report
 
 
 SWEEP_DEG = (-40.0, -20.0, 0.0, 20.0, 40.0)
+ZEROED_PREFIXES = ("hip_flexion_", "hip_adduction_", "hip_rotation_")
+
+
+def femur_yaw_at_zero_hip(
+    kin: Any, q: np.ndarray, pelvis_axes: np.ndarray, names: Sequence[str]
+) -> dict[str, float]:
+    """Yaw (deg, about pelvis up, + toward the left) of each femur's forward
+    (x) axis in the anatomical pelvis frame with all six hip coordinates at 0.
+
+    ``pelvis_axes`` has columns forward, up, right in the ``Hip`` frame. A
+    hip joint whose zero is anatomically neutral gives 0 here; the value is
+    marker-independent (frames only).
+    """
+    qq = np.asarray(q, dtype=float).copy()
+    for i, name in enumerate(names):
+        if name.startswith(ZEROED_PREFIXES):
+            qq[i] = 0.0
+    poses = kin.body_poses(qq, LEG_BODIES)
+    frame = np.asarray(poses[PELVIS_FRAME][0], dtype=float) @ pelvis_axes
+    fwd, right = frame[:, 0], frame[:, 2]
+    out = {}
+    for side, sfx in (("right", "r"), ("left", "l")):
+        x_axis = np.asarray(poses[f"femur_{sfx}"][0], dtype=float)[:, 0]
+        out[side] = float(np.degrees(np.arctan2(-(x_axis @ right), x_axis @ fwd)))
+    return out
 
 
 def thigh_minus_pelvis(
