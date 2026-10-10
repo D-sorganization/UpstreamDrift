@@ -18,7 +18,7 @@ packages, saved layouts, and golden test fixtures.
 
 ## Baseline Metrics
 
-- **Total Cataloged Entries**: 178
+- **Total Cataloged Entries**: 179
 - **Observed Launcher Tiles / Models**: 104 (61 base desktop models + 29 discovered provider models + 14 web catalog tiles)
 - **Feature Parity Contracts**: 45
 - **Excluded Tool Packages / Libraries**: 9
@@ -28,7 +28,7 @@ packages, saved layouts, and golden test fixtures.
 
 | Workspace | Primary Capability Count | Description |
 | :--- | :---: | :--- |
-| `analysis` | 33 | Telemetry extraction, metric calculation, video/data analysis, and flight comparison |
+| `analysis` | 34 | Telemetry extraction, metric calculation, video/data analysis, and flight comparison |
 | `capture` | 21 | Multi-camera mocap, pose estimation, marker tracking, and 3D reconstruction |
 | `governance` | 13 | Configuration setup, project architecture mapping, sidekick docks, and registry admin |
 | `putting` | 6 | Putting physics, green surface simulation, and ball rolling dynamics |
@@ -132,6 +132,7 @@ packages, saved layouts, and golden test fixtures.
 | `launcher.tile_grid` | Launcher tile grid from shared manifest | `feature` | `simulation` | — | `core` | 🟢 active_feature | `src/launchers/embedded_tool_bootstrap.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
 | `launcher.tile_web_reachability` | Manifest tile web-reachability contract (route / native-window / unavailable) | `feature` | `simulation` | — | `core` | 🔵 planned | `src/launchers/embedded_tool_bootstrap.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
 | `library_tool` | Library | `tile` | `governance` | — | `core` | 🟢 active_feature | `virtual/library` | `tests/config/test_launcher_registry_parity.py` |
+| `lifting.five_lift_viewing` | Weightlifting viewing and analysis for the five lifts | `feature` | `analysis` | — | `core` | 🔵 planned | `src/launchers/exercise_dashboard.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
 | `matched_swing_browser` | Matched Swing Results Browser | `tile` | `analysis` | `simulation`, `capture` | `core` | 🟢 active_feature | `src/tools/matched_swing_browser/gui.py` | `tests/config/test_launcher_registry_parity.py` |
 | `matlab_suite` | Matlab Models | `model` | `simulation` | — | `core` | 🟢 active_feature | `virtual/matlab_suite` | `tests/config/test_launcher_registry_parity.py` |
 | `matlab_utilities` | Tools Package: matlab_utilities | `library` | `simulation` | `analysis` | `core` | 🟣 intentionally_headless | `src/tools/matlab_utilities/__init__.py` | `tests/config/test_registry_exclusions.py` |

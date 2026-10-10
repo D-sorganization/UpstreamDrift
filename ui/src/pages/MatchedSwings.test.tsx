@@ -34,12 +34,15 @@ const SAMPLE_LEDGER: MatchedSwingLedgerResponse = {
         candidate_profile: 'kinematic',
         horizon_s: 0.85,
       },
+      gates: [
+        { name: 'g1', status: 'PASS', measured: 0.01, threshold: 0.02, unit: 'm' },
+      ],
     },
     {
       id: 'bbb222',
       engine: 'opensim',
-      lane: 'matched',
-      capture: 'driver',
+      lane: 'tour_matching',
+      capture: 'iron',
       candidate_sha256: 'cand2',
       receipt_sha256: 'bbb222',
       horizon_s: 0.85,
@@ -52,18 +55,28 @@ const SAMPLE_LEDGER: MatchedSwingLedgerResponse = {
         candidate_profile: null,
         horizon_s: 0.85,
       },
+      reason: 'unique_rejection_marker',
+      gates: [],
     },
   ],
 };
 
-const { fetchCandidatePreviewFrameMock } = vi.hoisted(() => ({
-  fetchCandidatePreviewFrameMock: vi.fn(async () => ({
-    id: 'aaa111',
-    frame_index: 0,
-    frame_count: 1,
-    joints: [{ name: 'pelvis', position: [0, 0, 1], confidence: 1, parent: null }],
-  })),
-}));
+const { fetchCandidatePreviewFrameMock, fetchMatchedSwingReceiptMock, fetchParityReportMock } =
+  vi.hoisted(() => ({
+    fetchCandidatePreviewFrameMock: vi.fn(async () => ({
+      id: 'aaa111',
+      frame_index: 0,
+      frame_count: 1,
+      joints: [{ name: 'pelvis', position: [0, 0, 1], confidence: 1, parent: null }],
+    })),
+    fetchMatchedSwingReceiptMock: vi.fn(async () => ({
+      id: 'aaa111',
+      receipt: { engine: 'drake' },
+    })),
+    fetchParityReportMock: vi.fn(async () => ({
+      schema_version: 'matched-swing-parity-report-v1',
+    })),
+  }));
 
 vi.mock('@/api/matchedSwings', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/api/matchedSwings')>();
@@ -71,6 +84,8 @@ vi.mock('@/api/matchedSwings', async (importOriginal) => {
     ...actual,
     fetchMatchedSwingLedger: vi.fn(async () => SAMPLE_LEDGER),
     fetchCandidatePreviewFrame: fetchCandidatePreviewFrameMock,
+    fetchMatchedSwingReceipt: fetchMatchedSwingReceiptMock,
+    fetchParityReport: fetchParityReportMock,
     matchedSwingAnimationUrl: (id: string) => `/api/v1/matched-swings/${id}/animation.gif`,
   };
 });
@@ -78,6 +93,8 @@ vi.mock('@/api/matchedSwings', async (importOriginal) => {
 describe('MatchedSwingsPage', () => {
   beforeEach(() => {
     fetchCandidatePreviewFrameMock.mockClear();
+    fetchMatchedSwingReceiptMock.mockClear();
+    fetchParityReportMock.mockClear();
   });
 
   it('renders run list with verdict badges', async () => {
@@ -131,5 +148,144 @@ describe('MatchedSwingsPage', () => {
 
     const link = await screen.findByRole('link', { name: /cross-engine dashboard/i });
     expect(link).toHaveAttribute('href', '/tools/cross-engine');
+  });
+
+  it('filters runs by capture', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <MatchedSwingsPage />
+      </MemoryRouter>,
+    );
+
+    await screen.findByRole('button', { name: /opensim/i });
+    const captureSelect = screen.getAllByRole('combobox')[1];
+    await user.selectOptions(captureSelect, 'iron');
+    await waitFor(() => {
+      expect(screen.queryByRole('button', { name: /drake/i })).not.toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /opensim/i })).toBeInTheDocument();
+    });
+  });
+
+  it('filters runs by lane', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <MatchedSwingsPage />
+      </MemoryRouter>,
+    );
+
+    await screen.findByRole('button', { name: /opensim/i });
+    const laneSelect = screen.getAllByRole('combobox')[2];
+    await user.selectOptions(laneSelect, 'tour_matching');
+    await waitFor(() => {
+      expect(screen.queryByRole('button', { name: /drake/i })).not.toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /opensim/i })).toBeInTheDocument();
+    });
+  });
+
+  it('finds runs by reason text in search', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <MatchedSwingsPage />
+      </MemoryRouter>,
+    );
+
+    await screen.findByRole('button', { name: /drake/i });
+    const searchInput = screen.getByPlaceholderText(/engine, sha, id, reason/i);
+    await user.type(searchInput, 'unique_rejection_marker');
+    await waitFor(() => {
+      expect(screen.queryByRole('button', { name: /drake/i })).not.toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /opensim/i })).toBeInTheDocument();
+    });
+  });
+
+  it('resets all filters and search', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <MatchedSwingsPage />
+      </MemoryRouter>,
+    );
+
+    await screen.findByRole('button', { name: /opensim/i });
+    const engineSelect = screen.getAllByRole('combobox')[0];
+    await user.selectOptions(engineSelect, 'drake');
+    const searchInput = screen.getByPlaceholderText(/engine, sha, id, reason/i);
+    await user.type(searchInput, 'cand1');
+    await waitFor(() => {
+      expect(screen.queryByRole('button', { name: /opensim/i })).not.toBeInTheDocument();
+    });
+
+    await user.click(screen.getByRole('button', { name: /^reset$/i }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /drake/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /opensim/i })).toBeInTheDocument();
+    });
+    expect(searchInput).toHaveValue('');
+  });
+
+  it('renders physical gates for the selected run and the empty-state placeholder', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <MatchedSwingsPage />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText(/g1/)).toBeInTheDocument();
+
+    await user.click(await screen.findByRole('button', { name: /opensim/i }));
+    await waitFor(() => {
+      expect(
+        screen.getByText('No physical gates evaluated for this run.'),
+      ).toBeInTheDocument();
+    });
+  });
+
+  it('fetches and displays receipt JSON', async () => {
+    const user = userEvent.setup();
+    const { container } = render(
+      <MemoryRouter>
+        <MatchedSwingsPage />
+      </MemoryRouter>,
+    );
+
+    await screen.findByRole('button', { name: /drake/i });
+    await user.click(screen.getByRole('button', { name: /view receipt json/i }));
+
+    await waitFor(() => {
+      expect(fetchMatchedSwingReceiptMock).toHaveBeenCalledWith('aaa111');
+    });
+    await waitFor(() => {
+      expect(container.textContent).toContain('"engine": "drake"');
+    });
+  });
+
+  it('disables the parity button when unavailable and fetches it when available', async () => {
+    const user = userEvent.setup();
+    const { container } = render(
+      <MemoryRouter>
+        <MatchedSwingsPage />
+      </MemoryRouter>,
+    );
+
+    await screen.findByRole('button', { name: /drake/i });
+    const parityButton = screen.getByRole('button', { name: /view parity report/i });
+    expect(parityButton).toBeEnabled();
+    await user.click(parityButton);
+    await waitFor(() => {
+      expect(fetchParityReportMock).toHaveBeenCalledWith('aaa111');
+    });
+    await waitFor(() => {
+      expect(container.textContent).toContain('matched-swing-parity-report-v1');
+    });
+
+    await user.click(screen.getByRole('button', { name: /opensim/i }));
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /view parity report/i })).toBeDisabled();
+    });
   });
 });

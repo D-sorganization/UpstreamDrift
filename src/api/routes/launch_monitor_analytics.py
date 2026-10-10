@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from functools import lru_cache
@@ -27,6 +28,7 @@ from src.tools.launch_monitor_model import (
     STROKES_GAINED_CONTRACT_VERSION,
     AnalysisContextV2,
     AnalysisMode,
+    ChangeCandidate,
     ExpectedStrokesBaselineV2,
     CorrelationMethod,
     FlexibleAnalysisRequest,
@@ -43,10 +45,12 @@ from src.tools.launch_monitor_model import (
     PlayerCovariationScanResultV1,
     StrokesGainedAnalysisResultV1,
     StrokesGainedRequestV1,
+    TemporalTrendResult,
     analyze_longitudinal_sessions,
     analyze_outcome_proxy,
     analyze_player_covariation_v1,
     analyze_source_backed_strokes_gained,
+    analyze_trend,
     analyze_variables,
     analyze_variables_v2,
     contract_v2_json_schema,
@@ -141,6 +145,22 @@ class LongitudinalSessionPayloadV1(BaseModel):
     records: list[dict[str, Any]] = Field(min_length=1, max_length=20_000)
     request: LongitudinalSessionRequestV1
     context: AnalysisContextV2
+
+
+class TrendPayloadV2(BaseModel):
+    """Bounded inline records and the PyQt Trends tab's widget-derived inputs.
+
+    Mirrors ``_TrendParams`` from ``src/tools/launch_monitor_analytics/gui.py``
+    (``_read_trend_params``): ``rolling_window`` keeps the same default and
+    the ``[3, 500]`` range as the Trends tab's spinbox
+    (``_build_trends_tab``), so the API and desktop paths accept identical
+    inputs for :func:`analyze_trend`.
+    """
+
+    records: list[dict[str, Any]] = Field(min_length=3, max_length=20_000)
+    metric: str = Field(min_length=1)
+    time_column: str = Field("captured_at", min_length=1)
+    rolling_window: int = Field(10, ge=3, le=500)
 
 
 @lru_cache(maxsize=1)
@@ -436,6 +456,89 @@ async def analyze_outcome_proxy_v1(
     return analyze_outcome_proxy(
         pd.DataFrame.from_records(payload.records), payload.request
     )
+
+
+def _json_safe_float(value: float) -> float | None:
+    """Return ``value``, or ``None`` when it is NaN/infinite.
+
+    Postcondition: an unavailable statistic never serializes as ``0``.
+    """
+    return value if math.isfinite(value) else None
+
+
+def _change_candidate_to_dict(candidate: ChangeCandidate) -> dict[str, object]:
+    """Serialize one :class:`ChangeCandidate` to a JSON-safe dict."""
+    return {
+        "captured_at": candidate.captured_at.isoformat(),
+        "row_index": candidate.row_index,
+        "before_mean": _json_safe_float(candidate.before_mean),
+        "after_mean": _json_safe_float(candidate.after_mean),
+        "effect_size": _json_safe_float(candidate.effect_size),
+    }
+
+
+def _rolling_series_to_records(
+    rolling: Any, time_column: str
+) -> list[dict[str, object]]:
+    """Serialize the rolling-statistics frame to JSON-safe row dicts."""
+    records: list[dict[str, Any]] = rolling.to_dict(orient="records")
+    for entry in records:
+        entry[time_column] = entry[time_column].isoformat()
+        for key, value in entry.items():
+            if isinstance(value, float):
+                entry[key] = _json_safe_float(value)
+    return records
+
+
+def _trend_result_to_dict(
+    result: TemporalTrendResult, time_column: str
+) -> dict[str, object]:
+    """Serialize :class:`TemporalTrendResult` to the ``/v2/trend`` response.
+
+    Postcondition: every numeric field is JSON-safe — NaN/infinite values
+    become ``null``, never ``0`` — and ``rolling``/``change_candidates`` are
+    plain JSON lists.
+    """
+    return {
+        "metric": result.metric,
+        "sample_count": result.sample_count,
+        "slope_per_day": _json_safe_float(result.slope_per_day),
+        "robust_slope_per_day": _json_safe_float(result.robust_slope_per_day),
+        "p_value": _json_safe_float(result.p_value),
+        "earliest_mean": _json_safe_float(result.earliest_mean),
+        "latest_mean": _json_safe_float(result.latest_mean),
+        "rolling": _rolling_series_to_records(result.rolling, time_column),
+        "change_candidates": [
+            _change_candidate_to_dict(candidate)
+            for candidate in result.change_candidates
+        ],
+    }
+
+
+@router.post("/v2/trend")
+@handle_api_errors
+async def analyze_trend_v2(payload: TrendPayloadV2) -> dict[str, object]:
+    """Analyze a longitudinal metric trend with the PyQt Trends tab's inputs.
+
+    Calls the same :func:`analyze_trend` the desktop Trends tab calls
+    (``src/tools/launch_monitor_analytics/gui.py`` ``_compute_trend``), so the
+    API and PyQt paths share one contract. Precondition: ``records`` holds
+    3-20,000 inline rows and ``rolling_window`` is in ``[3, 500]`` (validated
+    by the request schema). Postcondition: the response is a JSON-safe
+    serialization of every :class:`TemporalTrendResult` field; see
+    :func:`_trend_result_to_dict`.
+    """
+
+    import pandas as pd  # deferred import: pandas must not load at API boot (issue #8943)
+
+    frame = pd.DataFrame.from_records(payload.records)
+    result = analyze_trend(
+        frame,
+        metric=payload.metric,
+        time_column=payload.time_column,
+        rolling_window=payload.rolling_window,
+    )
+    return _trend_result_to_dict(result, payload.time_column)
 
 
 __all__ = ["CONTRACT_VERSION", "router"]
