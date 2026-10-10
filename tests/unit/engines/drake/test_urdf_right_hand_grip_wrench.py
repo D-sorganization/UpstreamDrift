@@ -11,6 +11,7 @@ import numpy as np
 import pytest
 
 pytest.importorskip("pydrake")
+pytest.importorskip("pydrake.multibody.plant")
 
 from pydrake.multibody.plant import MultibodyPlant  # noqa: E402
 
