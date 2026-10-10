@@ -108,7 +108,10 @@ def _weld_residual(kin: Any, closure: Mapping[str, Any]) -> ResidualFn:
 
 
 def _max_position_mm(residual: ResidualFn, q: np.ndarray) -> float:
-    return float(max(1e3 * np.linalg.norm(residual(row)[:3]) for row in q))
+    vals: list[float] = [
+        float(1e3 * float(np.linalg.norm(residual(row)[:3]))) for row in q
+    ]
+    return float(max(vals)) if vals else 0.0
 
 
 def weld_consistent_track(

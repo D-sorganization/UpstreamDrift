@@ -51,8 +51,8 @@
         "without_club_rms": 28.43749846541151
       },
       "upper_arm_flex_r": {
-        "delta_peak": 1.9999999949504854e-06,
-        "delta_rms": 1.3333333299669902e-07,
+        "delta_peak": 1.9999999949504854e-6,
+        "delta_rms": 1.3333333299669902e-7,
         "with_club_rms": 42.717919615471224,
         "without_club_rms": 42.71791968913205
       },
@@ -75,8 +75,8 @@
         "without_club_rms": 4.948114268166425
       },
       "upper_elbow_flex_r": {
-        "delta_peak": 1.0000000010279564e-06,
-        "delta_rms": 6.66666667351971e-08,
+        "delta_peak": 1.0000000010279564e-6,
+        "delta_rms": 6.66666667351971e-8,
         "with_club_rms": 17.44144659764833,
         "without_club_rms": 17.441446604911068
       },
@@ -358,10 +358,7 @@
           "rms": 110.34947912284409
         }
       },
-      "t_range_s": [
-        0.0,
-        1.45
-      ],
+      "t_range_s": [0.0, 1.45],
       "upper_body_torques": {
         "upper_arm_add_l": {
           "peak": 208.38311900000002,
@@ -617,10 +614,7 @@
             "rms": 274.7282764117726
           }
         },
-        "t_range_s": [
-          1.08333333,
-          1.45
-        ],
+        "t_range_s": [1.08333333, 1.45],
         "upper_body_torques": {
           "upper_arm_add_l": {
             "peak": 771.850201,
@@ -821,10 +815,7 @@
             "rms": 0.03454938222538138
           }
         },
-        "t_range_s": [
-          0.0,
-          1.07777778
-        ],
+        "t_range_s": [0.0, 1.07777778],
         "upper_body_torques": {
           "upper_arm_add_l": {
             "peak": 16.801785,
@@ -1143,8 +1134,5 @@
     "wall_clock_s": 1022.3151812553406
   },
   "status": "STATIC_OPTIMIZATION_ONLY_NOT_QUALIFIED",
-  "window_s": [
-    0.0,
-    1.45
-  ]
+  "window_s": [0.0, 1.45]
 }
