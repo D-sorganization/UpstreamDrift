@@ -1,0 +1,1052 @@
+{
+  "status": "visual_review_pending",
+  "scope": "Actual Saved Data Component, Not Final Study Acceptance",
+  "sources": {
+    "/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py": "ca336daefbd440095832ab57549d1e1bde72949244dbd0bb3fc35a22b2912c43",
+    "src/tools/shot_pattern_analysis/matched_pair_social.py": "6b5c8bac66601a51d8ce04900c29b5e496bb0b9e46da3c3832746133c44ec907"
+  },
+  "inputs": {
+    "driver_lean5_curve1_rotation1_combined2": "de7c91b5d88ed5648f96554352d24c5f7ab4eb0292dccc1a38b04ce71a893acd",
+    "driver_lean5_curve1_rotation2_combined2": "89bffeba1e047ab86c07ec0cdb26d269bb8336d52f56397a91a3c7a786eedc42"
+  },
+  "figures": [
+    {
+      "figure_kind": "density_png",
+      "presentation": "academic",
+      "physical_pattern": null,
+      "source_kind": "six_population_common_index_comparison",
+      "comparison_kind": "shaft_rotation_sd",
+      "first_cell": "driver_lean5_curve1_rotation1_combined2",
+      "second_cell": "driver_lean5_curve1_rotation2_combined2",
+      "first_protocol": "original_primary/1",
+      "second_protocol": "original_primary/1",
+      "common_supported_n": 9939,
+      "total_n_per_population": 10000,
+      "conditioning": "same shot indices supported in all six populations",
+      "target_x_m": 108.02738606179851,
+      "relative_path": "comparisons/shaft_rotation_sd_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve1_rotation2_combined2_af19ce16d0_density.png",
+      "sha256": "2651068b3618d7ab4e6cc2da40ad551d2c796af6710f70578f60b2a3ff15193d"
+    },
+    {
+      "figure_kind": "density_pdf",
+      "presentation": "academic",
+      "physical_pattern": null,
+      "source_kind": "six_population_common_index_comparison",
+      "comparison_kind": "shaft_rotation_sd",
+      "first_cell": "driver_lean5_curve1_rotation1_combined2",
+      "second_cell": "driver_lean5_curve1_rotation2_combined2",
+      "first_protocol": "original_primary/1",
+      "second_protocol": "original_primary/1",
+      "common_supported_n": 9939,
+      "total_n_per_population": 10000,
+      "conditioning": "same shot indices supported in all six populations",
+      "target_x_m": 108.02738606179851,
+      "relative_path": "comparisons/shaft_rotation_sd_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve1_rotation2_combined2_af19ce16d0_density.pdf",
+      "sha256": "2996986243044ad3f9e6392090f9751fd7b1e35411ae3065ae147bcbd1b719ed"
+    },
+    {
+      "figure_kind": "density_svg",
+      "presentation": "academic",
+      "physical_pattern": null,
+      "source_kind": "six_population_common_index_comparison",
+      "comparison_kind": "shaft_rotation_sd",
+      "first_cell": "driver_lean5_curve1_rotation1_combined2",
+      "second_cell": "driver_lean5_curve1_rotation2_combined2",
+      "first_protocol": "original_primary/1",
+      "second_protocol": "original_primary/1",
+      "common_supported_n": 9939,
+      "total_n_per_population": 10000,
+      "conditioning": "same shot indices supported in all six populations",
+      "target_x_m": 108.02738606179851,
+      "relative_path": "comparisons/shaft_rotation_sd_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve1_rotation2_combined2_af19ce16d0_density.svg",
+      "sha256": "e5ecf9fad6b5b2cc5b9ae7d74d941283b2b4d2aa6806412c24beb46f00d39cac"
+    },
+    {
+      "figure_kind": "density_straight_social_png",
+      "presentation": "social",
+      "physical_pattern": "Straight",
+      "source_kind": "six_population_common_index_comparison",
+      "comparison_kind": "shaft_rotation_sd",
+      "first_cell": "driver_lean5_curve1_rotation1_combined2",
+      "second_cell": "driver_lean5_curve1_rotation2_combined2",
+      "first_protocol": "original_primary/1",
+      "second_protocol": "original_primary/1",
+      "common_supported_n": 9939,
+      "total_n_per_population": 10000,
+      "conditioning": "same shot indices supported in all six populations",
+      "target_x_m": 108.02738606179851,
+      "relative_path": "comparisons/shaft_rotation_sd_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve1_rotation2_combined2_af19ce16d0_density_straight_social.png",
+      "sha256": "a37becd8f398f1a854ec6af530831f75fabbd60e540c3dca5c221d32acc9a2bb"
+    },
+    {
+      "figure_kind": "density_straight_social_pdf",
+      "presentation": "social",
+      "physical_pattern": "Straight",
+      "source_kind": "six_population_common_index_comparison",
+      "comparison_kind": "shaft_rotation_sd",
+      "first_cell": "driver_lean5_curve1_rotation1_combined2",
+      "second_cell": "driver_lean5_curve1_rotation2_combined2",
+      "first_protocol": "original_primary/1",
+      "second_protocol": "original_primary/1",
+      "common_supported_n": 9939,
+      "total_n_per_population": 10000,
+      "conditioning": "same shot indices supported in all six populations",
+      "target_x_m": 108.02738606179851,
+      "relative_path": "comparisons/shaft_rotation_sd_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve1_rotation2_combined2_af19ce16d0_density_straight_social.pdf",
+      "sha256": "0cc8dac95b076746cb719da7c5126dbdbcfcac5ab91e0214fa7a03bb0df4d816"
+    },
+    {
+      "figure_kind": "density_straight_social_svg",
+      "presentation": "social",
+      "physical_pattern": "Straight",
+      "source_kind": "six_population_common_index_comparison",
+      "comparison_kind": "shaft_rotation_sd",
+      "first_cell": "driver_lean5_curve1_rotation1_combined2",
+      "second_cell": "driver_lean5_curve1_rotation2_combined2",
+      "first_protocol": "original_primary/1",
+      "second_protocol": "original_primary/1",
+      "common_supported_n": 9939,
+      "total_n_per_population": 10000,
+      "conditioning": "same shot indices supported in all six populations",
+      "target_x_m": 108.02738606179851,
+      "relative_path": "comparisons/shaft_rotation_sd_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve1_rotation2_combined2_af19ce16d0_density_straight_social.svg",
+      "sha256": "a44ede52e9178f3898ce0992d855b77cccdc01819f892450b2a9bd7136307154"
+    },
+    {
+      "figure_kind": "density_draw_social_png",
+      "presentation": "social",
+      "physical_pattern": "Draw",
+      "source_kind": "six_population_common_index_comparison",
+      "comparison_kind": "shaft_rotation_sd",
+      "first_cell": "driver_lean5_curve1_rotation1_combined2",
+      "second_cell": "driver_lean5_curve1_rotation2_combined2",
+      "first_protocol": "original_primary/1",
+      "second_protocol": "original_primary/1",
+      "common_supported_n": 9939,
+      "total_n_per_population": 10000,
+      "conditioning": "same shot indices supported in all six populations",
+      "target_x_m": 108.02738606179851,
+      "relative_path": "comparisons/shaft_rotation_sd_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve1_rotation2_combined2_af19ce16d0_density_draw_social.png",
+      "sha256": "9ec7d6dbbd96e98a337eba97fa70c32386c9fe3b8cc4ec73bf4936a6232c1942"
+    },
+    {
+      "figure_kind": "density_draw_social_pdf",
+      "presentation": "social",
+      "physical_pattern": "Draw",
+      "source_kind": "six_population_common_index_comparison",
+      "comparison_kind": "shaft_rotation_sd",
+      "first_cell": "driver_lean5_curve1_rotation1_combined2",
+      "second_cell": "driver_lean5_curve1_rotation2_combined2",
+      "first_protocol": "original_primary/1",
+      "second_protocol": "original_primary/1",
+      "common_supported_n": 9939,
+      "total_n_per_population": 10000,
+      "conditioning": "same shot indices supported in all six populations",
+      "target_x_m": 108.02738606179851,
+      "relative_path": "comparisons/shaft_rotation_sd_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve1_rotation2_combined2_af19ce16d0_density_draw_social.pdf",
+      "sha256": "ef885838a2483d68d3c1629994c50b6ab47416e5bc4bb254a36048fa9773f7e9"
+    },
+    {
+      "figure_kind": "density_draw_social_svg",
+      "presentation": "social",
+      "physical_pattern": "Draw",
+      "source_kind": "six_population_common_index_comparison",
+      "comparison_kind": "shaft_rotation_sd",
+      "first_cell": "driver_lean5_curve1_rotation1_combined2",
+      "second_cell": "driver_lean5_curve1_rotation2_combined2",
+      "first_protocol": "original_primary/1",
+      "second_protocol": "original_primary/1",
+      "common_supported_n": 9939,
+      "total_n_per_population": 10000,
+      "conditioning": "same shot indices supported in all six populations",
+      "target_x_m": 108.02738606179851,
+      "relative_path": "comparisons/shaft_rotation_sd_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve1_rotation2_combined2_af19ce16d0_density_draw_social.svg",
+      "sha256": "eb92ae8545015fb1c09834584e7dd8184152c86d96cf0b4b4ccbbcf1487ed5ce"
+    },
+    {
+      "figure_kind": "density_fade_social_png",
+      "presentation": "social",
+      "physical_pattern": "Fade",
+      "source_kind": "six_population_common_index_comparison",
+      "comparison_kind": "shaft_rotation_sd",
+      "first_cell": "driver_lean5_curve1_rotation1_combined2",
+      "second_cell": "driver_lean5_curve1_rotation2_combined2",
+      "first_protocol": "original_primary/1",
+      "second_protocol": "original_primary/1",
+      "common_supported_n": 9939,
+      "total_n_per_population": 10000,
+      "conditioning": "same shot indices supported in all six populations",
+      "target_x_m": 108.02738606179851,
+      "relative_path": "comparisons/shaft_rotation_sd_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve1_rotation2_combined2_af19ce16d0_density_fade_social.png",
+      "sha256": "4c341ff1d50763cf0146060df6d9243b1afd1b45270abbf8521b28a15eddef0a"
+    },
+    {
+      "figure_kind": "density_fade_social_pdf",
+      "presentation": "social",
+      "physical_pattern": "Fade",
+      "source_kind": "six_population_common_index_comparison",
+      "comparison_kind": "shaft_rotation_sd",
+      "first_cell": "driver_lean5_curve1_rotation1_combined2",
+      "second_cell": "driver_lean5_curve1_rotation2_combined2",
+      "first_protocol": "original_primary/1",
+      "second_protocol": "original_primary/1",
+      "common_supported_n": 9939,
+      "total_n_per_population": 10000,
+      "conditioning": "same shot indices supported in all six populations",
+      "target_x_m": 108.02738606179851,
+      "relative_path": "comparisons/shaft_rotation_sd_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve1_rotation2_combined2_af19ce16d0_density_fade_social.pdf",
+      "sha256": "a4a2dbd7877e9062c7774e49295c929088da0d60e57aa5a52bff1abc55602606"
+    },
+    {
+      "figure_kind": "density_fade_social_svg",
+      "presentation": "social",
+      "physical_pattern": "Fade",
+      "source_kind": "six_population_common_index_comparison",
+      "comparison_kind": "shaft_rotation_sd",
+      "first_cell": "driver_lean5_curve1_rotation1_combined2",
+      "second_cell": "driver_lean5_curve1_rotation2_combined2",
+      "first_protocol": "original_primary/1",
+      "second_protocol": "original_primary/1",
+      "common_supported_n": 9939,
+      "total_n_per_population": 10000,
+      "conditioning": "same shot indices supported in all six populations",
+      "target_x_m": 108.02738606179851,
+      "relative_path": "comparisons/shaft_rotation_sd_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve1_rotation2_combined2_af19ce16d0_density_fade_social.svg",
+      "sha256": "5b874e6e0b6c586b81b8d0c0310bf342fd043da8d0d2752e591ac55eec2478f5"
+    },
+    {
+      "figure_kind": "overhead_png",
+      "presentation": "academic",
+      "physical_pattern": null,
+      "source_kind": "saved_illustrative_trajectory_samples",
+      "comparison_kind": "shaft_rotation_sd",
+      "first_cell": "driver_lean5_curve1_rotation1_combined2",
+      "second_cell": "driver_lean5_curve1_rotation2_combined2",
+      "first_protocol": "original_primary/1",
+      "second_protocol": "original_primary/1",
+      "conditioning": "saved raw trajectories, not paired by shot index",
+      "target_x_m": 108.02738606179851,
+      "saved_trajectory_samples_by_pattern": {
+        "Straight \u00b7 Rotation SD 1\u00b0": 6,
+        "Draw \u00b7 Rotation SD 1\u00b0": 6,
+        "Fade \u00b7 Rotation SD 1\u00b0": 6,
+        "Straight \u00b7 Rotation SD 2\u00b0": 6,
+        "Draw \u00b7 Rotation SD 2\u00b0": 6,
+        "Fade \u00b7 Rotation SD 2\u00b0": 6
+      },
+      "relative_path": "comparisons/shaft_rotation_sd_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve1_rotation2_combined2_af19ce16d0_overhead.png",
+      "sha256": "04d413e456bc724ccb6831147e7273e70bcf9ae724084af34efbdca98381fa50"
+    },
+    {
+      "figure_kind": "overhead_pdf",
+      "presentation": "academic",
+      "physical_pattern": null,
+      "source_kind": "saved_illustrative_trajectory_samples",
+      "comparison_kind": "shaft_rotation_sd",
+      "first_cell": "driver_lean5_curve1_rotation1_combined2",
+      "second_cell": "driver_lean5_curve1_rotation2_combined2",
+      "first_protocol": "original_primary/1",
+      "second_protocol": "original_primary/1",
+      "conditioning": "saved raw trajectories, not paired by shot index",
+      "target_x_m": 108.02738606179851,
+      "saved_trajectory_samples_by_pattern": {
+        "Straight \u00b7 Rotation SD 1\u00b0": 6,
+        "Draw \u00b7 Rotation SD 1\u00b0": 6,
+        "Fade \u00b7 Rotation SD 1\u00b0": 6,
+        "Straight \u00b7 Rotation SD 2\u00b0": 6,
+        "Draw \u00b7 Rotation SD 2\u00b0": 6,
+        "Fade \u00b7 Rotation SD 2\u00b0": 6
+      },
+      "relative_path": "comparisons/shaft_rotation_sd_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve1_rotation2_combined2_af19ce16d0_overhead.pdf",
+      "sha256": "b7a28f1be1b60e6d7b1a853cac8403ba103d88e2812b1ba843ebedfc680e4a45"
+    },
+    {
+      "figure_kind": "overhead_svg",
+      "presentation": "academic",
+      "physical_pattern": null,
+      "source_kind": "saved_illustrative_trajectory_samples",
+      "comparison_kind": "shaft_rotation_sd",
+      "first_cell": "driver_lean5_curve1_rotation1_combined2",
+      "second_cell": "driver_lean5_curve1_rotation2_combined2",
+      "first_protocol": "original_primary/1",
+      "second_protocol": "original_primary/1",
+      "conditioning": "saved raw trajectories, not paired by shot index",
+      "target_x_m": 108.02738606179851,
+      "saved_trajectory_samples_by_pattern": {
+        "Straight \u00b7 Rotation SD 1\u00b0": 6,
+        "Draw \u00b7 Rotation SD 1\u00b0": 6,
+        "Fade \u00b7 Rotation SD 1\u00b0": 6,
+        "Straight \u00b7 Rotation SD 2\u00b0": 6,
+        "Draw \u00b7 Rotation SD 2\u00b0": 6,
+        "Fade \u00b7 Rotation SD 2\u00b0": 6
+      },
+      "relative_path": "comparisons/shaft_rotation_sd_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve1_rotation2_combined2_af19ce16d0_overhead.svg",
+      "sha256": "cef954a612f795668d60e3dadbf3a068d9674921882a608faccbbd77358228d0"
+    },
+    {
+      "figure_kind": "overhead_social_png",
+      "presentation": "social",
+      "physical_pattern": null,
+      "source_kind": "saved_illustrative_trajectory_samples",
+      "comparison_kind": "shaft_rotation_sd",
+      "first_cell": "driver_lean5_curve1_rotation1_combined2",
+      "second_cell": "driver_lean5_curve1_rotation2_combined2",
+      "first_protocol": "original_primary/1",
+      "second_protocol": "original_primary/1",
+      "conditioning": "saved raw trajectories, not paired by shot index",
+      "target_x_m": 108.02738606179851,
+      "saved_trajectory_samples_by_pattern": {
+        "Straight \u00b7 Rotation SD 1\u00b0": 6,
+        "Draw \u00b7 Rotation SD 1\u00b0": 6,
+        "Fade \u00b7 Rotation SD 1\u00b0": 6,
+        "Straight \u00b7 Rotation SD 2\u00b0": 6,
+        "Draw \u00b7 Rotation SD 2\u00b0": 6,
+        "Fade \u00b7 Rotation SD 2\u00b0": 6
+      },
+      "relative_path": "comparisons/shaft_rotation_sd_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve1_rotation2_combined2_af19ce16d0_overhead_social.png",
+      "sha256": "b8986e60c4357b137d228177e1eda2f53270088b3a1dc336184e9c735c61d062"
+    },
+    {
+      "figure_kind": "density_png",
+      "presentation": "academic",
+      "source_kind": "individual_supported_endpoints",
+      "source_protocol": "original_primary/1",
+      "cell": "driver_lean5_curve1_rotation1_combined2",
+      "target_x_m": 108.02738606179851,
+      "conditioning": "individually supported endpoints by physical pattern",
+      "valid_n_by_pattern": {
+        "Straight": 9974,
+        "Draw": 9974,
+        "Fade": 9974
+      },
+      "total_n_by_pattern": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "saved_trajectory_samples_by_pattern": null,
+      "relative_path": "cells/driver_lean5_curve1_rotation1_combined2_511ff5d398_density.png",
+      "sha256": "ff1ce5dfec3cfdc64b8c552e8f9d467e95c570012dd26f80ebeefc310d5889ae"
+    },
+    {
+      "figure_kind": "density_pdf",
+      "presentation": "academic",
+      "source_kind": "individual_supported_endpoints",
+      "source_protocol": "original_primary/1",
+      "cell": "driver_lean5_curve1_rotation1_combined2",
+      "target_x_m": 108.02738606179851,
+      "conditioning": "individually supported endpoints by physical pattern",
+      "valid_n_by_pattern": {
+        "Straight": 9974,
+        "Draw": 9974,
+        "Fade": 9974
+      },
+      "total_n_by_pattern": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "saved_trajectory_samples_by_pattern": null,
+      "relative_path": "cells/driver_lean5_curve1_rotation1_combined2_511ff5d398_density.pdf",
+      "sha256": "0cf23b3342f5665a082d90c53aa31ea8246d052954ff4724bdf9bec42fced941"
+    },
+    {
+      "figure_kind": "density_svg",
+      "presentation": "academic",
+      "source_kind": "individual_supported_endpoints",
+      "source_protocol": "original_primary/1",
+      "cell": "driver_lean5_curve1_rotation1_combined2",
+      "target_x_m": 108.02738606179851,
+      "conditioning": "individually supported endpoints by physical pattern",
+      "valid_n_by_pattern": {
+        "Straight": 9974,
+        "Draw": 9974,
+        "Fade": 9974
+      },
+      "total_n_by_pattern": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "saved_trajectory_samples_by_pattern": null,
+      "relative_path": "cells/driver_lean5_curve1_rotation1_combined2_511ff5d398_density.svg",
+      "sha256": "c77e8075e0f065811746688dd7a5dbf1c08bdae3af13479f60a27c0942589c15"
+    },
+    {
+      "figure_kind": "density_social_png",
+      "presentation": "social",
+      "source_kind": "individual_supported_endpoints",
+      "source_protocol": "original_primary/1",
+      "cell": "driver_lean5_curve1_rotation1_combined2",
+      "target_x_m": 108.02738606179851,
+      "conditioning": "individually supported endpoints by physical pattern",
+      "valid_n_by_pattern": {
+        "Straight": 9974,
+        "Draw": 9974,
+        "Fade": 9974
+      },
+      "total_n_by_pattern": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "saved_trajectory_samples_by_pattern": null,
+      "relative_path": "cells/driver_lean5_curve1_rotation1_combined2_511ff5d398_density_social.png",
+      "sha256": "f42276b65aa12dc84b550187c2e7073446367dd3ef02124286d9a84b63cd8b9a"
+    },
+    {
+      "figure_kind": "density_social_pdf",
+      "presentation": "social",
+      "source_kind": "individual_supported_endpoints",
+      "source_protocol": "original_primary/1",
+      "cell": "driver_lean5_curve1_rotation1_combined2",
+      "target_x_m": 108.02738606179851,
+      "conditioning": "individually supported endpoints by physical pattern",
+      "valid_n_by_pattern": {
+        "Straight": 9974,
+        "Draw": 9974,
+        "Fade": 9974
+      },
+      "total_n_by_pattern": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "saved_trajectory_samples_by_pattern": null,
+      "relative_path": "cells/driver_lean5_curve1_rotation1_combined2_511ff5d398_density_social.pdf",
+      "sha256": "8264bd9a7f0b69fb28abe907b5b98267db5f02790a81ca72fcf41bd9e3156705"
+    },
+    {
+      "figure_kind": "density_social_svg",
+      "presentation": "social",
+      "source_kind": "individual_supported_endpoints",
+      "source_protocol": "original_primary/1",
+      "cell": "driver_lean5_curve1_rotation1_combined2",
+      "target_x_m": 108.02738606179851,
+      "conditioning": "individually supported endpoints by physical pattern",
+      "valid_n_by_pattern": {
+        "Straight": 9974,
+        "Draw": 9974,
+        "Fade": 9974
+      },
+      "total_n_by_pattern": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "saved_trajectory_samples_by_pattern": null,
+      "relative_path": "cells/driver_lean5_curve1_rotation1_combined2_511ff5d398_density_social.svg",
+      "sha256": "e46a3edc6ff73766ed3fc0140942139f785c990d4169ee2189834c10bc148446"
+    },
+    {
+      "figure_kind": "overhead_png",
+      "presentation": "academic",
+      "source_kind": "saved_illustrative_trajectories",
+      "source_protocol": "original_primary/1",
+      "cell": "driver_lean5_curve1_rotation1_combined2",
+      "target_x_m": 108.02738606179851,
+      "conditioning": "saved raw trajectories, not paired by shot index",
+      "valid_n_by_pattern": null,
+      "total_n_by_pattern": null,
+      "saved_trajectory_samples_by_pattern": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "relative_path": "cells/driver_lean5_curve1_rotation1_combined2_511ff5d398_overhead.png",
+      "sha256": "87647b0a8a837f23bf0a55fc772e9fe212b3540ba87a45d1639bfa04b73304a9"
+    },
+    {
+      "figure_kind": "overhead_pdf",
+      "presentation": "academic",
+      "source_kind": "saved_illustrative_trajectories",
+      "source_protocol": "original_primary/1",
+      "cell": "driver_lean5_curve1_rotation1_combined2",
+      "target_x_m": 108.02738606179851,
+      "conditioning": "saved raw trajectories, not paired by shot index",
+      "valid_n_by_pattern": null,
+      "total_n_by_pattern": null,
+      "saved_trajectory_samples_by_pattern": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "relative_path": "cells/driver_lean5_curve1_rotation1_combined2_511ff5d398_overhead.pdf",
+      "sha256": "8b0a99dc31e155da160851d4fa56f1f662c1cba7fbeb7ee17b2a6e4c5692ceb1"
+    },
+    {
+      "figure_kind": "overhead_svg",
+      "presentation": "academic",
+      "source_kind": "saved_illustrative_trajectories",
+      "source_protocol": "original_primary/1",
+      "cell": "driver_lean5_curve1_rotation1_combined2",
+      "target_x_m": 108.02738606179851,
+      "conditioning": "saved raw trajectories, not paired by shot index",
+      "valid_n_by_pattern": null,
+      "total_n_by_pattern": null,
+      "saved_trajectory_samples_by_pattern": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "relative_path": "cells/driver_lean5_curve1_rotation1_combined2_511ff5d398_overhead.svg",
+      "sha256": "5852f8403949578d7bde1cd93040e121858ea2701903fd1777562cc6699cf973"
+    },
+    {
+      "figure_kind": "overhead_social_png",
+      "presentation": "social",
+      "source_kind": "saved_illustrative_trajectories",
+      "source_protocol": "original_primary/1",
+      "cell": "driver_lean5_curve1_rotation1_combined2",
+      "target_x_m": 108.02738606179851,
+      "conditioning": "saved raw trajectories, not paired by shot index",
+      "valid_n_by_pattern": null,
+      "total_n_by_pattern": null,
+      "saved_trajectory_samples_by_pattern": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "relative_path": "cells/driver_lean5_curve1_rotation1_combined2_511ff5d398_overhead_social.png",
+      "sha256": "753be3b8d639df5b56504b69a081b13f317ef1ce8c8a7be35277ad792b745a07"
+    },
+    {
+      "figure_kind": "overhead_social_pdf",
+      "presentation": "social",
+      "source_kind": "saved_illustrative_trajectories",
+      "source_protocol": "original_primary/1",
+      "cell": "driver_lean5_curve1_rotation1_combined2",
+      "target_x_m": 108.02738606179851,
+      "conditioning": "saved raw trajectories, not paired by shot index",
+      "valid_n_by_pattern": null,
+      "total_n_by_pattern": null,
+      "saved_trajectory_samples_by_pattern": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "relative_path": "cells/driver_lean5_curve1_rotation1_combined2_511ff5d398_overhead_social.pdf",
+      "sha256": "e91ad8bf4b5f6e5b47c73c7b3cb6e09981d3a5e8d8c34d91392c71e80bba7c50"
+    },
+    {
+      "figure_kind": "overhead_social_svg",
+      "presentation": "social",
+      "source_kind": "saved_illustrative_trajectories",
+      "source_protocol": "original_primary/1",
+      "cell": "driver_lean5_curve1_rotation1_combined2",
+      "target_x_m": 108.02738606179851,
+      "conditioning": "saved raw trajectories, not paired by shot index",
+      "valid_n_by_pattern": null,
+      "total_n_by_pattern": null,
+      "saved_trajectory_samples_by_pattern": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "relative_path": "cells/driver_lean5_curve1_rotation1_combined2_511ff5d398_overhead_social.svg",
+      "sha256": "0990636087191e1a17c7f382f5754a7ef952a3e631c3c1acfd5a2749c45ea9e4"
+    }
+  ],
+  "layout": [
+    {
+      "path": "/tmp/p2-production-social-review-v1/comparisons/shaft_rotation_sd_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve1_rotation2_combined2_af19ce16d0_density.png",
+      "text": [
+        {
+          "text": "Matched Endpoint Density: Two Conditions, Shared Axes and Density Scale",
+          "bounds": [
+            0.06,
+            0.9451793981481482,
+            0.5897265625000001,
+            0.024820601851851753
+          ],
+          "outside_canvas": false
+        },
+        {
+          "text": "shaft_rotation_sd \u00b7 Target 108.027 m \u00b7 Density uses all 9,939/10,000 shots common to six populations; 600 evenly spaced dots per panel",
+          "bounds": [
+            0.06,
+            0.9116666666666666,
+            0.520234375,
+            0.014444444444444482
+          ],
+          "outside_canvas": false
+        },
+        {
+          "text": "Rotation SD 1\u00b0: Driver \u00b7 Combined 2 (Path SD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis) \u00b7 Lean 5\u00b0 \u00b7 Curve \u00d71 \u00b7 Shaft Twist SD 1\u00b0 \u00b7 original_primary/1",
+          "bounds": [
+            0.06,
+            0.8916666666666667,
+            0.5721972656250001,
+            0.013333333333333308
+          ],
+          "outside_canvas": false
+        },
+        {
+          "text": "Rotation SD 2\u00b0: Driver \u00b7 Combined 2 (Path SD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis) \u00b7 Lean 5\u00b0 \u00b7 Curve \u00d71 \u00b7 Shaft Twist SD 2\u00b0 \u00b7 original_primary/1",
+          "bounds": [
+            0.06,
+            0.8716666666666667,
+            0.5721972656250001,
+            0.013333333333333308
+          ],
+          "outside_canvas": false
+        },
+        {
+          "text": "Illustrative Simulation | Assumed Head Properties | Carry Only \u00b7 Raw coordinates; no aim correction. Matched-condition changes include nominal re-matching.",
+          "bounds": [
+            0.06,
+            0.8516634114583334,
+            0.6412500000000001,
+            0.015558810763888875
+          ],
+          "outside_canvas": false
+        }
+      ]
+    },
+    {
+      "path": "/tmp/p2-production-social-review-v1/comparisons/shaft_rotation_sd_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve1_rotation2_combined2_af19ce16d0_density_straight_social.png",
+      "text": [
+        {
+          "text": "Driver: Shot Dispersion",
+          "bounds": [
+            0.06,
+            0.9372157118055555,
+            0.20687500000000003,
+            0.02778428819444445
+          ],
+          "outside_canvas": false
+        },
+        {
+          "text": "Straight: Varying Shaft Rotation SD in Panels \u00b7 Fixed: Lean 5\u00b0 \u00b7 Curve \u00d71 \u00b7 Combined 2 (Path SD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis) \u00b7 Simulations, Not Measured Player Accuracy",
+          "bounds": [
+            0.06,
+            0.9148097511574074,
+            1.160439453125,
+            0.021604938271604923
+          ],
+          "outside_canvas": true
+        },
+        {
+          "text": "Population: Same Shot Indices Supported in All Six Populations  |  Scales: Shared Within This Figure; Other Pattern Figures May Differ  |\nValid/Total: Rotation SD 1\u00b0 9,939/10,000 valid; Rotation SD 2\u00b0 9,939/10,000 valid",
+          "bounds": [
+            0.06,
+            0.8469620466820988,
+            0.5911523437499999,
+            0.03803795331790116
+          ],
+          "outside_canvas": false
+        },
+        {
+          "text": "Model-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots Shown/Valid: Rotation SD 1\u00b0 600/9,939; Rotation SD 2\u00b0 600/9,939. Density, HDR, and\nmarginals use every valid endpoint. Shared axes and density scale; contours are simulated-sample HDR.",
+          "bounds": [
+            0.06,
+            0.020010564356674383,
+            0.71169921875,
+            0.03735827787422839
+          ],
+          "outside_canvas": false
+        }
+      ]
+    },
+    {
+      "path": "/tmp/p2-production-social-review-v1/comparisons/shaft_rotation_sd_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve1_rotation2_combined2_af19ce16d0_density_draw_social.png",
+      "text": [
+        {
+          "text": "Driver: Shot Dispersion",
+          "bounds": [
+            0.06,
+            0.9372157118055555,
+            0.20687500000000003,
+            0.02778428819444445
+          ],
+          "outside_canvas": false
+        },
+        {
+          "text": "Draw: Varying Shaft Rotation SD in Panels \u00b7 Fixed: Lean 5\u00b0 \u00b7 Curve \u00d71 \u00b7 Combined 2 (Path SD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis) \u00b7 Simulations, Not Measured Player Accuracy",
+          "bounds": [
+            0.06,
+            0.9148097511574074,
+            1.144775390625,
+            0.021604938271604923
+          ],
+          "outside_canvas": true
+        },
+        {
+          "text": "Population: Same Shot Indices Supported in All Six Populations  |  Scales: Shared Within This Figure; Other Pattern Figures May Differ  |\nValid/Total: Rotation SD 1\u00b0 9,939/10,000 valid; Rotation SD 2\u00b0 9,939/10,000 valid",
+          "bounds": [
+            0.06,
+            0.8469620466820988,
+            0.5911523437499999,
+            0.03803795331790116
+          ],
+          "outside_canvas": false
+        },
+        {
+          "text": "Model-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots Shown/Valid: Rotation SD 1\u00b0 600/9,939; Rotation SD 2\u00b0 600/9,939. Density, HDR, and\nmarginals use every valid endpoint. Shared axes and density scale; contours are simulated-sample HDR.",
+          "bounds": [
+            0.06,
+            0.020010564356674383,
+            0.71169921875,
+            0.03735827787422839
+          ],
+          "outside_canvas": false
+        }
+      ]
+    },
+    {
+      "path": "/tmp/p2-production-social-review-v1/comparisons/shaft_rotation_sd_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve1_rotation2_combined2_af19ce16d0_density_fade_social.png",
+      "text": [
+        {
+          "text": "Driver: Shot Dispersion",
+          "bounds": [
+            0.06,
+            0.9372157118055555,
+            0.20687500000000003,
+            0.02778428819444445
+          ],
+          "outside_canvas": false
+        },
+        {
+          "text": "Fade: Varying Shaft Rotation SD in Panels \u00b7 Fixed: Lean 5\u00b0 \u00b7 Curve \u00d71 \u00b7 Combined 2 (Path SD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis) \u00b7 Simulations, Not Measured Player Accuracy",
+          "bounds": [
+            0.06,
+            0.9148097511574074,
+            1.141826171875,
+            0.021604938271604923
+          ],
+          "outside_canvas": true
+        },
+        {
+          "text": "Population: Same Shot Indices Supported in All Six Populations  |  Scales: Shared Within This Figure; Other Pattern Figures May Differ  |\nValid/Total: Rotation SD 1\u00b0 9,939/10,000 valid; Rotation SD 2\u00b0 9,939/10,000 valid",
+          "bounds": [
+            0.06,
+            0.8469620466820988,
+            0.5911523437499999,
+            0.03803795331790116
+          ],
+          "outside_canvas": false
+        },
+        {
+          "text": "Model-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots Shown/Valid: Rotation SD 1\u00b0 600/9,939; Rotation SD 2\u00b0 600/9,939. Density, HDR, and\nmarginals use every valid endpoint. Shared axes and density scale; contours are simulated-sample HDR.",
+          "bounds": [
+            0.06,
+            0.020010564356674383,
+            0.71169921875,
+            0.03735827787422839
+          ],
+          "outside_canvas": false
+        }
+      ]
+    },
+    {
+      "path": "/tmp/p2-production-social-review-v1/comparisons/shaft_rotation_sd_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve1_rotation2_combined2_af19ce16d0_overhead.png",
+      "text": [
+        {
+          "text": "Saved Raw Flight Paths by Pattern and Matched Condition",
+          "bounds": [
+            0.06,
+            0.9403128616898149,
+            0.46052734375,
+            0.024687138310185097
+          ],
+          "outside_canvas": false
+        },
+        {
+          "text": "Shaft Rotation SD \u00b7 Target 108.027 m",
+          "bounds": [
+            0.06,
+            0.9165892650462962,
+            0.149296875,
+            0.015632957175925943
+          ],
+          "outside_canvas": false
+        },
+        {
+          "text": "Rotation SD 1\u00b0: Driver \u00b7 Combined 2 (Path SD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis) \u00b7 Lean 5\u00b0 \u00b7 Curve \u00d71 \u00b7 Shaft Twist SD 1\u00b0 \u00b7 original_primary/1",
+          "bounds": [
+            0.06,
+            0.8916666666666667,
+            0.5721679687500001,
+            0.013333333333333308
+          ],
+          "outside_canvas": false
+        },
+        {
+          "text": "Rotation SD 2\u00b0: Driver \u00b7 Combined 2 (Path SD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis) \u00b7 Lean 5\u00b0 \u00b7 Curve \u00d71 \u00b7 Shaft Twist SD 2\u00b0 \u00b7 original_primary/1",
+          "bounds": [
+            0.06,
+            0.8666666666666667,
+            0.5721679687500001,
+            0.013333333333333308
+          ],
+          "outside_canvas": false
+        },
+        {
+          "text": "Saved paths (not paired by shot index): Rotation SD 1\u00b0 Straight 6, Draw 6, Fade 6 \u00b7 Rotation SD 2\u00b0 Straight 6, Draw 6, Fade 6",
+          "bounds": [
+            0.06,
+            0.8371008752893518,
+            0.44350585937500003,
+            0.012899124710648135
+          ],
+          "outside_canvas": false
+        },
+        {
+          "text": "Illustrative Simulation | Assumed Head Properties | Carry Only \u00b7 Lateral display magnified 6\u00d7; physical axis limits are shared.",
+          "bounds": [
+            0.06,
+            0.8116666666666666,
+            0.446201171875,
+            0.013333333333333308
+          ],
+          "outside_canvas": false
+        }
+      ]
+    },
+    {
+      "path": "/tmp/p2-production-social-review-v1/comparisons/shaft_rotation_sd_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve1_rotation2_combined2_af19ce16d0_overhead_social.png",
+      "text": [
+        {
+          "text": "Saved Raw Flight Paths by Pattern and Matched Condition",
+          "bounds": [
+            0.06,
+            0.9386975549768518,
+            0.48794921875,
+            0.026302445023148158
+          ],
+          "outside_canvas": false
+        },
+        {
+          "text": "Shaft Rotation SD \u00b7 Target 108.027 m",
+          "bounds": [
+            0.06,
+            0.9162926793981482,
+            0.162861328125,
+            0.015929542824073994
+          ],
+          "outside_canvas": false
+        },
+        {
+          "text": "Rotation SD 1\u00b0: Driver \u00b7 Combined 2 (Path SD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis) \u00b7 Lean 5\u00b0 \u00b7 Curve \u00d71 \u00b7 Shaft Twist SD 1\u00b0 \u00b7 original_primary/1",
+          "bounds": [
+            0.06,
+            0.8916666666666667,
+            0.61009765625,
+            0.014444444444444371
+          ],
+          "outside_canvas": false
+        },
+        {
+          "text": "Rotation SD 2\u00b0: Driver \u00b7 Combined 2 (Path SD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis) \u00b7 Lean 5\u00b0 \u00b7 Curve \u00d71 \u00b7 Shaft Twist SD 2\u00b0 \u00b7 original_primary/1",
+          "bounds": [
+            0.06,
+            0.8666666666666667,
+            0.61009765625,
+            0.014444444444444371
+          ],
+          "outside_canvas": false
+        },
+        {
+          "text": "Saved paths (not paired by shot index): Rotation SD 1\u00b0 Straight 6, Draw 6, Fade 6 \u00b7 Rotation SD 2\u00b0 Straight 6, Draw 6, Fade 6",
+          "bounds": [
+            0.06,
+            0.8366666666666667,
+            0.47582031250000006,
+            0.014444444444444482
+          ],
+          "outside_canvas": false
+        },
+        {
+          "text": "Illustrative Simulation | Assumed Head Properties | Carry Only \u00b7 Lateral display magnified 6\u00d7; physical axis limits are shared.",
+          "bounds": [
+            0.06,
+            0.8116666666666666,
+            0.46799804687499996,
+            0.014444444444444482
+          ],
+          "outside_canvas": false
+        }
+      ]
+    },
+    {
+      "path": "/tmp/p2-production-social-review-v1/cells/driver_lean5_curve1_rotation1_combined2_511ff5d398_density.png",
+      "text": [
+        {
+          "text": "Shot-Endpoint Density Conditional on Supported Airborne Shots",
+          "bounds": [
+            0.06,
+            0.9394838169642856,
+            0.552121212121212,
+            0.025516183035714346
+          ],
+          "outside_canvas": false
+        },
+        {
+          "text": "Supplement Cell: driver_lean5_curve1_rotation1_combined2",
+          "bounds": [
+            0.06,
+            0.9159143813775511,
+            0.3125094696969697,
+            0.017350924744897855
+          ],
+          "outside_canvas": false
+        },
+        {
+          "text": "source: original_primary/1  |  cell: driver_lean5_curve1_rotation1_combined2  |  club: driver  |  lean deg: 5.0  |  curve scale: 1.0  |  shaft\nrotation sd deg: 1.0  |  stage: Final Supplemental Analysis  |  figure scope: one-cell supported population  |  conditioning: individually\nsupported endpoints by physical pattern  |  Valid/Total: Straight 9,974/10,000 valid; Draw 9,974/10,000 valid; Fade 9,974/10,000 valid",
+          "bounds": [
+            0.06,
+            0.8344733537946428,
+            0.5267992424242425,
+            0.050526646205357184
+          ],
+          "outside_canvas": false
+        },
+        {
+          "text": "Illustrative Simulation \u2022 Assumed Head Properties \u2022 Carry Only. HDR mass is sample-derived from simulated endpoints. Colored Dots Shown/Valid: Straight 600/9,974; Draw 600/9,974; Fade 600/9,974; density, HDR,\nand marginals use every valid endpoint. Histogram only; no KDE or synthetic covariance spread; not calibrated player precision. Bin resolution: 2.54 \u00d7 0.49 m. Achieved HDR Mass By Pattern (Discrete Ties May\nExceed Request): Straight 50.3%/80.6%/95.1%  |  Draw 50.8%/80.1%/95.0%  |  Fade 50.4%/80.1%/95.1%",
+          "bounds": [
+            0.06,
+            0.020732950569550736,
+            0.7873390151515152,
+            0.047030868011267005
+          ],
+          "outside_canvas": false
+        }
+      ]
+    },
+    {
+      "path": "/tmp/p2-production-social-review-v1/cells/driver_lean5_curve1_rotation1_combined2_511ff5d398_density_social.png",
+      "text": [
+        {
+          "text": "Driver: Shot Dispersion",
+          "bounds": [
+            0.06,
+            0.9372157118055555,
+            0.20687500000000003,
+            0.02778428819444445
+          ],
+          "outside_canvas": false
+        },
+        {
+          "text": "Supplement Cell: driver_lean5_curve1_rotation1_combined2 \u00b7 Driver \u00b7 Combined 2 (Path SD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis) \u00b7 Lean 5\u00b0 \u00b7 Curve \u00d71 \u00b7 Shaft Twist SD 1\u00b0 \u00b7 Simulations, Not Measured Player Accuracy",
+          "bounds": [
+            0.06,
+            0.9148097511574074,
+            1.37896484375,
+            0.021604938271604923
+          ],
+          "outside_canvas": true
+        },
+        {
+          "text": "source: original_primary/1  |  cell: driver_lean5_curve1_rotation1_combined2  |  club: driver  |  lean deg: 5.0  |  curve scale: 1.0  |  shaft\nrotation sd deg: 1.0  |  stage: Final Supplemental Analysis  |  figure scope: one-cell supported population  |  conditioning: individually\nsupported endpoints by physical pattern  |  Valid/Total: Straight 9,974/10,000 valid; Draw 9,974/10,000 valid; Fade 9,974/10,000 valid",
+          "bounds": [
+            0.06,
+            0.8279430700231482,
+            0.594453125,
+            0.057056929976851856
+          ],
+          "outside_canvas": false
+        },
+        {
+          "text": "Model-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots Shown/Valid: Straight 600/9,974; Draw 600/9,974; Fade 600/9,974. Density, HDR, and\nmarginals use every valid endpoint. Shared axes and density scale; contours are simulated-sample HDR.",
+          "bounds": [
+            0.06,
+            0.020010564356674383,
+            0.711689453125,
+            0.03735827787422839
+          ],
+          "outside_canvas": false
+        }
+      ]
+    },
+    {
+      "path": "/tmp/p2-production-social-review-v1/cells/driver_lean5_curve1_rotation1_combined2_511ff5d398_overhead.png",
+      "text": [
+        {
+          "text": "Raw Overhead Flight-Trajectory Comparison",
+          "bounds": [
+            0.06,
+            0.9433235677083334,
+            0.34421006944444443,
+            0.04167643229166673
+          ],
+          "outside_canvas": false
+        },
+        {
+          "text": "Supplement Cell: driver_lean5_curve1_rotation1_combined2; Raw Simulator Flight Samples",
+          "bounds": [
+            0.06,
+            0.8966601562500001,
+            0.43460069444444444,
+            0.028339843749999982
+          ],
+          "outside_canvas": false
+        },
+        {
+          "text": "source: original_primary/1  |  cell: driver_lean5_curve1_rotation1_combined2  |  club: driver  |  lean deg: 5.0  |  curve scale: 1.0  |  shaft\nrotation sd deg: 1.0  |  stage: Final Supplemental Analysis  |  figure scope: one-cell supported population  |  conditioning: individually\nsupported endpoints by physical pattern  |  Valid/Total: Straight 9,974/10,000 valid; Draw 9,974/10,000 valid; Fade 9,974/10,000 valid  |  Paths\nshown: Straight 6; Draw 6; Fade 6",
+          "bounds": [
+            0.06,
+            0.7799641927083334,
+            0.5083246527777778,
+            0.11003580729166662
+          ],
+          "outside_canvas": false
+        },
+        {
+          "text": "Illustrative Simulation \u2022 Assumed Head Properties \u2022 Carry Only. Raw trajectories; no aim-line rotation. Vertical display magnification: 12.6\u00d7 versus downrange. Only the displayed\npaths are plotted; paths are sampled from supported airborne shots.",
+          "bounds": [
+            0.06,
+            0.017909749348958334,
+            0.6455381944444445,
+            0.05501790364583334
+          ],
+          "outside_canvas": false
+        }
+      ]
+    },
+    {
+      "path": "/tmp/p2-production-social-review-v1/cells/driver_lean5_curve1_rotation1_combined2_511ff5d398_overhead_social.png",
+      "text": [
+        {
+          "text": "Driver: Sample Flight Paths",
+          "bounds": [
+            0.06,
+            0.9572157118055555,
+            0.244580078125,
+            0.02778428819444445
+          ],
+          "outside_canvas": false
+        },
+        {
+          "text": "Supplement Cell: driver_lean5_curve1_rotation1_combined2 \u00b7 Driver \u00b7 Combined 2 (Path SD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis) \u00b7 Lean 5\u00b0 \u00b7 Curve \u00d71 \u00b7 Shaft Twist SD 1\u00b0 \u00b7 Raw Simulator Flight Samples \u00b7 Simulations, Not Measured Player Accuracy",
+          "bounds": [
+            0.06,
+            0.903395061728395,
+            1.568076171875,
+            0.021604938271605034
+          ],
+          "outside_canvas": true
+        },
+        {
+          "text": "source: original_primary/1  |  cell: driver_lean5_curve1_rotation1_combined2  |  club: driver  |  lean deg: 5.0  |  curve scale: 1.0  |  shaft\nrotation sd deg: 1.0  |  stage: Final Supplemental Analysis  |  figure scope: one-cell supported population  |  conditioning: individually\nsupported endpoints by physical pattern  |  Valid/Total: Straight 9,974/10,000 valid; Draw 9,974/10,000 valid; Fade 9,974/10,000 valid",
+          "bounds": [
+            0.06,
+            0.8329430700231482,
+            0.594453125,
+            0.057056929976851856
+          ],
+          "outside_canvas": false
+        },
+        {
+          "text": "Model-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Raw trajectories; no aim-line rotation. Vertical display magnification: 20.9\u00d7 versus downrange. Paths\nShown: Straight 6; Draw 6; Fade 6. Samples from supported airborne shots.",
+          "bounds": [
+            0.06,
+            0.019747962480709876,
+            0.783662109375,
+            0.03803795331790123
+          ],
+          "outside_canvas": false
+        }
+      ]
+    }
+  ]
+}

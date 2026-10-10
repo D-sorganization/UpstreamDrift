@@ -1,0 +1,12 @@
+{
+  "status": "component_integration_passed",
+  "prior_result": "6 failures,71 passed,2 deselected; missing predeclared inventory file only",
+  "result": "77 passed,2 slow tests deselected",
+  "composition": "Exact unchanged MAIN inventory and its two hash-bound protocol plans; no execution source changes",
+  "files": {
+    "SUPPLEMENTAL_EXECUTION_INVENTORY.json": "d414750473fde94622d35ce137dee6820a33e71c70e20635dec5c40dd6585117",
+    "SUPPLEMENTAL_BOUNDS_PLAN.json": "6dc072b6fcf3a266b14eb5f43f5289b02aa9cccd346ca00f45ac9410d83cb6ca",
+    "DRIVER_SPEED_SENSITIVITY_PLAN.json": "128329ebaf182cda57d0298daabef798ffd6b1bba43b3d7049072e4036f7cdc2"
+  },
+  "scope": "Saved-data reporting component suite, not numerical or final publication acceptance"
+}

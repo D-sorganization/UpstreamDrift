@@ -1,0 +1,105 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+______ test_render_cell_figures_exports_dedicated_canonical_social_assets ______
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-1798/test_render_cell_figures_expor0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x74549c87d310>
+
+    def test_render_cell_figures_exports_dedicated_canonical_social_assets(
+        tmp_path, monkeypatch
+    ):
+        root = tmp_path / "cell_source"
+        cell_name = "driver_lean5_curve2_rotation1_combined2"
+        cell_dir = root / cell_name
+        cell_dir.mkdir(parents=True)
+        (cell_dir / "manifest.json").write_text("{}")
+        with gzip.open(cell_dir / "shots.csv.gz", "wt", newline="") as stream:
+            writer = csv.writer(stream)
+            writer.writerow(("pattern", "shot_index", "status", "carry_x_m", "carry_y_m"))
+            for pattern in ("Straight", "Draw", "Fade"):
+                for i in range(10):
+                    writer.writerow((pattern, i, "supported", 180.0 + i, 0.1 * i))
+        (cell_dir / "flight_samples.json").write_text(
+            json.dumps(
+                {
+                    "trajectories": {
+                        p: [[[0.0, 0.0], [180.0, 0.0]]]
+                        for p in ("Straight", "Draw", "Fade")
+                    }
+                }
+            )
+        )
+        ref = _fixture_ref(cell_name, profile="combined2")
+        ref["source_root"] = str(root)
+        ref["config"]["n_shots"] = 10
+        ref["summary"] = {"target_x_m": 180.0, "status": "completed"}
+    
+        monkeypatch.setattr(figures, "manifest_files_match", lambda path: True)
+    
+        from typing import Any
+    
+        calls: dict[str, list[Any]] = {"dispersion": [], "overhead": []}
+    
+        def capture_dispersion(arrays, stem, **kwargs):
+            calls["dispersion"].append((stem, kwargs))
+            out = {}
+            for ext in ("png", "pdf", "svg"):
+                p = stem.with_suffix(f".{ext}")
+                p.parent.mkdir(parents=True, exist_ok=True)
+                p.write_bytes(f"{stem.name}_{ext}".encode())
+                out[ext] = p
+            return out
+    
+        def capture_overhead(trajectories, stem, **kwargs):
+            calls["overhead"].append((stem, kwargs))
+            out = {}
+            for ext in ("png", "pdf", "svg"):
+                p = stem.with_suffix(f".{ext}")
+                p.parent.mkdir(parents=True, exist_ok=True)
+                p.write_bytes(f"{stem.name}_{ext}".encode())
+                out[ext] = p
+            return out
+    
+        monkeypatch.setattr(figures, "write_academic_dispersion_figure", capture_dispersion)
+        monkeypatch.setattr(figures, "write_overhead_trajectory_figure", capture_overhead)
+    
+        output_dir = tmp_path / "report_figures"
+        ledger = figures._render_cell_figures(ref, output_dir)
+        for _, kwargs in calls["dispersion"] + calls["overhead"]:
+>           assert "Supplement Cell" not in kwargs["scenario"]
+E           AssertionError: assert 'Supplement Cell' not in 'Supplement ...n1_combined2'
+E             
+E             'Supplement Cell' is contained here:
+E               Supplement Cell: driver_lean5_curve2_rotation1_combined2
+E             ? +++++++++++++++
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_social_integration.py:171: AssertionError
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/tools/shot_pattern_analysis/test_matched_social_integration.py::test_render_cell_figures_exports_dedicated_canonical_social_assets
+1 failed, 5 deselected, 6 warnings in 11.43s

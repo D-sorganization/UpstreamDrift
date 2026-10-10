@@ -21,7 +21,7 @@ def _ref(cell, club, lean, curve, rotation, target=100.0, protocol="original"):
         "config": {
             "club": {"club_id": club, "shaft_lean_deg": lean},
             "curve_scale": curve,
-            "noise": {"standard_deviations": [rotation]},
+            "noise": {"standard_deviations": [rotation, 0, 0, 0, 0, 0, 0]},
             "n_shots": 10_000,
             "seed": 7,
             "target_x_m": target,
@@ -541,12 +541,14 @@ def test_cell_figure_ledger_keeps_density_and_overhead_exports_distinct(
             outputs[ext] = path
         return outputs
 
+    def _mock_write_academic_dispersion(*args, **kwargs):
+        density_metadata.append(kwargs["metadata"])
+        return write_group(args[1])
+
     monkeypatch.setattr(
         figures,
         "write_academic_dispersion_figure",
-        lambda *args, **kwargs: (
-            density_metadata.append(kwargs["metadata"]) or write_group(args[1])
-        ),
+        _mock_write_academic_dispersion,
     )
     monkeypatch.setattr(
         figures,
@@ -556,18 +558,34 @@ def test_cell_figure_ledger_keeps_density_and_overhead_exports_distinct(
     ledger = module._render_cell_figures(ref, tmp_path / "figures")
 
     kinds = [entry["figure_kind"] for entry in ledger]
-    assert len(ledger) == 6
-    assert len(set(kinds)) == 6
+    assert len(ledger) == 12
+    assert len(set(kinds)) == 12
     assert {kind.split("_")[0] for kind in kinds} == {"density", "overhead"}
     density_entry = next(
         item for item in ledger if item["figure_kind"] == "density_png"
     )
     assert density_entry["valid_n_by_pattern"] == {"Straight": 8, "Draw": 9, "Fade": 10}
+    assert density_entry["presentation"] == "academic"
+    density_social_entry = next(
+        item for item in ledger if item["figure_kind"] == "density_social_png"
+    )
+    assert density_social_entry["valid_n_by_pattern"] == {
+        "Straight": 8,
+        "Draw": 9,
+        "Fade": 10,
+    }
+    assert density_social_entry["presentation"] == "social"
     overhead_entry = next(
         item for item in ledger if item["figure_kind"] == "overhead_png"
     )
     assert overhead_entry["source_kind"] == "saved_illustrative_trajectories"
     assert overhead_entry["valid_n_by_pattern"] is None
+    assert overhead_entry["presentation"] == "academic"
+    overhead_social_entry = next(
+        item for item in ledger if item["figure_kind"] == "overhead_social_png"
+    )
+    assert overhead_social_entry["valid_n_by_pattern"] is None
+    assert overhead_social_entry["presentation"] == "social"
 
 
 def test_pair_figure_ledger_keeps_overhead_when_common_density_support_is_missing(
@@ -642,7 +660,7 @@ def test_pipeline_writes_separate_tables_figures_and_aliases(tmp_path, monkeypat
         config = {
             "club": {"club_id": "pitching_wedge", "shaft_lean_deg": 0.0},
             "curve_scale": curve,
-            "noise": {"standard_deviations": [1.0]},
+            "noise": {"standard_deviations": [1.0, 0, 0, 0, 0, 0, 0]},
             "n_shots": 10_000,
             "seed": 7,
             "target_x_m": None,

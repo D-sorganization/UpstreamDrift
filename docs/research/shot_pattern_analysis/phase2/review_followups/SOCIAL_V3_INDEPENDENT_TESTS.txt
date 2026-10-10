@@ -1,0 +1,49 @@
+..................                                                       [100%]
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+[suite-markers:report-only] 6 collected test(s) carry no suite marker (one of ['benchmark', 'e2e', 'gate', 'integration', 'live_simulation', 'motion_pipeline', 'parity', 'perf', 'scientific', 'slow', 'smoke', 'unit']); see issue #7158.
+============================= slowest 20 durations =============================
+43.48s call     tests/tools/shot_pattern_analysis/test_matched_social_integration.py::test_render_pair_figures_exports_canonical_social_density_with_physical_patterns
+16.26s call     tests/tools/shot_pattern_analysis/test_matched_social_integration.py::test_pair_figure_ledger_preserves_unavailable_row_and_keeps_overhead
+2.22s call     tests/tools/shot_pattern_analysis/test_matched_social_integration.py::test_pair_social_scenario_distinguishes_varying_panels_from_fixed_conditions
+0.27s teardown tests/tools/shot_pattern_analysis/test_social_review_contracts.py::test_cell_low_density_support_does_not_hide_saved_flights
+0.24s setup    tests/tools/shot_pattern_analysis/test_matched_social_integration.py::test_report_source_hashes_includes_matched_pair_social
+0.08s setup    tests/tools/shot_pattern_analysis/test_social_review_contracts.py::test_cell_low_density_support_does_not_hide_saved_flights
+0.06s setup    tests/tools/shot_pattern_analysis/test_social_review_contracts.py::test_available_figure_without_path_is_rejected
+0.06s setup    tests/tools/shot_pattern_analysis/test_social_review_contracts.py::test_unavailable_figure_cannot_claim_an_unverified_artifact
+0.05s teardown tests/tools/shot_pattern_analysis/test_matched_social_integration.py::test_render_pair_figures_exports_canonical_social_density_with_physical_patterns
+0.05s setup    tests/tools/shot_pattern_analysis/test_social_review_contracts.py::test_nonzero_correlation_names_primitive_shaft_twist
+0.04s teardown tests/tools/shot_pattern_analysis/test_social_review_contracts.py::test_unequal_strike_standard_deviations_are_not_called_equal
+0.04s setup    tests/tools/shot_pattern_analysis/test_matched_social_integration.py::test_pair_figure_ledger_preserves_unavailable_row_and_keeps_overhead
+0.04s call     tests/tools/shot_pattern_analysis/test_matched_social_integration.py::test_render_cell_figures_exports_dedicated_canonical_social_assets
+0.04s setup    tests/tools/shot_pattern_analysis/test_social_review_contracts.py::test_serialized_zero_correlation_overrides_profile_name
+0.04s teardown tests/tools/shot_pattern_analysis/test_matched_social_integration.py::test_report_source_hashes_includes_matched_pair_social
+0.03s teardown tests/tools/shot_pattern_analysis/test_social_review_contracts.py::test_unavailable_figure_cannot_claim_an_unverified_artifact
+0.03s teardown tests/tools/shot_pattern_analysis/test_social_review_contracts.py::test_serialized_zero_correlation_overrides_profile_name
+0.03s teardown tests/tools/shot_pattern_analysis/test_social_review_contracts.py::test_available_figure_without_path_is_rejected
+0.03s call     tests/tools/shot_pattern_analysis/test_matched_social_integration.py::test_report_source_hashes_includes_matched_pair_social
+0.03s setup    tests/tools/shot_pattern_analysis/test_matched_social_integration.py::test_render_pair_figures_exports_canonical_social_density_with_physical_patterns

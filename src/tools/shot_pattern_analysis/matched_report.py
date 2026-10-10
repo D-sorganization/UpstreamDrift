@@ -77,6 +77,19 @@ def load_individually_supported_endpoints(
     return points, totals
 
 
+def _original_protocol_config(config: dict) -> dict:
+    """Compare historical implicit bounds without rewriting saved evidence.
+
+    These are the two pre-supplement defaults only. Explicit values and every
+    other field remain untouched, so wider bounds or delivery drift still fail
+    the complete expected-protocol equality check.
+    """
+    normalized = dict(config)
+    normalized.setdefault("match_face_bounds_deg", None)
+    normalized.setdefault("match_speed_factors", [0.75, 1.25])
+    return normalized
+
+
 def validate_original_matrix_protocol(
     report: dict,
     *,
@@ -92,7 +105,9 @@ def validate_original_matrix_protocol(
             "seven_iron",
             "pitching_wedge",
         }:
-            raise ValueError("original control requires the canonical common target map")
+            raise ValueError(
+                "original control requires the canonical common target map"
+            )
         if any(
             isinstance(value, bool)
             or not isinstance(value, (int, float))
@@ -119,14 +134,19 @@ def validate_original_matrix_protocol(
     actual_cells = report.get("cells")
     if not isinstance(actual_cells, list):
         raise ValueError("original matrix report lacks its explicit cell inventory")
-    actual = {cell.get("cell"): cell.get("config") for cell in actual_cells}
+    actual = {
+        cell.get("cell"): _original_protocol_config(cell["config"])
+        for cell in actual_cells
+    }
     if actual != expected:
         raise ValueError(
             f"{protocol} cells/configurations differ from the reviewed protocol"
         )
 
 
-def load_reviewed_common_targets(phase2_root: Path) -> tuple[dict[str, float], dict[str, str]]:
+def load_reviewed_common_targets(
+    phase2_root: Path,
+) -> tuple[dict[str, float], dict[str, str]]:
     """Read targets only from the pilot plan bound by final acceptance evidence."""
     root = Path(phase2_root)
     acceptance_path = root / "FINAL_RUN_ACCEPTANCE.md"
@@ -179,9 +199,14 @@ def load_reviewed_common_targets(phase2_root: Path) -> tuple[dict[str, float], d
             profiles=("shaft_only", "combined2"),
         )
     }
-    normalized_plan = json.loads(json.dumps(plan["cells"]))
+    normalized_plan = {
+        name: _original_protocol_config(config)
+        for name, config in plan["cells"].items()
+    }
     if normalized_plan != expected:
-        raise ValueError("accepted control-pilot plan differs from its factorial protocol")
+        raise ValueError(
+            "accepted control-pilot plan differs from its factorial protocol"
+        )
     if json.loads(target_path.read_text(encoding="utf-8")) != targets:
         raise ValueError("common_targets.json differs from the accepted pilot targets")
     return targets, {
