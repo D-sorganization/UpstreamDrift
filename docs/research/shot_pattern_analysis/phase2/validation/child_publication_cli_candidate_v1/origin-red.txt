@@ -1,0 +1,51 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_______________ test_origin_pin_mutation_rejected_after_rebasing _______________
+
+frozen = (PosixPath('/tmp/pytest-of-dieterolson/pytest-2226/test_origin_pin_mutation_rejec0/frozen'), '115a7cb00ec2814b4c22c054a9f97db665de7f9e', PosixPath('/tmp/pytest-of-dieterolson/pytest-2226/test_origin_pin_mutation_rejec0/execution.json'))
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2226/test_origin_pin_mutation_rejec0')
+
+    def test_origin_pin_mutation_rejected_after_rebasing(frozen,tmp_path):
+        from scripts.research.shot_pattern_analysis.supplement_revision_pin import create_parent_pin,load_parent_pin
+        from scripts.research.shot_pattern_analysis.supplement_parent_verifier import check_verifier_pin
+        root,commit,execution=frozen;output=tmp_path/'pin.json';child=tmp_path/'child'
+        create_parent_pin(root,Path(sys.executable),commit,execution,sha(execution),output)
+        pin=load_parent_pin(output,sha(output),base=child)
+        output.write_text('{}')
+>       with pytest.raises(ValueError,match='origin pin'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_revision_command.py:115: Failed
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 20 durations =============================
+2.95s call     tests/research/test_supplement_revision_command.py::test_origin_pin_mutation_rejected_after_rebasing
+0.60s setup    tests/research/test_supplement_revision_command.py::test_origin_pin_mutation_rejected_after_rebasing
+0.02s teardown tests/research/test_supplement_revision_command.py::test_origin_pin_mutation_rejected_after_rebasing
+=========================== short test summary info ============================
+FAILED tests/research/test_supplement_revision_command.py::test_origin_pin_mutation_rejected_after_rebasing

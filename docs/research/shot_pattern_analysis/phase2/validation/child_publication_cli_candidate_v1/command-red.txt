@@ -1,0 +1,128 @@
+FFFFFFF                                                                  [100%]
+=================================== FAILURES ===================================
+_________ test_pin_generation_rejects_unqualified_environment[commit] __________
+
+frozen = (PosixPath('/tmp/pytest-of-dieterolson/pytest-2223/test_pin_generation_rejects_un0/frozen'), '47d732c2c855e3c2fa78d9d3cba46d5eeb24a0a7', PosixPath('/tmp/pytest-of-dieterolson/pytest-2223/test_pin_generation_rejects_un0/execution.json'))
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2223/test_pin_generation_rejects_un0')
+mutation = 'commit'
+
+    @pytest.mark.parametrize('mutation',['commit','dirty_source','untracked_source','runtime','execution_hash'])
+    def test_pin_generation_rejects_unqualified_environment(frozen,tmp_path,mutation):
+>       from scripts.research.shot_pattern_analysis.supplement_revision_pin import create_parent_pin
+E       ModuleNotFoundError: No module named 'scripts.research.shot_pattern_analysis.supplement_revision_pin'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_revision_command.py:27: ModuleNotFoundError
+______ test_pin_generation_rejects_unqualified_environment[dirty_source] _______
+
+frozen = (PosixPath('/tmp/pytest-of-dieterolson/pytest-2223/test_pin_generation_rejects_un1/frozen'), '47d732c2c855e3c2fa78d9d3cba46d5eeb24a0a7', PosixPath('/tmp/pytest-of-dieterolson/pytest-2223/test_pin_generation_rejects_un1/execution.json'))
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2223/test_pin_generation_rejects_un1')
+mutation = 'dirty_source'
+
+    @pytest.mark.parametrize('mutation',['commit','dirty_source','untracked_source','runtime','execution_hash'])
+    def test_pin_generation_rejects_unqualified_environment(frozen,tmp_path,mutation):
+>       from scripts.research.shot_pattern_analysis.supplement_revision_pin import create_parent_pin
+E       ModuleNotFoundError: No module named 'scripts.research.shot_pattern_analysis.supplement_revision_pin'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_revision_command.py:27: ModuleNotFoundError
+____ test_pin_generation_rejects_unqualified_environment[untracked_source] _____
+
+frozen = (PosixPath('/tmp/pytest-of-dieterolson/pytest-2223/test_pin_generation_rejects_un2/frozen'), '47d732c2c855e3c2fa78d9d3cba46d5eeb24a0a7', PosixPath('/tmp/pytest-of-dieterolson/pytest-2223/test_pin_generation_rejects_un2/execution.json'))
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2223/test_pin_generation_rejects_un2')
+mutation = 'untracked_source'
+
+    @pytest.mark.parametrize('mutation',['commit','dirty_source','untracked_source','runtime','execution_hash'])
+    def test_pin_generation_rejects_unqualified_environment(frozen,tmp_path,mutation):
+>       from scripts.research.shot_pattern_analysis.supplement_revision_pin import create_parent_pin
+E       ModuleNotFoundError: No module named 'scripts.research.shot_pattern_analysis.supplement_revision_pin'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_revision_command.py:27: ModuleNotFoundError
+_________ test_pin_generation_rejects_unqualified_environment[runtime] _________
+
+frozen = (PosixPath('/tmp/pytest-of-dieterolson/pytest-2223/test_pin_generation_rejects_un3/frozen'), '47d732c2c855e3c2fa78d9d3cba46d5eeb24a0a7', PosixPath('/tmp/pytest-of-dieterolson/pytest-2223/test_pin_generation_rejects_un3/execution.json'))
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2223/test_pin_generation_rejects_un3')
+mutation = 'runtime'
+
+    @pytest.mark.parametrize('mutation',['commit','dirty_source','untracked_source','runtime','execution_hash'])
+    def test_pin_generation_rejects_unqualified_environment(frozen,tmp_path,mutation):
+>       from scripts.research.shot_pattern_analysis.supplement_revision_pin import create_parent_pin
+E       ModuleNotFoundError: No module named 'scripts.research.shot_pattern_analysis.supplement_revision_pin'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_revision_command.py:27: ModuleNotFoundError
+_____ test_pin_generation_rejects_unqualified_environment[execution_hash] ______
+
+frozen = (PosixPath('/tmp/pytest-of-dieterolson/pytest-2223/test_pin_generation_rejects_un4/frozen'), '47d732c2c855e3c2fa78d9d3cba46d5eeb24a0a7', PosixPath('/tmp/pytest-of-dieterolson/pytest-2223/test_pin_generation_rejects_un4/execution.json'))
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2223/test_pin_generation_rejects_un4')
+mutation = 'execution_hash'
+
+    @pytest.mark.parametrize('mutation',['commit','dirty_source','untracked_source','runtime','execution_hash'])
+    def test_pin_generation_rejects_unqualified_environment(frozen,tmp_path,mutation):
+>       from scripts.research.shot_pattern_analysis.supplement_revision_pin import create_parent_pin
+E       ModuleNotFoundError: No module named 'scripts.research.shot_pattern_analysis.supplement_revision_pin'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_revision_command.py:27: ModuleNotFoundError
+_____________ test_pin_generation_probes_exact_source_and_runtime ______________
+
+frozen = (PosixPath('/tmp/pytest-of-dieterolson/pytest-2223/test_pin_generation_probes_exa0/frozen'), '5d96448a165d270dfc54c7fcc426126ea2d0ab8d', PosixPath('/tmp/pytest-of-dieterolson/pytest-2223/test_pin_generation_probes_exa0/execution.json'))
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2223/test_pin_generation_probes_exa0')
+
+    def test_pin_generation_probes_exact_source_and_runtime(frozen,tmp_path):
+>       from scripts.research.shot_pattern_analysis.supplement_revision_pin import create_parent_pin,load_parent_pin
+E       ModuleNotFoundError: No module named 'scripts.research.shot_pattern_analysis.supplement_revision_pin'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_revision_command.py:39: ModuleNotFoundError
+_______________ test_cli_has_no_automatic_review_acceptance_flag _______________
+
+    def test_cli_has_no_automatic_review_acceptance_flag():
+>       from scripts.research.shot_pattern_analysis.revise_supplement_figures import parser
+E       ModuleNotFoundError: No module named 'scripts.research.shot_pattern_analysis.revise_supplement_figures'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_revision_command.py:48: ModuleNotFoundError
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 20 durations =============================
+0.62s setup    tests/research/test_supplement_revision_command.py::test_pin_generation_rejects_unqualified_environment[commit]
+0.14s setup    tests/research/test_supplement_revision_command.py::test_pin_generation_rejects_unqualified_environment[execution_hash]
+0.08s setup    tests/research/test_supplement_revision_command.py::test_pin_generation_probes_exact_source_and_runtime
+0.07s setup    tests/research/test_supplement_revision_command.py::test_pin_generation_rejects_unqualified_environment[dirty_source]
+0.07s setup    tests/research/test_supplement_revision_command.py::test_pin_generation_rejects_unqualified_environment[runtime]
+0.04s setup    tests/research/test_supplement_revision_command.py::test_pin_generation_rejects_unqualified_environment[untracked_source]
+0.02s teardown tests/research/test_supplement_revision_command.py::test_pin_generation_rejects_unqualified_environment[runtime]
+0.01s teardown tests/research/test_supplement_revision_command.py::test_pin_generation_rejects_unqualified_environment[commit]
+0.01s teardown tests/research/test_supplement_revision_command.py::test_pin_generation_rejects_unqualified_environment[execution_hash]
+0.01s setup    tests/research/test_supplement_revision_command.py::test_cli_has_no_automatic_review_acceptance_flag
+0.01s teardown tests/research/test_supplement_revision_command.py::test_pin_generation_probes_exact_source_and_runtime
+0.01s teardown tests/research/test_supplement_revision_command.py::test_pin_generation_rejects_unqualified_environment[untracked_source]
+
+(8 durations < 0.005s hidden.  Use -vv to show these durations.)
+=========================== short test summary info ============================
+FAILED tests/research/test_supplement_revision_command.py::test_pin_generation_rejects_unqualified_environment[commit]
+FAILED tests/research/test_supplement_revision_command.py::test_pin_generation_rejects_unqualified_environment[dirty_source]
+FAILED tests/research/test_supplement_revision_command.py::test_pin_generation_rejects_unqualified_environment[untracked_source]
+FAILED tests/research/test_supplement_revision_command.py::test_pin_generation_rejects_unqualified_environment[runtime]
+FAILED tests/research/test_supplement_revision_command.py::test_pin_generation_rejects_unqualified_environment[execution_hash]
+FAILED tests/research/test_supplement_revision_command.py::test_pin_generation_probes_exact_source_and_runtime
+FAILED tests/research/test_supplement_revision_command.py::test_cli_has_no_automatic_review_acceptance_flag
