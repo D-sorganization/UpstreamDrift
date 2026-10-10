@@ -31,8 +31,6 @@ from typing import Any
 import mujoco
 import numpy as np
 
-from src.engines.physics_engines.mujoco.python.grip_efc import grip_analysis_from_efc
-
 from ..model import unavailable_bar_hold
 
 _RIGID_ARMATURE = 1.0e9
@@ -178,6 +176,12 @@ def bar_hold_wrench(xml: str, welds: Sequence[Mapping[str, Any]]) -> dict[str, A
     _freeze_non_bar_dofs(model, bar_body_ids)
     _disable_bar_contacts(model, bar_body_ids)
     _settle_from_rest(model, data)
+
+    # Deferred import: shared code must not import the engines layer at
+    # module level (scripts/ci/check_dependency_direction.py).
+    from src.engines.physics_engines.mujoco.python.grip_efc import (
+        grip_analysis_from_efc,
+    )
 
     analysis = grip_analysis_from_efc(model, data, welds=weld_names)
     if analysis.left is None or analysis.right is None:
