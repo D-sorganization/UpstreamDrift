@@ -1,0 +1,18 @@
+{
+  "accepted_scope": "Native rasterization diagnostics for all original PDF/SVG assets",
+  "independent_root_rehash_pass": true,
+  "input_count": 744,
+  "diagnostics_count": 744,
+  "output_count": 744,
+  "counts": {
+    "('final_figures_v1', '.pdf')": 198,
+    "('final_figures_v1', '.svg')": 198,
+    "('control_final_figures_v1', '.pdf')": 174,
+    "('control_final_figures_v1', '.svg')": 174
+  },
+  "batch_review_sha256": "f8a5be9b8f0b58a1e70ccc6b2c8e5b13d3a7c56c0956dc5e31accdfad62c38df",
+  "coordinator_sha256": "020eeb0d181ca954439de0fc572ebc4f9fcba95e199b94599329a3aa99c8b02d",
+  "root_check_sha256": "e3897a23a64ca8686a7ed4d61d1a49b99aaa5ccf082e12e358da1d775bcaff24",
+  "visual_review_scope": "Separate representative24vector receipt; no all744 visual claim",
+  "full_publication_accepted": false
+}
