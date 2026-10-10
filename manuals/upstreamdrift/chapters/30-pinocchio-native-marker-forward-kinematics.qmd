@@ -1,0 +1,68 @@
+# Pinocchio Native Marker Forward Kinematics
+
+## Scope
+
+F09e (#11914) extends the F09d native marker-output boundary to the actual
+Pinocchio full-state torque replay in F06c (#11900). The replay is executed
+once through `replay_native_pinocchio_torque_bundle`; marker positions are
+then evaluated from that returned configuration trajectory. This layer does
+not integrate dynamics, score observations, or qualify a model.
+
+## Native Frame Mapping
+
+For each replay state, the existing `PinocchioPhysicsEngine` updates its native
+frame placements. An ordered attachment names one exact Pinocchio frame and a
+local SI point. The output position is
+
+$$
+p^w_i = t^w_f(q_i) + R^w_f(q_i) r^f,
+$$
+
+where $q_i$ is the configuration emitted by replay, and $r^f$ is the explicit
+finite three-vector offset in metres. Marker labels and frame names are unique
+and ordered. Unknown or ambiguous frame names, stale source/provider/model
+identity, non-finite points, changed input/policy digest, and incomplete q/v
+history are rejected.
+
+The F01 row's package, variant and drive mode remain distinct from the native
+bundle's `model_id`, native `variant_id`, execution provider, loaded model,
+state schema, ordered channels and executed policy. The binding must match both
+namespaces exactly. It does not infer a production model mapping from a
+synthetic fixture.
+
+## State and Numerical Policy
+
+The complete physical state has Pinocchio configuration `qpos` and tangent
+velocity `qvel`. The fixture's free-flyer model has $n_q=8$ and $n_v=7$; these
+dimensions are never conflated. Native frame placements are derived caches,
+not independently supplied physical state. The native execution policy binds
+fresh-engine initialization and forbids state resets. The reset count remains
+unknown (`None`); a policy declaration is not a measured zero.
+
+The output preserves the replay's exact simulation-relative time grid and is
+content-addressed with its unqualified F09c execution receipt, F09d marker map,
+and marker positions. All model/drive inventory rows and six required engines
+remain represented. Pinocchio fixture coverage does not turn missing MyoSuite,
+OpenSim or Simscape providers into passes; OpenSim's separate F07 geometry
+provider is only usable after full-state replay identity is available.
+
+## Verification and Limits
+
+The synthetic Pinocchio 4.1 URDF uses nonzero free-flyer translation and yaw,
+nonzero hinge position, a nonzero joint origin, and a nonzero marker-local
+offset. Expected world points are composed independently from the analytic
+root and hinge transforms and compared with the native `oMf` result. It checks
+software identity and transform conventions only. It does not establish
+anatomical attachment, contact, muscle behavior, observed-marker accuracy,
+production-model support, or cross-engine equivalence.
+
+Focused command:
+
+```text
+python -m pytest -q --confcutdir=tests/unit/engines tests/unit/engines/test_feedback_native_markers.py
+```
+
+The actual Pinocchio 4.1 case runs in the owned Ubuntu 24.04 environment
+`codex-feedback-pinocchio-11900`; the default Windows interpreter may skip it
+when the optional provider is absent. The design-manual calculation inventory
+remains empty and release remains blocked.

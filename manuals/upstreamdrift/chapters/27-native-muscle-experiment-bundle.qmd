@@ -1,0 +1,76 @@
+---
+title: "Native Muscle Experiment Bundle"
+---
+
+# Native Muscle Experiment Bundle
+
+## Scope and State Authority
+
+F07d #11908 connects the merged Tools `ExperimentReplayBundle` authority to
+the existing OpenSim native muscle excitation replay kernel. It does not add
+an integrator, muscle law, or acceptance evaluator. Initial admission is a
+reviewed cold-start subset with Millard and Thelen equilibrium muscles, fixed path
+points, Slider/Pin joints, muscle forces and gravity. Constraints, locks,
+clamps, moving points, contact, other forces, plugins and unreviewed concrete
+components remain excluded. All excluded engines and production variants
+remain in the required parity denominator.
+
+Every named continuous state must be supplied without defaults or muscle
+equilibration. Native continuous `Y` coverage is checked, but does not prove
+complete SimTK State serialization. Scalar actuators allocate discrete
+override force and an override modeling option; muscles also allocate
+activation/tendon modeling options. Coordinate clamp options are likewise
+distinct from continuous state. Registered discrete-variable and modeling-option
+path/value sets are included as auxiliary bundle state, together with force
+enabled/override and muscle-mode flags. Fresh initialization must reproduce
+these values exactly. Unsupported private subsystem or abstract state remains
+outside this policy, rather than being reported as absent or zero.
+
+The primary native source review is
+[Actuator.cpp](https://github.com/opensim-org/opensim-core/blob/85aaf6450a2f22457dac4d1ab35adfed9d3a8e43/OpenSim/Simulation/Model/Actuator.cpp),
+[Muscle.cpp](https://github.com/opensim-org/opensim-core/blob/85aaf6450a2f22457dac4d1ab35adfed9d3a8e43/OpenSim/Simulation/Model/Muscle.cpp), and
+[Component.cpp](https://github.com/opensim-org/opensim-core/blob/85aaf6450a2f22457dac4d1ab35adfed9d3a8e43/OpenSim/Common/Component.cpp).
+The recorded binary build identifies its runtime separately; reviewing source
+does not attest source-to-binary equivalence or transitive library closure.
+
+## Input and Execution
+
+Saved dimensionless excitation is bounded in $[0,1]$ and linearly interpolated
+by the existing time-only native player. It is not muscle force or joint
+torque. Activation and compliant fiber dynamics remain in the native plant.
+All input times are finite, increasing simulation-relative seconds beginning
+at zero. Adaptive Runge--Kutta--Merson uses the fixed policy accuracy $10^{-8}$.
+A fresh model and Manager execute the full horizon without observations,
+feedback callbacks, state corrections or re-equilibration after restoration.
+
+Source bytes, loaded model XML, native runtime/build, executed adapter/kernel,
+shared admission helper, native extension binaries, ordered muscle channels,
+state schema, initial values and execution/input policies are bound. Bundle
+serialization and required capabilities are revalidated before execution.
+Provider hashing is scoped evidence, not a process sandbox or full DLL
+dependency attestation. Execution requires exclusive native process ownership.
+
+## Evidence and Remaining Gates
+
+Commit `a8e63b4cda` records six native missing-module RED tests before the
+implementation. Subsequent law and admission negatives were recorded before
+their fixes. Actual OpenSim4.6 validation passes 26 bundle and 58 kernel tests
+across both muscle laws, checking fresh
+continuous-state reproduction, native excitation readback, explicit registered
+options, missing fiber rejection, changed source rejection, and an unreviewed
+force rejection. Self-contained XML admission rejects external resources
+before native loading; required owned capabilities cannot be replaced. These
+are synthetic development fixtures only. The source-byte ownership and explicit-unit regressions also pass. Scoped
+mypy, all five central gates, DRY, LoD, architecture, canonical governance and
+generated-context checks pass. After genuine contact-parent integration,134 actual native tests pass with
+two inapplicable contact-fixture skips. Shared kernel policy1.3.1 combines
+exact concrete-law admission with listed native-contact identity. The bundle
+subset continues to exclude contact. All five final central gates pass. Derivative/force initialization audits and publication
+remain pending at this checkpoint.
+
+The 520-muscle candidate has locked coordinates, couplers and non-muscle
+actuators and is not admitted by this policy. Native position geometry and
+marker fitting are separate from dynamics qualification. Full-body anatomy,
+frame registration, physiological/passive-force feasibility, contact and grip,
+training-only calibration, heldout accuracy, uninterrupted muscle-driven
+capture replay and all-engine/model parity remain open.

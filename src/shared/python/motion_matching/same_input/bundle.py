@@ -13,12 +13,12 @@ import hashlib
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
 
-Array = NDArray[np.float64]
+Array: TypeAlias = NDArray[np.float64]
 
 SCHEMA = "same-input-bundle/v1"
 POLICY: dict[str, Any] = {

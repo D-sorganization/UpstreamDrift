@@ -51,6 +51,11 @@ def test_existing_trc_export_records_rounding_and_preserves_missingness(
     from scripts.diagnostics import frozen_capture_trc
 
     source = _capture()
+    valid = source.valid.copy()
+    valid[2, 0] = False
+    from dataclasses import replace
+
+    source = replace(source, valid=valid)
     monkeypatch.setattr(
         frozen_capture_trc.tour_capture_contract,
         "load_tour_capture",
@@ -58,5 +63,16 @@ def test_existing_trc_export_records_rounding_and_preserves_missingness(
     )
     receipt = export_capture(tmp_path / "source.c3d", tmp_path / "export.trc")
     assert receipt["capture_sha256"] == source.source_sha256
-    assert 0 < receipt["max_position_rounding_m"] <= 5.1e-7
-    assert 0 < receipt["max_clock_rounding_s"] <= 5.1e-10
+    assert 0 <= receipt["max_position_rounding_m"] <= 5.1e-7
+    assert 0 <= receipt["max_clock_rounding_s"] <= 5.1e-10
+    from src.engines.physics_engines.opensim.python.tour_matching.trc import read_trc
+
+    restored = read_trc(tmp_path / "export.trc")
+    np.testing.assert_array_equal(restored.valid, source.valid)
+    np.testing.assert_allclose(restored.time_s, source.time_s, rtol=0, atol=5.1e-10)
+    np.testing.assert_allclose(
+        restored.points_m[source.valid],
+        source.points_m[source.valid],
+        rtol=0,
+        atol=5.1e-7,
+    )

@@ -40,6 +40,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1164 | `src/shared/python/physics/terrain_representation.py`                                                                                                                         |
 | 1163 | `src/launchers/settings_dialog.py`                                                                                                                                            |
 | 1158 | `src/engines/simscape/adapter.py`                                                                                                                                             |
+| 1154 | `src/engines/physics_engines/myosuite/python/native_direct_model_replay.py`                                                                                                   |
 | 1153 | `src/tools/motion_matching/gui.py`                                                                                                                                            |
 | 1152 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_widget.py`                                                                                                |
 | 1150 | `src/shared/python/chat/_chat_dock_widget_qt.py`                                                                                                                              |
@@ -79,6 +80,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1020 | `src/tools/bunker_shot_gui/render3d_vtk.py`                                                                                                                                   |
 | 1019 | `src/shared/python/optimization/casadi_backend.py`                                                                                                                            |
 | 1017 | `src/shared/python/shadow_tracker/contracts.py`                                                                                                                               |
+| 1016 | `src/engines/feedback_native_execution.py`                                                                                                                                    |
 | 1015 | `src/shared/python/motion_matching/gs3dx_variants.py`                                                                                                                         |
 | 1012 | `src/shared/python/config/model_source_providers.py`                                                                                                                          |
 | 1007 | `src/launchers/launcher_ui_setup.py`                                                                                                                                          |

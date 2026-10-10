@@ -20,7 +20,7 @@ from collections.abc import Mapping, Sequence
 import json
 import math
 import re
-from typing import Any, NamedTuple, Protocol, runtime_checkable
+from typing import Any, NamedTuple, Protocol, TypeAlias, runtime_checkable
 
 import numpy as np
 from numpy.typing import NDArray
@@ -40,7 +40,7 @@ from src.shared.python.force_overlay.grip_frame import grip_wrenches_and_metadat
 from src.shared.python.force_overlay.series import ForceTorqueSeries
 from src.shared.python.motion_matching.same_input import InputBundle
 
-Array = NDArray[np.float64]
+Array: TypeAlias = NDArray[np.float64]
 Vec3 = tuple[float, float, float]
 _LABEL_SAFE = re.compile(r"[^A-Za-z0-9_.-]+")
 _ANCHOR_DECIMALS = 5

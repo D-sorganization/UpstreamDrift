@@ -134,6 +134,129 @@
 - Base models are not in the clone (submodule fetch failed): set `UPSTREAMDRIFT_RAJAGOPAL_OPENSENSE` / `UPSTREAMDRIFT_MSK_BASE_MODEL`.
 - Open: no MyoFullBody OpenSim export exists; static optimisation not run; scaled-model address fit is weaker (wrists at their bounds); `opensim_golf/fk.py` `State.isValid` failure predates this.
 
+# Active: Native Platform Integration — F10i #12060
+
+Read `docs/development/feedback_controls/F10I-NATIVE-PLATFORM-INTEGRATION-TURNOVER.md`.
+The guarded controls and published native platform implementations now coexist.
+Preserve Tools 86d0f28, private contract class identity, preparation blockers and
+Astra's full-model qualification firewall. Actual runtime evidence and broad
+capture-runtime failures are separate; integration does not complete the goal.
+
+# Prior: Prediction Integrity Consolidation — F09p #12055
+
+Branch `feat/f09p-prediction-integrity-12055` begins at published F09o
+`98784e8374f3adf31f3b22d6bb9e54c0bfa3d081`. Read its plan and turnover.
+Final preparation verification follows conversion and bundle validation, rejects
+changed source/model/handles/callback/live state before stepping, and retains
+complete provider-byte checks at entry/pre-execution/exit. No cross-call cache.
+Controlled native short-fixture ABAB measurements retain identical state digests
+and 25 percent fewer native-library bytes read. No full-capture speed claim.
+Preserve original source-specific receipts; all seventeen rows, six ecosystems
+and private muscular OpenSim matching plus independent replay remain required.
+
+# Prior: Native Tools Integration — F09o #12044
+
+Branch `feat/f09o-native-tools-integration-12044` integrates F09n `df9f3b9538`
+with the admitted F01b/Tools/private-consumer stack `d232efcc69`. Read
+`docs/development/feedback_controls/F09O-NATIVE-TOOLS-INTEGRATION-PLAN.md`.
+Tools `86d0f28b1cc5acf61185e07e320c816c2d005512` is the admitted pin. Native
+contracts use the explicit private package loader; retain one class identity.
+The prior native 170-test receipt applies to its older source/pin. Fresh actual
+MyoSuite 3.0/MuJoCo 3.6 evidence passes 170 tests with zero skips in 208.34s;
+50 integration files and 8,122 tracked Tools files match before/after. The
+separate MuJoCo 3.8 consumer lane passes 81 with three explicit optional skips.
+Impact capability/served verification precedes metadata reconciliation; all
+27 matrix tests pass. Read the F09o turnover for exact source/evidence scope.
+Do not infer controlled speed improvement or scientific acceptance.
+All seventeen model rows, six ecosystems and muscular OpenSim remain required.
+
+# Prior Native Command Solve — F09n #12036
+
+Branch `feat/f09n-native-command-solve-12036` starts at F09m `ab0a1a37d2`.
+Reuse the exact shared F02 kernel/test dependency from PR #12024 `4f9d2e4b9f`.
+The new native solve admits/replays fallback first, applies complete-horizon
+command/increment and declared state margins, and requires guarded candidate
+improvement plus independent canonical replay. Source/state/criteria mutation
+fails. No live command, private fit, contact, physiology or parity is qualified.
+
+Read `docs/development/feedback_controls/F09N-NATIVE-COMMAND-SOLVE-TURNOVER.md`.
+The initial 169-test SDK campaign predates the final criteria-mutation fix.
+The final 170-test campaign passes with zero failures/errors/skips in 250.31s;
+all twenty executed hashes match current source. Global central five gates,
+pinned mypy hook, LoD/DRY/architecture/title/size checks pass. The synthetic
+objective improves 16.3614 to 0.000299930, but whole solve takes 44.93s/189
+evaluations for three native steps: rapid matching remains unqualified.
+Preserve genuine RED receipts, historical runs, missing local mypy-provider
+result and stopped exploratory type check. Parent CI still needs actual Tools
+capability probes/served-bundle reconciliation; the monolith register is refreshed.
+Current context and normal commit/push validation remain required. Full
+epic remains active. Sol/Luna/Astra account quota exhaustion is unchanged.
+
+# Prior Native Tracking Objective — F09m #12023
+
+Branch `feat/f09m-native-tracking-objective-12023` starts at published F09l
+`d5f003614426aef0ec6fdf2c0ed203942e25101c`, draft PR #12017. Read
+`docs/development/feedback_controls/F09M-NATIVE-TRACKING-TURNOVER.md` for frozen
+objective semantics, TDD and promotion boundaries. Cost scales are physical
+magnitudes; command slew cost does not enforce hard slew. No fitted private
+motion or physiological acceptance is claimed. All seventeen models and six
+ecosystems remain required, ending in muscular OpenSim and independent replay.
+
+# Active: Persistent Project MyoSuite Native Search — F09l #12014
+
+Branch `feat/f09l-persistent-native-search-12014` starts at published F09k
+`d50db51b603e967c9e09a4b3c31f7f97a0fdaaac`, draft PR #12011. Read
+`docs/development/feedback_controls/F09L-NATIVE-SEARCH-TURNOVER.md` for the
+provisional-search/guarded-promotion authority boundary and retained TDD evidence.
+The shared forecast admission extraction changes executed source identity;
+historical F09k receipts apply to their published head, not this new source.
+
+## Previous Forecast Foundation
+
+Branch `feat/f09k-owned-sdk-forecast-12009` starts at F09j
+`43e925dd7171f12593d6c8149e3468c720048bc7` (draft PR #12005).
+The owned forecast restores complete current native state and reuses the SDK
+recorder. Read chapter 38 and
+`docs/development/feedback_controls/F09K-OWNED-FORECAST-TURNOVER.md` for lifecycle,
+actual executed evidence and remaining boundaries. Preserve the live task and
+the separate independent replay authority. All 17 model rows and six ecosystems
+remain required; the endpoint is a private-capture-matched muscular OpenSim
+model with full-state, full-horizon independent excitation/contact replay.
+
+# Active: Project MyoSuite Feedback Recording — F09j #12003
+
+Branch `feat/f09j-project-feedback-recording-12003` starts at F09i `976feaf051`.
+Actual SDK campaign passes 89 tests with zero skips. The feedback source shares
+the admitted recorder loop; immutable snapshots, callback mutation rejection and
+independent replay are tested. Read chapter 38 and
+`docs/development/feedback_controls/F09J-FEEDBACK-RECORDING-TURNOVER.md`.
+Source/parameter provenance is declared, not signed. No production assembly,
+mocap fit, muscle-only physiology or all-model completion is claimed.
+
+# Active: Project MyoSuite Task and Independent Replay — F09i #11983
+
+Draft PR #11996 is based on surviving parent #11857 after intermediate parent
+merges; it remains unarmed. Exact original-source nominal driver/iron duration
+replay now passes with poor contact/constraint diagnostics retained. CI exposed
+install-pin mismatches and two exporter architecture-budget violations; those
+are corrected locally. The fingerprint scratch optimization retains every
+per-step check and has six native 3.8 RED-to-GREEN storage/hash regressions.
+Actual SDK revalidation after these local changes passed 76 tests with zero
+failures, errors or skips; all five central pre-PR gates also pass.
+
+Branch `feat/f09i-myosuite-task-producer-11983` stacks on published F01f source
+`73319871c74dbafeefc6548081e606cadc61de54`; parent merges and actual Tools main
+authority remain required. Read canonical chapter 38 and
+`docs/development/feedback_controls/F09I-PROJECT-TASK-TURNOVER.md`. Actual SDK
+production probes cover resource closure, T01/profile freeze and full-state
+uninterrupted/suffix/changed-future replay. Preserve original source bytes,
+separate SDK/helper/native-provider identities and all-model/full-horizon gates.
+Native evidence does not qualify anatomy, capture fit or muscle-only OpenSim.
+Read-only diagnosis found active grip-site gaps and no native foot contact at
+reset. Initial assembly must preserve source and distinguish reference-derived
+from optimizer-assembled poses; qualify named constraints/support and full-state
+reload before fitting. Tools-main ancestry is the current completed CI hold.
+
 # Active: Same-Input Bushing Grip Parity, OSV-7 Phase 2 #11739
 
 - Branch `claude/osv-7-grip-parity`. The shared OpenSim `BushingForce` law (`grip_contact/bushing_law.py`) and a `SimmSpline`-equivalent prescribed input (`grip_contact/prescribed_motion.py`) drive MuJoCo (`mjcb_passive`, RK4 1e-4 s), Drake (native `LinearBushingRollPitchYaw`, RK3 error controlled) and Pinocchio (`aba`, DOP853) on a free club, with each engine's own weld FK. Metrics are in `grip_contact/parity.py` (peak 5 %, RMS 2 % of peak), routed through GCV-10 `GripSeries`.
@@ -817,3 +940,50 @@ the complete integration-state trajectory exactly. F03 still lacks a native
 captured or optimized. This child is stacked on F05c #11922 and must remain
 unarmed until its prerequisite reaches `main`; F02 #11786 and full
 production/capture qualification remain open.
+
+### F09b Native Observation Scoring (#11837)
+
+`src/engines/feedback_observation_qualification.py` scores supplied native
+marker positions against exact measured observations using F01's registry,
+F09a's position-only sampler, and the existing acceptance evaluator. A case
+requires a validated T01 `ExperimentReplayBundle`; identity includes its
+actual complete initial-state payload SHA-256, model-identity digest, and
+capability-declaration digest. Input values/grid and executed policy are
+cross-checked against F01 evidence before scoring. Reports preserve every
+required comparison row and all six required engines; scores do not promote
+unqualified rows or missing evidence.
+
+The focused synthetic suite covers all-six denominator retention, measured
+clock scoring, gate/configuration identity, stale-input rejection, and full
+initial-state payload binding. It does not establish native replay,
+cross-engine parity, muscle physiology, or private-capture acceptance. Resume
+from `docs/development/feedback_controls/F09B-OBSERVATION-QUALIFICATION.md`;
+rerun the focused command recorded there with the pinned Tools submodule.
+
+## Native Pinocchio Replay Handoff (#11900)
+
+Native RED f273e45f2f precedes implementation; twelve actual Pinocchio4.1 tests pass including saturated torque reproduction and fixture refinement. See docs/development/feedback_controls/F06_PINOCCHIO_NATIVE_TURNOVER.md and canonical chapter25 for equations, commands, failed setups, resource ownership and remaining full-model/capture gates. Shared native admission changes require actual Drake/MuJoCo regression evidence before publication. This child does not close F06 or the full matching epic.
+
+## F09e Pinocchio Native Marker FK (#11914)
+
+Branch `feat/11914-f09e-pinocchio-marker-fk` is stacked on F09d #11913 and
+merges the exact native replay provider head from #11906. Actual Pinocchio 4.1
+`nq=8`, `nv=7` marker FK passes with independent nonzero floating-base and
+frame-offset transforms. The public `PinocchioPhysicsEngine.get_link_transforms`
+frame index was made compatible with Pinocchio 4.1. Native receipts retain
+separate inventory and adapter identities, complete q/v, and unknown reset
+count; marker results remain unqualified. See
+`docs/development/feedback_controls/F09E-NATIVE-MARKER-FK.md` and chapter30.
+
+## F09f MyoSuite Native Excitation Replay (#11918)
+
+Branch `feat/11918-f09f-myosuite-native-replay` adds a distinct MyoSuite
+muscle-excitation consumer to the F09 native execution path. It writes exact
+post-mapping normalized excitation directly to native `data.ctrl`; it never
+calls Gym `step` or treats `[-1, 1]` actions as muscle excitation. MyoSuite
+3.0.0/MuJoCo 3.6.0 public elbow fixture passes in the owned Python 3.12 runtime.
+The built-in fixture does not bind required production driver/iron models;
+those rows and the six-engine denominator remain unqualified. See
+`docs/development/feedback_controls/F09F-MYOSUITE-NATIVE-EXCITATION.md` and
+canonical chapter31. The generic legacy four-value Gym step issue remains
+separate because this provider uses native plant stepping only.
