@@ -395,7 +395,7 @@ def _write_pair_density_figure(
     )
     figure = plt.figure(figsize=(16, 9), facecolor="white")
     grid = figure.add_gridspec(
-        2, 3, left=0.06, right=0.91, top=0.76, bottom=0.13, hspace=0.24, wspace=0.24
+        2, 3, left=0.06, right=0.91, top=0.76, bottom=0.13, hspace=0.36, wspace=0.24
     )
     first_condition, second_condition = _condition(first), _condition(second)
     row_conditions = ((first_label, first_condition), (second_label, second_condition))
