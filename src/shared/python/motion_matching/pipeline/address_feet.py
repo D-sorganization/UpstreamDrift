@@ -12,7 +12,7 @@ the stance spheres still pinned flat by the solver.
 
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -35,6 +35,8 @@ __all__ = [
     "NATIVE_TARGET_AXIS",
     "NATIVE_UP_AXIS",
     "build_foot_targets",
+    "feet_deg_from_positions",
+    "split_address_coordinates",
     "MODEL_TARGET_AXIS",
     "foot_progression_report",
     "foot_progression_series",
@@ -139,19 +141,59 @@ def model_feet_deg(
     """Model toe-out per foot at ``q`` from the calcn -> toes axis."""
     names = [f"{b}_{sfx}" for sfx in ("r", "l") for b in ("calcn", "toes")]
     poses = kin.body_poses(q, names)
+    return feet_deg_from_positions(
+        {n: poses[n][1] for n in names}, targets.handedness, target_axis
+    )
+
+
+def feet_deg_from_positions(
+    positions: Mapping[str, np.ndarray],
+    handedness: str,
+    target_axis: np.ndarray = NATIVE_TARGET_AXIS,
+) -> dict[str, float]:
+    """Toe-out per foot from ``calcn_{r,l}`` and ``toes_{r,l}`` origins.
+
+    ``positions`` are world points (Z up). Raises ``ValueError`` naming a
+    missing body. Postcondition: ``{"left": deg, "right": deg}``.
+    """
+    for sfx in _SIDE_SUFFIX.values():
+        for body in ("calcn", "toes"):
+            if f"{body}_{sfx}" not in positions:
+                raise ValueError(f"positions need a '{body}_{sfx}' entry")
     out: dict[str, float] = {}
     for side, sfx in _SIDE_SUFFIX.items():
         axis = model_long_axis(
-            poses[f"calcn_{sfx}"][1], poses[f"toes_{sfx}"][1], NATIVE_UP_AXIS
+            positions[f"calcn_{sfx}"], positions[f"toes_{sfx}"], NATIVE_UP_AXIS
         )
         out[side] = progression_angle_deg(
             axis,
             target_axis=target_axis,
             up=NATIVE_UP_AXIS,
-            foot_role=foot_role(side, targets.handedness),
-            handedness=targets.handedness,
+            foot_role=foot_role(side, handedness),
+            handedness=handedness,
         )
     return out
+
+
+def split_address_coordinates(
+    names: Sequence[str], q: np.ndarray
+) -> tuple[dict[str, float], dict[str, float]]:
+    """Split a coordinate vector into ``(angles_deg, translations_m)`` by name.
+
+    A coordinate is a translation when its name starts with ``Translation`` or
+    ends in ``_tx``/``_ty``/``_tz``; everything else is an angle in radians.
+    """
+    values = np.asarray(q, dtype=float).reshape(-1)
+    if len(names) != values.size:
+        raise ValueError(f"{len(names)} coordinate names for {values.size} values")
+    angles: dict[str, float] = {}
+    translations: dict[str, float] = {}
+    for name, value in zip(names, values, strict=True):
+        if name.startswith("Translation") or name.endswith(("_tx", "_ty", "_tz")):
+            translations[name] = float(value)
+        else:
+            angles[name] = float(np.degrees(value))
+    return angles, translations
 
 
 def _sensitivity(
