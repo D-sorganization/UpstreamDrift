@@ -304,6 +304,11 @@
       "id": "UP-D1-exact-557-muscle-excitation-diagnostic-inventory",
       "owner": "UpstreamDrift issue #12182",
       "resolution": "Inventory provisional chapter50 and an opt-in exact-source v3 diagnostic: the derived 557-muscle XML, 6691 native component paths/classes, 106 visual-only Mesh references, four rotational coupled-coordinate units, 40 clamped ranges, 1226 complete named continuous values, 17 enforced couplers and ordered T01 excitation inputs are bound. The original source seed fails the unchanged SC_z chart at 1 ms. A separately declared six-coordinate interior seed passes only 0.2 ms of two fresh same-input native replays and a changed-future excitation check. Four source body inertias and passive/anatomy validity remain unresolved; missing visual VTPs, full native restart, Moco solve, full capture horizon and all17/six-engine parity remain unqualified. Publication blocked."
+    },
+    {
+      "id": "UP-D1-native-source-body-inertia-inventory",
+      "owner": "UpstreamDrift issue #12191",
+      "resolution": "Inventory provisional chapter52 and native_body_inertia.py: exact hash-bound OpenSim BodySet mass, body-frame COM and six inertia components, complete native Body readback equality, source/runtime/adapter digests, coordinate-invariant positive-mass physical-inertia checks reusing #12183, and an explicit exact-zero-mass/zero-inertia routing-carrier policy. Actual OpenSim4.6 native fixtures include rotated invalid inertia, source/native identity mutation and welded massless carrier; unchanged 557-muscle source rejects bilateral clavicle/scapula principal-moment violations among 40 bodies. This is a read-only necessary gate, not a parameter repair or physiological/capture approval. Full native source closure, contact/grip, passive policy, longer replay, all17/six-engine parity and publication remain blocked."
     }
   ],
   "calculations": []

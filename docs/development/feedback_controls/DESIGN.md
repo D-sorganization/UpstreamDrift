@@ -178,3 +178,17 @@ six-coordinate interior diagnostic seed has only 0.2 ms replay evidence;
 neither result certifies source inertia, passive physiology, full native
 restart or a captured swing. Chapter50 and the exact replay turnover bind
 the inputs, equations, failures and acceptance limits.
+
+## Native Source-Body Inertia Admission (#12191)
+
+The OpenSim source-body gate reads exact BodySet properties and checks a fresh
+native model, without equilibrating, integrating or editing parameters. It
+uses the shared physical-inertia validator for positive masses and explicitly
+admits native welded/internal routing carriers only when both mass and all
+inertia components are exactly zero. Inertia is about the body-frame COM;
+native mass, COM and six components must equal the source. The unchanged
+557-muscle source fails the necessary principal-moment condition on both
+clavicles and both scapulae. The gate records all failing bodies and keeps
+the #12182 short replay diagnostic separate from physical admission. Chapter52
+and the public receipt bind source/runtime/adapter identities; source anatomy,
+passive forces, contact/grip and capture matching remain unqualified.

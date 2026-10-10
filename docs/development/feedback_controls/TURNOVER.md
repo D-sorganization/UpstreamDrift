@@ -521,3 +521,15 @@ attempts are in `F07_EXACT_557_REPLAY_TURNOVER.md`; chapter50 records the
 calculation. Four invalid original body inertia tensors, physiological
 preparation, longer source-chart viability, real marker registration and
 capture matching remain open. The calculation registry stays unapproved.
+
+## F07 Source-Body Inertia Admission (#12191)
+
+`native_body_inertia.py` now checks exact source/native mass, body-frame COM,
+and inertia before a physical OpenSim claim. Its rotated-invalid and welded
+massless fixtures, source mutation and altered native readback are TDD
+regressions. Actual OpenSim 4.6 identifies exactly four invalid positive-mass
+bodies in the unchanged 557-muscle source; nine exact massless carriers use
+their explicit zero policy. See chapter52, the source-bound receipt and
+`F07_NATIVE_BODY_INERTIA_TURNOVER.md`. This gate neither changes source data
+nor upgrades the 0.2 ms #12182 diagnostic to a physiological or full-horizon
+result. All 17 required variants and six ecosystems remain open.
