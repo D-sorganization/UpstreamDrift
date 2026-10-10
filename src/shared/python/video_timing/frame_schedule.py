@@ -21,6 +21,7 @@ from src.shared.python.contracts import require
 Array = NDArray[np.float64]
 DEFAULT_FPS = 60.0
 MAX_SPEED = 4.0
+SPEED_VARIANTS = (1.0, 0.5, 0.25)  # full, half and quarter speed (GCV-14)
 _EPS = 1e-9
 _MUJOCO_FREE, _MUJOCO_BALL = 0, 1  # mjtJoint values
 

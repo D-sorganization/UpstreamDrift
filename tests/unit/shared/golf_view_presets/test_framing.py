@@ -12,9 +12,15 @@ from src.shared.python.golf_view_presets import (
     DEFAULT_FRAME_MARGIN,
     VIEW_ORDER,
     VIEWER_FOV_Y_RAD,
+    bounding_box_fill_fraction,
+    drake_meshcat_camera_pose,
     fit_distance_m,
     get_view_preset,
+    golfer_bounding_box,
+    meshcat_camera,
+    mujoco_camera_params,
     projected_extent,
+    simbody_camera_transform,
 )
 
 pytestmark = pytest.mark.unit
@@ -101,3 +107,53 @@ def test_extent_rejects_points_behind_the_camera() -> None:
     behind = np.asarray(LOOKAT) - 5.0 * preset.view_direction()
     with pytest.raises(ValueError, match="in front of the camera"):
         projected_extent(preset, [behind], LOOKAT, 3.2)
+
+
+def test_golfer_bounding_box_matches_standard_dimensions() -> None:
+    box = golfer_bounding_box(LOOKAT)
+    assert box.shape == (8, 3)
+    np.testing.assert_allclose(box.min(axis=0), (0.6, -0.7, 0.0))
+    np.testing.assert_allclose(box.max(axis=0), (1.4, 0.7, 1.85))
+
+
+@pytest.mark.parametrize("view", VIEW_ORDER)
+def test_each_camera_preset_fits_golfer_bounding_box_within_margin(view: str) -> None:
+    preset = get_view_preset(view)
+    fill = bounding_box_fill_fraction(preset, aspect=ASPECT)
+    margin = 1.0 - fill
+    assert 0.85 <= fill <= 1.0
+    assert margin <= DEFAULT_FRAME_MARGIN
+
+
+@pytest.mark.parametrize("view", VIEW_ORDER)
+def test_every_backend_fits_golfer_bounding_box_within_margin(view: str) -> None:
+    # Drake MeshCat
+    eye, target = drake_meshcat_camera_pose(view, LOOKAT)
+    dist_drake = float(np.linalg.norm(np.asarray(eye) - np.asarray(target)))
+    fill_drake = bounding_box_fill_fraction(view, distance_m=dist_drake, aspect=ASPECT)
+    assert 0.85 <= fill_drake <= 1.0
+    assert (1.0 - fill_drake) <= DEFAULT_FRAME_MARGIN
+
+    # Pinocchio MeshCat
+    cam = meshcat_camera(view, LOOKAT)
+    dist_pin = float(
+        np.linalg.norm(np.asarray(cam.position_world) - np.asarray(cam.target_world))
+    )
+    fill_pin = bounding_box_fill_fraction(view, distance_m=dist_pin, aspect=ASPECT)
+    assert 0.85 <= fill_pin <= 1.0
+    assert (1.0 - fill_pin) <= DEFAULT_FRAME_MARGIN
+
+    # OpenSim Simbody
+    _rows, pos = simbody_camera_transform(view, LOOKAT)
+    dist_osim = float(np.linalg.norm(np.asarray(pos) - np.asarray(LOOKAT)))
+    fill_osim = bounding_box_fill_fraction(view, distance_m=dist_osim, aspect=ASPECT)
+    assert 0.85 <= fill_osim <= 1.0
+    assert (1.0 - fill_osim) <= DEFAULT_FRAME_MARGIN
+
+    # MyoSuite MJRenderer
+    m_cam = mujoco_camera_params(view, LOOKAT)
+    fill_myo = bounding_box_fill_fraction(
+        view, distance_m=m_cam.distance, aspect=ASPECT
+    )
+    assert 0.85 <= fill_myo <= 1.0
+    assert (1.0 - fill_myo) <= DEFAULT_FRAME_MARGIN

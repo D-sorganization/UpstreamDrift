@@ -1,0 +1,177 @@
+{
+  "issue": 11932,
+  "limits": "Contact-free two-hinge software fixture only; neither hard real-time nor full-body golfer, grip/ground, muscle, capture, six-engine or full-swing qualification. F05 parent remains open.",
+  "parent_issue": 11789,
+  "provenance": {
+    "git_head_before_receipt": "c1e76ce91db11b257604d9ddbd227268d2e27db1",
+    "junit_sha256": "2260935db08da30dfed760403a200e3df28c57b8bbdf813bbf0943beef06fda3",
+    "source_sha256": {
+      "scripts/f05d_native_manifold_receipt.py": "1b81acb7c16a7c00229f7466520bda5d884fc8773966b988312013cc68284794",
+      "src/engines/physics_engines/mujoco/python/box_fddp_tracking.py": "3ce09e4c963a79d610b1721e87a5c3c1c8c5837528a8f2067d6d082c4f5e80e8",
+      "src/engines/physics_engines/mujoco/python/native_manifold_box_fddp.py": "0b5eff2fe4188dc091a551394438b6695634b7c020cbe27604d519755ce212ef",
+      "src/engines/physics_engines/mujoco/python/native_nmpc_tracking.py": "b0018d3e475af8e27ffe2dc21a9d6a2a478028ab119d6a0a5068ab2a4e5c3587",
+      "src/engines/physics_engines/mujoco/python/native_tangent_derivative.py": "0ce33ffe71ee11ad7d2bb49aec0efcdf779ae2ab5fa11d3e93ffd6b86b73376e",
+      "src/engines/physics_engines/mujoco/python/native_torque_replay.py": "8908ddb4ca0ed0d98ae4cc8580315335773fd5f8d5209b3159a11f3bacde6724",
+      "tests/unit/motion_matching/test_f05d_native_receipt.py": "467dcaed108c07680063c0b42f7bbbf78b54ac272e0dc1209e5eadfc9d9a1918",
+      "tests/unit/motion_matching/test_native_manifold_box_fddp.py": "6a4648165be9a1c7d1b10e8d88ac51a29ba8614c268804a6e94f99834728f2e4"
+    },
+    "tools_pin": "2e7665111b06f92ffbfe178b92d74d6a81c95388"
+  },
+  "runtime": {
+    "crocoddyl": "3.2.1",
+    "host_alias": "wsl-task-overlay",
+    "machine": "x86_64",
+    "mujoco": "3.8.0",
+    "numpy": "2.5.3",
+    "pinocchio": "4.1.0",
+    "python": "3.12.14",
+    "release": "6.6.87.1-microsoft-standard-WSL2",
+    "scipy": "1.18.1",
+    "system": "Linux"
+  },
+  "schema_version": "upstreamdrift/f05d-manifold-boxfddp-development/1.0.0",
+  "scope": {
+    "cooperative_wall_budget_s_each_call": 0.2,
+    "executed_steps": 4,
+    "horizon_steps": 4,
+    "input": "post_limit_direct_unit_motor_torque_ZOH",
+    "max_iterations_each": 15,
+    "native_integrator": "Euler",
+    "native_step_s": 0.01,
+    "ndx": 16,
+    "nq": 9,
+    "nu": 2,
+    "nv": 8,
+    "nx": 17,
+    "observation": "exact_simulated_qpos_qvel_each_step",
+    "plant": "native_mujoco_floating_root_two_hinges_contact_free",
+    "prediction_and_admission_objective": "same_nonlinear_native_stage_and_terminal_manifold_error_plus_effort",
+    "reference": "native_generated_full_state_from_fixed_admissible_teacher_motor_torque",
+    "replay": "independent_complete_mjSTATE_INTEGRATION_Tools_T01",
+    "replay_tolerance": 1e-12,
+    "timing": "Common T01 preflight charged to both; each run wall includes solver setup, every accepted or fallback call, native execution, frozen input export and independent replay. Process start/pytest collection excluded. A timeout is reported after the cooperative call returns."
+  },
+  "selection": "retain_as_contact_free_candidate_keep_F02_TVLQR_broad_default",
+  "trials": [
+    {
+      "box": {
+        "accepted_steps": 2.0,
+        "applied_input_sha256": "9709478381936e76deb17e7642b26e424bfc52148f56c18ee5d3e171f81ee360",
+        "call_p95_s": 0.4643717162951361,
+        "control_wall_s": 1.1794003879767843,
+        "effort_sum_n2m2": 8.27077387588566,
+        "final_qpos": [
+          0.09783202022086915, -0.2019999377242092, 0.8, 0.9032784357044279,
+          4.47304908279253e-18, 3.165738835387667e-18, 0.4290548538256639,
+          0.1613803506569657, 0.017030294880833352
+        ],
+        "hinge_rmse_rad": 0.12619527480829285,
+        "realized_native_cost": 31.92891992284445,
+        "run_wall_s": 1.3671048970427364,
+        "solver_id": "crocoddyl-boxfddp",
+        "statuses": [
+          "fallback_timeout",
+          "fallback_timeout",
+          "optimized",
+          "optimized"
+        ],
+        "time_to_fully_accepted_s": null,
+        "total_wall_s": 1.4039587810402736
+      },
+      "common_bootstrap_s": 0.036853883997537196,
+      "execution_order": ["box", "scipy"],
+      "initial_hip_rad": 0.4,
+      "initial_state_sha256": "3be7a6287343434f8dc89a3c3a0a9520dfc6cc1f5ac3b850f34bc133133dfe5c",
+      "input_channel_schema_sha256": "d719eafa61a99d76a6f7581b7f1f13315b4ddbf78ee64d0ba7f7f61344a9a1ec",
+      "loaded_model_sha256": "b88286e5f733b6e00af76e9fcb18ae5a33fd3594f547beb32077562d3c7e925e",
+      "model_sha256": "b542ab129b16e91c536d263d4de7ea470ec58df6e9f00363a98211d3f6a55b57",
+      "policy_sha256": "83cae458e4a2203ac6cdf7fadda7b8bf06753be98fa64db8f7297bf1962a7c97",
+      "scipy": {
+        "accepted_steps": 0.0,
+        "applied_input_sha256": "5580b004f586c012b3ab22a55335f23a296e72282c7be0b311dfcadd4628af39",
+        "call_p95_s": 0.4755524180305656,
+        "control_wall_s": 1.6875587440445088,
+        "effort_sum_n2m2": 0.0,
+        "final_qpos": [
+          0.10001134033249054, -0.1999862755799985, 0.8, 0.9224217457367568,
+          -1.5702499462189117e-20, -1.1898128323421538e-20, 0.3861840532595223,
+          0.3969680289854895, -0.29910640316344334
+        ],
+        "hinge_rmse_rad": 0.2587878720906372,
+        "realized_native_cost": 254.35015306421946,
+        "run_wall_s": 1.8559808179852553,
+        "solver_id": "scipy-slsqp-native-shooting",
+        "statuses": [
+          "fallback_timeout",
+          "fallback_timeout",
+          "fallback_timeout",
+          "fallback_timeout"
+        ],
+        "time_to_fully_accepted_s": null,
+        "total_wall_s": 1.8928347019827925
+      },
+      "state_schema_sha256": "3b6480658c125eb5139ba2229ae491ce0d1c0fb17297ed7d6349f9af89281604",
+      "time_grid_sha256": "5943c4a2f41de814cf69d88aa34be89d5b1ec35766de0d58ae91289084a59c20"
+    },
+    {
+      "box": {
+        "accepted_steps": 1.0,
+        "applied_input_sha256": "3cc2db19d7489e9260d15d23f191e2a79bdaf8eb9858d498d3eab1da1e12e83a",
+        "call_p95_s": 0.41394422288576604,
+        "control_wall_s": 1.2458439110196196,
+        "effort_sum_n2m2": 6.24930002,
+        "final_qpos": [
+          0.0989351027243149, -0.2014134302532671, 0.8, 0.9173244314513538,
+          1.8652224501463568e-19, 2.915626438948275e-19, 0.3981405373262696,
+          0.6195092937133174, -0.16486782258257143
+        ],
+        "hinge_rmse_rad": 0.18572377092034642,
+        "realized_native_cost": 61.79887795262,
+        "run_wall_s": 1.4546347659779713,
+        "solver_id": "crocoddyl-boxfddp",
+        "statuses": [
+          "fallback_timeout",
+          "fallback_timeout",
+          "fallback_timeout",
+          "optimized"
+        ],
+        "time_to_fully_accepted_s": null,
+        "total_wall_s": 1.4996333919698372
+      },
+      "common_bootstrap_s": 0.04499862599186599,
+      "execution_order": ["scipy", "box"],
+      "initial_hip_rad": 0.7,
+      "initial_state_sha256": "78a9d51759108b0ab94c86a0a7846836f22715a10794cb0cb11779e0747f7d37",
+      "input_channel_schema_sha256": "d719eafa61a99d76a6f7581b7f1f13315b4ddbf78ee64d0ba7f7f61344a9a1ec",
+      "loaded_model_sha256": "b88286e5f733b6e00af76e9fcb18ae5a33fd3594f547beb32077562d3c7e925e",
+      "model_sha256": "b542ab129b16e91c536d263d4de7ea470ec58df6e9f00363a98211d3f6a55b57",
+      "policy_sha256": "83cae458e4a2203ac6cdf7fadda7b8bf06753be98fa64db8f7297bf1962a7c97",
+      "scipy": {
+        "accepted_steps": 0.0,
+        "applied_input_sha256": "5580b004f586c012b3ab22a55335f23a296e72282c7be0b311dfcadd4628af39",
+        "call_p95_s": 0.31112545132345987,
+        "control_wall_s": 1.1519619450555183,
+        "effort_sum_n2m2": 0.0,
+        "final_qpos": [
+          0.10001045960785782, -0.1999821318541336, 0.8, 0.9223996316070332,
+          -2.7779138273693587e-21, -3.494976105997898e-21, 0.3862368698236997,
+          0.6967469690292236, -0.29898931252384653
+        ],
+        "hinge_rmse_rad": 0.22638525047927133,
+        "realized_native_cost": 201.83087170251548,
+        "run_wall_s": 1.3294095660094172,
+        "solver_id": "scipy-slsqp-native-shooting",
+        "statuses": [
+          "fallback_timeout",
+          "fallback_timeout",
+          "fallback_timeout",
+          "fallback_timeout"
+        ],
+        "time_to_fully_accepted_s": null,
+        "total_wall_s": 1.3744081920012832
+      },
+      "state_schema_sha256": "3b6480658c125eb5139ba2229ae491ce0d1c0fb17297ed7d6349f9af89281604",
+      "time_grid_sha256": "5943c4a2f41de814cf69d88aa34be89d5b1ec35766de0d58ae91289084a59c20"
+    }
+  ]
+}

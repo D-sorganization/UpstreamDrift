@@ -221,8 +221,8 @@ def seed_hip_rotation_deg(
     """``hip_rotation_*`` (deg) that give each foot its target toe-out at ``q_base``.
 
     Sign-safe: solved against forward kinematics, so it is right whether the
-    spec's left-leg rotation axis is mirrored or not (it is not: see the design
-    decisions). ``q_base`` is the shared address seed at pelvis yaw 0 in the
+    spec's left-leg rotation axis is mirrored or not (it is since OSV-6, #11737).
+    ``q_base`` is the shared address seed at pelvis yaw 0 in the
     spec world. Postcondition: both feet within ``FOOT_TOLERANCE_DEG``.
     """
     q = np.asarray(q_base, dtype=float).copy()

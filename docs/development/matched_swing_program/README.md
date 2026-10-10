@@ -49,16 +49,16 @@ To prevent drift between handoff notes and committed evidence, all headline numb
 
 | Metric                  | Quoted Value | Canonical Receipt Path                                                                         | Field Path                        | Notes                                                                                  |
 | ----------------------- | ------------ | ---------------------------------------------------------------------------------------------- | --------------------------------- | -------------------------------------------------------------------------------------- |
-| **Driver Address RMS**  | **7.9 mm**   | `docs/development/full_body_models/evidence/ground_support/anthro_driver_seeds/receipt.json`   | `address.calibrated.marker_rms_m` | Full neutral static-trial marker calibration (`--static-seeds`)                        |
-| **Driver IK RMS**       | **34.1 mm**  | `docs/development/full_body_models/evidence/ground_support/anthro_driver_seeds/receipt.json`   | `ik.marker_rms_m`                 | Calibrated upper/lower attachments, anatomical leg bounds (1.0), bounded wrists        |
-| **Driver Dynamics RMS** | **84.5 mm**  | `docs/development/full_body_models/evidence/ground_support/anthro_driver_seeds/receipt.json`   | `dynamics.marker_rms_m`           | Unactuated floating root, replay starts on the grip weld (#11047)                      |
-| **7-Iron Address RMS**  | **6.6 mm**   | `docs/development/full_body_models/evidence/ground_support/anthro_iron_seeds_zmp/receipt.json` | `address.calibrated.marker_rms_m` | Neutral static trial marker calibration                                                |
-| **7-Iron IK RMS**       | **31.6 mm**  | `docs/development/full_body_models/evidence/ground_support/anthro_iron_seeds_zmp/receipt.json` | `ik.marker_rms_m`                 | Full-capture IK on 7-iron tour capture, anatomical leg bounds (1.0)                    |
-| **7-Iron Dynamics RMS** | **88.6 mm**  | `docs/development/full_body_models/evidence/ground_support/anthro_iron_seeds_zmp/receipt.json` | `dynamics.marker_rms_m`           | Dynamics ZMP filter inside foot support polygon                                        |
-| **Driver Baseline IK**  | **52.3 mm**  | `docs/development/full_body_models/evidence/ground_support/anthro_driver/receipt.json`         | `ik.marker_rms_m`                 | Nominal attachments (without static-seeds), unwidened leg bounds (1.0), hip zero-twist |
-| **7-Iron Baseline IK**  | **72.0 mm**  | `docs/development/full_body_models/evidence/ground_support/anthro_iron/receipt.json`           | `ik.marker_rms_m`                 | Nominal attachments (without static-seeds), unwidened leg bounds (1.0), hip zero-twist |
+| **Driver Address RMS**  | **7.7 mm**   | `docs/development/full_body_models/evidence/ground_support/anthro_driver_seeds/receipt.json`   | `address.calibrated.marker_rms_m` | Full neutral static-trial marker calibration (`--static-seeds`)                        |
+| **Driver IK RMS**       | **33.0 mm**  | `docs/development/full_body_models/evidence/ground_support/anthro_driver_seeds/receipt.json`   | `ik.marker_rms_m`                 | Calibrated upper/lower attachments, anatomical leg bounds (1.0), bounded wrists        |
+| **Driver Dynamics RMS** | **61.6 mm**  | `docs/development/full_body_models/evidence/ground_support/anthro_driver_seeds/receipt.json`   | `dynamics.marker_rms_m`           | Unactuated floating root, replay starts on the grip weld (#11047)                      |
+| **7-Iron Address RMS**  | **6.5 mm**   | `docs/development/full_body_models/evidence/ground_support/anthro_iron_seeds_zmp/receipt.json` | `address.calibrated.marker_rms_m` | Neutral static trial marker calibration                                                |
+| **7-Iron IK RMS**       | **31.1 mm**  | `docs/development/full_body_models/evidence/ground_support/anthro_iron_seeds_zmp/receipt.json` | `ik.marker_rms_m`                 | Full-capture IK on 7-iron tour capture, anatomical leg bounds (1.0)                    |
+| **7-Iron Dynamics RMS** | **47.0 mm**  | `docs/development/full_body_models/evidence/ground_support/anthro_iron_seeds_zmp/receipt.json` | `dynamics.marker_rms_m`           | Dynamics ZMP filter inside foot support polygon                                        |
+| **Driver Baseline IK**  | **60.5 mm**  | `docs/development/full_body_models/evidence/ground_support/anthro_driver/receipt.json`         | `ik.marker_rms_m`                 | Nominal attachments (without static-seeds), unwidened leg bounds (1.0), hip zero-twist |
+| **7-Iron Baseline IK**  | **268.9 mm** | `docs/development/full_body_models/evidence/ground_support/anthro_iron/receipt.json`           | `ik.marker_rms_m`                 | Nominal attachments; trajectory IK fails from frame 0 on `main` too (#12030)           |
 
-The earlier calibrated figures (driver 5.1 / 27.3 / 74.6 mm, 7-iron 4.4 / 28.6 / 144.0 mm) are pre-HO-8 runs with widened leg bounds that current code does not reproduce and whose receipts record IK range-of-motion violations (#11044). For detailed factor attribution, including the measured #11044 bisect, see [`CANONICAL_RUN.md`](../full_body_models/evidence/ground_support/CANONICAL_RUN.md) and [`bisect_receipt.json`](../full_body_models/evidence/ground_support/bisect_receipt.json) and [`bisect_11044_receipt.json`](../full_body_models/evidence/ground_support/bisect_11044_receipt.json).
+The earlier calibrated figures (driver 5.1 / 27.3 / 74.6 mm, 7-iron 4.4 / 28.6 / 144.0 mm) are pre-HO-8 runs with widened leg bounds that current code does not reproduce and whose receipts record IK range-of-motion violations (#11044). All eight values were regenerated on the mirrored left hip (OSV-6, #11737); the pre-OSV-6 nominal receipts (52.3 / 72.0 mm IK) are kept under `anthro_{driver,iron}_pre_osv6/` as history. For detailed factor attribution, including the measured #11044 bisect, see [`CANONICAL_RUN.md`](../full_body_models/evidence/ground_support/CANONICAL_RUN.md) and [`bisect_receipt.json`](../full_body_models/evidence/ground_support/bisect_receipt.json) and [`bisect_11044_receipt.json`](../full_body_models/evidence/ground_support/bisect_11044_receipt.json).
 
 ---
 
@@ -138,41 +138,41 @@ Rules restated: a ledger row is accepted only by `acceptance.py` (non-empty `gat
 
 ### 1. Cross-Engine Engineering Progress Matrix
 
-Auto-generated from committed run ledger (`reports/matched_swing_ledger.json`, 147 committed receipts scanned).
+Auto-generated from committed run ledger (`reports/matched_swing_ledger.json`, 149 committed receipts scanned).
 
-| Engine | Candidate Lanes | Evaluated Captures | Best IK RMS | Best Dyn RMS | Receipts | Engine Status |
-|---|---|---|---|---|---|---|
-| **Mujoco** | anthropometry, fb4_calibration, fb5_matching, fb6_parity, ground_support, matched, replays, setup_parity, unclassified, viewer, visual_layer | driver, iron | — | — | 47 | ⚙️ Engineering Milestone (G1 IK not met: 34.1 mm > 30 mm, #11044) |
-| **Pinocchio** | fb3_kinematics, fb4_calibration, fb6_parity, ground_support, matched, replays | driver, iron | — | — | 12 | ⚙️ Kinematic Milestone (Pink QP active; Crocoddyl lift in progress) |
-| **Drake** | fb3_kinematics, fb4_calibration, fb6_parity, ground_support, matched, replays | driver | — | — | 6 | ⚙️ IK 47 mm / tracking 382 mm REJECTED |
-| **Opensim** | ground_support, matched, tour_matching | driver | — | — | 11 | ⚠️ Staged (Moco track problem under MS-102) |
-| **Simscape** | native | driver | — | — | 40 | 🏛️ Historical Tour Authority (Simscape lane baseline) |
-| **Myosuite** | matched | driver | — | — | 1 | 🔬 Experimental (Fail-closed; MS-50 corrective landed) |
+| Engine        | Candidate Lanes                                                                                                                              | Evaluated Captures | Best IK RMS | Best Dyn RMS | Receipts | Engine Status                                                             |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ | ----------- | ------------ | -------- | ------------------------------------------------------------------------- |
+| **Mujoco**    | anthropometry, fb4_calibration, fb5_matching, fb6_parity, ground_support, matched, replays, setup_parity, unclassified, viewer, visual_layer | driver, iron       | —           | —            | 49       | ⚙️ Engineering Milestone (G1 IK not met: 33.0 mm > 30 mm, #11044, #11737) |
+| **Pinocchio** | fb3_kinematics, fb4_calibration, fb6_parity, ground_support, matched, replays                                                                | driver, iron       | —           | —            | 12       | ⚙️ Kinematic Milestone (Pink QP active; Crocoddyl lift in progress)       |
+| **Drake**     | fb3_kinematics, fb4_calibration, fb6_parity, ground_support, matched, replays                                                                | driver             | —           | —            | 6        | ⚙️ IK 47 mm / tracking 382 mm REJECTED                                    |
+| **Opensim**   | ground_support, matched, tour_matching                                                                                                       | driver             | —           | —            | 11       | ⚠️ Staged (Moco track problem under MS-102)                               |
+| **Simscape**  | native                                                                                                                                       | driver             | —           | —            | 40       | 🏛️ Historical Tour Authority (Simscape lane baseline)                     |
+| **Myosuite**  | matched                                                                                                                                      | driver             | —           | —            | 1        | 🔬 Experimental (Fail-closed; MS-50 corrective landed)                    |
 
 ### 2. Full-Swing Qualification Ladder (Fail-Closed Gates)
 
 Per Owner-Authorized Contract Revision (MS-100 #10374 / MS-104 #10378 / MS-106 #10380):
 Partial, reduced-model, and strength-limited outcomes do not satisfy G3 release. All six engines remain required.
 
-| Gate | Criterion | MuJoCo | Pinocchio | Drake | OpenSim | Simscape | MyoSuite | Gate Status |
-|---|---|---|---|---|---|---|---|---|
-| **G1: Kinematic Fit** | Whole-swing marker RMS $\le 30$ mm, 0 RoM violations | ✅ Passed (27.3 mm) | 🔄 In Progress | 🔄 In Progress | ⏳ Pending | 🏛️ Baseline | ❌ Blocked | **G1 Milestone Active** |
-| **G2: Dynamic Ground Support** | GRF in support polygon, floating root tracked | ✅ Passed (74.6 mm) | 🔄 In Progress | ⏳ Pending | ⏳ Pending | 🏛️ Baseline | ❌ Blocked | **Partial (MuJoCo only)** |
-| **G3: Professional Release** | Dual-club (driver+iron), all 6 engines, cross-engine verified | ⏳ Pending | ⏳ Pending | ⏳ Pending | ⏳ Pending | ⏳ Pending | ❌ Blocked | **Open (Blocks Release)** |
+| Gate                           | Criterion                                                     | MuJoCo              | Pinocchio      | Drake          | OpenSim    | Simscape    | MyoSuite   | Gate Status               |
+| ------------------------------ | ------------------------------------------------------------- | ------------------- | -------------- | -------------- | ---------- | ----------- | ---------- | ------------------------- |
+| **G1: Kinematic Fit**          | Whole-swing marker RMS $\le 30$ mm, 0 RoM violations          | ✅ Passed (27.3 mm) | 🔄 In Progress | 🔄 In Progress | ⏳ Pending | 🏛️ Baseline | ❌ Blocked | **G1 Milestone Active**   |
+| **G2: Dynamic Ground Support** | GRF in support polygon, floating root tracked                 | ✅ Passed (74.6 mm) | 🔄 In Progress | ⏳ Pending     | ⏳ Pending | 🏛️ Baseline | ❌ Blocked | **Partial (MuJoCo only)** |
+| **G3: Professional Release**   | Dual-club (driver+iron), all 6 engines, cross-engine verified | ⏳ Pending          | ⏳ Pending     | ⏳ Pending     | ⏳ Pending | ⏳ Pending  | ❌ Blocked | **Open (Blocks Release)** |
 
 ### 3. Matched Swing Release Issues Roadmap
 
-| Issue | Title | Tier | Accountable Role | Blocker / Dependency | Next Executable Action |
-|---|---|---|---|---|---|
-| [**MS-100**](https://github.com/D-sorganization/UpstreamDrift/issues/10374) (#10374) | Fail-closed physical acceptance contract and validator | Governance | `acceptance-lead` | None (spec-first) | Implement MS-100 schema and fail-closed gate validator |
-| [**MS-101**](https://github.com/D-sorganization/UpstreamDrift/issues/10375) (#10375) | Drake native full-body trajectory optimization | P1 | `drake-agent` | Drake QP solver setup | Port trajectory optimization into Drake adapter |
-| [**MS-102**](https://github.com/D-sorganization/UpstreamDrift/issues/10376) (#10376) | OpenSim Moco full-body muscle-driven tracking | P1 | `opensim-agent` | Moco CASADI license & memory budget | Assemble full-body Moco track problem |
-| [**MS-103**](https://github.com/D-sorganization/UpstreamDrift/issues/10377) (#10377) | Pinocchio Crocoddyl full-body optimal control integration | P1 | `pinocchio-agent` | Two-window terminal cost tuning | Wire Crocoddyl action models into full pipeline |
-| [**MS-104**](https://github.com/D-sorganization/UpstreamDrift/issues/10378) (#10378) | Driver and 7-iron dual-club G3 coverage across all engines | P1 | `full-body-lead` | Single-club evidence on non-MuJoCo engines | Run and record dual-club suites per engine |
-| [**MS-105**](https://github.com/D-sorganization/UpstreamDrift/issues/10379) (#10379) | Cross-engine physical convergence and numerical verification | P2 | `verification-agent` | Step-size and GRF divergence checks | Run cross-engine step convergence analysis |
-| [**MS-106**](https://github.com/D-sorganization/UpstreamDrift/issues/10380) (#10380) | Professional release gate and verified matched badge | P2 | `release-auditor` | G3 multi-engine cross-validation pass | Sign off release verification audit |
-| [**MS-107**](https://github.com/D-sorganization/UpstreamDrift/issues/10381) (#10381) | Native automated engine benchmark regression suite | P2 | `ci-infra` | Runner execution time limits | Add nightly automated cross-engine benchmark lane |
-| [**MS-108**](https://github.com/D-sorganization/UpstreamDrift/issues/10382) (#10382) | Matched swing program end-to-end evidence release audit | P2 | `governance-lead` | MS-100 through MS-106 | Final immutable evidence freeze and turnover |
+| Issue                                                                                | Title                                                        | Tier       | Accountable Role     | Blocker / Dependency                       | Next Executable Action                                 |
+| ------------------------------------------------------------------------------------ | ------------------------------------------------------------ | ---------- | -------------------- | ------------------------------------------ | ------------------------------------------------------ |
+| [**MS-100**](https://github.com/D-sorganization/UpstreamDrift/issues/10374) (#10374) | Fail-closed physical acceptance contract and validator       | Governance | `acceptance-lead`    | None (spec-first)                          | Implement MS-100 schema and fail-closed gate validator |
+| [**MS-101**](https://github.com/D-sorganization/UpstreamDrift/issues/10375) (#10375) | Drake native full-body trajectory optimization               | P1         | `drake-agent`        | Drake QP solver setup                      | Port trajectory optimization into Drake adapter        |
+| [**MS-102**](https://github.com/D-sorganization/UpstreamDrift/issues/10376) (#10376) | OpenSim Moco full-body muscle-driven tracking                | P1         | `opensim-agent`      | Moco CASADI license & memory budget        | Assemble full-body Moco track problem                  |
+| [**MS-103**](https://github.com/D-sorganization/UpstreamDrift/issues/10377) (#10377) | Pinocchio Crocoddyl full-body optimal control integration    | P1         | `pinocchio-agent`    | Two-window terminal cost tuning            | Wire Crocoddyl action models into full pipeline        |
+| [**MS-104**](https://github.com/D-sorganization/UpstreamDrift/issues/10378) (#10378) | Driver and 7-iron dual-club G3 coverage across all engines   | P1         | `full-body-lead`     | Single-club evidence on non-MuJoCo engines | Run and record dual-club suites per engine             |
+| [**MS-105**](https://github.com/D-sorganization/UpstreamDrift/issues/10379) (#10379) | Cross-engine physical convergence and numerical verification | P2         | `verification-agent` | Step-size and GRF divergence checks        | Run cross-engine step convergence analysis             |
+| [**MS-106**](https://github.com/D-sorganization/UpstreamDrift/issues/10380) (#10380) | Professional release gate and verified matched badge         | P2         | `release-auditor`    | G3 multi-engine cross-validation pass      | Sign off release verification audit                    |
+| [**MS-107**](https://github.com/D-sorganization/UpstreamDrift/issues/10381) (#10381) | Native automated engine benchmark regression suite           | P2         | `ci-infra`           | Runner execution time limits               | Add nightly automated cross-engine benchmark lane      |
+| [**MS-108**](https://github.com/D-sorganization/UpstreamDrift/issues/10382) (#10382) | Matched swing program end-to-end evidence release audit      | P2         | `governance-lead`    | MS-100 through MS-106                      | Final immutable evidence freeze and turnover           |
 
 <!-- end-generated:matched-swing-status -->
 

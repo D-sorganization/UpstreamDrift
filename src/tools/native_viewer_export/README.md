@@ -38,12 +38,12 @@ python3 -m src.tools.native_viewer_export \
   `--no-hud` writes clean frames. `--speeds= --impact-window 0.6
 --impact-speed 0.25` writes only the 0.25x impact clip. Impact time is
   `--impact-time`, else the bundle provenance `impact_time_s`, else
-  `model_appearance.club_face.impact_frame` on the `Clubhead` frame (closest
-  approach to address with the ball-radius check), else the last sample. No
-  ball is drawn.
+  `model_appearance.club_face.ball_passage` on the `Clubhead` frame (the
+  sub-sample instant of closest approach to address, with the height and
+  ball-radius checks), else the last sample. No ball is drawn.
 - Force arrows use the `body_weight` scale mode when the model mass is known:
   one body weight is 0.5 m and the ceiling is 3 m (`default_glyph_style`).
-- `--speeds 1,0.5` (default) writes one clip set per playback speed, named
+- `--speeds 1,0.5,0.25` (default: full, half, quarter) writes one clip set per playback speed, named
   `_1x`, `_0p5x`, `_0p25x`. Frames are chosen by the time-based
   `video_timing.FrameSchedule` and interpolated when the source step is coarse.
 - `--impact-window 0.1` (with optional `--impact-time`) adds a `_impact_0p1x`
