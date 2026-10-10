@@ -1,0 +1,40 @@
+academic 0 18.638649558422177 (np.float64(-5.920650000000001), np.float64(183.60165)) ['−20', '0', '20', '40', '60', '80', '100', '120', '140', '160', '180'] ['0.03', '0.06', '0.09']
+academic 1 18.638649558422095 (np.float64(-5.920650000000001), np.float64(183.60165)) ['−20', '0', '20', '40', '60', '80', '100', '120', '140', '160', '180'] ['0.03', '0.06', '0.09']
+academic 2 18.638649558421932 (np.float64(-5.920650000000001), np.float64(183.60165)) ['−20', '0', '20', '40', '60', '80', '100', '120', '140', '160', '180'] ['0.03', '0.06', '0.09']
+.social 0 50.1395454072993 (np.float64(-5.920650000000001), np.float64(183.60165)) ['−20', '0', '20', '40', '60', '80', '100', '120', '140', '160', '180'] ['0.03', '0.06', '0.09']
+social 1 50.1395454072993 (np.float64(-5.920650000000001), np.float64(183.60165)) ['−20', '0', '20', '40', '60', '80', '100', '120', '140', '160', '180'] ['0.03', '0.06', '0.09']
+social 2 50.1395454072993 (np.float64(-5.920650000000001), np.float64(183.60165)) ['−20', '0', '20', '40', '60', '80', '100', '120', '140', '160', '180'] ['0.03', '0.06', '0.09']
+.
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 20 durations =============================
+2.97s call     tests/tools/shot_pattern_analysis/test_marginal_tick_gutter.py::test_main_to_marginal_tick_boundary_has_four_point_gutter[academic]
+2.36s call     tests/tools/shot_pattern_analysis/test_marginal_tick_gutter.py::test_main_to_marginal_tick_boundary_has_four_point_gutter[social]
+0.14s setup    tests/tools/shot_pattern_analysis/test_marginal_tick_gutter.py::test_main_to_marginal_tick_boundary_has_four_point_gutter[academic]
+0.01s setup    tests/tools/shot_pattern_analysis/test_marginal_tick_gutter.py::test_main_to_marginal_tick_boundary_has_four_point_gutter[social]
+
+(2 durations < 0.005s hidden.  Use -vv to show these durations.)

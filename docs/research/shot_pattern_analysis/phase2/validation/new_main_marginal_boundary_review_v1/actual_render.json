@@ -1,0 +1,617 @@
+{
+  "renderer_sha256": "ed1b840b0b19df5c4e73ccb9dfef0c1ca826c5f0d3ff7ff4ac7913396013df54",
+  "inputs": {
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean5_curve2_rotation2_combined2/manifest.json": "24c8f5cbca55bb2312a14b8d88160a59b2a55f69ac8b74425e16296a129e9746",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean5_curve2_rotation2_combined2/summary.json": "921f4fb57442ada57884d0a22b1744b6f92ee73d07de37d1c5dceede961e87ac",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean5_curve2_rotation2_combined2/shots.csv.gz": "709c88c2f76c051dd32d9bdb909da947b42dfcfa739fbb214f92ea61d9c28776",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/seven_iron_lean10_curve2_rotation2_shaft_only/manifest.json": "f4b1f56b15ff9bb75c49cda16432f52e7416ae72be5adce52d79c2621f65a0e3",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/seven_iron_lean10_curve2_rotation2_shaft_only/summary.json": "c822ac9009fb94eef8ef8c0822928b96cc16d980855e477e6a807b48cae561fd",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/seven_iron_lean10_curve2_rotation2_shaft_only/shots.csv.gz": "ecd0710b9217a93ffc98186e542b57d1311450f6d38db01faf6a418707215a47",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/pitching_wedge_lean5_curve2_rotation2_combined2/manifest.json": "2901538bfd186c7ede9984cb5892b1352b601620e14eb21b5721236c4e1e0403",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/pitching_wedge_lean5_curve2_rotation2_combined2/summary.json": "1bdbe8d192de62c013ea817607cfd6aaf3f83397861caf2a0d238494d3b3afd7",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/pitching_wedge_lean5_curve2_rotation2_combined2/shots.csv.gz": "87d8cce8021009395968efb2f3afa2e700b7e4db4fb73d04878663ac26e19e4d"
+  },
+  "outputs": [
+    {
+      "file": "driver_lean5_curve2_rotation2_combined2_academic.png",
+      "sha256": "901181aa5dbb04cea4bc5b9e6c43e003befaa0ffa2954abec16a898bda491546",
+      "preview": "driver_lean5_curve2_rotation2_combined2_academic_1080.png",
+      "preview_sha256": "a9f7b425c8e8ebf5c800836c167e31c15709260cf87b7ddc5ad7f7090e4edb59",
+      "panels": [
+        {
+          "boundary_gutter_points": 20.77959769215686,
+          "marginal_neighbor_gaps_points": [
+            23.06532023207231
+          ],
+          "xlim": [
+            -5.920716869126384,
+            183.60190899962572
+          ],
+          "ylim": [
+            -14.985838564511788,
+            48.40016325887452
+          ],
+          "main_ticks": [
+            -20.0,
+            0.0,
+            20.0,
+            40.0,
+            60.0,
+            80.0,
+            100.0,
+            120.0,
+            140.0,
+            160.0
+          ],
+          "marginal_ticks": [
+            0.0,
+            0.08
+          ]
+        },
+        {
+          "boundary_gutter_points": 20.77959769215686,
+          "marginal_neighbor_gaps_points": [
+            23.06532023207231
+          ],
+          "xlim": [
+            -5.920716869126384,
+            183.60190899962572
+          ],
+          "ylim": [
+            -14.985838564511788,
+            48.40016325887452
+          ],
+          "main_ticks": [
+            -20.0,
+            0.0,
+            20.0,
+            40.0,
+            60.0,
+            80.0,
+            100.0,
+            120.0,
+            140.0,
+            160.0
+          ],
+          "marginal_ticks": [
+            0.0,
+            0.08
+          ]
+        },
+        {
+          "boundary_gutter_points": 20.77959769215686,
+          "marginal_neighbor_gaps_points": [
+            23.065320232072228
+          ],
+          "xlim": [
+            -5.920716869126384,
+            183.60190899962572
+          ],
+          "ylim": [
+            -14.985838564511788,
+            48.40016325887452
+          ],
+          "main_ticks": [
+            -20.0,
+            0.0,
+            20.0,
+            40.0,
+            60.0,
+            80.0,
+            100.0,
+            120.0,
+            140.0,
+            160.0
+          ],
+          "marginal_ticks": [
+            0.0,
+            0.08
+          ]
+        }
+      ]
+    },
+    {
+      "file": "driver_lean5_curve2_rotation2_combined2_social.png",
+      "sha256": "bf10ccce7d4dcda7441a4c93884e21950ab0bc6b569ea9c7a0a04f214dfe512c",
+      "preview": "driver_lean5_curve2_rotation2_combined2_social_1080.png",
+      "preview_sha256": "2880ed8478c9e73cd8fe927fbaf6ebf3e717183509bc9926f56e1c29b10406cc",
+      "panels": [
+        {
+          "boundary_gutter_points": 45.69171808858826,
+          "marginal_neighbor_gaps_points": [
+            19.395254330323315,
+            19.395254330323233
+          ],
+          "xlim": [
+            -5.920716869126384,
+            183.60190899962572
+          ],
+          "ylim": [
+            -14.985838564511788,
+            48.40016325887452
+          ],
+          "main_ticks": [
+            -20.0,
+            0.0,
+            20.0,
+            40.0,
+            60.0,
+            80.0,
+            100.0,
+            120.0,
+            140.0,
+            160.0,
+            180.0
+          ],
+          "marginal_ticks": [
+            0.04,
+            0.08,
+            0.12
+          ]
+        },
+        {
+          "boundary_gutter_points": 45.69171808858826,
+          "marginal_neighbor_gaps_points": [
+            19.395254330323315,
+            19.395254330323233
+          ],
+          "xlim": [
+            -5.920716869126384,
+            183.60190899962572
+          ],
+          "ylim": [
+            -14.985838564511788,
+            48.40016325887452
+          ],
+          "main_ticks": [
+            -20.0,
+            0.0,
+            20.0,
+            40.0,
+            60.0,
+            80.0,
+            100.0,
+            120.0,
+            140.0,
+            160.0,
+            180.0
+          ],
+          "marginal_ticks": [
+            0.04,
+            0.08,
+            0.12
+          ]
+        },
+        {
+          "boundary_gutter_points": 45.69171808858826,
+          "marginal_neighbor_gaps_points": [
+            19.395254330323315,
+            19.395254330323233
+          ],
+          "xlim": [
+            -5.920716869126384,
+            183.60190899962572
+          ],
+          "ylim": [
+            -14.985838564511788,
+            48.40016325887452
+          ],
+          "main_ticks": [
+            -20.0,
+            0.0,
+            20.0,
+            40.0,
+            60.0,
+            80.0,
+            100.0,
+            120.0,
+            140.0,
+            160.0,
+            180.0
+          ],
+          "marginal_ticks": [
+            0.04,
+            0.08,
+            0.12
+          ]
+        }
+      ]
+    },
+    {
+      "file": "seven_iron_lean10_curve2_rotation2_shaft_only_academic.png",
+      "sha256": "174141f7f837bb4ced1f3dad76f105fcecdc6462fa97aadd32f945f94aea0741",
+      "preview": "seven_iron_lean10_curve2_rotation2_shaft_only_academic_1080.png",
+      "preview_sha256": "d18a65d20123e5bf46271d4301db46f818fcf299c4e7eb19f255cc63caf6cb15",
+      "panels": [
+        {
+          "boundary_gutter_points": 11.467764616542159,
+          "marginal_neighbor_gaps_points": [
+            25.89352205644886
+          ],
+          "xlim": [
+            136.58174718629968,
+            153.38646192592375
+          ],
+          "ylim": [
+            -29.643488967425952,
+            28.375480997905704
+          ],
+          "main_ticks": [
+            136.0,
+            138.0,
+            140.0,
+            142.0,
+            144.0,
+            146.0,
+            148.0,
+            150.0,
+            152.0
+          ],
+          "marginal_ticks": [
+            0.0,
+            0.05
+          ]
+        },
+        {
+          "boundary_gutter_points": 11.4677646165422,
+          "marginal_neighbor_gaps_points": [
+            25.89352205644882
+          ],
+          "xlim": [
+            136.58174718629968,
+            153.38646192592375
+          ],
+          "ylim": [
+            -29.643488967425952,
+            28.375480997905704
+          ],
+          "main_ticks": [
+            136.0,
+            138.0,
+            140.0,
+            142.0,
+            144.0,
+            146.0,
+            148.0,
+            150.0,
+            152.0
+          ],
+          "marginal_ticks": [
+            0.0,
+            0.05
+          ]
+        },
+        {
+          "boundary_gutter_points": 11.467764616542118,
+          "marginal_neighbor_gaps_points": [
+            25.89352205644882
+          ],
+          "xlim": [
+            136.58174718629968,
+            153.38646192592375
+          ],
+          "ylim": [
+            -29.643488967425952,
+            28.375480997905704
+          ],
+          "main_ticks": [
+            136.0,
+            138.0,
+            140.0,
+            142.0,
+            144.0,
+            146.0,
+            148.0,
+            150.0,
+            152.0
+          ],
+          "marginal_ticks": [
+            0.0,
+            0.05
+          ]
+        }
+      ]
+    },
+    {
+      "file": "seven_iron_lean10_curve2_rotation2_shaft_only_social.png",
+      "sha256": "11c19890408ded0fdea5744c2e4974f84cbda28d4b67e42d626dfbfe6a0f9dcb",
+      "preview": "seven_iron_lean10_curve2_rotation2_shaft_only_social_1080.png",
+      "preview_sha256": "8505a27df9c959077ec0487d6638ab3fa82ecbd80905abfc257f9bcb242266e6",
+      "panels": [
+        {
+          "boundary_gutter_points": 74.88817164937959,
+          "marginal_neighbor_gaps_points": [
+            16.56492054186223,
+            16.56492054186231
+          ],
+          "xlim": [
+            136.58174718629968,
+            153.38646192592375
+          ],
+          "ylim": [
+            -29.643488967425952,
+            28.375480997905704
+          ],
+          "main_ticks": [
+            136.0,
+            138.0,
+            140.0,
+            142.0,
+            144.0,
+            146.0,
+            148.0,
+            150.0,
+            152.0
+          ],
+          "marginal_ticks": [
+            0.025,
+            0.05,
+            0.07500000000000001
+          ]
+        },
+        {
+          "boundary_gutter_points": 74.88817164937959,
+          "marginal_neighbor_gaps_points": [
+            16.56492054186223,
+            16.56492054186231
+          ],
+          "xlim": [
+            136.58174718629968,
+            153.38646192592375
+          ],
+          "ylim": [
+            -29.643488967425952,
+            28.375480997905704
+          ],
+          "main_ticks": [
+            136.0,
+            138.0,
+            140.0,
+            142.0,
+            144.0,
+            146.0,
+            148.0,
+            150.0,
+            152.0
+          ],
+          "marginal_ticks": [
+            0.025,
+            0.05,
+            0.07500000000000001
+          ]
+        },
+        {
+          "boundary_gutter_points": 74.88817164937959,
+          "marginal_neighbor_gaps_points": [
+            16.56492054186223,
+            16.56492054186231
+          ],
+          "xlim": [
+            136.58174718629968,
+            153.38646192592375
+          ],
+          "ylim": [
+            -29.643488967425952,
+            28.375480997905704
+          ],
+          "main_ticks": [
+            136.0,
+            138.0,
+            140.0,
+            142.0,
+            144.0,
+            146.0,
+            148.0,
+            150.0,
+            152.0
+          ],
+          "marginal_ticks": [
+            0.025,
+            0.05,
+            0.07500000000000001
+          ]
+        }
+      ]
+    },
+    {
+      "file": "pitching_wedge_lean5_curve2_rotation2_combined2_academic.png",
+      "sha256": "04b9aef35246b2377cf37146744382ba86d7421d2c87bbd0af49c6cc7f7de7bf",
+      "preview": "pitching_wedge_lean5_curve2_rotation2_combined2_academic_1080.png",
+      "preview_sha256": "0c10b6398ca48b73aee16e45230e93ee128fccfb2631ee3d6dad3b698864ad60",
+      "panels": [
+        {
+          "boundary_gutter_points": 22.920956614767633,
+          "marginal_neighbor_gaps_points": [
+            23.1018079867856
+          ],
+          "xlim": [
+            65.02121736351518,
+            111.19667879024058
+          ],
+          "ylim": [
+            -13.600777600452355,
+            11.133417591328767
+          ],
+          "main_ticks": [
+            65.0,
+            70.0,
+            75.0,
+            80.0,
+            85.0,
+            90.0,
+            95.0,
+            100.0,
+            105.0
+          ],
+          "marginal_ticks": [
+            0.0,
+            0.12
+          ]
+        },
+        {
+          "boundary_gutter_points": 22.920956614767594,
+          "marginal_neighbor_gaps_points": [
+            23.101807986785644
+          ],
+          "xlim": [
+            65.02121736351518,
+            111.19667879024058
+          ],
+          "ylim": [
+            -13.600777600452355,
+            11.133417591328767
+          ],
+          "main_ticks": [
+            65.0,
+            70.0,
+            75.0,
+            80.0,
+            85.0,
+            90.0,
+            95.0,
+            100.0,
+            105.0
+          ],
+          "marginal_ticks": [
+            0.0,
+            0.12
+          ]
+        },
+        {
+          "boundary_gutter_points": 22.920956614767512,
+          "marginal_neighbor_gaps_points": [
+            23.101807986785644
+          ],
+          "xlim": [
+            65.02121736351518,
+            111.19667879024058
+          ],
+          "ylim": [
+            -13.600777600452355,
+            11.133417591328767
+          ],
+          "main_ticks": [
+            65.0,
+            70.0,
+            75.0,
+            80.0,
+            85.0,
+            90.0,
+            95.0,
+            100.0,
+            105.0
+          ],
+          "marginal_ticks": [
+            0.0,
+            0.12
+          ]
+        }
+      ]
+    },
+    {
+      "file": "pitching_wedge_lean5_curve2_rotation2_combined2_social.png",
+      "sha256": "f1a9062c20a3284b4edb3693c96b1aae7c2d6dc643558b24ccb556b1e80b2573",
+      "preview": "pitching_wedge_lean5_curve2_rotation2_combined2_social_1080.png",
+      "preview_sha256": "4909053e6bce19d547138be03502c6e27eaa552cb42afa86593ca83f9856fe35",
+      "panels": [
+        {
+          "boundary_gutter_points": 48.90161564643611,
+          "marginal_neighbor_gaps_points": [
+            19.433051117383165,
+            19.433051117383247
+          ],
+          "xlim": [
+            65.02121736351518,
+            111.19667879024058
+          ],
+          "ylim": [
+            -13.600777600452355,
+            11.133417591328767
+          ],
+          "main_ticks": [
+            65.0,
+            70.0,
+            75.0,
+            80.0,
+            85.0,
+            90.0,
+            95.0,
+            100.0,
+            105.0,
+            110.0
+          ],
+          "marginal_ticks": [
+            0.06,
+            0.12,
+            0.18
+          ]
+        },
+        {
+          "boundary_gutter_points": 48.90161564643611,
+          "marginal_neighbor_gaps_points": [
+            19.433051117383165,
+            19.433051117383247
+          ],
+          "xlim": [
+            65.02121736351518,
+            111.19667879024058
+          ],
+          "ylim": [
+            -13.600777600452355,
+            11.133417591328767
+          ],
+          "main_ticks": [
+            65.0,
+            70.0,
+            75.0,
+            80.0,
+            85.0,
+            90.0,
+            95.0,
+            100.0,
+            105.0,
+            110.0
+          ],
+          "marginal_ticks": [
+            0.06,
+            0.12,
+            0.18
+          ]
+        },
+        {
+          "boundary_gutter_points": 48.90161564643611,
+          "marginal_neighbor_gaps_points": [
+            19.433051117383165,
+            19.433051117383247
+          ],
+          "xlim": [
+            65.02121736351518,
+            111.19667879024058
+          ],
+          "ylim": [
+            -13.600777600452355,
+            11.133417591328767
+          ],
+          "main_ticks": [
+            65.0,
+            70.0,
+            75.0,
+            80.0,
+            85.0,
+            90.0,
+            95.0,
+            100.0,
+            105.0,
+            110.0
+          ],
+          "marginal_ticks": [
+            0.06,
+            0.12,
+            0.18
+          ]
+        }
+      ]
+    }
+  ],
+  "status": "numerical_geometry_checks_passed_visual_review_separate"
+}
