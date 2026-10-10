@@ -1,0 +1,15 @@
+from pathlib import Path
+import hashlib,json,zipfile,datetime,shutil
+from scripts.research.shot_pattern_analysis.archive_data import verify_archives
+bundle=Path('/tmp/shot-pattern-publication-bundles-v1/primary'); restore=Path('/tmp/shot-pattern-publication-restored-v1'); root=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift'); e=root/'docs/research/shot_pattern_analysis/phase2/validation/publication_primary_bundles_v1'
+assert not restore.exists(); restore.mkdir(); e.mkdir(exist_ok=True)
+m=json.loads((bundle/'archive_manifest.json').read_text()); count=verify_archives(bundle)
+for name in m['archives']:
+ with zipfile.ZipFile(bundle/name) as z:z.extractall(restore)
+h=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+assert all(h(restore/k)==v['sha256'] for k,v in m['files'].items())
+f=restore/'final_figures_v1/figure_manifest.json'; fig=json.loads(f.read_text()); assert all(h(f.parent/k)==v for k,v in fig['outputs'].items())
+assert len(list(p for p in restore.rglob('*') if p.is_file()))==count==690
+shutil.copyfile(bundle/'archive_manifest.json',e/'archive_manifest.json'); shutil.copyfile(Path(__file__),e/'executed_restoration.py.txt')
+(e/'restoration.json').write_text(json.dumps({'status':'local_fresh_restoration_pass_remote_delivery_pending','checked_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'bundle_root':str(bundle),'restored_root':str(restore),'files_verified':count,'figure_outputs_verified':len(fig['outputs']),'manifest_sha256':h(f),'archives':m['archives'],'max_bundle_bytes':500000000},indent=2)+'\n')
+print('Primary publication: all690files restored;689figureoutputs verified; remote delivery pending')

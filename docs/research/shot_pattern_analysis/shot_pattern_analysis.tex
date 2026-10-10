@@ -4,6 +4,10 @@
 \title{Straight, Draw, and Fade: Shot Pattern Variance}
 \author{UpstreamDrift}
 \date{October 8, 2026}
+% Compilation Attempt: 2026-10-10, Built-In Codex Compiler.
+% Result: compile-failed before source parsing; Tectonic src/config.rs:154:18
+% panicked because default_bundle_v33.tar.index.gz was not cached and could
+% not be fetched from relay.fullyjustified.net. Source compilation unverified.
 \begin{document}
 \maketitle
 \section{Current Matched-Delivery Study}
@@ -42,10 +46,120 @@ common distance from within-lean matching; re-matching delivery still prevents
 a causal claim that curvature or shaft lean alone improves accuracy.
 
 The saved original and supplemental simulations and independent data audits are
-complete. Final graphical and report acceptance remains pending. No final
-phase-two headline or strokes-gained conclusion is asserted in this historical
-reference until the qualified report is assembled and reviewed. The retained
+complete. Final graphical and report acceptance remains pending. The numerical examples below are independently checked selected results; they
+do not confer final graphical or publication acceptance. Complete report
+assembly and review remain pending. The retained
 phase-one results below must not be presented as phase-two outcomes.
+
+
+\subsection{Phase-Two Inventory and Statistical Populations}
+The original within-lean inventory contains 324 planned cells: 270 completed
+and 54 explicitly unavailable, with 8,100,000 attempted shot rows in completed
+cells. The fixed-target inventory contains 72 planned cells: 52 completed and
+20 unavailable, with 1,560,000 attempted rows. The separately declared bounds
+supplement contains 26 distinct executed cells and 780,000 attempted rows;
+779,712 are supported and 288 remain unsupported. Four control aliases reuse
+existing zero-lean supplemental cells and add no shots. Original unavailable
+records remain unchanged. Expanded bounds resolve some nominal-search failures;
+an original bounded-search failure is not proof of physical impossibility.
+See the \href{phase2/validation/independent_primary_final_audit.json}{Primary Audit},
+\href{phase2/validation/independent_control_final_audit.json}{Control Audit}, and
+\href{phase2/validation/supplement_final_completion.json}{Supplement Completion}.
+
+Dispersion and directional statistics use each pattern's supported endpoints.
+Within-cell SG benefits use the common three-pattern supported indices.
+Between-condition relative benefits use the intersection of all six populations,
+with paired differences formed before bootstrap resampling. These denominators
+are different; unsupported shots are retained in accounting rather than retried.
+The selected examples below come from 24 zero-lean cells and 72 pattern rows,
+covering three clubs, two curve scales, two shaft SDs and shaft-only versus
+combined delivery noise. Four PW strong-curve cells use the explicitly labelled
+supplement. This selection is not the complete factorial inventory.
+
+\subsection{Rigid Shaft Twist, Delivered Loft, and Forward Lean}
+Phase two pitches a fixed physical club, unlike the historical phase-one
+axis-only lean control. Let static loft be $L$, lie be $\beta$, forward lean
+be $\ell$, nominal right-positive face direction be $f$, and shaft twist be
+$\theta$. In the native forward/left/up frame,
+\[
+ \mathbf n_0=(\cos L,0,\sin L)^T,\qquad
+ \mathbf s_0=(0,\cos\beta,\sin\beta)^T,
+\]
+\[
+ Q=R_z(-f)R_y(\ell),\qquad \mathbf s=Q\mathbf s_0,\qquad
+ \mathbf n=R_{\mathbf s}(\theta)Q\mathbf n_0.
+\]
+Here $R_{\mathbf s}$ is Rodrigues rotation about the delivered shaft axis.
+Zero twist gives delivered loft $\lambda=L-\ell$. The local sensitivities are
+\[
+ \frac{df}{d\theta}=-\frac{\sin\beta\cos L}{\cos(L-\ell)},\qquad
+ \frac{d\lambda}{d\theta}=-\cos\beta,\qquad
+ \frac{d\lambda}{df}=\cot\beta\frac{\cos(L-\ell)}{\cos L}.
+\]
+Thus closing the face by this assumed rotation tends to reduce loft. Fixed
+shaft-twist SD has the same first-order loft SD across lean, but not the same
+face-angle SD. Twist is an orientation error, not clubhead closure angular
+velocity. Finite-angle geometry and impact/flight determine the endpoints;
+these derivatives do not require every closed-face miss to travel farther.
+The \href{phase2/DESIGN.md}{Phase-Two Design} and
+\href{phase2/validation/GEOMETRY_DERIVATIVES.md}{Independent Derivative Checks}
+provide the equations and their numerical checks.
+
+\subsection{Club-Dependent Long-Left and Short-Right Behavior}
+For the straight, zero-lean, ordinary-curve reference with shaft-only noise,
+let $X$ be downrange distance and $Y$ the reported right-positive lateral
+coordinate. ``Left'' means $Y<0$, ``right'' means $Y>0$, and long/short refer
+to $X-X_T$, not total radial range. Each row below has 10,000 supported shots.
+The side-conditioned mean errors are descriptive sample quantities, not
+causal effects of selecting a side and not confidence intervals.
+
+\begin{center}
+\small
+\begin{tabular}{lrrrrr}
+\toprule
+Club & Twist SD & $\rho(Y,X)$ & Left Error & Right Error & Mean Error\\
+ & ($^\circ$) & & (m) & (m) & (m)\\
+\midrule
+Driver & 1 & +0.9788 & -4.214 & +3.190 & -0.505 \\
+Driver & 2 & +0.9186 & -9.513 & +5.473 & -2.005 \\
+7-Iron & 1 & -0.9960 & +0.878 & -0.984 & -0.055 \\
+7-Iron & 2 & -0.9841 & +1.637 & -2.069 & -0.220 \\
+Pitching Wedge & 1 & -0.9982 & +0.896 & -0.939 & -0.023 \\
+Pitching Wedge & 2 & -0.9930 & +1.740 & -1.922 & -0.095 \\
+\bottomrule
+\end{tabular}
+\end{center}
+Targets are 178.949 m for driver, 127.882 m for 7-iron, and 77.402 m for PW.
+In this conditional model the 7-iron and PW exhibit long-left/short-right
+association, while the driver exhibits the opposite association. This is
+consistent with loft reduction affecting launch, spin and ball speed together;
+it is not evidence that a universal carry rule follows from face closure.
+Increasing shaft variability also shifts realized mean downrange distance,
+even though the zero-error nominal is matched to the same target. The
+\href{phase2/validation/selected_headline_traceability_v1/review.json}{Exact Selected Numeric Rows}
+and \href{phase2/validation/selected_headline_traceability_v1/astra_review.json}{Independent Field-by-Field Review}
+bind the source summaries and full-precision values. No new simulation or
+statistical fit supplies this table.
+
+\subsection{Distance Confounding and Scoring Interpretation}
+Nominal landing matching removes an initial target mismatch; it does not
+force equal realized carry distributions. Within-lean targets may differ
+across lean. Fixed-target controls hold the physical reference distance while
+rematching face, path and speed. Consequently, a change in spread or SG between
+these conditions cannot be uniquely attributed to shaft lean, curvature or
+distance alone. Lateral SD, downrange SD, bias and target error must be read
+together. Marginal statistics cannot partition their causal contributions.
+
+For example, the zero-lean driver, ordinary-curve, one-degree shaft-only
+Draw has relative SG $+7.46156\times10^{-5}$ per shot, with paired 95\%
+Monte Carlo interval $[-7.10405\times10^{-5},\;2.18961\times10^{-4}]$.
+Its sign alone does not establish an advantage; the interval includes zero.
+The estimate uses the hypothetical tee/fairway/rough context and the common
+three-pattern population of 10,000, not a measured golfer or a round score.
+Irons instead use the approach/green context. A smaller lateral width does
+not necessarily improve scoring when downrange error, target bias and lies
+change. Small sampling intervals do not include head-parameter uncertainty,
+impact discrepancy or the approximation in the historical SG benchmark.
 
 \subsection{Dependence on Assumed Head Properties}
 A separate deterministic sensitivity check holds face, path and shaft twist at
@@ -82,7 +196,12 @@ execution receipt} preserve these cases and their unsupported outcomes.
 This model dependence is distinct from finite-sample Monte Carlo uncertainty;
 small statistical intervals do not establish empirical impact-model accuracy.
 
+\clearpage
 \section{Historical Phase-One Status and Scope}
+All sections from this point onward describe phase one. Their delivery
+geometry, impact model, aiming procedure, seed and results are historical;
+they are not the phase-two matched-delivery method or results.
+
 The original four driver result bundles are historical controls from a
 superseded impact approximation: tangential impulse changed spin but not
 linear velocity. The completed corrected three-club experiments replace their

@@ -53,11 +53,15 @@ The v4 wrapper and its 16 red-to-green guard tests are in `validation/supplement
 
 Publication packaging: retain reports, numerical summaries, manifests and restoration instructions in Git. Preserve every final PNG/PDF/SVG in deterministic release bundles of at most 500 MB using the existing qualified archive API. Fresh-restoration and remote-download verification remain required; no release has been published. The measured 1,490,239,616-byte outgoing pack predates later commits and excludes final graphics; remeasure before pushing. Do not rewrite history or silently omit figures.
 
+## Local Publication Bundle Checkpoint
+
+Primary graphics are packaged as `/tmp/shot-pattern-publication-bundles-v1/primary/final_figures_v1-001.zip` (223,739,795 bytes). Fresh restoration verified all 690 members and 689 figure-manifest outputs. Inventory and receipt: `validation/publication_primary_bundles_v1/`. This is local verification only; release upload and remote download remain pending.
+
 ## Selected Headline and Editor Checkpoint
 
 The independent selected-headline traceability review covers 24 zero-lean cells and 72 pattern rows, including explicitly labeled supplemental PW cells. Root and Astra agree on saved-source hashes, nominal matching, numeric extraction and population denominators. Evidence: `validation/selected_headline_traceability_v1/`; root receipt SHA-256 `f4cc8ab15c65167617ecda4be1ae408c47b1039171cb44ffd4a63d5f3cd515cd`, Astra receipt `94cfc860a0a3708f7b435ae4ca0094dfc9ba05faf31f5f70de057ac555f34fdb`. This does not accept the unfinished publication.
 
-The latest user-requested built-in LaTeX check reproduced the Tectonic `src/config.rs:154:18` panic while fetching the uncached TeX bundle, before document parsing. The existing article and editor remain unchanged. The exposed tool provides no compiler cache or network configuration; compilation is unverified until that app-level failure is repaired. See `validation/latex_editor_compiler_followup.json`. Do not treat another host's successful HTTP request as editor compilation evidence.
+The latest user-requested built-in LaTeX check reproduced the Tectonic `src/config.rs:154:18` panic while fetching the uncached TeX bundle, before document parsing. The existing editor remains open. The article now includes accepted phase-two inventories, geometric derivatives, six club/SD directional rows, and a source-bound SG example; historical results remain separately labelled. The exposed tool provides no compiler cache or network configuration; compilation is unverified until that app-level failure is repaired. See `validation/latex_editor_compiler_followup.json`. Do not treat another host's successful HTTP request as editor compilation evidence.
 
 ## Completed Numerical Data
 

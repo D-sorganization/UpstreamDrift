@@ -70,6 +70,17 @@
       "editor_replaced": false,
       "separate_pdf_compiled": false,
       "check_context": "User asks to address Rust backtrace in right-panel article preview; reproduced through built-in compiler."
+    },
+    {
+      "checked_utc": "2026-10-10T10:11:25.441948+00:00",
+      "source_sha256": "9b136fb6d73ff240ceceb250b3ba701a2c0d1db7b8b607c8febb60e8bf91d4eb",
+      "result": "compile-failed",
+      "failure_stage": "Tectonic bundle initialization before document parsing",
+      "diagnostic": "src/config.rs:154:18 Result::unwrap on Err: uncached bundle cannot be fetched from https://relay.fullyjustified.net/default_bundle_v33.tar.index.gz",
+      "source_changed": true,
+      "editor_replaced": false,
+      "separate_pdf_compiled": false,
+      "check_context": "Compiled existing article after source-backed phase-two geometric and directional findings were added; no source diagnostics reached."
     }
   ]
 }
