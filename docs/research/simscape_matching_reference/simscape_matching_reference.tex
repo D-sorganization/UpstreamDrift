@@ -5528,7 +5528,8 @@ and the two-hand load split is not resolved.
   \path{docs/development/opensim_tour_matching/evidence/} are historical
   inputs pinned by hash, and keep their original club.
 \item The Rajagopal hand meshes are unchanged.
-\item The tracked legs are a planted-feet assumption, not a measurement.
+\item By default the tracked legs are a planted-feet assumption, not a
+  measurement; the capture-planted feet of the next subsection are opt-in.
 \end{itemize}
 Reproduce as follows:
 \begin{itemize}
@@ -5539,6 +5540,125 @@ Reproduce as follows:
 \item renders, under xvfb only:
   \texttt{python3 scripts/render\_msk\_club.py --geometry <dir>}.
 \end{itemize}
+
+\subsection{Pelvis and Upper-Trunk Turn Targets (Issue \#12042, Slice 4)}
+\label{sec:osv9_turn_targets}
+The landmark-only tracking above follows six joint centres of its MuJoCo
+source swing. Two hip centres 0.18 m apart barely constrain pelvis yaw
+against the lumbar, so on capture A the Rajagopal pelvis stayed nearly
+square ($33.5^\circ$ at the top against $40.9^\circ$ in the markers,
+\texttt{pelvis\_rotation} $-29^\circ$, \texttt{lumbar\_rotation} $-74^\circ$)
+and the thorax over-turned to $126^\circ$. Slice 4 adds two opt-in inputs to
+\texttt{msk\_club\_tracking.track\_swing}, built by
+\texttt{msk\_turn\_targets}:
+\begin{itemize}
+\item \emph{Turn targets.} The capture's pelvis and upper-trunk lines
+  (Section~\ref{sec:turn_definitions}, shared module
+  \texttt{swing\_comparison.turn}, markers \texttt{WaistLeft}/\texttt{WaistRight}
+  and \texttt{BackLeft}/\texttt{BackRight}) are interpolated linearly at each
+  tracked row's time; a row outside the valid marker span carries no target
+  (NaN, never zero). The fixture row $k$ is capture time $0.002\,k$~s
+  (\texttt{FIXTURE\_DT\_S}; the fixture's event times agree with the
+  capture's within 7 ms). The model lines, measured in the native world, are
+  the hip-centre line (\texttt{femur\_r} to \texttt{femur\_l} origins) and
+  the \texttt{torso} lateral axis ($-z$). With $\psi^{\mathrm{ref}}_s$ the
+  model yaw of segment $s$ at the calibrated address pose and $\theta_s(t)$
+  the marker turn (positive in the backswing), each frame adds the residual
+  \begin{equation}
+  r_s = \frac{\operatorname{wrap}\big(\psi_s(\mathbf{q}) -
+  (\psi^{\mathrm{ref}}_s - \theta_s(t))\big)}{w_\psi},\qquad
+  w_\psi = 0.02~\mathrm{rad},
+  \end{equation}
+  so a constant marker-to-model heading offset at address cancels and only
+  the turn is imposed. $w_\psi$ (about $1.1^\circ$) equals the lead-hand
+  rotation weight and dominates the 4 cm landmarks where the source and the
+  capture disagree.
+\item \emph{Capture-planted feet.} The square synthetic stance is replaced by
+  each foot's markers at address: medians over the shared address window
+  (\texttt{foot\_progression.address\_window}), the corrected heel-to-toe
+  long axis (\texttt{marker\_long\_axis} with
+  \texttt{ANKLE\_LATERAL\_OFFSET\_M}), and the ankle centre as
+  \texttt{*AnkleOut} moved medially by the OSV-6 malleolus offset
+  \texttt{hip\_calibration.ANKLE\_OUT\_LATERAL\_M}. The foot template is laid
+  along these axes with its heights unchanged (feet flat on the floor).
+\end{itemize}
+Without either input the tracking is unchanged (the baseline below
+reproduces the issue \#12042 audit within $1^\circ$ at the top).
+
+\paragraph{Results.}
+\texttt{scripts/msk\_turn\_audit.py} tracks every second fixture row plus the
+event rows (455 frames for A, 459 for B) of the golf humanoid; the capture-B run uses
+an iron grip calibration of the golf humanoid made in the run (status 2,
+palm gaps below 0.04 mm, landmark RMS 15 mm), which is not committed. Turn
+from address in degrees, top / impact; the Rajagopal shoulder centres are
+torso-fixed, so its shoulder-girdle line equals its upper-trunk line.
+
+\begin{center}
+\small
+\begin{tabular}{llcccc}
+\hline
+Capture & Source & Shoulder Girdle & Upper Trunk & Pelvis & X-Factor \\
+\hline
+A & markers & 103.0 / $-9.0$ & 92.2 / $-19.2$ & 40.9 / $-49.8$ & 51.3 / 30.6 \\
+A & MuJoCo source (joint centres) & 111.9 / $-5.2$ & n/a & 46.0 / $-32.7$ & n/a \\
+A & MSK before & 126.4 / 0.5 & 126.4 / 0.5 & 33.5 / $-29.1$ & 92.8 / 29.7 \\
+A & MSK turn targets & 95.8 / $-19.1$ & 95.8 / $-19.1$ & 41.0 / $-49.8$ & 54.8 / 30.7 \\
+A & MSK turn targets + feet & 95.8 / $-19.1$ & 95.8 / $-19.1$ & 40.6 / $-49.7$ & 55.2 / 30.7 \\
+B & markers & 97.5 / $-1.1$ & 86.9 / $-10.0$ & 41.1 / $-41.7$ & 45.8 / 31.7 \\
+B & MuJoCo source (joint centres) & 103.7 / 3.7 & n/a & 44.6 / $-26.8$ & n/a \\
+B & MSK before & 121.0 / 7.6 & 121.0 / 7.6 & 36.1 / $-24.4$ & 85.0 / 32.0 \\
+B & MSK turn targets + feet & 89.7 / $-9.8$ & 89.7 / $-9.8$ & 40.9 / $-41.7$ & 48.8 / 31.9 \\
+\hline
+\end{tabular}
+\end{center}
+
+With the targets the pelvis is within $0.3^\circ$ of the markers and the
+upper trunk within $3.6^\circ$ (A) and $2.8^\circ$ (B) at the top and
+impact, inside the issue's $5^\circ$ bound. The X-factor is $3.9^\circ$ (A)
+and $3.0^\circ$ (B) high at the top. The costs, measured over the whole swing
+(capture A, before $\rightarrow$ after): the worst lead-grip error rises from
+1.3 to 4.3 mm, the worst trail-hand gap from 15 to 50 mm (at 1.18 s, early
+downswing; 15 mm at the top, below 1 mm at impact) and the landmark RMS at the
+top from 89 to 122 mm, because the source's hands and joint centres belong to
+its over-turned trunk. Capture B: 0.8 $\rightarrow$ 3.4 mm and
+15 $\rightarrow$ 39 mm. A weaker weight $w_\psi=0.05$ rad halves the trail gap
+(24 mm) but lets the source pull the upper trunk back to $104.2^\circ$ at the
+top (pelvis $39.1^\circ$), so 0.02 rad is kept. The feet change the address
+lead-hip rotation (\texttt{hip\_rotation\_l} $-27^\circ$ against $-10^\circ$
+with the square stance) and leave the turn within $0.4^\circ$.
+
+\paragraph{Limitations.}
+\begin{itemize}
+\item The shoulder-girdle line cannot follow the markers: the Rajagopal model
+  has no scapular degrees of freedom, so it misses the $10.8^\circ$ (A) and
+  $10.6^\circ$ (B) marker scapular share at the top and is $7.2^\circ$ /
+  $10.1^\circ$ (A) and $7.8^\circ$ / $8.7^\circ$ (B) short at top / impact;
+  the impact values exceed the issue's $8^\circ$ shoulder bound.
+\item The retarget now departs from its MuJoCo source by design (the source
+  over-turns the trunk, issue \#12042 finding 5), so the issue's ``within
+  $5^\circ$ of the source'' criterion no longer applies to the targeted run;
+  the trail-hand gap is the visible price until the source is corrected
+  (slice 7).
+\item \texttt{hip\_rotation\_l} sits on its $-40^\circ$ limit at the top and
+  \texttt{hip\_rotation\_r} on its $-40^\circ$ limit at impact. No range was
+  widened.
+\item The feet are planted for the whole swing (no trail-heel lift), and the
+  tracking is kinematic only: no forward dynamics or muscle feasibility is
+  claimed.
+\end{itemize}
+
+\paragraph{Reproduction.}
+\texttt{python3 -m pytest tests/opensim/test\_msk\_turn\_targets.py
+tests/opensim/test\_msk\_club\_tracking.py} (the synthetic test turns the
+waist and back markers rigidly by $15^\circ$ and $35^\circ$ while the source
+holds its address pose; the tracked lines must agree within $2^\circ$,
+measured $0.2^\circ$ and $1.4^\circ$). The capture table:
+\texttt{python3 scripts/msk\_turn\_audit.py --capture <capture C3D> --club
+driver --mode \{baseline,turn,turn\_feet\} --stride 2 --out <json>}; for
+capture B first run
+\texttt{python3 -m src.engines.physics\_engines.opensim.python.msk\_club\_calibration
+src/engines/physics\_engines/opensim/models/golf\_humanoid.osim --club iron7}
+and pass \texttt{--club iron7}.
 
 \section{Dynamics-Informed Motion Estimation (DIME): Shared Reports, GUI Strategy Selection and Methods}
 \label{sec:dime_reports_methods}
