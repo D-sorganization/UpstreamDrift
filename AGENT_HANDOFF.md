@@ -1,14 +1,18 @@
-# Active: Clubhead Speed Timing — GCV-20 #11767, Epic #11706
+# Active: Hip Rewrite Uses the Spec's Own Pelvis Alignment - #12109
 
-- Branch `claude/gcv-20-speed-timing`. Ball contact impulse in every dynamics replay (`impact_parameters` collision), reference low-pass split at impact, release-preserving pre-contact cutoff (`pipeline/release_cutoff.py`, 25 Hz for both captures) and grip-weld projection of the tracked reference (`pipeline/weld_projection.py`).
-- Full re-solve at `5f8ee41fe5`: peak timing passes (driver -3.7 ms, 7-iron -4.2 ms; limit 5 ms); impact speed does not (driver -7.4 %, 7-iron -4.1 %; limit 3 %). `test_clubhead_speed_peaks_with_the_capture_and_matches_it_at_impact` is a strict xfail with those numbers; tolerances unchanged; fixtures not regenerated.
-- Next: the remaining gap is the unactuated root's ground yaw slip (DESIGN_DECISIONS decision 13). It needs a foot yaw-moment / contact model change, tracked outside GCV-20. Details: calculation reference, GCV-20 "Second Pass" and "Full Re-Solve".
+- Branch `claude/trail-hip-12109`, stacked on #12113. `cli._calibrate_and_scale` took `hip_from_opensim_pelvis` from `build_receipt_v2.json` for every spec, so `apply_hip_calibration` rotated the anthro hips (femur 24-66 deg off the pelvis at zero coordinates) and pinned `hip_rotation` at +-40 deg. `hip_calibration.pelvis_alignment_from_spec` now recovers the alignment from the spec's own hips (reproduces the v1/v2 receipts exactly) and fails closed when the hips disagree.
+- Address (MuJoCo, foot progression on): toe-out trail/lead -0.11/0.22 deg (driver) and -0.05/0.19 deg (7-iron); `hip_rotation` -17/+10 and -24/+18 deg. Evidence `evidence/foot_progression/pelvis_alignment_12109/`; diagnostic `scripts/diagnose_address_leg_yaw.py`. Reference: `docs/research/hip_axis_mirroring/` (Hip Rewrite Pelvis Alignment section).
+- Every calibrated anthro run changes: the canonical ground-support receipts are regenerated in this branch. Likely also the lead-hip limit in #12042 slice 3 / #11737.
 
+# Active: Right Knee Flexes Negative Like the Left - #12057
+
+- Branch `claude/knee-r-axis-12057`. `spec_builder.leg_extension` mirrors any knee whose hinge points to -z (`AXIS_MIRROR`), and `scripts/mirror_spec_right_knee.py` fixed the committed anthro specs. Spec-to-Rajagopal knee sign is -1 on both sides, and MyoSuite `knee_angle_r` is -1. The generated osims and the inventory hashes are refreshed.
+- Canonical receipts were regenerated on ControlTower; a control at the parent commit reproduced the old receipt exactly. Calibrated driver 7.7/33.0/61.6 -> 5.6/31.0/77.0 mm, 7-iron 6.5/31.1/47.0 -> 5.0/28.8/71.2 mm. The trail knee at address is now -27/-21 deg (was pinned near 0).
+- Open: the dynamics replay regresses (#12110). Trail toe-out is -2.1/-4.4 deg with `hip_rotation_r` at its -40 deg limit (#12109). Reference: `docs/research/hip_axis_mirroring/` (Right Knee Axis Convention section).
 # Active: Grip Wrench Gaps - GCV-8 #11714
 
 - Branch `claude/gcv-8-grip-wrench-gaps`. The MuJoCo grip-modelling tab shows the `grip_weld_l/r` wrench via `grip_efc` and reports "unavailable" for contact-only scenes. Drake URDF: `humanoid_urdf.right_hand_grip_analysis` gives the right-hand wrench from club Newton-Euler (`full_body_model.club_newton_euler`); the left hand is unavailable, with a reason. Pinocchio: `PinocchioForceAdapter.grip_analysis_from_allocation` routes `lambda_grip` through `grip_from_allocation`.
 - Open: `allocate_trajectory` does not store `q`, so callers pass it themselves. MyoSuite per-hand emission needs the pinned `myo_sim`.
-
 # Active: MuJoCo Native Export Backend - GCV-14 #11720
 
 - Branch `claude/gcv-14-mujoco-backend`, stacked on PR #12026 (`claude/gcv-14-speed-variants`). `native_viewer_export` has a fifth engine, `mujoco` (`backends/mujoco_native.py` + `mujoco_worker.py`): full-body MJCF with the default appearance document (body, head, club meshes, scene) rendered by `mujoco.Renderer` through the shared view presets and glyph overlay. It replaces the earlier throwaway stick-figure evidence renderer.
@@ -25,7 +29,6 @@
 - Branch `claude/gcv-14-speed-variants`, stacked on PR #12004 (kinematic impact time). `video_timing.frame_schedule.SPEED_VARIANTS = (1, 0.5, 0.25)` is the default of `ExportSettings.speeds` and `--speeds`; `motion_matching.export.export_video_variants` writes the same three clips for any engine's candidate (MuJoCo, MyoSuite, Drake, Pinocchio, OpenSim, Simscape logs).
 - Tests: `test_speed_variants_engines.py` (frame counts from the time span for all four native engines, HUD 0 ms at the ball-passage impact) and `test_export.py` (variants per engine).
 - Evidence: only MuJoCo renders on ControlTower (stick figure, no club, 1920x1080, 60 fps). Drake and Pinocchio need `playwright` and its Chromium libraries, OpenSim needs `xwd`, MyoSuite needs `myosuite.envs.env_base` (#11997); none are in the `ud-sim` image and installing them needs root or a new image (owner action).
-
 # Active: Same-Input Parity Design-Manual Chapter - SIP P-9 #11614
 
 - Branch `claude/sip-p9-manual-chapter-11614`; epic #11605. Provisional QMD chapter `manuals/upstreamdrift/chapters/16-same-input-parity.qmd` (renumbered from 14 after `14-muscle-qualification-evidence.qmd` landed) (KKT, closure projection, ZOH RK4, bundle, L0-L3 levels and results, failed experiments, limitations) and registry blocker `UP-D1-same-input-parity-inventory`; registry stays blocked with no calculations. `same_input_parity.tex` cross-links the chapter and compiles with pdflatex.
