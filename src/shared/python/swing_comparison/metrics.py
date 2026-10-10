@@ -30,6 +30,11 @@ from src.shared.python.swing_comparison.events import (
     detect_events,
 )
 
+from src.shared.python.swing_comparison.turn import (
+    LineTurn,
+    TurnMetrics,
+    marker_turn_lines,
+)
 from src.shared.python.swing_comparison.motion import (
     CAPTURE_A_PELVIS_LEFT_LABELS,
     CAPTURE_A_PELVIS_RIGHT_LABELS,
@@ -71,48 +76,98 @@ class TempoMetrics:
 
 @dataclass(frozen=True)
 class SegmentRotationMetrics:
-    """Pelvis and thorax rotation, and X-factor separation.
+    """Pelvis, upper-trunk and shoulder-girdle turn, and X-factor separation.
 
-    All angles in degrees. Yaw is rotation about vertical +Z in the XY ground plane.
+    All angles in degrees, relative to the same line at address, positive in the
+    backswing (see ``swing_comparison.turn`` for the frame convention).  Values
+    are NaN where the markers are unavailable; unavailable never means zero.
+
+    The former "thorax yaw" was the shoulder-marker line, which rides the
+    scapula.  It is now the ``shoulder_girdle`` line; the BackLeft/BackRight
+    ``upper_trunk`` line is separate.  ``thorax_yaw*`` remain as deprecated
+    aliases of the shoulder-girdle line.
 
     Attributes:
-        pelvis_yaw: Pelvis yaw angle time series (N,) in degrees.
-        thorax_yaw: Thorax yaw angle time series (N,) in degrees.
-        x_factor: X-factor (thorax yaw minus pelvis yaw) time series (N,) in degrees.
-        pelvis_yaw_address: Pelvis yaw at address in degrees.
-        pelvis_yaw_top: Pelvis yaw at top of backswing in degrees.
-        pelvis_yaw_impact: Pelvis yaw at impact in degrees.
-        thorax_yaw_address: Thorax yaw at address in degrees.
-        thorax_yaw_top: Thorax yaw at top of backswing in degrees.
-        thorax_yaw_impact: Thorax yaw at impact in degrees.
-        x_factor_address: X-factor at address in degrees.
-        x_factor_top: X-factor at top of backswing in degrees.
-        x_factor_impact: X-factor at impact in degrees.
-        x_factor_stretch: Maximum absolute X-factor magnitude during the swing in degrees.
+        pelvis_yaw / shoulder_girdle_yaw / upper_trunk_yaw: Turn time series (N,).
+        x_factor: Upper-trunk minus pelvis turn (N,).
+        x_factor_shoulder_girdle: Shoulder-girdle minus pelvis turn (N,).
+        *_address / *_top / *_impact: Values at the three swing events.
+        x_factor_stretch: Maximum absolute X-factor during the swing (NaN if none).
+        turn: The full ``TurnMetrics`` (status, reasons, max backswing).
     """
 
     pelvis_yaw: np.ndarray
-    thorax_yaw: np.ndarray
+    shoulder_girdle_yaw: np.ndarray
+    upper_trunk_yaw: np.ndarray
     x_factor: np.ndarray
+    x_factor_shoulder_girdle: np.ndarray
     pelvis_yaw_address: float
     pelvis_yaw_top: float
     pelvis_yaw_impact: float
-    thorax_yaw_address: float
-    thorax_yaw_top: float
-    thorax_yaw_impact: float
+    shoulder_girdle_yaw_address: float
+    shoulder_girdle_yaw_top: float
+    shoulder_girdle_yaw_impact: float
+    upper_trunk_yaw_address: float
+    upper_trunk_yaw_top: float
+    upper_trunk_yaw_impact: float
     x_factor_address: float
     x_factor_top: float
     x_factor_impact: float
     x_factor_stretch: float
+    turn: TurnMetrics | None = None
+
+    def _deprecated(self, name: str, replacement: str) -> None:
+        warnings.warn(
+            f"SegmentRotationMetrics.{name} is deprecated: it was the shoulder-"
+            f"marker (scapular) line, now named {replacement}; the rib-cage line is "
+            "upper_trunk_yaw",
+            DeprecationWarning,
+            stacklevel=3,
+        )
+
+    @property
+    def thorax_yaw(self) -> np.ndarray:
+        """Deprecated alias of ``shoulder_girdle_yaw``."""
+        self._deprecated("thorax_yaw", "shoulder_girdle_yaw")
+        return self.shoulder_girdle_yaw
+
+    @property
+    def thorax_yaw_address(self) -> float:
+        """Deprecated alias of ``shoulder_girdle_yaw_address``."""
+        self._deprecated("thorax_yaw_address", "shoulder_girdle_yaw_address")
+        return self.shoulder_girdle_yaw_address
+
+    @property
+    def thorax_yaw_top(self) -> float:
+        """Deprecated alias of ``shoulder_girdle_yaw_top``."""
+        self._deprecated("thorax_yaw_top", "shoulder_girdle_yaw_top")
+        return self.shoulder_girdle_yaw_top
+
+    @property
+    def thorax_yaw_impact(self) -> float:
+        """Deprecated alias of ``shoulder_girdle_yaw_impact``."""
+        self._deprecated("thorax_yaw_impact", "shoulder_girdle_yaw_impact")
+        return self.shoulder_girdle_yaw_impact
 
     def to_dict(self) -> dict[str, float]:
+        gird = {
+            f"shoulder_girdle_yaw_{k}_deg": float(
+                getattr(self, f"shoulder_girdle_yaw_{k}")
+            )
+            for k in ("address", "top", "impact")
+        }
         return {
             "pelvis_yaw_address_deg": float(self.pelvis_yaw_address),
             "pelvis_yaw_top_deg": float(self.pelvis_yaw_top),
             "pelvis_yaw_impact_deg": float(self.pelvis_yaw_impact),
-            "thorax_yaw_address_deg": float(self.thorax_yaw_address),
-            "thorax_yaw_top_deg": float(self.thorax_yaw_top),
-            "thorax_yaw_impact_deg": float(self.thorax_yaw_impact),
+            **gird,
+            "upper_trunk_yaw_address_deg": float(self.upper_trunk_yaw_address),
+            "upper_trunk_yaw_top_deg": float(self.upper_trunk_yaw_top),
+            "upper_trunk_yaw_impact_deg": float(self.upper_trunk_yaw_impact),
+            # Deprecated keys kept for existing consumers; shoulder-girdle values.
+            "thorax_yaw_address_deg": gird["shoulder_girdle_yaw_address_deg"],
+            "thorax_yaw_top_deg": gird["shoulder_girdle_yaw_top_deg"],
+            "thorax_yaw_impact_deg": gird["shoulder_girdle_yaw_impact_deg"],
             "x_factor_address_deg": float(self.x_factor_address),
             "x_factor_top_deg": float(self.x_factor_top),
             "x_factor_impact_deg": float(self.x_factor_impact),
@@ -437,15 +492,17 @@ def compute_segment_rotations(
     motion: SwingMotion,
     events: SwingEvents,
 ) -> SegmentRotationMetrics:
-    """Compute pelvis yaw, thorax yaw, and X-factor metrics.
+    """Compute pelvis, upper-trunk and shoulder-girdle turn and X-factor.
 
-    Definitions:
-    - Pelvis yaw: Rotation angle in the horizontal XY plane from hip markers (WaistLeft -> WaistRight),
-      measured relative to the address orientation in degrees.
-    - Thorax yaw: Rotation angle in the horizontal XY plane from shoulder markers (LShoulder -> RShoulder),
-      measured relative to the address orientation in degrees.
-    - X-factor: Separation angle (thorax yaw minus pelvis yaw) in degrees.
-    - X-factor stretch: Maximum absolute X-factor separation during the swing in degrees.
+    Definitions (see ``swing_comparison.turn``; Z up, golfer faces -X, target -Y):
+    - Pelvis: WaistLeft/WaistRight line turn relative to address.
+    - Upper trunk: BackLeft/BackRight line turn relative to address.
+    - Shoulder girdle: ShoulderBack line turn (rides the scapula) relative to address.
+    - X-factor: upper-trunk turn minus pelvis turn; the shoulder-girdle variant is
+      ``x_factor_shoulder_girdle``.
+    - X-factor stretch: maximum absolute X-factor during the swing.
+    A pair with a missing marker or a long gap yields NaN with a reason in
+    ``result.turn``, never zero.
 
     Preconditions:
         - len(motion.t) >= 4
@@ -459,45 +516,34 @@ def compute_segment_rotations(
         0 <= events.address_idx <= events.top_idx <= events.impact_idx < n,
         "Events must satisfy 0 <= address <= top <= impact < n",
     )
+    turn = marker_turn_lines(motion.markers, motion.t, events)
 
-    # 1. Pelvis vector (right hip to left hip)
-    pelvis_vec = _resolve_vector(
-        motion.markers,
-        CAPTURE_A_PELVIS_LEFT_LABELS,
-        CAPTURE_A_PELVIS_RIGHT_LABELS,
-        fallback_dim=n,
-    )
-    raw_p_yaw = np.unwrap(np.arctan2(pelvis_vec[:, 1], pelvis_vec[:, 0]))
-    pelvis_yaw = np.degrees(raw_p_yaw - raw_p_yaw[events.address_idx])
+    def at(line: LineTurn, idx: int) -> float:
+        return float(line.turn_deg[idx])
 
-    # 2. Thorax vector (right shoulder to left shoulder)
-    thorax_vec = _resolve_vector(
-        motion.markers,
-        CAPTURE_A_SHOULDER_LEFT_LABELS,
-        CAPTURE_A_SHOULDER_RIGHT_LABELS,
-        fallback_dim=n,
-    )
-    raw_t_yaw = np.unwrap(np.arctan2(thorax_vec[:, 1], thorax_vec[:, 0]))
-    thorax_yaw = np.degrees(raw_t_yaw - raw_t_yaw[events.address_idx])
-
-    # 3. X-Factor (Thorax - Pelvis)
-    x_factor = thorax_yaw - pelvis_yaw
-    stretch = float(np.nanmax(np.abs(x_factor)))
-
+    xf = turn.x_factor.turn_deg
+    stretch = float(np.nanmax(np.abs(xf))) if np.isfinite(xf).any() else float("nan")
+    a, tp, im = events.address_idx, events.top_idx, events.impact_idx
     return SegmentRotationMetrics(
-        pelvis_yaw=pelvis_yaw,
-        thorax_yaw=thorax_yaw,
-        x_factor=x_factor,
-        pelvis_yaw_address=float(pelvis_yaw[events.address_idx]),
-        pelvis_yaw_top=float(pelvis_yaw[events.top_idx]),
-        pelvis_yaw_impact=float(pelvis_yaw[events.impact_idx]),
-        thorax_yaw_address=float(thorax_yaw[events.address_idx]),
-        thorax_yaw_top=float(thorax_yaw[events.top_idx]),
-        thorax_yaw_impact=float(thorax_yaw[events.impact_idx]),
-        x_factor_address=float(x_factor[events.address_idx]),
-        x_factor_top=float(x_factor[events.top_idx]),
-        x_factor_impact=float(x_factor[events.impact_idx]),
+        pelvis_yaw=turn.pelvis.turn_deg,
+        shoulder_girdle_yaw=turn.shoulder_girdle.turn_deg,
+        upper_trunk_yaw=turn.upper_trunk.turn_deg,
+        x_factor=xf,
+        x_factor_shoulder_girdle=turn.x_factor_shoulder_girdle.turn_deg,
+        pelvis_yaw_address=at(turn.pelvis, a),
+        pelvis_yaw_top=at(turn.pelvis, tp),
+        pelvis_yaw_impact=at(turn.pelvis, im),
+        shoulder_girdle_yaw_address=at(turn.shoulder_girdle, a),
+        shoulder_girdle_yaw_top=at(turn.shoulder_girdle, tp),
+        shoulder_girdle_yaw_impact=at(turn.shoulder_girdle, im),
+        upper_trunk_yaw_address=at(turn.upper_trunk, a),
+        upper_trunk_yaw_top=at(turn.upper_trunk, tp),
+        upper_trunk_yaw_impact=at(turn.upper_trunk, im),
+        x_factor_address=at(turn.x_factor, a),
+        x_factor_top=at(turn.x_factor, tp),
+        x_factor_impact=at(turn.x_factor, im),
         x_factor_stretch=stretch,
+        turn=turn,
     )
 
 
@@ -1012,7 +1058,14 @@ def _compute_scalar_metric_differences(
     metrics_a: SwingMetrics, metrics_b: SwingMetrics
 ) -> dict[str, float | None]:
     """Return the b-minus-a scalar differences for every compared metric."""
-    return {
+
+    def _seg_diff(attr: str) -> float:
+        return float(
+            getattr(metrics_b.segment_rotation, attr)
+            - getattr(metrics_a.segment_rotation, attr)
+        )
+
+    diffs: dict[str, float | None] = {
         "backswing_time_s": metrics_b.tempo.backswing_time
         - metrics_a.tempo.backswing_time,
         "downswing_time_s": metrics_b.tempo.downswing_time
@@ -1024,12 +1077,13 @@ def _compute_scalar_metric_differences(
             metrics_b.segment_rotation.pelvis_yaw_impact
             - metrics_a.segment_rotation.pelvis_yaw_impact
         ),
-        "thorax_yaw_top_deg": metrics_b.segment_rotation.thorax_yaw_top
-        - metrics_a.segment_rotation.thorax_yaw_top,
-        "thorax_yaw_impact_deg": (
-            metrics_b.segment_rotation.thorax_yaw_impact
-            - metrics_a.segment_rotation.thorax_yaw_impact
-        ),
+        "shoulder_girdle_yaw_top_deg": _seg_diff("shoulder_girdle_yaw_top"),
+        "shoulder_girdle_yaw_impact_deg": _seg_diff("shoulder_girdle_yaw_impact"),
+        "upper_trunk_yaw_top_deg": _seg_diff("upper_trunk_yaw_top"),
+        "upper_trunk_yaw_impact_deg": _seg_diff("upper_trunk_yaw_impact"),
+        # Deprecated keys: shoulder-girdle values, kept for existing consumers.
+        "thorax_yaw_top_deg": _seg_diff("shoulder_girdle_yaw_top"),
+        "thorax_yaw_impact_deg": _seg_diff("shoulder_girdle_yaw_impact"),
         "x_factor_address_deg": (
             metrics_b.segment_rotation.x_factor_address
             - metrics_a.segment_rotation.x_factor_address
@@ -1091,6 +1145,12 @@ def _compute_scalar_metric_differences(
             else None
         ),
     }
+    # Unavailable turn lines are NaN; report "no comparison" instead of a NaN.
+    turn_prefixes = ("shoulder_girdle", "upper_trunk", "thorax", "x_factor")
+    for key, value in diffs.items():
+        if key.startswith(turn_prefixes) and value is not None and value != value:
+            diffs[key] = None
+    return diffs
 
 
 def _compute_shared_marker_rms(
