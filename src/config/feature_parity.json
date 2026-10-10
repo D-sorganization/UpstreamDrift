@@ -405,11 +405,11 @@
       "title": "Launch-monitor import, interdependency analysis, monitor comparison, dispersion, and longitudinal trends",
       "pyqt": "src/tools/launch_monitor_analytics/gui.py",
       "api": "src/api/routes/launch_monitor_analytics.py",
-      "web": null,
+      "web": "ui/src/pages/LaunchMonitorAnalytics.tsx",
       "status": "gap",
       "issue": 11987,
       "tiles": ["launch_monitor_analytics"],
-      "notes": "The PyQt6 workbench and versioned API share one flexible-analysis contract. A React panel exists only inside the vendored Tools Rate of Closure bundle (Tools #4205, closed), behind a different tile; this tile has no web page. Tracked in #11987 (epic #8364 is closed)."
+      "notes": "The PyQt6 workbench and versioned API share one flexible-analysis contract. The web page (#11987) now covers Flexible Analysis (POST /v2/analyze), Trends (POST /v2/trend), Dispersion (POST /v2/dispersion), and Relationships — correlations/partial correlations/dependency network, PCA, and VIF (POST /v2/relationships, POST /v2/multivariate). Still missing on the web: Sessions, Data Treatment, Models, Monitor Comparison, and Reports."
     },
     "tools.bunkershot3d_workbench": {
       "title": "BunkerShot3D designer workbench (W2 sole parameters, W3 sand condition, F0 dynamic-RFT shot, W7 metrics, playability window, bounce utilisation, animated sole load field, 3-D shot animation through the ADR-0027 viewport, linked scalar traces with a validity band, F1 sand-field cross-sections, A/B comparison, validity verdict)",
