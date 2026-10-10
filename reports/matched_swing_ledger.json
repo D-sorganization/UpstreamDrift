@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-10T17:49:48Z",
+  "generated_at": "2026-10-10T18:50:37Z",
   "rows": [
     {
       "acceptance": null,
@@ -1073,7 +1073,7 @@
       "artefacts": {
         "gif": null,
         "mot": null,
-        "npz": null
+        "npz": "docs/development/full_body_models/evidence/ground_support/anthro_driver_seeds/dynamics_record.npz"
       },
       "candidate_sha": "2caa3ce94e596dd61d50172229ad04a98c5235be6388566b4376be4ba41e2fcf",
       "capture": "driver",
@@ -6088,3 +6088,4 @@
   "schema_version": "1.0.0",
   "total_receipts": 149
 }
+
