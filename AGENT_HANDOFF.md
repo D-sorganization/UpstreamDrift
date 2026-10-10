@@ -1,3 +1,9 @@
+# Active: Forward-Dynamics Gaze Neck, OSV-3c #11729
+
+- Branch `claude/osv-3c-gaze-neck-tracking`. `motion_matching/pipeline/gaze_tracking.py`: `--fd-neck gaze` re-solves the tracked reference's neck to the gaze schedule (model FK, bounded, after the feasibility filters); `dynamics.head_gaze` reports schedule error per window for the tracked reference and the replay. `render_head_gaze_clips --trajectory replay` renders the replay; `scripts/summarize_fd_neck_tracking.py` writes `evidence/head_gaze/fd_neck_tracking.json`.
+- Result: replay schedule error RMS address→impact 20.3→1.8 deg (driver), 19.0→1.2 deg (7-iron); release 15.4/6.3 deg from open-loop torso error; neck yaw saturates ±80 deg on 213/114 frames; head-marker RMS doubles. Published head rotation at the top: −33.6/−25.4 deg (Zhang et al. 2026).
+- Open: closed-loop gaze controller (neck re-solved from the simulated torso), MyoSuite/OpenSim neck actuation and other engines' receipts, a gaze schedule that lets the head turn with the torso.
+
 # Active: Gaze Weight Selection, #11729
 
 - Branch `claude/osv-3b-gaze-default`. `motion_matching/gaze_sweep.py` (feasible set, Pareto knee, cross-capture `select_default`, `REPORTING_GAZE_WEIGHT = 0.1`), `scripts/sweep_gaze_weight.py` (IK-stage run per capture and weight), `scripts/summarize_gaze_sweep.py` (evidence JSON + Pareto plot), `scripts/render_head_gaze_clips.py` (MuJoCo side by side, 1080p60, 1x/0.5x/impact 0.25x), `scripts/render_head_gaze_engines.py` (Drake/Pinocchio/OpenSim/MyoSuite native clips + pairing).
