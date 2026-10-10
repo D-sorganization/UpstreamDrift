@@ -9,7 +9,7 @@
   "friction_static": 0.9,
   "friction_dynamic": 0.7,
   "integrator": "MuJoCo Euler, fixed step, soft constraints",
-  "timestep_s": 1e-05,
+  "timestep_s": 1e-5,
   "force_law": "MuJoCo native sphere-cylinder contact, condim 6",
   "solreffriction_time_s": 0.005,
   "hand_mode": "prescribed"
