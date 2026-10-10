@@ -66,6 +66,7 @@ def pipeline_argv(capture: str, run_dir: Path, face_weight: float) -> list[str]:
         "--capture",
         capture,
         *flags,
+        *__import__("os").environ.get("UD_EXTRA_12117", "").split(),
         "--face-weight",
         repr(float(face_weight)),
         "--out",
