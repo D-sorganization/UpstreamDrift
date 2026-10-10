@@ -320,120 +320,95 @@ def test_whole_body_com_and_scene_markers(tmp_path: Path) -> None:
         visual_layer.add_scene_marker(scene, com, -0.01, (1, 0, 0, 1))
 
 
-def test_render_playback_samples_via_frame_schedule(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+def _render(
+    tmp_path: Path, q: np.ndarray, name: str, timing: Any | None = None
 ) -> None:
-    """GCV-14 (#11720): frame count follows FrameSchedule, not a fixed stride."""
-    pytest.importorskip("mujoco")
     from src.engines.physics_engines.mujoco.python import visual_layer
-    from src.shared.python.video_timing.frame_schedule import FrameSchedule
 
-    captured = _patch_playback_rendering(monkeypatch)
-    q = np.zeros((101, 1))  # 1.0 s of swing at rate_hz=100
+    kwargs = {} if timing is None else {"timing": timing}
     visual_layer.render_playback(
         _spec_bytes(),
         ["hinge1"],
         q,
         np.zeros(3),
-        tmp_path / "out.gif",
+        tmp_path / name,
         show_com=False,
-        rate_hz=100.0,
-        fps=60.0,
+        **kwargs,
     )
-    expected = FrameSchedule(np.arange(101) / 100.0, 60.0, 1.0).n_frames
+
+
+def test_render_playback_samples_via_frame_schedule(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """GCV-14 (#11720): frame count follows FrameSchedule, not a fixed stride."""
+    pytest.importorskip("mujoco")
+    from src.engines.physics_engines.mujoco.python.visual_layer import (
+        PlaybackTiming,
+    )
+    from src.shared.python.video_timing.frame_schedule import FrameSchedule
+
+    captured = _patch_playback_rendering(monkeypatch)
+    q = np.zeros((101, 1))  # 1.0 s of swing at rate_hz=100
+    _render(tmp_path, q, "out.gif", PlaybackTiming(rate_hz=100.0, fps=50.0))
+    expected = FrameSchedule(np.arange(101) / 100.0, 50.0, 1.0).n_frames
     assert len(captured["frames"]) == expected
-    assert captured["kwargs"]["duration"] == pytest.approx(1000.0 / 60.0)
+    assert captured["kwargs"]["duration"] == pytest.approx(20.0)
+
+
+def test_render_playback_default_is_real_time_at_whole_centisecond_delay(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Default playback lasts as long as the swing, and its GIF frame delay is
+    a whole number of centiseconds above 1 cs, so viewers play it as written."""
+    pytest.importorskip("mujoco")
+    from src.engines.physics_engines.mujoco.python.visual_layer import (
+        GIF_FPS,
+        PlaybackTiming,
+    )
+
+    captured = _patch_playback_rendering(monkeypatch)
+    q = np.zeros((361, 1))  # 1.0 s of swing at the pipeline's 360 Hz
+    _render(tmp_path, q, "rt.gif", PlaybackTiming(rate_hz=360.0))
+    delay_ms = captured["kwargs"]["duration"]
+    assert len(captured["frames"]) * delay_ms == pytest.approx(1000.0, abs=delay_ms)
+    assert delay_ms == pytest.approx(1000.0 / GIF_FPS)
+    assert delay_ms % 10.0 == pytest.approx(0.0)
+    assert delay_ms > 10.0
 
 
 def test_render_playback_half_speed_doubles_frame_count(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     pytest.importorskip("mujoco")
-    from src.engines.physics_engines.mujoco.python import visual_layer
+    from src.engines.physics_engines.mujoco.python.visual_layer import (
+        PlaybackTiming,
+    )
 
     q = np.zeros((101, 1))
     captured_full = _patch_playback_rendering(monkeypatch)
-    visual_layer.render_playback(
-        _spec_bytes(),
-        ["hinge1"],
-        q,
-        np.zeros(3),
-        tmp_path / "a.gif",
-        show_com=False,
-        rate_hz=100.0,
-        fps=60.0,
-        speed=1.0,
-    )
+    _render(tmp_path, q, "a.gif", PlaybackTiming(rate_hz=100.0, speed=1.0))
     full = len(captured_full["frames"])
 
     captured_half = _patch_playback_rendering(monkeypatch)
-    visual_layer.render_playback(
-        _spec_bytes(),
-        ["hinge1"],
-        q,
-        np.zeros(3),
-        tmp_path / "b.gif",
-        show_com=False,
-        rate_hz=100.0,
-        fps=60.0,
-        speed=0.5,
-    )
+    _render(tmp_path, q, "b.gif", PlaybackTiming(rate_hz=100.0, speed=0.5))
     half = len(captured_half["frames"])
     assert abs(half - 2 * full) <= 1
 
 
-def test_render_playback_stride_alias_warns_and_converts(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    """Deprecated ``playback_stride`` converts to an equivalent speed (mirrors
-    ``ExportSettings.stride`` in native_viewer_export/core.py)."""
-    pytest.importorskip("mujoco")
-    from src.engines.physics_engines.mujoco.python import visual_layer
-    from src.shared.python.video_timing.frame_schedule import FrameSchedule
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"fps": 0.0},
+        {"speed": -1.0},
+        {"rate_hz": 0.0},
+        {"rate_hz": float("nan")},
+        {"fps": float("inf")},
+    ],
+)
+def test_playback_timing_rejects_invalid_values(kwargs: dict) -> None:
+    from src.engines.physics_engines.mujoco.python.visual_layer import (
+        PlaybackTiming,
+    )
 
-    captured = _patch_playback_rendering(monkeypatch)
-    q = np.zeros((101, 1))
-    with pytest.warns(DeprecationWarning, match="playback_stride"):
-        visual_layer.render_playback(
-            _spec_bytes(),
-            ["hinge1"],
-            q,
-            np.zeros(3),
-            tmp_path / "c.gif",
-            show_com=False,
-            rate_hz=120.0,
-            playback_stride=4,
-            fps=30.0,
-        )
-    # stride=4 at rate_hz=120, fps=30 -> speed = 4 * 30 / 120 = 1.0 (real time)
-    expected = FrameSchedule(np.arange(101) / 120.0, 30.0, 1.0).n_frames
-    assert len(captured["frames"]) == expected
-
-
-@pytest.mark.parametrize("kwargs", [{"fps": 0.0}, {"speed": -1.0}, {"rate_hz": 0.0}])
-def test_render_playback_invalid_timing_raises(kwargs: dict) -> None:
-    from src.engines.physics_engines.mujoco.python import visual_layer
-
-    with pytest.raises(ValueError):
-        visual_layer.render_playback(
-            b'{"contact": {}}',
-            ["j"],
-            np.zeros((2, 1)),
-            np.zeros(3),
-            Path("x.gif"),
-            **kwargs,
-        )
-
-
-def test_render_playback_invalid_stride_raises() -> None:
-    from src.engines.physics_engines.mujoco.python import visual_layer
-
-    with pytest.raises(ValueError, match="playback_stride"):
-        visual_layer.render_playback(
-            b'{"contact": {}}',
-            ["j"],
-            np.zeros((2, 1)),
-            np.zeros(3),
-            Path("x.gif"),
-            playback_stride=0,
-        )
+    with pytest.raises(ValueError, match=next(iter(kwargs))):
+        PlaybackTiming(**kwargs)
