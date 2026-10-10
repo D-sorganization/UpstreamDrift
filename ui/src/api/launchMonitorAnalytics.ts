@@ -10,6 +10,7 @@
 import { apiFetch } from "./fetch";
 import type {
   AnalyzePayloadV2,
+  DispersionPayloadV2,
   FlexibleAnalysisPayload,
   LaunchMonitorAnalysisResultV2,
 } from "./generated/types";
@@ -190,6 +191,65 @@ export async function postTrend(
     rolling_window: rollingWindow,
   };
   return apiFetch<TrendResponse>(`${BASE}/v2/trend`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+/**
+ * Group-by candidates accepted by `POST /v2/dispersion`
+ * (`DispersionPayloadV2.group_column`'s literal union).
+ */
+export type DispersionGroupColumn = NonNullable<
+  DispersionPayloadV2["group_column"]
+>;
+
+/**
+ * One group's serialized `DispersionResult` from `_dispersion_result_to_dict`
+ * (JSON-safe: NaN/infinite float fields become `null`, never a misleading 0).
+ */
+export interface DispersionGroupResult {
+  group: string;
+  sample_count: number;
+  center_forward: number | null;
+  center_lateral: number | null;
+  mean_forward: number | null;
+  mean_lateral: number | null;
+  ellipse_major: number | null;
+  ellipse_minor: number | null;
+  ellipse_angle_rad: number | null;
+  area_95: number | null;
+  radial_rmse: number | null;
+  radial_p50: number | null;
+  radial_p90: number | null;
+}
+
+/** Response body for `POST /v2/dispersion` (`analyze_dispersion_v2`). */
+export interface DispersionResponse {
+  forward: string;
+  lateral: string;
+  group_column: DispersionGroupColumn | null;
+  groups: DispersionGroupResult[];
+}
+
+/**
+ * Run the PyQt Dispersion tab's shot-dispersion analysis over caller-supplied
+ * inline records, via the same `analyze_dispersion` contract the desktop tab
+ * calls (`src/tools/launch_monitor_analytics/gui.py` `_compute_dispersion`).
+ */
+export async function analyzeDispersionV2(
+  records: Record<string, unknown>[],
+  forward = "carry_distance",
+  lateral = "lateral_carry",
+  groupColumn?: DispersionGroupColumn | null,
+): Promise<DispersionResponse> {
+  const payload: DispersionPayloadV2 = {
+    records,
+    forward,
+    lateral,
+    group_column: groupColumn ?? null,
+  };
+  return apiFetch<DispersionResponse>(`${BASE}/v2/dispersion`, {
     method: "POST",
     body: JSON.stringify(payload),
   });
