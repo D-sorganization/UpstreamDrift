@@ -566,6 +566,17 @@ def write_academic_dispersion_figure(
         axis_right.set_xlim(0.0, common_right_max * 1.05)
 
     if is_social:
+        # Reserve the actual tick/label footprint, not only the axes rectangle.
+        figure.canvas.draw()
+        renderer = figure.canvas.get_renderer()
+        decorated_bottom = min(axis.get_tightbbox(renderer).y0 for axis in figure.axes)
+        footer_top = t_footer.get_window_extent(renderer).y1
+        clearance = footer_top + 6.0 * figure.dpi / 72.0 - decorated_bottom
+        if clearance > 0:
+            bottom_grid += clearance / figure.bbox.height
+            if bottom_grid >= top_grid:
+                raise ValueError("social annotations leave no room for density panels")
+            outer.update(bottom=bottom_grid)
         colorbar_axis = figure.add_axes(
             (0.89, bottom_grid, 0.022, top_grid - bottom_grid)
         )
