@@ -41,6 +41,10 @@ from src.shared.python.motion_matching.pipeline.reference import (
     smooth_lane,
     smooth_reference,
 )
+from src.shared.python.motion_matching.pipeline.turn_split import (
+    lane_axis_targets,
+    lane_split_weights,
+)
 from src.shared.python.motion_matching.range_of_motion import (
     HUMAN_RANGES_DEG,
     violations,
@@ -412,7 +416,8 @@ def shooting_fit(
             prior_trajectory=q_track,
             bounds=lane.bounds,
             locked_per_frame=locked,
-            axis_targets_per_frame=getattr(lane, "face_targets", None),
+            axis_targets_per_frame=lane_axis_targets(lane),
+            marker_weights=lane_split_weights(lane),
         )
         q_track = smooth_lane(q_fit, lane, TRACKING_CUTOFF_HZ)
     zmp = fs.reference_zmp(sim, lane.times, best_q, lane.ground)
@@ -481,7 +486,8 @@ def zmp_filter(
             prior_trajectory=q_track,
             bounds=lane.bounds,
             com_targets_per_frame=goals,
-            axis_targets_per_frame=getattr(lane, "face_targets", None),
+            axis_targets_per_frame=lane_axis_targets(lane),
+            marker_weights=lane_split_weights(lane),
         )
         q_track = smooth_lane(q_new, lane, TRACKING_CUTOFF_HZ)
         zmp = fs.reference_zmp(sim, lane.times, q_track, lane.ground)

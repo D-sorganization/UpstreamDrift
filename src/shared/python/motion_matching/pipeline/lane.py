@@ -379,6 +379,11 @@ class Lane:
         #: the base cutoff on both sides of impact.
         self.pre_contact_cutoff_hz: float | None = None
         self.release_cutoff: dict[str, Any] | None = None
+        #: Thorax / shoulder-girdle turn split (#12042 slice 7); off until set.
+        self.thorax_targets: list[dict[str, Any] | None] | None = None
+        self.thorax_weight = 0.0
+        self.split_marker_weights: dict[str, float] = {}
+        self.shoulder_girdle_weight = 1.0
 
     def set_face_targets(
         self,
@@ -495,6 +500,27 @@ class Lane:
         if self.release_cutoff is not None:
             report["release_cutoff"] = self.release_cutoff
         return report
+
+    def set_turn_split(
+        self,
+        attachments: Mapping[str, tuple[str, Sequence[float]]],
+        thorax_weight: float,
+        shoulder_girdle_weight: float,
+    ) -> None:
+        """Enable the thorax-orientation residual and the shoulder-girdle
+        marker weights (#12042 slice 7) for the trajectory re-solves. Call it
+        after the address calibration so calibration stays marker-only.
+        Raises ``ValueError``/``TypeError`` for a negative or non-numeric weight."""
+        from src.shared.python.motion_matching.pipeline import turn_split
+
+        self.thorax_targets = turn_split.thorax_axis_targets(
+            self.points, self.valid, self.labels, attachments, thorax_weight
+        )
+        self.thorax_weight = float(thorax_weight) if self.thorax_targets else 0.0
+        self.split_marker_weights = turn_split.shoulder_girdle_weights(
+            self.labels, shoulder_girdle_weight
+        )
+        self.shoulder_girdle_weight = float(shoulder_girdle_weight)
 
     def leg_seeds(self) -> dict[str, tuple[str, Sequence[float]]]:
         """Leg marker seeds; forefoot markers squared when foot progression is on."""
@@ -646,9 +672,11 @@ class Lane:
             flat_feet_per_frame=self.stance,
             plant_stance=True,
             bounds=self.bounds,
-            marker_weights=self.marker_weights,
+            marker_weights={**self.marker_weights, **self.split_marker_weights},
             prior_weights=self.prior_weights,
-            axis_targets_per_frame=merge_axis_targets(axis_targets, self.face_targets),
+            axis_targets_per_frame=merge_axis_targets(
+                axis_targets, self.face_targets, self.thorax_targets
+            ),
             restarts=TRAJECTORY_RESTARTS,
             restart_threshold_m=TRAJECTORY_RESTART_THRESHOLD_M,
             restart_margin_m=TRAJECTORY_RESTART_MARGIN_M,
