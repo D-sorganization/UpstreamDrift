@@ -32,6 +32,8 @@ Original v6 primary and recovered control are complete and graphically reviewed.
 
 **MAIN/BOUNDS source freezes are released. FINAL_LAYOUT study Python remains frozen until supplemental v5 terminates.** Original builder `c9c0fb194f` and social caption candidates `b9f1ad05b4` / `14f27706e4` are integrated as `aa76fa2eb3`, `9a1aabce5c`, `3f34a6b247`. All 74 integration tests pass; scoped Ruff/format (six files), Mypy (three sources), and exact scientific/reporting source parity pass. Evidence is recorded in `validation/caption_main_integration_v1/`.
 
+The frozen-parent pin command passed against the exact v5 start execution snapshot. See `validation/supplement_parent_verifier_pin_v1/parent_pin.json`, SHA-256 `d018db37c950e3e4999cad223a78dd9853f8336416d50b40646002901243ed64`. This verifies source/runtime identity only; completed-artifact verification remains pending.
+
 ### Live Producer and Preserved History
 
 Supplemental v5 runs from frozen FINAL_LAYOUT commit `14f27706e4e9e52ca1324a7a2bac59e86ab33ef9`: wrapper PID `3402685`, child `3402855`, log `/tmp/p2-supplement-report-v5.log`. Validate `/proc` start ticks against `validation/supplement_rendering_revision_v5/launcher.json`; `exit.json` is the terminal receipt. Both identities were revalidated after three hours of execution. Do not infer termination from an observation timeout or absent final receipt. No simulations are being repeated.
