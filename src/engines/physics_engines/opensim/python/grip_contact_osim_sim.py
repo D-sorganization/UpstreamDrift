@@ -234,6 +234,11 @@ class ContactGripSimulator(BushingGripSimulator):
         super().__init__(spec_bytes, names, time_s, q, interface)
         self._index_records()
 
+    def _grip_layout(self) -> Any:
+        """Pad layout of the configured elastic foundation."""
+        foundation = self.contact_config.ef
+        return foundation.layout
+
     # ------------------------------------------------------------ build hooks
     def _export_xml(self, spec_bytes: bytes, interface: GripInterface | None) -> str:
         xml, receipt = export_full_body_osim(
@@ -267,7 +272,7 @@ class ContactGripSimulator(BushingGripSimulator):
             self._frames[(side, "club")] = self._add_offset_frame(
                 f"grip_club_frame_{side}", CLUB_BODY, gi.frame(side).matrix()
             )
-        layout = self.contact_config.ef.layout
+        layout = self._grip_layout()
         hand = self._model.getBodySet().get("LGrip")
         for k, local in enumerate(layout.positions_grip_frame("R")):
             geom = osim.ContactSphere.safeDownCast(
@@ -290,7 +295,7 @@ class ContactGripSimulator(BushingGripSimulator):
     def _index_records(self) -> None:
         """Locate the club-body force and torque entries of every pad record."""
         osim = self._osim
-        layout = self.contact_config.ef.layout
+        layout = self._grip_layout()
         for side, _ in _SIDES:
             rows = []
             for k in range(layout.pad_count):
@@ -312,7 +317,7 @@ class ContactGripSimulator(BushingGripSimulator):
     # ----------------------------------------------------------------- sample
     def _side_sample(self, state: Any, name: str) -> dict[str, Any]:
         side = "L" if name == "left" else "R"
-        layout = self.contact_config.ef.layout
+        layout = self._grip_layout()
         r1, p1 = _transform_to_rt(self._frame(name, "hand").getTransformInGround(state))
         r2, p2 = _transform_to_rt(self._frame(name, "club").getTransformInGround(state))
         axis = r2[:, 0]
