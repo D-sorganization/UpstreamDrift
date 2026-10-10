@@ -418,7 +418,11 @@ def draw(doc: Mapping[str, Any], engines: Sequence[str], out_dir: Path) -> list[
             LOGGER.warning("skipping %s: %s", engine, entry and entry["reason"])
             continue
         pts = {k: np.asarray(v) for k, v in entry["leg_points_m"].items()}
-        fig, (top, front) = plt.subplots(1, 2, figsize=(11, 5.4))
+        floor = min(pts[f"{b}_{s}"][2] for b in ("calcn", "toes") for _, s in SIDES)
+        for point in pts.values():
+            point[2] -= floor  # display only: lowest foot point on z = 0
+        fig, (top, front) = plt.subplots(1, 2, figsize=(11, 6.2))
+        lines = []
         for side, sfx in SIDES:
             chain = np.array([pts[f"{b}_{sfx}"] for b in BODIES])
             top.plot(chain[:, 0], chain[:, 1], "-o", color=COLORS[side], ms=3)
@@ -426,33 +430,31 @@ def draw(doc: Mapping[str, Any], engines: Sequence[str], out_dir: Path) -> list[
             heel, toe = pts[f"calcn_{sfx}"], pts[f"toes_{sfx}"]
             axis = model_long_axis(heel, toe, NATIVE_UP_AXIS)
             top.plot(
-                [heel[0], heel[0] + 0.35 * axis[0]],
-                [heel[1], heel[1] + 0.35 * axis[1]],
+                [heel[0], heel[0] + 0.3 * axis[0]],
+                [heel[1], heel[1] + 0.3 * axis[1]],
                 color="k",
                 lw=2,
             )
-            top.annotate(
-                f"{side}: model {entry['model_deg'][side]:+.1f} deg\n"
-                f"capture {doc['targets_deg'][side]:+.1f} deg\n"
-                f"error {entry['error_deg'][side]:+.1f} deg",
-                (heel[0], heel[1]),
-                xytext=(6, 10 if side == "left" else -34),
-                textcoords="offset points",
-                color=COLORS[side],
-                fontsize=9,
+            lines.append(
+                f"{side} foot: model {entry['model_deg'][side]:+.1f} deg, "
+                f"capture {doc['targets_deg'][side]:+.1f} deg, "
+                f"error {entry['error_deg'][side]:+.1f} deg"
             )
         top.set_title(f"{engine}: overhead (world axes, Z up)")
         top.set_aspect("equal")
         top.set_xlabel("world x (m)")
         top.set_ylabel("world y (m)")
-        front.set_title(f"{engine}: side view of the legs (y vs z)")
+        front.set_title(f"{engine}: face-on view along world x (y vs z)")
         front.set_aspect("equal")
         front.set_xlabel("world y (m)")
-        front.set_ylabel("up (m)")
+        front.set_ylabel("height above lowest foot point (m)")
+        fig.text(0.5, 0.02, "\n".join(lines), ha="center", fontsize=10)
         fig.suptitle(
             f"FK diagram: {engine} address foot progression, {doc['label']} "
-            "(legs from the engine's own FK at the fitted address)"
+            "(legs from the engine's own FK at the fitted address"
+            + (", via the retarget map)" if engine == "myosuite" else ")")
         )
+        fig.tight_layout(rect=(0, 0.1, 1, 0.95))
         path = out_dir / f"{doc['label']}_{engine}_fk_diagram.png"
         fig.savefig(path, dpi=110, bbox_inches="tight")
         plt.close(fig)
