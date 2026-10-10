@@ -1040,3 +1040,54 @@ separate because this provider uses native plant stepping only.
 - Branch `feat/f07-opensim-mixed-replay-12147`; separate native scalar-muscle and CoordinateActuator T01 admission and fresh replay with explicit assistance role/bounds/gain/unit identity, immutable physical outputs and input/state/policy provenance. Root assistance follows ground-parent topology, including renamed coordinates. Other regional roles remain declared hypotheses.
 - Shared native scalar executor preserves old muscle/contact semantics; time and saved applied controls are verified. Native extension presence is checked independently of helper file count. Actual OpenSim4.6 mixed profile tests pass; broader regression passes 214 with two inapplicable contact-fixture skips before final lineage refinements. Failed CasADi-path attempt retained and corrected without installing an environment.
 - Canonical chapter27 and `docs/development/feedback_controls/F07_MIXED_ACTUATION_TURNOVER.md` own equations, scope and reproduction. Astra reviewed the corrected bounded source. Mixed Moco dispatch, full Rajagopal/520 topology, source physiology, capture horizon, own-contact/grip and all-model parity remain open. Do not label these synthetic runs as mocap matching or a muscle-only result.
+
+## F07 Constrained Muscle Moco and Replay (#12143)
+
+The versioned OpenSim 4.6 constrained-muscle policy binds source, named
+state, explicit lock targets/charts/couplers, native muscle options and exact
+T01 excitation knots before independent fresh-model replay. Actual native
+tests include CustomJoint, moving path, two Millard muscles, changed-future
+excitation and a reachable coupler-only Moco endpoint with measured replay
+error. Installed Moco rejects locked coordinates; the unchanged 520-muscle
+source remains blocked by anatomy/passive/assistance/contact and private
+marker registration. See chapter42 and
+`docs/development/feedback_controls/F07_CONSTRAINED_MUSCLE_MOCO_TURNOVER.md`.
+
+## Active Mixed Moco Link (#12147)
+
+Branch `feat/f07-mixed-moco-link-12147` composes preserved constrained prerequisites and adds optional mixed scalar Moco dispatch. The new native test writes a nonzero 40 ms target and measures fresh replay independently. Exact roles/bounds are bound into requests; mixed NPZ fields preserve controls, physical units, assistance, powers and work. Retained unscaled-cost and coarse-transcription failures motivate per-state refinement. Full-body/source physiology/contact and private capture remain open; chapter39 and F07_MIXED_ACTUATION_TURNOVER own the calculation and handoff.
+
+## Constrained Mixed Moco and Replay (#12173)
+
+Child #12173 adds an opt-in composition of the declared cold-start constraint
+policy and the existing assistance-explicit mixed profile. Exact coordinate
+optimizer boxes must fit within declared charts; linear chart constraints are
+checked by conservative interval extrema. Fresh replay rejects a native
+`Manager` that changes any requested named state value or the initial time,
+and records actual native constraint enforcement and position/velocity
+residuals at every sample. No native constraints are disabled and the strict
+default muscle-only path is unchanged. Mixed output preserves dimensionless
+muscle excitation and mechanical commands separately from physical N or N\*m
+actuation, power and sampled work. The 40 ms synthetic Moco fixture exports
+exact knots and independently replays, but it is not a private capture or
+production qualification. The frozen native regression reports 73 passed and
+one optional provider skip. Canonical calculation is chapter48; turnover is
+`docs/development/feedback_controls/F07_CONSTRAINED_MIXED_MOCO_TURNOVER.md`.
+The calculation registry remains empty and release blocked; full-body
+anatomy, calibration, physiology, contact/grip, capture horizon, production
+variants and six-engine parity remain unresolved.
+
+## F07 Exact 557-Muscle Excitation Diagnostic (#12182)
+
+The exact-derived-source v3 profile is stacked on #12181 and merges the
+reviewed #12173 shared scalar executor. It does not widen v1/v2. The
+original 1,226-state seed exits its source SC_z chart at 1 ms; the retained
+failure remains authoritative. A separately declared six-coordinate
+interior diagnostic seed independently replays 557 saved excitations for
+only 0.2 ms on two fresh OpenSim 4.6 models with 17 native couplers observed.
+Changed future excitation alters native activation while preserving the
+prefix. See chapter50 and `F07_EXACT_557_REPLAY_TURNOVER.md` for source,
+runtime, input, policy and failure hashes. Four invalid original body
+inertias, physiology, visual assets, full-horizon private capture fit, and
+all-variant/six-engine qualification remain open. Keep the stacked PR
+unarmed until prerequisites merge.
