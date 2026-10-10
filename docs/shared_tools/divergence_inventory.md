@@ -125,7 +125,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `simulation_backends` | 0 | 0 | 0 | 21 | 0 | 0 |
 | `simulation_store` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `spatial_algebra` | 0 | 0 | 0 | 14 | 0 | 0 |
-| `swing_comparison` | 0 | 0 | 0 | 7 | 0 | 0 |
+| `swing_comparison` | 0 | 0 | 0 | 5 | 0 | 0 |
 | `swing_sim` | 0 | 0 | 0 | 0 | 429 | 0 |
 | `tests` | 0 | 0 | 0 | 0 | 6 | 0 |
 | `theme` | 0 | 0 | 0 | 4 | 23 | 0 |
@@ -142,7 +142,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `video_timing` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 36 | 0 | 0 |
-| **Total** | **400** | **273** | **121** | **1759** | **796** | **673** |
+| **Total** | **400** | **273** | **121** | **1757** | **796** | **673** |
 
 ## Diverged Files by Package
 
