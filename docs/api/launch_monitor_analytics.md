@@ -97,6 +97,57 @@ response carries every `TemporalTrendResult` field, the rolling series as rows,
 and the change candidates. Statistics that cannot be computed are `null`, never
 `0`. An unknown column or too few observations returns 400.
 
+`POST /tools/launch-monitor-analytics/v2/dispersion` runs `analyze_dispersion`
+on inline `records` with the desktop Dispersion tab's inputs: `forward`
+(default `carry_distance`), `lateral` (default `lateral_carry`), and an
+optional `group_column` (`monitor_vendor`, `session_id`, or `club`; omitted or
+absent from the records means the desktop tab's "(all shots)" choice). The
+response carries every `DispersionResult` field per group. Statistics that
+cannot be computed are `null`, never `0`. A missing column or fewer than three
+complete shots in a group returns 400.
+
+`POST /tools/launch-monitor-analytics/v2/relationships` runs
+`compute_correlations` on inline `records` with the desktop Relationships tab's
+inputs: at least two `metrics`, optional partial-correlation `controls` (any
+control that is also a selected metric is dropped, as on the desktop),
+`method` (`pearson`, `spearman` or `kendall`; default `pearson`) and
+`edge_threshold` (default 0.3, range 0 to 1). The response carries every
+`CorrelationResult` field: the coefficient, p-value, FDR-adjusted p-value,
+pair-count and (with controls) partial-coefficient matrices as rows in
+`metrics` order, the derived and boolean-projected metric names, and the
+screened dependency edges. Statistics that cannot be computed are `null`, never
+`0`. A column absent from the records returns 400.
+
+`POST /tools/launch-monitor-analytics/v2/multivariate` runs `compute_pca` and
+`compute_vif` on inline `records` with the same `metrics` selection the
+desktop Relationships tab's multivariate action reads (at least two
+columns). The response carries every `PCAResult` field (explained variance
+ratio, loadings, scores, sample count) under `pca`, and every `VIFResult`
+field (metric-keyed values, sample count, warning metrics at VIF >= 5) under
+`vif`. An infinite VIF from perfectly collinear metrics serializes as `null`,
+never `0`. An unknown metric or too few complete rows returns 400.
+
+`POST /tools/launch-monitor-analytics/v2/comparison` runs `compare_monitors`
+on inline `records` with the desktop Monitor Comparison tab's inputs: a
+`metric`, an optional `match_column` (unset means the desktop's
+"(unmatched)") and an optional `reference_monitor` (an empty string means
+none, as on the desktop). The response carries every per-monitor summary and
+every pairwise comparison field, including each pairwise `warning`; unmatched
+results are descriptive, not calibration evidence. Statistics that cannot be
+computed are `null`, never `0`. Fewer than two monitors, an unknown reference
+monitor or a missing column returns 400.
+
+`POST /tools/launch-monitor-analytics/v2/model` runs `fit_predictive_model` on
+inline `records` with the desktop Models tab's inputs: a `target`, one or more
+distinct `features`, `model` (`linear`, `ridge`, `lasso`, `elastic_net` or
+`mlp`; default `linear`), `random_seed` (default 42) and an optional
+`group_column` (`session_id`, `monitor_vendor` or `club`; unset means the
+desktop's random split). The response carries every `PredictiveModelResult`
+field, with the held-out predictions as rows. Coefficients are `null` for a
+model that has none, and non-finite metrics are `null`, never `0`. An unknown
+column or too few complete rows returns 400; a model whose optional dependency
+is missing returns 503.
+
 ## Analysis Contract V2
 
 UpstreamDrift is the canonical Python and API authority for launch-monitor
