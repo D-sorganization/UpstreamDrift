@@ -1,0 +1,70 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_ test_real_saved_interval_preserves_span_and_numeric_accuracy[0.004597062764879343-0.004531382987542545-0.004658536119213675] _
+
+estimate = 0.004597062764879343, low = 0.004531382987542545
+high = 0.004658536119213675
+
+    @pytest.mark.parametrize('estimate,low,high', [
+        (0.004597062764879343,0.004531382987542545,0.004658536119213675),
+        (-0.00392726220708177,-0.003979629136146112,-0.003872946949009742),
+        (-0.003284521591238346,-0.0033180608278863878,-0.003246621472447612),
+    ])
+    def test_real_saved_interval_preserves_span_and_numeric_accuracy(estimate,low,high):
+        text=format_matched_course_scoring({'status':'available','club_id':'pitching_wedge','paired_n':10000,'total_n':10000,'paired_benefit_vs_straight':{'Draw':{'estimate':estimate,'lower_95':low,'upper_95':high}}})
+        line=text.split('Paired Difference vs. Straight',1)[1]
+        match=re.search(r'Draw: ([+-][\deE.+-]+) \[([+-][\deE.+-]+), ([+-][\deE.+-]+)\]',line)
+        assert match is not None
+        actual=tuple(float(v) for v in match.groups())
+>       assert actual[1]<actual[2], 'Nonzero saved uncertainty must not display as a zero-width interval'
+E       AssertionError: Nonzero saved uncertainty must not display as a zero-width interval
+E       assert 0.005 < 0.005
+
+/tmp/test_p2_gui_sg_saved_interval_review.py:17: AssertionError
+_ test_real_saved_interval_preserves_span_and_numeric_accuracy[-0.00392726220708177--0.003979629136146112--0.003872946949009742] _
+
+estimate = -0.00392726220708177, low = -0.003979629136146112
+high = -0.003872946949009742
+
+    @pytest.mark.parametrize('estimate,low,high', [
+        (0.004597062764879343,0.004531382987542545,0.004658536119213675),
+        (-0.00392726220708177,-0.003979629136146112,-0.003872946949009742),
+        (-0.003284521591238346,-0.0033180608278863878,-0.003246621472447612),
+    ])
+    def test_real_saved_interval_preserves_span_and_numeric_accuracy(estimate,low,high):
+        text=format_matched_course_scoring({'status':'available','club_id':'pitching_wedge','paired_n':10000,'total_n':10000,'paired_benefit_vs_straight':{'Draw':{'estimate':estimate,'lower_95':low,'upper_95':high}}})
+        line=text.split('Paired Difference vs. Straight',1)[1]
+        match=re.search(r'Draw: ([+-][\deE.+-]+) \[([+-][\deE.+-]+), ([+-][\deE.+-]+)\]',line)
+        assert match is not None
+        actual=tuple(float(v) for v in match.groups())
+>       assert actual[1]<actual[2], 'Nonzero saved uncertainty must not display as a zero-width interval'
+E       AssertionError: Nonzero saved uncertainty must not display as a zero-width interval
+E       assert -0.004 < -0.004
+
+/tmp/test_p2_gui_sg_saved_interval_review.py:17: AssertionError
+_ test_real_saved_interval_preserves_span_and_numeric_accuracy[-0.003284521591238346--0.0033180608278863878--0.003246621472447612] _
+
+estimate = -0.003284521591238346, low = -0.0033180608278863878
+high = -0.003246621472447612
+
+    @pytest.mark.parametrize('estimate,low,high', [
+        (0.004597062764879343,0.004531382987542545,0.004658536119213675),
+        (-0.00392726220708177,-0.003979629136146112,-0.003872946949009742),
+        (-0.003284521591238346,-0.0033180608278863878,-0.003246621472447612),
+    ])
+    def test_real_saved_interval_preserves_span_and_numeric_accuracy(estimate,low,high):
+        text=format_matched_course_scoring({'status':'available','club_id':'pitching_wedge','paired_n':10000,'total_n':10000,'paired_benefit_vs_straight':{'Draw':{'estimate':estimate,'lower_95':low,'upper_95':high}}})
+        line=text.split('Paired Difference vs. Straight',1)[1]
+        match=re.search(r'Draw: ([+-][\deE.+-]+) \[([+-][\deE.+-]+), ([+-][\deE.+-]+)\]',line)
+        assert match is not None
+        actual=tuple(float(v) for v in match.groups())
+>       assert actual[1]<actual[2], 'Nonzero saved uncertainty must not display as a zero-width interval'
+E       AssertionError: Nonzero saved uncertainty must not display as a zero-width interval
+E       assert -0.003 < -0.003
+
+/tmp/test_p2_gui_sg_saved_interval_review.py:17: AssertionError
+=========================== short test summary info ============================
+FAILED ../../../../../../tmp/test_p2_gui_sg_saved_interval_review.py::test_real_saved_interval_preserves_span_and_numeric_accuracy[0.004597062764879343-0.004531382987542545-0.004658536119213675]
+FAILED ../../../../../../tmp/test_p2_gui_sg_saved_interval_review.py::test_real_saved_interval_preserves_span_and_numeric_accuracy[-0.00392726220708177--0.003979629136146112--0.003872946949009742]
+FAILED ../../../../../../tmp/test_p2_gui_sg_saved_interval_review.py::test_real_saved_interval_preserves_span_and_numeric_accuracy[-0.003284521591238346--0.0033180608278863878--0.003246621472447612]
+3 failed in 7.10s

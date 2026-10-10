@@ -1,0 +1,29 @@
+import hashlib,json,re
+from pathlib import Path
+from src.tools.shot_pattern_analysis.matched_gui import format_matched_course_scoring
+root=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1')
+source=Path('src/tools/shot_pattern_analysis/matched_gui.py');sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest();before=sha(source)
+records=[];max_relative=max_width_relative=0.0
+for path in sorted(root.glob('*/summary.json')):
+    digest=sha(path);summary=json.loads(path.read_text())
+    if summary['status']!='completed':continue
+    scoring=summary['course_scoring'];text=format_matched_course_scoring(scoring)
+    for pattern,interval in scoring['paired_benefit_vs_straight'].items():
+        match=re.search(pattern+r': ([^ ]+) \[([^,]+), ([^\]]+)\] strokes',text);assert match
+        shown=tuple(float(v) for v in match.groups());saved=tuple(interval[k] for k in ('estimate','lower_95','upper_95'))
+        assert shown[1]<shown[2] or saved[1]==saved[2]
+        for a,b in zip(shown,saved,strict=True):
+            if b:max_relative=max(max_relative,abs(a-b)/abs(b));assert abs(a-b)<=abs(b)*.01
+            else:assert a==0
+        width=saved[2]-saved[1]
+        if width:max_width_relative=max(max_width_relative,abs((shown[2]-shown[1])-width)/width);assert abs((shown[2]-shown[1])-width)<=width*.01
+    meanline=text.split('Mean Strokes Gained: ',1)[1].split('\n',1)[0]
+    for pattern,row in scoring['patterns'].items():
+        match=re.search(pattern+r': ([+-][\deE.+-]+)',meanline);assert match
+        shown_mean=float(match.group(1).rstrip('.'));saved_mean=row['mean_strokes_gained']
+        if saved_mean:assert abs(shown_mean-saved_mean)<=abs(saved_mean)*.01
+        else:assert shown_mean==0
+    assert sha(path)==digest;records.append({'cell':path.parent.name,'summary_sha256':digest})
+assert before==sha(source)
+result={'status':'passed','completed_cells':len(records),'intervals_checked':2*len(records),'means_checked':3*len(records),'maximum_relative_value_error':max_relative,'maximum_relative_interval_width_error':max_width_relative,'gui_source_sha256':before,'sources':records}
+Path('/tmp/p2-gui-sg-independent/all_saved_values_after.json').write_text(json.dumps(result,indent=2));print(json.dumps({k:v for k,v in result.items() if k!='sources'},indent=2))

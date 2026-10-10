@@ -1,0 +1,17 @@
+import json,hashlib
+from pathlib import Path
+from PyQt6.QtWidgets import QApplication
+from src.tools.shot_pattern_analysis.gui import MainWidget
+from src.tools.shot_pattern_analysis.matched_gui import format_matched_course_scoring
+root=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2')
+out=Path('/tmp/p2-gui-sg-independent');out.mkdir(exist_ok=True)
+app=QApplication.instance() or QApplication([])
+main=MainWidget();main.mode_tabs.setCurrentIndex(1);main.resize(1000,760);main.show();app.processEvents()
+rows=[]
+for name in ('driver_lean0_curve1_rotation1_shaft_only','driver_lean5_curve1_rotation2_cov_facepath_negative','seven_iron_lean0_curve1_rotation2_combined2','pitching_wedge_lean0_curve1_rotation2_combined2'):
+    folder=root/'final_v1'/name;s=json.loads((folder/'summary.json').read_text());main.matched_study._completed({'output_dir':folder});app.processEvents();w=main.matched_study
+    labels={k:{'width':getattr(w,k).width(),'height':getattr(w,k).height(),'height_for_width':getattr(w,k).heightForWidth(getattr(w,k).width()),'text':getattr(w,k).text()} for k in ('result_label','scoring_label')}
+    main.grab().save(str(out/f'{name}.png'));rows.append({'cell':name,'main_height':main.height(),'labels':labels,'score':s['course_scoring']})
+old=w.scoring_label.text();w._failed('Independent non-simulation test failure');rows.append({'failure_retains_identical_score':w.scoring_label.text()==old,'status':w.status_label.text()})
+w._cancelled();rows.append({'cancellation_retains_identical_score':w.scoring_label.text()==old,'status':w.status_label.text()})
+main.cleanup();main.close();(out/'probe.json').write_text(json.dumps(rows,indent=2));print(json.dumps([{k:v for k,v in row.items() if k not in ('score','labels')} | ({'labels':{k:{x:y for x,y in v.items() if x!='text'} for k,v in row['labels'].items()}} if 'labels'in row else {}) for row in rows],indent=2))

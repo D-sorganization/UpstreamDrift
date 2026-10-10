@@ -1,0 +1,9 @@
+{
+  "status": "passed",
+  "completed_cells": 270,
+  "intervals_checked": 540,
+  "means_checked": 810,
+  "maximum_relative_value_error": 0.0009971237725258974,
+  "maximum_relative_interval_width_error": 0.009183864928432164,
+  "gui_source_sha256": "91cf57e85c39d46643787bcf7c0f16ef52699b276106cb5b1dd94c66dd6256ab"
+}
