@@ -9,3 +9,5 @@ paths: "src/tools/shot_pattern_analysis/matched_supplement_figures.py,src/tools/
 ---
 
 Interrupted v5 is rejected and hash-preserved. Forty filename collision groups affect 80 records; all seven numerical artifacts match reviewed prior bytes. AGY owns naming TDD; Astra owns numeric parity and ledger guards. No final publication acceptance or Monte Carlo rerun.
+
+Independent review also reproduced suffix truncation for fractional cell labels: 1.5 and 1.6 collapse to the same density/overhead output path. The actual 26 cell names contain no fractional tokens and are unaffected. The same filename acceptance gate must reject or safely encode these labels; a failing-first final-path regression is required.
