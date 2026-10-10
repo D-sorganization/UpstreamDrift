@@ -266,6 +266,21 @@ describe('MatchedSwingsPage', () => {
     });
   });
 
+  it('links the export report action to the selected run report URL', async () => {
+    render(
+      <MemoryRouter>
+        <MatchedSwingsPage />
+      </MemoryRouter>,
+    );
+
+    await screen.findByRole('button', { name: /drake/i });
+    const reportLink = screen.getByRole('link', { name: /export report/i });
+    expect(reportLink).toHaveAttribute(
+      'href',
+      '/api/v1/matched-swings/aaa111/report',
+    );
+  });
+
   it('disables the parity button when unavailable and fetches it when available', async () => {
     const user = userEvent.setup();
     const { container } = render(
