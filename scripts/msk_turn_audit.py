@@ -87,7 +87,13 @@ def _source_points(club: str, rows: np.ndarray) -> dict[str, np.ndarray]:
     return {k: np.array([o[b] for o in origins]) for k, b in SOURCE_BODIES.items()}
 
 
-def audit(capture_path: Path, club: str, mode: str, stride: int) -> dict[str, Any]:
+def audit(
+    capture_path: Path,
+    club: str,
+    mode: str,
+    stride: int,
+    turn_weight_rad: float = tt.TURN_WEIGHT_RAD,
+) -> dict[str, Any]:
     """Run one retarget mode and return the turn table (JSON-ready)."""
     if mode not in MODES:
         raise ValueError(f"mode must be one of {MODES}, got {mode!r}")
@@ -103,7 +109,11 @@ def audit(capture_path: Path, club: str, mode: str, stride: int) -> dict[str, An
         [events.address_time, events.top_time, events.impact_time],
     )
     rows, times = all_rows[idx], idx * mt.FIXTURE_DT_S
-    targets = None if mode == "baseline" else tt.turn_targets_from_lines(markers, times)
+    targets = (
+        None
+        if mode == "baseline"
+        else tt.turn_targets_from_lines(markers, times, weight_rad=turn_weight_rad)
+    )
     feet = tt.planted_feet_from_capture(capture) if mode == "turn_feet" else None
     start = time.monotonic()
     frames = mt.track_swing(
@@ -131,6 +141,7 @@ def audit(capture_path: Path, club: str, mode: str, stride: int) -> dict[str, An
         "club": club,
         "mode": mode,
         "stride": stride,
+        "turn_weight_rad": None if targets is None else turn_weight_rad,
         "frames_tracked": len(frames),
         "track_seconds": round(elapsed, 1),
         "markers": turn_source_block(markers, events, "capture_markers"),
@@ -138,6 +149,10 @@ def audit(capture_path: Path, club: str, mode: str, stride: int) -> dict[str, An
         "msk": turn_source_block(msk, events, f"opensim_msk_retarget_{mode}"),
         "max_lead_grip_error_m": max(f.lead_grip_error_m for f in frames),
         "max_trail_grip_gap_m": max(f.trail_grip_gap_m for f in frames),
+        "max_trail_grip_gap_time_s": float(
+            times[int(np.argmax([f.trail_grip_gap_m for f in frames]))]
+        ),
+        "trail_grip_gap_m": {k: frames[i].trail_grip_gap_m for k, i in at.items()},
         "landmark_rms_m": {k: frames[i].landmark_rms_m for k, i in at.items()},
         "coordinates_deg": {
             k: {c: float(np.degrees(frames[i].q[c])) for c in COORDINATES}
@@ -174,10 +189,13 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--club", default="driver", choices=("driver", "iron7"))
     parser.add_argument("--mode", default="turn_feet", choices=MODES)
     parser.add_argument("--stride", type=int, default=2)
+    parser.add_argument("--turn-weight-rad", type=float, default=tt.TURN_WEIGHT_RAD)
     parser.add_argument("--out", type=Path, required=True, help="output JSON")
     args = parser.parse_args(argv)
     logging.basicConfig(level=logging.INFO)
-    result = audit(args.capture, args.club, args.mode, args.stride)
+    result = audit(
+        args.capture, args.club, args.mode, args.stride, args.turn_weight_rad
+    )
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(result, indent=1), encoding="utf-8")
     logger.info("\n%s", format_table(result))
