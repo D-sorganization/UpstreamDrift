@@ -64,6 +64,25 @@ def main() -> int:
     ap.add_argument("--friction", type=float, default=None)
     ap.add_argument("--t-end", type=float, default=None)
     ap.add_argument("--tag", default="")
+    ap.add_argument(
+        "--friction-time",
+        type=float,
+        default=None,
+        help="solreffriction time constant [s] (default 2 timesteps; issue #11986)",
+    )
+    ap.add_argument(
+        "--trail-shift-mm",
+        type=float,
+        nargs=3,
+        default=(0.0, 0.0, 0.0),
+        help="constant trail-hand offset in its grip frame [mm] (issue #11986)",
+    )
+    ap.add_argument(
+        "--hand-mode",
+        choices=("prescribed", "trail_follows_club", "lead_only"),
+        default="prescribed",
+        help="diagnostic hand drive (issue #11986)",
+    )
     args = ap.parse_args()
 
     spec_bytes = (MODELS / f"full_body_spec_anthro_{args.club}.json").read_bytes()
@@ -94,7 +113,16 @@ def main() -> int:
     )
 
     start = time.perf_counter()
-    run = simulate_grip_contact(spec_bytes, swing, pads, interface, t_end_s=args.t_end)
+    run = simulate_grip_contact(
+        spec_bytes,
+        swing,
+        pads,
+        interface,
+        t_end_s=args.t_end,
+        friction_time_s=args.friction_time,
+        hand_mode=args.hand_mode,
+        trail_shift_m=[v * 1e-3 for v in args.trail_shift_mm],
+    )
     wall = time.perf_counter() - start
     OUT.mkdir(exist_ok=True)
     stem = f"{args.engine}_{args.club}{args.tag}"
