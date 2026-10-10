@@ -1,0 +1,19 @@
+{
+  "status": "changes_required",
+  "scope": "Independent Review of Uncommitted AGY Social Integration",
+  "issue": 11988,
+  "test_result": "5 failed; each expected assertion reproduced the identified defect",
+  "source_worktree": "/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift",
+  "source_sha256": {
+    "src/tools/shot_pattern_analysis/matched_supplement_figures.py": "05d1818faa416ed3426befb3d3f047c4231334907a54e4a4978bcfdb63f02a0f",
+    "src/tools/shot_pattern_analysis/matched_supplement_pipeline.py": "c53b5a3b1437618e4a9432f7618011c323d82f1c735e8f7a79baf4776d073350"
+  },
+  "findings": [
+    "Serialized zero correlation must override profile-name assumptions.",
+    "Caption must distinguish primitive shaft-twist/path correlation from delivered face/path correlation.",
+    "Unequal horizontal/vertical strike SDs must be stated separately.",
+    "Available figure records without artifact paths must fail verification.",
+    "Unavailable records must not bypass verification for claimed artifact paths or hashes."
+  ],
+  "next_step": "Wait for the live AGY task to finish ownership, then fix with these failing regressions; inspect actual renders for long captions. Preserve numerical snapshot."
+}

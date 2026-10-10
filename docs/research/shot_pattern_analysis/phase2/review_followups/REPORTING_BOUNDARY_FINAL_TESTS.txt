@@ -1,0 +1,52 @@
+................................                                         [100%]
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+../../../../Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487
+  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487: UserWarning: Skipping collection of '.hypothesis' directory - this usually means you've explicitly set the `norecursedirs` pytest config option, replacing rather than extending the default ignores.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 20 durations =============================
+9.80s call     tests/research/test_shot_pattern_final_report.py::test_supplement_loader_return_cannot_rebind_old_data_to_new_receipt
+1.68s call     tests/research/test_shot_pattern_final_report.py::test_final_builder_requires_full_324_and_72_cell_protocols
+1.56s setup    tests/research/test_shot_pattern_final_report.py::test_report_shows_completed_and_unavailable_without_fabricating_effects
+0.91s call     tests/tools/shot_pattern_analysis/test_matched_supplement_pipeline.py::test_original_protocol_validation_checks_exact_factorial_configs
+0.13s setup    tests/research/test_shot_pattern_final_report.py::test_matrix_input_change_is_rejected_before_publication
+0.12s call     tests/tools/shot_pattern_analysis/test_matched_supplement_pipeline.py::test_verified_supplement_loader_rejects_changed_report_artifacts
+0.10s teardown tests/research/test_shot_pattern_final_report.py::test_final_publication_receipt_binds_report_and_supplement
+0.09s call     tests/research/test_shot_pattern_final_report.py::test_verified_original_figures_require_both_presentations
+0.08s setup    tests/research/test_shot_pattern_final_report.py::test_compact_comparison_table_does_not_wrap_full_optimizer_failure
+0.07s teardown tests/research/test_shot_pattern_final_report.py::test_compact_comparison_table_does_not_wrap_full_optimizer_failure
+0.07s setup    tests/tools/shot_pattern_analysis/test_matched_supplement_pipeline.py::test_selects_curve_lean_and_sd_pairs_without_reflection_or_deduping_patterns
+0.07s setup    tests/research/test_shot_pattern_final_report.py::test_final_publication_receipt_binds_report_and_supplement
+0.07s setup    tests/research/test_shot_pattern_final_report_assets.py::test_selected_asset_cannot_be_relabelled_or_escape_its_inventory[missing_pattern]
+0.06s setup    tests/research/test_shot_pattern_final_report.py::test_report_rejects_incomplete_or_wrong_study_population
+0.06s teardown tests/tools/shot_pattern_analysis/test_matched_supplement_pipeline.py::test_original_source_inventory_keeps_every_availability_state
+0.05s teardown tests/research/test_shot_pattern_final_report.py::test_matrix_input_change_is_rejected_before_publication
+0.05s call     tests/tools/shot_pattern_analysis/test_matched_supplement_pipeline.py::test_cell_figure_ledger_keeps_density_and_overhead_exports_distinct
+0.05s teardown tests/tools/shot_pattern_analysis/test_matched_supplement_pipeline.py::test_pair_figure_ledger_keeps_overhead_when_common_density_support_is_missing
+0.05s call     tests/tools/shot_pattern_analysis/test_matched_supplement_pipeline.py::test_original_source_inventory_keeps_every_availability_state
+0.05s call     tests/tools/shot_pattern_analysis/test_matched_supplement_pipeline.py::test_pair_figure_ledger_keeps_overhead_when_common_density_support_is_missing
