@@ -1,0 +1,43 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.13, pytest-9.1.1, pluggy-1.6.0
+PyQt6 6.11.0 -- Qt runtime 6.11.1 -- Qt compiled 6.11.0
+benchmark: 5.3.0 (defaults: timer=time.perf_counter disable_gc=False min_rounds=5 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)
+rootdir: /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift
+configfile: pyproject.toml
+plugins: qt-4.5.0, anyio-4.15.1, xdist-3.8.0, cov-7.1.0, asyncio-1.4.0, benchmark-5.3.0, hypothesis-6.168.5, platformdirs-4.12.3, timeout-2.4.0, mock-3.16.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+timeout: 60.0s
+timeout method: thread
+timeout func_only: False
+collecting ... collected 10 items                                                             
+
+tests/tools/shot_pattern_analysis/test_matched_report_plots.py ......... [ 90%]
+.                                                                        [100%]
+
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================== 10 passed, 6 warnings in 67.63s (0:01:07) ===================
