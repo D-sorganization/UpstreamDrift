@@ -1,0 +1,5 @@
+# Protocol Precondition Component Acceptance
+
+Isolated BOUNDS commit `c7a2f41fc8` adds one early protocol precondition and behavioral regressions. Eight independent cases fail against the prior implementation, then 48 focused tests and static checks pass. Root independently reran 29 regression cases and rehashed all evidence, inputs, sources and the 12 pairs of PNGs. Four actual comparison fixtures preserve exact PNG bytes, artists, axes, labels, density recipe and ledger metadata. Earlier reconstruction verified all 384 actual ordered references.
+
+The fix is committed separately and deliberately not integrated into MAIN yet. Build and verify the historical v6 publication and final report under frozen PRESENTATION `4023111d2a`, then integrate the guard. Reproducing that old publication continues to require its exact source; no source-map refresh, loader exemption or artificial child revision is authorized. This is component acceptance only; issue #12169 remains open until merged acceptance.

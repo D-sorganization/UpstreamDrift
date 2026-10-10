@@ -84,7 +84,7 @@ Canonical preliminary gate session `33360` ended with exit 1: 24 failed, 3,822 p
 
 ## Protocol Guard Independent Review
 
-AGY Gemini session `71510` completed with exit 0; exact candidate and logs are preserved in `validation/protocol_precondition_review_v1/agy_candidate/`. Astra now owns the isolated BOUNDS candidate for expanded no-side-effect tests and actual valid-pair artist/PNG parity against frozen PRESENTATION. All 384 actual resolved references passed the explicit-protocol preflight; this does not qualify graphics. Do not integrate the guard before the final v6 report is built and verified under frozen `4023111d2a`. Current MAIN and the live producer remain unchanged.
+Protocol guard #12169 is independently qualified and committed in isolated BOUNDS at `c7a2f41fc8`. Eight independent red cases, 48 focused green tests and static checks pass; root independently passed 29 regression cases. All 12 PNGs from four actual valid pairs are byte-identical to frozen PRESENTATION, with identical artists, labels, limits and metadata. Root rehashed all source/input/evidence bindings. All 384 actual resolved references also passed. Evidence: `validation/protocol_precondition_review_v1/independent_acceptance/`. BOUNDS editing is idle. **Do not integrate this commit into MAIN before final v6 report construction/verification under frozen `4023111d2a`; preserve historical strict source reproduction.** Whole-publication acceptance and issue closure remain pending.
 
 ## Completed Numerical Data
 
@@ -115,7 +115,7 @@ MAIN contains the accepted precision, narrative, same-six across-lean interactio
 
 PRESENTATION is `/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift`, branch `codex/shot-pattern-density-gutter`, committed through `4023111d2a` and source-frozen for v6. Its qualified gutter, caption and publication contract/CLI changes are integrated in MAIN. The actual-pair preflight and saved-data rendering plan are in `validation/actual_pair_adapter_preflight_v1/`. Integrate only qualified owned commits; never replace whole trees.
 
-FINAL_LAYOUT is `/home/dieterolson/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift` and is retained unchanged as stopped historical producer evidence. BOUNDS (`/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift`, branch `codex/shot-pattern-protocol-preconditions`, based at `b231eed2f8`) has an active Astra review of the completed Gemini protocol-guard candidate. The candidate is not accepted; preserve Astra’s ownership. Earlier accepted repairs are already in MAIN. Do not cherry-pick prerequisite duplicates `3615196639` or `4b53effe73`. Sparse checkouts may exclude historical data; restore required files before reproduction.
+FINAL_LAYOUT is `/home/dieterolson/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift` and is retained unchanged as stopped historical producer evidence. BOUNDS (`/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift`, branch `codex/shot-pattern-protocol-preconditions`, based at `b231eed2f8`) contains qualified isolated commit `c7a2f41fc8`; editing is idle and integration waits for frozen-source report completion. Earlier accepted repairs are already in MAIN. Do not cherry-pick prerequisite duplicates `3615196639` or `4b53effe73`. Sparse checkouts may exclude historical data; restore required files before reproduction.
 
 ## GUI and Scientific Interpretation
 
