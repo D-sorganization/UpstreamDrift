@@ -2,7 +2,7 @@
 
 Generated from catalog.json and current source evidence. Edit the sources and regenerate.
 
-Source fingerprint: `d28f8081751943c22178ac03f6f98d23cf3371e3729171280a00cb7c7a7117ed`.
+Source fingerprint: `59d15b0fe4fac233a5e92132d710cef43811d2a795aba9ca5dc14b374829fbf4`.
 
 This map covers registered components. A source match is not scientific approval or proof that tests passed.
 
@@ -166,6 +166,45 @@ Existing bounded local retrieval for canonical-core reference questions, separat
 - **Consumers:** None registered
 - **Providers:** None registered
 
+### Project MyoSuite Tasks
+
+ID: `project-myosuite-tasks` · Owner: UpstreamDrift: src/engines · Status: implemented
+
+SDK source-bound production task histories and exact independent native replay; short integration evidence does not qualify capture or physiology.
+
+- **Sources:** [myosuite_project_task_producer.py](../../src/engines/myosuite_project_task_producer.py), [myosuite_project_feedback.py](../../src/engines/myosuite_project_feedback.py), [myosuite_project_forecast.py](../../src/engines/myosuite_project_forecast.py), [myosuite_project_native_search.py](../../src/engines/myosuite_project_native_search.py), [project_task_replay_artifacts.py](../../src/engines/project_task_replay_artifacts.py), [myosuite_project_tracking.py](../../src/engines/myosuite_project_tracking.py), [myosuite_project_command_solve.py](../../src/engines/myosuite_project_command_solve.py), [bounded_candidate_search.py](../../src/shared/python/motion_matching/bounded_candidate_search.py)
+- **Documentation:** [38-project-myosuite-task-replay.qmd](../../manuals/upstreamdrift/chapters/38-project-myosuite-task-replay.qmd), [F09I-PROJECT-TASK-TURNOVER.md](../../docs/development/feedback_controls/F09I-PROJECT-TASK-TURNOVER.md), [F09J-FEEDBACK-RECORDING-TURNOVER.md](../../docs/development/feedback_controls/F09J-FEEDBACK-RECORDING-TURNOVER.md), [F09K-OWNED-FORECAST-TURNOVER.md](../../docs/development/feedback_controls/F09K-OWNED-FORECAST-TURNOVER.md), [F09L-NATIVE-SEARCH-TURNOVER.md](../../docs/development/feedback_controls/F09L-NATIVE-SEARCH-TURNOVER.md), [F09M-NATIVE-TRACKING-TURNOVER.md](../../docs/development/feedback_controls/F09M-NATIVE-TRACKING-TURNOVER.md), [F09N-NATIVE-COMMAND-SOLVE-TURNOVER.md](../../docs/development/feedback_controls/F09N-NATIVE-COMMAND-SOLVE-TURNOVER.md), [F09O-NATIVE-TOOLS-INTEGRATION-PLAN.md](../../docs/development/feedback_controls/F09O-NATIVE-TOOLS-INTEGRATION-PLAN.md), [F09O-NATIVE-TOOLS-INTEGRATION-TURNOVER.md](../../docs/development/feedback_controls/F09O-NATIVE-TOOLS-INTEGRATION-TURNOVER.md), [F09P-PREDICTION-INTEGRITY-PLAN.md](../../docs/development/feedback_controls/F09P-PREDICTION-INTEGRITY-PLAN.md), [F09P-PREDICTION-INTEGRITY-TURNOVER.md](../../docs/development/feedback_controls/F09P-PREDICTION-INTEGRITY-TURNOVER.md)
+- **Tests:** [test_project_task_producer.py](../../tests/unit/engines/myosuite/test_project_task_producer.py), [test_project_task_feedback.py](../../tests/unit/engines/myosuite/test_project_task_feedback.py), [test_project_task_forecast.py](../../tests/unit/engines/myosuite/test_project_task_forecast.py), [test_project_task_native_search.py](../../tests/unit/engines/myosuite/test_project_task_native_search.py), [test_project_task_artifact_admission.py](../../tests/unit/engines/myosuite/test_project_task_artifact_admission.py), [test_native_model_resource_closure.py](../../tests/unit/engines/myosuite/test_native_model_resource_closure.py), [test_project_task_tracking.py](../../tests/unit/engines/myosuite/test_project_task_tracking.py), [test_project_task_command_solve.py](../../tests/unit/engines/myosuite/test_project_task_command_solve.py), [test_bounded_candidate_search.py](../../tests/unit/motion_matching/test_bounded_candidate_search.py), [test_pinned_tools_package_loader.py](../../tests/unit/repo_hygiene/test_pinned_tools_package_loader.py), [test_prediction_integrity_boundaries.py](../../tests/unit/engines/myosuite/test_prediction_integrity_boundaries.py)
+- **Public Interfaces:** `create_project_golf_task` in [src/engines/myosuite_project_task_producer.py](../../src/engines/myosuite_project_task_producer.py), `ProjectTaskForecaster` in [src/engines/myosuite_project_forecast.py](../../src/engines/myosuite_project_forecast.py), `NativeCommandSolveProblem` in [src/engines/myosuite_project_command_solve.py](../../src/engines/myosuite_project_command_solve.py), `solve_native_command_plan` in [src/engines/myosuite_project_command_solve.py](../../src/engines/myosuite_project_command_solve.py)
+- **Consumers:** native-direct-command-replay
+- **Providers:** None registered
+
+### Independent Native Command Replay
+
+ID: `native-direct-command-replay` · Owner: UpstreamDrift: src/engines · Status: implemented
+
+SDK source-bound production task histories and exact independent native replay; short integration evidence does not qualify capture or physiology.
+
+- **Sources:** [native_direct_model_provider.py](../../src/engines/native_direct_model_provider.py), [native_replay_contracts.py](../../src/engines/native_replay_contracts.py), [native_direct_model_replay.py](../../src/engines/physics_engines/myosuite/python/native_direct_model_replay.py)
+- **Documentation:** [38-project-myosuite-task-replay.qmd](../../manuals/upstreamdrift/chapters/38-project-myosuite-task-replay.qmd), [F09I-PROJECT-TASK-TURNOVER.md](../../docs/development/feedback_controls/F09I-PROJECT-TASK-TURNOVER.md)
+- **Tests:** [test_project_task_producer.py](../../tests/unit/engines/myosuite/test_project_task_producer.py), [test_project_task_artifact_admission.py](../../tests/unit/engines/myosuite/test_project_task_artifact_admission.py), [test_native_model_resource_closure.py](../../tests/unit/engines/myosuite/test_native_model_resource_closure.py)
+- **Public Interfaces:** `create_native_direct_model` in [src/engines/native_direct_model_provider.py](../../src/engines/native_direct_model_provider.py)
+- **Consumers:** None registered
+- **Providers:** project-myosuite-tasks
+
+### Native Feedback Platform
+
+ID: `native-feedback-platform` · Owner: UpstreamDrift: src/engines · Status: implemented
+
+Maintained muscle matching and independent replay entry points coexist across six ecosystems. Availability and native fixture evidence do not qualify all models or private capture matching.
+
+- **Sources:** [cli.py](../../src/engines/physics_engines/opensim/python/tour_matching/cli.py), [native_moco_runner.py](../../src/engines/physics_engines/opensim/python/tour_matching/native_moco_runner.py), [native_moco_replay.py](../../src/engines/physics_engines/opensim/python/tour_matching/native_moco_replay.py), [native_moco_request.py](../../src/engines/physics_engines/opensim/python/tour_matching/native_moco_request.py), [native_moco_guess.py](../../src/engines/physics_engines/opensim/python/tour_matching/native_moco_guess.py), [moco_initial_bindings.py](../../src/engines/physics_engines/opensim/python/tour_matching/moco_initial_bindings.py), [native_reference_conventions.py](../../src/engines/physics_engines/opensim/python/tour_matching/native_reference_conventions.py), [native_passive_readiness.py](../../src/engines/physics_engines/opensim/python/tour_matching/native_passive_readiness.py), [native_muscle_bundle.py](../../src/engines/physics_engines/opensim/python/tour_matching/native_muscle_bundle.py), [moco_tracking.py](../../src/engines/physics_engines/opensim/python/tour_matching/moco_tracking.py), [native_owned_replay.py](../../src/engines/Simscape_Multibody_Models/python/native_owned_replay.py), [native_replay_contracts.py](../../src/engines/native_replay_contracts.py), [native_torque_replay.py](../../src/engines/physics_engines/mujoco/python/native_torque_replay.py), [native_torque_replay.py](../../src/engines/physics_engines/drake/python/native_torque_replay.py), [native_torque_replay.py](../../src/engines/physics_engines/pinocchio/python/native_torque_replay.py), [native_direct_model_replay.py](../../src/engines/physics_engines/myosuite/python/native_direct_model_replay.py)
+- **Documentation:** [39-native-offline-muscle-matching.qmd](../../manuals/upstreamdrift/chapters/39-native-offline-muscle-matching.qmd), [40-native-reference-conventions.qmd](../../manuals/upstreamdrift/chapters/40-native-reference-conventions.qmd), [ASTRA_REVIEW.md](../../docs/development/feedback_controls/ASTRA_REVIEW.md), [F10I-NATIVE-PLATFORM-INTEGRATION-PLAN.md](../../docs/development/feedback_controls/F10I-NATIVE-PLATFORM-INTEGRATION-PLAN.md), [F10I-NATIVE-PLATFORM-INTEGRATION-TURNOVER.md](../../docs/development/feedback_controls/F10I-NATIVE-PLATFORM-INTEGRATION-TURNOVER.md)
+- **Tests:** [test_native_feedback_platform.py](../../tests/integration/test_native_feedback_platform.py), [test_native_moco_runner.py](../../tests/opensim/test_native_moco_runner.py), [test_native_moco_guess.py](../../tests/opensim/test_native_moco_guess.py), [test_moco_initial_bindings.py](../../tests/opensim/test_moco_initial_bindings.py), [test_native_muscle_bundle.py](../../tests/opensim/test_native_muscle_bundle.py), [test_native_reference_conventions.py](../../tests/opensim/test_native_reference_conventions.py), [test_native_passive_readiness.py](../../tests/opensim/test_native_passive_readiness.py), [test_simscape_owned_native_replay.py](../../tests/unit/motion_matching/test_simscape_owned_native_replay.py)
+- **Public Interfaces:** `prepare_native_moco` in [src/engines/physics_engines/opensim/python/tour_matching/native_moco_runner.py](../../src/engines/physics_engines/opensim/python/tour_matching/native_moco_runner.py), `solve_native_moco` in [src/engines/physics_engines/opensim/python/tour_matching/native_moco_runner.py](../../src/engines/physics_engines/opensim/python/tour_matching/native_moco_runner.py), `replay_native_moco_bundle` in [src/engines/physics_engines/opensim/python/tour_matching/native_moco_replay.py](../../src/engines/physics_engines/opensim/python/tour_matching/native_moco_replay.py)
+- **Consumers:** None registered
+- **Providers:** None registered
+
 ## Integration Contracts
 
 | Provider | Consumer | Interaction | Contract |
@@ -175,6 +214,7 @@ Existing bounded local retrieval for canonical-core reference questions, separat
 | canonical-pose | pose-adapters | translates | [pose-conventions](../../docs/agent_context/contracts/pose-conventions.md) |
 | launcher | capability-atlas | generates | [launcher-atlas](../../docs/agent_context/contracts/launcher-atlas.md) |
 | capture-workflow | capability-atlas | generates | [capture-atlas](../../docs/agent_context/contracts/capture-atlas.md) |
+| project-myosuite-tasks | native-direct-command-replay | freezes | [project-task-native-replay](../../docs/agent_context/contracts/project-task-native-replay.md) |
 
 ```mermaid
 flowchart LR
@@ -190,11 +230,15 @@ flowchart LR
     n9["Capture Workflow State"]
     n10["Application Route Registry"]
     n11["Canonical Core Retrieval"]
+    n12["Project MyoSuite Tasks"]
+    n13["Independent Native Command Replay"]
+    n14["Native Feedback Platform"]
     n2 -->|"calls"| n3
     n4 -->|"constructs"| n5
     n6 -->|"translates"| n7
     n0 -->|"generates"| n1
     n9 -->|"generates"| n1
+    n12 -->|"freezes"| n13
 ```
 
 ## Existing Inventories
@@ -205,7 +249,7 @@ flowchart LR
 
 ## Provenance and Limits
 
-- 52 source files hashed with SHA-256; UTF-8 line endings normalized.
+- 114 source files hashed with SHA-256; UTF-8 line endings normalized.
 - Generated documents omit absolute paths and commit IDs to remain reproducible across worktrees.
 - Live CLI/MCP results include checkout identity and current revision.
 - Read integration contracts and their tests before modifying a boundary.

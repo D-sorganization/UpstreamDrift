@@ -1,3 +1,116 @@
+## Native Feedback Platform Integration (#12060)
+
+The published native Moco preparation/seed/solve/replay path and owned Simscape
+protocol coexist with guarded command search and six-engine replay entry points.
+Keep admitted Tools 86d0f28 and one private replay contract identity. Canonical
+chapter 39 and F10i turnover separate actual affected runtime checks, optional SDK
+skips, capture-loader DLL failures and the outstanding full-model scientific gates.
+Reference-conventions chapter is now 40; project MyoSuite remains chapter 38.
+
+## Project MyoSuite Bounded Native Command Solve (F09n)
+
+F09n #12036 connects the source-bound native objective and persistent native
+predictor to the existing shared F02 bounded search kernel. Freeze command
+plans, native bounds, first/subsequent command increments and declared hard
+criteria; verify unchanged parameters/callback identity. Independently admit
+and replay the complete fallback before search. Promote commands only through
+guarded SDK recomputation, full-horizon criteria and canonical replay; require
+guarded improvement. Return the admitted fallback on numerical or hard-criterion
+rejection, cancellation or timeout. Changed native/source/state identities fail.
+The adapter applies no live command. Its elapsed metric includes this solve's
+validation overhead; external preparation remains part of campaign timing.
+Chapter 38 and F09n turnover preserve source-specific proof and the remaining
+all-model muscular OpenSim endpoint. No physiology/private-fit acceptance follows.
+
+## Project MyoSuite Native Tracking Objective (F09m)
+
+F09m #12023 adds source-bound frozen native tracking costs shared by provisional
+search and guarded SDK histories. Decode complete states only on owned scratch
+data. Native configuration differences handle quaternion antipodes; native
+qvel differences, activation and exact command increments use explicit positive
+physical scales. Bind reference declaration, scales, absolute grid, complete
+initial state, previous controls, actuator order and source identities.
+Reject stale/changed lineage, clocks, bounds and solve parameters. The discrete
+cost does not grant physical feasibility, timestep-invariant integration or
+capture/physiological validity. Recompute selected commands through guarded
+promotion and independent full-horizon native replay. Chapter 38 and F09m
+turnover retain the evidence and remaining all-model muscular OpenSim endpoint.
+
+## Project MyoSuite Native Search, Forecast, Feedback and Independent Replay (F09i–F09l)
+
+F09l #12014 adds `ProjectTaskNativeSearch`, a persistent separately owned native
+context using the existing direct-command kernel and genuine Tools T01 bundles.
+Its invocation-boundary model guards leave every candidate explicitly
+provisional. Return immutable copied arrays plus the existing planned bundle
+binding the current initial state, model, channels, clock and policy. Commands
+are ordered post-mapping controls, bounded by native actuator limits and an
+explicit positive maximum horizon; no implicit clamping is allowed.
+
+Promotion accepts commands only and recomputes the entire plan through the
+guarded SDK forecaster. Both numerical callbacks receive bytes-backed immutable
+history arrays. Hard criteria must return `True`; objective must be finite.
+Existing export independently replays the serialized/reloaded T01 contract.
+No provisional states or scores qualify the plan. A validated future plan is
+separate from a live executed prefix, capture acceptance and physiological
+validation. Chapter 38 and F09l turnover retain the boundaries and evidence.
+
+F09k #12009 adds a reusable owned SDK forecasting plant for current-state
+shooting. Every candidate restores complete native integration state, including
+absolute time, activation, controls and warmstart, and runs the existing command
+recorder. The live plant is never reset or stepped by the forecaster. Exact
+current-state correspondence is checked before candidate execution, including
+caller conversion side effects. Source/model/SDK identity and live state are
+checked on success and failure. Timing includes admission and restoration;
+no real-time deadline or optimization convergence is established. Forecast
+history uses the existing independent replay boundary. Chapter 38 and F09k
+turnover preserve the unresolved calibration, physiology and parity gates.
+
+F09j #12003 provides copied immutable native feedback observations and reuses the
+admitted SDK loop for state-dependent commands. Retain controller provenance
+beside actual-input artifacts; reject callback state/model/source mutations
+before integration. Independent replay has no feedback dependency. The actual
+combined SDK campaign passes 89 tests; it does not establish a captured swing.
+
+Actual MyoSuite 3.0/MuJoCo 3.6 project tasks retain mixed native action bounds and
+exercise SDK lifecycle hooks. Freeze original source/resource bytes before
+native construction, retain concrete SDK helper/distribution identity, export
+existing T01/profile artifacts and verify every claimed state using the existing
+independent executor. Initialization 1.1 preserves absolute native epochs with
+measured relative clocks for suffix replay. Chapter 38 and F09i turnover govern
+the pathway. Three-step production probes do not qualify full capture,
+physiology, muscle-only drive, six-engine parity or the muscular OpenSim endpoint.
+Separate original-source nominal full-duration rollouts replay exactly for both
+variants but retain unqualified contact/constraint diagnostics. Invocation-local
+zero-filled fingerprint scratch preserves all per-step integrity checks while
+avoiding allocation/copy overhead. Python/Rust installs must match the actual
+vendored Tools revision, with feature-pin authority stated explicitly.
+Read-only reset diagnosis requires explicit initial assembly and physical support
+admission before fitting. Preserve default/reference/assembled provenance and
+independently reload full state; a mixed constraint norm does not qualify grip,
+joint limits or contact. Pose assembly alone does not prove capture correspondence.
+
+## Native Prediction Integrity Consolidation (F09p, #12055)
+
+Provisional predictions verify provider bytes at entry, after all preparation
+before native execution, and at exit. Preserve live state, owned handles,
+source/model/kernel identity, callback exclusion, full actuator/solver/clock
+admission and independent guarded promotion/replay. Changed preparation must
+reach no native step. Controlled short-fixture evidence reduces repeated
+native-library reads by 25 percent, without a cross-call cache or real-time claim.
+Canonical chapter 38 and F09p turnover retain source-specific proof and limits.
+Full seventeen-row/six-ecosystem/private muscular OpenSim acceptance remains open.
+
+## Native Tools Integration (F09o, #12044)
+
+The native command solve stack consumes admitted Tools main
+`86d0f28b1cc5acf61185e07e320c816c2d005512` with the F01b replay and private
+contract consumer migration. Python/Rust pins and the gitlink agree; native
+recording and independent replay share one private contract class identity
+through the existing governed loader. Actual affected SDK tests and provider
+source closure must be rerun. Impact acceptance is reconciled only after real
+capability probes and served-bundle verification. All-model parity, private
+motion fitting and muscular OpenSim matching/replay remain open.
+
 ## Unit Gate Rust Installation State (#11977)
 
 The unit-test gate allocates distinct empty Rust and Cargo homes under runtime
@@ -8351,6 +8464,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-09 | #11914 | Extend frozen native replay receipts and model-owned marker FK to actual Pinocchio q/v output, with frame-local marker transforms and nq=8/nv=7 identity-bound synthetic verification. |
 | 2026-10-07 | #11692 | Protect `.yml` and Related Filenames in the Title-Case Checker |
 | 2026-10-07 | #11666 | Register latex-references.yml in the workflow inventory so the inventory gate passes on main |
 | 2026-10-07 | #11598 | Commit recovered Crocoddyl G1 warm-start IK and 0.60 s FDDP stage inputs beside the rk45, rtol6 and b100 receipts, plus the w030r chain-root candidate, with sha256 provenance |
@@ -10400,6 +10514,30 @@ Enables owner capture (`capture-O`) resolution through the MuJoCo native ground-
 - Contact ground calibration via `prepare_hip_spec` aligns toe contact boundaries to meet ground-support specification tolerances.
 - Timeline samples past capture durations are skipped cleanly rather than clamped; short capture root errors report `None` safely.
 - Divergence inventory and matched swing ledger reconciled with full unit test coverage.
+## Native Feedback Observation Scoring and Full-State Identity (F09b, #11837)
+
+`src/engines/feedback_observation_qualification.py` consumes F01's existing
+comparison registry, a validated Tools `ExperimentReplayBundle` v1, native
+marker-position outputs, and measured marker positions. Admission cross-checks
+the bundle against F01 model/provider, state schema, ordered channel mapping,
+applied-input history and grid, integration policy, replay mode, horizon, and
+timebase. Replay identity also binds T01's actual full `initial_state_sha256`,
+model-identity digest, and capability-declaration digest; state-schema-only or
+partial-coordinate identity is insufficient. Changes to the full initial
+state, applied inputs, or executed policy invalidate a reused identity.
+
+Native 3-D positions are sampled at the exact observation clock through the
+F09a positions-only interpolation API, with no extrapolation. The workflow
+reuses canonical replay metrics and `motion_matching.acceptance.evaluate`,
+retaining the output and observation clocks, score receipt hashes, exact
+criterion identifiers/configuration, and existing verdict. It introduces no
+new tolerance. Reports preserve all required registry rows and the six-engine
+denominator; unavailable/missing evidence remains visible, and scoring never
+promotes F01 qualification. Synthetic tests prove contract integrity only;
+they are not native physics, private-capture, physiology, or cross-engine
+acceptance evidence. Canonical calculation notes are in
+`manuals/upstreamdrift/chapters/13-feedback-comparison.qmd`.
+
 # Native Torque Replay Development Boundary
 
 F06a (#11823, parent #11790) consumes the Tools experiment-replay bundle through
@@ -10437,6 +10575,71 @@ full-body/contact resources and muscle/six-engine gates remain open. Canonical
 calculation: `manuals/upstreamdrift/chapters/20-native-candidate-benchmark.qmd`.
 Turnover: `docs/development/feedback_controls/F03B_NATIVE_CANDIDATE_TURNOVER.md`.
 
+## Strict Native Replay Execution Boundary (F09c, #11898)
+
+`src/engines/feedback_native_execution.py` executes a frozen Tools T01 replay
+bundle through an explicitly selected native adapter and preserves the
+authoritative F01 comparison row. Its `NativeAdapterBinding` keeps the F01
+inventory provider/source identity separate from the T01 native adapter,
+loaded model, state-schema, and ordered input-channel identities. No provider
+or model variant is inferred from a package name. The current supported
+execution pairs are the reviewed MuJoCo and Drake direct-torque adapters and
+the Pinocchio native torque adapter. Other required engines remain in the
+six-engine denominator as unsupported or unavailable until an explicit
+adapter exists.
+
+The executor accepts only a complete `experiment-replay/1.0.0` bundle with
+native-own-contact policy, no observation/state-feedback access, reset policy
+forbidden, and simulation-relative zero-order-held actuator torque. It invokes
+the adapter with the local model source and frozen bundle, then verifies exact
+model, provider, initial physical and numerical state, policy, time grid,
+applied torque, full output horizon, and finite native state/effect arrays.
+The path to a local model is not copied into public receipts. Receipts bind the
+initial-state, input, policy, grid, channel schema, and output-state digests,
+but remain unqualified. A successful execution means only that the declared
+adapter replayed those bytes; it does not establish observation accuracy,
+physiological validity, or cross-engine equivalence. Contract tests use an
+independently generated one-hinge model and do not qualify production rows.
+The receipt retains `state_reset_allowed=False` separately from an unknown
+reset count when the adapter does not instrument that counter; policy is not
+reported as a measured zero.
+
+## Native Marker Positions From Replay States (F09d, #11907)
+
+`src/engines/feedback_native_markers.py` executes a frozen replay through the
+existing F09c boundary and passes its actual configuration trajectory to the
+selected native model's forward-kinematics implementation. A versioned
+`NativeMarkerMap` declares ordered marker labels, exact native body/frame
+identities, finite local points in metres, world output frame, simulation
+timebase, model/source/provider identities, and a canonical SHA-256 mapping
+identity. No marker is synthesized from generalized coordinates, quaternion
+components, or native integration-state arrays.
+
+The initial public FK consumers are the existing MuJoCo and Drake direct-torque
+adapters and the existing Pinocchio frozen-replay adapter. Their frame loading
+rechecks the exact Tools bundle model identity and uses native FK for every
+full-horizon output configuration. Pinocchio retains complete `qpos` and
+`qvel` with distinct `nq` and `nv`; derived frame placements use the public
+`PinocchioPhysicsEngine` path. Its cache initialization policy is bound without
+inventing a cache payload or claiming a measured reset count. The output retains
+native sample times and ordered 3-D points; its unqualified receipt binds the
+F09c execution receipt, state-output digest, marker-map digest, and position
+output digest. It contains no local model path. OpenSim marker geometry is
+owned by F07 #11903 and is consumed only once a matching full-state replay
+interface is available. MyoSuite, Simscape, and unavailable providers remain
+explicit in the six-engine denominator. Marker FK does not
+score observations or qualify anatomy, muscle physiology, contact, or model
+equivalence. `NativeMarkerReplayReport` keeps all inventory rows and six
+required engines visible; FK coverage is not qualification. Canonical note:
+`manuals/upstreamdrift/chapters/28-native-marker-forward-kinematics.qmd`.
+
+## Pinocchio Native Marker Forward Kinematics (F09e, #11914)
+
+F09e extends the F09d marker-output boundary with Pinocchio's existing native replay adapter and `PinocchioPhysicsEngine`. It evaluates only the actual q trajectory emitted by a validated, uninterrupted frozen torque replay. The complete state is Pinocchio configuration and tangent velocity (`nq` and `nv` remain distinct); cached frame poses are derived by the engine and are not fabricated extra state. Each ordered marker is an explicitly named native frame plus a finite local offset in metres, mapped by the frame's world transform.
+
+The F01 inventory package/variant/drive provider remains distinct from the T01/F06 native model, adapter provider, loaded-model, state-schema, input, and executed-policy identities. The mapping binds both namespaces and rejects mismatches. Synthetic Pinocchio 4.1 fixtures use an actual floating base (`nq=8`, `nv=7`), nonzero base translation/rotation, hinge configuration, and marker offset; expected points are computed from independent transform equations. A successful marker result remains unqualified and does not establish model physics, observation fit, contact, anatomy, or parity. The six-engine and all registered model/drive rows remain in the readiness denominator.
+
+
 ## Native Thelen Replay Boundary (F07b, #11826)
 
 Early native excitation replay explicitly admits compliant Thelen2003Muscle
@@ -10445,6 +10648,7 @@ length, complete restoration, ordered law identity and ignored-mode refusal
 are required. Canonical reference: native muscle replay chapter; turnover:
 `docs/development/feedback_controls/F07_THELEN_REPLAY_TURNOVER.md`. Full-body,
 contact/grip, licensing and real-capture scientific gates remain open.
+
 ## Controlled-Swing Comparison Admission (F01, #11785)
 
 `src/engines/feedback_comparison.py` projects the authoritative
@@ -10456,7 +10660,12 @@ independent input reproduction, and observation accuracy have distinct
 receipts. Missing rows, stale model or
 provider identities, absent SHA-256 bindings, feedback-driven or reset replay,
 mixed torque/excitation, and incomparable same-input horizons/channels/policies
-fail closed. The legacy Euclidean `same-input-bundle/v1` cannot satisfy the
+fail closed. Truncated replay cannot establish within-engine or same-input
+levels; observation scoring requires its own time-grid digest, distinct from
+the applied-input grid. Contract `feedback-comparison/1.1.0` additionally
+requires the exact Tools T01 initial-state payload digest for every independent
+replay level and equality of that digest for same-input comparison; older
+unbound receipts remain limited to identity/transcription admission. The legacy Euclidean `same-input-bundle/v1` cannot satisfy the
 new replay admission because it does not bind execution policy and applied
 inputs. Baselines must include independent polynomial, computed torque,
 MOSAIC+TVLQR, and selected OCP under one observation identity, horizon, and
@@ -10494,6 +10703,22 @@ an actual F02 controller driving a synthetic coupled two-coordinate plant;
 native full-body, real capture, muscle and scientific runtime claims remain
 open under the same blocked calculation registry.
 
+### Native Drake Frozen Torque Replay (F06b, #11838)
+
+`src/engines/physics_engines/drake/python/native_torque_replay.py` builds and
+independently consumes the canonical Tools experiment replay bundle. An owned
+collision-free URDF plant restores complete finite numeric discrete state,
+retains native configuration/tangent dimensions, audits actual net actuator
+effort, and advances frozen bounded inputs without feedback or state resets.
+Source, loaded topology, numeric parameter bytes, reviewed factory-default
+abstract parameter policy, solver/approximation and provider identity are
+bound and revalidated. The supported policy is Drake1.57.0, unit revolute
+motors, fixed steps and unsampled outputs; unsupported modes fail closed.
+Eleven actual native synthetic tests establish deterministic same-provider
+replay only. Canonical chapter22 and turnover preserve failed native probes
+and remaining full-body, contact, convergence, muscle and capture gates.
+
+
 ## Sparse Collocation and Shooting Benchmark Spike (F03, #11787)
 
 `sparse_collocation_spike.py` adds a bounded synthetic rotary fixture with
@@ -10506,6 +10731,15 @@ cold/warm starts, failures, timing and Python-tracked peak memory. The shooting
 fixture uses one constant torque while the spike uses one input per interval,
 so no production backend is selected from these results. Native F06 replay,
 private protocol D02, contact and full-body engine evidence remain open.
+
+## Native Pinocchio Frozen Torque Replay (#11900)
+
+The F06c adapter uses the existing public native ABA/RK4 integration kernel with complete configuration/tangent velocity, explicit unit motor scattering and immutable uninterrupted replay evidence. Canonical chapter25 and F06_PINOCCHIO_NATIVE_TURNOVER record source/model/provider identity, actual native RED/GREEN, fixture refinement and all remaining contact, muscle, capture and required-model parity gates. Tools owns the replay schema; common native admission is shared with Drake/MuJoCo and remains provider-hashed.
+## MyoSuite Native Muscle-Excitation Replay (F09f, #11918)
+
+`src/engines/physics_engines/myosuite/python/native_excitation_replay.py` consumes the versioned Tools T01 experiment bundle through a direct native MyoSuite/MuJoCo plant. Its input is normalized post-mapping muscle excitation written to ordered native `data.ctrl`; a Gym `[-1, 1]` action is not excitation and is never inverse-transformed. The fixed policy binds the registered environment, source and loaded model, provider/runtime identity, solver/integrator, frame skip, wrapper chain, state schema, time grid, applied inputs, and policy. It checks actual control readback and restores q/v, muscle activation, actuator controls, full `mjSTATE_INTEGRATION`, and the explicitly supported wrapper state before a fixed-horizon ZOH replay. The adapter does not call Gym `step`, task observation, reward, termination, tracking, or reset paths.
+
+An actual MyoSuite 3.0.0/MuJoCo 3.6.0 smoke on the public elbow pose fixture validates only the native excitation adapter seam. It does not bind the required MyoSuite golfer driver or iron rows. Both remain unqualified; all six engines and every registered model row stay in the denominator. No physiology, marker accuracy, production support, cross-engine equivalence, or scientific gate verdict follows from a successful receipt. The generic engine's legacy four-value Gym step path is unaffected and needs its own separately scoped compatibility test if supported. Canonical note: `manuals/upstreamdrift/chapters/31-myosuite-native-excitation-replay.qmd`.
 
 ## Frozen Marker Holdout Scoring (#11899)
 
@@ -10524,44 +10758,6 @@ residuals and failures through existing frozen-loader/TRC contracts. Its source
 candidate reaches a pelvis rotation bound and remains unqualified: fixed frame
 registration and anatomical calibration are unresolved. Canonical authority is
 chapter26; no capture, whole-body or full-state replay acceptance is claimed.
-
-# Native Torque Replay Development Boundary
-
-F06a (#11823, parent #11790) consumes the Tools experiment-replay bundle through
-actual native MuJoCo stepping for unit hinge motors. Full `mjSTATE_INTEGRATION`,
-distinct `nq`/`nv`, post-limit held torque, exact model/provider/policy identity
-and uninterrupted no-reset execution are required. Canonical calculation
-reference: `manuals/upstreamdrift/chapters/19-native-torque-replay.qmd`.
-Turnover: `docs/development/feedback_controls/F06_NATIVE_TORQUE_TURNOVER.md`.
-The temporary Tools development override has been replaced by merged T01 pin
-`2e7665111b06f92ffbfe178b92d74d6a81c95388`; the native unit-hinge
-consumer tests pass under the normal import path. Six-engine and muscular
-OpenSim real-capture gates remain open.
-
-## Independent Native Candidate Benchmark (F03b, #11824)
-
-`native_candidate_benchmark.py` extends F03's synthetic rotary comparison with
-an independent matrix-exponential solution for exact held-input truth and F06's
-fresh native MuJoCo replay. It binds the executed post-limit motor torque,
-complete initial `mjSTATE_INTEGRATION`, model and policy identities, and exact
-native step grid through the versioned Tools replay bundle. The gate keeps
-midpoint transcription defect, native-to-node gap, native-to-exact integrator
-gap, continuous RK45-to-exact gap, observation error, torque and slew residuals
-separate. Torque and slew are recomputed from applied input, not trusted from a
-solver report. A coarse stiff regression rejects low-defect transcription when
-native replay disagrees; native step refinement is checked independently.
-
-The serial benchmark retains failed and warm attempts, preparation, solve,
-native replay and receipt-export costs, cumulative time to first accepted
-attempt, p50/p95 wall time, and Python-tracked peak allocation with named
-hardware. The fixture is a no-contact one-hinge motor with synthetic node
-observations. The shooting adapter and collocation spike have unequal input
-degrees of freedom, so this is a provisional solver/replay boundary test, not a
-production backend selection or real-capture qualification. Capture
-preprocessing, D02/D03 frozen protocol, F09 observation-clock alignment,
-full-body/contact resources and muscle/six-engine gates remain open. Canonical
-calculation: `manuals/upstreamdrift/chapters/20-native-candidate-benchmark.qmd`.
-Turnover: `docs/development/feedback_controls/F03B_NATIVE_CANDIDATE_TURNOVER.md`.
 
 ## Bounded Native NMPC Evaluation (F05a, #11904; Parent #11789)
 
@@ -10701,3 +10897,105 @@ feedback bundles with matched model/initial-state/policy/grid identities,
 different applied-input hashes and exact full-state independent replay.
 This is not an F03 optimizer-to-native handoff: F03 currently exports only
 the one-dimensional synthetic sparse-collocation result.
+
+## Native Muscle Experiment Bundle (#11908)
+
+The native OpenSim T01 seam binds all admitted continuous state, registered discrete/modeling options, physical units, source/loaded/provider identity and cold-start policy. A reviewed fixed-path Millard/Slider-or-Pin subset executes owned frozen model bytes through the existing kernel. Canonical chapter27 and F07_MUSCLE_BUNDLE_TURNOVER preserve exclusions; native geometry, full-body constraints/contact, capture matching and required parity remain unqualified.
+
+## Native Moco Initial-State Bindings (#11949)
+
+The optional `MocoInitialBindings` contract in the existing OpenSim tracking
+provider binds complete caller-declared continuous state, scalar-control bounds
+and fixed initial values before native solver initialization and guess creation.
+Unknown/omitted states or controls, nonfinite/boolean values, unsupported existing
+controllers/PositionMotion and multi-control actuators fail before optimization.
+Existing callers retain their previous API behavior. Canonical chapter35 and
+`docs/development/moco_state_binding_11791` preserve actual OpenSim4.6 native tests,
+four-mesh collocation versus independent replay evidence, exact control knots,
+failed attempts and input nonidentifiability. Discrete/hidden native state,
+production anatomy, contact/grip, capture and physiological acceptance remain
+separate open gates. The per-child fragment owns later PR-keyed log collation.
+## Native Source Reference-Conventions Audit (F07f, #11962)
+
+`tour_matching.native_reference_conventions` observes exact XML/loaded OpenSim
+model identity, the declared post-`initSystem` reference frame and clock,
+achieved versus serialized coordinate defaults, joint/coupler dependencies,
+concrete muscle geometry paths, moving/conditional points, engaged wrap-curve
+readback and law/options. OpenSim `initSystem()` includes native initialization
+assembly; complete named continuous restoration afterward does not trigger a
+second assembly and is not a complete native restart. Explicit candidate
+correspondence binds both observation hashes and a proper rigid frame
+registration. Scalar coordinate mappings are existence-checked only; equal
+names, pelvis registration and path-length differences do not certify anatomy.
+The bounded unchanged 520-muscle Wilkinson and 318-muscle Pose2Sim diagnostics
+are unqualified for source-resource closure, physiology, contact/grip, capture
+matching or independent excitation replay. Canonical method is provisional
+chapter 40 and the source/turnover receipt remains local.
+
+## Native Offline OpenSim Muscle Matching (#11968)
+
+The maintained `tour_matching.cli moco-native` command consumes a strict,
+file-driven request binding native source, marker reference, state/control
+bounds, exact source and observation hashes, selected marker correspondence,
+weights, units, registration, passive policy and native exclusions. Preparation
+retains every independent blocker before solver construction. The solve stage
+revalidates source and registered observation bytes, calls the existing Moco
+builder, reads back native marker weights, rejects incomplete state/control
+names, and retains numbered attempts including failed solves.
+
+A successful native solution is exported at every original control knot plus
+each original observation time to the versioned T01 excitation bundle. The
+saved bundle is serialized and reloaded before a fresh observation-free native
+model replay; its exact state and input identities remain separate from the
+Moco transcription. Scoring uses original observation times and validity
+masks, while optimized objective, independent replay marker error and
+optimized-versus-replayed full-state disagreement remain distinct quantities.
+The tested two-DOF/two-muscle synthetic fixtures support ordered controls and
+two mesh refinements; native integration refinement was measured at common
+times under distinct declared numerical policies. No solver-success or
+synthetic result qualifies whole-body biomechanics or the private capture.
+
+The unchanged pinned 520-muscle source and frozen driver/iron references were
+prepared without constructing a solve. Missing source-valid guess, registration,
+marker placements, passive policy, nonmuscle-assistance policy, native
+constraint policy and complete prepared native state remain explicit blockers.
+Private marker arrays and identities stay outside the public repository.
+Canonical chapter39 and `F07_NATIVE_MOCO_RUNNER_TURNOVER.md` hold equations,
+tests, exact diagnostic scope and continuation instructions. All six engines
+and 17 required production rows remain in the acceptance denominator.
+
+## Source-Bound Native Moco Numerical Guess (#11990)
+
+The `moco-native-guess` command reads exact source XML and the existing frozen
+TRC clock, initializes the source through native OpenSim assembly and muscle
+equilibration, and writes every native named continuous state at every original
+time in a 17-digit STO table. Native readback must preserve complete ordered
+names, values and clock exactly. The receipt hashes source, loaded model,
+runtime/provider, state order/values, clock and serialized artifact, while
+declaring external-resource closure unavailable. The existing Moco builder
+checks complete state-table names and actual created state/control guess
+channels before accepting caller bindings; no control bounds are inferred.
+
+This is a numerical optimization seed only. It is not observed motion,
+physiological readiness, static equilibrium or a complete SimTK restart. The
+unchanged 520-muscle source produced 1,348 finite states at the driver and
+iron clocks. Both #11968 private preparations then lost exactly the artificial
+guess-file blocker, retaining six scientific/native blockers and doing no solve.
+Canonical chapter39 and the child turnover preserve the proof and limits.
+## Owned Native Simscape Diagnostic Replay
+
+F06d2 (#11942, parent #11921) consumes the separate Tools native-state envelope
+through immutable owned bytes. Actual R2025b class/clock/configuration and
+explicit simulation-checksum bindings precede strict complete-state restore.
+Native tests cover suffix-only and changed-future forces, independent full-run
+outputs, conflicting workspace inputs, byte identity and failure cleanup.
+The v5 source boundary additionally rejects a two-ULP snapshot-clock change,
+nonfinite or nonscalar saved time, wrong/missing saved provider identity and
+loaded-SLX path mismatch before native replay. The public evidence manifest
+binds an immutable 59-file fleet-local archive of source, request, model,
+operating point, native logs and outputs. The archive is a synthetic diagnostic
+artifact, not production-model or capture evidence.
+Canonical reference: `manuals/upstreamdrift/chapters/34-owned-native-simscape-replay.qmd`;
+turnover and source-hashed receipt: `docs/development/feedback_controls/F06D2_OWNED_SIMSCAPE_TURNOVER.md`
+and `F06D2_NATIVE_OWNED_RECEIPT.json`. This trusted synthetic diagnostic does not
+qualify production variants, muscle physiology, private capture or parity.

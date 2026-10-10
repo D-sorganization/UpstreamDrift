@@ -19,12 +19,21 @@ UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
 {{< include chapters/12-impact-parameters.qmd >}}
 
 {{< include chapters/13-native-muscle-replay.qmd >}}
+{{< include chapters/37-compiled-actuator-command-admission.qmd >}}
+{{< include chapters/38-project-myosuite-task-replay.qmd >}}
 
 {{< include chapters/19-native-torque-replay.qmd >}}
+{{< include chapters/22-native-drake-torque-replay.qmd >}}
+{{< include chapters/25-native-pinocchio-torque-replay.qmd >}}
+{{< include chapters/13-feedback-comparison.qmd >}}
+
+{{< include chapters/28-native-marker-forward-kinematics.qmd >}}
+{{< include chapters/30-pinocchio-native-marker-forward-kinematics.qmd >}}
 
 {{< include chapters/17-native-muscle-contact.qmd >}}
 
-{{< include chapters/13-feedback-comparison.qmd >}}
+
+
 
 {{< include chapters/16-distributed-feedback.qmd >}}
 
@@ -58,6 +67,18 @@ UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
 
 {{< include chapters/26-native-opensim-geometry.qmd >}}
 
+{{< include chapters/27-native-muscle-experiment-bundle.qmd >}}
+
+{{< include chapters/30-native-simscape-restart.qmd >}}
+
 {{< include chapters/32-native-constrained-state.qmd >}}
 
-{{< include chapters/20-native-candidate-benchmark.qmd >}}
+{{< include chapters/35-native-moco-initial-bindings.qmd >}}
+
+{{< include chapters/33-native-passive-readiness.qmd >}}
+
+{{< include chapters/40-native-reference-conventions.qmd >}}
+
+{{< include chapters/39-native-offline-muscle-matching.qmd >}}
+
+{{< include chapters/34-owned-native-simscape-replay.qmd >}}

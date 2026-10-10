@@ -10,6 +10,8 @@ from typing import Any
 
 import numpy as np
 
+__version__: str
+
 # Core data structures
 class Model:
     name: str
@@ -108,6 +110,7 @@ def buildGeomFromUrdf(
 
 # Kinematics / dynamics
 def neutral(model: Model) -> np.ndarray: ...
+def isNormalized(model: Model, q: np.ndarray, prec: float = ...) -> bool: ...
 def integrate(model: Model, q: np.ndarray, v: np.ndarray) -> np.ndarray: ...
 def forwardKinematics(
     model: Model,

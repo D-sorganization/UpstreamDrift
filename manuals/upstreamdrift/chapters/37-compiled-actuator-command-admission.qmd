@@ -1,0 +1,62 @@
+# Compiled Actuator Command Admission
+
+This chapter records the F01/F09 development boundary for a versioned T01
+`ACTUATOR_COMMAND` replay whose channel values are interpreted by the compiled
+native actuator laws. The inventory provider and the executable physics
+provider remain separate identities. In the current synthetic native fixture,
+the inventory row is `myosuite/driver/default`, while the direct executor is
+MuJoCo 3.8.0. That is development evidence for underlying MuJoCo replay; it
+does not establish availability or qualification of the official MyoSuite
+runtime.
+
+## Profile and Execution Receipt
+
+The T02 `compiled-actuator-profile/1.0.0` artifact is an opaque reference plus
+SHA-256 digest at the structural interchange boundary. F09 resolves those
+bytes, loads the registered direct model, and recomputes the canonical profile
+from the loaded model and T01 replay bundle before stepping. The profile binds
+the model source and loaded-model identities, execution provider and runtime,
+native actuator laws and ordered channels, complete initial-state digest,
+applied-input digest, time grid, replay policy, and verified resource closure.
+A matching T02 string or digest alone is not native execution evidence.
+
+F09 returns a frozen `NativeActuatorCommandReceipt` linked to the native output
+digest. The receipt carries the separate inventory-to-execution correspondence
+and the horizon of the submitted T01 bundle; it does not establish the duration
+or completeness of an original capture. F01 contract `feedback-comparison/1.2.0` admits that receipt for
+within-engine replay only when its identities and payload digests match the
+comparison evidence. The receipt is an integrity record, not a signature or a
+cryptographic attestation: deserialized caller-supplied receipts remain claims
+until a verifier independently checks their lineage or repeats the native
+execution. The API does not certify physics or physiology.
+
+## Mixed Compiled Laws Are Not Muscle-Only Drive
+
+`ACTUATOR_COMMAND` preserves each native channel's compiled transmission,
+dynamics, gain/bias/force law, target and order. A model may combine motors,
+muscles, filters, or other native actuator types. Therefore the coarse
+inventory drive label cannot establish that a run was fully muscle-driven;
+even zero motor commands do not prove muscle-only assistance. F01 explicitly
+rejects that claim for the compiled-command pathway. A separately reviewed
+assistance policy and corresponding native evidence are required.
+
+Within-engine replay may compare identical source and loaded model, execution
+provider, compiled profile, full initial state, policy, input history, channel
+order, and horizon. Cross-engine `SAME_INPUT` does not equate dimensionless
+command values or compiled profiles. It requires a separately reviewed
+semantic mapping. Required inventory rows remain in the denominator when a
+runtime or model binding is unavailable.
+
+## Evidence Limits
+
+Synthetic tests use a direct MuJoCo fixture and independently rehashed profile
+mutations. They exercise exact binding and negative admission cases, not a
+production MyoSuite package, full-body model, human capture, or a numerical
+acceptance tolerance. The six-engine parity and muscle-driven OpenSim goals
+remain open.
+
+F09 runtime consumers obtain Tools T01 types through the single
+`native_replay_contract_types()` facade. Its pinned package loader uses a
+private module name and does not extend `sidekick.lab.__path__`; this keeps
+execution, observation admission and tests on one canonical class/enum
+identity without publishing a second `sidekick.lab.mocap` module.

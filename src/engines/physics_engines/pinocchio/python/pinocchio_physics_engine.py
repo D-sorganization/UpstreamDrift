@@ -293,8 +293,8 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         pin.forwardKinematics(self.model, self.data, self.q)
         pin.updateFramePlacements(self.model, self.data)
         result: dict[str, np.ndarray] = {}
-        for frame in self.model.frames:
-            pose = self.data.oMf[frame.id]
+        for frame_id, frame in enumerate(self.model.frames):
+            pose = self.data.oMf[frame_id]
             transform = np.eye(4)
             transform[:3, :3] = pose.rotation
             transform[:3, 3] = pose.translation

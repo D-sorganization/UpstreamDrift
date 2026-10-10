@@ -44,7 +44,7 @@ from dataclasses import dataclass, field
 import math
 import re
 from types import MappingProxyType
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypeAlias
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -74,7 +74,7 @@ __all__ = [
     "to_overlay_wrenches",
 ]
 
-Array = NDArray[np.float64]
+Array: TypeAlias = NDArray[np.float64]
 
 #: Minimum vertical force [N] for a CoP / free moment to be reported.
 COP_MIN_FZ_N: float = 10.0

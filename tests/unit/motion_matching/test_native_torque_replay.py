@@ -14,7 +14,10 @@ pytestmark = pytest.mark.unit
 
 
 def test_contracts_resolve_pinned_tools_without_mutating_the_lab_namespace() -> None:
+    import sys
+
     from sidekick import lab
+    from src.engines.native_replay_contracts import native_replay_contract_types
 
     from src.engines.physics_engines.mujoco.python import native_torque_replay
 
@@ -26,6 +29,8 @@ def test_contracts_resolve_pinned_tools_without_mutating_the_lab_namespace() -> 
     assert Path(mocap.__file__).resolve().parent == vendor_mocap.resolve()
     assert hasattr(mocap, "ExperimentReplayBundle")
     assert list(lab.__path__) == before
+    assert native_replay_contract_types() is mocap
+    assert "sidekick.lab.mocap" not in sys.modules
 
 
 @pytest.fixture
