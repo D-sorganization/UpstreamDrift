@@ -1,0 +1,16 @@
+{
+  "status": "accepted_caption_component",
+  "source_hashes": {
+    "scripts/research/shot_pattern_analysis/build_final_figures.py": "a3b6aa26c2fa5d6ad98a39e697f5d0a5ab75de9e3c4d537b5265f07996ccbfe3",
+    "tests/research/test_shot_pattern_final_figures.py": "2135ed0195adc992df64ea18a7613e91c09b79749b60a1cbc53207ef92c6b01d"
+  },
+  "tests": "19 passed; Ruff check/format passed; scoped Mypy passed",
+  "actual_saved_cards": 3,
+  "assets": 9,
+  "top_level_text_overflow": 0,
+  "curve_control_png_exactly_matches_current_production": true,
+  "input_bytes_unchanged": true,
+  "visual_findings": [],
+  "scope": "Caption-only component; no production regeneration or full study acceptance",
+  "actual_preview_sha256": "0c8d3ba920695454cbc5c9465db7abfce6083667fed95fdbe5f1e093d8f07eef"
+}

@@ -543,11 +543,15 @@ def _render_density_comparison(
         if not math.isfinite(fixed_sd):
             raise ValueError("shaft twist SD must be finite")
         fixed_control = f"Shaft Twist SD {fixed_sd:g}°"
+        comparison_condition = f"{pair['first_label']} vs {pair['second_label']}"
     elif comparison_name == "shaft_rotation_sd":
         curve_scale = float(first_config.get("curve_scale", math.nan))
         if not math.isfinite(curve_scale):
             raise ValueError("curve scale must be finite")
         fixed_control = f"Curve ×{curve_scale:g}"
+        comparison_condition = (
+            f"Shaft Twist {pair['first_label']} vs {pair['second_label']}"
+        )
     else:
         raise ValueError(f"unrecognized comparison type: {comparison_name}")
 
@@ -580,7 +584,7 @@ def _render_density_comparison(
 
     scenario = (
         f"{'PILOT PREVIEW — ' if preview else ''}"
-        f"{pair['pattern']} • {pair['first_label']} vs {pair['second_label']} • "
+        f"{pair['pattern']} • {comparison_condition} • "
         f"{fixed_control} • {profile_label}"
     )
     stem = (

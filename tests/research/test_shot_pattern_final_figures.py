@@ -618,10 +618,13 @@ def test_density_comparison_captures_fixed_controls_and_units_for_combined_noise
     scenario_sd = call_sd["scenario"]
     metadata_sd = call_sd["metadata"]
 
-    assert "SD 1° vs SD 2°" in scenario_sd
+    assert "Shaft Twist SD 1° vs SD 2°" in scenario_sd
     assert "Curve ×1" in scenario_sd
     assert "Combined Delivery Noise" in scenario_sd
-    assert scenario_sd == "Draw • SD 1° vs SD 2° • Curve ×1 • Combined Delivery Noise"
+    assert (
+        scenario_sd
+        == "Draw • Shaft Twist SD 1° vs SD 2° • Curve ×1 • Combined Delivery Noise"
+    )
 
     assert metadata_sd["Static Loft"] == "10°"
     assert metadata_sd["Nominal Lean"] == "0°"
@@ -718,10 +721,12 @@ def test_density_comparison_captures_fixed_controls_and_units_for_shaft_only(
     scenario_sd = call_sd["scenario"]
     metadata_sd = call_sd["metadata"]
 
-    assert "SD 1° vs SD 2°" in scenario_sd
+    assert "Shaft Twist SD 1° vs SD 2°" in scenario_sd
     assert "Curve ×1" in scenario_sd
     assert "Shaft Twist Only" in scenario_sd
-    assert scenario_sd == "Draw • SD 1° vs SD 2° • Curve ×1 • Shaft Twist Only"
+    assert (
+        scenario_sd == "Draw • Shaft Twist SD 1° vs SD 2° • Curve ×1 • Shaft Twist Only"
+    )
 
     assert metadata_sd["Noise"] == (
         "Path SD 0° • Speed SD 0 mph • Strike SD 0/0 mm horizontal/vertical"
