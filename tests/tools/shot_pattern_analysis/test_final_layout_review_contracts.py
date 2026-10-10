@@ -106,3 +106,67 @@ def test_actual_social_fonts_and_axis_legend_clearance(
                 assert not box.overlaps(footer_box), (label.get_text(), box, footer_box)
                 assert box.x0 >= 0 and box.y0 >= 0
                 assert box.x1 <= figure.bbox.width and box.y1 <= figure.bbox.height
+
+
+@pytest.mark.parametrize("presentation", ["academic", "social"])
+@pytest.mark.parametrize("center,spread", [(148.5, 3.5), (77.4, 0.02), (180.0, 15.0)])
+def test_main_tick_neighbors_keep_readable_gutter(
+    tmp_path, monkeypatch, presentation, center, spread
+):
+    plots, _, canvas_type, _ = _plots()
+    original_spacing = plots._space_shared_x_ticks
+
+    def checked_spacing(figure, axes):
+        before = [
+            (axis.get_xlim(), [t.get_fontsize() for t in axis.get_xticklabels()])
+            for axis in axes
+        ]
+        original_spacing(figure, axes)
+        for axis, (limits, fonts) in zip(axes, before, strict=True):
+            assert axis.get_xlim() == limits
+            assert all(t.get_fontsize() in fonts for t in axis.get_xticklabels())
+
+    monkeypatch.setattr(plots, "_space_shared_x_ticks", checked_spacing)
+    captured = []
+
+    def save(figure, *_a, **_k):
+        captured.append(figure)
+        return {}
+
+    monkeypatch.setattr(plots, "_save_formats", save)
+    rng = np.random.default_rng(311)
+    points = {
+        name: np.column_stack(
+            (np.linspace(center - spread, center + spread, 500), rng.normal(0, 3, 500))
+        )
+        for name in ("Straight", "Draw", "Fade")
+    }
+    plots.write_academic_dispersion_figure(
+        points,
+        tmp_path / "main_ticks",
+        scenario="Main Tick Review",
+        metadata={"social_club": "7-Iron"},
+        target_point_m=(center, 0),
+        presentation=presentation,
+        dpi=96,
+    )
+    figure = captured[0]
+    canvas_type(figure)
+    figure.canvas.draw()
+    renderer = figure.canvas.get_renderer()
+    main_axes = [figure.axes[3 * i + 1] for i in range(3)]
+    reference = main_axes[0].get_xticks()
+    for axis in main_axes:
+        np.testing.assert_array_equal(axis.get_xticks(), reference)
+        labels = [t for t in axis.get_xticklabels() if t.get_visible() and t.get_text()]
+        boxes = sorted(
+            (t.get_window_extent(renderer) for t in labels), key=lambda b: b.x0
+        )
+        assert len(boxes) >= 2
+        assert (
+            min(
+                (b.x0 - a.x1) * 72 / figure.dpi
+                for a, b in zip(boxes, boxes[1:], strict=False)
+            )
+            >= 4
+        )

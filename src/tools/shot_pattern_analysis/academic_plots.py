@@ -32,8 +32,8 @@ _HDR_STYLES = {
 _MAX_OVERLAY_DOTS = 600
 
 
-def _space_marginal_ticks(figure: Any, axes: Sequence[Any]) -> None:
-    """Keep shared density scales while reserving a four-point label gutter."""
+def _space_shared_x_ticks(figure: Any, axes: Sequence[Any]) -> None:
+    """Keep shared scales and fonts while reserving a four-point label gutter."""
     if not axes:
         return
     limits = axes[0].get_xlim()
@@ -62,7 +62,7 @@ def _space_marginal_ticks(figure: Any, axes: Sequence[Any]) -> None:
         # when the former interior ticks cannot fit in the narrow marginal.
         reduced = ticks[::2] if len(ticks) > 2 else [float(limits[0]), ticks[-1]]
         if reduced == ticks:
-            raise ValueError("marginal tick labels cannot fit with a readable gutter")
+            raise ValueError("shared tick labels cannot fit with a readable gutter")
         ticks = reduced
         for axis in axes:
             axis.set_xticks(ticks)
@@ -99,7 +99,7 @@ def _space_main_marginal_boundary(
             return
         retained = ticks[:-1]
         if sum(limits[0] <= tick <= limits[1] for tick in retained) < 2:
-            raise ValueError("main and marginal tick labels cannot fit readably")
+            raise ValueError("main and shared tick labels cannot fit readably")
         ticks = retained
         for main in main_axes:
             main.set_xticks(ticks)
@@ -639,7 +639,8 @@ def write_academic_dispersion_figure(
         axis_top.set_ylim(0.0, common_top_max * 1.05)
         axis_right.set_xlim(0.0, common_right_max * 1.05)
 
-    _space_marginal_ticks(figure, right_axes)
+    _space_shared_x_ticks(figure, right_axes)
+    _space_shared_x_ticks(figure, main_axes)
     _space_main_marginal_boundary(figure, main_axes, right_axes)
 
     if is_social:
