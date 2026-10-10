@@ -122,4 +122,5 @@ Computed-torque tracking simulation, zero-moment point diagnostics, contact para
 | `zmp_filter`                      | compound | Optional cart-table zero-moment-point filter report              | dynamics |
 | `centroidal_filter`               | compound | Optional centroidal feasibility filter (v2) before/after report  | dynamics |
 | `shooting_fit`                    | compound | Optional contact-aware shooting fit report                       | dynamics |
+| `head_gaze`                       | compound | Optional OSV-3 head-gaze schedule tracking of the replay neck    | dynamics |
 | `mjx`                             | compound | Optional MJX differentiable trajectory optimization report       | dynamics |
