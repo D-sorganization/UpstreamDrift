@@ -399,12 +399,7 @@ def derive_zero_custom_joint_model(
     output = request.derived_model_path
     reducer_hash = _sha(Path(__file__))
     helper_hash = _sha(Path(comparison.__file__))
-    if not source.is_file() or _sha(source) != request.source_sha256:
-        raise ValueError("source model hash mismatch or source missing")
-    if output.exists():
-        raise FileExistsError(output)
-    if not output.parent.is_dir():
-        raise ValueError("derived model parent directory missing")
+    comparison.require_fresh_reduction_paths(source, request.source_sha256, output)
     if request.declared_target_rad != tuple(
         (name, 0.0) for name in profile.coordinates
     ):
