@@ -1242,24 +1242,24 @@
         {
           "com_m": [
             0.0,
-            -0.16371950999999998,
+            -0.168783,
             0.0
           ],
           "inertia_com_kg_m2": [
             [
-              0.130850963,
+              0.13907,
               0.0,
               0.0
             ],
             [
               0.0,
-              0.03430069768,
+              0.0364552,
               0.0
             ],
             [
               0.0,
               0.0,
-              0.1379848668
+              0.146652
             ]
           ],
           "mass_kg": 9.80040405351952,
@@ -1527,24 +1527,24 @@
         {
           "com_m": [
             0.0,
-            -0.15893449999999998,
+            -0.16385,
             0.0
           ],
           "inertia_com_kg_m2": [
             [
-              0.123314354,
+              0.13106,
               0.0,
               0.0
             ],
             [
               0.0,
-              0.03232508995,
+              0.0343555,
               0.0
             ],
             [
               0.0,
               0.0,
-              0.13003708449999998
+              0.138205
             ]
           ],
           "mass_kg": 9.80040405351952,
@@ -3669,20 +3669,20 @@
       "child_to_follower": [
         [
           -0.12429404455826688,
-          0.9922454285544172,
-          -4.5655751879009243e-07,
+          -0.9922454285544172,
+          4.5655751879009243e-07,
           -0.00830356
         ],
         [
           0.9897616899776521,
-          0.12398288545581986,
-          -0.07071096921009314,
+          -0.12398288545581986,
+          0.07071096921009314,
           -0.00387542
         ],
         [
           -0.07016257934204852,
-          -0.008789404240898925,
-          -0.997496846527928,
+          0.008789404240898925,
+          0.997496846527928,
           -0.00152402
         ],
         [
@@ -3697,21 +3697,21 @@
       "parent_to_base": [
         [
           -0.12429404455826688,
-          0.9922454285544172,
-          -4.5655751879009243e-07,
-          -0.007791098200000001
+          -0.9922454285544172,
+          4.5655751879009243e-07,
+          -0.00803206
         ],
         [
           0.9897616899776521,
-          0.12398288545581986,
-          -0.07071096921009314,
-          -0.39288686
+          -0.12398288545581986,
+          0.07071096921009314,
+          -0.405038
         ],
         [
           -0.07016257934204852,
-          -0.008789404240898925,
-          -0.997496846527928,
-          -0.0026484007
+          0.008789404240898925,
+          0.997496846527928,
+          -0.00273031
         ],
         [
           0.0,
@@ -4022,19 +4022,19 @@
           -0.12429404455826688,
           -0.9922454285544172,
           -4.5655751879009243e-07,
-          -0.0075634004
+          -0.00779732
         ],
         [
           0.9897616899776521,
           -0.12398288545581986,
           -0.07071096921009314,
-          -0.38140497
+          -0.393201
         ],
         [
           0.07016257934204852,
           -0.008789404240898925,
           0.997496846527928,
-          0.0025709947
+          0.00265051
         ],
         [
           0.0,
@@ -4483,7 +4483,7 @@
       ]
     }
   },
-  "provenance": "anthropometric full-body candidate v1 at 1.710 m, 78.0 kg (build_anthropometric_spec.py; AN-1 #10099); upper body unqualified; marker offsets are anatomical seeds to be calibrated; left hip axes mirrored to the OpenSim convention (OSV-6 #11737) | hip joints relocated to functional centres from the capture (radii 0.4278/0.3952 m, sphere sd 2.1/1.9 mm over 649 frames) with zero twist calibrated (R: -21.94 deg, L: 46.69 deg) | toe contact spheres added on calcanei; stiffness 5e+04 N/m | segments scaled femur_l x0.9700, femur_r x0.9700, tibia_l x1.0000, tibia_r x1.0000 (lengths, COMs, sphere and marker offsets by s; inertias by s^2; masses kept)",
+  "provenance": "anthropometric full-body candidate v1 at 1.710 m, 78.0 kg (build_anthropometric_spec.py; AN-1 #10099); upper body unqualified; marker offsets are anatomical seeds to be calibrated; left hip axes mirrored to the OpenSim convention (OSV-6 #11737); right knee axis mirrored to the OpenSim flexion-negative convention (#12057) | hip joints relocated to functional centres from the capture (radii 0.4278/0.3952 m, sphere sd 2.1/1.9 mm over 649 frames) with zero twist calibrated (R: -21.94 deg, L: 46.69 deg) | toe contact spheres added on calcanei; stiffness 5e+04 N/m | segments scaled femur_l x1.0000, femur_r x1.0000, tibia_l x1.0000, tibia_r x1.0000 (lengths, COMs, sphere and marker offsets by s; inertias by s^2; masses kept)",
   "qualification": "full-body extension of native-derived geometry; dynamics unqualified",
   "schema_version": "full-body-v1",
   "subject": {
