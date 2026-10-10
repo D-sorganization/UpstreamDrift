@@ -69,6 +69,43 @@ def _space_marginal_ticks(figure: Any, axes: Sequence[Any]) -> None:
             axis.set_xlim(limits)
 
 
+def _space_main_marginal_boundary(
+    figure: Any, main_axes: Sequence[Any], right_axes: Sequence[Any]
+) -> None:
+    """Prune a crowded final main tick without moving data or density axes."""
+    if not main_axes:
+        return
+    limits = main_axes[0].get_xlim()
+    ticks = [float(t) for t in main_axes[0].get_xticks()]
+    while True:
+        figure.canvas.draw()
+        renderer = figure.canvas.get_renderer()
+        crowded = False
+        for main, right in zip(main_axes, right_axes, strict=True):
+            main_boxes = [
+                t.get_window_extent(renderer)
+                for t in main.get_xticklabels()
+                if t.get_visible() and t.get_text()
+            ]
+            right_boxes = [
+                t.get_window_extent(renderer)
+                for t in right.get_xticklabels()
+                if t.get_visible() and t.get_text()
+            ]
+            if main_boxes and right_boxes:
+                gap = min(b.x0 for b in right_boxes) - max(b.x1 for b in main_boxes)
+                crowded |= gap * 72.0 / figure.dpi < 4.0
+        if not crowded:
+            return
+        retained = ticks[:-1]
+        if sum(limits[0] <= tick <= limits[1] for tick in retained) < 2:
+            raise ValueError("main and marginal tick labels cannot fit readably")
+        ticks = retained
+        for main in main_axes:
+            main.set_xticks(ticks)
+            main.set_xlim(limits)
+
+
 def _validate_metadata(metadata: Mapping[str, Any]) -> str:
     if not isinstance(metadata, Mapping):
         raise ValueError("metadata must be a mapping of scenario inputs")
@@ -603,6 +640,7 @@ def write_academic_dispersion_figure(
         axis_right.set_xlim(0.0, common_right_max * 1.05)
 
     _space_marginal_ticks(figure, right_axes)
+    _space_main_marginal_boundary(figure, main_axes, right_axes)
 
     if is_social:
         # Reserve the actual tick/label footprint, not only the axes rectangle.

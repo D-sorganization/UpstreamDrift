@@ -92,3 +92,73 @@ def test_neighboring_marginal_tick_labels_have_readable_gutter(
                 right_label.get_text(),
                 gap_points,
             )
+
+
+@pytest.mark.parametrize("presentation", ["academic", "social"])
+def test_main_to_marginal_tick_boundary_has_four_point_gutter(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, presentation: str
+) -> None:
+    """Wide driver-like endpoints must not merge main180 with marginal0.00."""
+    try:
+        from matplotlib.backends.backend_agg import FigureCanvasAgg
+        from src.tools.shot_pattern_analysis import academic_plots
+    except (ImportError, OSError) as exc:
+        pytest.skip(f"Matplotlib unavailable: {exc}")
+    captured = []
+
+    def capture(figure, _stem, *, dpi):
+        captured.append(figure)
+        return {}
+
+    monkeypatch.setattr(academic_plots, "_save_formats", capture)
+    rng = np.random.default_rng(20261009)
+    points = {
+        name: rng.normal([108, 0], [22, 7], (10_000, 2))
+        for name in ("Straight", "Draw", "Fade")
+    }
+    for values in points.values():
+        values[:, 0] = np.clip(values[:, 0], 2.694, 174.987)
+        values[0, 0] = 2.694
+        values[1, 0] = 174.987
+    academic_plots.write_academic_dispersion_figure(
+        points,
+        tmp_path / presentation,
+        scenario="Main–Marginal Boundary Review",
+        metadata={"social_club": "Driver"},
+        target_point_m=(108, 0),
+        presentation=presentation,
+        dpi=180,
+    )
+    estimate = academic_plots.shared_histogram_density(
+        points, bins=64, target_point_m=(108, 0), region_masses=(0.50, 0.80, 0.95)
+    )
+    figure = captured[0]
+    FigureCanvasAgg(figure)
+    figure.canvas.draw()
+    renderer = figure.canvas.get_renderer()
+    for panel, name in enumerate(points):
+        main, right = figure.axes[3 * panel + 1 : 3 * panel + 3]
+        np.testing.assert_array_equal(main.get_xlim(), estimate.x_limits_m)
+        np.testing.assert_array_equal(main.get_ylim(), estimate.y_limits_m)
+        np.testing.assert_array_equal(
+            main.collections[0].get_array(), estimate.patterns[name].density_per_m2.T
+        )
+        main_labels = [
+            t for t in main.get_xticklabels() if t.get_visible() and t.get_text()
+        ]
+        right_labels = [
+            t for t in right.get_xticklabels() if t.get_visible() and t.get_text()
+        ]
+        assert len(main_labels) >= 2
+        assert min(t.get_fontsize() for t in main_labels) >= (
+            10 if presentation == "social" else 8
+        )
+        gap = (
+            (
+                min(t.get_window_extent(renderer).x0 for t in right_labels)
+                - max(t.get_window_extent(renderer).x1 for t in main_labels)
+            )
+            * 72
+            / figure.dpi
+        )
+        assert gap >= 4, (presentation, panel, gap)
