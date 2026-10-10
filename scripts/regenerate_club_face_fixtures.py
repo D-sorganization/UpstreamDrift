@@ -41,11 +41,15 @@ FIXTURE_DT_S = 0.002
 #: capture -> (fixture club alias, document, extra pipeline flags of the
 #: original fixture runs, read back from their receipts).
 CAPTURE_RUNS: dict[str, tuple[str, str, tuple[str, ...]]] = {
-    "driver": ("driver", "full_body_spec_anthro_driver.json", ("--static-seeds",)),
+    "driver": (
+        "driver",
+        "full_body_spec_anthro_driver.json",
+        ("--static-seeds", "--foot-progression", "capture"),
+    ),
     "iron": (
         "iron7",
         "full_body_spec_anthro_iron7.json",
-        ("--static-seeds", "--zmp-filter"),
+        ("--static-seeds", "--zmp-filter", "--foot-progression", "capture"),
     ),
 }
 LOG = logging.getLogger("club_face_fixtures")
