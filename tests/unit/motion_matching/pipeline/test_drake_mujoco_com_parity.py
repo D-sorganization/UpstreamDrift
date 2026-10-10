@@ -132,3 +132,24 @@ def test_per_body_com_matches(plants):
             if err >= TOL_M:
                 bad.append(f"{name}: {err * 1000:.1f} mm")
         assert not bad, f"{label}: {bad}"
+
+
+def test_drake_model_array_inputs_are_spec_ordered(plants):
+    """Array coordinates mean ``coordinate_order``, exactly like a name mapping."""
+    spec, mj, dk = plants
+    model = dk.model
+    q = _poses(spec, mj)[2][1]
+    named = dict(zip(model.names, q, strict=True))
+    attachments = {"M": ("Head", (0.0, 0.0, 0.1)), "N": ("RS", (0.05, 0.0, 0.0))}
+    np.testing.assert_allclose(
+        model.marker_positions(q, attachments),
+        model.marker_positions(named, attachments),
+        atol=1e-12,
+    )
+    rates = np.linspace(-0.5, 0.5, len(q))
+    a_arr, b_arr = model.affine_dynamics(q, rates)
+    a_map, b_map = model.affine_dynamics(
+        named, dict(zip(model.names, rates, strict=True))
+    )
+    np.testing.assert_allclose(a_arr, a_map, atol=1e-9)
+    np.testing.assert_allclose(b_arr, b_map, atol=1e-9)

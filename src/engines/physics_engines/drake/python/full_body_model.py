@@ -225,6 +225,18 @@ class FullBodyDrakeModel:
         }
         return FullBodyDrakeModel(full_spec_like)
 
+    def _from_spec_order(self, values: Array, indices: list[int]) -> Array:
+        """Drake-ordered copy of a ``names``-ordered vector (#12039).
+
+        Drake orders positions and velocities by joint creation (upper body
+        first), not by ``names``; arrays are always in ``names`` order.
+        """
+        if values.shape != (len(self.names),) or not np.isfinite(values).all():
+            raise ValueError("Coordinates and rates must be a finite model-size vector")
+        result = np.empty(len(self.names))
+        result[indices] = values
+        return result
+
     def _vector(self, values: Mapping[str, float], indices: list[int]) -> Array:
         if set(values) != set(self.names):
             raise ValueError("Provide exactly the model coordinate inventory")
@@ -271,9 +283,10 @@ class FullBodyDrakeModel:
         if isinstance(coordinates, Mapping):
             q_vec = self._vector(coordinates, self._q_indices)
         else:
-            q_vec = np.asarray(coordinates, dtype=float)
-            if q_vec.size != len(self.names):
+            q_arr = np.asarray(coordinates, dtype=float)
+            if q_arr.size != len(self.names):
                 raise ValueError(f"Expected {len(self.names)} coordinates")
+            q_vec = self._from_spec_order(q_arr, self._q_indices)
         self.plant.SetPositions(self.context, q_vec)
         world_frame = self.plant.world_frame()
         positions: list[Array] = []
@@ -560,15 +573,17 @@ class FullBodyDrakeModel:
             q_vec = self._vector(coordinates, self._q_indices)
             coords_dict = dict(coordinates)
         else:
-            q_vec = np.asarray(coordinates, dtype=float)
-            coords_dict = dict(zip(self.names, q_vec, strict=True))
+            q_arr = np.asarray(coordinates, dtype=float)
+            coords_dict = dict(zip(self.names, q_arr, strict=True))
+            q_vec = self._from_spec_order(q_arr, self._q_indices)
 
         if isinstance(rates, Mapping):
             v_vec = self._vector(rates, self._v_indices)
             rates_dict = dict(rates)
         else:
-            v_vec = np.asarray(rates, dtype=float)
-            rates_dict = dict(zip(self.names, v_vec, strict=True))
+            v_arr = np.asarray(rates, dtype=float)
+            rates_dict = dict(zip(self.names, v_arr, strict=True))
+            v_vec = self._from_spec_order(v_arr, self._v_indices)
         return q_vec, coords_dict, v_vec, rates_dict
 
     def _sphere_jacobian_translational(self, frame: Any) -> Array:
