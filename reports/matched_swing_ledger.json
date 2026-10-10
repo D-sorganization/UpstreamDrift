@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-09T03:31:00Z",
+  "generated_at": "2026-10-10T10:34:24Z",
   "rows": [
     {
       "acceptance": null,
@@ -553,7 +553,7 @@
         "mot": null,
         "npz": null
       },
-      "candidate_sha": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
+      "candidate_sha": "2caa3ce94e596dd61d50172229ad04a98c5235be6388566b4376be4ba41e2fcf",
       "capture": "driver",
       "engine": "mujoco",
       "horizon_s": 1.8138888888888889,
@@ -563,11 +563,11 @@
         "early_marker_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
-        "whole_marker_rmse_m": 0.08913317524057322
+        "whole_marker_rmse_m": 0.1194005160781452
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_driver/receipt.json",
-      "sha256": "6e9437b81cf692a6654863ec2e28e1ef44fa8d219115e55539f59e72d39063d0"
+      "sha256": "8c39712bb8fd83b530936f38e17b897dd3d3009993e28aa1f301a9fe69650f63"
     },
     {
       "acceptance": {
@@ -889,6 +889,29 @@
       "sha256": "7e3fcce68b67fdd2973109c491f6fc27a2f2618a0f8bccda1abc5a3d9504dbf9"
     },
     {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
+      "capture": "driver",
+      "engine": "mujoco",
+      "horizon_s": 1.8138888888888889,
+      "lane": "ground_support",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": 0.08913317524057322
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_driver_pre_osv6/receipt.json",
+      "sha256": "6e9437b81cf692a6654863ec2e28e1ef44fa8d219115e55539f59e72d39063d0"
+    },
+    {
       "acceptance": {
         "gates": [
           {
@@ -900,9 +923,9 @@
             "unit": "hash"
           },
           {
-            "measured": 0.0844624120521208,
+            "measured": 0.0616326364652358,
             "name": "whole_marker_rmse_m",
-            "reason": "whole RMSE 84.46 mm > 60.00 mm",
+            "reason": "whole RMSE 61.63 mm > 60.00 mm",
             "status": "failed",
             "threshold": 0.06,
             "unit": "m"
@@ -916,7 +939,7 @@
             "unit": "N"
           },
           {
-            "measured": 0.003141789511362645,
+            "measured": 0.004270621633187087,
             "name": "max_closure_residual_m",
             "reason": "",
             "status": "passed",
@@ -926,7 +949,7 @@
           {
             "measured": 0.0,
             "name": "weight_fraction",
-            "reason": "weight fraction range [0.00, 3.76] outside [0.2, 3.0]",
+            "reason": "weight fraction range [0.00, 3.74] outside [0.2, 3.0]",
             "status": "failed",
             "threshold": 0.2,
             "unit": "BW"
@@ -974,7 +997,7 @@
         "mot": null,
         "npz": null
       },
-      "candidate_sha": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
+      "candidate_sha": "2caa3ce94e596dd61d50172229ad04a98c5235be6388566b4376be4ba41e2fcf",
       "capture": "driver",
       "engine": "mujoco",
       "horizon_s": 1.8138888888888889,
@@ -984,11 +1007,11 @@
         "early_marker_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
-        "whole_marker_rmse_m": 0.0844624120521208
+        "whole_marker_rmse_m": 0.0616326364652358
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_driver_seeds/receipt.json",
-      "sha256": "ed530c3e60da2922342589b9b47d0e1d65b20e57766ae4e41bd43de43de3f487"
+      "sha256": "1d6d40b1e87994ddced34e1946409c71ddc1b39858a37cead3a41f5017e22e6b"
     },
     {
       "acceptance": null,
@@ -1183,6 +1206,29 @@
         "mot": null,
         "npz": null
       },
+      "candidate_sha": "2caa3ce94e596dd61d50172229ad04a98c5235be6388566b4376be4ba41e2fcf",
+      "capture": "iron",
+      "engine": "mujoco",
+      "horizon_s": 1.8272980501392757,
+      "lane": "ground_support",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": 2.74325916701203
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_iron/receipt.json",
+      "sha256": "e53a30897a204ad94e4b7abac4af751b16d19ac376a5f60b814f75fab4e38499"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
       "candidate_sha": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
       "capture": "iron",
       "engine": "mujoco",
@@ -1196,7 +1242,7 @@
         "whole_marker_rmse_m": 0.11595556126394267
       },
       "reason": null,
-      "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_iron/receipt.json",
+      "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_iron_pre_osv6/receipt.json",
       "sha256": "d215d841a87198c75fdfb811c505a9870068845c713e5c0aa15540f044281d23"
     },
     {
@@ -1211,7 +1257,7 @@
             "unit": "hash"
           },
           {
-            "measured": 0.08860928312772964,
+            "measured": 0.046973745329394856,
             "name": "whole_marker_rmse_m",
             "reason": "",
             "status": "passed",
@@ -1227,7 +1273,7 @@
             "unit": "N"
           },
           {
-            "measured": 0.0019162281535644264,
+            "measured": 0.0017422083511793827,
             "name": "max_closure_residual_m",
             "reason": "",
             "status": "passed",
@@ -1237,7 +1283,7 @@
           {
             "measured": 0.0,
             "name": "weight_fraction",
-            "reason": "weight fraction range [0.00, 3.42] outside [0.2, 3.0]",
+            "reason": "weight fraction range [0.00, 3.98] outside [0.2, 3.0]",
             "status": "failed",
             "threshold": 0.2,
             "unit": "BW"
@@ -1285,7 +1331,7 @@
         "mot": null,
         "npz": null
       },
-      "candidate_sha": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
+      "candidate_sha": "2caa3ce94e596dd61d50172229ad04a98c5235be6388566b4376be4ba41e2fcf",
       "capture": "iron",
       "engine": "mujoco",
       "horizon_s": 1.8272980501392757,
@@ -1295,11 +1341,11 @@
         "early_marker_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
-        "whole_marker_rmse_m": 0.08860928312772964
+        "whole_marker_rmse_m": 0.046973745329394856
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_iron_seeds_zmp/receipt.json",
-      "sha256": "9f25aeb57a9029b8c0941457173a7672bc234aa880fa148dadcc494606717f4f"
+      "sha256": "04456e3add9e965e75ccc25219730768ffcfa3e78fb519e317e20a9eb5493af9"
     },
     {
       "acceptance": {
@@ -5726,5 +5772,5 @@
     }
   ],
   "schema_version": "1.0.0",
-  "total_receipts": 147
+  "total_receipts": 149
 }
