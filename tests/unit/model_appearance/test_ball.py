@@ -8,6 +8,7 @@ import pytest
 from src.shared.python.model_appearance.ball import (
     BALL_RADIUS_M,
     ball_position_at_address,
+    resolve_ball_visual,
 )
 
 pytestmark = pytest.mark.unit
@@ -55,3 +56,54 @@ def test_rejects_bad_inputs(face, normal) -> None:
 def test_rejects_nonpositive_radius() -> None:
     with pytest.raises(ValueError):
         ball_position_at_address([0, 0, 0], [1, 0, 0], radius_m=0.0)
+
+
+def test_resolve_ball_visual_disabled_returns_none() -> None:
+    assert (
+        resolve_ball_visual(
+            enabled=False,
+            position_m=None,
+            source="address_geometry",
+            face_centre_m=[0.0, 0.0, 0.03],
+            face_normal=[1.0, 0.0, 0.0],
+        )
+        is None
+    )
+
+
+def test_resolve_ball_visual_uses_explicit_position_verbatim() -> None:
+    pos, source = resolve_ball_visual(
+        enabled=True,
+        position_m=[1.0, 2.0, 3.0],
+        source="measured",
+    )
+    assert pos == pytest.approx([1.0, 2.0, 3.0])
+    assert source == "measured"
+
+
+def test_resolve_ball_visual_computes_address_geometry() -> None:
+    pos, source = resolve_ball_visual(
+        enabled=True,
+        position_m=None,
+        source="address_geometry",
+        face_centre_m=[0.0, 0.0, 0.03],
+        face_normal=[1.0, 0.0, 0.0],
+        ground_height_m=0.0,
+    )
+    expected = ball_position_at_address(
+        [0.0, 0.0, 0.03], [1.0, 0.0, 0.0], ground_height_m=0.0
+    )
+    assert pos == pytest.approx(expected)
+    assert source == "address_geometry"
+
+
+def test_resolve_ball_visual_requires_position_or_face_geometry() -> None:
+    with pytest.raises(ValueError, match="position_m.*face_centre_m"):
+        resolve_ball_visual(enabled=True, position_m=None, source="address_geometry")
+
+
+def test_resolve_ball_visual_rejects_malformed_explicit_position() -> None:
+    with pytest.raises(ValueError):
+        resolve_ball_visual(
+            enabled=True, position_m=[1.0, np.nan, 3.0], source="measured"
+        )

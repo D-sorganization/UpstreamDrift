@@ -39,6 +39,7 @@ from PyQt6.QtWidgets import (
 )
 from src.shared.python.core.contracts import require
 from src.shared.python.theme.layout_metrics import LayoutMetrics
+from src.shared.python.video_timing.frame_schedule import DEFAULT_FPS
 
 from .layout_model import LayoutSpec, SourceRef
 from .layout_presets import LayoutStore
@@ -60,7 +61,8 @@ from .session import SessionMedia, ViewMedia
 PLAYBACK_MIN_SIZE = (320, 200)
 DEFAULT_PLAYBACK_LAYOUT = "single"
 SPEED_RANGE = (0.1, 4.0)
-DEFAULT_FPS = 30.0
+#: fallback rate when a view's own fps is unknown; unified with the shared
+#: FrameSchedule default (GCV-14, #11720) rather than a locally hardcoded 30.
 HELP: dict[str, str] = {
     "view": "Which view drives the transport: its frame count sets the "
     "slider range and its rate the playback speed.",
