@@ -5296,6 +5296,497 @@ python3 -m scripts.regenerate_club_face_fixtures --work RUNS --capture iron
 python3 -m pytest tests/unit/model_appearance/test_clubface_square_at_address.py
 \end{verbatim}
 
+\section{Two-Hand Grip Pose and Lead-Hand Closure (OSV-2)}
+This section records the shared grip definition and the closure correction of
+issue \#11728 (epic \#11726, slice 1: definition, closure and orientation
+routing; finger meshes, stills and clips are slice 2). The definition lives in
+\texttt{src/shared/python/model\_appearance/grip\_pose.py}; no engine carries
+its own copy.
+
+\subsection{Definition and Conventions}
+Distances are measured down the shaft from the butt end. The tour-matching
+OpenSim club frame (\texttt{club\_geometry}) has its origin at the butt and the
+shaft along $-y$, so a hand at distance $d$ below the butt has club coordinate
+$y=-d$; the MyoSuite club body has its
+origin at the head, so the same hand sits at $y=-(L-d)$ for club length $L$.
+Angles are rotations about the grip axis $g$ (butt toward head), measured in
+the plane perpendicular to the shaft with $n$ the face normal (toward the
+target) and $t$ the toe axis. Azimuth $0$ is the direction $-n$ and grows
+toward $-t$, that is toward the golfer and the trail shoulder.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{llll}
+\hline
+Quantity & Symbol & Value & Basis \\
+\hline
+Lead-hand centre below butt & $d_L$ & 0.032 m & Generated anthropometric spec (OSV-9) \\
+Hand-centre spacing & $s$ & 0.0762 m & Native Simscape spec (below) \\
+Trail-hand centre below butt & $d_T=d_L+s$ & 0.1082 m & Derived; equals the spec \\
+Lead V (thumb/index crease) & $\psi_L$ & 20 deg & Between chin (about 10) and trail shoulder (about 35) \\
+Trail V relative to lead V & $\Delta\psi$ & 0 deg & Parallel V angles \\
+Lead thumb offset to trail side & $\theta_T$ & 10 deg & Short thumb, slightly trail of centre \\
+Finger link & --- & overlap & Trail little finger over the lead index/middle gap \\
+\hline
+\end{tabular}
+\caption{Neutral Grip Parameters for a Right-Handed Golfer}
+\end{table}
+
+The angle values are coaching-convention nominals, not measurements: the
+captures carry no hand markers, so only the hand roll that the markers
+constrain is fitted (\texttt{grip\_fit}). A reference figure for every angle
+is part of the slice-2 stills and is not yet produced.
+
+\subsection{Reconciling the Hand Spacing}
+\texttt{club\_geometry.py} previously placed the hands 0.035 m apart
+($-0.025$ and $-0.06$ m) while the native spec places them 0.0762 m apart.
+In \texttt{full\_body\_spec\_v2.json} the trail closure \texttt{placement\_b}
+has $y=-1.0000$ m and the lead joint \texttt{child\_to\_follower} has
+$y=-1.0762$ m in the club frame (shaft toward the grip along $-y$), so the lead
+hand is nearer the butt and the spacing is $s=0.0762$ m (3 in). That is the
+single value; \texttt{LEAD\_HAND\_OFFSET\_M} and \texttt{TRAIL\_HAND\_OFFSET\_M}
+are now derived from it, and the MyoSuite scene sites no longer carry the
+reversed $-0.95$ / $-0.88$ m pair (trail above lead).
+
+\subsection{Golf Humanoid Closure}
+The Rajagopal golf models take the two-hand club of OSV-9
+(\texttt{msk\_club}, section below): the lead \texttt{WeldJoint}
+\texttt{hand\_l\_to\_club} carries the club and the trail
+\texttt{WeldConstraint} \texttt{hand\_r\_to\_club} closes the loop, in both
+\texttt{golf\_humanoid.osim} and \texttt{golf\_humanoid\_scaled.osim}. The
+club-side grip points are the \texttt{GripInterface} positions of the
+generated anthropometric spec, which is the single source of truth: 0.032 m
+(lead) and 0.1082 m (trail) below the butt for both the driver and the
+7-iron, 0.0762 m apart. \texttt{grip\_pose} mirrors these values and
+\texttt{tests/opensim/test\_grip\_closure\_both\_hands.py} fails if they
+drift apart. The hand-side frames are the committed address calibration
+(\texttt{msk\_club\_grip\_calibration.json}), unchanged by this slice.
+
+An earlier draft of this slice placed the lead hand 0.015 m below the butt,
+with a lead \texttt{WeldConstraint} and a trail \texttt{WeldJoint} on a club
+whose origin was the butt. It was superseded when the OSV-9 club landed.
+Restoring a 0.015 m lead position would move both inverse-kinematics grip
+targets 0.017 m toward the butt and needs \texttt{msk\_club\_calibration} to be
+rerun for both models and both clubs; it awaits owner review. Reproduce:
+\texttt{python3 scripts/build\_humanoid\_osim.py}.
+
+\subsection{Closure Residual on the Canned Swing}
+Residual $=\lVert p_a-p_b\rVert$ of the two grip frames the closure ties, per
+frame of the closure-consistent fitted swings
+(\texttt{tests/fixtures/club\_face/swing\_q\_*.npz}, 908 and 914 frames at
+2 ms), against the frozen 5 mm tolerance of
+\texttt{tour\_matching.address}. Reproduce:
+\texttt{python3 -m scripts.grip\_closure\_report --output report.json}.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lll}
+\hline
+Engine & Driver maximum (m) & 7-Iron Maximum (m) \\
+\hline
+MuJoCo & $5.0\times10^{-8}$ & $1.7\times10^{-7}$ \\
+Pinocchio & $5.0\times10^{-8}$ & $1.7\times10^{-7}$ \\
+OpenSim (generated full-body weld) & $5.0\times10^{-8}$ & $1.7\times10^{-7}$ \\
+Drake & $5.0\times10^{-8}$ & $1.7\times10^{-7}$ \\
+MyoSuite & unavailable & unavailable \\
+\hline
+\end{tabular}
+\caption{Maximum Closure Residual Over the Canned Swing}
+\end{table}
+
+\subsection{Limitations and Open Items}
+\begin{itemize}
+\item These swings were fitted with the closure enforced, so a residual near
+ zero confirms engine consistency of the closure frames, not an independent
+ reachability test of the hand geometry.
+\item Drake ran on the ControlTower container. On the brick host its plant
+ import fails on a missing
+ \texttt{shared.python.model\_generation.inertia.result} in the pinned Tools
+ tree (a Tools gap) and is reported unavailable there, never zero.
+\item MyoSuite is unavailable: the pinned \texttt{myo\_sim} assets and a swing
+ in the retargeted coordinate space are not committed. Its shaft capsule is
+ drawn only half the club length, which predates this change.
+\item \texttt{golf\_humanoid.osim} has no closure-consistent swing in
+ Rajagopal coordinates, so no \texttt{golf\_humanoid} residual series is
+ claimed; its welds are exact at the calibrated address pose only.
+\end{itemize}
+
+\section{Clubhead Speed Timing and the Ball Collision Impulse (GCV-20)}
+\label{sec:gcv20_speed_timing}
+This section records a change to the shared Python ground-support pipeline
+and the same-input replay, not to the Simscape model. Issue \#11767, epic
+\#11706. The shared ball-collision model is also the one GCV-13 (\#11719)
+reuses.
+
+\subsection{Problem}
+After OSV-10 the fitted swings' clubhead (face-centre) speed peaked 23 ms
+(driver) and 26 ms (7-iron) before the ball passage, while the capture
+peaked 2.2 and 1.2 ms before it. The model's pre-contact speed at impact was
+44.1 and 34.5 m/s, against 51.75 and 41.05 m/s in the capture (Capture-A
+driver, Capture-B 7-iron). All values here use one measure
+(\texttt{club\_face.clubhead\_speed\_timing}): impact is the sub-sample ball
+passage of the face centre (OSV-10), each swing on its own clock; speeds are
+segment chord speeds at segment midpoints; the impact speed is the last
+segment that ends at or before the passage; the peak is searched from 60 ms
+before to 20 ms after impact, so an IK glitch far from the ball (one driver
+frame 206 ms after impact) cannot be picked; the post-impact speed is the
+chord speed from the first sample after the 0.45 ms contact to the last sample
+within 10 ms of impact.
+
+\subsection{Diagnosis and Rejected Hypotheses}
+\begin{itemize}
+\item \emph{Time offset between model and capture.} Rejected. Both are on the
+capture clock; the 1 kHz rollout lags the reference by about 3 ms, which the
+own-clock comparison removes.
+\item \emph{Different point.} Rejected. Model and capture both use the rendered
+face centre (\texttt{face\_centre\_in\_frame}); the raw head markers peak at
+the same time as the face centre.
+\item \emph{Club length or grip mismatch.} Rejected. The unfiltered IK
+reference matches the capture impact speed to 2.2 \% (driver) and 0.4 \%
+(7-iron) and peaks at the capture's time.
+\item \emph{IK or resampling.} Rejected for the same reason.
+\item \emph{Filtering.} Confirmed as the cause. The 12 Hz fourth-order
+zero-phase Butterworth low-pass (design decision 11) is applied twice (IK
+reference and tracked reference). The ball removes about 14 m/s of head speed
+in under a millisecond; filtering across that step spreads the deceleration
+over roughly 25 ms before impact (12 Hz across impact: driver $-25.9$ ms and
+43.0 m/s; 7-iron $-28.4$ ms and 32.5 m/s on the IK reference).
+\item \emph{Dynamics.} The forward replay had no ball. Nothing removed the
+head's momentum at impact, so a reference that showed the drop had to be
+produced by joint torques: splitting the filter alone raised the peak joint
+torque from 779 to 2090 N\,m at impact (spine).
+\end{itemize}
+
+\subsection{Ball Collision Impulse}
+\texttt{impact\_parameters.ball\_impact.collision\_impulse} treats the ball as
+a free sphere at rest struck by a frictionless face. With unit face normal
+$\hat n$, face-centre velocity $v$ (approach speed $v_n=v\cdot\hat n>0$), the
+clubhead's effective mass $m$ along $\hat n$ at the face centre, ball mass
+$m_b$ and coefficient of restitution $e$,
+\[
+J=\frac{(1+e)\,m\,m_b\,v_n}{m+m_b},\qquad
+\Delta v_{n,\mathrm{club}}=-\frac{J}{m},\qquad v_\mathrm{ball}=\frac{J}{m_b},
+\]
+with impulse $J\hat n$ on the ball and $-J\hat n$ on the club. Normal
+momentum is conserved and the separation speed is $e\,v_n$. Constants:
+$m_b=45.93$ g (Rules of Golf equipment limit, the regulation maximum),
+$e=0.830$ (R\&A/USGA driver COR limit; used as a constant because no
+speed-dependent source is in the repository; it is a ceiling, irons are
+lower, so the iron rebound is an upper bound), contact duration 0.45 ms
+(Cochran and Stobbs, about half a millisecond). Contracts reject non-positive
+masses, $e\notin(0,1]$, non-positive duration, a contact window outside the
+swing, a zero normal and a face not moving into the ball.
+
+The effective mass comes from the articulated plant, not from the head mass.
+With point Jacobian $J_p(q)$ of the face centre,
+$m^{-1}=\hat n^{\top}J_p\,\bigl(a(\tau+J_p^{\top}\hat n)-a(\tau)\bigr)$, one
+extra constrained acceleration solve (exact because the acceleration is
+affine in applied force and includes the grip weld and ground contact).
+MuJoCo, Drake and Pinocchio give 0.175 kg for the driver at impact; the
+predicted normal speed change with $v_n=38.4$ m/s is about 14.6 m/s, against
+a capture drop of 14.5 m/s.
+
+\subsection{Shared Force Hook}
+\texttt{motion\_matching.impact\_force.ImpactForce} is the one hook every
+replay uses. The plan is the face centre and face normal of the spec's
+\texttt{Clubhead} frame and the capture ball-passage time (on the lane clock,
+\texttt{club\_face\_target.capture\_impact}). At the window start it is
+latched from the simulated state: $\hat n=R\,a$, $v=J_p\dot q$, $m$ from the
+probe above. Over $[t_i,t_i+0.45\ \mathrm{ms}]$ the constant world force
+$F=-J\hat n/0.45\ \mathrm{ms}$ acts at the face centre as the generalized
+force $J_p(q)^{\top}F$. Integrator steps containing a window edge are split
+there so the delivered impulse is exact. The controller never sees the
+force: its torques are computed from the reference alone. Users:
+\texttt{FullBodySimulator.run} (pipeline replay, ZMP and shooting re-solves),
+the same-input \texttt{integrate}, \texttt{open\_loop}, \texttt{closed\_loop}
+and \texttt{segmented\_replay}, and \texttt{scripts/same\_input\_bundle.py}.
+The bundle records the latched force (\texttt{provenance.ball\_impact}), so an
+open-loop replay in any engine applies the identical force; a closed loop in
+another engine re-latches from its own state. Pipeline receipts record it as
+\texttt{dynamics.ball\_impact}.
+
+\subsection{Filter and Controller Split at Impact}
+\texttt{smooth\_reference} (12 Hz unchanged) filters the samples up to the
+last pre-contact capture frame and those after it separately, each with odd
+edge padding (\texttt{pipeline.reference.smooth\_lane}; receipts record
+\texttt{ik.impact\_split}). The computed-torque controller's velocity and
+acceleration tables are differentiated on each side of the impact time
+separately and sampled on the side the current time is on
+(\texttt{impact\_force.reference\_rates}); joint positions are still
+interpolated linearly across it. Without this the acceleration feedforward
+differentiates across the velocity step and produces the 2090 N\,m spike.
+
+\subsection{Re-Solved Result: Acceptance Not Met, Fixtures Not Adopted}
+Both captures were re-solved through the shared pipeline on this branch
+(\texttt{regenerate\_club\_face\_fixtures}, face weight 3.0, the original
+fixture flags) and measured with \texttt{clubhead\_speed\_timing}. Acceptance
+is a peak within 5 ms of the capture's, relative to impact, and an impact
+speed within 3\,\%.
+\begin{center}
+\begin{tabular}{@{}llrrr@{}}
+\toprule
+Club & Series & Peak $-$ impact (ms) & Impact (m/s) & Drop (m/s) \\
+\midrule
+Driver & Capture & $-2.2$ & 51.75 & 14.50 \\
+Driver & IK reference (unfiltered) & $-2.0$ & 50.46 & 16.66 \\
+Driver & Tracking reference, before (12 Hz across) & $-25.9$ & 43.03 & 0.75 \\
+Driver & Tracking reference, after (12 Hz split) & $-13.1$ & 46.40 & 3.37 \\
+Driver & 1 kHz dynamics, before (no ball) & $-22.9$ & 44.09 & 1.35 \\
+Driver & 1 kHz dynamics, after (ball impulse) & $-20.5$ & 42.55 & 10.48 \\
+7-iron & Capture & $-1.2$ & 41.05 & 12.45 \\
+7-iron & IK reference (unfiltered) & $-1.7$ & 41.26 & 12.49 \\
+7-iron & Tracking reference, before (12 Hz across) & $-28.4$ & 32.47 & 0.30 \\
+7-iron & Tracking reference, after (12 Hz split) & $-1.4$ & 41.11 & 10.54 \\
+7-iron & 1 kHz dynamics, before (no ball) & $-25.9$ & 34.55 & 0.76 \\
+7-iron & 1 kHz dynamics, after (ball impulse) & $-11.1$ & 37.27 & 6.88 \\
+\bottomrule
+\end{tabular}
+\end{center}
+Neither club meets acceptance in the dynamics: the driver misses by 18.3 ms
+and $-17.8$\,\%, the 7-iron by 9.9 ms and $-9.2$\,\%. Two causes remain.
+First, for the driver the split 12 Hz filter still removes the late
+wrist-release acceleration: the tracking reference peaks 13.1 ms early even
+though nothing is filtered across the ball. The 7-iron reference passes
+($-0.2$ ms, $+0.1$\,\%). Second, the computed-torque replay of either club
+reaches its peak speed 10--20 ms early and then decelerates before the ball;
+the driver replay peaks at 49.2 m/s about 20 ms before impact. The ball
+impulse itself behaves as predicted: effective mass 0.175 kg (driver) and
+0.348 kg (7-iron), normal speed change 13.3 and 5.5 m/s, contact fired at
+each replay's own face passage (closest approach 60 and 44 mm from the
+address face centre, inside the 150 mm gate).
+
+The regenerated fixtures were \emph{not} committed. They regress the OSV-10
+face-angle gate: the 7-iron face at impact is 14.9 deg against the capture's
+8.4 deg (limit 5 deg; the committed OSV-10 fixture is 7.6 deg), and the
+driver 13.6 against 8.8 deg. The 7-iron replay reaches the ball 2.1 ms later
+than the capture while the face is closing fast. No tolerance was changed.
+Next steps, each needing its own re-solve: a cutoff for the pre-contact
+segment chosen from the release bandwidth instead of the fixed 12 Hz, and a
+diagnosis of the early peak in the computed-torque replay (feedforward
+timing and feedback gains near impact). Evidence:
+\texttt{\textasciitilde/Videos/Parity Audit/forces\_and\_impact/clubhead\_speed\_timing/}
+on the implementing host (diagnosis plot and summary JSON).
+
+\subsection{Second Pass: Pre-Contact Release Cutoff and Weld-Consistent Tracking}
+\label{sec:gcv20_second_pass}
+The first pass left the driver replay 18 ms early and 18 \% slow and the
+7-iron replay 10 ms early and 9 \% slow. A second pass separated four causes
+by re-exporting the 1 kHz same-input bundle
+(\texttt{scripts.same\_input\_bundle export}) from the same pipeline runs with
+one change at a time. Re-exporting the unchanged runs reproduces the
+committed numbers (driver $-20.0$ ms and $-20.1$\,\%, 7-iron $-11.6$ ms and
+$-9.8$\,\% against the capture), so each row below differs from that
+baseline in the named change only. Columns are the model peak relative to
+the capture's peak (each relative to its own impact), the impact speed
+relative to the capture's, and the model-to-capture face-angle gap at impact
+(OSV-10 limit 5 deg).
+
+\paragraph{Cause 1: The 12 Hz Pre-Contact Cutoff.} With the filter split at
+impact, the pre-contact half still removes the late release. On the driver
+reference (whole pre-contact segments, against the unfiltered reference's
+$-1.4$ ms and 50.46 m/s before the split):
+\begin{center}
+\begin{tabular}{@{}rrr@{}}
+\toprule
+Pre-contact cutoff (Hz) & Peak $-$ impact (ms) & Impact (m/s) \\
+\midrule
+12 & $-13.1$ & 46.40 \\
+15 & $-7.6$ & 47.99 \\
+18 & $-4.8$ & 49.20 \\
+20 & $-4.8$ & 49.77 \\
+25 & $-2.0$ & 50.62 \\
+30 & $-2.0$ & 50.91 \\
+\bottomrule
+\end{tabular}
+\end{center}
+The pre-contact cutoff is therefore chosen per reference
+(\texttt{pipeline.release\_cutoff.release\_preserving\_cutoff}): the lowest of
+12, 15, 18, 20, 25 and 30 Hz whose filtered reference keeps the unfiltered
+reference's speed-peak time (relative to the split) within one sample and its
+last pre-contact segment speed within 1\,\%. Only the reference is used,
+never the capture, so this is a convergence criterion on the filter and not a
+fit to the acceptance target. The post-contact half keeps 12 Hz, so the
+impact-jerk reason for decision 11 is unaffected. When no candidate keeps the
+release the widest is used and the receipt says \texttt{preserved: false}.
+Both captures select 25 Hz (7-iron: 12 Hz gives $-9.7$ ms and 36.54 m/s,
+25 Hz gives $-1.4$ ms and 39.32 m/s, unfiltered $-4.2$ ms and 39.20 m/s).
+
+A failed first version measured the release at the ball passage. The segment
+that straddles the split joins the two separately filtered halves; on the
+7-iron it read 41.1 m/s where the last whole pre-contact segment was
+36.4 m/s, so the 12 Hz reference looked as though it passed. The criterion
+now uses whole pre-contact segments only.
+
+\paragraph{Cause 2: A Weld-Inconsistent Tracked Reference.} The low-pass
+acts on each coordinate separately, so the tracked reference opens the
+dual-grip weld: up to 16.1 mm (driver, 12 Hz), 10.7 mm (driver, 25 Hz) and
+8.1 mm (7-iron, 25 Hz), against 4.5 mm for the unfiltered IK reference. The
+KKT replay holds the weld exactly and spends trail-arm effort closing the
+gap through the release. Each tracked sample is now projected onto the weld
+by Gauss-Newton steps (minimum-norm, finite-difference Jacobian) over the
+nine trail-arm coordinates (right scapula, shoulder, elbow, forearm, wrist;
+\texttt{pipeline.weld\_projection.weld\_consistent\_track}), to below
+1~$\mu$m. The lead arm and body keep their filtered values; the receipt
+records the residual before and after.
+
+\paragraph{Cause 3: Ground Yaw Slip of the Unactuated Root.} Through the
+downswing the feet and pelvis turn about the vertical by 8--11 deg more than
+the reference (trail foot slides 35--46 mm); the root yaw error at impact is
+about $-0.19$ rad. This is the limitation recorded in decision 13 (the
+pelvis drift is governed by the ground yaw-moment capacity). As a diagnostic
+only, the root was made actuated; that is not a physical model and was not
+adopted.
+
+\paragraph{Cause 4: Residual Tracking Loss.} Even with an actuated root the
+replay is 4--5\,\% slow at impact.
+
+\begin{center}
+\begin{tabular}{@{}llrrr@{}}
+\toprule
+Club & Tracked reference & Peak vs capture (ms) & Impact vs capture & Face gap (deg) \\
+\midrule
+Driver & 12 Hz (baseline) & $-20.0$ & $-20.1$\,\% & -- \\
+Driver & 12 Hz + weld & $-13.6$ & $-14.6$\,\% & -- \\
+Driver & 25 Hz & $-10.2$ & $-12.5$\,\% & 1.8 \\
+Driver & 25 Hz + weld & $-4.1$ & $-8.0$\,\% & 1.7 \\
+Driver & 25 Hz + weld, actuated root (diagnostic) & $-1.4$ & $-4.9$\,\% & 0.75 \\
+7-iron & 12 Hz (baseline) & $-11.6$ & $-9.8$\,\% & -- \\
+7-iron & 12 Hz + weld & $-13.5$ & $-10.5$\,\% & 7.98 \\
+7-iron & 25 Hz & $-4.8$ & $-6.1$\,\% & 0.99 \\
+7-iron & 25 Hz + weld & $-3.7$ & $-5.4$\,\% & 1.36 \\
+7-iron & 25 Hz + weld, actuated root (diagnostic) & $-0.1$ & $-4.0$\,\% & 0.66 \\
+\bottomrule
+\end{tabular}
+\end{center}
+The 7-iron rows reuse the run's tracked reference for 12 Hz (which includes
+the zero-moment-point filter of that run) and re-filter the IK reference for
+25 Hz without it. The 12 Hz + weld 7-iron row fails the face gate, so the
+weld projection is adopted only together with the 25 Hz pre-contact cutoff.
+
+\paragraph{Other Experiments That Did Not Help.} Each was a full bundle
+re-export of both clubs.
+\begin{itemize}
+\item Stronger root regulation through the legs (balance gains 900/60 and
+root-only): no change in timing; 2500/100 diverged.
+\item Contact parameters: a 0.02 or 0.01 m/s Coulomb transition velocity made
+the face miss the ball; friction coefficient 1.5 gave the driver $-16.5$ ms
+and $-19.0$\,\% and made the 7-iron miss the ball.
+\item The wrench-QP tracking backend: driver $-17.6$ ms and $-23.0$\,\%; with
+friction 1.5, $-14.7$ ms and $-19$\,\% and the 7-iron missed the ball.
+\item KKT without the controller split at impact: driver $-17.6$ ms and
+$-22.8$\,\%; 7-iron $-2.5$ ms and $-8.6$\,\%.
+\item An actuated root with the 12 Hz reference: driver $-14.5$ ms and
+$-17.6$\,\%, 7-iron $-9.9$ ms and $-9.4$\,\%; root drift is not the only
+cause.
+\end{itemize}
+Joint tracking errors before impact stay below 0.035 rad; the large errors
+are after contact.
+
+\paragraph{Reproduction.} The pipeline change is exercised by
+\texttt{tests/unit/motion\_matching/pipeline/test\_release\_cutoff.py} and
+\texttt{test\_weld\_projection.py}. Full re-solve (writes the fixtures; run
+it only to measure, and adopt the fixtures only when the OSV-10 gate and the
+GCV-20 acceptance pass):
+\begin{verbatim}
+MUJOCO_GL=egl PYTHONPATH=.:src python3 -m scripts.regenerate_club_face_fixtures \
+    --work RUNS --capture driver     # and --capture iron
+\end{verbatim}
+The one-change-at-a-time re-exports used a scratch driver around
+\texttt{scripts.same\_input\_bundle.export} and
+\texttt{scripts.regenerate\_club\_face\_fixtures.measure\_swing} that swaps
+the run's \texttt{q\_track} before the export; the measurements are in the
+summary JSON beside the evidence plot.
+
+\paragraph{Full Re-Solve.} Both captures were then re-solved end to end with
+the final code (commit \texttt{5f8ee41fe5}: 25 Hz pre-contact cutoff, weld
+projection, and for the 7-iron the zero-moment-point filter that the
+re-exports above left out), measured by
+\texttt{scripts.regenerate\_club\_face\_fixtures} (model face centre by MuJoCo
+forward kinematics, capture face centre from the calibrated head triad, each
+on its own clock):
+\begin{center}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+Club & Peak vs capture (ms) & Impact (m/s) & Capture (m/s) & Impact vs capture \\
+\midrule
+Driver & $-3.7$ & 47.94 & 51.75 & $-7.4$\,\% \\
+7-iron & $-4.2$ & 39.36 & 41.05 & $-4.1$\,\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+The face at impact is 2.8 deg (driver) and 4.6 deg (7-iron) from the
+capture. The re-solve confirms the re-export: the timing acceptance (5 ms)
+is met and the impact-speed acceptance (3\,\%) is not. The GCV-20 acceptance
+test is therefore a strict expected failure carrying these numbers, with its
+tolerances unchanged, and the committed fixtures are not replaced (the
+re-solved fixtures would also fail the impact-frame check: the detected frame
+lies 0.34 m (driver) and 0.18 m (7-iron) from the ball, limit 0.15 m). The
+remaining gap is cause 3, which needs the ground yaw-moment model of
+decision 13.
+
+\subsection{Third Pass: Zero-Moment-Point Rates Split at Impact (\#12117)}
+\label{sec:gcv20_zmp_split}
+\paragraph{Regression.} On current main the 7-iron replay fell from
+$-4.1$\,\% to $-11.9$\,\% impact speed. A bisect put the step at \#12049,
+whose anthropometric hip rewrite used a foreign pelvis alignment (\#12109).
+The hip fix (\#12125) restores the IK reference (marker RMS 31.1 to
+26.8 mm; the 18 Hz pre-contact cutoff keeps the release again). But with
+GCV-20 on that spec the 7-iron replay drifted from the backswing on and the
+same-input bundle export diverged to NaN at the impact step.
+
+\paragraph{Mechanism.} The IK solution was bit-identical between the main
+code and GCV-20; the drift entered after IK, in the zero-moment-point (ZMP)
+filter's re-solves (root offset from IK at 1.0 s: $-40$ mm with main's code,
+$-69$ mm with GCV-20 without cutoff or weld projection). The tracked
+reference keeps the ball's velocity step at contact, and the replay
+controller already differentiates on each side of it, but
+\texttt{reference\_zmp} still took \texttt{np.gradient} twice across the
+step. That stencil spans $\pm 2$ samples, so frames $i-1$ to $i+2$ around the
+last pre-contact sample $i$ demanded a ZMP 4 to 29 m outside the feet (full
+GCV-20, third filter pass). The cart-table shift
+$\min\lVert \delta c-(z_c/g)D_2\delta c-\mathrm{gap}\rVert^2+\ldots$ is a
+global solve whose kernel decays over about $\sqrt{z_c/g}\approx0.3$ s, so it
+spread those gaps back over the downswing: centre-of-mass shifts of 37 mm
+(0.5 to 0.9 s) and 71 mm (0.9 to 1.1 s) where the gap is zero, and up to
+162 mm near impact.
+
+\paragraph{Change.} \texttt{reference\_zmp} takes \texttt{split\_time\_s} and
+differentiates with \texttt{impact\_force.reference\_rates}, the controller's
+split. The ball, not the ground, removes the velocity step, so it is not a
+ground acceleration. The pipeline calls it through
+\texttt{pipeline.dynamics.lane\_reference\_zmp}, which passes
+\texttt{lane.impact\_time\_s} (unsplit when the lane has no impact). Unsplit
+callers are unchanged. Test:
+\texttt{test\_reference\_zmp\_split\_keeps\_the\_impact\_velocity\_step\_out\_of\_the\_zmp}
+(a rest-then-constant-velocity root slide: unsplit, the step frames move the
+ZMP by more than 0.1 m; split, every frame's ZMP is the CoM projection within
+$10^{-6}$ m).
+
+\paragraph{Result.} Re-solved with GCV-20 plus \#12125 plus this change
+(\texttt{regenerate\_club\_face\_fixtures}, unchanged flags). The 7-iron
+replay no longer diverges and the bundle exports:
+\begin{center}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+7-iron run & Dynamics RMS (mm) & Root error 0.5/1.0/1.3 s (mm) & Impact vs capture \\
+\midrule
+\#12125, main's code & 59.6 & 13 / 53 / 76 & $-15.9$\,\% \\
+GCV-20 + \#12125 & 264 & 20 / 99 / 190 & export diverged \\
+GCV-20 + \#12125 + split ZMP & 54.5 & 10 / 41 / 47 & $-10.2$\,\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+Clubhead speed by stage of the last run (capture 41.26 m/s at impact): IK
+42.47, smoothed IK reference 42.46, tracked reference after the ZMP filter
+41.63 m/s ($+0.9$\,\%, peak 1.4 ms before impact), replay 37.48 m/s
+($-9.2$\,\%, peak 11.2 ms early), bundle 36.87 m/s. The reference now meets
+the acceptance; the loss is in the computed-torque replay through the
+release. The driver run does not use the ZMP filter and is unchanged
+($-6.1$\,\%, peak 6.1 ms early). Acceptance (3\,\%, 5 ms) is still not met
+for either club, so \#12117 and \#11767 stay open and no tolerance was
+changed. The fixtures are regenerated only after GCV-20 and \#12125 are on
+main.
+
 \section{Shared Club in the Musculoskeletal OpenSim Models (OSV-9)}
 This section records a change to the Rajagopal-based OpenSim models
 (\texttt{src/engines/physics\_engines/opensim}), not to the Simscape model.
@@ -5367,12 +5858,54 @@ angles (top 97.5 vs 98.8\textdegree, impact 11.1 vs 11.3\textdegree).
 The worst lead-grip error is 1.3 mm. The trail gap reaches 15 mm at the
 finish, where the trail weld constraint must close it.
 
+\subsection{Tour-Matching Variants and Static Optimisation}
+The tour-matching model variants (\texttt{tour\_matching/model\_variants.py})
+now read their equipment from the model with \texttt{equipment\_from\_model}.
+It returns the shared-club hash, the \texttt{Club} mass (checked against the
+spec to $10^{-6}$ kg), the weld or bushing topology, both hands, the lead and
+trail grip frames, and all three meshes. It fails closed when the club is
+missing, held by one hand, or stale. The previous hard-coded description named
+a nonexistent \texttt{grip\_frame}, one hand and the head mesh only.
+
+StaticOptimization on the tour-average driver swing
+(\texttt{scripts/run\_musculoskeletal\_swing.py --club driver
+--club-control}) solves the muscle model with the club and a no-club
+control, with the same kinematics.
+\begin{itemize}
+\item \textbf{Trail weld.} The marker IK does not close the two-hand loop.
+  With the trail weld enforced, all 14 arm coordinates missed their
+  accelerations at every one of the 88 frames tried. The solved model
+  therefore releases the trail weld, so the lead hand carries the club.
+\item \textbf{Convergence.} A frame converges when its logged violation is
+  at most $10^{-3}$. With the club, 234 of 262 frames converge; without it,
+  237.
+\item \textbf{Club load.} On the 225 frames converged in both runs, the
+  per-frame difference adds the following RMS load to the lead arm: wrist
+  deviation 32.9 N\,m, shoulder flexion 45.0 N\,m, shoulder rotation
+  42.9 N\,m and elbow flexion 16.3 N\,m. The trail arm differs by exactly
+  zero.
+\item \textbf{Reserves.} The pelvis residual dominates, at 520 N RMS with the
+  club and 454 N without.
+\end{itemize}
+The receipt is
+\path{docs/development/full_body_models/evidence/musculoskeletal/receipt.json}
+(\texttt{club}, \texttt{club\_load}, \texttt{solver.convergence}). This
+shows the club load reaches the arm actuators. It qualifies no muscle force,
+and the two-hand load split is not resolved.
+
 \subsection{Limitations and Reproduction}
 \begin{itemize}
-\item No MyoFullBody OpenSim export exists.
-\item Static optimisation with the two-hand club was not run.
+\item No MyoFullBody OpenSim export exists in the repository, so there is no
+  such model to convert.
+\item Static optimisation holds the club in the lead hand only, because the
+  IK does not close the two-hand loop. The load split between the hands
+  would need loop-consistent kinematics.
+\item The tour-matching evidence snapshots under
+  \path{docs/development/opensim_tour_matching/evidence/} are historical
+  inputs pinned by hash, and keep their original club.
 \item The Rajagopal hand meshes are unchanged.
-\item The tracked legs are a planted-feet assumption, not a measurement.
+\item By default the tracked legs are a planted-feet assumption, not a
+  measurement; the capture-planted feet of the next subsection are opt-in.
 \end{itemize}
 Reproduce as follows:
 \begin{itemize}
@@ -5383,6 +5916,125 @@ Reproduce as follows:
 \item renders, under xvfb only:
   \texttt{python3 scripts/render\_msk\_club.py --geometry <dir>}.
 \end{itemize}
+
+\subsection{Pelvis and Upper-Trunk Turn Targets (Issue \#12042, Slice 4)}
+\label{sec:osv9_turn_targets}
+The landmark-only tracking above follows six joint centres of its MuJoCo
+source swing. Two hip centres 0.18 m apart barely constrain pelvis yaw
+against the lumbar, so on capture A the Rajagopal pelvis stayed nearly
+square ($33.5^\circ$ at the top against $40.9^\circ$ in the markers,
+\texttt{pelvis\_rotation} $-29^\circ$, \texttt{lumbar\_rotation} $-74^\circ$)
+and the thorax over-turned to $126^\circ$. Slice 4 adds two opt-in inputs to
+\texttt{msk\_club\_tracking.track\_swing}, built by
+\texttt{msk\_turn\_targets}:
+\begin{itemize}
+\item \emph{Turn targets.} The capture's pelvis and upper-trunk lines
+  (Section~\ref{sec:turn_definitions}, shared module
+  \texttt{swing\_comparison.turn}, markers \texttt{WaistLeft}/\texttt{WaistRight}
+  and \texttt{BackLeft}/\texttt{BackRight}) are interpolated linearly at each
+  tracked row's time; a row outside the valid marker span carries no target
+  (NaN, never zero). The fixture row $k$ is capture time $0.002\,k$~s
+  (\texttt{FIXTURE\_DT\_S}; the fixture's event times agree with the
+  capture's within 7 ms). The model lines, measured in the native world, are
+  the hip-centre line (\texttt{femur\_r} to \texttt{femur\_l} origins) and
+  the \texttt{torso} lateral axis ($-z$). With $\psi^{\mathrm{ref}}_s$ the
+  model yaw of segment $s$ at the calibrated address pose and $\theta_s(t)$
+  the marker turn (positive in the backswing), each frame adds the residual
+  \begin{equation}
+  r_s = \frac{\operatorname{wrap}\big(\psi_s(\mathbf{q}) -
+  (\psi^{\mathrm{ref}}_s - \theta_s(t))\big)}{w_\psi},\qquad
+  w_\psi = 0.02~\mathrm{rad},
+  \end{equation}
+  so a constant marker-to-model heading offset at address cancels and only
+  the turn is imposed. $w_\psi$ (about $1.1^\circ$) equals the lead-hand
+  rotation weight and dominates the 4 cm landmarks where the source and the
+  capture disagree.
+\item \emph{Capture-planted feet.} The square synthetic stance is replaced by
+  each foot's markers at address: medians over the shared address window
+  (\texttt{foot\_progression.address\_window}), the corrected heel-to-toe
+  long axis (\texttt{marker\_long\_axis} with
+  \texttt{ANKLE\_LATERAL\_OFFSET\_M}), and the ankle centre as
+  \texttt{*AnkleOut} moved medially by the OSV-6 malleolus offset
+  \texttt{hip\_calibration.ANKLE\_OUT\_LATERAL\_M}. The foot template is laid
+  along these axes with its heights unchanged (feet flat on the floor).
+\end{itemize}
+Without either input the tracking is unchanged (the baseline below
+reproduces the issue \#12042 audit within $1^\circ$ at the top).
+
+\paragraph{Results.}
+\texttt{scripts/msk\_turn\_audit.py} tracks every second fixture row plus the
+event rows (455 frames for A, 459 for B) of the golf humanoid; the capture-B run uses
+an iron grip calibration of the golf humanoid made in the run (status 2,
+palm gaps below 0.04 mm, landmark RMS 15 mm), which is not committed. Turn
+from address in degrees, top / impact; the Rajagopal shoulder centres are
+torso-fixed, so its shoulder-girdle line equals its upper-trunk line.
+
+\begin{center}
+\small
+\begin{tabular}{llcccc}
+\hline
+Capture & Source & Shoulder Girdle & Upper Trunk & Pelvis & X-Factor \\
+\hline
+A & markers & 103.0 / $-9.0$ & 92.2 / $-19.2$ & 40.9 / $-49.8$ & 51.3 / 30.6 \\
+A & MuJoCo source (joint centres) & 111.9 / $-5.2$ & n/a & 46.0 / $-32.7$ & n/a \\
+A & MSK before & 126.4 / 0.5 & 126.4 / 0.5 & 33.5 / $-29.1$ & 92.8 / 29.7 \\
+A & MSK turn targets & 95.8 / $-19.1$ & 95.8 / $-19.1$ & 41.0 / $-49.8$ & 54.8 / 30.7 \\
+A & MSK turn targets + feet & 95.8 / $-19.1$ & 95.8 / $-19.1$ & 40.6 / $-49.7$ & 55.2 / 30.7 \\
+B & markers & 97.5 / $-1.1$ & 86.9 / $-10.0$ & 41.1 / $-41.7$ & 45.8 / 31.7 \\
+B & MuJoCo source (joint centres) & 103.7 / 3.7 & n/a & 44.6 / $-26.8$ & n/a \\
+B & MSK before & 121.0 / 7.6 & 121.0 / 7.6 & 36.1 / $-24.4$ & 85.0 / 32.0 \\
+B & MSK turn targets + feet & 89.7 / $-9.8$ & 89.7 / $-9.8$ & 40.9 / $-41.7$ & 48.8 / 31.9 \\
+\hline
+\end{tabular}
+\end{center}
+
+With the targets the pelvis is within $0.3^\circ$ of the markers and the
+upper trunk within $3.6^\circ$ (A) and $2.8^\circ$ (B) at the top and
+impact, inside the issue's $5^\circ$ bound. The X-factor is $3.9^\circ$ (A)
+and $3.0^\circ$ (B) high at the top. The costs, measured over the whole swing
+(capture A, before $\rightarrow$ after): the worst lead-grip error rises from
+1.3 to 4.3 mm, the worst trail-hand gap from 15 to 50 mm (at 1.18 s, early
+downswing; 15 mm at the top, below 1 mm at impact) and the landmark RMS at the
+top from 89 to 122 mm, because the source's hands and joint centres belong to
+its over-turned trunk. Capture B: 0.8 $\rightarrow$ 3.4 mm and
+15 $\rightarrow$ 39 mm. A weaker weight $w_\psi=0.05$ rad halves the trail gap
+(24 mm) but lets the source pull the upper trunk back to $104.2^\circ$ at the
+top (pelvis $39.1^\circ$), so 0.02 rad is kept. The feet change the address
+lead-hip rotation (\texttt{hip\_rotation\_l} $-27^\circ$ against $-10^\circ$
+with the square stance) and leave the turn within $0.4^\circ$.
+
+\paragraph{Limitations.}
+\begin{itemize}
+\item The shoulder-girdle line cannot follow the markers: the Rajagopal model
+  has no scapular degrees of freedom, so it misses the $10.8^\circ$ (A) and
+  $10.6^\circ$ (B) marker scapular share at the top and is $7.2^\circ$ /
+  $10.1^\circ$ (A) and $7.8^\circ$ / $8.7^\circ$ (B) short at top / impact;
+  the impact values exceed the issue's $8^\circ$ shoulder bound.
+\item The retarget now departs from its MuJoCo source by design (the source
+  over-turns the trunk, issue \#12042 finding 5), so the issue's ``within
+  $5^\circ$ of the source'' criterion no longer applies to the targeted run;
+  the trail-hand gap is the visible price until the source is corrected
+  (slice 7).
+\item \texttt{hip\_rotation\_l} sits on its $-40^\circ$ limit at the top and
+  \texttt{hip\_rotation\_r} on its $-40^\circ$ limit at impact. No range was
+  widened.
+\item The feet are planted for the whole swing (no trail-heel lift), and the
+  tracking is kinematic only: no forward dynamics or muscle feasibility is
+  claimed.
+\end{itemize}
+
+\paragraph{Reproduction.}
+\texttt{python3 -m pytest tests/opensim/test\_msk\_turn\_targets.py
+tests/opensim/test\_msk\_club\_tracking.py} (the synthetic test turns the
+waist and back markers rigidly by $15^\circ$ and $35^\circ$ while the source
+holds its address pose; the tracked lines must agree within $2^\circ$,
+measured $0.2^\circ$ and $1.4^\circ$). The capture table:
+\texttt{python3 scripts/msk\_turn\_audit.py --capture <capture C3D> --club
+driver --mode \{baseline,turn,turn\_feet\} --stride 2 --out <json>}; for
+capture B first run
+\texttt{python3 -m src.engines.physics\_engines.opensim.python.msk\_club\_calibration
+src/engines/physics\_engines/opensim/models/golf\_humanoid.osim --club iron7}
+and pass \texttt{--club iron7}.
 
 \section{Dynamics-Informed Motion Estimation (DIME): Shared Reports, GUI Strategy Selection and Methods}
 \label{sec:dime_reports_methods}
@@ -5421,6 +6073,149 @@ Visual overlays employ refined ellipsoid geometry (\texttt{GS3DX\_Human\_Refined
 \subsection{Limitations and Interpretation Boundaries}
 Kinematic agreement in inverse kinematics fitting does not demonstrate forward dynamic validity, neuromuscular plausibility, or physical ground support equilibrium. Reports must maintain clear distinctions between kinematic fits, inverse-dynamics effort attributions, and certified continuous forward simulations.
 
+\section{Shoulder, Trunk and Pelvis Turn Definitions (Issue \#12042)}
+\label{sec:turn_definitions}
+
+This section defines the turn metrics used to compare a matched swing with its capture. It records definitions and reporting only: the receipts carry no acceptance thresholds, and the measured discrepancies of issue \#12042 stay open until the later slices of that issue land. The implementation is \texttt{src/shared/python/swing\_comparison/turn.py}; the receipt block is built by \texttt{src/shared/python/motion\_matching/turn\_receipt.py}.
+
+\subsection{Lines, Frame and Sign Convention}
+Three distinct horizontal-plane lines are measured, each from a right point $\mathbf{r}$ to a left point $\mathbf{l}$:
+\begin{itemize}
+\item \emph{Pelvis}: \texttt{WaistLeft}/\texttt{WaistRight} markers (fallback \texttt{WaistLBack}/\texttt{WaistRBack}); in a model, the hip joint centres (femur body origins) or the model's waist sites.
+\item \emph{Upper trunk}: \texttt{BackLeft}/\texttt{BackRight} markers, the rib-cage proxy; in a model, the thorax-fixed points carrying those marker attachments.
+\item \emph{Shoulder girdle}: \texttt{LShoulderBack}/\texttt{RShoulderBack} markers (fallback \texttt{LShoulderTop}/\texttt{RShoulderTop}), which ride the scapula and acromion; in a model, the shoulder joint centres. The previous name ``thorax yaw'' for this line mislabelled scapular rotation as trunk rotation; \texttt{thorax\_yaw} remains only as a deprecated alias of the shoulder-girdle line.
+\end{itemize}
+The world frame is $Z$ up, the golfer faces $-X$ and the target line is $-Y$. A C3D file is $Y$ up in metres and is mapped $(x,y,z)\mapsto(x,-z,y)$. The line yaw is
+\begin{equation}
+\psi(t) = \operatorname{unwrap}\,\operatorname{atan2}\big((\mathbf{l}-\mathbf{r})_y,\,(\mathbf{l}-\mathbf{r})_x\big),
+\qquad
+\theta(t) = -\big(\psi(t)-\psi(t_{\mathrm{address}})\big),
+\end{equation}
+so $\theta$ is in degrees, relative to the same line at address, positive in the backswing (clockwise seen from above for a right-handed golfer) and continuous through $\pm180^\circ$. The X-factor is the upper-trunk turn minus the pelvis turn, $\chi=\theta_{\mathrm{trunk}}-\theta_{\mathrm{pelvis}}$; the shoulder-girdle variant $\theta_{\mathrm{girdle}}-\theta_{\mathrm{pelvis}}$ is reported separately. Events (address, top, impact) come from \texttt{swing\_comparison.detect\_events} on the capture; a model is sampled at the nearest frame to the capture event time, and an event outside the model's time span is reported as \texttt{null}, never as the last frame.
+
+\subsection{Data Validity}
+Both markers of a pair must be finite. A gap of at most $0.10$~s ($\texttt{MAX\_FILL\_GAP\_S}$) between valid frames is linearly interpolated per marker; longer gaps and leading or trailing gaps stay NaN with a stated reason. A pair with fewer than half of its frames valid is not preferred over its fallback. A line whose horizontal length is below $1$~mm is undefined, and a median line length outside $0.02$--$1.5$~m is rejected as a unit error. Unavailable is never zero: it is serialised as \texttt{null} with a reason. For example, \texttt{RShoulderTop} is missing in at least $80\,\%$ of the frames of captures A and B, which is why the \texttt{ShoulderBack} pair is preferred.
+
+\subsection{Receipt Block}
+Every matched-swing writer that is wired to the shared helper records a \texttt{turn} block (\texttt{turn\_block/v1}): the five lines (shoulder girdle, upper trunk, pelvis, X-factor, shoulder-girdle X-factor) at address, top and impact plus the maximum backswing turn between address and impact, for the capture markers and the model side by side, with the point names and a status (\texttt{ok}, \texttt{partial}, \texttt{unavailable}). Writers not yet wired are listed in \texttt{turn\_receipt.FOLLOW\_UP\_WRITERS} with the reason.
+
+\subsection{Reproduction and Check Values}
+\begin{verbatim}
+python3 -m pytest tests/unit/swing_comparison/test_turn.py \
+    tests/unit/motion_matching/test_turn_receipt.py
+\end{verbatim}
+On the private capture A (anonymised), the markers give shoulder girdle $103.0^\circ$, upper trunk $92.2^\circ$ and pelvis $40.9^\circ$ at the top, and $-9.0^\circ$, $-19.2^\circ$ and $-49.8^\circ$ at impact, matching the independent audit of issue \#12042 within $0.1^\circ$. These values are not committed; the committed tests use a synthetic rigid-rotation fixture with exact known yaw. These are definitions and measurements, not a qualification of any engine.
+
+\section{Drake Full-Body IK Coordinate Order and Thorax Twist (Issue \#12042, Slice 5)}
+This section records a defect and its fix in the Drake full-body adapter
+(\texttt{src/engines/physics\_engines/drake/python/full\_body\_model.py} and
+\texttt{full\_body\_ik.py}) used by the shared ground-support pipeline. It is
+not a Simscape change. It is kept here beside the OSV-10 record because the
+turn audit of issue \#12042 (epic \#11726) compares every engine on the same
+capture-A markers.
+
+\subsection{Symptom}
+The capture-A turn audit found that Drake IK barely twisted the thorax: the
+coordinate labelled \texttt{TorsoInput} moved only $-12.4$ deg from address
+to the top of the backswing (MuJoCo IK: $-65.2$ deg). The shoulder line
+reached 64.1 deg against 103.0 deg in the markers, the upper-trunk line 29.6
+deg against 92.2 deg, and the labelled \texttt{SpineInputX} and both
+\texttt{ScapInputX} coordinates sat on their bounds.
+
+\subsection{Model Topology, Frames and the Root Cause}
+The spec \texttt{coordinate\_order} lists the 44 scalar coordinates as
+root translation, pelvis gimbal, \texttt{SpineInputX}, \texttt{SpineInputY},
+\texttt{TorsoInput}, left arm, right arm, neck and legs. Drake parses the
+exported URDF and numbers positions in its own tree order. For the branched
+full-body tree the two orders differ: the plant slot of each spec coordinate is
+\[
+(0,1,2,3,4,5,\;7,8,6,\;17,18,12,\dots,16,19,20,\;26,27,21,\dots,25,28,29,\;9,10,11,\;30,\dots,43).
+\]
+The model's mapping-valued methods already permuted through
+\texttt{position\_start()}, but \texttt{DrakeFullBodyIK.\_set} and the array
+paths of \texttt{marker\_positions} and \texttt{affine\_dynamics} wrote a
+spec-ordered vector straight into the plant. The IK therefore solved in plant
+order, while the shared solver applied the document bounds, spin priors and
+locks by spec index and stored the result under spec names. The true torso
+twist (plant slot 6) received the \texttt{SpineInputX} bound of $\pm35$ deg,
+and it was pinned at $-35.0$ deg at the top. The wrist and neck coordinates
+received the scapula bounds. The joint axes, units and frames were correct:
+with the stored trajectory reordered into spec order, the shared spec FK
+reproduces the Drake markers (upper-body RMS 53.8 mm instead of 406.7 mm), and
+a pure \texttt{TorsoInput} twist moves every body marker identically in Drake,
+MuJoCo and the shared spec FK after the fix (error below $10^{-9}$ m).
+
+The computed-torque replay used the scrambled IK trajectory as its reference,
+so the previous Drake forward-dynamics result (382 mm) was also invalid.
+
+\subsection{Method of the Fix}
+\texttt{FullBodyDrakeModel} exposes \texttt{plant\_position\_indices},
+\texttt{to\_plant\_positions}, \texttt{to\_plant\_velocities},
+\texttt{from\_plant\_positions} and \texttt{named\_columns}. Every array-valued
+API of the adapter takes and returns spec-ordered coordinates. The IK permutes
+on \texttt{SetPositions} and maps every translational, angular and
+centre-of-mass Jacobian back to spec columns through two helpers.
+\texttt{\_coerce\_state} is spec-ordered for both mappings and arrays, which
+also fixes \texttt{step} with mapping input. No bound, weight, prior,
+tolerance or the shared spec's joint ranges changed. Neither proposed
+remedy in the issue (a MuJoCo warm start or a twist prior) was used: the
+under-twist was not a local minimum, and with the order fixed Drake reaches
+MuJoCo's solution on its own.
+
+\subsection{Results on Capture-A}
+Regenerated with the pipeline runner on the ud-sim image. Turn is the
+horizontal-plane line turn from address (+ = backswing), using the issue's
+line definitions; Drake and MuJoCo lines use the shared spec FK with each
+receipt's calibrated attachments.
+
+\begin{center}
+\small
+\begin{tabular}{lrrrrr}
+\toprule
+Source & IK RMS & Shoulder & Upper Trunk & Pelvis & X-Factor (Sh) \\
+ & (mm) & Top / Impact & Top / Impact & Top / Impact & Top / Impact \\
+\midrule
+Markers & -- & 103.0 / $-9.0$ & 92.2 / $-19.2$ & 40.9 / $-49.8$ & 62.2 / 40.8 \\
+MuJoCo IK & 32.8 & 112.9 / $-4.2$ & 109.7 / $-11.7$ & 46.3 / $-38.6$ & 66.6 / 34.5 \\
+Drake IK before (as labelled) & 47.2 & 64.1 / $-68.8$ & 29.6 / $-59.7$ & 43.5 / $-47.0$ & 20.6 / $-21.8$ \\
+Drake IK before (reordered) & 47.2 & 131.7 / $-11.2$ & 80.4 / $-9.3$ & 43.5 / $-47.0$ & 88.2 / 35.8 \\
+Drake IK after & 34.6 & 118.8 / $-4.9$ & 111.7 / $-13.3$ & 46.0 / $-44.0$ & 72.8 / 39.1 \\
+MuJoCo FD & 82.5 & 113.4 / 2.0 & 110.1 / $-5.4$ & 46.9 / $-28.7$ & 66.5 / 30.8 \\
+Drake FD before & 382.0 & 67.3 / $-1.6$ & 35.9 / 10.3 & 44.6 / 22.7 & 22.7 / $-24.3$ \\
+Drake FD after & 60.1 & 119.2 / $-0.9$ & 111.8 / $-6.7$ & 47.3 / $-31.4$ & 71.9 / 30.5 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\texttt{TorsoInput} from address to the top is $-68.9$ deg after the fix
+(absolute $-44.8$ deg), against $-65.2$ deg in MuJoCo IK. The address fit with
+static seeds improved from 6.6 to 3.6 mm and the closure residual from 7.8 to
+3.8 mm. The IK segment RMS now matches MuJoCo within 5 mm on every segment (club 37.5 against 32.5 mm, right arm 37.7 against 34.6 mm, the rest within 2 mm).
+There are no IK range-of-motion flags. The same command on \texttt{main}
+(2631615099) reached 66.5 mm IK RMS and then failed in dynamics with a
+singular KKT matrix.
+
+\subsection{Limitations}
+The Drake solution now inherits MuJoCo's shared over-twist at the top (shoulder
+line $+15.8$ deg, upper trunk $+19.5$ deg against the markers). That is
+finding 5 of issue \#12042 (scapula/thorax split, slice 7), not a Drake
+defect. The receipt stays \texttt{REJECTED}: whole-run dynamics RMS 60.1 mm
+against a 60 mm gate, and the weight fraction outside $[0.2, 3.0]$. The shared
+spec FK places the clubhead triad (on the club frame \texttt{Clubhead})
+0.9--1.1 m away from both Drake and MuJoCo, which agree exactly, so the turn audit must not use it
+for club markers; that discrepancy is recorded as a follow-up.
+
+\subsection{Reproduction}
+\begin{verbatim}
+python3 -m pytest tests/unit/motion_matching/test_drake_coordinate_order.py
+python3 -m src.shared.python.motion_matching.pipeline.cli \
+  --spec docs/development/full_body_models/full_body_spec_anthro_driver.json \
+  --static-seeds --engine drake --capture driver \
+  --out docs/development/full_body_models/evidence/ground_support/anthro_driver_drake
+python3 -m src.shared.python.motion_matching ledger --write
+\end{verbatim}
+The capture-A run takes about 7 minutes on 5 cores and reads the private
+capture through \texttt{CAPTURE\_DATA\_DIR}.
 \section{Phase-Split Forward-Dynamics Marker RMS (\#12042)}
 \label{sec:fd_phase_split}
 
@@ -5656,6 +6451,180 @@ python3 -m src.shared.python.motion_matching.pipeline.cli \
 #  --thorax-weight 0.01 --shoulder-girdle-weight 1 for the null run;
 #  the iron uses full_body_spec_anthro_iron7.json --zmp-filter --capture iron
 \end{verbatim}
+
+\section{Follow-Through IK Branch Uniqueness (\#12042)}
+
+\subsection{Motivation}
+The near-null thorax split (\texttt{--thorax-weight 0.01}, \#12108) should not
+change the swing. On the canonical runs it still moves whole-swing FD by
+$-6.6$ mm (capture-A) and $+13.9$ mm (capture-B). The MuJoCo full-body
+reference also changes by up to 39--47$^\circ$ on the toe and on the
+shoulder/forearm axial coordinates (\texttt{mtp\_angle\_r/l},
+\texttt{L/RSInputZ}, \texttt{L/RFInput}) after about 1.20--1.30 s. This
+section asks whether a principled regulariser can make the follow-through IK
+solution unique, so that whole-swing FD is not dominated by the choice of
+branch.
+
+\subsection{Diagnosis}
+The trajectory solver (\texttt{BaseFullBodyIK.solve\_trajectory}) seeds each
+frame with the previous one. When a frame's marker RMS exceeds 30 mm, it
+retries from four seeds jittered by up to $\pm0.5$ rad. A retry is accepted
+if it lowers marker RMS by 3 mm, with no other condition. Three properties of
+this \emph{free} policy cause the branch hops:
+\begin{enumerate}
+\item The jittered seed also became the prior anchor $q_\mathrm{init}$, so a
+retry was regularised toward a random pose, not toward the previous frame.
+\item One random stream is shared by all frames. A perturbation that changes
+the number of restarts in one frame changes the jitter of every later frame.
+\item Acceptance looks only at marker RMS. In the follow-through, the
+weakly observed toe and axial coordinates have mirror branches that fit to
+within the margin. Any restart can therefore jump to a branch that is not
+anatomical.
+\end{enumerate}
+The raw reference has about 40 frames with steps over 5$^\circ$ per frame
+between 1.29 and 1.35 s. With restarts disabled, the toe angles do not move
+under the null perturbation at all. Restarts are therefore the only source of
+the branch hops.
+
+\subsection{Method}
+All of the following options are opt-in. The default stays \texttt{free},
+which reproduces the canonical receipts bit for bit.
+\begin{description}
+\item[Anchored restarts] (\texttt{restart\_anchor\_prior}). A retry keeps the
+jittered seed, but its prior row anchors on the frame's start pose
+(\texttt{SolvePoseOptions.prior\_anchor}).
+\item[Frame-seeded jitter] (\texttt{restart\_seed\_per\_frame}). The jitter of
+frame $k$ is drawn from \texttt{default\_rng((0, k))}, so it does not depend on
+what earlier frames did.
+\item[Bounded step] (\texttt{restart\_max\_step\_rad}). A retry is admissible
+only if no joint moves more than $\omega_\mathrm{max}/f_s$ from the start pose,
+with $\omega_\mathrm{max}=34.9$ rad/s (2000$^\circ$/s). The peak smoothed
+pre-impact joint speed is 1299$^\circ$/s, at the lead wrist.
+\item[Posture prior] (\texttt{posture\_prior}). Rows
+$\sqrt{w}\,(q_i - q_i^\mathrm{address})$ act on the six toe and axial
+coordinates and pull them toward the static address pose.
+\end{description}
+The pipeline selects these with \texttt{--ik-restart-policy}:
+\texttt{free}; \texttt{seeded} (frame-seeded); \texttt{anchored};
+\texttt{stable} (seeded and anchored); \texttt{continuous} (anchored and
+bounded); and \texttt{off} (no restarts). The posture prior is set with
+\texttt{--ik-posture-prior-weight}. The receipt records the policy under
+\texttt{ik.restart\_policy}. Calibration subsets always use \texttt{free}.
+
+A synthetic one-joint model (\texttt{test\_ik\_restart\_continuity.py}) has
+two branches $\pm\theta$ that fit the strong marker equally. A weak marker
+prefers the mirror branch on random frames. Free restarts hop between the
+branches more than five times in 40 frames. Continuous restarts stay on the
+anatomical branch under a $10^{-4}$ m offset, a different start and a
+different noise sequence.
+
+\subsection{Results}
+Each cell gives base/null, where the null run adds \texttt{--thorax-weight
+0.01}. $\Delta q$ is the maximum follow-through change, base versus null, on
+the six toe and axial coordinates. FD values are in mm; ``pre'' is
+address$\to$impact and ``post'' is after impact. These experiments were run
+before the \#12057 right-knee fix. Their baseline is therefore the canonical
+receipt at that time (whole-swing FD 61.6 and 47.0 mm), not the current
+77.0 and 71.2 mm. The comparison is internally consistent; the policies have
+not been re-run on the corrected knee.
+
+\begin{center}
+\small
+\begin{tabular}{lrrrrr}
+\hline
+Policy & IK (mm) & Whole FD (mm) & Pre FD & Post FD & $\Delta q$ ($^\circ$) \\
+\hline
+\multicolumn{6}{l}{capture-A (driver)} \\
+free (default) & 33.0/33.2 & 61.6/55.0 & 29.9/30.0 & 108.1/93.7 & 39.1 \\
+off, continuous & 40.0/39.9 & 96.6/91.8 & 30.5/30.3 & 179.2/169.6 & 1.5 \\
+seeded & 33.2/33.8 & 67.3/76.7 & -- & -- & 34.4 \\
+anchored & 32.5/32.5 & 73.6/64.9 & 30.1/30.0 & 132.9/114.9 & 3.0 \\
+stable & 33.7/33.8 & 67.7/64.2 & 30.1/30.1 & 120.6/113.4 & 4.7 \\
+stable, posture $10^{-3}$ & 33.6/32.9 & 67.4/65.6 & 29.6/29.6 & 120.3/116.6 & 9.2 \\
+stable, posture $10^{-2}$ & 34.0/33.9 & 67.9/68.9 & 29.9/30.1 & 121.3/123.1 & 2.6 \\
+\multicolumn{6}{l}{capture-B (7-iron)} \\
+free (default) & 31.1/32.0 & 47.0/60.9 & 29.9/32.7 & 75.7/103.7 & 46.5 \\
+off, continuous & 38.0/38.0 & 51.0/50.4 & 31.5/31.2 & 83.0/82.2 & 2.3 \\
+seeded & 31.9/32.1 & 54.4/53.6 & 31.4/29.6 & -- & 60.0 \\
+anchored & 32.0/31.8 & 93.8/70.8 & 36.6/31.3 & 169.7/125.7 & 5.3 \\
+stable & 31.7/31.8 & 67.1/69.3 & 32.8/32.3 & 116.9/122.0 & 3.9 \\
+stable, posture $10^{-3}$ & 31.7/31.9 & 69.0/66.7 & 33.6/30.7 & 120.3/117.5 & 5.4 \\
+stable, posture $10^{-2}$ & 31.9/31.9 & 160.3/55.4 & 39.6/29.3 & 300.4/94.7 & 3.8 \\
+\hline
+\end{tabular}
+\end{center}
+
+The free control run reproduced the canonical receipts exactly (zero
+difference in IK, whole-swing FD and post-impact FD). \texttt{continuous} gave
+the same result as \texttt{off}, because the step bound rejected every
+restart. Over all coordinates, not only the six above, $\Delta q$ was larger
+in some rows: \texttt{stable} 11.9$^\circ$ (capture-A) and 9.4$^\circ$
+(capture-B); \texttt{anchored} 10.7$^\circ$ and 9.2$^\circ$; posture
+$10^{-3}$ 35.2$^\circ$ (capture-A, subtalar).
+
+\subsection{Acceptance and Failed Experiments}
+To become the default, a candidate had to meet two conditions on both
+captures:
+\begin{enumerate}
+\item[(a)] The null perturbation changes the follow-through reference by less
+than 5$^\circ$ on the six coordinates, and whole-swing FD by less than 3 mm.
+\item[(b)] Pre-impact FD stays within the 3 mm noise floor, whole-swing FD is
+no worse than baseline (61.6 and 47.0 mm), and IK RMS is no more than 1 mm
+worse.
+\end{enumerate}
+No candidate met both conditions, so the default is unchanged.
+\begin{itemize}
+\item \texttt{off}/\texttt{continuous} makes the reference unique
+($\le$2.3$^\circ$) but adds 7 mm of IK RMS. Whole-swing FD also rises
+(capture-A 96.6 mm).
+\item \texttt{seeded} alone does not help: $\Delta q$ is 34--60$^\circ$.
+\item \texttt{anchored} meets the coordinate bound, but FD moves by 8.7 and
+23.1 mm between base and null.
+\item \texttt{stable} is the best candidate. It meets the coordinate bound
+(4.7$^\circ$, 3.9$^\circ$) and the IK bound ($+0.7$, $+0.6$ mm). It fails
+because whole-swing FD is worse than baseline (67.7 versus 61.6, and 67.1
+versus 47.0 mm), and because the capture-A FD delta is 3.5 mm.
+\item A posture prior on top of \texttt{stable} did not tighten FD. At weight
+$10^{-2}$, the capture-B base run diverged: the root drifted 0.27 m from about
+1.0 s, before impact, and whole-swing FD reached 160.3 mm.
+\item An earlier attempt to let a weak posture prior choose between separated
+branches failed in the synthetic test. The prior cannot cross the marker
+barrier between branches, so only the seed and restart policy can choose the
+branch.
+\end{itemize}
+
+\subsection{Conclusion}
+The follow-through branch ambiguity comes from the restarts, and it can be
+removed (\texttt{stable}, $\Delta q \le 4.7^\circ$). Whole-swing FD is not
+stabilised by doing so. The FD rollout is itself sensitive after impact: the
+unactuated root drifts, and post-impact FD is about twice the reference error.
+On capture-A it is dominated by the club and head markers, and on capture-B by
+the pelvis. Reference changes of 1.5$^\circ$ or less still move whole-swing FD
+by about 5 mm. Reference uniqueness is necessary, but it is not sufficient for
+a repeatable whole-swing FD. The remaining sensitivity belongs to the
+post-impact rollout, not to the IK.
+
+\subsection{Reproduction and Limitations}
+Use the canonical commands in \texttt{CANONICAL\_RUN.md}, adding
+\texttt{--ik-restart-policy \{free,seeded,anchored,stable,continuous,off\}}
+and, optionally, \texttt{--ik-posture-prior-weight W}. The null runs also need
+\texttt{--thorax-weight 0.01}, which is in \#12108 and is not yet on
+\texttt{main}. Read the phase split from \texttt{dynamics.fd\_phase} in each
+receipt. Each run takes about 5 min.
+
+Limitations:
+\begin{itemize}
+\item Only two captures and one null perturbation were tested.
+\item The policy runs predate the \#12057 knee fix and have not been repeated
+on the current canonical specification.
+\item $\Delta q$ is measured base versus null, not against a ground-truth
+anatomical pose.
+\item The rows without pre/post values came from runs that predate the phase
+split.
+\end{itemize}
+The implementation is in \texttt{full\_body\_ik.py},
+\texttt{pipeline/lane.py} and \texttt{pipeline/constants.py}. The tests are
+\texttt{test\_ik\_restart\_continuity.py} and \texttt{pipeline/test\_lane.py}.
 
 \begin{thebibliography}{9}
 \bibitem{MathWorksPSUnits}

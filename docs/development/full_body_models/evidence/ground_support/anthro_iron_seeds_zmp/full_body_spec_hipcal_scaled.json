@@ -480,11 +480,11 @@
       "name": "femur_r",
       "solids": [
         {
-          "com_m": [0.0, -0.168783, 0.0],
+          "com_m": [0.0, -0.15865601999999998, 0.0],
           "inertia_com_kg_m2": [
-            [0.13907, 0.0, 0.0],
-            [0.0, 0.0364552, 0.0],
-            [0.0, 0.0, 0.146652]
+            [0.122882252, 0.0, 0.0],
+            [0.0, 0.032211814719999995, 0.0],
+            [0.0, 0.0, 0.1295817072]
           ],
           "mass_kg": 9.80040405351952,
           "name": "femur_r",
@@ -585,11 +585,11 @@
       "name": "femur_l",
       "solids": [
         {
-          "com_m": [0.0, -0.16385, 0.0],
+          "com_m": [0.0, -0.154019, 0.0],
           "inertia_com_kg_m2": [
-            [0.13106, 0.0, 0.0],
-            [0.0, 0.0343555, 0.0],
-            [0.0, 0.0, 0.138205]
+            [0.115804616, 0.0, 0.0],
+            [0.0, 0.030356519799999995, 0.0],
+            [0.0, 0.0, 0.12211793799999998]
           ],
           "mass_kg": 9.80040405351952,
           "name": "femur_l",
@@ -1436,15 +1436,15 @@
       "parent": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso",
       "parent_to_base": [
         [
-          0.2977480752612649, 0.8224896917007939, -0.48462025414147025,
-          -0.005010614545413135
+          -0.37559496913740226, 0.9267837442602025, 0.0005572555192803507,
+          -0.005010614545413137
         ],
         [
-          -0.9502761284954551, 0.20684767566143286, -0.23278599331822086,
+          -0.894854326717167, -0.3628113631183027, 0.26000701672801996,
           -0.10510059317219148
         ],
         [
-          -0.09122150672895075, 0.5298346403543222, 0.8431808172573102,
+          0.24117245513167462, 0.09715866491095361, 0.9656065662154962,
           -0.02497596096705229
         ],
         [0.0, 0.0, 0.0, 1.0]
@@ -1486,15 +1486,15 @@
       "parent_to_base": [
         [
           -0.12429404455826688, -0.9922454285544172, 4.5655751879009243e-7,
-          -0.00803206
+          -0.0075501364
         ],
         [
           0.9897616899776521, -0.12398288545581986, 0.07071096921009314,
-          -0.405038
+          -0.38073572
         ],
         [
           -0.07016257934204852, 0.008789404240898925, 0.997496846527928,
-          -0.00273031
+          -0.0025664914
         ],
         [0.0, 0.0, 0.0, 1.0]
       ],
@@ -1610,15 +1610,15 @@
       "parent": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso",
       "parent_to_base": [
         [
-          0.8744365453255578, -0.02244855173410469, 0.48462025414147025,
-          -0.004559604579806982
+          0.7261865690144195, -0.6874974592311978, -0.0005572555192803507,
+          -0.00455960457980698
         ],
         [
-          -0.1536651285740974, -0.9603112566117061, 0.23278599331822086,
+          -0.6639574844939068, -0.701111125312328, -0.26000701672801996,
           0.10533385137723636
         ],
         [
-          0.46016057682010086, -0.27802581345962457, -0.8431808172573102,
+          0.17836346533858805, 0.18918359737019722, -0.9656065662154962,
           -0.08163949804960405
         ],
         [0.0, 0.0, 0.0, 1.0]
@@ -1660,15 +1660,15 @@
       "parent_to_base": [
         [
           -0.12429404455826688, -0.9922454285544172, -4.5655751879009243e-7,
-          -0.00779732
+          -0.0073294808
         ],
         [
           0.9897616899776521, -0.12398288545581986, -0.07071096921009314,
-          -0.393201
+          -0.36960894
         ],
         [
           0.07016257934204852, -0.008789404240898925, 0.997496846527928,
-          0.00265051
+          0.0024914793999999997
         ],
         [0.0, 0.0, 0.0, 1.0]
       ],
@@ -1922,7 +1922,7 @@
       "offset_m": [0.02, -0.15, 0.08]
     }
   },
-  "provenance": "anthropometric full-body candidate v1 at 1.710 m, 78.0 kg (build_anthropometric_spec.py; AN-1 #10099); upper body unqualified; marker offsets are anatomical seeds to be calibrated; left hip axes mirrored to the OpenSim convention (OSV-6 #11737); right knee axis mirrored to the OpenSim flexion-negative convention (#12057) | hip joints relocated to functional centres from the capture (radii 0.4278/0.3952 m, sphere sd 2.1/1.9 mm over 649 frames) with zero twist calibrated (R: -21.94 deg, L: 46.69 deg) | toe contact spheres added on calcanei; stiffness 5e+04 N/m | segments scaled femur_l x1.0000, femur_r x1.0000, tibia_l x1.0000, tibia_r x1.0000 (lengths, COMs, sphere and marker offsets by s; inertias by s^2; masses kept)",
+  "provenance": "anthropometric full-body candidate v1 at 1.710 m, 78.0 kg (build_anthropometric_spec.py; AN-1 #10099); upper body unqualified; marker offsets are anatomical seeds to be calibrated; left hip axes mirrored to the OpenSim convention (OSV-6 #11737); right knee axis mirrored to the OpenSim flexion-negative convention (#12057) | hip joints relocated to functional centres from the capture (radii 0.4278/0.3952 m, sphere sd 2.1/1.9 mm over 649 frames) with zero twist calibrated (R: -21.94 deg, L: 46.69 deg) | toe contact spheres added on calcanei; stiffness 5e+04 N/m | segments scaled femur_l x0.9400, femur_r x0.9400, tibia_l x1.0000, tibia_r x1.0000 (lengths, COMs, sphere and marker offsets by s; inertias by s^2; masses kept)",
   "qualification": "full-body extension of native-derived geometry; dynamics unqualified",
   "schema_version": "full-body-v1",
   "subject": {
