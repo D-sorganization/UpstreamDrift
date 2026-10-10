@@ -1,0 +1,10 @@
+{
+  "scope": "Temporary omission of unchanged tracked archive copies from MAIN checkout only. Git retains all archive content; live saved shot input directories, source code and user-open LaTeX remain present.",
+  "tracked_files": 31,
+  "logical_bytes": 1515743185,
+  "restore_before_final_gates": "git sparse-checkout disable",
+  "reason": "Provide rendering space while retaining source/data provenance. Restore archival checkout before final repository gates; do not delete source datasets until any future preservation is independently verified.",
+  "restored_utc": "2026-10-10T07:38:27.761003+00:00",
+  "status": "temporary_omission_reversed_all_tracked_archives_restored",
+  "note": "Filesystem availability increased to13GB during cleanup, beyond the1.5GB archive omission. Restored MAIN archives immediately; no external cleanup attributed to this task."
+}

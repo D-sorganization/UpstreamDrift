@@ -1,0 +1,38 @@
+{
+  "status": "integration_tests_passed",
+  "checked_utc": "2026-10-10T07:39:06.420525+00:00",
+  "head": "4136ca331bfce1ecd1ea54c5e4438852f4c4f67c",
+  "tests": {
+    "scientific_reporting_layout": 144,
+    "gui": 34
+  },
+  "static": {
+    "ruff": "pass14files",
+    "format": "pass14files",
+    "mypy": "pass8sourcefiles"
+  },
+  "integrated_commits": [
+    "56f676e399",
+    "e71046afbb",
+    "598b0aab0e",
+    "e9771e2e24",
+    "4136ca331b"
+  ],
+  "source_sha256": {
+    "scripts/research/shot_pattern_analysis/build_final_report.py": "13f0b30d8c9b4c75f5e6cbf3b769ebc6f832cf6f737088d85692dcca5d08a180",
+    "scripts/research/shot_pattern_analysis/final_report_inputs.py": "084f580b117bb4a8b3049a7bb497eeef84d4cd70bf269a908ba0bf5e78de1b75",
+    "src/tools/shot_pattern_analysis/academic_plots.py": "0a32b4176cb114d62e96b1cc56adb177a74d093a55f40379c1fe0cf47ff427cb",
+    "src/tools/shot_pattern_analysis/matched_formatting.py": "67971a489527c9bfe43d6948afc6248746a81d5124917032e56238907e1a472f",
+    "src/tools/shot_pattern_analysis/matched_gui.py": "788b28561c0684111750895dfbebac365ce6962df4f77be805ce50a58031f7f2",
+    "src/tools/shot_pattern_analysis/matched_interpretation.py": "4ed78414a6daefa6e5215a376cdea5e36c03274c2190d3c823104fa180f3ce80",
+    "src/tools/shot_pattern_analysis/matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
+    "src/tools/shot_pattern_analysis/matched_supplement_pipeline.py": "f836132f5e850ea58d54c166b405487f8e4508746be466e30122d0ce5c1cdd59",
+    "tests/research/test_shot_pattern_final_report.py": "dbc25ec607aef5129fe88f208f1a42ddbfa0b269adf7928752a50b1624824823",
+    "tests/tools/shot_pattern_analysis/test_final_layout_review_contracts.py": "8d2e59ceac7e83c40da731eba35444649ee4e24011f4b7568567e179e656cf26",
+    "tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py": "cd52f6fe0535c1163e2ed0bf05a8a6846219424cd791f7dae30c2ba20b5c59c9",
+    "tests/tools/shot_pattern_analysis/test_matched_formatting.py": "068966a96e55862b8b38b225c6a89ffe3bb74a5e10780ebf6b5116e17e7f7314",
+    "tests/tools/shot_pattern_analysis/test_matched_interpretation.py": "5cc23826c9976096065a994d4e935a2c6be3047fe19d1221b1695fceaa6dbb14",
+    "tests/tools/shot_pattern_analysis/test_matched_supplement_pipeline.py": "54774eacfe13d46b7783ded552e000694591cbc5f5ebabf1f2c3ebb76a82c51e"
+  },
+  "limitations": "Component and integration qualification; full regenerated output and final report acceptance still pending."
+}
