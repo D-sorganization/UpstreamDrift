@@ -2,7 +2,7 @@
   "club": "iron7",
   "engine": "opensim_contact",
   "integrator": "OpenSim Manager, CPodes, error controlled",
-  "accuracy": 1e-08,
+  "accuracy": 1e-8,
   "wall_time_s": 403.9707705839537,
   "build_time_s": 2.8149260389618576,
   "squeeze_per_hand_n": 1154.5832728051953,
