@@ -324,6 +324,25 @@ def _derive_delivery_noise(cells: Sequence[Mapping[str, Any]]) -> str | None:
     return ", ".join(parts)
 
 
+def _containment_radius_caption(cells: Sequence[Mapping[str, Any]]) -> str:
+    """Disclose the endpoint success geometry separately from course scoring."""
+    radii = [_config_value(cell, "target_radius_m") for cell in cells]
+    if all(radius is None for radius in radii):
+        return "Circular Target Radius: Unspecified"
+    if (
+        any(
+            isinstance(radius, bool)
+            or not isinstance(radius, (int, float))
+            or not math.isfinite(radius)
+            or radius <= 0
+            for radius in radii
+        )
+        or len(set(radii)) != 1
+    ):
+        raise ValueError("selected cells must use one circular target radius")
+    return f"Circular Target Radius: {radii[0]:g} m"
+
+
 def _derive_target_context(cells: Sequence[Mapping[str, Any]]) -> str | None:
     """Identify within-lean nominal targets versus fixed-target control from cell config."""
     has_target_spec = False
@@ -630,6 +649,8 @@ def _draw_metric(
     caption_notes: list[str] = [
         "Unsupported or infeasible conditions are hatched and labeled. Landing metrics are model-conditional;",
     ]
+    if metric == "target_hit_fraction":
+        caption_notes.append(_containment_radius_caption(cells) + ".")
     if metric == "conditional_sg":
         caption_notes.append(
             "strokes gained is a hypothetical scoring comparison conditional on supported endpoints, not player-score prediction."

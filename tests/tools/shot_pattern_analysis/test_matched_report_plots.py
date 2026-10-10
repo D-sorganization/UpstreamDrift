@@ -506,3 +506,29 @@ def test_sg_panel_titles_and_unavailable_reasons_fit_their_cells(
                     assert box.y0 >= lower[1] and box.y1 <= upper[1]
     finally:
         original_close(figure)
+
+
+def test_containment_caption_names_actual_circular_radius(tmp_path) -> None:
+    export, _, _ = _load_api()
+    cells = _realistic_cells()
+    for cell in cells:
+        cell["config"]["target_radius_m"] = 7.5
+    paths = export(
+        cells,
+        tmp_path,
+        selection_label="Saved Data",
+        metrics=("target_hit_fraction",),
+        formats=("svg",),
+    )
+    assert (
+        "Circular Target Radius: 7.5 m" in paths["target_hit_fraction_svg"].read_text()
+    )
+    cells[-1]["config"]["target_radius_m"] = 15.0
+    with pytest.raises(ValueError, match="one circular target radius"):
+        export(
+            cells,
+            tmp_path / "mixed",
+            selection_label="Mixed",
+            metrics=("target_hit_fraction",),
+            formats=("svg",),
+        )
