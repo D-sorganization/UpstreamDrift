@@ -8,7 +8,7 @@ The goal is active and incomplete. MAIN is `/home/dieterolson/.codex/worktrees/s
 
 Original v6 primary and recovered control are complete and graphically reviewed. Primary: 689 outputs / 288 PNGs; control: 547 outputs / 194 PNGs. Every CSV is byte-identical to v4; exactly 18 shaft-SD caption PNGs changed in each set, with all changed cards inspected. Root independently revalidated all primary outputs against its accepted receipt after control completion. Astra accepted the control cards; receipt SHA256 `bab6a49c147606b071a45a09dff2bb3088a598328ea7e9f8cd9f2ea75866a982`. See `validation/original_final_graphics_independent_review_v6/` and `validation/original_control_recovery_v6/completion.json`.
 
-**MAIN/BOUNDS source freezes are released. FINAL_LAYOUT study Python remains frozen until supplemental v4 terminates.** Original builder `c9c0fb194f` and social caption candidates `b9f1ad05b4` / `14f27706e4` are integrated as `aa76fa2eb3`, `9a1aabce5c`, `3f34a6b247`. All74integrationtests pass; scopedRuff/format (sixfiles), Mypy (threesources), and exact scientific/reporting source parity pass. Evidence is recorded in `validation/caption_main_integration_v1/`.
+**MAIN/BOUNDS source freezes are released. FINAL_LAYOUT study Python remains frozen until supplemental v4 terminates.** Original builder `c9c0fb194f` and social caption candidates `b9f1ad05b4` / `14f27706e4` are integrated as `aa76fa2eb3`, `9a1aabce5c`, `3f34a6b247`. All 74 integration tests pass; scoped Ruff/format (six files), Mypy (three sources), and exact scientific/reporting source parity pass. Evidence is recorded in `validation/caption_main_integration_v1/`.
 
 | Job | Exec Session | Wrapper / Initial Child PID | Log / Terminal Receipt |
 | --- | --- | --- | --- |
@@ -57,7 +57,7 @@ Publication packaging: retain reports, numerical summaries, manifests and restor
 
 ## Local Publication Bundle Checkpoint
 
-Primary graphics are packaged as `/tmp/shot-pattern-publication-bundles-v1/primary/final_figures_v1-001.zip` (223,739,795 bytes). Fresh restoration verified all 690 members and 689 figure-manifest outputs. Inventory and receipt: `validation/publication_primary_bundles_v1/`. The control bundle has also passed fresh restoration: all548members and547figureoutputs; see `validation/publication_control_bundles_v1/`. This is local verification only; release upload and remote download remain pending.
+Primary graphics are packaged as `/tmp/shot-pattern-publication-bundles-v1/primary/final_figures_v1-001.zip` (223,739,795 bytes). Fresh restoration verified all 690 members and 689 figure-manifest outputs. Inventory and receipt: `validation/publication_primary_bundles_v1/`. The control bundle has also passed fresh restoration: all 548 members and 547 figure outputs; see `validation/publication_control_bundles_v1/`. This is local verification only; release upload and remote download remain pending.
 
 ## Selected Headline and Editor Checkpoint
 
