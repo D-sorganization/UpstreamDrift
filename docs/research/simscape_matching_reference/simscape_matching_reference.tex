@@ -5609,6 +5609,69 @@ lies 0.34 m (driver) and 0.18 m (7-iron) from the ball, limit 0.15 m). The
 remaining gap is cause 3, which needs the ground yaw-moment model of
 decision 13.
 
+\subsection{Third Pass: Zero-Moment-Point Rates Split at Impact (\#12117)}
+\label{sec:gcv20_zmp_split}
+\paragraph{Regression.} On current main the 7-iron replay fell from
+$-4.1$\,\% to $-11.9$\,\% impact speed. A bisect put the step at \#12049,
+whose anthropometric hip rewrite used a foreign pelvis alignment (\#12109).
+The hip fix (\#12125) restores the IK reference (marker RMS 31.1 to
+26.8 mm; the 18 Hz pre-contact cutoff keeps the release again). But with
+GCV-20 on that spec the 7-iron replay drifted from the backswing on and the
+same-input bundle export diverged to NaN at the impact step.
+
+\paragraph{Mechanism.} The IK solution was bit-identical between the main
+code and GCV-20; the drift entered after IK, in the zero-moment-point (ZMP)
+filter's re-solves (root offset from IK at 1.0 s: $-40$ mm with main's code,
+$-69$ mm with GCV-20 without cutoff or weld projection). The tracked
+reference keeps the ball's velocity step at contact, and the replay
+controller already differentiates on each side of it, but
+\texttt{reference\_zmp} still took \texttt{np.gradient} twice across the
+step. That stencil spans $\pm 2$ samples, so frames $i-1$ to $i+2$ around the
+last pre-contact sample $i$ demanded a ZMP 4 to 29 m outside the feet (full
+GCV-20, third filter pass). The cart-table shift
+$\min\lVert \delta c-(z_c/g)D_2\delta c-\mathrm{gap}\rVert^2+\ldots$ is a
+global solve whose kernel decays over about $\sqrt{z_c/g}\approx0.3$ s, so it
+spread those gaps back over the downswing: centre-of-mass shifts of 37 mm
+(0.5 to 0.9 s) and 71 mm (0.9 to 1.1 s) where the gap is zero, and up to
+162 mm near impact.
+
+\paragraph{Change.} \texttt{reference\_zmp} takes \texttt{split\_time\_s} and
+differentiates with \texttt{impact\_force.reference\_rates}, the controller's
+split. The ball, not the ground, removes the velocity step, so it is not a
+ground acceleration. The pipeline calls it through
+\texttt{pipeline.dynamics.lane\_reference\_zmp}, which passes
+\texttt{lane.impact\_time\_s} (unsplit when the lane has no impact). Unsplit
+callers are unchanged. Test:
+\texttt{test\_reference\_zmp\_split\_keeps\_the\_impact\_velocity\_step\_out\_of\_the\_zmp}
+(a rest-then-constant-velocity root slide: unsplit, the step frames move the
+ZMP by more than 0.1 m; split, every frame's ZMP is the CoM projection within
+$10^{-6}$ m).
+
+\paragraph{Result.} Re-solved with GCV-20 plus \#12125 plus this change
+(\texttt{regenerate\_club\_face\_fixtures}, unchanged flags). The 7-iron
+replay no longer diverges and the bundle exports:
+\begin{center}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+7-iron run & Dynamics RMS (mm) & Root error 0.5/1.0/1.3 s (mm) & Impact vs capture \\
+\midrule
+\#12125, main's code & 59.6 & 13 / 53 / 76 & $-15.9$\,\% \\
+GCV-20 + \#12125 & 264 & 20 / 99 / 190 & export diverged \\
+GCV-20 + \#12125 + split ZMP & 54.5 & 10 / 41 / 47 & $-10.2$\,\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+Clubhead speed by stage of the last run (capture 41.26 m/s at impact): IK
+42.47, smoothed IK reference 42.46, tracked reference after the ZMP filter
+41.63 m/s ($+0.9$\,\%, peak 1.4 ms before impact), replay 37.48 m/s
+($-9.2$\,\%, peak 11.2 ms early), bundle 36.87 m/s. The reference now meets
+the acceptance; the loss is in the computed-torque replay through the
+release. The driver run does not use the ZMP filter and is unchanged
+($-6.1$\,\%, peak 6.1 ms early). Acceptance (3\,\%, 5 ms) is still not met
+for either club, so \#12117 and \#11767 stay open and no tolerance was
+changed. The fixtures are regenerated only after GCV-20 and \#12125 are on
+main.
+
 \section{Shared Club in the Musculoskeletal OpenSim Models (OSV-9)}
 This section records a change to the Rajagopal-based OpenSim models
 (\texttt{src/engines/physics\_engines/opensim}), not to the Simscape model.
