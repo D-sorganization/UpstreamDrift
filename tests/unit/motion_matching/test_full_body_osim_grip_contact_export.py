@@ -53,6 +53,15 @@ def test_config_needs_an_existing_absolute_directory(spec: dict, tmp_path: Path)
         ContactGripConfig(pads, tmp_path / "missing")
 
 
+def test_config_delegates_layout_and_cylinder_origin(exported) -> None:
+    """The LOD delegates return exactly what the nested objects hold."""
+    _, _, cfg = exported
+    assert cfg.layout is cfg.ef.layout
+    cylinder = cfg.pads.cylinder
+    for side in "LR":
+        assert cfg.origin_axial_m(side) == cylinder.origin_axial_m(side)
+
+
 def test_topology_is_the_free_club_without_weld_or_bushing(exported) -> None:
     root, meta, _ = exported
     assert meta["grip_model"] == "contact"
