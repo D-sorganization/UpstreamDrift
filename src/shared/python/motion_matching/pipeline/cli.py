@@ -71,6 +71,7 @@ from src.shared.python.motion_matching.pipeline.dynamics import (
     DynamicsReportInputs,
     ShootingFitConfig,
     build_dynamics_report,
+    lane_reference_zmp,
     replay,
     score_reference,
     shooting_fit,
@@ -112,7 +113,11 @@ from src.shared.python.motion_matching.pipeline.reference import (
     full_capture_ik,
     marker_errors,
     render_playback,
+    smooth_lane,
     smooth_reference,
+)
+from src.shared.python.motion_matching.pipeline.weld_projection import (
+    weld_consistent_track,
 )
 from src.shared.python.motion_matching.pipeline.plant import (
     get_plant,
@@ -388,7 +393,9 @@ def _attach_face_report(
     q_pair: tuple[np.ndarray, np.ndarray],
     weight: float,
 ) -> None:
-    """Add the face residual's receipt block when the residual was active."""
+    """Add the face residual's receipt block when the residual was active,
+    and the impact split (GCV-20) always."""
+    ik_report["impact_split"] = lane.impact_split_report()
     if lane.face_targets is not None:
         ik_report["face_orientation"] = _face_orientation_report(
             lane, cal_res, *q_pair, weight
@@ -662,7 +669,7 @@ def _solve_pink_ik(
         )
         for r in pink_result.frame_residuals
     ]
-    q_smooth = smooth_reference(q_ik, lane.rate_hz, REFERENCE_CUTOFF_HZ)
+    q_smooth = smooth_lane(q_ik, lane, REFERENCE_CUTOFF_HZ)
     audit_result = pink_service.audit_trajectory(q_smooth, solve_req, ik_opts)
     all_converged = bool(pink_result.passed)
     rate_limits_respected = bool(
@@ -754,7 +761,7 @@ def _solve_trajectory_ik(
         return _solve_pink_ik(ctx, lane, kin, scaled_spec, labels, initial_q)
     q_ik, fits = full_capture_ik(lane, kin, initial_q)
     errors = marker_errors(kin, q_ik, lane.points)
-    q_smooth = smooth_reference(q_ik, lane.rate_hz, REFERENCE_CUTOFF_HZ)
+    q_smooth = smooth_lane(q_ik, lane, REFERENCE_CUTOFF_HZ)
     q_ref, ref_fits = consistency_resolve(
         lane, kin, q_smooth, prior_weight=CONSISTENCY_PRIOR, iterations=30
     )
@@ -875,21 +882,6 @@ def _attach_turn_block(
     )
 
 
-def _attach_descriptive_blocks(
-    receipt: dict[str, Any],
-    ctx: PipelineContext,
-    lane: Lane,
-    kin: Any,
-    q_ref: np.ndarray,
-    cal_res: _CalibrateAndScaleResult,
-    ik_report: dict[str, Any],
-) -> None:
-    """Record the engine, head-gaze and turn blocks on ``receipt``."""
-    receipt["engine"] = ctx.engine
-    receipt["head_gaze"] = head_gaze_receipt(lane, kin, q_ref)
-    _attach_turn_block(receipt, ctx, lane, kin, q_ref, cal_res, ik_report)
-
-
 def _apply_trajectory_optimiser(
     args: argparse.Namespace,
     out_dir: Path,
@@ -951,6 +943,60 @@ def _feasibility_filters(
     return q_track, zmp, zmp_report, centroidal_report
 
 
+def _maybe_shooting_fit(
+    args: argparse.Namespace,
+    context: tuple[Lane, Any, Any, logging.Logger],
+    q_track: np.ndarray,
+    q_ref: np.ndarray,
+    zmp: dict[str, Any],
+    tracking: str,
+) -> tuple[np.ndarray, dict[str, Any], dict[str, Any] | None]:
+    """Run the optional multiple-shooting refit stage."""
+    lane, kin, sim, log = context
+    shooting_report: dict[str, Any] | None = None
+    if args.shooting_fit > 0:
+        q_track, zmp, shooting_report = shooting_fit(
+            lane,
+            kin,
+            sim,
+            q_track,
+            q_ref,
+            log,
+            ShootingFitConfig(
+                iterations=args.shooting_fit,
+                gain=args.shooting_gain,
+                tracking_backend=tracking,
+            ),
+        )
+    return q_track, zmp, shooting_report
+
+
+def _finalize_receipt(
+    ctx: PipelineContext,
+    receipt: dict[str, Any],
+    context: tuple[Lane, Any, Any, logging.Logger],
+    *,
+    ik_report: dict[str, Any],
+    cal_res: _CalibrateAndScaleResult,
+    weld_report: dict[str, Any],
+    q_ref: np.ndarray,
+) -> None:
+    """Attach engine/gaze/weld metadata, run the optimiser stage and persist
+    the receipt."""
+    lane, kin, sim, log = context
+    receipt["engine"] = ctx.engine
+    receipt["head_gaze"] = head_gaze_receipt(lane, kin, q_ref)
+    receipt["tracking_weld_projection"] = weld_report
+    _attach_turn_block(receipt, ctx, lane, kin, q_ref, cal_res, ik_report)
+    _apply_trajectory_optimiser(
+        ctx.args, ctx.out_dir, receipt, lane=lane, kin=kin, sim=sim
+    )
+    _write_receipt(ctx.out_dir, receipt)
+    log_pipeline_summary(
+        log, receipt, ik_report, cal_res.calibration, cal_res.calibration2
+    )
+
+
 def _simulate_and_receipt(
     ctx: PipelineContext,
     lane: Lane,
@@ -968,26 +1014,15 @@ def _simulate_and_receipt(
     out_dir = ctx.out_dir
     log = ctx.log
     tracking = getattr(args, "tracking", "kkt")
-    q_track = smooth_reference(q_ref, lane.rate_hz, TRACKING_CUTOFF_HZ)
-    zmp = fs.reference_zmp(sim, lane.times, q_track, lane.ground)
+    q_track = smooth_lane(q_ref, lane, TRACKING_CUTOFF_HZ)
+    zmp = lane_reference_zmp(sim, lane, q_track)
     q_track, zmp, zmp_filter_report, centroidal_report = _feasibility_filters(
         args, (lane, kin, sim, log), q_track, zmp
     )
-    shooting_report: dict[str, Any] | None = None
-    if args.shooting_fit > 0:
-        q_track, zmp, shooting_report = shooting_fit(
-            lane,
-            kin,
-            sim,
-            q_track,
-            q_ref,
-            log,
-            ShootingFitConfig(
-                iterations=args.shooting_fit,
-                gain=args.shooting_gain,
-                tracking_backend=tracking,
-            ),
-        )
+    q_track, zmp, shooting_report = _maybe_shooting_fit(
+        args, (lane, kin, sim, log), q_track, q_ref, zmp, tracking
+    )
+    q_track, weld_report = weld_consistent_track(kin, cal_res.scaled_spec, q_track)
     record, sim_q = replay(sim, lane, q_track, tracking_backend=tracking)
     finish = finish_feasibility_report(
         sim,
@@ -1043,13 +1078,36 @@ def _simulate_and_receipt(
             elapsed_s=time.perf_counter() - ctx.t_start,
         )
     )
-    _attach_descriptive_blocks(receipt, ctx, lane, kin, q_ref, cal_res, ik_report)
-    _apply_trajectory_optimiser(args, out_dir, receipt, lane=lane, kin=kin, sim=sim)
-    _write_receipt(out_dir, receipt)
-    log_pipeline_summary(
-        log, receipt, ik_report, cal_res.calibration, cal_res.calibration2
+    _finalize_receipt(
+        ctx,
+        receipt,
+        (lane, kin, sim, log),
+        ik_report=ik_report,
+        cal_res=cal_res,
+        weld_report=weld_report,
+        q_ref=q_ref,
     )
     return receipt
+
+
+def _save_ik_trajectory(
+    ctx: PipelineContext,
+    lane: Lane,
+    q_ik: np.ndarray,
+    q_ref: np.ndarray,
+    errors: np.ndarray,
+    ref_errors: np.ndarray,
+) -> None:
+    """Persist the IK and reference trajectories the MJX exporter reads back."""
+    np.savez(
+        ctx.out_dir / "ik_trajectory.npz",
+        time_s=lane.times,
+        q=q_ik,
+        q_ref=q_ref,
+        errors_m=errors,
+        ref_errors_m=ref_errors,
+        valid=lane.valid,
+    )
 
 
 @dataclass(frozen=True)
@@ -1130,7 +1188,7 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
         run.labels,
         run.cal_res,
     )
-    lane.set_face_targets(cal_res.attachments, cal_res.scaled_spec, args.face_weight)
+    lane.set_club_targets(cal_res.attachments, cal_res.scaled_spec, args.face_weight)
     lane.set_restart_policy(
         getattr(args, "ik_restart_policy", DEFAULT_IK_RESTART_POLICY)
     )
@@ -1186,19 +1244,12 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
             constrained_ik=constrained_ik_dict,
         )
     )
+    lane.select_release_cutoff(cal_res.kin, cal_res.scaled_spec, q_ref)
     _attach_face_report(ik_report, lane, cal_res, (q_ik, q_ref), args.face_weight)
     ik_report["restart_policy"] = lane.restart_report()
     if turn_split_active(lane):
         ik_report["turn_split"] = turn_split_report(lane)
-    np.savez(
-        ctx.out_dir / "ik_trajectory.npz",
-        time_s=lane.times,
-        q=q_ik,
-        q_ref=q_ref,
-        errors_m=errors,
-        ref_errors_m=ref_errors,
-        valid=lane.valid,
-    )
+    _save_ik_trajectory(ctx, lane, q_ik, q_ref, errors, ref_errors)
 
     return _simulate_and_receipt(
         ctx,

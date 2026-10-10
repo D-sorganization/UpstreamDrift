@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+from typing import Any
+
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 import json
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import numpy as np
 from scipy.signal import butter, filtfilt
@@ -55,16 +57,41 @@ def validate_ik_backend(name: str) -> str:
     return key
 
 
-def smooth_reference(q: np.ndarray, rate_hz: float, cutoff_hz: float) -> np.ndarray:
+def smooth_reference(
+    q: np.ndarray,
+    rate_hz: float,
+    cutoff_hz: float,
+    *,
+    impact_index: int | None = None,
+    pre_contact_cutoff_hz: float | None = None,
+) -> np.ndarray:
     """Zero-phase Butterworth low-pass of every coordinate (edge-padded).
+
+    The ball collision is a velocity step: it removes about a quarter of the
+    clubhead speed within one capture sample. Filtered across it, the step is
+    spread over the whole kernel and the head starts braking some 25 ms
+    before the ball (GCV-20, #11767). With ``impact_index`` (the last
+    pre-contact sample) the pre-contact samples ``[0, impact_index]`` and the
+    post-contact samples are filtered separately, each with the usual odd
+    edge padding, so the step stays at impact.
 
     Args:
         q: (N, nq) array of coordinate trajectories.
         rate_hz: Sampling rate in Hz (> 0).
         cutoff_hz: Filter cutoff frequency in Hz (0 < cutoff_hz < 0.5 * rate_hz).
+        impact_index: Last pre-contact sample, ``1 <= impact_index < N - 2``,
+            or ``None`` to filter the whole trajectory in one pass.
+        pre_contact_cutoff_hz: Cutoff of the pre-contact samples only
+            (needs ``impact_index``; default ``cutoff_hz``). The release
+            selection of :mod:`.release_cutoff` raises it when the base
+            cutoff removes the late release (GCV-20).
 
     Returns:
         (N, nq) array of smoothed coordinate trajectories.
+
+    Raises:
+        ValueError: bad rate, cutoff, shape or impact index range.
+        TypeError: a non-integer ``impact_index``.
     """
     if rate_hz <= 0:
         raise ValueError(f"rate_hz must be positive, got {rate_hz}")
@@ -77,12 +104,66 @@ def smooth_reference(q: np.ndarray, rate_hz: float, cutoff_hz: float) -> np.ndar
         )
     if q.ndim != 2:
         raise ValueError(f"q must be a 2D array, got shape {q.shape}")
+    pre_cutoff = _pre_contact_cutoff(pre_contact_cutoff_hz, cutoff_hz, impact_index)
+    if not 0.0 < pre_cutoff < nyquist:
+        raise ValueError(
+            f"pre_contact_cutoff_hz must lie in (0, {nyquist}), got {pre_cutoff}"
+        )
+    if impact_index is not None:
+        split = _validate_impact_index(impact_index, q.shape[0])
+        return np.vstack(
+            [
+                _lowpass(q[: split + 1], pre_cutoff / nyquist),
+                _lowpass(q[split + 1 :], cutoff_hz / nyquist),
+            ]
+        )
     if q.shape[0] < 2:
         return q.copy()
+    return _lowpass(q, cutoff_hz / nyquist)
 
-    b, a = butter(4, cutoff_hz / nyquist)
+
+def _pre_contact_cutoff(
+    pre_contact_cutoff_hz: float | None, cutoff_hz: float, impact_index: object
+) -> float:
+    """The pre-contact cutoff; only meaningful with an impact split."""
+    if pre_contact_cutoff_hz is None:
+        return float(cutoff_hz)
+    if impact_index is None:
+        raise ValueError("pre_contact_cutoff_hz needs an impact_index split")
+    return float(pre_contact_cutoff_hz)
+
+
+def _lowpass(q: np.ndarray, normalised_cutoff: float) -> np.ndarray:
+    b, a = butter(4, normalised_cutoff)
     padlen = min(60, q.shape[0] - 1)
     return filtfilt(b, a, q, axis=0, padlen=padlen)
+
+
+def _validate_impact_index(impact_index: object, frames: int) -> int:
+    """Integer last pre-contact sample leaving two samples on each side."""
+    if isinstance(impact_index, bool) or not isinstance(
+        impact_index, (int, np.integer)
+    ):
+        raise TypeError(f"impact_index must be an integer, got {impact_index!r}")
+    split = int(impact_index)
+    if not 1 <= split < frames - 2:
+        raise ValueError(
+            f"impact_index must lie in [1, {frames - 2}) to leave samples on "
+            f"both sides of impact, got {split}"
+        )
+    return split
+
+
+def smooth_lane(q: np.ndarray, lane: Any, cutoff_hz: float) -> np.ndarray:
+    """:func:`smooth_reference` at the lane's rate, split at its capture
+    impact (``lane.impact_index``; unsplit when the lane has none), with the
+    lane's release-preserving pre-contact cutoff when one was selected
+    (``lane.pre_contact_cutoff_hz``, GCV-20)."""
+    split = getattr(lane, "impact_index", None)
+    pre = getattr(lane, "pre_contact_cutoff_hz", None) if split is not None else None
+    return smooth_reference(
+        q, lane.rate_hz, cutoff_hz, impact_index=split, pre_contact_cutoff_hz=pre
+    )
 
 
 def smooth_reference_bayesian(

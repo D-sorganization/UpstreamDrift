@@ -144,6 +144,25 @@ ADDRESS_SEEDS_DEG: list[dict[str, float]] = [
 STANCE_TOLERANCE_M: float = 0.02  # marker within this height of address: on ground
 REFERENCE_CUTOFF_HZ: float = 12.0  # zero-phase low-pass on IK reference
 TRACKING_CUTOFF_HZ: float = 12.0  # zero-phase low-pass on re-solved reference
+#: Pre-contact tracking cutoffs tried, lowest first, by the release-preserving
+#: selection (GCV-20, #11767; DESIGN_DECISIONS section 11). The first is the
+#: base cutoff; post-contact samples always keep TRACKING_CUTOFF_HZ.
+RELEASE_CUTOFF_CANDIDATES_HZ: tuple[float, ...] = (12.0, 15.0, 18.0, 20.0, 25.0, 30.0)
+#: Impact-speed agreement with the unfiltered reference that keeps a release.
+RELEASE_SPEED_TOL: float = 0.01
+# Trail-arm coordinates that re-close the dual-grip weld on the tracked
+# reference (GCV-20, #11767); the lead arm and body keep the filtered pose.
+TRAIL_ARM_WELD_COORDINATES: tuple[str, ...] = (
+    "RScapInputX",
+    "RScapInputY",
+    "RSInputX",
+    "RSInputY",
+    "RSInputZ",
+    "REInput",
+    "RFInput",
+    "RWInputX",
+    "RWInputY",
+)
 
 ZMP_MARGIN_M: float = 0.02
 ZMP_FILTER_ITERATIONS: int = 3

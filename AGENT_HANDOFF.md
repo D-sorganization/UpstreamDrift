@@ -50,6 +50,18 @@
 - Branch `claude/osv-6e-myosuite-hip-retarget`. `myosuite/python/hip_retarget.py` maps each femur's orientation relative to the pelvis from the fitted (hip-calibrated) spec into the `myolegs` Z-X-Y hip hinges; `retarget_frame/retarget_trajectory(..., hip_spec=spec)` and `ReplayConfig.hip_spec` use it. The map's `knee_angle_l` sign is now -1.
 - MyoSuite address toe-out error, lead/trail: driver +0.12/-0.37 deg, 7-iron -0.04/-1.46 deg (was -45/+33, -40/+36). Evidence: `docs/development/full_body_models/evidence/foot_progression/osv6_myosuite/`. Open: #12057, where the spec's right knee flexes positive but its range caps it at +10 deg (canonical IK sits on the bound).
 
+# Active: Reference ZMP Split at the Ball Impact - #12117 (GCV-20 #11767)
+
+- Branch `claude/zmp-impact-split-12117`, stacked on #11960 (GCV-20). `reference_zmp(..., split_time_s=)` uses `impact_force.reference_rates`; the pipeline calls `pipeline.dynamics.lane_reference_zmp` (passes `lane.impact_time_s`). Without it the ZMP of frames impact-1..+2 was 4-29 m outside the feet and the cart-table shift dragged the 7-iron reference off its IK over the downswing.
+- 7-iron on GCV-20 + #12125: dynamics RMS 264 -> 54.5 mm, export no longer diverges, impact speed -10.2 % (reference +0.9 %, replay -9.2 %). Driver unchanged (-6.1 %; no ZMP filter). Acceptance still open; no tolerance changed.
+- Next: computed-torque replay speed loss through the release; regenerate club-face fixtures after #11960 and #12125 merge. Reference: calc reference, GCV-20 "Third Pass".
+
+# Active: Clubhead Speed Timing — GCV-20 #11767, Epic #11706
+
+- Branch `claude/gcv-20-speed-timing`. Ball contact impulse in every dynamics replay (`impact_parameters` collision), reference low-pass split at impact, release-preserving pre-contact cutoff (`pipeline/release_cutoff.py`, 25 Hz for both captures) and grip-weld projection of the tracked reference (`pipeline/weld_projection.py`).
+- Full re-solve at `5f8ee41fe5`: peak timing passes (driver -3.7 ms, 7-iron -4.2 ms; limit 5 ms); impact speed does not (driver -7.4 %, 7-iron -4.1 %; limit 3 %). `test_clubhead_speed_peaks_with_the_capture_and_matches_it_at_impact` is a strict xfail with those numbers; tolerances unchanged; fixtures not regenerated.
+- Next: the remaining gap is the unactuated root's ground yaw slip (DESIGN_DECISIONS decision 13). It needs a foot yaw-moment / contact model change, tracked outside GCV-20. Details: calculation reference, GCV-20 "Second Pass" and "Full Re-Solve".
+
 # Active: Right Knee Flexes Negative Like the Left - #12057
 
 - Branch `claude/knee-r-axis-12057`. `spec_builder.leg_extension` mirrors any knee whose hinge points to -z (`AXIS_MIRROR`), and `scripts/mirror_spec_right_knee.py` fixed the committed anthro specs. Spec-to-Rajagopal knee sign is -1 on both sides, and MyoSuite `knee_angle_r` is -1. The generated osims and the inventory hashes are refreshed.

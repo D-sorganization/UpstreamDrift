@@ -5411,6 +5411,382 @@ MyoSuite & unavailable & unavailable \\
  claimed; its welds are exact at the calibrated address pose only.
 \end{itemize}
 
+\section{Clubhead Speed Timing and the Ball Collision Impulse (GCV-20)}
+\label{sec:gcv20_speed_timing}
+This section records a change to the shared Python ground-support pipeline
+and the same-input replay, not to the Simscape model. Issue \#11767, epic
+\#11706. The shared ball-collision model is also the one GCV-13 (\#11719)
+reuses.
+
+\subsection{Problem}
+After OSV-10 the fitted swings' clubhead (face-centre) speed peaked 23 ms
+(driver) and 26 ms (7-iron) before the ball passage, while the capture
+peaked 2.2 and 1.2 ms before it. The model's pre-contact speed at impact was
+44.1 and 34.5 m/s, against 51.75 and 41.05 m/s in the capture (Capture-A
+driver, Capture-B 7-iron). All values here use one measure
+(\texttt{club\_face.clubhead\_speed\_timing}): impact is the sub-sample ball
+passage of the face centre (OSV-10), each swing on its own clock; speeds are
+segment chord speeds at segment midpoints; the impact speed is the last
+segment that ends at or before the passage; the peak is searched from 60 ms
+before to 20 ms after impact, so an IK glitch far from the ball (one driver
+frame 206 ms after impact) cannot be picked; the post-impact speed is the
+chord speed from the first sample after the 0.45 ms contact to the last sample
+within 10 ms of impact.
+
+\subsection{Diagnosis and Rejected Hypotheses}
+\begin{itemize}
+\item \emph{Time offset between model and capture.} Rejected. Both are on the
+capture clock; the 1 kHz rollout lags the reference by about 3 ms, which the
+own-clock comparison removes.
+\item \emph{Different point.} Rejected. Model and capture both use the rendered
+face centre (\texttt{face\_centre\_in\_frame}); the raw head markers peak at
+the same time as the face centre.
+\item \emph{Club length or grip mismatch.} Rejected. The unfiltered IK
+reference matches the capture impact speed to 2.2 \% (driver) and 0.4 \%
+(7-iron) and peaks at the capture's time.
+\item \emph{IK or resampling.} Rejected for the same reason.
+\item \emph{Filtering.} Confirmed as the cause. The 12 Hz fourth-order
+zero-phase Butterworth low-pass (design decision 11) is applied twice (IK
+reference and tracked reference). The ball removes about 14 m/s of head speed
+in under a millisecond; filtering across that step spreads the deceleration
+over roughly 25 ms before impact (12 Hz across impact: driver $-25.9$ ms and
+43.0 m/s; 7-iron $-28.4$ ms and 32.5 m/s on the IK reference).
+\item \emph{Dynamics.} The forward replay had no ball. Nothing removed the
+head's momentum at impact, so a reference that showed the drop had to be
+produced by joint torques: splitting the filter alone raised the peak joint
+torque from 779 to 2090 N\,m at impact (spine).
+\end{itemize}
+
+\subsection{Ball Collision Impulse}
+\texttt{impact\_parameters.ball\_impact.collision\_impulse} treats the ball as
+a free sphere at rest struck by a frictionless face. With unit face normal
+$\hat n$, face-centre velocity $v$ (approach speed $v_n=v\cdot\hat n>0$), the
+clubhead's effective mass $m$ along $\hat n$ at the face centre, ball mass
+$m_b$ and coefficient of restitution $e$,
+\[
+J=\frac{(1+e)\,m\,m_b\,v_n}{m+m_b},\qquad
+\Delta v_{n,\mathrm{club}}=-\frac{J}{m},\qquad v_\mathrm{ball}=\frac{J}{m_b},
+\]
+with impulse $J\hat n$ on the ball and $-J\hat n$ on the club. Normal
+momentum is conserved and the separation speed is $e\,v_n$. Constants:
+$m_b=45.93$ g (Rules of Golf equipment limit, the regulation maximum),
+$e=0.830$ (R\&A/USGA driver COR limit; used as a constant because no
+speed-dependent source is in the repository; it is a ceiling, irons are
+lower, so the iron rebound is an upper bound), contact duration 0.45 ms
+(Cochran and Stobbs, about half a millisecond). Contracts reject non-positive
+masses, $e\notin(0,1]$, non-positive duration, a contact window outside the
+swing, a zero normal and a face not moving into the ball.
+
+The effective mass comes from the articulated plant, not from the head mass.
+With point Jacobian $J_p(q)$ of the face centre,
+$m^{-1}=\hat n^{\top}J_p\,\bigl(a(\tau+J_p^{\top}\hat n)-a(\tau)\bigr)$, one
+extra constrained acceleration solve (exact because the acceleration is
+affine in applied force and includes the grip weld and ground contact).
+MuJoCo, Drake and Pinocchio give 0.175 kg for the driver at impact; the
+predicted normal speed change with $v_n=38.4$ m/s is about 14.6 m/s, against
+a capture drop of 14.5 m/s.
+
+\subsection{Shared Force Hook}
+\texttt{motion\_matching.impact\_force.ImpactForce} is the one hook every
+replay uses. The plan is the face centre and face normal of the spec's
+\texttt{Clubhead} frame and the capture ball-passage time (on the lane clock,
+\texttt{club\_face\_target.capture\_impact}). At the window start it is
+latched from the simulated state: $\hat n=R\,a$, $v=J_p\dot q$, $m$ from the
+probe above. Over $[t_i,t_i+0.45\ \mathrm{ms}]$ the constant world force
+$F=-J\hat n/0.45\ \mathrm{ms}$ acts at the face centre as the generalized
+force $J_p(q)^{\top}F$. Integrator steps containing a window edge are split
+there so the delivered impulse is exact. The controller never sees the
+force: its torques are computed from the reference alone. Users:
+\texttt{FullBodySimulator.run} (pipeline replay, ZMP and shooting re-solves),
+the same-input \texttt{integrate}, \texttt{open\_loop}, \texttt{closed\_loop}
+and \texttt{segmented\_replay}, and \texttt{scripts/same\_input\_bundle.py}.
+The bundle records the latched force (\texttt{provenance.ball\_impact}), so an
+open-loop replay in any engine applies the identical force; a closed loop in
+another engine re-latches from its own state. Pipeline receipts record it as
+\texttt{dynamics.ball\_impact}.
+
+\subsection{Filter and Controller Split at Impact}
+\texttt{smooth\_reference} (12 Hz unchanged) filters the samples up to the
+last pre-contact capture frame and those after it separately, each with odd
+edge padding (\texttt{pipeline.reference.smooth\_lane}; receipts record
+\texttt{ik.impact\_split}). The computed-torque controller's velocity and
+acceleration tables are differentiated on each side of the impact time
+separately and sampled on the side the current time is on
+(\texttt{impact\_force.reference\_rates}); joint positions are still
+interpolated linearly across it. Without this the acceleration feedforward
+differentiates across the velocity step and produces the 2090 N\,m spike.
+
+\subsection{Re-Solved Result: Acceptance Not Met, Fixtures Not Adopted}
+Both captures were re-solved through the shared pipeline on this branch
+(\texttt{regenerate\_club\_face\_fixtures}, face weight 3.0, the original
+fixture flags) and measured with \texttt{clubhead\_speed\_timing}. Acceptance
+is a peak within 5 ms of the capture's, relative to impact, and an impact
+speed within 3\,\%.
+\begin{center}
+\begin{tabular}{@{}llrrr@{}}
+\toprule
+Club & Series & Peak $-$ impact (ms) & Impact (m/s) & Drop (m/s) \\
+\midrule
+Driver & Capture & $-2.2$ & 51.75 & 14.50 \\
+Driver & IK reference (unfiltered) & $-2.0$ & 50.46 & 16.66 \\
+Driver & Tracking reference, before (12 Hz across) & $-25.9$ & 43.03 & 0.75 \\
+Driver & Tracking reference, after (12 Hz split) & $-13.1$ & 46.40 & 3.37 \\
+Driver & 1 kHz dynamics, before (no ball) & $-22.9$ & 44.09 & 1.35 \\
+Driver & 1 kHz dynamics, after (ball impulse) & $-20.5$ & 42.55 & 10.48 \\
+7-iron & Capture & $-1.2$ & 41.05 & 12.45 \\
+7-iron & IK reference (unfiltered) & $-1.7$ & 41.26 & 12.49 \\
+7-iron & Tracking reference, before (12 Hz across) & $-28.4$ & 32.47 & 0.30 \\
+7-iron & Tracking reference, after (12 Hz split) & $-1.4$ & 41.11 & 10.54 \\
+7-iron & 1 kHz dynamics, before (no ball) & $-25.9$ & 34.55 & 0.76 \\
+7-iron & 1 kHz dynamics, after (ball impulse) & $-11.1$ & 37.27 & 6.88 \\
+\bottomrule
+\end{tabular}
+\end{center}
+Neither club meets acceptance in the dynamics: the driver misses by 18.3 ms
+and $-17.8$\,\%, the 7-iron by 9.9 ms and $-9.2$\,\%. Two causes remain.
+First, for the driver the split 12 Hz filter still removes the late
+wrist-release acceleration: the tracking reference peaks 13.1 ms early even
+though nothing is filtered across the ball. The 7-iron reference passes
+($-0.2$ ms, $+0.1$\,\%). Second, the computed-torque replay of either club
+reaches its peak speed 10--20 ms early and then decelerates before the ball;
+the driver replay peaks at 49.2 m/s about 20 ms before impact. The ball
+impulse itself behaves as predicted: effective mass 0.175 kg (driver) and
+0.348 kg (7-iron), normal speed change 13.3 and 5.5 m/s, contact fired at
+each replay's own face passage (closest approach 60 and 44 mm from the
+address face centre, inside the 150 mm gate).
+
+The regenerated fixtures were \emph{not} committed. They regress the OSV-10
+face-angle gate: the 7-iron face at impact is 14.9 deg against the capture's
+8.4 deg (limit 5 deg; the committed OSV-10 fixture is 7.6 deg), and the
+driver 13.6 against 8.8 deg. The 7-iron replay reaches the ball 2.1 ms later
+than the capture while the face is closing fast. No tolerance was changed.
+Next steps, each needing its own re-solve: a cutoff for the pre-contact
+segment chosen from the release bandwidth instead of the fixed 12 Hz, and a
+diagnosis of the early peak in the computed-torque replay (feedforward
+timing and feedback gains near impact). Evidence:
+\texttt{\textasciitilde/Videos/Parity Audit/forces\_and\_impact/clubhead\_speed\_timing/}
+on the implementing host (diagnosis plot and summary JSON).
+
+\subsection{Second Pass: Pre-Contact Release Cutoff and Weld-Consistent Tracking}
+\label{sec:gcv20_second_pass}
+The first pass left the driver replay 18 ms early and 18 \% slow and the
+7-iron replay 10 ms early and 9 \% slow. A second pass separated four causes
+by re-exporting the 1 kHz same-input bundle
+(\texttt{scripts.same\_input\_bundle export}) from the same pipeline runs with
+one change at a time. Re-exporting the unchanged runs reproduces the
+committed numbers (driver $-20.0$ ms and $-20.1$\,\%, 7-iron $-11.6$ ms and
+$-9.8$\,\% against the capture), so each row below differs from that
+baseline in the named change only. Columns are the model peak relative to
+the capture's peak (each relative to its own impact), the impact speed
+relative to the capture's, and the model-to-capture face-angle gap at impact
+(OSV-10 limit 5 deg).
+
+\paragraph{Cause 1: The 12 Hz Pre-Contact Cutoff.} With the filter split at
+impact, the pre-contact half still removes the late release. On the driver
+reference (whole pre-contact segments, against the unfiltered reference's
+$-1.4$ ms and 50.46 m/s before the split):
+\begin{center}
+\begin{tabular}{@{}rrr@{}}
+\toprule
+Pre-contact cutoff (Hz) & Peak $-$ impact (ms) & Impact (m/s) \\
+\midrule
+12 & $-13.1$ & 46.40 \\
+15 & $-7.6$ & 47.99 \\
+18 & $-4.8$ & 49.20 \\
+20 & $-4.8$ & 49.77 \\
+25 & $-2.0$ & 50.62 \\
+30 & $-2.0$ & 50.91 \\
+\bottomrule
+\end{tabular}
+\end{center}
+The pre-contact cutoff is therefore chosen per reference
+(\texttt{pipeline.release\_cutoff.release\_preserving\_cutoff}): the lowest of
+12, 15, 18, 20, 25 and 30 Hz whose filtered reference keeps the unfiltered
+reference's speed-peak time (relative to the split) within one sample and its
+last pre-contact segment speed within 1\,\%. Only the reference is used,
+never the capture, so this is a convergence criterion on the filter and not a
+fit to the acceptance target. The post-contact half keeps 12 Hz, so the
+impact-jerk reason for decision 11 is unaffected. When no candidate keeps the
+release the widest is used and the receipt says \texttt{preserved: false}.
+Both captures select 25 Hz (7-iron: 12 Hz gives $-9.7$ ms and 36.54 m/s,
+25 Hz gives $-1.4$ ms and 39.32 m/s, unfiltered $-4.2$ ms and 39.20 m/s).
+
+A failed first version measured the release at the ball passage. The segment
+that straddles the split joins the two separately filtered halves; on the
+7-iron it read 41.1 m/s where the last whole pre-contact segment was
+36.4 m/s, so the 12 Hz reference looked as though it passed. The criterion
+now uses whole pre-contact segments only.
+
+\paragraph{Cause 2: A Weld-Inconsistent Tracked Reference.} The low-pass
+acts on each coordinate separately, so the tracked reference opens the
+dual-grip weld: up to 16.1 mm (driver, 12 Hz), 10.7 mm (driver, 25 Hz) and
+8.1 mm (7-iron, 25 Hz), against 4.5 mm for the unfiltered IK reference. The
+KKT replay holds the weld exactly and spends trail-arm effort closing the
+gap through the release. Each tracked sample is now projected onto the weld
+by Gauss-Newton steps (minimum-norm, finite-difference Jacobian) over the
+nine trail-arm coordinates (right scapula, shoulder, elbow, forearm, wrist;
+\texttt{pipeline.weld\_projection.weld\_consistent\_track}), to below
+1~$\mu$m. The lead arm and body keep their filtered values; the receipt
+records the residual before and after.
+
+\paragraph{Cause 3: Ground Yaw Slip of the Unactuated Root.} Through the
+downswing the feet and pelvis turn about the vertical by 8--11 deg more than
+the reference (trail foot slides 35--46 mm); the root yaw error at impact is
+about $-0.19$ rad. This is the limitation recorded in decision 13 (the
+pelvis drift is governed by the ground yaw-moment capacity). As a diagnostic
+only, the root was made actuated; that is not a physical model and was not
+adopted.
+
+\paragraph{Cause 4: Residual Tracking Loss.} Even with an actuated root the
+replay is 4--5\,\% slow at impact.
+
+\begin{center}
+\begin{tabular}{@{}llrrr@{}}
+\toprule
+Club & Tracked reference & Peak vs capture (ms) & Impact vs capture & Face gap (deg) \\
+\midrule
+Driver & 12 Hz (baseline) & $-20.0$ & $-20.1$\,\% & -- \\
+Driver & 12 Hz + weld & $-13.6$ & $-14.6$\,\% & -- \\
+Driver & 25 Hz & $-10.2$ & $-12.5$\,\% & 1.8 \\
+Driver & 25 Hz + weld & $-4.1$ & $-8.0$\,\% & 1.7 \\
+Driver & 25 Hz + weld, actuated root (diagnostic) & $-1.4$ & $-4.9$\,\% & 0.75 \\
+7-iron & 12 Hz (baseline) & $-11.6$ & $-9.8$\,\% & -- \\
+7-iron & 12 Hz + weld & $-13.5$ & $-10.5$\,\% & 7.98 \\
+7-iron & 25 Hz & $-4.8$ & $-6.1$\,\% & 0.99 \\
+7-iron & 25 Hz + weld & $-3.7$ & $-5.4$\,\% & 1.36 \\
+7-iron & 25 Hz + weld, actuated root (diagnostic) & $-0.1$ & $-4.0$\,\% & 0.66 \\
+\bottomrule
+\end{tabular}
+\end{center}
+The 7-iron rows reuse the run's tracked reference for 12 Hz (which includes
+the zero-moment-point filter of that run) and re-filter the IK reference for
+25 Hz without it. The 12 Hz + weld 7-iron row fails the face gate, so the
+weld projection is adopted only together with the 25 Hz pre-contact cutoff.
+
+\paragraph{Other Experiments That Did Not Help.} Each was a full bundle
+re-export of both clubs.
+\begin{itemize}
+\item Stronger root regulation through the legs (balance gains 900/60 and
+root-only): no change in timing; 2500/100 diverged.
+\item Contact parameters: a 0.02 or 0.01 m/s Coulomb transition velocity made
+the face miss the ball; friction coefficient 1.5 gave the driver $-16.5$ ms
+and $-19.0$\,\% and made the 7-iron miss the ball.
+\item The wrench-QP tracking backend: driver $-17.6$ ms and $-23.0$\,\%; with
+friction 1.5, $-14.7$ ms and $-19$\,\% and the 7-iron missed the ball.
+\item KKT without the controller split at impact: driver $-17.6$ ms and
+$-22.8$\,\%; 7-iron $-2.5$ ms and $-8.6$\,\%.
+\item An actuated root with the 12 Hz reference: driver $-14.5$ ms and
+$-17.6$\,\%, 7-iron $-9.9$ ms and $-9.4$\,\%; root drift is not the only
+cause.
+\end{itemize}
+Joint tracking errors before impact stay below 0.035 rad; the large errors
+are after contact.
+
+\paragraph{Reproduction.} The pipeline change is exercised by
+\texttt{tests/unit/motion\_matching/pipeline/test\_release\_cutoff.py} and
+\texttt{test\_weld\_projection.py}. Full re-solve (writes the fixtures; run
+it only to measure, and adopt the fixtures only when the OSV-10 gate and the
+GCV-20 acceptance pass):
+\begin{verbatim}
+MUJOCO_GL=egl PYTHONPATH=.:src python3 -m scripts.regenerate_club_face_fixtures \
+    --work RUNS --capture driver     # and --capture iron
+\end{verbatim}
+The one-change-at-a-time re-exports used a scratch driver around
+\texttt{scripts.same\_input\_bundle.export} and
+\texttt{scripts.regenerate\_club\_face\_fixtures.measure\_swing} that swaps
+the run's \texttt{q\_track} before the export; the measurements are in the
+summary JSON beside the evidence plot.
+
+\paragraph{Full Re-Solve.} Both captures were then re-solved end to end with
+the final code (commit \texttt{5f8ee41fe5}: 25 Hz pre-contact cutoff, weld
+projection, and for the 7-iron the zero-moment-point filter that the
+re-exports above left out), measured by
+\texttt{scripts.regenerate\_club\_face\_fixtures} (model face centre by MuJoCo
+forward kinematics, capture face centre from the calibrated head triad, each
+on its own clock):
+\begin{center}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+Club & Peak vs capture (ms) & Impact (m/s) & Capture (m/s) & Impact vs capture \\
+\midrule
+Driver & $-3.7$ & 47.94 & 51.75 & $-7.4$\,\% \\
+7-iron & $-4.2$ & 39.36 & 41.05 & $-4.1$\,\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+The face at impact is 2.8 deg (driver) and 4.6 deg (7-iron) from the
+capture. The re-solve confirms the re-export: the timing acceptance (5 ms)
+is met and the impact-speed acceptance (3\,\%) is not. The GCV-20 acceptance
+test is therefore a strict expected failure carrying these numbers, with its
+tolerances unchanged, and the committed fixtures are not replaced (the
+re-solved fixtures would also fail the impact-frame check: the detected frame
+lies 0.34 m (driver) and 0.18 m (7-iron) from the ball, limit 0.15 m). The
+remaining gap is cause 3, which needs the ground yaw-moment model of
+decision 13.
+
+\subsection{Third Pass: Zero-Moment-Point Rates Split at Impact (\#12117)}
+\label{sec:gcv20_zmp_split}
+\paragraph{Regression.} On current main the 7-iron replay fell from
+$-4.1$\,\% to $-11.9$\,\% impact speed. A bisect put the step at \#12049,
+whose anthropometric hip rewrite used a foreign pelvis alignment (\#12109).
+The hip fix (\#12125) restores the IK reference (marker RMS 31.1 to
+26.8 mm; the 18 Hz pre-contact cutoff keeps the release again). But with
+GCV-20 on that spec the 7-iron replay drifted from the backswing on and the
+same-input bundle export diverged to NaN at the impact step.
+
+\paragraph{Mechanism.} The IK solution was bit-identical between the main
+code and GCV-20; the drift entered after IK, in the zero-moment-point (ZMP)
+filter's re-solves (root offset from IK at 1.0 s: $-40$ mm with main's code,
+$-69$ mm with GCV-20 without cutoff or weld projection). The tracked
+reference keeps the ball's velocity step at contact, and the replay
+controller already differentiates on each side of it, but
+\texttt{reference\_zmp} still took \texttt{np.gradient} twice across the
+step. That stencil spans $\pm 2$ samples, so frames $i-1$ to $i+2$ around the
+last pre-contact sample $i$ demanded a ZMP 4 to 29 m outside the feet (full
+GCV-20, third filter pass). The cart-table shift
+$\min\lVert \delta c-(z_c/g)D_2\delta c-\mathrm{gap}\rVert^2+\ldots$ is a
+global solve whose kernel decays over about $\sqrt{z_c/g}\approx0.3$ s, so it
+spread those gaps back over the downswing: centre-of-mass shifts of 37 mm
+(0.5 to 0.9 s) and 71 mm (0.9 to 1.1 s) where the gap is zero, and up to
+162 mm near impact.
+
+\paragraph{Change.} \texttt{reference\_zmp} takes \texttt{split\_time\_s} and
+differentiates with \texttt{impact\_force.reference\_rates}, the controller's
+split. The ball, not the ground, removes the velocity step, so it is not a
+ground acceleration. The pipeline calls it through
+\texttt{pipeline.dynamics.lane\_reference\_zmp}, which passes
+\texttt{lane.impact\_time\_s} (unsplit when the lane has no impact). Unsplit
+callers are unchanged. Test:
+\texttt{test\_reference\_zmp\_split\_keeps\_the\_impact\_velocity\_step\_out\_of\_the\_zmp}
+(a rest-then-constant-velocity root slide: unsplit, the step frames move the
+ZMP by more than 0.1 m; split, every frame's ZMP is the CoM projection within
+$10^{-6}$ m).
+
+\paragraph{Result.} Re-solved with GCV-20 plus \#12125 plus this change
+(\texttt{regenerate\_club\_face\_fixtures}, unchanged flags). The 7-iron
+replay no longer diverges and the bundle exports:
+\begin{center}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+7-iron run & Dynamics RMS (mm) & Root error 0.5/1.0/1.3 s (mm) & Impact vs capture \\
+\midrule
+\#12125, main's code & 59.6 & 13 / 53 / 76 & $-15.9$\,\% \\
+GCV-20 + \#12125 & 264 & 20 / 99 / 190 & export diverged \\
+GCV-20 + \#12125 + split ZMP & 54.5 & 10 / 41 / 47 & $-10.2$\,\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+Clubhead speed by stage of the last run (capture 41.26 m/s at impact): IK
+42.47, smoothed IK reference 42.46, tracked reference after the ZMP filter
+41.63 m/s ($+0.9$\,\%, peak 1.4 ms before impact), replay 37.48 m/s
+($-9.2$\,\%, peak 11.2 ms early), bundle 36.87 m/s. The reference now meets
+the acceptance; the loss is in the computed-torque replay through the
+release. The driver run does not use the ZMP filter and is unchanged
+($-6.1$\,\%, peak 6.1 ms early). Acceptance (3\,\%, 5 ms) is still not met
+for either club, so \#12117 and \#11767 stay open and no tolerance was
+changed. The fixtures are regenerated only after GCV-20 and \#12125 are on
+main.
+
 \section{Shared Club in the Musculoskeletal OpenSim Models (OSV-9)}
 This section records a change to the Rajagopal-based OpenSim models
 (\texttt{src/engines/physics\_engines/opensim}), not to the Simscape model.

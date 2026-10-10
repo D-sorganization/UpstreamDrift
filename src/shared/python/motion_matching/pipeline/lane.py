@@ -42,6 +42,7 @@ from src.shared.python.motion_matching.pipeline.constants import (
     STANCE_TOLERANCE_M,
     TOE_SPHERES,
     TOE_STANDOFF_M,
+    TRACKING_CUTOFF_HZ,
     TRAJECTORY_RESTART_MARGIN_M,
     TRAJECTORY_RESTART_THRESHOLD_M,
     TRAJECTORY_RESTARTS,
@@ -376,6 +377,16 @@ class Lane:
         self.restart_policy = DEFAULT_IK_RESTART_POLICY
         #: Weight of the address-pose posture prior (#12042); 0 disables it.
         self.posture_prior_weight = 0.0
+        #: Last pre-contact capture frame (GCV-20); the reference low-pass is
+        #: split there. None filters across impact (no club triad observed).
+        self.impact_index: int | None = None
+        self.impact_split_reason = "not computed"
+        self.ball_impact: Any = None  # ImpactForce plan (GCV-20)
+        self.impact_time_s: float | None = None
+        #: Release-preserving pre-contact tracking cutoff (GCV-20); None keeps
+        #: the base cutoff on both sides of impact.
+        self.pre_contact_cutoff_hz: float | None = None
+        self.release_cutoff: dict[str, Any] | None = None
         #: Thorax / shoulder-girdle turn split (#12042 slice 7); off until set.
         self.thorax_targets: list[dict[str, Any] | None] | None = None
         self.thorax_weight = 0.0
@@ -466,6 +477,102 @@ class Lane:
         )
         self.face_weight = float(weight)
         self.face_targets = targets if any(targets) else None
+
+    def set_club_targets(
+        self,
+        attachments: Mapping[str, tuple[str, Sequence[float]]],
+        spec: Mapping[str, Any],
+        face_weight: float,
+    ) -> None:
+        """Face-orientation targets (OSV-10) and the capture impact (GCV-20)."""
+        self.set_face_targets(attachments, spec, face_weight)
+        self.set_impact_split(attachments, spec)
+
+    def set_impact_split(
+        self,
+        attachments: Mapping[str, tuple[str, Sequence[float]]],
+        spec: Mapping[str, Any],
+    ) -> None:
+        """Locate impact in the capture so smoothing does not cross it (GCV-20,
+        #11767). Impact is the capture face centre's ball passage; when the
+        club triad cannot be observed the split is unavailable and the reason
+        is kept for the receipt (never a guessed frame)."""
+        from src.shared.python.motion_matching.club_face_target import capture_impact
+        from src.shared.python.motion_matching.impact_force import (
+            PASSAGE_ARM_LEAD_S,
+            ImpactForce,
+        )
+
+        try:
+            hit = capture_impact(
+                self.times, self.points, self.valid, self.labels, attachments, spec
+            )
+            # Armed before the capture impact; the replay's own face passage
+            # starts the contact (``ImpactForce.at_address``).
+            self.ball_impact = ImpactForce.for_spec(
+                spec,
+                t_start_s=max(hit.time_s - PASSAGE_ARM_LEAD_S, float(self.times[0])),
+                swing_span_s=(float(self.times[0]), float(self.times[-1])),
+                ball_centre_m=hit.ball_centre_m,
+            )
+            self.impact_time_s = hit.time_s
+        except ValueError as exc:
+            self.impact_index = None
+            self.ball_impact = None
+            self.impact_time_s = None
+            self.impact_split_reason = f"unavailable: {exc}"
+        else:
+            self.impact_index = hit.frame_index
+            self.impact_split_reason = "capture face-centre ball passage"
+
+    def select_release_cutoff(
+        self, kin: Any, spec: Mapping[str, Any], q_ref: np.ndarray
+    ) -> None:
+        """Pick the pre-contact tracking cutoff that keeps the reference's
+        late release (GCV-20, #11767; DESIGN_DECISIONS section 11).
+
+        Needs the capture impact split; without it, or when the reference's
+        clubhead never passes the ball, the base cutoff stays and the reason
+        is kept for the receipt.
+        """
+        from src.shared.python.motion_matching.club_face_target import (
+            model_face_centres,
+        )
+        from src.shared.python.motion_matching.pipeline.release_cutoff import (
+            release_preserving_cutoff,
+        )
+
+        self.pre_contact_cutoff_hz = None
+        if self.impact_index is None:
+            self.release_cutoff = {"source": "no impact split"}
+            return
+        try:
+            result = release_preserving_cutoff(
+                self.times,
+                q_ref,
+                self.impact_index,
+                lambda q: model_face_centres(kin, q, spec),
+                base_cutoff_hz=TRACKING_CUTOFF_HZ,
+            )
+        except ValueError as exc:
+            self.release_cutoff = {"source": f"unavailable: {exc}"}
+            return
+        self.pre_contact_cutoff_hz = result.cutoff_hz
+        self.release_cutoff = result.to_record()
+
+    def impact_split_report(self) -> dict[str, Any]:
+        """Receipt block describing where the reference low-pass is split."""
+        report: dict[str, Any] = {"source": self.impact_split_reason}
+        if self.impact_index is not None:
+            report["frame"] = self.impact_index
+            report["time_s"] = float(self.times[self.impact_index] - self.times[0])
+        if self.impact_time_s is not None:
+            report["impact_time_s"] = float(self.impact_time_s)
+        if self.pre_contact_cutoff_hz is not None:
+            report["pre_contact_cutoff_hz"] = float(self.pre_contact_cutoff_hz)
+        if self.release_cutoff is not None:
+            report["release_cutoff"] = self.release_cutoff
+        return report
 
     def set_turn_split(
         self,
