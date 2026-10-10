@@ -147,3 +147,119 @@ MuJoCo and Pinocchio evaluate the same law as OpenSim, so their residual is inte
 - Drake is compared with its native law, so its small residual is a model-definition difference, not an engine defect. A Drake run that applies the shared law through an `ExternallyAppliedSpatialForce` would isolate Drake's integrator and is not done.
 - On the loaded shared host, the full-swing parity test takes about 10 to 30 minutes per engine and club.
 - This covers software correctness only. Scientific qualification stays in the design-manual governance pathway.
+
+## 19. Contact Grip, MyoSuite Bushing and Kinetics Validation (OSV-7 Phase 3, #11739)
+
+### What
+
+Phase 3 adds a second grip interface model, a distributed pad `contact` grip, next to the section 16 bushing, runs the bushing in MyoSuite, and reports kinetics validation for the two. Nothing in the bushing law, the parity metrics or any tolerance changed.
+
+- MyoSuite bushing: `src/engines/physics_engines/myosuite/python/grip_bushing.py`. MyoSuite is MuJoCo behind `MujocoEnv`; the model is loaded through `load_myosuite_runtime` and handed to the MuJoCo bushing module through an injected loader, so the physics is the MuJoCo section 18 code and the runtime is MyoSuite's.
+- Contact grip: `src/shared/python/grip_contact/pad_layout.py`, `pad_contact.py`, `contact_run.py`, and per engine `src/engines/physics_engines/{mujoco,drake,pinocchio}/python/grip_contact_sim.py`.
+- Static balance: `src/shared/python/grip_contact/static_balance.py`.
+- Evidence runners: `evidence/grip_kinetics/run_grip_contact.py`, `run_grip_validation.py`, `render_grip_clip.py`.
+
+### Interface Model
+
+Per hand, two rings (axial offsets $\pm a$) of $n = 6$ spherical pads of radius 8 mm press on a rigid cylinder of radius $r = 12.7$ mm (the spec hand standoff) that is rigidly part of the club. The grip frame origin of each hand sits on the hand surface, $r$ from the shaft axis, so the two hand frames are $2r$ apart across the grip. A pad centre rests $r + r_\mathrm{pad} - \delta_0$ from the axis, where $\delta_0$ is the preload interference. The right-hand rings are turned by half a pad spacing. The hands are the prescribed OSV-7 hand frames, as in the bushing runs; only the interface differs.
+
+### Parameters (Derived, Not Fitted)
+
+- Stiffness. A translation across the axis of one hand compresses the pads in proportion to $\cos^2$, so $K_t = k_\mathrm{pad}\, n/2 - f_\mathrm{pad}/\rho$, where $f_\mathrm{pad}$ is the pad preload and $\rho$ the pad centre distance from the axis. The second term is the negative geometric stiffness of a preloaded pad. So $k_\mathrm{pad} = 2K_t/n + f_\mathrm{pad}/\rho$, which is about $1.71 \times 10^5$ N/m for both clubs. Bending uses $a = \sqrt{K_r/K_t} = 0.04$ m, the bushing's own effective radius.
+- Damping. Hunt-Crossley $c = c_t / (N_\mathrm{pads}/2 \cdot \text{preload})$ so the damping across the grip equals the bushing translational damping.
+- Squeeze (total pad normal force per hand), derived from the OpenSim bushing demand of the same club and not tuned: $N = \max\left(F_\mathrm{ax}/\mu,\ \tau_\mathrm{ax}/(\mu r),\ 2F_\perp\right)$ with the peak axial force, axial torque and cross-axis force of the bushing reference and $\mu = 0.9$. This gives 1104 N for the driver and 1155 N for the 7-iron.
+- Friction: static 0.9 and dynamic 0.7 from `ContactMaterial` (still engineering placeholders, not measurements). Stribeck transition speed 1 mm/s.
+
+### Equations (Shared Pad Law)
+
+For pad $j$ with centre $p_j$ and velocity $v_j$ relative to the cylinder surface, with penetration $\delta_j$ and normal $\hat n_j$ (from the cylinder axis to the pad centre):
+
+- Normal force (Hunt-Crossley): $F_{n,j} = k_\mathrm{pad}\,\delta_j\,(1 + c\,\dot\delta_j)$ for $\delta_j > 0$ and $F_{n,j} \ge 0$.
+- Tangential force: regularised Coulomb with a Stribeck blend, magnitude $\le \mu(v_t) F_{n,j}$, acting against the tangential slip speed. This is `physics.contact_law.sphere_ground_contact` applied against the cylinder tangent plane at the pad.
+- Hand wrench on the club: $F = \sum_j (F_{n,j} \hat n_j + F_{t,j})$ and $M = \sum_j (p_j - p_\mathrm{ref}) \times (\cdot)$ about the club grip origin, plus torsional friction about each pad normal (`torsional_friction_moment`).
+- There is no spring against translation along the axis or rotation about it; those are carried by friction only. This differs from the bushing, which has springs on all six freedoms.
+
+Engine implementations:
+
+- MuJoCo: native sphere-cylinder contacts, `condim` 6, elliptic cone, soft constraint with per-pad `solref` calibrated so each pad force equals $k_\mathrm{pad}\,\delta$ (calibration error under $10^{-3}$). The friction rows need an explicit `solreffriction` of two timesteps. Creep scales with the timestep, so the runs use $\Delta t = 10^{-5}$ s (Euler); 300 to 360 s per full swing. The hand bodies are heavy (100 kg) and overwritten every step, and the club starts with the weld velocity, to avoid a stiff-friction impulse at release.
+- Pinocchio: the shared law evaluated analytically and integrated with `aba` and SciPy Radau (rtol $10^{-6}$, atol $10^{-9}$, max step $2 \times 10^{-4}$ s).
+- Drake: continuous `MultibodyPlant` with SceneGraph point contact (`kPoint`), Hunt-Crossley, stiction tolerance $10^{-3}$, implicit Euler (an explicit RK3 shrinks to steps near $5 \times 10^{-7}$ s and is unusable). Drake has no torsional friction in point contact, so its hold is checked without that term.
+
+### Acceptance (Fixed Before the Runs)
+
+- Static hold: pad forces sum to the club weight within 1 %; tests `test_engine_grip_contact.py` for MuJoCo, Drake and Pinocchio (Drake and Pinocchio slow-marked, 0.05 s hold; MuJoCo 0.2 s).
+- Friction prevents sliding: axial slip under 0.1 mm over the hold at the real friction, and a nearly frictionless grip ($\mu = 10^{-4}$, below weight over squeeze) does slide, so the test can fail.
+- Quasi-static balance: with the hands still at four swing attitudes, $\sum F + mg = 0$ and the moment of the per-hand wrenches about the club centre of mass vanishes (`static_balance`, `test_static_balance.py`).
+- MyoSuite bushing parity: peak error at most 5 % and RMS at most 2 % of the OpenSim peak on every quantity, as in section 18.
+- Bushing deflection at peak load: at most 3 mm and 2 degrees. This is a flag, never a tuning target.
+
+### Results
+
+MyoSuite bushing against OpenSim (same input as section 18), worst quantity, peak / RMS:
+
+| Club   | Worst peak error  | Worst RMS error | Wall time |
+| ------ | ----------------- | --------------- | --------- |
+| Driver | 0.011 % (squeeze) | 0.006 %         | 107 s     |
+| 7-iron | 0.013 % (squeeze) | 0.005 %         | 113 s     |
+
+All ten quantities pass for both clubs, with no tolerance changed. The MyoSuite physics is the MuJoCo section 18 code, so agreement with MuJoCo is expected; the result confirms the MyoSuite model and runtime path.
+
+Quasi-static balance (MuJoCo contact, hands held 0.2 s at swing times covering address to the downswing): the settled force residual is at most $3 \times 10^{-7}$ of the weight and the moment residual at most $1.6 \times 10^{-7}$ of the gravity moment about the hands. Axial slip during the hold is at most 0.016 mm.
+
+Full swing, peak values (OpenSim bushing / MuJoCo contact):
+
+| Quantity                        | Driver                                | 7-iron                                |
+| ------------------------------- | ------------------------------------- | ------------------------------------- |
+| Left hand force                 | 515 / 2086 N                          | 533 / 1667 N                          |
+| Right hand force                | 564 / 2118 N                          | 584 / 1748 N                          |
+| Net force at midpoint           | 439.3 / 438.0 N                       | 456.7 / 452.5 N                       |
+| Internal force                  | 510 / 2100 N                          | 524 / 1697 N                          |
+| Axial squeeze (internal)        | 3.3 / 763 N                           | 3.9 / 438 N                           |
+| Couple at midpoint              | 99.5 / 76.3 N m                       | 98.6 / 92.3 N m                       |
+| Pad normal force sum (per hand) | n/a / 29.4 kN                         | n/a / 28.8 kN                         |
+| Hand-to-club deflection         | 0.56 mm, 0.84 deg / 1.61 mm, 0.30 deg | 0.58 mm, 0.84 deg / 1.10 mm, 0.12 deg |
+| Peak axial slip, roll slip      | n/a / 1.51 mm, 5.2 mrad               | n/a / 0.97 mm, 2.1 mrad               |
+
+The bushing deflections (0.56 mm and 0.84 degrees; 0.58 mm and 0.84 degrees) and the contact hand-to-club displacements are all inside the 3 mm and 2 degree flags. Nothing is flagged and nothing was tuned.
+
+### Indeterminacy Report
+
+Two hands holding one rigid club are statically indeterminate: the net wrench is fixed by the club motion, the split between the hands and the internal pair is not. Each grip model resolves it differently:
+
+| Model                 | Driver, L / R peak force | Lead share at peak net force | Basis                                                                                              |
+| --------------------- | ------------------------ | ---------------------------- | -------------------------------------------------------------------------------------------------- |
+| Weld (min-norm proxy) | 1176 / 1234 N            | 0.47                         | Minimum-norm split of the OpenSim net wrench with zero free torques; a labelled proxy, not a model |
+| OpenSim bushing       | 515 / 564 N              | 0.43                         | Spring split; free torques are 50/50 by construction                                               |
+| MuJoCo contact        | 2086 / 2118 N            | 0.48                         | Friction and pad stiffness                                                                         |
+
+For the 7-iron the shares are 0.49 (weld proxy), 0.50 (bushing) and 0.50 (contact). The net force agrees across models to within 0.3 % (driver) and 0.9 % (7-iron). The per-hand forces and the internal pair do not: the contact grip carries 4 times the per-hand peak of the bushing, with an internal force of about 2100 N against 510 N, and its couple at the midpoint is 23 % below the bushing's for the driver and 6 % below for the 7-iron.
+
+Reading of the difference, as a flag and not a conclusion: the bushing carries axial force and twist about the grip through springs, and the contact grip through friction only, which needs normal force. The pad normal force sum reaches 29 kN per hand against the 1.1 kN squeeze the demand estimate gives. Window diagnostics on the driver, 1.2 to 1.42 s, showed the peak is not a pure solver artefact: lowering `impratio` from 10 to 1 reduces the per-hand peak from 2967 N to 2434 N, and a pyramidal cone loses contact (slip 317 mm). The remaining inflation is not explained, so neither the contact internal force nor the squeeze should be read as measured grip squeeze. Which model matches a real hand is not decided by this work; only measured grip pressure would.
+
+### Limitations
+
+- Software correctness only. Stiffness, damping, friction, pad count and radius are engineering defaults with derived matching, not measured values.
+- The OpenSim contact variant (`ElasticFoundationForce` against a closed `ContactMesh`) is not implemented, so contact exists in MuJoCo (full swing), and Drake and Pinocchio (holds, 0.05 s). A full-swing Drake or Pinocchio contact run was not attempted: Drake's implicit Euler and Pinocchio's Radau at these stiffnesses cost hours per swing on the shared host.
+- The cross-engine contact comparison is the hold acceptance (weight within 1 %, slip), not a full-swing comparison.
+- The contact grip has no distributed ball (palm) of the hand and no finger geometry beyond the two pad rings; all pads are rigid-hand-anchored and the hand is prescribed.
+- The squeeze for the contact grip is derived from the OpenSim bushing demand of the same swing, so it inherits that model's indeterminacy.
+
+### What Was Tried and Rejected
+
+- Hunt-Crossley sphere-sphere and sphere-cylinder contact pairs, as tried in the earlier phase 3 probes, gave no force for the pad geometry, so the Drake contact uses point contact between pad spheres and a primitive cylinder with the shared Hunt-Crossley parameters set on the geometry.
+- Open (non-closed) meshes failed as contact geometry; an elastic-foundation contact needs a closed mesh. This is one reason the OpenSim contact variant is not done.
+- MuJoCo defaults: a single `solref` for all pads gave pad forces that did not follow $k\,\delta$ (the negative geometric stiffness was not included in $k_\mathrm{pad}$), friction rows with default `solreffriction` crept with the timestep, and a 1e-4 s step gave creep; the club also needed the weld velocity at release.
+- Drake explicit RK3: step sizes near $5 \times 10^{-7}$ s, abandoned for implicit Euler.
+- Pyramidal cone in MuJoCo: loses grip (slip 317 mm in the window run), kept the elliptic cone.
+
+### Evidence Receipt
+
+- Contact series and runs: `evidence/grip_kinetics/contact/{mujoco_<club>_series.npz, .contact.npz, _run.json}` and `validation_<club>.json`.
+- MyoSuite series: `evidence/grip_kinetics/parity/myosuite_<club>_series.npz`, with `metrics_<club>.json` and `runs_<club>.json`.
+- Reproduce, one heavy run at a time:
+  - Contact swing: `PYTHONPATH=.:src python3 docs/development/full_body_models/evidence/grip_kinetics/run_grip_contact.py --club driver --engine mujoco`.
+  - Validation: the same prefix with `run_grip_validation.py --club driver`.
+  - MyoSuite: `run_grip_parity.py --club driver --engines myosuite --report`, with the MyoSuite site-packages directory appended to `PYTHONPATH`.
+  - Clips: `render_grip_clip.py --club driver --variant contact`.
+- Clips (outside the repository): `~/Videos/Parity Audit/golfer_realism/grip_kinetics/<club>_{contact,bushing}_grip_hands_closeup_0p5x_60fps.mp4`, 1920 by 1080 at 60 fps, 0.5x, with per-hand force arrows from the GCV-10 overlay glyphs.
+- Tests: `python3 -m pytest -n 0 tests/unit/grip_contact` (add `-m slow` for the Drake and Pinocchio holds).

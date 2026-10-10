@@ -31,6 +31,7 @@ from src.shared.python.motion_matching.candidate_io import save_candidate
 from src.shared.python.motion_matching.export import (
     export_report,
     export_video,
+    export_video_variants,
 )
 
 pytestmark = [pytest.mark.unit]
@@ -197,6 +198,52 @@ class TestExportVideo:
         assert count == expected
         rendered = list(render.call_args.kwargs["frame_indices"])
         assert rendered == sorted(set(rendered))  # each sample rendered once
+
+    @pytest.mark.parametrize(
+        "engine", ["mujoco", "myosuite", "drake", "pinocchio", "opensim", "simscape"]
+    )
+    def test_export_video_variants_per_engine_full_half_quarter(
+        self, tmp_path: Path, mock_candidate: MatchedSwingCandidate, engine: str
+    ) -> None:
+        pytest.importorskip("imageio.v2")
+        from unittest.mock import patch
+
+        from src.shared.python.video_timing.frame_schedule import FrameSchedule
+
+        def fake_render(cand, eng, stride, size_px, frame_indices):
+            return [np.zeros((8, 8, 3), np.uint8)] * len(frame_indices)
+
+        with patch(
+            "src.shared.python.motion_matching.export._render_video_frames",
+            side_effect=fake_render,
+        ) as render:
+            paths = export_video_variants(
+                mock_candidate, engine, tmp_path / "swing.gif"
+            )
+        assert sorted(paths) == [0.25, 0.5, 1.0]
+        assert paths[1.0].name == "swing_1x.gif"
+        assert paths[0.5].name == "swing_0p5x.gif"
+        assert paths[0.25].name == "swing_0p25x.gif"
+        rendered = [c.args[4] for c in render.call_args_list]
+        expected = [
+            np.unique(
+                FrameSchedule(mock_candidate.time_s, 60, v).nearest_indices()
+            ).tolist()
+            for v in (1.0, 0.5, 0.25)
+        ]
+        assert rendered == expected
+
+    def test_export_video_variants_rejects_bad_speeds(
+        self, tmp_path: Path, mock_candidate: MatchedSwingCandidate
+    ) -> None:
+        with pytest.raises(ValueError, match="empty"):
+            export_video_variants(
+                mock_candidate, "mujoco", tmp_path / "a.gif", speeds=()
+            )
+        with pytest.raises(ValueError, match="unique"):
+            export_video_variants(
+                mock_candidate, "mujoco", tmp_path / "a.gif", speeds=(0.5, 0.5)
+            )
 
     def test_export_video_gif_from_path(
         self, tmp_path: Path, candidate_path: Path
