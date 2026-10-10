@@ -1,6 +1,29 @@
 # Straight, Draw, and Fade: Shot Pattern Analysis
 
-**Status:** All 24 corrected driver, 7-iron, and wedge experiments are complete,
+## Current Matched-Delivery Study
+
+The expanded study is documented in the [Phase-Two Scientific Design](phase2/DESIGN.md),
+[Current Turnover](phase2/TURNOVER.md), and [Final Report](phase2/REPORT.md).
+It matches raw zero-error landing points through solved physical delivery parameters,
+without an aiming rotation. It covers static lofts of 10°/34°/46° for driver,
+7-iron, and wedge, shaft lean of 0°/5°/10°, shaft-twist SD of 1°/2°,
+both curve strengths, and path, speed, strike, and correlated delivery noise.
+Shaft-twist SD is distinct from the face-angle SD used in the earlier experiment below.
+
+All original and supplemental final simulations, saved-data audits, and archive
+restorations are complete. The original inventories retain 54 primary and 20
+control cases unavailable within their search bounds. The separately labelled
+26-cell supplement adds 780,000 attempted shot rows, including 288 unsupported
+rows that remain explicitly exported. Final graphics and combined publication
+review are still in progress; consult the turnover for current acceptance.
+
+The following sections preserve the separate **phase-one** experiment. Its
+nominal aiming adjustments, club presets, and constant-loft controls must not be
+confused with the physically matched phase-two protocols.
+
+## Phase-One Study
+
+**Phase-One Status:** All 24 corrected driver, 7-iron, and wedge experiments are complete,
 with 720,000 synthetic shots and independent internal-consistency review.
 The four original driver bundles are [superseded historical controls](historical_control_report.md).
 Corrected V2 scoring and final graphics support the conditional results below;
@@ -10,9 +33,9 @@ This experiment compares 10,000 shots per pattern with independent normally
 distributed face errors at both 1° and 2° standard deviation and fixed path. It is a
 conditional simulation study, not a measured golfer study or physics qualification.
 
-## Expanded Goal and Acceptance
+## Phase-One Scope and Acceptance
 
-The active goal now includes driver, 7-iron, and wedge cases with
+The phase-one scope includes driver, 7-iron, and wedge cases with
 club-appropriate tee/approach scoring, an independent Astra review, and
 correction of the inconsistent impact impulse. It also includes face–loft coupling, rotation about the shaft,
 shaft-lean sensitivity, and the observed long-left/short-right pattern. The

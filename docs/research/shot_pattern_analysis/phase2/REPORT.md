@@ -2,7 +2,7 @@
 
 ## Results Pending
 
-The original 10,000-shot-per-pattern primary and fixed-target control matrices are complete and passed full independent saved-data audits (324 and 72 planned cells). Their lossless archives also passed fresh restoration. This editable report remains a framework until the supplemental trials and final publication review are complete.
+The original 10,000-shot-per-pattern primary and fixed-target control matrices are complete and passed full independent saved-data audits (324 and 72 planned cells). Their lossless archives also passed fresh restoration. This editable report remains a framework until the final graphics and publication review are complete.
 
 The primary comparison matches Straight, Draw, and Fade to one physical zero-error landing point within each club and lean setting. The fixed-target control attempts the zero-lean target across lean settings. Unsupported shots and unsuccessful bounded nominal searches remain visible in the final population accounting. A failed bounded search does not establish physical impossibility. Phase-one constant-delivered-loft results are a separate historical experiment.
 
@@ -21,6 +21,6 @@ Strokes-gained differences use the declared hypothetical tee-shot context for dr
 ## Rebuild Commands
 
 ```bash
-python -m scripts.research.shot_pattern_analysis.build_final_report docs/research/shot_pattern_analysis/phase2/final_v1 docs/research/shot_pattern_analysis/phase2/control_final_v1 docs/research/shot_pattern_analysis/phase2/REPORT.md
+python -m scripts.research.shot_pattern_analysis.build_final_report docs/research/shot_pattern_analysis/phase2/final_v1 docs/research/shot_pattern_analysis/phase2/control_final_v1 docs/research/shot_pattern_analysis/phase2/REPORT.md --supplement-dir docs/research/shot_pattern_analysis/phase2/supplement_report_v1 --primary-figures docs/research/shot_pattern_analysis/phase2/final_figures_v1 --control-figures docs/research/shot_pattern_analysis/phase2/control_final_figures_v1
 python -m scripts.research.shot_pattern_analysis.build_pdf docs/research/shot_pattern_analysis/phase2/REPORT.md docs/research/shot_pattern_analysis/phase2/REPORT.pdf
 ```
