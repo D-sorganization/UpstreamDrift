@@ -60,3 +60,7 @@ docs/development/full_body_models/evidence/foot_progression/osv4_final/iron/engi
 docs/development/full_body_models/evidence/foot_progression/osv4_final/capture_o/engines.json
 # #12187: byte-bound native neck-tracking receipt from #12154.
 docs/development/full_body_models/evidence/head_gaze/fd_neck_tracking.json
+
+# #12202: preserve exact serialization of canonical baseline receipts.
+docs/development/full_body_models/evidence/ground_support/anthro_driver/receipt.json
+docs/development/full_body_models/evidence/ground_support/anthro_iron/receipt.json
