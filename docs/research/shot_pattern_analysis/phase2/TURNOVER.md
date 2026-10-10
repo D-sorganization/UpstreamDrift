@@ -10,12 +10,12 @@ Both saved-data jobs started from `9ea4c14bed`. Revalidate actual handles before
 
 | Job | Session | Wrapper / Child PID | Log | Terminal Receipt |
 | --- | --- | --- | --- | --- |
-| Original Graphics v3 | 78157 | 2508214 / 2508443 (primary) | `/tmp/p2-original-final-figures-v3.log` | `/tmp/p2-v3-*-exit.json` |
+| Original Graphics v3 | 78157 | 2508214 / 2654100 (control) | `/tmp/p2-original-final-figures-v3.log` | `/tmp/p2-v3-*-exit.json` |
 | Supplemental Report v2 | 83056 | 2509004 / 2509013 | `/tmp/p2-supplement-report-v2.log` | `/tmp/p2-supplement-report-v2-exit.json` |
 
 **Freeze every MAIN Python file under `src/tools/shot_pattern_analysis` and `scripts/research/shot_pattern_analysis` until both jobs finish.** This includes adding files: the original wrapper binds the complete Python inventory. Docs/evidence may change. Do not cherry-pick the isolated repairs while either job is live.
 
-The original wrapper renders primary then control into canonical `final_figures_v1` and `control_final_figures_v1`; its final receipt is `validation/original_final_figures_rendering_revision_v3.json`. The supplemental pipeline writes `supplement_report_v1` only after computing all 384 paired comparisons, then renders figures. A missing output directory during that calculation is expected. There is no reuse/resume CLI. These jobs use saved shots; they do not rerun Monte Carlo. Wrapper copies and start identities are in `validation/final_publication_regeneration_start.json`, `validation/original_v3_renderer.py.txt`, and `validation/supplement_v2_wrapper.py.txt`.
+Primary completed with exit 0 at 06:32:48 UTC; control is now live. The primary audit validates all 689 output hashes, 324 cell manifests and five inventories, and all five inventory CSVs exactly match the preserved v2 output. All 288 PNGs are indexed in 18 contact sheets; complete Astra visual review is pending. Evidence: `validation/original_final_graphics_independent_review_v3/`. The original wrapper renders primary then control into canonical `final_figures_v1` and `control_final_figures_v1`; its final receipt is `validation/original_final_figures_rendering_revision_v3.json`. The supplemental pipeline writes `supplement_report_v1` only after computing all 384 paired comparisons, then renders figures. A missing output directory during that calculation is expected. There is no reuse/resume CLI. These jobs use saved shots; they do not rerun Monte Carlo. Wrapper copies and start identities are in `validation/final_publication_regeneration_start.json`, `validation/original_v3_renderer.py.txt`, and `validation/supplement_v2_wrapper.py.txt`.
 
 ## Completed Numerical Data
 
