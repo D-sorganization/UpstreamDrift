@@ -45,7 +45,12 @@ about6314N at a psoas fascicle, with no physiological acceptance. The final
 source-bound summary is F07_ABDOMINAL_REDUCTION_NATIVE_RECEIPT.json.
 After abdominal reduction, native Moco still rejects the four distal locks;
 #12167 separately handles the actual single-coordinate subtalar CustomJoints
-and #12150 handles MTP PinJoints. Compose and verify before claiming solver admission.
+and #12150 handles MTP PinJoints only. The explicit composition experiment
+found this candidate's MTP joints are CustomJoints, so the PinJoint reducer
+correctly rejects them after abdomen/subtalar sampled comparisons pass. A
+separate source-specific MTP admission is required before solver initialization.
+The retained failed composition is planning/composed_reduction_12161_v1; no
+Moco initialization or dynamic solve occurred.
 Do not modify source anatomy, quietly clear locks, use a whole-joint weld or
 re-equilibrate source during verification. Passive/path-cell, wrist, contact,
 private-reference, full-horizon and17-variant parity gates remain open. Existing
