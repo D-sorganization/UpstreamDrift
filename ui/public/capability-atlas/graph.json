@@ -497,7 +497,7 @@
       "reason": null,
       "pending_decision": false,
       "tiles": [],
-      "notes": "The desktop engine visual layers (MuJoCo, OpenSim, Drake and Pinocchio MeshCat exports, MyoSuite) draw the parametric club head, shaft and grip from one shared adapter (#11717, #11727). The web ClubHead.tsx now draws the same committed assets/club_heads STL heads at the spec loft and lie with a hosel, so the head half is at parity. The gap stays open because the ball visual (#11719) has not landed on the web: GolferModel.tsx draws no ball.",
+      "notes": "The desktop engine visual layers (MuJoCo, OpenSim, Drake and Pinocchio MeshCat exports, MyoSuite) draw the parametric club head, shaft and grip from one shared adapter (#11717, #11727). The web ClubHead.tsx now draws the same committed assets/club_heads STL heads at the spec loft and lie with a hosel, so the head half is at parity. GCV-13 (#11719) landed the shared address-ball geometry (src/shared/python/model_appearance/ball.py) and the MuJoCo decorative ball visual geom. The gap stays open because the ball visual has not landed on the web (GolferModel.tsx draws no ball) nor in OpenSim, Drake/Pinocchio MeshCat, MyoSuite or native export.",
       "id": "render.club_head_and_ball"
     },
     {
@@ -3146,7 +3146,7 @@
   "inputs": {
     "src/config/models.yaml": "e11682df79d7467f1eba9579d835f5d7019bfd7eb09cf81c14e22bd08d0bf844",
     "src/config/launcher_manifest.json": "1ae28f872b54c237440fcaacec40b735b93a7b80d710adc9228ef671b7831032",
-    "src/config/feature_parity.json": "0cf2dd99792b88b4e9489da82817f361123aebef304f9553627aa528af87a875",
+    "src/config/feature_parity.json": "c34105f8a6f58dd4c61ce8ed8e80c10382181543f2b0e6c324d63a5f4b9e99d5",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }
