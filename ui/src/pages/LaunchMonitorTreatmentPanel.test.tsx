@@ -192,6 +192,36 @@ describe("LaunchMonitorTreatmentPanel", () => {
     expect(onTreated).toHaveBeenCalledWith(null);
   });
 
+  it("ignores a stale Apply response after Reset Treatment", async () => {
+    let resolveApply: ((value: TreatmentResponse) => void) | undefined;
+    applyTreatmentV2Mock.mockImplementation(
+      () =>
+        new Promise<TreatmentResponse>((resolve) => {
+          resolveApply = resolve;
+        }),
+    );
+    const onTreated = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <LaunchMonitorTreatmentPanel
+        columns={COLUMNS}
+        records={RECORDS}
+        onTreated={onTreated}
+      />,
+    );
+
+    await user.click(
+      screen.getByRole("button", { name: /apply reproducible treatment/i }),
+    );
+    await user.click(screen.getByRole("button", { name: /reset treatment/i }));
+    expect(onTreated).toHaveBeenCalledWith(null);
+
+    resolveApply?.(SAMPLE_RESULT);
+    await waitFor(() => {
+      expect(onTreated).toHaveBeenCalledTimes(1);
+    });
+  });
+
   it("surfaces the API error message on failure", async () => {
     applyTreatmentV2Mock.mockRejectedValue(
       new Error("Outlier metric not present: missing_metric"),

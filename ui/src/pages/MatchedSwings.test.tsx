@@ -29,6 +29,7 @@ const SAMPLE_LEDGER: MatchedSwingLedgerResponse = {
       metrics: { whole_marker_rmse_m: 0.022 },
       capabilities: {
         has_candidate_npz: true,
+        has_video_export: true,
         has_animation_gif: true,
         has_parity_report: true,
         candidate_profile: 'kinematic',
@@ -50,6 +51,7 @@ const SAMPLE_LEDGER: MatchedSwingLedgerResponse = {
       metrics: { whole_marker_rmse_m: 0.245 },
       capabilities: {
         has_candidate_npz: false,
+        has_video_export: false,
         has_animation_gif: false,
         has_parity_report: false,
         candidate_profile: null,

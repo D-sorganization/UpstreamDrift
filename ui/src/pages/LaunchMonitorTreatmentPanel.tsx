@@ -12,7 +12,7 @@
  * treats `project.combined_shots()`, never a prior treatment's output.
  */
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   applyTreatmentV2,
   type FilterOperator,
@@ -111,8 +111,13 @@ export function LaunchMonitorTreatmentPanel({
   const [runState, setRunState] = useState<RunState>("idle");
   const [runError, setRunError] = useState<string | null>(null);
   const [result, setResult] = useState<TreatmentResponse | null>(null);
+  const applyGenerationRef = useRef(0);
 
   const canApply = records.length > 0;
+
+  useEffect(() => {
+    applyGenerationRef.current += 1;
+  }, [records]);
 
   const handleAddFilter = useCallback(() => {
     setFilterRows((rows) => [
@@ -143,6 +148,8 @@ export function LaunchMonitorTreatmentPanel({
 
   const handleApply = useCallback(() => {
     if (!canApply) return;
+    const generation = applyGenerationRef.current + 1;
+    applyGenerationRef.current = generation;
     setRunState("running");
     setRunError(null);
     const filters: FilterRulePayload[] = filterRows.map((row) => ({
@@ -158,11 +165,17 @@ export function LaunchMonitorTreatmentPanel({
       filters,
     })
       .then((data) => {
+        if (generation !== applyGenerationRef.current) {
+          return;
+        }
         setResult(data);
         setRunState("done");
         onTreated(data.data);
       })
       .catch((err) => {
+        if (generation !== applyGenerationRef.current) {
+          return;
+        }
         setRunError(
           err instanceof Error ? err.message : "Data treatment failed",
         );
@@ -180,6 +193,7 @@ export function LaunchMonitorTreatmentPanel({
   ]);
 
   const handleReset = useCallback(() => {
+    applyGenerationRef.current += 1;
     setResult(null);
     setRunState("idle");
     setRunError(null);

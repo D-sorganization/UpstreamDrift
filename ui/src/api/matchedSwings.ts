@@ -6,6 +6,7 @@ import { getApiBase } from './backend';
 
 export interface RunCapabilities {
   has_candidate_npz: boolean;
+  has_video_export: boolean;
   has_animation_gif: boolean;
   has_parity_report: boolean;
   candidate_profile: string | null;

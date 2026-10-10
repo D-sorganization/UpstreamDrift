@@ -23,7 +23,7 @@ from functools import lru_cache
 from typing import Any, Literal, NoReturn
 
 import anyio.to_thread
-from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request, status
 from fastapi.responses import FileResponse, Response
 
 from src.api.services.matched_swings_service import (
@@ -250,6 +250,14 @@ async def get_matched_swing_report(
         )
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ImportError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=(
+                "Matched-swing report export is unavailable in this runtime "
+                f"(optional dependencies missing): {exc}"
+            ),
+        ) from exc
     except (FileNotFoundError, ValueError, RuntimeError, OSError) as exc:
         _raise_job_error(
             MatchedSwingJobError(
@@ -283,6 +291,14 @@ async def get_matched_swing_video(
         )
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ImportError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=(
+                "Matched-swing video export is unavailable in this runtime "
+                f"(optional dependencies missing): {exc}"
+            ),
+        ) from exc
     except (FileNotFoundError, ValueError, RuntimeError, OSError) as exc:
         _raise_job_error(
             MatchedSwingJobError(

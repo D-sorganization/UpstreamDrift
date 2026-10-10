@@ -57,6 +57,7 @@ class RunCapabilities:
     """Explicit model/horizon capabilities advertised for a ledger row."""
 
     has_candidate_npz: bool
+    has_video_export: bool
     has_animation_gif: bool
     has_parity_report: bool
     candidate_profile: str | None
@@ -65,6 +66,7 @@ class RunCapabilities:
     def to_dict(self) -> dict[str, Any]:
         return {
             "has_candidate_npz": self.has_candidate_npz,
+            "has_video_export": self.has_video_export,
             "has_animation_gif": self.has_animation_gif,
             "has_parity_report": self.has_parity_report,
             "candidate_profile": self.candidate_profile,
@@ -593,10 +595,28 @@ class MatchedSwingsService:
         rows = self._browser.load_ledger(self._ledger_path)
         return rows
 
+    @staticmethod
+    def _npz_supports_video_export(npz_path: Path | None) -> bool:
+        """Return True when the candidate package can render marker-overlay video."""
+        if npz_path is None or not npz_path.is_file():
+            return False
+        try:
+            with np.load(npz_path, allow_pickle=False) as data:
+                times = data.get("time_s")
+                model_markers = data.get("model_markers_m")
+                target_markers = data.get("target_markers_m")
+        except (OSError, ValueError):
+            return False
+        if times is None or len(times) < 2:
+            return False
+        return model_markers is not None and target_markers is not None
+
     def _to_summary(self, row: LedgerRow) -> RunSummary:
         verdict = MatchedSwingBrowserModel.extract_verdict_string(row)
+        npz_path = self._browser.resolve_artifact_path(row, "npz")
         caps = RunCapabilities(
             has_candidate_npz=bool(row.artefacts.npz),
+            has_video_export=self._npz_supports_video_export(npz_path),
             has_animation_gif=bool(row.artefacts.gif),
             has_parity_report=self._browser.resolve_artifact_path(row, "parity")
             is not None,

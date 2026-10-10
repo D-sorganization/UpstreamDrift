@@ -452,7 +452,7 @@ export function MatchedSwingsPage() {
           >
             Export Report (PDF)
           </a>
-          {selectedRun.capabilities.has_candidate_npz ? (
+          {selectedRun.capabilities.has_video_export ? (
             <>
               <a
                 href={matchedSwingVideoUrl(selectedRun.id, 'gif')}

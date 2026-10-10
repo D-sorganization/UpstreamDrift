@@ -172,6 +172,7 @@ def test_list_matched_swings(
     assert data["runs"][0]["id"] == run_id
     assert data["runs"][0]["verdict"] == "PASSED"
     assert data["runs"][0]["capabilities"]["has_candidate_npz"] is True
+    assert data["runs"][0]["capabilities"]["has_video_export"] is False
     assert "receipt_path" not in json.dumps(data)
     assert data["runs"][0]["gates"] == [
         {"name": "G1", "status": "", "measured": None, "threshold": None, "unit": "m"}
@@ -412,6 +413,16 @@ def test_get_video_unavailable_returns_404_without_absolute_path(
 def test_get_video_unknown_run_returns_404(client: TestClient) -> None:
     response = client.get("/api/matched-swings/not-a-real-id/video")
     assert response.status_code == 404
+
+
+def test_list_matched_swings_advertises_video_export_capability(
+    video_client: TestClient, ledger_fixture_with_video: tuple[Path, str]
+) -> None:
+    _, run_id = ledger_fixture_with_video
+    response = video_client.get("/api/matched-swings")
+    assert response.status_code == 200
+    assert response.json()["runs"][0]["id"] == run_id
+    assert response.json()["runs"][0]["capabilities"]["has_video_export"] is True
 
 
 def test_get_video_gif(
