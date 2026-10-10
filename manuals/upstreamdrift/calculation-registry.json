@@ -319,6 +319,11 @@
       "id": "UP-D1-native-source-body-inertia-inventory",
       "owner": "UpstreamDrift issue #12191",
       "resolution": "Inventory provisional chapter52 and native_body_inertia.py: exact hash-bound OpenSim BodySet mass, body-frame COM and six inertia components, complete native Body readback equality, source/runtime/adapter digests, coordinate-invariant positive-mass physical-inertia checks reusing #12183, and an explicit exact-zero-mass/zero-inertia routing-carrier policy. Actual OpenSim4.6 native fixtures include rotated invalid inertia, source/native identity mutation and welded massless carrier; unchanged 557-muscle source rejects bilateral clavicle/scapula principal-moment violations among 40 bodies. This is a read-only necessary gate, not a parameter repair or physiological/capture approval. Full native source closure, contact/grip, passive policy, longer replay, all17/six-engine parity and publication remain blocked."
+    },
+    {
+      "id": "UP-D1-native-moco-physical-preflight-inventory",
+      "owner": "UpstreamDrift issue #12205",
+      "resolution": "Inventory provisional chapter53 and native_moco_runner.py: preparation binds the complete chapter52 physical-body audit to a SHA-256 sidecar and retains independent blockers. Solve/export/replay reject missing, rejected or changed audits and repeat the exact source/native physical-body audit before use. Actual OpenSim4.6 Millard/Thelen fixtures cover positive admission, rotated triangle-invalid source, malformed massless source, old preparation, sidecar and validator mutation. This necessary software admission does not repair the invalid 557-muscle source, qualify physiology or captured motion, close all17/six-engine parity, or authorize publication."
     }
   ],
   "calculations": []
