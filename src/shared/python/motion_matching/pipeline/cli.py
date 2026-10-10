@@ -90,6 +90,7 @@ from src.shared.python.motion_matching.pipeline.gaze_tracking import (
     NECK_REFERENCES,
     apply_fd_neck,
     fd_head_gaze_report,
+    fd_neck_feedback,
 )
 from src.shared.python.motion_matching.pipeline.lane import (
     Lane,
@@ -206,7 +207,8 @@ def build_parser() -> argparse.ArgumentParser:
         help=(
             "neck reference for the forward-dynamics replay (OSV-3 #11729): "
             "ik keeps the marker-driven neck (default); gaze tracks the gaze "
-            "schedule (modelled, not measured)"
+            "schedule (modelled, not measured); gaze-closed also re-solves "
+            "the neck target on the simulated torso during the replay"
         ),
     )
     parser.add_argument(
@@ -998,6 +1000,7 @@ class _FinalizeInputs:
     sim_q: np.ndarray | None = None
     neck_solve: Any = None
     fd_neck: str = "ik"
+    neck_feedback: Any = None
 
 
 def _finalize_receipt(
@@ -1024,6 +1027,7 @@ def _finalize_receipt(
             inputs.sim_q,
             inputs.neck_solve,
             inputs.fd_neck,
+            feedback=inputs.neck_feedback,
         )
     receipt["tracking_weld_projection"] = inputs.weld_report
     _attach_turn_block(
@@ -1071,7 +1075,10 @@ def _simulate_and_receipt(
         args, (lane, kin, sim, log), q_track, q_ref, zmp, tracking
     )
     q_track, weld_report = weld_consistent_track(kin, cal_res.scaled_spec, q_track)
-    record, sim_q = replay(sim, lane, q_track, tracking_backend=tracking)
+    feedback = fd_neck_feedback(fd_neck, lane, kin, q_ref)
+    record, sim_q = replay(
+        sim, lane, q_track, tracking_backend=tracking, reference_hook=feedback
+    )
     finish = finish_feasibility_report(
         sim,
         times_track=lane.times,
@@ -1139,6 +1146,7 @@ def _simulate_and_receipt(
             sim_q=sim_q,
             neck_solve=neck_solve,
             fd_neck=fd_neck,
+            neck_feedback=feedback,
         ),
     )
     return receipt
