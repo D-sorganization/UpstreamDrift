@@ -74,8 +74,15 @@ are recorded in the turnover as they complete.
 ## Remaining Qualification Gates
 
 This source retains 473 muscles, 17 couplers and all auxiliary muscle states;
-q/u drop from 54 to 52. The separately assembled 557-muscle source requires its
-own verification. Large passive psoas loading, conditional path discontinuities,
+q/u drop from 54 to 52. The separately assembled 557-muscle source is independently measured at
+three coupled poses: ten maximum mechanical differences are zero, with
+rank60/condition1. Its source-specific one-equilibrium preparation changes554
+fiber-length states while preserving q/u/time/activation/options/source;
+passive suitability remains unqualified. The abdominal reduction leaves four
+distal locks (bilateral subtalar and MTP), so assembled Moco initialization
+still rejects. Use `BUET_ASSEMBLED_REDUCTION_SOURCE` and
+`BUET_ASSEMBLED_REDUCTION_PREPARED` for this separate native test. The retained
+JSON receipt binds preparation and observation helper digests. Large passive psoas loading, conditional path discontinuities,
 wrist source authority, support/grip/contact, native private capture registration,
 whole-horizon muscle control and independent saved-excitation replay remain
 open. All 17 variants across six ecosystems stay in the parity denominator.

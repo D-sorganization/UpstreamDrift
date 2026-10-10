@@ -1,0 +1,56 @@
+{
+  "issue": 12161,
+  "scope": "sampled-mechanical-reduction-not-physiology-capture-or-independent-replay",
+  "source_preparation_receipt_sha256": "21f1095267f1b0d476c39df655118f134da2e7292aada7a4b9d0c45e9b9eca9b",
+  "observation_helper_sha256": "3aa3dec17748e7ae25bda500130cd7365f1cb18200c04c7bc1159e621ab2beaf",
+  "observations": "baseline and flex_extension -0.03/+0.03rad with +0.02/-0.02rad/s and native coupled values/speeds; no new equilibration/assembly/integration",
+  "error_order": [
+    "body_transform",
+    "muscle_length_m",
+    "projected_mass_mixed_SI",
+    "projected_applied_force_N_or_Nm",
+    "body_velocity_m_s_or_rad_s",
+    "q_u_constraint_residual",
+    "full_lift_mass_mixed_SI",
+    "full_lift_applied_force_N_or_Nm",
+    "muscle_speed_m_s",
+    "muscle_actuation_N"
+  ],
+  "receipt": {
+    "recipe": "buet-abdjnt-zero-translations/1",
+    "source_sha256": "8d4d349747060efbac31c707c4e01f452746a8fba32be77a425b5ac5be1d34a3",
+    "derived_sha256": "44b73ebed9f23268a4e1661507cf8d1e0351e1cbf49055d0b77be81065831cbf",
+    "reducer_sha256": "c53234b7c3ba675bfde0359c797a9c15797696f445436cfe139edd13a8c8ac9d",
+    "comparison_helper_sha256": "e2e01cad795e8fc2a4be703019051d4953ae059a3893de81d37fba53499a5b73",
+    "observation_sha256": "d034da37989d2d673039795932b9c623b94710a0a8a338edd7262faf392b3560",
+    "native_version": "version 4.6-2026-06-22-85aaf64, build date 18:27:55 Jun 22 2026",
+    "native_binary_sha256": [
+      [
+        "_simulation",
+        "950241f649dab8a113c4bb754a080d16db4a3f5f0aa1710ed2e53d03206eb09e"
+      ],
+      [
+        "_simbody",
+        "81afadccfe9e55dd366255d09c319ccb8d50fdb54fee4ac45b64708c4f044aa6"
+      ],
+      [
+        "_actuators",
+        "61c6d7810088ca8030eea967e9bfa71f7f7998d3c5601c5e1939367346238cc2"
+      ]
+    ],
+    "removed_state_count": 4,
+    "mobility_lift_rank": 60,
+    "mobility_lift_condition": 1.0,
+    "observed_pose_count": 3,
+    "max_errors": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  },
+  "remaining_locked_coordinates": [
+    "subtalar_angle_r",
+    "mtp_angle_r",
+    "subtalar_angle_l",
+    "mtp_angle_l"
+  ],
+  "physiology_qualified": false,
+  "native_moco_initialization": "not-qualified-four-distal-locks-remain",
+  "full_private_capture_match": false
+}

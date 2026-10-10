@@ -13,7 +13,6 @@ import math
 from pathlib import Path
 import re
 from typing import Any
-import xml.etree.ElementTree as ET
 
 from defusedxml import ElementTree
 
@@ -63,6 +62,7 @@ class AbdominalReductionRequest:
                 if (
                     not isinstance(name, str)
                     or not name
+                    or isinstance(value, bool)
                     or not isinstance(value, (int, float))
                     or not math.isfinite(value)
                 ):
@@ -164,8 +164,11 @@ def _derive_tree(tree: Any) -> None:
     for axis in axes:
         _required(axis, "coordinates").text = ""
         axis.remove(_required(axis, "LinearFunction"))
-        constant = ET.SubElement(axis, "Constant", {"name": "function"})
-        ET.SubElement(constant, "value").text = "0"
+        axis.append(
+            ElementTree.fromstring(
+                '<Constant name="function"><value>0</value></Constant>'
+            )
+        )
 
 
 def _native_admission(model: Any, state: Any) -> None:
@@ -220,8 +223,8 @@ def _verify_inventory(source: Any, derived: Any) -> tuple[str, ...]:
         for name in _REMOVED
         for kind in ("value", "speed")
     }
-    before, after = set(_names(source)), set(_names(derived))
-    if before - after != removed or after - before:
+    before_names, after_names = set(_names(source)), set(_names(derived))
+    if before_names - after_names != removed or after_names - before_names:
         raise ValueError("unexpected continuous-state ownership change")
     return tuple(coordinate.getName() for coordinate in derived.getCoordinateSet())
 

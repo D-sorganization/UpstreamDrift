@@ -5,10 +5,11 @@ from __future__ import annotations
 import hashlib
 import os
 from pathlib import Path
-import xml.etree.ElementTree as ET
+from io import StringIO
 from typing import Any
 
 import pytest
+from defusedxml import ElementTree as ET
 
 from src.engines.physics_engines.opensim.python.native_abdominal_reduction import (
     AbdominalReductionRequest,
@@ -23,8 +24,9 @@ def _sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def _tree() -> ET.ElementTree:
-    root = ET.fromstring("""<Model><CustomJoint name="Abdjnt"><coordinates>
+def _tree() -> Any:
+    tree = ET.parse(
+        StringIO("""<Model><CustomJoint name="Abdjnt"><coordinates>
     <Coordinate name="Abs_r3"/><Coordinate name="Abs_t1"/><Coordinate name="Abs_t2"/>
     </coordinates><SpatialTransform>
     <TransformAxis name="rotation1"><coordinates>Abs_r3</coordinates><axis>0 0 1</axis>
@@ -38,7 +40,8 @@ def _tree() -> ET.ElementTree:
     <independent_coordinate_names>flex_extension</independent_coordinate_names>
     <coupled_coordinates_function><PiecewiseLinearFunction/></coupled_coordinates_function>
     </CoordinateCouplerConstraint></Model>""")
-    return ET.ElementTree(root)
+    )
+    return tree
 
 
 def test_only_zero_translations_are_removed() -> None:
@@ -71,7 +74,8 @@ def test_unadmitted_declarations_reject(mutation: str) -> None:
     elif mutation == "coupler":
         root.find(".//CoordinateCouplerConstraint").set("name", "unknown")
     else:
-        node = ET.SubElement(root, "unknown")
+        node = ET.fromstring("<unknown/>")
+        root.append(node)
         if mutation == "unknown_text":
             node.text = "/jointset/Abdjnt/Abs_t1/value"
         elif mutation == "unknown_tail":
@@ -118,38 +122,54 @@ def _observations(osim: Any, source: Path, prepared: dict[str, float]) -> tuple:
     return tuple(observations)
 
 
+@pytest.mark.parametrize("variant", ["source473", "assembled557"])
 def test_native_buet_fresh_reload_preserves_complete_prepared_state(
     tmp_path: Path,
+    variant: str,
 ) -> None:
     osim = pytest.importorskip("opensim")
-    source_text = os.environ.get("BUET_REDUCTION_SOURCE")
-    prepared_text = os.environ.get("BUET_REDUCTION_PREPARED")
+    prefix = "BUET_REDUCTION" if variant == "source473" else "BUET_ASSEMBLED_REDUCTION"
+    source_text = os.environ.get(prefix + "_SOURCE")
+    prepared_text = os.environ.get(prefix + "_PREPARED")
     if not source_text or not prepared_text:
         pytest.skip("owned BUET source and prepared receipt opt-in absent")
     import json
 
     source = Path(source_text)
-    prepared = json.loads(Path(prepared_text).read_text(encoding="utf-8"))["prepared"][
-        "named_state"
-    ]
+    payload = json.loads(Path(prepared_text).read_text(encoding="utf-8"))
+    prepared = (
+        payload["prepared"]["named_state"]
+        if variant == "source473"
+        else payload["named_state"]
+    )
     states = _observations(osim, source, prepared)
     request = AbdominalReductionRequest(
         source, _sha(source), tmp_path / "derived.osim", states
     )
     receipt = derive_abdominal_zero_translations(request)
     assert receipt.removed_state_count == 4
-    assert receipt.mobility_lift_rank == 52
+    assert receipt.mobility_lift_rank == (52 if variant == "source473" else 60)
+    assert receipt.observed_pose_count == 3
     assert max(receipt.max_errors) < 1e-9
     assert receipt.derived_sha256 == _sha(request.derived_model_path)
     assert receipt.source_sha256 == _sha(source)
     derived = osim.Model(str(request.derived_model_path))
     state = derived.initSystem()
-    assert state.getNQ() == state.getNU() == 52
-    assert derived.getMuscles().getSize() == 473
+    assert state.getNQ() == state.getNU() == (52 if variant == "source473" else 60)
+    assert derived.getMuscles().getSize() == (473 if variant == "source473" else 557)
     assert derived.getConstraintSet().getSize() == 17
     study = osim.MocoStudy()
     study.updProblem().setModelAsCopy(derived)
-    study.initCasADiSolver()
+    if variant == "source473":
+        study.initCasADiSolver()
+    else:
+        assert {
+            coordinate.getName()
+            for coordinate in derived.getCoordinateSet()
+            if coordinate.getLocked(state)
+        } == {"subtalar_angle_r", "subtalar_angle_l", "mtp_angle_r", "mtp_angle_l"}
+        with pytest.raises(RuntimeError, match="locked"):
+            study.initCasADiSolver()
     with pytest.raises(FileExistsError):
         derive_abdominal_zero_translations(request)
 
