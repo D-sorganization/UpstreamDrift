@@ -32,10 +32,10 @@ class GripClosureSeries:
         else:
             arr = np.asarray(self.residual_m, dtype=float)
             require(
-                arr.ndim == 1 and arr.size > 0 and np.isfinite(arr).all(),
+                bool(arr.ndim == 1 and arr.size > 0 and np.isfinite(arr).all()),
                 "residual_m must be a non-empty finite 1-D series",
             )
-            require((arr >= 0.0).all(), "residual norms must be non-negative")
+            require(bool((arr >= 0.0).all()), "residual norms must be non-negative")
 
     @classmethod
     def unavailable(cls, engine: str, reason: str) -> GripClosureSeries:

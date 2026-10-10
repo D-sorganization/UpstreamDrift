@@ -55,7 +55,9 @@ def test_from_residuals_takes_translation_norm_per_frame() -> None:
 
 def test_engine_without_closure_is_unavailable() -> None:
     def residuals(row: np.ndarray) -> np.ndarray:
-        raise NotImplementedError("Native grip closure is not qualified")
+        raise NotImplementedError(  # tracked: #11728
+            "Native grip closure is not qualified"
+        )
 
     series = closure_series_from_residuals("opensim", residuals, np.zeros((2, 1)))
     assert series.available is False

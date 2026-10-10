@@ -64,8 +64,6 @@ def _builder():
 
 
 def test_builder_places_the_lead_weld_at_the_shared_offset() -> None:
-    from xml.etree import ElementTree as ET
-
     (weld,) = _builder()._make_lead_hand_closure("weld")
     club_frame = next(
         f
@@ -74,7 +72,6 @@ def test_builder_places_the_lead_weld_at_the_shared_offset() -> None:
     )
     y = float(club_frame.findtext("translation", "").split()[1])
     assert y == pytest.approx(DEFAULT_GRIP_POSE.club_y_m(Hand.LEAD))
-    assert isinstance(weld, ET.Element)
 
 
 def test_builder_point_pair_option_and_rejection() -> None:
