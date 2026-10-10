@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/tmp/p2-supplement-completion-independent.py", line 20, in <module>
+    execution=matched_source_snapshot();assert execution==acceptance['execution'];assert completion['execution_snapshot_unchanged'] is True
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

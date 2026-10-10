@@ -1,0 +1,11 @@
+fatal: path 'vendor/ud-tools/src/shared/python/launch_monitor/strokes_gained.py' exists on disk, but not in '256745676e'
+Traceback (most recent call last):
+  File "/tmp/p2-supplement-completion-independent.py", line 28, in <module>
+    old=subprocess.check_output(['git','show',f'256745676e:{path}'])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dieterolson/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dieterolson/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['git', 'show', '256745676e:vendor/ud-tools/src/shared/python/launch_monitor/strokes_gained.py']' returned non-zero exit status 128.
