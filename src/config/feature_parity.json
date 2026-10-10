@@ -379,7 +379,7 @@
       "web": "ui/src/pages/CharacterBuilder.tsx",
       "status": "parity",
       "tiles": ["character_builder"],
-      "notes": "Desktop and API share humanoid_character_builder.spec_export (build, preview, export spec/URDF/MJCF/OSIM, presets). The web page still drives only /character-builder/generate; wiring presets and spec export into the page is tracked under epic #11651."
+      "notes": "Desktop and API share humanoid_character_builder.spec_export (build, preview, export spec/URDF/MJCF/OSIM, presets). The web page now drives presets, preview/build and spec/URDF/MJCF/OSIM export through the spec API (CMB-7a, #11658); the appearance/material picker and glTF skinned preview remain under CMB-6 #11657 / CMB-7 #11658."
     },
     "tools.data_explorer": {
       "title": "Data Explorer (import/filter/visualize datasets)",
