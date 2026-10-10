@@ -147,7 +147,6 @@ export function MatchedSwingsPage() {
 
   useEffect(() => {
     let cancelled = false;
-    setLoadState('loading');
     void Promise.resolve().then(async () => {
       if (cancelled) return;
       setLoadState('loading');
