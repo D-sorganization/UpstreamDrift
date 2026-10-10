@@ -31,6 +31,7 @@ from .native_reference_conventions import (
     audit_source_reference,
 )
 from .registration import CaptureRegistration, register_points
+from .native_prepared_state import DeclaredColdStart, reconstruct_declared_cold_start
 from .trc import read_trc, write_trc
 from src.shared.python.motion_matching.tour_capture_contract import TourCapture
 
@@ -57,6 +58,7 @@ class NativeMocoRequest:
     reference_frame_path: str
     passive_policy: PassiveReadinessPolicy | None
     excluded_markers: Mapping[str, str]
+    constrained_cold_start: DeclaredColdStart | None = None
 
     def __post_init__(self) -> None:
         self.config.validate()
@@ -88,6 +90,20 @@ class NativeMocoRequest:
             raise ValueError("Excluded marker reasons must be explicit")
         if set(exclusions) & set(weights):
             raise ValueError("A selected marker cannot also be excluded")
+        if self.constrained_cold_start is not None:
+            declared = self.constrained_cold_start
+            if (
+                declared.model_path != self.model_path.resolve()
+                or declared.source_sha256 != self.model_sha256
+                or dict(declared.named_state) != dict(self.bindings.initial_state)
+                or declared.time_seconds != self.config.t_start_s
+                or declared.constant_commands
+                or declared.source_controller_replacement is not None
+                or declared.allow_source_controllers_for_observation
+            ):
+                raise ValueError(
+                    "constrained cold start differs from Moco source or state"
+                )
         object.__setattr__(self, "marker_weights", MappingProxyType(weights))
         object.__setattr__(self, "marker_bindings", MappingProxyType(bindings))
         object.__setattr__(self, "excluded_markers", MappingProxyType(exclusions))
@@ -96,6 +112,7 @@ class NativeMocoRequest:
     def identity_sha256(self) -> str:
         """Bind every caller policy and placement across all execution stages."""
         registration = self.registration
+        declared = self.constrained_cold_start
         payload = {
             "model_path": str(self.model_path.resolve()),
             "trc_path": str(self.trc_path.resolve()),
@@ -124,6 +141,22 @@ class NativeMocoRequest:
                 None if self.passive_policy is None else asdict(self.passive_policy)
             ),
             "excluded_markers": dict(self.excluded_markers),
+            "constrained_cold_start": None
+            if declared is None
+            else {
+                "lock_targets": dict(declared.lock_targets),
+                "chart_bounds": dict(declared.chart_bounds),
+                "linear_chart_bounds": {
+                    name: (dict(terms), lower, upper)
+                    for name, (
+                        terms,
+                        lower,
+                        upper,
+                    ) in declared.linear_chart_bounds.items()
+                },
+                "constraint_enforcement": dict(declared.constraint_enforcement),
+                "residual_tolerance": declared.residual_tolerance,
+            },
         }
         return hashlib.sha256(
             json.dumps(payload, sort_keys=True, allow_nan=False).encode()
@@ -197,14 +230,24 @@ def _native_preparation(
     if model.getActuators().getSize() != model.getMuscles().getSize():
         blockers.append("nonmuscle-assistance-unqualified")
     coordinates = model.getCoordinateSet()
-    if model.getConstraintSet().getSize() or any(
-        coordinates.get(i).getDefaultLocked() for i in range(coordinates.getSize())
+    declared = request.constrained_cold_start
+    if declared is None and (
+        model.getConstraintSet().getSize()
+        or any(
+            coordinates.get(i).getDefaultLocked() for i in range(coordinates.getSize())
+        )
     ):
         blockers.append("native-constraint-policy-unavailable")
+    if declared is not None and declared.lock_targets:
+        blockers.append("native-moco-locked-coordinates-unsupported")
     try:
-        state, _, _ = _restore_continuous_state(
-            model, request.bindings.initial_state, request.config.t_start_s
-        )
+        if declared is None:
+            state, _, _ = _restore_continuous_state(
+                model, request.bindings.initial_state, request.config.t_start_s
+            )
+        else:
+            with reconstruct_declared_cold_start(declared) as prepared:
+                model, state = prepared.model, prepared.state
     except (ValueError, RuntimeError):
         blockers.append("complete-native-state-unavailable")
         return loaded, reference_sha, passive_sha, blockers
@@ -256,13 +299,23 @@ def _native_preparation(
         preview = {
             muscles.get(i).getName(): np.zeros(2) for i in range(muscles.getSize())
         }
-        build_native_muscle_replay_bundle(
-            request.model_path,
-            request.bindings.initial_state,
-            np.array([0.0, request.config.duration_s]),
-            preview,
-            experiment_id="offline-moco-replay-capability-preview",
-        )
+        if declared is None:
+            build_native_muscle_replay_bundle(
+                request.model_path,
+                request.bindings.initial_state,
+                np.array([0.0, request.config.duration_s]),
+                preview,
+                experiment_id="offline-moco-replay-capability-preview",
+            )
+        else:
+            from .native_constrained_muscle import build_constrained_muscle_bundle
+
+            build_constrained_muscle_bundle(
+                declared,
+                np.array([0.0, request.config.duration_s]),
+                preview,
+                experiment_id="offline-moco-constrained-replay-capability-preview",
+            )
     except (ValueError, RuntimeError):
         blockers.append("independent-native-replay-unavailable")
     if _sha(request.model_path) != request.model_sha256:
