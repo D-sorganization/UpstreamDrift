@@ -10,6 +10,7 @@ from __future__ import annotations
 from collections.abc import Iterator, Mapping, Sequence
 from importlib.util import find_spec
 import json
+import logging
 from pathlib import Path
 import tempfile
 from typing import Any
@@ -29,6 +30,7 @@ from src.tools.native_viewer_export.backends._meshcat_page import (
 )
 from src.tools.native_viewer_export.backends._scene import z_axis_frame
 from src.tools.native_viewer_export.backends._subprocess import export_urdf
+from src.tools.native_viewer_export.ball import resolve_address_ball
 from src.tools.native_viewer_export.core import (
     ExportSettings,
     Image8,
@@ -37,9 +39,12 @@ from src.tools.native_viewer_export.core import (
     view_lookats,
 )
 
+logger = logging.getLogger(__name__)
+
 _CAPSULE_RGBA = (0.75, 0.78, 0.85, 1.0)
 _SHAPE_RGBA = (0.7, 0.72, 0.8, 1.0)
 _FLOOR_RGBA = (0.35, 0.45, 0.3, 1.0)
+_BALL_RGBA = (0.95, 0.95, 0.95, 1.0)
 
 
 class DrakeMeshcatBackend:
@@ -89,7 +94,9 @@ class DrakeMeshcatBackend:
             )
         return (heads[0].body if heads else None), club_body
 
-    def _build(self, swing: SwingInput) -> tuple[Any, Any, Any, Any, Any, list[int]]:
+    def _build(
+        self, swing: SwingInput, *, ball: bool = True
+    ) -> tuple[Any, Any, Any, Any, Any, list[int]]:
         from pydrake.geometry import (
             Box,
             Capsule,
@@ -100,6 +107,7 @@ class DrakeMeshcatBackend:
             MeshcatVisualizerParams,
             Rgba,
             Role,
+            Sphere,
         )
         from pydrake.math import RigidTransform, RotationMatrix
         from pydrake.multibody.parsing import Parser
@@ -155,6 +163,18 @@ class DrakeMeshcatBackend:
             "floor",
             np.array(_FLOOR_RGBA),
         )
+        if ball:
+            resolved = resolve_address_ball(swing)
+            if resolved.position_m is None:
+                logger.warning("skipping decorative ball: %s", resolved.reason)
+            else:
+                plant.RegisterVisualGeometry(
+                    plant.world_body(),
+                    RigidTransform(resolved.position_m),  # type: ignore[arg-type]
+                    Sphere(resolved.radius_m),
+                    "visual_ball",
+                    np.array(_BALL_RGBA),
+                )
         plant.Finalize()
         meshcat = Meshcat()
         MeshcatVisualizer.AddToBuilder(
@@ -184,7 +204,9 @@ class DrakeMeshcatBackend:
             DrakeMeshcatSink,
         )
 
-        plant, diagram, ctx, pctx, meshcat, starts = self._build(swing)
+        plant, diagram, ctx, pctx, meshcat, starts = self._build(
+            swing, ball=settings.ball
+        )
 
         def set_state(index: int) -> None:
             full = np.zeros(plant.num_positions())

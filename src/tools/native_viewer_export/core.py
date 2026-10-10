@@ -92,6 +92,7 @@ class ExportSettings:
     multiview: bool = True
     hud: bool = True  # False: clean frames, no view label or HUD text
     grip: bool = False  # hands/grip overlay (GCV-10); hands_closeup tracks it
+    ball: bool = True  # decorative address ball on the MeshCat backends (GCV-13)
     lookat_m: tuple[float, float, float] = (1.0, 0.0, 0.9)
     distance_m: float | None = None
 

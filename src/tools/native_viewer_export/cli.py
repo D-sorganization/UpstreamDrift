@@ -106,6 +106,11 @@ def build_parser() -> argparse.ArgumentParser:
         "hands_closeup",
     )
     p.add_argument("--no-grid", action="store_true", help="skip the 2x2 clip")
+    p.add_argument(
+        "--no-ball",
+        action="store_true",
+        help="skip the decorative address ball (Drake/Pinocchio MeshCat; GCV-13)",
+    )
     return p
 
 
@@ -144,6 +149,7 @@ def build_settings(args: argparse.Namespace) -> ExportSettings:
         multiview=not args.no_grid,
         grip=args.grip,
         hud=not args.no_hud,
+        ball=not args.no_ball,
         **(
             {"impact_speed": args.impact_speed} if args.impact_speed is not None else {}
         ),
