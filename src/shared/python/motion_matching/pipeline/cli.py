@@ -415,6 +415,15 @@ def _attach_face_report(
         ik_report["face_orientation"] = _face_orientation_report(
             lane, cal_res, *q_pair, weight
         )
+    elif weight > 0 and lane.face_unavailable_reason:
+        ik_report["face_orientation"] = {
+            "weight": weight,
+            "frame": FACE_FRAME,
+            "triad": list(HEAD_TRIAD_LABELS),
+            "targeted_frames": 0,
+            "available": False,
+            "reason": lane.face_unavailable_reason,
+        }
 
 
 def _face_orientation_report(
