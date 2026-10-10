@@ -19,8 +19,9 @@ function receipt = export_gs3dx_grf_fixture(repo, out_dir, opts)
 %
 %   OPTS fields: stop_time (0.30 s), n_rows (31), rest (true: the standing
 %   test; the impact drive tips the body over, see GROUND_CONTACT.md),
-%   hold_posture (false: true holds the upper body at its start pose with
-%   GS3DX_HOLD_POSTURE, the held stance compared with the Python engines).
+%   lock_joints (false: true locks every joint but the pelvis root with
+%   GS3DX_LOCK_JOINTS, in memory, so the body stands as one rigid body on
+%   its sole contacts: the stance compared with the Python engines).
 %
 %   Preconditions: MATLAB R2025b (asserted); REPO is an UpstreamDrift checkout.
 %   Postconditions: CSV (LF line endings) and receipt exist in OUT_DIR; the
@@ -34,7 +35,7 @@ function receipt = export_gs3dx_grf_fixture(repo, out_dir, opts)
     if ~isfield(opts, 'stop_time'); opts.stop_time = 0.30; end
     if ~isfield(opts, 'n_rows');    opts.n_rows    = 31;   end
     if ~isfield(opts, 'rest');      opts.rest      = true; end
-    if ~isfield(opts, 'hold_posture'); opts.hold_posture = false; end
+    if ~isfield(opts, 'lock_joints'); opts.lock_joints = false; end
     assert(opts.stop_time > 0 && opts.n_rows >= 2, 'BadOpts: stop_time > 0, n_rows >= 2');
 
     rel = version('-release');
@@ -48,13 +49,16 @@ function receipt = export_gs3dx_grf_fixture(repo, out_dir, opts)
     geo = local_geometry(mdl);
     if ~isfolder(out_dir); mkdir(out_dir); end
 
-    hold = struct();
-    if opts.hold_posture
-        hold = gs3dx_hold_posture(local_start_values(info, mdl));
+    locked = {};
+    edited = {};
+    if opts.lock_joints
+        load_system(mdl);   % GS3DX_CONTACT_CHECK runs the loaded, locked model
+        [locked, edited] = gs3dx_lock_joints(mdl);
     end
+    discard = onCleanup(@() cellfun(@(bd) close_system(bd, 0), edited)); %#ok<NASGU> scope guard
 
     tic;
-    c = gs3dx_contact_check(info, rest=opts.rest, stop_time=opts.stop_time, variables=hold);
+    c = gs3dx_contact_check(info, rest=opts.rest, stop_time=opts.stop_time);
     elapsed_s = toc;
     assert(c.newton.pass, 'NewtonFailed: residual %.3g > bound %.3g', c.newton.max, c.newton.bound);
     assert(isfield(c.feet.L, 'R') && isfield(c.feet.R, 'R'), ...
@@ -112,8 +116,8 @@ function receipt = export_gs3dx_grf_fixture(repo, out_dir, opts)
     receipt.model = mdl;
     receipt.model_sha256 = local_sha256(fullfile(info.models_dir, [mdl '.slx']));
     receipt.rest = opts.rest;
-    receipt.hold_posture = opts.hold_posture;
-    receipt.hold_overrides = hold;
+    receipt.lock_joints = opts.lock_joints;
+    receipt.locked_joint_count = numel(locked);
     receipt.stop_time_s = opts.stop_time;
     receipt.sim_wall_clock_s = elapsed_s;
     receipt.mass_kg = c.mass;
@@ -152,26 +156,6 @@ function geo = local_geometry(mdl)
     end
     assert(norm(geo.GroundRotation(:, 3) - [0; 0; 1]) < 1e-12, ...
         'GroundNotLevel: the plane normal must be world +Z');
-end
-
-function start = local_start_values(info, mdl)
-% The start angles the run uses: the impact drive's overrides over the
-% model workspace (GS3DX_CONTACT_CHECK applies the same drive).
-    load_system(mdl);
-    cleanup = onCleanup(@() close_system(mdl, 0));
-    ws = get_param(mdl, 'ModelWorkspace');
-    start = struct();
-    for n = {ws.whos.name}
-        if contains(n{1}, 'StartPosition')
-            start.(n{1}) = ws.getVariable(n{1});
-        end
-    end
-    drive = gs3dx_drive(info, "impact", mdl);
-    for f = reshape(fieldnames(drive), 1, [])
-        if contains(f{1}, 'StartPosition')
-            start.(f{1}) = drive.(f{1});
-        end
-    end
 end
 
 function local_write_csv(path, header, data)
