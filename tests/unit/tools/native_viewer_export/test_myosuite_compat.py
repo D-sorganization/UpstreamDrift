@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 import subprocess
 import sys
 import types
@@ -10,12 +11,14 @@ from typing import Any
 import pytest
 
 from src.tools.native_viewer_export.backends import myosuite_arena
+from src.tools.native_viewer_export.backends import myosuite_compat as compat
 from src.tools.native_viewer_export.backends.myosuite_arena import (
     MyoSuiteArenaBackend,
 )
 from src.tools.native_viewer_export.backends.myosuite_compat import (
     MJ_RENDERER_MODULES,
     PROBE_CODE,
+    SCENE_NAME,
     import_mj_renderer,
 )
 
@@ -83,3 +86,29 @@ def test_unavailable_reason_none_when_probe_passes(
         lambda argv, **_: subprocess.CompletedProcess(argv, 0, "", ""),
     )
     assert MyoSuiteArenaBackend().unavailable_reason() is None
+
+
+def test_find_scene_prefers_3x_myo_sim_package(tmp_path: Path) -> None:
+    scene = tmp_path / "models" / "scene" / SCENE_NAME
+    scene.parent.mkdir(parents=True)
+    scene.write_text("<mujoco/>", encoding="utf-8")
+    spec = types.SimpleNamespace(submodule_search_locations=[str(tmp_path)])
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setattr(
+            compat,
+            "find_spec",
+            lambda name: spec if name == "myo_sim" else None,
+        )
+        assert compat.find_scene() == scene
+
+
+def test_find_scene_missing_lists_candidates(tmp_path: Path) -> None:
+    spec = types.SimpleNamespace(submodule_search_locations=[str(tmp_path)])
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setattr(
+            compat,
+            "find_spec",
+            lambda name: spec if name == "myo_sim" else None,
+        )
+        with pytest.raises(FileNotFoundError, match="myo_sim|models"):
+            compat.find_scene()

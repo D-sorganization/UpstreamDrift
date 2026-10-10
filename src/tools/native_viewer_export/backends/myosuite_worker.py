@@ -31,17 +31,14 @@ from src.shared.python.motion_matching.same_input import InputBundle
 from src.shared.python.motion_matching.visual_skeleton import derive_visual_skeleton
 from src.tools.native_viewer_export.backends._worker_job import WorkerJob
 from src.tools.native_viewer_export.backends.myosuite_compat import (
+    find_scene,
     import_mj_renderer,
 )
-
-SCENE_FILE = ("simhive", "myo_sim", "scene", "myosuite_quad.xml")
 
 
 def arena_scene_path() -> Path:
     """The MyoSuite arena scene shipped with the installed package."""
-    import myosuite
-
-    return Path(myosuite.__file__).parent.joinpath(*SCENE_FILE)
+    return find_scene()
 
 
 def _append_child(parent: Any, tag: str) -> Any:
