@@ -221,3 +221,100 @@ def face_events(
         peak_speed_time_s=float(t[peak]),
         peak_speed_gap_to_ball_m=float(np.linalg.norm(head[peak] - head[0])),
     )
+
+
+# Peak search window around impact and post-contact measurement span (GCV-20).
+SPEED_PEAK_WINDOW_S: tuple[float, float] = (-0.060, 0.020)
+POST_IMPACT_WINDOW_S: float = 0.010
+
+
+@dataclass(frozen=True)
+class SpeedTiming:
+    """Clubhead speed around impact on the swing's own clock (GCV-20, #11767).
+
+    Speeds are face-centre chord speeds of whole sample segments, timed at the
+    segment midpoints. ``impact_speed_mps`` is the last segment that ends at
+    or before the ball passage, so it holds no post-contact motion (the
+    GCV-15 "last pre-contact sample" convention). ``post_impact_speed_mps``
+    is the chord speed from the first sample after the contact
+    (``CONTACT_DURATION_S``) to the last sample within
+    ``POST_IMPACT_WINDOW_S`` of impact.
+    """
+
+    impact_time_s: float
+    peak_time_s: float
+    peak_speed_mps: float
+    impact_speed_mps: float
+    post_impact_speed_mps: float
+
+    @property
+    def post_impact_drop_mps(self) -> float:
+        """Speed the head loses to the ball (pre- minus post-contact)."""
+        return self.impact_speed_mps - self.post_impact_speed_mps
+
+    @property
+    def peak_minus_impact_s(self) -> float:
+        """Peak time relative to impact; negative when the peak comes first."""
+        return self.peak_time_s - self.impact_time_s
+
+    def to_record(self) -> dict[str, float]:
+        """JSON-ready record including ``peak_minus_impact_s``."""
+        return {
+            "impact_time_s": self.impact_time_s,
+            "peak_time_s": self.peak_time_s,
+            "peak_minus_impact_s": self.peak_minus_impact_s,
+            "peak_speed_mps": self.peak_speed_mps,
+            "impact_speed_mps": self.impact_speed_mps,
+            "post_impact_speed_mps": self.post_impact_speed_mps,
+            "post_impact_drop_mps": self.post_impact_drop_mps,
+        }
+
+
+def clubhead_speed_timing(
+    time: Sequence[float] | np.ndarray, centres: np.ndarray
+) -> SpeedTiming:
+    """Peak and pre-contact impact clubhead speed of a swing (GCV-20).
+
+    ``centres`` is the finite ``(n, 3)`` world face-centre path at strictly
+    increasing ``time``. Impact is :func:`ball_passage`; the peak is the
+    fastest segment after the top of the backswing whose midpoint lies in
+    ``SPEED_PEAK_WINDOW_S`` around impact (so a tracking glitch far from the
+    ball cannot be picked). Raises ``ValueError`` for bad shapes, non-finite
+    input, non-increasing time, no impact or too few post-contact samples.
+    """
+    from src.shared.python.impact_parameters.ball_impact import CONTACT_DURATION_S
+
+    t = np.asarray(time, dtype=float)
+    head = np.asarray(centres, dtype=float)
+    if head.ndim != 2 or head.shape[1] != 3 or t.shape != (len(head),):
+        raise ValueError("time must be (n,) and clubhead (n, 3)")
+    if not (np.isfinite(t).all() and np.isfinite(head).all()):
+        raise ValueError("time and clubhead must be finite")
+    if np.any(np.diff(t) <= 0.0):
+        raise ValueError("time must strictly increase")
+    t_impact, _, _ = ball_passage(t, head)
+    top = top_of_backswing_index(t, head)
+    speed = np.linalg.norm(np.diff(head, axis=0), axis=1) / np.diff(t)
+    mid = 0.5 * (t[1:] + t[:-1])
+    lo, hi = SPEED_PEAK_WINDOW_S
+    window = (mid >= t_impact + lo) & (mid <= t_impact + hi)
+    window[:top] = False
+    if not window.any():
+        raise ValueError("no clubhead samples in the peak window around impact")
+    peak = int(np.flatnonzero(window)[np.argmax(speed[window])])
+    # Segments ending at the passage (to rounding) are wholly pre-contact.
+    pre = np.flatnonzero(t[1:] <= t_impact + 1e-6 * float(np.min(np.diff(t))))
+    after = np.flatnonzero(
+        (t >= t_impact + CONTACT_DURATION_S) & (t <= t_impact + POST_IMPACT_WINDOW_S)
+    )
+    if after.size < 2:
+        raise ValueError("need two clubhead samples after the contact")
+    a, b = int(after[0]), int(after[-1])
+    post = float(np.linalg.norm(head[b] - head[a])) / float(t[b] - t[a])
+    return SpeedTiming(
+        impact_time_s=float(t_impact),
+        peak_time_s=float(mid[peak]),
+        peak_speed_mps=float(speed[peak]),
+        impact_speed_mps=float(speed[pre[-1]]),
+        post_impact_speed_mps=post,
+    )

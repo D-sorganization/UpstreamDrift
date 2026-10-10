@@ -122,7 +122,9 @@ class MinimizeMarkerKinematics(FullBodyMarkerKinematics):
         opts = SolvePoseOptions(**kwargs) if options is None else options
         targets_arr = np.asarray(targets, dtype=float)
         prep = self._prepare_pose_fit(targets_arr, valid, q_init, ground, opts)
-        q, done = self._solve_with_minimize(prep, targets_arr, q_init, ground, opts)
+        q, done = self._solve_with_minimize(
+            prep, targets_arr, prep.anchor, ground, opts
+        )
         return self._finalize_pose_fit(
             q, targets_arr, prep, ground=ground, iterations=done
         )

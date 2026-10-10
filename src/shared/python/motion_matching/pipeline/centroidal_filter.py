@@ -562,8 +562,10 @@ def centroidal_filter(
     its reference ZMP and a report.  Steps that do not lower the exact
     violation merit are rejected and the trust region halves.
     """
-    from src.shared.python.motion_matching import full_body_forward_dynamics as fs
-    from src.shared.python.motion_matching.pipeline.dynamics import zmp_summary
+    from src.shared.python.motion_matching.pipeline.dynamics import (
+        lane_reference_zmp,
+        zmp_summary,
+    )
     from src.shared.python.motion_matching.pipeline.reference import marker_errors
 
     cfg = config or CentroidalFilterConfig()
@@ -584,7 +586,7 @@ def centroidal_filter(
     for it in range(cfg.iterations):
         step_cfg = replace(cfg, bound_rad=bound)
         trial = q_track + centroidal_step(frames, times, q_track, zmp, step_cfg)
-        trial_zmp = fs.reference_zmp(sim, times, trial, lane.ground)
+        trial_zmp = lane_reference_zmp(sim, lane, trial)
         trial_merit = violation_merit(trial_zmp, times, cfg)
         accepted = trial_merit < merit
         report["passes"].append(

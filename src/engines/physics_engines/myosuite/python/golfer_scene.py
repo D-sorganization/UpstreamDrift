@@ -25,6 +25,7 @@ from pathlib import Path
 from typing import Any
 
 from src.shared.python.contracts import postcondition, precondition
+from src.shared.python.model_appearance.grip_pose import DEFAULT_GRIP_POSE, Hand
 from src.shared.python.motion_matching.club_models import CLUBS, ClubSpec
 from src.shared.python.motion_matching.contact_law import ContactParameters
 
@@ -191,6 +192,16 @@ def _write_upper_chain_with_local_arms(
     return dst
 
 
+def _club_grip_site(name: str, club: ClubSpec, hand: Hand) -> str:
+    """Grip site on the club body (origin at the head, shaft toward -y).
+
+    The hand sits ``distance_below_butt_m`` below the butt, so its distance
+    from the head is the club length minus that (shared grip pose, OSV-2).
+    """
+    y = -(club.length_m - DEFAULT_GRIP_POSE.distance_below_butt_m(hand))
+    return f'      <site name="{name}" pos="0 {y:.6g} 0" size="0.006"/>'
+
+
 def _worldbody_addons(club: ClubSpec, contact: ContactParameters) -> str:
     """Club + contact sphere bodies placed inside ``<worldbody>``."""
     shaft_half = 0.5 * club.length_m
@@ -237,8 +248,8 @@ def _worldbody_addons(club: ClubSpec, contact: ContactParameters) -> str:
                 f'pos="0 0 0" mass="{club.head_mass_kg:.6g}" '
                 f'rgba="0.1 0.1 0.15 1"/>'
             ),
-            '      <site name="grip_site_club_r" pos="0 -0.95 0" size="0.006"/>',
-            '      <site name="grip_site_club_l" pos="0 -0.88 0" size="0.006"/>',
+            _club_grip_site("grip_site_club_r", club, Hand.TRAIL),
+            _club_grip_site("grip_site_club_l", club, Hand.LEAD),
             "    </body>",
             *contact_bodies,
         ]

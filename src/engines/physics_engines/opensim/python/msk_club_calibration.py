@@ -224,6 +224,13 @@ class GeneratedSwing:
     def _pose(self, row: Sequence[float]) -> dict[str, float]:
         return dict(zip(self.coordinate_order, map(float, row), strict=True))
 
+    def body_origins(
+        self, row: Sequence[float], bodies: Sequence[str]
+    ) -> dict[str, np.ndarray]:
+        """Native-world origins of generated-model ``bodies`` at pose ``row``."""
+        self._probe.set(self._pose(row))
+        return {name: self._probe.body(name)[:3, 3] for name in bodies}
+
     def targets(self, row: Sequence[float]) -> AddressTargets:
         """Club pose and landmarks (Rajagopal world) at generated pose ``row``."""
         self._probe.set(self._pose(row))

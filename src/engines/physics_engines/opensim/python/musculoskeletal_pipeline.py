@@ -13,7 +13,8 @@ Order of operations (each step is a function of the previous one's files):
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from collections.abc import Mapping
+from dataclasses import dataclass, field, replace
 import hashlib
 import json
 import logging
@@ -24,6 +25,7 @@ from typing import Any
 import numpy as np
 
 from src.engines.physics_engines.opensim.python import (
+    msk_club,
     musculoskeletal_grf as grf,
     musculoskeletal_solvers as solvers,
     musculoskeletal_swing as swing,
@@ -64,11 +66,25 @@ class PipelineConfig:
     phase_split_s: float = 1.08
     base_model: Path | None = None
     extra_notes: tuple[str, ...] = field(default_factory=tuple)
+    #: Shared club held in both hands (``msk_club.CLUBS``); ``None`` builds
+    #: the no-club control model.
+    club: str | None = "driver"
+    #: Keep the trail-hand weld in the solved model. Off by default: the IK
+    #: kinematics do not close the two-hand loop (see ``release_trail_weld``).
+    enforce_trail_weld: bool = False
 
     def validate(self) -> None:
         """Raise ``ValueError``/``FileNotFoundError`` on unusable inputs."""
         require(self.cutoff_hz > 0, "cutoff_hz must be positive")
         require(self.so_step >= 1, "so_step must be >= 1")
+        require(
+            self.club is None or self.club in msk_club.CLUBS,
+            f"club must be None or one of {msk_club.CLUBS}, got {self.club!r}",
+        )
+        require(
+            not self.enforce_trail_weld or self.club is not None,
+            "enforce_trail_weld needs a club",
+        )
         for p in (self.golf_model, self.states_file):
             if not Path(p).is_file():
                 raise FileNotFoundError(f"input not found: {p}")
@@ -103,7 +119,20 @@ def prepare_inputs(cfg: PipelineConfig) -> dict[str, Any]:
     cfg.validate()
     out = Path(cfg.out_dir)
     out.mkdir(parents=True, exist_ok=True)
-    model, info = swing.build_musculoskeletal_model(cfg.golf_model, cfg.base_model)
+    model, info = swing.build_musculoskeletal_model(
+        cfg.golf_model, cfg.base_model, club=cfg.club
+    )
+    if info["club"] is not None:
+        require(
+            info["grip_model"] == "weld",
+            "StaticOptimization needs the weld grip: the bushing club's free "
+            "coordinates have no source kinematics",
+        )
+    released = False
+    if not cfg.enforce_trail_weld:
+        released = swing.release_trail_weld(model)
+        model.initSystem()
+    info["trail_weld_released_for_so"] = released
     model_path = out / "msk_model.osim"
     model.printToXML(str(model_path))
     times, cols = swing.read_states_table(cfg.states_file)
@@ -207,6 +236,25 @@ def solve_and_summarise(cfg: PipelineConfig, prep: dict[str, Any]) -> dict[str, 
             summary["phases"][name] = summarize_phase(
                 t[mask], {k: v[mask] for k, v in acts.items()}
             )
+    log_t, log_v = solvers.parse_static_optimization_log(
+        Path(act_path).parent / solvers.SO_LOG_NAME
+    )
+    converged = solvers.converged_frames(t, log_t, log_v)
+    summary["converged_mask"] = converged
+    summary["convergence"] = {
+        "criterion": "logged equality-constraint violation <= "
+        f"{solvers.SO_CONVERGED_VIOLATION:g}",
+        "frames": int(t.size),
+        "frames_converged": int(converged.sum()),
+        "first_unconverged_time_s": (
+            float(t[~converged][0]) if (~converged).any() else None
+        ),
+        "max_violation": float(log_v.max()) if log_v.size else None,
+    }
+    if int(converged.sum()) > 1:
+        summary["converged_only"] = summarize_phase(
+            t[converged], {k: v[converged] for k, v in acts.items()}
+        )
     summary["wall_clock_s"] = wall
     summary["activation_file"] = str(act_path)
     return summary
@@ -261,16 +309,34 @@ def build_receipt(
             ],
         },
         "ground_reaction_estimate": prep["grf"],
+        "club": {
+            "issue": "#11756",
+            "club": info["club"],
+            "grip_model": info["grip_model"],
+            "mass_kg": info["club_mass_kg"],
+            "grip_calibration": info["grip_calibration"],
+            "trail_weld_released_for_so": info["trail_weld_released_for_so"],
+            "note": (
+                "The IK kinematics do not close the two-hand loop. With the "
+                "trail weld enforced, StaticOptimization could not meet any arm "
+                "coordinate's acceleration (14 arm coordinates at every one of "
+                "the 88 frames tried), so by default the solved model holds the "
+                "club with the lead hand only and the trail hand is free."
+            ),
+        },
         "solver": {
             "name": "opensim.StaticOptimization (AnalyzeTool)",
             "activation_exponent": solvers.DEFAULT_ACTIVATION_EXPONENT,
             "use_muscle_physiology": True,
             "step_interval": cfg.so_step,
             "wall_clock_s": summary["wall_clock_s"],
-            "converged": True,
+            "converged": summary["convergence"]["frames_converged"]
+            == summary["convergence"]["frames"],
+            "convergence": summary["convergence"],
             "convergence_note": (
-                "AnalyzeTool completed; per-frame optimiser failures, if any, are "
-                "visible as reserve use and saturated muscles below"
+                "results cover every frame, including frames whose optimiser did "
+                "not converge (their actuator values are not solutions); "
+                "results.converged_only repeats the summary on converged frames"
             ),
         },
         "results": {
@@ -282,6 +348,7 @@ def build_receipt(
             "muscles_saturated_fraction": summary["muscles_saturated_fraction"],
             "phases": summary["phases"],
             "phase_split_s": cfg.phase_split_s,
+            "converged_only": summary.get("converged_only"),
         },
         "moco_inverse": {
             "status": "NOT_RUN_TO_CONVERGENCE",
@@ -293,21 +360,117 @@ def build_receipt(
     }
 
 
+def club_load_comparison(
+    times_with: np.ndarray,
+    torques_with: Mapping[str, np.ndarray],
+    times_without: np.ndarray,
+    torques_without: Mapping[str, np.ndarray],
+    *,
+    valid: np.ndarray | None = None,
+) -> dict[str, Any]:
+    """Per-frame actuator torque difference, with club minus without (N m).
+
+    Both solves share the kinematics, so the difference isolates what the
+    club adds (its inertia and weight). ``valid`` (default: every frame)
+    selects the frames compared, normally those converged in both runs.
+
+    Raises ``ValueError`` unless both runs have the same frame times (within
+    1e-9 s) and the same actuator names, and ``valid`` matches the frames and
+    selects at least one. Postcondition: ``per_actuator`` has
+    ``delta_rms``/``delta_peak`` and each run's RMS for every actuator over
+    the valid frames, and ``largest_delta_rms`` names the actuator with the
+    largest ``delta_rms``.
+    """
+    tw = np.asarray(times_with, dtype=float)
+    to = np.asarray(times_without, dtype=float)
+    require(
+        tw.shape == to.shape and bool(np.allclose(tw, to, rtol=0.0, atol=1e-9)),
+        "with- and without-club runs must share frame times",
+    )
+    require(
+        set(torques_with) == set(torques_without),
+        "with- and without-club runs must have the same actuator names",
+    )
+    keep = np.ones(tw.size, dtype=bool) if valid is None else np.asarray(valid, bool)
+    require(
+        keep.shape == tw.shape and bool(keep.any()),
+        "valid must mark at least one of the compared frames",
+    )
+
+    def rms(v: np.ndarray) -> float:
+        return float(np.sqrt(np.mean(v**2)))
+
+    per: dict[str, dict[str, float]] = {}
+    for name in sorted(torques_with):
+        a = np.asarray(torques_with[name], dtype=float)[keep]
+        b = np.asarray(torques_without[name], dtype=float)[keep]
+        delta = a - b
+        per[name] = {
+            "delta_rms": rms(delta),
+            "delta_peak": float(np.abs(delta).max()),
+            "with_club_rms": rms(a),
+            "without_club_rms": rms(b),
+        }
+    largest = max(per, key=lambda k: per[k]["delta_rms"]) if per else None
+    return {
+        "method": "per-frame difference of StaticOptimization actuator torques, "
+        "same kinematics and window, with the club minus the no-club control",
+        "n_frames": int(keep.sum()),
+        "n_frames_excluded": int((~keep).sum()),
+        "per_actuator": per,
+        "largest_delta_rms": largest,
+    }
+
+
+def _upper_torque_series(
+    prep: dict[str, Any], summary: dict[str, Any]
+) -> tuple[np.ndarray, dict[str, np.ndarray]]:
+    t, acts = solvers.activation_table_to_arrays(summary["activation_file"])
+    info = prep["info"]
+    return t, solvers.actuator_torques(acts, info["actuator_optimal_force"], "upper_")
+
+
 def run_pipeline(
     cfg: PipelineConfig,
     receipt_path: str | Path,
     *,
     moco_pilot: tuple[float, float, float] | None = None,
     moco_iterations: int = 25,
+    club_control: bool = False,
 ) -> dict[str, Any]:
     """Run all steps and write the receipt; return it.
 
     ``moco_pilot=(t0, t1, mesh_s)`` additionally runs a short MocoInverse pilot
     whose (usually unconverged) status is recorded verbatim in the receipt.
+    ``club_control=True`` (needs ``cfg.club``) also solves the no-club control
+    in ``out_dir/no_club_control`` and records :func:`club_load_comparison`
+    of the upper-body torques under ``club_load``.
     """
+    require(
+        not club_control or cfg.club is not None,
+        "club_control needs a club to compare against",
+    )
     prep = prepare_inputs(cfg)
     summary = solve_and_summarise(cfg, prep)
     receipt = build_receipt(cfg, prep, summary)
+    if club_control:
+        control = replace(cfg, club=None, out_dir=Path(cfg.out_dir) / "no_club_control")
+        prep_c = prepare_inputs(control)
+        summary_c = solve_and_summarise(control, prep_c)
+        both = summary["converged_mask"] & summary_c["converged_mask"]
+        comparison = club_load_comparison(
+            *_upper_torque_series(prep, summary),
+            *_upper_torque_series(prep_c, summary_c),
+            valid=both,
+        )
+        comparison["frames"] = "converged in both runs"
+        comparison["control_convergence"] = summary_c["convergence"]
+        for key, run in (("with_club", summary), ("control", summary_c)):
+            converged = run.get("converged_only") or {}
+            comparison[f"{key}_converged_reserve_rms_max"] = converged.get(
+                "reserve_rms_max"
+            )
+        receipt["club_load"] = comparison
     if moco_pilot is not None:
         t0, t1, mesh = moco_pilot
         receipt["moco_inverse"] = solvers.solve_moco_pilot(

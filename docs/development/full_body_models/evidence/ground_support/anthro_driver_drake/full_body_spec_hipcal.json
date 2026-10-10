@@ -715,8 +715,8 @@
   },
   "contact": {
     "ground": {
-      "calibrated": false,
-      "height_m": null,
+      "calibrated": true,
+      "height_m": 0.0002577801048755657,
       "normal_policy": "opposite_gravity"
     },
     "law": "hunt_crossley_coulomb",
@@ -1435,9 +1435,18 @@
       "name": "hip_r",
       "parent": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso",
       "parent_to_base": [
-        [0.0, 1.0, 0.0, 0.0],
-        [-1.0, 0.0, 0.0, -0.08892],
-        [0.0, 0.0, 1.0, 0.0],
+        [
+          0.2695573528439115, 0.8371264475735777, -0.47598124364372063,
+          -0.008897556778798645
+        ],
+        [
+          -0.9405809263079957, 0.12287914687487424, -0.3165568453357066,
+          -0.10237072770747917
+        ],
+        [
+          -0.20650993824359673, 0.5330291043049555, 0.8205081470469883,
+          -0.059127878049276855
+        ],
         [0.0, 0.0, 0.0, 1.0]
       ],
       "primitives": [
@@ -1600,9 +1609,18 @@
       "name": "hip_l",
       "parent": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso",
       "parent_to_base": [
-        [0.0, 1.0, 0.0, 0.0],
-        [-1.0, 0.0, 0.0, 0.08892],
-        [0.0, 0.0, 1.0, 0.0],
+        [
+          0.8792167884636203, 0.020486448767231883, -0.47598124364372063,
+          -0.01458323891976715
+        ],
+        [
+          -0.19301437197917512, 0.9287288171907818, -0.3165568453357066,
+          0.11433175589894234
+        ],
+        [
+          0.43557237182034386, 0.3701933137379948, 0.8205081470469883,
+          -0.09829744266772114
+        ],
         [0.0, 0.0, 0.0, 1.0]
       ],
       "primitives": [
@@ -1904,7 +1922,7 @@
       "offset_m": [0.02, -0.15, 0.08]
     }
   },
-  "provenance": "anthropometric full-body candidate v1 at 1.710 m, 78.0 kg (build_anthropometric_spec.py; AN-1 #10099); upper body unqualified; marker offsets are anatomical seeds to be calibrated | toe contact spheres added on calcanei; stiffness 5e+04 N/m",
+  "provenance": "anthropometric full-body candidate v1 at 1.710 m, 78.0 kg (build_anthropometric_spec.py; AN-1 #10099); upper body unqualified; marker offsets are anatomical seeds to be calibrated | hip joints relocated to functional centres from the capture (radii 0.4040/0.3829 m, sphere sd 1.9/2.0 mm over 649 frames) with zero twist calibrated (R: -25.73 deg, L: 45.08 deg) | toe contact spheres added on calcanei; stiffness 5e+04 N/m",
   "qualification": "full-body extension of native-derived geometry; dynamics unqualified",
   "schema_version": "full-body-v1",
   "subject": {
@@ -1914,6 +1932,10 @@
     "grip_rotation_deg": {
       "L": [-90.0, 47.0, 0.0],
       "R": [-34.0, 46.0, 62.0]
+    },
+    "hip_zero_twist_deg": {
+      "l": 45.08,
+      "r": -25.73
     },
     "mass_kg": 78.0,
     "shoulder_scale": 1.0,

@@ -28,6 +28,8 @@ from src.shared.python.motion_matching.marker_calibration import (
 
 Array: TypeAlias = NDArray[np.float64]
 
+_ALIGNMENT_AGREEMENT_TOL = 1.0e-6
+
 
 @dataclass(frozen=True)
 class SphereFit:
@@ -387,6 +389,52 @@ def _twist_axis_sign(child_to_follower: Any) -> float:
 def hip_is_mirrored(joint: Mapping[str, Any]) -> bool:
     """True when a hip's ``Rz`` (rotation) axis runs down the femur (-y)."""
     return float(_matrix(joint["child_to_follower"])[1, 2]) < -0.5
+
+
+def pelvis_alignment_from_spec(
+    document: Mapping[str, Any], *, hip_frame: str = "Hip"
+) -> Array:
+    """The 4x4 OpenSim-pelvis -> ``hip_frame`` alignment ``document`` was built with.
+
+    OpenSim's hip has unrotated parent and child frames, so at zero hip
+    coordinates the femur frame has the pelvis orientation. A builder writes
+    the hip as ``P = H A F S`` and ``C = G S`` (``parent_to_base`` and
+    ``child_to_follower``; ``F``/``G`` the unrotated Rajagopal frames, ``S``
+    the builder's axis layout: permutation, mirror or identity), so each hip
+    gives ``A = (H^-1 P) C^T`` (rotation blocks). This is the
+    ``hip_from_pelvis_old`` that :func:`apply_hip_calibration` needs; taking it
+    from another spec's build receipt rotates the hips (#12109). The
+    translation is the hip-centre midpoint; :func:`apply_hip_calibration` does
+    not depend on it.
+
+    Raises ``ValueError`` when ``hip_frame`` or a hip joint is missing, or when
+    the two hips disagree on the rotation (a spec not built this way).
+    Postcondition: the rotation block is proper orthonormal.
+    """
+    frames = {f["name"]: f for f in document["frames"]}
+    if hip_frame not in frames:
+        raise ValueError(f"Document has no frame named {hip_frame}")
+    h_inv = np.linalg.inv(_matrix(frames[hip_frame]["placement"]))
+    joints = {j["name"]: j for j in document["joints"]}
+    rotations, origins = [], []
+    for name in ("hip_r", "hip_l"):
+        if name not in joints:
+            raise ValueError(f"Document has no {name} joint")
+        base = h_inv @ _matrix(joints[name]["parent_to_base"])
+        layout = _matrix(joints[name]["child_to_follower"])[:3, :3]
+        rotations.append(base[:3, :3] @ layout.T)
+        origins.append(base[:3, 3])
+    if float(np.max(np.abs(rotations[0] - rotations[1]))) > _ALIGNMENT_AGREEMENT_TOL:
+        raise ValueError("hip_r and hip_l disagree on the pelvis alignment")
+    rotation = rotations[0]
+    if not np.allclose(rotation.T @ rotation, np.eye(3), atol=1e-9) or (
+        abs(np.linalg.det(rotation) - 1.0) > 1e-9
+    ):
+        raise ValueError("Recovered pelvis alignment is not a proper rotation")
+    out = np.eye(4)
+    out[:3, :3] = rotation
+    out[:3, 3] = np.mean(origins, axis=0)
+    return out
 
 
 def apply_hip_calibration(

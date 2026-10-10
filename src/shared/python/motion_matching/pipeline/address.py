@@ -487,7 +487,7 @@ def prepare_hip_spec(
     upper_base: Mapping[str, Any],
     labels: tuple[str, ...],
     upper: Mapping[str, tuple[str, Sequence[float]]],
-    alignment_old: Sequence[float] | None = None,
+    alignment_old: Any | None = None,
     options: HipCalibrationOptions | None = None,
 ) -> tuple[
     dict[str, Any],

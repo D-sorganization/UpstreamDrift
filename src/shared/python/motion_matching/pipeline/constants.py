@@ -144,6 +144,25 @@ ADDRESS_SEEDS_DEG: list[dict[str, float]] = [
 STANCE_TOLERANCE_M: float = 0.02  # marker within this height of address: on ground
 REFERENCE_CUTOFF_HZ: float = 12.0  # zero-phase low-pass on IK reference
 TRACKING_CUTOFF_HZ: float = 12.0  # zero-phase low-pass on re-solved reference
+#: Pre-contact tracking cutoffs tried, lowest first, by the release-preserving
+#: selection (GCV-20, #11767; DESIGN_DECISIONS section 11). The first is the
+#: base cutoff; post-contact samples always keep TRACKING_CUTOFF_HZ.
+RELEASE_CUTOFF_CANDIDATES_HZ: tuple[float, ...] = (12.0, 15.0, 18.0, 20.0, 25.0, 30.0)
+#: Impact-speed agreement with the unfiltered reference that keeps a release.
+RELEASE_SPEED_TOL: float = 0.01
+# Trail-arm coordinates that re-close the dual-grip weld on the tracked
+# reference (GCV-20, #11767); the lead arm and body keep the filtered pose.
+TRAIL_ARM_WELD_COORDINATES: tuple[str, ...] = (
+    "RScapInputX",
+    "RScapInputY",
+    "RSInputX",
+    "RSInputY",
+    "RSInputZ",
+    "REInput",
+    "RFInput",
+    "RWInputX",
+    "RWInputY",
+)
 
 ZMP_MARGIN_M: float = 0.02
 ZMP_FILTER_ITERATIONS: int = 3
@@ -165,6 +184,37 @@ HEAD_MARKER_WEIGHT: float = 0.1
 TRAJECTORY_RESTARTS: int = 4
 TRAJECTORY_RESTART_THRESHOLD_M: float = 0.03
 TRAJECTORY_RESTART_MARGIN_M: float = 0.003
+#: Restart policies of the full-capture trajectory IK (#12042): ``free`` keeps
+#: the legacy jittered restarts (the prior follows the jittered seed and any
+#: 3 mm better retry wins, so a weakly observed coordinate can hop branches
+#: between two frames); ``seeded`` draws each frame's jitter from a
+#: frame-indexed generator; ``anchored`` keeps the retry's prior on the
+#: frame's start pose; ``stable`` does both; ``continuous`` anchors the retry's prior to the
+#: frame's start and rejects a retry that implies a joint speed above
+#: ``RESTART_MAX_JOINT_SPEED_RAD_S``; ``off`` disables restarts.
+IK_RESTART_POLICIES: tuple[str, ...] = (
+    "free",
+    "seeded",
+    "anchored",
+    "stable",
+    "continuous",
+    "off",
+)
+DEFAULT_IK_RESTART_POLICY: str = "free"
+#: 2000 deg/s, above every joint speed of the smoothed address-to-impact
+#: references of capture-A and capture-B (peak 1299 deg/s, lead wrist).
+RESTART_MAX_JOINT_SPEED_RAD_S: float = 34.9
+#: Coordinates the follow-through markers leave under-determined (#12042):
+#: toes, shoulder axial rotation and forearm rotation. The optional posture
+#: prior pulls them weakly toward the calibrated address pose.
+POSTURE_PRIOR_COORDINATES: tuple[str, ...] = (
+    "mtp_angle_r",
+    "mtp_angle_l",
+    "LSInputZ",
+    "RSInputZ",
+    "LFInput",
+    "RFInput",
+)
 
 SHOULDER_GIMBALS: tuple[tuple[str, str, str], ...] = tuple(
     (f"{s}SInputX", f"{s}SInputY", f"{s}SInputZ") for s in ("L", "R")

@@ -238,3 +238,43 @@ def test_reference_zmp_of_a_standing_pose_is_the_com_projection(
         module.reference_zmp(simulator, times[:2], still[:2], ground)
     with pytest.raises(ValueError):
         module.reference_zmp(simulator, times, still, ground, contact_tolerance_m=-1.0)
+
+
+def test_reference_zmp_split_keeps_the_impact_velocity_step_out_of_the_zmp(
+    simulator: module.FullBodySimulator,
+) -> None:
+    """#12117: a velocity step at the ball impact is not a ground acceleration.
+
+    The ball, not the ground, removes the clubhead's speed at contact. Rates
+    differentiated across that step put a spurious acceleration spike into
+    the frames around it, so the ZMP of those frames lies metres outside the
+    feet. Split at the impact, each side is differentiated on its own and
+    a reference with constant velocity on both sides has its ZMP under the
+    CoM on every frame.
+    """
+    from src.shared.python.motion_matching.contact_law import GroundPlane
+
+    q0 = module.preload_feet(simulator, standing_pose(simulator))
+    ground = GroundPlane(
+        normal=(0.0, 0.0, 1.0), height_m=simulator.adapter.ground_plane.height_m
+    )
+    times = np.linspace(0.0, 0.1, 11)
+    split_time_s = float(times[5])
+    stepped = np.tile(q0, (times.size, 1))
+    # At rest until the split, then 0.5 m/s along the first root slide.
+    stepped[:, 0] += 0.5 * np.clip(times - split_time_s, 0.0, None)
+    unsplit = module.reference_zmp(simulator, times, stepped, ground)
+    split = module.reference_zmp(
+        simulator, times, stepped, ground, split_time_s=split_time_s
+    )
+    com = np.array([simulator.centre_of_mass(q)[0][:2] for q in stepped])
+    # Unsplit, the step's frames demand a large acceleration.
+    assert np.abs(unsplit["zmp_xy"] - com).max() > 0.1
+    # Split, no frame does.
+    np.testing.assert_allclose(split["zmp_xy"], com, atol=1e-6)
+    assert not split["unloaded"].any()
+    # Precondition: the split must leave two samples on each side.
+    with pytest.raises(ValueError):
+        module.reference_zmp(
+            simulator, times, stepped, ground, split_time_s=float(times[-1])
+        )
