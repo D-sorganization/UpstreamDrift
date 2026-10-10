@@ -24,9 +24,10 @@ from src.engines.physics_engines.mujoco.python.replay_contract import (
 ROOT = Path(__file__).resolve().parents[3]
 pytestmark = pytest.mark.unit
 SOURCE = ROOT / "evidence/matched/driver_full_pinocchio"
+# The candidate was fitted on the pre-OSV-6 (unmirrored left hip) spec (#11737).
 SPEC = (
     ROOT
-    / "docs/development/full_body_models/evidence/ground_support/anthro_driver/full_body_spec_hipcal_scaled.json"
+    / "docs/development/full_body_models/evidence/ground_support/anthro_driver_pre_osv6/full_body_spec_hipcal_scaled.json"
 )
 
 

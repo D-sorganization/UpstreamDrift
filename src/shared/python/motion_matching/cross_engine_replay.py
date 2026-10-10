@@ -407,6 +407,26 @@ def render_marker_overlay_animation(
     return out_p
 
 
+def validate_frame_size(size_px: tuple[int, int]) -> tuple[int, int]:
+    """Return ``(width, height)``; raises ``ValueError`` unless positive ints."""
+    ok = len(size_px) == 2 and all(
+        isinstance(v, int) and not isinstance(v, bool) and v > 0 for v in size_px
+    )
+    if not ok:
+        raise ValueError(f"size_px must be two positive ints, got {size_px!r}")
+    return int(size_px[0]), int(size_px[1])
+
+
+_ENGINE_MARKER_COLORS = {
+    "mujoco": "#d62728",
+    "pinocchio": "#1f77b4",
+    "drake": "#2ca02c",
+    "opensim": "#9467bd",
+    "myosuite": "#8c564b",
+    "matlab": "#17becf",
+}
+
+
 def render_replay_frames(
     time_s: Array,
     target_markers_m: Array,
@@ -415,8 +435,18 @@ def render_replay_frames(
     engine_name: str = "engine",
     stride: int = 5,
     valid_mask: BoolArray | None = None,
+    size_px: tuple[int, int] = (480, 480),
+    frame_indices: Sequence[int] | None = None,
 ) -> list[np.ndarray]:
-    """Render 3D marker overlay frames comparing target and model markers."""
+    """Render 3D marker overlay frames comparing target and model markers.
+
+    ``size_px`` is the ``(width, height)`` of every frame; text scales with
+    the height (a 480 px frame keeps the original 6 in at 80 dpi layout).
+    Raises ``ValueError`` unless both are positive integers.
+    ``frame_indices`` renders exactly those samples, in order; otherwise every
+    ``stride``-th sample is rendered.
+    """
+    width, height = validate_frame_size(size_px)
     import matplotlib
 
     matplotlib.use("Agg")
@@ -424,23 +454,17 @@ def render_replay_frames(
 
     n_frames = len(time_s)
     frames: list[np.ndarray] = []
-    color_map = {
-        "mujoco": "#d62728",
-        "pinocchio": "#1f77b4",
-        "drake": "#2ca02c",
-        "opensim": "#9467bd",
-        "myosuite": "#8c564b",
-        "matlab": "#17becf",
-    }
-    m_color = color_map.get(engine_name.lower(), "#ff7f0e")
+    m_color = _ENGINE_MARKER_COLORS.get(engine_name.lower(), "#ff7f0e")
 
-    fig = plt.figure(figsize=(6, 6), dpi=80)
+    dpi = height / 6.0
+    fig = plt.figure(figsize=(width / dpi, height / dpi), dpi=dpi)
     ax: Any = fig.add_subplot(111, projection="3d")
     t0 = target_markers_m[0]
     center = np.nanmean(t0, axis=0) if np.isnan(t0).any() else np.mean(t0, axis=0)
     box_half = 1.0
 
-    for k in range(0, n_frames, stride):
+    indices = range(0, n_frames, stride) if frame_indices is None else frame_indices
+    for k in indices:
         ax.clear()
         t_k = target_markers_m[k]
         m_k = model_markers_m[k]
