@@ -116,6 +116,15 @@ formatter-only acceptance JSON, the main-branch OpenSim law guard and loader
 test changes. Do not describe all 50 as matching the final HEAD. The OpenSim
 guard and revised namespace tests are covered by the separate final campaign.
 
+The first normal push was rejected by mypy: three existing NumPy `Array`
+aliases in ground reaction, overlay consumption and same-input bundle needed
+explicit `TypeAlias` declarations in the hook's dependency environment.
+Declaring those aliases preserved runtime expressions; the affected mypy hook
+then passed, with 49 ground-reaction/overlay tests and 23 bundle/overlay tests
+passing in separate campaigns (overlapping cases, not an additive total).
+Bandit reported no qualifying findings; its first invocation noticed concurrent
+working-tree edits and therefore also required a clean normal-push retry.
+
 ## Remaining Full Epic Work
 
 The prior profiling evidence identifies repeated provider/source verification
