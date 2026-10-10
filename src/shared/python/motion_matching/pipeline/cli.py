@@ -800,6 +800,73 @@ def _write_receipt(out_dir: Path, receipt: dict[str, Any]) -> None:
     )
 
 
+def _attach_turn_block(
+    receipt: dict[str, Any],
+    ctx: PipelineContext,
+    lane: Lane,
+    kin: Any,
+    q_ref: np.ndarray,
+    cal_res: _CalibrateAndScaleResult,
+    ik_report: dict[str, Any],
+) -> None:
+    """Record shoulder/trunk/pelvis turn (markers vs model FK) on ``receipt``.
+
+    Model lines use the shared spec forward kinematics with the receipt's
+    calibrated attachments (hip centres, shoulder centres, thorax markers).
+    Descriptive only (issue #12042); a failure to evaluate is recorded, not raised.
+    """
+    from src.shared.python.motion_matching.tour_capture_contract import (  # noqa: PLC0415
+        load_tour_capture,
+    )
+    from src.shared.python.motion_matching.turn_receipt import (  # noqa: PLC0415
+        attach_turn_block,
+    )
+    from src.shared.python.swing_comparison.turn import (  # noqa: PLC0415
+        spec_model_points,
+        unavailable_turn_block,
+    )
+
+    try:
+        spec = json.loads(cal_res.spec_bytes.decode("utf-8"))
+        offsets = {
+            label: (att["body"], att["offset_m"])
+            for label, att in ik_report.get("attachments_m", {}).items()
+        }
+        points = spec_model_points(
+            spec,
+            q_ref,
+            coordinate_names=tuple(kin.coordinate_order),
+            marker_offsets=offsets or None,
+        )
+        capture = load_tour_capture(ctx.c3d_path)
+    except (KeyError, ValueError, TypeError, OSError) as exc:
+        ctx.log.warning("turn block inputs unavailable: %s", exc)
+        receipt["turn"] = unavailable_turn_block(f"inputs_failed: {exc!r}")
+        return
+    attach_turn_block(
+        receipt,
+        capture,
+        model_time_s=lane.times,
+        model_points=points,
+        model_source="mujoco_ik_reference_spec_fk",
+    )
+
+
+def _attach_descriptive_blocks(
+    receipt: dict[str, Any],
+    ctx: PipelineContext,
+    lane: Lane,
+    kin: Any,
+    q_ref: np.ndarray,
+    cal_res: _CalibrateAndScaleResult,
+    ik_report: dict[str, Any],
+) -> None:
+    """Record the engine, head-gaze and turn blocks on ``receipt``."""
+    receipt["engine"] = ctx.engine
+    receipt["head_gaze"] = head_gaze_receipt(lane, kin, q_ref)
+    _attach_turn_block(receipt, ctx, lane, kin, q_ref, cal_res, ik_report)
+
+
 def _apply_trajectory_optimiser(
     args: argparse.Namespace,
     out_dir: Path,
@@ -953,8 +1020,7 @@ def _simulate_and_receipt(
             elapsed_s=time.perf_counter() - ctx.t_start,
         )
     )
-    receipt["engine"] = ctx.engine
-    receipt["head_gaze"] = head_gaze_receipt(lane, kin, q_ref)
+    _attach_descriptive_blocks(receipt, ctx, lane, kin, q_ref, cal_res, ik_report)
     _apply_trajectory_optimiser(args, out_dir, receipt, lane=lane, kin=kin, sim=sim)
     _write_receipt(out_dir, receipt)
     log_pipeline_summary(

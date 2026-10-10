@@ -5577,6 +5577,38 @@ Visual overlays employ refined ellipsoid geometry (\texttt{GS3DX\_Human\_Refined
 \subsection{Limitations and Interpretation Boundaries}
 Kinematic agreement in inverse kinematics fitting does not demonstrate forward dynamic validity, neuromuscular plausibility, or physical ground support equilibrium. Reports must maintain clear distinctions between kinematic fits, inverse-dynamics effort attributions, and certified continuous forward simulations.
 
+\section{Shoulder, Trunk and Pelvis Turn Definitions (Issue \#12042)}
+\label{sec:turn_definitions}
+
+This section defines the turn metrics used to compare a matched swing with its capture. It records definitions and reporting only: the receipts carry no acceptance thresholds, and the measured discrepancies of issue \#12042 stay open until the later slices of that issue land. The implementation is \texttt{src/shared/python/swing\_comparison/turn.py}; the receipt block is built by \texttt{src/shared/python/motion\_matching/turn\_receipt.py}.
+
+\subsection{Lines, Frame and Sign Convention}
+Three distinct horizontal-plane lines are measured, each from a right point $\mathbf{r}$ to a left point $\mathbf{l}$:
+\begin{itemize}
+\item \emph{Pelvis}: \texttt{WaistLeft}/\texttt{WaistRight} markers (fallback \texttt{WaistLBack}/\texttt{WaistRBack}); in a model, the hip joint centres (femur body origins) or the model's waist sites.
+\item \emph{Upper trunk}: \texttt{BackLeft}/\texttt{BackRight} markers, the rib-cage proxy; in a model, the thorax-fixed points carrying those marker attachments.
+\item \emph{Shoulder girdle}: \texttt{LShoulderBack}/\texttt{RShoulderBack} markers (fallback \texttt{LShoulderTop}/\texttt{RShoulderTop}), which ride the scapula and acromion; in a model, the shoulder joint centres. The previous name ``thorax yaw'' for this line mislabelled scapular rotation as trunk rotation; \texttt{thorax\_yaw} remains only as a deprecated alias of the shoulder-girdle line.
+\end{itemize}
+The world frame is $Z$ up, the golfer faces $-X$ and the target line is $-Y$. A C3D file is $Y$ up in metres and is mapped $(x,y,z)\mapsto(x,-z,y)$. The line yaw is
+\begin{equation}
+\psi(t) = \operatorname{unwrap}\,\operatorname{atan2}\big((\mathbf{l}-\mathbf{r})_y,\,(\mathbf{l}-\mathbf{r})_x\big),
+\qquad
+\theta(t) = -\big(\psi(t)-\psi(t_{\mathrm{address}})\big),
+\end{equation}
+so $\theta$ is in degrees, relative to the same line at address, positive in the backswing (clockwise seen from above for a right-handed golfer) and continuous through $\pm180^\circ$. The X-factor is the upper-trunk turn minus the pelvis turn, $\chi=\theta_{\mathrm{trunk}}-\theta_{\mathrm{pelvis}}$; the shoulder-girdle variant $\theta_{\mathrm{girdle}}-\theta_{\mathrm{pelvis}}$ is reported separately. Events (address, top, impact) come from \texttt{swing\_comparison.detect\_events} on the capture; a model is sampled at the nearest frame to the capture event time, and an event outside the model's time span is reported as \texttt{null}, never as the last frame.
+
+\subsection{Data Validity}
+Both markers of a pair must be finite. A gap of at most $0.10$~s ($\texttt{MAX\_FILL\_GAP\_S}$) between valid frames is linearly interpolated per marker; longer gaps and leading or trailing gaps stay NaN with a stated reason. A pair with fewer than half of its frames valid is not preferred over its fallback. A line whose horizontal length is below $1$~mm is undefined, and a median line length outside $0.02$--$1.5$~m is rejected as a unit error. Unavailable is never zero: it is serialised as \texttt{null} with a reason. For example, \texttt{RShoulderTop} is missing in at least $80\,\%$ of the frames of captures A and B, which is why the \texttt{ShoulderBack} pair is preferred.
+
+\subsection{Receipt Block}
+Every matched-swing writer that is wired to the shared helper records a \texttt{turn} block (\texttt{turn\_block/v1}): the five lines (shoulder girdle, upper trunk, pelvis, X-factor, shoulder-girdle X-factor) at address, top and impact plus the maximum backswing turn between address and impact, for the capture markers and the model side by side, with the point names and a status (\texttt{ok}, \texttt{partial}, \texttt{unavailable}). Writers not yet wired are listed in \texttt{turn\_receipt.FOLLOW\_UP\_WRITERS} with the reason.
+
+\subsection{Reproduction and Check Values}
+\begin{verbatim}
+python3 -m pytest tests/unit/swing_comparison/test_turn.py \
+    tests/unit/motion_matching/test_turn_receipt.py
+\end{verbatim}
+On the private capture A (anonymised), the markers give shoulder girdle $103.0^\circ$, upper trunk $92.2^\circ$ and pelvis $40.9^\circ$ at the top, and $-9.0^\circ$, $-19.2^\circ$ and $-49.8^\circ$ at impact, matching the independent audit of issue \#12042 within $0.1^\circ$. These values are not committed; the committed tests use a synthetic rigid-rotation fixture with exact known yaw. These are definitions and measurements, not a qualification of any engine.
 \section{Phase-Split Forward-Dynamics Marker RMS (\#12042)}
 \label{sec:fd_phase_split}
 
