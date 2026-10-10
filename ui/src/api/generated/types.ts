@@ -3447,6 +3447,16 @@ export interface TransformRecordV2 {
 }
 
 /**
+ * Bounded inline records and the PyQt Trends tab's widget-derived inputs. Mirrors ``_TrendParams`` from ``src/tools/launch_monitor_analytics/gui.py`` (``_read_trend_params``): ``rolling_window`` keeps the same default and the ``[3, 500]`` range as the Trends tab's spinbox (``_build_trends_tab``), so the API and desktop paths accept identical inputs for :func:`analyze_trend`.
+ */
+export interface TrendPayloadV2 {
+  records: Record<string, unknown>[];
+  metric: string;
+  time_column: string;
+  rolling_window: number;
+}
+
+/**
  * Descriptor for a single URDF joint. See issue #1201
  */
 export interface URDFJointDescriptor {
