@@ -15,7 +15,7 @@ import math
 from dataclasses import dataclass
 from enum import Enum
 
-from model_generation.inertia.primitives import (
+from src.shared.python.model_generation.inertia.primitives import (
     sphere_inertia,
 )
 

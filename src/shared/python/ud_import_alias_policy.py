@@ -19,7 +19,6 @@ from src.shared.python.import_aliases import (
     _coalesce_loaded_aliases,
     _DOWNSTREAM_SRC_ALIAS_ROOTS,
     _SHARED_ROOTS,
-    _external_src_package_is_available,
 )
 
 __all__ = [
@@ -46,11 +45,7 @@ class UdSharedImportAliasFinder(SharedImportAliasFinder):
             root = parts[3]
             if root in UD_CANONICAL_SRC_ROOTS:
                 return (None, "")
-            allowed_roots = (
-                _DOWNSTREAM_SRC_ALIAS_ROOTS
-                if _external_src_package_is_available()
-                else _SHARED_ROOTS
-            )
+            allowed_roots = _DOWNSTREAM_SRC_ALIAS_ROOTS
             return (root, ".".join(parts[4:])) if root in allowed_roots else (None, "")
         if parts and parts[0] in _SHARED_ROOTS:
             return parts[0], ".".join(parts[1:])
