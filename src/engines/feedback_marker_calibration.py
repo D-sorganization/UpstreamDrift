@@ -31,6 +31,22 @@ class _HashAccumulator(Protocol):
     def update(self, data: bytes, /) -> None: ...
 
 
+@dataclass(frozen=True)
+class NativeMarkerCalibrationRequest:
+    """Inputs and provenance needed to estimate and later revalidate offsets."""
+
+    capture: TourCapture
+    frame_ids_by_label: Mapping[str, str]
+    poses: Sequence[Mapping[str, Pose]]
+    pose_time_s: FloatArray
+    binding: NativeAdapterBinding
+    native_engine_id: str
+    pose_provider_id: str
+    pose_provider_sha256: str
+    capture_frame_id: str
+    capture_timebase_id: str
+
+
 def _hash_array(digest: _HashAccumulator, name: str, values: NDArray) -> None:
     array = np.ascontiguousarray(values)
     digest.update(name.encode("utf-8") + b"\0")
@@ -47,6 +63,17 @@ def capture_observation_sha256(capture: TourCapture) -> str:
     _hash_array(digest, "valid", np.asarray(capture.valid, dtype=np.uint8))
     _hash_array(digest, "time_s", np.asarray(capture.time_s, dtype="<f8"))
     return digest.hexdigest()
+
+
+def _snapshot_capture(capture: TourCapture) -> TourCapture:
+    """Revalidate and detach capture arrays from writable caller-owned views."""
+    return TourCapture(
+        np.array(capture.time_s, dtype=np.float64, copy=True),
+        capture.labels,
+        np.array(capture.points_m, dtype=np.float64, copy=True),
+        np.array(capture.valid, dtype=np.bool_, copy=True),
+        capture.source_sha256,
+    )
 
 
 def _pose_history_sha256(
@@ -215,37 +242,36 @@ class NativeMarkerAttachmentCalibrationArtifact:
             if offset.shape != (3,) or not np.isfinite(offset).all():
                 raise ValueError("calibrated marker offsets must be finite metres")
 
-    def validate(
-        self,
-        *,
-        capture: TourCapture,
-        poses: Sequence[Mapping[str, Pose]],
-        pose_time_s: FloatArray,
-        binding: NativeAdapterBinding,
-        pose_provider_id: str,
-        pose_provider_sha256: str,
-        capture_frame_id: str,
-        capture_timebase_id: str,
-    ) -> None:
+    def validate(self, request: NativeMarkerCalibrationRequest) -> None:
         """Rehash inputs and compare expected provider and capture coordinates."""
+        capture = _snapshot_capture(request.capture)
+        poses = request.poses
         self.validate_structure()
-        _validate_binding_identity(self, binding)
-        require_sha256("pose provider", pose_provider_sha256)
+        _validate_binding_identity(self, request.binding)
+        require_sha256("pose provider", request.pose_provider_sha256)
         if (self.pose_provider_id, self.pose_provider_sha256) != (
-            pose_provider_id,
-            pose_provider_sha256,
+            request.pose_provider_id,
+            request.pose_provider_sha256,
         ):
             raise ValueError("marker calibration pose provider identity differs")
+        if self.native_engine_id != request.native_engine_id:
+            raise ValueError("marker calibration native engine identity differs")
         if (self.capture_frame_id, self.capture_timebase_id) != (
-            capture_frame_id,
-            capture_timebase_id,
+            request.capture_frame_id,
+            request.capture_timebase_id,
         ):
             raise ValueError("marker calibration capture coordinates differ")
         if capture.source_sha256 != self.capture_source_sha256:
             raise ValueError("marker calibration capture source differs")
         if capture.labels != self.capture_labels:
             raise ValueError("marker calibration capture label order differs")
-        times = np.asarray(pose_time_s, dtype=np.float64)
+        frame_ids = tuple(request.frame_ids_by_label.items())
+        expected_frame_ids = tuple(
+            (attachment.label, attachment.frame_id) for attachment in self.attachments
+        )
+        if frame_ids != expected_frame_ids:
+            raise ValueError("marker calibration native frame mapping differs")
+        times = np.asarray(request.pose_time_s, dtype=np.float64)
         if times.shape != capture.time_s.shape or not np.array_equal(
             times, capture.time_s
         ):
@@ -264,8 +290,9 @@ class NativeMarkerAttachmentCalibrationArtifact:
             != self.pose_trajectory_sha256
         ):
             raise ValueError("marker calibration pose trajectory differs")
-        body_frames = {item.label: item.frame_id for item in self.attachments}
-        expected_offsets = static_marker_offsets(capture, body_frames, poses)
+        expected_offsets = static_marker_offsets(
+            capture, request.frame_ids_by_label, poses
+        )
         if any(
             item.local_position_m != expected_offsets[item.label][1]
             for item in self.attachments
@@ -312,17 +339,7 @@ def _array_sha256(values: NDArray) -> str:
 
 
 def calibrate_static_marker_attachments(
-    capture: TourCapture,
-    frame_ids_by_label: Mapping[str, str],
-    poses: Sequence[Mapping[str, Pose]],
-    pose_time_s: FloatArray,
-    *,
-    binding: NativeAdapterBinding,
-    native_engine_id: str,
-    pose_provider_id: str,
-    pose_provider_sha256: str,
-    capture_frame_id: str,
-    capture_timebase_id: str,
+    request: NativeMarkerCalibrationRequest,
 ) -> NativeMarkerAttachmentCalibrationArtifact:
     """Estimate fixed offsets from native poses and emit provisional evidence.
 
@@ -330,10 +347,13 @@ def calibrate_static_marker_attachments(
     use the exact capture clock. This function hashes inputs for integrity but
     does not authenticate the caller or claim independent heldout validation.
     """
+    capture = _snapshot_capture(request.capture)
+    frame_ids_by_label = request.frame_ids_by_label
+    poses = request.poses
     if capture.source_sha256 is None:
         raise ValueError("marker calibration requires a capture source SHA-256")
     require_sha256("capture source", capture.source_sha256)
-    require_sha256("pose provider", pose_provider_sha256)
+    require_sha256("pose provider", request.pose_provider_sha256)
     if tuple(frame_ids_by_label) != capture.labels:
         raise ValueError("native marker frame mapping must follow capture label order")
     if any(
@@ -343,7 +363,7 @@ def calibrate_static_marker_attachments(
         raise ValueError("native marker frame IDs must be explicit")
     if len(poses) != capture.frames:
         raise ValueError("one native pose set per capture frame is required")
-    times = np.asarray(pose_time_s, dtype=np.float64)
+    times = np.asarray(request.pose_time_s, dtype=np.float64)
     if times.shape != capture.time_s.shape or not np.array_equal(times, capture.time_s):
         raise ValueError("marker calibration pose clock differs from capture")
     offsets = static_marker_offsets(capture, frame_ids_by_label, poses)
@@ -360,21 +380,21 @@ def calibrate_static_marker_attachments(
         "unqualified",
         "not_evaluated",
         "unqualified",
-        native_engine_id,
-        binding.native_model_id,
-        binding.native_variant_id,
-        binding.native_execution_provider_id,
-        binding.native_execution_provider_sha256,
-        pose_provider_id,
-        pose_provider_sha256,
-        binding.source_model_sha256,
-        binding.loaded_native_model_sha256,
+        request.native_engine_id,
+        request.binding.native_model_id,
+        request.binding.native_variant_id,
+        request.binding.native_execution_provider_id,
+        request.binding.native_execution_provider_sha256,
+        request.pose_provider_id,
+        request.pose_provider_sha256,
+        request.binding.source_model_sha256,
+        request.binding.loaded_native_model_sha256,
         capture.source_sha256,
         capture_observation_sha256(capture),
         _array_sha256(capture.time_s),
         capture.labels,
-        capture_frame_id,
-        capture_timebase_id,
+        request.capture_frame_id,
+        request.capture_timebase_id,
         _pose_history_sha256(frame_ids_by_label, poses),
         "body_frame_mean_via_static_marker_offsets/1.0.0",
         attachments,

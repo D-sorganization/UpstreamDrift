@@ -10,6 +10,7 @@ import pytest
 from src.engines.feedback_comparison import DriveMode
 from src.engines.feedback_native_execution import NativeAdapterBinding
 from src.engines.feedback_marker_calibration import (
+    NativeMarkerCalibrationRequest,
     calibrate_static_marker_attachments,
     capture_observation_sha256,
 )
@@ -74,29 +75,35 @@ def _capture_and_poses() -> tuple[
 
 def _calibrate(capture: TourCapture, poses):
     return calibrate_static_marker_attachments(
-        capture,
-        {"marker-a": "/bodyset/arm", "marker-b": "/bodyset/hand"},
-        poses,
-        capture.time_s,
-        binding=_binding(),
-        native_engine_id="mujoco",
-        pose_provider_id="mujoco-native-fk-fixture",
-        pose_provider_sha256="1" * 64,
-        capture_frame_id="capture-world",
-        capture_timebase_id="capture-relative",
+        NativeMarkerCalibrationRequest(
+            capture,
+            {"marker-a": "/bodyset/arm", "marker-b": "/bodyset/hand"},
+            poses,
+            capture.time_s,
+            _binding(),
+            "mujoco",
+            "mujoco-native-fk-fixture",
+            "1" * 64,
+            "capture-world",
+            "capture-relative",
+        )
     )
 
 
 def _validate(artifact, capture, poses, binding=None):
     artifact.validate(
-        capture=capture,
-        poses=poses,
-        pose_time_s=capture.time_s,
-        binding=binding or _binding(),
-        pose_provider_id="mujoco-native-fk-fixture",
-        pose_provider_sha256="1" * 64,
-        capture_frame_id="capture-world",
-        capture_timebase_id="capture-relative",
+        NativeMarkerCalibrationRequest(
+            capture,
+            {"marker-a": "/bodyset/arm", "marker-b": "/bodyset/hand"},
+            poses,
+            capture.time_s,
+            binding or _binding(),
+            "mujoco",
+            "mujoco-native-fk-fixture",
+            "1" * 64,
+            "capture-world",
+            "capture-relative",
+        )
     )
 
 
@@ -159,16 +166,18 @@ def test_artifact_rejects_provider_and_pose_clock_changes() -> None:
         )
     with pytest.raises(ValueError, match="pose clock differs"):
         calibrate_static_marker_attachments(
-            capture,
-            {"marker-a": "/bodyset/arm", "marker-b": "/bodyset/hand"},
-            poses,
-            np.array([0.0, 0.011, 0.02]),
-            binding=_binding(),
-            native_engine_id="mujoco",
-            pose_provider_id="mujoco-native-fk-fixture",
-            pose_provider_sha256="1" * 64,
-            capture_frame_id="capture-world",
-            capture_timebase_id="capture-relative",
+            NativeMarkerCalibrationRequest(
+                capture,
+                {"marker-a": "/bodyset/arm", "marker-b": "/bodyset/hand"},
+                poses,
+                np.array([0.0, 0.011, 0.02]),
+                _binding(),
+                "mujoco",
+                "mujoco-native-fk-fixture",
+                "1" * 64,
+                "capture-world",
+                "capture-relative",
+            )
         )
 
 
@@ -185,6 +194,88 @@ def test_artifact_rejects_pose_history_mutation() -> None:
 
     with pytest.raises(ValueError, match="pose trajectory differs"):
         _validate(artifact, capture, changed_pose)
+
+
+def test_artifact_rejects_changed_native_frame_mapping() -> None:
+    capture, poses = _capture_and_poses()
+    artifact = _calibrate(capture, poses)
+    request = NativeMarkerCalibrationRequest(
+        capture,
+        {"marker-a": "/bodyset/hand", "marker-b": "/bodyset/arm"},
+        poses,
+        capture.time_s,
+        _binding(),
+        "mujoco",
+        "mujoco-native-fk-fixture",
+        "1" * 64,
+        "capture-world",
+        "capture-relative",
+    )
+
+    with pytest.raises(ValueError, match="native frame mapping differs"):
+        artifact.validate(request)
+
+
+def test_artifact_rejects_changed_native_engine_identity() -> None:
+    capture, poses = _capture_and_poses()
+    artifact = _calibrate(capture, poses)
+    request = NativeMarkerCalibrationRequest(
+        capture,
+        {"marker-a": "/bodyset/arm", "marker-b": "/bodyset/hand"},
+        poses,
+        capture.time_s,
+        _binding(),
+        "opensim",
+        "mujoco-native-fk-fixture",
+        "1" * 64,
+        "capture-world",
+        "capture-relative",
+    )
+
+    with pytest.raises(ValueError, match="native engine identity differs"):
+        artifact.validate(request)
+
+
+@pytest.mark.parametrize("mutate_after_calibration", [False, True])
+def test_calibration_revalidates_aliased_capture_clock(
+    mutate_after_calibration: bool,
+) -> None:
+    owner_time = np.array([0.0, 0.01, 0.02])
+    capture, poses = _capture_and_poses()
+    aliased_capture = TourCapture(
+        owner_time.view(),
+        capture.labels,
+        capture.points_m,
+        capture.valid,
+        capture.source_sha256,
+    )
+    request = NativeMarkerCalibrationRequest(
+        aliased_capture,
+        {"marker-a": "/bodyset/arm", "marker-b": "/bodyset/hand"},
+        poses,
+        aliased_capture.time_s,
+        _binding(),
+        "mujoco",
+        "mujoco-native-fk-fixture",
+        "1" * 64,
+        "capture-world",
+        "capture-relative",
+    )
+    artifact = (
+        calibrate_static_marker_attachments(request)
+        if mutate_after_calibration
+        else None
+    )
+    owner_time[1] = 0.03
+
+    with pytest.raises(
+        ValueError, match="Capture time must start at zero and increase strictly"
+    ):
+        if mutate_after_calibration:
+            assert artifact is not None
+            artifact.validate(request)
+        else:
+            calibrate_static_marker_attachments(request)
 
 
 def test_artifact_recomputes_offsets_instead_of_trusting_receipt_fields() -> None:
@@ -230,11 +321,18 @@ def test_revalidation_rejects_changed_calibration_coordinate_identity(
 
     with pytest.raises(ValueError, match=message):
         artifact.validate(
-            capture=capture,
-            poses=poses,
-            pose_time_s=capture.time_s,
-            binding=_binding(),
-            **expected,
+            NativeMarkerCalibrationRequest(
+                capture,
+                {"marker-a": "/bodyset/arm", "marker-b": "/bodyset/hand"},
+                poses,
+                capture.time_s,
+                _binding(),
+                "mujoco",
+                expected["pose_provider_id"],
+                expected["pose_provider_sha256"],
+                expected["capture_frame_id"],
+                expected["capture_timebase_id"],
+            )
         )
 
 
