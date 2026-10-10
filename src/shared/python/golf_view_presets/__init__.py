@@ -18,7 +18,9 @@ from .adapters import (
 from .framing import (
     DEFAULT_FRAME_MARGIN,
     VIEWER_FOV_Y_RAD,
+    bounding_box_fill_fraction,
     fit_distance_m,
+    golfer_bounding_box,
     projected_extent,
 )
 from .presets import (
@@ -38,9 +40,11 @@ __all__ = [
     "MujocoFixedCamera",
     "MujocoFreeCamera",
     "ViewPreset",
+    "bounding_box_fill_fraction",
     "drake_meshcat_camera_pose",
     "fit_distance_m",
     "get_view_preset",
+    "golfer_bounding_box",
     "meshcat_camera",
     "mujoco_camera_params",
     "mujoco_fixed_camera",
