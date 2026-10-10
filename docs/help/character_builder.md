@@ -65,19 +65,65 @@ including `average` (1.75 m, 75.0 kg), `athletic` (1.80 m, 80.0 kg),
 
 ### Spec-Native Builder (Desktop Tool and API)
 
-| Input                                        | Unit / type                                                                                               | Notes                                                                                                                                       |
-| -------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| Preset                                       | `tour_average_male`, `tour_average_female`, `junior`, `senior`, `anthro_driver`, `anthro_iron7` or Custom | JSON files in `humanoid_character_builder/presets/data`, validated by `character_preset.schema.json`. Editing any value switches to Custom. |
-| `stature_m`                                  | m, 1.20 to 2.30                                                                                           | Scales De Leva segment lengths.                                                                                                             |
-| `mass_kg`                                    | kg, 30 to 200                                                                                             | Distributed by De Leva mass fractions.                                                                                                      |
-| `trunk_scale`, `arm_scale`, `shoulder_scale` | dimensionless, 0.7 to 1.4                                                                                 | Trunk length, arm lengths, biacromial breadth.                                                                                              |
-| `grip_roll_deg`                              | deg, -180 to 180                                                                                          | Hand roll about the shaft.                                                                                                                  |
-| `club`                                       | `driver` or `iron7`                                                                                       | Copied into the spec with its mass properties.                                                                                              |
+| Input                                        | Unit / type                                                                                               | Notes                                                                                                                                                            |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Preset                                       | `tour_average_male`, `tour_average_female`, `junior`, `senior`, `anthro_driver`, `anthro_iron7` or Custom | JSON files in `humanoid_character_builder/presets/data`, validated by `character_preset.schema.json`. Editing any value switches to Custom.                      |
+| `stature_m`                                  | m, 1.20 to 2.30                                                                                           | Scales De Leva segment lengths.                                                                                                                                  |
+| `mass_kg`                                    | kg, 30 to 200                                                                                             | Distributed by De Leva mass fractions over the upper body. The lower limbs do not yet scale with it, so the compiled total is below the requested mass (#12199). |
+| `trunk_scale`, `arm_scale`, `shoulder_scale` | dimensionless, 0.7 to 1.4                                                                                 | Trunk length, arm lengths, biacromial breadth.                                                                                                                   |
+| `grip_roll_deg`                              | deg, -180 to 180                                                                                          | Hand roll about the shaft.                                                                                                                                       |
+| `club`                                       | `driver` or `iron7`                                                                                       | Copied into the spec with its mass properties.                                                                                                                   |
 
 Outputs: the specification (sorted-key JSON, byte-identical for equal inputs,
 SHA-256 shown in the summary), a URDF, an MJCF and an OpenSim model. API:
 `GET /character-builder/presets`, `POST /character-builder/build`, `/preview`
 and `/export/{spec|urdf|mjcf|osim}`.
+
+### Web Character Builder
+
+The React page `ui/src/pages/CharacterBuilder.tsx` embeds
+`CharacterSpecPanel` (`ui/src/components/character/CharacterSpecPanel.tsx`),
+the same spec-native builder as a web panel: a preset select, sliders for
+`stature_m`, `mass_kg`, `trunk_scale`, `arm_scale` and `shoulder_scale` (same
+ranges as the table above) and a club select (`driver`, `7 Iron`). Preview
+calls `/api/character-builder/preview` then `/api/character-builder/build`
+and shows total mass, body and joint counts, and a per-body mass table.
+Export buttons (Spec JSON, URDF, MJCF, OpenSim) download through
+`/api/character-builder/export/{fmt}`.
+
+`AppearancePanel` (`ui/src/components/character/AppearancePanel.tsx`) sits
+alongside it: selects for skin tone, clothing, club finish, headwear and
+ground, plus an Export Appearance download. The appearance export is bound
+to the current spec character: it sends the spec request body as
+`character` in the export request, and the server compiles that character,
+stamps the compiled spec's hash onto the appearance document as
+`spec_sha256`, and names the download `<preset>_<sha8>.appearance.json`.
+
+### Appearance (`appearance-v1`)
+
+An appearance document (schema version `appearance-v1`,
+`src/shared/python/model_appearance/schema.py`,
+`appearance_v1.schema.json`) is the purely visual counterpart to a physics
+spec: skin tone (`skin_light`, `skin_medium`, `skin_tan`, `skin_dark`),
+a clothing preset (`none`, `golf_polo_shorts`, `golf_polo_trousers` —
+each maps an anatomical part such as `torso` or `thigh` to a material; an
+unmapped part shows skin), a club finish (`satin_steel`, `chrome`,
+`graphite`, `black_pvd`), headwear (`none`, `hair`, `cap`, defaulting to
+`hair_brown` or `cap_navy`) and a ground material (`turf`, `studio_floor`).
+Named materials (`library.py`) are metallic-roughness PBR definitions
+(base colour, roughness, metallic, optional texture); an unknown name
+fails closed with `ValueError`.
+
+The sidecar lives beside its spec file, named by `appearance_path_for`
+(`<spec-stem>.appearance.json`), and appearance never changes the physics
+spec hash: `physics_spec_sha256` hashes the spec with `visual_hints` and
+`appearance` keys removed, so editing appearance alone cannot perturb a
+hash a simulation depends on. API: `GET
+/character-builder/appearance/library` lists every pickable choice and
+material; `POST /character-builder/appearance` builds and validates a
+document; `POST /character-builder/appearance/export` returns it as a
+downloadable JSON sidecar (route `src/api/routes/character_appearance.py`,
+service `src/api/services/character_appearance_service.py`).
 
 ### Desktop Appearance Picker
 
@@ -170,6 +216,7 @@ converters, library) and `src/shared/python/humanoid_character_builder`
 
 ## See Also
 
+- [Build, Dress and Export a Golfer tutorial](../user_guide/character_builder_tutorial.md)
 - [Character Builder quickstart](../user_guide/character_builder_quickstart.md)
 - [Anthropometrics user guide](../user_guide/anthropometrics.md)
 - [Character presets reference](../user_guide/character_presets.md)
