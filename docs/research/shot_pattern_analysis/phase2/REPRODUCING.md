@@ -30,8 +30,9 @@ and adjacent executable wrapper copies document the actual invocation. A start
 receipt proves neither completion nor graphical acceptance. The original-figure
 wrapper checks the accepted execution snapshot, native library and runtime;
 only `academic_plots.py` and `matched_report_plots.py` are permitted reporting
-differences in that execution snapshot. FINAL_LAYOUT study Python is frozen for the live supplemental job.
-Do not change its source or start a second writer in its output directory.
+differences in that execution snapshot. The FINAL_LAYOUT supplemental job was stopped after protocol filename collisions
+were identified. Retain that checkout unchanged as historical execution evidence;
+do not resume its renderer or accept its incomplete outputs.
 The original MAIN/BOUNDS source freezes ended after control recovery completed.
 
 The caption-only original-figure revision uses BOUNDS candidate `c9c0fb194f` and the [V6 Preflight and Wrapper](validation/original_final_figures_rendering_v6_preflight/README.md). The first v5 launch failed its output-name contract before rendering; the corrected invocation keeps canonical names. Historical v4 outputs are retained under `presentation_preview_rejected_final_v4`, with [Exact-Byte Relocation Evidence](validation/original_final_figures_v4_preservation/relocation.json). A source/input preflight alone does not establish final graphical acceptance;
@@ -45,8 +46,10 @@ V4 later terminated without publishing its statistics or an exit receipt.
 The [Interruption Record](validation/supplement_rendering_revision_v4_interruption/interruption.json)
 confirms both processes were absent and all bound source/input hashes were unchanged.
 The [V5 Restart](validation/supplement_rendering_revision_v5/launcher.json)
-is running in an owned detached POSIX session, bound to the same immutable v4
-snapshot. Its start receipt is not acceptance; wait for its actual exit receipt.
+was intentionally stopped with process exit code -15 after the naming defect was
+confirmed. The [Stop Receipt and Partial Inventory](validation/supplement_v5_protocol_collision_stop/)
+preserve 2,594 incomplete output files. No final pipeline acceptance receipt was
+published. The numerical artifacts remain byte-identical to the preserved v3 set.
 The retired v3 outputs are preserved under
 `presentation_preview_rejected_supplement_v3/supplement_report_v1`, with
 [Terminal and Exact-Byte Preservation Evidence](validation/supplement_v3_retirement_for_caption_revision/retirement.json).
@@ -166,8 +169,9 @@ its actual compilation result separately.
 
 **This workflow requires a valid completed parent.** Interrupted v5 has confirmed protocol filename collisions and must not be used as that parent. Its seven numerical artifacts remain byte-identical to the reviewed v3 outputs. The recovery will use a fresh run of the existing saved-data pipeline after protocol-qualified naming and pre-render numeric-parity checks are qualified. It does not rerun Monte Carlo shots. See [Current Turnover](TURNOVER.md) and [Collision Evidence](validation/supplement_v5_protocol_collision_stop/collision_findings.json).
 
-The qualified caption/gutter repair uses a separate child publication. Preserve the
-completed `supplement_report_v1` parent unchanged. This route reuses its seven
+The qualified child-publication capability can apply the caption/gutter repair
+only to a completed, valid parent. It is not the recovery route for interrupted v5.
+For a valid parent, this route reuses its seven
 numeric/table/alias files byte-for-byte and revises only academic paired density
 and overhead PNG/PDF/SVG plus paired social overhead PNG. The other nine paired
 social-density formats and all supplemental cell figures are copied unchanged.
