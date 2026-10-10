@@ -173,7 +173,8 @@ constrained/mixed profile requires separate admission and currently rejects.
 
 Every native optimized knot is retained in the union with the original
 observation clock. Piecewise-linear values at added observation times preserve
-the optimized input law. Mixed channels keep absolute component paths through
+the saved knot-linear input law. This differs from Moco's internal collocation
+polynomial; fresh replay errors measure that executed approximation. Mixed channels keep absolute component paths through
 export and fresh independent replay. The saved NPZ reports `actuations`,
 `applied_controls`, channel roles and output units, native powers and sampled
 work. Mechanical outputs are N or N m; none are labeled muscle excitations.
