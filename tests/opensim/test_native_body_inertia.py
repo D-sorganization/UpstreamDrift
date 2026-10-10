@@ -14,6 +14,7 @@ import pytest
 from src.engines.physics_engines.opensim.python.tour_matching.native_body_inertia import (
     audit_native_body_inertia,
 )
+from src.shared.python.estimation import dime_global_calibration
 
 pytestmark = pytest.mark.integration
 
@@ -63,6 +64,7 @@ def test_physical_source_and_native_readback_are_bound(tmp_path: Path) -> None:
     assert audit.bodies[0].name == "segment"
     assert audit.bodies[0].source_native_exact
     assert audit.source_sha256 == _digest(source)
+    assert audit.validator_sha256 == _digest(Path(dime_global_calibration.__file__))
     audit.require_admitted()
 
 

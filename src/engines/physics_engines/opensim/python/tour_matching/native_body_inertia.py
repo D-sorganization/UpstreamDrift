@@ -11,6 +11,7 @@ from defusedxml import ElementTree
 import numpy as np
 
 from src.shared.python.core.contracts import PreconditionError
+from src.shared.python.estimation import dime_global_calibration
 from src.shared.python.estimation.dime_global_calibration import (
     validate_physical_inertia,
 )
@@ -56,6 +57,7 @@ class NativeBodyInertiaAudit:
 
     source_sha256: str
     adapter_sha256: str
+    validator_sha256: str
     opensim_version: str
     native_simulation_sha256: str
     native_simbody_sha256: str
@@ -150,6 +152,8 @@ def audit_native_body_inertia(
     source_sha = hashlib.sha256(raw).hexdigest()
     if source_sha != expected_source_sha256:
         raise ValueError("source model hash mismatch")
+    validator_path = Path(dime_global_calibration.__file__)
+    validator_sha = _sha(validator_path)
     rows = _source_bodies(raw)
     model = osim.Model(str(source_model_path))
     model.initSystem()
@@ -176,9 +180,12 @@ def audit_native_body_inertia(
         findings.append(BodyInertiaFinding(name, mass, center, inertia, exact, reason))
     if _sha(source_model_path) != source_sha:
         raise ValueError("source model changed during native admission")
+    if _sha(validator_path) != validator_sha:
+        raise ValueError("physical inertia validator changed during native admission")
     return NativeBodyInertiaAudit(
         source_sha256=source_sha,
         adapter_sha256=_sha(Path(__file__)),
+        validator_sha256=validator_sha,
         opensim_version=osim.GetVersionAndDate(),
         native_simulation_sha256=_sha(Path(osim._simulation.__file__)),
         native_simbody_sha256=_sha(Path(osim._simbody.__file__)),
