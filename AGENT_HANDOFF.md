@@ -4,6 +4,7 @@
 - Hand frames and address pose: `msk_club_calibration.py` (IK to the generated model's FK at the captured address; feet planted because the generated feet are unobserved) into `models/msk_club_grip_calibration.json`; the muscle model is calibrated on build. `msk_club_tracking.track_swing` follows a generated swing; `scripts/render_msk_club.py` renders under xvfb.
 - Base models are not in the clone (submodule fetch failed): set `UPSTREAMDRIFT_RAJAGOPAL_OPENSENSE` / `UPSTREAMDRIFT_MSK_BASE_MODEL`.
 - Open: no MyoFullBody OpenSim export exists; static optimisation not run; scaled-model address fit is weaker (wrists at their bounds); `opensim_golf/fk.py` `State.isValid` failure predates this.
+
 # Active: Same-Input Bushing Grip Parity, OSV-7 Phase 2 #11739
 
 - Branch `claude/osv-7-grip-parity`. The shared OpenSim `BushingForce` law (`grip_contact/bushing_law.py`) and a `SimmSpline`-equivalent prescribed input (`grip_contact/prescribed_motion.py`) drive MuJoCo (`mjcb_passive`, RK4 1e-4 s), Drake (native `LinearBushingRollPitchYaw`, RK3 error controlled) and Pinocchio (`aba`, DOP853) on a free club, with each engine's own weld FK. Metrics are in `grip_contact/parity.py` (peak 5 %, RMS 2 % of peak), routed through GCV-10 `GripSeries`.
