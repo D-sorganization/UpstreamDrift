@@ -5485,7 +5485,7 @@ B & 0.3/5 & 32.68 & 32.07 & 71.63 & $+2.2/+2.2$ & $+6.3/+1.7$ & $+2.8/+4.5$ \\
 \subsection{Decision, Limitations and Reproduction}
 No setting met the turn bounds without regressing the FD replay, so the split is not made the default and the canonical receipts and ledger are unchanged. Open items:
 \begin{itemize}
-\item The follow-through FD regression must be explained (for example, by restricting the thorax target to the address-to-impact window or by re-tuning the tracking gains) before the split can be adopted.
+\item The follow-through FD regression must be explained before the split can be adopted; Section~\ref{sec:turn_split_fd} traces it to IK branch selection in the follow-through.
 \item The axis-target rows exist only in the MuJoCo IK; in the Drake and Pinocchio base classes \texttt{\_axis\_rows} is a no-op, so the option has no effect there.
 \item Capture-O was not run.
 \item The pelvis impact turn belongs to slice 3.
@@ -5503,6 +5503,59 @@ python3 -m src.shared.python.motion_matching.pipeline.cli \
     --thorax-weight 0.3 --shoulder-girdle-weight 5
 \end{verbatim}
 The turn values use the line definitions of pull request \#12068 (\texttt{swing\_comparison.turn}, not yet on the main branch when this section was written): the relative horizontal yaw of each right-to-left line, positive in the backswing, evaluated at the model's calibrated marker sites for $q_{\mathrm{ref}}$ and for the FD trajectory.
+
+\subsection{Follow-Through FD Diagnosis (Follow-Up)}
+\label{sec:turn_split_fd}
+This subsection resolves the first open item above: why the follow-through FD replay got worse with the split. The experiments were run on branch \texttt{claude/turn-split-impact-window} at commit \texttt{f81c1647b2}. That commit adds \texttt{--thorax-window}/\texttt{--shoulder-girdle-window} \{\texttt{full}, \texttt{impact}\}, \texttt{--split-taper-s} and per-frame marker weights. It is not merged, because no setting passed. The baselines are the canonical receipts, at FD $61.63$~mm (capture-A) and $46.97$~mm (capture-B).
+
+\paragraph{Diagnosis.} The tracking controller is computed torque with an unactuated root and no actuator torque limits, so torque saturation cannot occur (zero saturated samples by construction). The peak joint torque after $1.35$~s was $681$~Nm without the split and $698$~Nm with it, both at the left hip flexion. On capture-A at $0.3/5$:
+\begin{itemize}
+\item The marker fit of $q_{\mathrm{ref}}$ after $1.35$~s is not worse ($52.5$~mm without and $52.2$~mm with the split), so the reference does not track the markers less well.
+\item The FD increase is whole-body and largest at the club ($+41$~mm), left ankle ($+55$~mm) and knees ($+28$ to $+33$~mm). The actuated-joint tracking error stays near $1^\circ$--$1.5^\circ$ RMS. The error sits in the unactuated root: pelvis yaw $8.3^\circ\to10.6^\circ$ RMS and lateral root $10.5\to38.0$~mm RMS. Contact unloads (weight fraction reaches $0$) in both runs.
+\item The reference itself differs where markers observe the model weakly. The toe (\texttt{mtp}) angles differ by up to $60^\circ$, shoulder axial rotation by $43^\circ$ and forearm rotation by $36^\circ$, from about $1.2$~s onwards. Changing the toe angles alters the foot contact geometry, which the root has to follow.
+\end{itemize}
+The trajectory IK solves frame by frame, warm-starting each frame from the previous solution with a prior toward it. In the follow-through the marker fit is about $55$~mm RMS and several near-equal solutions exist, so the branch it lands on depends on the solution path. Two observations confirm this:
+\begin{enumerate}
+\item With both split terms switched off from impact $+50$~ms onwards, the follow-through cost is identical to the baseline's. Yet $q_{\mathrm{ref}}$ there still differs by up to $20^\circ$--$60^\circ$ in the same coordinates.
+\item A near-null perturbation ($w_{\mathrm{thx}}=0.01$, $w_{\mathrm{sg}}=1$) changes $q_{\mathrm{ref}}$ by at most $1.9^\circ$ before $1.0$~s, but by up to $39^\circ$ (A) and $46^\circ$ (B) after impact. FD moves from $61.6$ to $55.0$~mm on A (better) and from $47.0$ to $60.9$~mm on B (worse).
+\end{enumerate}
+The whole-swing FD RMS therefore has a sensitivity floor of roughly $\pm7$ to $\pm14$~mm, set by the IK branch chosen in the follow-through, not by the turn split or the controller gains. A $2$~mm FD criterion cannot be resolved against that floor.
+
+\paragraph{Impact-windowed split (experiment (a)).} Impact is detected from the capture's club markers: the median of the per-marker \texttt{gaze.impact\_index} votes over markers with at least half their frames valid. The detected times are $1.319$~s (A) and $1.337$~s (B). The windowed terms hold until impact and then fall to zero over a $50$~ms half-cosine. Turn values are model minus markers at top/impact in degrees, from $q_{\mathrm{ref}}$; ``FT'' is the FD RMS after $1.35$~s.
+\begin{center}
+\small
+\begin{tabular}{lllllll}
+\hline
+Capture & Setting & IK (mm) & FD (mm) & FT (mm) & UT ($q_{\mathrm{ref}}$) & SG ($q_{\mathrm{ref}}$) \\
+\hline
+A & Baseline & 32.98 & 61.63 & 109.1 & $+18.1/+4.5$ & $+9.3/-1.4$ \\
+A & $0.3/5$, full & 33.26 & 69.09 & 124.1 & $+2.2/-0.8$ & $+6.5/-1.5$ \\
+A & $0.3/5$, thorax windowed & 33.97 & 65.13 & 115.3 & $+2.2/-0.9$ & $+6.5/-1.1$ \\
+A & $0.3/5$, both windowed & 34.17 & 74.26 & 135.2 & $+2.2/-1.1$ & $+6.5/-1.2$ \\
+A & $0.01/1$ (null) & 33.25 & 54.98 & 94.2 & $+15.6/+2.6$ & $+9.1/-0.2$ \\
+B & Baseline & 31.13 & 46.97 & 75.9 & $+13.4/+8.5$ & $+11.0/+1.0$ \\
+B & $0.3/5$, full & 32.68 & 71.63 & 129.7 & $+2.2/+2.2$ & $+6.3/+1.7$ \\
+B & $0.3/5$, thorax windowed & 33.00 & 69.26 & 124.5 & $+2.2/+2.4$ & $+6.3/+2.0$ \\
+B & $0.3/5$, both windowed & 32.65 & 60.90 & 106.5 & $+2.2/+2.2$ & $+6.3/+1.7$ \\
+B & $0.01/1$ (null) & 31.96 & 60.87 & 104.4 & $+11.8/+6.4$ & $+10.8/+1.4$ \\
+\hline
+\end{tabular}
+\end{center}
+Every split setting meets the turn bounds on both captures, but none keeps FD within $2$~mm of baseline on both. The null row shows that FD differences of this size occur without any meaningful change to the turn.
+
+\paragraph{Tracking gains (experiment (b)) not run.} The pipeline's gains are two global constants (\texttt{OMEGA\_RAD\_S}$=30$~rad/s and \texttt{BALANCE}$=(60,15)$) used by every receipt. There is no per-phase or per-term gain to adjust. The diagnosis places the regression in the reference branch, not in the controller: joint tracking stays tight and no torque saturates. A gain change could not be judged against a criterion below the $\pm7$--$14$~mm floor, so none was made.
+
+\paragraph{Decision and next step.} The split stays opt-in and off by default; the canonical receipts and the ledger are unchanged. Before any change that alters the reference can be accepted or rejected on whole-swing FD, the follow-through IK needs a unique solution, or FD needs a branch-robust metric. Candidates are a stronger prior or anatomical regularisation on the weakly observed toe and shoulder or forearm axial coordinates, or reporting FD over address to impact (where the reference is stable to $\le2^\circ$) separately from the follow-through. That work is a separate change. Reproduction (experiment branch):
+\begin{verbatim}
+git checkout f81c1647b2
+python3 -m src.shared.python.motion_matching.pipeline.cli \
+    --spec $G/full_body_spec_anthro_driver.json --static-seeds \
+    --capture driver --out runs/drv_wthx \
+    --thorax-weight 0.3 --shoulder-girdle-weight 5 --thorax-window impact
+#  add --shoulder-girdle-window impact for "both windowed";
+#  --thorax-weight 0.01 --shoulder-girdle-weight 1 for the null run;
+#  the iron uses full_body_spec_anthro_iron7.json --zmp-filter --capture iron
+\end{verbatim}
 
 \begin{thebibliography}{9}
 \bibitem{MathWorksPSUnits}
