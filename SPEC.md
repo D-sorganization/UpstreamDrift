@@ -11014,6 +11014,19 @@ Canonical chapter42 and `F07_CONSTRAINED_MUSCLE_MOCO_TURNOVER.md` retain
 the failed zero-force/loose-transcription experiment and all 520-muscle,
 private-capture, contact, assistance and physiology gates.
 
+## Source-Preserving BUET–Hamner OpenSim Candidate (#12157)
+
+An explicit version-one native factory now composes reviewed BUET upper/trunk
+and Hamner distal-leg source components into a separate 40-body, 557-muscle
+OpenSim artifact. Fresh XML reload, exact regional property identity and three
+sampled native body/path geometry and velocity checks establish a narrow
+mechanical source-preservation result. The entrypoint XML and loaded-runtime
+hashes are recorded in chapter 44 and the F07 turnover. This candidate has
+not passed source resource closure, passive physiology, partial abdominal lock
+reduction, native Moco, contact/grip, golfer marker registration, full-state
+replay or captured full-swing matching. Scientific publication stays blocked;
+all 17 variants and six engine families remain required.
+
 ## Assistance-Explicit OpenSim Replay (#12147)
 
 A distinct native mixed-actuation T01 profile freezes exact muscle and

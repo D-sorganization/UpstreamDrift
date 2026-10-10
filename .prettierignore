@@ -45,4 +45,3 @@ reports/matched_swing_ledger.json
 # the budget, so the budget wins (same rule as divergence_inventory.md).
 docs/development/full_body_models/DESIGN_DECISIONS.md
 docs/development/lifting/PACK_PARITY_BASELINE.md
-
