@@ -206,7 +206,7 @@ square to the ball. That matters for the gaze-schedule neck below, which
 saturates the neck's yaw range when it is asked to hold the gaze axis on the
 ball.
 
-## Forward-Dynamics Neck Tracking (OSV-3c)
+## Forward-Dynamics Neck Tracking
 
 `pipeline/gaze_tracking.py` gives the forward-dynamics replay a gaze-schedule
 neck. The replay's computed-torque tracker (`dynamics.controller`) is the neck

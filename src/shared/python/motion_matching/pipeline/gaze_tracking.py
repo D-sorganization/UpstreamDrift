@@ -158,7 +158,7 @@ def _plan(lane: Any, kin: Any, q_ref: Array) -> GazePlan:
     return plan
 
 
-def _window_stats(err: Array, mask: Array) -> dict[str, Any]:
+def _window_stats(err: Array, mask: NDArray[np.bool_]) -> dict[str, Any]:
     n = int(mask.sum())
     if n == 0:
         return {"frames": 0, "rms_deg": None, "max_deg": None}

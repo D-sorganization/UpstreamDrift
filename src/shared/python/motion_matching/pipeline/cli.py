@@ -8,7 +8,7 @@ import json
 import logging
 from pathlib import Path
 import time
-from typing import Any, Literal
+from typing import Any, Literal, NamedTuple
 
 import numpy as np
 
@@ -876,27 +876,30 @@ def _feasibility_filters(
     return q_track, zmp, zmp_report, centroidal_report
 
 
-def _simulate_and_receipt(
-    ctx: PipelineContext,
-    lane: Lane,
-    kin: Any,
-    sim: Any,
-    adapter: Any,
-    labels: tuple[str, ...],
+class _TrackedReference(NamedTuple):
+    """The reference the replay tracks, with the reports of each stage."""
+
+    q_track: np.ndarray
+    zmp: dict[str, Any]
+    zmp_filter_report: dict[str, Any] | None
+    centroidal_report: dict[str, Any] | None
+    shooting_report: dict[str, Any] | None
+    neck_solve: Any
+    fd_neck: str
+
+
+def _tracked_reference(
+    args: argparse.Namespace,
+    context: tuple[Lane, Any, Any, logging.Logger],
     q_ref: np.ndarray,
-    cal_res: _CalibrateAndScaleResult,
-    base_spec: dict[str, Any],
-    ik_report: dict[str, Any],
-) -> dict[str, Any]:
-    """Execute forward dynamics tracking replay, renders, and receipt generation."""
-    args = ctx.args
-    out_dir = ctx.out_dir
-    log = ctx.log
-    tracking = getattr(args, "tracking", "kkt")
+    tracking: str,
+) -> _TrackedReference:
+    """Smooth ``q_ref``, run the feasibility filters, the gaze neck and shooting."""
+    lane, kin, sim, log = context
     q_track = smooth_reference(q_ref, lane.rate_hz, TRACKING_CUTOFF_HZ)
     zmp = fs.reference_zmp(sim, lane.times, q_track, lane.ground)
-    q_track, zmp, zmp_filter_report, centroidal_report = _feasibility_filters(
-        args, (lane, kin, sim, log), q_track, zmp
+    q_track, zmp, zmp_report, centroidal_report = _feasibility_filters(
+        args, context, q_track, zmp
     )
     # After the filters, which re-pose the body; the ZMP keeps the IK neck.
     fd_neck = getattr(args, "fd_neck", "ik")
@@ -916,6 +919,36 @@ def _simulate_and_receipt(
                 tracking_backend=tracking,
             ),
         )
+    return _TrackedReference(
+        q_track,
+        zmp,
+        zmp_report,
+        centroidal_report,
+        shooting_report,
+        neck_solve,
+        fd_neck,
+    )
+
+
+def _simulate_and_receipt(
+    ctx: PipelineContext,
+    lane: Lane,
+    kin: Any,
+    sim: Any,
+    adapter: Any,
+    labels: tuple[str, ...],
+    q_ref: np.ndarray,
+    cal_res: _CalibrateAndScaleResult,
+    base_spec: dict[str, Any],
+    ik_report: dict[str, Any],
+) -> dict[str, Any]:
+    """Execute forward dynamics tracking replay, renders, and receipt generation."""
+    args = ctx.args
+    out_dir = ctx.out_dir
+    log = ctx.log
+    tracking = getattr(args, "tracking", "kkt")
+    ref = _tracked_reference(args, (lane, kin, sim, log), q_ref, tracking)
+    q_track, zmp = ref.q_track, ref.zmp
     record, sim_q = replay(sim, lane, q_track, tracking_backend=tracking)
     finish = finish_feasibility_report(
         sim,
@@ -936,9 +969,9 @@ def _simulate_and_receipt(
             sim_q=sim_q,
             q_ref=q_ref,
             zmp=zmp,
-            zmp_filter_report=zmp_filter_report,
-            centroidal_filter_report=centroidal_report,
-            shooting_report=shooting_report,
+            zmp_filter_report=ref.zmp_filter_report,
+            centroidal_filter_report=ref.centroidal_report,
+            shooting_report=ref.shooting_report,
             tracking_backend=tracking,
             finish_feasibility=finish,
         )
@@ -974,7 +1007,7 @@ def _simulate_and_receipt(
     receipt["engine"] = ctx.engine
     receipt["head_gaze"] = head_gaze_receipt(lane, kin, q_ref)
     receipt["dynamics"]["head_gaze"] = fd_head_gaze_report(
-        lane, kin, q_ref, q_track, sim_q, neck_solve, fd_neck
+        lane, kin, q_ref, q_track, sim_q, ref.neck_solve, ref.fd_neck
     )
     _apply_trajectory_optimiser(args, out_dir, receipt, lane=lane, kin=kin, sim=sim)
     _write_receipt(out_dir, receipt)

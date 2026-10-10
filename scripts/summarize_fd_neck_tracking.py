@@ -70,9 +70,7 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("out", type=Path)
     parser.add_argument("runs", type=Path, nargs="+")
     ns = parser.parse_args(argv)
-    ns.out.write_text(
-        json.dumps(summarize(ns.runs), indent=1) + "\n", encoding="utf-8"
-    )
+    ns.out.write_text(json.dumps(summarize(ns.runs), indent=1) + "\n", encoding="utf-8")
 
 
 if __name__ == "__main__":
