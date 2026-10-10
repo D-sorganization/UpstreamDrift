@@ -10,71 +10,71 @@
       "force_L": {
         "peak_reference": 533.0809132893766,
         "peak_candidate": 533.0884979975742,
-        "peak_error": 1.422806183561804e-05,
-        "rms_error": 7.622858168527949e-06,
+        "peak_error": 1.422806183561804e-5,
+        "rms_error": 7.622858168527949e-6,
         "passes": true
       },
       "force_R": {
         "peak_reference": 584.3608387292801,
         "peak_candidate": 584.3467955791655,
-        "peak_error": 2.4031641383009597e-05,
-        "rms_error": 5.825505058488473e-06,
+        "peak_error": 2.4031641383009597e-5,
+        "rms_error": 5.825505058488473e-6,
         "passes": true
       },
       "net_force": {
         "peak_reference": 456.7470104485919,
         "peak_candidate": 456.7344829756042,
-        "peak_error": 2.7427597118578592e-05,
-        "rms_error": 1.5916997770704717e-05,
+        "peak_error": 2.7427597118578592e-5,
+        "rms_error": 1.5916997770704717e-5,
         "passes": true
       },
       "internal_force": {
         "peak_reference": 524.1036631810554,
         "peak_candidate": 524.1026147409689,
-        "peak_error": 2.0004441108634803e-06,
-        "rms_error": 1.7459445697832165e-06,
+        "peak_error": 2.0004441108634803e-6,
+        "rms_error": 1.7459445697832165e-6,
         "passes": true
       },
       "squeeze": {
         "peak_reference": 3.859015099017924,
         "peak_candidate": 3.858507071433557,
         "peak_error": 0.00013164695429567793,
-        "rms_error": 4.726811027404702e-05,
+        "rms_error": 4.726811027404702e-5,
         "passes": true
       },
       "couple": {
         "peak_reference": 98.57389443823867,
         "peak_candidate": 98.57765247853527,
-        "peak_error": 3.812409277344182e-05,
-        "rms_error": 1.9654670339185275e-05,
+        "peak_error": 3.812409277344182e-5,
+        "rms_error": 1.9654670339185275e-5,
         "passes": true
       },
       "deflection_L": {
         "peak_reference": 0.0005339297094777079,
         "peak_candidate": 0.0005339331356685888,
-        "peak_error": 6.416932454032275e-06,
-        "rms_error": 1.3778282797522632e-05,
+        "peak_error": 6.416932454032275e-6,
+        "rms_error": 1.3778282797522632e-5,
         "passes": true
       },
       "deflection_R": {
         "peak_reference": 0.0005845723502388736,
         "peak_candidate": 0.0005845719249756941,
-        "peak_error": 7.27477410306734e-07,
-        "rms_error": 9.722428941081684e-06,
+        "peak_error": 7.27477410306734e-7,
+        "rms_error": 9.722428941081684e-6,
         "passes": true
       },
       "rotation_L": {
         "peak_reference": 0.014638950654741072,
         "peak_candidate": 0.014638872933427242,
-        "peak_error": 5.309213458141146e-06,
-        "rms_error": 1.1619365125240304e-06,
+        "peak_error": 5.309213458141146e-6,
+        "rms_error": 1.1619365125240304e-6,
         "passes": true
       },
       "rotation_R": {
         "peak_reference": 0.014638950654741072,
         "peak_candidate": 0.014638872933427242,
-        "peak_error": 5.309213458141146e-06,
-        "rms_error": 1.1619365125240304e-06,
+        "peak_error": 5.309213458141146e-6,
+        "rms_error": 1.1619365125240304e-6,
         "passes": true
       }
     },
@@ -96,8 +96,8 @@
       "net_force": {
         "peak_reference": 456.7470104485919,
         "peak_candidate": 456.7438928713952,
-        "peak_error": 6.825610513855629e-06,
-        "rms_error": 1.8182972697587748e-05,
+        "peak_error": 6.825610513855629e-6,
+        "rms_error": 1.8182972697587748e-5,
         "passes": true
       },
       "internal_force": {
@@ -118,7 +118,7 @@
         "peak_reference": 98.57389443823867,
         "peak_candidate": 98.55364370093515,
         "peak_error": 0.00020543712327609522,
-        "rms_error": 5.532237250217966e-05,
+        "rms_error": 5.532237250217966e-5,
         "passes": true
       },
       "deflection_L": {
@@ -154,71 +154,143 @@
       "force_L": {
         "peak_reference": 533.0809132893766,
         "peak_candidate": 533.0814226403869,
-        "peak_error": 9.554853637653332e-07,
-        "rms_error": 1.6749987119160792e-06,
+        "peak_error": 9.554853637653332e-7,
+        "rms_error": 1.6749987119160792e-6,
         "passes": true
       },
       "force_R": {
         "peak_reference": 584.3608387292801,
         "peak_candidate": 584.360156284084,
-        "peak_error": 1.1678489570456658e-06,
-        "rms_error": 1.3110299717776063e-06,
+        "peak_error": 1.1678489570456658e-6,
+        "rms_error": 1.3110299717776063e-6,
         "passes": true
       },
       "net_force": {
         "peak_reference": 456.7470104485919,
         "peak_candidate": 456.74654872599706,
-        "peak_error": 1.010893523676124e-06,
-        "rms_error": 3.623152097872851e-06,
+        "peak_error": 1.010893523676124e-6,
+        "rms_error": 3.623152097872851e-6,
         "passes": true
       },
       "internal_force": {
         "peak_reference": 524.1036631810554,
         "peak_candidate": 524.1037381109219,
-        "peak_error": 1.4296764510164189e-07,
-        "rms_error": 1.6486592606100277e-07,
+        "peak_error": 1.4296764510164189e-7,
+        "rms_error": 1.6486592606100277e-7,
         "passes": true
       },
       "squeeze": {
         "peak_reference": 3.859015099017924,
         "peak_candidate": 3.8590168310178967,
-        "peak_error": 4.4881917492803814e-07,
-        "rms_error": 1.2160127888738574e-05,
+        "peak_error": 4.4881917492803814e-7,
+        "rms_error": 1.2160127888738574e-5,
         "passes": true
       },
       "couple": {
         "peak_reference": 98.57389443823867,
         "peak_candidate": 98.57400595164637,
-        "peak_error": 1.131267140636454e-06,
-        "rms_error": 5.344032304928805e-06,
+        "peak_error": 1.131267140636454e-6,
+        "rms_error": 5.344032304928805e-6,
         "passes": true
       },
       "deflection_L": {
         "peak_reference": 0.0005339297094777079,
         "peak_candidate": 0.0005339302240431933,
-        "peak_error": 9.63732634382625e-07,
-        "rms_error": 3.537844195777682e-06,
+        "peak_error": 9.63732634382625e-7,
+        "rms_error": 3.537844195777682e-6,
         "passes": true
       },
       "deflection_R": {
         "peak_reference": 0.0005845723502388736,
         "peak_candidate": 0.0005845718711388068,
-        "peak_error": 8.195736021496229e-07,
-        "rms_error": 2.9019023055452587e-06,
+        "peak_error": 8.195736021496229e-7,
+        "rms_error": 2.9019023055452587e-6,
         "passes": true
       },
       "rotation_L": {
         "peak_reference": 0.014638950654741072,
         "peak_candidate": 0.014638949087862538,
-        "peak_error": 1.0703489410723702e-07,
-        "rms_error": 1.0098106810196399e-07,
+        "peak_error": 1.0703489410723702e-7,
+        "rms_error": 1.0098106810196399e-7,
         "passes": true
       },
       "rotation_R": {
         "peak_reference": 0.014638950654741072,
         "peak_candidate": 0.014638949087862538,
-        "peak_error": 1.0703489410723702e-07,
-        "rms_error": 1.0098106810196399e-07,
+        "peak_error": 1.0703489410723702e-7,
+        "rms_error": 1.0098106810196399e-7,
+        "passes": true
+      }
+    },
+    "myosuite": {
+      "force_L": {
+        "peak_reference": 533.0809132893766,
+        "peak_candidate": 533.0884979975742,
+        "peak_error": 1.422806183561804e-5,
+        "rms_error": 7.622858168527949e-6,
+        "passes": true
+      },
+      "force_R": {
+        "peak_reference": 584.3608387292801,
+        "peak_candidate": 584.3467955791655,
+        "peak_error": 2.4031641383009597e-5,
+        "rms_error": 5.825505058488473e-6,
+        "passes": true
+      },
+      "net_force": {
+        "peak_reference": 456.7470104485919,
+        "peak_candidate": 456.7344829756042,
+        "peak_error": 2.7427597118578592e-5,
+        "rms_error": 1.5916997770704717e-5,
+        "passes": true
+      },
+      "internal_force": {
+        "peak_reference": 524.1036631810554,
+        "peak_candidate": 524.1026147409689,
+        "peak_error": 2.0004441108634803e-6,
+        "rms_error": 1.7459445697832165e-6,
+        "passes": true
+      },
+      "squeeze": {
+        "peak_reference": 3.859015099017924,
+        "peak_candidate": 3.858507071433557,
+        "peak_error": 0.00013164695429567793,
+        "rms_error": 4.726811027404702e-5,
+        "passes": true
+      },
+      "couple": {
+        "peak_reference": 98.57389443823867,
+        "peak_candidate": 98.57765247853527,
+        "peak_error": 3.812409277344182e-5,
+        "rms_error": 1.9654670339185275e-5,
+        "passes": true
+      },
+      "deflection_L": {
+        "peak_reference": 0.0005339297094777079,
+        "peak_candidate": 0.0005339331356685888,
+        "peak_error": 6.416932454032275e-6,
+        "rms_error": 1.3778282797522632e-5,
+        "passes": true
+      },
+      "deflection_R": {
+        "peak_reference": 0.0005845723502388736,
+        "peak_candidate": 0.0005845719249756941,
+        "peak_error": 7.27477410306734e-7,
+        "rms_error": 9.722428941081684e-6,
+        "passes": true
+      },
+      "rotation_L": {
+        "peak_reference": 0.014638950654741072,
+        "peak_candidate": 0.014638872933427242,
+        "peak_error": 5.309213458141146e-6,
+        "rms_error": 1.1619365125240304e-6,
+        "passes": true
+      },
+      "rotation_R": {
+        "peak_reference": 0.014638950654741072,
+        "peak_candidate": 0.014638872933427242,
+        "peak_error": 5.309213458141146e-6,
+        "rms_error": 1.1619365125240304e-6,
         "passes": true
       }
     }
@@ -226,6 +298,7 @@
   "passes": {
     "mujoco": true,
     "drake": true,
-    "pinocchio": true
+    "pinocchio": true,
+    "myosuite": true
   }
 }
