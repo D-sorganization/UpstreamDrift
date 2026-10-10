@@ -1,0 +1,22 @@
+{
+  "canonical_generation_command": "python scripts/shared_tools/divergence_inventory.py --write --json /tmp/p2-divergence-current.json --markdown /tmp/p2-divergence-current.md",
+  "generated_record": {
+    "path": "physics/impact_model/README.md",
+    "classification": "ud-only",
+    "package": "physics",
+    "subpackage": "impact_model",
+    "ud_bytes": 1137,
+    "tools_bytes": null,
+    "byte_delta": null,
+    "byte_identical": false,
+    "ud_has_child_copy_header": false,
+    "spelling_only": false
+  },
+  "preserved_all_existing_records": true,
+  "excluded_generated_metadata_refresh": "physics/impact_model/utils.py byte-size metadata; classification unchanged, existing record retained",
+  "json_old_sha256": "c44a02cfa92149abe36a6b3673c5c789d228073ef6f4ba91dcede1b1bbb8173b",
+  "json_new_sha256": "d76bcdcfeb461f84a815ecf84e8dcaf80590d14f52deb67b1926da2f2617c31f",
+  "markdown_old_sha256": "9f91f744b8f04405c61d8918fde2b78a90c10a2646d9a26e6f8c48703df6304c",
+  "markdown_new_sha256": "96db569ff65e36cac7f8827823e37feacb69cda7da23742558308d6806a3c024",
+  "check_exit": 0
+}

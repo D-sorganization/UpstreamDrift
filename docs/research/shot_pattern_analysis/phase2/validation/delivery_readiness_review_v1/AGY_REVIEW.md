@@ -23,7 +23,7 @@ Active long-running jobs are explicitly scoped and quarantined:
 
 ## 2. Categorized Findings: Defects, Pending Work, and Improvements
 
-### Category A: Actual Actionable Defects (Not covered by active jobs)
+### Category A: Actual Actionable Defects (Not Covered by Active Jobs)
 
 #### 1. Phase Two Invisibility / Discoverability Defect in Main Research README
 * **Path & Evidence:** [`docs/research/shot_pattern_analysis/README.md`](docs/research/shot_pattern_analysis/README.md#L1-L274)

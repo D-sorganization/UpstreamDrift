@@ -1,4 +1,4 @@
-# Control v3 Graphics Visual Review
+# Control V3 Graphics Visual Review
 
 Status: **Changes Required**. The completed producer exited 0; the inventory audit binds 547 outputs and 72 cell manifests. This review independently rehashed all 194 PNGs, inspected all 13 contact sheets and ten representative full-size images across Driver, 7-Iron and Pitching Wedge. Exact paths and hashes are recorded in `visual_review.json`.
 

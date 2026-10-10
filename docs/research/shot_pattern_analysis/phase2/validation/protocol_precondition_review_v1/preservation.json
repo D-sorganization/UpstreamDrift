@@ -1,0 +1,18 @@
+{
+  "source_head": "b231eed2f80486b7a7243015870a973334d067b1",
+  "originals": [
+    {
+      "name": "p2-protocol-precondition-review.md",
+      "sha256": "4aaf97c26368f328b1077f8de0e22cbec92b7a662aea2f4acc61aa8026011fb3",
+      "bytes": 8612
+    },
+    {
+      "name": "p2-prepr-failure-source-comparison.json",
+      "sha256": "7e925fd0ab5980bb68479ff6749149f5535753924dfccf57e5d73d8c80608b43",
+      "bytes": 4625
+    }
+  ],
+  "archive_sha256": "46ec436077e08ab144a090925355f1f82d16da34f3e12dac92c2010e6b499623",
+  "readable_copy_transform": "UTF-8 text, normalized newlines, trailing whitespace stripped; originals unchanged in ZIP",
+  "status": "diagnostic only; not publication acceptance"
+}
