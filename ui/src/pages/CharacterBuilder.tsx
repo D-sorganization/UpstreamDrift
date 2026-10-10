@@ -3,6 +3,8 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Grid, Environment } from '@react-three/drei';
 import { getApiBase } from '@/api/backend';
 import { CharacterSpecPanel } from '@/components/character/CharacterSpecPanel';
+import { AppearancePanel } from '@/components/character/AppearancePanel';
+import type { AppearancePalette } from '@/components/character/appearanceTypes';
 
 interface SegmentBreakdown {
   name: string;
@@ -35,10 +37,12 @@ function CharacterPreview({
   height,
   weight,
   buildType,
+  palette,
 }: {
   height: number;
   weight: number;
   buildType: string;
+  palette?: AppearancePalette | null;
 }) {
   const thicknessBase = Math.sqrt(weight / 80);
   const multiplier = BUILD_MULTIPLIERS[buildType] || BUILD_MULTIPLIERS.Average;
@@ -46,6 +50,15 @@ function CharacterPreview({
   const trunkRadius = 0.15 * thicknessBase * multiplier.trunk;
   const armRadius = 0.035 * thicknessBase * multiplier.arms;
   const legRadius = 0.05 * thicknessBase * multiplier.legs;
+
+  // Appearance picks recolour the preview when present; otherwise keep the
+  // original hard-coded palette exactly (#11658 CMB-7c).
+  const trunkColor = palette?.trunk ?? '#4f46e5';
+  const headColor = palette?.head ?? '#6366f1';
+  const thighColor = palette?.thigh ?? '#3b82f6';
+  const shankColor = palette?.shank ?? '#60a5fa';
+  const upperArmColor = palette?.upperArm ?? '#a855f7';
+  const forearmColor = palette?.forearm ?? '#c084fc';
 
   const headLength = height * 0.1395;
   const trunkLength = height * 0.328;
@@ -61,61 +74,61 @@ function CharacterPreview({
       {/* Trunk */}
       <mesh position={[0, hipHeight + trunkLength / 2, 0]}>
         <cylinderGeometry args={[trunkRadius, trunkRadius * 0.9, trunkLength, 16]} />
-        <meshStandardMaterial color="#4f46e5" roughness={0.4} metalness={0.1} />
+        <meshStandardMaterial color={trunkColor} roughness={0.4} metalness={0.1} />
       </mesh>
 
       {/* Head */}
       <mesh position={[0, hipHeight + trunkLength + headLength / 2, 0]}>
         <sphereGeometry args={[headLength / 2, 16, 16]} />
-        <meshStandardMaterial color="#6366f1" roughness={0.4} metalness={0.1} />
+        <meshStandardMaterial color={headColor} roughness={0.4} metalness={0.1} />
       </mesh>
 
       {/* Left Thigh */}
       <mesh position={[-trunkRadius * 0.6, shankLength + thighLength / 2, 0]}>
         <cylinderGeometry args={[legRadius, legRadius * 0.9, thighLength, 16]} />
-        <meshStandardMaterial color="#3b82f6" roughness={0.4} metalness={0.1} />
+        <meshStandardMaterial color={thighColor} roughness={0.4} metalness={0.1} />
       </mesh>
 
       {/* Right Thigh */}
       <mesh position={[trunkRadius * 0.6, shankLength + thighLength / 2, 0]}>
         <cylinderGeometry args={[legRadius, legRadius * 0.9, thighLength, 16]} />
-        <meshStandardMaterial color="#3b82f6" roughness={0.4} metalness={0.1} />
+        <meshStandardMaterial color={thighColor} roughness={0.4} metalness={0.1} />
       </mesh>
 
       {/* Left Shank */}
       <mesh position={[-trunkRadius * 0.6, shankLength / 2, 0]}>
         <cylinderGeometry args={[legRadius * 0.9, legRadius * 0.8, shankLength, 16]} />
-        <meshStandardMaterial color="#60a5fa" roughness={0.4} metalness={0.1} />
+        <meshStandardMaterial color={shankColor} roughness={0.4} metalness={0.1} />
       </mesh>
 
       {/* Right Shank */}
       <mesh position={[trunkRadius * 0.6, shankLength / 2, 0]}>
         <cylinderGeometry args={[legRadius * 0.9, legRadius * 0.8, shankLength, 16]} />
-        <meshStandardMaterial color="#60a5fa" roughness={0.4} metalness={0.1} />
+        <meshStandardMaterial color={shankColor} roughness={0.4} metalness={0.1} />
       </mesh>
 
       {/* Left Upper Arm */}
       <mesh position={[-trunkRadius - armRadius, hipHeight + trunkLength - upperArmLength / 2, 0]}>
         <cylinderGeometry args={[armRadius, armRadius * 0.9, upperArmLength, 16]} />
-        <meshStandardMaterial color="#a855f7" roughness={0.4} metalness={0.1} />
+        <meshStandardMaterial color={upperArmColor} roughness={0.4} metalness={0.1} />
       </mesh>
 
       {/* Right Upper Arm */}
       <mesh position={[trunkRadius + armRadius, hipHeight + trunkLength - upperArmLength / 2, 0]}>
         <cylinderGeometry args={[armRadius, armRadius * 0.9, upperArmLength, 16]} />
-        <meshStandardMaterial color="#a855f7" roughness={0.4} metalness={0.1} />
+        <meshStandardMaterial color={upperArmColor} roughness={0.4} metalness={0.1} />
       </mesh>
 
       {/* Left Forearm */}
       <mesh position={[-trunkRadius - armRadius, hipHeight + trunkLength - upperArmLength - forearmLength / 2, 0]}>
         <cylinderGeometry args={[armRadius * 0.9, armRadius * 0.8, forearmLength, 16]} />
-        <meshStandardMaterial color="#c084fc" roughness={0.4} metalness={0.1} />
+        <meshStandardMaterial color={forearmColor} roughness={0.4} metalness={0.1} />
       </mesh>
 
       {/* Right Forearm */}
       <mesh position={[trunkRadius + armRadius, hipHeight + trunkLength - upperArmLength - forearmLength / 2, 0]}>
         <cylinderGeometry args={[armRadius * 0.9, armRadius * 0.8, forearmLength, 16]} />
-        <meshStandardMaterial color="#c084fc" roughness={0.4} metalness={0.1} />
+        <meshStandardMaterial color={forearmColor} roughness={0.4} metalness={0.1} />
       </mesh>
     </group>
   );
@@ -127,6 +140,7 @@ export function CharacterBuilderPage() {
   const [buildType, setBuildType] = useState('Average');
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [palette, setPalette] = useState<AppearancePalette | null>(null);
 
   const breakdown = useMemo(() => {
     return SEGMENT_RATIOS.map((seg) => {
@@ -257,6 +271,11 @@ export function CharacterBuilderPage() {
             <CharacterSpecPanel />
           </div>
 
+          {/* Appearance picker (CMB-7c, #11658) */}
+          <div className="border-t border-gray-700 pt-6">
+            <AppearancePanel onPaletteChange={setPalette} />
+          </div>
+
           {/* Segment breakdown */}
           <div className="border-t border-gray-700 pt-6">
             <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
@@ -324,7 +343,12 @@ export function CharacterBuilderPage() {
             cellColor="#374151"
             sectionColor="#4b5563"
           />
-          <CharacterPreview height={height} weight={weight} buildType={buildType} />
+          <CharacterPreview
+            height={height}
+            weight={weight}
+            buildType={buildType}
+            palette={palette}
+          />
           <Environment preset="studio" />
         </Canvas>
 
