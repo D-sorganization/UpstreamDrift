@@ -65,6 +65,17 @@ def capture_observation_sha256(capture: TourCapture) -> str:
     return digest.hexdigest()
 
 
+def _snapshot_capture(capture: TourCapture) -> TourCapture:
+    """Revalidate and detach capture arrays from writable caller-owned views."""
+    return TourCapture(
+        np.array(capture.time_s, dtype=np.float64, copy=True),
+        capture.labels,
+        np.array(capture.points_m, dtype=np.float64, copy=True),
+        np.array(capture.valid, dtype=np.bool_, copy=True),
+        capture.source_sha256,
+    )
+
+
 def _pose_history_sha256(
     frame_ids: Mapping[str, str], poses: Sequence[Mapping[str, Pose]]
 ) -> str:
@@ -233,7 +244,7 @@ class NativeMarkerAttachmentCalibrationArtifact:
 
     def validate(self, request: NativeMarkerCalibrationRequest) -> None:
         """Rehash inputs and compare expected provider and capture coordinates."""
-        capture = request.capture
+        capture = _snapshot_capture(request.capture)
         poses = request.poses
         self.validate_structure()
         _validate_binding_identity(self, request.binding)
@@ -243,6 +254,8 @@ class NativeMarkerAttachmentCalibrationArtifact:
             request.pose_provider_sha256,
         ):
             raise ValueError("marker calibration pose provider identity differs")
+        if self.native_engine_id != request.native_engine_id:
+            raise ValueError("marker calibration native engine identity differs")
         if (self.capture_frame_id, self.capture_timebase_id) != (
             request.capture_frame_id,
             request.capture_timebase_id,
@@ -334,7 +347,7 @@ def calibrate_static_marker_attachments(
     use the exact capture clock. This function hashes inputs for integrity but
     does not authenticate the caller or claim independent heldout validation.
     """
-    capture = request.capture
+    capture = _snapshot_capture(request.capture)
     frame_ids_by_label = request.frame_ids_by_label
     poses = request.poses
     if capture.source_sha256 is None:

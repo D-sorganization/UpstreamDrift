@@ -216,6 +216,68 @@ def test_artifact_rejects_changed_native_frame_mapping() -> None:
         artifact.validate(request)
 
 
+def test_artifact_rejects_changed_native_engine_identity() -> None:
+    capture, poses = _capture_and_poses()
+    artifact = _calibrate(capture, poses)
+    request = NativeMarkerCalibrationRequest(
+        capture,
+        {"marker-a": "/bodyset/arm", "marker-b": "/bodyset/hand"},
+        poses,
+        capture.time_s,
+        _binding(),
+        "opensim",
+        "mujoco-native-fk-fixture",
+        "1" * 64,
+        "capture-world",
+        "capture-relative",
+    )
+
+    with pytest.raises(ValueError, match="native engine identity differs"):
+        artifact.validate(request)
+
+
+@pytest.mark.parametrize("mutate_after_calibration", [False, True])
+def test_calibration_revalidates_aliased_capture_clock(
+    mutate_after_calibration: bool,
+) -> None:
+    owner_time = np.array([0.0, 0.01, 0.02])
+    capture, poses = _capture_and_poses()
+    aliased_capture = TourCapture(
+        owner_time.view(),
+        capture.labels,
+        capture.points_m,
+        capture.valid,
+        capture.source_sha256,
+    )
+    request = NativeMarkerCalibrationRequest(
+        aliased_capture,
+        {"marker-a": "/bodyset/arm", "marker-b": "/bodyset/hand"},
+        poses,
+        aliased_capture.time_s,
+        _binding(),
+        "mujoco",
+        "mujoco-native-fk-fixture",
+        "1" * 64,
+        "capture-world",
+        "capture-relative",
+    )
+    artifact = (
+        calibrate_static_marker_attachments(request)
+        if mutate_after_calibration
+        else None
+    )
+    owner_time[1] = 0.03
+
+    with pytest.raises(
+        ValueError, match="Capture time must start at zero and increase strictly"
+    ):
+        if mutate_after_calibration:
+            assert artifact is not None
+            artifact.validate(request)
+        else:
+            calibrate_static_marker_attachments(request)
+
+
 def test_artifact_recomputes_offsets_instead_of_trusting_receipt_fields() -> None:
     capture, poses = _capture_and_poses()
     artifact = _calibrate(capture, poses)
