@@ -600,6 +600,13 @@ def _qualified_interpretation_lines(interpretation: dict) -> list[str]:
             f"({figure['presentation'].title()}, {figure['source_protocol']}, "
             f"{figure['source_kind'].replace('_', ' ')})"
         )
+        if figure.get("physical_pattern"):
+            label += f" · {figure['physical_pattern']}"
+        if figure.get("comparison_kind"):
+            label += " · " + str(figure["comparison_kind"]).replace(
+                "_", " "
+            ).title().replace("Sd", "SD")
+            label += " · " + " → ".join(figure["source_cells"])
         lines.append(f"- [{label}]({path.as_posix()})")
     if not interpretation["figure_links"]:
         lines.append("No qualified figure asset is available for these selected cells.")

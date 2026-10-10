@@ -115,6 +115,99 @@ def verified_original_figure_inventory(
     return path.relative_to(report_root).as_posix()
 
 
+def supplement_figure_links(
+    entries: list[dict],
+    selected_effects: list[dict],
+    *,
+    supplement_dir: Path,
+    report_root: Path,
+) -> list[dict]:
+    """Select PNG links from an already hash-verified supplemental ledger.
+
+    Paired assets must describe the exact ordered conditions used in the
+    selected effect tables. Keep each physical pattern; do not deduplicate it
+    against another pattern. The caller verifies asset bytes at publication.
+    """
+    wanted = {
+        (
+            effect["comparison_kind"],
+            tuple(effect["source_cells"]),
+            tuple(effect["source_protocols"]),
+        )
+        for effect in selected_effects
+    }
+    links: list[dict] = []
+    seen: set[tuple] = set()
+    root = Path(supplement_dir).resolve() / "figures"
+    report_root = Path(report_root).resolve()
+    for entry in entries:
+        kind_name = entry.get("figure_kind", "")
+        match = re.fullmatch(
+            r"(?:paired_)?(density|overhead)(?:_(straight|draw|fade))?(_social)?_png",
+            kind_name,
+        )
+        if match is None or entry.get("status") == "unavailable":
+            continue
+        kind, filename_pattern, social = match.groups()
+        presentation = "social" if social else "academic"
+        if entry.get("presentation", presentation) != presentation:
+            raise ValueError("supplement figure presentation disagrees with asset kind")
+        pattern = entry.get("physical_pattern")
+        if filename_pattern and pattern != filename_pattern.title():
+            raise ValueError("supplement physical pattern disagrees with asset kind")
+        cells: tuple[str, ...]
+        protocols: tuple[str, ...]
+        identity: tuple
+        paired = "first_cell" in entry or "second_cell" in entry
+        if paired:
+            cells = (entry["first_cell"], entry["second_cell"])
+            protocols = (entry["first_protocol"], entry["second_protocol"])
+            identity = (entry.get("comparison_kind"), cells, protocols)
+            if identity not in wanted:
+                continue
+            if (
+                kind == "density"
+                and presentation == "social"
+                and pattern not in ("Straight", "Draw", "Fade")
+            ):
+                raise ValueError(
+                    "paired social density must identify a physical pattern"
+                )
+            club = str(cells[0]).split("_lean", 1)[0]
+            protocol = " → ".join(dict.fromkeys(protocols))
+        else:
+            cells = (entry["cell"],)
+            protocol = entry.get("source_protocol", "supplement")
+            protocols = (protocol,)
+            club = str(entry.get("club_id") or cells[0]).split("_lean", 1)[0]
+            identity = (protocol, club)
+        asset_key = (identity, presentation, kind, pattern)
+        if asset_key in seen:
+            continue
+        seen.add(asset_key)
+        relative = Path(entry["relative_path"])
+        if relative.is_absolute() or ".." in relative.parts:
+            raise ValueError("supplement figure path must remain relative")
+        path = (root / relative).resolve()
+        if not path.is_relative_to(root):
+            raise ValueError("supplement figure path escapes its artifact root")
+        links.append(
+            {
+                "club": club,
+                "kind": kind,
+                "presentation": presentation,
+                "source_protocol": protocol,
+                "source_protocols": protocols,
+                "source_cells": cells,
+                "physical_pattern": pattern,
+                "comparison_kind": entry.get("comparison_kind"),
+                "source_kind": entry["source_kind"],
+                "relative_path": path.relative_to(report_root).as_posix(),
+            }
+        )
+    return links
+
+
 def assemble_qualified_interpretation(
     primary_root: Path,
     primary: dict,
@@ -221,38 +314,14 @@ def assemble_qualified_interpretation(
     ledger = supplement["figure_ledger"]
     if ledger.get("schema") != "matched-supplement-figure-ledger/1":
         raise ValueError("qualified supplement figure inventory differs")
-    supplemental_assets: set[tuple[str, str, str]] = set()
-    for item in ledger["figures"]:
-        if item.get("figure_kind") not in (
-            "density_social_png",
-            "overhead_social_png",
-            "density_png",
-            "overhead_png",
-            "paired_density_social_png",
-            "paired_overhead_social_png",
-        ):
-            continue
-        source_protocol = item.get("source_protocol") or "paired supplement"
-        presentation = "social" if "social" in item["figure_kind"] else "academic"
-        kind = "overhead" if "overhead" in item["figure_kind"] else "density"
-        asset_key = (source_protocol, presentation, kind)
-        if asset_key in supplemental_assets:
-            continue
-        supplemental_assets.add(asset_key)
-        relative = Path(item["relative_path"])
-        if relative.is_absolute() or ".." in relative.parts:
-            raise ValueError("supplement figure path must be relative")
-        path = Path(supplement_dir).resolve() / "figures" / relative
-        links.append(
-            {
-                "club": item.get("club_id", "supplement"),
-                "kind": kind,
-                "presentation": presentation,
-                "source_protocol": source_protocol,
-                "source_kind": item["source_kind"],
-                "relative_path": path.relative_to(report_root).as_posix(),
-            }
+    links.extend(
+        supplement_figure_links(
+            ledger["figures"],
+            representative_effects,
+            supplement_dir=supplement_dir,
+            report_root=report_root,
         )
+    )
     report = supplement["report"]
     if (
         report.get("schema") != "matched-supplement-report/1"
