@@ -27,6 +27,9 @@ from src.shared.python.motion_matching.club_face_target import (
 from src.shared.python.motion_matching.full_body_spec import (
     validate_full_body_spec,
 )
+from src.shared.python.motion_matching.hip_calibration import (
+    pelvis_alignment_from_spec,
+)
 from src.shared.python.motion_matching.pipeline.address import (
     AddressStageInputs,
     HipCalibrationOptions,
@@ -45,7 +48,6 @@ from src.shared.python.motion_matching.pipeline.address_feet import (
     split_address_coordinates,
 )
 from src.shared.python.motion_matching.pipeline.constants import (
-    BUILD_RECEIPT,
     CANDIDATE,
     CAPTURE_NAMES,
     CONSISTENCY_PRIOR,
@@ -486,12 +488,10 @@ def _calibrate_and_scale(
     hipcal_path = ctx.out_dir / "full_body_spec_hipcal.json"
     scaled_path = ctx.out_dir / "full_body_spec_hipcal_scaled.json"
 
-    receipt_data = json.loads(BUILD_RECEIPT.read_text(encoding="utf-8"))
-    pelvis_alignment = receipt_data.get("pelvis_alignment", {})
+    # The alignment of the spec being rewritten, never another spec's build
+    # receipt: a foreign alignment rotates both hips (#12109).
     alignment_old = (
-        pelvis_alignment.get("hip_from_opensim_pelvis")
-        if not args.skip_hip_calibration
-        else None
+        pelvis_alignment_from_spec(base_spec) if not args.skip_hip_calibration else None
     )
     hip_spec, qualification_note, hip_report, fixed, seeds_all = prepare_hip_spec(
         lane,
