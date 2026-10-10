@@ -55,6 +55,7 @@ def test_cli_end_to_end(tmp_path, monkeypatch):
     with redirect_stdout(buf):
         rc = main(
             [
+                "run",
                 "--profile",
                 str(profile),
                 "--baseline",
