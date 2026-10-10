@@ -5,8 +5,9 @@ retarget through calibrated hip frames, #12125 spec pelvis alignment) for
 capture-A (reference driver) and capture-B (reference iron). Each
 `engines.json` evaluates the one fitted address vector in the engine's own
 forward kinematics (MuJoCo, Pinocchio, Drake, MyoSuite via the retarget map,
-OpenSim Simbody FK of the exported model). Capture-O (owner driver) is private
-and was not measurable on this host; its target stays unmeasured here.
+OpenSim Simbody FK of the exported model). Capture-O (owner driver) is private;
+it was measured on a host holding it and only its anonymous toe-out summary is
+committed (`capture_o/engines.json`, geometry stripped).
 
 Toe-out, degrees, model (error against the capture), tolerance 2 degrees:
 
@@ -17,6 +18,10 @@ Toe-out, degrees, model (error against the capture), tolerance 2 degrees:
 | Drake     | 16.59 (+0.22) | 3.92 (-0.11) | 15.19 (+0.19) | -0.42 (-0.05) |
 | OpenSim   | 16.59 (+0.22) | 3.92 (-0.11) | 15.19 (+0.19) | -0.42 (-0.05) |
 | MyoSuite  | 16.55 (+0.18) | 3.88 (-0.15) | 15.15 (+0.15) | -0.46 (-0.09) |
+
+Capture-O (target lead 6.12 / trail 1.61), model (error): MuJoCo, Pinocchio,
+Drake and OpenSim 6.39 (+0.27) / 2.04 (+0.43); MyoSuite 6.33 (+0.21) / 1.99
+(+0.37). All within 2 degrees.
 
 Capture targets: A 16.37 / 4.03, B 15.00 / -0.37 (lead / trail).
 `opensim_native_address.json` is OpenSim's own address fit
