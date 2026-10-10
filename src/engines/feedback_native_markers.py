@@ -32,6 +32,18 @@ def require_sha256(name: str, digest: str) -> None:
         raise ValueError(f"{name} identity must be a lowercase SHA-256")
 
 
+def native_binding_identity(binding: NativeAdapterBinding) -> tuple[str, ...]:
+    """Return the shared six-field model/provider identity for marker evidence."""
+    return (
+        binding.native_model_id,
+        binding.native_variant_id,
+        binding.native_execution_provider_id,
+        binding.native_execution_provider_sha256,
+        binding.source_model_sha256,
+        binding.loaded_native_model_sha256,
+    )
+
+
 @dataclass(frozen=True)
 class NativeMarkerAttachment:
     """An explicit local 3-D marker point attached to one native body/frame."""
@@ -78,15 +90,7 @@ class NativeMarkerMap:
             self.source_model_sha256,
             self.loaded_native_model_sha256,
         )
-        expected = (
-            binding.native_model_id,
-            binding.native_variant_id,
-            binding.native_execution_provider_id,
-            binding.native_execution_provider_sha256,
-            binding.source_model_sha256,
-            binding.loaded_native_model_sha256,
-        )
-        if identity != expected:
+        if identity != native_binding_identity(binding):
             raise ValueError("native marker map model or provider identity differs")
         if self.timebase_id != timebase_id:
             raise ValueError("native marker map timebase differs from replay bundle")

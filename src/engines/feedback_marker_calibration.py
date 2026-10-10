@@ -15,6 +15,7 @@ from src.engines.feedback_native_execution import NativeAdapterBinding
 from src.engines.feedback_native_markers import (
     NativeMarkerAttachment,
     NativeMarkerMap,
+    native_binding_identity,
     require_sha256,
 )
 from src.shared.python.motion_matching.marker_calibration import (
@@ -122,15 +123,7 @@ def _validate_binding_identity(
         artifact.source_model_sha256,
         artifact.loaded_native_model_sha256,
     )
-    expected = (
-        binding.native_model_id,
-        binding.native_variant_id,
-        binding.native_execution_provider_id,
-        binding.native_execution_provider_sha256,
-        binding.source_model_sha256,
-        binding.loaded_native_model_sha256,
-    )
-    if identity != expected:
+    if identity != native_binding_identity(binding):
         raise ValueError("marker calibration binding identity differs")
 
 
