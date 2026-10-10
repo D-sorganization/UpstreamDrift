@@ -53,6 +53,10 @@ ENGINE_MODULES = {
         "pinocchio",
         "src.engines.physics_engines.pinocchio.python.grip_bushing",
     ),
+    "myosuite": (
+        "myosuite",
+        "src.engines.physics_engines.myosuite.python.grip_bushing",
+    ),
 }
 
 
@@ -64,6 +68,9 @@ def _engine(name: str) -> types.ModuleType:
         pytest.skip(f"{package} is not installed: {exc}")
     if not hasattr(real, "__file__"):
         pytest.skip(f"{package} in sys.modules is a test double")
+    if name == "myosuite":
+        # a partial install imports the package but not the scene loader
+        pytest.importorskip("myosuite.envs.env_base")
     return import_module(module)
 
 

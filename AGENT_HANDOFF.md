@@ -1,4 +1,9 @@
-# Active: Lead-Foot Address Corrections - OSV-6 #11737 (Stacked on #12031)
+# Active: Contact Grip and MyoSuite Bushing, OSV-7 Phase 3 #11739
+
+- Branch `claude/osv-7-contact-grip` (stacked on #11963). Pad contact grip with pad stiffness matched to the bushing (`grip_contact/pad_layout.py`, `pad_contact.py`); MuJoCo full swing (dt 1e-5 s), Drake and Pinocchio holds; MyoSuite bushing parity passes (worst 0.013 % peak). Quasi-static balance closes (`static_balance.py`). See GRIP_PARITY_DECISIONS.md section 19.
+- Open and flagged: contact per-hand force is about 4x the bushing's with matching net force (indeterminacy, not tuned); no OpenSim contact variant; no full-swing Drake or Pinocchio contact run.
+
+# Active: Lead-Foot Address Corrections - OSV-6 #11737 (Stacked On #12031)
 
 - Branch `claude/osv-6b-leg-azimuth`. With `--foot-progression` on, two corrections apply. `hip_calibration.knee_flexion_axis` removes the lateral-marker tilt from the zero twist (it was biased by 17-43 deg). `pipeline/leg_marker_constraints.py` keeps the knee and ankle marker azimuth and keeps the forefoot square and centred.
 - MuJoCo address toe-out is within 2 deg on both captures, and so is Drake once the #12039 coordinate-order fix (PR #12047) lands. Pinocchio and MyoSuite evidence is on the stacked branch `claude/osv-6c-feet-evidence`. Canonical receipts are unchanged: the default-on correction is a recorded failed experiment (see `docs/research/hip_axis_mirroring/`). The finish-feasibility ratchet is strict-xfail on #12040.

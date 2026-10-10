@@ -346,7 +346,7 @@ def hip_rotation_zero(
                 p_a_out = rotation.T @ (pts[f, a_out_cols[side]] - translation)
                 c_hip = centres[side]
                 v_lat = knee_flexion_axis(
-                    np.zeros(3),
+                    (0.0, 0.0, 0.0),
                     axes.T @ (p_k_out - c_hip),
                     axes.T @ (p_a_out - c_hip),
                     side=side,
