@@ -162,6 +162,67 @@ Its success cannot resolve or establish acceptance of the recorded Tectonic
 bundle-download failure. Keep the user's existing LaTeX editor open and record
 its actual compilation result separately.
 
+## Revise Saved Figures Without Recomputing Statistics
+
+The qualified caption/gutter repair uses a separate child publication. Preserve the
+completed `supplement_report_v1` parent unchanged. This route reuses its seven
+numeric/table/alias files byte-for-byte and revises only academic paired density
+and overhead PNG/PDF/SVG plus paired social overhead PNG. The other nine paired
+social-density formats and all supplemental cell figures are copied unchanged.
+The completed ledger, rather than a hard-coded count, defines coverage.
+
+The [Frozen Parent Pin](validation/supplement_parent_verifier_pin_v1/REVIEW.md)
+records source commit `14f27706e4e9e52ca1324a7a2bac59e86ab33ef9`, the exact
+interpreter and its execution snapshot. The public `pin` command verified that
+identity; it did not validate unfinished output. Keep the preserved checkout and
+interpreter available. For another machine, reconstruct those identities and
+create a separately reviewed pin with `revise_supplement_figures pin`; do not edit
+an existing pin and retain its former checksum.
+
+Run the following from the qualified revision checkout only after the parent
+pipeline completes. The staging command invokes the unchanged parent verifier
+inside the pinned environment, reconstructs the exact ordered saved pairs and
+checks the complete original ledger before writing a new child directory. It
+never calls Monte Carlo simulation or statistical bootstrapping.
+
+```bash
+study_phase=docs/research/shot_pattern_analysis/phase2
+study_pin="$study_phase/validation/supplement_parent_verifier_pin_v1/parent_pin.json"
+study_child="$study_phase/supplement_publication_v1"
+python -m scripts.research.shot_pattern_analysis.revise_supplement_figures stage \
+  "$study_phase/supplement_report_v1" "$study_child" \
+  --pin "$study_pin" \
+  --pin-sha256 d018db37c950e3e4999cad223a78dd9853f8336416d50b40646002901243ed64
+```
+
+Staging writes `REPORT_SUPPLEMENT_PUBLICATION_CANDIDATE.json`. This is not an
+accepted publication, and the report loader rejects a candidate-only directory.
+An independent reviewer must inspect all revised graphics and verify the unchanged
+outputs. The review JSON must use schema `matched-supplement-publication-review/1`,
+`accepted: true`, `review_scope: "visual_and_contract"`, a named `reviewer`, the
+exact `candidate_sha256`, actual old/new `source_delta`, every revised file's
+`revised_asset_sha256`, and nonempty hash-bound `evidence_files`. The verifier
+checks this content; the CLI does not generate or approve its own review.
+
+Only after that review exists, set `study_review` to its JSON path and
+`study_review_sha256` to its independently verified SHA-256. Finalize and verify:
+
+```bash
+: "${study_review:?Set the completed independent review JSON path}"
+: "${study_review_sha256:?Set the verified review SHA-256}"
+python -m scripts.research.shot_pattern_analysis.revise_supplement_figures finalize \
+  "$study_child" --review "$study_review" --review-sha256 "$study_review_sha256"
+python -m scripts.research.shot_pattern_analysis.revise_supplement_figures verify \
+  "$study_child"
+```
+
+Successful finalization writes `REPORT_SUPPLEMENT_PUBLICATION_REVISION.json`.
+Then use `--supplement-dir "$study_child"` in the final-report command above.
+The report records both child and immutable parent receipt identities. Preserve
+the parent, child, verifier pin, approved review and its evidence for restoration.
+At this documentation checkpoint, staging/finalization and full publication
+review have not yet run; representative rendering evidence is not their substitute.
+
 ## Acceptance After Rebuilding
 
 A process exit or matching manifest is necessary but insufficient. Review the
