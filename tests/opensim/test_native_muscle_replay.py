@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import pytest
@@ -329,6 +330,42 @@ def test_native_replay_preserves_complete_nonzero_initial_state(
     muscle_laws = first.policy["muscle_laws"]
     assert isinstance(muscle_laws, str)
     assert actual_law in muscle_laws
+    assert first.policy["muscle_class_policy"] == "exact-supported-concrete-law/1.0.0"
+
+
+def test_unknown_derived_law_identity_is_rejected_before_native_init(
+    muscle_fixture: tuple[Path, dict[str, float]], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Proxy identity boundary test; this does not load a compiled C++ plugin."""
+    osim = pytest.importorskip("opensim")
+    path, initial = muscle_fixture
+    original_class_name = osim.Component.getConcreteClassName
+    probe_model = osim.Model(str(path))
+    muscle = probe_model.getMuscles().get(0)
+    supported_name = original_class_name(muscle)
+    law_type = getattr(osim, supported_name)
+    assert law_type.safeDownCast(muscle) is not None
+
+    def report_unknown_concrete_law(component: Any) -> str:
+        actual = original_class_name(component)
+        return "UnqualifiedDerived" + actual if actual == supported_name else actual
+
+    def forbid_initialization(model: Any) -> None:
+        raise AssertionError("unknown concrete law reached native initSystem")
+
+    monkeypatch.setattr(
+        osim.Component, "getConcreteClassName", report_unknown_concrete_law
+    )
+    monkeypatch.setattr(
+        osim.Muscle, "getConcreteClassName", report_unknown_concrete_law
+    )
+    assert muscle.getConcreteClassName().startswith("UnqualifiedDerived")
+    assert law_type.safeDownCast(muscle) is not None
+    monkeypatch.setattr(osim.Model, "initSystem", forbid_initialization)
+    with pytest.raises(ValueError, match="concrete muscle law"):
+        replay_muscle_excitations(
+            path, initial, np.array([0.0, 0.01]), {"flexor": np.array([0.1, 0.1])}
+        )
 
 
 def test_zero_fiber_length_is_not_an_admissible_physical_initial_state(
