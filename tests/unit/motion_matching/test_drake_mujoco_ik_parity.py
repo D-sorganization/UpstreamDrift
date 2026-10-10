@@ -18,7 +18,7 @@ import pytest
 
 from src.shared.python.motion_matching.contact_law import GroundPlane
 
-pytestmark = pytest.mark.unit
+pytestmark = [pytest.mark.unit, pytest.mark.requires_drake]
 pytest.importorskip("mujoco")
 pytest.importorskip("pydrake")
 
