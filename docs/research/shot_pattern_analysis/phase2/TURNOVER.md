@@ -6,16 +6,18 @@ The goal is active and incomplete. MAIN is `/home/dieterolson/.codex/worktrees/s
 
 ## Reporting Regeneration Checkpoint
 
-Original v6 primary completed and passed independent hash/layout review: 689 manifested outputs, 288 PNGs, all numerical CSVs byte-identical to v4; exactly 18 shaft-SD caption PNGs changed. See `validation/original_final_graphics_independent_review_v6/primary_review.json`. The outer v6 session returned 143 without a control terminal receipt; no control success is inferred. A guarded control-only recovery preserves partial output before re-rendering. **Freeze MAIN and BOUNDS study Python until recovery terminates; freeze FINAL_LAYOUT study Python until supplemental v4 terminates.** Docs/evidence may change.
+Original v6 primary and recovered control are complete and graphically reviewed. Primary: 689 outputs / 288 PNGs; control: 547 outputs / 194 PNGs. Every CSV is byte-identical to v4; exactly 18 shaft-SD caption PNGs changed in each set, with all changed cards inspected. Root independently revalidated all primary outputs against its accepted receipt after control completion. Astra accepted the control cards; receipt SHA256 `bab6a49c147606b071a45a09dff2bb3088a598328ea7e9f8cd9f2ea75866a982`. See `validation/original_final_graphics_independent_review_v6/` and `validation/original_control_recovery_v6/completion.json`.
+
+**MAIN/BOUNDS source freezes are released. FINAL_LAYOUT study Python remains frozen until supplemental v4 terminates.** Original builder `c9c0fb194f` and social caption candidates `b9f1ad05b4` / `14f27706e4` are integrated as `aa76fa2eb3`, `9a1aabce5c`, `3f34a6b247`. All74integrationtests pass; scopedRuff/format (sixfiles), Mypy (threesources), and exact scientific/reporting source parity pass. Evidence is recorded in `validation/caption_main_integration_v1/`.
 
 | Job | Exec Session | Wrapper / Initial Child PID | Log / Terminal Receipt |
 | --- | --- | --- | --- |
-| Original Graphics v6 | 91987 (terminal 143) | Primary exit 0; control incomplete | `/tmp/p2-original-final-figures-v6.log`; `/tmp/p2-v6-final_figures_v1-exit.json` |
-| Control Recovery v6 | 61868 | 3265564 / inspect process tree | `/tmp/p2-control-recovery-v6.log`; `validation/original_control_recovery_v6/` |
+| Original Graphics v6 | 91987 (terminal 143) | Primary exit 0; control was interrupted | `/tmp/p2-original-final-figures-v6.log`; `/tmp/p2-v6-final_figures_v1-exit.json` |
+| Control Recovery v6 | 61868 (terminal 0) | Completed 10:53 UTC | `/tmp/p2-control-recovery-v6.log`; `validation/original_control_recovery_v6/completion.json` |
 | Supplemental Report v3 | 86589 (terminal) | Child exit -15, intentional caption correction | `validation/supplement_v3_retirement_for_caption_revision/` |
 | Supplemental Report v4 | 56879 | 3263660 / 3264166 | `/tmp/p2-supplement-report-v4.log`; `validation/supplement_rendering_revision_v4/` |
 
-Supplemental v3 partial files and numerical tables were preserved byte-for-byte at `presentation_preview_rejected_supplement_v3/supplement_report_v1`. All bound inputs and both frozen source maps were checked. The accepted caption candidate is FINAL_LAYOUT commit `14f27706e4` atop `b9f1ad05b4`; actual-card receipt SHA256 is `94ea5d5857e8bdf828804bf7a4f38fb019319e0b3f03dbad20b232efd99468bc`. The guarded v4 preflight passed and the full saved-data pipeline is running. No Monte Carlo simulations are repeated.
+Supplemental v3 partial files and numerical tables were preserved byte-for-byte at `presentation_preview_rejected_supplement_v3/supplement_report_v1`. All bound inputs and both formerly frozen source maps were checked. The accepted caption candidate is FINAL_LAYOUT commit `14f27706e4` atop `b9f1ad05b4`; actual-card receipt SHA256 is `94ea5d5857e8bdf828804bf7a4f38fb019319e0b3f03dbad20b232efd99468bc`. The guarded v4 preflight passed and the full saved-data pipeline remains running. No Monte Carlo simulations are repeated.
 
 Start identity, complete study-Python hash inventory and executable wrapper copies: `validation/publication_regeneration_v4_start/`. Original wrapper final receipt: `validation/original_final_figures_rendering_revision_v4.json`. Supplemental output appears only after all384 paired calculations, then all comparisons are rendered; this is expected to be lengthy. Never infer termination from absent output or an observation timeout.
 
@@ -47,7 +49,7 @@ The 72 PW primary supplement cell PNGs (18 cells × academic/social density/over
 
 Astra completed all 32 supplemental control-cell PNGs with four contact sheets and six full-size views; layout and counts pass provisionally. However, standalone context is incomplete: all 52 social-cell SVGs (36 primary PW, 16 controls) omit actual source protocol and numeric matched target, as do all 29 completed pair-social-density SVGs inspected at that snapshot. Pair-overhead already identifies ordered protocols/target. The prior 72-image primary review remains layout/count evidence, not acceptance of standalone context. See `validation/supplement_v3_graphical_review/astra_control_cells/`: review SHA-256 `c540d701c1678eefa1199ef3bf1a6f58223605f5dbed3360b8a121c0cfe8d04b`, scope SHA-256 `ea603e5caeab2e60e9d5a2a440cc3d146532742c9eb286dc17e9913c4a7e1494`. Root verified both receipts.
 
-AGY Gemini 3.8 Flash High filed [#12115](https://github.com/D-sorganization/UpstreamDrift/issues/12115) under the authorized personal identity and produced the two accepted candidate commits. Sixteen red regressions became 34 green tests; scoped Ruff/format and Mypy pass. Astra inspected all 24 representative PNGs, eight full-size cards, all 68 asset hashes and eight byte-identical academic PNGs; no remaining representative caption/layout finding. See `validation/supplement_social_context_candidate_v1/actual_card_review.json`. Full-pipeline acceptance remains pending. Integrate both candidate commits and BOUNDS `c9c0fb194f` only when the MAIN/BOUNDS source freeze permits.
+AGY Gemini 3.8 Flash High filed [#12115](https://github.com/D-sorganization/UpstreamDrift/issues/12115) under the authorized personal identity and produced the two accepted candidate commits. Sixteen red regressions became 34 green tests; scoped Ruff/format and Mypy pass. Astra inspected all 24 representative PNGs, eight full-size cards, all 68 asset hashes and eight byte-identical academic PNGs; no remaining representative caption/layout finding. See `validation/supplement_social_context_candidate_v1/actual_card_review.json`. Full-pipeline acceptance remains pending. All three candidate commits are now integrated after terminal recovery checks; FINAL_LAYOUT remains unchanged for the live supplemental job.
 
 The v4 wrapper and its 16 red-to-green guard tests are in `validation/supplement_rendering_revision_v4_preparation/`; actual preflight/start/exit evidence lives in `validation/supplement_rendering_revision_v4/`. All 384 comparisons and the complete figure inventory remain required. Expected figure counts must come from the final ledger, not prior rough estimates.
 
@@ -55,7 +57,7 @@ Publication packaging: retain reports, numerical summaries, manifests and restor
 
 ## Local Publication Bundle Checkpoint
 
-Primary graphics are packaged as `/tmp/shot-pattern-publication-bundles-v1/primary/final_figures_v1-001.zip` (223,739,795 bytes). Fresh restoration verified all 690 members and 689 figure-manifest outputs. Inventory and receipt: `validation/publication_primary_bundles_v1/`. This is local verification only; release upload and remote download remain pending.
+Primary graphics are packaged as `/tmp/shot-pattern-publication-bundles-v1/primary/final_figures_v1-001.zip` (223,739,795 bytes). Fresh restoration verified all 690 members and 689 figure-manifest outputs. Inventory and receipt: `validation/publication_primary_bundles_v1/`. The control bundle has also passed fresh restoration: all548members and547figureoutputs; see `validation/publication_control_bundles_v1/`. This is local verification only; release upload and remote download remain pending.
 
 ## Selected Headline and Editor Checkpoint
 

@@ -1,0 +1,21 @@
+from pathlib import Path
+import hashlib,json,datetime
+from PIL import Image,ImageOps,ImageDraw
+p=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2'); out=p/'validation/original_final_graphics_independent_review_v6'; new=p/'control_final_figures_v1'; old=p/'presentation_preview_rejected_final_v4/control_final_figures_v1'
+h=lambda f:hashlib.sha256(f.read_bytes()).hexdigest()
+a=json.loads((new/'figure_manifest.json').read_text());b=json.loads((old/'figure_manifest.json').read_text()); assert all(h(new/k)==v for k,v in a['outputs'].items());assert set(a['outputs'])==set(b['outputs']);assert set(a['outputs'])=={str(f.relative_to(new)) for f in new.rglob('*') if f.is_file() and f.name!='figure_manifest.json'}
+assert {k for k in a if a[k]!=b[k]}=={'outputs','plot_source_sha256'}; assert [k for k in a['plot_source_sha256'] if a['plot_source_sha256'][k]!=b['plot_source_sha256'][k]]==['build_final_figures.py']
+changed=[k for k in a['outputs'] if k.endswith('.png') and h(new/k)!=h(old/k)]; same=[k for k in a['outputs'] if k.endswith('.png') and k not in changed];assert all(k.endswith('/shaft_rotation_sd.png') for k in changed)
+for k in a['outputs']:
+ if k.endswith('.csv'):assert h(new/k)==h(old/k)
+for k in changed:assert 'Shaft Twist SD' in (new/Path(k).with_suffix('.svg')).read_text()
+for club in ['driver','seven_iron','pitching_wedge']:
+ paths=sorted(k for k in changed if f'/{club}/' in k)
+ if not paths:continue
+ sheet=Image.new('RGB',(1560,((len(paths)+1)//2)*810),'#eeeeee');draw=ImageDraw.Draw(sheet)
+ for i,k in enumerate(paths):
+  with Image.open(new/k) as im:thumb=ImageOps.contain(im.convert('RGB'),(760,775))
+  x=10+(i%2)*780;y=25+(i//2)*810;sheet.paste(thumb,(x,y));draw.text((x,y-18),k.split(f'/{club}/')[1],fill='black')
+ sheet.save(out/f'control_changed_{club}.jpg',quality=93)
+primary=json.loads((out/'primary_review.json').read_text());assert h(p/'final_figures_v1/figure_manifest.json')==primary['manifest_sha256'];pm=json.loads((p/'final_figures_v1/figure_manifest.json').read_text());assert all(h(p/'final_figures_v1'/k)==v for k,v in pm['outputs'].items())
+r={'status':'control_hashes_pass_visual_review_pending','checked_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'outputs_verified':len(a['outputs']),'identical_png_count':len(same),'changed_png_count':len(changed),'changed_png_sha256':{k:h(new/k) for k in changed},'all_csv_byte_identical':True,'primary_independently_revalidated_against_accepted_receipt':True,'primary_outputs_verified':len(pm['outputs']),'manifest_sha256':h(new/'figure_manifest.json'),'source_changes':['build_final_figures.py'],'terminal_receipt_sha256':h(p/'validation/original_control_recovery_v6/completion.json')};(out/'control_manifest_reconciliation.json').write_text(json.dumps(r,indent=2)+'\n');(out/'executed_control_reconciliation.py.txt').write_bytes(Path(__file__).read_bytes());print(json.dumps(r,indent=2))
