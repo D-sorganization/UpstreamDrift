@@ -668,7 +668,7 @@
       "tiles": [
         "character_builder"
       ],
-      "notes": "Desktop and API share humanoid_character_builder.spec_export (build, preview, export spec/URDF/MJCF/OSIM, presets). The web page still drives only /character-builder/generate; wiring presets and spec export into the page is tracked under epic #11651.",
+      "notes": "Desktop and API share humanoid_character_builder.spec_export (build, preview, export spec/URDF/MJCF/OSIM, presets). The web page now drives presets, preview/build and spec/URDF/MJCF/OSIM export through the spec API (CMB-7a, #11658); the appearance/material picker and glTF skinned preview remain under CMB-6 #11657 / CMB-7 #11658.",
       "id": "tools.character_builder"
     },
     {
@@ -3146,7 +3146,7 @@
   "inputs": {
     "src/config/models.yaml": "e11682df79d7467f1eba9579d835f5d7019bfd7eb09cf81c14e22bd08d0bf844",
     "src/config/launcher_manifest.json": "1ae28f872b54c237440fcaacec40b735b93a7b80d710adc9228ef671b7831032",
-    "src/config/feature_parity.json": "20c4ca22515fff238621179447c0e7daaf71c58a3229a5c7187a322d90240dab",
+    "src/config/feature_parity.json": "606f346f7a7cefb9f1375027465bcd925b43053a03260750e9a4b17cd7ff3e1b",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }
