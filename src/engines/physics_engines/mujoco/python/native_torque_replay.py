@@ -48,11 +48,14 @@ class NativeTorqueReplay:
 
 
 def _contracts() -> Any:
-    """Resolve the single Tools authority, requiring its implemented T01 API."""
-    from src.shared.python._seam_redirect import extend_sidekick_lab_path
+    """Resolve the single Tools authority, requiring its implemented T01 API.
 
-    extend_sidekick_lab_path()
-    from sidekick.lab import mocap
+    Postcondition: the global ``sidekick.lab`` namespace is left unchanged, so
+    the vendored-Tools fallback keeps declining ``sidekick.lab.mocap``.
+    """
+    from src.shared.python._seam_redirect import load_pinned_tools_package
+
+    mocap = load_pinned_tools_package("sidekick.lab.mocap")
 
     if not hasattr(mocap, "ExperimentReplayBundle"):
         raise RuntimeError(
