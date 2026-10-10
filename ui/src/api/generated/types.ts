@@ -1010,6 +1010,16 @@ export interface ClaimsV2 {
   causal_inference: boolean;
 }
 
+/**
+ * Bounded inline records and the PyQt Monitor Comparison tab's inputs. Mirrors ``_ComparisonParams`` from ``src/tools/launch_monitor_analytics/gui.py`` (``_read_comparison_params``): ``match_column`` is ``None`` when the Monitor Comparison tab's "Matched-Shot Column" combo reads "(unmatched)" (``_build_comparison_tab``), and an empty ``reference_monitor`` (the combo's blank state, ``currentText() or None``) is treated the same as ``None``, so the API and desktop paths accept identical inputs for :func:`compare_monitors`.
+ */
+export interface ComparisonPayloadV2 {
+  records: Record<string, unknown>[];
+  metric: string;
+  match_column?: string | null;
+  reference_monitor?: string | null;
+}
+
 export interface ConfidenceIntervalV1 {
   lower: number;
   upper: number;
@@ -2443,6 +2453,18 @@ export interface ModelExplorerResponse {
 export interface ModelListResponse {
   /** List of available models with name and format */
   models: Record<string, string>[];
+}
+
+/**
+ * Bounded inline records and the PyQt Models tab's widget-derived inputs. Mirrors ``_ModelParams`` from ``src/tools/launch_monitor_analytics/gui.py`` (``_read_model_params``): ``model`` offers the same five choices, ``random_seed`` keeps the same default and ``[0, 2_147_483_647]`` range as the "Random Seed" spinbox, and ``group_column`` is ``None`` when the "Grouped Holdout" combo reads "(random split)" (``_build_models_tab``), so the API and desktop paths accept identical inputs for :func:`fit_predictive_model`.
+ */
+export interface ModelPayloadV2 {
+  records: Record<string, unknown>[];
+  target: string;
+  features: string[];
+  model: "linear" | "ridge" | "lasso" | "elastic_net" | "mlp";
+  random_seed: number;
+  group_column?: "monitor_vendor" | "session_id" | "club" | null;
 }
 
 export interface ModelProvenanceV2 {
