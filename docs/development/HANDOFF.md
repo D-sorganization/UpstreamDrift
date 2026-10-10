@@ -185,4 +185,3 @@
   - `ruff format --check`: passed.
   - `mypy`: passed with 0 issues.
   - `check_architecture_budget.py`: passed (all changed functions $\le 8$ parameters, $\le 100$ lines).
-
