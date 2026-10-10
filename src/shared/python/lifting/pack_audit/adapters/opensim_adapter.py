@@ -238,6 +238,13 @@ class OpensimAdapter(EngineAdapter):
             sole_z=self._sole_z(state),
         )
 
+    def bar_hold_wrench(self) -> dict[str, Any]:
+        from .opensim_bar_hold import bar_hold_wrench as _bar_hold_wrench
+
+        state = self.model.initializeState()
+        self.model.realizePosition(state)
+        return _bar_hold_wrench(self.model, state)
+
     def start_contact_force(self) -> dict[str, Any]:
         m = self.model
         state = m.initializeState()

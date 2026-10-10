@@ -51,12 +51,14 @@ def test_driver_receipt_validates_and_has_expected_zmp() -> None:
     receipt = validate_receipt(doc)
     assert isinstance(receipt, Receipt)
     assert receipt.dynamics.reference_zmp is not None
-    # 62/72 since the receipt was regenerated with the spec's own pelvis
-    # alignment in the hip rewrite (#12109); 51/60 on the flexion-negative right
-    # knee (#12057), 5/6 on the mirrored left hip alone (#11737), and the
-    # pre-OSV-6 receipt under anthro_driver_pre_osv6/ recorded 2/3.
+    # 157/180 since the receipt was regenerated for #12030 on the GCV-20
+    # impact-split reference (#12145; a control on main gives the same value);
+    # 62/72 with the spec's own pelvis alignment in the hip rewrite (#12109);
+    # 51/60 on the flexion-negative right knee (#12057), 5/6 on the mirrored
+    # left hip alone (#11737), and the pre-OSV-6 receipt under
+    # anthro_driver_pre_osv6/ recorded 2/3.
     assert receipt.dynamics.reference_zmp.outside_fraction_1s_to_1_5s == pytest.approx(
-        62 / 72, rel=1e-5
+        157 / 180, rel=1e-5
     )
 
 

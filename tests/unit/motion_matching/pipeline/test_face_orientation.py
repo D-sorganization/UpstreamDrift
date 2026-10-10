@@ -55,6 +55,49 @@ def test_face_targets_cover_every_observed_capture_frame(
     first = next(t for t in lane.face_targets if t is not None)
     assert first[cft.FACE_FRAME][2] == 2.0
     assert lane.face_weight == 2.0
+    assert lane.face_unavailable_reason is None
+
+
+def test_mismatched_head_triad_leaves_face_and_impact_unavailable() -> None:
+    """#12030: the driver triad offsets on the 7-iron capture fail closed."""
+    iron_spec = json.loads(
+        (
+            ROOT / "docs/development/full_body_models/full_body_spec_anthro_iron7.json"
+        ).read_text(encoding="utf-8")
+    )
+    iron_att = {
+        label: (a["body"], tuple(a["offset_m"]))
+        for label, a in iron_spec["marker_attachments"].items()
+        if a["offset_m"] is not None
+    }
+    lane = Lane(tuple({**iron_att, **LEG_SEEDS}), capture_path("iron"))
+    configure_lane(lane, iron_spec)
+    lane.set_face_targets(iron_att, iron_spec, 3.0)
+    assert lane.face_targets is None
+    assert lane.face_weight == 3.0
+    assert "do not match" in (lane.face_unavailable_reason or "")
+    lane.set_impact_split(iron_att, iron_spec)
+    assert lane.impact_index is None
+    assert lane.impact_split_reason.startswith("unavailable")
+    with pytest.raises(ValueError, match="face weight"):
+        lane.set_face_targets(iron_att, iron_spec, -1.0)
+
+
+def test_attach_face_report_records_the_unavailable_reason() -> None:
+    from types import SimpleNamespace
+
+    from src.shared.python.motion_matching.pipeline.cli import _attach_face_report
+
+    lane = SimpleNamespace(
+        impact_split_report=dict,
+        face_targets=None,
+        face_unavailable_reason="triad mismatch",
+    )
+    report: dict = {}
+    _attach_face_report(report, lane, None, (np.zeros(1), np.zeros(1)), 3.0)
+    block = report["face_orientation"]
+    assert block["available"] is False and block["reason"] == "triad mismatch"
+    assert block["weight"] == 3.0 and block["targeted_frames"] == 0
 
 
 def test_zero_weight_keeps_the_marker_only_fit(
