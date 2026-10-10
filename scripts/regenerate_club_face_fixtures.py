@@ -12,10 +12,11 @@ For each capture this script
    (``scripts.same_input_bundle export``);
 3. writes ``tests/fixtures/club_face/swing_q_<club>.npz`` (every second
    1 kHz reference sample, float32), the address pose in
-   ``address_poses.json`` and a per-club provenance record in
-   ``provenance.json``: commands, input and output hashes, marker RMS, the
-   model-versus-capture face fit, the impact and peak-speed frames and the
-   clubhead speed timing (GCV-20).
+   ``address_poses.json``, the run's scaled document in ``spec_<club>.json``
+   and a per-club provenance record in ``provenance.json``: commands, input
+   and output hashes, marker RMS, the model-versus-capture face fit, the
+   impact and peak-speed frames, the clubhead speed timing (GCV-20) and the
+   address toe-out against the capture (#12222).
 
 Before overwriting, the previous fixture is measured the same way so the
 provenance keeps the before/after face angles. Nothing here is hand edited.
@@ -38,6 +39,10 @@ FIXTURES = ROOT / "tests" / "fixtures" / "club_face"
 DOCS = ROOT / "docs" / "development" / "full_body_models"
 FIXTURE_STRIDE = 2  # the 1 kHz reference, every second sample (2 ms)
 FIXTURE_DT_S = 0.002
+#: The run's hip-calibrated, segment-scaled document: the fixture's model. It
+#: is committed beside the fixture as ``spec_<club>.json`` because the hip
+#: frames set the foot yaw (#12222).
+SCALED_SPEC = "full_body_spec_hipcal_scaled.json"
 #: capture -> (fixture club alias, document, extra pipeline flags of the
 #: original fixture runs, read back from their receipts).
 CAPTURE_RUNS: dict[str, tuple[str, str, tuple[str, ...]]] = {
@@ -149,7 +154,7 @@ def _run_kinematics(run_dir: Path) -> tuple[Any, Any, dict[str, Any], dict]:
     from src.shared.python.motion_matching.pipeline.plant import get_plant
 
     receipt = json.loads((run_dir / "receipt.json").read_text(encoding="utf-8"))
-    spec_path = run_dir / "full_body_spec_hipcal_scaled.json"
+    spec_path = run_dir / SCALED_SPEC
     spec = json.loads(spec_path.read_text(encoding="utf-8"))
     attachments = {
         label: (a["body"], tuple(a["offset_m"]))
@@ -196,6 +201,8 @@ def write_fixtures(
         manifest = json.loads(str(bundle["manifest"]))
     np.savez_compressed(npz_path, q=reference[::FIXTURE_STRIDE].astype(np.float32))
     _write_address_pose(club, manifest, reference[0])
+    spec_path = FIXTURES / f"spec_{club}.json"
+    spec_path.write_bytes((run_dir / SCALED_SPEC).read_bytes())
     receipt = json.loads((run_dir / "receipt.json").read_text(encoding="utf-8"))
     q_fixture = np.load(npz_path)["q"].astype(float)
     return {
@@ -205,6 +212,8 @@ def write_fixtures(
         "bundle_sha256": _sha256(bundle_path),
         "run_receipt_sha256": _sha256(run_dir / "receipt.json"),
         "fixture_sha256": _sha256(npz_path),
+        "spec_sha256": _sha256(spec_path),
+        "foot_progression": _foot_record(run_dir, receipt, q_fixture[0]),
         "marker_rms_m": {
             "ik": receipt["ik"]["marker_rms_m"],
             "reference": receipt["ik"]["reference"]["marker_rms_m"],
@@ -215,6 +224,38 @@ def write_fixtures(
         "before": before,
         "after": measure_swing(run_dir, q_fixture, FIXTURE_DT_S),
         "impact_split": receipt["ik"].get("impact_split"),
+    }
+
+
+def _foot_record(
+    run_dir: Path, receipt: dict[str, Any], q0: np.ndarray
+) -> dict[str, Any]:
+    """Capture toe-out targets, the calibrated address and fixture frame 0.
+
+    The targets are the capture's address measurement from the run receipt
+    (OSV-4, #11730); the model toe-out is MuJoCo FK of the run's scaled
+    document. Raises ``ValueError`` when the run had foot progression off.
+    """
+    from src.shared.python.motion_matching.pipeline.address_feet import (
+        FootTargets,
+        model_feet_deg,
+    )
+
+    block = receipt["address"].get("foot_progression") or {}
+    if not block.get("enabled"):
+        raise ValueError("the fixture run has no foot-progression targets")
+    feet = block["feet"]
+    targets = FootTargets(
+        {s: float(e["target_deg"]) for s, e in feet.items()},
+        {s: bool(e["target_is_default"]) for s, e in feet.items()},
+        block["source"],
+    )
+    kin, _, _, _ = _run_kinematics(run_dir)
+    return {
+        "source": block["source"],
+        "target_deg": dict(targets.target_deg),
+        "address_model_deg": {s: float(e["model_deg"]) for s, e in feet.items()},
+        "fixture_frame0_model_deg": model_feet_deg(kin, q0, targets),
     }
 
 
