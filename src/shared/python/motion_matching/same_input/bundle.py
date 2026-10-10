@@ -13,12 +13,12 @@ import hashlib
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
 
-Array = NDArray[np.float64]
+Array: TypeAlias = NDArray[np.float64]
 
 SCHEMA = "same-input-bundle/v1"
 POLICY: dict[str, Any] = {
@@ -95,6 +95,19 @@ class InputBundle:
             "reference_engine": self.reference_engine,
             "provenance": self.provenance,
         }
+
+    def ball_impact(self) -> Any:
+        """The recorded, latched ball force (``ImpactForce``) or ``None``.
+
+        Every engine's open-loop replay applies this identical force
+        (GCV-20, #11767); bundles without an impact return ``None``.
+        """
+        record = self.provenance.get("ball_impact")
+        if record is None:
+            return None
+        from src.shared.python.motion_matching.impact_force import ImpactForce
+
+        return ImpactForce.from_record(record)
 
     def save(self, path: Path) -> None:
         """Write the bundle as one compressed ``.npz``."""

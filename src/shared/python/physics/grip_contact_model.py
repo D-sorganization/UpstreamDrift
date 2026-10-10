@@ -41,6 +41,7 @@ from src.shared.python.physics._grip_exporter import (
 )
 from src.shared.python.physics._grip_forces import (
     compute_center_of_pressure,
+    compute_grip_pressure_centre,
     compute_grip_torque,
     compute_pressure_visualization,
 )
@@ -61,6 +62,7 @@ __all__ = [
     "check_friction_cone",
     "classify_contact_state",
     "compute_center_of_pressure",
+    "compute_grip_pressure_centre",
     "compute_grip_torque",
     "compute_pressure_visualization",
     "compute_slip_direction",

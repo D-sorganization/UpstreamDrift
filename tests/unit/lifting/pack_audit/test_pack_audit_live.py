@@ -38,3 +38,24 @@ def test_same_q_feet_agree_across_engines(receipt):
 
 def test_total_mass_agrees(receipt):
     assert receipt["comparisons"]["deadlift"]["mass"]["spread_kg"] < 1e-3
+
+
+def test_drake_inertia_is_about_com_not_body_origin():
+    """Drake ``inertia_diag`` is COM-referenced (no parallel-axis term), #12073."""
+    pytest.importorskip("pydrake.all")
+    import numpy as np
+
+    from src.shared.python.lifting.pack_audit.adapters import create_adapter
+    from src.shared.python.lifting.pack_audit.model import Anthropometry
+    from src.shared.python.lifting.pack_audit.packs import locate_pack
+
+    pack = locate_pack("drake")
+    if pack is None:
+        pytest.skip("Drake lift pack checkout not found (set LIFT_PACK_ROOT)")
+    adapter = create_adapter(pack, "deadlift", Anthropometry(80.0, 1.78, 50.0))
+    reported = adapter.structure()["inertia_diag"]
+    for name in adapter._bodies():
+        si = adapter.plant.GetBodyByName(name).default_spatial_inertia()
+        g = si.get_unit_inertia().ShiftToCenterOfMass(si.get_com())
+        expected = si.get_mass() * np.asarray(g.get_moments())
+        np.testing.assert_allclose(reported[name], expected, rtol=1e-6, atol=1e-12)

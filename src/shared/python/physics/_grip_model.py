@@ -14,7 +14,7 @@ from src.shared.python.physics._friction_laws import (
     classify_contact_state,
     decompose_contact_force,
 )
-from src.shared.python.physics._grip_forces import compute_center_of_pressure
+from src.shared.python.physics._grip_forces import compute_grip_pressure_centre
 
 logger = get_logger(__name__)
 
@@ -70,7 +70,10 @@ class GripContactModel:
         total_tangent = sum((c.tangent_force for c in contacts), np.zeros(3))
         num_slipping = sum(1 for c in contacts if c.state == ContactState.SLIPPING)
         num_sticking = sum(1 for c in contacts if c.state == ContactState.STICKING)
-        cop = compute_center_of_pressure(contacts)
+        # No loaded contact: the pressure centre is unavailable (NaN), not the origin.
+        cop = compute_grip_pressure_centre(contacts)
+        if cop is None:
+            cop = np.full(3, np.nan)
 
         self.current_state = GripContactState(
             contacts=contacts,

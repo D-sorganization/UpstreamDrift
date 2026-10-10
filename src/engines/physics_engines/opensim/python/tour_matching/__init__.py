@@ -6,6 +6,10 @@ steps (IK, Moco tracking) live in drivers under
 docs/development/opensim_tour_matching and skip without ``opensim``.
 """
 
+from src.engines.physics_engines.opensim.python.tour_matching.model_admission import (
+    MuscleModelAssetInventory,
+    audit_muscle_model_asset,
+)
 from src.engines.physics_engines.opensim.python.tour_matching.cli import (
     CheckpointManifest,
     RunConfig,
@@ -37,6 +41,9 @@ from src.engines.physics_engines.opensim.python.tour_matching.moco_tracking impo
     MocoTrackingResult,
     build_moco_study,
     sanitize_trc_for_horizon,
+)
+from src.engines.physics_engines.opensim.python.tour_matching.moco_initial_bindings import (
+    MocoInitialBindings,
 )
 from src.engines.physics_engines.opensim.python.tour_matching.muscle_replay import (
     NativeMuscleReplayResult,
@@ -137,11 +144,13 @@ from src.engines.physics_engines.opensim.python.tour_matching.model_variants imp
     GolfModelAdapter,
     GolfModelVariant,
     IncompatibleActuationError,
+    MissingClubAttachmentError,
     MissingGeometryAssetError,
     StaleModelHashError,
     UnknownStateError,
     UnsupportedCapabilityError,
     create_golf_model_adapter,
+    equipment_from_model,
     create_muscle_model_variant,
     create_torque_model_variant,
 )
@@ -186,6 +195,8 @@ from src.engines.physics_engines.opensim.python.tour_matching.view_package impor
 )
 
 __all__ = [
+    "MuscleModelAssetInventory",
+    "audit_muscle_model_asset",
     "BASELINE_MODEL_SHA256",
     "BASELINE_OS3B_INPUT_SHA256",
     "DEFAULT_NOMINAL_LENGTHS_M",
@@ -229,8 +240,10 @@ __all__ = [
     "LadderStage",
     "MarkerPlacement",
     "MissingClubAssetError",
+    "MissingClubAttachmentError",
     "MissingGeometryAssetError",
     "MocoTrackingConfig",
+    "MocoInitialBindings",
     "MocoTrackingResult",
     "ModelCheckpointMismatchError",
     "ModelGeometryAuditResult",
@@ -280,6 +293,7 @@ __all__ = [
     "compute_run_hash",
     "compute_shared_metrics",
     "create_golf_model_adapter",
+    "equipment_from_model",
     "create_golf_view_launcher_entry",
     "create_muscle_model_variant",
     "create_polynomial_prescribed_controller",

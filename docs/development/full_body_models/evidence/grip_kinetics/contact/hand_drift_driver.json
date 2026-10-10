@@ -1,0 +1,13 @@
+{
+  "club": "driver",
+  "samples": 908,
+  "duration_s": 1.814,
+  "hand_separation_mm": 80.32185256827684,
+  "hand_separation_change_mm": 3.469446951953614e-13,
+  "peak_drift": {
+    "along_mm": 4.163336342344337e-13,
+    "across_mm": 3.6407709131783e-13,
+    "rotation_deg": 1.2150354455704148e-29
+  },
+  "note": "trail (R) frame in the lead (L) frame, change vs sample 0"
+}

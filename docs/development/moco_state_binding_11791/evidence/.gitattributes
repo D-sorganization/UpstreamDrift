@@ -1,0 +1,4 @@
+# Immutable native evidence retains exact bytes and is reviewed via its manifest.
+* -text -diff
+.gitattributes text eol=lf diff
+MANIFEST.json text eol=lf diff

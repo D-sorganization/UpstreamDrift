@@ -8,7 +8,10 @@ from typing import Any
 import pytest
 
 from src.shared.python.golf_view_presets import VIEWER_FOV_Y_RAD
-from src.tools.native_viewer_export.backends._meshcat_page import MeshcatPage
+from src.tools.native_viewer_export.backends._meshcat_page import (
+    PAGE_LOAD_TIMEOUT_MS,
+    MeshcatPage,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -46,6 +49,31 @@ def test_apply_fov_fails_loudly_without_a_viewer_camera() -> None:
 
     with pytest.raises(RuntimeError, match="camera"):
         page.apply_fov()
+
+
+class _FakeNavPage:
+    def __init__(self) -> None:
+        self.gotos: list[tuple[str, float]] = []
+
+    def goto(self, url: str, timeout: float) -> None:
+        self.gotos.append((url, timeout))
+
+
+def test_navigation_uses_the_page_load_timeout() -> None:
+    """A loaded host (load 25+) needs longer than Playwright's implicit 30 s."""
+    page = MeshcatPage("http://localhost:7000", 64, 48)
+    assert page.load_timeout_ms == PAGE_LOAD_TIMEOUT_MS >= 120_000
+    fake = _FakeNavPage()
+    page._page = fake
+
+    page.navigate()
+
+    assert fake.gotos == [("http://localhost:7000", PAGE_LOAD_TIMEOUT_MS)]
+
+
+def test_page_load_timeout_must_be_positive() -> None:
+    with pytest.raises(ValueError, match="load_timeout_ms"):
+        MeshcatPage("http://localhost", 64, 48, load_timeout_ms=0)
 
 
 def test_fov_must_lie_in_the_open_interval() -> None:

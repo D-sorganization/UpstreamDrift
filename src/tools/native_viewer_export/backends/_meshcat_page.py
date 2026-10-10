@@ -33,6 +33,9 @@ _HIDE_FIXED_JS = (
     "e.style.display='none';}}"
 )
 _ONE_FRAME_JS = "()=>new Promise(r=>requestAnimationFrame(r))"
+# Playwright's implicit 30 s page-load limit failed repeatedly on a loaded
+# 4-core host (load average 25+) while SwiftShader compiled the scene (#11729).
+PAGE_LOAD_TIMEOUT_MS = 120_000.0
 # three.js defaults to 75 deg, which left the golfer at about a quarter of the
 # frame height (NV-9, #11697); every viewer uses the shared field of view.
 _SET_FOV_JS = (
@@ -92,13 +95,17 @@ class MeshcatPage:
         height: int,
         settle_ms: int = 2500,
         fov_y_rad: float = VIEWER_FOV_Y_RAD,
+        load_timeout_ms: float = PAGE_LOAD_TIMEOUT_MS,
     ) -> None:
         if width < 1 or height < 1:
             raise ValueError("width and height must be positive")
         if not (math.isfinite(fov_y_rad) and 0.0 < fov_y_rad < math.pi):
             raise ValueError(f"fov_y_rad must lie in (0, pi), got {fov_y_rad}")
+        if not (math.isfinite(load_timeout_ms) and load_timeout_ms > 0.0):
+            raise ValueError(f"load_timeout_ms must be positive, got {load_timeout_ms}")
         self._url, self._w, self._h, self._settle = url, width, height, settle_ms
         self.fov_y_rad = fov_y_rad
+        self.load_timeout_ms = load_timeout_ms
         self._pw: Any = None
         self._browser: Any = None
         self._page: Any = None
@@ -114,7 +121,7 @@ class MeshcatPage:
         self._page = self._browser.new_page(
             viewport={"width": self._w, "height": self._h}
         )
-        self._page.goto(self._url)
+        self.navigate()
         self._page.wait_for_timeout(self._settle)
         self._page.add_style_tag(content=_HIDE_CONTROLS_CSS)
         self._page.evaluate(_HIDE_FIXED_JS)
@@ -133,6 +140,10 @@ class MeshcatPage:
         ):
             if closer is not None:
                 closer()
+
+    def navigate(self) -> None:
+        """Load the MeshCat URL, allowing ``load_timeout_ms`` for the page load."""
+        self._page.goto(self._url, timeout=self.load_timeout_ms)
 
     def apply_fov(self) -> None:
         """Set the viewer camera's vertical field of view to ``fov_y_rad``.

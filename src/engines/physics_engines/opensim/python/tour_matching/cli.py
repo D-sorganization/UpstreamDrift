@@ -178,6 +178,21 @@ def _add_maintenance_subparsers(subparsers: Any) -> None:
         "--manifest", type=Path, required=True, help="Checkpoint manifest JSON"
     )
 
+    p_native = subparsers.add_parser(
+        "moco-native", help="Prepare, solve and independently replay native muscles"
+    )
+    p_native.add_argument("--request", type=Path, required=True)
+    p_native.add_argument("--output-dir", type=Path, required=True)
+    p_native.add_argument("--prepare-only", action="store_true")
+
+    p_guess = subparsers.add_parser(
+        "moco-native-guess", help="Materialize a source-bound numerical Moco seed"
+    )
+    p_guess.add_argument("--model", type=Path, required=True)
+    p_guess.add_argument("--source-sha256", required=True)
+    p_guess.add_argument("--trc", type=Path, required=True)
+    p_guess.add_argument("--output-dir", type=Path, required=True)
+
 
 def build_parser() -> argparse.ArgumentParser:
     """Build the unified CLI parser for OpenSim tour matching operations."""
@@ -297,6 +312,50 @@ def cmd_resume(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_moco_native(args: argparse.Namespace) -> int:
+    """Run existing native providers with separate durable stage receipts."""
+    from .native_moco_request import load_native_moco_request
+    from .native_moco_runner import prepare_native_moco, solve_native_moco
+    from .native_moco_replay import (
+        export_native_moco_bundle,
+        replay_native_moco_bundle,
+        score_native_moco_replay,
+    )
+
+    request = load_native_moco_request(args.request)
+    prepared = prepare_native_moco(request, args.output_dir)
+    if not prepared.ready_for_software_solve:
+        logger.warning("Native preparation has blockers: %s", prepared.blockers)
+        return 2
+    if args.prepare_only:
+        return 0
+    solved = solve_native_moco(request, prepared, args.output_dir)
+    if not solved.success:
+        logger.warning("Native Moco solve did not succeed: %s", solved.status)
+        return 2
+    exported = export_native_moco_bundle(request, prepared, solved, args.output_dir)
+    native = replay_native_moco_bundle(exported, request.model_path, args.output_dir)
+    score_native_moco_replay(
+        request, prepared, solved, exported, native, args.output_dir
+    )
+    return 0
+
+
+def cmd_moco_native_guess(args: argparse.Namespace) -> int:
+    """Generate only a native source-state numerical seed on the original clock."""
+    from .native_moco_guess import materialize_native_moco_guess
+    from .trc import read_trc
+
+    capture = read_trc(args.trc)
+    materialize_native_moco_guess(
+        args.model,
+        args.source_sha256,
+        capture.time_s,
+        args.output_dir,
+    )
+    return 0
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     """Entrypoint for OpenSim tour matching CLI."""
     parser = build_parser()
@@ -310,6 +369,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         "replay": cmd_replay,
         "compare": cmd_compare,
         "resume": cmd_resume,
+        "moco-native": cmd_moco_native,
+        "moco-native-guess": cmd_moco_native_guess,
     }
     handler = handlers.get(args.command)
     if handler is None:

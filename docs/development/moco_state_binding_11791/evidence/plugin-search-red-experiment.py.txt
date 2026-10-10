@@ -1,0 +1,91 @@
+"""Bounded actual Moco-to-independent-muscle-replay experiment; no capture claim."""
+from pathlib import Path
+from types import SimpleNamespace
+import hashlib,json,sys,time,traceback
+import numpy as np
+import opensim as o
+repo=Path("C:/Users/diete/Repositories/Worktrees/feedback-opensim-bundle-11908")
+sys.path.insert(0,str(repo))
+from tests.opensim.test_native_muscle_replay import muscle_fixture
+from src.engines.physics_engines.opensim.python.tour_matching import replay_muscle_excitations
+from src.engines.physics_engines.opensim.python.tour_matching.moco_tracking import MocoTrackingConfig,build_moco_study
+from src.engines.physics_engines.opensim.python.tour_matching.trc import write_trc
+from src.shared.python.motion_matching.tour_capture_contract import TourCapture
+from src.engines.physics_engines.opensim.python.tour_matching.native_muscle_bundle import build_native_muscle_replay_bundle,replay_native_muscle_bundle
+out=Path(__file__).parent
+start=time.perf_counter()
+record={"scope":"synthetic one-DOF compliant Millard muscle; no capture/production qualification","runtime":o.__version__,"executable":sys.executable,"source_sha256":hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}
+try:
+    path,initial=muscle_fixture.__wrapped__(out,SimpleNamespace(param="Millard2012EquilibriumMuscle"))
+    model=o.Model(str(path))
+    model.addMarker(o.Marker("load_marker",model.getBodySet().get("load"),o.Vec3(0)))
+    model.finalizeConnections();model.printToXML(str(path))
+    record["model_sha256"]=hashlib.sha256(path.read_bytes()).hexdigest()
+    times=np.linspace(0,.1,21)
+    teacher=replay_muscle_excitations(path,initial,times,{"flexor":.3+.2*times/.1},accuracy=1e-9)
+    index=teacher.state_names.index("/jointset/slider/slide/value")
+    points=np.zeros((len(times),1,3));points[:,0,0]=teacher.states[:,index]
+    capture=TourCapture(times,("load_marker",),points,np.ones((len(times),1),bool))
+    trc=write_trc(capture,out/"teacher.trc",rate_hz=200)
+    table=o.TimeSeriesTable()
+    labels=o.StdVectorString()
+    for name in teacher.state_names:labels.append(name)
+    table.setColumnLabels(labels)
+    for t in times:
+        row=o.RowVector(len(initial))
+        for k,name in enumerate(teacher.state_names):row[k]=initial[name]
+        table.appendRow(float(t),row)
+    guess=out/"constant_initial_guess.sto"
+    o.STOFileAdapter.write(table,str(guess))
+    config=MocoTrackingConfig(horizon_s=.1,mesh_interval_s=.01,effort_weight=1e-8,marker_weight=1,optim_max_iterations=60,optim_convergence_tolerance=1e-7,optim_constraint_tolerance=1e-7,allow_unused_references=False)
+    # Native prototype for the reproduced builder ordering defect; no production source edited.
+    study=o.MocoStudy()
+    problem=study.updProblem()
+    problem.setModelProcessor(o.ModelProcessor(str(path)))
+    problem.setTimeBounds(0,.1)
+    effort=o.MocoControlGoal('effort');effort.setWeight(config.effort_weight);problem.addGoal(effort)
+    marker=o.MocoMarkerTrackingGoal('marker_tracking');marker.setWeight(1)
+    marker.setMarkersReference(o.MarkersReference(str(trc),o.SetMarkerWeights()))
+    marker.setAllowUnusedReferences(False);problem.addGoal(marker)
+    for name,value in initial.items():
+        bounds=(.2,.4) if name.endswith('/value') else ((-2,2) if name.endswith('/speed') else ((.001,1) if name.endswith('/activation') else (.05,.2)))
+        problem.setStateInfo(name,o.MocoBounds(*bounds),o.MocoInitialBounds(value))
+    problem.setControlInfo('/forceset/flexor',o.MocoBounds(.001,1))
+    solver=o.MocoCasADiSolver.safeDownCast(study.initCasADiSolver())
+    solver.set_num_mesh_intervals(10)
+    solver.set_optim_max_iterations(60)
+    solver.set_optim_convergence_tolerance(1e-7)
+    solver.set_optim_constraint_tolerance(1e-7)
+    solver.set_parallel(0)
+    native_guess=solver.createGuess()
+    native_guess.insertStatesTrajectory(o.TimeSeriesTable(str(guess)),True)
+    solver.setGuess(native_guess)
+    solve_start=time.perf_counter()
+    solution=study.solve()
+    record['solve_elapsed_s']=time.perf_counter()-solve_start
+    record['solver_success']=bool(solution.success())
+    record['solver_status']=solution.getStatus()
+    if not solution.success():raise RuntimeError('Native Moco did not accept solution')
+    solution.write(str(out/'solution.sto'))
+    grid=np.asarray(solution.getTimeMat()).reshape(-1)
+    values=np.asarray(solution.getControlMat('/forceset/flexor')).reshape(-1)
+    bundle=build_native_muscle_replay_bundle(path,initial,grid,{'flexor':values})
+    native=replay_native_muscle_bundle(bundle,path)
+    repeat=replay_native_muscle_bundle(bundle,path)
+    native_index=native.state_names.index('/jointset/slider/slide/value')
+    reference=np.interp(grid,times,points[:,0,0])
+    record['independent_marker_rmse_m']=float(np.sqrt(np.mean((native.states[:,native_index]-reference)**2)))
+    record['constant_initial_marker_rmse_m']=float(np.sqrt(np.mean((initial['/jointset/slider/slide/value']-reference)**2)))
+    record['fullstate_repeat_max_abs']=float(np.max(np.abs(native.states-repeat.states)))
+    record['control_bounds']=[float(values.min()),float(values.max())]
+    record['native_samples']=len(grid)
+    record['complete_initial_state']=initial
+    record['qualification']='native synthetic optimization/replay bridge only'
+except Exception as error:
+    record['error']=str(error)
+    record['traceback']=traceback.format_exc()
+    record['qualification']='failed; no optimization/replay acceptance'
+finally:
+    record['total_elapsed_s']=time.perf_counter()-start
+    (out/'receipt.json').write_text(json.dumps(record,indent=2)+'\n',encoding='utf-8')
+    print(json.dumps(record,indent=2))

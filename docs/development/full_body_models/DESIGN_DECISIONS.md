@@ -284,6 +284,23 @@ Kinematic inverse kinematics re-solving introduces high-frequency frame-to-frame
 
 Tracking raw unfiltered kinematic trajectories (caused severe impact torque spikes $>2500\text{ N}\cdot\text{m}$) and 8 Hz filtering (oversmoothed transition dynamics, increasing tracking error to 188 mm).
 
+### GCV-20 Amendment (#11767): Release-Preserving Pre-Contact Cutoff and Weld-Consistent Track
+
+The post-contact half keeps 12 Hz. The pre-contact half (the filter is split at the capture impact) now uses the lowest of 12, 15, 18, 20, 25, 30 Hz that keeps the unfiltered reference's speed-peak time within one sample and its last whole pre-contact segment speed within 1 % (`pipeline.release_cutoff`); both captures select 25 Hz (driver reference at 12 Hz: peak 13.1 ms before impact, 46.40 m/s; at 25 Hz: 2.0 ms, 50.62 m/s; unfiltered 2.0 ms, 50.46 m/s). The filtered track is then projected onto the grip weld over the trail-arm coordinates (`pipeline.weld_projection`), because per-coordinate filtering opens it by up to 16.1 mm.
+
+| Club | Tracked reference | Peak vs capture (ms) | Impact speed vs capture | Face gap at impact (deg) |
+| --- | --- | --- | --- | --- |
+| Driver | 12 Hz (before) | -20.0 | -20.1 % | - |
+| Driver | 25 Hz | -10.2 | -12.5 % | 1.8 |
+| Driver | 25 Hz + weld (after) | -4.1 | -8.0 % | 1.7 |
+| 7-iron | 12 Hz (before) | -11.6 | -9.8 % | - |
+| 7-iron | 25 Hz | -4.8 | -6.1 % | 0.99 |
+| 7-iron | 25 Hz + weld (after) | -3.7 | -5.4 % | 1.36 |
+
+Measured by re-exporting the same-input bundle from the committed runs with one change at a time. Timing now meets the 5 ms acceptance; impact speed does not (3 % limit). Remaining causes: ground yaw slip of the unactuated root (decision 13; an actuated-root diagnostic gives -1.4 ms/-4.9 % and -0.1 ms/-4.0 %) and residual tracking loss. Failed experiments (12 Hz + weld fails the 7-iron face gate at 7.98 deg; a ball-passage release metric picked the straddling segment; leg root regulation, contact parameters, wrench-QP, no controller split) and reproduction commands are in the calculation reference `docs/research/simscape_matching_reference/simscape_matching_reference.tex` (GCV-20 second pass). Fixtures are not regenerated until acceptance and the OSV-10 gate pass.
+
+A full pipeline re-solve with the final code (`5f8ee41fe5`, both changes plus the 7-iron zero-moment-point filter) confirms the re-export: driver peak -3.7 ms and impact speed 47.94 against 51.75 m/s (-7.4 %); 7-iron peak -4.2 ms and 39.36 against 41.05 m/s (-4.1 %); face at impact 2.8 deg and 4.6 deg from the capture. Timing passes and speed does not, so `test_clubhead_speed_peaks_with_the_capture_and_matches_it_at_impact` is a strict expected failure with these numbers (tolerances unchanged) and the committed fixtures stay; the re-solved fixtures would also fail `test_impact_frame_puts_the_clubhead_at_the_ball` (the detected frame is 0.34 m from the ball for the driver and 0.18 m for the 7-iron, limit 0.15 m). Closing the gap needs the ground yaw-moment model of decision 13, outside GCV-20.
+
 ### REVIEW.md Sections
 
 - [REVIEW.md Section 15: Downswing Dynamics: Compliant Sole](evidence/anthropometry/REVIEW.md#15-downswing-dynamics-compliant-sole-tracked-reference-zero-moment-point-mm-7-2026-09-14)
@@ -400,7 +417,7 @@ Foot yaw has no coordinate of its own: it is pelvis yaw plus `hip_rotation_*` (p
 
 **Findings On the Strange Feet**
 
-- **The spec's left hip rotation axis is not mirrored.** `+hip_rotation_r` turns the right foot in (9.6 degrees for 10), `+hip_rotation_l` turns the left foot out (10.4 degrees for 10); OpenSim turns both in. The equal-sign multi-start seeds (`ADDRESS_SEEDS_DEG`, +/-20) therefore splay the feet by up to 40 degrees from each other, and since calibrated foot-marker offsets make yaw a null mode of the marker fit, the lowest-RMS seed decides the feet. The coordinate meaning is left as is (qualified receipts depend on it); seeding is sign-safe by solving against forward kinematics, and a unit test pins the finding.
+- **The spec's left hip rotation axis was not mirrored.** `+hip_rotation_r` turns the right foot in (9.6 degrees for 10), `+hip_rotation_l` turned the left foot out (10.4 degrees for 10); OpenSim turns both in. The equal-sign multi-start seeds (`ADDRESS_SEEDS_DEG`, +/-20) therefore splay the feet by up to 40 degrees from each other, and since calibrated foot-marker offsets make yaw a null mode of the marker fit, the lowest-RMS seed decides the feet. OSV-6 (#11737) mirrors it like OpenSim (`docs/research/hip_axis_mirroring/`); seeding stays sign-safe.
 - **The stock toe marker seeds carry a 12.5 degree yaw bias.** `RToeIn`/`RToeOut` (and the left mirror) on `calcn` stagger `ToeIn` 0.02 m ahead of `ToeOut` over a 0.09 m span. In the C3D the `ToeIn`-`ToeOut` line is perpendicular to the foot axis within a few degrees (forefoot-line and malleolus-corrected ankle-toe estimates agree within about 4 degrees), so a marker fit against the stock seeds turns the model foot by that bias. The left and right seeds are exact mirrors (a unit test pins that), so this is a bias, not a mirroring error. `square_forefoot_seeds` gives both toe markers the mean forward offset; it applies only with `--foot-progression` on.
 - **`AnkleOut` is the lateral malleolus**, about 0.04 m outside the heel line, so the unmodified ankle-toe axis reads about 13 degrees toe-in on a straight foot. The headline capture angle moves the heel proxy medially by 0.04 m and the raw binding value is kept alongside for traceability.
 
@@ -415,7 +432,7 @@ The tour players are not at 20 degrees per foot (the trail foot is close to squa
 
 ### What Was Tried and Rejected
 
-**Measured outcome on the tour driver capture (MuJoCo, full pipeline address stage).** Legacy seed: lead 41.7, trail -2.8 degrees (capture 16.4 and 4.0). With `--foot-progression capture`: lead 37.0, trail 4.05 degrees. The trail foot reaches the capture; the lead foot does not, because `hip_rotation_l` reaches its -40 degree limit while the marker fit's leg posture (hip adduction -14.6 degrees) contributes the rest of the yaw (sensitivity about 0.85 degrees of foot yaw per degree of hip rotation, so about -64 degrees would be needed). The lead-foot target is therefore NOT met in the full fit; the shared FK seed alone reaches both feet within 2 degrees (unit-tested). An address solve that also trades hip adduction against stance-width markers is the open follow-up.
+**Measured outcome on the tour driver capture (MuJoCo, full pipeline address stage).** Legacy seed: lead 41.7, trail -2.8 degrees (capture 16.4 and 4.0). With `--foot-progression capture`: lead 37.0, trail 4.05 degrees. The trail foot reaches the capture; the lead foot does not, because `hip_rotation_l` reaches its -40 degree limit while the marker fit's leg posture (hip adduction -14.6 degrees) contributes the rest of the yaw (sensitivity about 0.85 degrees of foot yaw per degree of hip rotation, so about -64 degrees would be needed). The lead-foot target is therefore NOT met in the full fit; the shared FK seed alone reaches both feet within 2 degrees (unit-tested). An address solve that also trades hip adduction against stance-width markers is the open follow-up (still 15-32 degrees off after OSV-6).
 
 Foot yaw through the swing is not constrained; it follows the matched solution and contact (the balance work in #11667 handles slip). The time series and the finish value are reported, not controlled.
 
@@ -595,3 +612,5 @@ Scope of the couple check. It uses the engine's realised accelerations (`realize
 - The couple and internal force oscillate at about 15 Hz from 1.25 to 1.40 s. This is in the fitted wrist kinematics (it survives the 25 Hz filter) and is not validated against measured club angular acceleration.
 - The fitted swing has no ball. The impact metrics are those of the club passing through the ball position, not of the collision.
 - Software correctness only. Scientific qualification stays in the design-manual governance pathway. MuJoCo, Drake and Pinocchio bushing parity and the contact model remain open (#11739).
+
+Section 18 on: [volume 2](DESIGN_DECISIONS_2.md).

@@ -421,6 +421,15 @@ def _white_pixels(canvas: np.ndarray) -> int:
     return int((canvas.min(axis=2) > 200).sum())
 
 
+def test_playback_default_fps_matches_the_shared_unified_default() -> None:
+    """GCV-14 (#11720): capture-rig playback's unknown-rate fallback matches
+    the shared FrameSchedule default (60 fps), not a locally hardcoded 30."""
+    from src.shared.python.video_timing import frame_schedule
+    from src.tools.capture_rig import playback
+
+    assert playback.DEFAULT_FPS == frame_schedule.DEFAULT_FPS
+
+
 def test_playback_puts_frame_k_of_both_views_on_one_canvas(tmp_path: Path) -> None:
     panel = _playback(_two_view_bundle(tmp_path), tmp_path)
     assert panel.offsets() == {"cam_a": 0, "cam_b": 0}  # no timing block in this take

@@ -56,6 +56,17 @@ BENCHMARK_TIMESTEP_S: float = 0.001
 BENCHMARK_SAMPLE_RATE_HZ: float = 1000.0
 EXPECTED_SAMPLE_COUNT: int = 21
 
+# The committed "Simscape" baseline reproduces the pre-#11811 self-colliding
+# MuJoCo golfer to 0.026 mm, so it is not Simscape ground truth (#12013).
+BASELINE_IS_MUJOCO_ARTEFACT = pytest.mark.xfail(
+    is_mujoco_available(),
+    reason=(
+        "#12013: baseline is a MuJoCo rollout of the self-colliding golfer; "
+        "with #11811 fixed MuJoCo grip RMSE is 20.0 mm and clubhead 53.2 mm"
+    ),
+    strict=True,
+)
+
 CANONICAL_BASELINE_PATH: Path = (
     Path(__file__).resolve().parents[1]
     / "fixtures"
@@ -404,6 +415,7 @@ def test_simscape_golden_baseline_integrity() -> None:
     np.testing.assert_allclose(grip_quat_norms, 1.0, atol=1e-6)
 
 
+@BASELINE_IS_MUJOCO_ARTEFACT
 def test_mujoco_parity_vs_simscape() -> None:
     """MuJoCo forward dynamics matches Simscape baseline within parity tolerances."""
     if not is_mujoco_available():
@@ -485,6 +497,7 @@ def test_drake_parity_vs_simscape() -> None:
     assert res.passed
 
 
+@BASELINE_IS_MUJOCO_ARTEFACT
 def test_four_engine_cross_engine_matrix() -> None:
     """Four-engine parity summary matrix across all available engines and Simscape."""
     baseline = load_simscape_golden_baseline()

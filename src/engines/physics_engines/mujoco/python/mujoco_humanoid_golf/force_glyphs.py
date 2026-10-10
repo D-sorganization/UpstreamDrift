@@ -70,6 +70,13 @@ def _call_connector(
 #: Length of the white marker arrow drawn past the tip of a clamped arrow (GCV-4).
 CLAMPED_TIP_LENGTH_M = 0.1
 
+#: Drawn length of an ``mjGEOM_ARROW`` as a fraction of its ``size[2]``.
+#: ``mjv_connector`` writes the full tail-to-tip length to ``size[2]``, but the
+#: renderer draws the arrow half that long (measured on MuJoCo 3.6 and 3.8: a
+#: 2 m connector arrow ends level with a 1 m capsule), so arrows are stretched
+#: by its inverse after the connector call (#11729).
+ARROW_RENDER_LENGTH_FRACTION = 0.5
+
 
 @dataclass(frozen=True)
 class SceneGlyphReceipt:
@@ -121,6 +128,8 @@ def _append_connector(
         np.asarray(rgba, dtype=np.float32),
     )
     _call_connector(geom, geom_type, width, from_pt, to_pt)
+    if geom_type == int(mujoco.mjtGeom.mjGEOM_ARROW):
+        geom.size[2] /= ARROW_RENDER_LENGTH_FRACTION
     geom.rgba[:] = rgba
     scene.ngeom += 1
     return True

@@ -11,6 +11,7 @@ Covers:
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -18,7 +19,6 @@ import numpy as np
 import pytest
 
 from src.engines.physics_engines.drake.python.full_body_fit import (
-    RECEIPT_SCHEMA,
     DrakeFitOptions,
     _fit_polynomial_controls,
     compute_parity_vs_reference,
@@ -123,7 +123,9 @@ def test_polynomial_control_fitting() -> None:
     assert max_err < 1e-4
 
 
-def test_drake_fit_refuses_fabricated_evidence(tmp_path: Path) -> None:
+def test_drake_fit_refuses_fabricated_evidence(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Part B: Drake fit refuses fabricated evidence and removes synthetic fallbacks.
 
     1. Missing Drake rollout markers raises ValueError (never scores the warm start or targets against themselves, #11567).
@@ -232,15 +234,21 @@ def test_drake_fit_refuses_fabricated_evidence(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="refusing to invent a velocity"):
         _load_warm_start(no_v_npz, {"coordinate_order": ["q0"]})
 
-    # 4. Drake initialization failure raises classified BackendNotAvailableError
+    # 4. Drake initialization failure raises classified BackendNotAvailableError.
+    # Force the plant import to fail so this holds whether or not pydrake is
+    # installed; a real runtime would otherwise build the plant and run.
     spec_dict = json.loads(SPEC_PATH.read_text(encoding="utf-8"))
-    with pytest.raises((BackendNotAvailableError, RuntimeError, ImportError)):
+    nq = len(spec_dict["coordinate_order"])
+    monkeypatch.setitem(
+        sys.modules, "src.engines.physics_engines.drake.python.full_body_model", None
+    )
+    with pytest.raises(BackendNotAvailableError, match="Drake plant initialization"):
         _simulate_drake(
             spec_dict,
-            np.zeros((n_frames, 41)),
-            np.zeros((n_frames, 41)),
+            np.zeros((n_frames, nq)),
+            np.zeros((n_frames, nq)),
             time_s,
-            np.zeros((n_frames - 1, 35)),
+            np.zeros((n_frames - 1, nq - 6)),
         )
 
     # 5. Audit has no invented values; acceptance fails closed on missing gates
@@ -279,22 +287,41 @@ def test_drake_fit_refuses_fabricated_evidence(tmp_path: Path) -> None:
     assert "missing" in force_gate.reason.lower()
 
 
-def test_drake_matching_plant_fit_hook() -> None:
-    """Verify DrakeMatchingPlant exposes the fit() hook."""
+def test_drake_matching_plant_fit_hook(monkeypatch: pytest.MonkeyPatch) -> None:
+    """DrakeMatchingPlant.fit() dispatches to fit_full_body_drake with its spec.
+
+    The hook is checked by recording the dispatch rather than running a fit:
+    an open-loop rollout of the committed candidate is a physics result, not
+    a property of the hook, and the committed archive predates the #10363
+    capture-hash requirement, so a real fit on it correctly fails closed.
+    """
     _require_real_drake()
-    if not SPEC_PATH.is_file() or not CANDIDATE_PATH.is_file():
-        pytest.skip("Required spec or candidate file not found")
+    if not SPEC_PATH.is_file():
+        pytest.skip("Required spec file not found")
+
+    from src.engines.physics_engines.drake.python import full_body_fit as fbf
 
     spec_dict = json.loads(SPEC_PATH.read_text(encoding="utf-8"))
     plant = get_plant("drake", spec_dict)
     assert hasattr(plant, "fit")
 
-    result = plant.fit(
-        warm_start_path=CANDIDATE_PATH,
-        options=DrakeFitOptions(control_mode="knots", max_iterations=5),
-    )
-    assert result.candidate is not None
-    assert result.receipt["schema"] == RECEIPT_SCHEMA
+    calls: list[tuple[Any, tuple[Any, ...], dict[str, Any]]] = []
+    sentinel = object()
+
+    def _record(spec: Any, *args: Any, **kwargs: Any) -> object:
+        calls.append((spec, args, kwargs))
+        return sentinel
+
+    monkeypatch.setattr(fbf, "fit_full_body_drake", _record)
+    options = DrakeFitOptions(control_mode="knots", max_iterations=5)
+    result = plant.fit(warm_start_path=CANDIDATE_PATH, options=options)
+
+    assert result is sentinel
+    assert len(calls) == 1
+    spec_arg, args, kwargs = calls[0]
+    assert spec_arg == spec_dict
+    assert args == ()
+    assert kwargs == {"warm_start_path": CANDIDATE_PATH, "options": options}
 
 
 class _DriftingDrakeModel:

@@ -32,6 +32,7 @@ from src.shared.python.force_overlay.renderers.matplotlib_glyphs import (
 )
 from src.shared.python.force_overlay.series import ForceTorqueSeries
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.video_timing.frame_schedule import DEFAULT_FPS, FrameSchedule
 
 logger = get_logger(__name__)
 
@@ -171,9 +172,17 @@ def _coerce_segment_series(
 
 @dataclass(frozen=True)
 class PlaybackOptions:
-    """Render options for force playback."""
+    """Render options for force playback.
 
-    fps: int = 30
+    ``fps`` defaults to 60, the unified default shared with
+    ``native_viewer_export`` and the MuJoCo GIF playback (GCV-14, #11720).
+    ``speed`` drives time-based sampling: output frame ``j`` shows the
+    series frame nearest to ``t0 + j * speed / fps`` (see
+    :func:`render_force_playback`).
+    """
+
+    fps: int = int(DEFAULT_FPS)
+    speed: float = 1.0
     size_px: tuple[int, int] = (1920, 1080)
     base_segment_color: str = "#808080"
     segment_line_width: float = 4.0
@@ -215,9 +224,11 @@ class _RenderContext:
     color_scale: ForceColorScale
     opts: PlaybackOptions
     limits: tuple[Any, Any, Any]
+    #: output frame index -> nearest series/segment sample (FrameSchedule)
+    frame_indices: tuple[int, ...]
 
 
-def _draw_single_frame(ctx: _RenderContext, t_idx: int) -> None:
+def _draw_single_frame(ctx: _RenderContext, src_idx: int) -> None:
     ax: Any = ctx.fig.axes[0]
     xlim, ylim, zlim = ctx.limits
     ax.cla()
@@ -229,13 +240,13 @@ def _draw_single_frame(ctx: _RenderContext, t_idx: int) -> None:
     ax.set_ylabel("Y (m)")
     ax.set_zlabel("Z (m)")
 
-    frame = ctx.series[t_idx]
+    frame = ctx.series[src_idx]
     ax.set_title(f"Time: {frame.time_s:.3f} s")
 
     axial_map = frame.axial_loads.values_n if frame.axial_loads is not None else {}
     for s_idx, name in enumerate(ctx.seg_series.names):
-        p = ctx.seg_series.proximal[t_idx, s_idx]
-        d = ctx.seg_series.distal[t_idx, s_idx]
+        p = ctx.seg_series.proximal[src_idx, s_idx]
+        d = ctx.seg_series.distal[src_idx, s_idx]
         load_val = axial_map.get(name)
         color = ctx.color_scale.color(load_val, ctx.opts.base_segment_color)
         ax.plot(
@@ -256,7 +267,9 @@ def _resolve_playback_options(
     options: PlaybackOptions | None,
     kwargs: Mapping[str, Any],
 ) -> PlaybackOptions:
-    fps = kwargs.get("fps", options.fps if options else 30)
+    default = PlaybackOptions()
+    fps = kwargs.get("fps", options.fps if options else default.fps)
+    speed = kwargs.get("speed", options.speed if options else default.speed)
     size_px = kwargs.get("size_px", options.size_px if options else (1920, 1080))
     base_segment_color = kwargs.get(
         "base_segment_color", options.base_segment_color if options else "#808080"
@@ -272,12 +285,31 @@ def _resolve_playback_options(
     )
     return PlaybackOptions(
         fps=fps,
+        speed=speed,
         size_px=size_px,
         base_segment_color=base_segment_color,
         segment_line_width=segment_line_width,
         camera_elevation=camera_elevation,
         camera_azimuth=camera_azimuth,
     )
+
+
+def _schedule_frame_indices(
+    series: ForceTorqueSeries, opts: PlaybackOptions
+) -> tuple[int, ...]:
+    """Output frame -> nearest series sample, via a time-based FrameSchedule.
+
+    ``series.times_s`` is the authoritative clock: ``segments`` is always
+    paired 1:1 with ``series`` by index (enforced by the length check in
+    :func:`render_force_playback`), so it has no time base of its own. A
+    series with fewer than two samples cannot define a schedule span, so it
+    falls back to one output frame per sample.
+    """
+    times = np.asarray(series.times_s, dtype=float)
+    if times.size < 2:
+        return tuple(range(len(series)))
+    schedule = FrameSchedule(times, opts.fps, opts.speed)
+    return tuple(int(i) for i in schedule.nearest_indices())
 
 
 def _render_frames(
@@ -289,14 +321,14 @@ def _render_frames(
     if encoder == "ffmpeg":
         writer = animation.FFMpegWriter(fps=ctx.opts.fps, bitrate=4000)
         with writer.saving(ctx.fig, out_target, dpi=100):
-            for t_idx in range(len(ctx.series)):
-                _draw_single_frame(ctx, t_idx)
+            for src_idx in ctx.frame_indices:
+                _draw_single_frame(ctx, src_idx)
                 writer.grab_frame()
     else:
         assert png_dir is not None
-        for t_idx in range(len(ctx.series)):
-            _draw_single_frame(ctx, t_idx)
-            frame_path = png_dir / f"frame_{t_idx:04d}.png"
+        for out_idx, src_idx in enumerate(ctx.frame_indices):
+            _draw_single_frame(ctx, src_idx)
+            frame_path = png_dir / f"frame_{out_idx:04d}.png"
             ctx.fig.savefig(frame_path, dpi=100)
 
 
@@ -310,7 +342,13 @@ def render_force_playback(
     options: PlaybackOptions | None = None,
     **kwargs: Any,
 ) -> PlaybackReceipt:
-    """Render animated 3D force playback to video (MP4) or image frames (PNG)."""
+    """Render animated 3D force playback to video (MP4) or image frames (PNG).
+
+    Playback is time-based (GCV-14, #11720): output frame ``j`` shows the
+    series sample nearest to ``t0 + j * speed / fps`` (see
+    :func:`_schedule_frame_indices`), so ``frame_count`` follows the swing's
+    time span and ``fps``/``speed``, not ``len(series)``.
+    """
     if not isinstance(series, ForceTorqueSeries):
         raise TypeError("series must be a ForceTorqueSeries")
     if len(series) == 0:
@@ -319,6 +357,8 @@ def render_force_playback(
     opts = _resolve_playback_options(options, kwargs)
     if opts.fps <= 0:
         raise ValueError("fps must be positive")
+    if not math.isfinite(opts.speed) or opts.speed <= 0:
+        raise ValueError("speed must be positive")
     if opts.size_px[0] <= 0 or opts.size_px[1] <= 0:
         raise ValueError("size_px dimensions must be positive")
 
@@ -327,6 +367,7 @@ def render_force_playback(
         raise ValueError(
             f"Length mismatch: series has {len(series)} frames but segments has {seg_series.proximal.shape[0]}"
         )
+    frame_indices = _schedule_frame_indices(series, opts)
 
     out_target = Path(out_path)
     style = style or ForceGlyphStyle()
@@ -367,6 +408,7 @@ def render_force_playback(
         color_scale=color_scale,
         opts=opts,
         limits=limits,
+        frame_indices=frame_indices,
     )
 
     try:
@@ -380,7 +422,7 @@ def render_force_playback(
         plt.close(fig)
 
     return PlaybackReceipt(
-        frame_count=len(series),
+        frame_count=len(frame_indices),
         encoder=encoder,
         out_path=out_target if encoder == "ffmpeg" else (png_dir or out_target),
         size_px=opts.size_px,

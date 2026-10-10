@@ -1,0 +1,98 @@
+# Native Manifold Marker Fitting and Independent Replay (Provisional)
+
+## Model, Observations, and Clock
+
+F03 reuses the F05c/F05d synthetic MuJoCo 3.8.0 floating-root plant and
+bounded Crocoddyl BoxFDDP action. The compiled model has $n_q=9$, $n_v=8$,
+$n_u=2$, two direct hinge torque motors, no root motor and a native Euler
+step of $0.01\,\mathrm{s}$. It has no gravity, ground contact, grip, muscles
+or human anatomy. Two named sites on the linked bodies serve as synthetic
+world-frame markers. Their targets come from an independent native forward
+run driven by a constant $(0.75,-0.5)\,\mathrm{N\,m}$ teacher. The optimizer
+receives only site positions at native step boundaries, an explicit ordered
+site list, metres, a world frame, per-site positive weights and a visibility
+mask. It does not receive the teacher's state or input trajectory. One of
+16 site-time observations is masked; an all-missing time row is rejected.
+
+The marker clock is required to equal the native execution grid exactly
+within $10^{-12}\,\mathrm{s}$. The observation hash binds that clock, ordered
+sites, frame, visible positions, mask and weights. No interpolation of the
+capture or commanded torque occurs in this fixture. A real capture clock
+would need the separate F09 observation alignment, with its own exact
+source-time and output-time identities. Its result is not supplied here.
+
+## Tangent Observation Cost and Derivatives
+
+Let $p_j(x_{k+1})$ be the native world position of site $j$ after one
+MuJoCo Euler step, $y_{k+1,j}$ its target, $m_{k+1,j}\in\{0,1\}$ the
+visibility mask and $w_j>0$ its weight. The running observation cost is
+
+$$
+\ell_{k+1}^{\mathrm{marker}}
+=\sum_j m_{k+1,j}w_j\|p_j(x_{k+1})-y_{k+1,j}\|_2^2.
+$$
+
+The physical state is $x=[q_{9},v_{8}]\in\mathbb R^{17}$, but its local
+tangent is $\delta x=[\delta q_{8},\delta v_{8}]\in\mathbb R^{16}$.
+MuJoCo's `mj_jacSite` supplies $J_j=\partial p_j/\partial\delta q$;
+the velocity columns of the immediate marker Jacobian are zero. For
+$r_j=p_j-y_j$ and $\bar J_j=[J_j\;0]$, the local gradient and
+Gauss–Newton curvature are
+
+$$
+g_p=2\sum_j m_j w_j\bar J_j^\mathsf T r_j,
+\qquad
+H_p=2\sum_j m_j w_j\bar J_j^\mathsf T\bar J_j.
+$$
+
+The F05c native discrete tangent derivative of the **same** Euler step
+provides $(A_k,B_k)=\partial x_{k+1}/\partial(x_k,u_k)$ on that manifold.
+The F05d action adds $A_k^\mathsf T g_p$ and $B_k^\mathsf T g_p$ to its
+state and input gradients, and the corresponding $A_k,B_k$ sandwich of
+$H_p$ to its Gauss–Newton Hessian blocks. It also adds the marker cost to
+the independently evaluated nonlinear plan score, including the terminal
+site observation. Finite differences of `mj_integratePos` perturbations
+check every site tangent-gradient column and the Gauss–Newton outer
+product from an independently sampled site Jacobian. The action's
+$x_{k+1}$ chain is checked for both floating-root quaternion rotation
+and a hinge coordinate, along with an input derivative. A masked site
+cannot contribute to any of these terms.
+The Gauss–Newton matrix omits second derivatives of site kinematics and
+dynamics; line search and independent nonlinear scoring decide admission.
+
+## Bounded Solve, Applied Input, and Evidence
+
+The same exact initial native state and four-step control experiment are
+used for the fitted controller and a zero-torque baseline. The optimizer
+uses a three-step receding horizon, a 12-iteration cap, a cooperative
+five-second **per-call** budget and small positive physical-state/effort
+regularizers about the fixed initial state. This is a diagnostic solver
+budget, not a real-time deadline. The F05d admission path checks motor
+bounds, native nonlinear plan cost against the zero-torque fallback,
+model identity, exact clock, hidden callbacks and contact-free policy.
+Only an accepted first motor command reaches the plant. The F05d runner
+exports the actual post-limit ZOH torques and complete initial
+`mjSTATE_INTEGRATION` state through pinned Tools T01. A fresh native model
+replays the saved history without the optimizer or observation feedback.
+
+The supported-provider source-hashed receipt records four accepted commands
+out of four in this particular synthetic run, and separately records that
+the whole four-command trajectory was accepted. Across the visible site
+coordinates the independently scored marker RMSE is
+$1.71\times10^{-9}\,\mathrm m$ versus $8.88\times10^{-3}\,\mathrm m$
+for zero torque. Complete-state replay differs by zero within a
+$10^{-12}$ acceptance tolerance. The source-bound run measured
+$0.56\,\mathrm s$ wall and $0.24\,\mathrm s$ process CPU for target
+validation, controller
+construction and derivative preflight, all native solves, execution,
+baseline comparison, export, fresh replay and score validation in one local
+run. They exclude the teacher generation, runtime startup and full
+production data preparation. Warmup and machine load may change them.
+
+These values establish only a reachable, contact-free, model-generated
+marker fitting boundary. They do not demonstrate measured motion-capture
+accuracy, marker attachment calibration, capture-clock alignment, contact
+or grip feasibility, anatomical or muscle dynamics, robustness under
+held-out perturbations, six-engine parity, or full-swing runtime. F03,
+F05, F09 and the manual release remain open. The F03 turnover gives the
+reproduction commands and exact source/input/observation identities.

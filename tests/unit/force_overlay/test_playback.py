@@ -23,12 +23,14 @@ from src.shared.python.force_overlay import (
 )
 from src.shared.python.force_overlay.glyphs import ForceGlyphStyle
 from src.shared.python.force_overlay.playback import (
+    PlaybackOptions,
     PlaybackReceipt,
     SegmentSeries,
     load_segment_series,
     render_force_playback,
     save_segment_series,
 )
+from src.shared.python.video_timing.frame_schedule import FrameSchedule
 
 
 def _make_synthetic_playback_data() -> tuple[ForceTorqueSeries, SegmentSeries]:
@@ -184,3 +186,53 @@ def test_playback_validates_inputs(tmp_path: Path) -> None:
     # Nonpositive fps
     with pytest.raises(ValueError, match="fps must be positive"):
         render_force_playback(series, segments, out_path=tmp_path / "out", fps=0)
+
+    # Nonpositive speed
+    with pytest.raises(ValueError, match="speed must be positive"):
+        render_force_playback(
+            series, segments, out_path=tmp_path / "out2", fps=10, speed=0.0
+        )
+
+
+def test_default_fps_is_sixty_the_unified_default() -> None:
+    """GCV-14 (#11720): capture-rig/export/visual_layer all default to 60 fps."""
+    assert PlaybackOptions().fps == 60
+    assert PlaybackOptions().speed == 1.0
+
+
+def test_render_force_playback_is_time_based_not_index_based(tmp_path: Path) -> None:
+    """One output frame per FrameSchedule sample over series.times_s, not one
+    per series sample (GCV-14, #11720)."""
+    series, segments = _make_synthetic_playback_data()
+    out_dir = tmp_path / "frames_time"
+
+    receipt = render_force_playback(series, segments, out_path=out_dir, fps=60)
+
+    expected = FrameSchedule(np.array(series.times_s), 60, 1.0).n_frames
+    assert expected != len(series)  # the behaviour actually changed
+    assert receipt.frame_count == expected
+    png_files = sorted(out_dir.glob("frame_*.png"))
+    assert len(png_files) == expected
+
+
+def test_render_force_playback_half_speed_roughly_doubles_frames(
+    tmp_path: Path,
+) -> None:
+    series, segments = _make_synthetic_playback_data()
+    full = render_force_playback(
+        series, segments, out_path=tmp_path / "full", fps=60, speed=1.0
+    )
+    half = render_force_playback(
+        series, segments, out_path=tmp_path / "half", fps=60, speed=0.5
+    )
+    assert abs(half.frame_count - 2 * full.frame_count) <= 1
+
+
+def test_render_force_playback_fps_ten_matches_legacy_frame_count(
+    tmp_path: Path,
+) -> None:
+    """At fps=10 the series' own 0.1 s spacing lines up with the schedule
+    exactly, so the frame count matches the pre-GCV-14 index-based count."""
+    series, segments = _make_synthetic_playback_data()
+    receipt = render_force_playback(series, segments, out_path=tmp_path / "ten", fps=10)
+    assert receipt.frame_count == len(series) == 3

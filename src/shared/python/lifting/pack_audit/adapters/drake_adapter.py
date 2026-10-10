@@ -90,6 +90,13 @@ class DrakeAdapter(EngineAdapter):
                 return f"{j.type_name()} joint, child of {j.parent_body().name()}"
         return "unattached"
 
+    def _com_inertia_moments(self, body_name: str) -> list[float]:
+        """Principal moments about the body COM (Drake stores them about Bo)."""
+        si = self.plant.GetBodyByName(body_name).default_spatial_inertia()
+        about_com = si.get_unit_inertia().ShiftToCenterOfMass(si.get_com())
+        mass = float(si.get_mass())
+        return [mass * float(x) for x in about_com.get_moments()]
+
     def structure(self) -> dict[str, Any]:
         p = self.plant
         root = ET.fromstring(self._xml)
@@ -100,8 +107,7 @@ class DrakeAdapter(EngineAdapter):
         ]
         inertia = {}
         for n in self._bodies():
-            moments = p.GetBodyByName(n).default_rotational_inertia().get_moments()
-            inertia[n] = [float(x) for x in moments]
+            inertia[n] = self._com_inertia_moments(n)
         joints = [
             p.get_joint(i).name() for i in p.GetJointIndices(self.loaded.model_instance)
         ]

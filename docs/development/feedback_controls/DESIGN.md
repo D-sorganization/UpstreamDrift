@@ -39,7 +39,21 @@ Rigid contact uses formulation-appropriate unilateral and complementarity checks
 7. **Translate to Muscles.** Use MocoInverse/CMC only as prescribed-motion diagnostics or warm starts. Use MocoTrack or MocoStudy for dynamically free muscle-driven tracking and joint excitation optimization over time. Per-frame torque-to-muscle allocation can be dynamically infeasible and is insufficient. Check the installed Moco version's Controller support: some versioned guides disallow OpenSim Controllers inside optimization, so use compatible problem terms or an outer forward-simulation controller.
 8. **Verify Pure Replay.** Independently instantiate the engine, load only the frozen initial state, model and applied-input bundle, disable feedback and measurement access, and integrate continuously. Do not reset states at windows, overwrite q/v, stabilize by measured trajectories or rerun the controller offline during replay.
 
+The optional bounded search implementation has one numerical boundary: a finite candidate plan is evaluated for a finite cost and a vector of signed hard margins (nonnegative means feasible). The existing F02 torque rollout supplies the first evaluator; native muscle/motor adapters must supply their own state scaling, exact post-mapping command ordering, physics, source identity and hard criteria. The shared SLSQP loop enforces plan bounds, counts prediction and vector-constraint preparation calls against one cooperative budget, then independently re-evaluates a proposed solution before returning it. A returned plan is only a numerical proposal. The caller separately admits a safe fallback and must promote a candidate through fresh native execution and independent saved-input replay before making a physical matching claim. The loop does not supply marker attachments, physiology, contact validity or a hard real-time guarantee.
+
 ## OpenSim Muscle Endpoint
+
+Before any controller or muscle parameter tuning, run the F07f native source
+reference observer on each exact source artifact and a declared post-initSystem
+or complete named continuous state at the initialized clock. Record achieved
+versus serialized coordinate defaults because OpenSim `initSystem()` itself
+assembles. Preserve frame transforms, joint/coupler coordinate paths, moving and
+conditional muscle path points, native wrap curves, concrete law/options and
+source/loaded/runtime identities. Cross-source diagnostics require explicit
+candidate path pairs and a declared rigid frame registration; scalar coordinate
+sign/axis equivalence and anatomical correspondence require separate evidence.
+This observer is read-only and cannot substitute for source-resource closure,
+physiological limits, native full-state replay, contact/grip or capture fit.
 
 Pin OpenSim/Moco versions and subject-specific muscle geometry, maximum isometric force, fiber/tendon lengths, activation constants and tendon-compliance choice. Sensitivity-test plausible parameter ranges; rank-deficient parameters retain priors. Reserve and root-residual actuators have separately frozen bounds and effort reports. No muscle-only claim if hidden reserves do substantial work. EMG, when actually present and synchronized, can constrain an uncertain recruitment objective; lack of EMG limits physiology validation and does not justify invented excitation truth.
 

@@ -70,6 +70,14 @@ class SolvePoseOptions:
     ) = None
     com_target: tuple[Sequence[float], float] | None = None
     solver: Literal["lm", "trf"] = "lm"
+    #: Pose the joint prior pulls toward; ``None`` uses the seed ``q_init``.
+    #: A restart passes its unjittered start here so the jitter only moves
+    #: the seed, never the prior (#12042).
+    prior_anchor: Sequence[float] | Array | None = None
+    #: Weak posture prior (#12042): ``{coordinate: (target_rad, weight)}``
+    #: adds ``sqrt(weight) * (q - target)`` rows. A weak weight only decides
+    #: coordinates the markers leave under-determined.
+    posture_prior: Mapping[str, tuple[float, float]] | None = None
 
 
 @dataclass(frozen=True)
@@ -87,6 +95,19 @@ class SolveTrajectoryOptions:
     axis_targets_per_frame: Sequence[Mapping[str, Any] | None] | None = None
     com_targets_per_frame: Sequence[tuple[Sequence[float], float] | None] | None = None
     locked_per_frame: Sequence[Mapping[str, float] | None] | None = None
+    #: Continuity-preserving restarts (#12042). ``None`` keeps the legacy free
+    #: restarts. A value keeps each retry's joint prior anchored to the frame's
+    #: start pose and accepts a retry only when no joint coordinate (index 6
+    #: on) moves further than this many radians from that start pose, so a
+    #: restart cannot hop to another branch between two frames.
+    restart_max_step_rad: float | None = None
+    #: Anchor each retry's joint prior to the frame's start pose instead of
+    #: the jittered seed (implied by ``restart_max_step_rad``).
+    restart_anchor_prior: bool = False
+    #: Draw each frame's restart jitter from a generator seeded by the frame
+    #: index, so a perturbation that changes which earlier frames restarted
+    #: cannot shift the jitter of every later frame.
+    restart_seed_per_frame: bool = False
 
 
 def _rotation_error(r_a: Array, r_b: Array) -> Array:
@@ -260,8 +281,13 @@ def solve_full_body_ik_trajectory(
     closure_weight: float = 10.0,
     reg_weight: float = 1e-3,
     max_nfev: int = 50,
+    coordinate_bounds: tuple[Array, Array] | None = None,
 ) -> Array:
-    """Solve inverse kinematics across all frames of a capture trajectory."""
+    """Solve trajectory IK; explicit finite source bounds opt into bounded TRF.
+
+    Omission preserves the original LM solver. Bounds never clip the seed or
+    widen source anatomy. Finite output is not an optimization acceptance test.
+    """
     q0 = np.asarray(initial_q, dtype=float)
     if q0.ndim != 1 or not np.isfinite(q0).all():
         raise ValueError("initial_q must be a finite 1D array")
@@ -274,6 +300,7 @@ def solve_full_body_ik_trajectory(
         raise ValueError("closure_weight must be non-negative")
     if reg_weight < 0:
         raise ValueError("reg_weight must be non-negative")
+    low, high = _trajectory_bounds(q0, coordinate_bounds)
 
     n_coords = q0.size
     q_out = np.zeros((capture.frames, n_coords), dtype=float)
@@ -317,12 +344,43 @@ def solve_full_body_ik_trajectory(
                 res = np.concatenate([res, reg_weight * (q_eval - ref_q)])
             return res
 
-        sol = least_squares(residual, q_curr, method="lm", max_nfev=max_nfev)
+        sol = least_squares(
+            residual,
+            q_curr,
+            method="lm" if coordinate_bounds is None else "trf",
+            bounds=(low, high),
+            max_nfev=max_nfev,
+            # As in _run_trf_loop, a tiny first step from a bound is not convergence.
+            ftol=1e-8 if coordinate_bounds is None else None,
+        )
         if np.isfinite(sol.x).all():
             q_curr = sol.x.copy()
         q_out[f] = q_curr
 
     return q_out
+
+
+def _trajectory_bounds(
+    initial_q: Array,
+    bounds: tuple[Array, Array] | None,
+) -> tuple[Array, Array]:
+    """Validate explicit finite bounds before any engine geometry evaluation."""
+    if bounds is None:
+        return np.full_like(initial_q, -np.inf), np.full_like(initial_q, np.inf)
+    low, high = (np.asarray(values, dtype=float) for values in bounds)
+    if (
+        low.shape != initial_q.shape
+        or high.shape != initial_q.shape
+        or not np.isfinite(low).all()
+        or not np.isfinite(high).all()
+        or np.any(low >= high)
+        or np.any(initial_q < low)
+        or np.any(initial_q > high)
+    ):
+        raise ValueError(
+            "Coordinate bounds must be finite, ordered and contain initial_q"
+        )
+    return low.copy(), high.copy()
 
 
 def compute_marker_rms_trajectory(
@@ -398,6 +456,40 @@ class _PosePrep:
     nv: int
     sqrt_prior: Array
     axes: list[Any]
+    anchor: Array
+    posture: tuple[NDArray[np.intp], Array, Array]
+
+
+def _prior_anchor(q_init: Array, anchor: Sequence[float] | Array | None) -> Array:
+    """Pose the joint prior pulls toward: ``anchor`` if given, else ``q_init``.
+
+    Raises ``ValueError`` when ``anchor`` is not a finite vector shaped like
+    ``q_init``.
+    """
+    seed = np.asarray(q_init, dtype=float)
+    if anchor is None:
+        return seed
+    target = np.asarray(anchor, dtype=float)
+    if target.shape != seed.shape or not np.isfinite(target).all():
+        raise ValueError(
+            f"prior_anchor must be a finite vector of shape {seed.shape}, "
+            f"got {target.shape}"
+        )
+    return target
+
+
+def _restart_admissible(
+    retry_q: Array, start: Array, max_step_rad: float | None
+) -> bool:
+    """True when a restart may replace the frame's fit (#12042).
+
+    With ``max_step_rad`` set, no joint coordinate (index 6 on; 0-5 are the
+    floating root) may move further than ``max_step_rad`` from ``start``.
+    """
+    if max_step_rad is None:
+        return True
+    step = np.abs(np.asarray(retry_q, dtype=float)[6:] - np.asarray(start)[6:])
+    return bool(step.size == 0 or float(step.max()) <= max_step_rad)
 
 
 class BaseFullBodyIK:
@@ -701,7 +793,26 @@ class BaseFullBodyIK:
             nv=nv,
             sqrt_prior=np.sqrt(prior_diag),
             axes=self._axis_rows(opts.axis_targets),
+            anchor=_prior_anchor(q_init, opts.prior_anchor),
+            posture=self._posture_rows(opts.posture_prior),
         )
+
+    def _posture_rows(
+        self, prior: Mapping[str, tuple[float, float]] | None
+    ) -> tuple[NDArray[np.intp], Array, Array]:
+        """Indices, targets and square-root weights of the posture prior."""
+        entries: Mapping[str, tuple[float, float]] = prior or {}
+        names = list(entries)
+        for name in names:
+            if name not in self.coordinate_order:
+                raise ValueError(f"Unknown posture prior coordinate {name}")
+        values = np.asarray([entries[n] for n in names], dtype=np.float64).reshape(
+            -1, 2
+        )
+        if not np.isfinite(values).all() or (values[:, 1] < 0).any():
+            raise ValueError("Posture prior targets must be finite, weights >= 0")
+        index = np.array([self.coordinate_order.index(n) for n in names], dtype=int)
+        return index, values[:, 0], np.sqrt(values[:, 1])
 
     def _pose_residual_stack(
         self,
@@ -722,6 +833,10 @@ class BaseFullBodyIK:
         jacs = [prep.row_scale[:, None] * jac[prep.mask].reshape(-1, prep.nv)]
         rows.append(prep.sqrt_prior * (q_k - q_init))
         jacs.append(prep.sqrt_prior * np.eye(prep.nv))
+        index, target, sqrt_w = prep.posture
+        if index.size:
+            rows.append(sqrt_w * (q_k[index] - target))
+            jacs.append(sqrt_w[:, None] * np.eye(prep.nv)[index])
         rot_w = (
             opts.closure_weight
             if opts.closure_rotation_weight is None
@@ -796,7 +911,9 @@ class BaseFullBodyIK:
             )
 
         def residuals(q_k: Array) -> tuple[Array, Array]:
-            return self._pose_residual_stack(q_k, prep, targets, q_init, ground, opts)
+            return self._pose_residual_stack(
+                q_k, prep, targets, prep.anchor, ground, opts
+            )
 
         if opts.solver == "trf":
             q, done = _run_trf_loop(
@@ -859,6 +976,10 @@ class BaseFullBodyIK:
             < 0
         ):
             raise ValueError("Restart settings must be nonnegative")
+        if opts.restart_max_step_rad is not None and not (
+            np.isfinite(opts.restart_max_step_rad) and opts.restart_max_step_rad > 0
+        ):
+            raise ValueError("restart_max_step_rad must be finite and positive")
         if (
             opts.axis_targets_per_frame is not None
             and len(opts.axis_targets_per_frame) != targets_arr.shape[0]
@@ -901,6 +1022,8 @@ class BaseFullBodyIK:
         anchors: dict[str, Array] = {}
 
         for k in indices:
+            if opts.restart_seed_per_frame:
+                rng = np.random.default_rng((0, k))
             stance = (
                 ()
                 if opts.flat_feet_per_frame is None
@@ -926,6 +1049,14 @@ class BaseFullBodyIK:
                 anchors=anchors if opts.plant_stance else None,
                 **f_opts,
             )
+            anchored = (
+                opts.restart_anchor_prior or opts.restart_max_step_rad is not None
+            )
+            retry_opts = (
+                {**f_opts, "prior_anchor": np.asarray(start, dtype=float)}
+                if anchored
+                else f_opts
+            )
             for _ in range(
                 opts.restarts if fit.marker_rms_m > opts.restart_threshold_m else 0
             ):
@@ -940,9 +1071,11 @@ class BaseFullBodyIK:
                     ground=ground,
                     flat_feet=stance if opts.flat_feet_per_frame is not None else False,
                     anchors=anchors if opts.plant_stance else None,
-                    **f_opts,
+                    **retry_opts,
                 )
-                if retry.marker_rms_m < fit.marker_rms_m - opts.restart_margin_m:
+                if retry.marker_rms_m < fit.marker_rms_m - opts.restart_margin_m and (
+                    _restart_admissible(retry.q, start, opts.restart_max_step_rad)
+                ):
                     fit = retry
             if opts.plant_stance:
                 points = self.sphere_ground_points(fit.q, ground)

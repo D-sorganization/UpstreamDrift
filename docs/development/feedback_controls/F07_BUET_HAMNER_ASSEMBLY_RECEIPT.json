@@ -1,0 +1,23 @@
+{
+  "assembler_sha256": "7a2050d6d18cbdf1fa368f5bf5c4bc37c8100806e7ba77933cfeb4fe7281209f",
+  "buet_muscle_count": 473,
+  "buet_source_sha256": "b66a31e08087327f8756d587f471b0494a3d9d6f7f6d510de66beba4a9e79bf6",
+  "derived_sha256": "8d4d349747060efbac31c707c4e01f452746a8fba32be77a425b5ac5be1d34a3",
+  "fresh_native_reload": true,
+  "hamner_muscle_count": 84,
+  "hamner_source_sha256": "349ce7a44f1541794f2283cab73bb954270228f2f50808de549ec5097a1687cf",
+  "max_native_constraint_residual": 0.0,
+  "max_owned_body_transform_error": 0.0,
+  "max_owned_body_velocity_error": 0.0,
+  "max_owned_muscle_length_error": 0.0,
+  "max_owned_muscle_speed_error": 0.0,
+  "max_shared_body_transform_error": 0.0,
+  "max_shared_body_velocity_error": 0.0,
+  "minimum_native_mass_eigenvalue": 1.3362969448668327e-6,
+  "native_actuators_sha256": "61c6d7810088ca8030eea967e9bfa71f7f7998d3c5601c5e1939367346238cc2",
+  "native_applied_force_norm": 54563.69711509691,
+  "native_simbody_sha256": "81afadccfe9e55dd366255d09c319ccb8d50fdb54fee4ac45b64708c4f044aa6",
+  "native_simulation_sha256": "950241f649dab8a113c4bb754a080d16db4a3f5f0aa1710ed2e53d03206eb09e",
+  "native_version": "version 4.6-2026-06-22-85aaf64, build date 18:27:55 Jun 22 2026",
+  "observed_pose_count": 3
+}

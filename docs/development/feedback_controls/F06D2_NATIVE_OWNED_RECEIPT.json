@@ -1,0 +1,494 @@
+{
+  "continuation_tests": {
+    "changed": {
+      "base_and_model_workspace_sentinels": true,
+      "discrete_bound": 1e-12,
+      "issue": "#11942",
+      "max_executed_input_error_n": 0,
+      "max_reference_discrete_error": 1.1102230246251565e-16,
+      "max_reference_position_error_m": 1.275659919260097e-7,
+      "outputs_sha256": {
+        "discrete_state": "212f08404854bc4f7f6ee5389cbf62b49cc658c0c50004a7bc084e74ea2fa632",
+        "executed_force": "36569e26bb5a917ced65c4b86d6312c2993fd0c28eb6be1a5a89b33e95397941",
+        "physical_position": "c40b40968fc9772a84dd4ed0405fb310256fece4a1afc8ad8b405367ce0c2910"
+      },
+      "position_bound_m": 1e-5,
+      "request_sha256": "d2a40465aacbddd59f739236e932a8ded6baf06c5be4bfadce0623739cb54fb5",
+      "scope": "synthetic diagnostic only",
+      "snapshot_time_s": 0.2,
+      "stop_time_s": 0.4,
+      "suffix_only_inputs": true
+    },
+    "same": {
+      "base_and_model_workspace_sentinels": true,
+      "discrete_bound": 1e-12,
+      "issue": "#11942",
+      "max_executed_input_error_n": 0,
+      "max_reference_discrete_error": 1.1102230246251565e-16,
+      "max_reference_position_error_m": 7.45931094670027e-17,
+      "outputs_sha256": {
+        "discrete_state": "92f1973dd867e4060426f8f90c786fec82592ca5c407947353e89c9b5f6e0e15",
+        "executed_force": "7b64b12053250b5c9edaa7a03c24071bfdfd3f38c78feaec622eb617b9fa011d",
+        "physical_position": "9d4ee45554a4c790b9ac38cc458372e6cb5b77118e4629629bb22732f2475124"
+      },
+      "position_bound_m": 1e-5,
+      "request_sha256": "6b33e414e572306ec2fa004bff41a649d201105d1967668224e9d6f39919f782",
+      "scope": "synthetic diagnostic only",
+      "snapshot_time_s": 0.2,
+      "stop_time_s": 0.4,
+      "suffix_only_inputs": true
+    }
+  },
+  "dependency_merge_required": false,
+  "issue": 11942,
+  "loaded_source_admission": {
+    "evidence_log": "native-configuration-tests-v5.out",
+    "loaded_model_filename": "C:\\Users\\diete\\Repositories\\.codex-feedback-simscape-11784\\owned-11942-v5\\native_restart_fixture_11921.slx",
+    "source_path_checked": true,
+    "wrong_path_identifier": "NativeOwned:LoadedModelPathMismatch"
+  },
+  "matlab_version": "25.2.0.3177638 (R2025b) Update 5",
+  "native_binding_tests": {
+    "binding": {
+      "compatibility": {
+        "checksum_uint32": [
+          2577157268.0, 808297687.0, 3078379937.0, 2258500947.0
+        ],
+        "context": "explicit-simulation-compile"
+      },
+      "compatibility_sha256": "82d068f63ea7350c73cc925940e008da1bf52b2f768f6ddaa980cf40763c028b",
+      "effective_configuration": {
+        "blocks": [
+          {
+            "block": "Input",
+            "parameter": "VariableName",
+            "value": "native_force_input"
+          },
+          {
+            "block": "Input",
+            "parameter": "Interpolate",
+            "value": "off"
+          },
+          {
+            "block": "Input",
+            "parameter": "OutputAfterFinalValue",
+            "value": "Holding final value"
+          },
+          {
+            "block": "Input",
+            "parameter": "SampleTime",
+            "value": "0"
+          },
+          {
+            "block": "Input",
+            "parameter": "ZeroCross",
+            "value": "on"
+          },
+          {
+            "block": "ToPhysical",
+            "parameter": "Unit",
+            "value": "N"
+          },
+          {
+            "block": "ToPhysical",
+            "parameter": "FilteringAndDerivatives",
+            "value": "zero"
+          },
+          {
+            "block": "ToSimulink",
+            "parameter": "Unit",
+            "value": "m"
+          },
+          {
+            "block": "Delay",
+            "parameter": "SampleTime",
+            "value": "0.01"
+          },
+          {
+            "block": "Delay",
+            "parameter": "InitialCondition",
+            "value": "-0.5"
+          },
+          {
+            "block": "Mass",
+            "parameter": "mass",
+            "value": "1"
+          },
+          {
+            "block": "Spring",
+            "parameter": "spr_rate",
+            "value": "40"
+          },
+          {
+            "block": "Damper",
+            "parameter": "D",
+            "value": "2"
+          },
+          {
+            "block": "Sensor",
+            "parameter": "reference",
+            "value": "foundation.enum.MeasurementReference.absolute"
+          }
+        ],
+        "model": {
+          "AbsTol": "1e-10",
+          "BlockReduction": "off",
+          "FinalStateName": "xFinal",
+          "MaxStep": "0.01",
+          "NonCurrentReleaseOperatingPointMsg": "error",
+          "OperatingPointContentsChecksumMismatchMsg": "error",
+          "OperatingPointInterfaceChecksumMismatchMsg": "error",
+          "RelTol": "1e-8",
+          "ReturnWorkspaceOutputs": "on",
+          "SaveFinalState": "on",
+          "SaveOperatingPoint": "on",
+          "SimulationMode": "normal",
+          "Solver": "ode23t",
+          "SolverType": "Variable-step",
+          "StartTime": "0.0"
+        },
+        "physical_solver": {
+          "AutomaticFiltering": "on",
+          "ComputeImpulses": "off",
+          "ConsistencyAbsTol": "0.001",
+          "ConsistencyRelTol": "0.001",
+          "ConsistencyTolFactor": "0.001",
+          "ConsistencyTolSource": "GLOBAL",
+          "DelaysMemoryBudget": "1024",
+          "DoDC": "off",
+          "DoFixedCost": "off",
+          "EquationFormulation": "NE_TIME_EF",
+          "FilteringTimeConstant": "0.001",
+          "FunctionEvalNumThread": "1",
+          "Harmonics": "[]",
+          "ImpulseIterations": "2",
+          "IndexReductionMethod": "DerivativeReplacement",
+          "LeftPortType": "input",
+          "LinearAlgebra": "auto",
+          "LinearAlgebraNumThread": "0",
+          "LocalSolverChoice": "NE_BACKWARD_EULER_ADVANCER",
+          "LocalSolverSampleTime": "0.001",
+          "MaxModeIter": "2",
+          "MaxNonlinIter": "3",
+          "MultibodyLocalSolverChoice": "ODE1",
+          "MultibodyLocalSolverSampleTime": "0.001",
+          "MultibodyUseLocalSolver": "off",
+          "PartitionMemoryBudget": "1024",
+          "PartitionMethod": "ROBUST",
+          "PartitionStorageMethod": "AS_NEEDED",
+          "PhysicalDomain": "network_engine_domain",
+          "ResidualTolerance": "1e-09",
+          "ResolveIndetEquations": "on",
+          "RightPortType": "generic",
+          "SimulateNoise": "off",
+          "SubClassName": "solver",
+          "Tones": "[]",
+          "UseLocalSolver": "off"
+        },
+        "schema_version": "simscape-diagnostic-config/1.0.0"
+      },
+      "effective_configuration_sha256": "c8d6873d216ed54e74b5814ab1a5431fe86523262e80f089723cf75423bfdb2c",
+      "loaded_model_filename": "C:\\Users\\diete\\Repositories\\.codex-feedback-simscape-11784\\owned-11942-v5\\native_restart_fixture_11921.slx",
+      "runtime_id": "25.2.0.3177638 (R2025b) Update 5",
+      "runtime_release": "2025b",
+      "solver_id": "ode23t",
+      "solver_version": "25.2.0",
+      "source_path_checked": false
+    },
+    "compile_terminated": true,
+    "input_scope_restored": true,
+    "partial_restore_rejected": true,
+    "repeatable": true,
+    "tunable_configuration_bound": true
+  },
+  "native_evidence_archive": {
+    "bytes": 715154,
+    "file_count": 59,
+    "location": "fleet-local docs/development/feedback_controls_planning/simscape_owned_11942_v5/evidence-archive-v5.zip",
+    "manifest_sha256": "b5153b055c9df418597ce47f42f7c248e93befb07378d4e20357ca4a749dfb59",
+    "sha256": "23f04ada1c235ec50f7af4eae5e9a5876927d9ddc6fa5a6b2f32a945ed4c4ff6"
+  },
+  "post_native_admission_validation": {
+    "all_materialized_files_byte_identical_to_executed_inputs": true,
+    "reproduced_request_sha256": {
+      "changed": "d2a40465aacbddd59f739236e932a8ded6baf06c5be4bfadce0623739cb54fb5",
+      "same": "6b33e414e572306ec2fa004bff41a649d201105d1967668224e9d6f39919f782"
+    },
+    "scope": "Current v5 source and materialized bytes reproduced from trusted producer; no new physics run implied",
+    "tools_commit": "89415ee859d6fcfe3384b95e5a53691e68bf9c1b"
+  },
+  "producer": {
+    "actual_replay_start_s": 0.2,
+    "actual_snapshot_time_s": 0.2,
+    "block_reduction": "off",
+    "diagnostic_files": {
+      "executed_input": {
+        "path": "executed-input.csv",
+        "sha256": "d145184026e9dac9a4b257532ea581d36811df07f39374457828c2df48ced4ef"
+      },
+      "full_discrete": {
+        "path": "full-discrete.csv",
+        "sha256": "28bf19594b59c6eb075d6473758660a6da156a45f62752aa9e636bb2c2cdd296"
+      },
+      "full_physical": {
+        "path": "full-physical.csv",
+        "sha256": "acb42c8df6607e812dd384ced23c1d4d74ffa43982c62912ca30e89a903a4bc3"
+      },
+      "replay_discrete": {
+        "path": "replay-discrete.csv",
+        "sha256": "92f1973dd867e4060426f8f90c786fec82592ca5c407947353e89c9b5f6e0e15"
+      },
+      "replay_physical": {
+        "path": "replay-physical.csv",
+        "sha256": "e6cc50f781e6e2785c4e81fc020d74cb489102a049d4d6191a4afe3c983d2262"
+      },
+      "saved_input": {
+        "path": "saved-input.csv",
+        "sha256": "a9985be71d29458ae014ab36cbef0ecd9899c8f2c02238dbd18fc8ba1e6ad8f1"
+      }
+    },
+    "discrete_bound": 1e-12,
+    "discrete_samples": 21,
+    "discrete_span": 1.1,
+    "execution_binding": {
+      "compatibility": {
+        "checksum_uint32": [
+          2577157268.0, 808297687.0, 3078379937.0, 2258500947.0
+        ],
+        "context": "explicit-simulation-compile"
+      },
+      "compatibility_sha256": "82d068f63ea7350c73cc925940e008da1bf52b2f768f6ddaa980cf40763c028b",
+      "effective_configuration": {
+        "blocks": [
+          {
+            "block": "Input",
+            "parameter": "VariableName",
+            "value": "native_force_input"
+          },
+          {
+            "block": "Input",
+            "parameter": "Interpolate",
+            "value": "off"
+          },
+          {
+            "block": "Input",
+            "parameter": "OutputAfterFinalValue",
+            "value": "Holding final value"
+          },
+          {
+            "block": "Input",
+            "parameter": "SampleTime",
+            "value": "0"
+          },
+          {
+            "block": "Input",
+            "parameter": "ZeroCross",
+            "value": "on"
+          },
+          {
+            "block": "ToPhysical",
+            "parameter": "Unit",
+            "value": "N"
+          },
+          {
+            "block": "ToPhysical",
+            "parameter": "FilteringAndDerivatives",
+            "value": "zero"
+          },
+          {
+            "block": "ToSimulink",
+            "parameter": "Unit",
+            "value": "m"
+          },
+          {
+            "block": "Delay",
+            "parameter": "SampleTime",
+            "value": "0.01"
+          },
+          {
+            "block": "Delay",
+            "parameter": "InitialCondition",
+            "value": "-0.5"
+          },
+          {
+            "block": "Mass",
+            "parameter": "mass",
+            "value": "1"
+          },
+          {
+            "block": "Spring",
+            "parameter": "spr_rate",
+            "value": "40"
+          },
+          {
+            "block": "Damper",
+            "parameter": "D",
+            "value": "2"
+          },
+          {
+            "block": "Sensor",
+            "parameter": "reference",
+            "value": "foundation.enum.MeasurementReference.absolute"
+          }
+        ],
+        "model": {
+          "AbsTol": "1e-10",
+          "BlockReduction": "off",
+          "FinalStateName": "xFinal",
+          "MaxStep": "0.01",
+          "NonCurrentReleaseOperatingPointMsg": "error",
+          "OperatingPointContentsChecksumMismatchMsg": "error",
+          "OperatingPointInterfaceChecksumMismatchMsg": "error",
+          "RelTol": "1e-8",
+          "ReturnWorkspaceOutputs": "on",
+          "SaveFinalState": "on",
+          "SaveOperatingPoint": "on",
+          "SimulationMode": "normal",
+          "Solver": "ode23t",
+          "SolverType": "Variable-step",
+          "StartTime": "0.0"
+        },
+        "physical_solver": {
+          "AutomaticFiltering": "on",
+          "ComputeImpulses": "off",
+          "ConsistencyAbsTol": "0.001",
+          "ConsistencyRelTol": "0.001",
+          "ConsistencyTolFactor": "0.001",
+          "ConsistencyTolSource": "GLOBAL",
+          "DelaysMemoryBudget": "1024",
+          "DoDC": "off",
+          "DoFixedCost": "off",
+          "EquationFormulation": "NE_TIME_EF",
+          "FilteringTimeConstant": "0.001",
+          "FunctionEvalNumThread": "1",
+          "Harmonics": "[]",
+          "ImpulseIterations": "2",
+          "IndexReductionMethod": "DerivativeReplacement",
+          "LeftPortType": "input",
+          "LinearAlgebra": "auto",
+          "LinearAlgebraNumThread": "0",
+          "LocalSolverChoice": "NE_BACKWARD_EULER_ADVANCER",
+          "LocalSolverSampleTime": "0.001",
+          "MaxModeIter": "2",
+          "MaxNonlinIter": "3",
+          "MultibodyLocalSolverChoice": "ODE1",
+          "MultibodyLocalSolverSampleTime": "0.001",
+          "MultibodyUseLocalSolver": "off",
+          "PartitionMemoryBudget": "1024",
+          "PartitionMethod": "ROBUST",
+          "PartitionStorageMethod": "AS_NEEDED",
+          "PhysicalDomain": "network_engine_domain",
+          "ResidualTolerance": "1e-09",
+          "ResolveIndetEquations": "on",
+          "RightPortType": "generic",
+          "SimulateNoise": "off",
+          "SubClassName": "solver",
+          "Tones": "[]",
+          "UseLocalSolver": "off"
+        },
+        "schema_version": "simscape-diagnostic-config/1.0.0"
+      },
+      "effective_configuration_sha256": "c8d6873d216ed54e74b5814ab1a5431fe86523262e80f089723cf75423bfdb2c",
+      "loaded_model_filename": "C:\\Users\\diete\\Repositories\\.codex-feedback-simscape-11784\\owned-11942-v5\\native_restart_fixture_11921.slx",
+      "runtime_id": "25.2.0.3177638 (R2025b) Update 5",
+      "runtime_release": "2025b",
+      "solver_id": "ode23t",
+      "solver_version": "25.2.0",
+      "source_path_checked": true
+    },
+    "fixture": "native_restart_fixture_11921",
+    "input_after_final_value": "Holding final value",
+    "input_converter_filtering": "zero",
+    "input_converter_unit": "N",
+    "input_file_sha256": "b85d7af0bfe71118e48240ab6c763bc5780888e35312876a64c2b4d184712472",
+    "input_interpolation": "zero_order_hold",
+    "issue": "#11921",
+    "matlab_release": "2025b",
+    "matlab_version": "25.2.0.3177638 (R2025b) Update 5",
+    "max_discrete_state_error": 0,
+    "max_executed_input_error_n": 0,
+    "max_physical_position_error_m": 0,
+    "model_sha256": "7159d8242a0347b8a610ded199c1f6a500369ad4db09fb55b1a22a67d0129df8",
+    "native_state_reloaded": true,
+    "native_state_saved": true,
+    "physical_samples": 366,
+    "physical_span_m": 0.016083947008273015,
+    "position_bound_m": 1e-5,
+    "provider_sha256": "10d890272361f57152d07e0d71e2e8afaf2034595db106475caa678dd7efad41",
+    "replayed_input_sha256": "c78777fe007d28c2b572c6b3008302be22bf4fed5c74646580c09f3fc958a634",
+    "saved_input_sha256": "c78777fe007d28c2b572c6b3008302be22bf4fed5c74646580c09f3fc958a634",
+    "scope": "small native Simscape plus Unit Delay; no golfer qualification",
+    "snapshot_class": "Simulink.op.ModelOperatingPoint",
+    "snapshot_sha256": "fec3bbe6c027ce3c3e877c538ed4896f437f6788f455c2777b0946b2b91acde9",
+    "solver_id": "ode23t",
+    "split_time_s": 0.2,
+    "stop_time_s": 0.4
+  },
+  "python_owned_boundary_tests": {
+    "native_qualification": false,
+    "passed": 15
+  },
+  "remaining_gates": [
+    "production Simscape control/state adapters and all variants",
+    "six-engine parity",
+    "physiological muscle calibration",
+    "private marker registration",
+    "full-swing closed-loop tracking and independent excitation replay",
+    "manual scientific release"
+  ],
+  "schema_version": "simscape-owned-native-evidence/1.0.0",
+  "scope": "synthetic mass-spring-damper plus Unit Delay; no production or capture qualification",
+  "semantic_metadata_tests": {
+    "cases": {
+      "missing_provider": {
+        "expected_identifier": "NativeRestart:NativeProviderMismatch",
+        "observed_identifier": "NativeRestart:NativeProviderMismatch",
+        "passed": true
+      },
+      "nan_clock": {
+        "expected_identifier": "NativeRestart:NativeSnapshotTimeMismatch",
+        "observed_identifier": "NativeRestart:NativeSnapshotTimeMismatch",
+        "passed": true
+      },
+      "nearby_clock": {
+        "expected_identifier": "NativeRestart:NativeSnapshotTimeMismatch",
+        "observed_identifier": "NativeRestart:NativeSnapshotTimeMismatch",
+        "passed": true
+      },
+      "vector_clock": {
+        "expected_identifier": "NativeRestart:NativeSnapshotTimeMismatch",
+        "observed_identifier": "NativeRestart:NativeSnapshotTimeMismatch",
+        "passed": true
+      },
+      "wrong_provider": {
+        "expected_identifier": "NativeRestart:NativeProviderMismatch",
+        "observed_identifier": "NativeRestart:NativeProviderMismatch",
+        "passed": true
+      }
+    },
+    "issue": "#11942",
+    "runtime_id": "25.2.0.3177638 (R2025b) Update 5",
+    "scope": "trusted diagnostic metadata"
+  },
+  "source_sha256": {
+    "docs/development/feedback_controls/prepare_f06d2_native_fixture.py": "c5475f76fca0d3d6d67038aef642d8cd292dcb3e0eec039c9106d87e1a4ed725",
+    "scripts/matlab/capture_native_simscape_execution.m": "895a541e1d69f05e8623d5d7aee6411fe526563a054155f29b27b76887f92f03",
+    "scripts/matlab/load_native_simscape_snapshot.m": "1884f59f7ecd69a9da8147f762c0cef8e022cbfd4a24f9397abddca3c337c65c",
+    "scripts/matlab/native_simscape_bytes_sha256.m": "fa5c762272967f4e7c8aa449b891d5d9ac379515332922618568dc1cb35e5171",
+    "scripts/matlab/native_simscape_file_sha256.m": "3e51f94acb948371070f373dbcd93d7028f717e507890d0763add34aae97dfd8",
+    "scripts/matlab/native_simscape_provider_sha256.m": "140da4756fcb73274b2d64c6eafcc63ab1cf4bf0eb50752929e12d3ee5bc876d",
+    "scripts/matlab/run_native_simscape_restart.m": "39b1ddc1d83cfe1a91a428e5f1acd2676199d334bdf648ea3828ab368ca3fa0b",
+    "scripts/matlab/run_owned_native_simscape_replay.m": "93aac362fb22eeff1a5fe4cd8c7e785cfc7bcbb697875223c0db570dff76ea9f",
+    "scripts/matlab/test_native_simscape_execution_binding.m": "2a4b7f58b7c07ea17b212403949a250d189c727dfcab7e81f08c80f6687254e8",
+    "scripts/matlab/test_native_simscape_loaded_source.m": "4cffddf1d00bf29f05d2eb10b741eb3b69c86ac50ce0a3f2e4f45bc0f970f8fa",
+    "scripts/matlab/test_native_simscape_snapshot_metadata.m": "d23189a6d630416b44acde9951e15f617173d6aac123dc78fa00e505c4f20635",
+    "scripts/matlab/test_owned_native_simscape_replay.m": "6f9c481dc1c8afb58821503ba69e878331d4da1bfacc13a58d7e66a2cc965b4d",
+    "src/engines/Simscape_Multibody_Models/python/native_owned_replay.py": "5f89fef5a07cea9da6c8fdbe8a69d93dee76f5af799fa39f14d91d007373163d",
+    "src/engines/native_replay_contracts.py": "ba59f3241e5e6100c55d52b12a0351be079341ccb6848c4b1876f9834b9ff810",
+    "tests/unit/motion_matching/test_simscape_owned_native_replay.py": "78b5e6bcc6710a4b14f93b5b299ec184841adf159bcb73915f8a6152d4787a17"
+  },
+  "tools_execution_and_integration_tree_sha1": "64b18e4690f4e4f0d5aa4f8410464c7adb320587",
+  "tools_execution_and_integration_trees_identical": true,
+  "tools_integration_commit": "89415ee859d6fcfe3384b95e5a53691e68bf9c1b",
+  "tools_source_commit": "f52a856e0853de6bae6b5ec9bc1bcd7007ab44b0"
+}

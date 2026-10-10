@@ -43,6 +43,7 @@ __all__ = [
     "extend_shared_python_path",
     "install",
     "installed_tools_distribution",
+    "load_pinned_tools_package",
     "vendor_search_paths",
 ]
 
@@ -91,6 +92,62 @@ def vendor_search_paths(vendor_root: Path = _VENDOR_ROOT) -> tuple[str, ...]:
         str(src),
         str(src / "python" / "src"),
     )
+
+
+#: Private top-level prefix for pinned-Tools packages loaded by
+#: :func:`load_pinned_tools_package`; never a shared namespace.
+PINNED_TOOLS_PREFIX = "_pinned_tools__"
+
+
+def load_pinned_tools_package(relative: str) -> types.ModuleType:
+    """Import a pinned-Tools package under a private name (#11994).
+
+    ``relative`` is the package's dotted path under the Tools
+    ``shared/python`` root, e.g. ``"sidekick.lab.mocap"``. The package is
+    executed as ``_pinned_tools__sidekick__lab__mocap`` so it is never grafted
+    onto UpstreamDrift's own ``sidekick`` namespace: appending the pinned tree
+    to ``sidekick.lab.__path__`` (the retired ``extend_sidekick_lab_path``)
+    built the half-UpstreamDrift, half-Tools package the vendored fallback
+    forbids, for the rest of the process. The package must be self-contained
+    (relative imports only), which ``sidekick.lab.mocap`` is.
+
+    Postconditions: the same module object is returned on every call, and no
+    ``sidekick.*`` ``__path__`` or ``sys.modules`` entry is changed.
+
+    Raises:
+        ValueError: when ``relative`` is not a dotted package path.
+        SeamResolutionError: when the package is not in the pinned tree.
+    """
+    parts = relative.split(".")
+    if not relative or not all(part.isidentifier() for part in parts):
+        raise ValueError(f"expected a dotted package path, got {relative!r}")
+    name = PINNED_TOOLS_PREFIX + "__".join(parts)
+    loaded = sys.modules.get(name)
+    if loaded is not None:
+        return loaded
+    for root in vendor_search_paths():
+        init = Path(root).joinpath(*parts, "__init__.py")
+        if init.is_file():
+            return _exec_private_package(name, init)
+    raise SeamResolutionError(
+        f"{relative} is not in the pinned Tools tree; run: {SUBMODULE_HINT}"
+    )
+
+
+def _exec_private_package(name: str, init: Path) -> types.ModuleType:
+    spec = importlib.util.spec_from_file_location(
+        name, init, submodule_search_locations=[str(init.parent)]
+    )
+    if spec is None or spec.loader is None:
+        raise SeamResolutionError(f"cannot load {init}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[name] = module
+    try:
+        spec.loader.exec_module(module)
+    except BaseException:
+        sys.modules.pop(name, None)
+        raise
+    return module
 
 
 def installed_tools_distribution() -> str | None:
@@ -180,6 +237,8 @@ class SeamRedirectFinder(MetaPathFinder):
         """
         for attempt in (0, 1):
             try:
+                # The import hook admits only REDIRECTED_ROOTS in _canonical.
+                # nosemgrep: python.lang.security.audit.non-literal-import.non-literal-import
                 module = importlib.import_module(canonical_name)
             except ModuleNotFoundError as exc:
                 if exc.name in {"shared", "shared.python", _CANONICAL_PREFIX + root}:
@@ -191,7 +250,10 @@ class SeamRedirectFinder(MetaPathFinder):
                 if attempt == 1 or REDIRECTED_ROOTS.get(root) is None:
                     return None
                 _extend_split_path(
-                    root, importlib.import_module(_CANONICAL_PREFIX + root)
+                    # root is selected from the explicit REDIRECTED_ROOTS allowlist.
+                    root,
+                    # nosemgrep: python.lang.security.audit.non-literal-import.non-literal-import
+                    importlib.import_module(_CANONICAL_PREFIX + root),
                 )
                 continue
             if "." not in canonical_name[len(_CANONICAL_PREFIX) :]:

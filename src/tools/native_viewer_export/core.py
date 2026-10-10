@@ -30,6 +30,7 @@ from src.shared.python.motion_matching.same_input import InputBundle
 from src.shared.python.video_timing.frame_schedule import (
     DEFAULT_FPS,
     MAX_SPEED,
+    SPEED_VARIANTS,
     FrameSchedule,
     speed_suffix,
 )
@@ -41,15 +42,16 @@ from src.tools.native_viewer_export.compositor import (
 )
 
 Image8 = NDArray[np.uint8]
-ENGINES = ("drake", "pinocchio", "opensim", "myosuite")
+ENGINES = ("drake", "pinocchio", "opensim", "myosuite", "mujoco")
 VIEWER_NAMES = {
     "drake": "Drake MeshCat",
     "pinocchio": "Pinocchio MeshcatVisualizer",
     "opensim": "OpenSim simbody-visualizer",
     "myosuite": "MyoSuite MJRenderer arena",
+    "mujoco": "MuJoCo Renderer",
 }
 GRID_VIEW = "2x2"
-DEFAULT_SPEEDS = (1.0, 0.5)
+DEFAULT_SPEEDS = SPEED_VARIANTS
 IMPACT_CLIP_SPEED = 0.1
 IMPACT_SUFFIX = "_impact"
 HQ_SIZE = (1280, 720)
@@ -289,8 +291,9 @@ def default_glyph_style(body_mass_kg: float | None = None) -> ForceGlyphStyle:
 
     With ``body_mass_kg`` the force arrows use ``body_weight`` scaling so one
     body weight is ``BODY_WEIGHT_ARROW_M`` (0.5 m) long, with a 3 m ceiling
-    (6 BW) so a driver swing is never silently clamped. Without it the legacy
-    fixed 0.7 m per kN scale is kept.
+    (6 BW) so a driver swing is never silently clamped. Torque arcs are
+    capped at 0.6 m length (0.30 m radius) to prevent oversized arcs near
+    impact (NV-9, #11697). Without body mass the fixed 0.7 m per kN scale is kept.
 
     Raises ``ValueError`` when ``body_mass_kg`` is not finite and positive.
     """
@@ -299,8 +302,9 @@ def default_glyph_style(body_mass_kg: float | None = None) -> ForceGlyphStyle:
             force_scale_m_per_n=0.7 / 1000.0,
             torque_scale_m_per_nm=0.5 / 250.0,
             max_length_m=0.9,
+            max_torque_length_m=0.6,
             min_length_m=0.04,
-            shaft_radius_m=0.014,
+            shaft_radius_m=0.015,
             magnitude_floor_nm=8.0,
             magnitude_floor_n=20.0,
         )
@@ -314,8 +318,9 @@ def default_glyph_style(body_mass_kg: float | None = None) -> ForceGlyphStyle:
         reference_length_m=BODY_WEIGHT_ARROW_M,
         torque_scale_m_per_nm=0.5 / 250.0,
         max_length_m=3.0,
+        max_torque_length_m=0.6,
         min_length_m=0.04,
-        shaft_radius_m=0.014,
+        shaft_radius_m=0.015,
         magnitude_floor_nm=8.0,
         magnitude_floor_n=20.0,
     )

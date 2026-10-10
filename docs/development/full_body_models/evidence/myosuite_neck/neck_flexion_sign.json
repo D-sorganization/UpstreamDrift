@@ -1,0 +1,19 @@
+{
+  "issue": 11729,
+  "method": "central difference of head forward-axis pitch, +/-delta rad",
+  "delta_rad": 0.2,
+  "native_spec": "docs/development/full_body_models/full_body_spec_anthro_driver.json",
+  "myosuite_model": "myo_sim body/myobody_simpleupper.xml",
+  "native_pitch_change_deg": {
+    "NeckInputX": 0.0,
+    "NeckInputY": -11.459155902616482,
+    "NeckInputZ": 0.0
+  },
+  "myosuite_pitch_change_deg": {
+    "neck_flexion": 11.459155661779807,
+    "neck_rotation": 0.0022730936759489534
+  },
+  "myosuite_head_x_dot_foot_forward": 0.9999192076260973,
+  "neck_flexion_sign_for_NeckInputY": -1.0,
+  "pitch_convention": "positive = head forward axis above horizontal"
+}

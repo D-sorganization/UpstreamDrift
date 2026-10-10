@@ -151,19 +151,55 @@ def _head_path(n: int = 400) -> tuple[np.ndarray, np.ndarray]:
     return t, np.stack([x, np.zeros(n), z], axis=1)
 
 
-def test_hud_impact_time_matches_impact_frame() -> None:
-    """The exporter's impact time is the shared ``impact_frame`` rule, one detector."""
-    from src.shared.python.model_appearance.club_face import impact_frame
-    from src.tools.native_viewer_export import overlay
+def _crossing_head_path() -> tuple[np.ndarray, np.ndarray]:
+    """Synthetic swing with a genuine sub-sample crossing of the address point.
 
-    t, head = _head_path()
-    k = impact_frame(t, head)
-    dt = float(t[1] - t[0])
-    swing = SimpleNamespace(
-        bundle=SimpleNamespace(coordinate_order=("a",), spec_bytes=b"{}"),
-        q=np.zeros((len(t), 1)),
-        source_times_s=tuple(t),
+    Same construction as ``club_face.test_ball_passage_finds_the_sub_sample_crossing``:
+    coarse samples (5 cm apart near the ball) so the true impact falls between
+    two of them, not on one.
+    """
+    t = np.linspace(0.0, 2.0, 41)
+    head = np.zeros((len(t), 3))
+    phase = np.pi * t / 2.0
+    head[:, 1] = -np.sin(2.0 * phase) * 0.8  # back, through the ball, through
+    head[:, 2] = 0.1 + 0.9 * np.sin(phase) ** 2 * (t < 1.0)
+    return t, head
+
+
+def _overshoot_head_path() -> tuple[np.ndarray, np.ndarray]:
+    """Synthetic swing reproducing the GCV-14 bug (#11720).
+
+    The peak-clubhead-speed sample lands 9 cm above the address height (so
+    ``impact_frame``'s height check alone accepts it) but 35 cm away from the
+    ball horizontally -- it is the follow-through, not impact. The true
+    closest approach to the ball falls on the segment between two earlier
+    samples.
+    """
+    pts = [
+        (0.00, 0.0, 0.0),
+        (0.60, -0.8, 0.3),
+        (0.90, -0.05, 0.02),
+        (0.94, 0.03, -0.01),
+        (1.00, 0.5, 0.14),
+        (1.30, 0.6, 0.30),
+        (1.60, 0.6, 0.30),
+    ]
+    times = np.array([p[0] for p in pts])
+    xs = np.array([p[1] for p in pts])
+    zs = np.array([p[2] for p in pts])
+    t = np.arange(0.0, 1.60 + 1e-9, 0.02)
+    head = np.stack(
+        [np.interp(t, times, xs), np.zeros_like(t), np.interp(t, times, zs)], axis=1
     )
+    return t, head
+
+
+def _patch_mujoco_overlay_source(
+    monkeypatch: pytest.MonkeyPatch, head: np.ndarray
+) -> None:
+    """Replay ``head`` as the world ``Clubhead`` frame origin, one sample per call."""
+    import sys
+    import types
 
     class _Source:
         def __init__(self, _spec: bytes) -> None:
@@ -175,28 +211,74 @@ def test_hud_impact_time_matches_impact_frame() -> None:
             pose[:3, 3] = head[self.i]
             return {"Clubhead": pose}
 
-    import sys
-    import types
-
     mod = types.ModuleType("overlay_source_stub")
     mod.MujocoOverlaySource = _Source  # type: ignore[attr-defined]
-    with pytest.MonkeyPatch.context() as mp:
-        mp.setitem(
-            sys.modules,
-            "src.engines.physics_engines.mujoco.python.overlay_source",
-            mod,
-        )
-        got = overlay.detect_impact_time_s(swing)
-    assert abs(got - t[k]) <= dt
+    monkeypatch.setitem(
+        sys.modules,
+        "src.engines.physics_engines.mujoco.python.overlay_source",
+        mod,
+    )
+
+
+def _swing_for(t: np.ndarray) -> SimpleNamespace:
+    return SimpleNamespace(
+        bundle=SimpleNamespace(coordinate_order=("a",), spec_bytes=b"{}"),
+        q=np.zeros((len(t), 1)),
+        source_times_s=tuple(t),
+    )
+
+
+def test_hud_impact_time_matches_ball_passage(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The exporter's impact time is the shared ``ball_passage`` rule, one detector."""
+    from src.shared.python.model_appearance.club_face import ball_passage
+    from src.tools.native_viewer_export import overlay
+
+    t, head = _crossing_head_path()
+    t_expected, _, _ = ball_passage(t, head)
+    _patch_mujoco_overlay_source(monkeypatch, head)
+    got = overlay.detect_impact_time_s(_swing_for(t))
+    assert got == pytest.approx(t_expected)
+
+
+def test_hud_impact_time_uses_ball_passage_not_the_peak_speed_sample(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """GCV-14 (#11720): a peak-speed sample near the address height but far from
+    the ball must not be reported as impact; the sub-sample ball-passage time
+    (strictly between the two samples whose segment crosses the ball) must."""
+    from src.shared.python.model_appearance.club_face import ball_passage, impact_frame
+    from src.tools.native_viewer_export import overlay
+
+    t, head = _overshoot_head_path()
+    peak = impact_frame(t, head)
+    t_expected, k, _ = ball_passage(t, head)
+    assert k < peak  # the true crossing precedes the accepted peak-speed sample
+    _patch_mujoco_overlay_source(monkeypatch, head)
+    got = overlay.detect_impact_time_s(_swing_for(t))
+    assert got == pytest.approx(t_expected)
+    assert t[k] < got < t[k + 1]
+    assert got != pytest.approx(t[peak])
+
+
+def test_hud_impact_time_raises_when_the_head_never_returns_to_the_ball(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from src.tools.native_viewer_export import overlay
+
+    t, head = _head_path()
+    head[1:, 2] += 0.5  # leaves the ball height and never returns
+    _patch_mujoco_overlay_source(monkeypatch, head)
+    with pytest.raises(ValueError, match="no valid impact"):
+        overlay.detect_impact_time_s(_swing_for(t))
 
 
 def test_hud_impact_time_for_capture_a_fixture_is_within_one_frame() -> None:
-    """Capture-A driver fixture: exporter impact time vs ``impact_frame`` (OSV-10)."""
+    """Capture-A driver fixture: exporter impact time vs ``ball_passage`` (OSV-10)."""
     pytest.importorskip("mujoco")
     from src.engines.physics_engines.mujoco.python.overlay_source import (
         MujocoOverlaySource,
     )
-    from src.shared.python.model_appearance.club_face import impact_frame
+    from src.shared.python.model_appearance.club_face import ball_passage
     from src.tools.native_viewer_export import overlay
 
     root = Path(__file__).resolve().parents[4]
@@ -223,5 +305,6 @@ def test_hud_impact_time_for_capture_a_fixture_is_within_one_frame() -> None:
         source_times_s=tuple(times),
     )
     got = overlay.detect_impact_time_s(swing)
-    assert abs(got - times[impact_frame(times, head)]) <= dt
+    t_expected, _, _ = ball_passage(times, head)
+    assert got == pytest.approx(t_expected)
     assert 1.2 < got < 1.45  # downswing of the 1.8 s capture, not its end

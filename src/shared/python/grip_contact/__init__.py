@@ -1,5 +1,14 @@
 """Engine-agnostic grip interface description (issue #11739, OSV-7)."""
 
+from src.shared.python.grip_contact.bushing_law import (
+    BushingState,
+    BushingWrench,
+    bushing_wrench,
+)
+from src.shared.python.grip_contact.closure_series import (
+    GripClosureSeries,
+    closure_series_from_residuals,
+)
 from src.shared.python.grip_contact.club_dynamics import ClubDynamics
 from src.shared.python.grip_contact.damping import (
     DEFAULT_DAMPING_RATIO,
@@ -24,6 +33,11 @@ from src.shared.python.grip_contact.parameters import (
     ContactMaterial,
     default_bushing,
 )
+from src.shared.python.grip_contact.prescribed_motion import (
+    CoordinateSpline,
+    RigidBodyState,
+    hand_frame_states,
+)
 from src.shared.python.grip_contact.swing_input import (
     FIXTURE_DT_S,
     CoordinateSwing,
@@ -39,6 +53,14 @@ from src.shared.python.grip_contact.trajectory_conditioning import (
 )
 
 __all__ = [
+    "BushingState",
+    "BushingWrench",
+    "CoordinateSpline",
+    "RigidBodyState",
+    "bushing_wrench",
+    "hand_frame_states",
+    "GripClosureSeries",
+    "closure_series_from_residuals",
     "DEFAULT_COUPLE_NOISE_FLOOR_NM",
     "ClubKinematics",
     "CoupleConsistency",

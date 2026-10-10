@@ -536,8 +536,8 @@ def test_audit_activation_dynamics_bounds() -> None:
         audit_activation_dynamics(bad_acts_high)
 
 
-def test_qualify_muscle_extensions_generates_receipt() -> None:
-    """Receipt compiles all audits, keeps baseline torque unreplaced, and reports residuals."""
+def test_qualify_muscle_extensions_does_not_invent_native_evidence() -> None:
+    """Parameter-only inputs cannot establish unperformed model/runtime audits."""
     receipt = qualify_muscle_extensions(
         model_variant_id="golf_humanoid_muscle_variant",
         base_model_sha256="abc123def456",
@@ -559,6 +559,24 @@ def test_qualify_muscle_extensions_generates_receipt() -> None:
     assert isinstance(receipt, MuscleQualificationReceipt)
     assert receipt.muscle_complete_status == "IN_PROGRESS_QUALIFICATION"
     assert receipt.independent_validation_status == "PENDING_10375"
-    assert receipt.short_replay_receipt is not None
-    assert isinstance(receipt.short_replay_receipt, NativeShortReplayReceipt)
+    assert receipt.parameter_audit_passed
+    assert receipt.short_replay_receipt is None
+    assert not receipt.path_wrapping_audit_passed
+    assert not receipt.moment_arm_validation_passed
+    assert not receipt.equilibrium_audit_passed
+    assert not receipt.activation_bounds_audit_passed
     assert len(receipt.receipt_sha256) == 64
+
+
+def test_constructing_short_replay_metrics_does_not_qualify_them() -> None:
+    """A metrics container has no native verification authority by default."""
+    receipt = NativeShortReplayReceipt(
+        variant_id="synthetic_unverified_model",
+        start_time_s=0.0,
+        end_time_s=0.05,
+        num_steps=50,
+        reserve_actuator_torques_rms={},
+        pelvic_residual_forces_rms=(0.0, 0.0, 0.0),
+        pelvic_residual_moments_rms=(0.0, 0.0, 0.0),
+    )
+    assert receipt.status == "UNVERIFIED_NATIVE_REPLAY"

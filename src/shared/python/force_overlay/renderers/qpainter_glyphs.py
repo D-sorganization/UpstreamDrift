@@ -5,7 +5,12 @@ from __future__ import annotations
 import math
 from typing import Any, Sequence
 
-from src.shared.python.force_overlay.glyphs import ArrowGlyph, GlyphSet, TorqueArcGlyph
+from src.shared.python.force_overlay.glyphs import (
+    ArrowGlyph,
+    GlyphSet,
+    TorqueArcGlyph,
+    clamped_tip_shift,
+)
 
 __all__ = ["draw_glyphs_2d"]
 
@@ -120,6 +125,23 @@ def _draw_single_arrow_2d(
         halo,
         halo_color,
     )
+
+    if arrow.clamped:
+        # ADR-0052: a clamped arrow gets a second, trailing head — the double
+        # chevron also drawn by the OpenCV and matplotlib renderers.
+        shift = clamped_tip_shift((p_tip.x(), p_tip.y()), (p_base.x(), p_base.y()))
+        p_base2 = QPointF(p_base.x() + shift[0], p_base.y() + shift[1])
+        p_tip2 = QPointF(p_tip.x() + shift[0], p_tip.y() + shift[1])
+        _draw_arrowhead_2d(
+            painter,
+            p_base2,
+            p_tip2,
+            (perp_x, perp_y),
+            head_w,
+            fg_col,
+            halo,
+            halo_color,
+        )
 
 
 def _draw_single_torque_arc_2d(

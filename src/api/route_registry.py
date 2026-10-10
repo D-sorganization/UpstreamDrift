@@ -253,6 +253,7 @@ _PUBLIC_ROUTERS: frozenset[str] = frozenset(
         "capabilities",
         "launcher",
         "matched_swings",
+        "lifting",
     }
 )
 

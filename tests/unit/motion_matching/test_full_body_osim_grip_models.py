@@ -39,9 +39,24 @@ def test_default_is_weld_and_unchanged(spec: dict) -> None:
     assert root.find(".//FreeJoint") is None
 
 
-def test_contact_is_not_implemented(spec: dict) -> None:
-    with pytest.raises(NotImplementedError, match="11739"):
+def test_contact_needs_its_configuration(spec: dict) -> None:
+    with pytest.raises(ValueError, match="grip_contact"):
         export_full_body_osim(spec, grip_model="contact")
+
+
+def test_contact_configuration_only_valid_with_contact_model(
+    spec: dict, tmp_path: Path
+) -> None:
+    from src.engines.physics_engines.opensim.python.full_body_grip_contact import (
+        ContactGripConfig,
+    )
+    from src.shared.python.grip_contact.pad_contact import build_pad_model
+
+    cfg = ContactGripConfig(
+        build_pad_model(GripInterface.from_spec(spec), 1100.0), tmp_path
+    )
+    with pytest.raises(ValueError, match="only valid"):
+        export_full_body_osim(spec, grip_model="bushing", grip_contact=cfg)
 
 
 def test_unknown_grip_model_rejected(spec: dict) -> None:

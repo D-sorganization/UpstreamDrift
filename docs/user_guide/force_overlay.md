@@ -147,6 +147,8 @@ Behavior to know when reading the overlays:
 - Below 10 N vertical force the CoP and free moment are unavailable (not zero); the force arrow remains, anchored at the contact centroid.
 - A foot with no active contact shows nothing and reports zero force.
 - The net free moment is computed from the net wrench about the net CoP. It is generally not the sum of the two foot free moments, because the foot CoPs differ and shear forces at those offset points contribute a vertical moment. The two agree when the CoPs coincide.
+- Engine availability (GCV-2, #11708): MuJoCo, MyoSuite, Drake and OpenSim emit the breakdown from their native contact output (Drake: any body welded to the world is ground; OpenSim: Y-up contact mapped to Z-up). Pinocchio has no contact model, so it emits the breakdown from the caller-supplied shared-contact-law `ContactSample` records and otherwise reports `ground_reaction_unavailable` with a reason in the frame metadata. Simscape reports it unavailable until its channels land (GCV-3, #11709). Club and other non-ground contacts are never counted as ground reaction.
+- A quasi-static check: with prescribed (kinematic) playback, as in the swing videos, contact forces follow the shared contact law and show penetration-driven spikes when a foot lifts and lands; the mean net vertical force over the swing is body weight, the instantaneous value is not.
 - Time series use `GroundReactionSeries` (NaN marks unavailable values, `to_dataframe()` for export).
 
 ---

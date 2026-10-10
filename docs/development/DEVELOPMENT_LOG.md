@@ -3229,3 +3229,18 @@ The selected club fits were tested at all anchors and midpoints using independen
 The private production integration candidate passed 17 native pre-model contract cases (parent RED, candidate GREEN, 51 recorded checks) at 20:20:58 UTC. Numerical whole-output parity and positive-fit validation remain separate pending gates. Original failed runner receipts are preserved. A custom vector measurement block built successfully, but the eight-axis instrumented simulation hit the Home license's 1,000-nonvirtual-block limit. No all-35 measured torque or moving feedback-off replay claim follows from these tests. Original physical model files were not saved.
 
 See the separate editable research reference and the extended aggregate `tangent_c2_checkpoint_20261003.json` for scope and provenance. The built-in LaTeX compiler still fails with `Unable to find standard directories for platform`; PDF compilation/page review are unverified. Canonical calculation inventory and governed manual release remain blocked; this update grants neither a release exemption nor scientific approval.
+
+## F05d Native Manifold BoxFDDP Candidate (#11932; 2026-10-09)
+
+A test-first MuJoCo 3.8/Crocoddyl 3.2.1 child now solves the same
+contact-free floating-root/two-hinge physical state with a 16-dimensional
+configuration/velocity tangent, exact native Euler action derivative,
+bounded direct motor input and nonlinear native fallback admission. The
+paired source-hashed receipt measures BoxFDDP against SciPy native shooting
+under identical reference, truth, input box, horizon, iteration and
+cooperative wall budget, alternates solver order and charges a common
+Tools T01 bootstrap to both. Every applied input independently replays from
+complete native integration state. This is synthetic controller evidence,
+not a hard deadline, measured capture fit or full-body qualification;
+the F05 parent and canonical manual publication remain blocked. Read
+chapter 26 and `F05D_NATIVE_MANIFOLD_BOX_FDDP_TURNOVER.md`.

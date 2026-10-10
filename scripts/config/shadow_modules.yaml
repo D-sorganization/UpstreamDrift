@@ -113,9 +113,11 @@ shadows:
   # deleting it would remove publish/subscribe and registry APIs. No new UD
   # source copy is added. Keep the split/pending-cleanup ruling and #8942
   # migration visible; this entry does not claim the overlap is resolved.
+  # #8942 closed and the 2026-10-09 sunset expired with the facade still in
+  # place; the resolution (port or ADR split ruling) is tracked in #12046.
   realtime:
-    tracking_issue: 8942
-    sunset_date: "2026-10-09"
+    tracking_issue: 12046
+    sunset_date: "2026-11-09"
 
   # ── ADR-0046 Stage 1 canonical launch-monitor layer — CLEARED 2026-09-02 ──
   #

@@ -22,7 +22,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, TypeAlias
 
 import numpy as np
 
@@ -33,7 +33,7 @@ if TYPE_CHECKING:
         musculoskeletal_static_opt as so,
     )
 
-Array = np.ndarray
+Array: TypeAlias = np.ndarray
 
 ROOT_PREFIXES = ("TranslationInput", "HipInput")
 GROUP_NAMES = ("trunk", "arms", "neck", "legs")

@@ -27,6 +27,13 @@ def test_capacity_table_is_documented_and_positive() -> None:
     assert "Vasavada" in neck.SOURCE
 
 
+def test_capacities_follow_anthro_neck_axes() -> None:
+    """Rx(X) Ry(Y) Rz(Z), head forward +x: X lateral, Y flexion (#11729)."""
+    assert neck.CAPACITY_NM["NeckInputY"] == pytest.approx(30.0)  # flexion
+    assert neck.CAPACITY_NM["NeckInputX"] == pytest.approx(36.0)  # lateral bending
+    assert neck.CAPACITY_NM["NeckInputZ"] == pytest.approx(15.0)  # axial rotation
+
+
 def test_actuator_names_come_in_signed_pairs() -> None:
     cols = [1, 2, 3]
     names = neck.actuator_names(ORDER, cols)
@@ -43,7 +50,7 @@ def test_augment_adds_signed_unit_moment_arm_actuators_at_capacity() -> None:
     out = neck.augment(base, ORDER, cols)
     assert out.active.shape[0] == 3 + 4
     np.testing.assert_allclose(out.active[:3], base.active)
-    np.testing.assert_allclose(out.active[3:], [30.0, 30.0, 36.0, 36.0])
+    np.testing.assert_allclose(out.active[3:], [36.0, 36.0, 30.0, 30.0])
     np.testing.assert_allclose(out.passive[3:], 0.0)
     np.testing.assert_allclose(out.moment[3], [0, 1, 0])
     np.testing.assert_allclose(out.moment[4], [0, -1, 0])
@@ -59,7 +66,7 @@ def test_augment_without_neck_columns_is_the_identity() -> None:
 def test_demand_inside_capacity_leaves_no_reserve_and_outside_leaves_the_excess() -> (
     None
 ):
-    cols = [1]
+    cols = [1]  # NeckInputX, lateral bending: 36 N m
     base = redundancy.FrameBasis(
         np.zeros(0), np.zeros(0), np.zeros((0, 1)), np.zeros((1, 5))
     )
@@ -71,7 +78,7 @@ def test_demand_inside_capacity_leaves_no_reserve_and_outside_leaves_the_excess(
     over = redundancy.solve_frame(
         out.active, out.passive, out.moment, np.array([-45.0])
     )
-    assert over.reserve[0] == pytest.approx(-15.0, abs=0.2)
+    assert over.reserve[0] == pytest.approx(-9.0, abs=0.2)
 
 
 def test_split_separates_muscle_and_neck_activation() -> None:

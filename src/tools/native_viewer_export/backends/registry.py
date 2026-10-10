@@ -39,11 +39,20 @@ def _myosuite() -> NativeBackend:
     return MyoSuiteArenaBackend()
 
 
+def _mujoco() -> NativeBackend:
+    from src.tools.native_viewer_export.backends.mujoco_native import (
+        MuJoCoRendererBackend,
+    )
+
+    return MuJoCoRendererBackend()
+
+
 BACKEND_FACTORIES: dict[str, Callable[[], NativeBackend]] = {
     "drake": _drake,
     "pinocchio": _pinocchio,
     "opensim": _opensim,
     "myosuite": _myosuite,
+    "mujoco": _mujoco,
 }
 
 

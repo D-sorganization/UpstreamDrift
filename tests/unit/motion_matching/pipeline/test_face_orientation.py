@@ -143,7 +143,9 @@ def test_shooting_refit_keeps_the_face_targets(monkeypatch: pytest.MonkeyPatch) 
         dynamics, "marker_errors", lambda *a: np.full((frames, 2), 0.01)
     )
     zmp = {"outside_m": np.zeros(frames), "unloaded": np.zeros(frames, dtype=bool)}
-    monkeypatch.setattr(full_body_forward_dynamics, "reference_zmp", lambda *a: zmp)
+    monkeypatch.setattr(
+        full_body_forward_dynamics, "reference_zmp", lambda *a, **k: zmp
+    )
     dynamics.shooting_fit(
         lane,
         kin,

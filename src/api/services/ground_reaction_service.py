@@ -8,7 +8,9 @@ Sources, in order:
 
 * ``run.simulation_data["ground_reaction_series"]``: the series recorded by
   the run;
-* ``run.engine.get_ground_reaction_series()`` returning the series or ``None``.
+* ``run.engine.get_ground_reaction_series()`` returning the series or ``None``;
+* ``run.recorder.get_ground_reaction_series()`` returning the series or
+  ``None`` (the ``GenericPhysicsRecorder`` stacked breakdown, GCV-5, #11711).
 
 Optional run data: ``body_weight_n`` (or ``body_mass_kg``) for the
 body-weight traces, ``events`` (name to time) and ``impact_time_s`` for the
@@ -36,8 +38,8 @@ __all__ = [
 
 NO_GROUND_REACTION_REASON = (
     "run carries no ground reaction: record 'ground_reaction_series' in the run "
-    "data or use an engine that provides get_ground_reaction_series() "
-    "(Simscape reports it unavailable until GCV-3)"
+    "data, use an engine that provides get_ground_reaction_series(), or record "
+    "with a recorder that does (Simscape reports it unavailable until GCV-3)"
 )
 
 
@@ -61,6 +63,13 @@ def resolve_ground_reaction_series(run: Any) -> GroundReactionSeries | None:
     provider = getattr(run.engine, "get_ground_reaction_series", None)
     if callable(provider):
         result = provider()
+        if result is not None:
+            return _checked(result)
+    recorder_provider = getattr(
+        getattr(run, "recorder", None), "get_ground_reaction_series", None
+    )
+    if callable(recorder_provider):
+        result = recorder_provider()
         if result is not None:
             return _checked(result)
     return None

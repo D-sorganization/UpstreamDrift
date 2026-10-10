@@ -1,0 +1,3221 @@
+{
+  "evidence_class": "exploratory_native_centered_fd_no_qualification",
+  "source_model": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\shared\\models\\myosuite\\myo_sim\\arm\\myoarm.xml",
+  "source_model_sha256": "7134c21c82a7d403f7900aa99f5a7d58d67515893ab23b38fcecb9ed59a29062",
+  "script_sha256": "811adf255ff361c009dcd426aacaa009e017a75519d407d30238d0597bd69ed8",
+  "mujoco_version": "3.8.0",
+  "dimensions": {
+    "nq": 38,
+    "nv": 38,
+    "na": 63,
+    "nu": 63,
+    "state_tangent": 139,
+    "integration_state_size": 530
+  },
+  "step_seconds": 0.002,
+  "state_restore_sha256": "21b7afb2a2e3f2aa79c00310c87c249d3acfaa9bc536585ee346daeea8fa04a3",
+  "initialization": "stock qpos/qvel; all activation and controls set to 0.5; mj_forward",
+  "restore_policy": "fresh MjData + exact mjSTATE_INTEGRATION restore before every plus/minus trial",
+  "configuration_difference_policy": "mj_integratePos perturbation and mj_differentiatePos output against one shared nominal next qpos",
+  "equality_solver_note": "the same frozen integration-state warm-start is restored before every rollout",
+  "baseline_step": {
+    "pre_step_contacts": 2,
+    "pre_step_equality_max_abs": 0.0,
+    "post_step_contacts": 2,
+    "post_step_equality_max_abs": 0.0002699263617466144,
+    "time_seconds": 0.002,
+    "warnings": 0,
+    "initial_position_perturb_max_error": 0.0,
+    "initial_velocity_perturb_max_error": 0.0,
+    "initial_activation_perturb_max_error": 0.0,
+    "post_step_qacc_max_abs": 3161.4421776604595,
+    "post_step_qacc_at_29": 753.1505766319648,
+    "post_step_actuator_force_at_29": -0.06819894953215448,
+    "post_step_constraint_force_at_29": 0.0,
+    "pre_step_contacts_detail": [
+      {
+        "geom1": "humerus_coll",
+        "geom2": "thorax_coll1",
+        "distance_m": -0.020644126777831354,
+        "force_in_contact_frame": [
+          1065.9500012529109, -677.208711051977, -130.5823455541537, 0.0, 0.0,
+          0.0
+        ]
+      },
+      {
+        "geom1": "thorax_coll0",
+        "geom2": "radius_coll",
+        "distance_m": -0.010184734904875245,
+        "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+      }
+    ],
+    "post_step_contacts_detail": [
+      {
+        "geom1": "humerus_coll",
+        "geom2": "thorax_coll1",
+        "distance_m": -0.020468656544078256,
+        "force_in_contact_frame": [
+          970.3955956576024, -521.1486061893883, -122.01114816029542, 0.0, 0.0,
+          0.0
+        ]
+      },
+      {
+        "geom1": "thorax_coll0",
+        "geom2": "radius_coll",
+        "distance_m": -0.009904309296670105,
+        "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+      }
+    ],
+    "pre_step_qacc_max_abs": 4601.033083258253,
+    "pre_step_qacc_at_29": -2807.8069602601595,
+    "pre_step_actuator_force_at_29": 0.16589610233355892,
+    "pre_step_constraint_force_at_29": 0.0,
+    "pre_step_equality_force_max_abs": 152.4214677742825
+  },
+  "perturbation_epsilons": [1e-5, 1e-6, 1e-7],
+  "direction_seed": 20261009,
+  "matrix_sensitivity": [
+    {
+      "epsilon": 1e-5,
+      "a_max_abs": 153126.3390338902,
+      "b_max_abs": 0.11125000000111739,
+      "a_finite": true,
+      "b_finite": true,
+      "a_max_index": [67, 29],
+      "a_block_max_abs": {
+        "q_input": 153126.3390338902,
+        "v_input": 2.1976844020610287,
+        "activation_input": 11.548402350758378
+      },
+      "max_a_pair_diagnostics": {
+        "input_column": 29,
+        "derivative_max_abs": 153126.3390338902,
+        "output_row": 67,
+        "plus": {
+          "pre_step_contacts": 2,
+          "pre_step_equality_max_abs": 0.0,
+          "post_step_contacts": 2,
+          "post_step_equality_max_abs": 0.0002699263610714635,
+          "time_seconds": 0.002,
+          "warnings": 0,
+          "initial_position_perturb_max_error": 0.0,
+          "initial_velocity_perturb_max_error": 0.0,
+          "initial_activation_perturb_max_error": 0.0,
+          "post_step_qacc_max_abs": 3161.442098560758,
+          "post_step_qacc_at_29": 753.1468631842664,
+          "post_step_actuator_force_at_29": -0.06819851373270722,
+          "post_step_constraint_force_at_29": 0.0,
+          "pre_step_contacts_detail": [
+            {
+              "geom1": "humerus_coll",
+              "geom2": "thorax_coll1",
+              "distance_m": -0.020644126777831354,
+              "force_in_contact_frame": [
+                1065.9500048680009, -677.2087097568425, -130.58234512853372,
+                0.0, 0.0, 0.0
+              ]
+            },
+            {
+              "geom1": "thorax_coll0",
+              "geom2": "radius_coll",
+              "distance_m": -0.010184734904875245,
+              "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            }
+          ],
+          "post_step_contacts_detail": [
+            {
+              "geom1": "humerus_coll",
+              "geom2": "thorax_coll1",
+              "distance_m": -0.02046865654442197,
+              "force_in_contact_frame": [
+                970.3955928594912, -521.1486090362432, -122.0111486910707, 0.0,
+                0.0, 0.0
+              ]
+            },
+            {
+              "geom1": "thorax_coll0",
+              "geom2": "radius_coll",
+              "distance_m": -0.009904309297215488,
+              "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            }
+          ],
+          "pre_step_qacc_max_abs": 4601.033066257964,
+          "pre_step_qacc_at_29": -2807.7919984725095,
+          "pre_step_actuator_force_at_29": 0.16589849250746624,
+          "pre_step_constraint_force_at_29": 0.0,
+          "pre_step_equality_force_max_abs": 152.42146765610062
+        },
+        "minus": {
+          "pre_step_contacts": 2,
+          "pre_step_equality_max_abs": 0.0,
+          "post_step_contacts": 2,
+          "post_step_equality_max_abs": 0.0002699988474458406,
+          "time_seconds": 0.002,
+          "warnings": 0,
+          "initial_position_perturb_max_error": 0.0,
+          "initial_velocity_perturb_max_error": 0.0,
+          "initial_activation_perturb_max_error": 0.0,
+          "post_step_qacc_max_abs": 3129.1887664265446,
+          "post_step_qacc_at_29": -287.03422637683116,
+          "post_step_actuator_force_at_29": -0.06841076617737189,
+          "post_step_constraint_force_at_29": 0.0,
+          "pre_step_contacts_detail": [
+            {
+              "geom1": "humerus_coll",
+              "geom2": "thorax_coll1",
+              "distance_m": -0.020644126777831354,
+              "force_in_contact_frame": [
+                1066.2412703602913, -677.2288439843819, -130.56075181868135,
+                0.0, 0.0, 0.0
+              ]
+            },
+            {
+              "geom1": "thorax_coll0",
+              "geom2": "radius_coll",
+              "distance_m": -0.010184734904875245,
+              "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            }
+          ],
+          "post_step_contacts_detail": [
+            {
+              "geom1": "humerus_coll",
+              "geom2": "thorax_coll1",
+              "distance_m": -0.02046867108900808,
+              "force_in_contact_frame": [
+                969.9696351419707, -521.3688550652718, -122.06832037006427, 0.0,
+                0.0, 0.0
+              ]
+            },
+            {
+              "geom1": "thorax_coll0",
+              "geom2": "radius_coll",
+              "distance_m": -0.009904346389672636,
+              "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            }
+          ],
+          "pre_step_qacc_max_abs": 4599.833327897511,
+          "pre_step_qacc_at_29": -280.73361090872044,
+          "pre_step_actuator_force_at_29": 0.1658937121637758,
+          "pre_step_constraint_force_at_29": 0.4120571367645693,
+          "pre_step_equality_force_max_abs": 152.44439989724793
+        },
+        "output_delta_max_abs": 3.0625267806778043,
+        "sensitivity_detail": {
+          "state_column": 29,
+          "state_column_joint": "md3_flexion",
+          "output_row": 67,
+          "output_velocity_index": 29,
+          "output_velocity_joint": "md3_flexion",
+          "epsilon": 1e-5,
+          "position_perturb_errors": [0.0, 0.0],
+          "max_abs_actuator_length_plus_minus_delta_m": 6.126810958573259e-8,
+          "max_abs_estimated_moment_arm_plus_minus_delta_m_per_rad": 5.00155472593633e-8,
+          "plus_minus_post_velocity_at_output_row": [
+            -2.992737379923936, 0.06978940075386846
+          ],
+          "largest_estimated_moment_arm_changes": [
+            {
+              "actuator": "FDP3",
+              "length_plus_m": 0.387458649382517,
+              "length_minus_m": 0.38745870266778876,
+              "length_delta_m": -5.3285271750525e-8,
+              "moment_arm_plus_m_per_rad": 0.002664288567544304,
+              "moment_arm_minus_m_per_rad": 0.0026642385519970446,
+              "moment_arm_delta_m_per_rad": 5.00155472593633e-8
+            },
+            {
+              "actuator": "EDC3",
+              "length_plus_m": 0.4179373042772222,
+              "length_minus_m": 0.4179372430091126,
+              "length_delta_m": 6.126810958573259e-8,
+              "moment_arm_plus_m_per_rad": -0.0030634108860727594,
+              "moment_arm_minus_m_per_rad": -0.003063400089153845,
+              "moment_arm_delta_m_per_rad": -1.0796918914479647e-8
+            },
+            {
+              "actuator": "UI_UB5",
+              "length_plus_m": 0.09690025492804157,
+              "length_minus_m": 0.09690025492804157,
+              "length_delta_m": 0.0,
+              "moment_arm_plus_m_per_rad": -0.0,
+              "moment_arm_minus_m_per_rad": -0.0,
+              "moment_arm_delta_m_per_rad": 0.0
+            },
+            {
+              "actuator": "UI_UB4",
+              "length_plus_m": 0.07866341299119715,
+              "length_minus_m": 0.07866341299119715,
+              "length_delta_m": 0.0,
+              "moment_arm_plus_m_per_rad": -0.0,
+              "moment_arm_minus_m_per_rad": -0.0,
+              "moment_arm_delta_m_per_rad": 0.0
+            },
+            {
+              "actuator": "LU_RB4",
+              "length_plus_m": 0.07707863341164943,
+              "length_minus_m": 0.07707863341164943,
+              "length_delta_m": 0.0,
+              "moment_arm_plus_m_per_rad": -0.0,
+              "moment_arm_minus_m_per_rad": -0.0,
+              "moment_arm_delta_m_per_rad": 0.0
+            },
+            {
+              "actuator": "LU_RB5",
+              "length_plus_m": 0.09756173108536179,
+              "length_minus_m": 0.09756173108536179,
+              "length_delta_m": 0.0,
+              "moment_arm_plus_m_per_rad": -0.0,
+              "moment_arm_minus_m_per_rad": -0.0,
+              "moment_arm_delta_m_per_rad": 0.0
+            },
+            {
+              "actuator": "RI5",
+              "length_plus_m": 0.04112509637974286,
+              "length_minus_m": 0.04112509637974286,
+              "length_delta_m": 0.0,
+              "moment_arm_plus_m_per_rad": -0.0,
+              "moment_arm_minus_m_per_rad": -0.0,
+              "moment_arm_delta_m_per_rad": 0.0
+            },
+            {
+              "actuator": "LU_RB3",
+              "length_plus_m": 0.09332127952839399,
+              "length_minus_m": 0.09332127952839399,
+              "length_delta_m": 0.0,
+              "moment_arm_plus_m_per_rad": -0.0,
+              "moment_arm_minus_m_per_rad": -0.0,
+              "moment_arm_delta_m_per_rad": 0.0
+            }
+          ],
+          "plus": {
+            "pre_step_contacts": 2,
+            "pre_step_equality_max_abs": 0.0,
+            "post_step_contacts": 2,
+            "post_step_equality_max_abs": 0.0002699263610714635,
+            "time_seconds": 0.002,
+            "warnings": 0,
+            "initial_position_perturb_max_error": 0.0,
+            "initial_velocity_perturb_max_error": 0.0,
+            "initial_activation_perturb_max_error": 0.0,
+            "post_step_qacc_max_abs": 3161.442098560758,
+            "post_step_qacc_at_29": 753.1468631842664,
+            "post_step_actuator_force_at_29": -0.06819851373270722,
+            "post_step_constraint_force_at_29": 0.0,
+            "pre_step_contacts_detail": [
+              {
+                "geom1": "humerus_coll",
+                "geom2": "thorax_coll1",
+                "distance_m": -0.020644126777831354,
+                "force_in_contact_frame": [
+                  1065.9500048680009, -677.2087097568425, -130.58234512853372,
+                  0.0, 0.0, 0.0
+                ]
+              },
+              {
+                "geom1": "thorax_coll0",
+                "geom2": "radius_coll",
+                "distance_m": -0.010184734904875245,
+                "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+              }
+            ],
+            "post_step_contacts_detail": [
+              {
+                "geom1": "humerus_coll",
+                "geom2": "thorax_coll1",
+                "distance_m": -0.02046865654442197,
+                "force_in_contact_frame": [
+                  970.3955928594912, -521.1486090362432, -122.0111486910707,
+                  0.0, 0.0, 0.0
+                ]
+              },
+              {
+                "geom1": "thorax_coll0",
+                "geom2": "radius_coll",
+                "distance_m": -0.009904309297215488,
+                "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+              }
+            ],
+            "pre_step_qacc_max_abs": 4601.033066257964,
+            "pre_step_qacc_at_29": -2807.7919984725095,
+            "pre_step_actuator_force_at_29": 0.16589849250746624,
+            "pre_step_constraint_force_at_29": 0.0,
+            "pre_step_equality_force_max_abs": 152.42146765610062
+          },
+          "minus": {
+            "pre_step_contacts": 2,
+            "pre_step_equality_max_abs": 0.0,
+            "post_step_contacts": 2,
+            "post_step_equality_max_abs": 0.0002699988474458406,
+            "time_seconds": 0.002,
+            "warnings": 0,
+            "initial_position_perturb_max_error": 0.0,
+            "initial_velocity_perturb_max_error": 0.0,
+            "initial_activation_perturb_max_error": 0.0,
+            "post_step_qacc_max_abs": 3129.1887664265446,
+            "post_step_qacc_at_29": -287.03422637683116,
+            "post_step_actuator_force_at_29": -0.06841076617737189,
+            "post_step_constraint_force_at_29": 0.0,
+            "pre_step_contacts_detail": [
+              {
+                "geom1": "humerus_coll",
+                "geom2": "thorax_coll1",
+                "distance_m": -0.020644126777831354,
+                "force_in_contact_frame": [
+                  1066.2412703602913, -677.2288439843819, -130.56075181868135,
+                  0.0, 0.0, 0.0
+                ]
+              },
+              {
+                "geom1": "thorax_coll0",
+                "geom2": "radius_coll",
+                "distance_m": -0.010184734904875245,
+                "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+              }
+            ],
+            "post_step_contacts_detail": [
+              {
+                "geom1": "humerus_coll",
+                "geom2": "thorax_coll1",
+                "distance_m": -0.02046867108900808,
+                "force_in_contact_frame": [
+                  969.9696351419707, -521.3688550652718, -122.06832037006427,
+                  0.0, 0.0, 0.0
+                ]
+              },
+              {
+                "geom1": "thorax_coll0",
+                "geom2": "radius_coll",
+                "distance_m": -0.009904346389672636,
+                "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+              }
+            ],
+            "pre_step_qacc_max_abs": 4599.833327897511,
+            "pre_step_qacc_at_29": -280.73361090872044,
+            "pre_step_actuator_force_at_29": 0.1658937121637758,
+            "pre_step_constraint_force_at_29": 0.4120571367645693,
+            "pre_step_equality_force_max_abs": 152.44439989724793
+          }
+        }
+      },
+      "max_b_pair_diagnostics": {
+        "input_column": 0,
+        "derivative_max_abs": 0.11125000000111739,
+        "output_row": 76,
+        "plus": {
+          "pre_step_contacts": 2,
+          "pre_step_equality_max_abs": 0.0,
+          "post_step_contacts": 2,
+          "post_step_equality_max_abs": 0.0002699263617466144,
+          "time_seconds": 0.002,
+          "warnings": 0,
+          "initial_position_perturb_max_error": 0.0,
+          "initial_velocity_perturb_max_error": 0.0,
+          "initial_activation_perturb_max_error": 0.0,
+          "post_step_qacc_max_abs": 3161.4421736457875,
+          "post_step_qacc_at_29": 753.1505781916269,
+          "post_step_actuator_force_at_29": -0.06819894953215448,
+          "post_step_constraint_force_at_29": 0.0,
+          "pre_step_contacts_detail": [
+            {
+              "geom1": "humerus_coll",
+              "geom2": "thorax_coll1",
+              "distance_m": -0.020644126777831354,
+              "force_in_contact_frame": [
+                1065.9500012529109, -677.208711051977, -130.5823455541537, 0.0,
+                0.0, 0.0
+              ]
+            },
+            {
+              "geom1": "thorax_coll0",
+              "geom2": "radius_coll",
+              "distance_m": -0.010184734904875245,
+              "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            }
+          ],
+          "post_step_contacts_detail": [
+            {
+              "geom1": "humerus_coll",
+              "geom2": "thorax_coll1",
+              "distance_m": -0.020468656544078256,
+              "force_in_contact_frame": [
+                970.3956370743913, -521.1485914231129, -122.01114262600038, 0.0,
+                0.0, 0.0
+              ]
+            },
+            {
+              "geom1": "thorax_coll0",
+              "geom2": "radius_coll",
+              "distance_m": -0.009904309296670105,
+              "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            }
+          ],
+          "pre_step_qacc_max_abs": 4601.033083258253,
+          "pre_step_qacc_at_29": -2807.8069602601595,
+          "pre_step_actuator_force_at_29": 0.16589610233355892,
+          "pre_step_constraint_force_at_29": 0.0,
+          "pre_step_equality_force_max_abs": 152.4214677742825
+        },
+        "minus": {
+          "pre_step_contacts": 2,
+          "pre_step_equality_max_abs": 0.0,
+          "post_step_contacts": 2,
+          "post_step_equality_max_abs": 0.0002699263617466144,
+          "time_seconds": 0.002,
+          "warnings": 0,
+          "initial_position_perturb_max_error": 0.0,
+          "initial_velocity_perturb_max_error": 0.0,
+          "initial_activation_perturb_max_error": 0.0,
+          "post_step_qacc_max_abs": 3161.4421792286876,
+          "post_step_qacc_at_29": 753.1505760227186,
+          "post_step_actuator_force_at_29": -0.06819894953215448,
+          "post_step_constraint_force_at_29": 0.0,
+          "pre_step_contacts_detail": [
+            {
+              "geom1": "humerus_coll",
+              "geom2": "thorax_coll1",
+              "distance_m": -0.020644126777831354,
+              "force_in_contact_frame": [
+                1065.9500012529109, -677.208711051977, -130.5823455541537, 0.0,
+                0.0, 0.0
+              ]
+            },
+            {
+              "geom1": "thorax_coll0",
+              "geom2": "radius_coll",
+              "distance_m": -0.010184734904875245,
+              "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            }
+          ],
+          "post_step_contacts_detail": [
+            {
+              "geom1": "humerus_coll",
+              "geom2": "thorax_coll1",
+              "distance_m": -0.020468656544078256,
+              "force_in_contact_frame": [
+                970.3955794791691, -521.1486119574645, -122.0111503221294, 0.0,
+                0.0, 0.0
+              ]
+            },
+            {
+              "geom1": "thorax_coll0",
+              "geom2": "radius_coll",
+              "distance_m": -0.009904309296670105,
+              "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            }
+          ],
+          "pre_step_qacc_max_abs": 4601.033083258253,
+          "pre_step_qacc_at_29": -2807.8069602601595,
+          "pre_step_actuator_force_at_29": 0.16589610233355892,
+          "pre_step_constraint_force_at_29": 0.0,
+          "pre_step_equality_force_max_abs": 152.4214677742825
+        },
+        "output_delta_max_abs": 2.225000000022348e-6
+      }
+    },
+    {
+      "epsilon": 1e-6,
+      "a_max_abs": 1531243.2470737768,
+      "b_max_abs": 0.11125000001777074,
+      "a_finite": true,
+      "b_finite": true,
+      "a_max_index": [67, 29],
+      "a_block_max_abs": {
+        "q_input": 1531243.2470737768,
+        "v_input": 2.197690226246607,
+        "activation_input": 11.548402351735376
+      },
+      "max_a_pair_diagnostics": {
+        "input_column": 29,
+        "derivative_max_abs": 1531243.2470737768,
+        "output_row": 67,
+        "plus": {
+          "pre_step_contacts": 2,
+          "pre_step_equality_max_abs": 0.0,
+          "post_step_contacts": 2,
+          "post_step_equality_max_abs": 0.00026992636167906065,
+          "time_seconds": 0.002,
+          "warnings": 0,
+          "initial_position_perturb_max_error": 0.0,
+          "initial_velocity_perturb_max_error": 0.0,
+          "initial_activation_perturb_max_error": 0.0,
+          "post_step_qacc_max_abs": 3161.4421697509097,
+          "post_step_qacc_at_29": 753.150205281531,
+          "post_step_actuator_force_at_29": -0.06819890595290831,
+          "post_step_constraint_force_at_29": 0.0,
+          "pre_step_contacts_detail": [
+            {
+              "geom1": "humerus_coll",
+              "geom2": "thorax_coll1",
+              "distance_m": -0.020644126777831354,
+              "force_in_contact_frame": [
+                1065.9500016144198, -677.2087109224638, -130.58234551159202,
+                0.0, 0.0, 0.0
+              ]
+            },
+            {
+              "geom1": "thorax_coll0",
+              "geom2": "radius_coll",
+              "distance_m": -0.010184734904875245,
+              "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            }
+          ],
+          "post_step_contacts_detail": [
+            {
+              "geom1": "humerus_coll",
+              "geom2": "thorax_coll1",
+              "distance_m": -0.020468656544104905,
+              "force_in_contact_frame": [
+                970.3955955254822, -521.1486064834825, -122.01114821752756, 0.0,
+                0.0, 0.0
+              ]
+            },
+            {
+              "geom1": "thorax_coll0",
+              "geom2": "radius_coll",
+              "distance_m": -0.009904309296724603,
+              "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            }
+          ],
+          "pre_step_qacc_max_abs": 4601.033081558223,
+          "pre_step_qacc_at_29": -2807.805464082559,
+          "pre_step_actuator_force_at_29": 0.16589634135076564,
+          "pre_step_constraint_force_at_29": 0.0,
+          "pre_step_equality_force_max_abs": 152.42146776246443
+        },
+        "minus": {
+          "pre_step_contacts": 2,
+          "pre_step_equality_max_abs": 0.0,
+          "post_step_contacts": 2,
+          "post_step_equality_max_abs": 0.0002699988451140501,
+          "time_seconds": 0.002,
+          "warnings": 0,
+          "initial_position_perturb_max_error": 0.0,
+          "initial_velocity_perturb_max_error": 0.0,
+          "initial_activation_perturb_max_error": 0.0,
+          "post_step_qacc_max_abs": 3129.1894897893985,
+          "post_step_qacc_at_29": -287.0127448507487,
+          "post_step_actuator_force_at_29": -0.06841042712028021,
+          "post_step_constraint_force_at_29": 0.0,
+          "pre_step_contacts_detail": [
+            {
+              "geom1": "humerus_coll",
+              "geom2": "thorax_coll1",
+              "distance_m": -0.020644126777831354,
+              "force_in_contact_frame": [
+                1066.241266685459, -677.2288423398985, -130.5607519492772, 0.0,
+                0.0, 0.0
+              ]
+            },
+            {
+              "geom1": "thorax_coll0",
+              "geom2": "radius_coll",
+              "distance_m": -0.010184734904875245,
+              "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            }
+          ],
+          "post_step_contacts_detail": [
+            {
+              "geom1": "humerus_coll",
+              "geom2": "thorax_coll1",
+              "distance_m": -0.02046867108959358,
+              "force_in_contact_frame": [
+                969.9696437905063, -521.3688513342171, -122.06831931736664, 0.0,
+                0.0, 0.0
+              ]
+            },
+            {
+              "geom1": "thorax_coll0",
+              "geom2": "radius_coll",
+              "distance_m": -0.009904346389281546,
+              "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            }
+          ],
+          "pre_step_qacc_max_abs": 4599.833341135888,
+          "pre_step_qacc_at_29": -280.78025633817083,
+          "pre_step_actuator_force_at_29": 0.16589586331639583,
+          "pre_step_constraint_force_at_29": 0.41204733529777254,
+          "pre_step_equality_force_max_abs": 152.4443992454081
+        },
+        "output_delta_max_abs": 3.0624864941475534,
+        "sensitivity_detail": {
+          "state_column": 29,
+          "state_column_joint": "md3_flexion",
+          "output_row": 67,
+          "output_velocity_index": 29,
+          "output_velocity_joint": "md3_flexion",
+          "epsilon": 1e-6,
+          "position_perturb_errors": [0.0, 0.0],
+          "max_abs_actuator_length_plus_minus_delta_m": 6.126810947471029e-9,
+          "max_abs_estimated_moment_arm_plus_minus_delta_m_per_rad": 4.9960036108132044e-9,
+          "plus_minus_post_velocity_at_output_row": [
+            -2.992753660760397, 0.06973283338715647
+          ],
+          "largest_estimated_moment_arm_changes": [
+            {
+              "actuator": "FDP3",
+              "length_plus_m": 0.3874586733610131,
+              "length_minus_m": 0.38745867868954026,
+              "length_delta_m": -5.3285271750525e-9,
+              "moment_arm_plus_m_per_rad": 0.0026642660855280553,
+              "moment_arm_minus_m_per_rad": 0.0026642610895244445,
+              "moment_arm_delta_m_per_rad": 4.9960036108132044e-9
+            },
+            {
+              "actuator": "EDC3",
+              "length_plus_m": 0.41793727670654623,
+              "length_minus_m": 0.4179372705797353,
+              "length_delta_m": 6.126810947471029e-9,
+              "moment_arm_plus_m_per_rad": -0.0030634060566026022,
+              "moment_arm_minus_m_per_rad": -0.003063404918624002,
+              "moment_arm_delta_m_per_rad": -1.1379786002407855e-9
+            },
+            {
+              "actuator": "UI_UB5",
+              "length_plus_m": 0.09690025492804157,
+              "length_minus_m": 0.09690025492804157,
+              "length_delta_m": 0.0,
+              "moment_arm_plus_m_per_rad": -0.0,
+              "moment_arm_minus_m_per_rad": -0.0,
+              "moment_arm_delta_m_per_rad": 0.0
+            },
+            {
+              "actuator": "UI_UB4",
+              "length_plus_m": 0.07866341299119715,
+              "length_minus_m": 0.07866341299119715,
+              "length_delta_m": 0.0,
+              "moment_arm_plus_m_per_rad": -0.0,
+              "moment_arm_minus_m_per_rad": -0.0,
+              "moment_arm_delta_m_per_rad": 0.0
+            },
+            {
+              "actuator": "LU_RB4",
+              "length_plus_m": 0.07707863341164943,
+              "length_minus_m": 0.07707863341164943,
+              "length_delta_m": 0.0,
+              "moment_arm_plus_m_per_rad": -0.0,
+              "moment_arm_minus_m_per_rad": -0.0,
+              "moment_arm_delta_m_per_rad": 0.0
+            },
+            {
+              "actuator": "LU_RB5",
+              "length_plus_m": 0.09756173108536179,
+              "length_minus_m": 0.09756173108536179,
+              "length_delta_m": 0.0,
+              "moment_arm_plus_m_per_rad": -0.0,
+              "moment_arm_minus_m_per_rad": -0.0,
+              "moment_arm_delta_m_per_rad": 0.0
+            },
+            {
+              "actuator": "RI5",
+              "length_plus_m": 0.04112509637974286,
+              "length_minus_m": 0.04112509637974286,
+              "length_delta_m": 0.0,
+              "moment_arm_plus_m_per_rad": -0.0,
+              "moment_arm_minus_m_per_rad": -0.0,
+              "moment_arm_delta_m_per_rad": 0.0
+            },
+            {
+              "actuator": "LU_RB3",
+              "length_plus_m": 0.09332127952839399,
+              "length_minus_m": 0.09332127952839399,
+              "length_delta_m": 0.0,
+              "moment_arm_plus_m_per_rad": -0.0,
+              "moment_arm_minus_m_per_rad": -0.0,
+              "moment_arm_delta_m_per_rad": 0.0
+            }
+          ],
+          "plus": {
+            "pre_step_contacts": 2,
+            "pre_step_equality_max_abs": 0.0,
+            "post_step_contacts": 2,
+            "post_step_equality_max_abs": 0.00026992636167906065,
+            "time_seconds": 0.002,
+            "warnings": 0,
+            "initial_position_perturb_max_error": 0.0,
+            "initial_velocity_perturb_max_error": 0.0,
+            "initial_activation_perturb_max_error": 0.0,
+            "post_step_qacc_max_abs": 3161.4421697509097,
+            "post_step_qacc_at_29": 753.150205281531,
+            "post_step_actuator_force_at_29": -0.06819890595290831,
+            "post_step_constraint_force_at_29": 0.0,
+            "pre_step_contacts_detail": [
+              {
+                "geom1": "humerus_coll",
+                "geom2": "thorax_coll1",
+                "distance_m": -0.020644126777831354,
+                "force_in_contact_frame": [
+                  1065.9500016144198, -677.2087109224638, -130.58234551159202,
+                  0.0, 0.0, 0.0
+                ]
+              },
+              {
+                "geom1": "thorax_coll0",
+                "geom2": "radius_coll",
+                "distance_m": -0.010184734904875245,
+                "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+              }
+            ],
+            "post_step_contacts_detail": [
+              {
+                "geom1": "humerus_coll",
+                "geom2": "thorax_coll1",
+                "distance_m": -0.020468656544104905,
+                "force_in_contact_frame": [
+                  970.3955955254822, -521.1486064834825, -122.01114821752756,
+                  0.0, 0.0, 0.0
+                ]
+              },
+              {
+                "geom1": "thorax_coll0",
+                "geom2": "radius_coll",
+                "distance_m": -0.009904309296724603,
+                "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+              }
+            ],
+            "pre_step_qacc_max_abs": 4601.033081558223,
+            "pre_step_qacc_at_29": -2807.805464082559,
+            "pre_step_actuator_force_at_29": 0.16589634135076564,
+            "pre_step_constraint_force_at_29": 0.0,
+            "pre_step_equality_force_max_abs": 152.42146776246443
+          },
+          "minus": {
+            "pre_step_contacts": 2,
+            "pre_step_equality_max_abs": 0.0,
+            "post_step_contacts": 2,
+            "post_step_equality_max_abs": 0.0002699988451140501,
+            "time_seconds": 0.002,
+            "warnings": 0,
+            "initial_position_perturb_max_error": 0.0,
+            "initial_velocity_perturb_max_error": 0.0,
+            "initial_activation_perturb_max_error": 0.0,
+            "post_step_qacc_max_abs": 3129.1894897893985,
+            "post_step_qacc_at_29": -287.0127448507487,
+            "post_step_actuator_force_at_29": -0.06841042712028021,
+            "post_step_constraint_force_at_29": 0.0,
+            "pre_step_contacts_detail": [
+              {
+                "geom1": "humerus_coll",
+                "geom2": "thorax_coll1",
+                "distance_m": -0.020644126777831354,
+                "force_in_contact_frame": [
+                  1066.241266685459, -677.2288423398985, -130.5607519492772,
+                  0.0, 0.0, 0.0
+                ]
+              },
+              {
+                "geom1": "thorax_coll0",
+                "geom2": "radius_coll",
+                "distance_m": -0.010184734904875245,
+                "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+              }
+            ],
+            "post_step_contacts_detail": [
+              {
+                "geom1": "humerus_coll",
+                "geom2": "thorax_coll1",
+                "distance_m": -0.02046867108959358,
+                "force_in_contact_frame": [
+                  969.9696437905063, -521.3688513342171, -122.06831931736664,
+                  0.0, 0.0, 0.0
+                ]
+              },
+              {
+                "geom1": "thorax_coll0",
+                "geom2": "radius_coll",
+                "distance_m": -0.009904346389281546,
+                "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+              }
+            ],
+            "pre_step_qacc_max_abs": 4599.833341135888,
+            "pre_step_qacc_at_29": -280.78025633817083,
+            "pre_step_actuator_force_at_29": 0.16589586331639583,
+            "pre_step_constraint_force_at_29": 0.41204733529777254,
+            "pre_step_equality_force_max_abs": 152.4443992454081
+          }
+        }
+      },
+      "max_b_pair_diagnostics": {
+        "input_column": 0,
+        "derivative_max_abs": 0.11125000001777074,
+        "output_row": 76,
+        "plus": {
+          "pre_step_contacts": 2,
+          "pre_step_equality_max_abs": 0.0,
+          "post_step_contacts": 2,
+          "post_step_equality_max_abs": 0.0002699263617466144,
+          "time_seconds": 0.002,
+          "warnings": 0,
+          "initial_position_perturb_max_error": 0.0,
+          "initial_velocity_perturb_max_error": 0.0,
+          "initial_activation_perturb_max_error": 0.0,
+          "post_step_qacc_max_abs": 3161.4421772589935,
+          "post_step_qacc_at_29": 753.1505767879291,
+          "post_step_actuator_force_at_29": -0.06819894953215448,
+          "post_step_constraint_force_at_29": 0.0,
+          "pre_step_contacts_detail": [
+            {
+              "geom1": "humerus_coll",
+              "geom2": "thorax_coll1",
+              "distance_m": -0.020644126777831354,
+              "force_in_contact_frame": [
+                1065.9500012529109, -677.208711051977, -130.5823455541537, 0.0,
+                0.0, 0.0
+              ]
+            },
+            {
+              "geom1": "thorax_coll0",
+              "geom2": "radius_coll",
+              "distance_m": -0.010184734904875245,
+              "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            }
+          ],
+          "post_step_contacts_detail": [
+            {
+              "geom1": "humerus_coll",
+              "geom2": "thorax_coll1",
+              "distance_m": -0.020468656544078256,
+              "force_in_contact_frame": [
+                970.395599799281, -521.1486047127607, -122.01114760686596, 0.0,
+                0.0, 0.0
+              ]
+            },
+            {
+              "geom1": "thorax_coll0",
+              "geom2": "radius_coll",
+              "distance_m": -0.009904309296670105,
+              "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            }
+          ],
+          "pre_step_qacc_max_abs": 4601.033083258253,
+          "pre_step_qacc_at_29": -2807.8069602601595,
+          "pre_step_actuator_force_at_29": 0.16589610233355892,
+          "pre_step_constraint_force_at_29": 0.0,
+          "pre_step_equality_force_max_abs": 152.4214677742825
+        },
+        "minus": {
+          "pre_step_contacts": 2,
+          "pre_step_equality_max_abs": 0.0,
+          "post_step_contacts": 2,
+          "post_step_equality_max_abs": 0.0002699263617466144,
+          "time_seconds": 0.002,
+          "warnings": 0,
+          "initial_position_perturb_max_error": 0.0,
+          "initial_velocity_perturb_max_error": 0.0,
+          "initial_activation_perturb_max_error": 0.0,
+          "post_step_qacc_max_abs": 3161.442177817279,
+          "post_step_qacc_at_29": 753.1505765710374,
+          "post_step_actuator_force_at_29": -0.06819894953215448,
+          "post_step_constraint_force_at_29": 0.0,
+          "pre_step_contacts_detail": [
+            {
+              "geom1": "humerus_coll",
+              "geom2": "thorax_coll1",
+              "distance_m": -0.020644126777831354,
+              "force_in_contact_frame": [
+                1065.9500012529109, -677.208711051977, -130.5823455541537, 0.0,
+                0.0, 0.0
+              ]
+            },
+            {
+              "geom1": "thorax_coll0",
+              "geom2": "radius_coll",
+              "distance_m": -0.010184734904875245,
+              "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            }
+          ],
+          "post_step_contacts_detail": [
+            {
+              "geom1": "humerus_coll",
+              "geom2": "thorax_coll1",
+              "distance_m": -0.020468656544078256,
+              "force_in_contact_frame": [
+                970.3955940397591, -521.148606766196, -122.01114837647879, 0.0,
+                0.0, 0.0
+              ]
+            },
+            {
+              "geom1": "thorax_coll0",
+              "geom2": "radius_coll",
+              "distance_m": -0.009904309296670105,
+              "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            }
+          ],
+          "pre_step_qacc_max_abs": 4601.033083258253,
+          "pre_step_qacc_at_29": -2807.8069602601595,
+          "pre_step_actuator_force_at_29": 0.16589610233355892,
+          "pre_step_constraint_force_at_29": 0.0,
+          "pre_step_equality_force_max_abs": 152.4214677742825
+        },
+        "output_delta_max_abs": 2.225000000355415e-7
+      }
+    },
+    {
+      "epsilon": 1e-7,
+      "a_max_abs": 15312427.487262093,
+      "b_max_abs": 0.11125000004552632,
+      "a_finite": true,
+      "b_finite": true,
+      "a_max_index": [67, 29],
+      "a_block_max_abs": {
+        "q_input": 15312427.487262093,
+        "v_input": 2.1976908159970776,
+        "activation_input": 11.548402354399911
+      },
+      "max_a_pair_diagnostics": {
+        "input_column": 29,
+        "derivative_max_abs": 15312427.487262093,
+        "output_row": 67,
+        "plus": {
+          "pre_step_contacts": 2,
+          "pre_step_equality_max_abs": 0.0,
+          "post_step_contacts": 2,
+          "post_step_equality_max_abs": 0.0002699263617398338,
+          "time_seconds": 0.002,
+          "warnings": 0,
+          "initial_position_perturb_max_error": 0.0,
+          "initial_velocity_perturb_max_error": 0.0,
+          "initial_activation_perturb_max_error": 0.0,
+          "post_step_qacc_max_abs": 3161.442176870038,
+          "post_step_qacc_at_29": 753.1505394953025,
+          "post_step_actuator_force_at_29": -0.06819894517423761,
+          "post_step_constraint_force_at_29": 0.0,
+          "pre_step_contacts_detail": [
+            {
+              "geom1": "humerus_coll",
+              "geom2": "thorax_coll1",
+              "distance_m": -0.020644126777831354,
+              "force_in_contact_frame": [
+                1065.9500012890617, -677.2087110390256, -130.58234554989752,
+                0.0, 0.0, 0.0
+              ]
+            },
+            {
+              "geom1": "thorax_coll0",
+              "geom2": "radius_coll",
+              "distance_m": -0.010184734904875245,
+              "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            }
+          ],
+          "post_step_contacts_detail": [
+            {
+              "geom1": "humerus_coll",
+              "geom2": "thorax_coll1",
+              "distance_m": -0.02046865654406272,
+              "force_in_contact_frame": [
+                970.3955957958011, -521.1486062295086, -122.01114816960882, 0.0,
+                0.0, 0.0
+              ]
+            },
+            {
+              "geom1": "thorax_coll0",
+              "geom2": "radius_coll",
+              "distance_m": -0.009904309296675462,
+              "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            }
+          ],
+          "pre_step_qacc_max_abs": 4601.033083088251,
+          "pre_step_qacc_at_29": -2807.806810642397,
+          "pre_step_actuator_force_at_29": 0.16589612623528038,
+          "pre_step_constraint_force_at_29": 0.0,
+          "pre_step_equality_force_max_abs": 152.4214677731007
+        },
+        "minus": {
+          "pre_step_contacts": 2,
+          "pre_step_equality_max_abs": 0.0,
+          "post_step_contacts": 2,
+          "post_step_equality_max_abs": 0.0002699988449526859,
+          "time_seconds": 0.002,
+          "warnings": 0,
+          "initial_position_perturb_max_error": 0.0,
+          "initial_velocity_perturb_max_error": 0.0,
+          "initial_activation_perturb_max_error": 0.0,
+          "post_step_qacc_max_abs": 3129.189529697402,
+          "post_step_qacc_at_29": -287.0116278569319,
+          "post_step_actuator_force_at_29": -0.06841039347081809,
+          "post_step_constraint_force_at_29": 0.0,
+          "pre_step_contacts_detail": [
+            {
+              "geom1": "humerus_coll",
+              "geom2": "thorax_coll1",
+              "distance_m": -0.020644126777831354,
+              "force_in_contact_frame": [
+                1066.2412666063371, -677.2288421953803, -130.5607519409587, 0.0,
+                0.0, 0.0
+              ]
+            },
+            {
+              "geom1": "thorax_coll0",
+              "geom2": "radius_coll",
+              "distance_m": -0.010184734904875245,
+              "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            }
+          ],
+          "post_step_contacts_detail": [
+            {
+              "geom1": "humerus_coll",
+              "geom2": "thorax_coll1",
+              "distance_m": -0.020468671089591873,
+              "force_in_contact_frame": [
+                969.9696442426273, -521.3688511789903, -122.06831926369509, 0.0,
+                0.0, 0.0
+              ]
+            },
+            {
+              "geom1": "thorax_coll0",
+              "geom2": "radius_coll",
+              "distance_m": -0.009904346389278798,
+              "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            }
+          ],
+          "pre_step_qacc_max_abs": 4599.833341271943,
+          "pre_step_qacc_at_29": -280.78241904555875,
+          "pre_step_actuator_force_at_29": 0.16589607843184284,
+          "pre_step_constraint_force_at_29": 0.41204676309042393,
+          "pre_step_equality_force_max_abs": 152.4443992029268
+        },
+        "output_delta_max_abs": 3.0624854974524185,
+        "sensitivity_detail": {
+          "state_column": 29,
+          "state_column_joint": "md3_flexion",
+          "output_row": 67,
+          "output_velocity_index": 29,
+          "output_velocity_joint": "md3_flexion",
+          "epsilon": 1e-7,
+          "position_perturb_errors": [0.0, 0.0],
+          "max_abs_actuator_length_plus_minus_delta_m": 6.126811835649448e-10,
+          "max_abs_estimated_moment_arm_plus_minus_delta_m_per_rad": 5.828670879282072e-10,
+          "plus_minus_post_velocity_at_output_row": [
+            -2.9927552888426336, 0.06973020860978477
+          ],
+          "largest_estimated_moment_arm_changes": [
+            {
+              "actuator": "FDP3",
+              "length_plus_m": 0.38745867575885157,
+              "length_minus_m": 0.3874586762917043,
+              "length_delta_m": -5.328527064030197e-10,
+              "moment_arm_plus_m_per_rad": 0.0026642638928375817,
+              "moment_arm_minus_m_per_rad": 0.0026642633099704938,
+              "moment_arm_delta_m_per_rad": 5.828670879282072e-10
+            },
+            {
+              "actuator": "EDC3",
+              "length_plus_m": 0.41793727394948105,
+              "length_minus_m": 0.41793727333679986,
+              "length_delta_m": 6.126811835649448e-10,
+              "moment_arm_plus_m_per_rad": -0.0030634055292466655,
+              "moment_arm_minus_m_per_rad": -0.0030634053904687875,
+              "moment_arm_delta_m_per_rad": -1.3877787807814457e-10
+            },
+            {
+              "actuator": "UI_UB5",
+              "length_plus_m": 0.09690025492804157,
+              "length_minus_m": 0.09690025492804157,
+              "length_delta_m": 0.0,
+              "moment_arm_plus_m_per_rad": -0.0,
+              "moment_arm_minus_m_per_rad": -0.0,
+              "moment_arm_delta_m_per_rad": 0.0
+            },
+            {
+              "actuator": "UI_UB4",
+              "length_plus_m": 0.07866341299119715,
+              "length_minus_m": 0.07866341299119715,
+              "length_delta_m": 0.0,
+              "moment_arm_plus_m_per_rad": -0.0,
+              "moment_arm_minus_m_per_rad": -0.0,
+              "moment_arm_delta_m_per_rad": 0.0
+            },
+            {
+              "actuator": "LU_RB4",
+              "length_plus_m": 0.07707863341164943,
+              "length_minus_m": 0.07707863341164943,
+              "length_delta_m": 0.0,
+              "moment_arm_plus_m_per_rad": -0.0,
+              "moment_arm_minus_m_per_rad": -0.0,
+              "moment_arm_delta_m_per_rad": 0.0
+            },
+            {
+              "actuator": "LU_RB5",
+              "length_plus_m": 0.09756173108536179,
+              "length_minus_m": 0.09756173108536179,
+              "length_delta_m": 0.0,
+              "moment_arm_plus_m_per_rad": -0.0,
+              "moment_arm_minus_m_per_rad": -0.0,
+              "moment_arm_delta_m_per_rad": 0.0
+            },
+            {
+              "actuator": "RI5",
+              "length_plus_m": 0.04112509637974286,
+              "length_minus_m": 0.04112509637974286,
+              "length_delta_m": 0.0,
+              "moment_arm_plus_m_per_rad": -0.0,
+              "moment_arm_minus_m_per_rad": -0.0,
+              "moment_arm_delta_m_per_rad": 0.0
+            },
+            {
+              "actuator": "LU_RB3",
+              "length_plus_m": 0.09332127952839399,
+              "length_minus_m": 0.09332127952839399,
+              "length_delta_m": 0.0,
+              "moment_arm_plus_m_per_rad": -0.0,
+              "moment_arm_minus_m_per_rad": -0.0,
+              "moment_arm_delta_m_per_rad": 0.0
+            }
+          ],
+          "plus": {
+            "pre_step_contacts": 2,
+            "pre_step_equality_max_abs": 0.0,
+            "post_step_contacts": 2,
+            "post_step_equality_max_abs": 0.0002699263617398338,
+            "time_seconds": 0.002,
+            "warnings": 0,
+            "initial_position_perturb_max_error": 0.0,
+            "initial_velocity_perturb_max_error": 0.0,
+            "initial_activation_perturb_max_error": 0.0,
+            "post_step_qacc_max_abs": 3161.442176870038,
+            "post_step_qacc_at_29": 753.1505394953025,
+            "post_step_actuator_force_at_29": -0.06819894517423761,
+            "post_step_constraint_force_at_29": 0.0,
+            "pre_step_contacts_detail": [
+              {
+                "geom1": "humerus_coll",
+                "geom2": "thorax_coll1",
+                "distance_m": -0.020644126777831354,
+                "force_in_contact_frame": [
+                  1065.9500012890617, -677.2087110390256, -130.58234554989752,
+                  0.0, 0.0, 0.0
+                ]
+              },
+              {
+                "geom1": "thorax_coll0",
+                "geom2": "radius_coll",
+                "distance_m": -0.010184734904875245,
+                "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+              }
+            ],
+            "post_step_contacts_detail": [
+              {
+                "geom1": "humerus_coll",
+                "geom2": "thorax_coll1",
+                "distance_m": -0.02046865654406272,
+                "force_in_contact_frame": [
+                  970.3955957958011, -521.1486062295086, -122.01114816960882,
+                  0.0, 0.0, 0.0
+                ]
+              },
+              {
+                "geom1": "thorax_coll0",
+                "geom2": "radius_coll",
+                "distance_m": -0.009904309296675462,
+                "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+              }
+            ],
+            "pre_step_qacc_max_abs": 4601.033083088251,
+            "pre_step_qacc_at_29": -2807.806810642397,
+            "pre_step_actuator_force_at_29": 0.16589612623528038,
+            "pre_step_constraint_force_at_29": 0.0,
+            "pre_step_equality_force_max_abs": 152.4214677731007
+          },
+          "minus": {
+            "pre_step_contacts": 2,
+            "pre_step_equality_max_abs": 0.0,
+            "post_step_contacts": 2,
+            "post_step_equality_max_abs": 0.0002699988449526859,
+            "time_seconds": 0.002,
+            "warnings": 0,
+            "initial_position_perturb_max_error": 0.0,
+            "initial_velocity_perturb_max_error": 0.0,
+            "initial_activation_perturb_max_error": 0.0,
+            "post_step_qacc_max_abs": 3129.189529697402,
+            "post_step_qacc_at_29": -287.0116278569319,
+            "post_step_actuator_force_at_29": -0.06841039347081809,
+            "post_step_constraint_force_at_29": 0.0,
+            "pre_step_contacts_detail": [
+              {
+                "geom1": "humerus_coll",
+                "geom2": "thorax_coll1",
+                "distance_m": -0.020644126777831354,
+                "force_in_contact_frame": [
+                  1066.2412666063371, -677.2288421953803, -130.5607519409587,
+                  0.0, 0.0, 0.0
+                ]
+              },
+              {
+                "geom1": "thorax_coll0",
+                "geom2": "radius_coll",
+                "distance_m": -0.010184734904875245,
+                "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+              }
+            ],
+            "post_step_contacts_detail": [
+              {
+                "geom1": "humerus_coll",
+                "geom2": "thorax_coll1",
+                "distance_m": -0.020468671089591873,
+                "force_in_contact_frame": [
+                  969.9696442426273, -521.3688511789903, -122.06831926369509,
+                  0.0, 0.0, 0.0
+                ]
+              },
+              {
+                "geom1": "thorax_coll0",
+                "geom2": "radius_coll",
+                "distance_m": -0.009904346389278798,
+                "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+              }
+            ],
+            "pre_step_qacc_max_abs": 4599.833341271943,
+            "pre_step_qacc_at_29": -280.78241904555875,
+            "pre_step_actuator_force_at_29": 0.16589607843184284,
+            "pre_step_constraint_force_at_29": 0.41204676309042393,
+            "pre_step_equality_force_max_abs": 152.4443992029268
+          }
+        }
+      },
+      "max_b_pair_diagnostics": {
+        "input_column": 0,
+        "derivative_max_abs": 0.11125000004552632,
+        "output_row": 76,
+        "plus": {
+          "pre_step_contacts": 2,
+          "pre_step_equality_max_abs": 0.0,
+          "post_step_contacts": 2,
+          "post_step_equality_max_abs": 0.0002699263617466144,
+          "time_seconds": 0.002,
+          "warnings": 0,
+          "initial_position_perturb_max_error": 0.0,
+          "initial_velocity_perturb_max_error": 0.0,
+          "initial_activation_perturb_max_error": 0.0,
+          "post_step_qacc_max_abs": 3161.4421776203108,
+          "post_step_qacc_at_29": 753.1505766475597,
+          "post_step_actuator_force_at_29": -0.06819894953215448,
+          "post_step_constraint_force_at_29": 0.0,
+          "pre_step_contacts_detail": [
+            {
+              "geom1": "humerus_coll",
+              "geom2": "thorax_coll1",
+              "distance_m": -0.020644126777831354,
+              "force_in_contact_frame": [
+                1065.9500012529109, -677.208711051977, -130.5823455541537, 0.0,
+                0.0, 0.0
+              ]
+            },
+            {
+              "geom1": "thorax_coll0",
+              "geom2": "radius_coll",
+              "distance_m": -0.010184734904875245,
+              "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            }
+          ],
+          "post_step_contacts_detail": [
+            {
+              "geom1": "humerus_coll",
+              "geom2": "thorax_coll1",
+              "distance_m": -0.020468656544078256,
+              "force_in_contact_frame": [
+                970.3955960717702, -521.1486060417255, -122.01114810495244, 0.0,
+                0.0, 0.0
+              ]
+            },
+            {
+              "geom1": "thorax_coll0",
+              "geom2": "radius_coll",
+              "distance_m": -0.009904309296670105,
+              "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            }
+          ],
+          "pre_step_qacc_max_abs": 4601.033083258253,
+          "pre_step_qacc_at_29": -2807.8069602601595,
+          "pre_step_actuator_force_at_29": 0.16589610233355892,
+          "pre_step_constraint_force_at_29": 0.0,
+          "pre_step_equality_force_max_abs": 152.4214677742825
+        },
+        "minus": {
+          "pre_step_contacts": 2,
+          "pre_step_equality_max_abs": 0.0,
+          "post_step_contacts": 2,
+          "post_step_equality_max_abs": 0.0002699263617466144,
+          "time_seconds": 0.002,
+          "warnings": 0,
+          "initial_position_perturb_max_error": 0.0,
+          "initial_velocity_perturb_max_error": 0.0,
+          "initial_activation_perturb_max_error": 0.0,
+          "post_step_qacc_max_abs": 3161.44217767614,
+          "post_step_qacc_at_29": 753.1505766258691,
+          "post_step_actuator_force_at_29": -0.06819894953215448,
+          "post_step_constraint_force_at_29": 0.0,
+          "pre_step_contacts_detail": [
+            {
+              "geom1": "humerus_coll",
+              "geom2": "thorax_coll1",
+              "distance_m": -0.020644126777831354,
+              "force_in_contact_frame": [
+                1065.9500012529109, -677.208711051977, -130.5823455541537, 0.0,
+                0.0, 0.0
+              ]
+            },
+            {
+              "geom1": "thorax_coll0",
+              "geom2": "radius_coll",
+              "distance_m": -0.010184734904875245,
+              "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            }
+          ],
+          "post_step_contacts_detail": [
+            {
+              "geom1": "humerus_coll",
+              "geom2": "thorax_coll1",
+              "distance_m": -0.020468656544078256,
+              "force_in_contact_frame": [
+                970.395595495818, -521.1486062470689, -122.01114818191365, 0.0,
+                0.0, 0.0
+              ]
+            },
+            {
+              "geom1": "thorax_coll0",
+              "geom2": "radius_coll",
+              "distance_m": -0.009904309296670105,
+              "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            }
+          ],
+          "pre_step_qacc_max_abs": 4601.033083258253,
+          "pre_step_qacc_at_29": -2807.8069602601595,
+          "pre_step_actuator_force_at_29": 0.16589610233355892,
+          "pre_step_constraint_force_at_29": 0.0,
+          "pre_step_equality_force_max_abs": 152.4214677742825
+        },
+        "output_delta_max_abs": 2.2250000009105264e-8
+      }
+    }
+  ],
+  "directional_rollout_sensitivity": [
+    {
+      "rollout_half_step": 0.0001,
+      "actual_slope_l2": 30013.50664891319,
+      "plus_pre_contacts": 2,
+      "minus_pre_contacts": 2,
+      "plus_post_contacts": 2,
+      "minus_post_contacts": 2,
+      "epsilon_1e-05": {
+        "prediction_error_l2": 25377.134216535385,
+        "relative_prediction_error_l2": 0.8455238007803499,
+        "prediction_error_max_abs": 13546.271940981136
+      },
+      "epsilon_1e-06": {
+        "prediction_error_l2": 56003.04905607367,
+        "relative_prediction_error_l2": 1.86592822062335,
+        "prediction_error_max_abs": 48209.27294886111
+      },
+      "epsilon_1e-07": {
+        "prediction_error_l2": 709628.9560237416,
+        "relative_prediction_error_l2": 23.643653649828945,
+        "prediction_error_max_abs": 603082.602831051
+      }
+    },
+    {
+      "rollout_half_step": 1e-5,
+      "actual_slope_l2": 300126.831526336,
+      "plus_pre_contacts": 2,
+      "minus_pre_contacts": 2,
+      "plus_post_contacts": 2,
+      "minus_post_contacts": 2,
+      "epsilon_1e-05": {
+        "prediction_error_l2": 295004.4914155311,
+        "relative_prediction_error_l2": 0.9829327485158372,
+        "prediction_error_max_abs": 149610.1713244522
+      },
+      "epsilon_1e-06": {
+        "prediction_error_l2": 253770.97871964364,
+        "relative_prediction_error_l2": 0.8455457895219053,
+        "prediction_error_max_abs": 135462.2270036168
+      },
+      "epsilon_1e-07": {
+        "prediction_error_l2": 560029.4093672102,
+        "relative_prediction_error_l2": 1.865975816021194,
+        "prediction_error_max_abs": 482092.91475200886
+      }
+    },
+    {
+      "rollout_half_step": 1e-6,
+      "actual_slope_l2": 3001260.765990835,
+      "plus_pre_contacts": 2,
+      "minus_pre_contacts": 2,
+      "plus_post_contacts": 2,
+      "minus_post_contacts": 2,
+      "epsilon_1e-05": {
+        "prediction_error_l2": 2996097.6575309727,
+        "relative_prediction_error_l2": 0.9982796868174972,
+        "prediction_error_max_abs": 1510249.176451232
+      },
+      "epsilon_1e-06": {
+        "prediction_error_l2": 2950045.811216597,
+        "relative_prediction_error_l2": 0.9829355198473299,
+        "prediction_error_max_abs": 1496101.2321303966
+      },
+      "epsilon_1e-07": {
+        "prediction_error_l2": 2537708.713968849,
+        "relative_prediction_error_l2": 0.8455475587876985,
+        "prediction_error_max_abs": 1354621.8161871124
+      }
+    }
+  ],
+  "constraint_disable_comparisons": {
+    "native": {
+      "joint": "md3_flexion",
+      "qpos_index": 29,
+      "dof_index": 29,
+      "limited": true,
+      "range_rad": [0.0, 1.5708],
+      "initial_position_rad": 0.0,
+      "initial_limit_margin_rad": 0.0,
+      "frictionloss": 0.0,
+      "armature": 0.0001,
+      "damping": 0.05,
+      "stiffness": 0.0,
+      "disableflags": 0,
+      "restore_sha256": "21b7afb2a2e3f2aa79c00310c87c249d3acfaa9bc536585ee346daeea8fa04a3",
+      "perturbations": [
+        {
+          "epsilon": 1e-5,
+          "plus": {
+            "pre_step": {
+              "qpos": 1e-5,
+              "qvel": 0.0,
+              "joint_limit_margin_rad": 1e-5,
+              "constraint_count": 19,
+              "constraint_types": {
+                "mjCNSTR_EQUALITY": 11,
+                "mjCNSTR_CONTACT_PYRAMIDAL": 8
+              },
+              "contacts": [
+                {
+                  "geom1": "humerus_coll",
+                  "geom2": "thorax_coll1",
+                  "distance_m": -0.020644126777831354,
+                  "force_in_contact_frame": [
+                    1065.9500048680009, -677.2087097568425, -130.58234512853372,
+                    0.0, 0.0, 0.0
+                  ]
+                },
+                {
+                  "geom1": "thorax_coll0",
+                  "geom2": "radius_coll",
+                  "distance_m": -0.010184734904875245,
+                  "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                }
+              ],
+              "equality_residual_max_abs": 0.0,
+              "equality_force_max_abs": 152.42146765610062,
+              "generalized_force_components": {
+                "qfrc_actuator": 0.16589849250746624,
+                "qfrc_passive": 0.0,
+                "qfrc_applied": 0.0,
+                "qfrc_bias": -4.336808689942018e-19,
+                "qfrc_constraint": 0.0,
+                "qacc": -2807.7919984725095
+              },
+              "muscle_actuator_samples": {
+                "FDP3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -106.18809545250096,
+                  "length_m": 0.387458649382517,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 212.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                },
+                "EDC3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -38.19834956996265,
+                  "length_m": 0.4179373042772222,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 94.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                }
+              }
+            },
+            "post_step_qvel": -2.992737379923936,
+            "post_step_contacts": 2,
+            "post_step_constraint_count": 29
+          },
+          "minus": {
+            "pre_step": {
+              "qpos": -1e-5,
+              "qvel": 0.0,
+              "joint_limit_margin_rad": -1e-5,
+              "constraint_count": 20,
+              "constraint_types": {
+                "mjCNSTR_EQUALITY": 11,
+                "mjCNSTR_LIMIT_JOINT": 1,
+                "mjCNSTR_CONTACT_PYRAMIDAL": 8
+              },
+              "contacts": [
+                {
+                  "geom1": "humerus_coll",
+                  "geom2": "thorax_coll1",
+                  "distance_m": -0.020644126777831354,
+                  "force_in_contact_frame": [
+                    1066.2412703602913, -677.2288439843819, -130.56075181868135,
+                    0.0, 0.0, 0.0
+                  ]
+                },
+                {
+                  "geom1": "thorax_coll0",
+                  "geom2": "radius_coll",
+                  "distance_m": -0.010184734904875245,
+                  "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                }
+              ],
+              "equality_residual_max_abs": 0.0,
+              "equality_force_max_abs": 152.44439989724793,
+              "generalized_force_components": {
+                "qfrc_actuator": 0.1658937121637758,
+                "qfrc_passive": 0.0,
+                "qfrc_applied": 0.0,
+                "qfrc_bias": -4.336808689942018e-19,
+                "qfrc_constraint": 0.4120571367645693,
+                "qacc": -280.73361090872044
+              },
+              "muscle_actuator_samples": {
+                "FDP3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -106.18809707683226,
+                  "length_m": 0.38745870266778876,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 212.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                },
+                "EDC3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -38.198311932938424,
+                  "length_m": 0.4179372430091126,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 94.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                }
+              }
+            },
+            "post_step_qvel": 0.06978940075386846,
+            "post_step_contacts": 2,
+            "post_step_constraint_count": 28
+          },
+          "central_qvel_derivative": -153126.3390338902
+        },
+        {
+          "epsilon": 1e-6,
+          "plus": {
+            "pre_step": {
+              "qpos": 1e-6,
+              "qvel": 0.0,
+              "joint_limit_margin_rad": 1e-6,
+              "constraint_count": 19,
+              "constraint_types": {
+                "mjCNSTR_EQUALITY": 11,
+                "mjCNSTR_CONTACT_PYRAMIDAL": 8
+              },
+              "contacts": [
+                {
+                  "geom1": "humerus_coll",
+                  "geom2": "thorax_coll1",
+                  "distance_m": -0.020644126777831354,
+                  "force_in_contact_frame": [
+                    1065.9500016144198, -677.2087109224638, -130.58234551159202,
+                    0.0, 0.0, 0.0
+                  ]
+                },
+                {
+                  "geom1": "thorax_coll0",
+                  "geom2": "radius_coll",
+                  "distance_m": -0.010184734904875245,
+                  "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                }
+              ],
+              "equality_residual_max_abs": 0.0,
+              "equality_force_max_abs": 152.42146776246443,
+              "generalized_force_components": {
+                "qfrc_actuator": 0.16589634135076564,
+                "qfrc_passive": 0.0,
+                "qfrc_applied": 0.0,
+                "qfrc_bias": -4.336808689942018e-19,
+                "qfrc_constraint": 0.0,
+                "qacc": -2807.805464082559
+              },
+              "muscle_actuator_samples": {
+                "FDP3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -106.18809618346754,
+                  "length_m": 0.3874586733610131,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 212.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                },
+                "EDC3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -38.198332633295124,
+                  "length_m": 0.41793727670654623,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 94.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                }
+              }
+            },
+            "post_step_qvel": -2.992753660760397,
+            "post_step_contacts": 2,
+            "post_step_constraint_count": 29
+          },
+          "minus": {
+            "pre_step": {
+              "qpos": -1e-6,
+              "qvel": 0.0,
+              "joint_limit_margin_rad": -1e-6,
+              "constraint_count": 20,
+              "constraint_types": {
+                "mjCNSTR_EQUALITY": 11,
+                "mjCNSTR_LIMIT_JOINT": 1,
+                "mjCNSTR_CONTACT_PYRAMIDAL": 8
+              },
+              "contacts": [
+                {
+                  "geom1": "humerus_coll",
+                  "geom2": "thorax_coll1",
+                  "distance_m": -0.020644126777831354,
+                  "force_in_contact_frame": [
+                    1066.241266685459, -677.2288423398985, -130.5607519492772,
+                    0.0, 0.0, 0.0
+                  ]
+                },
+                {
+                  "geom1": "thorax_coll0",
+                  "geom2": "radius_coll",
+                  "distance_m": -0.010184734904875245,
+                  "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                }
+              ],
+              "equality_residual_max_abs": 0.0,
+              "equality_force_max_abs": 152.4443992454081,
+              "generalized_force_components": {
+                "qfrc_actuator": 0.16589586331639583,
+                "qfrc_passive": 0.0,
+                "qfrc_applied": 0.0,
+                "qfrc_bias": -4.336808689942018e-19,
+                "qfrc_constraint": 0.41204733529777254,
+                "qacc": -280.78025633817083
+              },
+              "muscle_actuator_samples": {
+                "FDP3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -106.18809634590066,
+                  "length_m": 0.38745867868954026,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 212.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                },
+                "EDC3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -38.19832886959271,
+                  "length_m": 0.4179372705797353,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 94.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                }
+              }
+            },
+            "post_step_qvel": 0.06973283338715647,
+            "post_step_contacts": 2,
+            "post_step_constraint_count": 28
+          },
+          "central_qvel_derivative": -1531243.2470737768
+        },
+        {
+          "epsilon": 1e-7,
+          "plus": {
+            "pre_step": {
+              "qpos": 1e-7,
+              "qvel": 0.0,
+              "joint_limit_margin_rad": 1e-7,
+              "constraint_count": 19,
+              "constraint_types": {
+                "mjCNSTR_EQUALITY": 11,
+                "mjCNSTR_CONTACT_PYRAMIDAL": 8
+              },
+              "contacts": [
+                {
+                  "geom1": "humerus_coll",
+                  "geom2": "thorax_coll1",
+                  "distance_m": -0.020644126777831354,
+                  "force_in_contact_frame": [
+                    1065.9500012890617, -677.2087110390256, -130.58234554989752,
+                    0.0, 0.0, 0.0
+                  ]
+                },
+                {
+                  "geom1": "thorax_coll0",
+                  "geom2": "radius_coll",
+                  "distance_m": -0.010184734904875245,
+                  "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                }
+              ],
+              "equality_residual_max_abs": 0.0,
+              "equality_force_max_abs": 152.4214677731007,
+              "generalized_force_components": {
+                "qfrc_actuator": 0.16589612623528038,
+                "qfrc_passive": 0.0,
+                "qfrc_applied": 0.0,
+                "qfrc_bias": -4.336808689942018e-19,
+                "qfrc_constraint": 0.0,
+                "qacc": -2807.806810642397
+              },
+              "muscle_actuator_samples": {
+                "FDP3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -106.18809625656262,
+                  "length_m": 0.38745867575885157,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 212.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                },
+                "EDC3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -38.19833093962897,
+                  "length_m": 0.41793727394948105,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 94.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                }
+              }
+            },
+            "post_step_qvel": -2.9927552888426336,
+            "post_step_contacts": 2,
+            "post_step_constraint_count": 29
+          },
+          "minus": {
+            "pre_step": {
+              "qpos": -1e-7,
+              "qvel": 0.0,
+              "joint_limit_margin_rad": -1e-7,
+              "constraint_count": 20,
+              "constraint_types": {
+                "mjCNSTR_EQUALITY": 11,
+                "mjCNSTR_LIMIT_JOINT": 1,
+                "mjCNSTR_CONTACT_PYRAMIDAL": 8
+              },
+              "contacts": [
+                {
+                  "geom1": "humerus_coll",
+                  "geom2": "thorax_coll1",
+                  "distance_m": -0.020644126777831354,
+                  "force_in_contact_frame": [
+                    1066.2412666063371, -677.2288421953803, -130.5607519409587,
+                    0.0, 0.0, 0.0
+                  ]
+                },
+                {
+                  "geom1": "thorax_coll0",
+                  "geom2": "radius_coll",
+                  "distance_m": -0.010184734904875245,
+                  "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                }
+              ],
+              "equality_residual_max_abs": 0.0,
+              "equality_force_max_abs": 152.4443992029268,
+              "generalized_force_components": {
+                "qfrc_actuator": 0.16589607843184284,
+                "qfrc_passive": 0.0,
+                "qfrc_applied": 0.0,
+                "qfrc_bias": -4.336808689942018e-19,
+                "qfrc_constraint": 0.41204676309042393,
+                "qacc": -280.78241904555875
+              },
+              "muscle_actuator_samples": {
+                "FDP3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -106.18809627280594,
+                  "length_m": 0.3874586762917043,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 212.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                },
+                "EDC3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -38.19833056325867,
+                  "length_m": 0.41793727333679986,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 94.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                }
+              }
+            },
+            "post_step_qvel": 0.06973020860978477,
+            "post_step_contacts": 2,
+            "post_step_constraint_count": 28
+          },
+          "central_qvel_derivative": -15312427.487262093
+        }
+      ]
+    },
+    "limits_disabled_diagnostic_only": {
+      "joint": "md3_flexion",
+      "qpos_index": 29,
+      "dof_index": 29,
+      "limited": true,
+      "range_rad": [0.0, 1.5708],
+      "initial_position_rad": 0.0,
+      "initial_limit_margin_rad": 0.0,
+      "frictionloss": 0.0,
+      "armature": 0.0001,
+      "damping": 0.05,
+      "stiffness": 0.0,
+      "disableflags": 8,
+      "restore_sha256": "21b7afb2a2e3f2aa79c00310c87c249d3acfaa9bc536585ee346daeea8fa04a3",
+      "perturbations": [
+        {
+          "epsilon": 1e-5,
+          "plus": {
+            "pre_step": {
+              "qpos": 1e-5,
+              "qvel": 0.0,
+              "joint_limit_margin_rad": 1e-5,
+              "constraint_count": 19,
+              "constraint_types": {
+                "mjCNSTR_EQUALITY": 11,
+                "mjCNSTR_CONTACT_PYRAMIDAL": 8
+              },
+              "contacts": [
+                {
+                  "geom1": "humerus_coll",
+                  "geom2": "thorax_coll1",
+                  "distance_m": -0.020644126777831354,
+                  "force_in_contact_frame": [
+                    1065.9500048680009, -677.2087097568425, -130.58234512853372,
+                    0.0, 0.0, 0.0
+                  ]
+                },
+                {
+                  "geom1": "thorax_coll0",
+                  "geom2": "radius_coll",
+                  "distance_m": -0.010184734904875245,
+                  "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                }
+              ],
+              "equality_residual_max_abs": 0.0,
+              "equality_force_max_abs": 152.42146765610062,
+              "generalized_force_components": {
+                "qfrc_actuator": 0.16589849250746624,
+                "qfrc_passive": 0.0,
+                "qfrc_applied": 0.0,
+                "qfrc_bias": -4.336808689942018e-19,
+                "qfrc_constraint": 0.0,
+                "qacc": -2807.7919984725095
+              },
+              "muscle_actuator_samples": {
+                "FDP3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -106.18809545250096,
+                  "length_m": 0.387458649382517,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 212.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                },
+                "EDC3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -38.19834956996265,
+                  "length_m": 0.4179373042772222,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 94.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                }
+              }
+            },
+            "post_step_qvel": -2.992737379923936,
+            "post_step_contacts": 2,
+            "post_step_constraint_count": 19
+          },
+          "minus": {
+            "pre_step": {
+              "qpos": -1e-5,
+              "qvel": 0.0,
+              "joint_limit_margin_rad": -1e-5,
+              "constraint_count": 19,
+              "constraint_types": {
+                "mjCNSTR_EQUALITY": 11,
+                "mjCNSTR_CONTACT_PYRAMIDAL": 8
+              },
+              "contacts": [
+                {
+                  "geom1": "humerus_coll",
+                  "geom2": "thorax_coll1",
+                  "distance_m": -0.020644126777831354,
+                  "force_in_contact_frame": [
+                    1065.9499976378274, -677.2087123471092, -130.5823459797729,
+                    0.0, 0.0, 0.0
+                  ]
+                },
+                {
+                  "geom1": "thorax_coll0",
+                  "geom2": "radius_coll",
+                  "distance_m": -0.010184734904875245,
+                  "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                }
+              ],
+              "equality_residual_max_abs": 0.0,
+              "equality_force_max_abs": 152.42146789246473,
+              "generalized_force_components": {
+                "qfrc_actuator": 0.1658937121637758,
+                "qfrc_passive": 0.0,
+                "qfrc_applied": 0.0,
+                "qfrc_bias": -4.336808689942018e-19,
+                "qfrc_constraint": 0.0,
+                "qacc": -2807.8219220216856
+              },
+              "muscle_actuator_samples": {
+                "FDP3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -106.18809707683226,
+                  "length_m": 0.38745870266778876,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 212.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                },
+                "EDC3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -38.198311932938424,
+                  "length_m": 0.4179372430091126,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 94.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                }
+              }
+            },
+            "post_step_qvel": -2.9927735595258764,
+            "post_step_contacts": 2,
+            "post_step_constraint_count": 19
+          },
+          "central_qvel_derivative": 1.8089800970289003
+        },
+        {
+          "epsilon": 1e-6,
+          "plus": {
+            "pre_step": {
+              "qpos": 1e-6,
+              "qvel": 0.0,
+              "joint_limit_margin_rad": 1e-6,
+              "constraint_count": 19,
+              "constraint_types": {
+                "mjCNSTR_EQUALITY": 11,
+                "mjCNSTR_CONTACT_PYRAMIDAL": 8
+              },
+              "contacts": [
+                {
+                  "geom1": "humerus_coll",
+                  "geom2": "thorax_coll1",
+                  "distance_m": -0.020644126777831354,
+                  "force_in_contact_frame": [
+                    1065.9500016144198, -677.2087109224638, -130.58234551159202,
+                    0.0, 0.0, 0.0
+                  ]
+                },
+                {
+                  "geom1": "thorax_coll0",
+                  "geom2": "radius_coll",
+                  "distance_m": -0.010184734904875245,
+                  "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                }
+              ],
+              "equality_residual_max_abs": 0.0,
+              "equality_force_max_abs": 152.42146776246443,
+              "generalized_force_components": {
+                "qfrc_actuator": 0.16589634135076564,
+                "qfrc_passive": 0.0,
+                "qfrc_applied": 0.0,
+                "qfrc_bias": -4.336808689942018e-19,
+                "qfrc_constraint": 0.0,
+                "qacc": -2807.805464082559
+              },
+              "muscle_actuator_samples": {
+                "FDP3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -106.18809618346754,
+                  "length_m": 0.3874586733610131,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 212.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                },
+                "EDC3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -38.198332633295124,
+                  "length_m": 0.41793727670654623,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 94.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                }
+              }
+            },
+            "post_step_qvel": -2.992753660760397,
+            "post_step_contacts": 2,
+            "post_step_constraint_count": 19
+          },
+          "minus": {
+            "pre_step": {
+              "qpos": -1e-6,
+              "qvel": 0.0,
+              "joint_limit_margin_rad": -1e-6,
+              "constraint_count": 19,
+              "constraint_types": {
+                "mjCNSTR_EQUALITY": 11,
+                "mjCNSTR_CONTACT_PYRAMIDAL": 8
+              },
+              "contacts": [
+                {
+                  "geom1": "humerus_coll",
+                  "geom2": "thorax_coll1",
+                  "distance_m": -0.020644126777831354,
+                  "force_in_contact_frame": [
+                    1065.9500008914022, -677.2087111814902, -130.5823455967155,
+                    0.0, 0.0, 0.0
+                  ]
+                },
+                {
+                  "geom1": "thorax_coll0",
+                  "geom2": "radius_coll",
+                  "distance_m": -0.010184734904875245,
+                  "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                }
+              ],
+              "equality_residual_max_abs": 0.0,
+              "equality_force_max_abs": 152.42146778610066,
+              "generalized_force_components": {
+                "qfrc_actuator": 0.16589586331639583,
+                "qfrc_passive": 0.0,
+                "qfrc_applied": 0.0,
+                "qfrc_bias": -4.336808689942018e-19,
+                "qfrc_constraint": 0.0,
+                "qacc": -2807.808456437482
+              },
+              "muscle_actuator_samples": {
+                "FDP3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -106.18809634590066,
+                  "length_m": 0.38745867868954026,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 212.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                },
+                "EDC3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -38.19832886959271,
+                  "length_m": 0.4179372705797353,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 94.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                }
+              }
+            },
+            "post_step_qvel": -2.9927572787205983,
+            "post_step_contacts": 2,
+            "post_step_constraint_count": 19
+          },
+          "central_qvel_derivative": 1.8089801006038186
+        },
+        {
+          "epsilon": 1e-7,
+          "plus": {
+            "pre_step": {
+              "qpos": 1e-7,
+              "qvel": 0.0,
+              "joint_limit_margin_rad": 1e-7,
+              "constraint_count": 19,
+              "constraint_types": {
+                "mjCNSTR_EQUALITY": 11,
+                "mjCNSTR_CONTACT_PYRAMIDAL": 8
+              },
+              "contacts": [
+                {
+                  "geom1": "humerus_coll",
+                  "geom2": "thorax_coll1",
+                  "distance_m": -0.020644126777831354,
+                  "force_in_contact_frame": [
+                    1065.9500012890617, -677.2087110390256, -130.58234554989752,
+                    0.0, 0.0, 0.0
+                  ]
+                },
+                {
+                  "geom1": "thorax_coll0",
+                  "geom2": "radius_coll",
+                  "distance_m": -0.010184734904875245,
+                  "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                }
+              ],
+              "equality_residual_max_abs": 0.0,
+              "equality_force_max_abs": 152.4214677731007,
+              "generalized_force_components": {
+                "qfrc_actuator": 0.16589612623528038,
+                "qfrc_passive": 0.0,
+                "qfrc_applied": 0.0,
+                "qfrc_bias": -4.336808689942018e-19,
+                "qfrc_constraint": 0.0,
+                "qacc": -2807.806810642397
+              },
+              "muscle_actuator_samples": {
+                "FDP3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -106.18809625656262,
+                  "length_m": 0.38745867575885157,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 212.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                },
+                "EDC3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -38.19833093962897,
+                  "length_m": 0.41793727394948105,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 94.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                }
+              }
+            },
+            "post_step_qvel": -2.9927552888426336,
+            "post_step_contacts": 2,
+            "post_step_constraint_count": 19
+          },
+          "minus": {
+            "pre_step": {
+              "qpos": -1e-7,
+              "qvel": 0.0,
+              "joint_limit_margin_rad": -1e-7,
+              "constraint_count": 19,
+              "constraint_types": {
+                "mjCNSTR_EQUALITY": 11,
+                "mjCNSTR_CONTACT_PYRAMIDAL": 8
+              },
+              "contacts": [
+                {
+                  "geom1": "humerus_coll",
+                  "geom2": "thorax_coll1",
+                  "distance_m": -0.020644126777831354,
+                  "force_in_contact_frame": [
+                    1065.95000121676, -677.2087110649283, -130.5823455584099,
+                    0.0, 0.0, 0.0
+                  ]
+                },
+                {
+                  "geom1": "thorax_coll0",
+                  "geom2": "radius_coll",
+                  "distance_m": -0.010184734904875245,
+                  "force_in_contact_frame": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                }
+              ],
+              "equality_residual_max_abs": 0.0,
+              "equality_force_max_abs": 152.42146777546435,
+              "generalized_force_components": {
+                "qfrc_actuator": 0.16589607843184284,
+                "qfrc_passive": 0.0,
+                "qfrc_applied": 0.0,
+                "qfrc_bias": -4.336808689942018e-19,
+                "qfrc_constraint": 0.0,
+                "qacc": -2807.8071098778905
+              },
+              "muscle_actuator_samples": {
+                "FDP3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -106.18809627280594,
+                  "length_m": 0.3874586762917043,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 212.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                },
+                "EDC3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -38.19833056325867,
+                  "length_m": 0.41793727333679986,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 94.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                }
+              }
+            },
+            "post_step_qvel": -2.9927556506386583,
+            "post_step_contacts": 2,
+            "post_step_constraint_count": 19
+          },
+          "central_qvel_derivative": 1.808980123474413
+        }
+      ]
+    },
+    "equalities_disabled_diagnostic_only": {
+      "joint": "md3_flexion",
+      "qpos_index": 29,
+      "dof_index": 29,
+      "limited": true,
+      "range_rad": [0.0, 1.5708],
+      "initial_position_rad": 0.0,
+      "initial_limit_margin_rad": 0.0,
+      "frictionloss": 0.0,
+      "armature": 0.0001,
+      "damping": 0.05,
+      "stiffness": 0.0,
+      "disableflags": 2,
+      "restore_sha256": "21b7afb2a2e3f2aa79c00310c87c249d3acfaa9bc536585ee346daeea8fa04a3",
+      "perturbations": [
+        {
+          "epsilon": 1e-5,
+          "plus": {
+            "pre_step": {
+              "qpos": 1e-5,
+              "qvel": 0.0,
+              "joint_limit_margin_rad": 1e-5,
+              "constraint_count": 8,
+              "constraint_types": {
+                "mjCNSTR_CONTACT_PYRAMIDAL": 8
+              },
+              "contacts": [
+                {
+                  "geom1": "humerus_coll",
+                  "geom2": "thorax_coll1",
+                  "distance_m": -0.020644126777831354,
+                  "force_in_contact_frame": [
+                    508.4145369445604, -189.29086162450713, -310.26814870539715,
+                    0.0, 0.0, 0.0
+                  ]
+                },
+                {
+                  "geom1": "thorax_coll0",
+                  "geom2": "radius_coll",
+                  "distance_m": -0.010184734904875245,
+                  "force_in_contact_frame": [
+                    152.75467961593426, -152.75467961593426, 0.0, 0.0, 0.0, 0.0
+                  ]
+                }
+              ],
+              "equality_residual_max_abs": 0.0,
+              "equality_force_max_abs": 0.0,
+              "generalized_force_components": {
+                "qfrc_actuator": 0.16589849250746624,
+                "qfrc_passive": 0.0,
+                "qfrc_applied": 0.0,
+                "qfrc_bias": -4.336808689942018e-19,
+                "qfrc_constraint": 0.0,
+                "qacc": -2805.6446599214432
+              },
+              "muscle_actuator_samples": {
+                "FDP3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -106.18809545250096,
+                  "length_m": 0.387458649382517,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 212.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                },
+                "EDC3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -38.19834956996265,
+                  "length_m": 0.4179373042772222,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 94.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                }
+              }
+            },
+            "post_step_qvel": -2.990883433275965,
+            "post_step_contacts": 2,
+            "post_step_constraint_count": 21
+          },
+          "minus": {
+            "pre_step": {
+              "qpos": -1e-5,
+              "qvel": 0.0,
+              "joint_limit_margin_rad": -1e-5,
+              "constraint_count": 9,
+              "constraint_types": {
+                "mjCNSTR_LIMIT_JOINT": 1,
+                "mjCNSTR_CONTACT_PYRAMIDAL": 8
+              },
+              "contacts": [
+                {
+                  "geom1": "humerus_coll",
+                  "geom2": "thorax_coll1",
+                  "distance_m": -0.020644126777831354,
+                  "force_in_contact_frame": [
+                    508.54068834650224, -189.26698236459606,
+                    -310.27385420798254, 0.0, 0.0, 0.0
+                  ]
+                },
+                {
+                  "geom1": "thorax_coll0",
+                  "geom2": "radius_coll",
+                  "distance_m": -0.010184734904875245,
+                  "force_in_contact_frame": [
+                    152.82311658147285, -152.82311658147285, 0.0, 0.0, 0.0, 0.0
+                  ]
+                }
+              ],
+              "equality_residual_max_abs": 0.0,
+              "equality_force_max_abs": 0.0,
+              "generalized_force_components": {
+                "qfrc_actuator": 0.1658937121637758,
+                "qfrc_passive": 0.0,
+                "qfrc_applied": 0.0,
+                "qfrc_bias": -4.336808689942018e-19,
+                "qfrc_constraint": 0.411742598889005,
+                "qacc": -280.51929792285705
+              },
+              "muscle_actuator_samples": {
+                "FDP3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -106.18809707683226,
+                  "length_m": 0.38745870266778876,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 212.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                },
+                "EDC3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -38.198311932938424,
+                  "length_m": 0.4179372430091126,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 94.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                }
+              }
+            },
+            "post_step_qvel": 0.06930079273546198,
+            "post_step_contacts": 2,
+            "post_step_constraint_count": 20
+          },
+          "central_qvel_derivative": -153009.21130057133
+        },
+        {
+          "epsilon": 1e-6,
+          "plus": {
+            "pre_step": {
+              "qpos": 1e-6,
+              "qvel": 0.0,
+              "joint_limit_margin_rad": 1e-6,
+              "constraint_count": 8,
+              "constraint_types": {
+                "mjCNSTR_CONTACT_PYRAMIDAL": 8
+              },
+              "contacts": [
+                {
+                  "geom1": "humerus_coll",
+                  "geom2": "thorax_coll1",
+                  "distance_m": -0.020644126777831354,
+                  "force_in_contact_frame": [
+                    508.414534591372, -189.29086272948393, -310.26814862614293,
+                    0.0, 0.0, 0.0
+                  ]
+                },
+                {
+                  "geom1": "thorax_coll0",
+                  "geom2": "radius_coll",
+                  "distance_m": -0.010184734904875245,
+                  "force_in_contact_frame": [
+                    152.75467995216076, -152.75467995216076, 0.0, 0.0, 0.0, 0.0
+                  ]
+                }
+              ],
+              "equality_residual_max_abs": 0.0,
+              "equality_force_max_abs": 0.0,
+              "generalized_force_components": {
+                "qfrc_actuator": 0.16589634135076564,
+                "qfrc_passive": 0.0,
+                "qfrc_applied": 0.0,
+                "qfrc_bias": -4.336808689942018e-19,
+                "qfrc_constraint": 0.0,
+                "qacc": -2805.6581255528286
+              },
+              "muscle_actuator_samples": {
+                "FDP3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -106.18809618346754,
+                  "length_m": 0.3874586733610131,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 212.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                },
+                "EDC3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -38.198332633295124,
+                  "length_m": 0.41793727670654623,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 94.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                }
+              }
+            },
+            "post_step_qvel": -2.990899714179215,
+            "post_step_contacts": 2,
+            "post_step_constraint_count": 21
+          },
+          "minus": {
+            "pre_step": {
+              "qpos": -1e-6,
+              "qvel": 0.0,
+              "joint_limit_margin_rad": -1e-6,
+              "constraint_count": 9,
+              "constraint_types": {
+                "mjCNSTR_LIMIT_JOINT": 1,
+                "mjCNSTR_CONTACT_PYRAMIDAL": 8
+              },
+              "contacts": [
+                {
+                  "geom1": "humerus_coll",
+                  "geom2": "thorax_coll1",
+                  "distance_m": -0.020644126777831354,
+                  "force_in_contact_frame": [
+                    508.54068769764956, -189.2669818279342, -310.27385415147097,
+                    0.0, 0.0, 0.0
+                  ]
+                },
+                {
+                  "geom1": "thorax_coll0",
+                  "geom2": "radius_coll",
+                  "distance_m": -0.010184734904875245,
+                  "force_in_contact_frame": [
+                    152.82311461670653, -152.82311461670653, 0.0, 0.0, 0.0, 0.0
+                  ]
+                }
+              ],
+              "equality_residual_max_abs": 0.0,
+              "equality_force_max_abs": 0.0,
+              "generalized_force_components": {
+                "qfrc_actuator": 0.16589586331639583,
+                "qfrc_passive": 0.0,
+                "qfrc_applied": 0.0,
+                "qfrc_bias": -4.336808689942018e-19,
+                "qfrc_constraint": 0.4117328008649786,
+                "qacc": -280.5659221215421
+              },
+              "muscle_actuator_samples": {
+                "FDP3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -106.18809634590066,
+                  "length_m": 0.38745867868954026,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 212.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                },
+                "EDC3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -38.19832886959271,
+                  "length_m": 0.4179372705797353,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 94.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                }
+              }
+            },
+            "post_step_qvel": 0.06924425113750704,
+            "post_step_contacts": 2,
+            "post_step_constraint_count": 20
+          },
+          "central_qvel_derivative": -1530071.982658361
+        },
+        {
+          "epsilon": 1e-7,
+          "plus": {
+            "pre_step": {
+              "qpos": 1e-7,
+              "qvel": 0.0,
+              "joint_limit_margin_rad": 1e-7,
+              "constraint_count": 8,
+              "constraint_types": {
+                "mjCNSTR_CONTACT_PYRAMIDAL": 8
+              },
+              "contacts": [
+                {
+                  "geom1": "humerus_coll",
+                  "geom2": "thorax_coll1",
+                  "distance_m": -0.020644126777831354,
+                  "force_in_contact_frame": [
+                    508.41453435604376, -189.29086284000877, -310.2681486182607,
+                    0.0, 0.0, 0.0
+                  ]
+                },
+                {
+                  "geom1": "thorax_coll0",
+                  "geom2": "radius_coll",
+                  "distance_m": -0.010184734904875245,
+                  "force_in_contact_frame": [
+                    152.75467998577264, -152.75467998577264, 0.0, 0.0, 0.0, 0.0
+                  ]
+                }
+              ],
+              "equality_residual_max_abs": 0.0,
+              "equality_force_max_abs": 0.0,
+              "generalized_force_components": {
+                "qfrc_actuator": 0.16589612623528038,
+                "qfrc_passive": 0.0,
+                "qfrc_applied": 0.0,
+                "qfrc_bias": -4.336808689942018e-19,
+                "qfrc_constraint": 0.0,
+                "qacc": -2805.6594721148
+              },
+              "muscle_actuator_samples": {
+                "FDP3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -106.18809625656262,
+                  "length_m": 0.38745867575885157,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 212.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                },
+                "EDC3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -38.19833093962897,
+                  "length_m": 0.41793727394948105,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 94.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                }
+              }
+            },
+            "post_step_qvel": -2.9909013422681245,
+            "post_step_contacts": 2,
+            "post_step_constraint_count": 21
+          },
+          "minus": {
+            "pre_step": {
+              "qpos": -1e-7,
+              "qvel": 0.0,
+              "joint_limit_margin_rad": -1e-7,
+              "constraint_count": 9,
+              "constraint_types": {
+                "mjCNSTR_LIMIT_JOINT": 1,
+                "mjCNSTR_CONTACT_PYRAMIDAL": 8
+              },
+              "contacts": [
+                {
+                  "geom1": "humerus_coll",
+                  "geom2": "thorax_coll1",
+                  "distance_m": -0.020644126777831354,
+                  "force_in_contact_frame": [
+                    508.5406877576872, -189.26698175062984, -310.2738541514941,
+                    0.0, 0.0, 0.0
+                  ]
+                },
+                {
+                  "geom1": "thorax_coll0",
+                  "geom2": "radius_coll",
+                  "distance_m": -0.010184734904875245,
+                  "force_in_contact_frame": [
+                    152.82311448798058, -152.82311448798058, 0.0, 0.0, 0.0, 0.0
+                  ]
+                }
+              ],
+              "equality_residual_max_abs": 0.0,
+              "equality_force_max_abs": 0.0,
+              "generalized_force_components": {
+                "qfrc_actuator": 0.16589607843184284,
+                "qfrc_passive": 0.0,
+                "qfrc_applied": 0.0,
+                "qfrc_bias": -4.336808689942018e-19,
+                "qfrc_constraint": 0.41173222869109843,
+                "qacc": -280.56808461596864
+              },
+              "muscle_actuator_samples": {
+                "FDP3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -106.18809627280594,
+                  "length_m": 0.3874586762917043,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 212.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                },
+                "EDC3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -38.19833056325867,
+                  "length_m": 0.41793727333679986,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 94.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                }
+              }
+            },
+            "post_step_qvel": 0.06924162662221851,
+            "post_step_contacts": 2,
+            "post_step_constraint_count": 20
+          },
+          "central_qvel_derivative": -15300714.844451716
+        }
+      ]
+    },
+    "contacts_disabled_diagnostic_only": {
+      "joint": "md3_flexion",
+      "qpos_index": 29,
+      "dof_index": 29,
+      "limited": true,
+      "range_rad": [0.0, 1.5708],
+      "initial_position_rad": 0.0,
+      "initial_limit_margin_rad": 0.0,
+      "frictionloss": 0.0,
+      "armature": 0.0001,
+      "damping": 0.05,
+      "stiffness": 0.0,
+      "disableflags": 16,
+      "restore_sha256": "21b7afb2a2e3f2aa79c00310c87c249d3acfaa9bc536585ee346daeea8fa04a3",
+      "perturbations": [
+        {
+          "epsilon": 1e-5,
+          "plus": {
+            "pre_step": {
+              "qpos": 1e-5,
+              "qvel": 0.0,
+              "joint_limit_margin_rad": 1e-5,
+              "constraint_count": 11,
+              "constraint_types": {
+                "mjCNSTR_EQUALITY": 11
+              },
+              "contacts": [],
+              "equality_residual_max_abs": 0.0,
+              "equality_force_max_abs": 41.327564380296735,
+              "generalized_force_components": {
+                "qfrc_actuator": 0.16589849250746624,
+                "qfrc_passive": 0.0,
+                "qfrc_applied": 0.0,
+                "qfrc_bias": -4.336808689942018e-19,
+                "qfrc_constraint": 0.0,
+                "qacc": -2772.5825231906515
+              },
+              "muscle_actuator_samples": {
+                "FDP3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -106.18809545250096,
+                  "length_m": 0.387458649382517,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 212.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                },
+                "EDC3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -38.19834956996265,
+                  "length_m": 0.4179373042772222,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 94.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                }
+              }
+            },
+            "post_step_qvel": -2.9373217812920283,
+            "post_step_contacts": 0,
+            "post_step_constraint_count": 27
+          },
+          "minus": {
+            "pre_step": {
+              "qpos": -1e-5,
+              "qvel": 0.0,
+              "joint_limit_margin_rad": -1e-5,
+              "constraint_count": 12,
+              "constraint_types": {
+                "mjCNSTR_EQUALITY": 11,
+                "mjCNSTR_LIMIT_JOINT": 1
+              },
+              "contacts": [],
+              "equality_residual_max_abs": 0.0,
+              "equality_force_max_abs": 41.32880696102002,
+              "generalized_force_components": {
+                "qfrc_actuator": 0.1658937121637758,
+                "qfrc_passive": 0.0,
+                "qfrc_applied": 0.0,
+                "qfrc_bias": -4.336808689942018e-19,
+                "qfrc_constraint": 0.40688814485210273,
+                "qacc": -277.21167547033457
+              },
+              "muscle_actuator_samples": {
+                "FDP3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -106.18809707683226,
+                  "length_m": 0.38745870266778876,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 212.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                },
+                "EDC3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -38.198311932938424,
+                  "length_m": 0.4179372430091126,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 94.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                }
+              }
+            },
+            "post_step_qvel": 0.08680917706436912,
+            "post_step_contacts": 0,
+            "post_step_constraint_count": 26
+          },
+          "central_qvel_derivative": -151206.54791781984
+        },
+        {
+          "epsilon": 1e-6,
+          "plus": {
+            "pre_step": {
+              "qpos": 1e-6,
+              "qvel": 0.0,
+              "joint_limit_margin_rad": 1e-6,
+              "constraint_count": 11,
+              "constraint_types": {
+                "mjCNSTR_EQUALITY": 11
+              },
+              "contacts": [],
+              "equality_residual_max_abs": 0.0,
+              "equality_force_max_abs": 41.32756424653172,
+              "generalized_force_components": {
+                "qfrc_actuator": 0.16589634135076564,
+                "qfrc_passive": 0.0,
+                "qfrc_applied": 0.0,
+                "qfrc_bias": -4.336808689942018e-19,
+                "qfrc_constraint": 0.0,
+                "qacc": -2772.5959889795768
+              },
+              "muscle_actuator_samples": {
+                "FDP3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -106.18809618346754,
+                  "length_m": 0.3874586733610131,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 212.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                },
+                "EDC3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -38.198332633295124,
+                  "length_m": 0.41793727670654623,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 94.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                }
+              }
+            },
+            "post_step_qvel": -2.937338062436689,
+            "post_step_contacts": 0,
+            "post_step_constraint_count": 27
+          },
+          "minus": {
+            "pre_step": {
+              "qpos": -1e-6,
+              "qvel": 0.0,
+              "joint_limit_margin_rad": -1e-6,
+              "constraint_count": 12,
+              "constraint_types": {
+                "mjCNSTR_EQUALITY": 11,
+                "mjCNSTR_LIMIT_JOINT": 1
+              },
+              "contacts": [],
+              "equality_residual_max_abs": 0.0,
+              "equality_force_max_abs": 41.3288070650194,
+              "generalized_force_components": {
+                "qfrc_actuator": 0.16589586331639583,
+                "qfrc_passive": 0.0,
+                "qfrc_applied": 0.0,
+                "qfrc_bias": -4.336808689942018e-19,
+                "qfrc_constraint": 0.406878400263975,
+                "qacc": -277.25797220720017
+              },
+              "muscle_actuator_samples": {
+                "FDP3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -106.18809634590066,
+                  "length_m": 0.38745867868954026,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 212.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                },
+                "EDC3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -38.19832886959271,
+                  "length_m": 0.4179372705797353,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 94.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                }
+              }
+            },
+            "post_step_qvel": 0.0867530322210605,
+            "post_step_contacts": 0,
+            "post_step_constraint_count": 26
+          },
+          "central_qvel_derivative": -1512045.547328875
+        },
+        {
+          "epsilon": 1e-7,
+          "plus": {
+            "pre_step": {
+              "qpos": 1e-7,
+              "qvel": 0.0,
+              "joint_limit_margin_rad": 1e-7,
+              "constraint_count": 11,
+              "constraint_types": {
+                "mjCNSTR_EQUALITY": 11
+              },
+              "contacts": [],
+              "equality_residual_max_abs": 0.0,
+              "equality_force_max_abs": 41.327564233155215,
+              "generalized_force_components": {
+                "qfrc_actuator": 0.16589612623528038,
+                "qfrc_passive": 0.0,
+                "qfrc_applied": 0.0,
+                "qfrc_bias": -4.336808689942018e-19,
+                "qfrc_constraint": 0.0,
+                "qacc": -2772.5973355573014
+              },
+              "muscle_actuator_samples": {
+                "FDP3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -106.18809625656262,
+                  "length_m": 0.38745867575885157,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 212.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                },
+                "EDC3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -38.19833093962897,
+                  "length_m": 0.41793727394948105,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 94.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                }
+              }
+            },
+            "post_step_qvel": -2.9373396905497455,
+            "post_step_contacts": 0,
+            "post_step_constraint_count": 27
+          },
+          "minus": {
+            "pre_step": {
+              "qpos": -1e-7,
+              "qvel": 0.0,
+              "joint_limit_margin_rad": -1e-7,
+              "constraint_count": 12,
+              "constraint_types": {
+                "mjCNSTR_EQUALITY": 11,
+                "mjCNSTR_LIMIT_JOINT": 1
+              },
+              "contacts": [],
+              "equality_residual_max_abs": 0.0,
+              "equality_force_max_abs": 41.3288070766498,
+              "generalized_force_components": {
+                "qfrc_actuator": 0.16589607843184284,
+                "qfrc_passive": 0.0,
+                "qfrc_applied": 0.0,
+                "qfrc_bias": -4.336808689942018e-19,
+                "qfrc_constraint": 0.40687782862530086,
+                "qacc": -277.2601314275858
+              },
+              "muscle_actuator_samples": {
+                "FDP3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -106.18809627280594,
+                  "length_m": 0.3874586762917043,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 212.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                },
+                "EDC3": {
+                  "control": 0.5,
+                  "activation": 0.5,
+                  "force": -38.19833056325867,
+                  "length_m": 0.41793727333679986,
+                  "velocity_m_per_s": 0.0,
+                  "dyntype": 4,
+                  "gaintype": 2,
+                  "biastype": 2,
+                  "gainprm": [
+                    0.75, 1.05, 94.4, 200.0, 0.5, 1.6, 1.5, 1.3, 1.2, 0.0
+                  ],
+                  "dynprm": [0.01, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                }
+              }
+            },
+            "post_step_qvel": 0.08675041167011477,
+            "post_step_contacts": 0,
+            "post_step_constraint_count": 26
+          },
+          "central_qvel_derivative": -15120450.511099301
+        }
+      ]
+    }
+  },
+  "qualification": "none; stock contacting default geometry; no assembly, physiological acceptance, or controller claim"
+}

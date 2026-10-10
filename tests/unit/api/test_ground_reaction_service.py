@@ -42,8 +42,10 @@ def _series() -> GroundReactionSeries:
     )
 
 
-def _run(simulation_data=None, engine=None):
-    return SimpleNamespace(simulation_data=simulation_data or {}, engine=engine)
+def _run(simulation_data=None, engine=None, recorder=None):
+    return SimpleNamespace(
+        simulation_data=simulation_data or {}, engine=engine, recorder=recorder
+    )
 
 
 def test_recorded_series_is_preferred_over_the_engine() -> None:
@@ -57,6 +59,27 @@ def test_engine_provider_is_used_when_nothing_is_recorded() -> None:
     series = _series()
     engine = SimpleNamespace(get_ground_reaction_series=lambda: series)
     assert resolve_ground_reaction_series(_run(engine=engine)) is series
+
+
+def test_recorder_provider_is_used_when_recorded_and_engine_have_nothing() -> None:
+    series = _series()
+    recorder = SimpleNamespace(get_ground_reaction_series=lambda: series)
+    run = _run(engine=SimpleNamespace(), recorder=recorder)
+    assert resolve_ground_reaction_series(run) is series
+
+
+def test_recorder_provider_returning_none_is_still_unavailable() -> None:
+    recorder = SimpleNamespace(get_ground_reaction_series=lambda: None)
+    run = _run(engine=SimpleNamespace(), recorder=recorder)
+    assert resolve_ground_reaction_series(run) is None
+
+
+def test_engine_provider_is_preferred_over_the_recorder() -> None:
+    series = _series()
+    engine = SimpleNamespace(get_ground_reaction_series=lambda: series)
+    recorder = SimpleNamespace(get_ground_reaction_series=lambda: pytest.fail("used"))
+    run = _run(engine=engine, recorder=recorder)
+    assert resolve_ground_reaction_series(run) is series
 
 
 def test_missing_data_is_an_unavailable_payload_with_reason() -> None:

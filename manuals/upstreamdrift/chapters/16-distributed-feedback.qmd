@@ -1,0 +1,81 @@
+# Distributed Task and Phase Feedback (Provisional)
+
+## Scope and Coordinate Convention
+
+F02 (#11786) implements a local controller for a forward-dynamics plant. It
+consumes an already fitted nominal state and actuator feedforward trajectory,
+plus time-varying LQR gains from the existing MOSAIC provider. It does not
+identify body parameters, integrate a plant, fit motion capture, or qualify an
+engine. The configuration difference adapter returns
+$e_q=\operatorname{difference}(q,q^*)\in\mathbb R^{n_v}$ with a **current minus
+reference** sign; $e_v=v-v^*$. This remains meaningful when $n_q\ne n_v$.
+The adapter supplies the tangent inverse mass $M(q)^{-1}$ and must be native to
+the chosen model. The Euclidean unit-mass adapter is restricted to analytic
+fixtures. The controller rejects nonfinite states and nonsymmetric or
+nonpositive inverse mass matrices.
+
+For time interval $[t_k,t_{k+1})$, the frozen nominal input $u_k^{\rm ff}$ and
+MOSAIC gain $K_k\in\mathbb R^{n_u\times 2n_v}$ produce
+
+$$
+u_k^{\rm requested}=u_k^{\rm ff}+u_k^{\rm task}
+  -P_k K_k\begin{bmatrix}e_q\\e_v\end{bmatrix}.
+$$
+
+The task term is calculated from named, framed and unit-labeled pelvis/feet,
+trunk, arms, wrists/hands and club targets. Each task has an explicit phase
+mask and priority. For task Jacobian $J_i$ and position-error adapter
+$d_i(y_i^*,y_i)$, its local feedback wrench is
+$w_i=k_{p,i}d_i+k_{d,i}(\dot y_i^*-\dot y_i)$.
+The one-to-one actuator selection $S$ maps a task wrench to candidate actuator
+effort $SJ_i^Tw_i$. Higher-priority task influence uses
+$A_i=J_iM^{-1}S^T$; the lower-priority projector is updated by
+$P\leftarrow P(I-(AP)^\dagger AP)$. Equal-priority terms share one level and
+can compete; this is a local linearized control rule, not a guarantee of
+global nonlinear tracking or disturbance rejection.
+
+## Applied Input and Contact Boundary
+
+Only an explicit unit-constant, one-to-one actuator-to-generalized-effort map
+is supported. Generalized root coordinates are excluded from actuators. An
+engine with a state-dependent transmission, muscle activation, or different
+command-to-effort map requires a separate adapter and replay proof. The
+controller reports the frozen feedforward, feedback correction, total
+requested input, and post-limit **applied actuator torque** separately.
+Direct allocation is admitted only for declared contact-free plants and
+applies position-independent bounds and slew limits once per integration step.
+
+The existing contact/grip QP can predict feasible actuator torques and
+reactions only when an engine adapter supplies own-contact kinematics and a
+native inverse-dynamics target $M\dot v+h$. Root slack or a hidden residual
+drive is rejected. Predicted ground/grip reactions are diagnostics; they are
+**not** injected into the native plant as measured external forces. Native
+contact and grip reactions remain outputs of the forward solver. This QP
+adapter has no full-body scientific qualification yet.
+
+The caller samples the controller once at each integration-step boundary and
+holds the applied torque exactly across that step. Steps start at the nominal
+clock, remain contiguous, and cannot cross a policy boundary. The implemented
+information pattern is exact simulated full state; estimated, delayed,
+noisy, or measured-mocap feedback is unsupported. Independent open-loop replay
+must load the resulting applied-torque history into a fresh plant with no
+feedback or state resets under the F01 comparison and Tools T01 policies.
+
+## Evidence and Limits
+
+The analytic double-integrator test uses MOSAIC Riccati gains: the declared
+restoring sign reduces a 0.4 rad initial error below 0.1 rad over 1.6 s, while
+the reversed sign fails that bound. Other unit fixtures test phase masks,
+priority conflict, wrapped-angle task errors, $n_q\ne n_v$ tangent errors,
+actuator permutation, root-drive rejection, saturation and slew limits,
+contact-QP feasibility, and failure without native contact dynamics. A
+native one-joint MuJoCo motor test applies the saved torque to one forward
+step without prescribing coordinates. These are software and local-control
+checks, not proof of six-engine parity, full-swing capture matching, native
+human contact validity, muscle-driven matching, or independent replay.
+
+Reproduce the bounded evidence with
+`python -m pytest tests/unit/motion_matching/test_distributed_feedback.py -q`.
+The model/provider hashes, private capture identities, full-horizon replay,
+observability, actuator internal state, measured contact and qualification
+receipts remain open. The calculation registry and manual release stay blocked.

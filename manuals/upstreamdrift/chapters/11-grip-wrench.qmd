@@ -117,3 +117,48 @@ check any engine's constraint solver or grip model.
   established; none is claimed.
 - Reference derivation: `docs/research/proximal_distal_energy_transfer/`,
   section "Reduction of Two Contacts to an Equivalent Wrench".
+
+## Prescribed-Motion Bushing Parity Integration
+
+F10i #12060 integrates `main` at
+`26316150998ede86d08b59f1686d8b80ff9f8bdf`, including the separate #11739
+prescribed-motion bushing pathway. Its maintained method is
+`src/shared/python/grip_contact/bushing_law.py`; prescribed hand motion and
+per-engine force adapters are separate from the wrench reduction above.
+
+Let $R_h,R_c$ map hand and club frame components into world coordinates,
+$a=p_c-p_h$, and let all positions, velocities and angular velocities below
+be world quantities. Define
+
+$$
+\delta=R_h^T a,\qquad
+\dot\delta=R_h^T(v_c-v_h-\omega_h\times a),\qquad
+\theta=\operatorname{BodyXYZ}(R_h^T R_c).
+$$
+
+For the body-fixed X-Y-Z sequence, the implemented matrix $N(\theta)$ maps
+moving-frame angular velocity into angle rates:
+
+$$
+\dot\theta=N(\theta)R_c^T(\omega_c-\omega_h),\qquad
+F=-R_h(K_t\delta+C_t\dot\delta),\qquad
+M=-R_cN(\theta)^T(K_r\theta+C_r\dot\theta).
+$$
+
+Here $F$ and $M$ are the world wrench on the club at its bushing frame.
+The transpose follows from virtual power; rotational spring coordinates
+cannot be substituted directly for Cartesian moments at finite rotation.
+Diagonal stiffness and damping have units N/m, N s/m, N m/rad and
+N m s/rad. The source refuses the X-Y-Z singularity margin. The method
+requires declared rigid frame attachments, twist conventions and parameters;
+it does not calibrate those parameters against measured grip loads.
+
+Run `pytest --noconftest -o addopts='' tests/unit/grip_contact -q` in the
+existing native environment. The F10i main-integration run uses OpenSim 4.6
+and MuJoCo 3.8: 77 tests pass and 12 explicitly skip absent Drake/Pinocchio
+SDK execution. This mixed algebra/native suite is recorded separately from
+the 328-pass/25-skip native feedback platform campaign. The prescribed-motion
+series, static support and stiffness checks do not establish uninterrupted
+forward dynamics of a muscle-driven full body, ground/contact calibration,
+private mocap agreement or all-model six-engine acceptance. Keep the existing
+inventory and publication gates open.

@@ -1,0 +1,683 @@
+"""Offline one-step finite-difference audit for the pinned public MyoArm XML."""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+import sys
+from pathlib import Path
+from typing import Any
+
+import mujoco
+import numpy as np
+
+
+def _sha256(payload: bytes) -> str:
+    return hashlib.sha256(payload).hexdigest()
+
+
+def _integration_state(model: Any, data: Any) -> np.ndarray:
+    state = np.empty(
+        mujoco.mj_stateSize(model, mujoco.mjtState.mjSTATE_INTEGRATION),
+        dtype=np.float64,
+    )
+    mujoco.mj_getState(model, data, state, mujoco.mjtState.mjSTATE_INTEGRATION)
+    return state
+
+
+def _require_no_global_callbacks() -> None:
+    callback_names = (
+        "passive",
+        "control",
+        "contactfilter",
+        "sensor",
+        "time",
+        "act_dyn",
+        "act_gain",
+        "act_bias",
+    )
+    for name in callback_names:
+        getter = getattr(mujoco, f"get_mjcb_{name}", None)
+        if not callable(getter) or getter() is not None:
+            raise RuntimeError(f"MuJoCo global callback {name!r} is unavailable/active")
+
+
+def _equality_max_abs(data: Any) -> float:
+    mask = data.efc_type == mujoco.mjtConstraint.mjCNSTR_EQUALITY
+    values = np.asarray(data.efc_pos[mask], dtype=np.float64)
+    return float(np.max(np.abs(values))) if values.size else 0.0
+
+
+def _actuator_name(model: Any, index: int) -> str:
+    value = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_ACTUATOR, index)
+    return value if value is not None else f"actuator:{index}"
+
+
+def _joint_name(model: Any, index: int, *, velocity: bool) -> str | None:
+    for joint_id in range(model.njnt):
+        address = int(
+            model.jnt_dofadr[joint_id] if velocity else model.jnt_qposadr[joint_id]
+        )
+        if address == index:
+            return mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_JOINT, joint_id)
+    return None
+
+
+def _compact_step_info(info: dict[str, Any]) -> dict[str, Any]:
+    return {
+        key: value
+        for key, value in info.items()
+        if key not in {"pre_step_qpos", "pre_step_actuator_length", "post_step_qvel"}
+    }
+
+
+def _contact_snapshot(model: Any, data: Any) -> list[dict[str, Any]]:
+    contacts = []
+    for index in range(data.ncon):
+        contact = data.contact[index]
+        force = np.zeros(6, dtype=np.float64)
+        mujoco.mj_contactForce(model, data, index, force)
+        first = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_GEOM, contact.geom1)
+        second = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_GEOM, contact.geom2)
+        contacts.append(
+            {
+                "geom1": first,
+                "geom2": second,
+                "distance_m": float(contact.dist),
+                "force_in_contact_frame": [float(value) for value in force],
+            }
+        )
+    return contacts
+
+
+def _constraint_type_counts(data: Any) -> dict[str, int]:
+    names: dict[int, str] = {}
+    for name in dir(mujoco.mjtConstraint):
+        if name.startswith("mjCNSTR_"):
+            names.setdefault(int(getattr(mujoco.mjtConstraint, name)), name)
+    values = np.asarray(data.efc_type[: data.nefc], dtype=np.int64)
+    return {
+        names.get(int(value), f"constraint_type:{int(value)}"): int(count)
+        for value, count in zip(*np.unique(values, return_counts=True), strict=True)
+    }
+
+
+def _joint_limit_force_probe(model_path: Path) -> dict[str, Any]:
+    """Compare copied compiled models with one disable bit at a time."""
+    variant_bits = {
+        "native": 0,
+        "limits_disabled_diagnostic_only": int(mujoco.mjtDisableBit.mjDSBL_LIMIT),
+        "equalities_disabled_diagnostic_only": int(
+            mujoco.mjtDisableBit.mjDSBL_EQUALITY
+        ),
+        "contacts_disabled_diagnostic_only": int(mujoco.mjtDisableBit.mjDSBL_CONTACT),
+    }
+    results: dict[str, Any] = {}
+    for label, disable_bits in variant_bits.items():
+        model = mujoco.MjModel.from_xml_path(str(model_path.resolve(strict=True)))
+        model.opt.disableflags |= disable_bits
+        joint_id = next(
+            index
+            for index in range(model.njnt)
+            if _joint_name(model, int(model.jnt_qposadr[index]), velocity=False)
+            == "md3_flexion"
+        )
+        qpos_index = int(model.jnt_qposadr[joint_id])
+        dof_index = int(model.jnt_dofadr[joint_id])
+        base = mujoco.MjData(model)
+        base.act[:] = 0.5
+        base.ctrl[:] = 0.5
+        mujoco.mj_forward(model, base)
+        frozen = _integration_state(model, base)
+        control = base.ctrl.copy()
+
+        def trial(
+            sign: float,
+            epsilon: float,
+            *,
+            active_model: Any = model,
+            initial: np.ndarray = frozen,
+            command: np.ndarray = control,
+            active_joint_id: int = joint_id,
+            active_qpos_index: int = qpos_index,
+            active_dof_index: int = dof_index,
+        ) -> dict[str, Any]:
+            data = mujoco.MjData(active_model)
+            mujoco.mj_setState(
+                active_model,
+                data,
+                initial,
+                mujoco.mjtState.mjSTATE_INTEGRATION,
+            )
+            if not np.array_equal(_integration_state(active_model, data), initial):
+                raise RuntimeError("disable-copy restore was not exact")
+            direction = np.zeros(active_model.nv, dtype=np.float64)
+            direction[active_dof_index] = sign * epsilon
+            mujoco.mj_integratePos(active_model, data.qpos, direction, 1.0)
+            data.ctrl[:] = command
+            _require_no_global_callbacks()
+            mujoco.mj_forward(active_model, data)
+            _require_no_global_callbacks()
+            pre_force = {
+                name: float(np.asarray(getattr(data, name))[active_dof_index])
+                for name in (
+                    "qfrc_actuator",
+                    "qfrc_passive",
+                    "qfrc_applied",
+                    "qfrc_bias",
+                    "qfrc_constraint",
+                )
+            }
+            pre_force["qacc"] = float(data.qacc[active_dof_index])
+            actuator_details = {}
+            for actuator_name in ("FDP3", "EDC3"):
+                actuator_id = mujoco.mj_name2id(
+                    active_model, mujoco.mjtObj.mjOBJ_ACTUATOR, actuator_name
+                )
+                actuator_details[actuator_name] = {
+                    "control": float(data.ctrl[actuator_id]),
+                    "activation": float(data.act[actuator_id]),
+                    "force": float(data.actuator_force[actuator_id]),
+                    "length_m": float(data.actuator_length[actuator_id]),
+                    "velocity_m_per_s": float(data.actuator_velocity[actuator_id]),
+                    "dyntype": int(active_model.actuator_dyntype[actuator_id]),
+                    "gaintype": int(active_model.actuator_gaintype[actuator_id]),
+                    "biastype": int(active_model.actuator_biastype[actuator_id]),
+                    "gainprm": [
+                        float(value)
+                        for value in active_model.actuator_gainprm[actuator_id]
+                    ],
+                    "dynprm": [
+                        float(value)
+                        for value in active_model.actuator_dynprm[actuator_id]
+                    ],
+                }
+            pre = {
+                "qpos": float(data.qpos[active_qpos_index]),
+                "qvel": float(data.qvel[active_dof_index]),
+                "joint_limit_margin_rad": float(
+                    min(
+                        data.qpos[active_qpos_index]
+                        - active_model.jnt_range[active_joint_id, 0],
+                        active_model.jnt_range[active_joint_id, 1]
+                        - data.qpos[active_qpos_index],
+                    )
+                ),
+                "constraint_count": int(data.nefc),
+                "constraint_types": _constraint_type_counts(data),
+                "contacts": _contact_snapshot(active_model, data),
+                "equality_residual_max_abs": _equality_max_abs(data),
+                "equality_force_max_abs": (
+                    float(
+                        np.max(
+                            np.abs(
+                                data.efc_force[: data.nefc][
+                                    data.efc_type[: data.nefc]
+                                    == mujoco.mjtConstraint.mjCNSTR_EQUALITY
+                                ]
+                            )
+                        )
+                    )
+                    if np.any(
+                        data.efc_type[: data.nefc]
+                        == mujoco.mjtConstraint.mjCNSTR_EQUALITY
+                    )
+                    else 0.0
+                ),
+                "generalized_force_components": pre_force,
+                "muscle_actuator_samples": actuator_details,
+            }
+            mujoco.mj_step(active_model, data)
+            _require_no_global_callbacks()
+            if any(int(warning.number) for warning in data.warning):
+                raise RuntimeError("disable-copy native step produced warnings")
+            mujoco.mj_forward(active_model, data)
+            _require_no_global_callbacks()
+            if any(int(warning.number) for warning in data.warning):
+                raise RuntimeError("disable-copy post-step forward produced warnings")
+            if not np.isclose(
+                data.time,
+                float(active_model.opt.timestep),
+                atol=1e-15,
+                rtol=0.0,
+            ):
+                raise RuntimeError("disable-copy step clock changed")
+            return {
+                "pre_step": pre,
+                "post_step_qvel": float(data.qvel[active_dof_index]),
+                "post_step_contacts": int(data.ncon),
+                "post_step_constraint_count": int(data.nefc),
+            }
+
+        base_info = {
+            "joint": "md3_flexion",
+            "qpos_index": qpos_index,
+            "dof_index": dof_index,
+            "limited": bool(model.jnt_limited[joint_id]),
+            "range_rad": [float(value) for value in model.jnt_range[joint_id]],
+            "initial_position_rad": float(base.qpos[qpos_index]),
+            "initial_limit_margin_rad": float(
+                min(
+                    base.qpos[qpos_index] - model.jnt_range[joint_id, 0],
+                    model.jnt_range[joint_id, 1] - base.qpos[qpos_index],
+                )
+            ),
+            "frictionloss": float(model.dof_frictionloss[dof_index]),
+            "armature": float(model.dof_armature[dof_index]),
+            "damping": float(model.dof_damping[dof_index]),
+            "stiffness": float(model.jnt_stiffness[joint_id]),
+            "disableflags": int(model.opt.disableflags),
+            "restore_sha256": _sha256(frozen.tobytes()),
+        }
+        derivatives = []
+        for epsilon in (1e-5, 1e-6, 1e-7):
+            plus = trial(1.0, epsilon)
+            minus = trial(-1.0, epsilon)
+            derivatives.append(
+                {
+                    "epsilon": epsilon,
+                    "plus": plus,
+                    "minus": minus,
+                    "central_qvel_derivative": (
+                        plus["post_step_qvel"] - minus["post_step_qvel"]
+                    )
+                    / (2.0 * epsilon),
+                }
+            )
+        results[label] = {**base_info, "perturbations": derivatives}
+    return results
+
+
+def run_probe(model_path: Path, receipt_path: Path) -> dict[str, Any]:
+    _require_no_global_callbacks()
+    model = mujoco.MjModel.from_xml_path(str(model_path.resolve(strict=True)))
+    if (model.nq, model.nv, model.na, model.nu) != (38, 38, 63, 63):
+        raise RuntimeError("pinned MyoArm compiled dimensions differ")
+    base = mujoco.MjData(model)
+    base.act[:] = 0.5
+    base.ctrl[:] = 0.5
+    mujoco.mj_forward(model, base)
+    if any(int(warning.number) for warning in base.warning):
+        raise RuntimeError("base forward produced a MuJoCo warning")
+    frozen = _integration_state(model, base)
+    base_qpos = base.qpos.copy()
+    base_ctrl = base.ctrl.copy()
+    step_seconds = float(model.opt.timestep)
+    state_size = 2 * int(model.nv) + int(model.na)
+
+    def evaluate(
+        state_delta: np.ndarray | None = None,
+        command_delta: np.ndarray | None = None,
+    ) -> tuple[np.ndarray, dict[str, Any]]:
+        data = mujoco.MjData(model)
+        mujoco.mj_setState(model, data, frozen, mujoco.mjtState.mjSTATE_INTEGRATION)
+        if not np.array_equal(_integration_state(model, data), frozen):
+            raise RuntimeError("full integration-state restore was not exact")
+        _require_no_global_callbacks()
+        position_perturb_error = 0.0
+        velocity_perturb_error = 0.0
+        activation_perturb_error = 0.0
+        if state_delta is not None:
+            dq = state_delta[: model.nv]
+            dv = state_delta[model.nv : 2 * model.nv]
+            da = state_delta[2 * model.nv :]
+            mujoco.mj_integratePos(model, data.qpos, dq, 1.0)
+            data.qvel[:] += dv
+            data.act[:] += da
+            realized_dq = np.empty(model.nv, dtype=np.float64)
+            mujoco.mj_differentiatePos(model, realized_dq, 1.0, base.qpos, data.qpos)
+            position_perturb_error = float(np.max(np.abs(realized_dq - dq)))
+            velocity_perturb_error = float(np.max(np.abs(data.qvel - base.qvel - dv)))
+            activation_perturb_error = float(np.max(np.abs(data.act - base.act - da)))
+        command = base_ctrl if command_delta is None else base_ctrl + command_delta
+        data.ctrl[:] = command
+        if (
+            np.any(data.act < 0.0)
+            or np.any(data.act > 1.0)
+            or np.any(data.ctrl < 0.0)
+            or np.any(data.ctrl > 1.0)
+            or not np.array_equal(data.ctrl, command)
+        ):
+            raise RuntimeError("central perturbation changed/left bounded inputs")
+        _require_no_global_callbacks()
+        mujoco.mj_forward(model, data)
+        _require_no_global_callbacks()
+        pre_step_contacts = int(data.ncon)
+        pre_step_equality_error = _equality_max_abs(data)
+        pre_step_qpos = data.qpos.copy()
+        pre_step_actuator_length = np.asarray(
+            data.actuator_length, dtype=np.float64
+        ).copy()
+        pre_step_contacts_detail = _contact_snapshot(model, data)
+        pre_step_qacc_max_abs = float(np.max(np.abs(data.qacc)))
+        pre_step_qacc_at_29 = float(data.qacc[29])
+        pre_step_actuator_force_at_29 = float(data.qfrc_actuator[29])
+        pre_step_constraint_force_at_29 = float(data.qfrc_constraint[29])
+        pre_step_equality_force_max_abs = float(
+            np.max(
+                np.abs(
+                    data.efc_force[
+                        data.efc_type == mujoco.mjtConstraint.mjCNSTR_EQUALITY
+                    ]
+                )
+            )
+        )
+        if any(int(warning.number) for warning in data.warning):
+            raise RuntimeError("pre-step forward produced a MuJoCo warning")
+        mujoco.mj_step(model, data)
+        _require_no_global_callbacks()
+        if any(int(warning.number) for warning in data.warning):
+            raise RuntimeError("native step produced a MuJoCo warning")
+        if not np.isclose(data.time, step_seconds, atol=1e-15, rtol=0.0):
+            raise RuntimeError("native step clock differs from compiled timestep")
+        mujoco.mj_forward(model, data)
+        _require_no_global_callbacks()
+        if any(int(warning.number) for warning in data.warning):
+            raise RuntimeError("post-step forward produced a MuJoCo warning")
+        q_difference = np.empty(model.nv, dtype=np.float64)
+        mujoco.mj_differentiatePos(model, q_difference, 1.0, baseline_qpos, data.qpos)
+        output = np.concatenate(
+            (q_difference, data.qvel - baseline_qvel, data.act - baseline_act)
+        )
+        if not np.isfinite(output).all():
+            raise RuntimeError("native one-step output is nonfinite")
+        return output, {
+            "pre_step_contacts": pre_step_contacts,
+            "pre_step_equality_max_abs": pre_step_equality_error,
+            "post_step_contacts": int(data.ncon),
+            "post_step_equality_max_abs": _equality_max_abs(data),
+            "time_seconds": float(data.time),
+            "warnings": sum(int(warning.number) for warning in data.warning),
+            "initial_position_perturb_max_error": position_perturb_error,
+            "initial_velocity_perturb_max_error": velocity_perturb_error,
+            "initial_activation_perturb_max_error": activation_perturb_error,
+            "pre_step_qpos": pre_step_qpos,
+            "pre_step_actuator_length": pre_step_actuator_length,
+            "post_step_qvel": data.qvel.copy(),
+            "post_step_qacc_max_abs": float(np.max(np.abs(data.qacc))),
+            "post_step_qacc_at_29": float(data.qacc[29]),
+            "post_step_actuator_force_at_29": float(data.qfrc_actuator[29]),
+            "post_step_constraint_force_at_29": float(data.qfrc_constraint[29]),
+            "pre_step_contacts_detail": pre_step_contacts_detail,
+            "post_step_contacts_detail": _contact_snapshot(model, data),
+            "pre_step_qacc_max_abs": pre_step_qacc_max_abs,
+            "pre_step_qacc_at_29": pre_step_qacc_at_29,
+            "pre_step_actuator_force_at_29": pre_step_actuator_force_at_29,
+            "pre_step_constraint_force_at_29": pre_step_constraint_force_at_29,
+            "pre_step_equality_force_max_abs": pre_step_equality_force_max_abs,
+        }
+
+    def actuator_lengths_at(qpos: np.ndarray) -> np.ndarray:
+        data = mujoco.MjData(model)
+        mujoco.mj_setState(model, data, frozen, mujoco.mjtState.mjSTATE_INTEGRATION)
+        data.qpos[:] = qpos
+        data.ctrl[:] = base_ctrl
+        _require_no_global_callbacks()
+        mujoco.mj_forward(model, data)
+        _require_no_global_callbacks()
+        if any(int(warning.number) for warning in data.warning):
+            raise RuntimeError("actuator-length forward produced a MuJoCo warning")
+        return np.asarray(data.actuator_length, dtype=np.float64).copy()
+
+    def moment_arms_at(qpos: np.ndarray, qpos_index: int) -> np.ndarray:
+        direction = np.zeros(model.nv, dtype=np.float64)
+        direction[qpos_index] = 1.0
+        inner_epsilon = 1e-6
+        qpos_plus = qpos.copy()
+        qpos_minus = qpos.copy()
+        mujoco.mj_integratePos(model, qpos_plus, direction, inner_epsilon)
+        mujoco.mj_integratePos(model, qpos_minus, -direction, inner_epsilon)
+        return -(actuator_lengths_at(qpos_plus) - actuator_lengths_at(qpos_minus)) / (
+            2.0 * inner_epsilon
+        )
+
+    def sensitivity_detail(
+        plus_info: dict[str, Any],
+        minus_info: dict[str, Any],
+        epsilon: float,
+        state_column: int,
+        output_row: int,
+    ) -> dict[str, Any]:
+        output_velocity_index = output_row - model.nv
+        lengths_plus = plus_info["pre_step_actuator_length"]
+        lengths_minus = minus_info["pre_step_actuator_length"]
+        length_delta = lengths_plus - lengths_minus
+        arms_plus = moment_arms_at(plus_info["pre_step_qpos"], state_column)
+        arms_minus = moment_arms_at(minus_info["pre_step_qpos"], state_column)
+        arm_delta = arms_plus - arms_minus
+        selected = np.argsort(np.abs(arm_delta))[::-1][:8]
+        return {
+            "state_column": state_column,
+            "state_column_joint": _joint_name(model, state_column, velocity=False),
+            "output_row": output_row,
+            "output_velocity_index": output_velocity_index,
+            "output_velocity_joint": _joint_name(
+                model, output_velocity_index, velocity=True
+            ),
+            "epsilon": epsilon,
+            "position_perturb_errors": [
+                plus_info["initial_position_perturb_max_error"],
+                minus_info["initial_position_perturb_max_error"],
+            ],
+            "max_abs_actuator_length_plus_minus_delta_m": float(
+                np.max(np.abs(length_delta))
+            ),
+            "max_abs_estimated_moment_arm_plus_minus_delta_m_per_rad": float(
+                np.max(np.abs(arm_delta))
+            ),
+            "plus_minus_post_velocity_at_output_row": [
+                float(plus_info["post_step_qvel"][output_velocity_index]),
+                float(minus_info["post_step_qvel"][output_velocity_index]),
+            ],
+            "largest_estimated_moment_arm_changes": [
+                {
+                    "actuator": _actuator_name(model, int(index)),
+                    "length_plus_m": float(lengths_plus[index]),
+                    "length_minus_m": float(lengths_minus[index]),
+                    "length_delta_m": float(length_delta[index]),
+                    "moment_arm_plus_m_per_rad": float(arms_plus[index]),
+                    "moment_arm_minus_m_per_rad": float(arms_minus[index]),
+                    "moment_arm_delta_m_per_rad": float(arm_delta[index]),
+                }
+                for index in selected
+            ],
+            "plus": _compact_step_info(plus_info),
+            "minus": _compact_step_info(minus_info),
+        }
+
+    # The unperturbed next state is the common reference for every output.
+    data_base = mujoco.MjData(model)
+    mujoco.mj_setState(model, data_base, frozen, mujoco.mjtState.mjSTATE_INTEGRATION)
+    data_base.ctrl[:] = base_ctrl
+    mujoco.mj_forward(model, data_base)
+    mujoco.mj_step(model, data_base)
+    mujoco.mj_forward(model, data_base)
+    baseline_qpos = data_base.qpos.copy()
+    baseline_qvel = data_base.qvel.copy()
+    baseline_act = data_base.act.copy()
+    # Re-evaluate after assigning the shared output reference; this must be zero.
+    baseline, baseline_diagnostics = evaluate()
+    if not np.allclose(baseline, 0.0, atol=0.0, rtol=0.0):
+        raise RuntimeError("nominal next state did not reproduce its own reference")
+
+    rng = np.random.default_rng(20261009)
+    direction_state = rng.normal(size=state_size)
+    direction_state /= np.linalg.norm(direction_state)
+    direction_command = rng.normal(size=model.nu)
+    direction_command /= np.linalg.norm(direction_command)
+    matrix_results: list[dict[str, Any]] = []
+    jacobians: list[tuple[np.ndarray, np.ndarray]] = []
+    for epsilon in (1e-5, 1e-6, 1e-7):
+        a_matrix = np.empty((state_size, state_size), dtype=np.float64)
+        b_matrix = np.empty((state_size, model.nu), dtype=np.float64)
+        max_a_pair: dict[str, Any] | None = None
+        for index in range(state_size):
+            delta = np.zeros(state_size, dtype=np.float64)
+            delta[index] = epsilon
+            plus, plus_info = evaluate(state_delta=delta)
+            minus, minus_info = evaluate(state_delta=-delta)
+            derivative = (plus - minus) / (2.0 * epsilon)
+            a_matrix[:, index] = derivative
+            if (
+                max_a_pair is None
+                or float(np.max(np.abs(derivative))) > max_a_pair["derivative_max_abs"]
+            ):
+                max_a_pair = {
+                    "input_column": index,
+                    "derivative_max_abs": float(np.max(np.abs(derivative))),
+                    "output_row": int(np.argmax(np.abs(derivative))),
+                    "plus": _compact_step_info(plus_info),
+                    "minus": _compact_step_info(minus_info),
+                    "output_delta_max_abs": float(np.max(np.abs(plus - minus))),
+                    "sensitivity_detail": (
+                        sensitivity_detail(
+                            plus_info,
+                            minus_info,
+                            epsilon,
+                            index,
+                            int(np.argmax(np.abs(derivative))),
+                        )
+                        if index < model.nv
+                        else None
+                    ),
+                }
+        max_b_pair: dict[str, Any] | None = None
+        for index in range(model.nu):
+            delta = np.zeros(model.nu, dtype=np.float64)
+            delta[index] = epsilon
+            plus, plus_info = evaluate(command_delta=delta)
+            minus, minus_info = evaluate(command_delta=-delta)
+            derivative = (plus - minus) / (2.0 * epsilon)
+            b_matrix[:, index] = derivative
+            if (
+                max_b_pair is None
+                or float(np.max(np.abs(derivative))) > max_b_pair["derivative_max_abs"]
+            ):
+                max_b_pair = {
+                    "input_column": index,
+                    "derivative_max_abs": float(np.max(np.abs(derivative))),
+                    "output_row": int(np.argmax(np.abs(derivative))),
+                    "plus": _compact_step_info(plus_info),
+                    "minus": _compact_step_info(minus_info),
+                    "output_delta_max_abs": float(np.max(np.abs(plus - minus))),
+                }
+        matrix_results.append(
+            {
+                "epsilon": epsilon,
+                "a_max_abs": float(np.max(np.abs(a_matrix))),
+                "b_max_abs": float(np.max(np.abs(b_matrix))),
+                "a_finite": bool(np.isfinite(a_matrix).all()),
+                "b_finite": bool(np.isfinite(b_matrix).all()),
+                "a_max_index": [
+                    int(value)
+                    for value in np.unravel_index(
+                        np.argmax(np.abs(a_matrix)), a_matrix.shape
+                    )
+                ],
+                "a_block_max_abs": {
+                    "q_input": float(np.max(np.abs(a_matrix[:, : model.nv]))),
+                    "v_input": float(
+                        np.max(np.abs(a_matrix[:, model.nv : 2 * model.nv]))
+                    ),
+                    "activation_input": float(
+                        np.max(np.abs(a_matrix[:, 2 * model.nv :]))
+                    ),
+                },
+                "max_a_pair_diagnostics": max_a_pair,
+                "max_b_pair_diagnostics": max_b_pair,
+            }
+        )
+        jacobians.append((a_matrix, b_matrix))
+
+    directional: list[dict[str, Any]] = []
+    for half_step in (1e-4, 1e-5, 1e-6):
+        plus, plus_info = evaluate(
+            half_step * direction_state, half_step * direction_command
+        )
+        minus, minus_info = evaluate(
+            -half_step * direction_state, -half_step * direction_command
+        )
+        actual_slope = (plus - minus) / (2.0 * half_step)
+        row: dict[str, Any] = {
+            "rollout_half_step": half_step,
+            "actual_slope_l2": float(np.linalg.norm(actual_slope)),
+            "plus_pre_contacts": plus_info["pre_step_contacts"],
+            "minus_pre_contacts": minus_info["pre_step_contacts"],
+            "plus_post_contacts": plus_info["post_step_contacts"],
+            "minus_post_contacts": minus_info["post_step_contacts"],
+        }
+        for result, (a_matrix, b_matrix) in zip(matrix_results, jacobians, strict=True):
+            predicted = a_matrix @ direction_state + b_matrix @ direction_command
+            error = predicted - actual_slope
+            row[f"epsilon_{result['epsilon']:.0e}"] = {
+                "prediction_error_l2": float(np.linalg.norm(error)),
+                "relative_prediction_error_l2": float(
+                    np.linalg.norm(error)
+                    / max(float(np.linalg.norm(actual_slope)), 1e-30)
+                ),
+                "prediction_error_max_abs": float(np.max(np.abs(error))),
+            }
+        directional.append(row)
+
+    script_path = Path(__file__).resolve(strict=True)
+    receipt: dict[str, Any] = {
+        "evidence_class": "exploratory_native_centered_fd_no_qualification",
+        "source_model": str(model_path.resolve(strict=True)),
+        "source_model_sha256": _sha256(model_path.read_bytes()),
+        "script_sha256": _sha256(script_path.read_bytes()),
+        "mujoco_version": mujoco.__version__,
+        "dimensions": {
+            "nq": int(model.nq),
+            "nv": int(model.nv),
+            "na": int(model.na),
+            "nu": int(model.nu),
+            "state_tangent": state_size,
+            "integration_state_size": int(frozen.size),
+        },
+        "step_seconds": step_seconds,
+        "state_restore_sha256": _sha256(frozen.tobytes()),
+        "initialization": "stock qpos/qvel; all activation and controls set to 0.5; mj_forward",
+        "restore_policy": "fresh MjData + exact mjSTATE_INTEGRATION restore before every plus/minus trial",
+        "configuration_difference_policy": "mj_integratePos perturbation and mj_differentiatePos output against one shared nominal next qpos",
+        "equality_solver_note": "the same frozen integration-state warm-start is restored before every rollout",
+        "baseline_step": _compact_step_info(baseline_diagnostics),
+        "perturbation_epsilons": [1e-5, 1e-6, 1e-7],
+        "direction_seed": 20261009,
+        "matrix_sensitivity": matrix_results,
+        "directional_rollout_sensitivity": directional,
+        "constraint_disable_comparisons": _joint_limit_force_probe(model_path),
+        "qualification": "none; stock contacting default geometry; no assembly, physiological acceptance, or controller claim",
+    }
+    receipt_path.parent.mkdir(parents=True, exist_ok=True)
+    receipt_path.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
+    return receipt
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--model",
+        type=Path,
+        default=None,
+        help="Pinned arm/myoarm.xml path; defaults under UD_MYO_ARM_RESOURCE_ROOT.",
+    )
+    parser.add_argument(
+        "--receipt",
+        type=Path,
+        default=Path(__file__).with_name("F09G-MYOARM-FD-AUDIT-MJ38.json"),
+    )
+    args = parser.parse_args()
+    model_path = args.model
+    if model_path is None:
+        resource_root = os.environ.get("UD_MYO_ARM_RESOURCE_ROOT")
+        if not resource_root:
+            parser.error("set UD_MYO_ARM_RESOURCE_ROOT or pass --model")
+        model_path = Path(resource_root) / "arm" / "myoarm.xml"
+    receipt = run_probe(model_path, args.receipt)
+    sys.stdout.write(json.dumps(receipt, indent=2) + "\n")
+
+
+if __name__ == "__main__":
+    main()

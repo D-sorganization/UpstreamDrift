@@ -92,6 +92,7 @@ Full-trajectory marker matching, alternating calibration, limb scaling, and rang
 | `bound_widening`             | multiplier | Safety factor applied to widen joint range limits            | ik    |
 | `leg_angle_ranges_deg`       | deg        | Min and max angles observed per lower limb joint coordinate  | ik    |
 | `constrained_ik`             | compound   | Optional constrained IK execution diagnostics and provenance | ik    |
+| `restart_policy`             | compound   | Trajectory IK restart policy and its joint-step bound        | ik    |
 
 ## Dynamics Stage (`dynamics`)
 
@@ -113,6 +114,7 @@ Computed-torque tracking simulation, zero-moment point diagnostics, contact para
 | `range_of_motion_flags`           | compound | Range-of-motion excursions observed during simulation            | dynamics |
 | `root_error_timeline_m`           | m        | Floating pelvis tracking position error sampled across timeline  | dynamics |
 | `backswing_to_1s`                 | compound | Dynamic tracking metrics restricted to backswing (0 to 1.0 s)    | dynamics |
+| `fd_phase`                        | compound | FD marker RMS split at the detected impact (reporting only)      | dynamics |
 | `peak_joint_torque_n_m`           | N m      | Maximum absolute joint actuator torque exerted in simulation     | dynamics |
 | `lowest_sphere_height_min_m`      | m        | Minimum elevation of lowest foot contact sphere in simulation    | dynamics |
 | `lowest_sphere_height_max_m`      | m        | Maximum elevation of lowest foot contact sphere in simulation    | dynamics |

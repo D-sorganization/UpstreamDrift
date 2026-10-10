@@ -1,0 +1,129 @@
+# Native Passive-Load Readiness
+
+This provisional F07 chapter accompanies child #11939 under #11791 and #11792.
+It adds a necessary passive-load gate to the observations in
+[Native Constrained-State Readiness](32-native-constrained-state.qmd), without
+extending [Native Muscle Replay](13-native-muscle-replay.qmd) admission.
+Passing declared limits never establishes anatomical or capture qualification.
+
+## Native Evidence and Units
+
+`tour_matching/native_passive_readiness.py` observes an owned native Model/State
+through `audit_native_passive_readiness`. It supports exactly
+`Thelen2003Muscle` and `Millard2012EquilibriumMuscle`, requires agreement between
+recursive and registered muscle paths, and reuses the public constraint-state
+observer for model/runtime/provider identities and outstanding state gates.
+A State copy isolates realization caches; callers must prevent concurrent
+Model mutation because lock targets can be model-owned. The observer neither
+equilibrates nor integrates, assembles, unlocks, disables or overrides anything.
+
+Lengths are metres, fiber velocity is metres per second, and forces are newtons.
+Activation and excitation retain native dimensionless conventions. Native
+`getPassiveFiberForce` is a fiber-axis quantity; tendon and fiber-along-tendon
+forces are distinct outputs. Pennation projection must not be mistaken for
+damping. The observed native maximum isometric force $F_{max}>0$ defines the
+reported force ratios, not a universal physiological acceptance threshold.
+
+For the admitted Millard law, the native passive fiber output combines elastic
+and damping contributions:
+
+$$F_{passive}=F_{elastic}+F_{damping},\qquad
+r_{elastic}=F_{elastic}/F_{max},\qquad r_T=F_T/F_{max}.$$
+
+The observer uses the actual `getPassiveFiberElasticForce` and
+`getPassiveFiberDampingForce` accessors. The inspected
+[Millard implementation](https://github.com/opensim-org/opensim-core/blob/85aaf64/OpenSim/Actuators/Millard2012EquilibriumMuscle.cpp)
+computes these separately before their sum. The exact admitted
+[Thelen implementation](https://github.com/opensim-org/opensim-core/blob/85aaf64/OpenSim/Actuators/Thelen2003Muscle.cpp)
+has no parallel passive damping term: its passive fiber output is used as the
+elastic contribution and the damping contribution is recorded as zero.
+The runtime version names revision `85aaf64`; that string is not proof that
+every installed binary or transitive library matches the inspected source.
+
+Cancellation is a separate observation: the smaller absolute contribution when
+elastic and damping terms have opposing signs, otherwise zero. It is not an
+alternative to the elastic-force gate. Native fiber velocity also remains
+visible; algebraic force balance does not imply a static prepared posture.
+
+## Explicit Policy and Fail-Closed Admission
+
+`PassiveReadinessPolicy` binds the loaded model SHA-256, declared preparation
+scope and exactly one `MusclePassiveLimits` record per native muscle. Each record
+requires source provenance, a positive finite normalized-fiber interval, finite
+nonnegative elastic-force and tendon-force ratio limits, and explicit expected
+activation-dynamics and tendon-compliance flags. No physiological limits are
+invented by default. Provenance text is a declaration requiring external review,
+not independent approval. The scope string does not execute or verify preparation.
+
+The necessary tests are
+
+$$\ell_{min}\leq\ell_f/\ell_{opt}\leq\ell_{max},\qquad
+|r_{elastic}|\leq r_{elastic,max},\qquad |r_T|\leq r_{T,max}.$$
+
+Missing policy, foreign model identity, incomplete or extra muscle coverage,
+disabled/overridden muscles, changed runtime flags and violated limits block
+`require_native_passive_readiness`. It obtains fresh native evidence instead of
+accepting a caller-written receipt. Native option changes can leave the model
+XML hash unchanged; they are checked independently. Nonfinite observations and
+unsupported concrete laws cannot produce accepted evidence.
+
+`within_declared_limits` describes only this necessary gate. The immutable
+qualification field always reads `not-qualified-for-muscle-matching`, including
+when synthetic permissive limits pass. The nested constraint audit preserves its
+own blockers. Neither the observation digest nor an equilibrated state is a
+complete-state artifact or authenticity certificate. Existing exploratory and
+replay APIs are unchanged; future full-source matching orchestration must call
+this gate and independently enforce anatomy, assistance, contact, complete state,
+calibration, uncertainty and held-out validation requirements.
+
+## Native Counterexamples and Source Findings
+
+Both native-law fixtures equilibrate a 1 kg SliderJoint model at path length
+0.32 m, activation 0.05, $F_{max}=1000$ N, optimal fiber length 0.1 m and tendon
+slack length 0.1 m. Native fiber-along-tendon and tendon forces agree within
+0.001 N while a deliberately synthetic elastic-force limit of 0.1 $F_{max}$
+fails. These numbers test software rejection; they are not anatomical limits.
+
+A separate nonsteady Millard fixture uses path length 0.25 m and explicitly
+sets fiber length to 0.20 m after initial preparation. Native elastic force is
+approximately 1857.14 N, damping is -1857.14 N, net passive force is approximately
+zero, and fiber velocity is -18.57 m/s. A net-only check incorrectly accepted
+this case before the regression; the elastic-force gate rejects it. No law or
+anatomical parameter was changed to create acceptance.
+
+The unchanged public 520-muscle source at commit
+`3cfbe329a8ef9412494980419cb7177c41183a53`, source SHA-256
+`a55c64341680551fb5a41be254bdfdb3b2be0ac789336ea44902b22fc9a83913`, was
+evaluated with all 1348 previously prepared named values restored exactly and
+native defaults for other state. No new equilibrium or source edit was performed.
+All 520 muscles were observed, and the result remains `passive-policy-unavailable`.
+MF_m5_laminar elastic force reaches 62.377 $F_{max}$; IL_L4 fiber-axis passive
+force is 48406.73 N and its along-tendon/tendon force is 48066.55 N. These are
+observed source-readiness concerns, not clinical safety limits or proof of an
+anatomical defect. Missing visual meshes do not justify changing dynamics.
+
+Exact torso donor release and assembly ancestry remain unavailable. The source's
+torso citation alone does not identify a release checksum. Native reproduction
+of endpoint/frame distances and minimum-activation equilibrium has not resolved
+the loading. Obtain matching donor frame, endpoint, physiological parameter and
+neutral-posture provenance before calibration or tuning; retain original failures.
+Locked wrists, missing hand attachments, assistance, rigid tendons, ground/grip,
+capture marker correspondence and full-state replay remain separate gates.
+
+## Reproduction and Remaining Work
+
+Run serially with the actual OpenSim runtime:
+
+```text
+python -m pytest tests/opensim/test_native_passive_readiness.py tests/opensim/test_native_constraint_state.py -o addopts='' -q
+```
+
+The native suite covers force-equilibrium rejection, damping cancellation,
+runtime options, exact model/coverage, disabled/overridden drives, finite limits,
+missing provenance and immutable unqualified results. Default Python without
+OpenSim skips native cases and supplies no native evidence. The local full-source
+receipt retains source/preparation/runtime/provider hashes, all observed muscles
+and constraint blockers; it contains no private capture and is not a committed
+foreign model. Physiological policy approval, exact donor comparison, whole-model
+matching and independent full-horizon replay remain outstanding. Manual rendering,
+page review and publication approval remain governed and blocked.

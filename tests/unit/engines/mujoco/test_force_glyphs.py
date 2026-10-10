@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 import math
 import numpy as np
 import pytest
@@ -9,6 +10,8 @@ import pytest
 mujoco = pytest.importorskip("mujoco")
 
 from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.force_glyphs import (
+    ARROW_RENDER_LENGTH_FRACTION,
+    CLAMPED_TIP_LENGTH_M,
     SceneGlyphReceipt,
     add_glyphs_to_scene,
     segment_geom_count,
@@ -125,16 +128,74 @@ def test_one_arrow_geom_and_endpoints_match() -> None:
     assert geom.type == int(mujoco.mjtGeom.mjGEOM_ARROW)
     np.testing.assert_allclose(geom.rgba, [0.8, 0.2, 0.1, 1.0], atol=1e-6)
 
-    # In MuJoCo mjv_connector for mjGEOM_ARROW:
-    # geom.pos is the tail of the arrow
-    # geom.mat[:, 2] is the normalized direction vector along the shaft
-    # geom.size[2] is the total length
+    # For mjGEOM_ARROW, geom.pos is the tail and geom.mat[:, 2] the unit shaft
+    # direction. MuJoCo's renderer draws an arrow ARROW_RENDER_LENGTH_FRACTION
+    # of size[2] long (measured: a 2 m connector arrow reaches a 1 m capsule),
+    # so the drawn tip is pos + fraction * size[2] * z.
     tail_reconstructed = geom.pos
     np.testing.assert_allclose(tail_reconstructed, arrow.tail_m, atol=1e-9)
 
     z_dir = geom.mat.reshape(3, 3)[:, 2]
-    tip_reconstructed = geom.pos + geom.size[2] * z_dir
+    drawn = ARROW_RENDER_LENGTH_FRACTION * geom.size[2]
+    tip_reconstructed = geom.pos + drawn * z_dir
     np.testing.assert_allclose(tip_reconstructed, arrow.tip_m, atol=1e-9)
+
+
+@pytest.mark.unit
+def test_clamped_marker_arrow_is_drawn_at_its_true_length() -> None:
+    """The white clamped-tip marker uses the same render-length correction."""
+    model = mujoco.MjModel.from_xml_string("<mujoco><worldbody/></mujoco>")
+    scene = mujoco.MjvScene(model, maxgeom=10)
+    arrow = replace(_make_dummy_arrow(tail_m=(0, 0, 0), tip_m=(0, 0, 1)), clamped=True)
+    add_glyphs_to_scene(scene, _make_glyph_set(arrows=(arrow,)))
+    marker = scene.geoms[1]
+    drawn = ARROW_RENDER_LENGTH_FRACTION * marker.size[2]
+    assert drawn == pytest.approx(CLAMPED_TIP_LENGTH_M)
+
+
+@pytest.mark.unit
+@pytest.mark.requires_gl
+def test_rendered_arrow_reaches_the_same_height_as_a_capsule() -> None:
+    """Pixel check of the correction: a 1 m arrow and a 1 m capsule end level."""
+    model = mujoco.MjModel.from_xml_string(
+        '<mujoco><visual><global offwidth="320" offheight="240"/></visual>'
+        "<worldbody/></mujoco>"
+    )
+    data = mujoco.MjData(model)
+    mujoco.mj_forward(model, data)
+    try:
+        renderer = mujoco.Renderer(model, 240, 320)
+    except (RuntimeError, OSError, mujoco.FatalError) as exc:
+        pytest.skip(f"no MuJoCo GL context: {exc}")
+    cam = mujoco.MjvCamera()
+    cam.lookat[:] = (0.15, 0.0, 0.5)
+    cam.distance, cam.azimuth, cam.elevation = 3.0, 90.0, 0.0
+    renderer.update_scene(data, camera=cam)
+    arrow = _make_dummy_arrow(tail_m=(0, 0, 0), tip_m=(0, 0, 1), rgba=(1, 0, 0, 1))
+    add_glyphs_to_scene(renderer.scene, _make_glyph_set(arrows=(arrow,)))
+    geom = renderer.scene.geoms[renderer.scene.ngeom]
+    mujoco.mjv_initGeom(
+        geom,
+        int(mujoco.mjtGeom.mjGEOM_CAPSULE),
+        np.array([0.01, 0.0, 0.0]),
+        np.zeros(3),
+        np.eye(3).ravel(),
+        np.array([0, 0, 1, 1], dtype=np.float32),
+    )
+    mujoco.mjv_connector(
+        geom,
+        int(mujoco.mjtGeom.mjGEOM_CAPSULE),
+        0.02,
+        np.array([0.3, 0.0, 0.0]),
+        np.array([0.3, 0.0, 1.0]),
+    )
+    renderer.scene.ngeom += 1
+    img = renderer.render().astype(int)
+    red_rows = np.nonzero(((img[..., 0] > 120) & (img[..., 2] < 60)).any(axis=1))[0]
+    blue_rows = np.nonzero(((img[..., 2] > 120) & (img[..., 0] < 60)).any(axis=1))[0]
+    renderer.close()
+    assert red_rows.size and blue_rows.size
+    assert abs(int(red_rows.min()) - int(blue_rows.min())) <= 4
 
 
 @pytest.mark.unit

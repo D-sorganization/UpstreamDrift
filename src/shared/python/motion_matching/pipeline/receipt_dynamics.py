@@ -255,6 +255,57 @@ class FinishFeasibilityReceipt(BaseModel):
     )
 
 
+class FdPhaseReceipt(BaseModel):
+    """FD marker RMS split at the detected impact (#12042); reporting only."""
+
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+
+    status: str = Field(
+        ...,
+        description="ok, or unavailable with a reason (never reported as zero)",
+        json_schema_extra={"unit": "text", "stage": "dynamics"},
+    )
+    reason: str | None = Field(
+        None,
+        description="Why the split is unavailable",
+        json_schema_extra={"unit": "text", "stage": "dynamics"},
+    )
+    impact_detector: str | None = Field(
+        None,
+        description="Shared impact rule applied to the reference clubhead",
+        json_schema_extra={"unit": "text", "stage": "dynamics"},
+    )
+    impact_time_s: float | None = Field(
+        None,
+        description="Detected impact time",
+        json_schema_extra={"unit": "s", "stage": "dynamics"},
+    )
+    fd_rms_address_to_impact_m: float | None = Field(
+        None,
+        ge=0,
+        description="FD marker RMS from address to impact (t <= impact)",
+        json_schema_extra={"unit": "m", "stage": "dynamics"},
+    )
+    fd_rms_after_impact_m: float | None = Field(
+        None,
+        ge=0,
+        description="FD marker RMS after impact (follow-through)",
+        json_schema_extra={"unit": "m", "stage": "dynamics"},
+    )
+    address_to_impact_frames: int | None = Field(
+        None,
+        ge=0,
+        description="Capture frames in the address-to-impact phase",
+        json_schema_extra={"unit": "count", "stage": "dynamics"},
+    )
+    after_impact_frames: int | None = Field(
+        None,
+        ge=0,
+        description="Capture frames after impact",
+        json_schema_extra={"unit": "count", "stage": "dynamics"},
+    )
+
+
 class BackswingReceipt(BaseModel):
     """Dynamic tracking performance up to top of backswing (0 to 1.0 s)."""
 
@@ -449,6 +500,11 @@ class DynamicsReceipt(BaseModel):
     backswing_to_1s: BackswingReceipt | None = Field(
         None,
         description="Dynamic tracking metrics restricted to backswing (0 to 1.0 s)",
+        json_schema_extra={"unit": "compound", "stage": "dynamics"},
+    )
+    fd_phase: FdPhaseReceipt | None = Field(
+        None,
+        description="FD marker RMS split at the detected impact (reporting only)",
         json_schema_extra={"unit": "compound", "stage": "dynamics"},
     )
     peak_joint_torque_n_m: float = Field(

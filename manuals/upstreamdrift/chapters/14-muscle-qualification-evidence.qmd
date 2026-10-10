@@ -1,0 +1,55 @@
+# Muscle Qualification Evidence Boundaries
+
+## Status and Scope
+
+This provisional reference covers the evidence-integrity correction under
+F07 (#11791), within feedback matching epic #11784. It does not qualify a native
+muscle model, contact law or captured motion. The calculation inventory and
+publication approval remain blocked under the existing manual governance.
+
+## Inputs and Performed Checks
+
+`tour_matching.muscle_qualification.qualify_muscle_extensions` accepts muscle
+parameter/provenance records and a declared anatomical scope. It runs the
+existing anatomy-coverage and parameter-validation checks. It receives no
+native model, path geometry, state trajectory or independently verified replay
+receipt. Parameter validity alone cannot demonstrate muscle path correctness,
+moment-arm consistency, tendon equilibrium, activation trajectories or native
+forward replay.
+
+The lower-level geometry, finite-difference moment-arm, equilibrium and
+activation audit helpers remain available for separately supplied evidence.
+Their availability does not imply the parameter-only orchestrator ran them.
+
+## Result Contract
+
+The returned receipt retains actual parameter-audit outcomes and anatomical
+scope. Path/wrapping, moment-arm, equilibrium and activation pass fields are
+false because a pass has not been established. The native short-replay field
+is `None`; absent observations are never replaced by zero or fixed pilot
+residuals. Overall muscle qualification and independent validation remain
+pending.
+
+`NativeShortReplayReceipt` remains a compatible metrics container. Its default
+status is `UNVERIFIED_NATIVE_REPLAY`: constructing a record neither executes
+OpenSim nor verifies supplied values. Setting a status explicitly is not a
+scientific certification. Genuine native receipts must be checked through the
+governed F07/F08 evidence boundary with model, initialization, input,
+runtime and numerical-policy identity. No new certification shortcut is added.
+
+The existing `short_replay_duration_s` argument remains accepted for API
+compatibility. It expresses a requested future experiment and produces no
+runtime duration, step count or measurement. This change removes no executed
+native replay because the prior orchestration performed none.
+
+## Behavioral Evidence and Limits
+
+The focused tests in `tests/opensim/test_muscle_cmc.py` require parameter-only
+orchestration to return no native receipt and no unperformed audit successes.
+A separate test verifies that a manually constructed metrics record is
+unverified by default. Both fail against the prior fixed-pilot behavior and
+pass after the guard; existing lower-level audit tests remain required.
+
+These are software evidence-integrity tests. They do not establish physiological
+parameters, complete state restoration, contact dynamics, full-horizon matching
+or independent excitation replay. Those native model gates remain open.

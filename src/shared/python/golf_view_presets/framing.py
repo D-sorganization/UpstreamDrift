@@ -19,7 +19,7 @@ from typing import TypeAlias
 import numpy as np
 from numpy.typing import NDArray
 
-from .presets import ViewPreset, check_point3
+from .presets import ViewPreset, check_point3, get_view_preset
 
 Array: TypeAlias = NDArray[np.float64]
 
@@ -124,3 +124,46 @@ def fit_distance_m(
         if far - near <= _FIT_RELATIVE_TOLERANCE * far:
             break
     return far
+
+
+def golfer_bounding_box(
+    lookat_m: Sequence[float] | Array = (1.0, 0.0, 0.9),
+) -> Array:
+    """Corners of a standing golfer with a club: 0.8 x 1.4 x 1.85 m on the ground."""
+    look = check_point3(lookat_m, "lookat_m")
+    lo = np.array([look[0] - 0.4, look[1] - 0.7, 0.0])
+    hi = np.array([look[0] + 0.4, look[1] + 0.7, 1.85])
+    return np.array(
+        [
+            [lo[0], lo[1], lo[2]],
+            [lo[0], lo[1], hi[2]],
+            [lo[0], hi[1], lo[2]],
+            [lo[0], hi[1], hi[2]],
+            [hi[0], lo[1], lo[2]],
+            [hi[0], lo[1], hi[2]],
+            [hi[0], hi[1], lo[2]],
+            [hi[0], hi[1], hi[2]],
+        ],
+        dtype=np.float64,
+    )
+
+
+def bounding_box_fill_fraction(
+    preset: ViewPreset | str,
+    points_m: Sequence[Sequence[float]] | Array | None = None,
+    lookat_m: Sequence[float] | Array = (1.0, 0.0, 0.9),
+    distance_m: float | None = None,
+    *,
+    fov_y_rad: float = VIEWER_FOV_Y_RAD,
+    aspect: float = DEFAULT_ASPECT,
+) -> float:
+    """Projected fill fraction (extent) of a bounding box in ``preset``.
+
+    Defaults to ``golfer_bounding_box(lookat_m)`` and the preset's
+    ``default_distance_m``. A fill fraction of 1.0 reaches the frame edge;
+    a margin of <= 15% corresponds to a fill fraction in [0.85, 1.0].
+    """
+    p = get_view_preset(preset) if isinstance(preset, str) else preset
+    pts = golfer_bounding_box(lookat_m) if points_m is None else points_m
+    dist = p.default_distance_m if distance_m is None else float(distance_m)
+    return projected_extent(p, pts, lookat_m, dist, fov_y_rad=fov_y_rad, aspect=aspect)

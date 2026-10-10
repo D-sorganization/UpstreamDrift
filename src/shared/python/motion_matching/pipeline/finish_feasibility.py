@@ -393,7 +393,8 @@ def simulation_history(
     weight_n = sim.mass_kg * float(np.linalg.norm(sim.gravity))
     groups = _side_groups(list(adapter._spheres))
     positions, ratios = [], []
-    for q, v in zip(record.q, record.v, strict=True):
+    for q_row, v_row in zip(record.q, record.v, strict=True):
+        q, v = np.asarray(q_row), np.asarray(v_row)
         positions.append(_sphere_centres(sim, q))
         samples = adapter.evaluate_contact_samples(sim._map(q), sim._map(v))
         ratios.append(_foot_friction_ratio(samples, groups, n, weight_n))
@@ -442,6 +443,25 @@ def finish_feasibility_report(
         "reference": summarise_history(ref, mu=mu),
         "simulation": summarise_history(plant, mu=mu),
     }
+
+
+def ratcheted_metrics(block: Mapping[str, Any]) -> dict[str, dict[str, float]]:
+    """The ratcheted fractions of a full finish-feasibility block, per side.
+
+    A receipt (or companion baseline) block also carries its description,
+    windows and non-ratcheted metrics; :func:`regressions` takes only the
+    ratcheted ones. Raises ``ValueError`` if a side is missing.
+    """
+    out: dict[str, dict[str, float]] = {}
+    for side in ("reference", "simulation"):
+        if side not in block:
+            raise ValueError(f"finish-feasibility block lacks {side!r}")
+        out[side] = {
+            name: float(block[side][name])
+            for name in FLOOR_METRICS + CEILING_METRICS
+            if name in block[side]
+        }
+    return out
 
 
 def regressions(

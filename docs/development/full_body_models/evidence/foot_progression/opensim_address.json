@@ -1,0 +1,58 @@
+{
+  "driver": {
+    "address_qualified": true,
+    "error_deg": {
+      "left": -0.004909099493936253,
+      "right": -0.004186084378019039
+    },
+    "foot_progression": {
+      "hip_rotation_rad": {
+        "left": -0.3598500758275763,
+        "right": -0.13701262063592956
+      },
+      "method": "fk",
+      "model_deg": {
+        "left": 16.36321289039603,
+        "right": 4.027929460241907
+      },
+      "target_deg": {
+        "left": 16.368121989889968,
+        "right": 4.032115544619926
+      }
+    },
+    "targets_deg": {
+      "left": 16.368121989889968,
+      "right": 4.032115544619926
+    },
+    "within_tolerance": true
+  },
+  "iron": {
+    "address_qualified": true,
+    "error_deg": {
+      "left": -0.004811873636365149,
+      "right": -0.0040106351754402025
+    },
+    "foot_progression": {
+      "hip_rotation_rad": {
+        "left": -0.33509101696286364,
+        "right": -0.05747877103862187
+      },
+      "method": "fk",
+      "model_deg": {
+        "left": 14.993721158689237,
+        "right": -0.37572761381228825
+      },
+      "target_deg": {
+        "left": 14.998533032325602,
+        "right": -0.37171697863684805
+      }
+    },
+    "targets_deg": {
+      "left": 14.998533032325602,
+      "right": -0.37171697863684805
+    },
+    "within_tolerance": true
+  },
+  "model": "src/engines/physics_engines/opensim/models/golf_humanoid_scaled.osim",
+  "tolerance_deg": 2.0
+}

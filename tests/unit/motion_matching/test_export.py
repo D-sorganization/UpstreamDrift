@@ -31,6 +31,7 @@ from src.shared.python.motion_matching.candidate_io import save_candidate
 from src.shared.python.motion_matching.export import (
     export_report,
     export_video,
+    export_video_variants,
 )
 
 pytestmark = [pytest.mark.unit]
@@ -165,20 +166,84 @@ class TestExportVideo:
         frames = imageio.mimread(str(res))
         assert len(frames) == 5
 
-    def test_export_video_speed_sets_time_based_stride(
-        self, tmp_path: Path, mock_candidate: MatchedSwingCandidate
+    @pytest.mark.parametrize(
+        ("fps", "speed", "expected"),
+        [
+            # 0.18 s swing, 10 samples (dt 0.02 s); frames = floor(T*fps/speed)+1.
+            (10, 1.0, 2),  # decimates the source
+            (10, 0.1, 19),  # slower than the source: samples are held
+        ],
+    )
+    def test_export_video_speed_is_time_based(
+        self,
+        tmp_path: Path,
+        mock_candidate: MatchedSwingCandidate,
+        fps: int,
+        speed: float,
+        expected: int,
+    ) -> None:
+        import cv2
+
+        out_mp4 = tmp_path / "speed.mp4"
+        with patch(
+            "src.shared.python.motion_matching.cross_engine_replay.render_replay_frames",
+            side_effect=lambda *a, frame_indices, **k: [
+                np.full((8, 8, 3), i, np.uint8) for i in frame_indices
+            ],
+        ) as render:
+            export_video(mock_candidate, "mujoco", out_mp4, fps=fps, speed=speed)
+        cap = cv2.VideoCapture(str(out_mp4))
+        count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        cap.release()
+        assert count == expected
+        rendered = list(render.call_args.kwargs["frame_indices"])
+        assert rendered == sorted(set(rendered))  # each sample rendered once
+
+    @pytest.mark.parametrize(
+        "engine", ["mujoco", "myosuite", "drake", "pinocchio", "opensim", "simscape"]
+    )
+    def test_export_video_variants_per_engine_full_half_quarter(
+        self, tmp_path: Path, mock_candidate: MatchedSwingCandidate, engine: str
     ) -> None:
         pytest.importorskip("imageio.v2")
         from unittest.mock import patch
 
-        out_gif = tmp_path / "speed.gif"
+        from src.shared.python.video_timing.frame_schedule import FrameSchedule
+
+        def fake_render(cand, eng, stride, size_px, frame_indices):
+            return [np.zeros((8, 8, 3), np.uint8)] * len(frame_indices)
+
         with patch(
             "src.shared.python.motion_matching.export._render_video_frames",
-            return_value=[np.zeros((8, 8, 3), np.uint8)] * 2,
+            side_effect=fake_render,
         ) as render:
-            export_video(mock_candidate, "mujoco", out_gif, fps=10, speed=0.5)
-        dt_s = mock_candidate.time_s[1] - mock_candidate.time_s[0]
-        assert render.call_args.args[2] == max(1, round(0.5 / (10 * dt_s)))
+            paths = export_video_variants(
+                mock_candidate, engine, tmp_path / "swing.gif"
+            )
+        assert sorted(paths) == [0.25, 0.5, 1.0]
+        assert paths[1.0].name == "swing_1x.gif"
+        assert paths[0.5].name == "swing_0p5x.gif"
+        assert paths[0.25].name == "swing_0p25x.gif"
+        rendered = [c.args[4] for c in render.call_args_list]
+        expected = [
+            np.unique(
+                FrameSchedule(mock_candidate.time_s, 60, v).nearest_indices()
+            ).tolist()
+            for v in (1.0, 0.5, 0.25)
+        ]
+        assert rendered == expected
+
+    def test_export_video_variants_rejects_bad_speeds(
+        self, tmp_path: Path, mock_candidate: MatchedSwingCandidate
+    ) -> None:
+        with pytest.raises(ValueError, match="empty"):
+            export_video_variants(
+                mock_candidate, "mujoco", tmp_path / "a.gif", speeds=()
+            )
+        with pytest.raises(ValueError, match="unique"):
+            export_video_variants(
+                mock_candidate, "mujoco", tmp_path / "a.gif", speeds=(0.5, 0.5)
+            )
 
     def test_export_video_gif_from_path(
         self, tmp_path: Path, candidate_path: Path
@@ -206,6 +271,48 @@ class TestExportVideo:
         count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         cap.release()
         assert count == 5
+
+    def test_export_video_mp4_honours_frame_size(
+        self, tmp_path: Path, mock_candidate: MatchedSwingCandidate
+    ) -> None:
+        import cv2
+
+        out_mp4 = tmp_path / "hd.mp4"
+        export_video(
+            mock_candidate, "simscape", out_mp4, stride=5, fps=60, size_px=(1280, 720)
+        )
+        cap = cv2.VideoCapture(str(out_mp4))
+        shape = (
+            int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
+            int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)),
+            int(cap.get(cv2.CAP_PROP_FRAME_COUNT)),
+        )
+        fps = cap.get(cv2.CAP_PROP_FPS)
+        cap.release()
+        assert shape == (1280, 720, 2)
+        assert fps == pytest.approx(60.0)
+
+    def test_replay_frames_default_size_is_unchanged(
+        self, mock_candidate: MatchedSwingCandidate
+    ) -> None:
+        from src.shared.python.motion_matching.cross_engine_replay import (
+            render_replay_frames,
+        )
+
+        frames = render_replay_frames(
+            mock_candidate.time_s,
+            mock_candidate.target_markers_m,
+            mock_candidate.model_markers_m,
+            stride=10,
+        )
+        assert frames[0].shape == (480, 480, 3)
+
+    @pytest.mark.parametrize("size", [(0, 720), (1280, -1), (12.5, 720)])
+    def test_export_video_rejects_bad_frame_size(
+        self, tmp_path: Path, mock_candidate: MatchedSwingCandidate, size: Any
+    ) -> None:
+        with pytest.raises(ValueError, match="size_px"):
+            export_video(mock_candidate, "mujoco", tmp_path / "x.mp4", size_px=size)
 
     def test_export_video_fails_closed_on_missing_markers(self, tmp_path: Path) -> None:
         meta = CandidateMetadata(

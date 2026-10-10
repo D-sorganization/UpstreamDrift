@@ -132,11 +132,15 @@ def default_bushing() -> BushingParameters:
 
 @dataclass(frozen=True)
 class ContactMaterial:
-    """Elastic-foundation contact parameters (placeholder for phase 2).
+    """Contact parameters for the rubber grip against skin or glove.
 
-    Not consumed by any engine yet; values are engineering placeholders for
-    rubber grip against skin or glove and must be replaced with cited values
-    before the ``contact`` grip model is implemented.
+    ``static_friction`` and ``dynamic_friction`` are consumed by the pad
+    contact grip (``pad_contact``, OSV-7 phase 3).  The pad stiffness is not
+    taken from ``stiffness_n_m2``: it is matched to the bushing translational
+    stiffness (``pad_layout.matched_pad_parameters``).  ``stiffness_n_m2`` and
+    ``dissipation_s_m`` remain engineering placeholders for an
+    elastic-foundation (OpenSim) contact, which is not implemented; all values
+    still need cited measurements before they count as data.
     """
 
     stiffness_n_m2: float = 1.0e7

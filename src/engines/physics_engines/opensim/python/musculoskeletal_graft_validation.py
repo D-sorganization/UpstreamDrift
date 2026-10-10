@@ -22,13 +22,14 @@ from src.engines.physics_engines.opensim.python.musculoskeletal_spec_bundle impo
 )
 from src.shared.python.contracts import require
 
-#: Rajagopal coordinate = sign * spec coordinate, per side.  The spec's left knee
-#: hinge runs the opposite way to Rajagopal's; the left hip adduction/rotation
-#: signs reflect Rajagopal's mirrored left hip axes (applied to the geometric
-#: Euler angles).  Right side is the identity.
+#: Rajagopal coordinate = sign * spec coordinate, per side.  The spec's knee
+#: follows the gait2392 convention (flexion negative, #12057) while Rajagopal's
+#: knee flexes positive, so the knee sign is -1 on both sides; the left hip
+#: adduction/rotation signs reflect Rajagopal's mirrored left hip axes (applied
+#: to the geometric Euler angles).  The other right-side signs are the identity.
 RAJAGOPAL_SIGNS: dict[str, dict[str, float]] = {
     "r": {
-        "knee": 1.0,
+        "knee": -1.0,
         "ankle": 1.0,
         "subtalar": 1.0,
         "mtp": 1.0,

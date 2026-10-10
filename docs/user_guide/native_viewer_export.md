@@ -5,6 +5,10 @@ each physics engine and writes mp4 clips with force and torque overlays. It
 complements the shared renderers: each clip shows what the engine's own viewer
 displays for the engine's own rollout.
 
+The `mujoco` engine renders with `mujoco.Renderer` using the MuJoCo appearance
+layer (body, head, club and scene), not a stick figure; use `--engines mujoco`
+and, without a GPU, `MUJOCO_GL=osmesa`.
+
 ## Quick Start
 
 ```bash
@@ -27,7 +31,7 @@ spherical for free and ball joint quaternions) instead of repeated. Force and
 torque glyphs come from the nearest source sample.
 
 - `--fps` (default 60) sets the frame rate.
-- `--speeds 1,0.5` (default) writes one clip set per speed, each in `(0, 4]`;
+- `--speeds 1,0.5,0.25` (default: full, half and quarter speed) writes one clip set per speed, each in `(0, 4]`;
   suffixes are `_1x`, `_0p5x`, `_0p25x`.
 - `--impact-window 0.1` adds a clip of that many swing seconds centred on
   impact at 0.1x speed (suffix `_impact_0p1x`). Impact is `--impact-time`, else

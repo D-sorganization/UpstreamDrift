@@ -534,8 +534,8 @@ def fit_address_pose(
         )  # Bolt optimization
 
     # Lead hand grip location and club lead grip location
-    # Club grip origin is near lead wrist
-    club_butt = wrist_l + np.array([0.0, 0.025, 0.0])
+    # The butt sits one lead-hand offset above the lead hand (shared grip pose)
+    club_butt = wrist_l + np.array([0.0, -LEAD_HAND_OFFSET_M, 0.0])
     club_lead_grip = club_butt + np.array([0.0, LEAD_HAND_OFFSET_M, 0.0])
     club_trail_grip = club_butt + np.array([0.0, TRAIL_HAND_OFFSET_M, 0.0])
 

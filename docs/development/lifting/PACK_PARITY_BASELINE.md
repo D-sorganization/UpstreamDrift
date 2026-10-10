@@ -218,7 +218,7 @@ Hand-bar is the perpendicular distance from a hand origin to the bar axis, worst
 | Bench mass convention differs across packs | Drake, MuJoCo, OpenSim, Pinocchio | Drake_Models#391; MuJoCo_Models#428; OpenSim_Models#415; Pinocchio_Models#451 | LIFT-2 | new |
 | Start pose carries unphysical contact force | MuJoCo, OpenSim | MuJoCo_Models#427; OpenSim_Models#384 | LIFT-4 | new |
 | No ground-reaction output available | Drake, Pinocchio | Drake_Models#371; Pinocchio_Models#432 | LIFT-9 | existing |
-| Segment inertia differs from the other packs | Drake | Drake_Models#391 | LIFT-2 | new |
+| Segment inertia differs from the other packs | MuJoCo | MuJoCo_Models#392 | LIFT-2 | new |
 
 ## Epic Defect List Review
 

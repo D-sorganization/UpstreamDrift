@@ -13,7 +13,7 @@ from __future__ import annotations
 import os
 import tempfile
 from pathlib import Path
-from typing import Any, cast  # noqa: F401
+from typing import TYPE_CHECKING, Any, cast  # noqa: F401
 
 import mujoco
 import numpy as np
@@ -36,6 +36,9 @@ from src.shared.python.engine_core.capabilities import (
 from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
 from src.shared.python.force_overlay.contracts import ForceTorqueFrame
 from src.shared.python.logging_pkg.logging_config import get_logger
+
+if TYPE_CHECKING:  # pragma: no cover
+    from src.shared.python.biomechanics.ground_reaction import GroundReactionBreakdown
 
 logger = get_logger(__name__)
 
@@ -417,6 +420,30 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine):
         """Return qualified current rod reactions, or None for unavailable models."""
         frame = self.get_force_torque_frame()
         return None if frame is None else frame.axial_loads
+
+    def get_ground_reaction_breakdown(self) -> GroundReactionBreakdown | None:
+        """The current foot-ground reaction breakdown, or None when unloaded.
+
+        Delegates the MuJoCo contact extraction and the shared GCV-1 analysis
+        to ``ground_contacts`` (GCV-2, #11708); this engine supplies only the
+        current model, data and centre of mass.
+
+        Postconditions: None exactly when no model/data is loaded
+        (unavailable, never an empty breakdown).
+        """
+        if self.model is None or self.data is None:
+            return None
+        from src.engines.physics_engines.mujoco.python.ground_contacts import (
+            contact_wrenches,
+        )
+        from src.shared.python.biomechanics.ground_reaction_wrenches import (
+            ground_reaction_breakdown,
+        )
+
+        wrenches = contact_wrenches(
+            self.model, self.data, engine=self.engine_type, ground_only=True
+        )
+        return ground_reaction_breakdown(wrenches, self.data.subtree_com[0])
 
     def get_joint_names(self) -> list[str]:
         """Get list of joint names."""

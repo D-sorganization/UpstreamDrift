@@ -274,6 +274,25 @@ def test_regressions_flags_a_rise_in_saturated_fraction() -> None:
     assert any("friction_saturated_fraction" in m for m in found)
 
 
+def test_ratcheted_metrics_keeps_only_the_ratcheted_fractions() -> None:
+    from src.shared.python.motion_matching.pipeline.finish_feasibility import (
+        ratcheted_metrics,
+        regressions,
+    )
+
+    full = {
+        "description": "receipt block text",
+        "window_s": [1.0, 1.8],
+        "reference": {**_block(0.9, 0.1)["reference"], "friction_utilisation_max": 3},
+        "simulation": {**_block(0.9, 0.1)["simulation"], "vertical_force_bw_max": 2},
+    }
+    baseline = ratcheted_metrics(full)
+    assert baseline == _block(0.9, 0.1)
+    assert regressions(full, baseline) == []
+    with pytest.raises(ValueError, match="lacks"):
+        ratcheted_metrics({"reference": {}})
+
+
 def test_regressions_rejects_unknown_metric_and_side() -> None:
     from src.shared.python.motion_matching.pipeline.finish_feasibility import (
         regressions,

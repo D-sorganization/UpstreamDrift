@@ -88,22 +88,49 @@ def _provider(**kw) -> BundleOverlayProvider:
     )
 
 
+def _contact_by_label(frame) -> dict:
+    return {w.label: w for w in frame.by_kind(WrenchKind.CONTACT)}
+
+
 def test_frame_has_expected_wrench_counts() -> None:
     frame = _provider().frame_at(0)
-    assert len(frame.by_kind(WrenchKind.CONTACT)) == 1  # the unloaded foot is omitted
+    # right foot + net, each with force, free moment and moment about the CoM;
+    # the unloaded left foot is omitted (GCV-2 breakdown)
+    assert sorted(_contact_by_label(frame)) == [
+        "contact:free_moment_net",
+        "contact:free_moment_right",
+        "contact:grf_net",
+        "contact:grf_right",
+        "contact:moment_com_net",
+        "contact:moment_com_right",
+    ]
     assert len(frame.by_kind(WrenchKind.JOINT_ACTUATOR)) == 2  # hip (merged) + knee
     assert len(frame.by_kind(WrenchKind.GRAVITY)) == 1
-    assert len(frame.wrenches) == 4
+    assert len(frame.wrenches) == 9
     assert frame.engine == "fake"
 
 
-def test_grf_is_summed_force_at_normal_weighted_cop() -> None:
-    (grf,) = _provider().frame_at(0).by_kind(WrenchKind.CONTACT)
+def test_grf_is_summed_force_at_the_wrench_derived_cop() -> None:
+    contacts = _contact_by_label(_provider().frame_at(0))
+    grf = contacts["contact:grf_right"]
     np.testing.assert_allclose(grf.force_n, (10.0, 0.0, 400.0))
-    # CoP weighted by the normal loads 300 N at x=0 and 100 N at x=0.2
+    # CoP from the wrench: the 300 N at x=0 and 100 N at x=0.2 give x = 0.05
     np.testing.assert_allclose(grf.point_m, (0.05, 0.0, 0.0), atol=1e-12)
-    assert grf.body == "calcn_r"
     assert grf.torque_nm is None
+    # one loaded foot: the net equals the foot
+    net = contacts["contact:grf_net"]
+    np.testing.assert_allclose(net.force_n, grf.force_n)
+    np.testing.assert_allclose(net.point_m, grf.point_m, atol=1e-12)
+
+
+def test_com_moment_is_taken_about_the_kinematics_centre_of_mass() -> None:
+    m = _contact_by_label(_provider().frame_at(0))["contact:moment_com_net"]
+    np.testing.assert_allclose(m.point_m, (0.1, 0.0, 0.95))
+    # M_c = M_O - c x F with M_O = sum p x F about the origin
+    force = np.array([10.0, 0.0, 400.0])
+    m_origin = np.array([0.0, -20.0, 0.0])
+    expected = m_origin - np.cross([0.1, 0.0, 0.95], force)
+    np.testing.assert_allclose(m.torque_nm, expected, atol=1e-9)
 
 
 def test_joint_torques_use_bundle_efforts_and_merge_shared_anchor() -> None:

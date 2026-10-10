@@ -9,23 +9,23 @@
   "$defs": {
     "color": {
       "type": "array",
-      "items": {"type": "number", "minimum": 0, "maximum": 1},
+      "items": { "type": "number", "minimum": 0, "maximum": 1 },
       "minItems": 3,
       "maxItems": 4
     },
-    "unit": {"type": "number", "minimum": 0, "maximum": 1},
-    "name": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+    "unit": { "type": "number", "minimum": 0, "maximum": 1 },
+    "name": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
     "texture": {
       "type": "object",
       "required": ["kind"],
       "additionalProperties": false,
       "properties": {
-        "kind": {"enum": ["flat", "checker", "gradient", "noise", "file"]},
-        "color_a": {"$ref": "#/$defs/color"},
-        "color_b": {"$ref": "#/$defs/color"},
-        "noise": {"$ref": "#/$defs/unit"},
-        "repeat": {"type": "number", "exclusiveMinimum": 0, "maximum": 1000},
-        "path": {"type": "string", "minLength": 1}
+        "kind": { "enum": ["flat", "checker", "gradient", "noise", "file"] },
+        "color_a": { "$ref": "#/$defs/color" },
+        "color_b": { "$ref": "#/$defs/color" },
+        "noise": { "$ref": "#/$defs/unit" },
+        "repeat": { "type": "number", "exclusiveMinimum": 0, "maximum": 1000 },
+        "path": { "type": "string", "minLength": 1 }
       }
     },
     "material": {
@@ -33,10 +33,10 @@
       "required": ["base_color"],
       "additionalProperties": false,
       "properties": {
-        "base_color": {"$ref": "#/$defs/color"},
-        "roughness": {"$ref": "#/$defs/unit"},
-        "metallic": {"$ref": "#/$defs/unit"},
-        "texture": {"$ref": "#/$defs/texture"}
+        "base_color": { "$ref": "#/$defs/color" },
+        "roughness": { "$ref": "#/$defs/unit" },
+        "metallic": { "$ref": "#/$defs/unit" },
+        "texture": { "$ref": "#/$defs/texture" }
       }
     },
     "segment_rule": {
@@ -44,10 +44,14 @@
       "required": ["match"],
       "additionalProperties": false,
       "properties": {
-        "match": {"type": "string", "minLength": 1},
-        "material": {"$ref": "#/$defs/name"},
-        "mesh": {"enum": ["smooth", "capsule", "none"]},
-        "radius_scale": {"type": "number", "exclusiveMinimum": 0, "maximum": 3}
+        "match": { "type": "string", "minLength": 1 },
+        "material": { "$ref": "#/$defs/name" },
+        "mesh": { "enum": ["smooth", "capsule", "none"] },
+        "radius_scale": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 3
+        }
       }
     }
   },
@@ -56,46 +60,63 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "enabled": {"type": "boolean"},
-        "headwear": {"enum": ["none", "hair", "cap"]},
-        "headwear_material": {"$ref": "#/$defs/name"},
-        "scale": {"type": "number", "minimum": 0.5, "maximum": 2},
-        "forward_axis": {"enum": ["+x", "-x", "+y", "-y", "+z", "-z"]},
-        "up_axis": {"enum": ["+x", "-x", "+y", "-y", "+z", "-z"]},
+        "enabled": { "type": "boolean" },
+        "headwear": { "enum": ["none", "hair", "cap"] },
+        "headwear_material": { "$ref": "#/$defs/name" },
+        "scale": { "type": "number", "minimum": 0.5, "maximum": 2 },
+        "forward_axis": { "enum": ["+x", "-x", "+y", "-y", "+z", "-z"] },
+        "up_axis": { "enum": ["+x", "-x", "+y", "-y", "+z", "-z"] },
         "orientation_override": {
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "frame": {"enum": ["parent", "world"]},
-            "yaw_rad": {"type": "number", "minimum": -3.2, "maximum": 3.2},
-            "pitch_rad": {"type": "number", "minimum": -1.6, "maximum": 1.6},
-            "roll_rad": {"type": "number", "minimum": -1.6, "maximum": 1.6},
-            "channel": {"$ref": "#/$defs/name"}
+            "frame": { "enum": ["parent", "world"] },
+            "yaw_rad": { "type": "number", "minimum": -3.2, "maximum": 3.2 },
+            "pitch_rad": { "type": "number", "minimum": -1.6, "maximum": 1.6 },
+            "roll_rad": { "type": "number", "minimum": -1.6, "maximum": 1.6 },
+            "channel": { "$ref": "#/$defs/name" }
           }
         }
       }
     },
-    "body_model": {"enum": ["ellipsoid", "meshes"]},
-    "schema_version": {"const": "appearance-v1"},
-    "spec_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
-    "name": {"type": "string", "minLength": 1},
-    "skin_tone": {"$ref": "#/$defs/name"},
-    "clothing": {"$ref": "#/$defs/name"},
-    "club_finish": {"$ref": "#/$defs/name"},
+    "body_model": { "enum": ["ellipsoid", "meshes"] },
+    "ball": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "position_m": {
+          "type": "array",
+          "items": { "type": "number" },
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "source": { "enum": ["address_geometry", "measured", "model_estimate"] }
+      }
+    },
+    "schema_version": { "const": "appearance-v1" },
+    "spec_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "name": { "type": "string", "minLength": 1 },
+    "skin_tone": { "$ref": "#/$defs/name" },
+    "clothing": { "$ref": "#/$defs/name" },
+    "club_finish": { "$ref": "#/$defs/name" },
     "materials": {
       "type": "object",
-      "propertyNames": {"$ref": "#/$defs/name"},
-      "additionalProperties": {"$ref": "#/$defs/material"}
+      "propertyNames": { "$ref": "#/$defs/name" },
+      "additionalProperties": { "$ref": "#/$defs/material" }
     },
-    "segments": {"type": "array", "items": {"$ref": "#/$defs/segment_rule"}},
+    "segments": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/segment_rule" }
+    },
     "environment": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "ground_material": {"$ref": "#/$defs/name"},
-        "sky_top": {"$ref": "#/$defs/color"},
-        "sky_bottom": {"$ref": "#/$defs/color"},
-        "lighting": {"enum": ["studio", "daylight", "flat"]}
+        "ground_material": { "$ref": "#/$defs/name" },
+        "sky_top": { "$ref": "#/$defs/color" },
+        "sky_bottom": { "$ref": "#/$defs/color" },
+        "lighting": { "enum": ["studio", "daylight", "flat"] }
       }
     }
   }

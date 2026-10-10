@@ -88,9 +88,9 @@ def _run(settings: ExportSettings, tmp_path: Path, swing: SwingInput | None = No
     return result, sink, backend
 
 
-def test_defaults_are_60_fps_full_and_half_speed_at_720p() -> None:
+def test_defaults_are_60_fps_full_half_and_quarter_speed_at_720p() -> None:
     s = ExportSettings()
-    assert (s.fps, s.speeds) == (60, (1.0, 0.5))
+    assert (s.fps, s.speeds) == (60, (1.0, 0.5, 0.25))
     assert (s.width, s.height) == (1280, 720) and s.crf <= 18
     assert (ExportSettings.preview().width, ExportSettings.preview().height) == (
         640,
@@ -122,17 +122,19 @@ def test_stride_is_a_deprecated_alias() -> None:
     assert s.effective_speeds(0.001) == pytest.approx((0.8,))
     with warnings.catch_warnings():
         warnings.simplefilter("error")
-        assert ExportSettings().effective_speeds(0.001) == (1.0, 0.5)
+        assert ExportSettings().effective_speeds(0.001) == (1.0, 0.5, 0.25)
 
 
-def test_one_and_half_speed_clip_sets_with_suffixes(tmp_path: Path) -> None:
+def test_full_half_and_quarter_speed_clip_sets_with_suffixes(tmp_path: Path) -> None:
     result, sink, _ = _run(ExportSettings(width=32, height=32), tmp_path)
-    assert sorted(result.frames_by_suffix) == ["_0p5x", "_1x"]
+    assert sorted(result.frames_by_suffix) == ["_0p25x", "_0p5x", "_1x"]
     assert all(w.fps == 60 for w in sink.values())
     assert "driver_fake_face_on_1x.mp4" in sink
     assert "driver_fake_2x2_0p5x.mp4" in sink
     full, half = result.frames_by_suffix["_1x"], result.frames_by_suffix["_0p5x"]
-    assert abs(half - 2 * full) <= 1
+    quarter = result.frames_by_suffix["_0p25x"]
+    assert abs(half - 2 * full) <= 1 and abs(quarter - 4 * full) <= 3
+    assert "driver_fake_face_on_0p25x.mp4" in sink
     assert result.frames == full == len(sink["driver_fake_face_on_1x.mp4"].frames)
 
 

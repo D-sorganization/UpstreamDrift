@@ -3,7 +3,8 @@
 Emits world-frame OverlayWrenches for:
 - JOINT_ACTUATOR: applied actuator torques/forces from qfrc_actuator
 - JOINT_REACTION: parent-on-child internal reactions from cfrc_int
-- CONTACT: active contact pair forces from mj_contactForce
+- CONTACT: active contact pair forces from mj_contactForce, plus the per-foot and
+  net ground-reaction breakdown (GCV-2, #11708)
 - EXTERNAL: applied external wrenches from xfrc_applied
 - GRIP: per-hand wrench on the club from the grip weld efc_force (GCV-8, #11714)
 - GRAVITY: optional gravitational body forces mass * g
@@ -22,6 +23,10 @@ from src.engines.physics_engines.mujoco.python.grip_efc import (
     DEFAULT_GRIP_WELDS,
     grip_analysis_from_efc,
 )
+from src.engines.physics_engines.mujoco.python.ground_contacts import (
+    contact_wrenches,
+    ground_reaction_wrenches,
+)
 from src.shared.python.biomechanics.grip_wrench import to_overlay_wrenches
 from src.shared.python.body_part_viz.mujoco_axial_loads import MujocoAxialLoadSource
 from src.shared.python.engine_core.mujoco_compat import copy_mjdata_state
@@ -38,8 +43,6 @@ from src.shared.python.motion_matching.force_torque import (
 
 __all__ = ["MujocoForceTorqueSource"]
 
-_ENGINE = "mujoco"
-
 
 def _vec3(seq: Any) -> tuple[float, float, float]:
     return (float(seq[0]), float(seq[1]), float(seq[2]))
@@ -47,6 +50,8 @@ def _vec3(seq: Any) -> tuple[float, float, float]:
 
 class MujocoForceTorqueSource:
     """Extract instantaneous world-frame force/torque overlays from MuJoCo models."""
+
+    ENGINE = "mujoco"
 
     def __init__(self, model: mujoco.MjModel) -> None:
         if not isinstance(model, mujoco.MjModel):
@@ -87,7 +92,7 @@ class MujocoForceTorqueSource:
                             tau,
                             axis / norm,
                             anchor,
-                            _ENGINE,
+                            self.ENGINE,
                         )
                     )
             elif jnt_type == mujoco.mjtJoint.mjJNT_SLIDE:
@@ -104,7 +109,7 @@ class MujocoForceTorqueSource:
                             point_m=anchor,
                             force_n=f_vec,
                             torque_nm=None,
-                            source=_ENGINE,
+                            source=self.ENGINE,
                         )
                     )
             elif jnt_type == mujoco.mjtJoint.mjJNT_BALL:
@@ -120,7 +125,7 @@ class MujocoForceTorqueSource:
                             point_m=anchor,
                             force_n=None,
                             torque_nm=t_world,
-                            source=_ENGINE,
+                            source=self.ENGINE,
                         )
                     )
             elif jnt_type == mujoco.mjtJoint.mjJNT_FREE:
@@ -137,7 +142,7 @@ class MujocoForceTorqueSource:
                             point_m=pos,
                             force_n=f_free,
                             torque_nm=t_free,
-                            source=_ENGINE,
+                            source=self.ENGINE,
                         )
                     )
         return actuators
@@ -179,67 +184,17 @@ class MujocoForceTorqueSource:
                     point_m=anchor_pt,
                     force_n=w_anchor.force_n,
                     torque_nm=w_anchor.torque_nm,
-                    source=_ENGINE,
+                    source=self.ENGINE,
                 )
             )
         return reactions
 
     def _extract_contacts(self, scratch: mujoco.MjData) -> list[OverlayWrench]:
-        model = self._model
-        contacts: list[OverlayWrench] = []
-        c_force = np.zeros(6, dtype=np.float64)
+        return contact_wrenches(self._model, scratch, engine=self.ENGINE)
 
-        for i in range(scratch.ncon):
-            con = scratch.contact[i]
-            if con.geom1 < 0 or con.geom2 < 0:
-                continue
-
-            mujoco.mj_contactForce(model, scratch, i, c_force)
-            frame = con.frame.reshape(3, 3)
-            f_world = _vec3(frame.T @ c_force[:3])
-            t_world = _vec3(frame.T @ c_force[3:6]) if con.dim >= 4 else None
-            pt = _vec3(con.pos)
-
-            b1 = int(model.geom_bodyid[con.geom1])
-            if b1 != 0:
-                b1_name = (
-                    mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, b1)
-                    or f"body_{b1}"
-                )
-                contacts.append(
-                    OverlayWrench(
-                        kind=WrenchKind.CONTACT,
-                        label=f"contact:{b1_name}:{i}",
-                        body=b1_name,
-                        point_m=pt,
-                        force_n=(-f_world[0], -f_world[1], -f_world[2]),
-                        torque_nm=(
-                            (-t_world[0], -t_world[1], -t_world[2])
-                            if t_world is not None
-                            else None
-                        ),
-                        source=_ENGINE,
-                    )
-                )
-
-            b2 = int(model.geom_bodyid[con.geom2])
-            if b2 != 0:
-                b2_name = (
-                    mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, b2)
-                    or f"body_{b2}"
-                )
-                contacts.append(
-                    OverlayWrench(
-                        kind=WrenchKind.CONTACT,
-                        label=f"contact:{b2_name}:{i}",
-                        body=b2_name,
-                        point_m=pt,
-                        force_n=f_world,
-                        torque_nm=t_world,
-                        source=_ENGINE,
-                    )
-                )
-        return contacts
+    def _extract_ground_reaction(self, scratch: mujoco.MjData) -> list[OverlayWrench]:
+        """Per-foot and net GRF, CoP, free moment and moment about the CoM (GCV-2)."""
+        return list(ground_reaction_wrenches(self._model, scratch, engine=self.ENGINE))
 
     def _extract_externals(self, scratch: mujoco.MjData) -> list[OverlayWrench]:
         model = self._model
@@ -266,7 +221,7 @@ class MujocoForceTorqueSource:
                             point_m=pt,
                             force_n=f_val,
                             torque_nm=t_val,
-                            source=_ENGINE,
+                            source=self.ENGINE,
                         )
                     )
         return externals
@@ -285,7 +240,7 @@ class MujocoForceTorqueSource:
         if not all(present.values()):
             return []
         analysis = grip_analysis_from_efc(model, scratch)
-        return to_overlay_wrenches(analysis, source=_ENGINE + ":efc_force")
+        return to_overlay_wrenches(analysis, source=self.ENGINE + ":efc_force")
 
     def _extract_gravity(self, scratch: mujoco.MjData) -> list[OverlayWrench]:
         model = self._model
@@ -308,7 +263,7 @@ class MujocoForceTorqueSource:
                         point_m=_vec3(scratch.xipos[b]),
                         force_n=f_grav,
                         torque_nm=None,
-                        source=_ENGINE,
+                        source=self.ENGINE,
                     )
                 )
         return gravity_wrenches
@@ -333,6 +288,7 @@ class MujocoForceTorqueSource:
         wrenches.extend(self._extract_actuators(scratch))
         wrenches.extend(self._extract_reactions(scratch))
         wrenches.extend(self._extract_contacts(scratch))
+        wrenches.extend(self._extract_ground_reaction(scratch))
         wrenches.extend(self._extract_externals(scratch))
         wrenches.extend(self._extract_grip(scratch))
         if include_gravity:
@@ -342,7 +298,7 @@ class MujocoForceTorqueSource:
 
         return ForceTorqueFrame(
             time_s=float(data.time),
-            engine=_ENGINE,
+            engine=self.ENGINE,
             wrenches=tuple(wrenches),
             axial_loads=axial_loads,
             world_frame="world_Zup",
