@@ -234,13 +234,45 @@ class MatchedSwingsService:
     def export_report_markdown(self, run_id: str) -> tuple[str, str]:
         """Render the Markdown fit-quality report for a run.
 
-        Reuses :func:`export_report` exactly as the desktop exporter does
-        (``MatchedSwingBrowserWidget._on_export_report`` in gui.py), writing
-        into a temporary directory and reading the Markdown back so the two
-        surfaces can never diverge on report formatting (DRY).
+        Delegates to :meth:`export_report_file` (``fmt="md"``) so Markdown and
+        PDF reports can never diverge on report formatting (DRY).
 
         Returns:
             Tuple of ``(markdown_text, suggested_filename)``.
+
+        Raises:
+            KeyError: ``run_id`` is not in the ledger.
+            FileNotFoundError: the run has no receipt file on disk.
+        """
+        content, filename, _media_type = self.export_report_file(run_id, "md")
+        return content.decode("utf-8"), filename
+
+    @precondition(
+        lambda self, run_id, fmt: (
+            isinstance(run_id, str) and bool(run_id.strip()) and fmt in {"md", "pdf"}
+        )
+    )
+    @postcondition(
+        lambda result: (
+            isinstance(result, tuple)
+            and len(result) == 3
+            and isinstance(result[0], bytes)
+            and isinstance(result[1], str)
+            and isinstance(result[2], str)
+        )
+    )
+    def export_report_file(
+        self, run_id: str, fmt: Literal["md", "pdf"]
+    ) -> tuple[bytes, str, str]:
+        """Render the fit-quality report for a run as Markdown or PDF bytes.
+
+        Reuses :func:`export_report` exactly as the desktop exporter does
+        (``MatchedSwingBrowserWidget._on_export_report`` in gui.py), writing
+        into a temporary directory and reading the bytes back so the desktop
+        and web surfaces can never diverge on report formatting (DRY).
+
+        Returns:
+            Tuple of ``(content_bytes, suggested_filename, media_type)``.
 
         Raises:
             KeyError: ``run_id`` is not in the ledger.
@@ -254,12 +286,63 @@ class MatchedSwingsService:
             raise FileNotFoundError("No receipt file found for this run.")
         npz_path = self._browser.resolve_artifact_path(row, "npz")
 
-        filename = f"fit_report_{row.engine}_{row.capture or 'swing'}.md"
+        filename = f"fit_report_{row.engine}_{row.capture or 'swing'}.{fmt}"
+        media_type = (
+            "application/pdf" if fmt == "pdf" else "text/markdown; charset=utf-8"
+        )
         with tempfile.TemporaryDirectory() as tmp_dir:
             out_path = Path(tmp_dir) / filename
             export_report(receipt_path, out_path, candidate=npz_path)
-            markdown = out_path.read_text(encoding="utf-8")
-        return markdown, filename
+            content = out_path.read_bytes()
+        return content, filename, media_type
+
+    @precondition(
+        lambda self, run_id, fmt: (
+            isinstance(run_id, str) and bool(run_id.strip()) and fmt in {"gif", "mp4"}
+        )
+    )
+    @postcondition(
+        lambda result: (
+            isinstance(result, tuple)
+            and len(result) == 3
+            and isinstance(result[0], bytes)
+            and isinstance(result[1], str)
+            and isinstance(result[2], str)
+        )
+    )
+    def export_video_file(
+        self, run_id: str, fmt: Literal["gif", "mp4"]
+    ) -> tuple[bytes, str, str]:
+        """Render the candidate marker-overlay animation for a run as GIF/MP4 bytes.
+
+        Reuses :func:`export_video` exactly as the desktop exporter does
+        (``MatchedSwingBrowserWidget._on_export_video`` in gui.py) with the
+        same defaults, so the desktop and web surfaces can never diverge on
+        video rendering (DRY).
+
+        Returns:
+            Tuple of ``(content_bytes, suggested_filename, media_type)``.
+
+        Raises:
+            KeyError: ``run_id`` is not in the ledger.
+            FileNotFoundError: the run has no candidate NPZ package on disk.
+            ValueError: the candidate lacks the marker trajectories required
+                for video export.
+        """
+        from src.shared.python.motion_matching.export import export_video
+
+        row = self.get_row(run_id)
+        npz_path = self._browser.resolve_artifact_path(row, "npz")
+        if npz_path is None or not npz_path.is_file():
+            raise FileNotFoundError("No candidate package found for this run.")
+
+        filename = f"{row.engine}_{row.capture or 'swing'}.{fmt}"
+        media_type = "video/mp4" if fmt == "mp4" else "image/gif"
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            out_path = Path(tmp_dir) / filename
+            export_video(npz_path, row.engine, out_path)
+            content = out_path.read_bytes()
+        return content, filename, media_type
 
     @precondition(
         lambda self, run_id, artifact: (

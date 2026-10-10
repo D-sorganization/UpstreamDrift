@@ -29,21 +29,31 @@ from src.shared.python.motion_matching.ledger_schema import (
 pytestmark = pytest.mark.unit
 
 
-@pytest.fixture
-def ledger_fixture(tmp_path: Path) -> tuple[Path, str]:
-    """Build a minimal ledger with receipt, npz, gif, and parity artefacts."""
+def _build_matched_swing_ledger(
+    tmp_path: Path,
+    *,
+    with_target_markers: bool = False,
+    n_frames: int = 2,
+) -> tuple[Path, str]:
+    """Build a minimal ledger with receipt, npz, gif, and parity artefacts.
+
+    ``with_target_markers`` additionally writes ``target_markers_m`` (same
+    shape as ``model_markers_m``) so :func:`export_video` can render real
+    GIF/MP4 frames (desktop parity, #11987). The default omits it, which
+    exercises ``export_video``'s marker-trajectory validation error path
+    (``ValueError``, never an absolute path in the message).
+    """
     evidence = tmp_path / "evidence" / "matched" / "driver_test"
     evidence.mkdir(parents=True)
 
     marker_names = ("pelvis", "thorax", "head")
-    time_s = np.array([0.0, 0.1])
-    markers = np.array(
-        [
-            [[0.0, 0.0, 1.0], [0.0, 0.3, 1.2], [0.0, 0.5, 1.5]],
-            [[0.01, 0.0, 1.0], [0.01, 0.3, 1.2], [0.01, 0.5, 1.5]],
-        ],
-        dtype=np.float64,
+    time_s = np.linspace(0.0, 0.1 * (n_frames - 1), n_frames)
+    base = np.array(
+        [[0.0, 0.0, 1.0], [0.0, 0.3, 1.2], [0.0, 0.5, 1.5]], dtype=np.float64
     )
+    offsets = np.arange(n_frames, dtype=np.float64).reshape(-1, 1, 1) * 0.01
+    markers = base[np.newaxis, :, :] + offsets
+
     meta = CandidateMetadata(
         schema_version=CANDIDATE_SCHEMA_VERSION,
         profile=CandidateProfile.KINEMATIC,
@@ -52,13 +62,15 @@ def ledger_fixture(tmp_path: Path) -> tuple[Path, str]:
         marker_names=marker_names,
     )
     npz_path = evidence / "candidate.npz"
-    np.savez_compressed(
-        npz_path,
-        manifest_json=np.array(json.dumps(meta.to_dict())),
-        time_s=time_s,
-        q=np.zeros((2, 1)),
-        model_markers_m=markers,
-    )
+    arrays: dict[str, np.ndarray] = {
+        "manifest_json": np.array(json.dumps(meta.to_dict())),
+        "time_s": time_s,
+        "q": np.zeros((n_frames, 1)),
+        "model_markers_m": markers,
+    }
+    if with_target_markers:
+        arrays["target_markers_m"] = markers + 0.001
+    np.savez_compressed(npz_path, **arrays)
 
     receipt = {
         "schema_version": "matched-swing-fit/test-v1",
@@ -113,8 +125,33 @@ def ledger_fixture(tmp_path: Path) -> tuple[Path, str]:
 
 
 @pytest.fixture
+def ledger_fixture(tmp_path: Path) -> tuple[Path, str]:
+    """Minimal ledger whose candidate lacks target_markers_m (no video)."""
+    return _build_matched_swing_ledger(tmp_path)
+
+
+@pytest.fixture
+def ledger_fixture_with_video(tmp_path: Path) -> tuple[Path, str]:
+    """Ledger fixture whose candidate carries target_markers_m, 3 frames, so
+    GET /video can render a real GIF/MP4 (#11987)."""
+    return _build_matched_swing_ledger(tmp_path, with_target_markers=True, n_frames=3)
+
+
+@pytest.fixture
 def client(ledger_fixture: tuple[Path, str]) -> TestClient:
     ledger_path, _ = ledger_fixture
+    service = MatchedSwingsService.from_ledger_file(
+        ledger_path, repo_root=ledger_path.parent.parent
+    )
+    app.dependency_overrides[get_matched_swings_service] = lambda: service
+    with TestClient(app) as test_client:
+        yield test_client
+    app.dependency_overrides.pop(get_matched_swings_service, None)
+
+
+@pytest.fixture
+def video_client(ledger_fixture_with_video: tuple[Path, str]) -> TestClient:
+    ledger_path, _ = ledger_fixture_with_video
     service = MatchedSwingsService.from_ledger_file(
         ledger_path, repo_root=ledger_path.parent.parent
     )
@@ -327,6 +364,93 @@ def test_get_report_missing_receipt_returns_error(
     assert response.json()["detail"]["error"]["code"] == "report_unavailable"
 
 
+def test_get_report_pdf(client: TestClient, ledger_fixture: tuple[Path, str]) -> None:
+    _, run_id = ledger_fixture
+    response = client.get(
+        f"/api/matched-swings/{run_id}/report", params={"format": "pdf"}
+    )
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "application/pdf"
+    assert response.content.startswith(b"%PDF")
+    assert (
+        'filename="fit_report_pinocchio_driver.pdf"'
+        in response.headers["content-disposition"]
+    )
+
+
+def test_get_report_no_format_param_is_still_markdown(
+    client: TestClient, ledger_fixture: tuple[Path, str]
+) -> None:
+    _, run_id = ledger_fixture
+    response = client.get(f"/api/matched-swings/{run_id}/report")
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/markdown")
+
+
+def test_get_report_pdf_unknown_run_returns_404(client: TestClient) -> None:
+    response = client.get(
+        "/api/matched-swings/not-a-real-id/report", params={"format": "pdf"}
+    )
+    assert response.status_code == 404
+
+
+def test_get_video_unavailable_returns_404_without_absolute_path(
+    client: TestClient, ledger_fixture: tuple[Path, str], tmp_path: Path
+) -> None:
+    """The default fixture's candidate lacks target_markers_m, so export_video
+    raises ValueError; the 404 body must never leak the temp export path."""
+    _, run_id = ledger_fixture
+    response = client.get(f"/api/matched-swings/{run_id}/video")
+    assert response.status_code == 404
+    body = response.json()
+    assert body["detail"]["error"]["code"] == "video_unavailable"
+    body_text = json.dumps(body)
+    assert str(tmp_path) not in body_text
+    assert tmp_path.as_posix() not in body_text
+
+
+def test_get_video_unknown_run_returns_404(client: TestClient) -> None:
+    response = client.get("/api/matched-swings/not-a-real-id/video")
+    assert response.status_code == 404
+
+
+def test_get_video_gif(
+    video_client: TestClient, ledger_fixture_with_video: tuple[Path, str]
+) -> None:
+    _, run_id = ledger_fixture_with_video
+    response = video_client.get(f"/api/matched-swings/{run_id}/video")
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "image/gif"
+    assert response.content.startswith(b"GIF8")
+    assert 'filename="pinocchio_driver.gif"' in response.headers["content-disposition"]
+
+
+def test_get_video_mp4(
+    video_client: TestClient, ledger_fixture_with_video: tuple[Path, str]
+) -> None:
+    _, run_id = ledger_fixture_with_video
+    response = video_client.get(
+        f"/api/matched-swings/{run_id}/video", params={"format": "mp4"}
+    )
+    if response.status_code != 200:
+        pytest.skip(
+            f"OpenCV mp4v VideoWriter unavailable on this host: {response.text}"
+        )
+    assert response.headers["content-type"] == "video/mp4"
+    assert len(response.content) > 0
+    assert 'filename="pinocchio_driver.mp4"' in response.headers["content-disposition"]
+
+
+def test_get_video_invalid_format_returns_422(
+    video_client: TestClient, ledger_fixture_with_video: tuple[Path, str]
+) -> None:
+    _, run_id = ledger_fixture_with_video
+    response = video_client.get(
+        f"/api/matched-swings/{run_id}/video", params={"format": "avi"}
+    )
+    assert response.status_code == 422
+
+
 def test_get_animation_gif(
     client: TestClient, ledger_fixture: tuple[Path, str]
 ) -> None:
@@ -405,6 +529,12 @@ def test_remote_client_blocked(ledger_fixture: tuple[Path, str]) -> None:
                 f"/api/matched-swings/{run_id}/animation/frames/0"
             ).status_code
             == 403
+        )
+        assert (
+            remote_client.get(f"/api/matched-swings/{run_id}/report").status_code == 403
+        )
+        assert (
+            remote_client.get(f"/api/matched-swings/{run_id}/video").status_code == 403
         )
     finally:
         app.dependency_overrides.pop(get_matched_swings_service, None)
