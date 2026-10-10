@@ -243,7 +243,7 @@
     {
       "id": "UP-D1-native-muscle-bundle-inventory",
       "owner": "UpstreamDrift issue #11908",
-      "resolution": "Inventory the reviewed cold-start Tools T01 muscle bundle seam and chapter27. Registered discrete/modeling options and physical units are explicit; native continuous Y coverage alone is insufficient. Synthetic adapter tests do not qualify arbitrary SimTK State serialization, anatomy, contact/constraints, capture accuracy, or all-model parity."
+      "resolution": "Inventory the reviewed cold-start Tools T01 muscle bundle seam and chapter27. Registered discrete/modeling options and physical units are explicit; native continuous Y coverage alone is insufficient. Child #12147 adds separately admitted fixed-path muscle plus CoordinateActuator T01 commands, ground-topology root assistance, owner-specific override units, native force/power and sampled work, immutable source/input/state/policy lineage and one shared time-checked executor. Original muscle-only admission remains strict. Synthetic adapter tests do not qualify arbitrary SimTK State serialization, anatomy, contact/constraints, capture accuracy, or all-model parity."
     },
     {
       "id": "UP-D1-native-moco-initial-bindings-inventory",
@@ -264,6 +264,16 @@
       "id": "UP-D1-owned-native-simscape-replay-inventory",
       "owner": "UpstreamDrift issue #11942",
       "resolution": "Inventory chapter34 verified owned Tools native envelope admission, trusted R2025b complete-state decoder, explicit simulation/configuration bindings, exact saved metadata clock/provider and loaded-SLX path rejection, strict restoration diagnostics and full-interval same/changed-future native physical/discrete/input evidence. A committed manifest hashes the restricted 59-file v5 source/model/request/output archive. Source-bound synthetic diagnostic receipts do not qualify production variants, transitive libraries, physiology, capture accuracy or six-engine parity. The merged Tools pin is exact and byte-equivalent to the executed source; scientific release remains blocked."
+    },
+    {
+      "id": "UP-D1-native-zero-mtp-reduction-inventory",
+      "owner": "UpstreamDrift issue #12150",
+      "resolution": "Inventory provisional chapter43 and native_mtp_reduction.py: exact source-bound bilateral zero-locked PinJoint targets, source-reference rejection, native source/default/achieved value/speed and clamp/prescription admission, separately serialized and reloaded derived model, exact common continuous-state lift and native body/velocity/muscle/constraint inventories. Compare source and reduced full native mass and total applied generalized body-plus-mobility force through a rank-complete mobility lift at initialized, ankle-varied and pelvis-varied states. Actual unchanged Rajagopal80 lower-limb source and scaled/club mixed-assisted factory diagnostic tests do not qualify source scaling/anatomy, missing upper-body muscles, contact, passive policy, native Moco, capture matching, full-horizon excitation replay or all17/six-engine parity. Keep canonical calculation coverage/publication blocked."
+    },
+    {
+      "id": "UP-D1-native-buet-hamner-assembly-inventory",
+      "owner": "UpstreamDrift issue #12157",
+      "resolution": "Inventory provisional chapter44 and native_buet_hamner_assembly.py: exact reviewed BUET473 upper/trunk and Hamner84 distal lower source hashes, shared physical pelvis/femur and hip SpatialTransform admission, explicit eight distal body/joint and 84-muscle ownership, native serialization/reload and source component-property equality. Three hip poses/nonzero speeds compare donor region body transforms/velocities and all557 muscle path lengths/speeds; native finite positive mass, body-plus-mobility applied force and QErr/UErr are observed separately. This sampled source-preserving mechanical candidate does not prove whole-model dynamic equivalence, source asset closure, anatomy/physiology, native Moco, full-state replay, capture matching or all17/six-engine parity. Keep canonical calculation coverage/publication blocked."
     }
   ],
   "calculations": []
