@@ -22,6 +22,7 @@ Rows for engines that are not installed skip with an explicit reason.
 
 from __future__ import annotations
 
+import functools
 import importlib.util
 from collections.abc import Callable
 from pathlib import Path
@@ -47,7 +48,10 @@ _MODULES = {
 }
 
 
+@functools.cache
 def _load(engine: str) -> ModuleType:
+    # Executed once per engine: re-executing a module that imports pydrake or
+    # pinocchio under a fresh name breaks their native submodule imports.
     path = ROOT / _MODULES[engine]
     spec = importlib.util.spec_from_file_location(f"_gcv2_{engine}", path)
     assert spec is not None and spec.loader is not None
@@ -112,7 +116,7 @@ ENGINES = [
 ]
 
 
-@pytest.fixture(params=ENGINES)
+@pytest.fixture(params=ENGINES, scope="module")
 def breakdown(request, tmp_path_factory):
     wrenches, weight = _BUILDERS[request.param](tmp_path_factory.mktemp("grf"))
     return request.param, wrenches, weight
