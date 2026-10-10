@@ -146,8 +146,9 @@ export function MatchedSwingsPage() {
 
   useEffect(() => {
     let cancelled = false;
-    setLoadState('loading');
     void Promise.resolve().then(async () => {
+      if (cancelled) return;
+      setLoadState('loading');
       try {
         const data = await fetchMatchedSwingLedger({
           ranked: true,
