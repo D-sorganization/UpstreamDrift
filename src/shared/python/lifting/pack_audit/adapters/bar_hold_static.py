@@ -12,10 +12,10 @@ imports, so the contract is tested without any engine installed.
 from __future__ import annotations
 
 import math
-from collections.abc import Sequence
 from typing import Any
 
 import numpy as np
+from numpy.typing import ArrayLike
 
 from src.shared.python.biomechanics.grip_wrench import (
     GripAnalysis,
@@ -25,13 +25,19 @@ from src.shared.python.biomechanics.grip_wrench import (
 
 __all__ = ["static_hold_split"]
 
+Vec3 = tuple[float, float, float]
+
+
+def _t3(v: np.ndarray) -> Vec3:
+    return (float(v[0]), float(v[1]), float(v[2]))
+
 
 def static_hold_split(
     bar_mass_kg: float,
-    gravity_mps2: Sequence[float],
-    bar_com_m: Sequence[float],
-    grip_l_m: Sequence[float],
-    grip_r_m: Sequence[float],
+    gravity_mps2: ArrayLike,
+    bar_com_m: ArrayLike,
+    grip_l_m: ArrayLike,
+    grip_r_m: ArrayLike,
 ) -> dict[str, Any]:
     """Minimum-norm per-hand split of the static-hold wrench on a bar.
 
@@ -76,15 +82,15 @@ def static_hold_split(
     net_force = -bar_mass_kg * gravity
     moment_at_mid = np.cross(bar_com - midpoint, net_force)
 
-    left = HandWrench(side="L", point_m=tuple(grip_l), force_on_club_n=(0.0, 0.0, 0.0))
-    right = HandWrench(side="R", point_m=tuple(grip_r), force_on_club_n=(0.0, 0.0, 0.0))
+    left = HandWrench(side="L", point_m=_t3(grip_l), force_on_club_n=(0.0, 0.0, 0.0))
+    right = HandWrench(side="R", point_m=_t3(grip_r), force_on_club_n=(0.0, 0.0, 0.0))
     analysis = GripAnalysis(
         left=left,
         right=right,
-        midpoint_m=tuple(midpoint),
-        net_force_n=tuple(net_force),
-        couple_at_midpoint_nm=tuple(moment_at_mid),
-        contact_force_moment_nm=tuple(moment_at_mid),
+        midpoint_m=_t3(midpoint),
+        net_force_n=_t3(net_force),
+        couple_at_midpoint_nm=_t3(moment_at_mid),
+        contact_force_moment_nm=_t3(moment_at_mid),
         applied_free_torque_nm=(0.0, 0.0, 0.0),
         mof_left_nm=None,
         mof_right_nm=None,
