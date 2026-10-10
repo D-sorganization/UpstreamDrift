@@ -1,0 +1,23 @@
+# Source-Bound Native Zero-Subtalar Reduction
+
+This provisional F07 calculation, issue #12167 under #11791, creates a separate OpenSim artifact by replacing only the right and left locked-zero subtalar **CustomJoints** with native WeldJoints. The source is the unchanged, source-preserving 557-muscle BUET–Hamner candidate from chapter 44. Its abdominal and MTP locks remain. The output is a diagnostic derived model rather than an anatomical correction.
+
+## Exact Source, Lock and Spatial-Transform Domain
+
+`native_subtalar_reduction.py` requires source XML SHA-256, a fresh output path, and the ordered targets `((subtalar_angle_r, 0 rad), (subtalar_angle_l, 0 rad))`. Each target joint must be a single-coordinate CustomJoint, with source and achieved value/speed zero, a locked but unprescribed coordinate, and zero strictly inside any clamped range. The declared spatial transform has one `rotation1` LinearFunction with coefficients `(1, 0)` and five coordinate-free Constant(0) axes. Native parent/child joint frames must coincide at the achieved zero target. A source-XML dependency scan rejects coordinate consumers outside these two joints, including unknown component types. This is a checked special case; the stock joint-to-weld operator alone is not trusted for arbitrary locked targets or CustomJoint laws.
+
+The algorithm does not mutate the source. It serializes the new model and freshly loads it. Inventories and native property dumps for all bodies, muscles, actuators, constraints and unrelated joints must agree; only the declared subtalar coordinate and joint type may change. Common named continuous values are restored exactly from the source's native initialized state. `initSystem` may assemble before that restoration. No subsequent assembly, fiber equilibrium, control or integration is part of this reduction.
+
+## Sampled Mechanical Comparison
+
+At the initialized state and three independently perturbed common coordinates (right ankle, right knee and pelvis tilt, where native bounds/locks permit), the retained source and derived states use identical common coordinate values and native nonzero speeds. Native unit-speed probes construct the source and derived maps $P_s,P_d$. The reduced map must span its entire mobility space, and $L=P_sP_d^+$ must satisfy $P_s=LP_d$. The compared native quantities are
+
+$$M_d=L^\mathsf{T}M_sL,\qquad f_d=L^\mathsf{T}f_s,\qquad f=J_{\mathrm{system}}^\mathsf{T}F_{\mathrm{body}}+f_{\mathrm{mobility}}.$$
+
+The comparison reuses the zero-MTP native mass, body-force projection, mobility-lift, body-transform and spatial-velocity observers. It additionally checks all muscle path lengths and native lengthening speeds, common-coordinate projected mass/force, and native QErr/UErr. Every scalar/matrix observation is finite before error aggregation. The fixture threshold is $10^{-10}$ in each native quantity's own units; mixed generalized-force components are not assigned a single physiological scale. Applied force excludes a claim of inertial-bias or constraint-reaction equivalence.
+
+## Executed Evidence and Remaining Gates
+
+On OpenSim `4.6-2026-06-22-85aaf64`, exact assembled source XML SHA-256 `8d4d349747060efbac31c707c4e01f452746a8fba32be77a425b5ac5be1d34a3` produced fresh 2,262,113-byte derived XML SHA-256 `a646075a42b978f8a9c45b737849c6438101b6503621882e5fad322ad2d84434`. Four common poses had a rank-60, condition-one mobility lift and zero maximum observed body transform/velocity, 557 muscle path length/speed, projected/full mass and applied-force, and QErr/UErr differences. The receipt records native binary, reducer and reused comparison-helper hashes. A changed source with an updated digest but nonzero lock target, changed lock flag or altered rotation law rejects, as does a remaining coordinate consumer.
+
+This is a sampled continuous-state mechanical comparison, not complete SimTK restart, passive-force or tendon suitability, active-wrap/force-power equivalence over all poses, contact/grip, Moco solve, muscle-only drive, private capture matching, or full-horizon excitation replay. The separately prepared fiber-state observation in the turnover has a large pre-equilibrium passive force and remains unqualified after one native fiber equilibrium. The abdominal, subtalar and MTP reductions must be composed and rechecked on the same source-derived ancestry before Moco initialization; a successful initialization would still not prove a solution. All 17 variants and six engine families remain in the epic denominator.

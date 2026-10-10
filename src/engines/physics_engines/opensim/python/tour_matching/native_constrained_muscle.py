@@ -94,14 +94,21 @@ def _audit_moving_path_points(
 
 
 def _audit_source_components(
-    model: Any, muscles: Any, declaration: DeclaredColdStart
+    model: Any,
+    muscles: Any,
+    declaration: DeclaredColdStart,
+    mechanical_paths: frozenset[str] = frozenset(),
 ) -> None:
     import opensim as osim
 
     components = tuple(model.getComponentsList())
     for component in components:
         kind = component.getConcreteClassName()
-        if kind not in _ALLOWED_COMPONENTS:
+        declared_mechanical = (
+            kind == "CoordinateActuator"
+            and component.getAbsolutePathString() in mechanical_paths
+        )
+        if kind not in _ALLOWED_COMPONENTS and not declared_mechanical:
             raise ValueError(f"unreviewed constrained muscle component: {kind}")
         if osim.Controller.safeDownCast(component) is not None:
             raise ValueError("source controller is forbidden in excitation replay")
@@ -110,6 +117,7 @@ def _audit_source_components(
         if (
             osim.Force.safeDownCast(component) is not None
             and osim.Muscle.safeDownCast(component) is None
+            and not declared_mechanical
         ):
             raise ValueError("non-muscle force is forbidden in this policy")
     registered = {
@@ -230,7 +238,10 @@ def _bundle_for(
         )
         adapter_sha = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
         provider_sha = hashlib.sha256(
-            bytes.fromhex(identity.provider_sha256) + bytes.fromhex(adapter_sha)
+            bytes.fromhex(identity.provider_sha256)
+            + bytes.fromhex(adapter_sha)
+            + Path(__file__).with_name("native_prepared_state.py").read_bytes()
+            + Path(__file__).with_name("native_constraint_state.py").read_bytes()
         ).hexdigest()
         identity = replace(
             identity,
@@ -337,34 +348,29 @@ def replay_constrained_muscle_bundle(
             names = tuple(muscles.get(i).getName() for i in range(muscles.getSize()))
             state_names = tuple(declaration.named_state)
             domains = muscle_replay._muscle_state_domains(model, osim)
-            manager = osim.Manager(model)
-            manager.setIntegratorMethod(osim.Manager.IntegratorMethod_RungeKuttaMerson)
-            manager.setIntegratorAccuracy(_ACCURACY)
-            manager.setWriteToStorage(False)
-            manager.initialize(state)
-            states = np.empty((len(grid), len(state_names)))
-            forces = np.empty((len(grid), len(names)))
-            applied = np.empty_like(forces)
-            audits = []
-            for index, time in enumerate(grid):
-                state = state if index == 0 else manager.integrate(float(time))
-                if state.getTime() != time:
-                    raise RuntimeError("native integration missed exact replay clock")
-                model.realizeDynamics(state)
-                audits.append(observe_declared_native_sample(model, state, frozen))
-                model.realizeDynamics(state)
-                states[index] = [
-                    model.getStateVariableValue(state, name) for name in state_names
-                ]
-                muscle_replay._validate_muscle_state(
-                    dict(zip(state_names, states[index], strict=True)), domains
-                )
-                forces[index] = [
-                    muscles.get(i).getActuation(state) for i in range(len(names))
-                ]
-                applied[index] = [
-                    muscles.get(i).getExcitation(state) for i in range(len(names))
-                ]
+            from .native_scalar_replay import (
+                NativeScalarReplayPolicy,
+                integrate_native_scalar_replay,
+            )
+
+            paths = tuple(
+                muscles.get(i).getAbsolutePathString() for i in range(muscles.getSize())
+            )
+            samples = integrate_native_scalar_replay(
+                model,
+                state,
+                state_names,
+                paths,
+                grid,
+                domains,
+                NativeScalarReplayPolicy(_ACCURACY, constrained_cold_start=frozen),
+            )
+            states, forces, applied = (
+                samples.states,
+                samples.actuations,
+                samples.applied_controls,
+            )
+            audits = samples.state_observations
             if audits[0] != initial_audit:
                 raise RuntimeError(
                     "native prepared state changed before first replay sample"

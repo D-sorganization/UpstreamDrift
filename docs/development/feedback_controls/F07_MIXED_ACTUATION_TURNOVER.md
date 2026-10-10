@@ -5,9 +5,14 @@
 Replay prerequisite #12151 of parent #12147, child of #11791 and epic #11784. Implementation is a separate
 assistance-explicit scalar T01 profile. The original muscle-only bundle still
 rejects every non-muscle actuator. The restricted fixed-path Slider/Pin subset
-does not yet admit either full-body production model. Parent #12147 now composes the constrained-muscle prerequisites locally and
-adds optional mixed Moco request/export/replay dispatch. Combined constrained
-and mixed replay remains rejected until independently admitted.
+does not yet admit either full-body production model. Parent #12147 composes
+the constrained-muscle prerequisites locally and adds optional mixed Moco
+request/export/replay dispatch. The statement that combined constrained and
+mixed replay remains rejected records the earlier #12151/#12147 snapshot;
+child #12173 now exercises that composition only under an explicit declared
+constraint policy and narrow synthetic fixture. See
+`F07_CONSTRAINED_MIXED_MOCO_TURNOVER.md` and canonical chapter48. Production
+models remain unqualified.
 
 ## Reproduction
 
@@ -47,8 +52,10 @@ Final native regression after exact-time, source-read and result-lineage changes
 
 Integrate constrained and cold-start prerequisites using normal protected PR
 flow. Reuse the existing all-scalar Moco bindings rather than weakening the
-muscle-only endpoint. Broaden native topology through explicitly tested
-profiles; a fixed-path two-DOF fixture is not factory-model admission.
+muscle-only endpoint. The constrained-plus-mixed integration is exercised only
+for an explicit source-bound declaration and synthetic fixture; it does not
+broaden factory-model admission. Broaden native topology through explicitly
+tested profiles; a fixed-path two-DOF fixture is not factory-model admission.
 Astra's derived Rajagopal route and #12150 MTP reduction remain separate
 source/model qualification work. Ground support, grips, bilateral/trunk/upper
 muscle anatomy, passive-force policy, full capture horizon, independent saved

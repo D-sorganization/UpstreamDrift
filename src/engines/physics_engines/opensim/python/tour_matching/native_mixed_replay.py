@@ -26,7 +26,18 @@ from .native_mixed_actuation import (
     NativeMixedProfile,
     admit_native_mixed_profile,
 )
-from .native_scalar_replay import integrate_native_scalar_replay
+from .native_scalar_replay import (
+    NativeScalarReplayPolicy,
+    integrate_native_scalar_replay,
+)
+from .native_prepared_state import (
+    DeclaredColdStart,
+    NativeConstraintStateAudit,
+    _admission_identity,
+    _apply_declared_locks,
+    observe_declared_native_sample,
+)
+from .native_constraint_state import _restore_named_state
 
 _ACCURACY = 1e-8
 
@@ -49,6 +60,7 @@ class NativeMixedReplayResult:
     initial_state_sha256: str
     policy_sha256: str
     provider_sha256: str
+    constraint_audits: tuple[NativeConstraintStateAudit, ...] = ()
     mode: str = "native-mixed-assistance-replay"
 
 
@@ -84,20 +96,54 @@ def _inputs(
     return grid, copied, state
 
 
+def _restore(
+    model: Any, initial: Mapping[str, float], declaration: DeclaredColdStart | None
+) -> tuple[Any, tuple[str, ...], Any]:
+    if declaration is None:
+        return muscle_replay._restore_continuous_state(model, initial, 0.0)
+    import opensim as osim
+
+    if (
+        dict(initial) != dict(declaration.named_state)
+        or declaration.time_seconds != 0.0
+        or declaration.constant_commands
+        or declaration.allow_source_controllers_for_observation
+        or declaration.source_controller_replacement
+        or declaration.scheduled_command_step
+    ):
+        raise ValueError("mixed constraint declaration differs or has competing inputs")
+    state = model.initSystem()
+    _apply_declared_locks(model, state, declaration.lock_targets)
+    _restore_named_state(model, state, initial)
+    state.setTime(0.0)
+    observe_declared_native_sample(model, state, declaration)
+    domains = muscle_replay._muscle_state_domains(model, osim)
+    muscle_replay._validate_muscle_state(initial, domains)
+    return state, tuple(initial), domains
+
+
 def _prepare(
-    path: Path, initial: Mapping[str, float], profile: MixedActuationProfile
+    path: Path,
+    initial: Mapping[str, float],
+    profile: MixedActuationProfile,
+    declaration: DeclaredColdStart | None = None,
 ) -> tuple[
     Any, Any, tuple[str, ...], Any, NativeMixedProfile, dict[str, tuple[float, ...]]
 ]:
     import opensim as osim
 
     raw = path.read_bytes()
+    if declaration is not None and (
+        path.resolve() != declaration.model_path.resolve()
+        or hashlib.sha256(raw).hexdigest() != declaration.source_sha256
+    ):
+        raise ValueError("mixed constraint source identity differs")
     native_muscle_bundle._validate_self_contained_source(raw)
     model = osim.Model(str(path))
     if path.read_bytes() != raw:
         raise ValueError("native source changed during load")
-    state, names, domains = muscle_replay._restore_continuous_state(model, initial, 0.0)
-    admitted = admit_native_mixed_profile(model, state, profile)
+    state, names, domains = _restore(model, initial, declaration)
+    admitted = admit_native_mixed_profile(model, state, profile, declaration)
     if state.getNY() != len(names):
         raise ValueError("native continuous state coverage is incomplete")
     options = native_muscle_bundle._registered_options(model, state, model.getMuscles())
@@ -111,6 +157,7 @@ def _identity(
     admitted: NativeMixedProfile,
     options: Mapping[str, tuple[float, ...]],
     contracts: Any,
+    declaration: DeclaredColdStart | None = None,
 ) -> Any:
     paths = tuple(channel.path for channel in admitted.channels)
     base = native_muscle_bundle._identity(path, model, names, paths, options, contracts)
@@ -138,6 +185,13 @@ def _identity(
         provider.update(name.encode())
         provider.update(Path(__file__).with_name(name).read_bytes())
     provider.update(admitted.sha256.encode())
+    if declaration is not None:
+        for name in (
+            "native_prepared_state.py",
+            "native_constraint_state.py",
+            "native_constrained_muscle.py",
+        ):
+            provider.update(Path(__file__).with_name(name).read_bytes())
     return replace(
         base,
         variant_id="reviewed-mixed-scalar-assistance",
@@ -147,12 +201,24 @@ def _identity(
     )
 
 
-def _policy(identity: Any, contracts: Any) -> Any:
-    return replace(
+def _policy(
+    identity: Any, contracts: Any, declaration: DeclaredColdStart | None = None
+) -> Any:
+    policy = replace(
         native_muscle_bundle._policy(identity, contracts),
         initialization_policy_id="reviewed-mixed-scalar-cold-start",
         input_player_id="native-time-only-linear-scalar-command",
         contact_policy_id="explicit-muscle-coordinate-assistance-no-contact",
+    )
+    if declaration is None:
+        return policy
+    return replace(
+        policy,
+        initialization_policy_id="declared-constrained-mixed-scalar-cold-start",
+        contact_policy_id="declared-native-coupler-lock-mixed-no-contact",
+        contact_policy_sha256=_admission_identity(
+            declaration, identity.provider_sha256
+        ),
     )
 
 
@@ -164,14 +230,19 @@ def build_native_mixed_replay_bundle(
     profile: MixedActuationProfile,
     *,
     experiment_id: str = "native-opensim-mixed-replay",
+    constrained_cold_start: DeclaredColdStart | None = None,
 ) -> Any:
     """Freeze source, complete state, explicit assistance roles and saved controls."""
     contracts = native_replay_contract_types()
     grid, copied, initial = _inputs(times, controls, initial_state, profile)
     path = Path(model_path)
     raw = path.read_bytes()
-    model, _, names, _, admitted, options = _prepare(path, initial, profile)
-    identity = _identity(path, model, names, admitted, options, contracts)
+    model, _, names, _, admitted, options = _prepare(
+        path, initial, profile, constrained_cold_start
+    )
+    identity = _identity(
+        path, model, names, admitted, options, contracts, constrained_cold_start
+    )
     if path.read_bytes() != raw:
         raise ValueError("native source changed during bundle admission")
     paths = tuple(channel.path for channel in admitted.channels)
@@ -191,7 +262,7 @@ def build_native_mixed_replay_bundle(
         contracts.InputInterpolation.LINEAR,
         tuple(grid),
         tuple(tuple(copied[name][i] for name in paths) for i in range(len(grid))),
-        _policy(identity, contracts),
+        _policy(identity, contracts, constrained_cold_start),
     )
 
 
@@ -199,8 +270,39 @@ def _immutable(values: NDArray[np.float64]) -> NDArray[np.float64]:
     return np.frombuffer(values.tobytes(), dtype=np.float64).reshape(values.shape)
 
 
+def _replay_arrays(
+    samples: Any,
+    grid: NDArray[np.float64],
+    controls: Mapping[str, NDArray[np.float64]],
+    paths: tuple[str, ...],
+) -> tuple[NDArray[np.float64], ...]:
+    expected_controls = np.column_stack([controls[path] for path in paths])
+    if not np.allclose(samples.applied_controls, expected_controls, rtol=0, atol=1e-12):
+        raise RuntimeError("native applied controls differ from saved ordered controls")
+    work = np.zeros_like(samples.powers_w)
+    work[1:] = np.cumsum(
+        np.diff(grid)[:, None] * (samples.powers_w[:-1] + samples.powers_w[1:]) / 2,
+        axis=0,
+    )
+    return tuple(
+        _immutable(value)
+        for value in (
+            grid,
+            samples.states,
+            samples.actuations,
+            samples.applied_controls,
+            samples.powers_w,
+            work,
+        )
+    )
+
+
 def replay_native_mixed_bundle(
-    bundle: Any, model_path: str | Path, profile: MixedActuationProfile
+    bundle: Any,
+    model_path: str | Path,
+    profile: MixedActuationProfile,
+    *,
+    constrained_cold_start: DeclaredColdStart | None = None,
 ) -> NativeMixedReplayResult:
     """Revalidate frozen T01 identity, then execute one fresh time-only replay."""
     contracts = native_replay_contract_types()
@@ -213,6 +315,11 @@ def replay_native_mixed_bundle(
     with TemporaryDirectory(prefix="opensim-frozen-mixed-") as directory:
         snapshot = Path(directory) / "frozen.osim"
         snapshot.write_bytes(raw)
+        frozen = (
+            None
+            if constrained_cold_start is None
+            else replace(constrained_cold_start, model_path=snapshot)
+        )
         expected = build_native_mixed_replay_bundle(
             snapshot,
             initial,
@@ -220,6 +327,7 @@ def replay_native_mixed_bundle(
             controls,
             profile,
             experiment_id=bundle.experiment_id,
+            constrained_cold_start=frozen,
         )
         if expected.capabilities[0] not in bundle.capabilities or any(
             getattr(bundle, field) != getattr(expected, field)
@@ -228,7 +336,7 @@ def replay_native_mixed_bundle(
             raise ValueError(
                 "mixed model, state, controls, roles or executed policy identity differs"
             )
-        model, _, names, _, admitted, _ = _prepare(snapshot, initial, profile)
+        model, _, names, _, admitted, _ = _prepare(snapshot, initial, profile, frozen)
         actuators = model.getActuators()
         short_names = tuple(
             actuators.get(i).getName() for i in range(actuators.getSize())
@@ -243,37 +351,20 @@ def replay_native_mixed_bundle(
             grid,
             dict(zip(short_names, (controls[path] for path in paths), strict=True)),
         )
-        state, names, domains = muscle_replay._restore_continuous_state(
-            model, initial, 0.0
-        )
+        state, names, domains = _restore(model, initial, frozen)
+
         samples = integrate_native_scalar_replay(
-            model, state, names, paths, grid, domains, _ACCURACY
+            model,
+            state,
+            names,
+            paths,
+            grid,
+            domains,
+            NativeScalarReplayPolicy(_ACCURACY, constrained_cold_start=frozen),
         )
-        expected_controls = np.column_stack([controls[path] for path in paths])
-        if not np.allclose(
-            samples.applied_controls, expected_controls, rtol=0, atol=1e-12
-        ):
-            raise RuntimeError(
-                "native applied controls differ from saved ordered controls"
-            )
-        work = np.zeros_like(samples.powers_w)
-        work[1:] = np.cumsum(
-            np.diff(grid)[:, None] * (samples.powers_w[:-1] + samples.powers_w[1:]) / 2,
-            axis=0,
-        )
+        arrays = _replay_arrays(samples, grid, controls, paths)
         if snapshot.read_bytes() != raw:
             raise ValueError("executed native source identity differs")
-        arrays = tuple(
-            _immutable(value)
-            for value in (
-                grid,
-                samples.states,
-                samples.actuations,
-                samples.applied_controls,
-                samples.powers_w,
-                work,
-            )
-        )
         return NativeMixedReplayResult(
             state_names=names,
             channel_paths=paths,
@@ -289,4 +380,5 @@ def replay_native_mixed_bundle(
             initial_state_sha256=bundle.integrity.initial_state_sha256,
             policy_sha256=bundle.integrity.execution_policy_sha256,
             provider_sha256=bundle.model.provider_sha256,
+            constraint_audits=samples.state_observations,
         )
