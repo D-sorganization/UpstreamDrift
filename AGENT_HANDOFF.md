@@ -1073,3 +1073,51 @@ marker registration. See chapter42 and
 ## Active Mixed Moco Link (#12147)
 
 Branch `feat/f07-mixed-moco-link-12147` composes preserved constrained prerequisites and adds optional mixed scalar Moco dispatch. The new native test writes a nonzero 40 ms target and measures fresh replay independently. Exact roles/bounds are bound into requests; mixed NPZ fields preserve controls, physical units, assistance, powers and work. Retained unscaled-cost and coarse-transcription failures motivate per-state refinement. Full-body/source physiology/contact and private capture remain open; chapter39 and F07_MIXED_ACTUATION_TURNOVER own the calculation and handoff.
+
+## Constrained Mixed Moco and Replay (#12173)
+
+Child #12173 adds an opt-in composition of the declared cold-start constraint
+policy and the existing assistance-explicit mixed profile. Exact coordinate
+optimizer boxes must fit within declared charts; linear chart constraints are
+checked by conservative interval extrema. Fresh replay rejects a native
+`Manager` that changes any requested named state value or the initial time,
+and records actual native constraint enforcement and position/velocity
+residuals at every sample. No native constraints are disabled and the strict
+default muscle-only path is unchanged. Mixed output preserves dimensionless
+muscle excitation and mechanical commands separately from physical N or N\*m
+actuation, power and sampled work. The 40 ms synthetic Moco fixture exports
+exact knots and independently replays, but it is not a private capture or
+production qualification. The frozen native regression reports 73 passed and
+one optional provider skip. Canonical calculation is chapter48; turnover is
+`docs/development/feedback_controls/F07_CONSTRAINED_MIXED_MOCO_TURNOVER.md`.
+The calculation registry remains empty and release blocked; full-body
+anatomy, calibration, physiology, contact/grip, capture horizon, production
+variants and six-engine parity remain unresolved.
+
+## F07 Exact 557-Muscle Excitation Diagnostic (#12182)
+
+The exact-derived-source v3 profile is stacked on #12181 and merges the
+reviewed #12173 shared scalar executor. It does not widen v1/v2. The
+original 1,226-state seed exits its source SC_z chart at 1 ms; the retained
+failure remains authoritative. A separately declared six-coordinate
+interior diagnostic seed independently replays 557 saved excitations for
+only 0.2 ms on two fresh OpenSim 4.6 models with 17 native couplers observed.
+Changed future excitation alters native activation while preserving the
+prefix. See chapter50 and `F07_EXACT_557_REPLAY_TURNOVER.md` for source,
+runtime, input, policy and failure hashes. Four invalid original body
+inertias, physiology, visual assets, full-horizon private capture fit, and
+all-variant/six-engine qualification remain open. Keep the stacked PR
+unarmed until prerequisites merge.
+
+## F07 Native Source-Body Inertia Gate (#12191)
+
+The read-only OpenSim body gate reuses #12183's coordinate-invariant inertia
+validator and binds XML to fresh native Body mass, COM and inertia for every
+source body. A welded exact-zero-mass/zero-inertia routing carrier is distinct
+from a positive-mass solid. Actual OpenSim 4.6 tests include the rotated
+invalid case, native readback mutation and unchanged 557 source: bilateral
+clavicle/scapula tensors fail. The diagnostic replay in #12182 is unchanged
+and remains physically unqualified. See chapter52,
+`F07_NATIVE_BODY_INERTIA_TURNOVER.md` and the source-bound receipt; no
+parameter repair or private data was committed. This slice depends on #12183
+and #12182 and must remain unarmed until prerequisites merge.
