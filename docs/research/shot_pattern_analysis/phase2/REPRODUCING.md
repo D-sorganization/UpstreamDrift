@@ -22,18 +22,23 @@ historical manifests to make them match newer code. See the
 
 ## Rebuild From Saved Final Data
 
-Use a fresh output directory. The figure builders reject nonempty destinations.
-The final directory names below are required by the protocol checks; their parent
-can be a new directory so accepted publication artifacts remain intact.
+Use a separate working copy for reproduction. Preserve its existing published
+figure directories, supplemental-report directory, report and companion inventories
+in a backup location before running these commands. The figure builders reject
+nonempty destinations. Keep the study directory layout below: the narrative
+links its scientific design, original plan, and validation references relative
+to that directory. These commands are for rebuilding, not for appending to an
+active publication run.
 
 ```bash
 set -e
 export QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg
 export MUJOCO_GL=egl SDL_VIDEODRIVER=dummy OPENBLAS_NUM_THREADS=1
 study_phase=docs/research/shot_pattern_analysis/phase2
-study_output=/tmp/shot-pattern-publication-rebuild
-# Select a fresh location if this directory already exists.
-test ! -e "$study_output" && mkdir "$study_output"
+study_output="$study_phase"
+test ! -e "$study_output/final_figures_v1"
+test ! -e "$study_output/control_final_figures_v1"
+test ! -e "$study_output/supplement_report_v1"
 
 python -m scripts.research.shot_pattern_analysis.build_final_figures \
   "$study_phase/final_v1" "$study_output/final_figures_v1"
