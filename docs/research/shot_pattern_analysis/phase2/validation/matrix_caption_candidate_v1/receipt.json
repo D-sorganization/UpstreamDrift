@@ -4,7 +4,7 @@
   "tests": "13 passed including saved-context caption, 768-color contrast and panel geometry regressions",
   "static_checks": "Ruff check and scoped Mypy passed",
   "agy_status": "session2176 terminated3 by DNS transport error; root completed and strengthened candidate",
-  "actual_preview": "/tmp/p2-matrix-root-preview-v2; session60114; revalidate terminal state",
+  "actual_preview": "Completed exit0:8PNGs under actual_previews; root visually inspected primary SD2 SG; Astra full review pending",
   "source_sha256": {
     "src/tools/shot_pattern_analysis/matched_report_plots.py": "109fe2a9ca4bfd9540ab38364f90c3f6c085ec86a162a7585a020af6d61d262a",
     "tests/tools/shot_pattern_analysis/test_matched_report_plots.py": "8dcc189f4d5a8dcbacdf141166611189a66bb92506cda875d9fbc0f8c3ba3c0b"
