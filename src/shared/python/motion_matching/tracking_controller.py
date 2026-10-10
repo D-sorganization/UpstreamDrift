@@ -9,7 +9,7 @@ keeps working unchanged for existing callers.
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -27,6 +27,30 @@ if TYPE_CHECKING:
         FullBodySimulator,
     )
 
+#: ``hook(t, q, q_t, v_t) -> (q_t', v_t')``: replaces the sampled position and
+#: velocity targets from the simulated state (for example the closed-loop gaze
+#: neck, OSV-3d #11729). The acceleration feedforward stays the reference's.
+ReferenceHook = Callable[[float, "Array", "Array", "Array"], tuple["Array", "Array"]]
+
+
+def _hooked_target(
+    hook: ReferenceHook | None, t: float, q: Array, q_t: Array, v_t: Array
+) -> tuple[Array, Array]:
+    if hook is None:
+        return q_t, v_t
+    out = tuple(np.asarray(x, dtype=float) for x in hook(t, q, q_t, v_t))
+    if (
+        len(out) != 2
+        or out[0].shape != q_t.shape
+        or out[1].shape != v_t.shape
+        or not all(np.isfinite(x).all() for x in out)
+    ):
+        raise ValueError(
+            "reference_hook must return finite (q_t, v_t) targets of shapes "
+            f"{q_t.shape} and {v_t.shape}"
+        )
+    return out[0], out[1]
+
 
 def _tracking_controller_from_gains(
     simulator: FullBodySimulator,
@@ -36,11 +60,15 @@ def _tracking_controller_from_gains(
     *,
     acceleration_feedforward: float = 1.0,
     split_time_s: float | None = None,
+    reference_hook: ReferenceHook | None = None,
 ) -> Controller:
     """Computed-torque tracking with pre-built gains.
 
     ``split_time_s`` (ball impact, GCV-20) differentiates the reference on
     each side of impact separately so the feedforward has no spike there.
+    ``reference_hook`` may replace the sampled position and velocity targets
+    from the simulated state; the acceleration feedforward stays the
+    reference's.
     """
     # Deferred import: full_body_forward_dynamics imports this module back
     # at its own bottom, so importing it at module level here would cycle.
@@ -72,6 +100,7 @@ def _tracking_controller_from_gains(
             sample(velocity, t),
             sample(acceleration, t),
         )
+        q_t, v_t = _hooked_target(reference_hook, t, q, q_t, v_t)
         com_ref = (
             simulator.centre_of_mass(q_t)[0] if gains.balance is not None else None
         )
@@ -91,10 +120,13 @@ def tracking_controller(
     root_regulation: tuple[float, float] | None = None,
     acceleration_feedforward: float = 1.0,
     split_time_s: float | None = None,
+    reference_hook: ReferenceHook | None = None,
 ) -> Controller:
     """Computed-torque tracking of a reference trajectory (linear interpolation).
 
-    ``split_time_s`` splits the reference rates at the ball impact (GCV-20).
+    ``split_time_s`` splits the reference rates at the ball impact (GCV-20);
+    ``reference_hook`` replaces the position and velocity targets from the
+    simulated state.
     """
     from src.shared.python.motion_matching.full_body_forward_dynamics import (
         _tracking_gains,
@@ -107,4 +139,5 @@ def tracking_controller(
         _tracking_gains(omega_rad_s, zeta, balance, root_regulation),
         acceleration_feedforward=acceleration_feedforward,
         split_time_s=split_time_s,
+        reference_hook=reference_hook,
     )

@@ -54,6 +54,25 @@ $-33.6 \pm 9.1^\circ$ (driver) and $-25.4 \pm 11.1^\circ$ (7-iron) for 12 female
 professionals (Zhang, Liu and Liu 2026, doi:10.3389/fspor.2026.1867187), so tour heads
 turn with the torso. The table, evidence file and commands are in
 \texttt{HEAD\_GAZE\_REFERENCE.md}.
+\section{Closed-Loop Gaze Neck}
+With \texttt{--fd-neck gaze-closed} the open-loop neck above is the feedforward. Every
+capture frame ($h = 1/f_{\mathrm{capture}} \approx 2.8$~ms) the same bounded solve is
+repeated on the \emph{simulated} state $q^{\mathrm{sim}}$, with the prior toward the
+feedforward neck $\bar{x}(t)$, giving $x_j$ at update time $t_j$. The correction
+$c_j = x_j - \bar{x}(t_j)$ and its backward difference $\dot{c}_j = (c_j - c_{j-1})/h$
+set the computed-torque targets for $t_j \le t < t_{j+1}$:
+$x^{\mathrm{ref}}(t) = \mathrm{clip}\bigl(\bar{x}(t) + c_j + \dot{c}_j (t - t_j)\bigr)$ and
+$\dot{x}^{\mathrm{ref}}(t) = \dot{\bar{x}}(t) + \dot{c}_j$. The acceleration feedforward
+stays the reference's. A first version that changed only the position target lagged the
+moving correction: release error fell to 6.7$^\circ$ (driver) and 4.2$^\circ$ (7-iron),
+but the post-impact hold window rose to 4.8$^\circ$ and 1.7$^\circ$. With the rate term,
+replay schedule error RMS (address to impact, hold, release, after release) is
+0.4, 2.9, 1.7, 2.1$^\circ$ (driver; open loop 2.1, 1.1, 17.2, 16.7$^\circ$) and
+0.1, 0.6, 1.2, 0.7$^\circ$ (7-iron; open loop 0.7, 0.9, 8.6, 7.6$^\circ$). The driver
+hold window remains worse than open loop: the ball impact disturbs the torso there, and the
+tracked reference itself is 2.0$^\circ$ off the schedule. The neck still reaches its range
+on 93 (driver) and 69 (7-iron) of about 655 updates. The behaviour is modelled, not
+measured, and runs in the MuJoCo replay only.
 \section{Results and Limitations}
 See \texttt{HEAD\_GAZE\_REFERENCE.md} for the weight sweep on the capture-A driver
 (marker RMS 28.0 to 33.8~mm; $\theta_{\mathrm{gaze}}$ RMS 21.3$^\circ$ to 0.8$^\circ$ at $w = 10$),
