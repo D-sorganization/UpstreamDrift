@@ -86,6 +86,16 @@ class TestMjcfExporter:
         motors = actuator.findall("motor")
         assert len(motors) >= 20
 
+    def test_segment_geoms_skip_self_collision(self, mjcf_root: ET.Element) -> None:
+        floor = mjcf_root.find(".//geom[@name='floor']")
+        assert floor is not None
+        assert "contype" not in floor.attrib  # the floor keeps MuJoCo defaults
+        segment_geoms = mjcf_root.findall(".//body//geom")
+        assert segment_geoms
+        for geom in segment_geoms:
+            assert geom.attrib.get("contype") == "2", geom.attrib.get("name")
+            assert geom.attrib.get("conaffinity") == "1", geom.attrib.get("name")
+
     def test_export_to_file(self, canonical_model, tmp_path: Path) -> None:
         out_file = tmp_path / "test_golfer.xml"
         xml_str = export_mjcf(canonical_model, out_path=out_file)
