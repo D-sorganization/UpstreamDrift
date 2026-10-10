@@ -1,8 +1,14 @@
+# Active: Two-Hand Grip Pose - OSV-2 #11728 (Slice 1)
+
+- Branch `claude/osv-2-grip-pose` (PR #12032), merged with main after OSV-9 (#11795). `model_appearance/grip_pose.py` is the club-agnostic grip definition; its lead (3.2 cm below the butt) and trail (10.82 cm) positions mirror the generated-spec `GripInterface`, the single source, and `tests/opensim/test_grip_closure_both_hands.py` fails on drift. `club_geometry`, `address.py` and the MyoSuite scene sites import it. The Rajagopal models keep the OSV-9 topology (lead `WeldJoint hand_l_to_club`, trail `WeldConstraint hand_r_to_club`); `msk_club_grip_calibration.json` is untouched.
+- Canned-swing closure residual (`python3 -m scripts.grip_closure_report --output r.json`): MuJoCo, Drake (ControlTower), Pinocchio, OpenSim full-body weld <= 1.8e-7 m; MyoSuite unavailable. Open: owner review of a 1.5 cm lead position (needs `msk_club_calibration` rerun for both models and clubs), finger meshes, stills and clips (slice 2), no `golf_humanoid` swing residual.
+
 # Active: Gaze Weight Selection, #11729
 
 - Branch `claude/osv-3b-gaze-default`. `motion_matching/gaze_sweep.py` (feasible set, Pareto knee, cross-capture `select_default`, `REPORTING_GAZE_WEIGHT = 0.1`), `scripts/sweep_gaze_weight.py` (IK-stage run per capture and weight), `scripts/summarize_gaze_sweep.py` (evidence JSON + Pareto plot), `scripts/render_head_gaze_clips.py` (MuJoCo side by side, 1080p60, 1x/0.5x/impact 0.25x), `scripts/render_head_gaze_engines.py` (Drake/Pinocchio/OpenSim/MyoSuite native clips + pairing).
 - Result: knee 0.1 in both captures (common feasible {0, 0.1, 0.2}); theta_gaze RMS 20.2 to 8.5 deg (driver), 18.6 to 6.1 deg (iron), marker RMS +0.6/+1.3 mm. `--gaze-weight` still defaults to 0 for qualified receipts. Evidence `docs/development/full_body_models/evidence/head_gaze/gaze_weight_sweep.{json,png}`; method in `HEAD_GAZE_REFERENCE.md` (Gaze Weight Selection) and the `.tex`.
 - Open: neck PD tracking in forward dynamics, published tour head ranges.
+
 # Active: Golf Ball in Engine Scenes - GCV-13 #11719, Epic #11706
 
 - Branch `claude/gcv-13-ball-scenes`. `src/shared/python/model_appearance/ball.py` (landed in #11772) already had the regulation-radius address-geometry function; this slice adds `resolve_ball_visual` (enabled/override/computed, "unavailable" with a reason rather than a guess) and a `ball` block (`enabled`, `position_m`, `source` in `BALL_SOURCES = (address_geometry, measured, model_estimate)`) on `AppearanceDocument`/`appearance_v1.schema.json`.

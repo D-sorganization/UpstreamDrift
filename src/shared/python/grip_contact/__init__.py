@@ -5,6 +5,10 @@ from src.shared.python.grip_contact.bushing_law import (
     BushingWrench,
     bushing_wrench,
 )
+from src.shared.python.grip_contact.closure_series import (
+    GripClosureSeries,
+    closure_series_from_residuals,
+)
 from src.shared.python.grip_contact.club_dynamics import ClubDynamics
 from src.shared.python.grip_contact.damping import (
     DEFAULT_DAMPING_RATIO,
@@ -55,6 +59,8 @@ __all__ = [
     "RigidBodyState",
     "bushing_wrench",
     "hand_frame_states",
+    "GripClosureSeries",
+    "closure_series_from_residuals",
     "DEFAULT_COUPLE_NOISE_FLOOR_NM",
     "ClubKinematics",
     "CoupleConsistency",
