@@ -11113,3 +11113,18 @@ fails on bilateral clavicles and scapulae, while its short diagnostic replay
 remains separately labeled. Chapter52 and the source-body inertia turnover
 record the exact gate and evidence. No source repair, physiology qualification
 or full-swing matching follows from this necessary test.
+
+## Generic Shoulder Triangle-Lamina Candidate (#12211)
+
+The exact final 557-muscle source still fails four shoulder-body physical
+inertias. A separately identified candidate retains its joints, paths, laws
+and scalar masses while deriving bilateral clavicle/scapula COM and full
+tensor from exact right CEINMS triangle meshes through the Tools #5503
+lamina kernel. Right identity-frame placement and left local-z vertex
+reflection are declared generic registration assumptions, not recovered
+original anatomy. The new native model passes the 40-body physical gate and
+matches source body transforms and constraint residuals at three sampled
+poses. Chapter54 and `F07_GENERIC_SHOULDER_LAMINA_TURNOVER.md` retain exact
+hashes, exclusions and reproduction. Tools #5503 and #12207 are pending;
+physiology, native force/work over a chart, contact/grip, head/markers,
+private full-horizon matching and all17/six-engine qualification remain open.
