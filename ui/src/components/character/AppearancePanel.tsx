@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { getApiBase } from '@/api/backend';
 import { apiFetch } from '@/api/fetch';
-import { errorMessage } from './characterSpecTypes';
+import {
+  errorMessage,
+  type CharacterSpecRequestBody,
+} from './characterSpecTypes';
 import {
   appearancePalette,
   type AppearanceLibrary,
@@ -11,6 +14,7 @@ import {
 
 interface AppearancePanelProps {
   onPaletteChange?: (palette: AppearancePalette) => void;
+  character?: CharacterSpecRequestBody | null;
 }
 
 /** A labelled `<select>`, with an optional decorative colour swatch. */
@@ -96,8 +100,16 @@ function defaultPicks(library: AppearanceLibrary): AppearancePicks {
  * Loads `/api/character-builder/appearance/library` on mount and reports the
  * derived preview palette to the parent via `onPaletteChange` so
  * `CharacterPreview` can recolour without this component reaching into it.
+ *
+ * When `character` (the spec panel's `CharacterSpecRequestBody`, CMB-7d,
+ * #11658) is supplied, the export is bound to that spec character: the
+ * server compiles it, stamps `spec_sha256` on the document and names the
+ * file from the preset.
  */
-export function AppearancePanel({ onPaletteChange }: AppearancePanelProps) {
+export function AppearancePanel({
+  onPaletteChange,
+  character,
+}: AppearancePanelProps) {
   const [library, setLibrary] = useState<AppearanceLibrary | null>(null);
   const [libraryError, setLibraryError] = useState<string | null>(null);
   const [picks, setPicks] = useState<AppearancePicks | null>(null);
@@ -176,7 +188,7 @@ export function AppearancePanel({ onPaletteChange }: AppearancePanelProps) {
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(picks),
+          body: JSON.stringify(character ? { ...picks, character } : picks),
         },
       );
       if (!response.ok) {
@@ -211,7 +223,7 @@ export function AppearancePanel({ onPaletteChange }: AppearancePanelProps) {
     } finally {
       setExporting(false);
     }
-  }, [picks]);
+  }, [picks, character]);
 
   if (libraryError) {
     return (
@@ -295,6 +307,15 @@ export function AppearancePanel({ onPaletteChange }: AppearancePanelProps) {
       >
         {exporting ? 'Exporting…' : 'Export Appearance'}
       </button>
+      {character && (
+        <p
+          data-testid="appearance-spec-binding"
+          className="text-xs text-gray-400"
+        >
+          Bound to the current spec character (preset:{' '}
+          {character.preset ?? 'defaults'})
+        </p>
+      )}
       {exportError && (
         <div className="text-xs text-red-400 bg-red-950/30 p-2.5 rounded border border-red-900/50">
           {exportError}

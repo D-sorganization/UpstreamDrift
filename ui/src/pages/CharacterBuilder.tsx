@@ -4,6 +4,7 @@ import { OrbitControls, Grid, Environment } from '@react-three/drei';
 import { getApiBase } from '@/api/backend';
 import { CharacterSpecPanel } from '@/components/character/CharacterSpecPanel';
 import { AppearancePanel } from '@/components/character/AppearancePanel';
+import { useCharacterSpec } from '@/components/character/useCharacterSpec';
 import type { AppearancePalette } from '@/components/character/appearanceTypes';
 
 interface SegmentBreakdown {
@@ -141,6 +142,7 @@ export function CharacterBuilderPage() {
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [palette, setPalette] = useState<AppearancePalette | null>(null);
+  const spec = useCharacterSpec();
 
   const breakdown = useMemo(() => {
     return SEGMENT_RATIOS.map((seg) => {
@@ -268,12 +270,16 @@ export function CharacterBuilderPage() {
 
           {/* Spec-native character builder (CMB-7a, #11658) */}
           <div className="border-t border-gray-700 pt-6">
-            <CharacterSpecPanel />
+            <CharacterSpecPanel spec={spec} />
           </div>
 
-          {/* Appearance picker (CMB-7c, #11658) */}
+          {/* Appearance picker (CMB-7c, #11658), bound to the spec
+              character above (CMB-7d, #11658). */}
           <div className="border-t border-gray-700 pt-6">
-            <AppearancePanel onPaletteChange={setPalette} />
+            <AppearancePanel
+              onPaletteChange={setPalette}
+              character={spec.requestBody}
+            />
           </div>
 
           {/* Segment breakdown */}
