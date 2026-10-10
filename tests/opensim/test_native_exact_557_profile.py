@@ -32,13 +32,13 @@ def _installed_source() -> tuple[Path, Path]:
 def _native_declaration() -> tuple[
     Any, np.ndarray[Any, Any], dict[str, np.ndarray[Any, Any]]
 ]:
-    import opensim as osim
+    source, preparation = _installed_source()
+    osim = pytest.importorskip("opensim")
 
     from src.engines.physics_engines.opensim.python.tour_matching.native_prepared_state import (
         DeclaredColdStart,
     )
 
-    source, preparation = _installed_source()
     assert hashlib.sha256(preparation.read_bytes()).hexdigest() == _PREPARATION_SHA256
     model = osim.Model(str(source))
     state = model.initSystem()
