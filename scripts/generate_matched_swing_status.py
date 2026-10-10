@@ -150,7 +150,7 @@ def _render_progress_matrix(rows: list[dict[str, Any]]) -> list[str]:
 
     # Assign qualification labels based on actual verified receipts
     engine_stats["mujoco"]["status"] = (
-        "⚙️ Engineering Milestone (G1 IK not met: 34.1 mm > 30 mm, #11044)"
+        "⚙️ Engineering Milestone (G1 IK not met: 33.0 mm > 30 mm, #11044, #11737)"
     )
     engine_stats["pinocchio"]["status"] = (
         "⚙️ Kinematic Milestone (Pink QP active; Crocoddyl lift in progress)"
