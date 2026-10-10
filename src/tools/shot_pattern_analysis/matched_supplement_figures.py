@@ -809,6 +809,10 @@ def _render_pair_figures_core(
     first, second = pair["first"], pair["second"]
     if first.get("status") != "completed" or second.get("status") != "completed":
         return []
+    if first.get("source_protocol") is None or second.get("source_protocol") is None:
+        raise ValueError(
+            f"pair references lack source protocol: {first.get('cell')} vs {second.get('cell')}"
+        )
     # Preflight identity validation & canonical identity extraction
     comparison, p0, c0, p1, c1, target = pair_comparison_identity(pair)
 
