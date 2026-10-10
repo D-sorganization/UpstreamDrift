@@ -1,0 +1,206 @@
+FFFFFFFFFFFFFFFF                                                         [100%]
+=================================== FAILURES ===================================
+______________________ test_intended_command_is_accepted _______________________
+
+    def test_intended_command_is_accepted():
+>    w.validate_command(command())
+     ^^^^^^^^^^^^^^^^^^
+E    AttributeError: module 'wrapper' has no attribute 'validate_command'
+
+/tmp/test_p2_supplement_v4_guards.py:13: AttributeError
+_______ test_changed_actual_input_or_target_rejected[--original-primary] _______
+
+flag = '--original-primary'
+
+    @pytest.mark.parametrize('flag',['--original-primary','--original-control','--pw-primary-face-bounds','--pw-control-face-bounds','--driver-control-speed-bounds','--inventory','--transition-receipt','--transition-sha256','--output-dir'])
+    def test_changed_actual_input_or_target_rejected(flag):
+     cmd=command();cmd[cmd.index(flag)+1]='unbound-alternative'
+>    with pytest.raises(ValueError):w.validate_command(cmd)
+                                    ^^^^^^^^^^^^^^^^^^
+E    AttributeError: module 'wrapper' has no attribute 'validate_command'
+
+/tmp/test_p2_supplement_v4_guards.py:18: AttributeError
+_______ test_changed_actual_input_or_target_rejected[--original-control] _______
+
+flag = '--original-control'
+
+    @pytest.mark.parametrize('flag',['--original-primary','--original-control','--pw-primary-face-bounds','--pw-control-face-bounds','--driver-control-speed-bounds','--inventory','--transition-receipt','--transition-sha256','--output-dir'])
+    def test_changed_actual_input_or_target_rejected(flag):
+     cmd=command();cmd[cmd.index(flag)+1]='unbound-alternative'
+>    with pytest.raises(ValueError):w.validate_command(cmd)
+                                    ^^^^^^^^^^^^^^^^^^
+E    AttributeError: module 'wrapper' has no attribute 'validate_command'
+
+/tmp/test_p2_supplement_v4_guards.py:18: AttributeError
+____ test_changed_actual_input_or_target_rejected[--pw-primary-face-bounds] ____
+
+flag = '--pw-primary-face-bounds'
+
+    @pytest.mark.parametrize('flag',['--original-primary','--original-control','--pw-primary-face-bounds','--pw-control-face-bounds','--driver-control-speed-bounds','--inventory','--transition-receipt','--transition-sha256','--output-dir'])
+    def test_changed_actual_input_or_target_rejected(flag):
+     cmd=command();cmd[cmd.index(flag)+1]='unbound-alternative'
+>    with pytest.raises(ValueError):w.validate_command(cmd)
+                                    ^^^^^^^^^^^^^^^^^^
+E    AttributeError: module 'wrapper' has no attribute 'validate_command'
+
+/tmp/test_p2_supplement_v4_guards.py:18: AttributeError
+____ test_changed_actual_input_or_target_rejected[--pw-control-face-bounds] ____
+
+flag = '--pw-control-face-bounds'
+
+    @pytest.mark.parametrize('flag',['--original-primary','--original-control','--pw-primary-face-bounds','--pw-control-face-bounds','--driver-control-speed-bounds','--inventory','--transition-receipt','--transition-sha256','--output-dir'])
+    def test_changed_actual_input_or_target_rejected(flag):
+     cmd=command();cmd[cmd.index(flag)+1]='unbound-alternative'
+>    with pytest.raises(ValueError):w.validate_command(cmd)
+                                    ^^^^^^^^^^^^^^^^^^
+E    AttributeError: module 'wrapper' has no attribute 'validate_command'
+
+/tmp/test_p2_supplement_v4_guards.py:18: AttributeError
+_ test_changed_actual_input_or_target_rejected[--driver-control-speed-bounds] __
+
+flag = '--driver-control-speed-bounds'
+
+    @pytest.mark.parametrize('flag',['--original-primary','--original-control','--pw-primary-face-bounds','--pw-control-face-bounds','--driver-control-speed-bounds','--inventory','--transition-receipt','--transition-sha256','--output-dir'])
+    def test_changed_actual_input_or_target_rejected(flag):
+     cmd=command();cmd[cmd.index(flag)+1]='unbound-alternative'
+>    with pytest.raises(ValueError):w.validate_command(cmd)
+                                    ^^^^^^^^^^^^^^^^^^
+E    AttributeError: module 'wrapper' has no attribute 'validate_command'
+
+/tmp/test_p2_supplement_v4_guards.py:18: AttributeError
+__________ test_changed_actual_input_or_target_rejected[--inventory] ___________
+
+flag = '--inventory'
+
+    @pytest.mark.parametrize('flag',['--original-primary','--original-control','--pw-primary-face-bounds','--pw-control-face-bounds','--driver-control-speed-bounds','--inventory','--transition-receipt','--transition-sha256','--output-dir'])
+    def test_changed_actual_input_or_target_rejected(flag):
+     cmd=command();cmd[cmd.index(flag)+1]='unbound-alternative'
+>    with pytest.raises(ValueError):w.validate_command(cmd)
+                                    ^^^^^^^^^^^^^^^^^^
+E    AttributeError: module 'wrapper' has no attribute 'validate_command'
+
+/tmp/test_p2_supplement_v4_guards.py:18: AttributeError
+______ test_changed_actual_input_or_target_rejected[--transition-receipt] ______
+
+flag = '--transition-receipt'
+
+    @pytest.mark.parametrize('flag',['--original-primary','--original-control','--pw-primary-face-bounds','--pw-control-face-bounds','--driver-control-speed-bounds','--inventory','--transition-receipt','--transition-sha256','--output-dir'])
+    def test_changed_actual_input_or_target_rejected(flag):
+     cmd=command();cmd[cmd.index(flag)+1]='unbound-alternative'
+>    with pytest.raises(ValueError):w.validate_command(cmd)
+                                    ^^^^^^^^^^^^^^^^^^
+E    AttributeError: module 'wrapper' has no attribute 'validate_command'
+
+/tmp/test_p2_supplement_v4_guards.py:18: AttributeError
+______ test_changed_actual_input_or_target_rejected[--transition-sha256] _______
+
+flag = '--transition-sha256'
+
+    @pytest.mark.parametrize('flag',['--original-primary','--original-control','--pw-primary-face-bounds','--pw-control-face-bounds','--driver-control-speed-bounds','--inventory','--transition-receipt','--transition-sha256','--output-dir'])
+    def test_changed_actual_input_or_target_rejected(flag):
+     cmd=command();cmd[cmd.index(flag)+1]='unbound-alternative'
+>    with pytest.raises(ValueError):w.validate_command(cmd)
+                                    ^^^^^^^^^^^^^^^^^^
+E    AttributeError: module 'wrapper' has no attribute 'validate_command'
+
+/tmp/test_p2_supplement_v4_guards.py:18: AttributeError
+__________ test_changed_actual_input_or_target_rejected[--output-dir] __________
+
+flag = '--output-dir'
+
+    @pytest.mark.parametrize('flag',['--original-primary','--original-control','--pw-primary-face-bounds','--pw-control-face-bounds','--driver-control-speed-bounds','--inventory','--transition-receipt','--transition-sha256','--output-dir'])
+    def test_changed_actual_input_or_target_rejected(flag):
+     cmd=command();cmd[cmd.index(flag)+1]='unbound-alternative'
+>    with pytest.raises(ValueError):w.validate_command(cmd)
+                                    ^^^^^^^^^^^^^^^^^^
+E    AttributeError: module 'wrapper' has no attribute 'validate_command'
+
+/tmp/test_p2_supplement_v4_guards.py:18: AttributeError
+_______________________ test_duplicate_argument_rejected _______________________
+
+    def test_duplicate_argument_rejected():
+     cmd=command()+['--original-primary','unbound-alternative']
+>    with pytest.raises(ValueError):w.validate_command(cmd)
+                                    ^^^^^^^^^^^^^^^^^^
+E    AttributeError: module 'wrapper' has no attribute 'validate_command'
+
+/tmp/test_p2_supplement_v4_guards.py:22: AttributeError
+______________ test_changed_execution_rejected[numerical_runtime] ______________
+
+field = 'numerical_runtime'
+
+    @pytest.mark.parametrize('field',['numerical_runtime','contact_backend','source_sha256','native_binary_sha256'])
+    def test_changed_execution_rejected(field):
+     expected={'numerical_runtime':{'python':'3.12.13','numpy':'2.2.6'},'contact_backend':{'active_backend':'numba'},'source_sha256':{'physics.py':'a'},'native_binary_sha256':'b'}
+     actual=copy.deepcopy(expected);actual[field]='different'
+>    with pytest.raises(ValueError):w.validate_execution(actual,expected)
+                                    ^^^^^^^^^^^^^^^^^^^^
+E    AttributeError: module 'wrapper' has no attribute 'validate_execution'
+
+/tmp/test_p2_supplement_v4_guards.py:28: AttributeError
+_______________ test_changed_execution_rejected[contact_backend] _______________
+
+field = 'contact_backend'
+
+    @pytest.mark.parametrize('field',['numerical_runtime','contact_backend','source_sha256','native_binary_sha256'])
+    def test_changed_execution_rejected(field):
+     expected={'numerical_runtime':{'python':'3.12.13','numpy':'2.2.6'},'contact_backend':{'active_backend':'numba'},'source_sha256':{'physics.py':'a'},'native_binary_sha256':'b'}
+     actual=copy.deepcopy(expected);actual[field]='different'
+>    with pytest.raises(ValueError):w.validate_execution(actual,expected)
+                                    ^^^^^^^^^^^^^^^^^^^^
+E    AttributeError: module 'wrapper' has no attribute 'validate_execution'
+
+/tmp/test_p2_supplement_v4_guards.py:28: AttributeError
+________________ test_changed_execution_rejected[source_sha256] ________________
+
+field = 'source_sha256'
+
+    @pytest.mark.parametrize('field',['numerical_runtime','contact_backend','source_sha256','native_binary_sha256'])
+    def test_changed_execution_rejected(field):
+     expected={'numerical_runtime':{'python':'3.12.13','numpy':'2.2.6'},'contact_backend':{'active_backend':'numba'},'source_sha256':{'physics.py':'a'},'native_binary_sha256':'b'}
+     actual=copy.deepcopy(expected);actual[field]='different'
+>    with pytest.raises(ValueError):w.validate_execution(actual,expected)
+                                    ^^^^^^^^^^^^^^^^^^^^
+E    AttributeError: module 'wrapper' has no attribute 'validate_execution'
+
+/tmp/test_p2_supplement_v4_guards.py:28: AttributeError
+____________ test_changed_execution_rejected[native_binary_sha256] _____________
+
+field = 'native_binary_sha256'
+
+    @pytest.mark.parametrize('field',['numerical_runtime','contact_backend','source_sha256','native_binary_sha256'])
+    def test_changed_execution_rejected(field):
+     expected={'numerical_runtime':{'python':'3.12.13','numpy':'2.2.6'},'contact_backend':{'active_backend':'numba'},'source_sha256':{'physics.py':'a'},'native_binary_sha256':'b'}
+     actual=copy.deepcopy(expected);actual[field]='different'
+>    with pytest.raises(ValueError):w.validate_execution(actual,expected)
+                                    ^^^^^^^^^^^^^^^^^^^^
+E    AttributeError: module 'wrapper' has no attribute 'validate_execution'
+
+/tmp/test_p2_supplement_v4_guards.py:28: AttributeError
+_______________________ test_matching_execution_accepted _______________________
+
+    def test_matching_execution_accepted():
+     expected={'source_sha256':{'physics.py':'a'},'numerical_runtime':{'python':'3.12.13'}}
+>    w.validate_execution(copy.deepcopy(expected),expected)
+     ^^^^^^^^^^^^^^^^^^^^
+E    AttributeError: module 'wrapper' has no attribute 'validate_execution'
+
+/tmp/test_p2_supplement_v4_guards.py:32: AttributeError
+=========================== short test summary info ============================
+FAILED ../../../../../../tmp/test_p2_supplement_v4_guards.py::test_intended_command_is_accepted
+FAILED ../../../../../../tmp/test_p2_supplement_v4_guards.py::test_changed_actual_input_or_target_rejected[--original-primary]
+FAILED ../../../../../../tmp/test_p2_supplement_v4_guards.py::test_changed_actual_input_or_target_rejected[--original-control]
+FAILED ../../../../../../tmp/test_p2_supplement_v4_guards.py::test_changed_actual_input_or_target_rejected[--pw-primary-face-bounds]
+FAILED ../../../../../../tmp/test_p2_supplement_v4_guards.py::test_changed_actual_input_or_target_rejected[--pw-control-face-bounds]
+FAILED ../../../../../../tmp/test_p2_supplement_v4_guards.py::test_changed_actual_input_or_target_rejected[--driver-control-speed-bounds]
+FAILED ../../../../../../tmp/test_p2_supplement_v4_guards.py::test_changed_actual_input_or_target_rejected[--inventory]
+FAILED ../../../../../../tmp/test_p2_supplement_v4_guards.py::test_changed_actual_input_or_target_rejected[--transition-receipt]
+FAILED ../../../../../../tmp/test_p2_supplement_v4_guards.py::test_changed_actual_input_or_target_rejected[--transition-sha256]
+FAILED ../../../../../../tmp/test_p2_supplement_v4_guards.py::test_changed_actual_input_or_target_rejected[--output-dir]
+FAILED ../../../../../../tmp/test_p2_supplement_v4_guards.py::test_duplicate_argument_rejected
+FAILED ../../../../../../tmp/test_p2_supplement_v4_guards.py::test_changed_execution_rejected[numerical_runtime]
+FAILED ../../../../../../tmp/test_p2_supplement_v4_guards.py::test_changed_execution_rejected[contact_backend]
+FAILED ../../../../../../tmp/test_p2_supplement_v4_guards.py::test_changed_execution_rejected[source_sha256]
+FAILED ../../../../../../tmp/test_p2_supplement_v4_guards.py::test_changed_execution_rejected[native_binary_sha256]
+FAILED ../../../../../../tmp/test_p2_supplement_v4_guards.py::test_matching_execution_accepted
+16 failed in 16.11s
