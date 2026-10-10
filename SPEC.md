@@ -1,3 +1,12 @@
+## Coordinate-Invariant Physical Inertia Contract (#12183)
+
+The existing DIME inertia helper checks triangle feasibility on sorted principal
+moments and absolute symmetry tolerance. Chapter 51 records TDD evidence and
+the unchanged tensor-return contract. This helper correction introduces no native
+source-admission integration or optimizer-wide qualification. Imported body
+inertias still require explicit source/COM/frame/provenance validation; no
+automatic tensor repair or matching acceptance is authorized by this change.
+
 ## Native Feedback Platform Integration (#12060)
 
 The published native Moco preparation/seed/solve/replay path and owned Simscape
@@ -10999,3 +11008,87 @@ Canonical reference: `manuals/upstreamdrift/chapters/34-owned-native-simscape-re
 turnover and source-hashed receipt: `docs/development/feedback_controls/F06D2_OWNED_SIMSCAPE_TURNOVER.md`
 and `F06D2_NATIVE_OWNED_RECEIPT.json`. This trusted synthetic diagnostic does not
 qualify production variants, muscle physiology, private capture or parity.
+
+## Source-Preserving BUET–Hamner OpenSim Candidate (#12157)
+
+An explicit version-one native factory now composes reviewed BUET upper/trunk
+and Hamner distal-leg source components into a separate 40-body, 557-muscle
+OpenSim artifact. Fresh XML reload, exact regional property identity and three
+sampled native body/path geometry and velocity checks establish a narrow
+mechanical source-preservation result. The entrypoint XML and loaded-runtime
+hashes are recorded in chapter 44 and the F07 turnover. This candidate has
+not passed source resource closure, passive physiology, partial abdominal lock
+reduction, native Moco, contact/grip, golfer marker registration, full-state
+replay or captured full-swing matching. Scientific publication stays blocked;
+all 17 variants and six engine families remain required.
+
+## Source-Preserving Native Zero-Subtalar Reduction (#12167)
+
+An exact-source bilateral locked-zero CustomJoint reduction creates a separate
+native OpenSim artifact from the assembled 557-muscle BUET–Hamner candidate.
+The one-coordinate spatial function, source/default/achieved lock target,
+native zero frame transform and absence of external coordinate consumers are
+admitted before the native weld. Fresh reloading and four common-state
+comparisons verify a rank-complete mobility lift, native body motion, muscle
+path lengths/speeds, mass, applied forces and constraints. Canonical chapter
+46 and the F07 turnover bind source/runtime/output identity and sampled
+limits. Abdominal and MTP composition, physiological muscle state, full native
+replay, Moco and capture matching remain open.
+## Source-Bound Native Zero-MTP CustomJoint Reduction (#12176)
+
+The assembled 557-muscle BUET–Hamner source has bilateral single-coordinate
+locked-zero MTP CustomJoints, not PinJoints. A separate exact source-profile
+reduction now admits their zero spatial laws and native lock targets before
+welding only those joints in a derived model. Fresh native reload and four
+sampled common-state comparisons preserve body motion, 557 muscle path
+lengths/speeds, constraints and rank-complete lifted mass and applied force.
+The existing PinJoint policy remains strict. The retained abdominal→subtalar
+parent admits this final MTP step. Independent original-to-final sampled
+mechanics and native Moco initialization pass at three prepared states; Moco
+solve, physiology, contact/grip and captured matching remain unqualified. Canonical
+chapter 47, native receipt and F07 turnover bind the calculation and limits.
+
+## Assistance-Explicit OpenSim Replay (#12147)
+
+A distinct native mixed-actuation T01 profile freezes exact muscle and
+CoordinateActuator channels, complete state/options, physical role declarations,
+bounds, gains and native units. Independent replay retains one owned native
+Manager and checks actual physical time and applied saved commands. Forces,
+powers and sampled work retain root/upper/leg assistance labels and source,
+provider, input, state and policy digests. Zero-assistance point bounds are
+supported. The original muscle-only profile remains strict. Canonical chapter
+27 and F07_MIXED_ACTUATION_TURNOVER document the calculation and limits; full
+factory topology, capture/physiology/contact/grip and 17-model parity remain open.
+
+The #12147 mixed Moco link reuses scalar bindings and chapter39's file-driven
+pipeline. The original mixed link bound ordered roles/bounds and preserved
+optimizer knots through independent T01 replay; combined constrained profiles
+were outside that snapshot's scope. Mixed NPZ evidence distinguishes
+actuations/controls and physical units, roles, powers and sampled work. This
+does not discharge anatomy, contact, private full-horizon or all-model gates.
+
+Child #12173 now exercises an explicitly declared constrained-plus-mixed
+Moco/replay path. Optimizer boxes are contained in declared coordinate and
+linear charts; fresh replay rejects Manager projection of the exact named
+state/time seed and records constraint enforcement/residuals at every sample.
+Muscle excitation, mechanical commands and resulting physical force/torque
+remain separate. The strict default muscle-only policy is unchanged. Its
+40 ms synthetic native Moco and fresh-replay regression is software evidence
+only; full-body qualification, private capture, all required variants and
+six-engine parity remain open. See canonical chapter48 and
+`F07_CONSTRAINED_MIXED_MOCO_TURNOVER.md`.
+The F07 #12143 versioned constrained-muscle policy extends a declared
+native OpenSim cold start to exact ordered excitation T01 export, fresh
+source replay and marker sampling without reassembly. A coupler-only
+two-Millard source solves a reachable nonzero Moco endpoint and independently
+replays within declared fixture-specific per-unit state and q/u residual
+bounds; native locked-coordinate replay remains separate because installed
+OpenSim Moco rejects locked coordinates. The source-bound component audit
+admits only reviewed CustomJoint and coordinate-linear moving path laws.
+Canonical chapter42 and `F07_CONSTRAINED_MUSCLE_MOCO_TURNOVER.md` retain
+the failed zero-force/loose-transcription experiment and all 520-muscle,
+private-capture, contact, assistance and physiology gates.
+## Native Abdominal Zero-Translation Reduction
+
+Issue #12161 adds a separately identified guarded XML-derived abdominal reduction; chapter45 documents its exact zero manifold, state/force verification, provenance and unqualified status. No whole-joint weld, physiology adjustment or capture-matching claim is permitted.
+

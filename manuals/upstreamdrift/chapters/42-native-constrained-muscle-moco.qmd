@@ -1,0 +1,85 @@
+# Constrained Native Muscle Moco and Excitation Replay
+
+Issue #12143 adds a versioned OpenSim 4.6 diagnostic for a declared constrained
+cold start, native muscle excitation, and independent same-input replay. It
+extends the preparation recipe in chapter 41 and the maintained offline Moco
+runner in chapter 39. The original fixed-path muscle bundle retains its
+stricter component policy. This calculation does not certify anatomy,
+physiology, contact, grip, or a captured golf swing.
+
+## Native State and Input Contract
+
+The caller supplies an unchanged self-contained `.osim` entrypoint SHA-256,
+every native named continuous state, time zero, exact model-owned lock targets,
+constraint enforcement flags, coordinate chart bounds, and a residual
+tolerance. Native `initSystem()` may assemble its default state. The owned
+preparation then applies declared lock targets and restores the frozen named
+state without further assembly or muscle equilibration. The policy binds the
+loaded native model, provider source, registered modeling options, muscle
+state schema, excitation channel order, interpolation, exact knots, and
+declared constraint/chart rules to a T01 experiment-replay bundle. Source
+XML entrypoint hashing does not imply a transitive resource closure.
+
+For each admitted muscle $i$, a native time-only player applies saved
+excitation $e_i(t)$ by linear interpolation of the exact Moco control knots.
+The native muscle law evolves activation and fiber state internally. A fresh
+source load and one uninterrupted Runge–Kutta–Merson integration produce
+$x_k^{\mathrm{replay}}$ at every declared knot $t_k$. The replay compares
+the native applied excitation with the saved channel values and observes
+position and velocity constraint errors and source charts at each knot.
+Native constraint reactions are plant outputs, never injected controls.
+The scorer samples declared source-frame marker placements from restored
+replayed states without reassembly or a second integration.
+
+The `declared-constrained-muscles/2.0.0` profile admits exact native
+coordinate couplers, a one-coordinate unit-linear `CustomJoint` rotation
+chart, and simple fixed or coordinate-linear moving path points. Moving
+path coordinates require declared chart bounds; native function coefficients
+must be finite. Source-byte identity binds the actual coefficients and path
+route. Nonlinear moving-point laws, conditional points, wraps, external or
+non-muscle forces, source controllers, prescribed motion, and contact remain
+outside this profile. Native moving-guide work is retained as modeled; no
+workless-guide or anatomical interpretation is inferred.
+
+## Moco Feasibility Versus Replay Agreement
+
+The maintained file request may carry this exact constrained cold-start
+declaration. Preparation collects independent blockers before solving and
+checks T01 replay capability with the same declared source and state.
+OpenSim 4.6 Moco rejects locked coordinates at solver initialization; a
+locked-source replay capability therefore does **not** authorize a locked
+Moco solve or topology transformation. A coupler-only source can enter Moco.
+
+The native two-Millard, three-joint fixture has an active coupler
+$q_d=2q$, nonzero muscle forces, and a requested independent-coordinate
+displacement of $5\times10^{-6}$ rad over 10 ms. With 10 mesh intervals,
+convergence tolerance $10^{-6}$, constraint tolerance $10^{-7}$, and a
+300-iteration cap, Moco reaches its final-state bound. Its exact saved
+control knots replay on a fresh native model. Maximum transcription-to-replay
+differences at the returned 21 knots were $1.935\times10^{-7}$ rad for
+coordinates, $3.827\times10^{-9}$ rad/s for speeds,
+$1.647\times10^{-11}$ for activation, and $4.994\times10^{-9}$ m for
+fiber length. Position and velocity constraint residuals remain below the
+declared $10^{-9}$ tolerance. Fixture-specific tests require coordinate
+error below $2\times10^{-7}$ rad and final replay target error below that
+same bound. These measured differences are separate from optimizer success
+and from capture-observation accuracy.
+
+An earlier zero-force path fixture let a loose $10^{-4}$ transcription
+tolerance meet a tiny endpoint despite almost zero native speed; its fresh
+replay did not follow that endpoint. It was rejected as positive matching
+evidence. The revised source geometry produces nonzero native force and
+motion. This failure is retained as a reason for strict native replay
+acceptance after every solve, rather than trusting transcription status.
+
+## Remaining Scientific Gates
+
+The unchanged 520-muscle source still lacks approved private marker
+attachments/registration, source-anatomy and passive-load resolution,
+mechanical-assistance exclusion, exact contact/grip and constraint policy,
+and complete bounded native state preparation. The locked-coordinate Moco
+limitation requires a separate source-faithful reduction with native
+body/path/force equivalence; stock weld replacement cannot be assumed to
+preserve nonzero lock targets or actuator references. No blocked production
+solve is run. The required full-horizon muscular OpenSim excitation replay,
+all 17 variants, and six-engine comparison denominator remain open.

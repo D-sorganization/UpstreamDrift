@@ -1,16 +1,12 @@
 {
   "calibrated": {
     "centre_of_mass": {
-      "com_m": [
-        1.0372981587673267,
-        0.04471169063648493,
-        0.9337425120679408
-      ],
+      "com_m": [1.0372981587673267, 0.04471169063648493, 0.9337425120679408],
       "height_above_ground_m": 0.9334847319630653,
       "inside_support_polygon": true,
       "polygon_centroid_offset_m": 0.012930457719592007
     },
-    "closure_error_m": 6.0731396511155336e-05,
+    "closure_error_m": 6.0731396511155336e-5,
     "leg_angles_deg": {
       "ankle_angle_l": 3.907874127590744,
       "ankle_angle_r": -9.741377451865743,

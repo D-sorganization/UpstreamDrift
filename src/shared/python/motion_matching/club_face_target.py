@@ -27,7 +27,7 @@ from __future__ import annotations
 
 import math
 from collections.abc import Mapping, Sequence
-from typing import Any
+from typing import Any, NamedTuple
 
 import numpy as np
 from numpy.typing import NDArray
@@ -52,6 +52,16 @@ HEAD_TRIAD_LABELS: tuple[str, ...] = MARKER_SEGMENTS["club"][:3]
 FACE_ORIENTATION_WEIGHT = 3.0
 #: Minimum spread (m) of the triad offsets; a degenerate triad has no roll.
 MIN_TRIAD_SPREAD_M = 0.01
+#: Largest median rigid-fit residual (m) between the attached triad offsets and
+#: the captured triad. A rigid club triad's own Kabsch residual is capture noise
+#: (median 0.2 mm, p95 0.6 mm on capture-A and capture-B with matching
+#: offsets), while the offsets of another club's head give 42 mm, so 5 mm
+#: separates them with a wide margin on both sides (#12030).
+MAX_TRIAD_SHAPE_RESIDUAL_M = 0.005
+
+
+class TriadShapeMismatchError(ValueError):
+    """The attached head-triad offsets do not describe the captured triad."""
 
 
 def _finite_vector(value: Sequence[float] | Array, name: str) -> Array:
@@ -126,8 +136,67 @@ def observe_frame_rotations(
     matching ``(frames, markers)`` mask and ``offsets`` the triad offsets in
     the marker frame. Frames where any triad marker is missing or non-finite
     are NaN. Raises ``ValueError`` for mismatched shapes, unknown labels,
-    fewer than three markers or a degenerate (collinear) triad.
+    fewer than three markers or a degenerate (collinear) triad, and
+    ``TriadShapeMismatchError`` when the offsets do not describe the captured
+    triad's shape (``MAX_TRIAD_SHAPE_RESIDUAL_M``; the face is then not
+    observable).
     """
+    centred, triad, seen = _prepare_triad(points, valid, labels, offsets)
+    out = np.full((len(triad), 3, 3), np.nan)
+    if seen.any():
+        residual = _median_shape_residual(centred, triad, seen)
+        if residual > MAX_TRIAD_SHAPE_RESIDUAL_M:
+            raise TriadShapeMismatchError(
+                "head triad offsets do not match the captured triad (median "
+                f"rigid residual {residual * 1000:.1f} mm > "
+                f"{MAX_TRIAD_SHAPE_RESIDUAL_M * 1000:.1f} mm); the attached "
+                "marker geometry belongs to another club, so the face "
+                "orientation is not observable"
+            )
+    for k in np.flatnonzero(seen):
+        out[k] = kabsch_rotation(centred, triad[k] - triad[k].mean(axis=0))
+    return out
+
+
+def triad_shape_residual_m(
+    points: Array,
+    valid: NDArray[np.bool_],
+    labels: Sequence[str],
+    offsets: Mapping[str, Sequence[float] | Array],
+) -> float:
+    """Median over observed frames of the rigid-fit RMS point residual (m).
+
+    Same inputs and validation as :func:`observe_frame_rotations`. Per frame
+    the centred ``offsets`` are Kabsch-fitted to the centred captured triad
+    and the RMS point distance after the fit is taken. Raises ``ValueError``
+    when no frame observes the full triad. Postcondition: a finite value
+    ``>= 0``; about 0 when the offsets are the capture's own triad shape.
+    """
+    centred, triad, seen = _prepare_triad(points, valid, labels, offsets)
+    if not seen.any():
+        raise ValueError("no capture frame observes the full triad")
+    return _median_shape_residual(centred, triad, seen)
+
+
+def _median_shape_residual(
+    centred: Array, triad: Array, seen: NDArray[np.bool_]
+) -> float:
+    residuals = []
+    for k in np.flatnonzero(seen):
+        world = triad[k] - triad[k].mean(axis=0)
+        fit = centred @ kabsch_rotation(centred, world).T
+        residuals.append(float(np.sqrt(np.mean(np.sum((fit - world) ** 2, axis=1)))))
+    return float(np.median(residuals))
+
+
+def _prepare_triad(
+    points: Array,
+    valid: NDArray[np.bool_],
+    labels: Sequence[str],
+    offsets: Mapping[str, Sequence[float] | Array],
+) -> tuple[Array, Array, NDArray[np.bool_]]:
+    """Validate a triad observation; return centred offsets, the captured
+    triad ``(frames, markers, 3)`` and the per-frame observed mask."""
     pts = np.asarray(points, dtype=float)
     mask = np.asarray(valid, dtype=bool)
     names = list(labels)
@@ -147,11 +216,7 @@ def observe_frame_rotations(
     cols = [names.index(label) for label in offsets]
     triad = pts[:, cols, :]
     seen = mask[:, cols].all(axis=1) & np.isfinite(triad).all(axis=(1, 2))
-    out = np.full((len(pts), 3, 3), np.nan)
-    for k in np.flatnonzero(seen):
-        world = triad[k] - triad[k].mean(axis=0)
-        out[k] = kabsch_rotation(centred, world)
-    return out
+    return centred, triad, seen
 
 
 def observe_capture_face(
@@ -291,6 +356,24 @@ def model_face_normals(
     return np.array([kin.body_poses(row, [frame])[frame][0] @ axis for row in rows])
 
 
+def model_face_centres(
+    kin: Any, q: Array, spec: Mapping[str, Any], frame: str = FACE_FRAME
+) -> Array:
+    """World rendered face centre per row of ``q`` from the IK provider's FK.
+
+    Same contract as :func:`model_face_normals` (GCV-20 clubhead speed).
+    """
+    rows = np.asarray(q, dtype=float)
+    if rows.ndim != 2:
+        raise ValueError("q must be (frames, coordinates)")
+    centre = face_centre_in_frame(spec, frame)
+    out = []
+    for row in rows:
+        rot, pos = kin.body_poses(row, [frame])[frame]
+        out.append(rot @ centre + pos)
+    return np.array(out)
+
+
 def face_fit_summary(model_normals: Array, capture_normals: Array) -> dict[str, Any]:
     """Separation statistics (degrees) over the frames the capture observes.
 
@@ -325,3 +408,69 @@ def fill_unobserved(
     if seen.sum() < 2:
         raise ValueError("need at least two observed face centres to interpolate")
     return np.column_stack([np.interp(t, t[seen], c[seen, j]) for j in range(3)])
+
+
+class CaptureImpact(NamedTuple):
+    """Capture ball passage on the capture clock (GCV-20, #11767).
+
+    ``frame_index`` is the last pre-contact frame (``times[frame_index] <=
+    time_s <= times[frame_index + 1]``); named to avoid shadowing
+    ``tuple.index``. ``ball_centre_m`` is the shared ball
+    (:func:`model_appearance.ball.ball_position_at_address`) at the address
+    face, centred at the address face-centre height, or ``None`` when no
+    face normal was observed.
+    """
+
+    time_s: float
+    frame_index: int
+    ball_centre_m: Array | None
+
+
+def capture_impact(
+    times: Sequence[float] | Array,
+    points: Array,
+    valid: NDArray[np.bool_],
+    labels: Sequence[str],
+    attachments: Mapping[str, tuple[str, Sequence[float]]],
+    spec: Mapping[str, Any],
+) -> CaptureImpact:
+    """Sub-sample capture impact and the ball it strikes.
+
+    The capture face centre (head triad through the calibrated
+    ``attachments``, gaps interpolated) passes the ball at the sub-sample
+    :func:`model_appearance.club_face.ball_passage`. Raises ``ValueError``
+    when ``times`` does not match the frames, the triad cannot be observed,
+    or the face centre never returns to the ball.
+    """
+    from src.shared.python.model_appearance.ball import (
+        BALL_RADIUS_M,
+        ball_position_at_address,
+    )
+    from src.shared.python.model_appearance.club_face import ball_passage
+
+    normals, centres = observe_capture_face(points, valid, labels, attachments, spec)
+    t = np.asarray(times, dtype=float)
+    if t.shape != (len(centres),):
+        raise ValueError("times must hold one entry per capture frame")
+    filled = fill_unobserved(t, centres)
+    t_impact, k, _ = ball_passage(t, filled)
+    seen = np.isfinite(normals).all(axis=1) & (np.linalg.norm(normals, axis=1) > 0)
+    ball = None
+    if seen.any():
+        normal = normals[int(np.argmax(seen))]
+        ball = ball_position_at_address(
+            filled[0], normal, ground_height_m=float(filled[0, 2]) - BALL_RADIUS_M
+        )
+    return CaptureImpact(t_impact, int(k), ball)
+
+
+def capture_impact_index(
+    times: Sequence[float] | Array,
+    points: Array,
+    valid: NDArray[np.bool_],
+    labels: Sequence[str],
+    attachments: Mapping[str, tuple[str, Sequence[float]]],
+    spec: Mapping[str, Any],
+) -> int:
+    """Last pre-contact capture frame (:func:`capture_impact` ``.frame_index``)."""
+    return capture_impact(times, points, valid, labels, attachments, spec).frame_index

@@ -77,6 +77,40 @@ def test_triad_rotation_is_recovered_exactly() -> None:
     np.testing.assert_allclose(got, np.array(truth), atol=1e-12)
 
 
+def test_triad_shape_residual_is_zero_for_a_rigid_matching_triad() -> None:
+    points, valid = _capture([np.eye(3), _rot((1, 2, 3), 40.0)])
+    assert cft.triad_shape_residual_m(points, valid, LABELS, OFFSETS) < 1e-9
+
+
+def test_mismatched_triad_shape_is_rejected_fail_closed() -> None:
+    """#12030: another club's head offsets must not yield a face rotation."""
+    points, valid = _capture([np.eye(3), _rot((0, 1, 0), 30.0)])
+    wrong = {
+        k: v * (2.0 if i == 0 else 1.0) for i, (k, v) in enumerate(OFFSETS.items())
+    }
+    assert cft.triad_shape_residual_m(points, valid, LABELS, wrong) > (
+        cft.MAX_TRIAD_SHAPE_RESIDUAL_M
+    )
+    with pytest.raises(
+        cft.TriadShapeMismatchError, match="do not match the captured triad"
+    ):
+        cft.observe_frame_rotations(points, valid, LABELS, wrong)
+    assert issubclass(cft.TriadShapeMismatchError, ValueError)
+
+
+def test_triad_shape_residual_needs_an_observed_frame() -> None:
+    points, valid = _capture([np.eye(3)])
+    valid[0, 1] = False
+    with pytest.raises(ValueError, match="observes the full triad"):
+        cft.triad_shape_residual_m(points, valid, LABELS, OFFSETS)
+    # observe_frame_rotations keeps the NaN contract when nothing is observed.
+    assert np.isnan(cft.observe_frame_rotations(points, valid, LABELS, OFFSETS)).all()
+
+
+def test_triad_shape_limit_separates_noise_from_another_club() -> None:
+    assert 0.0 < cft.MAX_TRIAD_SHAPE_RESIDUAL_M < 0.042
+
+
 def test_unobserved_frames_are_nan_not_zero() -> None:
     points, valid = _capture([np.eye(3), np.eye(3), np.eye(3)])
     valid[1, 2] = False

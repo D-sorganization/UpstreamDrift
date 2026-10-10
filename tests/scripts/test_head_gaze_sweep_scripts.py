@@ -227,3 +227,31 @@ def test_clip_schedules_reject_bad_input(
 
     with pytest.raises(ValueError):
         clip_schedules(_clip_times(), impact, speeds, impact_speed, window)
+
+
+def test_replay_trajectory_resamples_the_simulation_onto_capture_times(
+    tmp_path: Path,
+) -> None:
+    from scripts.render_head_gaze_clips import replay_trajectory
+
+    sim_t = np.linspace(0.0, 1.0, 11)
+    sim_q = np.column_stack([sim_t, 2.0 * sim_t])
+    capture_t = np.array([0.0, 0.25, 0.5, 1.0])
+    np.savez(
+        tmp_path / "dynamics_record.npz",
+        time_s=sim_t,
+        q=sim_q,
+        track_time_s=capture_t,
+        q_track=np.zeros((4, 2)),
+    )
+    q, times = replay_trajectory(tmp_path)
+    assert times == pytest.approx(capture_t)
+    assert q[:, 0] == pytest.approx(capture_t)
+    assert q[:, 1] == pytest.approx(2.0 * capture_t)
+
+
+def test_clip_loader_rejects_an_unknown_trajectory(tmp_path: Path) -> None:
+    from scripts.render_head_gaze_clips import _load
+
+    with pytest.raises(ValueError):
+        _load(tmp_path, "markers")

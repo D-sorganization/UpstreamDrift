@@ -42,12 +42,38 @@ from src.shared.python.swing_comparison.motion import (
     SwingMotion,
     swing_motion_from_markers,
 )
+from src.shared.python.swing_comparison.turn import (
+    FRAME_CONVENTION,
+    LINE_NAMES,
+    MAX_FILL_GAP_S,
+    LineTurn,
+    TurnMetrics,
+    build_turn_block,
+    compute_turn_lines,
+    line_turn,
+    marker_turn_lines,
+    model_turn_lines,
+    spec_model_points,
+    validate_turn_block,
+)
 from src.shared.python.swing_comparison.report import (
     comparison_to_dict,
     comparison_to_markdown,
 )
 
 __all__ = [
+    "FRAME_CONVENTION",
+    "LINE_NAMES",
+    "MAX_FILL_GAP_S",
+    "LineTurn",
+    "TurnMetrics",
+    "build_turn_block",
+    "compute_turn_lines",
+    "line_turn",
+    "marker_turn_lines",
+    "model_turn_lines",
+    "spec_model_points",
+    "validate_turn_block",
     "CAPTURE_A_CLUBHEAD_LABELS",
     "CAPTURE_A_GRIP_LABELS",
     "CAPTURE_A_MARKER_LABELS",

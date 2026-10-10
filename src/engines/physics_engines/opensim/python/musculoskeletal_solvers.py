@@ -14,10 +14,14 @@ and upper-body stand-in torques so that a muscle-incapable motion is visible.
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Iterator, Mapping
+import contextlib
 from dataclasses import dataclass
 import logging
+import os
 from pathlib import Path
+import re
+import sys
 import time
 from typing import Any
 
@@ -50,6 +54,83 @@ def _opensim() -> Any:
     import opensim
 
     return opensim
+
+
+#: OpenSim log of a StaticOptimization run, written in its results directory.
+SO_LOG_NAME = "static_optimization.log"
+#: Equality-constraint violation above which a frame did not converge. On the
+#: tour-average driver swing the logged violations split into a solved group
+#: (below 1e-3; the optimiser's own criterion is 1e-4) and a failed group
+#: (1 to 1e7), with 2 of 524 frames in between.
+SO_CONVERGED_VIOLATION = 1e-3
+_SO_FRAME = re.compile(r"time = (\S+) Performance = (\S+) Constraint violation = (\S+)")
+
+
+def parse_static_optimization_log(path: str | Path) -> tuple[np.ndarray, np.ndarray]:
+    """Frame times and equality-constraint violations from an SO log.
+
+    StaticOptimization logs one ``time = ... Constraint violation = ...`` line
+    per frame; the violation is the residual of the acceleration equalities.
+    Returns ``(times, violations)`` in log order (empty arrays when no frame
+    was logged). Raises ``FileNotFoundError`` when ``path`` is missing.
+    """
+    text = Path(path).read_text(encoding="utf-8", errors="replace")
+    rows = [(float(m.group(1)), float(m.group(3))) for m in _SO_FRAME.finditer(text)]
+    data = np.asarray(rows, dtype=float).reshape(-1, 2)
+    return data[:, 0], data[:, 1]
+
+
+def converged_frames(
+    times: np.ndarray,
+    log_times: np.ndarray,
+    log_violations: np.ndarray,
+    *,
+    tolerance: float = SO_CONVERGED_VIOLATION,
+    time_tolerance: float = 1e-6,
+) -> np.ndarray:
+    """Boolean mask over ``times``: the frame's logged violation <= tolerance.
+
+    Frames are matched to log entries by time (within ``time_tolerance``); a
+    frame with no log entry counts as not converged. Raises ``ValueError``
+    for a non-positive tolerance or mismatched log arrays.
+    """
+    require(tolerance > 0 and time_tolerance > 0, "tolerance must be positive")
+    lt = np.asarray(log_times, dtype=float)
+    lv = np.asarray(log_violations, dtype=float)
+    require(lt.shape == lv.shape, "log times and violations must align")
+    mask = np.zeros(len(times), dtype=bool)
+    if lt.size == 0:
+        return mask
+    for i, t in enumerate(np.asarray(times, dtype=float)):
+        j = int(np.argmin(np.abs(lt - t)))
+        mask[i] = bool(abs(lt[j] - t) <= time_tolerance and lv[j] <= tolerance)
+    return mask
+
+
+@contextlib.contextmanager
+def _native_output_to(path: Path) -> Iterator[None]:
+    """Send file descriptors 1 and 2 (native and Python) to ``path`` meanwhile.
+
+    OpenSim writes the per-frame StaticOptimization status from native code,
+    so ``sys.stdout`` redirection would miss it.
+    """
+    for stream in (sys.stdout, sys.stderr):
+        stream.flush()
+    saved = {fd: os.dup(fd) for fd in (1, 2)}
+    try:
+        with Path(path).open("wb") as sink:
+            for fd in saved:
+                os.dup2(sink.fileno(), fd)
+            try:
+                yield
+            finally:
+                for stream in (sys.stdout, sys.stderr):
+                    stream.flush()
+                for fd, copy in saved.items():
+                    os.dup2(copy, fd)
+    finally:
+        for copy in saved.values():
+            os.close(copy)
 
 
 def run_static_optimization(
@@ -99,7 +180,10 @@ def run_static_optimization(
     # model and states are resolved from the setup file like the GUI does.
     setup = out / "msk_swing_setup.xml"
     tool.printToXML(str(setup))
-    osim.AnalyzeTool(str(setup)).run()
+    # The per-frame optimiser status is only logged; keep it next to the
+    # results so frames that did not converge can be identified.
+    with _native_output_to(out / SO_LOG_NAME):
+        osim.AnalyzeTool(str(setup)).run()
     act = out / "msk_swing_StaticOptimization_activation.sto"
     if not act.is_file():
         raise RuntimeError(f"StaticOptimization produced no activations in {out}")
@@ -215,6 +299,27 @@ def activation_table_to_arrays(
     return read_states_table(path)
 
 
+def actuator_torques(
+    activations: Mapping[str, np.ndarray],
+    optimal_forces: Mapping[str, float] | None,
+    prefix: str,
+) -> dict[str, np.ndarray]:
+    """Torque series (N or N m) of the ``prefix*`` actuator columns.
+
+    A CoordinateActuator column holds its control; the torque is the control
+    times the actuator's optimal force (1.0 when not listed). Raises
+    ``ValueError`` for an empty ``prefix``. Postcondition: keys are exactly the
+    ``activations`` keys starting with ``prefix``, in input order.
+    """
+    require(bool(prefix), "prefix must be a non-empty actuator-name prefix")
+    scale = optimal_forces or {}
+    return {
+        k: np.asarray(v, dtype=float) * scale.get(k, 1.0)
+        for k, v in activations.items()
+        if k.startswith(prefix)
+    }
+
+
 def summarize_solution(
     times: np.ndarray,
     activations: dict[str, np.ndarray],
@@ -253,17 +358,8 @@ def summarize_solution(
         }
         for g, ms in sorted(groups.items())
     }
-    scale = optimal_forces or {}
-    reserves = {
-        k: np.asarray(v, dtype=float) * scale.get(k, 1.0)
-        for k, v in activations.items()
-        if k.startswith("reserve_")
-    }
-    upper = {
-        k: np.asarray(v, dtype=float) * scale.get(k, 1.0)
-        for k, v in activations.items()
-        if k.startswith("upper_")
-    }
+    reserves = actuator_torques(activations, optimal_forces, "reserve_")
+    upper = actuator_torques(activations, optimal_forces, "upper_")
 
     def block(d: dict[str, np.ndarray]) -> dict[str, dict[str, float]]:
         return {

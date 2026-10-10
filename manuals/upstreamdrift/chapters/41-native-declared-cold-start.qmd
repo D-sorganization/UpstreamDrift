@@ -1,0 +1,101 @@
+# Declared Native Constrained Cold Starts
+
+This provisional F07 calculation for issue #12136 reconstructs an explicitly
+declared OpenSim 4.6 constrained **cold start**. It does not serialize an
+arbitrary SimTK `State`, certify muscle physiology, or admit the 520-muscle
+source for fitting. The implementation is
+`tour_matching/native_prepared_state.py`; the native observation authority is
+`native_constraint_state.py`.
+
+## Source, State, and Constraint Contract
+
+The declaration binds the exact entrypoint `.osim` SHA-256, every named
+continuous state value, native time, each model-owned lock target, constraint
+enforcement, absolute coordinate chart bounds and a residual tolerance. An
+optional source chart is a declared linear form
+$\ell(q)=\sum_i a_i q_i\in[\ell_-,\ell_+]$. This supports a separately
+reviewed composite-coordinate rule; a matching name alone never establishes
+its anatomical meaning. All angles are radians, time is seconds, and native
+position/velocity errors retain their native units. The caller chooses the
+tolerance from the declared source and numerical context; this method supplies
+no physiological acceptance threshold.
+
+The owned model is loaded from unchanged source bytes. OpenSim `initSystem()`
+performs native initialization assembly. The preparation recipe then
+temporarily unlocks each declared native locked coordinate, sets its explicit
+model-owned target, relocks it, restores every named continuous state value and
+sets the declared clock. It performs no further assembly or muscle
+equilibration. The observer checks the achieved coordinate, lock, QErr/UErr,
+constraint enforcement, chart and source hash. An optional expected audit
+requires every native observation to match a separately retained producer
+audit. A model-owned target is never inferred from the named coordinate value
+or serialized default. The source XML is not modified.
+
+The entrypoint XML digest does not close external assets or libraries. Named
+continuous states and lock targets do not constitute full native numerical or
+discrete restart state. Time-dependent forces, prescribed coordinates and
+unreviewed source controllers need separate execution policies. A source
+controller may be explicitly observed but cannot enter independent replay
+without the exact derived-model replacement policy below.
+
+## Restricted Time-Only Mechanical Diagnostic
+
+For a smooth fixture with exact scalar mechanical-actuator coverage, the
+caller may declare post-limit actuator controls held by native
+zero-order-hold time functions. An optional single future command step must
+name the same ordered channels and occur at an interior replay knot. A source controller
+can enter an explicit **derived-model policy** only when the model has exactly
+one reviewed `PrescribedController`, one `Constant` function and one actuator
+socket. The declaration binds its original absolute path, native serialized
+subtree SHA-256, scalar source command and exact actuator path. Only this
+verified controller is removed from an owned fresh model before initialization.
+Source XML remains unchanged; derived loaded-model identity is distinct from
+the original. Any other controller, law or channel rejects. An owned
+`PrescribedController` is installed before `initSystem()`, then a fresh model
+integrates without state correction. At every declared knot, native controls,
+constraint residuals and chart are read back. The clock must advance from the
+declared initial time and the native integrator must reach each knot exactly.
+The diagnostic input digest binds source, loaded model, original-controller replacement,
+initial observation, actuator order, controls, knots and
+Runge–Kutta–Merson accuracy. A repeated fresh run
+must agree under this same policy; changing the future command must change
+the native result while preserving the common sampled prefix.
+The separate admission digest binds the preparation-adapter source SHA-256,
+declared lock targets, coordinate and linear source charts, constraint
+enforcement, residual tolerance and controller policy. Neither digest is a
+complete physical-state or publication certificate.
+
+This input player excludes muscles, non-actuator native forces and unreplaced
+source controllers, including recursively discovered components outside their
+registered sets. It is a mechanical software diagnostic, not a T01
+muscle-excitation bundle or an all-force/contact parity claim. Source actuator
+bounds and observed applied controls are checked;
+native constraint reactions remain plant outputs.
+
+## Actual Native Evidence and Remaining Gates
+
+The analytic OpenSim fixture has a coordinate coupler $q_d=2q$ and a scalar
+mechanical actuator. A locked-joint fixture proves that identical named
+continuous values with a different declared model-owned lock target do not
+silently pass. Wrong enforcement, wrong actuator coverage, unreviewed native
+force, source mutation and chart exit also reject. The actual
+`physical_humerus_v2/candidate-129.osim`
+prepared receipt lies within the reviewed shoulder-elevation chart
+$[0.403598785852187,0.643598785852187]$ rad, retains $r=a+b$ within its
+source range, and has full-row-rank native constraint Jacobian at that state.
+Its source default is outside the chart. Its sole original constant mechanical
+controller is bound by subtree digest and replaced only under the declared
+derived policy. Original and replacement native trajectories agree at sampled
+knots in named state, derivatives, QErr/UErr, actuator control and actuation;
+an owned command step after the shared prefix changes the mechanical future.
+The original-controller observation
+remains available and never silently invokes replacement. Knot-level chart
+checks do not prove that an internal Runge–Kutta stage stayed within the chart.
+This is neither source-identical native replay nor a physiological shoulder or
+muscle-excitation result.
+
+The unchanged 520-muscle source still requires approved capture registration,
+marker attachment, passive-force policy, assistance exclusion, exact native
+constraint/contact/grip policy and complete bounded state preparation before
+a real Moco solve or excitation replay. All 17 variant rows, six engine
+families and the fully muscular OpenSim endpoint remain open.

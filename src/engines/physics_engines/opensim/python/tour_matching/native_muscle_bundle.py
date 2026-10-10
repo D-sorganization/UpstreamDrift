@@ -226,13 +226,15 @@ def _identity(
     import opensim as osim
 
     provider = hashlib.sha256(native_replay_admission_bytes())
+    native_extensions = tuple(sorted(Path(osim.__file__).parent.glob("*.pyd")))
+    if not native_extensions:
+        raise ValueError("native OpenSim binary identity is unavailable")
     artifacts = (
         Path(__file__),
         Path(muscle_replay.__file__),
-        *sorted(Path(osim.__file__).parent.glob("*.pyd")),
+        Path(__file__).with_name("native_scalar_replay.py"),
+        *native_extensions,
     )
-    if len(artifacts) < 3:
-        raise ValueError("native OpenSim binary identity is unavailable")
     for artifact in artifacts:
         provider.update(artifact.name.encode())
         provider.update(artifact.read_bytes())
@@ -320,12 +322,10 @@ def build_native_muscle_replay_bundle(
     )
 
 
-def replay_native_muscle_bundle(
-    bundle: ExperimentReplayBundle, model_path: str | Path
-) -> muscle_replay.NativeMuscleReplayResult:
-    """Revalidate identity and execute fresh native integration with no feedback."""
-    contracts = native_replay_contract_types()
-    bundle = validate_native_replay_bundle(bundle, contracts)
+def _bundle_inputs(
+    bundle: Any,
+) -> tuple[dict[str, float], NDArray[np.float64], dict[str, NDArray[np.float64]]]:
+    """Decode shared complete continuous state and ordered T01 histories."""
     values = {item.component_id: item.values for item in bundle.initial_state}
     initial = {
         name: value[0]
@@ -338,6 +338,16 @@ def replay_native_muscle_bundle(
         channel.channel_id: np.array([row[i] for row in history.values], dtype=float)
         for i, channel in enumerate(history.channels)
     }
+    return initial, grid, controls
+
+
+def replay_native_muscle_bundle(
+    bundle: ExperimentReplayBundle, model_path: str | Path
+) -> muscle_replay.NativeMuscleReplayResult:
+    """Revalidate identity and execute fresh native integration with no feedback."""
+    contracts = native_replay_contract_types()
+    bundle = validate_native_replay_bundle(bundle, contracts)
+    initial, grid, controls = _bundle_inputs(bundle)
     raw = Path(model_path).read_bytes()
     if hashlib.sha256(raw).hexdigest() != bundle.model.source_model_sha256:
         raise ValueError("native source model identity differs")

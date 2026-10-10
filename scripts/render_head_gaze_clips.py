@@ -13,7 +13,10 @@ sampled by time with the shared GCV-14 ``FrameSchedule``::
     MUJOCO_GL=egl python3 -m scripts.render_head_gaze_clips RUN_W0 RUN_ON OUT_STEM
 
 writes ``OUT_STEM_1x.mp4``, ``OUT_STEM_0p5x.mp4`` and
-``OUT_STEM_impact_0p25x.mp4``.
+``OUT_STEM_impact_0p25x.mp4``. ``--trajectory replay`` renders each run's
+forward-dynamics replay (``dynamics_record.npz``) instead of ``q_ref``, for
+example the IK neck against the gaze-schedule neck (``--fd-neck gaze``, OSV-3c)
+with ``--labels "IK neck" "gaze neck"``.
 """
 
 from __future__ import annotations
@@ -36,9 +39,26 @@ PANEL_HEIGHT, PANEL_WIDTH = 1080, 960
 GLYPH_LENGTH_M = 0.6
 # mjtJoint values: the IK coordinates are scalar joints, so no quaternion slerp.
 _HINGE, _SLIDE = 3, 2
+#: ``ik``: the reference ``q_ref``; ``replay``: the forward-dynamics replay.
+TRAJECTORIES = ("ik", "replay")
 
 
-def _load(run: Path):  # noqa: ANN202
+def replay_trajectory(run: Path) -> tuple[np.ndarray, np.ndarray]:
+    """Forward-dynamics replay ``(q, time_s)`` of a run, on the capture times.
+
+    ``dynamics_record.npz`` samples the simulation on its own clock; the state
+    is interpolated onto ``track_time_s`` (the capture times of ``q_track``).
+    """
+    rec = np.load(run / "dynamics_record.npz")
+    times = np.asarray(rec["track_time_s"], dtype=float)
+    sim_t, sim_q = np.asarray(rec["time_s"]), np.asarray(rec["q"])
+    require(sim_q.ndim == 2 and len(sim_t) == len(sim_q), "malformed dynamics record")
+    q = np.column_stack([np.interp(times, sim_t, col) for col in sim_q.T])
+    return q, times
+
+
+def _load(run: Path, trajectory: str = "ik"):  # noqa: ANN202
+    require(trajectory in TRAJECTORIES, f"trajectory must be one of {TRAJECTORIES}")
     spec_bytes = (run / "full_body_spec_hipcal_scaled.json").read_bytes()
     q = np.load(run / "ik_trajectory.npz")
     # A full pipeline run writes receipt.json; a sweep run (scripts.sweep_gaze_weight)
@@ -50,6 +70,8 @@ def _load(run: Path):  # noqa: ANN202
         block = json.loads((run / "sweep_row.json").read_text(encoding="utf-8"))[
             "head_gaze"
         ]
+    if trajectory == "replay":
+        return spec_bytes, *replay_trajectory(run), block
     return spec_bytes, q["q_ref"], q["time_s"], block
 
 
@@ -110,7 +132,9 @@ def clip_schedules(
     return plan
 
 
-def _panel_renderer(run: Path, label: str, azimuth: float):  # noqa: ANN202
+def _panel_renderer(  # noqa: ANN202
+    run: Path, label: str, azimuth: float, trajectory: str = "ik"
+):
     """Load ``run`` once; return ``(render, times, impact_t)``.
 
     ``render(schedule)`` yields one panel image per scheduled frame, rendered
@@ -127,7 +151,7 @@ def _panel_renderer(run: Path, label: str, azimuth: float):  # noqa: ANN202
     from src.shared.python.motion_matching.pipeline import gaze_residual as gr
     from src.shared.python.motion_matching.pipeline.plant import get_plant
 
-    spec_bytes, q_src, times, block = _load(run)
+    spec_bytes, q_src, times, block = _load(run, trajectory)
     spec = json.loads(spec_bytes)
     plant = get_plant("mujoco", spec)
     att = {
@@ -200,12 +224,25 @@ def main() -> None:
     parser.add_argument("--speeds", default="1,0.5", help="comma-separated speeds")
     parser.add_argument("--impact-speed", type=float, default=0.25)
     parser.add_argument("--impact-window", type=float, default=0.4, help="total, s")
+    parser.add_argument(
+        "--trajectory",
+        choices=TRAJECTORIES,
+        default="ik",
+        help="ik: reference q_ref; replay: forward-dynamics replay (OSV-3c)",
+    )
+    parser.add_argument(
+        "--labels", nargs=2, default=("gaze weight 0", "gaze on"), metavar=("L", "R")
+    )
     args = parser.parse_args()
 
     import imageio
 
-    left, times, impact_t = _panel_renderer(args.run_w0, "gaze weight 0", args.azimuth)
-    right, _, _ = _panel_renderer(args.run_on, "gaze on", args.azimuth)
+    left, times, impact_t = _panel_renderer(
+        args.run_w0, args.labels[0], args.azimuth, args.trajectory
+    )
+    right, _, _ = _panel_renderer(
+        args.run_on, args.labels[1], args.azimuth, args.trajectory
+    )
     speeds = tuple(float(s) for s in args.speeds.split(","))
     plan = clip_schedules(
         times, impact_t, speeds, args.impact_speed, args.impact_window
