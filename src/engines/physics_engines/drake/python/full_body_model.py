@@ -225,6 +225,57 @@ class FullBodyDrakeModel:
         }
         return FullBodyDrakeModel(full_spec_like)
 
+    @property
+    def plant_position_indices(self) -> tuple[int, ...]:
+        """Plant position slot of each spec coordinate, in spec order.
+
+        Drake numbers a parsed URDF's positions in its own tree order, which
+        differs from the spec ``coordinate_order`` for the branched full-body
+        tree (#12042). Every array-valued API of this adapter is spec-ordered.
+        """
+        return tuple(self._q_indices)
+
+    def to_plant_positions(self, q: Array) -> Array:
+        """Spec-ordered coordinates -> Drake plant position vector."""
+        return self._to_plant(q, self._q_indices)
+
+    def to_plant_velocities(self, v: Array) -> Array:
+        """Spec-ordered rates -> Drake plant velocity vector."""
+        return self._to_plant(v, self._v_indices)
+
+    def from_plant_positions(self, q_plant: Array) -> Array:
+        """Drake plant position vector -> spec-ordered coordinates."""
+        q_raw = np.asarray(q_plant, dtype=float)
+        if q_raw.shape != (len(self.names),):
+            raise ValueError(f"Expected {len(self.names)} plant coordinates")
+        return q_raw[self._q_indices].copy()
+
+    def named_columns(self, jacobian: Array) -> Array:
+        """Reorder the velocity columns of a plant Jacobian into spec order."""
+        return np.asarray(jacobian)[:, self._v_indices]
+
+    def _to_plant(self, values: Array, indices: list[int]) -> Array:
+        vec = np.asarray(values, dtype=float)
+        if vec.shape != (len(self.names),):
+            raise ValueError(
+                f"Expected {len(self.names)} spec-ordered coordinates, got {vec.shape}"
+            )
+        raw = np.empty(len(self.names))
+        raw[indices] = vec
+        return raw
+
+    def _named_vector(self, values: Mapping[str, float] | Array) -> Array:
+        """Spec-ordered array from a name mapping or a spec-ordered array."""
+        if isinstance(values, Mapping):
+            if set(values) != set(self.names):
+                raise ValueError("Provide exactly the model coordinate inventory")
+            vec = np.array([float(values[name]) for name in self.names])
+        else:
+            vec = np.asarray(values, dtype=float)
+        if vec.shape != (len(self.names),) or not np.isfinite(vec).all():
+            raise ValueError(f"Expected {len(self.names)} finite coordinates")
+        return vec
+
     def _vector(self, values: Mapping[str, float], indices: list[int]) -> Array:
         if set(values) != set(self.names):
             raise ValueError("Provide exactly the model coordinate inventory")
@@ -268,12 +319,7 @@ class FullBodyDrakeModel:
         Returns:
             Array of shape (N, 3) marker positions in world frame.
         """
-        if isinstance(coordinates, Mapping):
-            q_vec = self._vector(coordinates, self._q_indices)
-        else:
-            q_vec = np.asarray(coordinates, dtype=float)
-            if q_vec.size != len(self.names):
-                raise ValueError(f"Expected {len(self.names)} coordinates")
+        q_vec = self.to_plant_positions(self._named_vector(coordinates))
         self.plant.SetPositions(self.context, q_vec)
         world_frame = self.plant.world_frame()
         positions: list[Array] = []
@@ -556,19 +602,11 @@ class FullBodyDrakeModel:
         coordinates: Mapping[str, float] | Array,
         rates: Mapping[str, float] | Array,
     ) -> tuple[Array, dict[str, float], Array, dict[str, float]]:
-        if isinstance(coordinates, Mapping):
-            q_vec = self._vector(coordinates, self._q_indices)
-            coords_dict = dict(coordinates)
-        else:
-            q_vec = np.asarray(coordinates, dtype=float)
-            coords_dict = dict(zip(self.names, q_vec, strict=True))
-
-        if isinstance(rates, Mapping):
-            v_vec = self._vector(rates, self._v_indices)
-            rates_dict = dict(rates)
-        else:
-            v_vec = np.asarray(rates, dtype=float)
-            rates_dict = dict(zip(self.names, v_vec, strict=True))
+        """Spec-ordered ``(q, q_by_name, v, v_by_name)`` from mappings or arrays."""
+        q_vec = self._named_vector(coordinates)
+        v_vec = self._named_vector(rates)
+        coords_dict = dict(zip(self.names, q_vec.tolist(), strict=True))
+        rates_dict = dict(zip(self.names, v_vec.tolist(), strict=True))
         return q_vec, coords_dict, v_vec, rates_dict
 
     def _sphere_jacobian_translational(self, frame: Any) -> Array:
@@ -638,10 +676,7 @@ class FullBodyDrakeModel:
 
     def centre_of_mass(self, q: Array) -> tuple[Array, Array]:
         """Whole-body centre of mass and its Jacobian (spec coordinate order)."""
-        q_vec = np.asarray(q, dtype=float)
-        q_raw = np.empty(len(self.names))
-        q_raw[self._q_indices] = q_vec
-        self.plant.SetPositions(self.context, q_raw)
+        self.plant.SetPositions(self.context, self.to_plant_positions(q))
         com = np.asarray(
             self.plant.CalcCenterOfMassPositionInWorld(self.context), dtype=float
         )
@@ -651,8 +686,7 @@ class FullBodyDrakeModel:
             self.plant.world_frame(),
             self.plant.world_frame(),
         )
-        jac_ordered = jac_raw[:, self._v_indices]
-        return com.copy(), jac_ordered.copy()
+        return com.copy(), self.named_columns(jac_raw).copy()
 
     def affine_dynamics(
         self,
@@ -662,8 +696,8 @@ class FullBodyDrakeModel:
         """Return (A, b) with a = A @ tau_actuated + b in canonical coordinate order."""
         q_vec, coords_dict, v_vec, rates_dict = self._coerce_state(coordinates, rates)
 
-        self.plant.SetPositions(self.context, q_vec)
-        self.plant.SetVelocities(self.context, v_vec)
+        self.plant.SetPositions(self.context, self.to_plant_positions(q_vec))
+        self.plant.SetVelocities(self.context, self.to_plant_velocities(v_vec))
 
         samples = self.contact_forces(coords_dict, rates_dict)
         tau_contact = self._accumulate_contact_torques(samples)
@@ -692,9 +726,9 @@ class FullBodyDrakeModel:
     def sphere_jacobians(self) -> Array:
         """Jacobian rows of all contact sphere centers in canonical coordinate order."""
         rows = [
-            self._sphere_jacobian_translational(self._spheres[s]["frame"])[
-                :, self._v_indices
-            ]
+            self.named_columns(
+                self._sphere_jacobian_translational(self._spheres[s]["frame"])
+            )
             for s in self._spheres
         ]
         return np.concatenate(rows, axis=0)
@@ -703,14 +737,8 @@ class FullBodyDrakeModel:
         self, simulator: Any, q: Array, v: Array
     ) -> tuple[Array, Array, Array]:
         """Whole-body CoM position, linear momentum, and angular momentum."""
-        q_vec = np.asarray(q, dtype=float)
-        v_vec = np.asarray(v, dtype=float)
-        q_raw = np.empty(len(self.names))
-        q_raw[self._q_indices] = q_vec
-        v_raw = np.empty(len(self.names))
-        v_raw[self._v_indices] = v_vec
-        self.plant.SetPositions(self.context, q_raw)
-        self.plant.SetVelocities(self.context, v_raw)
+        self.plant.SetPositions(self.context, self.to_plant_positions(q))
+        self.plant.SetVelocities(self.context, self.to_plant_velocities(v))
 
         com = np.asarray(
             self.plant.CalcCenterOfMassPositionInWorld(self.context), dtype=float
