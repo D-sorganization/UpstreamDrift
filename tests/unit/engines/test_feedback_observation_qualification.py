@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
+import hashlib
 from pathlib import Path
 
 import numpy as np
@@ -406,14 +407,19 @@ def test_observation_score_consumes_native_mujoco_marker_receipt(
         NativeAdapterBinding,
         NativeReplayRequest,
     )
+    from src.engines.feedback_marker_calibration import (
+        calibrate_static_marker_attachments,
+        capture_observation_sha256,
+    )
     from src.engines.feedback_native_markers import (
-        NativeMarkerAttachment,
-        NativeMarkerMap,
         execute_native_marker_replay,
     )
+    from src.engines.physics_engines.mujoco.python import native_torque_replay
     from src.engines.physics_engines.mujoco.python.native_torque_replay import (
         build_native_torque_bundle,
+        replay_native_torque_bundle,
     )
+    from src.shared.python.motion_matching.tour_capture_contract import TourCapture
 
     model_path = tmp_path / "observation-handoff.xml"
     model_path.write_text(
@@ -435,11 +441,12 @@ def test_observation_score_consumes_native_mujoco_marker_receipt(
         np.zeros((3, 1)),
     )
     inventory_row = registry.get("mujoco/driver", "default", DriveMode.TORQUE)
+    inventory_provider_id = "synthetic-inventory-provider"
     inventory_row = replace(
         inventory_row,
         source_model_sha256=bundle.model.source_model_sha256,
-        provider_id="synthetic-inventory-provider",
-        provider_sha256="e" * 64,
+        provider_id=inventory_provider_id,
+        provider_sha256=hashlib.sha256(inventory_provider_id.encode()).hexdigest(),
         availability="available",
     )
     registry.rows = tuple(
@@ -467,22 +474,115 @@ def test_observation_score_consumes_native_mujoco_marker_receipt(
         bundle.input_channel_schema_sha256,
         bundle.model.ordered_input_channel_ids,
     )
-    marker_map = NativeMarkerMap(
-        engine_id="mujoco",
-        native_model_id=bundle.model.model_id,
-        native_variant_id=bundle.model.variant_id,
-        native_execution_provider_id=bundle.model.provider_id,
-        native_execution_provider_sha256=bundle.model.provider_sha256,
-        source_model_sha256=bundle.model.source_model_sha256,
-        loaded_native_model_sha256=bundle.model.loaded_native_model_sha256,
-        output_frame_id="world",
-        timebase_id=bundle.input_history.timebase_id,
-        attachments=(NativeMarkerAttachment("marker-a", "arm", (0.0, 0.2, 0.0)),),
+    calibration_run = replay_native_torque_bundle(bundle, model_path)
+    body_id = model.body("arm").id
+    local_offset = np.asarray([0.0, 0.2, 0.0])
+    pose_history = []
+    for qpos in calibration_run.qpos:
+        data.qpos[:] = qpos
+        mujoco.mj_forward(model, data)
+        pose_history.append(
+            {
+                "arm": (
+                    np.asarray(data.xmat[body_id]).reshape(3, 3).copy(),
+                    np.asarray(data.xpos[body_id]).copy(),
+                )
+            }
+        )
+    calibration_points = np.asarray(
+        [pose["arm"][0] @ local_offset + pose["arm"][1] for pose in pose_history],
+        dtype=np.float64,
+    )[:, None, :]
+    calibration_capture = TourCapture(
+        time_s=np.asarray(bundle.input_history.time_seconds, dtype=np.float64),
+        labels=("marker-a",),
+        points_m=calibration_points,
+        valid=np.ones((len(calibration_points), 1), dtype=bool),
+        source_sha256=bundle.model.source_model_sha256,
+    )
+    pose_provider_sha256 = hashlib.sha256(
+        Path(native_torque_replay.__file__).read_bytes()
+    ).hexdigest()
+    calibration = calibrate_static_marker_attachments(
+        calibration_capture,
+        {"marker-a": "arm"},
+        pose_history,
+        calibration_capture.time_s,
+        binding=binding,
+        native_engine_id="mujoco",
+        pose_provider_id="mujoco-native-marker-fk-test",
+        pose_provider_sha256=pose_provider_sha256,
+        capture_frame_id="world",
+        capture_timebase_id="simulation_relative",
+    )
+    calibration.validate(
+        capture=calibration_capture,
+        poses=pose_history,
+        pose_time_s=calibration_capture.time_s,
+        binding=binding,
+        pose_provider_id="mujoco-native-marker-fk-test",
+        pose_provider_sha256=pose_provider_sha256,
+        capture_frame_id="world",
+        capture_timebase_id="simulation_relative",
+    )
+    changed_pose_clock = calibration_capture.time_s.copy()
+    changed_pose_clock[1] += 1e-6
+    with pytest.raises(ValueError, match="pose clock differs"):
+        calibration.validate(
+            capture=calibration_capture,
+            poses=pose_history,
+            pose_time_s=changed_pose_clock,
+            binding=binding,
+            pose_provider_id="mujoco-native-marker-fk-test",
+            pose_provider_sha256=pose_provider_sha256,
+            capture_frame_id="world",
+            capture_timebase_id="simulation_relative",
+        )
+    changed_calibration = replace(
+        calibration,
+        attachments=(
+            replace(calibration.attachments[0], local_position_m=(0.001, 0.2, 0.0)),
+        ),
+    )
+    with pytest.raises(ValueError, match="offsets differ from frozen inputs"):
+        changed_calibration.validate(
+            capture=calibration_capture,
+            poses=pose_history,
+            pose_time_s=calibration_capture.time_s,
+            binding=binding,
+            pose_provider_id="mujoco-native-marker-fk-test",
+            pose_provider_sha256=pose_provider_sha256,
+            capture_frame_id="world",
+            capture_timebase_id="simulation_relative",
+        )
+    marker_map = calibration.to_native_marker_map(
+        binding, output_timebase_id=bundle.input_history.timebase_id
+    )
+    assert marker_map.calibration_artifact_sha256 == calibration.sha256
+    np.testing.assert_allclose(
+        marker_map.attachments[0].local_position_m, local_offset, atol=1e-12
     )
     marker_evidence = execute_native_marker_replay(
         NativeReplayRequest(binding, bundle, model_path), registry, marker_map
     )
     row = registry.get("mujoco/driver", "default", DriveMode.TORQUE)
+    output = marker_evidence.native_output
+    observations = ObservedMarkerPositions(
+        time_s=output.time_s,
+        positions_m=np.asarray(output.positions_m) + np.asarray([0.0, 0.0, 0.001]),
+        valid=np.ones((len(output.time_s), len(output.marker_labels)), dtype=bool),
+        marker_labels=output.marker_labels,
+        frame_id=output.frame_id,
+        timebase_id=output.timebase_id,
+    )
+    observation_capture = TourCapture(
+        time_s=np.asarray(observations.time_s, dtype=np.float64),
+        labels=tuple(observations.marker_labels),
+        points_m=np.asarray(observations.positions_m, dtype=np.float64),
+        valid=np.asarray(observations.valid, dtype=bool),
+        source_sha256=bundle.model.source_model_sha256,
+    )
+    observation_sha256 = capture_observation_sha256(observation_capture)
     channel_ids = tuple(item.channel_id for item in bundle.input_history.channels)
     state_dimensions = {
         "position": sum(
@@ -512,7 +612,7 @@ def test_observation_score_consumes_native_mujoco_marker_receipt(
         replay_policy=ReplayPolicy.INDEPENDENT_TIME_ONLY,
         evidence_mode=EvidenceMode(bundle.policy.replay_mode.value),
         horizon_s=float(bundle.input_history.time_seconds[-1]),
-        observation_sha256="a" * 64,
+        observation_sha256=observation_sha256,
         channel_ids=channel_ids,
         full_state=True,
         full_horizon=True,
@@ -522,21 +622,12 @@ def test_observation_score_consumes_native_mujoco_marker_receipt(
         physical_model_sha256=bundle.model.source_model_sha256,
         loaded_native_model_sha256=bundle.model.loaded_native_model_sha256,
         time_grid_sha256=bundle.time_grid_sha256,
-        physics_sha256="b" * 64,
+        physics_sha256=hashlib.sha256(model_path.read_bytes()).hexdigest(),
         input_channel_schema_sha256=bundle.input_channel_schema_sha256,
         initial_state_sha256=bundle.integrity.initial_state_sha256,
         contact_sha256=bundle.policy.contact_policy_sha256 or "",
-        integrator_sha256="c" * 64,
+        integrator_sha256=pose_provider_sha256,
         comparison_contract_version="feedback-comparison/1.1.0",
-    )
-    output = marker_evidence.native_output
-    observations = ObservedMarkerPositions(
-        time_s=output.time_s,
-        positions_m=np.asarray(output.positions_m) + np.asarray([0.0, 0.0, 0.001]),
-        valid=np.ones((len(output.time_s), len(output.marker_labels)), dtype=bool),
-        marker_labels=output.marker_labels,
-        frame_id=output.frame_id,
-        timebase_id=output.timebase_id,
     )
     case = NativeObservationCase(
         evidence=evidence,
@@ -558,6 +649,12 @@ def test_observation_score_consumes_native_mujoco_marker_receipt(
     assert (
         scored.score.native_marker_output_sha256 == marker_evidence.marker_output_sha256
     )
+    assert scored.score.native_marker_calibration_sha256 == calibration.sha256
+    assert scored.score.native_marker_map_sha256 == marker_map.sha256
+    assert scored.score.observation_identity_sha256
+    assert scored.score.alignment_identity_sha256
+    assert report.required_row_count == 17
+    assert report.scored_row_count == 1
     assert scored.qualification == "unqualified"
     assert not report.is_qualified
 

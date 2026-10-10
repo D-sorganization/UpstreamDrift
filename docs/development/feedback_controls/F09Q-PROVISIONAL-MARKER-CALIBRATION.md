@@ -51,15 +51,26 @@ proof that the named native pose provider executed. A consumer must preserve
 the calibration artifact and independently verify its inputs before using the
 mapping in a scored result.
 
-The native MuJoCo marker test now exercises the complete software handoff:
-full-state replay supplies the pose history, the calibration artifact is fit
-and revalidated against that history and the capture clock, and the resulting
-map is consumed by the existing native marker replay. The receipt carries the
-calibration digest. This verifies wiring and identity propagation for that
-fixture only; it does not establish production marker attachments or extend
-full-state replay support to OpenSim. OpenSim's native geometry fixture remains
-position-level, and Drake/Pinocchio calibration-to-replay are not separately
-covered by this integration test.
+Issue #12178 extends that handoff through the existing observation scorer. The
+MuJoCo fixture runs a full-state replay to produce calibration poses, builds
+and revalidates the provisional artifact against the exact capture clock,
+constructs a map carrying the artifact digest, and executes a fresh native
+marker replay. The scorer consumes those positions with separate synthetic
+observations and records calibration, map, replay, output, observation, and
+alignment identities. Negative checks reject a changed pose clock and a
+tampered frozen offset. The resulting row remains unqualified and the complete
+17-row denominator remains present. This is fixture-level integration only;
+it does not establish production marker attachments or qualification.
+
+The portable MuJoCo integration and adjacent calibration/FK/scoring tests pass
+in the retained Python 3.13 environment. The isolated WSL Drake 1.57 runtime
+was present, but its focused marker test could not collect because the runtime
+environment lacks `h5py`, imported through the Drake package initializer. The
+Pinocchio 4.1 runtime is available separately; no calibration-to-score test
+was run there. These are environment limitations, not product failures, and
+neither runtime is claimed as covered by the new scorer integration. OpenSim's
+native geometry provider remains position-level rather than a full-state
+replay adapter.
 
 No coordinate-retarget map is accepted as marker geometry. In particular,
 MyoSuite `coordinate_map_anthro.json` remains a coordinate map. Existing
@@ -82,3 +93,8 @@ Run the portable tests with the repository test configuration and the native
 test in the reviewed OpenSim 4.6 environment. Keep all manual/calculation
 inventory and release gates blocked until the governing review and independent
 evidence exist.
+
+For the replay-to-score integration, run
+`tests/unit/engines/test_feedback_observation_qualification.py::test_observation_score_consumes_native_mujoco_marker_receipt` with MuJoCo
+installed, together with the calibration and marker-FK test modules. This
+fixture uses synthetic observations and has no private-capture dependency.

@@ -1,0 +1,56 @@
+# Calibrated Native Marker Replay and Observation Scoring
+
+## Scope
+
+This chapter records the provisional software handoff from a source-bound
+marker-calibration artifact through native marker forward kinematics into the
+existing feedback observation scorer. It adds no calibration estimator,
+native execution adapter, observation scorer, or qualification authority.
+
+## Evidence Chain
+
+The MuJoCo fixture starts with one immutable T01 replay bundle and executes a
+full-state native replay. Native poses on the simulation-relative input grid
+and a separate synthetic calibration capture produce the existing
+`native-marker-calibration/1.0.0` artifact through the shared
+`static_marker_offsets` estimator. The test revalidates the artifact against
+the source, capture bytes, native pose history, exact clock, provider identity,
+and frame/timebase declarations. A changed pose clock and tampered local
+offset are rejected.
+
+The artifact creates the existing `NativeMarkerMap`, which binds its digest.
+A fresh native replay then generates marker positions through model-owned
+forward kinematics. Synthetic observations with a known 1 mm vertical
+difference enter the existing F09 observation-scoring path. Its score receipt
+links the calibration artifact, marker map, native execution, marker output,
+observations, and alignment identities. The report retains the full 17-row
+required denominator, scores only the synthetic fixture, and remains
+unqualified.
+
+## Limits
+
+The capture and model are synthetic; no private capture or production marker
+attachment is included. The calibration residual is in-sample, not an
+independent prediction. Digests provide integrity assertions, not signed
+execution provenance. The synthetic score does not establish anatomy,
+physiology, contact fidelity, held-out accuracy, or qualification.
+
+The end-to-end scorer integration is tested only on the MuJoCo fixture.
+Drake and Pinocchio have separate native marker-FK tests, but their calibration
+artifact-to-scoring chain remains unverified. The installed WSL Drake 1.57
+test environment lacks `h5py` required by repository module initialization;
+the integration test could not be collected there. Pinocchio 4.1 is available
+in a separate WSL environment, but the new scoring chain was not run there.
+OpenSim marker geometry remains position-level and does not provide the
+full-state replay used by this handoff. All production rows and independent
+physics and qualification gates therefore remain open.
+
+## Reproduction
+
+Run the MuJoCo case with the focused calibration, FK, and observation-scoring
+tests:
+
+```bash
+python3 -m pytest tests/unit/engines/test_feedback_observation_qualification.py::test_observation_score_consumes_native_mujoco_marker_receipt
+python3 -m pytest tests/unit/engines/test_feedback_marker_calibration.py tests/unit/engines/test_feedback_native_markers.py
+```
