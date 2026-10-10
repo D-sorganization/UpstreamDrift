@@ -3,7 +3,11 @@
 This workflow rebuilds figures, statistics, and the narrative from the preserved
 final shot rows. It does not run new Monte Carlo trials or replace the accepted
 simulation evidence. Use the [Archive Restoration Instructions](data_archives/README.md)
-to restore `final_v1`, `control_final_v1`, and `supplement_final_v1` first.
+to restore `final_v1`, `control_final_v1`, `supplement_final_v1`, and the
+`control_pilot_v1` provenance prerequisite first. The archive bundle names differ
+from the first two restored directory names; use the explicit mapping in that
+guide. Keep tracked `common_targets.json`, `FINAL_RUN_ACCEPTANCE.md`, and
+`validation/independent_control_pilot_audit.json` in the study directory layout.
 The [Turnover](TURNOVER.md) identifies current publication acceptance and blockers.
 
 ## Environment and Source Identity
@@ -20,6 +24,31 @@ snapshots. Keep the original and adapted-bound protocols separate. Never rewrite
 historical manifests to make them match newer code. See the
 [Supplemental Completion Review](validation/supplement_final_independent_completion_review_v1/REVIEW.md).
 
+The current publication regeneration started from `4bb2be7362`. Its
+[Start Receipt and Frozen Source Inventory](validation/publication_regeneration_v4_start/start.json)
+and adjacent executable wrapper copies document the actual invocation. A start
+receipt proves neither completion nor graphical acceptance. The original-figure
+wrapper checks the accepted execution snapshot, native library and runtime;
+only `academic_plots.py` and `matched_report_plots.py` are permitted reporting
+differences in that execution snapshot. All study Python is frozen for the live
+jobs. Do not change code or start a second writer in their output directories.
+
+The supplemental pipeline separately binds 14 postprocessing source files,
+including the shared `matched_formatting.py` precision helper, in
+`REPORT_SUPPLEMENT_PIPELINE.json`. This reporting identity does not replace the
+historical 54-source execution identity. The final receipt is written only after
+all statistics and figures finish and the source/input checks pass. A directory
+containing tables but lacking that receipt is incomplete.
+
+For this saved inventory, expect 384 paired comparisons: 164 curve-strength,
+164 shaft-SD and 56 across-lean contrasts. The across-lean records now include
+the direct change in Draw/Fade-versus-Straight scoring benefit on the same
+six-population intersection. For this across-lean interaction addition, existing
+per-pattern estimates and populations must remain unchanged from the preserved
+earlier tables. New interaction fields and
+their reporting provenance are expected additions; subtracting separately
+conditioned means or confidence limits is not an equivalent reproduction.
+
 ## Rebuild From Saved Final Data
 
 Use a separate working copy for reproduction. Preserve its existing published
@@ -29,6 +58,27 @@ nonempty destinations. Keep the study directory layout below: the narrative
 links its scientific design, original plan, and validation references relative
 to that directory. These commands are for rebuilding, not for appending to an
 active publication run.
+
+The CLI recipe below invokes the builders directly. It does not reproduce the
+outer original-figure wrapper's runtime/native snapshot checks by itself. To
+reproduce those guarantees, apply the snapshot comparison in the preserved
+wrapper before rendering and verify the frozen Python inventory again after
+rendering. Its absolute paths identify the recorded run; adapt those paths to
+the separate reproduction checkout while retaining the comparison logic and
+unchanged accepted hashes. A different runtime is a new reproduction environment
+and must be disclosed rather than silently accepted as the original one.
+
+The current jobs preserve superseded original graphics under
+`presentation_preview_rejected_final_v3/{final_figures_v1,control_final_figures_v1}`
+and the intentionally stopped supplemental output under
+`presentation_preview_rejected_supplement_v2/supplement_report_v1`. These are
+rejected or partial evidence, not publication inputs. Their exact file hashes
+and stop receipts are retained in
+[Preservation Evidence](validation/reporting_revision_preservation_v4/).
+Historical receipts may still name the original absolute output locations;
+use the preservation inventory to locate the identical bytes without rewriting
+those receipts. Restore sparse historical checkouts before running commands
+that depend on their omitted files.
 
 ```bash
 set -e
@@ -72,6 +122,13 @@ The supplemental receipt binds its separate inventories, common-population
 contrasts, figures, and postprocessing sources. Preserve failed or unavailable
 conditions and unsupported rows: a conditional result is not a result for all
 attempted deliveries.
+
+The supplemental pipeline computes all paired statistics before creating its
+output directory, then renders each unique supplemental cell and every available
+comparison. A quiet log or an absent output directory during that calculation
+does not establish a stalled or terminated job. Check the actual process handle;
+do not restart from an observation timeout. Allow the full run to produce its
+terminal receipt before invoking the narrative builder.
 
 The PDF builder uses Pandoc and ReportLab, separately from the app's LaTeX editor.
 Its success cannot resolve or establish acceptance of the recorded Tectonic

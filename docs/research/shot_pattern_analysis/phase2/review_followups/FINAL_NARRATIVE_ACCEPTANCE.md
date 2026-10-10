@@ -1,6 +1,6 @@
 # Final Scientific Narrative Acceptance Checklist
 
-This is a methodology checklist for the eventual complete report, not acceptance of currently incomplete datasets or the moving report builder. It supplements the software pipeline findings without modifying frozen sources or immutable source-transition evidence.
+This is the acceptance checklist for the final report. Saved simulations and their independent data audits are complete; publication regeneration and full graphical/narrative acceptance remain pending. This checklist itself does not establish acceptance. It supplements the software pipeline findings without modifying frozen sources or immutable source-transition evidence.
 
 ## Distance and Matching
 

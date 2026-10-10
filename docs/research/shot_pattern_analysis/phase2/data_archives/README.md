@@ -24,10 +24,17 @@ from scripts.research.shot_pattern_analysis.archive_data import verify_archives
 import json
 
 phase = Path("docs/research/shot_pattern_analysis/phase2")
-for dataset in ("final_v1", "control_final_v1", "supplement_final_v1"):
-    bundle = phase / "data_archives" / dataset
+bundles = {
+    "final_primary_v1": "final_v1",
+    "final_control_v1": "control_final_v1",
+    "supplement_final_v1": "supplement_final_v1",
+    "control_pilot_v1": "control_pilot_v1",
+}
+for bundle_name, dataset in bundles.items():
+    bundle = phase / "data_archives" / bundle_name
     verify_archives(bundle)
     manifest = json.loads((bundle / "archive_manifest.json").read_text())
+    assert manifest["source_name"] == dataset
     # Use a fresh destination. Do not overwrite an existing study run.
     assert not (phase / dataset).exists()
     for archive in manifest["archives"]:
@@ -39,6 +46,13 @@ Restoration returns the paths used by the immutable final-run acceptance receipt
 Run the independent matrix audit after restoration; archive integrity alone does
 not verify scientific calculations. Existing local unpacked copies are retained
 and ignored by Git to avoid duplicating the same data in two representations.
+
+The control pilot is a provenance prerequisite even when rebuilding only final
+results. `load_reviewed_common_targets` verifies its `matrix_plan.json` against
+the pilot audit bound by `FINAL_RUN_ACCEPTANCE.md`. Keep the tracked
+`common_targets.json`, `FINAL_RUN_ACCEPTANCE.md`, and
+`validation/independent_control_pilot_audit.json` alongside the restored datasets.
+Do not substitute a newly generated pilot plan or infer targets from final shots.
 
 ## Rebuilding Archives
 

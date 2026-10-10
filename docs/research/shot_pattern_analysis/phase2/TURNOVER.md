@@ -83,6 +83,8 @@ The existing user-open `../shot_pattern_analysis.tex` remains open and now disti
 
 `REPORT.md` remains a scaffold. Complete source-bound final Markdown/statistical inventories, editable LaTeX findings, final PDF and full page/graphic/claims review after qualified inputs are available. The PDF operation marker was already executed for this publication; do not repeat it. A separate ReportLab PDF does not establish LaTeX compilation.
 
+Astra found and root repaired the archive-restoration recipe: bundle names now map explicitly to restored directory names, and the accepted control-pilot plan is included as a final-report provenance prerequisite. All four archive bundles passed byte verification; an isolated missing-plan negative control failed as expected, then the exact archived plan passed the public target validator. See `validation/publication_restoration_document_review_v1/` and issue #11976 comment 6095296279. This is documentation/portability evidence, not final graphical acceptance.
+
 ## Next Steps and Gates
 
 1. Revalidate the fresh original graphics v4 and supplemental report v3 jobs; keep all study Python frozen for their duration. Review complete receipts and outputs before acceptance.
