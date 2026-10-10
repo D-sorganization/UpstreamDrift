@@ -165,6 +165,17 @@ HEAD_MARKER_WEIGHT: float = 0.1
 TRAJECTORY_RESTARTS: int = 4
 TRAJECTORY_RESTART_THRESHOLD_M: float = 0.03
 TRAJECTORY_RESTART_MARGIN_M: float = 0.003
+#: Restart policies of the full-capture trajectory IK (#12042): ``free`` keeps
+#: the legacy jittered restarts (the prior follows the jittered seed and any
+#: 3 mm better retry wins, so a weakly observed coordinate can hop branches
+#: between two frames); ``continuous`` anchors the retry's prior to the
+#: frame's start and rejects a retry that implies a joint speed above
+#: ``RESTART_MAX_JOINT_SPEED_RAD_S``; ``off`` disables restarts.
+IK_RESTART_POLICIES: tuple[str, ...] = ("free", "continuous", "off")
+DEFAULT_IK_RESTART_POLICY: str = "free"
+#: 2000 deg/s, above every joint speed of the smoothed address-to-impact
+#: references of capture-A and capture-B (peak 1299 deg/s, lead wrist).
+RESTART_MAX_JOINT_SPEED_RAD_S: float = 34.9
 
 SHOULDER_GIMBALS: tuple[tuple[str, str, str], ...] = tuple(
     (f"{s}SInputX", f"{s}SInputY", f"{s}SInputZ") for s in ("L", "R")

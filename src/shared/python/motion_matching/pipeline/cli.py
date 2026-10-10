@@ -48,7 +48,9 @@ from src.shared.python.motion_matching.pipeline.constants import (
     CANDIDATE,
     CAPTURE_NAMES,
     CONSISTENCY_PRIOR,
+    DEFAULT_IK_RESTART_POLICY,
     DEFAULT_MJX_ITERATIONS,
+    IK_RESTART_POLICIES,
     LEG_SEEDS,
     REFERENCE_CUTOFF_HZ,
     SHOOTING_RELAXATION,
@@ -342,6 +344,16 @@ def build_parser() -> argparse.ArgumentParser:
             "weight of the club-face orientation residual (OSV-10, #11759): the "
             "IK pulls the rendered face normal onto the one the capture head "
             "triad implies; 0 restores the marker-only fit"
+        ),
+    )
+    parser.add_argument(
+        "--ik-restart-policy",
+        choices=IK_RESTART_POLICIES,
+        default=DEFAULT_IK_RESTART_POLICY,
+        help=(
+            "trajectory IK restarts (#12042): 'free' jittered restarts, "
+            "'continuous' restarts that keep the prior on the previous frame "
+            "and reject a joint step above the peak joint speed, 'off'"
         ),
     )
     return parser
@@ -1030,6 +1042,9 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
         run.cal_res,
     )
     lane.set_face_targets(cal_res.attachments, cal_res.scaled_spec, args.face_weight)
+    lane.set_restart_policy(
+        getattr(args, "ik_restart_policy", DEFAULT_IK_RESTART_POLICY)
+    )
 
     (
         q_ik,
@@ -1077,6 +1092,7 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
         )
     )
     _attach_face_report(ik_report, lane, cal_res, (q_ik, q_ref), args.face_weight)
+    ik_report["restart_policy"] = lane.restart_report()
     np.savez(
         ctx.out_dir / "ik_trajectory.npz",
         time_s=lane.times,

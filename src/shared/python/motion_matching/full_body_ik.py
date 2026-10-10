@@ -70,6 +70,10 @@ class SolvePoseOptions:
     ) = None
     com_target: tuple[Sequence[float], float] | None = None
     solver: Literal["lm", "trf"] = "lm"
+    #: Pose the joint prior pulls toward; ``None`` uses the seed ``q_init``.
+    #: A restart passes its unjittered start here so the jitter only moves
+    #: the seed, never the prior (#12042).
+    prior_anchor: Sequence[float] | Array | None = None
 
 
 @dataclass(frozen=True)
@@ -87,6 +91,12 @@ class SolveTrajectoryOptions:
     axis_targets_per_frame: Sequence[Mapping[str, Any] | None] | None = None
     com_targets_per_frame: Sequence[tuple[Sequence[float], float] | None] | None = None
     locked_per_frame: Sequence[Mapping[str, float] | None] | None = None
+    #: Continuity-preserving restarts (#12042). ``None`` keeps the legacy free
+    #: restarts. A value keeps each retry's joint prior anchored to the frame's
+    #: start pose and accepts a retry only when no joint coordinate (index 6
+    #: on) moves further than this many radians from that start pose, so a
+    #: restart cannot hop to another branch between two frames.
+    restart_max_step_rad: float | None = None
 
 
 def _rotation_error(r_a: Array, r_b: Array) -> Array:
@@ -435,6 +445,39 @@ class _PosePrep:
     nv: int
     sqrt_prior: Array
     axes: list[Any]
+    anchor: Array
+
+
+def _prior_anchor(q_init: Array, anchor: Sequence[float] | Array | None) -> Array:
+    """Pose the joint prior pulls toward: ``anchor`` if given, else ``q_init``.
+
+    Raises ``ValueError`` when ``anchor`` is not a finite vector shaped like
+    ``q_init``.
+    """
+    seed = np.asarray(q_init, dtype=float)
+    if anchor is None:
+        return seed
+    target = np.asarray(anchor, dtype=float)
+    if target.shape != seed.shape or not np.isfinite(target).all():
+        raise ValueError(
+            f"prior_anchor must be a finite vector of shape {seed.shape}, "
+            f"got {target.shape}"
+        )
+    return target
+
+
+def _restart_admissible(
+    retry_q: Array, start: Array, max_step_rad: float | None
+) -> bool:
+    """True when a restart may replace the frame's fit (#12042).
+
+    With ``max_step_rad`` set, no joint coordinate (index 6 on; 0-5 are the
+    floating root) may move further than ``max_step_rad`` from ``start``.
+    """
+    if max_step_rad is None:
+        return True
+    step = np.abs(np.asarray(retry_q, dtype=float)[6:] - np.asarray(start)[6:])
+    return bool(step.size == 0 or float(step.max()) <= max_step_rad)
 
 
 class BaseFullBodyIK:
@@ -738,6 +781,7 @@ class BaseFullBodyIK:
             nv=nv,
             sqrt_prior=np.sqrt(prior_diag),
             axes=self._axis_rows(opts.axis_targets),
+            anchor=_prior_anchor(q_init, opts.prior_anchor),
         )
 
     def _pose_residual_stack(
@@ -833,7 +877,9 @@ class BaseFullBodyIK:
             )
 
         def residuals(q_k: Array) -> tuple[Array, Array]:
-            return self._pose_residual_stack(q_k, prep, targets, q_init, ground, opts)
+            return self._pose_residual_stack(
+                q_k, prep, targets, prep.anchor, ground, opts
+            )
 
         if opts.solver == "trf":
             q, done = _run_trf_loop(
@@ -896,6 +942,10 @@ class BaseFullBodyIK:
             < 0
         ):
             raise ValueError("Restart settings must be nonnegative")
+        if opts.restart_max_step_rad is not None and not (
+            np.isfinite(opts.restart_max_step_rad) and opts.restart_max_step_rad > 0
+        ):
+            raise ValueError("restart_max_step_rad must be finite and positive")
         if (
             opts.axis_targets_per_frame is not None
             and len(opts.axis_targets_per_frame) != targets_arr.shape[0]
@@ -963,6 +1013,12 @@ class BaseFullBodyIK:
                 anchors=anchors if opts.plant_stance else None,
                 **f_opts,
             )
+            continuous = opts.restart_max_step_rad is not None
+            retry_opts = (
+                {**f_opts, "prior_anchor": np.asarray(start, dtype=float)}
+                if continuous
+                else f_opts
+            )
             for _ in range(
                 opts.restarts if fit.marker_rms_m > opts.restart_threshold_m else 0
             ):
@@ -977,9 +1033,11 @@ class BaseFullBodyIK:
                     ground=ground,
                     flat_feet=stance if opts.flat_feet_per_frame is not None else False,
                     anchors=anchors if opts.plant_stance else None,
-                    **f_opts,
+                    **retry_opts,
                 )
-                if retry.marker_rms_m < fit.marker_rms_m - opts.restart_margin_m:
+                if retry.marker_rms_m < fit.marker_rms_m - opts.restart_margin_m and (
+                    _restart_admissible(retry.q, start, opts.restart_max_step_rad)
+                ):
                     fit = retry
             if opts.plant_stance:
                 points = self.sphere_ground_points(fit.q, ground)

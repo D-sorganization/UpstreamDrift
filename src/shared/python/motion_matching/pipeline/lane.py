@@ -26,13 +26,16 @@ from src.shared.python.motion_matching.pipeline.constants import (
     BOUND_WIDENING,
     CALIBRATION_STRIDE,
     CONTACT_STIFFNESS_N_M,
+    DEFAULT_IK_RESTART_POLICY,
     ELBOW_PIT_MARKERS,
     ELBOW_PIT_WEIGHT,
     HEAD_MARKER_WEIGHT,
+    IK_RESTART_POLICIES,
     IK_UNBOUNDED,
     LEG_LABELS,
     LEG_SEEDS,
     PRIOR,
+    RESTART_MAX_JOINT_SPEED_RAD_S,
     SPIN_COORDINATES,
     SPIN_PRIOR,
     STANCE_TOLERANCE_M,
@@ -368,6 +371,51 @@ class Lane:
         #: Per-frame club-face orientation targets (OSV-10); None: marker-only.
         self.face_targets: list[dict[str, Any] | None] | None = None
         self.face_weight = 0.0
+        #: Restart policy of the full-capture trajectory solve (#12042).
+        self.restart_policy = DEFAULT_IK_RESTART_POLICY
+
+    def set_restart_policy(self, policy: str) -> None:
+        """Select the trajectory IK restart policy (#12042), one of
+        ``IK_RESTART_POLICIES``. It applies to full-capture solves only;
+        calibration subsets keep the legacy restarts. Raises ``ValueError``
+        for an unknown policy."""
+        if policy not in IK_RESTART_POLICIES:
+            known = ", ".join(IK_RESTART_POLICIES)
+            raise ValueError(f"Unknown restart policy {policy!r}; expected {known}")
+        self.restart_policy = policy
+
+    def restart_settings(self, consecutive: bool = True) -> dict[str, Any]:
+        """``solve_trajectory`` restart keywords for the active policy.
+
+        ``consecutive`` is False for strided calibration subsets, whose frames
+        are not one sample apart, so the joint-speed bound does not apply.
+        """
+        policy = self.restart_policy if consecutive else "free"
+        return {
+            "restarts": 0 if policy == "off" else TRAJECTORY_RESTARTS,
+            "restart_threshold_m": TRAJECTORY_RESTART_THRESHOLD_M,
+            "restart_margin_m": TRAJECTORY_RESTART_MARGIN_M,
+            "restart_max_step_rad": (
+                RESTART_MAX_JOINT_SPEED_RAD_S / self.rate_hz
+                if policy == "continuous"
+                else None
+            ),
+        }
+
+    def restart_report(self) -> dict[str, Any]:
+        """Receipt block naming the restart policy and its bound (#12042)."""
+        settings = self.restart_settings()
+        step = settings["restart_max_step_rad"]
+        return {
+            "policy": self.restart_policy,
+            "restarts": settings["restarts"],
+            "threshold_m": settings["restart_threshold_m"],
+            "margin_m": settings["restart_margin_m"],
+            "max_joint_speed_rad_s": (
+                RESTART_MAX_JOINT_SPEED_RAD_S if step is not None else None
+            ),
+            "max_step_rad": step,
+        }
 
     def set_face_targets(
         self,
@@ -542,9 +590,7 @@ class Lane:
             marker_weights=self.marker_weights,
             prior_weights=self.prior_weights,
             axis_targets_per_frame=merge_axis_targets(axis_targets, self.face_targets),
-            restarts=TRAJECTORY_RESTARTS,
-            restart_threshold_m=TRAJECTORY_RESTART_THRESHOLD_M,
-            restart_margin_m=TRAJECTORY_RESTART_MARGIN_M,
+            **self.restart_settings(consecutive=frames is None),
         )
 
     def pinned_rms(
