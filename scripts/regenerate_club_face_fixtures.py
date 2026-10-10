@@ -41,7 +41,7 @@ FIXTURE_STRIDE = 2  # the 1 kHz reference, every second sample (2 ms)
 FIXTURE_DT_S = 0.002
 #: The run's hip-calibrated, segment-scaled document: the fixture's model. It
 #: is committed beside the fixture as ``spec_<club>.json`` because the hip
-#: frames set the foot yaw (#12222).
+#: frames set the foot yaw: the raw document turns the lead foot 29-30 deg (#12222).
 SCALED_SPEC = "full_body_spec_hipcal_scaled.json"
 #: capture -> (fixture club alias, document, extra pipeline flags of the
 #: original fixture runs, read back from their receipts).

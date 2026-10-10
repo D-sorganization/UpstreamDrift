@@ -1,3 +1,8 @@
+# Active: Club-Face Fixtures on the Capture Address Feet, #12222
+
+- Branch `claude/12222-fixture-toe-out`, stacked on #12223. The trajectory solver's new `anchor_stance_at_init` plants the stance at the start pose; `address_feet.planted_stance(lane)` turns it on with foot progression for the swing IK, consistency re-solve, shooting refit and ZMP filter (`off` receipts unchanged).
+- Fixtures run with `--foot-progression capture` and commit the run's scaled document (`spec_<club>.json`). Frame-0 toe-out: driver 16.64 / 3.57 against 16.37 / 4.03 degrees, 7-iron 15.43 / −0.96 against 15.00 / −0.37 degrees. The OSV-9 MSK calibration and both `golf_humanoid*.osim` are regenerated. Calc record: `simscape_matching_reference.tex`, "Fixtures on the Capture Address Feet".
+
 # Active: Club-Face Fixtures on the Current Spec, #12117
 
 - Branch `claude/12117-club-face-fixtures`. Fixtures from `657c811bcd` (#12145 sources; input receipts value-identical to main's #12166 receipts). Feet now flat (3.2–3.8 cm), address face follows the capture (5.43 / −5.41° vs 5.50 / −5.35°).
