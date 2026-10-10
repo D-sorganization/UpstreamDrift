@@ -801,11 +801,14 @@ class BaseFullBodyIK:
         self, prior: Mapping[str, tuple[float, float]] | None
     ) -> tuple[NDArray[np.intp], Array, Array]:
         """Indices, targets and square-root weights of the posture prior."""
-        names = list(prior or {})
+        entries: Mapping[str, tuple[float, float]] = prior or {}
+        names = list(entries)
         for name in names:
             if name not in self.coordinate_order:
                 raise ValueError(f"Unknown posture prior coordinate {name}")
-        values = np.array([prior[n] for n in names], dtype=float).reshape(-1, 2)
+        values = np.asarray([entries[n] for n in names], dtype=np.float64).reshape(
+            -1, 2
+        )
         if not np.isfinite(values).all() or (values[:, 1] < 0).any():
             raise ValueError("Posture prior targets must be finite, weights >= 0")
         index = np.array([self.coordinate_order.index(n) for n in names], dtype=int)
