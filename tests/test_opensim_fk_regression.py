@@ -4,7 +4,7 @@ This test guards against the regression that motivated issue #4191:
 the original ``opensim_golf/fk.py`` looked for body names ``hand_left`` /
 ``hand_right`` that **do not exist** in the canonical
 ``golf_humanoid.osim``. The shipped model exposes the grip and clubhead
-as ``PhysicalOffsetFrame`` objects on the ``hand_r_to_club`` weld joint
+as ``PhysicalOffsetFrame`` components of the hand and club bodies (OSV-9)
 (``hand_r_grip_offset`` and ``club_head_offset``).
 
 The canonical FK module under test is
@@ -79,8 +79,8 @@ def test_fk_module_exposes_canonical_frame_constants() -> None:
 
     assert fk.GRIP_FRAME_NAME == "hand_r_grip_offset"
     assert fk.CLUBHEAD_FRAME_NAME == "club_head_offset"
-    assert fk.GRIP_FRAME_PATH == "/jointset/hand_r_to_club/hand_r_grip_offset"
-    assert fk.CLUBHEAD_FRAME_PATH == "/jointset/hand_r_to_club/club_head_offset"
+    assert fk.GRIP_FRAME_PATH == "/bodyset/hand_r/hand_r_grip_offset"
+    assert fk.CLUBHEAD_FRAME_PATH == "/bodyset/Club/club_head_offset"
     # Catalogue keys are the cross-engine SimOut landmark names.
     assert set(fk.CANONICAL_LANDMARKS) == {"grip", "clubhead"}
     assert fk.CANONICAL_LANDMARKS["grip"] == fk.GRIP_FRAME_PATH

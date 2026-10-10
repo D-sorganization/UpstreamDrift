@@ -24,7 +24,7 @@ from src.shared.python.contracts import postcondition, precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.motion_matching.candidate import MatchedSwingCandidate
 from src.shared.python.motion_matching.candidate_io import load_candidate
-from src.shared.python.video_timing.frame_schedule import stride_for_speed
+from src.shared.python.video_timing.frame_schedule import FrameSchedule
 from src.shared.python.motion_matching.provenance import (
     engine_package_version,
     git_commit_short,
@@ -72,6 +72,8 @@ def _render_video_frames(
     candidate: MatchedSwingCandidate,
     engine: str,
     stride: int,
+    size_px: tuple[int, int] = (480, 480),
+    frame_indices: list[int] | None = None,
 ) -> list[np.ndarray]:
     """Render 3D marker overlay frames comparing target vs model markers."""
     from src.shared.python.motion_matching.cross_engine_replay import (
@@ -88,6 +90,8 @@ def _render_video_frames(
         engine_name=engine,
         stride=stride,
         valid_mask=candidate.marker_validity,
+        size_px=size_px,
+        frame_indices=frame_indices,
     )
 
 
@@ -151,6 +155,7 @@ def export_video(
     stride: int = 5,
     view: str = "marker_overlay",
     speed: float | None = None,
+    size_px: tuple[int, int] = (480, 480),
 ) -> Path:
     """Export 3D marker overlay trajectory animation as GIF or MP4.
 
@@ -162,21 +167,31 @@ def export_video(
         stride: Frame subsampling stride for rendering.
         view: Visual rendering preset ("marker_overlay").
         speed: Playback speed relative to real time (0.5 is half speed). When
-            given, ``stride`` is derived from ``fps`` and the swing ``dt`` so
-            playback is time-based (GCV-14); ``stride`` is then ignored.
+            given, frames follow ``video_timing.FrameSchedule`` (GCV-14): one
+            frame per ``speed / fps`` swing seconds showing the nearest sample,
+            held when the source is coarser than the playback, so a clip lasts
+            ``duration / speed``; ``stride`` is then ignored.
+        size_px: Frame ``(width, height)`` in pixels; positive ints.
 
     Returns:
         Resolved output Path.
     """
+    from src.shared.python.motion_matching.cross_engine_replay import (
+        validate_frame_size,
+    )
+
+    validate_frame_size(size_px)
     out_p = Path(path).resolve()
     cand = _validate_candidate_for_video(candidate)
     dt_s = cand.time_s[1] - cand.time_s[0] if len(cand.time_s) > 1 else 0.05
-    stride_safe = (
-        stride_for_speed(float(dt_s), fps, speed)
-        if speed is not None
-        else max(1, stride)
-    )
-    frames = _render_video_frames(cand, engine, stride_safe)
+    stride_safe = max(1, stride)
+    if speed is None:
+        frames = _render_video_frames(cand, engine, stride_safe, size_px)
+    else:
+        nearest = FrameSchedule(cand.time_s, fps, speed).nearest_indices()
+        unique, expand = np.unique(nearest, return_inverse=True)
+        rendered = _render_video_frames(cand, engine, 1, size_px, unique.tolist())
+        frames = [rendered[i] for i in expand]
 
     ext = out_p.suffix.lower()
     if ext == ".gif":
