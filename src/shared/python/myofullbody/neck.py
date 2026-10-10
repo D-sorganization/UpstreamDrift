@@ -60,7 +60,10 @@ def augment(
     appended actuators have zero passive force, ``active`` equal to the documented
     capacity, and a unit moment arm of the matching sign on their coordinate.
     """
-    require(basis.moment.shape[1] == len(columns), "moment/columns size mismatch")
+    require(
+        np.asarray(basis.moment).shape[1] == len(columns),
+        "moment/columns size mismatch",
+    )
     present = _present(order, columns)
     if not present:
         return basis
@@ -92,5 +95,5 @@ def split(activation: np.ndarray, n_muscles: int) -> tuple[np.ndarray, np.ndarra
 def torque(basis: FrameBasis, activation: np.ndarray, n_muscles: int) -> np.ndarray:
     """Spec generalised force of the neck torque actuators alone (zero if none)."""
     _, act = split(activation, n_muscles)
-    rows = basis.moment[n_muscles:]
-    return rows.T @ (act * basis.active[n_muscles:])
+    rows = np.asarray(basis.moment)[n_muscles:]
+    return rows.T @ (act * np.asarray(basis.active)[n_muscles:])
