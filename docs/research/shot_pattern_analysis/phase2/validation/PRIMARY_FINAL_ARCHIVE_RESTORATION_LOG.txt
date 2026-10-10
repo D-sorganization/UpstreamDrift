@@ -1,0 +1,101 @@
+{
+  "schema": "shot-study-primary-final-restoration/1",
+  "status": "passed",
+  "created_utc": "2026-10-10T00:33:30.129466+00:00",
+  "source_sha256": {
+    "docs/research/shot_pattern_analysis/phase2/validation/restore_final_primary_archives.py": "3e954209a3746325c5532ac88656701e7e44c3fd60a941d90ec83274bfa3c883",
+    "scripts/research/shot_pattern_analysis/archive_data.py": "5f0c483dd31e11517e5d5dbeb464f499df56c94aedcab6bbf049f65537a57969",
+    "src/tools/shot_pattern_analysis/matched_report.py": "3e190b43c4c8da337eeb73ea8825d3d69c128f684931f15406e02f243c21e94b",
+    "src/tools/shot_pattern_analysis/provenance.py": "70f67276f3de4d0a0934da93b0a4fc1f71cc000993cef04dde145dcb12166975"
+  },
+  "scientific_audit": {
+    "path": "docs/research/shot_pattern_analysis/phase2/validation/independent_primary_final_audit.json",
+    "sha256": "a9bf9e87eb3c72c21e002e9010a10d48f85cb1c71a2e0f250169485a54982e7d",
+    "rows": 8100000
+  },
+  "bundle_files": {
+    "final_primary_v1/archive_manifest.json": {
+      "sha256": "62af2c77fcbf2b0f965fe0eec28fb3f49f04d27c072ea2f0baaf430251354dcc",
+      "bytes": 485454
+    },
+    "final_primary_v1/final_v1-001.zip": {
+      "sha256": "8eaba91beaf1c9cf3be7dda504efaed7f513f27db005b266ae55b37e06644e7d",
+      "bytes": 79938512
+    },
+    "final_primary_v1/final_v1-002.zip": {
+      "sha256": "08443abc7fcb1c696274f7d93d0a495cf0b3cd6158f151390a11dd449c692e5d",
+      "bytes": 79213344
+    },
+    "final_primary_v1/final_v1-003.zip": {
+      "sha256": "ddafb14a04facefa29b37b74e647f6b2663fec46befb92364db8d718b238cb2e",
+      "bytes": 79014334
+    },
+    "final_primary_v1/final_v1-004.zip": {
+      "sha256": "8e1135bbdbd571d7750a2cceac05263193e5f4d648d47273a7ce4ad0666455f6",
+      "bytes": 79037500
+    },
+    "final_primary_v1/final_v1-005.zip": {
+      "sha256": "e5e0f1acafcf8755f506b2ae2f080c140b182bd747ca68a26912d358fa92e01e",
+      "bytes": 79372067
+    },
+    "final_primary_v1/final_v1-006.zip": {
+      "sha256": "ba25a5ae05f4b545bec41a8f490bc4c86c947f3b5281627f499cbe8d49e79bf9",
+      "bytes": 78691822
+    },
+    "final_primary_v1/final_v1-007.zip": {
+      "sha256": "96339adca4647c5c77dc78b2f24921bd200a011cdb47ccb87ff61af57cceaeca",
+      "bytes": 77743582
+    },
+    "final_primary_v1/final_v1-008.zip": {
+      "sha256": "4d2af644836aba5f910eecc19ace47c0226ff695443658685cc3795a0d72fcfc",
+      "bytes": 78654239
+    },
+    "final_primary_v1/final_v1-009.zip": {
+      "sha256": "ba6ca0b6289a6caee77c8199c4a628e159a426df8fa394891e5c014e1ec63b4e",
+      "bytes": 78694760
+    },
+    "final_primary_v1/final_v1-010.zip": {
+      "sha256": "081e49e0c1b696f8699286e206368fd4ddc985e4030ca30231487a62c8a50127",
+      "bytes": 79760372
+    },
+    "final_primary_v1/final_v1-011.zip": {
+      "sha256": "a2b53589af2cf447f64e691d156e9c5e23f9a3c70429d7580825570d9d472a44",
+      "bytes": 79281863
+    },
+    "final_primary_v1/final_v1-012.zip": {
+      "sha256": "8ee73076f98f2a899c2d4a172ed9620490084c582ef53c9918e260b1e60b4b85",
+      "bytes": 78757485
+    },
+    "final_primary_v1/final_v1-013.zip": {
+      "sha256": "32465c1629a4a21077ba967a320d0ffa6c357e3ff745f9b394a9a3aaacd26ccf",
+      "bytes": 77606018
+    },
+    "final_primary_v1/final_v1-014.zip": {
+      "sha256": "f944eb422ccbc201e7c868ef70491e543ae17762ff87608198a90f415ee61c3a",
+      "bytes": 78924853
+    },
+    "final_primary_v1/final_v1-015.zip": {
+      "sha256": "c58fa8a6fec2ba699b6cec76a0ef8ab9d732e53a9a789ceb510827dc0ebde17a",
+      "bytes": 3833318
+    }
+  },
+  "files_restored": 2097,
+  "archive_manifest_sha256": "62af2c77fcbf2b0f965fe0eec28fb3f49f04d27c072ea2f0baaf430251354dcc",
+  "plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+  "matrix_counts": {
+    "completed": 270,
+    "unavailable": 54,
+    "not_run": 0
+  },
+  "planned_cells": 324,
+  "fresh_directory": true,
+  "temporary_directory_removed": true,
+  "all_file_hashes_and_sizes_equal": true,
+  "full_restored_report_equals_original": true,
+  "audit_plan_execution_cells_statuses_bound": true,
+  "sources_originals_bundles_audit_unchanged": true,
+  "limitations": [
+    "Packaging/restoration acceptance only; scientific acceptance is the separately hash-bound prior audit.",
+    "No simulations, scoring recomputation, control or supplemental dataset acceptance, or visual review performed."
+  ]
+}
