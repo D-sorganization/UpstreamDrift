@@ -18,6 +18,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from src.engines.native_replay_contracts import (
+    _MUJOCO_GLOBAL_CALLBACKS,
     native_replay_admission_bytes,
     native_replay_contract_types,
     require_no_global_mujoco_callbacks,
@@ -28,6 +29,8 @@ if TYPE_CHECKING:
     from sidekick.lab.mocap import ExperimentReplayBundle
 
 _VERSION = "1.0.0"
+# Kept for sibling native replay modules that guard the same global callbacks.
+_CALLBACKS = _MUJOCO_GLOBAL_CALLBACKS
 
 
 @dataclass(frozen=True)
