@@ -1,16 +1,14 @@
 """Static-hold per-hand bar wrench (LIFT-4, #11744, GCV-7/GCV-8).
 
-The MuJoCo adapter reduces a static hold of the pack's start pose to the
-per-hand wrench on the bar through the shared GCV-7 grip analysis
+The MuJoCo adapter reduces a settled static hold of the pack's start pose to
+the per-hand wrench on the bar through the shared GCV-7 grip analysis
 (``biomechanics.grip_wrench``) and the GCV-8 weld ``efc_force`` extraction
 (``grip_efc``) -- no second wrench-transport routine.  A lift whose bar is
-not welded to both hands (back squat: bar welded to the torso) is reported
-unavailable with a precise reason, never as zero -- and so is a lift whose
-bar has no joint at all: the current MuJoCo_Models pack's barbell bodies are
-kinematic fixtures (``body_dofnum == 0``), so their weight never enters the
-dynamics and no per-hand split is physically recoverable from the weld
-reaction (see the comment above the real-pack tests below for the full
-investigation).
+not welded to both hands (back squat: bar welded to the torso), or whose bar
+has no joint, is reported unavailable with a reason, never as zero.
+
+Acceptance from #11744: the hand forces sum to the bar plus plate weight
+within 1 %, and a symmetric grip splits symmetrically.
 """
 
 from __future__ import annotations
@@ -24,9 +22,16 @@ pytestmark = pytest.mark.unit
 
 _G = 9.81
 _MASS_KG = 20.0
+#: #11744 acceptance: sum of hand forces equals the bar weight within 1 %.
+_WEIGHT_REL_TOL = 0.01
+#: Symmetric grip -> even split.  Measured |share - 0.5| <= 3e-16 on every
+#: hand-held lift of the MuJoCo pack (284b9b2) and on the fixture below.
+_SPLIT_ABS_TOL = 1e-6
+#: The settled bar must be at rest.  Measured <= 3.3e-6 m/s^2 on the pack.
+_REST_ACCEL_MPS2 = 1e-3
 
-# Two static (0-DOF) "hand" bodies holding a free barbell shaft at the
-# relpose MuJoCo derives from this reference layout (zero initial residual).
+# Two static "hand" bodies holding a free barbell shaft at the relpose MuJoCo
+# derives from this layout (zero initial residual).
 _HELD_XML = f"""
 <mujoco>
 <option gravity="0 0 -{_G}"/>
@@ -75,6 +80,20 @@ _TORSO_WELDS = [
     {"name": "barbell_to_torso", "body1": "torso", "body2": "barbell_shaft"},
 ]
 
+# The same hold with a jointless (world-fixed) bar.
+_FIXED_BAR_XML = _HELD_XML.replace("  <freejoint/>\n", "")
+
+_UNAVAILABLE_NUMERIC = (
+    "bar_mass_kg",
+    "bar_weight_n",
+    "hand_force_n",
+    "sum_vertical_n",
+    "relative_error",
+    "split_left_fraction",
+    "couple_at_midpoint_nm",
+    "bar_linear_accel_mps2",
+)
+
 
 def _mod():
     pytest.importorskip("mujoco")
@@ -83,53 +102,41 @@ def _mod():
     return mujoco_bar_hold
 
 
-@pytest.mark.requires_mujoco
-def test_static_hold_balances_weight_within_a_tight_tolerance() -> None:
-    mod = _mod()
-    result = mod.bar_hold_wrench(_HELD_XML, _HELD_WELDS)
+def _assert_static_hold(result: dict) -> None:
     assert result["available"], result["reason"]
+    assert result["split_method"] == "efc_force"
+    assert result["relative_error"] <= _WEIGHT_REL_TOL, result
+    assert abs(result["split_left_fraction"] - 0.5) <= _SPLIT_ABS_TOL, result
+    assert result["bar_linear_accel_mps2"] < _REST_ACCEL_MPS2, result
+    # Sign (ADR-0052): the wrench is exerted by the hand ON the bar -> up.
+    assert result["hand_force_n"]["L"][2] > 0.0
+    assert result["hand_force_n"]["R"][2] > 0.0
+
+
+@pytest.mark.requires_mujoco
+def test_static_hold_balances_weight_and_splits_evenly() -> None:
+    result = _mod().bar_hold_wrench(_HELD_XML, _HELD_WELDS)
     assert result["bar_mass_kg"] == pytest.approx(_MASS_KG)
     assert result["bar_weight_n"] == pytest.approx(_MASS_KG * _G)
-    # Two FULL 6-DOF welds pinning one 6-DOF free body are structurally
-    # redundant (12 constraint rows for 6 DOF); MuJoCo's default soft
-    # (compliant) equality solver does not fully cancel that redundancy in
-    # one static mj_forward solve. Measured 0.0526 (5.26%) for this fixture;
-    # asserted with margin, not loosened further.
-    assert result["relative_error"] < 0.06, result
-
-
-@pytest.mark.requires_mujoco
-def test_static_hold_sign_is_up_and_split_is_symmetric() -> None:
-    mod = _mod()
-    result = mod.bar_hold_wrench(_HELD_XML, _HELD_WELDS)
-    left = result["hand_force_n"]["L"]
-    right = result["hand_force_n"]["R"]
-    assert left[2] > 0.0
-    assert right[2] > 0.0
-    # Symmetric geometry (hands equidistant from the bar's midpoint, same
-    # height) measured to split evenly well under 1e-6.
-    assert result["split_left_fraction"] == pytest.approx(0.5, abs=1e-6)
-
-
-@pytest.mark.requires_mujoco
-def test_static_hold_bar_acceleration_is_negligible() -> None:
-    mod = _mod()
-    result = mod.bar_hold_wrench(_HELD_XML, _HELD_WELDS)
-    # Residual acceleration from the same redundant-weld compliance as above
-    # (measured 0.516 m/s^2); two orders of magnitude below the bar's own
-    # free-fall acceleration (g = 9.81 m/s^2), not loosened further.
-    assert result["bar_linear_accel_mps2"] < 0.6, result
+    _assert_static_hold(result)
 
 
 @pytest.mark.requires_mujoco
 def test_non_hand_weld_is_unavailable_not_zero() -> None:
-    mod = _mod()
-    result = mod.bar_hold_wrench(_TORSO_XML, _TORSO_WELDS)
+    result = _mod().bar_hold_wrench(_TORSO_XML, _TORSO_WELDS)
     assert result["available"] is False
-    assert result["bar_mass_kg"] is None
-    assert result["hand_force_n"] is None
-    assert result["relative_error"] is None
     assert "torso" in result["reason"]
+    for field in _UNAVAILABLE_NUMERIC:
+        assert result[field] is None, f"{field} must be None, never 0"
+
+
+@pytest.mark.requires_mujoco
+def test_world_fixed_bar_is_unavailable_not_zero() -> None:
+    result = _mod().bar_hold_wrench(_FIXED_BAR_XML, _HELD_WELDS)
+    assert result["available"] is False
+    assert "no joint" in result["reason"]
+    for field in _UNAVAILABLE_NUMERIC:
+        assert result[field] is None, f"{field} must be None, never 0"
 
 
 @pytest.mark.requires_mujoco
@@ -180,25 +187,11 @@ def test_base_adapter_default_is_unavailable_with_none_fields() -> None:
         commit=None,
         licence=None,
     )
-    adapter = _StubAdapter(pack, "deadlift", Anthropometry())
-    result = adapter.bar_hold_wrench()
+    result = _StubAdapter(pack, "deadlift", Anthropometry()).bar_hold_wrench()
 
     assert result["available"] is False
     assert result["reason"] == "not implemented for this engine"
-    numeric_fields = (
-        "split_method",
-        "bar_mass_kg",
-        "bar_weight_n",
-        "hand_force_n",
-        "sum_vertical_n",
-        "relative_error",
-        "split_left_fraction",
-        "couple_at_midpoint_nm",
-        "bar_linear_accel_mps2",
-        "method",
-        "n_welds",
-    )
-    for field in numeric_fields:
+    for field in (*_UNAVAILABLE_NUMERIC, "split_method", "method", "n_welds"):
         assert result[field] is None, f"{field} must be None, never 0"
 
 
@@ -211,73 +204,27 @@ def _mujoco_lift_adapter(lift: str):
     pack = locate_pack("mujoco")
     if pack is None:
         pytest.skip("MuJoCo lift pack checkout not found (set LIFT_PACK_ROOT)")
-    return create_adapter(pack, lift, Anthropometry(80.0, 1.78, 50.0))
-
-
-_HAND_HELD_LIFTS = ("deadlift", "bench_press", "snatch", "clean_and_jerk")
-
-# INVESTIGATION FINDING (LIFT-4, not a defect in this change): on the current
-# MuJoCo_Models lift pack (sibling checkout, `main`, grip-weld fixes #437/
-# #441/#443 already applied), the barbell bodies (`barbell_shaft`,
-# `barbell_left_sleeve`, `barbell_right_sleeve`) are added via
-# `create_barbell_bodies()` with no `<freejoint>` or any other joint --
-# confirmed empirically: `model.body_dofnum` is 0 for all three, for every
-# hand-held lift (deadlift/bench_press/snatch/clean_and_jerk). A body with
-# body_dofnum == 0 never enters MuJoCo's equations of motion (M*qacc = ...);
-# its `body_mass` is carried for bookkeeping (it sums correctly to
-# `Anthropometry.bar_total_mass_kg`) but gravity never acts on it the way it
-# acts on a jointed body. The `barbell_to_hand_{l,r}` weld equalities are
-# therefore purely kinematic position constraints (pinning the hand to the
-# bar's fixed location), not a load path: no per-hand split of the bar's
-# weight is physically recoverable from the weld reaction in this pack,
-# regardless of `grip_efc`'s own correctness. `bar_hold_wrench` detects this
-# (`body_dofnum` all zero across the matched bar bodies) and reports
-# `available=False` with a precise reason instead of a wrong or zero number.
-# Making this measurement physically meaningful needs a follow-up in
-# MuJoCo_Models: give `barbell_shaft` its own `<freejoint>` so the bar's mass
-# is dynamically coupled to the grip.
-
-
-def _mujoco_lift_adapter(lift: str):
-    pytest.importorskip("mujoco")
-    from src.shared.python.lifting.pack_audit.adapters import create_adapter
-    from src.shared.python.lifting.pack_audit.model import Anthropometry
-    from src.shared.python.lifting.pack_audit.packs import locate_pack
-
-    pack = locate_pack("mujoco")
-    if pack is None:
-        pytest.skip("MuJoCo lift pack checkout not found (set LIFT_PACK_ROOT)")
-    return create_adapter(pack, lift, Anthropometry(80.0, 1.78, 50.0))
+    return create_adapter(pack, lift, Anthropometry())
 
 
 @pytest.mark.requires_mujoco
 @pytest.mark.integration
-@pytest.mark.parametrize("lift", _HAND_HELD_LIFTS)
-def test_pack_hand_held_lifts_report_unavailable_bar_has_no_joint(lift: str) -> None:
+@pytest.mark.parametrize(
+    "lift", ("deadlift", "bench_press", "snatch", "clean_and_jerk")
+)
+def test_pack_hand_held_lift_static_hold(lift: str) -> None:
     adapter = _mujoco_lift_adapter(lift)
     result = adapter.bar_hold_wrench()
-    assert result["available"] is False
-    assert "dofnum=0" in result["reason"]
-    assert "barbell_shaft" in result["reason"]
-    numeric_fields = (
-        "bar_mass_kg",
-        "bar_weight_n",
-        "hand_force_n",
-        "sum_vertical_n",
-        "relative_error",
-        "split_left_fraction",
-        "couple_at_midpoint_nm",
-        "bar_linear_accel_mps2",
+    assert result["bar_mass_kg"] == pytest.approx(
+        adapter.anthro.bar_total_mass_kg, rel=1e-6
     )
-    for field in numeric_fields:
-        assert result[field] is None, f"{field} must be None, never 0 ({lift})"
+    _assert_static_hold(result)
 
 
 @pytest.mark.requires_mujoco
 @pytest.mark.integration
 def test_pack_squat_is_unavailable_bar_on_torso() -> None:
-    adapter = _mujoco_lift_adapter("squat")
-    result = adapter.bar_hold_wrench()
+    result = _mujoco_lift_adapter("squat").bar_hold_wrench()
     assert result["available"] is False
     assert result["bar_mass_kg"] is None
     assert "torso" in result["reason"]

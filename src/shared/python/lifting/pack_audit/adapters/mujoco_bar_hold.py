@@ -9,21 +9,18 @@ Method: on a private copy of the model, every DOF that does not belong to a
 barbell body gets a very large ``dof_armature`` (the lifter is held rigid so
 the hands cannot accelerate), and every barbell geom is excluded from contact
 (``geom_contype``/``geom_conaffinity`` set to 0, so the floor/rack never
-carries the load).  A single ``mj_forward`` at the pack's start pose and zero
-velocity then yields the weld reaction: the physical force each hand must
-exert on the bar to hold it still.  The bar's own linear acceleration is
-checked (not assumed) so the static-hold reading is verified, never asserted.
+carries the load).  From the pack's start pose at rest the model is stepped
+for ``SETTLE_S`` seconds, so the soft welds reach their steady sag: a single
+``mj_forward`` would report only MuJoCo's impedance-scaled first-instant
+constraint force (about 5 % short of the weight at the default ``solimp``),
+not the static hold.  The settled weld reaction is the force each hand
+exerts on the bar to hold it still.  The bar's residual linear acceleration
+is reported, so the static-hold assumption is checked, never asserted.
 
-Precondition the measurement depends on: at least one matched barbell body
-must have ``body_dofnum > 0`` (a genuine joint).  A body with no joint never
-enters MuJoCo's equations of motion, so its weight cannot show up in a weld
-reaction no matter how it is extracted; this is reported ``unavailable`` with
-a precise reason (never a wrong or zero number) rather than assumed away. As
-of this writing the MuJoCo_Models lift pack's barbell bodies are built via
-``create_barbell_bodies()`` with no joint at all (confirmed empirically),
-so every hand-held lift currently reports unavailable for this reason --
-see ``tests/unit/lifting/pack_audit/test_bar_hold_wrench.py`` for the full
-investigation and the pack-side follow-up this implies.
+Precondition: at least one matched barbell body must have a joint
+(``body_dofnum > 0``).  A jointless bar is fixed to the world, its weight
+never enters the dynamics and no weld reaction can carry it; that case is
+reported ``unavailable`` with the reason, never as a wrong or zero number.
 """
 
 from __future__ import annotations
@@ -40,10 +37,14 @@ from ..model import unavailable_bar_hold
 
 _RIGID_ARMATURE = 1.0e9
 _BAR_PREFIX = "barbell"
+#: Simulated settling time of the held bar before the reading (s).  The pack
+#: welds use MuJoCo's default ``solref`` time constant of 0.02 s, so 1 s is
+#: 50 time constants.
+SETTLE_S = 1.0
 _METHOD = (
     "rigid-lifter static hold: dof_armature=1e9 on every non-barbell DOF, "
-    "barbell geom contacts disabled, weld reaction read from efc_force "
-    "(GCV-7/GCV-8)"
+    f"barbell geom contacts disabled, settled {SETTLE_S:g} s from rest, weld "
+    "reaction read from efc_force (GCV-7/GCV-8)"
 )
 
 
@@ -74,6 +75,15 @@ def _disable_bar_contacts(model: mujoco.MjModel, bar_body_ids: Sequence[int]) ->
 
 def _start_qpos(model: mujoco.MjModel) -> np.ndarray:
     return np.array(model.key_qpos[0] if model.nkey else model.qpos0, dtype=float)
+
+
+def _settle_from_rest(model: mujoco.MjModel, data: mujoco.MjData) -> None:
+    """Step from the start pose at rest for ``SETTLE_S``; leave ``data`` current."""
+    data.qpos[:] = _start_qpos(model)
+    data.qvel[:] = 0.0
+    for _ in range(max(1, round(SETTLE_S / float(model.opt.timestep)))):
+        mujoco.mj_step(model, data)
+    mujoco.mj_forward(model, data)
 
 
 def _bar_linear_accel_mps2(
@@ -161,19 +171,13 @@ def bar_hold_wrench(xml: str, welds: Sequence[Mapping[str, Any]]) -> dict[str, A
 
     if not any(int(model.body_dofnum[bid]) > 0 for bid in bar_body_ids):
         return unavailable_bar_hold(
-            f"barbell bodies {sorted(bar_body_names)} all have body_dofnum=0 "
-            "(no joint): the bar is a kinematic fixture in this pack, not a "
-            "dynamically free rigid body, so its mass never enters the "
-            "equations of motion and the weld reaction cannot reflect its "
-            "weight; the pack needs a free joint on the bar for this "
-            "measurement to be physically meaningful"
+            f"barbell bodies {sorted(bar_body_names)} have no joint: the bar "
+            "is fixed to the world, so no weld reaction can carry its weight"
         )
 
     _freeze_non_bar_dofs(model, bar_body_ids)
     _disable_bar_contacts(model, bar_body_ids)
-    data.qpos[:] = _start_qpos(model)
-    data.qvel[:] = 0.0
-    mujoco.mj_forward(model, data)
+    _settle_from_rest(model, data)
 
     analysis = grip_analysis_from_efc(model, data, welds=weld_names)
     if analysis.left is None or analysis.right is None:
