@@ -2,6 +2,13 @@ import { describe, it, expect, vi, beforeEach, afterEach, type MockInstance } fr
 import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
 
 import { CharacterSpecPanel } from './CharacterSpecPanel';
+import { useCharacterSpec } from './useCharacterSpec';
+
+/** Supplies the `spec` prop `CharacterSpecPanel` now requires (CMB-7d). */
+function Harness() {
+  const spec = useCharacterSpec();
+  return <CharacterSpecPanel spec={spec} />;
+}
 
 const PRESET = {
   id: 'golfer_pro',
@@ -83,14 +90,14 @@ describe('CharacterSpecPanel', () => {
   });
 
   it('loads presets on mount and populates the select', async () => {
-    render(<CharacterSpecPanel />);
+    render(<Harness />);
 
     expect(await screen.findByRole('option', { name: 'Golfer Pro' })).toBeInTheDocument();
     expect(screen.getByRole('option', { name: 'Defaults (no preset)' })).toBeInTheDocument();
   });
 
   it('fills slider values from the selected preset', async () => {
-    render(<CharacterSpecPanel />);
+    render(<Harness />);
     await screen.findByRole('option', { name: 'Golfer Pro' });
 
     const select = screen.getByLabelText(/Preset/i) as HTMLSelectElement;
@@ -119,7 +126,7 @@ describe('CharacterSpecPanel', () => {
       return Promise.resolve(jsonResponse({ detail: 'not stubbed' }, { ok: false, status: 404 }));
     });
 
-    render(<CharacterSpecPanel />);
+    render(<Harness />);
     await screen.findByRole('option', { name: 'Golfer Pro' });
 
     await act(async () => {
@@ -166,7 +173,7 @@ describe('CharacterSpecPanel', () => {
       return Promise.resolve(jsonResponse({ detail: 'not stubbed' }, { ok: false, status: 404 }));
     });
 
-    render(<CharacterSpecPanel />);
+    render(<Harness />);
     await screen.findByRole('option', { name: 'Golfer Pro' });
 
     await act(async () => {
@@ -196,7 +203,7 @@ describe('CharacterSpecPanel', () => {
       return Promise.resolve(jsonResponse({ detail: 'not stubbed' }, { ok: false, status: 404 }));
     });
 
-    render(<CharacterSpecPanel />);
+    render(<Harness />);
     await screen.findByRole('option', { name: 'Golfer Pro' });
 
     await act(async () => {

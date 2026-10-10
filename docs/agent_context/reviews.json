@@ -36,7 +36,7 @@
         "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
         "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414"
       },
-      "rationale": "CMB-7e (#11658): tools.character_builder parity notes now record the desktop appearance picker and appearance-v1 sidecar export through the shared character_appearance_service; feature status, tile and paths unchanged; capability atlas regenerated."
+      "rationale": "CMB-7e (#11658): desktop appearance picker and sidecar export reconciled with merged CMB-7c"
     },
     "model-backends": {
       "fingerprint": "da739fcd3c56f6c4a3923b4f31202e515023487a49d54ca449090d33186a9685",
