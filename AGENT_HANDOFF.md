@@ -1,8 +1,15 @@
+# Active: Drake IK Coordinate Order — #12042 Slice 5
+
+- Branch `claude/drake-ik-twist`. Root cause of the Drake thorax under-twist: Drake's plant position order is not the spec `coordinate_order` (spine/torso/arms/neck permuted). `DrakeFullBodyIK._set` and the model's array paths skipped the permutation, so the twist was solved under the `SpineInputX` ±35° bound. Fixed with `to_plant_positions`/`named_columns` on `FullBodyDrakeModel`; tests in `tests/unit/motion_matching/test_drake_coordinate_order.py`.
+- Capture-A receipt `evidence/ground_support/anthro_driver_drake` regenerated: IK 47.2 → 34.6 mm, FD 382 → 60.1 mm; the twist now matches MuJoCo (inherits MuJoCo's +16°/+20° top over-twist, slice 7). Calc record: `simscape_matching_reference.tex`, section "Drake Full-Body IK Coordinate Order".
+- Open: shared spec FK misplaces the `Clubhead` triad by about 1 m versus Drake/MuJoCo (do not use it for club markers).
+
 # Active: Same-Input Bushing Grip Parity, OSV-7 Phase 2 #11739
 
 - Branch `claude/osv-7-grip-parity`. The shared OpenSim `BushingForce` law (`grip_contact/bushing_law.py`) and a `SimmSpline`-equivalent prescribed input (`grip_contact/prescribed_motion.py`) drive MuJoCo (`mjcb_passive`, RK4 1e-4 s), Drake (native `LinearBushingRollPitchYaw`, RK3 error controlled) and Pinocchio (`aba`, DOP853) on a free club, with each engine's own weld FK. Metrics are in `grip_contact/parity.py` (peak 5 %, RMS 2 % of peak), routed through GCV-10 `GripSeries`.
 - Driver: every engine passes every quantity. The worst case is the Drake squeeze, 0.96 % peak and 0.42 % RMS, from the RPY and midpoint convention. See GRIP_PARITY_DECISIONS.md section 18. Evidence: `evidence/grip_kinetics/parity/`. Plots: `~/Videos/Parity Audit/golfer_realism/grip_kinetics/parity/`.
 - Full-swing parity tests are `slow` (10 to 30 minutes per engine and club on a loaded host). Open: a contact-model grip, and Drake with the shared law to isolate its integrator.
+
 # Active: Simscape URDF Exchange — #11569 Task 3
 
 - Branch `claude/simscape-urdf-exchange-11569`; commit `SELF`. `smexport` is absent in R2025b, so `scripts/matlab/simscape_model_inventory.m` reads joints (type, DOF) and solid/inertia masses (unit-converted, density x volume where needed; NaN when not evaluable) from the canonical `GolfSwing3D_Kinetic` and from an `smimport` of the spec `golfer.urdf`. `export_simscape_urdf_exchange.m` writes `tests/fixtures/simscape/simscape_urdf_exchange_receipt.json`; `src/engines/simscape/urdf_exchange.py` diffs it against the URDF.

@@ -5333,6 +5333,117 @@ Visual overlays employ refined ellipsoid geometry (\texttt{GS3DX\_Human\_Refined
 \subsection{Limitations and Interpretation Boundaries}
 Kinematic agreement in inverse kinematics fitting does not demonstrate forward dynamic validity, neuromuscular plausibility, or physical ground support equilibrium. Reports must maintain clear distinctions between kinematic fits, inverse-dynamics effort attributions, and certified continuous forward simulations.
 
+\section{Drake Full-Body IK Coordinate Order and Thorax Twist (Issue \#12042, Slice 5)}
+This section records a defect and its fix in the Drake full-body adapter
+(\texttt{src/engines/physics\_engines/drake/python/full\_body\_model.py} and
+\texttt{full\_body\_ik.py}) used by the shared ground-support pipeline. It is
+not a Simscape change. It is kept here beside the OSV-10 record because the
+turn audit of issue \#12042 (epic \#11726) compares every engine on the same
+capture-A markers.
+
+\subsection{Symptom}
+The capture-A turn audit found that Drake IK barely twisted the thorax: the
+coordinate labelled \texttt{TorsoInput} moved only $-12.4$ deg from address
+to the top of the backswing (MuJoCo IK: $-65.2$ deg). The shoulder line
+reached 64.1 deg against 103.0 deg in the markers, the upper-trunk line 29.6
+deg against 92.2 deg, and the labelled \texttt{SpineInputX} and both
+\texttt{ScapInputX} coordinates sat on their bounds.
+
+\subsection{Model Topology, Frames and the Root Cause}
+The spec \texttt{coordinate\_order} lists the 44 scalar coordinates as
+root translation, pelvis gimbal, \texttt{SpineInputX}, \texttt{SpineInputY},
+\texttt{TorsoInput}, left arm, right arm, neck and legs. Drake parses the
+exported URDF and numbers positions in its own tree order. For the branched
+full-body tree the two orders differ: the plant slot of each spec coordinate is
+\[
+(0,1,2,3,4,5,\;7,8,6,\;17,18,12,\dots,16,19,20,\;26,27,21,\dots,25,28,29,\;9,10,11,\;30,\dots,43).
+\]
+The model's mapping-valued methods already permuted through
+\texttt{position\_start()}, but \texttt{DrakeFullBodyIK.\_set} and the array
+paths of \texttt{marker\_positions} and \texttt{affine\_dynamics} wrote a
+spec-ordered vector straight into the plant. The IK therefore solved in plant
+order, while the shared solver applied the document bounds, spin priors and
+locks by spec index and stored the result under spec names. The true torso
+twist (plant slot 6) received the \texttt{SpineInputX} bound of $\pm35$ deg,
+and it was pinned at $-35.0$ deg at the top. The wrist and neck coordinates
+received the scapula bounds. The joint axes, units and frames were correct:
+with the stored trajectory reordered into spec order, the shared spec FK
+reproduces the Drake markers (upper-body RMS 53.8 mm instead of 406.7 mm), and
+a pure \texttt{TorsoInput} twist moves every body marker identically in Drake,
+MuJoCo and the shared spec FK after the fix (error below $10^{-9}$ m).
+
+The computed-torque replay used the scrambled IK trajectory as its reference,
+so the previous Drake forward-dynamics result (382 mm) was also invalid.
+
+\subsection{Method of the Fix}
+\texttt{FullBodyDrakeModel} exposes \texttt{plant\_position\_indices},
+\texttt{to\_plant\_positions}, \texttt{to\_plant\_velocities},
+\texttt{from\_plant\_positions} and \texttt{named\_columns}. Every array-valued
+API of the adapter takes and returns spec-ordered coordinates. The IK permutes
+on \texttt{SetPositions} and maps every translational, angular and
+centre-of-mass Jacobian back to spec columns through two helpers.
+\texttt{\_coerce\_state} is spec-ordered for both mappings and arrays, which
+also fixes \texttt{step} with mapping input. No bound, weight, prior,
+tolerance or the shared spec's joint ranges changed. Neither proposed
+remedy in the issue (a MuJoCo warm start or a twist prior) was used: the
+under-twist was not a local minimum, and with the order fixed Drake reaches
+MuJoCo's solution on its own.
+
+\subsection{Results on Capture-A}
+Regenerated with the pipeline runner on the ud-sim image. Turn is the
+horizontal-plane line turn from address (+ = backswing), using the issue's
+line definitions; Drake and MuJoCo lines use the shared spec FK with each
+receipt's calibrated attachments.
+
+\begin{center}
+\small
+\begin{tabular}{lrrrrr}
+\toprule
+Source & IK RMS & Shoulder & Upper Trunk & Pelvis & X-Factor (Sh) \\
+ & (mm) & Top / Impact & Top / Impact & Top / Impact & Top / Impact \\
+\midrule
+Markers & -- & 103.0 / $-9.0$ & 92.2 / $-19.2$ & 40.9 / $-49.8$ & 62.2 / 40.8 \\
+MuJoCo IK & 32.8 & 112.9 / $-4.2$ & 109.7 / $-11.7$ & 46.3 / $-38.6$ & 66.6 / 34.5 \\
+Drake IK before (as labelled) & 47.2 & 64.1 / $-68.8$ & 29.6 / $-59.7$ & 43.5 / $-47.0$ & 20.6 / $-21.8$ \\
+Drake IK before (reordered) & 47.2 & 131.7 / $-11.2$ & 80.4 / $-9.3$ & 43.5 / $-47.0$ & 88.2 / 35.8 \\
+Drake IK after & 34.6 & 118.8 / $-4.9$ & 111.7 / $-13.3$ & 46.0 / $-44.0$ & 72.8 / 39.1 \\
+MuJoCo FD & 82.5 & 113.4 / 2.0 & 110.1 / $-5.4$ & 46.9 / $-28.7$ & 66.5 / 30.8 \\
+Drake FD before & 382.0 & 67.3 / $-1.6$ & 35.9 / 10.3 & 44.6 / 22.7 & 22.7 / $-24.3$ \\
+Drake FD after & 60.1 & 119.2 / $-0.9$ & 111.8 / $-6.7$ & 47.3 / $-31.4$ & 71.9 / 30.5 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\texttt{TorsoInput} from address to the top is $-68.9$ deg after the fix
+(absolute $-44.8$ deg), against $-65.2$ deg in MuJoCo IK. The address fit with
+static seeds improved from 6.6 to 3.6 mm and the closure residual from 7.8 to
+3.8 mm. The IK segment RMS now matches MuJoCo within 5 mm on every segment (club 37.5 against 32.5 mm, right arm 37.7 against 34.6 mm, the rest within 2 mm).
+There are no IK range-of-motion flags. The same command on \texttt{main}
+(2631615099) reached 66.5 mm IK RMS and then failed in dynamics with a
+singular KKT matrix.
+
+\subsection{Limitations}
+The Drake solution now inherits MuJoCo's shared over-twist at the top (shoulder
+line $+15.8$ deg, upper trunk $+19.5$ deg against the markers). That is
+finding 5 of issue \#12042 (scapula/thorax split, slice 7), not a Drake
+defect. The receipt stays \texttt{REJECTED}: whole-run dynamics RMS 60.1 mm
+against a 60 mm gate, and the weight fraction outside $[0.2, 3.0]$. The shared
+spec FK places the clubhead triad (on the club frame \texttt{Clubhead})
+0.9--1.1 m away from both Drake and MuJoCo, which agree exactly, so the turn audit must not use it
+for club markers; that discrepancy is recorded as a follow-up.
+
+\subsection{Reproduction}
+\begin{verbatim}
+python3 -m pytest tests/unit/motion_matching/test_drake_coordinate_order.py
+python3 -m src.shared.python.motion_matching.pipeline.cli \
+  --spec docs/development/full_body_models/full_body_spec_anthro_driver.json \
+  --static-seeds --engine drake --capture driver \
+  --out docs/development/full_body_models/evidence/ground_support/anthro_driver_drake
+python3 -m src.shared.python.motion_matching ledger --write
+\end{verbatim}
+The capture-A run takes about 7 minutes on 5 cores and reads the private
+capture through \texttt{CAPTURE\_DATA\_DIR}.
+
 \begin{thebibliography}{9}
 \bibitem{MathWorksPSUnits}
 MathWorks. \emph{Simulink-PS Converter: Unit Conversion and Checking}.
