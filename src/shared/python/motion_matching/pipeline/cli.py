@@ -8,7 +8,7 @@ import json
 import logging
 from pathlib import Path
 import time
-from typing import Any, Literal
+from typing import Any, Literal, NamedTuple
 
 import numpy as np
 
@@ -85,6 +85,11 @@ from src.shared.python.motion_matching.pipeline.finish_feasibility import (
 )
 from src.shared.python.motion_matching.pipeline.gaze_residual import (
     head_gaze_receipt,
+)
+from src.shared.python.motion_matching.pipeline.gaze_tracking import (
+    NECK_REFERENCES,
+    apply_fd_neck,
+    fd_head_gaze_report,
 )
 from src.shared.python.motion_matching.pipeline.lane import (
     Lane,
@@ -192,6 +197,16 @@ def build_parser() -> argparse.ArgumentParser:
             "soft head-gaze residual weight (eyes on the ball until impact + "
             "0.03 s, then a 0.35 s release to the target line); 0 keeps the "
             "marker-faithful head (default)"
+        ),
+    )
+    parser.add_argument(
+        "--fd-neck",
+        choices=list(NECK_REFERENCES),
+        default="ik",
+        help=(
+            "neck reference for the forward-dynamics replay (OSV-3 #11729): "
+            "ik keeps the marker-driven neck (default); gaze tracks the gaze "
+            "schedule (modelled, not measured)"
         ),
     )
     parser.add_argument(
@@ -971,29 +986,59 @@ def _maybe_shooting_fit(
     return q_track, zmp, shooting_report
 
 
+@dataclass(frozen=True)
+class _FinalizeInputs:
+    """Artifacts, kinematic solutions and replay states to finalize the receipt."""
+
+    ik_report: dict[str, Any]
+    cal_res: _CalibrateAndScaleResult
+    weld_report: dict[str, Any]
+    q_ref: np.ndarray
+    q_track: np.ndarray | None = None
+    sim_q: np.ndarray | None = None
+    neck_solve: Any = None
+    fd_neck: str = "ik"
+
+
 def _finalize_receipt(
     ctx: PipelineContext,
     receipt: dict[str, Any],
     context: tuple[Lane, Any, Any, logging.Logger],
-    *,
-    ik_report: dict[str, Any],
-    cal_res: _CalibrateAndScaleResult,
-    weld_report: dict[str, Any],
-    q_ref: np.ndarray,
+    inputs: _FinalizeInputs,
 ) -> None:
     """Attach engine/gaze/weld metadata, run the optimiser stage and persist
     the receipt."""
     lane, kin, sim, log = context
     receipt["engine"] = ctx.engine
-    receipt["head_gaze"] = head_gaze_receipt(lane, kin, q_ref)
-    receipt["tracking_weld_projection"] = weld_report
-    _attach_turn_block(receipt, ctx, lane, kin, q_ref, cal_res, ik_report)
+    receipt["head_gaze"] = head_gaze_receipt(lane, kin, inputs.q_ref)
+    if (
+        "dynamics" in receipt
+        and inputs.q_track is not None
+        and inputs.sim_q is not None
+    ):
+        receipt["dynamics"]["head_gaze"] = fd_head_gaze_report(
+            lane,
+            kin,
+            inputs.q_ref,
+            inputs.q_track,
+            inputs.sim_q,
+            inputs.neck_solve,
+            inputs.fd_neck,
+        )
+    receipt["tracking_weld_projection"] = inputs.weld_report
+    _attach_turn_block(
+        receipt, ctx, lane, kin, inputs.q_ref, inputs.cal_res, inputs.ik_report
+    )
     _apply_trajectory_optimiser(
         ctx.args, ctx.out_dir, receipt, lane=lane, kin=kin, sim=sim
     )
     _write_receipt(ctx.out_dir, receipt)
     log_pipeline_summary(
-        log, receipt, ik_report, cal_res.calibration, cal_res.calibration2
+        log,
+        receipt,
+        inputs.ik_report,
+        inputs.cal_res.calibration,
+        inputs.cal_res.calibration2,
     )
 
 
@@ -1019,6 +1064,9 @@ def _simulate_and_receipt(
     q_track, zmp, zmp_filter_report, centroidal_report = _feasibility_filters(
         args, (lane, kin, sim, log), q_track, zmp
     )
+    # After the filters, which re-pose the body; the ZMP keeps the IK neck.
+    fd_neck = getattr(args, "fd_neck", "ik")
+    q_track, neck_solve = apply_fd_neck(fd_neck, lane, kin, q_ref, q_track)
     q_track, zmp, shooting_report = _maybe_shooting_fit(
         args, (lane, kin, sim, log), q_track, q_ref, zmp, tracking
     )
@@ -1082,10 +1130,16 @@ def _simulate_and_receipt(
         ctx,
         receipt,
         (lane, kin, sim, log),
-        ik_report=ik_report,
-        cal_res=cal_res,
-        weld_report=weld_report,
-        q_ref=q_ref,
+        _FinalizeInputs(
+            ik_report=ik_report,
+            cal_res=cal_res,
+            weld_report=weld_report,
+            q_ref=q_ref,
+            q_track=q_track,
+            sim_q=sim_q,
+            neck_solve=neck_solve,
+            fd_neck=fd_neck,
+        ),
     )
     return receipt
 
