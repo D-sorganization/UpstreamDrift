@@ -1,0 +1,14 @@
+{
+  "from_ref": "10c7d61aa686e456b7962f1d9aa9ecfda4e8405f",
+  "to_ref": "0fb22bdc9c2c42c9c691314fcd122a2db504fd2d",
+  "checks": {
+    "lint_format": {
+      "passed": true,
+      "detail": "PASS"
+    },
+    "mypy": {
+      "passed": true,
+      "detail": "PASS"
+    }
+  }
+}
