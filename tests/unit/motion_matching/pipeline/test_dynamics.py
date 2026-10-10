@@ -153,6 +153,10 @@ def test_build_dynamics_report_structure() -> None:
     assert "address" in report["weight_fraction"]["by_phase"]
     assert report["lowest_sphere_height_min_m"] == 0.0
     assert report["lowest_sphere_height_max_m"] == 0.0
+    # Stand-in kinematics give no clubhead: the phase split is unavailable,
+    # never zero, and the whole-swing value is unchanged.
+    assert report["fd_phase"]["status"] == "unavailable"
+    assert report["fd_phase"]["fd_rms_after_impact_m"] is None
     assert errors.shape == (720, 2)
 
 
