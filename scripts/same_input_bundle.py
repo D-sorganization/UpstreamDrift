@@ -27,6 +27,7 @@ from pathlib import Path
 
 import numpy as np
 
+from src.shared.python.motion_matching.impact_force import ImpactForce
 from src.shared.python.motion_matching.same_input import (
     ALL_ENGINES,
     InputBundle,
@@ -55,16 +56,33 @@ def _track(run_dir: Path) -> tuple[Path, np.ndarray, np.ndarray]:
         return record_path, record["track_time_s"], record["q_track"]
 
 
+def _impact_plan(
+    receipt: dict, times: np.ndarray
+) -> tuple[ImpactForce | None, float | None]:
+    """The run's ball impact plan and reference impact time (GCV-20), on the
+    bundle clock; the plan is re-armed so the bundle run finds its own contact."""
+    record = receipt.get("dynamics", {}).get("ball_impact")
+    split = receipt.get("ik", {}).get("impact_split", {}).get("impact_time_s")
+    offset = -float(times[0])
+    plan = None
+    if record is not None:
+        plan = ImpactForce.from_record(record).rearmed().shifted(offset)
+    return plan, None if split is None else float(split) + offset
+
+
 def export(run_dir: Path, out: Path, duration_s: float | None) -> dict:
     """Build the MuJoCo reference bundle of a pipeline run directory."""
     spec_path = run_dir / "full_body_spec_hipcal_scaled.json"
     record_path, times, q_track = _track(run_dir)
     receipt = json.loads((run_dir / "receipt.json").read_text(encoding="utf-8"))
+    impact, split = _impact_plan(receipt, times)
     bundle = generate_reference_bundle(
         spec_path.read_bytes(),
         times,
         q_track,
         duration_s=duration_s,
+        impact=impact,
+        split_time_s=split,
         provenance={
             "run_dir": run_dir.name,
             "capture": receipt.get("capture"),
@@ -91,6 +109,7 @@ def replay(bundle_path: Path, engine: str, segment_ms: float) -> dict:
         bundle.efforts,
         dt_s=bundle.dt_s,
         policy=StepPolicy(stop_on_failure=True),
+        impact=bundle.ball_impact(),
     )
     elapsed = time.perf_counter() - started
     score = score_replay(plant, bundle, rollout)
@@ -123,6 +142,7 @@ def closed_loop_receipt(run_dir: Path, bundle_path: Path, engine: str) -> dict:
     """Score a closed-loop run in ``engine`` against the bundle reference."""
     bundle = InputBundle.load(bundle_path)
     _, times, q_track = _track(run_dir)
+    impact = bundle.ball_impact()
     started = time.perf_counter()
     rollout = closed_loop(
         engine,
@@ -130,6 +150,8 @@ def closed_loop_receipt(run_dir: Path, bundle_path: Path, engine: str) -> dict:
         times,
         q_track,
         duration_s=bundle.steps * bundle.dt_s,
+        impact=None if impact is None else impact.rearmed(),
+        split_time_s=bundle.provenance.get("impact_split_time_s"),
     )
     elapsed = time.perf_counter() - started
     plant = VectorPlant(engine, bundle.spec_bytes)
