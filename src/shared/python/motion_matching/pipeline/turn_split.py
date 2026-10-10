@@ -158,7 +158,7 @@ def shoulder_girdle_weights(
     return {label: w for label in SHOULDER_GIRDLE_MARKERS if label in labels}
 
 
-def lane_axis_targets(lane: Any) -> list[dict[str, Any]] | None:
+def lane_axis_targets(lane: Any) -> list[dict[str, Any] | None] | None:
     """Union of a lane's face and thorax axis targets for the re-solves.
 
     Lanes without the attributes (or with non-list stand-ins) contribute
@@ -168,7 +168,7 @@ def lane_axis_targets(lane: Any) -> list[dict[str, Any]] | None:
         merge_axis_targets,
     )
 
-    lists = []
+    lists: list[Any] = []
     for name in ("face_targets", "thorax_targets"):
         value = getattr(lane, name, None)
         if isinstance(value, (list, tuple)):

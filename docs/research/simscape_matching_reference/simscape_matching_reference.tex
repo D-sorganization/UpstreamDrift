@@ -5521,7 +5521,7 @@ The trajectory IK solves frame by frame, warm-starting each frame from the previ
 \end{enumerate}
 The whole-swing FD RMS therefore has a sensitivity floor of roughly $\pm7$ to $\pm14$~mm, set by the IK branch chosen in the follow-through, not by the turn split or the controller gains. A $2$~mm FD criterion cannot be resolved against that floor.
 
-\paragraph{Impact-windowed split (experiment (a)).} Impact is detected from the capture's club markers: the median of the per-marker \texttt{gaze.impact\_index} votes over markers with at least half their frames valid. The detected times are $1.319$~s (A) and $1.337$~s (B). The windowed terms hold until impact and then fall to zero over a $50$~ms half-cosine. Turn values are model minus markers at top/impact in degrees, from $q_{\mathrm{ref}}$; ``FT'' is the FD RMS after $1.35$~s.
+\paragraph{Impact-Windowed Split (Experiment (A)).} Impact is detected from the capture's club markers: the median of the per-marker \texttt{gaze.impact\_index} votes over markers with at least half their frames valid. The detected times are $1.319$~s (A) and $1.337$~s (B). The windowed terms hold until impact and then fall to zero over a $50$~ms half-cosine. Turn values are model minus markers at top/impact in degrees, from $q_{\mathrm{ref}}$; ``FT'' is the FD RMS after $1.35$~s.
 \begin{center}
 \small
 \begin{tabular}{lllllll}
@@ -5543,9 +5543,9 @@ B & $0.01/1$ (null) & 31.96 & 60.87 & 104.4 & $+11.8/+6.4$ & $+10.8/+1.4$ \\
 \end{center}
 Every split setting meets the turn bounds on both captures, but none keeps FD within $2$~mm of baseline on both. The null row shows that FD differences of this size occur without any meaningful change to the turn.
 
-\paragraph{Tracking gains (experiment (b)) not run.} The pipeline's gains are two global constants (\texttt{OMEGA\_RAD\_S}$=30$~rad/s and \texttt{BALANCE}$=(60,15)$) used by every receipt. There is no per-phase or per-term gain to adjust. The diagnosis places the regression in the reference branch, not in the controller: joint tracking stays tight and no torque saturates. A gain change could not be judged against a criterion below the $\pm7$--$14$~mm floor, so none was made.
+\paragraph{Tracking Gains (Experiment (B)) Not Run.} The pipeline's gains are two global constants (\texttt{OMEGA\_RAD\_S}$=30$~rad/s and \texttt{BALANCE}$=(60,15)$) used by every receipt. There is no per-phase or per-term gain to adjust. The diagnosis places the regression in the reference branch, not in the controller: joint tracking stays tight and no torque saturates. A gain change could not be judged against a criterion below the $\pm7$--$14$~mm floor, so none was made.
 
-\paragraph{Decision and next step.} The split stays opt-in and off by default; the canonical receipts and the ledger are unchanged. Before any change that alters the reference can be accepted or rejected on whole-swing FD, the follow-through IK needs a unique solution, or FD needs a branch-robust metric. Candidates are a stronger prior or anatomical regularisation on the weakly observed toe and shoulder or forearm axial coordinates, or reporting FD over address to impact (where the reference is stable to $\le2^\circ$) separately from the follow-through. That work is a separate change. Reproduction (experiment branch):
+\paragraph{Decision and Next Step.} The split stays opt-in and off by default; the canonical receipts and the ledger are unchanged. Before any change that alters the reference can be accepted or rejected on whole-swing FD, the follow-through IK needs a unique solution, or FD needs a branch-robust metric. Candidates are a stronger prior or anatomical regularisation on the weakly observed toe and shoulder or forearm axial coordinates, or reporting FD over address to impact (where the reference is stable to $\le2^\circ$) separately from the follow-through. That work is a separate change. Reproduction (experiment branch):
 \begin{verbatim}
 git checkout f81c1647b2
 python3 -m src.shared.python.motion_matching.pipeline.cli \
