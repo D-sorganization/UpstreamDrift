@@ -6,6 +6,8 @@ The goal is active and incomplete. MAIN is `/home/dieterolson/.codex/worktrees/s
 
 ## Reporting Regeneration Checkpoint
 
+The core child-publication contract and review gate are checkpointed in presentation commit `0654993415`. Root independently verified Astra’s five source hashes and passed 55 contract/report tests (exit 0). Evidence: `validation/child_publication_contract_candidate_v1/`. This qualifies the local contract checkpoint only: no CLI or actual child rendering is accepted. Astra is now implementing the narrow saved-pair adapter and staged create/finalize CLI; Gemini still owns the renderer/caption repair. MAIN reporting sources remain unchanged.
+
 Root reviewed the initial child-publication code and withheld acceptance because final receipts could precede independent visual review. Astra is adding candidate/final separation and a hash-bound review gate, plus complete new-helper source binding. See [Contract Review](validation/child_publication_contract_root_review_v1/REVIEW.md). This is ongoing work in the presentation branch; no child publication has been accepted or generated.
 
 The density-gutter candidate is saved in presentation worktree commit `093ae7ae6c`: a single spacing change (`hspace` 0.24 → 0.36), with three meaningful clearance failures followed by three passes. Root independently passed 12 regression/layout tests and scoped lint/format. Gemini's initial process exited 143 before final checks; its evidence is preserved in `validation/density_gutter_candidate_v1/`. Actual candidate visual review remains pending and MAIN has not integrated the producer change.

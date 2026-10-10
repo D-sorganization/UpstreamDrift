@@ -1,0 +1,150 @@
+.........................F.............F....                             [100%]
+=================================== FAILURES ===================================
+_____ test_supplement_loader_return_cannot_rebind_old_data_to_new_receipt ______
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2196/test_supplement_loader_return_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x76cf8e531460>
+
+    def test_supplement_loader_return_cannot_rebind_old_data_to_new_receipt(
+        tmp_path, monkeypatch
+    ):
+        from src.tools.shot_pattern_analysis import matched_supplement_pipeline
+    
+        receipt = tmp_path / "REPORT_SUPPLEMENT_PIPELINE.json"
+        receipt.write_bytes(b"first qualified receipt")
+    
+        def replaced_at_return(_directory):
+            receipt.write_bytes(b"second qualified receipt")
+            return {"report": "old qualified values"}
+    
+        monkeypatch.setattr(
+            matched_supplement_pipeline,
+            "load_verified_supplement_artifacts",
+            replaced_at_return,
+        )
+        with pytest.raises(RuntimeError, match="changed during supplement loading"):
+>           build_final_report.load_supplement_at_stable_receipt(tmp_path)
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_shot_pattern_final_report.py:567: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/scripts/research/shot_pattern_analysis/build_final_report.py:973: in load_supplement_at_stable_receipt
+    supplement = load_verified_supplement_publication(directory)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+directory = PosixPath('/tmp/pytest-of-dieterolson/pytest-2196/test_supplement_loader_return_0')
+
+    def load_verified_supplement_publication(directory: Path) -> dict:
+        """Dispatch only explicit receipt types; never recover from a failed parent."""
+        directory = Path(directory).resolve()
+        revision = directory / REVISION_RECEIPT
+        parent = directory / PARENT_RECEIPT
+        if revision.is_file():
+            if parent.exists():
+                raise ValueError("ambiguous parent and child publication")
+            from .supplement_parent_verifier import verify_parent_in_frozen_source
+    
+            binding = json.loads(revision.read_text()).get("parent_verifier")
+            if not isinstance(binding, dict):
+                raise ValueError("child has no pinned parent verifier")
+            return verify_density_revision(
+                directory,
+                parent_verifier=lambda path: verify_parent_in_frozen_source(
+                    path, binding, base=directory
+                ),
+            )
+        from src.tools.shot_pattern_analysis.matched_supplement_pipeline import (
+            load_verified_supplement_artifacts,
+        )
+    
+        before = sha256(safe_file(directory, PARENT_RECEIPT))
+        loaded = load_verified_supplement_artifacts(directory)
+        if sha256(parent) != before:
+>           raise ValueError("parent receipt changed during loading")
+E           ValueError: parent receipt changed during loading
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/scripts/research/shot_pattern_analysis/supplement_publication.py:321: ValueError
+___________ test_f6_draft_conclusions_provenance_truthful_v5_pending ___________
+
+    def test_f6_draft_conclusions_provenance_truthful_v5_pending():
+        repo_root = Path(__file__).resolve().parents[2]
+        path = (
+            repo_root
+            / "docs/research/shot_pattern_analysis/phase2/review_followups/PHASE_TWO_CONCLUSIONS_DRAFT.md"
+        )
+>       content = path.read_text(encoding="utf-8")
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_shot_pattern_final_report.py:1099: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/dieterolson/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pathlib.py:1027: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/review_followups/PHASE_TWO_CONCLUSIONS_DRAFT.md')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/review_followups/PHASE_TWO_CONCLUSIONS_DRAFT.md'
+
+/home/dieterolson/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pathlib.py:1013: FileNotFoundError
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 20 durations =============================
+2.42s call     tests/research/test_supplement_publication_revision.py::test_ordinary_dispatch_retains_public_parent_verifier
+0.38s setup    tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_rejects_drift[omitted_source]
+0.32s call     tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_origin_and_runtime
+0.29s setup    tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_rejects_drift[source]
+0.26s call     tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_rejects_drift[runtime]
+0.24s setup    tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_rejects_drift[runtime]
+0.23s call     tests/research/test_shot_pattern_final_report.py::test_final_builder_requires_full_324_and_72_cell_protocols
+0.21s setup    tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_origin_and_runtime
+0.19s setup    tests/research/test_supplement_publication_revision.py::test_child_preserves_parent_and_reuses_exact_bytes
+0.17s call     tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_rejects_drift[omitted_source]
+0.13s setup    tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_rejects_drift[commit]
+0.12s call     tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_rejects_drift[commit]
+0.12s call     tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_rejects_drift[source]
+0.11s call     tests/research/test_supplement_publication_revision.py::test_tampering_rejected[identity]
+0.07s call     tests/research/test_supplement_publication_revision.py::test_tampering_rejected[duplicate]
+0.07s call     tests/research/test_supplement_publication_revision.py::test_child_preserves_parent_and_reuses_exact_bytes
+0.06s call     tests/research/test_supplement_publication_revision.py::test_tampering_rejected[reused]
+0.06s call     tests/research/test_supplement_publication_revision.py::test_tampering_rejected[extra]
+0.05s call     tests/research/test_supplement_publication_revision.py::test_tampering_rejected[source]
+0.05s call     tests/research/test_supplement_publication_revision.py::test_tampering_rejected[numeric]
+=========================== short test summary info ============================
+FAILED tests/research/test_shot_pattern_final_report.py::test_supplement_loader_return_cannot_rebind_old_data_to_new_receipt
+FAILED tests/research/test_shot_pattern_final_report.py::test_f6_draft_conclusions_provenance_truthful_v5_pending
