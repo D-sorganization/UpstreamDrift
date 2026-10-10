@@ -1,0 +1,14 @@
+{
+  "session_id": 34618,
+  "exit_code": 0,
+  "file_sha256": {
+    "prompt.txt": "f28f8bb80fe94eae1357fb1f317dd9162b1dc6cd4adfa63b496115663fd4d944",
+    "result.txt": "68aed9a929eaba6ab4b2fe47e94b0c97d616eeec20e898b799b06d0363f39770",
+    "test_vector_inspection.py": "f3da47257f2f9b332d138538756d85c0164e6d6ea82b3e792ba37c76e40245b9",
+    "vector_inspection.py": "b17db46320f1f2b86cfadf61033be1c9752a4284d1cb3e159b87ff513e0f4cfc",
+    "README.md": "9e9c21137f28428c9d02e50f0c7e773aa42c99449b147a4ac9e9cfb45275daf7"
+  },
+  "archive_sha256": "6a3c92e9307f4edb9f291e1e5ce98dc05d3b272c3ea0434e4bccd81a00e5e4a5",
+  "status": "unaccepted; independent synthetic probes identify defects",
+  "raw_test_logs": "No separate red/green/static logs delivered; result.txt and README contain candidate claims. Independent qualification required."
+}

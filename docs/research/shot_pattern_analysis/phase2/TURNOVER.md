@@ -88,7 +88,7 @@ Protocol guard #12169 is independently qualified and committed in isolated BOUND
 
 ## Vector Inspection Helper in Progress
 
-Operational PDF/SVG inspection is being prepared by AGY Gemini 3.8 in `/tmp/p2-vector-review-agy/` only (session `34618`, PID `414060`; verify start ticks in `validation/vector_inspection_candidate_v1/start.json`). The repository, producer and live graphics are read-only to that worker. It is an unaccepted candidate; Astra is reviewing provisionally without edits. Tests must qualify hashes, parsing and resource diagnostics; these do not establish layout, scientific content or visual approval. Keep source/terminal gates in the existing qualified batch coordinator and preserve the distinction between automatic checks and visual review.
+AGY Gemini session `34618` is terminal with exit 0. Its unaccepted operational PDF/SVG checker is preserved in `validation/vector_inspection_candidate_v1/`, including exact candidate bytes and provisional probes. Astra found concrete namespace, resource-reference, stylesheet, duplicate-ID, text-extraction and late-PDF-warning gaps. Separate worker red/green logs were not delivered, so initial TDD chronology is unverified. Astra now owns only `/tmp/p2-vector-review-agy/vector_inspection.py` and its test file for independent failing-first correction and completed original PDF/SVG sample qualification. No repository source, frozen producer or live graphic edits. These diagnostics remain distinct from scientific content, layout and visual acceptance; retain existing terminal/source gates.
 
 ## Completed Numerical Data
 
