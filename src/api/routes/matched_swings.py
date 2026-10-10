@@ -16,7 +16,7 @@ Routes
 from __future__ import annotations
 
 from functools import lru_cache
-from typing import Any, NoReturn
+from typing import Any, Literal, NoReturn
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import FileResponse
@@ -78,6 +78,9 @@ async def list_matched_swings(
     drive_mode: str | None = Query(
         default=None, description="Filter by drive mode (e.g. torque_driven)"
     ),
+    profile: Literal["dynamic", "kinematic"] | None = Query(
+        default=None, description="Filter by candidate profile (dynamic or kinematic)"
+    ),
     ranked: bool = Query(
         default=False, description="When true, rank candidates in ascending RMSE order"
     ),
@@ -85,7 +88,9 @@ async def list_matched_swings(
     service: MatchedSwingsService = Depends(get_matched_swings_service),
 ) -> dict[str, Any]:
     """Return the matched-swing ledger as public run summaries."""
-    runs = service.list_runs(capture=capture, drive_mode=drive_mode, ranked=ranked)
+    runs = service.list_runs(
+        capture=capture, drive_mode=drive_mode, profile=profile, ranked=ranked
+    )
     return {
         "schema_version": "matched-swing-api/1",
         "total": len(runs),

@@ -3,13 +3,14 @@
 Part of the OpenSim musculoskeletal swing work (issue #11617, epic #11605).
 
 The golf humanoid used by the tour-matching pipeline is the Rajagopal-Lai-Uhlrich
-full-body skeleton with the muscles stripped and a welded club added: the 39
+full-body skeleton with the muscles stripped and a two-hand club added: the 39
 coordinate names are identical.  This module therefore builds the musculoskeletal
 swing model by *re-using the original muscle-bearing model* and fitting it to the
 golfer:
 
 1. per-body scale factors are derived from the golf humanoid joint-frame offsets,
-2. the golf body masses and the welded club are copied across,
+2. the golf body masses are copied across and the shared club is attached in
+   both hands, its grip calibrated to the same captured address (OSV-9),
 3. the wrist and subtalar coordinates are unlocked (the swing drives them),
 4. the generic upper-body torque actuators are replaced by named stand-ins and
    reserve actuators are added to every coordinate no muscle can actuate.
@@ -34,6 +35,7 @@ from typing import Any
 import numpy as np
 from scipy.signal import butter, filtfilt
 
+from src.engines.physics_engines.opensim.python.msk_club import FREE_COORDINATES
 from src.shared.python.contracts import ensure, require
 
 logger = logging.getLogger(__name__)
@@ -84,6 +86,9 @@ UNLOCKED_COORDINATES: tuple[str, ...] = (
 )
 # Dependent coordinates solved by constraint; they are never reserve-actuated.
 DEPENDENT_COORDINATES: tuple[str, ...] = ("knee_angle_r_beta", "knee_angle_l_beta")
+# Free-club coordinates of the bushing grip: the hands move the club through
+# the bushings, never an actuator.
+PASSIVE_CLUB_COORDINATES: tuple[str, ...] = FREE_COORDINATES
 
 # Optimal force of the non-muscle actuators.  Muscle-free joints (upper body, pelvis
 # root residuals) get a physical scale so their controls are O(1) and the
@@ -92,13 +97,6 @@ DEPENDENT_COORDINATES: tuple[str, ...] = ("knee_angle_r_beta", "knee_angle_l_bet
 UPPER_OPTIMAL_FORCE = 100.0
 ROOT_OPTIMAL_FORCE = 100.0
 RESERVE_OPTIMAL_FORCE = 1.0
-
-# Welded club copied from the golf humanoid (hand_r_to_club joint, Club body).
-CLUB_MASS_KG = 0.32
-CLUB_COM_M = (0.0, -0.786, 0.0)
-CLUB_INERTIA = (0.1158, 0.0001, 0.1158)
-CLUB_GRIP_OFFSET_IN_HAND_M = (0.0, -0.06, 0.0)
-CLUB_HEAD_IN_CLUB_M = (0.0, -1.042, 0.0)
 
 # Muscle-name prefix -> functional group (Rajagopal naming).
 _MUSCLE_GROUP_PREFIXES: tuple[tuple[str, str], ...] = (
@@ -388,25 +386,42 @@ def _copy_masses(model: Any, golf: Any) -> None:
         mine.set_inertia(osim.Vec6(*[float(x * ratio) for x in inertia]))
 
 
-def _add_club(model: Any) -> None:
+def _with_golf_club(model: Any, golf_path: Path, club: str) -> tuple[Any, dict]:
+    """Return ``model`` reloaded holding the shared club in both hands.
+
+    The muscle model's segments differ from the golf humanoid's, so its grip
+    is calibrated to the same captured address (``msk_club_calibration``)
+    rather than copied: the same shared club, grip model (weld or bushing,
+    as the golf humanoid holds it) and address club pose, with hand frames
+    exact for this model. Returns ``(model, calibration report)``.
+    """
+    import tempfile
+
+    from defusedxml import ElementTree as SafeET
+
+    from src.engines.physics_engines.opensim.python import msk_club
+    from src.engines.physics_engines.opensim.python import (
+        msk_club_calibration as calibration,
+    )
+
     osim = _require_opensim()
-    club = osim.Body(
-        "Club",
-        CLUB_MASS_KG,
-        osim.Vec3(*CLUB_COM_M),
-        osim.Inertia(*CLUB_INERTIA),
-    )
-    model.addBody(club)
-    weld = osim.WeldJoint(
-        "hand_r_to_club",
-        model.getBodySet().get("hand_r"),
-        osim.Vec3(*CLUB_GRIP_OFFSET_IN_HAND_M),
-        osim.Vec3(0.0),
-        club,
-        osim.Vec3(0.0),
-        osim.Vec3(0.0),
-    )
-    model.addJoint(weld)
+    golf = SafeET.parse(str(golf_path)).getroot().find("Model")
+    require(golf is not None, "golf model has no <Model>")
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / "golf_musculoskeletal.osim"
+        model.printToXML(str(path))
+        fit = calibration.calibrate(path, club)
+        tree = SafeET.parse(str(path))
+        target = tree.getroot().find("Model")
+        require(target is not None, "printed model has no <Model>")
+        msk_club.attach_club(
+            target,
+            msk_club.load_msk_club(club),
+            fit,
+            grip_model=msk_club.grip_model_of(golf),
+        )
+        tree.write(path, encoding="utf-8", xml_declaration=True)
+        return osim.Model(str(path)), dict(fit.report)
 
 
 def _replace_actuators(
@@ -428,7 +443,7 @@ def _replace_actuators(
     root = set(ROOT_COORDINATES)
     for coord in model.getCoordinateSet():
         name = coord.getName()
-        if name in DEPENDENT_COORDINATES:
+        if name in DEPENDENT_COORDINATES or name in PASSIVE_CLUB_COORDINATES:
             continue
         if coord.get_locked():
             continue
@@ -456,6 +471,7 @@ def build_musculoskeletal_model(
     base_model_path: str | Path | None = None,
     *,
     reserve_optimal_force: float = RESERVE_OPTIMAL_FORCE,
+    club: str = "driver",
 ) -> tuple[Any, dict[str, Any]]:
     """Fit the Rajagopal-Lai-Uhlrich muscle model to the golf humanoid.
 
@@ -481,7 +497,7 @@ def build_musculoskeletal_model(
     _copy_masses(model, golf)
     for coord_name in UNLOCKED_COORDINATES:
         model.updCoordinateSet().get(coord_name).set_locked(False)
-    _add_club(model)
+    model, grip_report = _with_golf_club(model, golf_path, club)
     kinds, optimal = _replace_actuators(model, reserve_optimal_force)
     model.setName("golf_musculoskeletal")
     model.finalizeConnections()
@@ -494,6 +510,7 @@ def build_musculoskeletal_model(
         "actuator_kinds": kinds,
         "actuator_optimal_force": optimal,
         "n_muscles": n_muscles,
+        "grip_calibration": grip_report,
         "n_coordinates": int(model.getCoordinateSet().getSize()),
         "total_mass_kg": float(sum(b.getMass() for b in model.getBodySet())),
     }
