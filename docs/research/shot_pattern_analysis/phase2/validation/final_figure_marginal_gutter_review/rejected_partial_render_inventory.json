@@ -1,0 +1,378 @@
+{
+  "status": "rejected_partial_final_render",
+  "reason": "Academic marginal tick gutter below readable4pt requirement; deliberately stopped before final manifest.",
+  "original_path": "docs/research/shot_pattern_analysis/phase2/final_figures_v1",
+  "preserved_path": "docs/research/shot_pattern_analysis/phase2/presentation_preview_rejected_final_v1",
+  "files": {
+    "details/driver_lean0_curve1_rotation1_combined2/overhead.png": {
+      "sha256": "6633c7e2a54657b6e7b9a42113a4078f93260f899e20204544da8d84d69b3900",
+      "bytes": 411374
+    },
+    "details/driver_lean0_curve1_rotation1_combined2/overhead.pdf": {
+      "sha256": "e0ad849fb11e44a8d95d985338c8ec81345ad8b9891e352d95138b72f59f240a",
+      "bytes": 104424
+    },
+    "details/driver_lean0_curve1_rotation1_combined2/density.svg": {
+      "sha256": "25dba301da24eb534dd56462d248d8b6fa744f0f0c6fb04ceb3ad78667d6f4d2",
+      "bytes": 421120
+    },
+    "details/driver_lean0_curve1_rotation1_combined2/overhead.svg": {
+      "sha256": "51ed674123f9bf59ec39ea4c8605f5c7170c3eb05083501e95a7dabcfb3eee68",
+      "bytes": 298617
+    },
+    "details/driver_lean0_curve1_rotation1_combined2/density.png": {
+      "sha256": "b8d55a0f57444ce9c280297d738ffcb0e13c0a8dd5d1d3f3b06603a5264d10ec",
+      "bytes": 666935
+    },
+    "details/driver_lean0_curve1_rotation1_combined2/density.pdf": {
+      "sha256": "fc163cf077d75cabc31ecf67f4d4e07133530d2d6a2bce63e231376ec5932ee3",
+      "bytes": 128447
+    },
+    "details/driver_lean5_curve1_rotation2_combined2/overhead.png": {
+      "sha256": "755cbe156d11e4b60ceab02b53e40a996e00d41a8ad93fdb0ca63032b10d7329",
+      "bytes": 354603
+    },
+    "details/driver_lean5_curve1_rotation2_combined2/overhead.pdf": {
+      "sha256": "5e84eb2882eaa5c9c1c5d72c8d0c0a058050baed754e21597720a4405c79725d",
+      "bytes": 85984
+    },
+    "details/driver_lean5_curve1_rotation2_combined2/density.svg": {
+      "sha256": "ce1f1e08b837c61a34f84e535c5449d794507cb70a2b2675851ae345c44201b9",
+      "bytes": 402593
+    },
+    "details/driver_lean5_curve1_rotation2_combined2/overhead.svg": {
+      "sha256": "e14fbf25e031ac0b7c03cad9e7050ff5345df2bade09ef8ab5a98d38a86338b6",
+      "bytes": 255162
+    },
+    "details/driver_lean5_curve1_rotation2_combined2/density.png": {
+      "sha256": "77b3fa4c2eef695e4f236f309e297a927192661cbd194d879be174c8b235b343",
+      "bytes": 610307
+    },
+    "details/driver_lean5_curve1_rotation2_combined2/density.pdf": {
+      "sha256": "d11fbced6fbc5b8da391319a5dae6d57eef49db18cd03bf2acc530fa93d52fcf",
+      "bytes": 123018
+    },
+    "details/driver_lean0_curve1_rotation2_combined2/overhead.png": {
+      "sha256": "2a576f3ea014796f7c9369294961d5973fe7fdbe1522e214e159ba5711aa57b8",
+      "bytes": 399117
+    },
+    "details/driver_lean0_curve1_rotation2_combined2/overhead.pdf": {
+      "sha256": "a1f8601d5bcf9b194c622a70b00a32437fee2cf9c1647340e0196cbe8d210f17",
+      "bytes": 99788
+    },
+    "details/driver_lean0_curve1_rotation2_combined2/density.svg": {
+      "sha256": "f69b7767b017d2940b81ea6da01968ee433fcf21a6963b13148490227359a9bd",
+      "bytes": 411254
+    },
+    "details/driver_lean0_curve1_rotation2_combined2/overhead.svg": {
+      "sha256": "c19849fb6cebabecda80032857a386c5e6a676843fe8ab623dbbe28158fac39a",
+      "bytes": 286128
+    },
+    "details/driver_lean0_curve1_rotation2_combined2/density.png": {
+      "sha256": "486a73e19a265e1b09136a2ac68f24d0571bc8ecba7366924944640b219089af",
+      "bytes": 635112
+    },
+    "details/driver_lean0_curve1_rotation2_combined2/density.pdf": {
+      "sha256": "f9556539f907dcdcfd30187496b7eccd852bfab7eac3bc7d5e19d7ef9af553f6",
+      "bytes": 126286
+    },
+    "details/driver_lean0_curve2_rotation1_combined2/overhead.png": {
+      "sha256": "cb957cc24ec9eca584eb34cd9c66be03cac19eb86bae88a91fc90989d4821779",
+      "bytes": 431328
+    },
+    "details/driver_lean0_curve2_rotation1_combined2/overhead.pdf": {
+      "sha256": "881c06aac08f6a700c22939c6b5b93e2eef02f96ca5cf02f7c9138fd9c095dfd",
+      "bytes": 109335
+    },
+    "details/driver_lean0_curve2_rotation1_combined2/density.svg": {
+      "sha256": "bfca657b6dc245ab1227c3639e1c36b36c56ffac25491271596798d36974145c",
+      "bytes": 417571
+    },
+    "details/driver_lean0_curve2_rotation1_combined2/overhead.svg": {
+      "sha256": "2e63199c2753153ddfaf6b7a9c8200fed4df198a0ec772b3c72752c9a28ffcbd",
+      "bytes": 308619
+    },
+    "details/driver_lean0_curve2_rotation1_combined2/density.png": {
+      "sha256": "7dacdf41b1751d74ee66385d856b316161a1a33fb470e6cf9bbf179e06c34475",
+      "bytes": 653198
+    },
+    "details/driver_lean0_curve2_rotation1_combined2/density.pdf": {
+      "sha256": "df51cc9166a2915e814f600bd6897a45f42c7f6566046b0e7ccea019e91f9106",
+      "bytes": 127451
+    },
+    "details/driver_lean0_curve2_rotation2_shaft_only/overhead.png": {
+      "sha256": "b915f8571f7e0f2579ae1345ae32d6f1dcd5570ebe9117402d5c5e112146303a",
+      "bytes": 415351
+    },
+    "details/driver_lean0_curve2_rotation2_shaft_only/overhead.pdf": {
+      "sha256": "89f0f110aa7b517ee8eddef6440a9db39a0292e7ad416ebce5d1433e6ad213ef",
+      "bytes": 105353
+    },
+    "details/driver_lean0_curve2_rotation2_shaft_only/density.svg": {
+      "sha256": "96ac38cc992e15b09c2c082c4e2cbc5a55ea46046faab2c6e28a1238e44e12c1",
+      "bytes": 329566
+    },
+    "details/driver_lean0_curve2_rotation2_shaft_only/overhead.svg": {
+      "sha256": "425367d87a11c011698c7bce8851d15ac0efb5a3467cb55401138485b85150a4",
+      "bytes": 293806
+    },
+    "details/driver_lean0_curve2_rotation2_shaft_only/density.png": {
+      "sha256": "1b5b86d426366d790f2395b30327fe1beb8885ec7ba1f15589d60e4280814738",
+      "bytes": 436945
+    },
+    "details/driver_lean0_curve2_rotation2_shaft_only/density.pdf": {
+      "sha256": "b1e7a88994cf97ed7210973b07c4c2cd5610257b9503082033e528d99e34b664",
+      "bytes": 83816
+    },
+    "details/driver_lean5_curve2_rotation1_combined2/overhead.png": {
+      "sha256": "c5e15b43bd13b47fc5637cbb895ef1922172273f45a0d7c788e54718cdb9eec1",
+      "bytes": 393366
+    },
+    "details/driver_lean5_curve2_rotation1_combined2/overhead.pdf": {
+      "sha256": "9ec37a238e0e230872e4d930c469263c21193cadac10569601dbf7ef49225712",
+      "bytes": 95471
+    },
+    "details/driver_lean5_curve2_rotation1_combined2/density.svg": {
+      "sha256": "77b85c14875744b9696309f9c46da37f1eac5f525d9688d3839dcd5cf0191b47",
+      "bytes": 415699
+    },
+    "details/driver_lean5_curve2_rotation1_combined2/overhead.svg": {
+      "sha256": "66ceaf13a6b98cea3d3c86a3db7bb847e332152942418c74540c01df3f66e12d",
+      "bytes": 277682
+    },
+    "details/driver_lean5_curve2_rotation1_combined2/density.png": {
+      "sha256": "02539e0631557912b1b935c6b87e985efee2106d549a3fe9abbaf3a3c898d343",
+      "bytes": 641219
+    },
+    "details/driver_lean5_curve2_rotation1_combined2/density.pdf": {
+      "sha256": "d5cf1fd7a98a2b4c8c7a040c25e31ce6228b1faa7aa06bc3d2aeb516b017417b",
+      "bytes": 128580
+    },
+    "details/driver_lean0_curve2_rotation2_combined2/overhead.png": {
+      "sha256": "9b62042b24061830b19f26983fcefd8354a2b487578db4ef99626e09734edc2f",
+      "bytes": 404910
+    },
+    "details/driver_lean0_curve2_rotation2_combined2/overhead.pdf": {
+      "sha256": "653f7229051a46b8c90a107e6d087638ba31688d6656f1a51de59cb9a7321863",
+      "bytes": 100849
+    },
+    "details/driver_lean0_curve2_rotation2_combined2/density.svg": {
+      "sha256": "af53ec3188a237f3f1e8d276c5bb0b608644a0a30b9c408b2fa3b5dde006c87d",
+      "bytes": 402716
+    },
+    "details/driver_lean0_curve2_rotation2_combined2/overhead.svg": {
+      "sha256": "741e3487a140115c9a4a03af96fc884266cd5d8aa2f4de115d150706f11f2d23",
+      "bytes": 288588
+    },
+    "details/driver_lean0_curve2_rotation2_combined2/density.png": {
+      "sha256": "3156c7871b392fdc5aef6463e1e46f30439b51723ee93b4e9477f1dddec0fa35",
+      "bytes": 616460
+    },
+    "details/driver_lean0_curve2_rotation2_combined2/density.pdf": {
+      "sha256": "f9d5306557763b4ad8e5cfd3a9ff86facabdf9460a4936b1e9b1f12af300f3d7",
+      "bytes": 124556
+    },
+    "details/driver_lean0_curve2_rotation1_shaft_only/overhead.png": {
+      "sha256": "80a957aa975a4d986efdd351500e6dd290e6a681ad52209bfd13b86ee4bb9466",
+      "bytes": 438811
+    },
+    "details/driver_lean0_curve2_rotation1_shaft_only/overhead.pdf": {
+      "sha256": "6f3be20e32447ad364cac4d85cfb5e9269128704f2cecf0ad00f453f277ef7e6",
+      "bytes": 113556
+    },
+    "details/driver_lean0_curve2_rotation1_shaft_only/density.svg": {
+      "sha256": "f40fdf7442bc033548999c4abd77d395dcd09bdaddd3a756821f3d35ec0422a3",
+      "bytes": 330902
+    },
+    "details/driver_lean0_curve2_rotation1_shaft_only/overhead.svg": {
+      "sha256": "cdd4262eb109f9ee99b90f4ae1b147f82f5bb461f88865a9050857fa2495fdd9",
+      "bytes": 314085
+    },
+    "details/driver_lean0_curve2_rotation1_shaft_only/density.png": {
+      "sha256": "b00ebe9ceda69b8cdd30bf6e445ebec94b59d574ef3ee5a5f161a6844cc76c68",
+      "bytes": 434465
+    },
+    "details/driver_lean0_curve2_rotation1_shaft_only/density.pdf": {
+      "sha256": "af77f8c8871e1a0e270eff17c3ec9955d7817a7629b16496e6231fa1b2c31845",
+      "bytes": 83970
+    },
+    "details/driver_lean0_curve1_rotation1_shaft_only/overhead.png": {
+      "sha256": "a5be1714bd2fe1dcd351cf236959182977531d2e3fdf1aed1a8fa18120842c6e",
+      "bytes": 423957
+    },
+    "details/driver_lean0_curve1_rotation1_shaft_only/overhead.pdf": {
+      "sha256": "4d18406d4e826d14ae1c8837606f7f334675278e362686ef31b29e0adf29db08",
+      "bytes": 108446
+    },
+    "details/driver_lean0_curve1_rotation1_shaft_only/density.svg": {
+      "sha256": "5e720dec5a00897ec035e7e71acad361ae297d2a81f4684c70ebd70484c5cfe2",
+      "bytes": 327620
+    },
+    "details/driver_lean0_curve1_rotation1_shaft_only/overhead.svg": {
+      "sha256": "6bbdc3d406ded35a2371c1db19fc8b271875e51b9fd25804672693b987d911b3",
+      "bytes": 303235
+    },
+    "details/driver_lean0_curve1_rotation1_shaft_only/density.png": {
+      "sha256": "d9611ff39c6f526bdafd45123d2d6453ded8ec6efe1aafd8a98f308976851658",
+      "bytes": 435481
+    },
+    "details/driver_lean0_curve1_rotation1_shaft_only/density.pdf": {
+      "sha256": "aaa224f633e7c9bc97e92ea54372e958cdf6f93900ebd35713c4f8ecb316841c",
+      "bytes": 85441
+    },
+    "details/driver_lean5_curve1_rotation2_shaft_only/overhead.png": {
+      "sha256": "04af6d39b3bf362a395b169ecf0335d68aa340738099aa81b38dbcfdd92d0fb9",
+      "bytes": 387572
+    },
+    "details/driver_lean5_curve1_rotation2_shaft_only/overhead.pdf": {
+      "sha256": "0f784f1b633ac3868439cca705c9ead2c2b2899bede616b8a0dbe9d4858d78f0",
+      "bytes": 97494
+    },
+    "details/driver_lean5_curve1_rotation2_shaft_only/density.svg": {
+      "sha256": "74d7a698b053a2e8cff848cfc4da5e86bdc75196e4e50e94f38687a9d4f2a4a4",
+      "bytes": 327404
+    },
+    "details/driver_lean5_curve1_rotation2_shaft_only/overhead.svg": {
+      "sha256": "09dd82898c11b7a93bb6f97643ce9f3b9c08b662ebc028b2b0d008fc42655929",
+      "bytes": 277766
+    },
+    "details/driver_lean5_curve1_rotation2_shaft_only/density.png": {
+      "sha256": "a42886e2637faa9639f9823e8188f308a98d4722197950092c51d84f0e011089",
+      "bytes": 434500
+    },
+    "details/driver_lean5_curve1_rotation2_shaft_only/density.pdf": {
+      "sha256": "2cc56d7a584cbb230d2f0fbf5d4390e577129c8d9cdabceea8e939df3dcfe20d",
+      "bytes": 84476
+    },
+    "details/driver_lean0_curve1_rotation2_shaft_only/overhead.png": {
+      "sha256": "56b11c43eca607451d89d71de98e915f6b06834d89b37c77544bac7f57cc3bf6",
+      "bytes": 408483
+    },
+    "details/driver_lean0_curve1_rotation2_shaft_only/overhead.pdf": {
+      "sha256": "0cc68086cab6b2e9900c491ac8bc96b35ab75179dd4f70e00e97d23c8733727b",
+      "bytes": 103102
+    },
+    "details/driver_lean0_curve1_rotation2_shaft_only/density.svg": {
+      "sha256": "182fe144123b4f4d040232804fef996f26ba32fb19ea0d2087ee7b9cbf4d06c5",
+      "bytes": 329800
+    },
+    "details/driver_lean0_curve1_rotation2_shaft_only/overhead.svg": {
+      "sha256": "bda2b62638d705d312cf113937d4b1eacd19e90d662dc3de381ccb3804010731",
+      "bytes": 288331
+    },
+    "details/driver_lean0_curve1_rotation2_shaft_only/density.png": {
+      "sha256": "5c42e7dcbece0deecb6519542efd5f4d7f13fbda48fd843c0270e7acfef4e015",
+      "bytes": 436839
+    },
+    "details/driver_lean0_curve1_rotation2_shaft_only/density.pdf": {
+      "sha256": "ea9ce0fc4379abaf6070aeb659d3278ecffeb4433f66199135f732023d087db1",
+      "bytes": 85703
+    },
+    "details/driver_lean5_curve1_rotation1_combined2/overhead.png": {
+      "sha256": "cf056ae9986da9386e2796ccf220e3a62a7d58b081cf25b522fd4fb37132c444",
+      "bytes": 377481
+    },
+    "details/driver_lean5_curve1_rotation1_combined2/overhead.pdf": {
+      "sha256": "9f531f58459b40a31f58ad0b333a34dfcc9329811299419d9a6a233c3382f54c",
+      "bytes": 91475
+    },
+    "details/driver_lean5_curve1_rotation1_combined2/density.svg": {
+      "sha256": "a075822bb40b7d082efda57774e9c3e3404a64915a1678c6f79369a88b193922",
+      "bytes": 412501
+    },
+    "details/driver_lean5_curve1_rotation1_combined2/overhead.svg": {
+      "sha256": "8d4220fdfa452448228c1e2e06ca6113aaf69cc6e45fdcbdc392f32e0e3670d0",
+      "bytes": 269823
+    },
+    "details/driver_lean5_curve1_rotation1_combined2/density.png": {
+      "sha256": "151e557e1489de51acb3545c9e70d44527a7554e27f446a2415efca5a93822dd",
+      "bytes": 642688
+    },
+    "details/driver_lean5_curve1_rotation1_combined2/density.pdf": {
+      "sha256": "c034f4588847f9d61f2aebc43890d0dcd3e05e523fbf4b6d1164a3df86b56135",
+      "bytes": 127658
+    },
+    "details/driver_lean5_curve2_rotation2_shaft_only/overhead.png": {
+      "sha256": "ce4afada1373ee5f80794e2fa451058ac61232fc4b31ecec78ad5fe0acddd104",
+      "bytes": 387241
+    },
+    "details/driver_lean5_curve2_rotation2_shaft_only/overhead.pdf": {
+      "sha256": "974538eda470a3d8a93fe07c30deb4333c9df5065062d37747f12beddbd38691",
+      "bytes": 97015
+    },
+    "details/driver_lean5_curve2_rotation2_shaft_only/density.svg": {
+      "sha256": "02297467c1d43ea5f9a625038c08dea26872700e2650379a1bd0d3737a3a3e58",
+      "bytes": 322347
+    },
+    "details/driver_lean5_curve2_rotation2_shaft_only/overhead.svg": {
+      "sha256": "250a4c07cf877f02cc88dc69438d94fb7b8e48ebf3257a62dcb102ab12e668eb",
+      "bytes": 277477
+    },
+    "details/driver_lean5_curve2_rotation2_shaft_only/density.png": {
+      "sha256": "0acaa1f6f4ce0b1bedaa395a402d6824e8d039d92f8cba48d623f04af3bf522c",
+      "bytes": 433135
+    },
+    "details/driver_lean5_curve2_rotation2_shaft_only/density.pdf": {
+      "sha256": "36753a61c260ef89aadc50bea4a98d2b0025966d66adf8b8aa9686ecb8b2cc80",
+      "bytes": 82022
+    },
+    "details/driver_lean5_curve2_rotation1_shaft_only/overhead.png": {
+      "sha256": "ad8c6043f9cc600fa624b6902472b1854cb2db64f39442a1158a6a5a9ccbca2b",
+      "bytes": 415524
+    },
+    "details/driver_lean5_curve2_rotation1_shaft_only/overhead.pdf": {
+      "sha256": "1aceddb3d2560afcc22de3220c4c85bb76d9e864704945291654e37ca1b1c6d5",
+      "bytes": 107089
+    },
+    "details/driver_lean5_curve2_rotation1_shaft_only/density.svg": {
+      "sha256": "4ea9797695879b5c6e2258c05fa99e59af8e43ff817e7c2fac38de45759f316b",
+      "bytes": 317473
+    },
+    "details/driver_lean5_curve2_rotation1_shaft_only/overhead.svg": {
+      "sha256": "6c365987e3190202477f1a22e4957ed96bab3d004d4d2ab06b15a466d9c207dd",
+      "bytes": 297674
+    },
+    "details/driver_lean5_curve2_rotation1_shaft_only/density.png": {
+      "sha256": "ca5fc4d116549e241ee7be595a9bbef42c8053cefc16687c59c5f0c8fbca8629",
+      "bytes": 418020
+    },
+    "details/driver_lean5_curve2_rotation1_shaft_only/density.pdf": {
+      "sha256": "5897d16130f6daacd0e928ba7e8f415953f6afd0f5628bdb0ee2dec1af734ac3",
+      "bytes": 81691
+    },
+    "details/driver_lean5_curve1_rotation1_shaft_only/overhead.png": {
+      "sha256": "bcd276302a373b0fbf4d6a96b10964dbdeabaddaa6793dd5160130b88f218eaa",
+      "bytes": 402648
+    },
+    "details/driver_lean5_curve1_rotation1_shaft_only/overhead.pdf": {
+      "sha256": "eccf0f5cd91514ff93a377dcd1c069d9793f33bbfc8215c33f8bf8985c471075",
+      "bytes": 103347
+    },
+    "details/driver_lean5_curve1_rotation1_shaft_only/density.svg": {
+      "sha256": "4452a75552863359c14c0164376c21f326c6a1084f8eb4e0077e88517d9503b0",
+      "bytes": 326934
+    },
+    "details/driver_lean5_curve1_rotation1_shaft_only/overhead.svg": {
+      "sha256": "5e51cc219cfee6dbba7034ca0f86e454d00e4951ad13bbcfc8d39b55ec88d42b",
+      "bytes": 289663
+    },
+    "details/driver_lean5_curve1_rotation1_shaft_only/density.png": {
+      "sha256": "034d1d220be32b4b46289d9cb65af866fcb7bf30d40a0d1ace9c07ac71383e71",
+      "bytes": 430698
+    },
+    "details/driver_lean5_curve1_rotation1_shaft_only/density.pdf": {
+      "sha256": "c392b60f673daf461665ea71871ccb7006993ed70d41ded344e84199893956c6",
+      "bytes": 84461
+    }
+  },
+  "stop_receipt": {
+    "status": "deliberately_stopped_for_visual_defect",
+    "pid": 1937409,
+    "utc": "2026-10-10T01:26:47.712896+00:00",
+    "signal": "SIGTERM",
+    "reason": "Academic right-marginal adjacent tick labels crowd together in actual saved-data plots; preserve partial assets and repair before final rendering.",
+    "monte_carlo_affected": false
+  },
+  "final_manifest_present": false,
+  "numerical_data_unchanged": true
+}
