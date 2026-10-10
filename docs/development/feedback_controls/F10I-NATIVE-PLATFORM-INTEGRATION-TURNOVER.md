@@ -127,3 +127,12 @@ record `f10i-main-grip-native.xml`. Canonical chapter 11 now records its bushing
 equations, frames, rotational-rate mapping and prescribed-motion scope. These
 checks do not promote full-body muscular own-contact or private-fit acceptance.
 UI/documentation changes inherited from main are not new F10i feature claims.
+
+The post-main native campaign passes 328 tests with 25 skips; 4,525 declared
+Python source/test hashes match before/after, and 4,523 match committed blobs
+exactly (the same two CRLF-only loader-test differences remain explicit).
+The normal full push hook also requires formatting main's grip decision note
+and four JSON metric/run receipts. Original JSON bytes are retained from exact
+main in the local evidence folder; `f10i-main-receipt-formatting-lineage.json`
+records old/new hashes and verifies identical parsed values. Native series NPZ
+files are unchanged. Formatting does not constitute a new native experiment.
