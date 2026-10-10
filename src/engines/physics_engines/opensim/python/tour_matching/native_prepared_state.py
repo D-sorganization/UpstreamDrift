@@ -222,6 +222,77 @@ def _apply_declared_locks(model: Any, state: Any, targets: Mapping[str, float]) 
         coordinate.setLocked(state, True)
 
 
+def _remove_matching_source_controller(
+    controllers: Any,
+    replacement: tuple[str, str, float],
+    commands: Mapping[str, float],
+) -> None:
+    import opensim as osim
+
+    if controllers.getSize() != 1:
+        raise ValueError("source controller identity requires exactly one controller")
+    original = controllers.get(0)
+    original_path, original_sha, original_command = replacement
+    if (
+        original.getAbsolutePathString() != original_path
+        or hashlib.sha256(original.dump().encode()).hexdigest() != original_sha
+    ):
+        raise ValueError("source controller identity differs from declaration")
+    prescribed = osim.PrescribedController.safeDownCast(original)
+    if (
+        original.getConcreteClassName() != "PrescribedController"
+        or prescribed is None
+        or prescribed.get_ControlFunctions().getSize() != 1
+    ):
+        raise ValueError("source controller law is not single-channel prescribed")
+    source_function = prescribed.get_ControlFunctions().get(0)
+    constant = osim.Constant.safeDownCast(source_function)
+    socket = prescribed.getSocket("actuators")
+    if (
+        source_function.getConcreteClassName() != "Constant"
+        or constant is None
+        or constant.getValue() != original_command
+        or socket.getNumConnectees() != 1
+        or set(commands) != {str(socket.getConnecteePath(0))}
+    ):
+        raise ValueError("source controller law or actuator differs")
+    if not controllers.remove(0):
+        raise RuntimeError("native source controller removal failed")
+
+
+def _build_prescribed_player(
+    native: Mapping[str, Any],
+    commands: Mapping[str, float],
+    initial_time: float,
+    command_step: tuple[float, Mapping[str, float]] | None,
+) -> Any:
+    import opensim as osim
+
+    player = osim.PrescribedController()
+    player.setName("owned_time_only_cold_start_player")
+    for path, actuator in native.items():
+        command = commands[path]
+        scalar = osim.ScalarActuator.safeDownCast(actuator)
+        if scalar is None:
+            raise ValueError("only scalar actuator commands have this native policy")
+        if osim.Muscle.safeDownCast(actuator) is not None:
+            raise ValueError("muscle excitation needs its dedicated native player")
+        if not scalar.getMinControl() <= command <= scalar.getMaxControl():
+            raise ValueError("command exceeds native actuator bounds")
+        future_command = command if command_step is None else command_step[1][path]
+        if not scalar.getMinControl() <= future_command <= scalar.getMaxControl():
+            raise ValueError("scheduled command exceeds native actuator bounds")
+        player.addActuator(scalar)
+        if command_step is None:
+            function = osim.Constant(command)
+        else:
+            function = osim.PiecewiseConstantFunction()
+            function.addPoint(initial_time, command)
+            function.addPoint(command_step[0], future_command)
+        player.prescribeControlForActuator(actuator.getName(), function)
+    return player
+
+
 def _install_owned_input_player(
     model: Any,
     commands: Mapping[str, float],
@@ -247,37 +318,7 @@ def _install_owned_input_player(
         raise ValueError("unregistered native controller needs a reviewed policy")
     source_controller = controllers.getSize() > 0
     if replacement is not None:
-        if controllers.getSize() != 1:
-            raise ValueError(
-                "source controller identity requires exactly one controller"
-            )
-        original = controllers.get(0)
-        original_path, original_sha, original_command = replacement
-        if (
-            original.getAbsolutePathString() != original_path
-            or hashlib.sha256(original.dump().encode()).hexdigest() != original_sha
-        ):
-            raise ValueError("source controller identity differs from declaration")
-        prescribed = osim.PrescribedController.safeDownCast(original)
-        if (
-            original.getConcreteClassName() != "PrescribedController"
-            or prescribed is None
-            or prescribed.get_ControlFunctions().getSize() != 1
-        ):
-            raise ValueError("source controller law is not single-channel prescribed")
-        source_function = prescribed.get_ControlFunctions().get(0)
-        constant = osim.Constant.safeDownCast(source_function)
-        socket = prescribed.getSocket("actuators")
-        if (
-            source_function.getConcreteClassName() != "Constant"
-            or constant is None
-            or constant.getValue() != original_command
-            or socket.getNumConnectees() != 1
-            or set(commands) != {str(socket.getConnecteePath(0))}
-        ):
-            raise ValueError("source controller law or actuator differs")
-        if not controllers.remove(0):
-            raise RuntimeError("native source controller removal failed")
+        _remove_matching_source_controller(controllers, replacement, commands)
         source_controller = False
     if source_controller and not allow_source_controllers:
         raise ValueError("source controller is forbidden in independent replay")
@@ -306,28 +347,7 @@ def _install_owned_input_player(
     }
     if set(commands) != set(native):
         raise ValueError("constant commands need exact native actuator coverage")
-    player = osim.PrescribedController()
-    player.setName("owned_time_only_cold_start_player")
-    for path, actuator in native.items():
-        command = commands[path]
-        scalar = osim.ScalarActuator.safeDownCast(actuator)
-        if scalar is None:
-            raise ValueError("only scalar actuator commands have this native policy")
-        if osim.Muscle.safeDownCast(actuator) is not None:
-            raise ValueError("muscle excitation needs its dedicated native player")
-        if not scalar.getMinControl() <= command <= scalar.getMaxControl():
-            raise ValueError("command exceeds native actuator bounds")
-        future_command = command if command_step is None else command_step[1][path]
-        if not scalar.getMinControl() <= future_command <= scalar.getMaxControl():
-            raise ValueError("scheduled command exceeds native actuator bounds")
-        player.addActuator(scalar)
-        if command_step is None:
-            function = osim.Constant(command)
-        else:
-            function = osim.PiecewiseConstantFunction()
-            function.addPoint(initial_time, command)
-            function.addPoint(command_step[0], future_command)
-        player.prescribeControlForActuator(actuator.getName(), function)
+    player = _build_prescribed_player(native, commands, initial_time, command_step)
     model.addController(player)
     return False
 
