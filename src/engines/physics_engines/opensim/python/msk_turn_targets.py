@@ -149,7 +149,8 @@ def turn_targets_from_lines(
 
 # ------------------------------------------------------------- model lines
 def _native(point_os: np.ndarray, floor_native_z: float) -> np.ndarray:
-    return cal.opensim_to_native_vector(point_os) + np.array([0.0, 0.0, floor_native_z])
+    native = cal.opensim_to_native_vector([float(v) for v in point_os])
+    return native + np.array([0.0, 0.0, floor_native_z])
 
 
 def model_turn_points(
