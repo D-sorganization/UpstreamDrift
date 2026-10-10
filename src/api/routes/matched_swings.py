@@ -88,6 +88,15 @@ def _safe_export_message(exc: Exception, fallback: str) -> str:
     return str(exc) if isinstance(exc, ValueError) else fallback
 
 
+def _attachment_response(result: tuple[bytes, str, str]) -> Response:
+    content, filename, media_type = result
+    return Response(
+        content=content,
+        media_type=media_type,
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
 @router.get("")
 async def list_matched_swings(
     capture: str | None = Query(
@@ -251,12 +260,7 @@ async def get_matched_swing_report(
             ),
             status_code=404,
         )
-    content, filename, media_type = result
-    return Response(
-        content=content,
-        media_type=media_type,
-        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
-    )
+    return _attachment_response(result)
 
 
 @router.get("/{run_id}/video")
@@ -289,12 +293,7 @@ async def get_matched_swing_video(
             ),
             status_code=404,
         )
-    content, filename, media_type = result
-    return Response(
-        content=content,
-        media_type=media_type,
-        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
-    )
+    return _attachment_response(result)
 
 
 @router.get("/{run_id}/animation.gif")
