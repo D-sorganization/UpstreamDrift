@@ -6,6 +6,7 @@ import argparse
 import hashlib
 import json
 import logging
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from time import perf_counter
@@ -57,6 +58,8 @@ class ReplayConfig:
     output_dir: Path
     source_engine: str = "mujoco"
     retarget_map: RetargetMap | None = None
+    #: Spec the candidate was fitted in; hips then map by orientation (#12052).
+    hip_spec: Mapping[str, Any] | None = None
 
     def __post_init__(self) -> None:
         if not Path(self.candidate).is_file():
@@ -465,7 +468,9 @@ def run_kinematic_replay(config: ReplayConfig) -> dict[str, Any]:
     if not source.coordinate_order:
         raise ValueError("Candidate coordinate_order is empty")
     q_myosuite = retarget_trajectory(
-        _align_source_q(source.q, source.coordinate_order, rmap), rmap
+        _align_source_q(source.q, source.coordinate_order, rmap),
+        rmap,
+        hip_spec=config.hip_spec,
     )
     import mujoco  # noqa: PLC0415
 
