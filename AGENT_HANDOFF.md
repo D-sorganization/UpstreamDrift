@@ -1,3 +1,9 @@
+# Active: Nominal 7-Iron IK and the Club-Face Triad Gate, #12030
+
+- Branch `claude/12030-nominal-iron-ik`. Root cause: `full_body_spec_anthro_iron7.json` carries the driver's clubhead triad offsets (edges 92/52/96 mm against the 7-iron capture's 106/127/40 mm), so the nominal run's face residual (OSV-10) fitted a meaningless rotation. `club_face_target.observe_frame_rotations` now raises `TriadShapeMismatchError` above a 5 mm median rigid residual (0.2 mm when matched, 42.4 mm here). Face targets, the impact split and the receipt's `ik.face_orientation` record the reason. The IK report adds `frame0_marker_rms_m`.
+- Nominal 7-iron: IK 264.8 → 67.9 mm (frame 0 70.2 mm against a 70.4 mm address), dynamics 1355 → 79.2 mm, 0 IK range-of-motion flags. The nominal driver is unchanged by the gate; its dynamics 79.3 → 97.3 mm comes from main's GCV-20 code (a control on main is identical). Calc record: `simscape_matching_reference.tex`, subsection "Triad-Shape Validity Gate".
+- Open: correct the 7-iron document's nominal head triad, which changes every 7-iron receipt's base spec hash.
+
 # Physical Inertia Helper Handoff — #12183
 
 `validate_physical_inertia` now uses sorted principal moments instead of frame
@@ -1044,6 +1050,23 @@ separate because this provider uses native plant stepping only.
   planning. Their extreme passive-force observations are **not** physiological
   admission. Root owns separate abdominal reduction #12161 and composition;
   MTP and subtalar policies are not silently applied together.
+
+# Exact Bilateral Zero-MTP CustomJoint Reduction - #12176
+
+- Branch `feat/f07-buet-zero-custom-mtp-12176` stacks on the subtalar and
+  BUET–Hamner source-preparation children. Keep it unarmed until the parent
+  lands. The original PinJoint MTP reducer remains unchanged.
+- The actual assembled source has two locked-zero MTP CustomJoints. The exact
+  profile shares the zero-CustomJoint mechanical comparison with subtalar,
+  rejecting altered targets/laws/consumers. Source and output stay in owned
+  staging. The public `F07_CUSTOM_MTP_REDUCTION_RECEIPT.json` binds the native
+  final step from the abdominal→subtalar artifact, not a full Moco solve.
+- Chapter 47, calculation registry and
+  `F07_CUSTOM_MTP_REDUCTION_TURNOVER.md` retain reproduction and open gates.
+  Root independently verified original→final sampled composition and native
+  Moco initialization at three prepared coupled states. Native Moco solve,
+  full-state excitation replay, source physiology and capture matching remain
+  blocked.
 
 # Active: Assistance-Explicit OpenSim Replay, F07 #12147
 

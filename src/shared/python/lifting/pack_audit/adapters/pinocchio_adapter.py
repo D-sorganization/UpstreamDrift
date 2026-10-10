@@ -207,6 +207,11 @@ class PinocchioAdapter(EngineAdapter):
             "reason": "URDF carries no contact model (Pinocchio_Models#432)",
         }
 
+    def bar_hold_wrench(self) -> dict[str, Any]:
+        from .pinocchio_bar_hold import bar_hold_wrench as _bar_hold_wrench
+
+        return _bar_hold_wrench(self.model, self.data, self._root, self._initial_q())
+
     def smoke_step(self) -> dict[str, Any]:
         m, d = self.model, self.data
         qv, v = self._initial_q(), np.zeros(m.nv)

@@ -5207,6 +5207,39 @@ engine-specific code. The residual applies in the full-capture IK, in the
 consistency re-solve, and in the optional ZMP-filter and shooting re-solves.
 \texttt{--face-weight 0} restores the marker-only fit.
 
+\subsection{Triad-Shape Validity Gate (Issue \#12030)}
+$R_{c,i}$ is meaningful only when the attached offsets $p_j$ describe the
+captured triad. Per observed frame the rigid residual is
+\[
+ e_i=\Bigl(\tfrac{1}{3}\textstyle\sum_j\bigl\lVert R_{c,i}(p_j-\bar p)-(x_{ij}-\bar x_i)\bigr\rVert^2\Bigr)^{1/2},
+\]
+with $x_{ij}$ the captured positions and bars the centroids.
+\texttt{observe\_frame\_rotations} raises \texttt{TriadShapeMismatchError} when
+the median of $e_i$ exceeds 5~mm. The face targets, the capture impact split
+and the face report are then recorded as unavailable with that reason; no
+rotation is fitted. Matching offsets give a median of 0.2~mm (p95 0.6~mm) on
+capture-A and capture-B, which is capture noise on a rigid triad.
+
+The nominal 7-iron document (\texttt{full\_body\_spec\_anthro\_iron7.json})
+carries the driver's head-triad offsets: edges 92/52/96~mm, against the
+7-iron capture's 106/127/40~mm, a median residual of 42.4~mm. Without
+\texttt{--static-seeds} those offsets are not recalibrated, so before the
+gate the face target was 40--80~deg off. At $w_f=3$ it pulled the trajectory
+IK off the address: 264.8~mm marker RMS and 1355~mm in dynamics. With the
+gate the nominal 7-iron reaches 67.9~mm IK (frame 0: 70.2~mm, against a
+70.4~mm address) and 79.2~mm dynamics. \texttt{--face-weight 0} on unmodified
+code gives the same 67.9~mm, which isolates the cause. The driver and every
+calibrated run match their capture triad, so their fits are unchanged.
+Limitation: the 7-iron document's nominal triad is still the driver's;
+correcting it changes the base-specification hash of every 7-iron receipt.
+
+Reproduce (ControlTower \texttt{ud-sim}, repository root):
+\begin{verbatim}
+python3 -m src.shared.python.motion_matching.pipeline.cli \
+  --spec docs/development/full_body_models/full_body_spec_anthro_iron7.json \
+  --capture iron --out runs/anthro_iron
+\end{verbatim}
+
 \subsection{Impact and Top Definitions}
 At about 2400 deg/s of face closure near impact, one 360 Hz capture sample
 spans about 7 deg. A frame index is therefore too coarse. Impact is the
