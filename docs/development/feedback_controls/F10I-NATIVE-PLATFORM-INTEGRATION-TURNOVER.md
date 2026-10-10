@@ -110,3 +110,20 @@ import path; explicitly retaining the repository root beside the fleet helper in
 `PYTHONPATH` resolves them. UTF-8 also avoids the helper's prior output-decoding
 failure. Keep the initial failures and the corrected-environment evidence; the
 central helper remains non-green because #12064 is unresolved.
+
+## Current Main Integration
+
+Merge current `main` `26316150998ede86d08b59f1686d8b80ff9f8bdf` after GitHub
+reported a conflicting base and therefore withheld ordinary PR workflows.
+Preserve both independent handoff additions and regenerate divergence views.
+Production changes inherited from main include Pinocchio's public velocity/body
+placement accessors, shared bushing-law/prescribed-motion exports, and per-engine
+grip adapters. They do not replace the guarded controls or native Moco path.
+
+Repeat the affected native campaign on this integrated source and retain
+`f10i-main-native-final.xml` with its new source manifests. The separate actual
+OpenSim 4.6/MuJoCo 3.8 grip suite passes 77 tests with 12 explicit SDK skips;
+record `f10i-main-grip-native.xml`. Canonical chapter 11 now records its bushing
+equations, frames, rotational-rate mapping and prescribed-motion scope. These
+checks do not promote full-body muscular own-contact or private-fit acceptance.
+UI/documentation changes inherited from main are not new F10i feature claims.
