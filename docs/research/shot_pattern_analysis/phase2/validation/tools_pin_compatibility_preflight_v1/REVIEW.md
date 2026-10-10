@@ -1,0 +1,34 @@
+# Study Tools Compatibility Preflight
+
+## Result and Limits
+
+Read-only comparison of fixed UpstreamDrift revisions `2953c52b37` and `fa7ee92f5c`, and Tools pins `3678409fc51024150ab28970b72e3b468935f345` and `86d0f28b1cc5acf61185e07e320c816c2d005512`. No integration-tree reads, network/install, import execution, environment mutation, test execution, or receipt refresh.
+
+**All 36 inspected Tools provider/package files are byte-identical across pins.** These cover the complete launch_monitor and logging_pkg trees plus shared/shared.python/ai package initializers. `evidence.json` records each old/new SHA256 and the study's actual import statements. This is strong scoped source-compatibility evidence, not a claim the whole Tools repository is unchanged or that a new runtime is accepted.
+
+The standalone Tools checkout did not provide a usable old/new object pair. The comparison used read-only Git objects from MAIN's existing vendor repository for the old pin and the primary UpstreamDrift vendor Git database for the new pin. No checkout was changed and `GIT_NO_LAZY_FETCH=1` was used for the successful comparison. The coordinator does not import provider code.
+
+## Provider and Consumer Mapping
+
+| Study Consumer | Actual Provider | Evidence and Required Post-Merge Checks |
+|---|---|---|
+| `scoring.py`, `scoring_cache.py` | `src.tools.launch_monitor_model` facade → Tools `shared.python.launch_monitor.strokes_gained` and `strokes_gained_types` | Consumes `CourseStateColumnsV1`, `ExpectedStrokesBaselineV2`, `ExpectedStrokesStateV2`, `StrokesGainedRequestV1`, `analyze_source_backed_strokes_gained`, `baseline_table_sha256`. Scorer's internal `_scoring_statistics` and `contract_v2` are included in byte comparison. |
+| Facade eager imports | Complete Tools launch_monitor tree | Facade imports comparison/contracts/schema/corpus/modeling/other modules even when only scoring is requested, so checking only strokes_gained.py would be insufficient. Entire subtree is equal. The one outside-subtree shared import found is `gspro_connect.py` → `shared.python.contracts`; gspro_connect is not imported by this facade or study pathway. This does not qualify optional GSPro behavior. |
+| `gui.py:get_logger` | Retired `src.shared.python.logging_pkg.logging_config` → Tools canonical logging_pkg via UD seam redirect | Both logging package files and initializers equal. Do not replace this with a shadow local logger. |
+| `_embed_adapter.py` | UD-owned `src.shared.python.launcher_embed` | Not a Tools provider. The package has no diff between the fixed UD revisions. Verify registration/widget lifecycle in offscreen tests. |
+| `gui.py:managed_popen` | UD-owned `src.shared.python.core.process_safety` | Not Tools; fixed revisions byte-identical. Preserve cleanup/cancellation tests. |
+| Physics/reporting imports | UD-owned physics modules | Outside this bounded Tools compatibility claim. Upstream model/physics integration still needs its own source projection and tests; equality of Tools scoring does not establish it. |
+| Source/evidence guards in `provenance.py`, `matched_sensitivity.py`, `scenario_scoring.py` and publication loaders | Tools gitlink and scorer source identity | Same scorer bytes do **not** make a changed gitlink/execution receipt interchangeable. Historical reports must reproduce from their frozen checkout/runtime. Never update stored execution/source hashes to turn strict loaders green. |
+
+`src.tools.launch_monitor_model.__init__`, UD shared-python initializer, launcher_embed and process_safety are unchanged across the two fixed UD revisions. `_seam_redirect.py` changes upstream: it adds the private pinned-package loader and related safeguards. Thus namespace/runtime compatibility must still be exercised, even with equal scoring/logging bytes. Inspect actual imported module `__file__` paths and shared/legacy module identity under the merged tree and resolved pin; do not infer provider selection from an environment name.
+
+## Focused Qualification After Resolution
+
+Use a fresh process against the isolated merged tree and exact resolved vendor sources, with existing dependencies only. Never pip-install into the live shared validation venv or mutate frozen PRESENTATION. Set all headless variables. Run these existing tests, preserving failures and optional dependency skips honestly:
+
+1. Provider seam: `tests/unit/shared_python/test_seam_redirect.py` and `tests/unit/launch_monitor/test_canonical_layer_parity.py`. Record provider file paths/pin, not only pass counts.
+2. Scoring boundary: `tests/tools/shot_pattern_analysis/test_scoring.py`, `test_scoring_cache.py`, `test_scoring_cache_independent.py`, `test_course_score_vectors.py`, `test_course_scoring_delegation.py`, `test_scenario_scoring.py`. The independent cache suite compares every knot/midpoint plus 100 seeded random states to the public API and preserved historical full-API means.
+3. Tile/GUI: `tests/ui/tools/shot_pattern_analysis/test_embed_adapter.py` and `test_matched_gui.py`, offscreen. These cover seven-input controls, units/covariance, source-aware SG populations, small-interval display, run/cancel cleanup and embedded layout. Do not launch native GUI processes.
+4. Report consumers: `tests/tools/shot_pattern_analysis/test_provenance.py`, `test_matched_report.py`, `test_matched_supplement_report.py`, plus `tests/research/test_shot_pattern_final_report.py` and `test_shot_pattern_final_report_assets.py`. Missing immutable fixtures must be restored exactly, not skipped or replaced with invented data. Preserve frozen-source rejection behavior; a strict historic artifact refusing the new merged execution is expected unless its established reproduction contract selects the old source.
+
+No scientific Monte Carlo or bootstrap rerun is implied. New-pin tests qualify present consumer behavior only. Existing simulation, source-transition and final-publication receipts retain their original exact pin/source/runtime and acceptance scope. A larger unchanged-provider claim is neither needed nor made.
