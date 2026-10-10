@@ -175,7 +175,8 @@ Child issue #11837 adds `src/engines/feedback_observation_qualification.py`
 and uses the F01 `FeedbackComparisonRegistry`, F09a position sampler,
 canonical replay metrics, pelvis-yaw calculation, and existing acceptance
 gates. Each scored case carries the actual Tools T01
-`ExperimentReplayBundle`. The adapter checks the complete ordered initial
+`ExperimentReplayBundle` and existing `NativeMarkerReplayEvidence`; a marker
+array or mapping alone is not accepted. The adapter checks the complete ordered initial
 state and binds its actual `initial_state_sha256` with the model and capability
 payload hashes; it does not infer state identity from a schema digest. It also
 checks the model/provider, state schema, channel ordering/schema, actual input
@@ -183,6 +184,17 @@ history and grid, policy, evidence mode, timebase, and horizon against F01.
 An altered full state or input cannot be rebound to stale comparison evidence.
 Replay admission requires F01c `feedback-comparison/1.1.0`; observation-
 accuracy admission receives the retained F09a observation-grid digest.
+Before scoring, marker evidence and execution receipt digests are verified,
+the exact marker output bytes are rehashed, and the native execution receipt
+is compared with the F01 row and T01 bundle identities. This includes the
+distinct inventory and native provider identities, initial-state payload,
+ordered inputs, applied-input history, policy, timebase, and full horizon. The
+native marker clock must equal the replay input grid; observation sampling
+continues on the independent retained F09a observation clock. The score now
+records the marker evidence, native execution receipt, explicit marker-map,
+and marker-output hashes. These remain integrity and lineage assertions, not
+authentication of arbitrary serialized receipts or a new qualification
+authority.
 
 The report preserves every required registry cell and all six engine IDs.
 Missing evidence remains missing, unavailable stays in the denominator, and
@@ -193,11 +205,10 @@ The canonical calculation description is in
 limits and commands are in
 `docs/development/feedback_controls/F09B-OBSERVATION-QUALIFICATION.md`.
 
-The F09b focused suite has twelve passing synthetic tests, including full
-initial-state identity binding and applied-input tamper rejection. These tests
-do not provide a native run, private capture acceptance, model qualification,
-or physiology evidence. F09 remains open for the native consumer and further
-per-engine qualification workflow.
+The focused F09b suite covers synthetic identity/tamper rejection and a native
+MuJoCo marker-replay-to-scorer handoff. This software evidence does not provide
+private capture acceptance, model qualification, or physiology evidence. F09
+remains open for other native consumers and per-engine qualification workflow.
 
 ## F09c Strict Native Replay Execution
 

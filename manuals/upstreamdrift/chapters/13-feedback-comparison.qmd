@@ -161,7 +161,9 @@ measured evidence and native replay receipts establish a bounded scope.
 The F09b observation workflow in
 `src/engines/feedback_observation_qualification.py` consumes the validated
 Tools `ExperimentReplayBundle` schema `experiment-replay/1.0.0` together with
-the F01 `ComparisonEvidence`, native marker positions, and measured positions.
+F01 `ComparisonEvidence`, the existing `NativeMarkerReplayEvidence`, its
+native marker positions, and measured positions. A positions array or a
+caller-provided marker map alone is not native replay evidence.
 Before scoring, the workflow checks that model, provider, full state schema,
 ordered channels, input kind/interpolation, timebase, full applied-input
 history, input grid, execution policy, replay mode, horizon, and contact
@@ -169,6 +171,18 @@ policy agree between the two authorities. The bundle validator independently
 checks the complete ordered initial state and all T01 integrity hashes.
 Generalized position and velocity dimensions are checked separately against
 F01's `nq` and `nv`; no Euclidean `nq=nv` assumption is made.
+
+Before scoring, the workflow verifies the marker-evidence and execution-receipt
+digests, recomputes the digest of the exact marker bytes being scored, and
+checks that the existing native execution receipt matches the F01 row and T01
+bundle, including native versus inventory provider identities, initial-state
+payload, ordered channels, applied input, policy, clock, timebase, dimensions,
+and full-horizon declaration. The marker clock must equal the replay input
+clock. The independently retained observation clock continues to use F09a's
+positions-only alignment; the score binds the marker evidence, execution
+receipt, map, and output hashes alongside the existing metric and gate
+identities. These integrity and lineage checks do not authenticate arbitrary
+serialized receipts or prove that a provider was actually executed.
 
 F01c's versioned `feedback-comparison/1.1.0` replay contract carries T01's
 actual `initial_state_sha256` separately from the state-schema digest. F09b
@@ -200,7 +214,9 @@ numerical gate is only reported as accepted by the existing gate evaluator;
 campaign qualification remains false until every required registry row is
 qualified and every existing gate passes. Synthetic contract fixtures prove
 identity binding and sampling behavior but provide no physiological or
-cross-engine acceptance evidence.
+cross-engine acceptance evidence. A focused native MuJoCo handoff test
+exercises marker replay into the scorer, but neither it nor the synthetic
+fixtures provides physiological or cross-engine acceptance evidence.
 
 ## F09c Strict Native Replay Execution
 

@@ -20,6 +20,7 @@ import numpy as np
 
 if TYPE_CHECKING:
     from sidekick.lab.mocap import ExperimentReplayBundle
+    from src.engines.feedback_native_markers import NativeMarkerReplayEvidence
 
 from src.engines.feedback_comparison import (
     ComparisonEvidence,
@@ -114,6 +115,7 @@ class NativeObservationCase:
     interpolation: PositionInterpolation = PositionInterpolation.LINEAR_POSITION
     gates: AcceptanceGates | None = None
     capture: str | None = None
+    native_marker_evidence: NativeMarkerReplayEvidence | None = None
 
 
 @dataclass(frozen=True)
@@ -142,6 +144,10 @@ class ObservationScoreReceipt:
     bundle_schema: str
     capture: str | None
     native_acceptance_receipt_sha256: str
+    native_marker_replay_evidence_sha256: str
+    native_execution_receipt_sha256: str
+    native_marker_map_sha256: str
+    native_marker_output_sha256: str
     frame_id: str
     timebase_id: str
     marker_labels: tuple[str, ...]
@@ -173,6 +179,10 @@ class ObservationScoreReceipt:
                 "bundle_schema": self.bundle_schema,
                 "capture": self.capture,
                 "native_acceptance_receipt_sha256": self.native_acceptance_receipt_sha256,
+                "native_marker_replay_evidence_sha256": self.native_marker_replay_evidence_sha256,
+                "native_execution_receipt_sha256": self.native_execution_receipt_sha256,
+                "native_marker_map_sha256": self.native_marker_map_sha256,
+                "native_marker_output_sha256": self.native_marker_output_sha256,
                 "frame_id": self.frame_id,
                 "timebase_id": self.timebase_id,
                 "marker_labels": list(self.marker_labels),
@@ -355,10 +365,7 @@ def _validate_replay_bundle(
     mismatches = {
         "bundle_schema": evidence.bundle_schema == bundle.schema_version,
         "engine": model.engine_id == row.engine,
-        "variant": model.variant_id == evidence.variant_id,
         "source_model": model.source_model_sha256 == evidence.source_model_sha256,
-        "provider": model.provider_id == evidence.provider_id,
-        "provider_digest": model.provider_sha256 == evidence.provider_sha256,
         "loaded_native_model": (
             model.loaded_native_model_sha256 == evidence.loaded_native_model_sha256
         ),
@@ -495,6 +502,7 @@ def _admit_and_align(
     replay_identity = feedback_replay_identity_sha256(evidence, case.replay_bundle)
     if case.source_replay_identity_sha256 != replay_identity:
         raise ValueError("source replay identity is stale or does not match evidence")
+    _validate_native_marker_evidence(case, row)
     if not isinstance(case.horizon, Horizon):
         raise ValueError("horizon must be Horizon enum")
     if not isinstance(case.native_acceptance_receipt, Mapping):
@@ -530,6 +538,71 @@ def _admit_and_align(
         metrics=metrics,
         pelvis_yaw_diff_deg=pelvis_yaw_diff_deg,
     )
+
+
+def _validate_native_marker_evidence(
+    case: NativeObservationCase, row: ComparisonRow
+) -> None:
+    """Bind scored marker bytes to the existing native execution receipt."""
+    from src.engines.feedback_native_markers import NativeMarkerReplayEvidence
+
+    evidence = case.native_marker_evidence
+    if not isinstance(evidence, NativeMarkerReplayEvidence):
+        raise ValueError("native marker replay evidence is required for scoring")
+    evidence.validate_output(case.native_output)
+    receipt = evidence.native_execution_receipt
+    bundle = case.replay_bundle
+    model = bundle.model
+    history = bundle.input_history
+    replay_mode = bundle.policy.replay_mode
+    if not np.array_equal(
+        np.asarray(case.native_output.time_s, dtype=np.float64),
+        np.asarray(history.time_seconds, dtype=np.float64),
+    ):
+        raise ValueError("native marker output clock differs from replay input grid")
+    expected = {
+        "package_id": row.package_id,
+        "variant_id": row.variant_id,
+        "drive_mode": row.drive_mode.value,
+        "engine": row.engine,
+        "required": row.required,
+        "support": row.support,
+        "availability": row.availability,
+        "source_model_sha256": row.source_model_sha256,
+        "inventory_provider_id": row.provider_id,
+        "inventory_provider_sha256": row.provider_sha256,
+        "native_model_id": model.model_id,
+        "native_variant_id": model.variant_id,
+        "native_execution_provider_id": model.provider_id,
+        "native_execution_provider_sha256": model.provider_sha256,
+        "loaded_native_model_sha256": model.loaded_native_model_sha256,
+        "state_schema_sha256": bundle.state_schema_sha256,
+        "initial_state_sha256": bundle.integrity.initial_state_sha256,
+        "input_channel_schema_sha256": bundle.input_channel_schema_sha256,
+        "applied_input_sha256": bundle.applied_input_sha256,
+        "policy_sha256": bundle.policy_sha256,
+        "time_grid_sha256": bundle.time_grid_sha256,
+        "channel_ids": tuple(channel.channel_id for channel in history.channels),
+        "input_kind": history.input_kind.value,
+        "interpolation": history.interpolation.value,
+        "timebase_id": history.timebase_id,
+        "evidence_mode": replay_mode.value,
+        "horizon_s": float(history.time_seconds[-1] - history.time_seconds[0]),
+        "state_sample_count": len(history.time_seconds),
+        "applied_input_sample_count": len(history.values) - 1,
+        "nq": case.evidence.nq,
+        "nv": case.evidence.nv,
+        "full_state": True,
+        "full_horizon": True,
+        "state_reset_allowed": False,
+        "state_reset_count": None,
+    }
+    if receipt.schema_version != "native-execution/1.0.0" or any(
+        getattr(receipt, name) != value for name, value in expected.items()
+    ):
+        raise ValueError("native marker execution receipt differs from replay bundle")
+    if receipt.qualification != "unqualified":
+        raise ValueError("native marker replay cannot promote qualification")
 
 
 def _evaluate_native_acceptance(
@@ -603,6 +676,10 @@ def _build_score_receipt(
     initial_state_sha256 = integrity.initial_state_sha256
     drive_mode = row.drive_mode
     evidence_sha256 = _canonical_sha256(_evidence_payload(evidence))
+    marker_evidence = case.native_marker_evidence
+    if marker_evidence is None:
+        raise ValueError("native marker replay evidence is required for scoring")
+    marker_evidence_sha256 = _canonical_sha256(marker_evidence.as_dict())
     receipt_payload = {
         "schema_version": FEEDBACK_OBSERVATION_SCHEMA_VERSION,
         "source_replay_identity_sha256": replay_identity,
@@ -615,6 +692,10 @@ def _build_score_receipt(
         "bundle_schema": evidence.bundle_schema,
         "capture": declared_capture,
         "native_acceptance_receipt_sha256": native_acceptance_receipt_sha256,
+        "native_marker_replay_evidence_sha256": marker_evidence_sha256,
+        "native_execution_receipt_sha256": marker_evidence.receipt_sha256,
+        "native_marker_map_sha256": marker_evidence.marker_map_sha256,
+        "native_marker_output_sha256": marker_evidence.marker_output_sha256,
         "frame_id": alignment.frame_id,
         "timebase_id": alignment.timebase_id,
         "marker_labels": alignment.marker_labels,
@@ -646,6 +727,10 @@ def _build_score_receipt(
         bundle_schema=evidence.bundle_schema,
         capture=declared_capture,
         native_acceptance_receipt_sha256=native_acceptance_receipt_sha256,
+        native_marker_replay_evidence_sha256=marker_evidence_sha256,
+        native_execution_receipt_sha256=marker_evidence.receipt_sha256,
+        native_marker_map_sha256=marker_evidence.marker_map_sha256,
+        native_marker_output_sha256=marker_evidence.marker_output_sha256,
         frame_id=alignment.frame_id,
         timebase_id=alignment.timebase_id,
         marker_labels=alignment.marker_labels,
