@@ -1,0 +1,15 @@
+{
+  "method": "CPodes",
+  "accuracy": 1e-08,
+  "transition_velocity_m_s": 0.001,
+  "window_s": 0.02,
+  "build_s": 2.146706974017434,
+  "completed": true,
+  "wall_s": 12.713192078052089,
+  "net_force_over_weight_last": 1.0000382046453855,
+  "axial_slip_mm": 7.423967036569544e-05,
+  "squeeze_last_n": [
+    1101.5437646067999,
+    1104.0017473551757
+  ]
+}

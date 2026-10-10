@@ -1145,6 +1145,33 @@
       "issue": 11739,
       "reason": "Issue #11739: OSV-7 simulate_grip_contact carries the swing, pad model, windowing and trail-shift options for the cross-engine grip comparison (10 parameters).",
       "expires_on": "2026-12-31"
+    },
+    {
+      "path": "docs/development/full_body_models/evidence/grip_kinetics/run_grip_contact_opensim.py",
+      "symbol": "main",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 11739,
+      "reason": "Issue #11739: OSV-7 OpenSim contact-grip evidence runner keeps argument parsing, simulation and artifact writing in one script entry point (125 lines).",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/engines/physics_engines/opensim/python/full_body_osim.py",
+      "symbol": "export_full_body_osim",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 11739,
+      "reason": "Issue #11739: OSV-7 export_full_body_osim gained the contact-grip option wiring (108 lines).",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/engines/physics_engines/opensim/python/full_body_osim.py",
+      "symbol": "export_full_body_osim",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 11739,
+      "reason": "Issue #11739: OSV-7 export_full_body_osim gained the contact-grip options (9 parameters).",
+      "expires_on": "2026-12-31"
     }
   ]
 }

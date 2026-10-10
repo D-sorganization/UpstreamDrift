@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+
 import numpy as np
 
 from src.shared.python.grip_contact.parity import GripKineticsSeries
