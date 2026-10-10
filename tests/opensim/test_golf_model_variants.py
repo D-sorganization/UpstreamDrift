@@ -189,9 +189,9 @@ CLUB_MESHES = (
 
 def _remove_element(path: Path, tag: str, name: str) -> None:
     """Delete the named ``tag`` element from the .osim at ``path`` (text edit)."""
-    import xml.etree.ElementTree as ET  # noqa: S405 - test-only tree surgery
+    from defusedxml import ElementTree as SafeET
 
-    tree = ET.parse(path)  # noqa: S314
+    tree = SafeET.parse(path)
     for parent in tree.getroot().iter():
         for child in list(parent):
             if child.tag == tag and child.get("name") == name:
