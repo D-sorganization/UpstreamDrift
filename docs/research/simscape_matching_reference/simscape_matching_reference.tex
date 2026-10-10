@@ -5454,6 +5454,89 @@ python3 -m pytest tests/unit/swing_comparison/test_turn.py \
 \end{verbatim}
 On the private capture A (anonymised), the markers give shoulder girdle $103.0^\circ$, upper trunk $92.2^\circ$ and pelvis $40.9^\circ$ at the top, and $-9.0^\circ$, $-19.2^\circ$ and $-49.8^\circ$ at impact, matching the independent audit of issue \#12042 within $0.1^\circ$. These values are not committed; the committed tests use a synthetic rigid-rotation fixture with exact known yaw. These are definitions and measurements, not a qualification of any engine.
 
+\section{Thorax and Shoulder-Girdle Turn Split (Issue \#12042, Slice 7)}
+\label{sec:turn_split}
+
+Status: \emph{measured, not adopted}. The MuJoCo lane put the shoulder girdle's scapular share of the turn into the thorax: at the top of capture-A the upper trunk of the consistency-resolved reference $q_{\mathrm{ref}}$ over-turned by $+18.1^\circ$ while the shoulder girdle was $+9.3^\circ$ and the scapular protraction coordinates sat near $-2^\circ$ to $-6^\circ$. Acceptance for this slice is: the upper trunk and pelvis within $5^\circ$ of the markers at top and impact, and the shoulder girdle within $8^\circ$, on capture-A and capture-B, without making the inverse-kinematics (IK) marker RMS or the forward-dynamics (FD) replay worse. An IK change below meets the turn bounds on both captures, but every setting that met them made the FD replay worse. It is therefore committed as an opt-in option, off by default, and the canonical receipts are unchanged. All results are MuJoCo; this is turn measurement, not an engine qualification.
+
+\subsection{Diagnosis}
+\begin{itemize}
+\item \emph{Thorax yaw is weakly identified.} At the top of capture-A, changing the thorax yaw by $15^\circ$ (with the other coordinates re-solved) moves the whole-window marker RMS by under $1$~mm. The arm and club markers (16 of the tracked set) therefore decide the yaw of the thorax and the scapulae, and the two shoulder-girdle markers are outvoted.
+\item \emph{The capture back triad is not rigid.} \texttt{BackLeft}--\texttt{BackTop} shortens from $209$ to $189$~mm at the top, so the rigid thorax cannot fit all three back markers exactly.
+\item \emph{The scapula ranges do not bind.} \texttt{ScapInputY} (protraction, the yaw share) is limited to $\pm40^\circ$ and the solved value at the top is $-2^\circ$ to $-6^\circ$. Widening it to $\pm60^\circ$ changed no solution, so lever (b), the scapula ranges, was rejected and no range was widened.
+\end{itemize}
+
+\subsection{Method}
+Two terms are added to the trajectory, consistency, shooting and ZMP-filter re-solves (\texttt{pipeline/turn\_split.py}); the address calibration and segment scaling stay marker-only.
+\begin{enumerate}
+\item A thorax-orientation residual (lever (c)). Let $\mathbf{a}=\widehat{\mathbf{p}_{\mathrm{BL}}-\mathbf{p}_{\mathrm{BR}}}$ be the unit axis between the calibrated \texttt{BackLeft} and \texttt{BackRight} attachments in the \texttt{Spine} frame, and $\mathbf{d}(t)$ the unit capture direction \texttt{BackRight}$\to$\texttt{BackLeft}. The residual is
+\begin{equation}
+\mathbf{r}_{\mathrm{thx}}(t)=\sqrt{w_{\mathrm{thx}}}\,\big(R_{\mathrm{Spine}}(q)\,\mathbf{a}-\mathbf{d}(t)\big),
+\end{equation}
+dimensionless and added beside the metre-valued marker residuals, using the same axis-target interface as the club-face residual (OSV-10). Frames with a missing marker, or a capture line shorter than $0.05$~m, have no target.
+\item Shoulder-girdle marker weights (lever (a)): \texttt{LShoulderBack} and \texttt{RShoulderBack} are weighted $w_{\mathrm{sg}}$ (all other markers $1$).
+\end{enumerate}
+The command-line options are \texttt{--thorax-weight} $w_{\mathrm{thx}}$ (default $0$) and \texttt{--shoulder-girdle-weight} $w_{\mathrm{sg}}$ (default $1$). The IK-passing setting is $w_{\mathrm{thx}}=0.3$, $w_{\mathrm{sg}}=5$; when either term is active the receipt carries an \texttt{ik.turn\_split} block.
+
+\subsection{Lever Sweep}
+The sweep used a fast address-to-impact IK at a stride of 6 frames on the committed seeded driver and iron specifications. The values are model minus marker turn in degrees (top/impact), with the window RMS.
+\begin{center}
+\begin{tabular}{lllll}
+\hline
+Setting & Capture & Upper trunk & Shoulder girdle & RMS (mm) \\
+\hline
+Marker-only & A & $+19.5/+7.9$ & $+9.9/-0.4$ & 23.3 \\
+$w_{\mathrm{thx}}=0.3$, $w_{\mathrm{sg}}=5$ & A & $+3.2/+2.2$ & $+6.7/-5.4$ & 24.4 \\
+Marker-only & B & $+13.9/+14.8$ & $+13.1/+7.2$ & 23.6 \\
+$w_{\mathrm{thx}}=0.3$, $w_{\mathrm{sg}}=5$ & B & $+2.5/+3.3$ & $+7.2/-0.8$ & 24.7 \\
+\hline
+\end{tabular}
+\end{center}
+Experiments that failed: scapula range $\pm60^\circ$ (no change); dropping \texttt{BackTop} (little change); \texttt{BackLeft}/\texttt{BackRight} weight $\times5$ or $\times20$ (partial); $w_{\mathrm{sg}}$ alone, or $w_{\mathrm{thx}}=0.1$ (upper trunk still out of bounds); $w_{\mathrm{sg}}=3$ with $w_{\mathrm{thx}}=0.2$ or $0.3$ (capture-B shoulder girdle $+8.9^\circ$/$+8.8^\circ$). A diagnostic with the arm and club markers and the closure removed still left the upper trunk at $+10^\circ$, which locates the remaining bias in the deforming back triad rather than in the arms alone.
+
+\subsection{Full Pipeline Before and After}
+The full pipeline was run with the documented canonical commands (seeded specifications; the iron with \texttt{--zmp-filter}). With $w_{\mathrm{thx}}=0$, $w_{\mathrm{sg}}=1$ it reproduces the committed receipts exactly. Turn values are model minus marker in degrees at top/impact. Capture-A markers: shoulder girdle $103.0/-9.0$, upper trunk $92.2/-19.2$, pelvis $40.9/-49.8$. Capture-B markers: $97.5/-1.1$, $86.9/-10.0$, $41.1/-41.7$.
+\begin{center}
+\small
+\begin{tabular}{llllllll}
+\hline
+Capture & $w_{\mathrm{thx}}$/$w_{\mathrm{sg}}$ & IK & $q_{\mathrm{ref}}$ & FD & UT ($q_{\mathrm{ref}}$) & SG ($q_{\mathrm{ref}}$) & UT (FD) \\
+ & & (mm) & (mm) & (mm) & & & \\
+\hline
+A & 0/1 & 32.98 & 32.17 & 61.63 & $+18.1/+4.5$ & $+9.3/-1.4$ & $+18.6/+10.0$ \\
+A & 0.3/5 & 33.26 & 32.53 & 69.09 & $+2.2/-0.8$ & $+6.5/-1.5$ & $+2.5/+5.9$ \\
+A & 0.2/5 & 33.08 & 32.34 & 65.00 & $+3.2/0.0$ & $+6.5/-2.1$ & $+3.6/+6.2$ \\
+A & 0.3/3 & 32.72 & 32.18 & 79.52 & $+2.5/-1.1$ & $+7.5/-0.9$ & $+2.8/+3.8$ \\
+A & 0.3/1 & 33.68 & 32.62 & 80.22 & $+2.8/-2.1$ & $+8.3/-0.7$ & $+3.3/+5.3$ \\
+B & 0/1 & 31.13 & 30.36 & 46.97 & $+13.4/+8.5$ & $+11.0/+1.0$ & $+13.0/+12.7$ \\
+B & 0.3/5 & 32.68 & 32.07 & 71.63 & $+2.2/+2.2$ & $+6.3/+1.7$ & $+2.8/+4.5$ \\
+\hline
+\end{tabular}
+\end{center}
+(UT = upper trunk, SG = shoulder girdle.) The split brings $q_{\mathrm{ref}}$ within the turn bounds on both captures at $0.3/5$ and on capture-A at $0.2/5$ and $0.3/3$, at an IK cost of $0.1$--$1.6$~mm. The FD replay is worse in every split run: capture-A $61.6\to65.0$--$80.2$~mm and capture-B $47.0\to71.6$~mm. By phase (capture-A, $0.3/5$), the FD error is unchanged before $0.9$~s ($14.9\to15.2$~mm), slightly worse to impact ($31.8\to34.4$ and $67.8\to71.2$~mm) and dominated by the follow-through after $1.35$~s ($109.1\to124.1$~mm); capture-B follow-through goes from $75.9$ to $129.7$~mm. The FD error is not monotonic in the weights (for example $0.2/5$ at $65.0$~mm against $0.3/3$ at $79.5$~mm), which indicates that the follow-through replay is sensitive to the reference rather than to the turn itself. The pelvis impact turn ($+12.3^\circ$ on A and $+9.6^\circ$ on B in $q_{\mathrm{ref}}$) is outside its $5^\circ$ bound with or without the split; it is governed by the hip rotation limit of slice 3 and is unaffected here.
+
+\subsection{Decision, Limitations and Reproduction}
+No setting met the turn bounds without regressing the FD replay, so the split is not made the default and the canonical receipts and ledger are unchanged. Open items:
+\begin{itemize}
+\item The follow-through FD regression must be explained (for example, by restricting the thorax target to the address-to-impact window or by re-tuning the tracking gains) before the split can be adopted.
+\item The axis-target rows exist only in the MuJoCo IK; in the Drake and Pinocchio base classes \texttt{\_axis\_rows} is a no-op, so the option has no effect there.
+\item Capture-O was not run.
+\item The pelvis impact turn belongs to slice 3.
+\end{itemize}
+A committed synthetic test (\texttt{tests/unit/motion\_matching/pipeline/test\_turn\_split.py}) builds markers from a known partition (thorax $-50^\circ$, each scapula $-10^\circ$), drags the arm and club markers a further $12^\circ$ about the vertical, and checks that the marker-only IK error of the upper trunk ($-4.7^\circ$) falls below $1.5^\circ$ with the split ($-0.8^\circ$), while the shoulder-girdle error also shrinks ($-8.9^\circ\to-5.0^\circ$). Reproduction, with \texttt{G=docs/development/full\_body\_models}:
+\begin{verbatim}
+python3 -m pytest tests/unit/motion_matching/pipeline/test_turn_split.py
+python3 -m src.shared.python.motion_matching.pipeline.cli \
+    --spec $G/full_body_spec_anthro_driver.json --static-seeds \
+    --capture driver --out runs/drv_split \
+    --thorax-weight 0.3 --shoulder-girdle-weight 5
+python3 -m src.shared.python.motion_matching.pipeline.cli \
+    --spec $G/full_body_spec_anthro_iron7.json --static-seeds --zmp-filter \
+    --capture iron --out runs/iron_split \
+    --thorax-weight 0.3 --shoulder-girdle-weight 5
+\end{verbatim}
+The turn values were read from each run's receipt \texttt{turn} block and from the FD trajectory with the same marker sites.
+
 \begin{thebibliography}{9}
 \bibitem{MathWorksPSUnits}
 MathWorks. \emph{Simulink-PS Converter: Unit Conversion and Checking}.

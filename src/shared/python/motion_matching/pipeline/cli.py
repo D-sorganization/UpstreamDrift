@@ -89,9 +89,10 @@ from src.shared.python.motion_matching.pipeline.lane import (
     wrist_bounds,
 )
 from src.shared.python.motion_matching.pipeline.turn_split import (
-    SHOULDER_GIRDLE_MARKER_WEIGHT,
-    THORAX_AXIS_WEIGHT,
+    DEFAULT_SHOULDER_GIRDLE_WEIGHT,
+    DEFAULT_THORAX_WEIGHT,
     add_turn_split_arguments,
+    turn_split_active,
     turn_split_report,
 )
 from src.shared.python.motion_matching.pipeline.receipt import (
@@ -1092,8 +1093,8 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
     lane.set_face_targets(cal_res.attachments, cal_res.scaled_spec, args.face_weight)
     lane.set_turn_split(
         cal_res.attachments,
-        getattr(args, "thorax_weight", THORAX_AXIS_WEIGHT),
-        getattr(args, "shoulder_girdle_weight", SHOULDER_GIRDLE_MARKER_WEIGHT),
+        getattr(args, "thorax_weight", DEFAULT_THORAX_WEIGHT),
+        getattr(args, "shoulder_girdle_weight", DEFAULT_SHOULDER_GIRDLE_WEIGHT),
     )
 
     (
@@ -1142,7 +1143,8 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
         )
     )
     _attach_face_report(ik_report, lane, cal_res, (q_ik, q_ref), args.face_weight)
-    ik_report["turn_split"] = turn_split_report(lane)
+    if turn_split_active(lane):
+        ik_report["turn_split"] = turn_split_report(lane)
     np.savez(
         ctx.out_dir / "ik_trajectory.npz",
         time_s=lane.times,
