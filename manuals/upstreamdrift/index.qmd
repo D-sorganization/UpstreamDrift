@@ -79,6 +79,12 @@ UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
 
 {{< include chapters/40-native-reference-conventions.qmd >}}
 
+{{< include chapters/41-native-declared-cold-start.qmd >}}
+
+{{< include chapters/42-native-constrained-muscle-moco.qmd >}}
+
+{{< include chapters/48-native-constrained-mixed-moco.qmd >}}
+
 {{< include chapters/39-native-offline-muscle-matching.qmd >}}
 
 {{< include chapters/34-owned-native-simscape-replay.qmd >}}
