@@ -1,9 +1,12 @@
 """OpenSim two-hand grip closure: structure and residual (OSV-2, #11728).
 
 ``constrained_hands`` reads a ``.osim`` as plain XML (no OpenSim import) and
-reports how each hand is tied to the club.  ``weld_closure_series`` evaluates
-the closure weld of a generated full-body model over a swing with the OpenSim
-bindings.
+reports how each hand is tied to the club.  The Rajagopal golf models follow
+the OSV-9 topology of ``msk_club``: the lead ``WeldJoint hand_l_to_club``
+carries the club and the trail ``WeldConstraint hand_r_to_club`` closes the
+loop (or one ``BushingForce`` per hand for the bushing grip).
+``weld_closure_series`` evaluates the closure weld of a generated full-body
+model over a swing with the OpenSim bindings.
 """
 
 from __future__ import annotations
@@ -24,7 +27,8 @@ CLUB_BODY_NAMES = ("Club", "Clubhead")
 FULL_BODY_WELD = "two_hand_grip_closure"
 FULL_BODY_LEAD_JOINT = "joint_Clubhead"
 _ELEMENT = re.compile(
-    r'<(?P<tag>WeldJoint|WeldConstraint|PointConstraint) name="(?P<name>[^"]*)">'
+    r"<(?P<tag>WeldJoint|WeldConstraint|PointConstraint|BushingForce) "
+    r'name="(?P<name>[^"]*)">'
     r".*?</(?P=tag)>",
     re.DOTALL,
 )
@@ -33,17 +37,24 @@ _ELEMENT = re.compile(
 def constrained_hands(model_path: Path | str) -> dict[str, str]:
     """Map ``"lead"``/``"trail"`` to the element that ties that hand to the club.
 
-    Golf humanoid: ``hand_r`` through a weld joint, ``hand_l`` through a weld
-    or point constraint.  Generated full-body model: the lead hand is the
-    parent chain of the club joint and the trail hand is the closure weld.
-    Hands that are not tied are absent from the result.
-
-    The file is scanned as text: OpenSim writes ``Class::Name`` element names
-    that strict XML parsers reject.
+    Values are ``"<Tag>:<name>"``.  Hands that are not tied are absent.  The
+    file is scanned as text: OpenSim writes ``Class::Name`` element names that
+    strict XML parsers reject.  See :func:`constrained_hands_from_text`.
     """
     path = Path(model_path)
     require(path.is_file(), f"model not found: {path}")
-    text = path.read_text(encoding="utf-8")
+    return constrained_hands_from_text(path.read_text(encoding="utf-8"))
+
+
+def constrained_hands_from_text(text: str) -> dict[str, str]:
+    """:func:`constrained_hands` of a model's XML text.
+
+    Golf humanoid (OSV-9): ``hand_l`` through the lead weld joint (or its
+    bushing), ``hand_r`` through the trail weld constraint (or its bushing).
+    Generated full-body model: the lead hand is the parent chain of the club
+    joint and the trail hand is the closure weld.
+    """
+    require(isinstance(text, str), "text must be a string")
     found: dict[str, str] = {}
     for match in _ELEMENT.finditer(text):
         tag, name, body = match.group("tag"), match.group("name"), match.group(0)

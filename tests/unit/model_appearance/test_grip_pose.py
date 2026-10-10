@@ -34,8 +34,8 @@ def test_lead_hand_is_above_trail_hand_along_the_grip() -> None:
     assert pose.club_y_m(Hand.LEAD) < 0.0  # both hands are on the club
 
 
-def test_lead_hand_sits_about_1p5_cm_below_the_butt() -> None:
-    assert DEFAULT_GRIP_POSE.distance_below_butt_m(Hand.LEAD) == pytest.approx(0.015)
+def test_lead_hand_sits_3p2_cm_below_the_butt_as_in_the_spec() -> None:
+    assert DEFAULT_GRIP_POSE.distance_below_butt_m(Hand.LEAD) == pytest.approx(0.032)
 
 
 def test_hand_spacing_matches_the_spec_closure_placements() -> None:
@@ -138,7 +138,7 @@ def test_myosuite_club_sites_come_from_the_shared_pose() -> None:
 
     # Origin at the head, shaft toward -y: the lead hand is farther from the head.
     assert y(lead) < y(trail) < 0.0
-    assert y(lead) == pytest.approx(-(club.length_m - 0.015))
+    assert y(lead) == pytest.approx(-(club.length_m - 0.032))
     assert y(trail) - y(lead) == pytest.approx(DEFAULT_GRIP_POSE.hand_spacing_m)
 
 

@@ -5304,9 +5304,10 @@ routing; finger meshes, stills and clips are slice 2). The definition lives in
 its own copy.
 
 \subsection{Definition and Conventions}
-Distances are measured down the shaft from the butt end. The OpenSim club body
-has its origin at the butt and the shaft along $-y$, so a hand at distance
-$d$ below the butt has club coordinate $y=-d$; the MyoSuite club body has its
+Distances are measured down the shaft from the butt end. The tour-matching
+OpenSim club frame (\texttt{club\_geometry}) has its origin at the butt and the
+shaft along $-y$, so a hand at distance $d$ below the butt has club coordinate
+$y=-d$; the MyoSuite club body has its
 origin at the head, so the same hand sits at $y=-(L-d)$ for club length $L$.
 Angles are rotations about the grip axis $g$ (butt toward head), measured in
 the plane perpendicular to the shaft with $n$ the face normal (toward the
@@ -5319,9 +5320,9 @@ toward $-t$, that is toward the golfer and the trail shoulder.
 \hline
 Quantity & Symbol & Value & Basis \\
 \hline
-Lead-hand centre below butt & $d_L$ & 0.015 m & Issue scope, butt minus 1.5 cm \\
+Lead-hand centre below butt & $d_L$ & 0.032 m & Generated anthropometric spec (OSV-9) \\
 Hand-centre spacing & $s$ & 0.0762 m & Native Simscape spec (below) \\
-Trail-hand centre below butt & $d_T=d_L+s$ & 0.0912 m & Derived \\
+Trail-hand centre below butt & $d_T=d_L+s$ & 0.1082 m & Derived; equals the spec \\
 Lead V (thumb/index crease) & $\psi_L$ & 20 deg & Between chin (about 10) and trail shoulder (about 35) \\
 Trail V relative to lead V & $\Delta\psi$ & 0 deg & Parallel V angles \\
 Lead thumb offset to trail side & $\theta_T$ & 10 deg & Short thumb, slightly trail of centre \\
@@ -5348,16 +5349,25 @@ are now derived from it, and the MyoSuite scene sites no longer carry the
 reversed $-0.95$ / $-0.88$ m pair (trail above lead).
 
 \subsection{Golf Humanoid Closure}
-The Rajagopal hands share axes with the left mesh mirrored, so the same hand
-anchor (0, $-0.06$, 0) m and an identity relative rotation put the two palms
-on opposite sides of the shaft; this was checked at the neutral pose
-(identical ground orientations of \texttt{hand\_r} and \texttt{hand\_l}).
-\texttt{scripts/build\_humanoid\_osim.py} now (i) places the club-side frame of
-the trail \texttt{WeldJoint} at $y=-d_T$ instead of the butt, which moves the
-club 0.0912 m along the shaft relative to the trail hand, and (ii) adds the
-\texttt{WeldConstraint} \texttt{hand\_l\_to\_club} at $y=-d_L$
-(\texttt{point\_pair} gives two \texttt{PointConstraint}s 0.05 m apart). The
-compliant-attachment research option keeps both hands soft. Reproduce:
+The Rajagopal golf models take the two-hand club of OSV-9
+(\texttt{msk\_club}, section below): the lead \texttt{WeldJoint}
+\texttt{hand\_l\_to\_club} carries the club and the trail
+\texttt{WeldConstraint} \texttt{hand\_r\_to\_club} closes the loop, in both
+\texttt{golf\_humanoid.osim} and \texttt{golf\_humanoid\_scaled.osim}. The
+club-side grip points are the \texttt{GripInterface} positions of the
+generated anthropometric spec, which is the single source of truth: 0.032 m
+(lead) and 0.1082 m (trail) below the butt for both the driver and the
+7-iron, 0.0762 m apart. \texttt{grip\_pose} mirrors these values and
+\texttt{tests/opensim/test\_grip\_closure\_both\_hands.py} fails if they
+drift apart. The hand-side frames are the committed address calibration
+(\texttt{msk\_club\_grip\_calibration.json}), unchanged by this slice.
+
+An earlier draft of this slice placed the lead hand 0.015 m below the butt,
+with a lead \texttt{WeldConstraint} and a trail \texttt{WeldJoint} on a club
+whose origin was the butt. It was superseded when the OSV-9 club landed.
+Restoring a 0.015 m lead position would move both inverse-kinematics grip
+targets 0.017 m toward the butt and needs \texttt{msk\_club\_calibration} to be
+rerun for both models and both clubs; it awaits owner review. Reproduce:
 \texttt{python3 scripts/build\_humanoid\_osim.py}.
 
 \subsection{Closure Residual on the Canned Swing}
@@ -5397,11 +5407,96 @@ MyoSuite & unavailable & unavailable \\
  in the retargeted coordinate space are not committed. Its shaft capsule is
  drawn only half the club length, which predates this change.
 \item \texttt{golf\_humanoid.osim} has no closure-consistent swing in
- Rajagopal coordinates. The committed tour IK states for the scaled model do
- not satisfy the new lead weld (hands about 1 m from the club), so no
- \texttt{golf\_humanoid} residual series is claimed.
-\item \texttt{golf\_humanoid\_scaled.osim} and \texttt{musculoskeletal\_swing}
- have no builder path in this change and still weld only the trail hand.
+ Rajagopal coordinates, so no \texttt{golf\_humanoid} residual series is
+ claimed; its welds are exact at the calibrated address pose only.
+\end{itemize}
+
+\section{Shared Club in the Musculoskeletal OpenSim Models (OSV-9)}
+This section records a change to the Rajagopal-based OpenSim models
+(\texttt{src/engines/physics\_engines/opensim}), not to the Simscape model.
+Issue \#11756, epic \#11726. It is kinematic and structural: no forward
+dynamics of the swing is claimed.
+
+\subsection{Topology, Frames and Parameters}
+\texttt{golf\_humanoid.osim}, \texttt{golf\_humanoid\_scaled.osim} and the
+muscle model built by \texttt{musculoskeletal\_swing} previously carried a
+placeholder club (0.32 kg, 1.14 m) welded to the right hand only. They now
+carry one \texttt{Club} body built by \texttt{msk\_club.attach\_club} from
+the shared driver specification: mass and inertia from
+\texttt{ClubDynamics.from\_spec} (club solids only, 0.313 kg), the shared
+head, shaft and grip meshes (head rolled by
+\texttt{ADDRESS\_SQUARE\_FACE\_ROLL\_DEG}), and the lead and trail grip frames
+at the \texttt{GripInterface} points ($y=-1.124$ and $-1.048$ m along the
+shaft, frame $x$ along the shaft). The club frame origin is the sole point,
+with the shaft axis at $z=0.064$ m. The default \texttt{weld} grip matches
+the generated models: a lead \texttt{WeldJoint} (\texttt{hand\_l} to
+\texttt{Club}) and a trail \texttt{WeldConstraint}. The \texttt{bushing}
+grip uses a \texttt{FreeJoint} and two \texttt{BushingForce}s with the shared
+grip stiffness and damping designed for $\zeta=0.7$. The Rajagopal world is
+$Y$ up with the golfer facing $+X$. Native vectors map to it by
+$N=\left(\begin{smallmatrix}-1&0&0\\0&0&1\\0&1&0\end{smallmatrix}\right)$, and the native
+floor (the lowest head-mesh point at address) maps to $y=0$.
+
+\subsection{Address Calibration}
+The generated full-body model's own OpenSim FK at the captured address pose
+(capture A) gives the club pose $T_c$ and the hip, shoulder and elbow
+centres. Bounded least squares over the Rajagopal coordinates minimises the
+following terms:
+\begin{itemize}
+\item each hand's palm grip point $p_h=(0.022,-0.085,0)$ m (hand frame) to
+  its shaft grip point, weighted at 2 mm;
+\item $1-\hat s\cdot u_h$, weighted at 0.1, where $\hat s$ is the shaft
+  direction toward the head and $u_h$ is the radial axis tilted
+  40\textdegree{} toward the fingers (the diagonal palm grip);
+\item the landmarks, weighted at 4 cm;
+\item the planted foot bodies, weighted at 1 cm;
+\item a pull to neutral of 2 rad on the rotational coordinates.
+\end{itemize}
+Wrist deviation is bounded by the Rajagopal physiological range
+($-25$\textdegree{} to $35$\textdegree{}). The golf models widen this range
+for the swing (\#10003); the calibrated address must also load in the muscle
+model. The feet are planted ($\pm0.22$ m about the hip midpoint, flat)
+because the generated model's ankles are unobserved: they sit 0.14 to 0.5 m
+above the floor and 0.35 m behind the hips at address. Each hand-side frame
+is $T_h^{-1}T_c G_h$ at the solution, so both welds are exact at address.
+The muscle model is calibrated the same way at build time; copying the frames
+from the golf humanoid left a 26 mm trail gap and an assembly failure.
+
+\subsection{Acceptance Evidence}
+Tests: \texttt{tests/opensim/test\_msk\_club.py},
+\texttt{test\_msk\_club\_tracking.py} and
+\texttt{tests/test\_opensim\_model\_loads.py}.
+\begin{itemize}
+\item Mass and inertia equal the spec.
+\item Palm-to-grip gaps are at most 0.4 mm (golf humanoid 0.02 mm).
+\item The trail weld closes to $10^{-6}$ m after \texttt{initSystem}.
+\item The face is 0.18\textdegree{} at address by OpenSim FK.
+\item A 0.01 s forward step stays finite for the weld and bushing builds.
+\item The muscle model keeps 80 muscles and holds the club with
+  sub-millimetre gaps.
+\end{itemize}
+Landmark RMS is 13 mm for \texttt{golf\_humanoid} and 41 mm for the scaled
+model, whose wrists reach their bounds (wrist flexion 64 to 70\textdegree).
+Swing tracking (\texttt{msk\_club\_tracking}) reproduces the generated face
+angles (top 97.5 vs 98.8\textdegree, impact 11.1 vs 11.3\textdegree).
+The worst lead-grip error is 1.3 mm. The trail gap reaches 15 mm at the
+finish, where the trail weld constraint must close it.
+
+\subsection{Limitations and Reproduction}
+\begin{itemize}
+\item No MyoFullBody OpenSim export exists.
+\item Static optimisation with the two-hand club was not run.
+\item The Rajagopal hand meshes are unchanged.
+\item The tracked legs are a planted-feet assumption, not a measurement.
+\end{itemize}
+Reproduce as follows:
+\begin{itemize}
+\item calibration:
+  \texttt{python3 -m src.engines.physics\_engines.opensim.python.msk\_club\_calibration <models>};
+\item models: \texttt{python3 scripts/build\_humanoid\_osim.py}, with
+  \texttt{UPSTREAMDRIFT\_RAJAGOPAL\_OPENSENSE} pointing to the base model;
+\item renders, under xvfb only:
+  \texttt{python3 scripts/render\_msk\_club.py --geometry <dir>}.
 \end{itemize}
 
 \section{Dynamics-Informed Motion Estimation (DIME): Shared Reports, GUI Strategy Selection and Methods}

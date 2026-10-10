@@ -7,8 +7,9 @@ takes the same numbers.  Nothing here depends on an engine.
 Conventions
 -----------
 Distances are metres measured **down the shaft from the butt end** of the grip
-(``distance_below_butt_m``); the OpenSim club body has its origin at the butt
-and the shaft along ``-y``, so ``club_y_m`` is the negated distance.
+(``distance_below_butt_m``); the tour-matching OpenSim club frame
+(``club_geometry``) has its origin at the butt and the shaft along ``-y``, so
+``club_y_m`` is the negated distance.
 
 Angles are rotations about the grip axis ``g`` (butt toward head) in the plane
 perpendicular to the shaft.  With ``n`` the face normal (toward the target) and
@@ -29,11 +30,10 @@ from enum import Enum
 
 from src.shared.python.contracts import ensure, require
 
-#: Point of the hand body (metres, hand frame) that sits on the grip: about
-#: 6 cm distal to the wrist origin along the hand's ``-y`` (the shaft axis).
-#: Both hands use it; the Rajagopal hands share axes, with the left mesh
-#: mirrored, so the same anchor and an identity weld rotation put the two
-#: palms on opposite sides of the shaft.
+#: Nominal point of the hand body (metres, hand frame) that sits on the grip:
+#: about 6 cm distal to the wrist origin along the hand's ``-y``.  The OSV-9
+#: Rajagopal models do not use it: their hand grip frames come from the
+#: committed address calibration (``msk_club.HAND_GRIP_POINT_M``).
 HAND_GRIP_ANCHOR_IN_HAND_M: tuple[float, float, float] = (0.0, -0.06, 0.0)
 
 #: Hand-centre spacing along the shaft.  3 in (0.0762 m): the separation of the
@@ -41,8 +41,14 @@ HAND_GRIP_ANCHOR_IN_HAND_M: tuple[float, float, float] = (0.0, -0.06, 0.0)
 #: (``full_body_spec_v2.json``: ``closure.placement_b`` y = -1.0 m vs the lead
 #: joint ``child_to_follower`` y = -1.0762 m in the club frame).
 NATIVE_HAND_SPACING_M = 0.0762
-#: The lead hand's heel pad sits this far below the butt end.
-LEAD_BELOW_BUTT_M = 0.015
+#: Lead-hand grip point below the butt end.  The single source of truth is the
+#: generated anthropometric spec (``GripInterface.from_spec`` of
+#: ``full_body_spec_anthro_{driver,iron7}.json``, which the OSV-9 musculoskeletal
+#: club and its committed address calibration use): 3.2 cm for both clubs.  It
+#: is mirrored here, not read at import, because the grip pose is club-agnostic
+#: and engine-free; ``tests/opensim/test_grip_closure_both_hands.py`` fails if
+#: the two drift apart.
+LEAD_BELOW_BUTT_M = 0.032
 
 
 class Hand(str, Enum):

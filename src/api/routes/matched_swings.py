@@ -10,16 +10,17 @@ Routes
 - ``GET /matched-swings/{id}`` — receipt JSON
 - ``GET /matched-swings/{id}/candidate`` — NPZ stream or preview JSON
 - ``GET /matched-swings/{id}/parity`` — parity report JSON
+- ``GET /matched-swings/{id}/report`` — Markdown fit-quality report download
 - ``GET /matched-swings/{id}/animation.gif`` — GIF stream
 """
 
 from __future__ import annotations
 
 from functools import lru_cache
-from typing import Any, NoReturn
+from typing import Any, Literal, NoReturn
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 
 from src.api.services.matched_swings_service import (
     MatchedSwingJobError,
@@ -78,6 +79,9 @@ async def list_matched_swings(
     drive_mode: str | None = Query(
         default=None, description="Filter by drive mode (e.g. torque_driven)"
     ),
+    profile: Literal["dynamic", "kinematic"] | None = Query(
+        default=None, description="Filter by candidate profile (dynamic or kinematic)"
+    ),
     ranked: bool = Query(
         default=False, description="When true, rank candidates in ascending RMSE order"
     ),
@@ -85,7 +89,9 @@ async def list_matched_swings(
     service: MatchedSwingsService = Depends(get_matched_swings_service),
 ) -> dict[str, Any]:
     """Return the matched-swing ledger as public run summaries."""
-    runs = service.list_runs(capture=capture, drive_mode=drive_mode, ranked=ranked)
+    runs = service.list_runs(
+        capture=capture, drive_mode=drive_mode, profile=profile, ranked=ranked
+    )
     return {
         "schema_version": "matched-swing-api/1",
         "total": len(runs),
@@ -200,6 +206,29 @@ async def get_matched_swing_parity(
             status_code=500, detail="Parity report is not a JSON object"
         )
     return dict(data)
+
+
+@router.get("/{run_id}/report")
+async def get_matched_swing_report(
+    run_id: str,
+    _local: None = Depends(require_local_client),
+    service: MatchedSwingsService = Depends(get_matched_swings_service),
+) -> Response:
+    """Download the Markdown fit-quality report for a run (desktop parity)."""
+    try:
+        markdown, filename = service.export_report_markdown(run_id)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except (FileNotFoundError, ValueError, RuntimeError) as exc:
+        _raise_job_error(
+            MatchedSwingJobError(code="report_unavailable", message=str(exc)),
+            status_code=404,
+        )
+    return Response(
+        content=markdown,
+        media_type="text/markdown; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
 
 
 @router.get("/{run_id}/animation.gif")
