@@ -1145,3 +1145,7 @@ three sampled poses. See chapter54 and
 `F07_GENERIC_SHOULDER_LAMINA_TURNOVER.md`. Keep the PR draft/unarmed until
 Tools #5503 and #12207 are integrated. No source anatomy, physiology,
 force/work chart, contact/grip, captured match or parity claim follows.
+
+## Explicitly Unqualified Moco Feasibility — #12225
+
+See docs/development/feedback_controls/F07_UNQUALIFIED_MOCO_FEASIBILITY_TURNOVER.md and canonical chapter55. Diagnostic opt-in retains unavailable passive admission and all other gates; no capture or muscle-matching qualification follows.

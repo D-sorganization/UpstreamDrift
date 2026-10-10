@@ -1,3 +1,13 @@
+## Explicitly Unqualified Moco Feasibility (#12225)
+
+The native runner accepts a default-false boolean diagnostic disposition only
+when passive physiological limits are unavailable. True is request-bound and
+retained in preparation; the unavailable-policy blocker remains visible, and
+all other source, physical, state, chart, observation and control gates remain
+mandatory. No supplied limits can be overridden, and independent excitation
+replay grants no muscle-matching qualification. Chapter55 and F07 unqualified
+feasibility turnover record TDD, native execution and remaining full-capture gates.
+
 ## Coordinate-Invariant Physical Inertia Contract (#12183)
 
 The existing DIME inertia helper checks triangle feasibility on sorted principal
