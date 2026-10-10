@@ -4,9 +4,8 @@ from __future__ import annotations
 
 from dataclasses import asdict, replace
 import json
-import math
 from pathlib import Path
-from typing import Any, Mapping, TypeGuard
+from typing import Any, Mapping
 
 from PyQt6 import QtCore, QtGui, QtWidgets
 
@@ -21,39 +20,14 @@ def _execute_and_export(request: Any, output_dir: Path, **kwargs: Any) -> Path:
     return execute_and_export(request, output_dir, **kwargs)
 
 
-def _is_finite_real(val: Any) -> TypeGuard[float]:
-    """Return True if val is a finite real number (excluding bool)."""
-    return (
-        isinstance(val, (int, float))
-        and not isinstance(val, bool)
-        and math.isfinite(val)
-    )
+from .matched_formatting import (
+    format_sg_interval,
+    format_sg_value,
+    is_finite_real,
+)
 
-
-def _format_sg_value(val: Any, *, absolute_tolerance: float | None = None) -> str:
-    """Keep compact SG text within 0.1% relative and optional absolute error.
-
-    Three decimal places remain the minimum for familiar ordinary values.
-    Small values use scientific notation. Interval endpoints additionally use
-    a width-based error budget, so a nonzero saved interval cannot collapse.
-    Missing and non-finite numbers remain unavailable rather than becoming zero.
-    """
-    if not _is_finite_real(val):
-        return "unavailable"
-    value = float(val)
-    if value == 0.0:
-        return "+0.000"
-    error_budget = abs(value) * 0.001
-    if absolute_tolerance is not None:
-        error_budget = min(error_budget, absolute_tolerance)
-    notation = "e" if abs(value) < 0.001 else "f"
-    for precision in range(3, 18):
-        rendered = format(value, f"+.{precision}{notation}")
-        if abs(float(rendered) - value) <= error_budget:
-            return rendered
-    # Seventeen significant digits round-trip any finite Python float, including
-    # an unusually narrow interval whose error budget is below fixed precision.
-    return format(value, "+.17g")
+_is_finite_real = is_finite_real
+_format_sg_value = format_sg_value
 
 
 def format_matched_course_scoring(
@@ -186,15 +160,8 @@ def format_matched_course_scoring(
                     and _is_finite_real(low)
                     and _is_finite_real(high)
                 ):
-                    width = high - low
-                    tolerance = 0.005 * width if width > 0 else None
-                    values = [
-                        _format_sg_value(value, absolute_tolerance=tolerance)
-                        for value in (est, low, high)
-                    ]
-                    paired_parts.append(
-                        f"{name}: {values[0]} [{values[1]}, {values[2]}] strokes"
-                    )
+                    rendered = format_sg_interval(est, low, high, check_reversed=False)
+                    paired_parts.append(f"{name}: {rendered} strokes")
                 else:
                     paired_parts.append(f"{name}: unavailable")
             else:

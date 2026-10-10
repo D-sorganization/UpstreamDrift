@@ -398,7 +398,7 @@ def test_report_tables_keep_denominators_and_noncausal_scope():
     assert "Not Attempted" in render_cell_table([describe_cell(_cell("unavailable"))])
     effect_table = render_effect_table([describe_effect_modification(_pair())])
     assert "8,000 / 10,000" in effect_table
-    assert "+0.0200" in effect_table
+    assert "+0.020" in effect_table
     assert "not a causal" in effect_table
 
 
@@ -422,7 +422,7 @@ def test_scoring_table_states_absolute_context_and_individual_population():
     assert "tee" in table
     assert "400.0 m" in table
     assert "15.0 m" in table
-    assert "-0.4000" in table
+    assert "-0.400" in table
     assert "9,000" in table and "8,500" in table
     assert "Common-Three Scored" in table
 

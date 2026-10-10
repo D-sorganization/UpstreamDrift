@@ -15,6 +15,7 @@ from pathlib import Path
 from statistics import fmean
 from typing import Any, Iterable, Mapping
 
+from .matched_formatting import format_sg_interval, format_sg_value
 from .matched_report import load_validated_cell
 from .provenance import manifest_files_match
 
@@ -471,7 +472,7 @@ def render_effect_table(effects: Iterable[Mapping[str, Any]]) -> str:
                 upper = _finite(value["upper_95"], "paired effect interval")
                 if lower > upper:
                     raise ValueError("paired effect interval is reversed")
-                interval = f"{estimate:+.4f} [{lower:+.4f}, {upper:+.4f}]"
+                interval = format_sg_interval(estimate, lower, upper)
             lines.append(
                 f"| {effect['comparison_kind']} | {name} | {interval} | "
                 f"{effect['common_six_n']:,} / {effect['total_n_per_population']:,} | "
@@ -519,7 +520,7 @@ def render_scoring_table(
             item = score["patterns"][name]
             lines.append(
                 f"| {cell_name} | {course} | {name} | "
-                f"{item['absolute_mean_strokes_gained']:+.4f} | "
+                f"{format_sg_value(item['absolute_mean_strokes_gained'])} | "
                 f"{item['individual_endpoint_supported_n']:,} / {total:,} | "
                 f"{item['common_three_scored_n']:,} / {total:,} |"
             )

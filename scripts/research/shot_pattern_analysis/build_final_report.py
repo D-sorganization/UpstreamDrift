@@ -14,12 +14,17 @@ import io
 import json
 import os
 from collections import Counter
+from collections.abc import Mapping
 from pathlib import Path
 from tempfile import NamedTemporaryFile
+from typing import Any
 
 
 PATTERNS = ("Straight", "Draw", "Fade")
 
+from src.tools.shot_pattern_analysis.matched_formatting import (
+    format_sg_interval_record,
+)
 from .final_report_inputs import (
     assemble_qualified_interpretation,
     profile_from_cell as _profile,
@@ -52,15 +57,8 @@ def _count_matrix(report: dict, label: str) -> tuple[int, int, int]:
     return total, counts.get("completed", 0), counts.get("unavailable", 0)
 
 
-def _interval(data: dict | None, digits: int = 4) -> str:
-    if not isinstance(data, dict):
-        return "Unavailable"
-    try:
-        values = (float(data[key]) for key in ("estimate", "lower_95", "upper_95"))
-        estimate, low, high = values
-    except (KeyError, TypeError, ValueError):
-        return "Unavailable"
-    return f"{estimate:.{digits}f} [{low:.{digits}f}, {high:.{digits}f}]"
+def _interval(data: Mapping[str, Any] | None) -> str:
+    return format_sg_interval_record(data)
 
 
 def render_cell_inventory(primary: dict, control: dict) -> str:
@@ -817,6 +815,7 @@ def _report_source_hashes() -> dict[str, str]:
         Path(__file__).resolve(),
         repository / "scripts/research/shot_pattern_analysis/final_report_inputs.py",
         repository / "src/tools/shot_pattern_analysis/matched_interpretation.py",
+        repository / "src/tools/shot_pattern_analysis/matched_formatting.py",
         repository / "src/tools/shot_pattern_analysis/matched_report.py",
         repository / "src/tools/shot_pattern_analysis/matched_lean_control.py",
         repository / "src/tools/shot_pattern_analysis/matched_sensitivity.py",

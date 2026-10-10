@@ -113,7 +113,7 @@ def test_report_shows_completed_and_unavailable_without_fabricating_effects():
     assert "10,000" in text
     assert "1 / 2" in text
     assert "nonairborne_nominal" in text
-    assert "0.0200 [0.0100, 0.0300]" in text
+    assert "+0.020 [+0.010, +0.030]" in text
     assert "conditional" in text.lower()
     assert "Phase One" in text
     assert "Missing Metric in Completed Cells" in text
