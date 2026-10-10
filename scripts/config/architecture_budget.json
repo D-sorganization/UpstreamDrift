@@ -1138,6 +1138,24 @@
       "expires_on": "2026-11-09"
     },
     {
+      "path": "src/engines/physics_engines/drake/python/motion_matching/humanoid_urdf.py",
+      "symbol": "_add_joint",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 11714,
+      "reason": "Issue #11714: pre-existing URDF joint emitter (10 > 8 budget) surfaced because GCV-8 adds right_hand_grip_analysis to this file; the function is untouched. Decompose at a follow-up.",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/engines/physics_engines/drake/python/motion_matching/humanoid_urdf.py",
+      "symbol": "_emit_segment",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 11714,
+      "reason": "Issue #11714: pre-existing URDF segment emitter (112 > 100 budget) surfaced because GCV-8 adds right_hand_grip_analysis to this file; the function is untouched. Decompose at a follow-up.",
+      "expires_on": "2026-12-31"
+    },
+    {
       "path": "src/engines/physics_engines/mujoco/python/grip_contact_sim.py",
       "symbol": "simulate_grip_contact",
       "rule": "parameters",
