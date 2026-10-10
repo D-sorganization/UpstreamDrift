@@ -411,42 +411,9 @@ def _selected_comparison_lines(primary: dict) -> list[str]:
 
 
 def _resolved_selected_comparison_lines(resolved_cells: list[dict]) -> list[str]:
-    lines = [
-        "### Resolved Zero-Lean Curve and Variability Comparison",
-        "",
-        "This resolved view integrates the qualified supplemental face-bounds protocol (pw-primary-face-bounds/1) for the four strong-curve pitching wedge conditions while preserving original primary protocol accounting (original_primary/1) above. Differences are matched shot by shot against Straight inside each cell. The common paired count may be smaller than every pattern's individual supported count. SG is per simulated opportunity; multiply by 100 for the same hypothetical effect over 100 identical opportunities, not per round.",
-        "",
-        "| Club | Profile | Twist SD (°) | Curve | Protocol | Individual Supported / Attempted (Straight; Draw; Fade) | Common-Three Scored / Attempted | Draw Δ SG [95%] | Fade Δ SG [95%] |",
-        "| --- | --- | ---: | ---: | --- | --- | ---: | --- | --- |",
-    ]
-    for cell in resolved_cells:
-        config = cell["config"]
-        descriptor = [
-            config["club"]["club_id"],
-            _profile(cell["cell"]),
-            f"{config['noise']['standard_deviations'][0]:g}",
-            f"{config['curve_scale']:g}",
-            cell.get("source_protocol", "original_primary/1"),
-        ]
-        score = cell["course_scoring"]
-        sg = score["paired_benefit_vs_straight"]
-        lines.append(
-            "| "
-            + " | ".join(
-                [
-                    *descriptor,
-                    "; ".join(
-                        f"{cell['summary'][name]['supported_n']:,} / {cell['summary'][name]['total_n']:,}"
-                        for name in PATTERNS
-                    ),
-                    f"{score['paired_n']:,} / {score['total_n']:,}",
-                    _interval(sg.get("Draw")),
-                    _interval(sg.get("Fade")),
-                ]
-            )
-            + " |"
-        )
-    return lines + [""]
+    from .report_tables import resolved_selection_lines
+
+    return resolved_selection_lines(resolved_cells)
 
 
 def _sensitivity_lines(sensitivity: dict[str, dict]) -> list[str]:
@@ -590,9 +557,7 @@ def render_lean_inventory(lean: dict) -> str:
 
 
 def _bounds_control_lines(bounds_control: Mapping[str, Any] | None) -> list[str]:
-    from src.tools.shot_pattern_analysis.matched_interpretation import (
-        render_effect_table,
-    )
+    from .report_tables import keyed_effect_table as render_effect_table
 
     lines = [
         "### Fixed-Target Across-Lean Bounds Controls",
@@ -628,10 +593,11 @@ def _qualified_interpretation_lines(interpretation: dict) -> list[str]:
     """Render only prevalidated cell, pair, and asset references."""
     from src.tools.shot_pattern_analysis.matched_interpretation import (
         render_cell_table,
-        render_effect_table,
         render_geometry_table,
         render_scoring_table,
     )
+
+    from .report_tables import keyed_effect_table as render_effect_table
 
     supplement = interpretation["supplement"]
     if supplement.get("status") != "qualified":
@@ -906,6 +872,7 @@ def _report_source_hashes() -> dict[str, str]:
         Path(__file__).resolve(),
         repository / "scripts/research/shot_pattern_analysis/final_report_inputs.py",
         repository / "scripts/research/shot_pattern_analysis/report_synthesis.py",
+        repository / "scripts/research/shot_pattern_analysis/report_tables.py",
         repository / "src/tools/shot_pattern_analysis/matched_interpretation.py",
         repository / "src/tools/shot_pattern_analysis/matched_formatting.py",
         repository / "src/tools/shot_pattern_analysis/matched_report.py",

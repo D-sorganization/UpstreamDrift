@@ -1,0 +1,77 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+_________ test_resolved_table_keeps_every_numeric_token_intact_in_pdf __________
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2170/test_resolved_table_keeps_ever0')
+
+    def test_resolved_table_keeps_every_numeric_token_intact_in_pdf(tmp_path):
+        pytest.importorskip('reportlab')
+        pypdf = pytest.importorskip('pypdf')
+        from scripts.research.shot_pattern_analysis.build_pdf import render_markdown_to_pdf
+    
+        cells = _cells()
+        source = tmp_path / 'preview.md'
+        source.write_text('# Partial Preview\n\n## Selected Results\n\n' + '\n'.join(_resolved_selected_comparison_lines(cells)))
+        output = tmp_path / 'preview.pdf'
+        render_markdown_to_pdf(source, output)
+        text = '\n'.join(page.extract_text() for page in pypdf.PdfReader(output).pages)
+        for cell in cells:
+            for pattern in ('Draw', 'Fade'):
+                interval = format_sg_interval_record(cell['course_scoring']['paired_benefit_vs_straight'][pattern])
+                tokens = re.findall(r'[+-]\d+(?:\.\d+)?(?:e[+-]\d+)?', interval)
+                for token in tokens:
+>                   assert token in text, f'numeric token split across lines: {token}'
+E                   AssertionError: numeric token split across lines: +7.462e-05
+E                   assert '+7.462e-05' in 'Partial Preview\nUpstreamDrift  |  Research Reference\nPage 1\nPartial Preview\nSelected Results\nResolved Zero-Lean ...99 /\n10,000\n9,999 /\n10,000\n+0.0010\n46 [+7.4\n06e-04,\n+0.0013\n32]\n-6.272e-\n04 [-9.68\n1e-04, -2\n.936e-04\n]\n'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/research/test_shot_pattern_report_table_layout.py:36: AssertionError
+________ test_resolved_table_maps_all_cells_and_independent_populations ________
+
+    def test_resolved_table_maps_all_cells_and_independent_populations():
+        cells = _cells()
+        text = '\n'.join(_resolved_selected_comparison_lines(cells))
+        for cell in cells:
+>           assert cell['cell'] in text
+E           AssertionError: assert 'driver_lean0_curve1_rotation1_shaft_only' in '### Resolved Zero-Lean Curve and Variability Comparison\n\nThis resolved view integrates the qualified supplemental f... 10,000; 9,999 / 10,000 | 9,999 / 10,000 | +0.001046 [+7.406e-04, +0.001332] | -6.272e-04 [-9.681e-04, -2.936e-04] |\n'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/research/test_shot_pattern_report_table_layout.py:43: AssertionError
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+../../../../Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487
+  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487: UserWarning: Skipping collection of '.hypothesis' directory - this usually means you've explicitly set the `norecursedirs` pytest config option, replacing rather than extending the default ignores.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 20 durations =============================
+3.51s call     tests/research/test_shot_pattern_report_table_layout.py::test_resolved_table_keeps_every_numeric_token_intact_in_pdf
+0.36s setup    tests/research/test_shot_pattern_report_table_layout.py::test_resolved_table_keeps_every_numeric_token_intact_in_pdf
+0.02s setup    tests/research/test_shot_pattern_report_table_layout.py::test_resolved_table_maps_all_cells_and_independent_populations
+0.02s teardown tests/research/test_shot_pattern_report_table_layout.py::test_resolved_table_maps_all_cells_and_independent_populations
+0.01s call     tests/research/test_shot_pattern_report_table_layout.py::test_resolved_table_maps_all_cells_and_independent_populations
+0.01s teardown tests/research/test_shot_pattern_report_table_layout.py::test_resolved_table_keeps_every_numeric_token_intact_in_pdf
+=========================== short test summary info ============================
+FAILED tests/research/test_shot_pattern_report_table_layout.py::test_resolved_table_keeps_every_numeric_token_intact_in_pdf
+FAILED tests/research/test_shot_pattern_report_table_layout.py::test_resolved_table_maps_all_cells_and_independent_populations
