@@ -92,7 +92,7 @@ The operational PDF/SVG helper is independently qualified under #12160 and reloc
 
 ## Original Vector Format Review
 
-Astra is auditing every PDF/SVG from the two completed original figure manifests with the qualified inspector (session `37782`, `/tmp/p2-original-vector-diagnostics/audit.py`; verify the live process before assuming activity). Final counts, warnings and hash reconciliation are pending. No live supplemental vector is read. Root separately viewed a completed 7-iron social-density PDF/SVG family and its PNG; labels and panels are intact. Evidence: `validation/vector_raster_sample_v1/`. The installed Sharp density setting does not map linearly from SVG point units to raster pixels; retain actual dimensions and proportional aspect in future comparisons. This is not a deliverable defect or full visual acceptance.
+Astra completed format diagnostics for all 744 original vectors: primary 198 PDF + 198 SVG, control 174 PDF + 174 SVG, with zero errors and no recorded PDF warnings. Exact manifests, closed path inventories, expected hashes and final source/output rechecks pass. Root independently rehashed all 744 assets and reconciled every diagnostic. Evidence: `validation/original_vector_diagnostics_v1/`. No live supplement was read. Root also viewed a completed 7-iron social-density PDF/SVG family and its PNG; labels and panels are intact (`validation/vector_raster_sample_v1/`). The installed Sharp density setting does not map linearly from SVG point units to raster pixels: retain actual dimensions/proportional aspect. Parsing and one representative visual check do not establish full vector or publication acceptance.
 
 ## Completed Numerical Data
 
