@@ -1,3 +1,11 @@
+# Project Steward Pass — 2026-10-06
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `staff/project-steward-task-63f93c`; draft PR opened from this branch (`docs(project): steward status 2026-10-06`).
+- Objective: keep `docs/project/CHARTER.md` and `STATUS.md` in step with the deferred-validation catalog.
+- Completed: added DV-11408 (catalog entry, not previously projected) as a parked feature and progress row; added its Board decision and two prerequisite decisions under Decisions Needed. Other six DV records were already projected and unchanged.
+- Not done: no Board proposal (DV-9546..DV-10382 first appeared 2026-09-23, under the 14-day age limit; DV-11408 is 2 days old). Central deferred-validation CLI and `check_agent_claim`/`post_agent_lease` were not runnable from this worktree; lease step fail-open per CLAUDE.md.
+- Next steps: re-run the steward pass on or after 2026-10-07 to evaluate the 2026-09-23 items against the 14-day limit.
+
 # Cone-Mode Sparse Checkout for Sidekick Wheel Smoke Job - #9507
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `claude/issue-9507`; PR: see branch (`Fixes #9507`)
@@ -177,4 +185,3 @@
   - `ruff format --check`: passed.
   - `mypy`: passed with 0 issues.
   - `check_architecture_budget.py`: passed (all changed functions $\le 8$ parameters, $\le 100$ lines).
-

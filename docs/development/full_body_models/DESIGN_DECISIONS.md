@@ -612,3 +612,5 @@ Scope of the couple check. It uses the engine's realised accelerations (`realize
 - The couple and internal force oscillate at about 15 Hz from 1.25 to 1.40 s. This is in the fitted wrist kinematics (it survives the 25 Hz filter) and is not validated against measured club angular acceleration.
 - The fitted swing has no ball. The impact metrics are those of the club passing through the ball position, not of the collision.
 - Software correctness only. Scientific qualification stays in the design-manual governance pathway. MuJoCo, Drake and Pinocchio bushing parity and the contact model remain open (#11739).
+
+Section 18 on: [volume 2](DESIGN_DECISIONS_2.md).
