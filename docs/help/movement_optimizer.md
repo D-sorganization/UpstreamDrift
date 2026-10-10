@@ -184,3 +184,4 @@ Each root `model_pack.yaml` declares the `model_pack/v1` schema, engine, engine-
 - [Biomechanics workspace architecture](../architecture/biomech_workspace.md)
 - [Project Map](../architecture/PROJECT_MAP.md)
 - [Lift pack audit design-manual chapter](../../manuals/upstreamdrift/chapters/15-lift-pack-audit.qmd)
+- [Lift model packs exploratory modelling reference (LaTeX)](../research/lift_models/README.md)

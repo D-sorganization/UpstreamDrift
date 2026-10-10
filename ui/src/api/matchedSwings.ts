@@ -12,6 +12,14 @@ export interface RunCapabilities {
   horizon_s: number | null;
 }
 
+export interface PhysicalGate {
+  name: string;
+  status: string;
+  measured: number | null;
+  threshold: number | null;
+  unit: string;
+}
+
 export interface MatchedSwingRun {
   id: string;
   engine: string;
@@ -24,12 +32,21 @@ export interface MatchedSwingRun {
   metrics: Record<string, number | null>;
   capabilities: RunCapabilities;
   reason?: string | null;
+  qualification_note?: string | null;
+  gates?: PhysicalGate[];
 }
 
 export interface MatchedSwingLedgerResponse {
   schema_version: string;
   total: number;
   runs: MatchedSwingRun[];
+}
+
+export interface MatchedSwingLedgerParams {
+  ranked?: boolean;
+  driveMode?: string;
+  profile?: string;
+  capture?: string;
 }
 
 export interface CandidatePreviewFrame {
@@ -48,8 +65,18 @@ function apiUrl(path: string): string {
   return `${getApiBase()}${path}`;
 }
 
-export async function fetchMatchedSwingLedger(): Promise<MatchedSwingLedgerResponse> {
-  const resp = await fetch(apiUrl('/api/v1/matched-swings'));
+export async function fetchMatchedSwingLedger(
+  params: MatchedSwingLedgerParams = {},
+): Promise<MatchedSwingLedgerResponse> {
+  // URLSearchParams, not `new URL(...)`: the browser build's API base is ''
+  // (relative), which `new URL` rejects.
+  const query = new URLSearchParams();
+  if (params.ranked) query.set('ranked', 'true');
+  if (params.driveMode) query.set('drive_mode', params.driveMode);
+  if (params.profile) query.set('profile', params.profile);
+  if (params.capture) query.set('capture', params.capture);
+  const suffix = query.toString() ? `?${query.toString()}` : '';
+  const resp = await fetch(apiUrl(`/api/v1/matched-swings${suffix}`));
   if (!resp.ok) {
     const text = await resp.text();
     throw new Error(`Failed to load matched-swing ledger: ${resp.status} ${text}`);
