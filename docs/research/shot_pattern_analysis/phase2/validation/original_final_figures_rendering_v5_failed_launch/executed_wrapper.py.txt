@@ -1,0 +1,217 @@
+"""Prepare or execute source-bound original figure revision; no simulation."""
+
+import argparse
+# ruff: noqa: T201 -- this execution wrapper writes durable console receipts.
+import datetime
+import hashlib
+import json
+import os
+import subprocess
+from pathlib import Path
+from src.tools.shot_pattern_analysis.matched_export import matched_source_snapshot
+from src.tools.shot_pattern_analysis.matched_report import load_matrix_report
+
+BOUNDS = Path("/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift")
+MAIN = Path("/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift")
+PHASE = MAIN / "docs/research/shot_pattern_analysis/phase2"
+EVIDENCE = (
+    BOUNDS
+    / "docs/research/shot_pattern_analysis/phase2/validation/original_final_figures_rendering_v5_preflight"
+)
+PYTHON = "/tmp/shot-pattern-validation-venv-20261009/bin/python"
+BUILDER = "scripts/research/shot_pattern_analysis/build_final_figures.py"
+RENDERERS = {
+    "src/tools/shot_pattern_analysis/academic_plots.py",
+    "src/tools/shot_pattern_analysis/matched_report_plots.py",
+}
+RUNS = [
+    ("final_v1", "final_figures_v2"),
+    ("control_final_v1", "control_final_figures_v2"),
+]
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def git(root, *args):
+    return subprocess.check_output(["git", "-C", str(root), *args], text=True).strip()
+
+
+def sources(root):
+    return {
+        str(p.relative_to(root)): sha(p)
+        for base in (
+            "src/tools/shot_pattern_analysis",
+            "scripts/research/shot_pattern_analysis",
+        )
+        for p in sorted((root / base).rglob("*.py"))
+    }
+
+
+def dataset(name):
+    report = load_matrix_report(PHASE / name, require_complete=True)
+    return {
+        key: report[key]
+        for key in (
+            "stage",
+            "execution",
+            "planned_cells",
+            "counts",
+            "plan_sha256",
+            "cell_manifest_sha256",
+        )
+    }
+
+
+def capture():
+    assert Path.cwd().resolve() == BOUNDS
+    own, main = sources(BOUNDS), sources(MAIN)
+    assert len(own) == len(main) == 52 and set(own) == set(main)
+    assert {key for key in own if own[key] != main[key]} == {BUILDER}
+    candidate = git(BOUNDS, "rev-parse", "c9c0fb194f")
+    assert git(BOUNDS, "merge-base", "--is-ancestor", candidate, "HEAD") == ""
+    assert not git(
+        BOUNDS,
+        "diff",
+        candidate,
+        "--",
+        "src/tools/shot_pattern_analysis",
+        "scripts/research/shot_pattern_analysis",
+    )
+    assert git(
+        BOUNDS,
+        "diff",
+        "3615196639",
+        candidate,
+        "--name-only",
+        "--",
+        "src/tools/shot_pattern_analysis",
+        "scripts/research/shot_pattern_analysis",
+    ).splitlines() == [BUILDER]
+    expected = json.loads((PHASE / "source_transition_supplement.json").read_text())[
+        "new_execution"
+    ]
+    actual = matched_source_snapshot()
+    assert set(actual) == set(expected)
+    assert all(actual[k] == expected[k] for k in actual if k != "source_sha256")
+    assert len(actual["source_sha256"]) == 54
+    assert set(actual["source_sha256"]) == set(expected["source_sha256"])
+    delta = {
+        k
+        for k in actual["source_sha256"]
+        if actual["source_sha256"][k] != expected["source_sha256"][k]
+    }
+    assert delta == RENDERERS
+    vendor = git(BOUNDS, "rev-parse", "HEAD:vendor/ud-tools")
+    assert vendor.startswith("3678409") and vendor == git(
+        MAIN, "rev-parse", "HEAD:vendor/ud-tools"
+    )
+    assert (
+        vendor
+        == git(BOUNDS / "vendor/ud-tools", "rev-parse", "HEAD")
+        == git(MAIN / "vendor/ud-tools", "rev-parse", "HEAD")
+    )
+    return {
+        "source_worktree": str(BOUNDS),
+        "source_commit": candidate,
+        "source_sha256": own,
+        "main_source_sha256": main,
+        "execution": actual,
+        "vendor_gitlink": vendor,
+        "builder_revision": {
+            "old_sha256": main[BUILDER],
+            "new_sha256": own[BUILDER],
+            "baseline_commit": "3615196639",
+            "candidate_commit": candidate,
+        },
+        "execution_delta": {
+            k: {
+                "accepted": expected["source_sha256"][k],
+                "rendered": actual["source_sha256"][k],
+            }
+            for k in sorted(delta)
+        },
+        "datasets": {name: dataset(name) for name, _ in RUNS},
+    }
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--preflight-only", action="store_true")
+    args = parser.parse_args()
+    for _, out in RUNS:
+        assert not (PHASE / out).exists(), f"output already exists: {out}"
+    snapshot = capture()
+    if args.preflight_only:
+        EVIDENCE.mkdir(parents=True, exist_ok=True)
+        (EVIDENCE / "preflight.json").write_text(
+            json.dumps(
+                {
+                    "status": "preflight_pass_not_launched",
+                    "wrapper_sha256": sha(Path(__file__)),
+                    **snapshot,
+                },
+                indent=2,
+            )
+            + "\n"
+        )
+        print("Preflight passed; no rendering launched.", flush=True)
+        return
+    preflight = json.loads((EVIDENCE / "preflight.json").read_text())
+    assert preflight["wrapper_sha256"] == sha(Path(__file__))
+    assert all(preflight[key] == value for key, value in snapshot.items())
+    records = []
+    for name, out in RUNS:
+        assert capture() == snapshot
+        command = [
+            PYTHON,
+            "-m",
+            "scripts.research.shot_pattern_analysis.build_final_figures",
+            str(PHASE / name),
+            str(PHASE / out),
+        ]
+        started = datetime.datetime.now(datetime.timezone.utc).isoformat()
+        print(json.dumps({"command": command, "started": started}), flush=True)
+        env = {
+            **os.environ,
+            "QT_QPA_PLATFORM": "offscreen",
+            "MPLBACKEND": "Agg",
+            "MUJOCO_GL": "egl",
+            "SDL_VIDEODRIVER": "dummy",
+        }
+        proc = subprocess.run(command, cwd=BOUNDS, env=env, check=False)
+        record = {
+            "command": command,
+            "started": started,
+            "finished": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            "exit_code": proc.returncode,
+        }
+        records.append(record)
+        Path("/tmp/p2-v5-" + out + "-exit.json").write_text(
+            json.dumps(record, indent=2) + "\n"
+        )
+        if proc.returncode:
+            raise SystemExit(proc.returncode)
+        assert capture() == snapshot
+    receipt = {
+        "scope": "Original Saved-Data Figures, Caption Revision Only",
+        "status": "rendered_pending_final_visual_review",
+        **snapshot,
+        "wrapper_sha256": sha(Path(__file__)),
+        "runs": records,
+        "manifests": {
+            out: sha(PHASE / out / "figure_manifest.json") for _, out in RUNS
+        },
+    }
+    (PHASE / "validation/original_final_figures_rendering_revision_v5.json").write_text(
+        json.dumps(receipt, indent=2) + "\n"
+    )
+    print(
+        "Completed both sets; independent visual and manifest acceptance remains required.",
+        flush=True,
+    )
+
+
+if __name__ == "__main__":
+    main()
