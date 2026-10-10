@@ -223,3 +223,25 @@ def test_posture_prior_validates_names_and_weights() -> None:
             posture_prior={"axial": (0.0, -1.0)},
             **common,
         )
+
+
+@pytest.mark.parametrize("seeded", [False, True])
+def test_frame_seeded_restarts_do_not_depend_on_earlier_frames(seeded: bool) -> None:
+    """With a frame-indexed jitter a frame's restarts are the same whether or
+    not earlier frames restarted; the shared stream shifts them."""
+    targets = _targets(3)
+    prior = np.tile(np.r_[np.zeros(6), ANGLE_RAD], (FRAMES, 1))
+    common = {
+        "ground": GROUND,
+        "prior_trajectory": prior,
+        "restart_seed_per_frame": seeded,
+        **RESTARTS,
+    }
+    valid = np.ones((FRAMES, 3), dtype=bool)
+    kin = _TwoBranchJoint()
+    full, _ = kin.solve_trajectory(targets, valid, prior[0], **common)
+    tail, _ = kin.solve_trajectory(
+        targets, valid, prior[0], frames=list(range(20, FRAMES)), **common
+    )
+    gap = float(np.max(np.abs(full[20:, 6] - tail[:, 6])))
+    assert (gap == 0.0) if seeded else (gap > 0.1)
