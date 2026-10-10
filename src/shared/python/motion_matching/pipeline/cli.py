@@ -986,37 +986,59 @@ def _maybe_shooting_fit(
     return q_track, zmp, shooting_report
 
 
+@dataclass(frozen=True)
+class _FinalizeInputs:
+    """Artifacts, kinematic solutions and replay states to finalize the receipt."""
+
+    ik_report: dict[str, Any]
+    cal_res: _CalibrateAndScaleResult
+    weld_report: dict[str, Any]
+    q_ref: np.ndarray
+    q_track: np.ndarray | None = None
+    sim_q: np.ndarray | None = None
+    neck_solve: Any = None
+    fd_neck: str = "ik"
+
+
 def _finalize_receipt(
     ctx: PipelineContext,
     receipt: dict[str, Any],
     context: tuple[Lane, Any, Any, logging.Logger],
-    *,
-    ik_report: dict[str, Any],
-    cal_res: _CalibrateAndScaleResult,
-    weld_report: dict[str, Any],
-    q_ref: np.ndarray,
-    q_track: np.ndarray | None = None,
-    sim_q: np.ndarray | None = None,
-    neck_solve: Any = None,
-    fd_neck: str = "ik",
+    inputs: _FinalizeInputs,
 ) -> None:
     """Attach engine/gaze/weld metadata, run the optimiser stage and persist
     the receipt."""
     lane, kin, sim, log = context
     receipt["engine"] = ctx.engine
-    receipt["head_gaze"] = head_gaze_receipt(lane, kin, q_ref)
-    if "dynamics" in receipt and q_track is not None and sim_q is not None:
+    receipt["head_gaze"] = head_gaze_receipt(lane, kin, inputs.q_ref)
+    if (
+        "dynamics" in receipt
+        and inputs.q_track is not None
+        and inputs.sim_q is not None
+    ):
         receipt["dynamics"]["head_gaze"] = fd_head_gaze_report(
-            lane, kin, q_ref, q_track, sim_q, neck_solve, fd_neck
+            lane,
+            kin,
+            inputs.q_ref,
+            inputs.q_track,
+            inputs.sim_q,
+            inputs.neck_solve,
+            inputs.fd_neck,
         )
-    receipt["tracking_weld_projection"] = weld_report
-    _attach_turn_block(receipt, ctx, lane, kin, q_ref, cal_res, ik_report)
+    receipt["tracking_weld_projection"] = inputs.weld_report
+    _attach_turn_block(
+        receipt, ctx, lane, kin, inputs.q_ref, inputs.cal_res, inputs.ik_report
+    )
     _apply_trajectory_optimiser(
         ctx.args, ctx.out_dir, receipt, lane=lane, kin=kin, sim=sim
     )
     _write_receipt(ctx.out_dir, receipt)
     log_pipeline_summary(
-        log, receipt, ik_report, cal_res.calibration, cal_res.calibration2
+        log,
+        receipt,
+        inputs.ik_report,
+        inputs.cal_res.calibration,
+        inputs.cal_res.calibration2,
     )
 
 
@@ -1108,14 +1130,16 @@ def _simulate_and_receipt(
         ctx,
         receipt,
         (lane, kin, sim, log),
-        ik_report=ik_report,
-        cal_res=cal_res,
-        weld_report=weld_report,
-        q_ref=q_ref,
-        q_track=q_track,
-        sim_q=sim_q,
-        neck_solve=neck_solve,
-        fd_neck=fd_neck,
+        _FinalizeInputs(
+            ik_report=ik_report,
+            cal_res=cal_res,
+            weld_report=weld_report,
+            q_ref=q_ref,
+            q_track=q_track,
+            sim_q=sim_q,
+            neck_solve=neck_solve,
+            fd_neck=fd_neck,
+        ),
     )
     return receipt
 
