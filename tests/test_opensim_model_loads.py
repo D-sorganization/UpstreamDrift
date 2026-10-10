@@ -4,7 +4,8 @@ Two layers:
 
 1. **Pure-XML structural assertions** (always run) — validate that the
    committed ``golf_humanoid.osim`` has the expected topology: 23 bodies
-   incl. ``Club``, a ``WeldJoint`` linking ``hand_r`` → ``Club``, and one
+   incl. ``Club``, a lead ``WeldJoint`` (``hand_l`` → ``Club``) plus a trail
+   ``WeldConstraint`` (``hand_r``), and one
    ``CoordinateActuator`` per ``Coordinate``. These are guard-rails that
    protect against accidental edits to the generated artifact.
 
@@ -89,39 +90,41 @@ def test_club_body_present(model_xml: ET.Element) -> None:
     assert "Club" in bodies, f"Expected a 'Club' body; bodies were: {bodies}"
 
 
-def test_weld_joint_hand_r_to_club(model_xml: ET.Element) -> None:
-    """A WeldJoint must rigidly connect hand_r → Club at the grip."""
+def test_club_held_by_lead_weld_and_trail_constraint(model_xml: ET.Element) -> None:
+    """OSV-9 (#11756): lead WeldJoint hand_l -> Club, trail WeldConstraint hand_r."""
     joints = list(model_xml.find("JointSet").find("objects"))
-    weld_joints = [
-        j for j in joints if j.tag == "WeldJoint" and j.get("name") == "hand_r_to_club"
+    welds = [
+        j for j in joints if j.tag == "WeldJoint" and j.get("name") == "hand_l_to_club"
     ]
-    assert len(weld_joints) == 1, (
-        "Exactly one WeldJoint named 'hand_r_to_club' must exist; "
-        f"found {len(weld_joints)}."
+    assert len(welds) == 1, f"Expected one lead WeldJoint; found {len(welds)}."
+    assert welds[0].findtext("socket_parent_frame").startswith("/bodyset/hand_l/")
+    assert welds[0].findtext("socket_child_frame").startswith("/bodyset/Club/")
+    constraints = list(model_xml.find("ConstraintSet").find("objects"))
+    trail = [
+        c
+        for c in constraints
+        if c.tag == "WeldConstraint" and c.get("name") == "hand_r_to_club"
+    ]
+    assert len(trail) == 1, "Exactly one trail WeldConstraint 'hand_r_to_club'."
+    assert trail[0].findtext("socket_frame1").startswith("/bodyset/hand_r/")
+    assert trail[0].findtext("socket_frame2").startswith("/bodyset/Club/")
+
+
+def _club_frame(model_xml: ET.Element, name: str) -> ET.Element:
+    club = next(
+        b for b in model_xml.find("BodySet").find("objects") if b.get("name") == "Club"
     )
-    weld = weld_joints[0]
-    parent_socket = weld.find("socket_parent_frame").text
-    child_socket = weld.find("socket_child_frame").text
-    # Frames are owned by the joint; resolve them and check their bodies.
-    frame_map = {
-        f.get("name"): f.find("socket_parent").text
-        for f in weld.find("frames").findall("PhysicalOffsetFrame")
-    }
-    assert frame_map[parent_socket] == "/bodyset/hand_r"
-    assert frame_map[child_socket] == "/bodyset/Club"
+    return next(
+        f
+        for f in club.find("components").findall("PhysicalOffsetFrame")
+        if f.get("name") == name
+    )
 
 
 def test_clubhead_offset_frame_present(model_xml: ET.Element) -> None:
     """A clubhead frame must exist on the Club body for FK extraction."""
-    weld = next(
-        j
-        for j in model_xml.find("JointSet").find("objects")
-        if j.tag == "WeldJoint" and j.get("name") == "hand_r_to_club"
-    )
-    frames = weld.find("frames").findall("PhysicalOffsetFrame")
-    head_frames = [f for f in frames if f.get("name") == "club_head_offset"]
-    assert head_frames, "Clubhead frame 'club_head_offset' missing from WeldJoint."
-    assert head_frames[0].find("socket_parent").text == "/bodyset/Club"
+    head = _club_frame(model_xml, "club_head_offset")
+    assert head.findtext("socket_parent") == ".."
 
 
 def test_one_actuator_per_coordinate(model_xml: ET.Element) -> None:
@@ -253,20 +256,14 @@ def test_golf_swing_coordinate_ranges(model_xml: ET.Element) -> None:
         )
 
 
-def test_club_dimensions_match_tour_capture(model_xml: ET.Element) -> None:
-    """Club length must match tour-average capture (1.042 m grip-to-head)."""
-    weld = next(
-        j
-        for j in model_xml.find("JointSet").find("objects")
-        if j.tag == "WeldJoint" and j.get("name") == "hand_r_to_club"
-    )
-    frames = weld.find("frames").findall("PhysicalOffsetFrame")
-    head_frame = next(f for f in frames if f.get("name") == "club_head_offset")
-    trans = [float(v) for v in (head_frame.findtext("translation") or "").split()]
-    # Distal offset along -y is club length: 1.042 m
-    assert abs(trans[1] - (-1.042)) < 1e-3, (
-        f"Expected club head translation y == -1.042 m, got {trans[1]}"
-    )
+def test_club_dimensions_match_the_shared_driver_spec(model_xml: ET.Element) -> None:
+    """The lead grip sits on the shaft of the shared driver (1.156 m, OSV-9)."""
+    from src.shared.python.motion_matching.club_models import DRIVER, WRIST_TO_BUTT_M
+
+    lead = _club_frame(model_xml, "club_grip_offset")
+    trans = [float(v) for v in (lead.findtext("translation") or "").split()]
+    # Club body origin is the sole; the lead grip is 32 mm below the butt end.
+    assert trans[1] == pytest.approx(-(DRIVER.length_m - WRIST_TO_BUTT_M), abs=1e-9)
 
 
 # ---------------------------------------------------------------------------
@@ -294,8 +291,10 @@ def test_model_loads_and_initsystem() -> None:
     state = model.initSystem()  # raises on any structural problem
     assert state is not None
 
-    # Joint count: 22 articulated joints + 1 WeldJoint (hand_r_to_club) = 23.
+    # Joint count: 22 articulated joints + 1 lead WeldJoint (hand_l_to_club);
+    # the trail hand is closed by a WeldConstraint (OSV-9).
     assert model.getJointSet().getSize() == 23
+    assert model.getConstraintSet().contains("hand_r_to_club")
 
     # Coordinate count + actuator count parity.
     n_coords = model.getCoordinateSet().getSize()
