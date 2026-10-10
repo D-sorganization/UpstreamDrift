@@ -13,15 +13,19 @@ from src.engines.physics_engines.mujoco.python.native_torque_replay import (
 pytestmark = pytest.mark.unit
 
 
-def test_lab_namespace_exposes_pinned_tools_without_copying_contracts() -> None:
-    from src.shared.python._seam_redirect import extend_sidekick_lab_path
-
-    extend_sidekick_lab_path()
+def test_contracts_resolve_pinned_tools_without_mutating_the_lab_namespace() -> None:
     from sidekick import lab
 
+    from src.engines.physics_engines.mujoco.python import native_torque_replay
+
+    before = list(lab.__path__)
+    mocap = native_torque_replay._contracts()
+
     root = Path(__file__).resolve().parents[3]
-    vendor_lab = root / "vendor/ud-tools/src/shared/python/sidekick/lab"
-    assert vendor_lab.resolve() in {Path(path).resolve() for path in lab.__path__}
+    vendor_mocap = root / "vendor/ud-tools/src/shared/python/sidekick/lab/mocap"
+    assert Path(mocap.__file__).resolve().parent == vendor_mocap.resolve()
+    assert hasattr(mocap, "ExperimentReplayBundle")
+    assert list(lab.__path__) == before
 
 
 @pytest.fixture
