@@ -1,0 +1,15 @@
+# Original Final Results: Narrative Preparation Review
+
+The current report source preserves the required methodological distinctions. This review prepares the final narrative; it does not accept an unpublished report or an incomplete figure set.
+
+The hash-bound complete data audits and all 396 saved summaries agree: the original primary matrix has 270 completed and 54 unavailable cells, with 8,100,000 attempted pattern rows; the control has 52 completed and 20 unavailable cells, with 1,560,000 attempted rows. Unavailable conditions are unattempted and must remain visible. Supplemental resolutions must appear with their separate protocol identities, not replace the original records.
+
+Every completed cell retains 10,000 attempts per pattern, no post-flight aim adjustment, and the historical baseline version 2. Individual endpoint counts differ conceptually from the common-three scoring population, even where their integer counts happen to coincide. Driver scores use tee starts on the hypothetical 400 m hole with 15 m fairway half-width; irons and wedge use fairway approach starts with a 15 m green radius. All saved scoring pattern counts equal their common-three count. Individual and common-three populations are bounded by the original attempts.
+
+The source currently labels individual geometric summaries, common-three within-cell SG and common-six cross-condition interactions separately. It does not infer a fraction of dispersion improvement caused by shorter distance. Matched nominal landings remove the intended initial target mismatch, but stochastic delivery can change realized carry, bias and support. Across-lean fixed-target matching changes nominal face, path and speed together: it is a comparison of complete conditions, not an isolated causal shaft-lean experiment.
+
+The range summaries in `review.json` are diagnostic ranges across heterogeneous conditions. They must not be presented as pooled effects, probabilities of benefit, or multiplicity-adjusted evidence. A narrower lateral distribution does not establish better target error or SG. The final report should retain paired intervals and physical units, show absolute SG context, and identify the six-population support intersection for each interaction.
+
+Shaft-twist SD remains an assumed primitive input rather than delivered face-angle SD or measured player precision. HDR regions describe the simulated endpoint population, not uncertainty in the mean. Bootstrap intervals describe Monte Carlo uncertainty under the model and course assumptions; they exclude empirical parameter, player and model uncertainty. Geometric face/loft coupling alone does not guarantee long-left or short-right carry.
+
+No additional substantive narrative defect was found in the two reviewed report modules. Final acceptance remains pending the completed supplemental comparisons, generated narrative, source-bound figure inventories, and direct inspection of the actual finished assets. The executed helper checks saved audited summaries without rereading or rescoring CSVs; it preserves all inputs and records their hashes.
