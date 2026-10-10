@@ -1,0 +1,23 @@
+{
+  "numeric_fields": 577,
+  "row_counts": {
+    "conditions": 24,
+    "geometry": 72,
+    "paired": 48,
+    "keys": 12,
+    "effect": 28,
+    "nominal": 12,
+    "synthesis": 6
+  },
+  "article_sha256": "4da27a01c2c1f5046233b912cdc57a0422535f8eb2c8f496d7a45bab4964ba10",
+  "script_sha256": "93c7bc9dc9e8a34183430c0b0e79db5d9168effe20b74b96352f63e5e5414862",
+  "negative_controls_rejected": [
+    "fine_precision",
+    "wrong_population",
+    "wrong_protocol",
+    "duplicate_row"
+  ],
+  "compiled": false,
+  "visual_review": false,
+  "full_publication_accepted": false
+}

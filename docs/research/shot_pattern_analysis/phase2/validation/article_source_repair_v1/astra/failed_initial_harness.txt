@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "/tmp/p2-article-astra-review/audit_candidate.py", line 15, in <module>
+    validate_resolved_selection(cells)
+  File "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/scripts/research/shot_pattern_analysis/report_synthesis.py", line 23, in validate_resolved_selection
+    if len(cells) != 24 or {c["cell"] for c in cells} != expected:
+                            ~^^^^^^^^
+KeyError: 'cell'

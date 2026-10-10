@@ -1,0 +1,582 @@
+{
+  "checked_fields": 72,
+  "failures": [],
+  "checks": [
+    {
+      "key": "E01",
+      "pattern": "Draw",
+      "field": "estimate",
+      "display": "+0.00282",
+      "actual": 0.002818006895857301,
+      "matches": true
+    },
+    {
+      "key": "E01",
+      "pattern": "Draw",
+      "field": "lower_95",
+      "display": "+0.002346",
+      "actual": 0.0023457310666235897,
+      "matches": true
+    },
+    {
+      "key": "E01",
+      "pattern": "Draw",
+      "field": "upper_95",
+      "display": "+0.00329",
+      "actual": 0.003287812973547091,
+      "matches": true
+    },
+    {
+      "key": "E01",
+      "pattern": "Fade",
+      "field": "estimate",
+      "display": "-0.001293",
+      "actual": -0.0012933794105451594,
+      "matches": true
+    },
+    {
+      "key": "E01",
+      "pattern": "Fade",
+      "field": "lower_95",
+      "display": "-0.001708",
+      "actual": -0.0017075462867510098,
+      "matches": true
+    },
+    {
+      "key": "E01",
+      "pattern": "Fade",
+      "field": "upper_95",
+      "display": "-8.956e-04",
+      "actual": -0.0008956274738255801,
+      "matches": true
+    },
+    {
+      "key": "E02",
+      "pattern": "Draw",
+      "field": "estimate",
+      "display": "+0.004905",
+      "actual": 0.004905032591681017,
+      "matches": true
+    },
+    {
+      "key": "E02",
+      "pattern": "Draw",
+      "field": "lower_95",
+      "display": "+0.00438",
+      "actual": 0.004382983373190278,
+      "matches": true
+    },
+    {
+      "key": "E02",
+      "pattern": "Draw",
+      "field": "upper_95",
+      "display": "+0.00545",
+      "actual": 0.00545231051310422,
+      "matches": true
+    },
+    {
+      "key": "E02",
+      "pattern": "Fade",
+      "field": "estimate",
+      "display": "-2.354e-04",
+      "actual": -0.00023541937361689405,
+      "matches": true
+    },
+    {
+      "key": "E02",
+      "pattern": "Fade",
+      "field": "lower_95",
+      "display": "-5.740e-04",
+      "actual": -0.0005740319453299297,
+      "matches": true
+    },
+    {
+      "key": "E02",
+      "pattern": "Fade",
+      "field": "upper_95",
+      "display": "+1.124e-04",
+      "actual": 0.00011235245020682497,
+      "matches": true
+    },
+    {
+      "key": "E03",
+      "pattern": "Draw",
+      "field": "estimate",
+      "display": "+0.00217",
+      "actual": 0.0021682485445200877,
+      "matches": true
+    },
+    {
+      "key": "E03",
+      "pattern": "Draw",
+      "field": "lower_95",
+      "display": "+0.0016",
+      "actual": 0.0016001133753659334,
+      "matches": true
+    },
+    {
+      "key": "E03",
+      "pattern": "Draw",
+      "field": "upper_95",
+      "display": "+0.002706",
+      "actual": 0.002706174340417945,
+      "matches": true
+    },
+    {
+      "key": "E03",
+      "pattern": "Fade",
+      "field": "estimate",
+      "display": "-9.699e-04",
+      "actual": -0.000969872768585676,
+      "matches": true
+    },
+    {
+      "key": "E03",
+      "pattern": "Fade",
+      "field": "lower_95",
+      "display": "-0.001502",
+      "actual": -0.0015021437445966008,
+      "matches": true
+    },
+    {
+      "key": "E03",
+      "pattern": "Fade",
+      "field": "upper_95",
+      "display": "-5.028e-04",
+      "actual": -0.0005027992535294424,
+      "matches": true
+    },
+    {
+      "key": "E04",
+      "pattern": "Draw",
+      "field": "estimate",
+      "display": "+0.00449",
+      "actual": 0.004487149875537121,
+      "matches": true
+    },
+    {
+      "key": "E04",
+      "pattern": "Draw",
+      "field": "lower_95",
+      "display": "+0.00394",
+      "actual": 0.00393766570217958,
+      "matches": true
+    },
+    {
+      "key": "E04",
+      "pattern": "Draw",
+      "field": "upper_95",
+      "display": "+0.00507",
+      "actual": 0.005066103581790338,
+      "matches": true
+    },
+    {
+      "key": "E04",
+      "pattern": "Fade",
+      "field": "estimate",
+      "display": "+9.299e-05",
+      "actual": 9.298539323259105e-05,
+      "matches": true
+    },
+    {
+      "key": "E04",
+      "pattern": "Fade",
+      "field": "lower_95",
+      "display": "-2.735e-04",
+      "actual": -0.0002735216135444836,
+      "matches": true
+    },
+    {
+      "key": "E04",
+      "pattern": "Fade",
+      "field": "upper_95",
+      "display": "+4.642e-04",
+      "actual": 0.00046416317558076306,
+      "matches": true
+    },
+    {
+      "key": "E05",
+      "pattern": "Draw",
+      "field": "estimate",
+      "display": "+6.449e-06",
+      "actual": 6.44854712184901e-06,
+      "matches": true
+    },
+    {
+      "key": "E05",
+      "pattern": "Draw",
+      "field": "lower_95",
+      "display": "-7.089e-05",
+      "actual": -7.089106865572494e-05,
+      "matches": true
+    },
+    {
+      "key": "E05",
+      "pattern": "Draw",
+      "field": "upper_95",
+      "display": "+4.934e-05",
+      "actual": 4.934200314962887e-05,
+      "matches": true
+    },
+    {
+      "key": "E05",
+      "pattern": "Fade",
+      "field": "estimate",
+      "display": "+2.000e-05",
+      "actual": 1.9999688110256854e-05,
+      "matches": true
+    },
+    {
+      "key": "E05",
+      "pattern": "Fade",
+      "field": "lower_95",
+      "display": "-5.979e-05",
+      "actual": -5.979478102884672e-05,
+      "matches": true
+    },
+    {
+      "key": "E05",
+      "pattern": "Fade",
+      "field": "upper_95",
+      "display": "+1.358e-04",
+      "actual": 0.00013579489301935357,
+      "matches": true
+    },
+    {
+      "key": "E06",
+      "pattern": "Draw",
+      "field": "estimate",
+      "display": "+2.109e-04",
+      "actual": 0.00021088612499607325,
+      "matches": true
+    },
+    {
+      "key": "E06",
+      "pattern": "Draw",
+      "field": "lower_95",
+      "display": "+9.164e-05",
+      "actual": 9.163611485094543e-05,
+      "matches": true
+    },
+    {
+      "key": "E06",
+      "pattern": "Draw",
+      "field": "upper_95",
+      "display": "+3.578e-04",
+      "actual": 0.00035779316349146827,
+      "matches": true
+    },
+    {
+      "key": "E06",
+      "pattern": "Fade",
+      "field": "estimate",
+      "display": "+0.001515",
+      "actual": 0.0015146785287921205,
+      "matches": true
+    },
+    {
+      "key": "E06",
+      "pattern": "Fade",
+      "field": "lower_95",
+      "display": "+0.001433",
+      "actual": 0.0014333201112030384,
+      "matches": true
+    },
+    {
+      "key": "E06",
+      "pattern": "Fade",
+      "field": "upper_95",
+      "display": "+0.001629",
+      "actual": 0.0016287721686257513,
+      "matches": true
+    },
+    {
+      "key": "E07",
+      "pattern": "Draw",
+      "field": "estimate",
+      "display": "-6.028e-05",
+      "actual": -6.0275021816287154e-05,
+      "matches": true
+    },
+    {
+      "key": "E07",
+      "pattern": "Draw",
+      "field": "lower_95",
+      "display": "-2.966e-04",
+      "actual": -0.00029661332998222686,
+      "matches": true
+    },
+    {
+      "key": "E07",
+      "pattern": "Draw",
+      "field": "upper_95",
+      "display": "+1.540e-04",
+      "actual": 0.00015399024325736624,
+      "matches": true
+    },
+    {
+      "key": "E07",
+      "pattern": "Fade",
+      "field": "estimate",
+      "display": "+2.175e-04",
+      "actual": 0.00021753968488091968,
+      "matches": true
+    },
+    {
+      "key": "E07",
+      "pattern": "Fade",
+      "field": "lower_95",
+      "display": "-7.965e-05",
+      "actual": -7.965288156183586e-05,
+      "matches": true
+    },
+    {
+      "key": "E07",
+      "pattern": "Fade",
+      "field": "upper_95",
+      "display": "+5.113e-04",
+      "actual": 0.0005113380529891381,
+      "matches": true
+    },
+    {
+      "key": "E08",
+      "pattern": "Draw",
+      "field": "estimate",
+      "display": "-2.476e-04",
+      "actual": -0.00024759190603234645,
+      "matches": true
+    },
+    {
+      "key": "E08",
+      "pattern": "Draw",
+      "field": "lower_95",
+      "display": "-4.948e-04",
+      "actual": -0.0004948097798874354,
+      "matches": true
+    },
+    {
+      "key": "E08",
+      "pattern": "Draw",
+      "field": "upper_95",
+      "display": "+2.780e-05",
+      "actual": 2.7803916800896178e-05,
+      "matches": true
+    },
+    {
+      "key": "E08",
+      "pattern": "Fade",
+      "field": "estimate",
+      "display": "+0.001183",
+      "actual": 0.001182900793187058,
+      "matches": true
+    },
+    {
+      "key": "E08",
+      "pattern": "Fade",
+      "field": "lower_95",
+      "display": "+9.817e-04",
+      "actual": 0.0009817451725574473,
+      "matches": true
+    },
+    {
+      "key": "E08",
+      "pattern": "Fade",
+      "field": "upper_95",
+      "display": "+0.001365",
+      "actual": 0.001364682438476691,
+      "matches": true
+    },
+    {
+      "key": "E09",
+      "pattern": "Draw",
+      "field": "estimate",
+      "display": "+0.001093",
+      "actual": 0.0010926831924960142,
+      "matches": true
+    },
+    {
+      "key": "E09",
+      "pattern": "Draw",
+      "field": "lower_95",
+      "display": "+0.001026",
+      "actual": 0.00102640515794385,
+      "matches": true
+    },
+    {
+      "key": "E09",
+      "pattern": "Draw",
+      "field": "upper_95",
+      "display": "+0.001164",
+      "actual": 0.0011635653368440248,
+      "matches": true
+    },
+    {
+      "key": "E09",
+      "pattern": "Fade",
+      "field": "estimate",
+      "display": "-0.001037",
+      "actual": -0.0010370962891657664,
+      "matches": true
+    },
+    {
+      "key": "E09",
+      "pattern": "Fade",
+      "field": "lower_95",
+      "display": "-0.001105",
+      "actual": -0.0011047929530935128,
+      "matches": true
+    },
+    {
+      "key": "E09",
+      "pattern": "Fade",
+      "field": "upper_95",
+      "display": "-9.711e-04",
+      "actual": -0.0009711341487379385,
+      "matches": true
+    },
+    {
+      "key": "E10",
+      "pattern": "Draw",
+      "field": "estimate",
+      "display": "+0.00559",
+      "actual": 0.005590491525009898,
+      "matches": true
+    },
+    {
+      "key": "E10",
+      "pattern": "Draw",
+      "field": "lower_95",
+      "display": "+0.005529",
+      "actual": 0.005528753276165701,
+      "matches": true
+    },
+    {
+      "key": "E10",
+      "pattern": "Draw",
+      "field": "upper_95",
+      "display": "+0.005643",
+      "actual": 0.00564323516790922,
+      "matches": true
+    },
+    {
+      "key": "E10",
+      "pattern": "Fade",
+      "field": "estimate",
+      "display": "-0.005479",
+      "actual": -0.0054790198292634,
+      "matches": true
+    },
+    {
+      "key": "E10",
+      "pattern": "Fade",
+      "field": "lower_95",
+      "display": "-0.00553",
+      "actual": -0.005530368666826816,
+      "matches": true
+    },
+    {
+      "key": "E10",
+      "pattern": "Fade",
+      "field": "upper_95",
+      "display": "-0.005418",
+      "actual": -0.005418490716384252,
+      "matches": true
+    },
+    {
+      "key": "E11",
+      "pattern": "Draw",
+      "field": "estimate",
+      "display": "+3.893e-04",
+      "actual": 0.000389315303627725,
+      "matches": true
+    },
+    {
+      "key": "E11",
+      "pattern": "Draw",
+      "field": "lower_95",
+      "display": "+2.185e-04",
+      "actual": 0.00021848705136951396,
+      "matches": true
+    },
+    {
+      "key": "E11",
+      "pattern": "Draw",
+      "field": "upper_95",
+      "display": "+5.506e-04",
+      "actual": 0.0005505621901394017,
+      "matches": true
+    },
+    {
+      "key": "E11",
+      "pattern": "Fade",
+      "field": "estimate",
+      "display": "-4.276e-04",
+      "actual": -0.0004276104924715274,
+      "matches": true
+    },
+    {
+      "key": "E11",
+      "pattern": "Fade",
+      "field": "lower_95",
+      "display": "-5.452e-04",
+      "actual": -0.0005452449082503445,
+      "matches": true
+    },
+    {
+      "key": "E11",
+      "pattern": "Fade",
+      "field": "upper_95",
+      "display": "-3.150e-04",
+      "actual": -0.00031499015055011585,
+      "matches": true
+    },
+    {
+      "key": "E12",
+      "pattern": "Draw",
+      "field": "estimate",
+      "display": "+5.621e-04",
+      "actual": 0.0005620856518476549,
+      "matches": true
+    },
+    {
+      "key": "E12",
+      "pattern": "Draw",
+      "field": "lower_95",
+      "display": "+4.164e-04",
+      "actual": 0.0004164434890593165,
+      "matches": true
+    },
+    {
+      "key": "E12",
+      "pattern": "Draw",
+      "field": "upper_95",
+      "display": "+7.167e-04",
+      "actual": 0.0007166807174056414,
+      "matches": true
+    },
+    {
+      "key": "E12",
+      "pattern": "Fade",
+      "field": "estimate",
+      "display": "-2.935e-04",
+      "actual": -0.00029346307415259915,
+      "matches": true
+    },
+    {
+      "key": "E12",
+      "pattern": "Fade",
+      "field": "lower_95",
+      "display": "-4.911e-04",
+      "actual": -0.0004910576535580905,
+      "matches": true
+    },
+    {
+      "key": "E12",
+      "pattern": "Fade",
+      "field": "upper_95",
+      "display": "-8.723e-05",
+      "actual": -8.723417604624049e-05,
+      "matches": true
+    }
+  ]
+}

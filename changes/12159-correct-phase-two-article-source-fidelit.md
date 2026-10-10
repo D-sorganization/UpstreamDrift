@@ -2,6 +2,6 @@
 issue: 12159
 summary: "Correct phase-two article source fidelity and unsupported review claims"
 dl_state: "in_progress"
-next_step: "Complete independent numerical article repair, record truthful compiler diagnostics, and qualify final publication before ready PR delivery"
+next_step: "Numerical article repair independently verified; resolve external compiler issue #12120 and qualify rendered publication before ready PR delivery"
 branch: "codex/shot-pattern-matched-delivery"
 ---
