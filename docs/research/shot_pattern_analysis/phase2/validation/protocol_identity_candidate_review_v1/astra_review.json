@@ -1,0 +1,28 @@
+{
+  "status": "changes_required",
+  "scope": "Provisional read-only naming candidate; not final source acceptance",
+  "source_sha256": "df1469a8e43f0e947cb30861bc8fb41eeeadb8ad165621d7d9814c754fe38b83",
+  "findings": [
+    {
+      "id": "exact_identity_digest",
+      "finding": "Formatting target to .3f before hashing merges 100.0001 and 100.0002; canonical full ordered tuple serialization must drive digest."
+    },
+    {
+      "id": "strict_identity_types",
+      "finding": "str coercion admits non-string identifiers; bool target is accepted as int. Reject these rather than silently normalize identities."
+    },
+    {
+      "id": "duplicate_guard",
+      "finding": "New ledger helper compares raw path strings and skips absent paths, duplicating the stronger pipeline resolved-path guard. Keep one canonical completed-ledger guard."
+    },
+    {
+      "id": "whole_plan_preflight",
+      "finding": "Pipeline must validate all planned pair and cell stems before comparison bootstrap or any rendering, using production naming helpers."
+    },
+    {
+      "id": "portable_tests",
+      "finding": "Actual384 test hardcodes a machine-specific live report path and skips elsewhere; preserve actual inventory proof in evidence and use synthetic portable CI fixtures."
+    }
+  ],
+  "recommended_api": "validate_planned_figure_identities(pairs, cell_refs) -> None; separate cells/comparisons namespaces, reject repeated identity and stem collision; pipeline supplies only uniquely executed supplement cell refs"
+}
