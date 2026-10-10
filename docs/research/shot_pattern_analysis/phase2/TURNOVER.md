@@ -44,16 +44,16 @@ The accepted isolated tree also contains exact GUI round-trip `b102ad0cf9` (22 t
 
 ## Immediate Next Steps
 
-1. Finish control fresh-restoration verification and the isolated layout regression repair.
-2. Save the completed full control audit/archive evidence, then integrate accepted supplemental execution sources.
-3. Merge the accepted isolated branch into the main feature branch, preserving its history. Retain both strict original protocol validation and dedicated social generation when resolving report-builder conflicts. Require exact accepted new execution snapshot equality. A read-only merge-tree preview against MAIN `0282f0435b` has one conflict in `build_final_figures.py::_supported_points`: retain MAIN’s `load_individually_supported_endpoints` implementation and the bounds branch’s other figure updates. Temporary resolved file `/tmp/p2-resolved-build_final_figures.py` parses and passes Ruff/format with its real repository filename; all non-vendor execution hashes in the preview match the accepted transition. Revalidate against actual merge heads; no merge has been applied and this is not runtime acceptance.
+1. Both original complete audits and fresh archive restorations passed; immutable evidence and all bounded archives are committed.
+2. Accepted bounds merged as `b21a57f2d0`; reviewed presentation merged as `3f5945edff`. Exact54-source/native/runtime snapshot equality passes. Integration suite97 passed, two slow tests deselected. Receipt: `validation/supplement_composition.json`.
+3. Three32-shot supplemental pilots are running sequentially in session12377 via `/tmp/p2-supplement-pilots.py`; log `/tmp/p2-supplement-pilots.log`, individual exit receipts `/tmp/p2-supplement-pilot-{protocol}-exit.json`. Outputs: `supplement_pilot_v1/{pw_primary_face,pw_control_face,driver_control_speed}`. Freeze all accepted execution sources and never restart a live or completed pilot blindly.
 4. Run three separately named 32-shot supplemental pilots and four alias proofs, audit them, execute the predeclared 333-case / 1,998-evaluation refinement, and obtain separate immutable supplemental final acceptance before the 26 unique 10,000-shot cells.
 5. Generate complete statistics, common-six effects, scoring sensitivities and all-club academic/social assets. Complete linked Markdown/HTML/PDF/editable LaTeX, independent data/claims/visual review, bounded raw archives and fresh restoration.
 6. Update current handoffs/change fragment, run final repository gates and publish ready PR(s) through the merge-queue guard. No issue closure without merged acceptance evidence; #11984 remains an empirical obligation.
 
 ## Running Jobs
 
-Original simulation workers are finished. Their historical logs are `/tmp/p2-final-worker{0,1}.log` and per-matrix/shard exit receipts remain in `/tmp`. Control archive restoration46633 also completed exit0; there are no active original numerical/audit/archive jobs. Supplemental pilots have not started; preserve accepted sources during every run.
+Original simulation workers are finished. Their historical logs are `/tmp/p2-final-worker{0,1}.log` and per-matrix/shard exit receipts remain in `/tmp`. Control archive restoration46633 also completed exit0; there are no active original numerical/audit/archive jobs. Supplemental pilots are active in session12377; preserve accepted sources during every run.
 
 ## Environment and Reproduction
 
