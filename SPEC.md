@@ -11029,3 +11029,7 @@ admits only reviewed CustomJoint and coordinate-linear moving path laws.
 Canonical chapter42 and `F07_CONSTRAINED_MUSCLE_MOCO_TURNOVER.md` retain
 the failed zero-force/loose-transcription experiment and all 520-muscle,
 private-capture, contact, assistance and physiology gates.
+
+## Native Abdominal Zero-Translation Reduction
+
+Issue #12161 adds a separately identified guarded XML-derived abdominal reduction; chapter45 documents its exact zero manifold, state/force verification, provenance and unqualified status. No whole-joint weld, physiology adjustment or capture-matching claim is permitted.
