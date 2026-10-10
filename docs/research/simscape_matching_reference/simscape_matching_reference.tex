@@ -5462,6 +5462,106 @@ Visual overlays employ refined ellipsoid geometry (\texttt{GS3DX\_Human\_Refined
 \subsection{Limitations and Interpretation Boundaries}
 Kinematic agreement in inverse kinematics fitting does not demonstrate forward dynamic validity, neuromuscular plausibility, or physical ground support equilibrium. Reports must maintain clear distinctions between kinematic fits, inverse-dynamics effort attributions, and certified continuous forward simulations.
 
+\section{Phase-Split Forward-Dynamics Marker RMS (\#12042)}
+\label{sec:fd_phase_split}
+
+\subsection{Motivation}
+The whole-swing FD marker RMS combines two regimes. Before impact, the
+tracked reference is stable. After impact, the frame-by-frame IK can settle
+on different, nearly equal solutions in weakly observed coordinates: the
+metatarsophalangeal toes, shoulder and forearm axial rotation, and right hip
+rotation. That choice of branch moves the whole-swing FD by several
+millimetres with no change to the swing itself. Matched-swing receipts
+therefore also report the two phases separately. This is reporting only: no
+gate, threshold or acceptance status reads the new values.
+
+\subsection{Definition}
+Let $e_{f,m}$ be the FD marker position error magnitude (m) at frame $f$ for
+marker $m$, $v_{f,m}$ the marker validity mask, and $t_I$ the impact time. Then
+\[
+  \mathrm{RMS}_{\le I} = \sqrt{\operatorname{mean}\{e_{f,m}^2 : t_f \le t_I,\ v_{f,m}\}},
+  \qquad
+  \mathrm{RMS}_{> I} = \sqrt{\operatorname{mean}\{e_{f,m}^2 : t_f > t_I,\ v_{f,m}\}}.
+\]
+These are recorded as \texttt{dynamics.fd\_phase.fd\_rms\_address\_to\_impact\_m}
+and \texttt{fd\_rms\_after\_impact\_m}, with the frame count of each phase. The
+ledger carries them as \texttt{fd\_address\_to\_impact\_rmse\_m} and
+\texttt{fd\_after\_impact\_rmse\_m}. A phase with no valid sample reports
+\texttt{null}, never zero.
+
+\subsection{Impact Rule}
+No new impact detector is added. $t_I$ is the shared sub-sample ball passage
+from GCV-14 (\texttt{club\_face.ball\_passage}; see the Impact and Top
+Definitions subsection of the OSV-10 section), applied to the
+\texttt{Clubhead} frame origin along the reference trajectory $q_\mathrm{ref}$.
+One guard applies. Before the detected impact, the clubhead must have risen
+by at least half of its full height range above address. When the reference
+clubhead path is discontinuous, a branch jump can corrupt the top-of-backswing
+search, and the detector can then accept a sample next to address. The block
+then reads \texttt{status: unavailable} with a reason, and no value is
+reported. One exploratory slice-7 run (capture-A, split weights 0.3/1) hit
+this guard: its reference clubhead jumps at about 1.81 s, and the detector
+returned 0.086 s.
+
+\subsection{Canonical Values}
+The canonical calibrated runs were regenerated with the documented commands
+in \texttt{evidence/ground\_support/CANONICAL\_RUN.md}. Whole-swing FD, IK and
+acceptance status are byte-identical to the receipts regenerated for the
+right-knee sign fix (\#12057); only the \texttt{fd\_phase} block is added.
+
+\begin{center}
+\begin{tabular}{lrrrr}
+\hline
+Capture & $t_I$ (s) & Whole FD (mm) & Address$\to$impact (mm) & After impact (mm) \\
+\hline
+capture-A (driver) & 1.3228 & 77.0 & 32.3 & 138.6 \\
+capture-B (7-iron) & 1.3343 & 71.2 & 33.3 & 125.1 \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{Slice-7 Turn-Split Settings Read Pre-Impact}
+The table below re-reads the saved slice-7 exploratory runs
+(\texttt{--thorax-weight}/\texttt{--shoulder-girdle-weight} lanes; \#12108,
+\#12111) with the new split. These runs predate the \#12057 spec change, so their
+baseline is the earlier canonical receipt (61.6 and 47.0 mm whole-swing), not
+the table above. On a pre-impact basis, the 0.3/5 split is within
+2 mm of baseline on both captures (capture-A $+1.7$, capture-B $+0.5$ mm).
+Nearly all of its whole-swing regression is after impact. A null run (0.01/1),
+which should not change the swing, still moves the pre-impact FD by up to
+$+2.8$ mm (capture-B). The pre-impact noise floor is therefore about 3 mm,
+and differences below that are not resolved. The default is unchanged.
+
+\begin{center}
+\begin{tabular}{llrrr}
+\hline
+Capture & Setting & Whole FD & Address$\to$impact & After impact \\
+\hline
+capture-A & baseline & 61.6 & 29.9 & 108.1 \\
+capture-A & 0.3/5 full & 69.1 & 31.6 & 122.5 \\
+capture-A & 0.2/5 full & 65.0 & 30.4 & 114.8 \\
+capture-A & 0.3/3 full & 79.5 & 29.5 & 145.3 \\
+capture-A & 0.3/5 thorax windowed & 65.1 & 31.6 & 114.2 \\
+capture-A & 0.3/5 both windowed & 74.3 & 31.6 & 133.3 \\
+capture-A & null 0.01/1 & 55.0 & 30.0 & 93.7 \\
+capture-B & baseline & 47.0 & 29.9 & 75.7 \\
+capture-B & 0.3/5 full & 71.6 & 30.4 & 128.1 \\
+capture-B & 0.3/5 thorax windowed & 69.3 & 30.6 & 123.0 \\
+capture-B & 0.3/5 both windowed & 60.9 & 30.6 & 105.5 \\
+capture-B & null 0.01/1 & 60.9 & 32.7 & 103.7 \\
+\hline
+\end{tabular}
+\end{center}
+All values are in mm. Impact comes from each run's own reference clubhead.
+
+\subsection{Reproduction and Limitations}
+Run the canonical commands in \texttt{CANONICAL\_RUN.md}. Then run
+\texttt{python -m src.shared.python.motion\_matching ledger --write}. The
+implementation is \texttt{motion\_matching/pipeline/fd\_phase.py}, and the
+tests are \texttt{tests/unit/motion\_matching/pipeline/test\_fd\_phase.py}. The
+split partitions the same samples as the whole-swing RMS, so it adds no new
+physical evidence. It only shows where the error accumulates. Impact is read
+from the reference kinematics, not from the FD rollout.
 \section{Thorax and Shoulder-Girdle Turn Split (Issue \#12042, Slice 7)}
 \label{sec:turn_split}
 

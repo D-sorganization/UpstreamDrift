@@ -21,8 +21,10 @@ from src.shared.python.model_appearance.library import (
     library_materials,
 )
 from src.shared.python.model_appearance.schema import (
+    BALL_SOURCES,
     SCHEMA_VERSION,
     AppearanceDocument,
+    BallSettings,
     Environment,
     HeadOrientationOverride,
     HeadSettings,
@@ -39,10 +41,12 @@ from src.shared.python.model_appearance.schema import (
 )
 
 __all__ = [
+    "BALL_SOURCES",
     "CLOTHING",
     "MATERIALS",
     "SCHEMA_VERSION",
     "AppearanceDocument",
+    "BallSettings",
     "Environment",
     "HeadAnchor",
     "HeadOrientationOverride",
