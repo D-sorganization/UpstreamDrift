@@ -2,10 +2,16 @@
 
 - Branch `claude/osv-2-grip-pose` (PR #12032), merged with main after OSV-9 (#11795). `model_appearance/grip_pose.py` is the club-agnostic grip definition; its lead (3.2 cm below the butt) and trail (10.82 cm) positions mirror the generated-spec `GripInterface`, the single source, and `tests/opensim/test_grip_closure_both_hands.py` fails on drift. `club_geometry`, `address.py` and the MyoSuite scene sites import it. The Rajagopal models keep the OSV-9 topology (lead `WeldJoint hand_l_to_club`, trail `WeldConstraint hand_r_to_club`); `msk_club_grip_calibration.json` is untouched.
 - Canned-swing closure residual (`python3 -m scripts.grip_closure_report --output r.json`): MuJoCo, Drake (ControlTower), Pinocchio, OpenSim full-body weld <= 1.8e-7 m; MyoSuite unavailable. Open: owner review of a 1.5 cm lead position (needs `msk_club_calibration` rerun for both models and clubs), finger meshes, stills and clips (slice 2), no `golf_humanoid` swing residual.
+# Active: Right Knee Flexes Negative Like the Left - #12057
+
+- Branch `claude/knee-r-axis-12057`. `spec_builder.leg_extension` mirrors any knee whose hinge points to -z (`AXIS_MIRROR`), and `scripts/mirror_spec_right_knee.py` fixed the committed anthro specs. Spec-to-Rajagopal knee sign is -1 on both sides, and MyoSuite `knee_angle_r` is -1. The generated osims and the inventory hashes are refreshed.
+- Canonical receipts were regenerated on ControlTower; a control at the parent commit reproduced the old receipt exactly. Calibrated driver 7.7/33.0/61.6 -> 5.6/31.0/77.0 mm, 7-iron 6.5/31.1/47.0 -> 5.0/28.8/71.2 mm. The trail knee at address is now -27/-21 deg (was pinned near 0).
+- Open: the dynamics replay regresses (#12110). Trail toe-out is -2.1/-4.4 deg with `hip_rotation_r` at its -40 deg limit (#12109). Reference: `docs/research/hip_axis_mirroring/` (Right Knee Axis Convention section).
 # Active: Grip Wrench Gaps - GCV-8 #11714
 
 - Branch `claude/gcv-8-grip-wrench-gaps`. The MuJoCo grip-modelling tab shows the `grip_weld_l/r` wrench via `grip_efc` and reports "unavailable" for contact-only scenes. Drake URDF: `humanoid_urdf.right_hand_grip_analysis` gives the right-hand wrench from club Newton-Euler (`full_body_model.club_newton_euler`); the left hand is unavailable, with a reason. Pinocchio: `PinocchioForceAdapter.grip_analysis_from_allocation` routes `lambda_grip` through `grip_from_allocation`.
 - Open: `allocate_trajectory` does not store `q`, so callers pass it themselves. MyoSuite per-hand emission needs the pinned `myo_sim`.
+
 # Active: MuJoCo Native Export Backend - GCV-14 #11720
 
 - Branch `claude/gcv-14-mujoco-backend`, stacked on PR #12026 (`claude/gcv-14-speed-variants`). `native_viewer_export` has a fifth engine, `mujoco` (`backends/mujoco_native.py` + `mujoco_worker.py`): full-body MJCF with the default appearance document (body, head, club meshes, scene) rendered by `mujoco.Renderer` through the shared view presets and glyph overlay. It replaces the earlier throwaway stick-figure evidence renderer.
@@ -16,11 +22,13 @@
 
 - Branch `claude/osv-7-opensim-contact` (stacked on #11985). `grip_model="contact"` in `export_full_body_osim` builds pad `ContactSphere`s against closed `ContactMesh` cylinders with one `ElasticFoundationForce` per pad (`opensim/python/full_body_grip_contact.py`, `grip_contact_osim_sim.py`, meshes in `grip_contact/grip_mesh.py`). Weld stays default. CPodes is required (RK-Merson needs about 1e-7 s steps); the club is released with the weld velocity.
 - Full swings (CT, accuracy 1e-8): net force peak -2.6 % (driver) and -3.1 % (7-iron) against the bushing; per-hand and internal pairs differ (hyperstatic, section 19). Evidence `evidence/grip_kinetics/contact/opensim_*_acc1e-8_*`. Slow tests run on CT with `-m 'slow or not slow'`.
+
 # Active: Quarter-Speed Export Variants for Every Engine - GCV-14 #11720
 
 - Branch `claude/gcv-14-speed-variants`, stacked on PR #12004 (kinematic impact time). `video_timing.frame_schedule.SPEED_VARIANTS = (1, 0.5, 0.25)` is the default of `ExportSettings.speeds` and `--speeds`; `motion_matching.export.export_video_variants` writes the same three clips for any engine's candidate (MuJoCo, MyoSuite, Drake, Pinocchio, OpenSim, Simscape logs).
 - Tests: `test_speed_variants_engines.py` (frame counts from the time span for all four native engines, HUD 0 ms at the ball-passage impact) and `test_export.py` (variants per engine).
 - Evidence: only MuJoCo renders on ControlTower (stick figure, no club, 1920x1080, 60 fps). Drake and Pinocchio need `playwright` and its Chromium libraries, OpenSim needs `xwd`, MyoSuite needs `myosuite.envs.env_base` (#11997); none are in the `ud-sim` image and installing them needs root or a new image (owner action).
+
 # Active: Same-Input Parity Design-Manual Chapter - SIP P-9 #11614
 
 - Branch `claude/sip-p9-manual-chapter-11614`; epic #11605. Provisional QMD chapter `manuals/upstreamdrift/chapters/16-same-input-parity.qmd` (renumbered from 14 after `14-muscle-qualification-evidence.qmd` landed) (KKT, closure projection, ZOH RK4, bundle, L0-L3 levels and results, failed experiments, limitations) and registry blocker `UP-D1-same-input-parity-inventory`; registry stays blocked with no calculations. `same_input_parity.tex` cross-links the chapter and compiles with pdflatex.
@@ -31,6 +39,16 @@
 - Branch `claude/osv-7-contact-grip` (stacked on #11963). Pad contact grip with pad stiffness matched to the bushing (`grip_contact/pad_layout.py`, `pad_contact.py`); MuJoCo full swing (dt 1e-5 s), Drake and Pinocchio holds; MyoSuite bushing parity passes (worst 0.013 % peak). Quasi-static balance closes (`static_balance.py`). See GRIP_PARITY_DECISIONS.md section 19.
 - Open and flagged: contact per-hand force is about 4x the bushing's with matching net force (indeterminacy, not tuned); no OpenSim contact variant; no full-swing Drake or Pinocchio contact run.
 - #11986 (branch `claude/grip-contact-internal-force`, stacked on `claude/osv-7-contact-grip`): the 4x is not input drift (hand-to-hand drift 4e-13 mm); it is the hyperstatic internal force of two stiff rings (26 to 44 N per micron of mismatch). Friction softening loses the grip. Section 19 "Why the Contact Grip Carries 4 Times". No default changed.
+
+# Active: Lead-Foot Address Corrections - OSV-6 #11737 (Stacked On #12031)
+
+- Branch `claude/osv-6b-leg-azimuth`. With `--foot-progression` on, two corrections apply. `hip_calibration.knee_flexion_axis` removes the lateral-marker tilt from the zero twist (it was biased by 17-43 deg). `pipeline/leg_marker_constraints.py` keeps the knee and ankle marker azimuth and keeps the forefoot square and centred.
+- MuJoCo address toe-out is within 2 deg on both captures, and so is Drake once the #12039 coordinate-order fix (PR #12047) lands. Pinocchio and MyoSuite evidence is on the stacked branch `claude/osv-6c-feet-evidence`. Canonical receipts are unchanged: the default-on correction is a recorded failed experiment (see `docs/research/hip_axis_mirroring/`). The finish-feasibility ratchet is strict-xfail on #12040.
+
+# Active: Mirrored Left Hip Axis - OSV-6 #11737
+
+- Branch `claude/osv-6-hip-mirror`. `spec_builder.hip_axis_signs` mirrors left hip adduction and rotation like OpenSim; specs regenerated by `scripts/mirror_spec_left_hip.py`. Calibrated receipts: driver 7.7/33.0/61.6 mm, 7-iron 6.5/31.1/47.0 mm. Nominal receipts were regenerated, and the old ones moved to `evidence/ground_support/anthro_*_pre_osv6/`. Reference: `docs/research/hip_axis_mirroring/`.
+- The nominal 7-iron trajectory IK (269 mm) fails on `main` without the mirror too, so the bug is pre-existing (#12030). Open for OSV-6: the lead foot is still 15-32 deg out at address in MuJoCo and Drake (`hip_rotation_l` at its limit), the heel-proxy malleolus correction, and the Pinocchio/MyoSuite stills.
 
 # Active: Lead-Foot Address Corrections - OSV-6 #11737 (Stacked On #12031)
 
