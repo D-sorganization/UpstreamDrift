@@ -10,6 +10,7 @@ import pytest
 from src.shared.python.model_appearance import (
     CLOTHING,
     MATERIALS,
+    BallSettings,
     classify_body,
     document_from_dict,
     document_to_dict,
@@ -35,6 +36,40 @@ def test_minimal_document_parses_with_defaults() -> None:
     doc = document_from_dict(MINIMAL)
     assert doc.skin_tone == "skin_medium"
     assert doc.clothing in CLOTHING and doc.club_finish in MATERIALS
+    assert doc.ball == BallSettings(True, None, "address_geometry")
+
+
+def test_ball_round_trips_with_explicit_position() -> None:
+    doc = document_from_dict(
+        {**MINIMAL, "ball": {"enabled": False, "source": "measured"}}
+    )
+    assert doc.ball == BallSettings(False, None, "measured")
+    doc = document_from_dict(
+        {
+            **MINIMAL,
+            "ball": {"position_m": [1.0, 2.0, 0.021335], "source": "measured"},
+        }
+    )
+    assert doc.ball.position_m == pytest.approx((1.0, 2.0, 0.021335))
+    again = document_from_dict(document_to_dict(doc))
+    assert again == doc
+
+
+def test_ball_rejects_unknown_source() -> None:
+    with pytest.raises(ValueError, match="ball source"):
+        BallSettings(True, None, "guessed")
+
+
+def test_ball_rejects_bad_position() -> None:
+    with pytest.raises(ValueError, match="ball position_m"):
+        BallSettings(True, (1.0, float("nan"), 0.0), "measured")
+
+
+def test_schema_rejects_malformed_ball_block() -> None:
+    with pytest.raises(ValueError, match="Invalid appearance document"):
+        validate_document({**MINIMAL, "ball": {"source": "guessed"}})
+    with pytest.raises(ValueError, match="Invalid appearance document"):
+        validate_document({**MINIMAL, "ball": {"position_m": [1.0, 2.0]}})
 
 
 def test_round_trip_is_schema_valid_and_stable(tmp_path: Path) -> None:
