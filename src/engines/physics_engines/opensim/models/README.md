@@ -86,7 +86,7 @@ following modifications:
    damping for zeta 0.7). The hand frames and address pose come from
    `msk_club_grip_calibration.json`, written by
    `python3 -m src.engines.physics_engines.opensim.python.msk_club_calibration
-   <models>`: inverse kinematics puts each hand's palm grip point on its
+<models>`: inverse kinematics puts each hand's palm grip point on its
    shaft grip point (gap under 0.4 mm), lays the shaft diagonally across the
    palm, keeps the wrists in their physiological deviation range, follows
    the generated model's hip, shoulder and elbow centres at the captured
@@ -209,4 +209,3 @@ records the spec hash, assembly parameters and a sha256 per file.
   head centre of mass in the dynamics model is not moved to the mesh centre.
 - Regenerate with the exporter command above; `--no-club-geometry` produces a
   bare club.
-
