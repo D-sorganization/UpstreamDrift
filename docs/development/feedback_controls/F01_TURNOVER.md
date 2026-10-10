@@ -2,8 +2,9 @@
 
 F01 extends the existing engine-model inventory rather than creating another
 engine catalog. The ledger is now `engine-model-inventory/1.1.0`; the OpenSim
-native-humanoid package explicitly lists its torque and eight-muscle variant
-factories. `FeedbackComparisonRegistry` derives all required rows and admits
+native-humanoid package explicitly lists its torque and legacy eight-name muscle
+target. The latter is not executable support unless native readback finds
+muscles; see F09 child #12148. `FeedbackComparisonRegistry` derives all required rows and admits
 only evidence with current model/provider source identity and bound state,
 physics, contact, integrator, input-channel schema, policy, time-grid, input,
 horizon, and channel

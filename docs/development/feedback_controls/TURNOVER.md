@@ -491,3 +491,17 @@ semantics, reproduction and remaining donor/resource/anatomy gates are in
 `F07_REFERENCE_CONVENTIONS_TURNOVER.md`. Canonical calculation detail is in
 chapter 38. Neither the previous 520-muscle source nor Pose2Sim is qualified
 for capture-matched muscle-driven forward dynamics by this diagnostic.
+
+## F09q OpenSim Variant Capability Readback (#12148)
+
+The legacy golf muscle-variant factory retains its eight target names only as
+declarations. Executable actuator/state names and muscle-law capability flags
+now require source-bound initialized OpenSim readback. The shipped golf model
+reads back zero native muscles under OpenSim 4.6; without bindings the status is
+unknown, not observed absent. Viewer muscle availability follows native
+readback, and the legacy control API reports validation rather than simulation.
+The required OpenSim muscle-variant row remains in the parity denominator and
+is unsupported for this zero-muscle source. See
+`F09Q-OPEN_SIM_NATIVE_MUSCLE_CAPABILITY.md` and canonical chapter 41. These
+structural checks do not qualify anatomy, physiology, contact, grip or native
+full-horizon replay.

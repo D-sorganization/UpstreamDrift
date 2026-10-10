@@ -1,0 +1,53 @@
+# OpenSim Native Muscle Capability Readback
+
+Evidence class: observed structural facts, provisional. F09 child #12148 corrects
+the legacy `create_muscle_model_variant` boundary: the historical target muscle
+names remain available as declarations, but a declaration does not construct an
+OpenSim muscle, actuator, muscle state, or executable control channel.
+
+## Native Readback Contract
+
+The factory hashes the supplied `.osim` source, then loads that exact file with
+OpenSim and initializes it when the SDK is present. It reuses
+`tour_matching._native_model_inventory.observe_native_model` to obtain loaded
+muscle paths, state-variable names, concrete law/options and native loaded-model
+identity. The compact `NativeMuscleInventory` binds these observations to the
+source digest, loaded identity digest and OpenSim runtime version. Active
+actuator names, state names, control ranges and capability flags are derived
+from this readback, never from the target declaration list.
+
+If OpenSim bindings cannot be imported, the inventory is `unknown`; executable
+muscle support remains unadvertised. A successful native load with no muscles
+is `observed_empty`. The shipped golf humanoid is in the latter category under
+OpenSim 4.6: the runtime reports zero native muscles. A synthetic one-muscle
+OpenSim fixture verifies the positive mapping without changing the shipped
+asset. Both observations are structural only.
+
+The view package enables its muscle layer only when native muscle components
+were observed. `GolfModelAdapter.replay_controls` validates input contracts but
+does not step an OpenSim simulation; its result is named
+`Controls_Validated_Not_Replayed`. Missing muscle capability is rejected before
+control validation can imply a replay.
+
+## Limits and Reproduction
+
+This boundary does not establish complete source-resource closure, native
+forward-dynamics replay, compliant-tendon execution, muscle equilibrium,
+activation fidelity, contact, grip, anatomical suitability, physiology, or
+capture matching. The legacy target names are not model contents. The engine
+inventory keeps the required OpenSim muscle-variant row and marks its current
+support unsupported for the shipped zero-muscle source; it does not remove the
+required denominator or change the status of other model families.
+
+Run the focused portable suite with:
+
+```powershell
+python -B -m pytest tests/opensim/test_golf_model_variants.py tests/opensim/test_golf_view_package.py tests/unit/engines/test_model_inventory.py -q --override-ini='addopts='
+```
+
+With the OpenSim 4.6 Python bindings installed, the same suite also executes the
+one-muscle fixture and shipped-model readback tests. Without bindings, those
+native checks skip and `unknown` remains distinct from observed absence. See
+`docs/development/feedback_controls/F09Q-OPEN_SIM_NATIVE_MUSCLE_CAPABILITY.md`
+for the source and test receipt. The engineering manual remains
+`blocked-inventory-required`; these tests do not approve a calculation.

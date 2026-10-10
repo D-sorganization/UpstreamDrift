@@ -1,8 +1,8 @@
-"""OpenSim versioned model variants and actuation capabilities (OG-07, #10401).
+"""OpenSim versioned model variants and source-bound native capabilities.
 
 Implements compositional model variants and actuation profiles:
 1. Composition: AnatomicalSkeletonSpec + GolfEquipmentSpec + Calibration + ActuationProfile.
-2. Distinct ActuationProfile types: Torque baseline vs. Muscle/Tendon variant.
+2. Distinct ActuationProfile types: Torque baseline vs. Muscle/Tendon target.
 3. Stable anatomical frame IDs, coordinates, states, and visual geometry assets.
 4. Typed exceptions guarding fail-closed boundaries:
    - IncompatibleActuationError: e.g. loading torque controls into muscle variant.
@@ -16,9 +16,10 @@ Implements compositional model variants and actuation profiles:
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 import enum
 import hashlib
+import importlib
 import logging
 from pathlib import Path
 from typing import Any
@@ -28,6 +29,10 @@ import numpy as np
 from numpy.typing import NDArray
 
 from src.engines.physics_engines.opensim.python import msk_club
+from src.engines.physics_engines.opensim.python.tour_matching._native_model_inventory import (
+    observe_native_model,
+)
+
 from src.shared.python.motion_matching.club_models import (
     DRIVER,
     IRON_7,
@@ -150,6 +155,40 @@ class GolfEquipmentSpec:
 
 
 @dataclass(frozen=True)
+class NativeMuscleInventory:
+    """Small, source-bound readback of muscles in one loaded OpenSim model."""
+
+    model_sha256: str
+    native_identity_sha256: str
+    runtime_version: str
+    muscle_names: tuple[str, ...]
+    muscle_state_names: tuple[str, ...]
+    activation_dynamics_muscles: tuple[str, ...]
+    tendon_compliance_muscles: tuple[str, ...]
+
+    def __post_init__(self) -> None:
+        """Keep the readback internally tied to one source and its observed names."""
+        if len(self.model_sha256) != 64 or any(
+            char not in "0123456789abcdef" for char in self.model_sha256.lower()
+        ):
+            raise ValueError("model_sha256 must be a SHA-256 digest")
+        if len(self.native_identity_sha256) != 64 or any(
+            char not in "0123456789abcdef"
+            for char in self.native_identity_sha256.lower()
+        ):
+            raise ValueError("native_identity_sha256 must be a SHA-256 digest")
+        if not self.runtime_version.strip():
+            raise ValueError("runtime_version must be non-empty")
+        if len(set(self.muscle_names)) != len(self.muscle_names):
+            raise ValueError("native muscle names must be unique")
+        native_names = set(self.muscle_names)
+        if not set(self.activation_dynamics_muscles) <= native_names:
+            raise ValueError("activation-dynamics names must be in native muscle names")
+        if not set(self.tendon_compliance_muscles) <= native_names:
+            raise ValueError("tendon-compliance names must be in native muscle names")
+
+
+@dataclass(frozen=True)
 class AnatomicalSkeletonSpec:
     """Stable anatomical frame IDs, coordinates, and visual mesh assets."""
 
@@ -170,6 +209,17 @@ class GolfModelVariant:
     calibration_hash: str
     actuation: ActuationProfile
     version: str = "1.0.0"
+    declared_actuator_names: tuple[str, ...] = ()
+    native_muscle_inventory: NativeMuscleInventory | None = None
+
+    def __post_init__(self) -> None:
+        """Reject inventory observations from a different source artifact."""
+        if (
+            self.native_muscle_inventory is not None
+            and self.native_muscle_inventory.model_sha256
+            != self.skeleton.base_model_sha256
+        ):
+            raise ValueError("native muscle inventory does not match the model source")
 
     def variant_hash(self) -> str:
         """Deterministic SHA-256 digest of composed variant definition."""
@@ -179,7 +229,20 @@ class GolfModelVariant:
         skeleton_part = f"{skel.skeleton_id}:{skel.base_model_sha256}"
         equip_part = self.equipment.club_spec_sha256 if self.equipment else "none"
         act_part = f"{act_type.value}:{','.join(act.actuator_names)}"
-        raw = f"{self.variant_id}|{self.version}|{skeleton_part}|{equip_part}|{self.calibration_hash}|{act_part}"
+        native_part = (
+            "unknown"
+            if self.native_muscle_inventory is None
+            else (
+                f"{self.native_muscle_inventory.model_sha256}:"
+                f"{self.native_muscle_inventory.native_identity_sha256}:"
+                f"{self.native_muscle_inventory.runtime_version}:"
+                f"{','.join(self.native_muscle_inventory.muscle_names)}"
+            )
+        )
+        raw = (
+            f"{self.variant_id}|{self.version}|{skeleton_part}|{equip_part}|"
+            f"{self.calibration_hash}|{act_part}|{native_part}"
+        )
         return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
     def validate_geometry_assets(self, asset_base_dir: Path | str) -> None:
@@ -207,20 +270,38 @@ class GolfModelVariant:
                     )
 
     def get_capabilities(self) -> dict[str, Any]:
-        """Return truthful capability dictionary matching launcher manifest."""
+        """Return declared intent separately from source-bound native support."""
         skel = self.skeleton
         act = self.actuation
         act_type = act.actuation_type
         is_muscle = act_type == ActuationType.MUSCLE_TENDON
+        inventory = self.native_muscle_inventory
+        muscle_names = inventory.muscle_names if inventory is not None else ()
         return {
             "variant_id": self.variant_id,
             "version": self.version,
             "actuation_type": act_type.value,
             "supports_joint_torques": not is_muscle,
-            "supports_muscle_forces": is_muscle,
-            "supports_activation_dynamics": is_muscle,
+            "supports_muscle_forces": bool(muscle_names),
+            "supports_activation_dynamics": bool(
+                inventory and inventory.activation_dynamics_muscles
+            ),
+            "supports_tendon_dynamics": bool(
+                inventory and inventory.tendon_compliance_muscles
+            ),
+            "native_muscle_inventory_status": (
+                "unknown"
+                if inventory is None
+                else "observed_empty"
+                if not muscle_names
+                else "observed"
+            ),
+            "native_muscle_count": None if inventory is None else len(muscle_names),
             "control_units": act.control_units,
             "num_actuators": len(act.actuator_names),
+            "declared_actuator_count": len(
+                self.declared_actuator_names or act.actuator_names
+            ),
             "num_coordinates": len(skel.coordinate_names),
             "num_internal_states": len(act.internal_state_names),
             "has_equipment": self.equipment is not None,
@@ -314,7 +395,7 @@ class GolfModelAdapter:
 
     @property
     def capabilities(self) -> dict[str, Any]:
-        """Truthful capability description matching GUI manifest labels."""
+        """Return native capabilities observed for the active source model."""
         var = self.current_variant
         return var.get_capabilities()
 
@@ -345,12 +426,22 @@ class GolfModelAdapter:
         """Assert capability is present; raises UnsupportedCapabilityError without silent fallback."""
         var = self.current_variant
         act = var.actuation
-        caps = act.capabilities
-        if capability_name not in caps:
-            act_type = act.actuation_type
+        native_capability_keys = {
+            "muscle_forces": "supports_muscle_forces",
+            "activation_dynamics": "supports_activation_dynamics",
+            "tendon_dynamics": "supports_tendon_dynamics",
+        }
+        caps = var.get_capabilities()
+        if capability_name in native_capability_keys:
+            supported = caps[native_capability_keys[capability_name]]
+        else:
+            supported = capability_name in act.capabilities
+        if not supported:
+            inventory_status = caps["native_muscle_inventory_status"]
             raise UnsupportedCapabilityError(
-                f"Capability '{capability_name}' is not supported by variant '{var.variant_id}' "
-                f"({act_type.value})"
+                f"Capability '{capability_name}' is not supported by variant "
+                f"'{var.variant_id}' ({caps['actuation_type']}); native muscle "
+                f"inventory status is {inventory_status}"
             )
 
     def evaluate_forward_kinematics(
@@ -380,18 +471,62 @@ class GolfModelAdapter:
         controls: Mapping[str, Array],
         time_s: Array,
     ) -> dict[str, Any]:
-        """Validate and replay control inputs through variant-specific actuation."""
+        """Validate controls without claiming that a native model was integrated."""
         var = self.current_variant
         act = var.actuation
+        if act.actuation_type == ActuationType.MUSCLE_TENDON:
+            if not set(controls) <= set(var.declared_actuator_names):
+                act.validate_controls(controls)
+            self.require_capability("muscle_forces")
         act.validate_controls(controls)
 
         return {
             "variant_id": var.variant_id,
             "actuation_type": act.actuation_type.value,
-            "status": "Replay_Succeeded",
+            "status": "Controls_Validated_Not_Replayed",
             "duration_s": float(time_s[-1] - time_s[0]),
             "num_controls": len(controls),
         }
+
+
+def _read_native_muscle_inventory(
+    model_path: Path,
+    model_sha256: str,
+) -> NativeMuscleInventory | None:
+    """Inspect native muscle components, leaving support unknown without OpenSim."""
+    try:
+        opensim = importlib.import_module("opensim")
+    except (ImportError, OSError):
+        return None
+
+    model = opensim.Model(str(model_path))
+    state = model.initSystem()
+    native = observe_native_model(opensim, model, state, regions={}, roles={})
+    muscle_rows = native["muscles"]
+    muscle_names = tuple(row["path"].rsplit("/", 1)[-1] for row in muscle_rows)
+    state_names = native["state_names"]
+    muscle_state_names = tuple(
+        state_name
+        for state_name in state_names
+        if any(f"/{name}/" in f"/{state_name}" for name in muscle_names)
+    )
+    return NativeMuscleInventory(
+        model_sha256=model_sha256,
+        native_identity_sha256=str(native["loaded_identity_sha256"]),
+        runtime_version=str(native["runtime_version"]),
+        muscle_names=muscle_names,
+        muscle_state_names=muscle_state_names,
+        activation_dynamics_muscles=tuple(
+            row["path"].rsplit("/", 1)[-1]
+            for row in muscle_rows
+            if not row["ignore_activation_dynamics"]
+        ),
+        tendon_compliance_muscles=tuple(
+            row["path"].rsplit("/", 1)[-1]
+            for row in muscle_rows
+            if not row["ignore_tendon_compliance"]
+        ),
+    )
 
 
 def _validate_and_extract_base(
@@ -618,12 +753,12 @@ def create_muscle_model_variant(
     model_path: Path | str,
     expected_base_sha256: str | None = None,
 ) -> GolfModelVariant:
-    """Construct muscle/tendon actuated golf model variant."""
+    """Describe a muscle/tendon target using only muscles read from OpenSim."""
     path, actual_sha, coords = _validate_and_extract_base(
         model_path, expected_base_sha256
     )
 
-    # Standard muscles (e.g. deltoid, latissimus, gluteus, etc.)
+    # Keep the historical target list for compatibility; it is not executable.
     muscles = (
         "deltoid_anterior_r",
         "deltoid_posterior_r",
@@ -634,21 +769,31 @@ def create_muscle_model_variant(
         "tibialis_anterior_r",
         "gastrocnemius_r",
     )
-    muscle_states = tuple(f"{m}/activation" for m in muscles) + tuple(
-        f"{m}/fiber_length" for m in muscles
-    )
-    ranges = dict.fromkeys(muscles, (0.0, 1.0))
+    native_inventory = _read_native_muscle_inventory(path, actual_sha)
+    native_muscles = native_inventory.muscle_names if native_inventory else ()
+    muscle_states = native_inventory.muscle_state_names if native_inventory else ()
+    ranges = dict.fromkeys(native_muscles, (0.0, 1.0))
 
     skeleton = _build_default_skeleton(coords, actual_sha)
     equipment = equipment_from_model(path)
 
     actuation = ActuationProfile(
         actuation_type=ActuationType.MUSCLE_TENDON,
-        actuator_names=muscles,
+        actuator_names=native_muscles,
         control_units="normalized",
         control_ranges=ranges,
         internal_state_names=muscle_states,
-        capabilities=("muscle_forces", "activation_dynamics", "tendon_dynamics"),
+        capabilities=(("muscle_forces",) if native_muscles else ())
+        + (
+            ("activation_dynamics",)
+            if native_inventory and native_inventory.activation_dynamics_muscles
+            else ()
+        )
+        + (
+            ("tendon_dynamics",)
+            if native_inventory and native_inventory.tendon_compliance_muscles
+            else ()
+        ),
     )
 
     return GolfModelVariant(
@@ -657,6 +802,8 @@ def create_muscle_model_variant(
         equipment=equipment,
         calibration_hash="baseline_calibration",
         actuation=actuation,
+        declared_actuator_names=muscles,
+        native_muscle_inventory=native_inventory,
     )
 
 

@@ -34,6 +34,15 @@ complete external resources. Those remain required before replay acceptance.
 
 ## Structural Observations
 
+The separate legacy golf variant factory keeps its eight muscle target names as
+declarations for compatibility. They are not loaded actuators. Executable
+actuator names, muscle-state names and muscle-law capability flags come from
+the exact model's initialized native OpenSim readback. When OpenSim bindings are
+unavailable, muscle inventory status is `unknown` and muscle support is not
+advertised; a successful readback with no muscles is `observed_empty`. Neither
+status qualifies the model for replay. The implementation and bounded evidence
+are documented in [chapter 41](41-opensim-native-muscle-capability.qmd).
+
 Recursive traversal reports exact native paths/classes for muscles, all forces,
 nonmuscle actuators, controllers, constraints, contact geometry, bodies and other
 components. Forces outside ForceSet remain visible. Actuator names do not prove
