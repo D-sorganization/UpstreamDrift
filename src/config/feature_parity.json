@@ -31,12 +31,12 @@
       "tiles": []
     },
     "export.video_speed_variants": {
-      "title": "Time-based native video export with full- and half-speed clips and an impact slow-motion clip",
+      "title": "Time-based native video export with full-, half- and quarter-speed clips and an impact slow-motion clip",
       "pyqt": "src/tools/native_viewer_export/cli.py",
       "api": null,
       "web": null,
       "status": "exempt",
-      "reason": "Headless CLI batch export of mp4 clips (60 fps, 1x and 0.5x, optional 0.1x impact window) through each engine's desktop viewer; no web route renders or serves these clips, so there is no browser equivalent until one is added (GCV-14, #11720, epic #11706).",
+      "reason": "Headless CLI batch export of mp4 clips (60 fps, 1x, 0.5x and 0.25x, optional 0.1x impact window; the motion-matching video export writes the same three variants through export_video_variants) through each engine's desktop viewer; no web route renders or serves these clips, so there is no browser equivalent until one is added (GCV-14, #11720, epic #11706).",
       "tiles": []
     },
     "tools.necromatcher": {

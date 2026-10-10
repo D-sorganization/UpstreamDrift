@@ -275,13 +275,13 @@
     },
     {
       "feature_id": "export.video_speed_variants",
-      "title": "Time-based native video export with full- and half-speed clips and an impact slow-motion clip",
+      "title": "Time-based native video export with full-, half- and quarter-speed clips and an impact slow-motion clip",
       "status": "exempt",
       "pyqt": "src/tools/native_viewer_export/cli.py",
       "api": null,
       "web": null,
       "issue": null,
-      "reason": "Headless CLI batch export of mp4 clips (60 fps, 1x and 0.5x, optional 0.1x impact window) through each engine's desktop viewer; no web route renders or serves these clips, so there is no browser equivalent until one is added (GCV-14, #11720, epic #11706).",
+      "reason": "Headless CLI batch export of mp4 clips (60 fps, 1x, 0.5x and 0.25x, optional 0.1x impact window; the motion-matching video export writes the same three variants through export_video_variants) through each engine's desktop viewer; no web route renders or serves these clips, so there is no browser equivalent until one is added (GCV-14, #11720, epic #11706).",
       "pending_decision": false,
       "tiles": [],
       "notes": "",
@@ -3146,7 +3146,7 @@
   "inputs": {
     "src/config/models.yaml": "e11682df79d7467f1eba9579d835f5d7019bfd7eb09cf81c14e22bd08d0bf844",
     "src/config/launcher_manifest.json": "1ae28f872b54c237440fcaacec40b735b93a7b80d710adc9228ef671b7831032",
-    "src/config/feature_parity.json": "7a2375481703eb20cda2df675f39ac1c4c9720d443864051a8116988a5e719e6",
+    "src/config/feature_parity.json": "bb3161a966b666c7c298e85c94c459f83185f02ada4468b99761556d999b2a75",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }
