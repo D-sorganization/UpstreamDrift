@@ -1,0 +1,16 @@
+{
+  "club": "iron7",
+  "engine": "mujoco",
+  "wall_time_s": 76.94894879800268,
+  "squeeze_per_hand_n": 1154.5832728051953,
+  "pad_stiffness_n_m": 171314.74747506116,
+  "pad_dissipation_s_m": 0.23622375600513934,
+  "preload_penetration_m": 0.0005616286639174052,
+  "friction_static": 0.9,
+  "friction_dynamic": 0.7,
+  "integrator": "MuJoCo Euler, fixed step, soft constraints",
+  "timestep_s": 1e-05,
+  "force_law": "MuJoCo native sphere-cylinder contact, condim 6",
+  "solreffriction_time_s": 2e-05,
+  "hand_mode": "trail_follows_club"
+}

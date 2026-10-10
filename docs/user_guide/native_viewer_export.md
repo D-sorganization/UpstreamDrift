@@ -5,6 +5,10 @@ each physics engine and writes mp4 clips with force and torque overlays. It
 complements the shared renderers: each clip shows what the engine's own viewer
 displays for the engine's own rollout.
 
+The `mujoco` engine renders with `mujoco.Renderer` using the MuJoCo appearance
+layer (body, head, club and scene), not a stick figure; use `--engines mujoco`
+and, without a GPU, `MUJOCO_GL=osmesa`.
+
 ## Quick Start
 
 ```bash
