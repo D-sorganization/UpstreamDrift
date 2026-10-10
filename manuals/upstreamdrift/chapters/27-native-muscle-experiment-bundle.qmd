@@ -74,3 +74,67 @@ marker fitting are separate from dynamics qualification. Full-body anatomy,
 frame registration, physiological/passive-force feasibility, contact and grip,
 training-only calibration, heldout accuracy, uninterrupted muscle-driven
 capture replay and all-engine/model parity remain open.
+
+## Assistance-Explicit Scalar Replay
+
+Child #12147 adds a separate mixed profile in
+`tour_matching/native_mixed_actuation.py` and `native_mixed_replay.py`.
+The original muscle-only admission remains strict. This first mixed subset
+admits the same fixed-path equilibrium muscle laws and Slider/Pin topology,
+plus exact native `CoordinateActuator` instances. Constraints, moving/wrapped
+paths, contact, prescribed motion and other concrete components remain outside
+this profile. It does not yet admit the complete Rajagopal or 520-muscle model.
+
+Each ordered channel has an absolute native component path, an explicit role,
+and finite closed experimental control bounds inside the native bounds.
+Point bounds permit an exactly zero mechanical-assistance ablation. Muscles
+retain native activation and compliant tendon dynamics; their dimensionless
+input is excitation. Mechanical commands are dimensionless scalar inputs,
+with native actuation $f_i=u_i f_{i,\mathrm{optimal}}$. For rotational
+coordinates this output is N m; for translation it is N. The T01 input kind is
+`ACTUATOR_COMMAND`, with `LINEAR` interpolation, because channels have mixed
+physical meanings. It is not a vector of joint torques or muscle forces.
+
+A mechanical actuator on a joint whose parent base frame is ground must be
+reported as root residual assistance, regardless of actuator or coordinate
+names. Other upper-assistance and leg-reserve roles are explicit experimental
+region declarations, not validated anatomical classifications. Full native
+actuator coverage and order, gains, motion units, force enable/override,
+muscle modes, and default and live coordinate restrictions are checked.
+Registered override auxiliary state inherits its owning scalar actuator's
+output units. No missing physical state is filled or equilibrated on replay.
+
+The profile digest binds declared roles/bounds and actual native readback.
+Source XML, loaded native model, T01 complete named state and registered
+options, saved controls, policy, runtime extensions and executed helper source
+are revalidated before a fresh replay. Native extension discovery must be
+nonempty independently of the Python helper count. The shared engine-owned
+`native_scalar_replay` executor uses one Manager, exact returned physical time,
+and sampled native control readback. Every returned applied control must
+match the saved ordered history within absolute tolerance $10^{-12}$.
+No observation access, feedback, correction or Manager restart is permitted.
+
+Returned histories include native actuation, native actuator power $P_i$,
+and cumulative sampled trapezoidal work:
+$$
+W_i(t_k)=\sum_{j=1}^{k}\frac{P_i(t_{j-1})+P_i(t_j)}{2}
+(t_j-t_{j-1}).
+$$
+For a CoordinateActuator, $P_i=f_i\dot q_i$ with the matching force/torque
+units. Muscle power is the native actuator output and must not be interpreted
+as total metabolic or complete elastic storage energy. Work is output-grid
+quadrature, not a qualified energy balance; refinement is required for
+scientific comparisons. Returned arrays are immutable owned byte-backed
+samples, with source, provider, input, initial-state and execution-policy
+digests. Assistance forces, powers and work remain separately labeled by
+channel role; disabling a channel does not remove it from the accounting.
+
+Actual native synthetic tests cover signed assistance, gain and unit readback,
+misleading names and renamed ground coordinates, live lock/clamp/prescription,
+fixed-zero ablations, serialization and fresh deterministic replay, changed
+future inputs, immutable result storage, changed source/roles/bounds/gain,
+missing state/channels, unavailable native binaries, actual player mismatch,
+and a mislabeled native initial time. The legacy muscle/contact/Moco regression
+also runs after extracting the common integration loop. These fixtures do not
+establish full-horizon capture matching, anatomical correspondence, ground
+support, muscle physiology, contact/grip, or all 17 production-variant parity.
