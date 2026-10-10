@@ -1,0 +1,42 @@
+{
+  "status": "passed",
+  "scope": "Packaging and Fresh Restoration Only",
+  "files": 191,
+  "protocols": {
+    "pw_primary_face": {
+      "completed": 18,
+      "unavailable": 0,
+      "not_run": 0
+    },
+    "pw_control_face": {
+      "completed": 4,
+      "unavailable": 0,
+      "not_run": 0
+    },
+    "driver_control_speed": {
+      "completed": 4,
+      "unavailable": 0,
+      "not_run": 0
+    }
+  },
+  "bundle_files": {
+    "supplement_final_v1/archive_manifest.json": {
+      "sha256": "b8ea5175439e491202eb4d355e78aab21c3bd705bf0ef0a993bfa4b081887fb5",
+      "bytes": 51773
+    },
+    "supplement_final_v1/supplement_final_v1-001.zip": {
+      "sha256": "d078e81389981c2de27e556b160026a657fbc2c035c195ea2ab7ae9747e56562",
+      "bytes": 79694653
+    },
+    "supplement_final_v1/supplement_final_v1-002.zip": {
+      "sha256": "2045dbe82b2de96366ffb148f6a56d39a8d426feba3a06032b5bc8e6bd3dc078",
+      "bytes": 21959328
+    }
+  },
+  "archive_manifest_sha256": "b8ea5175439e491202eb4d355e78aab21c3bd705bf0ef0a993bfa4b081887fb5",
+  "exact_file_hashes_and_sizes": true,
+  "full_reports_equal": true,
+  "temporary_directory_removed": true,
+  "originals_and_archives_unchanged": true,
+  "executed_script_sha256": "e4054bb5cb51e675b3e15dc82a90fdbb269a3e2d95bd2eba202331dbbdfea879"
+}

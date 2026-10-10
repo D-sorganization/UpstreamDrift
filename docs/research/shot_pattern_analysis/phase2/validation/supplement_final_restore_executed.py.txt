@@ -1,0 +1,25 @@
+import hashlib,json,tempfile
+from pathlib import Path
+from zipfile import ZipFile
+from docs.research.shot_pattern_analysis.phase2.validation.restore_final_primary_archives import inventory,require,sha
+from scripts.research.shot_pattern_analysis.archive_data import verify_archives
+from src.tools.shot_pattern_analysis.matched_report import load_matrix_report
+from src.tools.shot_pattern_analysis.matched_supplement import SUPPLEMENTS
+phase=Path('docs/research/shot_pattern_analysis/phase2');original=phase/'supplement_final_v1';bundle=phase/'data_archives/supplement_final_v1';out=phase/'validation/supplement_final_archive_restoration.json'
+require(not out.exists(),'receipt must be new')
+count=verify_archives(bundle);manifest=json.loads((bundle/'archive_manifest.json').read_text());before=inventory(bundle)
+expected={name:{k:item[k] for k in ('sha256','bytes')} for name,item in manifest['files'].items()}
+require(inventory(original)==expected,'original inventory differs')
+reports={key:load_matrix_report(original/key,require_complete=True) for key in SUPPLEMENTS}
+with tempfile.TemporaryDirectory(prefix='p2-supplement-final-restore-') as tmp:
+ destination=Path(tmp)
+ for name in manifest['archives']:
+  with ZipFile(bundle/name) as archive: archive.extractall(destination)
+ restored=destination/'supplement_final_v1'
+ require(inventory(restored)==expected,'restored bytes differ')
+ for key in SUPPLEMENTS: require(load_matrix_report(restored/key,require_complete=True)==reports[key],'restored report differs')
+require(not destination.exists(),'restoration copy remains')
+require(inventory(original)==expected and inventory(bundle)==before,'source/bundle changed')
+receipt={'status':'passed','scope':'Packaging and Fresh Restoration Only','files':count,'protocols':{key:report['counts'] for key,report in reports.items()},'bundle_files':before,'archive_manifest_sha256':sha(bundle/'archive_manifest.json'),'exact_file_hashes_and_sizes':True,'full_reports_equal':True,'temporary_directory_removed':True,'originals_and_archives_unchanged':True,'executed_script_sha256':sha(Path(__file__))}
+out.write_text(json.dumps(receipt,indent=2)+'\n')
+print(json.dumps({key:receipt[key] for key in ('status','files','protocols')}))
