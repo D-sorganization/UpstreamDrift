@@ -126,6 +126,75 @@ export async function runFlexibleAnalysisV2(
   });
 }
 
+/**
+ * Request body for `POST /v2/trend` (`TrendPayloadV2` in
+ * `src/api/routes/launch_monitor_analytics.py`). Mirrors the PyQt Trends tab
+ * (`_TrendParams` / `_read_trend_params` in `gui.py`): `time_column` and
+ * `rolling_window` share that widget's defaults, `"captured_at"` and `10`,
+ * and the same `[3, 500]` rolling-window bound.
+ */
+export interface TrendRequest {
+  records: Record<string, unknown>[];
+  metric: string;
+  time_column?: string;
+  rolling_window?: number;
+}
+
+/** One rolling-statistics row from `TrendResponse.rolling` (JSON-safe: never a misleading 0). */
+export interface TrendRollingPoint {
+  value: number | null;
+  rolling_mean: number | null;
+  rolling_median: number | null;
+  rolling_std: number | null;
+  ewma: number | null;
+  /** The request's `time_column`, serialized as an ISO-8601 timestamp string. */
+  [timeColumn: string]: number | string | null;
+}
+
+/** One ranked step-change candidate from `TrendResponse.change_candidates`. */
+export interface TrendChangeCandidate {
+  captured_at: string;
+  row_index: number;
+  before_mean: number | null;
+  after_mean: number | null;
+  effect_size: number | null;
+}
+
+/** Response body for `POST /v2/trend` (`_trend_result_to_dict`). */
+export interface TrendResponse {
+  metric: string;
+  sample_count: number;
+  slope_per_day: number | null;
+  robust_slope_per_day: number | null;
+  p_value: number | null;
+  earliest_mean: number | null;
+  latest_mean: number | null;
+  rolling: TrendRollingPoint[];
+  change_candidates: TrendChangeCandidate[];
+}
+
+/**
+ * Run the PyQt Trends tab's longitudinal trend analysis over caller-supplied
+ * inline records, via the same `analyze_trend` contract the desktop tab calls.
+ */
+export async function postTrend(
+  records: Record<string, unknown>[],
+  metric: string,
+  timeColumn = "captured_at",
+  rollingWindow = 10,
+): Promise<TrendResponse> {
+  const payload: TrendRequest = {
+    records,
+    metric,
+    time_column: timeColumn,
+    rolling_window: rollingWindow,
+  };
+  return apiFetch<TrendResponse>(`${BASE}/v2/trend`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
 /** Render a nullable statistic as the API would — never a misleading zero. */
 export function formatStat(
   value: number | null | undefined,

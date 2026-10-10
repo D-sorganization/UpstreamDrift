@@ -13,7 +13,7 @@
   "totals": {
     "identical": 400,
     "diverged": 273,
-    "ud-only": 1742,
+    "ud-only": 1746,
     "tools-only": 796,
     "spelling-only": 121
   },
@@ -518,7 +518,7 @@
     "motion_matching": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 278,
+      "ud-only": 282,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -1029,7 +1029,7 @@
       "classification": "ud-only",
       "package": "_seam_redirect.py",
       "subpackage": "",
-      "ud_bytes": 11009,
+      "ud_bytes": 12923,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -14261,6 +14261,18 @@
       "spelling_only": false
     },
     {
+      "path": "motion_matching/bounded_nmpc.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "",
+      "ud_bytes": 16611,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "motion_matching/candidate.py",
       "classification": "ud-only",
       "package": "motion_matching",
@@ -14825,6 +14837,18 @@
       "spelling_only": false
     },
     {
+      "path": "motion_matching/control_loop_tuning.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "",
+      "ud_bytes": 25633,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "motion_matching/control_names.py",
       "classification": "ud-only",
       "package": "motion_matching",
@@ -14889,7 +14913,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "",
-      "ud_bytes": 17161,
+      "ud_bytes": 18157,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -15053,6 +15077,18 @@
       "spelling_only": false
     },
     {
+      "path": "motion_matching/distributed_feedback.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "",
+      "ud_bytes": 22717,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "motion_matching/dynamics_filter.py",
       "classification": "ud-only",
       "package": "motion_matching",
@@ -15165,7 +15201,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "execution",
-      "ud_bytes": 22162,
+      "ud_bytes": 22951,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -15177,7 +15213,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "",
-      "ud_bytes": 17920,
+      "ud_bytes": 18682,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -16053,7 +16089,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "",
-      "ud_bytes": 8925,
+      "ud_bytes": 11577,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -16150,6 +16186,18 @@
       "package": "motion_matching",
       "subpackage": "",
       "ud_bytes": 21612,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "motion_matching/native_candidate_benchmark.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "",
+      "ud_bytes": 19340,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -16977,7 +17025,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "",
-      "ud_bytes": 29505,
+      "ud_bytes": 29683,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
