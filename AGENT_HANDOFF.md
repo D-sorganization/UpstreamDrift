@@ -1,3 +1,9 @@
+# Active: Gaze Weight Selection, #11729
+
+- Branch `claude/osv-3b-gaze-default`. `motion_matching/gaze_sweep.py` (feasible set, Pareto knee, cross-capture `select_default`, `REPORTING_GAZE_WEIGHT = 0.1`), `scripts/sweep_gaze_weight.py` (IK-stage run per capture and weight), `scripts/summarize_gaze_sweep.py` (evidence JSON + Pareto plot), `scripts/render_head_gaze_clips.py` (MuJoCo side by side, 1080p60, 1x/0.5x/impact 0.25x), `scripts/render_head_gaze_engines.py` (Drake/Pinocchio/OpenSim/MyoSuite native clips + pairing).
+- Result: knee 0.1 in both captures (common feasible {0, 0.1, 0.2}); theta_gaze RMS 20.2 to 8.5 deg (driver), 18.6 to 6.1 deg (iron), marker RMS +0.6/+1.3 mm. `--gaze-weight` still defaults to 0 for qualified receipts. Evidence `docs/development/full_body_models/evidence/head_gaze/gaze_weight_sweep.{json,png}`; method in `HEAD_GAZE_REFERENCE.md` (Gaze Weight Selection) and the `.tex`.
+- Open: neck PD tracking in forward dynamics, published tour head ranges.
+
 # Active: Web Club Head and Golfer Head - GCV-11 #11717, GCV-12 #11718
 
 - Branch `claude/gcv-11-12-web-head-club`. `ClubHead.tsx` (`clubHeadGeometry.ts`, `clubHeadAssets.ts`) draws the committed `assets/club_heads` STLs at spec loft and lie. `HeadModel.tsx` (`headModel.ts`) mirrors `model_appearance/head.py`. Both are mounted in `GolferModel.tsx`. The Vite dev server is allowed to read `../assets` only.
