@@ -894,12 +894,13 @@ def _simulate_and_receipt(
     log = ctx.log
     tracking = getattr(args, "tracking", "kkt")
     q_track = smooth_reference(q_ref, lane.rate_hz, TRACKING_CUTOFF_HZ)
-    fd_neck = getattr(args, "fd_neck", "ik")
-    q_track, neck_solve = apply_fd_neck(fd_neck, lane, kin, q_ref, q_track)
     zmp = fs.reference_zmp(sim, lane.times, q_track, lane.ground)
     q_track, zmp, zmp_filter_report, centroidal_report = _feasibility_filters(
         args, (lane, kin, sim, log), q_track, zmp
     )
+    # After the filters, which re-pose the body; the ZMP keeps the IK neck.
+    fd_neck = getattr(args, "fd_neck", "ik")
+    q_track, neck_solve = apply_fd_neck(fd_neck, lane, kin, q_ref, q_track)
     shooting_report: dict[str, Any] | None = None
     if args.shooting_fit > 0:
         q_track, zmp, shooting_report = shooting_fit(
