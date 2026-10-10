@@ -76,6 +76,12 @@ The independent selected-headline traceability review covers 24 zero-lean cells 
 
 The latest user-requested built-in LaTeX check reproduced the Tectonic `src/config.rs:154:18` panic while fetching the uncached TeX bundle, before document parsing. The existing editor remains open. The article now includes accepted phase-two inventories, geometric derivatives, six club/SD directional rows, and a source-bound SG example; historical results remain separately labelled. The exposed tool provides no compiler cache or network configuration; compilation is unverified until that app-level failure is repaired. External compiler repair is tracked in [#12120](https://github.com/D-sorganization/UpstreamDrift/issues/12120), filed through AGY and REST-verified. See `validation/latex_editor_compiler_followup.json`. Do not treat another host's successful HTTP request as editor compilation evidence.
 
+## Repository Readiness Repair In Progress
+
+A preliminary canonical gate check at `32877b6ecc` found 33 Mypy errors in ten validation helpers and twelve files needing Ruff formatting. Owned issue [#12160](https://github.com/D-sorganization/UpstreamDrift/issues/12160) was created through AGY and REST-verified. All 17 affected helpers/tests are preserved in a verified deterministic archive with original path/hash/commit manifest under `validation/repository_readiness_repair_v1/`. Historical execution receipts remain unchanged. AGY session `68061` owns only these files plus focused guard tests; prompt `/tmp/p2-readiness-repair-agy.txt`, output `/tmp/p2-readiness-repair-agy-result.txt`. Astra will review after the worker terminates. Do not start a competing editor or alter the frozen producer.
+
+Canonical preliminary gate session `33360` remains active, log `/tmp/p2-prepr-readiness-20261010-safe.txt`; the first invocation failed to resolve the module. `PYTHONSAFEPATH=1` plus Repository_Management first in `PYTHONPATH` resolves the package shadowing. The current run is diagnostic only because helper repairs may proceed while its broad test selection runs; final fixed-state qualification remains required. The terminal-gated 36-batch/all-format graphic review plan is `validation/v6_output_review_harness_v1/FINAL_REVIEW_PLAN.md`; no production graphic acceptance follows from the plan.
+
 ## Completed Numerical Data
 
 All simulation workers, full saved-data audits and fresh archive restorations are finished. Do not restart them.
