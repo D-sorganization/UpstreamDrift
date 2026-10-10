@@ -42,7 +42,7 @@ Final report builders preserve exact source/protocol/ordered-condition identitie
 
 ## Isolated GUI Scoring Follow-Up
 
-AGY static review found a verified display gap: matched results export conditional course SG but do not show it in the GUI. Root qualification is `validation/gui_completion_audit_v1/`. Reused clean bounds worktree on new branch`codex/shot-pattern-gui-scoring` from2e0a74f8ca; AGY session39626 is creating an issue and implementing tests first. Prompt`/tmp/p2-gui-sg-implementation-prompt.txt`, log`/tmp/p2-gui-sg-implementation.log`, expected report`/tmp/p2-gui-sg-implementation-review.md`. No commits/push or MAIN changes authorized to that worker. Inspect actual state before resuming. Defaults/facade recommendations are not accepted defects; broad scientific-qualification claims are rejected.
+AGY static review found a verified display gap: matched results export conditional course SG but do not show it in the GUI. Root qualification is `validation/gui_completion_audit_v1/`. Reused clean bounds worktree on new branch`codex/shot-pattern-gui-scoring` from2e0a74f8ca; AGY session39626 created issue[#12067](https://github.com/D-sorganization/UpstreamDrift/issues/12067) and is implementing tests first. Prompt`/tmp/p2-gui-sg-implementation-prompt.txt`, log`/tmp/p2-gui-sg-implementation.log`, expected report`/tmp/p2-gui-sg-implementation-review.md`. No commits/push or MAIN changes authorized to that worker. Inspect actual state before resuming. Defaults/facade recommendations are not accepted defects; broad scientific-qualification claims are rejected.
 
 ## Next Steps
 
