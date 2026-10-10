@@ -492,3 +492,17 @@ def test_physical_humerus_chart_is_not_source_default() -> None:
         "/jointset/clavicle_derived/clavicle_rhythm/value"
     ]
     assert abs(changed_q - base_q) > 1e-10
+
+
+@pytest.mark.parametrize("suffix", ("value", "speed"))
+def test_mechanical_manager_rejects_hidden_initial_projection(
+    tmp_path: Path, suffix: str
+) -> None:
+    path, named, _ = _coupled_source(tmp_path / "seed.osim")
+    named[f"/jointset/follower/dependent/{suffix}"] += 5e-10
+    declaration = replace(
+        _coupled_declaration(path, named),
+        constant_commands={"/forceset/mechanical_probe": 0.2},
+    )
+    with pytest.raises(RuntimeError, match="changed the requested initial state seed"):
+        replay_declared_time_only_input(declaration, (0.0, 0.005, 0.01))

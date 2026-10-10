@@ -143,3 +143,20 @@ Adopt the existing canonical model/variant/capability registry and stable engine
 [Astra Architecture Review](ASTRA_REVIEW.md) refines this design and its acceptance criteria. Record dynamics/contact/integration/actuator/restart implementations; common-model parity cannot qualify native muscle/contact replay. Required capabilities remain required when unavailable. Version full state, manifold operations, input boundaries and actual executed policies rather than silently broadening Euclidean torque fixtures.
 
 An optimized collocation trajectory must pass uninterrupted native integration and refinement checks. Score frozen nominal feedforward separately from replay of total feedback-generated input. Reserve/root assistance requires peak/RMS, integrated absolute effort and separate positive/negative work; zero signed work cannot prove muscle-only operation. Declare exact versus noisy/estimated/delayed state and validate that information pattern. Gain and recruitment estimates remain nonunique and require held-out perturbation and parameter/objective sensitivity evidence.
+
+## Constrained Mixed OpenSim Moco Boundary (#12173)
+
+The narrowly tested OpenSim composition is opt-in: a caller supplies an exact
+declared cold start, lock targets, constraint enforcement, coordinate charts
+and optional linear chart inequalities alongside the mixed muscle/mechanical
+profile. The native source constraints are retained and observed at each
+replay knot. Moco coordinate boxes must fit the declared chart; linear rules
+are checked by conservative interval extrema. A fresh replay rejects native
+Manager projection of the exact requested named-state seed or initial time.
+Mixed commands remain distinct from physical outputs: muscle excitation is
+dimensionless with nonlinear force in N, while CoordinateActuator commands
+are scaled into N or N\*m according to native coordinate motion. The strict
+muscle-only default is unchanged. The 40 ms synthetic Moco/replay regression
+is software-path evidence, not a private capture, production anatomy/physics
+qualification, or release. See canonical chapter48 and
+`F07_CONSTRAINED_MIXED_MOCO_TURNOVER.md`.

@@ -11013,11 +11013,22 @@ supported. The original muscle-only profile remains strict. Canonical chapter
 factory topology, capture/physiology/contact/grip and 17-model parity remain open.
 
 The #12147 mixed Moco link reuses scalar bindings and chapter39's file-driven
-pipeline. Requests bind ordered roles/bounds, reject combined constrained
-profiles, and preserve every optimizer knot through independently replayed
-T01 inputs. Mixed NPZ evidence distinguishes actuations/controls and physical
-units, roles, powers and sampled work. This does not discharge anatomy,
-contact, private full-horizon or all-model qualification gates.
+pipeline. The original mixed link bound ordered roles/bounds and preserved
+optimizer knots through independent T01 replay; combined constrained profiles
+were outside that snapshot's scope. Mixed NPZ evidence distinguishes
+actuations/controls and physical units, roles, powers and sampled work. This
+does not discharge anatomy, contact, private full-horizon or all-model gates.
+
+Child #12173 now exercises an explicitly declared constrained-plus-mixed
+Moco/replay path. Optimizer boxes are contained in declared coordinate and
+linear charts; fresh replay rejects Manager projection of the exact named
+state/time seed and records constraint enforcement/residuals at every sample.
+Muscle excitation, mechanical commands and resulting physical force/torque
+remain separate. The strict default muscle-only policy is unchanged. Its
+40 ms synthetic native Moco and fresh-replay regression is software evidence
+only; full-body qualification, private capture, all required variants and
+six-engine parity remain open. See canonical chapter48 and
+`F07_CONSTRAINED_MIXED_MOCO_TURNOVER.md`.
 The F07 #12143 versioned constrained-muscle policy extends a declared
 native OpenSim cold start to exact ordered excitation T01 export, fresh
 source replay and marker sampling without reassembly. A coupler-only

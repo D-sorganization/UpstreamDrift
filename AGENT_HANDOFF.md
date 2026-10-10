@@ -1009,3 +1009,23 @@ marker registration. See chapter42 and
 ## Active Mixed Moco Link (#12147)
 
 Branch `feat/f07-mixed-moco-link-12147` composes preserved constrained prerequisites and adds optional mixed scalar Moco dispatch. The new native test writes a nonzero 40 ms target and measures fresh replay independently. Exact roles/bounds are bound into requests; mixed NPZ fields preserve controls, physical units, assistance, powers and work. Retained unscaled-cost and coarse-transcription failures motivate per-state refinement. Full-body/source physiology/contact and private capture remain open; chapter39 and F07_MIXED_ACTUATION_TURNOVER own the calculation and handoff.
+
+## Constrained Mixed Moco and Replay (#12173)
+
+Child #12173 adds an opt-in composition of the declared cold-start constraint
+policy and the existing assistance-explicit mixed profile. Exact coordinate
+optimizer boxes must fit within declared charts; linear chart constraints are
+checked by conservative interval extrema. Fresh replay rejects a native
+`Manager` that changes any requested named state value or the initial time,
+and records actual native constraint enforcement and position/velocity
+residuals at every sample. No native constraints are disabled and the strict
+default muscle-only path is unchanged. Mixed output preserves dimensionless
+muscle excitation and mechanical commands separately from physical N or N\*m
+actuation, power and sampled work. The 40 ms synthetic Moco fixture exports
+exact knots and independently replays, but it is not a private capture or
+production qualification. The frozen native regression reports 73 passed and
+one optional provider skip. Canonical calculation is chapter48; turnover is
+`docs/development/feedback_controls/F07_CONSTRAINED_MIXED_MOCO_TURNOVER.md`.
+The calculation registry remains empty and release blocked; full-body
+anatomy, calibration, physiology, contact/grip, capture horizon, production
+variants and six-engine parity remain unresolved.

@@ -473,8 +473,6 @@ def replay_declared_time_only_input(
     This diagnostic exercises exact declared constraints and chart at every
     sample. It cannot qualify muscle excitation, contact or full-swing replay.
     """
-    import opensim as osim
-
     grid = _replay_grid(time_seconds, declaration.time_seconds)
     step = declaration.scheduled_command_step
     if step is not None and step[0] not in grid[1:-1]:
@@ -487,20 +485,23 @@ def replay_declared_time_only_input(
     if declaration.allow_source_controllers_for_observation:
         raise ValueError("source-controller observation cannot enter replay")
     adapter_sha256 = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+    # Local import avoids a cycle with the executor's declared sample policy.
+    from . import native_scalar_replay
+
+    executor_path = Path(native_scalar_replay.__file__)
+    executor_sha256 = hashlib.sha256(executor_path.read_bytes()).hexdigest()
     with reconstruct_declared_cold_start(
         declaration, expected_audit=expected_initial_audit
     ) as prepared:
-        manager = osim.Manager(prepared.model)
-        manager.setIntegratorMethod(osim.Manager.IntegratorMethod_RungeKuttaMerson)
-        manager.setIntegratorAccuracy(tolerance)
-        manager.setWriteToStorage(False)
-        manager.initialize(prepared.state)
+        manager, initial = native_scalar_replay._initialize_manager(
+            prepared.model, prepared.state, tuple(declaration.named_state), tolerance
+        )
         paths = tuple(declaration.constant_commands)
         initial_commands = tuple(declaration.constant_commands[path] for path in paths)
         audits = []
         applied = []
         for index, time in enumerate(grid):
-            state = prepared.state if index == 0 else manager.integrate(time)
+            state = initial if index == 0 else manager.integrate(time)
             if state.getTime() != time:
                 raise RuntimeError("native integration did not reach exact replay knot")
             audit = observe_declared_native_sample(prepared.model, state, declaration)
@@ -534,12 +535,15 @@ def replay_declared_time_only_input(
             "interpolation": "zero_order_hold",
             "integrator": "RungeKuttaMerson",
             "accuracy": tolerance,
+            "integrator_provider_sha256": executor_sha256,
         }
         digest = hashlib.sha256(
             json.dumps(identity, sort_keys=True, allow_nan=False).encode()
         ).hexdigest()
     if hashlib.sha256(Path(__file__).read_bytes()).hexdigest() != adapter_sha256:
         raise RuntimeError("native preparation adapter changed during replay")
+    if hashlib.sha256(executor_path.read_bytes()).hexdigest() != executor_sha256:
+        raise RuntimeError("native integrator provider changed during replay")
     return DeclaredColdStartReplay(
         grid,
         paths,
