@@ -206,6 +206,21 @@ def test_lane_leg_seeds_only_square_the_forefoot_when_enabled() -> None:
 
 
 @pytest.mark.parametrize("feet", [None, _targets(16.0, 4.0)])
+def test_planted_stance_anchors_at_the_start_only_with_foot_progression(
+    feet,
+) -> None:
+    """Every trajectory re-solve plants the stance; with foot progression on it
+    keeps the feet of its start pose instead of re-fitting them (#12222)."""
+    stance = [("heel_r",), ("heel_r",)]
+    kwargs = address_feet.planted_stance(SimpleNamespace(stance=stance, feet=feet))
+    assert kwargs == {
+        "flat_feet_per_frame": stance,
+        "plant_stance": True,
+        "anchor_stance_at_init": feet is not None,
+    }
+
+
+@pytest.mark.parametrize("feet", [None, _targets(16.0, 4.0)])
 def test_lane_trajectory_holds_the_address_feet_only_when_enabled(feet) -> None:
     """With foot progression on, the swing IK keeps the calibrated address
     feet: its stance anchors start at ``q_start`` (#12222). Off keeps the

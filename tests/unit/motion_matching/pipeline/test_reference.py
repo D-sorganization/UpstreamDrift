@@ -110,6 +110,7 @@ def test_consistency_resolve_calls_kin_solve_trajectory() -> None:
     lane.ground = MagicMock()
     lane.stance = [("heel_r",)] * 5
     lane.bounds = {"joint": (-1.0, 1.0)}
+    lane.feet = None
 
     kin = MagicMock()
     kin.nq = 10
@@ -133,6 +134,7 @@ def test_consistency_resolve_calls_kin_solve_trajectory() -> None:
     assert kwargs["iterations"] == 30
     assert kwargs["flat_feet_per_frame"] == lane.stance
     assert kwargs["plant_stance"] is True
+    assert kwargs["anchor_stance_at_init"] is False  # foot progression off
     assert np.array_equal(kwargs["prior_trajectory"], q_smooth)
     assert kwargs["bounds"] == lane.bounds
 
