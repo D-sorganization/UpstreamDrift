@@ -143,7 +143,7 @@
     {
       "id": "UP-D1-frozen-marker-holdout-inventory",
       "owner": "UpstreamDrift issue #11899",
-      "resolution": "Inventory score_frozen_marker_offsets and chapter 13 frozen marker scoring: supplied body-local placements and proper predicted transforms, pooled valid-sample Euclidean RMS, fail-closed missing support, and unchanged observation clock. Existing exploratory heldout placement refitting is not independent prediction. This pure scoring boundary cannot establish training-only provenance, anthropometry, anatomical attachments, independent subject/trial splits or native replay qualification; private D02 and publication remain blocked."
+      "resolution": "Inventory score_frozen_marker_offsets and chapter 13 frozen marker scoring: supplied body-local placements and proper predicted transforms, pooled valid-sample Euclidean RMS, fail-closed missing support, and unchanged observation clock. F09 #12164 adds a provisional native-marker-calibration/1.0.0 artifact that reuses TourCapture and static_marker_offsets, binding exact capture/pose bytes, ordered native frames, source/provider/model identities, timebase and in-sample residuals; it retains no observation arrays and remains unqualified with holdout not evaluated. Existing exploratory heldout placement refitting is not independent prediction. Neither boundary establishes training-only provenance, anthropometry, calibrated anatomy, independent subject/trial splits or native replay qualification; private D02 and publication remain blocked."
     },
     {
       "id": "UP-D1-native-muscle-contact-inventory",

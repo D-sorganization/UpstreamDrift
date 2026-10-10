@@ -502,3 +502,24 @@ semantics, reproduction and remaining donor/resource/anatomy gates are in
 `F07_REFERENCE_CONVENTIONS_TURNOVER.md`. Canonical calculation detail is in
 chapter 38. Neither the previous 520-muscle source nor Pose2Sim is qualified
 for capture-matched muscle-driven forward dynamics by this diagnostic.
+
+## F09q Source-Bound Provisional Marker Calibration (#12164)
+
+`src/engines/feedback_marker_calibration.py` reuses `TourCapture`,
+`static_marker_offsets`, and `score_frozen_marker_offsets` to create a
+`native-marker-calibration/1.0.0` artifact. It binds capture and pose bytes,
+ordered marker labels and native frame IDs, capture clock/frame, inventory and
+native model/provider identities, in-sample residuals, and exact local offsets.
+`validate` rehashes supplied inputs, requires the expected pose-provider and
+capture coordinate identities, and recomputes estimates/residuals. The artifact carries no observations or private source path and creates an
+`NativeMarkerMap` whose content digest includes the artifact digest. The map and
+F09 observation receipt now surface that calibration digest explicitly.
+
+The artifact is `provisional_estimated`, with qualification and physiology
+unqualified and holdout `not_evaluated`. It is an integrity record, not an
+execution signature. Its training residual is not a predictive score. Existing
+anatomical seed maps remain unchanged. Portable synthetic tests exercise
+mutation and identity rejection; one actual OpenSim 4.6 fixture confirms the
+shared calibration estimate from native frame poses. This is not production
+model, private capture, independent holdout, physics or full-engine coverage.
+Canonical equations and limitations are recorded in chapter 13.
