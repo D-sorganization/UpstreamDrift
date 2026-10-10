@@ -50,3 +50,45 @@ def ball_position_at_address(
     ball = centre + radius_m * normal / length
     ball[2] = ground_height_m + radius_m
     return ball
+
+
+def resolve_ball_visual(
+    *,
+    enabled: bool,
+    position_m: Sequence[float] | NDArray[np.float64] | None,
+    source: str,
+    face_centre_m: Sequence[float] | NDArray[np.float64] | None = None,
+    face_normal: Sequence[float] | NDArray[np.float64] | None = None,
+    ground_height_m: float = 0.0,
+    radius_m: float = BALL_RADIUS_M,
+) -> tuple[NDArray[np.float64], str] | None:
+    """World position and source label of the decorative ball, or ``None``.
+
+    ``enabled=False`` returns ``None`` (the caller draws nothing) without
+    validating anything else. When ``position_m`` is given (e.g. a
+    mocap-matched swing that holds a measured ball, GCV-13 #11719) it is used
+    verbatim, labelled ``source``. Otherwise the position is derived from
+    ``face_centre_m``/``face_normal`` via :func:`ball_position_at_address`,
+    which both must then be given.
+
+    Raises ``ValueError`` when enabled but neither an explicit
+    ``position_m`` nor both face-geometry arguments are available, or when
+    ``position_m`` is not a finite 3-vector. Postcondition: the returned
+    position is a finite 3-vector.
+    """
+    if not enabled:
+        return None
+    if position_m is not None:
+        pos = np.asarray(position_m, dtype=float)
+        if pos.shape != (3,) or not np.isfinite(pos).all():
+            raise ValueError("ball position_m must be a finite 3-vector")
+        return pos, source
+    if face_centre_m is None or face_normal is None:
+        raise ValueError(
+            "resolve_ball_visual needs either position_m or both "
+            "face_centre_m and face_normal"
+        )
+    pos = ball_position_at_address(
+        face_centre_m, face_normal, ground_height_m=ground_height_m, radius_m=radius_m
+    )
+    return pos, source

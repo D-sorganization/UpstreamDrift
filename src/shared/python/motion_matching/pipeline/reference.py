@@ -26,7 +26,6 @@ from src.shared.python.motion_matching.pipeline.constants import (
     CONSISTENCY_PRIOR,
     LEG_SEEDS,
     LOWER_LIMB_RANGES_DEG,
-    PLAYBACK_STRIDE,
     RATE_HZ,
     REFERENCE_CUTOFF_HZ,
     SCALE_GRID,
@@ -256,6 +255,9 @@ def render_playback(
 ) -> None:
     """Render animated GIF of motion from spec and joint trajectory."""
     from src.engines.physics_engines.mujoco.python.visual_layer import (
+        PlaybackTiming,
+    )
+    from src.engines.physics_engines.mujoco.python.visual_layer import (
         render_playback as _render,
     )
 
@@ -266,8 +268,7 @@ def render_playback(
         lookat=lookat,
         path=path,
         show_com=show_com,
-        playback_stride=PLAYBACK_STRIDE,
-        rate_hz=rate_hz,
+        timing=PlaybackTiming(rate_hz=rate_hz),
     )
 
 
