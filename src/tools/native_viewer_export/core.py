@@ -13,11 +13,14 @@ from dataclasses import dataclass, field, replace
 import functools
 import math
 from pathlib import Path
-from typing import Any, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 import warnings
 
 import numpy as np
 from numpy.typing import NDArray
+
+if TYPE_CHECKING:
+    from src.tools.native_viewer_export.ball import AddressBall
 
 from src.shared.python.force_overlay.glyphs import ForceGlyphStyle, GlyphSet
 from src.shared.python.force_overlay.renderers.meshcat_glyphs import legend_text
@@ -408,8 +411,16 @@ class NativeBackend(Protocol):
         settings: ExportSettings,
         indices: Sequence[int],
         overlay: OverlayFeed | None,
+        ball: AddressBall | None = None,
     ) -> Iterator[dict[str, Image8]]:
-        """Yield ``{view name: RGB frame}`` for every state index in order."""
+        """Yield ``{view name: RGB frame}`` for every state index in order.
+
+        ``ball`` is the decorative address ball already resolved from the
+        swing's true (unwindowed) address frame -- see :func:`_export_clip`;
+        backends that draw it must use this value as given, never re-resolve
+        it from ``swing`` (a windowed clip's ``swing.q[0]`` is not the
+        address frame, GCV-13 #11719).
+        """
         ...
 
 
@@ -530,7 +541,12 @@ def _export_clip(
     out_dir: Path,
     feed: OverlayFeed | None,
     writer_factory: WriterFactory,
+    ball: AddressBall | None = None,
 ) -> tuple[dict[str, Path], int, list[int]]:
+    """Render one clip set. ``ball`` must already be resolved from the full,
+    unwindowed swing (see :func:`export_swing`) -- a windowed clip's own
+    first state is not the address frame, so it is passed through as given
+    rather than re-resolved here (GCV-13 #11719)."""
     engine = backend.engine
     shown, shown_feed = _resampled(swing, feed, settings, plan)
     indices = list(range(shown.n_states))
@@ -547,7 +563,7 @@ def _export_clip(
     try:
         for k, tiles in zip(
             indices,
-            backend.render(shown, settings, indices, shown_feed),
+            backend.render(shown, settings, indices, shown_feed, ball=ball),
             strict=False,
         ):
             glyphs = shown_feed.glyphs_at(k) if shown_feed is not None else None
@@ -596,6 +612,7 @@ def export_swing(
     out_dir: Path,
     overlay: OverlayFeed | None = None,
     writer_factory: WriterFactory | None = None,
+    ball: AddressBall | None = None,
 ) -> ExportResult:
     """Render ``swing`` in ``backend`` and write one clip per view (and the 2x2).
 
@@ -604,6 +621,13 @@ def export_swing(
     Returns a skipped result (nothing written) when the backend reports a
     reason it cannot run. Postconditions: within a clip set every clip has the
     same number of frames, shown at ``settings.fps``.
+
+    ``ball``, when given, must already be resolved from ``swing`` *before*
+    any clip plan windows or resamples it (the caller's job -- see
+    ``runner.run_export``); the same value is passed unchanged to every clip,
+    including the impact window, so the ball never moves and never goes
+    missing just because a clip's own first frame is mid-swing (GCV-13,
+    #11719).
     """
     engine = backend.engine
     reason = backend.unavailable_reason()
@@ -619,7 +643,7 @@ def export_swing(
     glyph_counts: list[int] = []
     for plan in plans:
         clip_paths, frames, glyphs = _export_clip(
-            backend, swing, settings, plan, out_dir, feed, factory
+            backend, swing, settings, plan, out_dir, feed, factory, ball
         )
         paths.update(clip_paths)
         counts[plan.suffix] = frames

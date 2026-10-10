@@ -30,7 +30,7 @@ from src.tools.native_viewer_export.backends._meshcat_page import (
 )
 from src.tools.native_viewer_export.backends._scene import z_axis_frame
 from src.tools.native_viewer_export.backends._subprocess import export_urdf
-from src.tools.native_viewer_export.ball import resolve_address_ball
+from src.tools.native_viewer_export.ball import AddressBall
 from src.tools.native_viewer_export.core import (
     ExportSettings,
     Image8,
@@ -95,7 +95,7 @@ class DrakeMeshcatBackend:
         return (heads[0].body if heads else None), club_body
 
     def _build(
-        self, swing: SwingInput, *, ball: bool = True
+        self, swing: SwingInput, *, ball: AddressBall | None = None
     ) -> tuple[Any, Any, Any, Any, Any, list[int]]:
         from pydrake.geometry import (
             Box,
@@ -163,15 +163,14 @@ class DrakeMeshcatBackend:
             "floor",
             np.array(_FLOOR_RGBA),
         )
-        if ball:
-            resolved = resolve_address_ball(swing)
-            if resolved.position_m is None:
-                logger.warning("skipping decorative ball: %s", resolved.reason)
+        if ball is not None:
+            if ball.position_m is None:
+                logger.warning("skipping decorative ball: %s", ball.reason)
             else:
                 plant.RegisterVisualGeometry(
                     plant.world_body(),
-                    RigidTransform(resolved.position_m),  # type: ignore[arg-type]
-                    Sphere(resolved.radius_m),
+                    RigidTransform(ball.position_m),  # type: ignore[arg-type]
+                    Sphere(ball.radius_m),
                     "visual_ball",
                     np.array(_BALL_RGBA),
                 )
@@ -199,14 +198,13 @@ class DrakeMeshcatBackend:
         settings: ExportSettings,
         indices: Sequence[int],
         overlay: OverlayFeed | None,
+        ball: AddressBall | None = None,
     ) -> Iterator[dict[str, Image8]]:
         from src.engines.physics_engines.drake.python.src.drake_meshcat_sink import (
             DrakeMeshcatSink,
         )
 
-        plant, diagram, ctx, pctx, meshcat, starts = self._build(
-            swing, ball=settings.ball
-        )
+        plant, diagram, ctx, pctx, meshcat, starts = self._build(swing, ball=ball)
 
         def set_state(index: int) -> None:
             full = np.zeros(plant.num_positions())

@@ -29,7 +29,7 @@ from src.tools.native_viewer_export.backends._meshcat_page import (
     playwright_unavailable_reason,
 )
 from src.tools.native_viewer_export.backends._scene import z_axis_frame
-from src.tools.native_viewer_export.ball import resolve_address_ball
+from src.tools.native_viewer_export.ball import AddressBall
 from src.tools.native_viewer_export.core import (
     ExportSettings,
     Image8,
@@ -68,7 +68,9 @@ class PinocchioMeshcatBackend:
                 return f"{module} is not installed"
         return playwright_unavailable_reason()
 
-    def _build(self, swing: SwingInput, *, ball: bool = True) -> tuple[Any, Any, Any]:
+    def _build(
+        self, swing: SwingInput, *, ball: AddressBall | None = None
+    ) -> tuple[Any, Any, Any]:
 
         import coal
         import meshcat
@@ -156,16 +158,15 @@ class PinocchioMeshcatBackend:
         )
         floor.meshColor = np.array(_FLOOR_RGBA)
         geometry.addGeometryObject(floor)  # type: ignore[attr-defined]
-        if ball:
-            resolved = resolve_address_ball(swing)
-            if resolved.position_m is None:
-                logger.warning("skipping decorative ball: %s", resolved.reason)
+        if ball is not None:
+            if ball.position_m is None:
+                logger.warning("skipping decorative ball: %s", ball.reason)
             else:
                 ball_geom = pin.GeometryObject(  # type: ignore[attr-defined]
                     "visual_ball",
                     0,
-                    pin.SE3(np.eye(3), resolved.position_m),
-                    coal.Sphere(resolved.radius_m),
+                    pin.SE3(np.eye(3), ball.position_m),
+                    coal.Sphere(ball.radius_m),
                 )
                 ball_geom.meshColor = np.array(_BALL_RGBA)
                 geometry.addGeometryObject(ball_geom)  # type: ignore[attr-defined]
@@ -180,8 +181,9 @@ class PinocchioMeshcatBackend:
         settings: ExportSettings,
         indices: Sequence[int],
         overlay: OverlayFeed | None,
+        ball: AddressBall | None = None,
     ) -> Iterator[dict[str, Image8]]:
-        adapter, viz, _ = self._build(swing, ball=settings.ball)
+        adapter, viz, _ = self._build(swing, ball=ball)
         names = swing.bundle.coordinate_order
 
         def set_state(index: int) -> None:

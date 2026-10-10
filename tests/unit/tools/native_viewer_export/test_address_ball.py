@@ -116,6 +116,87 @@ def _stubbed_club_swing() -> Any:
     return types.SimpleNamespace(bundle=bundle, q=np.zeros((1, 0)))
 
 
+def _patch_height_dependent_clubhead(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Clubhead frame whose world height equals the single ``h`` coordinate."""
+
+    class _Source:
+        def __init__(self, _spec_bytes: bytes) -> None:
+            pass
+
+        def frame_poses(self, coordinates: dict) -> dict:
+            pose = np.eye(4)
+            pose[2, 3] = coordinates["h"]
+            return {"Clubhead": pose}
+
+    mod = types.ModuleType("overlay_source_stub_height")
+    mod.MujocoOverlaySource = _Source  # type: ignore[attr-defined]
+    monkeypatch.setitem(
+        sys.modules,
+        "src.engines.physics_engines.mujoco.python.overlay_source",
+        mod,
+    )
+
+
+def _grounded_then_elevated_swing(
+    n: int = 50, dt_s: float = 0.01, elevated_from: int = 20, elevated_h: float = 1.9
+) -> SwingInput:
+    """A real (loadable, multi-state) swing bundle: frame 0 is grounded, and
+    every frame from ``elevated_from`` on is ``elevated_h`` metres up.
+
+    Shares the club body of :func:`_stubbed_club_swing`, but as a genuine
+    ``InputBundle`` so the production clip/windowing pipeline
+    (``core._resampled``, ``video_timing.FrameSchedule``) can slice it --
+    the GCV-13 impact-window bug (#11719) only reproduces through that real
+    windowing, not a hand-built single-state swing.
+    """
+    spec = {
+        "gravity_m_s2": [0.0, 0.0, -9.81],
+        "coordinate_order": ["h"],
+        "bodies": [
+            {
+                "name": "Right Hand/Clubface Vector",
+                "solids": [
+                    {
+                        "name": "Grip",
+                        "placement": [
+                            [1, 0, 0, 0],
+                            [0, 1, 0, -1.0],
+                            [0, 0, 1, 0],
+                            [0, 0, 0, 1],
+                        ],
+                        "com_m": [0.0, 0.0, 0.0],
+                        "mass_kg": 0.05,
+                    },
+                ],
+            }
+        ],
+        "joints": [
+            {
+                "name": "club_joint",
+                "parent": "world",
+                "child": "Right Hand/Clubface Vector",
+                "child_to_follower": np.eye(4).tolist(),
+                "parent_to_base": np.eye(4).tolist(),
+            }
+        ],
+    }
+    spec_bytes = json.dumps(spec).encode("utf-8")
+    q = np.zeros((n, 1))
+    q[elevated_from:, 0] = elevated_h
+    bundle = InputBundle(
+        spec_bytes=spec_bytes,
+        coordinate_order=("h",),
+        dt_s=dt_s,
+        q0=q[0],
+        v0=np.zeros(1),
+        efforts=np.zeros((n - 1, 1)),
+        reference_q=q,
+        reference_v=np.zeros_like(q),
+        reference_engine="mujoco",
+    )
+    return SwingInput(bundle, q, "evidence", "Driver", "mujoco")
+
+
 def test_resolves_the_ball_from_the_real_driver_address_frame() -> None:
     """Wiring check: the resolver composes club_assembly with the Clubhead FK pose."""
     swing = _real_driver_swing()
@@ -255,7 +336,7 @@ def test_drake_meshcat_scene_has_a_ball_at_the_resolved_address_position() -> No
     assert resolved.position_m is not None
 
     plant, diagram, _ctx, _pctx, _meshcat, _starts = DrakeMeshcatBackend()._build(
-        swing, ball=True
+        swing, ball=resolved
     )
     scene_graph = diagram.GetSubsystemByName("scene_graph")
     inspector = scene_graph.model_inspector()
@@ -280,7 +361,7 @@ def test_drake_meshcat_scene_skips_the_ball_when_disabled() -> None:
 
     swing = _real_driver_swing()
     plant, diagram, _ctx, _pctx, _meshcat, _starts = DrakeMeshcatBackend()._build(
-        swing, ball=False
+        swing, ball=None
     )
     scene_graph = diagram.GetSubsystemByName("scene_graph")
     inspector = scene_graph.model_inspector()
@@ -302,10 +383,87 @@ def test_pinocchio_meshcat_scene_has_a_ball_at_the_resolved_address_position() -
     resolved = resolve_address_ball(swing)
     assert resolved.position_m is not None
 
-    _adapter, viz, _meshcat = PinocchioMeshcatBackend()._build(swing, ball=True)
+    _adapter, viz, _meshcat = PinocchioMeshcatBackend()._build(swing, ball=resolved)
     balls = [o for o in viz.visual_model.geometryObjects if o.name == "visual_ball"]
     assert len(balls) == 1
     obj = balls[0]
     assert isinstance(obj.geometry, coal.Sphere)
     assert obj.geometry.radius == pytest.approx(resolved.radius_m)
     assert np.allclose(obj.placement.translation, resolved.position_m, atol=1e-6)
+
+
+class _RecordingBackend:
+    """Fake backend recording the ``swing``/``ball`` each clip render saw."""
+
+    engine = "drake"
+
+    def __init__(self) -> None:
+        self.calls: list[tuple[SwingInput, Any]] = []
+
+    def unavailable_reason(self) -> str | None:
+        return None
+
+    def render(self, swing, settings, indices, overlay, ball=None):
+        self.calls.append((swing, ball))
+        for _ in indices:
+            yield {
+                v: np.zeros((settings.height, settings.width, 3), np.uint8)
+                for v in settings.views
+            }
+
+
+class _Writer:
+    def __init__(self, path: Path, fps: int) -> None:
+        self.path = path
+
+    def append_data(self, frame: object) -> None:
+        pass
+
+    def close(self) -> None:
+        self.path.write_bytes(b"x")
+
+
+def test_impact_window_clip_gets_the_ball_from_the_true_address_not_the_window(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """GCV-13 bug (#11719): an impact-window clip's own first frame is
+    mid-swing (elevated here), not the address; the ball must still resolve
+    from the swing's true frame 0, at the same position a full-speed clip
+    would use, instead of being wrongly reported as not grounded."""
+    from src.tools.native_viewer_export.core import ExportSettings
+    from src.tools.native_viewer_export.runner import ExportJob, run_export
+
+    _patch_height_dependent_clubhead(monkeypatch)
+    swing = _grounded_then_elevated_swing()
+    bpath = tmp_path / "b.npz"
+    swing.bundle.save(bpath)
+    expected = resolve_address_ball(swing)
+    assert expected.position_m is not None  # the true address frame is grounded
+
+    backend = _RecordingBackend()
+    job = ExportJob(bpath, tmp_path / "out", "evidence", "Driver", ("drake",))
+    settings = ExportSettings(
+        width=32,
+        height=32,
+        fps=20,
+        speeds=(),
+        views=("face_on",),
+        multiview=False,
+        impact_time_s=0.3,
+        impact_window_s=0.1,
+    )
+    run_export(
+        job,
+        settings,
+        lambda engine: backend,
+        lambda s, engine: (None, (0.5, 0.0, 0.9)),
+        _Writer,
+    )
+
+    assert len(backend.calls) == 1  # only the impact-window clip (speeds=())
+    windowed_swing, ball = backend.calls[0]
+    # The clip's own first frame is mid-swing (elevated), not the address...
+    assert windowed_swing.q[0, 0] == pytest.approx(1.9)
+    # ...but the ball still resolves, at the true address position.
+    assert ball is not None and ball.position_m is not None
+    assert ball.position_m == pytest.approx(expected.position_m)

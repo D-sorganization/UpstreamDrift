@@ -14,6 +14,7 @@ from __future__ import annotations
 import json
 import logging
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 import numpy as np
 from numpy.typing import NDArray
@@ -26,7 +27,12 @@ from src.shared.python.model_appearance.club_assembly import (
     clubface_vector,
 )
 from src.shared.python.motion_matching.visual_skeleton import derive_visual_skeleton
-from src.tools.native_viewer_export.core import SwingInput
+
+if TYPE_CHECKING:
+    # Type-only: a real import would make core.py -> ball.py -> core.py a
+    # runtime cycle, since core.py now imports AddressBall for the clip
+    # pipeline's ball parameter (GCV-13 slice 2 fix, #11719).
+    from src.tools.native_viewer_export.core import SwingInput
 
 logger = logging.getLogger(__name__)
 
@@ -78,6 +84,13 @@ def resolve_address_ball(swing: SwingInput) -> AddressBall:
     reported source is ``"address_geometry"``.
     """
     spec = json.loads(swing.bundle.spec_bytes)
+    if "bodies" not in spec:
+        # Not every spec (e.g. a non-full-body test bundle) describes bodies
+        # at all; club_assembly.assembly_from_spec/club_body_name assume the
+        # key is present. Resolving the ball is now attempted for every
+        # engine by default (run_export, GCV-13 #11719), so this is a real
+        # input shape, not just a test double.
+        return _unavailable("spec has no club body")
     club = assembly_from_spec(spec)
     club_body = club_body_name(spec)
     if club is None or club_body is None:
