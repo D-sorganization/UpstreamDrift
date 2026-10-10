@@ -95,8 +95,9 @@ class ContactGripConfig:
 
 def _grip_axis(interface: GripInterface, cfg: ContactGripConfig) -> tuple:
     rot = np.asarray(interface.right.rotation, dtype=float)
+    ef = cfg.ef
     point = np.asarray(interface.right.position_m) + rot @ (
-        cfg.ef.layout.axis_offset_grip_frame("R")
+        ef.layout.axis_offset_grip_frame("R")
     )
     return point, rot[:, 0], rot[:, 1]
 
@@ -105,11 +106,12 @@ def write_grip_meshes(interface: GripInterface, cfg: ContactGripConfig) -> dict:
     """Write the two closed grip meshes (club-body frame); return their facts."""
     point, axis, radial = _grip_axis(interface, cfg)
     layout = cfg.ef.layout
+    cylinder = cfg.pads.cylinder
     half = max(layout.axial_offsets_m(), key=abs)
     half = abs(half) + layout.pad_radius_m + MESH_MARGIN_M
     facts: dict[str, Any] = {}
     for side in SIDES:
-        centre = cfg.pads.cylinder.origin_axial_m(side)
+        centre = cylinder.origin_axial_m(side)
         verts, faces = capped_cylinder_mesh(
             layout.grip_radius_m,
             point,
