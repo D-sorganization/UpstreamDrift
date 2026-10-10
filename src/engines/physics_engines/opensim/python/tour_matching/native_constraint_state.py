@@ -11,10 +11,11 @@ import hashlib
 import json
 import math
 from collections.abc import Callable, Mapping
+from contextlib import contextmanager
 from dataclasses import asdict, dataclass, field, replace
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import Any
+from typing import Any, Iterator
 
 
 @dataclass(frozen=True)
@@ -168,6 +169,20 @@ def _constraint_observations(
     return tuple(result)
 
 
+def native_muscles(model: Any, osim: Any) -> tuple[Any, ...]:
+    """Return the complete native muscle registry or reject hidden components."""
+    muscles = tuple(model.getMuscles())
+    registered = {muscle.getAbsolutePathString() for muscle in muscles}
+    recursive = {
+        component.getAbsolutePathString()
+        for component in model.getComponentsList()
+        if osim.Muscle.safeDownCast(component) is not None
+    }
+    if recursive != registered:
+        raise ValueError("native muscle registry must cover all recursive muscles")
+    return muscles
+
+
 def _blockers(
     coordinates: tuple[CoordinateConstraintObservation, ...],
     constraints: tuple[ConstraintObservation, ...],
@@ -276,7 +291,7 @@ def audit_native_constraint_state(
         ),
         muscle_forces=tuple(
             (muscle.getAbsolutePathString(), _finite(muscle.getActuation(working)))
-            for muscle in model.getMuscles()
+            for muscle in native_muscles(model, osim)
         ),
         position_errors=_vector(working.getQErr()),
         velocity_errors=_vector(working.getUErr()),
@@ -301,6 +316,39 @@ def _restore_named_state(model: Any, state: Any, initial: Mapping[str, float]) -
         raise ValueError("native achieved state differs from requested restore")
 
 
+@contextmanager
+def owned_native_source_state(
+    model_path: Path, initial_state: Mapping[str, float] | None = None
+) -> Iterator[tuple[Any, Any, str]]:
+    """Load an owned XML copy, optionally restoring every named state value.
+
+    This is a read-only observation boundary, not a native restart certificate.
+    Resource closure is not verified; callers must account for external assets.
+    Native initSystem includes OpenSim's initialization assembly; restoring named
+    continuous values afterward does not invoke a second assembly here.
+    """
+    import opensim as osim
+
+    source = Path(model_path)
+    payload = source.read_bytes()
+    with NamedTemporaryFile(
+        prefix="opensim-constraint-audit-", suffix=".osim", delete=False
+    ) as stream:
+        stream.write(payload)
+        owned = Path(stream.name)
+    try:
+        model = osim.Model(str(owned))
+        model.finalizeConnections()
+        state = model.initSystem()
+        if initial_state is not None:
+            _restore_named_state(model, state, initial_state)
+        yield model, state, _digest(payload)
+        if source.read_bytes() != payload:
+            raise ValueError("source XML changed during native observation")
+    finally:
+        owned.unlink()
+
+
 def audit_source_constraint_state(
     model_path: Path,
     initial_state: Mapping[str, float],
@@ -313,25 +361,13 @@ def audit_source_constraint_state(
     this is explicitly not an arbitrary-state restart. External resources and
     transitive runtime dependencies are not certified by this diagnostic.
     """
-    import opensim as osim
-
-    payload = Path(model_path).read_bytes()
-    # Older XML upgrades can open a process-owned native log beside the model.
-    # Own/delete only our XML, never a directory containing native logger handles.
-    with NamedTemporaryFile(
-        prefix="opensim-constraint-audit-", suffix=".osim", delete=False
-    ) as stream:
-        stream.write(payload)
-        owned = Path(stream.name)
-    try:
-        model = osim.Model(str(owned))
-        model.finalizeConnections()
-        state = model.initSystem()
-        _restore_named_state(model, state, initial_state)
+    with owned_native_source_state(model_path, initial_state) as (
+        model,
+        state,
+        source_sha,
+    ):
         result = audit_native_constraint_state(model, state, declared_lock_targets)
-    finally:
-        owned.unlink()
-    return replace(result, source_sha256=_digest(payload))
+    return replace(result, source_sha256=source_sha)
 
 
 __all__ = [
@@ -341,4 +377,6 @@ __all__ = [
     "NativeConstraintStateAudit",
     "audit_native_constraint_state",
     "audit_source_constraint_state",
+    "owned_native_source_state",
+    "native_muscles",
 ]

@@ -231,6 +231,7 @@ def test_missing_visual_mesh_native_log_does_not_break_owned_xml_cleanup(
     )
     result = subprocess.run(
         [sys.executable, "-c", code, str(source)],
+        cwd=Path(__file__).resolve().parents[2],
         capture_output=True,
         text=True,
         timeout=30,

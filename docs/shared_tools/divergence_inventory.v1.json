@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "tools_pin": "2e7665111b06f92ffbfe178b92d74d6a81c95388",
+  "tools_pin": "86d0f28b1cc5acf61185e07e320c816c2d005512",
   "ud_root": "src/shared/python",
   "tools_root": "vendor/ud-tools/src/shared/python",
   "vendor_shim_roots": {
@@ -13,7 +13,7 @@
   "totals": {
     "identical": 400,
     "diverged": 273,
-    "ud-only": 1759,
+    "ud-only": 1760,
     "tools-only": 796,
     "spelling-only": 121
   },
@@ -518,7 +518,7 @@
     "motion_matching": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 287,
+      "ud-only": 288,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -3885,7 +3885,7 @@
       "classification": "ud-only",
       "package": "biomechanics",
       "subpackage": "",
-      "ud_bytes": 20410,
+      "ud_bytes": 20432,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -8481,7 +8481,7 @@
       "classification": "ud-only",
       "package": "force_overlay",
       "subpackage": "",
-      "ud_bytes": 12496,
+      "ud_bytes": 12518,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -14357,6 +14357,18 @@
       "spelling_only": false
     },
     {
+      "path": "motion_matching/bounded_candidate_search.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "",
+      "ud_bytes": 8318,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "motion_matching/bounded_nmpc.py",
       "classification": "ud-only",
       "package": "motion_matching",
@@ -17025,7 +17037,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "same_input",
-      "ud_bytes": 5005,
+      "ud_bytes": 5027,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
