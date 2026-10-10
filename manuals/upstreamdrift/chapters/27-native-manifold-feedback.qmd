@@ -69,6 +69,11 @@ each differentiated successor is checked against the recorded native
 successor. This time normalization is not admitted for time-dependent
 callbacks or external drives.
 
+Feedback admission and independent replay use the same
+`require_no_global_mujoco_callbacks` inspection boundary. A missing callback
+getter or an installed callback rejects admission before evaluation; the
+feedback adapter does not maintain a separate private callback-name list.
+
 From one held-out $0.25\,\mathrm{rad}$ hip perturbation, a frozen-feedforward
 run and an exact-state feedback run use the **same** native model, initial
 state, input grid and policy. The frozen run's saved input hash equals the

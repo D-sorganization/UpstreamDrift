@@ -247,3 +247,16 @@ def test_drake_full_body_ik_adapter(fb_spec: dict) -> None:
     closure_res = adapter.closure_residuals(q0)
     assert closure_res.shape == (3,)
     assert np.isfinite(closure_res).all()
+
+    # Spec attachments store ``offset_m``; uncalibrated markers (null offset)
+    # cannot be placed and must be left out rather than read as NaN.
+    placed = {
+        label
+        for label, att in fb_spec["marker_attachments"].items()
+        if att.get("offset_m") is not None
+    }
+    assert placed and len(placed) < len(fb_spec["marker_attachments"])
+    assert set(adapter.labels) == placed
+    markers = adapter.marker_positions(q0)
+    assert markers.shape == (len(placed), 3)
+    assert np.isfinite(markers).all()
