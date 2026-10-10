@@ -82,6 +82,52 @@ def solve_weld_acceleration(
     return solve_weld_with_multipliers(mass, force, jacobian, bias)[0]
 
 
+def club_newton_euler(
+    plant: Any,
+    context: Any,
+    body: Any,
+    acceleration: Array,
+    gravity: Array,
+    *,
+    welded: Sequence[Any] | None = None,
+) -> dict[str, Any]:
+    """Club kinematics as the ``holding_hand_wrench`` Newton-Euler keywords.
+
+    The club mass may live on solid links welded to ``body``, so by default the
+    composite inertia of everything welded to it is used; ``welded`` overrides
+    the body-index list (for a club that is itself the only club mass).
+    ``acceleration`` is the
+    generalised acceleration ``vdot`` at the state held by ``context``.
+    """
+    rot_wb = plant.EvalBodyPoseInWorld(context, body).rotation().matrix()
+    origin = plant.EvalBodyPoseInWorld(context, body).translation()
+    if welded is None:
+        welded = [b.index() for b in plant.GetBodiesWeldedTo(body)]
+    spatial_inertia = plant.CalcSpatialInertia(context, body.body_frame(), welded)
+    com_b = np.asarray(spatial_inertia.get_com())
+    inertia_com_b = spatial_inertia.CalcRotationalInertia().ShiftToCenterOfMass(
+        float(spatial_inertia.get_mass()), com_b
+    )
+    r = rot_wb @ com_b
+    velocity = plant.EvalBodySpatialVelocityInWorld(context, body)
+    omega = np.asarray(velocity.rotational())
+    accels = plant.CalcSpatialAccelerationsFromVdot(context, acceleration)
+    spatial_acc = accels[int(body.index())]
+    alpha = np.asarray(spatial_acc.rotational())
+    a_origin = np.asarray(spatial_acc.translational())
+    a_com = a_origin + np.cross(alpha, r) + np.cross(omega, np.cross(omega, r))
+    inertia_w = rot_wb @ inertia_com_b.CopyToFullMatrix3() @ rot_wb.T
+    return {
+        "mass_kg": float(spatial_inertia.get_mass()),
+        "gravity_m_s2": gravity,
+        "com_m": origin + r,
+        "com_acceleration_m_s2": a_com,
+        "inertia_world_kg_m2": inertia_w,
+        "angular_velocity_rad_s": omega,
+        "angular_acceleration_rad_s2": alpha,
+    }
+
+
 class FullBodyDrakeModel:
     """Full-body Drake adapter combining 41-DOF tree, weld closure, and FB-2 contact."""
 
@@ -506,36 +552,13 @@ class FullBodyDrakeModel:
 
     def _club_newton_euler(self, acceleration: Array) -> dict[str, Any]:
         """Club kinematics for the Newton-Euler keywords at the solved state."""
-        plant, ctx = self.plant, self.context
-        body = self._closure[1].body()
-        rot_wb = plant.EvalBodyPoseInWorld(ctx, body).rotation().matrix()
-        origin = plant.EvalBodyPoseInWorld(ctx, body).translation()
-        # The club mass lives on solid links welded to the (massless) closure
-        # body, so take the composite inertia of everything welded to it.
-        welded = [b.index() for b in plant.GetBodiesWeldedTo(body)]
-        spatial_inertia = plant.CalcSpatialInertia(ctx, body.body_frame(), welded)
-        com_b = np.asarray(spatial_inertia.get_com())
-        inertia_com_b = spatial_inertia.CalcRotationalInertia().ShiftToCenterOfMass(
-            float(spatial_inertia.get_mass()), com_b
+        return club_newton_euler(
+            self.plant,
+            self.context,
+            self._closure[1].body(),
+            acceleration,
+            self.gravity,
         )
-        r = rot_wb @ com_b
-        velocity = plant.EvalBodySpatialVelocityInWorld(ctx, body)
-        omega = np.asarray(velocity.rotational())
-        accels = plant.CalcSpatialAccelerationsFromVdot(ctx, acceleration)
-        spatial_acc = accels[int(body.index())]
-        alpha = np.asarray(spatial_acc.rotational())
-        a_origin = np.asarray(spatial_acc.translational())
-        a_com = a_origin + np.cross(alpha, r) + np.cross(omega, np.cross(omega, r))
-        inertia_w = rot_wb @ inertia_com_b.CopyToFullMatrix3() @ rot_wb.T
-        return {
-            "mass_kg": float(spatial_inertia.get_mass()),
-            "gravity_m_s2": self.gravity,
-            "com_m": origin + r,
-            "com_acceleration_m_s2": a_com,
-            "inertia_world_kg_m2": inertia_w,
-            "angular_velocity_rad_s": omega,
-            "angular_acceleration_rad_s2": alpha,
-        }
 
     def grip_analysis(
         self,
