@@ -519,3 +519,26 @@ Manager seed regressions cover value and speed projection in mixed and
 mechanical prepared-state paths. See chapter48 and
 `F07_CONSTRAINED_MIXED_MOCO_TURNOVER.md`; the registry still contains zero
 approved calculations and release remains blocked.
+## F07 Exact 557-Muscle Diagnostic Replay (#12182)
+
+The exact derived BUET–Hamner source now has a separate v3 excitation replay
+profile. The original one-equilibrium seed fails its unchanged source chart at
+the first 1 ms sample. An explicitly declared six-coordinate interior seed
+passes only a 0.2 ms saved-input/fresh-native replay with all 557 muscle
+channels and 17 observed couplers. The public hash-bound receipt and failed
+attempts are in `F07_EXACT_557_REPLAY_TURNOVER.md`; chapter50 records the
+calculation. Four invalid original body inertia tensors, physiological
+preparation, longer source-chart viability, real marker registration and
+capture matching remain open. The calculation registry stays unapproved.
+
+## F07 Source-Body Inertia Admission (#12191)
+
+`native_body_inertia.py` now checks exact source/native mass, body-frame COM,
+and inertia before a physical OpenSim claim. Its rotated-invalid and welded
+massless fixtures, source mutation and altered native readback are TDD
+regressions. Actual OpenSim 4.6 identifies exactly four invalid positive-mass
+bodies in the unchanged 557-muscle source; nine exact massless carriers use
+their explicit zero policy. See chapter52, the source-bound receipt and
+`F07_NATIVE_BODY_INERTIA_TURNOVER.md`. This gate neither changes source data
+nor upgrades the 0.2 ms #12182 diagnostic to a physiological or full-horizon
+result. All 17 required variants and six ecosystems remain open.
