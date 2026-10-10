@@ -243,7 +243,7 @@
     {
       "id": "UP-D1-native-muscle-bundle-inventory",
       "owner": "UpstreamDrift issue #11908",
-      "resolution": "Inventory the reviewed cold-start Tools T01 muscle bundle seam and chapter27. Registered discrete/modeling options and physical units are explicit; native continuous Y coverage alone is insufficient. Synthetic adapter tests do not qualify arbitrary SimTK State serialization, anatomy, contact/constraints, capture accuracy, or all-model parity."
+      "resolution": "Inventory the reviewed cold-start Tools T01 muscle bundle seam and chapter27. Registered discrete/modeling options and physical units are explicit; native continuous Y coverage alone is insufficient. Child #12147 adds separately admitted fixed-path muscle plus CoordinateActuator T01 commands, ground-topology root assistance, owner-specific override units, native force/power and sampled work, immutable source/input/state/policy lineage and one shared time-checked executor. Original muscle-only admission remains strict. Synthetic adapter tests do not qualify arbitrary SimTK State serialization, anatomy, contact/constraints, capture accuracy, or all-model parity."
     },
     {
       "id": "UP-D1-native-moco-initial-bindings-inventory",

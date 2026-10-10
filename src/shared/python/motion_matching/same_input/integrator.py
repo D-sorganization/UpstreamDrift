@@ -14,9 +14,9 @@ grow ~7x per step.  Eight substeps (0.125 ms) keep |lambda dt| ~ 1.2.
 
 from __future__ import annotations
 
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
-from typing import Protocol
+from typing import Any, Protocol
 
 import numpy as np
 from numpy.typing import NDArray
@@ -24,6 +24,10 @@ from numpy.typing import NDArray
 from src.shared.python.motion_matching.same_input.closure import (
     ClosurePlant,
     project_to_closure,
+)
+from src.shared.python.motion_matching.impact_force import (
+    ImpactForce,
+    step_through_impact,
 )
 
 Array = NDArray[np.float64]
@@ -86,6 +90,7 @@ class Rollout:
     efforts: Array
     pose_drift: Array
     failure: str | None = None
+    ball_impact: dict[str, Any] | None = None
 
 
 def root_indices(coordinate_order: Sequence[str]) -> Array:
@@ -114,6 +119,24 @@ def zoh_rk4_step(
     return q_next, v_next
 
 
+class _ForcedPlant:
+    """``plant`` with an extra applied generalized force ``external(q)``."""
+
+    def __init__(self, plant: DynamicsPlant, external: Callable[[Array], Array]):
+        self._plant = plant
+        self._external = external
+
+    def acceleration(self, q: Array, v: Array, tau: Array) -> Array:
+        return self._plant.acceleration(q, v, tau + self._external(q))
+
+
+def _plant_poses(plant: DynamicsPlant) -> Callable[[Array], Mapping[str, Array]]:
+    frames = getattr(plant, "kinematic_frames", None)
+    if frames is None:
+        raise TypeError("a ball impact needs a plant with kinematic_frames(q)")
+    return frames  # type: ignore[no-any-return]
+
+
 def integrate(
     plant: DynamicsPlant,
     q0: Array,
@@ -123,13 +146,18 @@ def integrate(
     steps: int,
     dt_s: float,
     policy: StepPolicy = DEFAULT_POLICY,
+    impact: ImpactForce | None = None,
 ) -> Rollout:
     """Integrate ``steps`` steps, asking ``source(k, t, q, v)`` for each effort.
 
     The effort is requested once per step at the step's start state and held
     over the step's ``policy.substeps`` RK4 substeps.  Root entries are forced
     to zero.  With ``policy.stop_on_failure`` a diverging run returns the
-    states reached so far instead of raising.
+    states reached so far instead of raising.  ``impact`` adds the ball's
+    collision force over its window (GCV-20): a step containing a window edge
+    is split there, each part keeping the substep size, and the closure is
+    projected once at the end of the step.  An unlatched plan is latched from
+    this plant's state; a latched one (a recorded bundle) is applied as is.
     """
     if steps < 1 or not (np.isfinite(dt_s) and dt_s > 0.0):
         raise ValueError("steps and dt_s must be positive")
@@ -138,11 +166,17 @@ def integrate(
     q, v = np.asarray(q0, dtype=float).copy(), np.asarray(v0, dtype=float).copy()
     qs, vs, efforts, drift = [q.copy()], [v.copy()], [], []
     failure = None
+    poses = None if impact is None else _plant_poses(plant)
     for k in range(steps):
         tau = np.asarray(source(k, k * dt_s, q, v), dtype=float).copy()
         tau[root] = 0.0
         try:
-            q, v, step_drift = _step(plant, q, v, tau, inner_dt, policy)
+            if impact is None:
+                q, v, step_drift = _step(plant, q, v, tau, inner_dt, policy)
+            else:
+                q, v, impact, step_drift = _impact_step(
+                    plant, (q, v, tau), (k * dt_s, dt_s), impact, poses, policy
+                )
         except (ArithmeticError, np.linalg.LinAlgError, ValueError) as exc:
             if not policy.stop_on_failure:
                 raise
@@ -159,7 +193,45 @@ def integrate(
         efforts=np.array(efforts).reshape(len(efforts), -1),
         pose_drift=np.array(drift),
         failure=failure,
+        ball_impact=None if impact is None else impact.to_record(),
     )
+
+
+def _impact_step(
+    plant: DynamicsPlant,
+    state: tuple[Array, Array, Array],
+    clock: tuple[float, float],
+    impact: ImpactForce,
+    poses: Any,
+    policy: StepPolicy,
+) -> tuple[Array, Array, ImpactForce, float]:
+    """One held-effort step through the ball window, then closure projection."""
+    q, v, tau = state
+    t, dt_s = clock
+
+    def advance(_t: float, h: float, q_a: Array, v_a: Array, external: Any) -> tuple:
+        parts = max(1, int(np.ceil(policy.substeps * h / dt_s - 1e-9)))
+        forced = plant if external is None else _ForcedPlant(plant, external)
+        for _ in range(parts):
+            q_a, v_a = zoh_rk4_step(forced, q_a, v_a, tau, h / parts)  # type: ignore[arg-type]
+        return q_a, v_a, None
+
+    q, v, latched, _ = step_through_impact(
+        impact,
+        t,
+        dt_s,
+        q,
+        v,
+        advance,
+        poses=poses,
+        accel=lambda qq, vv, f: plant.acceleration(qq, vv, f),
+    )
+    if latched is None:
+        raise ValueError("ball impact plan was lost during the step")
+    if not policy.project:
+        return q, v, latched, float(np.abs(plant.closure_pose_residual(q)).max())
+    projected = project_to_closure(plant, q, v)
+    return projected.q, projected.v, latched, projected.pose_residual_before
 
 
 def _step(
@@ -186,8 +258,13 @@ def open_loop(
     *,
     dt_s: float,
     policy: StepPolicy = DEFAULT_POLICY,
+    impact: ImpactForce | None = None,
 ) -> Rollout:
-    """Replay a fixed effort sequence (steps, nv); root columns must be zero."""
+    """Replay a fixed effort sequence (steps, nv); root columns must be zero.
+
+    ``impact`` (normally the bundle's recorded, latched ball force) is applied
+    identically in every engine.
+    """
     table = np.asarray(efforts, dtype=float)
     if table.ndim != 2 or table.shape[1] != len(plant.coordinate_order):
         raise ValueError("efforts must be (steps, nv) in spec order")
@@ -201,4 +278,5 @@ def open_loop(
         steps=table.shape[0],
         dt_s=dt_s,
         policy=policy,
+        impact=impact,
     )

@@ -86,8 +86,9 @@ class TestSegmentRotationMetrics:
         th_p = 40.0 * np.sin(np.pi * t)
         th_t = 80.0 * np.sin(np.pi * t)
 
-        rad_p = np.radians(th_p)
-        rad_t = np.radians(th_t)
+        # Backswing is clockwise from above, i.e. a falling horizontal yaw angle.
+        rad_p = -np.radians(th_p)
+        rad_t = -np.radians(th_t)
 
         # Build hip markers (width 0.3m, rotating about origin in XY plane, Z=0.9)
         d_p = 0.30
@@ -112,6 +113,8 @@ class TestSegmentRotationMetrics:
             "WaistRight": waist_r,
             "LShoulderBack": sh_l,
             "RShoulderBack": sh_r,
+            "BackLeft": sh_l,
+            "BackRight": sh_r,
         }
         motion = SwingMotion(t=t, markers=markers)
         events = SwingEvents(
@@ -130,12 +133,15 @@ class TestSegmentRotationMetrics:
 
         # Check address values (t=0 -> angle=0)
         assert np.isclose(res.pelvis_yaw_address, 0.0, atol=1e-3)
-        assert np.isclose(res.thorax_yaw_address, 0.0, atol=1e-3)
+        assert np.isclose(res.shoulder_girdle_yaw_address, 0.0, atol=1e-3)
         assert np.isclose(res.x_factor_address, 0.0, atol=1e-3)
 
         # Check top of backswing values (t=0.5 -> peak angle)
         assert np.isclose(res.pelvis_yaw_top, 40.0, atol=1e-1)
-        assert np.isclose(res.thorax_yaw_top, 80.0, atol=1e-1)
+        assert np.isclose(res.shoulder_girdle_yaw_top, 80.0, atol=1e-1)
+        assert np.isclose(res.upper_trunk_yaw_top, 80.0, atol=1e-1)
+        with pytest.warns(DeprecationWarning, match="shoulder_girdle_yaw_top"):
+            assert np.isclose(res.thorax_yaw_top, 80.0, atol=1e-1)
         assert np.isclose(res.x_factor_top, 40.0, atol=1e-1)
 
         # Check X-factor stretch: max absolute difference is 40 deg

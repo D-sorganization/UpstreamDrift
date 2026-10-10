@@ -27,7 +27,7 @@ from __future__ import annotations
 
 import math
 from collections.abc import Mapping, Sequence
-from typing import Any
+from typing import Any, NamedTuple
 
 import numpy as np
 from numpy.typing import NDArray
@@ -291,6 +291,24 @@ def model_face_normals(
     return np.array([kin.body_poses(row, [frame])[frame][0] @ axis for row in rows])
 
 
+def model_face_centres(
+    kin: Any, q: Array, spec: Mapping[str, Any], frame: str = FACE_FRAME
+) -> Array:
+    """World rendered face centre per row of ``q`` from the IK provider's FK.
+
+    Same contract as :func:`model_face_normals` (GCV-20 clubhead speed).
+    """
+    rows = np.asarray(q, dtype=float)
+    if rows.ndim != 2:
+        raise ValueError("q must be (frames, coordinates)")
+    centre = face_centre_in_frame(spec, frame)
+    out = []
+    for row in rows:
+        rot, pos = kin.body_poses(row, [frame])[frame]
+        out.append(rot @ centre + pos)
+    return np.array(out)
+
+
 def face_fit_summary(model_normals: Array, capture_normals: Array) -> dict[str, Any]:
     """Separation statistics (degrees) over the frames the capture observes.
 
@@ -325,3 +343,69 @@ def fill_unobserved(
     if seen.sum() < 2:
         raise ValueError("need at least two observed face centres to interpolate")
     return np.column_stack([np.interp(t, t[seen], c[seen, j]) for j in range(3)])
+
+
+class CaptureImpact(NamedTuple):
+    """Capture ball passage on the capture clock (GCV-20, #11767).
+
+    ``frame_index`` is the last pre-contact frame (``times[frame_index] <=
+    time_s <= times[frame_index + 1]``); named to avoid shadowing
+    ``tuple.index``. ``ball_centre_m`` is the shared ball
+    (:func:`model_appearance.ball.ball_position_at_address`) at the address
+    face, centred at the address face-centre height, or ``None`` when no
+    face normal was observed.
+    """
+
+    time_s: float
+    frame_index: int
+    ball_centre_m: Array | None
+
+
+def capture_impact(
+    times: Sequence[float] | Array,
+    points: Array,
+    valid: NDArray[np.bool_],
+    labels: Sequence[str],
+    attachments: Mapping[str, tuple[str, Sequence[float]]],
+    spec: Mapping[str, Any],
+) -> CaptureImpact:
+    """Sub-sample capture impact and the ball it strikes.
+
+    The capture face centre (head triad through the calibrated
+    ``attachments``, gaps interpolated) passes the ball at the sub-sample
+    :func:`model_appearance.club_face.ball_passage`. Raises ``ValueError``
+    when ``times`` does not match the frames, the triad cannot be observed,
+    or the face centre never returns to the ball.
+    """
+    from src.shared.python.model_appearance.ball import (
+        BALL_RADIUS_M,
+        ball_position_at_address,
+    )
+    from src.shared.python.model_appearance.club_face import ball_passage
+
+    normals, centres = observe_capture_face(points, valid, labels, attachments, spec)
+    t = np.asarray(times, dtype=float)
+    if t.shape != (len(centres),):
+        raise ValueError("times must hold one entry per capture frame")
+    filled = fill_unobserved(t, centres)
+    t_impact, k, _ = ball_passage(t, filled)
+    seen = np.isfinite(normals).all(axis=1) & (np.linalg.norm(normals, axis=1) > 0)
+    ball = None
+    if seen.any():
+        normal = normals[int(np.argmax(seen))]
+        ball = ball_position_at_address(
+            filled[0], normal, ground_height_m=float(filled[0, 2]) - BALL_RADIUS_M
+        )
+    return CaptureImpact(t_impact, int(k), ball)
+
+
+def capture_impact_index(
+    times: Sequence[float] | Array,
+    points: Array,
+    valid: NDArray[np.bool_],
+    labels: Sequence[str],
+    attachments: Mapping[str, tuple[str, Sequence[float]]],
+    spec: Mapping[str, Any],
+) -> int:
+    """Last pre-contact capture frame (:func:`capture_impact` ``.frame_index``)."""
+    return capture_impact(times, points, valid, labels, attachments, spec).frame_index
