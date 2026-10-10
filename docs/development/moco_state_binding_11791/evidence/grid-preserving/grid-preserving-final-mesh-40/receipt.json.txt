@@ -1,0 +1,169 @@
+{
+  "scope": "synthetic compliant Millard; no production/capture acceptance",
+  "mesh_intervals": 40,
+  "runtime": "4.6",
+  "executable": "C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Scripts\\python.exe",
+  "casadi_plugin_search": "C:/Users/diete/Repositories/.venv-feedback-opensim/Lib/site-packages/opensim",
+  "script_sha256": "086490671ea3b6b50272f8f53a7f46094ffd936c4c1361b8b00d8016774fe812",
+  "solve_elapsed_s": 0.9419979000231251,
+  "solver_success": true,
+  "solver_status": "Solve_Succeeded",
+  "dense_input_policy": {
+    "all_original_knots_exact": true,
+    "requested_output_probes": 101,
+    "actual_output_samples": 161,
+    "control_function_probe_difference_max": 5.551115123125783e-17,
+    "scoring_samples": 101,
+    "scoring_clock_max_abs_s": 1.3877787807814457e-17,
+    "scoring_policy": "common 101 requested physical-time probes; coincident original control knots retained exactly"
+  },
+  "state_errors": {
+    "/jointset/slider/slide/value": {
+      "optimized_vs_native_max_abs": 2.1779512748842933e-08,
+      "tight_vs_default_max_abs": 1.1874001781819743e-11
+    },
+    "/jointset/slider/slide/speed": {
+      "optimized_vs_native_max_abs": 3.6253074313392225e-06,
+      "tight_vs_default_max_abs": 5.859039633668295e-10
+    },
+    "/forceset/flexor/activation": {
+      "optimized_vs_native_max_abs": 0.0005890704650055173,
+      "tight_vs_default_max_abs": 6.6885232352653645e-09
+    },
+    "/forceset/flexor/fiber_length": {
+      "optimized_vs_native_max_abs": 4.555312879031548e-06,
+      "tight_vs_default_max_abs": 1.2115064507156603e-10
+    }
+  },
+  "fullstate_repeat_max_abs": 0.0,
+  "dense_marker_rmse_vs_native_teacher_m": 3.3963697271409156e-06,
+  "dense_marker_rmse_vs_linearly_interpolated_rounded_trc_m": 4.154969776312214e-06,
+  "complete_initial_state": {
+    "/jointset/slider/slide/value": 0.31,
+    "/jointset/slider/slide/speed": 0.0,
+    "/forceset/flexor/activation": 0.05,
+    "/forceset/flexor/fiber_length": 0.108573946282611
+  },
+  "state_bounds": {
+    "/jointset/slider/slide/value": [
+      0.2,
+      0.4
+    ],
+    "/jointset/slider/slide/speed": [
+      -2.0,
+      2.0
+    ],
+    "/forceset/flexor/activation": [
+      0.001,
+      1.0
+    ],
+    "/forceset/flexor/fiber_length": [
+      0.05,
+      0.2
+    ]
+  },
+  "control_bounds": {
+    "/forceset/flexor": [
+      0.001,
+      1.0
+    ]
+  },
+  "optimized_objective": 1.588818846735165e-10,
+  "solver_configuration": {
+    "parallel": 0,
+    "mesh": 40,
+    "convergence": 1e-07,
+    "constraint": 1e-07,
+    "effort_weight": 1e-08
+  },
+  "qualification": "synthetic optimization and independent replay evidence only",
+  "source_sha256": {
+    "src\\engines\\physics_engines\\opensim\\python\\tour_matching\\moco_tracking.py": "610285f8b6eba88ec8e0dfbb50dfeb54de8ce16a71b3cd1dcbfd68adf338705a",
+    "src\\engines\\physics_engines\\opensim\\python\\tour_matching\\moco_initial_bindings.py": "763bfd898e19de36bf6d95b49223b979724eb4c0817d877cad054ed7953a2c60",
+    "src\\engines\\physics_engines\\opensim\\python\\tour_matching\\muscle_replay.py": "ea6bbef96e235b4c181a4785fb03b2071c5eb42fffc3307c0e73c5f9191fc463",
+    "src\\engines\\physics_engines\\opensim\\python\\tour_matching\\native_muscle_bundle.py": "d7ecdae4faaf80a31b2a255ebddf8a2eb63e2a741eb56e75f18d859d98337f72"
+  },
+  "artifact_sha256": {
+    "constant_initial_guess.sto": "42cf4b593e910a68c16004054c708d2d85cb90994abb47013b503e918adec3b1",
+    "native_evidence.npz": "bbe52aa83335b2f51c25d7dfd2f293140cc6e21b7694c3a514e0c8d7f7a2079d",
+    "native_replay_bundle.json": "0adc7d860077353c877cb2cad66d7cbe354423b7423f5f79ab062f0a3771c4ff",
+    "solution.sto": "75611fba58f074e73e4e4b017c03406bcf02ada6067f3549639386e0f17fac25",
+    "synthetic_native_muscle.osim": "feb75b88e290ef0c90fc41c6e39ffd9c8c031ff1129b19b0b059230d0bdb0f32",
+    "teacher.trc": "ccc10dbd94da165d46fa7d0bf05a163b8329e6e8f8512224db7c56e0f5388453"
+  },
+  "runtime_binary_sha256": {
+    "casadi.dll": "d44ddc89f1879266fbee1f79e064b5ba19e65edce3aadcea00378dd8d8f0690a",
+    "casadi_conic_ipqp.dll": "02b4e5a8876ca85b0f5f536d9457f04f628ef4a9e65a6b515b32c28e39b07a07",
+    "casadi_conic_nlpsol.dll": "04dfb88058124c801f5c00dc975b4baf3e6b7bbfa6760b2b36e6c86f109a7f9d",
+    "casadi_conic_qrqp.dll": "24afb67c64fc60eaeeb43cb50e25872e059995598825c3458cc29962ef529053",
+    "casadi_importer_shell.dll": "a081fe45be13813b5497de89e2a6b4ad96d77d471d160b2faba1e534d1900a80",
+    "casadi_integrator_collocation.dll": "0281a6abc9863a2ed6fecfbb6a8134d52a5195216d5e410bc1e9a6241e3b1aed",
+    "casadi_integrator_cvodes.dll": "84b7d171c658106ea7e1e77981c4d7aeea7186f631a75c62d4883d1eb4525147",
+    "casadi_integrator_idas.dll": "86e47e2584ee7133a96b6a38565d0c99b6daf7f2af64d5461a6b1945c91c319a",
+    "casadi_integrator_rk.dll": "3346aa81287267a54447677b3e245053715b1b6a45bf4b5d8ef574dcf779ea79",
+    "casadi_interpolant_bspline.dll": "9ac9692a1dd3249c75a3c9877719dac0e94584d578e768ec67071c10904a750e",
+    "casadi_interpolant_linear.dll": "8829a4f2a8c0086f59469b58e18b934a7b17a926a59369784f59828ad75d06ed",
+    "casadi_linsol_csparse.dll": "ca4f4627f657da3ebeeff7e8452a4bc48f2a33849cad8052f22f6fab3e19ab18",
+    "casadi_linsol_csparsecholesky.dll": "89ba1f44724fb53dd2a46418c4867e9b3492c98fe1bca627652ab08a1b0950fb",
+    "casadi_linsol_ldl.dll": "f564a66938186748035787d8ac80b84b2afa92c17b685fd392726587f561e6a4",
+    "casadi_linsol_lsqr.dll": "7ec2b673d82ca688f86240049456735231aaab1c595ee927362611618b730f3e",
+    "casadi_linsol_qr.dll": "fde154e197b3773380185c8ec4e2188c9c0c0903bbbb047e8d1e7eb4737585f8",
+    "casadi_linsol_symbolicqr.dll": "eca25e7fb2b6e4d49b7ac7c7b97cd6e40dfb0605cabf46271edf5e10b455dde1",
+    "casadi_linsol_tridiag.dll": "3eac12d30c0f975a24ef5ee4e5a5f7841af9c4098b7e6bb3d3d724def405a6b0",
+    "casadi_nlpsol_feasiblesqpmethod.dll": "7aad3df9f769d02f7634d44f5a6d2f9f70a45f76d07468434bb02e639bbf8644",
+    "casadi_nlpsol_ipopt.dll": "b637fa68e66e63a77903f6b5a41852ced4b80701fe49d28c31820b5bc25d1190",
+    "casadi_nlpsol_qrsqp.dll": "8bbb01873364760ba1c7b84ccaddc8800f6dae60eda5cbf40c8a3e4864a20f2e",
+    "casadi_nlpsol_scpgen.dll": "78f4e67895b874834e6bf751cde7bcedc03d050837be8e863b492fff1fa4f296",
+    "casadi_nlpsol_sqpmethod.dll": "9434ebabc1afc290217fd24a1224c9d82907116a615a8e05552d898a8fafa210",
+    "casadi_rootfinder_fast_newton.dll": "8dbaf3934fccb7593f47345cc23dfd3787e141fe009c698a10dacce780238494",
+    "casadi_rootfinder_kinsol.dll": "f22ac86fecfdd66db1028457d9c97c354340a4a466d9fff022514a1335d18d8c",
+    "casadi_rootfinder_newton.dll": "6fb6db02c58cb9e6e7270d1a6112e29b8419b056f3e940f21ca1be11080f85f6",
+    "casadi_rootfinder_nlpsol.dll": "1d6c1e2df3cefc1015f4792edeb83a1bb0de6e679675e32da2dfefa11db768d8",
+    "casadi_sundials_common.dll": "83fe851e427bb117df8e25155ceb976c6e2cbee7bb632e6e565e68c5169c1073",
+    "casadi_xmlfile_tinyxml.dll": "c0ea94bf30c4e543a991cbb66431713bf76cb75be5c5d314365b022d8a319e99",
+    "coinmumps-3.dll": "1b183f6921423c15fa6d4638d78bb6f647140aaf08285917fa1c1147b4962a45",
+    "concrt140.dll": "2405355f0a58067b258f8df33c327e3a3d716eaac5a3a5aebb757842d85bd376",
+    "ezc3d.dll": "e829670905127ba27db2f2e26b82493b7bb0bd2b5f68338497128adf659cdd34",
+    "glut32.dll": "e2f7c0c399c8b034ad1fe60cbd955507c23424977a49ff518a9158edec6e01c8",
+    "ipopt-3.dll": "ae02e2bb99b2e134325d739442c1dba9bf8e4d5fd51416b57387a52c58eeb41e",
+    "ipoptamplinterface-3.dll": "6e4f08ca030ff19e7c24b71e3fe804a7ea4e7b9eacc555f8309c2fc1dd8d49e3",
+    "libblas.dll": "8748aeccfe238e6d53d304266364018479a5ee12f80c10cee2e6f7252c235172",
+    "libgcc_s_sjlj-1.dll": "cdc3ef007051487616c934aab89e84b806e1f0c216e3dd28f8f9002f39388bef",
+    "libgfortran-3.dll": "9fabf3414c6da397377945e45f27cf0c6c13af7721b4f86eba7bf7a30b2be6f7",
+    "libifcoremd.dll": "c7c8852c282d50226359d7dd990c9c531f4195770d096f90dcc786a5c20dd769",
+    "libiomp5md.dll": "0b63b72e3db22583c64f21f4675738152adf9674b3c47011a7acb4744dc7d992",
+    "liblapack.dll": "5e223ed3ad1ff4aa3a48deb0da42c75db2a7d4c839a9154f28b11f6f0539a501",
+    "libmmd.dll": "41ff5b137168325948caae204638462be025f4f5689d32343b918ff9dc2e85be",
+    "libquadmath-0.dll": "0aaddb3d45a2e3f435d488cc4df8b9a89b46ce70da80c2cf51e398e069dffa42",
+    "msvcp140.dll": "0f885b509a685d2bbfa652fed26b5fb31d88fbdab0a978c641d1c7b8aa460aa9",
+    "msvcp140_1.dll": "bfad5aef4c63a669e3c140655cdfdf395b6c979b400a447bd5dcb65ed8826c3d",
+    "msvcp140_2.dll": "3ea06f0ee098b4823cb79599df3780e7f23cce52c19aac31d2a0d47efe33a5e9",
+    "msvcp140_atomic_wait.dll": "640b2aefced484d0368eea5bdd06addd0658a3a70a49256e560d6923b404a479",
+    "msvcp140_codecvt_ids.dll": "f2069a52880ec885ee7f0511186100eb7fada0411a2b4948fafea7735b878a18",
+    "osimActuators.dll": "5532cb7c5e95ad0f4067e0ae3038b943b777d3f96121b96ba535af072c6cc5ac",
+    "osimAnalyses.dll": "e9ec9825045e7149e1ab20e9780875e88cf8032cfe299eb0cd464de2be0c6721",
+    "osimCommon.dll": "3d5fd1f8748651a7799dc8d3cf62ae069c8f4a9b30d4767dfd55b63a8a291718",
+    "osimdocopt.dll": "5cfdfe59477c289b956653943655037041b978c413e1ff872cfc528b678179f9",
+    "osimExampleComponents.dll": "4da650f3afd08cd7964a8726d23c859b772cb16c481fbef675af79d68acae755",
+    "osimLepton.dll": "0c0aa3db3025dd07ba59c57e3a82692540edf28149723f92cd1230712538d34a",
+    "osimMoco.dll": "c8553d8ee1c71ff3df9c4e3485e3dd2916ade712b2c28c28be6bf45f2b2a60ca",
+    "osimSimulation.dll": "76a890959d13a392f2575ae13509b7c29c8bd3edb307f92ebd37ddc12e842d68",
+    "osimTools.dll": "3baccab1de1d8e6305e056d7a9d44fb9e5e0e6c5448f63c466d4dabab0878803",
+    "SimTKcommon.dll": "28adb13632149c087961b6eaf9d5011cde9e0d2fdd050c63a0edfb9aab254cde",
+    "SimTKmath.dll": "b1301f2ee87d8f63a7933d7d91938d005fcc985b8904642bcfcaa018e72f6211",
+    "SimTKsimbody.dll": "a7eab6702e053041e06cd9478f943d248b4a099775ca1ffadb4c2ff9d88a47d8",
+    "sipopt-3.dll": "18094a94285390b3d10d024727d196a9b1fe5d83810c262d5975892e779ee236",
+    "svml_dispmd.dll": "aebdfd47bfb5786c0dc746352f1fe01a89abcdd6eb8940b2bb5c99b84b48d322",
+    "vcruntime140.dll": "d5e4d9a3e835fa679450145d6a7d94e36573a509317111904d9b3712c30d9066",
+    "vcruntime140_1.dll": "1f2d41c4aa5db0bc33ebf7b66d72943a817d7ce6cbe880502a9403823633093f",
+    "_actuators.pyd": "61c6d7810088ca8030eea967e9bfa71f7f7998d3c5601c5e1939367346238cc2",
+    "_analyses.pyd": "4af3d0b72833b4a1b1c588c67d031b7756aa489041bb7d0a06eb5a053012d168",
+    "_common.pyd": "9955fe0ad26079a9123a17af32bbd75761fa4388f2bb4cb72d2a56471d7a69c1",
+    "_examplecomponents.pyd": "b21cada74ab45f2cdae5e70e7ca2b85e7c66e41460cf12740e50de86e03baee6",
+    "_moco.pyd": "8309ab612033c5f68056b32384d154d026eb201e5c910e8ae68f7cf66b463664",
+    "_simbody.pyd": "81afadccfe9e55dd366255d09c319ccb8d50fdb54fee4ac45b64708c4f044aa6",
+    "_simulation.pyd": "950241f649dab8a113c4bb754a080d16db4a3f5f0aa1710ed2e53d03206eb09e",
+    "_tools.pyd": "1a687be10b149621208c4346d9c66452000e9c547625080c7c1cb90a586bbaf3"
+  },
+  "total_elapsed_s": 1.7854875000193715
+}
