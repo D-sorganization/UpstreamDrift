@@ -810,13 +810,13 @@ class ConstrainedIkReceipt(BaseModel):
 
 
 class IkRestartPolicyReceipt(BaseModel):
-    """Trajectory IK restart policy (#12042): free, continuous or off."""
+    """Trajectory IK restart policy and posture prior (#12042)."""
 
     model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
 
     policy: str = Field(
         ...,
-        description="free, continuous (bounded joint step) or off",
+        description="free, seeded, anchored, stable, continuous or off",
         json_schema_extra={"unit": "text", "stage": "ik"},
     )
     restarts: int = Field(
@@ -848,6 +848,22 @@ class IkRestartPolicyReceipt(BaseModel):
         gt=0,
         description="Per-frame joint step bound of a continuous restart",
         json_schema_extra={"unit": "rad", "stage": "ik"},
+    )
+    anchor_prior: bool = Field(
+        False,
+        description="Retry prior anchored to the frame start, not the jitter",
+        json_schema_extra={"unit": "bool", "stage": "ik"},
+    )
+    seed_per_frame: bool = Field(
+        False,
+        description="Restart jitter drawn from a frame-indexed generator",
+        json_schema_extra={"unit": "bool", "stage": "ik"},
+    )
+    posture_prior_weight: float = Field(
+        0.0,
+        ge=0,
+        description="Weight of the address-pose prior on toe and axial joints",
+        json_schema_extra={"unit": "m^2/rad^2", "stage": "ik"},
     )
 
 
