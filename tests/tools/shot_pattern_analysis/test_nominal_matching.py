@@ -61,8 +61,8 @@ def test_shapes_match_same_raw_landing_with_face_to_path_preserved(
     assert matched.residual_m <= 1e-5
 
 
-def test_unreachable_target_fails_closed() -> None:
-    with pytest.raises(RuntimeError, match="unreachable"):
+def test_match_not_found_within_bounds_fails_closed() -> None:
+    with pytest.raises(RuntimeError, match="not found within bounds"):
         match_nominal_landing(
             LinearPhysics(),
             config=replace(AnalysisConfig(), club_speed_mps=25.0),

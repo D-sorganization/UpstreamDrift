@@ -111,9 +111,20 @@ def matched_matrix_cells(
     seed: int = 20261009,
     common_targets: dict[str, float] | None = None,
     profiles: tuple[str, ...] | None = None,
+    selected_cell_names: tuple[str, ...] | None = None,
+    match_face_bounds_deg: tuple[float, float] | None = None,
+    match_speed_factors: tuple[float, float] = (0.75, 1.25),
 ) -> tuple[tuple[str, ExperimentConfig], ...]:
     """Return requested factorial cells; default contains all 324 candidates."""
     selected_profiles = _selected_profiles(profiles)
+    if selected_cell_names is not None and (
+        not selected_cell_names
+        or any(not isinstance(name, str) for name in selected_cell_names)
+        or len(selected_cell_names) != len(set(selected_cell_names))
+    ):
+        raise ValueError("selected cell names must be nonempty, unique plan members")
+    requested = set(selected_cell_names) if selected_cell_names is not None else None
+    available: set[str] = set()
     cells = []
     for club_id in ("driver", "seven_iron", "pitching_wedge"):
         for lean in (0.0, 5.0, 10.0):
@@ -122,6 +133,9 @@ def matched_matrix_cells(
                 for sd in (1.0, 2.0):
                     for profile in selected_profiles:
                         key = f"{club_id}_lean{lean:g}_curve{curve:g}_rotation{sd:g}_{profile}"
+                        available.add(key)
+                        if requested is not None and key not in requested:
+                            continue
                         target = (
                             None if common_targets is None else common_targets[club_id]
                         )
@@ -135,9 +149,13 @@ def matched_matrix_cells(
                                     seed=seed,
                                     curve_scale=curve,
                                     target_x_m=target,
+                                    match_face_bounds_deg=match_face_bounds_deg,
+                                    match_speed_factors=match_speed_factors,
                                 ),
                             )
                         )
+    if requested is not None and not requested <= available:
+        raise ValueError("selected cell names must be nonempty, unique plan members")
     return tuple(cells)
 
 
@@ -184,12 +202,32 @@ def run_matched_matrix(
     figures: str = "selected",
     common_targets: dict[str, float] | None = None,
     profiles: tuple[str, ...] | None = None,
+    selected_cell_names: tuple[str, ...] | None = None,
+    match_face_bounds_deg: tuple[float, float] | None = None,
+    match_speed_factors: tuple[float, float] = (0.75, 1.25),
+    supplement_protocol: str | None = None,
 ) -> list[dict]:
     """Publish immutable cells; resume verifies data, inputs, and execution sources."""
     if stage not in ("pilot", "final") or figures not in ("none", "selected", "all"):
         raise ValueError("invalid matrix stage or figure selection")
     if not isinstance(shard_count, int) or not 0 <= shard_index < shard_count:
         raise ValueError("shard index must be inside a positive shard count")
+    if supplement_protocol is not None and (
+        not supplement_protocol.strip() or selected_cell_names is None
+    ):
+        raise ValueError("supplement protocol requires selected cell names")
+    if (
+        stage == "final"
+        and supplement_protocol is None
+        and (
+            selected_cell_names is not None
+            or match_face_bounds_deg is not None
+            or match_speed_factors != (0.75, 1.25)
+        )
+    ):
+        raise ValueError(
+            "final custom bounds or cell selection require a supplement protocol"
+        )
     execution = matched_source_snapshot()
     if stage == "final":
         if n_shots != 10000:
@@ -200,8 +238,22 @@ def run_matched_matrix(
             "pilot runs are limited to512 shots perpattern; use accepted final stage"
         )
     cells = matched_matrix_cells(
-        n_shots=n_shots, common_targets=common_targets, profiles=profiles
+        n_shots=n_shots,
+        common_targets=common_targets,
+        profiles=profiles,
+        selected_cell_names=selected_cell_names,
+        match_face_bounds_deg=match_face_bounds_deg,
+        match_speed_factors=match_speed_factors,
     )
+    if stage == "final" and supplement_protocol is not None:
+        from .matched_supplement import validate_supplement_acceptance
+
+        validate_supplement_acceptance(
+            acceptance,
+            supplement_protocol,
+            execution,
+            {name: asdict(request) for name, request in cells},
+        )
     output_root = Path(output_root)
     output_root.mkdir(parents=True, exist_ok=True)
     plan = {
@@ -210,6 +262,9 @@ def run_matched_matrix(
         "execution": execution,
         "cells": {name: asdict(request) for name, request in cells},
     }
+    if supplement_protocol is not None:
+        plan["supplement_protocol"] = supplement_protocol
+        plan["selected_cell_names"] = [name for name, _ in cells]
     plan = json.loads(json.dumps(plan))
     plan_path = output_root / "matrix_plan.json"
     if plan_path.exists():
@@ -287,10 +342,30 @@ def main() -> None:
         choices=PROFILES,
         help="optional profile subset; default includes all nine",
     )
+    parser.add_argument(
+        "--face-bounds-deg", nargs=2, type=float, metavar=("MIN", "MAX")
+    )
+    parser.add_argument(
+        "--speed-factors",
+        nargs=2,
+        type=float,
+        default=(0.75, 1.25),
+        metavar=("MIN", "MAX"),
+    )
+    parser.add_argument(
+        "--cells-file", type=Path, help="JSON list of selected planned cell names"
+    )
+    parser.add_argument(
+        "--supplement-protocol",
+        help="versioned protocol label for a selected supplement",
+    )
     args = parser.parse_args()
     targets = (
         json.loads(args.common_targets.read_text()) if args.common_targets else None
     )
+    selection = json.loads(args.cells_file.read_text()) if args.cells_file else None
+    if selection is not None and not isinstance(selection, list):
+        parser.error("--cells-file must contain a JSON list")
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
     run_matched_matrix(
         args.output,
@@ -302,6 +377,12 @@ def main() -> None:
         figures=args.figures,
         common_targets=targets,
         profiles=tuple(args.profiles) if args.profiles else None,
+        selected_cell_names=tuple(selection) if selection is not None else None,
+        match_face_bounds_deg=tuple(args.face_bounds_deg)
+        if args.face_bounds_deg
+        else None,
+        match_speed_factors=tuple(args.speed_factors),
+        supplement_protocol=args.supplement_protocol,
     )
 
 

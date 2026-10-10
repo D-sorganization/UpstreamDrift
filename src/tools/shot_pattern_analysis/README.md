@@ -17,6 +17,8 @@ All head properties beyond documented loft/lie remain research assumptions.
 
 See the [Matched Study Design](../../../docs/research/shot_pattern_analysis/phase2/DESIGN.md),
 the [Reviewed Design PDF](../../../docs/research/shot_pattern_analysis/phase2/matched_delivery_reference.pdf),
+the [Nominal Matching Bounds Supplement](../../../docs/research/shot_pattern_analysis/phase2/BOUNDS_SUPPLEMENT.md)
+([editable LaTeX](../../../docs/research/shot_pattern_analysis/phase2/BOUNDS_SUPPLEMENT.tex)),
 and [Turnover](../../../docs/research/shot_pattern_analysis/phase2/TURNOVER.md).
 The commands and results below describe the historical phase-one controls.
 Phase-two pilots and execution gates have passed; the final matrices are running.
@@ -29,6 +31,11 @@ Final conclusions require the complete source-bound results and independent audi
    lean and shaft rotation. Driver 10° loft at 10° forward lean can be nonairborne.
 2. Choose curve strength and the nominal target. Matching adjusts face, path and
    speed within declared bounds; it never rotates the finished trajectories.
+   The nominal-search controls show reference-centered face bounds by default
+   (each pattern face ±3°) and speed factors 0.75–1.25 times reference club
+   speed. Enable absolute face bounds to edit a common interval; both the face
+   interval and speed factors survive config JSON import/export. The separate
+   driver bounds sensitivity uses a 1.30 upper speed factor explicitly.
 3. Set each delivery SD in its displayed units. Shaft rotation SD is not face-angle
    SD: delivered face angle is a derived output. Strike SD applies separately to
    heel/toe and high/low position. Zero SD holds a variable exactly fixed.

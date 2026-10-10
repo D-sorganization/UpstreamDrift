@@ -35,6 +35,8 @@ class ExperimentConfig:
     target_x_m: float | None = None
     match_tolerance_m: float = 0.05
     target_radius_m: float = 15.0
+    match_face_bounds_deg: tuple[float, float] | None = None
+    match_speed_factors: tuple[float, float] = (0.75, 1.25)
 
     def __post_init__(self) -> None:
         if (
@@ -60,6 +62,33 @@ class ExperimentConfig:
             not math.isfinite(self.target_x_m) or self.target_x_m <= 0
         ):
             raise ValueError("target distance must be finite and positive")
+        if self.match_face_bounds_deg is not None:
+            if len(self.match_face_bounds_deg) != 2:
+                raise ValueError("match face bounds require two values")
+            MatchBounds(*self.match_face_bounds_deg, 1.0, 2.0)
+        factors = self.match_speed_factors
+        if (
+            len(factors) != 2
+            or not all(math.isfinite(value) for value in factors)
+            or factors[0] <= 0
+            or factors[0] >= factors[1]
+        ):
+            raise ValueError(
+                "match speed bounds require finite ordered positive factors"
+            )
+
+    def bounds_for(self, reference_face_deg: float) -> MatchBounds:
+        """Resolve the recorded request into an absolute physical search box."""
+        faces = self.match_face_bounds_deg
+        if faces is None:
+            faces = (reference_face_deg - 3.0, reference_face_deg + 3.0)
+        speed = self.club.club_speed_mps
+        return MatchBounds(
+            faces[0],
+            faces[1],
+            self.match_speed_factors[0] * speed,
+            self.match_speed_factors[1] * speed,
+        )
 
 
 @dataclass(frozen=True)
@@ -160,12 +189,7 @@ def calibrate_patterns(
             reference_face_deg=reference,
             face_to_path_deg=(pattern.face_deg - pattern.path_deg)
             * request.curve_scale,
-            bounds=MatchBounds(
-                reference - 3,
-                reference + 3,
-                0.75 * club.club_speed_mps,
-                1.25 * club.club_speed_mps,
-            ),
+            bounds=request.bounds_for(reference),
             tolerance_m=request.match_tolerance_m,
         )
     return target, nominals

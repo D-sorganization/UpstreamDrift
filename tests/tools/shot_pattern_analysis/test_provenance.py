@@ -11,6 +11,7 @@ from src.tools.shot_pattern_analysis.provenance import (
     assert_source_unchanged,
     manifest_files_match,
     resolve_native_binary,
+    source_snapshot,
 )
 
 pytestmark = pytest.mark.unit
@@ -23,6 +24,12 @@ def test_changed_source_is_rejected_after_an_analysis() -> None:
         assert_source_unchanged(before, {**before, "source_sha256": {"core.py": "def"}})
     with pytest.raises(RuntimeError, match="source changed"):
         assert_source_unchanged(before, {**before, "native_binary_sha256": "456"})
+
+
+def test_snapshot_covers_public_course_vector_and_impact_utility_sources() -> None:
+    paths = source_snapshot()["source_sha256"]
+    assert "src/tools/shot_pattern_analysis/course_score_vectors.py" in paths
+    assert "src/shared/python/physics/impact_model/utils.py" in paths
 
 
 def test_complete_manifest_requires_matching_file_hashes(tmp_path) -> None:

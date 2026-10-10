@@ -161,6 +161,131 @@ def test_complete_config_json_round_trip_preserves_advanced_club_inputs(
     assert widget.cleanup()
 
 
+def test_nominal_bounds_are_visible_editable_and_preserved_across_config_json(
+    qapp, tmp_path: Path
+) -> None:  # noqa: ANN001
+    widget = _study(qapp)
+    request = replace(
+        widget.build_experiment(),
+        match_face_bounds_deg=(-6.0, 6.0),
+        match_speed_factors=(0.75, 1.30),
+    )
+    path = tmp_path / "supplement.json"
+    widget.export_config(path, request)
+    widget.load_config(path)
+
+    assert widget.use_absolute_face_bounds.isChecked()
+    assert widget.face_bound_min.value() == pytest.approx(-6.0)
+    assert widget.face_bound_max.value() == pytest.approx(6.0)
+    assert widget.speed_factor_min.value() == pytest.approx(0.75)
+    assert widget.speed_factor_max.value() == pytest.approx(1.30)
+    assert widget.build_experiment() == request
+
+    widget.face_bound_min.setValue(-5.5)
+    widget.speed_factor_max.setValue(1.25)
+    edited = widget.build_experiment()
+    assert edited.match_face_bounds_deg == (-5.5, 6.0)
+    assert edited.match_speed_factors == (0.75, 1.25)
+    assert widget.cleanup()
+
+
+def test_legacy_config_without_nominal_bounds_uses_visible_defaults(
+    qapp, tmp_path: Path
+) -> None:  # noqa: ANN001
+    widget = _study(qapp)
+    path = tmp_path / "legacy.json"
+    widget.export_config(path)
+    payload = json.loads(path.read_text())
+    del payload["match_face_bounds_deg"]
+    del payload["match_speed_factors"]
+    path.write_text(json.dumps(payload))
+
+    widget.load_config(path)
+
+    assert not widget.use_absolute_face_bounds.isChecked()
+    assert widget.speed_factor_min.value() == pytest.approx(0.75)
+    assert widget.speed_factor_max.value() == pytest.approx(1.25)
+    request = widget.build_experiment()
+    assert request.match_face_bounds_deg is None
+    assert request.match_speed_factors == (0.75, 1.25)
+    assert widget.cleanup()
+
+
+def test_imported_valid_bounds_are_not_silently_clamped(qapp, tmp_path: Path) -> None:  # noqa: ANN001
+    widget = _study(qapp)
+    request = replace(
+        widget.build_experiment(),
+        match_face_bounds_deg=(-14.995, 14.995),
+        match_speed_factors=(0.75, 12.0),
+    )
+    path = tmp_path / "wide.json"
+    widget.export_config(path, request)
+    widget.load_config(path)
+    assert widget.build_experiment() == request
+    assert widget.cleanup()
+
+
+def test_imported_bound_beyond_control_precision_fails_explicitly(
+    qapp, tmp_path: Path
+) -> None:  # noqa: ANN001
+    widget = _study(qapp)
+    request = replace(
+        widget.build_experiment(), match_speed_factors=(0.123456789, 1.25)
+    )
+    path = tmp_path / "precision.json"
+    widget.export_config(path, request)
+    with pytest.raises(ValueError, match="cannot display exactly"):
+        widget.load_config(path)
+    assert widget.cleanup()
+
+
+def test_exact_supplement_config_preserves_target_and_implicit_identity_noise(
+    qapp, tmp_path: Path
+) -> None:  # noqa: ANN001
+    from src.tools.shot_pattern_analysis.matched_matrix import matched_matrix_cells
+
+    widget = _study(qapp)
+    _, request = matched_matrix_cells(
+        n_shots=32,
+        common_targets={"driver": 178.94875782337786},
+        profiles=("combined2",),
+        selected_cell_names=("driver_lean5_curve2_rotation2_combined2",),
+        match_face_bounds_deg=(-6.0, 6.0),
+        match_speed_factors=(0.75, 1.30),
+    )[0]
+    path = tmp_path / "driver-supplement.json"
+    widget.export_config(path, request)
+    widget.load_config(path)
+
+    assert widget.build_experiment() == request
+    assert widget.noise_inputs["shaft_rotation_deg"].value() == pytest.approx(2.0)
+    assert widget.target_distance.value() == request.target_x_m
+    assert widget.cleanup()
+
+
+def test_import_precision_rejection_leaves_existing_gui_request_unchanged(
+    qapp, tmp_path: Path
+) -> None:  # noqa: ANN001
+    widget = _study(qapp)
+    original = widget.build_experiment()
+    request = replace(
+        original,
+        target_x_m=178.94875782337786,
+        noise=replace(
+            original.noise,
+            standard_deviations=(1.234567, *original.noise.standard_deviations[1:]),
+        ),
+    )
+    path = tmp_path / "precision.json"
+    widget.export_config(path, request)
+
+    with pytest.raises(ValueError, match="cannot display exactly"):
+        widget.load_config(path)
+
+    assert widget.build_experiment() == original
+    assert widget.cleanup()
+
+
 def test_invalid_correlation_prevents_worker_start(qapp, tmp_path, monkeypatch) -> None:  # noqa: ANN001
     widget = _study(qapp)
     widget.output_edit.setText(str(tmp_path))

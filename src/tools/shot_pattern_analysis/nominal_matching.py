@@ -34,7 +34,7 @@ class LandingPhysics(Protocol[ConfigContra]):
 
 
 class NominalMatchError(RuntimeError):
-    """Requested raw landing is unreachable within the stated delivery bounds."""
+    """The optimizer did not find a raw landing within the stated bounds."""
 
 
 @dataclass(frozen=True)
@@ -143,7 +143,7 @@ def match_nominal_landing(
     residual = math.hypot(final.carry_x_m - target_x_m, final.carry_y_m)
     if not result.success or residual > tolerance_m:
         raise NominalMatchError(
-            f"nominal landing unreachable within bounds: residual={residual:.6f} m"
+            f"nominal landing match not found within bounds: residual={residual:.6f} m"
         )
     face, speed = (float(v) for v in result.x)
     return MatchedNominal(
