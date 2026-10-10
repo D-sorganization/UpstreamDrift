@@ -153,6 +153,8 @@ def render_engine(
     doc: Mapping[str, Any],
     out_dir: Path,
     label: str,
+    overhead_distance_m: float = 2.6,
+    project_axes: bool = True,
 ) -> list[Path]:
     """Write ``<label>_<engine>_<view>.png`` for the overhead and face-on views."""
     import imageio.v2 as imageio
@@ -183,14 +185,16 @@ def render_engine(
             width=SIZE[0],
             height=SIZE[1],
             lookat_m=look,
-            distance_m=2.6 if view == "overhead" else 3.6,
+            distance_m=overhead_distance_m if view == "overhead" else 3.6,
             multiview=False,
             overlays=False,
             hud=False,
         )
         frame = next(iter(backend.render(_swing(run_dir), settings, [0], None)))[view]
         dist = settings.distance_m
-        frame = draw_foot_axes(np.asarray(frame), view, look, dist, points)
+        frame = np.asarray(frame)
+        if project_axes:
+            frame = draw_foot_axes(frame, view, look, dist, points)
         path = out_dir / f"{label}_{engine}_{view}.png"
         imageio.imwrite(path, annotate(frame, lines))
         paths.append(path)
@@ -204,6 +208,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--engines-json", type=Path, required=True)
     parser.add_argument("--engines", nargs="+", required=True)
     parser.add_argument("--label", default=None)
+    parser.add_argument("--overhead-distance", type=float, default=2.6)
+    parser.add_argument(
+        "--no-axes",
+        action="store_true",
+        help="skip the projected foot axes (a viewer whose camera registration "
+        "does not match the shared pinhole, e.g. the MyoSuite arena overhead)",
+    )
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -212,7 +223,15 @@ def main(argv: Sequence[str] | None = None) -> int:
     failed = 0
     for engine in args.engines:
         try:
-            for path in render_engine(engine, args.run_dir, doc, args.out, label):
+            for path in render_engine(
+                engine,
+                args.run_dir,
+                doc,
+                args.out,
+                label,
+                args.overhead_distance,
+                not args.no_axes,
+            ):
                 LOGGER.info("%s", path)
         except (RuntimeError, ValueError) as exc:
             failed += 1

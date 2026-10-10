@@ -42,4 +42,9 @@ python3 -m scripts.render_address_engine_stills --run-dir RUN \
 
 This is the calibrated address (inverse kinematics), not a dynamics result.
 Overhead stills are partly occluded by the torso; the projected foot axes
-(red) against the straight-ahead reference (white) carry the measurement.
+(red) against the straight-ahead reference (white) carry the measurement. The
+MyoSuite arena overhead is rendered with `--no-axes --overhead-distance 4.5`:
+its camera registration does not match the shared pinhole (feet appear about
+0.8 m from the projected axes), so that still carries the text annotation only,
+and the viewer shows the spec model in the arena rather than the `myolegs`
+model used for the MyoSuite number.
