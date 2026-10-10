@@ -1,0 +1,84 @@
+{
+  "schema": "independent-completion-scope-audit/1",
+  "checked_utc": "2026-10-10T09:32:24.954924+00:00",
+  "status": "goal_incomplete_numerical_study_complete_publication_delivery_pending",
+  "evidence_sha256": {
+    "docs/research/shot_pattern_analysis/phase2/validation/independent_primary_final_audit.json": "a9bf9e87eb3c72c21e002e9010a10d48f85cb1c71a2e0f250169485a54982e7d",
+    "docs/research/shot_pattern_analysis/phase2/validation/independent_control_final_audit.json": "41ea81786d110aac0e30c0cb3393534255e9aa1b7e99e59c426ad5a092d3aef9",
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_final_completion.json": "7b127c6425ddd8e64014dda72b43bb7114034c64bae7f02281420e8cfac4d453",
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_final_archive_restoration.json": "0e2412390c6b7d85c1254c2259c497106decdaa38fb7ddcdd68758b3dfb6d785",
+    "docs/research/shot_pattern_analysis/phase2/validation/primary_final_archive_restoration.json": "37c1deda30d11fb7f6762080b76cdf62cae6cbb948229464ec5e100b76e8339a",
+    "docs/research/shot_pattern_analysis/phase2/validation/control_final_archive_restoration.json": "cc6c433c62e8c309671639f0af723d90dd440cc19da51f13c4d2160d5de4b169",
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_refinement_v1.json": "17908fbe921ff1233dd42df02bdd7eac8b212e7cce799d2eebc8795a8c8e93cc",
+    "docs/research/shot_pattern_analysis/phase2/validation/independent_preflight_summary.json": "b1ddcb8591ae1ae03b8ddc0015d5aaecb279383c9fff9c3ed4b5706114da99df",
+    "docs/research/shot_pattern_analysis/phase2/validation/independent_head_sensitivity_summary.json": "010e6e47f827e2ee3601f7c7f0942aa02d9328a33be1fda8abc77d236c4a7265",
+    "docs/research/shot_pattern_analysis/phase2/validation/gui_scoring_independent_review_v1/review.json": "2faef77255fdb348d5b0884c8426c22cd6347d7323c46d78adefdf004f73f597",
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v3_numeric_comparison_review/review.json": "b1f8666e324af98fd3f733c9ad7786943aba51550fb9ebdb843f2d7dd80c6509",
+    "docs/research/shot_pattern_analysis/phase2/validation/selected_headline_traceability_v1/astra_review.json": "94cfc860a0a3708f7b435ae4ca0094dfc9ba05faf31f5f70de057ac555f34fdb",
+    "docs/research/shot_pattern_analysis/phase2/TURNOVER.md": "a567acff4233ee5bcb4d1971ded30d15fb501fe7f59f124c9b77ed651c697dfe",
+    "docs/research/shot_pattern_analysis/phase2/DESIGN.md": "79c9dbd3952ede204dea6c70669c693eb89ca3c1a82e2bf35f518478a9a9e8d8",
+    "docs/research/shot_pattern_analysis/phase2/review_followups/FINAL_NARRATIVE_ACCEPTANCE.md": "62c06308cd4d483c535b7189d923f5c35a5741e65388d029485f0b22bb876abe",
+    "docs/development/planning/DV-11984.md": "ce5fe4618570ec027d011e939b4cf0c85d31ac5de05ba3213e74e97bca3f1e54",
+    "src/tools/shot_pattern_analysis/matched_gui.py": "788b28561c0684111750895dfbebac365ce6962df4f77be805ce50a58031f7f2",
+    "src/tools/shot_pattern_analysis/matched_config.py": "4426573fb766fa02fcf2f5d247e2eb19bba97bb85a04d2224af113250d2e4814",
+    "src/tools/shot_pattern_analysis/matched_matrix.py": "af547eb668d33f2e606bbab7f4a9b69749d7c79d61d2d381bfc0924cc3216732",
+    "docs/research/shot_pattern_analysis/phase2/validation/independent_supplement_final_pw_primary_face.json": "549db507709d9b96b0b2b5079cf171a1a9ecf7f68144cab10e528520efde3ad0",
+    "docs/research/shot_pattern_analysis/phase2/validation/independent_supplement_final_pw_control_face.json": "6c37d47c685ab435b3d2ed88e4c4b9128fbf5148d40038e1e9328ed2a2c2e595",
+    "docs/research/shot_pattern_analysis/phase2/validation/independent_supplement_final_driver_control_speed.json": "485134cbf57c624e1a32b1c73f23de2ddba823aea75032e23ea94d788e4a8692"
+  },
+  "original_audit_counts": {
+    "independent_primary_final_audit.json": {
+      "planned": 324,
+      "audited": 324,
+      "completed": 270,
+      "unavailable": 54,
+      "rows": 8100000
+    },
+    "independent_control_final_audit.json": {
+      "planned": 72,
+      "audited": 72,
+      "completed": 52,
+      "unavailable": 20,
+      "rows": 1560000
+    }
+  },
+  "supplement_protocol_counts": {
+    "pw_primary_face": {
+      "planned": 18,
+      "audited": 18,
+      "rows": 540000,
+      "supported_rows": 539976,
+      "direct_api_rows": 396,
+      "bootstrap_cells": 2
+    },
+    "pw_control_face": {
+      "planned": 4,
+      "audited": 4,
+      "rows": 120000,
+      "supported_rows": 119994,
+      "direct_api_rows": 198,
+      "bootstrap_cells": 1
+    },
+    "driver_control_speed": {
+      "planned": 4,
+      "audited": 4,
+      "rows": 120000,
+      "supported_rows": 119742,
+      "direct_api_rows": 198,
+      "bootstrap_cells": 1
+    }
+  },
+  "supplement_supported_rows": 779712,
+  "new_undisclosed_numerical_gap_found": false,
+  "pending": [
+    "Qualified revised original and supplemental standalone figures and final manifests",
+    "Complete final narrative and editable LaTeX findings",
+    "Final PDF and page/claims review",
+    "Final pre-PR and issue/PR delivery"
+  ],
+  "external_or_deferred": [
+    "Empirical player/equipment validation DV-11984",
+    "Recorded built-in LaTeX compiler environment startup failure"
+  ],
+  "scope": "Read-only source/receipt inspection; no repeated tests, simulation, statistics, rendering or remote state query."
+}
