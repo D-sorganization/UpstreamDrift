@@ -27,6 +27,7 @@ from defusedxml import ElementTree as SafeET
 import numpy as np
 from numpy.typing import NDArray
 
+from src.engines.physics_engines.opensim.python import msk_club
 from src.shared.python.motion_matching.club_models import (
     DRIVER,
     IRON_7,
@@ -53,6 +54,10 @@ class MissingGeometryAssetError(FileNotFoundError):
 
 class StaleModelHashError(ValueError):
     """Raised when a model variant or component hash does not match the pinned/qualified digest."""
+
+
+class MissingClubAttachmentError(ValueError):
+    """Raised when a model has no Club body or the club is not held by both hands."""
 
 
 class UnsupportedCapabilityError(NotImplementedError):
@@ -123,14 +128,25 @@ def hash_club_spec(spec: ClubSpec) -> str:
 
 @dataclass(frozen=True)
 class GolfEquipmentSpec:
-    """Specification of parameterized golf club equipment attached to the skeleton."""
+    """Specification of parameterized golf club equipment attached to the skeleton.
+
+    Build it from a model with :func:`equipment_from_model` so it reports what
+    the model actually carries. Asset paths are relative to the opensim
+    ``models/`` directory.
+    """
 
     club_name: str
     club_spec_sha256: str
-    grip_frame_id: str = "grip_frame"
+    grip_frame_id: str = "club_grip_offset"
     shaft_length_m: float = 1.15
     head_mass_kg: float = 0.200
-    geometry_asset_path: str = "models/geometry/club/club_driver_head.stl"
+    geometry_asset_path: str = "geometry/club/club_driver_head.stl"
+    club_mass_kg: float | None = None
+    grip_model: str = "weld"
+    lead_grip_frame_id: str = "club_grip_offset"
+    trail_grip_frame_id: str = "club_trail_grip_offset"
+    hands_attached: tuple[str, ...] = ()
+    mesh_asset_paths: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -178,12 +194,17 @@ class GolfModelVariant:
                     f"Missing geometry asset for frame '{frame}': expected at {full_path}"
                 )
 
-        if self.equipment and self.equipment.geometry_asset_path:
-            equip_path = base_dir / self.equipment.geometry_asset_path
-            if not equip_path.is_file():
-                raise MissingGeometryAssetError(
-                    f"Missing geometry asset for equipment: expected at {equip_path}"
-                )
+        if self.equipment:
+            equip = self.equipment
+            rel_paths = tuple(equip.mesh_asset_paths)
+            if equip.geometry_asset_path and equip.geometry_asset_path not in rel_paths:
+                rel_paths += (equip.geometry_asset_path,)
+            for rel_path in rel_paths:
+                equip_path = base_dir / rel_path
+                if not equip_path.is_file():
+                    raise MissingGeometryAssetError(
+                        f"Missing geometry asset for equipment: expected at {equip_path}"
+                    )
 
     def get_capabilities(self) -> dict[str, Any]:
         """Return truthful capability dictionary matching launcher manifest."""
@@ -416,6 +437,12 @@ def _build_default_skeleton(
             "femur_r",
             "tibia_r",
             "calcn_r",
+            "humerus_l",
+            "radius_l",
+            "hand_l",
+            "femur_l",
+            "tibia_l",
+            "calcn_l",
         ),
         coordinate_names=tuple(coords),
         geometry_assets={},
@@ -423,15 +450,133 @@ def _build_default_skeleton(
     )
 
 
-def _build_default_driver_equipment() -> GolfEquipmentSpec:
-    """Build canonical Driver equipment specification."""
+_CLUBS = {"driver": ("Driver", DRIVER), "iron7": ("7-Iron", IRON_7)}
+_MASS_TOLERANCE_KG = 1e-6
+_MESH_SEARCH_DIRS = ("", "geometry", "geometry/club")
+
+
+def hash_msk_club(club: msk_club.MskClub) -> str:
+    """Deterministic SHA-256 of the shared musculoskeletal club definition.
+
+    Covers mass, centre of mass, inertia, lead/trail grip points and head alias.
+    """
+    dyn = club.dynamics
+    inertia = [float(v) for v in dyn.inertia_com_kg_m2.ravel()]
+    grips = [float(v) for side in ("L", "R") for v in club.grip_points[side]]
+    values = [dyn.mass_kg, *dyn.com_m, *inertia, *grips]
+    raw = club.assembly.head_alias + "|" + ",".join(f"{v:.9g}" for v in values)
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
+def _find_club_body(root: Any) -> Any | None:
+    for body in root.iter("Body"):
+        if body.get("name") == msk_club.CLUB_BODY:
+            return body
+    return None
+
+
+def _named(root: Any, tag: str, name: str) -> bool:
+    return any(item.get("name") == name for item in root.iter(tag))
+
+
+def _unattached_hands(root: Any, grip_model: str) -> list[str]:
+    """Hands that do not hold the club under the model's grip topology."""
+    if grip_model == "bushing":
+        held = {
+            msk_club.HAND_BODIES[side]: _named(root, "BushingForce", force)
+            for side, force in msk_club.GRIP_BUSHINGS.items()
+        }
+    else:
+        held = {
+            "hand_l": _named(root, "WeldJoint", msk_club.LEAD_JOINT),
+            "hand_r": _named(root, "WeldConstraint", msk_club.TRAIL_CONSTRAINT),
+        }
+    return [hand for hand, ok in held.items() if not ok]
+
+
+def _club_mesh_paths(club_body: Any, models_dir: Path) -> tuple[str, ...]:
+    """Mesh paths of the Club body relative to ``models_dir``.
+
+    Bare ``mesh_file`` names resolve like OpenSim's geometry search: next to
+    the model, then its ``geometry/`` folder (and ``geometry/club/``). A name
+    that resolves nowhere maps to ``geometry/club/<name>`` so that
+    ``validate_geometry_assets`` reports it as missing.
+    """
+    paths: list[str] = []
+    for mesh_file in club_body.iter("mesh_file"):
+        name = (mesh_file.text or "").strip()
+        if not name:
+            continue
+        resolved = f"geometry/club/{name}"
+        for sub in _MESH_SEARCH_DIRS:
+            candidate = f"{sub}/{name}" if sub else name
+            if (models_dir / candidate).is_file():
+                resolved = candidate
+                break
+        paths.append(resolved)
+    return tuple(paths)
+
+
+def equipment_from_model(
+    model_path: Path | str, club: str = "driver"
+) -> GolfEquipmentSpec:
+    """Equipment exactly as the OpenSim model at ``model_path`` carries it.
+
+    Preconditions: the file exists (``FileNotFoundError``); ``club`` is
+    ``driver`` or ``iron7`` (``ValueError``); the model has a ``Club`` body held
+    by both hands under the weld or bushing topology
+    (``MissingClubAttachmentError``); the Club mass equals the shared spec mass
+    to 1e-6 kg (``StaleModelHashError``).
+
+    Postconditions: a frozen spec with the shared-club hash, Club mass, grip
+    model, lead/trail grip frame names, attached hands and every Club mesh path
+    (relative to the model's directory). ``head_mass_kg`` is the stock head mass
+    of the club table because the shared dynamics do not split the head out.
+    """
+    path = Path(model_path)
+    if not path.is_file():
+        raise FileNotFoundError(f"Model file not found: {path}")
+    if club not in _CLUBS:
+        raise ValueError(f"club must be one of {tuple(_CLUBS)}, got {club!r}")
+    display_name, table_spec = _CLUBS[club]
+    shared = msk_club.load_msk_club(club)
+
+    root = SafeET.parse(str(path)).getroot()
+    club_body = _find_club_body(root)
+    if club_body is None:
+        raise MissingClubAttachmentError(f"Model {path.name} has no Club body")
+    grip_model = msk_club.grip_model_of(root)
+    unattached = _unattached_hands(root, grip_model)
+    if unattached:
+        raise MissingClubAttachmentError(
+            f"Club in {path.name} is not attached ({grip_model} topology) to: "
+            f"{', '.join(unattached)}"
+        )
+
+    mass_text = club_body.findtext("mass")
+    model_mass = float(mass_text) if mass_text else float("nan")
+    spec_mass = float(shared.dynamics.mass_kg)
+    if not abs(model_mass - spec_mass) <= _MASS_TOLERANCE_KG:
+        raise StaleModelHashError(
+            f"Stale club in {path.name}: Club mass {model_mass} kg differs from "
+            f"the shared {club} spec mass {spec_mass} kg"
+        )
+
+    meshes = _club_mesh_paths(club_body, path.parent)
+    head_meshes = [m for m in meshes if m.endswith("_head.stl")]
     return GolfEquipmentSpec(
-        club_name="Driver",
-        club_spec_sha256=hash_club_spec(DRIVER),
-        grip_frame_id="grip_frame",
-        shaft_length_m=DRIVER.length_m,
-        head_mass_kg=DRIVER.head_mass_kg,
-        geometry_asset_path="models/geometry/club/club_driver_head.stl",
+        club_name=display_name,
+        club_spec_sha256=hash_msk_club(shared),
+        grip_frame_id=msk_club.CLUB_GRIP_FRAMES["L"],
+        shaft_length_m=float(shared.assembly.length_m),
+        head_mass_kg=table_spec.head_mass_kg,
+        geometry_asset_path=head_meshes[0] if head_meshes else "",
+        club_mass_kg=model_mass,
+        grip_model=grip_model,
+        lead_grip_frame_id=msk_club.CLUB_GRIP_FRAMES["L"],
+        trail_grip_frame_id=msk_club.CLUB_GRIP_FRAMES["R"],
+        hands_attached=tuple(msk_club.HAND_BODIES[s] for s in ("L", "R")),
+        mesh_asset_paths=meshes,
     )
 
 
@@ -449,7 +594,7 @@ def create_torque_model_variant(
     ranges = dict.fromkeys(actuator_names, (-500.0, 500.0))
 
     skeleton = _build_default_skeleton(coords, actual_sha)
-    equipment = _build_default_driver_equipment()
+    equipment = equipment_from_model(path)
 
     actuation = ActuationProfile(
         actuation_type=ActuationType.TORQUE,
@@ -495,7 +640,7 @@ def create_muscle_model_variant(
     ranges = dict.fromkeys(muscles, (0.0, 1.0))
 
     skeleton = _build_default_skeleton(coords, actual_sha)
-    equipment = _build_default_driver_equipment()
+    equipment = equipment_from_model(path)
 
     actuation = ActuationProfile(
         actuation_type=ActuationType.MUSCLE_TENDON,

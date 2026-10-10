@@ -62,6 +62,12 @@
       "expires_on": "2026-10-15"
     },
     {
+      "path": "docs/development/full_body_models/DESIGN_DECISIONS.md",
+      "owner": "@simulation-team",
+      "reason": "Issue #11767 (GCV-20): the committed design-decision log was already 61 bytes under the budget on main before this change recorded the full re-solve result and the pre-contact release cutoff / weld-projection amendment; staged for topic decomposition.",
+      "expires_on": "2026-10-31"
+    },
+    {
       "path": "docs/development/DEVELOPMENT_LOG.md",
       "owner": "@maintainers",
       "reason": "Active repository development log tracking feature states across the project; pending topic decomposition.",

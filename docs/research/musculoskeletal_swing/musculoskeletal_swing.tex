@@ -35,6 +35,8 @@ with $\rho=0.05$ and $\boldsymbol\lambda_0$ spreading force equally over active 
 \section{Acceptance Criteria and Results}
 Acceptance for a muscle-force claim would require: low unexplained ground wrench, reserves small relative to muscle moments, and independent validation. None is met. Backswing (0--1.08~s): wrench residual about 58 (RMS), 44\% of muscles reach full activation, left-hip reserves 9--18~N\,m RMS. After 1.08~s the IK degrades (lumbar rotation to $-119^\circ$, joint limits hit, club head about 2.9~m high at top of backswing) and the wrench residual reaches thousands of newtons; reserves and activations there are artefacts. See \path{docs/development/full_body_models/evidence/musculoskeletal/receipt.json}.
 
+\textbf{Shared Club (OSV-9, \#11756).} The receipt is regenerated with the shared two-hand driver (0.313~kg) in the muscle model; the inputs and their hashes are unchanged. The marker IK does not close the two-hand loop: with the trail \texttt{WeldConstraint} enforced, the optimiser missed the acceleration of all 14 arm coordinates at each of the 88 frames tried. The solved model therefore holds the club with the lead hand only (\texttt{release\_trail\_weld}); \texttt{--enforce-trail-weld} restores the loop. The per-frame optimiser status is now recorded (\texttt{solver.convergence}): a frame converges when its logged equality violation is at most $10^{-3}$. The logged violations split into a solved group below $10^{-3}$ and a failed group from 1 to $10^{7}$, with 2 of 524 frames between. With the club, 234 of 262 frames converge (first failure 1.15~s); the no-club control converges on 237 (first failure 0.59~s). On the 225 frames converged in both runs, the club adds the following load to the lead arm (RMS of the per-frame difference): wrist deviation 32.9~N\,m (1.5 to 34.3), shoulder flexion 45.0 (28.4 to 72.6), shoulder rotation 42.9 and elbow flexion 16.3~N\,m. Every trail-arm difference is exactly zero. The largest converged-frame reserve is the pelvis residual (520~N RMS, versus 454 without the club). This shows that the club load is carried; it qualifies no muscle force.
+
 \section{Failed Experiments}
 Optimal force 1 for upper-body and pelvis actuators made Ipopt fail from $t\approx0.48$~s (scaling); fixed by optimal force 100. Sign error in the root wrench (required $=+\tau$) and zero-width foot lines (large moment residual) were fixed. Contact tolerances of 0.03--0.06~m wrongly marked feet airborne. \texttt{AnalyzeTool} built in Python failed until serialised and reloaded.
 
@@ -44,9 +46,10 @@ No arm, shoulder or trunk muscles; torque stand-ins instead. Estimated, not meas
 \section{Reproduction}
 \begin{verbatim}
 MUJOCO_GL=egl MPLBACKEND=Agg QT_QPA_PLATFORM=offscreen PYTHONPATH=.:src \
-python3 scripts/run_musculoskeletal_swing.py --out-dir /tmp/msk_run
+python3 scripts/run_musculoskeletal_swing.py --out-dir /tmp/msk_run \
+    --club driver --club-control
 \end{verbatim}
-Requires the \texttt{opensim-models} submodule (or \texttt{UPSTREAMDRIFT\_MSK\_BASE\_MODEL}). Runtime about 11~min on 4 cores.
+Requires the \texttt{opensim-models} submodule (or \texttt{UPSTREAMDRIFT\_MSK\_BASE\_MODEL}). Runtime about 11~min per solve on 4 cores; \texttt{--club-control} adds the no-club solve. Then regenerate the matched-swing ledger: \texttt{python3 -m src.shared.python.motion\_matching ledger --write}.
 
 \section{Phase 2: Spec-Driven Model and Inputs}
 Phase 2 targets the two root causes of Section 5: the degraded inverse-kinematics tail and the indeterminate ground reaction. The inputs are the same-input bundles (driver and iron): 44 coordinates sampled at $\Delta t=1$~ms for the full swing, reference $\mathbf{q}$, $\mathbf{v}$ and the joint-conjugate efforts $\boldsymbol\tau_{ref}$ that the MuJoCo plant used, together with the \texttt{full-body-v1} specification. The reference was produced by forward dynamics with a deterministic contact law, so the ground reaction is a function of $(\mathbf{q},\mathbf{v})$ and is not estimated.

@@ -11,7 +11,8 @@ instead of assumed:
 * ``mujoco`` and ``pinocchio``: ``get_plant(engine, scaled_spec)`` and the plant
   body poses at the recorded coordinates.
 * ``myosuite``: the bundled spec-to-MyoSuite retarget map
-  (``coordinate_map_anthro.json``) drives the named joints of the MyoSuite
+  (``coordinate_map_anthro.json``), with the hips mapped by orientation through
+  the calibrated hip frames (#12052), drives the named joints of the MyoSuite
   ``myolegs`` MJCF. The map carries no pelvis orientation, so the pelvis
   rotation (``HipInputX/Y/Z``) is applied to the model's pelvis body here.
   Run it with the MyoSuite virtual environment.
@@ -248,9 +249,10 @@ def myosuite_points(
 ) -> tuple[dict[str, np.ndarray], list[str]]:
     """Leg body origins from the MyoSuite ``myolegs`` MJCF via the retarget map.
 
-    Leg joints come from ``retarget_frame`` (the map's ``hip_rotation_*``,
-    ``hip_adduction_*``, ``hip_flexion_*``, knee, ankle, subtalar and mtp
-    entries). The pelvis body is rotated by the spec's pelvis chain because
+    Leg joints come from ``retarget_frame`` with ``hip_spec=spec``: the hips
+    reproduce the hip-calibrated spec's femur orientation relative to the
+    pelvis (``hip_retarget``, #12052); knee, ankle, subtalar and mtp use the
+    map entries. The pelvis body is rotated by the spec's pelvis chain because
     the map has no pelvis orientation entry.
     """
     import mujoco
@@ -271,7 +273,8 @@ def myosuite_points(
     if unmapped:
         raise ValueError(f"retarget map has no source for leg joints {unmapped}")
     gather = source_coordinate_index(order, rmap)
-    q_target = retarget_frame(q_source[gather], rmap)
+    # hip_spec: the hips carry the calibrated spec's femur orientation (#12052).
+    q_target = retarget_frame(q_source[gather], rmap, hip_spec=spec)
 
     model = mujoco.MjModel.from_xml_path(str(_myolegs_xml()))
     data = mujoco.MjData(model)
@@ -319,9 +322,9 @@ def _myosuite_hip_solve(
 ) -> dict[str, Any]:
     """Hip rotations that put the MyoSuite feet on target, against the map's own.
 
-    Diagnostic for the retarget map: the identity leg mapping hands the spec's
-    hip rotation to a model with different hip and foot geometry, so the map
-    alone need not reproduce the capture toe-out.
+    Diagnostic for the retarget: once the hips carry the spec's femur
+    orientation the solve should barely move them; a large difference means
+    the MyoSuite leg geometry, not the hip mapping, sets the toe-out.
     """
     from src.shared.python.motion_matching.pipeline.address_feet import (
         feet_deg_from_positions,
