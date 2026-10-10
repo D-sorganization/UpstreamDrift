@@ -5519,6 +5519,174 @@ split partitions the same samples as the whole-swing RMS, so it adds no new
 physical evidence. It only shows where the error accumulates. Impact is read
 from the reference kinematics, not from the FD rollout.
 
+\section{Follow-Through IK Branch Uniqueness (\#12042)}
+
+\subsection{Motivation}
+The near-null thorax split (\texttt{--thorax-weight 0.01}, \#12108) should not
+change the swing. On the canonical runs it still moves whole-swing FD by
+$-6.6$ mm (capture-A) and $+13.9$ mm (capture-B). The MuJoCo full-body
+reference also changes by up to 39--47$^\circ$ on the toe and on the
+shoulder/forearm axial coordinates (\texttt{mtp\_angle\_r/l},
+\texttt{L/RSInputZ}, \texttt{L/RFInput}) after about 1.20--1.30 s. This
+section asks whether a principled regulariser can make the follow-through IK
+solution unique, so that whole-swing FD is not dominated by the choice of
+branch.
+
+\subsection{Diagnosis}
+The trajectory solver (\texttt{BaseFullBodyIK.solve\_trajectory}) seeds each
+frame with the previous one. When a frame's marker RMS exceeds 30 mm, it
+retries from four seeds jittered by up to $\pm0.5$ rad. A retry is accepted
+if it lowers marker RMS by 3 mm, with no other condition. Three properties of
+this \emph{free} policy cause the branch hops:
+\begin{enumerate}
+\item The jittered seed also became the prior anchor $q_\mathrm{init}$, so a
+retry was regularised toward a random pose, not toward the previous frame.
+\item One random stream is shared by all frames. A perturbation that changes
+the number of restarts in one frame changes the jitter of every later frame.
+\item Acceptance looks only at marker RMS. In the follow-through, the
+weakly observed toe and axial coordinates have mirror branches that fit to
+within the margin. Any restart can therefore jump to a branch that is not
+anatomical.
+\end{enumerate}
+The raw reference has about 40 frames with steps over 5$^\circ$ per frame
+between 1.29 and 1.35 s. With restarts disabled, the toe angles do not move
+under the null perturbation at all. Restarts are therefore the only source of
+the branch hops.
+
+\subsection{Method}
+All of the following options are opt-in. The default stays \texttt{free},
+which reproduces the canonical receipts bit for bit.
+\begin{description}
+\item[Anchored restarts] (\texttt{restart\_anchor\_prior}). A retry keeps the
+jittered seed, but its prior row anchors on the frame's start pose
+(\texttt{SolvePoseOptions.prior\_anchor}).
+\item[Frame-seeded jitter] (\texttt{restart\_seed\_per\_frame}). The jitter of
+frame $k$ is drawn from \texttt{default\_rng((0, k))}, so it does not depend on
+what earlier frames did.
+\item[Bounded step] (\texttt{restart\_max\_step\_rad}). A retry is admissible
+only if no joint moves more than $\omega_\mathrm{max}/f_s$ from the start pose,
+with $\omega_\mathrm{max}=34.9$ rad/s (2000$^\circ$/s). The peak smoothed
+pre-impact joint speed is 1299$^\circ$/s, at the lead wrist.
+\item[Posture prior] (\texttt{posture\_prior}). Rows
+$\sqrt{w}\,(q_i - q_i^\mathrm{address})$ act on the six toe and axial
+coordinates and pull them toward the static address pose.
+\end{description}
+The pipeline selects these with \texttt{--ik-restart-policy}:
+\texttt{free}; \texttt{seeded} (frame-seeded); \texttt{anchored};
+\texttt{stable} (seeded and anchored); \texttt{continuous} (anchored and
+bounded); and \texttt{off} (no restarts). The posture prior is set with
+\texttt{--ik-posture-prior-weight}. The receipt records the policy under
+\texttt{ik.restart\_policy}. Calibration subsets always use \texttt{free}.
+
+A synthetic one-joint model (\texttt{test\_ik\_restart\_continuity.py}) has
+two branches $\pm\theta$ that fit the strong marker equally. A weak marker
+prefers the mirror branch on random frames. Free restarts hop between the
+branches more than five times in 40 frames. Continuous restarts stay on the
+anatomical branch under a $10^{-4}$ m offset, a different start and a
+different noise sequence.
+
+\subsection{Results}
+Each cell gives base/null, where the null run adds \texttt{--thorax-weight
+0.01}. $\Delta q$ is the maximum follow-through change, base versus null, on
+the six toe and axial coordinates. FD values are in mm; ``pre'' is
+address$\to$impact and ``post'' is after impact.
+
+\begin{center}
+\small
+\begin{tabular}{lrrrrr}
+\hline
+Policy & IK (mm) & Whole FD (mm) & Pre FD & Post FD & $\Delta q$ ($^\circ$) \\
+\hline
+\multicolumn{6}{l}{capture-A (driver)} \\
+free (default) & 33.0/33.2 & 61.6/55.0 & 29.9/30.0 & 108.1/93.7 & 39.1 \\
+off, continuous & 40.0/39.9 & 96.6/91.8 & 30.5/30.3 & 179.2/169.6 & 1.5 \\
+seeded & 33.2/33.8 & 67.3/76.7 & -- & -- & 34.4 \\
+anchored & 32.5/32.5 & 73.6/64.9 & 30.1/30.0 & 132.9/114.9 & 3.0 \\
+stable & 33.7/33.8 & 67.7/64.2 & 30.1/30.1 & 120.6/113.4 & 4.7 \\
+stable, posture $10^{-3}$ & 33.6/32.9 & 67.4/65.6 & 29.6/29.6 & 120.3/116.6 & 9.2 \\
+stable, posture $10^{-2}$ & 34.0/33.9 & 67.9/68.9 & 29.9/30.1 & 121.3/123.1 & 2.6 \\
+\multicolumn{6}{l}{capture-B (7-iron)} \\
+free (default) & 31.1/32.0 & 47.0/60.9 & 29.9/32.7 & 75.7/103.7 & 46.5 \\
+off, continuous & 38.0/38.0 & 51.0/50.4 & 31.5/31.2 & 83.0/82.2 & 2.3 \\
+seeded & 31.9/32.1 & 54.4/53.6 & 31.4/29.6 & -- & 60.0 \\
+anchored & 32.0/31.8 & 93.8/70.8 & 36.6/31.3 & 169.7/125.7 & 5.3 \\
+stable & 31.7/31.8 & 67.1/69.3 & 32.8/32.3 & 116.9/122.0 & 3.9 \\
+stable, posture $10^{-3}$ & 31.7/31.9 & 69.0/66.7 & 33.6/30.7 & 120.3/117.5 & 5.4 \\
+stable, posture $10^{-2}$ & 31.9/31.9 & 160.3/55.4 & 39.6/29.3 & 300.4/94.7 & 3.8 \\
+\hline
+\end{tabular}
+\end{center}
+
+The free control run reproduced the canonical receipts exactly (zero
+difference in IK, whole-swing FD and post-impact FD). \texttt{continuous} gave
+the same result as \texttt{off}, because the step bound rejected every
+restart. Over all coordinates, not only the six above, $\Delta q$ was larger
+in some rows: \texttt{stable} 11.9$^\circ$ (capture-A) and 9.4$^\circ$
+(capture-B); \texttt{anchored} 10.7$^\circ$ and 9.2$^\circ$; posture
+$10^{-3}$ 35.2$^\circ$ (capture-A, subtalar).
+
+\subsection{Acceptance and Failed Experiments}
+To become the default, a candidate had to meet two conditions on both
+captures:
+\begin{enumerate}
+\item[(a)] The null perturbation changes the follow-through reference by less
+than 5$^\circ$ on the six coordinates, and whole-swing FD by less than 3 mm.
+\item[(b)] Pre-impact FD stays within the 3 mm noise floor, whole-swing FD is
+no worse than baseline (61.6 and 47.0 mm), and IK RMS is no more than 1 mm
+worse.
+\end{enumerate}
+No candidate met both conditions, so the default is unchanged.
+\begin{itemize}
+\item \texttt{off}/\texttt{continuous} makes the reference unique
+($\le$2.3$^\circ$) but adds 7 mm of IK RMS. Whole-swing FD also rises
+(capture-A 96.6 mm).
+\item \texttt{seeded} alone does not help: $\Delta q$ is 34--60$^\circ$.
+\item \texttt{anchored} meets the coordinate bound, but FD moves by 8.7 and
+23.1 mm between base and null.
+\item \texttt{stable} is the best candidate. It meets the coordinate bound
+(4.7$^\circ$, 3.9$^\circ$) and the IK bound ($+0.7$, $+0.6$ mm). It fails
+because whole-swing FD is worse than baseline (67.7 versus 61.6, and 67.1
+versus 47.0 mm), and because the capture-A FD delta is 3.5 mm.
+\item A posture prior on top of \texttt{stable} did not tighten FD. At weight
+$10^{-2}$, the capture-B base run diverged: the root drifted 0.27 m from about
+1.0 s, before impact, and whole-swing FD reached 160.3 mm.
+\item An earlier attempt to let a weak posture prior choose between separated
+branches failed in the synthetic test. The prior cannot cross the marker
+barrier between branches, so only the seed and restart policy can choose the
+branch.
+\end{itemize}
+
+\subsection{Conclusion}
+The follow-through branch ambiguity comes from the restarts, and it can be
+removed (\texttt{stable}, $\Delta q \le 4.7^\circ$). Whole-swing FD is not
+stabilised by doing so. The FD rollout is itself sensitive after impact: the
+unactuated root drifts, and post-impact FD is about twice the reference error.
+On capture-A it is dominated by the club and head markers, and on capture-B by
+the pelvis. Reference changes of 1.5$^\circ$ or less still move whole-swing FD
+by about 5 mm. Reference uniqueness is necessary, but it is not sufficient for
+a repeatable whole-swing FD. The remaining sensitivity belongs to the
+post-impact rollout, not to the IK.
+
+\subsection{Reproduction and Limitations}
+Use the canonical commands in \texttt{CANONICAL\_RUN.md}, adding
+\texttt{--ik-restart-policy \{free,seeded,anchored,stable,continuous,off\}}
+and, optionally, \texttt{--ik-posture-prior-weight W}. The null runs also need
+\texttt{--thorax-weight 0.01}, which is in \#12108 and is not yet on
+\texttt{main}. Read the phase split from \texttt{dynamics.fd\_phase} in each
+receipt. Each run takes about 5 min.
+
+Limitations:
+\begin{itemize}
+\item Only two captures and one null perturbation were tested.
+\item $\Delta q$ is measured base versus null, not against a ground-truth
+anatomical pose.
+\item The rows without pre/post values came from runs that predate the phase
+split.
+\end{itemize}
+The implementation is in \texttt{full\_body\_ik.py},
+\texttt{pipeline/lane.py} and \texttt{pipeline/constants.py}. The tests are
+\texttt{test\_ik\_restart\_continuity.py} and \texttt{pipeline/test\_lane.py}.
+
 \begin{thebibliography}{9}
 \bibitem{MathWorksPSUnits}
 MathWorks. \emph{Simulink-PS Converter: Unit Conversion and Checking}.
