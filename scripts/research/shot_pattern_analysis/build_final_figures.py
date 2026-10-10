@@ -264,13 +264,13 @@ def _cell_metadata(
     noise = config.get("noise", {})
     standard_deviations = noise.get("standard_deviations", [])
     fields = (
-        "shaft rotation",
-        "path",
-        "speed",
-        "horizontal contact",
-        "vertical contact",
-        "shaft lean",
-        "attack angle",
+        "shaft rotation (deg)",
+        "path (deg)",
+        "speed (m/s)",
+        "horizontal contact (m)",
+        "vertical contact (m)",
+        "shaft lean (deg)",
+        "attack angle (deg)",
     )
     max_residual = max(
         (

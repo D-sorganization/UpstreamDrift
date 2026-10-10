@@ -1,0 +1,12 @@
+{
+  "status": "test_first_caption_unit_repair_pending_final_render_review",
+  "red_failed": 1,
+  "green_passed": 19,
+  "ruff_check": true,
+  "ruff_format_check": true,
+  "scope": "Only names the seven existing academic noise components with their unchanged SI units; no numeric value or model changes.",
+  "source_sha256": {
+    "scripts/research/shot_pattern_analysis/build_final_figures.py": "daecb84c22a758e013c2ebdd27d2e0617999ccf693bba117637640a2bf764ac1",
+    "tests/research/test_shot_pattern_final_figures.py": "c501970999729010d705d7cdf48ea21e3a00b1f660e15838f2e2c04c6918f1f1"
+  }
+}

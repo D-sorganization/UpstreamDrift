@@ -1,0 +1,64 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+____________ test_academic_noise_caption_identifies_all_seven_units ____________
+
+    def test_academic_noise_caption_identifies_all_seven_units() -> None:
+        from scripts.research.shot_pattern_analysis.build_final_figures import (
+            _cell_metadata,
+        )
+    
+        cell = {
+            "config": {
+                "club": {"club_id": "driver", "loft_deg": 10.0},
+                "noise": {
+                    "standard_deviations": [2.0, 0.5, 0.89408, 0.00635, 0.00635, 0.1, 0.2]
+                },
+            }
+        }
+        caption = _cell_metadata(cell, {}, {})["noise SDs"]
+        for expected in (
+            "shaft rotation (deg)=2",
+            "path (deg)=0.5",
+            "speed (m/s)=0.89408",
+            "horizontal contact (m)=0.00635",
+            "vertical contact (m)=0.00635",
+            "shaft lean (deg)=0.1",
+            "attack angle (deg)=0.2",
+        ):
+>           assert expected in caption
+E           AssertionError: assert 'shaft rotation (deg)=2' in 'shaft rotation=2, path=0.5, speed=0.89408, horizontal contact=0.00635, vertical contact=0.00635, shaft lean=0.1, attack angle=0.2'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/research/test_shot_pattern_final_figures.py:754: AssertionError
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+../../../../Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487
+  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487: UserWarning: Skipping collection of '.hypothesis' directory - this usually means you've explicitly set the `norecursedirs` pytest config option, replacing rather than extending the default ignores.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/research/test_shot_pattern_final_figures.py::test_academic_noise_caption_identifies_all_seven_units
+1 failed, 18 deselected, 7 warnings in 6.42s

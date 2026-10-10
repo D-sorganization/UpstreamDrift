@@ -726,3 +726,29 @@ def test_density_comparison_captures_fixed_controls_and_units_for_shaft_only(
     assert metadata_sd["Noise"] == (
         "Path SD 0° • Speed SD 0 mph • Strike SD 0/0 mm horizontal/vertical"
     )
+
+
+def test_academic_noise_caption_identifies_all_seven_units() -> None:
+    from scripts.research.shot_pattern_analysis.build_final_figures import (
+        _cell_metadata,
+    )
+
+    cell = {
+        "config": {
+            "club": {"club_id": "driver", "loft_deg": 10.0},
+            "noise": {
+                "standard_deviations": [2.0, 0.5, 0.89408, 0.00635, 0.00635, 0.1, 0.2]
+            },
+        }
+    }
+    caption = _cell_metadata(cell, {}, {})["noise SDs"]
+    for expected in (
+        "shaft rotation (deg)=2",
+        "path (deg)=0.5",
+        "speed (m/s)=0.89408",
+        "horizontal contact (m)=0.00635",
+        "vertical contact (m)=0.00635",
+        "shaft lean (deg)=0.1",
+        "attack angle (deg)=0.2",
+    ):
+        assert expected in caption
