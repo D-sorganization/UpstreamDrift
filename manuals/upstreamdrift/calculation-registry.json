@@ -279,6 +279,11 @@
       "id": "UP-D1-native-zero-subtalar-reduction-inventory",
       "owner": "UpstreamDrift issue #12167",
       "resolution": "Inventory provisional chapter46 and native_subtalar_reduction.py: exact assembled 557-muscle source, bilateral locked-zero one-coordinate CustomJoint rotation laws and native identity-frame targets, forbidden coordinate consumers, preserved component properties, separately serialized/reloaded derived XML, and rank-complete common mobility lift. At four sampled native poses with nonzero speeds, body transforms/velocities, all muscle path lengths/speeds, projected/full mass, actual J-transpose-body-plus-mobility applied force and QErr/UErr agree at the exact source/runtime-bound fixture. The separate V2 and one-equilibrium named-state observations remain unqualified. Partial abdominal and MTP policies are not composed by this operation; native Moco, full-state replay, physiology, contact, private capture matching and all17/six-engine parity remain open. Publication blocked."
+    },
+    {
+      "id": "UP-D1-native-zero-custom-mtp-reduction-inventory",
+      "owner": "UpstreamDrift issue #12176",
+      "resolution": "Inventory provisional chapter47 and native_custom_mtp_reduction.py: exact assembled 557-muscle source, bilateral locked-zero one-coordinate CustomJoint MTP rotation laws, native zero frame targets and forbidden coordinate consumers. The PinJoint-only policy remains strict. The derived XML is independently reloaded and sampled native body motion, all muscle path lengths/speeds, constraint residuals, rank-complete lifted mass and J-transpose-body-plus-mobility applied force are compared at four common poses. The retained abdomen-to-subtalar parent admits the final MTP reduction. Independently compared original-to-final sampled mechanics and native Moco initialization now pass on three prepared coupled states, while complete restart, native Moco solve, passive physiology, contact/grip, private capture matching and all17/six-engine parity remain open. Publication blocked."
     }
   ],
   "calculations": []

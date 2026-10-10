@@ -1,0 +1,73 @@
+# Source-Bound Native Zero-MTP CustomJoint Reduction
+
+Issue #12176 admits a separate, derived OpenSim mechanical artifact from the
+assembled 557-muscle BUET–Hamner source. The actual bilateral MTP joints in
+that source are one-coordinate **CustomJoints**. The pre-existing PinJoint
+reducer remains restricted to PinJoints; this exact CustomJoint profile shares
+the #12167 zero-transform admission and native comparison, without changing
+the source model or treating a joint-class name as sufficient evidence.
+
+## Declared Source and Reduction Domain
+
+The request binds the source XML SHA-256, a fresh derived output, and ordered
+zero-radian targets for `mtp_angle_r` and `mtp_angle_l`. The two source joints
+must each contain exactly that coordinate, with a `rotation1` LinearFunction
+of coefficients $(1,0)$ and five coordinate-free Constant$(0)$ axes. Their
+native default and achieved values and speeds must be zero, locked but not
+prescribed, and strictly interior to any clamped range. Their native parent
+and child frames must coincide at the achieved zero target. Source XML is
+scanned for any consumer of the removed coordinate names outside the target
+joints. Unexpected consumers, XML entities, altered laws, nonzero or unlocked
+targets, stale source bytes, and an occupied output path reject before or
+during the derived copy's admission. The exact profile wrapper and shared
+admission module are separately hashed.
+
+After a native whole-joint-to-weld operation on a copy, the result is serialized
+and freshly loaded. Bodies, muscles, actuators, constraints, all unrelated
+joints and their native property dumps must remain unchanged. Common named
+continuous values are restored exactly; `initSystem` can assemble before that
+restoration, but no subsequent assembly, fiber equilibrium or integration is
+used as an equivalence shortcut.
+
+## Sampled Native Mechanical Comparison
+
+At initialized, right-ankle, right-knee and pelvis-tilt common poses where
+valid, native unit-speed probes construct source and derived mobility maps.
+The rank-complete lift $L$ must preserve body transforms/velocities, all 557
+muscle path lengths and native lengthening speeds, native constraint position
+and velocity residuals, and
+
+$$M_d=L^\mathsf{T}M_sL,\qquad
+f_d=L^\mathsf{T}f_s,\qquad
+f=J_{\mathrm{system}}^\mathsf{T}F_{\mathrm{body}}+f_{\mathrm{mobility}}.$$
+
+All observations must be finite. The fixture tolerance is $10^{-10}$ in each
+quantity's native units; the aggregate is not a normalized physiological
+error. Applied force excludes inertial bias and constraint reactions.
+
+The qualified OpenSim `4.6-2026-06-22-85aaf64` experiment first reduced the
+unchanged assembled v4 XML SHA-256
+`8d4d349747060efbac31c707c4e01f452746a8fba32be77a425b5ac5be1d34a3`
+and then reduced the retained abdomen→subtalar artifact SHA-256
+`8d8c3cf1dbe5e149df07b0309d508d78d2524e3c7beeaee327e24c4c43c8b81b`.
+The latter produced a fresh 2,247,450-byte XML SHA-256
+`453e09c4e42dcc3f4b74a3b2efeff063e96c3820b3eee1efe95eef249579010d`,
+with rank 56, condition one and zero differences in every measured quantity
+at four sampled poses. The source-bound public receipt and turnover contain
+the final module, script and native-binary identities.
+
+An independent root-run composition receipt
+`composed_reduction_12161_v2/receipt.json` (SHA-256
+`c82e77aa1a760e6965a45cee22be530bab67fb8ed71de710521b51f9c7f3b5d7`)
+binds these reducer bytes and compares the unchanged original against all
+three derived reductions at three complete, coupled prepared states. Its
+rank-56 lift and eight mechanical error classes are zero at those states;
+`MocoStudy.initCasADiSolver` succeeds. The prior PinJoint-class failure is
+retained separately. Initialization is not a solve or tracking result.
+
+This is a sampled continuous-state mechanical prerequisite. It does not prove
+complete SimTK restart, all-pose force/power equivalence, physiological
+muscle-state suitability, missing visual-resource closure, contact/grip,
+Moco solve, muscle-only captured-swing matching or fresh full-horizon
+excitation replay.
+All 17 variants and six engine families remain in the epic denominator.

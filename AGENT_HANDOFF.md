@@ -1018,6 +1018,23 @@ separate because this provider uses native plant stepping only.
   admission. Root owns separate abdominal reduction #12161 and composition;
   MTP and subtalar policies are not silently applied together.
 
+# Exact Bilateral Zero-MTP CustomJoint Reduction - #12176
+
+- Branch `feat/f07-buet-zero-custom-mtp-12176` stacks on the subtalar and
+  BUET–Hamner source-preparation children. Keep it unarmed until the parent
+  lands. The original PinJoint MTP reducer remains unchanged.
+- The actual assembled source has two locked-zero MTP CustomJoints. The exact
+  profile shares the zero-CustomJoint mechanical comparison with subtalar,
+  rejecting altered targets/laws/consumers. Source and output stay in owned
+  staging. The public `F07_CUSTOM_MTP_REDUCTION_RECEIPT.json` binds the native
+  final step from the abdominal→subtalar artifact, not a full Moco solve.
+- Chapter 47, calculation registry and
+  `F07_CUSTOM_MTP_REDUCTION_TURNOVER.md` retain reproduction and open gates.
+  Root independently verified original→final sampled composition and native
+  Moco initialization at three prepared coupled states. Native Moco solve,
+  full-state excitation replay, source physiology and capture matching remain
+  blocked.
+
 # Active: Assistance-Explicit OpenSim Replay, F07 #12147
 
 - Branch `feat/f07-opensim-mixed-replay-12147`; separate native scalar-muscle and CoordinateActuator T01 admission and fresh replay with explicit assistance role/bounds/gain/unit identity, immutable physical outputs and input/state/policy provenance. Root assistance follows ground-parent topology, including renamed coordinates. Other regional roles remain declared hypotheses.

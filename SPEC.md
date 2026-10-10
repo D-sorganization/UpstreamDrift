@@ -11025,6 +11025,20 @@ path lengths/speeds, mass, applied forces and constraints. Canonical chapter
 46 and the F07 turnover bind source/runtime/output identity and sampled
 limits. Abdominal and MTP composition, physiological muscle state, full native
 replay, Moco and capture matching remain open.
+## Source-Bound Native Zero-MTP CustomJoint Reduction (#12176)
+
+The assembled 557-muscle BUET–Hamner source has bilateral single-coordinate
+locked-zero MTP CustomJoints, not PinJoints. A separate exact source-profile
+reduction now admits their zero spatial laws and native lock targets before
+welding only those joints in a derived model. Fresh native reload and four
+sampled common-state comparisons preserve body motion, 557 muscle path
+lengths/speeds, constraints and rank-complete lifted mass and applied force.
+The existing PinJoint policy remains strict. The retained abdominal→subtalar
+parent admits this final MTP step. Independent original-to-final sampled
+mechanics and native Moco initialization pass at three prepared states; Moco
+solve, physiology, contact/grip and captured matching remain unqualified. Canonical
+chapter 47, native receipt and F07 turnover bind the calculation and limits.
+
 ## Assistance-Explicit OpenSim Replay (#12147)
 
 A distinct native mixed-actuation T01 profile freezes exact muscle and
