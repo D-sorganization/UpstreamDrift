@@ -15,6 +15,12 @@ from .academic_plots import (
     write_academic_dispersion_figure,
     write_overhead_trajectory_figure,
 )
+from .matched_figure_identity import (
+    _slug as _slug,
+    pair_comparison_identity as pair_comparison_identity,
+    pair_comparison_slug as pair_comparison_slug,
+    validate_planned_figure_identities as validate_planned_figure_identities,
+)
 from .density import shared_histogram_density
 from .matched_matrix import PROFILES
 from .matched_pair_social import write_pair_social_density
@@ -38,7 +44,10 @@ CLOSED_SELECTED_FIGURE_KINDS: frozenset[str] = frozenset(
 __all__ = [
     "CLOSED_SELECTED_FIGURE_KINDS",
     "namespace_figure_paths",
+    "pair_comparison_identity",
+    "pair_comparison_slug",
     "render_selected_pair_figures",
+    "validate_planned_figure_identities",
 ]
 
 _PATTERNS = ("Straight", "Draw", "Fade")
@@ -354,13 +363,6 @@ def _render_cell_figures(ref: dict[str, Any], output_dir: Path) -> list[dict[str
                 }
             )
     return ledger
-
-
-def _slug(value: str) -> str:
-    clean = re.sub(r"[^A-Za-z0-9._-]+", "_", value).strip("_.-")
-    if not clean:
-        raise ValueError("figure label has no safe filename characters")
-    return f"{clean[:160]}_{hashlib.sha256(value.encode()).hexdigest()[:10]}"
 
 
 def _save_figure(
@@ -807,26 +809,12 @@ def _render_pair_figures_core(
     first, second = pair["first"], pair["second"]
     if first.get("status") != "completed" or second.get("status") != "completed":
         return []
-    p0 = first.get("source_protocol")
-    p1 = second.get("source_protocol")
-    if (
-        not p0
-        or not isinstance(p0, str)
-        or not p0.strip()
-        or not p1
-        or not isinstance(p1, str)
-        or not p1.strip()
-    ):
-        raise ValueError(
-            f"pair references lack source protocol: {first['cell']} vs {second['cell']}"
-        )
+    # Preflight identity validation & canonical identity extraction
+    comparison, p0, c0, p1, c1, target = pair_comparison_identity(pair)
 
-    comparison = pair["comparison_kind"]
     first_label = _pair_condition_label(comparison, first)
     second_label = _pair_condition_label(comparison, second)
-    label = f"{comparison}_{first['cell']}_vs_{second['cell']}"
-    stem = output_dir / "comparisons" / _slug(label)
-    target = pair["target_x_m"]
+    stem = output_dir / "comparisons" / pair_comparison_slug(pair)
     ledger: list[dict[str, Any]] = []
 
     needs_density = figure_kinds is None or bool(

@@ -32,6 +32,7 @@ from .matched_supplement_figures import (
     _condition,
     _render_cell_figures,
     _render_pair_figures,
+    validate_planned_figure_identities,
 )
 
 _PATTERNS = ("Straight", "Draw", "Fade")
@@ -46,6 +47,71 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+_NUMERIC_ARTIFACT_NAMES = frozenset(
+    {
+        "REPORT_SUPPLEMENT.json",
+        "REPORT_SUPPLEMENT.csv",
+        "control_aliases.json",
+        "REPORT_SUPPLEMENT_COMPARISONS.json",
+        "REPORT_SUPPLEMENT_COMPARISONS.csv",
+        "REPORT_SUPPLEMENT_COMPARISONS.md",
+        "REPORT_ORIGINAL_SOURCE_INVENTORY.csv",
+    }
+)
+
+
+def _load_numeric_parity_reference(path: Path | None) -> dict[str, Any] | None:
+    """Bind an optional exact seven-file reference before any computation."""
+    if path is None:
+        return None
+    path = Path(path).resolve()
+
+    def unique_object(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError("duplicate numeric reference key")
+            result[key] = value
+        return result
+
+    raw = path.read_bytes()
+    values = json.loads(raw, object_pairs_hook=unique_object)
+    if (
+        not isinstance(values, dict)
+        or set(values) != _NUMERIC_ARTIFACT_NAMES
+        or any(
+            not isinstance(value, str) or re.fullmatch(r"[0-9a-f]{64}", value) is None
+            for value in values.values()
+        )
+    ):
+        raise ValueError("numeric reference must contain exactly seven SHA256 hashes")
+    digest = hashlib.sha256(raw).hexdigest()
+    if _sha256(path) != digest:
+        raise ValueError("numeric reference changed while reading")
+    return {"path": str(path), "sha256": digest, "artifact_sha256": values}
+
+
+def _check_numeric_parity_reference(
+    reference: dict[str, Any] | None, output_dir: Path
+) -> None:
+    """Recheck both the reference bytes and the generated numerical artifacts."""
+    if reference is None:
+        return
+    if not isinstance(reference, dict) or set(reference) != {
+        "path",
+        "sha256",
+        "artifact_sha256",
+    }:
+        raise ValueError("malformed numeric parity reference")
+    current = _load_numeric_parity_reference(Path(reference["path"]))
+    if current != reference:
+        raise ValueError("numeric reference changed")
+    for name, expected in reference["artifact_sha256"].items():
+        path = output_dir / name
+        if not path.is_file() or _sha256(path) != expected:
+            raise ValueError(f"numeric artifact differs from expected bytes: {name}")
+
+
 def _report_source_hashes() -> dict[str, str]:
     """Bind postprocessing code separately from the saved physics snapshot."""
     package = Path(__file__).parent
@@ -53,6 +119,7 @@ def _report_source_hashes() -> dict[str, str]:
         "matched_supplement_pipeline.py",
         "matched_formatting.py",
         "matched_supplement_figures.py",
+        "matched_figure_identity.py",
         "matched_supplement_report.py",
         "matched_lean_control.py",
         "matched_report.py",
@@ -453,6 +520,7 @@ def _recheck_receipt_sources(receipt: dict[str, Any]) -> None:
 
 def _verify_figure_assets(output_dir: Path, ledger: dict[str, Any]) -> None:
     figure_root = (output_dir / "figures").resolve()
+    seen_paths: set[Path] = set()
     for item in ledger.get("figures", []):
         if item.get("status") == "unavailable":
             if not item.get("reason") or any(
@@ -465,6 +533,9 @@ def _verify_figure_assets(output_dir: Path, ledger: dict[str, Any]) -> None:
         if not isinstance(item.get("relative_path"), str) or not item["relative_path"]:
             raise ValueError("available figure must identify its artifact path")
         path = (figure_root / item["relative_path"]).resolve()
+        if path in seen_paths:
+            raise ValueError("duplicate figure artifact path")
+        seen_paths.add(path)
         if not path.is_relative_to(figure_root) or not path.is_file():
             raise ValueError("supplement figure artifact is missing or unsafe")
         if _sha256(path) != item.get("sha256"):
@@ -512,6 +583,7 @@ def load_verified_supplement_artifacts(output_dir: Path) -> dict[str, Any]:
     )
     if ledger.get("schema") != "matched-supplement-figure-ledger/1":
         raise ValueError("supplement figure ledger has an unexpected schema")
+    _check_numeric_parity_reference(receipt.get("numeric_parity_reference"), output_dir)
     _recheck_receipt_sources(receipt)
     _verify_figure_assets(output_dir, ledger)
     for key, relative in artifact_paths.items():
@@ -532,6 +604,7 @@ def load_verified_supplement_artifacts(output_dir: Path) -> dict[str, Any]:
         raise ValueError("report artifact changed while reading verified outputs")
     if _sha256(receipt_path) != receipt_sha256:
         raise ValueError("supplement pipeline receipt changed while reading outputs")
+    _check_numeric_parity_reference(receipt.get("numeric_parity_reference"), output_dir)
     return {
         "report": json.loads(artifact_bytes["report"]),
         "comparisons": json.loads(artifact_bytes["comparisons_json"]),
@@ -601,6 +674,7 @@ def build_final_supplement_report(
     output_dir: Path,
     transition_receipt_path: Path,
     transition_receipt_sha256: str,
+    expected_numeric_hashes_path: Path | None = None,
 ) -> dict[str, Path]:
     """Validate accepted roots, compare common-index populations, and export.
 
@@ -611,6 +685,7 @@ def build_final_supplement_report(
     output_dir = Path(output_dir).resolve()
     if output_dir.exists() and any(output_dir.iterdir()):
         raise FileExistsError("supplement report output directory must be empty")
+    numeric_reference = _load_numeric_parity_reference(expected_numeric_hashes_path)
     original_reports: dict[str, dict] = {}
     original_cells: list[dict[str, Any]] = []
     for key, root in (
@@ -644,6 +719,7 @@ def build_final_supplement_report(
         ref["_execution"] = supplement["execution"]
     cells = [*original_cells, *supplement_cells]
     pair_specs = select_explicit_pairs(cells)
+    validate_planned_figure_identities(pair_specs, supplement["unique_cells"])
     transition_path = Path(transition_receipt_path).resolve()
     if (
         not transition_path.is_file()
@@ -673,6 +749,7 @@ def build_final_supplement_report(
         render_comparison_markdown(comparison_results), encoding="utf-8"
     )
     paths["comparison_markdown"] = markdown_path
+    _check_numeric_parity_reference(numeric_reference, output_dir)
     figure_dir = output_dir / "figures"
     figure_ledger = []
     for ref in supplement["unique_cells"]:
@@ -739,10 +816,17 @@ def build_final_supplement_report(
     source_cells_sha256 = _source_cell_hashes(
         [*original_cells, *supplement["unique_cells"]]
     )
+    _check_numeric_parity_reference(numeric_reference, output_dir)
+    _verify_figure_assets(output_dir, {"figures": figure_ledger})
     pipeline_path = output_dir / "REPORT_SUPPLEMENT_PIPELINE.json"
     pipeline_path.write_text(
         json.dumps(
             {
+                **(
+                    {"numeric_parity_reference": numeric_reference}
+                    if numeric_reference is not None
+                    else {}
+                ),
                 "schema": "matched-supplement-pipeline-receipt/1",
                 "stage": "final",
                 "issue": 12000,
@@ -830,6 +914,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--transition-receipt", type=Path, required=True)
     parser.add_argument("--transition-sha256", required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
+    parser.add_argument("--expected-numeric-hashes", type=Path)
     args = parser.parse_args(argv)
     paths = build_final_supplement_report(
         original_primary_root=args.original_primary,
@@ -843,6 +928,7 @@ def main(argv: list[str] | None = None) -> int:
         output_dir=args.output_dir,
         transition_receipt_path=args.transition_receipt,
         transition_receipt_sha256=args.transition_sha256,
+        expected_numeric_hashes_path=args.expected_numeric_hashes,
     )
     for label, path in paths.items():
         sys.stdout.write(f"{label}: {path}\n")

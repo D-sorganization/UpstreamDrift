@@ -749,29 +749,28 @@ def test_pipeline_writes_separate_tables_figures_and_aliases(tmp_path, monkeypat
             "course_scoring_effect_modification": {},
         },
     )
+
+    def render_fixture(output, filename, metadata):
+        output.mkdir(parents=True, exist_ok=True)
+        path = output / filename
+        path.write_bytes(b"fixture image")
+        return [{**metadata, "relative_path": filename, "sha256": module._sha256(path)}]
+
     monkeypatch.setattr(
         module,
         "_render_cell_figures",
-        lambda ref, output: [
-            {
-                "figure_kind": "density",
-                "cell": ref["cell"],
-                "relative_path": "figures/cell.png",
-                "sha256": "cell-plot",
-            }
-        ],
+        lambda ref, output: render_fixture(
+            output, "cell.png", {"figure_kind": "density", "cell": ref["cell"]}
+        ),
     )
     monkeypatch.setattr(
         module,
         "_render_pair_figures",
-        lambda pair, output: [
-            {
-                "figure_kind": "paired-density",
-                "first_cell": pair["first"]["cell"],
-                "relative_path": "figures/pair.png",
-                "sha256": "pair-plot",
-            }
-        ],
+        lambda pair, output: render_fixture(
+            output,
+            "pair.png",
+            {"figure_kind": "paired-density", "first_cell": pair["first"]["cell"]},
+        ),
     )
     monkeypatch.setattr(module, "_sha256", lambda path: "receipt-hash")
     monkeypatch.setattr(
