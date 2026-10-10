@@ -52,10 +52,6 @@ _SHARED_ROOTS = frozenset(
     }
 )
 _DOWNSTREAM_SRC_ALIAS_ROOTS = frozenset({"chat", "sidekick", "upstream_drift_tools"})
-# ud-canonical clusters (``docs/shared_tools/seam_rulings.v1.json``) live under
-# ``src/shared/python`` in this repo. ``src.shared.python.<root>`` must resolve
-# there, not via the alias finder into the pinned Tools tree (issue #12177).
-_UD_CANONICAL_SRC_ROOTS = frozenset({"humanoid_character_builder", "model_generation"})
 _TOOLS_SRC_ROOT = Path(__file__).resolve().parents[2]
 
 
@@ -153,15 +149,16 @@ class SharedImportAliasFinder(MetaPathFinder):
                 else (None, "")
             )
         if len(parts) >= 4 and parts[:3] == ["src", "shared", "python"]:
-            root = parts[3]
-            if root in _UD_CANONICAL_SRC_ROOTS:
-                return (None, "")
             allowed_roots = (
                 _DOWNSTREAM_SRC_ALIAS_ROOTS
                 if _external_src_package_is_available()
                 else _SHARED_ROOTS
             )
-            return (root, ".".join(parts[4:])) if root in allowed_roots else (None, "")
+            return (
+                (parts[3], ".".join(parts[4:]))
+                if parts[3] in allowed_roots
+                else (None, "")
+            )
         if parts and parts[0] in _SHARED_ROOTS:
             return parts[0], ".".join(parts[1:])
         return None, ""

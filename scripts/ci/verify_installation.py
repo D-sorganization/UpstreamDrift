@@ -90,9 +90,11 @@ def check_shared_alias_roots(
     Returns:
         List of (root, resolved, message) tuples.
     """
-    from src.shared.python import import_aliases
+    from src.shared.python.ud_import_alias_policy import (
+        install_ud_canonical_shared_import_aliases,
+    )
 
-    import_aliases.install_shared_import_aliases()
+    install_ud_canonical_shared_import_aliases()
     results: list[tuple[str, bool, str]] = []
     for root in roots or shared_alias_roots():
         try:

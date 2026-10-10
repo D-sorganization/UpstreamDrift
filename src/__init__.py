@@ -58,19 +58,17 @@ def _install_parent_shared_aliases() -> bool:
     previous_modules = dict(sys.modules)
     previous_meta_path = list(sys.meta_path)
     try:
-        from shared.python.import_aliases import install_shared_import_aliases
+        _load_downstream_shared_namespaces()
+        from src.shared.python.ud_import_alias_policy import (
+            install_ud_canonical_shared_import_aliases,
+        )
+
+        install_ud_canonical_shared_import_aliases()
     except ModuleNotFoundError as exc:
         _restore_import_state(previous_modules, previous_meta_path)
         if exc.name not in _CANONICAL_ALIAS_MODULES:
             raise
         return False
-    except Exception:
-        _restore_import_state(previous_modules, previous_meta_path)
-        raise
-
-    try:
-        _load_downstream_shared_namespaces()
-        install_shared_import_aliases()
     except Exception:
         _restore_import_state(previous_modules, previous_meta_path)
         raise

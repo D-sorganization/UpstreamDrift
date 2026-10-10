@@ -75,6 +75,7 @@ def test_rulings_name_the_ud_canonical_packages() -> None:
     )
 
 
+@pytest.mark.slow
 def test_no_unprefixed_imports_of_ud_canonical_packages_in_src() -> None:
     offenders = _unprefixed_ud_canonical_imports()
     assert offenders == [], (
@@ -86,17 +87,17 @@ def test_no_unprefixed_imports_of_ud_canonical_packages_in_src() -> None:
 
 def test_ud_canonical_submodules_import_after_shared_aliases_installed() -> None:
     """``src.shared.python`` ud-canonical imports must not alias into Tools (#12177)."""
-    from src.shared.python.import_aliases import (
-        SharedImportAliasFinder,
-        install_shared_import_aliases,
+    from src.shared.python.ud_import_alias_policy import (
+        UdSharedImportAliasFinder,
+        install_ud_canonical_shared_import_aliases,
     )
 
-    finder = SharedImportAliasFinder()
+    finder = UdSharedImportAliasFinder()
     assert finder._parse(
         "src.shared.python.model_generation.editor.attachment_ports"
     ) == (None, "")
 
-    install_shared_import_aliases()
+    install_ud_canonical_shared_import_aliases()
     from src.shared.python.model_generation.editor.attachment_ports import PortPolarity
 
     assert PortPolarity.PLUG.value == "plug"
