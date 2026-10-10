@@ -67,6 +67,7 @@ from src.shared.python.motion_matching.pipeline.dynamics import (
     DynamicsReportInputs,
     ShootingFitConfig,
     build_dynamics_report,
+    lane_reference_zmp,
     replay,
     score_reference,
     shooting_fit,
@@ -938,7 +939,7 @@ def _simulate_and_receipt(
     log = ctx.log
     tracking = getattr(args, "tracking", "kkt")
     q_track = smooth_lane(q_ref, lane, TRACKING_CUTOFF_HZ)
-    zmp = fs.reference_zmp(sim, lane.times, q_track, lane.ground)
+    zmp = lane_reference_zmp(sim, lane, q_track)
     q_track, zmp, zmp_filter_report, centroidal_report = _feasibility_filters(
         args, (lane, kin, sim, log), q_track, zmp
     )

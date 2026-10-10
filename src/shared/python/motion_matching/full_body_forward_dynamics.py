@@ -28,6 +28,7 @@ from src.shared.python.motion_matching.ground_support import (
 )
 from src.shared.python.motion_matching.impact_force import (
     ImpactForce,
+    reference_rates,
     step_through_impact,
 )
 from src.shared.python.motion_matching.polynomial_torque import (
@@ -1481,8 +1482,16 @@ def reference_zmp(
     *,
     contact_tolerance_m: float = 0.005,
     min_load_fraction: float = 0.1,
+    split_time_s: float | None = None,
 ) -> dict[str, Array]:
-    """Zero-moment point a reference trajectory demands of this model."""
+    """Zero-moment point a reference trajectory demands of this model.
+
+    ``split_time_s`` (the ball impact, GCV-20) differentiates the reference
+    separately on each side of it (:func:`impact_force.reference_rates`).
+    The ball removes the velocity step at contact, so it must not appear as
+    a ground acceleration: differentiated across it, the frames around the
+    impact demand a zero-moment point metres outside the feet (#12117).
+    """
     times = np.asarray(time_ref, dtype=float)
     ref = np.asarray(q_ref, dtype=float)
     if (
@@ -1504,8 +1513,7 @@ def reference_zmp(
     n = n / np.linalg.norm(n)
     g = float(np.linalg.norm(simulator.gravity))
     mass = simulator.mass_kg
-    velocity = np.gradient(ref, times, axis=0)
-    acceleration = np.gradient(velocity, times, axis=0)
+    velocity, acceleration, _ = reference_rates(times, ref, split_time_s)
     dt = 1e-4
     frames = times.size
     zmp, com, grf = np.empty((frames, 2)), np.empty((frames, 3)), np.empty((frames, 3))
