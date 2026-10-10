@@ -50,6 +50,12 @@ No production job has been stopped for this finding. After code and actual-card 
 
 The original caption execution update was posted by AGY and verified through GitHub: [Issue #11975, Comment 6095889221](https://github.com/D-sorganization/UpstreamDrift/issues/11975#issuecomment-6095889221). V6 primary rendering started at 08:57:06 UTC from the qualified BOUNDS module. Both v6 and supplemental v3 were directly confirmed live at this checkpoint.
 
+## Selected Headline and Editor Checkpoint
+
+The independent selected-headline traceability review covers 24 zero-lean cells and 72 pattern rows, including explicitly labeled supplemental PW cells. Root and Astra agree on saved-source hashes, nominal matching, numeric extraction and population denominators. Evidence: `validation/selected_headline_traceability_v1/`; root receipt SHA-256 `f4cc8ab15c65167617ecda4be1ae408c47b1039171cb44ffd4a63d5f3cd515cd`, Astra receipt `94cfc860a0a3708f7b435ae4ca0094dfc9ba05faf31f5f70de057ac555f34fdb`. This does not accept the unfinished publication.
+
+The latest user-requested built-in LaTeX check reproduced the Tectonic `src/config.rs:154:18` panic while fetching the uncached TeX bundle, before document parsing. The existing article and editor remain unchanged. The exposed tool provides no compiler cache or network configuration; compilation is unverified until that app-level failure is repaired. See `validation/latex_editor_compiler_followup.json`. Do not treat another host's successful HTTP request as editor compilation evidence.
+
 ## Completed Numerical Data
 
 All simulation workers, full saved-data audits and fresh archive restorations are finished. Do not restart them.

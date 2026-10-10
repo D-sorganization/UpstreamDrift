@@ -57,6 +57,19 @@
       "editor_replaced": false,
       "separate_pdf_compiled": false,
       "check_context": "Resumed publication checkpoint; same compiler initialization failure"
+    },
+    {
+      "checked_utc": "2026-10-10T09:21:59.091961+00:00",
+      "source_sha256": "a4913d2c23351ce4c0a83185fb4c63895c577b1d3c195b5ebd8a350e00846a8d",
+      "result": "compile-failed",
+      "failure_stage": "Tectonic bundle initialization before document parsing",
+      "diagnostic": "thread main (2) panicked at src/config.rs:154:18: called Result::unwrap() on an Err value: this bundle isn't cached, and we couldn't get it from the internet. Error: error sending request for url (https://relay.fullyjustified.net/default_bundle_v33.tar.index.gz)",
+      "supported_repair_found": false,
+      "next_action": "Repair built-in compiler bundle/network access, then compile the same open source. Tool accepts only path; no exposed compiler configuration or cache controls.",
+      "source_changed": false,
+      "editor_replaced": false,
+      "separate_pdf_compiled": false,
+      "check_context": "User asks to address Rust backtrace in right-panel article preview; reproduced through built-in compiler."
     }
   ]
 }
