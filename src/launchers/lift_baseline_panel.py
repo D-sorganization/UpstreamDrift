@@ -239,6 +239,36 @@ class LiftBaselinePanel(QWidget):
         self._view: dict[str, Any] | None = None
         self._error: str | None = None
 
+        self._setup_ui()
+
+        if receipt is None:
+            try:
+                receipt = load_baseline()
+            except (FileNotFoundError, ValueError) as exc:
+                self._show_error(str(exc))
+                return
+        try:
+            lifts = available_lifts(receipt)
+        except TypeError as exc:
+            self._show_error(str(exc))
+            return
+        if not lifts:
+            self._show_error("Baseline receipt has no lifts recorded.")
+            return
+
+        self._receipt = receipt
+        self._lifts = lifts
+        for lift in lifts:
+            self._lift_selector.addItem(
+                TITLES.get(lift, lift.replace("_", " ").title()), lift
+            )
+
+        start_lift = initial_lift if initial_lift in lifts else lifts[0]
+        self._lift_selector.setCurrentIndex(lifts.index(start_lift))
+        self._load_lift(start_lift)
+
+    def _setup_ui(self) -> None:
+        """Construct child widgets, layouts, and signal connections."""
         layout = QVBoxLayout(self)
 
         self._message_label = QLabel()
@@ -313,32 +343,6 @@ class LiftBaselinePanel(QWidget):
         self._phase_engine_selector.currentIndexChanged.connect(
             self._on_phase_engine_changed
         )
-
-        if receipt is None:
-            try:
-                receipt = load_baseline()
-            except (FileNotFoundError, ValueError) as exc:
-                self._show_error(str(exc))
-                return
-        try:
-            lifts = available_lifts(receipt)
-        except TypeError as exc:
-            self._show_error(str(exc))
-            return
-        if not lifts:
-            self._show_error("Baseline receipt has no lifts recorded.")
-            return
-
-        self._receipt = receipt
-        self._lifts = lifts
-        for lift in lifts:
-            self._lift_selector.addItem(
-                TITLES.get(lift, lift.replace("_", " ").title()), lift
-            )
-
-        start_lift = initial_lift if initial_lift in lifts else lifts[0]
-        self._lift_selector.setCurrentIndex(lifts.index(start_lift))
-        self._load_lift(start_lift)
 
     # -- error state ---------------------------------------------------
 

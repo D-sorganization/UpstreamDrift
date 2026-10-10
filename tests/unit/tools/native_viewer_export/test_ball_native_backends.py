@@ -14,7 +14,8 @@ the real ``mujoco``/``opensim`` packages and skip cleanly without them.
 from __future__ import annotations
 
 import logging
-import xml.etree.ElementTree as ET
+
+import defusedxml.ElementTree as ET
 
 import numpy as np
 import pytest

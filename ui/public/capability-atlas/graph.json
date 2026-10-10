@@ -370,12 +370,12 @@
       "status": "gap",
       "pyqt": "src/launchers/exercise_dashboard.py",
       "api": "src/api/routes/lifting.py",
-      "web": null,
+      "web": "ui/src/pages/LiftBaseline.tsx",
       "issue": 11748,
       "reason": null,
       "pending_decision": false,
       "tiles": [],
-      "notes": "LIFT-8 (#11748, epic #11740) asks for PyQt and web parity for the five lifts. Today the PyQt Exercise Dashboard only selects an engine for one exercise name and shows that engine's dashboard (OpenSim not yet available); it has no lift selector, barbell, GCV-4/GCV-10 overlay groups or GCV-5 plots. A shared engine-free loader (src/shared/python/lifting/baseline_view.py) and read-only API (GET /lifting/baseline, GET /lifting/baseline/lifts/{lift}) now expose the LIFT-1 pack audit receipt (src/shared/python/lifting/pack_audit) for the PyQt and web views to consume, but neither surface consumes it yet and there is still no web page. The desktop-only exemption of biomech.exercise_injury_dashboards stays pending #7460; this entry tracks the lifting surfaces LIFT-8 requires.",
+      "notes": "LIFT-8 (#11748, epic #11740) asks for PyQt and web parity for the five lifts. The PyQt Exercise Dashboard (src/launchers/exercise_dashboard.py) includes the 'Cross-Engine Lift Baseline' dock (src/launchers/lift_baseline_panel.py) and the web Lift Baseline page (/tools/lift-baseline) consumes the read-only API (GET /lifting/baseline, GET /lifting/baseline/lifts/{lift}) driven by the shared engine-free loader (src/shared/python/lifting/baseline_view.py): lift selector, per-engine structure and start-pose table, cross-engine pair metrics, phases and gaps. Still missing: barbell, hand-force and GRF overlays and plots, which need an engine host. The desktop-only exemption of biomech.exercise_injury_dashboards stays pending #7460; this entry tracks the lifting surfaces LIFT-8 requires.",
       "id": "lifting.five_lift_viewing"
     },
     {
@@ -475,15 +475,15 @@
     {
       "feature_id": "render.body_appearance",
       "title": "Golfer body appearance with a visible head, face and neck in every engine render",
-      "status": "exempt",
+      "status": "parity",
       "pyqt": "src/shared/python/model_appearance/head.py",
       "api": null,
-      "web": null,
+      "web": "ui/src/components/visualization/HeadModel.tsx",
       "issue": null,
-      "reason": "Engine-render appearance layer (MuJoCo appearance and visual layers, Drake and Pinocchio MeshCat, MyoSuite, OpenSim native viewers) that produces mp4 and PNG artefacts and has no interactive PyQt6 surface; the web GolferModel.tsx head is a follow-up under #11718 (epic #11706).",
+      "reason": null,
       "pending_decision": false,
       "tiles": [],
-      "notes": "Visual-only parametric head (skull, eyes, brows, nose, mouth, ears, neck, optional hair or cap) attached to the spec Head body, with a visual-only yaw/pitch/roll orientation channel for gaze (OSV-3 #11729). No mass, inertia or degree of freedom changes.",
+      "notes": "Visual-only parametric head (skull, eyes, brows, nose, mouth, ears, neck, optional hair or cap) attached to the spec Head body, with a visual-only yaw/pitch/roll orientation channel for gaze (OSV-3 #11729). No mass, inertia or degree of freedom changes. The web HeadModel.tsx (headModel.ts, #11718) mirrors head.py with the same constants and is mounted on the torso of GolferModel.tsx; the web golfer has no appearance document, so the gaze orientation channel and the body_model option are not mirrored there (visual-only, no web consumer yet).",
       "id": "render.body_appearance"
     },
     {
@@ -492,12 +492,12 @@
       "status": "gap",
       "pyqt": "src/shared/python/model_appearance/club_head_mesh.py",
       "api": null,
-      "web": null,
+      "web": "ui/src/components/visualization/ClubHead.tsx",
       "issue": 11717,
       "reason": null,
       "pending_decision": false,
       "tiles": [],
-      "notes": "The desktop engine visual layers (MuJoCo, OpenSim, Drake and Pinocchio MeshCat exports, MyoSuite) draw the parametric club head, shaft and grip from one shared adapter (#11717, #11727). The web ClubHead component (#11717) and the ball visual (#11719) have not landed, so the web app still draws the placeholder head.",
+      "notes": "The desktop engine visual layers (MuJoCo, OpenSim, Drake and Pinocchio MeshCat exports, MyoSuite) draw the parametric club head, shaft and grip from one shared adapter (#11717, #11727). The web ClubHead.tsx now draws the same committed assets/club_heads STL heads at spec loft and lie with a hosel. GCV-13 (#11719) landed the shared address-ball geometry (src/shared/python/model_appearance/ball.py) and native-export decorative ball, resolved from the swing bundle's address frame (src/tools/native_viewer_export/ball.py): Drake and Pinocchio MeshCat (slice 2), then MuJoCo native-export, MyoSuite and OpenSim (slice 3, src/tools/native_viewer_export/backends/{_ball,mujoco_worker,myosuite_worker,opensim_worker}.py). Only the web GolferModel.tsx component still draws no ball, keeping the gap open.",
       "id": "render.club_head_and_ball"
     },
     {
@@ -732,7 +732,7 @@
       "tiles": [
         "launch_monitor_analytics"
       ],
-      "notes": "The PyQt6 workbench and versioned API share one flexible-analysis contract. The web page (#11987) now covers Flexible Analysis (POST /v2/analyze), Trends (POST /v2/trend), Dispersion (POST /v2/dispersion), and Relationships — correlations/partial correlations/dependency network, PCA, and VIF (POST /v2/relationships, POST /v2/multivariate). Still missing on the web: Sessions, Data Treatment, Models, Monitor Comparison, and Reports.",
+      "notes": "The PyQt6 workbench and versioned API share one flexible-analysis contract. The web page (#11987) now covers Flexible Analysis (POST /v2/analyze), Trends (POST /v2/trend), Dispersion (POST /v2/dispersion), Relationships — correlations/partial correlations/dependency network, PCA, and VIF (POST /v2/relationships, POST /v2/multivariate), Monitor Comparison (POST /v2/comparison), Models (POST /v2/model) and Data Treatment (POST /v2/treatment). As on the desktop, the treated data becomes the analysis view that every other section reads, while treatment itself always runs on the raw rows. Still missing on the web: Sessions and Reports.",
       "id": "tools.launch_monitor_analytics"
     },
     {
@@ -748,7 +748,7 @@
       "tiles": [
         "matched_swing_browser"
       ],
-      "notes": "PyQt6 tool for browsing matched-swing execution ledger, receipts, metrics, physical gate verdicts, animations, and viewer handoff (#10353 shipped the PyQt tile via #10543). The web page (MS-85 #10358) reads the same ledger through GET /matched-swings: desktop-ranked list with engine, capture, lane, verdict, drive-mode and profile filters and the desktop qualification note (#12061), receipt and parity JSON, GIF animation, 3D marker preview, impact parameters and grip-wrench charts. The Markdown Export Report (#12063) and frame-exact GIF Play/Pause/Restart (GET /matched-swings/{id}/animation/frames[/{index}], matching the desktop QMovie controls) are on the web. Still missing on the web (#11987): Export Video, PDF report and the native-viewer handoff.",
+      "notes": "PyQt6 tool for browsing matched-swing execution ledger, receipts, metrics, physical gate verdicts, animations, and viewer handoff (#10353 shipped the PyQt tile via #10543). The web page (MS-85 #10358) reads the same ledger through GET /matched-swings: desktop-ranked list with engine, capture, lane, verdict, drive-mode and profile filters and the desktop qualification note (#12061), receipt and parity JSON, GIF animation, 3D marker preview, impact parameters and grip-wrench charts. The Markdown and PDF Export Report (#12063, #11987; GET /matched-swings/{id}/report?format=pdf), frame-exact GIF Play/Pause/Restart (GET /matched-swings/{id}/animation/frames[/{index}], matching the desktop QMovie controls), and Export Video as GIF or MP4 (#11987; GET /matched-swings/{id}/video, reusing the desktop's export_video/export_report exactly) are on the web. Still missing on the web (#11987): the native-viewer handoff.",
       "id": "tools.matched_swing_browser"
     },
     {
@@ -3146,7 +3146,7 @@
   "inputs": {
     "src/config/models.yaml": "e11682df79d7467f1eba9579d835f5d7019bfd7eb09cf81c14e22bd08d0bf844",
     "src/config/launcher_manifest.json": "1ae28f872b54c237440fcaacec40b735b93a7b80d710adc9228ef671b7831032",
-    "src/config/feature_parity.json": "eca43544fc7e0531850e4fd981779b35b9b6e86c459780aab814f78a853161c7",
+    "src/config/feature_parity.json": "1eb092a4a7902d62a2e3d754d93f783f4f225a4fc3af0d539dc268db21943f9d",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }
