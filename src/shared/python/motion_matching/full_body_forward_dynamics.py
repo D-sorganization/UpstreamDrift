@@ -28,8 +28,6 @@ from src.shared.python.motion_matching.ground_support import (
 )
 from src.shared.python.motion_matching.impact_force import (
     ImpactForce,
-    reference_rates,
-    sample_rate_table,
     step_through_impact,
 )
 from src.shared.python.motion_matching.polynomial_torque import (
@@ -1401,52 +1399,6 @@ def _tracking_gains(
     )
 
 
-def _tracking_controller_from_gains(
-    simulator: FullBodySimulator,
-    time_ref: Sequence[float] | Array,
-    q_ref: Array,
-    gains: ComputedTorqueGains,
-    *,
-    acceleration_feedforward: float = 1.0,
-    split_time_s: float | None = None,
-) -> Controller:
-    """Computed-torque tracking with pre-built gains.
-
-    ``split_time_s`` (ball impact, GCV-20) differentiates the reference on
-    each side of impact separately so the feedforward has no spike there.
-    """
-    if not 0.0 <= acceleration_feedforward <= 1.0:
-        raise ValueError("acceleration_feedforward must lie in [0, 1]")
-    times = np.asarray(time_ref, dtype=float)
-    reference = np.asarray(q_ref, dtype=float)
-    if (
-        times.ndim != 1
-        or np.any(np.diff(times) <= 0)
-        or reference.shape != (times.size, simulator.nv)
-        or not np.isfinite(reference).all()
-    ):
-        raise ValueError("Reference times must increase with one finite q row each")
-    velocity, acceleration, last = reference_rates(times, reference, split_time_s)
-    acceleration = acceleration_feedforward * acceleration
-    split = None if last is None else (float(split_time_s or 0.0), last)
-
-    def sample(table: Array, t: float) -> Array:
-        return sample_rate_table(times, table, t, split)
-
-    def controller(t: float, q: Array, v: Array) -> Array:
-        q_t, v_t, a_t = (
-            sample_rate_table(times, reference, t, None),
-            sample(velocity, t),
-            sample(acceleration, t),
-        )
-        com_ref = (
-            simulator.centre_of_mass(q_t)[0] if gains.balance is not None else None
-        )
-        return _computed_torque(simulator, q, v, q_t, v_t, a_t, gains, com_ref)
-
-    return controller
-
-
 def hold_pose_controller(
     simulator: FullBodySimulator,
     q_ref: Array,
@@ -1475,32 +1427,6 @@ def hold_pose_controller(
         return _computed_torque(simulator, q, v, reference, zero, zero, gains, com_ref)
 
     return controller
-
-
-def tracking_controller(
-    simulator: FullBodySimulator,
-    time_ref: Sequence[float] | Array,
-    q_ref: Array,
-    *,
-    omega_rad_s: float | Array,
-    zeta: float = 1.0,
-    balance: tuple[float, float] | None = None,
-    root_regulation: tuple[float, float] | None = None,
-    acceleration_feedforward: float = 1.0,
-    split_time_s: float | None = None,
-) -> Controller:
-    """Computed-torque tracking of a reference trajectory (linear interpolation).
-
-    ``split_time_s`` splits the reference rates at the ball impact (GCV-20).
-    """
-    return _tracking_controller_from_gains(
-        simulator,
-        time_ref,
-        q_ref,
-        _tracking_gains(omega_rad_s, zeta, balance, root_regulation),
-        acceleration_feedforward=acceleration_feedforward,
-        split_time_s=split_time_s,
-    )
 
 
 def _distance_outside(point_xy: Array, hull_xy: Array) -> float:
@@ -1637,3 +1563,14 @@ def reference_zmp(
         "unloaded": unloaded,
         "hull_xy": hulls,
     }
+
+
+# `tracking_controller` (and its `_tracking_controller_from_gains` helper) live
+# in tracking_controller.py (#10330 module-size exception); imported back here,
+# after `_computed_torque`/`_tracking_gains` are defined above, so existing
+# callers of `full_body_forward_dynamics.tracking_controller` and
+# `full_body_forward_dynamics._tracking_controller_from_gains` are unaffected.
+from src.shared.python.motion_matching.tracking_controller import (  # noqa: E402
+    _tracking_controller_from_gains as _tracking_controller_from_gains,
+    tracking_controller as tracking_controller,
+)
