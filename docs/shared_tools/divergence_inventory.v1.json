@@ -13,7 +13,7 @@
   "totals": {
     "identical": 400,
     "diverged": 273,
-    "ud-only": 1770,
+    "ud-only": 1772,
     "tools-only": 805,
     "spelling-only": 121
   },
@@ -483,7 +483,7 @@
     "lifting": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 22,
+      "ud-only": 24,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -12605,6 +12605,18 @@
       "spelling_only": false
     },
     {
+      "path": "lifting/pack_audit/adapters/bar_hold_static.py",
+      "classification": "ud-only",
+      "package": "lifting",
+      "subpackage": "pack_audit",
+      "ud_bytes": 4100,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "lifting/pack_audit/adapters/drake_adapter.py",
       "classification": "ud-only",
       "package": "lifting",
@@ -12657,7 +12669,19 @@
       "classification": "ud-only",
       "package": "lifting",
       "subpackage": "pack_audit",
-      "ud_bytes": 8705,
+      "ud_bytes": 8918,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "lifting/pack_audit/adapters/pinocchio_bar_hold.py",
+      "classification": "ud-only",
+      "package": "lifting",
+      "subpackage": "pack_audit",
+      "ud_bytes": 9952,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,

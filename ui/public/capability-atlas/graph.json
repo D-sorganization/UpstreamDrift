@@ -668,7 +668,7 @@
       "tiles": [
         "character_builder"
       ],
-      "notes": "Desktop and API share humanoid_character_builder.spec_export (build, preview, export spec/URDF/MJCF/OSIM, presets). The web page now drives presets, preview/build and spec/URDF/MJCF/OSIM export through the spec API (CMB-7a, #11658); the appearance/material picker and glTF skinned preview remain under CMB-6 #11657 / CMB-7 #11658.",
+      "notes": "Desktop and API share humanoid_character_builder.spec_export (build, preview, export spec/URDF/MJCF/OSIM, presets). The web page now drives presets, preview/build and spec/URDF/MJCF/OSIM export through the spec API (CMB-7a, #11658), and picks skin tone, clothing, club finish, headwear and ground from the model_appearance library with a recoloured preview and an appearance-v1 sidecar export (CMB-7b/7c, #11658; the desktop tool has no appearance editor yet, engines read the same sidecar). The glTF skinned preview remains under CMB-6 #11657.",
       "id": "tools.character_builder"
     },
     {
@@ -3176,7 +3176,7 @@
   "inputs": {
     "src/config/models.yaml": "6c23f564ecde6e22049ee97880df3ab89d2332b922874a4a0f4217008816b889",
     "src/config/launcher_manifest.json": "45b6cea9134f9896b1a719c23c6fc77d59d4aed751bfe62908ad888acdc86037",
-    "src/config/feature_parity.json": "0d1b2e3c3fc7e02e2b583febb5bf525cde1a74703457a0217e7de80d413988f8",
+    "src/config/feature_parity.json": "9499a90d98a39efc281f16377426fd120997f56a8caaf6a9f7da91d023f81465",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }
