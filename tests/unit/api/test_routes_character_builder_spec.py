@@ -93,7 +93,12 @@ def test_export_spec_round_trips(client: TestClient) -> None:
 
 @pytest.mark.parametrize(
     "fmt,marker",
-    [("urdf", "<robot"), ("mjcf", "<mujoco"), ("osim", "<OpenSimDocument")],
+    [
+        ("urdf", "<robot"),
+        ("mjcf", "<mujoco"),
+        ("osim", "<OpenSimDocument"),
+        ("gltf", '"generator": "UpstreamDrift skinned_body"'),
+    ],
 )
 def test_export_engine_formats(client: TestClient, fmt: str, marker: str) -> None:
     r = client.post(f"/character-builder/export/{fmt}", json={"preset": "junior"})
