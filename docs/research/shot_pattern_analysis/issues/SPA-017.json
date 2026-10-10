@@ -1,0 +1,10 @@
+{
+  "local_id": "SPA-017",
+  "title": "Remove Duplicate Legends From the Shareable Scoring Overview",
+  "body": "The initial 24-cell SG forest chart repeated Draw/Fade legend entries for each club, placing six entries over the center panel title.\n\n## Acceptance Criteria\n\nUse one two-entry Draw/Fade legend with readable spacing in both delivery-mode plots. Add a failing regression test before fixing the shared rendering code and regenerate the V2 overview PNGs without changing data.\n\n## Validation\n\nTDD rendering regression and visual inspection of 1920 \u00d7 1080 outputs.\n\n## Handoff\n\nBranch `codex/shot-pattern-analysis`; source `src/tools/shot_pattern_analysis/overview.py`. Keep open until merged implementing PR.",
+  "publication_status": "published",
+  "github_issue_number": 11864,
+  "github_issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11864",
+  "issue_number": 11864,
+  "issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11864"
+}

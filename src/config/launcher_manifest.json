@@ -1065,6 +1065,25 @@
       }
     },
     {
+      "id": "shot_pattern_analysis",
+      "name": "Shot Pattern Analysis",
+      "description": "Compare paired straight, draw, and fade patterns with adjustable face SD and curve magnitude. Install: pip install -e '.[gui-tools]'; requires the native upstream-physics wheel.",
+      "category": "tool",
+      "type": "special_app",
+      "path": "src/tools/shot_pattern_analysis/__main__.py",
+      "logo": "data_explorer.svg",
+      "status": "ready",
+      "capabilities": [
+        "shot_pattern_analysis",
+        "shot_dispersion",
+        "impact_physics"
+      ],
+      "order": 55,
+      "web": {
+        "mode": "native-window"
+      }
+    },
+    {
       "id": "starting_pose_matcher",
       "name": "Starting-Pose Matcher (legacy)",
       "description": "Legacy alias for the motion-target preview tile. Hidden by default; kept for one release so saved layouts continue to resolve.",

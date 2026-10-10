@@ -1,0 +1,373 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,booktabs,graphicx,hyperref}
+\title{Straight, Draw, and Fade: Shot Pattern Variance}
+\author{UpstreamDrift}
+\date{October 8, 2026}
+\begin{document}
+\maketitle
+\section{Status and Scope}
+The original four driver result bundles are historical controls from a
+superseded impact approximation: tangential impulse changed spin but not
+linear velocity. The completed corrected three-club experiments replace their
+conclusions. Fixed loft also excluded face--loft covariance.
+
+This is an editable standalone experiment reference, separate from the governed
+engineering design manual. The canonical manual remains the QMD source under
+\texttt{manuals/upstreamdrift}. This experiment does not qualify the underlying
+impact or flight model against measured shot populations. It estimates
+conditional outcome variance from face-angle error, not a golfer's ability to
+produce a chosen pattern. All results are first ground contact (carry); bounce
+and roll are excluded.
+
+\section{Inputs, Frames, and Pairing}
+User-facing face and path angles are measured from the target, positive right
+for a right-handed golfer. Straight uses $(f,p)=(0,0)$ degrees, draw uses
+$(1.5,3)$, and fade uses $(-1.5,-3)$. The doubled-curve trials
+use $(3,6)$ and $(-3,-6)$ while retaining the straight baseline. The draw face is therefore $1.5$ degrees
+left of its path. The repository solver uses $x$ forward, $y$ left, and $z$ up;
+the adapter changes the sign of horizontal input and output angles once.
+The CSV diagnostic \texttt{spin\_axis\_tilt\_deg} instead retains the native
+axis tilt convention, positive toward draw/left curvature. It is not
+Trackman's right-positive spin-axis convention.
+Every pattern receives the same 10,000 independent errors
+$\epsilon_i\sim\mathcal{N}(0,\sigma_F^2)$, with separate trials at
+$\sigma_F=1$ and $2$ degrees. In each trial,
+$f_i=\bar f+\epsilon_i$ and $p_i=\bar p$. Shared errors provide paired
+comparisons; finite draw and fade samples need not be exact mirrors.
+The random seed is 20261008, using NumPy's default generator.
+
+The corrected study uses three illustrative hybrid delivery presets:
+\begin{center}
+\begin{tabular}{lrrrrr}
+\toprule
+Club & Speed (m/s) & Loft ($^\circ$) & Attack ($^\circ$) & Lie ($^\circ$) & Mass (kg)\\
+\midrule
+Driver &45&12.8&-0.9&58.5&0.200\\
+7-Iron &36&24.0&-4.0&63.0&0.272\\
+Pitching Wedge &32&36.7&-5.0&64.0&0.300\\
+\bottomrule
+\end{tabular}
+\end{center}
+These are assumptions for comparative modeling, not measured player inputs or
+reproduced specifications of one complete club. Trackman's dynamic-loft page
+reports driver $12.8^\circ$ as a Tour average; its PW $36.7^\circ$ is an
+optimizer example at 72 mph, not a measured Tour PW mean. The 7-iron
+$24^\circ$ delivered loft is an explicit assumption. Manufacturer static lie
+angles supply assumed shaft elevations. Speeds, attack angles, and masses
+are illustrative inputs unless the source receipt separately identifies a
+measurement. Nominal lean is zero; axis sensitivity explores 0, 10, and
+20 degrees where the geometry is valid.
+
+The experiment matrix is three clubs, two face standard deviations, two curve
+magnitudes, and two delivery modes (fixed loft and assumed shaft rotation):
+24 bundles, each with 10,000 shots per shape. The ball begins stationary
+without spin; strike is central. Restitution, friction, ball mass and radius,
+and atmospheric parameters are recorded in receipts. There is no wind,
+speed error, strike error, or path error. Driver scoring uses a hypothetical
+tee/fairway/rough context; 7-iron and PW scoring use approach/green contexts.
+The earlier $45\,\mathrm{m/s}$, $10.9^\circ$ loft, zero-attack driver case is
+retained only in superseded historical bundles.
+
+\section{Corrected Central-Contact Impact Equations}
+The experiment calls the public \texttt{ImpactSolverAPI} rigid-body model.
+For unit face normal $\mathbf n$, relative centre velocity
+$\mathbf v_r=\mathbf v_c^- -\mathbf v_b^-$, ball mass $m_b$, club mass $m_c$,
+restitution $e$, ball radius $R$, and inertia $I_b=2m_bR^2/5$:
+\[
+ m_*=(m_b^{-1}+m_c^{-1})^{-1},\qquad
+ J_n=(1+e)m_*\mathbf v_r\cdot\mathbf n.
+\]
+The ball contact point is $-R\mathbf n$ from its centre. Tangential surface
+slip, including initial ball spin, and its effective inverse mass are
+\[
+ \mathbf u_t=\mathbf v_r-(\mathbf v_r\cdot\mathbf n)\mathbf n
+                 +R(\boldsymbol\omega_b^-\times\mathbf n),\qquad
+ D=m_b^{-1}+m_c^{-1}+R^2/I_b.
+\]
+For positive normal approach, Coulomb friction supplies
+\[
+ \mathbf J_t=\min\{\mu J_n,\|\mathbf u_t\|/D\}
+                 \frac{\mathbf u_t}{\|\mathbf u_t\|},\qquad
+ \mathbf J=J_n\mathbf n+\mathbf J_t.
+\]
+The tangential impulse is zero at zero slip or zero friction. Both linear
+velocities and ball spin receive their corresponding impulse:
+\[
+ \mathbf v_b^+=\mathbf v_b^-+\mathbf J/m_b,\quad
+ \mathbf v_c^+=\mathbf v_c^- -\mathbf J/m_c,\quad
+ \boldsymbol\omega_b^+=\boldsymbol\omega_b^-+
+                 (R/I_b)(\mathbf J_t\times\mathbf n).
+\]
+Earlier result bundles omitted $\mathbf J_t$ from both translational updates
+and used the infinite-club sticking cap $(2/7)m_b\|\mathbf u_t\|$.
+Those bundles are superseded historical controls. Regression tests first
+failed against those defects, then passed with the correction. Independent
+arbitrary-3D tests check linear and angular momentum, normal restitution,
+nonincreasing kinetic energy, sticking contact, initial spin, and rotation
+covariance. These establish internal consistency of central contact with a
+translating club; off-centre club rotation, shaft response, and measured launch
+accuracy remain unqualified.
+
+\section{Geometric Face--Loft Coupling and Shaft Lean}
+This is an explicitly assumed rigid geometry, not observed player data.
+The native right-handed frame is $+X$ forward, $+Y$ left, and $+Z$ up.
+User face angle is positive right. At zero twist, the delivered face normal is
+$\mathbf n_0=(\cos L,0,\sin L)$ for nominal delivered loft $L$.
+Given assumed shaft elevation $\ell$ and forward lean $a$:
+\[
+ s_x=\sin\ell\tan a,\qquad
+ \mathbf s=(s_x,\sqrt{\cos^2\ell-s_x^2},\sin\ell).
+\]
+This construction is valid only when its square-root argument is nonnegative.
+Rodrigues rotation about the unit shaft axis gives
+\[
+ \mathbf n(\theta)=\mathbf n_0\cos\theta+
+ (\mathbf s\times\mathbf n_0)\sin\theta+
+ \mathbf s(\mathbf s\cdot\mathbf n_0)(1-\cos\theta).
+\]
+Delivered face and loft are extracted as
+\[
+ F=\operatorname{atan2}(-n_y,n_x),\qquad
+ L_d=\operatorname{atan2}(n_z,\sqrt{n_x^2+n_y^2}).
+\]
+Near zero twist,
+\[
+ \frac{dF}{d\theta}=-(s_z-s_x\tan L),\quad
+ \frac{dL_d}{d\theta}=-s_y,\quad
+ \frac{dL_d}{dF}=\frac{s_y}{s_z-s_x\tan L}.
+\]
+With zero lean, $dL_d/dF=\cot\ell$: closing tends to reduce loft in this
+specific rotation mode. Rotation about the vertical axis instead preserves
+loft. Face angle alone therefore does not identify delivered loft.
+
+The main comparison applies this geometry to the face error $F-F_0$ around
+each pattern's nominal face $F_0$, then rotates the axis and normal together
+by the nominal target yaw. All shapes share the same zero-error delivered
+loft, speed, attack angle, and strike. This isolates sensitivity to the assumed
+face--loft coupling without giving one shape a different baseline loft.
+Fixed-loft trials provide the corresponding control. Separate shaft-lean
+sensitivity holds nominal loft fixed and changes only the axis; it does not
+represent pitching a fixed physical club forward. That latter operation
+changes nominal loft as well and must be analyzed separately.
+
+Less delivered loft does not necessarily increase carry. Launch, spin, speed,
+and aerodynamic trajectory jointly determine carry, so long-left/short-right
+behavior is measured from the modeled endpoint covariance rather than imposed.
+Static manufacturer lie is used only as an assumed delivered shaft elevation;
+dynamic lie, shaft bending, and golfer covariance are unmeasured.
+
+\section{Flight Integration and Landing}
+Each shot calls the existing \texttt{BallFlightSimulator}, backed by the
+\texttt{upstream-physics} Rust kernel. Launch velocity uses metres per second,
+launch and azimuth angles radians, and spin magnitude RPM at the Python
+boundary, converted to radians per second inside the kernel. The spin axis
+is normalized. The solver integrates position, velocity and decaying spin
+with RK4, drag and spin-induced aerodynamic force:
+\[
+ \dot{\mathbf r}=\mathbf v,\qquad
+ m_b\dot{\mathbf v}=m_b\mathbf g+\mathbf F_D+\mathbf F_M,\qquad
+ \dot\omega=-\lambda\omega.
+\]
+The production step is $0.02\,\mathrm{s}$ with a $12\,\mathrm{s}$ horizon.
+Landing is linearly interpolated between the last above-ground and first
+nonpositive-height samples. Failure to land raises an error; it never
+silently treats the final airborne sample as a landing.
+The Rust coefficient path is distinct from the constant-spin Waterloo/Penner
+model in \texttt{flight\_models.py}; their calibrations must not be mixed.
+The kernel applies a single spin force (not separate additive backspin lift
+and sidespin Magnus forces). With $A=\pi R^2$ and relative airspeed $V$:
+\[
+ \mathbf F_D=-\tfrac12\rho C_D A V\mathbf v,\qquad
+ S=R|\boldsymbol\omega|/V,\qquad
+ C_L=\min(0.26,\;0.70 S^{0.645}),
+\]
+\[
+ \mathbf F_M=\tfrac12\rho C_L A V^2
+ \frac{\boldsymbol\omega\times\mathbf v}
+ {|\boldsymbol\omega\times\mathbf v|}.
+\]
+The zero-cross-product case returns zero spin force. The shared drag-crisis
+curve evaluates Reynolds number $\rho V(2R)/\mu$ with
+$\mu=1.81\times10^{-5}\,\mathrm{Pa\,s}$ and base drag coefficient $0.25$,
+using the exact source-bound constants in \texttt{aerodynamics.rs}.
+Spin decay uses $\lambda=0.05\,\mathrm{s}^{-1}$.
+
+\section{Aiming and Outcome Statistics}
+Raw outcomes keep the requested target-relative angles. A second comparison
+rotates each entire pattern by a single angle computed from its nominal,
+zero-error landing, placing that nominal landing on the target line. This is
+an aiming adjustment, not per-shot correction or a sample-mean fit. The
+fixed target distance is the straight nominal carry; differences in curved
+carry remain in the error metric.
+\[
+ \alpha=\operatorname{atan2}(y_0,x_0),\qquad
+ \begin{pmatrix}x'\\y'\end{pmatrix}=
+ \begin{pmatrix}\cos\alpha&\sin\alpha\\-\sin\alpha&\cos\alpha\end{pmatrix}
+ \begin{pmatrix}x\\y\end{pmatrix}.
+\]
+Lateral variance is the unbiased sample variance with denominator $n-1$;
+standard deviation is its square root. Central 90\% width is the empirical
+95th minus 5th percentile. Target RMSE is
+$\sqrt{n^{-1}\sum_i[(x_i-x_T)^2+y_i^2]}$. Target-hit probability counts
+landings within a $15\,\mathrm m$ radius circle, not a fairway strip.
+Paired percentile-bootstrap variance-ratio intervals resample common shot
+indices 500 times. These intervals describe Monte Carlo error only; they
+exclude model discrepancy and parameter uncertainty.
+
+\section{Distance Control}
+Carry is not fixed: face error changes impact and spin, and curved patterns
+have shorter mean carry. The supplementary common-range diagnostic maps each
+nominal-aimed endpoint to
+\[
+ (x'',y'')=\frac{x_T}{\sqrt{x'^2+y'^2}}(x',y').
+\]
+It preserves landing bearing and sets every radial range to the same straight
+nominal distance. It is geometric normalization, not a new flight simulation,
+and cannot isolate a causal physical mechanism. The superseded historical controls suggested a small residual effect after
+normalization. Their values do not establish the corrected-model result; all
+final shape comparisons require the corrected experiment matrix.
+
+\section{Club-Appropriate Scoring Estimates}
+The driver scenario is a tee shot on a hypothetical flat $400\,\mathrm m$
+hole with a fairway corridor of total width $30\,\mathrm m$. Endpoints inside
+that corridor use the fairway benchmark; outside use rough. Remaining distance
+is $d_i=\sqrt{(400-x_i)^2+y_i^2}$. Hole distances 350 and 450 m and corridor
+widths 20 and 40 m provide layout sensitivities. The tee starting benchmark
+must come from the published tee table, not a fairway approach substitute.
+
+For the 7-iron and pitching wedge, the scenario is an approach from fairway at
+the straight nominal carry, with the hole at that target and a circular green
+of radius $15\,\mathrm m$. Inside the green the benchmark uses putting distance;
+outside it uses unobstructed rough distance. Green radii 10 and 20 m provide
+layout sensitivities. There are no bunkers, water, out-of-bounds, slopes,
+bounce, or roll. Carry endpoints are assumed final resting locations in both
+contexts; actual driver total distance and wedge stopping behavior are not
+modeled. The original approximately 195 m driver-to-green experiment is only
+a superseded historical control.
+
+For historical-tour expected strokes $J(d,\ell)$ at distance $d$ and lie
+$\ell$, the existing source-backed Tools analysis computes
+\[
+ SG_i=J(d_{\rm start},\ell_{\rm start})-1-J(d_i,\ell_i).
+\]
+All patterns share the starting state, so their relative benefit depends only
+on the difference in expected strokes remaining. Reported benefits are per
+shot, not per round. Multiplying by an assumed number of identical
+approaches is an illustration, not a full-course simulation.
+The green benchmark represents an \emph{unholed} putting state. With valid
+one-, two-, and three-putt probabilities,
+\[
+ J_{\rm putt}=p_1+2p_2+3p_3=2-p_1+p_3\ge1,
+ \qquad \lim_{d\downarrow0}J_{\rm putt}(d)=1.
+\]
+A separately explicit already-holed terminal state has zero strokes remaining.
+No endpoint in this carry-only study is assumed holed; hole capture is not
+modeled. The original baseline incorrectly placed terminal zero in the same
+putting interpolation table. Between zero and its first positive knot at
+$5.3975\,\mathrm{cm}$, it awarded partial hole-outs. At $1\,\mathrm{cm}$ this
+produced approximately $0.815$ artificial extra SG. In the fixed-loft one-degree
+controls it inflated straight means by approximately $0.0053$ strokes for
+7-iron and $0.0103$ for PW. Direct API/cache parity reproduced this error and
+therefore did not establish physical validity. The corrected baseline uses the
+unholed tap-in anchor of one, a new version/digest, and rescoring of all saved
+endpoints. Pre-correction scoring artifacts are retained as failed experiments.
+
+The historical fairway and rough values come from Broadie's published
+benchmark table. The putting approximation and its source reconciliation are
+recorded in the scoring provenance. In the 2011 preprint, literal evaluation
+of the displayed three-putt formula with the listed coefficient order gives
+negative probabilities and conflicts with the stated anchors; that literal
+experiment was rejected. A reconciled approximation must not be represented
+as an independently verified exact reproduction of the author's fit.
+The implemented approximate three-putt expression uses putt distance $d_f$
+in feet:
+\[
+ \widetilde p_3=\frac{1}{1+\exp(5.49-0.106d_f+0.000563d_f^2)}-0.00398,
+ \qquad p_3=\min\{\widetilde p_3,1-p_1\}.
+\]
+The upper bound prevents a negative two-putt probability for tap-ins; the
+published one-putt expression uses yards. The baseline supports only its
+explicit distance range and rejects unsupported queries rather than extrapolating.
+Sampling intervals exclude putting-model uncertainty, green-layout error,
+and impact-model discrepancy.
+
+For the corrected matrix, the public Tools API evaluates every explicit
+benchmark distance knot for each fixed starting state and finishing lie.
+Endpoint SG is reconstructed by bounded piecewise-linear interpolation of
+those returned SG values. This reuses the public API's outputs without
+copying its expected-strokes formula. Knots, midpoints, and random supported
+queries are checked against direct API evaluation to $10^{-12}$ strokes.
+Receipts distinguish shots scored from API-evaluated states. Unsupported
+states are reported unavailable; neither starts nor endpoints are extrapolated.
+
+
+\section{Corrected Monte Carlo Results}
+All 24 cells and 720,000 flights completed. Baseline version 2 re-scores identical saved landings with the unholed tap-in correction. The adjacent README provides all 24 rows and the overview retains paired 95\% sampling intervals. Representative shaft-rotation, doubled-curve, two-degree-SD results follow; columns are straight/draw/fade lateral SD in metres and draw/fade relative SG per shot.
+\begin{center}\begin{tabular}{lrrr}
+\toprule Club & Lateral SD S/D/F & Draw $\Delta SG$ & Fade $\Delta SG$\\
+\midrule
+Driver & 16.29/15.63/15.98 & -0.0046 & -0.0053\\
+PW & 3.94/4.02/3.80 & +0.0037 & -0.0061\\
+7-Iron & 8.38/8.51/7.99 & -0.0084 & +0.0096\\
+\bottomrule\end{tabular}\end{center}
+Carry is not constant. A smaller lateral SD does not necessarily improve tee scoring when carry is lost. Equal-range normalization preserves bearing and diagnoses distance scaling, not a causal mechanism. These conditional predictions do not establish a universal curvature benefit or an empirically measured player effect.
+
+\section{Interpretation and Observability Limits}
+The relevant question is whether curved patterns reduce spread or target
+error after equal aiming treatment, not whether their nominal balls curve
+back toward the line. Fixed-loft centered still-air delivery is mirror symmetric. Keeping the same
+right-handed shaft axis in coupled mode does not preserve that reflection:
+$L_d(-\delta)\ne L_d(\delta)$ in general. Thus conditional draw/fade
+differences can arise structurally from assumed face--loft covariance and aiming
+as well as finite sampling; they do not establish a player-specific preference. A nonzero face-to-path mean also does
+not eliminate opposite curvature: a $1.5$-standard-deviation offset leaves
+about $6.68\%$ probability of crossing zero face-to-path under the assumed
+normal error distribution. At two degrees SD, the theoretical crossing
+probability rises to about $22.66\%$. Real golfers may have correlated face/path
+errors, different variability by intention, strike-dependent gear effect,
+wind, varying speed or loft, and asymmetric hazards. Those require measured
+inputs and additional experiments.
+With only one uncertain input, the landing set is a narrow one-dimensional
+curve in the horizontal plane, not a measured two-dimensional dispersion
+ellipse. No ellipse-area advantage is inferred from this experiment.
+For intuition, a local linear landing model
+$Y\simeq aF+b(F-P)$ with fixed path gives
+$\operatorname{Var}(Y)\simeq(a+b)^2\sigma_F^2$, independent of the mean
+face and path if the sensitivities are constant. Any simulated spread
+difference therefore arises from changing nonlinear sensitivities, not the
+mere existence of a nonzero curvature mean. This linearization explains the
+comparison; it is not used to generate any trajectory or landing.
+
+\section{Evidence and Reproduction}
+The adjacent README and checked-in result bundle record numerical results,
+validation commands, dependency/source hashes and graphic provenance.
+The graphics show a limited set of representative flights while the
+dispersion and statistics use all 10,000 shots per pattern. Full fresh reproduction uses a new output directory so preserved historical
+controls are never overwritten. Existing corrected bundles may instead be
+validated and summarized by the overview command.
+\begin{verbatim}
+python3 -m src.tools.shot_pattern_analysis.matrix \
+  shot_pattern_reproduction/corrected_results
+python3 -m src.tools.shot_pattern_analysis.overview \
+  shot_pattern_reproduction/corrected_results \
+  --output-dir shot_pattern_reproduction/overview
+python3 -m src.tools.shot_pattern_analysis.sensitivity \
+  --output shot_pattern_reproduction/sensitivity.json
+python3 -m src.tools.shot_pattern_analysis.numerics \
+  --output shot_pattern_reproduction/numerics.json
+\end{verbatim}
+The native Rust dependency must be installed from this checkout. Compilation
+of this reference is a document check, not scientific acceptance.
+
+\section{External Context}
+Trackman defines face-to-path as the horizontal difference between face and
+path and relates it to curvature; see
+\url{https://www.trackman.com/blog/face-to-path} and
+\url{https://www.trackman.com/blog/spin-axis}.
+Historical strokes-gained methodology and benchmarks are described in
+Broadie, \emph{Assessing Golfer Performance on the PGA TOUR},
+\url{https://business.columbia.edu/sites/default/files-efs/pubfiles/4996/assessing_golfer_performance.full.pdf}.
+These definitions support the input interpretation, not validation of this
+repository's numerical predictions.
+\end{document}

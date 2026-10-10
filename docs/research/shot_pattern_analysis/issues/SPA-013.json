@@ -1,0 +1,10 @@
+{
+  "local_id": "SPA-013",
+  "title": "Freeze Source Provenance Before Long Shot Pattern Experiments",
+  "body": "## Problem\n\nExport-time file hashes can identify edited files rather than code loaded at the beginning of a long simulation.\n\n## Acceptance Criteria\n\nCapture source and native hashes before simulation, retain a source snapshot or exact commit, link the run-start receipt, and reject unaccounted scientific-source drift. Apply this to standalone CLI/GUI analysis as well as the matrix. Ensure concurrent workers own disjoint outputs and skip only verified complete bundles.\n\n## Validation\n\ntests/tools/shot_pattern_analysis/test_matrix.py and standalone provenance regression tests; run-start snapshots, source-drift rejection, verified completion/resume manifests.\n\n## Handoff\n\nBranch: `codex/shot-pattern-analysis`. Current implementation and evidence are tracked in `docs/research/shot_pattern_analysis/issues/README.md`. Keep open until a merged implementing PR satisfies acceptance criteria or an explicitly permitted disposition applies.\n",
+  "publication_status": "published",
+  "github_issue_number": 11852,
+  "github_issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11852",
+  "issue_number": 11852,
+  "issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11852"
+}

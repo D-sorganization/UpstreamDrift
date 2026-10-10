@@ -49,6 +49,14 @@ for the golf double-pendulum behind one Protocol. See
   measured trajectory — _not_ forward-integrated. Do not "fix" them into a time
   integration (see the `# AGENT-NOTE:` in that module).
 
+### Shot Pattern Experiments
+
+`src/tools/shot_pattern_analysis/` exposes `AnalysisConfig`, `run_analysis`, and
+`export_analysis` for paired straight/draw/fade Monte Carlo studies. Reuse its
+`ShotPhysics` adapter to the existing impact and Rust flight solvers; do not
+copy flight equations. See the [Experiment Reference](../research/shot_pattern_analysis/README.md)
+for frames, aiming, uncertainty and the simplified-impact limitation.
+
 ### Tools Ground-Model Consumer Boundary
 
 `src/shared/python/ground_model/` is UpstreamDrift's thin, headless gateway to

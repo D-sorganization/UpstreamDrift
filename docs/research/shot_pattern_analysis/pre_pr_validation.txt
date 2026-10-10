@@ -1,0 +1,412 @@
+Success: no issues found in 24 source files
+================ pre_pr: Local CI Gate Runner ================
+Running diff-scoped pytest: /tmp/shot-pattern-validation-venv-20261009/bin/python -m pytest tests/analysis/test_cross_engine_provenance.py tests/api/test_chat_models.py tests/api/test_engine_matrix_route.py tests/api/test_physics_api.py tests/api/test_routes_cross_engine_provenance.py tests/api/wave5_api/test_models_chat.py tests/api/wave5_api/test_models_requests.py tests/api/wave5_api/test_models_responses.py tests/architecture/test_core_public_api.py tests/benchmarks/test_physics_benchmarks.py tests/bunkershot3d/geometry/test_wedge_presets.py tests/bunkershot3d/sand/test_presets.py tests/bunkershot3d/study/test_comparison.py tests/bunkershot3d/study/test_sensitivity.py tests/bunkershot3d/test_provenance_hashing.py tests/bunkershot3d/test_provenance_manifest.py tests/bunkershot3d/test_provenance_rng.py tests/ci/test_articulated_manufactured_authority_provenance_red.py tests/ci/test_dependency_lock_provenance.py tests/config/feature_parity/test_matrix_freshness.py tests/config/impact_acceptance/test_impact_acceptance_matrix.py tests/config/launcher_manifest/test_canonical_core_shell.py tests/config/test_engine_matrix_freshness.py tests/engines/pendulum_models/python/double_pendulum_model/test_mass_matrix_regression.py tests/heavy_integration/test_physics_consistency.py tests/heavy_integration/test_pyqt6_gui_components.py tests/imports/test_gui_import_boundaries.py tests/integration/motion_pipeline/test_compat_matrix.py tests/integration/putting_green/putting_simulation/test_physics_accuracy.py tests/integration/test_comparison_indicator_workspace.py tests/integration/test_physics_consistency.py tests/integration/test_physics_engines_strict.py tests/integration/test_physics_interfaces.py tests/launch_modes/test_launch_matrix.py tests/launchers/test_shot_tracer_import_gui.py tests/launchers/test_simulation_guis.py tests/launchers/wave8_misc/test_embedded_tool_bootstrap.py tests/motion_capture/annotate/test_guide.py tests/motion_capture/test_provenance.py tests/motion_capture/test_reference_comparison.py tests/motion_capture/test_reference_mjcf_models.py tests/motion_capture/test_reference_urdf_models.py tests/research/test_articulated_ground_posthoc_sensitivity.py tests/research/test_articulated_uncertainty_study.py tests/research/test_e1e_smooth_command_sensitivity.py tests/research/test_event_topology_channel_matrix_evidence.py tests/research/test_nonlinear_controller_comparison_registration.py tests/research/test_participant_twin_provenance.py tests/research/test_run_event_topology_channel_matrix.py tests/research/test_uncertainty_control.py tests/research/test_uncertainty_control_evidence.py tests/research/test_uncertainty_control_figures.py tests/research/test_uncertainty_stability_audit.py tests/robotics/wave6_robotics/test_core_types.py tests/rust_bindings/test_physics_bindings.py tests/shared/test_pose_estimation_gui.py tests/shared/wave10_remaining/test_assessment_reporting.py tests/shared/wave10_remaining/test_notes_models.py tests/shared/wave7_model_generation/test_core_types.py tests/shared/wave7_model_generation/test_core_validation.py tests/test_build_humanoid_models.py tests/tools/ball_flight_gui/test_ball_flight_gui.py tests/tools/bunker_shot_gui/test_gui.py tests/tools/capture_rig/test_comparison_coaching_source.py tests/tools/capture_rig/test_comparison_drawing_dialog.py tests/tools/capture_rig/test_comparison_frame_source.py tests/tools/capture_rig/test_comparison_geometry.py tests/tools/capture_rig/test_core.py tests/tools/capture_rig/test_gui.py tests/tools/capture_rig/test_guided_capture_acceptance.py tests/tools/capture_rig/test_layout_presets.py tests/tools/capture_rig/test_reference_comparison_state.py tests/tools/capture_rig/test_reference_comparison_ui.py tests/tools/capture_rig/test_user_guide_fresh.py tests/tools/golf_environment/test_gui.py tests/tools/matched_swing_browser/test_matched_swing_browser_gui.py tests/tools/motion_matching/test_motion_matching_gui.py tests/tools/pose_studio/test_core_layout.py tests/tools/putting_green_gui/test_putting_green_gui.py tests/tools/shadow_tracker/test_shadow_tracker_gui.py tests/tools/shot_pattern_analysis tests/tools/shot_pattern_analysis/test_cli.py tests/tools/shot_pattern_analysis/test_comparison.py tests/tools/shot_pattern_analysis/test_core.py tests/tools/shot_pattern_analysis/test_delivery_geometry.py tests/tools/shot_pattern_analysis/test_dispersion_stats.py tests/tools/shot_pattern_analysis/test_entrypoint.py tests/tools/shot_pattern_analysis/test_matrix.py tests/tools/shot_pattern_analysis/test_numerics.py tests/tools/shot_pattern_analysis/test_overview.py tests/tools/shot_pattern_analysis/test_physics.py tests/tools/shot_pattern_analysis/test_presets.py tests/tools/shot_pattern_analysis/test_provenance.py tests/tools/shot_pattern_analysis/test_range_control.py tests/tools/shot_pattern_analysis/test_reporting.py tests/tools/shot_pattern_analysis/test_scenario_scoring.py tests/tools/shot_pattern_analysis/test_scoring.py tests/tools/shot_pattern_analysis/test_scoring_cache.py tests/tools/shot_pattern_analysis/test_scoring_cache_independent.py tests/tools/shot_pattern_analysis/test_sensitivity.py tests/tools/shot_pattern_analysis/test_uncertainty.py tests/tools/starting_pose_matcher/test_core_comprehensive.py tests/tools/swing_flight_pipeline/test_gui.py tests/tools/terrain_engine/test_gui_coverage.py tests/tools/test_model_explorer_gui.py tests/tools/test_terrain_engine_gui.py tests/tools/training_controller/test_gui_smoke.py tests/ui/engines/drake/test_drake_embed_adapter.py tests/ui/engines/mujoco/test_mujoco_embed_adapter.py tests/ui/engines/myosuite/test_myosuite_embed_adapter.py tests/ui/engines/opensim/test_opensim_embed_adapter.py tests/ui/engines/opensim/test_opensim_gui_writable_state.py tests/ui/engines/pinocchio/test_pinocchio_embed_adapter.py tests/ui/test_golf_gui_tabs.py tests/ui/tools/launch_monitor/test_gui.py tests/ui/tools/shot_pattern_analysis tests/ui/tools/shot_pattern_analysis/test_embed_adapter.py tests/ui/tools/shot_pattern_analysis/test_launcher_registration.py tests/ui/tools/simulation_backends/test_gui.py tests/ui/tools/simulation_backends/test_gui_window.py tests/ui/tools/video_analyzer/test_gui.py tests/unit/analysis/test_reporting.py tests/unit/api/test_auth_models.py tests/unit/api/test_models_mesh_asset.py tests/unit/api/test_models_route_symlink_validation.py tests/unit/api/test_physics_cache.py tests/unit/api/test_routes_canonical_core.py tests/unit/api/test_routes_core.py tests/unit/api/test_routes_models.py tests/unit/api/test_routes_physics.py tests/unit/assessment/test_reporting.py tests/unit/character_builder/test_cmb2_presets.py tests/unit/chat/test_chat_models.py tests/unit/config/test_engine_matrix_generation.py tests/unit/config/test_standard_models.py tests/unit/core/test_physics_constants.py tests/unit/data_io/test_provenance.py tests/unit/dbc/test_dbc_contracts_core.py tests/unit/engines/drake/test_drake_gui_force_overlay.py tests/unit/engines/mujoco/test_models.py tests/unit/engines/myosuite/test_myosuite_physics_engine.py tests/unit/engines/opensim/test_opensim_core.py tests/unit/engines/pendulum/test_physics_correctness.py tests/unit/engines/physics_engines/drake/test_drake_gui_analysis.py tests/unit/engines/physics_engines/drake/test_drake_gui_app.py tests/unit/engines/physics_engines/drake/test_drake_gui_sim.py tests/unit/engines/physics_engines/mujoco/mujoco_humanoid_golf/test_advanced_gui_methods.py tests/unit/engines/physics_engines/mujoco/mujoco_humanoid_golf/test_force_glyph_gui.py tests/unit/engines/physics_engines/mujoco/test_golf_gui.py tests/unit/engines/pinocchio/pinocchio_golf/test_gui.py tests/unit/engines/pinocchio/pinocchio_golf/test_gui_simulation.py tests/unit/engines/pinocchio/pinocchio_golf/test_gui_ui_setup.py tests/unit/engines/pinocchio/test___main__.py tests/unit/engines/pinocchio/test_pinocchio_physics_engine.py tests/unit/engines/putting_green/test_ball_roll_physics.py tests/unit/engines/putting_green/test_roll_model_provenance.py tests/unit/engines/simscape/three_d_gui/starting_pose_matcher/test_event_label_presets.py tests/unit/engines/test_common_physics.py tests/unit/engines/test_feedback_comparison.py tests/unit/estimation/test_fit_uncertainty.py tests/unit/launcher_embed/test_canonical_core_shell.py tests/unit/launchers/test_special_app_embed_adapter.py tests/unit/motion_capture/test_cov7_2d_comparison.py tests/unit/motion_capture/test_cov9_3d_comparison.py tests/unit/motion_matching/pipeline/test_receipt_provenance_chain.py tests/unit/motion_matching/test_club_matrix_qualification.py tests/unit/motion_matching/test_club_models.py tests/unit/motion_matching/test_fit_uncertainty_wiring_11021.py tests/unit/motion_matching/test_full_body_osim_grip_models.py tests/unit/motion_matching/test_placeholder_provenance_10960.py tests/unit/motion_matching/test_provenance.py tests/unit/motion_matching/test_stability_matrix.py tests/unit/neural_motion/test_checkpoint_matrix_nm09.py tests/unit/pendulum_putter_model/test_pendulum_physics_analytical.py tests/unit/pendulum_putter_model/test_pendulum_putter_model_physics.py tests/unit/pendulum_simulator/test_gui_playback_perf.py tests/unit/pendulum_simulator/test_physics.py tests/unit/pendulum_simulator/test_physics_base.py tests/unit/pendulum_simulator/test_physics_triple.py tests/unit/perturbation/test_robustness_score.py tests/unit/physics/test_ball_simulator_landing.py tests/unit/physics/test_ball_simulator_post_process_vectorized_8930.py tests/unit/physics/test_impact_central_contact_review.py tests/unit/physics/test_impact_friction_axis_and_gear_offset.py tests/unit/physics/test_impact_physics_value_assertions.py tests/unit/physics/test_impact_tangential_impulse.py tests/unit/physics/test_physics_comprehensive.py tests/unit/pose_estimation/test_mediapipe_models.py tests/unit/process_calculators/test_pressure_drop_models.py tests/unit/process_calculators/test_scrubber_models.py tests/unit/reporting/test_reporting_5423.py tests/unit/robotics/sensing/test_noise_models.py tests/unit/scripts/test_gui_thread_blocking_ratchet.py tests/unit/shadow_tracker/test_calibration_provenance.py tests/unit/shadow_tracker/test_engine_matrix.py tests/unit/shared/golf_view_presets/test_golf_view_presets.py tests/unit/shared_python/test_ball_flight_physics.py tests/unit/shared_python/test_golf_physics_source_backed_validation.py tests/unit/shared_python/test_openpose_gui_coverage.py tests/unit/shared_python/test_physics_parameters.py tests/unit/shared_python/test_physics_validation.py tests/unit/shared_python/test_signal_toolkit_core.py tests/unit/shared_python/test_simulation_gui_base.py tests/unit/sidekick/lab/bio/test_c3d_models.py tests/unit/sidekick/test_conversion_core.py tests/unit/simulation_backends/test_comparison.py tests/unit/simulation_backends/test_provenance.py tests/unit/test_ball_flight_physics.py tests/unit/test_core.py tests/unit/test_core_core.py tests/unit/test_core_install_isolation.py tests/unit/test_dashboard_export_provenance.py tests/unit/test_data_processing_core_extended.py tests/unit/test_drake_gui_app.py tests/unit/test_drake_physics_engine.py tests/unit/test_flight_models.py tests/unit/test_flight_models_registry.py tests/unit/test_gui_coverage.py tests/unit/test_gui_launcher_manifest_targets.py tests/unit/test_gui_launcher_registry.py tests/unit/test_models.py tests/unit/test_mujoco_gui_tabs_smoke.py tests/unit/test_mujoco_physics_engine.py tests/unit/test_opensim_physics_engine.py tests/unit/test_pendulum_putter_physics.py tests/unit/test_pendulum_simulator_physics.py tests/unit/test_physics_constants_coverage.py tests/unit/test_physics_parameters.py tests/unit/test_physics_validation_extended.py tests/unit/test_pinned_tools_provenance.py tests/unit/test_pinocchio_gui.py tests/unit/test_pinocchio_physics_engine.py tests/unit/test_property_based_physics.py tests/unit/test_provenance.py tests/unit/test_shared_physics_parameters.py tests/unit/test_sim_gui_honest_messaging_6641.py tests/unit/test_simulation_core.py tests/unit/test_swing_comparison.py tests/unit/test_unreal_integration/test_data_models.py tests/unit/theme/test_api_models.py tests/unit/tools/bunker_shot_gui/test_camber_reporting_8698.py tests/unit/tools/bunker_shot_gui/test_no_fake_physics.py tests/unit/tools/bunker_shot_gui/test_uncertainty_propagation_9243.py tests/unit/tools/model_converter/test_build_models_cli.py tests/unit/tools/model_explorer/test_assembly_panel_gui.py tests/unit/tools/model_generation/test_core_types.py tests/unit/tools/native_viewer_export/test_core.py tests/unit/tools/pose_studio/test_core.py tests/unit/tools/pose_studio/test_gui.py tests/unit/tools/starting_pose_matcher/test_core_math_and_loaders.py tests/unit/tools/starting_pose_matcher/test_core_xlsx_adapters.py tests/unit/tools/test_necromatcher_gui.py tests/unit/tools/test_tour_matching_viewer_core.py tests/unit/tour_baselines/test_coverage_matrix.py tests/unit/ui/test_provenance_value.py tests/unit/ux/test_provenance.py tests/wave10_assets_config/test_standard_models_extra.py -p no:pytestqt
+........................................................................ [  2%]
+........................................................................ [  4%]
+........................................................................ [  6%]
+........................................................................ [  8%]
+........................................................................ [ 10%]
+........................................................................ [ 13%]
+...................................sssss.ss..ss......................... [ 15%]
+................................................F
+=================================== FAILURES ===================================
+__ test_ground_posthoc_sensitivity_preserves_primary_failure_and_mixed_signs ___
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/research/test_articulated_ground_posthoc_sensitivity.py:32: in test_ground_posthoc_sensitivity_preserves_primary_failure_and_mixed_signs
+    assert hashlib.sha256((ROOT / relative).read_bytes()).hexdigest() == expected
+E   AssertionError: assert 'ec8c37b73f22...05250112e8b31' == '4934a4cf6168...387944a2b1c15'
+E     
+E     - 4934a4cf6168a339755794151eb70dbd36af7bce84c38d9efa9387944a2b1c15
+E     + ec8c37b73f22d97bda93d4fee4d586513a73d966ca0081c42cb05250112e8b31
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+../../../../Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487
+  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487: UserWarning: Skipping collection of '.hypothesis' directory - this usually means you've explicitly set the `norecursedirs` pytest config option, replacing rather than extending the default ignores.
+    warnings.warn(
+
+src/shared/python/signal_toolkit/__init__.py:43
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/signal_toolkit/__init__.py:43: DeprecationWarning: __package__ != __spec__.parent
+    from .polynomial_generator import PolynomialGeneratorWidget
+
+src/shared/python/signal_toolkit/__init__.py:52
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/signal_toolkit/__init__.py:52: DeprecationWarning: __package__ != __spec__.parent
+    from .widget import SignalToolkitWidget
+
+src/shared/python/sidekick/ui/mixins/calculator_state_mixin.py:38
+src/shared/python/sidekick/ui/mixins/calculator_state_mixin.py:38
+src/shared/python/sidekick/ui/mixins/calculator_state_mixin.py:38
+src/shared/python/sidekick/ui/mixins/calculator_state_mixin.py:38
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/sidekick/ui/mixins/calculator_state_mixin.py:38: DeprecationWarning: Use of global 'state_manager' is deprecated. Use 'get_state_manager()' instead.
+    from ...utils.state_manager import state_manager
+
+../../../../Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+src/shared/python/motion_matching/loaders/c3d_body.py:36
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/motion_matching/loaders/c3d_body.py:36: DeprecationWarning: src.shared.python.motion_matching.loaders._optical is deprecated; import from src.shared.python.motion_matching.loaders._marker_clusters instead. The old module name will be removed in a future release.
+    from ._optical import fill_short_gaps, y_up_to_z_up
+
+src/shared/python/motion_pipeline/orchestrator.py:147
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/motion_pipeline/orchestrator.py:147: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    class PipelineConfig(BaseModel):
+
+src/shared/python/motion_pipeline/api.py:39
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/motion_pipeline/api.py:39: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    class PipelineRequest(BaseModel):
+
+src/shared/python/config/model_registry.py:242: 1 warning
+tests/api/test_engine_matrix_route.py: 1 warning
+tests/api/test_physics_api.py: 15 warnings
+tests/config/launcher_manifest/test_canonical_core_shell.py: 3 warnings
+tests/launch_modes/test_launch_matrix.py: 6 warnings
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/model_registry.py:242: DeprecationWarning: __package__ != __spec__.parent
+    from ..core import setup_logging
+
+src/shared/python/config/model_registry.py:413: 1 warning
+tests/api/test_engine_matrix_route.py: 1 warning
+tests/api/test_physics_api.py: 15 warnings
+tests/config/launcher_manifest/test_canonical_core_shell.py: 3 warnings
+tests/launch_modes/test_launch_matrix.py: 6 warnings
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/model_registry.py:413: DeprecationWarning: __package__ != __spec__.parent
+    from ..core import setup_logging
+
+src/shared/python/config/model_registry.py:459: 1 warning
+tests/api/test_engine_matrix_route.py: 1 warning
+tests/api/test_physics_api.py: 15 warnings
+tests/config/launcher_manifest/test_canonical_core_shell.py: 3 warnings
+tests/launch_modes/test_launch_matrix.py: 6 warnings
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/model_registry.py:459: DeprecationWarning: __package__ != __spec__.parent
+    from ..core import setup_logging
+
+scripts/research/proximal_distal_energy/run_experiments.py:49
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/scripts/research/proximal_distal_energy/run_experiments.py:49: DeprecationWarning: DynamicsProvider is deprecated and will be removed in a future release; use EquationsOfMotionProvider instead.
+    from src.shared.python.simulation_backends.protocol import DynamicsProvider, SimState
+
+../../../../Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/meshcat/servers/zmqserver.py:18
+  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/meshcat/servers/zmqserver.py:18: DeprecationWarning: zmq.eventloop.ioloop is deprecated in pyzmq 17. pyzmq now works with default tornado and asyncio eventloops.
+    import zmq.eventloop.ioloop
+
+tests/integration/test_physics_engines_strict.py::TestMuJoCoStrict::test_physics_engines_strict_jacobian_standardization_mocked
+tests/integration/test_physics_engines_strict.py::TestMuJoCoStrict::test_get_sensors_implemented
+tests/integration/test_physics_engines_strict.py::TestMuJoCoStrict::test_contact_forces_use_mujoco_grf_sign_convention
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/mujoco_version.py:63: UserWarning: Could not validate MuJoCo version: __version__. Proceeding with fallback Jacobian handling.
+    _check_mujoco_version()
+
+tests/integration/test_physics_engines_strict.py::TestOpenSimStrict::test_inverse_dynamics_implemented
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/integration/test_physics_engines_strict.py:226: ExperimentalTierWarning: OpenSim engine is in the EXPERIMENTAL tier. API may change without notice; not covered by the core support SLA. See docs/operations/tier-policy.md for tier policy.
+    engine = OpenSimPhysicsEngine()
+
+tests/integration/test_physics_engines_strict.py::TestMyoSuiteStrict::test_loading_uses_gym
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/integration/test_physics_engines_strict.py:258: ExperimentalTierWarning: MyoSuite engine is in the EXPERIMENTAL tier. API may change without notice; not covered by the core support SLA. See docs/operations/tier-policy.md for tier policy.
+    engine = MyoSuitePhysicsEngine()
+
+tests/integration/test_physics_engines_strict.py::TestMyoSuiteStrict::test_loading_without_sim_raises_and_rolls_back_state
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/integration/test_physics_engines_strict.py:275: ExperimentalTierWarning: MyoSuite engine is in the EXPERIMENTAL tier. API may change without notice; not covered by the core support SLA. See docs/operations/tier-policy.md for tier policy.
+    engine = MyoSuitePhysicsEngine()
+
+tests/integration/test_physics_engines_strict.py::TestMyoSuiteStrict::test_step_uses_env_step_and_preserves_timestep
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/integration/test_physics_engines_strict.py:290: ExperimentalTierWarning: MyoSuite engine is in the EXPERIMENTAL tier. API may change without notice; not covered by the core support SLA. See docs/operations/tier-policy.md for tier policy.
+    engine = MyoSuitePhysicsEngine()
+
+tests/integration/test_physics_engines_strict.py::TestMyoSuiteStrict::test_step_uses_last_control_action_when_available
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/integration/test_physics_engines_strict.py:315: ExperimentalTierWarning: MyoSuite engine is in the EXPERIMENTAL tier. API may change without notice; not covered by the core support SLA. See docs/operations/tier-policy.md for tier policy.
+    engine = MyoSuitePhysicsEngine()
+
+tests/integration/test_physics_interfaces.py::TestPhysicsEngines::test_myosuite_methods
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/integration/test_physics_interfaces.py:56: ExperimentalTierWarning: MyoSuite engine is in the EXPERIMENTAL tier. API may change without notice; not covered by the core support SLA. See docs/operations/tier-policy.md for tier policy.
+    engine = MyoSuitePhysicsEngine()
+
+tests/integration/test_physics_interfaces.py::TestPhysicsEngines::test_opensim_methods
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/integration/test_physics_interfaces.py:85: ExperimentalTierWarning: OpenSim engine is in the EXPERIMENTAL tier. API may change without notice; not covered by the core support SLA. See docs/operations/tier-policy.md for tier policy.
+    engine = OpenSimPhysicsEngine()
+
+tests/launch_modes/test_launch_matrix.py::test_web_app_constructs_within_budget
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/api/local_server.py:987: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    @app.on_event("shutdown")
+
+tests/launch_modes/test_launch_matrix.py::test_web_app_constructs_within_budget
+  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/fastapi/applications.py:4744: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    return self.router.on_event(event_type)  # ty: ignore[deprecated]
+
+tests/launch_modes/test_launch_matrix.py: 74 warnings
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/vendor/ud-tools/src/shared/python/theme/palette.py:110: DeprecationWarning: __package__ != __spec__.parent
+    from .colors import THEME_COLOR_KEYS
+
+tests/launch_modes/test_launch_matrix.py: 74 warnings
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/vendor/ud-tools/src/shared/python/theme/palette.py:113: DeprecationWarning: __package__ != __spec__.parent
+    from .theme_manager import get_theme_manager
+
+tests/launchers/test_simulation_guis.py::TestExternalToolsAdapter::test_get_video_analyzer_dockable_ui_is_self_contained
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/vendor/ud-tools/src/shared/python/theme/integration.py:57: DeprecationWarning: __package__ != __spec__.parent
+    from .theme_manager import ThemeManager
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+[suite-markers:report-only] 1363 collected test(s) carry no suite marker (one of ['benchmark', 'e2e', 'gate', 'integration', 'live_simulation', 'motion_pipeline', 'parity', 'perf', 'scientific', 'slow', 'smoke', 'unit']); see issue #7158.
+
+------------------------------------------------------------------------------------------------------ benchmark: 10 tests ------------------------------------------------------------------------------------------------------
+Name (time in ns)                             Min                     Max                  Mean                StdDev                Median                 IQR              Outliers  OPS (Kops/s)            Rounds  Iterations
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+test_get_club_config                      62.7851 (1.0)        2,145.0900 (1.0)         76.1621 (1.0)         33.0391 (1.0)         65.7549 (1.0)        1.8399 (1.0)       5144;7404   13,129.8931 (1.0)       47667         200
+test_gravity_on_slope_cached              98.7891 (1.57)       3,968.8940 (1.85)       126.5237 (1.66)        67.6470 (2.05)       104.1059 (1.58)       3.2106 (1.74)    20369;37389    7,903.6593 (0.60)     193088          19
+test_gravity_on_slope                    172.0036 (2.74)      33,021.0023 (15.39)      215.6524 (2.83)       204.5571 (6.19)       180.9967 (2.75)      25.0002 (13.59)    7489;16409    4,637.0910 (0.35)     152812           1
+test_air_density_at_altitude             190.9793 (3.04)      65,947.9992 (30.74)      248.0530 (3.26)       370.0734 (11.20)      202.9992 (3.09)      25.9897 (14.13)    1355;14774    4,031.3959 (0.31)      94501           1
+test_section_area                        194.9957 (3.11)      57,357.9746 (26.74)      235.1211 (3.09)       327.5068 (9.91)       205.0074 (3.12)      24.9711 (13.57)     1415;6176    4,253.1278 (0.32)      86814           1
+test_section_inertia                     197.9934 (3.15)      17,092.0102 (7.97)       238.0181 (3.13)       164.7479 (4.99)       208.0051 (3.16)      25.9897 (14.13)     4429;7955    4,201.3616 (0.32)      93171           1
+test_physics_benchmarks_spin_decay       207.0155 (3.30)      63,806.0155 (29.75)      279.7938 (3.67)       291.7660 (8.83)       232.0157 (3.53)      38.0096 (20.66)    7776;30859    3,574.0607 (0.27)     180799           1
+test_slope_angle_query                 2,595.9744 (41.35)     72,697.9924 (33.89)    3,683.1750 (48.36)    2,337.9458 (70.76)    2,718.0067 (41.34)    270.9858 (147.28)   7552;11948      271.5049 (0.02)      55152           1
+test_elevation_query                   2,877.0010 (45.82)     80,748.9851 (37.64)    3,486.1403 (45.77)    1,808.3176 (54.73)    3,021.0067 (45.94)     83.9937 (45.65)    5643;12876      286.8502 (0.02)      77670           1
+test_surface_normal_query              5,451.9915 (86.84)    133,134.0172 (62.06)    7,254.2419 (95.25)    4,004.6663 (121.21)   5,724.9854 (87.07)    402.0403 (218.51)    3526;6028      137.8504 (0.01)      29558           1
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Legend:
+  Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.
+  OPS: Operations Per Second, computed as 1 / Mean
+============================= slowest 20 durations =============================
+1.88s call     tests/launch_modes/test_launch_matrix.py::test_engine_mujoco_constructs_headless
+1.25s call     tests/launch_modes/test_launch_matrix.py::test_classic_launcher_populates_tile_grid
+0.78s call     tests/integration/putting_green/putting_simulation/test_physics_accuracy.py::TestPhysicsAccuracy::test_faster_green_longer_roll
+0.76s call     tests/benchmarks/test_physics_benchmarks.py::TestPhysicsFunctionBenchmarks::test_get_club_config
+0.75s call     tests/bunkershot3d/geometry/test_wedge_presets.py::TestProvenance::test_every_preset_lofts_a_watertight_head[acushnet_example_2]
+0.73s call     tests/config/impact_acceptance/test_impact_acceptance_matrix.py::test_no_hit_momentum_and_passivity_goldens[spring_damper]
+0.73s call     tests/bunkershot3d/geometry/test_wedge_presets.py::TestProvenance::test_every_preset_lofts_a_watertight_head[tour_shaved_heel_lob]
+0.69s call     tests/bunkershot3d/geometry/test_wedge_presets.py::TestProvenance::test_every_preset_lofts_a_watertight_head[sm9_58_m]
+0.69s call     tests/bunkershot3d/geometry/test_wedge_presets.py::TestProvenance::test_every_preset_lofts_a_watertight_head[acushnet_example_3]
+0.68s call     tests/config/impact_acceptance/test_impact_acceptance_matrix.py::test_spring_damper_converges_in_time_step
+0.66s call     tests/bunkershot3d/geometry/test_wedge_presets.py::TestProvenance::test_every_preset_lofts_a_watertight_head[sm9_54_f]
+0.66s call     tests/bunkershot3d/geometry/test_wedge_presets.py::TestProvenance::test_every_preset_lofts_a_watertight_head[acushnet_example_1]
+0.58s call     tests/benchmarks/test_physics_benchmarks.py::TestPhysicsFunctionBenchmarks::test_gravity_on_slope_cached
+0.54s call     tests/integration/putting_green/putting_simulation/test_physics_accuracy.py::TestPhysicsAccuracy::test_spin_affects_roll
+0.51s call     tests/integration/putting_green/putting_simulation/test_physics_accuracy.py::TestPhysicsAccuracy::test_uphill_vs_downhill
+0.51s setup    tests/api/test_engine_matrix_route.py::test_get_engine_matrix_endpoint
+0.47s call     tests/config/impact_acceptance/test_impact_acceptance_matrix.py::test_inertia_row_matches_library[spring_damper]
+0.45s call     tests/config/impact_acceptance/test_impact_acceptance_matrix.py::test_cor_is_speed_independent[spring_damper]
+0.37s call     tests/api/test_engine_matrix_route.py::test_get_engine_matrix_endpoint
+0.35s call     tests/api/test_engine_matrix_route.py::test_get_launcher_engine_capabilities
+=========================== short test summary info ============================
+SKIPPED [3] tests/unit/motion_matching/conftest.py:371: model_generation.models.pendulum_putter package not available
+SKIPPED [1] tests/launch_modes/test_launch_matrix.py:227: engine 'golf_swing_pendulum' has no direct-launch module
+SKIPPED [1] tests/launch_modes/test_launch_matrix.py:227: engine 'jaxsim' has no direct-launch module
+SKIPPED [1] tests/launch_modes/test_launch_matrix.py:227: engine 'matlab' has no direct-launch module
+SKIPPED [1] tests/launch_modes/test_launch_matrix.py:224: engine 'matlab_2d' is web-only; routed to web UI
+SKIPPED [1] tests/launch_modes/test_launch_matrix.py:224: engine 'matlab_3d' is web-only; routed to web UI
+SKIPPED [1] tests/launch_modes/test_launch_matrix.py:227: engine 'myosim' has no direct-launch module
+SKIPPED [1] tests/launch_modes/test_launch_matrix.py:230: engine not installed: myosuite
+SKIPPED [1] tests/launch_modes/test_launch_matrix.py:230: engine not installed: pinocchio
+SKIPPED [1] tests/launch_modes/test_launch_matrix.py:227: engine 'putting_green' has no direct-launch module
+FAILED tests/research/test_articulated_ground_posthoc_sensitivity.py::test_ground_posthoc_sensitivity_preserves_primary_failure_and_mixed_signs
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 543 passed, 12 skipped, 23 deselected, 258 warnings in 51.64s
+
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+../../../../Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487
+  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487: UserWarning: Skipping collection of '.hypothesis' directory - this usually means you've explicitly set the `norecursedirs` pytest config option, replacing rather than extending the default ignores.
+    warnings.warn(
+
+src/shared/python/motion_matching/loaders/c3d_body.py:36
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/motion_matching/loaders/c3d_body.py:36: DeprecationWarning: src.shared.python.motion_matching.loaders._optical is deprecated; import from src.shared.python.motion_matching.loaders._marker_clusters instead. The old module name will be removed in a future release.
+    from ._optical import fill_short_gaps, y_up_to_z_up
+
+src/shared/python/signal_toolkit/__init__.py:43
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/signal_toolkit/__init__.py:43: DeprecationWarning: __package__ != __spec__.parent
+    from .polynomial_generator import PolynomialGeneratorWidget
+
+src/shared/python/signal_toolkit/__init__.py:52
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/signal_toolkit/__init__.py:52: DeprecationWarning: __package__ != __spec__.parent
+    from .widget import SignalToolkitWidget
+
+../../../../Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+src/shared/python/motion_pipeline/orchestrator.py:147
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/motion_pipeline/orchestrator.py:147: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    class PipelineConfig(BaseModel):
+
+src/shared/python/motion_pipeline/api.py:39
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/motion_pipeline/api.py:39: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    class PipelineRequest(BaseModel):
+
+../../../../Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/meshcat/servers/zmqserver.py:18
+  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/meshcat/servers/zmqserver.py:18: DeprecationWarning: zmq.eventloop.ioloop is deprecated in pyzmq 17. pyzmq now works with default tornado and asyncio eventloops.
+    import zmq.eventloop.ioloop
+
+src/shared/python/config/model_registry.py:242
+src/shared/python/config/model_registry.py:242
+src/shared/python/config/model_registry.py:242
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/model_registry.py:242: DeprecationWarning: __package__ != __spec__.parent
+    from ..core import setup_logging
+
+src/shared/python/config/model_registry.py:413
+src/shared/python/config/model_registry.py:413
+src/shared/python/config/model_registry.py:413
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/model_registry.py:413: DeprecationWarning: __package__ != __spec__.parent
+    from ..core import setup_logging
+
+src/shared/python/config/model_registry.py:459
+src/shared/python/config/model_registry.py:459
+src/shared/python/config/model_registry.py:459
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/model_registry.py:459: DeprecationWarning: __package__ != __spec__.parent
+    from ..core import setup_logging
+
+scripts/research/proximal_distal_energy/run_experiments.py:49
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/scripts/research/proximal_distal_energy/run_experiments.py:49: DeprecationWarning: DynamicsProvider is deprecated and will be removed in a future release; use EquationsOfMotionProvider instead.
+    from src.shared.python.simulation_backends.protocol import DynamicsProvider, SimState
+
+src/shared/python/sidekick/ui/mixins/calculator_state_mixin.py:38
+src/shared/python/sidekick/ui/mixins/calculator_state_mixin.py:38
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/sidekick/ui/mixins/calculator_state_mixin.py:38: DeprecationWarning: Use of global 'state_manager' is deprecated. Use 'get_state_manager()' instead.
+    from ...utils.state_manager import state_manager
+
+../../../../Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/qpsolvers/solvers/__init__.py:1087
+  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/qpsolvers/solvers/__init__.py:1087: UserWarning: no QP solver found on your system, you can install solvers from PyPI by ``pip install qpsolvers[open_source_solvers]``
+    warnings.warn(
+
+tests/unit/motion_matching/test_full_body_markers.py:13
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/unit/motion_matching/test_full_body_markers.py:13: DeprecationWarning: src.engines.physics_engines.mujoco.python.full_body_markers is deprecated; import from src.engines.physics_engines.mujoco.python.full_body_ik or src.shared.python.motion_matching.full_body_ik instead.
+    from src.engines.physics_engines.mujoco.python import full_body_markers as module
+
+tests/unit/motion_matching/test_full_body_simulation.py:11
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/unit/motion_matching/test_full_body_simulation.py:11: DeprecationWarning: src.engines.physics_engines.mujoco.python.full_body_simulation is deprecated; import from src.shared.python.motion_matching.full_body_forward_dynamics instead.
+    from src.engines.physics_engines.mujoco.python import full_body_simulation as module
+
+tests/unit/sidekick/test_electrode_and_thermal.py:19
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/unit/sidekick/test_electrode_and_thermal.py:19: DeprecationWarning: Using pure-Python ElectrodeAdvancementCalculator
+    _CALC = ElectrodeAdvancementCalculator()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+[suite-markers:report-only] 20565 collected test(s) carry no suite marker (one of ['benchmark', 'e2e', 'gate', 'integration', 'live_simulation', 'motion_pipeline', 'parity', 'perf', 'scientific', 'slow', 'smoke', 'unit']); see issue #7158.
+=========================== short test summary info ============================
+SKIPPED [1] tests/heavy_integration/test_pinocchio_diff_ik.py:18: could not import 'pinocchio': No module named 'pinocchio'
+SKIPPED [1] tests/integration/engines/pinocchio/test_force_adapter.py:13: could not import 'pinocchio': No module named 'pinocchio'
+SKIPPED [1] tests/integration/engines/pinocchio/test_force_mapping.py:15: could not import 'pinocchio': No module named 'pinocchio'
+SKIPPED [1] tests/integration/engines/pinocchio/test_pink_adapter_contract.py:31: native Pinocchio/Pink stack unavailable: No module named 'pinocchio'
+SKIPPED [1] tests/integration/engines/pinocchio/test_pink_tasks.py:46: native Pinocchio/Pink stack unavailable: No module named 'pinocchio'
+SKIPPED [1] tests/integration/engines/pinocchio/test_pink_trajectory.py:42: native Pinocchio/Pink stack unavailable: No module named 'pinocchio'
+SKIPPED [1] tests/integration/motion_matching/test_crocoddyl_polynomial.py:38: native Crocoddyl/Pinocchio stack unavailable: No module named 'crocoddyl'
+SKIPPED [1] tests/integration/motion_matching/test_full_body_fit_native.py:21: could not import 'pinocchio': No module named 'pinocchio'
+SKIPPED [1] tests/integration/pose_interchange/services/test_pinocchio_real.py:15: could not import 'pinocchio': No module named 'pinocchio'
+SKIPPED [1] tests/launchers/test_golf_suite_launcher.py:13: target module removed in #8831 — tombstone pending post-merge cleanup
+SKIPPED [1] tests/launchers/test_launcher_env_injection.py:13: target module removed in #8831 — tombstone pending post-merge cleanup
+SKIPPED [1] tests/launchers/test_launcher_model_registry.py:13: target module removed in #8831 — tombstone pending post-merge cleanup
+SKIPPED [1] tests/launchers/test_unified_launcher.py:13: target module removed in #8831 — tombstone pending post-merge cleanup
+SKIPPED [1] tests/learning/test_rl_base_env.py:10: could not import 'gymnasium': No module named 'gymnasium'
+SKIPPED [1] tests/learning/test_rl_humanoid_envs.py:12: could not import 'gymnasium': No module named 'gymnasium'
+SKIPPED [1] tests/parity/test_simulate_contract_pinocchio.py:47: pinocchio not installed
+SKIPPED [1] tests/research/test_optimize_article_pdf.py:9: could not import 'fitz': No module named 'fitz'
+SKIPPED [1] tests/rust_bindings/test_mesh_convex_hull.py:17: upstream_mesh wheel not installed (run: maturin develop -m rust_core/upstream-mesh/Cargo.toml --features python)
+SKIPPED [1] tests/rust_bindings/test_mesh_decimation_primitives.py:21: upstream_mesh wheel not installed (run: maturin develop -m rust_core/upstream-mesh/Cargo.toml --features python)
+SKIPPED [1] tests/soak/realtime/test_24h_soak.py:52: soak tests gated on SOAK=1 (long-running; nightly only)
+SKIPPED [1] tests/unit/biomechanics/test_multi_muscle_rust_parity.py:14: could not import 'upstream_muscle': No module named 'upstream_muscle'
+SKIPPED [1] tests/unit/biomechanics/test_muscle_analysis.py:8: scikit-learn is required for muscle synergy analysis
+SKIPPED [1] tests/unit/body_part_viz/renderers/test_pyqtgl_renderer.py:22: could not import 'pyqtgraph': No module named 'pyqtgraph'
+SKIPPED [1] tests/unit/codemap_integration/test_codemap_smoke.py:21: codemap extras not installed (missing: ['tree_sitter']); install with `pip install tree-sitter tree-sitter-python blake3`
+SKIPPED [1] tests/unit/engines/drake/test_drake_model.py:26: pydrake not available: No module named 'python.src.drake_golf_model'
+SKIPPED [1] tests/unit/engines/mujoco/test_mjx_evidence_cli.py:11: could not import 'jax': No module named 'jax'
+SKIPPED [1] tests/unit/engines/mujoco/test_mjx_knot_optimiser.py:10: could not import 'jax': No module named 'jax'
+SKIPPED [1] tests/unit/engines/mujoco/test_mjx_tracking_plant.py:9: could not import 'jax': No module named 'jax'
+SKIPPED [1] tests/unit/engines/pinocchio/test_pinocchio_force_torque.py:12: real pinocchio runtime required (found mock/stub)
+SKIPPED [1] tests/unit/engines/test_jaxsim_parameter_gradients.py:22: could not import 'jax': No module named 'jax'
+SKIPPED [1] tests/unit/launchers/test_unified_launcher.py:13: target module removed in #8831 — tombstone pending post-merge cleanup
+SKIPPED [1] tests/unit/motion_matching/conftest.py:371: PyTorch not installed
+SKIPPED [32] tests/unit/motion_matching/conftest.py:371: could not import 'torch': No module named 'torch'
+SKIPPED [2] tests/unit/motion_matching/conftest.py:371: could not import 'jax': No module named 'jax'
+SKIPPED [1] tests/unit/motion_pipeline/matching_completeness/test_inverse_dyn_pinocchio.py:36: pinocchio in sys.modules is a MagicMock — real library absent
+SKIPPED [2] tests/unit/motion_matching/conftest.py:371: could not import 'upstream_mocap_preproc': No module named 'upstream_mocap_preproc'
+SKIPPED [2] tests/unit/motion_matching/conftest.py:371: could not import 'upstream_mocap_io': No module named 'upstream_mocap_io'
+SKIPPED [11] tests/unit/motion_matching/conftest.py:371: model_generation.models.pendulum_putter package not available
+SKIPPED [1] tests/unit/motion_matching/conftest.py:371: could not import 'pyqtgraph': No module named 'pyqtgraph'
+SKIPPED [3] tests/unit/motion_matching/conftest.py:371: could not import 'upstream_realtime': No module named 'upstream_realtime'
+SKIPPED [1] tests/unit/test_c3d_force_plate.py:17: c3d_reader module not available (requires c3d/ezc3d)
+SKIPPED [1] tests/unit/test_c3d_services.py:27: Could not import C3D apps
+SKIPPED [1] tests/unit/test_golf_suite_launcher.py:13: target module removed in #8831 — tombstone pending post-merge cleanup
+SKIPPED [1] tests/unit/test_unified_launcher_coverage.py:13: target module removed in #8831 — tombstone pending post-merge cleanup
+SKIPPED [1] tests/unit/test_unified_launcher_status.py:13: target module removed in #8831 — tombstone pending post-merge cleanup
+SKIPPED [2] tests/unit/motion_matching/conftest.py:371: the VTK/PyVista viz3d extra is optional
+SKIPPED [2] tests/unit/motion_matching/conftest.py:371: could not import 'upstream_urdf': No module named 'upstream_urdf'
+[PASS] Lint & Format
+[PASS] Diff Mypy
+[FAIL] Affected Tests
+       FAIL: affected tests failed (exit code 1)
+[PASS] Consistency Tests
+[PASS] Semgrep & Import Policy
+       PASS (semgrep not installed; advisory in CI, scan skipped)
+[PASS] Policy & Fragment Validators
+[FAIL] Fleet Policy Gate
+       FAIL:
+         - shared_scripts/development_log.py exited 1:
+                   Remediation: Include the verifying commit SHA in 'Last verified'.
+               - DEVELOPMENT_LOG.md:2708 [unusable_last_verified]: DL-#8869 'Last verified' has no commit SHA.
+                   Remediation: Include the verifying commit SHA in 'Last verified'.
+               - DEVELOPMENT_LOG.md:2722 [unusable_last_verified]: DL-#9193 'Last verified' has no commit SHA.
+                   Remediation: Include the verifying commit SHA in 'Last verified'.
+               - DEVELOPMENT_LOG.md:2735 [missing_state]: DL-#9349 has no State field.
+                   Remediation: Add '- **State:** <one of ['abandoned', 'in_progress', 'in_review', 'parked', 'proposed', 'shipped']>'.
+               - DEVELOPMENT_LOG.md:2735 [missing_field]: DL-#9349 is missing required field 'State'.
+                   Remediation: Add '- **State:** ...' to DL-#9349.
+               - DEVELOPMENT_LOG.md:2735 [missing_field]: DL-#9349 is missing required field 'Owner'.
+                   Remediation: Add '- **Owner:** ...' to DL-#9349.
+               - DEVELOPMENT_LOG.md [wip_ceiling]: 143 active entries exceeds the ceiling of 75. Work is being started faster than it is finished.
+                   Remediation: Park or ship entries before opening new ones.
+               - DEVELOPMENT_LOG.md [size_ceiling]: Development log exceeds 200000 bytes.
+                   Remediation: Move shipped entries to DEVELOPMENT_LOG_ARCHIVE_<year>.md.
+[PASS] Workflow Lint
+       PASS (no workflow files changed)
+==============================================================
+Pre-PR gates FAILED. Fix issues before pushing.

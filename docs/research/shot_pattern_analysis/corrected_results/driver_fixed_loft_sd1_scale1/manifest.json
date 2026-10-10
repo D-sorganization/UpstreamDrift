@@ -1,0 +1,33 @@
+{
+  "scenario": "driver_fixed_loft_sd1_scale1",
+  "config": {
+    "club_id": "driver",
+    "n_shots": 10000,
+    "face_sd_deg": 1.0,
+    "curve_scale": 1.0,
+    "seed": 20261008,
+    "club_speed_mps": 45.0,
+    "loft_deg": 12.8,
+    "attack_angle_deg": -0.9,
+    "clubhead_mass_kg": 0.2,
+    "delivery_mode": "fixed_loft",
+    "lie_deg": 58.5,
+    "shaft_lean_deg": 0.0,
+    "dt_s": 0.02,
+    "max_time_s": 12.0,
+    "target_radius_m": 15.0
+  },
+  "files_sha256": {
+    "shots.csv": "dd3022f131858abafd639cdf225fb5d177da08f5ff8d69f764a16bd99d901b6a",
+    "summary.json": "da2281e9f896a93be53754f29ee240f12aa86db07a63c42f4f7cbc4bfb604013",
+    "receipt.json": "a0ba058aed9a4f87d915f782d449d62cc844073e8a373857da09b19cdfd62e3e",
+    "overhead_flight.png": "8b51af0bf1da88d43495401c8a1ba9a4c5b7052f5016994afc4f4b09212a54e2",
+    "dispersion.png": "ab57016bd33ce014d36ec70e8f82049dac3241c5aca142793dc3c9946f5b0e74",
+    "dispersion_equal_range.png": "5987d1e0b3d820ec1aabf0ff818507b887c36a2b7d47f4514636f61baaf2df81",
+    "strokes_gained.json": "4dd1e2304e7e9ecae0c1e25f6e5ea9ea1134009d672ddfc8c62c8d325bcb5f2a",
+    "strokes_gained_baseline.json": "334d425d328c6dcbc43002d6134cfc359c2688213c2a37065c1184991103260a",
+    "run_start.json": "33dafb195a323086a4cecc9604761e1fafd8efc502135bd4104abb643a8e67c6"
+  },
+  "scoring_revision": "table9-full-plus-anchor-reconciled-putting/2",
+  "pre_correction_scoring_archive_sha256": "9c5130e845b91442fe427d9166a7c89c4b48655a50a849ff7abc5129df7da9ec"
+}

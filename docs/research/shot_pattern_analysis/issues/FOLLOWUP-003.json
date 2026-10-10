@@ -1,0 +1,8 @@
+{
+  "local_id": "FOLLOWUP-003",
+  "title": "Regenerate Stale Articulated Ground Sensitivity Provenance Against Its Actual Atlas",
+  "body": "The canonical pre-PR affected-test lane fails tests/research/test_articulated_ground_posthoc_sensitivity.py::test_ground_posthoc_sensitivity_preserves_primary_failure_and_mixed_signs. All three test/data files are byte-identical to origin/main 3245b5211e5329105dfe9c66007b8d8e85c652e7. The sensitivity JSON records atlas SHA256 4934a4cf6168a339755794151eb70dbd36af7bce84c38d9efa9387944a2b1c15, but articulated_ground_atlas.json hashes to ec8c37b73f22d97bda93d4fee4d586513a73d966ca0081c42cb05250112e8b31.\n\n## Acceptance Criteria\n\nValidate or regenerate the dependent research artifact through its documented calculation workflow, preserve primary failure and mixed-sign claims, and establish source provenance. Do not merely replace the recorded hash without scientific validation. Run the failing test and associated research tests.\n\n## Handoff\n\nUnrelated baseline release blocker discovered during shot-pattern validation (543 passed, 12 skipped before this failure). Keep open for a separately evidenced correction.",
+  "publication_status": "published",
+  "github_issue_number": 11940,
+  "github_issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11940"
+}

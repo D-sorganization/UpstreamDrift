@@ -1,0 +1,10 @@
+{
+  "local_id": "SPA-014",
+  "title": "Version the Extended Historical Scoring Baseline Explicitly",
+  "body": "## Problem\n\nThe new tee/fairway/rough support to 600 yd retains the abbreviated table version identifier. Content SHA distinguishes the values, so numeric scoring remains traceable, but the version label is misleading.\n\n## Acceptance Criteria\n\nAfter frozen flights finish, assign a full-table version, rerun scoring postprocess and update manifests/receipts while retaining original flight run-start provenance. Confirm numeric API parity and clearly distinguish historical shortened support.\n\n## Validation\n\nBaseline version/digest assertions, independent API/cache parity, and updated scoring manifests after postprocessing all 24 completed CSV bundles.\n\n## Handoff\n\nBranch: `codex/shot-pattern-analysis`. Current implementation and evidence are tracked in `docs/research/shot_pattern_analysis/issues/README.md`. Keep open until a merged implementing PR satisfies acceptance criteria or an explicitly permitted disposition applies.\n",
+  "publication_status": "published",
+  "github_issue_number": 11853,
+  "github_issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11853",
+  "issue_number": 11853,
+  "issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11853"
+}

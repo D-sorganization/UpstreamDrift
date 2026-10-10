@@ -1,0 +1,10 @@
+{
+  "local_id": "SPA-011",
+  "title": "Accept Custom Delivery Inputs Through the Shot Pattern GUI Subprocess",
+  "body": "## Problem\n\nEditing preset fields relabels the GUI selection custom, but its CLI subprocess rejected --club-preset custom.\n\n## Acceptance Criteria\n\nAccept custom mode without preset replacement; preserve entered delivery values. Verify parser resolution and a headless GUI custom shaft-rotation run.\n\n## Validation\n\ntests/tools/shot_pattern_analysis/test_presets.py, test_entrypoint.py, and tests/ui/tools/shot_pattern_analysis/test_embed_adapter.py; custom and modified club inputs preserve delivery and scoring context.\n\n## Handoff\n\nBranch: `codex/shot-pattern-analysis`. Current implementation and evidence are tracked in `docs/research/shot_pattern_analysis/issues/README.md`. Keep open until a merged implementing PR satisfies acceptance criteria or an explicitly permitted disposition applies.\n",
+  "publication_status": "published",
+  "github_issue_number": 11850,
+  "github_issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11850",
+  "issue_number": 11850,
+  "issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11850"
+}

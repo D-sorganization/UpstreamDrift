@@ -411,6 +411,16 @@
       "tiles": ["launch_monitor_analytics"],
       "notes": "The PyQt6 workbench and versioned API share one flexible-analysis contract. The web page (#11987) now covers Flexible Analysis (POST /v2/analyze), Trends (POST /v2/trend), Dispersion (POST /v2/dispersion), and Relationships — correlations/partial correlations/dependency network, PCA, and VIF (POST /v2/relationships, POST /v2/multivariate). Still missing on the web: Sessions, Data Treatment, Models, Monitor Comparison, and Reports."
     },
+    "tools.shot_pattern_analysis": {
+      "title": "Shot Pattern Analysis Workbench",
+      "pyqt": "src/tools/shot_pattern_analysis/gui.py",
+      "api": null,
+      "web": null,
+      "status": "exempt",
+      "reason": "The current product surface is a local PyQt6 launcher and headless CLI for deterministic physics simulation and local CSV, JSON, and PNG exports. There is no API route or React page, so browser parity is not claimed.",
+      "tiles": ["shot_pattern_analysis"],
+      "notes": "The GUI runs the canonical CLI in a cancellable managed subprocess. The Python solver delegates impact and flight to shared UpstreamDrift physics."
+    },
     "tools.bunkershot3d_workbench": {
       "title": "BunkerShot3D designer workbench (W2 sole parameters, W3 sand condition, F0 dynamic-RFT shot, W7 metrics, playability window, bounce utilisation, animated sole load field, 3-D shot animation through the ADR-0027 viewport, linked scalar traces with a validity band, F1 sand-field cross-sections, A/B comparison, validity verdict)",
       "pyqt": "src/tools/bunker_shot_gui/gui.py",

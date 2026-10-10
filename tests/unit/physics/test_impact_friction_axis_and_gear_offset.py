@@ -27,7 +27,6 @@ from src.shared.python.physics.impact_model import (
     PreImpactState,
     RigidBodyImpactModel,
 )
-from src.shared.python.physics.impact_model.models import SPHERE_ROLLING_CAP_FACTOR
 
 pytestmark = pytest.mark.unit
 
@@ -36,7 +35,7 @@ class TestFrictionSpinAxis:
     """The friction impulse must generate backspin, not topspin."""
 
     def test_lofted_strike_backspin_axis_and_cap(self) -> None:
-        """Lofted (oblique) strike: backspin about -Y, capped at 2/7 limit.
+        """Lofted strike: backspin about -Y with a finite-mass no-slip cap.
 
         Club moves +X, face normal tilted up by loft in the XZ plane.
         The tangential face motion drags the ball's contact surface
@@ -62,15 +61,18 @@ class TestFrictionSpinAxis:
         assert abs(post.ball_angular_velocity[0]) < 1e-12
         assert abs(post.ball_angular_velocity[2]) < 1e-12
 
-        # Cap: J_f = m v_t (2/7) → omega = (5/7) v_t / R for a solid sphere.
+        # Contact-point effective mass includes ball translation, club
+        # translation, and ball rotation. The 2/7 limit assumes an
+        # infinitely massive club and would overstate this shot's spin.
         v_rel = pre.clubhead_velocity
         v_t = float(np.linalg.norm(v_rel - np.dot(v_rel, n) * n))
         i_ball = (2.0 / 5.0) * GOLF_BALL_MASS_KG * GOLF_BALL_RADIUS_M**2
-        cap_spin = (
-            (GOLF_BALL_MASS_KG * v_t * SPHERE_ROLLING_CAP_FACTOR)
-            * GOLF_BALL_RADIUS_M
-            / i_ball
+        j_tangent = v_t / (
+            1 / GOLF_BALL_MASS_KG
+            + 1 / pre.clubhead_mass
+            + GOLF_BALL_RADIUS_M**2 / i_ball
         )
+        cap_spin = j_tangent * GOLF_BALL_RADIUS_M / i_ball
         assert float(np.linalg.norm(post.ball_angular_velocity)) == pytest.approx(
             cap_spin, rel=1e-9
         )

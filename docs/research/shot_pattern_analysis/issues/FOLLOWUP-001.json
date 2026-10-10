@@ -1,0 +1,8 @@
+{
+  "local_id": "FOLLOWUP-001",
+  "title": "Fix the Existing Drake Embed Widget Abort in Offscreen Tests",
+  "body": "The full affected-test runner aborts in tests/ui/engines/drake/test_drake_embed_adapter.py::test_create_main_widget_returns_qwidget, at src/engines/physics_engines/drake/python/src/drake_gui_ui.py:367 QComboBox.clear. The exact test alone also exits 134 under QT_QPA_PLATFORM=offscreen, MPLBACKEND=Agg, MUJOCO_GL=egl and SDL_VIDEODRIVER=dummy. The qapp fixture is session-scoped and retained; missing qapp is not supported by the trace. All Drake source, test and fixture files are byte-identical to origin/main at 3245b5211e.\n\n## Acceptance Criteria\n\nReproduce and fix the native offscreen construction abort with an appropriate regression and safe fixture/widget lifetime handling; do not launch a GUI or alter DLL paths. Confirm focused and broad GUI tests.\n\n## Handoff\n\nDiscovered while validating codex/shot-pattern-analysis; not a shot-pattern model defect. Keep this separate baseline issue open until its own merged fix. Exact environment inherits dependencies read-only from the existing Python3.12 project environment.",
+  "publication_status": "published",
+  "github_issue_number": 11934,
+  "github_issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11934"
+}

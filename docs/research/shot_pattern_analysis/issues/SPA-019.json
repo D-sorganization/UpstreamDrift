@@ -1,0 +1,10 @@
+{
+  "local_id": "SPA-019",
+  "title": "Namespace Shot Pattern Tests to Prevent Repository Collection Collisions",
+  "body": "The full affected-test gate found that the new un-packaged test_core.py shadows tests/unit/tools/native_viewer_export/test_core.py under pytest prepend imports. Focused tests alone did not reveal the collision.\n\n## Acceptance Criteria\n\nMake the shot-pattern test directories proper packages without changing unrelated tests or ignoring collection errors. Demonstrate red collection from the canonical runner then green simultaneous collection and rerun relevant tests.\n\n## Validation\n\nCanonical pre-PR log records import-file mismatch for bare test_core. Package markers and simultaneous collection must remove it.\n\n## Handoff\n\nBranch `codex/shot-pattern-analysis`; keep open until merged implementing PR.",
+  "publication_status": "published",
+  "github_issue_number": 11930,
+  "github_issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11930",
+  "issue_number": 11930,
+  "issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11930"
+}

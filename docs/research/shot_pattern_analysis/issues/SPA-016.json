@@ -1,0 +1,10 @@
+{
+  "local_id": "SPA-016",
+  "title": "Remove Artificial Partial Hole-Out Rewards From the Putting Baseline",
+  "body": "## Problem\n\nThe green/standard baseline interpolates from expected strokes 0 at zero distance to approximately 1 at 5.3975 cm. Positive unholed endpoints therefore receive impossible expectations below one stroke. At 1 cm the public API grants about 0.815 artificial extra strokes. In SD1 fixed-loft controls this inflates straight means by approximately 0.0053 strokes for 7-iron and 0.0103 for PW, dominating some shape comparisons. API/cache parity reproduces the defect and does not establish baseline validity.\n\n## Acceptance Criteria\n\nUse an unholed zero-distance tap-in limit of one in green/standard; all unholed expected values must be at least one. Reserve zero for a separately explicit holed state; no landing is assumed holed in this carry-only scenario. Bump baseline version/digest, archive pre-fix scoring artifacts, re-score saved endpoints, and update manifests and scoring-source provenance. Preserve direct public-API/cache parity at 1e-12. Test the physical lower bound before fixing it.\n\n## Validation\n\nBroadie 2011 Equation 7 defines putting expectation as p1 + 2p2 + 3p3, so valid unholed probabilities imply at least one stroke. Astra independently verified the erroneous API output and affected shot counts. Historical cache tests must use their preserved original baselines; corrected baselines must pass the new physical and API-parity checks.\n\n## Handoff\n\nBranch: `codex/shot-pattern-analysis`. Current implementation and evidence are tracked in `docs/research/shot_pattern_analysis/issues/README.md`. Keep open until a merged implementing PR satisfies acceptance criteria or an explicitly permitted disposition applies.\n",
+  "publication_status": "published",
+  "github_issue_number": 11863,
+  "github_issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11863",
+  "issue_number": 11863,
+  "issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11863"
+}

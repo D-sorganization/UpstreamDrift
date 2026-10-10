@@ -1,9 +1,8 @@
 {
-  "schema_version": "1.0.0",
-  "manual_id": "upstreamdrift",
   "repository": "D-sorganization/UpstreamDrift",
   "release_status": "blocked-inventory-required",
-  "inventory_commit": null,
+  "manual_id": "upstreamdrift",
+  "schema_version": "1.0.0",
   "blockers": [
     {
       "id": "UP-D1-native-muscle-asset-admission-inventory",
@@ -68,7 +67,7 @@
     {
       "id": "UP-D1-feedback-comparison-admission-inventory",
       "owner": "UpstreamDrift issue #11785",
-      "resolution": "Inventory F01 controlled-swing admission in src/engines/feedback_comparison.py and manuals/upstreamdrift/chapters/13-feedback-comparison.qmd: all 16 registered packages plus declared OpenSim torque/muscle variants stay required; support, availability and qualification remain separate; exact model/provider/state-schema/initial-state-payload/policy/input/physics/contact/integrator/actuator identities and time-only full-state no-reset replay guard comparison levels. The existing Euclidean same-input-bundle/v1 lacks policy/input hash binding and cannot qualify native muscle or manifold replay. Common-model, externally forced and restarted short-horizon evidence cannot qualify native own-contact muscle full-swing physics. Unit admission tests and source hashes do not establish matching accuracy, measured contact or EMG agreement, runtime speed, or native six-engine qualification. Full calculation coverage and publication remain blocked."
+      "resolution": "Inventory F01 controlled-swing admission in src/engines/feedback_comparison.py and manuals/upstreamdrift/chapters/13-feedback-comparison.qmd: all 16 registered packages plus declared OpenSim torque/muscle variants stay required; support, availability and qualification remain separate; exact model/provider/state/policy/input/physics/contact/integrator/actuator identities and time-only full-state no-reset replay guard comparison levels. The existing Euclidean same-input-bundle/v1 lacks policy/input hash binding and cannot qualify native muscle or manifold replay. Common-model, externally forced and restarted short-horizon evidence cannot qualify native own-contact muscle full-swing physics. Unit admission tests and source hashes do not establish matching accuracy, measured contact or EMG agreement, runtime speed, or native six-engine qualification. Full calculation coverage and publication remain blocked."
     },
     {
       "id": "UP-D1-sparse-collocation-benchmark-inventory",
@@ -118,7 +117,7 @@
     {
       "id": "UP-D1-grip-wrench-reduction-inventory",
       "owner": "UpstreamDrift issue #11724",
-      "resolution": "Inventory the GCV-7 (#11713) grip-wrench core in src/shared/python/biomechanics/grip_wrench.py and the GCV-8 (#11714) engine-agnostic extraction in src/shared/python/biomechanics/grip_extraction.py, documented provisionally in chapters/11-grip-wrench.qmd: hand-on-club wrenches in the world frame, grip midpoint net force, equivalent couple split into contact force moment and applied free torque (exact postconditions), per-hand moments of force, club-local components by the transpose rotation, the club Newton-Euler holding-hand recovery, the reference minimum-norm split, and the recorded split_method (rigid-weld splits are solver-defined; bushing is determinate). Unavailable values are None/NaN/null with a reason, never zero. tests/unit/biomechanics/test_grip_wrench.py and test_grip_extraction.py establish algebraic agreement with hand-computed wrenches and these invariants; they do not qualify any engine constraint solver or grip model, compare against instrumented-grip measurements, or establish an uncertainty. F10i #12060 integrates main prescribed-motion bushing adapters and documents shared bushing_law.py in chapter11: hand-frame translation/rate, BodyXYZ rotational coordinates and N-transpose virtual-power moment mapping, source singularity refusal and unit conventions. Mixed actual OpenSim4.6/MuJoCo3.8 grip checks pass77 with12 absent-SDK skips. Prescribed-motion wrench parity does not establish full-body muscle-driven own-contact replay, calibrated grip loads, private capture agreement or all-model parity."
+      "resolution": "Inventory the GCV-7 (#11713) grip-wrench core in src/shared/python/biomechanics/grip_wrench.py and the GCV-8 (#11714) engine-agnostic extraction in src/shared/python/biomechanics/grip_extraction.py, documented provisionally in chapters/11-grip-wrench.qmd: hand-on-club wrenches in the world frame, grip midpoint net force, equivalent couple split into contact force moment and applied free torque (exact postconditions), per-hand moments of force, club-local components by the transpose rotation, the club Newton-Euler holding-hand recovery, the reference minimum-norm split, and the recorded split_method (rigid-weld splits are solver-defined; bushing is determinate). Unavailable values are None/NaN/null with a reason, never zero. tests/unit/biomechanics/test_grip_wrench.py and test_grip_extraction.py establish algebraic agreement with hand-computed wrenches and these invariants; they do not qualify any engine constraint solver or grip model, compare against instrumented-grip measurements, or establish an uncertainty."
     },
     {
       "id": "UP-D1-same-input-parity-inventory",
@@ -206,6 +205,11 @@
       "resolution": "Inventory the provisional chapter 21 and control_loop_tuning.py: bounded F02 gain/task-weight block-coordinate initialization and joint refinement, exact stage rollout limits, heldout full/reduced reports, frozen phase/group loss Jacobian and objective cross-Hessian, descriptive covariance, rank checks, and separately labeled frozen-versus-refit perturbation. The native contact-free MuJoCo 9/8/2 fixture now evaluates a frozen moving feedforward and exact-state F02 feedback across disjoint training/held-out initial states, with complete-state independent post-limit torque replay and paired direct-motor interventions showing in-model cross-response. Its source-bound receipt retains objective, held-out error, full evaluation cost, local rank and unavailable uncertainty. Neither synthetic fixture qualifies native full-body contact, six-engine parity, private motion capture, human control causation, global identifiability or scientific runtime. Full calculation coverage and publication remain blocked."
     },
     {
+      "id": "UP-D1-shot-pattern-variance-inventory",
+      "owner": "UpstreamDrift Shot Pattern Analysis",
+      "resolution": "Inventory src/tools/shot_pattern_analysis and its separate editable experiment reference docs/research/shot_pattern_analysis/shot_pattern_analysis.tex: paired Monte Carlo face-only variation, rigid-body impact launch/spin mapping, Rust RK4 carry endpoints, nominal aiming rotation, empirical variance/quantiles/target-hit metrics and paired bootstrap uncertainty. Corrected central impact applies tangential impulse consistently to ball/club translation and ball spin, includes finite-club sticking mass, and rejects separating contact. Three-club fixed-loft/assumed shaft-rotation comparisons, V2 tee/approach scoring, and their numerical checks are model-conditional, not measured golfer outcomes or empirical scientific qualification. Keep manual publication and release blocked pending governed calculation inventory, measured validation, source/dependency provenance and page review."
+    },
+    {
       "id": "UP-D1-native-pinocchio-torque-replay-inventory",
       "owner": "UpstreamDrift issue #11900",
       "resolution": "Inventory existing public PinocchioPhysicsEngine ABA/RK4 manifold integration, complete q/v restoration, explicit unit generalized motor mapping, source/native model/provider identity and fixed post-limit inputs in chapter25. Twelve actual native Pinocchio4.1 synthetic checks establish independent replay and fixture-specific refinement. Native contact/grip, physiological actuation, required production models, private capture accuracy and all-model six-engine parity remain unqualified. Shared Tools contract/history/identity admission remains canonical and provider-bound."
@@ -291,5 +295,6 @@
       "resolution": "Inventory provisional chapter44 and native_buet_hamner_assembly.py: exact reviewed BUET473 upper/trunk and Hamner84 distal lower source hashes, shared physical pelvis/femur and hip SpatialTransform admission, explicit eight distal body/joint and 84-muscle ownership, native serialization/reload and source component-property equality. Three hip poses/nonzero speeds compare donor region body transforms/velocities and all557 muscle path lengths/speeds; native finite positive mass, body-plus-mobility applied force and QErr/UErr are observed separately. This sampled source-preserving mechanical candidate does not prove whole-model dynamic equivalence, source asset closure, anatomy/physiology, native Moco, full-state replay, capture matching or all17/six-engine parity. Keep canonical calculation coverage/publication blocked."
     }
   ],
+  "inventory_commit": null,
   "calculations": []
 }

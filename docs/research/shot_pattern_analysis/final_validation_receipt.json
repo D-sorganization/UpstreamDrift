@@ -1,0 +1,49 @@
+{
+  "production_commit": "928c594f54",
+  "upstream_baseline": "3245b5211e5329105dfe9c66007b8d8e85c652e7",
+  "feature_and_ui_tests": {
+    "passed": 139,
+    "includes_slow": true
+  },
+  "launcher_registration_tests_passed": 108,
+  "impact_landing_python_tests_passed": 105,
+  "rust_tests": {
+    "unit": 99,
+    "integration": 3
+  },
+  "changed_production_mypy_files_passed": 24,
+  "bundle_hashes_verified": 216,
+  "shots": 720000,
+  "cells": 24,
+  "numerical_refinement": {
+    "flights": 270,
+    "max_landing_delta_m": 0.000573215,
+    "acceptance_m": 0.05
+  },
+  "canonical_pre_pr": {
+    "exit_code": 1,
+    "passed": [
+      "Lint & Format",
+      "Diff Mypy",
+      "Consistency Tests (exit 5: no marked tests executed)",
+      "Semgrep & Import Policy (Semgrep unavailable: advisory skipped; import check passed)",
+      "Policy & Fragment Validators",
+      "Workflow Lint (no changed workflows)"
+    ],
+    "failed": [
+      "Affected Tests: unrelated stale research SHA #11940 after 543 passed, 12 skipped",
+      "Fleet Policy Gate: unchanged development log #11935"
+    ],
+    "additional_baseline_abort": "Drake offscreen abort independently reproduced, #11934"
+  },
+  "latex_compilation": "unverified: uncached Tectonic bundle download failed",
+  "engineering_manual": "blocked-inventory-required",
+  "validation_python": "/tmp/shot-pattern-validation-venv-20261009/bin/python",
+  "headless_environment": {
+    "QT_QPA_PLATFORM": "offscreen",
+    "MPLBACKEND": "Agg",
+    "MUJOCO_GL": "egl",
+    "SDL_VIDEODRIVER": "dummy"
+  },
+  "publication": "Ready PR required; blocked merge label until separately governed baseline corrections. No protection bypass."
+}

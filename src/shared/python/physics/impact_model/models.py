@@ -22,10 +22,11 @@ from .types import ImpactModelType, ImpactParameters, PostImpactState, PreImpact
 #   * surface speed from spin-up:            R·ΔΩ = J_f·R² / I
 # Rolling without slip is reached when the contact point stops sliding, i.e.
 # when ΔV + R·ΔΩ equals the effective tangential approach speed v_t:
-#   J_f·(1/m + R²/I) = m·v_t   ⇒   J_f = v_t / (1/m + R²/I).
+#   J_f·(1/m + R²/I) = v_t   ⇒   J_f = v_t / (1/m + R²/I).
 # For a uniform solid sphere I = (2/5)·m·R², so R²/I = 5/(2m) and
 #   J_f = v_t / (1/m + 5/(2m)) = m·v_t · (2/7).
-# Hence the rolling cap factor is 2/7 ≈ 0.2857, NOT the prior 0.4.
+# Hence the rolling cap factor is 2/7 ≈ 0.2857 in the infinite-club-mass
+# limit. The finite-club collision below also includes 1/m_club.
 # Ref: classic rigid-body collision of a sphere, e.g. Cross, "Grip-slip
 # behavior of a bouncing ball", Am. J. Phys. 70, 1093 (2002).
 SPHERE_ROLLING_CAP_FACTOR = 2.0 / 7.0
@@ -56,7 +57,9 @@ class RigidBodyImpactModel(ImpactModel):
     """Rigid body collision with coefficient of restitution.
 
     Uses instantaneous impulse-momentum equations with COR
-    to compute post-impact velocities.
+    to compute post-impact velocities. Tangential contact uses a translating,
+    non-rotating club surface. The scalar off-center club MOI approximation
+    does not establish full angular momentum conservation for gear-effect hits.
     """
 
     def _compute_effective_club_mass(self, pre_state: PreImpactState) -> float:
@@ -97,7 +100,7 @@ class RigidBodyImpactModel(ImpactModel):
         j = (1 + cor) * m_eff * v_approach
         return j, v_approach
 
-    def _compute_friction_spin(
+    def _compute_friction_impulse(
         self,
         pre_state: PreImpactState,
         v_rel: np.ndarray,
@@ -106,41 +109,34 @@ class RigidBodyImpactModel(ImpactModel):
         j: float,
         friction_coefficient: float,
     ) -> np.ndarray:
+        """Return surface impulse with finite ball and club translational mass.
+
+        The no-slip cap includes both bodies' linear response and the ball's
+        rotational response. Off-center club rotation remains outside this
+        simplified scalar model; callers must not infer full gear-effect
+        conservation from this central-contact calculation.
+        """
         if pre_state is None:
             raise ValueError("pre_state must be provided")
         v_tangent = v_rel - v_approach * n
-        tangent_mag = (
-            0.0
-            if np.asarray(v_tangent, dtype=float).reshape(-1).size == 0
-            else math.hypot(*np.asarray(v_tangent, dtype=float).reshape(-1))
+        # The ball contact point is -R*n from its center. Its surface
+        # velocity subtracts R*(omega x n) from center velocity.
+        slip = v_tangent + GOLF_BALL_RADIUS_M * np.cross(
+            pre_state.ball_angular_velocity, n
         )
-
-        if tangent_mag <= 1e-6:
-            return pre_state.ball_angular_velocity.copy()
-
-        tangent_dir = v_tangent / tangent_mag
-        # Spin axis: friction drags the ball's contact surface along the
-        # face's relative tangential motion t; the impulse J_f·t acts at
-        # the ball contact point -R·n, so torque = (-R n) × (J_f t) and the
-        # axis is t × n. (The prior n × t spun a lofted strike toward
-        # topspin, contradicting the pre-existing-spin slip reduction
-        # below, which assumes positive spin about this axis reduces
-        # contact-point sliding.)
-        spin_axis = np.cross(tangent_dir, n)
-        # Rolling cap relative to contact-point speed (pre-existing spin reduces sliding).
-        omega_contact = float(np.dot(pre_state.ball_angular_velocity, spin_axis))
-        v_t_eff = max(0.0, tangent_mag - omega_contact * float(GOLF_BALL_RADIUS_M))
-        # Coulomb friction impulse, capped at the rolling-without-slip impulse
-        # for a uniform solid sphere (J_f = m·v_t·2/7, see
-        # SPHERE_ROLLING_CAP_FACTOR derivation above).
-        j_friction = min(
-            float(friction_coefficient * j),
-            float(GOLF_BALL_MASS_KG * v_t_eff * SPHERE_ROLLING_CAP_FACTOR),
+        slip_mag = float(np.linalg.norm(slip))
+        if slip_mag <= 1e-12 or friction_coefficient == 0.0 or j <= 0.0:
+            return np.zeros(3)
+        inverse_effective_mass = (
+            1.0 / GOLF_BALL_MASS_KG
+            + 1.0 / pre_state.clubhead_mass
+            + GOLF_BALL_RADIUS_M**2 / GOLF_BALL_MOMENT_OF_INERTIA_KG_M2
         )
-        spin_magnitude = j_friction / (
-            GOLF_BALL_MOMENT_OF_INERTIA_KG_M2 / GOLF_BALL_RADIUS_M
+        j_tangent = min(
+            friction_coefficient * j,
+            slip_mag / inverse_effective_mass,
         )
-        return pre_state.ball_angular_velocity + spin_magnitude * spin_axis
+        return j_tangent * slip / slip_mag
 
     def _compute_energy_transfer(
         self,
@@ -183,6 +179,7 @@ class RigidBodyImpactModel(ImpactModel):
         """
         require_finite(pre_state.clubhead_velocity, "clubhead_velocity")
         require_finite(pre_state.ball_velocity, "ball_velocity")
+        require_finite(pre_state.ball_angular_velocity, "ball_angular_velocity")
         require_finite(pre_state.clubhead_orientation, "clubhead_orientation")
         require(
             bool(
@@ -213,13 +210,14 @@ class RigidBodyImpactModel(ImpactModel):
             )
         )
         v_rel = pre_state.clubhead_velocity - pre_state.ball_velocity
+        require(
+            bool(float(np.dot(v_rel, n)) >= 0.0),
+            "clubhead and ball must be approaching at contact",
+        )
 
         j, v_approach = self._compute_impulse(v_rel, n, m_club_effective, params.cor)
 
-        v_ball_post = pre_state.ball_velocity + (j / GOLF_BALL_MASS_KG) * n
-        v_club_post = pre_state.clubhead_velocity - (j / pre_state.clubhead_mass) * n
-
-        ball_spin = self._compute_friction_spin(
+        j_tangent = self._compute_friction_impulse(
             pre_state,
             v_rel,
             v_approach,
@@ -227,6 +225,12 @@ class RigidBodyImpactModel(ImpactModel):
             j,
             params.friction_coefficient,
         )
+        impulse = j * n + j_tangent
+        v_ball_post = pre_state.ball_velocity + impulse / GOLF_BALL_MASS_KG
+        v_club_post = pre_state.clubhead_velocity - impulse / pre_state.clubhead_mass
+        ball_spin = pre_state.ball_angular_velocity + (
+            GOLF_BALL_RADIUS_M / GOLF_BALL_MOMENT_OF_INERTIA_KG_M2
+        ) * np.cross(j_tangent, n)
         energy_transfer = self._compute_energy_transfer(
             pre_state.ball_velocity,
             v_ball_post,
@@ -271,9 +275,37 @@ class SpringDamperImpactModel(ImpactModel):
         self.dt = dt
 
     @precondition(
-        lambda self, pre_state, params: pre_state.clubhead_mass > 0,
+        lambda self, x_ball, v_ball, x_club, v_club, n, m_club, penetration, params: (
+            m_club > 0
+        ),
         "Clubhead mass must be positive",
     )
+    def _step_contact(
+        self,
+        x_ball: np.ndarray,
+        v_ball: np.ndarray,
+        x_club: np.ndarray,
+        v_club: np.ndarray,
+        n: np.ndarray,
+        m_club: float,
+        penetration: float,
+        params: ImpactParameters,
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+        """Advance positions and velocities during one contact time step."""
+        max_force = 1e5  # [N] max contact force
+        v_rel_normal = np.dot(v_ball - v_club, n)
+        f_spring = params.contact_stiffness * penetration
+        f_damper = -params.contact_damping * v_rel_normal
+        f_magnitude = max(0.0, min(f_spring + f_damper, max_force))
+        f_contact = f_magnitude * n
+        a_ball = f_contact / GOLF_BALL_MASS_KG
+        a_club = -f_contact / m_club
+        v_b = v_ball + a_ball * self.dt
+        v_c = v_club + a_club * self.dt
+        x_b = x_ball + v_b * self.dt
+        x_c = x_club + v_c * self.dt
+        return x_b, v_b, x_c, v_c
+
     @precondition(
         lambda self, pre_state, params: params.contact_stiffness > 0,
         "Contact stiffness must be positive",
@@ -313,46 +345,26 @@ class SpringDamperImpactModel(ImpactModel):
         x_club: np.ndarray = np.zeros(3)
         v_club: np.ndarray = pre_state.clubhead_velocity.copy()
 
-        # Integration
         contact_time = 0.0
         max_time = 0.005  # 5 ms max contact time [s]
         max_steps = int(max_time / self.dt)
-
-        # Limit max force to prevent numerical blow-up
         max_force = 1e5  # [N] max contact force
 
         for _ in range(max_steps):
-            # Penetration depth (along normal)
             gap = np.dot(x_ball - x_club, n) - GOLF_BALL_RADIUS_M
-
             if gap < 0:  # In contact (penetration)
-                penetration = -gap
-
-                # Contact force (spring-damper)
-                v_rel_normal = np.dot(v_ball - v_club, n)
-                f_spring = params.contact_stiffness * penetration
-                f_damper = -params.contact_damping * v_rel_normal
-                f_magnitude = max(0.0, min(f_spring + f_damper, max_force))
-
-                f_contact = f_magnitude * n
-
-                # Semi-implicit Euler: update velocities first
-                # Force on ball is in direction of normal (away from club)
-                a_ball = f_contact / m_ball
-                # Force on club is opposite to normal (reaction force)
-                a_club = -f_contact / m_club
-
-                v_ball = v_ball + a_ball * self.dt
-                v_club = v_club + a_club * self.dt
-
-                # Then positions
-                x_ball = x_ball + v_ball * self.dt
-                x_club = x_club + v_club * self.dt
-
+                x_ball, v_ball, x_club, v_club = self._step_contact(
+                    x_ball,
+                    v_ball,
+                    x_club,
+                    v_club,
+                    n,
+                    m_club,
+                    -gap,
+                    params,
+                )
                 contact_time += self.dt
-
             elif contact_time > 0:
-                # Was in contact but now separated
                 break
             else:
                 # Pre-contact: advance positions

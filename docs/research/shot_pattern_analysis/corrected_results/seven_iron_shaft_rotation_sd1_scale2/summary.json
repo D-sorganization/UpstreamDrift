@@ -1,0 +1,1034 @@
+{
+  "title": "Shot Pattern Analysis: Straight, Draw, and Fade",
+  "config": {
+    "club_id": "seven_iron",
+    "n_shots": 10000,
+    "face_sd_deg": 1.0,
+    "curve_scale": 2.0,
+    "seed": 20261008,
+    "club_speed_mps": 36.0,
+    "loft_deg": 24.0,
+    "attack_angle_deg": -4.0,
+    "clubhead_mass_kg": 0.272,
+    "delivery_mode": "shaft_rotation",
+    "lie_deg": 63.0,
+    "shaft_lean_deg": 0.0,
+    "dt_s": 0.02,
+    "max_time_s": 12.0,
+    "target_radius_m": 15.0
+  },
+  "target_x_m": 149.74812854111136,
+  "patterns": {
+    "Straight": {
+      "n": 10000.0,
+      "raw_mean_lateral_m": -0.062311618354167674,
+      "aimed_mean_lateral_m": -0.062311618354167674,
+      "lateral_sd_m": 4.217845724645419,
+      "lateral_variance_m2": 17.79022255690964,
+      "lateral_mean_se_m": 0.042178457246454186,
+      "aimed_lateral_sd_m": 4.217845724645419,
+      "aimed_lateral_variance_m2": 17.79022255690964,
+      "raw_lateral_p05_m": -7.053784150591281,
+      "raw_lateral_p50_m": -0.030142406885439746,
+      "raw_lateral_p95_m": 6.7906691055420945,
+      "aimed_lateral_p05_m": -7.053784150591281,
+      "aimed_lateral_p50_m": -0.030142406885439746,
+      "aimed_lateral_p95_m": 6.7906691055420945,
+      "raw_lateral_p05_p95_width_m": 13.844453256133376,
+      "aimed_lateral_p05_p95_width_m": 13.844453256133376,
+      "raw_target_hit_fraction": 0.9996,
+      "raw_target_hit_wilson95_low": 0.9989718716646431,
+      "raw_target_hit_wilson95_high": 0.9998444371633769,
+      "aimed_target_hit_fraction": 0.9996,
+      "aimed_target_hit_wilson95_low": 0.9989718716646431,
+      "aimed_target_hit_wilson95_high": 0.9998444371633769,
+      "raw_target_rmse_m": 4.3090020545378005,
+      "aimed_target_rmse_m": 4.3090020545378005,
+      "mean_carry_m": 149.68420580690244,
+      "carry_sd_m": 0.8635798177511728,
+      "mean_launch_azimuth_deg": 0.0009254818677019252,
+      "mean_spin_axis_tilt_deg": 0.034214937437023835,
+      "opposite_curve_fraction": 0.0
+    },
+    "Draw": {
+      "n": 10000.0,
+      "raw_mean_lateral_m": 2.9920999733681413,
+      "aimed_mean_lateral_m": -0.03519719099678683,
+      "lateral_sd_m": 4.285491358463846,
+      "lateral_variance_m2": 18.3654361834683,
+      "lateral_mean_se_m": 0.04285491358463846,
+      "aimed_lateral_sd_m": 4.297513762338157,
+      "aimed_lateral_variance_m2": 18.468624537485862,
+      "raw_lateral_p05_m": -4.071260149313106,
+      "raw_lateral_p50_m": 2.99940288342552,
+      "raw_lateral_p95_m": 10.000584013590268,
+      "aimed_lateral_p05_m": -7.113738230603826,
+      "aimed_lateral_p50_m": -0.030742924264244076,
+      "aimed_lateral_p95_m": 6.998038639596725,
+      "raw_lateral_p05_p95_width_m": 14.071844162903375,
+      "aimed_lateral_p05_p95_width_m": 14.11177687020055,
+      "raw_target_hit_fraction": 0.9979,
+      "raw_target_hit_wilson95_low": 0.9967916061274641,
+      "raw_target_hit_wilson95_high": 0.9986260082950161,
+      "aimed_target_hit_fraction": 0.9996,
+      "aimed_target_hit_wilson95_low": 0.9989718716646431,
+      "aimed_target_hit_wilson95_high": 0.9998444371633769,
+      "raw_target_rmse_m": 5.302647040122681,
+      "aimed_target_rmse_m": 4.373976364769108,
+      "mean_carry_m": 149.2423083973538,
+      "carry_sd_m": 0.5641765878958451,
+      "mean_launch_azimuth_deg": 3.622087639879546,
+      "mean_spin_axis_tilt_deg": 5.856766552487296,
+      "opposite_curve_fraction": 0.001
+    },
+    "Fade": {
+      "n": 10000.0,
+      "raw_mean_lateral_m": -3.109837077944935,
+      "aimed_mean_lateral_m": -0.08202339694556399,
+      "lateral_sd_m": 4.029385499542106,
+      "lateral_variance_m2": 16.235947503920187,
+      "lateral_mean_se_m": 0.04029385499542106,
+      "aimed_lateral_sd_m": 4.007436953158425,
+      "aimed_lateral_variance_m2": 16.059550933539683,
+      "raw_lateral_p05_m": -9.820532825397922,
+      "raw_lateral_p50_m": -3.058824061550835,
+      "raw_lateral_p95_m": 3.400039459733277,
+      "aimed_lateral_p05_m": -6.76038665354024,
+      "aimed_lateral_p50_m": -0.028607256581449914,
+      "aimed_lateral_p95_m": 6.387528567480317,
+      "raw_lateral_p05_p95_width_m": 13.2205722851312,
+      "aimed_lateral_p05_p95_width_m": 13.147915221020558,
+      "raw_target_hit_fraction": 0.9971,
+      "raw_target_hit_wilson95_low": 0.9958382254534343,
+      "raw_target_hit_wilson95_high": 0.9979800033664389,
+      "aimed_target_hit_fraction": 0.9996,
+      "aimed_target_hit_wilson95_low": 0.9989718716646431,
+      "aimed_target_hit_wilson95_high": 0.9998444371633769,
+      "raw_target_rmse_m": 5.229976866606955,
+      "aimed_target_rmse_m": 4.201451641642219,
+      "mean_carry_m": 149.26082805503995,
+      "carry_sd_m": 1.1358348531234173,
+      "mean_launch_azimuth_deg": -3.620248139607405,
+      "mean_spin_axis_tilt_deg": -5.790522964935722,
+      "opposite_curve_fraction": 0.0016
+    }
+  },
+  "nominal_outcomes": {
+    "Straight": {
+      "carry_x_m": 149.74812854111136,
+      "carry_y_m": -0.0,
+      "carry_m": 149.74812854111136,
+      "launch_azimuth_deg": -0.0,
+      "spin_rpm": 5154.652118546922,
+      "spin_axis_tilt_deg": 0.0,
+      "trajectory_xy_m": [
+        [
+          0.0,
+          -0.0
+        ],
+        [
+          6.478444095867186,
+          -0.0
+        ],
+        [
+          12.674644358952886,
+          -0.0
+        ],
+        [
+          18.60975535009701,
+          -0.0
+        ],
+        [
+          24.303109828017295,
+          -0.0
+        ],
+        [
+          30.536351096832053,
+          -0.0
+        ],
+        [
+          35.76913944336067,
+          -0.0
+        ],
+        [
+          40.81062284824206,
+          -0.0
+        ],
+        [
+          45.674002351502814,
+          -0.0
+        ],
+        [
+          50.371285044999055,
+          -0.0
+        ],
+        [
+          55.55017347871853,
+          -0.0
+        ],
+        [
+          59.9269917600388,
+          -0.0
+        ],
+        [
+          64.16874602696205,
+          -0.0
+        ],
+        [
+          68.28350746058393,
+          -0.0
+        ],
+        [
+          72.27863502097719,
+          -0.0
+        ],
+        [
+          76.70662261392131,
+          -0.0
+        ],
+        [
+          80.46739921454444,
+          -0.0
+        ],
+        [
+          84.12802456895429,
+          -0.0
+        ],
+        [
+          87.69382128560397,
+          -0.0
+        ],
+        [
+          91.16979971383041,
+          -0.0
+        ],
+        [
+          95.03843885012301,
+          -0.0
+        ],
+        [
+          98.33762301765866,
+          -0.0
+        ],
+        [
+          101.56113659992157,
+          -0.0
+        ],
+        [
+          104.71305268289406,
+          -0.0
+        ],
+        [
+          107.79725899468644,
+          -0.0
+        ],
+        [
+          111.24390941493871,
+          -0.0
+        ],
+        [
+          114.19530729749457,
+          -0.0
+        ],
+        [
+          117.09011323645947,
+          -0.0
+        ],
+        [
+          119.93155654577167,
+          -0.0
+        ],
+        [
+          122.72274314577461,
+          -0.0
+        ],
+        [
+          125.85497512952075,
+          -0.0
+        ],
+        [
+          128.54845418128323,
+          -0.0
+        ],
+        [
+          131.20082160924434,
+          -0.0
+        ],
+        [
+          133.8148474958918,
+          -0.0
+        ],
+        [
+          136.39325754257666,
+          -0.0
+        ],
+        [
+          139.29985174542415,
+          -0.0
+        ],
+        [
+          141.81097016764144,
+          -0.0
+        ],
+        [
+          144.2948459848102,
+          -0.0
+        ],
+        [
+          146.75409836008134,
+          -0.0
+        ],
+        [
+          149.53785450037412,
+          -0.0
+        ],
+        [
+          149.74812854111136,
+          -0.0
+        ]
+      ],
+      "launch_elevation_deg": 18.711390640500174,
+      "ball_speed_mps": 49.977972179414
+    },
+    "Draw": {
+      "carry_x_m": 149.2860217472011,
+      "carry_y_m": 3.0300583296159287,
+      "carry_m": 149.31676912720377,
+      "launch_azimuth_deg": 3.620916065645552,
+      "spin_rpm": 5180.359970336657,
+      "spin_axis_tilt_deg": 5.829409030341245,
+      "trajectory_xy_m": [
+        [
+          0.0,
+          -0.0
+        ],
+        [
+          6.457986852870523,
+          0.39622828632593654
+        ],
+        [
+          12.636838218342618,
+          0.7518004940610153
+        ],
+        [
+          18.557363095165282,
+          1.0706137815816688
+        ],
+        [
+          24.23858494127008,
+          1.3561523934535549
+        ],
+        [
+          29.69788331405189,
+          1.6115384557483097
+        ],
+        [
+          35.68562426923771,
+          1.8700702700565996
+        ],
+        [
+          40.72100509444128,
+          2.069926540601436
+        ],
+        [
+          45.57975376639823,
+          2.2475391849643693
+        ],
+        [
+          50.27369736760286,
+          2.4049352936126684
+        ],
+        [
+          54.81358415536719,
+          2.5439510406148633
+        ],
+        [
+          59.209176205348605,
+          2.6662530663670605
+        ],
+        [
+          64.06735999281577,
+          2.78749918992266
+        ],
+        [
+          68.1825817553297,
+          2.8789182717239963
+        ],
+        [
+          72.17878859808744,
+          2.9579523167670354
+        ],
+        [
+          76.06262808492295,
+          3.0257391411972647
+        ],
+        [
+          79.84022488616665,
+          3.0833200400419494
+        ],
+        [
+          84.03465679365044,
+          3.137849129347083
+        ],
+        [
+          87.60325065725999,
+          3.1766681614248946
+        ],
+        [
+          91.08228453405334,
+          3.2080157218009675
+        ],
+        [
+          94.47645621019831,
+          3.232613777354314
+        ],
+        [
+          97.79023545047043,
+          3.251122272798025
+        ],
+        [
+          101.02788584640932,
+          3.2641441314561774
+        ],
+        [
+          104.64005374624283,
+          3.2730122346856727
+        ],
+        [
+          107.72804988558772,
+          3.276071047454681
+        ],
+        [
+          110.75211453707608,
+          3.2752206029085844
+        ],
+        [
+          113.71577931806168,
+          3.2708782743978513
+        ],
+        [
+          116.6224250796775,
+          3.26342816827057
+        ],
+        [
+          119.87864163959598,
+          3.2515623119130908
+        ],
+        [
+          122.67386915395852,
+          3.238614876828489
+        ],
+        [
+          125.42187968629787,
+          3.2235928803692895
+        ],
+        [
+          128.12558642088933,
+          3.206781264527418
+        ],
+        [
+          130.78783046695725,
+          3.1884483579038165
+        ],
+        [
+          133.41139502114757,
+          3.168847926670845
+        ],
+        [
+          136.36590179008533,
+          3.1452038553808173
+        ],
+        [
+          138.9157540900797,
+          3.1236838179251616
+        ],
+        [
+          141.43541891221102,
+          3.101616102738974
+        ],
+        [
+          143.92754248685603,
+          3.0792089221769086
+        ],
+        [
+          146.39474989629704,
+          3.0566617136489205
+        ],
+        [
+          149.18724512508456,
+          3.0309668400582956
+        ],
+        [
+          149.2860217472011,
+          3.0300583296159287
+        ]
+      ],
+      "launch_elevation_deg": 18.709156896815546,
+      "ball_speed_mps": 49.910005024017934
+    },
+    "Fade": {
+      "carry_x_m": 149.2860217472011,
+      "carry_y_m": -3.0300583296159287,
+      "carry_m": 149.31676912720377,
+      "launch_azimuth_deg": -3.620916065645552,
+      "spin_rpm": 5180.359970336657,
+      "spin_axis_tilt_deg": -5.829409030341245,
+      "trajectory_xy_m": [
+        [
+          0.0,
+          -0.0
+        ],
+        [
+          6.457986852870523,
+          -0.39622828632593654
+        ],
+        [
+          12.636838218342618,
+          -0.7518004940610153
+        ],
+        [
+          18.557363095165282,
+          -1.0706137815816688
+        ],
+        [
+          24.23858494127008,
+          -1.3561523934535549
+        ],
+        [
+          29.69788331405189,
+          -1.6115384557483097
+        ],
+        [
+          35.68562426923771,
+          -1.8700702700565996
+        ],
+        [
+          40.72100509444128,
+          -2.069926540601436
+        ],
+        [
+          45.57975376639823,
+          -2.2475391849643693
+        ],
+        [
+          50.27369736760286,
+          -2.4049352936126684
+        ],
+        [
+          54.81358415536719,
+          -2.5439510406148633
+        ],
+        [
+          59.209176205348605,
+          -2.6662530663670605
+        ],
+        [
+          64.06735999281577,
+          -2.78749918992266
+        ],
+        [
+          68.1825817553297,
+          -2.8789182717239963
+        ],
+        [
+          72.17878859808744,
+          -2.9579523167670354
+        ],
+        [
+          76.06262808492295,
+          -3.0257391411972647
+        ],
+        [
+          79.84022488616665,
+          -3.0833200400419494
+        ],
+        [
+          84.03465679365044,
+          -3.137849129347083
+        ],
+        [
+          87.60325065725999,
+          -3.1766681614248946
+        ],
+        [
+          91.08228453405334,
+          -3.2080157218009675
+        ],
+        [
+          94.47645621019831,
+          -3.232613777354314
+        ],
+        [
+          97.79023545047043,
+          -3.251122272798025
+        ],
+        [
+          101.02788584640932,
+          -3.2641441314561774
+        ],
+        [
+          104.64005374624283,
+          -3.2730122346856727
+        ],
+        [
+          107.72804988558772,
+          -3.276071047454681
+        ],
+        [
+          110.75211453707608,
+          -3.2752206029085844
+        ],
+        [
+          113.71577931806168,
+          -3.2708782743978513
+        ],
+        [
+          116.6224250796775,
+          -3.26342816827057
+        ],
+        [
+          119.87864163959598,
+          -3.2515623119130908
+        ],
+        [
+          122.67386915395852,
+          -3.238614876828489
+        ],
+        [
+          125.42187968629787,
+          -3.2235928803692895
+        ],
+        [
+          128.12558642088933,
+          -3.206781264527418
+        ],
+        [
+          130.78783046695725,
+          -3.1884483579038165
+        ],
+        [
+          133.41139502114757,
+          -3.168847926670845
+        ],
+        [
+          136.36590179008533,
+          -3.1452038553808173
+        ],
+        [
+          138.9157540900797,
+          -3.1236838179251616
+        ],
+        [
+          141.43541891221102,
+          -3.101616102738974
+        ],
+        [
+          143.92754248685603,
+          -3.0792089221769086
+        ],
+        [
+          146.39474989629704,
+          -3.0566617136489205
+        ],
+        [
+          149.18724512508456,
+          -3.0309668400582956
+        ],
+        [
+          149.2860217472011,
+          -3.0300583296159287
+        ]
+      ],
+      "launch_elevation_deg": 18.709156896815546,
+      "ball_speed_mps": 49.910005024017934
+    }
+  },
+  "paired_variance_comparisons": {
+    "Draw": {
+      "raw": {
+        "estimate": 1.032333132692331,
+        "lower_95": 1.0315186298824335,
+        "upper_95": 1.033094024165774
+      },
+      "aimed": {
+        "estimate": 1.0381334172973982,
+        "lower_95": 1.0372236340701972,
+        "upper_95": 1.038980418377214
+      }
+    },
+    "Fade": {
+      "raw": {
+        "estimate": 0.9126331866834471,
+        "lower_95": 0.9120436755277455,
+        "upper_95": 0.9132540086820714
+      },
+      "aimed": {
+        "estimate": 0.9027178205425107,
+        "lower_95": 0.9020618736861774,
+        "upper_95": 0.9034115585493881
+      }
+    }
+  },
+  "paired_hit_comparisons": {
+    "Draw": {
+      "raw": {
+        "estimate": -0.0017,
+        "lower_95": -0.0027,
+        "upper_95": -0.0008
+      },
+      "aimed": {
+        "estimate": 0.0,
+        "lower_95": 0.0,
+        "upper_95": 0.0
+      }
+    },
+    "Fade": {
+      "raw": {
+        "estimate": -0.0025,
+        "lower_95": -0.0036,
+        "upper_95": -0.0016
+      },
+      "aimed": {
+        "estimate": 0.0,
+        "lower_95": 0.0,
+        "upper_95": 0.0
+      }
+    }
+  },
+  "equal_range_diagnostic": {
+    "method": "Geometric radial normalization of aimed carry endpoints; no impact or flight re-simulation",
+    "target_range_m": 149.74812854111136,
+    "patterns": {
+      "Straight": {
+        "n": 10000.0,
+        "lateral_mean_m": -0.038154264970819564,
+        "lateral_sd_m": 4.221828339681929,
+        "lateral_variance_m2": 17.82383452974147,
+        "lateral_p05_p95_width_m": 13.859841282596179,
+        "target_hit_fraction": 0.9996,
+        "target_rmse_m": 4.223054635490063,
+        "range_min_m": 149.74812854111133,
+        "range_max_m": 149.7481285411114
+      },
+      "Draw": {
+        "n": 10000.0,
+        "lateral_mean_m": -0.019314287805949844,
+        "lateral_sd_m": 4.315849163847184,
+        "lateral_variance_m2": 18.62655400508044,
+        "lateral_p05_p95_width_m": 14.171863045016366,
+        "target_hit_fraction": 0.9996,
+        "target_rmse_m": 4.317022057845412,
+        "range_min_m": 149.7481285411113,
+        "range_max_m": 149.74812854111138
+      },
+      "Fade": {
+        "n": 10000.0,
+        "lateral_mean_m": -0.05181427423089783,
+        "lateral_sd_m": 4.021074916943237,
+        "lateral_variance_m2": 16.169043487670063,
+        "lateral_p05_p95_width_m": 13.197484315386667,
+        "target_hit_fraction": 0.9996,
+        "target_rmse_m": 4.022305950575816,
+        "range_min_m": 149.74812854111133,
+        "range_max_m": 149.7481285411114
+      }
+    },
+    "paired_variance_ratios": {
+      "Draw": {
+        "estimate": 1.0450362953044432,
+        "lower_95": 1.0444022829207316,
+        "upper_95": 1.0456192459577491
+      },
+      "Fade": {
+        "estimate": 0.907158527571036,
+        "lower_95": 0.9067179965323355,
+        "upper_95": 0.9076281505849852
+      }
+    }
+  },
+  "landing_dispersion": {
+    "Straight": {
+      "n": 10000,
+      "coordinate_convention": "x downrange, y right; target=(target_x_m, 0)",
+      "covariance_convention": "unbiased sample covariance (ddof=1), m^2",
+      "mean_downrange_error_m": -0.12341502048663915,
+      "mean_lateral_error_m": -0.062311618354167674,
+      "downrange_variance_m2": 0.7600171680102037,
+      "lateral_variance_m2": 17.790222556909644,
+      "covariance_downrange_lateral_m2": -3.5857256142419516,
+      "corr_lateral_downrange_error": -0.9751572672483804,
+      "corr_lateral_radial_carry": -0.9920139676213886,
+      "median_radial_target_error_m": 2.896398642898726,
+      "p95_radial_target_error_m": 8.470988305364639,
+      "principal_axis_eigenvalues_m2": [
+        18.514405661571004,
+        0.03583406334884187
+      ],
+      "principal_axis_orientation_deg": -78.58197492482563,
+      "principal_axis_angle_convention": "unoriented axis from +downrange toward +right, normalized to [-90, 90)",
+      "quadrant_fractions": {
+        "left_long": 0.5036,
+        "left_short": 0.0,
+        "right_long": 0.0,
+        "right_short": 0.4964
+      },
+      "quadrant_fraction_convention": "strictly left/right and long/short; axis-aligned endpoints enter no quadrant; fractions use all endpoints as denominator",
+      "conditional_mean_downrange_error_m": {
+        "left": 0.557211829381381,
+        "right": -0.8139139761545178
+      },
+      "interpretation_limit": "Descriptive endpoint covariance only; face variation alone does not calibrate two-dimensional player precision.",
+      "nominal_mean_offset_m": [
+        -0.123415020486639,
+        -0.062311618354168
+      ],
+      "nominal_rmse_m": 4.3090020545378005
+    },
+    "Draw": {
+      "n": 10000,
+      "coordinate_convention": "x downrange, y right; target=(target_x_m, 0)",
+      "covariance_convention": "unbiased sample covariance (ddof=1), m^2",
+      "mean_downrange_error_m": -0.5677826938398337,
+      "mean_lateral_error_m": -0.03519719099678683,
+      "downrange_variance_m2": 0.34130966581517264,
+      "lateral_variance_m2": 18.468624537485862,
+      "covariance_downrange_lateral_m2": -2.3590429339511645,
+      "corr_lateral_downrange_error": -0.9396027410891936,
+      "corr_lateral_radial_carry": -0.9799236944962902,
+      "median_radial_target_error_m": 2.9518133123604824,
+      "p95_radial_target_error_m": 8.567728354840526,
+      "principal_axis_eigenvalues_m2": [
+        18.77059413236225,
+        0.03934007093878533
+      ],
+      "principal_axis_orientation_deg": -82.70551456353905,
+      "principal_axis_angle_convention": "unoriented axis from +downrange toward +right, normalized to [-90, 90)",
+      "quadrant_fractions": {
+        "left_long": 0.146,
+        "left_short": 0.3576,
+        "right_long": 0.0,
+        "right_short": 0.4964
+      },
+      "quadrant_fraction_convention": "strictly left/right and long/short; axis-aligned endpoints enter no quadrant; fractions use all endpoints as denominator",
+      "conditional_mean_downrange_error_m": {
+        "left": -0.12684980946887903,
+        "right": -1.0151110592089168
+      },
+      "interpretation_limit": "Descriptive endpoint covariance only; face variation alone does not calibrate two-dimensional player precision.",
+      "nominal_mean_offset_m": [
+        -0.5677826938398357,
+        -0.0351971909967868
+      ],
+      "nominal_rmse_m": 4.373976364769108
+    },
+    "Fade": {
+      "n": 10000,
+      "coordinate_convention": "x downrange, y right; target=(target_x_m, 0)",
+      "covariance_convention": "unbiased sample covariance (ddof=1), m^2",
+      "mean_downrange_error_m": -0.5411400314765263,
+      "mean_lateral_error_m": -0.08202339694556399,
+      "downrange_variance_m2": 1.2948200293017889,
+      "lateral_variance_m2": 16.05955093353968,
+      "covariance_downrange_lateral_m2": -4.49701539460619,
+      "corr_lateral_downrange_error": -0.9861726896643077,
+      "corr_lateral_radial_carry": -0.9951059337758662,
+      "median_radial_target_error_m": 2.835149757277437,
+      "p95_radial_target_error_m": 8.228657008758875,
+      "principal_axis_eigenvalues_m2": [
+        17.32140130056618,
+        0.03296966227528508
+      ],
+      "principal_axis_orientation_deg": -74.32602383030013,
+      "principal_axis_angle_convention": "unoriented axis from +downrange toward +right, normalized to [-90, 90)",
+      "quadrant_fractions": {
+        "left_long": 0.3493,
+        "left_short": 0.1543,
+        "right_long": 0.0,
+        "right_short": 0.4964
+      },
+      "quadrant_fraction_convention": "strictly left/right and long/short; axis-aligned endpoints enter no quadrant; fractions use all endpoints as denominator",
+      "conditional_mean_downrange_error_m": {
+        "left": 0.35557180329140625,
+        "right": -1.4508581619945176
+      },
+      "interpretation_limit": "Descriptive endpoint covariance only; face variation alone does not calibrate two-dimensional player precision.",
+      "nominal_mean_offset_m": [
+        -0.5411400314765258,
+        -0.08202339694556395
+      ],
+      "nominal_rmse_m": 4.201451641642218
+    }
+  },
+  "bootstrap": {
+    "method": "Paired percentile bootstrap; curved/straight lateral variance",
+    "resamples": 500,
+    "confidence": 0.95,
+    "scope": "Monte Carlo sampling only; excludes model and parameter uncertainty"
+  },
+  "limitations": [
+    "Simplified central rigid-body impulse and shaft-axis delivery geometry; no measured player covariance, off-center gear physics, or ground roll. Results are model-conditional, not observed player performance."
+  ],
+  "course_scoring": {
+    "status": "available",
+    "scenario_id": "approach_green_rough",
+    "scenario": "Historical PGA approach to a centered circular green with rough outside",
+    "club_id": "seven_iron",
+    "start_lie": "fairway",
+    "start_distance_m": 149.74812854111136,
+    "target_x_m": 149.74812854111136,
+    "hole_distance_m": null,
+    "fairway_half_width_m": null,
+    "green_radius_m": 15.0,
+    "source_backed_status": "available",
+    "evaluation": "Public Tools API scored each baseline knot; endpoint scores are exact piecewise-linear interpolation of those returned values",
+    "api_evaluated_states": 112,
+    "scored_shots": 30000,
+    "interpolation_tolerance_strokes": 1e-12,
+    "baseline": {
+      "id": "broadie-2011-historical-tour-approx",
+      "version": "table9-full-plus-anchor-reconciled-putting/2",
+      "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+      "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+    },
+    "patterns": {
+      "Straight": {
+        "n": 10000,
+        "mean_strokes_gained": 0.4812505726885933,
+        "green_fraction": 0.9996
+      },
+      "Draw": {
+        "n": 10000,
+        "mean_strokes_gained": 0.4701353192841238,
+        "green_fraction": 0.9996
+      },
+      "Fade": {
+        "n": 10000,
+        "mean_strokes_gained": 0.48450688306203454,
+        "green_fraction": 0.9996
+      }
+    },
+    "paired_benefit_vs_straight": {
+      "Draw": {
+        "estimate": -0.011115253404469484,
+        "lower_95": -0.011352986707526071,
+        "upper_95": -0.010847694222025493
+      },
+      "Fade": {
+        "estimate": 0.0032563103734412147,
+        "lower_95": 0.0028615100832890127,
+        "upper_95": 0.00372120964771234
+      }
+    },
+    "limitations": [
+      "2003-2010 PGA benchmark and approximate reconciled putting fit; not a current or player-specific estimate.",
+      "Flat hypothetical geometry; landing is treated as final lie with no roll, hazards, or recovery obstruction.",
+      "Bootstrap intervals include Monte Carlo sampling only, not club delivery, course, or model uncertainty."
+    ],
+    "green_radius_sensitivity_m": {
+      "10": {
+        "status": "available",
+        "scenario": "Historical PGA approach to a centered circular green with rough outside",
+        "patterns": {
+          "Straight": {
+            "n": 10000,
+            "mean_strokes_gained": 0.47419295533821476,
+            "green_fraction": 0.9803
+          },
+          "Draw": {
+            "n": 10000,
+            "mean_strokes_gained": 0.46238439519637414,
+            "green_fraction": 0.9784
+          },
+          "Fade": {
+            "n": 10000,
+            "mean_strokes_gained": 0.47833141034012605,
+            "green_fraction": 0.9827
+          }
+        },
+        "paired_benefit_vs_straight": {
+          "Draw": {
+            "estimate": -0.011808560141840813,
+            "lower_95": -0.01226877524661028,
+            "upper_95": -0.01135084255937145
+          },
+          "Fade": {
+            "estimate": 0.004138455001911173,
+            "lower_95": 0.00358883881834047,
+            "upper_95": 0.004686738092812792
+          }
+        },
+        "api_evaluated_states": 112
+      },
+      "15": {
+        "status": "available",
+        "scenario": "Historical PGA approach to a centered circular green with rough outside",
+        "patterns": {
+          "Straight": {
+            "n": 10000,
+            "mean_strokes_gained": 0.4812505726885933,
+            "green_fraction": 0.9996
+          },
+          "Draw": {
+            "n": 10000,
+            "mean_strokes_gained": 0.4701353192841238,
+            "green_fraction": 0.9996
+          },
+          "Fade": {
+            "n": 10000,
+            "mean_strokes_gained": 0.48450688306203454,
+            "green_fraction": 0.9996
+          }
+        },
+        "paired_benefit_vs_straight": {
+          "Draw": {
+            "estimate": -0.011115253404469484,
+            "lower_95": -0.011352986707526071,
+            "upper_95": -0.010847694222025493
+          },
+          "Fade": {
+            "estimate": 0.0032563103734412147,
+            "lower_95": 0.0028615100832890127,
+            "upper_95": 0.00372120964771234
+          }
+        },
+        "api_evaluated_states": 112
+      },
+      "20": {
+        "status": "available",
+        "scenario": "Historical PGA approach to a centered circular green with rough outside",
+        "patterns": {
+          "Straight": {
+            "n": 10000,
+            "mean_strokes_gained": 0.48139957494748215,
+            "green_fraction": 1.0
+          },
+          "Draw": {
+            "n": 10000,
+            "mean_strokes_gained": 0.4702842504314076,
+            "green_fraction": 1.0
+          },
+          "Fade": {
+            "n": 10000,
+            "mean_strokes_gained": 0.48465574236193404,
+            "green_fraction": 1.0
+          }
+        },
+        "paired_benefit_vs_straight": {
+          "Draw": {
+            "estimate": -0.011115324516074589,
+            "lower_95": -0.011353033535730828,
+            "upper_95": -0.01084775799219636
+          },
+          "Fade": {
+            "estimate": 0.00325616741445182,
+            "lower_95": 0.002861401544541106,
+            "upper_95": 0.003721100412977005
+          }
+        },
+        "api_evaluated_states": 112
+      }
+    },
+    "total_api_evaluated_states": 336,
+    "baseline_artifact": "strokes_gained_baseline.json"
+  }
+}
