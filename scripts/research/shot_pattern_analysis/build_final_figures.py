@@ -244,7 +244,9 @@ def _comparison_pair_specs(cells: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return pairs
 
 
-def _supported_points(cell_dir: Path) -> tuple[dict[str, list[list[float]]], dict[str, int]]:
+def _supported_points(
+    cell_dir: Path,
+) -> tuple[dict[str, list[list[float]]], dict[str, int]]:
     plan = json.loads((cell_dir.parent / "matrix_plan.json").read_text())
     config = plan.get("cells", {}).get(cell_dir.name)
     if not isinstance(config, dict):
