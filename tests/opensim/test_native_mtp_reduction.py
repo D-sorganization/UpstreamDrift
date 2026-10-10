@@ -9,6 +9,8 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+pytestmark = pytest.mark.integration
+
 opensim = pytest.importorskip("opensim")
 
 from src.engines.physics_engines.opensim.python import native_mtp_reduction as reduction  # noqa: E402
