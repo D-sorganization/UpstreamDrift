@@ -27,6 +27,9 @@ from src.shared.python.motion_matching.club_face_target import (
 from src.shared.python.motion_matching.full_body_spec import (
     validate_full_body_spec,
 )
+from src.shared.python.motion_matching.hip_calibration import (
+    pelvis_alignment_from_spec,
+)
 from src.shared.python.motion_matching.pipeline.address import (
     AddressStageInputs,
     HipCalibrationOptions,
@@ -45,11 +48,12 @@ from src.shared.python.motion_matching.pipeline.address_feet import (
     split_address_coordinates,
 )
 from src.shared.python.motion_matching.pipeline.constants import (
-    BUILD_RECEIPT,
     CANDIDATE,
     CAPTURE_NAMES,
     CONSISTENCY_PRIOR,
+    DEFAULT_IK_RESTART_POLICY,
     DEFAULT_MJX_ITERATIONS,
+    IK_RESTART_POLICIES,
     LEG_SEEDS,
     REFERENCE_CUTOFF_HZ,
     SHOOTING_RELAXATION,
@@ -67,6 +71,7 @@ from src.shared.python.motion_matching.pipeline.dynamics import (
     DynamicsReportInputs,
     ShootingFitConfig,
     build_dynamics_report,
+    lane_reference_zmp,
     replay,
     score_reference,
     shooting_fit,
@@ -113,7 +118,11 @@ from src.shared.python.motion_matching.pipeline.reference import (
     full_capture_ik,
     marker_errors,
     render_playback,
+    smooth_lane,
     smooth_reference,
+)
+from src.shared.python.motion_matching.pipeline.weld_projection import (
+    weld_consistent_track,
 )
 from src.shared.python.motion_matching.pipeline.plant import (
     get_plant,
@@ -142,7 +151,7 @@ def _nonnegative_float(value: str) -> float:
     except ValueError as e:
         raise argparse.ArgumentTypeError(f"Invalid number: {value!r}") from e
     if not np.isfinite(val) or val < 0:
-        raise argparse.ArgumentTypeError(f"--gaze-weight must be >= 0, got {val}")
+        raise argparse.ArgumentTypeError(f"weight must be >= 0, got {val}")
     return val
 
 
@@ -367,6 +376,27 @@ def build_parser() -> argparse.ArgumentParser:
             "triad implies; 0 restores the marker-only fit"
         ),
     )
+    parser.add_argument(
+        "--ik-restart-policy",
+        choices=IK_RESTART_POLICIES,
+        default=DEFAULT_IK_RESTART_POLICY,
+        help=(
+            "trajectory IK restarts (#12042): 'free' jittered restarts, "
+            "'continuous' restarts that keep the prior on the previous frame "
+            "and reject a joint step above the peak joint speed, 'anchored' "
+            "restarts that only keep the prior on the previous frame, 'off'"
+        ),
+    )
+    parser.add_argument(
+        "--ik-posture-prior-weight",
+        type=_nonnegative_float,
+        default=0.0,
+        help=(
+            "weight of a weak prior pulling the toes and shoulder/forearm axial "
+            "rotation toward the address pose in the trajectory IK (#12042); "
+            "0 disables it (default)"
+        ),
+    )
     add_turn_split_arguments(parser)
     return parser
 
@@ -378,7 +408,9 @@ def _attach_face_report(
     q_pair: tuple[np.ndarray, np.ndarray],
     weight: float,
 ) -> None:
-    """Add the face residual's receipt block when the residual was active."""
+    """Add the face residual's receipt block when the residual was active,
+    and the impact split (GCV-20) always."""
+    ik_report["impact_split"] = lane.impact_split_report()
     if lane.face_targets is not None:
         ik_report["face_orientation"] = _face_orientation_report(
             lane, cal_res, *q_pair, weight
@@ -501,12 +533,10 @@ def _calibrate_and_scale(
     hipcal_path = ctx.out_dir / "full_body_spec_hipcal.json"
     scaled_path = ctx.out_dir / "full_body_spec_hipcal_scaled.json"
 
-    receipt_data = json.loads(BUILD_RECEIPT.read_text(encoding="utf-8"))
-    pelvis_alignment = receipt_data.get("pelvis_alignment", {})
+    # The alignment of the spec being rewritten, never another spec's build
+    # receipt: a foreign alignment rotates both hips (#12109).
     alignment_old = (
-        pelvis_alignment.get("hip_from_opensim_pelvis")
-        if not args.skip_hip_calibration
-        else None
+        pelvis_alignment_from_spec(base_spec) if not args.skip_hip_calibration else None
     )
     hip_spec, qualification_note, hip_report, fixed, seeds_all = prepare_hip_spec(
         lane,
@@ -654,7 +684,7 @@ def _solve_pink_ik(
         )
         for r in pink_result.frame_residuals
     ]
-    q_smooth = smooth_reference(q_ik, lane.rate_hz, REFERENCE_CUTOFF_HZ)
+    q_smooth = smooth_lane(q_ik, lane, REFERENCE_CUTOFF_HZ)
     audit_result = pink_service.audit_trajectory(q_smooth, solve_req, ik_opts)
     all_converged = bool(pink_result.passed)
     rate_limits_respected = bool(
@@ -746,7 +776,7 @@ def _solve_trajectory_ik(
         return _solve_pink_ik(ctx, lane, kin, scaled_spec, labels, initial_q)
     q_ik, fits = full_capture_ik(lane, kin, initial_q)
     errors = marker_errors(kin, q_ik, lane.points)
-    q_smooth = smooth_reference(q_ik, lane.rate_hz, REFERENCE_CUTOFF_HZ)
+    q_smooth = smooth_lane(q_ik, lane, REFERENCE_CUTOFF_HZ)
     q_ref, ref_fits = consistency_resolve(
         lane, kin, q_smooth, prior_weight=CONSISTENCY_PRIOR, iterations=30
     )
@@ -815,6 +845,58 @@ def _write_receipt(out_dir: Path, receipt: dict[str, Any]) -> None:
     )
 
 
+def _attach_turn_block(
+    receipt: dict[str, Any],
+    ctx: PipelineContext,
+    lane: Lane,
+    kin: Any,
+    q_ref: np.ndarray,
+    cal_res: _CalibrateAndScaleResult,
+    ik_report: dict[str, Any],
+) -> None:
+    """Record shoulder/trunk/pelvis turn (markers vs model FK) on ``receipt``.
+
+    Model lines use the shared spec forward kinematics with the receipt's
+    calibrated attachments (hip centres, shoulder centres, thorax markers).
+    Descriptive only (issue #12042); a failure to evaluate is recorded, not raised.
+    """
+    from src.shared.python.motion_matching.tour_capture_contract import (  # noqa: PLC0415
+        load_tour_capture,
+    )
+    from src.shared.python.motion_matching.turn_receipt import (  # noqa: PLC0415
+        attach_turn_block,
+    )
+    from src.shared.python.swing_comparison.turn import (  # noqa: PLC0415
+        spec_model_points,
+        unavailable_turn_block,
+    )
+
+    try:
+        spec = json.loads(cal_res.spec_bytes.decode("utf-8"))
+        offsets = {
+            label: (att["body"], att["offset_m"])
+            for label, att in ik_report.get("attachments_m", {}).items()
+        }
+        points = spec_model_points(
+            spec,
+            q_ref,
+            coordinate_names=tuple(kin.coordinate_order),
+            marker_offsets=offsets or None,
+        )
+        capture = load_tour_capture(ctx.c3d_path)
+    except (KeyError, ValueError, TypeError, OSError) as exc:
+        ctx.log.warning("turn block inputs unavailable: %s", exc)
+        receipt["turn"] = unavailable_turn_block(f"inputs_failed: {exc!r}")
+        return
+    attach_turn_block(
+        receipt,
+        capture,
+        model_time_s=lane.times,
+        model_points=points,
+        model_source="mujoco_ik_reference_spec_fk",
+    )
+
+
 def _apply_trajectory_optimiser(
     args: argparse.Namespace,
     out_dir: Path,
@@ -876,34 +958,16 @@ def _feasibility_filters(
     return q_track, zmp, zmp_report, centroidal_report
 
 
-class _TrackedReference(NamedTuple):
-    """The reference the replay tracks, with the reports of each stage."""
-
-    q_track: np.ndarray
-    zmp: dict[str, Any]
-    zmp_filter_report: dict[str, Any] | None
-    centroidal_report: dict[str, Any] | None
-    shooting_report: dict[str, Any] | None
-    neck_solve: Any
-    fd_neck: str
-
-
-def _tracked_reference(
+def _maybe_shooting_fit(
     args: argparse.Namespace,
     context: tuple[Lane, Any, Any, logging.Logger],
+    q_track: np.ndarray,
     q_ref: np.ndarray,
+    zmp: dict[str, Any],
     tracking: str,
-) -> _TrackedReference:
-    """Smooth ``q_ref``, run the feasibility filters, the gaze neck and shooting."""
+) -> tuple[np.ndarray, dict[str, Any], dict[str, Any] | None]:
+    """Run the optional multiple-shooting refit stage."""
     lane, kin, sim, log = context
-    q_track = smooth_reference(q_ref, lane.rate_hz, TRACKING_CUTOFF_HZ)
-    zmp = fs.reference_zmp(sim, lane.times, q_track, lane.ground)
-    q_track, zmp, zmp_report, centroidal_report = _feasibility_filters(
-        args, context, q_track, zmp
-    )
-    # After the filters, which re-pose the body; the ZMP keeps the IK neck.
-    fd_neck = getattr(args, "fd_neck", "ik")
-    q_track, neck_solve = apply_fd_neck(fd_neck, lane, kin, q_ref, q_track)
     shooting_report: dict[str, Any] | None = None
     if args.shooting_fit > 0:
         q_track, zmp, shooting_report = shooting_fit(
@@ -919,14 +983,40 @@ def _tracked_reference(
                 tracking_backend=tracking,
             ),
         )
-    return _TrackedReference(
-        q_track,
-        zmp,
-        zmp_report,
-        centroidal_report,
-        shooting_report,
-        neck_solve,
-        fd_neck,
+    return q_track, zmp, shooting_report
+
+
+def _finalize_receipt(
+    ctx: PipelineContext,
+    receipt: dict[str, Any],
+    context: tuple[Lane, Any, Any, logging.Logger],
+    *,
+    ik_report: dict[str, Any],
+    cal_res: _CalibrateAndScaleResult,
+    weld_report: dict[str, Any],
+    q_ref: np.ndarray,
+    q_track: np.ndarray | None = None,
+    sim_q: np.ndarray | None = None,
+    neck_solve: Any = None,
+    fd_neck: str = "ik",
+) -> None:
+    """Attach engine/gaze/weld metadata, run the optimiser stage and persist
+    the receipt."""
+    lane, kin, sim, log = context
+    receipt["engine"] = ctx.engine
+    receipt["head_gaze"] = head_gaze_receipt(lane, kin, q_ref)
+    if "dynamics" in receipt and q_track is not None and sim_q is not None:
+        receipt["dynamics"]["head_gaze"] = fd_head_gaze_report(
+            lane, kin, q_ref, q_track, sim_q, neck_solve, fd_neck
+        )
+    receipt["tracking_weld_projection"] = weld_report
+    _attach_turn_block(receipt, ctx, lane, kin, q_ref, cal_res, ik_report)
+    _apply_trajectory_optimiser(
+        ctx.args, ctx.out_dir, receipt, lane=lane, kin=kin, sim=sim
+    )
+    _write_receipt(ctx.out_dir, receipt)
+    log_pipeline_summary(
+        log, receipt, ik_report, cal_res.calibration, cal_res.calibration2
     )
 
 
@@ -947,8 +1037,18 @@ def _simulate_and_receipt(
     out_dir = ctx.out_dir
     log = ctx.log
     tracking = getattr(args, "tracking", "kkt")
-    ref = _tracked_reference(args, (lane, kin, sim, log), q_ref, tracking)
-    q_track, zmp = ref.q_track, ref.zmp
+    q_track = smooth_lane(q_ref, lane, TRACKING_CUTOFF_HZ)
+    zmp = lane_reference_zmp(sim, lane, q_track)
+    q_track, zmp, zmp_filter_report, centroidal_report = _feasibility_filters(
+        args, (lane, kin, sim, log), q_track, zmp
+    )
+    # After the filters, which re-pose the body; the ZMP keeps the IK neck.
+    fd_neck = getattr(args, "fd_neck", "ik")
+    q_track, neck_solve = apply_fd_neck(fd_neck, lane, kin, q_ref, q_track)
+    q_track, zmp, shooting_report = _maybe_shooting_fit(
+        args, (lane, kin, sim, log), q_track, q_ref, zmp, tracking
+    )
+    q_track, weld_report = weld_consistent_track(kin, cal_res.scaled_spec, q_track)
     record, sim_q = replay(sim, lane, q_track, tracking_backend=tracking)
     finish = finish_feasibility_report(
         sim,
@@ -969,9 +1069,9 @@ def _simulate_and_receipt(
             sim_q=sim_q,
             q_ref=q_ref,
             zmp=zmp,
-            zmp_filter_report=ref.zmp_filter_report,
-            centroidal_filter_report=ref.centroidal_report,
-            shooting_report=ref.shooting_report,
+            zmp_filter_report=zmp_filter_report,
+            centroidal_filter_report=centroidal_report,
+            shooting_report=shooting_report,
             tracking_backend=tracking,
             finish_feasibility=finish,
         )
@@ -1004,17 +1104,40 @@ def _simulate_and_receipt(
             elapsed_s=time.perf_counter() - ctx.t_start,
         )
     )
-    receipt["engine"] = ctx.engine
-    receipt["head_gaze"] = head_gaze_receipt(lane, kin, q_ref)
-    receipt["dynamics"]["head_gaze"] = fd_head_gaze_report(
-        lane, kin, q_ref, q_track, sim_q, ref.neck_solve, ref.fd_neck
-    )
-    _apply_trajectory_optimiser(args, out_dir, receipt, lane=lane, kin=kin, sim=sim)
-    _write_receipt(out_dir, receipt)
-    log_pipeline_summary(
-        log, receipt, ik_report, cal_res.calibration, cal_res.calibration2
+    _finalize_receipt(
+        ctx,
+        receipt,
+        (lane, kin, sim, log),
+        ik_report=ik_report,
+        cal_res=cal_res,
+        weld_report=weld_report,
+        q_ref=q_ref,
+        q_track=q_track,
+        sim_q=sim_q,
+        neck_solve=neck_solve,
+        fd_neck=fd_neck,
     )
     return receipt
+
+
+def _save_ik_trajectory(
+    ctx: PipelineContext,
+    lane: Lane,
+    q_ik: np.ndarray,
+    q_ref: np.ndarray,
+    errors: np.ndarray,
+    ref_errors: np.ndarray,
+) -> None:
+    """Persist the IK and reference trajectories the MJX exporter reads back."""
+    np.savez(
+        ctx.out_dir / "ik_trajectory.npz",
+        time_s=lane.times,
+        q=q_ik,
+        q_ref=q_ref,
+        errors_m=errors,
+        ref_errors_m=ref_errors,
+        valid=lane.valid,
+    )
 
 
 @dataclass(frozen=True)
@@ -1095,7 +1218,11 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
         run.labels,
         run.cal_res,
     )
-    lane.set_face_targets(cal_res.attachments, cal_res.scaled_spec, args.face_weight)
+    lane.set_club_targets(cal_res.attachments, cal_res.scaled_spec, args.face_weight)
+    lane.set_restart_policy(
+        getattr(args, "ik_restart_policy", DEFAULT_IK_RESTART_POLICY)
+    )
+    lane.posture_prior_weight = getattr(args, "ik_posture_prior_weight", 0.0)
     lane.set_turn_split(
         cal_res.attachments,
         getattr(args, "thorax_weight", DEFAULT_THORAX_WEIGHT),
@@ -1147,18 +1274,12 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
             constrained_ik=constrained_ik_dict,
         )
     )
+    lane.select_release_cutoff(cal_res.kin, cal_res.scaled_spec, q_ref)
     _attach_face_report(ik_report, lane, cal_res, (q_ik, q_ref), args.face_weight)
+    ik_report["restart_policy"] = lane.restart_report()
     if turn_split_active(lane):
         ik_report["turn_split"] = turn_split_report(lane)
-    np.savez(
-        ctx.out_dir / "ik_trajectory.npz",
-        time_s=lane.times,
-        q=q_ik,
-        q_ref=q_ref,
-        errors_m=errors,
-        ref_errors_m=ref_errors,
-        valid=lane.valid,
-    )
+    _save_ik_trajectory(ctx, lane, q_ik, q_ref, errors, ref_errors)
 
     return _simulate_and_receipt(
         ctx,

@@ -62,6 +62,8 @@ CALIBRATION_SCHEMA = "msk-club-grip-calibration-v1"
 #: XML element type of the model trees (built here; parsed with defusedxml).
 Element = ET.Element
 CLUB_BODY = "Club"
+#: Clubs with a committed anthropometric spec (``spec_path``).
+CLUBS = ("driver", "iron7")
 GRIP_MODELS = ("weld", "bushing")
 DEFAULT_GRIP_MODEL = "weld"
 #: Hand bodies (Rajagopal names) by grip side: lead = left, trail = right.
@@ -69,6 +71,8 @@ HAND_BODIES = {"L": "hand_l", "R": "hand_r"}
 LEAD_JOINT = "hand_l_to_club"
 TRAIL_CONSTRAINT = "hand_r_to_club"
 FREE_JOINT = "ground_to_club"
+#: ``grip_model="bushing"`` force names by grip side.
+GRIP_BUSHINGS = {"L": "grip_bushing_left", "R": "grip_bushing_right"}
 FREE_COORDINATES = (
     "club_rx",
     "club_ry",
@@ -107,8 +111,8 @@ class MskClub:
 
 def spec_path(club: str) -> Path:
     """Generated full-body spec that defines ``club`` (``driver`` or ``iron7``)."""
-    if club not in ("driver", "iron7"):
-        raise ValueError(f"club must be 'driver' or 'iron7', got {club!r}")
+    if club not in CLUBS:
+        raise ValueError(f"club must be one of {CLUBS}, got {club!r}")
     return SPEC_DIR / f"full_body_spec_anthro_{club}.json"
 
 
@@ -369,11 +373,9 @@ def _free_joint(model: ET.Element, club_in_ground: np.ndarray) -> None:
 
 def _bushings(model: ET.Element, club: MskClub) -> None:
     params = club.interface.bushing
-    for side, label in (("L", "left"), ("R", "right")):
+    for side, name in GRIP_BUSHINGS.items():
         force = ET.SubElement(
-            _objects(model, "ForceSet"),
-            "BushingForce",
-            {"name": f"grip_bushing_{label}"},
+            _objects(model, "ForceSet"), "BushingForce", {"name": name}
         )
         ET.SubElement(force, "socket_frame1").text = _frame_path(side, "hand")
         ET.SubElement(force, "socket_frame2").text = _frame_path(side, "club")
