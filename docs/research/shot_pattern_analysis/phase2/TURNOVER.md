@@ -6,9 +6,18 @@ The goal is active and incomplete. MAIN is `/home/dieterolson/.codex/worktrees/s
 
 ## Reporting Regeneration Checkpoint
 
-No production job is currently live. Original v3 primary/control completed with exit 0; both are graphically rejected for adjacent main tick labels. Supplemental v2 was intentionally stopped with SIGTERM at 07:27:57 UTC after confirmed scoring/precision/layout defects. It had computed 384 comparisons but rendered only a small portion of hundreds of known-obsolete figures. This was a deliberate correctness-driven stop, not an inferred timeout. Its output is partial and unaccepted.
+Two fresh saved-data jobs started from `4bb2be7362` at 07:39 UTC. **Freeze all MAIN Python under `src/tools/shot_pattern_analysis` and `scripts/research/shot_pattern_analysis` until both jobs terminate**, including new files. Docs/evidence may change. Revalidate actual handles before acting.
 
-All 690 primary, 548 control and 405 partial supplemental files were preserved byte-for-byte under `presentation_preview_rejected_final_v3/{final_figures_v1,control_final_figures_v1}` and `presentation_preview_rejected_supplement_v2/supplement_report_v1`. Stop receipts and full hash inventories are in `validation/reporting_revision_preservation_v4/`. The original Python-only source freeze was verified unchanged through termination and is released.
+| Job | Exec Session | Wrapper / Initial Child PID | Log / Terminal Receipt |
+| --- | --- | --- | --- |
+| Original Graphics v4 | 12618 | 2862523 / 2862725 (primary) | `/tmp/p2-original-final-figures-v4.log`; `/tmp/p2-v4-*-exit.json` |
+| Supplemental Report v3 | 86589 | 2862524 / 2862533 | `/tmp/p2-supplement-report-v3.log`; `/tmp/p2-supplement-report-v3-exit.json` |
+
+Start identity, complete study-Python hash inventory and executable wrapper copies: `validation/publication_regeneration_v4_start/`. Original wrapper final receipt: `validation/original_final_figures_rendering_revision_v4.json`. Supplemental output appears only after all384 paired calculations, then all comparisons are rendered; this is expected to be lengthy. Never infer termination from absent output or an observation timeout.
+
+Original v3 primary/control completed with exit 0; both are graphically rejected for adjacent main tick labels. Supplemental v2 was intentionally stopped with SIGTERM at 07:27:57 UTC after confirmed scoring/precision/layout defects. It had computed 384 comparisons but rendered only a small portion of hundreds of known-obsolete figures. This was a deliberate correctness-driven stop, not an inferred timeout. Its output is partial and unaccepted.
+
+All 690 primary, 548 control and 405 partial supplemental files were preserved byte-for-byte under `presentation_preview_rejected_final_v3/{final_figures_v1,control_final_figures_v1}` and `presentation_preview_rejected_supplement_v2/supplement_report_v1`. Stop receipts and full hash inventories are in `validation/reporting_revision_preservation_v4/`. The prior Python-only source freeze was verified unchanged through termination; its accepted repairs were then integrated before starting the new frozen revision.
 
 Five reviewed repairs are integrated in MAIN: `56f676e399`, `e71046afbb`, `598b0aab0e`, `e9771e2e24`, `4136ca331b`. The combined 144 scientific/report/layout tests and 34 GUI tests pass; Ruff/format checks pass all 14 changed Python files and Mypy passes eight source files. Evidence: `validation/five_repair_main_integration_v1/`. Regenerate all original graphics and the full supplemental pipeline, including all 384 comparisons; no Monte Carlo rerun or scope reduction.
 
@@ -76,7 +85,7 @@ The existing user-open `../shot_pattern_analysis.tex` remains open and now disti
 
 ## Next Steps and Gates
 
-1. Start the fresh original graphics v4 and supplemental report v3 jobs after verifying available disk and the integrated source snapshot; keep all study Python frozen for their duration. Review complete receipts and outputs before acceptance.
+1. Revalidate the fresh original graphics v4 and supplemental report v3 jobs; keep all study Python frozen for their duration. Review complete receipts and outputs before acceptance.
 2. Verify all existing estimates/populations against the preserved provisional tables; only the newly added 56 across-lean interactions and provenance should differ numerically. Never relabel partial v2 output as accepted.
 3. Build and independently review complete scientific/social deliverables, including the selected fixed-target controls and model-sensitivity discussion. Keep reproducibility instructions current.
 4. Run final `python -m scripts.pre_pr` from MAIN with Repository_Management on `PYTHONPATH`; update handoff/change fragment and ready PR, arm only through the merge-queue guard, then end the session. No post-PR polling/check-ins. Check owned PR #11941's actual remote/queue state before deciding how to deliver the expanded branch; no force push or another session's PR changes.
