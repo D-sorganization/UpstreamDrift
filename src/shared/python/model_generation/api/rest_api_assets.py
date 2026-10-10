@@ -28,7 +28,7 @@ class AssetLibraryEditorRoutesMixin:
 
     def calculate_inertia(self, request: APIRequest) -> APIResponse:
         """Calculate inertia for a primitive shape."""
-        from shared.python.model_generation.core.types import Inertia
+        from src.shared.python.model_generation.core.types import Inertia
 
         body = request_body(ensure_request(request))
         shape = body.get("shape")
@@ -119,7 +119,7 @@ class AssetLibraryEditorRoutesMixin:
 
     def library_list_models(self, request: APIRequest) -> APIResponse:
         """List models available from the model library."""
-        from shared.python.model_generation.library import ModelLibrary
+        from src.shared.python.model_generation.library import ModelLibrary
 
         query_params = ensure_request(request).query_params
         models = ModelLibrary().list_models(
@@ -141,7 +141,7 @@ class AssetLibraryEditorRoutesMixin:
 
     def library_get_model(self, request: APIRequest) -> APIResponse:
         """Get metadata for a single library model."""
-        from shared.python.model_generation.library import ModelLibrary
+        from src.shared.python.model_generation.library import ModelLibrary
 
         model_id = ensure_request(request).query_params.get("model_id")
         if not model_id:
@@ -168,7 +168,10 @@ class AssetLibraryEditorRoutesMixin:
 
     def library_add_model(self, request: APIRequest) -> APIResponse:
         """Add a URDF to the model library."""
-        from shared.python.model_generation.library import ModelCategory, ModelLibrary
+        from src.shared.python.model_generation.library import (
+            ModelCategory,
+            ModelLibrary,
+        )
 
         ensure_request(request)
         body = request_body(request)
@@ -200,7 +203,7 @@ class AssetLibraryEditorRoutesMixin:
         returned a 501 stub. ``delete_files`` (default False) optionally removes
         the cached files as well.
         """
-        from shared.python.model_generation.library import ModelLibrary
+        from src.shared.python.model_generation.library import ModelLibrary
 
         model_id = ensure_request(request).query_params.get("model_id")
         if not model_id:
@@ -219,7 +222,7 @@ class AssetLibraryEditorRoutesMixin:
 
     def library_download_model(self, request: APIRequest) -> APIResponse:
         """Download the URDF content for a stored model."""
-        from shared.python.model_generation.library import ModelLibrary
+        from src.shared.python.model_generation.library import ModelLibrary
 
         model_id = ensure_request(request).query_params.get("model_id")
         if not model_id:
@@ -232,7 +235,7 @@ class AssetLibraryEditorRoutesMixin:
 
     def compose_models(self, request: APIRequest) -> APIResponse:
         """Compose a new model from source URDF fragments and edit operations."""
-        from shared.python.model_generation.editor import FrankensteinEditor
+        from src.shared.python.model_generation.editor import FrankensteinEditor
 
         body = request_body(ensure_request(request))
         sources = body.get("sources", {})
@@ -265,7 +268,7 @@ class AssetLibraryEditorRoutesMixin:
 
     def diff_urdfs(self, request: APIRequest) -> APIResponse:
         """Compare two URDF documents and return a structured diff."""
-        from shared.python.model_generation.editor.text_editor import URDFTextEditor
+        from src.shared.python.model_generation.editor.text_editor import URDFTextEditor
 
         body = request_body(ensure_request(request))
         content_a = body.get("content_a")

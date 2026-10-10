@@ -783,7 +783,7 @@ class SimscapeToURDFConverter:
         """Generate URDF XML string from conversion result."""
         if result is None:
             raise ValueError("result must be provided")
-        from shared.python.model_generation.builders.urdf_writer import URDFWriter
+        from src.shared.python.model_generation.builders.urdf_writer import URDFWriter
 
         writer = URDFWriter(pretty_print=True)
         return writer.write(

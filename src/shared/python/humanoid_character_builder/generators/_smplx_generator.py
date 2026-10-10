@@ -228,7 +228,7 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
             raise ValueError("visual_dir must be provided")
         import numpy as np
 
-        from shared.python.humanoid_character_builder.core.segment_definitions import (
+        from src.shared.python.humanoid_character_builder.core.segment_definitions import (
             HUMANOID_SEGMENTS,
         )
 
@@ -325,7 +325,7 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
         """Fallback segmentation using z-coordinate slicing."""
         if visual_dir is None:
             raise ValueError("visual_dir must be provided")
-        from shared.python.humanoid_character_builder.core.segment_definitions import (
+        from src.shared.python.humanoid_character_builder.core.segment_definitions import (
             HUMANOID_SEGMENTS,
         )
 
@@ -408,7 +408,7 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
         )
 
     def get_supported_segments(self) -> list[str]:
-        from shared.python.humanoid_character_builder.core.segment_definitions import (
+        from src.shared.python.humanoid_character_builder.core.segment_definitions import (
             HUMANOID_SEGMENTS,
         )
 

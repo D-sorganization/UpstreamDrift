@@ -11,14 +11,14 @@ from typing import TYPE_CHECKING
 from src.shared.python.model_generation.explorer.display_config import DISPLAY_OPTIONS
 
 if TYPE_CHECKING:
-    from shared.python.model_generation.explorer.model_explorer import (
+    from src.shared.python.model_generation.explorer.model_explorer import (
         ModelExplorerWindow,
     )
 
 
 def get_explorer_window() -> type[ModelExplorerWindow]:
     """Lazy import of ModelExplorerWindow to avoid PyQt6 dependency at import time."""
-    from shared.python.model_generation.explorer.model_explorer import (
+    from src.shared.python.model_generation.explorer.model_explorer import (
         ModelExplorerWindow,
     )
 

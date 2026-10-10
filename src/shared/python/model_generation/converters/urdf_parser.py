@@ -124,7 +124,7 @@ class ParsedModel:
         """Convert back to URDF XML."""
         if pretty_print is None:
             raise ValueError("pretty_print must be provided")
-        from shared.python.model_generation.builders.urdf_writer import URDFWriter
+        from src.shared.python.model_generation.builders.urdf_writer import URDFWriter
 
         writer = URDFWriter(pretty_print=pretty_print)
         return str(writer.write(self.name, self.links, self.joints, self.materials))

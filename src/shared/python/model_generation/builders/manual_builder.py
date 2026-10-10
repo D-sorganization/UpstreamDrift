@@ -553,7 +553,7 @@ class ManualBuilder(BaseURDFBuilder):
         shape = data.get("shape", "box").lower()
         dims = data.get("dimensions", {})
 
-        from shared.python.model_generation.core.types import GeometryType
+        from src.shared.python.model_generation.core.types import GeometryType
 
         if shape == "box":
             return Geometry(

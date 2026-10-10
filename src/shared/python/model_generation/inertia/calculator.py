@@ -16,18 +16,18 @@ from typing import Any
 
 import numpy as np
 
-from shared.python.model_generation.core.constants import (
+from src.shared.python.model_generation.core.constants import (
     DEFAULT_DENSITY_KG_M3,
     DEFAULT_INERTIA_KG_M2,
 )
-from shared.python.model_generation.core.types import Geometry, GeometryType
-from shared.python.model_generation.inertia.primitives import (
+from src.shared.python.model_generation.core.types import Geometry, GeometryType
+from src.shared.python.model_generation.inertia.primitives import (
     box_inertia,
     capsule_inertia,
     cylinder_inertia,
     sphere_inertia,
 )
-from shared.python.model_generation.inertia.result import InertiaMode, InertiaResult
+from src.shared.python.model_generation.inertia.result import InertiaMode, InertiaResult
 
 logger = logging.getLogger(__name__)
 
@@ -359,7 +359,7 @@ class InertiaCalculator:
         if segment_name is None:
             raise ValueError("Anthropometric mode requires segment_name")
         try:
-            from shared.python.model_generation.humanoid.anthropometry import (
+            from src.shared.python.model_generation.humanoid.anthropometry import (
                 estimate_segment_inertia_from_gyration,
             )
 

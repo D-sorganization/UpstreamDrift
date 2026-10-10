@@ -27,7 +27,7 @@ REST API Usage:
 
 # Re-export main API components from package root
 try:
-    from shared.python.model_generation import (
+    from src.shared.python.model_generation import (
         BuildResult,
         ManualBuilder,
         ParametricBuilder,
