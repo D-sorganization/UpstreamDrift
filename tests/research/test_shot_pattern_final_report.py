@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import csv
 import io
+from collections import Counter
+from pathlib import Path
 
 import pytest
 
@@ -942,3 +944,159 @@ def test_bounds_control_missing_relative_effect_is_explicitly_unavailable(
     assert effects == []
     expected = scoring_failure or "relative scoring effects were not emitted"
     assert any(expected in reason for reason in unavailable)
+
+
+def test_f2_exact_12_representative_interaction_contrasts():
+    import random
+    from scripts.research.shot_pattern_analysis.final_report_inputs import (
+        select_representative_interaction_pairs,
+    )
+    from src.tools.shot_pattern_analysis.matched_interpretation import (
+        render_effect_table,
+    )
+
+    clubs = ("driver", "seven_iron", "pitching_wedge")
+    profiles = ("shaft_only", "combined2")
+    pairs = []
+
+    for club in clubs:
+        for prof in profiles:
+            # Pair 1: SD 1 -> 2, Curve 1
+            pairs.append(
+                _make_source_pair(
+                    comparison_kind="shaft_rotation_sd",
+                    first_cell=f"{club}_lean0_curve1_rotation1_{prof}",
+                    second_cell=f"{club}_lean0_curve1_rotation2_{prof}",
+                    first_protocol="original_control/1",
+                    second_protocol="original_control/1",
+                    draw_effect={
+                        "estimate": 0.002,
+                        "lower_95": 0.001,
+                        "upper_95": 0.003,
+                    },
+                    fade_effect={
+                        "estimate": -0.001,
+                        "lower_95": -0.002,
+                        "upper_95": 0.0,
+                    },
+                )
+            )
+            # Pair 2: Curve 1 -> 2, SD 2
+            proto_b = (
+                "pw-primary-face-bounds/1"
+                if club == "pitching_wedge"
+                else "original_control/1"
+            )
+            pairs.append(
+                _make_source_pair(
+                    comparison_kind="curve_strength",
+                    first_cell=f"{club}_lean0_curve1_rotation2_{prof}",
+                    second_cell=f"{club}_lean0_curve2_rotation2_{prof}",
+                    first_protocol="original_control/1",
+                    second_protocol=proto_b,
+                    draw_effect={
+                        "estimate": 0.004,
+                        "lower_95": 0.003,
+                        "upper_95": 0.005,
+                    },
+                    fade_effect={
+                        "estimate": 0.0001,
+                        "lower_95": -0.0002,
+                        "upper_95": 0.0004,
+                    },
+                )
+            )
+
+    assert len(pairs) == 12
+
+    # Selection selects all 12 in exact intended order
+    selected = select_representative_interaction_pairs(pairs)
+    assert len(selected) == 12
+
+    # Order permutation invariance: reversing or shuffling input leaves output identical
+    shuffled = list(pairs)
+    random.Random(42).shuffle(shuffled)
+    selected_shuffled = select_representative_interaction_pairs(shuffled)
+    assert [e["source_cells"] for e in selected_shuffled] == [
+        e["source_cells"] for e in selected
+    ]
+    assert [e["comparison_kind"] for e in selected_shuffled] == [
+        e["comparison_kind"] for e in selected
+    ]
+
+    # Duplicate fails closed
+    with pytest.raises(ValueError, match="ambiguous|duplicate"):
+        select_representative_interaction_pairs([*pairs, pairs[0]])
+
+    # Omission fails closed
+    with pytest.raises(ValueError, match="missing|unavailable"):
+        select_representative_interaction_pairs(pairs[1:])
+
+    # Table rendering works
+    rendered_table = render_effect_table(selected)
+    assert "| Draw |" in rendered_table
+    assert "| Fade |" in rendered_table
+    assert "pw-primary-face-bounds/1" in rendered_table
+    # Supported geometry cannot masquerade as an available scoring interaction.
+    pairs[0].pop("course_scoring_effect_modification")
+    with pytest.raises(ValueError, match="relative scoring"):
+        select_representative_interaction_pairs(pairs)
+
+
+def test_f4_speed_bounds_scoping_and_driver_supplement_disclosure():
+    cell = _detailed_cell()
+    matrix = _matrix([cell], "final")
+    lean = {
+        "schema": "matched-across-lean/1",
+        "pairs": [],
+        "population": {"planned_pairs": 0},
+    }
+    interpretation = _qualified_interpretation()
+
+    rendered = build_final_report.render_final_report(
+        matrix, matrix, lean, {}, interpretation=interpretation
+    )
+
+    # 1. Controlled Inputs scopes 75–125% to original protocols
+    assert "original_primary/1" in rendered
+    assert "75–125%" in rendered or "75-125%" in rendered
+
+    # 2. Fixed-Target Across-Lean Bounds Controls discloses Driver 75–130% and ±6° face box
+    assert "driver-control-speed-bounds/1" in rendered
+    assert "75–130%" in rendered or "75-130%" in rendered
+    assert "6.0°" in rendered or "6°" in rendered
+    assert "not preregistered" in rendered or "were not preregistered" in rendered
+
+
+def test_f5_figure_population_prose_distinguishes_individual_and_paired_densities():
+    cell = _detailed_cell()
+    matrix = _matrix([cell], "final")
+    lean = {
+        "schema": "matched-across-lean/1",
+        "pairs": [],
+        "population": {"planned_pairs": 0},
+    }
+    interpretation = _qualified_interpretation()
+
+    rendered = build_final_report.render_final_report(
+        matrix, matrix, lean, {}, interpretation=interpretation
+    )
+
+    # Figure population prose distinguishes individual vs paired populations
+    assert "Individual cell densities use individually supported endpoints" in rendered
+    assert (
+        "shared six-population" in rendered
+        or "six-population supported-index intersection" in rendered
+    )
+
+
+def test_f6_draft_conclusions_provenance_truthful_v5_pending():
+    repo_root = Path(__file__).resolve().parents[2]
+    path = (
+        repo_root
+        / "docs/research/shot_pattern_analysis/phase2/review_followups/PHASE_TWO_CONCLUSIONS_DRAFT.md"
+    )
+    content = path.read_text(encoding="utf-8")
+    assert "completed v4 receipt" not in content
+    assert "v4" in content.lower()
+    assert "v5" in content.lower()

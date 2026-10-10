@@ -85,6 +85,99 @@ def select_bounds_control_pairs(
     return selected, unavailable
 
 
+def select_representative_interaction_pairs(
+    comparisons: list[dict],
+) -> list[dict]:
+    """Select the exact 12 draft representative interaction contrasts.
+
+    The qualified draft specifies 12 contrasts across all three clubs, both
+    shaft_only and combined2 profiles, SD 1→2° curve ×1, and curve ×1→×2 at SD 2°.
+    Pitching wedge curve ×2 uses the verified supplemental pw-primary-face-bounds/1
+    protocol. Selection is invariant to input order and fails closed on missing
+    or duplicate identities.
+    """
+    from src.tools.shot_pattern_analysis.matched_interpretation import (
+        describe_effect_modification,
+    )
+
+    targets: list[tuple[str, str, str, str, str, str, str]] = []
+    for club in ("driver", "seven_iron", "pitching_wedge"):
+        for profile in ("shaft_only", "combined2"):
+            # Contrast 1: SD 1 -> 2, Curve 1
+            targets.append(
+                (
+                    club,
+                    profile,
+                    "shaft_rotation_sd",
+                    f"{club}_lean0_curve1_rotation1_{profile}",
+                    f"{club}_lean0_curve1_rotation2_{profile}",
+                    "original_control/1",
+                    "original_control/1",
+                )
+            )
+            # Contrast 2: Curve 1 -> 2, SD 2
+            proto_b = (
+                "pw-primary-face-bounds/1"
+                if club == "pitching_wedge"
+                else "original_control/1"
+            )
+            targets.append(
+                (
+                    club,
+                    profile,
+                    "curve_strength",
+                    f"{club}_lean0_curve1_rotation2_{profile}",
+                    f"{club}_lean0_curve2_rotation2_{profile}",
+                    "original_control/1",
+                    proto_b,
+                )
+            )
+
+    selected: list[dict] = []
+    for club, profile, kind, cell_a, cell_b, proto_a, proto_b in targets:
+        expected = ((proto_a, cell_a), (proto_b, cell_b))
+        matches = []
+        for pair in comparisons:
+            sources = pair.get("sources")
+            if (
+                pair.get("comparison_kind") != kind
+                or not isinstance(sources, list)
+                or len(sources) != 2
+            ):
+                continue
+            if not all(isinstance(s, dict) for s in sources):
+                continue
+            identity = tuple((s.get("protocol_id"), s.get("cell")) for s in sources)
+            if identity == expected:
+                matches.append(pair)
+
+        if len(matches) > 1:
+            raise ValueError(
+                f"ambiguous duplicate comparison for {club} {profile} {kind}: {cell_a} -> {cell_b}"
+            )
+        if not matches:
+            raise ValueError(
+                f"missing required representative comparison for {club} {profile} {kind}: {cell_a} -> {cell_b}"
+            )
+
+        match = matches[0]
+        effect = describe_effect_modification(match)
+        if effect.get("status") not in ("available", "conditional_only"):
+            raise ValueError(
+                f"representative comparison is unavailable: {club} {profile} {kind}"
+            )
+        if any(
+            effect[key] is None
+            for key in ("draw_minus_straight_change", "fade_minus_straight_change")
+        ):
+            raise ValueError(
+                f"required relative scoring interaction unavailable: {cell_a}"
+            )
+        selected.append(effect)
+
+    return selected
+
+
 def verified_original_figure_links(
     figure_root: Path, report: dict, *, report_root: Path, protocol: str
 ) -> list[dict]:
@@ -276,6 +369,122 @@ def supplement_figure_links(
     return links
 
 
+def assemble_resolved_selected_cells(primary: dict, supplement: dict) -> list[dict]:
+    """Assemble the resolved 24-cell zero-lean selection with explicit protocols.
+
+    Preserves original primary accounting for the 20 completed primary cells
+    (protocol original_primary/1) and integrates the verified supplemental
+    cell records for the four resolved PW curve-2 cells (protocol
+    pw-primary-face-bounds/1). Guards against missing or duplicate identities
+    and asserts separate individual endpoint and common-three scoring counts.
+    """
+    clubs = ("driver", "seven_iron", "pitching_wedge")
+    curves = (1.0, 2.0)
+    rotations = (1.0, 2.0)
+    profiles = ("shaft_only", "combined2")
+
+    primary_cells: dict[str, dict] = {}
+    for cell in primary.get("cells", []):
+        name = cell["cell"]
+        if name in primary_cells:
+            raise ValueError(f"duplicate primary cell: {name}")
+        primary_cells[name] = cell
+
+    supp_report = supplement.get("report", {})
+    supp_unique: dict[str, dict] = {}
+    for entry in supp_report.get("unique_cells", []):
+        name = entry["cell"]
+        if name in supp_unique:
+            raise ValueError(f"duplicate supplement cell: {name}")
+        supp_unique[name] = entry
+
+    resolved: list[dict] = []
+    seen: set[str] = set()
+
+    for club in clubs:
+        for curve in curves:
+            for rot in rotations:
+                for prof in profiles:
+                    cell_name = (
+                        f"{club}_lean0_curve{int(curve)}_rotation{int(rot)}_{prof}"
+                    )
+                    if cell_name in seen:
+                        raise ValueError(f"duplicate requested cell: {cell_name}")
+                    seen.add(cell_name)
+
+                    if cell_name not in primary_cells:
+                        raise ValueError(f"missing requested primary cell: {cell_name}")
+
+                    p_cell = primary_cells[cell_name]
+                    status = p_cell.get("status")
+                    if status == "completed":
+                        summary = p_cell.get("summary", {})
+                        for pat in ("Straight", "Draw", "Fade"):
+                            if pat not in summary or "supported_n" not in summary[pat]:
+                                raise ValueError(
+                                    f"cell lacks individual support count: {cell_name}"
+                                )
+                        paired = p_cell.get("paired_comparisons", {})
+                        if "paired_n" not in paired:
+                            raise ValueError(
+                                f"cell lacks common paired count: {cell_name}"
+                            )
+
+                        resolved.append(
+                            {
+                                **p_cell,
+                                "source_protocol": "original_primary/1",
+                            }
+                        )
+                    elif status == "unavailable":
+                        if cell_name not in supp_unique:
+                            raise ValueError(
+                                f"missing resolved supplement cell for unavailable primary: {cell_name}"
+                            )
+                        s_entry = supp_unique[cell_name]
+                        if s_entry.get("status") != "completed":
+                            raise ValueError(
+                                f"supplement cell is not completed: {cell_name}"
+                            )
+
+                        s_summary = s_entry.get("summary", {})
+                        pat_summary = s_summary.get("summary", {})
+                        for pat in ("Straight", "Draw", "Fade"):
+                            if (
+                                pat not in pat_summary
+                                or "supported_n" not in pat_summary[pat]
+                            ):
+                                raise ValueError(
+                                    f"supplement cell lacks individual support count: {cell_name}"
+                                )
+                        paired = s_summary.get("paired_comparisons", {})
+                        if "paired_n" not in paired:
+                            raise ValueError(
+                                f"supplement cell lacks common paired count: {cell_name}"
+                            )
+
+                        resolved.append(
+                            {
+                                **s_summary,
+                                "cell": cell_name,
+                                "source_protocol": s_entry.get("source_protocol"),
+                                "original_status": "unavailable",
+                            }
+                        )
+                    else:
+                        raise ValueError(
+                            f"cell has invalid status {status}: {cell_name}"
+                        )
+
+    if len(resolved) != 24:
+        raise ValueError(f"expected exactly 24 resolved cells, got {len(resolved)}")
+
+    from .report_synthesis import validate_resolved_selection
+
+    validate_resolved_selection(resolved)
+    return resolved
+
+
 def assemble_qualified_interpretation(
     primary_root: Path,
     primary: dict,
@@ -290,7 +499,6 @@ def assemble_qualified_interpretation(
 ) -> dict:
     """Compose selected interpretation from independently qualified inputs."""
     from src.tools.shot_pattern_analysis.matched_interpretation import (
-        describe_effect_modification,
         describe_saved_cell,
         describe_scoring,
     )
@@ -325,32 +533,10 @@ def assemble_qualified_interpretation(
     comparisons = supplement["comparisons"]
     if comparisons.get("schema") != "matched-supplement-comparisons/1":
         raise ValueError("qualified supplement comparison schema differs")
-    # The separately qualified inventory can contain many comparisons; show
-    # source-named direct contrasts here and link its complete CSV below.
-    pairs = [
-        describe_effect_modification(pair)
-        for pair in comparisons["comparisons"]
-        if pair.get("comparison_kind") in ("curve_strength", "shaft_rotation_sd")
-        and pair.get("status") in ("available", "conditional_only")
-    ]
-    representative_effects: list[dict] = []
-    for club in ("driver", "seven_iron", "pitching_wedge"):
-        for kind in ("curve_strength", "shaft_rotation_sd"):
-            chosen = next(
-                (
-                    pair
-                    for pair in pairs
-                    if pair["comparison_kind"] == kind
-                    and all(
-                        name.startswith(club + "_") for name in pair["source_cells"]
-                    )
-                    and "combined2" in pair["source_cells"][0]
-                    and "lean0" in pair["source_cells"][0]
-                ),
-                None,
-            )
-            if chosen is not None:
-                representative_effects.append(chosen)
+    resolved_selected_cells = assemble_resolved_selected_cells(primary, supplement)
+    representative_effects = select_representative_interaction_pairs(
+        comparisons["comparisons"]
+    )
     bounds_effects, bounds_unavailable = select_bounds_control_pairs(
         comparisons["comparisons"]
     )
@@ -402,6 +588,7 @@ def assemble_qualified_interpretation(
     receipt_path = Path(supplement_dir) / "REPORT_SUPPLEMENT_PIPELINE.json"
     return {
         "selected_cells": explained,
+        "resolved_selected_cells": resolved_selected_cells,
         "scores": scored,
         "effects": representative_effects,
         "bounds_control": {

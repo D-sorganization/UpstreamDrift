@@ -241,7 +241,7 @@ def _experimental_control_lines(primary: dict) -> list[str]:
     lines = [
         "## Controlled Inputs",
         "",
-        f"Each completed cell uses {reference['n_shots']:,} indexed errors per physical pattern with seed `{reference.get('seed', 'see cell plan')}`. Nominal matching accepts raw X/Y residual at most {reference.get('match_tolerance_m', 'see cell plan')} m. Nominal speed is searched within 75–125% of each listed reference speed; no post-simulation aiming rotation is applied. Flight timestep, contact resolution, runtime backend and exact source hashes are frozen in the per-cell execution receipts.",
+        f"Each completed cell uses {reference['n_shots']:,} indexed errors per physical pattern with seed `{reference.get('seed', 'see cell plan')}`. Nominal matching accepts raw X/Y residual at most {reference.get('match_tolerance_m', 'see cell plan')} m. Under original protocols (protocol original_primary/1 and original_control/1), nominal speed is searched within 75–125% of each listed reference speed; no post-simulation aiming rotation is applied. Flight timestep, contact resolution, runtime backend and exact source hashes are frozen in the per-cell execution receipts.",
         "",
         "| Club | Static Loft (°) | Lie at Zero Lean (°) | Reference Speed (m/s) | Attack Angle (°) | Assumed Head Mass (kg) |",
         "| --- | ---: | ---: | ---: | ---: | ---: |",
@@ -410,6 +410,45 @@ def _selected_comparison_lines(primary: dict) -> list[str]:
     return lines + [""]
 
 
+def _resolved_selected_comparison_lines(resolved_cells: list[dict]) -> list[str]:
+    lines = [
+        "### Resolved Zero-Lean Curve and Variability Comparison",
+        "",
+        "This resolved view integrates the qualified supplemental face-bounds protocol (pw-primary-face-bounds/1) for the four strong-curve pitching wedge conditions while preserving original primary protocol accounting (original_primary/1) above. Differences are matched shot by shot against Straight inside each cell. The common paired count may be smaller than every pattern's individual supported count. SG is per simulated opportunity; multiply by 100 for the same hypothetical effect over 100 identical opportunities, not per round.",
+        "",
+        "| Club | Profile | Twist SD (°) | Curve | Protocol | Individual Supported / Attempted (Straight; Draw; Fade) | Common-Three Scored / Attempted | Draw Δ SG [95%] | Fade Δ SG [95%] |",
+        "| --- | --- | ---: | ---: | --- | --- | ---: | --- | --- |",
+    ]
+    for cell in resolved_cells:
+        config = cell["config"]
+        descriptor = [
+            config["club"]["club_id"],
+            _profile(cell["cell"]),
+            f"{config['noise']['standard_deviations'][0]:g}",
+            f"{config['curve_scale']:g}",
+            cell.get("source_protocol", "original_primary/1"),
+        ]
+        score = cell["course_scoring"]
+        sg = score["paired_benefit_vs_straight"]
+        lines.append(
+            "| "
+            + " | ".join(
+                [
+                    *descriptor,
+                    "; ".join(
+                        f"{cell['summary'][name]['supported_n']:,} / {cell['summary'][name]['total_n']:,}"
+                        for name in PATTERNS
+                    ),
+                    f"{score['paired_n']:,} / {score['total_n']:,}",
+                    _interval(sg.get("Draw")),
+                    _interval(sg.get("Fade")),
+                ]
+            )
+            + " |"
+        )
+    return lines + [""]
+
+
 def _sensitivity_lines(sensitivity: dict[str, dict]) -> list[str]:
     lines = ["## Course-Dimension Sensitivity", ""]
     if not sensitivity:
@@ -560,6 +599,8 @@ def _bounds_control_lines(bounds_control: Mapping[str, Any] | None) -> list[str]
         "",
         "The fixed-target across-lean controls evaluate whether adjusting shaft lean from 0° to 5° alters relative curve scoring when nominal target distance is held constant. These comparisons evaluate solver bounds adapted after original search; original unavailable cells remain unchanged in the complete matrix accounting. Rematched speed/face/path prevents causal claims.",
         "",
+        "Under original protocols (protocol original_primary/1 and original_control/1), nominal speed is searched within 75–125% of reference speed. To resolve the reviewed 5°-lean fixed-target nominal search, the driver control supplement (protocol driver-control-speed-bounds/1) expanded nominal speed search to 75–130%. Additionally, qualified supplemental protocols (driver-control-speed-bounds/1, pw-control-face-bounds/1, and pw-primary-face-bounds/1) evaluated delivery solutions within an explicit absolute face box of [-6.0°, +6.0°]. These adapted bounds were not preregistered in the original factorial protocol and do not imply physical impossibility outside them.",
+        "",
     ]
     if bounds_control is None:
         lines.extend(["No qualified bounds-control comparison is available.", ""])
@@ -575,6 +616,12 @@ def _bounds_control_lines(bounds_control: Mapping[str, Any] | None) -> list[str]
     if not effects and not unavailable:
         lines.extend(["No qualified bounds-control comparison is available.", ""])
     return lines
+
+
+def _conclusions_and_synthesis_lines(interpretation: dict) -> list[str]:
+    from .report_synthesis import synthesis_lines
+
+    return synthesis_lines(interpretation)
 
 
 def _qualified_interpretation_lines(interpretation: dict) -> list[str]:
@@ -611,13 +658,14 @@ def _qualified_interpretation_lines(interpretation: dict) -> list[str]:
         render_effect_table(interpretation["effects"]),
         "",
     ]
-    if "bounds_control" in interpretation:
-        lines.extend(_bounds_control_lines(interpretation["bounds_control"]))
+    lines.extend(_bounds_control_lines(interpretation.get("bounds_control")))
+    if "resolved_selected_cells" in interpretation:
+        lines.extend(_conclusions_and_synthesis_lines(interpretation))
     lines.extend(
         [
             "### Verified Academic and Social Figures",
             "",
-            "Figure links below come from source-bound inventories and include their actual protocol and population type. Density contours use all supported endpoints; displayed point overlays and overhead paths are sampled, as labeled in each image. A 95% highest-density region is not a confidence interval for the mean.",
+            "Figure links below come from source-bound inventories and include their actual protocol and population type. Individual cell densities use individually supported endpoints, while paired densities use the shared six-population supported-index intersection; displayed point overlays and overhead paths are sampled, as labeled in each image. A 95% highest-density region is not a confidence interval for the mean.",
             "",
         ]
     )
@@ -731,6 +779,12 @@ def render_final_report(
     else:
         lines.extend(_qualified_interpretation_lines(interpretation))
     lines.extend(_selected_comparison_lines(primary))
+    if interpretation is not None and "resolved_selected_cells" in interpretation:
+        lines.extend(
+            _resolved_selected_comparison_lines(
+                interpretation["resolved_selected_cells"]
+            )
+        )
     if interpretation is None:
         lines.extend(
             (
@@ -851,6 +905,7 @@ def _report_source_hashes() -> dict[str, str]:
     sources = (
         Path(__file__).resolve(),
         repository / "scripts/research/shot_pattern_analysis/final_report_inputs.py",
+        repository / "scripts/research/shot_pattern_analysis/report_synthesis.py",
         repository / "src/tools/shot_pattern_analysis/matched_interpretation.py",
         repository / "src/tools/shot_pattern_analysis/matched_formatting.py",
         repository / "src/tools/shot_pattern_analysis/matched_report.py",

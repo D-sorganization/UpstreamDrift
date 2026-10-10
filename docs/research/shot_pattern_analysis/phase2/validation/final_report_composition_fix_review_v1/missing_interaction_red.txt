@@ -1,0 +1,138 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+____________ test_f2_exact_12_representative_interaction_contrasts _____________
+
+    def test_f2_exact_12_representative_interaction_contrasts():
+        import random
+        from scripts.research.shot_pattern_analysis.final_report_inputs import (
+            select_representative_interaction_pairs,
+        )
+        from src.tools.shot_pattern_analysis.matched_interpretation import (
+            render_effect_table,
+        )
+    
+        clubs = ("driver", "seven_iron", "pitching_wedge")
+        profiles = ("shaft_only", "combined2")
+        pairs = []
+    
+        for club in clubs:
+            for prof in profiles:
+                # Pair 1: SD 1 -> 2, Curve 1
+                pairs.append(
+                    _make_source_pair(
+                        comparison_kind="shaft_rotation_sd",
+                        first_cell=f"{club}_lean0_curve1_rotation1_{prof}",
+                        second_cell=f"{club}_lean0_curve1_rotation2_{prof}",
+                        first_protocol="original_control/1",
+                        second_protocol="original_control/1",
+                        draw_effect={
+                            "estimate": 0.002,
+                            "lower_95": 0.001,
+                            "upper_95": 0.003,
+                        },
+                        fade_effect={
+                            "estimate": -0.001,
+                            "lower_95": -0.002,
+                            "upper_95": 0.0,
+                        },
+                    )
+                )
+                # Pair 2: Curve 1 -> 2, SD 2
+                proto_b = (
+                    "pw-primary-face-bounds/1"
+                    if club == "pitching_wedge"
+                    else "original_control/1"
+                )
+                pairs.append(
+                    _make_source_pair(
+                        comparison_kind="curve_strength",
+                        first_cell=f"{club}_lean0_curve1_rotation2_{prof}",
+                        second_cell=f"{club}_lean0_curve2_rotation2_{prof}",
+                        first_protocol="original_control/1",
+                        second_protocol=proto_b,
+                        draw_effect={
+                            "estimate": 0.004,
+                            "lower_95": 0.003,
+                            "upper_95": 0.005,
+                        },
+                        fade_effect={
+                            "estimate": 0.0001,
+                            "lower_95": -0.0002,
+                            "upper_95": 0.0004,
+                        },
+                    )
+                )
+    
+        assert len(pairs) == 12
+    
+        # Selection selects all 12 in exact intended order
+        selected = select_representative_interaction_pairs(pairs)
+        assert len(selected) == 12
+    
+        # Order permutation invariance: reversing or shuffling input leaves output identical
+        shuffled = list(pairs)
+        random.Random(42).shuffle(shuffled)
+        selected_shuffled = select_representative_interaction_pairs(shuffled)
+        assert [e["source_cells"] for e in selected_shuffled] == [
+            e["source_cells"] for e in selected
+        ]
+        assert [e["comparison_kind"] for e in selected_shuffled] == [
+            e["comparison_kind"] for e in selected
+        ]
+    
+        # Duplicate fails closed
+        with pytest.raises(ValueError, match="ambiguous|duplicate"):
+            select_representative_interaction_pairs([*pairs, pairs[0]])
+    
+        # Omission fails closed
+        with pytest.raises(ValueError, match="missing|unavailable"):
+            select_representative_interaction_pairs(pairs[1:])
+    
+        # Table rendering works
+        rendered_table = render_effect_table(selected)
+        assert "| Draw |" in rendered_table
+        assert "| Fade |" in rendered_table
+        assert "pw-primary-face-bounds/1" in rendered_table
+        # Supported geometry cannot masquerade as an available scoring interaction.
+        pairs[0].pop("course_scoring_effect_modification")
+>       with pytest.raises(ValueError, match="relative scoring"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/research/test_shot_pattern_final_report.py:1042: Failed
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+../../../../Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487
+  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487: UserWarning: Skipping collection of '.hypothesis' directory - this usually means you've explicitly set the `norecursedirs` pytest config option, replacing rather than extending the default ignores.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 20 durations =============================
+0.16s setup    tests/research/test_shot_pattern_final_report.py::test_f2_exact_12_representative_interaction_contrasts
+
+(2 durations < 0.005s hidden.  Use -vv to show these durations.)
+=========================== short test summary info ============================
+FAILED tests/research/test_shot_pattern_final_report.py::test_f2_exact_12_representative_interaction_contrasts

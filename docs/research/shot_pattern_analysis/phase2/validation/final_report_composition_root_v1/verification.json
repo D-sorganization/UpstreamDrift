@@ -1,0 +1,34 @@
+{
+  "status": "accepted_report_composition_component_only",
+  "source_sha256": {
+    "scripts/research/shot_pattern_analysis/build_final_report.py": "e11fdfb85c8f66c3db9e20cbf4d7636c742a3781126c57df6154b818cd557a6a",
+    "scripts/research/shot_pattern_analysis/final_report_inputs.py": "5cda7a9606f1ee8c93eca9b054ed311529366515c891e8025d409437db9fc497",
+    "scripts/research/shot_pattern_analysis/report_synthesis.py": "b30aea47fdebe1149075a955a39cbb742d11b5577a5029fc0a0e2377d789e58c",
+    "src/tools/shot_pattern_analysis/matched_interpretation.py": "4ed78414a6daefa6e5215a376cdea5e36c03274c2190d3c823104fa180f3ce80",
+    "src/tools/shot_pattern_analysis/matched_formatting.py": "67971a489527c9bfe43d6948afc6248746a81d5124917032e56238907e1a472f",
+    "src/tools/shot_pattern_analysis/matched_report.py": "0509d3bd122b6c5eec38b90921cd851840d6184534da248c9faeec9cae72e93c",
+    "src/tools/shot_pattern_analysis/matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
+    "src/tools/shot_pattern_analysis/matched_sensitivity.py": "95b2aa389be3a21ee30b3a56ef49d5a07ccf2e649f7299fb9189aaad086729cf",
+    "src/tools/shot_pattern_analysis/matched_supplement_pipeline.py": "f836132f5e850ea58d54c166b405487f8e4508746be466e30122d0ce5c1cdd59",
+    "src/tools/shot_pattern_analysis/matched_supplement_report.py": "048455151fc708504c7baa64160a245ccd526a034755e09a343601f0674dac8d",
+    "src/tools/shot_pattern_analysis/matched_supplement_figures.py": "9254d7aede64f5aed19bd32f7cd5a8fb1b1899f6e18d000ba2096b228fc18246"
+  },
+  "reference_sha256": "f4cc8ab15c65167617ecda4be1ae408c47b1039171cb44ffd4a63d5f3cd515cd",
+  "verified_cells": 24,
+  "verified_pattern_rows": 72,
+  "exact_order_invariant_pairs": 12,
+  "rendered_ranges_match_reference": true,
+  "full_report_and_pdf_acceptance": false,
+  "tests": {
+    "passed": 40,
+    "warnings": 7,
+    "exit_code": 0,
+    "log": "tests.txt"
+  },
+  "static_checks": {
+    "ruff": "passed",
+    "ruff_format": "5 files already formatted",
+    "git_diff_check": "passed"
+  },
+  "verification_method_note": "The initial local verifier compared mean downrange with radial mean_carry_m and failed. Corrected to target_x_m + mean_downrange_error_m; no production source or tolerance changed."
+}

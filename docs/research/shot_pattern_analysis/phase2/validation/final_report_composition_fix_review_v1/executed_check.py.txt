@@ -1,0 +1,20 @@
+from pathlib import Path
+import json,hashlib,sys
+r=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift');sys.path.insert(0,str(r))
+from scripts.research.shot_pattern_analysis.final_report_inputs import assemble_resolved_selected_cells,select_representative_interaction_pairs
+from scripts.research.shot_pattern_analysis.build_final_report import _conclusions_and_synthesis_lines
+b=r/'docs/research/shot_pattern_analysis/phase2';v=b/'validation/final_report_composition_fix_review_v1';v.mkdir(exist_ok=True)
+s=json.loads((b/'supplement_report_v1/REPORT_SUPPLEMENT.json').read_text());pairs=json.loads((b/'supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.json').read_text())['comparisons']
+primary=[]
+for club in ['driver','seven_iron','pitching_wedge']:
+ for curve in [1,2]:
+  for sd in [1,2]:
+   for noise in ['shaft_only','combined2']:
+    name=f'{club}_lean0_curve{curve}_rotation{sd}_{noise}';q=json.loads((b/'final_v1'/name/'summary.json').read_text());q['cell']=name;primary.append(q)
+resolved=assemble_resolved_selected_cells({'cells':primary},{'report':s});selected=select_representative_interaction_pairs(pairs)
+vals={}
+for club in ['driver','seven_iron','pitching_wedge']:
+ for pat in ['Draw','Fade']:
+  rows=[q for q in resolved if q['config']['club']['club_id']==club];a=[q['course_scoring']['paired_benefit_vs_straight'][pat]['estimate'] for q in rows];vals[club+'/'+pat]={'minimum':min(a),'maximum':max(a)}
+result={'actual_schema_compatible':True,'resolved_n':len(resolved),'selected_pair_n':len(selected),'selection_order_invariant':selected==select_representative_interaction_pairs(list(reversed(pairs))),'claims_identical_for_empty_vs_unrelated_input':_conclusions_and_synthesis_lines({})==_conclusions_and_synthesis_lines({'sentinel':'different'}),'actual_selected_sg_ranges':vals,'source_sha256':{p:hashlib.sha256((r/p).read_bytes()).hexdigest() for p in ['scripts/research/shot_pattern_analysis/build_final_report.py','scripts/research/shot_pattern_analysis/final_report_inputs.py','tests/research/test_shot_pattern_final_report.py']}}
+(v/'actual_checks.json').write_text(json.dumps(result,indent=2)+'\n');(v/'executed_check.py.txt').write_bytes(Path(__file__).read_bytes());print(json.dumps(result,indent=2))
