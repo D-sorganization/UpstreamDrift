@@ -10,6 +10,7 @@ import numpy as np
 import pytest
 
 from tests.opensim.test_native_mixed_actuation import _profile
+from tests.opensim.test_native_mixed_actuation import mixed_model as mixed_model
 from tests.opensim.test_native_moco_runner import _write_request
 from src.engines.physics_engines.opensim.python.tour_matching.native_moco_runner import (
     NativeMocoRequest,
@@ -40,7 +41,6 @@ from src.engines.physics_engines.opensim.python.tour_matching.registration impor
 from src.engines.physics_engines.opensim.python.tour_matching.trc import write_trc
 from src.shared.python.motion_matching.tour_capture_contract import TourCapture
 
-pytest_plugins = ("tests.opensim.test_native_mixed_actuation",)
 pytestmark = pytest.mark.unit
 
 
