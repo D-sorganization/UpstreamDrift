@@ -525,3 +525,13 @@ Marker/alignment arrays are bytes-backed. This is diagnostic, unqualified
 output, not an execution receipt, approved calibration, F01 admission, capture
 fit, or scientific validation. See chapter49 and
 `docs/development/feedback_controls/F09Q-OPENSIM-MIXED-MARKER-SCORING.md`.
+
+## F09R Drake Native Replay Import Isolation (#12203)
+
+The Drake engine and Drake-Python facades now defer implementation imports,
+so importing the native replay adapter no longer requires unrelated Drake
+simulation or wrench-processing dependencies. A clean subprocess regression
+blocks pydrake and bunkershot3d imports while loading the source-checkout
+adapter. The existing Drake 1.57.0 native synthetic replay tests pass 11/11
+with only the repository root on `PYTHONPATH`. This establishes neither an
+installed-wheel import path nor additional engine or scientific qualification.
