@@ -1,0 +1,11 @@
+{
+  "scope": "synthetic one-DOF compliant Millard muscle; no capture/production qualification",
+  "runtime": "4.6",
+  "executable": "C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Scripts\\python.exe",
+  "source_sha256": "0e291dd49a67936eee5ed69c599e3126585eec82ad9c783a1080a74a0579b004",
+  "model_sha256": "feb75b88e290ef0c90fc41c6e39ffd9c8c031ff1129b19b0b059230d0bdb0f32",
+  "error": "std::exception in 'OpenSim::MocoSolution OpenSim::MocoStudy::solve() const': MocoCasADiSolver failed internally with message: D:\\a\\opensim-core\\opensim-core\\dependencies\\casadi\\casadi\\core\\plugin_interface.hpp:292: Plugin 'ipopt' is not found.\n\tIn Object '<no-name>' of type MocoCasADiSolver.\n\tThrown at MocoCasADiSolver.cpp:406 in solveImpl().",
+  "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\moco_native_bridge\\experiment.py\", line 64, in <module>\n    solution=study.solve()\n             ^^^^^^^^^^^^^\n  File \"C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\opensim\\moco.py\", line 9319, in solve\n    return _moco.MocoStudy_solve(self)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: std::exception in 'OpenSim::MocoSolution OpenSim::MocoStudy::solve() const': MocoCasADiSolver failed internally with message: D:\\a\\opensim-core\\opensim-core\\dependencies\\casadi\\casadi\\core\\plugin_interface.hpp:292: Plugin 'ipopt' is not found.\n\tIn Object '<no-name>' of type MocoCasADiSolver.\n\tThrown at MocoCasADiSolver.cpp:406 in solveImpl().\n",
+  "qualification": "failed; no optimization/replay acceptance",
+  "total_elapsed_s": 0.1476548999780789
+}

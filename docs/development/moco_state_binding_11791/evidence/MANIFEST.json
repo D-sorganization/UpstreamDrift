@@ -1,0 +1,330 @@
+{
+  "scope": "Exact historical native execution evidence; synthetic only; no qualification",
+  "archive_policy": "Raw executed scripts/receipts/logs retain exact bytes as text evidence; not maintained executable source",
+  "files": [
+    {
+      "path": "public_api_experiment.py.txt",
+      "original_name": "public_api_experiment.py",
+      "bytes": 7508,
+      "sha256": "5fb0e1d1441935faac0bf9bb96c283f8607a0410497d58c5dec616885f7baec9"
+    },
+    {
+      "path": "public-mesh-10-final/constant_initial_guess.sto",
+      "original_name": "constant_initial_guess.sto",
+      "bytes": 991,
+      "sha256": "42cf4b593e910a68c16004054c708d2d85cb90994abb47013b503e918adec3b1"
+    },
+    {
+      "path": "public-mesh-10-final/native_evidence.npz",
+      "original_name": "native_evidence.npz",
+      "bytes": 11770,
+      "sha256": "95e306507bee9fc807a6872794824c755009db9e15e98ec3724ee3938971941b"
+    },
+    {
+      "path": "public-mesh-10-final/receipt.json.txt",
+      "original_name": "receipt.json",
+      "bytes": 10486,
+      "sha256": "4052d6955b73f3870e2200885166fb1ae5045d8816c5b782a4670ec15de029ad"
+    },
+    {
+      "path": "public-mesh-10-final/solution.sto",
+      "original_name": "solution.sto",
+      "bytes": 2768,
+      "sha256": "5e9b55fe8529bd0ef1a842d24d62e43872940f9d0f2d9c3c24fb3881f37ad84d"
+    },
+    {
+      "path": "public-mesh-10-final/synthetic_native_muscle.osim",
+      "original_name": "synthetic_native_muscle.osim",
+      "bytes": 9950,
+      "sha256": "feb75b88e290ef0c90fc41c6e39ffd9c8c031ff1129b19b0b059230d0bdb0f32"
+    },
+    {
+      "path": "public-mesh-10-final/teacher.trc",
+      "original_name": "teacher.trc",
+      "bytes": 1099,
+      "sha256": "ccc10dbd94da165d46fa7d0bf05a163b8329e6e8f8512224db7c56e0f5388453"
+    },
+    {
+      "path": "public-mesh-10-final.log.txt",
+      "original_name": "public-mesh-10-final.log",
+      "bytes": 163536,
+      "sha256": "9c7c7a15cd7d34093e64f568a17f18bac294afee63c9ee3ac60d1c298efc12fb"
+    },
+    {
+      "path": "public-mesh-20-final/constant_initial_guess.sto",
+      "original_name": "constant_initial_guess.sto",
+      "bytes": 991,
+      "sha256": "42cf4b593e910a68c16004054c708d2d85cb90994abb47013b503e918adec3b1"
+    },
+    {
+      "path": "public-mesh-20-final/native_evidence.npz",
+      "original_name": "native_evidence.npz",
+      "bytes": 13370,
+      "sha256": "8608cf43c374664870757244de55e9b4f159ad4c15629e9ed0f2ddf8af27fbc8"
+    },
+    {
+      "path": "public-mesh-20-final/receipt.json.txt",
+      "original_name": "receipt.json",
+      "bytes": 10489,
+      "sha256": "0da1273f017f220c3bd9f553a4a553e1d94a9a6f8498b9d8d1c7e0079a36e987"
+    },
+    {
+      "path": "public-mesh-20-final/solution.sto",
+      "original_name": "solution.sto",
+      "bytes": 4927,
+      "sha256": "07c1fba5b613fa5c0b336f617de60c46aa1506e0c7c1bee7e70bb7a153aaf588"
+    },
+    {
+      "path": "public-mesh-20-final/synthetic_native_muscle.osim",
+      "original_name": "synthetic_native_muscle.osim",
+      "bytes": 9950,
+      "sha256": "feb75b88e290ef0c90fc41c6e39ffd9c8c031ff1129b19b0b059230d0bdb0f32"
+    },
+    {
+      "path": "public-mesh-20-final/teacher.trc",
+      "original_name": "teacher.trc",
+      "bytes": 1099,
+      "sha256": "ccc10dbd94da165d46fa7d0bf05a163b8329e6e8f8512224db7c56e0f5388453"
+    },
+    {
+      "path": "public-mesh-20-final.log.txt",
+      "original_name": "public-mesh-20-final.log",
+      "bytes": 192849,
+      "sha256": "3b05dc0c3c65e6341c364b0e9c7dafa7cbeb7c33f3292348d9751b0d9313355e"
+    },
+    {
+      "path": "fiber-bounds-red-experiment.py.txt",
+      "original_name": "fiber-bounds-red-experiment.py",
+      "bytes": 4892,
+      "sha256": "1e109d8c7a314add0412fc40d6a9bd997d19b0af1b24adfc9db829c722c3b82e"
+    },
+    {
+      "path": "fiber-bounds-red-experiment.log.txt",
+      "original_name": "fiber-bounds-red-experiment.log",
+      "bytes": 16340,
+      "sha256": "a961aa26c02818fdab673444b12b95f8083631477eadb87d54509087287615c3"
+    },
+    {
+      "path": "fiber-bounds-red-receipt.json.txt",
+      "original_name": "fiber-bounds-red-receipt.json",
+      "bytes": 2008,
+      "sha256": "d329c85b29d63258903a6264cbacafbb7fa5fe5297938361d0af75e22534c6bf"
+    },
+    {
+      "path": "plugin-search-red-experiment.py.txt",
+      "original_name": "plugin-search-red-experiment.py",
+      "bytes": 5661,
+      "sha256": "0e291dd49a67936eee5ed69c599e3126585eec82ad9c783a1080a74a0579b004"
+    },
+    {
+      "path": "plugin-search-red-experiment.log.txt",
+      "original_name": "plugin-search-red-experiment.log",
+      "bytes": 15174,
+      "sha256": "1b63b0a739c971065fdb42bb0240fa5634e4cd78f794eaf65a936afc6d7fec84"
+    },
+    {
+      "path": "plugin-search-red-receipt.json.txt",
+      "original_name": "plugin-search-red-receipt.json",
+      "bytes": 1708,
+      "sha256": "7457aa1516cfe5088f7b682b233a5ddcd8c64c82f39abeda00ba7bfa02e03bd3"
+    },
+    {
+      "path": "grid-preserving/grid_preserving_experiment.py.txt",
+      "original_name": "grid_preserving_experiment.py",
+      "bytes": 9184,
+      "sha256": "086490671ea3b6b50272f8f53a7f46094ffd936c4c1361b8b00d8016774fe812"
+    },
+    {
+      "path": "grid-preserving/grid-preserving-final-mesh-10/constant_initial_guess.sto",
+      "original_name": "constant_initial_guess.sto",
+      "bytes": 991,
+      "sha256": "42cf4b593e910a68c16004054c708d2d85cb90994abb47013b503e918adec3b1"
+    },
+    {
+      "path": "grid-preserving/grid-preserving-final-mesh-10/native_evidence.npz",
+      "original_name": "native_evidence.npz",
+      "bytes": 11770,
+      "sha256": "5c65e344355542afc16a1922287ffec7eb7a463473ca09aaabdd3a3428bf6058"
+    },
+    {
+      "path": "grid-preserving/grid-preserving-final-mesh-10/native_replay_bundle.json.txt",
+      "original_name": "native_replay_bundle.json",
+      "bytes": 5750,
+      "sha256": "e77adda8e9cd80384364dacc83970d1fdcc49d70225b80fe1794f4fd346bf82c"
+    },
+    {
+      "path": "grid-preserving/grid-preserving-final-mesh-10/receipt.json.txt",
+      "original_name": "receipt.json",
+      "bytes": 11003,
+      "sha256": "00299a28e35624116b0b48b9adeef268fb82374df41b31a2644f050b026f13a1"
+    },
+    {
+      "path": "grid-preserving/grid-preserving-final-mesh-10/solution.sto",
+      "original_name": "solution.sto",
+      "bytes": 2768,
+      "sha256": "d84647b8d11aae0859a4ca8ed75d6cd22cdb75e2dbb367eae88f62d7cd780bf9"
+    },
+    {
+      "path": "grid-preserving/grid-preserving-final-mesh-10/synthetic_native_muscle.osim",
+      "original_name": "synthetic_native_muscle.osim",
+      "bytes": 9950,
+      "sha256": "feb75b88e290ef0c90fc41c6e39ffd9c8c031ff1129b19b0b059230d0bdb0f32"
+    },
+    {
+      "path": "grid-preserving/grid-preserving-final-mesh-10/teacher.trc",
+      "original_name": "teacher.trc",
+      "bytes": 1099,
+      "sha256": "ccc10dbd94da165d46fa7d0bf05a163b8329e6e8f8512224db7c56e0f5388453"
+    },
+    {
+      "path": "grid-preserving/grid-preserving-final-mesh-10.log.txt",
+      "original_name": "grid-preserving-final-mesh-10.log",
+      "bytes": 164352,
+      "sha256": "6533aa283b8abc40ffef89895c5b79f8618ebd7f240d8bed234ef0f48182faf0"
+    },
+    {
+      "path": "grid-preserving/grid-preserving-final-mesh-20/constant_initial_guess.sto",
+      "original_name": "constant_initial_guess.sto",
+      "bytes": 991,
+      "sha256": "42cf4b593e910a68c16004054c708d2d85cb90994abb47013b503e918adec3b1"
+    },
+    {
+      "path": "grid-preserving/grid-preserving-final-mesh-20/native_evidence.npz",
+      "original_name": "native_evidence.npz",
+      "bytes": 14970,
+      "sha256": "21f46a1728e2719e66acae387e96f713aeb545bb1a2779347e428cae289b1d22"
+    },
+    {
+      "path": "grid-preserving/grid-preserving-final-mesh-20/native_replay_bundle.json.txt",
+      "original_name": "native_replay_bundle.json",
+      "bytes": 6457,
+      "sha256": "7987597072033ea7bb83f1cfcd53a5016183dc8a3286101b5229335d93df8888"
+    },
+    {
+      "path": "grid-preserving/grid-preserving-final-mesh-20/receipt.json.txt",
+      "original_name": "receipt.json",
+      "bytes": 11008,
+      "sha256": "5111cbd9a9ae53cd324490de8729f7b2b023a25dc0c9e9456cd4f50f1a3205f9"
+    },
+    {
+      "path": "grid-preserving/grid-preserving-final-mesh-20/solution.sto",
+      "original_name": "solution.sto",
+      "bytes": 4927,
+      "sha256": "f4ba5b99f893aa0c9dfa730580ea127aaa8f94118684bec3a9004589f4d0b7e6"
+    },
+    {
+      "path": "grid-preserving/grid-preserving-final-mesh-20/synthetic_native_muscle.osim",
+      "original_name": "synthetic_native_muscle.osim",
+      "bytes": 9950,
+      "sha256": "feb75b88e290ef0c90fc41c6e39ffd9c8c031ff1129b19b0b059230d0bdb0f32"
+    },
+    {
+      "path": "grid-preserving/grid-preserving-final-mesh-20/teacher.trc",
+      "original_name": "teacher.trc",
+      "bytes": 1099,
+      "sha256": "ccc10dbd94da165d46fa7d0bf05a163b8329e6e8f8512224db7c56e0f5388453"
+    },
+    {
+      "path": "grid-preserving/grid-preserving-final-mesh-20.log.txt",
+      "original_name": "grid-preserving-final-mesh-20.log",
+      "bytes": 213415,
+      "sha256": "4a9954a11d50c133678664644a56fab8a059838f95e15d5f7d3f13e865bf43d8"
+    },
+    {
+      "path": "grid-preserving/grid-preserving-final-mesh-40/constant_initial_guess.sto",
+      "original_name": "constant_initial_guess.sto",
+      "bytes": 991,
+      "sha256": "42cf4b593e910a68c16004054c708d2d85cb90994abb47013b503e918adec3b1"
+    },
+    {
+      "path": "grid-preserving/grid-preserving-final-mesh-40/native_evidence.npz",
+      "original_name": "native_evidence.npz",
+      "bytes": 21370,
+      "sha256": "bbe52aa83335b2f51c25d7dfd2f293140cc6e21b7694c3a514e0c8d7f7a2079d"
+    },
+    {
+      "path": "grid-preserving/grid-preserving-final-mesh-40/native_replay_bundle.json.txt",
+      "original_name": "native_replay_bundle.json",
+      "bytes": 7860,
+      "sha256": "0adc7d860077353c877cb2cad66d7cbe354423b7423f5f79ab062f0a3771c4ff"
+    },
+    {
+      "path": "grid-preserving/grid-preserving-final-mesh-40/receipt.json.txt",
+      "original_name": "receipt.json",
+      "bytes": 11012,
+      "sha256": "4b333ff502cbd0de397f887c6933ab3f2532834ec6c3a9e6d81b80a9b7048d32"
+    },
+    {
+      "path": "grid-preserving/grid-preserving-final-mesh-40/solution.sto",
+      "original_name": "solution.sto",
+      "bytes": 9270,
+      "sha256": "75611fba58f074e73e4e4b017c03406bcf02ada6067f3549639386e0f17fac25"
+    },
+    {
+      "path": "grid-preserving/grid-preserving-final-mesh-40/synthetic_native_muscle.osim",
+      "original_name": "synthetic_native_muscle.osim",
+      "bytes": 9950,
+      "sha256": "feb75b88e290ef0c90fc41c6e39ffd9c8c031ff1129b19b0b059230d0bdb0f32"
+    },
+    {
+      "path": "grid-preserving/grid-preserving-final-mesh-40/teacher.trc",
+      "original_name": "teacher.trc",
+      "bytes": 1099,
+      "sha256": "ccc10dbd94da165d46fa7d0bf05a163b8329e6e8f8512224db7c56e0f5388453"
+    },
+    {
+      "path": "grid-preserving/grid-preserving-final-mesh-40.log.txt",
+      "original_name": "grid-preserving-final-mesh-40.log",
+      "bytes": 310975,
+      "sha256": "fb675ac5796eb96c28697d39d7753041f31710a84adb79b11d529fcf7ed5ea86"
+    },
+    {
+      "path": "grid-preserving/grid-preserving-final-mesh-80/constant_initial_guess.sto",
+      "original_name": "constant_initial_guess.sto",
+      "bytes": 991,
+      "sha256": "42cf4b593e910a68c16004054c708d2d85cb90994abb47013b503e918adec3b1"
+    },
+    {
+      "path": "grid-preserving/grid-preserving-final-mesh-80/native_evidence.npz",
+      "original_name": "native_evidence.npz",
+      "bytes": 34170,
+      "sha256": "f09367799424e2c59d409c7c295b182ab920b8e0967d2a4fcdaab4eda5bd97e4"
+    },
+    {
+      "path": "grid-preserving/grid-preserving-final-mesh-80/native_replay_bundle.json.txt",
+      "original_name": "native_replay_bundle.json",
+      "bytes": 10638,
+      "sha256": "ded7fd4706fab7937d1e9b15c251304fb3ddad76dc6cae02cabc28c04a0dc7db"
+    },
+    {
+      "path": "grid-preserving/grid-preserving-final-mesh-80/receipt.json.txt",
+      "original_name": "receipt.json",
+      "bytes": 11009,
+      "sha256": "da3c944109785a288aa9bffa9312a714d5658ef0207288f94dcd1e866861bcec"
+    },
+    {
+      "path": "grid-preserving/grid-preserving-final-mesh-80/solution.sto",
+      "original_name": "solution.sto",
+      "bytes": 17976,
+      "sha256": "aef1e2dad821e0d2de94d9e35e9b9df7db9985ce4930a88fd079bb35702ab1f6"
+    },
+    {
+      "path": "grid-preserving/grid-preserving-final-mesh-80/synthetic_native_muscle.osim",
+      "original_name": "synthetic_native_muscle.osim",
+      "bytes": 9950,
+      "sha256": "feb75b88e290ef0c90fc41c6e39ffd9c8c031ff1129b19b0b059230d0bdb0f32"
+    },
+    {
+      "path": "grid-preserving/grid-preserving-final-mesh-80/teacher.trc",
+      "original_name": "teacher.trc",
+      "bytes": 1099,
+      "sha256": "ccc10dbd94da165d46fa7d0bf05a163b8329e6e8f8512224db7c56e0f5388453"
+    },
+    {
+      "path": "grid-preserving/grid-preserving-final-mesh-80.log.txt",
+      "original_name": "grid-preserving-final-mesh-80.log",
+      "bytes": 508410,
+      "sha256": "40726ce763f2df730ef07561dd17b0c3a027a0e53fcf2f3affbfa5c01659e0e8"
+    }
+  ]
+}

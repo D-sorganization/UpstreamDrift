@@ -42,6 +42,9 @@ from src.engines.physics_engines.opensim.python.tour_matching.moco_tracking impo
     build_moco_study,
     sanitize_trc_for_horizon,
 )
+from src.engines.physics_engines.opensim.python.tour_matching.moco_initial_bindings import (
+    MocoInitialBindings,
+)
 from src.engines.physics_engines.opensim.python.tour_matching.muscle_replay import (
     NativeMuscleReplayResult,
     replay_muscle_excitations,
@@ -237,6 +240,7 @@ __all__ = [
     "MissingClubAssetError",
     "MissingGeometryAssetError",
     "MocoTrackingConfig",
+    "MocoInitialBindings",
     "MocoTrackingResult",
     "ModelCheckpointMismatchError",
     "ModelGeometryAuditResult",

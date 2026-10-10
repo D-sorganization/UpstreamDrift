@@ -19,7 +19,7 @@
       "rationale": "Preserve capture boundary review under baseline capability inventory ORG-01"
     },
     "launcher-atlas": {
-      "fingerprint": "8452198fc5a4fc7946fafae9506d53815468a6d9c65eb8caa83869b1b44ddf4e",
+      "fingerprint": "18f244c607c5142b8d5c9e7ede9e861853fc03d494993ba7359235fe65ad20da",
       "inputs": {
         "docs/agent_context/contracts/launcher-atlas.md": "f5976baa4ef78bcf71ede27afb4e7a85f3f72cfedbb3cdbe9b40e48d4016ae94",
         "scripts/capability_atlas/goals.py": "a4c449dbd07dc398530d7c85eefc697d36b6acaee48b7953b7e060fb413cc131",
@@ -29,14 +29,14 @@
         "src/config/feature_parity.json": "6c0708f8dbc8550fad5756c1306ce6c17919bbb432b7d8bedda29a67f39704ae",
         "src/config/launcher_manifest.json": "45b6cea9134f9896b1a719c23c6fc77d59d4aed751bfe62908ad888acdc86037",
         "src/config/launcher_manifest_loader.py": "aed6769fbdfc595400d0bd5d15bb75e8fbfda80243a586894d73d36b2d056a00",
-        "src/config/models.yaml": "8827a8f2b44ccc7336e03cb4a02a6a5b5887c38a75c895a0c17f70d34417629e",
+        "src/config/models.yaml": "6c23f564ecde6e22049ee97880df3ab89d2332b922874a4a0f4217008816b889",
         "src/tools/capture_rig/goal_catalog.py": "0461380a7c083812bed54c56e28a763a70679e083767303167b0ce07ef43d4e5",
         "src/tools/capture_rig/goal_planner.py": "3bb60b46953b477d13fc358baf6fad5fecdcf4860ce840998d325bff0bec3121",
         "tests/scripts/test_capability_atlas.py": "1d06a18c83571769b61d9b02cc86bbff3e22a089a9a8f11f7944fca44d72cc5b",
         "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
         "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414"
       },
-      "rationale": "Review shot pattern study launcher tile (#11941)"
+      "rationale": "Reconcile merged main feature_parity.json updates with shot pattern analysis and verify capability atlas"
     },
     "model-backends": {
       "fingerprint": "da739fcd3c56f6c4a3923b4f31202e515023487a49d54ca449090d33186a9685",
@@ -71,6 +71,36 @@
         "tests/unit/pose_interchange/adapters/test_mujoco_protocol.py": "ea910a2a4cdcc1b026f9f6e56376226a15343cac5484f286db3edf3ea6a0ebc7"
       },
       "rationale": "Reviewed canonical pose ownership and MuJoCo adapter protocol, explicit coordinate conventions and capability limits. Existing test_mujoco_protocol.py passed in the 41-test boundary run on 2026-09-09; no scientific validity assertion is added."
+    },
+    "project-task-native-replay": {
+      "fingerprint": "17d45c73b124125878e1672dc0b90a353cc5a650ddfddf21e6d4347c2af5f09f",
+      "inputs": {
+        "docs/agent_context/contracts/project-task-native-replay.md": "754359ce3d2ccfe8d80a31a1cd8867f151dc5bd63bf0023231a2cc797fc3f254",
+        "src/engines/myosuite_project_command_solve.py": "a8b3168dfb20b8f94322d2b8dc1e2b8570d4e11b3d4222f8b1300e71711cd2e2",
+        "src/engines/myosuite_project_feedback.py": "c0d4f3f2e2f5ec0fac1c0cb9861d1e02e2d7cc6012c66d38283ac1aec864f7c5",
+        "src/engines/myosuite_project_forecast.py": "b07b9f00d98f4b27e60be0de2ec255b294875255198f9a010ff12a67e13ab45f",
+        "src/engines/myosuite_project_native_search.py": "4f60b10981a97a6e0c1a7404f4cd91cecf6fb1f5faed42fe56b3866a69d782b6",
+        "src/engines/myosuite_project_task_producer.py": "59e63dca8f2c178d9dbc92adcc0047c70feac1052967f7055f8d5b8d77a074d1",
+        "src/engines/myosuite_project_tracking.py": "46be8b4b606893e0c3a7c29dfef6dcb76a4cb4fcf0f38557d01d7d0ded608648",
+        "src/engines/native_direct_model_provider.py": "053927847888280af9a0d6271d9f8a74ecb00b6d90cd6142fee884f4cb49b149",
+        "src/engines/native_replay_contracts.py": "fea6269739d24f5689ebc2f5c9244fa38dde072ee41b23ba4ed8c3fd07e20f69",
+        "src/engines/physics_engines/myosuite/python/native_direct_model_replay.py": "daa670e49f3d3e4b2940d321ef8104f0e9aef0ff8524659b1b65bd6cec08b719",
+        "src/engines/project_task_replay_artifacts.py": "8ea937a502755fb456815c212bf5aa0c7fa4987be3eba570d3faf87d0b5449b2",
+        "src/shared/python/_seam_redirect.py": "3446b274ae8c8ae5407c2305a9e34d31eb4824bfed362b5661dd5bc829c41448",
+        "src/shared/python/motion_matching/bounded_candidate_search.py": "b1f5c83ca8bcc686d68c76c12a759dbba333efdba8422028646ee40c789dae3d",
+        "tests/unit/engines/myosuite/test_native_model_resource_closure.py": "662eb43722a90a9c77fe01128ca8d22483259f6492e8d36d7b22c65460abbbef",
+        "tests/unit/engines/myosuite/test_prediction_integrity_boundaries.py": "96bbbbb810cfeae96dee33a88771cd6daf87db4677845793bbae279b3a1bf3e5",
+        "tests/unit/engines/myosuite/test_project_task_artifact_admission.py": "ea9e6d1da8bd2a6725d2b675607deafba8d9eac29e956a56e113cda2765a6fe1",
+        "tests/unit/engines/myosuite/test_project_task_command_solve.py": "f2ac18f7c5194dd627113749d797f022c42ff3329f8fdaec7cf8081d45a5fd12",
+        "tests/unit/engines/myosuite/test_project_task_feedback.py": "d9d8f9ae7b58e3c5fb9e641a32b1eeacf7b9873a26839d4c0724c27ad3ceff00",
+        "tests/unit/engines/myosuite/test_project_task_forecast.py": "a35bdf3f3ab2d8941743f1409d36a925c8f07f366ffd6cb58ac0719dd4d97fc1",
+        "tests/unit/engines/myosuite/test_project_task_native_search.py": "63795cc637ab7b62cca3ef213836584df94383dfdc9cfb10ef14352962dde63b",
+        "tests/unit/engines/myosuite/test_project_task_producer.py": "ead3c9f3eb031cf78bc63e011b8a9e1fe203a6b16af3c3e8f3120950f81f6faf",
+        "tests/unit/engines/myosuite/test_project_task_tracking.py": "8b329a3e676b28906e3c5a0f7439d483625ce071400f949420be0021488c0dc4",
+        "tests/unit/motion_matching/test_bounded_candidate_search.py": "5a256b469fe1f4fdd502626f125cd50eb64a62b1ec304488eda64335ca72ee4d",
+        "tests/unit/repo_hygiene/test_pinned_tools_package_loader.py": "98bf31807478472f8e15310c73d1e92552feb74a84988e32df905a80019c64c9"
+      },
+      "rationale": "Reviewed current command-solver source mutation guard and engine-test isolation: resolve the canonical currently imported module before monkeypatching. Ordered native fleet RED then GREEN confirms the guard remains effective; this changes the regression target, not replay or solve semantics. Actual full-campaign acceptance remains separately source-bound."
     }
   },
   "version": 1
