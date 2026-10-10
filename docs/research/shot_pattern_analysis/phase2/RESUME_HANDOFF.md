@@ -1,6 +1,13 @@
 # Shot Pattern Study: Agent Resume Handoff
 
-## Stop Request and Scope
+## Resumed State
+
+The user has resumed the goal and requested Sol/Luna agents. The exporter is now
+terminal: exit 0 at 2026-10-10T21:46:30.187679+00:00. Final independent acceptance
+remains pending. Sol owns terminal/full-ledger reconciliation and review batches;
+Luna owns delivery preparation. The stop checkpoint below is historical.
+
+## Prior Stop Request and Scope
 
 The user requested stopping goal pursuit to conserve credits on October 10, 2026.
 This is a committed handoff checkpoint, not completion or publication acceptance.
