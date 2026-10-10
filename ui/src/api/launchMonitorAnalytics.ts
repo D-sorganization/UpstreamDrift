@@ -13,6 +13,8 @@ import type {
   DispersionPayloadV2,
   FlexibleAnalysisPayload,
   LaunchMonitorAnalysisResultV2,
+  MultivariatePayloadV2,
+  RelationshipsPayloadV2,
 } from "./generated/types";
 
 const BASE = "/api/tools/launch-monitor-analytics";
@@ -250,6 +252,118 @@ export async function analyzeDispersionV2(
     group_column: groupColumn ?? null,
   };
   return apiFetch<DispersionResponse>(`${BASE}/v2/dispersion`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+/**
+ * Correlation-method candidates accepted by `RelationshipsPayloadV2.method`
+ * (`CorrelationMethod` in `src/tools/launch_monitor_model`); same three
+ * choices as the desktop `relationship_method` combo.
+ */
+export type RelationshipMethod = RelationshipsPayloadV2["method"];
+
+/**
+ * A matrix cell is `null` (not `0`) whenever the underlying pair is
+ * non-finite — see `_json_safe_float` / `_matrix_to_rows` in
+ * `src/api/routes/launch_monitor_analytics.py`.
+ */
+export type NullableMatrix = (number | null)[][];
+
+/**
+ * One screened dependency edge from `CorrelationResult.edges`
+ * (`DependencyEdge` in `shared.python.launch_monitor.relationships`).
+ */
+export interface RelationshipEdge {
+  source: string;
+  target: string;
+  coefficient: number | null;
+  p_value: number | null;
+  adjusted_p_value: number | null;
+  sample_count: number;
+  includes_derived_metric: boolean;
+  includes_boolean_projection: boolean;
+}
+
+/** Response body for `POST /v2/relationships` (`_relationships_result_to_dict`). */
+export interface RelationshipsResponse {
+  method: string;
+  metrics: string[];
+  coefficients: NullableMatrix;
+  p_values: NullableMatrix;
+  adjusted_p_values: NullableMatrix | null;
+  pair_counts: number[][];
+  partial_coefficients: NullableMatrix | null;
+  derived_metrics: string[];
+  boolean_projected: string[];
+  edges: RelationshipEdge[];
+}
+
+/**
+ * Run the PyQt Relationships tab's correlation/partial-correlation/dependency
+ * -network analysis over caller-supplied inline records, via the same
+ * `compute_correlations` contract the desktop tab calls
+ * (`src/tools/launch_monitor_analytics/gui.py` `_compute_relationship`).
+ * `controls` must already exclude any name also present in `metrics` — the
+ * desktop tab drops them before calling `compute_correlations`, and the API
+ * drops them again defensively (`RelationshipsPayloadV2.effective_controls`).
+ */
+export async function analyzeRelationshipsV2(
+  records: Record<string, unknown>[],
+  metrics: string[],
+  method: RelationshipMethod = "pearson",
+  controls: string[] = [],
+  edgeThreshold = 0.3,
+): Promise<RelationshipsResponse> {
+  const payload: RelationshipsPayloadV2 = {
+    records,
+    metrics,
+    controls,
+    method,
+    edge_threshold: edgeThreshold,
+  };
+  return apiFetch<RelationshipsResponse>(`${BASE}/v2/relationships`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+/** Serialized `PCAResult` from `_pca_result_to_dict` (`POST /v2/multivariate`). */
+export interface PCAResultPayload {
+  metrics: string[];
+  component_names: string[];
+  explained_variance_ratio: (number | null)[];
+  loadings: NullableMatrix;
+  scores: NullableMatrix;
+  sample_count: number;
+}
+
+/** Serialized `VIFResult` from `_vif_result_to_dict` (`POST /v2/multivariate`). */
+export interface VIFResultPayload {
+  values: Record<string, number | null>;
+  sample_count: number;
+  warning_metrics: string[];
+}
+
+/** Response body for `POST /v2/multivariate` (`analyze_multivariate_v2`). */
+export interface MultivariateResponse {
+  pca: PCAResultPayload;
+  vif: VIFResultPayload;
+}
+
+/**
+ * Run the PyQt Relationships tab's PCA/VIF diagnostics over caller-supplied
+ * inline records, via the same `compute_pca`/`compute_vif` contract the
+ * desktop tab calls (`src/tools/launch_monitor_analytics/gui.py`
+ * `_compute_multivariate`).
+ */
+export async function analyzeMultivariateV2(
+  records: Record<string, unknown>[],
+  metrics: string[],
+): Promise<MultivariateResponse> {
+  const payload: MultivariatePayloadV2 = { records, metrics };
+  return apiFetch<MultivariateResponse>(`${BASE}/v2/multivariate`, {
     method: "POST",
     body: JSON.stringify(payload),
   });

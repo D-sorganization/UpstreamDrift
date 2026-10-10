@@ -725,14 +725,14 @@
       "status": "gap",
       "pyqt": "src/tools/launch_monitor_analytics/gui.py",
       "api": "src/api/routes/launch_monitor_analytics.py",
-      "web": null,
+      "web": "ui/src/pages/LaunchMonitorAnalytics.tsx",
       "issue": 11987,
       "reason": null,
       "pending_decision": false,
       "tiles": [
         "launch_monitor_analytics"
       ],
-      "notes": "The PyQt6 workbench and versioned API share one flexible-analysis contract. A React panel exists only inside the vendored Tools Rate of Closure bundle (Tools #4205, closed), behind a different tile; this tile has no web page. Tracked in #11987 (epic #8364 is closed).",
+      "notes": "The PyQt6 workbench and versioned API share one flexible-analysis contract. The web page (#11987) now covers Flexible Analysis (POST /v2/analyze), Trends (POST /v2/trend), Dispersion (POST /v2/dispersion), and Relationships — correlations/partial correlations/dependency network, PCA, and VIF (POST /v2/relationships, POST /v2/multivariate). Still missing on the web: Sessions, Data Treatment, Models, Monitor Comparison, and Reports.",
       "id": "tools.launch_monitor_analytics"
     },
     {
@@ -3146,7 +3146,7 @@
   "inputs": {
     "src/config/models.yaml": "e11682df79d7467f1eba9579d835f5d7019bfd7eb09cf81c14e22bd08d0bf844",
     "src/config/launcher_manifest.json": "1ae28f872b54c237440fcaacec40b735b93a7b80d710adc9228ef671b7831032",
-    "src/config/feature_parity.json": "e16393f9e9e55ab63c2f52fa6dbc84f9254d66cb5f5f6fe456beb5e8f1ab4b68",
+    "src/config/feature_parity.json": "fdbbb4690a3f9b66f5a65c1f71dd060950e0711dee56279480ac64c75820c2bc",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }
