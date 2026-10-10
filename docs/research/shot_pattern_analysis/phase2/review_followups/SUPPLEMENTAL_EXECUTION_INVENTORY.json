@@ -1,0 +1,435 @@
+{
+  "schema": "shot-pattern-supplement-execution-inventory/1",
+  "issue": 12000,
+  "status": "adapted_after_feasibility_audit_predeclared_before_mc_not_execution_authorization",
+  "unique_executed_cells": 26,
+  "unique_attempted_shots": 780000,
+  "entries": [
+    {
+      "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+      "protocol": "pw_within_lean_face",
+      "target_x_m": null,
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        24,
+        40
+      ],
+      "n_shots": 10000,
+      "seed": 20261009,
+      "match_tolerance_m": 0.05
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_path",
+      "protocol": "pw_within_lean_face",
+      "target_x_m": null,
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        24,
+        40
+      ],
+      "n_shots": 10000,
+      "seed": 20261009,
+      "match_tolerance_m": 0.05
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_speed1",
+      "protocol": "pw_within_lean_face",
+      "target_x_m": null,
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        24,
+        40
+      ],
+      "n_shots": 10000,
+      "seed": 20261009,
+      "match_tolerance_m": 0.05
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_speed2",
+      "protocol": "pw_within_lean_face",
+      "target_x_m": null,
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        24,
+        40
+      ],
+      "n_shots": 10000,
+      "seed": 20261009,
+      "match_tolerance_m": 0.05
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_strike",
+      "protocol": "pw_within_lean_face",
+      "target_x_m": null,
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        24,
+        40
+      ],
+      "n_shots": 10000,
+      "seed": 20261009,
+      "match_tolerance_m": 0.05
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve2_rotation1_combined1",
+      "protocol": "pw_within_lean_face",
+      "target_x_m": null,
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        24,
+        40
+      ],
+      "n_shots": 10000,
+      "seed": 20261009,
+      "match_tolerance_m": 0.05
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve2_rotation1_combined2",
+      "protocol": "pw_within_lean_face",
+      "target_x_m": null,
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        24,
+        40
+      ],
+      "n_shots": 10000,
+      "seed": 20261009,
+      "match_tolerance_m": 0.05
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive",
+      "protocol": "pw_within_lean_face",
+      "target_x_m": null,
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        24,
+        40
+      ],
+      "n_shots": 10000,
+      "seed": 20261009,
+      "match_tolerance_m": 0.05
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative",
+      "protocol": "pw_within_lean_face",
+      "target_x_m": null,
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        24,
+        40
+      ],
+      "n_shots": 10000,
+      "seed": 20261009,
+      "match_tolerance_m": 0.05
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+      "protocol": "pw_within_lean_face",
+      "target_x_m": null,
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        24,
+        40
+      ],
+      "n_shots": 10000,
+      "seed": 20261009,
+      "match_tolerance_m": 0.05
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_path",
+      "protocol": "pw_within_lean_face",
+      "target_x_m": null,
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        24,
+        40
+      ],
+      "n_shots": 10000,
+      "seed": 20261009,
+      "match_tolerance_m": 0.05
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_speed1",
+      "protocol": "pw_within_lean_face",
+      "target_x_m": null,
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        24,
+        40
+      ],
+      "n_shots": 10000,
+      "seed": 20261009,
+      "match_tolerance_m": 0.05
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_speed2",
+      "protocol": "pw_within_lean_face",
+      "target_x_m": null,
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        24,
+        40
+      ],
+      "n_shots": 10000,
+      "seed": 20261009,
+      "match_tolerance_m": 0.05
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_strike",
+      "protocol": "pw_within_lean_face",
+      "target_x_m": null,
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        24,
+        40
+      ],
+      "n_shots": 10000,
+      "seed": 20261009,
+      "match_tolerance_m": 0.05
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve2_rotation2_combined1",
+      "protocol": "pw_within_lean_face",
+      "target_x_m": null,
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        24,
+        40
+      ],
+      "n_shots": 10000,
+      "seed": 20261009,
+      "match_tolerance_m": 0.05
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "protocol": "pw_within_lean_face",
+      "target_x_m": null,
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        24,
+        40
+      ],
+      "n_shots": 10000,
+      "seed": 20261009,
+      "match_tolerance_m": 0.05
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive",
+      "protocol": "pw_within_lean_face",
+      "target_x_m": null,
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        24,
+        40
+      ],
+      "n_shots": 10000,
+      "seed": 20261009,
+      "match_tolerance_m": 0.05
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative",
+      "protocol": "pw_within_lean_face",
+      "target_x_m": null,
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        24,
+        40
+      ],
+      "n_shots": 10000,
+      "seed": 20261009,
+      "match_tolerance_m": 0.05
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve2_rotation1_shaft_only",
+      "protocol": "pw_fixed_target_face",
+      "target_x_m": 77.40247724866299,
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        24,
+        40
+      ],
+      "n_shots": 10000,
+      "seed": 20261009,
+      "match_tolerance_m": 0.05
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve2_rotation1_combined2",
+      "protocol": "pw_fixed_target_face",
+      "target_x_m": 77.40247724866299,
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        24,
+        40
+      ],
+      "n_shots": 10000,
+      "seed": 20261009,
+      "match_tolerance_m": 0.05
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve2_rotation2_shaft_only",
+      "protocol": "pw_fixed_target_face",
+      "target_x_m": 77.40247724866299,
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        24,
+        40
+      ],
+      "n_shots": 10000,
+      "seed": 20261009,
+      "match_tolerance_m": 0.05
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+      "protocol": "pw_fixed_target_face",
+      "target_x_m": 77.40247724866299,
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        24,
+        40
+      ],
+      "n_shots": 10000,
+      "seed": 20261009,
+      "match_tolerance_m": 0.05
+    },
+    {
+      "cell": "driver_lean5_curve2_rotation1_shaft_only",
+      "protocol": "driver_fixed_target_speed",
+      "target_x_m": 178.94875782337786,
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        33.75,
+        58.5
+      ],
+      "n_shots": 10000,
+      "seed": 20261009,
+      "match_tolerance_m": 0.05
+    },
+    {
+      "cell": "driver_lean5_curve2_rotation1_combined2",
+      "protocol": "driver_fixed_target_speed",
+      "target_x_m": 178.94875782337786,
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        33.75,
+        58.5
+      ],
+      "n_shots": 10000,
+      "seed": 20261009,
+      "match_tolerance_m": 0.05
+    },
+    {
+      "cell": "driver_lean5_curve2_rotation2_shaft_only",
+      "protocol": "driver_fixed_target_speed",
+      "target_x_m": 178.94875782337786,
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        33.75,
+        58.5
+      ],
+      "n_shots": 10000,
+      "seed": 20261009,
+      "match_tolerance_m": 0.05
+    },
+    {
+      "cell": "driver_lean5_curve2_rotation2_combined2",
+      "protocol": "driver_fixed_target_speed",
+      "target_x_m": 178.94875782337786,
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        33.75,
+        58.5
+      ],
+      "n_shots": 10000,
+      "seed": 20261009,
+      "match_tolerance_m": 0.05
+    }
+  ],
+  "control_aliases_to_primary": {
+    "pitching_wedge_lean0_curve2_rotation1_shaft_only": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+    "pitching_wedge_lean0_curve2_rotation1_combined2": "pitching_wedge_lean0_curve2_rotation1_combined2",
+    "pitching_wedge_lean0_curve2_rotation2_shaft_only": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+    "pitching_wedge_lean0_curve2_rotation2_combined2": "pitching_wedge_lean0_curve2_rotation2_combined2"
+  },
+  "protocol_plan_sha256": {
+    "SUPPLEMENTAL_BOUNDS_PLAN.json": "6dc072b6fcf3a266b14eb5f43f5289b02aa9cccd346ca00f45ac9410d83cb6ca",
+    "DRIVER_SPEED_SENSITIVITY_PLAN.json": "128329ebaf182cda57d0298daabef798ffd6b1bba43b3d7049072e4036f7cdc2"
+  }
+}
