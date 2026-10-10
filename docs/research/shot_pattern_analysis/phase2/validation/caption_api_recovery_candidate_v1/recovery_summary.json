@@ -1,0 +1,21 @@
+{
+  "status": "success",
+  "issue": 12132,
+  "tests_passed": 12,
+  "tests_failed": 0,
+  "test_suites": [
+    "tests/tools/shot_pattern_analysis/test_pair_caption_overflow.py",
+    "tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py",
+    "tests/tools/shot_pattern_analysis/test_pair_density_row_gutter.py"
+  ],
+  "timing_seconds": 69.54,
+  "files_owned_modified": [
+    "src/tools/shot_pattern_analysis/matched_supplement_figures.py",
+    "tests/tools/shot_pattern_analysis/test_pair_density_row_gutter.py"
+  ],
+  "files_owned_untracked": [
+    "tests/tools/shot_pattern_analysis/test_pair_caption_overflow.py",
+    "tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py"
+  ],
+  "astra_files_modified": false
+}

@@ -1,0 +1,17 @@
+{
+  "source_sha256": {
+    "src/tools/shot_pattern_analysis/matched_supplement_figures.py": "2ce59515c23c3de8cc95d194ac1b3e5164079aba1049c6c4899b95b7dba87a3c",
+    "tests/tools/shot_pattern_analysis/test_pair_density_row_gutter.py": "62f659035976a0c27994ef7d637678ab7b162f5325d60deabaad4d72df0eb3f6",
+    "tests/tools/shot_pattern_analysis/test_pair_caption_overflow.py": "df41a1e769971a01374f08aa20373d18a541231ed1e347ef236afa216c5909f6",
+    "tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py": "eae68bc232d2d762a189eebedcb2d6d594408b13ead800659714e68a306bae9c"
+  },
+  "worker_exit": {
+    "exit_code": 0,
+    "finished_utc": "2026-10-10T14:10:27.904136+00:00"
+  },
+  "root_ruff_check_passed": true,
+  "root_ruff_format_check_passed": true,
+  "root_tests_pending": true,
+  "actual_saved_data_visual_review_pending": true,
+  "accepted": false
+}
