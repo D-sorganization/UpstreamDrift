@@ -6,37 +6,37 @@
       {
         "swing_time_s": 0.0,
         "force_residual_fraction_incl_release_sample": 0.9999999999999584,
-        "moment_residual_fraction_incl_release_sample": 8.460061880039942e-09,
+        "moment_residual_fraction_incl_release_sample": 8.460061880039942e-9,
         "gravity_moment_nm": 1.881216491162548,
-        "settled_force_residual_fraction": 2.3076278192807797e-07,
-        "settled_moment_residual_fraction": 8.41845941249855e-09,
+        "settled_force_residual_fraction": 2.3076278192807797e-7,
+        "settled_moment_residual_fraction": 8.41845941249855e-9,
         "axial_slip_mm": 0.012703630290646776
       },
       {
         "swing_time_s": 0.726,
         "force_residual_fraction_incl_release_sample": 0.9999999999999328,
-        "moment_residual_fraction_incl_release_sample": 8.46865329701066e-09,
+        "moment_residual_fraction_incl_release_sample": 8.46865329701066e-9,
         "gravity_moment_nm": 2.025674822582932,
-        "settled_force_residual_fraction": 2.5120119066679286e-07,
-        "settled_moment_residual_fraction": 8.427283198675857e-09,
+        "settled_force_residual_fraction": 2.5120119066679286e-7,
+        "settled_moment_residual_fraction": 8.427283198675857e-9,
         "axial_slip_mm": 0.011241464242162104
       },
       {
         "swing_time_s": 0.998,
         "force_residual_fraction_incl_release_sample": 0.9999999999999688,
-        "moment_residual_fraction_incl_release_sample": 8.463579968573397e-09,
+        "moment_residual_fraction_incl_release_sample": 8.463579968573397e-9,
         "gravity_moment_nm": 2.3603075318620585,
-        "settled_force_residual_fraction": 2.922740279383851e-07,
-        "settled_moment_residual_fraction": 8.422279278742122e-09,
+        "settled_force_residual_fraction": 2.922740279383851e-7,
+        "settled_moment_residual_fraction": 8.422279278742122e-9,
         "axial_slip_mm": 0.006903421207580714
       },
       {
         "swing_time_s": 1.27,
         "force_residual_fraction_incl_release_sample": 1.0000000000000417,
-        "moment_residual_fraction_incl_release_sample": 8.468824119168122e-09,
+        "moment_residual_fraction_incl_release_sample": 8.468824119168122e-9,
         "gravity_moment_nm": 2.367125156375578,
-        "settled_force_residual_fraction": 2.931039356071165e-07,
-        "settled_moment_residual_fraction": 8.427400873471779e-09,
+        "settled_force_residual_fraction": 2.931039356071165e-7,
+        "settled_moment_residual_fraction": 8.427400873471779e-9,
         "axial_slip_mm": 0.006780780939924233
       }
     ]
