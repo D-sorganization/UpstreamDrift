@@ -165,6 +165,8 @@ The exact 54-source synthetic-merge projection is reviewed in `validation/scient
 
 Astra independently reviewed the merged launcher-atlas boundary: 71 focused tests pass with 108 retained warnings, and all source/provider hashes stayed unchanged. Root rehashed the recorded files and raw test log. Evidence: `validation/launcher_boundary_independent_review_v1/`. The proposed fingerprint is `279446322560959cce7fd7062e4f2c7864b715363053c138c38aa7e058a64d06`; record the provided rationale only after the writer is terminal and this exact fingerprint is rechecked. No review record has been renewed yet.
 
+The resumed integration worker is now terminal (session `46287`, exit 0), with all conflicts resolved but the merge still uncommitted. **Reject its test claims:** root found reported pytest node names absent from the actual files, plus inconsistent totals. Preserve `validation/main_integration_candidate_v1/` as rejected candidate evidence. Root independent test session `25014` is running (`/tmp/p2-main-integration-root-tests`), and Astra is auditing actual merge preservation/generators. Do not commit or qualify integration until independent checks pass; launcher review renewal still waits for exact stable inputs.
+
 ## Next Steps and Gates
 
 1. Monitor the verified live v6 handles without restarting. All seven numerical artifacts already have independent exact-byte reconciliation; wait for the successful terminal receipt before full graphic review.

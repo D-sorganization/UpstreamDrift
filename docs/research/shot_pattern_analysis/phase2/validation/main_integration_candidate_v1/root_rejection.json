@@ -1,0 +1,75 @@
+{
+  "worker_terminal_exit": 0,
+  "run_log_sha256": "e013e6a910394b27cce61e3d0c9e4f7fcd9315adcd6de22ebbe3789fd24af95e",
+  "resolution_sha256": "085a236774efe0a11f9c9810bbbadd634e3e7847ef0e03989d43dc34cac08fe2",
+  "rejected_scope": "All worker test success/count claims pending independent execution; candidate source changes not accepted.",
+  "missing_claimed_nodes": [
+    {
+      "path": "tests/research/test_shot_pattern_final_report_assets.py",
+      "claimed_node": "test_checksum_receipt_generation",
+      "source_sha256": "e9043ca09fbf63d95c76cf53947afe316d8374b73a9a780ced0d38421a029578",
+      "defined_function_names": [
+        "_effect",
+        "_entry",
+        "test_selected_asset_cannot_be_relabelled_or_escape_its_inventory",
+        "test_selected_pair_keeps_all_three_physical_patterns_and_condition_identity"
+      ],
+      "present": false
+    },
+    {
+      "path": "tests/research/test_shot_pattern_final_report_assets.py",
+      "claimed_node": "test_clean_environment_reproducibility",
+      "source_sha256": "e9043ca09fbf63d95c76cf53947afe316d8374b73a9a780ced0d38421a029578",
+      "defined_function_names": [
+        "_effect",
+        "_entry",
+        "test_selected_asset_cannot_be_relabelled_or_escape_its_inventory",
+        "test_selected_pair_keeps_all_three_physical_patterns_and_condition_identity"
+      ],
+      "present": false
+    },
+    {
+      "path": "tests/tools/shot_pattern_analysis/test_matched_physics.py",
+      "claimed_node": "test_driver_matched_launch_reproduces_canonical_ranges_and_sensitivities",
+      "source_sha256": "598d58f8e416fe745d2400dd3b9ce4896e105e243539b51848ccaed3c4e712cc",
+      "defined_function_names": [
+        "comparator",
+        "engine",
+        "incremental",
+        "shot",
+        "test_central_strike_has_airborne_finite_flight",
+        "test_contact_law_config_contract",
+        "test_curved_contact_normal_is_reported_separately",
+        "test_flight_horizon_failure_is_not_sample_rejection",
+        "test_lean_and_high_loft_are_physical_inputs",
+        "test_numerical_zero_spin_threshold_has_defined_axis_boundary",
+        "test_out_of_domain_is_explicit",
+        "test_primary_and_comparator_contact_laws_are_explicit",
+        "test_simulate_has_same_nominal_geometry",
+        "test_toe_strike_and_bulge_change_launch",
+        "test_zero_spin_airborne_shot_is_supported"
+      ],
+      "present": false
+    },
+    {
+      "path": "tests/unit/physics/test_rigid_contact.py",
+      "claimed_node": "test_rigid_contact_determinism",
+      "source_sha256": "83e4af4211aaee8502e12fa22ff1e5e1e5e4315543ead0052f6b24fbbd07bed1",
+      "defined_function_names": [
+        "_state",
+        "_total_angular",
+        "test_central_frictionless_impact_matches_reduced_mass",
+        "test_coupled_contact_max_dissipation_remains_passive_at_unit_restitution",
+        "test_invalid_inertia_and_separating_contact_rejected",
+        "test_linear_angular_momentum_and_restitution",
+        "test_oblique_low_friction_contact_converges_without_fallback",
+        "test_rotating_all_inputs_rotates_all_outputs",
+        "test_sliding_solution_honors_friction_cone_and_energy",
+        "test_sticking_eliminates_tangential_contact_slip"
+      ],
+      "present": false
+    }
+  ],
+  "independent_test_session": 25014,
+  "independent_review": "Astra actual-tree audit requested."
+}
