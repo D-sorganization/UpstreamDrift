@@ -533,11 +533,11 @@
       "title": "Weightlifting viewing and analysis for the five lifts (squat, deadlift, bench press, snatch, clean and jerk): lift selection, barbell, hand-force and GRF overlays, plots",
       "pyqt": "src/launchers/exercise_dashboard.py",
       "api": "src/api/routes/lifting.py",
-      "web": null,
+      "web": "ui/src/pages/LiftBaseline.tsx",
       "status": "gap",
       "issue": 11748,
       "tiles": [],
-      "notes": "LIFT-8 (#11748, epic #11740) asks for PyQt and web parity for the five lifts. Today the PyQt Exercise Dashboard only selects an engine for one exercise name and shows that engine's dashboard (OpenSim not yet available); it has no lift selector, barbell, GCV-4/GCV-10 overlay groups or GCV-5 plots. A shared engine-free loader (src/shared/python/lifting/baseline_view.py) and read-only API (GET /lifting/baseline, GET /lifting/baseline/lifts/{lift}) now expose the LIFT-1 pack audit receipt (src/shared/python/lifting/pack_audit) for the PyQt and web views to consume, but neither surface consumes it yet and there is still no web page. The desktop-only exemption of biomech.exercise_injury_dashboards stays pending #7460; this entry tracks the lifting surfaces LIFT-8 requires."
+      "notes": "LIFT-8 (#11748, epic #11740) asks for PyQt and web parity for the five lifts. Today the PyQt Exercise Dashboard only selects an engine for one exercise name and shows that engine's dashboard (OpenSim not yet available); it has no lift selector, barbell, GCV-4/GCV-10 overlay groups or GCV-5 plots. A shared engine-free loader (src/shared/python/lifting/baseline_view.py) and read-only API (GET /lifting/baseline, GET /lifting/baseline/lifts/{lift}) expose the LIFT-1 pack audit receipt (src/shared/python/lifting/pack_audit). The web Lift Baseline page (/tools/lift-baseline) consumes that API: lift selector, per-engine structure and start-pose table, cross-engine pair metrics flagged against the position tolerance, phases and gaps, with unavailable values shown as unavailable. Still missing on both surfaces: barbell, hand-force and GRF overlays and plots, which need an engine host. The desktop-only exemption of biomech.exercise_injury_dashboards stays pending #7460; this entry tracks the lifting surfaces LIFT-8 requires."
     },
     "simulation.golf_suite_batch": {
       "title": "Golf Simulation Suite (parameter sweeps, batch runs)",
