@@ -1,0 +1,20 @@
+{
+  "status": "unresolved_builtin_compiler_initialization_failure",
+  "checked_utc": "2026-10-10T00:43:27.345300+00:00",
+  "document": "docs/research/shot_pattern_analysis/shot_pattern_analysis.tex",
+  "source_sha256": "b79a12f5d4293c3f7c7b64c6b06407cf7907298fe759f95d7fbf8319f6398e50",
+  "source_changed": false,
+  "editor_replaced": false,
+  "separate_pdf_compiled": false,
+  "built_in_retry_after_new_cache_evidence": "compile-failed; same Tectonic src/config.rs:154:18 panic before parsing; uncached bundle and HTTP request failure",
+  "host_followup": {
+    "cache_directory": "/home/dieterolson/.cache/Tectonic",
+    "cache_present": true,
+    "bundle_index_get_status": 200,
+    "downloaded_bytes": 1276215,
+    "decompressed_bytes": 5143485,
+    "download_sha256": "979a52178eb353c803dde1f66efe43ff7ae2ab908000323d4fef29e98e382ebd",
+    "download_seconds": 1.458796
+  },
+  "conclusion": "Host GET and gzip decoding succeed; this does not establish access from the built-in compiler environment. No cache mutations or application settings changes made. The exposed compile API accepts only document path, with no bundle/cache configuration. Source compilation remains unverified."
+}
