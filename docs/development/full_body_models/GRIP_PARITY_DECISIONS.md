@@ -58,12 +58,12 @@ How each engine applies it:
 
 ### Numerical Method
 
-| Engine | Integrator | Settings | Work, driver | Wall time, loaded host |
-| --- | --- | --- | --- | --- |
-| OpenSim (reference) | `Manager` Runge-Kutta-Merson, error controlled | accuracy 1e-5 | n/a | 411 s |
-| MuJoCo | RK4, fixed step | dt = 1e-4 s | about 18 100 steps | 504 s |
-| Drake | `Simulator` runge_kutta3, error controlled | accuracy 1e-7, max step 2.5e-4 s | 228 008 steps | 1791 s |
-| Pinocchio | SciPy `solve_ivp` DOP853, error controlled | rtol 1e-9, atol 1e-12, max step 2.5e-4 s | 208 298 right-hand-side evaluations | 1770 s |
+| Engine              | Integrator                                     | Settings                                 | Work, driver                        | Wall time, loaded host |
+| ------------------- | ---------------------------------------------- | ---------------------------------------- | ----------------------------------- | ---------------------- |
+| OpenSim (reference) | `Manager` Runge-Kutta-Merson, error controlled | accuracy 1e-5                            | n/a                                 | 411 s                  |
+| MuJoCo              | RK4, fixed step                                | dt = 1e-4 s                              | about 18 100 steps                  | 504 s                  |
+| Drake               | `Simulator` runge_kutta3, error controlled     | accuracy 1e-7, max step 2.5e-4 s         | 228 008 steps                       | 1791 s                 |
+| Pinocchio           | SciPy `solve_ivp` DOP853, error controlled     | rtol 1e-9, atol 1e-12, max step 2.5e-4 s | 208 298 right-hand-side evaluations | 1770 s                 |
 
 The bushing modes reach 946 Hz. The fixed step resolves them with about 10 RK4 steps per period, and the max-step caps keep the adaptive integrators from stepping over impact-phase transients.
 
@@ -85,29 +85,29 @@ The full-swing parity test is `test_full_swing_matches_the_opensim_reference[eng
 
 Driver (capture A), errors relative to the OpenSim peak, given as peak / RMS:
 
-| Quantity | OpenSim peak | MuJoCo | Drake | Pinocchio |
-| --- | --- | --- | --- | --- |
-| Left hand force | 515.2 N | 0.003 / 0.001 % | 0.018 / 0.044 % | 0.000 / 0.001 % |
-| Right hand force | 564.0 N | 0.001 / 0.001 % | 0.013 / 0.041 % | 0.000 / 0.001 % |
-| Net force | 439.3 N | 0.005 / 0.002 % | 0.006 / 0.004 % | 0.000 / 0.001 % |
-| Internal force | 509.8 N | 0.000 / 0.000 % | 0.012 / 0.045 % | 0.000 / 0.000 % |
-| Squeeze | 3.28 N | 0.011 / 0.006 % | 0.962 / 0.415 % | 0.002 / 0.003 % |
-| Couple at midpoint | 99.5 N m | 0.005 / 0.004 % | 0.051 / 0.016 % | 0.000 / 0.001 % |
-| Deflection L / R | 0.515 / 0.564 mm | 0.005 / 0.003 % | 0.028 / 0.044 % | 0.001 / 0.001 % |
-| Rotation L / R | 0.84 deg | 0.000 / 0.000 % | 0.005 / 0.050 % | 0.000 / 0.000 % |
+| Quantity           | OpenSim peak     | MuJoCo          | Drake           | Pinocchio       |
+| ------------------ | ---------------- | --------------- | --------------- | --------------- |
+| Left hand force    | 515.2 N          | 0.003 / 0.001 % | 0.018 / 0.044 % | 0.000 / 0.001 % |
+| Right hand force   | 564.0 N          | 0.001 / 0.001 % | 0.013 / 0.041 % | 0.000 / 0.001 % |
+| Net force          | 439.3 N          | 0.005 / 0.002 % | 0.006 / 0.004 % | 0.000 / 0.001 % |
+| Internal force     | 509.8 N          | 0.000 / 0.000 % | 0.012 / 0.045 % | 0.000 / 0.000 % |
+| Squeeze            | 3.28 N           | 0.011 / 0.006 % | 0.962 / 0.415 % | 0.002 / 0.003 % |
+| Couple at midpoint | 99.5 N m         | 0.005 / 0.004 % | 0.051 / 0.016 % | 0.000 / 0.001 % |
+| Deflection L / R   | 0.515 / 0.564 mm | 0.005 / 0.003 % | 0.028 / 0.044 % | 0.001 / 0.001 % |
+| Rotation L / R     | 0.84 deg         | 0.000 / 0.000 % | 0.005 / 0.050 % | 0.000 / 0.000 % |
 
 7-iron (capture B), errors relative to the OpenSim peak, given as peak / RMS:
 
-| Quantity | OpenSim peak | MuJoCo | Drake | Pinocchio |
-| --- | --- | --- | --- | --- |
-| Left hand force | 533.1 N | 0.001 / 0.001 % | 0.011 / 0.021 % | 0.000 / 0.000 % |
-| Right hand force | 584.4 N | 0.002 / 0.001 % | 0.038 / 0.020 % | 0.000 / 0.000 % |
-| Net force | 456.7 N | 0.003 / 0.002 % | 0.001 / 0.002 % | 0.000 / 0.000 % |
-| Internal force | 524.1 N | 0.000 / 0.000 % | 0.021 / 0.022 % | 0.000 / 0.000 % |
-| Squeeze | 3.86 N | 0.013 / 0.005 % | 1.697 / 0.365 % | 0.000 / 0.001 % |
-| Couple at midpoint | 98.6 N m | 0.004 / 0.002 % | 0.021 / 0.006 % | 0.000 / 0.001 % |
-| Deflection L / R | 0.534 / 0.585 mm | 0.001 / 0.001 % | 0.037 / 0.021 % | 0.000 / 0.000 % |
-| Rotation L / R | 0.84 deg | 0.001 / 0.000 % | 0.282 / 0.037 % | 0.000 / 0.000 % |
+| Quantity           | OpenSim peak     | MuJoCo          | Drake           | Pinocchio       |
+| ------------------ | ---------------- | --------------- | --------------- | --------------- |
+| Left hand force    | 533.1 N          | 0.001 / 0.001 % | 0.011 / 0.021 % | 0.000 / 0.000 % |
+| Right hand force   | 584.4 N          | 0.002 / 0.001 % | 0.038 / 0.020 % | 0.000 / 0.000 % |
+| Net force          | 456.7 N          | 0.003 / 0.002 % | 0.001 / 0.002 % | 0.000 / 0.000 % |
+| Internal force     | 524.1 N          | 0.000 / 0.000 % | 0.021 / 0.022 % | 0.000 / 0.000 % |
+| Squeeze            | 3.86 N           | 0.013 / 0.005 % | 1.697 / 0.365 % | 0.000 / 0.001 % |
+| Couple at midpoint | 98.6 N m         | 0.004 / 0.002 % | 0.021 / 0.006 % | 0.000 / 0.001 % |
+| Deflection L / R   | 0.534 / 0.585 mm | 0.001 / 0.001 % | 0.037 / 0.021 % | 0.000 / 0.000 % |
+| Rotation L / R     | 0.84 deg         | 0.001 / 0.000 % | 0.282 / 0.037 % | 0.000 / 0.000 % |
 
 Iron wall times on the loaded host: OpenSim 768 s, MuJoCo 261 s, Drake 1904 s (297 403 steps), Pinocchio 1158 s (318 896 right-hand-side evaluations).
 
@@ -197,10 +197,10 @@ Engine implementations:
 
 MyoSuite bushing against OpenSim (same input as section 18), worst quantity, peak / RMS:
 
-| Club | Worst peak error | Worst RMS error | Wall time |
-| --- | --- | --- | --- |
-| Driver | 0.011 % (squeeze) | 0.006 % | 107 s |
-| 7-iron | 0.013 % (squeeze) | 0.005 % | 113 s |
+| Club   | Worst peak error  | Worst RMS error | Wall time |
+| ------ | ----------------- | --------------- | --------- |
+| Driver | 0.011 % (squeeze) | 0.006 %         | 107 s     |
+| 7-iron | 0.013 % (squeeze) | 0.005 %         | 113 s     |
 
 All ten quantities pass for both clubs, with no tolerance changed. The MyoSuite physics is the MuJoCo section 18 code, so agreement with MuJoCo is expected; the result confirms the MyoSuite model and runtime path.
 
@@ -208,17 +208,17 @@ Quasi-static balance (MuJoCo contact, hands held 0.2 s at swing times covering a
 
 Full swing, peak values (OpenSim bushing / MuJoCo contact):
 
-| Quantity | Driver | 7-iron |
-| --- | --- | --- |
-| Left hand force | 515 / 2086 N | 533 / 1667 N |
-| Right hand force | 564 / 2118 N | 584 / 1748 N |
-| Net force at midpoint | 439.3 / 438.0 N | 456.7 / 452.5 N |
-| Internal force | 510 / 2100 N | 524 / 1697 N |
-| Axial squeeze (internal) | 3.3 / 763 N | 3.9 / 438 N |
-| Couple at midpoint | 99.5 / 76.3 N m | 98.6 / 92.3 N m |
-| Pad normal force sum (per hand) | n/a / 29.4 kN | n/a / 28.8 kN |
-| Hand-to-club deflection | 0.56 mm, 0.84 deg / 1.61 mm, 0.30 deg | 0.58 mm, 0.84 deg / 1.10 mm, 0.12 deg |
-| Peak axial slip, roll slip | n/a / 1.51 mm, 5.2 mrad | n/a / 0.97 mm, 2.1 mrad |
+| Quantity                        | Driver                                | 7-iron                                |
+| ------------------------------- | ------------------------------------- | ------------------------------------- |
+| Left hand force                 | 515 / 2086 N                          | 533 / 1667 N                          |
+| Right hand force                | 564 / 2118 N                          | 584 / 1748 N                          |
+| Net force at midpoint           | 439.3 / 438.0 N                       | 456.7 / 452.5 N                       |
+| Internal force                  | 510 / 2100 N                          | 524 / 1697 N                          |
+| Axial squeeze (internal)        | 3.3 / 763 N                           | 3.9 / 438 N                           |
+| Couple at midpoint              | 99.5 / 76.3 N m                       | 98.6 / 92.3 N m                       |
+| Pad normal force sum (per hand) | n/a / 29.4 kN                         | n/a / 28.8 kN                         |
+| Hand-to-club deflection         | 0.56 mm, 0.84 deg / 1.61 mm, 0.30 deg | 0.58 mm, 0.84 deg / 1.10 mm, 0.12 deg |
+| Peak axial slip, roll slip      | n/a / 1.51 mm, 5.2 mrad               | n/a / 0.97 mm, 2.1 mrad               |
 
 The bushing deflections (0.56 mm and 0.84 degrees; 0.58 mm and 0.84 degrees) and the contact hand-to-club displacements are all inside the 3 mm and 2 degree flags. Nothing is flagged and nothing was tuned.
 
@@ -226,11 +226,11 @@ The bushing deflections (0.56 mm and 0.84 degrees; 0.58 mm and 0.84 degrees) and
 
 Two hands holding one rigid club are statically indeterminate: the net wrench is fixed by the club motion, the split between the hands and the internal pair is not. Each grip model resolves it differently:
 
-| Model | Driver, L / R peak force | Lead share at peak net force | Basis |
-| --- | --- | --- | --- |
-| Weld (min-norm proxy) | 1176 / 1234 N | 0.47 | Minimum-norm split of the OpenSim net wrench with zero free torques; a labelled proxy, not a model |
-| OpenSim bushing | 515 / 564 N | 0.43 | Spring split; free torques are 50/50 by construction |
-| MuJoCo contact | 2086 / 2118 N | 0.48 | Friction and pad stiffness |
+| Model                 | Driver, L / R peak force | Lead share at peak net force | Basis                                                                                              |
+| --------------------- | ------------------------ | ---------------------------- | -------------------------------------------------------------------------------------------------- |
+| Weld (min-norm proxy) | 1176 / 1234 N            | 0.47                         | Minimum-norm split of the OpenSim net wrench with zero free torques; a labelled proxy, not a model |
+| OpenSim bushing       | 515 / 564 N              | 0.43                         | Spring split; free torques are 50/50 by construction                                               |
+| MuJoCo contact        | 2086 / 2118 N            | 0.48                         | Friction and pad stiffness                                                                         |
 
 For the 7-iron the shares are 0.49 (weld proxy), 0.50 (bushing) and 0.50 (contact). The net force agrees across models to within 0.3 % (driver) and 0.9 % (7-iron). The per-hand forces and the internal pair do not: the contact grip carries 4 times the per-hand peak of the bushing, with an internal force of about 2100 N against 510 N, and its couple at the midpoint is 23 % below the bushing's for the driver and 6 % below for the 7-iron.
 

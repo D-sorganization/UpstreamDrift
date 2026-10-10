@@ -32,6 +32,7 @@ import type {
   FlexibleAnalysisPayload,
   LaunchMonitorAnalysisResultV2,
 } from "@/api/generated/types";
+import { LaunchMonitorTrendsPanel } from "./LaunchMonitorTrendsPanel";
 
 const BOUNDARY_TEXT =
   "Associations and fitted regressions do not establish causality. " +
@@ -52,7 +53,7 @@ const FALLBACK_CAPABILITIES: LaunchMonitorAnalyticsCapabilities = {
 
 const NONE_GROUP = "(none)";
 
-type CsvValue = string | number | null;
+export type CsvValue = string | number | null;
 
 interface ParsedCsv {
   columns: string[];
@@ -150,7 +151,8 @@ function parseCsv(text: string): ParsedCsv {
 }
 
 /** A column is a usable outcome/predictor once >=3 rows parse as numeric. */
-function numericColumns(
+// eslint-disable-next-line react-refresh/only-export-components
+export function numericColumns(
   columns: string[],
   records: Record<string, CsvValue>[],
 ): string[] {
@@ -754,6 +756,8 @@ export function LaunchMonitorAnalyticsPage() {
           </details>
         </>
       )}
+
+      <LaunchMonitorTrendsPanel columns={columns} records={records} />
     </div>
   );
 

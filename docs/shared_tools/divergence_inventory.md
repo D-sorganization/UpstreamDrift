@@ -85,7 +85,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `math_utils` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `model_appearance` | 0 | 0 | 0 | 12 | 0 | 0 |
 | `model_generation` | 27 | 52 | 14 | 20 | 1 | 79 |
-| `motion_matching` | 0 | 0 | 0 | 278 | 0 | 0 |
+| `motion_matching` | 0 | 0 | 0 | 282 | 0 | 0 |
 | `motion_pipeline` | 0 | 0 | 0 | 60 | 0 | 0 |
 | `movement_optimizer` | 0 | 0 | 0 | 169 | 0 | 0 |
 | `myofullbody` | 0 | 0 | 0 | 14 | 0 | 0 |
