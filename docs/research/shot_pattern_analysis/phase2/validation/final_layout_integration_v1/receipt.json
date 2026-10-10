@@ -13,5 +13,6 @@
     "tests/tools/shot_pattern_analysis/test_marginal_tick_gutter.py": "c8a15c6e88bf6635755fccdd45285f1c445f990e309366d547dc557425c3d83a"
   },
   "log_sha256": "42f8f5ea5427ea5921c6cf5ba03ea28c9ca80d4e3e381e45cc05bc6bdea801c0",
-  "scope": "Reviewed renderer and validated endpoint-loader integration regression tests; not complete final-figure or scientific acceptance."
+  "scope": "Reviewed renderer and validated endpoint-loader integration regression tests; not complete final-figure or scientific acceptance.",
+  "log_path": "pytest_output.txt"
 }
