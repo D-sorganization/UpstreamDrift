@@ -279,34 +279,24 @@ def _integrate_native_replay(
     tuple[tuple[OverlayWrench, ...], ...],
 ]:
     """Advance one native manager without reinitialization or corrections."""
-    import opensim as osim
+    from .native_scalar_replay import integrate_native_scalar_replay
 
-    sampler = _contact_sampler(model, contact_force_paths)
-    contact_wrenches = []
-    manager = osim.Manager(model)
-    manager.setIntegratorMethod(osim.Manager.IntegratorMethod_RungeKuttaMerson)
-    manager.setIntegratorAccuracy(float(accuracy))
-    manager.setWriteToStorage(False)
-    manager.initialize(state)
-    states = np.empty((len(grid), len(state_names)), dtype=np.float64)
-    forces = np.empty((len(grid), muscles.getSize()), dtype=np.float64)
-    applied = np.empty_like(forces)
-    for row, time in enumerate(grid):
-        if row:
-            state = manager.integrate(float(time))
-        model.realizeDynamics(state)
-        states[row] = [model.getStateVariableValue(state, n) for n in state_names]
-        _validate_muscle_state(
-            dict(zip(state_names, states[row], strict=True)), domains
-        )
-        forces[row] = [
-            muscles.get(i).getActuation(state) for i in range(muscles.getSize())
-        ]
-        applied[row] = [
-            muscles.get(i).getExcitation(state) for i in range(muscles.getSize())
-        ]
-        contact_wrenches.append(_sample_contacts(sampler, state, contact_force_paths))
-    return states, forces, applied, tuple(contact_wrenches)
+    samples = integrate_native_scalar_replay(
+        model,
+        state,
+        state_names,
+        tuple(muscles.get(i).getAbsolutePathString() for i in range(muscles.getSize())),
+        grid,
+        domains,
+        accuracy,
+        contact_force_paths,
+    )
+    return (
+        samples.states,
+        samples.actuations,
+        samples.applied_controls,
+        samples.contact_wrenches,
+    )
 
 
 def _admit_native_muscles(

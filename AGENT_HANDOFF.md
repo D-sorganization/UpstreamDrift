@@ -999,3 +999,9 @@ error. Installed Moco rejects locked coordinates; the unchanged 520-muscle
 source remains blocked by anatomy/passive/assistance/contact and private
 marker registration. See chapter42 and
 `docs/development/feedback_controls/F07_CONSTRAINED_MUSCLE_MOCO_TURNOVER.md`.
+
+# Active: Assistance-Explicit OpenSim Replay, F07 #12147
+
+- Branch `feat/f07-opensim-mixed-replay-12147`; separate native scalar-muscle and CoordinateActuator T01 admission and fresh replay with explicit assistance role/bounds/gain/unit identity, immutable physical outputs and input/state/policy provenance. Root assistance follows ground-parent topology, including renamed coordinates. Other regional roles remain declared hypotheses.
+- Shared native scalar executor preserves old muscle/contact semantics; time and saved applied controls are verified. Native extension presence is checked independently of helper file count. Actual OpenSim4.6 mixed profile tests pass; broader regression passes 214 with two inapplicable contact-fixture skips before final lineage refinements. Failed CasADi-path attempt retained and corrected without installing an environment.
+- Canonical chapter27 and `docs/development/feedback_controls/F07_MIXED_ACTUATION_TURNOVER.md` own equations, scope and reproduction. Astra reviewed the corrected bounded source. Mixed Moco dispatch, full Rajagopal/520 topology, source physiology, capture horizon, own-contact/grip and all-model parity remain open. Do not label these synthetic runs as mocap matching or a muscle-only result.

@@ -11000,6 +11000,8 @@ turnover and source-hashed receipt: `docs/development/feedback_controls/F06D2_OW
 and `F06D2_NATIVE_OWNED_RECEIPT.json`. This trusted synthetic diagnostic does not
 qualify production variants, muscle physiology, private capture or parity.
 
+## Constrained Muscle Moco and Replay (#12143)
+
 The F07 #12143 versioned constrained-muscle policy extends a declared
 native OpenSim cold start to exact ordered excitation T01 export, fresh
 source replay and marker sampling without reassembly. A coupler-only
@@ -11011,3 +11013,16 @@ admits only reviewed CustomJoint and coordinate-linear moving path laws.
 Canonical chapter42 and `F07_CONSTRAINED_MUSCLE_MOCO_TURNOVER.md` retain
 the failed zero-force/loose-transcription experiment and all 520-muscle,
 private-capture, contact, assistance and physiology gates.
+
+## Assistance-Explicit OpenSim Replay (#12147)
+
+A distinct native mixed-actuation T01 profile freezes exact muscle and
+CoordinateActuator channels, complete state/options, physical role declarations,
+bounds, gains and native units. Independent replay retains one owned native
+Manager and checks actual physical time and applied saved commands. Forces,
+powers and sampled work retain root/upper/leg assistance labels and source,
+provider, input, state and policy digests. Zero-assistance point bounds are
+supported. The original muscle-only profile remains strict. Canonical chapter
+27 and F07_MIXED_ACTUATION_TURNOVER document the calculation and limits; full
+factory topology, capture/physiology/contact/grip and 17-model parity remain open.
+
