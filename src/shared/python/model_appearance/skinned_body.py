@@ -311,6 +311,57 @@ def gltf_up_rotation(up_axis: Any) -> Array:
     return m
 
 
+def _pack_accessors(
+    arrays: list[tuple[np.ndarray, int, str, int | None]],
+) -> tuple[bytes, list[dict[str, Any]], list[dict[str, Any]]]:
+    """Pack ``(data, componentType, type, target)`` into one 4-byte-aligned buffer.
+
+    Returns the buffer bytes, one bufferView per array and one accessor per
+    array (accessor ``i`` reads bufferView ``i``).
+    """
+    counts = {"SCALAR": 1, "VEC3": 3, "VEC4": 4, "MAT4": 16}
+    buffer = bytearray()
+    views: list[dict[str, Any]] = []
+    accessors: list[dict[str, Any]] = []
+    for data, component, kind, target in arrays:
+        buffer.extend(b"\x00" * (-len(buffer) % 4))
+        raw = np.ascontiguousarray(data).tobytes()
+        view: dict[str, Any] = {
+            "buffer": 0,
+            "byteOffset": len(buffer),
+            "byteLength": len(raw),
+        }
+        if target is not None:
+            view["target"] = target
+        buffer.extend(raw)
+        accessors.append(
+            {
+                "bufferView": len(views),
+                "componentType": component,
+                "count": int(data.size // counts[kind]),
+                "type": kind,
+            }
+        )
+        views.append(view)
+    return bytes(buffer), views, accessors
+
+
+def _bone_nodes(
+    names: tuple[str, ...], parents: tuple[int, ...], rest_poses: Array
+) -> list[dict[str, Any]]:
+    """One glTF node per bone with its local (parent-relative) rest matrix."""
+    nodes: list[dict[str, Any]] = []
+    for i, name in enumerate(names):
+        parent_pose = rest_poses[parents[i]] if parents[i] != -1 else np.eye(4)
+        local = np.linalg.inv(parent_pose) @ rest_poses[i]
+        node: dict[str, Any] = {"name": name, "matrix": local.T.flatten().tolist()}
+        children = [j for j, p in enumerate(parents) if p == i]
+        if children:
+            node["children"] = children
+        nodes.append(node)
+    return nodes
+
+
 def skinned_body_gltf(body: SkinnedBody) -> dict[str, Any]:
     """A glTF 2.0 JSON document with one embedded base64 buffer.
 
@@ -323,101 +374,48 @@ def skinned_body_gltf(body: SkinnedBody) -> dict[str, Any]:
     rest_poses = to_y_up @ body.rest_poses
     world_vertices = body.vertices @ to_y_up[:3, :3].T
     positions = world_vertices.astype(np.float32)
-    normals = _vertex_normals(world_vertices, body.faces).astype(np.float32)
-    joints = body.joints.astype(np.uint16)
-    weights = body.weights.astype(np.float32)
-    indices = body.faces.astype(np.uint32).reshape(-1)
     # glTF mat4 accessor data is column-major per matrix.
-    inverse_bind = np.ascontiguousarray(
-        np.transpose(np.linalg.inv(rest_poses), (0, 2, 1)), dtype=np.float32
+    inverse_bind = np.transpose(np.linalg.inv(rest_poses), (0, 2, 1))
+    buffer, views, accessors = _pack_accessors(
+        [
+            (positions, _COMPONENT_FLOAT, "VEC3", _TARGET_ARRAY_BUFFER),
+            (
+                _vertex_normals(world_vertices, body.faces).astype(np.float32),
+                _COMPONENT_FLOAT,
+                "VEC3",
+                _TARGET_ARRAY_BUFFER,
+            ),
+            (
+                body.joints.astype(np.uint16),
+                _COMPONENT_USHORT,
+                "VEC4",
+                _TARGET_ARRAY_BUFFER,
+            ),
+            (
+                body.weights.astype(np.float32),
+                _COMPONENT_FLOAT,
+                "VEC4",
+                _TARGET_ARRAY_BUFFER,
+            ),
+            (
+                body.faces.astype(np.uint32).reshape(-1),
+                _COMPONENT_UINT,
+                "SCALAR",
+                _TARGET_ELEMENT_ARRAY_BUFFER,
+            ),
+            (inverse_bind.astype(np.float32), _COMPONENT_FLOAT, "MAT4", None),
+        ]
     )
-
-    buffer = bytearray()
-    views: list[dict[str, Any]] = []
-
-    def add_view(data: np.ndarray, target: int | None = None) -> int:
-        while len(buffer) % 4:
-            buffer.append(0)
-        offset = len(buffer)
-        raw = np.ascontiguousarray(data).tobytes()
-        buffer.extend(raw)
-        view: dict[str, Any] = {
-            "buffer": 0,
-            "byteOffset": offset,
-            "byteLength": len(raw),
-        }
-        if target is not None:
-            view["target"] = target
-        views.append(view)
-        return len(views) - 1
-
-    pos_view = add_view(positions, _TARGET_ARRAY_BUFFER)
-    nrm_view = add_view(normals, _TARGET_ARRAY_BUFFER)
-    joints_view = add_view(joints, _TARGET_ARRAY_BUFFER)
-    weights_view = add_view(weights, _TARGET_ARRAY_BUFFER)
-    idx_view = add_view(indices, _TARGET_ELEMENT_ARRAY_BUFFER)
-    ibm_view = add_view(inverse_bind)
-
-    accessors = [
-        {
-            "bufferView": pos_view,
-            "componentType": _COMPONENT_FLOAT,
-            "count": int(positions.shape[0]),
-            "type": "VEC3",
-            "min": positions.min(axis=0).tolist(),
-            "max": positions.max(axis=0).tolist(),
-        },
-        {
-            "bufferView": nrm_view,
-            "componentType": _COMPONENT_FLOAT,
-            "count": int(normals.shape[0]),
-            "type": "VEC3",
-        },
-        {
-            "bufferView": joints_view,
-            "componentType": _COMPONENT_USHORT,
-            "count": int(joints.shape[0]),
-            "type": "VEC4",
-        },
-        {
-            "bufferView": weights_view,
-            "componentType": _COMPONENT_FLOAT,
-            "count": int(weights.shape[0]),
-            "type": "VEC4",
-        },
-        {
-            "bufferView": idx_view,
-            "componentType": _COMPONENT_UINT,
-            "count": int(indices.size),
-            "type": "SCALAR",
-        },
-        {
-            "bufferView": ibm_view,
-            "componentType": _COMPONENT_FLOAT,
-            "count": n_bones,
-            "type": "MAT4",
-        },
-    ]
-
-    nodes: list[dict[str, Any]] = []
-    for i, name in enumerate(body.bone_names):
-        parent_idx = body.bone_parents[i]
-        parent_pose = rest_poses[parent_idx] if parent_idx != -1 else np.eye(4)
-        local = np.linalg.inv(parent_pose) @ rest_poses[i]
-        node: dict[str, Any] = {
-            "name": name,
-            "matrix": local.T.flatten().tolist(),
-        }
-        children = [j for j, p in enumerate(body.bone_parents) if p == i]
-        if children:
-            node["children"] = children
-        nodes.append(node)
+    # glTF requires POSITION bounds.
+    accessors[0]["min"] = positions.min(axis=0).tolist()
+    accessors[0]["max"] = positions.max(axis=0).tolist()
+    nodes = _bone_nodes(body.bone_names, body.bone_parents, rest_poses)
     mesh_node = len(nodes)
     nodes.append({"mesh": 0, "skin": 0})
     root_bones = [i for i, p in enumerate(body.bone_parents) if p == -1]
 
     buffer_uri = "data:application/octet-stream;base64," + base64.b64encode(
-        bytes(buffer)
+        buffer
     ).decode("ascii")
     return {
         "asset": {"version": "2.0", "generator": "UpstreamDrift skinned_body"},
