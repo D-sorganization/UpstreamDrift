@@ -120,7 +120,18 @@ class DrakeFullBodyIK(BaseFullBodyIK):
         q_arr = np.asarray(q, dtype=float)
         if q_arr.shape != (len(self.coordinate_order),) or not np.isfinite(q_arr).all():
             raise ValueError("Coordinates must be a finite vector of model size")
-        self._plant.SetPositions(self._context, q_arr)
+        q_raw = np.empty_like(q_arr)
+        q_raw[self.model._q_indices] = q_arr
+        self._plant.SetPositions(self._context, q_raw)
+
+    def _spec_columns(self, jacobian: Array) -> Array:
+        """Reorder Drake velocity-ordered Jacobian columns to spec order.
+
+        Drake orders positions and velocities by joint creation order (upper
+        body first), which differs from ``coordinate_order``.  ``_set`` maps
+        spec-order ``q`` into Drake order, so Jacobians must be mapped back.
+        """
+        return np.asarray(jacobian)[:, self.model._v_indices]
 
     def marker_positions(self, q: Array) -> Array:
         self._set(q)
@@ -141,13 +152,15 @@ class DrakeFullBodyIK(BaseFullBodyIK):
         jac = np.empty((len(self.labels), 3, nv), dtype=float)
         for k, label in enumerate(self.labels):
             frame, offset = self._marker_frames[label]
-            jac[k] = self._plant.CalcJacobianTranslationalVelocity(
-                self._context,
-                self.model._wrt_v,
-                frame,
-                offset,
-                self._world_frame,
-                self._world_frame,
+            jac[k] = self._spec_columns(
+                self._plant.CalcJacobianTranslationalVelocity(
+                    self._context,
+                    self.model._wrt_v,
+                    frame,
+                    offset,
+                    self._world_frame,
+                    self._world_frame,
+                )
             )
         return jac
 
@@ -259,12 +272,14 @@ class DrakeFullBodyIK(BaseFullBodyIK):
                 self._context, self._world_frame, frame_obj
             )
             world_axis = x_wf.rotation().matrix() @ axis
-            jr = self._plant.CalcJacobianAngularVelocity(
-                self._context,
-                self.model._wrt_v,
-                frame_obj,
-                self._world_frame,
-                self._world_frame,
+            jr = self._spec_columns(
+                self._plant.CalcJacobianAngularVelocity(
+                    self._context,
+                    self.model._wrt_v,
+                    frame_obj,
+                    self._world_frame,
+                    self._world_frame,
+                )
             )
             skew = _skew3(world_axis)
             w = np.sqrt(weight)
@@ -284,21 +299,25 @@ class DrakeFullBodyIK(BaseFullBodyIK):
         a, b = self._closure
         x_wa = self._plant.CalcRelativeTransform(self._context, self._world_frame, a)
         x_wb = self._plant.CalcRelativeTransform(self._context, self._world_frame, b)
-        jp_a = self._plant.CalcJacobianTranslationalVelocity(
-            self._context,
-            self.model._wrt_v,
-            a,
-            [0, 0, 0],
-            self._world_frame,
-            self._world_frame,
+        jp_a = self._spec_columns(
+            self._plant.CalcJacobianTranslationalVelocity(
+                self._context,
+                self.model._wrt_v,
+                a,
+                [0, 0, 0],
+                self._world_frame,
+                self._world_frame,
+            )
         )
-        jp_b = self._plant.CalcJacobianTranslationalVelocity(
-            self._context,
-            self.model._wrt_v,
-            b,
-            [0, 0, 0],
-            self._world_frame,
-            self._world_frame,
+        jp_b = self._spec_columns(
+            self._plant.CalcJacobianTranslationalVelocity(
+                self._context,
+                self.model._wrt_v,
+                b,
+                [0, 0, 0],
+                self._world_frame,
+                self._world_frame,
+            )
         )
         if pos_weight > 0:
             w = np.sqrt(pos_weight)
@@ -307,19 +326,23 @@ class DrakeFullBodyIK(BaseFullBodyIK):
         if rot_weight > 0:
             wr = np.sqrt(rot_weight)
             rot = _rotation_error(x_wa.rotation().matrix(), x_wb.rotation().matrix())
-            jr_a = self._plant.CalcJacobianAngularVelocity(
-                self._context,
-                self.model._wrt_v,
-                a,
-                self._world_frame,
-                self._world_frame,
+            jr_a = self._spec_columns(
+                self._plant.CalcJacobianAngularVelocity(
+                    self._context,
+                    self.model._wrt_v,
+                    a,
+                    self._world_frame,
+                    self._world_frame,
+                )
             )
-            jr_b = self._plant.CalcJacobianAngularVelocity(
-                self._context,
-                self.model._wrt_v,
-                b,
-                self._world_frame,
-                self._world_frame,
+            jr_b = self._spec_columns(
+                self._plant.CalcJacobianAngularVelocity(
+                    self._context,
+                    self.model._wrt_v,
+                    b,
+                    self._world_frame,
+                    self._world_frame,
+                )
             )
             rows.append(wr * rot)
             jacs.append(wr * (jr_a - jr_b))
@@ -328,13 +351,15 @@ class DrakeFullBodyIK(BaseFullBodyIK):
         pos = self._plant.CalcRelativeTransform(
             self._context, self._world_frame, frame
         ).translation()
-        jp = self._plant.CalcJacobianTranslationalVelocity(
-            self._context,
-            self.model._wrt_v,
-            frame,
-            [0, 0, 0],
-            self._world_frame,
-            self._world_frame,
+        jp = self._spec_columns(
+            self._plant.CalcJacobianTranslationalVelocity(
+                self._context,
+                self.model._wrt_v,
+                frame,
+                [0, 0, 0],
+                self._world_frame,
+                self._world_frame,
+            )
         )
         return pos, jp
 
@@ -342,11 +367,13 @@ class DrakeFullBodyIK(BaseFullBodyIK):
         com = np.asarray(
             self._plant.CalcCenterOfMassPositionInWorld(self._context), dtype=float
         )
-        jac_com = self._plant.CalcJacobianCenterOfMassTranslationalVelocity(
-            self._context,
-            self.model._wrt_v,
-            self._world_frame,
-            self._world_frame,
+        jac_com = self._spec_columns(
+            self._plant.CalcJacobianCenterOfMassTranslationalVelocity(
+                self._context,
+                self.model._wrt_v,
+                self._world_frame,
+                self._world_frame,
+            )
         )
         return com, jac_com
 
