@@ -524,10 +524,47 @@ shared calibration estimate from native frame poses. This is not production
 model, private capture, independent holdout, physics or full-engine coverage.
 Canonical equations and limitations are recorded in chapter 13.
 
-The MuJoCo native-marker integration test also fits and revalidates this
-artifact from a full-state replay pose history, converts it to the existing
-native marker map, and verifies that the replay receipt binds the calibration
-digest. This closes only the tested software handoff. It adds no production
-marker attachments and does not make the position-level OpenSim geometry
-provider a full-state replay provider; Drake/Pinocchio handoff remains without
-an equivalent end-to-end calibration test.
+The MuJoCo native-marker integration test fits and revalidates this artifact
+from a full-state replay pose history, converts it to the existing native
+marker map, executes a fresh marker replay, and sends its positions through the
+existing observation scorer. The score carries the calibration-artifact,
+map, execution, marker-output, observation, and alignment identities. This
+closes only the tested software handoff. It adds no production marker
+attachments and does not make the position-level OpenSim geometry provider a
+full-state replay provider. The later F09r slice now also exercises the same
+calibration-to-scoring handoff through native Drake and Pinocchio fixtures.
+
+## F09r Calibrated Marker Replay to Observation Scoring (#12178)
+
+`test_observation_score_consumes_native_mujoco_marker_receipt` composes the
+existing calibration artifact, native map, fresh native marker replay, and F09
+observation scorer using one independent synthetic MuJoCo model. Calibration
+uses native full-state replay poses on the exact simulation-relative grid and
+rejects changed clock and offset inputs. The scored output is produced by a
+second replay from the same frozen bundle; synthetic observations differ by a
+known 1 mm z offset. The resulting report retains all 17 required rows, scores
+only the fixture row, and remains unqualified. No scorer or calibration
+authority was duplicated, and no private capture was used.
+
+The changed integration test plus calibration, marker FK, and scorer modules
+completed with 31 passed and 2 skipped in the retained Windows Python 3.13
+test environment using the exact pinned Tools donor for the uninitialized
+submodule. The two skips are optional engine runtime cases. Separate actual
+WSL runs passed the calibration-to-score native marker tests for Drake 1.57
+and Pinocchio 4.1 (one test each):
+`test_drake_markers_use_native_fk_with_floating_base_and_local_offset` and
+`test_pinocchio_markers_use_native_fk_with_floating_base_and_local_offset`.
+Both used a copied isolated test module
+outside the checkout with `UPSTREAMDRIFT_REPO_ROOT` pointing at the source
+checkout, avoiding repository-wide pytest configuration collection. The
+Pinocchio test used ordinary imports. The Drake test preloaded only namespace
+package objects for `src.engines.physics_engines.drake` and its `.python`
+submodule, each with `__path__` set to the real checkout source, before
+loading the real provider and native SDK. The minimal Drake environment lacks
+`structlog` and `simpleeval`; even a temporary 65 KB `structlog` 24.1.0
+overlay did not complete the broad repository package initializer. No native
+provider or physics code was mocked, but ordinary public package bootstrap is
+not verified. OpenSim remains position-level in this pathway. Production
+attachments, private captures, held-out scoring, physics and qualification
+remain open.
+Canonical detail is in chapter 49 and the F09q calibration note.
