@@ -976,6 +976,28 @@ export interface CaptureSource {
 }
 
 /**
+ * Appearance picks, optionally bound to a compiled character spec. ``character``, when given, is compiled the same way as ``/character-builder/build`` and its spec hash is stamped onto the returned appearance document as ``spec_sha256``.
+ */
+export interface CharacterAppearanceRequest {
+  /** Optional character spec to bind spec_sha256 to */
+  character?: CharacterSpecRequest | null;
+  /** Skin tone material name */
+  skin_tone?: string | null;
+  /** Clothing preset name */
+  clothing?: string | null;
+  /** Club finish material name */
+  club_finish?: string | null;
+  /** 'none', 'hair' or 'cap' */
+  headwear?: string | null;
+  /** Hair/cap material name override */
+  headwear_material?: string | null;
+  /** Ground material name */
+  ground_material?: string | null;
+  /** Appearance document name (letters, digits, '_' or '-') */
+  name?: string | null;
+}
+
+/**
  * Request model for Character Builder URDF generation. Preconditions: - height_m must be in [1.5, 2.1] - mass_kg must be in [40, 150] - build_type must be athletic, average, heavy, or slim
  */
 export interface CharacterBuilderRequest {
