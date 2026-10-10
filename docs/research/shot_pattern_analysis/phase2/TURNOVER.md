@@ -6,6 +6,8 @@ The goal is active and incomplete. MAIN is `/home/dieterolson/.codex/worktrees/s
 
 ## Reporting Regeneration Checkpoint
 
+Initial paired-graphics review also passed for two completed PW across-lean comparisons only (12 PNGs, 32 total assets; common-six populations 10,000 and 9,999). See [Initial Pair Review](validation/supplement_v5_initial_pair_review_v1/REVIEW.md). Other contrasts and the full pipeline remain unaccepted until completion and reconciliation.
+
 All 26 supplemental cell graphics are complete and independently accepted by Astra: 312 assets, including 52 academic PNGs identical to the preserved v3 review and 52 revised social cards inspected. Root revalidated every asset and contact-sheet hash. Evidence: [Cell Graphics Review](validation/supplement_v5_cell_graphics_review_v1/REVIEW.md); receipt SHA256 `19c398c21416cd96f6ab796359d6e38542cbc441418b70549f8da586e44a71f6`. This is component acceptance only; paired-comparison rendering and final pipeline reconciliation remain pending.
 
 Original v6 primary and recovered control are complete and graphically reviewed. Primary: 689 outputs / 288 PNGs; control: 547 outputs / 194 PNGs. Every CSV is byte-identical to v4; exactly 18 shaft-SD caption PNGs changed in each set, with all changed cards inspected. Root independently revalidated all primary outputs against its accepted receipt after control completion. Astra accepted the control cards; receipt SHA256 `bab6a49c147606b071a45a09dff2bb3088a598328ea7e9f8cd9f2ea75866a982`. See `validation/original_final_graphics_independent_review_v6/` and `validation/original_control_recovery_v6/completion.json`.
