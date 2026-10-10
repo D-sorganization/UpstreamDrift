@@ -32,5 +32,14 @@
     "rhs_evaluations": 208298,
     "force_law": "shared OpenSim BushingForce law, Pinocchio aba",
     "kinematics": "Pinocchio full-body weld model forward kinematics"
+  },
+  "myosuite": {
+    "engine": "myosuite",
+    "wall_time_s": 107.37609576398972,
+    "integrator": "MuJoCo RK4 (fixed step)",
+    "timestep_s": 0.0001,
+    "force_law": "shared OpenSim BushingForce law via mjcb_passive",
+    "kinematics": "MuJoCo full-body weld MJCF forward kinematics",
+    "runtime": "MyoSuite MujocoEnv (mj_model / mj_data held by MyoSuite)"
   }
 }

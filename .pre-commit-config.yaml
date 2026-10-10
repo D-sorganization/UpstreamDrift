@@ -129,6 +129,7 @@ repos:
           - types-requests
           - types-PyYAML
           - pydantic
+          - numpy==2.2.6
         args: [--config-file, pyproject.toml, --follow-imports=silent]
         types: [python]
         files: ^src/
