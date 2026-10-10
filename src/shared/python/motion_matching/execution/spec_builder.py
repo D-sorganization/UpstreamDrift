@@ -107,6 +107,38 @@ def transform(rotation: np.ndarray, translation: np.ndarray) -> np.ndarray:
     return t
 
 
+def _offset_frames(model: Any) -> dict[str, tuple[str, Any]]:
+    """Map body-owned frame paths (``/bodyset/<body>/<frame>``) to (body, frame)."""
+    frames = {}
+    for body in model.findall("BodySet/objects/Body"):
+        name = body.get("name")
+        for frame in body.findall("components/PhysicalOffsetFrame"):
+            frames[f"/bodyset/{name}/{frame.get('name')}"] = (name, frame)
+    return frames
+
+
+def _joint_frame(
+    joint: Any, socket: str, owned: dict[str, tuple[str, Any]]
+) -> tuple[str, Any]:
+    """Resolve a joint socket to (body name, PhysicalOffsetFrame element).
+
+    Accepts both layouts OpenSim 4 writes: a frame declared inside the joint's
+    ``<frames>`` (its ``socket_parent`` names the body) and a frame owned by a
+    body and referenced by absolute path.
+    """
+    path = joint.findtext(socket)
+    for frame in joint.findall("frames/PhysicalOffsetFrame"):
+        if frame.get("name") == path:
+            return frame.findtext("socket_parent").rsplit("/", 1)[1], frame
+    if path in owned:
+        return owned[path]
+    raise ValueError(f"Joint {joint.get('name')!r}: cannot resolve {socket}={path!r}")
+
+
+def _vector(frame: Any, tag: str) -> np.ndarray:
+    return np.array(frame.findtext(tag).split(), dtype=float)
+
+
 def read_osim(osim: Path) -> tuple[dict[str, Any], dict[str, Any]]:
     model = ET.parse(str(osim)).getroot().find("Model")
     if model is None:
@@ -118,29 +150,18 @@ def read_osim(osim: Path) -> tuple[dict[str, Any], dict[str, Any]]:
             "com": np.array(body.findtext("mass_center").split(), dtype=float),  # type: ignore[union-attr]
             "inertia": np.array(body.findtext("inertia").split(), dtype=float),  # type: ignore[union-attr]
         }
+    owned = _offset_frames(model)
     joints = {}
     for joint in model.findall("JointSet/objects/*"):
-        frames = joint.findall("frames/PhysicalOffsetFrame")
-        parent, child = frames[0], frames[1]
+        parent_body, parent = _joint_frame(joint, "socket_parent_frame", owned)
+        child_body, child = _joint_frame(joint, "socket_child_frame", owned)
         joints[joint.get("name")] = {
-            "parent_body": parent.findtext("socket_parent").rsplit("/", 1)[1],  # type: ignore[union-attr]
-            "child_body": child.findtext("socket_parent").rsplit("/", 1)[1],  # type: ignore[union-attr]
-            "parent_translation": np.array(
-                parent.findtext("translation").split(),
-                dtype=float,  # type: ignore[union-attr]
-            ),
-            "parent_orientation": np.array(
-                parent.findtext("orientation").split(),
-                dtype=float,  # type: ignore[union-attr]
-            ),
-            "child_translation": np.array(
-                child.findtext("translation").split(),
-                dtype=float,  # type: ignore[union-attr]
-            ),
-            "child_orientation": np.array(
-                child.findtext("orientation").split(),
-                dtype=float,  # type: ignore[union-attr]
-            ),
+            "parent_body": parent_body,
+            "child_body": child_body,
+            "parent_translation": _vector(parent, "translation"),
+            "parent_orientation": _vector(parent, "orientation"),
+            "child_translation": _vector(child, "translation"),
+            "child_orientation": _vector(child, "orientation"),
         }
     return bodies, joints
 
