@@ -1127,3 +1127,17 @@ and remains physically unqualified. See chapter52,
 `F07_NATIVE_BODY_INERTIA_TURNOVER.md` and the source-bound receipt; no
 parameter repair or private data was committed. This slice depends on #12183
 and #12182 and must remain unarmed until prerequisites merge.
+
+## F07 Generic Shoulder Lamina Candidate (#12211)
+
+The branch `feat/f07-generic-shoulder-lamina-12211` adds a separately
+identified generic 557-muscle shoulder mass candidate. It binds the exact
+reduced source and retained right CEINMS meshes, explicitly hypothesizes
+right identity and left local-z reflection, and calls the pending Tools
+#5503 triangle-lamina provider without changing the vendored pin. An actual
+OpenSim 4.6 candidate reload passes the 40-body physical audit, while the
+original retains four failures; native all-body FK and QErr/UErr agree at
+three sampled poses. See chapter54 and
+`F07_GENERIC_SHOULDER_LAMINA_TURNOVER.md`. Keep the PR draft/unarmed until
+Tools #5503 and #12207 are integrated. No source anatomy, physiology,
+force/work chart, contact/grip, captured match or parity claim follows.
