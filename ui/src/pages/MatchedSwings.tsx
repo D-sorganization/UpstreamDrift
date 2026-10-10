@@ -72,6 +72,8 @@ export function MatchedSwingsPage() {
   const [captureFilter, setCaptureFilter] = useState('all');
   const [laneFilter, setLaneFilter] = useState('all');
   const [verdictFilter, setVerdictFilter] = useState('all');
+  const [driveModeFilter, setDriveModeFilter] = useState('all');
+  const [profileFilter, setProfileFilter] = useState('all');
   const [search, setSearch] = useState('');
   const [previewJoints, setPreviewJoints] = useState<MocapJoint[]>([]);
   const [previewFrame, setPreviewFrame] = useState(0);
@@ -115,6 +117,8 @@ export function MatchedSwingsPage() {
     setCaptureFilter('all');
     setLaneFilter('all');
     setVerdictFilter('all');
+    setDriveModeFilter('all');
+    setProfileFilter('all');
     setSearch('');
   }, []);
 
@@ -143,8 +147,14 @@ export function MatchedSwingsPage() {
   useEffect(() => {
     let cancelled = false;
     void Promise.resolve().then(async () => {
+      if (cancelled) return;
+      setLoadState('loading');
       try {
-        const data = await fetchMatchedSwingLedger();
+        const data = await fetchMatchedSwingLedger({
+          ranked: true,
+          driveMode: driveModeFilter !== 'all' ? driveModeFilter : undefined,
+          profile: profileFilter !== 'all' ? profileFilter : undefined,
+        });
         if (cancelled) return;
         setRuns(data.runs);
         setLoadState('ready');
@@ -162,7 +172,7 @@ export function MatchedSwingsPage() {
     return () => {
       cancelled = true;
     };
-  }, [loadPreview]);
+  }, [loadPreview, driveModeFilter, profileFilter]);
 
   const filteredRuns = useMemo(
     () => filterRuns(runs, engineFilter, captureFilter, laneFilter, verdictFilter, search),
@@ -264,6 +274,32 @@ export function MatchedSwingsPage() {
       </label>
 
       <label className="flex flex-col gap-1">
+        <span className="text-xs uppercase tracking-wide text-gray-400">Drive Mode</span>
+        <select
+          className="rounded bg-gray-900 border border-gray-700 px-2 py-1"
+          value={driveModeFilter}
+          onChange={(e) => setDriveModeFilter(e.target.value)}
+        >
+          <option value="all">all</option>
+          <option value="torque_driven">torque_driven</option>
+          <option value="kinematic_prescribed">kinematic_prescribed</option>
+        </select>
+      </label>
+
+      <label className="flex flex-col gap-1">
+        <span className="text-xs uppercase tracking-wide text-gray-400">Profile</span>
+        <select
+          className="rounded bg-gray-900 border border-gray-700 px-2 py-1"
+          value={profileFilter}
+          onChange={(e) => setProfileFilter(e.target.value)}
+        >
+          <option value="all">all</option>
+          <option value="dynamic">dynamic</option>
+          <option value="kinematic">kinematic</option>
+        </select>
+      </label>
+
+      <label className="flex flex-col gap-1">
         <span className="text-xs uppercase tracking-wide text-gray-400">Search</span>
         <input
           className="rounded bg-gray-900 border border-gray-700 px-2 py-1"
@@ -361,9 +397,9 @@ export function MatchedSwingsPage() {
         </div>
       </dl>
 
-      {selectedRun.reason && (
+      {(selectedRun.qualification_note ?? selectedRun.reason) && (
         <p className="text-xs text-amber-300 border border-amber-700/40 rounded p-2">
-          {selectedRun.reason}
+          {selectedRun.qualification_note ?? selectedRun.reason}
         </p>
       )}
 

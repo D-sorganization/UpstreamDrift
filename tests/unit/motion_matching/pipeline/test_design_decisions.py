@@ -8,9 +8,8 @@ import pytest
 pytestmark = pytest.mark.unit
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
-DOC_PATH = (
-    REPO_ROOT / "docs" / "development" / "full_body_models" / "DESIGN_DECISIONS.md"
-)
+DOC_DIR = REPO_ROOT / "docs" / "development" / "full_body_models"
+DOC_PATH = DOC_DIR / "DESIGN_DECISIONS.md"
 
 
 def test_design_decisions_file_exists() -> None:
@@ -19,18 +18,47 @@ def test_design_decisions_file_exists() -> None:
 
 
 def test_design_decisions_parser_and_order() -> None:
-    """Verify all 17 decisions exist in order, each with what, why, receipt, rejected."""
+    """Verify all 19 decisions exist in order, each with what, why, receipt, rejected."""
     from src.shared.python.motion_matching.pipeline.design_decisions import (
-        parse_design_decisions,
+        load_design_decisions,
         validate_design_decisions,
     )
 
-    content = DOC_PATH.read_text(encoding="utf-8")
-    decisions = parse_design_decisions(content)
-    assert len(decisions) == 17, f"Expected 17 decisions, got {len(decisions)}"
+    decisions = load_design_decisions(DOC_DIR)
+    assert len(decisions) == 19, f"Expected 19 decisions, got {len(decisions)}"
 
     # Validate decision contents and verify all referenced receipt links exist on disk
     validate_design_decisions(decisions, repo_root=REPO_ROOT)
+
+
+def _section(number: int) -> str:
+    return f"## {number}. Title {number}\n\n### What\n\nw\n"
+
+
+def test_volumes_are_read_in_numeric_order(tmp_path: Path) -> None:
+    """Volume 10 follows volume 2, not volume 1; numbering continues across files."""
+    from src.shared.python.motion_matching.pipeline.design_decisions import (
+        load_design_decisions,
+    )
+
+    (tmp_path / "DESIGN_DECISIONS.md").write_text(_section(1))
+    for volume in range(2, 11):
+        (tmp_path / f"DESIGN_DECISIONS_{volume}.md").write_text(_section(volume))
+    numbers = [d.number for d in load_design_decisions(tmp_path)]
+    assert numbers == list(range(1, 11))
+
+
+def test_volume_gap_or_missing_first_volume_raises(tmp_path: Path) -> None:
+    from src.shared.python.motion_matching.pipeline.design_decisions import (
+        load_design_decisions,
+    )
+
+    with pytest.raises(ValueError, match="does not exist"):
+        load_design_decisions(tmp_path)
+    (tmp_path / "DESIGN_DECISIONS.md").write_text(_section(1))
+    (tmp_path / "DESIGN_DECISIONS_3.md").write_text(_section(2))
+    with pytest.raises(ValueError, match="must be numbered"):
+        load_design_decisions(tmp_path)
 
 
 def test_design_decisions_rejects_bad_input() -> None:
@@ -56,6 +84,7 @@ def test_design_decisions_rejects_bad_input() -> None:
 def test_design_decisions_rejects_broken_link(tmp_path: Path) -> None:
     """Verify that a broken link target raises FileNotFoundError."""
     from src.shared.python.motion_matching.pipeline.design_decisions import (
+        EXPECTED_DECISION_TITLES,
         DesignDecision,
         validate_design_decisions,
     )
@@ -74,27 +103,7 @@ def test_design_decisions_rejects_broken_link(tmp_path: Path) -> None:
             review_sections="[REVIEW](evidence/anthropometry/REVIEW.md#1)",
             raw_markdown="",
         )
-        for i, title in enumerate(
-            [
-                "Anthropometric Geometry From de Leva",
-                "Arms Forward at Zero Pose",
-                "Scapula Rz",
-                "One Static-Trial Round",
-                "Marker-Driven Elbow Pits",
-                "Anatomical Wrist Axes and Neutral-Grip Turn",
-                "Fitted Hand-to-Club Rotation (`GRIP_ROTATION_DEG`)",
-                "Human Ranges in the Matching Only, Wrists Bounded by Default",
-                "Clubs From `club_models`",
-                "Compliant 50 kN/m Sole",
-                "12 Hz Tracked Reference",
-                "Reference Zero-Moment-Point Diagnostic",
-                "Rejected: Grip-Roll Scan, Closure Fit From the Address, Cart-Table Filter, Fixed-Point and Iterative-Learning Shooting Fits",
-                "MJX Differentiable Optimisation (Windowed)",
-                "Address Foot Progression (OSV-4, #11730)",
-                "Compliant Bushing Grip Model (OSV-7 Phase 1)",
-                "Impact-Phase Bushing Grip From the Closure-Consistent Fits (OSV-7)",
-            ]
-        )
+        for i, title in enumerate(EXPECTED_DECISION_TITLES)
     ]
 
     with pytest.raises(FileNotFoundError, match="does not exist on disk"):
