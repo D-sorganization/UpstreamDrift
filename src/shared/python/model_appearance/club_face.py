@@ -90,7 +90,7 @@ def impact_frame(
     address = head[0]
 
     def at_ball(i: int) -> bool:
-        return (
+        return bool(
             i > top
             and abs(head[i, 2] - address[2]) <= height_tol_m
             and np.linalg.norm(head[i] - address) <= ball_radius_m
