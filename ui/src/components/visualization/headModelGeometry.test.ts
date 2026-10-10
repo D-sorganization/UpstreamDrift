@@ -8,7 +8,7 @@ import {
   meshVolume,
   skullMesh,
   skullPoint,
-} from './headModel';
+} from './headModelGeometry';
 
 const L = DEFAULT_HEAD_LENGTH_M;
 const byName = (name: string, headwear: 'none' | 'hair' | 'cap' = 'hair') => {

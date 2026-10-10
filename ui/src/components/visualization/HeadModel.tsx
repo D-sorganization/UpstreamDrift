@@ -8,7 +8,7 @@ import {
   type GridMesh,
   type HeadPartSpec,
   type Headwear,
-} from './headModel';
+} from './headModelGeometry';
 
 interface HeadModelProps {
   /** Head length (cervicale to vertex) in metres. */
