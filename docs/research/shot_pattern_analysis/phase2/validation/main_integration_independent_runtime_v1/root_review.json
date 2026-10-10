@@ -1,0 +1,17 @@
+{
+  "testcase_counts": {
+    "provider": 86,
+    "scoring": 25,
+    "gui": 43,
+    "report": 47,
+    "physics": 81
+  },
+  "total_passed": 282,
+  "no_failures_errors_skips": true,
+  "source_files_rehashed": 242,
+  "source_unchanged": true,
+  "result_sha256": "46fb257f8e94bd00e9c55b407e5823530449201527cf6f330aafdc209f996636",
+  "runtime_sha256": "6f805064748e6f91e57d2b5a1d4773487b8cf44d627ab31c9a9e9a805fcbeb2e",
+  "publication_acceptance": false,
+  "merge_acceptance": "Pending metadata/handoff gates and final stable-tree review."
+}
