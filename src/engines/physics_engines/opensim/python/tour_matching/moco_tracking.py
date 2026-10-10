@@ -10,12 +10,17 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import logging
+import math
 from pathlib import Path
+from collections.abc import Mapping
 from typing import Any
 
 import numpy as np
 
 from src.shared.python.contracts import postcondition, precondition
+
+from .moco_initial_bindings import MocoInitialBindings, apply_moco_initial_bindings
+from .trc import read_trc
 
 logger = logging.getLogger(__name__)
 
@@ -235,8 +240,8 @@ def _write_sanitized_trc(
 
 
 @precondition(
-    lambda model_path, trc_path, states_guess_path, config: isinstance(
-        config, MocoTrackingConfig
+    lambda model_path, trc_path, states_guess_path, config, initial_bindings=None, marker_weights=None: (
+        isinstance(config, MocoTrackingConfig)
     ),
     "config must be MocoTrackingConfig",
 )
@@ -245,6 +250,9 @@ def build_moco_study(
     trc_path: str,
     states_guess_path: str,
     config: MocoTrackingConfig,
+    *,
+    initial_bindings: MocoInitialBindings | None = None,
+    marker_weights: Mapping[str, float] | None = None,
 ) -> Any:
     """Build a MocoStudy problem configured for marker tracking with initial guess.
 
@@ -263,6 +271,8 @@ def build_moco_study(
     problem = study.updProblem()
     problem.setModelProcessor(opensim.ModelProcessor(model_path))
     problem.setTimeBounds(config.t_start_s, config.horizon_s)
+    if initial_bindings is not None:
+        apply_moco_initial_bindings(problem, model_path, initial_bindings, opensim)
 
     # Effort minimization goal
     effort = opensim.MocoControlGoal("effort")
@@ -272,7 +282,30 @@ def build_moco_study(
     # Marker tracking goal
     marker_tracking = opensim.MocoMarkerTrackingGoal("marker_tracking")
     marker_tracking.setWeight(config.marker_weight)
-    mr = opensim.MarkersReference(trc_path, opensim.SetMarkerWeights())
+    native_weights = opensim.SetMarkerWeights()
+    if marker_weights is not None:
+        if config.allow_unused_references:
+            raise ValueError("Explicit marker weights forbid unused references")
+        labels = set(read_trc(Path(trc_path)).labels)
+        if set(marker_weights) != labels:
+            raise ValueError(
+                "Every selected reference marker needs one explicit weight"
+            )
+        marker_model = opensim.Model(model_path)
+        markers = marker_model.getMarkerSet()
+        native_names = {markers.get(i).getName() for i in range(markers.getSize())}
+        if not labels <= native_names:
+            raise ValueError("Selected reference marker is absent from native model")
+        for name, weight in marker_weights.items():
+            if (
+                isinstance(weight, bool)
+                or not isinstance(weight, (int, float))
+                or not math.isfinite(weight)
+                or weight <= 0
+            ):
+                raise ValueError("Reference marker weights must be finite and positive")
+            native_weights.cloneAndAppend(opensim.MarkerWeight(name, float(weight)))
+    mr = opensim.MarkersReference(trc_path, native_weights)
     marker_tracking.setMarkersReference(mr)
     marker_tracking.setAllowUnusedReferences(config.allow_unused_references)
     problem.addGoal(marker_tracking)
@@ -287,7 +320,16 @@ def build_moco_study(
     # Seed with IK initial guess trajectory
     guess = solver.createGuess()
     states_table = opensim.TimeSeriesTable(states_guess_path)
+    if initial_bindings is not None and set(states_table.getColumnLabels()) != set(
+        initial_bindings.state_bounds
+    ):
+        raise ValueError("Native numerical guess state names are incomplete")
     guess.insertStatesTrajectory(states_table, True)
+    if initial_bindings is not None and (
+        set(guess.getStateNames()) != set(initial_bindings.state_bounds)
+        or set(guess.getControlNames()) != set(initial_bindings.control_bounds)
+    ):
+        raise ValueError("Native Moco guess state/control names differ from problem")
     solver.setGuess(guess)
 
     return study

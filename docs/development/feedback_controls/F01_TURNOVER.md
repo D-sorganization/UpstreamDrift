@@ -8,6 +8,9 @@ only evidence with current model/provider source identity and bound state,
 physics, contact, integrator, input-channel schema, policy, time-grid, input,
 horizon, and channel
 identities. Runtime availability and qualification remain unverified.
+Within-engine and same-input admission rejects truncated horizons. Observation
+accuracy requires a distinct observation-grid digest, separate from the input
+time-grid hash; F09 must provide that digest from the native scoring clock.
 
 The new contract is a prerequisite to numerical gates, not their result.
 `same-input-bundle/v1` remains intact for its existing Euclidean use but is

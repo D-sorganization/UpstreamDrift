@@ -4,16 +4,49 @@ Machine-readable record: [`src/config/impact_acceptance.json`](../../src/config/
 gated by `tests/config/impact_acceptance/test_impact_acceptance_matrix.py`.
 This page restates it for review; the JSON is authoritative.
 
-| Field                                          | Value                                                                                                |
-| ---------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| Audit snapshot (UpstreamDrift / Tools)         | `1f69a51fce997932f04a6ad1dd95bf4d065ba971` / `3d93bb2c89813e17551814d3be7e895f791e29af` (2026-09-04) |
-| Reconciled against (UpstreamDrift / Tools pin) | `5347cba0f4378cd72a6e8afea9fb27c8bfe5db75` / `62e8cdbf9c9f5f8a43a0342059f825e8fa78f8e1` (2026-09-18) |
-| Release claim                                  | `code_verified_only`; no predictive-accuracy claim                                                   |
-| Supported Python matrix                        | 3.11 and 3.12 (CI Standard); 3.12 for the lock and Docker image                                      |
+| Field                                               | Value                                                                                                                      |
+| --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Audit snapshot (UpstreamDrift / Tools)              | `1f69a51fce997932f04a6ad1dd95bf4d065ba971` / `3d93bb2c89813e17551814d3be7e895f791e29af` (2026-09-04)                       |
+| Reconciled against (UpstreamDrift base / Tools pin) | `df9f3b95386433fe4c3a45559498b3e3f501cfdf` / `86d0f28b1cc5acf61185e07e320c816c2d005512` (2026-10-10 UTC; F09o integration) |
+| Release claim                                       | `code_verified_only`; no predictive-accuracy claim                                                                         |
+| Supported Python matrix                             | 3.11 and 3.12 (CI Standard); 3.12 for the lock and Docker image                                                            |
 
 ## Model-Capability Matrix
 
-### Current T01 Pin Reconciliation
+### Current F09o Pin Reconciliation
+
+F09o #12044 integrates the F01b/private-consumer branch `d232efcc69` into the
+F09n base shown above. Before advancing the JSON, all 26 applicable capability
+probes passed and the new Tools bundle was built and actually served/verified:
+76 assets, five JavaScript assets, 2,801,426 bytes, exact revision/mount/digests,
+and the missing-file 404. The complete matrix suite then passed all 27 tests.
+Retain the original pin-drift RED receipt. The new served receipt is
+`docs/development/feedback_controls/F09O-IMPACT-SERVED-RECEIPT.json`.
+
+The diagnostic build used DeskComputer's Node 25.9.0/npm 11.12.1. Its existing
+native SDK environment lacked FastAPI, so the transferred built bundle was
+verified locally with Python 3.13/FastAPI 0.128.0/httpx 0.28.1. No native SDK
+environment was modified. These actual versions are separate from the CI
+authority's Node 22/Python 3.11/FastAPI 0.136.3; no toolchain-equivalence claim
+is made. The F09o turnover binds the source archive, integration inputs and
+executed evidence. This remains software correctness evidence only.
+
+Reproduction from a complete checkout of the admitted Tools pin:
+
+```powershell
+$env:ROC_RELEASE_REVISION = '86d0f28b1cc5acf61185e07e320c816c2d005512'
+Push-Location vendor/ud-tools/src/rate_of_closure/web
+npm.cmd ci --no-audit --no-fund
+npm.cmd run build -- --base=/impact-explorer-app/
+node.exe release/generateReleaseArtifacts.mjs
+Pop-Location
+python3 scripts/ci/verify_impact_explorer_bundle.py `
+  --dist vendor/ud-tools/src/rate_of_closure/web/dist `
+  --expected-revision 86d0f28b1cc5acf61185e07e320c816c2d005512
+python3 -m pytest tests/config/impact_acceptance/test_impact_acceptance_matrix.py
+```
+
+### Previous T01 Pin Reconciliation
 
 On 2026-10-09, the exact merged Tools pin
 `2e7665111b06f92ffbfe178b92d74d6a81c95388` was rechecked from UpstreamDrift
@@ -64,7 +97,7 @@ with its SHA-256 (76 assets, 5 JavaScript at this pin), all references under
 the base path, and a 404 — not the index fallback — for a missing artifact.
 The receipt is uploaded as `impact-explorer-bundle-receipt-<sha>`.
 
-Local reproduction at the pin (Windows, node 25; CI's node 22 is the
+Historical September 18 reproduction (Windows, Node 25; CI's Node 22 is the
 authority):
 
 ```text
