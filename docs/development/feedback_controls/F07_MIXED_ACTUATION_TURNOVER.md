@@ -99,5 +99,7 @@ CLI subprocess import failures with Repository_Management ahead of this
 checkout on PYTHONPATH. The header and path ordering were corrected; the
 standalone four orchestrator CLI tests then passed. Attempt two overlapped
 local merge conflict resolution and collected transient conflict-marker syntax
-errors; it is not validation evidence for the resolved tree. Rerun the full
-central gates on the frozen resolved source before publication.
+errors; it is not validation evidence for the resolved tree. The third full central run used the frozen resolved source and passes all five
+gates: lint/format, diff mypy, affected tests (247 passed, 35 explicit generic
+SDK/opt-in skips), Semgrep/import policy and policy/fragment validation. The
+separate actual OpenSim regression above supplies native execution evidence.
