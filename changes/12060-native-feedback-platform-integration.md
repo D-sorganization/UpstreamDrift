@@ -1,3 +1,8 @@
+---
+issue: 12060
+summary: "Restore shared native feedback admission after platform integration"
+---
+
 # Native Feedback Platform Integration
 
 Integrate maintained native OpenSim Moco matching/seed/replay and owned Simscape
