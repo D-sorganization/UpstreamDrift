@@ -40,6 +40,13 @@ def build_scene_xml(spec_bytes: bytes) -> tuple[str, dict[str, Any]]:
     return export_full_body_mjcf(spec_bytes, appearance=document_from_dict(APPEARANCE))
 
 
+def grow_offscreen_buffer(model: Any, width: int, height: int) -> None:
+    """Enlarge ``model``'s offscreen framebuffer (default 640x480) to fit a frame."""
+    buffer = model.vis.global_
+    buffer.offwidth = max(width, int(buffer.offwidth))
+    buffer.offheight = max(height, int(buffer.offheight))
+
+
 def main(job_path: str) -> None:
     os.environ.setdefault("MUJOCO_GL", "egl")
     import mujoco
@@ -50,8 +57,7 @@ def main(job_path: str) -> None:
     xml, _ = build_scene_xml(bundle.spec_bytes)
     model = mujoco.MjModel.from_xml_string(xml)
     # the default offscreen buffer is 640x480; grow it to the requested size
-    model.vis.global_.offwidth = max(job.width, int(model.vis.global_.offwidth))
-    model.vis.global_.offheight = max(job.height, int(model.vis.global_.offheight))
+    grow_offscreen_buffer(model, job.width, job.height)
     data = mujoco.MjData(model)
     adr = [model.joint(n).qposadr[0] for n in bundle.coordinate_order]
     glyph_sets = job.load_glyph_sets()
