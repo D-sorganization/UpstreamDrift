@@ -44,3 +44,12 @@ reports/matched_swing_ledger.json
 # tables are kept unpadded on purpose; Prettier's padding pushes the file over
 # the budget, so the budget wins (same rule as divergence_inventory.md).
 docs/development/full_body_models/DESIGN_DECISIONS.md
+
+# Generated, byte-exact artifacts: tests/unit/lifting/pack_audit compares the
+# committed markdown to its receipt, and reports/matched_swing_ledger.json pins
+# sha256 of each evidence receipt. Prettier rewriting them (as the pre-commit
+# hook did on stacked-PR merges) breaks those gates, so the generator output wins.
+docs/development/lifting/PACK_PARITY_BASELINE.md
+docs/development/lifting/pack_parity_baseline.json
+docs/development/full_body_models/evidence/
+docs/development/monolith_refactor_register.md

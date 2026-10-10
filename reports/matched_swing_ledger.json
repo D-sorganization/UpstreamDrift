@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-10T11:33:08Z",
+  "generated_at": "2026-10-10T08:34:45Z",
   "rows": [
     {
       "acceptance": null,
@@ -563,11 +563,11 @@
         "early_marker_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
-        "whole_marker_rmse_m": 0.1194005160781452
+        "whole_marker_rmse_m": 0.0904164062232158
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_driver/receipt.json",
-      "sha256": "908cf105e2e5ae985076cf5d21db3395ed0ec0979c2a9bad2016616f3978f4f7"
+      "sha256": "798e281552803989e9a2d1fa73cc9ca930ff7acf01860240c9f2cc73f5a44ee7"
     },
     {
       "acceptance": {
@@ -923,9 +923,9 @@
             "unit": "hash"
           },
           {
-            "measured": 0.0616326364652358,
+            "measured": 0.07704387460660152,
             "name": "whole_marker_rmse_m",
-            "reason": "whole RMSE 61.63 mm > 60.00 mm",
+            "reason": "whole RMSE 77.04 mm > 60.00 mm",
             "status": "failed",
             "threshold": 0.06,
             "unit": "m"
@@ -939,7 +939,7 @@
             "unit": "N"
           },
           {
-            "measured": 0.004270621633187087,
+            "measured": 0.003691804837768349,
             "name": "max_closure_residual_m",
             "reason": "",
             "status": "passed",
@@ -949,7 +949,7 @@
           {
             "measured": 0.0,
             "name": "weight_fraction",
-            "reason": "weight fraction range [0.00, 3.74] outside [0.2, 3.0]",
+            "reason": "weight fraction range [0.00, 3.01] outside [0.2, 3.0]",
             "status": "failed",
             "threshold": 0.2,
             "unit": "BW"
@@ -1007,11 +1007,11 @@
         "early_marker_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
-        "whole_marker_rmse_m": 0.0616326364652358
+        "whole_marker_rmse_m": 0.07704387460660152
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_driver_seeds/receipt.json",
-      "sha256": "1bcc449fd79e84c95a1a5762c168403cef661ed421590b59bf563b5034df7d5e"
+      "sha256": "6389557bd863d50c4a518bed11971c87fd7d6d49f3a9a0497141321087b8fde4"
     },
     {
       "acceptance": null,
@@ -1216,11 +1216,11 @@
         "early_marker_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
-        "whole_marker_rmse_m": 2.74325916701203
+        "whole_marker_rmse_m": 3.9668119965424107
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_iron/receipt.json",
-      "sha256": "555b49bb3e9c4c925cec3bc5213c7a4c05a299b1118e7b950b6a82d622cfbaae"
+      "sha256": "ecdd54a75e2e86204fdc1fa5803622c89d2595334b55fcd6ff40e97efc7dee99"
     },
     {
       "acceptance": null,
@@ -1257,7 +1257,7 @@
             "unit": "hash"
           },
           {
-            "measured": 0.046973745329394856,
+            "measured": 0.07119080940576616,
             "name": "whole_marker_rmse_m",
             "reason": "",
             "status": "passed",
@@ -1273,17 +1273,17 @@
             "unit": "N"
           },
           {
-            "measured": 0.0017422083511793827,
+            "measured": 0.0050218042466984095,
             "name": "max_closure_residual_m",
-            "reason": "",
-            "status": "passed",
+            "reason": "closure residual 5.02 mm > 5.00 mm",
+            "status": "failed",
             "threshold": 0.005,
             "unit": "m"
           },
           {
-            "measured": 0.0,
+            "measured": 0.05680813770076837,
             "name": "weight_fraction",
-            "reason": "weight fraction range [0.00, 3.98] outside [0.2, 3.0]",
+            "reason": "weight fraction range [0.06, 2.62] outside [0.2, 3.0]",
             "status": "failed",
             "threshold": 0.2,
             "unit": "BW"
@@ -1341,11 +1341,11 @@
         "early_marker_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
-        "whole_marker_rmse_m": 0.046973745329394856
+        "whole_marker_rmse_m": 0.07119080940576616
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_iron_seeds_zmp/receipt.json",
-      "sha256": "ec3afd31e2cf9e537d80bd6f49f8303dd2d4d6966e3d0f091ca56b19100b885a"
+      "sha256": "3e1bf90b51e6150e4168db3afc2849f25da9f379592d840ac8855341db422314"
     },
     {
       "acceptance": {

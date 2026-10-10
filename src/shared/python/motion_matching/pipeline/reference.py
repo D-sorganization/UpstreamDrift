@@ -12,6 +12,10 @@ from scipy.signal import butter, filtfilt
 from src.shared.python.contracts import postcondition, precondition
 from src.shared.python.motion_matching.full_body_spec import canonical_sha256
 from src.shared.python.motion_matching.club_face_target import merge_axis_targets
+from src.shared.python.motion_matching.pipeline.turn_split import (
+    lane_axis_targets,
+    lane_split_weights,
+)
 from src.shared.python.motion_matching.tour_capture_contract import (
     MARKER_VALIDITY_POLICY,
 )
@@ -234,8 +238,9 @@ def consistency_resolve(
         prior_trajectory=q_smooth,
         bounds=lane.bounds,
         axis_targets_per_frame=merge_axis_targets(
-            lane.gaze_axis_targets_cache, lane.face_targets
+            lane.gaze_axis_targets_cache, lane_axis_targets(lane)
         ),
+        marker_weights=lane_split_weights(lane),
     )
     return q_ref, ref_fits
 
