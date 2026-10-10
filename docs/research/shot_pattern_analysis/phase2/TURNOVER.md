@@ -161,6 +161,8 @@ A read-only merge check against current main `fa7ee92f5c` found 12 real conflict
 
 The bounded Tools-pin preflight is complete: all 36 inspected scoring/logging/provider initializer files are byte-identical across the old/new pins; root rehashed all 72 Git blobs. Evidence: `validation/tools_pin_compatibility_preflight_v1/`. Upstream import-routing code changes, so runtime namespace/scoring/GUI/report consumer tests remain required after resolution. Source equality does not accept the new runtime or permit refreshing frozen receipts.
 
+The exact 54-source synthetic-merge projection is reviewed in `validation/scientific_merge_preflight_v1/`: only the grip-contact facade differs from the study branch; no direct shot-study caller was identified. Root rehashed all 108 old/new Git blobs. This is not a complete transitive-dependency or runtime audit. Preserve the upstream pressure-centre semantics, run the named contact/provenance gates, and repeat the projection against the resolved tree. Frozen scientific hashes remain unchanged.
+
 ## Next Steps and Gates
 
 1. Monitor the verified live v6 handles without restarting. All seven numerical artifacts already have independent exact-byte reconciliation; wait for the successful terminal receipt before full graphic review.
