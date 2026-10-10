@@ -60,6 +60,10 @@ Publication packaging: retain reports, numerical summaries, manifests and restor
 
 Primary graphics are packaged as `/tmp/shot-pattern-publication-bundles-v1/primary/final_figures_v1-001.zip` (223,739,795 bytes). Fresh restoration verified all 690 members and 689 figure-manifest outputs. Inventory and receipt: `validation/publication_primary_bundles_v1/`. The control bundle has also passed fresh restoration: all 548 members and 547 figure outputs; see `validation/publication_control_bundles_v1/`. This is local verification only; release upload and remote download remain pending.
 
+## Supplemental V5 Numerical Reconciliation
+
+The restarted pipeline has published all statistics and is rendering figures. All seven numerical/table/alias files are byte-identical to preserved v3, including 384 comparisons (164 curve, 164 shaft-SD, 56 lean). Astra independently verified the 12 selected draft contrasts and exact Driver/PW fixed-target objects (common supported n = 9,940 / 9,999), candidate/input/native identities, and the first two actual social cards. See `validation/supplement_v5_numeric_review_v1/`; numerical receipt SHA256 `4273612077b1b25bb3944c5a9817362aecdc7a616bc2ad79b91269ae5cce48e6`. The complete figure ledger, producer exit receipt, full visual reconciliation and final narrative/PDF remain pending. No final publication acceptance follows from these partial graphics.
+
 ## Selected Headline and Editor Checkpoint
 
 The independent selected-headline traceability review covers 24 zero-lean cells and 72 pattern rows, including explicitly labeled supplemental PW cells. Root and Astra agree on saved-source hashes, nominal matching, numeric extraction and population denominators. Evidence: `validation/selected_headline_traceability_v1/`; root receipt SHA-256 `f4cc8ab15c65167617ecda4be1ae408c47b1039171cb44ffd4a63d5f3cd515cd`, Astra receipt `94cfc860a0a3708f7b435ae4ca0094dfc9ba05faf31f5f70de057ac555f34fdb`. This does not accept the unfinished publication.

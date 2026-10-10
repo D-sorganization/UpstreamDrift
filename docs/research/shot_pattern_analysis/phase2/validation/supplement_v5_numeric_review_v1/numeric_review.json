@@ -1,0 +1,314 @@
+{
+  "schema": "independent-supplement-v5-numeric-review/1",
+  "status": "numeric_parity_pass_publication_incomplete",
+  "publication_accepted": false,
+  "utc": "2026-10-10T11:32:26.417370+00:00",
+  "files": {
+    "REPORT_ORIGINAL_SOURCE_INVENTORY.csv": {
+      "old_sha256": "6a237d80f005b3a8da7d0b4502fc7e5ec0f0aae7d805c5b15c879f9e6f58c7d5",
+      "new_sha256": "6a237d80f005b3a8da7d0b4502fc7e5ec0f0aae7d805c5b15c879f9e6f58c7d5",
+      "bytes_equal": true
+    },
+    "REPORT_SUPPLEMENT.csv": {
+      "old_sha256": "fe7f9e671f97122042e6a578b2aa8f21fe9a3eb4490831cb38bc3a1e88935848",
+      "new_sha256": "fe7f9e671f97122042e6a578b2aa8f21fe9a3eb4490831cb38bc3a1e88935848",
+      "bytes_equal": true
+    },
+    "REPORT_SUPPLEMENT.json": {
+      "old_sha256": "6cdf53ca15bebb8829f42b5b3a1013571f1d8d4df83d054ab9935fa1bb5a8f0d",
+      "new_sha256": "6cdf53ca15bebb8829f42b5b3a1013571f1d8d4df83d054ab9935fa1bb5a8f0d",
+      "bytes_equal": true
+    },
+    "REPORT_SUPPLEMENT_COMPARISONS.csv": {
+      "old_sha256": "39a08d071373a6a30c0bbc2b06e4dd01630432ee5fe529ff24a858db6a20b9c8",
+      "new_sha256": "39a08d071373a6a30c0bbc2b06e4dd01630432ee5fe529ff24a858db6a20b9c8",
+      "bytes_equal": true
+    },
+    "REPORT_SUPPLEMENT_COMPARISONS.json": {
+      "old_sha256": "c46738a38bb35ab86ba2163260e31a225aca07c807e021225d3c38fd09f0cf46",
+      "new_sha256": "c46738a38bb35ab86ba2163260e31a225aca07c807e021225d3c38fd09f0cf46",
+      "bytes_equal": true
+    },
+    "REPORT_SUPPLEMENT_COMPARISONS.md": {
+      "old_sha256": "b1693ff7268f1cb6c901dff1fee39a3135a80ca688b193079411e0d2fe9b3721",
+      "new_sha256": "b1693ff7268f1cb6c901dff1fee39a3135a80ca688b193079411e0d2fe9b3721",
+      "bytes_equal": true
+    },
+    "control_aliases.json": {
+      "old_sha256": "dcd7097475a1a0b67ceceaf1509e4c780655c7ec5f0cd0e041e25fcdcad2b87b",
+      "new_sha256": "dcd7097475a1a0b67ceceaf1509e4c780655c7ec5f0cd0e041e25fcdcad2b87b",
+      "bytes_equal": true
+    }
+  },
+  "pair_counts": {
+    "across_lean": 56,
+    "curve_strength": 164,
+    "shaft_rotation_sd": 164
+  },
+  "total_pairs": 384,
+  "all_seven_files_byte_identical": true,
+  "all_effects_populations_and_aliases_preserved": true,
+  "selected_draft_interactions": [
+    {
+      "kind": "shaft_rotation_sd",
+      "sources": [
+        "driver_lean0_curve1_rotation1_shaft_only",
+        "driver_lean0_curve1_rotation2_shaft_only"
+      ],
+      "common_supported_n": 10000,
+      "effects": {
+        "Draw": {
+          "estimate": 0.002818006895857301,
+          "lower_95": 0.0023457310666235897,
+          "upper_95": 0.003287812973547091
+        },
+        "Fade": {
+          "estimate": -0.0012933794105451594,
+          "lower_95": -0.0017075462867510098,
+          "upper_95": -0.0008956274738255801
+        }
+      }
+    },
+    {
+      "kind": "curve_strength",
+      "sources": [
+        "driver_lean0_curve1_rotation2_shaft_only",
+        "driver_lean0_curve2_rotation2_shaft_only"
+      ],
+      "common_supported_n": 10000,
+      "effects": {
+        "Draw": {
+          "estimate": 0.004905032591681017,
+          "lower_95": 0.004382983373190278,
+          "upper_95": 0.00545231051310422
+        },
+        "Fade": {
+          "estimate": -0.00023541937361689405,
+          "lower_95": -0.0005740319453299297,
+          "upper_95": 0.00011235245020682497
+        }
+      }
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "sources": [
+        "driver_lean0_curve1_rotation1_combined2",
+        "driver_lean0_curve1_rotation2_combined2"
+      ],
+      "common_supported_n": 10000,
+      "effects": {
+        "Draw": {
+          "estimate": 0.0021682485445200877,
+          "lower_95": 0.0016001133753659334,
+          "upper_95": 0.002706174340417945
+        },
+        "Fade": {
+          "estimate": -0.000969872768585676,
+          "lower_95": -0.0015021437445966008,
+          "upper_95": -0.0005027992535294424
+        }
+      }
+    },
+    {
+      "kind": "curve_strength",
+      "sources": [
+        "driver_lean0_curve1_rotation2_combined2",
+        "driver_lean0_curve2_rotation2_combined2"
+      ],
+      "common_supported_n": 10000,
+      "effects": {
+        "Draw": {
+          "estimate": 0.004487149875537121,
+          "lower_95": 0.00393766570217958,
+          "upper_95": 0.005066103581790338
+        },
+        "Fade": {
+          "estimate": 9.298539323259105e-05,
+          "lower_95": -0.0002735216135444836,
+          "upper_95": 0.00046416317558076306
+        }
+      }
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "sources": [
+        "seven_iron_lean0_curve1_rotation1_shaft_only",
+        "seven_iron_lean0_curve1_rotation2_shaft_only"
+      ],
+      "common_supported_n": 10000,
+      "effects": {
+        "Draw": {
+          "estimate": 6.44854712184901e-06,
+          "lower_95": -7.089106865572494e-05,
+          "upper_95": 4.934200314962887e-05
+        },
+        "Fade": {
+          "estimate": 1.9999688110256854e-05,
+          "lower_95": -5.979478102884672e-05,
+          "upper_95": 0.00013579489301935357
+        }
+      }
+    },
+    {
+      "kind": "curve_strength",
+      "sources": [
+        "seven_iron_lean0_curve1_rotation2_shaft_only",
+        "seven_iron_lean0_curve2_rotation2_shaft_only"
+      ],
+      "common_supported_n": 10000,
+      "effects": {
+        "Draw": {
+          "estimate": 0.00021088612499607325,
+          "lower_95": 9.163611485094543e-05,
+          "upper_95": 0.00035779316349146827
+        },
+        "Fade": {
+          "estimate": 0.0015146785287921205,
+          "lower_95": 0.0014333201112030384,
+          "upper_95": 0.0016287721686257513
+        }
+      }
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "sources": [
+        "seven_iron_lean0_curve1_rotation1_combined2",
+        "seven_iron_lean0_curve1_rotation2_combined2"
+      ],
+      "common_supported_n": 9996,
+      "effects": {
+        "Draw": {
+          "estimate": -6.0275021816287154e-05,
+          "lower_95": -0.00029661332998222686,
+          "upper_95": 0.00015399024325736624
+        },
+        "Fade": {
+          "estimate": 0.00021753968488091968,
+          "lower_95": -7.965288156183586e-05,
+          "upper_95": 0.0005113380529891381
+        }
+      }
+    },
+    {
+      "kind": "curve_strength",
+      "sources": [
+        "seven_iron_lean0_curve1_rotation2_combined2",
+        "seven_iron_lean0_curve2_rotation2_combined2"
+      ],
+      "common_supported_n": 9996,
+      "effects": {
+        "Draw": {
+          "estimate": -0.00024759190603234645,
+          "lower_95": -0.0004948097798874354,
+          "upper_95": 2.7803916800896178e-05
+        },
+        "Fade": {
+          "estimate": 0.001182900793187058,
+          "lower_95": 0.0009817451725574473,
+          "upper_95": 0.001364682438476691
+        }
+      }
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "sources": [
+        "pitching_wedge_lean0_curve1_rotation1_shaft_only",
+        "pitching_wedge_lean0_curve1_rotation2_shaft_only"
+      ],
+      "common_supported_n": 10000,
+      "effects": {
+        "Draw": {
+          "estimate": 0.0010926831924960142,
+          "lower_95": 0.00102640515794385,
+          "upper_95": 0.0011635653368440248
+        },
+        "Fade": {
+          "estimate": -0.0010370962891657664,
+          "lower_95": -0.0011047929530935128,
+          "upper_95": -0.0009711341487379385
+        }
+      }
+    },
+    {
+      "kind": "curve_strength",
+      "sources": [
+        "pitching_wedge_lean0_curve1_rotation2_shaft_only",
+        "pitching_wedge_lean0_curve2_rotation2_shaft_only"
+      ],
+      "common_supported_n": 10000,
+      "effects": {
+        "Draw": {
+          "estimate": 0.005590491525009898,
+          "lower_95": 0.005528753276165701,
+          "upper_95": 0.00564323516790922
+        },
+        "Fade": {
+          "estimate": -0.0054790198292634,
+          "lower_95": -0.005530368666826816,
+          "upper_95": -0.005418490716384252
+        }
+      }
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "sources": [
+        "pitching_wedge_lean0_curve1_rotation1_combined2",
+        "pitching_wedge_lean0_curve1_rotation2_combined2"
+      ],
+      "common_supported_n": 9999,
+      "effects": {
+        "Draw": {
+          "estimate": 0.000389315303627725,
+          "lower_95": 0.00021848705136951396,
+          "upper_95": 0.0005505621901394017
+        },
+        "Fade": {
+          "estimate": -0.0004276104924715274,
+          "lower_95": -0.0005452449082503445,
+          "upper_95": -0.00031499015055011585
+        }
+      }
+    },
+    {
+      "kind": "curve_strength",
+      "sources": [
+        "pitching_wedge_lean0_curve1_rotation2_combined2",
+        "pitching_wedge_lean0_curve2_rotation2_combined2"
+      ],
+      "common_supported_n": 9999,
+      "effects": {
+        "Draw": {
+          "estimate": 0.0005620856518476549,
+          "lower_95": 0.0004164434890593165,
+          "upper_95": 0.0007166807174056414
+        },
+        "Fade": {
+          "estimate": -0.00029346307415259915,
+          "lower_95": -0.0004910576535580905,
+          "upper_95": -8.723417604624049e-05
+        }
+      }
+    }
+  ],
+  "fixed_target_independent_checks": [
+    {
+      "club": "driver",
+      "entire_pair_equal_to_independent_qualification": true,
+      "common_supported_n": 9940
+    },
+    {
+      "club": "pitching_wedge",
+      "entire_pair_equal_to_independent_qualification": true,
+      "common_supported_n": 9999
+    }
+  ],
+  "v5_start_sha256": "61b2172d1e3a93b6991b91ae0f5f65bfec88bf9003dcc79faaef4e04b644e960",
+  "v4_start_sha256": "d6af966d503090e90fd4722878b10c0576ba02b2fe2b61405fb812c5d58a846c",
+  "source52_input9_native_rechecked": true,
+  "snapshot_and_command_equal_to_accepted_v4": true,
+  "draft_sha256": "f36f6292154afeaa8aba261f3e06a72159e54e319e5e9e91ec8f64418990c030",
+  "limitations": [
+    "Producer still live; no final pipeline receipt exists.",
+    "Numerical parity does not establish complete graphic or final publication acceptance."
+  ]
+}
