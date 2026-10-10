@@ -22,7 +22,8 @@ Hunt-Crossley form linearised at the nominal penetration.
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+from collections.abc import Sequence
+from dataclasses import dataclass, replace
 from typing import Any
 
 import numpy as np
@@ -46,6 +47,9 @@ from src.shared.python.grip_contact.parity import GripKineticsSeries
 
 ENGINE = "mujoco_contact"
 DEFAULT_TIMESTEP_S = 1.0e-5
+#: ``hand_mode`` values: both hands prescribed (default), the trail hand
+#: following the club (issue #11986), or only the lead hand gripping.
+HAND_MODES = ("prescribed", "trail_follows_club", "lead_only")
 HAND_MASS_KG = 100.0
 IMPEDANCE = 0.95
 
@@ -61,8 +65,18 @@ def contact_mjcf(
     interface: GripInterface,
     pads: PadContactModel,
     solref: dict[tuple[str, int], tuple[float, float]],
+    friction_time_s: float | None = None,
+    sides: tuple[str, ...] = SIDES,
 ) -> str:
-    """Free club (grip cylinder), two heavy hand bodies with pads, explicit pairs."""
+    """Free club (grip cylinder), heavy hand bodies with pads, explicit pairs.
+
+    ``friction_time_s`` is the ``solreffriction`` time constant (default two
+    timesteps); ``sides`` are the hands that carry pads.
+    """
+    if friction_time_s is None:
+        friction_time_s = 2.0 * timestep_s
+    if not friction_time_s > 0.0:
+        raise ValueError("friction_time_s must be positive")
     i = club.inertia_com_kg_m2
     full = (i[0, 0], i[1, 1], i[2, 2], i[0, 1], i[0, 2], i[1, 2])
     axis, axis_point = grip_axis(interface, pads)
@@ -71,7 +85,7 @@ def contact_mjcf(
     mu = pads.law.static_friction
     torsional = mu * pads.patch_radius_m
     bodies, pairs = [], []
-    for side in SIDES:
+    for side in sides:
         geoms = []
         for k, pos in enumerate(pads.layout.positions_grip_frame(side)):
             geoms.append(
@@ -83,7 +97,7 @@ def contact_mjcf(
                 f'<pair geom1="pad_{side}{k}" geom2="grip" condim="6" '
                 f'friction="{mu:.17g} {mu:.17g} {torsional:.17g} 1e-5 1e-5" '
                 f'solref="{ref[0]:.17g} {ref[1]:.17g}" '
-                f'solreffriction="{2.0 * timestep_s:.17g} 1" '
+                f'solreffriction="{friction_time_s:.17g} 1" '
                 f'solimp="{IMPEDANCE} {IMPEDANCE} 0.001 0.5 2"/>'
             )
         bodies.append(
@@ -128,8 +142,16 @@ class ClubInHands:
         interface: GripInterface,
         pads: PadContactModel,
         timestep_s: float = DEFAULT_TIMESTEP_S,
+        friction_time_s: float | None = None,
+        hand_mode: str = "prescribed",
     ) -> None:
+        if hand_mode not in HAND_MODES:
+            raise ValueError(
+                f"hand_mode must be one of {HAND_MODES}, got {hand_mode!r}"
+            )
         mj = _mujoco()
+        self.friction_time_s, self.hand_mode = friction_time_s, hand_mode
+        self.pad_sides = ("L",) if hand_mode == "lead_only" else SIDES
         spec = json.loads(spec_bytes)
         self._mj = mj
         self.interface, self.pads, self.timestep_s = interface, pads, timestep_s
@@ -147,6 +169,8 @@ class ClubInHands:
         self._rebuild()
         self.delta0 = delta0
         self.hand_source: Any = None
+        #: diagnostic drift of the trail hand, in its grip frame (issue #11986)
+        self.trail_shift_m: np.ndarray = np.zeros(3)
 
     def _solref(self, k_solref: float) -> tuple[float, float]:
         damping = k_solref * IMPEDANCE * self._preload_m * self._dissipation_s_m
@@ -161,14 +185,16 @@ class ClubInHands:
             self.interface,
             self.pads,
             self.solref,
+            self.friction_time_s,
+            self.pad_sides,
         )
         self.model = mj.MjModel.from_xml_string(xml)
         self.data = mj.MjData(self.model)
         self._club = int(self.model.body("club").id)
-        self._hand = {s: int(self.model.body(f"hand_{s}").id) for s in SIDES}
+        self._hand = {s: int(self.model.body(f"hand_{s}").id) for s in self.pad_sides}
         self._offsets = {s: self.interface.frame(s).matrix() for s in SIDES}
         self._pad_geom = {}
-        for s in SIDES:
+        for s in self.pad_sides:
             for k in range(self.pad_count):
                 self._pad_geom[int(self.model.geom(f"pad_{s}{k}").id)] = (s, k)
 
@@ -196,8 +222,14 @@ class ClubInHands:
             vel = hand_frame_states(self.kinematics.state(qv, qvd), self.interface)
         else:
             vel = hands
-        for s in SIDES:
+        for s in self.pad_sides:
             h = hands[s]
+            if s == "R" and self.hand_mode == "trail_follows_club":
+                h = hands[s] = vel[s] = self.club_state_now().frame(self._offsets[s])
+            if s == "R" and self.trail_shift_m.any():
+                h = hands[s] = replace(
+                    h, position_m=h.position_m + h.rotation @ self.trail_shift_m
+                )
             self._set_free(self._hand[s], h.rotation, h.position_m)
             dof = self._dof(self._hand[s])
             self.data.qvel[dof : dof + 3] = vel[s].velocity_m_s
@@ -215,6 +247,14 @@ class ClubInHands:
         from src.engines.physics_engines.mujoco.python.grip_bushing import body_state
 
         return body_state(self._mj, self.model, self.data, self._club)
+
+    def club_state_now(self) -> RigidBodyState:
+        """Club state from the current ``qpos``/``qvel`` (kinematics refreshed)."""
+        mj, m, d = self._mj, self.model, self.data
+        mj.mj_kinematics(m, d)
+        mj.mj_comPos(m, d)
+        mj.mj_comVel(m, d)
+        return self.club_state()
 
     # ------------------------------------------------------------ recording
     def read(self, hands: dict) -> ContactSample:
@@ -247,10 +287,9 @@ class ClubInHands:
     def hold_pose(self, q: np.ndarray) -> dict:
         """Hands and club at the weld pose for ``q``, at rest."""
         self.hand_source = lambda _t: (q, np.zeros_like(q))
-        hands = self.place_hands(0.0)
         weld = self.kinematics.state(q, np.zeros_like(q))
         self.place_club(weld)
-        return hands
+        return self.place_hands(0.0)
 
     def pad_forces_and_penetrations(self) -> tuple[dict, dict]:
         """Normal force and penetration of every pad contact after ``mj_forward``."""
@@ -278,7 +317,7 @@ class ClubInHands:
         for _ in range(iterations):
             self.hold_pose(q)
             force, depth = self.pad_forces_and_penetrations()
-            if len(force) != 2 * self.pad_count:
+            if len(force) != len(self.pad_sides) * self.pad_count:
                 raise RuntimeError("every pad must touch the grip at the held pose")
             worst = 0.0
             for key, f in force.items():
@@ -374,6 +413,9 @@ def simulate_grip_contact(
     timestep_s: float = DEFAULT_TIMESTEP_S,
     t_end_s: float | None = None,
     t_start_s: float | None = None,
+    friction_time_s: float | None = None,
+    hand_mode: str = "prescribed",
+    trail_shift_m: Sequence[float] = (0.0, 0.0, 0.0),
 ) -> ContactRun:
     """Integrate the free club held by pads over the prescribed swing.
 
@@ -390,10 +432,22 @@ def simulate_grip_contact(
     """
     spec = json.loads(spec_bytes)
     interface = interface or GripInterface.from_spec(spec)
-    sim = ClubInHands(spec_bytes, list(swing.names), interface, pads, timestep_s)
+    sim = ClubInHands(
+        spec_bytes,
+        list(swing.names),
+        interface,
+        pads,
+        timestep_s,
+        friction_time_s,
+        hand_mode,
+    )
     sim.calibrate(np.asarray(swing.q[0], float))
+    shift = np.asarray(trail_shift_m, dtype=float)
+    if shift.shape != (3,) or not np.isfinite(shift).all():
+        raise ValueError("trail_shift_m must be a finite 3-vector")
+    sim.trail_shift_m = shift
     spline = CoordinateSpline(swing.time_s, swing.q)
-    times = swing.time_s
+    times: np.ndarray = swing.time_s
     if t_start_s is not None:
         times = times[times >= t_start_s - 1e-12]
     if t_end_s is not None:
@@ -416,6 +470,9 @@ def simulate_grip_contact(
             "integrator": "MuJoCo Euler, fixed step, soft constraints",
             "timestep_s": timestep_s,
             "force_law": "MuJoCo native sphere-cylinder contact, condim 6",
+            "solreffriction_time_s": friction_time_s or 2.0 * timestep_s,
+            "hand_mode": hand_mode,
+            "trail_shift_m": [float(v) for v in shift],
             "squeeze_per_hand_n": pads.layout.pad_count
             * pads.law.stiffness_n_m
             * pads.layout.preload_penetration_m,

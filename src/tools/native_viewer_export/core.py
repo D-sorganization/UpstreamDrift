@@ -30,6 +30,7 @@ from src.shared.python.motion_matching.same_input import InputBundle
 from src.shared.python.video_timing.frame_schedule import (
     DEFAULT_FPS,
     MAX_SPEED,
+    SPEED_VARIANTS,
     FrameSchedule,
     speed_suffix,
 )
@@ -49,7 +50,7 @@ VIEWER_NAMES = {
     "myosuite": "MyoSuite MJRenderer arena",
 }
 GRID_VIEW = "2x2"
-DEFAULT_SPEEDS = (1.0, 0.5)
+DEFAULT_SPEEDS = SPEED_VARIANTS
 IMPACT_CLIP_SPEED = 0.1
 IMPACT_SUFFIX = "_impact"
 HQ_SIZE = (1280, 720)
