@@ -1180,6 +1180,18 @@ jobs:
         # Fresh state after dependency setup: workspace-local homes also
         # exhibited missing stable manifests in merge groups (#11977).
         run: python scripts/ci/prepare_rust_environment.py
+      - name: Bootstrap rustup without editing shell profiles
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          # dtolnay/rust-toolchain installs rustup WITHOUT --no-modify-path when
+          # rustup is not on PATH (always true with a per-job CARGO_HOME). On
+          # self-hosted runners that appends `. "$CARGO_HOME/env"` to the host's
+          # ~/.bashrc and ~/.bash_profile on every job (RM#2064).
+          if ! command -v rustup >/dev/null 2>&1; then
+            curl --proto '=https' --tlsv1.2 --retry 10 --retry-connrefused --location --silent --show-error --fail https://sh.rustup.rs | sh -s -- --default-toolchain none --no-modify-path -y
+            echo "${CARGO_HOME:-$HOME/.cargo}/bin" >> "$GITHUB_PATH"
+          fi
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8
       - name: Verify Rust toolchain
@@ -3207,6 +3219,18 @@ jobs:
         run: |
           git config --global core.longpaths true
 
+      - name: Bootstrap rustup without editing shell profiles
+        if: (steps.rust-changes.outputs.has_changes == 'true') && runner.os != 'Windows'
+        shell: bash
+        run: |
+          # dtolnay/rust-toolchain installs rustup WITHOUT --no-modify-path when
+          # rustup is not on PATH (always true with a per-job CARGO_HOME). On
+          # self-hosted runners that appends `. "$CARGO_HOME/env"` to the host's
+          # ~/.bashrc and ~/.bash_profile on every job (RM#2064).
+          if ! command -v rustup >/dev/null 2>&1; then
+            curl --proto '=https' --tlsv1.2 --retry 10 --retry-connrefused --location --silent --show-error --fail https://sh.rustup.rs | sh -s -- --default-toolchain none --no-modify-path -y
+            echo "${CARGO_HOME:-$HOME/.cargo}/bin" >> "$GITHUB_PATH"
+          fi
       - name: Install Rust toolchain
         if: steps.rust-changes.outputs.has_changes == 'true'
         uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8
@@ -3431,6 +3455,18 @@ jobs:
 
       - name: Purge pip cache
         run: python -m pip cache purge || true
+      - name: Bootstrap rustup without editing shell profiles
+        if: (steps.rust-changes.outputs.has_changes == 'true') && runner.os != 'Windows'
+        shell: bash
+        run: |
+          # dtolnay/rust-toolchain installs rustup WITHOUT --no-modify-path when
+          # rustup is not on PATH (always true with a per-job CARGO_HOME). On
+          # self-hosted runners that appends `. "$CARGO_HOME/env"` to the host's
+          # ~/.bashrc and ~/.bash_profile on every job (RM#2064).
+          if ! command -v rustup >/dev/null 2>&1; then
+            curl --proto '=https' --tlsv1.2 --retry 10 --retry-connrefused --location --silent --show-error --fail https://sh.rustup.rs | sh -s -- --default-toolchain none --no-modify-path -y
+            echo "${CARGO_HOME:-$HOME/.cargo}/bin" >> "$GITHUB_PATH"
+          fi
       - name: Install Rust toolchain
         if: steps.rust-changes.outputs.has_changes == 'true'
         uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8
@@ -3639,6 +3675,18 @@ jobs:
         if: steps.rust-wheel-parity-changes.outputs.has_changes == 'true'
         run: python -m pip cache purge || true
 
+      - name: Bootstrap rustup without editing shell profiles
+        if: (steps.rust-wheel-parity-changes.outputs.has_changes == 'true') && runner.os != 'Windows'
+        shell: bash
+        run: |
+          # dtolnay/rust-toolchain installs rustup WITHOUT --no-modify-path when
+          # rustup is not on PATH (always true with a per-job CARGO_HOME). On
+          # self-hosted runners that appends `. "$CARGO_HOME/env"` to the host's
+          # ~/.bashrc and ~/.bash_profile on every job (RM#2064).
+          if ! command -v rustup >/dev/null 2>&1; then
+            curl --proto '=https' --tlsv1.2 --retry 10 --retry-connrefused --location --silent --show-error --fail https://sh.rustup.rs | sh -s -- --default-toolchain none --no-modify-path -y
+            echo "${CARGO_HOME:-$HOME/.cargo}/bin" >> "$GITHUB_PATH"
+          fi
       - name: Install Rust toolchain
         if: steps.rust-wheel-parity-changes.outputs.has_changes == 'true'
         uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8
