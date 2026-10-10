@@ -87,6 +87,7 @@ class SolveTrajectoryOptions:
     axis_targets_per_frame: Sequence[Mapping[str, Any] | None] | None = None
     com_targets_per_frame: Sequence[tuple[Sequence[float], float] | None] | None = None
     locked_per_frame: Sequence[Mapping[str, float] | None] | None = None
+    marker_weights_per_frame: Sequence[Mapping[str, float]] | None = None
 
 
 def _rotation_error(r_a: Array, r_b: Array) -> Array:
@@ -896,21 +897,15 @@ class BaseFullBodyIK:
             < 0
         ):
             raise ValueError("Restart settings must be nonnegative")
-        if (
-            opts.axis_targets_per_frame is not None
-            and len(opts.axis_targets_per_frame) != targets_arr.shape[0]
+        for name in (
+            "axis_targets_per_frame",
+            "com_targets_per_frame",
+            "locked_per_frame",
+            "marker_weights_per_frame",
         ):
-            raise ValueError("axis_targets_per_frame needs one entry per capture frame")
-        if (
-            opts.com_targets_per_frame is not None
-            and len(opts.com_targets_per_frame) != targets_arr.shape[0]
-        ):
-            raise ValueError("com_targets_per_frame needs one entry per capture frame")
-        if (
-            opts.locked_per_frame is not None
-            and len(opts.locked_per_frame) != targets_arr.shape[0]
-        ):
-            raise ValueError("locked_per_frame needs one entry per capture frame")
+            per_frame = getattr(opts, name)
+            if per_frame is not None and len(per_frame) != targets_arr.shape[0]:
+                raise ValueError(f"{name} needs one entry per capture frame")
         return targets_arr, mask, indices, prior
 
     def solve_trajectory(
@@ -953,6 +948,8 @@ class BaseFullBodyIK:
                 f_opts["com_target"] = opts.com_targets_per_frame[k]
             if opts.locked_per_frame is not None:
                 f_opts["locked"] = opts.locked_per_frame[k]
+            if opts.marker_weights_per_frame is not None:
+                f_opts["marker_weights"] = opts.marker_weights_per_frame[k]
 
             fit = self.solve_pose(
                 targets[k],

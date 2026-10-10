@@ -92,6 +92,7 @@ from src.shared.python.motion_matching.pipeline.turn_split import (
     DEFAULT_SHOULDER_GIRDLE_WEIGHT,
     DEFAULT_THORAX_WEIGHT,
     add_turn_split_arguments,
+    split_window_from_args,
     turn_split_active,
     turn_split_report,
 )
@@ -1042,6 +1043,7 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
         cal_res.attachments,
         getattr(args, "thorax_weight", DEFAULT_THORAX_WEIGHT),
         getattr(args, "shoulder_girdle_weight", DEFAULT_SHOULDER_GIRDLE_WEIGHT),
+        split_window_from_args(args),
     )
 
     (

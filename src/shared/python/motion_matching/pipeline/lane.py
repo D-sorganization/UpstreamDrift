@@ -372,7 +372,10 @@ class Lane:
         self.thorax_targets: list[dict[str, Any] | None] | None = None
         self.thorax_weight = 0.0
         self.split_marker_weights: dict[str, float] = {}
+        self.split_marker_weights_per_frame: list[dict[str, float]] | None = None
         self.shoulder_girdle_weight = 1.0
+        self.turn_split_window: Any = None
+        self.turn_split_impact_s: float | None = None
 
     def set_face_targets(
         self,
@@ -399,20 +402,48 @@ class Lane:
         attachments: Mapping[str, tuple[str, Sequence[float]]],
         thorax_weight: float,
         shoulder_girdle_weight: float,
+        window: Any = None,
     ) -> None:
         """Enable the thorax-orientation residual and the shoulder-girdle
         marker weights (#12042 slice 7) for the trajectory re-solves. Call it
         after the address calibration so calibration stays marker-only.
+        ``window`` (a ``turn_split.SplitWindow``) limits either term to the
+        address-to-impact span, impact detected from the club markers.
         Raises ``ValueError``/``TypeError`` for a negative or non-numeric weight."""
         from src.shared.python.motion_matching.pipeline import turn_split
 
+        window = window or turn_split.SplitWindow()
+        self.turn_split_window = window
+        self.turn_split_impact_s = None
+        factors = None
+        if window.active:
+            self.turn_split_impact_s = turn_split.capture_impact_time(
+                self.times, self.points, self.valid, self.labels
+            )
+            factors = turn_split.window_factors(
+                self.times, self.turn_split_impact_s, window.taper_s
+            )
         self.thorax_targets = turn_split.thorax_axis_targets(
-            self.points, self.valid, self.labels, attachments, thorax_weight
+            self.points,
+            self.valid,
+            self.labels,
+            attachments,
+            thorax_weight,
+            factors=factors if window.thorax else None,
         )
         self.thorax_weight = float(thorax_weight) if self.thorax_targets else 0.0
-        self.split_marker_weights = turn_split.shoulder_girdle_weights(
-            self.labels, shoulder_girdle_weight
-        )
+        self.split_marker_weights = {}
+        self.split_marker_weights_per_frame = None
+        if window.girdle and factors is not None:
+            self.split_marker_weights_per_frame = (
+                turn_split.shoulder_girdle_weights_per_frame(
+                    self.labels, shoulder_girdle_weight, factors
+                )
+            )
+        else:
+            self.split_marker_weights = turn_split.shoulder_girdle_weights(
+                self.labels, shoulder_girdle_weight
+            )
         self.shoulder_girdle_weight = float(shoulder_girdle_weight)
 
     def leg_seeds(self) -> dict[str, tuple[str, Sequence[float]]]:
@@ -566,6 +597,14 @@ class Lane:
             plant_stance=True,
             bounds=self.bounds,
             marker_weights={**self.marker_weights, **self.split_marker_weights},
+            marker_weights_per_frame=(
+                None
+                if self.split_marker_weights_per_frame is None
+                else [
+                    {**self.marker_weights, **w}
+                    for w in self.split_marker_weights_per_frame
+                ]
+            ),
             prior_weights=self.prior_weights,
             axis_targets_per_frame=merge_axis_targets(
                 axis_targets, self.face_targets, self.thorax_targets

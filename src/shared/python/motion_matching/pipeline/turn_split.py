@@ -29,6 +29,7 @@ from __future__ import annotations
 
 import argparse
 from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
@@ -52,6 +53,27 @@ DEFAULT_THORAX_WEIGHT = 0.0
 DEFAULT_SHOULDER_GIRDLE_WEIGHT = 1.0
 #: Shortest capture line that still defines a direction, metres.
 MIN_LINE_LENGTH_M = 0.05
+#: Default cosine taper after the detected impact for windowed terms, seconds.
+IMPACT_TAPER_S = 0.05
+#: Least fraction of valid frames for a club marker to vote on impact.
+MIN_CLUB_VALID_FRACTION = 0.5
+
+
+@dataclass(frozen=True)
+class SplitWindow:
+    """Which split terms stop at the detected impact (plus ``taper_s``).
+
+    The default applies both terms over the whole capture, as in slice 7.
+    """
+
+    thorax: bool = False
+    girdle: bool = False
+    taper_s: float = IMPACT_TAPER_S
+
+    @property
+    def active(self) -> bool:
+        return self.thorax or self.girdle
+
 
 AxisTarget = tuple[tuple[float, float, float], tuple[float, float, float], float]
 
@@ -107,6 +129,7 @@ def thorax_axis_targets(
     labels: Sequence[str],
     attachments: Mapping[str, tuple[str, Sequence[float]]],
     weight: float = THORAX_AXIS_WEIGHT,
+    factors: Sequence[float] | None = None,
 ) -> list[dict[str, AxisTarget] | None] | None:
     """Per-frame axis targets aligning the thorax with the upper-trunk line.
 
@@ -116,6 +139,8 @@ def thorax_axis_targets(
         labels: Marker labels for the columns of ``points``.
         attachments: Calibrated attachments ``{label: (frame, offset_m)}``.
         weight: Residual weight; 0 disables the target.
+        factors: Optional per-frame scale in [0, 1] of ``weight`` (see
+            :func:`window_factors`); a frame with factor 0 has no target.
 
     Returns:
         One entry per frame, ``None`` where either line marker is missing or
@@ -130,6 +155,7 @@ def thorax_axis_targets(
         raise ValueError("points must be (frames, markers, 3) matching valid")
     if len(labels) != pts.shape[1]:
         raise ValueError("labels must name every marker column")
+    scale = _frame_factors(factors, pts.shape[0])
     if w == 0.0:
         return None
     left, right = (list(labels).index(name) for name in THORAX_LINE)
@@ -137,12 +163,80 @@ def thorax_axis_targets(
     out: list[dict[str, AxisTarget] | None] = []
     for frame in range(pts.shape[0]):
         direction = None
-        if mask[frame, left] and mask[frame, right]:
+        if mask[frame, left] and mask[frame, right] and scale[frame] > 0:
             direction = _unit(pts[frame, left] - pts[frame, right])
         out.append(
-            None if direction is None else {THORAX_FRAME: (body_axis, direction, w)}
+            None
+            if direction is None
+            else {THORAX_FRAME: (body_axis, direction, w * scale[frame])}
         )
     return out
+
+
+def _frame_factors(factors: Sequence[float] | None, frames: int) -> np.ndarray:
+    if factors is None:
+        return np.ones(frames)
+    scale = np.asarray(factors, dtype=float)
+    if scale.shape != (frames,):
+        raise ValueError("factors must hold one value per frame")
+    if not np.all((scale >= 0) & (scale <= 1)):
+        raise ValueError("factors must lie in [0, 1]")
+    return scale
+
+
+def capture_impact_time(
+    times: Sequence[float] | np.ndarray,
+    points: np.ndarray,
+    valid: np.ndarray,
+    labels: Sequence[str],
+) -> float:
+    """Impact time of a capture from its club markers, never a fixed time.
+
+    Each club marker with at least ``MIN_CLUB_VALID_FRACTION`` valid frames is
+    gap-interpolated and passed to :func:`gaze.impact_index` (lowest point
+    near peak speed); the median frame of those votes is the impact.
+
+    Raises:
+        ValueError: when no club marker has enough valid frames.
+    """
+    from src.shared.python.motion_matching.gaze import (  # noqa: PLC0415
+        impact_index,
+    )
+    from src.shared.python.motion_matching.tour_capture_contract import (  # noqa: PLC0415
+        MARKER_SEGMENTS,
+    )
+
+    t = np.asarray(times, dtype=float)
+    pts = np.asarray(points, dtype=float)
+    mask = np.asarray(valid, dtype=bool)
+    votes = []
+    for label in MARKER_SEGMENTS["club"]:
+        if label not in labels:
+            continue
+        j = list(labels).index(label)
+        ok = mask[:, j] & np.isfinite(pts[:, j]).all(axis=1)
+        if ok.mean() < MIN_CLUB_VALID_FRACTION:
+            continue
+        track = np.stack(
+            [np.interp(t, t[ok], pts[ok, j, axis]) for axis in range(3)], axis=1
+        )
+        votes.append(impact_index(t, track))
+    if not votes:
+        raise ValueError("no club marker has enough valid frames to find impact")
+    return float(t[int(np.sort(votes)[(len(votes) - 1) // 2])])
+
+
+def window_factors(
+    times: Sequence[float] | np.ndarray, end_s: float, taper_s: float
+) -> np.ndarray:
+    """1 up to ``end_s``, a half-cosine down to 0 over ``taper_s``, then 0."""
+    if not np.isfinite(taper_s) or taper_s < 0:
+        raise ValueError(f"taper must be finite and >= 0, got {taper_s}")
+    t = np.asarray(times, dtype=float)
+    if taper_s == 0:
+        return (t <= end_s).astype(float)
+    x = np.clip((t - end_s) / taper_s, 0.0, 1.0)
+    return 0.5 * (1.0 + np.cos(np.pi * x))
 
 
 def shoulder_girdle_weights(
@@ -156,6 +250,15 @@ def shoulder_girdle_weights(
     if w == 1.0:
         return {}
     return {label: w for label in SHOULDER_GIRDLE_MARKERS if label in labels}
+
+
+def shoulder_girdle_weights_per_frame(
+    labels: Sequence[str], weight: float, factors: Sequence[float]
+) -> list[dict[str, float]]:
+    """Per-frame shoulder-girdle weights tapering from ``weight`` to 1."""
+    w = _check_weight(weight, "shoulder-girdle weight")
+    scale = _frame_factors(factors, len(factors))
+    return [shoulder_girdle_weights(labels, 1.0 + (w - 1.0) * float(f)) for f in scale]
 
 
 def lane_axis_targets(lane: Any) -> list[dict[str, Any]] | None:
@@ -185,6 +288,21 @@ def lane_split_weights(lane: Any) -> dict[str, float] | None:
     if isinstance(value, Mapping) and value:
         return dict(value)
     return None
+
+
+def lane_split_weights_per_frame(lane: Any) -> list[dict[str, float]] | None:
+    """The lane's windowed shoulder-girdle weights, or ``None`` when unset."""
+    value = getattr(lane, "split_marker_weights_per_frame", None)
+    return value if isinstance(value, list) else None
+
+
+def split_window_from_args(args: argparse.Namespace) -> SplitWindow:
+    """The :class:`SplitWindow` selected on the command line."""
+    return SplitWindow(
+        thorax=getattr(args, "thorax_window", "full") == "impact",
+        girdle=getattr(args, "shoulder_girdle_window", "full") == "impact",
+        taper_s=float(getattr(args, "split_taper_s", IMPACT_TAPER_S)),
+    )
 
 
 def add_turn_split_arguments(parser: argparse.ArgumentParser) -> None:
@@ -217,16 +335,42 @@ def add_turn_split_arguments(parser: argparse.ArgumentParser) -> None:
             "pairs with --thorax-weight 0.3"
         ),
     )
+    for flag, term in (
+        ("--thorax-window", "thorax target"),
+        ("--shoulder-girdle-window", "shoulder-girdle weights"),
+    ):
+        parser.add_argument(
+            flag,
+            choices=("full", "impact"),
+            default="full",
+            help=(
+                f"'impact' applies the {term} from address to the impact "
+                "detected from the club markers, then tapers it out over "
+                "--split-taper-s; 'full' (default) applies it to every frame"
+            ),
+        )
+    parser.add_argument(
+        "--split-taper-s",
+        type=nonnegative,
+        default=IMPACT_TAPER_S,
+        help="cosine taper after impact for windowed split terms, seconds",
+    )
 
 
 def turn_split_active(lane: Any) -> bool:
     """Whether either split term is switched on for ``lane``."""
-    return bool(getattr(lane, "thorax_targets", None)) or bool(lane_split_weights(lane))
+    return (
+        bool(getattr(lane, "thorax_targets", None))
+        or bool(lane_split_weights(lane))
+        or bool(lane_split_weights_per_frame(lane))
+    )
 
 
 def turn_split_report(lane: Any) -> dict[str, Any]:
     """Receipt block describing the active split terms."""
     targets = getattr(lane, "thorax_targets", None) or ()
+    window = getattr(lane, "turn_split_window", None)
+    impact = getattr(lane, "turn_split_impact_s", None)
     return {
         "thorax_frame": THORAX_FRAME,
         "thorax_line": list(THORAX_LINE),
@@ -235,4 +379,14 @@ def turn_split_report(lane: Any) -> dict[str, Any]:
         "shoulder_girdle_markers": list(SHOULDER_GIRDLE_MARKERS),
         "shoulder_girdle_weight": float(getattr(lane, "shoulder_girdle_weight", 1.0)),
         "stages": ["trajectory", "consistency", "shooting", "zmp_filter"],
+        "window": (
+            {
+                "thorax": window.thorax,
+                "shoulder_girdle": window.girdle,
+                "impact_s": impact,
+                "taper_s": window.taper_s,
+            }
+            if isinstance(window, SplitWindow) and window.active
+            else None
+        ),
     }

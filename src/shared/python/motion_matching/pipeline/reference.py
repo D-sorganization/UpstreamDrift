@@ -15,6 +15,7 @@ from src.shared.python.motion_matching.club_face_target import merge_axis_target
 from src.shared.python.motion_matching.pipeline.turn_split import (
     lane_axis_targets,
     lane_split_weights,
+    lane_split_weights_per_frame,
 )
 from src.shared.python.motion_matching.tour_capture_contract import (
     MARKER_VALIDITY_POLICY,
@@ -241,6 +242,7 @@ def consistency_resolve(
             lane.gaze_axis_targets_cache, lane_axis_targets(lane)
         ),
         marker_weights=lane_split_weights(lane),
+        marker_weights_per_frame=lane_split_weights_per_frame(lane),
     )
     return q_ref, ref_fits
 
