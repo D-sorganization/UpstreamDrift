@@ -9,6 +9,14 @@ This is software integration evidence only; it does not close F07, F08, the
 
 ## Behavior Frozen by the Declaration
 
+Integration follow-up retains the parent mixed Moco fixture correction and
+explicitly exports its dependency fixtures in the constrained test module.
+This removes dependence on collected test-module plugin order. After the
+normal parent/main merge, the three affected suites pass 34 actual OpenSim 4.6
+tests; the default interpreter with two workers reports 34 SDK skips without
+fixture errors. These follow-up checks do not replace the earlier 197 native
+regressions or establish full-suite CI/scientific acceptance.
+
 The combined route is opt-in through `DeclaredColdStart`. The caller declares
 exact source and named continuous state, clock, lock targets, constraint
 enforcement, coordinate charts, optional linear chart rules and residual

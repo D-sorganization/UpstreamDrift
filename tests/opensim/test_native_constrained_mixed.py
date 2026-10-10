@@ -11,6 +11,8 @@ import numpy as np
 import pytest
 
 from tests.opensim.test_native_constrained_muscle import _source
+from tests.opensim.test_native_mixed_actuation import mixed_model as mixed_model
+from tests.opensim.test_native_mixed_moco import mixed_request as mixed_request
 
 from src.engines.physics_engines.opensim.python.tour_matching.native_mixed_actuation import (
     ActuationRole,
@@ -23,7 +25,6 @@ from src.engines.physics_engines.opensim.python.tour_matching.native_mixed_repla
 )
 
 pytestmark = pytest.mark.unit
-pytest_plugins = ("tests.opensim.test_native_mixed_moco",)
 
 
 @pytest.fixture
