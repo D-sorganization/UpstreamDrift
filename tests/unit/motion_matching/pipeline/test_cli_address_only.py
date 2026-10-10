@@ -50,7 +50,12 @@ def test_run_address_stage_writes_report_with_hip_coordinates(
     assert report["hip_coordinates_deg"] == pytest.approx(
         {"hip_rotation_l": -12.0, "hip_adduction_l": 5.0}
     )
+    assert report["address_coordinates_deg"] == pytest.approx(
+        {"hip_rotation_l": -12.0, "hip_adduction_l": 5.0, "knee_angle_l": 30.0}
+    )
+    assert report["address_translations_m"] == pytest.approx({"pelvis_tx": 0.0})
     written = json.loads((tmp_path / "address_report.json").read_text())
+    assert written["address_coordinates_deg"]["knee_angle_l"] == pytest.approx(30.0)
     assert written["foot_progression"]["left"]["error_deg"] == 0.4
 
 

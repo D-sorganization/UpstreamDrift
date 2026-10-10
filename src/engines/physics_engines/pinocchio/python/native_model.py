@@ -415,6 +415,24 @@ class NativePinocchioModel:
         jacobian.setflags(write=False)
         return NativeClosureForceJacobian(names, jacobian)
 
+    def closure_frame_pose(
+        self, coordinates: Mapping[str, float]
+    ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+        """World rotation and origin of the weld's constraint LOCAL frame.
+
+        This is the frame in which :meth:`closure_force_jacobian` expresses its
+        wrench dual.  Preconditions: exactly the native coordinate inventory.
+        Postconditions: owned ``(3, 3)`` rotation and ``(3,)`` origin.
+        """
+        q = self.configuration(coordinates)
+        self._pin.forwardKinematics(self.model, self.data, q)
+        constraint = self.constraints[0]
+        pose = self.data.oMi[constraint.joint1_id] * constraint.joint1_placement
+        return (
+            np.array(pose.rotation, dtype=float, copy=True),
+            np.array(pose.translation, dtype=float, copy=True),
+        )
+
     def closure_trajectory_residuals(
         self,
         coordinates: Mapping[str, float],
