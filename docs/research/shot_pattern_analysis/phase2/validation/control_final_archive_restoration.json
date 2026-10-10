@@ -1,0 +1,54 @@
+{
+  "schema": "shot-study-control-final-restoration/1",
+  "status": "passed",
+  "created_utc": "2026-10-10T01:06:26.486750+00:00",
+  "source_sha256": {
+    "docs/research/shot_pattern_analysis/phase2/validation/restore_final_control_archives.py": "c4d981aa552b7d06c7b6c2f0ac10bb09c9acf9745e8b195e91c02c527514d616",
+    "docs/research/shot_pattern_analysis/phase2/validation/restore_final_primary_archives.py": "3e954209a3746325c5532ac88656701e7e44c3fd60a941d90ec83274bfa3c883",
+    "scripts/research/shot_pattern_analysis/archive_data.py": "5f0c483dd31e11517e5d5dbeb464f499df56c94aedcab6bbf049f65537a57969",
+    "src/tools/shot_pattern_analysis/matched_report.py": "3e190b43c4c8da337eeb73ea8825d3d69c128f684931f15406e02f243c21e94b",
+    "src/tools/shot_pattern_analysis/provenance.py": "70f67276f3de4d0a0934da93b0a4fc1f71cc000993cef04dde145dcb12166975"
+  },
+  "scientific_audit": {
+    "path": "docs/research/shot_pattern_analysis/phase2/validation/independent_control_final_audit.json",
+    "sha256": "41ea81786d110aac0e30c0cb3393534255e9aa1b7e99e59c426ad5a092d3aef9",
+    "rows": 1560000
+  },
+  "bundle_files": {
+    "final_control_v1/archive_manifest.json": {
+      "sha256": "6c6e89ae6fccb47d19551d59bc0e2060b3faae5ad423a1d402a747f9d0ca5ba6",
+      "bytes": 104254
+    },
+    "final_control_v1/control_final_v1-001.zip": {
+      "sha256": "7e60f040a4ecbd00bdd967eb1ea5103d6c12f48608643ef01fc6d8d26f10b39a",
+      "bytes": 79352817
+    },
+    "final_control_v1/control_final_v1-002.zip": {
+      "sha256": "da4a1f2ce00eaa0fc288dbc6597e54ce800935bb3f07a828e05c846650333032",
+      "bytes": 76505364
+    },
+    "final_control_v1/control_final_v1-003.zip": {
+      "sha256": "84fee9e292dec012feea7716b572175e9cdeb04b40407e0281237ef34f40cc25",
+      "bytes": 45787502
+    }
+  },
+  "files_restored": 427,
+  "archive_manifest_sha256": "6c6e89ae6fccb47d19551d59bc0e2060b3faae5ad423a1d402a747f9d0ca5ba6",
+  "plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+  "matrix_counts": {
+    "completed": 52,
+    "unavailable": 20,
+    "not_run": 0
+  },
+  "planned_cells": 72,
+  "fresh_directory": true,
+  "temporary_directory_removed": true,
+  "all_file_hashes_and_sizes_equal": true,
+  "full_restored_report_equals_original": true,
+  "audit_plan_execution_cells_statuses_bound": true,
+  "sources_originals_bundles_audit_unchanged": true,
+  "limitations": [
+    "Packaging/restoration acceptance only; scientific acceptance is the separately hash-bound completed audit.",
+    "No simulations, scoring recomputation, supplemental dataset acceptance, or visual review performed."
+  ]
+}
