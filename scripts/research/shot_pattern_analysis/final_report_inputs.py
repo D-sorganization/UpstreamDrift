@@ -17,6 +17,65 @@ def profile_from_cell(name: str) -> str:
     return match.group(1)
 
 
+def select_bounds_control_pairs(
+    comparisons: list[dict],
+) -> tuple[list[dict], list[str]]:
+    """Select exact reviewed curve-2, SD2, combined2 fixed-target 0→5 controls."""
+    from src.tools.shot_pattern_analysis.matched_interpretation import (
+        describe_effect_modification,
+    )
+
+    targets = (
+        ("driver", "Driver", "original_control/1", "driver-control-speed-bounds/1"),
+        (
+            "pitching_wedge",
+            "Pitching Wedge",
+            "pw-primary-face-bounds/1",
+            "pw-control-face-bounds/1",
+        ),
+    )
+    selected: list[dict] = []
+    unavailable: list[str] = []
+    for club, label, protocol_a, protocol_b in targets:
+        expected = (
+            (protocol_a, f"{club}_lean0_curve2_rotation2_combined2"),
+            (protocol_b, f"{club}_lean5_curve2_rotation2_combined2"),
+        )
+        matches = []
+        for pair in comparisons:
+            sources = pair.get("sources")
+            if (
+                pair.get("comparison_kind") != "across_lean"
+                or not isinstance(sources, list)
+                or len(sources) != 2
+            ):
+                continue
+            if not all(isinstance(source, dict) for source in sources):
+                continue
+            identity = tuple(
+                (source.get("protocol_id"), source.get("cell")) for source in sources
+            )
+            if identity == expected:
+                matches.append(pair)
+        if len(matches) > 1:
+            raise ValueError(
+                f"ambiguous duplicate bounds-control comparison for {club}"
+            )
+        description = f"{label} 0°→5° (Curve 2, Shaft SD 2°, Combined-2; {protocol_a} → {protocol_b})"
+        if not matches:
+            unavailable.append(
+                f"{description}: Unavailable (absent from verified supplement comparisons)."
+            )
+            continue
+        effect = describe_effect_modification(matches[0])
+        if effect["status"] == "unavailable":
+            reason = matches[0].get("reason") or "qualified comparison unavailable"
+            unavailable.append(f"{description}: Unavailable ({reason}).")
+        else:
+            selected.append(effect)
+    return selected, unavailable
+
+
 def verified_original_figure_links(
     figure_root: Path, report: dict, *, report_root: Path, protocol: str
 ) -> list[dict]:
@@ -283,6 +342,9 @@ def assemble_qualified_interpretation(
             )
             if chosen is not None:
                 representative_effects.append(chosen)
+    bounds_effects, bounds_unavailable = select_bounds_control_pairs(
+        comparisons["comparisons"]
+    )
     links = [
         *verified_original_figure_links(
             primary_figures,
@@ -317,7 +379,7 @@ def assemble_qualified_interpretation(
     links.extend(
         supplement_figure_links(
             ledger["figures"],
-            representative_effects,
+            representative_effects + bounds_effects,
             supplement_dir=supplement_dir,
             report_root=report_root,
         )
@@ -333,6 +395,10 @@ def assemble_qualified_interpretation(
         "selected_cells": explained,
         "scores": scored,
         "effects": representative_effects,
+        "bounds_control": {
+            "effects": bounds_effects,
+            "unavailable": bounds_unavailable,
+        },
         "figure_links": links,
         "figure_inventories": figure_inventories,
         "supplement": {

@@ -550,6 +550,33 @@ def render_lean_inventory(lean: dict) -> str:
     return stream.getvalue()
 
 
+def _bounds_control_lines(bounds_control: Mapping[str, Any] | None) -> list[str]:
+    from src.tools.shot_pattern_analysis.matched_interpretation import (
+        render_effect_table,
+    )
+
+    lines = [
+        "### Fixed-Target Across-Lean Bounds Controls",
+        "",
+        "The fixed-target across-lean controls evaluate whether adjusting shaft lean from 0° to 5° alters relative curve scoring when nominal target distance is held constant. These comparisons evaluate solver bounds adapted after original search; original unavailable cells remain unchanged in the complete matrix accounting. Rematched speed/face/path prevents causal claims.",
+        "",
+    ]
+    if bounds_control is None:
+        lines.extend(["No qualified bounds-control comparison is available.", ""])
+        return lines
+    effects = bounds_control.get("effects", [])
+    if effects:
+        lines.extend([render_effect_table(effects), ""])
+    unavailable = bounds_control.get("unavailable", [])
+    for item in unavailable:
+        lines.append(f"- {item}")
+    if unavailable:
+        lines.append("")
+    if not effects and not unavailable:
+        lines.extend(["No qualified bounds-control comparison is available.", ""])
+    return lines
+
+
 def _qualified_interpretation_lines(interpretation: dict) -> list[str]:
     """Render only prevalidated cell, pair, and asset references."""
     from src.tools.shot_pattern_analysis.matched_interpretation import (
@@ -583,11 +610,17 @@ def _qualified_interpretation_lines(interpretation: dict) -> list[str]:
         "",
         render_effect_table(interpretation["effects"]),
         "",
-        "### Verified Academic and Social Figures",
-        "",
-        "Figure links below come from source-bound inventories and include their actual protocol and population type. Density contours use all supported endpoints; displayed point overlays and overhead paths are sampled, as labeled in each image. A 95% highest-density region is not a confidence interval for the mean.",
-        "",
     ]
+    if "bounds_control" in interpretation:
+        lines.extend(_bounds_control_lines(interpretation["bounds_control"]))
+    lines.extend(
+        [
+            "### Verified Academic and Social Figures",
+            "",
+            "Figure links below come from source-bound inventories and include their actual protocol and population type. Density contours use all supported endpoints; displayed point overlays and overhead paths are sampled, as labeled in each image. A 95% highest-density region is not a confidence interval for the mean.",
+            "",
+        ]
+    )
     for figure in interpretation["figure_links"]:
         path = Path(figure["relative_path"])
         if path.is_absolute() or ".." in path.parts:
@@ -666,6 +699,10 @@ def render_final_report(
         "### Relation to Phase One",
         "",
         "[Phase One](../README.md) included both a fixed-delivered-loft face-error experiment and earlier shaft-rotation geometric controls. Those historical outputs remain separate. The original face-angle SD is not interchangeable with this phase's primitive shaft-twist SD. This phase pitches the complete club, matches raw nominal landings, adds path/speed/strike noise, and uses the independently reviewed two-body incremental contact law. Numeric phase-one and phase-two effects must not be pooled as if they were the same experiment.",
+        "",
+        "### Deterministic Head-Assumption Sensitivity",
+        "",
+        "The [Deterministic Head-Assumption Sensitivity](DESIGN.md#deterministic-head-assumption-sensitivity) section of the scientific design, supported by the [Saved Sensitivity Summary](validation/independent_head_sensitivity_summary.json) and [Full Execution Receipt](validation/independent_head_sensitivity.json), documents a separate deterministic evaluation of off-center impact sensitivity. The chosen ±20% perturbations to clubhead parameters (CG depth, principal inertias, face radii) and contact-law comparison (energetic restitution versus Newton velocity restitution) are model sensitivities, not measured parameter uncertainty. Narrow Monte Carlo confidence intervals quantify only random delivery draw sampling error and do not validate impact model accuracy or off-center delivery realism.",
         "",
     ]
     unavailable_example = next(

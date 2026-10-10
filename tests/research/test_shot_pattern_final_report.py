@@ -674,3 +674,241 @@ def test_final_builder_requires_full_324_and_72_cell_protocols():
         build_final_report.validate_final_plans(
             altered, control, common_targets=targets
         )
+
+
+def _make_source_pair(
+    *,
+    comparison_kind: str = "across_lean",
+    first_cell: str,
+    second_cell: str,
+    first_protocol: str = "original_control/1",
+    second_protocol: str,
+    status: str = "conditional_only",
+    common_n: int = 9_995,
+    total_n: int = 10_000,
+    draw_effect: dict | None = None,
+    fade_effect: dict | None = None,
+) -> dict:
+    effects = {}
+    if draw_effect is not None:
+        effects["Draw"] = draw_effect
+    if fade_effect is not None:
+        effects["Fade"] = fade_effect
+    return {
+        "schema": "matched-explicit-source-pair/1",
+        "comparison_kind": comparison_kind,
+        "status": status,
+        "conditioning": "same_indices_supported_in_all_six_populations",
+        "common_supported_n": common_n,
+        "total_n_per_population": total_n,
+        "source_protocols": [first_protocol, second_protocol],
+        "sources": [
+            {
+                "protocol_id": first_protocol,
+                "cell": first_cell,
+                "source_plan_sha256": "1" * 64,
+                "source_cell_manifest_sha256": "2" * 64,
+                "source_csv_sha256": "3" * 64,
+            },
+            {
+                "protocol_id": second_protocol,
+                "cell": second_cell,
+                "source_plan_sha256": "4" * 64,
+                "source_cell_manifest_sha256": "5" * 64,
+                "source_csv_sha256": "6" * 64,
+            },
+        ],
+        "analysis_source_sha256": {"matched_lean_control.py": "7" * 64},
+        "course_scoring_effect_modification": effects,
+    }
+
+
+def test_select_bounds_control_pairs_strictly_identifies_sources_and_rejects_distractors():
+    from scripts.research.shot_pattern_analysis import final_report_inputs
+
+    driver_valid = _make_source_pair(
+        first_cell="driver_lean0_curve2_rotation2_combined2",
+        second_cell="driver_lean5_curve2_rotation2_combined2",
+        second_protocol="driver-control-speed-bounds/1",
+        draw_effect={"estimate": 0.015, "lower_95": 0.008, "upper_95": 0.022},
+        fade_effect={"estimate": -0.005, "lower_95": -0.011, "upper_95": 0.001},
+    )
+    pw_valid = _make_source_pair(
+        first_cell="pitching_wedge_lean0_curve2_rotation2_combined2",
+        second_cell="pitching_wedge_lean5_curve2_rotation2_combined2",
+        first_protocol="pw-primary-face-bounds/1",
+        second_protocol="pw-control-face-bounds/1",
+        draw_effect={"estimate": 0.007, "lower_95": 0.002, "upper_95": 0.012},
+        fade_effect={"estimate": -0.002, "lower_95": -0.006, "upper_95": 0.002},
+    )
+    distractors = [
+        # Wrong lean (0->10)
+        _make_source_pair(
+            first_cell="driver_lean0_curve2_rotation2_combined2",
+            second_cell="driver_lean10_curve2_rotation2_combined2",
+            second_protocol="driver-control-speed-bounds/1",
+        ),
+        # Wrong curve (curve 1 instead of curve 2 for driver)
+        _make_source_pair(
+            first_cell="driver_lean0_curve1_rotation2_combined2",
+            second_cell="driver_lean5_curve1_rotation2_combined2",
+            second_protocol="driver-control-speed-bounds/1",
+        ),
+        # Wrong shaft SD (rotation 1 instead of rotation 2)
+        _make_source_pair(
+            first_cell="driver_lean0_curve2_rotation1_combined2",
+            second_cell="driver_lean5_curve2_rotation1_combined2",
+            second_protocol="driver-control-speed-bounds/1",
+        ),
+        # Wrong profile (shaft_only instead of combined2)
+        _make_source_pair(
+            first_cell="driver_lean0_curve2_rotation2_shaft_only",
+            second_cell="driver_lean5_curve2_rotation2_shaft_only",
+            second_protocol="driver-control-speed-bounds/1",
+        ),
+        # Wrong protocol (original_control instead of driver-control-speed-bounds/1)
+        _make_source_pair(
+            first_cell="driver_lean0_curve2_rotation2_combined2",
+            second_cell="driver_lean5_curve2_rotation2_combined2",
+            second_protocol="original_control/1",
+        ),
+        # Wrong PW curve (curve 1 instead of reviewed curve 2)
+        _make_source_pair(
+            first_cell="pitching_wedge_lean0_curve1_rotation2_combined2",
+            second_cell="pitching_wedge_lean5_curve1_rotation2_combined2",
+            second_protocol="pw-control-face-bounds/1",
+        ),
+    ]
+
+    # Only driver present: driver selected, PW reported unavailable, distractors rejected
+    effects, unavailable = final_report_inputs.select_bounds_control_pairs(
+        [driver_valid, *distractors]
+    )
+    assert len(effects) == 1
+    assert effects[0]["source_protocols"] == (
+        "original_control/1",
+        "driver-control-speed-bounds/1",
+    )
+    assert effects[0]["source_cells"] == (
+        "driver_lean0_curve2_rotation2_combined2",
+        "driver_lean5_curve2_rotation2_combined2",
+    )
+    assert len(unavailable) == 1
+    assert "pitching wedge" in unavailable[0].lower() or "pw" in unavailable[0].lower()
+
+    # Both reviewed driver and PW curve2 controls present: both selected
+    effects_both, unavailable_both = final_report_inputs.select_bounds_control_pairs(
+        [driver_valid, pw_valid, *distractors]
+    )
+    assert len(effects_both) == 2
+    assert effects_both[0]["source_protocols"][1] == "driver-control-speed-bounds/1"
+    assert effects_both[1]["source_protocols"][1] == "pw-control-face-bounds/1"
+    assert len(unavailable_both) == 0
+
+    # Neither present (only distractors): both unavailable, no fabrication
+    effects_none, unavailable_none = final_report_inputs.select_bounds_control_pairs(
+        distractors
+    )
+    assert len(effects_none) == 0
+    assert len(unavailable_none) == 2
+
+
+def test_final_report_renders_bounds_control_section_and_deterministic_head_sensitivity():
+    cell = _detailed_cell()
+    matrix = _matrix([cell], "final")
+    lean = {
+        "schema": "matched-across-lean/1",
+        "pairs": [],
+        "population": {"planned_pairs": 0},
+    }
+    interpretation = _qualified_interpretation()
+
+    driver_pair = _make_source_pair(
+        first_cell="driver_lean0_curve2_rotation2_combined2",
+        second_cell="driver_lean5_curve2_rotation2_combined2",
+        second_protocol="driver-control-speed-bounds/1",
+        draw_effect={"estimate": 0.015, "lower_95": 0.008, "upper_95": 0.022},
+        fade_effect={"estimate": -0.005, "lower_95": -0.011, "upper_95": 0.001},
+    )
+    interpretation["bounds_control"] = {
+        "effects": [describe_effect_modification(driver_pair)],
+        "unavailable": [
+            "Pitching Wedge across-lean 0°→5° control (curve 2, shaft SD 2°, combined-2; pw-control-face-bounds/1): Unavailable (absent from verified supplement comparisons)."
+        ],
+    }
+
+    rendered = build_final_report.render_final_report(
+        matrix, matrix, lean, {}, interpretation=interpretation
+    )
+
+    # 1. Bounds-control section
+    assert "### Fixed-Target Across-Lean Bounds Controls" in rendered
+    assert "bounds adapted after original search" in rendered
+    assert "original unavailable cells remain unchanged" in rendered
+    assert "rematched" in rendered and "causal" in rendered
+    assert "driver-control-speed-bounds/1" in rendered
+    assert "driver_lean0_curve2_rotation2_combined2" in rendered
+    assert "driver_lean5_curve2_rotation2_combined2" in rendered
+    assert "9,995 / 10,000" in rendered
+    assert "+0.015 [+0.008, +0.022]" in rendered
+    assert "pw-control-face-bounds/1" in rendered
+    assert "Unavailable" in rendered
+    # Must be separate from zero-lean interactions section
+    assert rendered.index(
+        "### Direct Curve and Shaft-Variability Interactions"
+    ) < rendered.index("### Fixed-Target Across-Lean Bounds Controls")
+
+    # 2. Deterministic head sensitivity link and distinction from MC uncertainty
+    assert "DESIGN.md#deterministic-head-assumption-sensitivity" in rendered
+    assert "validation/independent_head_sensitivity_summary.json" in rendered
+    assert "validation/independent_head_sensitivity.json" in rendered
+    assert "±20%" in rendered or "+/-20%" in rendered
+    assert "model sensitivities" in rendered
+    assert "not measured" in rendered
+    assert "Monte Carlo" in rendered
+    assert "do not validate" in rendered
+    # Ensure unbound displacement summaries (like 22.63 or 7.10) are not copied
+    assert "22.63" not in rendered
+
+
+def test_bounds_control_rejects_wrong_first_protocol_and_duplicate_identity():
+    from scripts.research.shot_pattern_analysis.final_report_inputs import (
+        select_bounds_control_pairs,
+    )
+
+    wrong = _make_source_pair(
+        first_cell="driver_lean0_curve2_rotation2_combined2",
+        second_cell="driver_lean5_curve2_rotation2_combined2",
+        second_protocol="driver-control-speed-bounds/1",
+        first_protocol="original_primary/1",
+    )
+    effects, unavailable = select_bounds_control_pairs([wrong])
+    assert effects == []
+    assert len(unavailable) == 2
+    valid = _make_source_pair(
+        first_cell="driver_lean0_curve2_rotation2_combined2",
+        second_cell="driver_lean5_curve2_rotation2_combined2",
+        second_protocol="driver-control-speed-bounds/1",
+    )
+    with pytest.raises(ValueError, match="ambiguous|duplicate"):
+        select_bounds_control_pairs([valid, valid])
+
+
+def test_bounds_control_preserves_actual_unavailable_reason_without_invention():
+    from scripts.research.shot_pattern_analysis.final_report_inputs import (
+        select_bounds_control_pairs,
+    )
+
+    pair = _make_source_pair(
+        first_cell="pitching_wedge_lean0_curve2_rotation2_combined2",
+        second_cell="pitching_wedge_lean5_curve2_rotation2_combined2",
+        first_protocol="pw-primary-face-bounds/1",
+        second_protocol="pw-control-face-bounds/1",
+        status="unavailable",
+        common_n=1,
+    )
+    pair["reason"] = "fewer_than_two_common_supported_shots"
+    effects, unavailable = select_bounds_control_pairs([pair])
+    assert not effects
+    assert any(pair["reason"] in item for item in unavailable)
+    assert all("physical" not in item.lower() for item in unavailable)
