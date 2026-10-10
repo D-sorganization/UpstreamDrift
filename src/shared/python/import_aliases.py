@@ -166,18 +166,11 @@ class SharedImportAliasFinder(MetaPathFinder):
     def _aliases(self, root: str, suffix: str) -> list[str]:
         suffix_part = f".{suffix}" if suffix else ""
         canonical_root = "sidekick" if root == "upstream_drift_tools" else root
-        if root in _UD_CANONICAL_SRC_ROOTS:
-            aliases = [
-                f"src.shared.python.{canonical_root}{suffix_part}",
-                f"{canonical_root}{suffix_part}",
-                f"shared.python.{canonical_root}{suffix_part}",
-            ]
-        else:
-            aliases = [
-                f"shared.python.{canonical_root}{suffix_part}",
-                f"src.shared.python.{canonical_root}{suffix_part}",
-                f"{canonical_root}{suffix_part}",
-            ]
+        aliases = [
+            f"shared.python.{canonical_root}{suffix_part}",
+            f"src.shared.python.{canonical_root}{suffix_part}",
+            f"{canonical_root}{suffix_part}",
+        ]
         if root in {"sidekick", "upstream_drift_tools"}:
             aliases.extend(
                 [
