@@ -4,6 +4,16 @@
 - Nominal 7-iron: IK 264.8 → 67.9 mm (frame 0 70.2 mm against a 70.4 mm address), dynamics 1355 → 79.2 mm, 0 IK range-of-motion flags. The nominal driver is unchanged by the gate; its dynamics 79.3 → 97.3 mm comes from main's GCV-20 code (a control on main is identical). Calc record: `simscape_matching_reference.tex`, subsection "Triad-Shape Validity Gate".
 - Open: correct the 7-iron document's nominal head triad, which changes every 7-iron receipt's base spec hash.
 
+# Physical Inertia Helper Handoff — #12183
+
+`validate_physical_inertia` now uses sorted principal moments instead of frame
+diagonals, and absolute symmetry tolerance with zero relative tolerance. Two
+rotated impossible tensors and a masked asymmetry failed before the fix; affected
+calibration/human-prior tests now pass 25 cases. Chapter 51 gives reproduction
+and numerical tolerances. Values are preserved on success. Native source
+admission and optimizer enforcement are separate integration work; physical
+source provenance, matching and all-model qualification remain open.
+
 # Active: Forward-Dynamics Gaze Neck, #11729
 
 - Branch `claude/osv-3c-gaze-neck-tracking`. `motion_matching/pipeline/gaze_tracking.py`: `--fd-neck gaze` re-solves the tracked reference's neck to the gaze schedule (model FK, bounded, after the feasibility filters); `dynamics.head_gaze` reports schedule error per window for the tracked reference and the replay. `render_head_gaze_clips --trajectory replay` renders the replay; `scripts/summarize_fd_neck_tracking.py` writes `evidence/head_gaze/fd_neck_tracking.json`.
@@ -1021,3 +1031,19 @@ separate because this provider uses native plant stepping only.
 - Branch `feat/f07-opensim-mixed-replay-12147`; separate native scalar-muscle and CoordinateActuator T01 admission and fresh replay with explicit assistance role/bounds/gain/unit identity, immutable physical outputs and input/state/policy provenance. Root assistance follows ground-parent topology, including renamed coordinates. Other regional roles remain declared hypotheses.
 - Shared native scalar executor preserves old muscle/contact semantics; time and saved applied controls are verified. Native extension presence is checked independently of helper file count. Actual OpenSim4.6 mixed profile tests pass; broader regression passes 214 with two inapplicable contact-fixture skips before final lineage refinements. Failed CasADi-path attempt retained and corrected without installing an environment.
 - Canonical chapter27 and `docs/development/feedback_controls/F07_MIXED_ACTUATION_TURNOVER.md` own equations, scope and reproduction. Astra reviewed the corrected bounded source. Mixed Moco dispatch, full Rajagopal/520 topology, source physiology, capture horizon, own-contact/grip and all-model parity remain open. Do not label these synthetic runs as mocap matching or a muscle-only result.
+
+## F07 Constrained Muscle Moco and Replay (#12143)
+
+The versioned OpenSim 4.6 constrained-muscle policy binds source, named
+state, explicit lock targets/charts/couplers, native muscle options and exact
+T01 excitation knots before independent fresh-model replay. Actual native
+tests include CustomJoint, moving path, two Millard muscles, changed-future
+excitation and a reachable coupler-only Moco endpoint with measured replay
+error. Installed Moco rejects locked coordinates; the unchanged 520-muscle
+source remains blocked by anatomy/passive/assistance/contact and private
+marker registration. See chapter42 and
+`docs/development/feedback_controls/F07_CONSTRAINED_MUSCLE_MOCO_TURNOVER.md`.
+
+## Active Mixed Moco Link (#12147)
+
+Branch `feat/f07-mixed-moco-link-12147` composes preserved constrained prerequisites and adds optional mixed scalar Moco dispatch. The new native test writes a nonzero 40 ms target and measures fresh replay independently. Exact roles/bounds are bound into requests; mixed NPZ fields preserve controls, physical units, assistance, powers and work. Retained unscaled-cost and coarse-transcription failures motivate per-state refinement. Full-body/source physiology/contact and private capture remain open; chapter39 and F07_MIXED_ACTUATION_TURNOVER own the calculation and handoff.
