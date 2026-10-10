@@ -43,6 +43,9 @@ BASELINE_MODEL_PATH = (
     / "os7_moco_g1"
     / "golf_humanoid_scaled_tour_markers_moco.osim"
 )
+# attach_visual_club serves the legacy butt-origin Club body of the one-hand
+# tour-matching models; the committed golf humanoid carries the OSV-9 club.
+LEGACY_CLUB_MODEL_PATH = BASELINE_MODEL_PATH
 GOLF_HUMANOID_PATH = (
     REPO_ROOT
     / "src"
@@ -57,7 +60,8 @@ GOLF_HUMANOID_PATH = (
 def test_baseline_fixture_lacks_visual_club() -> None:
     """Baseline models have empty attached_geometry on Club body (reproducing the defect)."""
     assert not has_visual_club(BASELINE_MODEL_PATH)
-    assert not has_visual_club(GOLF_HUMANOID_PATH)
+    # OSV-9 (#11756): the committed golf humanoid now carries the shared club
+    assert has_visual_club(GOLF_HUMANOID_PATH)
 
     audit = audit_model_geometry(BASELINE_MODEL_PATH)
     assert audit.club_attached_geometry_count == 0
@@ -66,7 +70,7 @@ def test_baseline_fixture_lacks_visual_club() -> None:
 
 def test_attach_visual_club_driver() -> None:
     """Attaching driver visual geometry adds shaft and head meshes to Club attached_geometry."""
-    tree = SafeET.parse(str(GOLF_HUMANOID_PATH))
+    tree = SafeET.parse(str(LEGACY_CLUB_MODEL_PATH))
     modified_tree = attach_visual_club(tree, DRIVER)
 
     club_body = modified_tree.find(".//BodySet/objects/Body[@name='Club']")
@@ -89,12 +93,13 @@ def test_attach_visual_club_driver() -> None:
 
     com_elem = club_body.find("mass_center")
     assert com_elem is not None
-    assert com_elem.text == "0.0 -0.786 0.0"
+    com = [float(v) for v in (com_elem.text or "").split()]
+    assert com == pytest.approx([0.0, -0.786, 0.0])
 
 
 def test_attach_visual_club_iron7() -> None:
     """Attaching 7-iron visual geometry scales dimensions according to IRON_7 spec."""
-    tree = SafeET.parse(str(GOLF_HUMANOID_PATH))
+    tree = SafeET.parse(str(LEGACY_CLUB_MODEL_PATH))
     modified_tree = attach_visual_club(tree, IRON_7)
 
     club_body = modified_tree.find(".//BodySet/objects/Body[@name='Club']")
@@ -143,7 +148,7 @@ def test_qualification_passes_with_visual_club(tmp_path: Path) -> None:
 
 def test_attach_visual_club_fails_closed_on_missing_club_body() -> None:
     """attach_visual_club raises ValueError if the model has no Club body."""
-    tree = SafeET.parse(str(GOLF_HUMANOID_PATH))
+    tree = SafeET.parse(str(LEGACY_CLUB_MODEL_PATH))
     body_set = tree.find(".//BodySet/objects")
     assert body_set is not None
     club = body_set.find("Body[@name='Club']")
@@ -158,7 +163,7 @@ def test_attach_visual_club_uses_committed_stl_assets_and_a_frame_offset() -> No
     """OSV-1: shaft, grip and head STLs on an offset frame; no missing .vtp files."""
     from src.engines.physics_engines.opensim.python import club_visuals
 
-    tree = SafeET.parse(str(GOLF_HUMANOID_PATH))
+    tree = SafeET.parse(str(LEGACY_CLUB_MODEL_PATH))
     attach_visual_club(tree, IRON_7)
     club_body = tree.find(".//BodySet/objects/Body[@name='Club']")
     assert club_body is not None
@@ -180,7 +185,7 @@ def test_attach_visual_club_uses_committed_stl_assets_and_a_frame_offset() -> No
 
 
 def test_attach_visual_club_fails_closed_without_assets(tmp_path: Path) -> None:
-    tree = SafeET.parse(str(GOLF_HUMANOID_PATH))
+    tree = SafeET.parse(str(LEGACY_CLUB_MODEL_PATH))
     with pytest.raises(FileNotFoundError, match="assets missing"):
         attach_visual_club(tree, DRIVER, geometry_dir=tmp_path)
 
@@ -190,8 +195,8 @@ def test_visual_club_model_loads_in_opensim_with_unchanged_mass(tmp_path: Path) 
     from src.engines.physics_engines.opensim.python import club_visuals
 
     club_visuals.register_geometry_path()
-    plain = osim.Model(str(GOLF_HUMANOID_PATH))
-    tree = SafeET.parse(str(GOLF_HUMANOID_PATH))
+    plain = osim.Model(str(LEGACY_CLUB_MODEL_PATH))
+    tree = SafeET.parse(str(LEGACY_CLUB_MODEL_PATH))
     attach_visual_club(tree, DRIVER)
     out = tmp_path / "with_club.osim"
     out.write_bytes(ET.tostring(tree.getroot(), encoding="utf-8"))

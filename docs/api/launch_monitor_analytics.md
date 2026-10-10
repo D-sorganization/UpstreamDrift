@@ -97,6 +97,36 @@ response carries every `TemporalTrendResult` field, the rolling series as rows,
 and the change candidates. Statistics that cannot be computed are `null`, never
 `0`. An unknown column or too few observations returns 400.
 
+`POST /tools/launch-monitor-analytics/v2/dispersion` runs `analyze_dispersion`
+on inline `records` with the desktop Dispersion tab's inputs: `forward`
+(default `carry_distance`), `lateral` (default `lateral_carry`), and an
+optional `group_column` (`monitor_vendor`, `session_id`, or `club`; omitted or
+absent from the records means the desktop tab's "(all shots)" choice). The
+response carries every `DispersionResult` field per group. Statistics that
+cannot be computed are `null`, never `0`. A missing column or fewer than three
+complete shots in a group returns 400.
+
+`POST /tools/launch-monitor-analytics/v2/relationships` runs
+`compute_correlations` on inline `records` with the desktop Relationships tab's
+inputs: at least two `metrics`, optional partial-correlation `controls` (any
+control that is also a selected metric is dropped, as on the desktop),
+`method` (`pearson`, `spearman` or `kendall`; default `pearson`) and
+`edge_threshold` (default 0.3, range 0 to 1). The response carries every
+`CorrelationResult` field: the coefficient, p-value, FDR-adjusted p-value,
+pair-count and (with controls) partial-coefficient matrices as rows in
+`metrics` order, the derived and boolean-projected metric names, and the
+screened dependency edges. Statistics that cannot be computed are `null`, never
+`0`. A column absent from the records returns 400.
+
+`POST /tools/launch-monitor-analytics/v2/multivariate` runs `compute_pca` and
+`compute_vif` on inline `records` with the same `metrics` selection the
+desktop Relationships tab's multivariate action reads (at least two
+columns). The response carries every `PCAResult` field (explained variance
+ratio, loadings, scores, sample count) under `pca`, and every `VIFResult`
+field (metric-keyed values, sample count, warning metrics at VIF >= 5) under
+`vif`. An infinite VIF from perfectly collinear metrics serializes as `null`,
+never `0`. An unknown metric or too few complete rows returns 400.
+
 ## Analysis Contract V2
 
 UpstreamDrift is the canonical Python and API authority for launch-monitor

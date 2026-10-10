@@ -30,6 +30,7 @@ from src.shared.python.motion_matching.anthropometry import (
     de_leva_table_sha256,
 )
 from src.shared.python.motion_matching.club_models import CLUBS
+from src.shared.python.motion_matching.hip_calibration import hip_is_mirrored
 from src.shared.python.motion_matching.full_body_spec import (
     BodySpec,
     ContactSpec,
@@ -107,6 +108,38 @@ def transform(rotation: np.ndarray, translation: np.ndarray) -> np.ndarray:
     return t
 
 
+def _offset_frames(model: Any) -> dict[str, tuple[str, Any]]:
+    """Map body-owned frame paths (``/bodyset/<body>/<frame>``) to (body, frame)."""
+    frames = {}
+    for body in model.findall("BodySet/objects/Body"):
+        name = body.get("name")
+        for frame in body.findall("components/PhysicalOffsetFrame"):
+            frames[f"/bodyset/{name}/{frame.get('name')}"] = (name, frame)
+    return frames
+
+
+def _joint_frame(
+    joint: Any, socket: str, owned: dict[str, tuple[str, Any]]
+) -> tuple[str, Any]:
+    """Resolve a joint socket to (body name, PhysicalOffsetFrame element).
+
+    Accepts both layouts OpenSim 4 writes: a frame declared inside the joint's
+    ``<frames>`` (its ``socket_parent`` names the body) and a frame owned by a
+    body and referenced by absolute path.
+    """
+    path = joint.findtext(socket)
+    for frame in joint.findall("frames/PhysicalOffsetFrame"):
+        if frame.get("name") == path:
+            return frame.findtext("socket_parent").rsplit("/", 1)[1], frame
+    if path in owned:
+        return owned[path]
+    raise ValueError(f"Joint {joint.get('name')!r}: cannot resolve {socket}={path!r}")
+
+
+def _vector(frame: Any, tag: str) -> np.ndarray:
+    return np.array(frame.findtext(tag).split(), dtype=float)
+
+
 def read_osim(osim: Path) -> tuple[dict[str, Any], dict[str, Any]]:
     model = ET.parse(str(osim)).getroot().find("Model")
     if model is None:
@@ -118,31 +151,73 @@ def read_osim(osim: Path) -> tuple[dict[str, Any], dict[str, Any]]:
             "com": np.array(body.findtext("mass_center").split(), dtype=float),  # type: ignore[union-attr]
             "inertia": np.array(body.findtext("inertia").split(), dtype=float),  # type: ignore[union-attr]
         }
+    owned = _offset_frames(model)
     joints = {}
     for joint in model.findall("JointSet/objects/*"):
-        frames = joint.findall("frames/PhysicalOffsetFrame")
-        parent, child = frames[0], frames[1]
+        parent_body, parent = _joint_frame(joint, "socket_parent_frame", owned)
+        child_body, child = _joint_frame(joint, "socket_child_frame", owned)
         joints[joint.get("name")] = {
-            "parent_body": parent.findtext("socket_parent").rsplit("/", 1)[1],  # type: ignore[union-attr]
-            "child_body": child.findtext("socket_parent").rsplit("/", 1)[1],  # type: ignore[union-attr]
-            "parent_translation": np.array(
-                parent.findtext("translation").split(),
-                dtype=float,  # type: ignore[union-attr]
-            ),
-            "parent_orientation": np.array(
-                parent.findtext("orientation").split(),
-                dtype=float,  # type: ignore[union-attr]
-            ),
-            "child_translation": np.array(
-                child.findtext("translation").split(),
-                dtype=float,  # type: ignore[union-attr]
-            ),
-            "child_orientation": np.array(
-                child.findtext("orientation").split(),
-                dtype=float,  # type: ignore[union-attr]
-            ),
+            "parent_body": parent_body,
+            "child_body": child_body,
+            "parent_translation": _vector(parent, "translation"),
+            "parent_orientation": _vector(parent, "orientation"),
+            "child_translation": _vector(child, "translation"),
+            "child_orientation": _vector(child, "orientation"),
         }
     return bodies, joints
+
+
+#: Conjugating a hip's base and follower frames by ``Rx(pi)`` turns
+#: ``Rx(a) Ry(b) Rz(c)`` into ``Rx(a) Ry(-b) Rz(-c)``: OpenSim's mirrored side,
+#: unchanged at the zero pose.
+HIP_MIRROR = transform(np.diag([1.0, -1.0, -1.0]), np.zeros(3))
+
+
+def hip_axis_signs(osim: Path) -> dict[str, float]:
+    """Per side, the OpenSim coefficient on hip adduction and rotation (+1 or -1).
+
+    DbC Postcondition: flexion has coefficient +1 and adduction and rotation
+    share one sign on each side; otherwise ``ValueError`` (the spec's three
+    primitives cannot express it).
+    """
+    model = ET.parse(str(osim)).getroot().find("Model")
+    if model is None:
+        raise ValueError(f"No Model tag found in OpenSim file {osim}")
+    signs: dict[str, float] = {}
+    for side in ("r", "l"):
+        joint = model.find(f"JointSet/objects/CustomJoint[@name='hip_{side}']")
+        if joint is None:
+            raise ValueError(f"{osim} has no CustomJoint hip_{side}")
+        coefficient = {}
+        for axis in joint.findall("SpatialTransform/TransformAxis"):
+            name = axis.findtext("coordinates", "").strip()
+            values = axis.findtext("LinearFunction/coefficients", "1 0").split()
+            coefficient[name] = float(values[0])
+        flexion = coefficient.get(f"hip_flexion_{side}")
+        pair = {
+            coefficient.get(f"hip_adduction_{side}"),
+            coefficient.get(f"hip_rotation_{side}"),
+        }
+        sign = pair.pop() if len(pair) == 1 else None
+        if flexion != 1.0 or sign is None or sign not in (1.0, -1.0):
+            raise ValueError(f"Unsupported hip_{side} coefficients: {coefficient}")
+        signs[side] = sign
+    return signs
+
+
+def mirror_document_hip(document: dict[str, Any], side: str) -> bool:
+    """Conjugate ``hip_<side>`` in a spec document by :data:`HIP_MIRROR`, in place.
+
+    Idempotent: returns ``False`` (no change) when the hip is already mirrored.
+    """
+    joint = next((j for j in document["joints"] if j["name"] == f"hip_{side}"), None)
+    if joint is None:
+        raise ValueError(f"Document has no hip_{side} joint")
+    if hip_is_mirrored(joint):
+        return False
+    for key in ("parent_to_base", "child_to_follower"):
+        joint[key] = (np.asarray(joint[key], dtype=float) @ HIP_MIRROR).tolist()
+    return True
 
 
 def _frame(entry: dict[str, Any], which: str) -> np.ndarray:
@@ -156,7 +231,16 @@ def leg_extension(
     joints: dict[str, Any],
     pelvis_body: str,
     hip_frame_in_pelvis: np.ndarray,
+    mirrored_hips: frozenset[str] = frozenset(),
 ) -> tuple[LowerLimbExtension, list[str]]:
+    """Rajagopal legs as spec bodies and joints.
+
+    ``mirrored_hips`` lists the sides ("r"/"l") whose OpenSim hip adduction and
+    rotation coefficients are -1 (see :func:`hip_axis_signs`); their hip frames
+    are conjugated by :data:`HIP_MIRROR` so the spec keeps OpenSim's signs.
+    """
+    if not mirrored_hips <= {"r", "l"}:
+        raise ValueError(f"mirrored_hips must be a subset of r/l: {mirrored_hips}")
     specs: list[BodySpec] = []
     edges: list[JointSpec] = []
     notes = [
@@ -174,19 +258,16 @@ def leg_extension(
                 )
             )
         hip = joints[f"hip_{side}"]
+        axes = transform(HIP_PERMUTATION, np.zeros(3))
+        if side in mirrored_hips:
+            axes = axes @ HIP_MIRROR
         edges.append(
             JointSpec(
                 f"hip_{side}",
                 pelvis_body,
                 f"femur_{side}",
-                (
-                    hip_frame_in_pelvis
-                    @ _frame(hip, "parent")
-                    @ transform(HIP_PERMUTATION, np.zeros(3))
-                ).tolist(),
-                (
-                    _frame(hip, "child") @ transform(HIP_PERMUTATION, np.zeros(3))
-                ).tolist(),
+                (hip_frame_in_pelvis @ _frame(hip, "parent") @ axes).tolist(),
+                (_frame(hip, "child") @ axes).tolist(),
                 ("Rx", "Ry", "Rz"),
                 (
                     f"hip_flexion_{side}",
@@ -309,6 +390,7 @@ def _build_aligned_leg_extension(
         joints,
         hip_frame["body"],
         np.asarray(hip_frame["placement"]) @ alignment,
+        frozenset(s for s, sign in hip_axis_signs(osim_path).items() if sign < 0),
     )
 
     edges = []
