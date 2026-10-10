@@ -24,6 +24,31 @@ no GPU (containers); the default is `egl`.
 The OpenSim visualizer cannot draw dynamic 3D decorations, so its overlay is
 projected with the same pinhole camera and drawn on the captured frame.
 
+### Decorative Address Ball (GCV-13, #11719)
+
+Every backend draws a regulation-radius ball at the swing's resolved address
+position (`ball.resolve_address_ball`, from the bundle's true `q[0]` frame
+composed with the club assembly -- never the exporter's own static reference
+pose). It is on by default (`ExportSettings.ball = True`, `--no-ball`
+disables it) and is visual only: massless and non-colliding, and it never
+moves. When the address frame cannot be resolved (no club body, or the
+address clubhead is not plausibly grounded), the reason is logged and no
+ball is drawn -- never a guessed position.
+
+- Drake and Pinocchio (`backends/drake_meshcat.py`,
+  `backends/pinocchio_meshcat.py`): a `visual_ball` sphere registered
+  directly on the MeshCat scene.
+- MuJoCo and MyoSuite (`backends/mujoco_worker.py`,
+  `backends/myosuite_worker.py`): a `visual_ball` MJCF geom
+  (`contype="0" conaffinity="0" mass="0"`) attached by the shared
+  `backends/_ball.py` helper, which also strips whatever the appearance/visual
+  layer's own static-reference-pose fallback may have drawn.
+- OpenSim (`backends/opensim_worker.py`): a sphere attached once to the
+  model's ground frame when the model is built -- a plain geometry
+  component, not a body, so (like the per-frame force/torque overlays, which
+  stay 2D-projected because the real simbody-visualizer takes no dynamic 3D
+  decorations from Python) it adds no mass or DOF.
+
 ## Usage
 
 ```bash
@@ -50,7 +75,7 @@ python3 -m src.tools.native_viewer_export \
   `--impact-time`, else the bundle provenance `impact_time_s`, else
   `model_appearance.club_face.ball_passage` on the `Clubhead` frame (the
   sub-sample instant of closest approach to address, with the height and
-  ball-radius checks), else the last sample. No ball is drawn.
+  ball-radius checks), else the last sample.
 - Force arrows use the `body_weight` scale mode when the model mass is known:
   one body weight is 0.5 m and the ceiling is 3 m (`default_glyph_style`).
 - `--speeds 1,0.5,0.25` (default: full, half, quarter) writes one clip set per playback speed, named
@@ -72,10 +97,14 @@ The OpenSim backend only ever runs under `xvfb-run` and refuses to start when
 
 - `core.py`: settings, clip plans (speeds, impact window), the backend protocol,
   `export_swing`; frame timing lives in `src/shared/python/video_timing`.
+- `ball.py`: `resolve_address_ball` (GCV-13, #11719), the decorative address
+  ball resolved from the swing bundle's address frame.
 - `compositor.py`: labelled 2x2 grid and HUD text.
 - `overlay.py`: overlay feed built from `force_overlay.bundle_provider`.
 - `overlay2d.py`: pinhole projection for the OpenSim 2D glyphs.
-- `backends/`: one module per engine plus shared helpers.
+- `backends/`: one module per engine plus shared helpers, including
+  `backends/_ball.py` (the MJCF `visual_ball` geom shared by the MuJoCo and
+  MyoSuite workers).
 
 Camera presets live in `src/shared/python/golf_view_presets`; the glyph
 pipeline is `src/shared/python/force_overlay` (ADR-0052). The OpenSim and

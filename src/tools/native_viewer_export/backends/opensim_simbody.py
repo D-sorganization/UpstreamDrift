@@ -1,14 +1,17 @@
 """OpenSim native export: the real simbody-visualizer in a virtual X server.
 
 Never touches the real display: the worker is launched through ``xvfb-run``
-with its own screen and refuses to run on ``:0``. Overlays are projected 2D
-glyphs (the visualizer takes no dynamic 3D decorations from Python).
+with its own screen and refuses to run on ``:0``. Per-frame overlays are
+projected 2D glyphs (the visualizer takes no dynamic 3D decorations from
+Python); the decorative address ball is static, so it is attached once to
+the model's ground frame instead (``opensim_worker.build_model``).
 """
 
 from __future__ import annotations
 
 from collections.abc import Iterator, Sequence
 from importlib.util import find_spec
+import logging
 import shutil
 import sys
 
@@ -23,6 +26,8 @@ from src.tools.native_viewer_export.core import (
     OverlayFeed,
     SwingInput,
 )
+
+logger = logging.getLogger(__name__)
 
 WORKER_MODULE = "src.tools.native_viewer_export.backends.opensim_worker"
 XVFB_SCREEN = "1280x960x24"
@@ -61,11 +66,8 @@ class OpenSimSimbodyBackend:
         overlay: OverlayFeed | None,
         ball: AddressBall | None = None,
     ) -> Iterator[dict[str, Image8]]:
-        # The OpenSim visualizer draws no dynamic 3D decorations (see the
-        # module docstring); the decorative ball is out of scope here
-        # (GCV-13, #11719) and the parameter is accepted but unused, only to
-        # satisfy the shared NativeBackend.render signature.
-        del ball
+        if ball is not None and ball.position_m is None:
+            logger.warning("skipping decorative ball: %s", ball.reason)
         yield from render_in_worker(
             self.command(),
             swing,
@@ -73,4 +75,5 @@ class OpenSimSimbodyBackend:
             indices,
             overlay,
             worker_env({"NATIVE_VIEWER_XVFB": "1"}),
+            ball,
         )

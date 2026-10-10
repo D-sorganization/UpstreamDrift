@@ -27,6 +27,9 @@ class WorkerJob:
     glyphs_path: str | None = None  # JSON list of GlyphSet dicts aligned to indices
     #: look-at point per view and position (tracking views follow the grip midpoint)
     lookats: dict[str, list[list[float]]] | None = None
+    #: resolved decorative address-ball world position, or None to draw none
+    #: (GCV-13, #11719); the radius is always model_appearance.ball.BALL_RADIUS_M
+    ball_position_m: list[float] | None = None
 
     def lookat_for(self, view: str, position: int) -> list[float]:
         """Look-at point of ``view`` at ``position`` (static ``lookat_m`` if unset)."""

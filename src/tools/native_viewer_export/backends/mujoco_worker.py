@@ -5,7 +5,11 @@ The specification is exported once with the shared MuJoCo appearance document
 ground, sky and lights) and rendered with the golf view presets. The rollout
 ``q`` is mapped to ``qpos`` through the bundle's coordinate order, so the
 pose shown is the same-input pose every other engine displays. 3D force and
-torque glyphs are added to the MuJoCo scene before each render.
+torque glyphs are added to the MuJoCo scene before each render. The
+decorative address ball (GCV-13, #11719), already resolved by the caller
+from the swing's true address frame, is attached with
+:func:`backends._ball.set_decorative_ball`, which replaces whatever the
+appearance layer's own static-reference-pose fallback may have drawn.
 """
 
 from __future__ import annotations
@@ -14,6 +18,7 @@ import os
 from pathlib import Path
 import sys
 from typing import Any
+from defusedxml import ElementTree as ET
 
 import numpy as np
 
@@ -25,6 +30,7 @@ from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.force_glyphs
 )
 from src.shared.python.model_appearance import document_from_dict
 from src.shared.python.motion_matching.same_input import InputBundle
+from src.tools.native_viewer_export.backends._ball import set_decorative_ball
 from src.tools.native_viewer_export.backends._worker_job import WorkerJob
 from src.tools.native_viewer_export.backends.myosuite_worker import make_camera
 
@@ -55,7 +61,9 @@ def main(job_path: str) -> None:
     bundle = InputBundle.load(Path(job.bundle_path))
     q = np.load(job.q_path)
     xml, _ = build_scene_xml(bundle.spec_bytes)
-    model = mujoco.MjModel.from_xml_string(xml)
+    root = ET.fromstring(xml)
+    set_decorative_ball(root, job.ball_position_m)
+    model = mujoco.MjModel.from_xml_string(ET.tostring(root, encoding="unicode"))
     # the default offscreen buffer is 640x480; grow it to the requested size
     grow_offscreen_buffer(model, job.width, job.height)
     data = mujoco.MjData(model)

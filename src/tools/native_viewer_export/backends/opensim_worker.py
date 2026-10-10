@@ -3,10 +3,16 @@
 Run only through ``xvfb-run`` (the backend does this): the worker refuses to
 start unless ``NATIVE_VIEWER_XVFB=1`` and ``DISPLAY`` is not the real
 display ``:0``. Frames are grabbed with ``xwd`` from the visualizer window.
+The decorative address ball (GCV-13, #11719) is attached once, to the model's
+ground frame, when :func:`build_model` is called -- unlike the per-frame
+force/torque overlays (which the real simbody-visualizer cannot take 3D
+decorations for from Python and are instead projected in 2D), a static,
+never-moving ball needs no per-frame update.
 """
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 import json
 import os
 from pathlib import Path
@@ -25,6 +31,7 @@ from src.shared.python.golf_view_presets import (
     VIEWER_FOV_Y_RAD,
     simbody_camera_transform,
 )
+from src.shared.python.model_appearance.ball import BALL_RADIUS_M
 from src.shared.python.motion_matching.same_input import InputBundle
 from src.shared.python.motion_matching.visual_skeleton import derive_visual_skeleton
 from src.tools.native_viewer_export.backends._club import club_parts
@@ -41,6 +48,7 @@ FOV_Y_RAD = VIEWER_FOV_Y_RAD
 SETTLE_S = 0.6
 _GREY = (0.75, 0.78, 0.85)
 _SHAPE_GREY = (0.7, 0.72, 0.8)
+_BALL_GREY = (0.95, 0.95, 0.95)
 
 
 def require_virtual_display() -> str:
@@ -102,8 +110,17 @@ def _attach(
     frame.thisown = False
 
 
-def build_model(osim: Any, spec_bytes: bytes) -> tuple[Any, float]:
-    """OpenSim model of the specification with the shared visual skeleton attached."""
+def build_model(
+    osim: Any, spec_bytes: bytes, ball_position_m: Sequence[float] | None = None
+) -> tuple[Any, float]:
+    """OpenSim model of the specification with the shared visual skeleton attached.
+
+    ``ball_position_m``, when given, attaches a decorative sphere to the
+    model's ground frame (GCV-13, #11719): a plain geometry component, not a
+    body, so it adds no mass or DOF and never moves regardless of the
+    simulated state -- the same "visual only" contract as the capsule,
+    shape and club meshes already attached here.
+    """
     from src.engines.physics_engines.opensim.python.full_body_osim import (
         clean_osim_body_name,
         export_full_body_osim,
@@ -175,6 +192,17 @@ def build_model(osim: Any, spec_bytes: bytes) -> tuple[Any, float]:
         )
         _attach(osim, body, np.eye(3), shp.center_m, geom, _SHAPE_GREY, n)
         n += 1
+    if ball_position_m is not None:
+        _attach(
+            osim,
+            model.getGround(),
+            np.eye(3),
+            ball_position_m,
+            osim.Sphere(BALL_RADIUS_M),
+            _BALL_GREY,
+            n,
+        )
+        n += 1
     return model, float(skeleton.ground.height_m)
 
 
@@ -197,7 +225,7 @@ def main(job_path: str) -> None:
     job = WorkerJob.load(Path(job_path))
     bundle = InputBundle.load(Path(job.bundle_path))
     q = np.load(job.q_path)
-    model, ground_h = build_model(osim, bundle.spec_bytes)
+    model, ground_h = build_model(osim, bundle.spec_bytes, job.ball_position_m)
     model.setUseVisualizer(True)
     state = model.initSystem()
     viz = model.updVisualizer().updSimbodyVisualizer()

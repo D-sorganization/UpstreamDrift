@@ -17,18 +17,18 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#11719 · GCV-13 Slice 2: Decorative Address Ball in the Drake/Pinocchio MeshCat Native Export
+### DL-#11719 · GCV-13 Slice 3: Decorative Address Ball in the MuJoCo, OpenSim and MyoSuite Native Export
 
 - **State:** in_review
 - **Owner:** claude
 - **Issue:** #11719 (epic #11706)
-- **Branch:** claude/gcv-13b-meshcat-ball
-- **PR:** #12114
-- **Paths:** src/tools/native_viewer_export/ball.py, src/tools/native_viewer_export/core.py, src/tools/native_viewer_export/runner.py, src/tools/native_viewer_export/cli.py, src/tools/native_viewer_export/backends/drake_meshcat.py, src/tools/native_viewer_export/backends/pinocchio_meshcat.py, src/tools/native_viewer_export/backends/opensim_simbody.py, src/tools/native_viewer_export/backends/myosuite_arena.py, tests/unit/tools/native_viewer_export/test_address_ball.py, tests/unit/tools/native_viewer_export/test_runner_cli.py, tests/unit/tools/native_viewer_export/test_core.py, tests/unit/tools/native_viewer_export/test_speed_variants.py, tests/unit/tools/native_viewer_export/test_speed_variants_engines.py
+- **Branch:** claude/gcv-13c-native-ball-backends
+- **PR:** not created (stacked on #12114, which is stacked on #11992)
+- **Paths:** src/tools/native_viewer_export/backends/\_ball.py, src/tools/native_viewer_export/backends/\_worker_job.py, src/tools/native_viewer_export/backends/\_subprocess.py, src/tools/native_viewer_export/backends/mujoco_native.py, src/tools/native_viewer_export/backends/mujoco_worker.py, src/tools/native_viewer_export/backends/myosuite_arena.py, src/tools/native_viewer_export/backends/myosuite_worker.py, src/tools/native_viewer_export/backends/opensim_simbody.py, src/tools/native_viewer_export/backends/opensim_worker.py, src/tools/native_viewer_export/README.md, src/config/feature_parity.json, tests/unit/tools/native_viewer_export/test_ball_native_backends.py
 - **Started:** 2026-10-10
-- **Last verified:** 2026-10-10 (`4d8b0533`)
-- **Summary:** Stacked on GCV-13 slice 1 (#11992, MuJoCo decorative ball + shared `ball_position_at_address`/`resolve_ball_visual`). `resolve_address_ball()` resolves the decorative address ball for a swing bundle from the address frame's (`q[0]`) MuJoCo-FK `Clubhead` pose composed with `model_appearance.club_assembly`'s clubface centre/normal, reusing the slice-1 placement rule; the Drake and Pinocchio MeshCat backends draw a white sphere there (on by default; `--no-ball`/`ExportSettings.ball=False` disables it). Fixed a real bug caught on #12114 after merge: the impact-window clip was recomputing the ball from its own windowed first frame (mid-swing, not the address), so it was reported "not grounded" and drawn missing. Now `runner.run_export` resolves the ball exactly once per engine from the full, unwindowed swing and threads the same `AddressBall` through `core.export_swing`/`_export_clip` to every clip plan's `backend.render(...)`; the `NativeBackend.render` protocol gained a `ball: AddressBall | None` parameter (OpenSim/MyoSuite accept and ignore it, out of scope).
-- **Next step:** Rebase onto main and arm auto-merge on PR #12114 once #11992 merges.
+- **Last verified:** 2026-10-10 (`SELF`)
+- **Summary:** Stacked on GCV-13 slice 2 (#12114, Drake/Pinocchio MeshCat decorative ball; this branch first merged `origin/main` to pick up #12043's MuJoCo Renderer backend, absent when this stack was cut). Threads the already-resolved `AddressBall` (slice 2) into the three remaining backends: new `backends/_ball.py` strips/replaces the MJCF `visual_ball` geom shared by the `mujoco_native`/`myosuite_arena` workers (never trusting the appearance layer's own static-reference-pose fallback); OpenSim attaches a sphere to `model.getGround()` once, at build time, with the existing `_attach` helper (a plain geometry component, not a body -- unlike the genuinely dynamic per-frame overlays, which stay 2D-projected). `WorkerJob.ball_position_m` carries the resolved position through the subprocess worker protocol. Dropped the slice-2 `del ball`/"out of scope" stubs on OpenSim and MyoSuite. Only the web `ClubHead` component (#11717) now draws no ball.
+- **Next step:** Push `claude/gcv-13c-native-ball-backends` and open the PR stacked on #12114.
 
 ### DL-#11596 · Commit Recovered Crocoddyl G1 Warm-Start IK and 0.60 s FDDP Stage Inputs Beside the Rk45, Rtol6 and B100 Receipts, Plus the W030r Chain-Root Candidate, With Sha256 Provenance
 

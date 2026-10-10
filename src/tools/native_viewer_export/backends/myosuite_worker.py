@@ -4,7 +4,11 @@ Runs in a Python that can import ``myosuite`` (often a separate virtual
 environment). The specification MJCF is merged with the MyoSuite arena scene
 assets (floor texture, headlight), loaded into a MyoSuite ``MujocoEnv`` and
 rendered with the env's own renderer, with 3D force/torque glyphs added to the
-MuJoCo scene before each render.
+MuJoCo scene before each render. The decorative address ball (GCV-13,
+#11719), already resolved by the caller, is attached with
+:func:`backends._ball.set_decorative_ball` after the arena scene is merged,
+so it never depends on the plain visual layer's own static-reference-pose
+fallback.
 """
 
 from __future__ import annotations
@@ -29,6 +33,7 @@ from src.shared.python.force_overlay.glyphs import GlyphSet
 from src.shared.python.golf_view_presets import mujoco_camera_params
 from src.shared.python.motion_matching.same_input import InputBundle
 from src.shared.python.motion_matching.visual_skeleton import derive_visual_skeleton
+from src.tools.native_viewer_export.backends._ball import set_decorative_ball
 from src.tools.native_viewer_export.backends._worker_job import WorkerJob
 
 SCENE_FILE = ("simhive", "myo_sim", "scene", "myosuite_quad.xml")
@@ -130,6 +135,9 @@ def main(job_path: str) -> None:
     skeleton = derive_visual_skeleton(json.loads(bundle.spec_bytes))
     xml, _ = export_full_body_mjcf(bundle.spec_bytes, visual=True, with_head=True)
     scene_xml = merge_arena(xml, skeleton.ground.height_m, job.width, job.height)
+    scene_root = ET.fromstring(scene_xml)
+    set_decorative_ball(scene_root, job.ball_position_m)
+    scene_xml = ET.tostring(scene_root, encoding="unicode")
     with tempfile.TemporaryDirectory() as tmp:
         path = Path(tmp) / "scene.xml"
         path.write_text(scene_xml, encoding="utf-8")

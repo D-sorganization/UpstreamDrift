@@ -9,18 +9,22 @@ from __future__ import annotations
 
 from collections.abc import Iterator, Sequence
 from importlib.util import find_spec
+import logging
 import sys
 
 from src.tools.native_viewer_export.backends._subprocess import (
     render_in_worker,
     worker_env,
 )
+from src.tools.native_viewer_export.ball import AddressBall
 from src.tools.native_viewer_export.core import (
     ExportSettings,
     Image8,
     OverlayFeed,
     SwingInput,
 )
+
+logger = logging.getLogger(__name__)
 
 WORKER_MODULE = "src.tools.native_viewer_export.backends.mujoco_worker"
 
@@ -45,7 +49,10 @@ class MuJoCoRendererBackend:
         settings: ExportSettings,
         indices: Sequence[int],
         overlay: OverlayFeed | None,
+        ball: AddressBall | None = None,
     ) -> Iterator[dict[str, Image8]]:
+        if ball is not None and ball.position_m is None:
+            logger.warning("skipping decorative ball: %s", ball.reason)
         yield from render_in_worker(
-            self.command(), swing, settings, indices, overlay, worker_env()
+            self.command(), swing, settings, indices, overlay, worker_env(), ball
         )
