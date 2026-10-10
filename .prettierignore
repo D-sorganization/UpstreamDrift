@@ -56,3 +56,6 @@ docs/development/full_body_models/evidence/foot_progression/osv4_final/driver/ad
 docs/development/full_body_models/evidence/foot_progression/osv4_final/driver/engines.json
 docs/development/full_body_models/evidence/foot_progression/osv4_final/iron/address_report.json
 docs/development/full_body_models/evidence/foot_progression/osv4_final/iron/engines.json
+docs/development/full_body_models/evidence/foot_progression/osv4_final/capture_o/engines.json
+# #12187: byte-bound native neck-tracking receipt from #12154.
+docs/development/full_body_models/evidence/head_gaze/fd_neck_tracking.json
