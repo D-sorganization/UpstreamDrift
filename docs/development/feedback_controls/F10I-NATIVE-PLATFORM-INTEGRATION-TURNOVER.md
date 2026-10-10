@@ -93,3 +93,20 @@ the OpenSim/C3D mixed-process DLL issue is #12065. The initial central helper al
 hit a Windows output-decoding failure after its affected-test run; it is not an
 all-green central-gate receipt. Preserve these failures alongside the passing
 actual native campaign and normal hooks.
+
+The final availability contract uses explicit public imports; the dynamic-import
+form triggered Semgrep's non-literal-import rule despite its fixed parametrization.
+No exemption or suppression was added. The revised test passes all eight cases in
+the SDK-free Python 3.13 process and the frozen OpenSim native campaign again
+passes 328 tests with 25 explicit skips. Retain `f10i-native-static-final.xml` and
+`f10i-static-source-before.json`/`f10i-static-source-after.json`: all 4,509 hashes
+match within this final execution; the only changed Python file relative to the
+earlier campaign is the availability test.
+
+The final central affected-test selection returns 334 pass / 1 fail / 118 skip.
+Its remaining failure is the unchanged shot-optimizer baseline #12064. The two
+motion-pipeline subprocess failures were missing `src.shared` in their inherited
+import path; explicitly retaining the repository root beside the fleet helper in
+`PYTHONPATH` resolves them. UTF-8 also avoids the helper's prior output-decoding
+failure. Keep the initial failures and the corrected-environment evidence; the
+central helper remains non-green because #12064 is unresolved.
