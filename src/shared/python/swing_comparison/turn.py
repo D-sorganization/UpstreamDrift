@@ -181,7 +181,7 @@ def fill_short_gaps(points: np.ndarray, max_gap_frames: int) -> tuple[np.ndarray
     out[~valid] = np.nan
     idx = np.flatnonzero(valid)
     filled = 0
-    for a, b in zip(idx[:-1], idx[1:]):
+    for a, b in zip(idx[:-1], idx[1:], strict=True):
         gap = int(b - a - 1)
         if 0 < gap <= max_gap_frames:
             w = (np.arange(a + 1, b) - a) / float(b - a)
@@ -494,9 +494,11 @@ def spec_model_points(
         out["thorax_l"], out["thorax_r"] = [], []
     for qi in q_arr:
         poses = body_poses_from_coordinates(spec, qi, coordinate_names=coordinate_names)
-        for key, body in zip(("hip_l", "hip_r"), hip_bodies):
+        for key, body in zip(("hip_l", "hip_r"), hip_bodies, strict=True):
             out[key].append(poses[body][:3, 3])
-        for key, frame in zip(("shoulder_l", "shoulder_r"), shoulder_frames):
+        for key, frame in zip(
+            ("shoulder_l", "shoulder_r"), shoulder_frames, strict=True
+        ):
             body, placement = frames[frame]
             out[key].append((poses[body] @ placement)[:3, 3])
         if has_thorax:
