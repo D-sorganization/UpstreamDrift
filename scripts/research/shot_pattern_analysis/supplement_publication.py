@@ -27,7 +27,7 @@ ARTIFACTS = {
 PARENT_RECEIPT = "REPORT_SUPPLEMENT_PIPELINE.json"
 REVISION_RECEIPT = "REPORT_SUPPLEMENT_PUBLICATION_REVISION.json"
 CANDIDATE_RECEIPT = "REPORT_SUPPLEMENT_PUBLICATION_CANDIDATE.json"
-OPERATION = "academic_pair_density_row_gutter"
+OPERATION = "paired_figure_gutter_and_caption"
 Verifier = Callable[[Path], dict[str, Any]]
 Renderer = Callable[[list[dict[str, Any]], Path], list[dict[str, Any]]]
 
@@ -41,13 +41,12 @@ def sha256(path: Path) -> str:
 def revision_source_hashes() -> dict[str, str]:
     """Bind this contract and the actual renderer, including density preparation."""
     root = Path(__file__).resolve().parents[3]
-    paths = [
-        Path(__file__),
-        root / "src/tools/shot_pattern_analysis/matched_supplement_figures.py",
-    ]
-    verifier = Path(__file__).with_name("supplement_parent_verifier.py")
-    if verifier.exists():
-        paths.append(verifier)
+    # Include extracted renderer helpers and every script implementing this contract.
+    paths = list((root / "src/tools/shot_pattern_analysis").glob("*.py"))
+    paths.extend(Path(__file__).parent.glob("supplement_*.py"))
+    command = Path(__file__).with_name("revise_supplement_figures.py")
+    if command.exists():
+        paths.append(command)
     from src.tools.shot_pattern_analysis.matched_supplement_pipeline import (
         _report_source_hashes,
     )
@@ -92,15 +91,33 @@ def figure_records(ledger: dict) -> dict[str, dict]:
 
 
 def revised_paths(records: dict[str, dict]) -> set[str]:
-    """Closed scope: only academic pair density in the three existing formats."""
-    return {
-        name
-        for name, row in records.items()
-        if row.get("presentation") == "academic"
-        and row.get("source_kind") == "six_population_common_index_comparison"
-        and row.get("figure_kind") in {"density_png", "density_pdf", "density_svg"}
-        and Path(name).suffix in {".png", ".pdf", ".svg"}
-    }
+    """Closed seven-format pair scope; cell and social-density assets stay exact."""
+    selected = set()
+    for name, row in records.items():
+        kind = row.get("figure_kind", "")
+        density = kind in {"density_png", "density_pdf", "density_svg"}
+        overhead = kind in {
+            "overhead_png",
+            "overhead_pdf",
+            "overhead_svg",
+            "overhead_social_png",
+        }
+        source_kind = (
+            "six_population_common_index_comparison"
+            if density
+            else "saved_illustrative_trajectory_samples"
+        )
+        presentation = "social" if kind == "overhead_social_png" else "academic"
+        if (
+            (density or overhead)
+            and row.get("first_cell")
+            and row.get("second_cell")
+            and row.get("source_kind") == source_kind
+            and row.get("presentation") == presentation
+            and Path(name).suffix == "." + kind.rsplit("_", 1)[-1]
+        ):
+            selected.add(name)
+    return selected
 
 
 def _parent_snapshot(root: Path, loaded: dict) -> dict[str, str]:
@@ -354,12 +371,23 @@ def load_verified_supplement_publication(directory: Path) -> dict:
 
 def approved_source_delta(loaded: dict, candidate: dict) -> dict:
     """Derive the actual old/new producer delta instead of trusting a claim."""
-    old = loaded["receipt"]["postprocessing_source_sha256"]
+    binding = candidate.get("parent_verifier") or {}
+    old = {
+        Path(name).name: digest
+        for name, digest in binding.get("source_sha256", {}).items()
+        if name.startswith(
+            (
+                "src/tools/shot_pattern_analysis/",
+                "scripts/research/shot_pattern_analysis/",
+            )
+        )
+    }
+    old.update(loaded["receipt"]["postprocessing_source_sha256"])
     new = candidate["revision_source_sha256"]
     return {
-        name: {"old_sha256": digest, "new_sha256": new[name]}
-        for name, digest in old.items()
-        if new.get(name) != digest
+        name: {"old_sha256": old.get(name), "new_sha256": digest}
+        for name, digest in new.items()
+        if old.get(name) != digest
     }
 
 

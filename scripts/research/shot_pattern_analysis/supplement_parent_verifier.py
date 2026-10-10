@@ -22,7 +22,8 @@ if Path(pipeline.__file__).resolve()!=root/'src/tools/shot_pattern_analysis/matc
 expected=json.loads(sys.stdin.read())
 if matched_source_snapshot()!=expected:
     raise ValueError('parent execution/runtime/native differs')
-result=pipeline.load_verified_supplement_artifacts(Path(sys.argv[2]))
+result = ({"execution": matched_source_snapshot(), "report_sources": pipeline._report_source_hashes()}
+          if sys.argv[3] == "probe" else pipeline.load_verified_supplement_artifacts(Path(sys.argv[2])))
 if matched_source_snapshot()!=expected:
     raise ValueError('parent execution changed while validating')
 print(json.dumps(result))
@@ -32,6 +33,17 @@ print(json.dumps(result))
 def check_verifier_pin(binding: dict[str, Any], *, base: Path) -> tuple[Path, Path]:
     """Check immutable identity; relative checkout paths may be reconstructed."""
     root = (base / binding["source_root"]).resolve()
+    if "origin_pin_relative_path" in binding:
+        origin = (base / binding["origin_pin_relative_path"]).resolve()
+        if not origin.is_file() or sha256(origin) != binding.get("origin_pin_sha256"):
+            raise ValueError("parent origin pin changed")
+        original = json.loads(origin.read_text())
+        if (origin.parent / original["source_root"]).resolve() != root or any(
+            binding.get(key) != value
+            for key, value in original.items()
+            if key != "source_root"
+        ):
+            raise ValueError("parent origin pin identity differs")
     executable = Path(binding["python_executable"]).absolute()
     if not executable.is_file() or sha256(executable) != binding["python_sha256"]:
         raise ValueError("parent Python executable differs")
@@ -71,8 +83,8 @@ def check_verifier_pin(binding: dict[str, Any], *, base: Path) -> tuple[Path, Pa
     return root, executable
 
 
-def verify_parent_in_frozen_source(
-    parent: Path, binding: dict[str, Any], *, base: Path
+def _run_frozen(
+    parent: Path, binding: dict[str, Any], *, base: Path, mode: str
 ) -> dict:
     """Use isolated imports and exact runtime checks, never current-source fallback."""
     root, executable = check_verifier_pin(binding, base=base)
@@ -88,7 +100,7 @@ def verify_parent_in_frozen_source(
         SDL_VIDEODRIVER="dummy",
     )
     result = subprocess.run(
-        [str(executable), "-I", "-c", _WORKER, str(root), str(parent.resolve())],
+        [str(executable), "-I", "-c", _WORKER, str(root), str(parent.resolve()), mode],
         cwd=root,
         env=environment,
         input=json.dumps(binding["execution"]),
@@ -98,3 +110,15 @@ def verify_parent_in_frozen_source(
     )
     check_verifier_pin(binding, base=base)
     return json.loads(result.stdout)
+
+
+def verify_parent_in_frozen_source(
+    parent: Path, binding: dict[str, Any], *, base: Path
+) -> dict:
+    """Run full original artifact validation in the pinned parent environment."""
+    return _run_frozen(parent, binding, base=base, mode="verify")
+
+
+def probe_parent_environment(binding: dict[str, Any], *, base: Path) -> dict:
+    """Qualify sources/runtime without claiming any artifact verification."""
+    return _run_frozen(base, binding, base=base, mode="probe")

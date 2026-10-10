@@ -63,14 +63,19 @@ def parent(tmp_path):
     figures = root / "figures"
     figures.mkdir()
     records = []
-    for name in ["density.png", "density.pdf", "density.svg", "overhead.png"]:
+    for name in [
+        "density.png",
+        "density.pdf",
+        "density.svg",
+        "density_draw_social.png",
+    ]:
         path = figures / name
         path.write_text(name)
         records.append(
             {
                 "relative_path": name,
                 "sha256": sha(path),
-                "presentation": "academic",
+                "presentation": "social" if "_social" in name else "academic",
                 "figure_kind": name.replace(".", "_"),
                 "source_kind": "six_population_common_index_comparison",
                 "comparison_kind": "across_lean",
@@ -132,9 +137,9 @@ def test_child_preserves_parent_and_reuses_exact_bytes(parent, tmp_path):
         root, child, parent_verifier=verifier, render_density=renderer
     )
     result = verify_density_revision(child, parent_verifier=verifier)
-    assert result["publication_identity"]["kind"] == "academic_pair_density_row_gutter"
-    assert (root / "figures/overhead.png").read_bytes() == (
-        child / "figures/overhead.png"
+    assert result["publication_identity"]["kind"] == "paired_figure_gutter_and_caption"
+    assert (root / "figures/density_draw_social.png").read_bytes() == (
+        child / "figures/density_draw_social.png"
     ).read_bytes()
     assert len(result["figure_ledger"]["figures"]) == 4
     assert result["receipt"] == data["receipt"]
@@ -163,7 +168,7 @@ def test_tampering_rejected(parent, tmp_path, mutation):
     if mutation == "numeric":
         (child / "REPORT_SUPPLEMENT.json").write_text('{"changed":1}')
     elif mutation == "reused":
-        (child / "figures/overhead.png").write_text("changed")
+        (child / "figures/density_draw_social.png").write_text("changed")
     elif mutation == "extra":
         (child / "figures/extra.png").write_text("extra")
     elif mutation == "source":
@@ -412,7 +417,7 @@ def test_final_receipt_retains_parent_and_child_identity(tmp_path):
     for path in paths:
         path.write_text("output")
     identity = {
-        "kind": "academic_pair_density_row_gutter",
+        "kind": "paired_figure_gutter_and_caption",
         "receipt_filename": "REPORT_SUPPLEMENT_PUBLICATION_REVISION.json",
         "receipt_sha256": "child",
         "parent_receipt_sha256": "parent",
@@ -513,3 +518,46 @@ def test_independent_qualification_cannot_be_forged_by_rehashing(
         publication.verify_density_revision(
             child, parent_verifier=lambda p: copy.deepcopy(data)
         )
+
+
+def test_revision_scope_is_exact_seven_pair_formats_not_cell_or_social_density():
+    from scripts.research.shot_pattern_analysis.supplement_publication import (
+        revised_paths,
+    )
+
+    rows = {}
+    expected = set()
+    for kind in [
+        "density_png",
+        "density_pdf",
+        "density_svg",
+        "overhead_png",
+        "overhead_pdf",
+        "overhead_svg",
+        "overhead_social_png",
+        "density_draw_social_png",
+        "density_png_cell",
+    ]:
+        name = kind + "." + kind.rsplit("_", 1)[-1]
+        overhead = kind.startswith("overhead")
+        rows[name] = {
+            "figure_kind": kind,
+            "presentation": "social" if "social" in kind else "academic",
+            "source_kind": "saved_illustrative_trajectory_samples"
+            if overhead
+            else "six_population_common_index_comparison",
+            "first_cell": "a",
+            "second_cell": "b",
+        }
+        if kind in {
+            "density_png",
+            "density_pdf",
+            "density_svg",
+            "overhead_png",
+            "overhead_pdf",
+            "overhead_svg",
+            "overhead_social_png",
+        }:
+            expected.add(name)
+    rows["density_png_cell.cell"]["source_kind"] = "individual_supported_endpoints"
+    assert revised_paths(rows) == expected
