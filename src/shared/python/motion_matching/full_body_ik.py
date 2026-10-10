@@ -74,6 +74,10 @@ class SolvePoseOptions:
     #: A restart passes its unjittered start here so the jitter only moves
     #: the seed, never the prior (#12042).
     prior_anchor: Sequence[float] | Array | None = None
+    #: Weak posture prior (#12042): ``{coordinate: (target_rad, weight)}``
+    #: adds ``sqrt(weight) * (q - target)`` rows. A weak weight only decides
+    #: coordinates the markers leave under-determined.
+    posture_prior: Mapping[str, tuple[float, float]] | None = None
 
 
 @dataclass(frozen=True)
@@ -97,6 +101,13 @@ class SolveTrajectoryOptions:
     #: on) moves further than this many radians from that start pose, so a
     #: restart cannot hop to another branch between two frames.
     restart_max_step_rad: float | None = None
+    #: Anchor each retry's joint prior to the frame's start pose instead of
+    #: the jittered seed (implied by ``restart_max_step_rad``).
+    restart_anchor_prior: bool = False
+    #: Draw each frame's restart jitter from a generator seeded by the frame
+    #: index, so a perturbation that changes which earlier frames restarted
+    #: cannot shift the jitter of every later frame.
+    restart_seed_per_frame: bool = False
 
 
 def _rotation_error(r_a: Array, r_b: Array) -> Array:
@@ -446,6 +457,7 @@ class _PosePrep:
     sqrt_prior: Array
     axes: list[Any]
     anchor: Array
+    posture: tuple[NDArray[np.intp], Array, Array]
 
 
 def _prior_anchor(q_init: Array, anchor: Sequence[float] | Array | None) -> Array:
@@ -782,7 +794,22 @@ class BaseFullBodyIK:
             sqrt_prior=np.sqrt(prior_diag),
             axes=self._axis_rows(opts.axis_targets),
             anchor=_prior_anchor(q_init, opts.prior_anchor),
+            posture=self._posture_rows(opts.posture_prior),
         )
+
+    def _posture_rows(
+        self, prior: Mapping[str, tuple[float, float]] | None
+    ) -> tuple[NDArray[np.intp], Array, Array]:
+        """Indices, targets and square-root weights of the posture prior."""
+        names = list(prior or {})
+        for name in names:
+            if name not in self.coordinate_order:
+                raise ValueError(f"Unknown posture prior coordinate {name}")
+        values = np.array([prior[n] for n in names], dtype=float).reshape(-1, 2)
+        if not np.isfinite(values).all() or (values[:, 1] < 0).any():
+            raise ValueError("Posture prior targets must be finite, weights >= 0")
+        index = np.array([self.coordinate_order.index(n) for n in names], dtype=int)
+        return index, values[:, 0], np.sqrt(values[:, 1])
 
     def _pose_residual_stack(
         self,
@@ -803,6 +830,10 @@ class BaseFullBodyIK:
         jacs = [prep.row_scale[:, None] * jac[prep.mask].reshape(-1, prep.nv)]
         rows.append(prep.sqrt_prior * (q_k - q_init))
         jacs.append(prep.sqrt_prior * np.eye(prep.nv))
+        index, target, sqrt_w = prep.posture
+        if index.size:
+            rows.append(sqrt_w * (q_k[index] - target))
+            jacs.append(sqrt_w[:, None] * np.eye(prep.nv)[index])
         rot_w = (
             opts.closure_weight
             if opts.closure_rotation_weight is None
@@ -988,6 +1019,8 @@ class BaseFullBodyIK:
         anchors: dict[str, Array] = {}
 
         for k in indices:
+            if opts.restart_seed_per_frame:
+                rng = np.random.default_rng((0, k))
             stance = (
                 ()
                 if opts.flat_feet_per_frame is None
@@ -1013,10 +1046,12 @@ class BaseFullBodyIK:
                 anchors=anchors if opts.plant_stance else None,
                 **f_opts,
             )
-            continuous = opts.restart_max_step_rad is not None
+            anchored = (
+                opts.restart_anchor_prior or opts.restart_max_step_rad is not None
+            )
             retry_opts = (
                 {**f_opts, "prior_anchor": np.asarray(start, dtype=float)}
-                if continuous
+                if anchored
                 else f_opts
             )
             for _ in range(

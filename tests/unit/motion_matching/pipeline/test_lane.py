@@ -151,3 +151,19 @@ def test_cli_exposes_the_restart_policy() -> None:
     assert args.ik_restart_policy == "continuous"
     with pytest.raises(SystemExit):
         parser.parse_args(["--ik-restart-policy", "jitter"])
+
+
+@pytest.mark.parametrize("policy", ["free", "continuous", "off"])
+def test_restart_report_validates_against_the_receipt_schema(policy: str) -> None:
+    from pydantic import ValidationError
+
+    from src.shared.python.motion_matching.pipeline.receipt_components import (
+        IkRestartPolicyReceipt,
+    )
+
+    lane = _synthetic_lane()
+    lane.set_restart_policy(policy)
+    block = IkRestartPolicyReceipt.model_validate(lane.restart_report())
+    assert block.policy == policy
+    with pytest.raises(ValidationError):
+        IkRestartPolicyReceipt.model_validate({**lane.restart_report(), "margin_m": -1})

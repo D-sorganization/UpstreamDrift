@@ -138,7 +138,7 @@ def _nonnegative_float(value: str) -> float:
     except ValueError as e:
         raise argparse.ArgumentTypeError(f"Invalid number: {value!r}") from e
     if not np.isfinite(val) or val < 0:
-        raise argparse.ArgumentTypeError(f"--gaze-weight must be >= 0, got {val}")
+        raise argparse.ArgumentTypeError(f"weight must be >= 0, got {val}")
     return val
 
 
@@ -360,7 +360,18 @@ def build_parser() -> argparse.ArgumentParser:
         help=(
             "trajectory IK restarts (#12042): 'free' jittered restarts, "
             "'continuous' restarts that keep the prior on the previous frame "
-            "and reject a joint step above the peak joint speed, 'off'"
+            "and reject a joint step above the peak joint speed, 'anchored' "
+            "restarts that only keep the prior on the previous frame, 'off'"
+        ),
+    )
+    parser.add_argument(
+        "--ik-posture-prior-weight",
+        type=_nonnegative_float,
+        default=0.0,
+        help=(
+            "weight of a weak prior pulling the toes and shoulder/forearm axial "
+            "rotation toward the address pose in the trajectory IK (#12042); "
+            "0 disables it (default)"
         ),
     )
     add_turn_split_arguments(parser)
@@ -1053,6 +1064,7 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
     lane.set_restart_policy(
         getattr(args, "ik_restart_policy", DEFAULT_IK_RESTART_POLICY)
     )
+    lane.posture_prior_weight = getattr(args, "ik_posture_prior_weight", 0.0)
     lane.set_turn_split(
         cal_res.attachments,
         getattr(args, "thorax_weight", DEFAULT_THORAX_WEIGHT),

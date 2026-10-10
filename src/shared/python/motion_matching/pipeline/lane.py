@@ -34,6 +34,7 @@ from src.shared.python.motion_matching.pipeline.constants import (
     IK_UNBOUNDED,
     LEG_LABELS,
     LEG_SEEDS,
+    POSTURE_PRIOR_COORDINATES,
     PRIOR,
     RESTART_MAX_JOINT_SPEED_RAD_S,
     SPIN_COORDINATES,
@@ -378,6 +379,8 @@ class Lane:
         self.shoulder_girdle_weight = 1.0
         #: Restart policy of the full-capture trajectory solve (#12042).
         self.restart_policy = DEFAULT_IK_RESTART_POLICY
+        #: Weight of the address-pose posture prior (#12042); 0 disables it.
+        self.posture_prior_weight = 0.0
 
     def set_restart_policy(self, policy: str) -> None:
         """Select the trajectory IK restart policy (#12042), one of
@@ -405,6 +408,25 @@ class Lane:
                 if policy == "continuous"
                 else None
             ),
+            "restart_anchor_prior": policy in ("anchored", "stable", "continuous"),
+            "restart_seed_per_frame": policy in ("seeded", "stable"),
+        }
+
+    def posture_prior(
+        self, kin: BaseFullBodyIK, q_address: np.ndarray
+    ) -> dict[str, tuple[float, float]] | None:
+        """Address-pose posture prior on ``POSTURE_PRIOR_COORDINATES`` the
+        model has (#12042); None while ``posture_prior_weight`` is 0."""
+        weight = float(self.posture_prior_weight)
+        if not np.isfinite(weight) or weight < 0:
+            raise ValueError(f"posture prior weight must be >= 0, got {weight}")
+        if weight == 0:
+            return None
+        order = tuple(kin.coordinate_order)
+        return {
+            name: (float(q_address[order.index(name)]), weight)
+            for name in POSTURE_PRIOR_COORDINATES
+            if name in order
         }
 
     def restart_report(self) -> dict[str, Any]:
@@ -420,6 +442,9 @@ class Lane:
                 RESTART_MAX_JOINT_SPEED_RAD_S if step is not None else None
             ),
             "max_step_rad": step,
+            "anchor_prior": settings["restart_anchor_prior"],
+            "seed_per_frame": settings["restart_seed_per_frame"],
+            "posture_prior_weight": float(self.posture_prior_weight),
         }
 
     def set_face_targets(
@@ -618,6 +643,7 @@ class Lane:
             axis_targets_per_frame=merge_axis_targets(
                 axis_targets, self.face_targets, self.thorax_targets
             ),
+            posture_prior=None if frames else self.posture_prior(kin, q_start),
             **self.restart_settings(consecutive=frames is None),
         )
 

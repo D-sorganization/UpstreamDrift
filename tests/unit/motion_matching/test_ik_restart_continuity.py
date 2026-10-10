@@ -164,3 +164,62 @@ def test_prior_anchor_must_match_the_coordinates() -> None:
             ground=GROUND,
             prior_anchor=np.zeros(5),
         )
+
+
+def test_anchored_restarts_keep_the_prior_on_the_start_pose() -> None:
+    theta = _TwoBranchJoint().solve_trajectory(
+        _targets(3),
+        np.ones((FRAMES, 3), dtype=bool),
+        np.r_[np.zeros(6), ANGLE_RAD],
+        ground=GROUND,
+        restart_anchor_prior=True,
+        prior_weight=1.0,
+        **RESTARTS,
+    )[0][:, 6]
+    # A unit prior on the previous frame outweighs the weak marker's preference.
+    assert _branch_hops(theta) == 0
+
+
+def test_posture_prior_decides_only_what_the_markers_leave_open() -> None:
+    """The weak prior fixes an unobserved coordinate from any seed and leaves
+    a marker-determined one where the markers put it. It cannot move a fit
+    across a marker barrier into the other branch: that choice belongs to the
+    seed and the restarts."""
+    kin = _TwoBranchJoint()
+    targets = _targets(3)[0]
+    targets[1, 1] = WEAK_M * np.sin(ANGLE_RAD)
+    prior = {"x": (0.4, 1e-3), "axial": (0.0, 1e-3)}
+    for seed_x in (-1.0, 0.0, 2.0):
+        seed = np.r_[seed_x, np.zeros(5), ANGLE_RAD]
+        fit = kin.solve_pose(
+            targets,
+            np.ones(3, dtype=bool),
+            seed,
+            ground=GROUND,
+            prior_weight=0.0,
+            posture_prior=prior,
+            iterations=200,
+        )
+        assert fit.q[0] == pytest.approx(0.4, abs=1e-6)
+        assert fit.q[6] == pytest.approx(ANGLE_RAD, abs=0.01)
+
+
+def test_posture_prior_validates_names_and_weights() -> None:
+    kin = _TwoBranchJoint()
+    common = {"ground": GROUND}
+    with pytest.raises(ValueError, match="Unknown posture prior"):
+        kin.solve_pose(
+            _targets(3)[0],
+            np.ones(3, dtype=bool),
+            np.zeros(7),
+            posture_prior={"elbow": (0.0, 1.0)},
+            **common,
+        )
+    with pytest.raises(ValueError, match="Posture prior"):
+        kin.solve_pose(
+            _targets(3)[0],
+            np.ones(3, dtype=bool),
+            np.zeros(7),
+            posture_prior={"axial": (0.0, -1.0)},
+            **common,
+        )
