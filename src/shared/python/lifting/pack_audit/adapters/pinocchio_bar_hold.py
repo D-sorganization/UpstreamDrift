@@ -63,7 +63,7 @@ import numpy as np
 from defusedxml import ElementTree as ET
 
 from ..model import unavailable_bar_hold
-from .bar_hold_static import static_hold_split
+from .bar_hold_static import static_hold_result, static_hold_split
 
 pin: Any = importlib.import_module("pinocchio")
 
@@ -192,13 +192,6 @@ def bar_hold_wrench(
     grip_r = _frame_translation(model, data, _RIGHT_GRIP_LINK)
 
     split = static_hold_split(bar_mass_kg, gravity, bar_com_world, grip_l, grip_r)
-    left_f = split["hand_force_n"]["L"]
-    right_f = split["hand_force_n"]["R"]
-    sum_vertical_n = float(left_f[2] + right_f[2])
-    if abs(sum_vertical_n) < 1e-9:
-        raise ValueError("sum of vertical hand forces is ~0; cannot form a split")
-
-    bar_weight_n = bar_mass_kg * split["gravity_mag_mps2"]
     n_welds = sum(
         1
         for joint in root.findall("joint")
@@ -206,24 +199,15 @@ def bar_hold_wrench(
     )
     hand_r = _frame_translation(model, data, "hand_r")
 
-    return {
-        "available": True,
-        "reason": "",
-        "split_method": "allocation",
-        "bar_mass_kg": bar_mass_kg,
-        "bar_weight_n": bar_weight_n,
-        "hand_force_n": {"L": left_f.tolist(), "R": right_f.tolist()},
-        "sum_vertical_n": sum_vertical_n,
-        "relative_error": abs(sum_vertical_n - bar_weight_n) / bar_weight_n,
-        "split_left_fraction": float(left_f[2] / sum_vertical_n),
-        "couple_at_midpoint_nm": split["couple_at_midpoint_nm"].tolist(),
-        "bar_linear_accel_mps2": None,
-        "method": _METHOD,
-        "n_welds": n_welds,
-        "hand_grip_residual_m": {
+    return static_hold_result(
+        bar_mass_kg,
+        split,
+        _METHOD,
+        n_welds,
+        {
             # grip_l IS the hand_l frame (see module docstring): the
             # residual is exactly 0 by construction, not a measurement.
             "L": 0.0,
             "R": float(np.linalg.norm(hand_r - grip_r)),
         },
-    }
+    )
