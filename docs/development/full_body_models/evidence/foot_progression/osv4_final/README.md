@@ -11,8 +11,8 @@ committed (`capture_o/engines.json`, geometry stripped).
 
 Toe-out, degrees, model (error against the capture), tolerance 2 degrees:
 
-| Engine    | A lead      | A trail      | B lead      | B trail      |
-| --------- | ----------- | ------------ | ----------- | ------------ |
+| Engine    | A lead        | A trail      | B lead        | B trail       |
+| --------- | ------------- | ------------ | ------------- | ------------- |
 | MuJoCo    | 16.59 (+0.22) | 3.92 (-0.11) | 15.19 (+0.19) | -0.42 (-0.05) |
 | Pinocchio | 16.59 (+0.22) | 3.92 (-0.11) | 15.19 (+0.19) | -0.42 (-0.05) |
 | Drake     | 16.59 (+0.22) | 3.92 (-0.11) | 15.19 (+0.19) | -0.42 (-0.05) |

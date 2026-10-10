@@ -678,6 +678,33 @@ export interface Body_import_dataset_tools_data_explorer_import_post {
   file: string;
 }
 
+export interface Body_import_session_v2_api_tools_launch_monitor_analytics_v2_import_post {
+  file: string;
+  options: string;
+}
+
+export interface Body_import_session_v2_api_v1_tools_launch_monitor_analytics_v2_import_post {
+  file: string;
+  options: string;
+}
+
+export interface Body_import_session_v2_tools_launch_monitor_analytics_v2_import_post {
+  file: string;
+  options: string;
+}
+
+export interface Body_preview_import_v2_api_tools_launch_monitor_analytics_v2_import_preview_post {
+  file: string;
+}
+
+export interface Body_preview_import_v2_api_v1_tools_launch_monitor_analytics_v2_import_preview_post {
+  file: string;
+}
+
+export interface Body_preview_import_v2_tools_launch_monitor_analytics_v2_import_preview_post {
+  file: string;
+}
+
 export interface Body_upload_c3d_api_tools_motion_capture_upload_c3d_post {
   file: string;
 }
