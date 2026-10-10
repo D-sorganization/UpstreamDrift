@@ -68,12 +68,12 @@
 +    from scripts.research.shot_pattern_analysis.report_synthesis import validate_resolved_selection
 +    return (select_bounds_control_pairs, select_representative_interaction_pairs, validate_resolved_selection)
 +select_bounds_control_pairs, select_representative_interaction_pairs, validate_resolved_selection = _load_public_apis()
- 
+
  def sha(p):
      return hashlib.sha256(p.read_bytes()).hexdigest()
 @@ -38,7 +46,14 @@
 
- 
+
  def check(label, token, value):
      d = Decimal(token)
 -    tol = float(Decimal(10) ** d.as_tuple().exponent) / 2 + abs(float(value)) * 1e-12
@@ -341,7 +341,7 @@
 -    elif abs(a - b) > Decimal('0.50000001') * Decimal(10) ** a.as_tuple().exponent + abs(b) * Decimal('1e-14'):
 +    elif abs(a - b) > Decimal('0.50000001') * Decimal(10) ** exp + abs(b) * Decimal('1e-14'):
          raise ValueError(('display precision mismatch', display, want))
- 
+
  def verify(s):
 @@ -160,4 +172,4 @@
 
@@ -428,7 +428,7 @@
 +
 +class CaptureResult(TypedDict):
  results = []
- 
+
 -def capture(fig, stem, *, dpi):
 -    fig.canvas.draw()
 -    renderer = fig.canvas.get_renderer()
@@ -505,7 +505,7 @@
 @@ -22,7 +23,7 @@
 
      return {str(p.relative_to(root)): digest(p) for folder in ['src/tools/shot_pattern_analysis', 'scripts/research/shot_pattern_analysis'] for p in (root / folder).rglob('*.py')}
- 
+
  def data_value(value):
 -    if dataclasses.is_dataclass(value):
 +    if dataclasses.is_dataclass(value) and (not isinstance(value, type)):
@@ -562,7 +562,7 @@
 +            current['ledger'] = ledger
 +            captures[item['label']] = current
      (out / 'capture.json').write_text(json.dumps(data_value(captures), indent=2) + '\n')
- 
+
  def main():
 --- original/docs/research/shot_pattern_analysis/phase2/validation/v6_output_review_harness_v1/review_batch.py
 
@@ -575,7 +575,7 @@
  from pathlib import Path
 +from typing import Any
  from PIL import Image, ImageDraw, ImageFont
- 
+
  def sha(path):
 @@ -138,6 +139,8 @@
 
@@ -622,7 +622,7 @@
      pipeline = types.ModuleType('src.tools.shot_pattern_analysis.matched_supplement_pipeline')
 -    pipeline._report_source_hashes = dict
 +    monkeypatch.setattr(pipeline, '_report_source_hashes', dict, raising=False)
- 
+
 -    def forbidden(*args):
 +    def forbidden(*args: object):
          raise AssertionError('live outputs must not be read')
