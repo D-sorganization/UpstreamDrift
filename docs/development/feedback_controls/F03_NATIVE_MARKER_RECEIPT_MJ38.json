@@ -1,0 +1,44 @@
+{
+  "coordination": "offline-parent-authorized-F03; reconcile child lease after GitHub quota recovers",
+  "host_alias": "wsl-task-overlay",
+  "junit_sha256": "0d79e6e720eb2a21e4d3207ba2d0c4b1456c2864cb81bd973360c0961d16961c",
+  "native_evidence": {
+    "accepted_commands": 4,
+    "applied_input_sha256": "9b171e19844988e060eba3788f39933da878500f9e9538bd16629e987695dbe5",
+    "fit_marker_rmse_m": 1.7134288601908426e-9,
+    "full_trajectory_accepted": true,
+    "initial_state_sha256": "3be7a6287343434f8dc89a3c3a0a9520dfc6cc1f5ac3b850f34bc133133dfe5c",
+    "loaded_native_model_sha256": "da5a152b118a69bba715037332324755fedb04764f22a6c2b50f0aed6a96ece5",
+    "masked_site_samples": 1,
+    "max_full_state_replay_error": 0.0,
+    "observation_sha256": "25f84a9a25866705903c50ac7aa86093cc352b1b83f253ff1a16efbdd39883e9",
+    "observed_site_samples": 15,
+    "policy_sha256": "0619de23c0cba4490d91e3d48bd054ec104b0c974f14e3b4180c00c65f9c663d",
+    "source_model_sha256": "c01dd114257f0f7fbb1e497d73ab292bf6170b56b2dfb12f957a2bd1e93118ba",
+    "statuses": ["optimized", "optimized", "optimized", "optimized"],
+    "steps": 4,
+    "time_grid_sha256": "5943c4a2f41de814cf69d88aa34be89d5b1ec35766de0d58ae91289084a59c20",
+    "total_cpu_s": 0.24334493099999976,
+    "total_wall_s": 0.5550919420202263,
+    "zero_marker_rmse_m": 0.008878453818013436
+  },
+  "parent_issue": 11787,
+  "provider_versions": {
+    "crocoddyl": "3.2.1",
+    "mujoco": "3.8.0",
+    "numpy": "2.5.3",
+    "pinocchio": "4.1.0"
+  },
+  "qualification": "synthetic-contact-free-native-fixture-only",
+  "schema_version": "f03-native-marker-fit/1",
+  "source_sha256": {
+    "scripts/f03_native_marker_receipt.py": "8465d378e0e68dbfc0284e8d76b76e2630d9311a78edc31db9fe1bd48587f014",
+    "src/engines/physics_engines/mujoco/python/native_manifold_box_fddp.py": "0751e9d203b2f824d5fe7ca2bd68b25e3ade3a7e96860c132c0ec9afe52f55fd",
+    "src/engines/physics_engines/mujoco/python/native_marker_fit.py": "0e6ec4de904caf0502718f5a4d64f17f58d59408556c0686c708037f844bee26",
+    "src/engines/physics_engines/mujoco/python/native_tangent_derivative.py": "0ce33ffe71ee11ad7d2bb49aec0efcdf779ae2ab5fa11d3e93ffd6b86b73376e",
+    "src/engines/physics_engines/mujoco/python/native_torque_replay.py": "8908ddb4ca0ed0d98ae4cc8580315335773fd5f8d5209b3159a11f3bacde6724",
+    "tests/unit/motion_matching/test_f03_native_marker_receipt.py": "b845fe132651a3bc2f0d01a1d8e6d0975c128a7246b0e5253ef3f0a6e6de4f8d",
+    "tests/unit/motion_matching/test_native_marker_fit.py": "ac31f64472a2d88460fee321785d8268714532d60e0943df731113a009940167"
+  },
+  "tools_gitlink": "2e7665111b06f92ffbfe178b92d74d6a81c95388"
+}
