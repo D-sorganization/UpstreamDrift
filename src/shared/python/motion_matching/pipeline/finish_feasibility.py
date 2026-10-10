@@ -394,8 +394,9 @@ def simulation_history(
     groups = _side_groups(list(adapter._spheres))
     positions, ratios = [], []
     for q, v in zip(record.q, record.v, strict=True):
-        positions.append(_sphere_centres(sim, q))
-        samples = adapter.evaluate_contact_samples(sim._map(q), sim._map(v))
+        q_arr, v_arr = np.asarray(q), np.asarray(v)
+        positions.append(_sphere_centres(sim, q_arr))
+        samples = adapter.evaluate_contact_samples(sim._map(q_arr), sim._map(v_arr))
         ratios.append(_foot_friction_ratio(samples, groups, n, weight_n))
     col = _yaw_index(sim)
     yaw_ref = np.interp(record.time_s, times_track, np.asarray(q_track)[:, col])
