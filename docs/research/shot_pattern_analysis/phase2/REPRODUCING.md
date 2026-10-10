@@ -33,6 +33,8 @@ only `academic_plots.py` and `matched_report_plots.py` are permitted reporting
 differences in that execution snapshot. All study Python is frozen for the live
 jobs. Do not change code or start a second writer in their output directories.
 
+The caption-only original-figure revision uses BOUNDS candidate `c9c0fb194f` and the [V6 Preflight and Wrapper](validation/original_final_figures_rendering_v6_preflight/README.md). The first v5 launch failed its output-name contract before rendering; the corrected invocation keeps canonical names. Historical v4 outputs are retained under `presentation_preview_rejected_final_v4`, with [Exact-Byte Relocation Evidence](validation/original_final_figures_v4_preservation/relocation.json). A source/input preflight does not establish final graphical acceptance.
+
 The supplemental pipeline separately binds 14 postprocessing source files,
 including the shared `matched_formatting.py` precision helper, in
 `REPORT_SUPPLEMENT_PIPELINE.json`. This reporting identity does not replace the
