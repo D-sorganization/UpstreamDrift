@@ -90,6 +90,10 @@ Protocol guard #12169 is independently qualified and committed in isolated BOUND
 
 The operational PDF/SVG helper is independently qualified under #12160 and relocated to `scripts/research/shot_pattern_analysis/vector_inspection.py`, with discoverable tests in `tests/research/test_shot_pattern_vector_inspection.py`. Seven demonstrated failures were corrected; Astra and root each passed 37 tests and static checks. Root verified an actual completed primary PDF/SVG pair and all source/evidence bindings. Evidence: `validation/vector_inspection_qualification_v1/`; rejected candidate/claims remain in `vector_inspection_candidate_v1/`. Editing is idle. This is bounded parsing/resource diagnostics only: use it after existing terminal/strict-loader gates, then perform required vector rendering/content/bounds and visual reviews. No v6 assets or frozen producer sources were changed.
 
+## Original Vector Format Review
+
+Astra is auditing every PDF/SVG from the two completed original figure manifests with the qualified inspector (session `37782`, `/tmp/p2-original-vector-diagnostics/audit.py`; verify the live process before assuming activity). Final counts, warnings and hash reconciliation are pending. No live supplemental vector is read. Root separately viewed a completed 7-iron social-density PDF/SVG family and its PNG; labels and panels are intact. Evidence: `validation/vector_raster_sample_v1/`. The installed Sharp density setting does not map linearly from SVG point units to raster pixels; retain actual dimensions and proportional aspect in future comparisons. This is not a deliverable defect or full visual acceptance.
+
 ## Completed Numerical Data
 
 All simulation workers, full saved-data audits and fresh archive restorations are finished. Do not restart them.
