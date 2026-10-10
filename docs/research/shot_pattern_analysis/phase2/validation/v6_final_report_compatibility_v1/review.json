@@ -1,0 +1,26 @@
+{
+  "scope": "Final Report Consumer Compatibility After Protocol-Safe Figure Naming",
+  "checked_at": "2026-10-10T15:40:11.702050+00:00",
+  "commit": "b6ab6d179a95c69009e6a495041f51a6340f1185",
+  "command": "QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg OPENBLAS_NUM_THREADS=1 /tmp/shot-pattern-validation-venv-20261009/bin/python -m pytest -o addopts= -q tests/research/test_shot_pattern_final_report_assets.py tests/research/test_shot_pattern_final_report.py tests/research/test_shot_pattern_report_synthesis.py",
+  "result": {
+    "exit_code": 0,
+    "passed": 40,
+    "warnings": 7,
+    "seconds": 6.79
+  },
+  "sources": {
+    "scripts/research/shot_pattern_analysis/build_final_report.py": "196dd522869ceaa33d63f606b016abcaeabdd0d6cd91f81a103488d225c536d3",
+    "scripts/research/shot_pattern_analysis/final_report_inputs.py": "d651e71b3eb9bf17c08d70118d6b4d9d27aadda9094956614509b987ed28119c",
+    "scripts/research/shot_pattern_analysis/report_synthesis.py": "b30aea47fdebe1149075a955a39cbb742d11b5577a5029fc0a0e2377d789e58c",
+    "src/tools/shot_pattern_analysis/matched_figure_identity.py": "fc475ced792c889c2e63a216b7194da2f0ab27ca8e940e472fcbb15c2b68e4d1",
+    "src/tools/shot_pattern_analysis/matched_supplement_figures.py": "8a61cc4df94a59b4a8ee8ab110d51899e2390587e1f76862a6c871ea884f5754",
+    "src/tools/shot_pattern_analysis/matched_supplement_pipeline.py": "6590c485e5f8eb71b12ae2616ddb9c30b99e8a762aad781ddb3de64f2cd572f3",
+    "tests/research/test_shot_pattern_final_report_assets.py": "e9043ca09fbf63d95c76cf53947afe316d8374b73a9a780ced0d38421a029578",
+    "tests/research/test_shot_pattern_final_report.py": "db581199fcf5294564e6669c5c05c071887321ded383df4ec2eb328e576907c6",
+    "tests/research/test_shot_pattern_report_synthesis.py": "2a726b5eed6be5b33825d3c348e910d4ef442dee6381fb5046e5f9b15e403a0e"
+  },
+  "log_sha256": "9a84e3104773ac68e99677b671094f028347d3a7449428fc10ceb58df5088b87",
+  "full_publication_accepted": false,
+  "limitations": "Fixture-based consumer regression tests; live v6 numerical stage and full output review remain pending."
+}
