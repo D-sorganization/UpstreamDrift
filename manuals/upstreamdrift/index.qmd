@@ -85,6 +85,8 @@ UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
 
 {{< include chapters/48-native-constrained-mixed-moco.qmd >}}
 
+{{< include chapters/49-native-opensim-mixed-marker-observation.qmd >}}
+
 {{< include chapters/39-native-offline-muscle-matching.qmd >}}
 
 {{< include chapters/34-owned-native-simscape-replay.qmd >}}

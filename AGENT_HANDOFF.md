@@ -1051,3 +1051,23 @@ one optional provider skip. Canonical calculation is chapter48; turnover is
 The calculation registry remains empty and release blocked; full-body
 anatomy, calibration, physiology, contact/grip, capture horizon, production
 variants and six-engine parity remain unresolved.
+
+## OpenSim Mixed Replay Marker Scoring (#12195)
+
+Issue #12195 adds `native_mixed_marker_observation.py` on the constrained
+mixed replay seam. It consumes an exact frozen T01 bundle and runs the
+maintained fresh native replay once. For marker FK it restores the full
+ordered named state and exact replay clock, then evaluates explicit
+PhysicalFrame/local-offset bindings through the existing no-assembly native
+observer. Existing position alignment/scoring retains the separate measured
+clock and rejects extrapolation. The actual OpenSim 4.6 constrained-mixed
+module reports 12 passed, including source-mismatch and out-of-horizon
+negatives. Two portable contract tests protect the unqualified status.
+
+The result and receipt digest are diagnostic records only, explicitly
+unqualified; they are not an authenticated native execution receipt or F01
+admission. Bindings remain caller-declared and no calibration is inferred.
+Private-capture fit, anatomy, resource closure, physiology, contact, production
+variants and six-engine parity remain open. Canonical chapter49 and turnover
+are `manuals/upstreamdrift/chapters/49-native-opensim-mixed-marker-observation.qmd`
+and `docs/development/feedback_controls/F09Q-OPENSIM-MIXED-MARKER-SCORING.md`.

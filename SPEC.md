@@ -11042,6 +11042,12 @@ remain separate. The strict default muscle-only policy is unchanged. Its
 only; full-body qualification, private capture, all required variants and
 six-engine parity remain open. See canonical chapter48 and
 `F07_CONSTRAINED_MIXED_MOCO_TURNOVER.md`.
+Child #12195 adds an opt-in complete-state OpenSim mixed replay to explicit
+PhysicalFrame marker observation and the existing exact-observation-clock
+scorer. The model-owned FK restores saved named states without assembly; the
+diagnostic output remains unqualified and does not assert calibration or F01
+admission. See canonical chapter49 and
+`F09Q-OPENSIM-MIXED-MARKER-SCORING.md`.
 The F07 #12143 versioned constrained-muscle policy extends a declared
 native OpenSim cold start to exact ordered excitation T01 export, fresh
 source replay and marker sampling without reassembly. A coupler-only
