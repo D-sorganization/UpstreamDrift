@@ -1,0 +1,15 @@
+..................F                                                      [100%]
+=================================== FAILURES ===================================
+__________________ test_wrong_cell_population_count_rejected ___________________
+
+    def test_wrong_cell_population_count_rejected():
+        rows=json.loads(Path(__file__).with_name('saved_caption_fixtures.json').read_text())
+        row=next(r for r in rows if r['group']=='cells')
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+/tmp/shot-pattern-v6-output-review/test_review_batch.py:113: Failed
+=========================== short test summary info ============================
+FAILED ../../../../tmp/shot-pattern-v6-output-review/test_review_batch.py::test_wrong_cell_population_count_rejected
+1 failed, 18 passed in 0.83s

@@ -1,0 +1,196 @@
+"""Snapshot complete publication components; contact creation is not visual acceptance."""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import html
+import json
+import re
+import sys
+from pathlib import Path
+
+from PIL import Image, ImageDraw, ImageFont
+
+
+def sha(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--repo", type=Path, required=True)
+    parser.add_argument("--report", type=Path, required=True)
+    parser.add_argument("--expected-numeric", type=Path, required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--group", choices=("pairs", "cells"), required=True)
+    parser.add_argument(
+        "--kind", choices=("across_lean", "curve_strength", "shaft_rotation_sd")
+    )
+    parser.add_argument("--offset", type=int, default=0)
+    parser.add_argument("--limit", type=int, default=12)
+    args = parser.parse_args()
+    if args.offset < 0 or args.limit < 1 or args.output.exists():
+        raise ValueError(
+            "Use a fresh evidence directory and a nonnegative bounded selection"
+        )
+    sys.path.insert(0, str(args.repo.resolve()))
+    from src.tools.shot_pattern_analysis.matched_supplement_figures import (
+        _slug,
+        pair_comparison_identity,
+        pair_comparison_slug,
+    )
+    from src.tools.shot_pattern_analysis.matched_supplement_pipeline import (
+        _check_numeric_parity_reference,
+        _load_numeric_parity_reference,
+        _report_source_hashes,
+    )
+
+    source_before = _report_source_hashes()
+    reference = _load_numeric_parity_reference(args.expected_numeric)
+    _check_numeric_parity_reference(reference, args.report)
+    numeric = {name: sha(args.report / name) for name in reference["artifact_sha256"]}
+    if args.group == "pairs":
+        records = json.loads(
+            (args.report / "REPORT_SUPPLEMENT_COMPARISONS.json").read_text()
+        )["comparisons"]
+        if args.kind:
+            records = [r for r in records if r["comparison_kind"] == args.kind]
+        records.sort(key=pair_comparison_identity)
+        suffixes = [
+            f"density_{p}_social.{e}"
+            for p in ("straight", "draw", "fade")
+            for e in ("png", "pdf", "svg")
+        ]
+        suffixes += [
+            f"{k}.{e}" for k in ("density", "overhead") for e in ("png", "pdf", "svg")
+        ]
+        suffixes += ["overhead_social.png"]
+    else:
+        records = json.loads((args.report / "REPORT_SUPPLEMENT.json").read_text())[
+            "unique_cells"
+        ]
+        records.sort(key=lambda r: (r["source_protocol"], r["cell"]))
+        suffixes = [
+            f"{k}.{e}"
+            for k in ("density", "density_social", "overhead", "overhead_social")
+            for e in ("png", "pdf", "svg")
+        ]
+    args.output.mkdir(parents=True)
+    reviewed, pending = [], []
+    font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 22)
+    for index, record in enumerate(
+        records[args.offset : args.offset + args.limit], args.offset
+    ):
+        stem = (
+            pair_comparison_slug(record)
+            if args.group == "pairs"
+            else _slug(record["cell"])
+        )
+        directory = "comparisons" if args.group == "pairs" else "cells"
+        files = [args.report / "figures" / directory / f"{stem}_{s}" for s in suffixes]
+        if not all(p.is_file() for p in files):
+            pending.append(
+                {
+                    "index": index,
+                    "stem": stem,
+                    "present": sum(p.is_file() for p in files),
+                }
+            )
+            continue
+        hashes = {str(p.relative_to(args.report)): sha(p) for p in files}
+        extracted = {}
+        for p in files:
+            if p.suffix == ".svg":
+                text = " ".join(
+                    html.unescape(t)
+                    for t in re.findall(r"<!-- (.*?) -->", p.read_text(), re.DOTALL)
+                )
+                extracted[p.name] = " ".join(text.split())
+                # Social density captions carry exact source and physical-target identity.
+                if "density" in p.name and "social" in p.name:
+                    flat = re.sub(r"\s+", "", text)
+                    protocols = (
+                        record["source_protocols"]
+                        if args.group == "pairs"
+                        else [record["source_protocol"]]
+                    )
+                    assert all(
+                        re.sub(r"\s+", "", protocol) in flat for protocol in protocols
+                    ), p
+                    target = (
+                        record["target_x_m"]
+                        if args.group == "pairs"
+                        else record["summary"]["target_x_m"]
+                    )
+                    assert re.sub(r"\s+", "", f"{target:.2f} m") in flat, p
+                    if args.group == "pairs":
+                        assert "AllSixPopulations" in flat, p
+                        assert (
+                            f"{record['common_supported_n']:,}/{record['total_n_per_population']:,}"
+                            in flat
+                        ), p
+        pngs = [p for p in files if p.suffix == ".png"]
+        contacts = []
+        # Only two charts per large contact: preserve useful scientific label size.
+        for start in range(0, len(pngs), 2):
+            canvas = Image.new("RGB", (3000, 1800), "white")
+            draw = ImageDraw.Draw(canvas)
+            for j, p in enumerate(pngs[start : start + 2]):
+                with Image.open(p) as image:
+                    image.load()
+                    image.thumbnail((1480, 1690))
+                    canvas.paste(
+                        image.convert("RGB"), (j * 1500 + (1500 - image.width) // 2, 75)
+                    )
+                draw.text(
+                    (j * 1500 + 10, 10),
+                    f"{index}: {p.name[len(stem) + 1 :]}",
+                    fill="black",
+                    font=font,
+                )
+            contact = args.output / f"contact_{index:03}_{start // 2 + 1}.jpg"
+            canvas.save(contact, quality=96)
+            contacts.append({"path": contact.name, "sha256": sha(contact)})
+        assert all(sha(args.report / p) == h for p, h in hashes.items())
+        reviewed.append(
+            {
+                "index": index,
+                "record": record,
+                "stem": stem,
+                "asset_sha256": hashes,
+                "svg_text": extracted,
+                "contacts": contacts,
+                "visual_review": "pending",
+            }
+        )
+    assert source_before == _report_source_hashes()
+    assert numeric == {name: sha(args.report / name) for name in numeric}
+    _check_numeric_parity_reference(reference, args.report)
+    receipt = {
+        "scope": "Provisional Complete-Component File Snapshot; Not Visual or Whole-Publication Acceptance",
+        "accepted": False,
+        "producer_sources": source_before,
+        "script_sha256": sha(Path(__file__)),
+        "numeric_sha256": numeric,
+        "expected_reference": reference,
+        "group": args.group,
+        "kind": args.kind,
+        "offset": args.offset,
+        "limit": args.limit,
+        "selected": reviewed,
+        "pending": pending,
+        "final_manifest_reconciliation": "pending",
+    }
+    (args.output / "batch_inventory.json").write_text(
+        json.dumps(receipt, indent=2) + "\n"
+    )
+    sys.stdout.write(
+        json.dumps(
+            {"complete_components": len(reviewed), "pending_components": len(pending)}
+        )
+    )
+
+
+if __name__ == "__main__":
+    main()
