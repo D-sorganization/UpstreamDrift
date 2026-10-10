@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import hashlib
 import json
 import sys
 import uuid
@@ -53,6 +52,13 @@ from src.tools.launch_monitor_analytics.flexible_analysis_widget import (
     FlexibleAnalysisWidget,
 )
 from src.tools.launch_monitor_analytics.plot_canvas import PlotCanvas
+from src.tools.launch_monitor_analytics.reporting import (
+    SCIENTIFIC_BOUNDARY_TEXT,
+    build_data_export_record,
+    build_project_report,
+    build_reproducibility_manifest,
+    format_canonical_csv_export,
+)
 from src.tools.launch_monitor_analytics.widgets import (
     DataFrameTable,
     ImportMappingDialog,
@@ -163,11 +169,7 @@ class MainWidget(DestructiveActionGuards, QtWidgets.QWidget):
             "measurement systems, and track dispersion and player change."
         )
         subtitle.setWordWrap(True)
-        self.scientific_boundary = QtWidgets.QLabel(
-            "Scientific Boundary: Correlation and predictive fit do not establish "
-            "causality. Derived metrics and unmatched monitor comparisons require "
-            "special care."
-        )
+        self.scientific_boundary = QtWidgets.QLabel(SCIENTIFIC_BOUNDARY_TEXT)
         self.scientific_boundary.setObjectName("ScientificBoundary")
         self.scientific_boundary.setWordWrap(True)
 
@@ -734,42 +736,19 @@ class MainWidget(DestructiveActionGuards, QtWidgets.QWidget):
         self.session_tree.resizeColumnToContents(0)
 
     def _refresh_report(self) -> None:
-        source_fields = len(
-            [
-                column
-                for column in self.analysis_frame
-                if str(column).startswith("source::")
-            ]
-        )
-        metrics = numeric_metric_columns(self.analysis_frame)
         warnings = [
             warning
             for session in self.project.sessions
             for warning in session.manifest.warnings
         ]
         self.report_text.setPlainText(
-            "Launch Monitor Analytics Project\n"
-            "================================\n"
-            f"Project: {self.project.name}\n"
-            f"Sessions: {len(self.project.sessions)}\n"
-            f"Shots: {len(self.analysis_frame)}\n"
-            f"Canonical Numeric Metrics: {len(metrics)}\n"
-            f"Retained Source Fields: {source_fields}\n"
-            f"Import Warnings: {len(warnings)}\n\n"
-            f"Recorded Treatment Actions: {len(self.project.audit_log)}\n\n"
-            "Scientific Interpretation & Traceability\n"
-            "-----------------------------------------\n"
-            "Relationships describe association, not causation. Identity-derived "
-            "metrics are marked by the metric registry. Matched shots are required "
-            "for monitor bias and agreement claims; unmatched comparisons remain "
-            "descriptive. Original source columns and per-file SHA-256 provenance "
-            "are retained in the project.\n\n"
-            "Methodology & Formula Traceability:\n"
-            "- Longitudinal trends: Theil-Sen robust linear regression with Mann-Kendall test\n"
-            "- Dispersion: 95% bivariate normal confidence ellipse (Hotelling T^2)\n"
-            "- Multicollinearity: Variance Inflation Factor (VIF = 1 / (1 - R_i^2))\n"
-            "- Strokes Gained: SG = verified E(start state) - 1 - verified E(finish state) "
-            "(Broadie 2011/2014, DOI: 10.1287/inte.1110.0594)\n"
+            build_project_report(
+                project_name=self.project.name,
+                session_count=len(self.project.sessions),
+                frame=self.analysis_frame,
+                import_warning_count=len(warnings),
+                treatment_action_count=len(self.project.audit_log),
+            )
         )
 
     # ---- shared action-bar plumbing (#9470) -----------------------------
@@ -1482,16 +1461,16 @@ class MainWidget(DestructiveActionGuards, QtWidgets.QWidget):
             table = table.replace_schema_metadata(metadata)
             pq.write_table(table, destination)
         else:
-            with destination.open("w", encoding="utf-8", newline="") as handle:
-                handle.write(f"# export_id={export_id} exported_at={exported_at}\n")
-                self.analysis_frame.to_csv(handle, index=False)
-        data_sha256 = hashlib.sha256(destination.read_bytes()).hexdigest()
-        self._last_data_export = {
-            "export_id": export_id,
-            "exported_at": exported_at,
-            "data_file": destination.name,
-            "data_sha256": data_sha256,
-        }
+            csv_text = format_canonical_csv_export(
+                self.analysis_frame, export_id=export_id, exported_at=exported_at
+            )
+            destination.write_text(csv_text, encoding="utf-8", newline="")
+        self._last_data_export = build_data_export_record(
+            export_id=export_id,
+            exported_at=exported_at,
+            data_file=destination.name,
+            data_bytes=destination.read_bytes(),
+        )
         return destination
 
     def _on_export_data(self) -> None:
@@ -1519,15 +1498,14 @@ class MainWidget(DestructiveActionGuards, QtWidgets.QWidget):
         stays verifiably linked even once separated on disk.
         """
         destination = Path(path)
-        payload = {
-            "project": self.project.name,
-            "sessions": [asdict(session.manifest) for session in self.project.sessions],
-            "treatment_audit_log": self.project.audit_log,
-            "analysis_rows": len(self.analysis_frame),
-            "canonical_metrics": numeric_metric_columns(self.analysis_frame),
-            "scientific_boundary": self.scientific_boundary.text(),
-            "data_export": self._last_data_export,
-        }
+        payload = build_reproducibility_manifest(
+            project_name=self.project.name,
+            sessions=[asdict(session.manifest) for session in self.project.sessions],
+            treatment_audit_log=self.project.audit_log,
+            frame=self.analysis_frame,
+            scientific_boundary=self.scientific_boundary.text(),
+            data_export=self._last_data_export,
+        )
         destination.write_text(json.dumps(payload, indent=2, default=str), "utf-8")
         return destination
 
