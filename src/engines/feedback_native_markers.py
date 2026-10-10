@@ -10,9 +10,6 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-from src.shared.python._seam_redirect import extend_sidekick_lab_path
-
-extend_sidekick_lab_path()
 
 from src.shared.python.motion_matching.replay_metrics import NativeMarkerPositionOutput
 

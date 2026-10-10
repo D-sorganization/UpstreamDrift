@@ -20,31 +20,28 @@ from src.engines.feedback_native_execution import (
     validate_native_replay_output,
 )
 from src.engines.model_inventory import EngineModelInventory, TARGET_ENGINES
-from src.shared.python._seam_redirect import extend_sidekick_lab_path
+from src.engines.native_replay_contracts import native_replay_contract_types
 
-extend_sidekick_lab_path()
-
-from sidekick.lab.mocap import (
-    ActuationInputKind,
-    CapabilityAvailability,
-    CapabilityDeclaration,
-    CapabilitySupport,
-    InitialStateSchema,
-    InputChannel,
-    InputInterpolation,
-    DriveMode as T02DriveMode,
-    ModelIdentity,
-    ReplayExecutionPolicy,
-    ReplayMode,
-    StateComponentRole,
-    StateComponentSpec,
-    ComparisonEvidenceRow,
-    EvidenceArtifactKind,
-    EvidenceArtifactReference,
-    ImplementationEvidence,
-    ImplementationEvidenceKind,
-    build_experiment_replay_bundle,
-)
+_mocap = native_replay_contract_types()
+ActuationInputKind = _mocap.ActuationInputKind
+CapabilityAvailability = _mocap.CapabilityAvailability
+CapabilityDeclaration = _mocap.CapabilityDeclaration
+CapabilitySupport = _mocap.CapabilitySupport
+InitialStateSchema = _mocap.InitialStateSchema
+InputChannel = _mocap.InputChannel
+InputInterpolation = _mocap.InputInterpolation
+T02DriveMode = _mocap.DriveMode
+ModelIdentity = _mocap.ModelIdentity
+ReplayExecutionPolicy = _mocap.ReplayExecutionPolicy
+ReplayMode = _mocap.ReplayMode
+StateComponentRole = _mocap.StateComponentRole
+StateComponentSpec = _mocap.StateComponentSpec
+ComparisonEvidenceRow = _mocap.ComparisonEvidenceRow
+EvidenceArtifactKind = _mocap.EvidenceArtifactKind
+EvidenceArtifactReference = _mocap.EvidenceArtifactReference
+ImplementationEvidence = _mocap.ImplementationEvidence
+ImplementationEvidenceKind = _mocap.ImplementationEvidenceKind
+build_experiment_replay_bundle = _mocap.build_experiment_replay_bundle
 
 pytestmark = pytest.mark.unit
 
@@ -357,7 +354,9 @@ def test_request_references_bundle_model_path_without_serializing_it(
 def test_command_admission_requires_matching_t02_profile_artifact(
     registry: FeedbackComparisonRegistry,
 ) -> None:
-    from sidekick.lab.mocap import COMPILED_ACTUATOR_PROFILE_SCHEMA_VERSION
+    COMPILED_ACTUATOR_PROFILE_SCHEMA_VERSION = (
+        native_replay_contract_types().COMPILED_ACTUATOR_PROFILE_SCHEMA_VERSION
+    )
 
     f01_row = registry.get("myosuite/driver", "default", DriveMode.MUSCLE_EXCITATION)
     _, source_bundle, _ = _bundle(registry)
@@ -380,10 +379,9 @@ def test_command_admission_requires_matching_t02_profile_artifact(
     ).encode()
     profile_sha = hashlib.sha256(profile_bytes).hexdigest()
     reference = "opaque:test-compiled-profile"
-    from sidekick.lab.mocap import (
-        COMPILED_ACTUATOR_PROFILE_ID,
-        COMPILED_ACTUATOR_PROFILE_VERSION,
-    )
+    contracts = native_replay_contract_types()
+    COMPILED_ACTUATOR_PROFILE_ID = contracts.COMPILED_ACTUATOR_PROFILE_ID
+    COMPILED_ACTUATOR_PROFILE_VERSION = contracts.COMPILED_ACTUATOR_PROFILE_VERSION
 
     t02_row = ComparisonEvidenceRow(
         "myosuite/driver/default/muscle_excitation",

@@ -2,7 +2,7 @@
 
 Generated from catalog.json and current source evidence. Edit the sources and regenerate.
 
-Source fingerprint: `41292379031b4a3777d26d45042f0975a4b1f5c748cae2c239d65acd5967ee57`.
+Source fingerprint: `efaa4f432a72f6b2930712794da770039fdd0bfb5c3a48133b42a261b9c37508`.
 
 This map covers registered components. A source match is not scientific approval or proof that tests passed.
 
@@ -173,8 +173,8 @@ ID: `project-myosuite-tasks` · Owner: UpstreamDrift: src/engines · Status: imp
 SDK source-bound production task histories and exact independent native replay; short integration evidence does not qualify capture or physiology.
 
 - **Sources:** [myosuite_project_task_producer.py](../../src/engines/myosuite_project_task_producer.py), [myosuite_project_feedback.py](../../src/engines/myosuite_project_feedback.py), [myosuite_project_forecast.py](../../src/engines/myosuite_project_forecast.py), [myosuite_project_native_search.py](../../src/engines/myosuite_project_native_search.py), [project_task_replay_artifacts.py](../../src/engines/project_task_replay_artifacts.py), [myosuite_project_tracking.py](../../src/engines/myosuite_project_tracking.py), [myosuite_project_command_solve.py](../../src/engines/myosuite_project_command_solve.py), [bounded_candidate_search.py](../../src/shared/python/motion_matching/bounded_candidate_search.py)
-- **Documentation:** [38-project-myosuite-task-replay.qmd](../../manuals/upstreamdrift/chapters/38-project-myosuite-task-replay.qmd), [F09I-PROJECT-TASK-TURNOVER.md](../../docs/development/feedback_controls/F09I-PROJECT-TASK-TURNOVER.md), [F09J-FEEDBACK-RECORDING-TURNOVER.md](../../docs/development/feedback_controls/F09J-FEEDBACK-RECORDING-TURNOVER.md), [F09K-OWNED-FORECAST-TURNOVER.md](../../docs/development/feedback_controls/F09K-OWNED-FORECAST-TURNOVER.md), [F09L-NATIVE-SEARCH-TURNOVER.md](../../docs/development/feedback_controls/F09L-NATIVE-SEARCH-TURNOVER.md), [F09M-NATIVE-TRACKING-TURNOVER.md](../../docs/development/feedback_controls/F09M-NATIVE-TRACKING-TURNOVER.md), [F09N-NATIVE-COMMAND-SOLVE-TURNOVER.md](../../docs/development/feedback_controls/F09N-NATIVE-COMMAND-SOLVE-TURNOVER.md)
-- **Tests:** [test_project_task_producer.py](../../tests/unit/engines/myosuite/test_project_task_producer.py), [test_project_task_feedback.py](../../tests/unit/engines/myosuite/test_project_task_feedback.py), [test_project_task_forecast.py](../../tests/unit/engines/myosuite/test_project_task_forecast.py), [test_project_task_native_search.py](../../tests/unit/engines/myosuite/test_project_task_native_search.py), [test_project_task_artifact_admission.py](../../tests/unit/engines/myosuite/test_project_task_artifact_admission.py), [test_native_model_resource_closure.py](../../tests/unit/engines/myosuite/test_native_model_resource_closure.py), [test_project_task_tracking.py](../../tests/unit/engines/myosuite/test_project_task_tracking.py), [test_project_task_command_solve.py](../../tests/unit/engines/myosuite/test_project_task_command_solve.py), [test_bounded_candidate_search.py](../../tests/unit/motion_matching/test_bounded_candidate_search.py)
+- **Documentation:** [38-project-myosuite-task-replay.qmd](../../manuals/upstreamdrift/chapters/38-project-myosuite-task-replay.qmd), [F09I-PROJECT-TASK-TURNOVER.md](../../docs/development/feedback_controls/F09I-PROJECT-TASK-TURNOVER.md), [F09J-FEEDBACK-RECORDING-TURNOVER.md](../../docs/development/feedback_controls/F09J-FEEDBACK-RECORDING-TURNOVER.md), [F09K-OWNED-FORECAST-TURNOVER.md](../../docs/development/feedback_controls/F09K-OWNED-FORECAST-TURNOVER.md), [F09L-NATIVE-SEARCH-TURNOVER.md](../../docs/development/feedback_controls/F09L-NATIVE-SEARCH-TURNOVER.md), [F09M-NATIVE-TRACKING-TURNOVER.md](../../docs/development/feedback_controls/F09M-NATIVE-TRACKING-TURNOVER.md), [F09N-NATIVE-COMMAND-SOLVE-TURNOVER.md](../../docs/development/feedback_controls/F09N-NATIVE-COMMAND-SOLVE-TURNOVER.md), [F09O-NATIVE-TOOLS-INTEGRATION-PLAN.md](../../docs/development/feedback_controls/F09O-NATIVE-TOOLS-INTEGRATION-PLAN.md), [F09O-NATIVE-TOOLS-INTEGRATION-TURNOVER.md](../../docs/development/feedback_controls/F09O-NATIVE-TOOLS-INTEGRATION-TURNOVER.md)
+- **Tests:** [test_project_task_producer.py](../../tests/unit/engines/myosuite/test_project_task_producer.py), [test_project_task_feedback.py](../../tests/unit/engines/myosuite/test_project_task_feedback.py), [test_project_task_forecast.py](../../tests/unit/engines/myosuite/test_project_task_forecast.py), [test_project_task_native_search.py](../../tests/unit/engines/myosuite/test_project_task_native_search.py), [test_project_task_artifact_admission.py](../../tests/unit/engines/myosuite/test_project_task_artifact_admission.py), [test_native_model_resource_closure.py](../../tests/unit/engines/myosuite/test_native_model_resource_closure.py), [test_project_task_tracking.py](../../tests/unit/engines/myosuite/test_project_task_tracking.py), [test_project_task_command_solve.py](../../tests/unit/engines/myosuite/test_project_task_command_solve.py), [test_bounded_candidate_search.py](../../tests/unit/motion_matching/test_bounded_candidate_search.py), [test_pinned_tools_package_loader.py](../../tests/unit/repo_hygiene/test_pinned_tools_package_loader.py)
 - **Public Interfaces:** `create_project_golf_task` in [src/engines/myosuite_project_task_producer.py](../../src/engines/myosuite_project_task_producer.py), `ProjectTaskForecaster` in [src/engines/myosuite_project_forecast.py](../../src/engines/myosuite_project_forecast.py), `NativeCommandSolveProblem` in [src/engines/myosuite_project_command_solve.py](../../src/engines/myosuite_project_command_solve.py), `solve_native_command_plan` in [src/engines/myosuite_project_command_solve.py](../../src/engines/myosuite_project_command_solve.py)
 - **Consumers:** native-direct-command-replay
 - **Providers:** None registered
@@ -230,12 +230,12 @@ flowchart LR
 ## Existing Inventories
 
 - [Launcher Metadata](../../src/config/launcher_manifest.json): 58 records at `tiles`; registry remains authoritative.
-- [Feature Parity](../../src/config/feature_parity.json): 59 records at `features`; registry remains authoritative.
+- [Feature Parity](../../src/config/feature_parity.json): 60 records at `features`; registry remains authoritative.
 - [Capability Architecture Nodes](../../src/config/capability_connections.json): 26 records at `nodes`; registry remains authoritative.
 
 ## Provenance and Limits
 
-- 80 source files hashed with SHA-256; UTF-8 line endings normalized.
+- 84 source files hashed with SHA-256; UTF-8 line endings normalized.
 - Generated documents omit absolute paths and commit IDs to remain reproducible across worktrees.
 - Live CLI/MCP results include checkout identity and current revision.
 - Read integration contracts and their tests before modifying a boundary.

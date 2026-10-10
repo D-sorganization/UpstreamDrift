@@ -1,4 +1,20 @@
-# Active: Native Command Solve — F09n #12036
+# Active: Native Tools Integration — F09o #12044
+
+Branch `feat/f09o-native-tools-integration-12044` integrates F09n `df9f3b9538`
+with the admitted F01b/Tools/private-consumer stack `d232efcc69`. Read
+`docs/development/feedback_controls/F09O-NATIVE-TOOLS-INTEGRATION-PLAN.md`.
+Tools `86d0f28b1cc5acf61185e07e320c816c2d005512` is the admitted pin. Native
+contracts use the explicit private package loader; retain one class identity.
+The prior native 170-test receipt applies to its older source/pin. Fresh actual
+MyoSuite 3.0/MuJoCo 3.6 evidence passes 170 tests with zero skips in 208.34s;
+50 integration files and 8,122 tracked Tools files match before/after. The
+separate MuJoCo 3.8 consumer lane passes 81 with three explicit optional skips.
+Impact capability/served verification precedes metadata reconciliation; all
+27 matrix tests pass. Read the F09o turnover for exact source/evidence scope.
+Do not infer controlled speed improvement or scientific acceptance.
+All seventeen model rows, six ecosystems and muscular OpenSim remain required.
+
+# Prior Native Command Solve — F09n #12036
 
 Branch `feat/f09n-native-command-solve-12036` starts at F09m `ab0a1a37d2`.
 Reuse the exact shared F02 kernel/test dependency from PR #12024 `4f9d2e4b9f`.
@@ -85,10 +101,36 @@ reset. Initial assembly must preserve source and distinguish reference-derived
 from optimizer-assembled poses; qualify named constraints/support and full-state
 reload before fitting. Tools-main ancestry is the current completed CI hold.
 
+# Active: Simscape URDF Exchange — #11569 Task 3
+
+- Branch `claude/simscape-urdf-exchange-11569`; commit `SELF`. `smexport` is absent in R2025b, so `scripts/matlab/simscape_model_inventory.m` reads joints (type, DOF) and solid/inertia masses (unit-converted, density x volume where needed; NaN when not evaluable) from the canonical `GolfSwing3D_Kinetic` and from an `smimport` of the spec `golfer.urdf`. `export_simscape_urdf_exchange.m` writes `tests/fixtures/simscape/simscape_urdf_exchange_receipt.json`; `src/engines/simscape/urdf_exchange.py` diffs it against the URDF.
+- R2025b result: smimport round trip exact (43/43 coordinates, 77.969 kg, error 0). Canonical 27 coordinates vs spec 43; totals 77.606 vs 77.969 kg, but the Simscape model has no legs and puts +17 kg in the shoulder bars (`HubtoLS`/`HubtoRS`), +4.3 kg trunk, +2.0 kg head/neck.
+- Next: #11569 task 1 (inverse dynamics) or task 4 (run-102 playback video). The mass redistribution is a model decision for the owner.
+
+# Active: GRF Engine Wiring and CoP Consolidation - GCV-2 #11708, GCV-6 #11712
+
+- Branch `claude/gcv-2-grf-wiring`. MuJoCo, MyoSuite, Drake and OpenSim emit `contact:grf_/free_moment_/moment_com_` per foot and net from native contacts; Pinocchio from shared-contact-law `ContactSample`s (else `ground_reaction_unavailable`); Simscape is unavailable (GCV-3 #11709). `BundleOverlayProvider` uses `ground_reaction_overlay`, so the native videos show per-foot and net GRF.
+- Every CoP goes through `biomechanics.ground_reaction.center_of_pressure`; legacy helpers are `DeprecationWarning` shims. Tests: `tests/integration/cross_engine/test_ground_reaction_parity.py` plus per-engine `*ground_reaction*` tests (static stance net Fz = weight within 2 %).
+- GCV-5 (#11711) plots, API and web display landed in #11781; the remaining #11711 item is the real-MuJoCo-run plot sheet. Open for GCV-2: Pinocchio GRF render (1x + 0.5x) on an engine host.
+
+# Active: Native OpenSim Geometry — #11903
+
+Scoped F07/F08 branch `feat/feedback-native-markers-11903`. Read canonical
+`manuals/upstreamdrift/chapters/26-native-opensim-geometry.qmd` and
+`docs/development/feedback_controls/F07_NATIVE_GEOMETRY_TURNOVER.md` before
+continuing. Explicit native frame/station geometry and bounded shared IK are
+implemented; metadata-only physical placeholders fail closed. The unchanged
+520-muscle candidate's three-pose pelvis probe remains unqualified and reaches
+its source rotation bound. Preserve native replay, anatomy and registration gates.
+
 # Active: MeshCat Camera Framing - NV-9 #11697
 
 - Branch `claude/nv-9-meshcat-framing-11697`; epic #11673. MeshCat kept the 75 deg three.js default FOV; `MeshcatPage` now sets the shared `golf_view_presets.VIEWER_FOV_Y_RAD` (0.7 rad, OpenSim's value) on entry and raises if the page has no viewer camera. New `golf_view_presets.framing`: `projected_extent` and `fit_distance_m` (15 % margin) with unit tests.
 - Open (engine host): verify the Drake/Pinocchio renders at 720p, feed the per-swing body bounding box from engine FK into `fit_distance_m` per view, and judge glyph legibility.
+
+# Active: Muscle Qualification Evidence Guard — F07 #11791
+
+Branch `fix/feedback-muscle-evidence-11791`; current commit `SELF`; PR #11814. Scoped child #11810: parameter-only orchestration now returns no native replay and no unperformed audit successes. The test-first commit records two failures; 31 focused tests pass after correction. Read [Guard Turnover](docs/development/feedback_controls/F07_MUSCLE_EVIDENCE_TURNOVER.md). Merged current main while preserving its impact chapter and this evidence chapter. Next: normal protected PR checks; F07 and native model qualification remain open.
 
 # Active: Feedback Controls Planning — #11784
 

@@ -95,12 +95,9 @@ _REPLAY_IDENTITY_FIELDS = (
 
 def _experiment_replay_bundle_type() -> type[Any]:
     """Resolve the Tools bundle only when a qualified bundle is consumed."""
-    from src.shared.python._seam_redirect import extend_sidekick_lab_path
+    from src.engines.native_replay_contracts import native_replay_contract_types
 
-    extend_sidekick_lab_path()
-    from sidekick.lab.mocap import ExperimentReplayBundle
-
-    return ExperimentReplayBundle
+    return native_replay_contract_types().ExperimentReplayBundle
 
 
 @dataclass(frozen=True)

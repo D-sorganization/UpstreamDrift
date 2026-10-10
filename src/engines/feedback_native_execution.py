@@ -267,7 +267,9 @@ def _binding_row(row: ComparisonRow, binding: NativeAdapterBinding) -> None:
 def _validate_bundle(
     row: ComparisonRow, binding: NativeAdapterBinding, bundle: Any
 ) -> None:
-    from sidekick.lab.mocap import ActuationInputKind, InputInterpolation, ReplayMode
+    from src.engines.native_replay_contracts import native_replay_contract_types
+
+    contracts = native_replay_contract_types()
 
     _binding_row(row, binding)
     if row.engine == "myosuite":
@@ -281,15 +283,21 @@ def _validate_bundle(
         raise ValueError("unsupported frozen replay bundle schema")
     if bundle.blocking_capabilities:
         raise ValueError("required replay capability is unavailable")
-    if bundle.policy.replay_mode is not ReplayMode.NATIVE_OWN_CONTACT:
+    if bundle.policy.replay_mode is not contracts.ReplayMode.NATIVE_OWN_CONTACT:
         raise ValueError("native execution requires native own-contact replay policy")
     if bundle.policy.observation_access or bundle.policy.state_feedback_access:
         raise ValueError("observation and state-feedback access are forbidden")
     if bundle.policy.state_reset_allowed:
         raise ValueError("state resets are forbidden by native replay policy")
-    if bundle.input_history.input_kind is not ActuationInputKind.ACTUATOR_TORQUE:
+    if (
+        bundle.input_history.input_kind
+        is not contracts.ActuationInputKind.ACTUATOR_TORQUE
+    ):
         raise ValueError("current native adapters require actuator torque input")
-    if bundle.input_history.interpolation is not InputInterpolation.ZERO_ORDER_HOLD:
+    if (
+        bundle.input_history.interpolation
+        is not contracts.InputInterpolation.ZERO_ORDER_HOLD
+    ):
         raise ValueError("current native adapters require zero-order-held torque")
     if bundle.input_history.timebase_id != "simulation_relative":
         raise ValueError("native replay requires simulation_relative time")
@@ -639,16 +647,9 @@ def _validate_command_evidence_row(
     request: NativeReplayRequest, evidence_row: Any, profile_bytes: bytes
 ) -> Any:
     """Validate T02's structural link before resolving native model semantics."""
-    from sidekick.lab.mocap import (
-        ActuationInputKind,
-        CapabilityAvailability,
-        CapabilitySupport,
-        COMPILED_ACTUATOR_PROFILE_ID,
-        COMPILED_ACTUATOR_PROFILE_SCHEMA_VERSION,
-        COMPILED_ACTUATOR_PROFILE_VERSION,
-        EvidenceArtifactKind,
-        ImplementationEvidenceKind,
-    )
+    from src.engines.native_replay_contracts import native_replay_contract_types
+
+    contracts = native_replay_contract_types()
 
     if evidence_row.replay_bundle != request.bundle:
         raise ValueError("T02 evidence row does not contain this exact T01 bundle")
@@ -661,24 +662,27 @@ def _validate_command_evidence_row(
     ):
         raise ValueError("T02 evidence row differs from the F01 inventory binding")
     if (
-        evidence_row.support is not CapabilitySupport.SUPPORTED
-        or evidence_row.availability is not CapabilityAvailability.AVAILABLE
+        evidence_row.support is not contracts.CapabilitySupport.SUPPORTED
+        or evidence_row.availability is not contracts.CapabilityAvailability.AVAILABLE
     ):
         raise ValueError("T02 command evidence is not supported and available")
     bundle = request.bundle
-    if bundle.input_history.input_kind is not ActuationInputKind.ACTUATOR_COMMAND:
+    if (
+        bundle.input_history.input_kind
+        is not contracts.ActuationInputKind.ACTUATOR_COMMAND
+    ):
         raise ValueError("compiled profile admission requires ACTUATOR_COMMAND input")
     if evidence_row.drive_mode.value != "muscle_excitation":
         raise ValueError("compiled command profile applies only to the muscle row")
     implementations = tuple(
         item
         for item in evidence_row.implementation_evidence
-        if item.kind is ImplementationEvidenceKind.ACTUATOR
+        if item.kind is contracts.ImplementationEvidenceKind.ACTUATOR
     )
     artifacts = tuple(
         item
         for item in evidence_row.artifacts
-        if item.kind is EvidenceArtifactKind.ACTUATOR
+        if item.kind is contracts.EvidenceArtifactKind.ACTUATOR
     )
     if len(implementations) != 1 or len(artifacts) != 1:
         raise ValueError("T02 must provide exactly one actuator profile reference")
@@ -687,8 +691,8 @@ def _validate_command_evidence_row(
     if (
         not implementation.required
         or not implementation.is_available
-        or implementation.implementation_id != COMPILED_ACTUATOR_PROFILE_ID
-        or implementation.version != COMPILED_ACTUATOR_PROFILE_VERSION
+        or implementation.implementation_id != contracts.COMPILED_ACTUATOR_PROFILE_ID
+        or implementation.version != contracts.COMPILED_ACTUATOR_PROFILE_VERSION
         or implementation.evidence_reference_id != artifact.reference_id
         or implementation.sha256 != artifact.sha256
     ):
@@ -706,7 +710,8 @@ def _validate_command_evidence_row(
         ) from error
     if (
         not isinstance(profile, dict)
-        or profile.get("schema_version") != COMPILED_ACTUATOR_PROFILE_SCHEMA_VERSION
+        or profile.get("schema_version")
+        != contracts.COMPILED_ACTUATOR_PROFILE_SCHEMA_VERSION
         or json.dumps(profile, sort_keys=True, separators=(",", ":")).encode("utf-8")
         != profile_bytes
     ):

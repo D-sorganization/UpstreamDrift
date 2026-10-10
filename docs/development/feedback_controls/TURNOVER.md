@@ -360,3 +360,29 @@ the old generated report incorrectly listed the T01 pin commit as its last
 touch. The submodule contains complete history and the old/new feature commits
 share their expected merge base. The complete generated JSON/Markdown output
 is retained; no generated authorship values were edited manually.
+
+## Exact Tools Main Pin Alignment
+
+This parent-branch repair aligns the `vendor/ud-tools` gitlink, `Cargo.toml` tools-core revision, and `requirements-tools.txt` source pin to the actual merged Tools main commit `86d0f28b1cc5acf61185e07e320c816c2d005512` (PR #5475). It changes dependency identity only; it does not add qualification evidence. Validate the three surfaces with `scripts/shared_tools/check_tools_pins.py`.
+
+## F09 Private Tools Contract Consumers (#12018)
+
+Runtime consumers now get replay-contract enums and dataclasses through
+`src/engines/native_replay_contracts.py::native_replay_contract_types()`. The
+facade uses `load_pinned_tools_package("sidekick.lab.mocap")`, keeping the
+contract module under a private package name and preserving a single runtime
+class identity. F09 execution, observation admission, and their tests must not
+extend `sidekick.lab.__path__` or import the public `sidekick.lab.mocap`
+namespace. Remaining public-name imports in the F09 path are restricted to
+`TYPE_CHECKING` declarations.
+
+The focused local regression set completed with 81 passed and 3 skipped using
+the retained Python 3.12 environment and `--noconftest`; the skips are optional
+native/provider cases. A default Python 3.13 collection attempt faulted inside
+the installed MuJoCo plugin loader and was stopped; it is not a product-test
+failure. The exact private-loader implementation from UpstreamDrift PR #12002
+is included as a dependency commit in this child. It belongs to UpstreamDrift's
+pinned-Tools import seam, not a pending Tools-repository change. Its inclusion
+does not establish that PR #12002 has merged or qualify engine physics. Keep
+that PR's loader authority and this consumer migration separate when
+integrating the dependency chain.

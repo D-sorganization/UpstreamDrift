@@ -80,9 +80,32 @@ admission before fitting. Preserve default/reference/assembled provenance and
 independently reload full state; a mixed constraint norm does not qualify grip,
 joint limits or contact. Pose assembly alone does not prove capture correspondence.
 
+## Native Tools Integration (F09o, #12044)
+
+The native command solve stack consumes admitted Tools main
+`86d0f28b1cc5acf61185e07e320c816c2d005512` with the F01b replay and private
+contract consumer migration. Python/Rust pins and the gitlink agree; native
+recording and independent replay share one private contract class identity
+through the existing governed loader. Actual affected SDK tests and provider
+source closure must be rerun. Impact acceptance is reconciled only after real
+capability probes and served-bundle verification. All-model parity, private
+motion fitting and muscular OpenSim matching/replay remain open.
+
+## Unit Gate Rust Installation State (#11977)
+
+The unit-test gate allocates distinct empty Rust and Cargo homes under runtime
+`RUNNER_TEMP` and publishes them through `GITHUB_ENV` before installing Rust.
+Missing runtime paths or invalid environment destinations fail setup explicitly.
+Existing toolchains remain untouched. Toolchain verification, wheel build and
+the unit suite remain required; local preparation tests do not qualify a CI run.
+
 ## Native Muscle Replay Development Boundary (F07, #11791)
 
 `tour_matching.replay_muscle_excitations` restores complete named continuous state, plays bounded linear native muscle excitation inputs, and cold-starts Runge-Kutta-Merson once without observations, feedback or resets. It audits actual native applied excitations and binds state/input/model/policy identities. Existing controllers, prescribed coordinates, non-muscle actuators and undeclared non-muscle forces fail closed. This early fixture does not qualify discrete/plugin initialization, contact, full-body anatomy or mocap matching; #11791 remains open. The revised feedback-controls milestone DAG separates schema/provider readiness from scientific acceptance and private evidence delivery.
+
+## Native Muscle Contact Replay (F07b, #11815)
+
+Independent native excitation replay accepts an explicit exact contact-force path allowlist for supported native sphere/half-space laws. It reuses OpenSimForceTorqueSource and fails on incomplete wrench evidence. Policy/hash records native law identity; arbitrary external forces, controllers, reserves and state corrections remain forbidden. Native synthetic contact/refinement tests do not qualify full-body golf anatomy, contact/grip calibration or private mocap matching.
 
 ## Capture-O Video Companion: Error Budget, Guidance Derivation, and Public Summary (COV-11, #11279)
 
@@ -10555,6 +10578,14 @@ F09e extends the F09d marker-output boundary with Pinocchio's existing native re
 
 The F01 inventory package/variant/drive provider remains distinct from the T01/F06 native model, adapter provider, loaded-model, state-schema, input, and executed-policy identities. The mapping binds both namespaces and rejects mismatches. Synthetic Pinocchio 4.1 fixtures use an actual floating base (`nq=8`, `nv=7`), nonzero base translation/rotation, hinge configuration, and marker offset; expected points are computed from independent transform equations. A successful marker result remains unqualified and does not establish model physics, observation fit, contact, anatomy, or parity. The six-engine and all registered model/drive rows remain in the readiness denominator.
 
+## Native Thelen Replay Boundary (F07b, #11826)
+
+Early native excitation replay explicitly admits compliant Thelen2003Muscle
+alongside Millard2012EquilibriumMuscle. Model-owned state minima, positive fiber
+length, complete restoration, ordered law identity and ignored-mode refusal
+are required. Canonical reference: native muscle replay chapter; turnover:
+`docs/development/feedback_controls/F07_THELEN_REPLAY_TURNOVER.md`. Full-body,
+contact/grip, licensing and real-capture scientific gates remain open.
 ## Controlled-Swing Comparison Admission (F01, #11785)
 
 `src/engines/feedback_comparison.py` projects the authoritative
@@ -10614,3 +10645,21 @@ The F06c adapter uses the existing public native ABA/RK4 integration kernel with
 `src/engines/physics_engines/myosuite/python/native_excitation_replay.py` consumes the versioned Tools T01 experiment bundle through a direct native MyoSuite/MuJoCo plant. Its input is normalized post-mapping muscle excitation written to ordered native `data.ctrl`; a Gym `[-1, 1]` action is not excitation and is never inverse-transformed. The fixed policy binds the registered environment, source and loaded model, provider/runtime identity, solver/integrator, frame skip, wrapper chain, state schema, time grid, applied inputs, and policy. It checks actual control readback and restores q/v, muscle activation, actuator controls, full `mjSTATE_INTEGRATION`, and the explicitly supported wrapper state before a fixed-horizon ZOH replay. The adapter does not call Gym `step`, task observation, reward, termination, tracking, or reset paths.
 
 An actual MyoSuite 3.0.0/MuJoCo 3.6.0 smoke on the public elbow pose fixture validates only the native excitation adapter seam. It does not bind the required MyoSuite golfer driver or iron rows. Both remain unqualified; all six engines and every registered model row stay in the denominator. No physiology, marker accuracy, production support, cross-engine equivalence, or scientific gate verdict follows from a successful receipt. The generic engine's legacy four-value Gym step path is unaffected and needs its own separately scoped compatibility test if supported. Canonical note: `manuals/upstreamdrift/chapters/31-myosuite-native-excitation-replay.qmd`.
+
+## Frozen Marker Holdout Scoring (#11899)
+
+The shared marker calibration provider exposes score_frozen_marker_offsets for fixed placements and predicted poses on the original observation clock. It performs no fitting and rejects missing support or invalid rigid transforms. Existing exploratory OpenSim holdout refitting remains available and is not independent predictive evidence. Training-only model, anthropometry, attachment and split provenance remains a campaign gate; no real capture or F07/F08 qualification is claimed. See canonical chapter 13 and F07_FROZEN_HOLDOUT_TURNOVER.md.
+
+## Native OpenSim Marker Geometry (F07/F08, #11903)
+
+Explicit native model/frame/station bindings supply actual OpenSim geometry to
+shared calibration and trajectory IK. Selected coordinates must be independent;
+native assembly must achieve them, preserve other independent coordinates and
+respect every source range, including dependent coordinates. Metadata-only
+geometry, zero closure and no-op dynamics are rejected. Explicit finite bounds
+opt into TRF in the existing shared trajectory solver; default LM is unchanged.
+The three-sample pelvis diagnostic retains source clock, hashes, native identity,
+residuals and failures through existing frozen-loader/TRC contracts. Its source
+candidate reaches a pelvis rotation bound and remains unqualified: fixed frame
+registration and anatomical calibration are unresolved. Canonical authority is
+chapter26; no capture, whole-body or full-state replay acceptance is claimed.

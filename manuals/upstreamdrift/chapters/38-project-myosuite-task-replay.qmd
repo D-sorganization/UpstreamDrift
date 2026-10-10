@@ -433,3 +433,21 @@ whole solve elapsed time is 44.93 seconds. This establishes a correct numerical
 baseline and a measured performance bottleneck, not rapid matching. Profile
 native guard/prediction work and derivative strategy under the same source,
 state and physical admission requirements before claiming production speed.
+
+## Admitted Dependency and Private Contract Integration
+
+F09o (#12044) integrates the admitted F01b/Tools-main source and private replay
+consumer migration into the native solve stack. The consumed Tools revision is
+`86d0f28b1cc5acf61185e07e320c816c2d005512`; Python requirements, Rust dependency
+and gitlink must agree. Native replay contracts load through the existing
+`load_pinned_tools_package` seam into one private module/class identity, without
+grafting the vendor package into UpstreamDrift's public namespace. This changes
+executed provider lineage and requires fresh actual-SDK replay evidence.
+
+Preserve previous source/pin-specific receipts. Acceptance metadata advances
+only after actual capability probes and served-artifact verification at the
+new dependency. Native source/runtime hashes and affected admission/forecast/
+tracking/solve tests must be rechecked together. Neither a pin update nor an
+import identity check establishes capture correspondence, hard-contact validity,
+muscle physiology, rapid matching or all-model parity. See the F09o plan and
+turnover for exact executed evidence and remaining gates.

@@ -113,3 +113,12 @@ No live prefix is applied, and all future execution requires current-state
 admission. Cooperative budgets include solve-local validation overhead; external
 preparation belongs to campaign timing. Fixture criteria do not qualify contact,
 physiology, private capture or the full all-model muscular OpenSim endpoint.
+
+## Private Contract and Dependency Identity
+
+F09o consumes the admitted Tools-main revision through the explicit
+`load_pinned_tools_package` seam. Replay contracts have one private module/class
+identity throughout recording, forecasting, tracking, promotion and independent
+replay. Do not extend public package paths or combine old public contract types
+with the private authority. Dependency changes require actual native source
+closure revalidation, not reuse of older pin-specific successful receipts.

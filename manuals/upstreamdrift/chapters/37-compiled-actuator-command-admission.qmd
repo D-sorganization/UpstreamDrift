@@ -54,3 +54,9 @@ mutations. They exercise exact binding and negative admission cases, not a
 production MyoSuite package, full-body model, human capture, or a numerical
 acceptance tolerance. The six-engine parity and muscle-driven OpenSim goals
 remain open.
+
+F09 runtime consumers obtain Tools T01 types through the single
+`native_replay_contract_types()` facade. Its pinned package loader uses a
+private module name and does not extend `sidekick.lab.__path__`; this keeps
+execution, observation admission and tests on one canonical class/enum
+identity without publishing a second `sidekick.lab.mocap` module.

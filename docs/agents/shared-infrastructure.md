@@ -172,7 +172,8 @@ plot_cartesian_delta_summary, summarize_for_pr_comment}` —
 
 - `foot_reaction(label, forces, points, torques=None, *, ground_height_m, cop_min_fz_n)` and `analyze_ground_reaction(contacts_by_foot, com_m)` return `FootReaction` / `GroundReactionBreakdown`; unavailable CoP quantities are `None`, never zero.
 - `to_overlay_wrenches` emits the `contact:grf_*`, `contact:free_moment_*`, `contact:moment_com_*` labels (ADR-0052); `to_contact_reaction` populates `motion_matching.force_torque.ContactReaction`; `GroundReactionSeries` stacks frames for plots and export.
-- `force_overlay/bundle_provider.py` already consumes it. Do not add another CoP helper; GCV-6 (#11712) consolidates the legacy ones.
+- `center_of_pressure(force, moment_about_origin, ground_height_m, min_fz)` is the one CoP implementation (GCV-6, #11712). `physics.ground_reaction_forces.compute_cop_from_grf`, `motion_matching.force_torque.compute_center_of_pressure` and `physics._grip_forces.compute_center_of_pressure` are deprecation shims (the grip one is now `compute_grip_pressure_centre`, a pressure-weighted centroid, not a ground CoP). Do not add another CoP helper.
+- `biomechanics/ground_reaction_wrenches.py` (`foot_contact_sets`, `ground_reaction_overlay`) and `biomechanics/foot_membership.py` map contact bodies to feet; `mujoco/python/ground_contacts.py` extracts MuJoCo/MyoSuite contacts. Every engine's force-torque source and `force_overlay/bundle_provider.py` route through them (GCV-2, #11708); parity test `tests/integration/cross_engine/test_ground_reaction_parity.py`.
 
 ### Impact Parameters
 
@@ -659,3 +660,13 @@ MuJoCo `overlay_source` supplies its contact and kinematics. Epic #11673.
 ### Lift Pack Parity Audit
 
 `src/shared/python/lifting/pack_audit/` loads the OpenSim, MuJoCo, Drake and Pinocchio lift model packs behind one `EngineAdapter` (canonical frame, FK, CoM, closure), and reduces the receipt to tables and gap rules (`analysis.py`, `gaps.py`, `report.py`). Reuse it for same-input lift parity (LIFT-2 onward) instead of writing another per-engine loader. Entry point: `scripts/lifting/run_pack_parity_baseline.py`; record: `docs/development/lifting/PACK_PARITY_BASELINE.md`.
+
+## Native OpenSim Marker Geometry
+
+`tour_matching/native_marker_geometry.py` supplies explicit native body-attached
+frame poses and station positions for `OpensimMatchingPlant` and existing shared
+calibration/trajectory IK. It validates actual native assembly and all source
+coordinate ranges; it does not supply dynamics or grip closure. Reuse the existing
+`full_body_ik.solve_full_body_ik_trajectory` optional finite `coordinate_bounds`
+for bounded TRF. See canonical chapter26 and #11903; do not reintroduce metadata
+placeholders or revive the retired OpenSim IK backend.

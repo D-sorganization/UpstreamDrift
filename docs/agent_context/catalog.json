@@ -261,7 +261,9 @@
         "docs/development/feedback_controls/F09K-OWNED-FORECAST-TURNOVER.md",
         "docs/development/feedback_controls/F09L-NATIVE-SEARCH-TURNOVER.md",
         "docs/development/feedback_controls/F09M-NATIVE-TRACKING-TURNOVER.md",
-        "docs/development/feedback_controls/F09N-NATIVE-COMMAND-SOLVE-TURNOVER.md"
+        "docs/development/feedback_controls/F09N-NATIVE-COMMAND-SOLVE-TURNOVER.md",
+        "docs/development/feedback_controls/F09O-NATIVE-TOOLS-INTEGRATION-PLAN.md",
+        "docs/development/feedback_controls/F09O-NATIVE-TOOLS-INTEGRATION-TURNOVER.md"
       ],
       "tests": [
         "tests/unit/engines/myosuite/test_project_task_producer.py",
@@ -272,7 +274,8 @@
         "tests/unit/engines/myosuite/test_native_model_resource_closure.py",
         "tests/unit/engines/myosuite/test_project_task_tracking.py",
         "tests/unit/engines/myosuite/test_project_task_command_solve.py",
-        "tests/unit/motion_matching/test_bounded_candidate_search.py"
+        "tests/unit/motion_matching/test_bounded_candidate_search.py",
+        "tests/unit/repo_hygiene/test_pinned_tools_package_loader.py"
       ],
       "entrypoints": [
         {
@@ -427,7 +430,8 @@
         "src/engines/physics_engines/myosuite/python/native_direct_model_replay.py",
         "src/engines/myosuite_project_tracking.py",
         "src/engines/myosuite_project_command_solve.py",
-        "src/shared/python/motion_matching/bounded_candidate_search.py"
+        "src/shared/python/motion_matching/bounded_candidate_search.py",
+        "src/shared/python/_seam_redirect.py"
       ],
       "tests": [
         "tests/unit/engines/myosuite/test_project_task_producer.py",
@@ -438,7 +442,8 @@
         "tests/unit/engines/myosuite/test_native_model_resource_closure.py",
         "tests/unit/engines/myosuite/test_project_task_tracking.py",
         "tests/unit/engines/myosuite/test_project_task_command_solve.py",
-        "tests/unit/motion_matching/test_bounded_candidate_search.py"
+        "tests/unit/motion_matching/test_bounded_candidate_search.py",
+        "tests/unit/repo_hygiene/test_pinned_tools_package_loader.py"
       ]
     }
   ],

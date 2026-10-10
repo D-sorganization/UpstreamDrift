@@ -30,4 +30,15 @@ UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
 {{< include chapters/28-native-marker-forward-kinematics.qmd >}}
 {{< include chapters/30-pinocchio-native-marker-forward-kinematics.qmd >}}
 
+{{< include chapters/17-native-muscle-contact.qmd >}}
+
+
+{{< include chapters/14-muscle-qualification-evidence.qmd >}}
+
+{{< include chapters/15-lift-pack-audit.qmd >}}
+
 {{< include chapters/17-sparse-collocation-benchmark.qmd >}}
+
+{{< include chapters/26-native-opensim-geometry.qmd >}}
+
+{{< include chapters/32-native-constrained-state.qmd >}}

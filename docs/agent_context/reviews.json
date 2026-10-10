@@ -19,14 +19,14 @@
       "rationale": "Preserve capture boundary review under baseline capability inventory ORG-01"
     },
     "launcher-atlas": {
-      "fingerprint": "46dd977091a2a684bcbb591486e514a56fcc51e97a90047d5d5a1cb3674ec9fb",
+      "fingerprint": "727cdc20560b5756492ca22aa9f31fdc4f0c6ee9068878e25f49dea68b0398eb",
       "inputs": {
         "docs/agent_context/contracts/launcher-atlas.md": "f5976baa4ef78bcf71ede27afb4e7a85f3f72cfedbb3cdbe9b40e48d4016ae94",
         "scripts/capability_atlas/goals.py": "a4c449dbd07dc398530d7c85eefc697d36b6acaee48b7953b7e060fb413cc131",
         "scripts/capability_atlas/model.py": "ecca5889caad0e087c895f6c56c0fcd966b646bda5c3ab5a87a65c4694eb41cf",
         "scripts/capability_atlas/render.py": "7981df3ea262536a2c847b693c104e9600ce2aad85d17d4e0f3048e80ee066a5",
         "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
-        "src/config/feature_parity.json": "175efe0624320b8cd6a149029ad5cc848834ccc5a27aef9f3fe243dae7fe50da",
+        "src/config/feature_parity.json": "89d2d8a1223efd17603d6dbb620768e730aee8f08558380288d11732342dda11",
         "src/config/launcher_manifest.json": "1ae28f872b54c237440fcaacec40b735b93a7b80d710adc9228ef671b7831032",
         "src/config/launcher_manifest_loader.py": "aed6769fbdfc595400d0bd5d15bb75e8fbfda80243a586894d73d36b2d056a00",
         "src/config/models.yaml": "e11682df79d7467f1eba9579d835f5d7019bfd7eb09cf81c14e22bd08d0bf844",
@@ -36,7 +36,7 @@
         "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
         "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414"
       },
-      "rationale": "CMB-10 #11661 slice 1 (re-recorded after merging main with GCV-5): feature_parity.json tools.model_explorer.frankenstein_assembly gains api=src/api/routes/model_explorer_assembly.py (status stays gap, web still null). Atlas regenerated: one added api link in CAPABILITY_ATLAS.md, graph.json and index.html on top of main; no tile, connection or goal change from this PR."
+      "rationale": "LIFT-8 #11748: feature_parity.json gains lifting.five_lift_viewing (gap, no tiles, no new paths); launcher manifest and tile coverage unchanged."
     },
     "model-backends": {
       "fingerprint": "da739fcd3c56f6c4a3923b4f31202e515023487a49d54ca449090d33186a9685",
@@ -73,9 +73,9 @@
       "rationale": "Reviewed canonical pose ownership and MuJoCo adapter protocol, explicit coordinate conventions and capability limits. Existing test_mujoco_protocol.py passed in the 41-test boundary run on 2026-09-09; no scientific validity assertion is added."
     },
     "project-task-native-replay": {
-      "fingerprint": "03ce15d8728adb3076bd9036961363c2bf74144a353101ff3488055e3fa6f86e",
+      "fingerprint": "d2e314272224dd9cbfdf8a7a34270c9e63a0d3a22d29cb085f7b3486a964e3ab",
       "inputs": {
-        "docs/agent_context/contracts/project-task-native-replay.md": "15a144311fb3ef7394cb2e575cef4df5e0be3c07022d3f9d95f353434a826ba0",
+        "docs/agent_context/contracts/project-task-native-replay.md": "754359ce3d2ccfe8d80a31a1cd8867f151dc5bd63bf0023231a2cc797fc3f254",
         "src/engines/myosuite_project_command_solve.py": "a8b3168dfb20b8f94322d2b8dc1e2b8570d4e11b3d4222f8b1300e71711cd2e2",
         "src/engines/myosuite_project_feedback.py": "c0d4f3f2e2f5ec0fac1c0cb9861d1e02e2d7cc6012c66d38283ac1aec864f7c5",
         "src/engines/myosuite_project_forecast.py": "b07b9f00d98f4b27e60be0de2ec255b294875255198f9a010ff12a67e13ab45f",
@@ -83,9 +83,10 @@
         "src/engines/myosuite_project_task_producer.py": "59e63dca8f2c178d9dbc92adcc0047c70feac1052967f7055f8d5b8d77a074d1",
         "src/engines/myosuite_project_tracking.py": "46be8b4b606893e0c3a7c29dfef6dcb76a4cb4fcf0f38557d01d7d0ded608648",
         "src/engines/native_direct_model_provider.py": "053927847888280af9a0d6271d9f8a74ecb00b6d90cd6142fee884f4cb49b149",
-        "src/engines/native_replay_contracts.py": "a8da8d7080b9cfc3c3452dccb05a69428a3502fa348bf33c2290caa4b52626d2",
+        "src/engines/native_replay_contracts.py": "fea6269739d24f5689ebc2f5c9244fa38dde072ee41b23ba4ed8c3fd07e20f69",
         "src/engines/physics_engines/myosuite/python/native_direct_model_replay.py": "daa670e49f3d3e4b2940d321ef8104f0e9aef0ff8524659b1b65bd6cec08b719",
         "src/engines/project_task_replay_artifacts.py": "8ea937a502755fb456815c212bf5aa0c7fa4987be3eba570d3faf87d0b5449b2",
+        "src/shared/python/_seam_redirect.py": "3446b274ae8c8ae5407c2305a9e34d31eb4824bfed362b5661dd5bc829c41448",
         "src/shared/python/motion_matching/bounded_candidate_search.py": "b1f5c83ca8bcc686d68c76c12a759dbba333efdba8422028646ee40c789dae3d",
         "tests/unit/engines/myosuite/test_native_model_resource_closure.py": "662eb43722a90a9c77fe01128ca8d22483259f6492e8d36d7b22c65460abbbef",
         "tests/unit/engines/myosuite/test_project_task_artifact_admission.py": "ea9e6d1da8bd2a6725d2b675607deafba8d9eac29e956a56e113cda2765a6fe1",
@@ -95,9 +96,10 @@
         "tests/unit/engines/myosuite/test_project_task_native_search.py": "63795cc637ab7b62cca3ef213836584df94383dfdc9cfb10ef14352962dde63b",
         "tests/unit/engines/myosuite/test_project_task_producer.py": "ead3c9f3eb031cf78bc63e011b8a9e1fe203a6b16af3c3e8f3120950f81f6faf",
         "tests/unit/engines/myosuite/test_project_task_tracking.py": "8b329a3e676b28906e3c5a0f7439d483625ce071400f949420be0021488c0dc4",
-        "tests/unit/motion_matching/test_bounded_candidate_search.py": "5a256b469fe1f4fdd502626f125cd50eb64a62b1ec304488eda64335ca72ee4d"
+        "tests/unit/motion_matching/test_bounded_candidate_search.py": "5a256b469fe1f4fdd502626f125cd50eb64a62b1ec304488eda64335ca72ee4d",
+        "tests/unit/repo_hygiene/test_pinned_tools_package_loader.py": "bdb0497de481a5ba8f2b2c1d14155137c9896b3f3647d8173b7e159fc0cc9157"
       },
-      "rationale": "F09n12036 reuses exact shared F02 kernel4f9d2e4 and native tracking/persistent prediction; complete-horizon command/increment and declared state margins, independently replayed fallback and guarded recomputed improvement. Genuine API RED7, criteria API RED1 and mutation RED1 retained; final actual MyoSuite3.0/MuJoCo3.6 nine-module campaign170PASS0F/E/S250.31s with20 before/after hashes matching source. Synthetic objective16.3614474 to0.000299930,189 evaluations44.93s: correctness only, no rapid/real-time/private-fit/contact/physiology acceptance. Current central5gates,pinnedmypy,LoD/DRY/architecture/title/size PASS. Parent Tools capability acceptance needs actual probes and admitted pin/private-consumer integration; all17/six/muscularOpenSim remain open."
+      "rationale": "F09o12044 integrates admitted Tools86d0f28 and private loader/class identity into F09i-n; exact50 integration files and8122 tracked Tools archive files match before/after actual MyoSuite3.0/MuJoCo3.6 campaign170PASS0F/E/S208.34s. Separate actual MuJoCo3.8 consumer suite81PASS3 optional skips; portable central61PASS28skips distinct. Impact genuine pin RED retained;26 capability probes and actual76asset/5JS/digest/mount/404 served verification precede metadata, final27PASS. Native solve fixture37.92s189eval is correctness only; no controlled performance gain/private fit/contact/physiology or all17/six/muscularOpenSim acceptance. Existing single replay/optimizer authority and complete mutation/admission guards preserved."
     }
   },
   "version": 1
