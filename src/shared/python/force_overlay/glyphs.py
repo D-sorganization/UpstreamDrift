@@ -154,6 +154,7 @@ class ForceGlyphStyle:
         default_factory=lambda: MappingProxyType({})
     )
     groups: frozenset[str] = DEFAULT_GROUPS
+    max_torque_length_m: float | None = None
 
     def force_scale_for(self, kind: WrenchKind) -> float:
         """Effective arrow length in metres per newton for ``kind``.
@@ -232,6 +233,21 @@ class ForceGlyphStyle:
                 f"min_length_m ({self.min_length_m}) must be < max_length_m ({self.max_length_m})"
             )
 
+        if self.max_torque_length_m is not None:
+            if not isinstance(self.max_torque_length_m, (int, float)) or isinstance(
+                self.max_torque_length_m, bool
+            ):
+                raise TypeError("max_torque_length_m must be numeric")
+            if (
+                not math.isfinite(self.max_torque_length_m)
+                or self.max_torque_length_m <= 0.0
+            ):
+                raise ValueError("max_torque_length_m must be finite and positive")
+            if self.min_length_m >= self.max_torque_length_m:
+                raise ValueError(
+                    f"min_length_m ({self.min_length_m}) must be < max_torque_length_m ({self.max_torque_length_m})"
+                )
+
         if not isinstance(self.arc_segments, int) or isinstance(
             self.arc_segments, bool
         ):
@@ -270,6 +286,7 @@ class ForceGlyphStyle:
                 for k, v in sorted(self.kind_scale.items(), key=lambda kv: kv[0].value)
             },
             "groups": sorted(self.groups),
+            "max_torque_length_m": self.max_torque_length_m,
         }
 
     @classmethod
@@ -296,6 +313,7 @@ class ForceGlyphStyle:
             "reference_length_m",
             "kind_scale",
             "groups",
+            "max_torque_length_m",
         }
         unknown = set(data.keys()) - valid_keys
         if unknown:
@@ -674,8 +692,13 @@ def _build_torque_arc(
     a_hat = (tx / mag, ty / mag, tz / mag)
 
     raw_len = mag * style.torque_scale_m_per_nm
-    clamped = raw_len > style.max_length_m
-    eff_len = max(style.min_length_m, min(raw_len, style.max_length_m))
+    max_len = (
+        style.max_torque_length_m
+        if style.max_torque_length_m is not None
+        else style.max_length_m
+    )
+    clamped = raw_len > max_len
+    eff_len = max(style.min_length_m, min(raw_len, max_len))
     radius = eff_len / 2.0
 
     u, v = _compute_arc_basis(a_hat)

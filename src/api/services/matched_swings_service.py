@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import math
+import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Literal
@@ -216,6 +217,45 @@ class MatchedSwingsService:
         if not isinstance(data, dict):
             raise ValueError("Receipt JSON must be an object")
         return data
+
+    @precondition(lambda self, run_id: isinstance(run_id, str) and bool(run_id.strip()))
+    @postcondition(
+        lambda result: (
+            isinstance(result, tuple)
+            and len(result) == 2
+            and isinstance(result[0], str)
+            and isinstance(result[1], str)
+        )
+    )
+    def export_report_markdown(self, run_id: str) -> tuple[str, str]:
+        """Render the Markdown fit-quality report for a run.
+
+        Reuses :func:`export_report` exactly as the desktop exporter does
+        (``MatchedSwingBrowserWidget._on_export_report`` in gui.py), writing
+        into a temporary directory and reading the Markdown back so the two
+        surfaces can never diverge on report formatting (DRY).
+
+        Returns:
+            Tuple of ``(markdown_text, suggested_filename)``.
+
+        Raises:
+            KeyError: ``run_id`` is not in the ledger.
+            FileNotFoundError: the run has no receipt file on disk.
+        """
+        from src.shared.python.motion_matching.export import export_report
+
+        row = self.get_row(run_id)
+        receipt_path = self._browser.resolve_artifact_path(row, "receipt")
+        if receipt_path is None or not receipt_path.is_file():
+            raise FileNotFoundError("No receipt file found for this run.")
+        npz_path = self._browser.resolve_artifact_path(row, "npz")
+
+        filename = f"fit_report_{row.engine}_{row.capture or 'swing'}.md"
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            out_path = Path(tmp_dir) / filename
+            export_report(receipt_path, out_path, candidate=npz_path)
+            markdown = out_path.read_text(encoding="utf-8")
+        return markdown, filename
 
     @precondition(
         lambda self, run_id, artifact: (
