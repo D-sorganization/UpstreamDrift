@@ -4,6 +4,11 @@
 - Result: knee 0.1 in both captures (common feasible {0, 0.1, 0.2}); theta_gaze RMS 20.2 to 8.5 deg (driver), 18.6 to 6.1 deg (iron), marker RMS +0.6/+1.3 mm. `--gaze-weight` still defaults to 0 for qualified receipts. Evidence `docs/development/full_body_models/evidence/head_gaze/gaze_weight_sweep.{json,png}`; method in `HEAD_GAZE_REFERENCE.md` (Gaze Weight Selection) and the `.tex`.
 - Open: neck PD tracking in forward dynamics, published tour head ranges.
 
+# Active: Right Knee Flexes Negative Like the Left - #12057
+
+- Branch `claude/knee-r-axis-12057`. `spec_builder.leg_extension` mirrors any knee whose hinge points to -z (`AXIS_MIRROR`), and `scripts/mirror_spec_right_knee.py` fixed the committed anthro specs. Spec-to-Rajagopal knee sign is -1 on both sides, and MyoSuite `knee_angle_r` is -1. The generated osims and the inventory hashes are refreshed.
+- Canonical receipts were regenerated on ControlTower; a control at the parent commit reproduced the old receipt exactly. Calibrated driver 7.7/33.0/61.6 -> 5.6/31.0/77.0 mm, 7-iron 6.5/31.1/47.0 -> 5.0/28.8/71.2 mm. The trail knee at address is now -27/-21 deg (was pinned near 0).
+- Open: the dynamics replay regresses (#12110). Trail toe-out is -2.1/-4.4 deg with `hip_rotation_r` at its -40 deg limit (#12109). Reference: `docs/research/hip_axis_mirroring/` (Right Knee Axis Convention section).
 # Active: Grip Wrench Gaps - GCV-8 #11714
 
 - Branch `claude/gcv-8-grip-wrench-gaps`. The MuJoCo grip-modelling tab shows the `grip_weld_l/r` wrench via `grip_efc` and reports "unavailable" for contact-only scenes. Drake URDF: `humanoid_urdf.right_hand_grip_analysis` gives the right-hand wrench from club Newton-Euler (`full_body_model.club_newton_euler`); the left hand is unavailable, with a reason. Pinocchio: `PinocchioForceAdapter.grip_analysis_from_allocation` routes `lambda_grip` through `grip_from_allocation`.

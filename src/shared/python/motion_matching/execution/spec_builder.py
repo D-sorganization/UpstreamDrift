@@ -9,7 +9,7 @@ toe spheres, calibrated contact law, and anatomical seed offsets.
 from __future__ import annotations
 
 import argparse
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 import hashlib
 import json
@@ -172,6 +172,9 @@ def read_osim(osim: Path) -> tuple[dict[str, Any], dict[str, Any]]:
 #: unchanged at the zero pose.
 HIP_MIRROR = transform(np.diag([1.0, -1.0, -1.0]), np.zeros(3))
 
+#: Neutral name for the same ``Rx(pi)`` conjugation (also used for the knee).
+AXIS_MIRROR = HIP_MIRROR
+
 
 def hip_axis_signs(osim: Path) -> dict[str, float]:
     """Per side, the OpenSim coefficient on hip adduction and rotation (+1 or -1).
@@ -217,6 +220,39 @@ def mirror_document_hip(document: dict[str, Any], side: str) -> bool:
         return False
     for key in ("parent_to_base", "child_to_follower"):
         joint[key] = (np.asarray(joint[key], dtype=float) @ HIP_MIRROR).tolist()
+    return True
+
+
+def knee_follows_convention(joint: Mapping[str, Any]) -> bool:
+    """True when a knee hinge axis points to the subject's right (+z).
+
+    The spec's knee follows the gait2392 convention: the base ``z`` column
+    (the ``Rz`` axis in the femur frame) has a positive ``z`` component on both
+    sides, so a positive angle is extension and flexion is negative.
+    """
+    base = np.asarray(joint["parent_to_base"], dtype=float)
+    return bool(base[2, 2] > 0.0)
+
+
+def mirror_document_knee(document: dict[str, Any], side: str) -> bool:
+    """Conjugate ``knee_<side>`` in a spec document by :data:`AXIS_MIRROR`, in place.
+
+    Idempotent: returns ``False`` (no change) when the knee already follows the
+    convention. Postcondition: ``knee_follows_convention`` holds for the joint
+    and the zero pose is unchanged.
+
+    Raises:
+        ValueError: ``side`` is not ``"r"``/``"l"`` or the joint is missing.
+    """
+    if side not in ("r", "l"):
+        raise ValueError(f"Unknown side for knee_{side}: expected 'r' or 'l'")
+    joint = next((j for j in document["joints"] if j["name"] == f"knee_{side}"), None)
+    if joint is None:
+        raise ValueError(f"Document has no knee_{side} joint")
+    if knee_follows_convention(joint):
+        return False
+    for key in ("parent_to_base", "child_to_follower"):
+        joint[key] = (np.asarray(joint[key], dtype=float) @ AXIS_MIRROR).tolist()
     return True
 
 
@@ -277,17 +313,18 @@ def leg_extension(
             )
         )
         knee = joints[f"walker_knee_{side}"]
+        knee_axes = transform(KNEE_PERMUTATION, np.zeros(3))
+        # Geometric rule, independent of the OpenSim axis sign: the hinge axis
+        # (base z column) must point to +z on both sides (flexion negative).
+        if (_frame(knee, "parent") @ knee_axes)[2, 2] <= 0.0:
+            knee_axes = knee_axes @ AXIS_MIRROR
         edges.append(
             JointSpec(
                 f"knee_{side}",
                 f"femur_{side}",
                 f"tibia_{side}",
-                (
-                    _frame(knee, "parent") @ transform(KNEE_PERMUTATION, np.zeros(3))
-                ).tolist(),
-                (
-                    _frame(knee, "child") @ transform(KNEE_PERMUTATION, np.zeros(3))
-                ).tolist(),
+                (_frame(knee, "parent") @ knee_axes).tolist(),
+                (_frame(knee, "child") @ knee_axes).tolist(),
                 ("Rz",),
                 (f"knee_angle_{side}",),
             )
