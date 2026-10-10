@@ -3,6 +3,12 @@
 - Branch `claude/turn-metrics-core`; refs #11726. `swing_comparison/turn.py` splits the old "thorax yaw" into `shoulder_girdle` (ShoulderBack, scapular) and `upper_trunk` (BackLeft/BackRight) lines, keeps `pelvis`, and reports X-factor as upper trunk minus pelvis (plus a shoulder-girdle variant). Turn is relative to address, + = backswing, unwrapped. Gaps over 0.10 s stay NaN with a reason; unavailable is never zero. `SegmentRotationMetrics.thorax_yaw*` is a deprecated alias (shoulder girdle).
 - Model side: `spec_model_points` (shared FK; hip centres, `LS`/`RS`, thorax attachments) or model marker sites. Receipt block: `motion_matching/turn_receipt.py` (`turn_block/v1`), wired into the MuJoCo pipeline (`pipeline/cli.py`) and Pinocchio (`full_body_fit.py`); schema check in `receipt_schema.validate_receipt`. No thresholds (slice 8 gates).
 - Follow-ups: Drake, OpenSim, MyoSuite, MuJoCo replay, Simscape writers (`FOLLOW_UP_WRITERS`, with reasons). Next: slice 3 (OSV-6 #11737). Definitions: `simscape_matching_reference.tex`, section on turn definitions.
+# Active: MuJoCo Native Export Backend - GCV-14 #11720
+
+- Branch `claude/gcv-14-mujoco-backend`, stacked on PR #12026 (`claude/gcv-14-speed-variants`). `native_viewer_export` has a fifth engine, `mujoco` (`backends/mujoco_native.py` + `mujoco_worker.py`): full-body MJCF with the default appearance document (body, head, club meshes, scene) rendered by `mujoco.Renderer` through the shared view presets and glyph overlay. It replaces the earlier throwaway stick-figure evidence renderer.
+- Tests: `tests/unit/tools/native_viewer_export/test_mujoco_backend.py` (registration, `unavailable_reason()`, appearance/club scene, `requires_gl` render); the speed-variant frame-count and 0 ms HUD test iterates `ENGINES`, so it covers MuJoCo.
+- Evidence: ControlTower renders `gcv14/mujoco_native` (`MUJOCO_GL=osmesa`), see the PR body for frame counts and the impact frame.
+
 # Active: OpenSim Contact Grip, OSV-7 Phase 4 #11739
 
 - Branch `claude/osv-7-opensim-contact` (stacked on #11985). `grip_model="contact"` in `export_full_body_osim` builds pad `ContactSphere`s against closed `ContactMesh` cylinders with one `ElasticFoundationForce` per pad (`opensim/python/full_body_grip_contact.py`, `grip_contact_osim_sim.py`, meshes in `grip_contact/grip_mesh.py`). Weld stays default. CPodes is required (RK-Merson needs about 1e-7 s steps); the club is released with the weld velocity.

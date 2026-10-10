@@ -27,7 +27,7 @@ def build_parser() -> argparse.ArgumentParser:
         prog="python -m src.tools.native_viewer_export",
         description=(
             "Render a same-input swing in each engine's native viewer (Drake MeshCat, "
-            "Pinocchio MeshCat, OpenSim simbody under xvfb, MyoSuite arena) as mp4 "
+            "Pinocchio MeshCat, OpenSim simbody under xvfb, MyoSuite arena, MuJoCo Renderer) as mp4 "
             "clips: one per camera view plus a labelled 2x2."
         ),
     )
