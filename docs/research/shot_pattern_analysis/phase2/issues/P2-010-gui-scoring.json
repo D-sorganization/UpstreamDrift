@@ -3,6 +3,8 @@
   "issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/12067",
   "title": "Display Conditional Course Scoring in Matched Study Results",
   "repo": "D-sorganization/UpstreamDrift",
-  "status": "open; isolated implementation in progress",
-  "source_finding": "matched_gui.MatchedStudyWidget._completed does not show exported course_scoring"
+  "status": "open; reviewed implementation integrated locally, pending PR merge",
+  "source_finding": "matched_gui.MatchedStudyWidget._completed does not show exported course_scoring",
+  "implementation_commit": "1ac7342872",
+  "validation": "51 offscreen GUI/adapter/precision tests; all540saved intervals and810means checked; source-bound Astra evidence in ../validation/gui_scoring_independent_review_v1"
 }

@@ -7,8 +7,10 @@ name and all relative paths, including raw gzip CSV rows, plans, summaries,
 scoring baselines, execution receipts, and figures. Packaging is lossless; it does
 not substitute for scientific acceptance.
 
-The completed pilot datasets are `pilot_v1` and `control_pilot_v1`. Final datasets
-will be added only after all planned cells complete and pass independent review.
+Completed pilot datasets are `pilot_v1`, `control_pilot_v1`, and
+`supplement_pilot_v1`. Completed final datasets are `final_v1`,
+`control_final_v1`, and `supplement_final_v1`; their saved-data audits and
+fresh-restoration evidence are linked from the [Current Turnover](../TURNOVER.md).
 Pilot results must not be presented as final 10,000-shot results.
 
 ## Verification and Restoration
@@ -22,7 +24,7 @@ from scripts.research.shot_pattern_analysis.archive_data import verify_archives
 import json
 
 phase = Path("docs/research/shot_pattern_analysis/phase2")
-for dataset in ("pilot_v1", "control_pilot_v1"):
+for dataset in ("final_v1", "control_final_v1", "supplement_final_v1"):
     bundle = phase / "data_archives" / dataset
     verify_archives(bundle)
     manifest = json.loads((bundle / "archive_manifest.json").read_text())
@@ -60,7 +62,7 @@ matrix produced exactly the same source-bound report as its original local
 copy. The original bundles were verified again after the check. See the
 [Restoration Receipt](../validation/pilot_archive_restoration_review.json).
 This is a packaging and portability check; it does not replace scientific
-validation or establish acceptance of the incomplete final datasets.
+validation or establish acceptance of final datasets. Separate final audit/restoration receipts provide that evidence.
 
 To repeat the check from the repository root, supply a new receipt path:
 
@@ -73,3 +75,8 @@ PYTHONPATH=. OPENBLAS_NUM_THREADS=1 python \
 The script compares the restored reports with the existing local unpacked
 pilots, uses a temporary destination, and refuses to replace an existing output
 receipt. Its source hash and the exact archive hashes are included in the receipt.
+
+## Rebuilding the Publication
+
+After restoring the final data, follow the [Publication Reproduction Guide](../REPRODUCING.md).
+Keep the accepted simulation snapshots separate from the reviewed reporting revision.

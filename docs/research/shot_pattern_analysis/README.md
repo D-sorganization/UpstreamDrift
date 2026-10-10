@@ -4,6 +4,8 @@
 
 The expanded study is documented in the [Phase-Two Scientific Design](phase2/DESIGN.md),
 [Current Turnover](phase2/TURNOVER.md), and [Final Report](phase2/REPORT.md).
+The [Reproduction Guide](phase2/REPRODUCING.md) and
+[Issue Register](phase2/issues/README.md) provide the publication workflow and tracked findings.
 It matches raw zero-error landing points through solved physical delivery parameters,
 without an aiming rotation. It covers static lofts of 10°/34°/46° for driver,
 7-iron, and wedge, shaft lean of 0°/5°/10°, shaft-twist SD of 1°/2°,
