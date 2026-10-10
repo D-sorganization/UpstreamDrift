@@ -218,6 +218,31 @@ def _is_reviewed_driver_speed_control(
     )
 
 
+def _is_reviewed_driver_curve_control(
+    first_config: dict,
+    second_config: dict,
+    first_plan: dict,
+    second_plan: dict,
+    first_protocol: str | None,
+) -> bool:
+    """Qualify the fixed-target Driver5° curve1→2 speed-bound extension only."""
+    first_club, second_club = first_config["club"], second_config["club"]
+    return (
+        first_protocol == "original_control/1"
+        and first_plan.get("supplement_protocol") is None
+        and second_plan.get("supplement_protocol") == "driver-control-speed-bounds/1"
+        and first_club["club_id"] == second_club["club_id"] == "driver"
+        and first_club["shaft_lean_deg"] == second_club["shaft_lean_deg"] == 5.0
+        and (first_config["curve_scale"], second_config["curve_scale"]) == (1.0, 2.0)
+        and _speed_factors(first_config) == [0.75, 1.25]
+        and _speed_factors(second_config) == [0.75, 1.30]
+        and first_config.get("match_face_bounds_deg") is None
+        and second_config.get("match_face_bounds_deg") == [-6.0, 6.0]
+        and first_config.get("target_x_m") is not None
+        and first_config["target_x_m"] == second_config.get("target_x_m")
+    )
+
+
 def _execution_transition(
     first: dict,
     second: dict,
@@ -588,6 +613,10 @@ def analyze_explicit_source_pair(
         }
     elif comparison_kind == "curve_strength":
         expected_differences = {"curve_scale", "target_x_m", "match_face_bounds_deg"}
+        if _is_reviewed_driver_curve_control(
+            config_a, config_b, plan_a, plan_b, first_source.get("source_protocol")
+        ):
+            expected_differences.add("match_speed_factors")
     elif comparison_kind == "shaft_rotation_sd":
         expected_differences = {"noise.standard_deviations[0]", "target_x_m"}
     else:

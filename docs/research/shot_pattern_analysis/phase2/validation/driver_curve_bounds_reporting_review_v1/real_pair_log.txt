@@ -1,0 +1,8 @@
+{
+  "common_supported_n": 9940,
+  "differences": [
+    "curve_scale",
+    "match_face_bounds_deg",
+    "match_speed_factors"
+  ]
+}
