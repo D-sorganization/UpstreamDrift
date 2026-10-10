@@ -24,7 +24,11 @@ from src.shared.python.contracts import postcondition, precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.motion_matching.candidate import MatchedSwingCandidate
 from src.shared.python.motion_matching.candidate_io import load_candidate
-from src.shared.python.video_timing.frame_schedule import FrameSchedule
+from src.shared.python.video_timing.frame_schedule import (
+    SPEED_VARIANTS,
+    FrameSchedule,
+    speed_suffix,
+)
 from src.shared.python.motion_matching.provenance import (
     engine_package_version,
     git_commit_short,
@@ -204,6 +208,46 @@ def export_video(
     if ext == ".mp4":
         return _write_mp4(frames, out_p, fps)
     raise ValueError(f"Unsupported video format '{ext}', expected .gif or .mp4")
+
+
+def export_video_variants(
+    candidate: MatchedSwingCandidate | Path | str,
+    engine: str,
+    path: Path | str,
+    *,
+    fps: int = 60,
+    speeds: tuple[float, ...] = SPEED_VARIANTS,
+    view: str = "marker_overlay",
+) -> dict[float, Path]:
+    """Export one time-based clip per playback speed (full, half, quarter).
+
+    ``path`` (``.gif`` or ``.mp4``) gains the speed suffix, so ``swing.mp4``
+    gives ``swing_1x.mp4``, ``swing_0p5x.mp4`` and ``swing_0p25x.mp4``. Every
+    engine's candidate goes through this one path (GCV-14, #11720).
+
+    Raises:
+        ValueError: ``speeds`` is empty, repeats a speed or has a speed that
+            is not positive.
+
+    Returns:
+        Mapping of each speed to its written file.
+    """
+    if not speeds:
+        raise ValueError("speeds must not be empty")
+    if len({speed_suffix(v) for v in speeds}) != len(speeds):
+        raise ValueError("speeds must be unique")
+    base = Path(path)
+    return {
+        speed: export_video(
+            candidate,
+            engine,
+            base.with_name(base.stem + speed_suffix(speed) + base.suffix),
+            fps=fps,
+            view=view,
+            speed=speed,
+        )
+        for speed in speeds
+    }
 
 
 def _load_receipt_data(

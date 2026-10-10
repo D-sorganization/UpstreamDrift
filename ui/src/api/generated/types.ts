@@ -1010,6 +1010,16 @@ export interface ClaimsV2 {
   causal_inference: boolean;
 }
 
+/**
+ * Bounded inline records and the PyQt Monitor Comparison tab's inputs. Mirrors ``_ComparisonParams`` from ``src/tools/launch_monitor_analytics/gui.py`` (``_read_comparison_params``): ``match_column`` is ``None`` when the Monitor Comparison tab's "Matched-Shot Column" combo reads "(unmatched)" (``_build_comparison_tab``), and an empty ``reference_monitor`` (the combo's blank state, ``currentText() or None``) is treated the same as ``None``, so the API and desktop paths accept identical inputs for :func:`compare_monitors`.
+ */
+export interface ComparisonPayloadV2 {
+  records: Record<string, unknown>[];
+  metric: string;
+  match_column?: string | null;
+  reference_monitor?: string | null;
+}
+
 export interface ConfidenceIntervalV1 {
   lower: number;
   upper: number;
@@ -1649,6 +1659,15 @@ export interface FeatureReportModel {
   message: string;
   missing?: string[];
   depends_on?: string[];
+}
+
+/**
+ * Serialized form of one :class:`FilterRule`. ``operator`` is restricted to the operators :class:`FilterRule` accepts; ``value`` is the raw text the desktop filter table's value cell holds (``_filter_rules``), passed through verbatim.
+ */
+export interface FilterRulePayload {
+  column: string;
+  operator: "eq" | "ne" | "lt" | "le" | "gt" | "ge" | "contains" | "in";
+  value: string;
 }
 
 /**
@@ -2445,6 +2464,18 @@ export interface ModelListResponse {
   models: Record<string, string>[];
 }
 
+/**
+ * Bounded inline records and the PyQt Models tab's widget-derived inputs. Mirrors ``_ModelParams`` from ``src/tools/launch_monitor_analytics/gui.py`` (``_read_model_params``): ``model`` offers the same five choices, ``random_seed`` keeps the same default and ``[0, 2_147_483_647]`` range as the "Random Seed" spinbox, and ``group_column`` is ``None`` when the "Grouped Holdout" combo reads "(random split)" (``_build_models_tab``), so the API and desktop paths accept identical inputs for :func:`fit_predictive_model`.
+ */
+export interface ModelPayloadV2 {
+  records: Record<string, unknown>[];
+  target: string;
+  features: string[];
+  model: "linear" | "ridge" | "lasso" | "elastic_net" | "mlp";
+  random_seed: number;
+  group_column?: "monitor_vendor" | "session_id" | "club" | null;
+}
+
 export interface ModelProvenanceV2 {
   model_id: string;
   version: string;
@@ -2458,6 +2489,14 @@ export interface ModelRequest {
   source_path: string;
   engine: "mujoco" | "drake" | "pinocchio" | "opensim" | "simscape";
   dofs: string[];
+}
+
+/**
+ * Bounded inline records and the PyQt Relationships tab's PCA/VIF inputs. Mirrors ``_compute_multivariate`` from ``src/tools/launch_monitor_analytics/gui.py``: the same ``metrics`` selection feeds both :func:`compute_pca` and :func:`compute_vif`, so the API and desktop paths accept identical inputs.
+ */
+export interface MultivariatePayloadV2 {
+  records: Record<string, unknown>[];
+  metrics: string[];
 }
 
 /**
@@ -2906,6 +2945,17 @@ export interface RefreshTokenResponse {
   access_token: string;
   token_type: string;
   expires_in: number;
+}
+
+/**
+ * Bounded inline records and the PyQt Relationships tab's widget inputs. Mirrors ``_RelationshipParams`` from ``src/tools/launch_monitor_analytics/gui.py`` (``_read_relationship_params``): ``method`` offers the same three choices, ``edge_threshold`` keeps the same default and ``[0, 1]`` range as the "Network Edge Threshold" spinbox (``_build_relationships_tab``), and controls that are also selected metrics are dropped as the desktop tab drops them, so the API and desktop paths accept identical inputs for :func:`compute_correlations`.
+ */
+export interface RelationshipsPayloadV2 {
+  records: Record<string, unknown>[];
+  metrics: string[];
+  controls?: string[];
+  method: "pearson" | "spearman" | "kendall";
+  edge_threshold: number;
 }
 
 export interface ReplayActionRequest {
@@ -3454,6 +3504,18 @@ export interface TransformRecordV2 {
   transform_id: string;
   version: string;
   parameters_sha256: string;
+}
+
+/**
+ * Bounded inline records and the PyQt Data Treatment tab's widget inputs. Mirrors ``_read_treatment_config`` from ``src/tools/launch_monitor_analytics/gui.py``: ``robust_z_threshold`` keeps the same default and ``[1, 20]`` range as the "Modified Z Threshold" spinbox (``_build_treatment_tab``), and ``required_metrics``/ ``outlier_metrics`` behave like the comma-separated text fields — whitespace-only or empty entries are dropped — so the API and desktop paths accept identical inputs for :func:`apply_treatment`.
+ */
+export interface TreatmentPayloadV2 {
+  records: Record<string, unknown>[];
+  required_metrics?: string[];
+  outlier_metrics?: string[];
+  robust_z_threshold: number;
+  exclude_flagged: boolean;
+  filters?: FilterRulePayload[];
 }
 
 /**

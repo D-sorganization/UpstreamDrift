@@ -336,13 +336,56 @@ def test_get_animation_gif(
     assert response.headers["content-type"] == "image/gif"
 
 
+def test_get_animation_frame_info(
+    client: TestClient, ledger_fixture: tuple[Path, str]
+) -> None:
+    _, run_id = ledger_fixture
+    response = client.get(f"/api/matched-swings/{run_id}/animation/frames")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["schema_version"] == "matched-swing-animation/1"
+    assert body["frame_count"] == 1
+    assert body["durations_ms"] == [100]
+    assert body["width"] == 1
+    assert body["height"] == 1
+
+
+def test_get_animation_frame_png(
+    client: TestClient, ledger_fixture: tuple[Path, str]
+) -> None:
+    _, run_id = ledger_fixture
+    response = client.get(f"/api/matched-swings/{run_id}/animation/frames/0")
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "image/png"
+    assert response.content.startswith(b"\x89PNG")
+
+
+def test_get_animation_frame_png_out_of_range_returns_404(
+    client: TestClient, ledger_fixture: tuple[Path, str]
+) -> None:
+    _, run_id = ledger_fixture
+    response = client.get(f"/api/matched-swings/{run_id}/animation/frames/7")
+    assert response.status_code == 404
+    assert response.json()["detail"]["error"]["code"] == "animation_unavailable"
+
+
+def test_get_animation_frame_info_unknown_run_returns_404(client: TestClient) -> None:
+    response = client.get("/api/matched-swings/not-a-real-id/animation/frames")
+    assert response.status_code == 404
+
+
+def test_get_animation_frame_png_unknown_run_returns_404(client: TestClient) -> None:
+    response = client.get("/api/matched-swings/not-a-real-id/animation/frames/0")
+    assert response.status_code == 404
+
+
 def test_unknown_run_returns_404(client: TestClient) -> None:
     response = client.get("/api/matched-swings/not-a-real-id")
     assert response.status_code == 404
 
 
 def test_remote_client_blocked(ledger_fixture: tuple[Path, str]) -> None:
-    ledger_path, _ = ledger_fixture
+    ledger_path, run_id = ledger_fixture
     service = MatchedSwingsService.from_ledger_file(
         ledger_path, repo_root=ledger_path.parent.parent
     )
@@ -351,5 +394,17 @@ def test_remote_client_blocked(ledger_fixture: tuple[Path, str]) -> None:
         remote_client = TestClient(app, client=("203.0.113.1", 1234))
         response = remote_client.get("/api/matched-swings")
         assert response.status_code == 403
+        assert (
+            remote_client.get(
+                f"/api/matched-swings/{run_id}/animation/frames"
+            ).status_code
+            == 403
+        )
+        assert (
+            remote_client.get(
+                f"/api/matched-swings/{run_id}/animation/frames/0"
+            ).status_code
+            == 403
+        )
     finally:
         app.dependency_overrides.pop(get_matched_swings_service, None)
