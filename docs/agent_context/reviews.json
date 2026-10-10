@@ -73,7 +73,7 @@
       "rationale": "Reviewed canonical pose ownership and MuJoCo adapter protocol, explicit coordinate conventions and capability limits. Existing test_mujoco_protocol.py passed in the 41-test boundary run on 2026-09-09; no scientific validity assertion is added."
     },
     "project-task-native-replay": {
-      "fingerprint": "8f3e075350cb2c315800e5ebbd2abb6b0a54b58dd48f270f97d00b62ac46ea11",
+      "fingerprint": "17d45c73b124125878e1672dc0b90a353cc5a650ddfddf21e6d4347c2af5f09f",
       "inputs": {
         "docs/agent_context/contracts/project-task-native-replay.md": "754359ce3d2ccfe8d80a31a1cd8867f151dc5bd63bf0023231a2cc797fc3f254",
         "src/engines/myosuite_project_command_solve.py": "a8b3168dfb20b8f94322d2b8dc1e2b8570d4e11b3d4222f8b1300e71711cd2e2",
@@ -91,7 +91,7 @@
         "tests/unit/engines/myosuite/test_native_model_resource_closure.py": "662eb43722a90a9c77fe01128ca8d22483259f6492e8d36d7b22c65460abbbef",
         "tests/unit/engines/myosuite/test_prediction_integrity_boundaries.py": "96bbbbb810cfeae96dee33a88771cd6daf87db4677845793bbae279b3a1bf3e5",
         "tests/unit/engines/myosuite/test_project_task_artifact_admission.py": "ea9e6d1da8bd2a6725d2b675607deafba8d9eac29e956a56e113cda2765a6fe1",
-        "tests/unit/engines/myosuite/test_project_task_command_solve.py": "c5c7d0c34b61ac352e279ffb635adf41e46a97f61a04838fb6d8fad0c1abb775",
+        "tests/unit/engines/myosuite/test_project_task_command_solve.py": "f2ac18f7c5194dd627113749d797f022c42ff3329f8fdaec7cf8081d45a5fd12",
         "tests/unit/engines/myosuite/test_project_task_feedback.py": "d9d8f9ae7b58e3c5fb9e641a32b1eeacf7b9873a26839d4c0724c27ad3ceff00",
         "tests/unit/engines/myosuite/test_project_task_forecast.py": "a35bdf3f3ab2d8941743f1409d36a925c8f07f366ffd6cb58ac0719dd4d97fc1",
         "tests/unit/engines/myosuite/test_project_task_native_search.py": "63795cc637ab7b62cca3ef213836584df94383dfdc9cfb10ef14352962dde63b",
@@ -100,7 +100,7 @@
         "tests/unit/motion_matching/test_bounded_candidate_search.py": "5a256b469fe1f4fdd502626f125cd50eb64a62b1ec304488eda64335ca72ee4d",
         "tests/unit/repo_hygiene/test_pinned_tools_package_loader.py": "98bf31807478472f8e15310c73d1e92552feb74a84988e32df905a80019c64c9"
       },
-      "rationale": "F09p12055 retains complete provider bytes at entry/final preparation/exit and existing native execution/guarded promotion/replay authority. Genuine native RED four checks and post-step handle rejection; final176PASS0F/E/S with21 declared source/test hashes and8122 Tools86files matching before/after. ABAB actualSDK shortfixture14 predictions/run preserves all state digests and25percent less native-library byte work, medians97.91/86.51ms and108.58/67.61ms; no statistical production speed or realtime claim. Preparation model/source/handles/callback/live mutations reach zero native steps. Full17/six/private muscularOpenSim/contact/physiology acceptance remains open."
+      "rationale": "Reviewed current command-solver source mutation guard and engine-test isolation: resolve the canonical currently imported module before monkeypatching. Ordered native fleet RED then GREEN confirms the guard remains effective; this changes the regression target, not replay or solve semantics. Actual full-campaign acceptance remains separately source-bound."
     }
   },
   "version": 1
