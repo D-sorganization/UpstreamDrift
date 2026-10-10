@@ -10,7 +10,7 @@ from functools import lru_cache
 from typing import Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from src.api.middleware.error_handler import handle_api_errors
 from src.api.services.launch_monitor_dataset_jobs import (
@@ -33,6 +33,7 @@ from src.tools.launch_monitor_model import (
     DispersionResult,
     ExpectedStrokesBaselineV2,
     CorrelationMethod,
+    CorrelationResult,
     FlexibleAnalysisRequest,
     LaunchMonitorAnalysisResultV2,
     LongitudinalSessionRequestV1,
@@ -41,6 +42,7 @@ from src.tools.launch_monitor_model import (
     MissingPolicy,
     OutcomeProxyRequestV1,
     OutcomeProxyResultV1,
+    PCAResult,
     PlayerCovariationRequestV1,
     PlayerCovariationResultV1,
     PlayerCovariationScanRequestV1,
@@ -48,6 +50,7 @@ from src.tools.launch_monitor_model import (
     StrokesGainedAnalysisResultV1,
     StrokesGainedRequestV1,
     TemporalTrendResult,
+    VIFResult,
     analyze_dispersion,
     analyze_longitudinal_sessions,
     analyze_outcome_proxy,
@@ -56,6 +59,9 @@ from src.tools.launch_monitor_model import (
     analyze_trend,
     analyze_variables,
     analyze_variables_v2,
+    compute_correlations,
+    compute_pca,
+    compute_vif,
     contract_v2_json_schema,
     longitudinal_session_contract_json_schema,
     player_covariation_contract_json_schema,
@@ -180,6 +186,50 @@ class DispersionPayloadV2(BaseModel):
     forward: str = Field("carry_distance", min_length=1)
     lateral: str = Field("lateral_carry", min_length=1)
     group_column: Literal["monitor_vendor", "session_id", "club"] | None = None
+
+
+class RelationshipsPayloadV2(BaseModel):
+    """Bounded inline records and the PyQt Relationships tab's widget inputs.
+
+    Mirrors ``_RelationshipParams`` from
+    ``src/tools/launch_monitor_analytics/gui.py`` (``_read_relationship_params``):
+    ``method`` offers the same three choices, ``edge_threshold`` keeps the same
+    default and ``[0, 1]`` range as the "Network Edge Threshold" spinbox
+    (``_build_relationships_tab``), and controls that are also selected metrics
+    are dropped as the desktop tab drops them, so the API and desktop paths
+    accept identical inputs for :func:`compute_correlations`.
+    """
+
+    records: list[dict[str, Any]] = Field(min_length=3, max_length=20_000)
+    metrics: list[str] = Field(min_length=2)
+    controls: list[str] = Field(default_factory=list)
+    method: CorrelationMethod = "pearson"
+    edge_threshold: float = Field(0.3, ge=0.0, le=1.0)
+
+    @field_validator("metrics")
+    @classmethod
+    def _metrics_are_unique(cls, value: list[str]) -> list[str]:
+        """Precondition: ``metrics`` names each column at most once."""
+        if len(set(value)) != len(value):
+            raise ValueError("metrics must not contain duplicates")
+        return value
+
+    def effective_controls(self) -> tuple[str, ...]:
+        """Return ``controls`` without the selected metrics (desktop parity)."""
+        return tuple(item for item in self.controls if item not in self.metrics)
+
+
+class MultivariatePayloadV2(BaseModel):
+    """Bounded inline records and the PyQt Relationships tab's PCA/VIF inputs.
+
+    Mirrors ``_compute_multivariate`` from
+    ``src/tools/launch_monitor_analytics/gui.py``: the same ``metrics``
+    selection feeds both :func:`compute_pca` and :func:`compute_vif`, so the
+    API and desktop paths accept identical inputs.
+    """
+
+    records: list[dict[str, Any]] = Field(min_length=3, max_length=20_000)
+    metrics: list[str] = Field(min_length=2)
 
 
 @lru_cache(maxsize=1)
@@ -613,6 +663,140 @@ async def analyze_dispersion_v2(payload: DispersionPayloadV2) -> dict[str, objec
             )
             for name, group in groups
         ],
+    }
+
+
+def _matrix_to_rows(matrix: Any) -> list[list[float | None]]:
+    """Serialize a labelled matrix to JSON-safe rows in its index order.
+
+    Postcondition: NaN/infinite cells become ``null``, never ``0``.
+    """
+    return [
+        [_json_safe_float(float(value)) for value in row]
+        for row in matrix.to_numpy(dtype=float)
+    ]
+
+
+def _relationships_result_to_dict(result: CorrelationResult) -> dict[str, object]:
+    """Serialize :class:`CorrelationResult` to the ``/v2/relationships`` response.
+
+    Postcondition: every matrix is a list of rows ordered like ``metrics``;
+    an optional matrix the analysis did not produce is ``null``; every
+    non-finite number is ``null``, never ``0``.
+    """
+    adjusted = result.adjusted_p_values
+    partial = result.partial_coefficients
+    return {
+        "method": result.method,
+        "metrics": [str(metric) for metric in result.coefficients.index],
+        "coefficients": _matrix_to_rows(result.coefficients),
+        "p_values": _matrix_to_rows(result.p_values),
+        "adjusted_p_values": None if adjusted is None else _matrix_to_rows(adjusted),
+        "pair_counts": result.pair_counts.to_numpy(dtype=int).tolist(),
+        "partial_coefficients": None if partial is None else _matrix_to_rows(partial),
+        "derived_metrics": list(result.derived_metrics),
+        "boolean_projected": list(result.boolean_projected),
+        "edges": [
+            {
+                key: _json_safe_float(value) if isinstance(value, float) else value
+                for key, value in dataclasses.asdict(edge).items()
+            }
+            for edge in result.edges
+        ],
+    }
+
+
+@router.post("/v2/relationships")
+@handle_api_errors
+async def analyze_relationships_v2(
+    payload: RelationshipsPayloadV2,
+) -> dict[str, object]:
+    """Map metric interdependencies with the PyQt Relationships tab's inputs.
+
+    Calls the same :func:`compute_correlations` the desktop Relationships tab
+    calls (``src/tools/launch_monitor_analytics/gui.py``
+    ``_compute_relationship``), so the API and PyQt paths share one contract.
+    Precondition: ``records`` holds 3-20,000 inline rows, ``metrics`` names at
+    least two columns and ``edge_threshold`` is in ``[0, 1]`` (validated by
+    the request schema); a column absent from the records returns 400.
+    Postcondition: the response is a JSON-safe serialization of every
+    :class:`CorrelationResult` field; see :func:`_relationships_result_to_dict`.
+    """
+
+    import pandas as pd  # deferred import: pandas must not load at API boot (issue #8943)
+
+    result = compute_correlations(
+        pd.DataFrame.from_records(payload.records),
+        metrics=tuple(payload.metrics),
+        method=payload.method,
+        controls=payload.effective_controls(),
+        edge_threshold=payload.edge_threshold,
+    )
+    return _relationships_result_to_dict(result)
+
+
+def _pca_result_to_dict(result: PCAResult) -> dict[str, object]:
+    """Serialize :class:`PCAResult` to the ``/v2/multivariate`` response.
+
+    Postcondition: ``loadings`` rows follow ``metrics`` order and
+    ``scores`` rows follow the complete-case sample order, both with
+    columns ordered like ``component_names``; every non-finite number is
+    ``null``, never ``0``.
+    """
+    return {
+        "metrics": list(result.metrics),
+        "component_names": list(result.explained_variance_ratio.index),
+        "explained_variance_ratio": [
+            _json_safe_float(float(value))
+            for value in result.explained_variance_ratio.to_numpy(dtype=float)
+        ],
+        "loadings": _matrix_to_rows(result.loadings),
+        "scores": _matrix_to_rows(result.scores),
+        "sample_count": result.sample_count,
+    }
+
+
+def _vif_result_to_dict(result: VIFResult) -> dict[str, object]:
+    """Serialize :class:`VIFResult` to the ``/v2/multivariate`` response.
+
+    Postcondition: ``values`` is a metric-keyed mapping; an infinite VIF
+    (perfectly collinear metrics) serializes as ``null``, never ``0``.
+    """
+    return {
+        "values": {
+            str(metric): _json_safe_float(float(value))
+            for metric, value in result.values.items()
+        },
+        "sample_count": result.sample_count,
+        "warning_metrics": list(result.warning_metrics),
+    }
+
+
+@router.post("/v2/multivariate")
+@handle_api_errors
+async def analyze_multivariate_v2(payload: MultivariatePayloadV2) -> dict[str, object]:
+    """Compute PCA and VIF diagnostics with the PyQt multivariate inputs.
+
+    Calls the same :func:`compute_pca` and :func:`compute_vif` the desktop
+    Relationships tab calls (``src/tools/launch_monitor_analytics/gui.py``
+    ``_compute_multivariate``), so the API and PyQt paths share one
+    contract. Precondition: ``records`` holds 3-20,000 inline rows and
+    ``metrics`` names at least two columns (validated by the request
+    schema); an unknown metric or too few complete rows returns 400.
+    Postcondition: the response is a JSON-safe serialization of every
+    :class:`PCAResult` and :class:`VIFResult` field; see
+    :func:`_pca_result_to_dict` and :func:`_vif_result_to_dict`.
+    """
+
+    import pandas as pd  # deferred import: pandas must not load at API boot (issue #8943)
+
+    frame = pd.DataFrame.from_records(payload.records)
+    metrics = tuple(payload.metrics)
+    pca = compute_pca(frame, metrics=metrics)
+    vif = compute_vif(frame, metrics=metrics)
+    return {
+        "pca": _pca_result_to_dict(pca),
+        "vif": _vif_result_to_dict(vif),
     }
 
 

@@ -1145,6 +1145,42 @@
       "issue": 11767,
       "reason": "Issue #11767 (GCV-20): split_time_s is one explicit optional keyword added to the existing public computed-torque tracking API so the reference rates can be differentiated on each side of the ball impact. It is threaded through several callers (pipeline/dynamics.py, same_input/reference.py) as the same named keyword, so folding it into an options object is a wider call-site migration than this acceptance change; track that consolidation before this exception expires.",
       "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/grip_contact_sim.py",
+      "symbol": "simulate_grip_contact",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 11739,
+      "reason": "Issue #11739: OSV-7 simulate_grip_contact carries the swing, pad model, windowing and trail-shift options for the cross-engine grip comparison (10 parameters).",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "docs/development/full_body_models/evidence/grip_kinetics/run_grip_contact_opensim.py",
+      "symbol": "main",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 11739,
+      "reason": "Issue #11739: OSV-7 OpenSim contact-grip evidence runner keeps argument parsing, simulation and artifact writing in one script entry point (125 lines).",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/engines/physics_engines/opensim/python/full_body_osim.py",
+      "symbol": "export_full_body_osim",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 11739,
+      "reason": "Issue #11739: OSV-7 export_full_body_osim gained the contact-grip option wiring (108 lines).",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/engines/physics_engines/opensim/python/full_body_osim.py",
+      "symbol": "export_full_body_osim",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 11739,
+      "reason": "Issue #11739: OSV-7 export_full_body_osim gained the contact-grip options (9 parameters).",
+      "expires_on": "2026-12-31"
     }
   ]
 }
