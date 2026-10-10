@@ -290,6 +290,43 @@ def test_get_parity(client: TestClient, ledger_fixture: tuple[Path, str]) -> Non
     assert response.json()["schema_version"] == "matched-swing-parity-report-v1"
 
 
+def test_get_report_markdown(
+    client: TestClient, ledger_fixture: tuple[Path, str], tmp_path: Path
+) -> None:
+    _, run_id = ledger_fixture
+    response = client.get(f"/api/matched-swings/{run_id}/report")
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/markdown")
+    assert (
+        'filename="fit_report_pinocchio_driver.md"'
+        in response.headers["content-disposition"]
+    )
+    body = response.text
+    assert run_id in body
+    assert "pinocchio" in body.lower()
+    # Public responses never expose absolute filesystem paths (service contract).
+    assert str(tmp_path) not in body
+    assert tmp_path.as_posix() not in body
+
+
+def test_get_report_unknown_run_returns_404(client: TestClient) -> None:
+    response = client.get("/api/matched-swings/not-a-real-id/report")
+    assert response.status_code == 404
+
+
+def test_get_report_missing_receipt_returns_error(
+    client: TestClient, ledger_fixture: tuple[Path, str], tmp_path: Path
+) -> None:
+    _, run_id = ledger_fixture
+    receipt_path = tmp_path / "evidence" / "matched" / "driver_test" / "receipt.json"
+    receipt_path.unlink()
+
+    response = client.get(f"/api/matched-swings/{run_id}/report")
+
+    assert response.status_code == 404
+    assert response.json()["detail"]["error"]["code"] == "report_unavailable"
+
+
 def test_get_animation_gif(
     client: TestClient, ledger_fixture: tuple[Path, str]
 ) -> None:
