@@ -84,8 +84,10 @@ mypy on five sources), 15 pin/build-boundary/register tests, LoD no-growth,
 document titles, file-size budget and design-manual governance. Architecture and
 DRY pass without new exceptions or duplicate growth. Context review/render/check
 passes at the integrated source. The manual inventory remains release-blocked.
-Normal hook, current-main integration and GitHub results must be recorded
-truthfully before publication.
+Both integration merge commits passed the normal commit hooks. Context
+navigation evaluated 12/12 curated tasks correctly. GitHub CI and publication
+status remain separate from these local results and must be recorded in the
+publication receipt.
 
 ### Current Main Integration
 
