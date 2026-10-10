@@ -31,6 +31,9 @@ from src.shared.python.motion_matching.range_of_motion import UPPER_RANGES_DEG
 Array = NDArray[np.float64]
 
 NECK_REFERENCES = ("ik", "gaze")
+#: Schedule evaluations in :func:`apply_fd_neck` (the first from the reference
+#: neck, the second from the solved neck).
+EYE_COUPLING_PASSES = 2
 _BOUND_TOL_RAD = 1e-6
 _WINDOWS = ("address_to_impact", "hold", "release", "after_release")
 
@@ -209,8 +212,13 @@ def apply_fd_neck(
     if mode == "ik":
         return q_track, None
     plan = _plan(lane, kin, q_ref)
-    directions, *_ = schedule_directions(plan, kin, q_track, lane.times)
-    solve = solve_neck_schedule(kin, q_track, directions, plan.gaze_axis_head)
+    solved = q_track
+    # The eye point turns with the head, so the scheduled direction depends on
+    # the neck solution: re-evaluate it once from the first solve.
+    for _ in range(EYE_COUPLING_PASSES):
+        directions, *_ = schedule_directions(plan, kin, solved, lane.times)
+        solve = solve_neck_schedule(kin, q_track, directions, plan.gaze_axis_head)
+        solved = solve.q
     cols = _neck_columns(kin)
     lo, hi = _neck_bounds(None)
     smooth = smooth_reference(solve.q[:, cols], lane.rate_hz, TRACKING_CUTOFF_HZ)
