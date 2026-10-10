@@ -468,7 +468,20 @@ def zmp_filter(
         heights = zmp["com"][:, 2] - lane.ground.height_m
         shift = cart_table_shift(zmp["zmp_xy"], target, heights, lane.times)
         com_goal = zmp["com"][:, :2] + shift
-        goals = [(basis @ np.r_[g, 0.0], ZMP_COM_WEIGHT) for g in com_goal]
+        _dump_12117 = __import__("os").environ.get("UD_DUMP_12117")
+        if _dump_12117:  # throwaway diagnosis (#12117), not for merge
+            __import__("pathlib").Path(_dump_12117).mkdir(parents=True, exist_ok=True)
+            np.savez(
+                f"{_dump_12117}/zmp_pass{k + 1}.npz",
+                times=lane.times,
+                zmp_xy=zmp["zmp_xy"],
+                target=target,
+                shift=shift,
+                com=zmp["com"],
+                unloaded=np.asarray(zmp["unloaded"]),
+                q_track=q_track,
+                impact_index=np.asarray(getattr(lane, "impact_index", -1) or -1),
+            )
         q_new, fits = kin.solve_trajectory(
             lane.points,
             lane.valid,
