@@ -21,8 +21,13 @@ the [Nominal Matching Bounds Supplement](../../../docs/research/shot_pattern_ana
 ([editable LaTeX](../../../docs/research/shot_pattern_analysis/phase2/BOUNDS_SUPPLEMENT.tex)),
 and [Turnover](../../../docs/research/shot_pattern_analysis/phase2/TURNOVER.md).
 The commands and results below describe the historical phase-one controls.
-Phase-two pilots and execution gates have passed; the final matrices are running.
-Final conclusions require the complete source-bound results and independent audit.
+The original and supplemental final matrices are complete, and their saved-data
+independent audits and archive-restoration checks have passed. Final figure
+regeneration and publication review are underway; no final study conclusion is
+claimed until the complete report is reviewed. The linked design PDF is a
+reviewed design snapshot, not the final results report. See the
+[Saved-Data Reproduction Guide](../../../docs/research/shot_pattern_analysis/phase2/REPRODUCING.md)
+and [Final Report Status](../../../docs/research/shot_pattern_analysis/phase2/REPORT.md).
 
 ### Configure the Matched Study
 
