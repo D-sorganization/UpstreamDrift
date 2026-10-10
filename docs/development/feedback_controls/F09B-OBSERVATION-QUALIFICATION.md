@@ -7,8 +7,10 @@ it does not define another model inventory, replay format, numerical gate, or
 integrator.
 
 `NativeObservationCase` binds one F01 comparison row to the actual T01 replay
-bundle, a complete native marker-position output, the exact observed-position
-clock and validity mask, and the existing native acceptance receipt/gates.
+bundle, the existing `NativeMarkerReplayEvidence`, its complete native
+marker-position output, the exact observed-position clock and validity mask,
+and the existing native acceptance receipt/gates. A positions array and a
+caller-supplied marker mapping are not sufficient evidence by themselves.
 Before replay admission, the adapter requires F01c's
 `feedback-comparison/1.1.0` contract and the exact initial-state digest from
 the T01 bundle. It checks T01 and F01 model,
@@ -18,6 +20,19 @@ identity adds T01 `integrity.initial_state_sha256`; it never infers initial
 state identity from a schema digest or partial coordinate vector. Position
 and tangent-velocity dimensions are checked separately, so a valid manifold
 schema with `nq != nv` remains representable.
+
+Before scoring, the workflow verifies the marker-evidence schema and its
+content digests, recomputes the digest of the exact marker output being scored,
+and requires its native execution receipt to match the F01 row and T01 bundle
+identity, including provider identities, full initial-state digest, ordered
+channels, input history and clock, policy, state dimensions, and full-horizon
+declaration. The marker-output clock must equal the replay input grid; the
+observed-position clock remains separate and is sampled by the existing
+F09a alignment contract. The resulting score binds the marker evidence,
+execution receipt, marker map, and marker output digests as well as the
+existing score inputs. These checks preserve receipt lineage and integrity;
+they do not authenticate arbitrary externally serialized receipts or attest
+that a caller actually ran a native provider.
 
 Observation scoring reuses F09a's positions-only sampler and canonical replay
 metrics, pelvis-yaw metric, and `acceptance.evaluate`. It preserves the exact
@@ -42,9 +57,12 @@ The public replay-bundle facade is pinned through `vendor/ud-tools`; the
 `extend_sidekick_lab_path` seam exposes the Tools-owned `sidekick.lab.mocap`
 package only when an actual bundle is validated. Importing the scorer does not
 mutate the Sidekick package path or change capture-rig schema availability.
-This child does not provide private capture evidence, native physics results,
-muscle qualification, or a cross-engine acceptance claim. F09 remains open for
-native consumers and qualification evidence.
+The typed synthetic fixtures prove structural receipt matching only. The
+focused MuJoCo test exercises the existing native marker replay through the
+scorer handoff, but this remains unqualified software evidence: it does not
+provide private capture evidence, native physics qualification, muscle
+qualification, or cross-engine acceptance. F09 remains open for native
+consumers and qualification evidence.
 
 Validation:
 

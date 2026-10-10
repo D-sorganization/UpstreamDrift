@@ -130,6 +130,31 @@ class NativeMarkerReplayEvidence:
     marker_output_sha256: str
     native_output: NativeMarkerPositionOutput
 
+    def validate_output(self, output: NativeMarkerPositionOutput) -> None:
+        """Verify receipt and marker bytes before downstream scoring."""
+        if self.schema_version != "native-marker-replay/1.0.0":
+            raise ValueError("native marker replay evidence schema is unsupported")
+        if self.qualification != "unqualified":
+            raise ValueError(
+                "native marker replay evidence cannot promote qualification"
+            )
+        if not isinstance(self.native_execution_receipt, NativeExecutionReceipt):
+            raise TypeError("native marker replay evidence has no execution receipt")
+        if self.receipt_sha256 != _receipt_sha256(self.native_execution_receipt):
+            raise ValueError("native marker execution receipt digest differs")
+        if _marker_output_sha256(self.native_output) != self.marker_output_sha256:
+            raise ValueError("native marker evidence output digest differs")
+        if _marker_output_sha256(output) != self.marker_output_sha256:
+            raise ValueError("scored marker output differs from native replay evidence")
+        for name, digest in (
+            ("marker map", self.marker_map_sha256),
+            ("marker output", self.marker_output_sha256),
+        ):
+            if len(digest) != 64 or any(
+                char not in "0123456789abcdef" for char in digest
+            ):
+                raise ValueError(f"native marker {name} digest is invalid")
+
     def as_dict(self) -> dict[str, Any]:
         return {
             "schema_version": self.schema_version,

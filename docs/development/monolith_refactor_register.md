@@ -153,6 +153,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 |  868 | `src/tools/matched_swing_browser/gui.py`                                                                                                                                      |
 |  865 | `src/shared/python/signal_toolkit/fitting.py`                                                                                                                                 |
 |  864 | `src/tools/simulation_backends_launcher/gui.py`                                                                                                                               |
+|  862 | `src/engines/feedback_observation_qualification.py`                                                                                                                           |
 |  862 | `src/shared/python/pendulum_simulator/gui/pendulum_widget.py`                                                                                                                 |
 |  859 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/functions/dataset_generator/extractAllSignalsFromBus.m`                                                       |
 |  853 | `src/shared/python/ai/gui/assistant_panel.py`                                                                                                                                 |
