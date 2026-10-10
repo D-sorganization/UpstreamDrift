@@ -1,0 +1,752 @@
+......FF......FFFFFFF.FFFF....F.FF                                       [100%]
+=================================== FAILURES ===================================
+____ test_pair_social_density_includes_matched_target_and_ordered_protocols ____
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7eb7122e6c60>
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2112/test_pair_social_density_inclu0')
+
+    def test_pair_social_density_includes_matched_target_and_ordered_protocols(
+        monkeypatch, tmp_path
+    ):
+        calls = []
+    
+        def fake_render(*args, **kwargs):
+            calls.append(kwargs)
+            return {"png": tmp_path / "plot.png"}
+    
+        monkeypatch.setattr(social, "write_academic_dispersion_figure", fake_render)
+>       social.write_pair_social_density(
+            _points(),
+            tmp_path / "comparison",
+            condition_labels=("SD 1°", "SD 2°"),
+            scenario="Lean 5° · Curve ×1",
+            social_club="Driver",
+            target_point_m=(180.0, 0.0),
+            total_n=10,
+            source_protocols=("pw-primary-face-bounds/1", "pw-control-face-bounds/1"),
+            target_modes=("Within-Lean Nominal Target", "Fixed-Target Control"),
+        )
+E       TypeError: write_pair_social_density() got an unexpected keyword argument 'target_modes'
+
+tests/tools/shot_pattern_analysis/test_matched_pair_social.py:120: TypeError
+___________ test_pair_social_density_supports_nonzero_lateral_target ___________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7eb7122e7dd0>
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2112/test_pair_social_density_suppo0')
+
+    def test_pair_social_density_supports_nonzero_lateral_target(monkeypatch, tmp_path):
+        calls = []
+    
+        def fake_render(*args, **kwargs):
+            calls.append(kwargs)
+            return {"png": tmp_path / "plot.png"}
+    
+        monkeypatch.setattr(social, "write_academic_dispersion_figure", fake_render)
+>       social.write_pair_social_density(
+            _points(),
+            tmp_path / "comparison",
+            condition_labels=("SD 1°", "SD 2°"),
+            scenario="Lean 5° · Curve ×1",
+            social_club="Driver",
+            target_point_m=(180.0, 3.5),
+            total_n=10,
+            source_protocols=("pw-primary-face-bounds/1", "pw-control-face-bounds/1"),
+            target_modes=("Within-Lean Nominal Target", "Fixed-Target Control"),
+        )
+E       TypeError: write_pair_social_density() got an unexpected keyword argument 'target_modes'
+
+tests/tools/shot_pattern_analysis/test_matched_pair_social.py:154: TypeError
+_____ test_pair_social_density_invalid_target_modes_raises[invalid_modes0] _____
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7eb72b74d490>
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2112/test_pair_social_density_inval5')
+invalid_modes = ('only_one',)
+
+    @pytest.mark.parametrize(
+        "invalid_modes",
+        [
+            ("only_one",),
+            ("one", "two", "three"),
+            ("", "valid"),
+            ("valid", "   "),
+            (123, "valid"),
+        ],
+    )
+    def test_pair_social_density_invalid_target_modes_raises(
+        monkeypatch, tmp_path, invalid_modes
+    ):
+        monkeypatch.setattr(social, "write_academic_dispersion_figure", lambda *a, **kw: {})
+        with pytest.raises(ValueError, match="target_modes"):
+>           social.write_pair_social_density(
+                _points(),
+                tmp_path / "comparison",
+                condition_labels=("SD 1°", "SD 2°"),
+                scenario="Lean 5° · Curve ×1",
+                social_club="Driver",
+                target_point_m=(180.0, 0.0),
+                total_n=10,
+                target_modes=invalid_modes,  # type: ignore[arg-type]
+            )
+E           TypeError: write_pair_social_density() got an unexpected keyword argument 'target_modes'
+
+tests/tools/shot_pattern_analysis/test_matched_pair_social.py:244: TypeError
+_____ test_pair_social_density_invalid_target_modes_raises[invalid_modes1] _____
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7eb72b74df10>
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2112/test_pair_social_density_inval6')
+invalid_modes = ('one', 'two', 'three')
+
+    @pytest.mark.parametrize(
+        "invalid_modes",
+        [
+            ("only_one",),
+            ("one", "two", "three"),
+            ("", "valid"),
+            ("valid", "   "),
+            (123, "valid"),
+        ],
+    )
+    def test_pair_social_density_invalid_target_modes_raises(
+        monkeypatch, tmp_path, invalid_modes
+    ):
+        monkeypatch.setattr(social, "write_academic_dispersion_figure", lambda *a, **kw: {})
+        with pytest.raises(ValueError, match="target_modes"):
+>           social.write_pair_social_density(
+                _points(),
+                tmp_path / "comparison",
+                condition_labels=("SD 1°", "SD 2°"),
+                scenario="Lean 5° · Curve ×1",
+                social_club="Driver",
+                target_point_m=(180.0, 0.0),
+                total_n=10,
+                target_modes=invalid_modes,  # type: ignore[arg-type]
+            )
+E           TypeError: write_pair_social_density() got an unexpected keyword argument 'target_modes'
+
+tests/tools/shot_pattern_analysis/test_matched_pair_social.py:244: TypeError
+_____ test_pair_social_density_invalid_target_modes_raises[invalid_modes2] _____
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7eb72b74ee10>
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2112/test_pair_social_density_inval7')
+invalid_modes = ('', 'valid')
+
+    @pytest.mark.parametrize(
+        "invalid_modes",
+        [
+            ("only_one",),
+            ("one", "two", "three"),
+            ("", "valid"),
+            ("valid", "   "),
+            (123, "valid"),
+        ],
+    )
+    def test_pair_social_density_invalid_target_modes_raises(
+        monkeypatch, tmp_path, invalid_modes
+    ):
+        monkeypatch.setattr(social, "write_academic_dispersion_figure", lambda *a, **kw: {})
+        with pytest.raises(ValueError, match="target_modes"):
+>           social.write_pair_social_density(
+                _points(),
+                tmp_path / "comparison",
+                condition_labels=("SD 1°", "SD 2°"),
+                scenario="Lean 5° · Curve ×1",
+                social_club="Driver",
+                target_point_m=(180.0, 0.0),
+                total_n=10,
+                target_modes=invalid_modes,  # type: ignore[arg-type]
+            )
+E           TypeError: write_pair_social_density() got an unexpected keyword argument 'target_modes'
+
+tests/tools/shot_pattern_analysis/test_matched_pair_social.py:244: TypeError
+_____ test_pair_social_density_invalid_target_modes_raises[invalid_modes3] _____
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7eb72b774050>
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2112/test_pair_social_density_inval8')
+invalid_modes = ('valid', '   ')
+
+    @pytest.mark.parametrize(
+        "invalid_modes",
+        [
+            ("only_one",),
+            ("one", "two", "three"),
+            ("", "valid"),
+            ("valid", "   "),
+            (123, "valid"),
+        ],
+    )
+    def test_pair_social_density_invalid_target_modes_raises(
+        monkeypatch, tmp_path, invalid_modes
+    ):
+        monkeypatch.setattr(social, "write_academic_dispersion_figure", lambda *a, **kw: {})
+        with pytest.raises(ValueError, match="target_modes"):
+>           social.write_pair_social_density(
+                _points(),
+                tmp_path / "comparison",
+                condition_labels=("SD 1°", "SD 2°"),
+                scenario="Lean 5° · Curve ×1",
+                social_club="Driver",
+                target_point_m=(180.0, 0.0),
+                total_n=10,
+                target_modes=invalid_modes,  # type: ignore[arg-type]
+            )
+E           TypeError: write_pair_social_density() got an unexpected keyword argument 'target_modes'
+
+tests/tools/shot_pattern_analysis/test_matched_pair_social.py:244: TypeError
+_____ test_pair_social_density_invalid_target_modes_raises[invalid_modes4] _____
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7eb72b774950>
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2112/test_pair_social_density_inval9')
+invalid_modes = (123, 'valid')
+
+    @pytest.mark.parametrize(
+        "invalid_modes",
+        [
+            ("only_one",),
+            ("one", "two", "three"),
+            ("", "valid"),
+            ("valid", "   "),
+            (123, "valid"),
+        ],
+    )
+    def test_pair_social_density_invalid_target_modes_raises(
+        monkeypatch, tmp_path, invalid_modes
+    ):
+        monkeypatch.setattr(social, "write_academic_dispersion_figure", lambda *a, **kw: {})
+        with pytest.raises(ValueError, match="target_modes"):
+>           social.write_pair_social_density(
+                _points(),
+                tmp_path / "comparison",
+                condition_labels=("SD 1°", "SD 2°"),
+                scenario="Lean 5° · Curve ×1",
+                social_club="Driver",
+                target_point_m=(180.0, 0.0),
+                total_n=10,
+                target_modes=invalid_modes,  # type: ignore[arg-type]
+            )
+E           TypeError: write_pair_social_density() got an unexpected keyword argument 'target_modes'
+
+tests/tools/shot_pattern_analysis/test_matched_pair_social.py:244: TypeError
+____ test_pair_social_density_invalid_target_point_raises[invalid_target0] _____
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7eb72b775ca0>
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2112/test_pair_social_density_inval10')
+invalid_target = (180.0,)
+
+    @pytest.mark.parametrize(
+        "invalid_target",
+        [
+            (180.0,),
+            (180.0, 0.0, 1.0),
+            (float("nan"), 0.0),
+            (180.0, float("inf")),
+            (True, 0.0),
+            (180.0, False),
+            ("180", 0.0),
+        ],
+    )
+    def test_pair_social_density_invalid_target_point_raises(
+        monkeypatch, tmp_path, invalid_target
+    ):
+        monkeypatch.setattr(social, "write_academic_dispersion_figure", lambda *a, **kw: {})
+>       with pytest.raises(ValueError, match="target_point_m"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/tools/shot_pattern_analysis/test_matched_pair_social.py:272: Failed
+____ test_pair_social_density_invalid_target_point_raises[invalid_target1] _____
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7eb72b775df0>
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2112/test_pair_social_density_inval11')
+invalid_target = (180.0, 0.0, 1.0)
+
+    @pytest.mark.parametrize(
+        "invalid_target",
+        [
+            (180.0,),
+            (180.0, 0.0, 1.0),
+            (float("nan"), 0.0),
+            (180.0, float("inf")),
+            (True, 0.0),
+            (180.0, False),
+            ("180", 0.0),
+        ],
+    )
+    def test_pair_social_density_invalid_target_point_raises(
+        monkeypatch, tmp_path, invalid_target
+    ):
+        monkeypatch.setattr(social, "write_academic_dispersion_figure", lambda *a, **kw: {})
+>       with pytest.raises(ValueError, match="target_point_m"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/tools/shot_pattern_analysis/test_matched_pair_social.py:272: Failed
+____ test_pair_social_density_invalid_target_point_raises[invalid_target3] _____
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7eb72b777a10>
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2112/test_pair_social_density_inval13')
+invalid_target = (180.0, inf)
+
+    @pytest.mark.parametrize(
+        "invalid_target",
+        [
+            (180.0,),
+            (180.0, 0.0, 1.0),
+            (float("nan"), 0.0),
+            (180.0, float("inf")),
+            (True, 0.0),
+            (180.0, False),
+            ("180", 0.0),
+        ],
+    )
+    def test_pair_social_density_invalid_target_point_raises(
+        monkeypatch, tmp_path, invalid_target
+    ):
+        monkeypatch.setattr(social, "write_academic_dispersion_figure", lambda *a, **kw: {})
+>       with pytest.raises(ValueError, match="target_point_m"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/tools/shot_pattern_analysis/test_matched_pair_social.py:272: Failed
+____ test_pair_social_density_invalid_target_point_raises[invalid_target4] _____
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7eb72b7683b0>
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2112/test_pair_social_density_inval14')
+invalid_target = (True, 0.0)
+
+    @pytest.mark.parametrize(
+        "invalid_target",
+        [
+            (180.0,),
+            (180.0, 0.0, 1.0),
+            (float("nan"), 0.0),
+            (180.0, float("inf")),
+            (True, 0.0),
+            (180.0, False),
+            ("180", 0.0),
+        ],
+    )
+    def test_pair_social_density_invalid_target_point_raises(
+        monkeypatch, tmp_path, invalid_target
+    ):
+        monkeypatch.setattr(social, "write_academic_dispersion_figure", lambda *a, **kw: {})
+>       with pytest.raises(ValueError, match="target_point_m"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/tools/shot_pattern_analysis/test_matched_pair_social.py:272: Failed
+____ test_pair_social_density_invalid_target_point_raises[invalid_target5] _____
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7eb72b769160>
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2112/test_pair_social_density_inval15')
+invalid_target = (180.0, False)
+
+    @pytest.mark.parametrize(
+        "invalid_target",
+        [
+            (180.0,),
+            (180.0, 0.0, 1.0),
+            (float("nan"), 0.0),
+            (180.0, float("inf")),
+            (True, 0.0),
+            (180.0, False),
+            ("180", 0.0),
+        ],
+    )
+    def test_pair_social_density_invalid_target_point_raises(
+        monkeypatch, tmp_path, invalid_target
+    ):
+        monkeypatch.setattr(social, "write_academic_dispersion_figure", lambda *a, **kw: {})
+>       with pytest.raises(ValueError, match="target_point_m"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/tools/shot_pattern_analysis/test_matched_pair_social.py:272: Failed
+____ test_pair_social_density_invalid_target_point_raises[invalid_target6] _____
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7eb72b768fb0>
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2112/test_pair_social_density_inval16')
+invalid_target = ('180', 0.0)
+
+    @pytest.mark.parametrize(
+        "invalid_target",
+        [
+            (180.0,),
+            (180.0, 0.0, 1.0),
+            (float("nan"), 0.0),
+            (180.0, float("inf")),
+            (True, 0.0),
+            (180.0, False),
+            ("180", 0.0),
+        ],
+    )
+    def test_pair_social_density_invalid_target_point_raises(
+        monkeypatch, tmp_path, invalid_target
+    ):
+        monkeypatch.setattr(social, "write_academic_dispersion_figure", lambda *a, **kw: {})
+>       with pytest.raises(ValueError, match="target_point_m"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/tools/shot_pattern_analysis/test_matched_pair_social.py:272: Failed
+_ test_render_pair_figures_exports_canonical_social_density_with_physical_patterns _
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2112/test_render_pair_figures_expor0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7eb70bbe8b00>
+
+    def test_render_pair_figures_exports_canonical_social_density_with_physical_patterns(
+        tmp_path, monkeypatch
+    ):
+        first = _fixture_ref("cell1", rotation=1.0)
+        second = _fixture_ref("cell2", rotation=2.0)
+    
+        for ref in (first, second):
+            root = tmp_path / ref["cell"]
+            cell_dir = root / ref["cell"]
+            cell_dir.mkdir(parents=True)
+            (cell_dir / "flight_samples.json").write_text(
+                json.dumps(
+                    {
+                        "trajectories": {
+                            p: [[[0.0, 0.0], [180.0, 0.0]]]
+                            for p in ("Straight", "Draw", "Fade")
+                        }
+                    }
+                )
+            )
+            ref["source_root"] = str(root)
+    
+        # 10 common shot indices
+        common_endpoints = {
+            p: [(i, 180.0 + i, 0.1 * i) for i in range(10)]
+            for p in ("Straight", "Draw", "Fade")
+        }
+        monkeypatch.setattr(
+            figures, "_supported_endpoints", lambda *args: (common_endpoints, {})
+        )
+    
+        social_calls = []
+    
+        def fake_social_density(point_sets, output_stem, **kwargs):
+            social_calls.append((point_sets, output_stem, kwargs))
+            out = {}
+            for pattern in ("straight", "draw", "fade"):
+                for ext in ("png", "pdf", "svg"):
+                    p = output_stem.with_name(f"{output_stem.name}_{pattern}_social.{ext}")
+                    p.parent.mkdir(parents=True, exist_ok=True)
+                    p.write_bytes(f"{pattern}_{ext}".encode())
+                    out[f"{pattern}_{ext}"] = p
+            return out
+    
+        monkeypatch.setattr(figures, "write_pair_social_density", fake_social_density)
+    
+        pair = {
+            "comparison_kind": "shaft_rotation_sd",
+            "first": first,
+            "second": second,
+            "target_x_m": 180.0,
+        }
+        output_dir = tmp_path / "report_figures"
+        ledger = figures._render_pair_figures(pair, output_dir)
+    
+        # Check social density call
+        assert len(social_calls) == 1
+        passed_points, passed_stem, kwargs = social_calls[0]
+        assert kwargs["condition_labels"] == ("Rotation SD 1°", "Rotation SD 2°")
+        assert kwargs["social_club"] == "Driver"
+        assert kwargs["total_n"] == 10_000
+        assert kwargs["target_point_m"] == (180.0, 0.0)
+        assert "Path SD 0.5°" in kwargs["delivery_noise"]
+        assert "Speed SD 2 mph" in kwargs["delivery_noise"]
+        assert "Strike SD 0.25 in" in kwargs["delivery_noise"]
+        assert "Fixed:" in kwargs["scenario"]
+        assert kwargs["source_protocols"] == (
+            first["source_protocol"],
+            second["source_protocol"],
+        )
+>       assert kwargs["target_modes"] == (
+               ^^^^^^^^^^^^^^^^^^^^^^
+            "Fixed-Target Control",
+            "Fixed-Target Control",
+        )
+E       KeyError: 'target_modes'
+
+tests/tools/shot_pattern_analysis/test_matched_social_integration.py:318: KeyError
+_ test_render_cell_figures_social_metadata_distinguishes_within_lean_and_control_alias _
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2112/test_render_cell_figures_socia0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7eb70874b080>
+
+    def test_render_cell_figures_social_metadata_distinguishes_within_lean_and_control_alias(
+        tmp_path, monkeypatch
+    ):
+        monkeypatch.setattr(figures, "manifest_files_match", lambda path: True)
+        monkeypatch.setattr(
+            figures,
+            "load_individually_supported_endpoints",
+            lambda *args: (
+                {p: [(77.4, 0.0), (77.5, 0.1)] for p in ("Straight", "Draw", "Fade")},
+                {},
+            ),
+        )
+    
+        captured_metadata = []
+    
+        def capture_dispersion(arrays, stem, **kwargs):
+            if kwargs.get("presentation") == "social":
+                captured_metadata.append(kwargs["metadata"])
+            out = {}
+            for ext in ("png", "pdf", "svg"):
+                p = stem.with_suffix(f".{ext}")
+                p.parent.mkdir(parents=True, exist_ok=True)
+                p.write_bytes(f"{stem.name}_{ext}".encode())
+                out[ext] = p
+            return out
+    
+        def capture_overhead(trajectories, stem, **kwargs):
+            out = {}
+            for ext in ("png", "pdf", "svg"):
+                p = stem.with_suffix(f".{ext}")
+                p.parent.mkdir(parents=True, exist_ok=True)
+                p.write_bytes(f"{stem.name}_{ext}".encode())
+                out[ext] = p
+            return out
+    
+        monkeypatch.setattr(figures, "write_academic_dispersion_figure", capture_dispersion)
+        monkeypatch.setattr(figures, "write_overhead_trajectory_figure", capture_overhead)
+    
+        # 1. Primary cell: within-lean nominal target (config target_x_m is None)
+        root = tmp_path / "primary_cell"
+        primary_ref = _fixture_ref(
+            "pitching_wedge_lean0_curve2_rotation1_combined2",
+            club="pitching_wedge",
+            lean=0.0,
+            curve=2.0,
+            rotation=1.0,
+            profile="combined2",
+            target=77.402477248663,
+            protocol="pw-primary-face-bounds/1",
+        )
+        primary_ref["source_root"] = str(root)
+        primary_ref["config"]["target_x_m"] = None  # Within-lean matching
+        primary_ref["summary"] = {"target_x_m": 77.402477248663, "status": "completed"}
+    
+        cell_dir = root / primary_ref["cell"]
+        cell_dir.mkdir(parents=True)
+        (cell_dir / "manifest.json").write_text("{}")
+        (cell_dir / "flight_samples.json").write_text(
+            json.dumps(
+                {
+                    "trajectories": {
+                        p: [[[0.0, 0.0], [77.4, 0.0]]] for p in ("Straight", "Draw", "Fade")
+                    }
+                }
+            )
+        )
+    
+        figures._render_cell_figures(primary_ref, tmp_path / "figures_primary")
+        assert len(captured_metadata) == 1
+        m1 = captured_metadata[-1]
+        assert m1["Protocol"] == "pw-primary-face-bounds/1"
+        assert (
+            m1["Matched Target"] == "77.40 m downrange (Within-Lean Nominal Target)"
+        )
+    
+        # 2. Control cell: fixed-target control (config target_x_m is explicitly set)
+        control_ref = _fixture_ref(
+            "pitching_wedge_lean5_curve2_rotation1_combined2",
+            club="pitching_wedge",
+            lean=5.0,
+            curve=2.0,
+            rotation=1.0,
+            profile="combined2",
+            target=77.402477248663,
+            protocol="pw-control-face-bounds/1",
+        )
+        control_ref["source_root"] = str(root)
+        control_ref["config"]["target_x_m"] = 77.402477248663
+        control_ref["summary"] = {"target_x_m": 77.402477248663, "status": "completed"}
+    
+        ctrl_dir = root / control_ref["cell"]
+        ctrl_dir.mkdir(parents=True)
+        (ctrl_dir / "manifest.json").write_text("{}")
+        (ctrl_dir / "flight_samples.json").write_text(
+            json.dumps(
+                {
+                    "trajectories": {
+                        p: [[[0.0, 0.0], [77.4, 0.0]]] for p in ("Straight", "Draw", "Fade")
+                    }
+                }
+            )
+        )
+    
+        figures._render_cell_figures(control_ref, tmp_path / "figures_control")
+        assert len(captured_metadata) == 2
+        m2 = captured_metadata[-1]
+        assert m2["Protocol"] == "pw-control-face-bounds/1"
+        assert m2["Matched Target"] == "77.40 m downrange (Fixed-Target Control)"
+    
+        # 3. Provenance alias: real PW control aliases are same-cell zero-lean reuse
+        # of zero-lean primary with requested_config target set.
+        alias_ref = dict(primary_ref)
+        alias_ref["execution_kind"] = "provenance_alias"
+        alias_ref["alias_of_primary"] = primary_ref["cell"]
+        alias_ref["alias_cell"] = primary_ref["cell"]
+        alias_ref["requested_config"] = {
+            **primary_ref["config"],
+            "target_x_m": 77.402477248663,
+        }
+    
+        figures._render_cell_figures(alias_ref, tmp_path / "figures_alias")
+        assert len(captured_metadata) == 3
+        m3 = captured_metadata[-1]
+        assert m3["Protocol"] == "pw-primary-face-bounds/1"
+        assert (
+            m3["Matched Target"]
+            == "77.40 m downrange (Fixed-Target Control (Alias))"
+        )
+    
+        # Missing actual protocol should fail clearly without protocol_id fallback
+        bad_cell_ref = dict(primary_ref)
+        bad_cell_ref.pop("source_protocol", None)
+        bad_cell_ref["protocol_id"] = "pw-control-face-bounds/1"
+        with pytest.raises(ValueError, match="cell reference lacks source protocol"):
+>           figures._render_cell_figures(bad_cell_ref, tmp_path / "figures_bad")
+
+tests/tools/shot_pattern_analysis/test_matched_social_integration.py:566: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/tools/shot_pattern_analysis/matched_supplement_figures.py:219: in _render_cell_figures
+    metadata = _plot_metadata(ref, "one-cell supported population", valid_counts)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ref = {'cell': 'pitching_wedge_lean0_curve2_rotation1_combined2', 'execution_kind': 'unique', 'status': 'completed', 'source_root': '/tmp/pytest-of-dieterolson/pytest-2112/test_render_cell_figures_socia0/primary_cell', ...}
+label = 'one-cell supported population'
+valid_counts = {'Straight': 2, 'Draw': 2, 'Fade': 2}
+
+    def _plot_metadata(
+        ref: dict[str, Any], label: str, valid_counts: dict[str, int]
+    ) -> dict[str, Any]:
+        config = ref["config"]
+        summary = ref["summary"]
+        total = {pattern: int(config["n_shots"]) for pattern in _PATTERNS}
+        return {
+>           "source": ref["source_protocol"],
+                      ^^^^^^^^^^^^^^^^^^^^^^
+            "cell": ref.get("alias_cell", ref["cell"]),
+            "club": config["club"]["club_id"],
+            "lean_deg": config["club"]["shaft_lean_deg"],
+            "curve_scale": config["curve_scale"],
+            "shaft_rotation_sd_deg": config["noise"]["standard_deviations"][0],
+            "figure_scope": label,
+            "valid_shots_by_pattern": valid_counts,
+            "total_shots_by_pattern": total,
+            "conditioning": "individually supported endpoints by physical pattern",
+        }
+E       KeyError: 'source_protocol'
+
+src/tools/shot_pattern_analysis/matched_supplement_figures.py:163: KeyError
+_______ test_render_pair_figures_cross_protocol_passes_ordered_protocols _______
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2112/test_render_pair_figures_cross0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7eb7085ab1a0>
+
+    def test_render_pair_figures_cross_protocol_passes_ordered_protocols(
+        tmp_path, monkeypatch
+    ):
+        first = _fixture_ref(
+            "pitching_wedge_lean0_curve2_rotation1_combined2",
+            club="pitching_wedge",
+            lean=0.0,
+            rotation=1.0,
+            protocol="original_primary/1",
+        )
+        first["config"]["target_x_m"] = None  # Within-Lean Nominal Target
+    
+        second = _fixture_ref(
+            "pitching_wedge_lean5_curve2_rotation1_combined2",
+            club="pitching_wedge",
+            lean=5.0,
+            rotation=2.0,
+            protocol="pw-control-face-bounds/1",
+        )
+        second["config"]["target_x_m"] = 180.0  # Fixed-Target Control
+    
+        for ref in (first, second):
+            root = tmp_path / ref["cell"]
+            cell_dir = root / ref["cell"]
+            cell_dir.mkdir(parents=True)
+            (cell_dir / "flight_samples.json").write_text(
+                json.dumps(
+                    {
+                        "trajectories": {
+                            p: [[[0.0, 0.0], [180.0, 0.0]]]
+                            for p in ("Straight", "Draw", "Fade")
+                        }
+                    }
+                )
+            )
+            ref["source_root"] = str(root)
+    
+        common_endpoints = {
+            p: [(i, 180.0 + i, 0.1 * i) for i in range(10)]
+            for p in ("Straight", "Draw", "Fade")
+        }
+        monkeypatch.setattr(
+            figures, "_supported_endpoints", lambda *args: (common_endpoints, {})
+        )
+    
+        social_calls = []
+    
+        def fake_social_density(point_sets, output_stem, **kwargs):
+            social_calls.append(kwargs)
+            out = {}
+            for p in ("straight", "draw", "fade"):
+                for ext in ("png", "pdf", "svg"):
+                    path = output_stem.with_name(f"{output_stem.name}_{p}.{ext}")
+                    path.parent.mkdir(parents=True, exist_ok=True)
+                    path.write_bytes(b"dummy")
+                    out[f"{p}_{ext}"] = path
+            return out
+    
+        monkeypatch.setattr(figures, "write_pair_social_density", fake_social_density)
+    
+        pair = {
+            "comparison_kind": "curve_strength",
+            "first": first,
+            "second": second,
+            "target_x_m": 180.0,
+        }
+        figures._render_pair_figures(pair, tmp_path / "comparisons")
+    
+        assert len(social_calls) == 1
+        kwargs = social_calls[0]
+        assert kwargs["source_protocols"] == (
+            "original_primary/1",
+            "pw-control-face-bounds/1",
+        )
+>       assert kwargs["target_modes"] == (
+               ^^^^^^^^^^^^^^^^^^^^^^
+            "Within-Lean Nominal Target",
+            "Fixed-Target Control",
+        )
+E       KeyError: 'target_modes'
+
+tests/tools/shot_pattern_analysis/test_matched_social_integration.py:643: KeyError
+=========================== short test summary info ============================
+FAILED tests/tools/shot_pattern_analysis/test_matched_pair_social.py::test_pair_social_density_includes_matched_target_and_ordered_protocols
+FAILED tests/tools/shot_pattern_analysis/test_matched_pair_social.py::test_pair_social_density_supports_nonzero_lateral_target
+FAILED tests/tools/shot_pattern_analysis/test_matched_pair_social.py::test_pair_social_density_invalid_target_modes_raises[invalid_modes0]
+FAILED tests/tools/shot_pattern_analysis/test_matched_pair_social.py::test_pair_social_density_invalid_target_modes_raises[invalid_modes1]
+FAILED tests/tools/shot_pattern_analysis/test_matched_pair_social.py::test_pair_social_density_invalid_target_modes_raises[invalid_modes2]
+FAILED tests/tools/shot_pattern_analysis/test_matched_pair_social.py::test_pair_social_density_invalid_target_modes_raises[invalid_modes3]
+FAILED tests/tools/shot_pattern_analysis/test_matched_pair_social.py::test_pair_social_density_invalid_target_modes_raises[invalid_modes4]
+FAILED tests/tools/shot_pattern_analysis/test_matched_pair_social.py::test_pair_social_density_invalid_target_point_raises[invalid_target0]
+FAILED tests/tools/shot_pattern_analysis/test_matched_pair_social.py::test_pair_social_density_invalid_target_point_raises[invalid_target1]
+FAILED tests/tools/shot_pattern_analysis/test_matched_pair_social.py::test_pair_social_density_invalid_target_point_raises[invalid_target3]
+FAILED tests/tools/shot_pattern_analysis/test_matched_pair_social.py::test_pair_social_density_invalid_target_point_raises[invalid_target4]
+FAILED tests/tools/shot_pattern_analysis/test_matched_pair_social.py::test_pair_social_density_invalid_target_point_raises[invalid_target5]
+FAILED tests/tools/shot_pattern_analysis/test_matched_pair_social.py::test_pair_social_density_invalid_target_point_raises[invalid_target6]
+FAILED tests/tools/shot_pattern_analysis/test_matched_social_integration.py::test_render_pair_figures_exports_canonical_social_density_with_physical_patterns
+FAILED tests/tools/shot_pattern_analysis/test_matched_social_integration.py::test_render_cell_figures_social_metadata_distinguishes_within_lean_and_control_alias
+FAILED tests/tools/shot_pattern_analysis/test_matched_social_integration.py::test_render_pair_figures_cross_protocol_passes_ordered_protocols
+16 failed, 18 passed in 76.08s (0:01:16)
