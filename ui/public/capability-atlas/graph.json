@@ -370,12 +370,12 @@
       "status": "gap",
       "pyqt": "src/launchers/exercise_dashboard.py",
       "api": "src/api/routes/lifting.py",
-      "web": null,
+      "web": "ui/src/pages/LiftBaseline.tsx",
       "issue": 11748,
       "reason": null,
       "pending_decision": false,
       "tiles": [],
-      "notes": "LIFT-8 (#11748, epic #11740) asks for PyQt and web parity for the five lifts. Today the PyQt Exercise Dashboard only selects an engine for one exercise name and shows that engine's dashboard (OpenSim not yet available); it has no lift selector, barbell, GCV-4/GCV-10 overlay groups or GCV-5 plots. A shared engine-free loader (src/shared/python/lifting/baseline_view.py) and read-only API (GET /lifting/baseline, GET /lifting/baseline/lifts/{lift}) now expose the LIFT-1 pack audit receipt (src/shared/python/lifting/pack_audit) for the PyQt and web views to consume, but neither surface consumes it yet and there is still no web page. The desktop-only exemption of biomech.exercise_injury_dashboards stays pending #7460; this entry tracks the lifting surfaces LIFT-8 requires.",
+      "notes": "LIFT-8 (#11748, epic #11740) asks for PyQt and web parity for the five lifts. Today the PyQt Exercise Dashboard only selects an engine for one exercise name and shows that engine's dashboard (OpenSim not yet available); it has no lift selector, barbell, GCV-4/GCV-10 overlay groups or GCV-5 plots. A shared engine-free loader (src/shared/python/lifting/baseline_view.py) and read-only API (GET /lifting/baseline, GET /lifting/baseline/lifts/{lift}) expose the LIFT-1 pack audit receipt (src/shared/python/lifting/pack_audit). The web Lift Baseline page (/tools/lift-baseline) consumes that API: lift selector, per-engine structure and start-pose table, cross-engine pair metrics flagged against the position tolerance, phases and gaps, with unavailable values shown as unavailable. Still missing on both surfaces: barbell, hand-force and GRF overlays and plots, which need an engine host. The desktop-only exemption of biomech.exercise_injury_dashboards stays pending #7460; this entry tracks the lifting surfaces LIFT-8 requires.",
       "id": "lifting.five_lift_viewing"
     },
     {
@@ -3146,7 +3146,7 @@
   "inputs": {
     "src/config/models.yaml": "e11682df79d7467f1eba9579d835f5d7019bfd7eb09cf81c14e22bd08d0bf844",
     "src/config/launcher_manifest.json": "1ae28f872b54c237440fcaacec40b735b93a7b80d710adc9228ef671b7831032",
-    "src/config/feature_parity.json": "7cc64c6af8199952a9f7d1f840ac21732003583ccc7d60c069f9760613ed7042",
+    "src/config/feature_parity.json": "25c9c409be460438af6048bc31ccb0733082900a17962524daa31c5d31152c85",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }
