@@ -11079,3 +11079,17 @@ admits only reviewed CustomJoint and coordinate-linear moving path laws.
 Canonical chapter42 and `F07_CONSTRAINED_MUSCLE_MOCO_TURNOVER.md` retain
 the failed zero-force/loose-transcription experiment and all 520-muscle,
 private-capture, contact, assistance and physiology gates.
+
+## Exact 557-Muscle Excitation Diagnostic (#12182)
+
+The opt-in v3 OpenSim profile accepts only the exact source-preserving
+BUET–Hamner derived XML and a frozen native path/class inventory. It binds
+visual-only mesh references, 40 clamped ranges, four audited rotational
+coupled-coordinate units, 1,226 complete continuous values, 17 couplers and
+557 ordered excitation inputs. The untouched one-equilibrium seed fails the
+SC_z chart at 1 ms. An explicitly different six-coordinate interior seed
+passes only a 0.2 ms fresh same-input replay; a final-knot excitation change
+preserves the preceding state and alters native activation. Chapter50 and
+`F07_EXACT_557_REPLAY_TURNOVER.md` retain the source-hashed failure and
+limited positive evidence. Original body inertia validity, source physiology,
+full-horizon capture matching and 17-variant/six-engine parity remain blocked.

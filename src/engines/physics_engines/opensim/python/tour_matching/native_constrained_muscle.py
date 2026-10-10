@@ -172,6 +172,8 @@ def _owned_prepared(
     declaration: DeclaredColdStart,
     grid: NDArray[np.float64],
     controls: Mapping[str, NDArray[np.float64]],
+    *,
+    exact_557: bool = False,
 ) -> Any:
     """Yield a fresh model with one time-only player and explicit lock recipe."""
     from contextlib import contextmanager
@@ -182,13 +184,23 @@ def _owned_prepared(
 
         path = declaration.model_path
         raw = path.read_bytes()
-        native_muscle_bundle._validate_self_contained_source(raw)
+        if exact_557:
+            from .native_exact_557_profile import validate_exact_source_bytes
+
+            validate_exact_source_bytes(raw)
+        else:
+            native_muscle_bundle._validate_self_contained_source(raw)
         if hashlib.sha256(raw).hexdigest() != declaration.source_sha256:
             raise ValueError("native constrained muscle source identity differs")
 
         def before_initialize(model: Any) -> None:
             model.finalizeConnections()
-            _audit_source_components(model, model.getMuscles(), declaration)
+            if exact_557:
+                from .native_exact_557_profile import validate_exact_loaded_model
+
+                validate_exact_loaded_model(model, declaration)
+            else:
+                _audit_source_components(model, model.getMuscles(), declaration)
             muscles = model.getMuscles()
             names = tuple(muscles.get(i).getName() for i in range(muscles.getSize()))
             if len(set(names)) != len(names) or set(names) != set(controls):
@@ -226,37 +238,79 @@ def _bundle_for(
     grid: NDArray[np.float64],
     controls: Mapping[str, NDArray[np.float64]],
     experiment_id: str,
+    *,
+    exact_557: bool = False,
 ) -> ExperimentReplayBundle:
     contracts = native_replay_contract_types()
-    with _owned_prepared(declaration, grid, controls) as (model, state, _audit):
+    with _owned_prepared(declaration, grid, controls, exact_557=exact_557) as (
+        model,
+        state,
+        _audit,
+    ):
         muscles = model.getMuscles()
         names = tuple(muscles.get(i).getName() for i in range(muscles.getSize()))
         state_names = tuple(declaration.named_state)
         options = native_muscle_bundle._registered_options(model, state, muscles)
+        coupled_rotation_paths = frozenset()
+        if exact_557:
+            from .native_exact_557_profile import COUPLED_ROTATION_PATHS
+
+            coupled_rotation_paths = COUPLED_ROTATION_PATHS
         identity = native_muscle_bundle._identity(
-            declaration.model_path, model, state_names, names, options, contracts
+            declaration.model_path,
+            model,
+            state_names,
+            names,
+            options,
+            contracts,
+            coupled_rotation_paths,
         )
         adapter_sha = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+        profile_sha = ""
+        version = _VERSION
+        variant = "declared-constrained-muscles"
+        if exact_557:
+            from .native_exact_557_profile import (
+                PROFILE_VERSION,
+                VARIANT_ID,
+                profile_source_sha256,
+            )
+
+            profile_sha = profile_source_sha256()
+            version, variant = PROFILE_VERSION, VARIANT_ID
+        provider_material = bytes.fromhex(identity.provider_sha256) + bytes.fromhex(
+            adapter_sha
+        )
+        if exact_557:
+            provider_material += bytes.fromhex(profile_sha)
         provider_sha = hashlib.sha256(
-            bytes.fromhex(identity.provider_sha256)
-            + bytes.fromhex(adapter_sha)
+            provider_material
             + Path(__file__).with_name("native_prepared_state.py").read_bytes()
             + Path(__file__).with_name("native_constraint_state.py").read_bytes()
         ).hexdigest()
         identity = replace(
             identity,
-            variant_id="declared-constrained-muscles",
-            model_version=_VERSION,
+            variant_id=variant,
+            model_version=version,
             provider_sha256=provider_sha,
         )
         policy = native_muscle_bundle._policy(identity, contracts)
+        admission_sha = adapter_sha
+        if exact_557:
+            admission_sha = hashlib.sha256(
+                bytes.fromhex(adapter_sha) + bytes.fromhex(profile_sha)
+            ).hexdigest()
         policy = replace(
             policy,
-            initialization_policy_id="declared-coupler-lock-muscle-cold-start",
-            initialization_policy_version=_VERSION,
+            initialization_policy_id=(
+                "exact-557-coupler-muscle-cold-start"
+                if exact_557
+                else "declared-coupler-lock-muscle-cold-start"
+            ),
+            initialization_policy_version=version,
             contact_policy_id="native-coupler-lock-no-contact",
-            contact_policy_version=_VERSION,
-            contact_policy_sha256=_admission_identity(declaration, adapter_sha),
+            contact_policy_version=version,
+            contact_policy_sha256=_admission_identity(declaration, admission_sha),
         )
         values = tuple(
             (name, (declaration.named_state[name],)) for name in state_names
@@ -287,6 +341,7 @@ def build_constrained_muscle_bundle(
     excitations: Mapping[str, NDArray[np.float64]],
     *,
     experiment_id: str = "native-constrained-muscle-replay",
+    exact_557: bool = False,
 ) -> ExperimentReplayBundle:
     """Bind native source, complete initial muscle state and declared constraints."""
     if (
@@ -303,11 +358,14 @@ def build_constrained_muscle_bundle(
     )
     if grid[0] != declaration.time_seconds or grid[0] != 0.0:
         raise ValueError("T01 constrained muscle clock must start at zero")
-    return _bundle_for(declaration, grid, controls, experiment_id)
+    return _bundle_for(declaration, grid, controls, experiment_id, exact_557=exact_557)
 
 
 def replay_constrained_muscle_bundle(
-    bundle: ExperimentReplayBundle, declaration: DeclaredColdStart
+    bundle: ExperimentReplayBundle,
+    declaration: DeclaredColdStart,
+    *,
+    exact_557: bool = False,
 ) -> ConstrainedMuscleReplay:
     """Independently reconstruct and replay the same frozen excitation policy."""
     import opensim as osim
@@ -330,7 +388,11 @@ def replay_constrained_muscle_bundle(
         snapshot.write_bytes(raw)
         frozen = replace(declaration, model_path=snapshot)
         expected = build_constrained_muscle_bundle(
-            frozen, grid, controls, experiment_id=bundle.experiment_id
+            frozen,
+            grid,
+            controls,
+            experiment_id=bundle.experiment_id,
+            exact_557=exact_557,
         )
         for field in (
             "model",
@@ -343,7 +405,11 @@ def replay_constrained_muscle_bundle(
                 raise ValueError(
                     "native constrained muscle policy or input identity differs"
                 )
-        with _owned_prepared(frozen, grid, controls) as (model, state, initial_audit):
+        with _owned_prepared(frozen, grid, controls, exact_557=exact_557) as (
+            model,
+            state,
+            initial_audit,
+        ):
             muscles = model.getMuscles()
             names = tuple(muscles.get(i).getName() for i in range(muscles.getSize()))
             state_names = tuple(declaration.named_state)

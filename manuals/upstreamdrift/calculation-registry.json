@@ -299,6 +299,11 @@
       "id": "UP-D1-native-zero-custom-mtp-reduction-inventory",
       "owner": "UpstreamDrift issue #12176",
       "resolution": "Inventory provisional chapter47 and native_custom_mtp_reduction.py: exact assembled 557-muscle source, bilateral locked-zero one-coordinate CustomJoint MTP rotation laws, native zero frame targets and forbidden coordinate consumers. The PinJoint-only policy remains strict. The derived XML is independently reloaded and sampled native body motion, all muscle path lengths/speeds, constraint residuals, rank-complete lifted mass and J-transpose-body-plus-mobility applied force are compared at four common poses. The retained abdomen-to-subtalar parent admits the final MTP reduction. Independently compared original-to-final sampled mechanics and native Moco initialization now pass on three prepared coupled states, while complete restart, native Moco solve, passive physiology, contact/grip, private capture matching and all17/six-engine parity remain open. Publication blocked."
+    },
+    {
+      "id": "UP-D1-exact-557-muscle-excitation-diagnostic-inventory",
+      "owner": "UpstreamDrift issue #12182",
+      "resolution": "Inventory provisional chapter50 and an opt-in exact-source v3 diagnostic: the derived 557-muscle XML, 6691 native component paths/classes, 106 visual-only Mesh references, four rotational coupled-coordinate units, 40 clamped ranges, 1226 complete named continuous values, 17 enforced couplers and ordered T01 excitation inputs are bound. The original source seed fails the unchanged SC_z chart at 1 ms. A separately declared six-coordinate interior seed passes only 0.2 ms of two fresh same-input native replays and a changed-future excitation check. Four source body inertias and passive/anatomy validity remain unresolved; missing visual VTPs, full native restart, Moco solve, full capture horizon and all17/six-engine parity remain unqualified. Publication blocked."
     }
   ],
   "calculations": []

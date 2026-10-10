@@ -162,3 +162,19 @@ muscle-only default is unchanged. The 40 ms synthetic Moco/replay regression
 is software-path evidence, not a private capture, production anatomy/physics
 qualification, or release. See canonical chapter48 and
 `F07_CONSTRAINED_MIXED_MOCO_TURNOVER.md`.
+
+## Exact-Source 557-Muscle Replay Boundary (#12182)
+
+An opt-in version-three profile freezes the exact BUET–Hamner derived model
+bytes and native component inventory instead of widening the reviewed v1/v2
+class allowlists. Every clamped source range and the four source-coupled
+rotational coordinates have explicit units and chart declarations. Attached
+visual meshes are inventoried separately from dynamic resources. The
+prepared named state, native options, ordered 557 excitations and constraint
+policy are bound in T01; the shared scalar executor rejects initial
+projection and independently observes all 17 couplers at each knot. The
+original equilibrium seed fails the SC_z chart after 1 ms. A distinct
+six-coordinate interior diagnostic seed has only 0.2 ms replay evidence;
+neither result certifies source inertia, passive physiology, full native
+restart or a captured swing. Chapter50 and the exact replay turnover bind
+the inputs, equations, failures and acceptance limits.
