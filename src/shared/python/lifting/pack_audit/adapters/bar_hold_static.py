@@ -12,6 +12,7 @@ imports, so the contract is tested without any engine installed.
 from __future__ import annotations
 
 import math
+from collections.abc import Mapping
 from typing import Any
 
 import numpy as np
@@ -23,7 +24,7 @@ from src.shared.python.biomechanics.grip_wrench import (
     allocate_min_norm,
 )
 
-__all__ = ["static_hold_split"]
+__all__ = ["static_hold_result", "static_hold_split"]
 
 Vec3 = tuple[float, float, float]
 
@@ -106,4 +107,57 @@ def static_hold_split(
             "R": np.asarray(right_f, dtype=float),
         },
         "gravity_mag_mps2": gravity_mag,
+    }
+
+
+def static_hold_result(
+    bar_mass_kg: float,
+    split: Mapping[str, Any],
+    method: str,
+    n_welds: int,
+    hand_grip_residual_m: Mapping[str, float],
+) -> dict[str, Any]:
+    """Build the ``EngineAdapter.bar_hold_wrench`` contract dict from a split.
+
+    Shared by every rigid-weld adapter (Pinocchio, OpenSim, ...) that forms
+    its per-hand split via :func:`static_hold_split`: the result dict shape
+    is identical across engines, so this is the single place that builds it
+    (DRY) -- each adapter supplies only its own ``method`` description,
+    weld count and grip-residual diagnostic.
+
+    Postconditions: see ``EngineAdapter.bar_hold_wrench``'s field contract;
+    additionally carries ``hand_grip_residual_m`` (``{"L": ..., "R": ...}``),
+    a diagnostic distance between each hand's frame and the grip point used.
+
+    Raises:
+        ValueError: if ``bar_mass_kg`` is not positive and finite, or the
+            sum of vertical hand forces in *split* is ~0 (no split to
+            report).
+    """
+    if not math.isfinite(bar_mass_kg) or bar_mass_kg <= 0.0:
+        raise ValueError(f"bar_mass_kg must be positive and finite, got {bar_mass_kg}")
+    left_f = np.asarray(split["hand_force_n"]["L"], dtype=float)
+    right_f = np.asarray(split["hand_force_n"]["R"], dtype=float)
+    sum_vertical_n = float(left_f[2] + right_f[2])
+    if abs(sum_vertical_n) < 1e-9:
+        raise ValueError("sum of vertical hand forces is ~0; cannot form a split")
+
+    gravity_mag = float(split["gravity_mag_mps2"])
+    bar_weight_n = bar_mass_kg * gravity_mag
+    couple = np.asarray(split["couple_at_midpoint_nm"], dtype=float)
+    return {
+        "available": True,
+        "reason": "",
+        "split_method": "allocation",
+        "bar_mass_kg": bar_mass_kg,
+        "bar_weight_n": bar_weight_n,
+        "hand_force_n": {"L": left_f.tolist(), "R": right_f.tolist()},
+        "sum_vertical_n": sum_vertical_n,
+        "relative_error": abs(sum_vertical_n - bar_weight_n) / bar_weight_n,
+        "split_left_fraction": float(left_f[2] / sum_vertical_n),
+        "couple_at_midpoint_nm": couple.tolist(),
+        "bar_linear_accel_mps2": None,
+        "method": method,
+        "n_welds": n_welds,
+        "hand_grip_residual_m": dict(hand_grip_residual_m),
     }
