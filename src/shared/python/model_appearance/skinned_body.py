@@ -8,7 +8,10 @@ two bones is a follow-up, not implemented in this slice. ``skinned_body_gltf``
 packs the mesh, skin and node hierarchy into one glTF 2.0 JSON document with
 a single embedded base64 buffer, so every bone maps onto exactly one spec
 body and a posed test frame can be checked against the spec's own forward
-kinematics for vertex-to-segment attachment error.
+kinematics for vertex-to-segment attachment error. Given a spec-coordinate
+trajectory (``spec_motion_bone_poses``), the same document also carries a
+glTF animation, so any glTF viewer (three.js included) drives the skin from
+spec ``q`` without an engine.
 
 License: the mesh geometry here is generated procedurally by
 ``build_skinned_body`` from the spec document alone (a loft of a capsule per
@@ -23,7 +26,7 @@ from __future__ import annotations
 import base64
 import json
 import math
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any
 
@@ -46,9 +49,11 @@ __all__ = [
     "build_skinned_body",
     "gltf_up_rotation",
     "pose_skinned_vertices",
+    "quaternion_xyzw",
     "skinned_body_gltf",
     "skinned_body_gltf_text",
     "spec_body_poses",
+    "spec_motion_bone_poses",
 ]
 
 _PRIMITIVES = frozenset({"Px", "Py", "Pz", "Rx", "Ry", "Rz"})
@@ -346,15 +351,66 @@ def _pack_accessors(
     return bytes(buffer), views, accessors
 
 
+def quaternion_xyzw(rotation: Any) -> Array:
+    """Unit quaternion ``(x, y, z, w)`` of a 3x3 rotation matrix, with ``w >= 0``.
+
+    Precondition: ``rotation`` is a finite proper rotation (orthonormal,
+    determinant +1, to 1e-6).
+    """
+    r = np.asarray(rotation, dtype=float)
+    if r.shape != (3, 3) or not np.isfinite(r).all():
+        raise ValueError("rotation must be a finite 3x3 matrix")
+    if not np.allclose(r @ r.T, np.eye(3), atol=1e-6) or np.linalg.det(r) <= 0:
+        raise ValueError("rotation must be a proper orthonormal matrix")
+    # Shepperd: pivot on the largest of (w, x, y, z) for numerical stability.
+    diag = (np.trace(r), r[0, 0], r[1, 1], r[2, 2])
+    pivot = int(np.argmax(diag))
+    if pivot == 0:
+        s = 2.0 * math.sqrt(1.0 + diag[0])
+        q = [(r[2, 1] - r[1, 2]) / s, (r[0, 2] - r[2, 0]) / s, (r[1, 0] - r[0, 1]) / s]
+        q.append(0.25 * s)
+    else:
+        i = pivot - 1
+        j, k = (i + 1) % 3, (i + 2) % 3
+        s = 2.0 * math.sqrt(1.0 + r[i, i] - r[j, j] - r[k, k])
+        q = [0.0, 0.0, 0.0, (r[k, j] - r[j, k]) / s]
+        q[i] = 0.25 * s
+        q[j] = (r[j, i] + r[i, j]) / s
+        q[k] = (r[k, i] + r[i, k]) / s
+    quat = np.asarray(q) / np.linalg.norm(q)
+    return -quat if quat[3] < 0 else quat
+
+
+def _local_poses(parents: tuple[int, ...], global_poses: Array) -> Array:
+    """Parent-relative bone transforms ``(..., B, 4, 4)`` from world ones."""
+    local = np.empty_like(global_poses)
+    for i, parent in enumerate(parents):
+        if parent == -1:
+            local[..., i, :, :] = global_poses[..., i, :, :]
+        else:
+            local[..., i, :, :] = (
+                np.linalg.inv(global_poses[..., parent, :, :])
+                @ global_poses[..., i, :, :]
+            )
+    return local
+
+
 def _bone_nodes(
     names: tuple[str, ...], parents: tuple[int, ...], rest_poses: Array
 ) -> list[dict[str, Any]]:
-    """One glTF node per bone with its local (parent-relative) rest matrix."""
+    """One glTF node per bone with its local (parent-relative) rest TRS.
+
+    Nodes carry ``translation``/``rotation`` rather than ``matrix`` because
+    glTF animations can only target TRS nodes.
+    """
+    local = _local_poses(parents, rest_poses)
     nodes: list[dict[str, Any]] = []
     for i, name in enumerate(names):
-        parent_pose = rest_poses[parents[i]] if parents[i] != -1 else np.eye(4)
-        local = np.linalg.inv(parent_pose) @ rest_poses[i]
-        node: dict[str, Any] = {"name": name, "matrix": local.T.flatten().tolist()}
+        node: dict[str, Any] = {
+            "name": name,
+            "translation": local[i, :3, 3].tolist(),
+            "rotation": quaternion_xyzw(local[i, :3, :3]).tolist(),
+        }
         children = [j for j, p in enumerate(parents) if p == i]
         if children:
             node["children"] = children
@@ -362,53 +418,179 @@ def _bone_nodes(
     return nodes
 
 
-def skinned_body_gltf(body: SkinnedBody) -> dict[str, Any]:
+def spec_motion_bone_poses(
+    body: SkinnedBody,
+    spec: Mapping[str, Any],
+    frames: Sequence[Mapping[str, float]],
+) -> Array:
+    """World pose ``(F, B, 4, 4)`` of every bone at each spec-coordinate frame.
+
+    Precondition: at least one frame; each frame obeys ``spec_body_poses``.
+    """
+    if not frames:
+        raise ValueError("frames must contain at least one coordinate frame")
+    return np.stack(
+        [
+            np.stack([poses[name] for name in body.bone_names])
+            for poses in (spec_body_poses(spec, q) for q in frames)
+        ]
+    )
+
+
+def _motion_arrays(
+    parents: tuple[int, ...], motion_y_up: Array, fps: float
+) -> tuple[Array, Array, Array]:
+    """Key times ``(F,)``, local translations ``(F, B, 3)`` and rotations ``(F, B, 4)``.
+
+    Consecutive quaternions are kept in one hemisphere so a viewer's slerp
+    takes the short way between keys.
+    """
+    local = _local_poses(parents, motion_y_up)
+    n_frames, n_bones = local.shape[:2]
+    rotations = np.empty((n_frames, n_bones, 4))
+    for f in range(n_frames):
+        for b in range(n_bones):
+            quat = quaternion_xyzw(local[f, b, :3, :3])
+            if f and float(np.dot(quat, rotations[f - 1, b])) < 0:
+                quat = -quat
+            rotations[f, b] = quat
+    times = np.arange(n_frames, dtype=float) / fps
+    return times, local[:, :, :3, 3], rotations
+
+
+def _mesh_skin_accessor_data(
+    body: SkinnedBody, to_y_up: Array, rest_poses_y_up: Array
+) -> list[tuple[np.ndarray, int, str, int | None]]:
+    """``_pack_accessors`` entries 0-5: position, normal, joints, weights,
+    indices and inverse bind matrices, all in the Y-up glTF frame."""
+    world_vertices = body.vertices @ to_y_up[:3, :3].T
+    # glTF mat4 accessor data is column-major per matrix.
+    inverse_bind = np.transpose(np.linalg.inv(rest_poses_y_up), (0, 2, 1))
+    return [
+        (
+            world_vertices.astype(np.float32),
+            _COMPONENT_FLOAT,
+            "VEC3",
+            _TARGET_ARRAY_BUFFER,
+        ),
+        (
+            _vertex_normals(world_vertices, body.faces).astype(np.float32),
+            _COMPONENT_FLOAT,
+            "VEC3",
+            _TARGET_ARRAY_BUFFER,
+        ),
+        (
+            body.joints.astype(np.uint16),
+            _COMPONENT_USHORT,
+            "VEC4",
+            _TARGET_ARRAY_BUFFER,
+        ),
+        (
+            body.weights.astype(np.float32),
+            _COMPONENT_FLOAT,
+            "VEC4",
+            _TARGET_ARRAY_BUFFER,
+        ),
+        (
+            body.faces.astype(np.uint32).reshape(-1),
+            _COMPONENT_UINT,
+            "SCALAR",
+            _TARGET_ELEMENT_ARRAY_BUFFER,
+        ),
+        (inverse_bind.astype(np.float32), _COMPONENT_FLOAT, "MAT4", None),
+    ]
+
+
+def _motion_accessor_data(
+    body: SkinnedBody, motion: Any, to_y_up: Array, fps: float
+) -> list[tuple[np.ndarray, int, str, int | None]]:
+    """Validated ``_pack_accessors`` entries: key times, then per bone T and R."""
+    n_bones = len(body.bone_names)
+    poses = np.asarray(motion, dtype=float)
+    if (
+        poses.ndim != 4
+        or poses.shape[0] < 1
+        or poses.shape[1:] != (n_bones, 4, 4)
+        or not np.isfinite(poses).all()
+    ):
+        raise ValueError(f"motion must be a finite (F, {n_bones}, 4, 4) array")
+    if not (math.isfinite(fps) and fps > 0):
+        raise ValueError("fps must be finite and positive")
+    times, translations, rotations = _motion_arrays(
+        body.bone_parents, to_y_up @ poses, fps
+    )
+    entries: list[tuple[np.ndarray, int, str, int | None]] = [
+        (times.astype(np.float32), _COMPONENT_FLOAT, "SCALAR", None)
+    ]
+    for bone in range(n_bones):
+        entries.append(
+            (translations[:, bone].astype(np.float32), _COMPONENT_FLOAT, "VEC3", None)
+        )
+        entries.append(
+            (rotations[:, bone].astype(np.float32), _COMPONENT_FLOAT, "VEC4", None)
+        )
+    return entries
+
+
+def _animation(n_bones: int, first_accessor: int, name: str) -> dict[str, Any]:
+    """One glTF animation: per bone a translation and a rotation channel.
+
+    Accessor ``first_accessor`` holds the key times, followed by translation
+    then rotation outputs for bone 0, bone 1, ...
+    """
+    samplers: list[dict[str, Any]] = []
+    channels: list[dict[str, Any]] = []
+    for bone in range(n_bones):
+        for offset, path in enumerate(("translation", "rotation")):
+            channels.append(
+                {"sampler": len(samplers), "target": {"node": bone, "path": path}}
+            )
+            samplers.append(
+                {
+                    "input": first_accessor,
+                    "output": first_accessor + 1 + 2 * bone + offset,
+                    "interpolation": "LINEAR",
+                }
+            )
+    return {"name": name, "samplers": samplers, "channels": channels}
+
+
+def skinned_body_gltf(
+    body: SkinnedBody,
+    motion: Any = None,
+    *,
+    fps: float = 60.0,
+    animation_name: str = "spec_motion",
+) -> dict[str, Any]:
     """A glTF 2.0 JSON document with one embedded base64 buffer.
 
+    ``motion`` is an optional ``(F, B, 4, 4)`` array of world bone poses in
+    the spec frame (see ``spec_motion_bone_poses``), sampled at ``fps``; when
+    given, the document carries one LINEAR animation with a translation and
+    a rotation channel per bone.
+
     Postconditions: the scene is Y-up (spec up mapped to +Y by
-    ``gltf_up_rotation``); each bone node's local matrix is the spec joint
-    offset, so driving bones with ``spec_body_poses`` reproduces the skin.
+    ``gltf_up_rotation``); each bone node's local TRS is the spec joint
+    offset, so driving bones with ``spec_body_poses`` reproduces the skin,
+    and evaluating the animation at key ``f`` reproduces ``motion[f]``.
     """
     n_bones = len(body.bone_names)
     to_y_up = gltf_up_rotation(body.up_axis)
     rest_poses = to_y_up @ body.rest_poses
-    world_vertices = body.vertices @ to_y_up[:3, :3].T
-    positions = world_vertices.astype(np.float32)
-    # glTF mat4 accessor data is column-major per matrix.
-    inverse_bind = np.transpose(np.linalg.inv(rest_poses), (0, 2, 1))
-    buffer, views, accessors = _pack_accessors(
-        [
-            (positions, _COMPONENT_FLOAT, "VEC3", _TARGET_ARRAY_BUFFER),
-            (
-                _vertex_normals(world_vertices, body.faces).astype(np.float32),
-                _COMPONENT_FLOAT,
-                "VEC3",
-                _TARGET_ARRAY_BUFFER,
-            ),
-            (
-                body.joints.astype(np.uint16),
-                _COMPONENT_USHORT,
-                "VEC4",
-                _TARGET_ARRAY_BUFFER,
-            ),
-            (
-                body.weights.astype(np.float32),
-                _COMPONENT_FLOAT,
-                "VEC4",
-                _TARGET_ARRAY_BUFFER,
-            ),
-            (
-                body.faces.astype(np.uint32).reshape(-1),
-                _COMPONENT_UINT,
-                "SCALAR",
-                _TARGET_ELEMENT_ARRAY_BUFFER,
-            ),
-            (inverse_bind.astype(np.float32), _COMPONENT_FLOAT, "MAT4", None),
-        ]
+    motion_arrays = (
+        [] if motion is None else _motion_accessor_data(body, motion, to_y_up, fps)
     )
-    # glTF requires POSITION bounds.
+    static_arrays = _mesh_skin_accessor_data(body, to_y_up, rest_poses)
+    buffer, views, accessors = _pack_accessors(static_arrays + motion_arrays)
+    # glTF requires POSITION and animation-input bounds.
+    positions = static_arrays[0][0]
     accessors[0]["min"] = positions.min(axis=0).tolist()
     accessors[0]["max"] = positions.max(axis=0).tolist()
+    animations: list[dict[str, Any]] = []
+    if motion_arrays:
+        accessors[6]["min"] = [float(motion_arrays[0][0].min())]
+        accessors[6]["max"] = [float(motion_arrays[0][0].max())]
+        animations.append(_animation(n_bones, 6, animation_name))
     nodes = _bone_nodes(body.bone_names, body.bone_parents, rest_poses)
     mesh_node = len(nodes)
     nodes.append({"mesh": 0, "skin": 0})
@@ -417,7 +599,7 @@ def skinned_body_gltf(body: SkinnedBody) -> dict[str, Any]:
     buffer_uri = "data:application/octet-stream;base64," + base64.b64encode(
         buffer
     ).decode("ascii")
-    return {
+    doc: dict[str, Any] = {
         "asset": {"version": "2.0", "generator": "UpstreamDrift skinned_body"},
         "extras": {
             "spec_sha256": body.spec_sha256,
@@ -454,8 +636,13 @@ def skinned_body_gltf(body: SkinnedBody) -> dict[str, Any]:
         "scenes": [{"nodes": root_bones + [mesh_node]}],
         "scene": 0,
     }
+    if animations:
+        doc["animations"] = animations
+    return doc
 
 
-def skinned_body_gltf_text(body: SkinnedBody) -> str:
+def skinned_body_gltf_text(
+    body: SkinnedBody, motion: Any = None, *, fps: float = 60.0
+) -> str:
     """``skinned_body_gltf`` serialised to JSON text."""
-    return json.dumps(skinned_body_gltf(body))
+    return json.dumps(skinned_body_gltf(body, motion, fps=fps))
