@@ -160,6 +160,25 @@ every `TreatmentResult` field: the analysis view as `data` rows, the row-level
 Missing values are `null`, never `0`, and timestamps are ISO strings. The input
 records are never mutated. An unknown column returns 400.
 
+`POST /tools/launch-monitor-analytics/v2/report` builds the Reports tab's
+plain-text report for inline `records`, a `project_name` (default
+`"Untitled Launch Monitor Study"`, the desktop's `clear_project` default), and
+`treatment_audit_log`. The web app has no import step, so `session_count` is
+the number of distinct non-null `session_id` values in `records` (0 when the
+column is absent) and `import_warning_count` is always 0. The response
+carries `report_text`, `project_name`, `session_count`, `shot_count`,
+`canonical_metrics`, and `treatment_action_count`. A blank `project_name`
+returns 400.
+
+`POST /tools/launch-monitor-analytics/v2/export` takes the same payload and
+builds the canonical CSV export and reproducibility manifest the desktop
+Reports tab's `export_data`/`export_manifest` build — CSV only; Parquet export
+stays desktop-only. The response carries `csv` (the CSV text, with the
+leading `# export_id=... exported_at=...` comment row), `data_export` (the
+export's id, timestamp, file name, and SHA-256 of the CSV bytes), and
+`manifest` (the reproducibility manifest, with `sessions` always `[]` since
+the web app has no imported-session manifests).
+
 ## Analysis Contract V2
 
 UpstreamDrift is the canonical Python and API authority for launch-monitor

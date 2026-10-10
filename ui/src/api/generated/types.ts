@@ -2970,6 +2970,15 @@ export interface ReplayStatusResponse {
   playback_rate: number;
 }
 
+/**
+ * Bounded inline records for the web Reports tab. Mirrors the inputs ``_refresh_report``/``export_data``/ ``export_manifest`` read from ``src/tools/launch_monitor_analytics/gui.py``, minus the desktop's imported-session state the web app does not have. ``project_name`` defaults to the desktop's ``clear_project`` default.
+ */
+export interface ReportPayloadV2 {
+  records: Record<string, unknown>[];
+  project_name: string;
+  treatment_audit_log?: Record<string, unknown>[];
+}
+
 export interface ResolveUncertainRequest {
   operator_evidence: string;
   confirmed: boolean;
