@@ -1,0 +1,404 @@
+{
+  "checked_utc": "2026-10-10T08:26:25.654186+00:00",
+  "whole_run_accepted": false,
+  "limitations": [
+    "Contact sheets support layout overview; full-size inspections are listed separately.",
+    "This review does not repeat the accepted statistical or physical audits.",
+    "Original comparison caption repair and control/supplemental publication remain pending."
+  ],
+  "status": "visual_review_pass",
+  "scope": "All 90 primary matrix PNGs on 15 contact sheets; five whole-image inspections covering all metric types. All output hashes reconciled with completed manifest.",
+  "contact_sheets_inspected": [
+    "contact_01.jpg",
+    "contact_02.jpg",
+    "contact_03.jpg",
+    "contact_04.jpg",
+    "contact_05.jpg",
+    "contact_06.jpg",
+    "contact_07.jpg",
+    "contact_08.jpg",
+    "contact_09.jpg",
+    "contact_10.jpg",
+    "contact_11.jpg",
+    "contact_12.jpg",
+    "contact_13.jpg",
+    "contact_14.jpg",
+    "contact_15.jpg"
+  ],
+  "full_size_pngs_inspected": [
+    "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0.5_speed0.44704_contactx0.00635_contacty0.00635_lean0_attack0__corr-2c6e2729__n10000/matched_matrix_conditional_sg.png",
+    "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0.5_speed0.89408_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_radial_p95_m.png",
+    "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0.5_speed0.44704_contactx0.00635_contacty0.00635_lean0_attack0__corr-2c6e2729__n10000/matched_matrix_supported_fraction.png",
+    "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0_speed0.89408_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_target_hit_fraction.png",
+    "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0_speed0_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_target_rmse_m.png"
+  ],
+  "findings": [],
+  "observations": [
+    "No clipping or overlap found in inspected layouts.",
+    "Covariance headers fit; units, target context, conditional scoring and unavailable-cell reasons are visible.",
+    "Rounded percentages are accompanied by exact supported/total counts.",
+    "Matrix overview is not a paired-effect significance analysis; detailed tables provide those contrasts."
+  ],
+  "files": [
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0.5_speed0.44704_contactx0.00635_contacty0.00635_lean0_attack0__corr-2c6e2729__n10000/matched_matrix_conditional_sg.png",
+      "sha256": "959d0548772a950561b08298bec4b181df8db243f978bfe49882566d081e9557"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0.5_speed0.44704_contactx0.00635_contacty0.00635_lean0_attack0__corr-2c6e2729__n10000/matched_matrix_radial_p95_m.png",
+      "sha256": "3f5a7b89ecb23cf796ce85d5d076f06b42bfb916e477dbc33d2a362506e1c554"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0.5_speed0.44704_contactx0.00635_contacty0.00635_lean0_attack0__corr-2c6e2729__n10000/matched_matrix_supported_fraction.png",
+      "sha256": "c7e2a1635447a42af00dc6973a9acc8b1590c08d18a5b0cad88faae15afc9f15"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0.5_speed0.44704_contactx0.00635_contacty0.00635_lean0_attack0__corr-2c6e2729__n10000/matched_matrix_target_hit_fraction.png",
+      "sha256": "bd7a6d1fabd19f88a3437b643b58359e08729b4f49b35fc5e33945175b36b920"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0.5_speed0.44704_contactx0.00635_contacty0.00635_lean0_attack0__corr-2c6e2729__n10000/matched_matrix_target_rmse_m.png",
+      "sha256": "44dccb2243e2e1eadb1e716e14794952ed9c26ebfd9c4693254d17f322d6bec2"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0.5_speed0.44704_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_conditional_sg.png",
+      "sha256": "79728046d0404912747a48560009c6bb818f22babbb0bacbc289f661bad4ba12"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0.5_speed0.44704_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_radial_p95_m.png",
+      "sha256": "9b877d9f92bf115c3dc70f80846499da3737ff19d6af200420cd71c07258e2e5"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0.5_speed0.44704_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_supported_fraction.png",
+      "sha256": "a6327f5ec684507018ae47d9e225ae980aad62fa6bca4240db31fb9b6e7ab1c4"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0.5_speed0.44704_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_target_hit_fraction.png",
+      "sha256": "9c685556814ad037d6b9991349b53edc3963cda0056e97bae32b3ba9cf22ed94"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0.5_speed0.44704_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_target_rmse_m.png",
+      "sha256": "2a97c4ffba4bbd67478e7686f673f99e4f67e98c449f5aac5a066d1706ae46b0"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0.5_speed0.44704_contactx0.00635_contacty0.00635_lean0_attack0__corr-7a926fba__n10000/matched_matrix_conditional_sg.png",
+      "sha256": "0747dd091f2bd5c07c229050e736eca337842acf8b6f890fa5707574caf3f928"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0.5_speed0.44704_contactx0.00635_contacty0.00635_lean0_attack0__corr-7a926fba__n10000/matched_matrix_radial_p95_m.png",
+      "sha256": "f967cd0ab85570136999519d9fe935870f35937ed241877c8fb3f4e2eef98ba6"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0.5_speed0.44704_contactx0.00635_contacty0.00635_lean0_attack0__corr-7a926fba__n10000/matched_matrix_supported_fraction.png",
+      "sha256": "f48bf79ec50d83cdf988be44da6a980530b188e806bd7a3fbde19e1a45c30769"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0.5_speed0.44704_contactx0.00635_contacty0.00635_lean0_attack0__corr-7a926fba__n10000/matched_matrix_target_hit_fraction.png",
+      "sha256": "dc0187271f282b7981caf2ea23f1f906da64f8d5827387623233241a0a9d8449"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0.5_speed0.44704_contactx0.00635_contacty0.00635_lean0_attack0__corr-7a926fba__n10000/matched_matrix_target_rmse_m.png",
+      "sha256": "0a6b5a57c83c16f85da3a0a5874e8ff22ee00d58878cd78def6cbe18c2054d6e"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0.5_speed0.89408_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_conditional_sg.png",
+      "sha256": "996eb797fa250d6180fe87f0e0f7664bfebdb76926f8ef1d5c85326effdd8800"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0.5_speed0.89408_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_radial_p95_m.png",
+      "sha256": "158826bcee24e002ba5cb34958ab280f85b1fbe405ede2db4cfe416afe93ec10"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0.5_speed0.89408_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_supported_fraction.png",
+      "sha256": "5db03b9d64229810b80f82e0c1d90c7037291d571b564d7207f5d034eb877be1"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0.5_speed0.89408_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_target_hit_fraction.png",
+      "sha256": "d119d9036b239bfa3a6c62a79dd6c1753bc87abdede15a7aa1142f4cc518704c"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0.5_speed0.89408_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_target_rmse_m.png",
+      "sha256": "c0f37318c0da2052698471d0e820f14c06e306d6e2e734f4cd8f2fcbc492b46e"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0.5_speed0_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_conditional_sg.png",
+      "sha256": "376d72679744557187be591883a7d9c96bedf582aabc21d08812e18f683c3653"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0.5_speed0_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_radial_p95_m.png",
+      "sha256": "5524ebbba328a3d32561c508668dd0719fe0f5e25adc6f08fce78e4128fce441"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0.5_speed0_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_supported_fraction.png",
+      "sha256": "2600db3627ee7cc6981c1addd8ee74af249e9614f6ef00a83ac61c446d3d2c92"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0.5_speed0_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_target_hit_fraction.png",
+      "sha256": "cc15bed5e17097186f123dd947c8f88c2d1ade7d29676ab7842aa7883d6bc7ba"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0.5_speed0_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_target_rmse_m.png",
+      "sha256": "0a432cd158fcac4c795e88975baa8e3802005de67ffa2c71338580b94d10f8b8"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0_speed0.44704_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_conditional_sg.png",
+      "sha256": "dbf755068d18e9b6fb25e4285c3dc7c1a3ac7cf6de68127d5ebea7ee3ca8a11c"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0_speed0.44704_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_radial_p95_m.png",
+      "sha256": "515ddd4e771e7448c72299c3aaee798565319884389fd6d0d7bafd5c62eda72b"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0_speed0.44704_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_supported_fraction.png",
+      "sha256": "e3808e2ea2bbe7870a415b66bc637902f7f52aefa4d32df56cbe24963b683d4b"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0_speed0.44704_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_target_hit_fraction.png",
+      "sha256": "eae077d6b0436e764c7d74241bbcfafa0fa8eee62a99d7766d83a914d51f415b"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0_speed0.44704_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_target_rmse_m.png",
+      "sha256": "6abfe37a1af5a07d7122fcf45fc5e31425c5a431a447c5bac028bd02a7a04d22"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0_speed0.89408_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_conditional_sg.png",
+      "sha256": "3fe367e057f3e9fdab37288612880efa95d41236b33cd21f7319566eb7c71278"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0_speed0.89408_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_radial_p95_m.png",
+      "sha256": "baddc1a938c2879ac54b58487588a05c4006455af86196018a6b9c9276733b5a"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0_speed0.89408_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_supported_fraction.png",
+      "sha256": "fd2cfd354ac54502ae48ea458a6b71cebf796690a4dcc9b17f0bb5fd2dc3d4f4"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0_speed0.89408_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_target_hit_fraction.png",
+      "sha256": "580fdfe9936bb853713fa6bf34a0d280f192d64775d12ddd39c2204157398b04"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0_speed0.89408_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_target_rmse_m.png",
+      "sha256": "699bf5d1c4936d41b0d87a3d155229da305f940eb9844e4a5e0642b1346bd7b9"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0_speed0_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_conditional_sg.png",
+      "sha256": "7e14d1b824e421ba0187536693e88a4f31b333267b040890aebeff53df770e52"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0_speed0_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_radial_p95_m.png",
+      "sha256": "dd8937d486636a2bc4740fc299082116567eb5200cb3eb6fc73a7c6d655cc60f"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0_speed0_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_supported_fraction.png",
+      "sha256": "9aeac99b512d8f2ac9384f8894e53c7facf7c3c1cb7f4a048981d9dff307a804"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0_speed0_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_target_hit_fraction.png",
+      "sha256": "c88b16d9c37bc59be6ccf9cfbb302fb187d93d74456971b531e6430eea84e47c"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0_speed0_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_target_rmse_m.png",
+      "sha256": "8e4b7396b2b2e9754c99cb61bae3b4d97835d3099c88be93753bf39ed9664616"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0_speed0_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_conditional_sg.png",
+      "sha256": "cb8de91f7485b0670e2046a531c48d3db54ba45d98007fe1ab82e319d964e756"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0_speed0_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_radial_p95_m.png",
+      "sha256": "ee4eacdcff1ecdfdbbbf55482ecaa652dd8c0553fff19d8bdfcbb9d4f8a1caf5"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0_speed0_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_supported_fraction.png",
+      "sha256": "af5b6547db87ed6c34113ae335733f39110e9bc56a3929ecd756bedbf512b588"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0_speed0_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_target_hit_fraction.png",
+      "sha256": "80cc7cc5cdc5ea5a2b12e97edf6a40737dd15c2b61f69b0a89e13e3599b4e47e"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0_speed0_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_target_rmse_m.png",
+      "sha256": "8937a28e61c236e7226d488a186bc5dc2d2e84b462476d341d77e8b0f0d2ef0f"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0.5_speed0.44704_contactx0.00635_contacty0.00635_lean0_attack0__corr-2c6e2729__n10000/matched_matrix_conditional_sg.png",
+      "sha256": "393fad0116b24ff461cf702f7c48c0c8deb7d6a05c4da677de32bb63f874fce2"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0.5_speed0.44704_contactx0.00635_contacty0.00635_lean0_attack0__corr-2c6e2729__n10000/matched_matrix_radial_p95_m.png",
+      "sha256": "44dc00c0c5223e8384457433db06099bd4e5c52412bb1ad083e35b3499e256ca"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0.5_speed0.44704_contactx0.00635_contacty0.00635_lean0_attack0__corr-2c6e2729__n10000/matched_matrix_supported_fraction.png",
+      "sha256": "4b8ae1bc9488010cef8fc4012144ea16c01998da2833581dd5a776b14bd7c9c6"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0.5_speed0.44704_contactx0.00635_contacty0.00635_lean0_attack0__corr-2c6e2729__n10000/matched_matrix_target_hit_fraction.png",
+      "sha256": "d931306e7de03e62affd7879f8036c418b096314616a9698e8385df23ca0e963"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0.5_speed0.44704_contactx0.00635_contacty0.00635_lean0_attack0__corr-2c6e2729__n10000/matched_matrix_target_rmse_m.png",
+      "sha256": "03d56836e2892fa9f6bbbc812fd9078b6416ae4efc3d29f918b8d71f6a79817e"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0.5_speed0.44704_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_conditional_sg.png",
+      "sha256": "a18406550ddde54f27b0b1832c379562a9a7eeb8c3f5458933f32393c813b295"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0.5_speed0.44704_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_radial_p95_m.png",
+      "sha256": "2b37cdf73eab2f737c9a3fa84adec4eb51f5638161317d9edd0a967f2e9c01e4"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0.5_speed0.44704_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_supported_fraction.png",
+      "sha256": "305691cb5f4abe104ba0739527fbd5e333668f1dfa48419a92afbd4f1259105b"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0.5_speed0.44704_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_target_hit_fraction.png",
+      "sha256": "377d165f1cde767ab4e50b4dad7fce6733e1512055593ff0502685b19d13e9ce"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0.5_speed0.44704_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_target_rmse_m.png",
+      "sha256": "ee129dc9a0de0ec2b919c791d738d7e37cb8e50a0b557ac477dc0277a6162081"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0.5_speed0.44704_contactx0.00635_contacty0.00635_lean0_attack0__corr-7a926fba__n10000/matched_matrix_conditional_sg.png",
+      "sha256": "b11bf9d2cc19cfb413f93ba088301478a884b750408a567928801ccc706ee767"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0.5_speed0.44704_contactx0.00635_contacty0.00635_lean0_attack0__corr-7a926fba__n10000/matched_matrix_radial_p95_m.png",
+      "sha256": "b5fefadba5258c0d45b4b9fa379e7335c4dc4c8da390a2f81950de3395844591"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0.5_speed0.44704_contactx0.00635_contacty0.00635_lean0_attack0__corr-7a926fba__n10000/matched_matrix_supported_fraction.png",
+      "sha256": "967c3d7148bc81101ff59d553b85a230b1e16a65137e12d677d2653958dabe63"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0.5_speed0.44704_contactx0.00635_contacty0.00635_lean0_attack0__corr-7a926fba__n10000/matched_matrix_target_hit_fraction.png",
+      "sha256": "7045736b38d0c2ee676750feee10fb4465fd6212bd6da6eb834fa0c3a112b4bd"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0.5_speed0.44704_contactx0.00635_contacty0.00635_lean0_attack0__corr-7a926fba__n10000/matched_matrix_target_rmse_m.png",
+      "sha256": "4e83ee2084b397061f912d69c597242a3ad691ffe5db6c44f3d11565649f216f"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0.5_speed0.89408_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_conditional_sg.png",
+      "sha256": "22ac6e370d7dade48f45ac83412a1cee19c04d54f4981f0f2aa33b911dc2b7f9"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0.5_speed0.89408_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_radial_p95_m.png",
+      "sha256": "db6377f543cad89564ec3edbc4195687e5a8eb63a78130a88f9eacf1f6f38655"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0.5_speed0.89408_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_supported_fraction.png",
+      "sha256": "608b6bfddca4da7fe5c094dbcacc95b4b20a607b4291029aca2a305a9b12d0a9"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0.5_speed0.89408_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_target_hit_fraction.png",
+      "sha256": "afb84892a7a5438e0fb38d62b67b62415efc598816312bb210288cf79eb8d27e"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0.5_speed0.89408_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_target_rmse_m.png",
+      "sha256": "908bd9c770899bff2cfa263c96618e941dac5c2eb36267107efdfc393fce82b9"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0.5_speed0_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_conditional_sg.png",
+      "sha256": "76c44094cd07f5f2f03cd795e2602313cff1a2a7d5e22c6aaf1281a7887f678d"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0.5_speed0_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_radial_p95_m.png",
+      "sha256": "e8a0ea1cea0d51b12bccc592eff828f706d8e31c5bb36dd3b33eb22c3a5886e4"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0.5_speed0_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_supported_fraction.png",
+      "sha256": "39540521a510a4e74eb2778e38c2ed4815f40a96749b4913803f63aaa2223cc7"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0.5_speed0_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_target_hit_fraction.png",
+      "sha256": "a1852d510391dbabb0f741c779b7c47b2d91223b8a4aff656fe8ecd47d29291a"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0.5_speed0_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_target_rmse_m.png",
+      "sha256": "7701bbecb020e8ede7b9d36a51a0fa826821a2a6448f911ff95aa99697adfb1e"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0_speed0.44704_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_conditional_sg.png",
+      "sha256": "41ca4708c3956804f779c97a2b4bb23cf54369e98355e4cea4259929770eb94d"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0_speed0.44704_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_radial_p95_m.png",
+      "sha256": "f863010df88c3b5b6f2095ef0efe405c7cbf9ad1f422c3c1abfd4e28b00fa67f"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0_speed0.44704_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_supported_fraction.png",
+      "sha256": "eafe0a56eca29e6776cb3991d4d93fa631a6983527323c9f0e10f8a161c4d708"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0_speed0.44704_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_target_hit_fraction.png",
+      "sha256": "a79d07875f250c913698fba996d83191ee34e20d16c00f2dfb8084cc33e07ed5"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0_speed0.44704_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_target_rmse_m.png",
+      "sha256": "c63379cc658a1f370158b8fe4d287a13d9b6a38eca346d84f4480cefb20a6066"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0_speed0.89408_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_conditional_sg.png",
+      "sha256": "132fe4cba0334a2ef672da5084bf3bb166564bcfc01eb2807b0423957595c293"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0_speed0.89408_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_radial_p95_m.png",
+      "sha256": "f58cf0f65b8bfbcaf7c7e2d0d9b23cb193e0f33a06ecde751568a810128adb03"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0_speed0.89408_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_supported_fraction.png",
+      "sha256": "d5c49102211f0d1b1301e905df4fa8c731a3140833b276cc3420be293f9c88f3"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0_speed0.89408_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_target_hit_fraction.png",
+      "sha256": "56cf5ec2fb7dbaf4b4da4b522083e35f0f1ccc43d8293be035e60e8a06be6e82"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0_speed0.89408_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_target_rmse_m.png",
+      "sha256": "a9b76f2ae5cc4bd19b38a725927c6213c6368335941f96ed090067a5425d8d25"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0_speed0_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_conditional_sg.png",
+      "sha256": "ba2a693e9202e908b45b0574c891e4d0aa1623bcb9f1b0a0b901dcef7869e31e"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0_speed0_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_radial_p95_m.png",
+      "sha256": "d84b2458c43ee0c204491c398a94ef9035077e661b17ffd2514dbb08ee2f3f0e"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0_speed0_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_supported_fraction.png",
+      "sha256": "49fe8bd577f1139008f3599970bfff12dc7e3f3fc32d1416daea66b974bcae6d"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0_speed0_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_target_hit_fraction.png",
+      "sha256": "4d61fa95277a987f35aeb3b07b913c9f2a69cace32610cbe32f7d08b1fee041a"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0_speed0_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_target_rmse_m.png",
+      "sha256": "5ebaa9cdded730fec8ea9609c3301999cb5e460a16fa7aa80ba93b7f148fbfab"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0_speed0_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_conditional_sg.png",
+      "sha256": "eeea8c2aaa4bbb70709b0d6222e4a5a6ff92710b8f4270026e8d5d91065d9b35"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0_speed0_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_radial_p95_m.png",
+      "sha256": "904efaf8e083b9bcb17af04be6bb08407e03a8f4aa0187f200bc84f0986bfa4f"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0_speed0_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_supported_fraction.png",
+      "sha256": "8c1174f47f2adfe049e21034a6b88cac70e8ce38847d337b2ea4b4ba2bc1f784"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0_speed0_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_target_hit_fraction.png",
+      "sha256": "62715a6dcb7986bb8af2926c3586e76456f103cfa18f2667e0ebbc1deaee725d"
+    },
+    {
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0_speed0_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_target_rmse_m.png",
+      "sha256": "1931b080e5433ba108b59034c1047f366622a858c469f1d460ce26e17009b55e"
+    }
+  ]
+}
