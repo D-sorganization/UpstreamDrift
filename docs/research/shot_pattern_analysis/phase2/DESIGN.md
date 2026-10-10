@@ -106,6 +106,22 @@ All four body velocity states receive equal-and-opposite linear and angular impu
 
 For curved faces, a local parabolic surface provides a declared geometry approximation. Surface displacement along the center normal is −½(h²/R_b + v²/R_r), and its normal is proportional to n + (h/R_b)t_toe + (v/R_r)t_up. A zero radius explicitly selects a flat direction; it is not evaluated as a division by zero.
 
+## Deterministic Head-Assumption Sensitivity
+
+The [Saved Sensitivity Summary](validation/independent_head_sensitivity_summary.json) and [Full Execution Receipt](validation/independent_head_sensitivity.json) record a separate, one-factor-at-a-time check. It holds face, path and shaft twist at zero, uses preset speed and attack angle, and does not rematch targets. It covers all three clubs, lean 0°/5°/10°, and center/toe/heel/high/low strikes; the four displaced strikes are 0.5 in (0.0127 m) from center. This fixed displacement is twice the stochastic study's per-axis strike SD, not a separate strike SD.
+
+There are 268 valid and 32 unsupported deterministic variant evaluations. CG depth, all principal inertias together, and driver bulge/roll radii together are scaled to 0.8 and 1.2 of their assumed values. A separate comparator changes the contact law; its numeric restitution coefficient 0.83 denotes a Newton velocity coefficient, whereas the primary law uses energetic restitution. These are deliberately chosen sensitivities, not measured parameter uncertainty or probabilistic confidence bounds.
+
+The table gives the largest Euclidean landing displacement among comparable supported variants and baseline deliveries for each club and parameter group. Each maximum can occur at a different delivery; values must not be added or interpreted as shot-dispersion SDs. Unsupported cases remain in the receipt and cannot contribute a finite displacement.
+
+| Club | CG Depth ±20% (m) | Principal Inertias ±20% (m) | Face Radii ±20% (m) | Contact-Law Comparator (m) |
+| --- | ---: | ---: | ---: | ---: |
+| Driver | 5.14 | 7.10 | 22.63 | 11.33 |
+| 7-Iron | 0.54 | 1.76 | Not Varied | 1.22 |
+| Pitching Wedge | 0.18 | 1.40 | Not Varied | 0.33 |
+
+The driver is particularly sensitive in low-launch conditions: the 22.63 m face-radius maximum occurs at 5° lean with a low strike and radii scaled to 0.8. These checks support reporting strong dependence on assumed head properties; they do not establish off-center prediction accuracy. Small Monte Carlo confidence intervals cannot remove this model uncertainty. Empirical qualification remains deferred under #11984.
+
 ## Stochastic Delivery and Covariance
 
 The primitive error vector is ordered as shaft rotation (degrees), path (degrees), speed (m/s), toe/heel contact (m), high/low contact (m), forward lean (degrees), and attack angle (degrees). A multivariate Gaussian is a transparent local sensitivity assumption, not an established distribution for all human motion. Without player data there is no justified empirical tail or covariance fit.

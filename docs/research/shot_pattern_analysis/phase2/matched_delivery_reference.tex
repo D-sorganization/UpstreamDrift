@@ -341,6 +341,41 @@ approximation. Surface displacement along the center normal is
 (h/R\_b)t\_toe + (v/R\_r)t\_up. A zero radius explicitly selects a flat
 direction; it is not evaluated as a division by zero.
 
+\subsection{Deterministic Head-Assumption Sensitivity}
+A separate deterministic sensitivity check holds face, path and shaft twist at
+zero, retains preset speed and attack angle, and does not rematch targets.
+It examines all three clubs and lean settings, with center strikes and
+0.5\,in toe, heel, high and low offsets. Of 300 variant evaluations, 268 are
+supported and 32 are unsupported. The offsets are fixed test positions,
+not the stochastic study's 0.25\,in per-axis strike standard deviation.
+
+\begin{center}
+\begin{tabular}{lrrrr}
+\toprule
+Club & CG Depth & Inertia & Face Radii & Contact Law\\
+\midrule
+Driver & 5.14 & 7.10 & 22.63 & 11.33\\
+7-Iron & 0.54 & 1.76 & --- & 1.22\\
+Pitching Wedge & 0.18 & 1.40 & --- & 0.33\\
+\bottomrule
+\end{tabular}
+\end{center}
+Values are maximum landing displacements in metres among comparable supported
+baseline/variant pairs. CG depth, principal inertias together, and driver
+bulge/roll radii together are varied by $\pm20\%$. These deliberately chosen
+ranges are not measured confidence intervals. The last column instead changes
+contact law: the primary energetic restitution and comparator Newton velocity
+coefficient both use the number 0.83 but have different definitions. Maxima
+can occur at different deliveries; they are not additive or dispersion SDs.
+The driver's largest face-radius response occurs at $5^\circ$ lean with a low
+strike and radius scale 0.8, illustrating sensitivity at low launch.
+
+The \href{validation/independent_head_sensitivity_summary.json}{saved
+summary} and \href{validation/independent_head_sensitivity.json}{full
+execution receipt} preserve these cases and their unsupported outcomes.
+This model dependence is distinct from finite-sample Monte Carlo uncertainty;
+small statistical intervals do not establish empirical impact-model accuracy.
+
 \subsection{Stochastic Delivery and
 Covariance}\label{stochastic-delivery-and-covariance}
 
