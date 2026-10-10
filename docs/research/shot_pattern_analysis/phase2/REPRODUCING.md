@@ -164,6 +164,8 @@ its actual compilation result separately.
 
 ## Revise Saved Figures Without Recomputing Statistics
 
+**This workflow requires a valid completed parent.** Interrupted v5 has confirmed protocol filename collisions and must not be used as that parent. Its seven numerical artifacts remain byte-identical to the reviewed v3 outputs. The recovery will use a fresh run of the existing saved-data pipeline after protocol-qualified naming and pre-render numeric-parity checks are qualified. It does not rerun Monte Carlo shots. See [Current Turnover](TURNOVER.md) and [Collision Evidence](validation/supplement_v5_protocol_collision_stop/collision_findings.json).
+
 The qualified caption/gutter repair uses a separate child publication. Preserve the
 completed `supplement_report_v1` parent unchanged. This route reuses its seven
 numeric/table/alias files byte-for-byte and revises only academic paired density
