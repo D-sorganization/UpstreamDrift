@@ -1,0 +1,128 @@
+#!/usr/bin/env python3
+"""Standalone evidence script verifying 384 saved comparisons from MAIN.
+
+Runs outside repository tests so CI and local test suites remain 100% portable.
+Validates:
+1. All 384 comparison records from REPORT_SUPPLEMENT_COMPARISONS.json produce 384 distinct identities.
+2. All 384 comparison records produce 384 distinct filesystem slugs (stems).
+3. All 16 figure formats for each comparison produce 6,144 distinct relative paths without collision.
+4. Maximum slug and filename lengths conform to filesystem budgets.
+"""
+
+from __future__ import annotations
+
+import json
+import os
+import sys
+from pathlib import Path
+from typing import Any
+
+REPO_ROOT = Path("/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift")
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from src.tools.shot_pattern_analysis.matched_supplement_figures import (
+    pair_comparison_identity,
+    pair_comparison_slug,
+)
+
+MAIN_COMPARISONS_PATH = Path(
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.json"
+)
+
+FORMAT_SUFFIXES = (
+    # 9 social density formats
+    "density_straight_social.png",
+    "density_straight_social.pdf",
+    "density_straight_social.svg",
+    "density_draw_social.png",
+    "density_draw_social.pdf",
+    "density_draw_social.svg",
+    "density_fade_social.png",
+    "density_fade_social.pdf",
+    "density_fade_social.svg",
+    # 4 overhead formats
+    "overhead.png",
+    "overhead.pdf",
+    "overhead.svg",
+    "overhead_social.png",
+    # 3 academic dispersion formats
+    "dispersion.png",
+    "dispersion.pdf",
+    "dispersion.svg",
+)
+
+assert len(FORMAT_SUFFIXES) == 16, f"Expected 16 formats, got {len(FORMAT_SUFFIXES)}"
+
+
+def verify_384_inventory() -> dict[str, Any]:
+    if not MAIN_COMPARISONS_PATH.is_file():
+        raise FileNotFoundError(f"Cannot find MAIN comparisons: {MAIN_COMPARISONS_PATH}")
+
+    data = json.loads(MAIN_COMPARISONS_PATH.read_text(encoding="utf-8"))
+    comparisons = data["comparisons"]
+    if len(comparisons) != 384:
+        raise ValueError(f"Expected 384 comparisons, found {len(comparisons)}")
+
+    identities: set[tuple[str, str, str, str, str, float]] = set()
+    stems: set[str] = set()
+    all_relative_paths: set[str] = set()
+    records_output: list[dict[str, Any]] = []
+
+    for idx, comp in enumerate(comparisons):
+        ident = pair_comparison_identity(comp)
+        if ident in identities:
+            raise ValueError(f"Duplicate identity at index {idx}: {ident}")
+        identities.add(ident)
+
+        slug = pair_comparison_slug(comp)
+        if slug in stems:
+            raise ValueError(f"Duplicate stem at index {idx}: {slug}")
+        stems.add(slug)
+
+        if len(slug) > 200:
+            raise ValueError(f"Slug exceeds 200 chars ({len(slug)}): {slug}")
+
+        comp_paths = []
+        for suffix in FORMAT_SUFFIXES:
+            rel_path = f"comparisons/{slug}_{suffix}"
+            if rel_path in all_relative_paths:
+                raise ValueError(f"Duplicate relative path: {rel_path}")
+            all_relative_paths.add(rel_path)
+            comp_paths.append(rel_path)
+
+        records_output.append(
+            {
+                "index": idx,
+                "comparison_kind": ident[0],
+                "first_protocol": ident[1],
+                "first_cell": ident[2],
+                "second_protocol": ident[3],
+                "second_cell": ident[4],
+                "target_x_m": ident[5],
+                "stem": slug,
+                "formats_count": len(comp_paths),
+            }
+        )
+
+    summary = {
+        "status": "verified",
+        "total_comparisons": len(comparisons),
+        "distinct_identities": len(identities),
+        "distinct_stems": len(stems),
+        "formats_per_comparison": 16,
+        "total_distinct_relative_paths": len(all_relative_paths),
+        "max_slug_length": max(len(s) for s in stems),
+        "min_slug_length": min(len(s) for s in stems),
+        "sample_stems": sorted(list(stems))[:5],
+    }
+
+    out_file = Path("/tmp/shot-pattern-protocol-identity-fix-evidence/inventory_384_stems.json")
+    out_file.write_text(json.dumps({"summary": summary, "records": records_output}, indent=2), encoding="utf-8")
+    print(f"Verified {len(stems)} distinct stems and {len(all_relative_paths)} distinct figure paths.")
+    print(f"Summary written to: {out_file}")
+    return summary
+
+
+if __name__ == "__main__":
+    verify_384_inventory()
