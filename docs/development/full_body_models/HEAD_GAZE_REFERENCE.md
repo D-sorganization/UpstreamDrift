@@ -96,14 +96,14 @@ docs/development/full_body_models/full_body_spec_anthro_driver.json
 RUN`.
 
 | Gaze weight | Marker RMS (mm) | theta_gaze RMS (deg) | theta_gaze max (deg) | Eye range x / y / z (mm) | Head yaw / pitch / roll range (deg) |
-|---|---|---|---|---|---|
-| 0 | 28.0 | 21.26 | 39.10 | 56 / 123 / 31 | 47 / 9 / 72 |
-| 0.3 | 30.5 | 7.63 | 20.46 | 60 / 128 / 23 | 32 / 8 / 31 |
-| 1 | 32.7 | 1.78 | 6.50 | 57 / 105 / 26 | 27 / 4 / 19 |
-| 3 | 33.4 | 0.77 | 1.86 | 57 / 109 / 26 | 29 / 3 / 18 |
-| 10 | 33.8 | 0.80 | 2.14 | 55 / 99 / 23 | 29 / 3 / 17 |
-| 30 | 33.9 | 0.96 | 2.29 | 57 / 93 / 24 | 29 / 3 / 17 |
-| 100 | 33.8 | 0.97 | 2.19 | 53 / 96 / 29 | 28 / 3 / 17 |
+| ----------- | --------------- | -------------------- | -------------------- | ------------------------ | ----------------------------------- |
+| 0           | 28.0            | 21.26                | 39.10                | 56 / 123 / 31            | 47 / 9 / 72                         |
+| 0.3         | 30.5            | 7.63                 | 20.46                | 60 / 128 / 23            | 32 / 8 / 31                         |
+| 1           | 32.7            | 1.78                 | 6.50                 | 57 / 105 / 26            | 27 / 4 / 19                         |
+| 3           | 33.4            | 0.77                 | 1.86                 | 57 / 109 / 26            | 29 / 3 / 18                         |
+| 10          | 33.8            | 0.80                 | 2.14                 | 55 / 99 / 23             | 29 / 3 / 17                         |
+| 30          | 33.9            | 0.96                 | 2.29                 | 57 / 93 / 24             | 29 / 3 / 17                         |
+| 100         | 33.8            | 0.97                 | 2.19                 | 53 / 96 / 29             | 28 / 3 / 17                         |
 
 This first exploratory sweep picked 10 for reporting by eye (the numbers are
 flat above 1). OSV-3b replaces that choice with the rule-based selection below. The
@@ -139,27 +139,27 @@ flags differ from the exploratory table above, so its absolute numbers differ.
 The table lists marker RMS, face-fit RMS, `theta_gaze` RMS and max, eye
 translation range, head yaw/pitch/roll range and the feasibility flag.
 
-| Capture | w | Marker RMS (mm) | Face RMS (deg) | theta_gaze RMS / max (deg) | Eye range x / y / z (mm) | Yaw / pitch / roll (deg) | Feasible |
-|---|---|---|---|---|---|---|---|
-| capture-A driver | 0 | 32.6 | 0.76 | 20.23 / 37.06 | 48 / 113 / 25 | 49 / 11 / 75 | yes |
-| capture-A driver | 0.1 | 33.2 | 0.82 | 8.54 / 20.11 | 44 / 104 / 24 | 23 / 9 / 37 | yes |
-| capture-A driver | 0.2 | 34.7 | 0.75 | 6.45 / 15.77 | 48 / 104 / 23 | 22 / 8 / 30 | yes |
-| capture-A driver | 0.3 | 35.4 | 0.84 | 5.45 / 14.13 | 48 / 107 / 31 | 24 / 7 / 25 | yes |
-| capture-A driver | 0.5 | 35.6 | 0.86 | 4.33 / 12.68 | 48 / 112 / 25 | 24 / 6 / 22 | yes |
-| capture-A driver | 1 | 37.2 | 0.76 | 2.65 / 9.40 | 50 / 116 / 26 | 27 / 5 / 19 | no |
-| capture-A driver | 2 | 37.7 | 0.91 | 1.40 / 4.79 | 49 / 107 / 26 | 27 / 4 / 18 | no |
-| capture-A driver | 3 | 37.6 | 0.82 | 1.24 / 4.70 | 46 / 127 / 25 | 27 / 4 / 18 | no |
-| capture-A driver | 5 | 38.4 | 0.87 | 0.90 / 3.39 | 49 / 126 / 27 | 28 / 4 / 18 | no |
-| capture-A driver | 10 | 38.4 | 0.83 | 0.54 / 1.43 | 47 / 112 / 28 | 28 / 4 / 18 | no |
-| capture-B iron | 0 | 30.8 | 0.58 | 18.55 / 32.63 | 60 / 125 / 38 | 45 / 8 / 66 | yes |
-| capture-B iron | 0.1 | 32.1 | 0.66 | 6.12 / 11.09 | 54 / 82 / 37 | 19 / 9 / 16 | yes |
-| capture-B iron | 0.2 | 33.3 | 0.64 | 4.10 / 8.02 | 53 / 76 / 36 | 24 / 7 / 11 | yes |
-| capture-B iron | 0.3 | 33.9 | 0.59 | 3.05 / 6.23 | 51 / 77 / 36 | 28 / 5 / 9 | no |
-| capture-B iron | 0.5 | 34.8 | 0.62 | 1.96 / 4.12 | 51 / 78 / 36 | 30 / 4 / 7 | no |
-| capture-B iron | 1 | 37.0 | 0.76 | 0.94 / 1.95 | 55 / 81 / 36 | 32 / 2 / 6 | no |
-| capture-B iron | 2 | 37.4 | 0.65 | 0.50 / 0.95 | 50 / 70 / 36 | 30 / 2 / 4 | no |
-| capture-B iron | 3 | 37.1 | 0.65 | 0.48 / 0.98 | 50 / 72 / 36 | 32 / 2 / 4 | no |
-| capture-B iron | 5 | 37.7 | 0.83 | 0.56 / 1.10 | 53 / 75 / 35 | 33 / 2 / 4 | no |
+| Capture          | w   | Marker RMS (mm) | Face RMS (deg) | theta_gaze RMS / max (deg) | Eye range x / y / z (mm) | Yaw / pitch / roll (deg) | Feasible |
+| ---------------- | --- | --------------- | -------------- | -------------------------- | ------------------------ | ------------------------ | -------- |
+| capture-A driver | 0   | 32.6            | 0.76           | 20.23 / 37.06              | 48 / 113 / 25            | 49 / 11 / 75             | yes      |
+| capture-A driver | 0.1 | 33.2            | 0.82           | 8.54 / 20.11               | 44 / 104 / 24            | 23 / 9 / 37              | yes      |
+| capture-A driver | 0.2 | 34.7            | 0.75           | 6.45 / 15.77               | 48 / 104 / 23            | 22 / 8 / 30              | yes      |
+| capture-A driver | 0.3 | 35.4            | 0.84           | 5.45 / 14.13               | 48 / 107 / 31            | 24 / 7 / 25              | yes      |
+| capture-A driver | 0.5 | 35.6            | 0.86           | 4.33 / 12.68               | 48 / 112 / 25            | 24 / 6 / 22              | yes      |
+| capture-A driver | 1   | 37.2            | 0.76           | 2.65 / 9.40                | 50 / 116 / 26            | 27 / 5 / 19              | no       |
+| capture-A driver | 2   | 37.7            | 0.91           | 1.40 / 4.79                | 49 / 107 / 26            | 27 / 4 / 18              | no       |
+| capture-A driver | 3   | 37.6            | 0.82           | 1.24 / 4.70                | 46 / 127 / 25            | 27 / 4 / 18              | no       |
+| capture-A driver | 5   | 38.4            | 0.87           | 0.90 / 3.39                | 49 / 126 / 27            | 28 / 4 / 18              | no       |
+| capture-A driver | 10  | 38.4            | 0.83           | 0.54 / 1.43                | 47 / 112 / 28            | 28 / 4 / 18              | no       |
+| capture-B iron   | 0   | 30.8            | 0.58           | 18.55 / 32.63              | 60 / 125 / 38            | 45 / 8 / 66              | yes      |
+| capture-B iron   | 0.1 | 32.1            | 0.66           | 6.12 / 11.09               | 54 / 82 / 37             | 19 / 9 / 16              | yes      |
+| capture-B iron   | 0.2 | 33.3            | 0.64           | 4.10 / 8.02                | 53 / 76 / 36             | 24 / 7 / 11              | yes      |
+| capture-B iron   | 0.3 | 33.9            | 0.59           | 3.05 / 6.23                | 51 / 77 / 36             | 28 / 5 / 9               | no       |
+| capture-B iron   | 0.5 | 34.8            | 0.62           | 1.96 / 4.12                | 51 / 78 / 36             | 30 / 4 / 7               | no       |
+| capture-B iron   | 1   | 37.0            | 0.76           | 0.94 / 1.95                | 55 / 81 / 36             | 32 / 2 / 6               | no       |
+| capture-B iron   | 2   | 37.4            | 0.65           | 0.50 / 0.95                | 50 / 70 / 36             | 30 / 2 / 4               | no       |
+| capture-B iron   | 3   | 37.1            | 0.65           | 0.48 / 0.98                | 50 / 72 / 36             | 32 / 2 / 4               | no       |
+| capture-B iron   | 5   | 37.7            | 0.83           | 0.56 / 1.10                | 53 / 75 / 35             | 33 / 2 / 4               | no       |
 
 Result: the knee is 0.1 in both captures and the common feasible set is
 {0, 0.1, 0.2}, so `REPORTING_GAZE_WEIGHT = 0.1`. At 0.1 the address-to-impact

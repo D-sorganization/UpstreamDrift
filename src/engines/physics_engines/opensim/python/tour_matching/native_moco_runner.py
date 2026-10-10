@@ -225,85 +225,34 @@ def _observed_marker_bindings(model: Any, request: NativeMocoRequest) -> list[st
     return failures
 
 
-def _native_preparation(
-    request: NativeMocoRequest,
-) -> tuple[str | None, str | None, str | None, list[str]]:
-    """Read the actual prepared state and independent provider dispositions."""
-    import opensim as osim
-
-    from .muscle_replay import _restore_continuous_state
-    from .native_muscle_bundle import build_native_muscle_replay_bundle
-
-    blockers: list[str] = []
-    loaded: str | None = None
-    reference_sha: str | None = None
-    passive_sha: str | None = None
-    model = osim.Model(str(request.model_path))
-    blockers.extend(_observed_marker_bindings(model, request))
-    if request.passive_policy is None:
-        blockers.append("passive-policy-unavailable")
-    if (
-        request.mixed_actuation is None
-        and model.getActuators().getSize() != model.getMuscles().getSize()
-    ):
-        blockers.append("nonmuscle-assistance-unqualified")
-    coordinates = model.getCoordinateSet()
-    declared = request.constrained_cold_start
-    if declared is None and (
-        model.getConstraintSet().getSize()
-        or any(
-            coordinates.get(i).getDefaultLocked() for i in range(coordinates.getSize())
-        )
-    ):
-        blockers.append("native-constraint-policy-unavailable")
-    if declared is not None and declared.lock_targets:
-        blockers.append("native-moco-locked-coordinates-unsupported")
+def _audit_native_passive(
+    model: Any, state: Any, policy: Any, mixed: MixedActuationProfile | None = None
+) -> tuple[str | None, list[str]]:
     try:
-        if declared is None:
-            state, _, _ = _restore_continuous_state(
-                model, request.bindings.initial_state, request.config.t_start_s
-            )
-        else:
-            with reconstruct_declared_cold_start(declared) as prepared:
-                model, state = prepared.model, prepared.state
-    except (ValueError, RuntimeError):
-        blockers.append("complete-native-state-unavailable")
-        return loaded, reference_sha, passive_sha, blockers
-    loaded = hashlib.sha256(model.dump().encode()).hexdigest()
-    names = model.getStateVariableNames()
-    native_states = {str(names.get(i)) for i in range(names.getSize())}
-    if set(request.bindings.state_bounds) != native_states:
-        blockers.append("native-state-binding-coverage")
-    actuators = model.getActuators()
-    native_controls = {
-        str(actuators.get(i).getAbsolutePathString())
-        for i in range(actuators.getSize())
-    }
-    if set(request.bindings.control_bounds) != native_controls:
-        blockers.append("native-control-binding-coverage")
-    try:
-        if request.mixed_actuation is not None:
+        if mixed is not None:
             from .native_mixed_actuation import admit_native_mixed_profile
 
-            admit_native_mixed_profile(model, state, request.mixed_actuation)
-        passive = audit_native_passive_readiness(model, state, request.passive_policy)
-        passive_sha = passive.observation_sha256
-        blockers.extend(passive.blockers)
+            admit_native_mixed_profile(model, state, mixed)
+        passive = audit_native_passive_readiness(model, state, policy)
+        blockers = list(passive.blockers)
         blockers.extend(
             item
             for item in passive.native_state.blockers
-            if not (
-                request.mixed_actuation is not None
-                and item == "nonmuscle-assistance-unqualified"
-            )
+            if not (mixed is not None and item == "nonmuscle-assistance-unqualified")
             if item
             not in {
                 "complete-native-state-unverified",
                 "constraint-residual-acceptance-unqualified",
             }
         )
+        return passive.observation_sha256, blockers
     except (ValueError, RuntimeError):
-        blockers.append("native-passive-or-constraint-observation-unavailable")
+        return None, ["native-passive-or-constraint-observation-unavailable"]
+
+
+def _audit_reference_convention(
+    request: NativeMocoRequest,
+) -> tuple[str | None, list[str]]:
     try:
         named_initial = request.bindings.initial_state
         reference = ReferenceStateDeclaration(
@@ -317,10 +266,17 @@ def _native_preparation(
         observed = audit_source_reference(
             request.model_path, reference, request.reference_frame_path
         )
-        reference_sha = observed.observation_sha256
+        return observed.observation_sha256, []
     except (ValueError, RuntimeError):
-        blockers.append("native-reference-convention-unavailable")
+        return None, ["native-reference-convention-unavailable"]
+
+
+def _preview_replay_capability(
+    model: Any, request: NativeMocoRequest, declared: Any
+) -> list[str]:
     try:
+        from .native_muscle_bundle import build_native_muscle_replay_bundle
+
         muscles = model.getMuscles()
         preview = {
             muscles.get(i).getName(): np.zeros(2) for i in range(muscles.getSize())
@@ -356,8 +312,75 @@ def _native_preparation(
                 preview,
                 experiment_id="offline-moco-constrained-replay-capability-preview",
             )
+        return []
     except (ValueError, RuntimeError):
-        blockers.append("independent-native-replay-unavailable")
+        return ["independent-native-replay-unavailable"]
+
+
+def _native_preparation(
+    request: NativeMocoRequest,
+) -> tuple[str | None, str | None, str | None, list[str]]:
+    """Read the actual prepared state and independent provider dispositions."""
+    import opensim as osim
+
+    from .muscle_replay import _restore_continuous_state
+
+    blockers: list[str] = []
+    loaded: str | None = None
+    model = osim.Model(str(request.model_path))
+    blockers.extend(_observed_marker_bindings(model, request))
+    if request.passive_policy is None:
+        blockers.append("passive-policy-unavailable")
+    if (
+        request.mixed_actuation is None
+        and model.getActuators().getSize() != model.getMuscles().getSize()
+    ):
+        blockers.append("nonmuscle-assistance-unqualified")
+    coordinates = model.getCoordinateSet()
+    declared = request.constrained_cold_start
+    if declared is None and (
+        model.getConstraintSet().getSize()
+        or any(
+            coordinates.get(i).getDefaultLocked() for i in range(coordinates.getSize())
+        )
+    ):
+        blockers.append("native-constraint-policy-unavailable")
+    if declared is not None and declared.lock_targets:
+        blockers.append("native-moco-locked-coordinates-unsupported")
+    try:
+        if declared is None:
+            state, _, _ = _restore_continuous_state(
+                model, request.bindings.initial_state, request.config.t_start_s
+            )
+        else:
+            with reconstruct_declared_cold_start(declared) as prepared:
+                model, state = prepared.model, prepared.state
+    except (ValueError, RuntimeError):
+        blockers.append("complete-native-state-unavailable")
+        return loaded, None, None, blockers
+    loaded = hashlib.sha256(model.dump().encode()).hexdigest()
+    names = model.getStateVariableNames()
+    native_states = {str(names.get(i)) for i in range(names.getSize())}
+    if set(request.bindings.state_bounds) != native_states:
+        blockers.append("native-state-binding-coverage")
+    actuators = model.getActuators()
+    native_controls = {
+        str(actuators.get(i).getAbsolutePathString())
+        for i in range(actuators.getSize())
+    }
+    if set(request.bindings.control_bounds) != native_controls:
+        blockers.append("native-control-binding-coverage")
+
+    passive_sha, passive_blockers = _audit_native_passive(
+        model, state, request.passive_policy, request.mixed_actuation
+    )
+    blockers.extend(passive_blockers)
+
+    reference_sha, ref_blockers = _audit_reference_convention(request)
+    blockers.extend(ref_blockers)
+
+    blockers.extend(_preview_replay_capability(model, request, declared))
+
     if _sha(request.model_path) != request.model_sha256:
         blockers.append("model-sha256-changed-during-preparation")
     return loaded, reference_sha, passive_sha, blockers

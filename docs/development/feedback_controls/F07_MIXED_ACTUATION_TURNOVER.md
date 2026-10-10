@@ -84,3 +84,20 @@ marker RMSE is about $7.58\times10^{-7}$ m. These are fixture numerical
 checks, not biomechanical thresholds. A forty-interval attempt with tighter
 $10^{-9}/10^{-8}$ tolerances hit the configured test timeout; the failed log
 is retained and no faster-solve claim is made.
+
+## Prerequisite Refactor Integration
+
+The preserved constrained stack is composed through parent commit f1c57928e9.
+Its bounded request parsing, passive/reference/replay helpers and owned native
+input-player refactor are retained; mixed request parsing and explicit admission
+are integrated into those helpers. Architecture budget and generated context
+checks pass. The post-merge native regression passes 239 tests with three
+explicit fixture/opt-in skips (62.78 s).
+
+Pre-PR attempt one exposed a missing change-fragment header and two unrelated
+CLI subprocess import failures with Repository_Management ahead of this
+checkout on PYTHONPATH. The header and path ordering were corrected; the
+standalone four orchestrator CLI tests then passed. Attempt two overlapped
+local merge conflict resolution and collected transient conflict-marker syntax
+errors; it is not validation evidence for the resolved tree. Rerun the full
+central gates on the frozen resolved source before publication.
