@@ -141,9 +141,13 @@ approval. The export is visual only: it never feeds back into mass, inertia
 or contact, and carries the compiled spec's SHA-256 in `extras.spec_sha256`
 so a viewed mesh can always be tied back to its physics spec. The scene is
 Y-up as glTF requires: the spec's up axis (opposite gravity, `+Z` for the
-shipped presets) is rotated onto `+Y`, and each bone node's local matrix is
-the spec joint offset, so setting a bone's global transform to that rotation
-times its `spec_body_poses` pose reproduces the posed skin.
+shipped presets) is rotated onto `+Y`, and each bone node's local translation
+and rotation are the spec joint offset, so setting a bone's global transform
+to that rotation times its `spec_body_poses` pose reproduces the posed skin.
+Passing a spec-coordinate trajectory (`spec_motion_bone_poses`) to
+`skinned_body_gltf(body, motion, fps=...)` adds one glTF animation with a
+translation and a rotation channel per bone, so any glTF viewer (three.js
+included) plays spec motion on the skin without a physics engine.
 
 ## Outputs
 
