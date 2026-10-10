@@ -39,6 +39,7 @@ from src.shared.python.grip_contact.grip_mesh import (
     write_obj,
 )
 from src.shared.python.grip_contact.pad_contact import PadContactModel
+from src.shared.python.grip_contact.pad_layout import PadLayout
 
 CONTACT_FORCE_PREFIX = "grip_contact"
 SIDES = ("L", "R")
@@ -89,12 +90,12 @@ class ContactGripConfig:
         return self.foundation
 
     @property
-    def layout(self) -> Any:
-        """The pad layout of the foundation parameters (shallow accessor)."""
+    def layout(self) -> PadLayout:
+        """The foundation's pad layout (delegates through ``ef``)."""
         return self.ef.layout
 
-    def axial_origin_m(self, side: str) -> float:
-        """Axial origin of ``side``'s pad cylinder (shallow accessor)."""
+    def origin_axial_m(self, side: str) -> float:
+        """Axial origin of ``side``'s pad cylinder (delegates through ``pads``)."""
         cylinder = self.pads.cylinder
         return cylinder.origin_axial_m(side)
 
@@ -119,7 +120,7 @@ def write_grip_meshes(interface: GripInterface, cfg: ContactGripConfig) -> dict:
     half = abs(half) + layout.pad_radius_m + MESH_MARGIN_M
     facts: dict[str, Any] = {}
     for side in SIDES:
-        centre = cfg.axial_origin_m(side)
+        centre = cfg.origin_axial_m(side)
         verts, faces = capped_cylinder_mesh(
             layout.grip_radius_m,
             point,
