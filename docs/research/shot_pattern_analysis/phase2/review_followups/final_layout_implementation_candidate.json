@@ -1,0 +1,16 @@
+{
+  "status": "implementation_candidate_pending_independent_visual_acceptance",
+  "base_commit": "a40cf86dc0",
+  "files": {
+    "src/tools/shot_pattern_analysis/academic_plots.py": "1f531dbcb4d44e2ab24f175fa9af6fc2615f3c61a6ba62683d7a48c1735aa06e",
+    "tests/tools/shot_pattern_analysis/test_academic_plots.py": "27094eca536b2a37cb46d060e0b075d9d19af1560651e55199f4615b917e12e1"
+  },
+  "primary_evidence": "Three new regressions failed before change;16focusedtests pass afterward",
+  "contributor_claims": "Additional31relatedtests and Ruff/format/Mypy claimed in contributor note; independent review ongoing",
+  "scope": "Reporting-only revision. Never use this worktree for Monte Carlo. Historical execution snapshots and acceptance receipts unchanged.",
+  "review_gaps": [
+    "Multiline typography assertions should measure per-line size",
+    "Collision assertions need axis/legend text extents beyond axes rectangles"
+  ],
+  "active_actual_render": "/tmp/p2-render-final-layout-review.py; session30421; output/tmp/p2-final-layout-actual-v1"
+}

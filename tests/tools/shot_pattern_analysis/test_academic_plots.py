@@ -412,9 +412,12 @@ def test_social_presentation_keeps_data_and_uses_readable_16_by_9_layout(
         dpi=96,
     )
     assert len(captured) == 3
+    overhead_w, overhead_h = captured[1].get_size_inches()
+    assert overhead_w / overhead_h == pytest.approx(16 / 9)
+    density_w, density_h = captured[0].get_size_inches()
+    assert density_w == pytest.approx(10.8)
+    assert density_h >= density_w
     for figure in captured[:2]:
-        width, height = figure.get_size_inches()
-        assert width / height == pytest.approx(16 / 9)
         full_text = " ".join(item.get_text() for item in figure.texts)
         assert "Lean 0° • Curve ×1" in full_text
         assert "Original Matched-Delivery Protocol" in full_text
@@ -487,3 +490,205 @@ def test_overhead_figure_rejects_aim_adjusted_or_nontrajectory_inputs(tmp_path) 
             metadata={},
             trajectories_are_aimed=True,
         )
+
+
+def test_density_rightmost_downrange_tick_does_not_overlap_marginal_zero_tick(
+    tmp_path, monkeypatch
+) -> None:
+    write_dispersion, _ = _plot_api()
+    import src.tools.shot_pattern_analysis.academic_plots as plots
+
+    captured = {}
+
+    def capture_figure(figure, _stem, *, dpi):
+        captured["figure"] = figure
+        return {}
+
+    monkeypatch.setattr(plots, "_save_formats", capture_figure)
+    rng = np.random.default_rng(0)
+    points = {
+        "Straight": rng.normal(loc=[180.0, 0.0], scale=[15.0, 8.0], size=(100, 2)),
+        "Draw": rng.normal(loc=[185.0, 5.0], scale=[12.0, 6.0], size=(100, 2)),
+        "Fade": rng.normal(loc=[175.0, -5.0], scale=[14.0, 7.0], size=(100, 2)),
+    }
+    write_dispersion(
+        points,
+        tmp_path / "density_tick_check",
+        scenario="Tick Overlap Regression Check",
+        metadata={
+            "valid_shots_by_pattern": {"Straight": 100, "Draw": 100, "Fade": 100},
+            "total_shots_by_pattern": {"Straight": 100, "Draw": 100, "Fade": 100},
+        },
+        target_point_m=(180.0, 0.0),
+        bins=16,
+        dpi=96,
+    )
+    figure = captured["figure"]
+    from matplotlib.backends.backend_agg import FigureCanvasAgg
+
+    FigureCanvasAgg(figure)
+    figure.canvas.draw()
+    renderer = figure.canvas.get_renderer()
+
+    for panel_index in range(3):
+        ax_main = figure.axes[1 + panel_index * 3]
+        ax_right = figure.axes[2 + panel_index * 3]
+        main_ticks = [
+            t for t in ax_main.get_xticklabels() if t.get_text() and t.get_visible()
+        ]
+        right_ticks = [
+            t for t in ax_right.get_xticklabels() if t.get_text() and t.get_visible()
+        ]
+        assert main_ticks, f"Panel {panel_index} main axis has no visible x-ticks"
+        assert right_ticks, f"Panel {panel_index} right marginal has no visible x-ticks"
+        bb_main_last = main_ticks[-1].get_window_extent(renderer)
+        for r_tick in right_ticks:
+            bb_r = r_tick.get_window_extent(renderer)
+            assert not bb_main_last.overlaps(bb_r), (
+                f"Panel {panel_index} downrange tick '{main_ticks[-1].get_text()}' "
+                f"overlaps right marginal tick '{r_tick.get_text()}': "
+                f"main_bbox={bb_main_last}, right_bbox={bb_r}"
+            )
+            assert bb_r.x0 >= bb_main_last.x1, (
+                f"Panel {panel_index} right marginal tick '{r_tick.get_text()}' "
+                f"is not to the right of downrange tick '{main_ticks[-1].get_text()}': "
+                f"gap={bb_r.x0 - bb_main_last.x1}"
+            )
+
+
+@pytest.mark.parametrize("n_panels", [2, 3])
+def test_social_density_phone_preview_geometry_and_typography(
+    tmp_path, monkeypatch, n_panels: int
+) -> None:
+    write_dispersion, _ = _plot_api()
+    import src.tools.shot_pattern_analysis.academic_plots as plots
+
+    captured = {}
+
+    def capture_figure(figure, _stem, *, dpi):
+        captured["figure"] = figure
+        return {}
+
+    monkeypatch.setattr(plots, "_save_formats", capture_figure)
+
+    rng = np.random.default_rng(42)
+    if n_panels == 2:
+        names = ["SD 1°", "SD 2°"]
+        points = {
+            "SD 1°": rng.normal(loc=[180.0, 0.0], scale=[10.0, 5.0], size=(120, 2)),
+            "SD 2°": rng.normal(loc=[180.0, 0.0], scale=[16.0, 8.0], size=(120, 2)),
+        }
+        metadata = {
+            "social_club": "Driver",
+            "Delivery Noise": (
+                "Shaft Twist SD 2° • Path SD 0.5° • Speed SD 0.9 m/s • "
+                "Horizontal Strike SD 0.25 in • Vertical Strike SD 0.5 in • "
+                "Shaft Twist–Path Correlation r = +0.35"
+            ),
+            "Population": "Same Shot Indices Supported in All Six Populations",
+            "Scales": "Shared Within This Figure; Other Pattern Figures May Differ",
+            "valid_shots_by_pattern": {"SD 1°": 120, "SD 2°": 120},
+            "total_shots_by_pattern": {"SD 1°": 150, "SD 2°": 150},
+        }
+        scenario = (
+            "Draw: Lean 5° • Curve ×1 • Combined Delivery Variation with Correlation"
+        )
+    else:
+        names = ["Straight", "Draw", "Fade"]
+        points = {
+            "Straight": rng.normal(loc=[180.0, 0.0], scale=[12.0, 6.0], size=(120, 2)),
+            "Draw": rng.normal(loc=[185.0, 6.0], scale=[10.0, 5.0], size=(120, 2)),
+            "Fade": rng.normal(loc=[175.0, -6.0], scale=[14.0, 7.0], size=(120, 2)),
+        }
+        metadata = {
+            "social_club": "Driver",
+            "Delivery Noise": (
+                "Shaft Twist SD 1° • Path SD 0.5° • Speed SD 0.9 m/s • "
+                "Horizontal Strike SD 0.25 in • Vertical Strike SD 0.5 in"
+            ),
+            "Population": "One Cell Supported Populations",
+            "valid_shots_by_pattern": {"Straight": 120, "Draw": 120, "Fade": 120},
+            "total_shots_by_pattern": {"Straight": 150, "Draw": 150, "Fade": 150},
+        }
+        scenario = "Driver Lean 5° • Curve ×1 • Combined Delivery Variation"
+
+    write_dispersion(
+        points,
+        tmp_path / f"social_density_{n_panels}p",
+        scenario=scenario,
+        metadata=metadata,
+        target_point_m=(180.0, 0.0),
+        presentation="social",
+        dpi=96,
+    )
+    figure = captured["figure"]
+    from matplotlib.backends.backend_agg import FigureCanvasAgg
+
+    FigureCanvasAgg(figure)
+    figure.canvas.draw()
+    renderer = figure.canvas.get_renderer()
+
+    scale_1080 = 1080.0 / figure.bbox.width
+
+    visible_texts = [t for t in figure.texts if t.get_text().strip()]
+    for i, t1 in enumerate(visible_texts):
+        bb1 = t1.get_window_extent(renderer)
+        for t2 in visible_texts[i + 1 :]:
+            bb2 = t2.get_window_extent(renderer)
+            assert not bb1.overlaps(bb2), (
+                f"Figure texts overlap: {t1.get_text()[:30]!r} and {t2.get_text()[:30]!r}"
+            )
+
+    if figure.legends:
+        legend = figure.legends[0]
+        bb_leg = legend.get_window_extent(renderer)
+        for t in visible_texts:
+            bb = t.get_window_extent(renderer)
+            assert not bb.overlaps(bb_leg), (
+                f"Text overlaps legend: {t.get_text()[:30]!r}"
+            )
+
+    for ax in figure.axes:
+        ax_bb = ax.get_window_extent(renderer)
+        for t in visible_texts:
+            bb = t.get_window_extent(renderer)
+            assert not bb.overlaps(ax_bb), (
+                f"Figure text overlaps axis: {t.get_text()[:30]!r} vs {ax}"
+            )
+
+    for t in visible_texts:
+        bb = t.get_window_extent(renderer)
+        assert bb.x0 >= 0 and bb.y0 >= 0, (
+            f"Text extends outside canvas (left/bottom): {t.get_text()[:30]!r}"
+        )
+        assert bb.x1 <= figure.bbox.width and bb.y1 <= figure.bbox.height, (
+            f"Text extends outside canvas (right/top): {t.get_text()[:30]!r}"
+        )
+
+    for t in visible_texts:
+        h_px = t.get_window_extent(renderer).height * scale_1080
+        assert h_px >= 11.0, (
+            f"Figure text too small at 1080px preview: {t.get_text()[:30]!r} height={h_px:.1f}px < 11.0px"
+        )
+
+    for ax in figure.axes:
+        for tick in ax.get_xticklabels() + ax.get_yticklabels():
+            if tick.get_text() and tick.get_visible():
+                h_px = tick.get_window_extent(renderer).height * scale_1080
+                assert h_px >= 11.0, (
+                    f"Tick label '{tick.get_text()}' too small at 1080px preview: height={h_px:.1f}px < 11.0px"
+                )
+        for label in (ax.xaxis.label, ax.yaxis.label, ax.title):
+            if label.get_text() and label.get_visible():
+                h_px = label.get_window_extent(renderer).height * scale_1080
+                assert h_px >= 11.0, (
+                    f"Axis label/title '{label.get_text()}' too small at 1080px preview: height={h_px:.1f}px < 11.0px"
+                )
+
+    full_text = " ".join(t.get_text() for t in visible_texts)
+    normalized_text = " ".join(full_text.split())
+    assert scenario in normalized_text
+    assert "Model-Conditional" in full_text
+    assert "120/150" in full_text
+    for name in names:
+        assert name in full_text or any(name in ax.get_title() for ax in figure.axes)

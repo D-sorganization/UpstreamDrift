@@ -230,29 +230,228 @@ def write_academic_dispersion_figure(
         name: min(actual_valid_counts[name], _MAX_OVERLAY_DOTS) for name in names
     }
     plt = _matplotlib()
-    figure = plt.figure(
-        figsize=(16.0, 9.0) if presentation == "social" else (16.5, 9.8),
-        facecolor="white",
+    from matplotlib import ticker
+    from matplotlib.backends.backend_agg import FigureCanvasAgg
+    from matplotlib.lines import Line2D
+
+    is_social = presentation == "social"
+    num_panels = len(names)
+
+    if is_social:
+        fig_width = 10.8
+        if num_panels == 2:
+            fig_height = 13.5  # 4:5 Facebook portrait post aspect ratio (1080 x 1350)
+        elif num_panels == 3:
+            fig_height = 18.0  # 3:5 mobile feed portrait ratio (1080 x 1800)
+        elif num_panels == 1:
+            fig_height = 10.8  # 1:1 square
+        else:
+            fig_height = 5.0 + 4.5 * num_panels
+        figure = plt.figure(figsize=(fig_width, fig_height), facecolor="white")
+    else:
+        figure = plt.figure(figsize=(16.5, 9.8), facecolor="white")
+
+    FigureCanvasAgg(figure)
+
+    hdr_handles: list[Line2D] = []
+    for mass in region_masses:
+        mass_value = float(mass)
+        style, label = _HDR_STYLES.get(mass_value, ("solid", f"{mass_value:.0%} HDR"))
+        style = cast(_LineStyle, style)
+        hdr_handles.append(
+            Line2D(
+                [0],
+                [0],
+                color="#222222",
+                linestyle=style,
+                linewidth=1.4 if is_social else 1.2,
+                label=label,
+            )
+        )
+    hdr_handles.append(
+        Line2D(
+            [0],
+            [0],
+            color="#111111",
+            marker="+",
+            linestyle="none",
+            markersize=7 if is_social else 6,
+            label="Target",
+        )
     )
-    outer = figure.add_gridspec(
-        1, len(names), left=0.06, right=0.91, top=0.69, bottom=0.17, wspace=0.27
+
+    achieved_text = (
+        "Achieved HDR Mass By Pattern (Discrete Ties May Exceed Request): "
+        + "  |  ".join(
+            f"{name} "
+            + "/".join(
+                f"{estimate.patterns[name].hdr_achieved_mass[float(mass)]:.1%}"
+                for mass in region_masses
+            )
+            for name in names
+        )
     )
+    dx, dy = estimate.bin_resolution_m
+    overlay_caption = "Colored Dots Shown/Valid: " + "; ".join(
+        f"{name} {overlay_counts[name]:,}/{actual_valid_counts[name]:,}"
+        for name in names
+    )
+    if is_social:
+        footer = (
+            "Model-Conditional Simulation • Carry Only • Not Calibrated Player Precision. "
+            f"{overlay_caption}. Density, HDR, and marginals use every valid endpoint. "
+            "Shared axes and density scale; contours are simulated-sample HDR."
+        )
+    else:
+        footer = (
+            f"{_PILOT_FIGURE_LABEL}. HDR mass is sample-derived from simulated endpoints. "
+            f"{overlay_caption}; density, HDR, and marginals use every valid endpoint. "
+            "Histogram only; no KDE or synthetic covariance spread; not calibrated player precision. "
+            f"Bin resolution: {dx:.3g} × {dy:.3g} m. {achieved_text}"
+        )
+
+    if is_social:
+        # Suptitle
+        title_text = f"{metadata.get('social_club', 'Shot')}: Shot Dispersion"
+        t_title = figure.text(
+            0.08, 0.985, title_text, ha="left", va="top", fontsize=18, fontweight="bold"
+        )
+        figure.canvas.draw()
+        renderer = figure.canvas.get_renderer()
+        y_title_bottom = t_title.get_window_extent(renderer).y0 / figure.bbox.height
+
+        # Scenario
+        wrapped_scenario = textwrap.fill(scenario, width=70, break_long_words=False)
+        t_scenario = figure.text(
+            0.08,
+            y_title_bottom - 0.010,
+            wrapped_scenario,
+            fontsize=13,
+            fontweight="bold",
+            ha="left",
+            va="top",
+        )
+        figure.canvas.draw()
+        y_scen_bottom = t_scenario.get_window_extent(renderer).y0 / figure.bbox.height
+
+        # Metadata caption with complete population disclosures
+        wrapped_metadata = textwrap.fill(
+            f"{metadata_caption}  |  {population}" if metadata_caption else population,
+            width=78,
+            break_long_words=False,
+        )
+        t_metadata = figure.text(
+            0.08,
+            y_scen_bottom - 0.008,
+            wrapped_metadata,
+            fontsize=10.5,
+            ha="left",
+            va="top",
+            color="#333333",
+        )
+        figure.canvas.draw()
+        y_meta_bottom = t_metadata.get_window_extent(renderer).y0 / figure.bbox.height
+
+        # Legend
+        legend_top = y_meta_bottom - 0.012
+        legend = figure.legend(
+            handles=hdr_handles,
+            loc="upper center",
+            bbox_to_anchor=(0.48, legend_top),
+            ncol=len(hdr_handles),
+            frameon=False,
+            fontsize=10,
+            title="Simulated-Sample Highest-Density Regions",
+            title_fontsize=10.5,
+        )
+        figure.canvas.draw()
+        y_leg_bottom = legend.get_window_extent(renderer).y0 / figure.bbox.height
+
+        # Footer
+        wrapped_footer = textwrap.fill(footer, width=95, break_long_words=False)
+        t_footer = figure.text(
+            0.08, 0.018, wrapped_footer, fontsize=9.5, ha="left", va="bottom"
+        )
+        figure.canvas.draw()
+        y_foot_top = t_footer.get_window_extent(renderer).y1 / figure.bbox.height
+
+        top_grid = y_leg_bottom - 0.016
+        bottom_grid = y_foot_top + 0.028
+        outer = figure.add_gridspec(
+            num_panels,
+            1,
+            left=0.10,
+            right=0.86,
+            top=top_grid,
+            bottom=bottom_grid,
+            hspace=0.36 if num_panels == 2 else 0.32,
+        )
+    else:
+        outer = figure.add_gridspec(
+            1, len(names), left=0.06, right=0.91, top=0.69, bottom=0.17, wspace=0.27
+        )
+        figure.suptitle(
+            "Shot-Endpoint Density Conditional on Supported Airborne Shots",
+            x=0.06,
+            y=0.965,
+            ha="left",
+            fontsize=18,
+            fontweight="bold",
+        )
+        figure.text(0.06, 0.92, scenario, fontsize=12, ha="left")
+        figure.text(
+            0.06,
+            0.885,
+            textwrap.fill(
+                f"{metadata_caption}  |  {population}"
+                if metadata_caption
+                else population,
+                width=145,
+                break_long_words=False,
+            ),
+            fontsize=9,
+            ha="left",
+            va="top",
+            color="#333333",
+        )
+        figure.legend(
+            handles=hdr_handles,
+            loc="upper center",
+            bbox_to_anchor=(0.48, 0.775),
+            ncol=len(hdr_handles),
+            frameon=False,
+            title="Simulated-Sample Highest-Density Regions",
+        )
+        figure.text(
+            0.06,
+            0.025,
+            textwrap.fill(footer, width=210, break_long_words=False),
+            fontsize=8.5,
+            ha="left",
+        )
+
     top_axes: list[Any] = []
     right_axes: list[Any] = []
+    main_axes: list[Any] = []
+    meshes: list[Any] = []
     common_top_max = 0.0
     common_right_max = 0.0
+
     for name, panel_index in zip(names, range(len(names)), strict=True):
-        inner = outer[0, panel_index].subgridspec(
-            2, 2, height_ratios=(1, 4), width_ratios=(4, 1), hspace=0.04, wspace=0.04
+        grid_cell = outer[panel_index, 0] if is_social else outer[0, panel_index]
+        inner = grid_cell.subgridspec(
+            2, 2, height_ratios=(1, 4), width_ratios=(4, 1), hspace=0.06, wspace=0.06
         )
         axis_top = figure.add_subplot(inner[0, 0])
         axis = figure.add_subplot(inner[1, 0], sharex=axis_top)
         axis_right = figure.add_subplot(inner[1, 1], sharey=axis)
+        main_axes.append(axis)
+        top_axes.append(axis_top)
+        right_axes.append(axis_right)
+
         pattern = estimate.patterns[name]
         density = pattern.density_per_m2
         marginal_x, marginal_y = _density_marginals(estimate, density)
-        top_axes.append(axis_top)
-        right_axes.append(axis_right)
         common_top_max = max(common_top_max, float(np.max(marginal_x)))
         common_right_max = max(common_right_max, float(np.max(marginal_y)))
         color = _COLORS.get(name, "#286090")
@@ -267,6 +466,8 @@ def write_academic_dispersion_figure(
             shading="flat",
             rasterized=True,
         )
+        meshes.append(mesh)
+
         sample = np.asarray(points_by_pattern[name], dtype=float)
         overlay_indices = np.linspace(
             0, len(sample) - 1, overlay_counts[name], dtype=int
@@ -274,7 +475,7 @@ def write_academic_dispersion_figure(
         axis.scatter(
             sample[overlay_indices, 0],
             sample[overlay_indices, 1],
-            s=5,
+            s=6 if is_social else 5,
             color=color,
             alpha=0.22,
             linewidths=0,
@@ -294,7 +495,7 @@ def write_academic_dispersion_figure(
                 density.T,
                 levels=[threshold],
                 colors=["#222222"],
-                linewidths=1.0,
+                linewidths=1.2 if is_social else 1.0,
                 linestyles=[style],
                 zorder=4,
             )
@@ -303,9 +504,9 @@ def write_academic_dispersion_figure(
             [target_point_m[0]],
             [target_point_m[1]],
             marker="+",
-            s=35,
+            s=40 if is_social else 35,
             color="#111111",
-            linewidths=1.0,
+            linewidths=1.2 if is_social else 1.0,
             zorder=5,
             label="Target",
         )
@@ -313,33 +514,50 @@ def write_academic_dispersion_figure(
         axis.axhline(target_point_m[1], color="#333333", linewidth=0.55, alpha=0.55)
         axis.set_xlim(estimate.x_limits_m)
         axis.set_ylim(estimate.y_limits_m)
+
         axis_top.set_title(
-            f"{name}  (n={pattern.n:,})", fontsize=12, fontweight="bold", pad=5
+            f"{name}  (n={pattern.n:,})",
+            fontsize=12.5 if is_social else 12,
+            fontweight="bold",
+            pad=5,
         )
-        axis.set_xlabel("Downrange Endpoint (m)")
-        if panel_index == 0:
-            axis.set_ylabel("Lateral Endpoint (m; Right Positive)")
+        axis.set_xlabel("Downrange Endpoint (m)", fontsize=11 if is_social else 10)
+        if is_social or panel_index == 0:
+            axis.set_ylabel(
+                "Lateral Endpoint (m; Right Positive)",
+                fontsize=11 if is_social else 10,
+            )
         axis.grid(color="#666666", linewidth=0.35, alpha=0.25)
         axis.set_facecolor("white")
+        axis.tick_params(axis="both", labelsize=10 if is_social else 8, length=3)
+        axis.xaxis.set_major_locator(ticker.MaxNLocator(prune="upper"))
 
-        axis_top.stairs(marginal_x, estimate.x_edges_m, color=color, linewidth=1.1)
+        axis_top.stairs(
+            marginal_x,
+            estimate.x_edges_m,
+            color=color,
+            linewidth=1.3 if is_social else 1.1,
+        )
         axis_top.set_xlim(estimate.x_limits_m)
         axis_top.tick_params(axis="x", labelbottom=False, bottom=False)
-        axis_top.tick_params(axis="y", labelsize=7, length=2)
-        axis_top.set_ylabel("Density", fontsize=8)
+        axis_top.tick_params(axis="y", labelsize=9 if is_social else 7, length=2)
+        axis_top.set_ylabel("Density", fontsize=9.5 if is_social else 8)
         axis_top.grid(axis="y", linewidth=0.3, alpha=0.25)
+        axis_top.yaxis.set_major_locator(ticker.MaxNLocator(nbins=3, prune="lower"))
+
         axis_right.stairs(
             marginal_y,
             estimate.y_edges_m,
             orientation="horizontal",
             color=color,
-            linewidth=1.1,
+            linewidth=1.3 if is_social else 1.1,
         )
         axis_right.set_ylim(estimate.y_limits_m)
         axis_right.tick_params(axis="y", labelleft=False, left=False)
-        axis_right.tick_params(axis="x", labelsize=7, length=2)
-        axis_right.set_xlabel("Density", fontsize=8)
+        axis_right.tick_params(axis="x", labelsize=9 if is_social else 7, length=2)
+        axis_right.set_xlabel("Density", fontsize=9.5 if is_social else 8)
         axis_right.grid(axis="x", linewidth=0.3, alpha=0.25)
+        axis_right.xaxis.set_major_locator(ticker.MaxNLocator(nbins=3, prune="lower"))
 
     if common_top_max <= 0 or common_right_max <= 0:
         raise ValueError("marginal density maxima must be positive")
@@ -347,109 +565,18 @@ def write_academic_dispersion_figure(
         axis_top.set_ylim(0.0, common_top_max * 1.05)
         axis_right.set_xlim(0.0, common_right_max * 1.05)
 
-    colorbar_axis = figure.add_axes((0.93, 0.28, 0.014, 0.48))
-    colorbar = figure.colorbar(mesh, cax=colorbar_axis)
-    colorbar.set_label("Endpoint Probability Density (m⁻²)")
-    figure.suptitle(
-        (
-            f"{metadata.get('social_club', 'Shot')}: Shot Dispersion"
-            if presentation == "social"
-            else "Shot-Endpoint Density Conditional on Supported Airborne Shots"
-        ),
-        x=0.06,
-        y=0.965,
-        ha="left",
-        fontsize=18,
-        fontweight="bold",
-    )
-    figure.text(
-        0.06, 0.92, scenario, fontsize=14 if presentation == "social" else 12, ha="left"
-    )
-    figure.text(
-        0.06,
-        0.885,
-        textwrap.fill(
-            f"{metadata_caption}  |  {population}" if metadata_caption else population,
-            width=145,
-            break_long_words=False,
-        ),
-        fontsize=10 if presentation == "social" else 9,
-        ha="left",
-        va="top",
-        color="#333333",
-    )
-
-    hdr_handles = []
-    from matplotlib.lines import Line2D
-
-    for mass in region_masses:
-        mass_value = float(mass)
-        style, label = _HDR_STYLES.get(mass_value, ("solid", f"{mass_value:.0%} HDR"))
-        style = cast(_LineStyle, style)
-        hdr_handles.append(
-            Line2D(
-                [0], [0], color="#222222", linestyle=style, linewidth=1.2, label=label
-            )
+    if is_social:
+        colorbar_axis = figure.add_axes(
+            (0.89, bottom_grid, 0.022, top_grid - bottom_grid)
         )
-    hdr_handles.append(
-        Line2D(
-            [0],
-            [0],
-            color="#111111",
-            marker="+",
-            linestyle="none",
-            markersize=6,
-            label="Target",
-        )
-    )
-    figure.legend(
-        handles=hdr_handles,
-        loc="upper center",
-        bbox_to_anchor=(0.48, 0.775),
-        ncol=len(hdr_handles),
-        frameon=False,
-        title="Simulated-Sample Highest-Density Regions",
-    )
-    achieved_text = (
-        "Achieved HDR Mass By Pattern (Discrete Ties May Exceed Request): "
-        + "  |  ".join(
-            f"{name} "
-            + "/".join(
-                f"{estimate.patterns[name].hdr_achieved_mass[float(mass)]:.1%}"
-                for mass in region_masses
-            )
-            for name in names
-        )
-    )
-    dx, dy = estimate.bin_resolution_m
-    overlay_caption = "Colored Dots Shown/Valid: " + "; ".join(
-        f"{name} {overlay_counts[name]:,}/{actual_valid_counts[name]:,}"
-        for name in names
-    )
-    if presentation == "social":
-        footer = (
-            "Model-Conditional Simulation • Carry Only • Not Calibrated Player Precision. "
-            f"{overlay_caption}. Density, HDR, and marginals use every valid endpoint. "
-            "Shared axes and density scale; contours are simulated-sample HDR."
-        )
+        colorbar = figure.colorbar(meshes[0], cax=colorbar_axis)
+        colorbar.set_label("Endpoint Probability Density (m⁻²)", fontsize=10.5)
+        colorbar.ax.tick_params(labelsize=9)
     else:
-        footer = (
-            f"{_PILOT_FIGURE_LABEL}. HDR mass is sample-derived from simulated endpoints. "
-            f"{overlay_caption}; density, HDR, and marginals use every valid endpoint. "
-            "Histogram only; no KDE or synthetic covariance spread; not calibrated player precision. "
-            f"Bin resolution: {dx:.3g} × {dy:.3g} m. {achieved_text}"
-        )
-    figure.text(
-        0.06,
-        0.025,
-        textwrap.fill(
-            footer,
-            width=180 if presentation == "social" else 210,
-            break_long_words=False,
-        ),
-        fontsize=9.5 if presentation == "social" else 8.5,
-        ha="left",
-    )
+        colorbar_axis = figure.add_axes((0.93, 0.28, 0.014, 0.48))
+        colorbar = figure.colorbar(meshes[0], cax=colorbar_axis)
+        colorbar.set_label("Endpoint Probability Density (m⁻²)")
+
     outputs = _save_formats(figure, _validate_stem(output_stem), dpi=dpi)
     plt.close(figure)
     return outputs
