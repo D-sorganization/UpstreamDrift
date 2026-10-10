@@ -585,7 +585,23 @@ def assemble_qualified_interpretation(
         or report.get("unique_executed_cells") != 26
     ):
         raise ValueError("additive supplement inventory is incomplete")
-    receipt_path = Path(supplement_dir) / "REPORT_SUPPLEMENT_PIPELINE.json"
+    publication = supplement.get("publication_identity")
+    if publication is None:
+        # Ordinary in-memory callers retain the original receipt contract.
+        receipt_path = Path(supplement_dir) / "REPORT_SUPPLEMENT_PIPELINE.json"
+        digest = hashlib.sha256(receipt_path.read_bytes()).hexdigest()
+        publication = {
+            "kind": "pipeline",
+            "receipt_filename": receipt_path.name,
+            "receipt_sha256": digest,
+            "parent_receipt_sha256": digest,
+        }
+    receipt_path = Path(supplement_dir) / publication["receipt_filename"]
+    if (
+        hashlib.sha256(receipt_path.read_bytes()).hexdigest()
+        != publication["receipt_sha256"]
+    ):
+        raise ValueError("supplement publication identity changed")
     return {
         "selected_cells": explained,
         "resolved_selected_cells": resolved_selected_cells,
@@ -603,7 +619,8 @@ def assemble_qualified_interpretation(
             "verified_control_aliases": sum(
                 row["proof_status"] == "verified" for row in report["aliases"]
             ),
-            "receipt_sha256": hashlib.sha256(receipt_path.read_bytes()).hexdigest(),
+            "receipt_sha256": publication["receipt_sha256"],
+            "publication_identity": publication,
             "comparison_inventory": (
                 Path(supplement_dir).resolve() / "REPORT_SUPPLEMENT_COMPARISONS.csv"
             )

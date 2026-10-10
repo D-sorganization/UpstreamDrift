@@ -673,7 +673,8 @@ def _qualified_interpretation_lines(interpretation: dict) -> list[str]:
             + supplement["figure_inventory"]
             + ") contain every reviewed result and asset.",
             "",
-            f"Supplement pipeline receipt SHA-256: `{supplement['receipt_sha256']}`.",
+            f"Supplement publication receipt SHA-256: `{supplement['receipt_sha256']}`. "
+            f"Parent numerical pipeline receipt SHA-256: `{supplement.get('publication_identity', {}).get('parent_receipt_sha256', supplement['receipt_sha256'])}`.",
             "",
         )
     )
@@ -873,6 +874,9 @@ def _report_source_hashes() -> dict[str, str]:
         repository / "scripts/research/shot_pattern_analysis/final_report_inputs.py",
         repository / "scripts/research/shot_pattern_analysis/report_synthesis.py",
         repository / "scripts/research/shot_pattern_analysis/report_tables.py",
+        repository / "scripts/research/shot_pattern_analysis/supplement_publication.py",
+        repository
+        / "scripts/research/shot_pattern_analysis/supplement_parent_verifier.py",
         repository / "src/tools/shot_pattern_analysis/matched_interpretation.py",
         repository / "src/tools/shot_pattern_analysis/matched_formatting.py",
         repository / "src/tools/shot_pattern_analysis/matched_report.py",
@@ -896,6 +900,7 @@ def final_publication_receipt(
     control_plan_sha256: str,
     figure_manifest_sha256: dict[str, str],
     supplement_receipt_sha256: str,
+    supplement_publication_identity: dict | None = None,
 ) -> dict:
     """Bind every editable report output to its validated input identities."""
     if len({path.parent.resolve() for path in output_paths}) != 1:
@@ -910,6 +915,7 @@ def final_publication_receipt(
         "control_plan_sha256": control_plan_sha256,
         "figure_manifest_sha256": dict(figure_manifest_sha256),
         "supplement_receipt_sha256": supplement_receipt_sha256,
+        "supplement_publication_identity": supplement_publication_identity,
         "output_sha256": {
             path.name: hashlib.sha256(path.read_bytes()).hexdigest()
             for path in output_paths
@@ -932,9 +938,7 @@ def assert_publication_inputs_unchanged(
     report_root: Path,
 ) -> None:
     """Revalidate long-running aggregation inputs immediately before writing."""
-    from src.tools.shot_pattern_analysis.matched_supplement_pipeline import (
-        load_verified_supplement_artifacts,
-    )
+    from .supplement_publication import load_verified_supplement_publication
 
     for root, report in ((primary_root, primary), (control_root, control)):
         assert_matrix_inputs_unchanged(root, report)
@@ -956,13 +960,8 @@ def assert_publication_inputs_unchanged(
         verified_original_figure_inventory(
             root, report, report_root=report_root, protocol=protocol
         )
-    load_verified_supplement_artifacts(supplement_dir)
-    if (
-        hashlib.sha256(
-            (supplement_dir / "REPORT_SUPPLEMENT_PIPELINE.json").read_bytes()
-        ).hexdigest()
-        != supplement_receipt_sha256
-    ):
+    verified = load_verified_supplement_publication(supplement_dir)
+    if verified["publication_identity"]["receipt_sha256"] != supplement_receipt_sha256:
         raise RuntimeError("supplement receipt changed during report assembly")
     if _report_source_hashes() != source_sha256:
         raise RuntimeError(
@@ -972,16 +971,10 @@ def assert_publication_inputs_unchanged(
 
 def load_supplement_at_stable_receipt(directory: Path) -> tuple[dict, str]:
     """Bind validated values to the same receipt observed before their load."""
-    from src.tools.shot_pattern_analysis.matched_supplement_pipeline import (
-        load_verified_supplement_artifacts,
-    )
+    from .supplement_publication import load_verified_supplement_publication
 
-    receipt = Path(directory) / "REPORT_SUPPLEMENT_PIPELINE.json"
-    before = hashlib.sha256(receipt.read_bytes()).hexdigest()
-    supplement = load_verified_supplement_artifacts(directory)
-    if hashlib.sha256(receipt.read_bytes()).hexdigest() != before:
-        raise RuntimeError("receipt changed during supplement loading")
-    return supplement, before
+    supplement = load_verified_supplement_publication(directory)
+    return supplement, supplement["publication_identity"]["receipt_sha256"]
 
 
 def build_final_report(
@@ -1082,6 +1075,9 @@ def build_final_report(
             root.name: digest for root, digest in figure_manifests_before.items()
         },
         supplement_receipt_sha256=interpretation["supplement"]["receipt_sha256"],
+        supplement_publication_identity=interpretation["supplement"].get(
+            "publication_identity"
+        ),
     )
     _write_atomic(
         destination.with_name("REPORT_PUBLICATION_RECEIPT.json"),
