@@ -399,7 +399,7 @@
     "grip_contact": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 12,
+      "ud-only": 16,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -10433,6 +10433,18 @@
       "spelling_only": false
     },
     {
+      "path": "grip_contact/contact_run.py",
+      "classification": "ud-only",
+      "package": "grip_contact",
+      "subpackage": "",
+      "ud_bytes": 3370,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "grip_contact/couple_check.py",
       "classification": "ud-only",
       "package": "grip_contact",
@@ -10481,11 +10493,35 @@
       "spelling_only": false
     },
     {
+      "path": "grip_contact/pad_contact.py",
+      "classification": "ud-only",
+      "package": "grip_contact",
+      "subpackage": "",
+      "ud_bytes": 8421,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "grip_contact/pad_layout.py",
+      "classification": "ud-only",
+      "package": "grip_contact",
+      "subpackage": "",
+      "ud_bytes": 10473,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "grip_contact/parameters.py",
       "classification": "ud-only",
       "package": "grip_contact",
       "subpackage": "",
-      "ud_bytes": 7441,
+      "ud_bytes": 7741,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -10510,6 +10546,18 @@
       "package": "grip_contact",
       "subpackage": "",
       "ud_bytes": 5946,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "grip_contact/static_balance.py",
+      "classification": "ud-only",
+      "package": "grip_contact",
+      "subpackage": "",
+      "ud_bytes": 3395,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
