@@ -1026,6 +1026,21 @@ separate because this provider uses native plant stepping only.
   replay, capture registration and muscle-only golf endpoint remain open.
   Manual chapter 44 and turnover record reproduction and limitations.
 
+# Source-Bound Bilateral Zero-Subtalar Reduction - #12167
+
+- Branch `feat/f07-buet-zero-subtalar-12167` is stacked on BUET–Hamner
+  assembly #12165 and its zero-MTP helper ancestry #12153. Keep the PR
+  unarmed until prerequisites land; use normal ancestry merge, not force.
+- Exact v4 source and native derived output remain outside the public repo.
+  `F07_SUBTALAR_REDUCTION_RECEIPT.json` retains source/output hashes, OpenSim
+  binary and reducer/helper identities, four sampled mechanical poses and a
+  rank-complete mobility lift. Chapter 46 and
+  `F07_ZERO_SUBTALAR_REDUCTION_TURNOVER.md` are calculation/handoff sources.
+- Separate complete named-state V2 and one-equilibrium receipts live in owned
+  planning. Their extreme passive-force observations are **not** physiological
+  admission. Root owns separate abdominal reduction #12161 and composition;
+  MTP and subtalar policies are not silently applied together.
+
 # Active: Assistance-Explicit OpenSim Replay, F07 #12147
 
 - Branch `feat/f07-opensim-mixed-replay-12147`; separate native scalar-muscle and CoordinateActuator T01 admission and fresh replay with explicit assistance role/bounds/gain/unit identity, immutable physical outputs and input/state/policy provenance. Root assistance follows ground-parent topology, including renamed coordinates. Other regional roles remain declared hypotheses.
@@ -1047,3 +1062,23 @@ marker registration. See chapter42 and
 ## Active Mixed Moco Link (#12147)
 
 Branch `feat/f07-mixed-moco-link-12147` composes preserved constrained prerequisites and adds optional mixed scalar Moco dispatch. The new native test writes a nonzero 40 ms target and measures fresh replay independently. Exact roles/bounds are bound into requests; mixed NPZ fields preserve controls, physical units, assistance, powers and work. Retained unscaled-cost and coarse-transcription failures motivate per-state refinement. Full-body/source physiology/contact and private capture remain open; chapter39 and F07_MIXED_ACTUATION_TURNOVER own the calculation and handoff.
+
+## Constrained Mixed Moco and Replay (#12173)
+
+Child #12173 adds an opt-in composition of the declared cold-start constraint
+policy and the existing assistance-explicit mixed profile. Exact coordinate
+optimizer boxes must fit within declared charts; linear chart constraints are
+checked by conservative interval extrema. Fresh replay rejects a native
+`Manager` that changes any requested named state value or the initial time,
+and records actual native constraint enforcement and position/velocity
+residuals at every sample. No native constraints are disabled and the strict
+default muscle-only path is unchanged. Mixed output preserves dimensionless
+muscle excitation and mechanical commands separately from physical N or N\*m
+actuation, power and sampled work. The 40 ms synthetic Moco fixture exports
+exact knots and independently replays, but it is not a private capture or
+production qualification. The frozen native regression reports 73 passed and
+one optional provider skip. Canonical calculation is chapter48; turnover is
+`docs/development/feedback_controls/F07_CONSTRAINED_MIXED_MOCO_TURNOVER.md`.
+The calculation registry remains empty and release blocked; full-body
+anatomy, calibration, physiology, contact/grip, capture horizon, production
+variants and six-engine parity remain unresolved.
