@@ -499,6 +499,28 @@ def test_impact_frame_accepts_a_swing_that_returns_to_the_ball() -> None:
     assert abs(head[k, 2] - head[0, 2]) <= 0.10
 
 
+def test_impact_frame_skips_a_peak_speed_frame_short_of_the_ball() -> None:
+    """#12117: a replay that peaks early reaches its top speed short of the
+    ball at about the address height; that frame is not impact."""
+    knots = [
+        (0.00, 0.00, 0.00),  # address, at the ball
+        (0.80, 1.00, 1.00),  # backswing
+        (1.00, 1.00, 1.00),  # top
+        (1.18, 0.75, 0.08),  # peak speed, 8 cm high and 75 cm short of the ball
+        (1.20, 0.35, 0.05),
+        (1.40, 0.00, 0.00),  # decelerates into the ball
+        (1.60, -0.30, 0.10),
+    ]
+    t = np.arange(0.0, 1.60 + 1e-9, 0.02)
+    k_t, k_y, k_z = (np.array(c) for c in zip(*knots, strict=True))
+    head = np.column_stack(
+        [np.zeros_like(t), np.interp(t, k_t, k_y), np.interp(t, k_t, k_z)]
+    )
+    k = cf.impact_frame(t, head)
+    assert t[k] == pytest.approx(1.40)
+    assert np.linalg.norm(head[k] - head[0]) <= cf.IMPACT_BALL_RADIUS_M
+
+
 def test_impact_frame_raises_when_the_head_never_returns_to_the_ball() -> None:
     t, head = _swing()
     head[1:, 2] += 0.5  # leaves the ball and never comes back down
