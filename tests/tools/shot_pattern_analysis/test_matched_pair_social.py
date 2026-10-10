@@ -85,11 +85,12 @@ def test_noise_details_use_wrapped_metadata_not_single_line_subtitle(
     monkeypatch, tmp_path
 ):
     calls = []
-    monkeypatch.setattr(
-        social,
-        "write_academic_dispersion_figure",
-        lambda *args, **kwargs: calls.append(kwargs) or {"png": tmp_path / "plot.png"},
-    )
+
+    def fake_render(*args, **kwargs):
+        calls.append(kwargs)
+        return {"png": tmp_path / "plot.png"}
+
+    monkeypatch.setattr(social, "write_academic_dispersion_figure", fake_render)
     details = "Path SD 0.5° · Speed SD 2 mph · Strike SD 0.25 in on Each Axis"
     social.write_pair_social_density(
         _points(),
@@ -104,3 +105,118 @@ def test_noise_details_use_wrapped_metadata_not_single_line_subtitle(
     assert len(calls) == 3
     assert all(call["metadata"]["Delivery Noise"] == details for call in calls)
     assert all(details not in call["scenario"] for call in calls)
+
+
+def test_pair_social_density_includes_matched_target_and_ordered_protocols(
+    monkeypatch, tmp_path
+):
+    calls = []
+
+    def fake_render(*args, **kwargs):
+        calls.append(kwargs)
+        return {"png": tmp_path / "plot.png"}
+
+    monkeypatch.setattr(social, "write_academic_dispersion_figure", fake_render)
+    social.write_pair_social_density(
+        _points(),
+        tmp_path / "comparison",
+        condition_labels=("SD 1°", "SD 2°"),
+        scenario="Lean 5° · Curve ×1",
+        social_club="Driver",
+        target_point_m=(180.0, 0.0),
+        total_n=10,
+        source_protocols=("original_primary/1", "supplement_pw_within_lean_face_v1"),
+    )
+    assert len(calls) == 3
+    for call in calls:
+        meta = call["metadata"]
+        assert "Matched Target" in meta
+        assert "180.00 m downrange" in meta["Matched Target"]
+        assert "Common Target" in meta["Matched Target"]
+        assert "Protocol" in meta
+        assert (
+            "SD 1°: original_primary/1 · SD 2°: supplement_pw_within_lean_face_v1"
+            in meta["Protocol"]
+        )
+
+
+def test_pair_social_density_accepts_context_mapping(monkeypatch, tmp_path):
+    calls = []
+
+    def fake_render(*args, **kwargs):
+        calls.append(kwargs)
+        return {"png": tmp_path / "plot.png"}
+
+    monkeypatch.setattr(social, "write_academic_dispersion_figure", fake_render)
+    social.write_pair_social_density(
+        _points(),
+        tmp_path / "comparison",
+        condition_labels=("SD 1°", "SD 2°"),
+        scenario="Lean 5° · Curve ×1",
+        social_club="Driver",
+        target_point_m=(178.95, 0.0),
+        total_n=10,
+        context={
+            "source_protocols": ("protocol_alpha", "protocol_beta"),
+            "target_context": "Fixed-Target Control",
+        },
+    )
+    assert len(calls) == 3
+    for call in calls:
+        meta = call["metadata"]
+        assert "Matched Target" in meta
+        assert "178.95 m downrange" in meta["Matched Target"]
+        assert "Fixed-Target Control" in meta["Matched Target"]
+        assert "Protocol" in meta
+        assert "SD 1°: protocol_alpha · SD 2°: protocol_beta" in meta["Protocol"]
+
+
+def test_pair_social_density_default_without_source_protocols_still_includes_target(
+    monkeypatch, tmp_path
+):
+    calls = []
+
+    def fake_render(*args, **kwargs):
+        calls.append(kwargs)
+        return {"png": tmp_path / "plot.png"}
+
+    monkeypatch.setattr(social, "write_academic_dispersion_figure", fake_render)
+    social.write_pair_social_density(
+        _points(),
+        tmp_path / "comparison",
+        condition_labels=("SD 1°", "SD 2°"),
+        scenario="Lean 5° · Curve ×1",
+        social_club="Driver",
+        target_point_m=(180.0, 0.0),
+        total_n=10,
+    )
+    assert len(calls) == 3
+    for call in calls:
+        meta = call["metadata"]
+        assert "Matched Target" in meta
+        assert "180.00 m downrange" in meta["Matched Target"]
+        assert "Common Target" in meta["Matched Target"]
+
+
+@pytest.mark.parametrize(
+    "invalid_protocols",
+    [
+        ("only_one",),
+        ("one", "two", "three"),
+        ("", "valid"),
+        ("valid", "   "),
+        (123, "valid"),
+    ],
+)
+def test_pair_social_density_invalid_protocols_raises(tmp_path, invalid_protocols):
+    with pytest.raises(ValueError):
+        social.write_pair_social_density(
+            _points(),
+            tmp_path / "comparison",
+            condition_labels=("SD 1°", "SD 2°"),
+            scenario="Lean 5° · Curve ×1",
+            social_club="Driver",
+            target_point_m=(180.0, 0.0),
+            total_n=10,
+            source_protocols=invalid_protocols,  # type: ignore[arg-type]
+        )

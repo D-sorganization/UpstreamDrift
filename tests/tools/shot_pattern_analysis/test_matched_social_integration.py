@@ -194,6 +194,20 @@ def test_render_cell_figures_exports_dedicated_canonical_social_assets(
     assert "Path SD 0.5°" in social_call["metadata"]["Delivery Noise"]
     assert "Speed SD 2 mph" in social_call["metadata"]["Delivery Noise"]
     assert "Strike SD 0.25 in" in social_call["metadata"]["Delivery Noise"]
+    assert "Protocol" in social_call["metadata"]
+    assert social_call["metadata"]["Protocol"] == ref["source_protocol"]
+    assert "Matched Target" in social_call["metadata"]
+    assert "180.00 m downrange" in social_call["metadata"]["Matched Target"]
+    assert "Fixed-Target Control" in social_call["metadata"]["Matched Target"]
+
+    overhead_social_call = next(
+        kwargs for _, kwargs in calls["overhead"] if kwargs["presentation"] == "social"
+    )
+    assert "Protocol" in overhead_social_call["metadata"]
+    assert overhead_social_call["metadata"]["Protocol"] == ref["source_protocol"]
+    assert "Matched Target" in overhead_social_call["metadata"]
+    assert "180.00 m downrange" in overhead_social_call["metadata"]["Matched Target"]
+
     assert "density_social_pdf" in kinds
     assert "density_social_svg" in kinds
     assert "overhead_png" in kinds
@@ -297,6 +311,10 @@ def test_render_pair_figures_exports_canonical_social_density_with_physical_patt
     assert "Speed SD 2 mph" in kwargs["delivery_noise"]
     assert "Strike SD 0.25 in" in kwargs["delivery_noise"]
     assert "Fixed:" in kwargs["scenario"]
+    assert kwargs["source_protocols"] == (
+        first["source_protocol"],
+        second["source_protocol"],
+    )
 
     # Check that point_sets passed to social wrapper use exact common coordinates
     for pattern in ("Straight", "Draw", "Fade"):
@@ -404,3 +422,193 @@ def test_pair_figure_ledger_preserves_unavailable_row_and_keeps_overhead(
         item for item in ledger if item["figure_kind"].startswith("overhead_")
     ]
     assert len(overhead_items) == 4
+
+
+def test_render_cell_figures_social_metadata_distinguishes_within_lean_and_control_alias(
+    tmp_path, monkeypatch
+):
+    monkeypatch.setattr(figures, "manifest_files_match", lambda path: True)
+    monkeypatch.setattr(
+        figures,
+        "load_individually_supported_endpoints",
+        lambda *args: (
+            {p: [(77.4, 0.0), (77.5, 0.1)] for p in ("Straight", "Draw", "Fade")},
+            {},
+        ),
+    )
+
+    captured_metadata = []
+
+    def capture_dispersion(arrays, stem, **kwargs):
+        if kwargs.get("presentation") == "social":
+            captured_metadata.append(kwargs["metadata"])
+        out = {}
+        for ext in ("png", "pdf", "svg"):
+            p = stem.with_suffix(f".{ext}")
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_bytes(f"{stem.name}_{ext}".encode())
+            out[ext] = p
+        return out
+
+    def capture_overhead(trajectories, stem, **kwargs):
+        out = {}
+        for ext in ("png", "pdf", "svg"):
+            p = stem.with_suffix(f".{ext}")
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_bytes(f"{stem.name}_{ext}".encode())
+            out[ext] = p
+        return out
+
+    monkeypatch.setattr(figures, "write_academic_dispersion_figure", capture_dispersion)
+    monkeypatch.setattr(figures, "write_overhead_trajectory_figure", capture_overhead)
+
+    # 1. Primary cell: within-lean nominal target (config target_x_m is None)
+    root = tmp_path / "primary_cell"
+    primary_ref = _fixture_ref(
+        "pw_cell",
+        club="pitching_wedge",
+        lean=0.0,
+        curve=2.0,
+        rotation=1.0,
+        profile="combined2",
+        target=77.402477248663,
+        protocol="supplement_pw_within_lean_face_v1",
+    )
+    primary_ref["source_root"] = str(root)
+    primary_ref["config"]["target_x_m"] = None  # Within-lean matching
+    primary_ref["summary"] = {"target_x_m": 77.402477248663, "status": "completed"}
+
+    cell_dir = root / primary_ref["cell"]
+    cell_dir.mkdir(parents=True)
+    (cell_dir / "manifest.json").write_text("{}")
+    (cell_dir / "flight_samples.json").write_text(
+        json.dumps(
+            {
+                "trajectories": {
+                    p: [[[0.0, 0.0], [77.4, 0.0]]] for p in ("Straight", "Draw", "Fade")
+                }
+            }
+        )
+    )
+
+    figures._render_cell_figures(primary_ref, tmp_path / "figures_primary")
+    assert len(captured_metadata) == 1
+    m1 = captured_metadata[-1]
+    assert m1["Protocol"] == "supplement_pw_within_lean_face_v1"
+    assert "77.40 m downrange" in m1["Matched Target"]
+    assert "Within-Lean Nominal Target" in m1["Matched Target"]
+
+    # 2. Control cell: fixed-target control (config target_x_m is explicitly set)
+    control_ref = _fixture_ref(
+        "pw_cell_control",
+        club="pitching_wedge",
+        lean=5.0,
+        curve=2.0,
+        rotation=1.0,
+        profile="combined2",
+        target=77.402477248663,
+        protocol="supplement_pw_fixed_target_face_v1",
+    )
+    control_ref["source_root"] = str(root)
+    control_ref["config"]["target_x_m"] = 77.402477248663
+    control_ref["summary"] = {"target_x_m": 77.402477248663, "status": "completed"}
+
+    ctrl_dir = root / control_ref["cell"]
+    ctrl_dir.mkdir(parents=True)
+    (ctrl_dir / "manifest.json").write_text("{}")
+    (ctrl_dir / "flight_samples.json").write_text(
+        json.dumps(
+            {
+                "trajectories": {
+                    p: [[[0.0, 0.0], [77.4, 0.0]]] for p in ("Straight", "Draw", "Fade")
+                }
+            }
+        )
+    )
+
+    figures._render_cell_figures(control_ref, tmp_path / "figures_control")
+    assert len(captured_metadata) == 2
+    m2 = captured_metadata[-1]
+    assert m2["Protocol"] == "supplement_pw_fixed_target_face_v1"
+    assert "77.40 m downrange" in m2["Matched Target"]
+    assert "Fixed-Target Control" in m2["Matched Target"]
+
+    # 3. Provenance alias: represents control condition via primary source
+    alias_ref = dict(primary_ref)
+    alias_ref["execution_kind"] = "provenance_alias"
+    alias_ref["alias_of_primary"] = primary_ref["cell"]
+    alias_ref["alias_cell"] = "pitching_wedge_lean5_curve2_rotation1_combined2"
+
+    figures._render_cell_figures(alias_ref, tmp_path / "figures_alias")
+    assert len(captured_metadata) == 3
+    m3 = captured_metadata[-1]
+    assert m3["Protocol"] == "supplement_pw_within_lean_face_v1"
+    assert "77.40 m downrange" in m3["Matched Target"]
+    assert "Fixed-Target Control" in m3["Matched Target"]
+
+
+def test_render_pair_figures_cross_protocol_passes_ordered_protocols(
+    tmp_path, monkeypatch
+):
+    first = _fixture_ref("cell1", rotation=1.0, protocol="original_primary/1")
+    second = _fixture_ref(
+        "cell2", rotation=2.0, protocol="supplement_pw_within_lean_face_v1"
+    )
+
+    for ref in (first, second):
+        root = tmp_path / ref["cell"]
+        cell_dir = root / ref["cell"]
+        cell_dir.mkdir(parents=True)
+        (cell_dir / "flight_samples.json").write_text(
+            json.dumps(
+                {
+                    "trajectories": {
+                        p: [[[0.0, 0.0], [180.0, 0.0]]]
+                        for p in ("Straight", "Draw", "Fade")
+                    }
+                }
+            )
+        )
+        ref["source_root"] = str(root)
+
+    common_endpoints = {
+        p: [(i, 180.0 + i, 0.1 * i) for i in range(10)]
+        for p in ("Straight", "Draw", "Fade")
+    }
+    monkeypatch.setattr(
+        figures, "_supported_endpoints", lambda *args: (common_endpoints, {})
+    )
+
+    social_calls = []
+
+    def fake_social_density(point_sets, output_stem, **kwargs):
+        social_calls.append(kwargs)
+        out = {}
+        for p in ("straight", "draw", "fade"):
+            for ext in ("png", "pdf", "svg"):
+                path = output_stem.with_name(f"{output_stem.name}_{p}.{ext}")
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(b"dummy")
+                out[f"{p}_{ext}"] = path
+        return out
+
+    monkeypatch.setattr(figures, "write_pair_social_density", fake_social_density)
+
+    pair = {
+        "comparison_kind": "curve_strength",
+        "first": first,
+        "second": second,
+        "target_x_m": 180.0,
+    }
+    figures._render_pair_figures(pair, tmp_path / "comparisons")
+
+    assert len(social_calls) == 1
+    kwargs = social_calls[0]
+    assert kwargs["source_protocols"] == (
+        "original_primary/1",
+        "supplement_pw_within_lean_face_v1",
+    )
+    assert kwargs["target_point_m"] == (180.0, 0.0)
+    assert "context" in kwargs
+    assert kwargs["context"]["first_protocol"] == "original_primary/1"
+    assert kwargs["context"]["second_protocol"] == "supplement_pw_within_lean_face_v1"

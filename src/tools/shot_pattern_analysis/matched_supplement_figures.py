@@ -6,7 +6,7 @@ import hashlib
 import json
 import re
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Literal, Mapping
 
 import numpy as np
 
@@ -188,6 +188,19 @@ def _raw_flight_metadata(metadata: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _cell_target_mode(ref: Mapping[str, Any]) -> str:
+    """Classify cell target mode to distinguish within-lean matching from controls."""
+    config = ref.get("config")
+    req_config = ref.get("requested_config")
+    if ref.get("execution_kind") == "provenance_alias" or ref.get("alias_of_primary"):
+        return "Fixed-Target Control (Alias)"
+    if isinstance(config, Mapping) and config.get("target_x_m") is not None:
+        return "Fixed-Target Control"
+    if isinstance(req_config, Mapping) and req_config.get("target_x_m") is not None:
+        return "Fixed-Target Control"
+    return "Within-Lean Nominal Target"
+
+
 def _render_cell_figures(ref: dict[str, Any], output_dir: Path) -> list[dict[str, Any]]:
     if ref.get("status") != "completed":
         return []
@@ -205,8 +218,14 @@ def _render_cell_figures(ref: dict[str, Any], output_dir: Path) -> list[dict[str
     valid_counts = {name: len(arrays[name]) for name in _PATTERNS}
     metadata = _plot_metadata(ref, "one-cell supported population", valid_counts)
     social_club = str(ref["config"]["club"]["club_id"]).replace("_", " ").title()
+    target_mode = _cell_target_mode(ref)
+    protocol = ref.get("source_protocol") or ref.get("protocol_id")
+    if not protocol:
+        raise ValueError(f"cell reference lacks source protocol: {label}")
     social_metadata = {
         "social_club": social_club,
+        "Protocol": protocol,
+        "Matched Target": f"{target_x:.2f} m downrange ({target_mode})",
         "Delivery Noise": _noise_profile_description(
             _condition(ref)["profile"], ref["config"]["noise"]
         ),
@@ -767,6 +786,12 @@ def _render_pair_figures(
             )
         pair_scenario = _pair_social_scenario(comparison, first, second)
         social_club = str(first["config"]["club"]["club_id"]).replace("_", " ").title()
+        p0 = str(first.get("source_protocol") or first.get("protocol_id") or "")
+        p1 = str(second.get("source_protocol") or second.get("protocol_id") or "")
+        if not p0 or not p1:
+            raise ValueError(
+                f"pair references lack source protocol: {first['cell']} vs {second['cell']}"
+            )
         social_density_paths = write_pair_social_density(
             point_sets,
             stem.with_name(stem.name + "_density"),
@@ -778,6 +803,12 @@ def _render_pair_figures(
             delivery_noise=_noise_profile_description(
                 _condition(first)["profile"], first["config"]["noise"]
             ),
+            source_protocols=(p0, p1),
+            context={
+                "comparison_kind": comparison,
+                "first_protocol": p0,
+                "second_protocol": p1,
+            },
         )
         for key, path in social_density_paths.items():
             pattern_lower, ext = key.split("_", 1)

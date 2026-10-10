@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
+import math
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 
@@ -22,6 +24,9 @@ def write_pair_social_density(
     target_point_m: tuple[float, float],
     total_n: int,
     delivery_noise: str | None = None,
+    source_protocols: tuple[str, str] | Sequence[str] | None = None,
+    context: Mapping[str, Any] | None = None,
+    metadata: Mapping[str, Any] | None = None,
 ) -> dict[str, Path]:
     """Export three two-panel figures, preserving all supplied coordinates.
 
@@ -50,6 +55,50 @@ def write_pair_social_density(
         not isinstance(delivery_noise, str) or not delivery_noise.strip()
     ):
         raise ValueError("delivery noise must be a non-empty display label")
+    resolved_protocols = source_protocols
+    if resolved_protocols is None and context is not None:
+        if "source_protocols" in context:
+            resolved_protocols = context["source_protocols"]
+        elif "protocols" in context:
+            resolved_protocols = context["protocols"]
+        elif "first_protocol" in context and "second_protocol" in context:
+            resolved_protocols = (
+                context["first_protocol"],
+                context["second_protocol"],
+            )
+
+    if resolved_protocols is not None:
+        if (
+            not isinstance(resolved_protocols, Sequence)
+            or isinstance(resolved_protocols, (str, bytes))
+            or len(resolved_protocols) != 2
+            or any(not isinstance(p, str) or not p.strip() for p in resolved_protocols)
+        ):
+            raise ValueError(
+                "source_protocols must be a sequence of two non-empty strings"
+            )
+    target_x = float(target_point_m[0])
+    if not math.isfinite(target_x):
+        raise ValueError("target_point_m must contain finite coordinates")
+    target_context = None
+    if context is not None and isinstance(context, Mapping):
+        target_context = context.get("target_context") or context.get("target_mode")
+    target_str = (
+        f"{target_x:.2f} m downrange ({target_context})"
+        if target_context
+        else f"{target_x:.2f} m downrange (Common Target)"
+    )
+    protocol_str: str | None = None
+    if resolved_protocols is not None:
+        protocol_str = (
+            f"{condition_labels[0]}: {resolved_protocols[0]} · "
+            f"{condition_labels[1]}: {resolved_protocols[1]}"
+        )
+    elif metadata is not None and "Protocol" in metadata:
+        protocol_str = str(metadata["Protocol"])
+    elif context is not None and "Protocol" in context:
+        protocol_str = str(context["Protocol"])
+
     if isinstance(total_n, bool) or not isinstance(total_n, int) or total_n < 2:
         raise ValueError("total_n must be an integer >= 2")
     expected = {
@@ -76,18 +125,25 @@ def write_pair_social_density(
     outputs: dict[str, Path] = {}
     for pattern in _PATTERNS:
         points = {label: arrays[f"{pattern} · {label}"] for label in condition_labels}
+        pair_metadata = {
+            "social_club": social_club,
+            **({"Protocol": protocol_str} if protocol_str else {}),
+            "Matched Target": target_str,
+            **({"Delivery Noise": delivery_noise} if delivery_noise else {}),
+            "Population": "Same Shot Indices Supported in All Six Populations",
+            "Scales": "Shared Within This Figure; Other Pattern Figures May Differ",
+            "valid_shots_by_pattern": dict.fromkeys(condition_labels, common_n),
+            "total_shots_by_pattern": dict.fromkeys(condition_labels, total_n),
+        }
+        if metadata:
+            for key, val in metadata.items():
+                if key not in pair_metadata:
+                    pair_metadata[key] = val
         paths = write_academic_dispersion_figure(
             points,
             output_stem.with_name(f"{output_stem.name}_{pattern.lower()}_social"),
             scenario=f"{pattern}: {scenario}",
-            metadata={
-                "social_club": social_club,
-                **({"Delivery Noise": delivery_noise} if delivery_noise else {}),
-                "Population": "Same Shot Indices Supported in All Six Populations",
-                "Scales": "Shared Within This Figure; Other Pattern Figures May Differ",
-                "valid_shots_by_pattern": dict.fromkeys(condition_labels, common_n),
-                "total_shots_by_pattern": dict.fromkeys(condition_labels, total_n),
-            },
+            metadata=pair_metadata,
             target_point_m=target_point_m,
             presentation="social",
         )
