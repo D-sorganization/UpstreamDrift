@@ -28,7 +28,8 @@ from src.shared.python.motion_matching.hip_calibration import (
     hip_rotation_zero,
 )
 from src.shared.python.motion_matching.marker_calibration import (
-    calibrate_marker_offsets,
+    PlacementPrior,
+    calibrate_constrained_marker_offsets,
     static_marker_offsets,
 )
 from src.shared.python.motion_matching import posture_metrics as post
@@ -370,16 +371,18 @@ def calibrate_legs(
             state["kin"] = FullBodyMarkerKinematics(adapter, attachments)
         return lane.trajectory(state["kin"], q_start, frames=frames)[0]
 
-    result = calibrate_marker_offsets(
+    result = calibrate_constrained_marker_offsets(
         leg_capture,
         leg_bodies,
         pose_fn,
         ik_fn,
         initial_q=q_start,
         iterations=CALIBRATION_ITERATIONS,
-        prior_offsets={label: offset for label, (_, offset) in seeds.items()},
-        prior_weight=CALIBRATION_PRIOR_FRAMES,
-        constrain=None if lane.feet is None else anatomical_leg_constraint(seeds),
+        prior=PlacementPrior(
+            {label: offset for label, (_, offset) in seeds.items()},
+            CALIBRATION_PRIOR_FRAMES,
+            None if lane.feet is None else anatomical_leg_constraint(seeds),
+        ),
     )
     offsets = {
         label: (

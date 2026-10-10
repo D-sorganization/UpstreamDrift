@@ -134,14 +134,14 @@ def test_calibration_applies_the_constraint_to_every_placement() -> None:
         seen.append(offsets)
         return {k: (b, (0.0, o[1], o[2])) for k, (b, o) in offsets.items()}
 
-    result = marker_calibration.calibrate_marker_offsets(
+    result = marker_calibration.calibrate_constrained_marker_offsets(
         capture,
         bodies,
         lambda q: {"A": (np.eye(3), np.zeros(3))},
         lambda offsets, cap: np.zeros((cap.frames, 1)),
         initial_q=np.zeros(1),
         iterations=2,
-        constrain=constrain,
+        prior=marker_calibration.PlacementPrior(constrain=constrain),
     )
     assert len(seen) == 2
     assert all(offset[0] == 0.0 for _, offset in result.offsets.values())
@@ -150,12 +150,23 @@ def test_calibration_applies_the_constraint_to_every_placement() -> None:
 def test_calibration_rejects_a_constraint_that_drops_a_marker() -> None:
     capture, bodies = _one_body_rig()
     with pytest.raises(ValueError, match="constrain"):
-        marker_calibration.calibrate_marker_offsets(
+        marker_calibration.calibrate_constrained_marker_offsets(
             capture,
             bodies,
             lambda q: {"A": (np.eye(3), np.zeros(3))},
             lambda offsets, cap: np.zeros((cap.frames, 1)),
             initial_q=np.zeros(1),
             iterations=1,
-            constrain=lambda offsets: {"M1": offsets["M1"]},
+            prior=marker_calibration.PlacementPrior(
+                constrain=lambda offsets: {"M1": offsets["M1"]}
+            ),
         )
+
+
+def test_placement_prior_validates_its_inputs() -> None:
+    with pytest.raises(ValueError, match="nonnegative"):
+        marker_calibration.PlacementPrior(weight=-1.0)
+    with pytest.raises(ValueError, match="3-vector"):
+        marker_calibration.PlacementPrior({"M1": (0.0, 0.0)})
+    with pytest.raises(TypeError, match="callable"):
+        marker_calibration.PlacementPrior(constrain="not a function")  # type: ignore[arg-type]
