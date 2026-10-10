@@ -491,3 +491,21 @@ semantics, reproduction and remaining donor/resource/anatomy gates are in
 `F07_REFERENCE_CONVENTIONS_TURNOVER.md`. Canonical calculation detail is in
 chapter 38. Neither the previous 520-muscle source nor Pose2Sim is qualified
 for capture-matched muscle-driven forward dynamics by this diagnostic.
+
+## F07 Constrained Mixed Moco and Replay (#12173)
+
+The opt-in combined route composes declared native constraint/cold-start
+admission with ordered mixed muscle and CoordinateActuator controls. Moco
+optimizer boxes are proven inside coordinate charts, including conservative
+interval-extrema checks for declared linear chart rules. Fresh native replay
+rejects Manager changes to the exact requested named state/time seed, checks
+native enforcement and residuals at every sample, and saves physical
+actuation separately from dimensionless commands. The 40 ms synthetic Moco
+fixture passes independent replay; it does not represent a private capture or
+qualify the production models. The frozen native regression is 73 passed, 1
+optional-provider skip. The disjoint pure-muscle/contact and Moco-runner
+regression adds 124 passed and 2 skips (197 passed, 3 skips combined). Four
+Manager seed regressions cover value and speed projection in mixed and
+mechanical prepared-state paths. See chapter48 and
+`F07_CONSTRAINED_MIXED_MOCO_TURNOVER.md`; the registry still contains zero
+approved calculations and release remains blocked.
