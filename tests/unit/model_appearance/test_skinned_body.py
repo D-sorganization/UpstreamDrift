@@ -20,9 +20,11 @@ from src.shared.python.model_appearance.skinned_body import (
     build_skinned_body,
     gltf_up_rotation,
     pose_skinned_vertices,
+    quaternion_xyzw,
     skinned_body_gltf,
     skinned_body_gltf_text,
     spec_body_poses,
+    spec_motion_bone_poses,
 )
 from src.shared.python.motion_matching.anthropometric_candidate import (
     zero_pose_joint_positions,
@@ -280,21 +282,170 @@ def test_gltf_inverse_bind_matrices_cancel_node_global_matrix(skinned) -> None:
     inverse_bind = np.frombuffer(ibm_bytes, dtype=np.float32).reshape(-1, 4, 4)
     inverse_bind = np.transpose(inverse_bind, (0, 2, 1))  # column-major -> row-major
 
-    bone_count = len(skinned.bone_names)
-    globals_: list[np.ndarray | None] = [None] * bone_count
-
-    def global_matrix(i: int) -> np.ndarray:
-        if globals_[i] is not None:
-            return globals_[i]
-        local = np.array(doc["nodes"][i]["matrix"], dtype=float).reshape(4, 4).T
-        parent = skinned.bone_parents[i]
-        result = local if parent == -1 else global_matrix(parent) @ local
-        globals_[i] = result
-        return result
-
-    for i in range(bone_count):
-        product = inverse_bind[i].astype(float) @ global_matrix(i)
+    locals_ = [
+        _trs_matrix(node["translation"], node["rotation"])
+        for node in doc["nodes"][: len(skinned.bone_names)]
+    ]
+    for i, global_matrix in enumerate(_compose_globals(skinned.bone_parents, locals_)):
+        product = inverse_bind[i].astype(float) @ global_matrix
         assert np.allclose(product, np.eye(4), atol=1e-4)
+
+
+# --- glTF animation driven by spec q (slice 2) ----------------------------
+
+
+def _quaternion_matrix(xyzw) -> np.ndarray:
+    x, y, z, w = np.asarray(xyzw, dtype=float) / np.linalg.norm(xyzw)
+    return np.array(
+        [
+            [1 - 2 * (y * y + z * z), 2 * (x * y - z * w), 2 * (x * z + y * w)],
+            [2 * (x * y + z * w), 1 - 2 * (x * x + z * z), 2 * (y * z - x * w)],
+            [2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (x * x + y * y)],
+        ]
+    )
+
+
+def _trs_matrix(translation, rotation) -> np.ndarray:
+    m = np.eye(4)
+    m[:3, :3] = _quaternion_matrix(rotation)
+    m[:3, 3] = translation
+    return m
+
+
+def _compose_globals(parents, locals_) -> list[np.ndarray]:
+    globals_: list[np.ndarray] = []
+    for i, local in enumerate(locals_):  # parents precede children
+        globals_.append(local if parents[i] == -1 else globals_[parents[i]] @ local)
+    return globals_
+
+
+def _swing_frames(spec_doc: dict, n_frames: int) -> list[dict[str, float]]:
+    primitive_of = _primitive_of_coordinate(spec_doc)
+    rotational = [n for n in spec_doc["coordinate_order"] if primitive_of[n][0] == "R"]
+    return [
+        {name: 0.6 * np.sin(0.4 * f + i) for i, name in enumerate(rotational)}
+        for f in range(n_frames)
+    ]
+
+
+@pytest.fixture(scope="module")
+def animated(skinned, spec_doc):
+    frames = _swing_frames(spec_doc, 5)
+    motion = spec_motion_bone_poses(skinned, spec_doc, frames)
+    return frames, motion, skinned_body_gltf(skinned, motion, fps=30.0)
+
+
+@pytest.mark.parametrize("seed", range(6))
+def test_quaternion_round_trips_random_rotations(seed) -> None:
+    rng = np.random.default_rng(seed)
+    q, _ = np.linalg.qr(rng.normal(size=(3, 3)))
+    rotation = q * np.sign(np.linalg.det(q))
+    quat = quaternion_xyzw(rotation)
+    assert quat[3] >= 0
+    assert np.allclose(_quaternion_matrix(quat), rotation, atol=1e-12)
+
+
+def test_quaternion_handles_half_turns() -> None:
+    for rotation in (np.diag([1.0, -1.0, -1.0]), np.diag([-1.0, 1.0, -1.0])):
+        assert np.allclose(_quaternion_matrix(quaternion_xyzw(rotation)), rotation)
+
+
+def test_quaternion_rejects_reflection() -> None:
+    with pytest.raises(ValueError):
+        quaternion_xyzw(np.diag([1.0, 1.0, -1.0]))
+
+
+def test_static_export_has_no_animation(skinned) -> None:
+    assert "animations" not in skinned_body_gltf(skinned)
+
+
+def test_motion_poses_match_spec_fk(skinned, spec_doc) -> None:
+    frames = _swing_frames(spec_doc, 2)
+    motion = spec_motion_bone_poses(skinned, spec_doc, frames)
+    assert motion.shape == (2, len(skinned.bone_names), 4, 4)
+    poses = spec_body_poses(spec_doc, frames[1])
+    for b, name in enumerate(skinned.bone_names):
+        assert np.allclose(motion[1, b], poses[name], atol=1e-12)
+
+
+def test_animation_channels_cover_every_bone(skinned, animated) -> None:
+    _, _, doc = animated
+    (animation,) = doc["animations"]
+    targets = {
+        (c["target"]["node"], c["target"]["path"]) for c in animation["channels"]
+    }
+    expected = {
+        (b, p)
+        for b in range(len(skinned.bone_names))
+        for p in ("translation", "rotation")
+    }
+    assert targets == expected
+    times = _accessor_array(doc, animation["samplers"][0]["input"], np.float32, 1)
+    assert np.allclose(times[:, 0], np.arange(5) / 30.0, atol=1e-7)
+    accessor = doc["accessors"][animation["samplers"][0]["input"]]
+    assert accessor["min"] == [0.0] and np.isclose(accessor["max"][0], 4 / 30.0)
+
+
+def _keyframe_globals(doc: dict, parents, frame: int) -> list[np.ndarray]:
+    (animation,) = doc["animations"]
+    trs: dict[int, dict[str, np.ndarray]] = {}
+    for channel in animation["channels"]:
+        sampler = animation["samplers"][channel["sampler"]]
+        width = 3 if channel["target"]["path"] == "translation" else 4
+        values = _accessor_array(doc, sampler["output"], np.float32, width)
+        trs.setdefault(channel["target"]["node"], {})[channel["target"]["path"]] = (
+            values[frame].astype(float)
+        )
+    locals_ = [
+        _trs_matrix(trs[b]["translation"], trs[b]["rotation"])
+        for b in range(len(parents))
+    ]
+    return _compose_globals(parents, locals_)
+
+
+def test_animation_keys_reproduce_spec_fk_and_skin(skinned, animated) -> None:
+    """A viewer playing the animation shows the spec-FK pose and posed skin."""
+    frames, motion, doc = animated
+    to_y_up = gltf_up_rotation(skinned.up_axis)
+    positions = _accessor_array(doc, 0, np.float32, 3).astype(float)
+    inverse_bind = np.transpose(
+        _accessor_array(doc, 5, np.float32, 16).reshape(-1, 4, 4), (0, 2, 1)
+    ).astype(float)
+    bone = skinned.vertex_bone
+    homogeneous = np.concatenate([positions, np.ones((len(positions), 1))], axis=1)
+    for f in (0, len(frames) - 1):
+        globals_ = np.stack(_keyframe_globals(doc, skinned.bone_parents, f))
+        assert np.abs(globals_ - to_y_up @ motion[f]).max() < 1e-5
+        skin = globals_[bone] @ inverse_bind[bone]
+        viewer = np.einsum("nij,nj->ni", skin, homogeneous)[:, :3]
+        posed = dict(zip(skinned.bone_names, motion[f], strict=True))
+        expected = pose_skinned_vertices(skinned, posed) @ to_y_up[:3, :3].T
+        assert np.abs(viewer - expected).max() < 1e-4
+
+
+def test_animation_rotations_stay_in_one_hemisphere(skinned, animated) -> None:
+    _, _, doc = animated
+    (animation,) = doc["animations"]
+    for channel in animation["channels"]:
+        if channel["target"]["path"] != "rotation":
+            continue
+        sampler = animation["samplers"][channel["sampler"]]
+        quats = _accessor_array(doc, sampler["output"], np.float32, 4)
+        assert (np.einsum("ij,ij->i", quats[1:], quats[:-1]) > 0).all()
+
+
+def test_motion_validation(skinned, spec_doc) -> None:
+    with pytest.raises(ValueError):
+        spec_motion_bone_poses(skinned, spec_doc, [])
+    motion = spec_motion_bone_poses(skinned, spec_doc, [{}])
+    with pytest.raises(ValueError):
+        skinned_body_gltf(skinned, motion[:, :-1])
+    with pytest.raises(ValueError):
+        skinned_body_gltf(skinned, motion, fps=0.0)
+    bad = motion.copy()
+    bad[0, 0, 0, 0] = np.nan
+    with pytest.raises(ValueError):
+        skinned_body_gltf(skinned, bad)
 
 
 def test_gltf_text_round_trips_through_json(skinned) -> None:
