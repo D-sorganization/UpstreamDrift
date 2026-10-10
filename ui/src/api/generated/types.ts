@@ -678,6 +678,33 @@ export interface Body_import_dataset_tools_data_explorer_import_post {
   file: string;
 }
 
+export interface Body_import_session_v2_api_tools_launch_monitor_analytics_v2_import_post {
+  file: string;
+  options: string;
+}
+
+export interface Body_import_session_v2_api_v1_tools_launch_monitor_analytics_v2_import_post {
+  file: string;
+  options: string;
+}
+
+export interface Body_import_session_v2_tools_launch_monitor_analytics_v2_import_post {
+  file: string;
+  options: string;
+}
+
+export interface Body_preview_import_v2_api_tools_launch_monitor_analytics_v2_import_preview_post {
+  file: string;
+}
+
+export interface Body_preview_import_v2_api_v1_tools_launch_monitor_analytics_v2_import_preview_post {
+  file: string;
+}
+
+export interface Body_preview_import_v2_tools_launch_monitor_analytics_v2_import_preview_post {
+  file: string;
+}
+
 export interface Body_upload_c3d_api_tools_motion_capture_upload_c3d_post {
   file: string;
 }
@@ -973,6 +1000,28 @@ export interface CaptureSource {
   /** Why the source is unavailable (None when available) */
   reason?: string | null;
   description: string;
+}
+
+/**
+ * Appearance picks, optionally bound to a compiled character spec. ``character``, when given, is compiled the same way as ``/character-builder/build`` and its spec hash is stamped onto the returned appearance document as ``spec_sha256``.
+ */
+export interface CharacterAppearanceRequest {
+  /** Optional character spec to bind spec_sha256 to */
+  character?: CharacterSpecRequest | null;
+  /** Skin tone material name */
+  skin_tone?: string | null;
+  /** Clothing preset name */
+  clothing?: string | null;
+  /** Club finish material name */
+  club_finish?: string | null;
+  /** 'none', 'hair' or 'cap' */
+  headwear?: string | null;
+  /** Hair/cap material name override */
+  headwear_material?: string | null;
+  /** Ground material name */
+  ground_material?: string | null;
+  /** Appearance document name (letters, digits, '_' or '-') */
+  name?: string | null;
 }
 
 /**
@@ -2497,6 +2546,14 @@ export interface ModelRequest {
 export interface MultivariatePayloadV2 {
   records: Record<string, unknown>[];
   metrics: string[];
+}
+
+/**
+ * Request body for launching a native viewer backend on a run's NPZ.
+ */
+export interface NativeViewerLaunchRequest {
+  backend: string;
+  speed: number;
 }
 
 /**

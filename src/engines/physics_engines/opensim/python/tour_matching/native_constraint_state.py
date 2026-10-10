@@ -318,12 +318,16 @@ def _restore_named_state(model: Any, state: Any, initial: Mapping[str, float]) -
 
 @contextmanager
 def owned_native_source_state(
-    model_path: Path, initial_state: Mapping[str, float] | None = None
+    model_path: Path,
+    initial_state: Mapping[str, float] | None = None,
+    *,
+    before_initialize: Callable[[Any], None] | None = None,
 ) -> Iterator[tuple[Any, Any, str]]:
     """Load an owned XML copy, optionally restoring every named state value.
 
     This is a read-only observation boundary, not a native restart certificate.
     Resource closure is not verified; callers must account for external assets.
+    A trusted caller may install a time-only player before initialization.
     Native initSystem includes OpenSim's initialization assembly; restoring named
     continuous values afterward does not invoke a second assembly here.
     """
@@ -338,6 +342,8 @@ def owned_native_source_state(
         owned = Path(stream.name)
     try:
         model = osim.Model(str(owned))
+        if before_initialize is not None:
+            before_initialize(model)
         model.finalizeConnections()
         state = model.initSystem()
         if initial_state is not None:
