@@ -257,8 +257,8 @@ def test_markdown_comparison_table_keeps_population_scope_and_unavailable_sg():
     assert "Unavailable" in rendered
     assert "results do not isolate a causal curvature effect" in rendered
     assert "Paired Pattern SG Change" in rendered
-    assert "+0.0300" in rendered
-    assert "+0.0200" in rendered
+    assert "+0.030 [+0.010, +0.050]" in rendered
+    assert "+0.020 [+0.000, +0.040]" in rendered
     assert "not independent experimental replications" in rendered
 
 
@@ -882,3 +882,62 @@ def test_pair_density_and_overhead_render_shared_condition_panels(
     assert {key.split("_", 1)[0] for key in namespaced} == {"density", "overhead"}
     with Image.open(overhead_paths["social_png"]) as image:
         assert image.size == (1920, 1080)
+
+
+def test_default_markdown_uses_shared_precision_for_all_interval_columns():
+    from src.tools.shot_pattern_analysis.matched_formatting import (
+        format_sg_interval_record,
+    )
+    from src.tools.shot_pattern_analysis.matched_supplement_pipeline import (
+        render_comparison_markdown,
+    )
+
+    # Actual saved 7-iron narrow interval and Driver near-zero effect.
+    narrow = {
+        "estimate": -0.0005056061017231564,
+        "lower_95": -0.0005136910470865477,
+        "upper_95": -0.0004968345325920594,
+    }
+    tiny = {
+        "estimate": 2.6911773453713884e-05,
+        "lower_95": -0.00016417507301096237,
+        "upper_95": 0.00022037368523597208,
+    }
+    pair = {
+        "comparison_kind": "curve_strength",
+        "status": "conditional_only",
+        "common_supported_n": 19,
+        "total_n_per_population": 20,
+        "sources": [
+            {"protocol_id": "primary", "cell": "a"},
+            {"protocol_id": "supplement", "cell": "b"},
+        ],
+        "patterns": {
+            "Draw": {"radial_error_difference_m": narrow, "course_sg_difference": tiny}
+        },
+        "course_scoring_effect_modification": {"Draw": narrow},
+    }
+    text = render_comparison_markdown([pair])
+    expected = format_sg_interval_record(narrow)
+    est, bounds = expected.split(" ", 1)
+    assert f"{est} m {bounds}" in text
+    assert format_sg_interval_record(tiny) in text
+    assert f"| {expected} | conditional_only |" in text
+    assert "primary:a → supplement:b" in text
+    assert "19 / 20" in text
+    assert "Unavailable" in text
+
+
+def test_pipeline_provenance_binds_shared_numeric_formatter():
+    import hashlib
+    from pathlib import Path
+    from src.tools.shot_pattern_analysis import matched_formatting
+    from src.tools.shot_pattern_analysis.matched_supplement_pipeline import (
+        _report_source_hashes,
+    )
+
+    path = Path(matched_formatting.__file__)
+    assert (
+        _report_source_hashes()["matched_formatting.py"]
+        == hashlib.sha256(path.read_bytes()).hexdigest()
+    )

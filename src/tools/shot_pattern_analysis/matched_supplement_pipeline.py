@@ -26,6 +26,7 @@ from .matched_supplement_report import (
     write_supplement_artifacts,
     write_supplement_comparisons,
 )
+from .matched_formatting import format_sg_interval_record
 from .provenance import manifest_files_match
 from .matched_supplement_figures import (
     _condition,
@@ -50,6 +51,7 @@ def _report_source_hashes() -> dict[str, str]:
     package = Path(__file__).parent
     names = (
         "matched_supplement_pipeline.py",
+        "matched_formatting.py",
         "matched_supplement_figures.py",
         "matched_supplement_report.py",
         "matched_lean_control.py",
@@ -583,12 +585,11 @@ def render_comparison_markdown(results: list[dict[str, Any]]) -> str:
 
 
 def _estimate_ci(value: dict[str, Any], unit: str) -> str:
-    if not isinstance(value, dict) or "estimate" not in value:
-        return "Unavailable"
-    return (
-        f"{float(value['estimate']):+.4f}{unit} "
-        f"[{float(value['lower_95']):+.4f}, {float(value['upper_95']):+.4f}]"
-    )
+    rendered = format_sg_interval_record(value)
+    if rendered == "Unavailable":
+        return rendered
+    estimate, interval = rendered.split(" ", 1)
+    return f"{estimate}{unit} {interval}"
 
 
 def build_final_supplement_report(
