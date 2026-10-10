@@ -834,6 +834,17 @@
         "p95_deg": 1.608493617586452,
         "max_deg": 2.838760548067086
       }
+    },
+    "restart_policy": {
+      "policy": "free",
+      "restarts": 4,
+      "threshold_m": 0.03,
+      "margin_m": 0.003,
+      "max_joint_speed_rad_s": null,
+      "max_step_rad": null,
+      "anchor_prior": false,
+      "seed_per_frame": false,
+      "posture_prior_weight": 0.0
     }
   },
   "dynamics": {
@@ -1027,7 +1038,7 @@
     "lowest_sphere_height_min_m": -0.014004638540651385,
     "lowest_sphere_height_max_m": 0.002429885620830685
   },
-  "elapsed_s": 240.58085230900906,
+  "elapsed_s": 226.62442204798572,
   "qualification": "kinematic IK and computed-torque tracking milestone on the MuJoCo full-body model (anthropometric geometry (AN-1); unqualified until Simscape parity); not a fit, not acceptance",
   "acceptance": {
     "horizon": "G3",

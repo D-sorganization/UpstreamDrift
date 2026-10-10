@@ -5727,7 +5727,11 @@ different noise sequence.
 Each cell gives base/null, where the null run adds \texttt{--thorax-weight
 0.01}. $\Delta q$ is the maximum follow-through change, base versus null, on
 the six toe and axial coordinates. FD values are in mm; ``pre'' is
-address$\to$impact and ``post'' is after impact.
+address$\to$impact and ``post'' is after impact. These experiments were run
+before the \#12057 right-knee fix. Their baseline is therefore the canonical
+receipt at that time (whole-swing FD 61.6 and 47.0 mm), not the current
+77.0 and 71.2 mm. The comparison is internally consistent; the policies have
+not been re-run on the corrected knee.
 
 \begin{center}
 \small
@@ -5816,6 +5820,8 @@ receipt. Each run takes about 5 min.
 Limitations:
 \begin{itemize}
 \item Only two captures and one null perturbation were tested.
+\item The policy runs predate the \#12057 knee fix and have not been repeated
+on the current canonical specification.
 \item $\Delta q$ is measured base versus null, not against a ground-truth
 anatomical pose.
 \item The rows without pre/post values came from runs that predate the phase
