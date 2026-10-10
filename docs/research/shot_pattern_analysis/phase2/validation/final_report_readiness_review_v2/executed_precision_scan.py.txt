@@ -1,0 +1,21 @@
+import hashlib,json
+from pathlib import Path
+from scripts.research.shot_pattern_analysis.build_final_report import _interval
+base=Path('docs/research/shot_pattern_analysis/phase2');out=base/'validation/final_report_readiness_review_v2'
+rows=[]
+for root in [base/'final_v1',base/'control_final_v1',*(base/'supplement_final_v1').iterdir()]:
+ if not root.is_dir():continue
+ for p in sorted(root.glob('*/summary.json')):
+  d=json.loads(p.read_text())
+  for pattern,v in d.get('course_scoring',{}).get('paired_benefit_vs_straight',{}).items():
+   if not isinstance(v,dict) or 'estimate' not in v:continue
+   e,l,h=(float(v[k]) for k in ('estimate','lower_95','upper_95'))
+   rounded=[float(f'{x:.4f}') for x in (e,l,h)]
+   flags=[]
+   if e and rounded[0]==0:flags.append('nonzero_estimate_shown_zero')
+   if h>l and rounded[1]==rounded[2]:flags.append('nonzero_interval_collapsed')
+   if l>0 and rounded[1]==0 or h<0 and rounded[2]==0:flags.append('one_sided_interval_shown_touching_zero')
+   if flags:rows.append({'summary':str(p),'summary_sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'pattern':pattern,'values':v,'rendered':_interval(v),'flags':flags,'selected_combined2':p.parent.name.endswith('combined2')})
+(out/'precision_scan.json').write_text(json.dumps({'scope':'Saved per-cell paired SG, current public report interval formatter; no new simulation or bootstrap','affected':rows,'counts':{flag:sum(flag in x['flags'] for x in rows) for flag in ['nonzero_estimate_shown_zero','nonzero_interval_collapsed','one_sided_interval_shown_touching_zero']}},indent=2)+'\n')
+print('Affected',len(rows));print(json.dumps(json.loads((out/'precision_scan.json').read_text())['counts']))
+for row in [x for x in rows if x['selected_combined2']][:5]:print(json.dumps(row))

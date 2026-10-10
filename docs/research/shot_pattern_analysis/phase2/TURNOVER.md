@@ -56,6 +56,14 @@ Both saved-data postprocessing jobs started from9ea4c14bed and are confirmed liv
 
 Freeze all MAIN Python under `src/tools/shot_pattern_analysis` and `scripts/research/shot_pattern_analysis` until both finish; renderer and pipeline recheck source hashes. Docs/evidence may be updated. Source snapshot differs from accepted numerical execution only in the two reviewed rendering modules; runtime/native identities remain unchanged. See `validation/final_publication_regeneration_start.json` and saved wrappers. No Monte Carlo rerun is involved. After terminal success, perform complete hash/inventory/graphics and supplemental statistics reviews, then assemble and review final report formats and deliver through the PR gates.
 
+## Report Precision Follow-Up During Regeneration
+
+Astra's read-only readiness review confirms that final-report fixed four-decimal formatting collapses13nonzero SG intervals, zeroes18nonzero estimates and makes16one-sided intervals appear to touch zero across47affected saved rows (overlapping counts). Exact source-bound examples and final narrative/LaTeX requirements are in `validation/final_report_readiness_review_v2/`. These are display defects, not changes to saved numerical results.
+
+AGY Gemini3.8Flash High session69662 is implementing a shared pure precision formatter with TDD in BOUNDS (`codex/shot-pattern-report-precision`, starting1b1a5f17ec), reusing the accepted GUI policy for report, effect, and absolute-SG tables. Prompt `/tmp/p2-report-precision-agy.txt`, log `/tmp/p2-report-precision-agy.log`. It must not edit MAIN or stage/commit. Root owns integration after source freeze and Astra review.
+
+The separate supplemental `_estimate_ci` also uses fixed precision in its Markdown output; its raw JSON/CSV retain full values. The live384-pair affected count remains unverified. Pipeline.py is one of13bound postprocessing sources, so do not change it or silently replace its source hashes. The readiness addendum documents a separately verified derived table option and the still-open future default formatter fix. Decide an explicit provenance-safe correction after live output completion; never claim unchanged legacy text was repaired.
+
 ## Reporting Revision
 
 Isolated layout `1e4d70d0dd` fixes phone readability, main/marginal ticks and footer clearance. Regression evidence is red-to-green;19tests pass. Astra inspected nine1080px previews and verified27artifact hashes across Driver/7-Iron/PW. Root also inspected the7-Iron draw. This qualifies the reviewed component, not the complete final publication.
