@@ -6216,6 +6216,57 @@ python3 -m src.shared.python.motion_matching ledger --write
 \end{verbatim}
 The capture-A run takes about 7 minutes on 5 cores and reads the private
 capture through \texttt{CAPTURE\_DATA\_DIR}.
+
+\subsection{Weld Rotation Row Parity (Issue \#12039)}
+After the coordinate-order fix, the Drake calibrated driver address was
+still 1.64~mm worse than MuJoCo's, although both plants have identical
+forward kinematics and marker Jacobians. The two least-squares problems
+differed in the dual-grip weld rotation row. MuJoCo uses the principal
+logarithm and its exact derivative,
+\[
+ r_{\mathrm{rot}}=\log\!\bigl(R_aR_b^{\top}\bigr)^{\vee},\qquad
+ \frac{\partial r_{\mathrm{rot}}}{\partial q}
+ =J_l^{-1}(r_{\mathrm{rot}})\,\bigl(J_{\omega,a}-R_aR_b^{\top}J_{\omega,b}\bigr),
+\]
+with $J_{\omega}$ the world-frame angular Jacobians and $J_l^{-1}$ the inverse
+left Jacobian of $SO(3)$. Drake used the small-angle
+$\tfrac12(R_aR_b^{\top}-R_bR_a^{\top})^{\vee}=\sin\theta\,\hat n$ with the
+Jacobian $J_{\omega,a}-J_{\omega,b}$. That is exact only at $\theta=0$, and it
+is not the derivative of its own residual elsewhere. At random poses with
+36--73~deg of weld error, it was up to 0.84 off central differences, while
+MuJoCo's was less than $10^{-9}$ off. The closure rotation weight defaults to 100
+in every pose solve, so each Drake address fit followed a different
+Levenberg--Marquardt path.
+
+Both adapters now use one shared row
+(\texttt{full\_body\_ik.\_closure\_rotation\_row}), and Drake's
+\texttt{closure\_error} reports the principal angle. On capture-A and
+capture-B (\texttt{--address-only --static-seeds --foot-progression capture})
+every address stage now agrees within 0.02~mm:
+
+\begin{center}
+\small
+\begin{tabular}{lrrrr}
+\toprule
+Drake $-$ MuJoCo (mm) & Driver Before & Driver After & 7-Iron Before & 7-Iron After \\
+\midrule
+Static trial & $-0.27$ & 0.00 & $+0.13$ & 0.00 \\
+Seed offsets & $-0.84$ & 0.00 & $-0.87$ & 0.00 \\
+Calibrated address & $+1.64$ & 0.00 & $-0.54$ & $+0.02$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The calibrated address is 7.13~mm in both plants for the driver, and 4.78
+(MuJoCo) and 4.80~mm (Drake) for the 7-iron. Drake toe-out now equals MuJoCo's
+(driver $+0.22/-0.11$~deg, 7-iron $+0.19/-0.05$~deg, lead/trail). The MuJoCo
+reports are byte-identical before and after, because the shared row is
+MuJoCo's existing formula. No bound, weight, prior or tolerance changed.
+Evidence: \texttt{evidence/foot\_progression/drake\_parity\_12039/}. Regression
+tests: \texttt{tests/unit/motion\_matching/test\_drake\_mujoco\_ik\_parity.py}.
+The closure rows and Jacobians match MuJoCo to $10^{-9}$ and $10^{-7}$, and
+\texttt{solve\_pose} from the same start reaches the same marker RMS within
+0.5~mm. Before the fix the two plants were 7.7~mm apart on that test.
 \section{Phase-Split Forward-Dynamics Marker RMS (\#12042)}
 \label{sec:fd_phase_split}
 
