@@ -1,0 +1,35 @@
+{
+  "schema": "shot-study-footer-repair-visual-review/1",
+  "status": "accepted_component_layout",
+  "render_receipt_sha256": "9d94342c30d02ff45f82865b3e0585e9740782d228a7634e0c66d632fba74c97",
+  "renderer_sha256": "b3375f2324a62fe2ad997b5e3686195ead314dca40b5887f6f200626d131d0e5",
+  "process_exit_code": 0,
+  "tests": "19 passed; exit0",
+  "inspected_1080px_previews": {
+    "driver_straight_social_1080px.png": "ead2c8a5e0201b83ed4a4007e3e8bca4b6b1435356ef802b697c789d88b793b7",
+    "driver_draw_social_1080px.png": "eb4c0505fd8904f50d7239e847e27531e47664f8381dd6d50e9b8183a36a2cda",
+    "driver_fade_social_1080px.png": "d4ec3a7902cb1395ce0a4ae0d27034e1160c799f77c2cd16e0678b7cfa5942d1",
+    "seven_iron_straight_social_1080px.png": "70d610badfef5427d5d819ceee840e0f713c94755b3cb5d0eea5eae4ba20b8f1",
+    "seven_iron_draw_social_1080px.png": "371bc37aed8a634cc5e3ad04553d520be7de239adf87811981f0ebc7185ecf0b",
+    "seven_iron_fade_social_1080px.png": "b4fdaceac16d6f29549d00eec4892615e7cad9379554fc04167ac326a1713cba",
+    "pitching_wedge_straight_social_1080px.png": "81d9ffaf0a0b02de2186bd79bb8d82e5c02556b758674dd9b8b285125cbde600",
+    "pitching_wedge_draw_social_1080px.png": "cc1ebd5e21ff5ce854c179d31faeb526d111f2b6b80064e30f32270670d475e0",
+    "pitching_wedge_fade_social_1080px.png": "752de3fe91572858c8594e2a9a40e1e4d2d7b3efd06cba6ad3bc858745514261"
+  },
+  "all_27_artifact_hashes_verified": true,
+  "minimum_font_em_pixels_at_1080": 12.5,
+  "footer_clearance_points": 6.0,
+  "geometry_issues": [],
+  "visual_findings": [
+    "All nine actual saved-data previews inspected: readable labels, legend, marginals and HDR; footer and main/marginal ticks separated.",
+    "Driver common-six n10000, seven-iron9996, pitching-wedge9999;600dot overlays disclosed while density/HDR retain all common endpoints.",
+    "Shared scales correctly qualified within each pattern figure; other pattern figures may differ.",
+    "Straight subtitle wraps Curve \u00d71 across two lines without losing content; nonblocking stylistic observation."
+  ],
+  "scope": "Three-club lean0 curve1 combined2 SD1/2 social-pair rendering only; not final study or supplemental execution acceptance",
+  "limits": [
+    "PNG previews visually inspected; PDF/SVG hashes verified, not independently rendered.",
+    "Original84-asset failed-footer diagnostic and red evidence retained; no retrospective acceptance.",
+    "Future final assets and narrative still require source-bound publication review."
+  ]
+}

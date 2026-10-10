@@ -1,0 +1,47 @@
+{
+  "schema": "shot-study-final-layout-independent-review/1",
+  "status": "changes_required",
+  "scope": "Candidate source and partial actual saved-data visual review; render still active",
+  "source_sha256": {
+    "src/tools/shot_pattern_analysis/academic_plots.py": "1f531dbcb4d44e2ab24f175fa9af6fc2615f3c61a6ba62683d7a48c1735aa06e",
+    "tests/tools/shot_pattern_analysis/test_academic_plots.py": "27094eca536b2a37cb46d060e0b075d9d19af1560651e55199f4615b917e12e1",
+    "tests/tools/shot_pattern_analysis/test_final_layout_review_contracts.py": "6348bb9b17390aa13b28ff947fea988faac9cf90c7446dc44aea1f6cfb3eefda"
+  },
+  "inspected_png_sha256": {
+    "/tmp/p2-final-layout-actual-v1/cells/driver_lean0_curve1_rotation1_combined2_aa4e8c24d6_density_social.png": "6be597d2dc8d2ac00cb378acd238490f681e2edbb4f255b52b796992b2e8d037",
+    "/tmp/p2-final-layout-actual-v1/comparisons/shaft_rotation_sd_driver_lean0_curve1_rotation1_combined2_vs_driver_lean0_curve1_rotation2_combined2_2a0d143d7e_density_draw_social.png": "3040fa4cbbc28c42e2b513ff1a777fb376b65a9fe633bc1725e68a7b93f0eaf4"
+  },
+  "font_size_minimum_em_pixels_at_1080": 12.5,
+  "findings": [
+    {
+      "severity": "publication_blocker",
+      "finding": "Two-panel bottom main xlabel overlaps footer",
+      "reproducer": "test_final_layout_review_contracts.py::test_actual_social_fonts_and_axis_legend_clearance[2]",
+      "label_y_px": [
+        68.78367513020825,
+        84.06145290798604
+      ],
+      "footer_y_px": [
+        24.3,
+        74.73367513020833
+      ],
+      "overlap_px": 5.95
+    },
+    {
+      "severity": "test_gap",
+      "finding": "Multiline/rotated whole-block bbox height is not a per-line font-size bound; independent all-Text font-size checks pass actual candidate fonts"
+    },
+    {
+      "severity": "design_observation",
+      "finding": "Three-panel tall scrolling format is readable in first Driver render; 4:5 was a proposed style target, not a user constraint"
+    }
+  ],
+  "tests": {
+    "footer_extent_regression": "1 failed, 2 passed; exit1",
+    "earlier_font_tick_legend_checks": "3 passed before adding footer assertion"
+  },
+  "limits": [
+    "Only two PNGs inspected so far; all-club completed-render review pending.",
+    "No numerical sources or renderer edits by reviewer; no final visual acceptance."
+  ]
+}

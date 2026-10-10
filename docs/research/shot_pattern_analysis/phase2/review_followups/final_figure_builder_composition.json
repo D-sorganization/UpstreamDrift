@@ -1,0 +1,13 @@
+{
+  "scope": "Reporting-Only Composition",
+  "source": "scripts/research/shot_pattern_analysis/build_final_figures.py",
+  "sha256": "6f0ad23c122666cf99126a2d4357ab9b58a9504a605a32c177819a9dc9440e07",
+  "reason": "Preserve the already-reviewed common validated endpoint loader after merging bounds and presentation; the prior isolated builder retained its duplicate CSV parser.",
+  "tests_passed": 20,
+  "test_log": "FINAL_FIGURE_BUILDER_COMPOSITION_TESTS.txt",
+  "limitation": "No numerical-source change or final publication acceptance.",
+  "origin_sha256": "e3108e81f7c0c66306ea4513043efddacca3f72d4440a586a403c0f1080408ae",
+  "copied_then_formatted_from_main": "e55638e6db",
+  "normalized_ast_identical_to_main": true,
+  "initial_format_check": "failed; canonical Ruff format applied without AST change"
+}
