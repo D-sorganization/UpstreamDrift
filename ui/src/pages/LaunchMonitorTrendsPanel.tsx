@@ -9,7 +9,7 @@
  * `LaunchMonitorAnalyticsPage` — no separate upload step.
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   formatStat,
   postTrend,
@@ -138,8 +138,8 @@ export function LaunchMonitorTrendsPanel({
     [columns],
   );
 
-  const [metric, setMetric] = useState("");
-  const [timeColumn, setTimeColumn] = useState("");
+  const [chosenMetric, setMetric] = useState("");
+  const [chosenTimeColumn, setTimeColumn] = useState("");
   const [rollingWindowText, setRollingWindowText] = useState(
     String(DEFAULT_ROLLING_WINDOW),
   );
@@ -150,15 +150,12 @@ export function LaunchMonitorTrendsPanel({
   const [runError, setRunError] = useState<string | null>(null);
   const [result, setResult] = useState<TrendResponse | null>(null);
 
-  // Drop selections a newly loaded CSV no longer supports.
-  useEffect(() => {
-    setMetric((prev) => (metricOptions.includes(prev) ? prev : ""));
-  }, [metricOptions]);
-  useEffect(() => {
-    setTimeColumn((prev) =>
-      timeColumnOptions.includes(prev) ? prev : (timeColumnOptions[0] ?? ""),
-    );
-  }, [timeColumnOptions]);
+  // Drop selections a newly loaded CSV no longer supports (derived, not synced
+  // through an effect, so a stale choice never renders).
+  const metric = metricOptions.includes(chosenMetric) ? chosenMetric : "";
+  const timeColumn = timeColumnOptions.includes(chosenTimeColumn)
+    ? chosenTimeColumn
+    : (timeColumnOptions[0] ?? "");
 
   // Same bounds `TrendPayloadV2` enforces; out-of-range input disables Run
   // rather than being silently rewritten while the user types.

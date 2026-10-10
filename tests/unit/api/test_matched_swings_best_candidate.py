@@ -96,6 +96,111 @@ class TestMatchedSwingsServiceBestCandidate:
         assert ranked[1].engine == "drake"
         assert ranked[1].verdict == "PASSED"
 
+    def test_list_runs_filters_by_profile(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
+        """profile reuses MatchedSwingBrowserModel.filter_rows's dynamic/
+        kinematic rule (DRY — #GCV-5)."""
+        rows = [
+            _make_row(
+                "r1.json",
+                "mujoco",
+                0.02,
+                lane="matched",
+                drive_mode="torque_driven",
+                sha256="1" * 64,
+            ),
+            _make_row(
+                "r2.json",
+                "pinocchio",
+                0.03,
+                lane="tour_matching",
+                drive_mode="kinematic_prescribed",
+                sha256="2" * 64,
+            ),
+        ]
+        service = MatchedSwingsService.from_ledger_file(
+            tmp_path / "ledger.json", tmp_path
+        )
+        monkeypatch.setattr(service, "_load_rows", lambda: list(rows))
+
+        dynamic_only = service.list_runs(profile="dynamic")
+        assert [r.engine for r in dynamic_only] == ["mujoco"]
+
+        kinematic_only = service.list_runs(profile="kinematic")
+        assert [r.engine for r in kinematic_only] == ["pinocchio"]
+
+    def test_fastapi_route_profile_filter_combined_with_ranked(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
+        from fastapi import FastAPI
+        from fastapi.testclient import TestClient
+        from src.api.routes.matched_swings import router, get_matched_swings_service
+
+        rows = [
+            _make_row(
+                "r1.json",
+                "mujoco",
+                0.02,
+                capture="driver",
+                lane="matched",
+                drive_mode="torque_driven",
+                sha256="1" * 64,
+            ),
+            _make_row(
+                "r2.json",
+                "pinocchio",
+                0.01,
+                capture="driver",
+                lane="tour_matching",
+                drive_mode="kinematic_prescribed",
+                sha256="2" * 64,
+            ),
+            _make_row(
+                "r3.json",
+                "drake",
+                0.005,
+                capture="driver",
+                lane="matched",
+                drive_mode="torque_driven",
+                sha256="3" * 64,
+            ),
+        ]
+        service = MatchedSwingsService.from_ledger_file(
+            tmp_path / "ledger.json", tmp_path
+        )
+        monkeypatch.setattr(service, "_load_rows", lambda: list(rows))
+
+        app = FastAPI()
+        app.include_router(router)
+        app.dependency_overrides[get_matched_swings_service] = lambda: service
+        client = TestClient(app)
+
+        res = client.get("/matched-swings?profile=dynamic&ranked=true")
+        assert res.status_code == 200
+        data = res.json()
+        assert [r["engine"] for r in data["runs"]] == ["drake", "mujoco"]
+
+    def test_fastapi_route_profile_filter_rejects_unknown_value(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
+        from fastapi import FastAPI
+        from fastapi.testclient import TestClient
+        from src.api.routes.matched_swings import router, get_matched_swings_service
+
+        service = MatchedSwingsService.from_ledger_file(
+            tmp_path / "ledger.json", tmp_path
+        )
+        monkeypatch.setattr(service, "_load_rows", list)
+
+        app = FastAPI()
+        app.include_router(router)
+        app.dependency_overrides[get_matched_swings_service] = lambda: service
+        client = TestClient(app)
+
+        res = client.get("/matched-swings?profile=bogus")
+        assert res.status_code == 422
+
     def test_candidate_preview_frame_includes_observed_dots_and_residuals(
         self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
     ) -> None:
