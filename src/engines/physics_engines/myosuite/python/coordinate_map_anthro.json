@@ -114,7 +114,7 @@
     { "source": "hip_flexion_r", "target": "hip_flexion_r", "sign": 1.0 },
     { "source": "hip_adduction_r", "target": "hip_adduction_r", "sign": 1.0 },
     { "source": "hip_rotation_r", "target": "hip_rotation_r", "sign": 1.0 },
-    { "source": "knee_angle_r", "target": "knee_angle_r", "sign": 1.0 },
+    { "source": "knee_angle_r", "target": "knee_angle_r", "sign": -1.0 },
     { "source": "ankle_angle_r", "target": "ankle_angle_r", "sign": 1.0 },
     { "source": "subtalar_angle_r", "target": "subtalar_angle_r", "sign": 1.0 },
     { "source": "mtp_angle_r", "target": "mtp_angle_r", "sign": 1.0 },

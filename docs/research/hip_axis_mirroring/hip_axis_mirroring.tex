@@ -334,6 +334,93 @@ to the pelvis match the calibrated spec FK within $1^\circ$ on
 (\path{tests/unit/engines/myosuite/test_hip_retarget.py}). Inputs and outputs
 are in \path{evidence/foot_progression/osv6_myosuite/}.
 
+\section{Right Knee Axis Convention (\#12057)}
+
+\subsection{Defect and Convention}
+In the Rajagopal source both walker knees flex positive (range
+0--120\textdegree). The primary axis is $+x$ on the right and $-x$ on the left.
+\texttt{leg\_extension} built each spec knee as $R_z$ in the walker-knee frame
+times \texttt{KNEE\_PERMUTATION}, and dropped the axis sign. The spec's left
+knee therefore flexed negative, which matches its declared range
+$[-120, 10]$\textdegree. The right knee flexed positive, so the IK could not
+flex the trail knee past 10\textdegree. The spec base $z$ columns were
+$(0,-0.071,-0.997)$ (right) and $(0,-0.071,+0.997)$ (left).
+
+The chosen convention is the gait2392 one: knee flexion is negative on both
+sides, i.e.\ the spec knee angle is the negated Rajagopal angle. Geometrically,
+the hinge axis points to the subject's right ($+z$), so a positive $R_z$
+swings the shank anteriorly. A knee whose permuted base $z$ column has a
+negative $z$ component is conjugated by $A=\mathrm{diag}(1,-1,-1)$, the same
+$R_x(\pi)$ used for the hip: $R_z(c)\mapsto R_z(-c)$, the identity at the
+zero pose.
+
+\begin{itemize}
+\item \texttt{spec\_builder.leg\_extension} applies the convention by this
+  geometric rule, independent of the OpenSim axis signs.
+\item \texttt{scripts/mirror\_spec\_right\_knee.py} applies it, idempotently,
+  to the committed anthropometric documents.
+\item The spec-to-Rajagopal knee sign is $-1$ on both sides
+  (\texttt{musculoskeletal\_graft\_validation}).
+\item The MyoSuite \texttt{knee\_angle\_r} sign is $-1$, because MyoSuite
+  flexes positive.
+\item The MyoFullBody map already used $-1$ on both knees.
+\end{itemize}
+
+FK check (\texttt{test\_knee\_axis\_convention.py}): a $-20$\textdegree{}
+right knee moves the ankle 0.148~m posterior in the pelvis frame. Before the
+fix it moved the ankle 0.148~m anterior. The left knee gives 0.147~m
+posterior. The zero pose is unchanged to $10^{-12}$.
+
+\subsection{Evidence}
+All runs were made on ControlTower (\texttt{ud-sim}). A control at the
+parent commit \texttt{80450f267a} reproduced the previous calibrated driver
+receipt exactly.
+
+\begin{center}
+\begin{tabular}{lcc}
+\hline
+Receipt (address / IK / dynamics, mm) & Before & After \\
+\hline
+Driver \texttt{--static-seeds} & 7.7 / 33.0 / 61.6 & 5.6 / 31.0 / 77.0 \\
+7-iron \texttt{--static-seeds --zmp-filter} & 6.5 / 31.1 / 47.0 & 5.0 / 28.8 / 71.2 \\
+Driver nominal & 43.0 / 60.5 / 119.4 & 43.7 / 56.3 / 90.4 \\
+7-iron nominal (\#12030 failure) & 70.2 / 268.9 / 2743 & 70.2 / 262.9 / 3967 \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{itemize}
+\item \textbf{Trail knee, calibrated address:}
+  \begin{itemize}
+  \item driver: $-0.1$ to $-26.9$\textdegree;
+  \item 7-iron: $-0.6$ to $-20.8$\textdegree.
+  \end{itemize}
+\item \textbf{IK \texttt{knee\_angle\_r} range:}
+  \begin{itemize}
+  \item driver: $[-8.0, 10.0]$ to $[-51.3, -19.9]$\textdegree;
+  \item 7-iron: $[-6.6, 10.0]$ to $[-49.8, -12.2]$\textdegree.
+  \end{itemize}
+  Both previously sat on the bound. There are no IK range-of-motion flags.
+\item \textbf{Calibrated dynamics replay:} it regresses (61.6 to 77.0~mm,
+  47.0 to 71.2~mm). The backswing root error grows: the driver maximum goes
+  from 5.7 to 20.3~mm. The simulated finish foot slide falls from 411 to
+  169~mm. The tracking controller was tuned on the capped knee.
+\item \textbf{Address toe-out error, MuJoCo} (lead / trail, control at the
+  parent commit to the fix,
+  \path{evidence/foot_progression/knee_12057/}):
+  \begin{itemize}
+  \item driver: $+0.16/-0.32$ to $+0.00/-2.07$\textdegree;
+  \item 7-iron: $-0.00/-1.41$ to $-0.00/-4.45$\textdegree.
+  \end{itemize}
+  The address marker RMS improves (8.3 to 7.5~mm and 8.1 to 7.3~mm).
+\end{itemize}
+
+With the knee flexed, femoral rotation steers the trail foot, and
+\texttt{hip\_rotation\_r} sits on its $-40$\textdegree{} range limit. The trail
+foot therefore misses the 2\textdegree{} OSV-6 target. The range was not
+widened: that needs measured evidence (\#12109; see also \#12042). The
+dynamics regression is tracked in \#12110.
+
 \section{Limitations and Failed Experiments}
 
 \begin{itemize}
@@ -386,6 +473,10 @@ python3 -m pytest tests/unit/motion_matching/test_hip_mirroring.py \
 python3 -m scripts.mirror_spec_left_hip \
   docs/development/full_body_models/full_body_spec_anthro_driver.json \
   docs/development/full_body_models/full_body_spec_anthro_iron7.json
+python3 -m scripts.mirror_spec_right_knee \
+  docs/development/full_body_models/full_body_spec_anthro_driver.json \
+  docs/development/full_body_models/full_body_spec_anthro_iron7.json
+python3 -m pytest tests/unit/motion_matching/test_knee_axis_convention.py -q
 G=docs/development/full_body_models
 python3 -m src.shared.python.motion_matching.pipeline.cli \
   --spec $G/full_body_spec_anthro_driver.json --static-seeds \
