@@ -1145,3 +1145,8 @@ three sampled poses. See chapter54 and
 `F07_GENERIC_SHOULDER_LAMINA_TURNOVER.md`. Keep the PR draft/unarmed until
 Tools #5503 and #12207 are integrated. No source anatomy, physiology,
 force/work chart, contact/grip, captured match or parity claim follows.
+
+The #12198 CI receipt-preservation follow-up restores two canonical
+ground-support receipts to their recorded hashes and adds explicit formatter
+exclusions. See `F07_NATIVE_BODY_INERTIA_TURNOVER.md` for the failed run,
+provenance and validation. Full epic qualification remains open.

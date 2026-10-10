@@ -42,3 +42,21 @@ separately justified mass/COM/inertia dataset, then passive-force, anatomy,
 native contact/grip, prepared state and full-horizon capture qualification.
 All 17 variants and six ecosystems remain in the denominator. Canonical
 chapter52 is provisional, calculation approval empty and release blocked.
+
+## Canonical Receipt Preservation
+
+CI run 38093988214 passed 23,970 tests and failed only matched-swing ledger
+freshness. A merge-time formatter had rewritten two unrelated canonical
+ground-support receipts, changing their SHA-256 values. Restore their exact
+`origin/main` bytes, which match the already recorded ledger hashes, and extend
+the existing explicit immutable-evidence exclusions in `.prettierignore`.
+The driver receipt retains `f2840c2018ee4fd51a24a6dcce3510dc265c5f67009fbec71ed9b2c4d45268fc`;
+iron retains `f065ed2699e29aa75ebe274a46d2a9a54cfc897525ef166e06fb92f254e01cf7`.
+No experiment, receipt field or scientific acceptance changes. Re-run the
+existing ledger freshness and formatter-ignore governance tests; do not
+rebaseline archived evidence to formatting changes.
+
+Validation passed: existing `test_ledger_freshness` (one test),
+`test_prettierignore_gate_owned_files.py` (two tests), and all five RM-6 central
+gates. These checks repair publication provenance and do not rerun or qualify
+the physical model experiments.
