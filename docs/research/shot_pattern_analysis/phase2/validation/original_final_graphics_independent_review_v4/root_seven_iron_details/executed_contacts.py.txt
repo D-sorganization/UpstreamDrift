@@ -1,0 +1,23 @@
+from pathlib import Path
+from PIL import Image,ImageDraw
+import hashlib,json
+phase=Path('docs/research/shot_pattern_analysis/phase2')
+fig=phase/'final_figures_v1'
+paths=sorted((fig/'details').glob('seven_iron_*/*.png'))
+assert len(paths)==48
+out=phase/'validation/original_final_graphics_independent_review_v4/root_seven_iron_details';out.mkdir(exist_ok=True)
+index=[]
+for page,start in enumerate(range(0,len(paths),16),1):
+ canvas=Image.new('RGB',(2000,1640),'#ddd');draw=ImageDraw.Draw(canvas)
+ for slot,p in enumerate(paths[start:start+16]):
+  blob=p.read_bytes();sha=hashlib.sha256(blob).hexdigest()
+  with Image.open(p) as im:
+   im.load();thumb=im.convert('RGB');thumb.thumbnail((488,365));size=im.size
+  assert hashlib.sha256(p.read_bytes()).hexdigest()==sha
+  x,y=slot%4*500,slot//4*410;canvas.paste(thumb,(x+(500-thumb.width)//2,y))
+  label=f'{start+slot+1:02d} {p.parent.name}/{p.name}'
+  draw.text((x+6,y+368),label[:65],fill='black');draw.text((x+6,y+383),label[65:],fill='black')
+  index.append({'index':start+slot+1,'page':page,'path':str(p.relative_to(fig)),'sha256':sha,'size':size})
+ canvas.save(out/f'contact_{page:02}.jpg',quality=90)
+(out/'inventory.json').write_text(json.dumps({'status':'provisional_inventory_only','pngs':index},indent=2)+'\n')
+print(out)

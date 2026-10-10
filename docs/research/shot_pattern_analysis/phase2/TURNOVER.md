@@ -23,6 +23,8 @@ Five reviewed repairs are integrated in MAIN: `56f676e399`, `e71046afbb`, `598b0
 
 Disk briefly fell to about 2 GB. Task-owned tagged caches were removed and inactive FINAL_LAYOUT/PRESENTATION checkouts were made sparse (`docs`, `src`, `tests` excluded; restore with `git sparse-checkout disable`). MAIN archives were briefly omitted from checkout and immediately restored when free space rose to about 13 GB. All data/Git history and noncache ignored files were preserved. No further user disk action is needed at that reading; recheck capacity before large outputs. The inactive checkouts require restoration before historical reproduction commands are used.
 
+The primary v4 detail images have a provisional file-level review: all 120 PNGs covered by contact sheets (Driver 32 by Astra; 7-iron 48 and PW 40 by root), with 16 full-size representatives and label checks against saved summaries. No new defect was found. Evidence: `validation/original_final_graphics_independent_review_v4/`. Reconcile these hashes with the completed manifest; social/matrix/control/supplemental graphics and whole-run acceptance remain pending.
+
 ## Completed Numerical Data
 
 All simulation workers, full saved-data audits and fresh archive restorations are finished. Do not restart them.
