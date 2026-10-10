@@ -19,7 +19,10 @@ Two terms resolve the split, measured in
   scapular protraction, which the arm and club markers otherwise outvote.
 
 Both act only in the trajectory, consistency, shooting and ZMP re-solves; the
-address calibration and segment scaling stay marker-only.
+address calibration and segment scaling stay marker-only.  The split is off by
+default (``--thorax-weight 0 --shoulder-girdle-weight 1``): it brings the IK
+turn within bounds but regresses the forward-dynamics replay, see the
+constants below.
 """
 
 from __future__ import annotations
@@ -36,10 +39,17 @@ THORAX_FRAME = "Spine"
 THORAX_LINE: tuple[str, str] = ("BackLeft", "BackRight")
 #: Capture markers of the shoulder-girdle line (scapular / acromial).
 SHOULDER_GIRDLE_MARKERS: tuple[str, str] = ("LShoulderBack", "RShoulderBack")
-#: Thorax-orientation residual weight (unit-vector residual, squared weight).
+#: Thorax-orientation residual weight that meets the IK turn bounds on
+#: capture-A and capture-B (unit-vector residual, squared weight).
 THORAX_AXIS_WEIGHT = 0.3
-#: Marker weight of the two shoulder-girdle markers (others weigh 1).
+#: Shoulder-girdle marker weight paired with ``THORAX_AXIS_WEIGHT`` (others 1).
 SHOULDER_GIRDLE_MARKER_WEIGHT = 5.0
+#: Pipeline defaults: the split is opt-in.  The IK-passing setting above makes
+#: the forward-dynamics replay worse on both captures (driver 61.6 -> 69.1 mm,
+#: iron 47.0 -> 71.6 mm), so the canonical receipts keep the marker-only
+#: thorax until the follow-through regression is resolved.
+DEFAULT_THORAX_WEIGHT = 0.0
+DEFAULT_SHOULDER_GIRDLE_WEIGHT = 1.0
 #: Shortest capture line that still defines a direction, metres.
 MIN_LINE_LENGTH_M = 0.05
 
@@ -161,7 +171,11 @@ def lane_axis_targets(lane: Any) -> list[dict[str, Any]] | None:
     lists = []
     for name in ("face_targets", "thorax_targets"):
         value = getattr(lane, name, None)
-        lists.append(value if isinstance(value, (list, tuple)) else None)
+        if isinstance(value, (list, tuple)):
+            lists.append(value)
+    if len(lists) == 1:
+        # One source: hand it through unchanged, as before the split existed.
+        return lists[0]
     return merge_axis_targets(*lists)
 
 
@@ -185,22 +199,29 @@ def add_turn_split_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--thorax-weight",
         type=nonnegative,
-        default=THORAX_AXIS_WEIGHT,
+        default=DEFAULT_THORAX_WEIGHT,
         help=(
             "thorax-orientation residual (#12042 slice 7): pulls the Spine "
             "frame's BackRight->BackLeft axis onto the capture line; 0 restores "
-            "the marker-only thorax"
+            "the marker-only thorax (default); 0.3 meets the IK turn bounds "
+            "but regresses forward dynamics"
         ),
     )
     parser.add_argument(
         "--shoulder-girdle-weight",
         type=nonnegative,
-        default=SHOULDER_GIRDLE_MARKER_WEIGHT,
+        default=DEFAULT_SHOULDER_GIRDLE_WEIGHT,
         help=(
             "marker weight of LShoulderBack/RShoulderBack in the trajectory "
-            "re-solves (#12042 slice 7); 1 restores equal weights"
+            "re-solves (#12042 slice 7); 1 (default) keeps equal weights; 5 "
+            "pairs with --thorax-weight 0.3"
         ),
     )
+
+
+def turn_split_active(lane: Any) -> bool:
+    """Whether either split term is switched on for ``lane``."""
+    return bool(getattr(lane, "thorax_targets", None)) or bool(lane_split_weights(lane))
 
 
 def turn_split_report(lane: Any) -> dict[str, Any]:
