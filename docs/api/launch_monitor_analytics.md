@@ -127,6 +127,39 @@ field (metric-keyed values, sample count, warning metrics at VIF >= 5) under
 `vif`. An infinite VIF from perfectly collinear metrics serializes as `null`,
 never `0`. An unknown metric or too few complete rows returns 400.
 
+`POST /tools/launch-monitor-analytics/v2/comparison` runs `compare_monitors`
+on inline `records` with the desktop Monitor Comparison tab's inputs: a
+`metric`, an optional `match_column` (unset means the desktop's
+"(unmatched)") and an optional `reference_monitor` (an empty string means
+none, as on the desktop). The response carries every per-monitor summary and
+every pairwise comparison field, including each pairwise `warning`; unmatched
+results are descriptive, not calibration evidence. Statistics that cannot be
+computed are `null`, never `0`. Fewer than two monitors, an unknown reference
+monitor or a missing column returns 400.
+
+`POST /tools/launch-monitor-analytics/v2/model` runs `fit_predictive_model` on
+inline `records` with the desktop Models tab's inputs: a `target`, one or more
+distinct `features`, `model` (`linear`, `ridge`, `lasso`, `elastic_net` or
+`mlp`; default `linear`), `random_seed` (default 42) and an optional
+`group_column` (`session_id`, `monitor_vendor` or `club`; unset means the
+desktop's random split). The response carries every `PredictiveModelResult`
+field, with the held-out predictions as rows. Coefficients are `null` for a
+model that has none, and non-finite metrics are `null`, never `0`. An unknown
+column or too few complete rows returns 400; a model whose optional dependency
+is missing returns 503.
+
+`POST /tools/launch-monitor-analytics/v2/treatment` runs `apply_treatment` on
+inline `records` with the desktop Data Treatment tab's inputs:
+`required_metrics` and `outlier_metrics` (lists; blank entries are dropped, as
+the desktop's comma-separated fields drop them), `robust_z_threshold` (modified
+Z, default 4.5, range 1 to 20), `exclude_flagged` (default false) and
+structured `filters` (`column`, `operator` — `eq`, `ne`, `lt`, `le`, `gt`,
+`ge`, `contains` or `in` — and the raw `value` text). The response carries
+every `TreatmentResult` field: the analysis view as `data` rows, the row-level
+`flags`, and the `audit_log` actions, plus `shot_count` and `flag_count`.
+Missing values are `null`, never `0`, and timestamps are ISO strings. The input
+records are never mutated. An unknown column returns 400.
+
 ## Analysis Contract V2
 
 UpstreamDrift is the canonical Python and API authority for launch-monitor
