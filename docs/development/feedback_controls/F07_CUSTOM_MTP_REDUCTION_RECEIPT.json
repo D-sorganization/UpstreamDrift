@@ -1,0 +1,30 @@
+{
+  "issue": 12176,
+  "receipt_script_sha256": "feb7a92805cbeebac4a6660700319d4a57aa1eed32fecbd55609ef2f1089ae10",
+  "reducer": {
+    "comparison_helper_sha256": "e2e01cad795e8fc2a4be703019051d4953ae059a3893de81d37fba53499a5b73",
+    "derived_sha256": "453e09c4e42dcc3f4b74a3b2efeff063e96c3820b3eee1efe95eef249579010d",
+    "max_body_transform_error": 0.0,
+    "max_body_velocity_error": 0.0,
+    "max_constraint_residual": 0.0,
+    "max_full_lift_force_error": 0.0,
+    "max_full_lift_mass_error": 0.0,
+    "max_muscle_length_error": 0.0,
+    "max_muscle_speed_error": 0.0,
+    "max_projected_mass_error": 0.0,
+    "max_projected_total_force_error": 0.0,
+    "mobility_lift_condition": 1.0,
+    "mobility_lift_rank": 56,
+    "native_actuators_sha256": "61c6d7810088ca8030eea967e9bfa71f7f7998d3c5601c5e1939367346238cc2",
+    "native_reload_verified": true,
+    "native_simbody_sha256": "81afadccfe9e55dd366255d09c319ccb8d50fdb54fee4ac45b64708c4f044aa6",
+    "native_simulation_sha256": "950241f649dab8a113c4bb754a080d16db4a3f5f0aa1710ed2e53d03206eb09e",
+    "native_version": "version 4.6-2026-06-22-85aaf64, build date 18:27:55 Jun 22 2026",
+    "observed_pose_count": 4,
+    "profile_source_sha256": "05837ea5ce934d676c44cd6effb8e5062058e7a3b355a7b5083a1d6bde60cb29",
+    "reducer_sha256": "6c05fdd87875207a35172366d7e4a0363c77ecaffbd97abdfee8e143ffdbf482",
+    "removed_coordinate_names": ["mtp_angle_r", "mtp_angle_l"],
+    "source_sha256": "8d8c3cf1dbe5e149df07b0309d508d78d2524e3c7beeaee327e24c4c43c8b81b"
+  },
+  "scope": "sampled-zero-CustomJoint-MTP-mechanics-only"
+}
