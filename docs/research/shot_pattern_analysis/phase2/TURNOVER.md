@@ -46,14 +46,14 @@ The accepted isolated tree also contains exact GUI round-trip `b102ad0cf9` (22 t
 
 1. Both original complete audits and fresh archive restorations passed; immutable evidence and all bounded archives are committed.
 2. Accepted bounds merged as `b21a57f2d0`; reviewed presentation merged as `3f5945edff`. Exact54-source/native/runtime snapshot equality passes. Integration suite97 passed, two slow tests deselected. Receipt: `validation/supplement_composition.json`.
-3. Three32-shot supplemental pilots are running sequentially in session12377 via `/tmp/p2-supplement-pilots.py`; log `/tmp/p2-supplement-pilots.log`, individual exit receipts `/tmp/p2-supplement-pilot-{protocol}-exit.json`. Outputs: `supplement_pilot_v1/{pw_primary_face,pw_control_face,driver_control_speed}`. Freeze all accepted execution sources and never restart a live or completed pilot blindly.
-4. Run three separately named 32-shot supplemental pilots and four alias proofs, audit them, execute the predeclared 333-case / 1,998-evaluation refinement, and obtain separate immutable supplemental final acceptance before the 26 unique 10,000-shot cells.
+3. Three32-shot supplemental pilots completed with exit0 in session12377 via `/tmp/p2-supplement-pilots.py`; log `/tmp/p2-supplement-pilots.log`, individual exit receipts `/tmp/p2-supplement-pilot-{protocol}-exit.json`. Outputs: `supplement_pilot_v1/{pw_primary_face,pw_control_face,driver_control_speed}`. All26 unique cells and2,496 saved shot rows passed independent full audits; four reuse aliases verified. Preserve accepted execution sources for remaining refinement and final runs.
+4. Refinement21047 completed exit0:333 deliveries/1,998 evaluations, no failures; maximum primary-to-fine endpoint change0.00900125m and maximum refined nominal residual0.00113820m, below the unchanged0.05m gate. Astra is reviewing three source-matched pilot graphics and final-run acceptance; do not launch the26 unique10,000-shot cells before that independent acceptance.
 5. Generate complete statistics, common-six effects, scoring sensitivities and all-club academic/social assets. Complete linked Markdown/HTML/PDF/editable LaTeX, independent data/claims/visual review, bounded raw archives and fresh restoration.
 6. Update current handoffs/change fragment, run final repository gates and publish ready PR(s) through the merge-queue guard. No issue closure without merged acceptance evidence; #11984 remains an empirical obligation.
 
 ## Running Jobs
 
-Original simulation workers are finished. Their historical logs are `/tmp/p2-final-worker{0,1}.log` and per-matrix/shard exit receipts remain in `/tmp`. Control archive restoration46633 also completed exit0; there are no active original numerical/audit/archive jobs. Supplemental pilots are active in session12377; preserve accepted sources during every run.
+Original simulation workers are finished. Their historical logs are `/tmp/p2-final-worker{0,1}.log` and per-matrix/shard exit receipts remain in `/tmp`. Control archive restoration46633 also completed exit0; there are no active original numerical/audit/archive jobs. Supplemental pilots12377 and refinement21047 finished exit0. Pilot archive restoration43476 finished exit0 (188files, exact bytes and all three reports); Astra pilot-figure/acceptance review remains active. Preserve accepted sources during every run.
 
 ## Environment and Reproduction
 
