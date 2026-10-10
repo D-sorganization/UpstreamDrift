@@ -126,8 +126,10 @@ of $\pm1$.
     engines: \textbf{not met}. With the mirror alone the lead foot misses
     by $15$ to $32^\circ$ (Table~\ref{tab:feet}). With the corrections of
     Section~\ref{sec:zero} it is met in MuJoCo, OpenSim and, with the Drake
-    coordinate-order fix (\#12039, PR \#12047), Drake. Pinocchio and MyoSuite
-    are pending (Table~\ref{tab:feet2}).
+    coordinate-order fix (\#12039, PR \#12047), Drake (Table~\ref{tab:feet2}).
+    Pinocchio's own FK and MyoSuite's \texttt{myolegs} FK, through the
+    calibrated hip retarget of Section~\ref{sec:myo}, meet it as well
+    (Table~\ref{tab:myo}).
 \end{enumerate}
 
 \section{Evidence}
@@ -260,9 +262,90 @@ matched MuJoCo exactly, but the centre of mass was off by 2.7 cm at the seed.
 That gave lead-foot errors of $+5.7$ / $+9.7^\circ$ and address RMS of 17.4 /
 9.3 mm, with \texttt{hip\_flexion\_r} pinned at $-30^\circ$.
 
+\section{MyoSuite Leg Retarget Through the Calibrated Hip Frames (\#12052)}
+\label{sec:myo}
+
+\paragraph{Problem.} The spec-to-MyoSuite map
+(\path{coordinate_map_anthro.json}) copied each leg coordinate with sign
+$+1$. The pipeline fits the address in the hip-calibrated, scaled spec, where
+\texttt{apply\_hip\_calibration} has rewritten each hip's
+\texttt{parent\_to\_base} (functional centre, calibrated pelvis axes,
+zero-twist rotation). The same \texttt{hip\_*} values then mean different
+femur orientations in stock \texttt{myolegs}: the MyoSuite feet were
+$-45.3$ / $+33.4^\circ$ (driver) and $-39.6$ / $+35.8^\circ$ (7-iron) off
+the capture, lead / trail.
+
+\paragraph{Frames.} Let $P = R_x(90^\circ)$ be the MyoSuite pelvis frame in
+the spec pelvis (\texttt{LowerTorso} follower) frame, the \texttt{myolegs}
+pelvis \texttt{body\_quat}. On the stock spec the femur body frame (follower
+frame times $C^{-1}$, with $C$ the hip's \texttt{child\_to\_follower})
+coincides with the MyoSuite femur frame. Hence for every hip pose,
+verified to $10^{-14}$ degrees on random poses,
+\begin{equation}
+  R^{\mathrm{spec}}_{\mathrm{pelvis}\to\mathrm{femur}}
+  = C_{\mathrm{pelvis}}^{\top}\, B\, R_x(q_1) R_y(q_2) R_z(q_3)\, C^{\top}
+  = P\, R^{\mathrm{myo}}_{\mathrm{pelvis}\to\mathrm{femur}},
+\end{equation}
+where $B$ is the rotation of \texttt{parent\_to\_base}. MyoSuite composes
+its hinges in MJCF order about femur-frame axes,
+\begin{equation}
+  R^{\mathrm{myo}} = R_z(f)\, R_x(s\,a)\, R_y(s\,r), \qquad
+  s = +1 \text{ (right)},\ -1 \text{ (left)}.
+\end{equation}
+\texttt{hip\_retarget.calibrated\_hip\_targets} evaluates the spec side with
+the calibrated $B$, forms $P^{\top} R^{\mathrm{spec}}$, and decomposes it as
+intrinsic $Z$-$X$-$Y$ Euler angles. It refuses $|\cos a| < 10^{-6}$ (gimbal
+lock). On the stock spec it returns the input coordinates to $10^{-9}$ rad
+(unit-tested), so the identity map is the special case. Knee, ankle,
+subtalar and mtp frames are untouched by the calibration and keep the map.
+
+\paragraph{Left Knee Sign.} The orientation check exposed a second defect.
+The spec's left knee flexes with negative \texttt{knee\_angle\_l} about the
+OpenSim axis $(0, -0.071, +0.997)$, while \texttt{myolegs} flexes both knees
+positive about $(0, \pm0.071, -0.997)$. The identity entry turned the left
+tibia by $2|q|$ ($34.4^\circ$ at $0.3$ rad). The map entry is now $-1$. The
+right spec knee uses the MyoSuite axis, so it flexes positive, yet its
+range is $[-120, 10]^\circ$. Flexion is capped at $10^\circ$, and the canonical
+driver IK sits on that bound. This is filed as \#12057 and is not changed
+here.
+
+\begin{table}[h]
+\centering
+\caption{Address Toe-Out Error (deg), Each Engine's Own FK at the Fitted
+Address, \texttt{--foot-progression capture}, Lead / Trail}
+\label{tab:myo}
+\begin{tabular}{lccc}
+\toprule
+Capture & MuJoCo & Pinocchio & MyoSuite (retarget) \\
+\midrule
+Driver (target $16.37$ / $4.03$) & $+0.16$ / $-0.32$ & $+0.16$ / $-0.32$ & $+0.12$ / $-0.37$ \\
+7-iron (target $15.00$ / $-0.37$) & $-0.00$ / $-1.41$ & $-0.00$ / $-1.41$ & $-0.04$ / $-1.46$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Before the change MyoSuite read $-45.3$ / $+33.4^\circ$ and $-39.6$ /
+$+35.8^\circ$. Re-solving \texttt{hip\_rotation} against MyoSuite's FK now
+moves the spec values by at most $1.5^\circ$ (driver $30.39$ / $-37.34^\circ$
+against $30.25$ / $-36.95^\circ$), so the hip mapping, not the MyoSuite leg
+geometry, carried the error. Femur, tibia and calcn orientations relative
+to the pelvis match the calibrated spec FK within $1^\circ$ on
+\texttt{myolegs}, on random leg poses for both capture specs
+(\path{tests/unit/engines/myosuite/test_hip_retarget.py}). Inputs and outputs
+are in \path{evidence/foot_progression/osv6_myosuite/}.
+
 \section{Limitations and Failed Experiments}
 
 \begin{itemize}
+  \item \textbf{MyoSuite retarget scope.} The evidence is kinematic: the
+    \texttt{myolegs} pose at the fitted address, with the knee's
+    equality-coupled helper joints at 0 (in simulation they follow the knee
+    angle and add up to several degrees of tibial rotation). The pelvis is
+    placed by the evaluation script, because the map has no pelvis
+    orientation entry. Only orientations are matched: the calibrated hip
+    centre is not transferred, and \texttt{replay.ReplayConfig} needs the fit's
+    spec (\texttt{hip\_spec}) to use the retarget. It is not a MyoSuite
+    dynamics or muscle result.
   \item \textbf{Default-on zero-twist correction (failed).} Applied to the
     canonical \texttt{--static-seeds} runs, the correction gave driver
     address / IK / dynamics of 7.35 / 36.81 / 55.06 mm (main control 7.22 /
@@ -316,6 +399,15 @@ python3 -m src.shared.python.motion_matching.pipeline.cli --address-only \
   --out runs/addr_driver_mujoco
 python3 -m scripts.opensim_address_foot_progression \
   --out $G/evidence/foot_progression/opensim_address.json
+# Section 8 (#12052); run myosuite with the MyoSuite environment's python.
+python3 -m pytest tests/unit/engines/myosuite/test_hip_retarget.py -q
+E=$G/evidence/foot_progression/osv6_myosuite/driver   # and .../iron
+python3 -m scripts.address_foot_progression_engines evaluate --run-dir $E \
+  --label driver --engines mujoco pinocchio --out $E/engines.json
+myo-python -m scripts.address_foot_progression_engines evaluate --run-dir $E \
+  --label driver --engines myosuite --out $E/engines.json
+python3 -m scripts.address_foot_progression_engines render \
+  --json $E/engines.json --out-dir stills --engines mujoco pinocchio myosuite
 \end{verbatim}
 
 \end{document}

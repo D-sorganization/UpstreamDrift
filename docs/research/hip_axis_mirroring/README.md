@@ -5,13 +5,14 @@ editable standalone research source (see `AGENTS.md`, Modeling Reference
 Documentation) for OSV-6 (#11737). The engineering design manual source remains
 `manuals/upstreamdrift`.
 
-| Item                                                | Status                                       |
-| --------------------------------------------------- | -------------------------------------------- |
-| Left hip adduction/rotation mirrored like OpenSim   | Done, unit-tested (`test_hip_mirroring.py`)  |
-| Canonical calibrated receipts regenerated           | Done, with a main control run                |
-| Trail foot within 2 deg at address (MuJoCo, Drake)  | Met (within 0.2 deg)                         |
-| Lead foot within 2 deg at address                   | **Not met** (15 to 32 deg, hip at its limit) |
-| Pinocchio and MyoSuite address toe-out              | Not available on this pathway                |
+| Item                                                    | Status                                                         |
+| ------------------------------------------------------- | -------------------------------------------------------------- |
+| Left hip adduction/rotation mirrored like OpenSim       | Done, unit-tested (`test_hip_mirroring.py`)                    |
+| Canonical calibrated receipts regenerated               | Done, with a main control run                                  |
+| Both feet within 2 deg, mirror only                     | Trail met; lead **not met** (15 to 32 deg, hip at its limit)   |
+| Both feet within 2 deg, `--foot-progression` (MuJoCo, Drake) | Met with the zero-twist and leg-marker corrections        |
+| Pinocchio and MyoSuite address toe-out (own FK)         | Met; MyoSuite through the calibrated hip retarget (#12052)     |
+| Right knee flexion capped at 10 deg by the spec range   | Open, #12057                                                   |
 
 ## Build and Reproduce
 

@@ -188,6 +188,41 @@ def test_retarget_frame_with_hip_spec_overwrites_only_hips() -> None:
     np.testing.assert_allclose(traj[1], calibrated, atol=1e-12)
 
 
+def test_kinematic_replay_passes_hip_spec_to_the_retarget(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """``ReplayConfig.hip_spec`` reaches ``retarget_trajectory``."""
+    from types import SimpleNamespace
+
+    from src.engines.physics_engines.myosuite.python import replay
+
+    class _Stop(Exception):
+        pass
+
+    seen: dict[str, object] = {}
+
+    def fake_retarget(q, rmap, *, hip_spec=None):
+        seen["hip_spec"] = hip_spec
+        raise _Stop
+
+    rmap = default_retarget_map()
+    source = SimpleNamespace(
+        coordinate_order=rmap.source_names,
+        q=np.zeros((2, rmap.n_source)),
+    )
+    monkeypatch.setattr(replay, "resolve_golfer_scene", lambda _sites: None)
+    monkeypatch.setattr(replay, "_load_replay_source", lambda _path: source)
+    monkeypatch.setattr(replay, "retarget_trajectory", fake_retarget)
+    candidate = tmp_path / "candidate.npz"
+    candidate.write_bytes(b"")
+    spec = {"joints": []}
+    with pytest.raises(_Stop):
+        replay.run_kinematic_replay(
+            replay.ReplayConfig(candidate=candidate, output_dir=tmp_path, hip_spec=spec)
+        )
+    assert seen["hip_spec"] is spec
+
+
 #: ``knee_angle_{side}`` hinge axes in the ``myolegs`` tibia frames (MJCF).
 MYOLEGS_KNEE_AXES = {"r": (0.0, -0.0707, -0.9975), "l": (0.0, 0.0707, -0.9975)}
 
