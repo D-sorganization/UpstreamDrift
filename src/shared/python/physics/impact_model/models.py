@@ -278,6 +278,32 @@ class SpringDamperImpactModel(ImpactModel):
         lambda self, pre_state, params: pre_state.clubhead_mass > 0,
         "Clubhead mass must be positive",
     )
+    def _step_contact(
+        self,
+        x_ball: np.ndarray,
+        v_ball: np.ndarray,
+        x_club: np.ndarray,
+        v_club: np.ndarray,
+        n: np.ndarray,
+        m_club: float,
+        penetration: float,
+        params: ImpactParameters,
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+        """Advance positions and velocities during one contact time step."""
+        max_force = 1e5  # [N] max contact force
+        v_rel_normal = np.dot(v_ball - v_club, n)
+        f_spring = params.contact_stiffness * penetration
+        f_damper = -params.contact_damping * v_rel_normal
+        f_magnitude = max(0.0, min(f_spring + f_damper, max_force))
+        f_contact = f_magnitude * n
+        a_ball = f_contact / GOLF_BALL_MASS_KG
+        a_club = -f_contact / m_club
+        v_b = v_ball + a_ball * self.dt
+        v_c = v_club + a_club * self.dt
+        x_b = x_ball + v_b * self.dt
+        x_c = x_club + v_c * self.dt
+        return x_b, v_b, x_c, v_c
+
     @precondition(
         lambda self, pre_state, params: params.contact_stiffness > 0,
         "Contact stiffness must be positive",
@@ -317,46 +343,26 @@ class SpringDamperImpactModel(ImpactModel):
         x_club: np.ndarray = np.zeros(3)
         v_club: np.ndarray = pre_state.clubhead_velocity.copy()
 
-        # Integration
         contact_time = 0.0
         max_time = 0.005  # 5 ms max contact time [s]
         max_steps = int(max_time / self.dt)
-
-        # Limit max force to prevent numerical blow-up
         max_force = 1e5  # [N] max contact force
 
         for _ in range(max_steps):
-            # Penetration depth (along normal)
             gap = np.dot(x_ball - x_club, n) - GOLF_BALL_RADIUS_M
-
             if gap < 0:  # In contact (penetration)
-                penetration = -gap
-
-                # Contact force (spring-damper)
-                v_rel_normal = np.dot(v_ball - v_club, n)
-                f_spring = params.contact_stiffness * penetration
-                f_damper = -params.contact_damping * v_rel_normal
-                f_magnitude = max(0.0, min(f_spring + f_damper, max_force))
-
-                f_contact = f_magnitude * n
-
-                # Semi-implicit Euler: update velocities first
-                # Force on ball is in direction of normal (away from club)
-                a_ball = f_contact / m_ball
-                # Force on club is opposite to normal (reaction force)
-                a_club = -f_contact / m_club
-
-                v_ball = v_ball + a_ball * self.dt
-                v_club = v_club + a_club * self.dt
-
-                # Then positions
-                x_ball = x_ball + v_ball * self.dt
-                x_club = x_club + v_club * self.dt
-
+                x_ball, v_ball, x_club, v_club = self._step_contact(
+                    x_ball,
+                    v_ball,
+                    x_club,
+                    v_club,
+                    n,
+                    m_club,
+                    -gap,
+                    params,
+                )
                 contact_time += self.dt
-
             elif contact_time > 0:
-                # Was in contact but now separated
                 break
             else:
                 # Pre-contact: advance positions

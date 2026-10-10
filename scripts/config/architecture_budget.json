@@ -1190,6 +1190,105 @@
       "issue": 11739,
       "reason": "Issue #11739: OSV-7 export_full_body_osim gained the contact-grip options (9 parameters).",
       "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/tools/shot_pattern_analysis/core.py",
+      "symbol": "run_analysis",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 11840,
+      "reason": "Issue #11840: shot pattern analysis batch execution coordinator across 24 cells.",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/tools/shot_pattern_analysis/dispersion_stats.py",
+      "symbol": "landing_dispersion",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 11840,
+      "reason": "Issue #11840: landing dispersion metric aggregation across patterns.",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/tools/shot_pattern_analysis/gui.py",
+      "symbol": "MainWidget._build_ui",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 11840,
+      "reason": "Issue #11840: shot pattern analysis UI layout construction.",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/tools/shot_pattern_analysis/gui.py",
+      "symbol": "MainWidget._run_cli",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 11840,
+      "reason": "Issue #11840: GUI to CLI parameter forwarding for worker invocation.",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/tools/shot_pattern_analysis/overview.py",
+      "symbol": "_plot_scoring_forest",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 11840,
+      "reason": "Issue #11840: scoring forest plot rendering with uncertainty bands.",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/tools/shot_pattern_analysis/physics.py",
+      "symbol": "ShotPhysics.simulate",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 11840,
+      "reason": "Issue #11840: shot flight simulation loop with RK4 integration.",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/tools/shot_pattern_analysis/reporting.py",
+      "symbol": "_save_dispersion",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 11840,
+      "reason": "Issue #11840: 1080p dispersion figure export with confidence ellipses.",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/tools/shot_pattern_analysis/scenario_scoring.py",
+      "symbol": "score_course_endpoints",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 11840,
+      "reason": "Issue #11840: tee/fairway/rough course scoring for driver pattern endpoints.",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/tools/shot_pattern_analysis/scenario_scoring.py",
+      "symbol": "score_corrected_bundle",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 11840,
+      "reason": "Issue #11840: bundle rescoring pipeline with V2 putting baseline.",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/tools/shot_pattern_analysis/scoring.py",
+      "symbol": "score_approach_endpoints",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 11840,
+      "reason": "Issue #11840: approach/green/rough scoring for iron and wedge pattern endpoints.",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/tools/shot_pattern_analysis/sensitivity.py",
+      "symbol": "render_sensitivity",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 11840,
+      "reason": "Issue #11840: sensitivity tornado and variance plot rendering.",
+      "expires_on": "2026-12-31"
     }
   ]
 }
