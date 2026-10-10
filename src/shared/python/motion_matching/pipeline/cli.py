@@ -144,6 +144,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--out", type=Path, default=Path.cwd())
     parser.add_argument(
+        "--address-only",
+        action="store_true",
+        help="stop after the calibrated address and write address_report.json",
+    )
+    parser.add_argument(
         "--spec",
         type=Path,
         default=SPEC,
@@ -1019,9 +1024,20 @@ def _save_ik_trajectory(
     )
 
 
+@dataclass(frozen=True)
+class CalibratedRun:
+    """Pipeline state after hip calibration, the address solve and leg scaling."""
+
+    ctx: PipelineContext
+    lane: Lane
+    base_spec: dict[str, Any]
+    labels: tuple[str, ...]
+    cal_res: _CalibrateAndScaleResult
+
+
 @precondition(lambda args: args is not None, "args must not be None")
-def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
-    """Execute the full-body ground support matching pipeline."""
+def calibrate_run(args: argparse.Namespace) -> CalibratedRun:
+    """Run the pipeline through the calibrated address (no trajectory or dynamics)."""
     ctx = _init_pipeline(args)
     base_spec = json.loads(Path(args.spec).read_text(encoding="utf-8"))
     upper_base = json.loads(UPPER_SPEC.read_text(encoding="utf-8"))
@@ -1050,6 +1066,39 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
     lane.gaze_weight = float(getattr(args, "gaze_weight", 0.0))
 
     cal_res = _calibrate_and_scale(ctx, lane, base_spec, upper_base, upper, labels)
+    return CalibratedRun(ctx, lane, base_spec, labels, cal_res)
+
+
+def run_address_stage(args: argparse.Namespace) -> dict[str, Any]:
+    """Return the calibrated address report (``foot_progression`` included).
+
+    Adds ``hip_coordinates_deg``: the six hip coordinates at the calibrated
+    address, so a coordinate at its range limit is visible in the report.
+    """
+    cal_res = calibrate_run(args).cal_res
+    report = cal_res.address_report
+    names = list(cal_res.kin.coordinate_order)
+    report["hip_coordinates_deg"] = {
+        name: float(np.degrees(cal_res.address2.q[names.index(name)]))
+        for name in names
+        if name.startswith("hip_")
+    }
+    out = Path(args.out) / "address_report.json"
+    out.write_text(json.dumps(report, indent=2, sort_keys=True, default=str) + "\n")
+    return report
+
+
+@precondition(lambda args: args is not None, "args must not be None")
+def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
+    """Execute the full-body ground support matching pipeline."""
+    run = calibrate_run(args)
+    ctx, lane, base_spec, labels, cal_res = (
+        run.ctx,
+        run.lane,
+        run.base_spec,
+        run.labels,
+        run.cal_res,
+    )
     lane.set_club_targets(cal_res.attachments, cal_res.scaled_spec, args.face_weight)
 
     (
@@ -1119,6 +1168,9 @@ def main() -> None:
     """CLI entry point."""
     parser = build_parser()
     args = parser.parse_args()
+    if args.address_only:
+        run_address_stage(args)
+        return
     run_pipeline(args)
 
 
