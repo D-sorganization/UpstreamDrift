@@ -30,6 +30,8 @@ The independently accepted repair is committed at reporting-only `codex/shot-pat
 
 Corrected original figure production restarted2026-10-10 at01:37:33UTC, wrapperPID1979270; `/tmp/p2-render-original-final-figures-v2.py`, log`/tmp/p2-original-final-figures-v2.log`, startreceipt`/tmp/p2-original-final-figures-v2-start.json`. It reads original saved data and writes `final_figures_v1` then `control_final_figures_v1`; no simulation. Exitreceipts use `/tmp/p2-v2-{output}-exit.json`; completed sourcebinding will be `validation/original_final_figures_rendering_revision_v2.json`. Revalidate actual state before acting. Astra's final-set review remains pending; never infer publication acceptance from component review.
 
+Saved-data audit wrapperPID1983001 is waiting for all six successful simulation receipts, then will validate aliases and audit each complete supplemental protocol. Script`/tmp/p2-audit-supplement-final.py`; log`/tmp/p2-supplement-final-audits.log`; aggregate successreceipt`/tmp/p2-supplement-final-audits-exit.json`. It never runs simulations or accepts partial data. Revalidate before starting duplicate audits.
+
 ## Reporting Revision
 
 Isolated layout `1e4d70d0dd` fixes phone readability, main/marginal ticks and footer clearance. Regression evidence is red-to-green;19tests pass. Astra inspected nine1080px previews and verified27artifact hashes across Driver/7-Iron/PW. Root also inspected the7-Iron draw. This qualifies the reviewed component, not the complete final publication.
