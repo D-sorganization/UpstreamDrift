@@ -468,6 +468,7 @@ def zmp_filter(
         heights = zmp["com"][:, 2] - lane.ground.height_m
         shift = cart_table_shift(zmp["zmp_xy"], target, heights, lane.times)
         com_goal = zmp["com"][:, :2] + shift
+        goals = [(basis @ np.r_[g, 0.0], ZMP_COM_WEIGHT) for g in com_goal]
         _dump_12117 = __import__("os").environ.get("UD_DUMP_12117")
         if _dump_12117:  # throwaway diagnosis (#12117), not for merge
             __import__("pathlib").Path(_dump_12117).mkdir(parents=True, exist_ok=True)
