@@ -73,7 +73,7 @@
       "rationale": "Reviewed canonical pose ownership and MuJoCo adapter protocol, explicit coordinate conventions and capability limits. Existing test_mujoco_protocol.py passed in the 41-test boundary run on 2026-09-09; no scientific validity assertion is added."
     },
     "project-task-native-replay": {
-      "fingerprint": "d2e314272224dd9cbfdf8a7a34270c9e63a0d3a22d29cb085f7b3486a964e3ab",
+      "fingerprint": "665fbf69cc524109cb142eb9caf29f56c531feb9f4dd6dfa851fca8430e452a3",
       "inputs": {
         "docs/agent_context/contracts/project-task-native-replay.md": "754359ce3d2ccfe8d80a31a1cd8867f151dc5bd63bf0023231a2cc797fc3f254",
         "src/engines/myosuite_project_command_solve.py": "a8b3168dfb20b8f94322d2b8dc1e2b8570d4e11b3d4222f8b1300e71711cd2e2",
@@ -97,9 +97,9 @@
         "tests/unit/engines/myosuite/test_project_task_producer.py": "ead3c9f3eb031cf78bc63e011b8a9e1fe203a6b16af3c3e8f3120950f81f6faf",
         "tests/unit/engines/myosuite/test_project_task_tracking.py": "8b329a3e676b28906e3c5a0f7439d483625ce071400f949420be0021488c0dc4",
         "tests/unit/motion_matching/test_bounded_candidate_search.py": "5a256b469fe1f4fdd502626f125cd50eb64a62b1ec304488eda64335ca72ee4d",
-        "tests/unit/repo_hygiene/test_pinned_tools_package_loader.py": "bdb0497de481a5ba8f2b2c1d14155137c9896b3f3647d8173b7e159fc0cc9157"
+        "tests/unit/repo_hygiene/test_pinned_tools_package_loader.py": "6958ac34d8b9daa90a45bfb1d151c4f31103a3e9555ec4e71757d7008dee6080"
       },
-      "rationale": "F09o12044 integrates admitted Tools86d0f28 and private loader/class identity into F09i-n; exact50 integration files and8122 tracked Tools archive files match before/after actual MyoSuite3.0/MuJoCo3.6 campaign170PASS0F/E/S208.34s. Separate actual MuJoCo3.8 consumer suite81PASS3 optional skips; portable central61PASS28skips distinct. Impact genuine pin RED retained;26 capability probes and actual76asset/5JS/digest/mount/404 served verification precede metadata, final27PASS. Native solve fixture37.92s189eval is correctness only; no controlled performance gain/private fit/contact/physiology or all17/six/muscularOpenSim acceptance. Existing single replay/optimizer authority and complete mutation/admission guards preserved."
+      "rationale": "F09o integrates Tools86 and the authoritative private loader; actual MyoSuite3/MuJoCo3.6 campaign170PASS with exact20 executed source/test hashes unchanged after main d3b2da0. Separate actual OpenSim4.6/MuJoCo3.8 final consumer/fallback campaign209PASS5 optional skips, preserving public resolution in fresh processes with owned versus exposed Tools paths. Genuine integration RED and obsolete extension RED retained. Larger50input manifest has separately disclosed metadata/OpenSim/test deltas; no blanket finalHEAD equivalence claim. Impact26 capability probes and actual76asset served verification precede metadata,27PASS. Full17rows/sixecosystems/private matching/muscularOpenSim/contact acceptance remains open."
     }
   },
   "version": 1

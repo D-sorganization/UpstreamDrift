@@ -87,6 +87,33 @@ passes at the integrated source. The manual inventory remains release-blocked.
 Normal hook, current-main integration and GitHub results must be recorded
 truthfully before publication.
 
+### Current Main Integration
+
+Integrated main `d3b2da076808126b8db696aa73b5619c9895b37e`, including
+the authoritative private loader and OpenSim concrete muscle-law guard.
+The first actual OpenSim 4.6/MuJoCo 3.8 consumer run retained a genuine
+failure (188 passed, five skipped): a main-branch test required public mocap
+resolution to be absent even when declared Tools roots already exposed it.
+The contract requires unchanged public resolution, paths and module identity.
+Fresh subprocess tests now exercise project-owned paths and explicitly
+exposed Tools paths separately. An obsolete F06 test also failed genuinely
+on the removed public path-extension API; it now checks private loading while
+the generic fallback continues declining project-owned namespace gaps.
+
+The final eight-module native consumer/OpenSim/fallback campaign passed
+**209 tests, with five optional skips**, in 18.22 seconds (JUnit 16.970 s),
+recorded as `f09o-main-integration-green-qualified.xml`. These results include
+both supported OpenSim muscle laws; unknown derived-law proxy tests do not
+claim validation of a compiled third-party muscle plugin. Two intermediate
+fresh-process test fixtures failed because their path ordering did not match
+the intended import environments; their receipts remain retained.
+
+All 20 executed MyoSuite campaign source/test hashes remain unchanged by this
+main merge. The larger 50-input manifest has separately reported deltas:
+formatter-only acceptance JSON, the main-branch OpenSim law guard and loader
+test changes. Do not describe all 50 as matching the final HEAD. The OpenSim
+guard and revised namespace tests are covered by the separate final campaign.
+
 ## Remaining Full Epic Work
 
 The prior profiling evidence identifies repeated provider/source verification

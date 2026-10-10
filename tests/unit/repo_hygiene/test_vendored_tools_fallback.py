@@ -197,12 +197,7 @@ def test_retired_clusters_resolve_to_the_pinned_tree(module_name: str) -> None:
 
 @_requires_vendor
 def test_the_fallback_declines_gaps_inside_a_cluster_upstreamdrift_owns() -> None:
-    """The generic fallback declines owned roots despite explicit Lab extension.
-
-    F06 deliberately exposes the Tools-owned mocap leaf through the reviewed
-    Lab seam. That explicit package path does not broaden the generic fallback
-    finder or make genuinely missing child modules importable.
-    """
+    """Private package loading does not broaden the generic fallback finder."""
     assert (_UD_SHARED / "sidekick").is_dir(), (
         "fixture assumption: sidekick is still an UpstreamDrift-owned cluster"
     )
@@ -217,13 +212,15 @@ def test_the_fallback_declines_gaps_inside_a_cluster_upstreamdrift_owns() -> Non
 
     assert finder.find_spec("src.shared.python.sidekick.lab.mocap") is None
     assert finder.find_spec("shared.python.sidekick.lab.mocap") is None
-    from src.shared.python._seam_redirect import extend_sidekick_lab_path
+    from sidekick import lab
+    from src.shared.python._seam_redirect import load_pinned_tools_package
 
-    extend_sidekick_lab_path()
-    spec = importlib.util.find_spec("sidekick.lab.mocap")
-    assert spec is not None and spec.origin is not None
+    before = tuple(lab.__path__)
+    package = load_pinned_tools_package("sidekick.lab.mocap")
+    assert package.__file__ is not None
+    assert tuple(lab.__path__) == before
     assert (
-        Path(spec.origin)
+        Path(package.__file__)
         .resolve()
         .is_relative_to((_VENDORED_SHARED / "sidekick" / "lab" / "mocap").resolve())
     )
