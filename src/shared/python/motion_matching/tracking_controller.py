@@ -105,7 +105,10 @@ def tracking_controller(
         _tracking_gains,
     )
 
-    acceleration_feedforward = impact_split.pop("acceleration_feedforward", 1.0)
+    raw_feedforward = impact_split.pop("acceleration_feedforward", 1.0)
+    acceleration_feedforward = (
+        1.0 if raw_feedforward is None else float(raw_feedforward)
+    )
     split_time_s = impact_split.pop("split_time_s", None)
     if impact_split:
         raise TypeError(
