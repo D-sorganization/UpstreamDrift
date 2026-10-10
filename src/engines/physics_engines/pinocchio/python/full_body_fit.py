@@ -71,6 +71,9 @@ from src.shared.python.motion_matching.tour_capture_contract import (
     tracked_labels,
 )
 from src.shared.python.motion_matching.tour_metrics import compute_shared_metrics
+from src.shared.python.motion_matching.turn_receipt import (
+    attach_turn_block_from_markers,
+)
 from src.shared.python.motion_matching.two_window_fit import (
     MarkerMetricResults,
     check_acceptance,
@@ -848,6 +851,14 @@ def run_fit(
         "wall_clock_s": time.perf_counter() - t_wall,
         "qualification": "milestone of a stated candidate on the qualified Pinocchio plant; acceptance is decided by acceptance.py (MS-01), not by this receipt",
     }
+    attach_turn_block_from_markers(
+        receipt,
+        inputs.capture,
+        model_time_s=targets.node_times,
+        labels=inputs.labels,
+        model_markers_m=pred_rep,
+        model_source="pinocchio_crocoddyl_replay_sites",
+    )
     (out_dir / "receipt.json").write_text(
         json.dumps(receipt, indent=2), encoding="utf-8"
     )

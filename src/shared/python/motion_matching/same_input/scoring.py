@@ -125,11 +125,13 @@ def segmented_replay(
     """Replay each ``segment_steps`` window from its reference start state.
 
     Returns one record per segment with its start time and end-of-segment
-    coordinate and frame errors.
+    coordinate and frame errors.  The bundle's recorded ball force is applied
+    on each segment's own clock.
     """
     if segment_steps < 1:
         raise ValueError("segment_steps must be positive")
     segments = []
+    impact = bundle.ball_impact()
     for start in range(0, bundle.steps, segment_steps):
         stop = min(start + segment_steps, bundle.steps)
         rollout = open_loop(
@@ -138,6 +140,7 @@ def segmented_replay(
             bundle.reference_v[start],
             bundle.efforts[start:stop],
             dt_s=bundle.dt_s,
+            impact=None if impact is None else impact.shifted(-start * bundle.dt_s),
         )
         end_q, ref_q = rollout.q[-1], bundle.reference_q[stop]
         segments.append(

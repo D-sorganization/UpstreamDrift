@@ -321,6 +321,7 @@ forward-dynamics matching. Design reference:
 - `library` — named PBR materials, skin tones, clothing presets, club finishes,
   `classify_body` (body name to anatomical part).
 - `geometry` — `lofted_segment` / `ellipsoid_mesh` smooth meshes.
+- `grip_pose` — the one two-hand grip definition (`DEFAULT_GRIP_POSE`, lead above trail, positions mirroring the spec `GripInterface`, spacing, V angles, overlap/interlock/ten-finger, `HAND_GRIP_ANCHOR_IN_HAND_M`). Engines import it; never keep per-engine hand offsets. Residual series: `grip_contact.closure_series` (`GripClosureSeries`, unavailable is `None`, never zero); report: `python3 -m scripts.grip_closure_report`.
 - `head` — parametric visible head (skull, eyes, brows, nose, mouth, ears, neck,
   optional hair or cap), `build_head_parts`, `resolve_head_anchor` (the spec
   `Head` body on the neck at the cervicale; head length from de Leva), and
