@@ -1,0 +1,20 @@
+{
+  "docs/research/shot_pattern_analysis/phase2/validation/actual_pair_adapter_preflight_v1/check.py": "03be96f9266c8b584d0a386e847270416ef6acee72395a02ada4d48bd3b93a02",
+  "docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py": "6bb99ac19852de934c739f552d396facf2e57fcc502fe38c02add485365c35b9",
+  "docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_interactions.py": "ad95637606365b38cff35b8507adf8c96a03bdd9a8eab5445bd9c8efad3a9ee7",
+  "docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/final_check.py": "f521285202a9403d94b34105247f4db929e7c82f018bd59a7d857a8c44fa28a6",
+  "docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py": "49ebbd1fa4c80c963c9856017ee38ce85b475caf42ce936b61f810b06316f64a",
+  "docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/tidy_article.py": "2f715d1e91b16a58c738d6a17d5e0c03130c196d06e48fd64b3da83e4eaf65ba",
+  "docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/verify_repair.py": "80bd70180d30c3164661a5a9b14fe010e70c33be1a7dfc5a6d190e6db8bece26",
+  "docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py": "f99d559627795788f4d2ba9a74e60028f838f208c72a0294d3206209ca5c4f28",
+  "docs/research/shot_pattern_analysis/phase2/validation/capture_bounds_gui.py": "e1c2aa1a322506a4bde21a0d412f2fcb88921bbe802ac703af41204568d6efec",
+  "docs/research/shot_pattern_analysis/phase2/validation/driver_curve_bounds_reporting_review_v1/preflight.py": "58a70e8159b6afd874733f08c4246477a4514dd8ccb45aa841cffc7f4c2182d0",
+  "docs/research/shot_pattern_analysis/phase2/validation/final_figure_marginal_gutter_review/reproduce_saved_cell.py": "3de07660a938f6989b736f0767deed776729184ad7e70fb5d4e8d2bb6b840377",
+  "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v1/review_inventory.py": "077bee2052e5f8729cf866366879ee5638c54974f1af5c0538ff5f58f8d47099",
+  "docs/research/shot_pattern_analysis/phase2/validation/selected_renderer_representative_v1/qualify.py": "109e1a28d6cce6122a0bd73573e81ef92faf27d0dc086d1b96caef2ca58754ec",
+  "docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_numeric_review_v1/verify_numeric.py": "7278879141159d8fdae42054db41e2ffc7f0cfe980d0443733e5f3edeab8bdf0",
+  "docs/research/shot_pattern_analysis/phase2/validation/v6_output_review_harness_v1/review_batch.py": "1db7be642e097377afeb44874687e41639a29c32c0440f13b3055eb3457d0bf6",
+  "docs/research/shot_pattern_analysis/phase2/validation/v6_output_review_harness_v1/test_review_batch.py": "d0727947040546911f3c56e6f51f2874ea349cb9e27a2b7ee9572f00f9051380",
+  "tests/research/test_independent_supplement_audit.py": "b9f85d891531c5da7b96dc3d58a4c0d9600d6395bdb92a6baaf6a1d24449ce9c",
+  "tests/research/test_validation_helper_contracts.py": "abf1c71a72c73223f8d47eff881d87d30bf40f94b48b159b6d46dfa971527b81"
+}

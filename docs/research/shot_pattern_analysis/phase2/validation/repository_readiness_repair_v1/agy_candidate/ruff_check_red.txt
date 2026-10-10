@@ -1,0 +1,2473 @@
+E401 [*] Multiple imports on one line
+ --> docs/research/shot_pattern_analysis/phase2/validation/actual_pair_adapter_preflight_v1/check.py:2:1
+  |
+1 | from pathlib import Path
+2 | import json,sys,hashlib,collections
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+3 | ROOT=Path('/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift')
+4 | sys.path.insert(0,str(ROOT))
+  |
+help: Split imports
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/actual_pair_adapter_preflight_v1/check.py:13:13
+   |
+11 | report,comparisons=[json.loads(p.read_text()) for p in files]
+12 | roots={'original_primary/1':P/'final_v1','original_control/1':P/'control_final_v1','pw-primary-face-bounds/1':P/'supplement_final_v1/p…
+13 | snapshots={}; manifests={};rows=[];failures=[]
+   |             ^
+14 | for row in comparisons['comparisons']:
+15 |  for proof in row['sources']:
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/actual_pair_adapter_preflight_v1/check.py:13:27
+   |
+11 | report,comparisons=[json.loads(p.read_text()) for p in files]
+12 | roots={'original_primary/1':P/'final_v1','original_control/1':P/'control_final_v1','pw-primary-face-bounds/1':P/'supplement_final_v1/p…
+13 | snapshots={}; manifests={};rows=[];failures=[]
+   |                           ^
+14 | for row in comparisons['comparisons']:
+15 |  for proof in row['sources']:
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/actual_pair_adapter_preflight_v1/check.py:13:35
+   |
+11 | report,comparisons=[json.loads(p.read_text()) for p in files]
+12 | roots={'original_primary/1':P/'final_v1','original_control/1':P/'control_final_v1','pw-primary-face-bounds/1':P/'supplement_final_v1/p…
+13 | snapshots={}; manifests={};rows=[];failures=[]
+   |                                   ^
+14 | for row in comparisons['comparisons']:
+15 |  for proof in row['sources']:
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/actual_pair_adapter_preflight_v1/check.py:17:22
+   |
+15 |  for proof in row['sources']:
+16 |   key=f"{proof['protocol_id']}:{proof['cell']}"
+17 |   if key in snapshots:continue
+   |                      ^
+18 |   root=roots[proof['protocol_id']];directory=root/proof['cell']; mp=directory/'manifest.json';m=json.loads(mp.read_text());s=json.load…
+19 |   assert sha256(mp)==proof['source_cell_manifest_sha256']
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/actual_pair_adapter_preflight_v1/check.py:18:35
+   |
+16 |   key=f"{proof['protocol_id']}:{proof['cell']}"
+17 |   if key in snapshots:continue
+18 |   root=roots[proof['protocol_id']];directory=root/proof['cell']; mp=directory/'manifest.json';m=json.loads(mp.read_text());s=json.load…
+   |                                   ^
+19 |   assert sha256(mp)==proof['source_cell_manifest_sha256']
+20 |   assert sha256(root/'matrix_plan.json')==proof['source_plan_sha256']
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/actual_pair_adapter_preflight_v1/check.py:18:64
+   |
+16 |   key=f"{proof['protocol_id']}:{proof['cell']}"
+17 |   if key in snapshots:continue
+18 |   root=roots[proof['protocol_id']];directory=root/proof['cell']; mp=directory/'manifest.json';m=json.loads(mp.read_text());s=json.load…
+   |                                                                ^
+19 |   assert sha256(mp)==proof['source_cell_manifest_sha256']
+20 |   assert sha256(root/'matrix_plan.json')==proof['source_plan_sha256']
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/actual_pair_adapter_preflight_v1/check.py:18:94
+   |
+16 |   key=f"{proof['protocol_id']}:{proof['cell']}"
+17 |   if key in snapshots:continue
+18 |   root=roots[proof['protocol_id']];directory=root/proof['cell']; mp=directory/'manifest.json';m=json.loads(mp.read_text());s=json.load…
+   |                                                                                              ^
+19 |   assert sha256(mp)==proof['source_cell_manifest_sha256']
+20 |   assert sha256(root/'matrix_plan.json')==proof['source_plan_sha256']
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/actual_pair_adapter_preflight_v1/check.py:18:123
+   |
+16 |   key=f"{proof['protocol_id']}:{proof['cell']}"
+17 |   if key in snapshots:continue
+18 |   root=roots[proof['protocol_id']];directory=root/proof['cell']; mp=directory/'manifest.json';m=json.loads(mp.read_text());s=json.load…
+   |                                                                                                                           ^
+19 |   assert sha256(mp)==proof['source_cell_manifest_sha256']
+20 |   assert sha256(root/'matrix_plan.json')==proof['source_plan_sha256']
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/actual_pair_adapter_preflight_v1/check.py:21:47
+   |
+19 |   assert sha256(mp)==proof['source_cell_manifest_sha256']
+20 |   assert sha256(root/'matrix_plan.json')==proof['source_plan_sha256']
+21 |   for name,digest in m['files_sha256'].items():assert sha256(directory/name)==digest,(key,name)
+   |                                               ^
+22 |   assert m['files_sha256']['shots.csv.gz']==proof['source_csv_sha256']
+23 |   manifests[str(mp)]=sha256(mp)
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/actual_pair_adapter_preflight_v1/check.py:27:20
+   |
+25 | loaded={'report':report,'comparisons':comparisons,'receipt':{'source_cells_sha256':snapshots}}
+26 | for row in comparisons['comparisons']:
+27 |  a,b=row['sources']; rec={'comparison_kind':row['comparison_kind'],'first_protocol':a['protocol_id'],'first_cell':a.get('alias_cell') …
+   |                    ^
+28 |  try:
+29 |   pair=reconstruct_pair(loaded,rec)
+   |
+
+BLE001 Do not catch blind exception: `Exception`
+  --> docs/research/shot_pattern_analysis/phase2/validation/actual_pair_adapter_preflight_v1/check.py:32:9
+   |
+30 |   assert pair['first']['source_protocol']==a['protocol_id'] and pair['second']['source_protocol']==b['protocol_id']
+31 |   rows.append({**rec,'alias_count':sum(x.get('execution_kind')=='provenance_alias' for x in [pair['first'],pair['second']]),'status':'…
+32 |  except Exception as e:failures.append({**rec,'error':repr(e)})
+   |         ^^^^^^^^^
+33 | assert before=={str(p):sha256(p) for p in files}
+34 | assert all(sha256(Path(p))==h for p,h in manifests.items())
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/actual_pair_adapter_preflight_v1/check.py:32:23
+   |
+30 |   assert pair['first']['source_protocol']==a['protocol_id'] and pair['second']['source_protocol']==b['protocol_id']
+31 |   rows.append({**rec,'alias_count':sum(x.get('execution_kind')=='provenance_alias' for x in [pair['first'],pair['second']]),'status':'…
+32 |  except Exception as e:failures.append({**rec,'error':repr(e)})
+   |                       ^
+33 | assert before=={str(p):sha256(p) for p in files}
+34 | assert all(sha256(Path(p))==h for p,h in manifests.items())
+   |
+
+T201 `print` found
+  --> docs/research/shot_pattern_analysis/phase2/validation/actual_pair_adapter_preflight_v1/check.py:37:1
+   |
+35 | result={'scope':'Provisional Actual Ordered-Pair Adapter Preflight','parent_final_acceptance':False,'parent_receipt_available':(P/'sup…
+36 | (OUT/'review.json').write_text(json.dumps(result,indent=2)+'\n')
+37 | print(json.dumps({k:result[k] for k in ['comparisons','reconstructed','unique_bound_cells','counts','alias_references','failures']},in…
+   | ^^^^^
+   |
+help: Remove `print`
+
+E401 [*] Multiple imports on one line
+ --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py:2:1
+  |
+1 | from pathlib import Path
+2 | import hashlib,json,re,sys
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+3 | from decimal import Decimal
+4 | ROOT=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift');P=ROOT/'docs/research/shot_pattern_analysis/phase2'…
+  |
+help: Split imports
+
+E702 Multiple statements on one line (semicolon)
+ --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py:4:84
+  |
+2 | import hashlib,json,re,sys
+3 | from decimal import Decimal
+4 | ROOT=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift');P=ROOT/'docs/research/shot_pattern_analysis/phase2'…
+  |                                                                                    ^
+5 | from scripts.research.shot_pattern_analysis.final_report_inputs import select_representative_interaction_pairs,select_bounds_control_pa…
+6 | from scripts.research.shot_pattern_analysis.report_synthesis import validate_resolved_selection
+  |
+
+E702 Multiple statements on one line (semicolon)
+ --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py:4:136
+  |
+2 | …
+3 | …
+4 | …pstreamDrift');P=ROOT/'docs/research/shot_pattern_analysis/phase2';OUT=Path('/tmp/p2-article-astra-review');sys.path.insert(0,str(ROOT…
+  |                                                                    ^
+5 | …t select_representative_interaction_pairs,select_bounds_control_pairs
+6 | …alidate_resolved_selection
+  |
+
+E702 Multiple statements on one line (semicolon)
+ --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py:4:177
+  |
+2 | …
+3 | …
+4 | …_pattern_analysis/phase2';OUT=Path('/tmp/p2-article-astra-review');sys.path.insert(0,str(ROOT))
+  |                                                                    ^
+5 | …,select_bounds_control_pairs
+6 | …
+  |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py:9:72
+   |
+ 8 | def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
+ 9 | trace_path=P/'validation/selected_headline_traceability_v1/review.json';trace=json.loads(trace_path.read_text())
+   |                                                                        ^
+10 | for name,digest in trace['source_sha256'].items():
+11 |  if sha(P/name)!=digest:raise ValueError(name)
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py:11:24
+   |
+ 9 | trace_path=P/'validation/selected_headline_traceability_v1/review.json';trace=json.loads(trace_path.read_text())
+10 | for name,digest in trace['source_sha256'].items():
+11 |  if sha(P/name)!=digest:raise ValueError(name)
+   |                        ^
+12 | cells=[]
+13 | for entry in trace['cells']:
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py:14:67
+   |
+12 | cells=[]
+13 | for entry in trace['cells']:
+14 |  s=json.loads((P/entry['source_root']/'summary.json').read_text());cells.append({**s,'cell':entry['cell'],'source_protocol':entry['sou…
+   |                                                                   ^
+15 | validate_resolved_selection(cells)
+16 | expected=json.loads((P/'validation/protocol_name_recovery_v6/expected_numeric_hashes.json').read_text());inputs={str(trace_path):sha(t…
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py:16:105
+   |
+14 |  s=json.loads((P/entry['source_root']/'summary.json').read_text());cells.append({**s,'cell':entry['cell'],'source_protocol':entry['sou…
+15 | validate_resolved_selection(cells)
+16 | expected=json.loads((P/'validation/protocol_name_recovery_v6/expected_numeric_hashes.json').read_text());inputs={str(trace_path):sha(t…
+   |                                                                                                         ^
+17 | for name,digest in expected.items():
+18 |  p=P/'supplement_report_v1'/name
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py:19:19
+   |
+17 | for name,digest in expected.items():
+18 |  p=P/'supplement_report_v1'/name
+19 |  if sha(p)!=digest:raise ValueError(name)
+   |                   ^
+20 |  inputs[str(p)]=digest
+21 | pairs=json.loads((P/'supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.json').read_text())['comparisons'];effects=select_representati…
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py:21:107
+   |
+19 |  if sha(p)!=digest:raise ValueError(name)
+20 |  inputs[str(p)]=digest
+21 | pairs=json.loads((P/'supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.json').read_text())['comparisons'];effects=select_representati…
+   |                                                                                                           ^
+22 | if missing or len(effects)!=12 or len(controls)!=2:raise ValueError('selector inventory')
+23 | article=(OUT/'rejected_article.tex').read_text();rows=[];failures=[]
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py:21:162
+   |
+19 | …
+20 | …
+21 | …mparisons'];effects=select_representative_interaction_pairs(pairs);controls,missing=select_bounds_control_pairs(pairs)
+   |                                                                    ^
+22 | …
+23 | …
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py:22:51
+   |
+20 |  inputs[str(p)]=digest
+21 | pairs=json.loads((P/'supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.json').read_text())['comparisons'];effects=select_representati…
+22 | if missing or len(effects)!=12 or len(controls)!=2:raise ValueError('selector inventory')
+   |                                                   ^
+23 | article=(OUT/'rejected_article.tex').read_text();rows=[];failures=[]
+24 | def check(label,token,value):
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py:23:49
+   |
+21 | pairs=json.loads((P/'supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.json').read_text())['comparisons'];effects=select_representati…
+22 | if missing or len(effects)!=12 or len(controls)!=2:raise ValueError('selector inventory')
+23 | article=(OUT/'rejected_article.tex').read_text();rows=[];failures=[]
+   |                                                 ^
+24 | def check(label,token,value):
+25 |  d=Decimal(token);tol=float(Decimal(10)**d.as_tuple().exponent)/2+abs(float(value))*1e-12
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py:23:57
+   |
+21 | pairs=json.loads((P/'supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.json').read_text())['comparisons'];effects=select_representati…
+22 | if missing or len(effects)!=12 or len(controls)!=2:raise ValueError('selector inventory')
+23 | article=(OUT/'rejected_article.tex').read_text();rows=[];failures=[]
+   |                                                         ^
+24 | def check(label,token,value):
+25 |  d=Decimal(token);tol=float(Decimal(10)**d.as_tuple().exponent)/2+abs(float(value))*1e-12
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py:25:18
+   |
+23 | article=(OUT/'rejected_article.tex').read_text();rows=[];failures=[]
+24 | def check(label,token,value):
+25 |  d=Decimal(token);tol=float(Decimal(10)**d.as_tuple().exponent)/2+abs(float(value))*1e-12
+   |                  ^
+26 |  ok=abs(float(token)-value)<=tol
+27 |  result={'field':label,'display':token,'expected':value,'rounding_tolerance':tol,'matches_display_precision':ok};rows.append(result)
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py:27:113
+   |
+25 |  d=Decimal(token);tol=float(Decimal(10)**d.as_tuple().exponent)/2+abs(float(value))*1e-12
+26 |  ok=abs(float(token)-value)<=tol
+27 |  result={'field':label,'display':token,'expected':value,'rounding_tolerance':tol,'matches_display_precision':ok};rows.append(result)
+   |                                                                                                                 ^
+28 |  if not ok:failures.append(result)
+29 | count=0
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py:28:11
+   |
+26 |  ok=abs(float(token)-value)<=tol
+27 |  result={'field':label,'display':token,'expected':value,'rounding_tolerance':tol,'matches_display_precision':ok};rows.append(result)
+28 |  if not ok:failures.append(result)
+   |           ^
+29 | count=0
+30 | for line in article.splitlines():
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py:31:63
+   |
+29 | count=0
+30 | for line in article.splitlines():
+31 |  if not re.match(r'C\d\d\s*&\s*(Straight|Draw|Fade)\s*&',line):continue
+   |                                                               ^
+32 |  fields=[v.strip() for v in line.rstrip('\\ ').split('&')];i=int(fields[0][1:])-1;pattern=fields[1];cell=cells[i];stats=cell['summary'…
+33 |  ns=[int(v.replace(',','').strip()) for v in fields[2].split('/')]
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py:32:59
+   |
+30 | for line in article.splitlines():
+31 |  if not re.match(r'C\d\d\s*&\s*(Straight|Draw|Fade)\s*&',line):continue
+32 |  fields=[v.strip() for v in line.rstrip('\\ ').split('&')];i=int(fields[0][1:])-1;pattern=fields[1];cell=cells[i];stats=cell['summary'…
+   |                                                           ^
+33 |  ns=[int(v.replace(',','').strip()) for v in fields[2].split('/')]
+34 |  for label,actual,want in [('support',ns[0],stats['supported_n']),('attempts',ns[1],stats['total_n'])]:
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py:32:82
+   |
+30 | for line in article.splitlines():
+31 |  if not re.match(r'C\d\d\s*&\s*(Straight|Draw|Fade)\s*&',line):continue
+32 |  fields=[v.strip() for v in line.rstrip('\\ ').split('&')];i=int(fields[0][1:])-1;pattern=fields[1];cell=cells[i];stats=cell['summary'…
+   |                                                                                  ^
+33 |  ns=[int(v.replace(',','').strip()) for v in fields[2].split('/')]
+34 |  for label,actual,want in [('support',ns[0],stats['supported_n']),('attempts',ns[1],stats['total_n'])]:
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py:32:100
+   |
+30 | for line in article.splitlines():
+31 |  if not re.match(r'C\d\d\s*&\s*(Straight|Draw|Fade)\s*&',line):continue
+32 |  fields=[v.strip() for v in line.rstrip('\\ ').split('&')];i=int(fields[0][1:])-1;pattern=fields[1];cell=cells[i];stats=cell['summary'…
+   |                                                                                                    ^
+33 |  ns=[int(v.replace(',','').strip()) for v in fields[2].split('/')]
+34 |  for label,actual,want in [('support',ns[0],stats['supported_n']),('attempts',ns[1],stats['total_n'])]:
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py:32:114
+   |
+30 | for line in article.splitlines():
+31 |  if not re.match(r'C\d\d\s*&\s*(Straight|Draw|Fade)\s*&',line):continue
+32 |  fields=[v.strip() for v in line.rstrip('\\ ').split('&')];i=int(fields[0][1:])-1;pattern=fields[1];cell=cells[i];stats=cell['summary'…
+   |                                                                                                                  ^
+33 |  ns=[int(v.replace(',','').strip()) for v in fields[2].split('/')]
+34 |  for label,actual,want in [('support',ns[0],stats['supported_n']),('attempts',ns[1],stats['total_n'])]:
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py:32:145
+   |
+30 | …
+31 | …
+32 | …)-1;pattern=fields[1];cell=cells[i];stats=cell['summary'][pattern];score=cell['course_scoring'];count+=1
+   |                                                                    ^
+33 | …
+34 | …ns[1],stats['total_n'])]:
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py:32:174
+   |
+30 | …
+31 | …
+32 | …lls[i];stats=cell['summary'][pattern];score=cell['course_scoring'];count+=1
+   |                                                                    ^
+33 | …
+34 | …
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py:36:81
+   |
+34 |  for label,actual,want in [('support',ns[0],stats['supported_n']),('attempts',ns[1],stats['total_n'])]:
+35 |   check(f'{fields[0]} {pattern} {label}',str(actual),want)
+36 |  for column,key in [(3,'lateral_sd_m'),(4,'downrange_sd_m'),(5,'target_rmse_m')]:check(f'{fields[0]} {pattern} {key}',fields[column],s…
+   |                                                                                 ^
+37 |  check(f'{fields[0]} {pattern} absolute_sg',fields[6],score['patterns'][pattern]['mean_strokes_gained'])
+38 |  if pattern!='Straight':
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py:39:68
+   |
+37 |  check(f'{fields[0]} {pattern} absolute_sg',fields[6],score['patterns'][pattern]['mean_strokes_gained'])
+38 |  if pattern!='Straight':
+39 |   numbers=re.findall(r'[+-]?\d+(?:\.\d+)?(?:e[+-]?\d+)?',fields[7]);interval=score['paired_benefit_vs_straight'][pattern]
+   |                                                                    ^
+40 |   for token,key in zip(numbers,('estimate','lower_95','upper_95'),strict=True):check(f'{fields[0]} {pattern} {key}',token,interval[key…
+41 | if count!=72:raise ValueError(count)
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py:40:79
+   |
+38 |  if pattern!='Straight':
+39 |   numbers=re.findall(r'[+-]?\d+(?:\.\d+)?(?:e[+-]?\d+)?',fields[7]);interval=score['paired_benefit_vs_straight'][pattern]
+40 |   for token,key in zip(numbers,('estimate','lower_95','upper_95'),strict=True):check(f'{fields[0]} {pattern} {key}',token,interval[key…
+   |                                                                               ^
+41 | if count!=72:raise ValueError(count)
+42 | # Exact selected control records and source summaries, including signed face/path.
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py:41:13
+   |
+39 |   numbers=re.findall(r'[+-]?\d+(?:\.\d+)?(?:e[+-]?\d+)?',fields[7]);interval=score['paired_benefit_vs_straight'][pattern]
+40 |   for token,key in zip(numbers,('estimate','lower_95','upper_95'),strict=True):check(f'{fields[0]} {pattern} {key}',token,interval[key…
+41 | if count!=72:raise ValueError(count)
+   |             ^
+42 | # Exact selected control records and source summaries, including signed face/path.
+43 | control_records=[]
+   |
+
+B905 `zip()` without an explicit `strict=` parameter
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py:45:132
+   |
+43 | …
+44 | …
+45 | …['cell']) for s in r['sources']]==list(zip(effect['source_protocols'],effect['source_cells'])))
+   |                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+46 | …
+47 | …
+   |
+help: Add explicit value for parameter `strict=`
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py:48:81
+   |
+46 |  control_records.append(match)
+47 | nominals=[]
+48 | report=json.loads((P/'supplement_report_v1/REPORT_SUPPLEMENT.json').read_text());supp={ (r['source_protocol'],r['cell']):r for r in re…
+   |                                                                                 ^
+49 | for pair in control_records:
+50 |  for src in pair['sources']:
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py:52:17
+   |
+50 |  for src in pair['sources']:
+51 |   key=(src['protocol_id'],src['cell'])
+52 |   if key in supp: ref=supp[key];summary=ref['summary'];path=Path(ref['source_root'])/ref['cell']/'summary.json'
+   |                 ^
+53 |   else:path=P/'control_final_v1'/src['cell']/'summary.json';summary=json.loads(path.read_text())
+54 |   inputs[str(path)]=sha(path);nominals.append({'protocol':src['protocol_id'],'cell':src['cell'],'config':summary['config'],'target':su…
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py:52:32
+   |
+50 |  for src in pair['sources']:
+51 |   key=(src['protocol_id'],src['cell'])
+52 |   if key in supp: ref=supp[key];summary=ref['summary'];path=Path(ref['source_root'])/ref['cell']/'summary.json'
+   |                                ^
+53 |   else:path=P/'control_final_v1'/src['cell']/'summary.json';summary=json.loads(path.read_text())
+54 |   inputs[str(path)]=sha(path);nominals.append({'protocol':src['protocol_id'],'cell':src['cell'],'config':summary['config'],'target':su…
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py:52:55
+   |
+50 |  for src in pair['sources']:
+51 |   key=(src['protocol_id'],src['cell'])
+52 |   if key in supp: ref=supp[key];summary=ref['summary'];path=Path(ref['source_root'])/ref['cell']/'summary.json'
+   |                                                       ^
+53 |   else:path=P/'control_final_v1'/src['cell']/'summary.json';summary=json.loads(path.read_text())
+54 |   inputs[str(path)]=sha(path);nominals.append({'protocol':src['protocol_id'],'cell':src['cell'],'config':summary['config'],'target':su…
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py:53:7
+   |
+51 |   key=(src['protocol_id'],src['cell'])
+52 |   if key in supp: ref=supp[key];summary=ref['summary'];path=Path(ref['source_root'])/ref['cell']/'summary.json'
+53 |   else:path=P/'control_final_v1'/src['cell']/'summary.json';summary=json.loads(path.read_text())
+   |       ^
+54 |   inputs[str(path)]=sha(path);nominals.append({'protocol':src['protocol_id'],'cell':src['cell'],'config':summary['config'],'target':su…
+55 | source_paths=['scripts/research/shot_pattern_analysis/final_report_inputs.py','scripts/research/shot_pattern_analysis/report_synthesis…
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py:53:60
+   |
+51 |   key=(src['protocol_id'],src['cell'])
+52 |   if key in supp: ref=supp[key];summary=ref['summary'];path=Path(ref['source_root'])/ref['cell']/'summary.json'
+53 |   else:path=P/'control_final_v1'/src['cell']/'summary.json';summary=json.loads(path.read_text())
+   |                                                            ^
+54 |   inputs[str(path)]=sha(path);nominals.append({'protocol':src['protocol_id'],'cell':src['cell'],'config':summary['config'],'target':su…
+55 | source_paths=['scripts/research/shot_pattern_analysis/final_report_inputs.py','scripts/research/shot_pattern_analysis/report_synthesis…
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py:54:30
+   |
+52 |   if key in supp: ref=supp[key];summary=ref['summary'];path=Path(ref['source_root'])/ref['cell']/'summary.json'
+53 |   else:path=P/'control_final_v1'/src['cell']/'summary.json';summary=json.loads(path.read_text())
+54 |   inputs[str(path)]=sha(path);nominals.append({'protocol':src['protocol_id'],'cell':src['cell'],'config':summary['config'],'target':su…
+   |                              ^
+55 | source_paths=['scripts/research/shot_pattern_analysis/final_report_inputs.py','scripts/research/shot_pattern_analysis/report_synthesis…
+56 | data={'cells':cells,'effects':effects,'controls':controls,'control_records':control_records,'nominals':nominals,'input_sha256':inputs,…
+   |
+
+T201 `print` found
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py:60:1
+   |
+58 | review={'candidate_sha256':sha(OUT/'rejected_article.tex'),'status':'changes_required','checked_pattern_rows':count,'checked_numeric_f…
+59 | (OUT/'candidate_field_audit.json').write_text(json.dumps(review,indent=2)+'\n')
+60 | print(json.dumps({k:review[k] for k in ['checked_pattern_rows','checked_numeric_fields','numeric_rounding_mismatches','max_selected_no…
+   | ^^^^^
+   |
+help: Remove `print`
+
+E401 [*] Multiple imports on one line
+ --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_interactions.py:2:1
+  |
+1 | from pathlib import Path
+2 | import json,re
+  | ^^^^^^^^^^^^^^
+3 | from decimal import Decimal
+4 | p=Path('/tmp/p2-article-astra-review');d=json.loads((p/'verified_data.json').read_text());s=(p/'rejected_article.tex').read_text();key=…
+  |
+help: Split imports
+
+E702 Multiple statements on one line (semicolon)
+ --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_interactions.py:4:39
+  |
+2 | import json,re
+3 | from decimal import Decimal
+4 | p=Path('/tmp/p2-article-astra-review');d=json.loads((p/'verified_data.json').read_text());s=(p/'rejected_article.tex').read_text();key=…
+  |                                       ^
+5 | for line in s.splitlines():
+6 |  f=[x.strip() for x in line.rstrip('\\ ').split('&')]
+  |
+
+E702 Multiple statements on one line (semicolon)
+ --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_interactions.py:4:90
+  |
+2 | import json,re
+3 | from decimal import Decimal
+4 | p=Path('/tmp/p2-article-astra-review');d=json.loads((p/'verified_data.json').read_text());s=(p/'rejected_article.tex').read_text();key=…
+  |                                                                                          ^
+5 | for line in s.splitlines():
+6 |  f=[x.strip() for x in line.rstrip('\\ ').split('&')]
+  |
+
+E702 Multiple statements on one line (semicolon)
+ --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_interactions.py:4:131
+  |
+2 | …
+3 | …
+4 | …_data.json').read_text());s=(p/'rejected_article.tex').read_text();key=None;checks=[]
+  |                                                                    ^
+5 | …
+6 | …
+  |
+
+E702 Multiple statements on one line (semicolon)
+ --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_interactions.py:4:140
+  |
+2 | …
+3 | …
+4 | …n').read_text());s=(p/'rejected_article.tex').read_text();key=None;checks=[]
+  |                                                                    ^
+5 | …
+6 | …
+  |
+
+E701 Multiple statements on one line (colon)
+ --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_interactions.py:7:30
+  |
+5 | for line in s.splitlines():
+6 |  f=[x.strip() for x in line.rstrip('\\ ').split('&')]
+7 |  if re.match(r'E\d\d &',line):key=int(f[0][1:])-1
+  |                              ^
+8 |  elif not(key is not None and len(f)==6 and f[3]=='Fade'):continue
+9 |  if len(f)!=6 or f[3] not in ['Draw','Fade']:continue
+  |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_interactions.py:8:58
+   |
+ 6 |  f=[x.strip() for x in line.rstrip('\\ ').split('&')]
+ 7 |  if re.match(r'E\d\d &',line):key=int(f[0][1:])-1
+ 8 |  elif not(key is not None and len(f)==6 and f[3]=='Fade'):continue
+   |                                                          ^
+ 9 |  if len(f)!=6 or f[3] not in ['Draw','Fade']:continue
+10 |  e=d['effects'][key];v=e[f[3].lower()+'_minus_straight_change'];n=int(f[4].replace(',',''));tokens=re.findall(r'[+-]?\d+(?:\.\d+)?(?:e…
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_interactions.py:9:45
+   |
+ 7 |  if re.match(r'E\d\d &',line):key=int(f[0][1:])-1
+ 8 |  elif not(key is not None and len(f)==6 and f[3]=='Fade'):continue
+ 9 |  if len(f)!=6 or f[3] not in ['Draw','Fade']:continue
+   |                                             ^
+10 |  e=d['effects'][key];v=e[f[3].lower()+'_minus_straight_change'];n=int(f[4].replace(',',''));tokens=re.findall(r'[+-]?\d+(?:\.\d+)?(?:e…
+11 |  if n!=e['common_six_n']:raise ValueError('population')
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_interactions.py:10:21
+   |
+ 8 |  elif not(key is not None and len(f)==6 and f[3]=='Fade'):continue
+ 9 |  if len(f)!=6 or f[3] not in ['Draw','Fade']:continue
+10 |  e=d['effects'][key];v=e[f[3].lower()+'_minus_straight_change'];n=int(f[4].replace(',',''));tokens=re.findall(r'[+-]?\d+(?:\.\d+)?(?:e…
+   |                     ^
+11 |  if n!=e['common_six_n']:raise ValueError('population')
+12 |  for t,k in zip(tokens,['estimate','lower_95','upper_95'],strict=True):
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_interactions.py:10:64
+   |
+ 8 |  elif not(key is not None and len(f)==6 and f[3]=='Fade'):continue
+ 9 |  if len(f)!=6 or f[3] not in ['Draw','Fade']:continue
+10 |  e=d['effects'][key];v=e[f[3].lower()+'_minus_straight_change'];n=int(f[4].replace(',',''));tokens=re.findall(r'[+-]?\d+(?:\.\d+)?(?:e…
+   |                                                                ^
+11 |  if n!=e['common_six_n']:raise ValueError('population')
+12 |  for t,k in zip(tokens,['estimate','lower_95','upper_95'],strict=True):
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_interactions.py:10:92
+   |
+ 8 |  elif not(key is not None and len(f)==6 and f[3]=='Fade'):continue
+ 9 |  if len(f)!=6 or f[3] not in ['Draw','Fade']:continue
+10 |  e=d['effects'][key];v=e[f[3].lower()+'_minus_straight_change'];n=int(f[4].replace(',',''));tokens=re.findall(r'[+-]?\d+(?:\.\d+)?(?:e…
+   |                                                                                            ^
+11 |  if n!=e['common_six_n']:raise ValueError('population')
+12 |  for t,k in zip(tokens,['estimate','lower_95','upper_95'],strict=True):
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_interactions.py:11:25
+   |
+ 9 |  if len(f)!=6 or f[3] not in ['Draw','Fade']:continue
+10 |  e=d['effects'][key];v=e[f[3].lower()+'_minus_straight_change'];n=int(f[4].replace(',',''));tokens=re.findall(r'[+-]?\d+(?:\.\d+)?(?:e…
+11 |  if n!=e['common_six_n']:raise ValueError('population')
+   |                         ^
+12 |  for t,k in zip(tokens,['estimate','lower_95','upper_95'],strict=True):
+13 |   tolerance=float(Decimal(10)**Decimal(t).as_tuple().exponent)/2+1e-12
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_interactions.py:15:17
+   |
+13 |   tolerance=float(Decimal(10)**Decimal(t).as_tuple().exponent)/2+1e-12
+14 |   checks.append({'key':f'E{key+1:02}','pattern':f[3],'field':k,'display':t,'actual':v[k],'matches':abs(float(t)-v[k])<=tolerance})
+15 |  if f[3]=='Fade':key=None
+   |                 ^
+16 | if len(checks)!=72:raise ValueError(len(checks))
+17 | (p/'candidate_interaction_audit.json').write_text(json.dumps({'checked_fields':len(checks),'failures':[c for c in checks if not c['mat…
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_interactions.py:16:19
+   |
+14 |   checks.append({'key':f'E{key+1:02}','pattern':f[3],'field':k,'display':t,'actual':v[k],'matches':abs(float(t)-v[k])<=tolerance})
+15 |  if f[3]=='Fade':key=None
+16 | if len(checks)!=72:raise ValueError(len(checks))
+   |                   ^
+17 | (p/'candidate_interaction_audit.json').write_text(json.dumps({'checked_fields':len(checks),'failures':[c for c in checks if not c['mat…
+18 | print('72 interaction fields checked; failures:',sum(not c['matches'] for c in checks))
+   |
+
+T201 `print` found
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_interactions.py:18:1
+   |
+16 | if len(checks)!=72:raise ValueError(len(checks))
+17 | (p/'candidate_interaction_audit.json').write_text(json.dumps({'checked_fields':len(checks),'failures':[c for c in checks if not c['mat…
+18 | print('72 interaction fields checked; failures:',sum(not c['matches'] for c in checks))
+   | ^^^^^
+   |
+help: Remove `print`
+
+E401 [*] Multiple imports on one line
+ --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/final_check.py:2:1
+  |
+1 | from pathlib import Path
+2 | import json,hashlib,re
+  | ^^^^^^^^^^^^^^^^^^^^^^
+3 | from decimal import Decimal
+4 | from collections import Counter
+  |
+help: Split imports
+
+E702 Multiple statements on one line (semicolon)
+ --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/final_check.py:5:39
+  |
+3 | from decimal import Decimal
+4 | from collections import Counter
+5 | D=Path('/tmp/p2-article-astra-review');R=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift');P=R/'docs/resea…
+  |                                       ^
+6 | def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
+7 | for path,h in trace['source_sha256'].items():
+  |
+
+E702 Multiple statements on one line (semicolon)
+ --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/final_check.py:5:120
+  |
+3 | from decimal import Decimal
+4 | from collections import Counter
+5 | D=Path('/tmp/p2-article-astra-review');R=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift');P=R/'docs/resea…
+  |                                                                                                                        ^
+6 | def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
+7 | for path,h in trace['source_sha256'].items():
+  |
+
+E702 Multiple statements on one line (semicolon)
+ --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/final_check.py:5:169
+  |
+3 | …
+4 | …
+5 | …s/UpstreamDrift');P=R/'docs/research/shot_pattern_analysis/phase2';A=P.parent/'shot_pattern_analysis.tex';s=A.read_text();d=json.loads…
+  |                                                                    ^
+6 | …
+7 | …
+  |
+
+E702 Multiple statements on one line (semicolon)
+ --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/final_check.py:5:208
+  |
+3 | …
+4 | …
+5 | …ot_pattern_analysis/phase2';A=P.parent/'shot_pattern_analysis.tex';s=A.read_text();d=json.loads((D/'verified_data.json').read_text());…
+  |                                                                    ^
+6 | …
+7 | …
+  |
+
+E702 Multiple statements on one line (semicolon)
+ --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/final_check.py:5:224
+  |
+3 | …
+4 | …
+5 | …sis/phase2';A=P.parent/'shot_pattern_analysis.tex';s=A.read_text();d=json.loads((D/'verified_data.json').read_text());trace=json.loads…
+  |                                                                    ^
+6 | …
+7 | …
+  |
+
+E702 Multiple statements on one line (semicolon)
+ --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/final_check.py:5:275
+  |
+3 | …
+4 | …
+5 | …s=A.read_text();d=json.loads((D/'verified_data.json').read_text());trace=json.loads((P/'validation/selected_headline_traceability_v1/r…
+  |                                                                    ^
+6 | …
+7 | …
+  |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/final_check.py:8:19
+   |
+ 6 | def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
+ 7 | for path,h in trace['source_sha256'].items():
+ 8 |  if sha(P/path)!=h:raise ValueError(path)
+   |                   ^
+ 9 | for path,h in d['api_sha256'].items():
+10 |  if sha(R/path)!=h:raise ValueError(path)
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/final_check.py:10:19
+   |
+ 8 |  if sha(P/path)!=h:raise ValueError(path)
+ 9 | for path,h in d['api_sha256'].items():
+10 |  if sha(R/path)!=h:raise ValueError(path)
+   |                   ^
+11 | # Independent strict display-rounding checks for all generated numeric tokens.
+12 | tokens=re.findall(r'\\numtext\{([^}]+)\}',s)
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/final_check.py:14:28
+   |
+12 | tokens=re.findall(r'\\numtext\{([^}]+)\}',s)
+13 | fields=json.loads((D/'generated_numeric_fields.json').read_text())
+14 | if len(tokens)!=len(fields):raise ValueError((len(tokens),len(fields)))
+   |                            ^
+15 | if Counter(tokens)!=Counter(f['display'] for f in fields):raise ValueError('numeric token inventory')
+16 | for f in fields:
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/final_check.py:15:58
+   |
+13 | fields=json.loads((D/'generated_numeric_fields.json').read_text())
+14 | if len(tokens)!=len(fields):raise ValueError((len(tokens),len(fields)))
+15 | if Counter(tokens)!=Counter(f['display'] for f in fields):raise ValueError('numeric token inventory')
+   |                                                          ^
+16 | for f in fields:
+17 |  t=f['display']
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/final_check.py:19:58
+   |
+17 |  t=f['display']
+18 |  tolerance=float(Decimal(10)**Decimal(t).as_tuple().exponent)/2+abs(f['value'])*1e-14
+19 |  if t!=f['display'] or abs(float(t)-f['value'])>tolerance:raise ValueError((t,f))
+   |                                                          ^
+20 | # Exact noncollapsed signed intervals, populations and source identities separately checked by verify_repair.py.
+21 | for e in d['effects']+d['controls']:
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/final_check.py:24:100
+   |
+22 |  for key in ['draw_minus_straight_change','fade_minus_straight_change']:
+23 |   v=e[key]
+24 |   if v['lower_95']<v['upper_95'] and float(f"{v['lower_95']:+.7g}")>=float(f"{v['upper_95']:+.7g}"):raise ValueError('collapsed interv…
+   |                                                                                                    ^
+25 | for p in ['380','10.0','kinetic energy','optimal carry','decisively','negligible']:
+26 |  pass
+   |
+
+B007 Loop control variable `p` not used within loop body
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/final_check.py:25:5
+   |
+23 |   v=e[key]
+24 |   if v['lower_95']<v['upper_95'] and float(f"{v['lower_95']:+.7g}")>=float(f"{v['upper_95']:+.7g}"):raise ValueError('collapsed interv…
+25 | for p in ['380','10.0','kinetic energy','optimal carry','decisively','negligible']:
+   |     ^
+26 |  pass
+27 | compile_result=json.loads((D/'builtin_compile.json').read_text())
+   |
+help: Rename unused `p` to `_p`
+
+FURB171 Membership test against single-item container
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/final_check.py:28:656
+   |
+26 | …
+27 | …
+28 | …name:sha(p) for p in D.iterdir() if p.is_file() and p.name not in ['review.json']}}
+   |                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+29 | …
+   |
+help: Convert to inequality test
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/final_check.py:29:63
+   |
+27 | compile_result=json.loads((D/'builtin_compile.json').read_text())
+28 | result={'status':'numeric_source_repair_verified_compilation_unverified','article':str(A),'article_sha256':sha(A),'line_count':len(s.s…
+29 | (D/'review.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps({k:result[k] for k in ['article_sha256','line_count','…
+   |                                                               ^
+   |
+
+T201 `print` found
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/final_check.py:29:64
+   |
+27 | compile_result=json.loads((D/'builtin_compile.json').read_text())
+28 | result={'status':'numeric_source_repair_verified_compilation_unverified','article':str(A),'article_sha256':sha(A),'line_count':len(s.s…
+29 | (D/'review.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps({k:result[k] for k in ['article_sha256','line_count','…
+   |                                                                ^^^^^
+   |
+help: Remove `print`
+
+E401 [*] Multiple imports on one line
+ --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py:2:1
+  |
+1 | from pathlib import Path
+2 | import json,hashlib
+  | ^^^^^^^^^^^^^^^^^^^
+3 | P=Path('/tmp/p2-article-astra-review');d=json.loads((P/'verified_data.json').read_text());cells=d['cells'];effects=d['effects'];control…
+4 | article=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/shot_pattern_a…
+  |
+help: Split imports
+
+E702 Multiple statements on one line (semicolon)
+ --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py:3:39
+  |
+1 | from pathlib import Path
+2 | import json,hashlib
+3 | P=Path('/tmp/p2-article-astra-review');d=json.loads((P/'verified_data.json').read_text());cells=d['cells'];effects=d['effects'];control…
+  |                                       ^
+4 | article=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/shot_pattern_a…
+5 | s=article.read_text(); start=s.index(r'\subsection{Selected Zero-Lean Experimental Design and Condition Keys}');end=s.index(r'\clearpag…
+  |
+
+E702 Multiple statements on one line (semicolon)
+ --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py:3:90
+  |
+1 | from pathlib import Path
+2 | import json,hashlib
+3 | P=Path('/tmp/p2-article-astra-review');d=json.loads((P/'verified_data.json').read_text());cells=d['cells'];effects=d['effects'];control…
+  |                                                                                          ^
+4 | article=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/shot_pattern_a…
+5 | s=article.read_text(); start=s.index(r'\subsection{Selected Zero-Lean Experimental Design and Condition Keys}');end=s.index(r'\clearpag…
+  |
+
+E702 Multiple statements on one line (semicolon)
+ --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py:3:107
+  |
+1 | from pathlib import Path
+2 | import json,hashlib
+3 | P=Path('/tmp/p2-article-astra-review');d=json.loads((P/'verified_data.json').read_text());cells=d['cells'];effects=d['effects'];control…
+  |                                                                                                           ^
+4 | article=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/shot_pattern_a…
+5 | s=article.read_text(); start=s.index(r'\subsection{Selected Zero-Lean Experimental Design and Condition Keys}');end=s.index(r'\clearpag…
+  |
+
+E702 Multiple statements on one line (semicolon)
+ --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py:3:128
+  |
+1 | from pathlib import Path
+2 | import json,hashlib
+3 | P=Path('/tmp/p2-article-astra-review');d=json.loads((P/'verified_data.json').read_text());cells=d['cells'];effects=d['effects'];control…
+  |                                                                                                                                ^
+4 | article=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/shot_pattern_a…
+5 | s=article.read_text(); start=s.index(r'\subsection{Selected Zero-Lean Experimental Design and Condition Keys}');end=s.index(r'\clearpag…
+  |
+
+E702 Multiple statements on one line (semicolon)
+ --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py:5:22
+  |
+3 | P=Path('/tmp/p2-article-astra-review');d=json.loads((P/'verified_data.json').read_text());cells=d['cells'];effects=d['effects'];control…
+4 | article=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/shot_pattern_a…
+5 | s=article.read_text(); start=s.index(r'\subsection{Selected Zero-Lean Experimental Design and Condition Keys}');end=s.index(r'\clearpag…
+  |                      ^
+6 | lines=[]; checks=[]
+7 | def add(x=''):lines.append(x)
+  |
+
+E702 Multiple statements on one line (semicolon)
+ --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py:5:112
+  |
+3 | P=Path('/tmp/p2-article-astra-review');d=json.loads((P/'verified_data.json').read_text());cells=d['cells'];effects=d['effects'];control…
+4 | article=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/shot_pattern_a…
+5 | s=article.read_text(); start=s.index(r'\subsection{Selected Zero-Lean Experimental Design and Condition Keys}');end=s.index(r'\clearpag…
+  |                                                                                                                ^
+6 | lines=[]; checks=[]
+7 | def add(x=''):lines.append(x)
+  |
+
+E702 Multiple statements on one line (semicolon)
+ --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py:6:9
+  |
+4 | article=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/shot_pattern_a…
+5 | s=article.read_text(); start=s.index(r'\subsection{Selected Zero-Lean Experimental Design and Condition Keys}');end=s.index(r'\clearpag…
+6 | lines=[]; checks=[]
+  |         ^
+7 | def add(x=''):lines.append(x)
+8 | def num(v,places=None):
+  |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py:16:23
+   |
+14 |  add(r'\caption{'+title+r'}\\')
+15 |  add(r'\toprule '+ ' & '.join(headers)+r' \\ \midrule')
+16 |  add(r'\endfirsthead');add(r'\toprule '+' & '.join(headers)+r' \\ \midrule');add(r'\endhead')
+   |                       ^
+17 |  for row in rows:add(' & '.join(map(str,row))+r' \\')
+18 |  add(r'\bottomrule\end{longtable}')
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py:16:77
+   |
+14 |  add(r'\caption{'+title+r'}\\')
+15 |  add(r'\toprule '+ ' & '.join(headers)+r' \\ \midrule')
+16 |  add(r'\endfirsthead');add(r'\toprule '+' & '.join(headers)+r' \\ \midrule');add(r'\endhead')
+   |                                                                             ^
+17 |  for row in rows:add(' & '.join(map(str,row))+r' \\')
+18 |  add(r'\bottomrule\end{longtable}')
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py:17:17
+   |
+15 |  add(r'\toprule '+ ' & '.join(headers)+r' \\ \midrule')
+16 |  add(r'\endfirsthead');add(r'\toprule '+' & '.join(headers)+r' \\ \midrule');add(r'\endhead')
+17 |  for row in rows:add(' & '.join(map(str,row))+r' \\')
+   |                 ^
+18 |  add(r'\bottomrule\end{longtable}')
+19 | protocol={'original_primary/1':'P','original_control/1':'OC','pw-primary-face-bounds/1':'WP','pw-control-face-bounds/1':'WC','driver-c…
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py:29:17
+   |
+27 | rows=[]
+28 | for i,c in enumerate(cells):
+29 |  cfg=c['config'];rows.append([f'C{i+1:02}',clubnames[cfg['club']['club_id']],int(cfg['curve_scale']),int(cfg['noise']['standard_deviat…
+   |                 ^
+30 | add(r'{\small');table('Selected Condition and Protocol Keys',['Key','Club','Curve','Twist SD ($^\circ$)','Profile','Protocol'],rows);a…
+31 | add('Targets are Driver 178.948758 m, 7-Iron 127.881942 m, and PW 77.402477 m. Face, path and speed are solved before sampling, with n…
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py:30:16
+   |
+28 | for i,c in enumerate(cells):
+29 |  cfg=c['config'];rows.append([f'C{i+1:02}',clubnames[cfg['club']['club_id']],int(cfg['curve_scale']),int(cfg['noise']['standard_deviat…
+30 | add(r'{\small');table('Selected Condition and Protocol Keys',['Key','Club','Curve','Twist SD ($^\circ$)','Profile','Protocol'],rows);a…
+   |                ^
+31 | add('Targets are Driver 178.948758 m, 7-Iron 127.881942 m, and PW 77.402477 m. Face, path and speed are solved before sampling, with n…
+32 | add(r'\subsection{Dispersion, Absolute Scoring, and Within-Condition Benefits}')
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py:30:133
+   |
+28 | …
+29 | …club_id']],int(cfg['curve_scale']),int(cfg['noise']['standard_deviations'][0]),'S' if c['cell'].endswith('shaft_only') else 'C',proto…
+30 | …','Club','Curve','Twist SD ($^\circ$)','Profile','Protocol'],rows);add('}')
+   |                                                                    ^
+31 | …77.402477 m. Face, path and speed are solved before sampling, with no post-flight aim correction. The maximum residual among the 72 s…
+32 | …on Benefits}')
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py:35:67
+   |
+33 | add(r'All geometry columns below use each pattern\textquotesingle s individual supported endpoints. $n_e$ is that endpoint count; ever…
+34 | for club in clubnames:
+35 |  subset=[c for c in cells if c['config']['club']['club_id']==club];rows=[];benefits=[]
+   |                                                                   ^
+36 |  for c in subset:
+37 |   for pat in ['Straight','Draw','Fade']:
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py:35:75
+   |
+33 | add(r'All geometry columns below use each pattern\textquotesingle s individual supported endpoints. $n_e$ is that endpoint count; ever…
+34 | for club in clubnames:
+35 |  subset=[c for c in cells if c['config']['club']['club_id']==club];rows=[];benefits=[]
+   |                                                                           ^
+36 |  for c in subset:
+37 |   for pat in ['Straight','Draw','Fade']:
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py:38:24
+   |
+36 |  for c in subset:
+37 |   for pat in ['Straight','Draw','Fade']:
+38 |    st=c['summary'][pat];sc=c['course_scoring'];rows.append([keys[c['cell']],pat,st['supported_n'],num(st['lateral_sd_m'],3),num(st['do…
+   |                        ^
+39 |    if pat!='Straight':
+40 |     v=sc['paired_benefit_vs_straight'][pat];benefits.append([keys[c['cell']],pat,sc['paired_n'],*[num(v[k]) for k in ['estimate','lowe…
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py:38:47
+   |
+36 |  for c in subset:
+37 |   for pat in ['Straight','Draw','Fade']:
+38 |    st=c['summary'][pat];sc=c['course_scoring'];rows.append([keys[c['cell']],pat,st['supported_n'],num(st['lateral_sd_m'],3),num(st['do…
+   |                                               ^
+39 |    if pat!='Straight':
+40 |     v=sc['paired_benefit_vs_straight'][pat];benefits.append([keys[c['cell']],pat,sc['paired_n'],*[num(v[k]) for k in ['estimate','lowe…
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py:40:44
+   |
+38 |    st=c['summary'][pat];sc=c['course_scoring'];rows.append([keys[c['cell']],pat,st['supported_n'],num(st['lateral_sd_m'],3),num(st['do…
+39 |    if pat!='Straight':
+40 |     v=sc['paired_benefit_vs_straight'][pat];benefits.append([keys[c['cell']],pat,sc['paired_n'],*[num(v[k]) for k in ['estimate','lowe…
+   |                                            ^
+41 |  add(r'{\small');table(clubnames[club]+' Endpoint Geometry and Absolute SG',['Key','Pattern',r'$n_e$',r'$\sigma_Y$',r'$\sigma_X$','RMS…
+42 | add(r'The scoring context is a 400 m tee opportunity for Driver, with a 15 m fairway half-width and rough outside. The 7-Iron and PW u…
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py:41:17
+   |
+39 |    if pat!='Straight':
+40 |     v=sc['paired_benefit_vs_straight'][pat];benefits.append([keys[c['cell']],pat,sc['paired_n'],*[num(v[k]) for k in ['estimate','lowe…
+41 |  add(r'{\small');table(clubnames[club]+' Endpoint Geometry and Absolute SG',['Key','Pattern',r'$n_e$',r'$\sigma_Y$',r'$\sigma_X$','RMS…
+   |                 ^
+42 | add(r'The scoring context is a 400 m tee opportunity for Driver, with a 15 m fairway half-width and rough outside. The 7-Iron and PW u…
+43 | add(r'\subsection{Paired SD and Curve-Strength Interactions}')
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py:41:154
+   |
+39 | …
+40 | …ired_n'],*[num(v[k]) for k in ['estimate','lower_95','upper_95']]])
+41 | …tern',r'$n_e$',r'$\sigma_Y$',r'$\sigma_X$','RMSE','Mean SG'],rows);table(clubnames[club]+' Paired Benefit Relative to Straight',['Key…
+   |                                                                    ^
+42 | …lf-width and rough outside. The 7-Iron and PW use fairway approach opportunities at their respective nominal target distances, with a…
+43 | …
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py:41:289
+   |
+39 | …
+40 | …
+41 | …'Pattern',r'$n_3$','Estimate','Lower 95\%','Upper 95\%'],benefits);add('}')
+   |                                                                    ^
+42 | …entered circular green of radius 15 m and rough outside. First ground contact is treated as the stopping lie: bounce, roll and hazard…
+43 | …
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py:45:8
+   |
+43 | add(r'\subsection{Paired SD and Curve-Strength Interactions}')
+44 | add(r'For pattern $P$, each interaction is the rowwise difference $[(SG_P-SG_S)_B-(SG_P-SG_S)_A]$ on the common supported indices of a…
+45 | rows=[];erows=[]
+   |        ^
+46 | for i,e in enumerate(effects):
+47 |  key=f'E{i+1:02}';kind='Twist SD 1 to 2' if e['comparison_kind']=='shaft_rotation_sd' else 'Curve 1 to 2';a,b=e['source_cells'];pa,pb=…
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py:47:18
+   |
+45 | rows=[];erows=[]
+46 | for i,e in enumerate(effects):
+47 |  key=f'E{i+1:02}';kind='Twist SD 1 to 2' if e['comparison_kind']=='shaft_rotation_sd' else 'Curve 1 to 2';a,b=e['source_cells'];pa,pb=…
+   |                  ^
+48 |  for pat,f in [('Draw','draw_minus_straight_change'),('Fade','fade_minus_straight_change')]:erows.append([key,pat,e['common_six_n'],*[…
+49 | add(r'{\small');table('Ordered Interaction Source Keys',['Key','Contrast','A','B'],rows);table('Direct Common-Six Relative-Pattern Int…
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py:47:106
+   |
+45 | rows=[];erows=[]
+46 | for i,e in enumerate(effects):
+47 |  key=f'E{i+1:02}';kind='Twist SD 1 to 2' if e['comparison_kind']=='shaft_rotation_sd' else 'Curve 1 to 2';a,b=e['source_cells'];pa,pb=…
+   |                                                                                                          ^
+48 |  for pat,f in [('Draw','draw_minus_straight_change'),('Fade','fade_minus_straight_change')]:erows.append([key,pat,e['common_six_n'],*[…
+49 | add(r'{\small');table('Ordered Interaction Source Keys',['Key','Contrast','A','B'],rows);table('Direct Common-Six Relative-Pattern Int…
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py:47:128
+   |
+45 | rows=[];erows=[]
+46 | for i,e in enumerate(effects):
+47 |  key=f'E{i+1:02}';kind='Twist SD 1 to 2' if e['comparison_kind']=='shaft_rotation_sd' else 'Curve 1 to 2';a,b=e['source_cells'];pa,pb=…
+   |                                                                                                                                ^
+48 |  for pat,f in [('Draw','draw_minus_straight_change'),('Fade','fade_minus_straight_change')]:erows.append([key,pat,e['common_six_n'],*[…
+49 | add(r'{\small');table('Ordered Interaction Source Keys',['Key','Contrast','A','B'],rows);table('Direct Common-Six Relative-Pattern Int…
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py:47:156
+   |
+45 | …
+46 | …
+47 | …e 'Curve 1 to 2';a,b=e['source_cells'];pa,pb=e['source_protocols'];rows.append([key,kind,keys[a]+'/'+protocol[pa],keys[b]+'/'+protoco…
+   |                                                                    ^
+48 | …)]:erows.append([key,pat,e['common_six_n'],*[num(e[f][k]) for k in ['estimate','lower_95','upper_95']]])
+49 | …table('Direct Common-Six Relative-Pattern Interactions',['Key','Pattern',r'$n_6$','Estimate','Lower 95\%','Upper 95\%'],erows);add('}…
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py:48:92
+   |
+46 | for i,e in enumerate(effects):
+47 |  key=f'E{i+1:02}';kind='Twist SD 1 to 2' if e['comparison_kind']=='shaft_rotation_sd' else 'Curve 1 to 2';a,b=e['source_cells'];pa,pb=…
+48 |  for pat,f in [('Draw','draw_minus_straight_change'),('Fade','fade_minus_straight_change')]:erows.append([key,pat,e['common_six_n'],*[…
+   |                                                                                            ^
+49 | add(r'{\small');table('Ordered Interaction Source Keys',['Key','Contrast','A','B'],rows);table('Direct Common-Six Relative-Pattern Int…
+50 | add(r'In these selected controls, increasing twist SD from $1^\circ$ to $2^\circ$ increases Draw relative to Straight for Driver and P…
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py:49:16
+   |
+47 |  key=f'E{i+1:02}';kind='Twist SD 1 to 2' if e['comparison_kind']=='shaft_rotation_sd' else 'Curve 1 to 2';a,b=e['source_cells'];pa,pb=…
+48 |  for pat,f in [('Draw','draw_minus_straight_change'),('Fade','fade_minus_straight_change')]:erows.append([key,pat,e['common_six_n'],*[…
+49 | add(r'{\small');table('Ordered Interaction Source Keys',['Key','Contrast','A','B'],rows);table('Direct Common-Six Relative-Pattern Int…
+   |                ^
+50 | add(r'In these selected controls, increasing twist SD from $1^\circ$ to $2^\circ$ increases Draw relative to Straight for Driver and P…
+51 | add(r'\subsection{Fixed-Target Across-Lean Controls}')
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py:49:89
+   |
+47 |  key=f'E{i+1:02}';kind='Twist SD 1 to 2' if e['comparison_kind']=='shaft_rotation_sd' else 'Curve 1 to 2';a,b=e['source_cells'];pa,pb=…
+48 |  for pat,f in [('Draw','draw_minus_straight_change'),('Fade','fade_minus_straight_change')]:erows.append([key,pat,e['common_six_n'],*[…
+49 | add(r'{\small');table('Ordered Interaction Source Keys',['Key','Contrast','A','B'],rows);table('Direct Common-Six Relative-Pattern Int…
+   |                                                                                         ^
+50 | add(r'In these selected controls, increasing twist SD from $1^\circ$ to $2^\circ$ increases Draw relative to Straight for Driver and P…
+51 | add(r'\subsection{Fixed-Target Across-Lean Controls}')
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py:49:216
+   |
+47 | …cols'];rows.append([key,kind,keys[a]+'/'+protocol[pa],keys[b]+'/'+protocol[pb]])
+48 | …r k in ['estimate','lower_95','upper_95']]])
+49 | …y','Pattern',r'$n_6$','Estimate','Lower 95\%','Upper 95\%'],erows);add('}')
+   |                                                                    ^
+50 | …les. The 7-Iron SD interactions span zero; that is not proof of equivalence or negligible effects. Increasing curve scale from 1 to 2…
+51 | …
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py:57:23
+   |
+55 | for i,n in enumerate(d['nominals']):
+56 |  for pat in ['Straight','Draw','Fade']:
+57 |   q=n['nominals'][pat];rows.append([f'F{i//2+1}'+('A' if i%2==0 else 'B'),pat,num(q['face_deg'],5),num(q['path_deg'],5),num(q['speed_m…
+   |                       ^
+58 | add(r'{\small');table('Signed Nominal Inputs for Fixed-Target Controls',['Key','Pattern','Face ($^\circ$)','Path ($^\circ$)','Speed (m…
+59 | rows=[]
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py:58:16
+   |
+56 |  for pat in ['Straight','Draw','Fade']:
+57 |   q=n['nominals'][pat];rows.append([f'F{i//2+1}'+('A' if i%2==0 else 'B'),pat,num(q['face_deg'],5),num(q['path_deg'],5),num(q['speed_m…
+58 | add(r'{\small');table('Signed Nominal Inputs for Fixed-Target Controls',['Key','Pattern','Face ($^\circ$)','Path ($^\circ$)','Speed (m…
+   |                ^
+59 | rows=[]
+60 | for i,e in enumerate(controls):
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py:61:92
+   |
+59 | rows=[]
+60 | for i,e in enumerate(controls):
+61 |  for pat,f in [('Draw','draw_minus_straight_change'),('Fade','fade_minus_straight_change')]:rows.append([f'F{i+1}',pat,e['common_six_n…
+   |                                                                                            ^
+62 | table('Fixed-Target Common-Six Relative-Pattern Interactions',['Key','Pattern',r'$n_6$','Estimate','Lower 95\%','Upper 95\%'],rows);ad…
+63 | add(r'The Driver common-six intersection excludes 60 of the 10,000 shared indices; the PW intersection excludes one. These counts are …
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py:62:132
+   |
+60 | …
+61 | …e_minus_straight_change')]:rows.append([f'F{i+1}',pat,e['common_six_n'],*[num(e[f][k]) for k in ['estimate','lower_95','upper_95']]])
+62 | …ey','Pattern',r'$n_6$','Estimate','Lower 95\%','Upper 95\%'],rows);add('}')
+   |                                                                    ^
+63 | …0 shared indices; the PW intersection excludes one. These counts are union exclusions across six populations, not counts of one diagn…
+64 | …)
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py:69:78
+   |
+67 |  subset=[c for c in cells if c['config']['club']['club_id']==club]
+68 |  for pat in ['Draw','Fade']:
+69 |   vs=[c['course_scoring']['paired_benefit_vs_straight'][pat] for c in subset];pos=sum(v['lower_95']>0 for v in vs);neg=sum(v['upper_95…
+   |                                                                              ^
+70 |   rows.append([clubnames[club],pat,num(min(v['estimate'] for v in vs)),num(max(v['estimate'] for v in vs)),f'{pos}/{neg}/{8-pos-neg}'])
+71 | add(r'{\small');table('Selected Relative-SG Ranges and Pointwise Interval Directions',['Club','Pattern','Minimum','Maximum','Pos/Neg/S…
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py:69:115
+   |
+67 |  subset=[c for c in cells if c['config']['club']['club_id']==club]
+68 |  for pat in ['Draw','Fade']:
+69 |   vs=[c['course_scoring']['paired_benefit_vs_straight'][pat] for c in subset];pos=sum(v['lower_95']>0 for v in vs);neg=sum(v['upper_95…
+   |                                                                                                                   ^
+70 |   rows.append([clubnames[club],pat,num(min(v['estimate'] for v in vs)),num(max(v['estimate'] for v in vs)),f'{pos}/{neg}/{8-pos-neg}'])
+71 | add(r'{\small');table('Selected Relative-SG Ranges and Pointwise Interval Directions',['Club','Pattern','Minimum','Maximum','Pos/Neg/S…
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py:71:16
+   |
+69 |   vs=[c['course_scoring']['paired_benefit_vs_straight'][pat] for c in subset];pos=sum(v['lower_95']>0 for v in vs);neg=sum(v['upper_95…
+70 |   rows.append([clubnames[club],pat,num(min(v['estimate'] for v in vs)),num(max(v['estimate'] for v in vs)),f'{pos}/{neg}/{8-pos-neg}'])
+71 | add(r'{\small');table('Selected Relative-SG Ranges and Pointwise Interval Directions',['Club','Pattern','Minimum','Maximum','Pos/Neg/S…
+   |                ^
+72 | add(r'For the eight selected 7-Iron conditions, Fade intervals are positive and Draw intervals negative. Driver and PW have different …
+73 | add(r'The geometric derivative above establishes that face closure and delivered loft are coupled for this shaft-axis convention; it d…
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py:71:149
+   |
+69 | …sum(v['lower_95']>0 for v in vs);neg=sum(v['upper_95']<0 for v in vs)
+70 | …estimate'] for v in vs)),f'{pos}/{neg}/{8-pos-neg}'])
+71 | …ns',['Club','Pattern','Minimum','Maximum','Pos/Neg/Spans 0'],rows);add('}')
+   |                                                                    ^
+72 | …aw intervals negative. Driver and PW have different signs and zero-spanning cases as tabulated. Consequently these selected modeled c…
+73 | …oft are coupled for this shaft-axis convention; it does not by itself establish carry direction. The earlier source-bound Straight ex…
+   |
+
+T201 `print` found
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py:85:1
+   |
+83 | (P/'generated_numeric_fields.json').write_text(json.dumps(checks,indent=2)+'\n')
+84 | (P/'repaired_article.tex').write_text(s)
+85 | print(hashlib.sha256(s.encode()).hexdigest(),len(checks))
+   | ^^^^^
+   |
+help: Remove `print`
+
+E702 Multiple statements on one line (semicolon)
+ --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/tidy_article.py:3:143
+  |
+1 | …
+2 | …
+3 | …ft/docs/research/shot_pattern_analysis/shot_pattern_analysis.tex');s=p.read_text()
+  |                                                                    ^
+4 | …*\n','\n',m[0]),s,flags=re.S)
+5 | …
+  |
+
+FURB167 [*] Use of regular expression alias `re.S`
+ --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/tidy_article.py:4:101
+  |
+2 | import re
+3 | p=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/shot_pattern_analysi…
+4 | s=re.sub(r'\\begin\{longtable\}.*?\\end\{longtable\}',lambda m:re.sub(r'\n\s*\n','\n',m[0]),s,flags=re.S)
+  |                                                                                                     ^^^^
+5 | s=s.replace(r'\date{October 8, 2026}',r'\date{October 10, 2026}')
+6 | s=s.replace(r'\texttt{table9-full-plus-anchor-reconciled-putting/2}',r'\path{table9-full-plus-anchor-reconciled-putting/2}')
+  |
+help: Replace with `re.DOTALL`
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/tidy_article.py:10:16
+   |
+ 8 |  s=s.replace(r'\texttt{'+name.replace('_',r'\_')+'}',r'\path{'+name+'}')
+ 9 | s=s.replace('SG units are strokes per modeled opportunity.','SG units are strokes per modeled opportunity. Numerical notation such as …
+10 | p.write_text(s);Path('/tmp/p2-article-astra-review/repaired_article.tex').write_text(s)
+   |                ^
+11 | print(len(s.splitlines()))
+   |
+
+T201 `print` found
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/tidy_article.py:11:1
+   |
+ 9 | s=s.replace('SG units are strokes per modeled opportunity.','SG units are strokes per modeled opportunity. Numerical notation such as …
+10 | p.write_text(s);Path('/tmp/p2-article-astra-review/repaired_article.tex').write_text(s)
+11 | print(len(s.splitlines()))
+   | ^^^^^
+   |
+help: Remove `print`
+
+E401 [*] Multiple imports on one line
+ --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/verify_repair.py:2:1
+  |
+1 | from pathlib import Path
+2 | import json,re,hashlib
+  | ^^^^^^^^^^^^^^^^^^^^^^
+3 | P=Path('/tmp/p2-article-astra-review');d=json.loads((P/'verified_data.json').read_text());s=(P/'repaired_article.tex').read_text();old=…
+4 | def verify(got,want,label):
+  |
+help: Split imports
+
+E702 Multiple statements on one line (semicolon)
+ --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/verify_repair.py:3:39
+  |
+1 | from pathlib import Path
+2 | import json,re,hashlib
+3 | P=Path('/tmp/p2-article-astra-review');d=json.loads((P/'verified_data.json').read_text());s=(P/'repaired_article.tex').read_text();old=…
+  |                                       ^
+4 | def verify(got,want,label):
+5 |  if len(got)!=len(want):raise ValueError((label,len(got),len(want)))
+  |
+
+E702 Multiple statements on one line (semicolon)
+ --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/verify_repair.py:3:90
+  |
+1 | from pathlib import Path
+2 | import json,re,hashlib
+3 | P=Path('/tmp/p2-article-astra-review');d=json.loads((P/'verified_data.json').read_text());s=(P/'repaired_article.tex').read_text();old=…
+  |                                                                                          ^
+4 | def verify(got,want,label):
+5 |  if len(got)!=len(want):raise ValueError((label,len(got),len(want)))
+  |
+
+E702 Multiple statements on one line (semicolon)
+ --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/verify_repair.py:3:131
+  |
+1 | …
+2 | …
+3 | …_data.json').read_text());s=(P/'repaired_article.tex').read_text();old=(P/'rejected_article.tex').read_text();out=[]
+  |                                                                    ^
+4 | …
+5 | …t)))
+  |
+
+E702 Multiple statements on one line (semicolon)
+ --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/verify_repair.py:3:174
+  |
+1 | …
+2 | …
+3 | …ticle.tex').read_text();old=(P/'rejected_article.tex').read_text();out=[]
+  |                                                                    ^
+4 | …
+5 | …
+  |
+
+E701 Multiple statements on one line (colon)
+ --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/verify_repair.py:5:24
+  |
+3 | P=Path('/tmp/p2-article-astra-review');d=json.loads((P/'verified_data.json').read_text());s=(P/'repaired_article.tex').read_text();old=…
+4 | def verify(got,want,label):
+5 |  if len(got)!=len(want):raise ValueError((label,len(got),len(want)))
+  |                        ^
+6 |  for a,b in zip(got,want,strict=True):
+7 |   if abs(float(a)-float(b))>max(abs(float(b))*5.1e-7,5.01e-4 if label.endswith('geometry') else 1e-15):raise ValueError((label,a,b))
+  |
+
+E701 Multiple statements on one line (colon)
+ --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/verify_repair.py:7:103
+  |
+5 |  if len(got)!=len(want):raise ValueError((label,len(got),len(want)))
+6 |  for a,b in zip(got,want,strict=True):
+7 |   if abs(float(a)-float(b))>max(abs(float(b))*5.1e-7,5.01e-4 if label.endswith('geometry') else 1e-15):raise ValueError((label,a,b))
+  |                                                                                                       ^
+8 |  out.append({'field':label,'values':got,'source_values':want})
+9 | def nums(line):return re.findall(r'\\numtext\{([^}]+)\}',line)
+  |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/verify_repair.py:14:37
+   |
+12 |  fields=[f.strip() for f in line.rstrip('\\ ').split('&')]
+13 |  if re.match(r'C\d\d & (Straight|Draw|Fade)',line):
+14 |   c=d['cells'][int(fields[0][1:])-1];pat=fields[1];st=c['summary'][pat];sc=c['course_scoring']
+   |                                     ^
+15 |   if len(fields)==7:
+16 |    if int(fields[2])!=st['supported_n']:raise ValueError('endpoint n')
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/verify_repair.py:14:51
+   |
+12 |  fields=[f.strip() for f in line.rstrip('\\ ').split('&')]
+13 |  if re.match(r'C\d\d & (Straight|Draw|Fade)',line):
+14 |   c=d['cells'][int(fields[0][1:])-1];pat=fields[1];st=c['summary'][pat];sc=c['course_scoring']
+   |                                                   ^
+15 |   if len(fields)==7:
+16 |    if int(fields[2])!=st['supported_n']:raise ValueError('endpoint n')
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/verify_repair.py:14:72
+   |
+12 |  fields=[f.strip() for f in line.rstrip('\\ ').split('&')]
+13 |  if re.match(r'C\d\d & (Straight|Draw|Fade)',line):
+14 |   c=d['cells'][int(fields[0][1:])-1];pat=fields[1];st=c['summary'][pat];sc=c['course_scoring']
+   |                                                                        ^
+15 |   if len(fields)==7:
+16 |    if int(fields[2])!=st['supported_n']:raise ValueError('endpoint n')
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/verify_repair.py:16:40
+   |
+14 |   c=d['cells'][int(fields[0][1:])-1];pat=fields[1];st=c['summary'][pat];sc=c['course_scoring']
+15 |   if len(fields)==7:
+16 |    if int(fields[2])!=st['supported_n']:raise ValueError('endpoint n')
+   |                                        ^
+17 |    verify(nums(line),[st[k] for k in ['lateral_sd_m','downrange_sd_m','target_rmse_m']]+[sc['patterns'][pat]['mean_strokes_gained']],f…
+18 |   else:
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/verify_repair.py:17:159
+   |
+15 | …
+16 | …
+17 | …'patterns'][pat]['mean_strokes_gained']],fields[0]+pat+'geometry');counts['geometry']+=1
+   |                                                                    ^
+18 | …
+19 | …
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/verify_repair.py:19:37
+   |
+17 |    verify(nums(line),[st[k] for k in ['lateral_sd_m','downrange_sd_m','target_rmse_m']]+[sc['patterns'][pat]['mean_strokes_gained']],f…
+18 |   else:
+19 |    if int(fields[2])!=sc['paired_n']:raise ValueError('SG n')
+   |                                     ^
+20 |    verify(nums(line),[sc['paired_benefit_vs_straight'][pat][k] for k in ['estimate','lower_95','upper_95']],fields[0]+pat);counts['ben…
+21 |  elif re.match(r'E\d\d & (Draw|Fade)',line):
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/verify_repair.py:20:123
+   |
+18 |   else:
+19 |    if int(fields[2])!=sc['paired_n']:raise ValueError('SG n')
+20 |    verify(nums(line),[sc['paired_benefit_vs_straight'][pat][k] for k in ['estimate','lower_95','upper_95']],fields[0]+pat);counts['ben…
+   |                                                                                                                           ^
+21 |  elif re.match(r'E\d\d & (Draw|Fade)',line):
+22 |   e=d['effects'][int(fields[0][1:])-1];f=fields[1].lower()+'_minus_straight_change'
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/verify_repair.py:22:39
+   |
+20 |    verify(nums(line),[sc['paired_benefit_vs_straight'][pat][k] for k in ['estimate','lower_95','upper_95']],fields[0]+pat);counts['ben…
+21 |  elif re.match(r'E\d\d & (Draw|Fade)',line):
+22 |   e=d['effects'][int(fields[0][1:])-1];f=fields[1].lower()+'_minus_straight_change'
+   |                                       ^
+23 |   if int(fields[2])!=e['common_six_n']:raise ValueError('effect n')
+24 |   verify(nums(line),[e[f][k] for k in ['estimate','lower_95','upper_95']],fields[0]+f);counts['effects']+=1
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/verify_repair.py:23:39
+   |
+21 |  elif re.match(r'E\d\d & (Draw|Fade)',line):
+22 |   e=d['effects'][int(fields[0][1:])-1];f=fields[1].lower()+'_minus_straight_change'
+23 |   if int(fields[2])!=e['common_six_n']:raise ValueError('effect n')
+   |                                       ^
+24 |   verify(nums(line),[e[f][k] for k in ['estimate','lower_95','upper_95']],fields[0]+f);counts['effects']+=1
+25 |  elif re.match(r'F[12][AB] &',line):
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/verify_repair.py:24:87
+   |
+22 |   e=d['effects'][int(fields[0][1:])-1];f=fields[1].lower()+'_minus_straight_change'
+23 |   if int(fields[2])!=e['common_six_n']:raise ValueError('effect n')
+24 |   verify(nums(line),[e[f][k] for k in ['estimate','lower_95','upper_95']],fields[0]+f);counts['effects']+=1
+   |                                                                                       ^
+25 |  elif re.match(r'F[12][AB] &',line):
+26 |   i=(int(fields[0][1])-1)*2+(fields[0][2]=='B');n=d['nominals'][i]['nominals'][fields[1]]
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/verify_repair.py:26:48
+   |
+24 |   verify(nums(line),[e[f][k] for k in ['estimate','lower_95','upper_95']],fields[0]+f);counts['effects']+=1
+25 |  elif re.match(r'F[12][AB] &',line):
+26 |   i=(int(fields[0][1])-1)*2+(fields[0][2]=='B');n=d['nominals'][i]['nominals'][fields[1]]
+   |                                                ^
+27 |   for got,key in zip(nums(line),['face_deg','path_deg','speed_mps','residual_m'],strict=True):
+28 |    if abs(float(got)-n[key])>max(5.01e-6,abs(n[key])*5.1e-7):raise ValueError('nominal')
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/verify_repair.py:28:61
+   |
+26 |   i=(int(fields[0][1])-1)*2+(fields[0][2]=='B');n=d['nominals'][i]['nominals'][fields[1]]
+27 |   for got,key in zip(nums(line),['face_deg','path_deg','speed_mps','residual_m'],strict=True):
+28 |    if abs(float(got)-n[key])>max(5.01e-6,abs(n[key])*5.1e-7):raise ValueError('nominal')
+   |                                                             ^
+29 |   counts['control_nominals']+=1
+30 |  elif re.match(r'F[12] & (Draw|Fade)',line):
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/verify_repair.py:31:39
+   |
+29 |   counts['control_nominals']+=1
+30 |  elif re.match(r'F[12] & (Draw|Fade)',line):
+31 |   e=d['controls'][int(fields[0][1])-1];f=fields[1].lower()+'_minus_straight_change'
+   |                                       ^
+32 |   if int(fields[2])!=e['common_six_n']:raise ValueError('control n')
+33 |   verify(nums(line),[e[f][k] for k in ['estimate','lower_95','upper_95']],fields[0]+f);counts['controls']+=1
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/verify_repair.py:32:39
+   |
+30 |  elif re.match(r'F[12] & (Draw|Fade)',line):
+31 |   e=d['controls'][int(fields[0][1])-1];f=fields[1].lower()+'_minus_straight_change'
+32 |   if int(fields[2])!=e['common_six_n']:raise ValueError('control n')
+   |                                       ^
+33 |   verify(nums(line),[e[f][k] for k in ['estimate','lower_95','upper_95']],fields[0]+f);counts['controls']+=1
+34 | expected={'geometry':72,'benefits':48,'effects':24,'control_nominals':12,'controls':4}
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/verify_repair.py:33:87
+   |
+31 |   e=d['controls'][int(fields[0][1])-1];f=fields[1].lower()+'_minus_straight_change'
+32 |   if int(fields[2])!=e['common_six_n']:raise ValueError('control n')
+33 |   verify(nums(line),[e[f][k] for k in ['estimate','lower_95','upper_95']],fields[0]+f);counts['controls']+=1
+   |                                                                                       ^
+34 | expected={'geometry':72,'benefits':48,'effects':24,'control_nominals':12,'controls':4}
+35 | if counts!=expected:raise ValueError(counts)
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/verify_repair.py:35:20
+   |
+33 |   verify(nums(line),[e[f][k] for k in ['estimate','lower_95','upper_95']],fields[0]+f);counts['controls']+=1
+34 | expected={'geometry':72,'benefits':48,'effects':24,'control_nominals':12,'controls':4}
+35 | if counts!=expected:raise ValueError(counts)
+   |                    ^
+36 | marker=r'\section{Historical Phase-One Status and Scope}'
+37 | if s[s.index(marker):]!=old[old.index(marker):]:raise ValueError('historical changed')
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/verify_repair.py:37:48
+   |
+35 | if counts!=expected:raise ValueError(counts)
+36 | marker=r'\section{Historical Phase-One Status and Scope}'
+37 | if s[s.index(marker):]!=old[old.index(marker):]:raise ValueError('historical changed')
+   |                                                ^
+38 | for p,h in d['input_sha256'].items():
+39 |  if hashlib.sha256(Path(p).read_bytes()).hexdigest()!=h:raise ValueError(p)
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/verify_repair.py:39:56
+   |
+37 | if s[s.index(marker):]!=old[old.index(marker):]:raise ValueError('historical changed')
+38 | for p,h in d['input_sha256'].items():
+39 |  if hashlib.sha256(Path(p).read_bytes()).hexdigest()!=h:raise ValueError(p)
+   |                                                        ^
+40 | # Check balanced environments and braces, excluding escaped braces and comments.
+41 | stack=[]
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/verify_repair.py:43:18
+   |
+41 | stack=[]
+42 | for kind,name in re.findall(r'\\(begin|end)\{([^}]+)\}',s):
+43 |  if kind=='begin':stack.append(name)
+   |                  ^
+44 |  elif not stack or stack.pop()!=name:raise ValueError((kind,name))
+45 | if stack:raise ValueError(stack)
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/verify_repair.py:44:37
+   |
+42 | for kind,name in re.findall(r'\\(begin|end)\{([^}]+)\}',s):
+43 |  if kind=='begin':stack.append(name)
+44 |  elif not stack or stack.pop()!=name:raise ValueError((kind,name))
+   |                                     ^
+45 | if stack:raise ValueError(stack)
+46 | res={'article_sha256':hashlib.sha256(s.encode()).hexdigest(),'counts':counts,'numeric_checks':out,'historical_section_unchanged':True,…
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/verify_repair.py:45:9
+   |
+43 |  if kind=='begin':stack.append(name)
+44 |  elif not stack or stack.pop()!=name:raise ValueError((kind,name))
+45 | if stack:raise ValueError(stack)
+   |         ^
+46 | res={'article_sha256':hashlib.sha256(s.encode()).hexdigest(),'counts':counts,'numeric_checks':out,'historical_section_unchanged':True,…
+47 | (P/'repair_verification.json').write_text(json.dumps(res,indent=2)+'\n');print(json.dumps({k:v for k,v in res.items() if k!='numeric_c…
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/verify_repair.py:47:73
+   |
+45 | if stack:raise ValueError(stack)
+46 | res={'article_sha256':hashlib.sha256(s.encode()).hexdigest(),'counts':counts,'numeric_checks':out,'historical_section_unchanged':True,…
+47 | (P/'repair_verification.json').write_text(json.dumps(res,indent=2)+'\n');print(json.dumps({k:v for k,v in res.items() if k!='numeric_c…
+   |                                                                         ^
+   |
+
+T201 `print` found
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/verify_repair.py:47:74
+   |
+45 | if stack:raise ValueError(stack)
+46 | res={'article_sha256':hashlib.sha256(s.encode()).hexdigest(),'counts':counts,'numeric_checks':out,'historical_section_unchanged':True,…
+47 | (P/'repair_verification.json').write_text(json.dumps(res,indent=2)+'\n');print(json.dumps({k:v for k,v in res.items() if k!='numeric_c…
+   |                                                                          ^^^^^
+   |
+help: Remove `print`
+
+E401 [*] Multiple imports on one line
+ --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:3:1
+  |
+1 | from pathlib import Path
+2 | from decimal import Decimal
+3 | import hashlib,json,re,collections
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+4 | ROOT=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift')
+5 | P=ROOT/'docs/research/shot_pattern_analysis/phase2'
+  |
+help: Split imports
+
+E731 Do not assign a `lambda` expression, use a `def`
+ --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:7:1
+  |
+5 | P=ROOT/'docs/research/shot_pattern_analysis/phase2'
+6 | ARTICLE=P.parent/'shot_pattern_analysis.tex'
+7 | h=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+8 | trace_path=P/'validation/selected_headline_traceability_v1/review.json'
+9 | trace=json.loads(trace_path.read_text()); ref_path=P/'validation/protocol_name_recovery_v6/expected_numeric_hashes.json'; ref=json.loa…
+  |
+help: Rewrite `h` as a `def`
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:9:41
+   |
+ 7 | h=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+ 8 | trace_path=P/'validation/selected_headline_traceability_v1/review.json'
+ 9 | trace=json.loads(trace_path.read_text()); ref_path=P/'validation/protocol_name_recovery_v6/expected_numeric_hashes.json'; ref=json.loa…
+   |                                         ^
+10 | bindings={P/name:digest for name,digest in trace['source_sha256'].items()}
+11 | bindings.update({P/'supplement_report_v1'/name:digest for name,digest in ref.items()})
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:9:121
+   |
+ 7 | h=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+ 8 | trace_path=P/'validation/selected_headline_traceability_v1/review.json'
+ 9 | trace=json.loads(trace_path.read_text()); ref_path=P/'validation/protocol_name_recovery_v6/expected_numeric_hashes.json'; ref=json.loa…
+   |                                                                                                                         ^
+10 | bindings={P/name:digest for name,digest in trace['source_sha256'].items()}
+11 | bindings.update({P/'supplement_report_v1'/name:digest for name,digest in ref.items()})
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:12:35
+   |
+10 | bindings={P/name:digest for name,digest in trace['source_sha256'].items()}
+11 | bindings.update({P/'supplement_report_v1'/name:digest for name,digest in ref.items()})
+12 | bindings[trace_path]=h(trace_path);bindings[ref_path]=h(ref_path)
+   |                                   ^
+13 | for p,d in bindings.items():
+14 |  if h(p)!=d:raise ValueError(f'changed input {p}')
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:14:12
+   |
+12 | bindings[trace_path]=h(trace_path);bindings[ref_path]=h(ref_path)
+13 | for p,d in bindings.items():
+14 |  if h(p)!=d:raise ValueError(f'changed input {p}')
+   |            ^
+15 | cells={f'C{i:02}':c for i,c in enumerate(trace['cells'],1)}
+16 | rows={(f'C{i:02}',r['pattern']):r for i,c in enumerate(trace['cells'],1) for r in trace['rows'] if r['cell']==c['cell']}
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:19:11
+   |
+17 | comparisons=json.loads((P/'supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.json').read_text())['comparisons']
+18 | proto={'P':'original_primary/1','OC':'original_control/1','WP':'pw-primary-face-bounds/1','WC':'pw-control-face-bounds/1','DC':'driver…
+19 | effects={};expected_e={}
+   |           ^
+20 | for club in ['driver','seven_iron','pitching_wedge']:
+21 |  for profile in ['shaft_only','combined2']:
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:23:31
+   |
+21 |  for profile in ['shaft_only','combined2']:
+22 |   for kind,a,b,pb in [('shaft_rotation_sd',f'{club}_lean0_curve1_rotation1_{profile}',f'{club}_lean0_curve1_rotation2_{profile}','OC')…
+23 |    key=f'E{len(effects)+1:02}';ids=[(proto['OC'],a),(proto[pb],b)];matches=[x for x in comparisons if x['comparison_kind']==kind and […
+   |                               ^
+24 |    if len(matches)!=1:raise ValueError('ambiguous interaction')
+25 |    effects[key]=matches[0];expected_e[key]=ids
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:23:67
+   |
+21 |  for profile in ['shaft_only','combined2']:
+22 |   for kind,a,b,pb in [('shaft_rotation_sd',f'{club}_lean0_curve1_rotation1_{profile}',f'{club}_lean0_curve1_rotation2_{profile}','OC')…
+23 |    key=f'E{len(effects)+1:02}';ids=[(proto['OC'],a),(proto[pb],b)];matches=[x for x in comparisons if x['comparison_kind']==kind and […
+   |                                                                   ^
+24 |    if len(matches)!=1:raise ValueError('ambiguous interaction')
+25 |    effects[key]=matches[0];expected_e[key]=ids
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:24:22
+   |
+22 |   for kind,a,b,pb in [('shaft_rotation_sd',f'{club}_lean0_curve1_rotation1_{profile}',f'{club}_lean0_curve1_rotation2_{profile}','OC')…
+23 |    key=f'E{len(effects)+1:02}';ids=[(proto['OC'],a),(proto[pb],b)];matches=[x for x in comparisons if x['comparison_kind']==kind and […
+24 |    if len(matches)!=1:raise ValueError('ambiguous interaction')
+   |                      ^
+25 |    effects[key]=matches[0];expected_e[key]=ids
+26 | roots={'OC':P/'control_final_v1','WP':P/'supplement_final_v1/pw_primary_face','WC':P/'supplement_final_v1/pw_control_face','DC':P/'sup…
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:25:27
+   |
+23 |    key=f'E{len(effects)+1:02}';ids=[(proto['OC'],a),(proto[pb],b)];matches=[x for x in comparisons if x['comparison_kind']==kind and […
+24 |    if len(matches)!=1:raise ValueError('ambiguous interaction')
+25 |    effects[key]=matches[0];expected_e[key]=ids
+   |                           ^
+26 | roots={'OC':P/'control_final_v1','WP':P/'supplement_final_v1/pw_primary_face','WC':P/'supplement_final_v1/pw_control_face','DC':P/'sup…
+27 | nominals={}
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:31:18
+   |
+29 |  ids=[(proto[pa],f'{club}_lean0_curve2_rotation2_combined2'),(proto[pb],f'{club}_lean5_curve2_rotation2_combined2')]
+30 |  found=[x for x in comparisons if x['comparison_kind']=='across_lean' and [(s['protocol_id'],s['cell']) for s in x['sources']]==ids]
+31 |  if len(found)!=1:raise ValueError('ambiguous control')
+   |                  ^
+32 |  effects[key]=found[0]
+33 |  for suffix,pc,source in zip('AB',[pa,pb],found[0]['sources'],strict=True):
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:34:32
+   |
+32 |  effects[key]=found[0]
+33 |  for suffix,pc,source in zip('AB',[pa,pb],found[0]['sources'],strict=True):
+34 |   root=roots[pc]/source['cell']; mp=root/'manifest.json';sp=root/'summary.json'
+   |                                ^
+35 |   if h(mp)!=source['source_cell_manifest_sha256']:raise ValueError('manifest mismatch')
+36 |   manifest=json.loads(mp.read_text()); bindings[mp]=h(mp);bindings[sp]=manifest['files_sha256']['summary.json']
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:34:57
+   |
+32 |  effects[key]=found[0]
+33 |  for suffix,pc,source in zip('AB',[pa,pb],found[0]['sources'],strict=True):
+34 |   root=roots[pc]/source['cell']; mp=root/'manifest.json';sp=root/'summary.json'
+   |                                                         ^
+35 |   if h(mp)!=source['source_cell_manifest_sha256']:raise ValueError('manifest mismatch')
+36 |   manifest=json.loads(mp.read_text()); bindings[mp]=h(mp);bindings[sp]=manifest['files_sha256']['summary.json']
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:35:50
+   |
+33 |  for suffix,pc,source in zip('AB',[pa,pb],found[0]['sources'],strict=True):
+34 |   root=roots[pc]/source['cell']; mp=root/'manifest.json';sp=root/'summary.json'
+35 |   if h(mp)!=source['source_cell_manifest_sha256']:raise ValueError('manifest mismatch')
+   |                                                  ^
+36 |   manifest=json.loads(mp.read_text()); bindings[mp]=h(mp);bindings[sp]=manifest['files_sha256']['summary.json']
+37 |   if h(sp)!=bindings[sp]:raise ValueError('summary mismatch')
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:36:38
+   |
+34 |   root=roots[pc]/source['cell']; mp=root/'manifest.json';sp=root/'summary.json'
+35 |   if h(mp)!=source['source_cell_manifest_sha256']:raise ValueError('manifest mismatch')
+36 |   manifest=json.loads(mp.read_text()); bindings[mp]=h(mp);bindings[sp]=manifest['files_sha256']['summary.json']
+   |                                      ^
+37 |   if h(sp)!=bindings[sp]:raise ValueError('summary mismatch')
+38 |   nominals[key+suffix]=json.loads(sp.read_text())['nominals']
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:36:58
+   |
+34 |   root=roots[pc]/source['cell']; mp=root/'manifest.json';sp=root/'summary.json'
+35 |   if h(mp)!=source['source_cell_manifest_sha256']:raise ValueError('manifest mismatch')
+36 |   manifest=json.loads(mp.read_text()); bindings[mp]=h(mp);bindings[sp]=manifest['files_sha256']['summary.json']
+   |                                                          ^
+37 |   if h(sp)!=bindings[sp]:raise ValueError('summary mismatch')
+38 |   nominals[key+suffix]=json.loads(sp.read_text())['nominals']
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:37:25
+   |
+35 |   if h(mp)!=source['source_cell_manifest_sha256']:raise ValueError('manifest mismatch')
+36 |   manifest=json.loads(mp.read_text()); bindings[mp]=h(mp);bindings[sp]=manifest['files_sha256']['summary.json']
+37 |   if h(sp)!=bindings[sp]:raise ValueError('summary mismatch')
+   |                         ^
+38 |   nominals[key+suffix]=json.loads(sp.read_text())['nominals']
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:41:20
+   |
+40 | def number(display,want):
+41 |  a=Decimal(display);b=Decimal(str(want))
+   |                    ^
+42 |  if a==0:
+43 |   if b!=0:raise ValueError(('rounded-to-zero',display,want))
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:43:10
+   |
+41 |  a=Decimal(display);b=Decimal(str(want))
+42 |  if a==0:
+43 |   if b!=0:raise ValueError(('rounded-to-zero',display,want))
+   |          ^
+44 |  elif abs(a-b)>Decimal('0.50000001')*(Decimal(10)**a.as_tuple().exponent)+abs(b)*Decimal('1e-14'):
+45 |   raise ValueError(('display precision mismatch',display,want))
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:48:35
+   |
+47 | def verify(s):
+48 |  seen=collections.defaultdict(set);n=0
+   |                                   ^
+49 |  for line in s.splitlines():
+50 |   f=[v.strip() for v in line.rstrip('\\ ').split('&')]; nums=re.findall(r'\\numtext\{([^}]+)\}',line)
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:50:55
+   |
+48 |  seen=collections.defaultdict(set);n=0
+49 |  for line in s.splitlines():
+50 |   f=[v.strip() for v in line.rstrip('\\ ').split('&')]; nums=re.findall(r'\\numtext\{([^}]+)\}',line)
+   |                                                       ^
+51 |   if re.match(r'C\d\d & (Straight|Draw|Fade)',line):
+52 |    key,pat=f[:2];r=rows[key,pat];group='geometry' if len(f)==7 else 'paired';identity=(key,pat)
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:52:17
+   |
+50 |   f=[v.strip() for v in line.rstrip('\\ ').split('&')]; nums=re.findall(r'\\numtext\{([^}]+)\}',line)
+51 |   if re.match(r'C\d\d & (Straight|Draw|Fade)',line):
+52 |    key,pat=f[:2];r=rows[key,pat];group='geometry' if len(f)==7 else 'paired';identity=(key,pat)
+   |                 ^
+53 |    if group=='geometry':
+54 |     if int(f[2])!=r['supported_n']:raise ValueError('endpoint count')
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:52:33
+   |
+50 |   f=[v.strip() for v in line.rstrip('\\ ').split('&')]; nums=re.findall(r'\\numtext\{([^}]+)\}',line)
+51 |   if re.match(r'C\d\d & (Straight|Draw|Fade)',line):
+52 |    key,pat=f[:2];r=rows[key,pat];group='geometry' if len(f)==7 else 'paired';identity=(key,pat)
+   |                                 ^
+53 |    if group=='geometry':
+54 |     if int(f[2])!=r['supported_n']:raise ValueError('endpoint count')
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:52:77
+   |
+50 |   f=[v.strip() for v in line.rstrip('\\ ').split('&')]; nums=re.findall(r'\\numtext\{([^}]+)\}',line)
+51 |   if re.match(r'C\d\d & (Straight|Draw|Fade)',line):
+52 |    key,pat=f[:2];r=rows[key,pat];group='geometry' if len(f)==7 else 'paired';identity=(key,pat)
+   |                                                                             ^
+53 |    if group=='geometry':
+54 |     if int(f[2])!=r['supported_n']:raise ValueError('endpoint count')
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:54:35
+   |
+52 |    key,pat=f[:2];r=rows[key,pat];group='geometry' if len(f)==7 else 'paired';identity=(key,pat)
+53 |    if group=='geometry':
+54 |     if int(f[2])!=r['supported_n']:raise ValueError('endpoint count')
+   |                                   ^
+55 |     want=[r[k] for k in ['lateral_sd_m','downrange_sd_m','target_rmse_m','mean_sg_strokes']]
+56 |    else:
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:57:40
+   |
+55 |     want=[r[k] for k in ['lateral_sd_m','downrange_sd_m','target_rmse_m','mean_sg_strokes']]
+56 |    else:
+57 |     if int(f[2])!=r['scoring_paired_n']:raise ValueError('scoring count')
+   |                                        ^
+58 |     want=[r['paired_sg_vs_straight'][k] for k in ['estimate','lower_95','upper_95']]
+59 |   elif re.match(r'[EF]\d\d? & (Draw|Fade)',line):
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:60:17
+   |
+58 |     want=[r['paired_sg_vs_straight'][k] for k in ['estimate','lower_95','upper_95']]
+59 |   elif re.match(r'[EF]\d\d? & (Draw|Fade)',line):
+60 |    key,pat=f[:2];r=effects[key];group='effect';identity=(key,pat)
+   |                 ^
+61 |    if int(f[2])!=r['common_supported_n']:raise ValueError('common six count')
+62 |    want=[r['course_scoring_effect_modification'][pat][k] for k in ['estimate','lower_95','upper_95']]
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:60:32
+   |
+58 |     want=[r['paired_sg_vs_straight'][k] for k in ['estimate','lower_95','upper_95']]
+59 |   elif re.match(r'[EF]\d\d? & (Draw|Fade)',line):
+60 |    key,pat=f[:2];r=effects[key];group='effect';identity=(key,pat)
+   |                                ^
+61 |    if int(f[2])!=r['common_supported_n']:raise ValueError('common six count')
+62 |    want=[r['course_scoring_effect_modification'][pat][k] for k in ['estimate','lower_95','upper_95']]
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:60:47
+   |
+58 |     want=[r['paired_sg_vs_straight'][k] for k in ['estimate','lower_95','upper_95']]
+59 |   elif re.match(r'[EF]\d\d? & (Draw|Fade)',line):
+60 |    key,pat=f[:2];r=effects[key];group='effect';identity=(key,pat)
+   |                                               ^
+61 |    if int(f[2])!=r['common_supported_n']:raise ValueError('common six count')
+62 |    want=[r['course_scoring_effect_modification'][pat][k] for k in ['estimate','lower_95','upper_95']]
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:61:41
+   |
+59 |   elif re.match(r'[EF]\d\d? & (Draw|Fade)',line):
+60 |    key,pat=f[:2];r=effects[key];group='effect';identity=(key,pat)
+61 |    if int(f[2])!=r['common_supported_n']:raise ValueError('common six count')
+   |                                         ^
+62 |    want=[r['course_scoring_effect_modification'][pat][k] for k in ['estimate','lower_95','upper_95']]
+63 |   elif re.match(r'F[12][AB] &',line):
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:64:17
+   |
+62 |    want=[r['course_scoring_effect_modification'][pat][k] for k in ['estimate','lower_95','upper_95']]
+63 |   elif re.match(r'F[12][AB] &',line):
+64 |    key,pat=f[:2];group='nominal';identity=(key,pat);r=nominals[key][pat];want=[r[k] for k in ['face_deg','path_deg','speed_mps','resid…
+   |                 ^
+65 |   elif re.match(r'E\d\d & (Twist|Curve)',line):
+66 |    key=f[0];ids=[]
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:64:33
+   |
+62 |    want=[r['course_scoring_effect_modification'][pat][k] for k in ['estimate','lower_95','upper_95']]
+63 |   elif re.match(r'F[12][AB] &',line):
+64 |    key,pat=f[:2];group='nominal';identity=(key,pat);r=nominals[key][pat];want=[r[k] for k in ['face_deg','path_deg','speed_mps','resid…
+   |                                 ^
+65 |   elif re.match(r'E\d\d & (Twist|Curve)',line):
+66 |    key=f[0];ids=[]
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:64:52
+   |
+62 |    want=[r['course_scoring_effect_modification'][pat][k] for k in ['estimate','lower_95','upper_95']]
+63 |   elif re.match(r'F[12][AB] &',line):
+64 |    key,pat=f[:2];group='nominal';identity=(key,pat);r=nominals[key][pat];want=[r[k] for k in ['face_deg','path_deg','speed_mps','resid…
+   |                                                    ^
+65 |   elif re.match(r'E\d\d & (Twist|Curve)',line):
+66 |    key=f[0];ids=[]
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:64:73
+   |
+62 |    want=[r['course_scoring_effect_modification'][pat][k] for k in ['estimate','lower_95','upper_95']]
+63 |   elif re.match(r'F[12][AB] &',line):
+64 |    key,pat=f[:2];group='nominal';identity=(key,pat);r=nominals[key][pat];want=[r[k] for k in ['face_deg','path_deg','speed_mps','resid…
+   |                                                                         ^
+65 |   elif re.match(r'E\d\d & (Twist|Curve)',line):
+66 |    key=f[0];ids=[]
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:66:12
+   |
+64 |    key,pat=f[:2];group='nominal';identity=(key,pat);r=nominals[key][pat];want=[r[k] for k in ['face_deg','path_deg','speed_mps','resid…
+65 |   elif re.match(r'E\d\d & (Twist|Curve)',line):
+66 |    key=f[0];ids=[]
+   |            ^
+67 |    for item in f[2:4]:
+68 |     ck,pc=item.split('/');ids.append((proto[pc],cells[ck]['cell']))
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:68:26
+   |
+66 |    key=f[0];ids=[]
+67 |    for item in f[2:4]:
+68 |     ck,pc=item.split('/');ids.append((proto[pc],cells[ck]['cell']))
+   |                          ^
+69 |    if ids!=expected_e[key] or key in seen['keys']:raise ValueError('interaction identity')
+70 |    seen['keys'].add(key);continue
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:69:50
+   |
+67 |    for item in f[2:4]:
+68 |     ck,pc=item.split('/');ids.append((proto[pc],cells[ck]['cell']))
+69 |    if ids!=expected_e[key] or key in seen['keys']:raise ValueError('interaction identity')
+   |                                                  ^
+70 |    seen['keys'].add(key);continue
+71 |   elif re.match(r'C\d\d & (Driver|7-Iron|Pitching Wedge)',line):
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:70:25
+   |
+68 |     ck,pc=item.split('/');ids.append((proto[pc],cells[ck]['cell']))
+69 |    if ids!=expected_e[key] or key in seen['keys']:raise ValueError('interaction identity')
+70 |    seen['keys'].add(key);continue
+   |                         ^
+71 |   elif re.match(r'C\d\d & (Driver|7-Iron|Pitching Wedge)',line):
+72 |    key=f[0];c=cells[key];cfg=c['config'];club={'driver':'Driver','seven_iron':'7-Iron','pitching_wedge':'Pitching Wedge'}[cfg['club'][…
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:72:12
+   |
+70 |    seen['keys'].add(key);continue
+71 |   elif re.match(r'C\d\d & (Driver|7-Iron|Pitching Wedge)',line):
+72 |    key=f[0];c=cells[key];cfg=c['config'];club={'driver':'Driver','seven_iron':'7-Iron','pitching_wedge':'Pitching Wedge'}[cfg['club'][…
+   |            ^
+73 |    expected_fields=[key,club,str(int(cfg['curve_scale'])),str(int(cfg['noise']['standard_deviations'][0])),'S' if c['cell'].endswith('…
+74 |    if f!=expected_fields or key in seen['conditions']:raise ValueError('condition key metadata')
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:72:25
+   |
+70 |    seen['keys'].add(key);continue
+71 |   elif re.match(r'C\d\d & (Driver|7-Iron|Pitching Wedge)',line):
+72 |    key=f[0];c=cells[key];cfg=c['config'];club={'driver':'Driver','seven_iron':'7-Iron','pitching_wedge':'Pitching Wedge'}[cfg['club'][…
+   |                         ^
+73 |    expected_fields=[key,club,str(int(cfg['curve_scale'])),str(int(cfg['noise']['standard_deviations'][0])),'S' if c['cell'].endswith('…
+74 |    if f!=expected_fields or key in seen['conditions']:raise ValueError('condition key metadata')
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:72:41
+   |
+70 |    seen['keys'].add(key);continue
+71 |   elif re.match(r'C\d\d & (Driver|7-Iron|Pitching Wedge)',line):
+72 |    key=f[0];c=cells[key];cfg=c['config'];club={'driver':'Driver','seven_iron':'7-Iron','pitching_wedge':'Pitching Wedge'}[cfg['club'][…
+   |                                         ^
+73 |    expected_fields=[key,club,str(int(cfg['curve_scale'])),str(int(cfg['noise']['standard_deviations'][0])),'S' if c['cell'].endswith('…
+74 |    if f!=expected_fields or key in seen['conditions']:raise ValueError('condition key metadata')
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:74:54
+   |
+72 |    key=f[0];c=cells[key];cfg=c['config'];club={'driver':'Driver','seven_iron':'7-Iron','pitching_wedge':'Pitching Wedge'}[cfg['club'][…
+73 |    expected_fields=[key,club,str(int(cfg['curve_scale'])),str(int(cfg['noise']['standard_deviations'][0])),'S' if c['cell'].endswith('…
+74 |    if f!=expected_fields or key in seen['conditions']:raise ValueError('condition key metadata')
+   |                                                      ^
+75 |    seen['conditions'].add(key);continue
+76 |   elif re.match(r'(Driver|7-Iron|Pitching Wedge) & (Draw|Fade)',line):
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:75:31
+   |
+73 |    expected_fields=[key,club,str(int(cfg['curve_scale'])),str(int(cfg['noise']['standard_deviations'][0])),'S' if c['cell'].endswith('…
+74 |    if f!=expected_fields or key in seen['conditions']:raise ValueError('condition key metadata')
+75 |    seen['conditions'].add(key);continue
+   |                               ^
+76 |   elif re.match(r'(Driver|7-Iron|Pitching Wedge) & (Draw|Fade)',line):
+77 |    club={'Driver':'driver','7-Iron':'seven_iron','Pitching Wedge':'pitching_wedge'}[f[0]];pat=f[1];items=[r['paired_sg_vs_straight'] f…
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:77:90
+   |
+75 |    seen['conditions'].add(key);continue
+76 |   elif re.match(r'(Driver|7-Iron|Pitching Wedge) & (Draw|Fade)',line):
+77 |    club={'Driver':'driver','7-Iron':'seven_iron','Pitching Wedge':'pitching_wedge'}[f[0]];pat=f[1];items=[r['paired_sg_vs_straight'] f…
+   |                                                                                          ^
+78 |    counts=[sum(x['lower_95']>0 for x in items),sum(x['upper_95']<0 for x in items),sum(x['lower_95']<=0<=x['upper_95'] for x in items)]
+79 |    if f[4]!='/'.join(map(str,counts)):raise ValueError('interval direction counts')
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:77:99
+   |
+75 |    seen['conditions'].add(key);continue
+76 |   elif re.match(r'(Driver|7-Iron|Pitching Wedge) & (Draw|Fade)',line):
+77 |    club={'Driver':'driver','7-Iron':'seven_iron','Pitching Wedge':'pitching_wedge'}[f[0]];pat=f[1];items=[r['paired_sg_vs_straight'] f…
+   |                                                                                                   ^
+78 |    counts=[sum(x['lower_95']>0 for x in items),sum(x['upper_95']<0 for x in items),sum(x['lower_95']<=0<=x['upper_95'] for x in items)]
+79 |    if f[4]!='/'.join(map(str,counts)):raise ValueError('interval direction counts')
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:79:38
+   |
+77 |    club={'Driver':'driver','7-Iron':'seven_iron','Pitching Wedge':'pitching_wedge'}[f[0]];pat=f[1];items=[r['paired_sg_vs_straight'] f…
+78 |    counts=[sum(x['lower_95']>0 for x in items),sum(x['upper_95']<0 for x in items),sum(x['lower_95']<=0<=x['upper_95'] for x in items)]
+79 |    if f[4]!='/'.join(map(str,counts)):raise ValueError('interval direction counts')
+   |                                      ^
+80 |    group='synthesis';identity=(club,pat);want=[min(x['estimate'] for x in items),max(x['estimate'] for x in items)]
+81 |   else:continue
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:80:21
+   |
+78 |    counts=[sum(x['lower_95']>0 for x in items),sum(x['upper_95']<0 for x in items),sum(x['lower_95']<=0<=x['upper_95'] for x in items)]
+79 |    if f[4]!='/'.join(map(str,counts)):raise ValueError('interval direction counts')
+80 |    group='synthesis';identity=(club,pat);want=[min(x['estimate'] for x in items),max(x['estimate'] for x in items)]
+   |                     ^
+81 |   else:continue
+82 |   if identity in seen[group]:raise ValueError('duplicate row')
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:80:41
+   |
+78 |    counts=[sum(x['lower_95']>0 for x in items),sum(x['upper_95']<0 for x in items),sum(x['lower_95']<=0<=x['upper_95'] for x in items)]
+79 |    if f[4]!='/'.join(map(str,counts)):raise ValueError('interval direction counts')
+80 |    group='synthesis';identity=(club,pat);want=[min(x['estimate'] for x in items),max(x['estimate'] for x in items)]
+   |                                         ^
+81 |   else:continue
+82 |   if identity in seen[group]:raise ValueError('duplicate row')
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:81:7
+   |
+79 |    if f[4]!='/'.join(map(str,counts)):raise ValueError('interval direction counts')
+80 |    group='synthesis';identity=(club,pat);want=[min(x['estimate'] for x in items),max(x['estimate'] for x in items)]
+81 |   else:continue
+   |       ^
+82 |   if identity in seen[group]:raise ValueError('duplicate row')
+83 |   seen[group].add(identity)
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:82:29
+   |
+80 |    group='synthesis';identity=(club,pat);want=[min(x['estimate'] for x in items),max(x['estimate'] for x in items)]
+81 |   else:continue
+82 |   if identity in seen[group]:raise ValueError('duplicate row')
+   |                             ^
+83 |   seen[group].add(identity)
+84 |   if len(nums)!=len(want):raise ValueError('field count')
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:84:26
+   |
+82 |   if identity in seen[group]:raise ValueError('duplicate row')
+83 |   seen[group].add(identity)
+84 |   if len(nums)!=len(want):raise ValueError('field count')
+   |                          ^
+85 |   for a,b in zip(nums,want,strict=True):number(a,b);n+=1
+86 |  expected={'geometry':set(rows),'paired':{k for k in rows if k[1]!='Straight'},'effect':{(k,p) for k in effects for p in ['Draw','Fade…
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:85:40
+   |
+83 |   seen[group].add(identity)
+84 |   if len(nums)!=len(want):raise ValueError('field count')
+85 |   for a,b in zip(nums,want,strict=True):number(a,b);n+=1
+   |                                        ^
+86 |  expected={'geometry':set(rows),'paired':{k for k in rows if k[1]!='Straight'},'effect':{(k,p) for k in effects for p in ['Draw','Fade…
+87 |  if dict(seen)!=expected:raise ValueError('incomplete identity coverage')
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:85:52
+   |
+83 |   seen[group].add(identity)
+84 |   if len(nums)!=len(want):raise ValueError('field count')
+85 |   for a,b in zip(nums,want,strict=True):number(a,b);n+=1
+   |                                                    ^
+86 |  expected={'geometry':set(rows),'paired':{k for k in rows if k[1]!='Straight'},'effect':{(k,p) for k in effects for p in ['Draw','Fade…
+87 |  if dict(seen)!=expected:raise ValueError('incomplete identity coverage')
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:87:25
+   |
+85 |   for a,b in zip(nums,want,strict=True):number(a,b);n+=1
+86 |  expected={'geometry':set(rows),'paired':{k for k in rows if k[1]!='Straight'},'effect':{(k,p) for k in effects for p in ['Draw','Fade…
+87 |  if dict(seen)!=expected:raise ValueError('incomplete identity coverage')
+   |                         ^
+88 |  residual=re.search(r'maximum residual among the 72 selected nominal solutions is \\numtext\{([^}]+)\}',s)
+89 |  if residual is None:raise ValueError('residual missing')
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:89:21
+   |
+87 |  if dict(seen)!=expected:raise ValueError('incomplete identity coverage')
+88 |  residual=re.search(r'maximum residual among the 72 selected nominal solutions is \\numtext\{([^}]+)\}',s)
+89 |  if residual is None:raise ValueError('residual missing')
+   |                     ^
+90 |  number(residual.group(1),max(nom['residual_m'] for c in cells.values() for nom in c['nominals'].values()));n+=1
+91 |  return {'numeric_fields':n,'row_counts':{k:len(v) for k,v in seen.items()}}
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:90:108
+   |
+88 |  residual=re.search(r'maximum residual among the 72 selected nominal solutions is \\numtext\{([^}]+)\}',s)
+89 |  if residual is None:raise ValueError('residual missing')
+90 |  number(residual.group(1),max(nom['residual_m'] for c in cells.values() for nom in c['nominals'].values()));n+=1
+   |                                                                                                            ^
+91 |  return {'numeric_fields':n,'row_counts':{k:len(v) for k,v in seen.items()}}
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:93:22
+   |
+91 |  return {'numeric_fields':n,'row_counts':{k:len(v) for k,v in seen.items()}}
+92 |
+93 | s=ARTICLE.read_text();result=verify(s)
+   |                      ^
+94 | mutations={'fine_precision':s.replace('\\numtext{-0.395737}','\\numtext{-0.395730}',1),'wrong_population':s.replace('C01 & Draw & 1000…
+95 | for name,mutant in mutations.items():
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:96:14
+   |
+94 | mutations={'fine_precision':s.replace('\\numtext{-0.395737}','\\numtext{-0.395730}',1),'wrong_population':s.replace('C01 & Draw & 1000…
+95 | for name,mutant in mutations.items():
+96 |  if mutant==s:raise ValueError('ineffective negative control')
+   |              ^
+97 |  try:verify(mutant)
+98 |  except ValueError:continue
+   |
+
+E701 Multiple statements on one line (colon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:97:5
+   |
+95 | for name,mutant in mutations.items():
+96 |  if mutant==s:raise ValueError('ineffective negative control')
+97 |  try:verify(mutant)
+   |     ^
+98 |  except ValueError:continue
+99 |  raise ValueError('negative control accepted '+name)
+   |
+
+E701 Multiple statements on one line (colon)
+   --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:98:19
+    |
+ 96 |  if mutant==s:raise ValueError('ineffective negative control')
+ 97 |  try:verify(mutant)
+ 98 |  except ValueError:continue
+    |                   ^
+ 99 |  raise ValueError('negative control accepted '+name)
+100 | for p,d in bindings.items():
+    |
+
+E701 Multiple statements on one line (colon)
+   --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:101:12
+    |
+ 99 |  raise ValueError('negative control accepted '+name)
+100 | for p,d in bindings.items():
+101 |  if h(p)!=d:raise ValueError('input changed during review')
+    |            ^
+102 | result.update(article_sha256=h(ARTICLE),script_sha256=h(Path(__file__)),input_sha256={str(p.relative_to(P)):d for p,d in bindings.ite…
+103 | Path('/tmp/p2-article-root-review/review.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps({k:v for k,v in result.…
+    |
+
+E702 Multiple statements on one line (semicolon)
+   --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:103:93
+    |
+101 |  if h(p)!=d:raise ValueError('input changed during review')
+102 | result.update(article_sha256=h(ARTICLE),script_sha256=h(Path(__file__)),input_sha256={str(p.relative_to(P)):d for p,d in bindings.ite…
+103 | Path('/tmp/p2-article-root-review/review.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps({k:v for k,v in result.…
+    |                                                                                             ^
+    |
+
+T201 `print` found
+   --> docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:103:94
+    |
+101 |  if h(p)!=d:raise ValueError('input changed during review')
+102 | result.update(article_sha256=h(ARTICLE),script_sha256=h(Path(__file__)),input_sha256={str(p.relative_to(P)):d for p,d in bindings.ite…
+103 | Path('/tmp/p2-article-root-review/review.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps({k:v for k,v in result.…
+    |                                                                                              ^^^^^
+    |
+help: Remove `print`
+
+B905 `zip()` without an explicit `strict=` parameter
+  --> docs/research/shot_pattern_analysis/phase2/validation/final_figure_marginal_gutter_review/reproduce_saved_cell.py:15:20
+   |
+13 | …     ticks=[t for t in ax.get_xticklabels() if t.get_visible() and t.get_text()]
+14 | …     ticks.sort(key=lambda t:t.get_window_extent(renderer).x0)
+15 | …     for a,b in zip(ticks,ticks[1:]):
+   |                  ^^^^^^^^^^^^^^^^^^^^
+16 | …         gap=b.get_window_extent(renderer).x0-a.get_window_extent(renderer).x1
+17 | …         rows.append({'axis':i,'labels':[a.get_text(),b.get_text()],'gap_points':gap*72/fig.dpi,'axis_width_points':ax.get_window_ext…
+   |
+help: Add explicit value for parameter `strict=`
+
+T201 `print` found
+  --> docs/research/shot_pattern_analysis/phase2/validation/final_figure_marginal_gutter_review/reproduce_saved_cell.py:24:1
+   |
+22 |     p.write_academic_dispersion_figure(points, mode, scenario='Driver · Lean 0° · Curve ×1 · Shaft Twist SD 1°', metadata={'social_clu…
+23 | Path('/tmp/p2-marginal-gutter-review.json').write_text(json.dumps(results,indent=2))
+24 | print(json.dumps([{'presentation':r['presentation'],'right_marginals':[x for x in r['tick_gaps'] if x['axis'] in (2,5,8)]} for r in re…
+   | ^^^^^
+   |
+help: Remove `print`
+
+C401 Unnecessary generator (rewrite as a set comprehension)
+  --> docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v1/review_inventory.py:34:8
+   |
+32 | assert len(ledgers['availability']) == 324
+33 | assert Counter(x['status'] for x in ledgers['availability']) == {'completed':270,'unavailable':54}
+34 | assert set(x['cell'] for x in ledgers['availability']) == set(m['cell_manifest_sha256'])
+   |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+35 | assert len(ledgers['comparison_availability']) == 36
+36 | assert Counter(x['status'] for x in ledgers['comparison_availability']) == {'completed':30,'unavailable':6}
+   |
+help: Rewrite as a set comprehension
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v1/review_inventory.py:52:45
+   |
+50 |         x,y = slot%4*500,slot//4*410
+51 |         with Image.open(FIG / relative) as source_image:
+52 |             im = source_image.convert('RGB'); im.thumbnail((488,365))
+   |                                             ^
+53 |             canvas.paste(im,(x+(500-im.width)//2,y))
+54 |         label=f'{start+slot+1:03d} '+relative
+   |
+
+T201 `print` found
+  --> docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v1/review_inventory.py:62:1
+   |
+60 | receipt={'scope':'Byte and inventory checks; visual verdict recorded separately','manifest_sha256':initial,'exit_record':exit_record,'…
+61 | (OUT/'inventory_review.json').write_text(json.dumps(receipt,indent=2)+'\n')
+62 | print(json.dumps({k:v for k,v in receipt.items() if k!='png_index'},indent=2))
+   | ^^^^^
+   |
+help: Remove `print`
+
+Found 226 errors.
+[*] 8 fixable with the `--fix` option (16 hidden fixes can be enabled with the `--unsafe-fixes` option).
