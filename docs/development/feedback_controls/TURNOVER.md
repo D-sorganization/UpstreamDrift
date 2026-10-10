@@ -525,3 +525,10 @@ Marker/alignment arrays are bytes-backed. This is diagnostic, unqualified
 output, not an execution receipt, approved calibration, F01 admission, capture
 fit, or scientific validation. See chapter49 and
 `docs/development/feedback_controls/F09Q-OPENSIM-MIXED-MARKER-SCORING.md`.
+
+CI run 38082402009 exposed a standard-library exception difference:
+`dataclasses.replace` raises `ValueError` on Python 3.11 and `TypeError` on
+Python 3.13 for an `init=False` field. The regression accepts both runtime
+exceptions while requiring the `init=False` diagnostic. The affected test
+file passes on Python 3.11.17 and 3.13.5. The initial full unit run completed
+23,846 tests with this single failure before the test-only correction.
