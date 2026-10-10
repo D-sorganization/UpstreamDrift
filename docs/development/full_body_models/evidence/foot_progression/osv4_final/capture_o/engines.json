@@ -10,9 +10,7 @@
         "left": 6.388562284374341,
         "right": 2.0411967653697762
       },
-      "notes": [
-        "plant has 44 coordinates, report has 44"
-      ],
+      "notes": ["plant has 44 coordinates, report has 44"],
       "reason": null,
       "within_tolerance": true
     },
@@ -26,9 +24,7 @@
         "left": 6.388562284374337,
         "right": 2.0411967653698033
       },
-      "notes": [
-        "plant has 44 coordinates, report has 44"
-      ],
+      "notes": ["plant has 44 coordinates, report has 44"],
       "reason": null,
       "within_tolerance": true
     },
@@ -59,9 +55,7 @@
         "left": 6.388562284374361,
         "right": 2.0411967653697953
       },
-      "notes": [
-        "OpenSim Simbody FK of the exported .osim, 44 coordinates"
-      ],
+      "notes": ["OpenSim Simbody FK of the exported .osim, 44 coordinates"],
       "reason": null,
       "within_tolerance": true
     },
