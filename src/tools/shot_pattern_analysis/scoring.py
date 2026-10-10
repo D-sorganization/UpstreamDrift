@@ -355,6 +355,25 @@ def score_approach_endpoints(
     }
 
 
+def load_pattern_endpoints(
+    shots_csv_path: Path,
+) -> dict[str, list[tuple[int, float, float]]]:
+    """Load shot endpoints grouped by pattern from a shots.csv file."""
+    endpoints: dict[str, list[tuple[int, float, float]]] = {
+        name: [] for name in ("Straight", "Draw", "Fade")
+    }
+    with Path(shots_csv_path).open(newline="") as handle:
+        for row in csv.DictReader(handle):
+            endpoints[row["pattern"]].append(
+                (
+                    int(row["shot_index"]),
+                    float(row["aimed_x_m"]),
+                    float(row["aimed_y_m"]),
+                )
+            )
+    return endpoints
+
+
 def score_saved_bundle(output_dir: Path) -> Path:
     """Add the approach scenario to a completed shot bundle without re-simulation."""
     output_dir = Path(output_dir)
@@ -368,18 +387,7 @@ def score_saved_bundle(output_dir: Path) -> Path:
         from .scenario_scoring import score_corrected_bundle
 
         return score_corrected_bundle(output_dir)
-    endpoints: dict[str, list[tuple[int, float, float]]] = {
-        name: [] for name in ("Straight", "Draw", "Fade")
-    }
-    with (output_dir / "shots.csv").open(newline="") as handle:
-        for row in csv.DictReader(handle):
-            endpoints[row["pattern"]].append(
-                (
-                    int(row["shot_index"]),
-                    float(row["aimed_x_m"]),
-                    float(row["aimed_y_m"]),
-                )
-            )
+    endpoints = load_pattern_endpoints(output_dir / "shots.csv")
     try:
         report = score_approach_endpoints(
             endpoints,

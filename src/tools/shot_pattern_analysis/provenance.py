@@ -77,7 +77,9 @@ def source_snapshot() -> dict:
     native_binary = resolve_native_binary(Path(rust_spec.origin))
     return {
         "source_sha256": {
-            str(path.relative_to(root)): hashlib.sha256(path.read_bytes()).hexdigest()
+            path.relative_to(root).as_posix(): hashlib.sha256(
+                path.read_bytes()
+            ).hexdigest()
             for path in files
         },
         "native_binary_path": str(native_binary),

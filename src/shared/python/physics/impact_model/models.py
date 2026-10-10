@@ -275,7 +275,9 @@ class SpringDamperImpactModel(ImpactModel):
         self.dt = dt
 
     @precondition(
-        lambda self, pre_state, params: pre_state.clubhead_mass > 0,
+        lambda self, x_ball, v_ball, x_club, v_club, n, m_club, penetration, params: (
+            m_club > 0
+        ),
         "Clubhead mass must be positive",
     )
     def _step_contact(
