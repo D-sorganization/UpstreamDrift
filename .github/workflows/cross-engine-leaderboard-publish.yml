@@ -10,7 +10,8 @@
 # `fit_swing` runs with `UD_LEADERBOARD_PUBLISH=1`.
 #
 # Trigger / publication policy:
-#   * pull_request -> regenerate JSON, upload as artifact (no commit).
+#   * pull_request -> regenerate JSON, upload as artifact (no commit). Only
+#     on PRs labelled `ci:full`: the docker fleet lane is scarce (#12224).
 #   * push to main -> regenerate JSON, commit back with `[skip ci]`.
 #   * workflow_dispatch -> manual artifact-only run.
 
@@ -18,6 +19,7 @@ name: cross-engine-leaderboard-publish
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review, labeled]
     paths:
       - "src/engines/**"
       - "scripts/run_cross_engine_leaderboard.py"
@@ -40,15 +42,23 @@ permissions:
   pull-requests: read
 
 concurrency:
-  group: cross-engine-leaderboard-publish-${{ github.ref }}
+  # Label events other than ci:full get their own group so tagging a PR
+  # never cancels its in-flight run (#12224).
+  group: >-
+    cross-engine-leaderboard-publish-${{ format('{0}-{1}', github.ref, github.event.action == 'labeled' &&
+    github.event.label.name != 'ci:full' && 'label' || 'run') }}
   cancel-in-progress: true
 
 jobs:
   publish:
-    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    # Fork PRs never run on the self-hosted fleet (RM#1989). PR artifact runs
+    # need the ci:full label; main publishing is unchanged (#12224).
     if: >-
-      (!github.event.pull_request ||
-      github.event.pull_request.head.repo.full_name == github.repository)
+      github.event_name != 'pull_request' ||
+      (github.event.pull_request.head.repo.full_name == github.repository &&
+      contains(github.event.pull_request.labels.*.name, 'ci:full') &&
+      (github.event.action != 'labeled' ||
+      github.event.label.name == 'ci:full'))
     name: publish cross-engine leaderboard JSON
     runs-on: d-sorg-fleet-docker
     timeout-minutes: 15

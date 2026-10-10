@@ -14,6 +14,12 @@
 # Triggered on every PR (and main push) that touches src/engines/. Engines
 # whose Python deps fail to install are gracefully skipped by the test
 # itself via `requires_<engine>` markers + dynamic availability probing.
+#
+# Lane split (issue #12224): the light conformance gate runs on every PR and
+# main push. The heavy jobs (forward-sim/JaxSim equivalence and the
+# force-overlay parity matrix) need the scarce docker fleet lane, so they run
+# nightly, on workflow_dispatch, or on a PR labelled `ci:full`. Label events
+# other than `ci:full` start no work and cancel nothing.
 
 name: Cross-Engine Equivalence
 
@@ -45,7 +51,7 @@ on:
       - "pyproject.toml"
       - ".github/workflows/cross-engine-equivalence.yml"
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
+    types: [opened, synchronize, reopened, ready_for_review, labeled]
     paths:
       - "src/engines/**"
       - "!src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/**"
@@ -71,20 +77,33 @@ on:
       - "pyproject.toml"
       - ".github/workflows/cross-engine-equivalence.yml"
   workflow_dispatch:
+  schedule:
+    # Nightly heavy lanes at 09:30 UTC (02:30 PT), off the merge-queue peak.
+    - cron: "30 9 * * *"
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # PR runs cancel superseded pushes of the same PR; label events other than
+  # ci:full land in their own group so tagging a PR never cancels its run.
+  # Main, scheduled and dispatched runs are grouped per SHA and run to
+  # completion -- per-ref cancellation meant no main run ever finished.
+  group: >-
+    ${{ github.workflow }}-${{ github.event_name == 'pull_request' &&
+    format('{0}-{1}', github.ref, github.event.action == 'labeled' &&
+    github.event.label.name != 'ci:full' && 'label' || 'run') || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
 
 jobs:
   pick-runner:
-    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    # Fork PRs never run on the self-hosted fleet (RM#1989). Label events
+    # start work only for ci:full (#12224).
     if: >-
       (!github.event.pull_request ||
-      github.event.pull_request.head.repo.full_name == github.repository)
+      github.event.pull_request.head.repo.full_name == github.repository) &&
+      (github.event.action != 'labeled' ||
+      github.event.label.name == 'ci:full')
     # Dispatcher placement only. This repo is public, so a hosted runner is
     # free and unmetered; pinning the dispatcher meant every run waited for a
     # self-hosted slot just to decide where to run. The runner it SELECTS is
@@ -95,6 +114,10 @@ jobs:
     timeout-minutes: 2
     outputs:
       runner: ${{ steps.check.outputs.runner }}
+      heavy: >-
+        ${{ github.event_name == 'schedule' ||
+        github.event_name == 'workflow_dispatch' ||
+        contains(github.event.pull_request.labels.*.name, 'ci:full') }}
     steps:
       - name: Set runner
         id: check
@@ -104,10 +127,12 @@ jobs:
           echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
 
   equivalence:
-    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    # Fork PRs never run on the self-hosted fleet (RM#1989). Heavy lane:
+    # nightly, dispatch or ci:full only (#12224).
     if: >-
       (!github.event.pull_request ||
-      github.event.pull_request.head.repo.full_name == github.repository)
+      github.event.pull_request.head.repo.full_name == github.repository) &&
+      needs.pick-runner.outputs.heavy == 'true'
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 30
@@ -383,10 +408,12 @@ jobs:
           if-no-files-found: warn
 
   force-overlay-parity:
-    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    # Fork PRs never run on the self-hosted fleet (RM#1989). Heavy lane:
+    # nightly, dispatch or ci:full only (#12224).
     if: >-
       (!github.event.pull_request ||
-      github.event.pull_request.head.repo.full_name == github.repository)
+      github.event.pull_request.head.repo.full_name == github.repository) &&
+      needs.pick-runner.outputs.heavy == 'true'
     # Issue #11346 (follow-up to #11306 / PR #11345, epic #11285): runs
     # tests/integration/cross_engine/test_force_overlay_parity.py once per
     # engine with that engine actually installed. The conformance gate above
@@ -507,3 +534,59 @@ jobs:
           name: force-overlay-parity-${{ matrix.engine }}
           path: test-results/force-overlay-parity-${{ matrix.engine }}-junit.xml
           if-no-files-found: warn
+
+  report-nightly:
+    # A nightly heavy-lane failure must reach a human: open (or update) one
+    # tracking issue, and close it when a later nightly passes (#12224).
+    name: Report Nightly Heavy-Lane Result
+    needs: [equivalence, force-overlay-parity]
+    if: always() && github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write
+    steps:
+      - name: Open, update or close the nightly failure issue
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+        with:
+          script: |
+            const title = 'Nightly Cross-Engine Equivalence FAILED';
+            const results = JSON.parse(process.env.NEEDS_JSON);
+            const failed = Object.entries(results)
+              .filter(([, job]) => job.result !== 'success')
+              .map(([name, job]) => `- \`${name}\`: ${job.result}`);
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const { data: open } = await github.rest.issues.listForRepo({
+              ...context.repo, state: 'open', labels: 'cross-engine',
+            });
+            const existing = open.find((issue) => issue.title === title);
+            if (failed.length === 0) {
+              if (existing) {
+                await github.rest.issues.createComment({
+                  ...context.repo, issue_number: existing.number,
+                  body: `Nightly heavy lanes passed in [run ${context.runId}](${runUrl}). Closing.`,
+                });
+                await github.rest.issues.update({
+                  ...context.repo, issue_number: existing.number, state: 'closed',
+                });
+              }
+              return;
+            }
+            const body = [
+              `Nightly cross-engine heavy lanes failed in [run ${context.runId}](${runUrl}).`,
+              '',
+              ...failed,
+              '',
+              'Reproduce on a PR by adding the `ci:full` label, or re-run via workflow_dispatch.',
+            ].join('\n');
+            if (existing) {
+              await github.rest.issues.createComment({
+                ...context.repo, issue_number: existing.number, body,
+              });
+            } else {
+              await github.rest.issues.create({
+                ...context.repo, title, body, labels: ['cross-engine', 'ci-cd'],
+              });
+            }

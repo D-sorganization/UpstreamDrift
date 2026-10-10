@@ -19,16 +19,13 @@ name: CI Optional Stack
 #      skipped due to missing dependencies.
 #   3. This comment block documents which job is the optional-stack lane.
 # ---------------------------------------------------------------------------
+#
+# Trigger policy (issue #12224): this lane needs the scarce docker fleet
+# runners, and with per-ref cancellation most push/PR runs never finished. It
+# runs nightly on main, on workflow_dispatch, or on a PR labelled `ci:full`.
 on:
-  push:
-    branches: [main, staging]
-    paths-ignore:
-      - "docs/**"
-      - "**.md"
-      - "LICENSE"
-      - ".gitignore"
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
+    types: [opened, synchronize, reopened, ready_for_review, labeled]
     paths-ignore:
       - "docs/**"
       - "**.md"
@@ -36,11 +33,15 @@ on:
       - ".gitignore"
   workflow_dispatch:
   schedule:
-    # Weekly run every Wednesday at 07:00 UTC  -  staggered from ci-standard
-    - cron: "0 7 * * 3"
+    # Nightly at 07:00 UTC  -  staggered from ci-standard
+    - cron: "0 7 * * *"
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # Label events other than ci:full get their own group so tagging a PR
+  # never cancels its in-flight run (#12224).
+  group: >-
+    ${{ github.workflow }}-${{ format('{0}-{1}', github.ref, github.event.action == 'labeled' &&
+    github.event.label.name != 'ci:full' && 'label' || 'run') }}
   cancel-in-progress: true
 
 permissions:
@@ -49,10 +50,15 @@ permissions:
 jobs:
   # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:
-    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    # Fork PRs never run on the self-hosted fleet (RM#1989). PR runs need the
+    # ci:full label, and only that label event starts work (#12224). Every
+    # other job needs this one, so skipping it skips the whole lane.
     if: >-
       (!github.event.pull_request ||
-      github.event.pull_request.head.repo.full_name == github.repository)
+      (github.event.pull_request.head.repo.full_name == github.repository &&
+      contains(github.event.pull_request.labels.*.name, 'ci:full'))) &&
+      (github.event.action != 'labeled' ||
+      github.event.label.name == 'ci:full')
     # Dispatcher placement only. This repo is public, so a hosted runner is
     # free and unmetered; pinning the dispatcher meant every run waited for a
     # self-hosted slot just to decide where to run. The runner it SELECTS is
