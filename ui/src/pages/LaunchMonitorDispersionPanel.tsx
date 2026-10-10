@@ -9,7 +9,7 @@
  * already loaded by `LaunchMonitorAnalyticsPage` — no separate upload step.
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   analyzeDispersionV2,
   type DispersionGroupColumn,
@@ -241,6 +241,25 @@ function ResultsTable({ groups }: { groups: DispersionGroupResult[] }) {
   );
 }
 
+/**
+ * The coordinate column to use: the user's choice while it is still a column
+ * (or the explicit empty placeholder), otherwise the desktop tab's default,
+ * otherwise the first numeric column (mirrors `_set_preferred_combo`'s no-op
+ * when its preferred value is absent, which leaves the combo at its first
+ * item).
+ */
+function effectiveCoordinate(
+  choice: string | null,
+  options: string[],
+  preferred: string,
+): string {
+  if (choice !== null && (choice === "" || options.includes(choice))) {
+    return choice;
+  }
+  if (options.includes(preferred)) return preferred;
+  return options[0] ?? "";
+}
+
 export function LaunchMonitorDispersionPanel({
   columns,
   records,
@@ -257,38 +276,32 @@ export function LaunchMonitorDispersionPanel({
     [columns],
   );
 
-  const [forward, setForward] = useState("");
-  const [lateral, setLateral] = useState("");
-  const [groupColumn, setGroupColumn] = useState<string>(ALL_SHOTS);
+  // The user's explicit choices; null means "not chosen yet".
+  const [forwardChoice, setForward] = useState<string | null>(null);
+  const [lateralChoice, setLateral] = useState<string | null>(null);
+  const [groupChoice, setGroupColumn] = useState<string>(ALL_SHOTS);
 
   const [runState, setRunState] = useState<RunState>("idle");
   const [runError, setRunError] = useState<string | null>(null);
   const [result, setResult] = useState<DispersionResponse | null>(null);
 
-  // Prefer the desktop tab's defaults; fall back to the first numeric column
-  // when the CSV has neither (mirrors `_set_preferred_combo`'s no-op when its
-  // preferred value is absent, which leaves the combo at its first item).
-  useEffect(() => {
-    setForward((prev) => {
-      if (coordinateOptions.includes(prev)) return prev;
-      if (coordinateOptions.includes(DEFAULT_FORWARD)) return DEFAULT_FORWARD;
-      return coordinateOptions[0] ?? "";
-    });
-  }, [coordinateOptions]);
-  useEffect(() => {
-    setLateral((prev) => {
-      if (coordinateOptions.includes(prev)) return prev;
-      if (coordinateOptions.includes(DEFAULT_LATERAL)) return DEFAULT_LATERAL;
-      return coordinateOptions[0] ?? "";
-    });
-  }, [coordinateOptions]);
-  useEffect(() => {
-    setGroupColumn((prev) =>
-      prev === ALL_SHOTS || groupOptions.includes(prev as DispersionGroupColumn)
-        ? prev
-        : ALL_SHOTS,
-    );
-  }, [groupOptions]);
+  // Derived during render rather than synced in effects, so a column that
+  // leaves the CSV falls back without a cascading re-render.
+  const forward = effectiveCoordinate(
+    forwardChoice,
+    coordinateOptions,
+    DEFAULT_FORWARD,
+  );
+  const lateral = effectiveCoordinate(
+    lateralChoice,
+    coordinateOptions,
+    DEFAULT_LATERAL,
+  );
+  const groupColumn =
+    groupChoice === ALL_SHOTS ||
+    groupOptions.includes(groupChoice as DispersionGroupColumn)
+      ? groupChoice
+      : ALL_SHOTS;
 
   const canRun = forward !== "" && lateral !== "" && records.length >= 3;
 

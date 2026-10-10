@@ -11,7 +11,11 @@ from pathlib import Path
 import sys
 
 from src.shared.python.golf_view_presets import VIEW_ORDER
-from src.tools.native_viewer_export.core import ENGINES, ExportSettings
+from src.tools.native_viewer_export.core import (
+    DEFAULT_SPEEDS,
+    ENGINES,
+    ExportSettings,
+)
 from src.tools.native_viewer_export.overlay import build_overlay_feed
 from src.tools.native_viewer_export.runner import ExportJob, run_export
 
@@ -23,7 +27,7 @@ def build_parser() -> argparse.ArgumentParser:
         prog="python -m src.tools.native_viewer_export",
         description=(
             "Render a same-input swing in each engine's native viewer (Drake MeshCat, "
-            "Pinocchio MeshCat, OpenSim simbody under xvfb, MyoSuite arena) as mp4 "
+            "Pinocchio MeshCat, OpenSim simbody under xvfb, MyoSuite arena, MuJoCo Renderer) as mp4 "
             "clips: one per camera view plus a labelled 2x2."
         ),
     )
@@ -52,9 +56,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--fps", type=int, default=60, help="video frame rate")
     p.add_argument(
         "--speeds",
-        default="1,0.5",
+        default=",".join(f"{v:g}" for v in DEFAULT_SPEEDS),
         help="comma-separated playback speeds, each in (0, 4]; one clip set per "
-        "speed with _1x / _0p5x suffixes (default 1,0.5)",
+        "speed with _1x / _0p5x suffixes (default 1,0.5,0.25: full, half, quarter)",
     )
     p.add_argument(
         "--impact-window",
