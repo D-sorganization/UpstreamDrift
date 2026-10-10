@@ -155,6 +155,10 @@ Astra checked the full matched-study requirement list against current source int
 
 The local non-delta Git pack measurement completed with exit 0: 1,490,239,616 bytes (about 1.39 GiB) for committed history at `1e6ef40343` minus prior PR head `10c7d61aa6`. It excludes all untracked final graphics and is not evidence of remote push acceptance. The original delta-search estimator was intentionally retired; its partial pack is not a result. Evidence: `validation/publication_transport_size_v1/`. Full original v4 graphics total about 392 MB, and the still-partial supplemental v3 contains 345 PNGs plus PDF/SVG companions at this later snapshot. Do not blindly commit the whole final graphic collection into a single oversized Git push. Decide complete manifested artifact delivery after measuring finalized bundles; no release/upload or history rewrite has occurred.
 
+## Main Integration Preparation
+
+A read-only merge check against current main `fa7ee92f5c` found 12 real conflicts in generated context/capability documents, divergence inventories, the calculation registry and root handoff. Evidence: `validation/main_conflict_preflight_v1/`. A separate managed `shot-pattern-main-integration` worktree is being created from `2953c52b37`; Gemini primary resolution and Astra independent review will preserve both branches’ substantive records and canonical generation rules. No changes to the armed phase-one PR, MAIN working sources or frozen PRESENTATION producer are authorized by this preflight. Recheck the integration task before starting another merge.
+
 ## Next Steps and Gates
 
 1. Monitor the verified live v6 handles without restarting. All seven numerical artifacts already have independent exact-byte reconciliation; wait for the successful terminal receipt before full graphic review.

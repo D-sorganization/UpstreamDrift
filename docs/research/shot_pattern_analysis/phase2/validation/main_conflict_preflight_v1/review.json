@@ -1,0 +1,10 @@
+{
+  "refs": {
+    "HEAD": "2953c52b37001a8a3893e07943fb3cf2b6c38b45",
+    "origin/main": "fa7ee92f5cddd753099d7418fc974b142b7ebb54"
+  },
+  "merge_base": "3245b5211e5329105dfe9c66007b8d8e85c652e7",
+  "ahead_behind": "349\t85",
+  "merge_tree_exit": 1,
+  "working_tree_changed": false
+}
