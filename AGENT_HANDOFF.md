@@ -3,6 +3,7 @@
 - Branch `claude/12117-club-face-fixtures`. Fixtures from `657c811bcd` (#12145 sources; input receipts value-identical to main's #12166 receipts). Feet now flat (3.2–3.8 cm), address face follows the capture (5.43 / −5.41° vs 5.50 / −5.35°).
 - `club_face.impact_frame` now enforces the 0.15 m ball radius on the peak-speed frame (the driver replay peaks 0.351 m short of the ball). OSV-8 and OSV-9 address-face tests compare with the capture's address face (2° unchanged). OSV-9 MSK grip calibration and both `golf_humanoid*.osim` regenerated (control reproduces main byte for byte). Calc record: `simscape_matching_reference.tex`, "Fixtures Regenerated on the Current Spec".
 - Strict xfails: 7-iron impact face 10.97 vs 3.21° (#12221, club-in-hand rotation); GCV-20 speed −6.1 / −10.2 % (#11767). Toe-out miss filed as #12222.
+
 # Active: Nominal 7-Iron IK and the Club-Face Triad Gate, #12030
 
 - Branch `claude/12030-nominal-iron-ik`. Root cause: `full_body_spec_anthro_iron7.json` carries the driver's clubhead triad offsets (edges 92/52/96 mm against the 7-iron capture's 106/127/40 mm), so the nominal run's face residual (OSV-10) fitted a meaningless rotation. `club_face_target.observe_frame_rotations` now raises `TriadShapeMismatchError` above a 5 mm median rigid residual (0.2 mm when matched, 42.4 mm here). Face targets, the impact split and the receipt's `ik.face_orientation` record the reason. The IK report adds `frame0_marker_rms_m`.
