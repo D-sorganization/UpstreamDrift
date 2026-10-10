@@ -1,0 +1,273 @@
+FF....F                                                                  [100%]
+=================================== FAILURES ===================================
+_ test_original_final_protocol_accepts_only_missing_historical_bounds[original_primary] _
+
+protocol = 'original_primary'
+
+    @pytest.mark.parametrize("protocol", ["original_primary", "original_control"])
+    def test_original_final_protocol_accepts_only_missing_historical_bounds(protocol):
+        cells = _historical_cells(protocol, 10_000)
+        report = {"cells": [{"cell": name, "config": config} for name, config in cells.items()]}
+        before = deepcopy(report)
+>       validate_original_matrix_protocol(report, protocol=protocol,
+                                          common_targets=_TARGETS if protocol == "original_control" else None)
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_original_protocol_compatibility.py:39: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+report = {'cells': [{'cell': 'driver_lean0_curve1_rotation1_shaft_only', 'config': {'club': {'club_id': 'driver', 'club_speed_m...[1.0, 0.5, 0.44704, 0.00635, 0.00635, 0.0, ...], 'correlation': None}, 'n_shots': 10000, 'seed': 20261009, ...}}, ...]}
+protocol = 'original_primary', common_targets = None
+
+    def validate_original_matrix_protocol(
+        report: dict,
+        *,
+        protocol: str,
+        common_targets: dict[str, float] | None = None,
+    ) -> None:
+        """Require the exact reviewed factorial cell/config contract for originals."""
+        if protocol not in {"original_primary", "original_control"}:
+            raise ValueError("unknown original matched-matrix protocol")
+        if protocol == "original_control":
+            if not isinstance(common_targets, dict) or set(common_targets) != {
+                "driver",
+                "seven_iron",
+                "pitching_wedge",
+            }:
+                raise ValueError("original control requires the canonical common target map")
+            if any(
+                isinstance(value, bool)
+                or not isinstance(value, (int, float))
+                or not math.isfinite(value)
+                or value <= 0
+                for value in common_targets.values()
+            ):
+                raise ValueError("canonical common targets must be positive and finite")
+        from dataclasses import asdict
+    
+        from .matched_matrix import matched_matrix_cells
+    
+        expected = {
+            name: json.loads(json.dumps(asdict(config)))
+            for name, config in matched_matrix_cells(
+                n_shots=10_000,
+                seed=20261009,
+                common_targets=common_targets if protocol == "original_control" else None,
+                profiles=("shaft_only", "combined2")
+                if protocol == "original_control"
+                else None,
+            )
+        }
+        actual_cells = report.get("cells")
+        if not isinstance(actual_cells, list):
+            raise ValueError("original matrix report lacks its explicit cell inventory")
+        actual = {cell.get("cell"): cell.get("config") for cell in actual_cells}
+        if actual != expected:
+>           raise ValueError(
+                f"{protocol} cells/configurations differ from the reviewed protocol"
+            )
+E           ValueError: original_primary cells/configurations differ from the reviewed protocol
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/tools/shot_pattern_analysis/matched_report.py:124: ValueError
+_ test_original_final_protocol_accepts_only_missing_historical_bounds[original_control] _
+
+protocol = 'original_control'
+
+    @pytest.mark.parametrize("protocol", ["original_primary", "original_control"])
+    def test_original_final_protocol_accepts_only_missing_historical_bounds(protocol):
+        cells = _historical_cells(protocol, 10_000)
+        report = {"cells": [{"cell": name, "config": config} for name, config in cells.items()]}
+        before = deepcopy(report)
+>       validate_original_matrix_protocol(report, protocol=protocol,
+                                          common_targets=_TARGETS if protocol == "original_control" else None)
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_original_protocol_compatibility.py:39: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+report = {'cells': [{'cell': 'driver_lean0_curve1_rotation1_shaft_only', 'config': {'club': {'club_id': 'driver', 'club_speed_m...[1.0, 0.5, 0.89408, 0.00635, 0.00635, 0.0, ...], 'correlation': None}, 'n_shots': 10000, 'seed': 20261009, ...}}, ...]}
+protocol = 'original_control'
+common_targets = {'driver': 178.94875782337786, 'seven_iron': 127.88194166336235, 'pitching_wedge': 77.40247724866299}
+
+    def validate_original_matrix_protocol(
+        report: dict,
+        *,
+        protocol: str,
+        common_targets: dict[str, float] | None = None,
+    ) -> None:
+        """Require the exact reviewed factorial cell/config contract for originals."""
+        if protocol not in {"original_primary", "original_control"}:
+            raise ValueError("unknown original matched-matrix protocol")
+        if protocol == "original_control":
+            if not isinstance(common_targets, dict) or set(common_targets) != {
+                "driver",
+                "seven_iron",
+                "pitching_wedge",
+            }:
+                raise ValueError("original control requires the canonical common target map")
+            if any(
+                isinstance(value, bool)
+                or not isinstance(value, (int, float))
+                or not math.isfinite(value)
+                or value <= 0
+                for value in common_targets.values()
+            ):
+                raise ValueError("canonical common targets must be positive and finite")
+        from dataclasses import asdict
+    
+        from .matched_matrix import matched_matrix_cells
+    
+        expected = {
+            name: json.loads(json.dumps(asdict(config)))
+            for name, config in matched_matrix_cells(
+                n_shots=10_000,
+                seed=20261009,
+                common_targets=common_targets if protocol == "original_control" else None,
+                profiles=("shaft_only", "combined2")
+                if protocol == "original_control"
+                else None,
+            )
+        }
+        actual_cells = report.get("cells")
+        if not isinstance(actual_cells, list):
+            raise ValueError("original matrix report lacks its explicit cell inventory")
+        actual = {cell.get("cell"): cell.get("config") for cell in actual_cells}
+        if actual != expected:
+>           raise ValueError(
+                f"{protocol} cells/configurations differ from the reviewed protocol"
+            )
+E           ValueError: original_control cells/configurations differ from the reviewed protocol
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/tools/shot_pattern_analysis/matched_report.py:124: ValueError
+_ test_hash_bound_historical_pilot_accepts_defaults_without_rewriting_evidence _
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-1784/test_hash_bound_historical_pil0')
+
+    def test_hash_bound_historical_pilot_accepts_defaults_without_rewriting_evidence(tmp_path):
+        pilot = tmp_path / "control_pilot_v1/matrix_plan.json"
+        pilot.parent.mkdir()
+        pilot.write_text(json.dumps({"stage": "pilot", "cells": _historical_cells("original_control", 32)}))
+        audit = tmp_path / "validation/independent_control_pilot_audit.json"
+        audit.parent.mkdir()
+        audit.write_text(json.dumps({"pass": True, "failures": [], "plan_sha256": hashlib.sha256(pilot.read_bytes()).hexdigest()}))
+        acceptance = tmp_path / "FINAL_RUN_ACCEPTANCE.md"
+        acceptance.write_text("validation/independent_control_pilot_audit.json: " + hashlib.sha256(audit.read_bytes()).hexdigest())
+        targets = tmp_path / "common_targets.json"
+        targets.write_text(json.dumps(_TARGETS))
+        before = {path: path.read_bytes() for path in (pilot, audit, acceptance, targets)}
+>       loaded, provenance = load_reviewed_common_targets(tmp_path)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_original_protocol_compatibility.py:70: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+phase2_root = PosixPath('/tmp/pytest-of-dieterolson/pytest-1784/test_hash_bound_historical_pil0')
+
+    def load_reviewed_common_targets(phase2_root: Path) -> tuple[dict[str, float], dict[str, str]]:
+        """Read targets only from the pilot plan bound by final acceptance evidence."""
+        root = Path(phase2_root)
+        acceptance_path = root / "FINAL_RUN_ACCEPTANCE.md"
+        audit_path = root / "validation/independent_control_pilot_audit.json"
+        pilot_plan_path = root / "control_pilot_v1/matrix_plan.json"
+        target_path = root / "common_targets.json"
+        acceptance = acceptance_path.read_text(encoding="utf-8")
+        match = re.search(
+            r"validation/independent_control_pilot_audit\.json`?:\s*`?([0-9a-f]{64})",
+            acceptance,
+        )
+        if match is None or _sha256(audit_path) != match.group(1):
+            raise ValueError("control-pilot audit is not bound by final acceptance")
+        audit = json.loads(audit_path.read_text(encoding="utf-8"))
+        if audit.get("pass") is not True or audit.get("failures") != []:
+            raise ValueError("control-pilot audit did not pass")
+        plan_bytes = pilot_plan_path.read_bytes()
+        if hashlib.sha256(plan_bytes).hexdigest() != audit.get("plan_sha256"):
+            raise ValueError("control-pilot matrix plan differs from its accepted audit")
+        plan = json.loads(plan_bytes)
+        if plan.get("stage") != "pilot" or len(plan.get("cells", {})) != 72:
+            raise ValueError("accepted control-pilot plan has the wrong protocol shape")
+        targets: dict[str, float] = {}
+        for config in plan["cells"].values():
+            club_id = config["club"]["club_id"]
+            target = config.get("target_x_m")
+            if (
+                club_id not in {"driver", "seven_iron", "pitching_wedge"}
+                or isinstance(target, bool)
+                or not isinstance(target, (int, float))
+                or not math.isfinite(target)
+                or target <= 0
+            ):
+                raise ValueError("accepted control-pilot plan has invalid targets")
+            if club_id in targets and not math.isclose(
+                targets[club_id], float(target), rel_tol=0.0, abs_tol=1e-12
+            ):
+                raise ValueError("accepted control-pilot targets vary within a club")
+            targets[club_id] = float(target)
+        from dataclasses import asdict
+    
+        from .matched_matrix import matched_matrix_cells
+    
+        expected = {
+            name: json.loads(json.dumps(asdict(config)))
+            for name, config in matched_matrix_cells(
+                n_shots=32,
+                seed=20261009,
+                common_targets=targets,
+                profiles=("shaft_only", "combined2"),
+            )
+        }
+        normalized_plan = json.loads(json.dumps(plan["cells"]))
+        if normalized_plan != expected:
+>           raise ValueError("accepted control-pilot plan differs from its factorial protocol")
+E           ValueError: accepted control-pilot plan differs from its factorial protocol
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/tools/shot_pattern_analysis/matched_report.py:184: ValueError
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 20 durations =============================
+0.59s call     tests/tools/shot_pattern_analysis/test_original_protocol_compatibility.py::test_original_final_protocol_accepts_only_missing_historical_bounds[original_primary]
+0.58s setup    tests/tools/shot_pattern_analysis/test_original_protocol_compatibility.py::test_original_final_protocol_accepts_only_missing_historical_bounds[original_primary]
+0.03s call     tests/tools/shot_pattern_analysis/test_original_protocol_compatibility.py::test_hash_bound_historical_pilot_accepts_defaults_without_rewriting_evidence
+0.03s call     tests/tools/shot_pattern_analysis/test_original_protocol_compatibility.py::test_original_final_protocol_accepts_only_missing_historical_bounds[original_control]
+0.02s call     tests/tools/shot_pattern_analysis/test_original_protocol_compatibility.py::test_original_protocol_rejects_explicit_bounds_or_other_drift[match_speed_factors-value1]
+0.02s call     tests/tools/shot_pattern_analysis/test_original_protocol_compatibility.py::test_original_protocol_rejects_explicit_bounds_or_other_drift[seed-20261010]
+0.02s call     tests/tools/shot_pattern_analysis/test_original_protocol_compatibility.py::test_original_protocol_rejects_explicit_bounds_or_other_drift[match_tolerance_m-0.1]
+0.02s call     tests/tools/shot_pattern_analysis/test_original_protocol_compatibility.py::test_original_protocol_rejects_explicit_bounds_or_other_drift[match_face_bounds_deg-value0]
+0.01s teardown tests/tools/shot_pattern_analysis/test_original_protocol_compatibility.py::test_original_final_protocol_accepts_only_missing_historical_bounds[original_primary]
+0.01s setup    tests/tools/shot_pattern_analysis/test_original_protocol_compatibility.py::test_original_protocol_rejects_explicit_bounds_or_other_drift[match_face_bounds_deg-value0]
+0.01s teardown tests/tools/shot_pattern_analysis/test_original_protocol_compatibility.py::test_original_final_protocol_accepts_only_missing_historical_bounds[original_control]
+0.01s setup    tests/tools/shot_pattern_analysis/test_original_protocol_compatibility.py::test_original_protocol_rejects_explicit_bounds_or_other_drift[match_tolerance_m-0.1]
+0.01s teardown tests/tools/shot_pattern_analysis/test_original_protocol_compatibility.py::test_original_protocol_rejects_explicit_bounds_or_other_drift[seed-20261010]
+0.01s setup    tests/tools/shot_pattern_analysis/test_original_protocol_compatibility.py::test_original_final_protocol_accepts_only_missing_historical_bounds[original_control]
+0.01s setup    tests/tools/shot_pattern_analysis/test_original_protocol_compatibility.py::test_original_protocol_rejects_explicit_bounds_or_other_drift[match_speed_factors-value1]
+0.01s setup    tests/tools/shot_pattern_analysis/test_original_protocol_compatibility.py::test_original_protocol_rejects_explicit_bounds_or_other_drift[seed-20261010]
+0.01s teardown tests/tools/shot_pattern_analysis/test_original_protocol_compatibility.py::test_original_protocol_rejects_explicit_bounds_or_other_drift[match_tolerance_m-0.1]
+0.01s teardown tests/tools/shot_pattern_analysis/test_original_protocol_compatibility.py::test_original_protocol_rejects_explicit_bounds_or_other_drift[match_face_bounds_deg-value0]
+0.01s teardown tests/tools/shot_pattern_analysis/test_original_protocol_compatibility.py::test_hash_bound_historical_pilot_accepts_defaults_without_rewriting_evidence
+0.01s teardown tests/tools/shot_pattern_analysis/test_original_protocol_compatibility.py::test_original_protocol_rejects_explicit_bounds_or_other_drift[match_speed_factors-value1]
+=========================== short test summary info ============================
+FAILED tests/tools/shot_pattern_analysis/test_original_protocol_compatibility.py::test_original_final_protocol_accepts_only_missing_historical_bounds[original_primary]
+FAILED tests/tools/shot_pattern_analysis/test_original_protocol_compatibility.py::test_original_final_protocol_accepts_only_missing_historical_bounds[original_control]
+FAILED tests/tools/shot_pattern_analysis/test_original_protocol_compatibility.py::test_hash_bound_historical_pilot_accepts_defaults_without_rewriting_evidence

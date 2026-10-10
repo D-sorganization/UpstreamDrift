@@ -1,0 +1,24 @@
+{
+  "pilot": {
+    "cells": 72,
+    "passed": true,
+    "acceptance_sha256": "9d68c6ac39aa2572a15ee6219070f29de32ab366111ffcf02743df0764ba0001",
+    "audit_sha256": "c3dc7fc43d6ff9ca044d291fe5f5a7af059313b28cc20af5affafd0d5f330bad",
+    "pilot_plan_sha256": "491a37dd430b4de0946089b75db11db5fe17016df3b98ff32d6c819f664af073",
+    "common_targets_sha256": "79cac0bc5fcac90cdd2f708c75c3714401c5771a09512c259d8222e607375c75"
+  },
+  "original_final_protocols": [
+    {
+      "protocol": "original_primary",
+      "cells": 324,
+      "plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+      "passed": true
+    },
+    {
+      "protocol": "original_control",
+      "cells": 72,
+      "plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+      "passed": true
+    }
+  ]
+}
