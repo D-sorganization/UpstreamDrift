@@ -1,3 +1,8 @@
+# Active: Drake Spec-Order Coordinates - #12039
+
+- Branch `claude/drake-com-parity-12039`. `DrakeFullBodyIK._set` and its Jacobians, and `FullBodyDrakeModel.marker_positions` and `_coerce_state` for array inputs, passed spec-ordered vectors in Drake joint-creation order. Spec indices 6-29 (the upper body) were scrambled; the legs and root map one to one. All four now map through `_q_indices`/`_v_indices`. `test_drake_mujoco_com_parity.py` pins mass, CoM, per-body CoM, Jacobian columns, and array input matching mapping input.
+- Evidence made through the Drake IK or array paths before this fix is suspect and needs regeneration: OSV-6 Drake address reports, Drake parity reports, Drake forward-dynamics replays.
+
 # Active: Simscape URDF Exchange — #11569 Task 3
 
 - Branch `claude/simscape-urdf-exchange-11569`; commit `SELF`. `smexport` is absent in R2025b, so `scripts/matlab/simscape_model_inventory.m` reads joints (type, DOF) and solid/inertia masses (unit-converted, density x volume where needed; NaN when not evaluable) from the canonical `GolfSwing3D_Kinetic` and from an `smimport` of the spec `golfer.urdf`. `export_simscape_urdf_exchange.m` writes `tests/fixtures/simscape/simscape_urdf_exchange_receipt.json`; `src/engines/simscape/urdf_exchange.py` diffs it against the URDF.
