@@ -1,0 +1,112 @@
+# Constrained Mixed Moco and Independent Native Replay
+
+This provisional F07 calculation documents the combined path exercised by
+child #12173 under #11791 and #11784. It composes the separately declared
+OpenSim cold-start/constraint policy with the explicit mixed-muscle and
+mechanical-assistance profile, then exports the solved inputs to T01 and
+executes them on a fresh native model. It does not alter the strict default
+muscle-only path or qualify production anatomy, physiology, contact, capture
+matching, or release.
+
+## Declared Native Constraints and Cold Start
+
+`DeclaredColdStart` records the source identity, complete named continuous
+state, initial time, every explicit coordinate lock target, expected native
+constraint-enforcement map, residual tolerance, coordinate chart intervals,
+and optional linear chart inequalities. The declaration does not disable,
+remove, simplify, or silently re-target a native constraint. The constrained
+path is opt-in; without a declaration, the existing strict muscle-only and
+mixed-actuation admissions retain their prior restrictions.
+
+The maintained Moco preparation checks every caller optimizer coordinate box
+against its declared chart. For a linear chart rule
+$\ell \leq \sum_i a_i q_i \leq h$, it computes the minimum and maximum of
+each weighted independent interval and sums those extrema. The resulting
+interval must lie inside $[\ell,h]$; unknown coordinates, overflow, and any
+box that extends outside the chart block preparation. This is a conservative
+box-containment proof, not a proof about arbitrary solver iterates outside the
+declared box or every internal integrator stage.
+
+Fresh reconstruction applies only the declared lock targets, restores the
+named continuous state, fixes its declared clock, and reads back constraint
+enforcement and residual observations. The one native `Manager` used by the
+replay must initialize without changing any requested named state value or
+the initial time. Any projection or other seed change raises before sampled
+replay output is accepted. At each replay knot, the provider checks exact
+native time, source chart membership, declared linear inequalities, native
+constraint enforcement and position/velocity residuals. Observation is
+read-only; it does not repair the state or alter saved controls.
+
+## Mixed Physical Roles and Units
+
+The ordered `MixedActuationProfile` covers every registered native scalar
+actuator and binds its absolute path, role, finite control bounds, concrete
+native law, coordinate association, native bounds, scale, and output unit.
+Muscle channels keep dimensionless excitation separate from their nonlinear
+native force in newtons. A `CoordinateActuator` command is also dimensionless;
+native optimal force scales it into newtons for a translational coordinate or
+newton-metres for a rotational coordinate. Mechanical assistance is labeled
+as `root-residual`, `upper-assistance`, or `leg-reserve` by explicit profile
+declaration; root assignment is checked against the actual ground-parent
+topology, not the actuator name. These labels do not establish that a source
+model contains clinically or biomechanically valid assistance.
+
+T01 export retains the exact ordered control knots and binds model, complete
+declared state, profile and execution-policy identity. Replay reloads that
+immutable bundle, rejects changed declarations, reconstructs a fresh source
+model, and sends only the saved time-indexed input. It records applied
+dimensionless controls separately from physical actuator outputs, units,
+power and sampled work. Results are immutable arrays. Every constrained mixed
+sample also carries its native constraint observation digest and separate
+maximum position and velocity residuals; no mixed-unit global residual norm is
+used.
+
+## Native Fixture Evidence
+
+The direct changed-future replay fixture contains two Millard muscles, a
+relative rotational Pin coordinate, and an explicit linear coordinate
+coupler. Four sampled times span 15 ms. Its 0.2 coordinate command at an
+optimal-force scale of 7 produces 1.4 N*m, retained separately from the 0.2
+input. The test also checks read-only per-sample enforcement, residuals no
+greater than the fixture's declared $10^{-9}$ tolerance, and a byte-identical
+common prefix before a changed future assistance command. The maintained
+40 ms synthetic Moco fixture contains two muscles, a ground-parented
+translational Slider, a relative rotational Pin and a declared coupler. It
+exports solver knots and independently replays simultaneous muscle and
+mechanical commands through the combined path.
+
+Four negative regressions perturb a dependent coordinate's requested initial
+value or speed by $5\times10^{-10}$ in both the mixed replay and mechanical
+prepared-state paths, verifying that native `Manager` initialization cannot
+hide the altered seed by projection. Other checks reject
+an omitted constraint declaration, changed declaration policy, competing
+command/controller policy, optimizer bounds outside the chart, and a linear
+chart whose interval proof fails.
+
+These short synthetic runs establish bounded software-path behavior only.
+They are not private swing captures, static-equilibrium demonstrations,
+source-model preparation, or physiology/contact acceptance. A finite solve,
+low fixture marker error, fresh replay, or passing software tests does not
+convert the T01 profile into a production model qualification.
+
+## Reproduction and Remaining Gates
+
+Use the already-installed OpenSim 4.6 Python 3.12 runtime and its matching
+CasADi configuration; no new environment is required. The focused frozen
+regression completed with 73 passed and one explicit unavailable-provider
+skip in 63.60 seconds. The separate successful Moco v2 run used a 40 ms
+synthetic target, marker weight $10^4$, and completed in 20.49 seconds. The
+prior hidden-projection/seed regression is retained as RED evidence; it is not
+included as a production failure. The central manual still has zero
+registered calculations and `blocked-inventory-required` status.
+
+The disjoint existing pure-muscle/contact and Moco-runner regression completed
+with 124 passed and two explicit skips in 66.39 seconds. Across the combined
+selected regressions this is 197 passed and three skips; no test is counted
+twice.
+
+Before any production interpretation, the source needs reviewed native
+anatomy, calibrated marker attachments, a validated complete state, passive
+force policy, model-specific assistance mapping, contact/grip policy, and
+independent full-horizon replay. Private capture fit, all required variants,
+six-engine parity, physiology and manual release approval remain open.
