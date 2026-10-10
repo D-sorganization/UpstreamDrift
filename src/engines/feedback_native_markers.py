@@ -23,6 +23,27 @@ from src.engines.feedback_comparison import FeedbackComparisonRegistry
 from src.engines.model_inventory import TARGET_ENGINES
 
 
+def require_sha256(name: str, digest: str) -> None:
+    if (
+        not isinstance(digest, str)
+        or len(digest) != 64
+        or any(char not in "0123456789abcdef" for char in digest)
+    ):
+        raise ValueError(f"{name} identity must be a lowercase SHA-256")
+
+
+def native_binding_identity(binding: NativeAdapterBinding) -> tuple[str, ...]:
+    """Return the shared six-field model/provider identity for marker evidence."""
+    return (
+        binding.native_model_id,
+        binding.native_variant_id,
+        binding.native_execution_provider_id,
+        binding.native_execution_provider_sha256,
+        binding.source_model_sha256,
+        binding.loaded_native_model_sha256,
+    )
+
+
 @dataclass(frozen=True)
 class NativeMarkerAttachment:
     """An explicit local 3-D marker point attached to one native body/frame."""
@@ -46,11 +67,12 @@ class NativeMarkerMap:
     output_frame_id: str
     timebase_id: str
     attachments: tuple[NativeMarkerAttachment, ...]
+    calibration_artifact_sha256: str | None = None
 
     @property
     def sha256(self) -> str:
         payload = {
-            "schema_version": "native-marker-map/1.0.0",
+            "schema_version": "native-marker-map/1.1.0",
             **asdict(self),
         }
         encoded = json.dumps(
@@ -68,20 +90,16 @@ class NativeMarkerMap:
             self.source_model_sha256,
             self.loaded_native_model_sha256,
         )
-        expected = (
-            binding.native_model_id,
-            binding.native_variant_id,
-            binding.native_execution_provider_id,
-            binding.native_execution_provider_sha256,
-            binding.source_model_sha256,
-            binding.loaded_native_model_sha256,
-        )
-        if identity != expected:
+        if identity != native_binding_identity(binding):
             raise ValueError("native marker map model or provider identity differs")
         if self.timebase_id != timebase_id:
             raise ValueError("native marker map timebase differs from replay bundle")
         if self.output_frame_id != "world":
             raise ValueError("native marker output frame must be explicit world frame")
+        if self.calibration_artifact_sha256 is not None:
+            require_sha256(
+                "marker calibration artifact", self.calibration_artifact_sha256
+            )
         if not self.engine_id or not self.native_model_id or not self.native_variant_id:
             raise ValueError("native marker map identity fields must be non-empty")
         for name, digest in (
@@ -89,10 +107,7 @@ class NativeMarkerMap:
             ("source model", self.source_model_sha256),
             ("loaded model", self.loaded_native_model_sha256),
         ):
-            if len(digest) != 64 or any(
-                char not in "0123456789abcdef" for char in digest
-            ):
-                raise ValueError(f"native marker map {name} identity must be SHA-256")
+            require_sha256(f"native marker map {name}", digest)
         if not self.attachments:
             raise ValueError("native marker map requires at least one attachment")
         labels = tuple(item.label for item in self.attachments)
@@ -129,6 +144,7 @@ class NativeMarkerReplayEvidence:
     marker_map_sha256: str
     marker_output_sha256: str
     native_output: NativeMarkerPositionOutput
+    calibration_artifact_sha256: str | None = None
 
     def validate_output(self, output: NativeMarkerPositionOutput) -> None:
         """Verify receipt and marker bytes before downstream scoring."""
@@ -150,10 +166,11 @@ class NativeMarkerReplayEvidence:
             ("marker map", self.marker_map_sha256),
             ("marker output", self.marker_output_sha256),
         ):
-            if len(digest) != 64 or any(
-                char not in "0123456789abcdef" for char in digest
-            ):
-                raise ValueError(f"native marker {name} digest is invalid")
+            require_sha256(f"native marker {name}", digest)
+        if self.calibration_artifact_sha256 is not None:
+            require_sha256(
+                "native marker calibration artifact", self.calibration_artifact_sha256
+            )
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -171,6 +188,7 @@ class NativeMarkerReplayEvidence:
             "state_output_sha256": self.native_execution_receipt.output_state_sha256,
             "native_execution_receipt": asdict(self.native_execution_receipt),
             "marker_map_sha256": self.marker_map_sha256,
+            "calibration_artifact_sha256": self.calibration_artifact_sha256,
             "marker_output_sha256": self.marker_output_sha256,
             "frame_id": self.native_output.frame_id,
             "timebase_id": self.native_output.timebase_id,
@@ -368,6 +386,7 @@ def execute_native_marker_replay(
         marker_map.sha256,
         _marker_output_sha256(marker_output),
         marker_output,
+        marker_map.calibration_artifact_sha256,
     )
 
 
