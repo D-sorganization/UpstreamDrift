@@ -120,6 +120,8 @@ The existing user-open `../shot_pattern_analysis.tex` remains open and now disti
 
 Astra found and root repaired the archive-restoration recipe: bundle names now map explicitly to restored directory names, and the accepted control-pilot plan is included as a final-report provenance prerequisite. All four archive bundles passed byte verification; an isolated missing-plan negative control failed as expected, then the exact archived plan passed the public target validator. See `validation/publication_restoration_document_review_v1/` and issue #11976 comment 6095296279. This is documentation/portability evidence, not final graphical acceptance.
 
+The first 168 completed primary v6 PNGs are byte-identical to their preserved, reviewed v4 counterparts; no differing or missing-reference PNG was found at that snapshot. This permits reuse of exact-image visual evidence only after final v6 manifest reconciliation; it does not accept unfinished outputs or PDF/SVGs. See `validation/original_final_graphics_independent_review_v6/initial_png_parity.json`.
+
 ## Independent Completion Audit
 
 Astra checked the full matched-study requirement list against current source interfaces and named audit/restoration/GUI receipts. No new undisclosed numerical gap was found. The goal remains incomplete: complete qualified graphics, source/output reconciliation, the scientific report and editable findings, final PDF/page review and repository delivery remain pending. Empirical qualification and the editor compiler failure retain their separate limitations. See `validation/completion_scope_audit_v1/`; receipt SHA-256 `b7c963b402ce879e86ff7160247597712f4b6681771f01a724879bae3f14cf16`.
