@@ -96,6 +96,8 @@ Astra completed format diagnostics for all 744 original vectors: primary 198 PDF
 
 Astra completed the predeclared original-vector visual sample: 24 PDF/SVG files across all three clubs and four plot types, with no clipping or missing content. Root rehashed all 96 references and viewed two paired contact sheets. See `validation/original_vector_visual_review_v1/`. This supplements all-744 format diagnostics but does not imply all-744 visual review or full publication approval.
 
+AGY raster-helper session `15816` is terminal, exit 0, with a 13-test candidate and raw logs preserved in `validation/vector_rasterization_candidate_v1/`. Independent Astra qualification is running in `/tmp/p2-vector-raster-astra` against the immutable terminal snapshot. No integration or full raster batch has occurred.
+
 ## Completed Numerical Data
 
 All simulation workers, full saved-data audits and fresh archive restorations are finished. Do not restart them.
