@@ -139,10 +139,10 @@ The local non-delta Git pack measurement completed with exit 0: 1,490,239,616 by
 
 ## Next Steps and Gates
 
-1. Monitor the verified live v6 handles without restarting. When numerical artifacts appear, reconcile their exact seven hashes; the producer enforces this before graphics.
+1. Monitor the verified live v6 handles without restarting. All seven numerical artifacts already have independent exact-byte reconciliation; wait for the successful terminal receipt before full graphic review.
 2. Verify the completed v6 ledger, terminal receipt and full graphic coverage; expected coverage is 384 pairs × 16 formats plus 26 cells × 12 formats. Preserve failed output if any; never manufacture a final receipt.
 3. Complete all-output visual/hash reconciliation, then assemble and independently review the full report, PDF and editable findings. Verify complete release bundles locally and after remote download.
-4. Run final `python -m scripts.pre_pr` with Repository_Management on `PYTHONPATH`; update handoff/fragments and ready PR, arm through the merge-queue guard, then end the session. Check owned PR #11941’s actual remote/queue state first; no force push, protection bypass or peer PR changes.
+4. Run final `python -m scripts.pre_pr` with Repository_Management on `PYTHONPATH`; update handoff/fragments and ready PR, arm through the merge-queue guard, then end the session. Reassess the phase-two branch base and prepare its own PR; phase-one #11941 is already armed on a different remote branch and must remain untouched. No force push, protection bypass or peer PR changes.
 
 Prior gates identified unrelated API 401 baseline #11995, document-title/development-log debt #11935, and recorded baselines #11934/#11940. Design-manual structure passes; its release inventory remains blocked. Root `AGENT_HANDOFF.md` inherits excessive length and peer work; do not delete peer sections to mask that baseline. No hook, tolerance, identity-policy or branch-protection bypass. Issues require merged acceptance before closure; #11984 stays deferred.
 

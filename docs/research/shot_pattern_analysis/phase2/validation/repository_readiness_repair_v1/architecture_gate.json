@@ -1,0 +1,7 @@
+{
+  "command": "python3 scripts/architecture_map_contract.py",
+  "exit_code": 0,
+  "output": "PASS: docs/architecture/C4.md is valid (1 context, 1 container, 9 features, 3 changelog rows)",
+  "source_sha256": "9425ee96f5e5e05fc4b82e5a4600a8f3288f42a28cfd85b45804050b38eaa57f",
+  "scope": "Architecture document contract only; not full repository or scientific acceptance."
+}
