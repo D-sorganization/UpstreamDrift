@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from contextlib import contextmanager
 import hashlib
+import importlib
 from pathlib import Path
 from typing import Any, Iterator
 
@@ -252,7 +253,9 @@ def test_changed_adapter_source_is_rejected(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     with _fixture(tmp_path) as (_, _, observation, search, objective):
-        from src.engines import myosuite_project_command_solve as module
+        # Engine isolation can leave an earlier module on the parent package.
+        # Patch the current module used by _solve's direct import.
+        module = importlib.import_module("src.engines.myosuite_project_command_solve")
 
         calls = iter(("a" * 64, "b" * 64))
         monkeypatch.setattr(module, "_source_sha256", lambda: next(calls))

@@ -13,6 +13,7 @@ from typing import Any, cast
 import numpy as np
 from numpy.typing import NDArray
 
+from src.engines.native_replay_contracts import require_no_global_mujoco_callbacks
 from src.engines.physics_engines.mujoco.python.native_nmpc_tracking import (
     NativeNMPCTracking,
     run_native_direct_torque_tracking,
@@ -21,7 +22,6 @@ from src.engines.physics_engines.mujoco.python.native_tangent_derivative import 
     linearize_native_tangent_step,
 )
 from src.engines.physics_engines.mujoco.python.native_torque_replay import (
-    _CALLBACKS,
     _load_native,
     replay_native_torque_bundle,
 )
@@ -48,8 +48,7 @@ class NativeMuJoCoTangentModel:
     def __init__(self, model: Any, initial_integration_state: Array) -> None:
         import mujoco as mj
 
-        if any(getattr(mj, "get_mjcb_" + name)() is not None for name in _CALLBACKS):
-            raise ValueError("native callbacks are forbidden for feedback admission")
+        require_no_global_mujoco_callbacks(mj)
         derivative = linearize_native_tangent_step(
             model,
             np.array(initial_integration_state, dtype=np.float64, copy=True),
