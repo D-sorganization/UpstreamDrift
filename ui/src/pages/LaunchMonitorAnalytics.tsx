@@ -34,6 +34,7 @@ import type {
 } from "@/api/generated/types";
 import { LaunchMonitorTrendsPanel } from "./LaunchMonitorTrendsPanel";
 import { LaunchMonitorDispersionPanel } from "./LaunchMonitorDispersionPanel";
+import { LaunchMonitorRelationshipsPanel } from "./LaunchMonitorRelationshipsPanel";
 
 const BOUNDARY_TEXT =
   "Associations and fitted regressions do not establish causality. " +
@@ -760,6 +761,7 @@ export function LaunchMonitorAnalyticsPage() {
 
       <LaunchMonitorTrendsPanel columns={columns} records={records} />
       <LaunchMonitorDispersionPanel columns={columns} records={records} />
+      <LaunchMonitorRelationshipsPanel columns={columns} records={records} />
     </div>
   );
 
