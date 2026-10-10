@@ -1013,11 +1013,21 @@
       "weight_fraction_min": 0.7160937787914028,
       "weight_fraction_max": 1.2013645636001777
     },
+    "fd_phase": {
+      "impact_detector": "model_appearance.club_face.ball_passage(reference Clubhead)",
+      "impact_time_s": 1.322847784758023,
+      "fd_rms_address_to_impact_m": 0.03227164876795101,
+      "fd_rms_after_impact_m": 0.13859898549991906,
+      "address_to_impact_frames": 477,
+      "after_impact_frames": 177,
+      "status": "ok",
+      "reason": null
+    },
     "peak_joint_torque_n_m": 655.0048949248707,
     "lowest_sphere_height_min_m": -0.014004638540651385,
     "lowest_sphere_height_max_m": 0.002429885620830685
   },
-  "elapsed_s": 266.51108433899935,
+  "elapsed_s": 240.58085230900906,
   "qualification": "kinematic IK and computed-torque tracking milestone on the MuJoCo full-body model (anthropometric geometry (AN-1); unqualified until Simscape parity); not a fit, not acceptance",
   "acceptance": {
     "horizon": "G3",
