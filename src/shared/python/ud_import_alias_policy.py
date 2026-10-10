@@ -65,8 +65,9 @@ def install_ud_canonical_shared_import_aliases() -> None:
             if type(finder) is UdSharedImportAliasFinder:
                 _coalesce_loaded_aliases(finder)
                 return
-            sys.meta_path[index] = UdSharedImportAliasFinder()
-            _coalesce_loaded_aliases(sys.meta_path[index])
+            policy_finder = UdSharedImportAliasFinder()
+            sys.meta_path[index] = policy_finder
+            _coalesce_loaded_aliases(policy_finder)
             return
     finder = UdSharedImportAliasFinder()
     _coalesce_loaded_aliases(finder)
