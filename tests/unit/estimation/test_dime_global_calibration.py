@@ -34,6 +34,36 @@ from src.shared.python.estimation.dime_global_calibration import (
 pytestmark = pytest.mark.unit
 
 
+def _rotate_inertia(moments: tuple[float, float, float]) -> np.ndarray:
+    cosine = np.sqrt(0.5)
+    rotation = np.array([[cosine, 0, cosine], [0, 1, 0], [-cosine, 0, cosine]])
+    return rotation @ np.diag(moments) @ rotation.T
+
+
+@pytest.mark.parametrize("moments", [(0.02, 0.02, 0.08), (0.08, 0.02, 0.02)])
+def test_rotated_unrealizable_inertia_is_rejected(
+    moments: tuple[float, float, float],
+) -> None:
+    """A coordinate rotation cannot make impossible principal moments physical."""
+    tensor = _rotate_inertia(moments)
+    with pytest.raises(PreconditionError, match="triangle inequality"):
+        validate_physical_inertia(tensor)
+
+
+@pytest.mark.parametrize("moments", [(0.03, 0.04, 0.05), (0.02, 0.02, 0.04)])
+def test_valid_rotated_inertia_is_preserved(
+    moments: tuple[float, float, float],
+) -> None:
+    tensor = _rotate_inertia(moments)
+    np.testing.assert_array_equal(validate_physical_inertia(tensor), tensor)
+
+
+def test_inertia_symmetry_uses_the_explicit_absolute_tolerance() -> None:
+    tensor = np.array([[3e5, 1e5, 0], [1e5 + 1e-3, 4e5, 0], [0, 0, 5e5]])
+    with pytest.raises(PreconditionError, match="symmetric"):
+        validate_physical_inertia(tensor)
+
+
 def test_red_monocular_scale_ambiguity_rejected() -> None:
     """RED: Monocular observation without metric scale anchor cannot determine scale."""
     policy = PhysicalGaugePolicy(
