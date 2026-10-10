@@ -2,6 +2,10 @@
 
 - Branch `claude/osv-7-opensim-contact` (stacked on #11985). `grip_model="contact"` in `export_full_body_osim` builds pad `ContactSphere`s against closed `ContactMesh` cylinders with one `ElasticFoundationForce` per pad (`opensim/python/full_body_grip_contact.py`, `grip_contact_osim_sim.py`, meshes in `grip_contact/grip_mesh.py`). Weld stays default. CPodes is required (RK-Merson needs about 1e-7 s steps); the club is released with the weld velocity.
 - Full swings (CT, accuracy 1e-8): net force peak -2.6 % (driver) and -3.1 % (7-iron) against the bushing; per-hand and internal pairs differ (hyperstatic, section 19). Evidence `evidence/grip_kinetics/contact/opensim_*_acc1e-8_*`. Slow tests run on CT with `-m 'slow or not slow'`.
+# Active: Same-Input Parity Design-Manual Chapter - SIP P-9 #11614
+
+- Branch `claude/sip-p9-manual-chapter-11614`; epic #11605. Provisional QMD chapter `manuals/upstreamdrift/chapters/16-same-input-parity.qmd` (renumbered from 14 after `14-muscle-qualification-evidence.qmd` landed) (KKT, closure projection, ZOH RK4, bundle, L0-L3 levels and results, failed experiments, limitations) and registry blocker `UP-D1-same-input-parity-inventory`; registry stays blocked with no calculations. `same_input_parity.tex` cross-links the chapter and compiles with pdflatex.
+- Open: Simscape P-8 (#11613) must update both documents when it lands.
 
 # Active: Contact Grip and MyoSuite Bushing, OSV-7 Phase 3 #11739
 
