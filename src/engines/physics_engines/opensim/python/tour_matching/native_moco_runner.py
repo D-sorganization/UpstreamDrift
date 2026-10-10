@@ -33,8 +33,10 @@ from .native_reference_conventions import (
 from .registration import CaptureRegistration, register_points
 from .native_prepared_state import DeclaredColdStart, reconstruct_declared_cold_start
 from .native_mixed_actuation import MixedActuationProfile
+from .native_body_inertia import NativeBodyInertiaAudit, audit_native_body_inertia
 from .trc import read_trc, write_trc
 from src.shared.python.motion_matching.tour_capture_contract import TourCapture
+from src.shared.python.estimation import dime_global_calibration
 
 
 def _sha(path: Path) -> str:
@@ -191,6 +193,8 @@ class NativeMocoPreparation:
     passive_observation_sha256: str | None
     observation_clock_sha256: str | None
     registered_trc_sha256: str | None
+    physical_body_inertia_sha256: str | None
+    physical_body_inertia_qualified: bool
     marker_count: int
     observation_count: int
     excluded_marker_count: int
@@ -202,7 +206,11 @@ class NativeMocoPreparation:
     @property
     def ready_for_software_solve(self) -> bool:
         """A necessary technical gate, never anatomy or capture approval."""
-        return not self.blockers
+        return (
+            self.physical_body_inertia_qualified
+            and self.physical_body_inertia_sha256 is not None
+            and not self.blockers
+        )
 
 
 def _observed_marker_bindings(model: Any, request: NativeMocoRequest) -> list[str]:
@@ -419,6 +427,72 @@ def _load_observation_capture(
         return None, None, ["capture-trc-invalid"]
 
 
+def _physical_audit_bytes(audit: NativeBodyInertiaAudit) -> bytes:
+    """Serialize the exact native audit for preparation and later re-admission."""
+    return (
+        json.dumps(
+            {
+                "schema_version": "native-body-inertia-preflight/1.0.0",
+                "qualified": audit.admitted,
+                "audit": asdict(audit),
+            },
+            indent=2,
+            allow_nan=False,
+        )
+        + "\n"
+    ).encode()
+
+
+def _physical_body_preflight(
+    request: NativeMocoRequest, directory: Path
+) -> tuple[str, bool, list[str]]:
+    """Retain failed physical evidence without hiding other preparation blockers."""
+    try:
+        audit = audit_native_body_inertia(request.model_path, request.model_sha256)
+    except (OSError, ValueError, RuntimeError, ImportError) as exc:
+        payload = {
+            "schema_version": "native-body-inertia-preflight/1.0.0",
+            "qualified": False,
+            "source_sha256": request.model_sha256,
+            "adapter_sha256": _sha(
+                Path(audit_native_body_inertia.__code__.co_filename)
+            ),
+            "validator_sha256": _sha(Path(dime_global_calibration.__file__)),
+            "error_type": type(exc).__name__,
+            "reason": str(exc),
+        }
+        serialized = (json.dumps(payload, indent=2, allow_nan=False) + "\n").encode()
+        blockers = ["physical-body-inertia-audit-unavailable"]
+        qualified = False
+    else:
+        serialized = _physical_audit_bytes(audit)
+        blockers = [] if audit.admitted else ["physical-body-inertia-unqualified"]
+        qualified = audit.admitted
+    path = directory / "physical_body_inertia.json"
+    path.write_bytes(serialized)
+    return hashlib.sha256(serialized).hexdigest(), qualified, blockers
+
+
+def _preparation_source_digests(
+    request: NativeMocoRequest,
+) -> tuple[dict[str, str | None], list[str]]:
+    """Read each frozen input once and retain every independent hash failure."""
+    actual: dict[str, str | None] = {}
+    blockers: list[str] = []
+    for label, path, expected in (
+        ("model", request.model_path, request.model_sha256),
+        ("capture", request.trc_path, request.trc_sha256),
+        ("guess", request.states_guess_path, request.states_guess_sha256),
+    ):
+        try:
+            actual[label] = _sha(path)
+        except OSError:
+            actual[label] = None
+        if actual[label] != expected:
+            blockers.append(f"{label}-sha256-mismatch")
+    return actual, blockers
+
+
 def prepare_native_moco(
     request: NativeMocoRequest, output_dir: Path
 ) -> NativeMocoPreparation:
@@ -432,18 +506,15 @@ def prepare_native_moco(
         blockers.append("unused-reference-policy")
     if request.config.t_start_s != 0.0:
         blockers.append("nonzero-native-replay-origin")
-    actual: dict[str, str | None] = {}
-    for label, path, expected in (
-        ("model", request.model_path, request.model_sha256),
-        ("capture", request.trc_path, request.trc_sha256),
-        ("guess", request.states_guess_path, request.states_guess_sha256),
-    ):
-        try:
-            actual[label] = _sha(path)
-        except OSError:
-            actual[label] = None
-        if actual[label] != expected:
-            blockers.append(f"{label}-sha256-mismatch")
+    actual, source_blockers = _preparation_source_digests(request)
+    blockers.extend(source_blockers)
+    physical_sha = None
+    physical_qualified = False
+    if actual["model"] == request.model_sha256:
+        physical_sha, physical_qualified, physical_blockers = _physical_body_preflight(
+            request, directory
+        )
+        blockers.extend(physical_blockers)
     capture = None
     clock_sha = None
     registered_sha = None
@@ -507,6 +578,8 @@ def prepare_native_moco(
         passive_sha,
         clock_sha,
         registered_sha,
+        physical_sha,
+        physical_qualified,
         len(request.marker_weights),
         capture.frames if capture is not None else 0,
         len(request.excluded_markers),
@@ -560,12 +633,38 @@ def _solution_names(vector: Any) -> tuple[str, ...]:
     return tuple(str(vector.get(i)) for i in range(vector.getSize()))
 
 
+def _require_physical_body_audit(
+    request: NativeMocoRequest, prepared: NativeMocoPreparation, directory: Path
+) -> None:
+    """Recompute native body physics, not just a claimed sidecar checksum."""
+    expected = prepared.physical_body_inertia_sha256
+    if not prepared.physical_body_inertia_qualified or expected is None:
+        raise ValueError("Physical body inertia admission is missing or rejected")
+    try:
+        frozen = (directory / "physical_body_inertia.json").read_bytes()
+    except OSError as exc:
+        raise ValueError("Physical body inertia audit sidecar is missing") from exc
+    if hashlib.sha256(frozen).hexdigest() != expected:
+        raise ValueError("Physical body inertia audit sidecar changed")
+    try:
+        current = audit_native_body_inertia(request.model_path, request.model_sha256)
+    except (OSError, ValueError, RuntimeError) as exc:
+        raise ValueError("Physical body inertia native re-audit failed") from exc
+    if not current.admitted or _physical_audit_bytes(current) != frozen:
+        raise ValueError("Physical body inertia audit identity changed")
+
+
 def _require_current_inputs(
     request: NativeMocoRequest, prepared: NativeMocoPreparation, directory: Path
 ) -> Path:
     """Reject any source, observation or preparation drift before native work."""
     if request.identity_sha256 != prepared.request_sha256:
         raise ValueError("Native Moco request changed after preparation")
+    if (
+        not prepared.physical_body_inertia_qualified
+        or prepared.physical_body_inertia_sha256 is None
+    ):
+        raise ValueError("Physical body inertia admission is missing or rejected")
     if not prepared.ready_for_software_solve:
         raise ValueError("Preparation blockers prohibit native Moco solve")
     for path, expected in (
@@ -575,6 +674,7 @@ def _require_current_inputs(
     ):
         if _sha(path) != expected:
             raise ValueError("Source, observation or guess changed after preparation")
+    _require_physical_body_audit(request, prepared, directory)
     registered = directory / "registered.trc"
     if _sha(registered) != prepared.registered_trc_sha256:
         raise ValueError("Registered marker reference changed after preparation")
