@@ -9,7 +9,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 import re
-from typing import Any
+from typing import Any, Protocol
 
 from defusedxml import ElementTree
 import numpy as np
@@ -24,8 +24,37 @@ from .native_mtp_reduction import (
     _transform,
 )
 
-_JOINTS = ("subtalar_r", "subtalar_l")
-_COORDINATES = ("subtalar_angle_r", "subtalar_angle_l")
+
+@dataclass(frozen=True)
+class ZeroCustomJointProfile:
+    """Exact bilateral source names; never a generic joint-type allowlist."""
+
+    label: str
+    joints: tuple[str, str]
+    coordinates: tuple[str, str]
+
+
+SUBTALAR_PROFILE = ZeroCustomJointProfile(
+    "subtalar",
+    ("subtalar_r", "subtalar_l"),
+    ("subtalar_angle_r", "subtalar_angle_l"),
+)
+
+
+class ZeroCustomJointRequest(Protocol):
+    @property
+    def source_model_path(self) -> Path: ...
+
+    @property
+    def source_sha256(self) -> str: ...
+
+    @property
+    def derived_model_path(self) -> Path: ...
+
+    @property
+    def declared_target_rad(self) -> tuple[tuple[str, float], ...]: ...
+
+
 _AXES = (
     "rotation1",
     "rotation2",
@@ -88,41 +117,45 @@ class ZeroSubtalarReductionReceipt:
     native_reload_verified: bool
 
 
-def _reject_removed_coordinate_references(source: Path) -> None:
+def _reject_removed_coordinate_references(
+    source: Path,
+    profile: ZeroCustomJointProfile = SUBTALAR_PROFILE,
+) -> None:
     root = ElementTree.parse(source).getroot()
     targets = {
         node
         for node in root.iter()
-        if node.tag == "CustomJoint" and node.get("name") in _JOINTS
+        if node.tag == "CustomJoint" and node.get("name") in profile.joints
     }
     if len(targets) != 2:
-        raise ValueError("bilateral subtalar CustomJoint declaration required")
+        raise ValueError("bilateral declared CustomJoint source declaration required")
     for parent in root.iter():
         for child in list(parent):
             if child in targets:
                 parent.remove(child)
-    pattern = re.compile(
-        r"(?<![A-Za-z0-9_])(?:subtalar_angle_r|subtalar_angle_l)(?![A-Za-z0-9_])"
-    )
+    names = "|".join(re.escape(name) for name in profile.coordinates)
+    pattern = re.compile(rf"(?<![A-Za-z0-9_])(?:{names})(?![A-Za-z0-9_])")
     if any(
         pattern.search(value)
         for node in root.iter()
         for value in (*node.attrib.values(), node.text or "")
     ):
         raise ValueError(
-            "unresolved reference or dependency on removed subtalar coordinate"
+            "unresolved reference or dependency on removed declared CustomJoint coordinate"
         )
 
 
-def _source_axis_profile(source: Path) -> None:
+def _source_axis_profile(source: Path, profile: ZeroCustomJointProfile) -> None:
     root = ElementTree.parse(source).getroot()
     joints = {
         node.get("name"): node for node in root.iter() if node.tag == "CustomJoint"
     }
-    for joint_name, coordinate_name in zip(_JOINTS, _COORDINATES, strict=True):
+    for joint_name, coordinate_name in zip(
+        profile.joints, profile.coordinates, strict=True
+    ):
         joint = joints.get(joint_name)
         if joint is None:
-            raise ValueError("exact subtalar CustomJoint is missing")
+            raise ValueError("exact declared CustomJoint is missing")
         coordinate = joint.find("coordinates/Coordinate")
         axes = joint.findall("SpatialTransform/TransformAxis")
         if (
@@ -130,22 +163,26 @@ def _source_axis_profile(source: Path) -> None:
             or coordinate.get("name") != coordinate_name
             or len(axes) != 6
         ):
-            raise ValueError("subtalar one-coordinate spatial transform required")
+            raise ValueError(
+                "declared CustomJoint one-coordinate spatial transform required"
+            )
         if [axis.get("name") for axis in axes] != list(_AXES):
-            raise ValueError("subtalar spatial-axis order changed")
+            raise ValueError("declared CustomJoint spatial-axis order changed")
         for index, axis in enumerate(axes):
             values = _finite_native_array(
                 np.fromstring(axis.findtext("axis", ""), sep=" ")
             )
             if values.shape != (3,) or np.linalg.norm(values) < _TOL:
-                raise ValueError("invalid subtalar spatial axis")
+                raise ValueError("invalid declared CustomJoint spatial axis")
             if index == 0:
                 function = axis.find("LinearFunction/coefficients")
                 if (
                     axis.findtext("coordinates", "").strip() != coordinate_name
                     or function is None
                 ):
-                    raise ValueError("subtalar rotation law or coordinate changed")
+                    raise ValueError(
+                        "declared CustomJoint rotation law or coordinate changed"
+                    )
                 coefficients = _finite_native_array(
                     np.fromstring(function.text or "", sep=" ")
                 )
@@ -153,33 +190,45 @@ def _source_axis_profile(source: Path) -> None:
                     coefficients, [1.0, 0.0]
                 ):
                     raise ValueError(
-                        "subtalar rotation law must be identity through zero"
+                        "declared CustomJoint rotation law must be identity through zero"
                     )
             else:
                 constant = axis.find("Constant/value")
                 if axis.findtext("coordinates", "").strip() or constant is None:
-                    raise ValueError("subtalar nonrotational axis is not constant")
+                    raise ValueError(
+                        "declared CustomJoint nonrotational axis is not constant"
+                    )
                 values = _finite_native_array(
                     np.fromstring(constant.text or "", sep=" ")
                 )
                 if values.shape != (1,) or values[0] != 0.0:
-                    raise ValueError("subtalar nonrotational axis is not zero")
+                    raise ValueError(
+                        "declared CustomJoint nonrotational axis is not zero"
+                    )
 
 
-def _admit_native_joint(model: Any, state: Any) -> None:
-    for joint_name, coordinate_name in zip(_JOINTS, _COORDINATES, strict=True):
+def _admit_native_joint(
+    model: Any,
+    state: Any,
+    profile: ZeroCustomJointProfile,
+) -> None:
+    for joint_name, coordinate_name in zip(
+        profile.joints, profile.coordinates, strict=True
+    ):
         joint = model.getJointSet().get(joint_name)
         if joint.getConcreteClassName() != "CustomJoint" or joint.numCoordinates() != 1:
-            raise ValueError("exact one-coordinate subtalar CustomJoint required")
+            raise ValueError("exact one-coordinate declared CustomJoint required")
         coordinate = joint.get_coordinates(0)
         if coordinate.getName() != coordinate_name:
-            raise ValueError("subtalar native coordinate mapping changed")
+            raise ValueError("declared CustomJoint native coordinate mapping changed")
         if not coordinate.getDefaultLocked() or not coordinate.getLocked(state):
-            raise ValueError("subtalar target is not locked")
+            raise ValueError("declared CustomJoint target is not locked")
         if coordinate.getDefaultIsPrescribed() or coordinate.isPrescribed(state):
-            raise ValueError("prescribed subtalar target unsupported")
+            raise ValueError("prescribed declared CustomJoint target unsupported")
         if coordinate.getDefaultClamped() != coordinate.getClamped(state):
-            raise ValueError("subtalar clamp option changed during initialization")
+            raise ValueError(
+                "declared CustomJoint clamp option changed during initialization"
+            )
         if any(
             abs(value) > _TOL
             for value in (
@@ -190,12 +239,14 @@ def _admit_native_joint(model: Any, state: Any) -> None:
             )
         ):
             raise ValueError(
-                "nonzero subtalar source or achieved target cannot be welded"
+                "nonzero declared CustomJoint source or achieved target cannot be welded"
             )
         if coordinate.getClamped(state) and not (
             coordinate.getRangeMin() < -_TOL and coordinate.getRangeMax() > _TOL
         ):
-            raise ValueError("zero subtalar target lies on clamped boundary")
+            raise ValueError(
+                "zero declared CustomJoint target lies on clamped boundary"
+            )
         model.realizePosition(state)
         if (
             _max_difference(
@@ -204,10 +255,16 @@ def _admit_native_joint(model: Any, state: Any) -> None:
             )
             > _TOL
         ):
-            raise ValueError("native subtalar frame transform at zero is not identity")
+            raise ValueError(
+                "native declared CustomJoint frame transform at zero is not identity"
+            )
 
 
-def _common_state_pairs(original: Any, derived: Any) -> tuple[tuple[Any, Any], ...]:
+def _common_state_pairs(
+    original: Any,
+    derived: Any,
+    profile: ZeroCustomJointProfile,
+) -> tuple[tuple[Any, Any], ...]:
     source_state = original.initSystem()
     reduced_state = derived.initSystem()
     source_ids = {
@@ -225,13 +282,13 @@ def _common_state_pairs(original: Any, derived: Any) -> tuple[tuple[Any, Any], .
         or any(
             not any(
                 f"/{name}/{kind}" in identifier
-                for name in _COORDINATES
+                for name in profile.coordinates
                 for kind in ("value", "speed")
             )
             for identifier in removed
         )
     ):
-        raise ValueError("derived state changed beyond bilateral subtalar")
+        raise ValueError("derived state changed beyond bilateral declared CustomJoint")
     for identifier in reduced_ids:
         value = original.getStateVariableValue(source_state, identifier)
         derived.setStateVariableValue(reduced_state, identifier, value)
@@ -249,7 +306,11 @@ def _common_state_pairs(original: Any, derived: Any) -> tuple[tuple[Any, Any], .
     return pairs
 
 
-def _check_inventory(original: Any, derived: Any) -> tuple[str, ...]:
+def _check_inventory(
+    original: Any,
+    derived: Any,
+    profile: ZeroCustomJointProfile,
+) -> tuple[str, ...]:
     for title, before, after in (
         ("body", original.getBodySet(), derived.getBodySet()),
         ("muscle", original.getMuscles(), derived.getMuscles()),
@@ -268,22 +329,28 @@ def _check_inventory(original: Any, derived: Any) -> tuple[str, ...]:
         raise ValueError("derived joint inventory changed")
     for joint in before_joints:
         matched = after_joints.get(joint.getName())
-        if joint.getName() in _JOINTS:
+        if joint.getName() in profile.joints:
             if matched.getConcreteClassName() != "WeldJoint":
-                raise ValueError("only declared subtalar joints may be welded")
+                raise ValueError("only declared CustomJoint joints may be welded")
         elif joint.dump() != matched.dump():
             raise ValueError("unrelated joint property changed")
     names = tuple(coordinate.getName() for coordinate in derived.getCoordinateSet())
     if set(names) != {
         coordinate.getName() for coordinate in original.getCoordinateSet()
-    } - set(_COORDINATES):
-        raise ValueError("derived coordinate inventory changed beyond subtalar")
+    } - set(profile.coordinates):
+        raise ValueError(
+            "derived coordinate inventory changed beyond declared CustomJoint"
+        )
     return names
 
 
-def _compare_native(original: Any, derived: Any) -> tuple[float, ...]:
-    names = _check_inventory(original, derived)
-    pairs = _common_state_pairs(original, derived)
+def _compare_native(
+    original: Any,
+    derived: Any,
+    profile: ZeroCustomJointProfile,
+) -> tuple[float, ...]:
+    names = _check_inventory(original, derived, profile)
+    pairs = _common_state_pairs(original, derived, profile)
     if len(pairs) < 3:
         raise ValueError("insufficient nonzero common native comparison poses")
     errors = np.zeros(9)
@@ -314,14 +381,17 @@ def _compare_native(original: Any, derived: Any) -> tuple[float, ...]:
         rank = int(observed[8])
         condition = max(condition, float(observed[9]))
     if np.max(errors) > _TOL or _constraint_residual(pairs[0][0]) > _TOL:
-        raise ValueError("fresh native subtalar derivation changed sampled mechanics")
+        raise ValueError(
+            "fresh native declared CustomJoint derivation changed sampled mechanics"
+        )
     return (*[float(value) for value in errors], rank, condition, len(pairs))
 
 
-def derive_zero_subtalar_model(
-    request: ZeroSubtalarReductionRequest,
+def derive_zero_custom_joint_model(
+    request: ZeroCustomJointRequest,
+    profile: ZeroCustomJointProfile,
 ) -> ZeroSubtalarReductionReceipt:
-    """Weld only declared zero subtalar joints and verify freshly reloaded XML."""
+    """Weld only exact declared zero CustomJoints and independently reload."""
     import opensim as osim
     from . import native_mtp_reduction as comparison
 
@@ -329,25 +399,24 @@ def derive_zero_subtalar_model(
     output = request.derived_model_path
     reducer_hash = _sha(Path(__file__))
     helper_hash = _sha(Path(comparison.__file__))
-    if not source.is_file() or _sha(source) != request.source_sha256:
-        raise ValueError("source model hash mismatch or source missing")
-    if output.exists():
-        raise FileExistsError(output)
-    if not output.parent.is_dir():
-        raise ValueError("derived model parent directory missing")
-    _reject_removed_coordinate_references(source)
-    _source_axis_profile(source)
+    comparison.require_fresh_reduction_paths(source, request.source_sha256, output)
+    if request.declared_target_rad != tuple(
+        (name, 0.0) for name in profile.coordinates
+    ):
+        raise ValueError("joint profile and declared zero targets differ")
+    _reject_removed_coordinate_references(source, profile)
+    _source_axis_profile(source, profile)
     original = osim.Model(str(source))
-    _admit_native_joint(original, original.initSystem())
+    _admit_native_joint(original, original.initSystem(), profile)
     derived = osim.Model(original)
     names = osim.StdVectorString()
-    for joint_name in _JOINTS:
+    for joint_name in profile.joints:
         names.append(joint_name)
     osim.ModOpReplaceJointsWithWelds(names).operate(derived, "")
     derived.printToXML(str(output))
     output_hash = _sha(output)
     try:
-        observed = _compare_native(original, osim.Model(str(output)))
+        observed = _compare_native(original, osim.Model(str(output)), profile)
         if (
             _sha(source),
             _sha(output),
@@ -374,7 +443,7 @@ def derive_zero_subtalar_model(
         native_simbody_sha256=_sha(Path(osim._simbody.__file__)),
         native_actuators_sha256=_sha(Path(osim._actuators.__file__)),
         comparison_helper_sha256=helper_hash,
-        removed_coordinate_names=_COORDINATES,
+        removed_coordinate_names=profile.coordinates,
         max_body_transform_error=observed[0],
         max_muscle_length_error=observed[1],
         max_muscle_speed_error=observed[2],
@@ -389,3 +458,10 @@ def derive_zero_subtalar_model(
         observed_pose_count=int(observed[11]),
         native_reload_verified=True,
     )
+
+
+def derive_zero_subtalar_model(
+    request: ZeroSubtalarReductionRequest,
+) -> ZeroSubtalarReductionReceipt:
+    """Preserve the exact published subtalar profile and result contract."""
+    return derive_zero_custom_joint_model(request, SUBTALAR_PROFILE)

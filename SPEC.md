@@ -11025,6 +11025,19 @@ path lengths/speeds, mass, applied forces and constraints. Canonical chapter
 46 and the F07 turnover bind source/runtime/output identity and sampled
 limits. Abdominal and MTP composition, physiological muscle state, full native
 replay, Moco and capture matching remain open.
+## Source-Bound Native Zero-MTP CustomJoint Reduction (#12176)
+
+The assembled 557-muscle BUET–Hamner source has bilateral single-coordinate
+locked-zero MTP CustomJoints, not PinJoints. A separate exact source-profile
+reduction now admits their zero spatial laws and native lock targets before
+welding only those joints in a derived model. Fresh native reload and four
+sampled common-state comparisons preserve body motion, 557 muscle path
+lengths/speeds, constraints and rank-complete lifted mass and applied force.
+The existing PinJoint policy remains strict. The retained abdominal→subtalar
+parent admits this final MTP step. Independent original-to-final sampled
+mechanics and native Moco initialization pass at three prepared states; Moco
+solve, physiology, contact/grip and captured matching remain unqualified. Canonical
+chapter 47, native receipt and F07 turnover bind the calculation and limits.
 
 ## Assistance-Explicit OpenSim Replay (#12147)
 
@@ -11037,3 +11050,46 @@ provider, input, state and policy digests. Zero-assistance point bounds are
 supported. The original muscle-only profile remains strict. Canonical chapter
 27 and F07_MIXED_ACTUATION_TURNOVER document the calculation and limits; full
 factory topology, capture/physiology/contact/grip and 17-model parity remain open.
+
+The #12147 mixed Moco link reuses scalar bindings and chapter39's file-driven
+pipeline. The original mixed link bound ordered roles/bounds and preserved
+optimizer knots through independent T01 replay; combined constrained profiles
+were outside that snapshot's scope. Mixed NPZ evidence distinguishes
+actuations/controls and physical units, roles, powers and sampled work. This
+does not discharge anatomy, contact, private full-horizon or all-model gates.
+
+Child #12173 now exercises an explicitly declared constrained-plus-mixed
+Moco/replay path. Optimizer boxes are contained in declared coordinate and
+linear charts; fresh replay rejects Manager projection of the exact named
+state/time seed and records constraint enforcement/residuals at every sample.
+Muscle excitation, mechanical commands and resulting physical force/torque
+remain separate. The strict default muscle-only policy is unchanged. Its
+40 ms synthetic native Moco and fresh-replay regression is software evidence
+only; full-body qualification, private capture, all required variants and
+six-engine parity remain open. See canonical chapter48 and
+`F07_CONSTRAINED_MIXED_MOCO_TURNOVER.md`.
+The F07 #12143 versioned constrained-muscle policy extends a declared
+native OpenSim cold start to exact ordered excitation T01 export, fresh
+source replay and marker sampling without reassembly. A coupler-only
+two-Millard source solves a reachable nonzero Moco endpoint and independently
+replays within declared fixture-specific per-unit state and q/u residual
+bounds; native locked-coordinate replay remains separate because installed
+OpenSim Moco rejects locked coordinates. The source-bound component audit
+admits only reviewed CustomJoint and coordinate-linear moving path laws.
+Canonical chapter42 and `F07_CONSTRAINED_MUSCLE_MOCO_TURNOVER.md` retain
+the failed zero-force/loose-transcription experiment and all 520-muscle,
+private-capture, contact, assistance and physiology gates.
+
+## Exact 557-Muscle Excitation Diagnostic (#12182)
+
+The opt-in v3 OpenSim profile accepts only the exact source-preserving
+BUET–Hamner derived XML and a frozen native path/class inventory. It binds
+visual-only mesh references, 40 clamped ranges, four audited rotational
+coupled-coordinate units, 1,226 complete continuous values, 17 couplers and
+557 ordered excitation inputs. The untouched one-equilibrium seed fails the
+SC_z chart at 1 ms. An explicitly different six-coordinate interior seed
+passes only a 0.2 ms fresh same-input replay; a final-knot excitation change
+preserves the preceding state and alters native activation. Chapter50 and
+`F07_EXACT_557_REPLAY_TURNOVER.md` retain the source-hashed failure and
+limited positive evidence. Original body inertia validity, source physiology,
+full-horizon capture matching and 17-variant/six-engine parity remain blocked.

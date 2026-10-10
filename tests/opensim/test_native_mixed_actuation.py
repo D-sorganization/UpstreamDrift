@@ -457,6 +457,7 @@ def test_scalar_core_rejects_mislabeled_initial_native_time(
     mixed_model: tuple[Any, Any, Path],
 ) -> None:
     from src.engines.physics_engines.opensim.python.tour_matching.native_scalar_replay import (
+        NativeScalarReplayPolicy,
         integrate_native_scalar_replay,
     )
 
@@ -465,7 +466,13 @@ def test_scalar_core_rejects_mislabeled_initial_native_time(
     state.setTime(0.001)
     with pytest.raises(RuntimeError, match="time"):
         integrate_native_scalar_replay(
-            model, state, tuple(initial), tuple(controls), times, {}, 1e-8
+            model,
+            state,
+            tuple(initial),
+            tuple(controls),
+            times,
+            {},
+            NativeScalarReplayPolicy(1e-8),
         )
 
 

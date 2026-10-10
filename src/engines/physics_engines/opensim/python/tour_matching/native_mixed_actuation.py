@@ -11,10 +11,12 @@ from dataclasses import asdict, dataclass
 from enum import Enum
 import hashlib
 import json
+from pathlib import Path
 from typing import Any
 
 from .moco_initial_bindings import _finite_number
 from .native_muscle_bundle import _COMPONENTS, _registered_options
+from .native_prepared_state import DeclaredColdStart
 
 
 class ActuationRole(str, Enum):
@@ -170,7 +172,10 @@ def _native_channel(
 
 
 def admit_native_mixed_profile(
-    model: Any, state: Any, profile: MixedActuationProfile
+    model: Any,
+    state: Any,
+    profile: MixedActuationProfile,
+    constrained_cold_start: DeclaredColdStart | None = None,
 ) -> NativeMixedProfile:
     """Read back actual native law/units/options before admitting any input."""
     import opensim as osim
@@ -178,6 +183,23 @@ def admit_native_mixed_profile(
     if not isinstance(profile, MixedActuationProfile):
         raise TypeError("mixed admission requires a typed profile")
     allowed = _COMPONENTS | {"CoordinateActuator"}
+    if constrained_cold_start is not None:
+        from .native_constrained_muscle import (
+            _audit_source_components,
+            _ALLOWED_COMPONENTS,
+        )
+        from .native_prepared_state import observe_declared_native_sample
+
+        _audit_source_components(
+            model,
+            model.getMuscles(),
+            constrained_cold_start,
+            frozenset(
+                c.path for c in profile.channels if c.role != ActuationRole.MUSCLE
+            ),
+        )
+        observe_declared_native_sample(model, state, constrained_cold_start)
+        allowed |= _ALLOWED_COMPONENTS
     recursive_actuators = set()
     for component in tuple(model.getComponentsList()):
         if component.getConcreteClassName() not in allowed:
@@ -189,7 +211,7 @@ def admit_native_mixed_profile(
     coordinates = model.getCoordinateSet()
     for i in range(coordinates.getSize()):
         coordinate = coordinates.get(i)
-        if (
+        if constrained_cold_start is None and (
             coordinate.getDefaultLocked()
             or coordinate.getDefaultIsPrescribed()
             or coordinate.getDefaultClamped()
@@ -226,6 +248,15 @@ def admit_native_mixed_profile(
         "channels": channel_payload,
         "registered_options": options,
     }
+    if constrained_cold_start is not None:
+        from .native_prepared_state import _admission_identity
+
+        payload["constraint_policy"] = _admission_identity(
+            constrained_cold_start,
+            hashlib.sha256(
+                Path(__file__).with_name("native_constrained_muscle.py").read_bytes()
+            ).hexdigest(),
+        )
     # Infinite native bounds are allowed only alongside finite experiment bounds.
     # Encode their representations explicitly, never emit nonstandard JSON NaN.
     digest = hashlib.sha256(

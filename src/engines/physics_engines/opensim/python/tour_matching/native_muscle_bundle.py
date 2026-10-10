@@ -154,10 +154,13 @@ def _prepare(
     return model, state, names, muscle_names, options
 
 
-def _coordinate_units(model: Any) -> dict[str, str]:
+def _coordinate_units(
+    model: Any, coupled_rotation_paths: frozenset[str] = frozenset()
+) -> dict[str, str]:
     import opensim as osim
 
     units = {}
+    observed_coupled = set()
     coordinates = model.getCoordinateSet()
     for i in range(coordinates.getSize()):
         coordinate = coordinates.get(i)
@@ -166,11 +169,19 @@ def _coordinate_units(model: Any) -> dict[str, str]:
             unit = "rad"
         elif motion == osim.Coordinate.Translational:
             unit = "m"
+        elif (
+            motion == osim.Coordinate.Coupled
+            and coordinate.getAbsolutePathString() in coupled_rotation_paths
+        ):
+            unit = "rad"
+            observed_coupled.add(coordinate.getAbsolutePathString())
         else:
             raise ValueError("coordinate motion units need another native policy")
         prefix = coordinate.getAbsolutePathString()
         units[prefix + "/value"] = unit
         units[prefix + "/speed"] = unit + "/s"
+    if observed_coupled != coupled_rotation_paths:
+        raise ValueError("declared coupled rotation chart differs from native source")
     return units
 
 
@@ -179,8 +190,9 @@ def _state_specs(
     names: tuple[str, ...],
     options: Mapping[str, tuple[float, ...]],
     contracts: Any,
+    coupled_rotation_paths: frozenset[str] = frozenset(),
 ) -> tuple[Any, ...]:
-    units = _coordinate_units(model)
+    units = _coordinate_units(model, coupled_rotation_paths)
     roles = {
         "value": contracts.StateComponentRole.POSITION,
         "speed": contracts.StateComponentRole.VELOCITY,
@@ -222,6 +234,7 @@ def _identity(
     muscles: tuple[str, ...],
     options: Mapping[str, tuple[float, ...]],
     contracts: Any,
+    coupled_rotation_paths: frozenset[str] = frozenset(),
 ) -> Any:
     import opensim as osim
 
@@ -255,7 +268,7 @@ def _identity(
         contracts.InitialStateSchema(
             "opensim-native-continuous-and-registered-options",
             _VERSION,
-            _state_specs(model, names, options, contracts),
+            _state_specs(model, names, options, contracts, coupled_rotation_paths),
         ),
         muscles,
         hashlib.sha256(model.dump().encode()).hexdigest(),

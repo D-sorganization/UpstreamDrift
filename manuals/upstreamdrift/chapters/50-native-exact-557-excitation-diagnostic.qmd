@@ -1,0 +1,73 @@
+# Exact-Source 557-Muscle Excitation Diagnostic
+
+Issue #12182 adds a separately versioned, source-exact diagnostic to the
+constrained OpenSim muscle replay pathway. The strict version-two pathway
+continues to reject external files, complex CustomJoint functions, wraps,
+conditional and moving path points. Version three admits only the derived
+BUET–Hamner XML SHA-256
+`453e09c4e42dcc3f4b74a3b2efeff063e96c3820b3eee1efe95eef249579010d`
+and its OpenSim 4.6 loaded component/path digest. A change to a law, range,
+muscle path, constraint, flag or source byte needs a new reviewed profile.
+This is a diagnostic replay policy, not an anatomy or physiological approval.
+
+## Source and Initial-State Contracts
+
+The frozen XML has 557 Thelen muscles, 56 coordinates, 17 native couplers,
+29 CustomJoints, 58 ConditionalPathPoints, 8 MovingPathPoints, 233 PathWraps,
+22 WrapCylinders, and 40 source-clamped coordinate ranges. The exact
+path/class inventory contains 6,691 components. Four `Coordinate.Coupled`
+coordinates are mapped to radians only after verifying their exact source
+paths drive native rotational transform axes; the generic v1 schema still
+rejects unknown coupled-coordinate units. All 106 `mesh_file` declarations
+are under attached `Mesh` rendering geometry on bodies or offset frames.
+Their filenames and locations are bound; absent VTP files cannot be promoted
+to dynamic resources or treated as rendered-geometry qualification. Any other
+file reference, contact geometry, controller, prescribed motion, or
+non-muscle force rejects.
+
+The named seed is the retained single-equilibrium v2 observation SHA-256
+`21f1095267f1b0d476c39df655118f134da2e7292aada7a4b9d0c45e9b9eca9b`.
+Exactly 1,226 common continuous values survive the three explicit joint
+reductions from its 1,238 source values. The first direct attempt kept those
+values and source bounds; at the first 1 ms replay sample `SC_z` moved below
+its source lower bound zero. That failed attempt is retained. A second
+declared diagnostic seed moves only six initially bound-sitting coordinate
+**values** inward by 0.1% of each source range: bilateral `SC_z`, elbow
+flexion and pronation/supination. It does not alter speeds, muscle activation,
+fiber states, source XML, bounds, constraints, gravity, or force laws. No
+post-restoration assembly or muscle equilibrium is used. All 17 native
+couplers and the 40 exact source-clamped ranges are checked at each sampled
+state. This seed adjustment is a numerical diagnostic, not a measured pose.
+
+## Saved Input and Native Replay
+
+The version-three T01 envelope binds complete named and registered native
+state, source and loaded model, provider/profile hashes, ordered 557 muscle
+channels, linear time-only excitation knots, and the declared constraint
+policy. The existing scalar executor uses an owned OpenSim Manager; it rejects
+an initialization that changes the requested state or clock. It saves actual
+native excitation and force separately. For sample $k$ the independent
+fresh-model replay tests
+
+$$x_{k+1}=F_{\mathrm{OpenSim}}(x_k,e(t),\pi),\qquad
+e_i(t)=\operatorname{linear}(e_{i,k},e_{i,k+1}),$$
+
+where $\pi$ includes the exact source and native constraint policy. No
+observation is fed back into the input player and no state is reset between
+samples. With the diagnostic interior seed and frozen $e_i=0.05$, two fresh
+replays on $[0,0.1,0.2]$ ms have zero maximum named-state and muscle-force
+differences. Native QErr is at most $6.28\times10^{-17}$ and UErr at most
+$1.60\times10^{-14}$ in their respective native units. Changing one final
+excitation knot preserves the pre-change state and changes that muscle's
+terminal activation by $5.77\times10^{-4}$; input payload digests differ.
+The source-bound receipt preserves exact values and reproduction commands.
+
+The horizon is only **0.2 ms**. The original source seed fails the 1 ms
+chart gate, and a 2 ms attempt with the interior seed also fails it. Four
+source-body inertia tensors have separate unresolved physical-validity
+findings. Successful saved-input replay does not establish complete SimTK
+restart, meaningful swing duration, Moco solve, passive-force physiology,
+source anatomy, visual-resource availability, contact/grip, calibrated marker
+correspondence, private-capture tracking or six-engine parity. All 17 required
+variant rows remain in the epic denominator; the calculation registry and
+publication approval remain blocked.
