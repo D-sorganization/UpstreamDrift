@@ -16,6 +16,20 @@ Child #11867 restricts recursive native admission before `initSystem` to exact `
 
 Independent native excitation replay accepts an explicit exact contact-force path allowlist for supported native sphere/half-space laws. It reuses OpenSimForceTorqueSource and fails on incomplete wrench evidence. Policy/hash records native law identity; arbitrary external forces, controllers, reserves and state corrections remain forbidden. Native synthetic contact/refinement tests do not qualify full-body golf anatomy, contact/grip calibration or private mocap matching.
 
+## Native Muscle-Model Asset Admission (F07 Child #11819)
+
+`tour_matching.audit_muscle_model_asset` requires a pinned source SHA-256 and
+returns serialized declarations plus optional actual native initialization,
+recursive components, effective muscle options, path attachment frames,
+coordinate locks/prescription, state names and runtime/loaded-serialization
+identity. Region and coordinate-role maps use exact native paths and retain
+unverified anatomical status. Unknown paths fail; unavailable native loading
+retains source facts and required evidence. Local mesh candidates are hashed
+without claiming complete native dependency closure. This API never qualifies
+anatomy, muscle capacity, model provenance, contact, full state or replay.
+See canonical manual chapter 18 and F07_MODEL_ADMISSION_TURNOVER.md; F07 #11791
+and the full feedback-controls epic #11784 remain open.
+
 ## Capture-O Video Companion: Error Budget, Guidance Derivation, and Public Summary (COV-11, #11279)
 
 Specifies machine-readable error budgeting, frozen-rule guidance classification, and privacy-preserving summary generation (#11268, #11279):
@@ -10397,6 +10411,31 @@ Turnover: `docs/development/feedback_controls/F06_NATIVE_TORQUE_TURNOVER.md`.
 Tools T01 is consumed through merged pin
 `2e7665111b06f92ffbfe178b92d74d6a81c95388` and the UD-owned seam helper.
 Six-engine and muscular OpenSim real-capture gates remain open.
+
+## Independent Native Candidate Benchmark (F03b, #11824)
+
+`native_candidate_benchmark.py` extends F03's synthetic rotary comparison with
+an independent matrix-exponential solution for exact held-input truth and F06's
+fresh native MuJoCo replay. It binds the executed post-limit motor torque,
+complete initial `mjSTATE_INTEGRATION`, model and policy identities, and exact
+native step grid through the versioned Tools replay bundle. The gate keeps
+midpoint transcription defect, native-to-node gap, native-to-exact integrator
+gap, continuous RK45-to-exact gap, observation error, torque and slew residuals
+separate. Torque and slew are recomputed from applied input, not trusted from a
+solver report. A coarse stiff regression rejects low-defect transcription when
+native replay disagrees; native step refinement is checked independently.
+
+The serial benchmark retains failed and warm attempts, preparation, solve,
+native replay and receipt-export costs, cumulative time to first accepted
+attempt, p50/p95 wall time, and Python-tracked peak allocation with named
+hardware. The fixture is a no-contact one-hinge motor with synthetic node
+observations. The shooting adapter and collocation spike have unequal input
+degrees of freedom, so this is a provisional solver/replay boundary test, not a
+production backend selection or real-capture qualification. Capture
+preprocessing, D02/D03 frozen protocol, F09 observation-clock alignment,
+full-body/contact resources and muscle/six-engine gates remain open. Canonical
+calculation: `manuals/upstreamdrift/chapters/20-native-candidate-benchmark.qmd`.
+Turnover: `docs/development/feedback_controls/F03B_NATIVE_CANDIDATE_TURNOVER.md`.
 
 ## Native Thelen Replay Boundary (F07b, #11826)
 

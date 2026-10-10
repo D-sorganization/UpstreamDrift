@@ -23,12 +23,13 @@ import {
   fetchMatchedSwingReceipt,
   fetchParityReport,
   formatMetric,
-  matchedSwingAnimationUrl,
+  matchedSwingReportUrl,
   verdictBadgeClass,
   type MatchedSwingRun,
 } from '@/api/matchedSwings';
 import { ImpactParametersPanel } from '@/components/analysis/ImpactParametersPanel';
 import { GripWrenchCharts } from '@/components/analysis/GripWrenchCharts';
+import { MatchedSwingGifPlayer } from '@/components/analysis/MatchedSwingGifPlayer';
 import type { MocapJoint } from '@/components/visualization/MocapSkeleton3D';
 
 const MocapSkeleton3D = lazy(
@@ -436,6 +437,13 @@ export function MatchedSwingsPage() {
           >
             View Parity Report
           </button>
+          <a
+            href={matchedSwingReportUrl(selectedRun.id)}
+            download
+            className="text-xs rounded border border-gray-700 bg-gray-800 px-2 py-1 hover:border-gray-500"
+          >
+            Export Report
+          </a>
         </div>
         {receiptError && <p className="text-xs text-red-300">{receiptError}</p>}
         {receiptJson && (
@@ -488,15 +496,11 @@ export function MatchedSwingsPage() {
         <div className="grid lg:grid-cols-2 gap-4">
           <section className="rounded border border-gray-700 bg-gray-800 p-3">
             <h3 className="text-sm font-medium text-white mb-2">GIF Playback</h3>
-            {selectedRun.capabilities.has_animation_gif ? (
-              <img
-                src={matchedSwingAnimationUrl(selectedRun.id)}
-                alt={`${selectedRun.engine} matched swing animation`}
-                className="mx-auto max-h-72 rounded border border-gray-700 bg-black"
-              />
-            ) : (
-              <p className="text-xs text-gray-400">No animation artefact for this run.</p>
-            )}
+            <MatchedSwingGifPlayer
+              key={selectedRun.id}
+              runId={selectedRun.id}
+              hasAnimation={selectedRun.capabilities.has_animation_gif}
+            />
           </section>
 
           <section className="rounded border border-gray-700 bg-gray-800 p-3 min-h-[18rem]">

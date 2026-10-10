@@ -97,6 +97,37 @@ export function matchedSwingAnimationUrl(runId: string): string {
   return apiUrl(`/api/v1/matched-swings/${encodeURIComponent(runId)}/animation.gif`);
 }
 
+export interface MatchedSwingAnimationInfo {
+  schema_version: string;
+  frame_count: number;
+  durations_ms: number[];
+  width: number;
+  height: number;
+}
+
+export async function fetchMatchedSwingAnimationInfo(
+  runId: string,
+): Promise<MatchedSwingAnimationInfo> {
+  const resp = await fetch(
+    apiUrl(`/api/v1/matched-swings/${encodeURIComponent(runId)}/animation/frames`),
+  );
+  if (!resp.ok) {
+    const text = await resp.text();
+    throw new Error(`Failed to load animation info: ${resp.status} ${text}`);
+  }
+  return resp.json();
+}
+
+export function matchedSwingAnimationFrameUrl(runId: string, index: number): string {
+  return apiUrl(
+    `/api/v1/matched-swings/${encodeURIComponent(runId)}/animation/frames/${index}`,
+  );
+}
+
+export function matchedSwingReportUrl(runId: string): string {
+  return apiUrl(`/api/v1/matched-swings/${encodeURIComponent(runId)}/report`);
+}
+
 export async function fetchCandidatePreviewFrame(
   runId: string,
   frameIndex: number,
