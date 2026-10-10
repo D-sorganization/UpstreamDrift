@@ -4,8 +4,9 @@ from __future__ import annotations
 
 from dataclasses import asdict, replace
 import json
+import math
 from pathlib import Path
-from typing import Any
+from typing import Any, Mapping, TypeGuard
 
 from PyQt6 import QtCore, QtGui, QtWidgets
 
@@ -18,6 +19,198 @@ def _execute_and_export(request: Any, output_dir: Path, **kwargs: Any) -> Path:
     from .matched_export import execute_and_export
 
     return execute_and_export(request, output_dir, **kwargs)
+
+
+def _is_finite_real(val: Any) -> TypeGuard[float]:
+    """Return True if val is a finite real number (excluding bool)."""
+    return (
+        isinstance(val, (int, float))
+        and not isinstance(val, bool)
+        and math.isfinite(val)
+    )
+
+
+def _format_sg_value(val: Any, *, absolute_tolerance: float | None = None) -> str:
+    """Keep compact SG text within 0.1% relative and optional absolute error.
+
+    Three decimal places remain the minimum for familiar ordinary values.
+    Small values use scientific notation. Interval endpoints additionally use
+    a width-based error budget, so a nonzero saved interval cannot collapse.
+    Missing and non-finite numbers remain unavailable rather than becoming zero.
+    """
+    if not _is_finite_real(val):
+        return "unavailable"
+    value = float(val)
+    if value == 0.0:
+        return "+0.000"
+    error_budget = abs(value) * 0.001
+    if absolute_tolerance is not None:
+        error_budget = min(error_budget, absolute_tolerance)
+    notation = "e" if abs(value) < 0.001 else "f"
+    for precision in range(3, 18):
+        rendered = format(value, f"+.{precision}{notation}")
+        if abs(float(rendered) - value) <= error_budget:
+            return rendered
+    # Seventeen significant digits round-trip any finite Python float, including
+    # an unusually narrow interval whose error budget is below fixed precision.
+    return format(value, "+.17g")
+
+
+def format_matched_course_scoring(
+    scoring: Mapping[str, Any] | None,
+    *,
+    club_id: str | None = None,
+    target_x_m: float | None = None,
+) -> str:
+    """Format saved course scoring results for compact display in the matched GUI.
+
+    Preconditions:
+      - scoring is None or a Mapping representing saved course_scoring
+      - club_id is None or a string indicating the club identifier
+      - target_x_m is None or a finite float indicating target downrange distance
+    Postcondition:
+      - Returns a non-empty human-readable string without fabricating empirical claims
+        or converting missing/null values to zeros.
+    """
+    if scoring is None:
+        return "Model-conditional strokes gained: Not available in saved results."
+
+    if not isinstance(scoring, Mapping):
+        return "Model-conditional strokes gained: Invalid scoring payload format."
+
+    effective_club = scoring.get("club_id") or club_id
+    status = scoring.get("status")
+
+    if status not in ("available", "conditional_only"):
+        reason = str(scoring.get("reason", "unspecified"))
+        if reason == "fewer_than_two_common_supported_shots":
+            paired_n = scoring.get("paired_n", 0)
+            total_n = scoring.get("total_n", 0)
+            return (
+                "Model-conditional strokes gained is unavailable: "
+                f"Insufficient common supported shots ({paired_n}/{total_n} common pairs; minimum 2 required)."
+            )
+        if effective_club == "custom" or "preset" in reason or "club_id" in reason:
+            return (
+                "Model-conditional strokes gained is unavailable for custom club: "
+                "No published baseline context (only Driver, 7-Iron, and Pitching Wedge illustrative presets are supported)."
+            )
+        return f"Model-conditional strokes gained is unavailable for this configuration: {reason}."
+
+    # Parse scenario context
+    driver = effective_club == "driver"
+    hole_distance = scoring.get("hole_distance_m")
+    fairway_width = scoring.get("fairway_half_width_m")
+    green_radius = scoring.get("green_radius_m")
+    target_distance = (
+        scoring.get("target_x_m")
+        if scoring.get("target_x_m") is not None
+        else target_x_m
+    )
+
+    scenario = scoring.get("scenario")
+    if not scenario:
+        if driver or hole_distance is not None:
+            scenario = "Historical PGA tee shot on a flat hole with a fairway corridor"
+        else:
+            scenario = "Historical PGA approach to a centered circular green with rough outside"
+
+    context_details: list[str] = []
+    if driver or hole_distance is not None:
+        if _is_finite_real(hole_distance) and f"{hole_distance:g} m" not in scenario:
+            context_details.append(f"{hole_distance:g} m hole")
+        if (
+            _is_finite_real(fairway_width)
+            and f"{2 * fairway_width:g} m" not in scenario
+        ):
+            context_details.append(f"{2 * fairway_width:g} m fairway corridor")
+    else:
+        if (
+            _is_finite_real(target_distance)
+            and f"{target_distance:.1f} m" not in scenario
+        ):
+            context_details.append(f"{target_distance:.1f} m fairway start")
+        if _is_finite_real(green_radius) and f"{green_radius:g} m" not in scenario:
+            context_details.append(f"{green_radius:g} m green radius")
+
+    detail_str = f" ({', '.join(context_details)})" if context_details else ""
+    context_line = f"Scenario: {scenario}{detail_str}."
+
+    # Common supported population
+    paired_n = scoring.get("paired_n")
+    total_n = scoring.get("total_n")
+    if (
+        isinstance(paired_n, int)
+        and not isinstance(paired_n, bool)
+        and isinstance(total_n, int)
+        and not isinstance(total_n, bool)
+    ):
+        if status == "conditional_only" or paired_n < total_n:
+            pop_line = (
+                f"Common supported pairs: {paired_n}/{total_n} "
+                "(conditional on common supported indices only; full population unavailable due to unsupported terminal lies)."
+            )
+        else:
+            pop_line = f"Common supported pairs: {paired_n}/{total_n} (all samples)."
+    else:
+        pop_line = "Common supported pairs: unspecified population."
+
+    # Pattern mean SG
+    patterns = scoring.get("patterns")
+    mean_parts: list[str] = []
+    if isinstance(patterns, Mapping):
+        for name in ("Straight", "Draw", "Fade"):
+            p_data = patterns.get(name)
+            val = (
+                p_data.get("mean_strokes_gained")
+                if isinstance(p_data, Mapping)
+                else None
+            )
+            mean_parts.append(f"{name}: {_format_sg_value(val)}")
+    mean_sg_line = "Mean Strokes Gained: " + (
+        "; ".join(mean_parts) if mean_parts else "unavailable"
+    )
+
+    # Paired differences vs Straight with actual provided 95% Monte Carlo interval
+    paired = scoring.get("paired_benefit_vs_straight")
+    paired_parts: list[str] = []
+    if isinstance(paired, Mapping):
+        for name in ("Draw", "Fade"):
+            entry = paired.get(name)
+            if isinstance(entry, Mapping):
+                est = entry.get("estimate")
+                low = entry.get("lower_95")
+                high = entry.get("upper_95")
+                if (
+                    _is_finite_real(est)
+                    and _is_finite_real(low)
+                    and _is_finite_real(high)
+                ):
+                    width = high - low
+                    tolerance = 0.005 * width if width > 0 else None
+                    values = [
+                        _format_sg_value(value, absolute_tolerance=tolerance)
+                        for value in (est, low, high)
+                    ]
+                    paired_parts.append(
+                        f"{name}: {values[0]} [{values[1]}, {values[2]}] strokes"
+                    )
+                else:
+                    paired_parts.append(f"{name}: unavailable")
+            else:
+                paired_parts.append(f"{name}: unavailable")
+    paired_line = "Paired Difference vs. Straight (95% Monte Carlo Interval): " + (
+        "; ".join(paired_parts) if paired_parts else "unavailable"
+    )
+
+    # Caveats: conditional model, approximate baseline, carry-as-stop
+    caveat_line = (
+        "Caveats: Model-conditional historical PGA Tour benchmark (approximate baseline fit; not player-specific). "
+        "Flat hypothetical geometry; carry landing is final lie without roll, hazards, or obstruction. "
+        "Intervals describe Monte Carlo sampling only."
+    )
+
+    return f"{context_line}\n{pop_line}\n{mean_sg_line}.\n{paired_line}.\n{caveat_line}"
 
 
 class MatchedStudyWidget(QtWidgets.QWidget):
@@ -302,6 +495,11 @@ class MatchedStudyWidget(QtWidgets.QWidget):
         )
         self.result_label.setWordWrap(True)
         root.addWidget(self.result_label)
+        self.scoring_label = QtWidgets.QLabel(
+            "Model-conditional strokes gained appears after running a study."
+        )
+        self.scoring_label.setWordWrap(True)
+        root.addWidget(self.scoring_label)
         self.previews = QtWidgets.QTabWidget()
         self.preview = QtWidgets.QLabel(
             "A report preview will appear after a successful run."
@@ -606,6 +804,9 @@ class MatchedStudyWidget(QtWidgets.QWidget):
                 raise ValueError("correlation cannot display exactly in GUI")
 
     def run_analysis(self) -> None:
+        self.scoring_label.setText(
+            "Model-conditional strokes gained: no result for the requested study yet."
+        )
         output_text = self.output_edit.text().strip()
         if not output_text:
             self.status_label.setText("Choose an output folder first.")
@@ -657,6 +858,9 @@ class MatchedStudyWidget(QtWidgets.QWidget):
             self.status_label.setText(
                 "Study completed with unavailable nominal geometry; no endpoint figures were fabricated."
             )
+            self.scoring_label.setText(
+                "Model-conditional strokes gained is unavailable because the nominal delivery could not be solved."
+            )
             return
         config = summary["config"]
         club = config["club"]
@@ -696,6 +900,13 @@ class MatchedStudyWidget(QtWidgets.QWidget):
         self.result_label.setText(
             header + "\n" + "\n".join(parts) + f"\nResults saved in {output_dir}"
         )
+        scoring = summary.get("course_scoring")
+        scoring_text = format_matched_course_scoring(
+            scoring,
+            club_id=club.get("club_id"),
+            target_x_m=summary.get("target_x_m"),
+        )
+        self.scoring_label.setText(scoring_text)
         self.status_label.setText(
             "Matched study complete. Density is conditional on supported airborne shots where any attempts were unsupported."
         )
@@ -717,11 +928,17 @@ class MatchedStudyWidget(QtWidgets.QWidget):
     def _failed(self, message: str) -> None:
         if not self._closed:
             self.status_label.setText(f"Matched study failed: {message}")
+            self.scoring_label.setText(
+                "Model-conditional strokes gained is unavailable: the latest study failed."
+            )
 
     def _cancelled(self) -> None:
         if not self._closed:
             self.status_label.setText(
                 "Matched study cancelled; staged outputs were discarded."
+            )
+            self.scoring_label.setText(
+                "Model-conditional strokes gained is unavailable: the latest study was cancelled."
             )
 
     def _save_dialog(self) -> None:
