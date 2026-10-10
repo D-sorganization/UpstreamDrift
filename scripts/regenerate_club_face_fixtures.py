@@ -38,14 +38,22 @@ FIXTURES = ROOT / "tests" / "fixtures" / "club_face"
 DOCS = ROOT / "docs" / "development" / "full_body_models"
 FIXTURE_STRIDE = 2  # the 1 kHz reference, every second sample (2 ms)
 FIXTURE_DT_S = 0.002
+#: Foot torsional-friction patch radius (m) of the canonical runs: the value
+#: #11671 fixed on the driver and validated on the 7-iron
+#: (FOOT_CONTACT_TORSION.md), adopted against the ground yaw slip (#11961).
+TORSION_PATCH_M = "0.05"
 #: capture -> (fixture club alias, document, extra pipeline flags of the
-#: original fixture runs, read back from their receipts).
+#: original fixture runs, read back from their receipts, plus the torsion patch).
 CAPTURE_RUNS: dict[str, tuple[str, str, tuple[str, ...]]] = {
-    "driver": ("driver", "full_body_spec_anthro_driver.json", ("--static-seeds",)),
+    "driver": (
+        "driver",
+        "full_body_spec_anthro_driver.json",
+        ("--static-seeds", "--torsional-patch-m", TORSION_PATCH_M),
+    ),
     "iron": (
         "iron7",
         "full_body_spec_anthro_iron7.json",
-        ("--static-seeds", "--zmp-filter"),
+        ("--static-seeds", "--zmp-filter", "--torsional-patch-m", TORSION_PATCH_M),
     ),
 }
 LOG = logging.getLogger("club_face_fixtures")

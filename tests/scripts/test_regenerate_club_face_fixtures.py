@@ -25,6 +25,13 @@ def test_pipeline_argv_keeps_the_original_run_flags_and_the_weight() -> None:
         regen.pipeline_argv("owner", Path("o"), 3.0)
 
 
+@pytest.mark.parametrize("capture", ["driver", "iron"])
+def test_pipeline_argv_applies_the_foot_torsion_patch(capture: str) -> None:
+    """#11961: both canonical runs resist foot yaw with the #11671 patch."""
+    argv = regen.pipeline_argv(capture, Path("r"), 3.0)
+    assert argv[argv.index("--torsional-patch-m") + 1] == "0.05"
+
+
 def test_triad_offsets_must_sit_on_the_face_frame() -> None:
     labels = ("Marker_2:2:1", "Marker_2:2:2", "Marker_2:2:3")
     receipt = {
