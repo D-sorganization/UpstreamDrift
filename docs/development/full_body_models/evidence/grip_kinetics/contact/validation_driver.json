@@ -1,0 +1,91 @@
+{
+  "club": "driver",
+  "quasi_static": {
+    "hold_s": 0.2,
+    "poses": [
+      {
+        "swing_time_s": 0.0,
+        "force_residual_fraction_incl_release_sample": 0.9999999999999584,
+        "moment_residual_fraction_incl_release_sample": 8.460061880039942e-09,
+        "gravity_moment_nm": 1.881216491162548,
+        "settled_force_residual_fraction": 2.3076278192807797e-07,
+        "settled_moment_residual_fraction": 8.41845941249855e-09,
+        "axial_slip_mm": 0.012703630290646776
+      },
+      {
+        "swing_time_s": 0.726,
+        "force_residual_fraction_incl_release_sample": 0.9999999999999328,
+        "moment_residual_fraction_incl_release_sample": 8.46865329701066e-09,
+        "gravity_moment_nm": 2.025674822582932,
+        "settled_force_residual_fraction": 2.5120119066679286e-07,
+        "settled_moment_residual_fraction": 8.427283198675857e-09,
+        "axial_slip_mm": 0.011241464242162104
+      },
+      {
+        "swing_time_s": 0.998,
+        "force_residual_fraction_incl_release_sample": 0.9999999999999688,
+        "moment_residual_fraction_incl_release_sample": 8.463579968573397e-09,
+        "gravity_moment_nm": 2.3603075318620585,
+        "settled_force_residual_fraction": 2.922740279383851e-07,
+        "settled_moment_residual_fraction": 8.422279278742122e-09,
+        "axial_slip_mm": 0.006903421207580714
+      },
+      {
+        "swing_time_s": 1.27,
+        "force_residual_fraction_incl_release_sample": 1.0000000000000417,
+        "moment_residual_fraction_incl_release_sample": 8.468824119168122e-09,
+        "gravity_moment_nm": 2.367125156375578,
+        "settled_force_residual_fraction": 2.931039356071165e-07,
+        "settled_moment_residual_fraction": 8.427400873471779e-09,
+        "axial_slip_mm": 0.006780780939924233
+      }
+    ]
+  },
+  "indeterminacy": {
+    "weld_min_norm_proxy": {
+      "peak_force_L_n": 1175.508421898955,
+      "peak_force_R_n": 1233.5785680480867,
+      "lead_share_at_peak_net": 0.47462740328769754,
+      "peak_net_n": 439.29195018254387
+    },
+    "opensim_bushing": {
+      "peak_force_L_n": 515.1578323854484,
+      "peak_force_R_n": 564.0251922380963,
+      "lead_share_at_peak_net": 0.42534172237190193,
+      "peak_net_n": 439.29195018254387,
+      "peak_internal_n": 509.80903513399784,
+      "peak_squeeze_n": 3.2844880589147536,
+      "peak_couple_nm": 99.50809242568974
+    },
+    "mujoco_contact": {
+      "peak_force_L_n": 2086.293146048467,
+      "peak_force_R_n": 2117.9795852401917,
+      "lead_share_at_peak_net": 0.48343873509110774,
+      "peak_net_n": 438.00649250398834,
+      "peak_internal_n": 2099.683499911663,
+      "peak_squeeze_n": 762.556615602346,
+      "peak_couple_nm": 76.33189979742947
+    },
+    "note": "two hands on one rigid club are statically indeterminate; the weld row is a minimum-norm proxy of the opensim net wrench"
+  },
+  "deflection": {
+    "opensim_bushing": {
+      "max_translation_mm": 0.5640583702070978,
+      "max_rotation_deg": 0.8443518720360188,
+      "flag_translation_mm": 3.0,
+      "flag_rotation_deg": 2.0,
+      "exceeds_flag": false
+    },
+    "mujoco_contact_hand_to_club": {
+      "max_translation_mm": 1.6080684643177643,
+      "max_rotation_deg": 0.29992553198912514,
+      "flag_translation_mm": 3.0,
+      "flag_rotation_deg": 2.0,
+      "exceeds_flag": false
+    },
+    "contact_slip": {
+      "peak_roll_slip_rad": 0.005214454908110544,
+      "peak_axial_slip_mm": 1.5111229067633916
+    }
+  }
+}
