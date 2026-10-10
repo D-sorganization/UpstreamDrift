@@ -124,7 +124,9 @@ class DrakeFullBodyIK(BaseFullBodyIK):
         # by ``_translational_jacobian`` / ``_angular_jacobian``.
         self._plant.SetPositions(self._context, self.model.to_plant_positions(q_arr))
 
-    def _translational_jacobian(self, frame: Any, offset: Sequence[float]) -> Array:
+    def _translational_jacobian(
+        self, frame: Any, offset: Sequence[float] | Array
+    ) -> Array:
         """World translational Jacobian of a point on ``frame``, spec columns."""
         jac = self._plant.CalcJacobianTranslationalVelocity(
             self._context,
