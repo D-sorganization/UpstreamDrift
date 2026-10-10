@@ -1,0 +1,29 @@
+from pathlib import Path
+import sys,json,hashlib
+import numpy as np
+from matplotlib.backends.backend_agg import FigureCanvasAgg
+sys.path.insert(0,str(Path.cwd()))
+from src.tools.shot_pattern_analysis import academic_plots as plots
+from scripts.research.shot_pattern_analysis.build_final_figures import _supported_points
+import importlib.util
+spec=importlib.util.spec_from_file_location("review_current_builder", "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/scripts/research/shot_pattern_analysis/build_final_figures.py")
+builder=importlib.util.module_from_spec(spec);spec.loader.exec_module(builder)
+plots.write_overhead_trajectory_figure=lambda *_a,**_k: {}
+main=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2')
+out=main/'validation/main_tick_neighbor_candidate_v1'
+records=[]
+for cell in ['seven_iron_lean10_curve1_rotation1_shaft_only','driver_lean5_curve2_rotation2_combined2','pitching_wedge_lean0_curve1_rotation1_shaft_only']:
+ points,totals=_supported_points(main/'final_v1'/cell)
+ for presentation in ['academic','social']:
+  def save(fig,stem,*,dpi):
+   FigureCanvasAgg(fig);fig.canvas.draw();renderer=fig.canvas.get_renderer();panels=[]
+   for i in range(3):
+    a=fig.axes[3*i+1];boxes=[t.get_window_extent(renderer) for t in a.get_xticklabels() if t.get_visible() and t.get_text()];boxes.sort(key=lambda b:b.x0)
+    gap=min((b.x0-a.x1)*72/fig.dpi for a,b in zip(boxes,boxes[1:]));assert gap>=4
+    panels.append({'minimum_neighbor_gap_pt':gap,'xlim':list(a.get_xlim()),'ticks':a.get_xticks().tolist()})
+   path=out/f'{cell}_{presentation}.png';fig.savefig(path,dpi=100,bbox_inches='tight');records.append({'cell':cell,'presentation':presentation,'panels':panels,'png':path.name,'sha256':hashlib.sha256(path.read_bytes()).hexdigest()});return {}
+  plots._save_formats=save
+  summary=json.loads((main/'final_v1'/cell/'summary.json').read_text());summary['cell']=cell
+  builder._render_cell_figures(summary,main/'final_v1',out/'scratch',dpi=180,preview=False,presentation=presentation)
+
+(out/'actual_review.json').write_text(json.dumps(records,indent=2)+'\n')

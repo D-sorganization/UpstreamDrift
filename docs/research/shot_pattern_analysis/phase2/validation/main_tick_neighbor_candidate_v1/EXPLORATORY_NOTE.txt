@@ -1,0 +1,1 @@
+Initial harness used target zero, so its geometry was rejected. Corrected target-only replay then passed but did not use exact production metadata. Final replay uses the unchanged MAIN builder _render_cell_figures with saved summary and target. No exploratory run is acceptance evidence.
