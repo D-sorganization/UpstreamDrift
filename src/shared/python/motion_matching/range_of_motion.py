@@ -44,8 +44,8 @@ UPPER_RANGES_DEG: dict[str, tuple[float, float]] = {
     "REInput": (-150.0, 5.0),
     "LFInput": (-90.0, 90.0),
     "RFInput": (-90.0, 90.0),
-    "LWInputX": (-40.0, 25.0),  # ulnar .. radial deviation from a neutral grip
-    "RWInputX": (-40.0, 25.0),
+    "LWInputX": (-60.0, 25.0),  # DIAGNOSTIC ONLY (#12117): not for merge
+    "RWInputX": (-60.0, 25.0),
     "LWInputY": (-70.0, 70.0),  # flexion .. extension
     "RWInputY": (-70.0, 70.0),
 }
