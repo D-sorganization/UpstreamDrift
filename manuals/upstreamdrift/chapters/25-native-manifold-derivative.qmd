@@ -1,0 +1,65 @@
+# Native Floating-Root Tangent Derivatives (Provisional)
+
+## Physical and Numerical State
+
+F05c (#11920, parent #11789) creates a small native MuJoCo 3.8 fixture with
+one unactuated floating root, two connected hinges and two direct unit-gain
+hinge motors. It deliberately has $n_q=9$, $n_v=8$, $n_u=2$; the free-root
+unit quaternion contributes four configuration numbers but only three
+angular tangent velocities. This prevents a Euclidean $q$/$v$ shortcut.
+The admitted fixture is gravity-free and contact-free, with no plugin,
+activation state, hidden assistance or external load. Both motors have
+distinct names, ordered target joints and explicit torque limits. Native
+Euler integration is fixed at 10 ms. RK4 is rejected at this derivative
+boundary because the native transition-derivative API does not support it.
+
+For the full native step $x^+=F_h(x,u)$, MuJoCo's
+[`mjd_transitionFD`](https://mujoco.readthedocs.io/en/3.8.0/computation.html#derivatives)
+returns $A=\partial\delta x^+/\partial\delta x$ and
+$B=\partial\delta x^+/\partial u$ on
+$\delta x=(\delta q_{\mathrm{tan}},\delta v)\in\mathbb R^{16}$.
+The code restores the complete `mjSTATE_INTEGRATION` state, computes the
+native derivative, and independently steps a fresh state with the identical
+held motor command. Tests perturb the quaternion and hinge coordinates using
+`mj_integratePos`, then compare the next positions using
+`mj_differentiatePos`, rather than subtracting quaternion components.
+[MuJoCo's computation documentation](https://mujoco.readthedocs.io/en/3.8.0/computation.html)
+describes this $n_q/n_v$ distinction and the discrete transition Jacobian.
+Selected columns of $A$ and both ordered motor columns of $B$ match
+independent centered native-step differences within $2\times10^{-4}$.
+
+The two motor commands also undergo a separate full-state replay check:
+three executed 10 ms ZOH torque rows plus an unused terminal sentinel are
+bound through the pinned Tools T01 bundle with the exact source model,
+native integration-state schema, time grid, actuator order and policy.
+A fresh native model receives only the frozen time-indexed torques and
+reproduces the complete integration-state trajectory within $10^{-12}$.
+The fixture's unactuated root reacts through the plant dynamics; no root
+force is injected or relabeled as a motor command. Actuator order reversal
+reverses $B$ columns and the T01 channel order, while preserving the same
+physical next state when commands are permuted accordingly. Out-of-limit
+torques, commands at a limit where centered control derivatives are
+nonsmooth, hidden gravity compensation and a mismatched integrator fail
+admission. Compiled collision-enabled geometry fails admission even if the
+initial state has no active contact.
+
+## Timing and Qualification Boundary
+
+The source-hashed development receipt
+`docs/development/feedback_controls/F05C_NATIVE_TANGENT_RECEIPT_MJ38.json`
+binds the supported provider, source files, Tools pin, model/input/initial
+state/policy/time-grid digests and all four native tests. Ten repeated
+derivative calls on the declared WSL host had median 1.56 ms, p95 3.23 ms
+and worst 3.61 ms. The first Tools T01 bundle construction took 3.37 s
+under cold import and independent replay took 0.060 s. These are observed
+local timings; the 10 ms step does not become a hard control deadline from
+the derivative-only figure. There is no source observation grid or measured
+motion-capture error in this fixture.
+
+This child establishes a multi-DOF manifold derivative and actual-input
+replay boundary, **not** a multi-DOF optimized-controller win. The
+linearized plant has not been promoted to contact-aware BoxFDDP, a full-body
+model, muscle excitation control, grip/ground physics, six-engine parity or
+private-capture matching. F02 TVLQR remains the broader fallback and F05
+parent acceptance remains open. The canonical calculation inventory stays
+blocked pending those qualification gates.

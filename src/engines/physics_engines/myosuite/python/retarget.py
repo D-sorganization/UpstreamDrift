@@ -42,29 +42,32 @@ class RetargetMap:
         return len(self.target_names)
 
     def project_to_source(self, q_target: Array) -> Array:
-        """Best-effort inverse for mapped coordinates (identity on 1:1 entries)."""
+        """Inverse of ``retarget_frame`` on mapped sources; unmapped sources are 0.
+
+        Exact because the loader enforces a one-to-one map with non-zero signs.
+        """
         q = np.asarray(q_target, dtype=np.float64).reshape(-1)
-        out = (
-            self.neutral_target[: self.n_source].copy()
-            if self.n_source
-            else np.zeros(0)
-        )
-        if self.n_source != len(self.source_names):
-            out = np.zeros(self.n_source, dtype=np.float64)
         out = np.zeros(self.n_source, dtype=np.float64)
         for src_name, (tgt_idx, sign) in self.source_to_target.items():
-            src_idx = self.source_names.index(src_name)
-            out[src_idx] = float(q[tgt_idx]) / sign if sign != 0 else 0.0
+            out[self.source_names.index(src_name)] = float(q[tgt_idx]) / sign
         return out
 
 
 @precondition(lambda doc: isinstance(doc, Mapping), "coordinate map document required")
 def load_retarget_map(doc: Mapping[str, Any]) -> RetargetMap:
-    """Load a retarget map from the MS-51 coordinate map JSON document."""
+    """Load a retarget map from the MS-51 coordinate map JSON document.
+
+    The map must be one-to-one with non-zero signs: each source and each target
+    appears in at most one entry.  ``retarget_frame`` assigns each target from a
+    single source and ``project_to_source`` inverts it, so a second source on
+    the same target would silently overwrite the first (#11729).  Raises
+    ``ValueError`` otherwise.
+    """
     source_names = tuple(str(x) for x in doc["source_coordinates"])
     target_names = tuple(str(x) for x in doc["target_coordinates"])
     name_to_source = {name: idx for idx, name in enumerate(source_names)}
     source_to_target: dict[str, tuple[int, float]] = {}
+    claimed_targets: dict[int, str] = {}
     for entry in doc.get("mappings", ()):
         src = str(entry["source"])
         tgt = str(entry["target"])
@@ -73,7 +76,18 @@ def load_retarget_map(doc: Mapping[str, Any]) -> RetargetMap:
             raise ValueError(f"Unknown source coordinate {src!r}")
         if tgt not in target_names:
             raise ValueError(f"Unknown target coordinate {tgt!r}")
-        source_to_target[src] = (target_names.index(tgt), sign)
+        if src in source_to_target:
+            raise ValueError(f"Source coordinate {src!r} mapped more than once")
+        if sign == 0.0:
+            raise ValueError(f"Mapping {src!r} -> {tgt!r} needs a non-zero sign")
+        tgt_idx = target_names.index(tgt)
+        if tgt_idx in claimed_targets:
+            raise ValueError(
+                f"Sources {claimed_targets[tgt_idx]!r} and {src!r} both map to "
+                f"target {tgt!r}; the map must be one-to-one (#11729)"
+            )
+        claimed_targets[tgt_idx] = src
+        source_to_target[src] = (tgt_idx, sign)
     neutral = doc.get("neutral_target", {})
     neutral_target = np.array(
         [float(neutral.get(name, 0.0)) for name in target_names], dtype=np.float64

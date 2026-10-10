@@ -48,11 +48,14 @@ class NativeTorqueReplay:
 
 
 def _contracts() -> Any:
-    """Resolve the single Tools authority, requiring its implemented T01 API."""
-    from src.shared.python._seam_redirect import extend_sidekick_lab_path
+    """Resolve the single Tools authority, requiring its implemented T01 API.
 
-    extend_sidekick_lab_path()
-    from sidekick.lab import mocap
+    Postcondition: the global ``sidekick.lab`` namespace is left unchanged, so
+    the vendored-Tools fallback keeps declining ``sidekick.lab.mocap``.
+    """
+    from src.shared.python._seam_redirect import load_pinned_tools_package
+
+    mocap = load_pinned_tools_package("sidekick.lab.mocap")
 
     if not hasattr(mocap, "ExperimentReplayBundle"):
         raise RuntimeError(
@@ -87,6 +90,24 @@ def _load_native(path: Path) -> tuple[Any, Any]:
     # A numerical failure must fail, never silently reset physical state.
     model.opt.disableflags |= int(mj.mjtDisableBit.mjDSBL_AUTORESET)
     return model, mj.MjData(model)
+
+
+def native_initial_state_from_joint_state(
+    model_path: Path, joint_state: NDArray[np.float64]
+) -> NDArray[np.float64]:
+    """Export the complete native fixture state without importing MuJoCo in shared code."""
+    import mujoco as mj
+
+    values = np.asarray(joint_state, dtype=np.float64)
+    if values.shape != (2,) or not np.isfinite(values).all():
+        raise ValueError("one-hinge fixture requires finite position and velocity")
+    model, data = _load_native(model_path)
+    if model.nq != 1 or model.nv != 1 or model.nu != 1:
+        raise ValueError("native fixture must have one hinge and one unit motor")
+    data.qpos[0], data.qvel[0] = values
+    state = np.empty(mj.mj_stateSize(model, mj.mjtState.mjSTATE_INTEGRATION))
+    mj.mj_getState(model, data, state, mj.mjtState.mjSTATE_INTEGRATION)
+    return state
 
 
 def _validate_unit_motors(model: Any, mj: Any) -> None:
