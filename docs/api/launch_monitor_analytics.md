@@ -90,6 +90,22 @@ where available, split counts, and the recipe seed.
 All public functions validate required columns and minimum sample sizes with
 descriptive `ValueError` messages.
 
+`POST /tools/launch-monitor-analytics/v2/trend` runs `analyze_trend` on inline
+`records` with the desktop Trends tab's inputs: `metric`, `time_column`
+(default `captured_at`) and `rolling_window` (default 10, range 3 to 500). The
+response carries every `TemporalTrendResult` field, the rolling series as rows,
+and the change candidates. Statistics that cannot be computed are `null`, never
+`0`. An unknown column or too few observations returns 400.
+
+`POST /tools/launch-monitor-analytics/v2/dispersion` runs `analyze_dispersion`
+on inline `records` with the desktop Dispersion tab's inputs: `forward`
+(default `carry_distance`), `lateral` (default `lateral_carry`), and an
+optional `group_column` (`monitor_vendor`, `session_id`, or `club`; omitted or
+absent from the records means the desktop tab's "(all shots)" choice). The
+response carries every `DispersionResult` field per group. Statistics that
+cannot be computed are `null`, never `0`. A missing column or fewer than three
+complete shots in a group returns 400.
+
 ## Analysis Contract V2
 
 UpstreamDrift is the canonical Python and API authority for launch-monitor

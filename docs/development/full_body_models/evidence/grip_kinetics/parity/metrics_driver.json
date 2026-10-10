@@ -1,0 +1,231 @@
+{
+  "club": "driver",
+  "tolerance": {
+    "peak": 0.05,
+    "rms_of_peak": 0.02
+  },
+  "impact_time_s": 1.326,
+  "engines": {
+    "mujoco": {
+      "force_L": {
+        "peak_reference": 515.1578323854484,
+        "peak_candidate": 515.1446783497402,
+        "peak_error": 2.5533991490172636e-5,
+        "rms_error": 1.0066547138670218e-5,
+        "passes": true
+      },
+      "force_R": {
+        "peak_reference": 564.0251922380963,
+        "peak_candidate": 564.029658855466,
+        "peak_error": 7.919180616596691e-6,
+        "rms_error": 8.649347676277589e-6,
+        "passes": true
+      },
+      "net_force": {
+        "peak_reference": 439.29195018254387,
+        "peak_candidate": 439.2719353814567,
+        "peak_error": 4.556150204637921e-5,
+        "rms_error": 2.2511577647158576e-5,
+        "passes": true
+      },
+      "internal_force": {
+        "peak_reference": 509.80903513399784,
+        "peak_candidate": 509.80749832780924,
+        "peak_error": 3.014474210314056e-6,
+        "rms_error": 1.858135408148285e-6,
+        "passes": true
+      },
+      "squeeze": {
+        "peak_reference": 3.2844880589147536,
+        "peak_candidate": 3.28486109634526,
+        "peak_error": 0.00011357551734552087,
+        "rms_error": 5.6498202155410684e-5,
+        "passes": true
+      },
+      "couple": {
+        "peak_reference": 99.50809242568974,
+        "peak_candidate": 99.50288589269547,
+        "peak_error": 5.2322709312844115e-5,
+        "rms_error": 3.752949540023925e-5,
+        "passes": true
+      },
+      "deflection_L": {
+        "peak_reference": 0.0005145951210327053,
+        "peak_candidate": 0.000514619674221761,
+        "peak_error": 4.7713606391042145e-5,
+        "rms_error": 2.5997545583474166e-5,
+        "passes": true
+      },
+      "deflection_R": {
+        "peak_reference": 0.0005640583702070978,
+        "peak_candidate": 0.0005640436293733782,
+        "peak_error": 2.6133525355109874e-5,
+        "rms_error": 2.1252281285324157e-5,
+        "passes": true
+      },
+      "rotation_L": {
+        "peak_reference": 0.014736720212406365,
+        "peak_candidate": 0.014736716972979291,
+        "peak_error": 2.1982008392083115e-7,
+        "rms_error": 1.1550342056924457e-6,
+        "passes": true
+      },
+      "rotation_R": {
+        "peak_reference": 0.014736720212406365,
+        "peak_candidate": 0.014736716972979291,
+        "peak_error": 2.1982008392083115e-7,
+        "rms_error": 1.1550342056924457e-6,
+        "passes": true
+      }
+    },
+    "drake": {
+      "force_L": {
+        "peak_reference": 515.1578323854484,
+        "peak_candidate": 515.2520342196409,
+        "peak_error": 0.0001828601416313798,
+        "rms_error": 0.00043704930569833926,
+        "passes": true
+      },
+      "force_R": {
+        "peak_reference": 564.0251922380963,
+        "peak_candidate": 563.9526547853969,
+        "peak_error": 0.00012860676029659784,
+        "rms_error": 0.00041214198984187024,
+        "passes": true
+      },
+      "net_force": {
+        "peak_reference": 439.29195018254387,
+        "peak_candidate": 439.2662534121085,
+        "peak_error": 5.8495882805751964e-5,
+        "rms_error": 4.2456880346399045e-5,
+        "passes": true
+      },
+      "internal_force": {
+        "peak_reference": 509.80903513399784,
+        "peak_candidate": 509.86985927778835,
+        "peak_error": 0.00011930770072469425,
+        "rms_error": 0.00044848755271381766,
+        "passes": true
+      },
+      "squeeze": {
+        "peak_reference": 3.2844880589147536,
+        "peak_candidate": 3.2528956063292043,
+        "peak_error": 0.009618683952831287,
+        "rms_error": 0.0041529425470960574,
+        "passes": true
+      },
+      "couple": {
+        "peak_reference": 99.50809242568974,
+        "peak_candidate": 99.45756318229328,
+        "peak_error": 0.0005077902928768147,
+        "rms_error": 0.00016207200894382702,
+        "passes": true
+      },
+      "deflection_L": {
+        "peak_reference": 0.0005145951210327053,
+        "peak_candidate": 0.0005147404821469459,
+        "peak_error": 0.0002824766662165515,
+        "rms_error": 0.0004372612946807954,
+        "passes": true
+      },
+      "deflection_R": {
+        "peak_reference": 0.0005640583702070978,
+        "peak_candidate": 0.0005639888515789846,
+        "peak_error": 0.00012324722366534153,
+        "rms_error": 0.0004123378929889729,
+        "passes": true
+      },
+      "rotation_L": {
+        "peak_reference": 0.014736720212406365,
+        "peak_candidate": 0.014737384694111686,
+        "peak_error": 4.509020295854149e-5,
+        "rms_error": 0.0004975190515461793,
+        "passes": true
+      },
+      "rotation_R": {
+        "peak_reference": 0.014736720212406365,
+        "peak_candidate": 0.014737384694111686,
+        "peak_error": 4.509020295854149e-5,
+        "rms_error": 0.0004975190515461793,
+        "passes": true
+      }
+    },
+    "pinocchio": {
+      "force_L": {
+        "peak_reference": 515.1578323854484,
+        "peak_candidate": 515.1580322798036,
+        "peak_error": 3.880254606237338e-7,
+        "rms_error": 6.320538326446269e-6,
+        "passes": true
+      },
+      "force_R": {
+        "peak_reference": 564.0251922380963,
+        "peak_candidate": 564.0250734599084,
+        "peak_error": 2.1059021752902793e-7,
+        "rms_error": 5.3120795503274274e-6,
+        "passes": true
+      },
+      "net_force": {
+        "peak_reference": 439.29195018254387,
+        "peak_candidate": 439.2915474340236,
+        "peak_error": 9.168128851883557e-7,
+        "rms_error": 1.4224539562513563e-5,
+        "passes": true
+      },
+      "internal_force": {
+        "peak_reference": 509.80903513399784,
+        "peak_candidate": 509.8090239359786,
+        "peak_error": 2.1965125134513456e-8,
+        "rms_error": 3.271436150611258e-7,
+        "passes": true
+      },
+      "squeeze": {
+        "peak_reference": 3.2844880589147536,
+        "peak_candidate": 3.2845410753498854,
+        "peak_error": 1.6141460763689986e-5,
+        "rms_error": 2.8326435814794768e-5,
+        "passes": true
+      },
+      "couple": {
+        "peak_reference": 99.50809242568974,
+        "peak_candidate": 99.50782944967,
+        "peak_error": 2.6427601346812533e-6,
+        "rms_error": 1.4150133463856498e-5,
+        "passes": true
+      },
+      "deflection_L": {
+        "peak_reference": 0.0005145951210327053,
+        "peak_candidate": 0.0005145983691426,
+        "peak_error": 6.311971804430315e-6,
+        "rms_error": 1.2888609223778478e-5,
+        "passes": true
+      },
+      "deflection_R": {
+        "peak_reference": 0.0005640583702070978,
+        "peak_candidate": 0.0005640573064431719,
+        "peak_error": 1.8859110724900146e-6,
+        "rms_error": 1.0792678530455563e-5,
+        "passes": true
+      },
+      "rotation_L": {
+        "peak_reference": 0.014736720212406365,
+        "peak_candidate": 0.014736721392725246,
+        "peak_error": 8.009372939266718e-8,
+        "rms_error": 1.8379517151738683e-7,
+        "passes": true
+      },
+      "rotation_R": {
+        "peak_reference": 0.014736720212406365,
+        "peak_candidate": 0.014736721392725246,
+        "peak_error": 8.009372939266718e-8,
+        "rms_error": 1.8379517151738683e-7,
+        "passes": true
+      }
+    }
+  },
+  "passes": {
+    "mujoco": true,
+    "drake": true,
+    "pinocchio": true
+  }
+}
