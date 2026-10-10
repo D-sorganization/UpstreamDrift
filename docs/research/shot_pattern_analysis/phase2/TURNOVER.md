@@ -40,6 +40,10 @@ Layout `edfae39f00` additionally composes MAIN's validated endpoint loader in `b
 
 Final report builders preserve exact source/protocol/ordered-condition identities, all three physical-pattern social density assets, input receipts before loading and figure bytes after source rechecks. Existing interpretation gates distinguish individual-supported endpoints, common-three scoring and common-six paired comparisons. Existing `REPORT.md` is still a pending scaffold.
 
+## Isolated GUI Scoring Follow-Up
+
+AGY static review found a verified display gap: matched results export conditional course SG but do not show it in the GUI. Root qualification is `validation/gui_completion_audit_v1/`. Reused clean bounds worktree on new branch`codex/shot-pattern-gui-scoring` from2e0a74f8ca; AGY session39626 is creating an issue and implementing tests first. Prompt`/tmp/p2-gui-sg-implementation-prompt.txt`, log`/tmp/p2-gui-sg-implementation.log`, expected report`/tmp/p2-gui-sg-implementation-review.md`. No commits/push or MAIN changes authorized to that worker. Inspect actual state before resuming. Defaults/facade recommendations are not accepted defects; broad scientific-qualification claims are rejected.
+
 ## Next Steps
 
 1. Verify all six supplemental command exit receipts and complete manifests. Run the full independent auditor separately on each protocol with `--supplement-stage final --supplement-acceptance .../supplement_final_acceptance.json`. Generate and validate four final alias references with existing `load_supplement_sources`; pass the alias envelope to the auditor. Preserve all unsupported shots and failures.

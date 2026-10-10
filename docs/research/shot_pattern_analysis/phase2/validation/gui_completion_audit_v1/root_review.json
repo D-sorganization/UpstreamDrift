@@ -1,0 +1,25 @@
+{
+  "status": "static_review_with_one_verified_ui_gap",
+  "source_commit": "dcec2af2fbf859a3b5b4a13ded4606fccfc988a9",
+  "source_sha256": {
+    "src/tools/shot_pattern_analysis/matched_gui.py": "7133da61df806f69a2523e25497654ea5c4c866207c44132f4d60f6e6568d8a4",
+    "src/tools/shot_pattern_analysis/matched_runner.py": "55ce0984c53f41b8c2b85264cb3222a8426c765eeaab0a08aa54b704f33bbdd5",
+    "src/tools/shot_pattern_analysis/gui.py": "7e43fbcc0c2a532883bbd30b1802624e9636ebe4f5e0cbfe9c74b4f0cbfc2e27",
+    "src/tools/shot_pattern_analysis/README.md": "6ab719465c06c3f971c37d8c212be48b874c8dacb872e5c9f05955cd68b64dc0",
+    "tests/ui/tools/shot_pattern_analysis/test_matched_gui.py": "6e19fd547f44abccbc648349f8c595d711a24eb5921277ea0bc91c9ce2396f4e"
+  },
+  "raw_agent_audit_sha256": "75c76d96031cea36ab1cbeb457344e5f007b406eb6360764105b6cae9a6fa1bd",
+  "verified_gap": "MatchedStudyWidget._completed displays nominals/support but never reads course_scoring, although runner/export save it.",
+  "accepted_next_action": "Add a saved-score display with population, context and uncertainty qualification in isolated worktree; no scientific execution change.",
+  "rejected_or_unproven_agent_claims": [
+    "Scientifically qualified/sound is not established; empirical validation remains deferred.",
+    "No new runtime/test acceptance is inferred from static test citations without execution receipts.",
+    "Editable defaults and legacy default tab are not established requirement failures.",
+    "Unrequested facade exports are unnecessary."
+  ],
+  "isolation": {
+    "worktree": "/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift",
+    "branch": "codex/shot-pattern-gui-scoring",
+    "main_sources_frozen": true
+  }
+}
