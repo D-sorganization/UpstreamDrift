@@ -124,13 +124,13 @@ def validate_physical_inertia(tensor: np.ndarray) -> np.ndarray:
     1. Square 3x3 symmetric matrix.
     2. Strict positive definiteness (all eigenvalues > 0).
     3. Classical triangle inequalities:
-       I_xx + I_yy >= I_zz,  I_yy + I_zz >= I_xx,  I_zz + I_xx >= I_yy.
+       I_1 + I_2 >= I_3 for sorted principal moments, independent of body axes.
     """
     arr = np.asarray(tensor, dtype=np.float64)
     if arr.shape != (3, 3) or not np.all(np.isfinite(arr)):
         raise PreconditionError("Inertia tensor must be finite 3x3 matrix")
 
-    if not np.allclose(arr, arr.T, atol=1e-7):
+    if not np.allclose(arr, arr.T, atol=1e-7, rtol=0):
         raise PreconditionError("Inertia tensor must be symmetric")
 
     eigvals = np.linalg.eigvalsh(arr)
@@ -138,11 +138,12 @@ def validate_physical_inertia(tensor: np.ndarray) -> np.ndarray:
         raise PreconditionError("Inertia tensor is not positive definite")
 
     # Triangle inequalities on principal moments
-    ixx, iyy, izz = arr[0, 0], arr[1, 1], arr[2, 2]
+    first, second, third = (float(value) for value in eigvals)
     tol = 1e-9
-    if (ixx + iyy < izz - tol) or (iyy + izz < ixx - tol) or (izz + ixx < iyy - tol):
+    if first + second < third - tol:
         raise PreconditionError(
-            f"Inertia tensor violates triangle inequality: ixx={ixx}, iyy={iyy}, izz={izz}"
+            "Inertia tensor violates triangle inequality on principal moments: "
+            f"I1={first}, I2={second}, I3={third}"
         )
     return arr
 

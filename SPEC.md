@@ -11093,3 +11093,15 @@ preserves the preceding state and alters native activation. Chapter50 and
 `F07_EXACT_557_REPLAY_TURNOVER.md` retain the source-hashed failure and
 limited positive evidence. Original body inertia validity, source physiology,
 full-horizon capture matching and 17-variant/six-engine parity remain blocked.
+
+## Native Source-Body Inertia Admission (#12191)
+
+Physical use of a native OpenSim source now has a read-only body-property
+precondition. Every declared Body mass, body-frame COM and six inertia entries
+must equal fresh native readback. Positive-mass tensors use the corrected
+principal-moment validator from #12183; exact massless/zero-inertia internal
+carriers have a separate explicit policy. The unchanged 557-muscle source
+fails on bilateral clavicles and scapulae, while its short diagnostic replay
+remains separately labeled. Chapter52 and the source-body inertia turnover
+record the exact gate and evidence. No source repair, physiology qualification
+or full-swing matching follows from this necessary test.

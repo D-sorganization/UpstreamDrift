@@ -1098,3 +1098,16 @@ runtime, input, policy and failure hashes. Four invalid original body
 inertias, physiology, visual assets, full-horizon private capture fit, and
 all-variant/six-engine qualification remain open. Keep the stacked PR
 unarmed until prerequisites merge.
+
+## F07 Native Source-Body Inertia Gate (#12191)
+
+The read-only OpenSim body gate reuses #12183's coordinate-invariant inertia
+validator and binds XML to fresh native Body mass, COM and inertia for every
+source body. A welded exact-zero-mass/zero-inertia routing carrier is distinct
+from a positive-mass solid. Actual OpenSim 4.6 tests include the rotated
+invalid case, native readback mutation and unchanged 557 source: bilateral
+clavicle/scapula tensors fail. The diagnostic replay in #12182 is unchanged
+and remains physically unqualified. See chapter52,
+`F07_NATIVE_BODY_INERTIA_TURNOVER.md` and the source-bound receipt; no
+parameter repair or private data was committed. This slice depends on #12183
+and #12182 and must remain unarmed until prerequisites merge.

@@ -1,0 +1,38 @@
+{
+  "adapter_sha256": "1488794c71272e78015f47461d912e1489b5a1da60a8ee044e19ce4ff3aafe38",
+  "admitted": false,
+  "body_count": 40,
+  "failures": [
+    {
+      "body": "clavicle_r",
+      "reason": "Precondition violation: Inertia tensor violates triangle inequality on principal moments: I1=1.4384489067458154e-05, I2=0.000247110921441557, I3=0.0003228652885800651"
+    },
+    {
+      "body": "scapula_r",
+      "reason": "Precondition violation: Inertia tensor violates triangle inequality on principal moments: I1=0.0005089474016100671, I2=0.0006884567914894732, I3=0.0013932748575046655"
+    },
+    {
+      "body": "clavicle_l",
+      "reason": "Precondition violation: Inertia tensor violates triangle inequality on principal moments: I1=1.4384489067458154e-05, I2=0.000247110921441557, I3=0.0003228652885800651"
+    },
+    {
+      "body": "scapula_l",
+      "reason": "Precondition violation: Inertia tensor violates triangle inequality on principal moments: I1=0.0005089474016100671, I2=0.0006884567914894732, I3=0.0013932748575046655"
+    }
+  ],
+  "issue": 12191,
+  "junit_sha256": "43e10aab0c6499514949f3d4687e726886b4a4213c867b4ef02275fbfd217674",
+  "limits": "Necessary body-property test only; no source repair, anatomy, passive force, contact/grip, capture or full-horizon qualification",
+  "native_actuators_sha256": "61c6d7810088ca8030eea967e9bfa71f7f7998d3c5601c5e1939367346238cc2",
+  "native_simbody_sha256": "81afadccfe9e55dd366255d09c319ccb8d50fdb54fee4ac45b64708c4f044aa6",
+  "native_simulation_sha256": "950241f649dab8a113c4bb754a080d16db4a3f5f0aa1710ed2e53d03206eb09e",
+  "native_test_result": "7 passed, 0 failed, OpenSim 4.6",
+  "opensim_version": "version 4.6-2026-06-22-85aaf64, build date 18:27:55 Jun 22 2026",
+  "positive_mass_rejected_count": 4,
+  "schema_version": "upstreamdrift/native-body-inertia-audit/1.0.0",
+  "scientific_status": "not-qualified-for-physical-forward-dynamics",
+  "source_model_sha256": "453e09c4e42dcc3f4b74a3b2efeff063e96c3820b3eee1efe95eef249579010d",
+  "source_native_exact_count": 40,
+  "validator_sha256": "8439c2312a6d59e8a5628ca80d20f9442f429a53739da73291d46e5c9a16f93c",
+  "zero_mass_zero_inertia_count": 9
+}
