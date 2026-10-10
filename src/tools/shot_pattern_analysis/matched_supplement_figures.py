@@ -70,7 +70,7 @@ def _noise_profile_description(
     )
     sd = spec.standard_deviations
     human_profile = (
-        "Correlated Delivery"
+        "Covariance Profile"
         if profile.startswith("cov_facepath_")
         else re.sub(r"([A-Za-z])([0-9])", r"\1 \2", profile).replace("_", " ").title()
     )
@@ -107,14 +107,16 @@ def _noise_profile_description(
     return f"{human_profile} ({', '.join(parts)})" if parts else human_profile
 
 
-def _condition_caption(ref: dict[str, Any]) -> str:
+def _condition_caption(ref: dict[str, Any], *, include_noise: bool = True) -> str:
     condition = _condition(ref)
     club = str(condition["club"]).replace("_", " ").title()
     profile = _noise_profile_description(
         condition["profile"], ref.get("config", {}).get("noise")
     )
     return (
-        f"{club} · {profile} · Lean {condition['lean']:g}° · "
+        f"{club} · "
+        + (f"{profile} · " if include_noise else "")
+        + f"Lean {condition['lean']:g}° · "
         f"Curve ×{condition['curve']:g} · Shaft Twist SD {condition['rotation']:g}°"
     )
 
@@ -124,9 +126,6 @@ def _pair_social_scenario(
 ) -> str:
     """Construct scenario string distinguishing varying panel condition from fixed controls."""
     c1 = _condition(first)
-    profile = _noise_profile_description(
-        c1["profile"], first.get("config", {}).get("noise")
-    )
     comparison_title = _comparison_title(comparison)
     fixed_parts: list[str] = []
     if comparison != "across_lean":
@@ -135,12 +134,8 @@ def _pair_social_scenario(
         fixed_parts.append(f"Curve ×{c1['curve']:g}")
     if comparison != "shaft_rotation_sd":
         fixed_parts.append(f"Shaft Twist SD {c1['rotation']:g}°")
-    fixed_parts.append(profile)
     fixed_str = " · ".join(fixed_parts)
-    return (
-        f"Varying {comparison_title} in Panels · Fixed: {fixed_str} · "
-        "Simulations, Not Measured Player Accuracy"
-    )
+    return f"Varying {comparison_title} in Panels · Fixed: {fixed_str}"
 
 
 def _pair_condition_label(comparison: str, ref: dict[str, Any]) -> str:
@@ -179,6 +174,20 @@ def _plot_metadata(
     }
 
 
+def _raw_flight_metadata(metadata: dict[str, Any]) -> dict[str, Any]:
+    """Keep saved flight samples distinct from independently supported endpoints."""
+    excluded = {
+        "conditioning",
+        "Population",
+        "valid_shots_by_pattern",
+        "total_shots_by_pattern",
+    }
+    return {
+        **{key: value for key, value in metadata.items() if key not in excluded},
+        "Population": "Saved Raw Trajectories; Not Paired by Shot Index",
+    }
+
+
 def _render_cell_figures(ref: dict[str, Any], output_dir: Path) -> list[dict[str, Any]]:
     if ref.get("status") != "completed":
         return []
@@ -190,40 +199,54 @@ def _render_cell_figures(ref: dict[str, Any], output_dir: Path) -> list[dict[str
         cell_dir / "shots.csv.gz", int(ref["config"]["n_shots"])
     )
     arrays = {name: points[name] for name in _PATTERNS}
-    if any(not arrays[name] for name in _PATTERNS):
-        return [
-            {
-                "figure_kind": "density_and_overhead",
-                "source_kind": "unique_supplement_cell",
-                "source_protocol": ref["source_protocol"],
-                "cell": ref.get("alias_cell", ref["cell"]),
-                "status": "unavailable",
-                "reason": "at least one physical pattern has no supported endpoints",
-            }
-        ]
     target_x = float(ref["summary"]["target_x_m"])
     label = str(ref.get("alias_cell", ref["cell"]))
     stem = output_dir / "cells" / _slug(label)
     valid_counts = {name: len(arrays[name]) for name in _PATTERNS}
     metadata = _plot_metadata(ref, "one-cell supported population", valid_counts)
-    density_paths = write_academic_dispersion_figure(
-        arrays,
-        stem.with_name(stem.name + "_density"),
-        scenario=f"Supplement Cell: {label}",
-        metadata=metadata,
-        target_point_m=(target_x, 0.0),
-        presentation="academic",
-    )
     social_club = str(ref["config"]["club"]["club_id"]).replace("_", " ").title()
-    social_metadata = {**metadata, "social_club": social_club}
-    density_social_paths = write_academic_dispersion_figure(
-        arrays,
-        stem.with_name(stem.name + "_density_social"),
-        scenario=f"Supplement Cell: {label} · {_condition_caption(ref)} · Simulations, Not Measured Player Accuracy",
-        metadata=social_metadata,
-        target_point_m=(target_x, 0.0),
-        presentation="social",
-    )
+    social_metadata = {
+        "social_club": social_club,
+        "Delivery Noise": _noise_profile_description(
+            _condition(ref)["profile"], ref["config"]["noise"]
+        ),
+        "Population": "Individually Supported Endpoints by Physical Pattern",
+        "valid_shots_by_pattern": valid_counts,
+        "total_shots_by_pattern": metadata["total_shots_by_pattern"],
+    }
+    ledger: list[dict[str, Any]] = []
+    density_paths: dict[str, Path] = {}
+    density_social_paths: dict[str, Path] = {}
+    if all(len(arrays[name]) >= 2 for name in _PATTERNS):
+        density_paths = write_academic_dispersion_figure(
+            arrays,
+            stem.with_name(stem.name + "_density"),
+            scenario=f"Supplement Cell: {label}",
+            metadata=metadata,
+            target_point_m=(target_x, 0.0),
+            presentation="academic",
+        )
+        density_social_paths = write_academic_dispersion_figure(
+            arrays,
+            stem.with_name(stem.name + "_density_social"),
+            scenario=_condition_caption(ref, include_noise=False),
+            metadata=social_metadata,
+            target_point_m=(target_x, 0.0),
+            presentation="social",
+        )
+    else:
+        ledger.append(
+            {
+                "figure_kind": "density",
+                "source_kind": "individual_supported_endpoints",
+                "source_protocol": ref["source_protocol"],
+                "cell": label,
+                "status": "unavailable",
+                "reason": "at least one physical pattern has fewer than two supported endpoints",
+                "valid_n_by_pattern": valid_counts,
+                "total_n_by_pattern": metadata["total_shots_by_pattern"],
+            }
+        )
     flights_path = cell_dir / "flight_samples.json"
     if not flights_path.is_file():
         raise ValueError(f"figure source has no flight samples: {ref['cell']}")
@@ -238,18 +261,17 @@ def _render_cell_figures(ref: dict[str, Any], output_dir: Path) -> list[dict[str
         stem.with_name(stem.name + "_overhead"),
         target_x_m=target_x,
         scenario=f"Supplement Cell: {label}; Raw Simulator Flight Samples",
-        metadata=metadata,
+        metadata=_raw_flight_metadata(metadata),
         presentation="academic",
     )
     overhead_social_paths = write_overhead_trajectory_figure(
         trajectory_paths,
         stem.with_name(stem.name + "_overhead_social"),
         target_x_m=target_x,
-        scenario=f"Supplement Cell: {label} · {_condition_caption(ref)} · Raw Simulator Flight Samples · Simulations, Not Measured Player Accuracy",
-        metadata=social_metadata,
+        scenario=_condition_caption(ref, include_noise=False) + " · Raw Flight Samples",
+        metadata=_raw_flight_metadata(social_metadata),
         presentation="social",
     )
-    ledger = []
     for figure_group, paths, presentation in (
         ("density", density_paths, "academic"),
         ("density_social", density_social_paths, "social"),
@@ -753,6 +775,9 @@ def _render_pair_figures(
             social_club=social_club,
             target_point_m=(target, 0.0),
             total_n=int(first["config"]["n_shots"]),
+            delivery_noise=_noise_profile_description(
+                _condition(first)["profile"], first["config"]["noise"]
+            ),
         )
         for key, path in social_density_paths.items():
             pattern_lower, ext = key.split("_", 1)

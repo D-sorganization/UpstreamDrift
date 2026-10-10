@@ -79,3 +79,28 @@ def test_invalid_six_population_data_fails_before_any_export(
     with pytest.raises(ValueError):
         _render(points, tmp_path)
     assert not calls
+
+
+def test_noise_details_use_wrapped_metadata_not_single_line_subtitle(
+    monkeypatch, tmp_path
+):
+    calls = []
+    monkeypatch.setattr(
+        social,
+        "write_academic_dispersion_figure",
+        lambda *args, **kwargs: calls.append(kwargs) or {"png": tmp_path / "plot.png"},
+    )
+    details = "Path SD 0.5° · Speed SD 2 mph · Strike SD 0.25 in on Each Axis"
+    social.write_pair_social_density(
+        _points(),
+        tmp_path / "comparison",
+        condition_labels=("SD 1°", "SD 2°"),
+        scenario="Lean 5° · Curve ×1",
+        social_club="Driver",
+        target_point_m=(180, 0),
+        total_n=10,
+        delivery_noise=details,
+    )
+    assert len(calls) == 3
+    assert all(call["metadata"]["Delivery Noise"] == details for call in calls)
+    assert all(details not in call["scenario"] for call in calls)

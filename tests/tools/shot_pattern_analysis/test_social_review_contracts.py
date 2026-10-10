@@ -21,6 +21,7 @@ def noise(correlation=0.0, horizontal=0.00635, vertical=0.0127):
 def test_serialized_zero_correlation_overrides_profile_name():
     label = figures._noise_profile_description("cov_facepath_positive", noise())
     assert "Correlation r" not in label
+    assert "Correlated Delivery" not in label
 
 
 def test_nonzero_correlation_names_primitive_shaft_twist():
@@ -58,3 +59,61 @@ def test_unavailable_figure_cannot_claim_an_unverified_artifact(tmp_path):
                 ]
             },
         )
+
+
+def test_cell_low_density_support_does_not_hide_saved_flights(tmp_path, monkeypatch):
+    import json
+
+    cell = "driver_lean5_curve1_rotation1_shaft_only"
+    directory = tmp_path / cell
+    directory.mkdir()
+    (directory / "manifest.json").write_text("{}")
+    paths = {name: [[[0, 0], [180, 0]]] for name in ("Straight", "Draw", "Fade")}
+    (directory / "flight_samples.json").write_text(json.dumps({"trajectories": paths}))
+    ref = {
+        "cell": cell,
+        "source_root": str(tmp_path),
+        "status": "completed",
+        "source_protocol": "original_primary/1",
+        "config": {
+            "n_shots": 10,
+            "club": {"club_id": "driver", "shaft_lean_deg": 5},
+            "curve_scale": 1,
+            "noise": {"standard_deviations": [1, 0, 0, 0, 0, 0, 0]},
+        },
+        "summary": {"target_x_m": 180},
+    }
+    monkeypatch.setattr(figures, "manifest_files_match", lambda path: True)
+    monkeypatch.setattr(
+        figures,
+        "load_individually_supported_endpoints",
+        lambda *args: (
+            {
+                "Straight": [(180, 0), (181, 1)],
+                "Draw": [],
+                "Fade": [(180, 0), (181, 1)],
+            },
+            {},
+        ),
+    )
+
+    def density(*args, **kwargs):
+        pytest.fail("Insufficient endpoints must be recorded as unavailable density")
+
+    def overhead(trajectories, stem, **kwargs):
+        path = stem.with_suffix(".png")
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(b"fixture overhead")
+        return {"png": path}
+
+    monkeypatch.setattr(figures, "write_academic_dispersion_figure", density)
+    monkeypatch.setattr(figures, "write_overhead_trajectory_figure", overhead)
+    ledger = figures._render_cell_figures(ref, tmp_path / "figures")
+    assert {row["figure_kind"] for row in ledger if row.get("relative_path")} == {
+        "overhead_png",
+        "overhead_social_png",
+    }
+    assert any(
+        row.get("status") == "unavailable" and row["figure_kind"] == "density"
+        for row in ledger
+    )

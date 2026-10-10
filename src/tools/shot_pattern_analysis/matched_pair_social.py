@@ -21,6 +21,7 @@ def write_pair_social_density(
     social_club: str,
     target_point_m: tuple[float, float],
     total_n: int,
+    delivery_noise: str | None = None,
 ) -> dict[str, Path]:
     """Export three two-panel figures, preserving all supplied coordinates.
 
@@ -45,6 +46,10 @@ def write_pair_social_density(
         for label in (scenario, social_club)
     ):
         raise ValueError("scenario and social club must be non-empty display labels")
+    if delivery_noise is not None and (
+        not isinstance(delivery_noise, str) or not delivery_noise.strip()
+    ):
+        raise ValueError("delivery noise must be a non-empty display label")
     if isinstance(total_n, bool) or not isinstance(total_n, int) or total_n < 2:
         raise ValueError("total_n must be an integer >= 2")
     expected = {
@@ -77,6 +82,7 @@ def write_pair_social_density(
             scenario=f"{pattern}: {scenario}",
             metadata={
                 "social_club": social_club,
+                **({"Delivery Noise": delivery_noise} if delivery_noise else {}),
                 "Population": "Same Shot Indices Supported in All Six Populations",
                 "Scales": "Shared Within This Figure; Other Pattern Figures May Differ",
                 "valid_shots_by_pattern": dict.fromkeys(condition_labels, common_n),

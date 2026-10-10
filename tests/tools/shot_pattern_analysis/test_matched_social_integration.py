@@ -99,12 +99,12 @@ def test_pair_social_scenario_distinguishes_varying_panels_from_fixed_conditions
     assert "Fixed:" in scenario
     assert "Lean 5°" in scenario
     assert "Curve ×2" in scenario
-    assert "Combined 2" in scenario
-    assert "Path SD 0.5°" in scenario
-    assert "Speed SD 2 mph" in scenario
-    assert "Strike SD 0.25 in on Each Axis" in scenario
-    # Simulation disclaimer
-    assert "Simulations, Not Measured Player Accuracy" in scenario
+    from matplotlib.textpath import TextPath
+
+    assert TextPath((0, 0), scenario, size=14).get_extents().width < 0.88 * 16 * 72
+    # Noise units belong in wrapped metadata; the canonical footer supplies
+    # the model-conditional simulation caveat.
+    assert "Path SD" not in scenario
 
 
 def test_render_cell_figures_exports_dedicated_canonical_social_assets(
@@ -167,6 +167,14 @@ def test_render_cell_figures_exports_dedicated_canonical_social_assets(
 
     output_dir = tmp_path / "report_figures"
     ledger = figures._render_cell_figures(ref, output_dir)
+    for _, kwargs in calls["overhead"]:
+        assert "valid_shots_by_pattern" not in kwargs["metadata"]
+        assert "total_shots_by_pattern" not in kwargs["metadata"]
+        if kwargs["presentation"] == "social":
+            assert (
+                kwargs["metadata"]["Population"]
+                == "Saved Raw Trajectories; Not Paired by Shot Index"
+            )
 
     # Must contain both academic and social exports for density and overhead
     kinds = {item["figure_kind"] for item in ledger}
@@ -174,6 +182,14 @@ def test_render_cell_figures_exports_dedicated_canonical_social_assets(
     assert "density_pdf" in kinds
     assert "density_svg" in kinds
     assert "density_social_png" in kinds
+    social_call = next(
+        kwargs
+        for _, kwargs in calls["dispersion"]
+        if kwargs["presentation"] == "social"
+    )
+    assert "Path SD 0.5°" in social_call["metadata"]["Delivery Noise"]
+    assert "Speed SD 2 mph" in social_call["metadata"]["Delivery Noise"]
+    assert "Strike SD 0.25 in" in social_call["metadata"]["Delivery Noise"]
     assert "density_social_pdf" in kinds
     assert "density_social_svg" in kinds
     assert "overhead_png" in kinds
@@ -273,7 +289,9 @@ def test_render_pair_figures_exports_canonical_social_density_with_physical_patt
     assert kwargs["social_club"] == "Driver"
     assert kwargs["total_n"] == 10_000
     assert kwargs["target_point_m"] == (180.0, 0.0)
-    assert "Simulations, Not Measured Player Accuracy" in kwargs["scenario"]
+    assert "Path SD 0.5°" in kwargs["delivery_noise"]
+    assert "Speed SD 2 mph" in kwargs["delivery_noise"]
+    assert "Strike SD 0.25 in" in kwargs["delivery_noise"]
     assert "Fixed:" in kwargs["scenario"]
 
     # Check that point_sets passed to social wrapper use exact common coordinates
