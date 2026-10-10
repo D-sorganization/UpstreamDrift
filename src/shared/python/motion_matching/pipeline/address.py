@@ -22,12 +22,14 @@ from src.shared.python.motion_matching.full_body_spec import (
     validate_full_body_spec,
 )
 from src.shared.python.motion_matching.hip_calibration import (
+    LATERAL_SEEDS_M,
     apply_hip_calibration,
     functional_hip_calibration,
     hip_rotation_zero,
 )
 from src.shared.python.motion_matching.marker_calibration import (
-    calibrate_marker_offsets,
+    PlacementPrior,
+    calibrate_constrained_marker_offsets,
     static_marker_offsets,
 )
 from src.shared.python.motion_matching import posture_metrics as post
@@ -317,7 +319,16 @@ def calibrate_legs(
     seeds: Mapping[str, tuple[str, Sequence[float]]],
     q_start: np.ndarray,
 ) -> tuple[dict[str, tuple[str, tuple[float, float, float]]], Any]:
-    """Alternating marker calibration of ``seeds`` (others fixed) with stance pins."""
+    """Alternating marker calibration of ``seeds`` (others fixed) with stance pins.
+
+    With foot progression on (``lane.feet``), the lateral leg markers keep their
+    seed azimuth and the forefoot pair stays square, so hip rotation and foot
+    yaw stay observable (``leg_marker_constraints``, #11737).
+    """
+    from src.shared.python.motion_matching.pipeline.leg_marker_constraints import (
+        anatomical_leg_constraint,
+    )
+
     frames = lane.calibration_frames
     calibrated = tuple(seeds)
     cols = [lane.labels.index(m) for m in calibrated]
@@ -360,15 +371,18 @@ def calibrate_legs(
             state["kin"] = FullBodyMarkerKinematics(adapter, attachments)
         return lane.trajectory(state["kin"], q_start, frames=frames)[0]
 
-    result = calibrate_marker_offsets(
+    result = calibrate_constrained_marker_offsets(
         leg_capture,
         leg_bodies,
         pose_fn,
         ik_fn,
         initial_q=q_start,
         iterations=CALIBRATION_ITERATIONS,
-        prior_offsets={label: offset for label, (_, offset) in seeds.items()},
-        prior_weight=CALIBRATION_PRIOR_FRAMES,
+        prior=PlacementPrior(
+            {label: offset for label, (_, offset) in seeds.items()},
+            CALIBRATION_PRIOR_FRAMES,
+            None if lane.feet is None else anatomical_leg_constraint(seeds),
+        ),
     )
     offsets = {
         label: (
@@ -497,8 +511,15 @@ def prepare_hip_spec(
         for label in MARKER_SEGMENTS["pelvis"]
     }
     hip_cal = functional_hip_calibration(lane.points, lane.valid, labels, waist_offsets)
+    # Foot progression on: remove the lateral-marker tilt from the zero twist
+    # (#11737). Off: the legacy plane the canonical receipts were made with.
     zero_twist = hip_rotation_zero(
-        lane.points, lane.valid, labels, waist_offsets, calibration=hip_cal
+        lane.points,
+        lane.valid,
+        labels,
+        waist_offsets,
+        calibration=hip_cal,
+        lateral_marker_offsets_m=(0.0, 0.0) if lane.feet is None else LATERAL_SEEDS_M,
     )
     if opts.skip_hip_calibration:
         hip_spec = add_toe_spheres(dict(base_spec))
