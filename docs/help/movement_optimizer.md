@@ -166,6 +166,21 @@ Movement Optimizer is the only source of a spine-load figure. It computes compre
 
 A cross-engine audit compares the four packs on the same inputs (reference lifter 80 kg / 1.78 m, competition bar plus 100 kg) in `manuals/upstreamdrift/chapters/15-lift-pack-audit.qmd`. That chapter is evidence class "derived, provisional" and not approved; read it, and its recorded baseline at `docs/development/lifting/PACK_PARITY_BASELINE.md`, for the measured discrepancies — segment/hand/foot position parity, bar-centre offsets between packs, lifter-only centre-of-mass differences, which packs weld only one hand to the bar, grip-width mismatch, and floor-pull start poses that miss the plate radius. Discrepancies are derived programmatically (`src/shared/python/lifting/pack_audit/gaps.py`) and each maps to a tracked issue in its pack repository or a LIFT child of epic #11740. The chapter also records what it does not cover: body-frame origins only, no contact force or dynamics, and no lift motion-capture or force-plate data exist to validate any pack against.
 
+### Lift Baseline API
+
+The committed `docs/development/lifting/pack_parity_baseline.json` receipt behind
+the audit above is also available programmatically, without re-running the
+audit: `src/shared/python/lifting/baseline_view.py` is an engine-free loader
+(`load_baseline`, `available_lifts`, `lift_view`) that reduces the receipt to a
+JSON-safe, per-lift summary — pack commit/licence, body/structure counts, start
+pose and smoke-test results, phase hand-to-bar distances, cross-engine position
+parity per pose flagged against the parity tolerance, and the discrepancies
+that apply to that lift. `GET /lifting/baseline` returns receipt metadata
+(schema, anthropometry, tolerances, packs, the five lift names, gap count) and
+`GET /lifting/baseline/lifts/{lift}` returns one lift's `lift_view`; both are
+read-only and serve the same committed receipt the PyQt and web lift-viewing
+surfaces (LIFT-8, GitHub issue #11748) will build on.
+
 ### Where to Find Each Pack
 
 | Pack      | Repository                         | Exercises root                    | Manifest          |
