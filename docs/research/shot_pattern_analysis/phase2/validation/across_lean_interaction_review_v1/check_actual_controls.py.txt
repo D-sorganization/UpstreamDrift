@@ -1,0 +1,53 @@
+"""Independently replay two saved controls; no physical simulation."""
+import csv, gzip, hashlib, json
+from pathlib import Path
+import numpy as np
+from src.tools.shot_pattern_analysis.matched_lean_control import analyze_explicit_source_pair
+from src.tools.shot_pattern_analysis.course_score_vectors import score_course_endpoint_vectors
+from src.tools.shot_pattern_analysis.matched_interpretation import render_effect_table
+from src.tools.shot_pattern_analysis.matched_supplement_report import load_supplement_sources
+from scripts.research.shot_pattern_analysis.final_report_inputs import select_bounds_control_pairs
+
+PHASE=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2')
+OUT=PHASE/'validation/across_lean_interaction_review_v1'
+sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+old_path=PHASE/'supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.json'
+old_sha=sha(old_path)
+old=json.loads(old_path.read_text())['comparisons']
+protocol_roots={'original_control/1':PHASE/'control_final_v1','pw-primary-face-bounds/1':PHASE/'supplement_final_v1/pw_primary_face','pw-control-face-bounds/1':PHASE/'supplement_final_v1/pw_control_face','driver-control-speed-bounds/1':PHASE/'supplement_final_v1/driver_control_speed'}
+qualified=load_supplement_sources({k:v for k,v in protocol_roots.items() if k != 'original_control/1'},PHASE/'review_followups/SUPPLEMENTAL_EXECUTION_INVENTORY.json')
+transition=PHASE/'source_transition_supplement.json'
+results=[]
+for club,expected_n in [('driver',9940),('pitching_wedge',9999)]:
+    name=f'{club}_lean0_curve2_rotation2_combined2'
+    previous=next(x for x in old if x['comparison_kind']=='across_lean' and x['sources'][0]['cell']==name and 'lean5' in x['sources'][1]['cell'])
+    refs=[]; groups=[]
+    for source in previous['sources']:
+        root=protocol_roots[source['protocol_id']];cell=source['cell']
+        ref={'source_root':str(root),'cell':cell,'source_protocol':source['protocol_id'],'execution_kind':source['execution_kind'],**{k:source[k] for k in ('source_plan_sha256','source_cell_manifest_sha256','source_csv_sha256')}}
+        if ref['execution_kind']=='provenance_alias':
+            aliases=qualified['aliases']
+            alias=next(x for x in aliases if x['alias_cell']==cell)
+            ref.update({k:alias[k] for k in ('alias_cell','alias_of_primary','requested_config','proof_status')})
+        refs.append(ref)
+        group={p:{} for p in ('Straight','Draw','Fade')}
+        with gzip.open(root/cell/'shots.csv.gz','rt') as f:
+            for row in csv.DictReader(f):
+                if row['status']=='supported':group[row['pattern']][int(row['shot_index'])]=(float(row['carry_x_m']),float(row['carry_y_m']))
+        groups.append(group)
+    pair=analyze_explicit_source_pair(*refs,comparison_kind='across_lean',target_x_m=previous['target_x_m'],transition_receipt_path=transition if previous['source_transition_receipt_sha256'] else None,transition_receipt_sha256=sha(transition) if previous['source_transition_receipt_sha256'] else None)
+    indices=sorted(set.intersection(*(set(g[p]) for g in groups for p in ('Straight','Draw','Fade'))))
+    assert len(indices)==expected_n==pair['common_supported_n']
+    vectors=[score_course_endpoint_vectors({p:[(i,*g[p][i]) for i in indices] for p in g},club_id=club,target_x_m=pair['target_x_m'],green_radius_m=15).scores for g in groups]
+    means={p:float(np.mean((vectors[1][p]-vectors[1]['Straight'])-(vectors[0][p]-vectors[0]['Straight']))) for p in ('Draw','Fade')}
+    assert all(abs(means[p]-pair['course_scoring_effect_modification'][p]['estimate'])<1e-12 for p in means)
+    assert pair['patterns']==previous['patterns'], 'existing per-pattern quantities changed'
+    results.append({'club':club,'pair_result':pair,'independent_mean_interaction_sg':means,'common_index_n':len(indices),'old_per_pattern_metrics_exactly_equal':True})
+    print(club,len(indices),means,flush=True)
+effects,unavailable=select_bounds_control_pairs([x['pair_result'] for x in results])
+assert len(effects)==2 and not unavailable
+markdown=render_effect_table(effects)
+assert 'Unavailable' not in markdown and '9,940 / 10,000' in markdown and '9,999 / 10,000' in markdown
+assert sha(old_path)==old_sha
+(OUT/'actual_control_effects.json').write_text(json.dumps({'schema':'independent-across-lean-actual-control-check/1','status':'passed','script_sha256':sha(Path(__file__)),'provisional_old_comparisons_sha256':old_sha,'source_module_sha256':sha(Path('src/tools/shot_pattern_analysis/matched_lean_control.py')),'results':results},indent=2)+'\n')
+(OUT/'ACTUAL_CONTROL_TABLE.md').write_text('# Actual Saved-Control Relative Scoring Table\n\n'+markdown+'\n')
