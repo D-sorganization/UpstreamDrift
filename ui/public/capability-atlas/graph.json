@@ -497,7 +497,7 @@
       "reason": null,
       "pending_decision": false,
       "tiles": [],
-      "notes": "The desktop engine visual layers (MuJoCo, OpenSim, Drake and Pinocchio MeshCat exports, MyoSuite) draw the parametric club head, shaft and grip from one shared adapter (#11717, #11727). The web ClubHead component (#11717) and the ball visual (#11719) have not landed, so the web app still draws the placeholder head.",
+      "notes": "The desktop engine visual layers (MuJoCo, OpenSim, Drake and Pinocchio MeshCat exports, MyoSuite) draw the parametric club head, shaft and grip from one shared adapter (#11717, #11727). GCV-13 (#11719) landed the shared address-ball geometry (src/shared/python/model_appearance/ball.py) and the MuJoCo decorative ball visual geom; OpenSim, Drake/Pinocchio MeshCat, MyoSuite, native export and the web ClubHead component (#11717) still draw no ball, so the web app still draws the placeholder head.",
       "id": "render.club_head_and_ball"
     },
     {
@@ -3146,7 +3146,7 @@
   "inputs": {
     "src/config/models.yaml": "e11682df79d7467f1eba9579d835f5d7019bfd7eb09cf81c14e22bd08d0bf844",
     "src/config/launcher_manifest.json": "1ae28f872b54c237440fcaacec40b735b93a7b80d710adc9228ef671b7831032",
-    "src/config/feature_parity.json": "0ae0f88ea6c00e37a5a1925761a2a275276461cd20003362e223e0b4f3ec28c0",
+    "src/config/feature_parity.json": "20c4ca22515fff238621179447c0e7daaf71c58a3229a5c7187a322d90240dab",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }
