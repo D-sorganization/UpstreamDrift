@@ -197,11 +197,18 @@ def test_retired_clusters_resolve_to_the_pinned_tree(module_name: str) -> None:
 
 @_requires_vendor
 def test_the_fallback_declines_gaps_inside_a_cluster_upstreamdrift_owns() -> None:
-    """The generic fallback declines owned roots despite explicit Lab extension.
+    """A missing submodule of an owned cluster must stay missing.
 
-    F06 deliberately exposes the Tools-owned mocap leaf through the reviewed
-    Lab seam. That explicit package path does not broaden the generic fallback
-    finder or make genuinely missing child modules importable.
+    ``sidekick`` is UpstreamDrift-owned and has no ``lab/mocap``; the pinned
+    tree does. An earlier form of the finder answered for it, silently building
+    a package half UpstreamDrift and half Tools. That flipped
+    ``probe_tools_schema()`` from ``unavailable`` to ``ready`` and broke
+    ``test_cli_record_dry_run_then_session_check`` and
+    ``test_cli_capture_synthetic_writes_manifest_and_exits_zero``, which assert
+    the module is absent.
+
+    The absence of a submodule inside an owned cluster is a fact about this
+    repository, not a gap for the fallback to paper over.
     """
     assert (_UD_SHARED / "sidekick").is_dir(), (
         "fixture assumption: sidekick is still an UpstreamDrift-owned cluster"
@@ -217,14 +224,4 @@ def test_the_fallback_declines_gaps_inside_a_cluster_upstreamdrift_owns() -> Non
 
     assert finder.find_spec("src.shared.python.sidekick.lab.mocap") is None
     assert finder.find_spec("shared.python.sidekick.lab.mocap") is None
-    from src.shared.python._seam_redirect import extend_sidekick_lab_path
-
-    extend_sidekick_lab_path()
-    spec = importlib.util.find_spec("sidekick.lab.mocap")
-    assert spec is not None and spec.origin is not None
-    assert (
-        Path(spec.origin)
-        .resolve()
-        .is_relative_to((_VENDORED_SHARED / "sidekick" / "lab" / "mocap").resolve())
-    )
-    assert importlib.util.find_spec("sidekick.lab.definitely_not_a_module") is None
+    assert importlib.util.find_spec("sidekick.lab.mocap") is None
