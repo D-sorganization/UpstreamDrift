@@ -95,10 +95,10 @@ _REPLAY_IDENTITY_FIELDS = (
 
 def _experiment_replay_bundle_type() -> type[Any]:
     """Resolve the Tools bundle only when a qualified bundle is consumed."""
-    from src.shared.python._seam_redirect import extend_sidekick_lab_path
+    from src.shared.python._seam_redirect import load_pinned_tools_package
 
-    extend_sidekick_lab_path()
-    from sidekick.lab.mocap import ExperimentReplayBundle
+    load_pinned_tools_package("sidekick.lab.mocap")
+    from _pinned_tools__sidekick__lab__mocap import ExperimentReplayBundle  # type: ignore[import-not-found]
 
     return ExperimentReplayBundle
 

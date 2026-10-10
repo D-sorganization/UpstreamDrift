@@ -267,7 +267,14 @@ def _binding_row(row: ComparisonRow, binding: NativeAdapterBinding) -> None:
 def _validate_bundle(
     row: ComparisonRow, binding: NativeAdapterBinding, bundle: Any
 ) -> None:
-    from sidekick.lab.mocap import ActuationInputKind, InputInterpolation, ReplayMode
+    from src.shared.python._seam_redirect import load_pinned_tools_package
+
+    load_pinned_tools_package("sidekick.lab.mocap")
+    from _pinned_tools__sidekick__lab__mocap import (  # type: ignore[import-not-found]
+        ActuationInputKind,
+        InputInterpolation,
+        ReplayMode,
+    )
 
     _binding_row(row, binding)
     if row.engine == "myosuite":
@@ -639,7 +646,10 @@ def _validate_command_evidence_row(
     request: NativeReplayRequest, evidence_row: Any, profile_bytes: bytes
 ) -> Any:
     """Validate T02's structural link before resolving native model semantics."""
-    from sidekick.lab.mocap import (
+    from src.shared.python._seam_redirect import load_pinned_tools_package
+
+    load_pinned_tools_package("sidekick.lab.mocap")
+    from _pinned_tools__sidekick__lab__mocap import (  # type: ignore[import-not-found]
         ActuationInputKind,
         CapabilityAvailability,
         CapabilitySupport,

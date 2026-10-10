@@ -54,10 +54,10 @@ def _evidence_and_bundle(
         (0.1, 0.1),
     ),
 ) -> tuple[ComparisonEvidence, ExperimentReplayBundle]:
-    from src.shared.python._seam_redirect import extend_sidekick_lab_path
+    from src.shared.python._seam_redirect import load_pinned_tools_package
 
-    extend_sidekick_lab_path()
-    from sidekick.lab.mocap import (
+    load_pinned_tools_package("sidekick.lab.mocap")
+    from _pinned_tools__sidekick__lab__mocap import (  # type: ignore[import-not-found]
         ActuationInputKind,
         CapabilityAvailability,
         CapabilityDeclaration,

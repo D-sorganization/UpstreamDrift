@@ -26,11 +26,11 @@ from src.engines.physics_engines.myosuite.python.native_excitation_replay import
     _module_bytes,
     validate_myo_suite_bundle_contract,
 )
-from src.shared.python._seam_redirect import extend_sidekick_lab_path
+from src.shared.python._seam_redirect import load_pinned_tools_package
 
-extend_sidekick_lab_path()
+load_pinned_tools_package("sidekick.lab.mocap")
 
-from sidekick.lab.mocap import (
+from _pinned_tools__sidekick__lab__mocap import (  # type: ignore[import-not-found]
     ActuationInputKind,
     CapabilityAvailability,
     CapabilityDeclaration,

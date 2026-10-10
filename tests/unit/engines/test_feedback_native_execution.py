@@ -20,11 +20,11 @@ from src.engines.feedback_native_execution import (
     validate_native_replay_output,
 )
 from src.engines.model_inventory import EngineModelInventory, TARGET_ENGINES
-from src.shared.python._seam_redirect import extend_sidekick_lab_path
+from src.shared.python._seam_redirect import load_pinned_tools_package
 
-extend_sidekick_lab_path()
+load_pinned_tools_package("sidekick.lab.mocap")
 
-from sidekick.lab.mocap import (
+from _pinned_tools__sidekick__lab__mocap import (  # type: ignore[import-not-found]
     ActuationInputKind,
     CapabilityAvailability,
     CapabilityDeclaration,
@@ -357,7 +357,9 @@ def test_request_references_bundle_model_path_without_serializing_it(
 def test_command_admission_requires_matching_t02_profile_artifact(
     registry: FeedbackComparisonRegistry,
 ) -> None:
-    from sidekick.lab.mocap import COMPILED_ACTUATOR_PROFILE_SCHEMA_VERSION
+    from _pinned_tools__sidekick__lab__mocap import (
+        COMPILED_ACTUATOR_PROFILE_SCHEMA_VERSION,
+    )  # type: ignore[import-not-found]
 
     f01_row = registry.get("myosuite/driver", "default", DriveMode.MUSCLE_EXCITATION)
     _, source_bundle, _ = _bundle(registry)
@@ -380,7 +382,7 @@ def test_command_admission_requires_matching_t02_profile_artifact(
     ).encode()
     profile_sha = hashlib.sha256(profile_bytes).hexdigest()
     reference = "opaque:test-compiled-profile"
-    from sidekick.lab.mocap import (
+    from _pinned_tools__sidekick__lab__mocap import (  # type: ignore[import-not-found]
         COMPILED_ACTUATOR_PROFILE_ID,
         COMPILED_ACTUATOR_PROFILE_VERSION,
     )
