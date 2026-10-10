@@ -2461,6 +2461,14 @@ export interface ModelRequest {
 }
 
 /**
+ * Bounded inline records and the PyQt Relationships tab's PCA/VIF inputs. Mirrors ``_compute_multivariate`` from ``src/tools/launch_monitor_analytics/gui.py``: the same ``metrics`` selection feeds both :func:`compute_pca` and :func:`compute_vif`, so the API and desktop paths accept identical inputs.
+ */
+export interface MultivariatePayloadV2 {
+  records: Record<string, unknown>[];
+  metrics: string[];
+}
+
+/**
  * Toast notification preferences.
  */
 export interface NotificationSettings {
@@ -2906,6 +2914,17 @@ export interface RefreshTokenResponse {
   access_token: string;
   token_type: string;
   expires_in: number;
+}
+
+/**
+ * Bounded inline records and the PyQt Relationships tab's widget inputs. Mirrors ``_RelationshipParams`` from ``src/tools/launch_monitor_analytics/gui.py`` (``_read_relationship_params``): ``method`` offers the same three choices, ``edge_threshold`` keeps the same default and ``[0, 1]`` range as the "Network Edge Threshold" spinbox (``_build_relationships_tab``), and controls that are also selected metrics are dropped as the desktop tab drops them, so the API and desktop paths accept identical inputs for :func:`compute_correlations`.
+ */
+export interface RelationshipsPayloadV2 {
+  records: Record<string, unknown>[];
+  metrics: string[];
+  controls?: string[];
+  method: "pearson" | "spearman" | "kendall";
+  edge_threshold: number;
 }
 
 export interface ReplayActionRequest {
