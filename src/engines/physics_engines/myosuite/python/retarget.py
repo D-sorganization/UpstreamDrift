@@ -11,6 +11,9 @@ from typing import Any, TypeAlias
 import numpy as np
 from numpy.typing import NDArray
 
+from src.engines.physics_engines.myosuite.python.hip_retarget import (
+    calibrated_hip_targets,
+)
 from src.shared.python.contracts import postcondition, precondition
 
 Array: TypeAlias = NDArray[np.float64]
@@ -102,8 +105,18 @@ def default_retarget_map() -> RetargetMap:
     lambda result: result.ndim == 1 and bool(np.all(np.isfinite(result))),
     "finite 1-D target vector",
 )
-def retarget_frame(q_source: Array, rmap: RetargetMap) -> Array:
-    """Map one source coordinate vector into the MyoSuite joint order."""
+def retarget_frame(
+    q_source: Array,
+    rmap: RetargetMap,
+    *,
+    hip_spec: Mapping[str, Any] | None = None,
+) -> Array:
+    """Map one source coordinate vector into the MyoSuite joint order.
+
+    With ``hip_spec`` (the spec the source was fitted in, e.g. a hip-calibrated
+    one), the ``hip_*`` targets carry that spec's femur orientation relative to
+    the pelvis instead of the raw values (``hip_retarget``, #12052).
+    """
     q = np.asarray(q_source, dtype=np.float64).reshape(-1)
     if q.shape[0] != rmap.n_source:
         raise ValueError(
@@ -113,7 +126,12 @@ def retarget_frame(q_source: Array, rmap: RetargetMap) -> Array:
     for src_name, (tgt_idx, sign) in rmap.source_to_target.items():
         src_idx = rmap.source_names.index(src_name)
         out[tgt_idx] = sign * float(q[src_idx])
-    return interpolate_unmapped(out, rmap)
+    out = interpolate_unmapped(out, rmap)
+    if hip_spec is not None:
+        coords = dict(zip(rmap.source_names, q.tolist(), strict=True))
+        for name, value in calibrated_hip_targets(hip_spec, coords).items():
+            out[rmap.target_names.index(name)] = value
+    return out
 
 
 def interpolate_unmapped(q_target: Array, rmap: RetargetMap) -> Array:
@@ -142,14 +160,19 @@ def interpolate_unmapped(q_target: Array, rmap: RetargetMap) -> Array:
 
 
 @precondition(lambda q_traj, rmap: q_traj.ndim == 2, "trajectory must be 2-D")
-def retarget_trajectory(q_traj: Array, rmap: RetargetMap) -> Array:
-    """Retarget a (frames, n_source) trajectory."""
+def retarget_trajectory(
+    q_traj: Array,
+    rmap: RetargetMap,
+    *,
+    hip_spec: Mapping[str, Any] | None = None,
+) -> Array:
+    """Retarget a (frames, n_source) trajectory (``hip_spec``: see retarget_frame)."""
     q = np.asarray(q_traj, dtype=np.float64)
     if q.ndim != 2 or q.shape[1] != rmap.n_source:
         raise ValueError(
             f"Expected trajectory shape (frames, {rmap.n_source}), got {q.shape}"
         )
-    return np.stack([retarget_frame(row, rmap) for row in q], axis=0)
+    return np.stack([retarget_frame(row, rmap, hip_spec=hip_spec) for row in q], axis=0)
 
 
 def source_coordinate_index(
