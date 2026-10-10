@@ -935,3 +935,18 @@ those rows and the six-engine denominator remain unqualified. See
 `docs/development/feedback_controls/F09F-MYOSUITE-NATIVE-EXCITATION.md` and
 canonical chapter31. The generic legacy four-value Gym step issue remains
 separate because this provider uses native plant stepping only.
+
+# Source-Preserving BUET–Hamner Native Candidate - #12157
+
+- Branch `feat/f07-buet-hamner-assembly-12157` is stacked on #12153 for the
+  shared native mass, body velocity, force-projection and constraint observers.
+  Preserve that prerequisite until merged; do not silently retarget to main.
+- Exact reviewed donor XML hashes, fresh derived XML hash, loaded OpenSim 4.6
+  extension hashes and sampled native findings are in
+  `docs/development/feedback_controls/F07_BUET_HAMNER_ASSEMBLY_RECEIPT.json`.
+  The donor and derived source artifacts remain outside the public PR.
+- The factory retains BUET's upper/trunk and adds only Hamner's eight distal
+  bodies/joints and 84 lower muscles. The separate Abdjnt reduction, donor
+  visual resource closure, passive-force policy, native Moco, full native
+  replay, capture registration and muscle-only golf endpoint remain open.
+  Manual chapter 44 and turnover record reproduction and limitations.
