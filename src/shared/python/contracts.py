@@ -96,10 +96,23 @@ def set_contract_level(level: ContractLevel) -> None:
     import sys
 
     _ContractState.level = level
-    # Update module-level aliases so existing references see the new values
-    current_module = sys.modules[__name__]
-    current_module.DBC_LEVEL = level  # type: ignore[attr-defined]
-    current_module.CONTRACTS_ENABLED = level != ContractLevel.OFF  # type: ignore[attr-defined]
+    contracts_enabled = level != ContractLevel.OFF
+    # Update module-level aliases so existing references see the new values.
+    # ``shared.python.contracts`` may be a separate sys.modules entry (pinned
+    # Tools tree) that tests and legacy imports still consult.
+    for mod_name in {
+        __name__,
+        "src.shared.python.contracts",
+        "shared.python.contracts",
+    }:
+        module = sys.modules.get(mod_name)
+        if module is None:
+            continue
+        module.DBC_LEVEL = level  # type: ignore[attr-defined]
+        module.CONTRACTS_ENABLED = contracts_enabled  # type: ignore[attr-defined]
+        state = getattr(module, "_ContractState", None)
+        if state is not None and state is not _ContractState:
+            state.level = level
     logger.info("Contract enforcement level set to %s", level.value)
 
 
