@@ -26,7 +26,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** not yet created
 - **Paths:** src/tools/native_viewer_export/ball.py, src/tools/native_viewer_export/backends/drake_meshcat.py, src/tools/native_viewer_export/backends/pinocchio_meshcat.py, src/tools/native_viewer_export/core.py, src/tools/native_viewer_export/cli.py, tests/unit/tools/native_viewer_export/test_address_ball.py
 - **Started:** 2026-10-10
-- **Last verified:** 2026-10-10 (`SELF`)
+- **Last verified:** 2026-10-10 (`6024cba5`)
 - **Summary:** Stacked on GCV-13 slice 1 (#11992, MuJoCo decorative ball + shared `ball_position_at_address`/`resolve_ball_visual`). Adds `resolve_address_ball()`, a shared helper that resolves the decorative address ball for a swing bundle from the address frame's (`q[0]`) MuJoCo-FK `Clubhead` pose composed with `model_appearance.club_assembly`'s clubface centre/normal, reusing the slice-1 placement rule. The Drake and Pinocchio MeshCat backends draw a white sphere there (on by default; `--no-ball` / `ExportSettings.ball=False` disables it); unresolvable cases (no club body, ungrounded address frame, MuJoCo unavailable) draw nothing and log the reason, never a guessed position.
 - **Next step:** Open the PR (stacked on #11992), then arm auto-merge once #11992 merges.
 
