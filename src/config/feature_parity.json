@@ -158,7 +158,7 @@
       "status": "gap",
       "issue": 11987,
       "tiles": ["matched_swing_browser"],
-      "notes": "PyQt6 tool for browsing matched-swing execution ledger, receipts, metrics, physical gate verdicts, animations, and viewer handoff (#10353 shipped the PyQt tile via #10543). The web page (MS-85 #10358) reads the same ledger through GET /matched-swings: desktop-ranked list with engine, capture, lane, verdict, drive-mode and profile filters and the desktop qualification note (#12061), receipt and parity JSON, GIF animation, 3D marker preview, impact parameters and grip-wrench charts. Still missing on the web (#11987): Export Report (#12063 in flight), Export Video, GIF pause/restart, PDF report and the native-viewer handoff."
+      "notes": "PyQt6 tool for browsing matched-swing execution ledger, receipts, metrics, physical gate verdicts, animations, and viewer handoff (#10353 shipped the PyQt tile via #10543). The web page (MS-85 #10358) reads the same ledger through GET /matched-swings: desktop-ranked list with engine, capture, lane, verdict, drive-mode and profile filters and the desktop qualification note (#12061), receipt and parity JSON, GIF animation, 3D marker preview, impact parameters and grip-wrench charts. The Markdown Export Report (#12063) and frame-exact GIF Play/Pause/Restart (GET /matched-swings/{id}/animation/frames[/{index}], matching the desktop QMovie controls) are on the web. Still missing on the web (#11987): Export Video, PDF report and the native-viewer handoff."
     },
     "analysis.impact_parameters": {
       "title": "Impact parameters panel (speed, attack angle, path, face, face-to-path, dynamic loft, spin loft) relative to a target line",
@@ -405,11 +405,11 @@
       "title": "Launch-monitor import, interdependency analysis, monitor comparison, dispersion, and longitudinal trends",
       "pyqt": "src/tools/launch_monitor_analytics/gui.py",
       "api": "src/api/routes/launch_monitor_analytics.py",
-      "web": null,
+      "web": "ui/src/pages/LaunchMonitorAnalytics.tsx",
       "status": "gap",
       "issue": 11987,
       "tiles": ["launch_monitor_analytics"],
-      "notes": "The PyQt6 workbench and versioned API share one flexible-analysis contract. A React panel exists only inside the vendored Tools Rate of Closure bundle (Tools #4205, closed), behind a different tile; this tile has no web page. Tracked in #11987 (epic #8364 is closed)."
+      "notes": "The PyQt6 workbench and versioned API share one flexible-analysis contract. The web page (#11987) now covers Flexible Analysis (POST /v2/analyze), Trends (POST /v2/trend), Dispersion (POST /v2/dispersion), and Relationships — correlations/partial correlations/dependency network, PCA, and VIF (POST /v2/relationships, POST /v2/multivariate). Still missing on the web: Sessions, Data Treatment, Models, Monitor Comparison, and Reports."
     },
     "tools.bunkershot3d_workbench": {
       "title": "BunkerShot3D designer workbench (W2 sole parameters, W3 sand condition, F0 dynamic-RFT shot, W7 metrics, playability window, bounce utilisation, animated sole load field, 3-D shot animation through the ADR-0027 viewport, linked scalar traces with a validity band, F1 sand-field cross-sections, A/B comparison, validity verdict)",
@@ -533,12 +533,12 @@
     "lifting.five_lift_viewing": {
       "title": "Weightlifting viewing and analysis for the five lifts (squat, deadlift, bench press, snatch, clean and jerk): lift selection, barbell, hand-force and GRF overlays, plots",
       "pyqt": "src/launchers/exercise_dashboard.py",
-      "api": null,
-      "web": null,
+      "api": "src/api/routes/lifting.py",
+      "web": "ui/src/pages/LiftBaseline.tsx",
       "status": "gap",
       "issue": 11748,
       "tiles": [],
-      "notes": "LIFT-8 (#11748, epic #11740) asks for PyQt and web parity for the five lifts. Today the PyQt Exercise Dashboard only selects an engine for one exercise name and shows that engine's dashboard (OpenSim not yet available); it has no lift selector, barbell, GCV-4/GCV-10 overlay groups or GCV-5 plots, and there is no API route or web page. The LIFT-1 pack audit (src/shared/python/lifting/pack_audit) is the data source. The desktop-only exemption of biomech.exercise_injury_dashboards stays pending #7460; this entry tracks the lifting surfaces LIFT-8 requires."
+      "notes": "LIFT-8 (#11748, epic #11740) asks for PyQt and web parity for the five lifts. Today the PyQt Exercise Dashboard only selects an engine for one exercise name and shows that engine's dashboard (OpenSim not yet available); it has no lift selector, barbell, GCV-4/GCV-10 overlay groups or GCV-5 plots. A shared engine-free loader (src/shared/python/lifting/baseline_view.py) and read-only API (GET /lifting/baseline, GET /lifting/baseline/lifts/{lift}) expose the LIFT-1 pack audit receipt (src/shared/python/lifting/pack_audit). The web Lift Baseline page (/tools/lift-baseline) consumes that API: lift selector, per-engine structure and start-pose table, cross-engine pair metrics flagged against the position tolerance, phases and gaps, with unavailable values shown as unavailable. Still missing on both surfaces: barbell, hand-force and GRF overlays and plots, which need an engine host. The desktop-only exemption of biomech.exercise_injury_dashboards stays pending #7460; this entry tracks the lifting surfaces LIFT-8 requires."
     },
     "simulation.golf_suite_batch": {
       "title": "Golf Simulation Suite (parameter sweeps, batch runs)",

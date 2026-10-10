@@ -2,6 +2,7 @@
 
 import json
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import pytest
@@ -15,6 +16,53 @@ FULL_BODY = ROOT / "docs/development/full_body_models/full_body_spec_v1.json"
 # (OSV-8, #11755), so the decorative-ball tests use a spec where the club
 # actually resolves.
 CLUB_BODY = ROOT / "docs/development/full_body_models/full_body_spec_anthro_driver.json"
+
+_HINGE_XML = (
+    "<mujoco><worldbody>"
+    '<body name="b"><joint name="hinge1" type="hinge" axis="0 1 0"/>'
+    '<geom type="sphere" size="0.05"/></body>'
+    "</worldbody></mujoco>"
+)
+
+
+def _spec_bytes() -> bytes:
+    return json.dumps({"contact": {"ground_height_m": 0.0}}).encode()
+
+
+class _FakeRenderer:
+    """Renderer stub: no offscreen GL needed, records frames drawn."""
+
+    def __init__(self, model: Any, height: int, width: int) -> None:
+        self.calls = 0
+
+    def update_scene(self, data: Any, camera: Any = None) -> None:
+        self.calls += 1
+
+    def render(self) -> np.ndarray:
+        return np.zeros((2, 2, 3), dtype=np.uint8)
+
+
+def _patch_playback_rendering(monkeypatch: pytest.MonkeyPatch) -> dict[str, Any]:
+    """Stub the mujoco render + GIF write so FrameSchedule sampling is isolated."""
+    import imageio
+    import mujoco
+
+    from src.engines.physics_engines.mujoco.python import full_body_mjcf
+
+    captured: dict[str, Any] = {}
+    monkeypatch.setattr(
+        full_body_mjcf,
+        "export_full_body_mjcf",
+        lambda spec_bytes, visual=False: (_HINGE_XML, {}),
+    )
+    monkeypatch.setattr(mujoco, "Renderer", _FakeRenderer)
+
+    def fake_mimsave(path: Path, frames: list, **kwargs: Any) -> None:
+        captured["frames"] = frames
+        captured["kwargs"] = kwargs
+
+    monkeypatch.setattr(imageio, "mimsave", fake_mimsave)
+    return captured
 
 
 def test_visual_export_adds_geoms_but_keeps_physics_identical() -> None:
@@ -270,3 +318,122 @@ def test_whole_body_com_and_scene_markers(tmp_path: Path) -> None:
     assert scene.ngeom == before + 2
     with pytest.raises(ValueError):
         visual_layer.add_scene_marker(scene, com, -0.01, (1, 0, 0, 1))
+
+
+def test_render_playback_samples_via_frame_schedule(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """GCV-14 (#11720): frame count follows FrameSchedule, not a fixed stride."""
+    pytest.importorskip("mujoco")
+    from src.engines.physics_engines.mujoco.python import visual_layer
+    from src.shared.python.video_timing.frame_schedule import FrameSchedule
+
+    captured = _patch_playback_rendering(monkeypatch)
+    q = np.zeros((101, 1))  # 1.0 s of swing at rate_hz=100
+    visual_layer.render_playback(
+        _spec_bytes(),
+        ["hinge1"],
+        q,
+        np.zeros(3),
+        tmp_path / "out.gif",
+        show_com=False,
+        rate_hz=100.0,
+        fps=60.0,
+    )
+    expected = FrameSchedule(np.arange(101) / 100.0, 60.0, 1.0).n_frames
+    assert len(captured["frames"]) == expected
+    assert captured["kwargs"]["duration"] == pytest.approx(1000.0 / 60.0)
+
+
+def test_render_playback_half_speed_doubles_frame_count(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    pytest.importorskip("mujoco")
+    from src.engines.physics_engines.mujoco.python import visual_layer
+
+    q = np.zeros((101, 1))
+    captured_full = _patch_playback_rendering(monkeypatch)
+    visual_layer.render_playback(
+        _spec_bytes(),
+        ["hinge1"],
+        q,
+        np.zeros(3),
+        tmp_path / "a.gif",
+        show_com=False,
+        rate_hz=100.0,
+        fps=60.0,
+        speed=1.0,
+    )
+    full = len(captured_full["frames"])
+
+    captured_half = _patch_playback_rendering(monkeypatch)
+    visual_layer.render_playback(
+        _spec_bytes(),
+        ["hinge1"],
+        q,
+        np.zeros(3),
+        tmp_path / "b.gif",
+        show_com=False,
+        rate_hz=100.0,
+        fps=60.0,
+        speed=0.5,
+    )
+    half = len(captured_half["frames"])
+    assert abs(half - 2 * full) <= 1
+
+
+def test_render_playback_stride_alias_warns_and_converts(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Deprecated ``playback_stride`` converts to an equivalent speed (mirrors
+    ``ExportSettings.stride`` in native_viewer_export/core.py)."""
+    pytest.importorskip("mujoco")
+    from src.engines.physics_engines.mujoco.python import visual_layer
+    from src.shared.python.video_timing.frame_schedule import FrameSchedule
+
+    captured = _patch_playback_rendering(monkeypatch)
+    q = np.zeros((101, 1))
+    with pytest.warns(DeprecationWarning, match="playback_stride"):
+        visual_layer.render_playback(
+            _spec_bytes(),
+            ["hinge1"],
+            q,
+            np.zeros(3),
+            tmp_path / "c.gif",
+            show_com=False,
+            rate_hz=120.0,
+            playback_stride=4,
+            fps=30.0,
+        )
+    # stride=4 at rate_hz=120, fps=30 -> speed = 4 * 30 / 120 = 1.0 (real time)
+    expected = FrameSchedule(np.arange(101) / 120.0, 30.0, 1.0).n_frames
+    assert len(captured["frames"]) == expected
+
+
+@pytest.mark.parametrize("kwargs", [{"fps": 0.0}, {"speed": -1.0}, {"rate_hz": 0.0}])
+def test_render_playback_invalid_timing_raises(kwargs: dict) -> None:
+    from src.engines.physics_engines.mujoco.python import visual_layer
+
+    with pytest.raises(ValueError):
+        visual_layer.render_playback(
+            b'{"contact": {}}',
+            ["j"],
+            np.zeros((2, 1)),
+            np.zeros(3),
+            Path("x.gif"),
+            **kwargs,
+        )
+
+
+def test_render_playback_invalid_stride_raises() -> None:
+    from src.engines.physics_engines.mujoco.python import visual_layer
+
+    with pytest.raises(ValueError, match="playback_stride"):
+        visual_layer.render_playback(
+            b'{"contact": {}}',
+            ["j"],
+            np.zeros((2, 1)),
+            np.zeros(3),
+            Path("x.gif"),
+            playback_stride=0,
+        )

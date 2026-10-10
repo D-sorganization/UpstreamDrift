@@ -8,6 +8,8 @@ untouched; the exporter's plain output remains the qualified representation.
 
 from __future__ import annotations
 
+import math
+import warnings
 import xml.etree.ElementTree as ET  # nosec B405 # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml - construction only; parsing is defused
 from collections.abc import Mapping, Sequence
 from pathlib import Path
@@ -28,6 +30,7 @@ from src.shared.python.motion_matching.visual_skeleton import (
     VisualSkeleton,
     derive_visual_skeleton,
 )
+from src.shared.python.video_timing.frame_schedule import DEFAULT_FPS, FrameSchedule
 
 _VISUAL_CLASS = "visual"
 _CAPSULE_RGBA = "0.75 0.78 0.85 1"
@@ -393,10 +396,42 @@ def render_playback(
     lookat: np.ndarray,
     path: Path,
     show_com: bool = True,
-    playback_stride: int = 4,
+    playback_stride: int | None = None,
     rate_hz: float = 120.0,
+    fps: float = DEFAULT_FPS,
+    speed: float = 1.0,
 ) -> None:
-    """Render animated GIF of motion from spec and joint trajectory."""
+    """Render an animated GIF of a motion from a spec and joint trajectory.
+
+    Time-based sampling (GCV-14, #11720): GIF frame ``j`` shows the ``q``
+    sample nearest to swing time ``j * speed / fps``, via a
+    :class:`~src.shared.python.video_timing.frame_schedule.FrameSchedule`
+    over the ``rate_hz``-spaced trajectory. ``playback_stride`` is a
+    deprecated alias for a fixed index step: it is converted to the
+    equivalent ``speed`` at ``fps`` and ``rate_hz`` (mirrors
+    ``ExportSettings.stride`` in ``native_viewer_export/core.py``) and emits
+    a ``DeprecationWarning``.
+
+    Raises:
+        ValueError: if ``rate_hz`` is not positive and finite, if
+            ``playback_stride`` is given but is not a positive integer, or
+            if the resulting ``fps``/``speed`` are invalid (raised by
+            :class:`FrameSchedule`).
+    """
+    if not math.isfinite(rate_hz) or rate_hz <= 0.0:
+        raise ValueError(f"rate_hz must be positive and finite, got {rate_hz}")
+    if playback_stride is not None:
+        if not isinstance(playback_stride, int) or playback_stride < 1:
+            raise ValueError("playback_stride must be a positive integer")
+        warnings.warn(
+            "render_playback(playback_stride=...) is deprecated: playback is "
+            "time-based now; use fps and speed",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        speed = playback_stride * fps / rate_hz
+    schedule = FrameSchedule(np.arange(q.shape[0]) / rate_hz, fps, speed)
+
     import json
 
     import imageio
@@ -416,11 +451,11 @@ def render_playback(
     cam.lookat[:] = lookat
     cam.distance, cam.azimuth, cam.elevation = 3.2, 135.0, -12.0
     frames_out = []
-    for k in range(0, q.shape[0], playback_stride):
+    for k in schedule.nearest_indices():
         data.qpos[addresses] = q[k]
         mujoco.mj_forward(model, data)
         renderer.update_scene(data, camera=cam)
         if show_com:
             add_com_markers(renderer.scene, model, data, ground_height)
         frames_out.append(renderer.render().copy())
-    imageio.mimsave(path, frames_out, duration=1000 * playback_stride / rate_hz, loop=0)
+    imageio.mimsave(path, frames_out, duration=1000.0 / fps, loop=0)
