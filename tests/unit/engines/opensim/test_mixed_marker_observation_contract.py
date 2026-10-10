@@ -45,9 +45,11 @@ def test_mixed_marker_diagnostic_qualification_is_not_replaceable() -> None:
 
     assert observation.qualification == "unqualified"
     assert score.qualification == "unqualified"
-    with pytest.raises(TypeError, match="init=False"):
+    # CPython 3.11 raises ValueError here; 3.13 changed dataclasses.replace
+    # to raise TypeError for the same init=False misuse.
+    with pytest.raises((TypeError, ValueError), match="init=False"):
         replace(observation, qualification="qualified")
-    with pytest.raises(TypeError, match="init=False"):
+    with pytest.raises((TypeError, ValueError), match="init=False"):
         replace(score, qualification="qualified")
 
 

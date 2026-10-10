@@ -1,5 +1,15 @@
 # Feedback Controls Planning Turnover
 
+## Physical Inertia Helper Handoff
+
+Issue #12183 fixes rotation-dependent acceptance and scale-masked asymmetry in
+the existing DIME validator. Canonical chapter 51 records the exact equations,
+absolute tolerances, original three failing regressions and 25 passing affected
+tests. No source admission wiring or tensor repair is included. Next integration
+must check actual per-body source tensors with declared COM/frame conventions
+and provenance; positive full-system mass alone does not qualify individual
+bodies. Keep all 17-model/six-engine scientific gates and publication blocked.
+
 ## F07 Source-Bound Native Moco Numerical Guess Handoff
 
 Issue #11990 adds a byte-bound numerical seed for the maintained native Moco
@@ -535,3 +545,10 @@ blocks pydrake and bunkershot3d imports while loading the source-checkout
 adapter. The existing Drake 1.57.0 native synthetic replay tests pass 11/11
 with only the repository root on `PYTHONPATH`. This establishes neither an
 installed-wheel import path nor additional engine or scientific qualification.
+
+CI run 38082402009 exposed a standard-library exception difference:
+`dataclasses.replace` raises `ValueError` on Python 3.11 and `TypeError` on
+Python 3.13 for an `init=False` field. The regression accepts both runtime
+exceptions while requiring the `init=False` diagnostic. The affected test
+file passes on Python 3.11.17 and 3.13.5. The initial full unit run completed
+23,846 tests with this single failure before the test-only correction.

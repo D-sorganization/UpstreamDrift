@@ -1,3 +1,13 @@
+# Physical Inertia Helper Handoff — #12183
+
+`validate_physical_inertia` now uses sorted principal moments instead of frame
+diagonals, and absolute symmetry tolerance with zero relative tolerance. Two
+rotated impossible tensors and a masked asymmetry failed before the fix; affected
+calibration/human-prior tests now pass 25 cases. Chapter 51 gives reproduction
+and numerical tolerances. Values are preserved on success. Native source
+admission and optimizer enforcement are separate integration work; physical
+source provenance, matching and all-model qualification remain open.
+
 # Active: Forward-Dynamics Gaze Neck, #11729
 
 - Branch `claude/osv-3c-gaze-neck-tracking`. `motion_matching/pipeline/gaze_tracking.py`: `--fd-neck gaze` re-solves the tracked reference's neck to the gaze schedule (model FK, bounded, after the feasibility filters); `dynamics.head_gaze` reports schedule error per window for the tracked reference and the replay. `render_head_gaze_clips --trajectory replay` renders the replay; `scripts/summarize_fd_neck_tracking.py` writes `evidence/head_gaze/fd_neck_tracking.json`.
