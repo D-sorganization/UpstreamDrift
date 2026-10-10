@@ -185,6 +185,7 @@ def _raw_flight_metadata(metadata: dict[str, Any]) -> dict[str, Any]:
     return {
         **{key: value for key, value in metadata.items() if key not in excluded},
         "Population": "Saved Raw Trajectories; Not Paired by Shot Index",
+        "figure_scope": "Saved Raw Flight Samples",
     }
 
 

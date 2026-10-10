@@ -1,0 +1,9 @@
+# V3 Complete Component PNG Review
+
+All ten PNGs named by `/tmp/p2-production-social-review-v3/receipt.json` were independently inspected, including the previously reviewed Straight social pair. All 28 ledger artifact hashes match. PDF/SVG bytes were verified, but those formats were not separately rendered for this review.
+
+The shortened titles and wrapped metadata fit; no additional title, footer or legend collision was seen. Paired density clearly reports 9,939/10,000 common-six shots and 600 displayed points. Per-cell density correctly reports the separate 9,974/10,000 individual-supported populations. HDR legends, shared density scales and axis units are readable. Saved trajectory figures disclose six paths per pattern/condition and the absence of shot-index pairing; stated lateral magnifications are visible. The academic pair plots leave substantial whitespace but remain readable at the supplied resolution.
+
+Status remains **changes required**. Draw social density retains the known main-axis `175`/marginal `0.00` tick overlap. Academic per-cell overhead still displays the stale `figure_scope: one-cell supported population` caption. In addition, the actual original-primary preview is called `Supplement Cell`/`Final Supplemental Analysis` in academic cell captions, despite its correctly disclosed `original_primary/1` source. Neutral or source-derived captions avoid that contradiction; these are preview provenance labels, not evidence of changed coordinates.
+
+The companion JSON binds every inspected PNG and the render receipt/source hashes. Preserve this v3 diagnostic rather than overwriting it with rerenders. Review corrected affected assets and the separately approved canonical tick fix before publication. This driver component check does not qualify every club or the complete study, and makes no new physical or empirical claim.

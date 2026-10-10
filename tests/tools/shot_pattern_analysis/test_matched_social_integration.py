@@ -170,6 +170,7 @@ def test_render_cell_figures_exports_dedicated_canonical_social_assets(
     for _, kwargs in calls["overhead"]:
         assert "valid_shots_by_pattern" not in kwargs["metadata"]
         assert "total_shots_by_pattern" not in kwargs["metadata"]
+        assert kwargs["metadata"]["figure_scope"] == "Saved Raw Flight Samples"
         if kwargs["presentation"] == "social":
             assert (
                 kwargs["metadata"]["Population"]
