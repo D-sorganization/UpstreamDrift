@@ -4,6 +4,11 @@
 - Hand frames and address pose: `msk_club_calibration.py` (IK to the generated model's FK at the captured address; feet planted because the generated feet are unobserved) into `models/msk_club_grip_calibration.json`; the muscle model is calibrated on build. `msk_club_tracking.track_swing` follows a generated swing; `scripts/render_msk_club.py` renders under xvfb.
 - Base models are not in the clone (submodule fetch failed): set `UPSTREAMDRIFT_RAJAGOPAL_OPENSENSE` / `UPSTREAMDRIFT_MSK_BASE_MODEL`.
 - Open: no MyoFullBody OpenSim export exists; static optimisation not run; scaled-model address fit is weaker (wrists at their bounds); `opensim_golf/fk.py` `State.isValid` failure predates this.
+# Active: Same-Input Bushing Grip Parity, OSV-7 Phase 2 #11739
+
+- Branch `claude/osv-7-grip-parity`. The shared OpenSim `BushingForce` law (`grip_contact/bushing_law.py`) and a `SimmSpline`-equivalent prescribed input (`grip_contact/prescribed_motion.py`) drive MuJoCo (`mjcb_passive`, RK4 1e-4 s), Drake (native `LinearBushingRollPitchYaw`, RK3 error controlled) and Pinocchio (`aba`, DOP853) on a free club, with each engine's own weld FK. Metrics are in `grip_contact/parity.py` (peak 5 %, RMS 2 % of peak), routed through GCV-10 `GripSeries`.
+- Driver: every engine passes every quantity. The worst case is the Drake squeeze, 0.96 % peak and 0.42 % RMS, from the RPY and midpoint convention. See GRIP_PARITY_DECISIONS.md section 18. Evidence: `evidence/grip_kinetics/parity/`. Plots: `~/Videos/Parity Audit/golfer_realism/grip_kinetics/parity/`.
+- Full-swing parity tests are `slow` (10 to 30 minutes per engine and club on a loaded host). Open: a contact-model grip, and Drake with the shared law to isolate its integrator.
 # Active: Simscape URDF Exchange — #11569 Task 3
 
 - Branch `claude/simscape-urdf-exchange-11569`; commit `SELF`. `smexport` is absent in R2025b, so `scripts/matlab/simscape_model_inventory.m` reads joints (type, DOF) and solid/inertia masses (unit-converted, density x volume where needed; NaN when not evaluable) from the canonical `GolfSwing3D_Kinetic` and from an `smimport` of the spec `golfer.urdf`. `export_simscape_urdf_exchange.m` writes `tests/fixtures/simscape/simscape_urdf_exchange_receipt.json`; `src/engines/simscape/urdf_exchange.py` diffs it against the URDF.
