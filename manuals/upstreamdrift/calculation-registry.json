@@ -274,6 +274,11 @@
       "id": "UP-D1-native-constrained-muscle-moco-inventory",
       "owner": "UpstreamDrift issue #12143",
       "resolution": "Inventory versioned constrained-muscle T01 excitation replay and maintained Moco request/score integration in chapter42. Exact source, named continuous states, explicit lock targets/chart/coupler flags, native modeling options, ordered muscle channels and knots are bound. Actual OpenSim4.6 synthetic CustomJoint/coupler/two-Millard and linear moving-point tests execute fresh native replay, changed-future excitation, and finite native marker sampling. Locked-source replay remains separate from Moco, which rejects locked coordinates. A coupler-only nonzero endpoint Moco solve is independently replayed with observed per-unit state differences and fixture-specific acceptance bounds. Contact, wraps/conditional paths, mixed mechanical assistance, source physiology, 520-muscle preparation, private capture matching, all 17 variants and six engines remain open."
+    },
+    {
+      "id": "UP-D1-native-zero-mtp-reduction-inventory",
+      "owner": "UpstreamDrift issue #12150",
+      "resolution": "Inventory provisional chapter43 and native_mtp_reduction.py: exact source-bound bilateral zero-locked PinJoint targets, source-reference rejection, native source/default/achieved value/speed and clamp/prescription admission, separately serialized and reloaded derived model, exact common continuous-state lift and native body/velocity/muscle/constraint inventories. Compare source and reduced full native mass and total applied generalized body-plus-mobility force through a rank-complete mobility lift at initialized, ankle-varied and pelvis-varied states. Actual unchanged Rajagopal80 lower-limb source and scaled/club mixed-assisted factory diagnostic tests do not qualify source scaling/anatomy, missing upper-body muscles, contact, passive policy, native Moco, capture matching, full-horizon excitation replay or all17/six-engine parity. Keep canonical calculation coverage/publication blocked."
     }
   ],
   "calculations": []
