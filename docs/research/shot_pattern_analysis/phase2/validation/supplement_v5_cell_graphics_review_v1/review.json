@@ -1,0 +1,67 @@
+{
+  "schema": "independent-supplement-cell-graphics-review/1",
+  "reviewed_at_utc": "2026-10-10T11:56:17.632567+00:00",
+  "accepted": true,
+  "scope": "All 26 supplemental cell graphics only",
+  "full_pipeline_accepted": false,
+  "final_manifest_reconciliation_pending": true,
+  "source_commit": "14f27706e4e9e52ca1324a7a2bac59e86ab33ef9",
+  "source_sha256": {
+    "src/tools/shot_pattern_analysis/matched_pair_social.py": "16a4a48eb32432cbbb39648150b5e428c014af920845e006ddf12be0375fe369",
+    "src/tools/shot_pattern_analysis/matched_supplement_figures.py": "9254d7aede64f5aed19bd32f7cd5a8fb1b1899f6e18d000ba2096b228fc18246"
+  },
+  "cell_checks_sha256": "9c9083eb06e58f231bf641e901d210aa00b71f354f7c7fbe1ce66b58ca29867b",
+  "report_sha256": "6cdf53ca15bebb8829f42b5b3a1013571f1d8d4df83d054ab9935fa1bb5a8f0d",
+  "protocol_counts": {
+    "pw-primary-face-bounds/1": 18,
+    "pw-control-face-bounds/1": 4,
+    "driver-control-speed-bounds/1": 4
+  },
+  "asset_counts": {
+    ".pdf": 104,
+    ".png": 104,
+    ".svg": 104
+  },
+  "all_312_asset_hashes_unchanged_after_review": true,
+  "social_pngs_contact_reviewed": 52,
+  "academic_pngs_identical_to_previously_reviewed_v3": 52,
+  "contact_sheets_sha256": {
+    "contact_01.jpg": "3ba51c801b141442771b9d9022b92a8e0abb606af5d5ae8fa2aeb82587e67b12",
+    "contact_02.jpg": "46b853464dfb2cfa1ecb9540d184ff3a555db8e13bc7d8f5541e29176c45968b",
+    "contact_03.jpg": "26bac4d522e2e4a5062b6732cd2cc6a2ab0f6d90d2fa15adebf28bbb88291a03",
+    "contact_04.jpg": "2cb69e67f8fc322d6fc70559e33a697357a829445c54bfb62f6ac65507c6b944",
+    "contact_05.jpg": "8e4ad5acc8bd50c78c84c1215ae1324f43c5ef4b5400ae4ce2969fc2f614d7e6",
+    "contact_06.jpg": "b53c19bd65b86637487fd4e85045a19ab9aa36149a487009e8d743c0c3043986",
+    "contact_07.jpg": "565c32347c9e14cc0c014c69400a41814388ff62ba240535cb32644ae1c81df3",
+    "contact_08.jpg": "ee3221860b07b3cd518e58db8ca0bae14f866447f82483085f297dbcd99cf503",
+    "contact_09.jpg": "253c6613054d15fac7b7eb8ce0f5741fc0dcdea4bedd73b44fc80ce402ee6ca8",
+    "contact_10.jpg": "80281684b510ad48681ba7a496203081723578d6b9acab1d27c1e83f23282bda",
+    "contact_11.jpg": "a354cced61deaf18fb982cc8aeee51e4ce17a70063be0f532458fbee7708b231",
+    "contact_12.jpg": "9a939f0a658986d225268a5863101bedfecfbe6e28729e99288b16d303cefd8b",
+    "contact_13.jpg": "14e1fc80dd0f1db5dbcc3914498db980add12d5f614692b47bb655f9ddac2854"
+  },
+  "full_size_social_pngs_reviewed": {
+    "driver_lean5_curve2_rotation1_shaft_only_2d0cf66cda_density_social.png": "f522576ffc131a07a300ba27e58b7e2f397d3fd59b2248f3117571bf47532063",
+    "driver_lean5_curve2_rotation2_combined2_6f4910bfcd_overhead_social.png": "d674f42a001d7efb53ec0d4ec5a31abbbdc5d2b01028c95124847d28b040a60a",
+    "pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_density_social.png": "b6cbeefede9def62152c3018e3005fc612c152610ed1d56236c7bad3d7d53b79",
+    "pitching_wedge_lean0_curve2_rotation1_shaft_only_fad2619401_overhead_social.png": "fc764bde39df02e1f9306c547f82b982b053cf5ac70f42d4b6241df2a5556e36",
+    "pitching_wedge_lean5_curve2_rotation1_shaft_only_0d15b623ca_density_social.png": "40459fec805126665936f358b024ecbce9d647a9e2a0fc1b2237adc1be14c845",
+    "pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_overhead_social.png": "bb0746c61a600b334b9b042c5da94392b1c93aeb5c3e98127063f970b4f8a235"
+  },
+  "findings": [],
+  "checks": [
+    "All social SVG captions identify exact protocol, numeric target and within-lean/fixed-target basis.",
+    "Individual supported/total density counts agree with hash-verified source summaries.",
+    "Overhead labels identify saved raw trajectories and disclose that paths are not paired by shot index.",
+    "All 52 social PNGs visually inspected in 13 contact sheets; six representative full-size images inspected.",
+    "No observed clipping, legend/footer overlap or crowded quantitative tick labels in reviewed images.",
+    "All 52 academic PNGs exactly match preserved v3 bytes; prior visual review reused."
+  ],
+  "limitations": [
+    "This is component acceptance while the production pipeline remains live. Final output receipt must reconcile these exact hashes.",
+    "PDF and SVG bytes are inventoried; SVG caption content is checked. PDF/SVG pages were not each visually inspected.",
+    "All 26 supplemental cells use curve scale 2; no curve-1 graphical coverage is claimed by this receipt.",
+    "Conditional model results do not establish empirical golf performance."
+  ],
+  "receipt_rename_note": "The original executed check wrote checks.json; it was renamed byte-for-byte to cell_checks.json because the repository ignores checks.json."
+}

@@ -1,0 +1,27 @@
+from pathlib import Path
+import json,hashlib,re,html
+from PIL import Image,ImageDraw
+b=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2');n=b/'supplement_report_v1/figures/cells';old=b/'presentation_preview_rejected_supplement_v3/supplement_report_v1/figures/cells';v=b/'validation/supplement_v5_cell_graphics_review_v1';v.mkdir(exist_ok=True)
+def h(p):return hashlib.sha256(p.read_bytes()).hexdigest()
+files={p.name:h(p) for p in sorted(n.iterdir()) if p.is_file()};assert len(files)==312
+report=b/'supplement_report_v1/REPORT_SUPPLEMENT.json';cells=json.loads(report.read_text())['unique_cells'];checks=[]
+for c in cells:
+ stem=list(n.glob(c['cell']+'_*_density_social.svg'));assert len(stem)==1
+ prefix=stem[0].name.removesuffix('_density_social.svg');s=c['summary'];target=s['target_x_m'];mode='Within-Lean Nominal Target' if c['config']['target_x_m'] is None else 'Fixed-Target Control'
+ root=Path(c['source_root'])/c['cell'];assert h(root/'summary.json')==c['source_summary_sha256'];assert h(root/'manifest.json')==c['source_cell_manifest_sha256']
+ for kind in ['density','overhead']:
+  svg=(n/f'{prefix}_{kind}_social.svg').read_text();text=' '.join(html.unescape(z) for z in re.findall(r'<!-- (.*?) -->',svg,re.S));text=' '.join(text.split())
+  assert c['source_protocol'] in text and f'{target:.2f} m downrange' in text and mode in text,(c['cell'],kind)
+  if kind=='density':
+   for pat in ['Straight','Draw','Fade']:
+    q=s['summary'][pat];assert f"{pat} {q['supported_n']:,}/{q['total_n']:,} valid" in text
+  else:assert 'Saved Raw Trajectories; Not Paired by Shot Index' in text
+  assert h(n/f'{prefix}_{kind}.png')==h(old/f'{prefix}_{kind}.png')
+ checks.append({'cell':c['cell'],'protocol':c['source_protocol'],'target_x_m':target,'target_basis':mode,'source_summary_sha256':c['source_summary_sha256']})
+imgs=sorted(n.glob('*_social.png'));assert len(imgs)==52
+for i in range(0,52,4):
+ canvas=Image.new('RGB',(1800,2200),'#eeeeee');draw=ImageDraw.Draw(canvas)
+ for j,p in enumerate(imgs[i:i+4]):
+  im=Image.open(p);im.load();im.thumbnail((870,1040));x=(j%2)*900;y=(j//2)*1100;canvas.paste(im,(x+(900-im.width)//2,y+35));draw.text((x+5,y+5),p.stem.replace('_',' ')[:100],fill='black')
+ canvas.save(v/f'contact_{i//4+1:02}.jpg',quality=90)
+(v/'checks.json').write_text(json.dumps({'asset_sha256':files,'report_sha256':h(report),'cells':checks,'academic_png_byte_identical':52,'social_png_count':52},indent=2)+'\n');(v/'executed_check.py.txt').write_bytes(Path(__file__).read_bytes());print('passed26cells312assets52academicidentical13contacts')
