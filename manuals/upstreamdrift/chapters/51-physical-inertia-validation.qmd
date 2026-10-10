@@ -1,0 +1,48 @@
+# Coordinate-Invariant Physical Inertia Validation
+
+Issue #12183 corrects the existing public `validate_physical_inertia` helper in
+`src/shared/python/estimation/dime_global_calibration.py`. It validates a supplied
+finite symmetric 3-by-3 rotational inertia tensor; callers remain responsible
+for body ownership, center-of-mass reference, source provenance and SI units
+(kg m²). It does not extract tensors from native models or qualify their sources.
+
+## Equations and Numerical Contract
+
+For orthogonal body-frame rotation $R$, $I'=RIR^T$ preserves principal moments.
+Let the sorted eigenvalues be $\lambda_1\leq\lambda_2\leq\lambda_3$.
+The helper retains the existing strictly positive numerical condition
+$\lambda_1>10^{-9}$ and requires
+$\lambda_1+\lambda_2\geq\lambda_3-10^{-9}$.
+These absolute tolerances retain the existing scale-dependent contract; they
+are not material-property uncertainty estimates. Planar equality is allowed.
+Symmetry uses absolute tolerance $10^{-7}$ with zero relative tolerance,
+preventing large entries from masking an asymmetric tensor. The existing
+NumPy symmetric eigensolver supplies all principal moments. On success the
+numeric tensor values are returned unchanged; invalid tensors raise
+`PreconditionError`. There is no projection, symmetrization or parameter repair.
+
+## Regression Evidence and Reproduction
+
+Rotating principal moments `(0.02, 0.02, 0.08)` by 45 degrees around the second
+axis produces diagonal entries `(0.05, 0.02, 0.05)`. The old diagonal-only check
+accepted this impossible tensor; its principal moments remain impossible.
+Tests exercise two invalid principal-axis orderings, a valid rotated tensor,
+planar equality, and an asymmetry previously hidden by relative tolerance.
+Before the fix the focused new tests produced three failures and two passes.
+After the fix the affected calibration and human-prior suites produced 25 passes:
+
+```bash
+python3 -m pytest -o addopts='' tests/unit/estimation/test_dime_global_calibration.py tests/unit/estimation/test_dime_human_priors.py -q
+```
+
+## Acceptance Boundary and Turnover
+
+This is a helper-contract correction. No production source-admission call site
+or optimizer-wide enforcement is introduced. Native source extraction,
+mass/COM/frame checks, provenance-supported remediation and parameter-fit
+constraints need separate reviewed integration and tests. A positive full-system
+mass matrix alone does not establish physically realizable individual bodies.
+Do not repair an imported tensor merely to obtain a passing gate. This change
+does not qualify capture matching, muscle physiology, contact/grip, full-horizon
+excitation replay or the 17-model/six-engine parity program. Calculation
+registration and publication remain blocked.

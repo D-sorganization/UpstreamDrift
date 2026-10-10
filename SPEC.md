@@ -1,3 +1,12 @@
+## Coordinate-Invariant Physical Inertia Contract (#12183)
+
+The existing DIME inertia helper checks triangle feasibility on sorted principal
+moments and absolute symmetry tolerance. Chapter 51 records TDD evidence and
+the unchanged tensor-return contract. This helper correction introduces no native
+source-admission integration or optimizer-wide qualification. Imported body
+inertias still require explicit source/COM/frame/provenance validation; no
+automatic tensor repair or matching acceptance is authorized by this change.
+
 ## Native Feedback Platform Integration (#12060)
 
 The published native Moco preparation/seed/solve/replay path and owned Simscape
