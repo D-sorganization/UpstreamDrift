@@ -591,6 +591,20 @@ class BenchmarkHardware:
     scipy_version: str
 
 
+def capture_benchmark_hardware() -> BenchmarkHardware:
+    """One canonical environment receipt for synthetic and native candidates."""
+    from scipy import __version__ as scipy_version
+
+    return BenchmarkHardware(
+        host=platform.node() or "unknown-host",
+        machine=platform.machine(),
+        processor=platform.processor(),
+        python_version=platform.python_version(),
+        numpy_version=np.__version__,
+        scipy_version=scipy_version,
+    )
+
+
 @dataclass(frozen=True)
 class BenchmarkAttempt:
     backend: str
@@ -766,8 +780,6 @@ def benchmark_backends(
     derivative construction, fresh replay and receipt assembly. The memory
     measure is Python-tracked peak allocation, not process RSS or GPU memory.
     """
-    from scipy import __version__ as scipy_version
-
     if (
         not backends
         or not starts
@@ -778,14 +790,7 @@ def benchmark_backends(
     for start in starts:
         if start.initial_torque_nm.shape != (problem.intervals,):
             raise ValueError("benchmark start torque dimension differs from grid")
-    hardware = BenchmarkHardware(
-        host=platform.node() or "unknown-host",
-        machine=platform.machine(),
-        processor=platform.processor(),
-        python_version=platform.python_version(),
-        numpy_version=np.__version__,
-        scipy_version=scipy_version,
-    )
+    hardware = capture_benchmark_hardware()
     attempts: list[BenchmarkAttempt] = []
     for backend in backends:
         for start in starts:

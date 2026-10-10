@@ -1,0 +1,13 @@
+{
+  "club": "iron7",
+  "samples": 914,
+  "duration_s": 1.826,
+  "hand_separation_mm": 80.32185256827681,
+  "hand_separation_change_mm": 3.885780586188048e-13,
+  "peak_drift": {
+    "along_mm": 3.885780586188048e-13,
+    "across_mm": 2.8360474132579645e-13,
+    "rotation_deg": 9.579702088950763e-30
+  },
+  "note": "trail (R) frame in the lead (L) frame, change vs sample 0"
+}

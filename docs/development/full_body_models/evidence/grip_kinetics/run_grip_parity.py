@@ -51,6 +51,7 @@ ENGINE_MODULES = {
     "mujoco": "src.engines.physics_engines.mujoco.python.grip_bushing",
     "drake": "src.engines.physics_engines.drake.python.grip_bushing",
     "pinocchio": "src.engines.physics_engines.pinocchio.python.grip_bushing",
+    "myosuite": "src.engines.physics_engines.myosuite.python.grip_bushing",
 }
 REFERENCE_ACCURACY = 1e-5
 
@@ -101,6 +102,7 @@ ENGINE_STYLE = {
     "mujoco": ("#E69F00", "--", 1.4),
     "drake": ("#56B4E9", "-.", 1.4),
     "pinocchio": ("#009E73", ":", 1.8),
+    "myosuite": ("#CC79A7", "--", 1.2),
 }
 PANELS = (
     ("force_L", "Left Hand Force", "N", 1.0),

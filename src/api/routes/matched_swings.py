@@ -10,7 +10,10 @@ Routes
 - ``GET /matched-swings/{id}`` — receipt JSON
 - ``GET /matched-swings/{id}/candidate`` — NPZ stream or preview JSON
 - ``GET /matched-swings/{id}/parity`` — parity report JSON
+- ``GET /matched-swings/{id}/report`` — Markdown fit-quality report download
 - ``GET /matched-swings/{id}/animation.gif`` — GIF stream
+- ``GET /matched-swings/{id}/animation/frames`` — GIF frame count/durations/size
+- ``GET /matched-swings/{id}/animation/frames/{index}`` — one decoded GIF frame (PNG)
 """
 
 from __future__ import annotations
@@ -18,8 +21,8 @@ from __future__ import annotations
 from functools import lru_cache
 from typing import Any, Literal, NoReturn
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
-from fastapi.responses import FileResponse
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request
+from fastapi.responses import FileResponse, Response
 
 from src.api.services.matched_swings_service import (
     MatchedSwingJobError,
@@ -207,6 +210,29 @@ async def get_matched_swing_parity(
     return dict(data)
 
 
+@router.get("/{run_id}/report")
+async def get_matched_swing_report(
+    run_id: str,
+    _local: None = Depends(require_local_client),
+    service: MatchedSwingsService = Depends(get_matched_swings_service),
+) -> Response:
+    """Download the Markdown fit-quality report for a run (desktop parity)."""
+    try:
+        markdown, filename = service.export_report_markdown(run_id)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except (FileNotFoundError, ValueError, RuntimeError) as exc:
+        _raise_job_error(
+            MatchedSwingJobError(code="report_unavailable", message=str(exc)),
+            status_code=404,
+        )
+    return Response(
+        content=markdown,
+        media_type="text/markdown; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
 @router.get("/{run_id}/animation.gif")
 async def get_matched_swing_animation(
     run_id: str,
@@ -221,3 +247,47 @@ async def get_matched_swing_animation(
     except FileNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     return FileResponse(path, media_type="image/gif", filename=f"{run_id[:12]}.gif")
+
+
+@router.get("/{run_id}/animation/frames")
+async def get_matched_swing_animation_frames(
+    run_id: str,
+    _local: None = Depends(require_local_client),
+    service: MatchedSwingsService = Depends(get_matched_swings_service),
+) -> dict[str, Any]:
+    """Return GIF frame count, per-frame durations, and size for a run.
+
+    Lets a browser client implement frame-exact Play/Pause/Restart, which an
+    ``<img>``-based GIF cannot do (desktop parity with the QMovie controls
+    in ``gui.py``).
+    """
+    try:
+        info = service.animation_frame_info(run_id)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except (FileNotFoundError, ValueError) as exc:
+        _raise_job_error(
+            MatchedSwingJobError(code="animation_unavailable", message=str(exc)),
+            status_code=404,
+        )
+    return {"schema_version": "matched-swing-animation/1", **info}
+
+
+@router.get("/{run_id}/animation/frames/{index}")
+async def get_matched_swing_animation_frame(
+    run_id: str,
+    index: int = Path(..., ge=0, description="GIF frame index (0-based)"),
+    _local: None = Depends(require_local_client),
+    service: MatchedSwingsService = Depends(get_matched_swings_service),
+) -> Response:
+    """Return one decoded GIF frame as a PNG image."""
+    try:
+        png_bytes = service.animation_frame_png(run_id, index)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except (FileNotFoundError, ValueError, IndexError) as exc:
+        _raise_job_error(
+            MatchedSwingJobError(code="animation_unavailable", message=str(exc)),
+            status_code=404,
+        )
+    return Response(content=png_bytes, media_type="image/png")

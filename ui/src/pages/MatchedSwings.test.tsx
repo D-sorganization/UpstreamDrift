@@ -62,22 +62,33 @@ const SAMPLE_LEDGER: MatchedSwingLedgerResponse = {
   ],
 };
 
-const { fetchCandidatePreviewFrameMock, fetchMatchedSwingReceiptMock, fetchParityReportMock } =
-  vi.hoisted(() => ({
-    fetchCandidatePreviewFrameMock: vi.fn(async () => ({
-      id: 'aaa111',
-      frame_index: 0,
-      frame_count: 1,
-      joints: [{ name: 'pelvis', position: [0, 0, 1], confidence: 1, parent: null }],
-    })),
-    fetchMatchedSwingReceiptMock: vi.fn(async () => ({
-      id: 'aaa111',
-      receipt: { engine: 'drake' },
-    })),
-    fetchParityReportMock: vi.fn(async () => ({
-      schema_version: 'matched-swing-parity-report-v1',
-    })),
-  }));
+const {
+  fetchCandidatePreviewFrameMock,
+  fetchMatchedSwingReceiptMock,
+  fetchParityReportMock,
+  fetchMatchedSwingAnimationInfoMock,
+} = vi.hoisted(() => ({
+  fetchCandidatePreviewFrameMock: vi.fn(async () => ({
+    id: 'aaa111',
+    frame_index: 0,
+    frame_count: 1,
+    joints: [{ name: 'pelvis', position: [0, 0, 1], confidence: 1, parent: null }],
+  })),
+  fetchMatchedSwingReceiptMock: vi.fn(async () => ({
+    id: 'aaa111',
+    receipt: { engine: 'drake' },
+  })),
+  fetchParityReportMock: vi.fn(async () => ({
+    schema_version: 'matched-swing-parity-report-v1',
+  })),
+  fetchMatchedSwingAnimationInfoMock: vi.fn(async () => ({
+    schema_version: 'matched-swing-animation/1',
+    frame_count: 1,
+    durations_ms: [100],
+    width: 1,
+    height: 1,
+  })),
+}));
 
 vi.mock('@/api/matchedSwings', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/api/matchedSwings')>();
@@ -88,6 +99,9 @@ vi.mock('@/api/matchedSwings', async (importOriginal) => {
     fetchMatchedSwingReceipt: fetchMatchedSwingReceiptMock,
     fetchParityReport: fetchParityReportMock,
     matchedSwingAnimationUrl: (id: string) => `/api/v1/matched-swings/${id}/animation.gif`,
+    fetchMatchedSwingAnimationInfo: fetchMatchedSwingAnimationInfoMock,
+    matchedSwingAnimationFrameUrl: (id: string, index: number) =>
+      `/api/v1/matched-swings/${id}/animation/frames/${index}`,
   };
 });
 
@@ -264,6 +278,21 @@ describe('MatchedSwingsPage', () => {
     await waitFor(() => {
       expect(container.textContent).toContain('"engine": "drake"');
     });
+  });
+
+  it('links the export report action to the selected run report URL', async () => {
+    render(
+      <MemoryRouter>
+        <MatchedSwingsPage />
+      </MemoryRouter>,
+    );
+
+    await screen.findByRole('button', { name: /drake/i });
+    const reportLink = screen.getByRole('link', { name: /export report/i });
+    expect(reportLink).toHaveAttribute(
+      'href',
+      '/api/v1/matched-swings/aaa111/report',
+    );
   });
 
   it('disables the parity button when unavailable and fetches it when available', async () => {
