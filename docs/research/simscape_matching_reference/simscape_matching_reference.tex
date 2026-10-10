@@ -6267,6 +6267,14 @@ tests: \texttt{tests/unit/motion\_matching/test\_drake\_mujoco\_ik\_parity.py}.
 The closure rows and Jacobians match MuJoCo to $10^{-9}$ and $10^{-7}$, and
 \texttt{solve\_pose} from the same start reaches the same marker RMS within
 0.5~mm. Before the fix the two plants were 7.7~mm apart on that test.
+
+The capture-A Drake receipt (\texttt{anthro\_driver\_drake}) was regenerated
+at the fix with the command above. It reads address / IK / dynamics
+6.3 / 29.2 / 78.8~mm, against 6.3 / 29.5 / 80.8~mm for MuJoCo's canonical
+\texttt{anthro\_driver\_seeds}. The previous 7.9 / 34.6 / 60.1~mm Drake receipt
+predates both this fix and main's spec pelvis alignment (\#12109) and GCV-20
+impact-split reference (\#12145), so its dynamics figure is not comparable;
+MuJoCo moved from 75.4 to 80.8~mm on the GCV-20 code alone.
 \section{Phase-Split Forward-Dynamics Marker RMS (\#12042)}
 \label{sec:fd_phase_split}
 

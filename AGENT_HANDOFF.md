@@ -1,3 +1,8 @@
+# Active: Drake and MuJoCo IK Parity, Weld Rotation Row — #12039
+
+- Branch `claude/12039-drake-address-parity`. Drake's dual-grip weld rotation row was the small-angle vee with Jacobian `J_a - J_b` (up to 0.84 off finite differences); MuJoCo's is the principal log with its exact Jacobian. Both now use `full_body_ik._closure_rotation_row`; Drake `closure_error` reports the principal angle. Tests: `tests/unit/motion_matching/test_drake_mujoco_ik_parity.py`.
+- Address stages (static seeds, foot progression capture), Drake minus MuJoCo: driver +1.64 → 0.00 mm, 7-iron −0.54 → +0.02 mm; toe-out identical. Capture-A Drake receipt regenerated: 6.3 / 29.2 / 78.8 mm against MuJoCo's 6.3 / 29.5 / 80.8 mm. Evidence `evidence/foot_progression/drake_parity_12039/`; calc record "Weld Rotation Row Parity" in `simscape_matching_reference.tex`.
+
 # Physical Inertia Helper Handoff — #12183
 
 `validate_physical_inertia` now uses sorted principal moments instead of frame
