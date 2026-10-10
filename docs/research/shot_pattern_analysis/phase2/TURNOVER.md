@@ -94,6 +94,8 @@ The operational PDF/SVG helper is independently qualified under #12160 and reloc
 
 Astra completed format diagnostics for all 744 original vectors: primary 198 PDF + 198 SVG, control 174 PDF + 174 SVG, with zero errors and no recorded PDF warnings. Exact manifests, closed path inventories, expected hashes and final source/output rechecks pass. Root independently rehashed all 744 assets and reconciled every diagnostic. Evidence: `validation/original_vector_diagnostics_v1/`. No live supplement was read. Root also viewed a completed 7-iron social-density PDF/SVG family and its PNG; labels and panels are intact (`validation/vector_raster_sample_v1/`). The installed Sharp density setting does not map linearly from SVG point units to raster pixels: retain actual dimensions/proportional aspect. Parsing and one representative visual check do not establish full vector or publication acceptance.
 
+Astra completed the predeclared original-vector visual sample: 24 PDF/SVG files across all three clubs and four plot types, with no clipping or missing content. Root rehashed all 96 references and viewed two paired contact sheets. See `validation/original_vector_visual_review_v1/`. This supplements all-744 format diagnostics but does not imply all-744 visual review or full publication approval.
+
 ## Completed Numerical Data
 
 All simulation workers, full saved-data audits and fresh archive restorations are finished. Do not restart them.
