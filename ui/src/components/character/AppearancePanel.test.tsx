@@ -143,6 +143,8 @@ describe('AppearancePanel', () => {
 
     render(<AppearancePanel />);
     await screen.findByRole('option', { name: 'skin_light' });
+    // Unbound: no spec character, so no binding line and no `character` key.
+    expect(screen.queryByTestId('appearance-spec-binding')).not.toBeInTheDocument();
 
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: /Export Appearance/i }));
@@ -164,6 +166,67 @@ describe('AppearancePanel', () => {
       ),
     );
     expect(clickSpy).toHaveBeenCalled();
+  });
+
+  it('binds the export to the current spec character when character is given', async () => {
+    const character = {
+      preset: 'golfer_pro',
+      stature_m: 1.83,
+      mass_kg: 82,
+      trunk_scale: 1.05,
+      arm_scale: 1.02,
+      shoulder_scale: 1.08,
+      club: 'driver',
+    };
+
+    mockFetch.mockImplementation((url: string) => {
+      if (url.includes('/character-builder/appearance/library')) {
+        return Promise.resolve(jsonResponse(LIBRARY));
+      }
+      if (url.includes('/character-builder/appearance/export')) {
+        return Promise.resolve(
+          jsonResponse(
+            { schema_version: 'appearance-v1' },
+            {
+              headers: {
+                'Content-Disposition':
+                  'attachment; filename="golfer_pro_abc123.appearance.json"',
+                'Content-Type': 'application/json',
+              },
+            },
+          ),
+        );
+      }
+      return Promise.resolve(jsonResponse({ detail: 'not stubbed' }, { ok: false, status: 404 }));
+    });
+
+    render(<AppearancePanel character={character} />);
+    await screen.findByRole('option', { name: 'skin_light' });
+
+    expect(screen.getByTestId('appearance-spec-binding')).toHaveTextContent(
+      'Bound to the current spec character (preset: golfer_pro)',
+    );
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Export Appearance/i }));
+    });
+
+    const expectedBody = JSON.stringify({
+      skin_tone: 'skin_medium',
+      clothing: 'golf_polo_shorts',
+      club_finish: 'satin_steel',
+      headwear: 'hair',
+      headwear_material: 'hair_brown',
+      ground_material: 'turf',
+      character,
+    });
+
+    await waitFor(() =>
+      expect(mockFetch).toHaveBeenCalledWith(
+        '/api/character-builder/appearance/export',
+        expect.objectContaining({ method: 'POST', body: expectedBody }),
+      ),
+    );
   });
 
   it('shows the API detail message on a 422 export error', async () => {
