@@ -444,6 +444,25 @@ def finish_feasibility_report(
     }
 
 
+def ratcheted_metrics(block: Mapping[str, Any]) -> dict[str, dict[str, float]]:
+    """The ratcheted fractions of a full finish-feasibility block, per side.
+
+    A receipt (or companion baseline) block also carries its description,
+    windows and non-ratcheted metrics; :func:`regressions` takes only the
+    ratcheted ones. Raises ``ValueError`` if a side is missing.
+    """
+    out: dict[str, dict[str, float]] = {}
+    for side in ("reference", "simulation"):
+        if side not in block:
+            raise ValueError(f"finish-feasibility block lacks {side!r}")
+        out[side] = {
+            name: float(block[side][name])
+            for name in FLOOR_METRICS + CEILING_METRICS
+            if name in block[side]
+        }
+    return out
+
+
 def regressions(
     block: Mapping[str, Any], baseline: Mapping[str, Mapping[str, float]]
 ) -> list[str]:
