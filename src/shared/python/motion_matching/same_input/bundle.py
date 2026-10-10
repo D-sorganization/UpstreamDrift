@@ -96,6 +96,19 @@ class InputBundle:
             "provenance": self.provenance,
         }
 
+    def ball_impact(self) -> Any:
+        """The recorded, latched ball force (``ImpactForce``) or ``None``.
+
+        Every engine's open-loop replay applies this identical force
+        (GCV-20, #11767); bundles without an impact return ``None``.
+        """
+        record = self.provenance.get("ball_impact")
+        if record is None:
+            return None
+        from src.shared.python.motion_matching.impact_force import ImpactForce
+
+        return ImpactForce.from_record(record)
+
     def save(self, path: Path) -> None:
         """Write the bundle as one compressed ``.npz``."""
         np.savez_compressed(

@@ -11025,3 +11025,14 @@ path lengths/speeds, mass, applied forces and constraints. Canonical chapter
 46 and the F07 turnover bind source/runtime/output identity and sampled
 limits. Abdominal and MTP composition, physiological muscle state, full native
 replay, Moco and capture matching remain open.
+## Assistance-Explicit OpenSim Replay (#12147)
+
+A distinct native mixed-actuation T01 profile freezes exact muscle and
+CoordinateActuator channels, complete state/options, physical role declarations,
+bounds, gains and native units. Independent replay retains one owned native
+Manager and checks actual physical time and applied saved commands. Forces,
+powers and sampled work retain root/upper/leg assistance labels and source,
+provider, input, state and policy digests. Zero-assistance point bounds are
+supported. The original muscle-only profile remains strict. Canonical chapter
+27 and F07_MIXED_ACTUATION_TURNOVER document the calculation and limits; full
+factory topology, capture/physiology/contact/grip and 17-model parity remain open.

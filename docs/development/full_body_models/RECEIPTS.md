@@ -92,6 +92,7 @@ Full-trajectory marker matching, alternating calibration, limb scaling, and rang
 | `bound_widening`             | multiplier | Safety factor applied to widen joint range limits            | ik    |
 | `leg_angle_ranges_deg`       | deg        | Min and max angles observed per lower limb joint coordinate  | ik    |
 | `constrained_ik`             | compound   | Optional constrained IK execution diagnostics and provenance | ik    |
+| `restart_policy`             | compound   | Trajectory IK restart policy and its joint-step bound        | ik    |
 
 ## Dynamics Stage (`dynamics`)
 
