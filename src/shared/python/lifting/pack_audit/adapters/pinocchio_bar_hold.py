@@ -32,7 +32,7 @@ hands must exert on the bar for static equilibrium (``R = -m*g``, with the
 moment of ``R`` about the grip midpoint balancing the weight acting at the
 bar's centre of mass -- gravity has no moment about the bar's own centre of
 mass) and splits that wrench with the shared ``allocate_min_norm`` minimum
-norm allocator.
+norm allocator (through the engine-free :mod:`.bar_hold_static`).
 
 This is a kinematic static-equilibrium calculation, not a simulation: there
 is no bar acceleration to report (``bar_linear_accel_mps2`` is always
@@ -57,20 +57,13 @@ to the torso instead (no ``barbell_grip_r`` anchor exists) and is reported
 from __future__ import annotations
 
 import importlib
-import math
-from collections.abc import Sequence
 from typing import Any
 
 import numpy as np
 from defusedxml import ElementTree as ET
 
-from src.shared.python.biomechanics.grip_wrench import (
-    GripAnalysis,
-    HandWrench,
-    allocate_min_norm,
-)
-
 from ..model import unavailable_bar_hold
+from .bar_hold_static import static_hold_split
 
 pin: Any = importlib.import_module("pinocchio")
 
@@ -152,84 +145,6 @@ def _bar_mass_and_world_com(
     return total_mass, weighted_com / total_mass
 
 
-def _static_hold_split(
-    bar_mass_kg: float,
-    gravity_mps2: Sequence[float],
-    bar_com_m: Sequence[float],
-    grip_l_m: Sequence[float],
-    grip_r_m: Sequence[float],
-) -> dict[str, Any]:
-    """Pure static-equilibrium per-hand split; no pinocchio objects, no I/O.
-
-    The net wrench the two hands must exert on the bar for static
-    equilibrium is ``R = -bar_mass_kg * gravity_mps2`` (the hands carry the
-    weight), with the moment of ``R`` about the grip midpoint balancing the
-    weight acting at ``bar_com_m`` (gravity has no moment about the bar's
-    own centre of mass). ``allocate_min_norm`` (GCV-7) splits that wrench
-    into a minimum-norm pair of hand forces at ``grip_l_m``/``grip_r_m``.
-
-    Postconditions: ``hand_force_n["L"] + hand_force_n["R"] == net_force_n``
-    to floating-point precision; a grip symmetric about ``bar_com_m``
-    (``grip_l_m`` and ``grip_r_m`` equidistant from ``bar_com_m``) splits the
-    vertical force evenly.
-
-    Raises:
-        ValueError: if ``bar_mass_kg`` or the gravity magnitude is not
-            positive and finite, any vector is not a finite 3-vector, or the
-            grip points coincide.
-    """
-    if not math.isfinite(bar_mass_kg) or bar_mass_kg <= 0.0:
-        raise ValueError(f"bar_mass_kg must be positive and finite, got {bar_mass_kg}")
-    vectors = {
-        "gravity_mps2": np.asarray(gravity_mps2, dtype=float),
-        "bar_com_m": np.asarray(bar_com_m, dtype=float),
-        "grip_l_m": np.asarray(grip_l_m, dtype=float),
-        "grip_r_m": np.asarray(grip_r_m, dtype=float),
-    }
-    for name, v in vectors.items():
-        if v.shape != (3,) or not np.all(np.isfinite(v)):
-            raise ValueError(f"{name} must be a finite 3-vector, got {v}")
-    gravity = vectors["gravity_mps2"]
-    bar_com = vectors["bar_com_m"]
-    grip_l = vectors["grip_l_m"]
-    grip_r = vectors["grip_r_m"]
-    gravity_mag = float(np.linalg.norm(gravity))
-    if gravity_mag <= 0.0:
-        raise ValueError("gravity magnitude must be positive")
-    if float(np.sum((grip_r - grip_l) ** 2)) <= 0.0:
-        raise ValueError("left/right grip points coincide; cannot split")
-
-    midpoint = (grip_l + grip_r) / 2.0
-    net_force = -bar_mass_kg * gravity
-    moment_at_mid = np.cross(bar_com - midpoint, net_force)
-
-    left = HandWrench(side="L", point_m=tuple(grip_l), force_on_club_n=(0.0, 0.0, 0.0))
-    right = HandWrench(side="R", point_m=tuple(grip_r), force_on_club_n=(0.0, 0.0, 0.0))
-    analysis = GripAnalysis(
-        left=left,
-        right=right,
-        midpoint_m=tuple(midpoint),
-        net_force_n=tuple(net_force),
-        couple_at_midpoint_nm=tuple(moment_at_mid),
-        contact_force_moment_nm=tuple(moment_at_mid),
-        applied_free_torque_nm=(0.0, 0.0, 0.0),
-        mof_left_nm=None,
-        mof_right_nm=None,
-        split_method="allocation",
-    )
-    left_f, right_f = allocate_min_norm(analysis)
-    return {
-        "midpoint_m": midpoint,
-        "net_force_n": net_force,
-        "couple_at_midpoint_nm": moment_at_mid,
-        "hand_force_n": {
-            "L": np.asarray(left_f, dtype=float),
-            "R": np.asarray(right_f, dtype=float),
-        },
-        "gravity_mag_mps2": gravity_mag,
-    }
-
-
 def bar_hold_wrench(
     model: Any, data: Any, root: ET.Element, q: np.ndarray
 ) -> dict[str, Any]:
@@ -276,7 +191,7 @@ def bar_hold_wrench(
     grip_l = _frame_translation(model, data, _LEFT_GRIP_FRAME)  # == hand_l
     grip_r = _frame_translation(model, data, _RIGHT_GRIP_LINK)
 
-    split = _static_hold_split(bar_mass_kg, gravity, bar_com_world, grip_l, grip_r)
+    split = static_hold_split(bar_mass_kg, gravity, bar_com_world, grip_l, grip_r)
     left_f = split["hand_force_n"]["L"]
     right_f = split["hand_force_n"]["R"]
     sum_vertical_n = float(left_f[2] + right_f[2])
