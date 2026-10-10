@@ -1,0 +1,81 @@
+.F                                                                       [100%]
+=================================== FAILURES ===================================
+______ test_sg_panel_titles_and_unavailable_reasons_fit_their_cells[True] ______
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-1969/test_sg_panel_titles_and_unava1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7038fa194860>
+dense_covariance = True
+
+    @pytest.mark.parametrize("dense_covariance", [False, True])
+    def test_sg_panel_titles_and_unavailable_reasons_fit_their_cells(
+        tmp_path, monkeypatch, dense_covariance
+    ) -> None:
+        _load_api()
+        import matplotlib.pyplot as plt
+        from src.tools.shot_pattern_analysis.matched_report_plots import (
+            export_matched_matrix_heatmaps,
+        )
+    
+        cells = _realistic_cells()
+        if dense_covariance:
+            import numpy as np
+    
+            correlation = np.full((7, 7), 0.36)
+            np.fill_diagonal(correlation, 1.0)
+            for cell in cells:
+                cell["config"]["noise"]["correlation"] = correlation.tolist()
+        cells[-1].update(
+            status="unavailable",
+            reason="nominal landing unreachable within bounds: residual=0.351838 m",
+        )
+        captured = []
+        original_close = plt.close
+        monkeypatch.setattr(plt, "close", lambda figure: captured.append(figure))
+        export_matched_matrix_heatmaps(
+            cells,
+            tmp_path,
+            selection_label="Saved Data",
+            metrics=("conditional_sg",),
+            formats=("svg",),
+        )
+        figure = captured[-1]
+        try:
+            figure.canvas.draw()
+            renderer = figure.canvas.get_renderer()
+            subtitle = next(text for text in figure.texts if "Delivery Noise:" in text.get_text())
+            header_bottom = subtitle.get_window_extent(renderer).y0
+            panel_top = max(axis.title.get_window_extent(renderer).y1 for axis in figure.axes[:3])
+>           assert header_bottom - panel_top >= 4 * figure.dpi / 72
+E           assert (np.float64(884.2975260416666) - np.float64(919.8406575520834)) >= ((4 * 100.0) / 72)
+E            +  where 100.0 = <Figure size 1650x1050 with 10 Axes>.dpi
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_report_plots.py:491: AssertionError
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/tools/shot_pattern_analysis/test_matched_report_plots.py::test_sg_panel_titles_and_unavailable_reasons_fit_their_cells[True]
+1 failed, 1 passed, 12 deselected, 6 warnings in 31.21s

@@ -1,0 +1,9 @@
+{
+  "status": "tested_and_rendered_pending_independent_review",
+  "tests": "14 passed; dense covariance header regression red\u2192green",
+  "static_checks": "Ruff and scoped Mypy passed",
+  "scope": "Physical header space grows without shrinking matrix panels or annotations",
+  "preview_count": 8,
+  "source_sha256": "3eb79503d9390046622cbb9bf6b2da94253b7831ec46df8526d59e82c02aaa54",
+  "root_visual_review": "Actual positive correlation primary SG inspected; clear header and first row titles"
+}
