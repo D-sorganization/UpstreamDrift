@@ -61,6 +61,7 @@ def _report_source_hashes() -> dict[str, str]:
         "course_score_vectors.py",
         "scenario_scoring.py",
         "uncertainty.py",
+        "matched_pair_social.py",
     )
     return {name: _sha256(package / name) for name in names}
 
@@ -451,6 +452,16 @@ def _recheck_receipt_sources(receipt: dict[str, Any]) -> None:
 def _verify_figure_assets(output_dir: Path, ledger: dict[str, Any]) -> None:
     figure_root = (output_dir / "figures").resolve()
     for item in ledger.get("figures", []):
+        if item.get("status") == "unavailable":
+            if not item.get("reason") or any(
+                key in item for key in ("relative_path", "sha256")
+            ):
+                raise ValueError(
+                    "unavailable figure must state a reason without artifact claims"
+                )
+            continue
+        if not isinstance(item.get("relative_path"), str) or not item["relative_path"]:
+            raise ValueError("available figure must identify its artifact path")
         path = (figure_root / item["relative_path"]).resolve()
         if not path.is_relative_to(figure_root) or not path.is_file():
             raise ValueError("supplement figure artifact is missing or unsafe")

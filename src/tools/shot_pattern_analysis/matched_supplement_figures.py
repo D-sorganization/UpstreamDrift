@@ -16,9 +16,11 @@ from .academic_plots import (
 )
 from .density import shared_histogram_density
 from .matched_matrix import PROFILES
+from .matched_pair_social import write_pair_social_density
 from .matched_report import load_individually_supported_endpoints
 from .matched_sensitivity import _supported_endpoints
 from .provenance import manifest_files_match
+from .noise import NoiseSpec
 
 _PATTERNS = ("Straight", "Draw", "Fade")
 
@@ -57,14 +59,87 @@ def _condition(ref: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _noise_profile_description(
+    profile: str, noise_config: dict[str, Any] | None = None
+) -> str:
+    """Describe actual serialized primitive noise, never infer it from a name."""
+    if not isinstance(noise_config, dict):
+        raise ValueError("caption requires serialized noise parameters")
+    spec = NoiseSpec(
+        tuple(noise_config["standard_deviations"]), noise_config.get("correlation")
+    )
+    sd = spec.standard_deviations
+    human_profile = (
+        "Correlated Delivery"
+        if profile.startswith("cov_facepath_")
+        else re.sub(r"([A-Za-z])([0-9])", r"\1 \2", profile).replace("_", " ").title()
+    )
+    parts: list[str] = []
+    if sd[1]:
+        parts.append(f"Path SD {sd[1]:g}°")
+    if sd[2]:
+        parts.append(f"Speed SD {sd[2] / 0.44704:g} mph")
+    if sd[3] == sd[4] and sd[3]:
+        parts.append(f"Strike SD {sd[3] / 0.0254:g} in on Each Axis")
+    else:
+        for label, value in (("Horizontal", sd[3]), ("Vertical", sd[4])):
+            if value:
+                parts.append(f"{label} Strike SD {value / 0.0254:g} in")
+    for label, value in (("Shaft Lean", sd[5]), ("Attack Angle", sd[6])):
+        if value:
+            parts.append(f"{label} SD {value:g}°")
+    names = (
+        "Shaft Twist",
+        "Path",
+        "Speed",
+        "Horizontal Strike",
+        "Vertical Strike",
+        "Shaft Lean",
+        "Attack Angle",
+    )
+    correlation = spec.correlation_matrix()
+    for i in range(len(names)):
+        for j in range(i + 1, len(names)):
+            if sd[i] and sd[j] and correlation[i, j]:
+                parts.append(
+                    f"{names[i]}–{names[j]} Correlation r = {correlation[i, j]:+g}"
+                )
+    return f"{human_profile} ({', '.join(parts)})" if parts else human_profile
+
+
 def _condition_caption(ref: dict[str, Any]) -> str:
     condition = _condition(ref)
     club = str(condition["club"]).replace("_", " ").title()
-    profile = re.sub(r"([A-Za-z])([0-9])", r"\1 \2", condition["profile"])
-    profile = profile.replace("_", " ").title()
+    profile = _noise_profile_description(
+        condition["profile"], ref.get("config", {}).get("noise")
+    )
     return (
         f"{club} · {profile} · Lean {condition['lean']:g}° · "
         f"Curve ×{condition['curve']:g} · Shaft Twist SD {condition['rotation']:g}°"
+    )
+
+
+def _pair_social_scenario(
+    comparison: str, first: dict[str, Any], second: dict[str, Any]
+) -> str:
+    """Construct scenario string distinguishing varying panel condition from fixed controls."""
+    c1 = _condition(first)
+    profile = _noise_profile_description(
+        c1["profile"], first.get("config", {}).get("noise")
+    )
+    comparison_title = _comparison_title(comparison)
+    fixed_parts: list[str] = []
+    if comparison != "across_lean":
+        fixed_parts.append(f"Lean {c1['lean']:g}°")
+    if comparison != "curve_strength":
+        fixed_parts.append(f"Curve ×{c1['curve']:g}")
+    if comparison != "shaft_rotation_sd":
+        fixed_parts.append(f"Shaft Twist SD {c1['rotation']:g}°")
+    fixed_parts.append(profile)
+    fixed_str = " · ".join(fixed_parts)
+    return (
+        f"Varying {comparison_title} in Panels · Fixed: {fixed_str} · "
+        "Simulations, Not Measured Player Accuracy"
     )
 
 
@@ -137,6 +212,17 @@ def _render_cell_figures(ref: dict[str, Any], output_dir: Path) -> list[dict[str
         scenario=f"Supplement Cell: {label}",
         metadata=metadata,
         target_point_m=(target_x, 0.0),
+        presentation="academic",
+    )
+    social_club = str(ref["config"]["club"]["club_id"]).replace("_", " ").title()
+    social_metadata = {**metadata, "social_club": social_club}
+    density_social_paths = write_academic_dispersion_figure(
+        arrays,
+        stem.with_name(stem.name + "_density_social"),
+        scenario=f"Supplement Cell: {label} · {_condition_caption(ref)} · Simulations, Not Measured Player Accuracy",
+        metadata=social_metadata,
+        target_point_m=(target_x, 0.0),
+        presentation="social",
     )
     flights_path = cell_dir / "flight_samples.json"
     if not flights_path.is_file():
@@ -153,37 +239,54 @@ def _render_cell_figures(ref: dict[str, Any], output_dir: Path) -> list[dict[str
         target_x_m=target_x,
         scenario=f"Supplement Cell: {label}; Raw Simulator Flight Samples",
         metadata=metadata,
+        presentation="academic",
+    )
+    overhead_social_paths = write_overhead_trajectory_figure(
+        trajectory_paths,
+        stem.with_name(stem.name + "_overhead_social"),
+        target_x_m=target_x,
+        scenario=f"Supplement Cell: {label} · {_condition_caption(ref)} · Raw Simulator Flight Samples · Simulations, Not Measured Player Accuracy",
+        metadata=social_metadata,
+        presentation="social",
     )
     ledger = []
-    for figure_group, paths in (
-        ("density", density_paths),
-        ("overhead", overhead_paths),
+    for figure_group, paths, presentation in (
+        ("density", density_paths, "academic"),
+        ("density_social", density_social_paths, "social"),
+        ("overhead", overhead_paths, "academic"),
+        ("overhead_social", overhead_social_paths, "social"),
     ):
         for kind, path in paths.items():
             ledger.append(
                 {
                     "figure_kind": f"{figure_group}_{kind}",
+                    "presentation": presentation,
                     "source_kind": (
                         "individual_supported_endpoints"
-                        if figure_group == "density"
+                        if "density" in figure_group
                         else "saved_illustrative_trajectories"
                     ),
                     "source_protocol": ref["source_protocol"],
                     "cell": label,
                     "target_x_m": target_x,
+                    "conditioning": (
+                        "individually supported endpoints by physical pattern"
+                        if "density" in figure_group
+                        else "saved raw trajectories, not paired by shot index"
+                    ),
                     "valid_n_by_pattern": (
                         metadata["valid_shots_by_pattern"]
-                        if figure_group == "density"
+                        if "density" in figure_group
                         else None
                     ),
                     "total_n_by_pattern": (
                         metadata["total_shots_by_pattern"]
-                        if figure_group == "density"
+                        if "density" in figure_group
                         else None
                     ),
                     "saved_trajectory_samples_by_pattern": (
                         {name: len(trajectory_paths[name]) for name in _PATTERNS}
-                        if figure_group == "overhead"
+                        if "overhead" in figure_group
                         else None
                     ),
                     "relative_path": str(path.relative_to(output_dir)),
@@ -620,24 +723,59 @@ def _render_pair_figures(
                 output_stem=stem.with_name(stem.name + "_density"),
             ),
         )
-        ledger.extend(
-            {
-                "figure_kind": kind,
-                "source_kind": "six_population_common_index_comparison",
-                "comparison_kind": comparison,
-                "first_cell": first["cell"],
-                "second_cell": second["cell"],
-                "first_protocol": first["source_protocol"],
-                "second_protocol": second["source_protocol"],
-                "common_supported_n": len(common),
-                "total_n_per_population": first["config"]["n_shots"],
-                "conditioning": "same shot indices supported in all six populations",
-                "target_x_m": target,
-                "relative_path": str(path.relative_to(output_dir)),
-                "sha256": _sha256(path),
-            }
-            for kind, path in density_paths.items()
+        for kind, path in density_paths.items():
+            ledger.append(
+                {
+                    "figure_kind": kind,
+                    "presentation": "academic",
+                    "physical_pattern": None,
+                    "source_kind": "six_population_common_index_comparison",
+                    "comparison_kind": comparison,
+                    "first_cell": first["cell"],
+                    "second_cell": second["cell"],
+                    "first_protocol": first["source_protocol"],
+                    "second_protocol": second["source_protocol"],
+                    "common_supported_n": len(common),
+                    "total_n_per_population": first["config"]["n_shots"],
+                    "conditioning": "same shot indices supported in all six populations",
+                    "target_x_m": target,
+                    "relative_path": str(path.relative_to(output_dir)),
+                    "sha256": _sha256(path),
+                }
+            )
+        pair_scenario = _pair_social_scenario(comparison, first, second)
+        social_club = str(first["config"]["club"]["club_id"]).replace("_", " ").title()
+        social_density_paths = write_pair_social_density(
+            point_sets,
+            stem.with_name(stem.name + "_density"),
+            condition_labels=(first_label, second_label),
+            scenario=pair_scenario,
+            social_club=social_club,
+            target_point_m=(target, 0.0),
+            total_n=int(first["config"]["n_shots"]),
         )
+        for key, path in social_density_paths.items():
+            pattern_lower, ext = key.split("_", 1)
+            pattern = pattern_lower.title()
+            ledger.append(
+                {
+                    "figure_kind": f"density_{pattern_lower}_social_{ext}",
+                    "presentation": "social",
+                    "physical_pattern": pattern,
+                    "source_kind": "six_population_common_index_comparison",
+                    "comparison_kind": comparison,
+                    "first_cell": first["cell"],
+                    "second_cell": second["cell"],
+                    "first_protocol": first["source_protocol"],
+                    "second_protocol": second["source_protocol"],
+                    "common_supported_n": len(common),
+                    "total_n_per_population": first["config"]["n_shots"],
+                    "conditioning": "same shot indices supported in all six populations",
+                    "target_x_m": target,
+                    "relative_path": str(path.relative_to(output_dir)),
+                    "sha256": _sha256(path),
+                }
+            )
     else:
         ledger.append(
             {
@@ -686,20 +824,25 @@ def _render_pair_figures(
                 output_stem=stem.with_name(stem.name + "_overhead"),
             ),
         )
-        ledger.extend(
-            {
-                "figure_kind": kind,
-                "source_kind": "saved_illustrative_trajectory_samples",
-                "comparison_kind": comparison,
-                "first_cell": first["cell"],
-                "second_cell": second["cell"],
-                "first_protocol": first["source_protocol"],
-                "second_protocol": second["source_protocol"],
-                "conditioning": "saved raw trajectories, not paired by shot index",
-                "target_x_m": target,
-                "relative_path": str(path.relative_to(output_dir)),
-                "sha256": _sha256(path),
-            }
-            for kind, path in overhead_paths.items()
-        )
+        for kind, path in overhead_paths.items():
+            ledger.append(
+                {
+                    "figure_kind": kind,
+                    "presentation": "social" if "social" in kind else "academic",
+                    "physical_pattern": None,
+                    "source_kind": "saved_illustrative_trajectory_samples",
+                    "comparison_kind": comparison,
+                    "first_cell": first["cell"],
+                    "second_cell": second["cell"],
+                    "first_protocol": first["source_protocol"],
+                    "second_protocol": second["source_protocol"],
+                    "conditioning": "saved raw trajectories, not paired by shot index",
+                    "target_x_m": target,
+                    "saved_trajectory_samples_by_pattern": {
+                        key: len(paths) for key, paths in trajectory_sets.items()
+                    },
+                    "relative_path": str(path.relative_to(output_dir)),
+                    "sha256": _sha256(path),
+                }
+            )
     return ledger
