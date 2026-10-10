@@ -172,11 +172,13 @@ export function LaunchMonitorModelsPanel({
   // Derived during render rather than synced in effects, so a column that
   // leaves the CSV falls back without a cascading re-render.
   const selectedTarget = numericOptions.includes(target) ? target : "";
-  const featureOptions = numericOptions.filter(
-    (column) => column !== selectedTarget,
+  const featureOptions = useMemo(
+    () => numericOptions.filter((column) => column !== selectedTarget),
+    [numericOptions, selectedTarget],
   );
-  const selectedFeatures = featuresChoice.filter((feature) =>
-    featureOptions.includes(feature),
+  const selectedFeatures = useMemo(
+    () => featuresChoice.filter((feature) => featureOptions.includes(feature)),
+    [featuresChoice, featureOptions],
   );
   const groupColumn =
     groupChoice === RANDOM_SPLIT ||
