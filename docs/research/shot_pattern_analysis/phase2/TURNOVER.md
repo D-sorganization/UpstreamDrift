@@ -98,6 +98,8 @@ Astra completed the predeclared original-vector visual sample: 24 PDF/SVG files 
 
 The raster helper is independently qualified and integrated: four demonstrated defects corrected, 18 tests plus native PDF/SVG success, and repository-config Ruff/format/Mypy pass. Evidence: `validation/vector_rasterization_qualification_v1/`; AGY recorded all findings on #12160. The original 13-test candidate remains preserved separately. The original-vector native raster check is complete: all 744 files passed, session `79084` exited 0, with no errors/warnings/stderr. Root independently reconciled coverage and rehashed all input/diagnostic/output files and sources/manifests. See `validation/original_vector_rasterization_v1/`. Full-collection rendering evidence is separate from the 24-vector representative visual review; supplemental and full-publication acceptance remain pending. No live supplemental assets are read by that task.
 
+Astra predeclared the supplemental representative PDF/SVG selection in `validation/v6_vector_selection_plan_v1/PLAN.md`. It covers all nine vector families, three clubs through available pair/cell records, all contrast kinds, difficult captions/support/range cases and cross-protocol aliases. Selection executes only after the successful terminal/strict-loader gate and freezes identities before views; it is not graphical acceptance. Root verified all plan/source bindings.
+
 ## Completed Numerical Data
 
 All simulation workers, full saved-data audits and fresh archive restorations are finished. Do not restart them.
