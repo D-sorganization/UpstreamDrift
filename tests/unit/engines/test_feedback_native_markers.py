@@ -25,6 +25,7 @@ from src.engines.feedback_native_markers import (
     execute_native_marker_replay,
 )
 from src.engines.feedback_marker_calibration import (
+    NativeMarkerCalibrationRequest,
     calibrate_static_marker_attachments,
 )
 from src.engines.model_inventory import EngineModelInventory
@@ -88,6 +89,160 @@ def _rotate_wxyz(quaternion: np.ndarray, vector: np.ndarray) -> np.ndarray:
     axis = quaternion[1:]
     cross = 2 * np.cross(axis, vector)
     return vector + scalar * cross + np.cross(axis, cross)
+
+
+def _assert_calibration_replay_is_scored(
+    registry: FeedbackComparisonRegistry,
+    binding: NativeAdapterBinding,
+    bundle,
+    model_path: Path,
+    poses: list[dict[str, tuple[np.ndarray, np.ndarray]]],
+    engine_id: str,
+) -> None:
+    """Run a fresh native marker replay through the existing F09 scorer."""
+    import hashlib
+
+    from src.engines.feedback_comparison import (
+        ComparisonEvidence,
+        EvidenceMode,
+        InputKind,
+        ReplayPolicy,
+    )
+    from src.engines.feedback_marker_calibration import (
+        NativeMarkerCalibrationRequest,
+        calibrate_static_marker_attachments,
+        capture_observation_sha256,
+    )
+    from src.engines.feedback_observation_qualification import (
+        NativeObservationCase,
+        build_feedback_observation_report,
+        feedback_replay_identity_sha256,
+    )
+    from src.shared.python.motion_matching.acceptance import Horizon
+    from src.shared.python.motion_matching.replay_metrics import (
+        ObservedMarkerPositions,
+        PositionInterpolation,
+    )
+
+    frame_id = "arm"
+    offset = np.asarray([0.2, 0.1, -0.05])
+    times = np.asarray(bundle.input_history.time_seconds, dtype=np.float64)
+    capture_points = np.asarray(
+        [pose[frame_id][0] @ offset + pose[frame_id][1] for pose in poses]
+    )[:, None, :]
+    capture = TourCapture(
+        times,
+        ("marker-a",),
+        capture_points,
+        np.ones((len(times), 1), dtype=bool),
+        bundle.model.source_model_sha256,
+    )
+    pose_provider_id = f"{engine_id}-test-native-fullstate-fk"
+    pose_provider_sha256 = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+    calibration_request = NativeMarkerCalibrationRequest(
+        capture,
+        {"marker-a": frame_id},
+        poses,
+        times,
+        binding,
+        engine_id,
+        pose_provider_id,
+        pose_provider_sha256,
+        "world",
+        "capture-relative",
+    )
+    calibration = calibrate_static_marker_attachments(calibration_request)
+    calibration.validate(calibration_request)
+    marker_map = calibration.to_native_marker_map(
+        binding, output_timebase_id=bundle.input_history.timebase_id
+    )
+    fresh_marker_evidence = execute_native_marker_replay(
+        NativeReplayRequest(binding, bundle, model_path), registry, marker_map
+    )
+    output = fresh_marker_evidence.native_output
+    observations = ObservedMarkerPositions(
+        time_s=output.time_s,
+        positions_m=np.asarray(output.positions_m) + np.asarray([0.0, 0.0, 0.001]),
+        valid=np.ones((len(times), 1), dtype=bool),
+        marker_labels=output.marker_labels,
+        frame_id=output.frame_id,
+        timebase_id=output.timebase_id,
+    )
+    observation_capture = TourCapture(
+        times,
+        tuple(output.marker_labels),
+        np.asarray(observations.positions_m),
+        np.asarray(observations.valid, dtype=bool),
+        bundle.model.source_model_sha256,
+    )
+    row = registry.get(binding.package_id, binding.variant_id, binding.drive_mode)
+    position_dimension = sum(
+        item.dimension
+        for item in bundle.model.state_schema.components
+        if item.role.value == "position"
+    )
+    velocity_dimension = sum(
+        item.dimension
+        for item in bundle.model.state_schema.components
+        if item.role.value == "velocity"
+    )
+    comparison = ComparisonEvidence(
+        package_id=row.package_id,
+        variant_id=row.variant_id,
+        drive_mode=row.drive_mode,
+        source_model_sha256=row.source_model_sha256,
+        provider_id=row.provider_id,
+        provider_sha256=row.provider_sha256,
+        state_schema_sha256=bundle.state_schema_sha256,
+        policy_sha256=bundle.policy_sha256,
+        applied_input_sha256=bundle.applied_input_sha256,
+        input_kind=InputKind(bundle.input_history.input_kind.value),
+        input_interpolation=bundle.input_history.interpolation.value,
+        timebase_id=bundle.input_history.timebase_id,
+        replay_policy=ReplayPolicy.INDEPENDENT_TIME_ONLY,
+        evidence_mode=EvidenceMode(bundle.policy.replay_mode.value),
+        horizon_s=float(times[-1]),
+        observation_sha256=capture_observation_sha256(observation_capture),
+        channel_ids=tuple(item.channel_id for item in bundle.input_history.channels),
+        full_state=True,
+        full_horizon=True,
+        state_resets=0,
+        nq=position_dimension,
+        nv=velocity_dimension,
+        physical_model_sha256=bundle.model.source_model_sha256,
+        loaded_native_model_sha256=bundle.model.loaded_native_model_sha256,
+        time_grid_sha256=bundle.time_grid_sha256,
+        physics_sha256=bundle.model.loaded_native_model_sha256,
+        contact_sha256=bundle.policy.contact_policy_sha256 or "",
+        integrator_sha256=bundle.policy_sha256,
+        input_channel_schema_sha256=bundle.input_channel_schema_sha256,
+        initial_state_sha256=bundle.integrity.initial_state_sha256,
+        comparison_contract_version="feedback-comparison/1.1.0",
+    )
+    case = NativeObservationCase(
+        evidence=comparison,
+        replay_bundle=bundle,
+        source_replay_identity_sha256=feedback_replay_identity_sha256(
+            comparison, bundle
+        ),
+        native_output=output,
+        observations=observations,
+        native_acceptance_receipt={"engine": engine_id, "capture": "driver"},
+        horizon=Horizon.G3,
+        interpolation=PositionInterpolation.LINEAR_POSITION,
+        native_marker_evidence=fresh_marker_evidence,
+    )
+
+    report = build_feedback_observation_report(registry, (case,))
+
+    scored = next(item for item in report.rows if item.package_id == row.package_id)
+    assert scored.score is not None
+    assert scored.score.native_marker_calibration_sha256 == calibration.sha256
+    assert (
+        scored.score.native_execution_receipt_sha256
+        == fresh_marker_evidence.receipt_sha256
+    )
+    assert not report.is_qualified
 
 
 def test_mujoco_markers_use_native_fk_with_floating_base_and_local_offset(
@@ -158,26 +313,32 @@ def test_mujoco_markers_use_native_fk_with_floating_base_and_local_offset(
     pose_provider_id = "test-mujoco-mj-forward-fullstate-fk"
     pose_provider_sha256 = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
     calibration = calibrate_static_marker_attachments(
-        capture,
-        {"marker-a": "arm"},
-        native_poses,
-        capture.time_s,
-        binding=binding,
-        native_engine_id="mujoco",
-        pose_provider_id=pose_provider_id,
-        pose_provider_sha256=pose_provider_sha256,
-        capture_frame_id="capture-world",
-        capture_timebase_id="capture-relative",
+        NativeMarkerCalibrationRequest(
+            capture,
+            {"marker-a": "arm"},
+            native_poses,
+            capture.time_s,
+            binding,
+            "mujoco",
+            pose_provider_id,
+            pose_provider_sha256,
+            "capture-world",
+            "capture-relative",
+        )
     )
     calibration.validate(
-        capture=capture,
-        poses=native_poses,
-        pose_time_s=capture.time_s,
-        binding=binding,
-        pose_provider_id=pose_provider_id,
-        pose_provider_sha256=pose_provider_sha256,
-        capture_frame_id="capture-world",
-        capture_timebase_id="capture-relative",
+        NativeMarkerCalibrationRequest(
+            capture,
+            {"marker-a": "arm"},
+            native_poses,
+            capture.time_s,
+            binding,
+            "mujoco",
+            pose_provider_id,
+            pose_provider_sha256,
+            "capture-world",
+            "capture-relative",
+        )
     )
     marker_map = calibration.to_native_marker_map(
         binding, output_timebase_id=bundle.input_history.timebase_id

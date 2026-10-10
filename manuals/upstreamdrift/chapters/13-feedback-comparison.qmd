@@ -59,7 +59,11 @@ Synthetic tests establish this scoring boundary only. Anatomical attachments,
 noise models, private D02 splits, uncertainty and actual native muscle replay
 remain unqualified until separately evidenced.
 
-The F09 `calibrate_static_marker_attachments` producer reuses
+The F09 `calibrate_static_marker_attachments` producer accepts a
+`NativeMarkerCalibrationRequest` that groups capture, ordered native-frame
+mapping, pose history and clock, adapter binding, provider identity, and capture
+frame/timebase. Revalidation receives the same request and recomputes its
+integrity. The producer reuses
 `TourCapture` and the shared `static_marker_offsets` estimator. For marker
 $m$ attached to native frame $b_m$, it estimates the local point from the
 ordered valid calibration samples $V_m$ as

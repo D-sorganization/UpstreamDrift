@@ -10,6 +10,7 @@ import pytest
 
 from src.engines.feedback_comparison import DriveMode
 from src.engines.feedback_marker_calibration import (
+    NativeMarkerCalibrationRequest,
     calibrate_static_marker_attachments,
 )
 from src.engines.feedback_native_execution import NativeAdapterBinding
@@ -89,16 +90,18 @@ def test_calibration_recovers_offsets_from_native_frame_poses(
     )
 
     artifact = calibrate_static_marker_attachments(
-        capture,
-        frame_ids,
-        poses,
-        times,
-        binding=binding,
-        native_engine_id="opensim",
-        pose_provider_id="opensim-native-marker-geometry",
-        pose_provider_sha256=provider.provider_sha256,
-        capture_frame_id="native-ground",
-        capture_timebase_id="capture-relative",
+        NativeMarkerCalibrationRequest(
+            capture,
+            frame_ids,
+            poses,
+            times,
+            binding,
+            "opensim",
+            "opensim-native-marker-geometry",
+            provider.provider_sha256,
+            "native-ground",
+            "capture-relative",
+        )
     )
 
     np.testing.assert_allclose(
@@ -107,14 +110,18 @@ def test_calibration_recovers_offsets_from_native_frame_poses(
         atol=1e-12,
     )
     artifact.validate(
-        capture=capture,
-        poses=poses,
-        pose_time_s=times,
-        binding=binding,
-        pose_provider_id="opensim-native-marker-geometry",
-        pose_provider_sha256=provider.provider_sha256,
-        capture_frame_id="native-ground",
-        capture_timebase_id="capture-relative",
+        NativeMarkerCalibrationRequest(
+            capture,
+            frame_ids,
+            poses,
+            times,
+            binding,
+            "opensim",
+            "opensim-native-marker-geometry",
+            provider.provider_sha256,
+            "native-ground",
+            "capture-relative",
+        )
     )
     assert artifact.source_model_sha256 == provider.source_sha256
     assert artifact.loaded_native_model_sha256 == provider.loaded_sha256

@@ -7,7 +7,11 @@ capture reader, scoring authority, or qualification gate.
 
 ## Artifact and Fit
 
-`calibrate_static_marker_attachments` accepts one ordered calibration capture,
+`calibrate_static_marker_attachments` accepts one `NativeMarkerCalibrationRequest`
+that groups the ordered capture, label-to-native-frame mapping, native poses and
+clock, adapter binding, pose-provider identity, and capture frame/timebase. The
+request is supplied again to artifact revalidation so those inputs are rehashed.
+The producer accepts one ordered calibration capture,
 one exact native frame ID per capture label, native world-pose samples for the
 same frame count, and an explicit pose-time vector. The vector must exactly
 match the capture clock. For each label it applies the shared body-frame
