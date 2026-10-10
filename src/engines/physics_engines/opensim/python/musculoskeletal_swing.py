@@ -393,7 +393,8 @@ def _with_golf_club(model: Any, golf_path: Path, club: str) -> tuple[Any, dict]:
     is calibrated to the same captured address (``msk_club_calibration``)
     rather than copied: the same shared club, grip model (weld or bushing,
     as the golf humanoid holds it) and address club pose, with hand frames
-    exact for this model. Returns ``(model, calibration report)``.
+    exact for this model. Returns ``(model, club record)``: the calibration
+    report plus ``grip_model`` and ``club_mass_kg``.
     """
     import tempfile
 
@@ -414,14 +415,16 @@ def _with_golf_club(model: Any, golf_path: Path, club: str) -> tuple[Any, dict]:
         tree = SafeET.parse(str(path))
         target = tree.getroot().find("Model")
         require(target is not None, "printed model has no <Model>")
-        msk_club.attach_club(
-            target,
-            msk_club.load_msk_club(club),
-            fit,
-            grip_model=msk_club.grip_model_of(golf),
-        )
+        shared = msk_club.load_msk_club(club)
+        grip_model = msk_club.grip_model_of(golf)
+        msk_club.attach_club(target, shared, fit, grip_model=grip_model)
         tree.write(path, encoding="utf-8", xml_declaration=True)
-        return osim.Model(str(path)), dict(fit.report)
+        record = {
+            "grip_calibration": dict(fit.report),
+            "grip_model": grip_model,
+            "club_mass_kg": float(shared.dynamics.mass_kg),
+        }
+        return osim.Model(str(path)), record
 
 
 def _replace_actuators(
@@ -471,17 +474,26 @@ def build_musculoskeletal_model(
     base_model_path: str | Path | None = None,
     *,
     reserve_optimal_force: float = RESERVE_OPTIMAL_FORCE,
-    club: str = "driver",
+    club: str | None = "driver",
 ) -> tuple[Any, dict[str, Any]]:
     """Fit the Rajagopal-Lai-Uhlrich muscle model to the golf humanoid.
 
     Returns ``(model, info)`` where ``info`` holds the body scale factors, the
-    actuator kinds and the model counts.  The model is *not* yet initialised.
+    actuator kinds, the model counts and the club record (``club``,
+    ``grip_model``, ``club_mass_kg``, ``grip_calibration``; all ``None`` for
+    ``club=None``, the no-club control).  The model is *not* yet initialised.
 
     Raises:
         FileNotFoundError: if the golf or base model is missing.
-        ValueError: if ``reserve_optimal_force`` is not positive.
+        ValueError: if ``reserve_optimal_force`` is not positive or ``club``
+            is neither ``None`` nor one of ``msk_club.CLUBS``.
     """
+    from src.engines.physics_engines.opensim.python import msk_club
+
+    require(
+        club is None or club in msk_club.CLUBS,
+        f"club must be None or one of {msk_club.CLUBS}, got {club!r}",
+    )
     osim = _require_opensim()
     require(reserve_optimal_force > 0, "reserve_optimal_force must be positive")
     golf_path = Path(golf_model_path)
@@ -497,7 +509,13 @@ def build_musculoskeletal_model(
     _copy_masses(model, golf)
     for coord_name in UNLOCKED_COORDINATES:
         model.updCoordinateSet().get(coord_name).set_locked(False)
-    model, grip_report = _with_golf_club(model, golf_path, club)
+    club_record: dict[str, Any] = {
+        "grip_calibration": None,
+        "grip_model": None,
+        "club_mass_kg": None,
+    }
+    if club is not None:
+        model, club_record = _with_golf_club(model, golf_path, club)
     kinds, optimal = _replace_actuators(model, reserve_optimal_force)
     model.setName("golf_musculoskeletal")
     model.finalizeConnections()
@@ -510,7 +528,8 @@ def build_musculoskeletal_model(
         "actuator_kinds": kinds,
         "actuator_optimal_force": optimal,
         "n_muscles": n_muscles,
-        "grip_calibration": grip_report,
+        "club": club,
+        **club_record,
         "n_coordinates": int(model.getCoordinateSet().getSize()),
         "total_mass_kg": float(sum(b.getMass() for b in model.getBodySet())),
     }

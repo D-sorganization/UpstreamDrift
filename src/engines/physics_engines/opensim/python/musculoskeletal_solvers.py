@@ -215,6 +215,27 @@ def activation_table_to_arrays(
     return read_states_table(path)
 
 
+def actuator_torques(
+    activations: Mapping[str, np.ndarray],
+    optimal_forces: Mapping[str, float] | None,
+    prefix: str,
+) -> dict[str, np.ndarray]:
+    """Torque series (N or N m) of the ``prefix*`` actuator columns.
+
+    A CoordinateActuator column holds its control; the torque is the control
+    times the actuator's optimal force (1.0 when not listed). Raises
+    ``ValueError`` for an empty ``prefix``. Postcondition: keys are exactly the
+    ``activations`` keys starting with ``prefix``, in input order.
+    """
+    require(bool(prefix), "prefix must be a non-empty actuator-name prefix")
+    scale = optimal_forces or {}
+    return {
+        k: np.asarray(v, dtype=float) * scale.get(k, 1.0)
+        for k, v in activations.items()
+        if k.startswith(prefix)
+    }
+
+
 def summarize_solution(
     times: np.ndarray,
     activations: dict[str, np.ndarray],
@@ -253,17 +274,8 @@ def summarize_solution(
         }
         for g, ms in sorted(groups.items())
     }
-    scale = optimal_forces or {}
-    reserves = {
-        k: np.asarray(v, dtype=float) * scale.get(k, 1.0)
-        for k, v in activations.items()
-        if k.startswith("reserve_")
-    }
-    upper = {
-        k: np.asarray(v, dtype=float) * scale.get(k, 1.0)
-        for k, v in activations.items()
-        if k.startswith("upper_")
-    }
+    reserves = actuator_torques(activations, optimal_forces, "reserve_")
+    upper = actuator_torques(activations, optimal_forces, "upper_")
 
     def block(d: dict[str, np.ndarray]) -> dict[str, dict[str, float]]:
         return {

@@ -56,6 +56,17 @@ def main() -> int:
     )
     parser.add_argument("--moco-iterations", type=int, default=25)
     parser.add_argument("--phase-split", type=float, default=1.08)
+    parser.add_argument(
+        "--club",
+        choices=("driver", "iron7", "none"),
+        default="driver",
+        help="shared club held in both hands; 'none' builds the no-club model",
+    )
+    parser.add_argument(
+        "--club-control",
+        action="store_true",
+        help="also solve the no-club control and record the club's upper-body load",
+    )
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO)
     cfg = PipelineConfig(
@@ -67,12 +78,14 @@ def main() -> int:
         so_step=args.so_step,
         phase_split_s=args.phase_split,
         base_model=args.base_model,
+        club=None if args.club == "none" else args.club,
     )
     receipt = run_pipeline(
         cfg,
         args.receipt,
         moco_pilot=args.moco_pilot,
         moco_iterations=args.moco_iterations,
+        club_control=args.club_control,
     )
     logger.info("receipt: %s", args.receipt)
     logger.info("%s", json.dumps(receipt["results"]["per_group"], indent=2))
