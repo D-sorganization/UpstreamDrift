@@ -1138,7 +1138,7 @@
       "expires_on": "2026-11-09"
     },
     {
-      "path": "src/shared/python/motion_matching/full_body_forward_dynamics.py",
+      "path": "src/shared/python/motion_matching/tracking_controller.py",
       "symbol": "tracking_controller",
       "rule": "parameters",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
