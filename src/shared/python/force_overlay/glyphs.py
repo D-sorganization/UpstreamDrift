@@ -29,6 +29,7 @@ __all__ = [
     "DEFAULT_GROUPS",
     "SCALE_MODES",
     "build_glyphs",
+    "clamped_tip_shift",
     "label_group",
     "scale_for_view",
 ]
@@ -153,6 +154,7 @@ class ForceGlyphStyle:
         default_factory=lambda: MappingProxyType({})
     )
     groups: frozenset[str] = DEFAULT_GROUPS
+    max_torque_length_m: float | None = None
 
     def force_scale_for(self, kind: WrenchKind) -> float:
         """Effective arrow length in metres per newton for ``kind``.
@@ -231,6 +233,21 @@ class ForceGlyphStyle:
                 f"min_length_m ({self.min_length_m}) must be < max_length_m ({self.max_length_m})"
             )
 
+        if self.max_torque_length_m is not None:
+            if not isinstance(self.max_torque_length_m, (int, float)) or isinstance(
+                self.max_torque_length_m, bool
+            ):
+                raise TypeError("max_torque_length_m must be numeric")
+            if (
+                not math.isfinite(self.max_torque_length_m)
+                or self.max_torque_length_m <= 0.0
+            ):
+                raise ValueError("max_torque_length_m must be finite and positive")
+            if self.min_length_m >= self.max_torque_length_m:
+                raise ValueError(
+                    f"min_length_m ({self.min_length_m}) must be < max_torque_length_m ({self.max_torque_length_m})"
+                )
+
         if not isinstance(self.arc_segments, int) or isinstance(
             self.arc_segments, bool
         ):
@@ -269,6 +286,7 @@ class ForceGlyphStyle:
                 for k, v in sorted(self.kind_scale.items(), key=lambda kv: kv[0].value)
             },
             "groups": sorted(self.groups),
+            "max_torque_length_m": self.max_torque_length_m,
         }
 
     @classmethod
@@ -295,6 +313,7 @@ class ForceGlyphStyle:
             "reference_length_m",
             "kind_scale",
             "groups",
+            "max_torque_length_m",
         }
         unknown = set(data.keys()) - valid_keys
         if unknown:
@@ -591,6 +610,33 @@ def _compute_arc_basis(
     return u, v
 
 
+def clamped_tip_shift(
+    tip: Sequence[float], base_center: Sequence[float], ratio: float = 0.6
+) -> tuple[float, ...]:
+    """Translation vector for a second, trailing tip marking a clamped glyph.
+
+    ADR-0052 draws force arrows clamped at ``max_length_m`` with a double
+    chevron: a second head, identical in shape, shifted backward
+    along the shaft by ``ratio`` of the tip-to-base-center distance. Every
+    renderer applies this single offset to its own head representation (a 2D
+    pixel polygon for OpenCV/QPainter, a 3D cone apex/base for matplotlib)
+    instead of re-deriving the geometry (DRY).
+
+    Precondition: ``tip`` and ``base_center`` have equal, nonzero length and
+    ``ratio`` is finite and positive.
+    Postcondition: the returned vector has the same dimensionality as the
+    inputs and points from ``tip`` toward ``base_center``.
+    """
+    if len(tip) != len(base_center) or len(tip) == 0:
+        raise ValueError(
+            "tip and base_center must have equal, nonzero length; got "
+            f"{len(tip)} and {len(base_center)}"
+        )
+    if not math.isfinite(ratio) or ratio <= 0.0:
+        raise ValueError(f"ratio must be finite and positive, got {ratio}")
+    return tuple((base_center[i] - tip[i]) * ratio for i in range(len(tip)))
+
+
 def _build_force_arrow(
     wrench: OverlayWrench,
     style: ForceGlyphStyle,
@@ -646,8 +692,13 @@ def _build_torque_arc(
     a_hat = (tx / mag, ty / mag, tz / mag)
 
     raw_len = mag * style.torque_scale_m_per_nm
-    clamped = raw_len > style.max_length_m
-    eff_len = max(style.min_length_m, min(raw_len, style.max_length_m))
+    max_len = (
+        style.max_torque_length_m
+        if style.max_torque_length_m is not None
+        else style.max_length_m
+    )
+    clamped = raw_len > max_len
+    eff_len = max(style.min_length_m, min(raw_len, max_len))
     radius = eff_len / 2.0
 
     u, v = _compute_arc_basis(a_hat)

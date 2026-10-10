@@ -230,6 +230,31 @@ def gaze_report(
     }
 
 
+def plan_from_pass(lane: Any, kin: Any, q: Array) -> tuple[GazePlan, Array]:
+    """``(plan, smoothed q)``: plan from ``q`` smoothed at the reference cutoff.
+
+    Impact detection reads the peak clubhead speed, so a one-frame IK glitch
+    in the raw pass would otherwise move impact. Every plan (gaze-on lane and
+    weight-0 receipt) goes through here so all weights share one impact.
+    """
+    from src.shared.python.motion_matching.pipeline.constants import (
+        REFERENCE_CUTOFF_HZ,
+    )
+    from src.shared.python.motion_matching.pipeline.reference import (
+        smooth_reference,
+    )
+
+    smooth = smooth_reference(np.asarray(q), lane.rate_hz, REFERENCE_CUTOFF_HZ)
+    plan = plan_gaze(
+        kin,
+        smooth,
+        lane.times,
+        ground_height_m=lane.ground.height_m,
+        face_offset_m=lane.gaze_face_offset_m,
+    )
+    return plan, smooth
+
+
 def head_gaze_receipt(lane: Any, kin: Any, q: Array) -> dict[str, Any]:
     """Receipt block for a finished lane (plans from ``q`` when no gaze pass ran).
 
@@ -239,13 +264,7 @@ def head_gaze_receipt(lane: Any, kin: Any, q: Array) -> dict[str, Any]:
     try:
         plan = lane.gaze_plan
         if plan is None:
-            plan = plan_gaze(
-                kin,
-                q,
-                lane.times,
-                ground_height_m=lane.ground.height_m,
-                face_offset_m=lane.gaze_face_offset_m,
-            )
+            plan, _ = plan_from_pass(lane, kin, q)
         return gaze_report(
             plan, kin, q, lane.times, lane.gaze_weight, tuple(kin.coordinate_order)
         )

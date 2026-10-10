@@ -250,13 +250,16 @@ def _spec_kin():
     return document, plant.create_ik(dict(LEG_SEEDS))
 
 
-def test_spec_left_hip_rotation_axis_is_not_mirrored_unlike_opensim() -> None:
-    """Finding: +hip_rotation_r turns the right foot in, +hip_rotation_l turns the
-    left foot OUT (OpenSim turns both in). Equal-sign seeds therefore splay feet."""
+def test_spec_left_hip_rotation_axis_is_mirrored_like_opensim() -> None:
+    """+hip_rotation on either side turns that foot in, as in OpenSim (OSV-6 #11737).
+
+    Before the fix +hip_rotation_l turned the left foot OUT, so equal-sign seeds
+    splayed the feet and the left hip saturated at its -40 deg limit.
+    """
     document, kin = _spec_kin()
     targets = _targets(0.0, 0.0)
     names = list(kin.coordinate_order)
-    for side, expected_sign in (("right", -1.0), ("left", 1.0)):
+    for side, expected_sign in (("right", -1.0), ("left", -1.0)):
         q = np.zeros(len(names))
         q[names.index(f"hip_rotation_{side[0]}")] = np.radians(10.0)
         angle = model_feet_deg(kin, q, targets, address_feet.MODEL_TARGET_AXIS)[side]
