@@ -8,6 +8,7 @@ import hashlib
 import json
 from dataclasses import asdict, replace
 from pathlib import Path
+from typing import Any
 
 import pytest
 import numpy as np
@@ -43,8 +44,12 @@ def test_rotation_sd_pairing_compares_standardized_rotation_draws() -> None:
         _normalized_rotation_errors,
     )
 
-    one_degree = {pattern: {0: (0.25, 1.0, 2.0)} for pattern in PATTERNS}
-    two_degree = {pattern: {0: (0.5, 1.0, 2.0)} for pattern in PATTERNS}
+    one_degree: dict[str, dict[int, tuple[float, ...]]] = {
+        pattern: {0: (0.25, 1.0, 2.0)} for pattern in PATTERNS
+    }
+    two_degree: dict[str, dict[int, tuple[float, ...]]] = {
+        pattern: {0: (0.5, 1.0, 2.0)} for pattern in PATTERNS
+    }
     assert _normalized_rotation_errors(one_degree, 1.0) == _normalized_rotation_errors(
         two_degree, 2.0
     )
@@ -299,13 +304,255 @@ def test_curve_strength_pair_reports_paired_sg_interaction(
     assert result["course_scoring_effect_modification"]["Fade"]["estimate"] == -1.0
 
 
+def test_across_lean_pair_reports_paired_sg_interaction(tmp_path, monkeypatch) -> None:
+    from types import SimpleNamespace
+    from src.tools.shot_pattern_analysis import matched_lean_control as module
+
+    monkeypatch.setattr(module, "score_course_endpoints", _stub_scorer)
+    first = _write_cell(
+        tmp_path / "lean0",
+        lean=0,
+        target_request=None,
+        protocol="pw-primary-face-bounds/1",
+    )
+    second = _write_cell(
+        tmp_path / "lean5",
+        lean=5,
+        target_request=77.40247724866299,
+        protocol="pw-control-face-bounds/1",
+    )
+    vectors = [
+        {
+            "Straight": np.array([10.0, 10.0, 10.0, 10.0]),
+            "Draw": np.array([12.0, 12.0, 12.0, 12.0]),
+            "Fade": np.array([9.0, 9.0, 9.0, 9.0]),
+        },
+        {
+            "Straight": np.array([10.0, 10.0, 10.0, 10.0]),
+            "Draw": np.array([15.0, 15.0, 15.0, 15.0]),
+            "Fade": np.array([7.0, 7.0, 7.0, 7.0]),
+        },
+    ]
+    calls = 0
+
+    def score_vectors(endpoints, **kwargs):
+        nonlocal calls
+        result = SimpleNamespace(
+            scores=vectors[calls],
+            scenario_id="approach_green_rough",
+            baseline={"id": "fixture"},
+            api_evaluated_states=10,
+        )
+        calls += 1
+        return result
+
+    monkeypatch.setattr(module, "score_course_endpoint_vectors", score_vectors)
+    result = module.analyze_explicit_source_pair(
+        first, second, comparison_kind="across_lean", target_x_m=77.40247724866299
+    )
+    assert result["course_scoring_effect_modification"]["Draw"]["estimate"] == 3.0
+    assert result["course_scoring_effect_modification"]["Fade"]["estimate"] == -2.0
+    assert result["common_supported_n"] == 4
+    assert "same six-population" in result["course_scoring_effect_modification_scope"]
+    provenance = result["course_scoring_provenance"]
+    assert provenance["source_backed_status"] == "available"
+    assert provenance["scenario_id"] == "approach_green_rough"
+    assert provenance["index_order"] == "ascending_common_shot_index"
+
+
+def test_across_lean_pair_uses_same_six_conditional_intersection_for_scoring(
+    tmp_path, monkeypatch
+) -> None:
+    from types import SimpleNamespace
+    from src.tools.shot_pattern_analysis import matched_lean_control as module
+
+    monkeypatch.setattr(module, "score_course_endpoints", _stub_scorer)
+    first = _write_cell(
+        tmp_path / "lean0",
+        lean=0,
+        target_request=None,
+        protocol="pw-primary-face-bounds/1",
+        invalid=("Draw", 3),
+    )
+    second = _write_cell(
+        tmp_path / "lean5",
+        lean=5,
+        target_request=77.40247724866299,
+        protocol="pw-control-face-bounds/1",
+        invalid=("Fade", 1),
+    )
+    recorded_endpoints: list[dict[str, list[tuple[int, float, float]]]] = []
+    vectors = [
+        {
+            "Straight": np.array([10.0, 10.0]),
+            "Draw": np.array([11.0, 11.0]),
+            "Fade": np.array([9.0, 9.0]),
+        },
+        {
+            "Straight": np.array([10.0, 10.0]),
+            "Draw": np.array([13.0, 13.0]),
+            "Fade": np.array([8.0, 8.0]),
+        },
+    ]
+    calls = 0
+
+    def score_vectors(endpoints, **kwargs):
+        nonlocal calls
+        recorded_endpoints.append(endpoints)
+        res = SimpleNamespace(
+            scores=vectors[calls],
+            scenario_id="approach_green_rough",
+            baseline={"id": "fixture"},
+            api_evaluated_states=10,
+        )
+        calls += 1
+        return res
+
+    monkeypatch.setattr(module, "score_course_endpoint_vectors", score_vectors)
+    result = module.analyze_explicit_source_pair(
+        first, second, comparison_kind="across_lean", target_x_m=77.40247724866299
+    )
+    assert result["status"] == "conditional_only"
+    assert result["common_supported_n"] == 2
+    assert len(recorded_endpoints) == 2
+    for ep_dict in recorded_endpoints:
+        for pattern in PATTERNS:
+            shot_indices = [idx for idx, _, _ in ep_dict[pattern]]
+            assert shot_indices == [0, 2]
+    assert result["course_scoring_effect_modification"]["Draw"]["estimate"] == 2.0
+    assert result["course_scoring_effect_modification"]["Fade"]["estimate"] == -1.0
+
+
+def test_across_lean_pair_fewer_than_two_common_shots_marks_unavailable(
+    tmp_path, monkeypatch
+) -> None:
+    from src.tools.shot_pattern_analysis import matched_lean_control as module
+
+    monkeypatch.setattr(module, "score_course_endpoints", _stub_scorer)
+    first = _write_cell(
+        tmp_path / "lean0",
+        lean=0,
+        target_request=None,
+        protocol="pw-primary-face-bounds/1",
+        invalid={("Straight", 1), ("Straight", 2), ("Straight", 3)},
+    )
+    second = _write_cell(
+        tmp_path / "lean5",
+        lean=5,
+        target_request=77.40247724866299,
+        protocol="pw-control-face-bounds/1",
+    )
+    result = module.analyze_explicit_source_pair(
+        first, second, comparison_kind="across_lean", target_x_m=77.40247724866299
+    )
+    assert result["status"] == "unavailable"
+    assert result["reason"] == "fewer_than_two_common_supported_shots"
+    assert result["common_supported_n"] == 1
+    assert result["patterns"] == {}
+    assert "course_scoring_effect_modification" not in result
+
+
+def test_across_lean_scoring_failure_records_unavailable_status(
+    tmp_path, monkeypatch
+) -> None:
+    from src.tools.shot_pattern_analysis import matched_lean_control as module
+
+    monkeypatch.setattr(module, "score_course_endpoints", _stub_scorer)
+    first = _write_cell(
+        tmp_path / "lean0",
+        lean=0,
+        target_request=None,
+        protocol="pw-primary-face-bounds/1",
+    )
+    second = _write_cell(
+        tmp_path / "lean5",
+        lean=5,
+        target_request=77.40247724866299,
+        protocol="pw-control-face-bounds/1",
+    )
+
+    def failing_scorer(endpoints, **kwargs):
+        raise ValueError(
+            "course state outside published baseline support: simulated test error"
+        )
+
+    monkeypatch.setattr(module, "score_course_endpoint_vectors", failing_scorer)
+    result = module.analyze_explicit_source_pair(
+        first, second, comparison_kind="across_lean", target_x_m=77.40247724866299
+    )
+    assert result["status"] == "available"
+    assert result["course_scoring_effect_modification"] == {
+        "status": "unavailable",
+        "reason": "course state outside published baseline support: simulated test error",
+    }
+    assert "course_scoring_provenance" not in result
+    assert set(result["patterns"]) == set(PATTERNS)
+
+
+def test_across_lean_pair_rejects_non_ascending_or_unsupported_order(
+    tmp_path,
+) -> None:
+    from src.tools.shot_pattern_analysis import matched_lean_control as module
+
+    first = _write_cell(
+        tmp_path / "lean5",
+        lean=5,
+        target_request=77.40247724866299,
+        protocol="pw-control-face-bounds/1",
+    )
+    second = _write_cell(
+        tmp_path / "lean0",
+        lean=0,
+        target_request=77.40247724866299,
+        protocol="pw-control-face-bounds/1",
+    )
+    with pytest.raises(
+        ValueError, match="order supported leans 0, 5, and 10 ascending"
+    ):
+        module.analyze_explicit_source_pair(
+            first, second, comparison_kind="across_lean", target_x_m=77.40247724866299
+        )
+
+    with pytest.raises(
+        ValueError, match="across-lean pair must change lean and hold curve scale fixed"
+    ):
+        module.analyze_explicit_source_pair(
+            first, first, comparison_kind="across_lean", target_x_m=77.40247724866299
+        )
+
+
+def test_across_lean_pair_rejects_target_identity_mismatch(
+    tmp_path,
+) -> None:
+    from src.tools.shot_pattern_analysis import matched_lean_control as module
+
+    first = _write_cell(
+        tmp_path / "lean0",
+        lean=0,
+        target_request=77.40247724866299,
+        protocol="pw-control-face-bounds/1",
+    )
+    second = _write_cell(
+        tmp_path / "lean5",
+        lean=5,
+        target_request=77.40247724866299,
+        protocol="pw-control-face-bounds/1",
+    )
+    with pytest.raises(
+        ValueError, match="paired cells do not share the declared physical target"
+    ):
+        module.analyze_explicit_source_pair(
+            first, second, comparison_kind="across_lean", target_x_m=100.0
+        )
+
+
 def _write_cell(
     root: Path,
     *,
     lean: float,
     target_request: float | None,
     protocol: str,
-    invalid: tuple[str, int] | None = None,
+    invalid: tuple[str, int] | set[tuple[str, int]] | None = None,
     rotation_sd: float = 1.0,
     curve_scale: float = 2.0,
     club_id: str = "pitching_wedge",
@@ -330,7 +577,7 @@ def _write_cell(
     cell = f"{club_id}_lean{lean:g}_curve{curve_scale:g}_rotation{rotation_sd:g}_shaft_only"
     execution = {"source_sha256": {"frozen.py": "fixture"}}
     target = 77.40247724866299
-    nominals = {}
+    nominals: dict[str, dict[str, Any]] = {}
     for index, pattern in enumerate(PATTERNS):
         face = (index - 1) * (2.0 + lean * 0.01)
         path = (index - 1) * (3.5 - lean * 0.01)
@@ -369,20 +616,27 @@ def _write_cell(
         "carry_x_m",
         "carry_y_m",
     )
+    invalid_set: set[tuple[str, int]] = set()
+    if isinstance(invalid, tuple) and len(invalid) == 2 and isinstance(invalid[0], str):
+        invalid_set = {invalid}  # type: ignore[arg-type]
+    elif invalid is not None:
+        invalid_set = set(invalid)
     with gzip.open(directory / "shots.csv.gz", "wt", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=fields)
         writer.writeheader()
         for pattern in PATTERNS:
             for index in range(4):
-                is_invalid = invalid == (pattern, index)
+                is_invalid = (pattern, index) in invalid_set
                 writer.writerow(
                     {
                         "pattern": pattern,
                         "shot_index": index,
                         "status": "off_face" if is_invalid else "supported",
                         "shaft_rotation_deg": (index + 1) * 0.1 * rotation_sd,
-                        "path_deg": nominals[pattern]["path_deg"] + (index + 1) * 0.05,
-                        "speed_mps": nominals[pattern]["speed_mps"] + (index + 1) * 0.1,
+                        "path_deg": float(nominals[pattern]["path_deg"])
+                        + (index + 1) * 0.05,
+                        "speed_mps": float(nominals[pattern]["speed_mps"])
+                        + (index + 1) * 0.1,
                         "contact_horizontal_m": index * 0.001,
                         "contact_vertical_m": -index * 0.001,
                         "shaft_lean_deg": lean + (index + 1) * 0.02,

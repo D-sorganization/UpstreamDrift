@@ -912,3 +912,33 @@ def test_bounds_control_preserves_actual_unavailable_reason_without_invention():
     assert not effects
     assert any(pair["reason"] in item for item in unavailable)
     assert all("physical" not in item.lower() for item in unavailable)
+
+
+@pytest.mark.parametrize(
+    "scoring_failure", [None, "course state outside baseline support"]
+)
+def test_bounds_control_missing_relative_effect_is_explicitly_unavailable(
+    scoring_failure,
+):
+    from scripts.research.shot_pattern_analysis.final_report_inputs import (
+        select_bounds_control_pairs,
+    )
+
+    # The old real producer emitted supported across-lean pairs without relative
+    # scoring fields. Geometry availability must not imply scoring availability.
+    pair = _make_source_pair(
+        first_cell="driver_lean0_curve2_rotation2_combined2",
+        second_cell="driver_lean5_curve2_rotation2_combined2",
+        second_protocol="driver-control-speed-bounds/1",
+        common_n=9940,
+    )
+    pair.pop("course_scoring_effect_modification")
+    if scoring_failure:
+        pair["course_scoring_effect_modification"] = {
+            "status": "unavailable",
+            "reason": scoring_failure,
+        }
+    effects, unavailable = select_bounds_control_pairs([pair])
+    assert effects == []
+    expected = scoring_failure or "relative scoring effects were not emitted"
+    assert any(expected in reason for reason in unavailable)

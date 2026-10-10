@@ -833,7 +833,7 @@ def analyze_explicit_source_pair(
             metrics["first_curve_scale"] = config_a["curve_scale"]
             metrics["second_curve_scale"] = config_b["curve_scale"]
             result["patterns"][pattern] = metrics
-        if comparison_kind in ("curve_strength", "shaft_rotation_sd"):
+        if comparison_kind in ("across_lean", "curve_strength", "shaft_rotation_sd"):
             try:
                 score_a = score_course_endpoint_vectors(
                     endpoint_maps[0],

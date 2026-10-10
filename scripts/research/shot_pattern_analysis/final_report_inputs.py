@@ -71,6 +71,15 @@ def select_bounds_control_pairs(
         if effect["status"] == "unavailable":
             reason = matches[0].get("reason") or "qualified comparison unavailable"
             unavailable.append(f"{description}: Unavailable ({reason}).")
+        elif any(
+            effect[key] is None
+            for key in ("draw_minus_straight_change", "fade_minus_straight_change")
+        ):
+            scoring = matches[0].get("course_scoring_effect_modification", {})
+            reason = (
+                scoring.get("reason") or "relative scoring effects were not emitted"
+            )
+            unavailable.append(f"{description}: Unavailable ({reason}).")
         else:
             selected.append(effect)
     return selected, unavailable
