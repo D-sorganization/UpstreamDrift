@@ -11025,6 +11025,7 @@ path lengths/speeds, mass, applied forces and constraints. Canonical chapter
 46 and the F07 turnover bind source/runtime/output identity and sampled
 limits. Abdominal and MTP composition, physiological muscle state, full native
 replay, Moco and capture matching remain open.
+
 ## Assistance-Explicit OpenSim Replay (#12147)
 
 A distinct native mixed-actuation T01 profile freezes exact muscle and

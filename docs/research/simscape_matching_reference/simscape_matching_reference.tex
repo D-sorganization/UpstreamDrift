@@ -6259,17 +6259,20 @@ returned 0.086 s.
 
 \subsection{Canonical Values}
 The canonical calibrated runs were regenerated with the documented commands
-in \texttt{evidence/ground\_support/CANONICAL\_RUN.md}. Whole-swing FD, IK and
-acceptance status are byte-identical to the receipts regenerated for the
-right-knee sign fix (\#12057); only the \texttt{fd\_phase} block is added.
+in \texttt{evidence/ground\_support/CANONICAL\_RUN.md}, on the consolidated
+code of \#12145. That code adds the hip pelvis-alignment fix (\#12109) and the
+GCV-20 ball impact, weld projection and impact-split reference ZMP (\#11767,
+\#12117). On the right-knee sign fix (\#12057) receipts the split read
+capture-A 32.3/138.6~mm and capture-B 33.3/125.1~mm (whole FD 77.0 and
+71.2~mm).
 
 \begin{center}
 \begin{tabular}{lrrrr}
 \hline
 Capture & $t_I$ (s) & Whole FD (mm) & Address$\to$impact (mm) & After impact (mm) \\
 \hline
-capture-A (driver) & 1.3228 & 77.0 & 32.3 & 138.6 \\
-capture-B (7-iron) & 1.3343 & 71.2 & 33.3 & 125.1 \\
+capture-A (driver) & 1.3229 & 80.8 & 34.2 & 145.0 \\
+capture-B (7-iron) & 1.3343 & 54.5 & 30.1 & 92.1 \\
 \hline
 \end{tabular}
 \end{center}
