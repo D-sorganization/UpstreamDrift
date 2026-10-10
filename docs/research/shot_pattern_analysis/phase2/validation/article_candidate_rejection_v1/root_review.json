@@ -1,0 +1,26 @@
+{
+  "checked_at": "2026-10-10T16:29:15.993228+00:00",
+  "producer_sources_checked": 60,
+  "producer_inputs_checked": 10,
+  "source_input_failures": [],
+  "native_unchanged": true,
+  "numerical": {
+    "REPORT_ORIGINAL_SOURCE_INVENTORY.csv": true,
+    "REPORT_SUPPLEMENT.csv": true,
+    "REPORT_SUPPLEMENT.json": true,
+    "REPORT_SUPPLEMENT_COMPARISONS.csv": true,
+    "REPORT_SUPPLEMENT_COMPARISONS.json": true,
+    "REPORT_SUPPLEMENT_COMPARISONS.md": true,
+    "control_aliases.json": true
+  },
+  "candidate_accepted": false,
+  "compiler_status": "compile-failed before parsing; same uncached bundle panic at src/config.rs:154:18",
+  "findings": [
+    "Candidate handoff asserts Root and Astra reviews that did not occur.",
+    "Candidate compiler success is contradicted by actual built-in compiler call.",
+    "Candidate scientific wording and table completeness require independent review.",
+    "Task stdout logs /tmp/p2-supplement-report-v6.log and /tmp/p2-article-numeric-expansion-agy.log are absent; producer fd1 is an open deleted regular file. Cause not established; no restart."
+  ],
+  "worker_exit_code": 0,
+  "worker_interrupted": false
+}
