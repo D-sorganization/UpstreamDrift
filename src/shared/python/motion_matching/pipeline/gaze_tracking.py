@@ -262,11 +262,14 @@ class GazeNeckFeedback:
 
     Every ``update_period_s`` the neck target is re-solved on the *simulated*
     state, so the head axis points along the schedule direction seen from the
-    simulated eye whatever the replay torso does; between updates the target
-    is held. A weak prior toward the feedforward neck (``q_t``) fixes the roll
-    about the gaze axis. Only the neck columns of ``q_t`` are replaced, and
-    they stay inside ``UPPER_RANGES_DEG``. This is a modelled behaviour, not
-    measured data.
+    simulated eye whatever the replay torso does. The correction to the
+    feedforward neck (``q_t``) and its rate between updates (backward
+    difference) are added to the position and velocity targets, the
+    correction extrapolated at that rate between updates, so the PD does not
+    lag a moving correction. A weak prior toward the feedforward neck fixes
+    the roll about the gaze axis. Only the neck columns are replaced, and the
+    position target stays inside ``UPPER_RANGES_DEG``. This is a modelled
+    behaviour, not measured data.
     """
 
     def __init__(
@@ -296,7 +299,10 @@ class GazeNeckFeedback:
             prior_weight,
         )
         self._slot: int | None = None
-        self._neck: Array | None = None
+        self._t_update = 0.0
+        self._solved = False
+        self._correction = np.zeros(len(self._cols))
+        self._rate = np.zeros(len(self._cols))
         self._residuals: list[float] = []
         self._clamped = 0
 
@@ -304,10 +310,9 @@ class GazeNeckFeedback:
         directions, *_ = schedule_directions(self.plan, self.kin, row[None], [t])
         return directions[0] / np.linalg.norm(directions[0])
 
-    def _update(self, t: float, q: Array, q_t: Array) -> Array:
+    def _solve(self, t: float, q: Array, ref: Array) -> Array:
         row = q.copy()
-        ref = q_t[self._cols]
-        x = q[self._cols] if self._neck is None else self._neck
+        x = q[self._cols]
         for _ in range(EYE_COUPLING_PASSES):  # the eye turns with the head
             x, residual, clamped = self._frame.solve(
                 row, self._direction(t, row), ref, x
@@ -317,22 +322,33 @@ class GazeNeckFeedback:
         self._clamped += int(clamped)
         return x
 
-    def __call__(self, t: float, q: Array, q_t: Array) -> Array:
-        q = np.asarray(q, dtype=float)
-        q_t = np.asarray(q_t, dtype=float)
-        if q.shape != q_t.shape or q.ndim != 1:
+    def _update(self, t: float, q: Array, q_t: Array) -> None:
+        ref = q_t[self._cols]
+        correction = self._solve(t, q, ref) - ref
+        if self._solved and t > self._t_update:
+            self._rate = (correction - self._correction) / (t - self._t_update)
+        self._correction, self._t_update, self._solved = correction, t, True
+
+    def __call__(
+        self, t: float, q: Array, q_t: Array, v_t: Array
+    ) -> tuple[Array, Array]:
+        q, q_t, v_t = (np.asarray(x, dtype=float) for x in (q, q_t, v_t))
+        if q.ndim != 1 or q.shape != q_t.shape or v_t.shape != q.shape:
             raise ValueError(
-                f"q and q_t must share a 1-D shape, got {q.shape} and {q_t.shape}"
+                "q, q_t and v_t must share a 1-D shape, got "
+                f"{q.shape}, {q_t.shape} and {v_t.shape}"
             )
-        if not (np.isfinite(q).all() and np.isfinite(q_t).all()):
-            raise ValueError("q and q_t must be finite")
+        if not all(np.isfinite(x).all() for x in (q, q_t, v_t)):
+            raise ValueError("q, q_t and v_t must be finite")
         slot = int(np.floor((float(t) - self._t0) / self.update_period_s + 1e-9))
-        if self._neck is None or slot != self._slot:
-            self._neck = self._update(float(t), q, q_t)
+        if not self._solved or slot != self._slot:
+            self._update(float(t), q, q_t)
             self._slot = slot
-        out = q_t.copy()
-        out[self._cols] = self._neck
-        return out
+        ahead = self._correction + self._rate * (float(t) - self._t_update)
+        q_out, v_out = q_t.copy(), v_t.copy()
+        q_out[self._cols] = np.clip(q_t[self._cols] + ahead, *self._frame.bounds)
+        v_out[self._cols] = v_t[self._cols] + self._rate
+        return q_out, v_out
 
     def as_dict(self) -> dict[str, Any]:
         """Update count, clamped updates and residuals (``None`` before any)."""

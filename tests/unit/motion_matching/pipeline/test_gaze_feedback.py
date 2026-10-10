@@ -95,6 +95,11 @@ def _head_error_deg(fb: gt.GazeNeckFeedback, kin, t: float, row) -> float:  # no
     return float(np.degrees(np.arccos(np.clip(a @ d, -1.0, 1.0))))
 
 
+def _target(fb: gt.GazeNeckFeedback, t: float, q, q_t) -> np.ndarray:  # noqa: ANN001
+    q_out, _ = fb(t, q, q_t, np.zeros_like(q_t))
+    return q_out
+
+
 def test_hook_resolves_the_neck_on_the_simulated_torso() -> None:
     kin = TorsoKin()
     q_track, _ = gt.apply_fd_neck("gaze", FakeLane(), kin, _q(), _q())
@@ -105,7 +110,7 @@ def test_hook_resolves_the_neck_on_the_simulated_torso() -> None:
     sim_q[TORSO] = np.radians(12.0)  # the replay torso lags the reference
     open_loop = sim_q.copy()
     open_loop[NECK_COLS] = q_track[k, NECK_COLS]
-    target = fb(t, sim_q, q_track[k].copy())
+    target = _target(fb, t, sim_q, q_track[k].copy())
     # only the neck columns of the reference are replaced
     other = [c for c in range(len(COORDS)) if c not in NECK_COLS]
     assert np.array_equal(target[other], q_track[k, other])
@@ -124,7 +129,7 @@ def test_hook_matches_the_open_loop_neck_on_the_tracked_torso() -> None:
     q_track, _ = gt.apply_fd_neck("gaze", FakeLane(), kin, _q(), _q())
     fb = _feedback(kin, q_track)
     k = 12
-    target = fb(float(TIMES[k]), q_track[k].copy(), q_track[k].copy())
+    target = _target(fb, float(TIMES[k]), q_track[k].copy(), q_track[k].copy())
     assert np.allclose(target[NECK_COLS], q_track[k, NECK_COLS], atol=np.radians(1.0))
 
 
@@ -133,13 +138,13 @@ def test_hook_updates_once_per_period_and_counts() -> None:
     q_track, _ = gt.apply_fd_neck("gaze", FakeLane(), kin, _q(), _q())
     fb = _feedback(kin, q_track, update_period_s=0.01)
     row = q_track[20].copy()
-    first = fb(0.2, row, row.copy())
+    first = _target(fb, 0.2, row, row.copy())
     moved = row.copy()
     moved[TORSO] = 0.3
-    # inside the same period the held neck target is reused
-    held = fb(0.205, moved, row.copy())
+    # inside the same period the held correction is reused (rate still zero)
+    held = _target(fb, 0.205, moved, row.copy())
     assert np.array_equal(held[NECK_COLS], first[NECK_COLS])
-    fresh = fb(0.21, moved, row.copy())
+    fresh = _target(fb, 0.21, moved, row.copy())
     assert not np.allclose(fresh[NECK_COLS], first[NECK_COLS])
     stats = fb.as_dict()
     assert stats["updates"] == 2
@@ -152,6 +157,27 @@ def test_hook_updates_once_per_period_and_counts() -> None:
     }
 
 
+def test_hook_feeds_the_correction_rate_forward() -> None:
+    kin = TorsoKin()
+    q_track, _ = gt.apply_fd_neck("gaze", FakeLane(), kin, _q(), _q())
+    fb = _feedback(kin, q_track, update_period_s=0.01)
+    row = q_track[20].copy()
+    v_t = np.full(len(COORDS), 0.5)
+    q0, v0 = fb(0.2, row, row.copy(), v_t.copy())
+    assert np.array_equal(v0, v_t)  # no rate before a second update
+    moved = row.copy()
+    moved[TORSO] = 0.05
+    q1, v1 = fb(0.21, moved, row.copy(), v_t.copy())
+    rate = (q1[NECK_COLS] - q0[NECK_COLS]) / 0.01
+    assert np.abs(rate).max() > 0.1
+    assert np.allclose(v1[NECK_COLS], v_t[NECK_COLS] + rate)
+    other = [c for c in range(len(COORDS)) if c not in NECK_COLS]
+    assert np.array_equal(v1[other], v_t[other])
+    # between updates the correction is extrapolated at that rate
+    q2, _ = fb(0.215, moved, row.copy(), v_t.copy())
+    assert np.allclose(q2[NECK_COLS], q1[NECK_COLS] + 0.005 * rate)
+
+
 def test_hook_preconditions() -> None:
     kin = TorsoKin()
     q_track, _ = gt.apply_fd_neck("gaze", FakeLane(), kin, _q(), _q())
@@ -159,9 +185,9 @@ def test_hook_preconditions() -> None:
         _feedback(kin, q_track, update_period_s=0.0)
     fb = _feedback(kin, q_track)
     with pytest.raises(ValueError, match="finite"):
-        fb(0.1, np.full(len(COORDS), np.nan), q_track[0].copy())
+        _target(fb, 0.1, np.full(len(COORDS), np.nan), q_track[0].copy())
     with pytest.raises(ValueError, match="shape"):
-        fb(0.1, q_track[0][:-1], q_track[0].copy())
+        _target(fb, 0.1, q_track[0][:-1], q_track[0].copy())
 
 
 def test_closed_mode_feedforward_equals_gaze_and_report_label() -> None:
@@ -190,7 +216,7 @@ def test_controller_reference_hook_replaces_the_target(monkeypatch) -> None:  # 
     seen: list[np.ndarray] = []
 
     def fake_ct(sim, q, v, q_t, v_t, a_t, gains, com_ref):  # noqa: ANN001
-        seen.append(q_t.copy())
+        seen.append(np.concatenate([q_t, v_t]))
         return np.zeros_like(q)
 
     monkeypatch.setattr(fs, "_computed_torque", fake_ct)
@@ -202,21 +228,21 @@ def test_controller_reference_hook_replaces_the_target(monkeypatch) -> None:  # 
     ref = np.array([[0.0, 0.0], [1.0, 1.0]])
     calls: list[tuple[float, np.ndarray]] = []
 
-    def hook(t, q, q_t):  # noqa: ANN001
+    def hook(t, q, q_t, v_t):  # noqa: ANN001
         calls.append((t, q.copy()))
         out = q_t.copy()
         out[1] = 7.0
-        return out
+        return out, v_t + 1.0
 
     ctl = tc.tracking_controller(
         Sim(), times, ref, omega_rad_s=10.0, reference_hook=hook
     )
     ctl(0.5, np.array([0.1, 0.2]), np.zeros(2))
     assert calls and calls[0][0] == 0.5
-    assert np.allclose(seen[-1], [0.5, 7.0])
+    assert np.allclose(seen[-1], [0.5, 7.0, 2.0, 2.0])
 
-    def bad(t, q, q_t):  # noqa: ANN001
-        return q_t[:1]
+    def bad(t, q, q_t, v_t):  # noqa: ANN001
+        return q_t[:1], v_t
 
     ctl = tc.tracking_controller(
         Sim(), times, ref, omega_rad_s=10.0, reference_hook=bad
