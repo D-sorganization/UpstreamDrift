@@ -86,3 +86,5 @@ UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
 {{< include chapters/43-native-zero-mtp-reduction.qmd >}}
 
 {{< include chapters/51-physical-inertia-validation.qmd >}}
+
+{{< include chapters/44-native-buet-hamner-assembly.qmd >}}

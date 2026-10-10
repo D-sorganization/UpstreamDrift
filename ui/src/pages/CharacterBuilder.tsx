@@ -2,6 +2,7 @@ import { useState, useMemo, useCallback } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Grid, Environment } from '@react-three/drei';
 import { getApiBase } from '@/api/backend';
+import { CharacterSpecPanel } from '@/components/character/CharacterSpecPanel';
 
 interface SegmentBreakdown {
   name: string;
@@ -249,6 +250,11 @@ export function CharacterBuilderPage() {
               <option value="Heavy">Heavy</option>
               <option value="Slim">Slim</option>
             </select>
+          </div>
+
+          {/* Spec-native character builder (CMB-7a, #11658) */}
+          <div className="border-t border-gray-700 pt-6">
+            <CharacterSpecPanel />
           </div>
 
           {/* Segment breakdown */}
