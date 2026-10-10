@@ -19,8 +19,9 @@ from src.shared.python.motion_matching import posture_metrics as post
 from src.shared.python.motion_matching.contact_law import GroundPlane
 from src.shared.python.motion_matching.full_body_ik import (
     BaseFullBodyIK,
+    _closure_rotation_row,
+    _finite_rotation_error,
     _resolve_closure_weights,
-    _rotation_error,
     _skew3,
     _validate_axis_spec,
 )
@@ -219,7 +220,9 @@ class DrakeFullBodyIK(BaseFullBodyIK):
         self._set(q)
         x_wa, x_wb = self._closure_transforms()
         pos = np.linalg.norm(x_wa.translation() - x_wb.translation())
-        rot = _rotation_error(x_wa.rotation().matrix(), x_wb.rotation().matrix())
+        rot = _finite_rotation_error(
+            x_wa.rotation().matrix(), x_wb.rotation().matrix()
+        )
         return float(pos), float(np.linalg.norm(rot))
 
     def sphere_heights(self, q: Array, ground: GroundPlane) -> dict[str, float]:
@@ -312,11 +315,15 @@ class DrakeFullBodyIK(BaseFullBodyIK):
             jacs.append(w * (jp_a - jp_b))
         if rot_weight > 0:
             wr = np.sqrt(rot_weight)
-            rot = _rotation_error(x_wa.rotation().matrix(), x_wb.rotation().matrix())
-            jr_a = self._angular_jacobian(a)
-            jr_b = self._angular_jacobian(b)
+            # The same principal-log row and exact Jacobian as MuJoCo (#12039).
+            rot, derivative = _closure_rotation_row(
+                x_wa.rotation().matrix(),
+                x_wb.rotation().matrix(),
+                self._angular_jacobian(a),
+                self._angular_jacobian(b),
+            )
             rows.append(wr * rot)
-            jacs.append(wr * (jr_a - jr_b))
+            jacs.append(wr * derivative)
 
     def _frame_pos_and_jac(self, frame: Any) -> tuple[Array, Array]:
         pos = self._plant.CalcRelativeTransform(
