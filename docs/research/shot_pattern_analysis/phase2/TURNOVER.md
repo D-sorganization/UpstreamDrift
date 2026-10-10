@@ -32,6 +32,8 @@ Corrected original figure production restarted2026-10-10 at01:37:33UTC, wrapperP
 
 Saved-data audit wrapperPID1983001 is waiting for all six successful simulation receipts, then will validate aliases and audit each complete supplemental protocol. Script`/tmp/p2-audit-supplement-final.py`; log`/tmp/p2-supplement-final-audits.log`; aggregate successreceipt`/tmp/p2-supplement-final-audits-exit.json`. It never runs simulations or accepts partial data. Revalidate before starting duplicate audits.
 
+Supplemental archive wrapperPID2063917 is waiting for all three complete successful audits, then will run the existing bounded archive builder and the same fresh-restoration check used for the pilot. It enforces a disk reserve before packaging. Script`/tmp/p2-package-final-supplement.py`; log`/tmp/p2-supplement-final-packaging.log`; exitreceipt`/tmp/p2-supplement-final-packaging-exit.json`. No archive acceptance is implied by this queued job.
+
 ## Reporting Revision
 
 Isolated layout `1e4d70d0dd` fixes phone readability, main/marginal ticks and footer clearance. Regression evidence is red-to-green;19tests pass. Astra inspected nine1080px previews and verified27artifact hashes across Driver/7-Iron/PW. Root also inspected the7-Iron draw. This qualifies the reviewed component, not the complete final publication.
