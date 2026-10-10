@@ -1,4 +1,4 @@
-"""Unit tests and RED failure fixtures for OpenSim versioned model variants and actuation capabilities (OG-07, #10401).
+"""Unit tests for OpenSim golf variant declarations and native readback.
 
 Tests:
 1. RED fixture: Loading torque controls as muscle activations raises IncompatibleActuationError.
@@ -8,7 +8,8 @@ Tests:
 5. RED fixture: Requesting an unsupported capability raises UnsupportedCapabilityError rather than silent fallback.
 6. Identity/no-op variant preserves forward kinematics and source geometry.
 7. Torque model and muscle/tendon variant traverse the same adapter API.
-8. Adapter contracts shield callers from OpenSim SDK object chains (no leaked C++ pointers/handles).
+8. A native one-muscle fixture exposes only its loaded names and capabilities.
+9. Adapter contracts shield callers from OpenSim SDK object chains.
 """
 
 from __future__ import annotations
@@ -149,7 +150,7 @@ def test_identity_no_op_variant_preserves_fk() -> None:
 
 
 def test_torque_and_muscle_variants_traverse_same_adapter_api() -> None:
-    """Verify that torque and muscle variants share identical adapter interface and truthful capabilities."""
+    """Keep muscle intent separate from capabilities in the loaded native model."""
     adapter = create_golf_model_adapter(SCALED_MODEL_PATH)
 
     torque_var = create_torque_model_variant(SCALED_MODEL_PATH)
@@ -170,12 +171,100 @@ def test_torque_and_muscle_variants_traverse_same_adapter_api() -> None:
     assert adapter.current_variant.actuation.control_units == "normalized"
     caps_muscle = adapter.capabilities
     assert caps_muscle["actuation_type"] == "muscle_tendon"
-    assert caps_muscle["supports_muscle_forces"] is True
+    assert caps_muscle["declared_actuator_count"] == 8
+    assert caps_muscle["supports_muscle_forces"] is False
     assert caps_muscle["supports_joint_torques"] is False
+    assert caps_muscle["native_muscle_inventory_status"] in {
+        "unknown",
+        "observed_empty",
+    }
 
-    # State variables in muscle variant include activation states
-    assert len(muscle_var.actuation.internal_state_names) > 0
-    assert "activation" in muscle_var.actuation.internal_state_names[0]
+    # The shipped golf artifact has no native muscles, so no fabricated muscle
+    # actuator or activation-state names may leak into the executable variant.
+    assert muscle_var.actuation.actuator_names == ()
+    assert muscle_var.actuation.internal_state_names == ()
+
+
+def test_native_zero_muscle_model_rejects_declared_muscle_controls() -> None:
+    """A declared target muscle must not be executable against a zero-muscle model."""
+    adapter = create_golf_model_adapter(SCALED_MODEL_PATH)
+    adapter.load_variant(create_muscle_model_variant(SCALED_MODEL_PATH))
+
+    with pytest.raises(UnsupportedCapabilityError, match="native muscle inventory"):
+        adapter.replay_controls(
+            {"deltoid_anterior_r": np.array([0.2, 0.2])},
+            time_s=np.array([0.0, 0.01]),
+        )
+
+
+def test_muscle_replay_api_reports_validation_without_simulation() -> None:
+    """Control validation alone must never claim that forward replay occurred."""
+    adapter = create_golf_model_adapter(SCALED_MODEL_PATH)
+    variant = create_torque_model_variant(SCALED_MODEL_PATH)
+    adapter.load_variant(variant)
+
+    result = adapter.replay_controls(
+        {variant.actuation.actuator_names[0]: np.array([1.0, 1.0])},
+        time_s=np.array([0.0, 0.01]),
+    )
+
+    assert result["status"] == "Controls_Validated_Not_Replayed"
+
+
+def test_native_muscle_inventory_matches_sdk_model_readback(tmp_path: Path) -> None:
+    """A positive native fixture reports only muscles actually loaded by OpenSim."""
+    osim = pytest.importorskip("opensim")
+    model = osim.Model()
+    model.setName("one_native_muscle")
+    model.setGravity(osim.Vec3(0))
+    body = osim.Body("load", 1.0, osim.Vec3(0), osim.Inertia(0.01))
+    model.addBody(body)
+    joint = osim.SliderJoint(
+        "slider",
+        model.getGround(),
+        osim.Vec3(0),
+        osim.Vec3(0),
+        body,
+        osim.Vec3(0),
+        osim.Vec3(0),
+    )
+    model.addJoint(joint)
+    muscle = osim.Millard2012EquilibriumMuscle("flexor", 10.0, 0.1, 0.2, 0.0)
+    muscle.addNewPathPoint("origin", model.getGround(), osim.Vec3(0))
+    muscle.addNewPathPoint("insertion", body, osim.Vec3(0))
+    model.addForce(muscle)
+    model.finalizeConnections()
+    state = model.initSystem()
+    names = model.getStateVariableNames()
+    native_states = tuple(names.get(i) for i in range(names.getSize()))
+    path = tmp_path / "native_muscle_inventory_fixture.osim"
+    model.printToXML(str(path))
+    try:
+        variant = create_muscle_model_variant(path)
+    finally:
+        path.unlink(missing_ok=True)
+
+    assert variant.actuation.actuator_names == ("flexor",)
+    assert variant.actuation.internal_state_names == tuple(
+        name for name in native_states if "flexor" in name
+    )
+    assert variant.get_capabilities()["supports_muscle_forces"] is True
+    assert variant.get_capabilities()["supports_activation_dynamics"] is True
+    assert variant.get_capabilities()["native_muscle_count"] == 1
+    assert len(variant.native_muscle_inventory.native_identity_sha256) == 64
+
+
+def test_shipped_golf_model_has_no_native_muscles_when_sdk_is_available() -> None:
+    """The shipped golf asset is read through OpenSim, not its declared target list."""
+    osim = pytest.importorskip("opensim")
+    expected_count = int(osim.Model(str(SCALED_MODEL_PATH)).getMuscles().getSize())
+    variant = create_muscle_model_variant(SCALED_MODEL_PATH)
+
+    assert expected_count == 0
+    assert variant.native_muscle_inventory is not None
+    assert variant.native_muscle_inventory.muscle_names == ()
+    assert variant.get_capabilities()["native_muscle_count"] == 0
+    assert variant.get_capabilities()["supports_muscle_forces"] is False
 
 
 def test_no_sdk_objects_leaked_through_adapter() -> None:
