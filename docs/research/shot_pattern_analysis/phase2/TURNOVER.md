@@ -6,6 +6,8 @@ The goal is active and incomplete. MAIN is `/home/dieterolson/.codex/worktrees/s
 
 ## Reporting Regeneration Checkpoint
 
+The first Gemini caption/API worker was deliberately interrupted after repeated real test timeouts in redundant image encoding. Its wrapper exited 1, with evidence preserved in [Test Recovery](validation/caption_api_interrupted_candidate_v1/REVIEW.md). The unaccepted candidate remains in the presentation worktree. New detached recovery wrapper PID `4001482` uses `/tmp/shot-pattern-caption-api-recovery-evidence/`; it must retain the existing timeout and substantive parity/containment checks while removing redundant export work. Production v5 remains running; no simulations or statistics were restarted.
+
 The core child-publication contract and review gate are checkpointed in presentation commit `0654993415`. Root independently verified Astra’s five source hashes and passed 55 contract/report tests (exit 0). Evidence: `validation/child_publication_contract_candidate_v1/`. This qualifies the local contract checkpoint only: no CLI or actual child rendering is accepted. Astra is now implementing the narrow saved-pair adapter and staged create/finalize CLI; Gemini still owns the renderer/caption repair. MAIN reporting sources remain unchanged.
 
 Root reviewed the initial child-publication code and withheld acceptance because final receipts could precede independent visual review. Astra is adding candidate/final separation and a hash-bound review gate, plus complete new-helper source binding. See [Contract Review](validation/child_publication_contract_root_review_v1/REVIEW.md). This is ongoing work in the presentation branch; no child publication has been accepted or generated.
