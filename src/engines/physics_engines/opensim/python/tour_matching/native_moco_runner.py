@@ -32,6 +32,7 @@ from .native_reference_conventions import (
 )
 from .registration import CaptureRegistration, register_points
 from .native_prepared_state import DeclaredColdStart, reconstruct_declared_cold_start
+from .native_mixed_actuation import MixedActuationProfile
 from .trc import read_trc, write_trc
 from src.shared.python.motion_matching.tour_capture_contract import TourCapture
 
@@ -59,9 +60,20 @@ class NativeMocoRequest:
     passive_policy: PassiveReadinessPolicy | None
     excluded_markers: Mapping[str, str]
     constrained_cold_start: DeclaredColdStart | None = None
+    mixed_actuation: MixedActuationProfile | None = None
 
     def __post_init__(self) -> None:
         self.config.validate()
+        if self.mixed_actuation is not None:
+            if not isinstance(self.mixed_actuation, MixedActuationProfile):
+                raise TypeError("mixed Moco requires a typed actuation profile")
+            if self.constrained_cold_start is not None:
+                raise ValueError("combined constrained mixed Moco is not admitted")
+            if dict(self.bindings.control_bounds) != {
+                channel.path: channel.control_bounds
+                for channel in self.mixed_actuation.channels
+            }:
+                raise ValueError("mixed Moco control bounds differ from profile")
         for name in ("model_sha256", "trc_sha256", "states_guess_sha256"):
             value = getattr(self, name)
             if len(value) != 64 or any(
@@ -141,6 +153,9 @@ class NativeMocoRequest:
                 None if self.passive_policy is None else asdict(self.passive_policy)
             ),
             "excluded_markers": dict(self.excluded_markers),
+            "mixed_actuation": None
+            if self.mixed_actuation is None
+            else asdict(self.mixed_actuation),
             "constrained_cold_start": None
             if declared is None
             else {
@@ -227,7 +242,10 @@ def _native_preparation(
     blockers.extend(_observed_marker_bindings(model, request))
     if request.passive_policy is None:
         blockers.append("passive-policy-unavailable")
-    if model.getActuators().getSize() != model.getMuscles().getSize():
+    if (
+        request.mixed_actuation is None
+        and model.getActuators().getSize() != model.getMuscles().getSize()
+    ):
         blockers.append("nonmuscle-assistance-unqualified")
     coordinates = model.getCoordinateSet()
     declared = request.constrained_cold_start
@@ -264,12 +282,20 @@ def _native_preparation(
     if set(request.bindings.control_bounds) != native_controls:
         blockers.append("native-control-binding-coverage")
     try:
+        if request.mixed_actuation is not None:
+            from .native_mixed_actuation import admit_native_mixed_profile
+
+            admit_native_mixed_profile(model, state, request.mixed_actuation)
         passive = audit_native_passive_readiness(model, state, request.passive_policy)
         passive_sha = passive.observation_sha256
         blockers.extend(passive.blockers)
         blockers.extend(
             item
             for item in passive.native_state.blockers
+            if not (
+                request.mixed_actuation is not None
+                and item == "nonmuscle-assistance-unqualified"
+            )
             if item
             not in {
                 "complete-native-state-unverified",
@@ -299,7 +325,21 @@ def _native_preparation(
         preview = {
             muscles.get(i).getName(): np.zeros(2) for i in range(muscles.getSize())
         }
-        if declared is None:
+        if request.mixed_actuation is not None:
+            from .native_mixed_replay import build_native_mixed_replay_bundle
+
+            build_native_mixed_replay_bundle(
+                request.model_path,
+                request.bindings.initial_state,
+                np.array([0.0, request.config.duration_s]),
+                {
+                    channel.path: np.full(2, channel.control_bounds[0])
+                    for channel in request.mixed_actuation.channels
+                },
+                request.mixed_actuation,
+                experiment_id="offline-moco-mixed-replay-capability-preview",
+            )
+        elif declared is None:
             build_native_muscle_replay_bundle(
                 request.model_path,
                 request.bindings.initial_state,

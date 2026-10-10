@@ -953,3 +953,7 @@ error. Installed Moco rejects locked coordinates; the unchanged 520-muscle
 source remains blocked by anatomy/passive/assistance/contact and private
 marker registration. See chapter42 and
 `docs/development/feedback_controls/F07_CONSTRAINED_MUSCLE_MOCO_TURNOVER.md`.
+
+## Active Mixed Moco Link (#12147)
+
+Branch `feat/f07-mixed-moco-link-12147` composes preserved constrained prerequisites and adds optional mixed scalar Moco dispatch. The new native test writes a nonzero 40 ms target and measures fresh replay independently. Exact roles/bounds are bound into requests; mixed NPZ fields preserve controls, physical units, assistance, powers and work. Retained unscaled-cost and coarse-transcription failures motivate per-state refinement. Full-body/source physiology/contact and private capture remain open; chapter39 and F07_MIXED_ACTUATION_TURNOVER own the calculation and handoff.

@@ -13,6 +13,7 @@ from .moco_initial_bindings import MocoInitialBindings
 from .moco_tracking import MocoTrackingConfig
 from .native_moco_runner import NativeMocoRequest
 from .native_prepared_state import DeclaredColdStart
+from .native_mixed_actuation import ActuationRole, MixedChannel, MixedActuationProfile
 from .native_passive_readiness import MusclePassiveLimits, PassiveReadinessPolicy
 from .registration import CaptureRegistration
 
@@ -145,6 +146,27 @@ def load_native_moco_request(path: Path) -> NativeMocoRequest:
             },
         )
 
+    mixed_data = payload.get("mixed_actuation")
+    mixed = None
+    if mixed_data is not None:
+        mixed_data = _keys(mixed_data, {"channels"}, {"channels"})
+        mixed = MixedActuationProfile(
+            tuple(
+                MixedChannel(
+                    checked["path"],
+                    ActuationRole(checked["role"]),
+                    tuple(checked["control_bounds"]),
+                )
+                for item in mixed_data["channels"]
+                for checked in (
+                    _keys(
+                        item,
+                        {"path", "role", "control_bounds"},
+                        {"path", "role", "control_bounds"},
+                    ),
+                )
+            )
+        )
     return NativeMocoRequest(
         source_path("model_path"),
         source_path("trc_path"),
@@ -161,6 +183,7 @@ def load_native_moco_request(path: Path) -> NativeMocoRequest:
         policy,
         payload["excluded_markers"],
         declared,
+        mixed,
     )
 
 

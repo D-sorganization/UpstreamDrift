@@ -28,6 +28,12 @@ from .native_muscle_bundle import (
     replay_native_muscle_bundle,
 )
 from .native_prepared_state import DeclaredColdStart
+from .native_mixed_actuation import MixedActuationProfile
+from .native_mixed_replay import (
+    NativeMixedReplayResult,
+    build_native_mixed_replay_bundle,
+    replay_native_mixed_bundle,
+)
 from .registration import register_points
 from .trc import read_trc
 
@@ -134,13 +140,19 @@ def _native_control_history(
     import opensim as osim
 
     model = osim.Model(str(request.model_path))
-    muscles = model.getMuscles()
+    muscles = (
+        model.getMuscles() if request.mixed_actuation is None else model.getActuators()
+    )
     channels = {
-        muscles.get(i).getAbsolutePathString(): muscles.get(i).getName()
+        muscles.get(i).getAbsolutePathString(): (
+            muscles.get(i).getName()
+            if request.mixed_actuation is None
+            else muscles.get(i).getAbsolutePathString()
+        )
         for i in range(muscles.getSize())
     }
     if set(channels) != set(request.bindings.control_bounds):
-        raise ValueError("Saved controls are not exactly all native muscles")
+        raise ValueError("Saved controls do not exactly cover native profile channels")
     history: dict[str, NDArray[np.float64]] = {}
     for path, name in channels.items():
         knots = np.asarray(solution.getControlMat(path), dtype=float).reshape(-1)
@@ -172,7 +184,16 @@ def export_native_moco_bundle(
     solution = _solution(request, solved, directory)
     original, output = _exact_output_grid(solution, prepared, directory)
     controls = _native_control_history(request, solution, original, output)
-    if request.constrained_cold_start is None:
+    if request.mixed_actuation is not None:
+        bundle = build_native_mixed_replay_bundle(
+            request.model_path,
+            request.bindings.initial_state,
+            output,
+            controls,
+            request.mixed_actuation,
+            experiment_id="offline-native-moco-mixed-independent-replay",
+        )
+    elif request.constrained_cold_start is None:
         bundle = build_native_muscle_replay_bundle(
             request.model_path,
             request.bindings.initial_state,
@@ -228,6 +249,7 @@ def replay_native_moco_bundle(
     output_dir: Path,
     *,
     constrained_cold_start: DeclaredColdStart | None = None,
+    mixed_actuation: MixedActuationProfile | None = None,
 ) -> Any:
     """Execute the saved T01 inputs on a fresh model, without a reference API."""
     directory = Path(output_dir)
@@ -242,8 +264,12 @@ def replay_native_moco_bundle(
         raise ValueError("Native model changed before independent replay")
     wall = time.perf_counter()
     cpu = time.process_time()
-    result: NativeMuscleReplayResult | ConstrainedMuscleReplay
-    if constrained_cold_start is None:
+    result: NativeMuscleReplayResult | ConstrainedMuscleReplay | NativeMixedReplayResult
+    if mixed_actuation is not None:
+        if constrained_cold_start is not None:
+            raise ValueError("combined constrained mixed replay is not admitted")
+        result = replay_native_mixed_bundle(bundle, model_path, mixed_actuation)
+    elif constrained_cold_start is None:
         if bundle.model.variant_id != "reviewed-cold-start-muscles":
             raise ValueError("constrained replay requires its declared cold start")
         result = replay_native_muscle_bundle(bundle, model_path)
@@ -256,14 +282,27 @@ def replay_native_moco_bundle(
     if not np.array_equal(result.times, exported.output_times):
         raise ValueError("Native execution did not retain the frozen output clock")
     evidence = directory / "native_replay.npz"
-    np.savez(
-        evidence,
-        time_seconds=result.times,
-        state_names=np.asarray(result.state_names),
-        states=result.states,
-        muscle_forces_n=result.muscle_forces_n,
-        applied_excitations=result.applied_excitations,
-    )
+    arrays: dict[str, Any] = {
+        "time_seconds": result.times,
+        "state_names": np.asarray(result.state_names),
+        "states": result.states,
+    }
+    if isinstance(result, NativeMixedReplayResult):
+        arrays.update(
+            channel_paths=np.asarray(result.channel_paths),
+            roles=np.asarray([c.role.value for c in result.profile.channels]),
+            output_units=np.asarray([c.output_unit for c in result.profile.channels]),
+            actuations=result.actuations,
+            applied_controls=result.applied_controls,
+            powers_w=result.powers_w,
+            work_j=result.work_j,
+        )
+    else:
+        arrays.update(
+            muscle_forces_n=result.muscle_forces_n,
+            applied_excitations=result.applied_excitations,
+        )
+    np.savez(evidence, **arrays)
     (directory / "replay.json").write_text(
         json.dumps(
             {
