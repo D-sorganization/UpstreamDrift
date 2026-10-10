@@ -779,7 +779,7 @@ def _protect_engine_modules() -> Generator[None, None, None]:
             continue
         current = vars(parent).get(child_name)
         if current is module:
-            vars(parent).pop(child_name)
+            vars(parent).pop(child_name, None)
     for (parent_name, child_name), (existed, value) in saved_bindings.items():
         parent = sys.modules.get(parent_name)
         if parent is None:
