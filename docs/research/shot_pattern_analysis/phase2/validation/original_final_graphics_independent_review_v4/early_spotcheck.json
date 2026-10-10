@@ -1,0 +1,18 @@
+{
+  "checked_utc": "2026-10-10T07:54:17.260434+00:00",
+  "status": "provisional_spot_checks_pass",
+  "scope": "Three actual v4 PNG files viewed at available full-image resolution; whole set and source/output manifest acceptance still pending",
+  "checks": [
+    "Previously overlapping narrow 7-iron main x-axis labels are now distinct and legible",
+    "Driver combined-noise density shows distinct 50/80/95 percent HDR line styles, readable marginal axes and common density scale",
+    "Figures identify delivered conditions, valid/attempted counts, raw matched landings and illustrative-model limitations",
+    "Overhead identifies six shown trajectories per pattern and vertical display magnification; it does not claim all 10000 trajectories are drawn"
+  ],
+  "files": {
+    "details/driver_lean0_curve1_rotation2_combined2/density.png": "a8f6efdae7ecf618e13960fc0fb0edbbb6d289a0c52963e7f8de5edb11094cc6",
+    "details/seven_iron_lean10_curve1_rotation1_shaft_only/density.png": "7baa9404a81134e4de2b9f6ddfbc45233cbff30774a3f24187def7f8ab54e42d",
+    "details/seven_iron_lean10_curve1_rotation1_shaft_only/overhead.png": "8c2158a946032f4108c4a98cf2e4cc32c2f45efe4f1993d350bc7fb8280cfdd0"
+  },
+  "source_commit": "4bb2be7362a04fc1af04a3662adae674d50916b7",
+  "producer_pid": 2862725
+}
