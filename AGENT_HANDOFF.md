@@ -56,6 +56,16 @@ source provenance, matching and all-model qualification remain open.
 - Address (MuJoCo, foot progression on): toe-out trail/lead -0.11/0.22 deg (driver) and -0.05/0.19 deg (7-iron); `hip_rotation` -17/+10 and -24/+18 deg. Evidence `evidence/foot_progression/pelvis_alignment_12109/`; diagnostic `scripts/diagnose_address_leg_yaw.py`. Reference: `docs/research/hip_axis_mirroring/` (Hip Rewrite Pelvis Alignment section).
 - Every calibrated anthro run changes: the canonical ground-support receipts are regenerated in this branch. Likely also the lead-hip limit in #12042 slice 3 / #11737.
 
+# Active: Web Club Head and Golfer Head - GCV-11 #11717, GCV-12 #11718
+
+- Branch `claude/gcv-11-12-web-head-club`. `ClubHead.tsx` (`clubHeadGeometry.ts`, `clubHeadAssets.ts`) draws the committed `assets/club_heads` STLs at spec loft and lie. `HeadModel.tsx` (`headModel.ts`) mirrors `model_appearance/head.py`. Both are mounted in `GolferModel.tsx`. The Vite dev server is allowed to read `../assets` only.
+- Open: the web ball (#11719) keeps `render.club_head_and_ball` at `gap`. There is no web club selector (the driver is always drawn), no WebGL stills, and the GCV-12 iron renders for Drake, Pinocchio, OpenSim and MyoSuite still need an engine host.
+
+# Active: MyoSuite Version 3 Native Export Worker - #11997 (GCV-14 #11720)
+
+- Branch `claude/myosuite-worker-3x`, stacked on PR #12026. myosuite 3.x has no `envs.env_base`, so the worker builds its own `mujoco` model and takes `MJRenderer` from `myosuite.viz.mj_renderer` (3.x) or `myosuite.renderer.mj_renderer` (2.x). The arena scene moved to the `myo_sim` package (`models/scene/myosuite_quad.xml`). Both lookups live in `backends/myosuite_compat.py`, which `MyoSuiteArenaBackend.unavailable_reason()` also probes (one import path).
+- Tests: `tests/unit/tools/native_viewer_export/test_myosuite_compat.py` (3.x preferred, 2.x fallback, unavailable reason string, scene lookup).
+
 # Active: Golf Ball in Engine Scenes - GCV-13 #11719, Epic #11706
 
 - Branch `claude/gcv-13-ball-scenes`. `src/shared/python/model_appearance/ball.py` (landed in #11772) already had the regulation-radius address-geometry function; this slice adds `resolve_ball_visual` (enabled/override/computed, "unavailable" with a reason rather than a guess) and a `ball` block (`enabled`, `position_m`, `source` in `BALL_SOURCES = (address_geometry, measured, model_estimate)`) on `AppearanceDocument`/`appearance_v1.schema.json`.

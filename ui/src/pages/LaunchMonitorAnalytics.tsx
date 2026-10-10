@@ -35,6 +35,9 @@ import type {
 import { LaunchMonitorTrendsPanel } from "./LaunchMonitorTrendsPanel";
 import { LaunchMonitorDispersionPanel } from "./LaunchMonitorDispersionPanel";
 import { LaunchMonitorRelationshipsPanel } from "./LaunchMonitorRelationshipsPanel";
+import { LaunchMonitorComparisonPanel } from "./LaunchMonitorComparisonPanel";
+import { LaunchMonitorModelsPanel } from "./LaunchMonitorModelsPanel";
+import { LaunchMonitorTreatmentPanel } from "./LaunchMonitorTreatmentPanel";
 
 const BOUNDARY_TEXT =
   "Associations and fitted regressions do not establish causality. " +
@@ -348,6 +351,13 @@ export function LaunchMonitorAnalyticsPage() {
   const [parseError, setParseError] = useState<string | null>(null);
   const [columns, setColumns] = useState<string[]>([]);
   const [records, setRecords] = useState<Record<string, CsvValue>[]>([]);
+  // Data Treatment's output (or null, meaning no treatment is active).
+  // Desktop parity: `_present_treatment` replaces `self.analysis_frame`,
+  // which every other tab then reads — the Treatment panel itself keeps
+  // working on the raw `records` (`project.combined_shots()`).
+  const [treatedRecords, setTreatedRecords] = useState<
+    Record<string, CsvValue>[] | null
+  >(null);
 
   const [outcome, setOutcome] = useState("");
   const [predictors, setPredictors] = useState<string[]>([]);
@@ -380,13 +390,31 @@ export function LaunchMonitorAnalyticsPage() {
     };
   }, []);
 
+  // The treated view feeds every analysis tab (desktop parity:
+  // `self.analysis_frame`); the Treatment panel itself always sees the raw
+  // `records` below.
+  const analysisRecords = useMemo(
+    () => treatedRecords ?? records,
+    [treatedRecords, records],
+  );
+  // Treatment can add derived/status columns, so the column list is
+  // recomputed from the treated rows rather than reusing the CSV's header.
+  const analysisColumns = useMemo(() => {
+    if (!treatedRecords) return columns;
+    const keys = new Set<string>();
+    for (const record of treatedRecords) {
+      Object.keys(record).forEach((key) => keys.add(key));
+    }
+    return Array.from(keys);
+  }, [treatedRecords, columns]);
+
   const numericCols = useMemo(
-    () => numericColumns(columns, records),
-    [columns, records],
+    () => numericColumns(analysisColumns, analysisRecords),
+    [analysisColumns, analysisRecords],
   );
   const groupCols = useMemo(
-    () => groupColumns(columns, records),
-    [columns, records],
+    () => groupColumns(analysisColumns, analysisRecords),
+    [analysisColumns, analysisRecords],
   );
   const predictorOptions = useMemo(
     () => numericCols.filter((column) => column !== outcome),
@@ -417,6 +445,7 @@ export function LaunchMonitorAnalyticsPage() {
       }
       setColumns(parsed.columns);
       setRecords(parsed.records);
+      setTreatedRecords(null);
       setFileName(file.name);
       setParseError(null);
       setResult(null);
@@ -440,7 +469,7 @@ export function LaunchMonitorAnalyticsPage() {
   );
 
   const canRun =
-    outcome !== "" && predictors.length > 0 && records.length >= 3;
+    outcome !== "" && predictors.length > 0 && analysisRecords.length >= 3;
 
   const handleRun = useCallback(() => {
     if (!canRun) return;
@@ -457,7 +486,7 @@ export function LaunchMonitorAnalyticsPage() {
       min_samples: minSamples,
       allow_aggregate: false,
     };
-    void runFlexibleAnalysisV2(records, analysis)
+    void runFlexibleAnalysisV2(analysisRecords, analysis)
       .then((data) => {
         setResult(data);
         setRunState("done");
@@ -475,7 +504,7 @@ export function LaunchMonitorAnalyticsPage() {
     missingPolicy,
     groupBy,
     minSamples,
-    records,
+    analysisRecords,
   ]);
 
   const analysisPayload = (result?.analysis ?? null) as
@@ -650,6 +679,15 @@ export function LaunchMonitorAnalyticsPage() {
 
   const mainContent = (
     <div className="flex flex-col h-full gap-4 p-4 overflow-y-auto text-sm text-gray-200">
+      {treatedRecords && (
+        <p
+          data-testid="lma-treated-indicator"
+          className="text-xs text-amber-300"
+        >
+          Treated view: {treatedRecords.length} of {records.length} shots
+        </p>
+      )}
+
       <p
         data-testid="lma-status"
         className={
@@ -759,9 +797,31 @@ export function LaunchMonitorAnalyticsPage() {
         </>
       )}
 
-      <LaunchMonitorTrendsPanel columns={columns} records={records} />
-      <LaunchMonitorDispersionPanel columns={columns} records={records} />
-      <LaunchMonitorRelationshipsPanel columns={columns} records={records} />
+      <LaunchMonitorTrendsPanel
+        columns={analysisColumns}
+        records={analysisRecords}
+      />
+      <LaunchMonitorDispersionPanel
+        columns={analysisColumns}
+        records={analysisRecords}
+      />
+      <LaunchMonitorRelationshipsPanel
+        columns={analysisColumns}
+        records={analysisRecords}
+      />
+      <LaunchMonitorComparisonPanel
+        columns={analysisColumns}
+        records={analysisRecords}
+      />
+      <LaunchMonitorModelsPanel
+        columns={analysisColumns}
+        records={analysisRecords}
+      />
+      <LaunchMonitorTreatmentPanel
+        columns={columns}
+        records={records}
+        onTreated={setTreatedRecords}
+      />
     </div>
   );
 

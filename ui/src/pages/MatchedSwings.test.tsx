@@ -288,11 +288,61 @@ describe('MatchedSwingsPage', () => {
     );
 
     await screen.findByRole('button', { name: /drake/i });
-    const reportLink = screen.getByRole('link', { name: /export report/i });
+    const reportLink = screen.getByRole('link', { name: /^export report$/i });
     expect(reportLink).toHaveAttribute(
       'href',
       '/api/v1/matched-swings/aaa111/report',
     );
+  });
+
+  it('links the PDF report action to the format=pdf report URL', async () => {
+    render(
+      <MemoryRouter>
+        <MatchedSwingsPage />
+      </MemoryRouter>,
+    );
+
+    await screen.findByRole('button', { name: /drake/i });
+    const pdfLink = screen.getByRole('link', { name: /export report \(pdf\)/i });
+    expect(pdfLink).toHaveAttribute(
+      'href',
+      '/api/v1/matched-swings/aaa111/report?format=pdf',
+    );
+  });
+
+  it('enables Export Video links for a run with a candidate NPZ', async () => {
+    render(
+      <MemoryRouter>
+        <MatchedSwingsPage />
+      </MemoryRouter>,
+    );
+
+    await screen.findByRole('button', { name: /drake/i });
+    const gifLink = screen.getByRole('link', { name: /export video \(gif\)/i });
+    const mp4Link = screen.getByRole('link', { name: /export video \(mp4\)/i });
+    expect(gifLink).toHaveAttribute(
+      'href',
+      '/api/v1/matched-swings/aaa111/video?format=gif',
+    );
+    expect(mp4Link).toHaveAttribute(
+      'href',
+      '/api/v1/matched-swings/aaa111/video?format=mp4',
+    );
+  });
+
+  it('disables Export Video buttons for a run without a candidate NPZ', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <MatchedSwingsPage />
+      </MemoryRouter>,
+    );
+
+    await user.click(await screen.findByRole('button', { name: /opensim/i }));
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /export video \(gif\)/i })).toBeDisabled();
+      expect(screen.getByRole('button', { name: /export video \(mp4\)/i })).toBeDisabled();
+    });
   });
 
   it('disables the parity button when unavailable and fetches it when available', async () => {

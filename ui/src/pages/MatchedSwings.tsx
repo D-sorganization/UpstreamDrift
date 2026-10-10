@@ -24,6 +24,7 @@ import {
   fetchParityReport,
   formatMetric,
   matchedSwingReportUrl,
+  matchedSwingVideoUrl,
   verdictBadgeClass,
   type MatchedSwingRun,
 } from '@/api/matchedSwings';
@@ -444,6 +445,48 @@ export function MatchedSwingsPage() {
           >
             Export Report
           </a>
+          <a
+            href={matchedSwingReportUrl(selectedRun.id, 'pdf')}
+            download
+            className="text-xs rounded border border-gray-700 bg-gray-800 px-2 py-1 hover:border-gray-500"
+          >
+            Export Report (PDF)
+          </a>
+          {selectedRun.capabilities.has_candidate_npz ? (
+            <>
+              <a
+                href={matchedSwingVideoUrl(selectedRun.id, 'gif')}
+                download
+                className="text-xs rounded border border-gray-700 bg-gray-800 px-2 py-1 hover:border-gray-500"
+              >
+                Export Video (GIF)
+              </a>
+              <a
+                href={matchedSwingVideoUrl(selectedRun.id, 'mp4')}
+                download
+                className="text-xs rounded border border-gray-700 bg-gray-800 px-2 py-1 hover:border-gray-500"
+              >
+                Export Video (MP4)
+              </a>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                disabled
+                className="text-xs rounded border border-gray-700 bg-gray-800 px-2 py-1 hover:border-gray-500 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Export Video (GIF)
+              </button>
+              <button
+                type="button"
+                disabled
+                className="text-xs rounded border border-gray-700 bg-gray-800 px-2 py-1 hover:border-gray-500 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Export Video (MP4)
+              </button>
+            </>
+          )}
         </div>
         {receiptError && <p className="text-xs text-red-300">{receiptError}</p>}
         {receiptJson && (

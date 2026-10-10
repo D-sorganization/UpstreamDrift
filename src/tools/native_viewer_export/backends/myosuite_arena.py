@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from collections.abc import Iterator, Sequence
 from importlib.util import find_spec
+import logging
 import os
 from pathlib import Path
 import subprocess
@@ -19,12 +20,16 @@ from src.tools.native_viewer_export.backends._subprocess import (
     render_in_worker,
     worker_env,
 )
+from src.tools.native_viewer_export.backends.myosuite_compat import PROBE_CODE
+from src.tools.native_viewer_export.ball import AddressBall
 from src.tools.native_viewer_export.core import (
     ExportSettings,
     Image8,
     OverlayFeed,
     SwingInput,
 )
+
+logger = logging.getLogger(__name__)
 
 WORKER_MODULE = "src.tools.native_viewer_export.backends.myosuite_worker"
 PYTHON_ENV = "NATIVE_VIEWER_MYOSUITE_PYTHON"
@@ -51,7 +56,7 @@ class MyoSuiteArenaBackend:
                 "myosuite installed"
             )
         probe = subprocess.run(  # noqa: S603 - fixed argv
-            [python, "-c", "import myosuite, mujoco"],
+            [python, "-c", PROBE_CODE],
             capture_output=True,
             text=True,
             check=False,
@@ -59,7 +64,7 @@ class MyoSuiteArenaBackend:
             env=worker_env(),
         )
         if probe.returncode != 0:
-            return f"{python} cannot import myosuite and mujoco: {probe.stderr[-200:]}"
+            return f"{python} cannot import the MyoSuite renderer and mujoco: {probe.stderr[-200:]}"
         return None
 
     def render(
@@ -68,7 +73,10 @@ class MyoSuiteArenaBackend:
         settings: ExportSettings,
         indices: Sequence[int],
         overlay: OverlayFeed | None,
+        ball: AddressBall | None = None,
     ) -> Iterator[dict[str, Image8]]:
+        if ball is not None and ball.position_m is None:
+            logger.warning("skipping decorative ball: %s", ball.reason)
         python = myosuite_python()
         if python is None:
             raise RuntimeError(
@@ -81,4 +89,5 @@ class MyoSuiteArenaBackend:
             indices,
             overlay,
             worker_env(),
+            ball,
         )

@@ -114,7 +114,9 @@ def test_bad_names_raise(bad) -> None:
 
 
 def test_committed_assets_have_provenance_and_exist() -> None:
-    manifest = json.loads((ROOT / "assets/club_heads/provenance.json").read_text())
+    manifest = json.loads(
+        (ROOT / "assets/club_heads/provenance.json").read_text(encoding="utf-8")
+    )
     assert manifest["units"] == "mm"
     assert manifest["head_frame"] == "x=target,y=up,z=toe"
     for name, entry in manifest["heads"].items():

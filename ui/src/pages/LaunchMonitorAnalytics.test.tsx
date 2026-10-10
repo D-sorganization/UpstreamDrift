@@ -116,6 +116,7 @@ const {
   fetchCapabilitiesMock,
   analyzeRelationshipsV2Mock,
   analyzeMultivariateV2Mock,
+  applyTreatmentV2Mock,
 } = vi.hoisted(() => ({
   runFlexibleAnalysisV2Mock: vi.fn(),
   fetchCapabilitiesMock: vi.fn(async () => ({
@@ -126,6 +127,7 @@ const {
   })),
   analyzeRelationshipsV2Mock: vi.fn(),
   analyzeMultivariateV2Mock: vi.fn(),
+  applyTreatmentV2Mock: vi.fn(),
 }));
 
 vi.mock("@/api/launchMonitorAnalytics", async (importOriginal) => {
@@ -137,6 +139,7 @@ vi.mock("@/api/launchMonitorAnalytics", async (importOriginal) => {
     runFlexibleAnalysisV2: runFlexibleAnalysisV2Mock,
     analyzeRelationshipsV2: analyzeRelationshipsV2Mock,
     analyzeMultivariateV2: analyzeMultivariateV2Mock,
+    applyTreatmentV2: applyTreatmentV2Mock,
   };
 });
 
@@ -157,6 +160,7 @@ describe("LaunchMonitorAnalyticsPage", () => {
     fetchCapabilitiesMock.mockClear();
     analyzeRelationshipsV2Mock.mockReset();
     analyzeMultivariateV2Mock.mockReset();
+    applyTreatmentV2Mock.mockReset();
   });
 
   it("parses a loaded CSV and shows row/column counts and numeric options", async () => {
@@ -246,5 +250,44 @@ describe("LaunchMonitorAnalyticsPage", () => {
         /Analysis could not run: Columns not present/,
       ),
     ).toBeInTheDocument();
+  });
+
+  it("feeds a successful treatment into every analysis panel as the treated view", async () => {
+    applyTreatmentV2Mock.mockResolvedValue({
+      data: [
+        { ball_speed: 100, club_speed: 80, notes: "a" },
+        { ball_speed: 105, club_speed: 82, notes: "b" },
+      ],
+      flags: [{ row_index: 2, flag_type: "robust_outlier", metric: "ball_speed" }],
+      audit_log: [],
+      shot_count: 2,
+      flag_count: 1,
+    });
+    const user = userEvent.setup();
+    await loadCsv();
+
+    expect(screen.queryByTestId("lma-treated-indicator")).not.toBeInTheDocument();
+
+    await user.click(
+      screen.getByRole("button", { name: /apply reproducible treatment/i }),
+    );
+
+    // The page passes the raw (not yet treated) records to the Treatment
+    // panel itself, mirroring the desktop's `project.combined_shots()`.
+    await waitFor(() => {
+      expect(applyTreatmentV2Mock).toHaveBeenCalledTimes(1);
+    });
+    expect(applyTreatmentV2Mock.mock.calls[0][0]).toHaveLength(4);
+
+    // The treated view (2 of the original 4 rows) now drives the page's
+    // indicator and every analysis panel's `analysisRecords`/`analysisColumns`.
+    expect(await screen.findByTestId("lma-treated-indicator")).toHaveTextContent(
+      "Treated view: 2 of 4 shots",
+    );
+
+    await user.click(screen.getByRole("button", { name: /reset treatment/i }));
+    expect(
+      screen.queryByTestId("lma-treated-indicator"),
+    ).not.toBeInTheDocument();
   });
 });
