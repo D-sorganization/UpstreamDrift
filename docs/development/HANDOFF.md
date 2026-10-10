@@ -1,6 +1,6 @@
 # GCV-13 Slice 2: Decorative Address Ball in the Drake/Pinocchio MeshCat Native Export — #11719
 
-- Repository: `D-sorganization/UpstreamDrift`; worktree `UpstreamDrift-wt/g13b`; branch `claude/gcv-13b-meshcat-ball`; PR: not yet created.
+- Repository: `D-sorganization/UpstreamDrift`; worktree `UpstreamDrift-wt/g13b`; branch `claude/gcv-13b-meshcat-ball`; PR: #12114 (open, stacked on #11992; auto-merge not armed yet).
 - Governing issue: #11719 (epic #11706). Stacked on GCV-13 slice 1 (#11992, branch `claude/gcv-13-ball-scenes`, not yet merged; auto-merge armed).
 - Objective: draw the decorative address ball in the native viewer export's Drake and Pinocchio MeshCat backends, using the swing bundle's address frame (`q[0]`, clubhead grounded) rather than slice 1's static reference pose.
 - Completed:
@@ -12,7 +12,7 @@
 - Environment note: this worktree's `vendor/ud-tools` checkout was initially left empty by an interrupted `git submodule update --init` (files tracked in git's index but absent on disk, so `git status` read clean while imports failed with "vendor/ud-tools/src/shared/python is missing"). Fixed locally with `git -C vendor/ud-tools reset --hard <pinned-sha>`; the pin itself (`2e7665111b06f92ffbfe178b92d74d6a81c95388`) was already correct, no vendor bump was needed or made.
 - Validation: `ruff check`/`ruff format --check` clean on changed files; `pytest tests/unit/tools/native_viewer_export tests/unit/model_appearance -m unit` passes except 3 pre-existing failures unrelated to this change (two `test_backend_smoke.py::test_overlay_changes_native_pixels[drake|pinocchio]` failures from a pre-existing `pydrake`/`pinocchio` `sys.modules` test-double contamination left by another test in the same session — `find_spec` raises `ValueError: pydrake.__spec__ is not set` instead of returning `None`; and one `test_club_head_mesh.py::test_committed_assets_have_provenance_and_exist` Windows console mojibake on a `°` character). Both reproduce identically without this PR's changes.
 - Not in this slice: OpenSim, MyoSuite, the MuJoCo native-export backend, the web scene and post-impact ball flight (see PR body "Not in this slice").
-- Next steps: open the PR (stacked on #11992, do not arm auto-merge until #11992 merges); render the driver swing for Drake and Pinocchio through the ud-sim Docker image for evidence; fix up this handoff's/DEVELOPMENT_LOG's placeholder PR number and `Last verified` SHA in a follow-up commit once the PR exists.
+- Next steps: PR #12114 is open; do not arm auto-merge until #11992 merges, then rebase and arm it. The ud-sim Docker render for both backends was attempted and skipped (`playwright is not installed`, and the container user cannot `pip install` into `/opt/venv` to add it) — see the PR body's Evidence section; re-run on a host with Playwright installed if face-on footage is wanted.
 
 # Project Steward Pass — 2026-10-06
 
