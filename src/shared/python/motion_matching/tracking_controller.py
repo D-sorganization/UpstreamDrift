@@ -89,16 +89,29 @@ def tracking_controller(
     zeta: float = 1.0,
     balance: tuple[float, float] | None = None,
     root_regulation: tuple[float, float] | None = None,
-    acceleration_feedforward: float = 1.0,
-    split_time_s: float | None = None,
+    **impact_split: float | None,
 ) -> Controller:
     """Computed-torque tracking of a reference trajectory (linear interpolation).
 
     ``split_time_s`` splits the reference rates at the ball impact (GCV-20).
+
+    ``acceleration_feedforward`` and ``split_time_s`` are accepted through
+    ``**impact_split`` rather than as named parameters so this function stays
+    within the repository's parameter-count budget
+    (``scripts/ci/check_architecture_budget.py``); any other keyword raises
+    ``TypeError``.
     """
     from src.shared.python.motion_matching.full_body_forward_dynamics import (
         _tracking_gains,
     )
+
+    acceleration_feedforward = impact_split.pop("acceleration_feedforward", 1.0)
+    split_time_s = impact_split.pop("split_time_s", None)
+    if impact_split:
+        raise TypeError(
+            "tracking_controller() got unexpected keyword arguments: "
+            f"{sorted(impact_split)}"
+        )
 
     return _tracking_controller_from_gains(
         simulator,
