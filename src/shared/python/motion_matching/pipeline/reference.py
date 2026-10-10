@@ -487,6 +487,9 @@ def build_ik_report(inputs: IKReportInputs) -> dict[str, Any]:
     report = {
         "frames": lane.frames,
         "marker_rms_m": float(np.sqrt(np.mean(errors[lane.valid] ** 2))),
+        # The trajectory starts at the address solve; a large frame-0 jump
+        # means the trajectory IK left the address basin (#12030).
+        "frame0_marker_rms_m": float(np.sqrt(np.mean(errors[0][lane.valid[0]] ** 2))),
         "segment_rms_m": segment_rms(inputs.labels, errors, lane.valid),
         "closure_error_max_m": float(max(f.closure_error_m for f in inputs.fits)),
         "lowest_sphere_height_min_m": float(heights.min()),

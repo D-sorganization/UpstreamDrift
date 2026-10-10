@@ -373,6 +373,8 @@ class Lane:
         #: Per-frame club-face orientation targets (OSV-10); None: marker-only.
         self.face_targets: list[dict[str, Any] | None] | None = None
         self.face_weight = 0.0
+        #: Why a requested face residual is unavailable (#12030); None if not.
+        self.face_unavailable_reason: str | None = None
         #: Restart policy of the full-capture trajectory solve (#12042).
         self.restart_policy = DEFAULT_IK_RESTART_POLICY
         #: Weight of the address-pose posture prior (#12042); 0 disables it.
@@ -469,13 +471,23 @@ class Lane:
         ``attachments`` and the document's rendered face. Raises
         ``ValueError``/``TypeError`` for a negative or non-numeric weight."""
         from src.shared.python.motion_matching.club_face_target import (
+            TriadShapeMismatchError,
             face_axis_targets,
+            validate_face_weight,
         )
 
-        targets = face_axis_targets(
-            self.points, self.valid, self.labels, attachments, spec, weight=weight
-        )
+        validate_face_weight(weight)
         self.face_weight = float(weight)
+        self.face_unavailable_reason = None
+        try:
+            targets = face_axis_targets(
+                self.points, self.valid, self.labels, attachments, spec, weight=weight
+            )
+        except TriadShapeMismatchError as exc:
+            # Triad offsets of another club: never fake a face target (#12030).
+            self.face_targets = None
+            self.face_unavailable_reason = str(exc)
+            return
         self.face_targets = targets if any(targets) else None
 
     def set_club_targets(
