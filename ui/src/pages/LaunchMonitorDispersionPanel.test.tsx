@@ -74,6 +74,34 @@ describe("LaunchMonitorDispersionPanel", () => {
     analyzeDispersionV2Mock.mockReset();
   });
 
+  it("falls back to the first numeric column and (all shots) when chosen columns leave the CSV", async () => {
+    const user = userEvent.setup();
+    const { rerender } = render(
+      <LaunchMonitorDispersionPanel columns={COLUMNS} records={RECORDS} />,
+    );
+    await user.selectOptions(screen.getByLabelText("Group By"), "club");
+
+    const otherColumns = ["ball_speed", "spin_rate"];
+    const otherRecords: Record<string, CsvValue>[] = RECORDS.map((_, i) => ({
+      ball_speed: 150 + i,
+      spin_rate: 2500 + i,
+    }));
+    rerender(
+      <LaunchMonitorDispersionPanel
+        columns={otherColumns}
+        records={otherRecords}
+      />,
+    );
+
+    expect(screen.getByLabelText("Forward Coordinate")).toHaveValue(
+      "ball_speed",
+    );
+    expect(screen.getByLabelText("Lateral Coordinate")).toHaveValue(
+      "ball_speed",
+    );
+    expect(screen.getByLabelText("Group By")).toHaveValue("(all shots)");
+  });
+
   it(
     "sends the desktop-default inputs, omitting group_column for " +
       '"(all shots)", and includes it once a group is selected',
