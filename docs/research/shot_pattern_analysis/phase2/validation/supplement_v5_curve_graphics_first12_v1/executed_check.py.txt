@@ -1,0 +1,29 @@
+from pathlib import Path
+import json,hashlib,re,html
+from PIL import Image,ImageDraw,ImageFont
+root=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift')
+b=root/'docs/research/shot_pattern_analysis/phase2'; p=b/'supplement_report_v1/figures/comparisons'; v=b/'validation/supplement_v5_curve_graphics_first12_v1';v.mkdir(exist_ok=True)
+h=lambda f:hashlib.sha256(f.read_bytes()).hexdigest()
+f=b/'supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.json'; start=h(f)
+rows=[x for x in json.loads(f.read_text())['comparisons'] if x['comparison_kind']=='curve_strength'];out=[]
+for row in sorted(rows,key=lambda x:tuple(s['cell'] for s in x['sources'])):
+ prefix='curve_strength_'+row['sources'][0]['cell']+'_vs_'+row['sources'][1]['cell']+'_'
+ fs=sorted(p.glob(prefix+'*'));png=[x for x in fs if x.suffix=='.png']
+ if len(fs)!=16 or len(png)!=6:continue
+ texts={x.name:' '.join(' '.join(html.unescape(t) for t in re.findall(r'<!-- (.*?) -->',x.read_text(),re.S)).split()) for x in fs if x.suffix=='.svg'}
+ for name,t in texts.items():
+  for protocol in row['source_protocols']:assert protocol in t.replace('- ', '-'),(name,protocol)
+  if '_density_' in name:
+   assert f"{row['common_supported_n']:,}/10,000" in t,(name,'n')
+   assert f"{row['target_x_m']:.2f} m" in t,(name,'target')
+   assert 'All Six Populations' in t,name
+  if '_overhead.' in name:assert 'not paired by shot index' in t,name
+ i=len(out)+1;contact=v/f'contact_{i:02d}.jpg';canvas=Image.new('RGB',(2400,3150),'white');draw=ImageDraw.Draw(canvas);font=ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',18)
+ for j,x in enumerate(png):
+  im=Image.open(x);im.load();im.thumbnail((1180,980));xx=j%2*1200;yy=j//2*1050;canvas.paste(im,(xx+(1200-im.width)//2,yy+50));draw.text((xx+10,yy+8),x.name.split('_density')[-1] if '_density' in x.name else 'Overhead',font=font,fill='black')
+ canvas.save(contact,quality=95)
+ out.append({'index':i,'sources':row['sources'],'common_supported_n':row['common_supported_n'],'target_x_m':row['target_x_m'],'assets_sha256':{x.name:h(x) for x in fs},'contact_sha256':h(contact),'contact':contact.name})
+ if len(out)==12:break
+assert len(out)==12;assert h(f)==start
+(v/'inventory.json').write_text(json.dumps({'scope':'First12 completed curve pairs; not full publication acceptance','comparison_sha256':start,'pairs':out},indent=2)+'\n')
+(v/'executed_check.py.txt').write_bytes(Path(__file__).read_bytes());print(v)
