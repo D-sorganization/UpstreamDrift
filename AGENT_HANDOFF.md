@@ -1,3 +1,9 @@
+# Active: Per-Club Clubhead Marker Cluster, #12210
+
+- Branch `claude/12210-iron-head-triad` (stacked on #12208). The builder gave every club the driver-fitted native candidate's `Clubhead` cluster. `execution/club_markers.py` and `assets.get_club_markers` now supply a per-club `club-markers/1` file (`evidence/club_markers/iron7.json`, from the calibrated `anthro_iron_seeds_zmp` receipt at `1bef553457`); `scripts/set_spec_club_markers.py` applies it idempotently. 7-iron head-triad residual on capture-B 42.4 → 0.24 mm.
+- Nominal 7-iron 70.4 / 67.9 / 79.2 → 41.5 / 45.2 / 104.9 mm (face and impact split now observed). Calibrated 7-iron 6.6 / 26.8 / 54.5 → 4.0 / 28.4 / 109.9 mm; a control at the parent reproduces the old receipt, so static calibration depends on its club priors and the GCV-20 release cutoff falls back to 30 Hz. Calc record: `simscape_matching_reference.tex`, "Per-Club Cluster".
+- Open: owner decision on the canonical calibrated 7-iron (PR left unarmed).
+
 # Active: Nominal 7-Iron IK and the Club-Face Triad Gate, #12030
 
 - Branch `claude/12030-nominal-iron-ik`. Root cause: `full_body_spec_anthro_iron7.json` carries the driver's clubhead triad offsets (edges 92/52/96 mm against the 7-iron capture's 106/127/40 mm), so the nominal run's face residual (OSV-10) fitted a meaningless rotation. `club_face_target.observe_frame_rotations` now raises `TriadShapeMismatchError` above a 5 mm median rigid residual (0.2 mm when matched, 42.4 mm here). Face targets, the impact split and the receipt's `ik.face_orientation` record the reason. The IK report adds `frame0_marker_rms_m`.

@@ -5230,11 +5230,48 @@ gate the nominal 7-iron reaches 67.9~mm IK (frame 0: 70.2~mm, against a
 70.4~mm address) and 79.2~mm dynamics. \texttt{--face-weight 0} on unmodified
 code gives the same 67.9~mm, which isolates the cause. The driver and every
 calibrated run match their capture triad, so their fits are unchanged.
-Limitation: the 7-iron document's nominal triad is still the driver's;
-correcting it changes the base-specification hash of every 7-iron receipt.
 
-Reproduce (ControlTower \texttt{ud-sim}, repository root):
+\paragraph{Per-Club Cluster (Issue \#12210).}
+The builder gave every club the native candidate's \texttt{Clubhead} cluster,
+which is the driver's head triad and shaft cluster (the shaft markers sat
+170~mm too far up the shorter 7-iron shaft). It now reads a per-club
+\texttt{club-markers/1} file and refuses a non-driver club without one. The
+7-iron file holds the six offsets of the static-seed calibrated
+\texttt{anthro\_iron\_seeds\_zmp} receipt at commit \texttt{1bef553457}; its
+head-triad edges are 40/106/128~mm and its median residual on capture-B is
+0.24~mm (the driver document on capture-A: 0.17~mm).
+
+\begin{center}
+\begin{tabular}{lrrrr}
+\hline
+7-Iron Receipt & Address & IK & Dynamics & After Impact \\
+\hline
+Nominal, driver cluster & 70.4 & 67.9 & 79.2 & 101.6 \\
+Nominal, 7-iron cluster & 41.5 & 45.2 & 104.9 & 184.6 \\
+Calibrated, driver cluster prior & 6.6 & 26.8 & 54.5 & 92.1 \\
+Calibrated, 7-iron cluster prior & 4.0 & 28.4 & 109.9 & 199.7 \\
+\hline
+\end{tabular}
+\end{center}
+Marker RMS in mm. On the nominal run the face residual is observed
+(separation RMS 1.41~deg) and the club segment falls from 117.3 to
+25.4~mm in IK. The calibrated run changes too, although its static trial
+recalibrates the cluster. A control at the parent commit reproduces the old
+receipt exactly. The static-trial calibration is therefore not a fixed point
+of its priors: it moves the club markers 25--54~mm and body markers up to
+32~mm. On the new placement the IK clubhead speed peak precedes the impact
+split by 7--18~ms at every candidate cutoff. The release cutoff then falls
+back to 30~Hz, from 18~Hz, and the after-impact replay error doubles.
+Failed experiment, recorded: the canonical 54.5~mm depended on a
+calibration seeded with the wrong club; which calibrated 7-iron result is
+canonical awaits an owner decision.
+
+Reproduce (ControlTower \texttt{ud-sim}, repository root; add
+\texttt{--static-seeds --zmp-filter} for the calibrated run):
 \begin{verbatim}
+python3 -m scripts.set_spec_club_markers apply \
+  docs/development/full_body_models/evidence/club_markers/iron7.json \
+  docs/development/full_body_models/full_body_spec_anthro_iron7.json
 python3 -m src.shared.python.motion_matching.pipeline.cli \
   --spec docs/development/full_body_models/full_body_spec_anthro_iron7.json \
   --capture iron --out runs/anthro_iron

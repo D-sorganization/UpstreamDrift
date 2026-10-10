@@ -397,7 +397,14 @@ def marker_seeds(
                 f"native {CLUB_MARKER_BODY} cluster {sorted(club)}"
             )
         club = {
-            label: MarkerAttachment(CLUB_MARKER_BODY, tuple(club_offsets[label]))
+            label: MarkerAttachment(
+                CLUB_MARKER_BODY,
+                (
+                    float(club_offsets[label][0]),
+                    float(club_offsets[label][1]),
+                    float(club_offsets[label][2]),
+                ),
+            )
             for label in club
         }
     seeds: dict[str, MarkerAttachment] = {
