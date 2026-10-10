@@ -5,7 +5,12 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from scripts.diagnose_address_leg_yaw import heading_deg, leg_headings, wrap_deg
+from scripts.diagnose_address_leg_yaw import (
+    heading_deg,
+    leg_headings,
+    toe_out_estimators,
+    wrap_deg,
+)
 from src.shared.python.motion_matching.hip_calibration import (
     ANKLE_OUT_LATERAL_M,
     KNEE_OUT_LATERAL_M,
@@ -69,6 +74,24 @@ def test_foot_only_yaw_is_isolated_to_the_shank_to_foot_link() -> None:
     assert out["right"]["knee_forward_heading_deg"] == pytest.approx(0.0, abs=1e-6)
     assert out["right"]["forefoot_minus_knee_deg"] == pytest.approx(-12.0, abs=1e-6)
     assert out["left"]["forefoot_minus_knee_deg"] == pytest.approx(9.0, abs=1e-6)
+
+
+def test_forefoot_toe_out_matches_the_capture_estimator_sign() -> None:
+    """Native capture world: golfer faces -x, target (lead side) is -y."""
+    turn = _rz(180.0)
+    m_r, _ = _leg("R", 0.0, -12.0)
+    m_l, _ = _leg("L", 0.0, 9.0)
+    markers = {k: turn @ v for k, v in {**m_r, **m_l}.items()}
+    out = toe_out_estimators(markers)
+    assert out["right"]["forefoot"] == pytest.approx(12.0, abs=1e-6)
+    assert out["left"]["forefoot"] == pytest.approx(9.0, abs=1e-6)
+    square = toe_out_estimators(
+        {k: turn @ v for k, v in {**_leg("R", 0, 0)[0], **_leg("L", 0, 0)[0]}.items()}
+    )
+    for side in ("right", "left"):
+        assert square[side]["forefoot"] == pytest.approx(0.0, abs=1e-6)
+        # the raw ankle-toe axis reads toe-in because AnkleOut is lateral
+        assert square[side]["raw"] < square[side]["corrected"] < 0.0
 
 
 def test_heading_rejects_vertical_vector() -> None:

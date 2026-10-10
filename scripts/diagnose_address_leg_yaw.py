@@ -24,11 +24,22 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.motion_matching.foot_progression import (
+    ANKLE_LATERAL_OFFSET_M,
+    foot_role,
+    forward_axis,
+    marker_long_axis,
+    progression_angle_deg,
+)
 from src.shared.python.motion_matching.hip_calibration import (
     LATERAL_SEEDS_M,
     knee_flexion_axis,
 )
 from src.shared.python.motion_matching.pipeline import cli
+from src.shared.python.motion_matching.pipeline.address_feet import (
+    NATIVE_TARGET_AXIS,
+    NATIVE_UP_AXIS,
+)
 
 PELVIS_FRAME = "Hip"  # the spec's pelvis frame (Simscape LowerTorso)
 LEG_BODIES = (PELVIS_FRAME, "femur_r", "femur_l", "tibia_r", "tibia_l")
@@ -160,8 +171,99 @@ def diagnose(ns: argparse.Namespace) -> dict[str, Any]:
         },
         "foot_progression": res.address_report.get("foot_progression"),
         "marker_rms_m": res.address_report.get("calibrated", {}).get("marker_rms_m"),
+        "toe_out_estimators_deg": {
+            "capture_markers": toe_out_estimators(capture),
+            "model_markers": toe_out_estimators(model),
+        },
+    }
+    forward_in_hip = np.asarray(res.hip_report["pelvis_axes_in_hip_frame"][0])
+    report["pelvis_anatomical_forward_heading_deg"] = heading_deg(
+        pelvis_r @ forward_in_hip
+    )
+    report["thigh_minus_pelvis_deg"] = thigh_minus_pelvis(kin, q, forward_in_hip, names)
+    report["thigh_minus_pelvis_vs_hip_rotation_deg"] = {
+        f"{rot:+.0f}": thigh_minus_pelvis(
+            kin, q, forward_in_hip, names, hip_rotation_deg=rot
+        )
+        for rot in SWEEP_DEG
     }
     return report
+
+
+SWEEP_DEG = (-40.0, -20.0, 0.0, 20.0, 40.0)
+
+
+def thigh_minus_pelvis(
+    kin: Any,
+    q: np.ndarray,
+    forward_in_hip: np.ndarray,
+    names: Sequence[str],
+    *,
+    hip_rotation_deg: float | None = None,
+) -> dict[str, float]:
+    """Model knee-forward heading minus the anatomical pelvis-forward heading.
+
+    With ``hip_rotation_deg`` both ``hip_rotation_*`` coordinates are set to
+    that value first (the rest of ``q`` unchanged), so the sweep exposes the
+    coordinate's zero: the value at which the thigh is square to the pelvis.
+    """
+    qq = np.asarray(q, dtype=float).copy()
+    if hip_rotation_deg is not None:
+        for sfx in ("r", "l"):
+            qq[list(names).index(f"hip_rotation_{sfx}")] = np.radians(hip_rotation_deg)
+    poses = kin.body_poses(qq, LEG_BODIES)
+    pelvis = heading_deg(np.asarray(poses[PELVIS_FRAME][0]) @ forward_in_hip)
+    points = kin.marker_positions(qq)
+    markers = {label: points[i] for i, label in enumerate(kin.labels)}
+    hips = {
+        "right": np.asarray(poses["femur_r"][1], dtype=float),
+        "left": np.asarray(poses["femur_l"][1], dtype=float),
+    }
+    legs = leg_headings(markers, hips)
+    return {
+        side: wrap_deg(legs[side]["knee_forward_heading_deg"] - pelvis) for side in legs
+    }
+
+
+def toe_out_estimators(markers: Mapping[str, Sequence[float]]) -> dict[str, Any]:
+    """The capture's three toe-out estimators applied to one marker set.
+
+    Same definitions as :func:`foot_progression._measure_foot` (raw ankle-toe,
+    malleolus-corrected ankle-toe, forefoot normal) at a single frame, so a
+    model marker set and the capture are compared like for like.
+    """
+    target, up = NATIVE_TARGET_AXIS, NATIVE_UP_AXIS
+    out: dict[str, Any] = {}
+    for side, pre, _ in SIDES:
+        role = foot_role(side, "right")
+        toe_dir = target if role == "lead" else -target
+        heel = np.asarray(markers[f"{pre}AnkleOut"], dtype=float)
+        t_in = np.asarray(markers[f"{pre}ToeIn"], dtype=float)
+        t_out = np.asarray(markers[f"{pre}ToeOut"], dtype=float)
+        fwd = forward_axis(target, up, "right")
+        line = np.cross(up, t_out - t_in)
+        fore = line if line @ fwd > 0 else -line
+
+        def angle(axis: np.ndarray, role: str = role) -> float:
+            return progression_angle_deg(
+                axis, target_axis=target, up=up, foot_role=role, handedness="right"
+            )
+
+        out[side] = {
+            "raw": angle(marker_long_axis(heel, t_in, t_out, up=up)),
+            "corrected": angle(
+                marker_long_axis(
+                    heel,
+                    t_in,
+                    t_out,
+                    up=up,
+                    out_dir=toe_dir,
+                    ankle_lateral_offset_m=ANKLE_LATERAL_OFFSET_M,
+                )
+            ),
+            "forefoot": angle(fore),
+        }
+    return out
 
 
 def main(argv: Sequence[str] | None = None) -> int:
