@@ -7,7 +7,7 @@ import hashlib
 import json
 from pathlib import Path
 import time
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 from numpy.typing import NDArray
@@ -27,8 +27,13 @@ from .native_muscle_bundle import (
     build_native_muscle_replay_bundle,
     replay_native_muscle_bundle,
 )
+from .native_prepared_state import DeclaredColdStart
 from .registration import register_points
 from .trc import read_trc
+
+if TYPE_CHECKING:
+    from .muscle_replay import NativeMuscleReplayResult
+    from .native_constrained_muscle import ConstrainedMuscleReplay
 
 
 @dataclass(frozen=True)
@@ -167,13 +172,23 @@ def export_native_moco_bundle(
     solution = _solution(request, solved, directory)
     original, output = _exact_output_grid(solution, prepared, directory)
     controls = _native_control_history(request, solution, original, output)
-    bundle = build_native_muscle_replay_bundle(
-        request.model_path,
-        request.bindings.initial_state,
-        output,
-        controls,
-        experiment_id="offline-native-moco-independent-replay",
-    )
+    if request.constrained_cold_start is None:
+        bundle = build_native_muscle_replay_bundle(
+            request.model_path,
+            request.bindings.initial_state,
+            output,
+            controls,
+            experiment_id="offline-native-moco-independent-replay",
+        )
+    else:
+        from .native_constrained_muscle import build_constrained_muscle_bundle
+
+        bundle = build_constrained_muscle_bundle(
+            request.constrained_cold_start,
+            output,
+            controls,
+            experiment_id="offline-native-moco-constrained-independent-replay",
+        )
     contracts = native_replay_contract_types()
     payload = contracts.dumps_experiment_replay_bundle(bundle)
     reloaded = contracts.load_experiment_replay_bundle(payload)
@@ -208,7 +223,11 @@ def export_native_moco_bundle(
 
 
 def replay_native_moco_bundle(
-    exported: NativeMocoExport, model_path: Path, output_dir: Path
+    exported: NativeMocoExport,
+    model_path: Path,
+    output_dir: Path,
+    *,
+    constrained_cold_start: DeclaredColdStart | None = None,
 ) -> Any:
     """Execute the saved T01 inputs on a fresh model, without a reference API."""
     directory = Path(output_dir)
@@ -223,7 +242,17 @@ def replay_native_moco_bundle(
         raise ValueError("Native model changed before independent replay")
     wall = time.perf_counter()
     cpu = time.process_time()
-    result = replay_native_muscle_bundle(bundle, model_path)
+    result: NativeMuscleReplayResult | ConstrainedMuscleReplay
+    if constrained_cold_start is None:
+        if bundle.model.variant_id != "reviewed-cold-start-muscles":
+            raise ValueError("constrained replay requires its declared cold start")
+        result = replay_native_muscle_bundle(bundle, model_path)
+    else:
+        from .native_constrained_muscle import replay_constrained_muscle_bundle
+
+        if constrained_cold_start.model_path != Path(model_path).resolve():
+            raise ValueError("constrained replay model path differs")
+        result = replay_constrained_muscle_bundle(bundle, constrained_cold_start)
     if not np.array_equal(result.times, exported.output_times):
         raise ValueError("Native execution did not retain the frozen output clock")
     evidence = directory / "native_replay.npz"
@@ -261,6 +290,15 @@ def _native_marker_points(
     indices: NDArray[np.intp],
     labels: tuple[str, ...],
 ) -> tuple[NDArray[np.float64], str]:
+    if request.constrained_cold_start is not None:
+        from .native_constrained_muscle import observe_constrained_markers
+
+        return observe_constrained_markers(
+            request.constrained_cold_start,
+            native,
+            {label: request.marker_bindings[label] for label in labels},
+            indices,
+        )
     coordinate_names = tuple(
         name.removesuffix("/value")
         for name in native.state_names

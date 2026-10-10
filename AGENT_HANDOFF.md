@@ -935,3 +935,15 @@ those rows and the six-engine denominator remain unqualified. See
 `docs/development/feedback_controls/F09F-MYOSUITE-NATIVE-EXCITATION.md` and
 canonical chapter31. The generic legacy four-value Gym step issue remains
 separate because this provider uses native plant stepping only.
+
+## F07 Constrained Muscle Moco and Replay (#12143)
+
+The versioned OpenSim 4.6 constrained-muscle policy binds source, named
+state, explicit lock targets/charts/couplers, native muscle options and exact
+T01 excitation knots before independent fresh-model replay. Actual native
+tests include CustomJoint, moving path, two Millard muscles, changed-future
+excitation and a reachable coupler-only Moco endpoint with measured replay
+error. Installed Moco rejects locked coordinates; the unchanged 520-muscle
+source remains blocked by anatomy/passive/assistance/contact and private
+marker registration. See chapter42 and
+`docs/development/feedback_controls/F07_CONSTRAINED_MUSCLE_MOCO_TURNOVER.md`.
