@@ -86,6 +86,16 @@ environment with matching `CASADIPATH`:
 ```
 
 Do not treat the 40 ms fixture as a private capture or full-horizon result.
+After parent #12163 and physical-inertia helper #12188 merged, the normal main
+integration retained this child's shared Manager seed check, declared mixed
+constraint policy, chart checks and regression tests. The ten-suite native
+command above passed 223 tests with three explicit optional skips in 66.94 s.
+The reused checkout initially held an older Tools submodule: that run failed
+74 cases at the missing T01 contract boundary. Restoring the already governed
+`86d0f28b1cc5acf61185e07e320c816c2d005512` pin resolved those environment failures;
+no source admission or replay assertion was relaxed. Dependency/context and
+design-manual governance checks pass; scientific release remains blocked.
+
 Production driver/iron source anatomy, marker calibration, passive forces,
 complete native initial-state evidence, external-resource closure,
 contact/grip, assistance policy, physiology and all-variant/six-engine parity
