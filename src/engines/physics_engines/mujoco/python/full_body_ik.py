@@ -33,7 +33,6 @@ Array: TypeAlias = NDArray[np.float64]
 Attachment = tuple[str, tuple[float, float, float]]
 
 
-
 class MujocoFullBodyIK(BaseFullBodyIK):
     """Full-body MuJoCo inverse kinematics adapter consuming a full-body spec."""
 

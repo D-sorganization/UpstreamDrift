@@ -220,9 +220,7 @@ class DrakeFullBodyIK(BaseFullBodyIK):
         self._set(q)
         x_wa, x_wb = self._closure_transforms()
         pos = np.linalg.norm(x_wa.translation() - x_wb.translation())
-        rot = _finite_rotation_error(
-            x_wa.rotation().matrix(), x_wb.rotation().matrix()
-        )
+        rot = _finite_rotation_error(x_wa.rotation().matrix(), x_wb.rotation().matrix())
         return float(pos), float(np.linalg.norm(rot))
 
     def sphere_heights(self, q: Array, ground: GroundPlane) -> dict[str, float]:
