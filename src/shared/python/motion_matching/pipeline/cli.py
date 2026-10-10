@@ -81,6 +81,11 @@ from src.shared.python.motion_matching.pipeline.finish_feasibility import (
 from src.shared.python.motion_matching.pipeline.gaze_residual import (
     head_gaze_receipt,
 )
+from src.shared.python.motion_matching.pipeline.gaze_tracking import (
+    NECK_REFERENCES,
+    apply_fd_neck,
+    fd_head_gaze_report,
+)
 from src.shared.python.motion_matching.pipeline.lane import (
     Lane,
     configure_lane,
@@ -183,6 +188,16 @@ def build_parser() -> argparse.ArgumentParser:
             "soft head-gaze residual weight (eyes on the ball until impact + "
             "0.03 s, then a 0.35 s release to the target line); 0 keeps the "
             "marker-faithful head (default)"
+        ),
+    )
+    parser.add_argument(
+        "--fd-neck",
+        choices=list(NECK_REFERENCES),
+        default="ik",
+        help=(
+            "neck reference for the forward-dynamics replay (OSV-3 #11729): "
+            "ik keeps the marker-driven neck (default); gaze tracks the gaze "
+            "schedule (modelled, not measured)"
         ),
     )
     parser.add_argument(
@@ -879,6 +894,8 @@ def _simulate_and_receipt(
     log = ctx.log
     tracking = getattr(args, "tracking", "kkt")
     q_track = smooth_reference(q_ref, lane.rate_hz, TRACKING_CUTOFF_HZ)
+    fd_neck = getattr(args, "fd_neck", "ik")
+    q_track, neck_solve = apply_fd_neck(fd_neck, lane, kin, q_ref, q_track)
     zmp = fs.reference_zmp(sim, lane.times, q_track, lane.ground)
     q_track, zmp, zmp_filter_report, centroidal_report = _feasibility_filters(
         args, (lane, kin, sim, log), q_track, zmp
@@ -955,6 +972,9 @@ def _simulate_and_receipt(
     )
     receipt["engine"] = ctx.engine
     receipt["head_gaze"] = head_gaze_receipt(lane, kin, q_ref)
+    receipt["dynamics"]["head_gaze"] = fd_head_gaze_report(
+        lane, kin, q_ref, q_track, sim_q, neck_solve, fd_neck
+    )
     _apply_trajectory_optimiser(args, out_dir, receipt, lane=lane, kin=kin, sim=sim)
     _write_receipt(out_dir, receipt)
     log_pipeline_summary(

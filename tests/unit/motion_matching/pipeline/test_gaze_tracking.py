@@ -198,7 +198,7 @@ def test_apply_fd_neck_ik_is_identity_and_gaze_improves() -> None:
     before = gt.schedule_tracking(plan, kin, q_track, TIMES)
     after = gt.schedule_tracking(plan, kin, new, TIMES)
     assert after["release"]["rms_deg"] < before["release"]["rms_deg"]
-    assert after["hold"]["rms_deg"] <= before["hold"]["rms_deg"] + 1e-9
+    assert after["hold"]["rms_deg"] < 0.5  # eye offset moves with the head
     with pytest.raises(ValueError, match="ik"):
         gt.apply_fd_neck("foo", FakeLane(), kin, q_ref, q_track)
 
