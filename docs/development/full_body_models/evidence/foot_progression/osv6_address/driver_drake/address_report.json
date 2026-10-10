@@ -1,11 +1,7 @@
 {
   "calibrated": {
     "centre_of_mass": {
-      "com_m": [
-        0.9913964046578607,
-        0.06230685860061226,
-        0.9154062784533038
-      ],
+      "com_m": [0.9913964046578607, 0.06230685860061226, 0.9154062784533038],
       "height_above_ground_m": 0.9151484983484283,
       "inside_support_polygon": true,
       "polygon_centroid_offset_m": 0.049368725092557485

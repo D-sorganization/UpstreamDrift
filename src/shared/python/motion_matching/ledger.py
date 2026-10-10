@@ -96,7 +96,7 @@ def _extract_metric_value(data: Mapping[str, Any], *keys: str) -> float | None:
 
 
 def extract_metrics(data: Mapping[str, Any]) -> SharedMetrics:
-    """Extract standard five comparison metrics from receipt data."""
+    """Extract the five comparison metrics and the FD phase split."""
     whole = _extract_metric_value(
         data, "whole_marker_rmse_m", "whole_rms_m", "marker_rms_m"
     )
@@ -111,7 +111,12 @@ def extract_metrics(data: Mapping[str, Any]) -> SharedMetrics:
         deg = _extract_metric_value(data, "pelvis_yaw_diff_deg")
         if deg is not None:
             yaw = math.radians(abs(deg))
+    phase = (data.get("dynamics") or {}).get("fd_phase") or {}
     return SharedMetrics(
+        fd_address_to_impact_rmse_m=_extract_metric_value(
+            phase, "fd_rms_address_to_impact_m"
+        ),
+        fd_after_impact_rmse_m=_extract_metric_value(phase, "fd_rms_after_impact_m"),
         whole_marker_rmse_m=whole,
         early_marker_rmse_m=early,
         terminal_marker_rmse_m=terminal,
