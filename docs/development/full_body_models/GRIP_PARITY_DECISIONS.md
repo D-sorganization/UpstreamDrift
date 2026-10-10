@@ -58,12 +58,12 @@ How each engine applies it:
 
 ### Numerical Method
 
-| Engine | Integrator | Settings | Work, driver | Wall time, loaded host |
-| --- | --- | --- | --- | --- |
-| OpenSim (reference) | `Manager` Runge-Kutta-Merson, error controlled | accuracy 1e-5 | n/a | 411 s |
-| MuJoCo | RK4, fixed step | dt = 1e-4 s | about 18 100 steps | 504 s |
-| Drake | `Simulator` runge_kutta3, error controlled | accuracy 1e-7, max step 2.5e-4 s | 228 008 steps | 1791 s |
-| Pinocchio | SciPy `solve_ivp` DOP853, error controlled | rtol 1e-9, atol 1e-12, max step 2.5e-4 s | 208 298 right-hand-side evaluations | 1770 s |
+| Engine              | Integrator                                     | Settings                                 | Work, driver                        | Wall time, loaded host |
+| ------------------- | ---------------------------------------------- | ---------------------------------------- | ----------------------------------- | ---------------------- |
+| OpenSim (reference) | `Manager` Runge-Kutta-Merson, error controlled | accuracy 1e-5                            | n/a                                 | 411 s                  |
+| MuJoCo              | RK4, fixed step                                | dt = 1e-4 s                              | about 18 100 steps                  | 504 s                  |
+| Drake               | `Simulator` runge_kutta3, error controlled     | accuracy 1e-7, max step 2.5e-4 s         | 228 008 steps                       | 1791 s                 |
+| Pinocchio           | SciPy `solve_ivp` DOP853, error controlled     | rtol 1e-9, atol 1e-12, max step 2.5e-4 s | 208 298 right-hand-side evaluations | 1770 s                 |
 
 The bushing modes reach 946 Hz. The fixed step resolves them with about 10 RK4 steps per period, and the max-step caps keep the adaptive integrators from stepping over impact-phase transients.
 
@@ -85,29 +85,29 @@ The full-swing parity test is `test_full_swing_matches_the_opensim_reference[eng
 
 Driver (capture A), errors relative to the OpenSim peak, given as peak / RMS:
 
-| Quantity | OpenSim peak | MuJoCo | Drake | Pinocchio |
-| --- | --- | --- | --- | --- |
-| Left hand force | 515.2 N | 0.003 / 0.001 % | 0.018 / 0.044 % | 0.000 / 0.001 % |
-| Right hand force | 564.0 N | 0.001 / 0.001 % | 0.013 / 0.041 % | 0.000 / 0.001 % |
-| Net force | 439.3 N | 0.005 / 0.002 % | 0.006 / 0.004 % | 0.000 / 0.001 % |
-| Internal force | 509.8 N | 0.000 / 0.000 % | 0.012 / 0.045 % | 0.000 / 0.000 % |
-| Squeeze | 3.28 N | 0.011 / 0.006 % | 0.962 / 0.415 % | 0.002 / 0.003 % |
-| Couple at midpoint | 99.5 N m | 0.005 / 0.004 % | 0.051 / 0.016 % | 0.000 / 0.001 % |
-| Deflection L / R | 0.515 / 0.564 mm | 0.005 / 0.003 % | 0.028 / 0.044 % | 0.001 / 0.001 % |
-| Rotation L / R | 0.84 deg | 0.000 / 0.000 % | 0.005 / 0.050 % | 0.000 / 0.000 % |
+| Quantity           | OpenSim peak     | MuJoCo          | Drake           | Pinocchio       |
+| ------------------ | ---------------- | --------------- | --------------- | --------------- |
+| Left hand force    | 515.2 N          | 0.003 / 0.001 % | 0.018 / 0.044 % | 0.000 / 0.001 % |
+| Right hand force   | 564.0 N          | 0.001 / 0.001 % | 0.013 / 0.041 % | 0.000 / 0.001 % |
+| Net force          | 439.3 N          | 0.005 / 0.002 % | 0.006 / 0.004 % | 0.000 / 0.001 % |
+| Internal force     | 509.8 N          | 0.000 / 0.000 % | 0.012 / 0.045 % | 0.000 / 0.000 % |
+| Squeeze            | 3.28 N           | 0.011 / 0.006 % | 0.962 / 0.415 % | 0.002 / 0.003 % |
+| Couple at midpoint | 99.5 N m         | 0.005 / 0.004 % | 0.051 / 0.016 % | 0.000 / 0.001 % |
+| Deflection L / R   | 0.515 / 0.564 mm | 0.005 / 0.003 % | 0.028 / 0.044 % | 0.001 / 0.001 % |
+| Rotation L / R     | 0.84 deg         | 0.000 / 0.000 % | 0.005 / 0.050 % | 0.000 / 0.000 % |
 
 7-iron (capture B), errors relative to the OpenSim peak, given as peak / RMS:
 
-| Quantity | OpenSim peak | MuJoCo | Drake | Pinocchio |
-| --- | --- | --- | --- | --- |
-| Left hand force | 533.1 N | 0.001 / 0.001 % | 0.011 / 0.021 % | 0.000 / 0.000 % |
-| Right hand force | 584.4 N | 0.002 / 0.001 % | 0.038 / 0.020 % | 0.000 / 0.000 % |
-| Net force | 456.7 N | 0.003 / 0.002 % | 0.001 / 0.002 % | 0.000 / 0.000 % |
-| Internal force | 524.1 N | 0.000 / 0.000 % | 0.021 / 0.022 % | 0.000 / 0.000 % |
-| Squeeze | 3.86 N | 0.013 / 0.005 % | 1.697 / 0.365 % | 0.000 / 0.001 % |
-| Couple at midpoint | 98.6 N m | 0.004 / 0.002 % | 0.021 / 0.006 % | 0.000 / 0.001 % |
-| Deflection L / R | 0.534 / 0.585 mm | 0.001 / 0.001 % | 0.037 / 0.021 % | 0.000 / 0.000 % |
-| Rotation L / R | 0.84 deg | 0.001 / 0.000 % | 0.282 / 0.037 % | 0.000 / 0.000 % |
+| Quantity           | OpenSim peak     | MuJoCo          | Drake           | Pinocchio       |
+| ------------------ | ---------------- | --------------- | --------------- | --------------- |
+| Left hand force    | 533.1 N          | 0.001 / 0.001 % | 0.011 / 0.021 % | 0.000 / 0.000 % |
+| Right hand force   | 584.4 N          | 0.002 / 0.001 % | 0.038 / 0.020 % | 0.000 / 0.000 % |
+| Net force          | 456.7 N          | 0.003 / 0.002 % | 0.001 / 0.002 % | 0.000 / 0.000 % |
+| Internal force     | 524.1 N          | 0.000 / 0.000 % | 0.021 / 0.022 % | 0.000 / 0.000 % |
+| Squeeze            | 3.86 N           | 0.013 / 0.005 % | 1.697 / 0.365 % | 0.000 / 0.001 % |
+| Couple at midpoint | 98.6 N m         | 0.004 / 0.002 % | 0.021 / 0.006 % | 0.000 / 0.001 % |
+| Deflection L / R   | 0.534 / 0.585 mm | 0.001 / 0.001 % | 0.037 / 0.021 % | 0.000 / 0.000 % |
+| Rotation L / R     | 0.84 deg         | 0.001 / 0.000 % | 0.282 / 0.037 % | 0.000 / 0.000 % |
 
 Iron wall times on the loaded host: OpenSim 768 s, MuJoCo 261 s, Drake 1904 s (297 403 steps), Pinocchio 1158 s (318 896 right-hand-side evaluations).
 
