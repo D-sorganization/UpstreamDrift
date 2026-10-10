@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-09T23:30:38Z",
+  "generated_at": "2026-10-10T09:03:38Z",
   "rows": [
     {
       "acceptance": null,
@@ -16,6 +16,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -39,6 +41,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -62,6 +66,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -85,6 +91,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -108,6 +116,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -131,6 +141,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -154,6 +166,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -177,6 +191,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -200,6 +216,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -223,6 +241,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -246,6 +266,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -269,6 +291,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -292,6 +316,8 @@
       "metrics": {
         "club_marker_rmse_m": 2.98477607949087,
         "early_marker_rmse_m": 2.5524319638104944,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": 1.9154185605956466,
         "terminal_marker_rmse_m": 2.680892587011775,
         "whole_marker_rmse_m": 2.843032751363113
@@ -315,6 +341,8 @@
       "metrics": {
         "club_marker_rmse_m": 2.3954748975395934,
         "early_marker_rmse_m": 2.055885419989572,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": 1.6255139710127382,
         "terminal_marker_rmse_m": 3.5210512652727326,
         "whole_marker_rmse_m": 2.392862692965229
@@ -338,6 +366,8 @@
       "metrics": {
         "club_marker_rmse_m": 3.04803885087286,
         "early_marker_rmse_m": 2.404090388278514,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": 2.002802181268733,
         "terminal_marker_rmse_m": 3.437955476652786,
         "whole_marker_rmse_m": 2.7379990661879527
@@ -361,6 +391,8 @@
       "metrics": {
         "club_marker_rmse_m": 2.7401197173341076,
         "early_marker_rmse_m": 2.0826599265537746,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": 1.8853296205998342,
         "terminal_marker_rmse_m": 3.41106738017757,
         "whole_marker_rmse_m": 2.7573124637458317
@@ -384,6 +416,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -407,6 +441,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -430,6 +466,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -453,6 +491,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -476,6 +516,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -499,6 +541,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -561,6 +605,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": 0.1194005160781452
@@ -647,6 +693,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": 0.3819772131450465
@@ -670,6 +718,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": 0.892551901745324
@@ -764,6 +814,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": 0.7668662552505235
@@ -811,6 +863,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": 0.26215802208491734
@@ -834,6 +888,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -857,6 +913,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -880,6 +938,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -903,6 +963,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": 0.08913317524057322
@@ -923,7 +985,7 @@
             "unit": "hash"
           },
           {
-            "measured": 0.0616326364652358,
+            "measured": 0.0616326366600127,
             "name": "whole_marker_rmse_m",
             "reason": "whole RMSE 61.63 mm > 60.00 mm",
             "status": "failed",
@@ -939,7 +1001,7 @@
             "unit": "N"
           },
           {
-            "measured": 0.004270621633187087,
+            "measured": 0.004270621633450349,
             "name": "max_closure_residual_m",
             "reason": "",
             "status": "passed",
@@ -1005,13 +1067,15 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": 0.029880227053813217,
+        "fd_after_impact_rmse_m": 0.10807095442692824,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
-        "whole_marker_rmse_m": 0.0616326364652358
+        "whole_marker_rmse_m": 0.0616326366600127
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_driver_seeds/receipt.json",
-      "sha256": "1d6d40b1e87994ddced34e1946409c71ddc1b39858a37cead3a41f5017e22e6b"
+      "sha256": "569b347d4eb4c94bd5ca151c260acbd3ba41a1635ad2c4820387d2577bfc53c1"
     },
     {
       "acceptance": null,
@@ -1028,6 +1092,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": 0.2199878597167669
@@ -1090,6 +1156,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": 0.07458191318642943
@@ -1152,6 +1220,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": 0.0919040678474688
@@ -1214,6 +1284,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": 2.74325916701203
@@ -1237,6 +1309,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": 0.11595556126394267
@@ -1339,13 +1413,15 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": 0.029874661684710098,
+        "fd_after_impact_rmse_m": 0.07565448123868956,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": 0.046973745329394856
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_iron_seeds_zmp/receipt.json",
-      "sha256": "04456e3add9e965e75ccc25219730768ffcfa3e78fb519e317e20a9eb5493af9"
+      "sha256": "771b14473e1b1eb78a1a4758b12e00b66abad4a36edb528c24d29f781d92aedc"
     },
     {
       "acceptance": {
@@ -1401,6 +1477,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": 0.11595556126394267
@@ -1424,6 +1502,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": 0.14399834356614188
@@ -1447,6 +1527,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -1470,6 +1552,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -1493,6 +1577,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": 0.2977742055509406
@@ -1516,6 +1602,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": 0.17394016240341792
@@ -1539,6 +1627,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -1641,6 +1731,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": 0.08446241181803726
@@ -1664,6 +1756,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -1766,6 +1860,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": 0.08446241181803726
@@ -1868,6 +1964,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": 0.08446241181803726
@@ -1970,6 +2068,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": 0.08446241181803726
@@ -1993,6 +2093,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -2095,6 +2197,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": 0.08860926039813796
@@ -2118,6 +2222,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -2220,6 +2326,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": 0.08860926039813796
@@ -2322,6 +2430,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": 0.08860926039813796
@@ -2424,6 +2534,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": 0.08860926039813796
@@ -2447,6 +2559,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -2549,6 +2663,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": 0.08446241181803726
@@ -2572,6 +2688,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -2674,6 +2792,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": 0.08860926039813796
@@ -2697,6 +2817,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -2720,6 +2842,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -2743,6 +2867,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -2766,6 +2892,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -2789,6 +2917,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -2812,6 +2942,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -2835,6 +2967,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -2858,6 +2992,8 @@
       "metrics": {
         "club_marker_rmse_m": 0.023535569477815654,
         "early_marker_rmse_m": 0.01120787654293546,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": 0.05520780716261591,
         "whole_marker_rmse_m": 0.026796765470681376
@@ -2881,6 +3017,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -2904,6 +3042,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -2927,6 +3067,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -2950,6 +3092,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -2973,6 +3117,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -2996,6 +3142,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -3019,6 +3167,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -3042,6 +3192,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -3065,6 +3217,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -3088,6 +3242,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -3111,6 +3267,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -3134,6 +3292,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -3157,6 +3317,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -3180,6 +3342,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -3203,6 +3367,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -3226,6 +3392,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -3304,6 +3472,8 @@
       "metrics": {
         "club_marker_rmse_m": 0.020426568465718466,
         "early_marker_rmse_m": 0.04263623753268094,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": 0.18029554317259003,
         "terminal_marker_rmse_m": 0.17121397017839793,
         "whole_marker_rmse_m": 0.07851433583675457
@@ -3327,6 +3497,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -3350,6 +3522,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -3373,6 +3547,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -3396,6 +3572,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -3419,6 +3597,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -3442,6 +3622,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -3465,6 +3647,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -3488,6 +3672,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -3511,6 +3697,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -3534,6 +3722,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -3557,6 +3747,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -3580,6 +3772,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -3603,6 +3797,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -3626,6 +3822,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -3649,6 +3847,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -3672,6 +3872,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -3695,6 +3897,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -3718,6 +3922,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -3741,6 +3947,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -3764,6 +3972,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -3787,6 +3997,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -3810,6 +4022,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -3833,6 +4047,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -3856,6 +4072,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -3879,6 +4097,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -3902,6 +4122,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -3925,6 +4147,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -3948,6 +4172,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -3971,6 +4197,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -3994,6 +4222,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -4017,6 +4247,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -4040,6 +4272,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -4063,6 +4297,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -4086,6 +4322,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -4109,6 +4347,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -4132,6 +4372,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -4155,6 +4397,8 @@
       "metrics": {
         "club_marker_rmse_m": 0.5229251688778479,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": 0.713199633002574,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -4178,6 +4422,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -4201,6 +4447,8 @@
       "metrics": {
         "club_marker_rmse_m": 0.00871531504251686,
         "early_marker_rmse_m": 0.010085811282029051,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": 0.039201754139887725,
         "whole_marker_rmse_m": 0.020532843478659774
@@ -4224,6 +4472,8 @@
       "metrics": {
         "club_marker_rmse_m": 0.008727543584364457,
         "early_marker_rmse_m": 0.010014831763024146,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": 0.14955202276364696,
         "terminal_marker_rmse_m": 0.03920171701461849,
         "whole_marker_rmse_m": 0.02034232449869241
@@ -4310,6 +4560,8 @@
       "metrics": {
         "club_marker_rmse_m": 0.008424186734364101,
         "early_marker_rmse_m": 0.009995135614984909,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": 0.005040823947322624,
         "terminal_marker_rmse_m": 0.04031367410730996,
         "whole_marker_rmse_m": 0.020264853256802433
@@ -4333,6 +4585,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -4356,6 +4610,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -4379,6 +4635,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -4402,6 +4660,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -4430,6 +4690,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -4458,6 +4720,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -4486,6 +4750,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -4514,6 +4780,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -4542,6 +4810,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -4570,6 +4840,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -4784,6 +5056,8 @@
       "metrics": {
         "club_marker_rmse_m": 1.5473104591894296,
         "early_marker_rmse_m": 0.859119255495535,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": 1.8451309708448902,
         "terminal_marker_rmse_m": 2.4292363856539376,
         "whole_marker_rmse_m": 1.4446584952684365
@@ -4863,6 +5137,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -4950,6 +5226,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -5045,6 +5323,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -5259,6 +5539,8 @@
       "metrics": {
         "club_marker_rmse_m": 0.46492214197469106,
         "early_marker_rmse_m": 0.03659059275721495,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": 0.9884702853562879,
         "terminal_marker_rmse_m": 0.9446179073563208,
         "whole_marker_rmse_m": 0.3500115189186422
@@ -5346,6 +5628,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -5369,6 +5653,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -5456,6 +5742,8 @@
       "metrics": {
         "club_marker_rmse_m": 0.0,
         "early_marker_rmse_m": 0.0,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": 0.0,
         "terminal_marker_rmse_m": 0.0,
         "whole_marker_rmse_m": 0.0
@@ -5479,6 +5767,8 @@
       "metrics": {
         "club_marker_rmse_m": 0.0,
         "early_marker_rmse_m": 0.06289786174732638,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": 0.9366239177658751,
         "terminal_marker_rmse_m": 0.29791451101341426,
         "whole_marker_rmse_m": 0.18569771909574298
@@ -5581,6 +5871,8 @@
       "metrics": {
         "club_marker_rmse_m": 0.3900449519505721,
         "early_marker_rmse_m": 0.23014149679046664,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": 0.32399201077582096,
         "terminal_marker_rmse_m": 0.26151220010975246,
         "whole_marker_rmse_m": 0.2452450443233475
@@ -5660,6 +5952,8 @@
       "metrics": {
         "club_marker_rmse_m": 2.7401197173341076,
         "early_marker_rmse_m": 2.0826599265537746,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": 1.8853296205998342,
         "terminal_marker_rmse_m": 3.41106738017757,
         "whole_marker_rmse_m": 2.7573124637458317
@@ -5683,6 +5977,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
@@ -5762,6 +6058,8 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
