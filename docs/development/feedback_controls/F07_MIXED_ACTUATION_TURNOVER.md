@@ -5,8 +5,9 @@
 Replay prerequisite #12151 of parent #12147, child of #11791 and epic #11784. Implementation is a separate
 assistance-explicit scalar T01 profile. The original muscle-only bundle still
 rejects every non-muscle actuator. The restricted fixed-path Slider/Pin subset
-does not yet admit either full-body production model. Moco mixed dispatch is
-follow-on work after the constrained-muscle stack #12142/#12149 integrates.
+does not yet admit either full-body production model. Parent #12147 now composes the constrained-muscle prerequisites locally and
+adds optional mixed Moco request/export/replay dispatch. Combined constrained
+and mixed replay remains rejected until independently admitted.
 
 ## Reproduction
 
@@ -55,3 +56,67 @@ excitation replay and 17-variant/six-engine parity remain open. Store only
 truthfully labeled preview videos on Desktop; no matching video was generated
 from these synthetic fixtures. Preserve private captures and retained failure
 receipts, and remove only clean merged owned worktrees.
+
+## Mixed Moco Link Validation
+
+Full-suite CI at parent head `2c636a7336` exposed two setup errors: the
+`mixed_model` fixture was unavailable through a collected test-module plugin.
+Import the shared fixture explicitly into the mixed Moco test module rather
+than relying on collection order. After this correction the actual OpenSim 4.6
+mixed-actuation/Moco suites pass 25 tests; the default interpreter with two
+xdist workers reports 25 SDK skips and no fixture errors. These are distinct
+runtime results. Full-suite CI remains the final integration check; no native
+or scientific acceptance threshold changes.
+
+Run `tests/opensim/test_native_mixed_moco.py` with the same native SDK and
+CASADIPATH. Requests bind all channel bounds and roles; JSON accepts only
+explicit typed channel declarations. Export preserves absolute mixed paths and
+every original control knot. Independent replay NPZ distinguishes physical
+actuations, dimensionless controls, roles and output units, native power and
+sampled work. Pure muscle evidence retains its original field names.
+
+Initial TDD failed on the missing mixed request API. An unscaled tiny target
+cost allowed an almost motionless optimizer success; a predeclared marker
+weight of 1e6 resolves this numerical stopping problem. The first ten-interval
+solve then replayed with about 0.69 micrometre marker RMSE but 0.0034 maximum
+raw mixed-unit state error, prompting finer-mesh per-state checks. Retain these
+failed runs under planning `12147-mixed-moco-*`; no production or capture
+qualification follows from this synthetic exercise.
+
+The twenty-interval diagnostic at constraint tolerance $10^{-7}$ and optimizer
+convergence tolerance $10^{-6}$ passes separate synthetic replay limits:
+coordinate value $10^{-7}$ m or rad, speed $10^{-5}$ m/s or rad/s, activation
+$10^{-3}$, and fiber length $10^{-5}$ m. Observed maxima are about
+$9.97\times10^{-9}$ m translation, $3.85\times10^{-7}$ m/s speed,
+$6.07\times10^{-4}$ activation and $3.99\times10^{-6}$ m fiber length;
+marker RMSE is about $7.58\times10^{-7}$ m. These are fixture numerical
+checks, not biomechanical thresholds. A forty-interval attempt with tighter
+$10^{-9}/10^{-8}$ tolerances hit the configured test timeout; the failed log
+is retained and no faster-solve claim is made.
+
+## Prerequisite Refactor Integration
+
+The preserved constrained stack is composed through parent commit f1c57928e9.
+Its bounded request parsing, passive/reference/replay helpers and owned native
+input-player refactor are retained; mixed request parsing and explicit admission
+are integrated into those helpers. Architecture budget and generated context
+checks pass. The post-merge native regression passes 239 tests with three
+explicit fixture/opt-in skips (62.78 s).
+
+Pre-PR attempt one exposed a missing change-fragment header and two unrelated
+CLI subprocess import failures with Repository_Management ahead of this
+checkout on PYTHONPATH. The header and path ordering were corrected; the
+standalone four orchestrator CLI tests then passed. Attempt two overlapped
+local merge conflict resolution and collected transient conflict-marker syntax
+errors; it is not validation evidence for the resolved tree. The third full central run used the frozen resolved source and passes all five
+gates: lint/format, diff mypy, affected tests (247 passed, 35 explicit generic
+SDK/opt-in skips), Semgrep/import policy and policy/fragment validation. The
+separate actual OpenSim regression above supplies native execution evidence.
+
+## Publication Gate Correction
+
+CI on af321fdc93 found one failing generated lifting-report freshness test.
+Inherited formatting changed the report bytes while its generator and source
+receipt stayed unchanged. Restoring the authoritative main report and excluding
+that byte-exact generated artifact from Prettier passes all11 report tests.
+The original failed log is retained; this correction changes no dynamics.

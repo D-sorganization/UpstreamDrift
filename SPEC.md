@@ -11024,3 +11024,21 @@ provider, input, state and policy digests. Zero-assistance point bounds are
 supported. The original muscle-only profile remains strict. Canonical chapter
 27 and F07_MIXED_ACTUATION_TURNOVER document the calculation and limits; full
 factory topology, capture/physiology/contact/grip and 17-model parity remain open.
+
+The #12147 mixed Moco link reuses scalar bindings and chapter39's file-driven
+pipeline. Requests bind ordered roles/bounds, reject combined constrained
+profiles, and preserve every optimizer knot through independently replayed
+T01 inputs. Mixed NPZ evidence distinguishes actuations/controls and physical
+units, roles, powers and sampled work. This does not discharge anatomy,
+contact, private full-horizon or all-model qualification gates.
+The F07 #12143 versioned constrained-muscle policy extends a declared
+native OpenSim cold start to exact ordered excitation T01 export, fresh
+source replay and marker sampling without reassembly. A coupler-only
+two-Millard source solves a reachable nonzero Moco endpoint and independently
+replays within declared fixture-specific per-unit state and q/u residual
+bounds; native locked-coordinate replay remains separate because installed
+OpenSim Moco rejects locked coordinates. The source-bound component audit
+admits only reviewed CustomJoint and coordinate-linear moving path laws.
+Canonical chapter42 and `F07_CONSTRAINED_MUSCLE_MOCO_TURNOVER.md` retain
+the failed zero-force/loose-transcription experiment and all 520-muscle,
+private-capture, contact, assistance and physiology gates.
