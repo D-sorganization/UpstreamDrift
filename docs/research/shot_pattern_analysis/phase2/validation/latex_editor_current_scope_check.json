@@ -1,0 +1,11 @@
+{
+  "checked_at": "2026-10-10T05:33:24.631148+00:00",
+  "source_path": "docs/research/shot_pattern_analysis/shot_pattern_analysis.tex",
+  "source_sha256": "31e47393578132475209fff37ebf74529f9e974fdd45e14efb2f79c28ea01282",
+  "tool": "compile_latex_document",
+  "status": "compile-failed",
+  "failure_stage": "Tectonic bundle initialization before document parsing",
+  "diagnostic": "src/config.rs:154:18 Result::unwrap(): this bundle isn't cached, and we couldn't get it from the internet; https://relay.fullyjustified.net/default_bundle_v33.tar.index.gz",
+  "source_change": "Added current phase-two scope and traceability links; identified remaining content as historical phase-one results",
+  "editor": "Existing editor retained; no replacement PDF"
+}
