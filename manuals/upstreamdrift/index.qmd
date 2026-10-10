@@ -55,3 +55,5 @@ UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
 {{< include chapters/26-native-opensim-geometry.qmd >}}
 
 {{< include chapters/32-native-constrained-state.qmd >}}
+
+{{< include chapters/20-native-candidate-benchmark.qmd >}}
