@@ -168,6 +168,7 @@ muscle-only default is unchanged. The 40 ms synthetic Moco/replay regression
 is software-path evidence, not a private capture, production anatomy/physics
 qualification, or release. See canonical chapter48 and
 `F07_CONSTRAINED_MIXED_MOCO_TURNOVER.md`.
+
 ## Exact-Source 557-Muscle Replay Boundary (#12182)
 
 An opt-in version-three profile freezes the exact BUET–Hamner derived model

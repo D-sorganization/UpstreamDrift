@@ -1093,6 +1093,7 @@ one optional provider skip. Canonical calculation is chapter48; turnover is
 The calculation registry remains empty and release blocked; full-body
 anatomy, calibration, physiology, contact/grip, capture horizon, production
 variants and six-engine parity remain unresolved.
+
 ## F07 Exact 557-Muscle Excitation Diagnostic (#12182)
 
 The exact-derived-source v3 profile is stacked on #12181 and merges the

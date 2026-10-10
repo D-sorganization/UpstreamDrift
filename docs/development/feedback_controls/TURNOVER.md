@@ -519,6 +519,7 @@ Manager seed regressions cover value and speed projection in mixed and
 mechanical prepared-state paths. See chapter48 and
 `F07_CONSTRAINED_MIXED_MOCO_TURNOVER.md`; the registry still contains zero
 approved calculations and release remains blocked.
+
 ## F07 Exact 557-Muscle Diagnostic Replay (#12182)
 
 The exact derived BUET–Hamner source now has a separate v3 excitation replay
