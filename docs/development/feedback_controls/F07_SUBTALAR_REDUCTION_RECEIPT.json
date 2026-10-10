@@ -1,0 +1,33 @@
+{
+  "derived_bytes": 2262113,
+  "derived_sha256_after": "a646075a42b978f8a9c45b737849c6438101b6503621882e5fad322ad2d84434",
+  "elapsed_seconds": 12.780115800036583,
+  "policy": "one exact bilateral locked-zero CustomJoint-to-WeldJoint derivation; no native muscle state preparation, integration, source edit or physiology admission",
+  "receipt": {
+    "comparison_helper_sha256": "e2e01cad795e8fc2a4be703019051d4953ae059a3893de81d37fba53499a5b73",
+    "derived_sha256": "a646075a42b978f8a9c45b737849c6438101b6503621882e5fad322ad2d84434",
+    "max_body_transform_error": 0.0,
+    "max_body_velocity_error": 0.0,
+    "max_constraint_residual": 0.0,
+    "max_full_lift_force_error": 0.0,
+    "max_full_lift_mass_error": 0.0,
+    "max_muscle_length_error": 0.0,
+    "max_muscle_speed_error": 0.0,
+    "max_projected_mass_error": 0.0,
+    "max_projected_total_force_error": 0.0,
+    "mobility_lift_condition": 1.0,
+    "mobility_lift_rank": 60,
+    "native_actuators_sha256": "61c6d7810088ca8030eea967e9bfa71f7f7998d3c5601c5e1939367346238cc2",
+    "native_reload_verified": true,
+    "native_simbody_sha256": "81afadccfe9e55dd366255d09c319ccb8d50fdb54fee4ac45b64708c4f044aa6",
+    "native_simulation_sha256": "950241f649dab8a113c4bb754a080d16db4a3f5f0aa1710ed2e53d03206eb09e",
+    "native_version": "version 4.6-2026-06-22-85aaf64, build date 18:27:55 Jun 22 2026",
+    "observed_pose_count": 4,
+    "reducer_sha256": "7ed03c412ec035b9c03c40d72f25749ed3bfe346ec71203ced417631ea2d9945",
+    "removed_coordinate_names": ["subtalar_angle_r", "subtalar_angle_l"],
+    "source_sha256": "8d4d349747060efbac31c707c4e01f452746a8fba32be77a425b5ac5be1d34a3"
+  },
+  "script_sha256": "5e9de379b2f35d7db976ffb5f43d5680ead4182b4d3604a3f0d1a3a6f3ef8e07",
+  "source_sha256_after": "8d4d349747060efbac31c707c4e01f452746a8fba32be77a425b5ac5be1d34a3",
+  "status": "sampled_mechanical_comparison_only"
+}

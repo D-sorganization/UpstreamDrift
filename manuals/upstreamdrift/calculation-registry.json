@@ -274,6 +274,11 @@
       "id": "UP-D1-native-buet-hamner-assembly-inventory",
       "owner": "UpstreamDrift issue #12157",
       "resolution": "Inventory provisional chapter44 and native_buet_hamner_assembly.py: exact reviewed BUET473 upper/trunk and Hamner84 distal lower source hashes, shared physical pelvis/femur and hip SpatialTransform admission, explicit eight distal body/joint and 84-muscle ownership, native serialization/reload and source component-property equality. Three hip poses/nonzero speeds compare donor region body transforms/velocities and all557 muscle path lengths/speeds; native finite positive mass, body-plus-mobility applied force and QErr/UErr are observed separately. This sampled source-preserving mechanical candidate does not prove whole-model dynamic equivalence, source asset closure, anatomy/physiology, native Moco, full-state replay, capture matching or all17/six-engine parity. Keep canonical calculation coverage/publication blocked."
+    },
+    {
+      "id": "UP-D1-native-zero-subtalar-reduction-inventory",
+      "owner": "UpstreamDrift issue #12167",
+      "resolution": "Inventory provisional chapter46 and native_subtalar_reduction.py: exact assembled 557-muscle source, bilateral locked-zero one-coordinate CustomJoint rotation laws and native identity-frame targets, forbidden coordinate consumers, preserved component properties, separately serialized/reloaded derived XML, and rank-complete common mobility lift. At four sampled native poses with nonzero speeds, body transforms/velocities, all muscle path lengths/speeds, projected/full mass, actual J-transpose-body-plus-mobility applied force and QErr/UErr agree at the exact source/runtime-bound fixture. The separate V2 and one-equilibrium named-state observations remain unqualified. Partial abdominal and MTP policies are not composed by this operation; native Moco, full-state replay, physiology, contact, private capture matching and all17/six-engine parity remain open. Publication blocked."
     }
   ],
   "calculations": []

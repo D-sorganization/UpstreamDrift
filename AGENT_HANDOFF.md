@@ -950,3 +950,18 @@ separate because this provider uses native plant stepping only.
   visual resource closure, passive-force policy, native Moco, full native
   replay, capture registration and muscle-only golf endpoint remain open.
   Manual chapter 44 and turnover record reproduction and limitations.
+
+# Source-Bound Bilateral Zero-Subtalar Reduction - #12167
+
+- Branch `feat/f07-buet-zero-subtalar-12167` is stacked on BUET–Hamner
+  assembly #12165 and its zero-MTP helper ancestry #12153. Keep the PR
+  unarmed until prerequisites land; use normal ancestry merge, not force.
+- Exact v4 source and native derived output remain outside the public repo.
+  `F07_SUBTALAR_REDUCTION_RECEIPT.json` retains source/output hashes, OpenSim
+  binary and reducer/helper identities, four sampled mechanical poses and a
+  rank-complete mobility lift. Chapter 46 and
+  `F07_ZERO_SUBTALAR_REDUCTION_TURNOVER.md` are calculation/handoff sources.
+- Separate complete named-state V2 and one-equilibrium receipts live in owned
+  planning. Their extreme passive-force observations are **not** physiological
+  admission. Root owns separate abdominal reduction #12161 and composition;
+  MTP and subtalar policies are not silently applied together.
