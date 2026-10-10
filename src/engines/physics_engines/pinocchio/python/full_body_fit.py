@@ -55,6 +55,9 @@ from src.shared.python.contracts import ensure, require
 from src.shared.python.motion_matching.acceptance import Horizon
 from src.shared.python.motion_matching.contact_law import GroundPlane
 from src.shared.python.motion_matching.ground_support import capture_to_native_world
+from src.shared.python.motion_matching.turn_receipt import (
+    attach_turn_block_from_markers,
+)
 from src.shared.python.motion_matching.pelvis_yaw import (
     compute_pelvis_yaw_residual_and_derivative,
 )
@@ -848,6 +851,14 @@ def run_fit(
         "wall_clock_s": time.perf_counter() - t_wall,
         "qualification": "milestone of a stated candidate on the qualified Pinocchio plant; acceptance is decided by acceptance.py (MS-01), not by this receipt",
     }
+    attach_turn_block_from_markers(
+        receipt,
+        inputs.capture,
+        model_time_s=targets.node_times,
+        labels=inputs.labels,
+        model_markers_m=pred_rep,
+        model_source="pinocchio_crocoddyl_replay_sites",
+    )
     (out_dir / "receipt.json").write_text(
         json.dumps(receipt, indent=2), encoding="utf-8"
     )

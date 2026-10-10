@@ -67,8 +67,11 @@ MARKER_PAIRS: dict[str, tuple[tuple[str, str], ...]] = {
 
 #: Default model point names (left, right) accepted by ``model_turn_lines``.
 MODEL_POINT_PAIRS: dict[str, tuple[tuple[str, str], ...]] = {
-    "shoulder_girdle": (("shoulder_l", "shoulder_r"),),
-    "upper_trunk": (("thorax_l", "thorax_r"),),
+    "shoulder_girdle": (
+        ("shoulder_l", "shoulder_r"),
+        ("LShoulderBack", "RShoulderBack"),
+    ),
+    "upper_trunk": (("thorax_l", "thorax_r"), ("BackLeft", "BackRight")),
     "pelvis": (("hip_l", "hip_r"), ("WaistLeft", "WaistRight")),
 }
 
@@ -103,14 +106,25 @@ class LineTurn:
         """Return the frame index nearest to ``time_s``."""
         return _nearest_index(self.t, time_s)
 
+    def covers(self, time_s: float) -> bool:
+        """Return True if ``time_s`` lies within this line's time span (one frame slack)."""
+        slack = float(np.max(np.diff(self.t)))
+        return bool(self.t[0] - slack <= time_s <= self.t[-1] + slack)
+
     def value_at(self, time_s: float) -> float:
-        """Return the turn (deg) at the frame nearest to ``time_s`` (NaN if none)."""
+        """Return the turn (deg) at the frame nearest to ``time_s``.
+
+        NaN if the line is unavailable there or ``time_s`` is outside the span of
+        the data (a truncated horizon never reports its last frame as an event).
+        """
+        if not self.covers(time_s):
+            return float("nan")
         return float(self.turn_deg[self.index_at(time_s)])
 
     def max_backswing_deg(self, start_s: float, end_s: float) -> float:
         """Return the maximum turn within ``[start_s, end_s]`` (NaN if none)."""
-        i0, i1 = self.index_at(start_s), self.index_at(end_s)
-        window = self.turn_deg[min(i0, i1) : max(i0, i1) + 1]
+        lo, hi = min(start_s, end_s), max(start_s, end_s)
+        window = self.turn_deg[(self.t >= lo) & (self.t <= hi)]
         if window.size == 0 or not np.isfinite(window).any():
             return float("nan")
         return float(np.nanmax(window))
@@ -541,6 +555,21 @@ def turn_source_block(metrics: TurnMetrics, events: SwingEvents, source: str) ->
     return block
 
 
+def unavailable_turn_block(reason: str) -> dict[str, Any]:
+    """Return a well-formed turn block recording why no turn could be computed."""
+    if not isinstance(reason, str) or not reason:
+        raise ValueError("reason must be a non-empty string")
+    block = {
+        "schema": TURN_BLOCK_SCHEMA,
+        "frame_convention": FRAME_CONVENTION,
+        "unavailable_reason": reason,
+        "markers": None,
+        "model": None,
+    }
+    validate_turn_block(block)
+    return block
+
+
 def build_turn_block(
     events: SwingEvents,
     *,
@@ -610,6 +639,14 @@ def validate_turn_block(block: Mapping[str, Any]) -> None:
         raise TypeError("turn block must be a mapping")
     if block.get("schema") != TURN_BLOCK_SCHEMA:
         raise ValueError(f"turn block schema must be {TURN_BLOCK_SCHEMA!r}")
+    if "unavailable_reason" in block:
+        if not block["unavailable_reason"] or not isinstance(
+            block["unavailable_reason"], str
+        ):
+            raise ValueError("turn block unavailable_reason must be a non-empty string")
+        if block.get("markers") is not None or block.get("model") is not None:
+            raise ValueError("an unavailable turn block must not carry markers/model")
+        return
     events = block.get("event_times_s")
     if not isinstance(events, Mapping) or set(events) != {"address", "top", "impact"}:
         raise ValueError("turn block needs event_times_s with address/top/impact")
