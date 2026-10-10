@@ -1,0 +1,17 @@
+{
+  "club": "driver",
+  "engine": "mujoco",
+  "wall_time_s": 64.47430216206703,
+  "squeeze_per_hand_n": 1104.235558472961,
+  "pad_stiffness_n_m": 171112.05941414234,
+  "pad_dissipation_s_m": 0.38119785714729637,
+  "preload_penetration_m": 0.0005377740773374233,
+  "friction_static": 0.9,
+  "friction_dynamic": 0.7,
+  "integrator": "MuJoCo Euler, fixed step, soft constraints",
+  "timestep_s": 1e-5,
+  "force_law": "MuJoCo native sphere-cylinder contact, condim 6",
+  "solreffriction_time_s": 2e-5,
+  "hand_mode": "prescribed",
+  "trail_shift_m": [0.0, 0.0, 1e-5]
+}

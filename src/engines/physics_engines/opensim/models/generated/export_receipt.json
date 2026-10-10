@@ -1,7 +1,7 @@
 {
   "representation": "native-full-body-osim-v1",
-  "model_sha256": "a376e6889b2b9d3b05a0b2f110f386c83f17f4ec0c94c9f4b9289a887ba4643e",
-  "osim_sha256": "1c6a938da4bc5edd70728e1458125afb9e2a3effaf4c2a3dcb73b57f3da6d05b",
+  "model_sha256": "71b0d656fdd3c1572130be8cfc5649db12225417035f70fcb993850897da9fe5",
+  "osim_sha256": "b7e15fbc24e2f61a66b5fc3a8c0ac3d233ef978bbdfe704eb33fa2a796d1f95a",
   "coordinate_count": 44,
   "coordinate_order": [
     "TranslationInputX",
@@ -62,5 +62,6 @@
       "club_driver_grip.stl",
       "club_driver_head.stl"
     ]
-  }
+  },
+  "grip_model": "weld"
 }

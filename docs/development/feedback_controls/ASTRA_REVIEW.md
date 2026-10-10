@@ -21,6 +21,23 @@ Existing source boundaries motivating the firewall: `motion_matching/same_input/
 
 milestone_dependencies.json records implementation readiness separately from scientific acceptance. D02 consumes T02 schema readiness; D03 consumes runnable F07-F09 providers and supplies their native evidence; D04 feeds F10.
 
+## October 10 Endpoint Review
+
+The renewed review of integrated native platform head `45ad4e372c5f32e12bd15a183ef09468b2024bd1`
+puts declared constrained cold-start reconstruction and source-chart-bound
+independent replay before additional optimization. Child #12136 must distinguish
+model-owned lock targets from named State values, reject out-of-domain default
+humerus initialization, and test the actual retained mechanical candidate.
+Source-coordinate and branch-aware muscle path/work admission follows, retaining
+`r = a + b` and the corresponding force covectors. Whole-body bilateral/contact
+assembly and frozen private reference geometry precede full-horizon Moco inference
+and fresh saved-excitation replay. Numerical seed availability does not remove
+the six original-source scientific/preparation blockers. The original model's
+large passive loads cannot be corrected by an unsupported donor-pose choice.
+All seventeen variants and six ecosystems remain required; no new optimizer or
+schema is justified by this review. The detailed read-only reasoning is retained
+as `ASTRA_RESUMED_ENDPOINT_REVIEW_20261010.md` in the fleet planning directory.
+
 ## Primary Method References
 
 - [MuJoCo Simulation State](https://mujoco.readthedocs.io/en/latest/programming/simulation.html)

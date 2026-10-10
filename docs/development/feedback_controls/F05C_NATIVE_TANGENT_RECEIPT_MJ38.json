@@ -1,0 +1,58 @@
+{
+  "derivative": {
+    "A_sha256": "35ded2968afe0e67d7a6dc18bb184fc36429faef0231f9e65aab5876ba927c4a",
+    "B_sha256": "fa3705f78f6f9be862c25b7fa8759284ec96da435ab8f19837c02efc18e1fba2",
+    "derivative_calls": 10,
+    "derivative_p50_s": 0.0015631204878445715,
+    "derivative_p95_s": 0.003228958128602243,
+    "derivative_worst_s": 0.00361372297629714
+  },
+  "issue": 11920,
+  "limits": "This is an exact-state/contact-free multi-DOF derivative and input-replay fixture, not optimized full-body feedback, hard-real-time evidence, muscle/contact/grip qualification, private capture accuracy or six-engine parity.",
+  "parent_issue": 11789,
+  "provenance": {
+    "git_head_before_receipt": "8cbf920021fb72b7774ba7a95240b2aa9e17a6a5",
+    "source_sha256": {
+      "scripts/f05c_native_tangent_receipt.py": "c3e466d152a061b411b271712b750014e19785f14b553ccf9b8bc5988121d7a6",
+      "src/engines/physics_engines/mujoco/python/native_tangent_derivative.py": "0ce33ffe71ee11ad7d2bb49aec0efcdf779ae2ab5fa11d3e93ffd6b86b73376e",
+      "src/engines/physics_engines/mujoco/python/native_torque_replay.py": "8908ddb4ca0ed0d98ae4cc8580315335773fd5f8d5209b3159a11f3bacde6724",
+      "tests/unit/motion_matching/test_native_tangent_derivative.py": "cc0896d45763da105ba63f99ea7d7be7af6d32ac304c70a5f828ea300ab5ef04"
+    },
+    "tools_pin": "2e7665111b06f92ffbfe178b92d74d6a81c95388"
+  },
+  "replay": {
+    "applied_input_sha256": "e0ccc47f10085766f4b815d0519f3e17a7205b3ee9ab20d11947eab295c1de1d",
+    "bundle_s": 3.3718580559943803,
+    "initial_state_sha256": "3be7a6287343434f8dc89a3c3a0a9520dfc6cc1f5ac3b850f34bc133133dfe5c",
+    "model_sha256": "b542ab129b16e91c536d263d4de7ea470ec58df6e9f00363a98211d3f6a55b57",
+    "policy_sha256": "83cae458e4a2203ac6cdf7fadda7b8bf06753be98fa64db8f7297bf1962a7c97",
+    "replay_s": 0.0595532109728083,
+    "state_schema_sha256": "3b6480658c125eb5139ba2229ae491ce0d1c0fb17297ed7d6349f9af89281604",
+    "time_grid_sha256": "cc9b4505f8db14f497e28ad4b3b33ded79f1946d37b6642d97ce6850af6196b2"
+  },
+  "runtime": {
+    "host_alias": "wsl-task-overlay",
+    "machine": "x86_64",
+    "mujoco": "3.8.0",
+    "numpy": "2.5.3",
+    "python": "3.12.14",
+    "release": "6.6.87.1-microsoft-standard-WSL2",
+    "system": "Linux"
+  },
+  "schema_version": "upstreamdrift/f05c-native-tangent-development/1.0.0",
+  "scope": {
+    "derivative": "mjd_transitionFD_tangent_central_checked_against_native_steps",
+    "derivative_repeat_calls": 10,
+    "initial_state": "complete_mjSTATE_INTEGRATION",
+    "input": "post_limit_actuator_torque_exact_ZOH",
+    "native_integrator": "Euler",
+    "native_step_s": 0.01,
+    "nq": 9,
+    "nu": 2,
+    "nv": 8,
+    "observation_grid": "none_synthetic_native_state_only",
+    "plant": "floating_root_two_hinge_two_direct_unit_motors_contact_free",
+    "replay": "fresh_native_time_only_no_resets",
+    "replay_tolerance": 1e-12
+  }
+}

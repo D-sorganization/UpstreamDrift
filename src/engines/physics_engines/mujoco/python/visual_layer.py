@@ -8,6 +8,8 @@ untouched; the exporter's plain output remains the qualified representation.
 
 from __future__ import annotations
 
+import math
+import warnings
 import xml.etree.ElementTree as ET  # nosec B405 # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml - construction only; parsing is defused
 from collections.abc import Mapping, Sequence
 from pathlib import Path
@@ -15,15 +17,20 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.model_appearance.ball import BALL_RADIUS_M, resolve_ball_visual
 from src.shared.python.model_appearance.club_assembly import (
+    ClubAssembly,
     assembly_from_spec,
     club_body_name,
+    clubface_centre,
+    clubface_vector,
 )
-from src.shared.python.model_appearance.schema import AppearanceDocument
+from src.shared.python.model_appearance.schema import AppearanceDocument, BallSettings
 from src.shared.python.motion_matching.visual_skeleton import (
     VisualSkeleton,
     derive_visual_skeleton,
 )
+from src.shared.python.video_timing.frame_schedule import DEFAULT_FPS, FrameSchedule
 
 _VISUAL_CLASS = "visual"
 _CAPSULE_RGBA = "0.75 0.78 0.85 1"
@@ -34,6 +41,7 @@ _MARKER_SPHERE_GROUP = "3"
 _COM_RGBA = "0.9 0.35 0.2 1"
 _FRAME_RGBA = "0.2 0.6 0.95 1"
 _FLOOR_RGBA = "0.35 0.45 0.3 1"
+_BALL_RGBA = "0.95 0.95 0.95 1"
 
 
 def _numbers(values: Any) -> str:
@@ -57,6 +65,89 @@ def _plane_quat(normal: np.ndarray) -> str:
     axis /= s
     half = float(np.arctan2(s, c)) / 2.0
     return _numbers([np.cos(half), *(np.sin(half) * axis)])
+
+
+def _club_face_world(
+    club: ClubAssembly, club_body: str, offsets: Mapping[str, np.ndarray]
+) -> tuple[np.ndarray, np.ndarray]:
+    """World face centre and face normal of ``club`` at the exporter's reference pose.
+
+    Uses the same ``offsets[club_body]`` transform the club head mesh itself
+    is drawn with, so the decorative ball is placed consistently with
+    whatever pose this exporter renders (GCV-13, #11719).
+    """
+    offset = offsets[club_body]
+    centre = offset[:3, :3] @ clubface_centre(club) + offset[:3, 3]
+    normal = offset[:3, :3] @ clubface_vector(club)
+    return centre, normal
+
+
+# A clubhead sitting higher than this above the ground cannot be an address
+# stance (real clubs rest within a few centimetres of the ground). The
+# exporter's static reference pose is a kinematic rest configuration, not
+# necessarily the biomechanical address pose (OSV-8, #11755), so the
+# geometric fallback below is only trusted when it looks grounded; otherwise
+# the caller must resolve the real address pose and pass ``ball.position_m``.
+_MAX_ADDRESS_HEIGHT_M = 0.5
+
+
+def _attach_decorative_ball(
+    elements: Mapping[str, ET.Element],
+    offsets: Mapping[str, np.ndarray],
+    club: ClubAssembly | None,
+    club_body: str | None,
+    ball: BallSettings,
+    ground_height_m: float,
+) -> dict[str, Any]:
+    """Attach the decorative address ball (GCV-13, #11719), or report why not.
+
+    The ball is a massless, non-colliding sphere fixed to the world body:
+    adding it changes no dynamics and it never moves on its own (an optional
+    post-impact launch is future work, GCV-15). Returns a summary dict with
+    ``enabled`` and either ``position_m``/``source`` or a ``reason`` the ball
+    was skipped — "unavailable" is reported, never silently drawn as zero.
+
+    ``ball.position_m`` (e.g. a mocap-matched swing's measured ball) is used
+    verbatim regardless of this exporter's reference pose. Without it, the
+    face centre at the reference pose is used only when it is plausibly
+    grounded (within :data:`_MAX_ADDRESS_HEIGHT_M` of ``ground_height_m``).
+    """
+    if club is None or club_body is None or club_body not in elements:
+        return {"enabled": False, "reason": "spec has no club body"}
+    centre_world, normal_world = _club_face_world(club, club_body, offsets)
+    if ball.position_m is None and ball.enabled:
+        height_above_ground = abs(float(centre_world[2]) - ground_height_m)
+        if height_above_ground > _MAX_ADDRESS_HEIGHT_M:
+            return {
+                "enabled": False,
+                "reason": (
+                    "exporter reference pose is not grounded "
+                    f"({height_above_ground:.3f} m above ground_height_m); "
+                    "supply appearance.ball.position_m from a resolved address pose"
+                ),
+            }
+    resolved = resolve_ball_visual(
+        enabled=ball.enabled,
+        position_m=ball.position_m,
+        source=ball.source,
+        face_centre_m=centre_world,
+        face_normal=normal_world,
+        ground_height_m=ground_height_m,
+    )
+    if resolved is None:
+        return {"enabled": False, "reason": "ball.enabled is False"}
+    position, source = resolved
+    ET.SubElement(
+        elements["world"],
+        "geom",
+        name="visual_ball",
+        type="sphere",
+        pos=_numbers(position),
+        size=_numbers([BALL_RADIUS_M]),
+        rgba=_BALL_RGBA,
+        attrib={"class": _VISUAL_CLASS},
+    )
+    return {"enabled": True, "position_m": position.tolist(), "source": source}
 
 
 def attach_visual_layer(
@@ -137,6 +228,10 @@ def attach_visual_layer(
         )
 
         attach_club_meshes(root, elements, offsets, club_body, club)  # type: ignore[arg-type]
+    ball_settings = appearance.ball if appearance is not None else BallSettings()
+    ball_meta = _attach_decorative_ball(
+        elements, offsets, club, club_body, ball_settings, skeleton.ground.height_m
+    )
     for index, shape in enumerate(() if appearance is not None else skeleton.shapes):
         if mesh_club and shape.body == club_body:
             continue  # the mesh head replaces the ellipsoid hint
@@ -229,6 +324,7 @@ def attach_visual_layer(
         "floor": True,
         "ground_calibrated": skeleton.ground.calibrated,
         "lights": lights,
+        "ball": ball_meta,
     }
 
 
@@ -300,10 +396,42 @@ def render_playback(
     lookat: np.ndarray,
     path: Path,
     show_com: bool = True,
-    playback_stride: int = 4,
+    playback_stride: int | None = None,
     rate_hz: float = 120.0,
+    fps: float = DEFAULT_FPS,
+    speed: float = 1.0,
 ) -> None:
-    """Render animated GIF of motion from spec and joint trajectory."""
+    """Render an animated GIF of a motion from a spec and joint trajectory.
+
+    Time-based sampling (GCV-14, #11720): GIF frame ``j`` shows the ``q``
+    sample nearest to swing time ``j * speed / fps``, via a
+    :class:`~src.shared.python.video_timing.frame_schedule.FrameSchedule`
+    over the ``rate_hz``-spaced trajectory. ``playback_stride`` is a
+    deprecated alias for a fixed index step: it is converted to the
+    equivalent ``speed`` at ``fps`` and ``rate_hz`` (mirrors
+    ``ExportSettings.stride`` in ``native_viewer_export/core.py``) and emits
+    a ``DeprecationWarning``.
+
+    Raises:
+        ValueError: if ``rate_hz`` is not positive and finite, if
+            ``playback_stride`` is given but is not a positive integer, or
+            if the resulting ``fps``/``speed`` are invalid (raised by
+            :class:`FrameSchedule`).
+    """
+    if not math.isfinite(rate_hz) or rate_hz <= 0.0:
+        raise ValueError(f"rate_hz must be positive and finite, got {rate_hz}")
+    if playback_stride is not None:
+        if not isinstance(playback_stride, int) or playback_stride < 1:
+            raise ValueError("playback_stride must be a positive integer")
+        warnings.warn(
+            "render_playback(playback_stride=...) is deprecated: playback is "
+            "time-based now; use fps and speed",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        speed = playback_stride * fps / rate_hz
+    schedule = FrameSchedule(np.arange(q.shape[0]) / rate_hz, fps, speed)
+
     import json
 
     import imageio
@@ -323,11 +451,11 @@ def render_playback(
     cam.lookat[:] = lookat
     cam.distance, cam.azimuth, cam.elevation = 3.2, 135.0, -12.0
     frames_out = []
-    for k in range(0, q.shape[0], playback_stride):
+    for k in schedule.nearest_indices():
         data.qpos[addresses] = q[k]
         mujoco.mj_forward(model, data)
         renderer.update_scene(data, camera=cam)
         if show_com:
             add_com_markers(renderer.scene, model, data, ground_height)
         frames_out.append(renderer.render().copy())
-    imageio.mimsave(path, frames_out, duration=1000 * playback_stride / rate_hz, loop=0)
+    imageio.mimsave(path, frames_out, duration=1000.0 / fps, loop=0)

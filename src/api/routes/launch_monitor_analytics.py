@@ -2,14 +2,15 @@
 
 from __future__ import annotations
 
+import dataclasses
 import math
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from functools import lru_cache
-from typing import Any
+from typing import Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from src.api.middleware.error_handler import handle_api_errors
 from src.api.services.launch_monitor_dataset_jobs import (
@@ -29,23 +30,33 @@ from src.tools.launch_monitor_model import (
     AnalysisContextV2,
     AnalysisMode,
     ChangeCandidate,
+    DispersionResult,
     ExpectedStrokesBaselineV2,
     CorrelationMethod,
+    CorrelationResult,
+    FilterRule,
     FlexibleAnalysisRequest,
     LaunchMonitorAnalysisResultV2,
     LongitudinalSessionRequestV1,
     LongitudinalSessionResultV1,
     ModelProvenanceV2,
     MissingPolicy,
+    MonitorComparisonResult,
     OutcomeProxyRequestV1,
     OutcomeProxyResultV1,
+    PCAResult,
     PlayerCovariationRequestV1,
     PlayerCovariationResultV1,
     PlayerCovariationScanRequestV1,
     PlayerCovariationScanResultV1,
+    PredictiveModelResult,
     StrokesGainedAnalysisResultV1,
     StrokesGainedRequestV1,
     TemporalTrendResult,
+    TreatmentConfig,
+    TreatmentResult,
+    VIFResult,
+    analyze_dispersion,
     analyze_longitudinal_sessions,
     analyze_outcome_proxy,
     analyze_player_covariation_v1,
@@ -53,7 +64,13 @@ from src.tools.launch_monitor_model import (
     analyze_trend,
     analyze_variables,
     analyze_variables_v2,
+    apply_treatment,
+    compare_monitors,
+    compute_correlations,
+    compute_pca,
+    compute_vif,
     contract_v2_json_schema,
+    fit_predictive_model,
     longitudinal_session_contract_json_schema,
     player_covariation_contract_json_schema,
     scan_player_covariation_v1,
@@ -161,6 +178,178 @@ class TrendPayloadV2(BaseModel):
     metric: str = Field(min_length=1)
     time_column: str = Field("captured_at", min_length=1)
     rolling_window: int = Field(10, ge=3, le=500)
+
+
+class DispersionPayloadV2(BaseModel):
+    """Bounded inline records and the PyQt Dispersion tab's widget-derived inputs.
+
+    Mirrors ``_DispersionParams`` from
+    ``src/tools/launch_monitor_analytics/gui.py`` (``_read_dispersion_params``):
+    ``group_column`` is ``None`` when the Dispersion tab's "Group By" combo box
+    reads "(all shots)" (``_build_dispersion_tab``), so the API and desktop
+    paths accept identical inputs for :func:`analyze_dispersion`.
+    """
+
+    records: list[dict[str, Any]] = Field(min_length=3, max_length=20_000)
+    forward: str = Field("carry_distance", min_length=1)
+    lateral: str = Field("lateral_carry", min_length=1)
+    group_column: Literal["monitor_vendor", "session_id", "club"] | None = None
+
+
+class RelationshipsPayloadV2(BaseModel):
+    """Bounded inline records and the PyQt Relationships tab's widget inputs.
+
+    Mirrors ``_RelationshipParams`` from
+    ``src/tools/launch_monitor_analytics/gui.py`` (``_read_relationship_params``):
+    ``method`` offers the same three choices, ``edge_threshold`` keeps the same
+    default and ``[0, 1]`` range as the "Network Edge Threshold" spinbox
+    (``_build_relationships_tab``), and controls that are also selected metrics
+    are dropped as the desktop tab drops them, so the API and desktop paths
+    accept identical inputs for :func:`compute_correlations`.
+    """
+
+    records: list[dict[str, Any]] = Field(min_length=3, max_length=20_000)
+    metrics: list[str] = Field(min_length=2)
+    controls: list[str] = Field(default_factory=list)
+    method: CorrelationMethod = "pearson"
+    edge_threshold: float = Field(0.3, ge=0.0, le=1.0)
+
+    @field_validator("metrics")
+    @classmethod
+    def _metrics_are_unique(cls, value: list[str]) -> list[str]:
+        """Precondition: ``metrics`` names each column at most once."""
+        if len(set(value)) != len(value):
+            raise ValueError("metrics must not contain duplicates")
+        return value
+
+    def effective_controls(self) -> tuple[str, ...]:
+        """Return ``controls`` without the selected metrics (desktop parity)."""
+        return tuple(item for item in self.controls if item not in self.metrics)
+
+
+class MultivariatePayloadV2(BaseModel):
+    """Bounded inline records and the PyQt Relationships tab's PCA/VIF inputs.
+
+    Mirrors ``_compute_multivariate`` from
+    ``src/tools/launch_monitor_analytics/gui.py``: the same ``metrics``
+    selection feeds both :func:`compute_pca` and :func:`compute_vif`, so the
+    API and desktop paths accept identical inputs.
+    """
+
+    records: list[dict[str, Any]] = Field(min_length=3, max_length=20_000)
+    metrics: list[str] = Field(min_length=2)
+
+
+class ComparisonPayloadV2(BaseModel):
+    """Bounded inline records and the PyQt Monitor Comparison tab's inputs.
+
+    Mirrors ``_ComparisonParams`` from
+    ``src/tools/launch_monitor_analytics/gui.py``
+    (``_read_comparison_params``): ``match_column`` is ``None`` when the
+    Monitor Comparison tab's "Matched-Shot Column" combo reads "(unmatched)"
+    (``_build_comparison_tab``), and an empty ``reference_monitor`` (the
+    combo's blank state, ``currentText() or None``) is treated the same as
+    ``None``, so the API and desktop paths accept identical inputs for
+    :func:`compare_monitors`.
+    """
+
+    records: list[dict[str, Any]] = Field(min_length=3, max_length=20_000)
+    metric: str = Field(min_length=1)
+    match_column: str | None = None
+    reference_monitor: str | None = None
+
+    @field_validator("reference_monitor")
+    @classmethod
+    def _blank_reference_is_none(cls, value: str | None) -> str | None:
+        """Precondition: an empty reference behaves like an absent one (desktop parity)."""
+        return value or None
+
+
+ModelName = Literal["linear", "ridge", "lasso", "elastic_net", "mlp"]
+
+
+class ModelPayloadV2(BaseModel):
+    """Bounded inline records and the PyQt Models tab's widget-derived inputs.
+
+    Mirrors ``_ModelParams`` from ``src/tools/launch_monitor_analytics/gui.py``
+    (``_read_model_params``): ``model`` offers the same five choices,
+    ``random_seed`` keeps the same default and ``[0, 2_147_483_647]`` range as
+    the "Random Seed" spinbox, and ``group_column`` is ``None`` when the
+    "Grouped Holdout" combo reads "(random split)" (``_build_models_tab``), so
+    the API and desktop paths accept identical inputs for
+    :func:`fit_predictive_model`.
+    """
+
+    records: list[dict[str, Any]] = Field(min_length=3, max_length=20_000)
+    target: str = Field(min_length=1)
+    features: list[str] = Field(min_length=1)
+    model: ModelName = "linear"
+    random_seed: int = Field(42, ge=0, le=2_147_483_647)
+    group_column: Literal["session_id", "monitor_vendor", "club"] | None = None
+
+    @field_validator("features")
+    @classmethod
+    def _features_are_unique(cls, value: list[str]) -> list[str]:
+        """Precondition: ``features`` names each column at most once."""
+        if len(set(value)) != len(value):
+            raise ValueError("features must not contain duplicates")
+        return value
+
+
+FilterOperator = Literal["eq", "ne", "lt", "le", "gt", "ge", "contains", "in"]
+
+
+class FilterRulePayload(BaseModel):
+    """Serialized form of one :class:`FilterRule`.
+
+    ``operator`` is restricted to the operators :class:`FilterRule` accepts;
+    ``value`` is the raw text the desktop filter table's value cell holds
+    (``_filter_rules``), passed through verbatim.
+    """
+
+    column: str = Field(min_length=1)
+    operator: FilterOperator
+    value: str = ""
+
+
+class TreatmentPayloadV2(BaseModel):
+    """Bounded inline records and the PyQt Data Treatment tab's widget inputs.
+
+    Mirrors ``_read_treatment_config`` from
+    ``src/tools/launch_monitor_analytics/gui.py``: ``robust_z_threshold``
+    keeps the same default and ``[1, 20]`` range as the "Modified Z
+    Threshold" spinbox (``_build_treatment_tab``), and ``required_metrics``/
+    ``outlier_metrics`` behave like the comma-separated text fields —
+    whitespace-only or empty entries are dropped — so the API and desktop
+    paths accept identical inputs for :func:`apply_treatment`.
+    """
+
+    records: list[dict[str, Any]] = Field(min_length=3, max_length=20_000)
+    required_metrics: list[str] = Field(default_factory=list)
+    outlier_metrics: list[str] = Field(default_factory=list)
+    robust_z_threshold: float = Field(4.5, ge=1.0, le=20.0)
+    exclude_flagged: bool = False
+    filters: list[FilterRulePayload] = Field(default_factory=list)
+
+    @field_validator("required_metrics", "outlier_metrics")
+    @classmethod
+    def _strip_blank_metrics(cls, value: list[str]) -> list[str]:
+        """Precondition: blank/whitespace-only entries behave like the
+        desktop's comma-separated text field, which drops them."""
+        return [item.strip() for item in value if item.strip()]
+
+    def to_config(self) -> TreatmentConfig:
+        """Build the :class:`TreatmentConfig` ``_read_treatment_config`` builds."""
+        return TreatmentConfig(
+            required_metrics=tuple(self.required_metrics),
+            outlier_metrics=tuple(self.outlier_metrics),
+            robust_z_threshold=self.robust_z_threshold,
+            exclude_flagged=self.exclude_flagged,
+            filters=tuple(
+                FilterRule(rule.column, rule.operator, rule.value)
+                for rule in self.filters
+            ),
+        )
 
 
 @lru_cache(maxsize=1)
@@ -539,6 +728,412 @@ async def analyze_trend_v2(payload: TrendPayloadV2) -> dict[str, object]:
         rolling_window=payload.rolling_window,
     )
     return _trend_result_to_dict(result, payload.time_column)
+
+
+def _dispersion_result_to_dict(
+    name: str, result: DispersionResult
+) -> dict[str, object]:
+    """Serialize one group's :class:`DispersionResult` for ``/v2/dispersion``.
+
+    Postcondition: every float field is JSON-safe — NaN/infinite values
+    become ``null``, never ``0`` — and the result carries its group ``name``.
+    """
+    fields: dict[str, object] = dataclasses.asdict(result)
+    for key, value in fields.items():
+        if isinstance(value, float):
+            fields[key] = _json_safe_float(value)
+    return {"group": name, **fields}
+
+
+@router.post("/v2/dispersion")
+@handle_api_errors
+async def analyze_dispersion_v2(payload: DispersionPayloadV2) -> dict[str, object]:
+    """Analyze shot dispersion with the PyQt Dispersion tab's inputs.
+
+    Calls the same :func:`analyze_dispersion` the desktop Dispersion tab
+    calls (``src/tools/launch_monitor_analytics/gui.py``
+    ``_compute_dispersion``), so the API and PyQt paths share one contract.
+    Precondition: ``records`` holds 3-20,000 inline rows (validated by the
+    request schema). Grouping mirrors ``_compute_dispersion``: a single
+    "All Shots" group when ``group_column`` is ``None`` or the column is
+    absent from the frame, otherwise one group per
+    ``frame.groupby(group_column, dropna=False)`` value, named ``str(name)``.
+    Postcondition: the response is a JSON-safe serialization of every
+    :class:`DispersionResult` field per group; see
+    :func:`_dispersion_result_to_dict`.
+    """
+
+    import pandas as pd  # deferred import: pandas must not load at API boot (issue #8943)
+
+    frame = pd.DataFrame.from_records(payload.records)
+    groups: list[tuple[object, pd.DataFrame]] = [("All Shots", frame)]
+    if payload.group_column is not None and payload.group_column in frame:
+        groups = list(frame.groupby(payload.group_column, dropna=False))
+
+    return {
+        "forward": payload.forward,
+        "lateral": payload.lateral,
+        "group_column": payload.group_column,
+        "groups": [
+            _dispersion_result_to_dict(
+                str(name),
+                analyze_dispersion(
+                    group, forward=payload.forward, lateral=payload.lateral
+                ),
+            )
+            for name, group in groups
+        ],
+    }
+
+
+def _matrix_to_rows(matrix: Any) -> list[list[float | None]]:
+    """Serialize a labelled matrix to JSON-safe rows in its index order.
+
+    Postcondition: NaN/infinite cells become ``null``, never ``0``.
+    """
+    return [
+        [_json_safe_float(float(value)) for value in row]
+        for row in matrix.to_numpy(dtype=float)
+    ]
+
+
+def _relationships_result_to_dict(result: CorrelationResult) -> dict[str, object]:
+    """Serialize :class:`CorrelationResult` to the ``/v2/relationships`` response.
+
+    Postcondition: every matrix is a list of rows ordered like ``metrics``;
+    an optional matrix the analysis did not produce is ``null``; every
+    non-finite number is ``null``, never ``0``.
+    """
+    adjusted = result.adjusted_p_values
+    partial = result.partial_coefficients
+    return {
+        "method": result.method,
+        "metrics": [str(metric) for metric in result.coefficients.index],
+        "coefficients": _matrix_to_rows(result.coefficients),
+        "p_values": _matrix_to_rows(result.p_values),
+        "adjusted_p_values": None if adjusted is None else _matrix_to_rows(adjusted),
+        "pair_counts": result.pair_counts.to_numpy(dtype=int).tolist(),
+        "partial_coefficients": None if partial is None else _matrix_to_rows(partial),
+        "derived_metrics": list(result.derived_metrics),
+        "boolean_projected": list(result.boolean_projected),
+        "edges": [
+            {
+                key: _json_safe_float(value) if isinstance(value, float) else value
+                for key, value in dataclasses.asdict(edge).items()
+            }
+            for edge in result.edges
+        ],
+    }
+
+
+@router.post("/v2/relationships")
+@handle_api_errors
+async def analyze_relationships_v2(
+    payload: RelationshipsPayloadV2,
+) -> dict[str, object]:
+    """Map metric interdependencies with the PyQt Relationships tab's inputs.
+
+    Calls the same :func:`compute_correlations` the desktop Relationships tab
+    calls (``src/tools/launch_monitor_analytics/gui.py``
+    ``_compute_relationship``), so the API and PyQt paths share one contract.
+    Precondition: ``records`` holds 3-20,000 inline rows, ``metrics`` names at
+    least two columns and ``edge_threshold`` is in ``[0, 1]`` (validated by
+    the request schema); a column absent from the records returns 400.
+    Postcondition: the response is a JSON-safe serialization of every
+    :class:`CorrelationResult` field; see :func:`_relationships_result_to_dict`.
+    """
+
+    import pandas as pd  # deferred import: pandas must not load at API boot (issue #8943)
+
+    result = compute_correlations(
+        pd.DataFrame.from_records(payload.records),
+        metrics=tuple(payload.metrics),
+        method=payload.method,
+        controls=payload.effective_controls(),
+        edge_threshold=payload.edge_threshold,
+    )
+    return _relationships_result_to_dict(result)
+
+
+def _pca_result_to_dict(result: PCAResult) -> dict[str, object]:
+    """Serialize :class:`PCAResult` to the ``/v2/multivariate`` response.
+
+    Postcondition: ``loadings`` rows follow ``metrics`` order and
+    ``scores`` rows follow the complete-case sample order, both with
+    columns ordered like ``component_names``; every non-finite number is
+    ``null``, never ``0``.
+    """
+    return {
+        "metrics": list(result.metrics),
+        "component_names": list(result.explained_variance_ratio.index),
+        "explained_variance_ratio": [
+            _json_safe_float(float(value))
+            for value in result.explained_variance_ratio.to_numpy(dtype=float)
+        ],
+        "loadings": _matrix_to_rows(result.loadings),
+        "scores": _matrix_to_rows(result.scores),
+        "sample_count": result.sample_count,
+    }
+
+
+def _vif_result_to_dict(result: VIFResult) -> dict[str, object]:
+    """Serialize :class:`VIFResult` to the ``/v2/multivariate`` response.
+
+    Postcondition: ``values`` is a metric-keyed mapping; an infinite VIF
+    (perfectly collinear metrics) serializes as ``null``, never ``0``.
+    """
+    return {
+        "values": {
+            str(metric): _json_safe_float(float(value))
+            for metric, value in result.values.items()
+        },
+        "sample_count": result.sample_count,
+        "warning_metrics": list(result.warning_metrics),
+    }
+
+
+@router.post("/v2/multivariate")
+@handle_api_errors
+async def analyze_multivariate_v2(payload: MultivariatePayloadV2) -> dict[str, object]:
+    """Compute PCA and VIF diagnostics with the PyQt multivariate inputs.
+
+    Calls the same :func:`compute_pca` and :func:`compute_vif` the desktop
+    Relationships tab calls (``src/tools/launch_monitor_analytics/gui.py``
+    ``_compute_multivariate``), so the API and PyQt paths share one
+    contract. Precondition: ``records`` holds 3-20,000 inline rows and
+    ``metrics`` names at least two columns (validated by the request
+    schema); an unknown metric or too few complete rows returns 400.
+    Postcondition: the response is a JSON-safe serialization of every
+    :class:`PCAResult` and :class:`VIFResult` field; see
+    :func:`_pca_result_to_dict` and :func:`_vif_result_to_dict`.
+    """
+
+    import pandas as pd  # deferred import: pandas must not load at API boot (issue #8943)
+
+    frame = pd.DataFrame.from_records(payload.records)
+    metrics = tuple(payload.metrics)
+    pca = compute_pca(frame, metrics=metrics)
+    vif = compute_vif(frame, metrics=metrics)
+    return {
+        "pca": _pca_result_to_dict(pca),
+        "vif": _vif_result_to_dict(vif),
+    }
+
+
+def _dataclass_to_json_safe_dict(instance: Any) -> dict[str, object]:
+    """Serialize one frozen dataclass instance to a JSON-safe dict.
+
+    Postcondition: every float field is JSON-safe — NaN/infinite values
+    become ``null``, never ``0``; every other field is unchanged.
+    """
+    return {
+        key: _json_safe_float(value) if isinstance(value, float) else value
+        for key, value in dataclasses.asdict(instance).items()
+    }
+
+
+def _comparison_result_to_dict(result: MonitorComparisonResult) -> dict[str, object]:
+    """Serialize :class:`MonitorComparisonResult` to the ``/v2/comparison`` response.
+
+    Postcondition: every float field of each summary and pairwise entry is
+    JSON-safe — NaN/infinite values become ``null``, never ``0``.
+    """
+    return {
+        "metric": result.metric,
+        "summaries": [_dataclass_to_json_safe_dict(item) for item in result.summaries],
+        "pairwise": [_dataclass_to_json_safe_dict(item) for item in result.pairwise],
+    }
+
+
+@router.post("/v2/comparison")
+@handle_api_errors
+async def analyze_comparison_v2(payload: ComparisonPayloadV2) -> dict[str, object]:
+    """Compare monitor behavior with the PyQt Monitor Comparison tab's inputs.
+
+    Calls the same :func:`compare_monitors` the desktop Monitor Comparison
+    tab calls (``src/tools/launch_monitor_analytics/gui.py``
+    ``_compute_comparison``), so the API and PyQt paths share one contract.
+    Precondition: ``records`` holds 3-20,000 inline rows and ``metric`` names
+    a non-empty column (validated by the request schema); fewer than two
+    monitors, an unknown reference monitor, or fewer than three matched pairs
+    is a domain ``ValueError`` -> 400. Postcondition: the response is a
+    JSON-safe serialization of every :class:`MonitorComparisonResult` field;
+    see :func:`_comparison_result_to_dict`.
+    """
+
+    import pandas as pd  # deferred import: pandas must not load at API boot (issue #8943)
+
+    result = compare_monitors(
+        pd.DataFrame.from_records(payload.records),
+        metric=payload.metric,
+        match_column=payload.match_column,
+        reference_monitor=payload.reference_monitor,
+    )
+    return {
+        "match_column": payload.match_column,
+        "reference_monitor": payload.reference_monitor,
+        **_comparison_result_to_dict(result),
+    }
+
+
+def _frame_to_records(frame: Any) -> list[dict[str, object]]:
+    """Serialize a result DataFrame to JSON-safe row dicts.
+
+    Postcondition: every float value is JSON-safe — NaN/infinite values
+    become ``null``, never ``0``; a timestamp-like value (e.g. a
+    ``pandas.Timestamp``) becomes its ISO string, and a missing timestamp
+    (``NaT``, which is unequal to itself) becomes ``null``.
+    """
+    records: list[dict[str, Any]] = frame.to_dict(orient="records")
+    for entry in records:
+        for key, value in entry.items():
+            if isinstance(value, float):
+                entry[key] = _json_safe_float(value)
+            elif hasattr(value, "isoformat"):
+                entry[key] = None if value != value else value.isoformat()
+    return records
+
+
+def _model_result_to_dict(result: PredictiveModelResult) -> dict[str, object]:
+    """Serialize :class:`PredictiveModelResult` to the ``/v2/model`` response.
+
+    Postcondition: every float in ``metrics``/``coefficients`` is JSON-safe
+    — NaN/infinite values become ``null``, never ``0`` — and
+    ``predictions`` is a JSON-safe list of row dicts; see
+    :func:`_frame_to_records`.
+    """
+    coefficients = result.coefficients
+    return {
+        "model": result.model,
+        "target": result.target,
+        "features": list(result.features),
+        "metrics": {
+            key: _json_safe_float(value) for key, value in result.metrics.items()
+        },
+        "coefficients": (
+            None
+            if coefficients is None
+            else {key: _json_safe_float(value) for key, value in coefficients.items()}
+        ),
+        "random_seed": result.random_seed,
+        "train_count": result.train_count,
+        "test_count": result.test_count,
+        "predictions": _frame_to_records(result.predictions),
+    }
+
+
+@router.post("/v2/model")
+@handle_api_errors
+async def fit_model_v2(payload: ModelPayloadV2) -> dict[str, object]:
+    """Fit a predictive model with the PyQt Models tab's widget-derived inputs.
+
+    Calls the same :func:`fit_predictive_model` the desktop Models tab calls
+    (``src/tools/launch_monitor_analytics/gui.py`` ``_compute_model``), so the
+    API and PyQt paths share one contract. Precondition: ``records`` holds
+    3-20,000 inline rows, ``features`` names 1+ distinct columns, and
+    ``random_seed`` is in ``[0, 2_147_483_647]`` (validated by the request
+    schema); target leakage, an unknown column, or insufficient complete rows
+    is a domain ``ValueError`` -> 400. A model whose optional dependency is
+    missing (``ImportError``, e.g. ``mlp`` without scikit-learn) is reported
+    as unavailable -> 503, the same failure the desktop tab shows.
+    Postcondition: the response is a JSON-safe serialization of every
+    :class:`PredictiveModelResult` field; see :func:`_model_result_to_dict`.
+    """
+
+    import pandas as pd  # deferred import: pandas must not load at API boot (issue #8943)
+
+    try:
+        result = fit_predictive_model(
+            pd.DataFrame.from_records(payload.records),
+            target=payload.target,
+            features=payload.features,
+            model=payload.model,
+            random_seed=payload.random_seed,
+            group_column=payload.group_column,
+        )
+    except ImportError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"Model {payload.model!r} is unavailable: {exc}",
+        ) from exc
+    return _model_result_to_dict(result)
+
+
+def _json_safe_action_value(value: object) -> object:
+    """Mirror ``json.dumps(..., default=str)`` for one audit-action value.
+
+    Postcondition: a float is JSON-safe (NaN/infinite becomes ``null``,
+    never ``0``); ``None``/``bool``/``int``/``str`` pass through unchanged;
+    a ``dict``/``list``/``tuple`` is converted recursively; anything else
+    (e.g. a numpy scalar row index) becomes its ``str()`` — the same
+    fallback the desktop's ``json.dumps(..., default=str)`` uses
+    (``_present_treatment``).
+    """
+    if isinstance(value, float):
+        return _json_safe_float(value)
+    if value is None or isinstance(value, (bool, int, str)):
+        return value
+    if isinstance(value, dict):
+        return {key: _json_safe_action_value(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_json_safe_action_value(item) for item in value]
+    return str(value)
+
+
+def _audit_log_to_json_safe(
+    audit_log: tuple[dict[str, object], ...],
+) -> list[dict[str, object]]:
+    """Serialize :class:`TreatmentResult` ``audit_log`` entries, action by action."""
+    return [
+        {key: _json_safe_action_value(value) for key, value in action.items()}
+        for action in audit_log
+    ]
+
+
+def _treatment_result_to_dict(result: TreatmentResult) -> dict[str, object]:
+    """Serialize :class:`TreatmentResult` to the ``/v2/treatment`` response.
+
+    Postcondition: ``data``/``flags`` are JSON-safe row dicts (see
+    :func:`_frame_to_records`); ``audit_log`` entries are JSON-safe,
+    mirroring the desktop's ``json.dumps(..., default=str)`` serialization
+    (see :func:`_audit_log_to_json_safe`); ``shot_count``/``flag_count``
+    match the desktop status line's "{flags} flags; {shots} shots in the
+    analysis view" counts (``_present_treatment``).
+    """
+    return {
+        "data": _frame_to_records(result.data),
+        "flags": _frame_to_records(result.flags),
+        "audit_log": _audit_log_to_json_safe(result.audit_log),
+        "shot_count": len(result.data),
+        "flag_count": len(result.flags),
+    }
+
+
+@router.post("/v2/treatment")
+@handle_api_errors
+async def apply_treatment_v2(payload: TreatmentPayloadV2) -> dict[str, object]:
+    """Apply reproducible data-quality treatment with the PyQt Data Treatment
+    tab's widget-derived inputs.
+
+    Calls the same :func:`apply_treatment` the desktop Data Treatment tab
+    calls (``src/tools/launch_monitor_analytics/gui.py``
+    ``_compute_treatment``), so the API and PyQt paths share one contract.
+    Precondition: ``records`` holds 3-20,000 inline rows, ``robust_z_threshold``
+    is in ``[1, 20]``, and each filter names a non-empty ``column`` with one
+    of the operators :class:`FilterRule` accepts (validated by the request
+    schema); an empty frame, an unknown required/outlier/filter column, or a
+    non-numeric filter value for a numeric operator is a domain
+    ``ValueError`` -> 400. Postcondition: the response is a JSON-safe
+    serialization of every :class:`TreatmentResult` field plus ``shot_count``
+    and ``flag_count``; see :func:`_treatment_result_to_dict`. The input
+    ``records`` are never mutated — ``apply_treatment`` works on a copy.
+    """
+
+    import pandas as pd  # deferred import: pandas must not load at API boot (issue #8943)
+
+    frame = pd.DataFrame.from_records(payload.records)
+    result = apply_treatment(frame, payload.to_config())
+    return _treatment_result_to_dict(result)
 
 
 __all__ = ["CONTRACT_VERSION", "router"]

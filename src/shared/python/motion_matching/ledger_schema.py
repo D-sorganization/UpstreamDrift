@@ -21,7 +21,8 @@ __all__ = [
 
 
 class SharedMetrics(BaseModel):
-    """Five standardized cross-engine comparison metrics (metres or radians)."""
+    """Five standardized cross-engine comparison metrics (metres or radians),
+    plus the forward-dynamics phase split at impact (#12042, reporting only)."""
 
     model_config = ConfigDict(extra="ignore")
 
@@ -44,6 +45,14 @@ class SharedMetrics(BaseModel):
     pelvis_yaw_rmse_rad: float | None = Field(
         default=None,
         description="Pelvis yaw tracking RMSE in radians or angle difference",
+    )
+    fd_address_to_impact_rmse_m: float | None = Field(
+        default=None,
+        description="Forward-dynamics marker RMSE from address to impact (#12042)",
+    )
+    fd_after_impact_rmse_m: float | None = Field(
+        default=None,
+        description="Forward-dynamics marker RMSE after impact (#12042)",
     )
 
 

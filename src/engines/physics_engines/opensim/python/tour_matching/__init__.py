@@ -6,6 +6,10 @@ steps (IK, Moco tracking) live in drivers under
 docs/development/opensim_tour_matching and skip without ``opensim``.
 """
 
+from src.engines.physics_engines.opensim.python.tour_matching.model_admission import (
+    MuscleModelAssetInventory,
+    audit_muscle_model_asset,
+)
 from src.engines.physics_engines.opensim.python.tour_matching.cli import (
     CheckpointManifest,
     RunConfig,
@@ -189,6 +193,8 @@ from src.engines.physics_engines.opensim.python.tour_matching.view_package impor
 )
 
 __all__ = [
+    "MuscleModelAssetInventory",
+    "audit_muscle_model_asset",
     "BASELINE_MODEL_SHA256",
     "BASELINE_OS3B_INPUT_SHA256",
     "DEFAULT_NOMINAL_LENGTHS_M",

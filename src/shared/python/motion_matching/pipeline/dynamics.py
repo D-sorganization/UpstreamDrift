@@ -40,6 +40,14 @@ from src.shared.python.motion_matching.pipeline.reference import (
     marker_errors,
     smooth_reference,
 )
+from src.shared.python.motion_matching.pipeline.fd_phase import (
+    fd_phase_report,
+    reference_clubhead,
+)
+from src.shared.python.motion_matching.pipeline.turn_split import (
+    lane_axis_targets,
+    lane_split_weights,
+)
 from src.shared.python.motion_matching.range_of_motion import (
     HUMAN_RANGES_DEG,
     violations,
@@ -388,7 +396,8 @@ def shooting_fit(
             prior_trajectory=q_track,
             bounds=lane.bounds,
             locked_per_frame=locked,
-            axis_targets_per_frame=getattr(lane, "face_targets", None),
+            axis_targets_per_frame=lane_axis_targets(lane),
+            marker_weights=lane_split_weights(lane),
         )
         q_track = smooth_reference(q_fit, rate_hz, TRACKING_CUTOFF_HZ)
     zmp = fs.reference_zmp(sim, lane.times, best_q, lane.ground)
@@ -457,7 +466,8 @@ def zmp_filter(
             prior_trajectory=q_track,
             bounds=lane.bounds,
             com_targets_per_frame=goals,
-            axis_targets_per_frame=getattr(lane, "face_targets", None),
+            axis_targets_per_frame=lane_axis_targets(lane),
+            marker_weights=lane_split_weights(lane),
         )
         q_track = smooth_reference(q_new, rate_hz, TRACKING_CUTOFF_HZ)
         zmp = fs.reference_zmp(sim, lane.times, q_track, lane.ground)
@@ -757,6 +767,9 @@ def build_dynamics_report(
             lane.frames,
             record,
             rate_hz=rate_hz,
+        ),
+        "fd_phase": fd_phase_report(
+            lane.times, sim_errors, lane.valid, reference_clubhead(kin, q_ref)
         ),
         "peak_joint_torque_n_m": float(np.abs(record.tau).max()),
         "lowest_sphere_height_min_m": float(record.lowest_sphere_height_m.min()),
