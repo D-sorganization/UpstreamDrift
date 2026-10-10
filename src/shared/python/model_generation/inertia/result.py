@@ -15,8 +15,8 @@ from typing import Any
 
 import numpy as np
 
-from shared.python.model_generation.core.contracts import precondition
-from shared.python.model_generation.core.types import Inertia
+from src.shared.python.model_generation.core.contracts import precondition
+from src.shared.python.model_generation.core.types import Inertia
 
 
 class InertiaMode(Enum):

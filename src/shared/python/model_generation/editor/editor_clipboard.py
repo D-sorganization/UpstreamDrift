@@ -16,7 +16,7 @@ from .editor_types import ComponentType
 from src.shared.python.contracts import require
 
 if TYPE_CHECKING:
-    from shared.python.model_generation.converters.urdf_parser import ParsedModel
+    from src.shared.python.model_generation.converters.urdf_parser import ParsedModel
 
 logger = logging.getLogger(__name__)
 

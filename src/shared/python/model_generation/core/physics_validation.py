@@ -26,14 +26,14 @@ from typing import TYPE_CHECKING  # noqa: E402
 
 import numpy as np  # noqa: E402
 
-from shared.python.model_generation.core.constants import GRAVITY_M_S2  # noqa: E402
-from shared.python.model_generation.core.validation import (  # noqa: E402
+from src.shared.python.model_generation.core.constants import GRAVITY_M_S2  # noqa: E402
+from src.shared.python.model_generation.core.validation import (  # noqa: E402
     ValidationResult,
     Validator,
 )
 
 if TYPE_CHECKING:
-    from shared.python.model_generation.core.types import Inertia, Joint, Link
+    from src.shared.python.model_generation.core.types import Inertia, Joint, Link
 
 logger = logging.getLogger(__name__)
 
