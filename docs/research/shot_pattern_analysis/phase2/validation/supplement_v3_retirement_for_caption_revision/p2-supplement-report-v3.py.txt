@@ -1,0 +1,11 @@
+from pathlib import Path
+import subprocess,json,datetime
+phase=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2')
+assert not (phase/'supplement_report_v1').exists()
+cmd=['/tmp/shot-pattern-validation-venv-20261009/bin/python','-m','src.tools.shot_pattern_analysis.matched_supplement_pipeline','--original-primary',str(phase/'final_v1'),'--original-control',str(phase/'control_final_v1'),'--pw-primary-face-bounds',str(phase/'supplement_final_v1/pw_primary_face'),'--pw-control-face-bounds',str(phase/'supplement_final_v1/pw_control_face'),'--driver-control-speed-bounds',str(phase/'supplement_final_v1/driver_control_speed'),'--inventory',str(phase/'review_followups/SUPPLEMENTAL_EXECUTION_INVENTORY.json'),'--transition-receipt',str(phase/'source_transition_supplement.json'),'--transition-sha256','cf622694964b0dc6c2ca0c24b92f9fa8ee5365721219069283aca1f6804a8981','--output-dir',str(phase/'supplement_report_v1')]
+record={'command':cmd,'started':datetime.datetime.now(datetime.timezone.utc).isoformat(),'source_commit':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()}
+Path('/tmp/p2-supplement-report-v3-start.json').write_text(json.dumps(record,indent=2)+'\n')
+result=subprocess.run(cmd)
+record.update(finished=datetime.datetime.now(datetime.timezone.utc).isoformat(),exit_code=result.returncode)
+Path('/tmp/p2-supplement-report-v3-exit.json').write_text(json.dumps(record,indent=2)+'\n')
+raise SystemExit(result.returncode)

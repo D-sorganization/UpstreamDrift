@@ -1,0 +1,31 @@
+from pathlib import Path
+import hashlib,json,shutil,subprocess
+from datetime import datetime,timezone
+main=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift')
+candidate=Path('/home/dieterolson/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift')
+out=Path('/tmp/p2-social-context-actual-candidate')
+dest=main/'docs/research/shot_pattern_analysis/phase2/validation/supplement_social_context_candidate_v1'
+def sha(p): return hashlib.sha256(p.read_bytes()).hexdigest()
+r=json.loads((out/'receipt.json').read_text())
+assert sha(out/'receipt.json')=='7448f929bb3f75c62d9934cb624d7d1b9ccbd2839ce1c02a6b5880d272bcb221'
+for root,key in [(main,'main_source_sha256'),(candidate,'source_sha256')]:
+ for name,h in r[key].items(): assert sha(root/name)==h,name
+for name,h in r['input_sha256'].items(): assert sha(Path(name))==h,name
+for name,h in r['assets'].items(): assert sha(out/name)==h,name
+assert not any(x['outside_canvas'] for x in r['figure_text_checks'])
+assert all(x['same_bytes'] for x in r['unchanged_academic_png_checks'])
+assert subprocess.check_output(['git','rev-parse','HEAD'],cwd=candidate,text=True).strip()==r['commit']
+dest.mkdir(parents=True,exist_ok=True)
+shutil.copy2(out/'receipt.json',dest/'actual_render_receipt.json')
+shutil.copy2('/tmp/p2-social-context-actual-review.py',dest/'executed_actual_render.py.txt')
+shutil.copy2('/tmp/p2-social-context-actual-review.log',dest/'actual_render_log.txt')
+for n in range(1,4): shutil.copy2(out/f'review_contact_{n}.jpg',dest/f'review_contact_{n}.jpg')
+full=[n for n in r['assets'] if n.endswith('_social.png') and (n.startswith('cells/') or n.endswith('_density_draw_social.png'))]
+assert len(full)==8
+for n in full:
+ target=dest/'reviewed_fullsize'/n;target.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(out/n,target)
+result={'schema':'independent-social-context-card-review/1','accepted':True,'candidate_commit':r['commit'],'source_sha256':{k:r['source_sha256'][k] for k in ['src/tools/shot_pattern_analysis/matched_pair_social.py','src/tools/shot_pattern_analysis/matched_supplement_figures.py']},'qualification_receipt_sha256':sha(out/'receipt.json'),'qualification_receipt':'actual_render_receipt.json','render_exit_code':0,'scope':'Representative saved-data component qualification; not complete publication acceptance or empirical validation.','exported_asset_count':len(r['assets']),'contact_reviewed_png_count':24,'fullsize_reviewed_png_count':8,'reviewed_file_sha256':{k:v for k,v in r['assets'].items() if k.endswith('.png')},'fullsize_reviewed_files':full,'selected_cells':r['selected_cells'],'selected_pairs':r['selected_pairs'],'checks':{'all_68_asset_hashes_reconciled':True,'candidate_and_main_52_sources_unchanged':True,'bound_inputs_unchanged':True,'top_level_text_outside_canvas':0,'unchanged_academic_png_comparisons':8,'protocol_target_basis_readable':True,'counts_and_population_qualifications_preserved':True,'no_observed_tick_legend_footer_collision':True},'limitations':['Representative cards only; actual final ledger determines complete inventory.','Full regenerated pipeline requires terminal success and complete source/input/output validation.','Raw trajectory samples are explicitly not paired by shot index; density pair population is the common-six supported intersection.'],'unresolved_findings':[],'reviewed_utc':datetime.now(timezone.utc).isoformat()}
+(dest/'actual_card_review.json').write_text(json.dumps(result,indent=2)+'\n')
+(dest/'ACTUAL_CARD_REVIEW.md').write_text('''# Independent Actual Social-Card Review\n\nAccepted the narrow caption component at candidate `14f27706e4e9e52ca1324a7a2bac59e86ab33ef9`. This does not accept the complete publication or qualify empirical accuracy.\n\nThe actual saved-data render exited 0 and exported 68 assets, including 24 PNGs. All 24 PNGs were inspected on three contact sheets; eight social cards were also inspected at full size. They cover the long PW covariance caption, PW and Driver fixed-target controls, mixed original/supplement protocols, and the genuine zero-lean control alias. Exact ordered protocols, numeric targets and matching bases are readable. No clipping, tick-label, legend or footer collision was observed in this sample.\n\nAll asset bytes, both worktrees’ 52 study-source hashes, and bound inputs were reconciled after inspection. All eight available unchanged academic PNG comparisons remain byte-identical. Endpoint support, common-six conditional density counts, and unpaired raw-path sample labels remain distinct. The across-lean and curve-strength pair density cards retain the actual alias basis rather than presenting reused data as a new execution.\n\nThe JSON receipt binds the exact inspected files and producer hashes. Full replacement-pipeline acceptance still requires terminal success, a complete authoritative ledger and independent final artifact review. Historical defective outputs and their receipts must remain preserved.\n''')
+shutil.copy2('/tmp/p2-social-context-finalize-review.py',dest/'executed_final_reconciliation.py.txt')
+print(sha(dest/'actual_card_review.json'))

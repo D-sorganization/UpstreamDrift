@@ -1,0 +1,94 @@
+{
+  "schema": "independent-social-context-card-review/1",
+  "accepted": true,
+  "candidate_commit": "14f27706e4e9e52ca1324a7a2bac59e86ab33ef9",
+  "source_sha256": {
+    "src/tools/shot_pattern_analysis/matched_pair_social.py": "16a4a48eb32432cbbb39648150b5e428c014af920845e006ddf12be0375fe369",
+    "src/tools/shot_pattern_analysis/matched_supplement_figures.py": "9254d7aede64f5aed19bd32f7cd5a8fb1b1899f6e18d000ba2096b228fc18246"
+  },
+  "qualification_receipt_sha256": "7448f929bb3f75c62d9934cb624d7d1b9ccbd2839ce1c02a6b5880d272bcb221",
+  "qualification_receipt": "actual_render_receipt.json",
+  "render_exit_code": 0,
+  "scope": "Representative saved-data component qualification; not complete publication acceptance or empirical validation.",
+  "exported_asset_count": 68,
+  "contact_reviewed_png_count": 24,
+  "fullsize_reviewed_png_count": 8,
+  "reviewed_file_sha256": {
+    "comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_density_straight_social.png": "565871404830a2d55e5595bb7da16063a822f688a2baca756f0d5829b99b014d",
+    "comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density_straight_social.png": "848d24888d62503533dfedf93fe37be2864fbc52d5e4a40035bda95fa2ea6827",
+    "comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_overhead.png": "d0a93814ba1778cb3263684c2908e79821aeb969862d72d1440e5b2a82521e1b",
+    "comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density_fade_social.png": "7e1d6d0c8eebdad00aa178f7590a580096acd405a099cf80e6b8007263cd5546",
+    "comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density.png": "541c1199e26f04e757299977af2cb3b5a81477c85ddf38b0ab822e162603e981",
+    "comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_density_draw_social.png": "fc839586afb5ddcb05102c83387c5919aae3cdd0bfbff283d966dc886d70818b",
+    "comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_overhead_social.png": "c35f49e4a7f111ff9818f196ae3ca3ce8078fde16f59a58c3c23072fbd52ea23",
+    "comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density_draw_social.png": "21c069ac34945498e826898c5c5cd3726a8806486e02db6a24169b1287c7ac06",
+    "comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_density.png": "45687b0d7dc007a03568b336e53154a0daf44b05f7888024e70beb4eda1b1f34",
+    "comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_density_fade_social.png": "7346d9d08147fa7ac03f3640f4f2c83e436276447b2b9fd3404fbcdab7d318a7",
+    "comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_overhead.png": "638f9c813901f96409e9b7f1d5e36fab73d0a045ebad56ff8299044f7b637a0a",
+    "comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_overhead_social.png": "611eb4e857e63a388c8e9c663daaa409b9c15242935de0bbc73391e9efafd00a",
+    "cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_overhead_social.png": "bb0746c61a600b334b9b042c5da94392b1c93aeb5c3e98127063f970b4f8a235",
+    "cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_density_social.png": "b6cbeefede9def62152c3018e3005fc612c152610ed1d56236c7bad3d7d53b79",
+    "cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_density.png": "ca670c1763ad2a55ea26aa8de7416d79b087d55c77e27a5c119640b0333b0473",
+    "cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_density.png": "43f7ebe4d683706f04c914268ba6f615ccc0468b39e0c48533d5c9cd9f1204bf",
+    "cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_overhead_social.png": "d674f42a001d7efb53ec0d4ec5a31abbbdc5d2b01028c95124847d28b040a60a",
+    "cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_overhead.png": "f60e99822b75893eab24e4b53393e62ddc43eda7ea1624eb21fd8c1de0945cab",
+    "cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_overhead.png": "104c1ddfef3ac536e71faeeba15a864cf4a9296c3f3f40d45a73b3d6430a4dc7",
+    "cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_overhead_social.png": "5fc73c93f1373427f11744811a2e995850da2f7e910ed6fad64370c569c5e31a",
+    "cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_density_social.png": "786002b3c1a75b55ab212f2523ada95254319c32f79efa21cec067276714322c",
+    "cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_overhead.png": "8f61e3cdae7ff3067e53807c5495c69cfe6e10cd319408d88cef8e18320da1c7",
+    "cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_density.png": "3c7caabbbae0a97483bd01ca7c645395b1168ad14e6c147415f9153830a5cea6",
+    "cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_density_social.png": "8f8f6e932f3f9e42f511c21fb4bad5ca863cad44d48acc8baea554d01be84389"
+  },
+  "fullsize_reviewed_files": [
+    "comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_density_draw_social.png",
+    "comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density_draw_social.png",
+    "cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_overhead_social.png",
+    "cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_density_social.png",
+    "cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_overhead_social.png",
+    "cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_overhead_social.png",
+    "cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_density_social.png",
+    "cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_density_social.png"
+  ],
+  "selected_cells": [
+    "pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive",
+    "pitching_wedge_lean5_curve2_rotation2_combined2",
+    "driver_lean5_curve2_rotation2_combined2"
+  ],
+  "selected_pairs": [
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean0_curve1_rotation2_combined2",
+      "second": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "first_protocol": "original_primary/1",
+      "second_protocol": "pw-primary-face-bounds/1",
+      "first_mode": "Within-Lean Nominal Target",
+      "second_mode": "Fixed-Target Control (Alias)"
+    },
+    {
+      "kind": "across_lean",
+      "first": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "second": "pitching_wedge_lean5_curve2_rotation2_combined2",
+      "first_protocol": "pw-primary-face-bounds/1",
+      "second_protocol": "pw-control-face-bounds/1",
+      "first_mode": "Fixed-Target Control (Alias)",
+      "second_mode": "Fixed-Target Control"
+    }
+  ],
+  "checks": {
+    "all_68_asset_hashes_reconciled": true,
+    "candidate_and_main_52_sources_unchanged": true,
+    "bound_inputs_unchanged": true,
+    "top_level_text_outside_canvas": 0,
+    "unchanged_academic_png_comparisons": 8,
+    "protocol_target_basis_readable": true,
+    "counts_and_population_qualifications_preserved": true,
+    "no_observed_tick_legend_footer_collision": true
+  },
+  "limitations": [
+    "Representative cards only; actual final ledger determines complete inventory.",
+    "Full regenerated pipeline requires terminal success and complete source/input/output validation.",
+    "Raw trajectory samples are explicitly not paired by shot index; density pair population is the common-six supported intersection."
+  ],
+  "unresolved_findings": [],
+  "reviewed_utc": "2026-10-10T10:02:04.749004+00:00"
+}
