@@ -13,6 +13,7 @@
 
 - Branch `claude/gcv-8-grip-wrench-gaps`. The MuJoCo grip-modelling tab shows the `grip_weld_l/r` wrench via `grip_efc` and reports "unavailable" for contact-only scenes. Drake URDF: `humanoid_urdf.right_hand_grip_analysis` gives the right-hand wrench from club Newton-Euler (`full_body_model.club_newton_euler`); the left hand is unavailable, with a reason. Pinocchio: `PinocchioForceAdapter.grip_analysis_from_allocation` routes `lambda_grip` through `grip_from_allocation`.
 - Open: `allocate_trajectory` does not store `q`, so callers pass it themselves. MyoSuite per-hand emission needs the pinned `myo_sim`.
+
 # Active: MuJoCo Native Export Backend - GCV-14 #11720
 
 - Branch `claude/gcv-14-mujoco-backend`, stacked on PR #12026 (`claude/gcv-14-speed-variants`). `native_viewer_export` has a fifth engine, `mujoco` (`backends/mujoco_native.py` + `mujoco_worker.py`): full-body MJCF with the default appearance document (body, head, club meshes, scene) rendered by `mujoco.Renderer` through the shared view presets and glyph overlay. It replaces the earlier throwaway stick-figure evidence renderer.
@@ -29,6 +30,7 @@
 - Branch `claude/gcv-14-speed-variants`, stacked on PR #12004 (kinematic impact time). `video_timing.frame_schedule.SPEED_VARIANTS = (1, 0.5, 0.25)` is the default of `ExportSettings.speeds` and `--speeds`; `motion_matching.export.export_video_variants` writes the same three clips for any engine's candidate (MuJoCo, MyoSuite, Drake, Pinocchio, OpenSim, Simscape logs).
 - Tests: `test_speed_variants_engines.py` (frame counts from the time span for all four native engines, HUD 0 ms at the ball-passage impact) and `test_export.py` (variants per engine).
 - Evidence: only MuJoCo renders on ControlTower (stick figure, no club, 1920x1080, 60 fps). Drake and Pinocchio need `playwright` and its Chromium libraries, OpenSim needs `xwd`, MyoSuite needs `myosuite.envs.env_base` (#11997); none are in the `ud-sim` image and installing them needs root or a new image (owner action).
+
 # Active: Same-Input Parity Design-Manual Chapter - SIP P-9 #11614
 
 - Branch `claude/sip-p9-manual-chapter-11614`; epic #11605. Provisional QMD chapter `manuals/upstreamdrift/chapters/16-same-input-parity.qmd` (renumbered from 14 after `14-muscle-qualification-evidence.qmd` landed) (KKT, closure projection, ZOH RK4, bundle, L0-L3 levels and results, failed experiments, limitations) and registry blocker `UP-D1-same-input-parity-inventory`; registry stays blocked with no calculations. `same_input_parity.tex` cross-links the chapter and compiles with pdflatex.
