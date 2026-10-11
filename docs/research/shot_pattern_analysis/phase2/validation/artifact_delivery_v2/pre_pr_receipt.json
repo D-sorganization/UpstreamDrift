@@ -2,11 +2,11 @@
   "affected_test_summary": "34 failed, 5861 passed, 48 skipped, 36 deselected, 1 xpassed, 1514 warnings, 7 errors, 21 subtests passed in 765.44s",
   "base_ref": "fa7ee92f5cddd753099d7418fc974b142b7ebb54",
   "checkout": "/home/dieterolson/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift",
-  "classification_limit": "All 37 failed/error nodes were in unchanged test files outside this delivery diff. This is scope evidence only; no runtime-baseline claim was tested.",
+  "classification_limit": "All 41 failed/error nodes were in unchanged test files outside this delivery diff. This is scope evidence only; no runtime-baseline claim was tested.",
   "command": "python /home/dieterolson/Repositories/Repository_Management/scripts/pre_pr.py --from-ref <base> --to-ref <tested_head>",
   "exit_code": 1,
   "exit_marker": "/tmp/shot-pattern-delivery-resume/prepr-final-dac6618c58.exit",
-  "failed_or_error_node_count": 37,
+  "failed_or_error_node_count": 41,
   "failure_paths_in_scope_diff": [],
   "failure_test_paths": [
     "tests/research/test_articulated_ground_posthoc_sensitivity.py",
@@ -21,6 +21,7 @@
     "tests/ui/engines/drake/test_drake_embed_adapter.py",
     "tests/ui/engines/pinocchio/test_pinocchio_embed_adapter.py",
     "tests/unit/engines/physics_engines/drake/test_drake_gui_app.py",
+    "tests/unit/shared_python/test_signal_toolkit_core.py",
     "tests/unit/test_core_install_isolation.py",
     "tests/unit/test_data_processing_core_extended.py",
     "tests/unit/test_drake_physics_engine.py",
@@ -66,6 +67,12 @@
   "schema": "shot-pattern-pre-pr-evidence/1",
   "semgrep_import_policy_failure": "scripts/research/shot_pattern_analysis/vector_inspection.py:12 raw xml.parsers.expat import remains flagged; defusedxml.ElementTree second parse is fixed, but the intentional custom Expat preflight remains a gate failure.",
   "tested_head": "dac6618c58834b671acc7cf7e1137f7a548cee73",
-  "unchanged_test_paths_outside_scope_count": 17,
-  "working_tree_note": "Committed docs/data-only changes were added to HEAD while the long gate was running; the ref diff and precomputed changed-file scope remained base..tested_head. No Python runtime source changed after the gate started."
+  "unchanged_test_paths_outside_scope_count": 18,
+  "working_tree_note": "Committed docs/data-only changes were added to HEAD while the long gate was running; the ref diff and precomputed changed-file scope remained base..tested_head. No Python runtime source changed after the gate started.",
+  "count_correction": {
+    "previous_node_count": 37,
+    "previous_path_count": 17,
+    "evidence": "../artifact_delivery_v3/original_failure_nodes.json",
+    "method": "Independent FAILED/ERROR summary extraction preserving parameter IDs containing spaces; 41 unique nodes across18paths; original compressed log preserved."
+  }
 }

@@ -109,6 +109,9 @@ trusted manifest comparison, and full archive/member verification.
    tests, Ruff, mypy, and central import-policy checks pass, with unavailable
    Semgrep advisory-skipped. Full log and receipts live
    in `validation/artifact_delivery_v2/`. Do not waive or describe these gates as green.
+   Focused base-commit checks reproduce 38 nonpassing statuses among the 41
+   original nodes; the other three pass in isolation at both base and delivery.
+   Their full-suite failures remain unresolved; see `validation/baseline_gate_audit_v1/`.
 3. The illustrated PDF and source ZIP are staged and verified in the 21-asset
    v3 inventory. Local source restoration passes. Fresh remote download and
    complete member verification remain required.

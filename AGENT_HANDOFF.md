@@ -30,6 +30,7 @@
 - `python -m src.tools.check_markdown_links AGENT_HANDOFF.md`
 - Root's 282 provider/scoring/GUI/report/contact tests and Astra's 71 launcher-boundary tests passed; exact receipts live under `phase2/validation/`.
 - Canonical pre-PR ran at `dac6618c58`: Ruff, mypy, consistency, fragments, and workflow checks pass. Affected tests report 5,861 passes, 34 failures, and seven errors in unchanged outside-study test files; this is scope evidence, not runtime-baseline proof. Fleet development-log policy also fails. The subsequent XML parser fix passed 41 focused vector tests, Ruff, mypy, and the central import-policy check; Semgrep was unavailable and advisory-skipped. The full suite has not been rerun.
+- Focused baseline audit: all 41 original failed/error nodes span 18 unchanged paths. At the base commit, 31 failed and seven errored; three passed and also pass in isolated current-branch tests. The full-suite cause of those three remains unresolved. See `phase2/validation/baseline_gate_audit_v1/`.
 - Verify archive manifests and every restored member before publication. Upload success alone is insufficient.
 
 ## Do-Not List and Next Steps
