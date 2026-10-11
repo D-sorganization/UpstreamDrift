@@ -19,9 +19,6 @@ import warnings
 import numpy as np
 from numpy.typing import NDArray
 
-if TYPE_CHECKING:
-    from src.tools.native_viewer_export.ball import AddressBall
-
 from src.shared.python.force_overlay.glyphs import ForceGlyphStyle, GlyphSet
 from src.shared.python.force_overlay.renderers.meshcat_glyphs import legend_text
 from src.shared.python.golf_view_presets import (
@@ -37,12 +34,24 @@ from src.shared.python.video_timing.frame_schedule import (
     FrameSchedule,
     speed_suffix,
 )
+from src.shared.python.impact_parameters.panel_model import ImpactCard
 from src.tools.native_viewer_export.compositor import (
     HudInfo,
     compose_grid,
     draw_hud,
+    draw_impact_card,
     draw_label,
 )
+from src.tools.native_viewer_export.impact_card import impact_card_for
+from src.tools.native_viewer_export.inset_strip import (
+    StripRenderer,
+    StripSeries,
+    grf_series,
+    grip_series,
+)
+
+if TYPE_CHECKING:
+    from src.tools.native_viewer_export.ball import BallPlacement
 
 Image8 = NDArray[np.uint8]
 ENGINES = ("drake", "pinocchio", "opensim", "myosuite", "mujoco")
@@ -95,8 +104,12 @@ class ExportSettings:
     overlays: bool = True
     multiview: bool = True
     hud: bool = True  # False: clean frames, no view label or HUD text
+    impact_card: bool = True  # GCV-17 card from the impact frame on (needs hud)
+    #: GCV-19 inset plot strip with a time cursor (GRF in BW and CoP; with ``grip``
+    #: the net grip force and couple instead); needs the overlay feed
+    inset_strip: bool = False
+    ball: bool = True  # decorative golf ball until impact (GCV-13, #11719)
     grip: bool = False  # hands/grip overlay (GCV-10); hands_closeup tracks it
-    ball: bool = True  # decorative address ball on the MeshCat backends (GCV-13)
     lookat_m: tuple[float, float, float] = (1.0, 0.0, 0.9)
     distance_m: float | None = None
 
@@ -180,6 +193,7 @@ class SwingInput:
     club: str
     rollout_engine: str
     sample_times_s: tuple[float, ...] | None = None  # set on resampled swings
+    ball: BallPlacement | None = None  # decorative ball, set once per export
 
     @property
     def reference_shape(self) -> tuple[int, ...]:
@@ -412,16 +426,8 @@ class NativeBackend(Protocol):
         settings: ExportSettings,
         indices: Sequence[int],
         overlay: OverlayFeed | None,
-        ball: AddressBall | None = None,
     ) -> Iterator[dict[str, Image8]]:
-        """Yield ``{view name: RGB frame}`` for every state index in order.
-
-        ``ball`` is the decorative address ball already resolved from the
-        swing's true (unwindowed) address frame -- see :func:`_export_clip`;
-        backends that draw it must use this value as given, never re-resolve
-        it from ``swing`` (a windowed clip's ``swing.q[0]`` is not the
-        address frame, GCV-13 #11719).
-        """
+        """Yield ``{view name: RGB frame}`` for every state index in order."""
         ...
 
 
@@ -463,6 +469,13 @@ class ExportResult:
     glyph_counts: tuple[int, ...] = ()
     frames_by_suffix: dict[str, int] = field(default_factory=dict)
     grip_json: Path | None = None  # grip plot payload (GCV-10), when enabled
+    #: impact card record (``ImpactCard.to_dict()``) or the reason it is unavailable
+    impact_card: dict[str, Any] | str | None = None
+    #: ball provenance: placement dict, or {'unavailable': reason}; None if disabled
+    ball: dict[str, Any] | None = None
+    #: inset strip record (``StripSeries.record()``) or the reason it is
+    #: unavailable; None when the strip is off
+    inset_strip: dict[str, Any] | str | None = None
 
     @property
     def skipped(self) -> bool:
@@ -534,6 +547,32 @@ def _resampled(
     return resampled, replace(feed, frame_at=lambda i: source(int(nearest[i])))
 
 
+def _strip_outcome(
+    swing: SwingInput, settings: ExportSettings, feed: OverlayFeed | None
+) -> StripSeries | str | None:
+    """The swing's inset strip series (computed once), a reason, or None if off.
+
+    The curves come from the SOURCE samples of ``feed`` (not the resampled clip
+    frames). ``settings.grip`` selects the grip strip, else the GRF strip.
+    """
+    if not settings.inset_strip:
+        return None
+    times = swing.source_times_s
+    impact = impact_time_s(swing, settings)
+    build = grip_series if settings.grip else grf_series
+    if feed is None:
+        return "inset strip unavailable: overlays are disabled"
+    return build(feed, int(times.size), times, impact)
+
+
+@dataclass(frozen=True)
+class ClipOverlays:
+    """Optional per-frame HUD overlays (impact card, synchronised strip)."""
+
+    card: ImpactCard | None = None
+    strip: StripRenderer | None = None
+
+
 def _export_clip(
     backend: NativeBackend,
     swing: SwingInput,
@@ -542,12 +581,10 @@ def _export_clip(
     out_dir: Path,
     feed: OverlayFeed | None,
     writer_factory: WriterFactory,
-    ball: AddressBall | None = None,
+    overlays: ClipOverlays | None = None,
 ) -> tuple[dict[str, Path], int, list[int]]:
-    """Render one clip set. ``ball`` must already be resolved from the full,
-    unwindowed swing (see :func:`export_swing`) -- a windowed clip's own
-    first state is not the address frame, so it is passed through as given
-    rather than re-resolved here (GCV-13 #11719)."""
+    card = overlays.card if overlays is not None else None
+    strip = overlays.strip if overlays is not None else None
     engine = backend.engine
     shown, shown_feed = _resampled(swing, feed, settings, plan)
     indices = list(range(shown.n_states))
@@ -564,7 +601,7 @@ def _export_clip(
     try:
         for k, tiles in zip(
             indices,
-            backend.render(shown, settings, indices, shown_feed, ball=ball),
+            backend.render(shown, settings, indices, shown_feed),
             strict=False,
         ):
             glyphs = shown_feed.glyphs_at(k) if shown_feed is not None else None
@@ -585,6 +622,7 @@ def _export_clip(
                 else tiles[v]
                 for v in settings.views
             }
+            show_card = card is not None and settings.hud and t >= impact
             outputs = {
                 v: draw_hud(labelled[v], hud) if settings.hud else labelled[v]
                 for v in settings.views
@@ -592,6 +630,10 @@ def _export_clip(
             if settings.multiview:
                 grid = compose_grid([labelled[v] for v in settings.views])
                 outputs[GRID_VIEW] = draw_hud(grid, hud) if settings.hud else grid
+            if show_card:
+                outputs = {n: draw_impact_card(f, card) for n, f in outputs.items()}
+            if strip is not None:  # cursor at this frame's swing time
+                outputs = {n: strip.draw(f, t) for n, f in outputs.items()}
             for name, frame in outputs.items():
                 key = f"{name}{plan.suffix}"
                 if key not in writers:
@@ -613,7 +655,6 @@ def export_swing(
     out_dir: Path,
     overlay: OverlayFeed | None = None,
     writer_factory: WriterFactory | None = None,
-    ball: AddressBall | None = None,
 ) -> ExportResult:
     """Render ``swing`` in ``backend`` and write one clip per view (and the 2x2).
 
@@ -622,19 +663,17 @@ def export_swing(
     Returns a skipped result (nothing written) when the backend reports a
     reason it cannot run. Postconditions: within a clip set every clip has the
     same number of frames, shown at ``settings.fps``.
-
-    ``ball``, when given, must already be resolved from ``swing`` *before*
-    any clip plan windows or resamples it (the caller's job -- see
-    ``runner.run_export``); the same value is passed unchanged to every clip,
-    including the impact window, so the ball never moves and never goes
-    missing just because a clip's own first frame is mid-swing (GCV-13,
-    #11719).
     """
     engine = backend.engine
     reason = backend.unavailable_reason()
     if reason is not None:
         return ExportResult(engine, {}, 0, skipped_reason=reason)
     out_dir = Path(out_dir)
+    from src.tools.native_viewer_export.ball import attach_ball
+
+    swing, ball_record = attach_ball(
+        swing, settings, getattr(backend, "ball_limitation", None)
+    )
     plans = clip_plans(swing, settings)
     out_dir.mkdir(parents=True, exist_ok=True)
     factory = writer_factory or functools.partial(imageio_writer, crf=settings.crf)
@@ -642,9 +681,24 @@ def export_swing(
     paths: dict[str, Path] = {}
     counts: dict[str, int] = {}
     glyph_counts: list[int] = []
+    outcome = (
+        impact_card_for(swing, impact_time_s(swing, settings))
+        if settings.impact_card and settings.hud
+        else None
+    )
+    card = outcome if isinstance(outcome, ImpactCard) else None
+    strip_outcome = _strip_outcome(swing, settings, feed)
+    strip = (
+        StripRenderer(strip_outcome) if isinstance(strip_outcome, StripSeries) else None
+    )
+    overlays = (
+        ClipOverlays(card=card, strip=strip)
+        if card is not None or strip is not None
+        else None
+    )
     for plan in plans:
         clip_paths, frames, glyphs = _export_clip(
-            backend, swing, settings, plan, out_dir, feed, factory, ball
+            backend, swing, settings, plan, out_dir, feed, factory, overlays
         )
         paths.update(clip_paths)
         counts[plan.suffix] = frames
@@ -655,4 +709,15 @@ def export_swing(
         counts[plans[0].suffix],
         glyph_counts=tuple(glyph_counts),
         frames_by_suffix=counts,
+        impact_card=(
+            card.to_dict()
+            if card is not None
+            else (outcome if isinstance(outcome, str) else None)
+        ),
+        ball=ball_record,
+        inset_strip=(
+            strip_outcome.record()
+            if isinstance(strip_outcome, StripSeries)
+            else strip_outcome
+        ),
     )

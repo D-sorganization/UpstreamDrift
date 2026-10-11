@@ -24,31 +24,6 @@ no GPU (containers); the default is `egl`.
 The OpenSim visualizer cannot draw dynamic 3D decorations, so its overlay is
 projected with the same pinhole camera and drawn on the captured frame.
 
-### Decorative Address Ball (GCV-13, #11719)
-
-Every backend draws a regulation-radius ball at the swing's resolved address
-position (`ball.resolve_address_ball`, from the bundle's true `q[0]` frame
-composed with the club assembly -- never the exporter's own static reference
-pose). It is on by default (`ExportSettings.ball = True`, `--no-ball`
-disables it) and is visual only: massless and non-colliding, and it never
-moves. When the address frame cannot be resolved (no club body, or the
-address clubhead is not plausibly grounded), the reason is logged and no
-ball is drawn -- never a guessed position.
-
-- Drake and Pinocchio (`backends/drake_meshcat.py`,
-  `backends/pinocchio_meshcat.py`): a `visual_ball` sphere registered
-  directly on the MeshCat scene.
-- MuJoCo and MyoSuite (`backends/mujoco_worker.py`,
-  `backends/myosuite_worker.py`): a `visual_ball` MJCF geom
-  (`contype="0" conaffinity="0" mass="0"`) attached by the shared
-  `backends/_ball.py` helper, which also strips whatever the appearance/visual
-  layer's own static-reference-pose fallback may have drawn.
-- OpenSim (`backends/opensim_worker.py`): a sphere attached once to the
-  model's ground frame when the model is built -- a plain geometry
-  component, not a body, so (like the per-frame force/torque overlays, which
-  stay 2D-projected because the real simbody-visualizer takes no dynamic 3D
-  decorations from Python) it adds no mass or DOF.
-
 ## Usage
 
 ```bash
@@ -76,6 +51,23 @@ python3 -m src.tools.native_viewer_export \
   `model_appearance.club_face.ball_passage` on the `Clubhead` frame (the
   sub-sample instant of closest approach to address, with the height and
   ball-radius checks), else the last sample.
+- The decorative golf ball (GCV-13, #11719; `--no-ball` disables it) is drawn at
+  address and hidden after impact, visual only (never in a dynamics model). One
+  placement per swing (`ball.py`, `BallPlacement`) is shared by every engine:
+  the bundle's recorded `ball_impact().ball_centre_m` (source
+  `bundle:ball_impact`, the ball every replay strikes), else the address
+  geometry (MuJoCo FK of the first state, face centre and normal through
+  `model_appearance.ball.ball_position_at_address`, source `address_geometry`).
+  When neither exists (no club, ungrounded first state, no MuJoCo) no ball is
+  drawn and the reason is logged and returned in `ExportResult.ball`
+  (`{"unavailable": reason}`, printed by the CLI); a placement is recorded with
+  its position, source and `hide_after_s`. MuJoCo and MyoSuite append a render
+  scene sphere per visible frame; Drake and Pinocchio MeshCat hold one `/ball`
+  sphere and toggle `visible`. **OpenSim limitation:** the simbody visualizer
+  caches fixed geometry, and toggling Appearance visibility or opacity after
+  `initSystem` does not redraw (verified by a smoke render), so the OpenSim ball
+  stays visible after impact; this is recorded as `limitation` in the result.
+  Post-impact flight is a later slice.
 - Force arrows use the `body_weight` scale mode when the model mass is known:
   one body weight is 0.5 m and the ceiling is 3 m (`default_glyph_style`).
 - `--speeds 1,0.5,0.25` (default: full, half, quarter) writes one clip set per playback speed, named
@@ -97,14 +89,11 @@ The OpenSim backend only ever runs under `xvfb-run` and refuses to start when
 
 - `core.py`: settings, clip plans (speeds, impact window), the backend protocol,
   `export_swing`; frame timing lives in `src/shared/python/video_timing`.
-- `ball.py`: `resolve_address_ball` (GCV-13, #11719), the decorative address
-  ball resolved from the swing bundle's address frame.
-- `compositor.py`: labelled 2x2 grid and HUD text.
+- `compositor.py`: labelled 2x2 grid, HUD text and the impact card panel.
+- `impact_card.py`: one impact card per swing from the displayed pose.
 - `overlay.py`: overlay feed built from `force_overlay.bundle_provider`.
 - `overlay2d.py`: pinhole projection for the OpenSim 2D glyphs.
-- `backends/`: one module per engine plus shared helpers, including
-  `backends/_ball.py` (the MJCF `visual_ball` geom shared by the MuJoCo and
-  MyoSuite workers).
+- `backends/`: one module per engine plus shared helpers.
 
 Camera presets live in `src/shared/python/golf_view_presets`; the glyph
 pipeline is `src/shared/python/force_overlay` (ADR-0052). The OpenSim and
@@ -121,5 +110,53 @@ a 15 % margin (`fit_distance_m`).
 renders the `clean/`, `club_forces/` and `grf/` clip set (1280x720, 60 fps,
 CRF 18) into `~/Videos/Parity Audit/forces_and_impact/` through this tool and
 writes `manifest_<capture>.json`. A missing bundle or unavailable engine stops
-the run with a message (`--skip-unavailable` records it instead). The inset
-plot strips and the impact parameter card are not rendered yet (GCV-19, #11725).
+the run with a message (`--skip-unavailable` records it instead). The `grf/` and
+`club_forces/` clips carry the impact card and an inset plot strip (see below);
+`clean/` carries neither.
+
+## Inset Plot Strips
+
+`ExportSettings.inset_strip` (default off; the showcase enables it for `grf/` and
+`club_forces/`) draws a translucent plot strip along the bottom of every frame
+(above the HUD), with a vertical time cursor at the frame's swing time
+(`inset_strip.py`, GCV-19, #11725). The strip kind follows `ExportSettings.grip`:
+
+- GRF strip (`grip=False`): left panel, vertical ground-reaction force of the
+  left foot, right foot and their net in body weights (BW; `Fz / reference_force_n`
+  of the glyph style, i.e. the golfer's `mass * g`); right panel, the net centre of
+  pressure world X and Y in metres (taken from the `contact:free_moment_net`
+  wrench, which sits at the net CoP).
+- Grip strip (`grip=True`): net grip force magnitude |F| in N and couple
+  magnitude |M| in N m from `OverlayFeed.grip_analyses`.
+
+Both show a dashed vertical line at the impact time and a legend. The curves are
+read once per swing from the SOURCE samples (at most 600, stride-thinned), not
+from the resampled clip frames, and rendered once per frame size with matplotlib
+Agg; per frame only the cursor changes, so every speed clip and the impact window
+share one strip. Unavailable samples (a foot without loaded contact, a CoP below
+the force threshold, a failed grip solve) are gaps in the line, never zero. When
+nothing can be plotted (no overlay feed, no body-weight scale, no loaded contact,
+grip overlay off, no grip wrench) no strip is drawn and `ExportResult.inset_strip`
+(and the showcase manifest) holds the reason; otherwise it holds the panels and
+per-curve sample counts. The values are model outputs of the shared contact law and
+grip extraction, not measurements.
+
+## Impact Parameter Card
+
+`ExportSettings.impact_card` (default on, needs the HUD) draws the GCV-17
+`ImpactCard` as a semi-transparent right-hand panel from the impact frame to the
+end of each clip (`compositor.draw_impact_card`). `impact_card.impact_card_for`
+computes it once per swing, on the unresampled source states (identical for
+every speed clip), from the displayed pose `q`: `club_pose.ClubPoseModel` (shared
+with the decorative ball) places the spec club body through MuJoCo and gives the
+true face centre, normal, toe and grip axes; `np.gradient` of the face-centre
+positions gives the velocity; `extract_impact_parameters` (impact state = last
+sample before the impact time) gives the rows. The specification has no target
+line, so the target direction is the horizontal part of the address (state 0)
+face normal (face square at address, as `plan_gaze` does), right-handed, Z-up;
+the card records `extras.target_source = "address_face_normal"`, so face angle
+and path are relative to that assumed line. Unavailable rows show "unavailable" and a
+reason, never zero. When no card can be computed (no MuJoCo, no club, speed
+below 1 m/s) nothing is drawn, `ExportResult.impact_card` holds the reason, and
+the showcase manifest records it. The panel shows model estimates, not a
+measurement.

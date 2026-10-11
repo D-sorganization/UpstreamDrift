@@ -1255,15 +1255,15 @@
       "child": "solid_reference:GolfSwing3D_Kinetic/Club/Clubface Vector",
       "child_to_follower": [
         [
-          -0.5343338817661774, -0.7357083276751796, 0.4161977407267835,
+          -0.5081477570916182, -0.5389020166087571, 0.6718411072997638,
           -0.02501411692651008
         ],
         [
-          0.30908343009591993, 0.28822496143962084, 0.9063077870366498,
+          0.8182511949624285, -0.05862039888744794, 0.5718641716149336,
           -1.1239999999999999
         ],
         [
-          -0.7867367641319611, 0.6129107832242139, 0.07338689100003808,
+          -0.2687951616106874, 0.8403262850400977, 0.47074504327225064,
           0.05908933628725997
         ],
         [0.0, 0.0, 0.0, 1.0]
@@ -1397,9 +1397,9 @@
     {
       "child": "solid_reference:GolfSwing3D_Kinetic/Grip/RHandStandoff",
       "child_to_follower": [
-        [0.8598872403227148, 0.19501971017073785, 0.47176397337557163, 0.0],
-        [0.3261223507816858, -0.9208415297808589, -0.21376409743330366, 0.0],
-        [0.3927316466123055, 0.3376657958333494, -0.8554201681474538, 0.0127],
+        [0.8805386396180525, 0.1734467360006889, 0.4410985535119072, 0.0],
+        [0.06392620905854039, -0.96559408915801, 0.2520743834238559, 0.0],
+        [0.4696436350414996, -0.19376347631537966, -0.8613306979965281, 0.0127],
         [0.0, 0.0, 0.0, 1.0]
       ],
       "name": "GolfSwing3D_Kinetic/Right Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint",
@@ -1904,7 +1904,7 @@
       "offset_m": [0.02, -0.15, 0.08]
     }
   },
-  "provenance": "anthropometric full-body candidate v1 at 1.710 m, 78.0 kg (build_anthropometric_spec.py; AN-1 #10099); upper body unqualified; marker offsets are anatomical seeds to be calibrated; left hip axes mirrored to the OpenSim convention (OSV-6 #11737); right knee axis mirrored to the OpenSim flexion-negative convention (#12057); club markers from driver.json (#12210)",
+  "provenance": "anthropometric full-body candidate v1 at 1.710 m, 78.0 kg (build_anthropometric_spec.py; AN-1 #10099); upper body unqualified; marker offsets are anatomical seeds to be calibrated; left hip axes mirrored to the OpenSim convention (OSV-6 #11737); right knee axis mirrored to the OpenSim flexion-negative convention (#12057); club markers from driver.json (#12210); grip rotation refitted per capture from docs/development/full_body_models/evidence/anthropometry/fit_grip_rotation_receipt_driver.json (#12221)",
   "qualification": "full-body extension of native-derived geometry; dynamics unqualified",
   "schema_version": "full-body-v1",
   "subject": {
@@ -1912,8 +1912,8 @@
     "de_leva_table_sha256": "7e930d2248251ae345af1b3c889d47b50bd3a032dbe22345752a0e18178aa1c1",
     "grip_roll_deg": 0.0,
     "grip_rotation_deg": {
-      "L": [-90.0, 47.0, 0.0],
-      "R": [-34.0, 46.0, 62.0]
+      "L": [-36.864, 57.315, 70.926],
+      "R": [9.769, 52.918, 83.914]
     },
     "mass_kg": 78.0,
     "shoulder_scale": 1.0,

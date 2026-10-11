@@ -13,7 +13,6 @@ from src.shared.python.biomechanics.grip_plot_model import (
 )
 from src.shared.python.motion_matching.same_input import InputBundle
 from src.tools.native_viewer_export.backends.registry import make_backend
-from src.tools.native_viewer_export.ball import AddressBall, resolve_address_ball
 from src.tools.native_viewer_export.core import (
     ENGINES,
     BackendUnavailable,
@@ -92,18 +91,8 @@ def run_export(
     overlay_factory: OverlayFactory = build_overlay_feed,
     writer_factory: WriterFactory | None = None,
     impact_detector: Callable[[SwingInput], float] = detect_impact_time_s,
-    ball_resolver: Callable[[SwingInput], AddressBall] = resolve_address_ball,
 ) -> list[ExportResult]:
-    """Render every requested engine; unavailable backends are skipped, not fatal.
-
-    The decorative ball (GCV-13, #11719) is resolved once per engine from
-    ``swing`` here, *before* any clip plan windows or resamples it for a
-    particular speed or the impact window, then passed unchanged to every
-    clip of that engine (``export_swing``). Resolving it per clip instead
-    would read a windowed clip's own first frame as the "address" -- for the
-    impact window that is mid-swing, not the address, and the ball would be
-    wrongly reported unavailable.
-    """
+    """Render every requested engine; unavailable backends are skipped, not fatal."""
     for engine in job.engines:
         if engine not in ENGINES:
             raise ValueError(
@@ -131,9 +120,8 @@ def run_export(
                 per_settings = replace(per_settings, lookat_m=lookat)
             except BackendUnavailable as exc:
                 logger.warning("rendering %s without overlays: %s", engine, exc)
-        ball = ball_resolver(swing) if settings.ball else None
         result = export_swing(
-            backend, swing, per_settings, job.out_dir, feed, writer_factory, ball
+            backend, swing, per_settings, job.out_dir, feed, writer_factory
         )
         if feed is not None and feed.grip_analyses is not None:
             result = replace(

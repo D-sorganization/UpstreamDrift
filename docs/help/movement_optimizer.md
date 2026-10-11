@@ -18,9 +18,10 @@ The tile declares the capabilities `trajectory_optimization`,
 the registry gives it `source_root: Movement_Optimizer` and
 `path: src/movement_optimizer/__main__.py`, so `resolve_tile_target`
 (`src/shared/python/config/tile_target_resolution.py`) resolves it as
-`KIND_SIBLING` against a `Movement_Optimizer` checkout beside this one. A
-synchronized copy of the same package is vendored in this repository at
-`src/shared/python/movement_optimizer/` and is the source read for this page.
+`KIND_SIBLING` against a `Movement_Optimizer` checkout beside this one. The
+same package is pinned in this repository through the Tools submodule at
+`vendor/ud-tools/src/movement_optimizer/`, which is the source read for this
+page. The former in-tree copy under `src/shared/python/` was retired (#12267).
 
 ## Inputs
 
@@ -156,7 +157,7 @@ MuJoCo's optimizer layer defines each lift as a named `Phase(name, t, pose)` seq
 
 ### What the Optimizer Computes
 
-Movement Optimizer (`Tools/src/movement_optimizer`, vendored at `src/shared/python/movement_optimizer/`) is the only tool here producing full lift trajectories with inverse dynamics: joint angles, velocities, accelerations, torques, power, and centre-of-mass/bar paths from multi-start SLSQP under balance and joint-limit constraints (see "Method" above). Its Hill-type muscle model gives torque-angle-velocity capacity and sticking-point detection for its single three-link chain; it does not distribute load across named muscles. None of the four engine packs define muscle actuators: a search of `OpenSim_Models/src/opensim_models` for `Muscle`/`Thelen`/`Millard`/`actuator` classes found none, consistent with the epic's note that "muscle content in the OpenSim pack is unverified" (GitHub issue #11740). Full-body musculoskeletal lifts with muscle forces are future work under LIFT-6 (GitHub issue #11746); muscle-redundancy solving is not yet documented anywhere in this fleet.
+Movement Optimizer (`Tools/src/movement_optimizer`, pinned at `vendor/ud-tools/src/movement_optimizer/`) is the only tool here producing full lift trajectories with inverse dynamics: joint angles, velocities, accelerations, torques, power, and centre-of-mass/bar paths from multi-start SLSQP under balance and joint-limit constraints (see "Method" above). Its Hill-type muscle model gives torque-angle-velocity capacity and sticking-point detection for its single three-link chain; it does not distribute load across named muscles. None of the four engine packs define muscle actuators: a search of `OpenSim_Models/src/opensim_models` for `Muscle`/`Thelen`/`Millard`/`actuator` classes found none, consistent with the epic's note that "muscle content in the OpenSim pack is unverified" (GitHub issue #11740). Full-body musculoskeletal lifts with muscle forces are future work under LIFT-6 (GitHub issue #11746); muscle-redundancy solving is not yet documented anywhere in this fleet.
 
 ### Spine Load
 
@@ -196,7 +197,7 @@ In the web app, the Lift Baseline page (`/tools/lift-baseline`) shows the same d
 | Drake     | `D-sorganization/Drake_Models`     | `src/drake_models/exercises/`     | `model_pack.yaml` |
 | Pinocchio | `D-sorganization/Pinocchio_Models` | `src/pinocchio_models/exercises/` | `model_pack.yaml` |
 
-Each root `model_pack.yaml` declares the `model_pack/v1` schema, engine, engine-version constraint, anthropometrics source, and exercise IDs with paths (all four read directly for this section). Movement Optimizer lives at `Tools/src/movement_optimizer`, vendored here at `src/shared/python/movement_optimizer/`, documented in full above.
+Each root `model_pack.yaml` declares the `model_pack/v1` schema, engine, engine-version constraint, anthropometrics source, and exercise IDs with paths (all four read directly for this section). Movement Optimizer lives at `Tools/src/movement_optimizer`, pinned here at `vendor/ud-tools/src/movement_optimizer/`, documented in full above.
 
 ## See Also
 

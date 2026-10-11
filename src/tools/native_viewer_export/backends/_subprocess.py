@@ -6,7 +6,7 @@ from collections.abc import Iterator, Sequence
 import json
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import Any
 import subprocess
 import sys
 import tempfile
@@ -14,6 +14,7 @@ import tempfile
 import numpy as np
 
 from src.shared.python.force_overlay.glyphs import GlyphSet
+from src.tools.native_viewer_export.backends._ball import ball_visibility
 from src.tools.native_viewer_export.backends._worker_job import WorkerJob
 from src.tools.native_viewer_export.core import (
     ExportSettings,
@@ -22,9 +23,6 @@ from src.tools.native_viewer_export.core import (
     SwingInput,
     view_lookats,
 )
-
-if TYPE_CHECKING:
-    from src.tools.native_viewer_export.ball import AddressBall
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
 WORKER_TIMEOUT_S = 3600
@@ -47,15 +45,8 @@ def stage_job(
     indices: Sequence[int],
     overlay: OverlayFeed | None,
     work: Path,
-    ball: AddressBall | None = None,
 ) -> WorkerJob:
-    """Write the bundle, rollout and optional glyph sets a worker reads.
-
-    ``ball``, when its position resolved, is encoded as
-    ``WorkerJob.ball_position_m``; when it is ``None`` or unresolved
-    (``ball.position_m is None``) the job carries no ball position, so the
-    worker draws none (GCV-13, #11719).
-    """
+    """Write the bundle, rollout and optional glyph sets a worker reads."""
     bundle_path, q_path = work / "bundle.npz", work / "q.npy"
     swing.bundle.save(bundle_path)
     np.save(q_path, swing.q)
@@ -68,6 +59,7 @@ def stage_job(
         )
     frames = work / "frames"
     frames.mkdir()
+    visible = ball_visibility(swing, indices)
     return WorkerJob(
         bundle_path=str(bundle_path),
         q_path=str(q_path),
@@ -83,11 +75,8 @@ def stage_job(
             v: [list(p) for p in points]
             for v, points in view_lookats(settings, indices, overlay).items()
         },
-        ball_position_m=(
-            [float(c) for c in ball.position_m]
-            if ball is not None and ball.position_m is not None
-            else None
-        ),
+        ball=swing.ball.to_dict() if swing.ball is not None else None,
+        ball_visible=visible,
     )
 
 
@@ -124,12 +113,11 @@ def render_in_worker(
     indices: Sequence[int],
     overlay: OverlayFeed | None,
     env: dict[str, str],
-    ball: AddressBall | None = None,
 ) -> Iterator[dict[str, Image8]]:
     """Stage a job, run the worker, then stream its frames."""
     with tempfile.TemporaryDirectory(prefix="native_viewer_") as tmp:
         work = Path(tmp)
-        job = stage_job(swing, settings, indices, overlay, work, ball)
+        job = stage_job(swing, settings, indices, overlay, work)
         run_worker(command, job, work, env)
         yield from read_frames(job)
 

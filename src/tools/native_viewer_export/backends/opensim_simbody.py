@@ -1,17 +1,14 @@
 """OpenSim native export: the real simbody-visualizer in a virtual X server.
 
 Never touches the real display: the worker is launched through ``xvfb-run``
-with its own screen and refuses to run on ``:0``. Per-frame overlays are
-projected 2D glyphs (the visualizer takes no dynamic 3D decorations from
-Python); the decorative address ball is static, so it is attached once to
-the model's ground frame instead (``opensim_worker.build_model``).
+with its own screen and refuses to run on ``:0``. Overlays are projected 2D
+glyphs (the visualizer takes no dynamic 3D decorations from Python).
 """
 
 from __future__ import annotations
 
 from collections.abc import Iterator, Sequence
 from importlib.util import find_spec
-import logging
 import shutil
 import sys
 
@@ -19,15 +16,12 @@ from src.tools.native_viewer_export.backends._subprocess import (
     render_in_worker,
     worker_env,
 )
-from src.tools.native_viewer_export.ball import AddressBall
 from src.tools.native_viewer_export.core import (
     ExportSettings,
     Image8,
     OverlayFeed,
     SwingInput,
 )
-
-logger = logging.getLogger(__name__)
 
 WORKER_MODULE = "src.tools.native_viewer_export.backends.opensim_worker"
 XVFB_SCREEN = "1280x960x24"
@@ -37,6 +31,11 @@ class OpenSimSimbodyBackend:
     """OpenSim's simbody-visualizer captured under xvfb."""
 
     engine = "opensim"
+    #: recorded in the export result: the ball cannot be hidden after impact
+    ball_limitation = (
+        "ball stays visible after impact: the simbody visualizer caches fixed "
+        "geometry, so it cannot be hidden per frame"
+    )
 
     def unavailable_reason(self) -> str | None:
         if find_spec("opensim") is None:
@@ -64,10 +63,7 @@ class OpenSimSimbodyBackend:
         settings: ExportSettings,
         indices: Sequence[int],
         overlay: OverlayFeed | None,
-        ball: AddressBall | None = None,
     ) -> Iterator[dict[str, Image8]]:
-        if ball is not None and ball.position_m is None:
-            logger.warning("skipping decorative ball: %s", ball.reason)
         yield from render_in_worker(
             self.command(),
             swing,
@@ -75,5 +71,4 @@ class OpenSimSimbodyBackend:
             indices,
             overlay,
             worker_env({"NATIVE_VIEWER_XVFB": "1"}),
-            ball,
         )

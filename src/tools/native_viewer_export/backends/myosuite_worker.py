@@ -4,11 +4,7 @@ Runs in a Python that can import ``myosuite`` (often a separate virtual
 environment). The specification MJCF is merged with the MyoSuite arena scene
 assets (floor texture, headlight), loaded into a MyoSuite ``MujocoEnv`` and
 rendered with the env's own renderer, with 3D force/torque glyphs added to the
-MuJoCo scene before each render. The decorative address ball (GCV-13,
-#11719), already resolved by the caller, is attached with
-:func:`backends._ball.set_decorative_ball` after the arena scene is merged,
-so it never depends on the plain visual layer's own static-reference-pose
-fallback.
+MuJoCo scene before each render.
 """
 
 from __future__ import annotations
@@ -33,17 +29,17 @@ from src.shared.python.force_overlay.glyphs import GlyphSet
 from src.shared.python.golf_view_presets import mujoco_camera_params
 from src.shared.python.motion_matching.same_input import InputBundle
 from src.shared.python.motion_matching.visual_skeleton import derive_visual_skeleton
-from src.tools.native_viewer_export.backends._ball import set_decorative_ball
+from src.tools.native_viewer_export.backends._ball import draw_job_ball
 from src.tools.native_viewer_export.backends._worker_job import WorkerJob
-from src.tools.native_viewer_export.backends.myosuite_compat import (
-    find_scene,
-    import_mj_renderer,
-)
+
+SCENE_FILE = ("simhive", "myo_sim", "scene", "myosuite_quad.xml")
 
 
 def arena_scene_path() -> Path:
     """The MyoSuite arena scene shipped with the installed package."""
-    return find_scene()
+    import myosuite
+
+    return Path(myosuite.__file__).parent.joinpath(*SCENE_FILE)
 
 
 def _append_child(parent: Any, tag: str) -> Any:
@@ -127,8 +123,7 @@ def make_camera(mujoco: Any, view: str, job: WorkerJob) -> Any:
 def main(job_path: str) -> None:
     os.environ.setdefault("MUJOCO_GL", "egl")
     import mujoco
-
-    mj_renderer_cls = import_mj_renderer()
+    from myosuite.envs.env_base import MujocoEnv
 
     job = WorkerJob.load(Path(job_path))
     bundle = InputBundle.load(Path(job.bundle_path))
@@ -136,20 +131,16 @@ def main(job_path: str) -> None:
     skeleton = derive_visual_skeleton(json.loads(bundle.spec_bytes))
     xml, _ = export_full_body_mjcf(bundle.spec_bytes, visual=True, with_head=True)
     scene_xml = merge_arena(xml, skeleton.ground.height_m, job.width, job.height)
-    scene_root = ET.fromstring(scene_xml)
-    set_decorative_ball(scene_root, job.ball_position_m)
-    scene_xml = ET.tostring(scene_root, encoding="unicode")
     with tempfile.TemporaryDirectory() as tmp:
         path = Path(tmp) / "scene.xml"
         path.write_text(scene_xml, encoding="utf-8")
-        model = mujoco.MjModel.from_xml_path(str(path))
-    data = mujoco.MjData(model)
-    myo_renderer = mj_renderer_cls(model, data)
+        env = MujocoEnv(str(path))
+    model, data = env.mj_model, env.mj_data
     adr = [model.joint(n).qposadr[0] for n in bundle.coordinate_order]
     # warm up MyoSuite's own renderer, then render through it with glyphs added
-    myo_renderer.render_offscreen(width=job.width, height=job.height, camera_id=-1)
-    renderer = myo_renderer._renderer  # noqa: SLF001 - the env's mujoco.Renderer
-    option = myo_renderer._scene_option  # noqa: SLF001
+    env.mj_renderer.render_offscreen(width=job.width, height=job.height, camera_id=-1)
+    renderer = env.mj_renderer._renderer  # noqa: SLF001 - the env's mujoco.Renderer
+    option = env.mj_renderer._scene_option  # noqa: SLF001
     glyph_sets = job.load_glyph_sets()
     cams = {v: make_camera(mujoco, v, job) for v in job.views}
     for pos, k in enumerate(job.indices):
@@ -160,6 +151,7 @@ def main(job_path: str) -> None:
             renderer.update_scene(data, camera=cams[view], scene_option=option)
             if glyph_sets is not None:
                 add_glyphs_to_scene(renderer.scene, glyph_sets[pos])
+            draw_job_ball(renderer.scene, job, pos)
             np.save(job.frame_path(view, pos), renderer.render().copy())
 
 

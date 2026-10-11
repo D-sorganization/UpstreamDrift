@@ -5396,6 +5396,214 @@ python3 -m src.shared.python.motion_matching.pipeline.cli \
   --face-weight 3.0 --fix-club-markers --out runs/driver
 \end{verbatim}
 
+\paragraph{Per-Capture Grip Rotation on the Fixed Clusters (Issue \#12221).}
+With both club clusters held fixed, the hand-to-club rotation was refitted once per
+capture (capture-A driver, capture-B 7-iron) from free-wrist runs
+(\texttt{--fix-club-markers --free-wrists}, fixture flags, ControlTower
+\texttt{ud-sim}, commit \texttt{b90ab900fa}). Let $G(R_0)$ be the document's grip rotation, $G(E)$ an extrinsic
+$x$-$y$-$z$ correction, and $M_k$ the free-wrist orientation of frame $k$ under
+the old grip, so that $\mathrm{angles}(\cdot)$ returns pronation, cock and flexion. The
+fitted total is $G(T)=G(R_0)\,G(E)$, and
+\[
+J(E)=\sqrt{\tfrac{1}{|\mathcal K|}\textstyle\sum_{k\in\mathcal K}
+\lVert \mathrm{excess}(\mathrm{angles}(M_k\,G(E)))\rVert^{2}},
+\]
+where $\mathrm{excess}$ is the amount beyond \texttt{coordinate\_ranges\_deg} and
+$\mathcal K$ is a weighted frame multiset: every swing frame once, the last 30
+frames before the IK impact split repeated 10 times, and the first 30 frames
+repeated 20 times. Search: a 15~deg grid over $\pm 90$~deg, then Nelder--Mead.
+Fitted totals (extrinsic $x$-$y$-$z$, deg; documents currently carry L
+$[-90, 47, 0]$, R $[-34, 46, 62]$):
+
+\begin{center}
+\begin{tabular}{lrr}
+\hline
+Capture & Lead hand & Trail hand \\
+\hline
+Capture-A (driver) & $[-36.864, 57.315, 70.926]$ & $[9.769, 52.918, 83.914]$ \\
+Capture-B (7-iron) & $[-48.993, 15.681, 29.676]$ & $[37.035, 49.131, 121.189]$ \\
+\hline
+\end{tabular}
+\end{center}
+Free-wrist cock (\texttt{WInputX}, bound $-40$~deg), before $\to$ after, address
+and window minimum: driver lead $-25.0 \to -8.4$, $-51.9 \to -46.7$; driver trail
+$-30.1 \to -7.0$, $-51.8 \to -24.8$; 7-iron lead $-45.1 \to -11.2$,
+$-67.0 \to -46.3$; 7-iron trail $-43.1 \to -26.3$, $-62.3 \to -38.7$.
+
+Result A, fixture flags with the cluster fixed and bounded wrists
+(\texttt{measure\_swing} of the tracked trajectory; control is the same commit
+without the refit):
+
+\begin{center}
+\footnotesize
+\begin{tabular}{lrrrrrrrr}
+\hline
+Run & Speed & Peak & Face model / & Address & IK / track & Address cock & \multicolumn{2}{c}{On bound} \\
+ & (\%) & (ms) & capture (deg) & face (deg) & (mm) & L / R (deg) & L & R \\
+\hline
+Driver control & $-3.6$ & $-0.3$ & 16.13 / 14.96 & 5.50 & 29.0 / 63.8 & $-34.6$ / $-30.1$ & 101 & 3 \\
+Driver refit & $-1.9$ & $-2.7$ & 15.52 / 14.96 & 5.50 & 28.4 / 58.1 & $-12.3$ / $-8.1$ & 6 & 0 \\
+7-iron control & $-1.6$ & $-0.2$ & 3.78 / 3.21 & $-5.35$ & 26.8 / 61.3 & $-35.7$ / $-40.0$ & 73 & 178 \\
+7-iron refit & $-1.9$ & $-0.2$ & 2.59 / 3.21 & $-5.35$ & 27.1 / 61.8 & $-4.2$ / $-26.8$ & 0 & 0 \\
+\hline
+\end{tabular}
+\end{center}
+``On bound'' counts the pre-impact frames at the $-40$~deg cock bound
+(\texttt{WInputX}). Both refit runs
+meet GCV-20 (speed within 3~\%, peak within 5~ms) and the OSV-10 5~deg face limit,
+and neither wrist starts on its bound. The 7-iron control already met the limits at
+this commit; the refit keeps that and frees the wrists. The release cutoff moved
+from 30 to 20~Hz (driver) and 18 to 20~Hz (7-iron).
+
+Failed and alternative experiments. (i) A joint fit (one rotation for both clubs,
+same objective), L $[-51.556, 27.682, 41.407]$, R $[13.945, 54.214, 92.912]$,
+passes (speed $-2.6$~\% on both, faces 15.49 / 14.96 and 2.54 / 3.21~deg) with less
+margin and worse tracking (62.7 / 64.8~mm); it is not proposed, because the
+captures differ by about 20~deg in lead address cock ($-25$ against $-45$~deg).
+(ii) A whole-swing-only per-capture objective moved the driver lead wrist toward its
+bound at address ($-25.0 \to -39.1$~deg) and was rejected. (iii) With the cluster
+free (canonical flags) the refit is invalid: the static trial re-absorbs the grip
+into the club triad and moves the capture's own face (driver address face
+$5.50 \to -10.93$~deg, 7-iron $-5.35 \to 2.12$~deg), 7-iron dynamics rise
+$109.9 \to 148.3$~mm, and the driver tracks $-6.3$~\% at $-7.5$~ms with the lead
+wrist on its bound for 195 pre-impact frames. This is the failure mode of the
+whole-swing ($-20.7$~\%, 140~mm) and release-weighted ($-22.9$~\%) refits
+recorded earlier on \#12221.
+
+Result C, canonical flags (address / IK / dynamics marker RMS, mm, as in
+\texttt{CANONICAL\_RUN.md}):
+
+\begin{center}
+\begin{tabular}{lll}
+\hline
+Run & Driver (\texttt{--static-seeds}) & 7-iron (+ \texttt{--zmp-filter}) \\
+\hline
+Committed (cluster free, old grip) & 7.5 / 30.5 / 82.6 & 4.0 / 28.4 / 109.9 \\
+Cluster fixed, old grip (control) & 7.7 / 29.4 / 105.9 & 9.2 / 28.1 / 185.9 \\
+Cluster fixed, refit & 10.7 / 30.3 / 79.3 & 8.4 / 29.2 / 102.7 \\
+Cluster free, refit & n/a / 33.4 / 78.5 & 5.0 / 30.4 / 148.3 \\
+\hline
+\end{tabular}
+\end{center}
+Tracked impact speed with the cluster fixed: driver $-4.6$~\% (old grip) against
+$-4.7$~\% (refit); 7-iron $-5.5$~\% against $-1.9$~\%. Forward-dynamics
+address-to-impact / after-impact RMS with the cluster fixed and the refit: driver
+36.7 / 140.4~mm, 7-iron 37.0 / 186.8~mm (committed 39.9 / 145.0 and 40.9 / 199.7).
+
+Limitations. The lead pronation range after the fit reaches 105.9~deg (driver) and
+113.1~deg (7-iron) against $\pm 90$ in the free-wrist IK; in the bounded runs above
+no forearm-pronation or wrist-flexion bound is touched before impact, but a few
+follow-through frames touch it. Address RMS rises 3--4~mm because the club markers
+are no longer free in the static trial. The fits come from IK, not from dynamics,
+and depend on the fixed cluster; each is one fit per capture.
+
+Status. The documents are not changed. Adopting the refit requires calibrated runs
+to hold the measured cluster fixed (\texttt{--fix-club-markers}), the open owner
+decision on \#12265 and \#12221, because with the cluster free the refit corrupts
+the capture face frame. If approved, a follow-up applies both receipts and
+regenerates \texttt{anthro\_driver\_seeds}, \texttt{anthro\_driver\_drake},
+\texttt{anthro\_driver}, \texttt{anthro\_iron\_seeds\_zmp}, \texttt{anthro\_iron},
+the OpenSim exports, dependent hashes and the club-face fixtures (the driver
+fixture export is blocked by the trail-shoulder singularity, \#12266). No bound,
+tolerance or filter constant changed.
+
+\paragraph{Adoption of the Per-Capture Grip Rotation for the Driver (Issue \#12221).}
+The fitted driver rotation was applied to the committed driver document
+(\texttt{scripts/set\_spec\_grip\_rotation.py}, receipt
+\texttt{fit\_grip\_rotation\_receipt\_driver.json}), and the three driver
+ground-support receipts, the driver OpenSim export and the driver club-face fixture
+were regenerated on ControlTower \texttt{ud-sim} (commits \texttt{8d42b60dce} and
+\texttt{e44573633b}, identical documents). The calibrated driver commands now add
+\texttt{--fix-club-markers}, since the fit is valid only with the measured cluster
+held fixed. Address / IK / dynamics marker RMS (mm), before $\to$ after:
+
+\begin{center}
+\begin{tabular}{lrr}
+\hline
+Receipt & Before & After \\
+\hline
+Driver, \texttt{--static-seeds} & 7.5 / 30.5 / 82.6 & 11.0 / 30.3 / 82.0 \\
+Driver, Drake engine & 7.2 / 30.7 / 77.8 & 11.0 / 30.3 / 86.3 \\
+Driver, nominal & 41.7 / 46.1 / 73.6 & 50.9 / 46.5 / 71.9 \\
+\hline
+\end{tabular}
+\end{center}
+All three keep 0 IK range-of-motion flags. The Drake driver dynamics replay worsened
+($77.8 \to 86.3$~mm), and the nominal driver reference-ZMP outside fraction over
+1--1.5~s went from 140/180 to 158/180 frames.
+
+Control. The same commit with the old document and the cluster held fixed
+reproduces the earlier control exactly (driver 7.7 / 29.4 / 105.9~mm), so the grip
+refit, not code drift, explains the change against the cluster-fixed baseline:
+dynamics $105.9 \to 82.0$~mm.
+
+Sensitivity. The experiment document behind Result C differed from the applied
+document only by receipt rounding (about $10^{-5}$ in each wrist
+\texttt{child\_to\_follower} entry), yet its dynamics were 79.3~mm against 82.0~mm
+here, while address and IK agree within 0.3~mm. The tracking replay is therefore
+sensitive at the 3--15~mm level to tiny parameter changes. The fit is one per
+capture and is not independently validated.
+
+\paragraph{Driver Club-Face Fixture (Issue \#12221).}
+The driver club-face fixture (\texttt{tests/fixtures/club\_face}) was regenerated at
+\texttt{9fe74740a5} on ControlTower. The same-input export no longer stops at the
+trail-shoulder singularity (\#12266) on this document.
+
+\begin{center}
+\begin{tabular}{lrr}
+\hline
+Quantity & Before & After \\
+\hline
+Impact speed (model / capture, m/s) & --- & 50.02 / 51.32 \\
+Impact speed error (\%) & $-5.1$ & $-2.5$ \\
+Peak early (ms) & 1.8 & 4.4 \\
+Post-impact speed drop (\%) & $-43.2$ & $-4.5$ \\
+Face at address, model / capture (deg) & --- & 5.44 / 5.50 \\
+Face at impact, model / capture (deg) & --- & 16.88 / 14.96 \\
+\hline
+\end{tabular}
+\end{center}
+The fixture meets GCV-20 (3~\%, 5~ms, 10~\%) and OSV-10 (5~deg).
+The Rajagopal driver grip calibration reads this fixture's address pose, so it was
+re-run (grip gaps 0.03 and 0.2~mm) and the club of both musculoskeletal models
+rebuilt. Driven by this fixture, the OpenSim bushing grip exceeds its full-swing
+bounds only in the 6~ms ball-impact window (2.62~deg against 2~deg, 51.3~N
+against 50~N; the previous fixture peaked at 1.81~deg and 34.5~N at the same
+instant). The bounds are unchanged; the two driver cases carry a strict xfail
+and the decision is recorded on issue \#12272.
+
+The 7-iron is not adopted. Its refit meets GCV-20 and OSV-10 on the tracked swing
+($-1.9$~\%, $-0.2$~ms, impact face 2.59 against 3.21~deg), but its club-face fixture
+comes from the same-input export (open-loop replay of the recorded efforts at
+1~kHz), which gives $-5.0$~\%, peak $-5.1$~ms and an 8.71~deg impact face against
+the capture's 3.21~deg (a 5.50~deg gap; the top-of-backswing gap is 5.09~deg), both
+beyond the 5~deg limit. The committed 7-iron fixture gives $-3.9$~\%, $-3.9$~ms and
+2.83~deg, and the OSV-10 face tests run forward kinematics on the current document,
+so adopting the refit would turn eight passing face tests red. The 7-iron document,
+OpenSim export and receipts are unchanged, and
+\texttt{fit\_grip\_rotation\_receipt\_iron7.json} stays committed for a follow-up.
+
+Reproduce (ControlTower \texttt{ud-sim}, repository root):
+\begin{verbatim}
+python3 -m src.shared.python.motion_matching.pipeline.cli \
+  --spec docs/development/full_body_models/full_body_spec_anthro_driver.json \
+  --capture driver --static-seeds --fix-club-markers --out <dir>
+python3 -m scripts.regenerate_club_face_fixtures --work <dir> --capture driver
+\end{verbatim}
+
+Reproduce, once per capture (receipts \texttt{fit\_grip\_rotation\_receipt\_<club>.json}
+under \texttt{evidence/anthropometry/}):
+\begin{verbatim}
+python3 docs/development/full_body_models/evidence/\
+anthropometry/fit_grip_rotation.py \
+  --run <free-wrist run> --window-frames 30 --window-weight 10 \
+  --address-frames 30 --address-weight 20 --receipt <receipt>
+python3 -m scripts.set_spec_grip_rotation apply <receipt> <document>
+\end{verbatim}
+The free-wrist runs use the pipeline CLI with the fixture flags plus
+\texttt{--fix-club-markers --free-wrists}. \texttt{apply\_grip\_rotation} composes
+$\texttt{c2f} \leftarrow \texttt{c2f}\,G(R)^{T}G(T)$ and sets \texttt{subject.grip\_rotation\_deg}.
+
 \subsection{Impact and Top Definitions}
 At about 2400 deg/s of face closure near impact, one 360 Hz capture sample
 spans about 7 deg. A frame index is therefore too coarse. Impact is the
