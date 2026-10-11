@@ -217,7 +217,7 @@ def test_order_shape_depth_capability_fail_closed() -> None:
 
     class Missing:
         def marker_linearization(self, q):
-            raise NotImplementedError
+            raise NotImplementedError  # tracked: #11359
 
     result = fd.assess_fragment_derivatives(
         Missing(), camera(), [0, 0, 0], fragment(), options()

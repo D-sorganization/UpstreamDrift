@@ -576,7 +576,9 @@ class BaseFullBodyIK:
 
     def marker_linearization(self, q: Array) -> MarkerLinearization:
         """Optional public point derivatives; unsupported adapters reject explicitly."""
-        raise NotImplementedError("Native marker linearization is unsupported")
+        raise NotImplementedError(
+            "Native marker linearization is unsupported"
+        )  # tracked: #11359
 
     def _set(self, q: Array) -> None:
         """Set generalized coordinates on underlying physics model."""

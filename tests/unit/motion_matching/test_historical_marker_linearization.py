@@ -219,7 +219,9 @@ def test_explicit_unsupported_linearizer_retains_finite_fallback():
     native = AnalyticPlant()
 
     def unsupported(q):
-        raise NotImplementedError("Fixture lacks analytic capability")
+        raise NotImplementedError(
+            "Fixture lacks analytic capability"
+        )  # tracked: #11359
 
     native.marker_linearization = unsupported
     fit, trajectory, coefficients = fixture(native)
