@@ -205,15 +205,12 @@ def test_attach_ball_records_placement_or_reason(
 
 
 def test_attach_ball_records_backend_limitation() -> None:
-    from src.tools.native_viewer_export.backends.opensim_simbody import (
-        OpenSimSimbodyBackend,
-    )
-
     swing = SwingInput(**{**_fixture_swing().__dict__, "ball": _placement()})
-    note = OpenSimSimbodyBackend.ball_limitation
+    note = "ball stays visible after impact in this viewer"
     _, record = attach_ball(swing, ExportSettings(), note)
     assert record is not None and record["limitation"] == note
-    assert "after impact" in note
+    _, plain = attach_ball(swing, ExportSettings())
+    assert plain is not None and "limitation" not in plain
 
 
 # --- worker plumbing ---------------------------------------------------------
