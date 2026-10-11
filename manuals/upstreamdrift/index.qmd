@@ -53,6 +53,8 @@ UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
 
 {{< include chapters/23-native-bounded-nmpc.qmd >}}
 
+{{< include chapters/24-native-path-work.qmd >}}
+
 {{< include chapters/24-native-box-fddp-candidate.qmd >}}
 
 {{< include chapters/25-native-manifold-derivative.qmd >}}
@@ -103,6 +105,8 @@ UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
 
 {{< include chapters/47-native-zero-custom-mtp-reduction.qmd >}}
 
+{{< include chapters/49-native-opensim-mixed-marker-observation.qmd >}}
+
 {{< include chapters/50-native-exact-557-excitation-diagnostic.qmd >}}
 
 {{< include chapters/52-native-source-body-inertia.qmd >}}
@@ -114,4 +118,10 @@ UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
 
 {{< include chapters/24-native-path-work.qmd >}}
 
-{{< include chapters/49-native-opensim-mixed-marker-observation.qmd >}}
+{{< include chapters/55-unqualified-moco-feasibility.qmd >}}
+
+{{< include chapters/56-native-diagnostic-execution-contract.qmd >}}
+
+{{< include chapters/57-native-wrapped-path-closure.qmd >}}
+
+{{< include chapters/58-native-contact-source-closure.qmd >}}
