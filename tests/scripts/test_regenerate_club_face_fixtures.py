@@ -20,6 +20,8 @@ def test_pipeline_argv_keeps_the_original_run_flags_and_the_weight() -> None:
     assert "--zmp-filter" in argv and "--static-seeds" in argv
     assert argv[argv.index("--face-weight") + 1] == "3.0"
     assert argv[argv.index("--spec") + 1].endswith("full_body_spec_anthro_iron7.json")
+    # The OSV-4 address toe-out calibration, held through the swing (#12222).
+    assert argv[argv.index("--foot-progression") + 1] == "capture"
     assert "--zmp-filter" not in regen.pipeline_argv("driver", Path("d"), 0.0)
     with pytest.raises(ValueError, match="unknown capture"):
         regen.pipeline_argv("owner", Path("o"), 3.0)

@@ -1,705 +1,680 @@
 {
- "clubs": {
-  "driver": {
-   "after": {
-    "faces": {
-     "capture": {
-      "address_deg": 5.498955098048745,
-      "impact_deg": 14.964779323749287,
-      "impact_time_s": 1.3229536401569004,
-      "peak_speed_gap_to_ball_m": 0.17396077494510212,
-      "peak_speed_time_s": 1.3194444444444444,
-      "top_deg": 95.10186699414457,
-      "top_time_s": 1.1027777777777779
-     },
-     "model": {
-      "address_deg": 5.431426418430594,
-      "impact_deg": 17.64844763720228,
-      "impact_time_s": 1.3271291275539532,
-      "peak_speed_gap_to_ball_m": 0.35146747422312336,
-      "peak_speed_time_s": 1.32,
-      "top_deg": 95.5503314595742,
-      "top_time_s": 1.1
-     }
+  "clubs": {
+    "driver": {
+      "after": {
+        "faces": {
+          "capture": {
+            "address_deg": 2.504984429751854,
+            "impact_deg": 11.625703774902208,
+            "impact_time_s": 1.3229544804759907,
+            "peak_speed_gap_to_ball_m": 0.1739503488810174,
+            "peak_speed_time_s": 1.3194444444444444,
+            "top_deg": 96.84814737096555,
+            "top_time_s": 1.1027777777777779
+          },
+          "model": {
+            "address_deg": 2.422800207182933,
+            "impact_deg": 15.784228098391393,
+            "impact_time_s": 1.3268795614874096,
+            "peak_speed_gap_to_ball_m": 0.1602204048003708,
+            "peak_speed_time_s": 1.324,
+            "top_deg": 97.37985664254073,
+            "top_time_s": 1.102
+          }
+        },
+        "speed_timing": {
+          "capture": {
+            "impact_speed_mps": 51.31815082711865,
+            "impact_time_s": 1.3229544804759907,
+            "peak_minus_impact_s": -0.0021211471426574313,
+            "peak_speed_mps": 51.31815082711865,
+            "peak_time_s": 1.3208333333333333,
+            "post_impact_drop_mps": 14.336791152124533,
+            "post_impact_speed_mps": 36.98135967499412
+          },
+          "model": {
+            "impact_speed_mps": 48.72603895991257,
+            "impact_time_s": 1.3268795614874096,
+            "peak_minus_impact_s": -0.003879561487409644,
+            "peak_speed_mps": 48.81707795798533,
+            "peak_time_s": 1.323,
+            "post_impact_drop_mps": 8.164694679434696,
+            "post_impact_speed_mps": 40.561344280477876
+          }
+        }
+      },
+      "before": {
+        "faces": {
+          "capture": {
+            "address_deg": 2.504984429751854,
+            "impact_deg": 11.625703774902208,
+            "impact_time_s": 1.3229544804759907,
+            "peak_speed_gap_to_ball_m": 0.1739503488810174,
+            "peak_speed_time_s": 1.3194444444444444,
+            "top_deg": 96.84814737096555,
+            "top_time_s": 1.1027777777777779
+          },
+          "model": {
+            "address_deg": 5.431426418430594,
+            "impact_deg": 17.64844763720228,
+            "impact_time_s": 1.3271291275539532,
+            "peak_speed_gap_to_ball_m": 0.35146747422312336,
+            "peak_speed_time_s": 1.32,
+            "top_deg": 95.5503314595742,
+            "top_time_s": 1.1
+          }
+        },
+        "fixture_sha256": "30391927906610017631c658edb08311a7ca7182cb5e5030647173e9572c9e87",
+        "speed_timing": {
+          "capture": {
+            "impact_speed_mps": 51.31815082711865,
+            "impact_time_s": 1.3229544804759907,
+            "peak_minus_impact_s": -0.0021211471426574313,
+            "peak_speed_mps": 51.31815082711865,
+            "peak_time_s": 1.3208333333333333,
+            "post_impact_drop_mps": 14.336791152124533,
+            "post_impact_speed_mps": 36.98135967499412
+          },
+          "model": {
+            "impact_speed_mps": 48.182967460078395,
+            "impact_time_s": 1.3271291275539532,
+            "peak_minus_impact_s": -0.006129127553953007,
+            "peak_speed_mps": 48.77395633185119,
+            "peak_time_s": 1.3210000000000002,
+            "post_impact_drop_mps": 9.910403977551674,
+            "post_impact_speed_mps": 38.27256348252672
+          }
+        }
+      },
+      "bundle_manifest": {
+        "coordinate_order": [
+          "TranslationInputX",
+          "TranslationInputY",
+          "TranslationInputZ",
+          "HipInputX",
+          "HipInputY",
+          "HipInputZ",
+          "SpineInputX",
+          "SpineInputY",
+          "TorsoInput",
+          "LEInput",
+          "LFInput",
+          "LScapInputX",
+          "LScapInputY",
+          "LSInputX",
+          "LSInputY",
+          "LSInputZ",
+          "LWInputX",
+          "LWInputY",
+          "REInput",
+          "RFInput",
+          "RScapInputX",
+          "RScapInputY",
+          "RSInputX",
+          "RSInputY",
+          "RSInputZ",
+          "RWInputX",
+          "RWInputY",
+          "NeckInputX",
+          "NeckInputY",
+          "NeckInputZ",
+          "hip_flexion_r",
+          "hip_adduction_r",
+          "hip_rotation_r",
+          "knee_angle_r",
+          "ankle_angle_r",
+          "subtalar_angle_r",
+          "mtp_angle_r",
+          "hip_flexion_l",
+          "hip_adduction_l",
+          "hip_rotation_l",
+          "knee_angle_l",
+          "ankle_angle_l",
+          "subtalar_angle_l",
+          "mtp_angle_l"
+        ],
+        "dt_s": 0.001,
+        "duration_s": 1.814,
+        "policy": {
+          "closure_projection": "closest_point_each_step",
+          "effort_hold": "zero_order",
+          "integrator": "rk4",
+          "kkt": "exact",
+          "projection_tolerance": 1e-13,
+          "root_efforts": "zero",
+          "substeps": 8
+        },
+        "provenance": {
+          "ball_impact": {
+            "axis_in_frame": [
+              -0.15108009768730238, -0.37035426441492897, -0.9165219707745539
+            ],
+            "ball_centre_m": [
+              0.050635675610419026, -0.013139426803878602, 0.1275040857780252
+            ],
+            "ball_mass_kg": 0.04593,
+            "collision": {
+              "application_point_m": [
+                0.08835465550221155, 0.005217136047899185, 0.20408005855498923
+              ],
+              "approach_speed_mps": 44.46054039080316,
+              "ball_mass_kg": 0.04593,
+              "ball_speed_mps": 64.44554077430061,
+              "club_normal_speed_change_mps": 16.917248140869177,
+              "contact_point_m": [
+                0.05556637336053536, 0.006042373131530675, 0.11957130594149055
+              ],
+              "cor": 0.83,
+              "duration_s": 0.00045,
+              "effective_mass_kg": 0.17496839102411774,
+              "face_normal": [
+                -0.23110840169282093, -0.8990766316104654, 0.3718200063995609
+              ],
+              "face_to_ball_gap_m": 0.09065032669734778,
+              "impulse_on_club_n_s": [
+                0.6840770991158737, 2.661252163616445, -1.1005811537268677
+              ],
+              "model": "frictionless normal impulse, constant COR",
+              "time_s": 1.3267533952163137
+            },
+            "cor": 0.83,
+            "duration_s": 0.00045,
+            "force_world_n": [
+              1520.1713313686082, 5913.893696925434, -2445.735897170817
+            ],
+            "frame": "Clubhead",
+            "passage_point_m": [
+              0.05151028098804813, 0.007531409806307343, 0.1275040857780252
+            ],
+            "point_in_frame": [
+              0.0010481605339686087, 0.04921124092301568, -0.026174281039839195
+            ],
+            "scheduled": true,
+            "swing_span_s": [0.0, 1.8138888888888889],
+            "t_start_s": 1.3267533952163137,
+            "trigger": "passage"
+          },
+          "capture": "driver",
+          "capture_sha256": "cbcb4d84aca0a1f558073f0c2328c3f501c4726aaf699e382cf20c5861a0971d",
+          "controller": "pipeline computed-torque (kkt), held per step",
+          "dynamics_record_sha256": "1ced26ff36f317e00e8d8384f0ea3a8c4334390edc3c78d57adb04c704a1c196",
+          "impact_split_time_s": 1.3229544804764821,
+          "max_pose_drift_m": 1.5496283531755146e-9,
+          "run_dir": "driver",
+          "spec_file": "full_body_spec_hipcal_scaled.json"
+        },
+        "reference_engine": "mujoco",
+        "schema": "same-input-bundle/v1",
+        "spec_sha256": "83afac9d8be8faeb31a020df720bfe0c9e36c326694dded4cee695de75da43eb",
+        "steps": 1814
+      },
+      "bundle_sha256": "3c34f92dd2bfd7af2aeadc2ff638e370878b8cbf81445c83125d62afb14a295b",
+      "capture": "driver",
+      "capture_triad_offsets_m": {
+        "Marker_2:2:1": [
+          0.0025409428105505703, -0.07126399744933627, -0.008963942637420116
+        ],
+        "Marker_2:2:2": [
+          0.05103597038612945, -0.005660757259155431, -0.05236891970923721
+        ],
+        "Marker_2:2:3": [
+          0.06324294796269762, 0.0025310384530393133, -0.0024486020698853794
+        ]
+      },
+      "face_orientation": {
+        "frame": "Clubhead",
+        "ik": {
+          "frames_observed": 618,
+          "frames_unobserved": 36,
+          "max_deg": 2.85402378790736,
+          "p95_deg": 1.7614476305540439,
+          "rms_deg": 0.734073821431858
+        },
+        "reference": {
+          "frames_observed": 618,
+          "frames_unobserved": 36,
+          "max_deg": 3.2563761648233838,
+          "p95_deg": 1.4693778627164122,
+          "rms_deg": 0.672535365291432
+        },
+        "targeted_frames": 618,
+        "triad": ["Marker_2:2:1", "Marker_2:2:2", "Marker_2:2:3"],
+        "weight": 3.0
+      },
+      "face_weight": 3.0,
+      "fixture_sha256": "8d3fca56dc94006dcf8a0ef1ae7dc35c148e8fe982b395fd2ed9949ec315b9fe",
+      "foot_progression": {
+        "address_model_deg": {
+          "left": 16.634832080887268,
+          "right": 3.6119889857832153
+        },
+        "fixture_frame0_model_deg": {
+          "left": 16.64478956422848,
+          "right": 3.5732888089632624
+        },
+        "source": "capture",
+        "target_deg": {
+          "left": 16.368121989889968,
+          "right": 4.032115544619926
+        }
+      },
+      "generated_at_commit": "4bd77f5818c9cf17e6c4a60e1017a8cc8e1365fa",
+      "impact_split": {
+        "frame": 476,
+        "impact_time_s": 1.3229544804764821,
+        "pre_contact_cutoff_hz": 20.0,
+        "release_cutoff": {
+          "base_cutoff_hz": 12.0,
+          "candidates": [
+            {
+              "cutoff_hz": 12.0,
+              "last_pre_contact_speed_mps": 46.97723582657864,
+              "peak_minus_split_s": -0.009722222222222188,
+              "preserved": false
+            },
+            {
+              "cutoff_hz": 15.0,
+              "last_pre_contact_speed_mps": 48.19771465964598,
+              "peak_minus_split_s": -0.004166666666666652,
+              "preserved": false
+            },
+            {
+              "cutoff_hz": 18.0,
+              "last_pre_contact_speed_mps": 49.43120782394233,
+              "peak_minus_split_s": -0.001388888888888884,
+              "preserved": false
+            },
+            {
+              "cutoff_hz": 20.0,
+              "last_pre_contact_speed_mps": 50.04270409525968,
+              "peak_minus_split_s": -0.001388888888888884,
+              "preserved": true
+            },
+            {
+              "cutoff_hz": 25.0,
+              "last_pre_contact_speed_mps": 50.97973471292286,
+              "peak_minus_split_s": -0.001388888888888884,
+              "preserved": false
+            },
+            {
+              "cutoff_hz": 30.0,
+              "last_pre_contact_speed_mps": 51.29572529454803,
+              "peak_minus_split_s": -0.001388888888888884,
+              "preserved": false
+            }
+          ],
+          "cutoff_hz": 20.0,
+          "preserved": true,
+          "speed_tol": 0.01,
+          "timing_tol_s": 0.002777777777777768,
+          "unfiltered": {
+            "last_pre_contact_speed_mps": 50.00944855223277,
+            "peak_minus_split_s": -0.001388888888888884
+          }
+        },
+        "source": "capture face-centre ball passage",
+        "time_s": 1.3222222222222222
+      },
+      "marker_rms_m": {
+        "ik": 0.027823393502674643,
+        "reference": 0.027074649228818238,
+        "tracking": 0.05747224025233081
+      },
+      "pipeline_argv": [
+        "--spec",
+        "/home/dieterolson/Repositories/UpstreamDrift-worktrees/claude-12222/docs/development/full_body_models/full_body_spec_anthro_driver.json",
+        "--capture",
+        "driver",
+        "--static-seeds",
+        "--foot-progression",
+        "capture",
+        "--face-weight",
+        "3.0",
+        "--out",
+        "/home/dieterolson/fleet24/brick-sim-s31/ct/fx2-drv/runs/driver"
+      ],
+      "run_receipt_sha256": "e0cd4f074b03f4e5d5902780f3e364e8ce1fe47d234406d5461f50f7c9b8c44a",
+      "spec_sha256": "83afac9d8be8faeb31a020df720bfe0c9e36c326694dded4cee695de75da43eb"
     },
-    "speed_timing": {
-     "capture": {
-      "impact_speed_mps": 51.320635669041174,
-      "impact_time_s": 1.3229536401569004,
-      "peak_minus_impact_s": -0.0021203068235671196,
-      "peak_speed_mps": 51.320635669041174,
-      "peak_time_s": 1.3208333333333333,
-      "post_impact_drop_mps": 14.3621314080374,
-      "post_impact_speed_mps": 36.958504261003775
-     },
-     "model": {
-      "impact_speed_mps": 48.182967460078395,
-      "impact_time_s": 1.3271291275539532,
-      "peak_minus_impact_s": -0.006129127553953007,
-      "peak_speed_mps": 48.77395633185119,
-      "peak_time_s": 1.3210000000000002,
-      "post_impact_drop_mps": 9.910403977551674,
-      "post_impact_speed_mps": 38.27256348252672
-     }
+    "iron7": {
+      "after": {
+        "faces": {
+          "capture": {
+            "address_deg": -8.190171783368694,
+            "impact_deg": 0.7125078971951259,
+            "impact_time_s": 1.334031465119783,
+            "peak_speed_gap_to_ball_m": 0.10615720437468297,
+            "peak_speed_time_s": 1.3314763231197773,
+            "top_deg": 116.9574593100455,
+            "top_time_s": 1.0919220055710306
+          },
+          "model": {
+            "address_deg": -8.234611726807001,
+            "impact_deg": 2.828855114794931,
+            "impact_time_s": 1.3360559946065085,
+            "peak_speed_gap_to_ball_m": 0.17001325992111116,
+            "peak_speed_time_s": 1.332,
+            "top_deg": 117.1185430516738,
+            "top_time_s": 1.1
+          }
+        },
+        "speed_timing": {
+          "capture": {
+            "impact_speed_mps": 41.26452580352146,
+            "impact_time_s": 1.334031465119783,
+            "peak_minus_impact_s": -0.001162384339838729,
+            "peak_speed_mps": 41.48351594867471,
+            "peak_time_s": 1.3328690807799444,
+            "post_impact_drop_mps": 12.464356088657599,
+            "post_impact_speed_mps": 28.80016971486386
+          },
+          "model": {
+            "impact_speed_mps": 39.63925086201168,
+            "impact_time_s": 1.3360559946065085,
+            "peak_minus_impact_s": -0.005055994606508518,
+            "peak_speed_mps": 39.91511057570481,
+            "peak_time_s": 1.331,
+            "post_impact_drop_mps": 7.635221674030333,
+            "post_impact_speed_mps": 32.004029187981345
+          }
+        }
+      },
+      "before": {
+        "faces": {
+          "capture": {
+            "address_deg": -8.190171783368694,
+            "impact_deg": 0.7125078971951259,
+            "impact_time_s": 1.334031465119783,
+            "peak_speed_gap_to_ball_m": 0.10615720437468297,
+            "peak_speed_time_s": 1.3314763231197773,
+            "top_deg": 116.9574593100455,
+            "top_time_s": 1.0919220055710306
+          },
+          "model": {
+            "address_deg": -5.406382580011684,
+            "impact_deg": 10.974053601940463,
+            "impact_time_s": 1.3407696927699084,
+            "peak_speed_gap_to_ball_m": 0.5590245470502518,
+            "peak_speed_time_s": 1.326,
+            "top_deg": 113.6990525577131,
+            "top_time_s": 1.098
+          }
+        },
+        "fixture_sha256": "7a4658da1479ac0419ddcf52987668c4a021a80663a9da1ff33808f058882e30",
+        "speed_timing": {
+          "capture": {
+            "impact_speed_mps": 41.26452580352146,
+            "impact_time_s": 1.334031465119783,
+            "peak_minus_impact_s": -0.001162384339838729,
+            "peak_speed_mps": 41.48351594867471,
+            "peak_time_s": 1.3328690807799444,
+            "post_impact_drop_mps": 12.464356088657599,
+            "post_impact_speed_mps": 28.80016971486386
+          },
+          "model": {
+            "impact_speed_mps": 37.06756523002014,
+            "impact_time_s": 1.3407696927699084,
+            "peak_minus_impact_s": -0.01576969276990825,
+            "peak_speed_mps": 38.928008711001326,
+            "peak_time_s": 1.3250000000000002,
+            "post_impact_drop_mps": 6.467277061534364,
+            "post_impact_speed_mps": 30.60028816848578
+          }
+        }
+      },
+      "bundle_manifest": {
+        "coordinate_order": [
+          "TranslationInputX",
+          "TranslationInputY",
+          "TranslationInputZ",
+          "HipInputX",
+          "HipInputY",
+          "HipInputZ",
+          "SpineInputX",
+          "SpineInputY",
+          "TorsoInput",
+          "LEInput",
+          "LFInput",
+          "LScapInputX",
+          "LScapInputY",
+          "LSInputX",
+          "LSInputY",
+          "LSInputZ",
+          "LWInputX",
+          "LWInputY",
+          "REInput",
+          "RFInput",
+          "RScapInputX",
+          "RScapInputY",
+          "RSInputX",
+          "RSInputY",
+          "RSInputZ",
+          "RWInputX",
+          "RWInputY",
+          "NeckInputX",
+          "NeckInputY",
+          "NeckInputZ",
+          "hip_flexion_r",
+          "hip_adduction_r",
+          "hip_rotation_r",
+          "knee_angle_r",
+          "ankle_angle_r",
+          "subtalar_angle_r",
+          "mtp_angle_r",
+          "hip_flexion_l",
+          "hip_adduction_l",
+          "hip_rotation_l",
+          "knee_angle_l",
+          "ankle_angle_l",
+          "subtalar_angle_l",
+          "mtp_angle_l"
+        ],
+        "dt_s": 0.001,
+        "duration_s": 1.827,
+        "policy": {
+          "closure_projection": "closest_point_each_step",
+          "effort_hold": "zero_order",
+          "integrator": "rk4",
+          "kkt": "exact",
+          "projection_tolerance": 1e-13,
+          "root_efforts": "zero",
+          "substeps": 8
+        },
+        "provenance": {
+          "ball_impact": {
+            "axis_in_frame": [
+              -0.4960101632149362, -0.3209252593949264, -0.806833871295567
+            ],
+            "ball_centre_m": [
+              -0.07644116305142207, -0.000308166315065396, 0.0593654156369459
+            ],
+            "ball_mass_kg": 0.04593,
+            "collision": {
+              "application_point_m": [
+                -0.056231211823503255, 0.014529584311058368, 0.09357702436441516
+              ],
+              "approach_speed_mps": 31.711015061903417,
+              "ball_mass_kg": 0.04593,
+              "ball_speed_mps": 51.28169524233209,
+              "club_normal_speed_change_mps": 6.749462320951162,
+              "contact_point_m": [
+                -0.07554820540826401, 0.01858475160123809, 0.049494118647423986
+              ],
+              "cor": 0.83,
+              "duration_s": 0.00045,
+              "effective_mass_kg": 0.3489712440010162,
+              "face_normal": [
+                -0.04185411966993468, -0.8855363447997885, 0.4626808994385708
+              ],
+              "face_to_ball_gap_m": 0.04830003311963838,
+              "impulse_on_club_n_s": [
+                0.09858186512461714, 2.085764201814245, -1.0897839061934549
+              ],
+              "model": "frictionless normal impulse, constant COR",
+              "time_s": 1.3360778408622491
+            },
+            "cor": 0.83,
+            "duration_s": 0.00045,
+            "force_world_n": [
+              219.0708113880381, 4635.031559587212, -2421.742013763233
+            ],
+            "frame": "Clubhead",
+            "passage_point_m": [
+              -0.07921738873946026, 0.018875420303994923, 0.0593654156369459
+            ],
+            "point_in_frame": [
+              -0.0011876474581223838, 0.024833938754146433,
+              -0.023795020849464794
+            ],
+            "scheduled": true,
+            "swing_span_s": [0.0, 1.8272980501392757],
+            "t_start_s": 1.3360778408622491,
+            "trigger": "passage"
+          },
+          "capture": "iron",
+          "capture_sha256": "00a70c1ec0a887c28f9c0397766904eb9e79dee9f6d2bbd0cbb0062445adf561",
+          "controller": "pipeline computed-torque (kkt), held per step",
+          "dynamics_record_sha256": "8fa555c415d65c49483ccbd4b277b737d452273113bf50d7d3ce300a40539d31",
+          "impact_split_time_s": 1.3340314651195886,
+          "max_pose_drift_m": 3.3269516394648914e-10,
+          "run_dir": "iron",
+          "spec_file": "full_body_spec_hipcal_scaled.json"
+        },
+        "reference_engine": "mujoco",
+        "schema": "same-input-bundle/v1",
+        "spec_sha256": "e11ac6e652bd485e21a2314a02e8d02fed35316502f1902204e0e3fd084053ff",
+        "steps": 1827
+      },
+      "bundle_sha256": "8018991eff65fa27c13cd8460c24817a505019cda723baf3082f4cc0af273776",
+      "capture": "iron",
+      "capture_triad_offsets_m": {
+        "Marker_2:2:1": [
+          -0.010119155124445908, -0.06090248810469689, -0.005375813379869708
+        ],
+        "Marker_2:2:2": [
+          0.03224901380931657, 0.018795237176377464, -0.0606983486805692
+        ],
+        "Marker_2:2:3": [
+          -0.05002737058948841, -0.06063838845808297, -0.004233894776827047
+        ]
+      },
+      "face_orientation": {
+        "frame": "Clubhead",
+        "ik": {
+          "frames_observed": 640,
+          "frames_unobserved": 17,
+          "max_deg": 3.8391484418994657,
+          "p95_deg": 1.0320814306046453,
+          "rms_deg": 0.5333674413688669
+        },
+        "reference": {
+          "frames_observed": 640,
+          "frames_unobserved": 17,
+          "max_deg": 4.351489942314316,
+          "p95_deg": 0.8184484351711635,
+          "rms_deg": 0.5188002712072274
+        },
+        "targeted_frames": 640,
+        "triad": ["Marker_2:2:1", "Marker_2:2:2", "Marker_2:2:3"],
+        "weight": 3.0
+      },
+      "face_weight": 3.0,
+      "fixture_sha256": "21dc49fa59b46c1a35af0b926c5f2ebfec79e8cc122c8c1a673df003821c01e8",
+      "foot_progression": {
+        "address_model_deg": {
+          "left": 15.389814133020092,
+          "right": -0.8618655490259268
+        },
+        "fixture_frame0_model_deg": {
+          "left": 15.433216065054879,
+          "right": -0.9645949630981274
+        },
+        "source": "capture",
+        "target_deg": {
+          "left": 14.998533032325602,
+          "right": -0.37171697863684805
+        }
+      },
+      "generated_at_commit": "4bd77f5818c9cf17e6c4a60e1017a8cc8e1365fa",
+      "impact_split": {
+        "frame": 478,
+        "impact_time_s": 1.3340314651195886,
+        "pre_contact_cutoff_hz": 25.0,
+        "release_cutoff": {
+          "base_cutoff_hz": 12.0,
+          "candidates": [
+            {
+              "cutoff_hz": 12.0,
+              "last_pre_contact_speed_mps": 36.29066480911497,
+              "peak_minus_split_s": -0.01532033426183843,
+              "preserved": false
+            },
+            {
+              "cutoff_hz": 15.0,
+              "last_pre_contact_speed_mps": 37.57985395598826,
+              "peak_minus_split_s": -0.009749303621169991,
+              "preserved": false
+            },
+            {
+              "cutoff_hz": 18.0,
+              "last_pre_contact_speed_mps": 38.70241782660266,
+              "peak_minus_split_s": -0.0069637883008357715,
+              "preserved": false
+            },
+            {
+              "cutoff_hz": 20.0,
+              "last_pre_contact_speed_mps": 39.21661159326382,
+              "peak_minus_split_s": -0.004178272980501552,
+              "preserved": false
+            },
+            {
+              "cutoff_hz": 25.0,
+              "last_pre_contact_speed_mps": 39.916074981508864,
+              "peak_minus_split_s": -0.001392757660167332,
+              "preserved": true
+            },
+            {
+              "cutoff_hz": 30.0,
+              "last_pre_contact_speed_mps": 40.12105557848011,
+              "peak_minus_split_s": -0.001392757660167332,
+              "preserved": true
+            }
+          ],
+          "cutoff_hz": 25.0,
+          "preserved": true,
+          "speed_tol": 0.01,
+          "timing_tol_s": 0.0027855153203342198,
+          "unfiltered": {
+            "last_pre_contact_speed_mps": 39.908759314236775,
+            "peak_minus_split_s": -0.001392757660167332
+          }
+        },
+        "source": "capture face-centre ball passage",
+        "time_s": 1.3314763231197773
+      },
+      "marker_rms_m": {
+        "ik": 0.024393049066233706,
+        "reference": 0.024630010248936445,
+        "tracking": 0.05278611228015476
+      },
+      "pipeline_argv": [
+        "--spec",
+        "/home/dieterolson/Repositories/UpstreamDrift-worktrees/claude-12222/docs/development/full_body_models/full_body_spec_anthro_iron7.json",
+        "--capture",
+        "iron",
+        "--static-seeds",
+        "--zmp-filter",
+        "--foot-progression",
+        "capture",
+        "--face-weight",
+        "3.0",
+        "--out",
+        "/home/dieterolson/fleet24/brick-sim-s31/ct/fx2-iron/runs/iron"
+      ],
+      "run_receipt_sha256": "beb6ee488abff56e8715109bdbdbe6d067a96646e9913b90a23696c28cc9b556",
+      "spec_sha256": "e11ac6e652bd485e21a2314a02e8d02fed35316502f1902204e0e3fd084053ff"
     }
-   },
-   "before": {
-    "faces": {
-     "capture": {
-      "address_deg": 5.498955098048745,
-      "impact_deg": 14.964779323749287,
-      "impact_time_s": 1.3229536401569004,
-      "peak_speed_gap_to_ball_m": 0.17396077494510212,
-      "peak_speed_time_s": 1.3194444444444444,
-      "top_deg": 95.10186699414457,
-      "top_time_s": 1.1027777777777779
-     },
-     "model": {
-      "address_deg": 0.18271734921995458,
-      "impact_deg": 11.330914281434668,
-      "impact_time_s": 1.3258726215619583,
-      "peak_speed_gap_to_ball_m": 1.0808579259294167,
-      "peak_speed_time_s": 1.302,
-      "top_deg": 98.77144978959201,
-      "top_time_s": 1.104
-     }
-    },
-    "fixture_sha256": "41a8db49f55a12c21b6ae08f917699b5222294ddbd96a3674c9f9087e0c0ed0b",
-    "speed_timing": {
-     "capture": {
-      "impact_speed_mps": 51.320635669041174,
-      "impact_time_s": 1.3229536401569004,
-      "peak_minus_impact_s": -0.0021203068235671196,
-      "peak_speed_mps": 51.320635669041174,
-      "peak_time_s": 1.3208333333333333,
-      "post_impact_drop_mps": 14.3621314080374,
-      "post_impact_speed_mps": 36.958504261003775
-     },
-     "model": {
-      "impact_speed_mps": 44.0899469102697,
-      "impact_time_s": 1.3258726215619583,
-      "peak_minus_impact_s": -0.02287262156195835,
-      "peak_speed_mps": 46.578348874985004,
-      "peak_time_s": 1.303,
-      "post_impact_drop_mps": 1.3502070908454655,
-      "post_impact_speed_mps": 42.73973981942424
-     }
-    }
-   },
-   "bundle_manifest": {
-    "coordinate_order": [
-     "TranslationInputX",
-     "TranslationInputY",
-     "TranslationInputZ",
-     "HipInputX",
-     "HipInputY",
-     "HipInputZ",
-     "SpineInputX",
-     "SpineInputY",
-     "TorsoInput",
-     "LEInput",
-     "LFInput",
-     "LScapInputX",
-     "LScapInputY",
-     "LSInputX",
-     "LSInputY",
-     "LSInputZ",
-     "LWInputX",
-     "LWInputY",
-     "REInput",
-     "RFInput",
-     "RScapInputX",
-     "RScapInputY",
-     "RSInputX",
-     "RSInputY",
-     "RSInputZ",
-     "RWInputX",
-     "RWInputY",
-     "NeckInputX",
-     "NeckInputY",
-     "NeckInputZ",
-     "hip_flexion_r",
-     "hip_adduction_r",
-     "hip_rotation_r",
-     "knee_angle_r",
-     "ankle_angle_r",
-     "subtalar_angle_r",
-     "mtp_angle_r",
-     "hip_flexion_l",
-     "hip_adduction_l",
-     "hip_rotation_l",
-     "knee_angle_l",
-     "ankle_angle_l",
-     "subtalar_angle_l",
-     "mtp_angle_l"
-    ],
-    "dt_s": 0.001,
-    "duration_s": 1.814,
-    "policy": {
-     "closure_projection": "closest_point_each_step",
-     "effort_hold": "zero_order",
-     "integrator": "rk4",
-     "kkt": "exact",
-     "projection_tolerance": 1e-13,
-     "root_efforts": "zero",
-     "substeps": 8
-    },
-    "provenance": {
-     "ball_impact": {
-      "axis_in_frame": [
-       -0.15108009768730238,
-       -0.37035426441492897,
-       -0.9165219707745539
-      ],
-      "ball_centre_m": [
-       0.050021824182766086,
-       -0.005617998186084281,
-       0.1262972821907931
-      ],
-      "ball_mass_kg": 0.04593,
-      "collision": {
-       "application_point_m": [
-        0.07049547694445818,
-        0.017795061535716764,
-        0.20264760615529653
-       ],
-       "approach_speed_mps": 45.20077750553461,
-       "ball_mass_kg": 0.04593,
-       "ball_speed_mps": 65.53581580806917,
-       "club_normal_speed_change_mps": 17.18160702705915,
-       "contact_point_m": [
-        0.055565401589807446,
-        0.013400976881503266,
-        0.11837708257773889
-       ],
-       "cor": 0.83,
-       "duration_s": 0.00045,
-       "effective_mass_kg": 0.17519083141199202,
-       "face_normal": [
-        -0.2598348913541768,
-        -0.8914448121672157,
-        0.3712303544904708
-       ],
-       "face_to_ball_gap_m": 0.08569560241972538,
-       "impulse_on_club_n_s": [
-        0.7821186182830411,
-        2.6833023891985484,
-        -1.1174256482861815
-       ],
-       "model": "frictionless normal impulse, constant COR",
-       "time_s": 1.3269762219270917
-      },
-      "cor": 0.83,
-      "duration_s": 0.00045,
-      "force_world_n": [
-       1738.0413739623136,
-       5962.894198218996,
-       -2483.1681073026257
-      ],
-      "frame": "Clubhead",
-      "passage_point_m": [
-       0.05196272939442875,
-       0.014795128650381623,
-       0.1262972821907931
-      ],
-      "point_in_frame": [
-       0.0010481605339686087,
-       0.04921124092301568,
-       -0.026174281039839195
-      ],
-      "scheduled": true,
-      "swing_span_s": [
-       0.0,
-       1.8138888888888889
-      ],
-      "t_start_s": 1.3269762219270917,
-      "trigger": "passage"
-     },
-     "capture": "driver",
-     "capture_sha256": "cbcb4d84aca0a1f558073f0c2328c3f501c4726aaf699e382cf20c5861a0971d",
-     "controller": "pipeline computed-torque (kkt), held per step",
-     "dynamics_record_sha256": "c8eb488054779fb681ec37e4a5b3928ae36d4ae55ea9ee5931b739b0f7c8555a",
-     "impact_split_time_s": 1.322953640157547,
-     "max_pose_drift_m": 1.2621235916024646e-09,
-     "run_dir": "driver",
-     "spec_file": "full_body_spec_hipcal_scaled.json"
-    },
-    "reference_engine": "mujoco",
-    "schema": "same-input-bundle/v1",
-    "spec_sha256": "2dc8038a32a46481b83aa2b3d4b470a524bb9db7fc0278e310b05ad4450c9e65",
-    "steps": 1814
-   },
-   "bundle_sha256": "2d57bdd789ad7519774bd09ca35bb48ee0c44bee386cd2b25116f1f494a8c8c3",
-   "capture": "driver",
-   "capture_triad_offsets_m": {
-    "Marker_2:2:1": [
-     0.0014236261251189483,
-     -0.07311493220309755,
-     -0.008604687430533628
-    ],
-    "Marker_2:2:2": [
-     0.04934388630384107,
-     -0.010268455189889931,
-     -0.05649533212282851
-    ],
-    "Marker_2:2:3": [
-     0.0622866156510181,
-     0.000823910819803318,
-     -0.007326245237757357
-    ]
-   },
-   "face_orientation": {
-    "frame": "Clubhead",
-    "ik": {
-     "frames_observed": 618,
-     "frames_unobserved": 36,
-     "max_deg": 3.149899981213703,
-     "p95_deg": 1.6852160503837625,
-     "rms_deg": 0.7334647657472539
-    },
-    "reference": {
-     "frames_observed": 618,
-     "frames_unobserved": 36,
-     "max_deg": 3.4613058670255756,
-     "p95_deg": 1.6361384309672464,
-     "rms_deg": 0.7134082812184086
-    },
-    "targeted_frames": 618,
-    "triad": [
-     "Marker_2:2:1",
-     "Marker_2:2:2",
-     "Marker_2:2:3"
-    ],
-    "weight": 3.0
-   },
-   "face_weight": 3.0,
-   "fixture_sha256": "30391927906610017631c658edb08311a7ca7182cb5e5030647173e9572c9e87",
-   "generated_at_commit": "69d2ebf3fe4f2b9a4754a853f4a62164f180db77",
-   "impact_split": {
-    "frame": 476,
-    "impact_time_s": 1.322953640157547,
-    "pre_contact_cutoff_hz": 30.0,
-    "release_cutoff": {
-     "base_cutoff_hz": 12.0,
-     "candidates": [
-      {
-       "cutoff_hz": 12.0,
-       "last_pre_contact_speed_mps": 43.59803010583168,
-       "peak_minus_split_s": -0.01805555555555549,
-       "preserved": false
-      },
-      {
-       "cutoff_hz": 15.0,
-       "last_pre_contact_speed_mps": 44.67094392000238,
-       "peak_minus_split_s": -0.015277777777777724,
-       "preserved": false
-      },
-      {
-       "cutoff_hz": 18.0,
-       "last_pre_contact_speed_mps": 46.11982448761084,
-       "peak_minus_split_s": -0.009722222222222188,
-       "preserved": false
-      },
-      {
-       "cutoff_hz": 20.0,
-       "last_pre_contact_speed_mps": 46.94538990573285,
-       "peak_minus_split_s": -0.009722222222222188,
-       "preserved": false
-      },
-      {
-       "cutoff_hz": 25.0,
-       "last_pre_contact_speed_mps": 48.35116801662352,
-       "peak_minus_split_s": -0.004166666666666652,
-       "preserved": false
-      },
-      {
-       "cutoff_hz": 30.0,
-       "last_pre_contact_speed_mps": 49.11952965798871,
-       "peak_minus_split_s": -0.004166666666666652,
-       "preserved": false
-      }
-     ],
-     "cutoff_hz": 30.0,
-     "preserved": false,
-     "speed_tol": 0.01,
-     "timing_tol_s": 0.002777777777777768,
-     "unfiltered": {
-      "last_pre_contact_speed_mps": 49.93099281125477,
-      "peak_minus_split_s": -0.001388888888888884
-     }
-    },
-    "source": "capture face-centre ball passage",
-    "time_s": 1.3222222222222222
-   },
-   "marker_rms_m": {
-    "ik": 0.029543424359941572,
-    "reference": 0.029009600885079825,
-    "tracking": 0.08075503807480953
-   },
-   "pipeline_argv": [
-    "--spec",
-    "/home/dieterolson/Repositories/UpstreamDrift-worktrees/claude-c145v2/docs/development/full_body_models/full_body_spec_anthro_driver.json",
-    "--capture",
-    "driver",
-    "--static-seeds",
-    "--face-weight",
-    "3.0",
-    "--out",
-    "/home/dieterolson/fleet24/brick-sim-s26/fx/runs/driver"
-   ],
-   "run_receipt_sha256": "767ce7749170cc41fd6aceccda23f76ce37ca80b8865f147d34fcaa9b52fa055"
   },
-  "iron7": {
-   "after": {
-    "faces": {
-     "capture": {
-      "address_deg": -5.345956431977208,
-      "impact_deg": 3.207699915495414,
-      "impact_time_s": 1.3340328918971296,
-      "peak_speed_gap_to_ball_m": 0.10637484042014975,
-      "peak_speed_time_s": 1.3314763231197773,
-      "top_deg": 113.23679385606074,
-      "top_time_s": 1.0974930362116992
-     },
-     "model": {
-      "address_deg": -5.406382580011684,
-      "impact_deg": 10.974053601940463,
-      "impact_time_s": 1.3407696927699084,
-      "peak_speed_gap_to_ball_m": 0.5590245470502518,
-      "peak_speed_time_s": 1.326,
-      "top_deg": 113.6990525577131,
-      "top_time_s": 1.098
-     }
-    },
-    "speed_timing": {
-     "capture": {
-      "impact_speed_mps": 41.26353114495258,
-      "impact_time_s": 1.3340328918971296,
-      "peak_minus_impact_s": -0.0011638111171852206,
-      "peak_speed_mps": 41.55118183870019,
-      "peak_time_s": 1.3328690807799444,
-      "post_impact_drop_mps": 12.531913796031947,
-      "post_impact_speed_mps": 28.731617348920633
-     },
-     "model": {
-      "impact_speed_mps": 37.06756523002014,
-      "impact_time_s": 1.3407696927699084,
-      "peak_minus_impact_s": -0.01576969276990825,
-      "peak_speed_mps": 38.928008711001326,
-      "peak_time_s": 1.3250000000000002,
-      "post_impact_drop_mps": 6.467277061534364,
-      "post_impact_speed_mps": 30.60028816848578
-     }
-    }
-   },
-   "before": {
-    "faces": {
-     "capture": {
-      "address_deg": -5.345956431977208,
-      "impact_deg": 3.207699915495414,
-      "impact_time_s": 1.3340328918971296,
-      "peak_speed_gap_to_ball_m": 0.10637484042014975,
-      "peak_speed_time_s": 1.3314763231197773,
-      "top_deg": 113.23679385606074,
-      "top_time_s": 1.0974930362116992
-     },
-     "model": {
-      "address_deg": -0.3520537686618838,
-      "impact_deg": 7.627746525746561,
-      "impact_time_s": 1.3368994664598575,
-      "peak_speed_gap_to_ball_m": 0.8812831158648321,
-      "peak_speed_time_s": 1.312,
-      "top_deg": 110.27836038657283,
-      "top_time_s": 1.1
-     }
-    },
-    "fixture_sha256": "2b6d382f298612c14a9ca45f5ef9543d79db553fb89121db3214aacf430843af",
-    "speed_timing": {
-     "capture": {
-      "impact_speed_mps": 41.26353114495258,
-      "impact_time_s": 1.3340328918971296,
-      "peak_minus_impact_s": -0.0011638111171852206,
-      "peak_speed_mps": 41.55118183870019,
-      "peak_time_s": 1.3328690807799444,
-      "post_impact_drop_mps": 12.531913796031947,
-      "post_impact_speed_mps": 28.731617348920633
-     },
-     "model": {
-      "impact_speed_mps": 34.545393605524275,
-      "impact_time_s": 1.3368994664598575,
-      "peak_minus_impact_s": -0.025899466459857523,
-      "peak_speed_mps": 36.72405319891603,
-      "peak_time_s": 1.311,
-      "post_impact_drop_mps": 0.7564485649890358,
-      "post_impact_speed_mps": 33.78894504053524
-     }
-    }
-   },
-   "bundle_manifest": {
-    "coordinate_order": [
-     "TranslationInputX",
-     "TranslationInputY",
-     "TranslationInputZ",
-     "HipInputX",
-     "HipInputY",
-     "HipInputZ",
-     "SpineInputX",
-     "SpineInputY",
-     "TorsoInput",
-     "LEInput",
-     "LFInput",
-     "LScapInputX",
-     "LScapInputY",
-     "LSInputX",
-     "LSInputY",
-     "LSInputZ",
-     "LWInputX",
-     "LWInputY",
-     "REInput",
-     "RFInput",
-     "RScapInputX",
-     "RScapInputY",
-     "RSInputX",
-     "RSInputY",
-     "RSInputZ",
-     "RWInputX",
-     "RWInputY",
-     "NeckInputX",
-     "NeckInputY",
-     "NeckInputZ",
-     "hip_flexion_r",
-     "hip_adduction_r",
-     "hip_rotation_r",
-     "knee_angle_r",
-     "ankle_angle_r",
-     "subtalar_angle_r",
-     "mtp_angle_r",
-     "hip_flexion_l",
-     "hip_adduction_l",
-     "hip_rotation_l",
-     "knee_angle_l",
-     "ankle_angle_l",
-     "subtalar_angle_l",
-     "mtp_angle_l"
-    ],
-    "dt_s": 0.001,
-    "duration_s": 1.827,
-    "policy": {
-     "closure_projection": "closest_point_each_step",
-     "effort_hold": "zero_order",
-     "integrator": "rk4",
-     "kkt": "exact",
-     "projection_tolerance": 1e-13,
-     "root_efforts": "zero",
-     "substeps": 8
-    },
-    "provenance": {
-     "ball_impact": {
-      "axis_in_frame": [
-       -0.4960101632149362,
-       -0.3209252593949264,
-       -0.806833871295567
-      ],
-      "ball_centre_m": [
-       -0.08466194855995406,
-       0.02514820961144162,
-       0.07708301208984909
-      ],
-      "ball_mass_kg": 0.04593,
-      "collision": {
-       "application_point_m": [
-        -0.0939735051284302,
-        0.040983099639651355,
-        0.10943654277563877
-       ],
-       "approach_speed_mps": 28.12800227340109,
-       "ball_mass_kg": 0.04593,
-       "ball_speed_mps": 45.47275908076375,
-       "club_normal_speed_change_mps": 6.001485079560242,
-       "contact_point_m": [
-        -0.08138788141491837,
-        0.04291502359264632,
-        0.0657338698188637
-       ],
-       "cor": 0.83,
-       "duration_s": 0.00045,
-       "effective_mass_kg": 0.34800783420968173,
-       "face_normal": [
-        -0.1534599083682062,
-        -0.8327543464356547,
-        0.5319494853988932
-       ],
-       "face_to_ball_gap_m": 0.0455198185188068,
-       "impulse_on_club_n_s": [
-        0.3205108131411171,
-        1.7392606027268356,
-        -1.111010451707798
-       ],
-       "model": "frictionless normal impulse, constant COR",
-       "time_s": 1.3406834212418257
-      },
-      "cor": 0.83,
-      "duration_s": 0.00045,
-      "force_world_n": [
-       712.2462514247047,
-       3865.0235616151904,
-       -2468.912114906218
-      ],
-      "frame": "Clubhead",
-      "passage_point_m": [
-       -0.08652155560951258,
-       0.044797451935585014,
-       0.07708301208984909
-      ],
-      "point_in_frame": [
-       -0.0011876474581223838,
-       0.024833938754146433,
-       -0.023795020849464794
-      ],
-      "scheduled": true,
-      "swing_span_s": [
-       0.0,
-       1.8272980501392757
-      ],
-      "t_start_s": 1.3406834212418257,
-      "trigger": "passage"
-     },
-     "capture": "iron",
-     "capture_sha256": "00a70c1ec0a887c28f9c0397766904eb9e79dee9f6d2bbd0cbb0062445adf561",
-     "controller": "pipeline computed-torque (kkt), held per step",
-     "dynamics_record_sha256": "856ac34c46aa3323f03bc5094623fce18766691e98f61c4e68249b96bad94e59",
-     "impact_split_time_s": 1.334032891896939,
-     "max_pose_drift_m": 9.546091891409023e-11,
-     "run_dir": "iron",
-     "spec_file": "full_body_spec_hipcal_scaled.json"
-    },
-    "reference_engine": "mujoco",
-    "schema": "same-input-bundle/v1",
-    "spec_sha256": "4095618f8bfdb568559b3b4b27ea1d6d156b613048a6616233c26f323416ca2f",
-    "steps": 1827
-   },
-   "bundle_sha256": "662974808b94d0502a508c5dbae665eda7cff09ac960465c52dbf0c471fcd62e",
-   "capture": "iron",
-   "capture_triad_offsets_m": {
-    "Marker_2:2:1": [
-     -0.007327540324495248,
-     -0.08631616596535785,
-     -0.01714432071883919
-    ],
-    "Marker_2:2:2": [
-     0.037275077966665786,
-     -0.011449684473765744,
-     -0.0772524604048805
-    ],
-    "Marker_2:2:3": [
-     -0.047068573801067694,
-     -0.08360904669160808,
-     -0.014431176458904947
-    ]
-   },
-   "face_orientation": {
-    "frame": "Clubhead",
-    "ik": {
-     "frames_observed": 640,
-     "frames_unobserved": 17,
-     "max_deg": 3.214080825644508,
-     "p95_deg": 1.3322873296660753,
-     "rms_deg": 0.6336224411829203
-    },
-    "reference": {
-     "frames_observed": 640,
-     "frames_unobserved": 17,
-     "max_deg": 3.6784226827818394,
-     "p95_deg": 1.2240907963188186,
-     "rms_deg": 0.5795587936522862
-    },
-    "targeted_frames": 640,
-    "triad": [
-     "Marker_2:2:1",
-     "Marker_2:2:2",
-     "Marker_2:2:3"
-    ],
-    "weight": 3.0
-   },
-   "face_weight": 3.0,
-   "fixture_sha256": "7a4658da1479ac0419ddcf52987668c4a021a80663a9da1ff33808f058882e30",
-   "generated_at_commit": "69d2ebf3fe4f2b9a4754a853f4a62164f180db77",
-   "impact_split": {
-    "frame": 478,
-    "impact_time_s": 1.334032891896939,
-    "pre_contact_cutoff_hz": 18.0,
-    "release_cutoff": {
-     "base_cutoff_hz": 12.0,
-     "candidates": [
-      {
-       "cutoff_hz": 12.0,
-       "last_pre_contact_speed_mps": 37.420840451106166,
-       "peak_minus_split_s": -0.009749303621169991,
-       "preserved": false
-      },
-      {
-       "cutoff_hz": 15.0,
-       "last_pre_contact_speed_mps": 38.56704625698227,
-       "peak_minus_split_s": -0.004178272980501552,
-       "preserved": false
-      },
-      {
-       "cutoff_hz": 18.0,
-       "last_pre_contact_speed_mps": 39.58790347597793,
-       "peak_minus_split_s": -0.001392757660167332,
-       "preserved": true
-      },
-      {
-       "cutoff_hz": 20.0,
-       "last_pre_contact_speed_mps": 40.068346238640785,
-       "peak_minus_split_s": -0.001392757660167332,
-       "preserved": false
-      },
-      {
-       "cutoff_hz": 25.0,
-       "last_pre_contact_speed_mps": 40.779088212179005,
-       "peak_minus_split_s": -0.001392757660167332,
-       "preserved": false
-      },
-      {
-       "cutoff_hz": 30.0,
-       "last_pre_contact_speed_mps": 40.99328151958243,
-       "peak_minus_split_s": -0.001392757660167332,
-       "preserved": false
-      }
-     ],
-     "cutoff_hz": 18.0,
-     "preserved": true,
-     "speed_tol": 0.01,
-     "timing_tol_s": 0.0027855153203342198,
-     "unfiltered": {
-      "last_pre_contact_speed_mps": 39.656563387980604,
-      "peak_minus_split_s": -0.004178272980501552
-     }
-    },
-    "source": "capture face-centre ball passage",
-    "time_s": 1.3314763231197773
-   },
-   "marker_rms_m": {
-    "ik": 0.0267723825399104,
-    "reference": 0.026153912745051053,
-    "tracking": 0.05447519000319136
-   },
-   "pipeline_argv": [
-    "--spec",
-    "/home/dieterolson/Repositories/UpstreamDrift-worktrees/claude-c145v2/docs/development/full_body_models/full_body_spec_anthro_iron7.json",
-    "--capture",
-    "iron",
-    "--static-seeds",
-    "--zmp-filter",
-    "--face-weight",
-    "3.0",
-    "--out",
-    "/home/dieterolson/fleet24/brick-sim-s26/fx/runs/iron"
-   ],
-   "run_receipt_sha256": "74abf96cc0beafdf5442e118101943a2aab68e02546633dc71014e73d2cfe0c0"
-  }
- },
- "generator": "scripts/regenerate_club_face_fixtures.py",
- "schema": "club-face-fixture-provenance/v1"
+  "generator": "scripts/regenerate_club_face_fixtures.py",
+  "schema": "club-face-fixture-provenance/v1"
 }
