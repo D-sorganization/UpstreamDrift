@@ -72,7 +72,12 @@ def _moving_flexor(path: Path) -> None:
 
 
 def _source(
-    tmp_path: Path, *, locked: bool = True, custom: bool = False, moving: bool = False
+    tmp_path: Path,
+    *,
+    locked: bool = True,
+    custom: bool = False,
+    moving: bool = False,
+    wrapped: bool = False,
 ) -> tuple[Path, DeclaredColdStart]:
     osim = pytest.importorskip("opensim")
     model = osim.Model()
@@ -112,6 +117,14 @@ def _source(
         muscle.addNewPathPoint(
             "insertion", model.getBodySet().get(body_name), osim.Vec3(0.0, 0.15, 0)
         )
+        if wrapped:
+            cylinder = osim.WrapCylinder()
+            cylinder.setName(f"{muscle_name}_cylinder")
+            cylinder.set_radius(0.015)
+            cylinder.set_length(0.3)
+            cylinder.set_translation(osim.Vec3(0.0, 0.0, 0.0))
+            model.getGround().addWrapObject(cylinder)
+            muscle.updGeometryPath().addPathWrap(cylinder)
         model.addForce(muscle)
     model.addMarker(
         osim.Marker(

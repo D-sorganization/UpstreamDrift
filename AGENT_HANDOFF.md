@@ -1,3 +1,31 @@
+# Native Wrapped-Path Closure Handoff — #12234
+
+`native_wrapped_path.py` carries a source-hash-bound declaration for
+WrapCylinder/WrapEllipsoid/WrapSphere geometry, exact PathWrap targets and
+owners, and ConditionalPathPoint coordinate ranges. The constrained muscle
+path remains default-reject unless the caller supplies the declaration. Native
+reference observation reports the evaluated route without changing it. It
+does not prove global worklessness or guide-work bounds and makes no
+physiological claim. Eleven OpenSim 4.6 wrapped-path fixtures pass; the
+shared Chapter 56 typed findings/request integration is present in the
+current feature history. See provisional Chapter 57 and
+`docs/development/native_wrapped_path_diagnostic.qmd`.
+
+# Native Contact Source Closure Handoff — #12244
+
+Commits `316b011324` and `b48f7b053b` bind the exact-source contact declaration,
+shared sampler, and `opensim_force_torque.py` implementation digest into
+constrained replay identity. OpenSim 4.6 tests cover Smooth and HuntCrossley
+force identities, sphere/half-space geometry closure, source mutation, changed
+provider digest, default rejection, and finite constrained Smooth wrench
+sampling. HuntCrossley constrained replay remains untested because strict
+self-contained XML validation previously rejected its generated fixture;
+the parser fix and new source audit tests now pass. Request/runner serialization,
+preparation closure, export identity, and fresh-replay digest checks are
+integrated. No capture contact, support/grip, or physical qualification is
+claimed. See provisional Chapter 58 and
+`docs/development/feedback_controls/F07_NATIVE_CONTACT_SOURCE_CLOSURE_TURNOVER.md`.
+
 # Active: Fixed Club Cluster in the Static Trial, #12221
 
 - Branch `claude/12221-fixed-triad`. Opt-in `--fix-club-markers` (needs `--static-seeds`) keeps the six `Clubhead` markers at the document's per-club offsets, so a grip rotation can no longer move the capture's own face through the static trial. Default receipts are unchanged.
@@ -356,14 +384,6 @@ model, raw capture, native optimizer or replay was qualified by this slice.
 # Active: Feedback Controls Planning — #11784
 
 Documentation branch `docs/feedback-controls-11784`; commit `SELF`. Read [Design](docs/development/feedback_controls/DESIGN.md), [Issue Dependencies](docs/development/feedback_controls/IMPLEMENTATION_PLAN.md) and [Turnover](docs/development/feedback_controls/TURNOVER.md). Goal: all-model six-engine parity culminating in muscle-driven OpenSim and independent excitation replay. Planning only; no new model/video is qualified. Next: F01 inventory/gate freeze, coordinate MOSAIC #11532 and parity #11605.
-
-# Active: MyoSuite Native Muscle Actuator Classification — #12249
-
-`MyoSuiteMuscleAnalyzer` now compares compiled actuator dynamics to the
-installed MuJoCo `mjDYN_MUSCLE` enum. The actual MuJoCo 3.8.0 mixed-actuator
-fixture runs without Gym/MyoSuite registration. See the F09q turnover and
-canonical chapter 31. Classification does not qualify physiology, capture
-mapping, excitation replay, or cross-engine parity.
 
 # Active: Impact-Phase Bushing Grip, OSV-7 #11739
 

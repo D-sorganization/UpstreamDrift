@@ -441,7 +441,14 @@ def _replay_grid(values: tuple[float, ...], initial_time: float) -> tuple[float,
     return grid
 
 
-def _admission_identity(declaration: DeclaredColdStart, adapter_sha256: str) -> str:
+def _admission_identity(
+    declaration: DeclaredColdStart,
+    adapter_sha256: str,
+    wrapped_path_declaration_sha256: str | None = None,
+    native_mechanics_profile_sha256: str | None = None,
+    contact_declaration_sha256: str | None = None,
+    native_contact_provider_sha256: str | None = None,
+) -> str:
     payload = {
         "source_sha256": declaration.source_sha256,
         "adapter_source_sha256": adapter_sha256,
@@ -456,6 +463,14 @@ def _admission_identity(declaration: DeclaredColdStart, adapter_sha256: str) -> 
         "source_controller_replacement": declaration.source_controller_replacement,
         "source_controller_observation": declaration.allow_source_controllers_for_observation,
     }
+    if wrapped_path_declaration_sha256 is not None:
+        payload["wrapped_path_declaration_sha256"] = wrapped_path_declaration_sha256
+    if native_mechanics_profile_sha256 is not None:
+        payload["native_mechanics_profile_sha256"] = native_mechanics_profile_sha256
+    if contact_declaration_sha256 is not None:
+        payload["contact_declaration_sha256"] = contact_declaration_sha256
+    if native_contact_provider_sha256 is not None:
+        payload["native_contact_provider_sha256"] = native_contact_provider_sha256
     return hashlib.sha256(
         json.dumps(payload, sort_keys=True, allow_nan=False).encode()
     ).hexdigest()
