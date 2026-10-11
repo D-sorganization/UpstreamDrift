@@ -104,12 +104,6 @@
       "expires_on": "2026-12-31"
     },
     {
-      "path": "docs/agents/handoffs/shot-pattern-integration-peer-records.md",
-      "owner": "@maintainers",
-      "reason": "Shot pattern analysis multi-agent peer records and validation evidence.",
-      "expires_on": "2026-10-31"
-    },
-    {
       "path": "docs/research/shot_pattern_analysis/phase2/REPORT.md",
       "owner": "@maintainers",
       "reason": "Comprehensive phase 2 shot pattern analysis research report.",

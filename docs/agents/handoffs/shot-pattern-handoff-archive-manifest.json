@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "snapshots": [
+    {
+      "original_path": "AGENT_HANDOFF.md",
+      "archive_path": "docs/agents/handoffs/archive/shot-pattern-integration-20261011/AGENT_HANDOFF.original.md.archive",
+      "size_bytes": 164066,
+      "sha256": "475e3ab2cb02f0c2c1f94fa6bf541a109f61a036f6966da0fd7c41fb36501430"
+    },
+    {
+      "original_path": "docs/agents/handoffs/shot-pattern-integration-peer-records.md",
+      "archive_path": "docs/agents/handoffs/archive/shot-pattern-integration-20261011/shot-pattern-integration-peer-records.original.md.archive",
+      "size_bytes": 133820,
+      "sha256": "bf292cd335b83d70a52c91ead19ff27781a857fe2d7f2513f8f5bbb5e243b564"
+    }
+  ],
+  "splits": [
+    {
+      "source_archive_path": "docs/agents/handoffs/archive/shot-pattern-integration-20261011/AGENT_HANDOFF.original.md.archive",
+      "source_start_byte": 6679,
+      "source_sha256": "1d7bc7d28ea374704fe3a5f5151dd5d2dbc0535624499f5cadce2b7da010c853",
+      "chunks": [
+        "AGENT_HANDOFF_PEER_RECORDS-01.md",
+        "AGENT_HANDOFF_PEER_RECORDS-02.md",
+        "AGENT_HANDOFF_PEER_RECORDS-03.md",
+        "AGENT_HANDOFF_PEER_RECORDS-04.md"
+      ]
+    },
+    {
+      "source_archive_path": "docs/agents/handoffs/archive/shot-pattern-integration-20261011/shot-pattern-integration-peer-records.original.md.archive",
+      "source_start_byte": 0,
+      "source_sha256": "bf292cd335b83d70a52c91ead19ff27781a857fe2d7f2513f8f5bbb5e243b564",
+      "chunks": [
+        "docs/agents/handoffs/shot-pattern-integration-peer-records-01.md",
+        "docs/agents/handoffs/shot-pattern-integration-peer-records-02.md",
+        "docs/agents/handoffs/shot-pattern-integration-peer-records-03.md"
+      ]
+    }
+  ],
+  "legacy_archives": [
+    {
+      "path": "docs/agents/handoffs/shot-pattern-integration-peer-original.zip",
+      "sha256": "ccdf76e585e6a5c43eba8a714d4d20d075ff0781b45f2f2fba694c0a7da0db54"
+    }
+  ],
+  "navigation_documents": [
+    "docs/agents/handoffs/shot-pattern-integration-peer-records.md",
+    "AGENT_HANDOFF_PEER_RECORDS-01.md",
+    "AGENT_HANDOFF_PEER_RECORDS-02.md",
+    "AGENT_HANDOFF_PEER_RECORDS-03.md",
+    "AGENT_HANDOFF_PEER_RECORDS-04.md",
+    "docs/agents/handoffs/shot-pattern-integration-peer-records-01.md",
+    "docs/agents/handoffs/shot-pattern-integration-peer-records-02.md",
+    "docs/agents/handoffs/shot-pattern-integration-peer-records-03.md"
+  ],
+  "root_index_prefix_bytes": 6679,
+  "root_index_prefix_sha256": "effdd42242ce99570aea66835235a5ea6428fa25bd94342d5ef5fd0fda09d36a"
+}
