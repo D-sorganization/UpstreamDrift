@@ -1,0 +1,194 @@
+"""Pure contract tests for the prepared one-call Drake dynamics observer."""
+
+from __future__ import annotations
+
+from typing import Any
+
+import numpy as np
+import pytest
+
+from drake_v1_candidate_lift_zero_effort_20261012 import (
+    artifacts_unchanged,
+    observe_one_zero_effort_acceleration,
+    snapshot_artifacts,
+    validate_geometry_preconditions,
+    validate_zero_effort_input,
+    verify_api_module_origin,
+)
+
+
+ORDER = tuple(f"coordinate_{index}" for index in range(41))
+
+
+def _geometry(rank: int = 6) -> tuple[dict[str, Any], dict[str, Any]]:
+    weld = {
+        "pose_residual_translation_then_rotation_vector_frame_a": [0.0] * 6,
+        "rate_residual_linear_then_angular_frame_a": [0.0] * 6,
+        "native_spatial_jacobian_svd": {"shape": [6, 41], "rank": rank},
+    }
+    contacts = {
+        "sphere_count": 4,
+        "spheres": {
+            f"sphere_{index}": {
+                "contact_point_world_m": [0.0, 0.0, 0.0],
+                "normal_force_n": [0.0, 0.0, 0.0],
+                "friction_force_n": [0.0, 0.0, 0.0],
+                "penetration_m": 0.0,
+                "penetration_rate_m_s": 0.0,
+            }
+            for index in range(4)
+        },
+    }
+    return weld, contacts
+
+
+class FakeOwner:
+    coordinate_order = ORDER
+    mass_kg = 80.0
+
+    def __init__(self, qdd: np.ndarray | None = None) -> None:
+        self.qdd = np.zeros(41) if qdd is None else qdd
+        self.calls: list[tuple[dict[str, float], dict[str, float], dict[str, float]]] = []
+
+    def accelerations(self, coordinates, rates, efforts):
+        self.calls.append((dict(coordinates), dict(rates), dict(efforts)))
+        return dict(zip(ORDER, self.qdd, strict=True))
+
+
+def _state():
+    q = {name: float(index) / 10.0 for index, name in enumerate(ORDER)}
+    v = dict.fromkeys(ORDER, 0.0)
+    tau = dict.fromkeys(ORDER, 0.0)
+    return q, v, tau
+
+
+def test_valid_contract_calls_native_acceleration_once_after_rank_six_gate() -> None:
+    owner = FakeOwner(np.arange(41, dtype=np.float64))
+    q, v, tau = _state()
+    weld, contacts = _geometry()
+    report = observe_one_zero_effort_acceleration(owner, ORDER, q, v, tau, weld, contacts)
+    assert len(owner.calls) == 1
+    assert owner.calls[0] == (q, v, tau)
+    assert report["call_count"] == 1
+    assert report["qdd_source_order"] == list(np.arange(41, dtype=np.float64))
+    assert report["adapter_total_mass_kg"] == 80.0
+    assert report["weld_multiplier_or_kkt_residual_exposed_by_adapter"] is False
+
+
+def test_rank_deficient_geometry_blocks_before_dynamics_call() -> None:
+    owner = FakeOwner()
+    q, v, tau = _state()
+    weld, contacts = _geometry(rank=5)
+    with pytest.raises(ValueError, match="rank six"):
+        observe_one_zero_effort_acceleration(owner, ORDER, q, v, tau, weld, contacts)
+    assert owner.calls == []
+
+
+@pytest.mark.parametrize("field", ["rate", "effort"])
+def test_nonzero_rate_or_effort_blocks_before_dynamics(field: str) -> None:
+    owner = FakeOwner()
+    q, v, tau = _state()
+    if field == "rate":
+        v[ORDER[0]] = 1e-12
+    else:
+        tau[ORDER[0]] = 1e-12
+    weld, contacts = _geometry()
+    with pytest.raises(ValueError, match="exact zero"):
+        observe_one_zero_effort_acceleration(owner, ORDER, q, v, tau, weld, contacts)
+    assert owner.calls == []
+
+
+def test_incomplete_or_nonfinite_state_blocks_before_dynamics() -> None:
+    owner = FakeOwner()
+    q, v, tau = _state()
+    del q[ORDER[-1]]
+    weld, contacts = _geometry()
+    with pytest.raises(ValueError, match="keys differ"):
+        observe_one_zero_effort_acceleration(owner, ORDER, q, v, tau, weld, contacts)
+    assert owner.calls == []
+
+    q, v, tau = _state()
+    q[ORDER[0]] = np.nan
+    with pytest.raises(ValueError, match="finite"):
+        validate_zero_effort_input(ORDER, q, v, tau)
+
+
+def test_malformed_contacts_block_before_dynamics_call() -> None:
+    owner = FakeOwner()
+    q, v, tau = _state()
+    weld, contacts = _geometry()
+    contacts["sphere_count"] = 3
+    with pytest.raises(ValueError, match="exactly four"):
+        observe_one_zero_effort_acceleration(owner, ORDER, q, v, tau, weld, contacts)
+    assert owner.calls == []
+
+
+def test_nonfinite_acceleration_is_failure_after_exactly_one_call() -> None:
+    values = np.zeros(41)
+    values[17] = np.inf
+    owner = FakeOwner(values)
+    q, v, tau = _state()
+    weld, contacts = _geometry()
+    with pytest.raises(FloatingPointError, match="finite and 41-dimensional"):
+        observe_one_zero_effort_acceleration(owner, ORDER, q, v, tau, weld, contacts)
+    assert len(owner.calls) == 1
+
+
+def test_source_order_mismatch_blocks_before_dynamics_call() -> None:
+    owner = FakeOwner()
+    q, v, tau = _state()
+    weld, contacts = _geometry()
+    reversed_order = tuple(reversed(ORDER))
+    with pytest.raises(ValueError, match="source order"):
+        validate_zero_effort_input(reversed_order, q, v, tau)
+    owner.coordinate_order = reversed_order
+    with pytest.raises(ValueError, match="coordinate order"):
+        observe_one_zero_effort_acceleration(owner, ORDER, q, v, tau, weld, contacts)
+    assert owner.calls == []
+
+
+def test_kinematic_precondition_rejects_nonfinite_closure_before_dynamics() -> None:
+    owner = FakeOwner()
+    q, v, tau = _state()
+    weld, contacts = _geometry()
+    weld["pose_residual_translation_then_rotation_vector_frame_a"][0] = np.nan
+    with pytest.raises(ValueError, match="finite six-vectors"):
+        validate_geometry_preconditions(weld, contacts)
+    assert owner.calls == []
+
+
+def test_helper_mutation_during_mocked_native_call_is_detected(tmp_path) -> None:
+    helper = tmp_path / "helper.py"
+    observer = tmp_path / "observer.py"
+    helper.write_text("before helper", encoding="utf-8")
+    observer.write_text("before observer", encoding="utf-8")
+    paths = {"helper": helper, "observer": observer}
+    before = snapshot_artifacts(paths)
+
+    class MutatingOwner(FakeOwner):
+        def accelerations(self, coordinates, rates, efforts):
+            result = super().accelerations(coordinates, rates, efforts)
+            helper.write_text("mutated during call", encoding="utf-8")
+            return result
+
+    q, v, tau = _state()
+    weld, contacts = _geometry()
+    owner = MutatingOwner()
+    observe_one_zero_effort_acceleration(owner, ORDER, q, v, tau, weld, contacts)
+    after = snapshot_artifacts(paths)
+    assert not artifacts_unchanged(before, after)
+
+
+def test_pydrake_api_module_must_resolve_inside_its_installed_package(tmp_path) -> None:
+    package = tmp_path / "site-packages/pydrake/__init__.py"
+    api = tmp_path / "site-packages/pydrake/all.py"
+    package.parent.mkdir(parents=True)
+    package.write_text("", encoding="utf-8")
+    api.write_text("", encoding="utf-8")
+    assert verify_api_module_origin(package, api) == api.resolve()
+
+    foreign = tmp_path / "src/pydrake/all.py"
+    foreign.parent.mkdir(parents=True)
+    foreign.write_text("", encoding="utf-8")
+    with pytest.raises(ImportError, match="outside the installed"):
+        verify_api_module_origin(package, foreign)

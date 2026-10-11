@@ -668,7 +668,7 @@
       "tiles": [
         "character_builder"
       ],
-      "notes": "Desktop and API share humanoid_character_builder.spec_export (build, preview, export spec/URDF/MJCF/OSIM/glTF, presets). The web page now drives presets, preview/build and spec/URDF/MJCF/OSIM/glTF export through the spec API (CMB-7a, #11658), and picks skin tone, clothing, club finish, headwear and ground from the model_appearance library with a recoloured preview and an appearance-v1 sidecar export (CMB-7b/7c, #11658; the desktop tool has no appearance editor yet, engines read the same sidecar). A rigidly skinned glTF export of the spec skeleton landed under CMB-6 (#11657). The web page can preview that glTF body live, refetched (debounced) as the spec sliders move and tinted with the appearance trunk colour (CMB-7f, #11658); the desktop tool keeps its primitive preview.",
+      "notes": "Desktop and API share humanoid_character_builder.spec_export (build, preview, export spec/URDF/MJCF/OSIM/glTF, presets). The web page now drives presets, preview/build and spec/URDF/MJCF/OSIM/glTF export through the spec API (CMB-7a, #11658), and picks skin tone, clothing, club finish, headwear and ground from the model_appearance library with a recoloured preview and an appearance-v1 sidecar export (CMB-7b/7c, #11658); the desktop tool now also picks the same appearance choices and exports the same appearance-v1 sidecar through the shared character_appearance_service (CMB-7e, #11658). A rigidly skinned glTF export of the spec skeleton landed under CMB-6 (#11657). The web page can preview that glTF body live, refetched (debounced) as the spec sliders move and tinted with the appearance trunk colour (CMB-7f, #11658); the desktop tool keeps its primitive preview.",
       "id": "tools.character_builder"
     },
     {
@@ -3146,7 +3146,7 @@
   "inputs": {
     "src/config/models.yaml": "e11682df79d7467f1eba9579d835f5d7019bfd7eb09cf81c14e22bd08d0bf844",
     "src/config/launcher_manifest.json": "1ae28f872b54c237440fcaacec40b735b93a7b80d710adc9228ef671b7831032",
-    "src/config/feature_parity.json": "0476b0d7bf53874d89f0ca9ea81c4b88460e4686785410b24978a2b4c3079a4d",
+    "src/config/feature_parity.json": "c5946c444f776909c9fa520137fd69bc27339c69ddbe5f0d3a8deda62d0f2530",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }

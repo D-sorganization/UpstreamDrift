@@ -1,0 +1,93 @@
+{
+  "optimizer_invoked": false,
+  "provenance": {
+    "code_sha256": {
+      "tests\\opensim\\native_moco_ladder_harness.py": "9c45546b7788b08656198bdff7c4589f707485d4d14e404fb3402527d5bfa4cf",
+      "tests\\opensim\\native_moco_ladder_worker.py": "3a7f87e691db50531d12bd1228c6a9d402e5ecf198148d6ea89b6e66da5b9381",
+      "tests\\opensim\\native_moco_refinement.py": "3e22f17dcaac36e4ff17378c185080953c4f964988a1f0da0d58d01774a2e790"
+    },
+    "failed_run_sha256": {
+      "mesh_grid_audit.json": "93403801b94986fd51fe1136d3c21cb1a3e1595f90ad6787c2694a4aec8a15b5",
+      "request.json": "ba01112a4ea142d1b93e89a27b5f381829889fd3799aa613eb8e2efdd737174c",
+      "solution.sto": "0ba31fd0f6e6859ab4e8b20ed82cb7d9f9eb1092b8e279b0e3954990440b8996",
+      "solution_serialization_audit.json": "da7a3b732714a3b5bf219f9ab73168325cf7d0882f45fac911d735f81b940886",
+      "source.osim": "6a098517bdba09b19b3eb99e4da7e795f27d10be8f42c0fca04fee20ce67e143"
+    },
+    "head": "3bc787e36d2002776198e70506ab74d86c28da6d",
+    "runtime_coverage": "bounded Python extensions and Moco DLL; not a closed dependency identity",
+    "runtime_sha256": {
+      "_common.pyd": "9955fe0ad26079a9123a17af32bbd75761fa4388f2bb4cb72d2a56471d7a69c1",
+      "_moco.pyd": "8309ab612033c5f68056b32384d154d026eb201e5c910e8ae68f7cf66b463664",
+      "_simulation.pyd": "950241f649dab8a113c4bb754a080d16db4a3f5f0aa1710ed2e53d03206eb09e",
+      "osimMoco.dll": "c8553d8ee1c71ff3df9c4e3485e3dd2916ade712b2c28c28be6bf45f2b2a60ca"
+    },
+    "snapshot_sha256": {
+      "replay_input_manifest.json": "e9100b2682fec486d83abcbc8bf514d5ba8850a1afcfab93a2f8c7744308c7a5",
+      "request.json": "ba01112a4ea142d1b93e89a27b5f381829889fd3799aa613eb8e2efdd737174c",
+      "solution.sto": "0ba31fd0f6e6859ab4e8b20ed82cb7d9f9eb1092b8e279b0e3954990440b8996",
+      "source.osim": "6a098517bdba09b19b3eb99e4da7e795f27d10be8f42c0fca04fee20ce67e143",
+      "time_only_controls.sto": "0975347efabf63f2344348ab1e77e67375e725c8bf010a28c0abdc660fbaf50b"
+    },
+    "worker_interpreter": {
+      "path": "C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Scripts\\python.exe",
+      "sha256": "0b471133e110cfb53a061cad528ce8e517d7b9ac41a0a396c39ad795a487fc14"
+    }
+  },
+  "sampled_rss_soft_threshold_bytes": 1073741824,
+  "schema": "source-bound-retained-solution-replay-invocation-v1",
+  "wall_timeout_seconds": 30,
+  "worker_command": [
+    "C:/Users/diete/Repositories/.venv-feedback-opensim/Scripts/python.exe",
+    "-m",
+    "tests.opensim.native_moco_ladder_worker",
+    "--replay-existing",
+    "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-marker-calibration-12164\\docs\\development\\feedback_controls\\experiments\\native_moco_refinement_solve_cecfcd98_root_20261011T080500Z\\solution_control_replay_inputs_final",
+    "--output",
+    "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-marker-calibration-12164\\docs\\development\\feedback_controls\\experiments\\native_moco_refinement_solve_cecfcd98_root_20261011T080500Z\\solution_control_replay_diagnostic_3bc787e36d_root\\retained_replay\\native_audit"
+  ],
+  "worker_environment": {
+    "BLIS_NUM_THREADS": "1",
+    "CASADIPATH": "C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\opensim",
+    "MKL_NUM_THREADS": "1",
+    "NUMEXPR_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PYTHONPATH": "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-marker-calibration-12164",
+    "VECLIB_MAXIMUM_THREADS": "1"
+  },
+  "worker_invocation": {
+    "harness_sha256": "9c45546b7788b08656198bdff7c4589f707485d4d14e404fb3402527d5bfa4cf",
+    "input_sha256": {
+      "request.json": "ba01112a4ea142d1b93e89a27b5f381829889fd3799aa613eb8e2efdd737174c",
+      "solution.sto": "0ba31fd0f6e6859ab4e8b20ed82cb7d9f9eb1092b8e279b0e3954990440b8996",
+      "source.osim": "6a098517bdba09b19b3eb99e4da7e795f27d10be8f42c0fca04fee20ce67e143",
+      "time_only_controls.sto": "0975347efabf63f2344348ab1e77e67375e725c8bf010a28c0abdc660fbaf50b"
+    },
+    "nonsecret_environment": {
+      "BLIS_NUM_THREADS": "1",
+      "CASADIPATH": "C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\opensim",
+      "MKL_NUM_THREADS": "1",
+      "NUMEXPR_NUM_THREADS": "1",
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1",
+      "PYTHONPATH": "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-marker-calibration-12164",
+      "VECLIB_MAXIMUM_THREADS": "1"
+    },
+    "optimizer_invoked": false,
+    "sampled_rss_soft_threshold_bytes": 1073741824,
+    "schema": "native-retained-replay-invocation-v1",
+    "source_run": "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-marker-calibration-12164\\docs\\development\\feedback_controls\\experiments\\native_moco_refinement_solve_cecfcd98_root_20261011T080500Z\\solution_control_replay_inputs_final",
+    "timeout_seconds": 30.0,
+    "worker_command": [
+      "C:/Users/diete/Repositories/.venv-feedback-opensim/Scripts/python.exe",
+      "-m",
+      "tests.opensim.native_moco_ladder_worker",
+      "--replay-existing",
+      "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-marker-calibration-12164\\docs\\development\\feedback_controls\\experiments\\native_moco_refinement_solve_cecfcd98_root_20261011T080500Z\\solution_control_replay_inputs_final",
+      "--output",
+      "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-marker-calibration-12164\\docs\\development\\feedback_controls\\experiments\\native_moco_refinement_solve_cecfcd98_root_20261011T080500Z\\solution_control_replay_diagnostic_3bc787e36d_root\\retained_replay\\native_audit"
+    ],
+    "worker_sha256": "3a7f87e691db50531d12bd1228c6a9d402e5ecf198148d6ea89b6e66da5b9381",
+    "working_directory": "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-marker-calibration-12164"
+  }
+}

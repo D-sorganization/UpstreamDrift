@@ -1,0 +1,292 @@
+{
+  "actual_solver_settings": {
+    "interpolate_control_mesh_interior_points": true,
+    "parallel": 0,
+    "set_mesh_requested_interval_count": 21,
+    "set_mesh_requested_normalized_points": [
+      0.0,
+      0.025,
+      0.05,
+      0.1,
+      0.15,
+      0.2,
+      0.25,
+      0.3,
+      0.35,
+      0.4,
+      0.45,
+      0.5,
+      0.55,
+      0.6,
+      0.65,
+      0.7,
+      0.75,
+      0.8,
+      0.85,
+      0.9,
+      0.95,
+      1.0
+    ],
+    "transcription_scheme": "hermite-simpson",
+    "uniform_mesh_interval_getter_ignored": 100
+  },
+  "cold_start_chart_bounds": {
+    "/jointset/base/q": [
+      0.2,
+      0.4
+    ]
+  },
+  "cold_start_constraint_enforcement": {},
+  "cold_start_lock_targets": {},
+  "cold_start_named_state": {
+    "/forceset/extensor/activation": 0.05,
+    "/forceset/extensor/fiber_length": 0.08545580283920036,
+    "/forceset/flexor/activation": 0.05,
+    "/forceset/flexor/fiber_length": 0.09541832200700395,
+    "/jointset/anchor/fixed/speed": 0.0,
+    "/jointset/anchor/fixed/value": 0.2,
+    "/jointset/base/q/speed": 0.0,
+    "/jointset/base/q/value": 0.3,
+    "/jointset/follower/dependent/speed": 0.0,
+    "/jointset/follower/dependent/value": 0.6
+  },
+  "cold_start_residual_tolerance": 1e-09,
+  "cold_start_state_units": {
+    "/forceset/extensor/activation": "1",
+    "/forceset/extensor/fiber_length": "m",
+    "/forceset/flexor/activation": "1",
+    "/forceset/flexor/fiber_length": "m",
+    "/jointset/anchor/fixed/speed": "rad/s",
+    "/jointset/anchor/fixed/value": "rad",
+    "/jointset/base/q/speed": "rad/s",
+    "/jointset/base/q/value": "rad",
+    "/jointset/follower/dependent/speed": "rad/s",
+    "/jointset/follower/dependent/value": "rad"
+  },
+  "cold_start_time_seconds": 0.0,
+  "conditional_point_active_range": [],
+  "constraint_tolerance": 1e-07,
+  "convergence_tolerance": 1e-06,
+  "coupler_function": null,
+  "custom_joint_simm_spline_knots": [],
+  "custom_joint_simm_spline_values": [],
+  "features": [],
+  "horizon_seconds": 0.01,
+  "initial_q": 0.3,
+  "interpolate_control_mesh_interior_points": true,
+  "maximum_iterations": 300,
+  "mesh_intervals": 21,
+  "mesh_refinement": {
+    "analysis_sha256": "1195cdf39855accfd761e41410d8b23121cafbb28f0407d69e3a479d1e136116",
+    "attempt_id": "848866a47d1dcb315605dfce0ba9dab29bac209f898e60ea042096a8a34ddd16",
+    "control_seed": {
+      "forbidden_operations": [
+        "resampleControlsTrajectory",
+        "resampleWith"
+      ],
+      "interpolation": "piecewise_linear",
+      "sample_at": "every child Hermite-Simpson endpoint and midpoint",
+      "source": "retained_time_only_controls.sto"
+    },
+    "flagged_parent_cells": [
+      0
+    ],
+    "native_guess_time_grid_seconds": [
+      0.0,
+      0.000125,
+      0.00025,
+      0.00037500000000000006,
+      0.0005,
+      0.0007500000000000001,
+      0.001,
+      0.00125,
+      0.0015,
+      0.0017499999999999998,
+      0.002,
+      0.0022500000000000003,
+      0.0025,
+      0.0027500000000000003,
+      0.003,
+      0.0032499999999999994,
+      0.0034999999999999996,
+      0.00375,
+      0.004,
+      0.00425,
+      0.0045000000000000005,
+      0.00475,
+      0.005,
+      0.00525,
+      0.0055000000000000005,
+      0.00575,
+      0.006,
+      0.00625,
+      0.006500000000000001,
+      0.006750000000000001,
+      0.006999999999999999,
+      0.0072499999999999995,
+      0.0075,
+      0.007750000000000001,
+      0.008,
+      0.00825,
+      0.0085,
+      0.00875,
+      0.009000000000000001,
+      0.009250000000000001,
+      0.0095,
+      0.00975,
+      0.01
+    ],
+    "normalized_mesh_points": [
+      0.0,
+      0.025,
+      0.05,
+      0.1,
+      0.15,
+      0.2,
+      0.25,
+      0.3,
+      0.35,
+      0.4,
+      0.45,
+      0.5,
+      0.55,
+      0.6,
+      0.65,
+      0.7,
+      0.75,
+      0.8,
+      0.85,
+      0.9,
+      0.95,
+      1.0
+    ],
+    "parent_hashes": {
+      "replay_audit": "ad6f872d5f385f67a8ff60e014cd9d330f7311f4b2b4f49c7407e9bf5653f1db",
+      "request": "86570790ab4fce02df7b8a1c899b0755a7518c36c541fa366a2dd467a6a8f1a9",
+      "solution_sto": "a13dfe3a7e793efff177a1c2cb64dbb055cd57e1704498a99e9fa3e80340578f",
+      "source_osim": "6a098517bdba09b19b3eb99e4da7e795f27d10be8f42c0fca04fee20ce67e143",
+      "time_only_controls_sto": "dced78b02cea4d36af31d6f08b881d9feaa87cff1ac5a87d2bebfa5d592a1796"
+    },
+    "preserved_contract": {
+      "cold_start_chart_bounds": {
+        "/jointset/base/q": [
+          0.2,
+          0.4
+        ]
+      },
+      "cold_start_constraint_enforcement": {},
+      "cold_start_lock_targets": {},
+      "cold_start_named_state": {
+        "/forceset/extensor/activation": 0.05,
+        "/forceset/extensor/fiber_length": 0.08545580283920036,
+        "/forceset/flexor/activation": 0.05,
+        "/forceset/flexor/fiber_length": 0.09541832200700395,
+        "/jointset/anchor/fixed/speed": 0.0,
+        "/jointset/anchor/fixed/value": 0.2,
+        "/jointset/base/q/speed": 0.0,
+        "/jointset/base/q/value": 0.3,
+        "/jointset/follower/dependent/speed": 0.0,
+        "/jointset/follower/dependent/value": 0.6
+      },
+      "cold_start_state_units": {
+        "/forceset/extensor/activation": "1",
+        "/forceset/extensor/fiber_length": "m",
+        "/forceset/flexor/activation": "1",
+        "/forceset/flexor/fiber_length": "m",
+        "/jointset/anchor/fixed/speed": "rad/s",
+        "/jointset/anchor/fixed/value": "rad",
+        "/jointset/base/q/speed": "rad/s",
+        "/jointset/base/q/value": "rad",
+        "/jointset/follower/dependent/speed": "rad/s",
+        "/jointset/follower/dependent/value": "rad"
+      },
+      "constraint_tolerance": 1e-07,
+      "convergence_tolerance": 1e-06,
+      "horizon_seconds": 0.01,
+      "initial_q": 0.3,
+      "interpolate_control_mesh_interior_points": true,
+      "maximum_iterations": 300,
+      "native_control_bounds": {
+        "/forceset/extensor": [
+          0.01,
+          1.0
+        ],
+        "/forceset/flexor": [
+          0.01,
+          1.0
+        ]
+      },
+      "native_control_bounds_source": {
+        "model_path": "source.osim",
+        "property": "Muscle.min_control/max_control",
+        "source_sha256": "6a098517bdba09b19b3eb99e4da7e795f27d10be8f42c0fca04fee20ce67e143"
+      },
+      "objective": "MocoControlGoal(effort)",
+      "parallel": 0,
+      "physical_qualification": "unqualified",
+      "replay_control_interpolation": "piecewise_linear",
+      "solution_serialization_max_ulps": 8,
+      "target_coordinate": "/jointset/base/q/value",
+      "target_q": 0.30000558574001657,
+      "transcription_scheme": "hermite-simpson"
+    },
+    "status": "attempted_unqualified_until_fresh_replay_passes"
+  },
+  "moving_path_simm_spline_knots": [],
+  "moving_path_simm_spline_values": [],
+  "native_control_bounds": {
+    "/forceset/extensor": [
+      0.01,
+      1.0
+    ],
+    "/forceset/flexor": [
+      0.01,
+      1.0
+    ]
+  },
+  "native_control_bounds_source": {
+    "model_path": "source.osim",
+    "property": "Muscle.min_control/max_control",
+    "source_sha256": "6a098517bdba09b19b3eb99e4da7e795f27d10be8f42c0fca04fee20ce67e143"
+  },
+  "native_mechanics_profile": {
+    "components": [],
+    "schema_version": "native-sdk-mechanics-v1",
+    "source_sha256": "6a098517bdba09b19b3eb99e4da7e795f27d10be8f42c0fca04fee20ce67e143"
+  },
+  "native_mechanics_profile_sha256": "189c5d07c24b6b8c993aedba8cb794dbe82925bb6b368fef98be1327c2057fbf",
+  "parallel": 0,
+  "physical_qualification": "unqualified",
+  "replay_control_interpolation": "piecewise_linear",
+  "rung": "plain",
+  "solution_serialization_max_ulps": 8,
+  "solver_settings_validation_status": "passed",
+  "source_sha256": "6a098517bdba09b19b3eb99e4da7e795f27d10be8f42c0fca04fee20ce67e143",
+  "target_coordinate": "/jointset/base/q/value",
+  "target_q": 0.30000558574001657,
+  "transcription_scheme": "hermite-simpson",
+  "witness_builder_sha256": "b920934103eb7a7e3de983dc2906cacb24ebd17533731a1c62a1abd186105987",
+  "witness_controls_sha256": "db0c14e4fbfb1fe9678fcb5df75b6e027ee1462922ff6dff0134dd6fde6f3e72",
+  "witness_excitation_by_channel": {
+    "extensor": 0.05,
+    "flexor": 0.05
+  },
+  "witness_profile": "constant-0.05-forward-integrated-v1",
+  "witness_provider_sha256": "fc1bedfee03c7d330a47e13988d432042790ab538d69a8d53e105cfd82a26966",
+  "witness_source_sha256": "6a098517bdba09b19b3eb99e4da7e795f27d10be8f42c0fca04fee20ce67e143",
+  "witness_states_sha256": "8524ace75d72795445b7a8bb7095cf63f41af9709452afee5285398c779f5f10",
+  "witness_time_knots": [
+    0.0,
+    0.001,
+    0.002,
+    0.003,
+    0.004,
+    0.005,
+    0.006,
+    0.007,
+    0.008,
+    0.009000000000000001,
+    0.01
+  ],
+  "witness_worker_sha256": "3a7f87e691db50531d12bd1228c6a9d402e5ecf198148d6ea89b6e66da5b9381"
+}

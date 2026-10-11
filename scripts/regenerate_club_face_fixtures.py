@@ -12,10 +12,11 @@ For each capture this script
    (``scripts.same_input_bundle export``);
 3. writes ``tests/fixtures/club_face/swing_q_<club>.npz`` (every second
    1 kHz reference sample, float32), the address pose in
-   ``address_poses.json`` and a per-club provenance record in
-   ``provenance.json``: commands, input and output hashes, marker RMS, the
-   model-versus-capture face fit, the impact and peak-speed frames and the
-   clubhead speed timing (GCV-20).
+   ``address_poses.json``, the run's scaled document in ``spec_<club>.json``
+   and a per-club provenance record in ``provenance.json``: commands, input
+   and output hashes, marker RMS, the model-versus-capture face fit, the
+   impact and peak-speed frames, the clubhead speed timing (GCV-20) and the
+   address toe-out against the capture (#12222).
 
 Before overwriting, the previous fixture is measured the same way so the
 provenance keeps the before/after face angles. Nothing here is hand edited.
@@ -38,16 +39,31 @@ FIXTURES = ROOT / "tests" / "fixtures" / "club_face"
 DOCS = ROOT / "docs" / "development" / "full_body_models"
 FIXTURE_STRIDE = 2  # the 1 kHz reference, every second sample (2 ms)
 FIXTURE_DT_S = 0.002
+#: The run's hip-calibrated, segment-scaled document: the fixture's model. It
+#: is committed beside the fixture as ``spec_<club>.json`` because the hip
+#: frames set the foot yaw: the raw document turns the lead foot 29-30 deg (#12222).
+SCALED_SPEC = "full_body_spec_hipcal_scaled.json"
 #: capture -> (fixture club alias, document, extra pipeline flags of the
-#: original fixture runs, read back from their receipts).
+#: original fixture runs, read back from their receipts). The driver's static
+#: trial holds the measured club cluster fixed: its per-capture grip rotation
+#: is fitted on it, and a free cluster moves the capture's own face (#12221).
+#: The 7-iron keeps its grip until its same-input export stops degrading the
+#: tracked swing (impact face 2.6 -> 8.7 deg on the refit).
 CAPTURE_RUNS: dict[str, tuple[str, str, tuple[str, ...]]] = {
-    "driver": ("driver", "full_body_spec_anthro_driver.json", ("--static-seeds",)),
+    "driver": (
+        "driver",
+        "full_body_spec_anthro_driver.json",
+        ("--static-seeds", "--fix-club-markers"),
+    ),
     "iron": (
         "iron7",
         "full_body_spec_anthro_iron7.json",
         ("--static-seeds", "--zmp-filter"),
     ),
 }
+#: Address foot progression of every fixture run: the OSV-4 capture toe-out
+#: calibration (#11730), held through the swing by the planted stance (#12222).
+FOOT_PROGRESSION = "capture"
 LOG = logging.getLogger("club_face_fixtures")
 
 
@@ -66,6 +82,8 @@ def pipeline_argv(capture: str, run_dir: Path, face_weight: float) -> list[str]:
         "--capture",
         capture,
         *flags,
+        "--foot-progression",
+        FOOT_PROGRESSION,
         "--face-weight",
         repr(float(face_weight)),
         "--out",
@@ -105,21 +123,24 @@ def _git_head() -> str:
     return out.stdout.strip()
 
 
-def measure_swing(run_dir: Path, q: np.ndarray, dt_s: float) -> dict[str, Any]:
+def measure_swing(
+    run_dir: Path, q: np.ndarray, dt_s: float, model_spec: Path | None = None
+) -> dict[str, Any]:
     """Face events and clubhead speed timing of ``q`` and of the capture triad.
 
-    The model uses MuJoCo FK of the run's scaled document; the capture face
-    comes from the run's calibrated head triad. Impact is the sub-sample
-    passage of the face centre through the ball, each swing on its own clock.
-    Returns ``{"faces": {...}, "speed_timing": {...}}``, each keyed by
-    ``model`` and ``capture`` (speed timing: GCV-20, #11767).
+    The model uses MuJoCo FK of the run's scaled document, or of
+    ``model_spec`` when given (a previous fixture's own document); the
+    capture face comes from the run's calibrated head triad. Impact is the
+    sub-sample passage of the face centre through the ball, each swing on its
+    own clock. Returns ``{"faces": {...}, "speed_timing": {...}}``, each keyed
+    by ``model`` and ``capture`` (speed timing: GCV-20, #11767).
     """
     from dataclasses import asdict
 
     from src.shared.python.model_appearance import club_face as cf
     from src.shared.python.motion_matching import club_face_target as cft
 
-    kin, lane, spec, attachments = _run_kinematics(run_dir)
+    kin, lane, spec, attachments = _run_kinematics(run_dir, model_spec)
     cap_n, cap_c = cft.observe_capture_face(
         lane.points, lane.valid, lane.labels, attachments, spec
     )
@@ -138,13 +159,15 @@ def measure_swing(run_dir: Path, q: np.ndarray, dt_s: float) -> dict[str, Any]:
     }
 
 
-def _run_kinematics(run_dir: Path) -> tuple[Any, Any, dict[str, Any], dict]:
+def _run_kinematics(
+    run_dir: Path, spec_path: Path | None = None
+) -> tuple[Any, Any, dict[str, Any], dict]:
     from src.shared.python.motion_matching.pipeline.constants import capture_path
     from src.shared.python.motion_matching.pipeline.lane import Lane
     from src.shared.python.motion_matching.pipeline.plant import get_plant
 
     receipt = json.loads((run_dir / "receipt.json").read_text(encoding="utf-8"))
-    spec_path = run_dir / "full_body_spec_hipcal_scaled.json"
+    spec_path = spec_path or run_dir / SCALED_SPEC
     spec = json.loads(spec_path.read_text(encoding="utf-8"))
     attachments = {
         label: (a["body"], tuple(a["offset_m"]))
@@ -173,24 +196,39 @@ def _model_face(
     return np.array(normals), np.array(centres)
 
 
+def _previous_fixture_record(
+    npz_path: Path, spec_path: Path, run_dir: Path
+) -> dict[str, Any] | None:
+    """Measure the fixture being replaced on its own committed document.
+
+    Its joint angles describe the old swing only on the old scaled document
+    (``spec_<club>.json``); on a changed document they can miss the ball.
+    Returns ``None`` when there is no previous fixture.
+    """
+    if not npz_path.is_file():
+        return None
+    old_q = np.load(npz_path)["q"].astype(float)
+    return {
+        "fixture_sha256": _sha256(npz_path),
+        "model_spec_sha256": _sha256(spec_path),
+        **measure_swing(run_dir, old_q, FIXTURE_DT_S, model_spec=spec_path),
+    }
+
+
 def write_fixtures(
     capture: str, run_dir: Path, bundle_path: Path, argv: list[str]
 ) -> dict[str, Any]:
     """Overwrite the club's fixtures and return its provenance record."""
     club = CAPTURE_RUNS[capture][0]
     npz_path = FIXTURES / f"swing_q_{club}.npz"
-    before = None
-    if npz_path.is_file():
-        old_q = np.load(npz_path)["q"].astype(float)
-        before = {
-            "fixture_sha256": _sha256(npz_path),
-            **measure_swing(run_dir, old_q, FIXTURE_DT_S),
-        }
+    before = _previous_fixture_record(npz_path, FIXTURES / f"spec_{club}.json", run_dir)
     with np.load(bundle_path, allow_pickle=False) as bundle:
         reference = np.asarray(bundle["reference_q"], dtype=float)
         manifest = json.loads(str(bundle["manifest"]))
     np.savez_compressed(npz_path, q=reference[::FIXTURE_STRIDE].astype(np.float32))
     _write_address_pose(club, manifest, reference[0])
+    spec_path = FIXTURES / f"spec_{club}.json"
+    spec_path.write_bytes((run_dir / SCALED_SPEC).read_bytes())
     receipt = json.loads((run_dir / "receipt.json").read_text(encoding="utf-8"))
     q_fixture = np.load(npz_path)["q"].astype(float)
     return {
@@ -200,6 +238,8 @@ def write_fixtures(
         "bundle_sha256": _sha256(bundle_path),
         "run_receipt_sha256": _sha256(run_dir / "receipt.json"),
         "fixture_sha256": _sha256(npz_path),
+        "spec_sha256": _sha256(spec_path),
+        "foot_progression": _foot_record(run_dir, receipt, q_fixture[0]),
         "marker_rms_m": {
             "ik": receipt["ik"]["marker_rms_m"],
             "reference": receipt["ik"]["reference"]["marker_rms_m"],
@@ -210,6 +250,38 @@ def write_fixtures(
         "before": before,
         "after": measure_swing(run_dir, q_fixture, FIXTURE_DT_S),
         "impact_split": receipt["ik"].get("impact_split"),
+    }
+
+
+def _foot_record(
+    run_dir: Path, receipt: dict[str, Any], q0: np.ndarray
+) -> dict[str, Any]:
+    """Capture toe-out targets, the calibrated address and fixture frame 0.
+
+    The targets are the capture's address measurement from the run receipt
+    (OSV-4, #11730); the model toe-out is MuJoCo FK of the run's scaled
+    document. Raises ``ValueError`` when the run had foot progression off.
+    """
+    from src.shared.python.motion_matching.pipeline.address_feet import (
+        FootTargets,
+        model_feet_deg,
+    )
+
+    block = receipt["address"].get("foot_progression") or {}
+    if not block.get("enabled"):
+        raise ValueError("the fixture run has no foot-progression targets")
+    feet = block["feet"]
+    targets = FootTargets(
+        {s: float(e["target_deg"]) for s, e in feet.items()},
+        {s: bool(e["target_is_default"]) for s, e in feet.items()},
+        block["source"],
+    )
+    kin, _, _, _ = _run_kinematics(run_dir)
+    return {
+        "source": block["source"],
+        "target_deg": dict(targets.target_deg),
+        "address_model_deg": {s: float(e["model_deg"]) for s, e in feet.items()},
+        "fixture_frame0_model_deg": model_feet_deg(kin, q0, targets),
     }
 
 

@@ -33,6 +33,7 @@ from src.shared.python.motion_matching.hip_calibration import (
 from src.shared.python.motion_matching.pipeline.address import (
     AddressStageInputs,
     HipCalibrationOptions,
+    add_hip_zero_twist_argument,
     calibrated_address_summary,
     prepare_hip_spec,
     scaled_offsets,
@@ -276,6 +277,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="place every marker from a neutral-spine static trial",
     )
     parser.add_argument(
+        "--fix-club-markers",
+        action="store_true",
+        help="keep the club cluster at the document's per-club offsets in the "
+        "static trial (needs --static-seeds; #12221)",
+    )
+    parser.add_argument(
         "--engine",
         default="mujoco",
         help="plant physics engine (mujoco, drake, pinocchio)",
@@ -400,6 +407,7 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     add_turn_split_arguments(parser)
+    add_hip_zero_twist_argument(parser)
     return parser
 
 
@@ -562,6 +570,7 @@ def _calibrate_and_scale(
             recalibrate_upper=args.recalibrate_upper,
             foot_half_width_m=getattr(args, "foot_half_width_m", None),
             torsional_patch_m=getattr(args, "torsional_patch_m", None),
+            hip_zero_twist=getattr(args, "hip_zero_twist", "capture"),
         ),
     )
     hipcal_path.write_text(
@@ -584,6 +593,7 @@ def _calibrate_and_scale(
             hipcal_path=hipcal_path,
             static_seeds=args.static_seeds,
             fit_closure=args.fit_closure,
+            fix_club_markers=args.fix_club_markers,
             log=log,
         )
     )

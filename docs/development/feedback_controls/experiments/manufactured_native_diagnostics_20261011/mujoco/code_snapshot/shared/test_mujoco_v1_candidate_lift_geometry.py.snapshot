@@ -1,0 +1,254 @@
+import numpy as np
+import pytest
+
+from mujoco_v1_candidate_lift_geometry import (
+    lift_named_upper,
+    root_translation_axis_world,
+    root_translation_axes_world,
+    root_translation_world_z_deltas,
+    shift_root_translation_world_z,
+)
+
+
+def root_joint():
+    c = np.sqrt(3.0) / 2.0
+    return {
+        "parent_to_base": [[1,0,0,0],[0,c,-0.5,0],[0,0.5,c,0],[0,0,0,1]],
+        "primitives": [
+            {"coordinate":"tx", "primitive":"Px"},
+            {"coordinate":"ty", "primitive":"Py"},
+            {"coordinate":"tz", "primitive":"Pz"},
+            {"coordinate":"rx", "primitive":"Rx"},
+        ],
+    }
+
+
+def test_lift_uses_compiled_lower_defaults_and_exact_name_prefix():
+    names = ("tx", "ty", "tz", "rx", "leg")
+    defaults = dict(zip(names, [0.1, 0.2, 0.3, 0.4, 0.5], strict=True))
+    result = lift_named_upper(names, names[:4], [1, 2, 3, 4], defaults)
+    np.testing.assert_array_equal(result, [1, 2, 3, 4, 0.5])
+
+
+@pytest.mark.parametrize("candidate", [("ty",), ("tx", "tx"), ()])
+def test_lift_rejects_wrong_or_ambiguous_candidate_names(candidate):
+    names = ("tx", "ty", "tz")
+    defaults = dict.fromkeys(names, 0.0)
+    with pytest.raises(ValueError):
+        lift_named_upper(names, candidate, [0.0] * len(candidate), defaults)
+
+
+def test_lift_requires_exact_compiled_qpos0_readback():
+    with pytest.raises(ValueError, match="exact source names"):
+        lift_named_upper(("tx", "leg"), ("tx",), [0.0], {"tx": 0.0})
+
+
+def test_world_z_shift_uses_actual_rotated_root_translation_axis():
+    joint = root_joint()
+    axis = root_translation_axis_world(joint)
+    np.testing.assert_allclose(axis, [0.0, -0.5, np.sqrt(3.0) / 2.0])
+    q = np.zeros(5)
+    shifted = shift_root_translation_world_z(q, ("tx", "ty", "tz", "rx", "leg"), 0.2, joint)
+    np.testing.assert_allclose(shifted[:3], [0.0, 0.1, 0.2 * np.sqrt(3.0) / 2.0], atol=1e-12)
+    np.testing.assert_array_equal(shifted[[3, 4]], [0, 0])
+
+
+def test_root_transform_must_be_declared_and_proper():
+    joint = root_joint()
+    joint["parent_to_base"][0][0] = 2
+    with pytest.raises(ValueError, match="proper orthonormal"):
+        root_translation_axis_world(joint)
+
+def test_prepared_probe_uses_existing_kinematic_apis_only():
+    from pathlib import Path
+
+    repo = Path(r"C:/Users/diete/Repositories/Worktrees/feedback-moco-state-binding-11791")
+    model_source = (repo / "src/engines/physics_engines/mujoco/python/full_body_model.py").read_text(encoding="utf-8")
+    ik_source = (repo / "src/engines/physics_engines/mujoco/python/full_body_ik.py").read_text(encoding="utf-8")
+    assert "class NativeMujocoFullBodyModel" in model_source
+    assert "def evaluate_contact_samples(" in model_source
+    assert "self._mj.mj_fwdPosition(self.model, self.data)" in model_source
+    assert "class FullBodyMarkerKinematics" in ik_source
+    assert "def constraint_residual_jacobian(" in ik_source
+    assert "def _append_closure(" in ik_source
+    assert "def _append_ground(" in ik_source
+    driver = Path(__file__).with_name("run_mujoco_v1_candidate_lift_geometry_20261012.py").read_text(encoding="utf-8")
+    assert "--execute-native" in driver
+    assert "observe_source_geometry" in driver
+    assert "root_translation_world_z_deltas" in driver
+    assert "sphere_center_displacement_assertion" in driver
+    assert "weld_pose_residual_invariance_assertion" in driver
+    assert "adapter = FullBodyMarkerKinematics(native, attachments)" in driver
+    assert "NativeMujocoFullBodyModel(" in driver
+    assert "FullBodyMarkerKinematics(native, attachments)" in driver
+    assert "MujocoFullBodyIK" not in driver
+    assert "accelerations(" not in driver
+    assert "solve_with_multipliers(" not in driver
+    assert "closure_errors(" not in driver
+
+def test_exact_v1_source_and_candidate_prefix_and_root_axis():
+    import json
+    from pathlib import Path
+
+    repo = Path(r"C:/Users/diete/Repositories/Worktrees/feedback-moco-state-binding-11791")
+    spec = json.loads((repo / "docs/development/full_body_models/full_body_spec_v1.json").read_text(encoding="utf-8"))
+    candidate = json.loads((repo / "docs/development/full_body_models/evidence/native_candidates/returned81_candidate.json").read_text(encoding="utf-8"))
+    assert len(spec["coordinate_order"]) == 41
+    assert len(candidate["coordinate_names"]) == 27
+    assert tuple(candidate["coordinate_names"]) == tuple(spec["coordinate_order"][:27])
+    root = next(j for j in spec["joints"] if j["parent"] == "world")
+    np.testing.assert_allclose(root_translation_axis_world(root), [0, -0.5, np.sqrt(3) / 2], atol=1e-12)
+    assert len(spec["contact"]["spheres"]) == 4
+
+
+
+
+
+
+def test_translation_solution_maps_exactly_to_world_z_and_preserves_weld_geometry():
+    joint = root_joint()
+    names, axes = root_translation_axes_world(joint)
+    deltas = root_translation_world_z_deltas(0.2, joint)
+    ordered_delta = np.array([deltas[name] for name in names])
+    np.testing.assert_allclose(axes @ ordered_delta, [0.0, 0.0, 0.2], atol=1e-12, rtol=1e-12)
+    np.testing.assert_allclose(ordered_delta, [0.0, 0.1, 0.2 * np.sqrt(3.0) / 2.0], atol=1e-12)
+    points = np.array([[0.4, -0.2, 0.7], [-0.1, 0.5, 1.2]])
+    shifted_points = points + (axes @ ordered_delta)[None, :]
+    before_relative = points[0] - points[1]
+    after_relative = shifted_points[0] - shifted_points[1]
+    np.testing.assert_allclose(after_relative, before_relative, atol=1e-12)
+    np.testing.assert_allclose(shifted_points - points, [[0, 0, 0.2], [0, 0, 0.2]], atol=1e-12)
+
+
+def test_translation_solver_rejects_missing_or_duplicate_translation_axes():
+    joint = root_joint()
+    joint["primitives"] = [p for p in joint["primitives"] if p["primitive"] != "Pz"]
+    with pytest.raises(ValueError, match="exactly one each"):
+        root_translation_axes_world(joint)
+
+
+
+
+
+
+def test_native_api_methods_are_owned_by_constructed_facades():
+    import ast
+    from pathlib import Path
+
+    repo = Path(r"C:/Users/diete/Repositories/Worktrees/feedback-moco-state-binding-11791")
+    ik_path = repo / "src/engines/physics_engines/mujoco/python/full_body_ik.py"
+    model_path = repo / "src/engines/physics_engines/mujoco/python/full_body_model.py"
+    ik_tree = ast.parse(ik_path.read_text(encoding="utf-8"))
+    model_tree = ast.parse(model_path.read_text(encoding="utf-8"))
+    ik_classes = {node.name: {item.name for item in node.body if isinstance(item, ast.FunctionDef)} for node in ik_tree.body if isinstance(node, ast.ClassDef)}
+    model_classes = {node.name: {item.name for item in node.body if isinstance(item, ast.FunctionDef)} for node in model_tree.body if isinstance(node, ast.ClassDef)}
+    assert "constraint_residual_jacobian" in ik_classes["FullBodyMarkerKinematics"]
+    assert "constraint_residual_jacobian" not in ik_classes["MujocoFullBodyIK"]
+    assert "evaluate_contact_samples" in model_classes["NativeMujocoFullBodyModel"]
+    driver = Path(__file__).with_name("run_mujoco_v1_candidate_lift_geometry_20261012.py").read_text(encoding="utf-8")
+    assert "native = NativeMujocoFullBodyModel(" in driver
+    assert "adapter = FullBodyMarkerKinematics(native, attachments)" in driver
+    assert "adapter = MujocoFullBodyIK" not in driver
+
+def test_supervisor_binds_owned_process_caps_and_native_import_provenance():
+    from pathlib import Path
+
+    directory = Path(__file__).parent
+    wrapper = (directory / "run_supervised_mujoco_v1_candidate_lift_geometry_20261012.py").read_text(encoding="utf-8")
+    driver = (directory / "run_mujoco_v1_candidate_lift_geometry_20261012.py").read_text(encoding="utf-8")
+    assert "_supervise_process_tree(" in wrapper
+    assert "30.0, 1 << 30" in wrapper
+    assert "OMP_NUM_THREADS" in wrapper and "BLIS_NUM_THREADS" in wrapper
+    assert "child_python_sha256" in wrapper and "input_hashes_after" in wrapper
+    assert "runtime_and_imported_module_hashes" in driver
+    assert "python_executable_sha256" in driver
+    assert "mujoco_modules" in driver
+
+
+def test_full_observation_path_matches_native_mapping_shaped_api():
+    from types import SimpleNamespace
+    from mujoco_v1_candidate_lift_geometry import observe_source_geometry
+
+    names = tuple(f"q{i}" for i in range(41))
+    q = np.linspace(-0.1, 0.1, 41)
+    v = np.linspace(0.0, 0.04, 41)
+    residual = np.arange(10, dtype=np.float64) / 10.0
+    jacobian = np.zeros((10, 41), dtype=np.float64)
+    jacobian[:6, :6] = np.eye(6)
+    centers = np.array([[0.0,0.0,0.3],[0.1,0.0,0.4],[0.0,0.1,0.5],[-0.1,0.0,0.6]])
+    sphere_names = ("heel_l", "toe_l", "heel_r", "toe_r")
+    spheres = {
+        name: {"site_id":index, "body_id":index+1, "radius":0.1}
+        for index, name in enumerate(sphere_names)
+    }
+    force_samples = {
+        name: SimpleNamespace(
+            penetration_m=0.01 * index,
+            normal_force_n=np.array([0.0, 0.0, 10.0 + index]),
+            friction_force_n=np.array([1.0, 0.0, 0.0]),
+        )
+        for index, name in enumerate(sphere_names)
+    }
+
+    class FakeFacade:
+        def constraint_residual_jacobian(self, coordinates, options):
+            np.testing.assert_array_equal(coordinates, q)
+            return SimpleNamespace(residual=residual, jacobian=jacobian)
+
+    class FakeNative:
+        _spheres = spheres
+        data = SimpleNamespace(site_xpos=centers)
+        ground_plane = SimpleNamespace(normal=(0.0, 0.0, 1.0), height_m=0.0)
+
+        def evaluate_contact_samples(self, coordinates, rates):
+            assert tuple(coordinates) == names
+            assert tuple(rates) == names
+            np.testing.assert_allclose(list(coordinates.values()), q)
+            np.testing.assert_allclose(list(rates.values()), v)
+            return force_samples
+
+    result = observe_source_geometry(FakeNative(), FakeFacade(), q, names, v, object())
+    np.testing.assert_allclose(result["weld_pose_residual_m_rad"], residual[:6])
+    np.testing.assert_allclose(result["weld_rate_residual_m_s_rad_s"], jacobian[:6] @ v)
+    assert result["jacobian_rank"] == 6
+    assert set(result["spheres"]) == set(sphere_names)
+    assert result["spheres"]["toe_l"]["center_world_m"] == centers[1].tolist()
+    assert result["spheres"]["toe_l"]["bottom_height_m"] == pytest.approx(0.3)
+    assert result["spheres"]["toe_l"]["normal_force_n"] == [0.0, 0.0, 11.0]
+    assert result["spheres"]["toe_l"]["friction_force_n"] == [1.0, 0.0, 0.0]
+
+
+def test_observation_rejects_non_native_sphere_tuple_shape():
+    from types import SimpleNamespace
+    from mujoco_v1_candidate_lift_geometry import observe_source_geometry
+
+    native = SimpleNamespace(
+        _spheres={f"sphere{i}": (i, i, 0.1) for i in range(4)}, data=SimpleNamespace(site_xpos=np.zeros((4,3))),
+        ground_plane=SimpleNamespace(normal=(0,0,1), height_m=0.0),
+    )
+    facade = SimpleNamespace(constraint_residual_jacobian=lambda q, options: None)
+    with pytest.raises(ValueError, match="sphere entries"):
+        observe_source_geometry(native, facade, np.zeros(41), tuple(f"q{i}" for i in range(41)), np.zeros(41), object())
+
+
+
+def test_supervisor_fails_closed_when_any_source_or_compiled_module_changes():
+    import importlib.util
+    from pathlib import Path
+
+    path = Path(__file__).with_name("run_supervised_mujoco_v1_candidate_lift_geometry_20261012.py")
+    spec = importlib.util.spec_from_file_location("geometry_supervisor_for_test", path)
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    stable_files = {"a.py":"aaa"}
+    stable_modules = {"mujoco.pyd":"bbb"}
+    assert module.provenance_unchanged(stable_files, stable_files, stable_modules, stable_modules)
+    assert not module.provenance_unchanged(stable_files, {"a.py":"changed"}, stable_modules, stable_modules)
+    assert not module.provenance_unchanged(stable_files, stable_files, stable_modules, {"mujoco.pyd":"changed"})
+    assert module.final_exit_code({"status":"exited", "returncode":0, "provenance_unchanged":False, "child_receipt_present":True}) != 0
+    assert module.final_exit_code({"status":"exited", "returncode":0, "provenance_unchanged":False, "child_receipt_present":True}) != 0
+    assert module.final_exit_code({"status":"exited", "returncode":0, "provenance_unchanged":True, "child_receipt_present":False}) != 0
+    assert module.final_exit_code({"status":"exited", "returncode":0, "provenance_unchanged":True, "child_receipt_present":True}) == 0
+
+
