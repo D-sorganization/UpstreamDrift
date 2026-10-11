@@ -28,30 +28,31 @@ separated from current guidance.
 ### Stable
 
 - [`adapters/`](adapters/authoring_guide.md) - 1 page
-- [`adr/`](adr/README.md) - 54 pages
-- [`agent_context/`](agent_context/README.md) - 8 pages
+- [`adr/`](adr/README.md) - 56 pages
+- [`agent_context/`](agent_context/README.md) - 9 pages
 - [`agents/`](agents/shared-infrastructure.md) - 1 page
 - [`api/`](api/README.md) - 7 pages
 - [`architecture/`](architecture/) - 22 pages
 - [`audits/`](audits/) - 7 pages
-- [`ci-failures/`](ci-failures/10255-2026-09-16.md) - 1 page
+- [`ci-failures/`](ci-failures/) - 5 pages
 - [`code-quality/`](code-quality/function-design-review.md) - 1 page
 - [`codemap/`](codemap/README.md) - 3 pages
 - [`conformance/`](conformance/) - no Markdown pages
 - [`conventions/`](conventions/) - 3 pages
+- [`critiques/`](critiques/README.md) - 3 pages
 - [`deployment/`](deployment/interim_setup.md) - 1 page
-- [`development/`](development/README.md) - 193 pages
+- [`development/`](development/README.md) - 319 pages
 - [`engineering/`](engineering/) - 2 pages
 - [`engines/`](engines/README.md) - 17 pages
 - [`estimation/`](estimation/) - 2 pages
 - [`examples/`](examples/) - no Markdown pages
 - [`governance/`](governance/) - 6 pages
-- [`help/`](help/) - 5 pages
+- [`help/`](help/) - 61 pages
 - [`installation/`](installation/) - 2 pages
 - [`legal/`](legal/licenses.md) - 1 page
 - [`motion_matching/`](motion_matching/README.md) - 2 pages
 - [`motion_pipeline/`](motion_pipeline/README.md) - 6 pages
-- [`operations/`](operations/) - 19 pages
+- [`operations/`](operations/) - 20 pages
 - [`physics/`](physics/) - 3 pages
 - [`portfolio/`](portfolio/golf_modeling_demo.md) - 1 page
 - [`references/`](references/README.md) - 1 page
@@ -62,10 +63,11 @@ separated from current guidance.
 - [`specs/`](specs/README.md) - 4 pages
 - [`sphinx/`](sphinx/_static/VENDORED.md) - 1 page
 - [`technical/`](technical/README.md) - 7 pages
+- [`templates/`](templates/sanitation-report.md) - 1 page
 - [`testing/`](testing/) - 8 pages
 - [`troubleshooting/`](troubleshooting/README.md) - 6 pages
 - [`tutorials/`](tutorials/README.md) - 6 pages
-- [`user_guide/`](user_guide/README.md) - 31 pages
+- [`user_guide/`](user_guide/README.md) - 35 pages
 - [`validation/`](validation/cross_engine_v1.md) - 1 page
 - [`workflows/`](workflows/) - 2 pages
 
@@ -80,10 +82,11 @@ separated from current guidance.
 - [`model_explorer/`](model_explorer/attachment-manifests.md) - 1 page
 - [`motion_capture/`](motion_capture/) - 21 pages
 - [`motion_training/`](motion_training/README.md) - 1 page
-- [`plans/`](plans/README.md) - 67 pages
+- [`plans/`](plans/README.md) - 76 pages
 - [`project/`](project/) - 2 pages
 - [`proposals/`](proposals/ROBOTICS_EXPANSION_PROPOSAL.md) - 1 page
-- [`research/`](research/) - 33 pages
+- [`research/`](research/) - 42 pages
+- [`screenshots/`](screenshots/) - no Markdown pages
 - [`sg_optimizer/`](sg_optimizer/README.md) - 3 pages
 - [`status/`](status/) - no Markdown pages
 - [`technical_debt/`](technical_debt/TODO_FIXME_REGISTER.md) - 1 page
@@ -205,6 +208,7 @@ repository, which made them effectively unreachable.
 | `status_quo_analysis/`  | @product-team         | archived  | Status quo analysis snapshots preserved for planning history.                                                                       |
 | `technical/`            | @engineering-team     | stable    | Technical reference pages for implementation details and subsystem behavior.                                                        |
 | `technical_debt/`       | @quality-team         | draft     | Technical debt inventories, cleanup plans, and remediation tracking.                                                                |
+| `templates/`            | @maintainers          | stable    | Standard document templates and reporting scaffolding across the repository.                                                        |
 | `testing/`              | @quality-team         | stable    | Testing strategy, validation guidance, and quality assurance references.                                                            |
 | `troubleshooting/`      | @support-team         | stable    | Troubleshooting guides for installation, runtime, and development issues.                                                           |
 | `tutorials/`            | @developer-experience | stable    | Step-by-step learning paths and task walkthroughs for users.                                                                        |
