@@ -22,7 +22,8 @@ feet; default ``turn_feet``) for ``--club`` ``driver`` or ``iron7``::
         python3 scripts/render_msk_club.py --geometry <opensim Geometry dir> \\
         --capture "$CAPTURE_DATA_DIR/<capture>.c3d" --club driver --mode turn_feet
 
-Output goes to ``<default dir>/<club>_<mode>`` unless ``--out`` is given.
+Output goes to ``<default dir>/<club>_<mode>`` unless ``--out`` is given; only
+the capture-free driver baseline keeps the legacy ``<default dir>`` root.
 """
 
 from __future__ import annotations
@@ -373,10 +374,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     except ValueError as exc:
         parser.error(str(exc))
     if args.out is None:
-        with_capture = args.capture is not None
-        args.out = (
-            DEFAULT_OUT / f"{args.club}_{args.mode}" if with_capture else DEFAULT_OUT
-        )
+        # Only the legacy baseline driver render keeps the unqualified root.
+        legacy = args.capture is None and args.club == "driver"
+        args.out = DEFAULT_OUT if legacy else DEFAULT_OUT / f"{args.club}_{args.mode}"
     return args
 
 

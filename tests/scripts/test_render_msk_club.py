@@ -62,6 +62,12 @@ def test_defaults_are_the_baseline_driver_render() -> None:
     assert args.out == _script().DEFAULT_OUT
 
 
+def test_a_no_capture_iron_render_does_not_overwrite_the_driver_baseline() -> None:
+    script = _script()
+    args = script.parse_args(["--club", "iron7"])
+    assert args.out == script.DEFAULT_OUT / "iron7_baseline"
+
+
 def test_capture_defaults_to_turn_feet_and_a_club_mode_folder() -> None:
     script = _script()
     args = script.parse_args(["--capture", "c.c3d", "--club", "iron7"])
