@@ -19,7 +19,8 @@ control cases unavailable within their search bounds. The separately labelled
 rows that remain explicitly exported. Scientific narrative and assigned graphic
 reviews are complete, including selective density-layout repairs. Final repository
 gates and remote delivery are tracked in the [Current Resume Handoff](phase2/RESUME_HANDOFF.md).
-See the [Sharing Guide](phase2/SHARING_GUIDE.md) for the six selected Facebook images.
+The [Illustrated Article](shot_pattern_analysis.tex) embeds 13 reviewed figure plates in a 33-page locally compiled report; its [Review Record](phase2/validation/illustrated_article_v1/README.md) gives reproduction and compiler limits.
+See the [Sharing Guide](phase2/SHARING_GUIDE.md) for the report and six selected Facebook images.
 
 The following sections preserve the separate **phase-one** experiment. Its
 nominal aiming adjustments, club presets, and constant-loft controls must not be

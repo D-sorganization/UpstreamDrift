@@ -1,5 +1,26 @@
 # Shot Pattern Phase-Two Artifact Delivery Plan
 
+## Current Delivery Checkpoint
+
+The illustrated article is now accepted: 33 pages, 13 source-bound figures,
+local Tectonic 0.15.0 compilation with zero warnings, and rendered-page review.
+The authoritative current staging inventory is
+`phase2/validation/artifact_delivery_v3/release_staging_inventory_v3.json`:
+21 assets, including `ILLUSTRATED_REPORT.pdf` and `illustrated-report-source.zip`.
+The prior `report__REPORT.pdf` remains a clearly identified historical text-only
+artifact. The new source archive restores the canonical TeX and all 13 figures;
+its independent restoration receipt is in the same v3 validation directory.
+The local staging path remains `/tmp/shot-pattern-delivery-resume/release-assets-v2`.
+The report-presentation hold below is resolved by these later receipts; the
+remaining required steps are remote transport verification and repository gates.
+No remote completion is claimed here. The research release must use
+`gh release create --prerelease --target <exact-pushed-sha>`; never label it a
+production or latest stable release. The examples below are historical recipes;
+use the current 21-asset inventory and include the illustrated source ZIP in
+fresh-download verification.
+
+## Earlier Packaging Plan and Evidence
+
 This plan binds the current phase-two delivery data to the accepted repaired child v2 graphics. It is an execution recipe only: no release or remote state has been changed. The currently staged generic REPORT.pdf is not an acceptable visual deliverable; a polished research-grade report with embedded shot-pattern and dispersion graphics must be prepared and visually reviewed before any release asset upload or research prerelease. Preserve the accepted dataset and reviewed figures; this report correction does not authorize simulation or graphics regeneration.
 
 ## Current Acceptance Evidence

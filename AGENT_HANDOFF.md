@@ -36,7 +36,7 @@
 
 - Preserve frozen science, baseline graphics, peer records, and armed Phase 1 PR state.
 - Do not claim player calibration, isolated causal curvature benefit, per-round strokes gained, or successful compilation in the built-in LaTeX editor.
-- Before remote publication, stage the accepted illustrated PDF and source archive, refresh and verify the complete release inventory, and perform fresh restoration checks. Then push a reviewable PR with explicit unresolved repository gates; do not claim merge readiness or waive protection.
+- The 21-asset v3 inventory includes the accepted illustrated PDF and source archive; all local hashes and fresh source restoration pass. Remote download and complete restored-member verification remain required. Then push a reviewable PR with explicit unresolved repository gates; do not claim merge readiness or waive protection.
 - Keep empirical validation #11984 deferred and compiler blocker #12120 open; close implementation issues only with qualifying merged evidence.
 
 ## Imported Peer Handoff Records Index

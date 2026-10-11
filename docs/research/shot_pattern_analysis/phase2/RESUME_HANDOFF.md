@@ -105,18 +105,20 @@ trusted manifest comparison, and full archive/member verification.
    and workflow checks pass. Affected tests: 5,861 passes, 34 failures, seven
    errors in unchanged outside-study test files. That is path-scope evidence, not
    an independent runtime baseline reproduction. Fleet development-log policy
-   fails. The remaining raw-XML import-policy finding is being repaired with
-   targeted tests; record its follow-up separately. Full log and receipts live
+   fails. The raw-XML import-policy finding was repaired in `c8dff74a0a`; 41 focused
+   tests, Ruff, mypy, and central import-policy checks pass, with unavailable
+   Semgrep advisory-skipped. Full log and receipts live
    in `validation/artifact_delivery_v2/`. Do not waive or describe these gates as green.
-3. Stage the accepted illustrated PDF and its source archive, refresh the release
-   asset inventory, and verify fresh restoration before any remote publication.
+3. The illustrated PDF and source ZIP are staged and verified in the 21-asset
+   v3 inventory. Local source restoration passes. Fresh remote download and
+   complete member verification remain required.
    Then push and open/attach a reviewable PR with explicit blocked gates, a Handoff
    section, and change fragments. Never bypass hooks or protection.
 4. The illustrated article has a successful local Tectonic CLI compile and accepted
    33-page visual review. The separate built-in LaTeX editor remains blocked before
    parsing by its bundle fetch failure (#12120); local CLI success does not resolve
-   that editor issue. The accepted PDF and source archive still need verified
-   inclusion in the refreshed release inventory before publication.
+   that editor issue. The accepted PDF and source archive are included in the verified v3
+   inventory; remote delivery remains unverified.
 
 ## Scientific Limits and Reproduction
 
