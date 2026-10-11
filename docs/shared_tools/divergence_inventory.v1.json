@@ -13,7 +13,7 @@
   "totals": {
     "identical": 400,
     "diverged": 273,
-    "ud-only": 1815,
+    "ud-only": 1816,
     "tools-only": 805,
     "spelling-only": 121
   },
@@ -504,7 +504,7 @@
     "model_appearance": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 13,
+      "ud-only": 14,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -11649,7 +11649,7 @@
       "classification": "ud-only",
       "package": "humanoid_character_builder",
       "subpackage": "presets",
-      "ud_bytes": 1869,
+      "ud_bytes": 1777,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -11745,7 +11745,7 @@
       "classification": "ud-only",
       "package": "humanoid_character_builder",
       "subpackage": "",
-      "ud_bytes": 5435,
+      "ud_bytes": 5779,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -13126,6 +13126,18 @@
       "package": "model_appearance",
       "subpackage": "",
       "ud_bytes": 13763,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "model_appearance/skinned_body.py",
+      "classification": "ud-only",
+      "package": "model_appearance",
+      "subpackage": "",
+      "ud_bytes": 24474,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -16761,7 +16773,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "pipeline",
-      "ud_bytes": 44458,
+      "ud_bytes": 45056,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -16797,7 +16809,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "pipeline",
-      "ud_bytes": 29036,
+      "ud_bytes": 29606,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -16857,7 +16869,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "pipeline",
-      "ud_bytes": 10188,
+      "ud_bytes": 16633,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -17841,7 +17853,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "",
-      "ud_bytes": 3768,
+      "ud_bytes": 5153,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -20805,7 +20817,7 @@
       "classification": "ud-only",
       "package": "myofullbody",
       "subpackage": "",
-      "ud_bytes": 20269,
+      "ud_bytes": 20631,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -32217,7 +32229,7 @@
       "classification": "ud-only",
       "package": "simulation_backends",
       "subpackage": "",
-      "ud_bytes": 7711,
+      "ud_bytes": 7837,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -40329,7 +40341,7 @@
       "classification": "ud-only",
       "package": "workspace",
       "subpackage": "",
-      "ud_bytes": 35553,
+      "ud_bytes": 35608,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -42193,8 +42205,8 @@
       "path": "humanoid_character_builder/presets/__init__.py",
       "ud": {
         "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
+        "date": "2026-10-07",
+        "commit": "5b607519924a610ff6588749084c928e7051701e"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -42206,8 +42218,8 @@
       "path": "humanoid_character_builder/presets/loader.py",
       "ud": {
         "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
+        "date": "2026-10-07",
+        "commit": "5b607519924a610ff6588749084c928e7051701e"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
