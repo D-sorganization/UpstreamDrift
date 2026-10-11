@@ -565,6 +565,14 @@ def _strip_outcome(
     return build(feed, int(times.size), times, impact)
 
 
+@dataclass(frozen=True)
+class ClipOverlays:
+    """Optional per-frame HUD overlays (impact card, synchronised strip)."""
+
+    card: ImpactCard | None = None
+    strip: StripRenderer | None = None
+
+
 def _export_clip(
     backend: NativeBackend,
     swing: SwingInput,
@@ -573,9 +581,10 @@ def _export_clip(
     out_dir: Path,
     feed: OverlayFeed | None,
     writer_factory: WriterFactory,
-    card: ImpactCard | None = None,
-    strip: StripRenderer | None = None,
+    overlays: ClipOverlays | None = None,
 ) -> tuple[dict[str, Path], int, list[int]]:
+    card = overlays.card if overlays is not None else None
+    strip = overlays.strip if overlays is not None else None
     engine = backend.engine
     shown, shown_feed = _resampled(swing, feed, settings, plan)
     indices = list(range(shown.n_states))
@@ -682,9 +691,14 @@ def export_swing(
     strip = (
         StripRenderer(strip_outcome) if isinstance(strip_outcome, StripSeries) else None
     )
+    overlays = (
+        ClipOverlays(card=card, strip=strip)
+        if card is not None or strip is not None
+        else None
+    )
     for plan in plans:
         clip_paths, frames, glyphs = _export_clip(
-            backend, swing, settings, plan, out_dir, feed, factory, card, strip
+            backend, swing, settings, plan, out_dir, feed, factory, overlays
         )
         paths.update(clip_paths)
         counts[plan.suffix] = frames
