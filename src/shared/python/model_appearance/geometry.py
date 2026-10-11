@@ -30,6 +30,22 @@ class Mesh:
         )
 
 
+def concat_meshes(*meshes: Mesh) -> Mesh:
+    """One mesh holding every input mesh as a separate (closed) shell.
+
+    Precondition: at least one mesh. Postcondition: faces are re-indexed into
+    the stacked vertex array, so a set of watertight shells stays watertight.
+    """
+    if not meshes:
+        raise ValueError("concat_meshes needs at least one mesh")
+    verts, faces, base = [], [], 0
+    for mesh in meshes:
+        verts.append(mesh.vertices)
+        faces.append(mesh.faces + base)
+        base += len(mesh.vertices)
+    return Mesh(np.vstack(verts), np.vstack(faces))
+
+
 def _frame(axis: Array, hint: Array | None = None) -> tuple[Array, Array, Array]:
     """Right-handed (u, v, a) with ``a`` the unit axis."""
     a = axis / np.linalg.norm(axis)
