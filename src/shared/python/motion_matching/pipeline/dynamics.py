@@ -45,6 +45,7 @@ from src.shared.python.motion_matching.pipeline.fd_phase import (
     fd_phase_report,
     reference_clubhead,
 )
+from src.shared.python.motion_matching.pipeline.address_feet import planted_stance
 from src.shared.python.motion_matching.pipeline.turn_split import (
     lane_axis_targets,
     lane_split_weights,
@@ -444,8 +445,7 @@ def shooting_fit(
             ground=lane.ground,
             prior_weight=CONSISTENCY_PRIOR,
             iterations=30,
-            flat_feet_per_frame=lane.stance,
-            plant_stance=True,
+            **planted_stance(lane),
             prior_trajectory=q_track,
             bounds=lane.bounds,
             locked_per_frame=locked,
@@ -514,8 +514,7 @@ def zmp_filter(
             ground=lane.ground,
             prior_weight=CONSISTENCY_PRIOR,
             iterations=30,
-            flat_feet_per_frame=lane.stance,
-            plant_stance=True,
+            **planted_stance(lane),
             prior_trajectory=q_track,
             bounds=lane.bounds,
             com_targets_per_frame=goals,
