@@ -879,6 +879,257 @@ def _write_pair_overhead_figure(
     return outputs
 
 
+@dataclass(frozen=True)
+class _PairExportRequest:
+    """A validated comparison with its artifact destination and selected formats."""
+
+    context: PairFigureContext
+    output_dir: Path
+    stem: Path
+    figure_kinds: frozenset[str] | None
+
+
+def _pair_export_formats(
+    group: str, figure_kinds: frozenset[str] | None
+) -> tuple[str, ...]:
+    """Select academic formats in stable PNG, PDF, SVG order."""
+    return tuple(
+        suffix
+        for suffix in ("png", "pdf", "svg")
+        if figure_kinds is None or f"{group}_{suffix}" in figure_kinds
+    )
+
+
+def _load_pair_common_points(
+    context: PairFigureContext,
+) -> tuple[dict[str, list[tuple[float, float]]], int]:
+    """Intersect saved supported shot indices across both conditions and patterns."""
+    loaded = []
+    for ref in (context.first, context.second):
+        directory = Path(ref["source_root"]) / ref["cell"]
+        endpoints, _ = _supported_endpoints(
+            directory / "shots.csv.gz", int(ref["config"]["n_shots"])
+        )
+        loaded.append(endpoints)
+    common = sorted(
+        set.intersection(
+            *(
+                {index for index, _, _ in endpoint_map[pattern]}
+                for endpoint_map in loaded
+                for pattern in _PATTERNS
+            )
+        )
+    )
+    point_sets: dict[str, list[tuple[float, float]]] = {}
+    for condition_label, endpoint_map in zip(context.labels, loaded, strict=True):
+        by_pattern = {
+            name: {idx: (x, y) for idx, x, y in endpoint_map[name]}
+            for name in _PATTERNS
+        }
+        for pattern in _PATTERNS:
+            name = f"{pattern} · {condition_label}"
+            point_sets[name] = [by_pattern[pattern][index] for index in common]
+    return point_sets, len(common)
+
+
+def _pair_density_ledger(
+    request: _PairExportRequest,
+    paths: dict[str, Path],
+    common_n: int,
+    *,
+    social: bool = False,
+) -> list[dict[str, Any]]:
+    """Record the same common population for academic and per-pattern exports."""
+    context = request.context
+    first, second = context.first, context.second
+    ledger: list[dict[str, Any]] = []
+    for key, path in paths.items():
+        pattern: str | None
+        if social:
+            pattern_lower, ext = key.split("_", 1)
+            pattern = pattern_lower.title()
+            kind = f"density_{pattern_lower}_social_{ext}"
+        else:
+            kind, pattern = key, None
+            if request.figure_kinds is not None and kind not in request.figure_kinds:
+                continue
+        ledger.append(
+            {
+                "figure_kind": kind,
+                "presentation": "social" if social else "academic",
+                "physical_pattern": pattern,
+                "source_kind": "six_population_common_index_comparison",
+                "comparison_kind": context.comparison,
+                "first_cell": first["cell"],
+                "second_cell": second["cell"],
+                "first_protocol": first["source_protocol"],
+                "second_protocol": second["source_protocol"],
+                "common_supported_n": common_n,
+                "total_n_per_population": first["config"]["n_shots"],
+                "conditioning": "same shot indices supported in all six populations",
+                "target_x_m": context.target_x,
+                "relative_path": str(path.relative_to(request.output_dir)),
+                "sha256": _sha256(path),
+            }
+        )
+    return ledger
+
+
+def _unavailable_pair_figure(
+    context: PairFigureContext,
+    kind: str,
+    source_kind: str,
+    reason: str,
+) -> dict[str, Any]:
+    """Retain an explicit unavailable row instead of silently omitting a population."""
+    return {
+        "figure_kind": kind,
+        "source_kind": source_kind,
+        "comparison_kind": context.comparison,
+        "first_cell": context.first["cell"],
+        "second_cell": context.second["cell"],
+        "status": "unavailable",
+        "reason": reason,
+    }
+
+
+def _render_pair_social_density(
+    request: _PairExportRequest,
+    point_sets: dict[str, list[tuple[float, float]]],
+    common_n: int,
+) -> list[dict[str, Any]]:
+    """Export the full-report social figures with their original condition captions."""
+    context, stem = request.context, request.stem
+    first, second = context.first, context.second
+    pair_scenario = _pair_social_scenario(context.comparison, first, second)
+    social_club = str(first["config"]["club"]["club_id"]).replace("_", " ").title()
+    m0, m1 = _cell_target_mode(first), _cell_target_mode(second)
+    paths = write_pair_social_density(
+        point_sets,
+        stem.with_name(stem.name + "_density"),
+        condition_labels=context.labels,
+        scenario=pair_scenario,
+        social_club=social_club,
+        target_point_m=(context.target_x, 0.0),
+        total_n=int(first["config"]["n_shots"]),
+        delivery_noise=_noise_profile_description(
+            _condition(first)["profile"], first["config"]["noise"]
+        ),
+        source_protocols=(first["source_protocol"], second["source_protocol"]),
+        target_modes=(m0, m1),
+    )
+    return _pair_density_ledger(request, paths, common_n, social=True)
+
+
+def _render_pair_density(request: _PairExportRequest) -> list[dict[str, Any]]:
+    """Render only the requested common-index density exports."""
+    point_sets, common_n = _load_pair_common_points(request.context)
+    if common_n < 2:
+        return [
+            _unavailable_pair_figure(
+                request.context,
+                "paired_density",
+                "six_population_common_index_comparison",
+                "fewer than two indices supported in all six populations",
+            )
+        ]
+    ledger: list[dict[str, Any]] = []
+    formats = _pair_export_formats("density", request.figure_kinds)
+    if formats:
+        paths = namespace_figure_paths(
+            "density",
+            _write_pair_density_figure(
+                point_sets,
+                context=request.context,
+                common_n=common_n,
+                output_stem=request.stem.with_name(request.stem.name + "_density"),
+                formats=formats,
+            ),
+        )
+        ledger.extend(_pair_density_ledger(request, paths, common_n))
+    if request.figure_kinds is None:
+        ledger.extend(_render_pair_social_density(request, point_sets, common_n))
+    return ledger
+
+
+def _load_pair_trajectories(context: PairFigureContext) -> dict[str, list[Any]]:
+    """Read saved raw paths without applying endpoint support conditioning."""
+    trajectory_sets: dict[str, list[Any]] = {}
+    for label, ref in zip(context.labels, (context.first, context.second), strict=True):
+        directory = Path(ref["source_root"]) / ref["cell"]
+        flight = json.loads((directory / "flight_samples.json").read_text())
+        paths_by_pattern = flight.get("trajectories", {})
+        for pattern in _PATTERNS:
+            trajectory_sets[f"{pattern} · {label}"] = paths_by_pattern.get(pattern, [])
+    return trajectory_sets
+
+
+def _pair_overhead_ledger(
+    request: _PairExportRequest,
+    paths: dict[str, Path],
+    trajectory_sets: dict[str, list[Any]],
+) -> list[dict[str, Any]]:
+    """Record raw trajectory sample counts independently of supported endpoints."""
+    context = request.context
+    first, second = context.first, context.second
+    ledger: list[dict[str, Any]] = []
+    for kind, path in paths.items():
+        if request.figure_kinds is not None and kind not in request.figure_kinds:
+            continue
+        ledger.append(
+            {
+                "figure_kind": kind,
+                "presentation": "social" if "social" in kind else "academic",
+                "physical_pattern": None,
+                "source_kind": "saved_illustrative_trajectory_samples",
+                "comparison_kind": context.comparison,
+                "first_cell": first["cell"],
+                "second_cell": second["cell"],
+                "first_protocol": first["source_protocol"],
+                "second_protocol": second["source_protocol"],
+                "conditioning": "saved raw trajectories, not paired by shot index",
+                "target_x_m": context.target_x,
+                "saved_trajectory_samples_by_pattern": {
+                    key: len(samples) for key, samples in trajectory_sets.items()
+                },
+                "relative_path": str(path.relative_to(request.output_dir)),
+                "sha256": _sha256(path),
+            }
+        )
+    return ledger
+
+
+def _render_pair_overhead(request: _PairExportRequest) -> list[dict[str, Any]]:
+    """Route academic and social overhead exports without thinning saved paths."""
+    trajectory_sets = _load_pair_trajectories(request.context)
+    if any(not trajectory_sets[name] for name in trajectory_sets):
+        return [
+            _unavailable_pair_figure(
+                request.context,
+                "paired_overhead",
+                "saved_illustrative_trajectory_samples",
+                "one source lacks saved raw trajectory samples",
+            )
+        ]
+    formats = _pair_export_formats("overhead", request.figure_kinds)
+    include_social = (
+        request.figure_kinds is None or "overhead_social_png" in request.figure_kinds
+    )
+    if not formats and not include_social:
+        return []
+    paths = namespace_figure_paths(
+        "overhead",
+        _write_pair_overhead_figure(
+            trajectory_sets,
+            context=request.context,
+            output_stem=request.stem.with_name(request.stem.name + "_overhead"),
+            academic_formats=formats,
+            include_social=include_social,
+        ),
+    )
+    return _pair_overhead_ledger(request, paths, trajectory_sets)
+
+
 def _render_pair_figures_core(
     pair: dict[str, Any],
     output_dir: Path,
@@ -892,236 +1143,27 @@ def _render_pair_figures_core(
         raise ValueError(
             f"pair references lack source protocol: {first.get('cell')} vs {second.get('cell')}"
         )
-    # Preflight identity validation & canonical identity extraction
-    comparison, p0, c0, p1, c1, target = pair_comparison_identity(pair)
-
-    first_label = _pair_condition_label(comparison, first)
-    second_label = _pair_condition_label(comparison, second)
-    stem = output_dir / "comparisons" / pair_comparison_slug(pair)
-    ledger: list[dict[str, Any]] = []
-
-    needs_density = figure_kinds is None or bool(
-        {"density_png", "density_pdf", "density_svg"} & figure_kinds
+    comparison, _, _, _, _, target = pair_comparison_identity(pair)
+    labels = (
+        _pair_condition_label(comparison, first),
+        _pair_condition_label(comparison, second),
     )
-
-    if needs_density:
-        loaded = []
-        for ref in (first, second):
-            directory = Path(ref["source_root"]) / ref["cell"]
-            endpoints, _ = _supported_endpoints(
-                directory / "shots.csv.gz", int(ref["config"]["n_shots"])
-            )
-            loaded.append(endpoints)
-        common = sorted(
-            set.intersection(
-                *(
-                    {index for index, _, _ in endpoint_map[pattern]}
-                    for endpoint_map in loaded
-                    for pattern in _PATTERNS
-                )
-            )
-        )
-        if len(common) >= 2:
-            point_sets: dict[str, list[tuple[float, float]]] = {}
-            for condition_label, endpoint_map in zip(
-                (first_label, second_label), loaded, strict=True
-            ):
-                by_pattern = {
-                    name: {idx: (x, y) for idx, x, y in endpoint_map[name]}
-                    for name in _PATTERNS
-                }
-                for pattern in _PATTERNS:
-                    name = f"{pattern} · {condition_label}"
-                    point_sets[name] = [by_pattern[pattern][index] for index in common]
-
-            density_formats = (
-                ("png", "pdf", "svg")
-                if figure_kinds is None
-                else tuple(
-                    k.removeprefix("density_")
-                    for k in ("density_png", "density_pdf", "density_svg")
-                    if k in figure_kinds
-                )
-            )
-            if density_formats:
-                density_paths = namespace_figure_paths(
-                    "density",
-                    _write_pair_density_figure(
-                        point_sets,
-                        context=PairFigureContext(
-                            first,
-                            second,
-                            comparison,
-                            (first_label, second_label),
-                            target,
-                        ),
-                        common_n=len(common),
-                        output_stem=stem.with_name(stem.name + "_density"),
-                        formats=density_formats,
-                    ),
-                )
-                for kind, path in density_paths.items():
-                    if figure_kinds is None or kind in figure_kinds:
-                        ledger.append(
-                            {
-                                "figure_kind": kind,
-                                "presentation": "academic",
-                                "physical_pattern": None,
-                                "source_kind": "six_population_common_index_comparison",
-                                "comparison_kind": comparison,
-                                "first_cell": first["cell"],
-                                "second_cell": second["cell"],
-                                "first_protocol": first["source_protocol"],
-                                "second_protocol": second["source_protocol"],
-                                "common_supported_n": len(common),
-                                "total_n_per_population": first["config"]["n_shots"],
-                                "conditioning": "same shot indices supported in all six populations",
-                                "target_x_m": target,
-                                "relative_path": str(path.relative_to(output_dir)),
-                                "sha256": _sha256(path),
-                            }
-                        )
-
-            if figure_kinds is None:
-                pair_scenario = _pair_social_scenario(comparison, first, second)
-                social_club = (
-                    str(first["config"]["club"]["club_id"]).replace("_", " ").title()
-                )
-                m0 = _cell_target_mode(first)
-                m1 = _cell_target_mode(second)
-                social_density_paths = write_pair_social_density(
-                    point_sets,
-                    stem.with_name(stem.name + "_density"),
-                    condition_labels=(first_label, second_label),
-                    scenario=pair_scenario,
-                    social_club=social_club,
-                    target_point_m=(target, 0.0),
-                    total_n=int(first["config"]["n_shots"]),
-                    delivery_noise=_noise_profile_description(
-                        _condition(first)["profile"], first["config"]["noise"]
-                    ),
-                    source_protocols=(p0, p1),
-                    target_modes=(m0, m1),
-                )
-                for key, path in social_density_paths.items():
-                    pattern_lower, ext = key.split("_", 1)
-                    pattern = pattern_lower.title()
-                    ledger.append(
-                        {
-                            "figure_kind": f"density_{pattern_lower}_social_{ext}",
-                            "presentation": "social",
-                            "physical_pattern": pattern,
-                            "source_kind": "six_population_common_index_comparison",
-                            "comparison_kind": comparison,
-                            "first_cell": first["cell"],
-                            "second_cell": second["cell"],
-                            "first_protocol": first["source_protocol"],
-                            "second_protocol": second["source_protocol"],
-                            "common_supported_n": len(common),
-                            "total_n_per_population": first["config"]["n_shots"],
-                            "conditioning": "same shot indices supported in all six populations",
-                            "target_x_m": target,
-                            "relative_path": str(path.relative_to(output_dir)),
-                            "sha256": _sha256(path),
-                        }
-                    )
-        else:
-            ledger.append(
-                {
-                    "figure_kind": "paired_density",
-                    "source_kind": "six_population_common_index_comparison",
-                    "comparison_kind": comparison,
-                    "first_cell": first["cell"],
-                    "second_cell": second["cell"],
-                    "status": "unavailable",
-                    "reason": "fewer than two indices supported in all six populations",
-                }
-            )
-
-    needs_overhead = figure_kinds is None or bool(
+    request = _PairExportRequest(
+        PairFigureContext(first, second, comparison, labels, target),
+        output_dir,
+        output_dir / "comparisons" / pair_comparison_slug(pair),
+        figure_kinds,
+    )
+    ledger: list[dict[str, Any]] = []
+    if figure_kinds is None or bool(
+        {"density_png", "density_pdf", "density_svg"} & figure_kinds
+    ):
+        ledger.extend(_render_pair_density(request))
+    if figure_kinds is None or bool(
         {"overhead_png", "overhead_pdf", "overhead_svg", "overhead_social_png"}
         & figure_kinds
-    )
-
-    if needs_overhead:
-        trajectory_sets: dict[str, list[Any]] = {}
-        for label_condition, ref in zip(
-            (first_label, second_label), (first, second), strict=True
-        ):
-            directory = Path(ref["source_root"]) / ref["cell"]
-            flight = json.loads((directory / "flight_samples.json").read_text())
-            paths_by_pattern = flight.get("trajectories", {})
-            for pattern in _PATTERNS:
-                key = f"{pattern} · {label_condition}"
-                trajectory_sets[key] = paths_by_pattern.get(pattern, [])
-        if any(not trajectory_sets[name] for name in trajectory_sets):
-            ledger.append(
-                {
-                    "figure_kind": "paired_overhead",
-                    "source_kind": "saved_illustrative_trajectory_samples",
-                    "comparison_kind": comparison,
-                    "first_cell": first["cell"],
-                    "second_cell": second["cell"],
-                    "status": "unavailable",
-                    "reason": "one source lacks saved raw trajectory samples",
-                }
-            )
-        else:
-            acad_formats = (
-                ("png", "pdf", "svg")
-                if figure_kinds is None
-                else tuple(
-                    k.removeprefix("overhead_")
-                    for k in ("overhead_png", "overhead_pdf", "overhead_svg")
-                    if k in figure_kinds
-                )
-            )
-            inc_social = (
-                True if figure_kinds is None else "overhead_social_png" in figure_kinds
-            )
-            if acad_formats or inc_social:
-                overhead_paths = namespace_figure_paths(
-                    "overhead",
-                    _write_pair_overhead_figure(
-                        trajectory_sets,
-                        context=PairFigureContext(
-                            first,
-                            second,
-                            comparison,
-                            (first_label, second_label),
-                            target,
-                        ),
-                        output_stem=stem.with_name(stem.name + "_overhead"),
-                        academic_formats=acad_formats,
-                        include_social=inc_social,
-                    ),
-                )
-                for kind, path in overhead_paths.items():
-                    if figure_kinds is None or kind in figure_kinds:
-                        ledger.append(
-                            {
-                                "figure_kind": kind,
-                                "presentation": "social"
-                                if "social" in kind
-                                else "academic",
-                                "physical_pattern": None,
-                                "source_kind": "saved_illustrative_trajectory_samples",
-                                "comparison_kind": comparison,
-                                "first_cell": first["cell"],
-                                "second_cell": second["cell"],
-                                "first_protocol": first["source_protocol"],
-                                "second_protocol": second["source_protocol"],
-                                "conditioning": "saved raw trajectories, not paired by shot index",
-                                "target_x_m": target,
-                                "saved_trajectory_samples_by_pattern": {
-                                    key: len(paths)
-                                    for key, paths in trajectory_sets.items()
-                                },
-                                "relative_path": str(path.relative_to(output_dir)),
-                                "sha256": _sha256(path),
-                            }
-                        )
-
+    ):
+        ledger.extend(_render_pair_overhead(request))
     return ledger
 
 
