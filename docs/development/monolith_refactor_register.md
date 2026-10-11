@@ -16,7 +16,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1638 | `src/tools/launch_monitor_analytics/gui.py`                                                                                                                                   |
 | 1584 | `src/shared/python/motion_matching/full_body_forward_dynamics.py`                                                                                                             |
 | 1465 | `src/shared/python/motion_matching/acceptance.py`                                                                                                                             |
-| 1342 | `src/shared/python/motion_matching/pipeline/cli.py`                                                                                                                           |
+| 1355 | `src/shared/python/motion_matching/pipeline/cli.py`                                                                                                                           |
 | 1319 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/scripts/dataset_generator/runSimulation.m`                                                                    |
 | 1199 | `src/api/services/simulation_service.py`                                                                                                                                      |
 | 1199 | `src/launchers/launcher_model_handlers.py`                                                                                                                                    |
@@ -49,6 +49,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1134 | `src/shared/python/shadow_tracker/segmentation.py`                                                                                                                            |
 | 1134 | `src/tools/model_explorer/model_library.py`                                                                                                                                   |
 | 1128 | `src/tools/starting_pose_matcher/gui_main_widget.py`                                                                                                                          |
+| 1123 | `src/shared/python/motion_matching/full_body_ik.py`                                                                                                                           |
 | 1118 | `src/motion_capture/rig/__main__.py`                                                                                                                                          |
 | 1115 | `src/bunkershot3d/ball/qualification.py`                                                                                                                                      |
 | 1114 | `src/engines/physics_engines/drake/python/motion_matching/humanoid_urdf.py`                                                                                                   |
@@ -59,7 +60,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1100 | `src/shared/python/movement_optimizer/models/swingset.py`                                                                                                                     |
 | 1096 | `src/learning/retargeting/retargeter.py`                                                                                                                                      |
 | 1089 | `src/shared/python/motion_pipeline/contracts.py`                                                                                                                              |
-| 1086 | `src/shared/python/motion_matching/full_body_ik.py`                                                                                                                           |
 | 1073 | `src/shared/python/sidekick/calculators/thermo/steam_engine.py`                                                                                                               |
 | 1072 | `src/tools/bunker_shot_gui/model.py`                                                                                                                                          |
 | 1068 | `src/shared/python/swing_comparison/metrics.py`                                                                                                                               |
@@ -157,6 +157,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 |  855 | `src/tools/matched_swing_browser/gui.py`                                                                                                                                      |
 |  853 | `src/shared/python/ai/gui/assistant_panel.py`                                                                                                                                 |
 |  853 | `src/shared/python/sidekick/process_calculators/constants.py`                                                                                                                 |
+|  850 | `src/engines/physics_engines/opensim/python/tour_matching/native_moco_runner.py`                                                                                              |
 |  849 | `src/tools/training_controller/gui.py`                                                                                                                                        |
 |  848 | `src/shared/python/motion_matching/club_only/reproduction.py`                                                                                                                 |
 |  846 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_render.m`                                                                           |
@@ -170,6 +171,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 |  836 | `src/shared/python/perturbation/cross_engine_runner.py`                                                                                                                       |
 |  834 | `src/shared/python/engine_core/engine_probes.py`                                                                                                                              |
 |  833 | `src/shared/python/ui/qt/widgets/signal_toolkit_ui_mixin.py`                                                                                                                  |
+|  832 | `src/shared/python/motion_matching/pipeline/dynamics.py`                                                                                                                      |
 |  831 | `src/bunkershot3d/solvers/mpm/constitutive.py`                                                                                                                                |
 |  831 | `src/shared/python/signal_toolkit/widget_processing.py`                                                                                                                       |
 |  831 | `src/tools/starting_pose_matcher/gui_builders_mixin.py`                                                                                                                       |
@@ -178,14 +180,12 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 |  828 | `src/bunkershot3d/solvers/envelope.py`                                                                                                                                        |
 |  828 | `src/shared/python/motion_matching/pipeline/lane.py`                                                                                                                          |
 |  822 | `src/tools/capture_rig/layout_editor.py`                                                                                                                                      |
-|  820 | `src/shared/python/motion_matching/pipeline/dynamics.py`                                                                                                                      |
 |  819 | `src/shared/python/model_generation/converters/simscape/simscape_converter.py`                                                                                                |
 |  819 | `src/shared/python/motion_matching/club_only/ui_integration.py`                                                                                                               |
 |  813 | `src/engines/physics_engines/drake/python/src/drake_golf_model.py`                                                                                                            |
 |  813 | `src/robotics/control/whole_body/wbc_controller.py`                                                                                                                           |
 |  813 | `src/shared/python/gui_pkg/help_system.py`                                                                                                                                    |
 |  813 | `src/tools/model_explorer/urdf_code_editor.py`                                                                                                                                |
-|  812 | `src/engines/physics_engines/opensim/python/tour_matching/model_variants.py`                                                                                                  |
 |  812 | `src/tools/starting_pose_matcher/live_view_controller.py`                                                                                                                     |
 |  811 | `src/engines/physics_engines/drake/python/src/pose_editor_tab.py`                                                                                                             |
 |  811 | `src/tools/model_explorer/joint_manipulator.py`                                                                                                                               |
