@@ -34,12 +34,15 @@ from src.shared.python.video_timing.frame_schedule import (
     FrameSchedule,
     speed_suffix,
 )
+from src.shared.python.impact_parameters.panel_model import ImpactCard
 from src.tools.native_viewer_export.compositor import (
     HudInfo,
     compose_grid,
     draw_hud,
+    draw_impact_card,
     draw_label,
 )
+from src.tools.native_viewer_export.impact_card import impact_card_for
 
 Image8 = NDArray[np.uint8]
 ENGINES = ("drake", "pinocchio", "opensim", "myosuite", "mujoco")
@@ -92,6 +95,7 @@ class ExportSettings:
     overlays: bool = True
     multiview: bool = True
     hud: bool = True  # False: clean frames, no view label or HUD text
+    impact_card: bool = True  # GCV-17 card from the impact frame on (needs hud)
     grip: bool = False  # hands/grip overlay (GCV-10); hands_closeup tracks it
     lookat_m: tuple[float, float, float] = (1.0, 0.0, 0.9)
     distance_m: float | None = None
@@ -451,6 +455,8 @@ class ExportResult:
     glyph_counts: tuple[int, ...] = ()
     frames_by_suffix: dict[str, int] = field(default_factory=dict)
     grip_json: Path | None = None  # grip plot payload (GCV-10), when enabled
+    #: impact card record (``ImpactCard.to_dict()``) or the reason it is unavailable
+    impact_card: dict[str, Any] | str | None = None
 
     @property
     def skipped(self) -> bool:
@@ -530,6 +536,7 @@ def _export_clip(
     out_dir: Path,
     feed: OverlayFeed | None,
     writer_factory: WriterFactory,
+    card: ImpactCard | None = None,
 ) -> tuple[dict[str, Path], int, list[int]]:
     engine = backend.engine
     shown, shown_feed = _resampled(swing, feed, settings, plan)
@@ -568,6 +575,7 @@ def _export_clip(
                 else tiles[v]
                 for v in settings.views
             }
+            show_card = card is not None and settings.hud and t >= impact
             outputs = {
                 v: draw_hud(labelled[v], hud) if settings.hud else labelled[v]
                 for v in settings.views
@@ -575,6 +583,8 @@ def _export_clip(
             if settings.multiview:
                 grid = compose_grid([labelled[v] for v in settings.views])
                 outputs[GRID_VIEW] = draw_hud(grid, hud) if settings.hud else grid
+            if show_card:
+                outputs = {n: draw_impact_card(f, card) for n, f in outputs.items()}
             for name, frame in outputs.items():
                 key = f"{name}{plan.suffix}"
                 if key not in writers:
@@ -617,9 +627,15 @@ def export_swing(
     paths: dict[str, Path] = {}
     counts: dict[str, int] = {}
     glyph_counts: list[int] = []
+    outcome = (
+        impact_card_for(swing, impact_time_s(swing, settings))
+        if settings.impact_card and settings.hud
+        else None
+    )
+    card = outcome if isinstance(outcome, ImpactCard) else None
     for plan in plans:
         clip_paths, frames, glyphs = _export_clip(
-            backend, swing, settings, plan, out_dir, feed, factory
+            backend, swing, settings, plan, out_dir, feed, factory, card
         )
         paths.update(clip_paths)
         counts[plan.suffix] = frames
@@ -630,4 +646,5 @@ def export_swing(
         counts[plans[0].suffix],
         glyph_counts=tuple(glyph_counts),
         frames_by_suffix=counts,
+        impact_card=card.to_dict() if card is not None else outcome,
     )

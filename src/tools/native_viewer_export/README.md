@@ -72,7 +72,8 @@ The OpenSim backend only ever runs under `xvfb-run` and refuses to start when
 
 - `core.py`: settings, clip plans (speeds, impact window), the backend protocol,
   `export_swing`; frame timing lives in `src/shared/python/video_timing`.
-- `compositor.py`: labelled 2x2 grid and HUD text.
+- `compositor.py`: labelled 2x2 grid, HUD text and the impact card panel.
+- `impact_card.py`: one impact card per swing from the displayed pose.
 - `overlay.py`: overlay feed built from `force_overlay.bundle_provider`.
 - `overlay2d.py`: pinhole projection for the OpenSim 2D glyphs.
 - `backends/`: one module per engine plus shared helpers.
@@ -93,4 +94,19 @@ renders the `clean/`, `club_forces/` and `grf/` clip set (1280x720, 60 fps,
 CRF 18) into `~/Videos/Parity Audit/forces_and_impact/` through this tool and
 writes `manifest_<capture>.json`. A missing bundle or unavailable engine stops
 the run with a message (`--skip-unavailable` records it instead). The inset
-plot strips and the impact parameter card are not rendered yet (GCV-19, #11725).
+plot strips are not rendered yet (GCV-19, #11725).
+
+## Impact Parameter Card
+
+`ExportSettings.impact_card` (default on, needs the HUD) draws the GCV-17
+`ImpactCard` as a semi-transparent right-hand panel from the impact frame to the
+end of each clip (`compositor.draw_impact_card`). `impact_card.impact_card_for`
+computes it once per swing from the displayed pose `q`: the MuJoCo plant of the
+specification export places the `Clubface Vector` body, central differences of
+`q` give the rates, `clubhead_series_from_mujoco` and
+`extract_impact_parameters` (impact state = last sample before the impact time,
+default `TargetFrame`) give the rows. Unavailable rows show "unavailable" and a
+reason, never zero. When no card can be computed (no MuJoCo, no club, speed
+below 1 m/s) nothing is drawn, `ExportResult.impact_card` holds the reason, and
+the showcase manifest records it. The panel shows model estimates in the default
+target frame (ADR-0041), not a measurement.

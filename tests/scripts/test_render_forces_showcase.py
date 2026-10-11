@@ -158,6 +158,49 @@ def test_run_lays_out_directories_and_manifest(tmp_path: Path) -> None:
     assert clip["files"] == [f"{clip['kind']}/capture-A_driver_mujoco_face_on_1x.mp4"]
 
 
+def test_impact_card_is_no_longer_a_known_gap() -> None:
+    assert not any("impact parameter card" in gap for gap in rfs.KNOWN_GAPS)
+    assert any("inset plot" in gap for gap in rfs.KNOWN_GAPS)
+
+
+def test_impact_card_setting_follows_the_overlay_clip_kinds() -> None:
+    plan = rfs.ShowcasePlan(
+        "capture-A",
+        {},
+        ("mujoco",),
+        Path("o"),
+        tuple(rfs.CLIP_KINDS),
+        rfs.HQ_SIZE,
+        (1.0,),
+        False,
+        False,
+    )
+    assert rfs.settings_for(plan, "clean").impact_card is False
+    assert rfs.settings_for(plan, "grf").impact_card is True
+    assert rfs.settings_for(plan, "club_forces").impact_card is True
+
+
+def test_manifest_carries_the_card_or_the_unavailable_reason(tmp_path: Path) -> None:
+    from src.tools.native_viewer_export.core import ExportResult
+
+    bundle = tmp_path / "b.npz"
+    bundle.write_bytes(b"x")
+    card = {"units": "mph", "rows": [{"key": "clubhead_speed", "value": 99.0}]}
+
+    def fake_runner(job, settings, **_kw):  # noqa: ANN001, ANN202
+        record = card if job.out_dir.name == "grf" else "no club in model"
+        return [ExportResult("mujoco", {}, 3, impact_card=record)]
+
+    out = str(tmp_path / "o")
+    argv = ["--swing", f"d={bundle}", "--out", out, "--clips", "grf,clean"]
+    plan = rfs.plan_from_args(rfs.build_parser().parse_args(argv))
+    manifest = json.loads(rfs.run_showcase(plan, runner=fake_runner).read_text())
+    by_kind = {c["kind"]: c for c in manifest["clips"]}
+    assert by_kind["grf"]["impact_card"] == card
+    assert by_kind["clean"]["impact_card"] == "no club in model"
+    assert not any("impact parameter card" in g for g in manifest["known_gaps"])
+
+
 def test_skipped_engine_is_recorded_not_zero(tmp_path: Path) -> None:
     from src.tools.native_viewer_export.core import ExportResult
 

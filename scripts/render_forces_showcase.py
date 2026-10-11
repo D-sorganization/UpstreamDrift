@@ -18,9 +18,13 @@ reimplemented here). Per run it lays out::
 or an unavailable engine stops the run with a message (``--skip-unavailable``
 records the engine as unavailable in the manifest and renders the rest).
 
-Known gaps, recorded in the manifest and not drawn as zero: the synchronised
-inset plot strips (GRF in body weights and CoP trace; net force and couple) and
-the GCV-17 impact-parameter card are not yet rendered by the shared exporter.
+The grf/ and club_forces/ clips carry the GCV-17 impact parameter card from the
+impact frame onward (``native_viewer_export.impact_card``); each manifest clip
+entry records the card (``impact_card.rows``) or the reason it is unavailable.
+
+Known gap, recorded in the manifest and not drawn as zero: the synchronised
+inset plot strips (GRF in body weights and CoP trace; net force and couple) are
+not yet rendered by the shared exporter.
 Full clips are generated once the stale committed fixtures are refreshed
 (#12223, #12230); this script only renders what its inputs support.
 """
@@ -59,7 +63,6 @@ IMPACT_WINDOW_S: Final[float] = 0.4
 IMPACT_SPEED: Final[float] = 0.1
 KNOWN_GAPS: Final[tuple[str, ...]] = (
     "inset plot strips (GRF in BW with CoP trace; net force and couple)",
-    "GCV-17 impact parameter card on the impact frame",
 )
 
 
@@ -70,6 +73,11 @@ class ClipKind:
     views: tuple[str, ...]
     overlays: bool
     grip: bool = False
+
+    @property
+    def impact_card(self) -> bool:
+        """The GCV-17 card rides on the overlay clips; ``clean`` stays clean."""
+        return self.overlays
 
 
 CLIP_KINDS: Final[dict[str, ClipKind]] = {
@@ -205,6 +213,7 @@ def settings_for(plan: ShowcasePlan, kind: str) -> Any:
         crf=CRF,
         overlays=spec.overlays,
         grip=spec.grip,
+        impact_card=spec.impact_card,
         multiview=False,
         **extra,
     )
@@ -264,6 +273,8 @@ def _clip_entry(
     )
     if result.grip_json is not None:
         entry["grip_json"] = result.grip_json.relative_to(out_dir).as_posix()
+    if result.impact_card is not None:  # card record, or why it is unavailable
+        entry["impact_card"] = result.impact_card
     return entry
 
 
