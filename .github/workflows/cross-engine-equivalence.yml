@@ -540,7 +540,10 @@ jobs:
     # tracking issue, and close it when a later nightly passes (#12224).
     name: Report Nightly Heavy-Lane Result
     needs: [equivalence, force-overlay-parity]
-    if: always() && github.event_name == 'schedule'
+    if: >-
+      always() && (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository) &&
+      github.event_name == 'schedule'
     runs-on: d-sorg-fleet-docker
     timeout-minutes: 5
     permissions:
