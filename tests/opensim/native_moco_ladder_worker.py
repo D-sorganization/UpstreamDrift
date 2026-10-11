@@ -60,6 +60,120 @@ def run_rung(rung_name: str, output: Path) -> None:
     _write_success_receipt(prepared, solved, replay_path, stages, osim)
 
 
+def run_saved_replay_diagnostic(source_run: Path, output: Path) -> None:
+    """Replay retained solution inputs without constructing or running a solver."""
+    import opensim as osim
+    from src.engines.physics_engines.opensim.python.tour_matching.native_constrained_muscle import (
+        replay_constrained_muscle_bundle,
+    )
+
+    output.mkdir(parents=True, exist_ok=False)
+    prepared, solution, grid, controls, bundle = _load_saved_replay_inputs(
+        source_run, output, osim
+    )
+    replay = replay_constrained_muscle_bundle(
+        bundle,
+        prepared["declaration"],
+        native_mechanics_profile=prepared["profile"],
+    )
+    audit = _make_replay_state_audit(
+        solution,
+        replay.states,
+        replay.state_names,
+        grid,
+        prepared["target_q"],
+        prepared["initial_q"],
+        prepared["declaration"].named_state,
+    )
+    audit.update(
+        {
+            "schema": "native-moco-fresh-replay-diagnostic-v1",
+            "fresh_model": True,
+            "input_kind": "retained_time_only_controls",
+            "source_sha256": prepared["source_sha256"],
+            "request_sha256": prepared["request_sha256"],
+            "solution_sha256": prepared["solution_sha256"],
+            "saved_controls_sha256": prepared["controls_sha256"],
+            "input_sha256": bundle.applied_input_sha256,
+            "native_constraint_audit_count": len(replay.constraint_audits),
+            "physical_qualification": "unqualified",
+            **_replay_control_audit(replay, controls),
+        }
+    )
+    _record_replay_audit(
+        output / "fresh_replay_diagnostic.json", audit, require_pass=False
+    )
+    _write_json(
+        output / "diagnostic_status.json",
+        {
+            "status": audit["status"],
+            "acceptance_failures": audit["acceptance_failures"],
+        },
+    )
+
+
+def _load_saved_replay_inputs(
+    source_run: Path, output: Path, osim: Any
+) -> tuple[dict[str, Any], Any, np.ndarray, dict[str, np.ndarray], Any]:
+    from src.engines.physics_engines.opensim.python.tour_matching.native_constrained_muscle import (
+        build_constrained_muscle_bundle,
+    )
+    from src.engines.physics_engines.opensim.python.tour_matching.native_mechanics_profile import (
+        declare_native_mechanics_execution_profile,
+    )
+
+    request_path = source_run / "request.json"
+    source_path = source_run / "source.osim"
+    solution_path = source_run / "solution.sto"
+    controls_path = source_run / "time_only_controls.sto"
+    request = json.loads(request_path.read_text(encoding="utf-8"))
+    source_hash = _sha256(source_path)
+    if request.get("source_sha256") != source_hash:
+        raise ValueError("retained replay source differs from its request identity")
+    built_path, declaration = build_synthetic_rung(DEFAULT_RUNGS[0], output / "build")
+    if _sha256(built_path) != source_hash:
+        raise ValueError(
+            "retained replay source differs from the declared plain source"
+        )
+    if dict(declaration.named_state) != request.get("cold_start_named_state"):
+        raise ValueError(
+            "retained cold state differs from freshly declared source state"
+        )
+    declaration = replace(declaration, model_path=source_path)
+    profile = declare_native_mechanics_execution_profile(source_path, source_hash)
+    if profile.profile_sha256 != request.get("native_mechanics_profile_sha256"):
+        raise ValueError("retained replay mechanics profile identity changed")
+    solution = osim.MocoTrajectory(str(solution_path))
+    arrays = _trajectory_arrays(solution)
+    muscle_names = tuple(
+        name.removeprefix("/forceset/") for name in arrays["control_names"]
+    )
+    expected_controls = {
+        name: arrays["controls"][:, index] for index, name in enumerate(muscle_names)
+    }
+    grid, controls = _load_time_only_controls(
+        osim, controls_path, arrays["time"], muscle_names, expected_controls
+    )
+    bundle = build_constrained_muscle_bundle(
+        declaration,
+        grid,
+        controls,
+        experiment_id="native-moco-retained-solution-diagnostic-v1",
+        native_mechanics_profile=profile,
+    )
+    prepared = {
+        "declaration": declaration,
+        "profile": profile,
+        "source_sha256": source_hash,
+        "request_sha256": _sha256(request_path),
+        "solution_sha256": _sha256(solution_path),
+        "controls_sha256": _sha256(controls_path),
+        "target_q": float(request["target_q"]),
+        "initial_q": float(request["initial_q"]),
+    }
+    return prepared, solution, grid, controls, bundle
+
+
 def _prepare_rung(rung: Any, output: Path, stages: dict, osim: Any) -> dict[str, Any]:
     from src.engines.physics_engines.opensim.python.tour_matching.native_mechanics_profile import (
         declare_native_mechanics_execution_profile,
@@ -109,12 +223,24 @@ def _prepare_rung(rung: Any, output: Path, stages: dict, osim: Any) -> dict[str,
     target_q = witness["target_q"]
     initial_q = witness["initial_q"]
     config = _rung_config(rung, target_q, source_hash, initial_q)
+    model = osim.Model(str(source))
+    control_bounds = _native_control_bounds(
+        model, {f"/forceset/{name}" for name in witness["controls"]}
+    )
+    config["native_control_bounds"] = {
+        name: list(bounds) for name, bounds in control_bounds.items()
+    }
+    config["native_control_bounds_source"] = {
+        "source_sha256": source_hash,
+        "model_path": source.name,
+        "property": "Muscle.min_control/max_control",
+    }
     config.update(_witness_request_metadata(declaration, profile, witness))
     config_path = output / "request.json"
     _write_json(config_path, config)
     started = _stage_start()
     study, solver = _build_witness_seeded_problem(
-        source, declaration, witness, target_q, osim
+        source, declaration, witness, target_q, osim, control_bounds
     )
     stages["preflight_and_solver_setup"] = _stage_finish(started)
     _write_progress(output, rung.name, stages)
@@ -344,7 +470,12 @@ def _witness_request_metadata(
 
 
 def _build_witness_seeded_problem(
-    source: Path, declaration: Any, witness: dict[str, Any], target_q: float, osim: Any
+    source: Path,
+    declaration: Any,
+    witness: dict[str, Any],
+    target_q: float,
+    osim: Any,
+    control_bounds: dict[str, tuple[float, float]] | None = None,
 ) -> tuple[Any, Any]:
     from src.engines.physics_engines.opensim.python.tour_matching.moco_initial_bindings import (
         MocoInitialBindings,
@@ -354,6 +485,12 @@ def _build_witness_seeded_problem(
     if _sha256(source) != witness["source_sha256"]:
         raise ValueError("witness source changed before Moco problem construction")
     model = osim.Model(str(source))
+    observed_bounds = _native_control_bounds(
+        model, {f"/forceset/{name}" for name in witness["controls"]}
+    )
+    if control_bounds is not None and control_bounds != observed_bounds:
+        raise ValueError("declared Moco control bounds differ from native source")
+    native_bounds = observed_bounds
     optimal = {
         f"/forceset/{model.getMuscles().get(index).getName()}": float(
             model.getMuscles().get(index).getOptimalFiberLength()
@@ -362,10 +499,11 @@ def _build_witness_seeded_problem(
     }
     state_bounds = _synthetic_state_bounds(declaration.named_state, optimal)
     _validate_witness_inside_bounds(witness, state_bounds)
+    _validate_witness_control_bounds(witness, native_bounds)
     bindings = MocoInitialBindings(
         state_bounds,
         declaration.named_state,
-        dict.fromkeys(optimal, (0.0, 1.0)),
+        native_bounds,
     )
     study = osim.MocoStudy()
     problem = study.updProblem()
@@ -385,6 +523,34 @@ def _build_witness_seeded_problem(
     return study, solver
 
 
+def _native_control_bounds(
+    model: Any, expected_control_paths: set[str]
+) -> dict[str, tuple[float, float]]:
+    """Read complete scalar muscle excitation bounds from the unchanged model."""
+    muscles = model.getMuscles()
+    result = {}
+    for index in range(muscles.getSize()):
+        muscle = muscles.get(index)
+        path = str(muscle.getAbsolutePathString())
+        lower = _finite_control_bound(muscle.getMinControl(), path, "min_control")
+        upper = _finite_control_bound(muscle.getMaxControl(), path, "max_control")
+        if not 0.0 <= lower <= upper <= 1.0:
+            raise ValueError(f"native muscle control bounds are invalid for {path}")
+        result[path] = (lower, upper)
+    if set(result) != expected_control_paths:
+        raise ValueError("native muscle bounds do not cover exact witness controls")
+    return result
+
+
+def _finite_control_bound(value: Any, path: str, label: str) -> float:
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise TypeError(f"native {label} must be a real scalar for {path}")
+    bound = float(value)
+    if not math.isfinite(bound):
+        raise ValueError(f"native {label} must be finite for {path}")
+    return bound
+
+
 def _validate_witness_inside_bounds(
     witness: dict[str, Any], state_bounds: dict[str, tuple[float, float]]
 ) -> None:
@@ -393,6 +559,25 @@ def _validate_witness_inside_bounds(
         values = witness["states"][:, column]
         if np.any(values < low) or np.any(values > high):
             raise ValueError(f"forward witness leaves synthetic bounds for {name}")
+
+
+def _validate_witness_control_bounds(
+    witness: dict[str, Any], control_bounds: dict[str, tuple[float, float]]
+) -> None:
+    if set(witness["controls"]) != {
+        name.removeprefix("/forceset/") for name in control_bounds
+    }:
+        raise ValueError("forward witness controls differ from native bound channels")
+    for path, (lower, upper) in control_bounds.items():
+        values = np.asarray(witness["controls"][path.removeprefix("/forceset/")])
+        if (
+            not np.isfinite(values).all()
+            or np.any(values < lower)
+            or np.any(values > upper)
+        ):
+            raise ValueError(
+                f"forward witness excitation leaves native bounds for {path}"
+            )
 
 
 def _set_witness_guess(
@@ -860,30 +1045,35 @@ def _fresh_native_replay(prepared: dict[str, Any], solved: dict, stages: dict) -
     grid = solved["grid"]
     if not np.isfinite(replay.states).all() or not np.array_equal(replay.times, grid):
         raise ValueError("fresh replay differs from saved time-only controls")
-    state_audit = _compare_replayed_states(
+    state_audit = _make_replay_state_audit(
         solved["solution"],
         replay.states,
         replay.state_names,
         grid,
         prepared["target_q"],
         prepared["declaration"].named_state[prepared["config"]["target_coordinate"]],
+        prepared["declaration"].named_state,
     )
     replay_path = output / "fresh_replay.json"
-    _write_json(
+    _record_replay_audit(
         replay_path,
         {
+            "schema": "native-moco-fresh-replay-diagnostic-v1",
+            "status": state_audit["status"],
             "fresh_model": True,
             "input_kind": "time_only_controls",
             "input_sha256": replay.input_sha256,
+            "source_sha256": prepared["source_hash"],
+            "request_sha256": _sha256(prepared["config_path"]),
+            "solution_sha256": _sha256(solved["solution_path"]),
+            "saved_controls_sha256": _sha256(solved["controls_path"]),
             "time_count": len(grid),
-            "state_names": replay.state_names,
             **state_audit,
-            "state_matrix_sha256": hashlib.sha256(
-                np.asarray(replay.states, dtype=np.float64).tobytes()
-            ).hexdigest(),
+            **_replay_control_audit(replay, solved["controls"]),
             "native_constraint_audit_count": len(replay.constraint_audits),
             "physical_qualification": "unqualified",
         },
+        require_pass=True,
     )
     stages["fresh_native_replay"] = _stage_finish(started)
     _write_progress(output, prepared["rung"].name, stages)
@@ -898,6 +1088,22 @@ def _compare_replayed_states(
     target_q: float,
     initial_q: float,
 ) -> dict[str, Any]:
+    audit = _make_replay_state_audit(
+        solution, replay_states, state_names, saved_grid, target_q, initial_q
+    )
+    _require_replay_audit(audit)
+    return audit
+
+
+def _make_replay_state_audit(
+    solution: Any,
+    replay_states: np.ndarray,
+    state_names: tuple[str, ...],
+    saved_grid: np.ndarray,
+    target_q: float,
+    initial_q: float,
+    cold_start_named_state: dict[str, float] | None = None,
+) -> dict[str, Any]:
     solution_grid = np.asarray(solution.getTimeMat(), dtype=np.float64).reshape(-1)
     optimized = np.column_stack(
         [
@@ -905,16 +1111,11 @@ def _compare_replayed_states(
             for name in state_names
         ]
     )
-    if (
-        not np.array_equal(solution_grid, saved_grid)
-        or optimized.shape != replay_states.shape
-        or optimized.shape[0] != len(saved_grid)
-        or not np.isfinite(optimized).all()
-        or not np.isfinite(replay_states).all()
-    ):
-        raise ValueError(
-            "optimized and fresh replay states differ in shape or finiteness"
-        )
+    replay_values = np.asarray(replay_states, dtype=np.float64)
+    if optimized.shape != replay_values.shape or optimized.shape[0] != len(saved_grid):
+        raise ValueError("optimized and fresh replay states differ in shape")
+    if not np.isfinite(optimized).all() or not np.isfinite(replay_values).all():
+        raise ValueError("optimized and fresh replay states fail finiteness checks")
     groups = {
         "coordinates_rad": tuple(
             i for i, name in enumerate(state_names) if name.endswith("/value")
@@ -933,7 +1134,7 @@ def _compare_replayed_states(
         range(len(state_names))
     ):
         raise ValueError("replay states include an unclassified native state variable")
-    difference = np.abs(optimized - replay_states)
+    difference = np.abs(optimized - replay_values)
     limits = {
         "coordinates_rad": 2e-7,
         "speeds_rad_s": 1e-7,
@@ -944,23 +1145,124 @@ def _compare_replayed_states(
         group: float(np.max(difference[:, indices]))
         for group, indices in groups.items()
     }
-    if any(errors[group] >= limit for group, limit in limits.items()):
-        raise ValueError(f"fresh replay state error exceeds limits: {errors}")
+    max_error_times = {
+        group: float(saved_grid[int(np.argmax(np.max(difference[:, indices], axis=1)))])
+        for group, indices in groups.items()
+    }
     coordinate_index = state_names.index("/jointset/base/q/value")
     optimized_endpoint = float(optimized[-1, coordinate_index])
-    replay_endpoint = float(replay_states[-1, coordinate_index])
+    replay_endpoint = float(replay_values[-1, coordinate_index])
     endpoints = (optimized_endpoint, replay_endpoint)
-    if any(abs(value - target_q) >= 2e-7 for value in endpoints):
-        raise ValueError("optimized or replay endpoint misses requested target")
-    if any((value - initial_q) * (target_q - initial_q) <= 0 for value in endpoints):
-        raise ValueError("optimized or replay endpoint moves in the wrong direction")
-    if any(abs(value - initial_q) <= 2e-6 for value in endpoints):
-        raise ValueError("optimized or replay endpoint did not move to nonzero target")
-    return {
-        "max_state_error_by_unit": errors,
+    endpoint_residuals = {
+        "target_q": target_q,
+        "initial_q": initial_q,
         "optimized_endpoint_q": optimized_endpoint,
         "replayed_endpoint_q": replay_endpoint,
-        "target_endpoint_within_tolerance": True,
+        "optimized_target_residual_rad": optimized_endpoint - target_q,
+        "replayed_target_residual_rad": replay_endpoint - target_q,
+        "optimized_initial_motion_rad": optimized_endpoint - initial_q,
+        "replayed_initial_motion_rad": replay_endpoint - initial_q,
+    }
+    initial_state_residuals = None
+    if cold_start_named_state is not None:
+        if set(cold_start_named_state) != set(state_names):
+            raise ValueError("cold-start state does not exactly cover replay channels")
+        initial_state_residuals = {
+            name: {
+                "optimized_minus_declared": float(
+                    optimized[0, index] - cold_start_named_state[name]
+                ),
+                "replayed_minus_declared": float(
+                    replay_values[0, index] - cold_start_named_state[name]
+                ),
+            }
+            for index, name in enumerate(state_names)
+        }
+    failures = [
+        f"unit_error_exceeds:{group}"
+        for group, limit in limits.items()
+        if errors[group] >= limit
+    ]
+    if not np.array_equal(solution_grid, saved_grid):
+        failures.append("optimized_clock_differs_from_saved_clock")
+    if any(abs(value - target_q) >= 2e-7 for value in endpoints):
+        failures.append("endpoint_target_residual_exceeds_2e-7_rad")
+    if any((value - initial_q) * (target_q - initial_q) <= 0 for value in endpoints):
+        failures.append("endpoint_moves_in_wrong_direction")
+    if any(abs(value - initial_q) <= 2e-6 for value in endpoints):
+        failures.append("endpoint_motion_not_nonzero")
+    return {
+        "status": "failed" if failures else "passed",
+        "acceptance_failures": failures,
+        "state_names": list(state_names),
+        "times_seconds": saved_grid.tolist(),
+        "replayed_state_matrix": replay_values.tolist(),
+        "optimized_state_matrix_sha256": hashlib.sha256(
+            np.ascontiguousarray(optimized, dtype=np.float64).tobytes()
+        ).hexdigest(),
+        "replayed_state_matrix_sha256": hashlib.sha256(
+            np.ascontiguousarray(replay_values, dtype=np.float64).tobytes()
+        ).hexdigest(),
+        "absolute_state_error_by_time": difference.tolist(),
+        "max_state_error_time_by_unit_seconds": max_error_times,
+        "absolute_state_error_matrix_sha256": hashlib.sha256(
+            np.ascontiguousarray(difference, dtype=np.float64).tobytes()
+        ).hexdigest(),
+        "initial_state_residuals_by_name": initial_state_residuals,
+        "final_absolute_state_error_by_name": {
+            name: float(difference[-1, index]) for index, name in enumerate(state_names)
+        },
+        "max_state_error_by_unit": errors,
+        "state_error_limits_by_unit": limits,
+        "optimized_endpoint_q": optimized_endpoint,
+        "replayed_endpoint_q": replay_endpoint,
+        "endpoint_residuals": endpoint_residuals,
+        "target_endpoint_within_tolerance": not any(
+            failure.startswith("endpoint_") for failure in failures
+        ),
+    }
+
+
+def _require_replay_audit(audit: dict[str, Any]) -> None:
+    failures = audit["acceptance_failures"]
+    if failures:
+        raise ValueError(
+            "fresh replay failed acceptance checks: "
+            f"{failures}; max state errors {audit['max_state_error_by_unit']}"
+        )
+
+
+def _record_replay_audit(
+    path: Path, audit: dict[str, Any], *, require_pass: bool = True
+) -> None:
+    _write_json(path, audit)
+    if require_pass:
+        _require_replay_audit(audit)
+
+
+def _replay_control_audit(
+    replay: Any, saved_controls: dict[str, np.ndarray]
+) -> dict[str, Any]:
+    names = tuple(replay.muscle_names)
+    expected = np.column_stack([saved_controls[name] for name in names])
+    applied = np.asarray(replay.applied_excitations, dtype=np.float64)
+    if applied.shape != expected.shape or not np.isfinite(applied).all():
+        raise ValueError("replayed control samples have invalid shape or finiteness")
+    difference = np.abs(applied - expected)
+    return {
+        "control_names": [f"/forceset/{name}" for name in names],
+        "replayed_applied_controls": applied.tolist(),
+        "saved_control_samples": expected.tolist(),
+        "applied_controls_equal_saved_samples_exactly": bool(
+            np.array_equal(applied, expected)
+        ),
+        "max_applied_control_sample_error": float(np.max(difference)),
+        "replayed_applied_controls_sha256": hashlib.sha256(
+            np.ascontiguousarray(applied, dtype=np.float64).tobytes()
+        ).hexdigest(),
+        "saved_control_samples_sha256": hashlib.sha256(
+            np.ascontiguousarray(expected, dtype=np.float64).tobytes()
+        ).hexdigest(),
     }
 
 
@@ -1041,9 +1343,17 @@ def _write_runtime_fingerprint(osim: Any, output: Path) -> Path:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--rung", required=True)
+    parser.add_argument("--rung")
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--replay-existing", type=Path)
     args = parser.parse_args()
+    if args.replay_existing is not None:
+        if args.rung is not None:
+            parser.error("--rung cannot be combined with --replay-existing")
+        run_saved_replay_diagnostic(args.replay_existing, args.output)
+        return
+    if args.rung is None:
+        parser.error("--rung is required unless --replay-existing is supplied")
     run_rung(args.rung, args.output)
 
 

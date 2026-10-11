@@ -209,7 +209,8 @@ The Python 3.13.5 supervisor used psutil 7.0.0; its isolated worker used
 Python 3.12.10 and OpenSim `4.6-2026-06-22-85aaf64`. The `plain` solve
 succeeded in 5.149 seconds wall / 5.063 seconds CPU after 51 iterations, with
 objective `3.175796576239704e-6`. The optimized base-coordinate endpoint was
-`0.3000055857400166` rad for the requested `0.300005` rad target.
+`0.3000055857400166` rad for the requested `0.30000558574001657` rad target
+stored in `request.json`.
 
 The corrected persisted-trajectory audit passed before replay. Exact ordered
 float64 distances were 1 ULP for time, 2 for states, and 3 for controls; their
@@ -257,3 +258,124 @@ under `experiments/native_moco_ladder_a1a2767e61/plain/`:
 The executed worker and harness source hashes were
 `b1a95f9aae245d6d04a9b4b91aae07fd29a3f43543797c0ca83eb8e2f137fe43` and
 `62ed9de2d82713ed36be87decfc83a4a3e63c9f2886ad4573e85d9fd0ed77a07`.
+
+## Bounded Saved-Solution Replay Diagnosis
+
+The request's full-precision target is `0.30000558574001657` rad; the stored
+solution endpoint is `0.3000055857400166` rad, not a `0.300005` rad target.
+The optimized and fresh-replay first rows both exactly match all ten declared
+cold-start states. The independent controller-off replay below used only the
+retained source, request, persisted solution, and saved time-only controls; it
+did not construct a Moco study or invoke an optimizer.
+
+The replay completed under a 30-second ceiling and sampled peak worker-tree RSS
+of 209,420,288 bytes in 5.083 seconds. It reproduced the failed acceptance
+status. Its complete 21-by-10 replay state matrix, 21-sample clock, absolute
+per-state/per-time difference matrix, per-unit maxima and times, endpoint
+residuals, and source/request/solution/control bindings are retained in
+`experiments/native_moco_ladder_replay_a1a2767e61/diagnostic/fresh_replay_diagnostic.json`.
+The artifact SHA-256 is
+`a9fd0c8dac9dc4065841bebc4dcafb8ea07cf613d6b5b9274a843e9901240b14`; its
+replayed-state matrix SHA-256 is
+`c1253c5670193a1e249b5f107c9742f1a7553e9eb18c7abe2f945e126970ac2b`, and the
+absolute-error matrix SHA-256 is
+`bf5a0a163b62c1c939812ae8bfb74befa4a579a52c5094b35f5f25285eb0e8b2`. The
+worker exited 1 after persisting the failed audit because the diagnostic entry
+point also invoked the fail-closed acceptance check; the supervisor did not
+timeout, and a process scan found no remaining worker. This exit does not
+change the retained audit's explicit `failed` status.
+
+The diagnostic worker source SHA-256 was
+`8ce2ae5fcd56096b48a037eaf33a2ef2bfe77230e3d0a10bde3de4e07d83f6e2`; its
+stdout and stderr hashes are `3492492046068ec50b66497cb6c2a24de666c9d621c3cdeee97dbc467bc04311`
+and `e708e31ca6f1000beb84394c0f7b1642a87651abdb6aa5c2a58151524d9625f9`.
+The request, solution, controls, and source hashes in the diagnostic match the
+original run: `85023064b3e1ca8c8c03c73ded091fdff19633284b61337ae35129b8f2b0536e`,
+`9c96137a20e5ac014ed5e90685967e7fb85a6e563cc870986e02a4367aaac851`,
+`b5c65c34067a17e5964bf4e82d1e34268c7c40d747597657a2c98a70737ceb95`, and
+`6a098517bdba09b19b3eb99e4da7e795f27d10be8f42c0fca04fee20ce67e143`.
+
+All named-state errors are zero at time 0. At 0.0005 seconds, flexor
+activation already differs by `1.202676736851635e-4`; it peaks at
+`4.2118714943707725e-4` at 0.001 seconds and remains `3.6461925940936557e-4`
+different at 0.01 seconds. Base-coordinate speed error grows from
+`1.8516945245736823e-9` rad/s at 0.0005 seconds to `4.243097622228572e-6`
+rad/s at the final sample. Flexor fiber-length error grows from
+`3.2634289141852957e-7` m at 0.0005 seconds to `5.393972289921556e-6` m at
+0.01 seconds. Extensor activation and fiber-length maxima are only
+`9.995776859006433e-9` and `4.90473939240843e-10` respectively. Thus the main
+divergence begins after the identical initial sample and is concentrated in
+the flexor activation, then its fiber length and base speed.
+
+The replay endpoint is `0.30000560078247746` rad, with target residual
+`+1.5042460888015086e-8` rad, within the unchanged `2e-7` endpoint limit. The
+Moco solve reports an equality-constraint violation of
+`2.0528726148464835e-9`, below the configured `1e-7` optimizer constraint
+tolerance. That scalar optimizer feasibility result does not guarantee
+componentwise agreement with forward integration: the observed speed,
+activation, and flexor fiber errors exceed their separate replay limits. No
+quantitative attribution to the solver tolerance is established.
+
+The saved solution and control tables have identical 21-knot clocks, with
+exactly matching control samples. The constrained replay provider adds only a
+`PrescribedController` using `PiecewiseLinearFunction`; its integration path
+checks sampled applied excitations against saved knots with zero relative and
+`1e-12` absolute tolerance, and that check completed. The Moco problem fixes
+all ten initial continuous states to the declared values, bounds controls in
+`[0, 1]`, has no source controller, and uses a 10-mesh-interval Moco grid whose
+solution contains 21 rows. These checks make an initial-state, source identity,
+or gross control-sample mismatch unlikely. The retained replay does not record
+the applied-control sample matrix, so exact rather than tolerance-bounded
+applied-control equality cannot be asserted. Whether the remaining divergence
+comes from the Moco transcription's internal control/state interpolation or
+from its discretized muscle-state defects is unresolved; no threshold or model
+was changed to force agreement.
+
+### Read-Only Control-Bound and Midpoint Check
+
+The persisted controls were inspected without another replay or solve. The
+first five saved knots are:
+
+| Time (s) |                  Flexor |              Extensor |
+| -------: | ----------------------: | --------------------: |
+|        0 |     0.09544759030496992 | 0.0008312441911413515 |
+|   0.0005 |     0.04772462501999535 | 0.0007238851585008595 |
+|    0.001 | 0.000001659735020775346 | 0.0006165261258603676 |
+|   0.0015 |    0.005345077920641525 | 0.0006317446484905896 |
+|    0.002 |     0.01068849610626228 | 0.0006469631711208116 |
+
+The native OpenSim 4.6 model reports `min_control=0.01` and `max_control=1.0`
+for both muscles; its XML contains those same limits and no activation-limit
+fields. The Moco problem instead sets control bounds to `[0, 1]`. Over the
+21 saved samples, flexor controls fall below the source minimum at 18 samples
+(minimum `1.659735020775346e-6`); extensor controls fall below it at all 21
+samples (range `0.0006165261258603676` to `0.0008868723599153841`). This is a
+confirmed declaration mismatch and a candidate replay-divergence mechanism;
+the retained evidence does not establish how the muscle's native minimum
+control affects force or activation during this replay.
+
+The 21 rows represent 10 mesh intervals and their midpoints. At the first five
+interior samples, each saved midpoint equals the average of its neighboring
+mesh-endpoint controls to within `2.7e-18` for either muscle. The OpenSim 4.6
+Python binding exposes `interpolate_control_mesh_interior_points`; a
+read-only `MocoCasADiSolver` instance reports `True`. The ladder's solver setup
+does not override this setting, and the SDK documentation identifies the
+setting as the default recommended linear interpolation. The API does not
+expose a setting named `enforce_control_midpoints`. The realized control
+matrix from the prior replay was not retained, although its in-process sample
+check passed within `1e-12` absolute tolerance. These findings do not attribute
+the state mismatch to either source minimum-control handling or collocation.
+
+The original `a1a2767e61` solve remains historical: its request explicitly
+used `[0, 1]` control bounds. A follow-up harness change now derives each
+channel's Moco bounds from the unchanged source muscle's `min_control` and
+`max_control`, binds the bounds and source hash into the request, and rejects
+nonfinite, reversed, out-of-range, or incomplete channel declarations before
+solver setup. The synthetic constant `0.05` witness must lie inside those
+source-derived intervals. A native SDK regression uses altered test-only
+source bounds `[0.02, 0.8]` and verifies those exact values reach the Moco
+binding calls. This addresses a proven configuration mismatch, but is not
+evidence that the mismatch caused the earlier replay errors. The earlier
+replay artifact has no persisted applied-control matrix; the code records such
+samples for future runs, but this historical artifact is not being rerun or
+rewritten. No new optimizer run has been authorized yet.

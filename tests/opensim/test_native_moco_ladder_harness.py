@@ -107,6 +107,121 @@ def test_synthetic_fiber_bounds_are_finite_and_strictly_positive() -> None:
     assert bounds["/forceset/flexor/activation"] == (0.01, 0.15)
 
 
+def test_native_control_bounds_reject_invalid_or_uncovered_channels() -> None:
+    from tests.opensim.native_moco_ladder_worker import _native_control_bounds
+
+    class Muscle:
+        def __init__(self, name: str, lower: object, upper: object) -> None:
+            self.name = name
+            self.lower = lower
+            self.upper = upper
+
+        def getAbsolutePathString(self) -> str:
+            return f"/forceset/{self.name}"
+
+        def getMinControl(self) -> object:
+            return self.lower
+
+        def getMaxControl(self) -> object:
+            return self.upper
+
+    class Collection:
+        def __init__(self, items: list[Muscle]) -> None:
+            self.items = items
+
+        def getSize(self) -> int:
+            return len(self.items)
+
+        def get(self, index: int) -> Muscle:
+            return self.items[index]
+
+    class Model:
+        def __init__(self, items: list[Muscle]) -> None:
+            self.items = items
+
+        def getMuscles(self) -> Collection:
+            return Collection(self.items)
+
+    expected = {"/forceset/flexor", "/forceset/extensor"}
+    valid = Model([Muscle("flexor", 0.02, 0.8), Muscle("extensor", 0.03, 0.9)])
+    assert _native_control_bounds(valid, expected) == {
+        "/forceset/flexor": (0.02, 0.8),
+        "/forceset/extensor": (0.03, 0.9),
+    }
+    for bad in (
+        Model([Muscle("flexor", float("nan"), 0.8), Muscle("extensor", 0.03, 0.9)]),
+        Model([Muscle("flexor", 0.8, 0.2), Muscle("extensor", 0.03, 0.9)]),
+        Model([Muscle("flexor", -0.01, 0.8), Muscle("extensor", 0.03, 0.9)]),
+        Model([Muscle("flexor", 0.02, 0.8)]),
+    ):
+        with pytest.raises((TypeError, ValueError)):
+            _native_control_bounds(bad, expected)
+
+
+def test_forward_witness_excitations_must_fit_native_channel_bounds() -> None:
+    import numpy as np
+
+    from tests.opensim.native_moco_ladder_worker import (
+        _validate_witness_control_bounds,
+    )
+
+    witness = {"controls": {"flexor": np.array([0.05, 0.05])}}
+    _validate_witness_control_bounds(witness, {"/forceset/flexor": (0.01, 0.8)})
+    with pytest.raises(ValueError, match="leaves native bounds"):
+        _validate_witness_control_bounds(witness, {"/forceset/flexor": (0.06, 0.8)})
+
+
+def test_native_source_control_bounds_are_applied_exactly(
+    tmp_path: Path,
+) -> None:
+    import shutil
+    import defusedxml.ElementTree as ET
+
+    from src.engines.physics_engines.opensim.python.tour_matching.moco_initial_bindings import (
+        MocoInitialBindings,
+        apply_moco_initial_bindings,
+    )
+    from tests.opensim.native_moco_ladder_harness import build_synthetic_rung
+    from tests.opensim.native_moco_ladder_worker import _native_control_bounds
+
+    osim = pytest.importorskip("opensim")
+    source, _ = build_synthetic_rung(DEFAULT_RUNGS[0], tmp_path / "original")
+    changed = tmp_path / "nondefault_bounds.osim"
+    shutil.copyfile(source, changed)
+    tree = ET.parse(changed)
+    for muscle in tree.findall(".//Millard2012EquilibriumMuscle"):
+        muscle.find("min_control").text = "0.02"
+        muscle.find("max_control").text = "0.8"
+    tree.write(changed, encoding="utf-8", xml_declaration=True)
+    model = osim.Model(str(changed))
+    paths = {"/forceset/flexor", "/forceset/extensor"}
+    control_bounds = _native_control_bounds(model, paths)
+    assert control_bounds == dict.fromkeys(paths, (0.02, 0.8))
+
+    model.initSystem()
+    state_names = model.getStateVariableNames()
+    states = {str(state_names.get(i)): 0.0 for i in range(state_names.getSize())}
+    bindings = MocoInitialBindings(
+        dict.fromkeys(states, (-1000000.0, 1000000.0)),
+        states,
+        control_bounds,
+    )
+
+    class CapturingProblem:
+        def __init__(self) -> None:
+            self.controls: dict[str, tuple[float, float]] = {}
+
+        def setStateInfo(self, *_args: object) -> None:
+            pass
+
+        def setControlInfo(self, name: str, bounds: object) -> None:
+            self.controls[name] = (float(bounds.getLower()), float(bounds.getUpper()))
+
+    problem = CapturingProblem()
+    apply_moco_initial_bindings(problem, str(changed), bindings, osim)
+    assert problem.controls == control_bounds
+
+
 def test_forward_witness_has_exact_saved_clock_and_nonzero_endpoint(
     tmp_path: Path,
 ) -> None:
@@ -277,6 +392,85 @@ def test_replay_audit_rejects_miss_wrong_direction_and_nonfinite() -> None:
     nonfinite[-1, -1] = float("nan")
     with pytest.raises(ValueError, match="finiteness"):
         _compare_replayed_states(Solution(), nonfinite, names, times, 0.300005, 0.3)
+
+
+def test_failed_replay_audit_is_persisted_before_acceptance_raises(
+    tmp_path: Path,
+) -> None:
+    import numpy as np
+
+    from tests.opensim.native_moco_ladder_worker import (
+        _make_replay_state_audit,
+        _record_replay_audit,
+    )
+
+    names = (
+        "/jointset/base/q/value",
+        "/jointset/base/q/speed",
+        "/forceset/flexor/activation",
+        "/forceset/flexor/fiber_length",
+    )
+    times = np.asarray([0.0, 0.005, 0.01])
+    optimized_states = np.asarray(
+        [
+            [0.3, 0.0, 0.05, 0.1],
+            [0.300002, 0.001, 0.04, 0.101],
+            [0.300005, 0.002, 0.03, 0.102],
+        ]
+    )
+
+    class Solution:
+        def getTimeMat(self):
+            return times
+
+        def getStateMat(self, name):
+            return optimized_states[:, names.index(name)]
+
+    replay_states = optimized_states.copy()
+    replay_states[2, 0] += 2e-5
+    replay_states[1, 1] += 3e-7
+    replay_states[2, 2] += 2e-5
+    replay_states[2, 3] += 3e-6
+    cold = dict(zip(names, optimized_states[0], strict=True))
+    audit = _make_replay_state_audit(
+        Solution(), replay_states, names, times, 0.300005, 0.3, cold
+    )
+    path = tmp_path / "fresh_replay_diagnostic.json"
+    with pytest.raises(ValueError, match="failed acceptance"):
+        _record_replay_audit(path, audit)
+
+    persisted = json.loads(path.read_text(encoding="utf-8"))
+    assert persisted["status"] == "failed"
+    assert persisted["state_names"] == list(names)
+    assert persisted["times_seconds"] == times.tolist()
+    assert persisted["replayed_state_matrix"] == replay_states.tolist()
+    assert persisted["max_state_error_by_unit"]["speeds_rad_s"] == pytest.approx(3e-7)
+    assert persisted["max_state_error_time_by_unit_seconds"]["speeds_rad_s"] == 0.005
+    assert persisted["endpoint_residuals"][
+        "replayed_target_residual_rad"
+    ] == pytest.approx(2e-5)
+    assert (
+        persisted["initial_state_residuals_by_name"][names[0]][
+            "replayed_minus_declared"
+        ]
+        == 0.0
+    )
+    assert len(persisted["replayed_state_matrix_sha256"]) == 64
+    assert len(persisted["absolute_state_error_matrix_sha256"]) == 64
+
+
+def test_diagnostic_replay_records_failed_status_without_promoting_it(
+    tmp_path: Path,
+) -> None:
+    from tests.opensim.native_moco_ladder_worker import _record_replay_audit
+
+    failed = {
+        "status": "failed",
+        "acceptance_failures": ["unit_error_exceeds:speeds_rad_s"],
+    }
+    path = tmp_path / "fresh_replay_diagnostic.json"
+    _record_replay_audit(path, failed, require_pass=False)
+    assert json.loads(path.read_text(encoding="utf-8")) == failed
 
 
 def test_solution_sto_roundtrip_allows_one_ulp_and_records_array_hashes(
