@@ -175,6 +175,14 @@ Because the C3D dataset contains no markers on the hands, the wrist orientation 
 - [`evidence/anthropometry/fit_grip_rotation_residual_receipt.json`](evidence/anthropometry/fit_grip_rotation_residual_receipt.json)
 - [`evidence/ground_support/anthro_driver/receipt.json`](evidence/ground_support/anthro_driver/receipt.json)
 
+### Per-Capture Refit on the Fixed Clusters (#12221)
+
+The values above remain the documents' values. With the club clusters held fixed, one rotation per capture was refitted from free-wrist IK runs, minimising the RMS excess of pronation, cock and flexion beyond `coordinate_ranges_deg` over the whole swing plus the last 30 pre-impact frames (weight 10) and the first 30 frames (weight 20). Totals (extrinsic x-y-z, degrees): driver lead $[-36.864, 57.315, 70.926]$, trail $[9.769, 52.918, 83.914]$; 7-iron lead $[-48.993, 15.681, 29.676]$, trail $[37.035, 49.131, 121.189]$. With the fixture flags and `--fix-club-markers`, the tracked impact speed was $-1.9\%$ on both clubs, the impact-face gaps were $0.56^\circ$ (driver) and $0.62^\circ$ (7-iron), and no wrist sat on its bound at address. The refit is valid only with `--fix-club-markers`: with the cluster free the static trial re-absorbs the grip into the club triad and moves the capture's own face. It is applied to the driver; the 7-iron is deferred. `full_body_spec_anthro_driver.json` carries the fitted rotation (`scripts/set_spec_grip_rotation.py`), and the calibrated driver commands add `--fix-club-markers`. Regenerated driver address / IK / dynamics (mm): calibrated 11.0 / 30.3 / 82.0, nominal 50.9 / 46.5 / 71.9; the Drake driver dynamics worsened (77.8 to 86.3). The driver club-face fixture was regenerated (impact speed -2.5 %, was -5.1 %; impact face 16.88 / 14.96 deg). The 7-iron refit meets GCV-20 and OSV-10 on the tracked swing, but its same-input export gives -5.0 %, -5.1 ms and an 8.71 deg impact face, which would turn eight passing face tests red, so its document and receipts are unchanged and its fit receipt stays committed. The replay is sensitive at the 3 to 15 mm level to tiny parameter changes (see `CANONICAL_RUN.md` §2A). Making `--fix-club-markers` the calibrated default remains an owner decision.
+
+- [`evidence/anthropometry/fit_grip_rotation_receipt_driver.json`](evidence/anthropometry/fit_grip_rotation_receipt_driver.json)
+- [`evidence/anthropometry/fit_grip_rotation_receipt_iron7.json`](evidence/anthropometry/fit_grip_rotation_receipt_iron7.json)
+- Calculation record: "Per-Capture Grip Rotation on the Fixed Clusters (Issue #12221)" in `docs/research/simscape_matching_reference/simscape_matching_reference.tex`
+
 ### What Was Tried and Rejected
 
 One-dimensional grip roll rotation scans (`scan_grip_roll.py`, tested from $-90^\circ$ to $+90^\circ$) and adjusting the closure weld placement from address (`closure_fit.fit_closure_placement`). Neither 1D roll nor closure weld adjustment could eliminate the multidimensional wrist coordinate excursion.
@@ -412,6 +420,7 @@ Foot yaw has no coordinate of its own: it is pelvis yaw plus `hip_rotation_*` (p
 1. The shared address seed (`address_feet.seed_document_feet`) solves `hip_rotation_*` against forward kinematics at pelvis yaw 0 and writes them into the document's `address_seed_deg`, so every engine that reads the seed (MuJoCo, Drake, Pinocchio, MyoSuite) starts from the same feet. OpenSim starts from `tour_matching/address.py` (`toe_out_deg=`), solved against OpenSim forward kinematics because its hip rotation is mirrored.
 2. After the multi-start address fit, `refine_foot_progression` moves `hip_rotation_*` by the measured sensitivity (central difference, sign-safe) and re-solves with a prior weight of 1000 on the two hip-rotation coordinates. The prior is soft: the markers can overrule it; the stance spheres stay pinned flat by the solver. It converges to 0.5 degrees (the issue asks for 2).
 3. The per-engine multi-start `hip_rotation` seeds of -20/0/+20 are not applied when the option is on.
+4. The swing keeps the calibrated address feet (#12222). Every trajectory solve plants its stance spheres where they first touch (`plant_stance`); with the option on, `address_feet.planted_stance` also sets `anchor_stance_at_init`, so the plant starts at the solve's start pose instead of the first frame's own fit. This applies to the swing IK (which starts at the calibrated address), the consistency re-solve, the shooting refit and the ZMP filter, so each pass keeps the feet of its input's first frame. Without it, each pass re-fitted frame 0 and the 7-iron trail toe-out drifted −0.88 → −1.40 → −2.23 degrees across the three passes (target −0.37). With the option off, the anchors still come from the first frame's fit, so `off` receipts are unchanged.
 
 ### Why
 
@@ -434,12 +443,14 @@ The tour players are not at 20 degrees per foot (the trail foot is close to squa
 
 **Measured outcome on the tour driver capture (MuJoCo, full pipeline address stage).** Legacy seed: lead 41.7, trail -2.8 degrees (capture 16.4 and 4.0). With `--foot-progression capture`: lead 37.0, trail 4.05 degrees. The trail foot reaches the capture; the lead foot does not, because `hip_rotation_l` reaches its -40 degree limit while the marker fit's leg posture (hip adduction -14.6 degrees) contributes the rest of the yaw (sensitivity about 0.85 degrees of foot yaw per degree of hip rotation, so about -64 degrees would be needed). The lead-foot target is therefore NOT met in the full fit; the shared FK seed alone reaches both feet within 2 degrees (unit-tested). An address solve that also trades hip adduction against stance-width markers is the open follow-up (still 15-32 degrees off after OSV-6).
 
-Foot yaw through the swing is not constrained; it follows the matched solution and contact (the balance work in #11667 handles slip). The time series and the finish value are reported, not controlled.
+While a foot is in stance, its yaw is held at the address value (step 4). Once it leaves stance, foot yaw is not constrained: it follows the matched solution and contact (the balance work in #11667 handles slip). The time series and the finish value are reported, not controlled. In the follow-through, the lead foot turns to about 82 degrees and the trail foot to between −133 and −158 degrees.
+
+**Club-Face Fixtures (#12222).** `scripts/regenerate_club_face_fixtures.py` runs with `--foot-progression capture`. It commits each run's hip-calibrated, scaled document as `tests/fixtures/club_face/spec_<club>.json`, because the calibrated hip frames set the foot yaw: the raw document's FK of the same pose turns the lead foot 29–30 degrees and lifts it 10–11 cm off the floor. Fixture frame 0 against the capture (MuJoCo FK): driver 16.64 / 3.57 against 16.37 / 4.03 degrees, 7-iron 15.43 / −0.96 against 15.00 / −0.37 degrees. `tests/unit/motion_matching/test_club_face_fixture_feet.py` holds them to 2 degrees and the feet to 5 cm.
 
 ### Evidence Receipt
 
 - [`evidence/foot_progression/capture_report.json`](evidence/foot_progression/capture_report.json)
-- Tests: `tests/unit/motion_matching/test_foot_progression.py`, `tests/unit/motion_matching/pipeline/test_address_feet.py`, `tests/opensim/test_golf_address.py`.
+- Tests: `tests/unit/motion_matching/test_foot_progression.py`, `tests/unit/motion_matching/pipeline/test_address_feet.py`, `tests/opensim/test_golf_address.py`, `tests/unit/motion_matching/test_club_face_fixture_feet.py`, `tests/unit/motion_matching/test_full_body_markers.py::test_stance_anchored_at_the_start_pose_holds_the_first_frame`.
 
 ## 16. Compliant Bushing Grip Model (OSV-7 Phase 1)
 

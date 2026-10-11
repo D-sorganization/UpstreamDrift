@@ -42,8 +42,15 @@ from src.shared.python.motion_matching.foot_progression import (
 )
 from src.shared.python.motion_matching.ground_support import capture_to_native_world
 from src.shared.python.motion_matching.hip_calibration import ANKLE_OUT_LATERAL_M
-from src.shared.python.swing_comparison.turn import LineTurn, TurnMetrics
+from src.shared.python.motion_matching.turn_receipt import capture_turn_inputs
+from src.shared.python.swing_comparison.turn import (
+    LineTurn,
+    TurnMetrics,
+    marker_turn_lines,
+)
 
+#: Retarget modes: landmarks only, plus turn targets, plus capture-planted feet.
+MODES: tuple[str, ...] = ("baseline", "turn", "turn_feet")
 #: Weight (rad) of a segment-yaw residual: about one degree, as strong as the
 #: lead-hand rotation term, so the markers' turn overrules the source swing's
 #: joint-centre landmarks (4 cm) where they disagree.
@@ -322,3 +329,46 @@ def planted_feet_from_capture(capture: Any) -> PlantedFeet:
         lateral[suffix] = side_axis if side_axis @ out_dir > 0 else -side_axis
         ankle[suffix] = heel - ANKLE_OUT_LATERAL_M * lateral[suffix]
     return PlantedFeet(ankle=ankle, axis=axis, lateral=lateral, frames=int(window.size))
+
+
+# ------------------------------------------------------------- tracking inputs
+def tracking_inputs(
+    capture: Any,
+    times_s: Any,
+    mode: str,
+    weight_rad: float = TURN_WEIGHT_RAD,
+    *,
+    turn_inputs: Any = None,
+) -> tuple[TurnTargets | None, PlantedFeet | None]:
+    """Capture inputs of ``msk_club_tracking.track_swing`` for one retarget mode.
+
+    ``capture`` is an already-loaded ``TourCapture`` (no file IO here);
+    ``times_s`` are the tracked rows' times on the capture clock, seconds.
+    ``turn_inputs`` optionally reuses a ``CaptureTurnInputs`` already built
+    from ``capture`` (``turn_receipt.capture_turn_inputs``).
+
+    ``mode`` is one of :data:`MODES`: ``baseline`` returns ``(None, None)``,
+    ``turn`` returns turn targets only, ``turn_feet`` also the planted feet.
+
+    Postconditions: ``len(targets) == len(times_s)`` whenever targets are
+    returned; ``feet`` is not ``None`` only for ``turn_feet``.
+
+    Raises:
+        ValueError: unknown ``mode``; ``times_s`` not a non-empty finite
+            non-decreasing 1-D array; or the capture lacks events or foot
+            markers.
+    """
+    if mode not in MODES:
+        raise ValueError(f"mode must be one of {MODES}, got {mode!r}")
+    times = np.asarray(times_s, dtype=float)
+    if times.ndim != 1 or times.size == 0 or not np.isfinite(times).all():
+        raise ValueError("times_s must be a non-empty finite 1-D array")
+    if (np.diff(times) < 0.0).any():
+        raise ValueError("times_s must be non-decreasing")
+    if mode == "baseline":
+        return None, None
+    cap = turn_inputs if turn_inputs is not None else capture_turn_inputs(capture)
+    lines = marker_turn_lines(cap.markers, cap.t, cap.events)
+    targets = turn_targets_from_lines(lines, times, weight_rad=weight_rad)
+    feet = planted_feet_from_capture(capture) if mode == "turn_feet" else None
+    return targets, feet

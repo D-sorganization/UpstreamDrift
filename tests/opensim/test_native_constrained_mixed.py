@@ -95,6 +95,118 @@ def test_coupled_mixed_fresh_replay_preserves_constraints_and_units(
     assert not result.states.flags.writeable
 
 
+def test_coupled_mixed_replay_produces_observation_scorer_positions(
+    coupled_mixed: tuple[Any, Any],
+) -> None:
+    from src.engines.physics_engines.opensim.python.tour_matching.native_mixed_marker_observation import (
+        replay_and_score_native_mixed_markers,
+    )
+    from src.shared.python.motion_matching.replay_metrics import (
+        ObservedMarkerPositions,
+        PositionInterpolation,
+    )
+
+    declaration, profile = coupled_mixed
+    bundle = _bundle(declaration, profile)
+    output = replay_and_score_native_mixed_markers(
+        bundle,
+        declaration.model_path,
+        profile,
+        declaration,
+        {"base-marker": ("/bodyset/base", (0.0, -0.1, 0.0))},
+        ObservedMarkerPositions(
+            time_s=np.array([0.0025, 0.0075, 0.0125]),
+            positions_m=np.zeros((3, 1, 3)),
+            valid=np.ones((3, 1), dtype=bool),
+            marker_labels=("base-marker",),
+            frame_id="opensim-ground",
+            timebase_id="simulation_relative",
+        ),
+        interpolation=PositionInterpolation.LINEAR_POSITION,
+    )
+
+    assert output.qualification == "unqualified"
+    native_output = output.observation.native_output
+    assert native_output.frame_id == "opensim-ground"
+    assert native_output.timebase_id == "simulation_relative"
+    assert tuple(native_output.time_s) == tuple(bundle.input_history.time_seconds)
+    assert native_output.positions_m.shape == (4, 1, 3)
+    assert output.observation.replay_identity_sha256
+    assert output.alignment.alignment_identity_sha256
+    assert output.metrics.whole_rms_m > 0.0
+    assert not native_output.positions_m.flags.writeable
+    with pytest.raises(ValueError):
+        native_output.positions_m.setflags(write=True)
+    assert not output.alignment.predicted_positions_m.flags.writeable
+    with pytest.raises(ValueError):
+        output.alignment.predicted_positions_m.setflags(write=True)
+
+
+def test_mixed_marker_scorer_rejects_changed_declared_source(
+    coupled_mixed: tuple[Any, Any],
+) -> None:
+    from src.engines.physics_engines.opensim.python.tour_matching.native_mixed_marker_observation import (
+        replay_and_score_native_mixed_markers,
+    )
+    from src.shared.python.motion_matching.replay_metrics import (
+        ObservedMarkerPositions,
+    )
+
+    declaration, profile = coupled_mixed
+    bundle = _bundle(declaration, profile)
+    changed = replace(declaration, source_sha256="0" * 64)
+    observed = ObservedMarkerPositions(
+        time_s=np.array([0.0, 0.005, 0.01, 0.015]),
+        positions_m=np.zeros((4, 1, 3)),
+        valid=np.ones((4, 1), dtype=bool),
+        marker_labels=("base-marker",),
+        frame_id="opensim-ground",
+        timebase_id="simulation_relative",
+    )
+
+    with pytest.raises(ValueError, match="source|identity"):
+        replay_and_score_native_mixed_markers(
+            bundle,
+            declaration.model_path,
+            profile,
+            changed,
+            {"base-marker": ("/bodyset/base", (0.0, -0.1, 0.0))},
+            observed,
+        )
+
+
+def test_mixed_marker_scorer_rejects_observations_beyond_replay_horizon(
+    coupled_mixed: tuple[Any, Any],
+) -> None:
+    from src.engines.physics_engines.opensim.python.tour_matching.native_mixed_marker_observation import (
+        replay_and_score_native_mixed_markers,
+    )
+    from src.shared.python.motion_matching.replay_metrics import (
+        ObservedMarkerPositions,
+    )
+
+    declaration, profile = coupled_mixed
+    bundle = _bundle(declaration, profile)
+    observed = ObservedMarkerPositions(
+        time_s=np.array([0.005, 0.02]),
+        positions_m=np.zeros((2, 1, 3)),
+        valid=np.ones((2, 1), dtype=bool),
+        marker_labels=("base-marker",),
+        frame_id="opensim-ground",
+        timebase_id="simulation_relative",
+    )
+
+    with pytest.raises(ValueError, match="outside|horizon|clock"):
+        replay_and_score_native_mixed_markers(
+            bundle,
+            declaration.model_path,
+            profile,
+            declaration,
+            {"base-marker": ("/bodyset/base", (0.0, -0.1, 0.0))},
+            observed,
+        )
+
+
 def test_coupled_mixed_changed_future_has_identical_prefix(
     coupled_mixed: tuple[Any, Any],
 ) -> None:

@@ -3,11 +3,14 @@
 The CodeMap indexer is a high-performance, tree-sitter based syntax indexer backed by SQLite FTS5.
 
 The canonical implementation lives in [Tools](https://github.com/D-sorganization/Tools)
-under `src/shared/python/codemap/`; this repo carries a byte-identical copy of
-those modules at `src/shared/python/codemap/` plus a thin consumer-side
-adapter at `src/shared/python/ai/tools/codemap_tools.py` that wires the
-canonical six-function API into the in-app chat `ToolRegistry`. Bug fixes
-to the indexer/api/parsers belong in Tools; downstream tests covering the
+under `src/shared/python/codemap/`. The former UpstreamDrift child copy at
+`src/shared/python/codemap/` was retired ([#9406](https://github.com/D-sorganization/UpstreamDrift/issues/9406));
+the CLI, watcher and MCP server now resolve from the pinned Tools tree
+(`vendor/ud-tools/`, see [`docs/agent_context/USAGE.md`](../agent_context/USAGE.md)
+for the `PYTHONPATH` setup). This repo keeps a thin consumer-side adapter at
+`src/shared/python/ai/tools/codemap_tools.py` that wires the canonical
+six-function API into the in-app chat `ToolRegistry`. Bug fixes to the
+indexer/api/parsers belong in Tools; downstream tests covering the
 chat-tool wiring live here.
 
 ## Features

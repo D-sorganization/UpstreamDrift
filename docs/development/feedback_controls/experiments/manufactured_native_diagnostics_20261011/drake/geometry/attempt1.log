@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/mnt/c/tmp/drake_v1_candidate_lift_geometry_20261012.py", line 380, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/mnt/c/tmp/drake_v1_candidate_lift_geometry_20261012.py", line 370, in main
+    result = observe(
+             ^^^^^^^^
+  File "/mnt/c/tmp/drake_v1_candidate_lift_geometry_20261012.py", line 259, in observe
+    raise ImportError(
+ImportError: Drake API did not resolve to the external installed Drake package

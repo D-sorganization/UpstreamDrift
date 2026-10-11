@@ -1,0 +1,32 @@
+# Native Structural Weld Admission
+
+This provisional F07 software slice admits one exact structural component in
+the constrained-muscle replay policy: a native `WeldJoint` with zero
+coordinates and valid, distinct parent and child physical frames. The
+`WeldJoint` itself must pass OpenSim's native concrete-class cast. Frame
+references must resolve to reviewed `Body`, `Ground`, or
+`PhysicalOffsetFrame` components and carry absolute component paths. The
+source model hash binds socket selection and all serialized frame transforms.
+
+This admission is separate from the strict base muscle-bundle component set;
+that set remains unchanged. `WeldConstraint`, plugin or substitute classes,
+controllers, prescribed motion, and undeclared non-muscle forces remain
+rejected. A weld does not waive state, constraint, force, wrapped-path,
+contact, or native initialization checks.
+
+The synthetic fixture for issue #12280 uses nonzero weld-frame translation
+and rotation, attaches a muscle path to the welded body, and retains movable
+and coupled coordinates. The selected native fixture run passed all three
+cases: fresh reload and saved-excitation replay, plus source-mutation
+rejections for a weld-frame orientation and parent-frame socket. The pure
+admission tests remain a separate 14-case check. Raw public test outputs and
+their hashes are archived under
+`docs/development/feedback_controls/evidence/native_weldjoint_12280/`.
+
+This synthetic result establishes only this software path. It does not
+establish capture matching, anatomy, support or grip, physiological validity,
+full-clock replay, or qualification of a production model. The aggregate
+pre-PR check remains incomplete: its first run reported duplicate mypy module
+identities and missing vendor initialization, and the bounded mypy retry was
+stopped at the local resource cap before producing a result. The calculation
+registry remains release-blocked.

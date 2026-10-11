@@ -1,0 +1,14 @@
+{
+  "collected_node_ids": [
+    "tests/opensim/test_native_constrained_muscle.py::test_structural_weld_fresh_reload_and_saved_excitation_replay",
+    "tests/opensim/test_native_constrained_muscle.py::test_weld_transform_or_socket_mutation_invalidates_old_bundle[parent_frame_orientation-0.2 0.1 -0.1]",
+    "tests/opensim/test_native_constrained_muscle.py::test_weld_transform_or_socket_mutation_invalidates_old_bundle[socket_parent_frame-/bodyset/follower]"
+  ],
+  "outcomes": {
+    "tests/opensim/test_native_constrained_muscle.py::test_structural_weld_fresh_reload_and_saved_excitation_replay": "passed",
+    "tests/opensim/test_native_constrained_muscle.py::test_weld_transform_or_socket_mutation_invalidates_old_bundle[parent_frame_orientation-0.2 0.1 -0.1]": "passed",
+    "tests/opensim/test_native_constrained_muscle.py::test_weld_transform_or_socket_mutation_invalidates_old_bundle[socket_parent_frame-/bodyset/follower]": "passed"
+  },
+  "pytest_exit_status": 0,
+  "status": "tests_verified"
+}

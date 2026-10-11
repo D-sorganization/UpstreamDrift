@@ -14,6 +14,7 @@ from src.shared.python.motion_matching import posture_metrics as post
 from src.shared.python.motion_matching.club_face_target import merge_axis_targets
 from src.shared.python.motion_matching.contact_law import GroundPlane
 from src.shared.python.motion_matching.full_body_ik import BaseFullBodyIK
+from src.shared.python.motion_matching.pipeline.address_feet import planted_stance
 from src.shared.python.motion_matching.pipeline.plant import (
     MatchingPlant,
     get_plant,
@@ -740,8 +741,7 @@ class Lane:
             ground=self.ground,
             frames=frames,
             prior_weight=PRIOR,
-            flat_feet_per_frame=self.stance,
-            plant_stance=True,
+            **planted_stance(self),
             bounds=self.bounds,
             marker_weights={**self.marker_weights, **self.split_marker_weights},
             prior_weights=self.prior_weights,
@@ -781,11 +781,12 @@ class Lane:
         spec_bytes: bytes,
         seeds: dict[str, tuple[str, Sequence[float]]],
         q_seed: np.ndarray,
+        fixed_bodies: Sequence[str] = (),
     ) -> tuple[dict[str, tuple[str, tuple[float, float, float]]], Any, Any]:
         """Alternating static trial: neutral address fit and marker placement."""
         from src.shared.python.motion_matching.pipeline.address import static_trial
 
-        return static_trial(self, spec_bytes, seeds, q_seed)
+        return static_trial(self, spec_bytes, seeds, q_seed, fixed_bodies)
 
     def static_offsets(
         self,

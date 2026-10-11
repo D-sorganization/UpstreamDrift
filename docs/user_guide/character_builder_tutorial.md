@@ -35,11 +35,11 @@ from src.shared.python.humanoid_character_builder.spec_export import (
 # mass_kg to 90.0 and keep every other preset value (driver, stature 1.80 m).
 compiled = compile_character("tour_average_male", {"mass_kg": 90.0})
 print(compiled.preset_id)     # tour_average_male
-print(compiled.sha256[:8])    # c0e2ca45
+print(compiled.sha256[:8])    # 4ee2c43d
 print(build_summary(compiled))
 ```
 
-This produced `preset_id="tour_average_male"`, spec hash `c0e2ca45...`, and
+This produced `preset_id="tour_average_male"`, spec hash `4ee2c43d...`, and
 a summary of 25 bodies, 24 joints, 44 coordinates and 86.58 kg total mass
 (De Leva 1996 male table plus Rajagopal lower limbs — unqualified geometry,
 not a validated subject; see **Limitations** below). The total is below the
@@ -72,12 +72,12 @@ choices = {
     "club_finish": "chrome",
 }
 appearance_doc = build_appearance(choices, compiled.sha256)
-print(appearance_doc["spec_sha256"][:8])  # c0e2ca45 — bound to Step 1's spec
+print(appearance_doc["spec_sha256"][:8])  # 4ee2c43d — bound to Step 1's spec
 
 sidecar_name = appearance_sidecar_filename(
     appearance_doc, preset_id=compiled.preset_id, spec_sha256=compiled.sha256
 )
-print(sidecar_name)  # tour_average_male_c0e2ca45.appearance.json
+print(sidecar_name)  # tour_average_male_4ee2c43d.appearance.json
 
 with open(sidecar_name, "w", encoding="utf-8") as f:
     f.write(json.dumps(appearance_doc, indent=2) + "\n")
@@ -110,7 +110,7 @@ print(compiled_iron.sha256[:8])              # 9ac415e2
 print(compiled.sha256 != compiled_iron.sha256)  # True
 ```
 
-The spec hash changed (`c0e2ca45...` to `9ac415e2...`) because the club is
+The spec hash changed (`4ee2c43d...` to `9ac415e2...`) because the club is
 part of the physics spec. The Step 2 appearance document is still a valid
 `appearance-v1` document — `document_from_dict` on it still passes — but
 its `spec_sha256` now names a spec that no longer exists; rebind it to the
@@ -151,10 +151,10 @@ For the driver character from Step 1 this wrote:
 
 | Format | Filename                          | Bytes | Media Type         |
 | ------ | --------------------------------- | ----- | ------------------ |
-| `spec` | `tour_average_male_c0e2ca45.json` | 85471 | `application/json` |
-| `urdf` | `tour_average_male_c0e2ca45.urdf` | 57438 | `text/xml`         |
-| `mjcf` | `tour_average_male_c0e2ca45.xml`  | 18287 | `text/xml`         |
-| `osim` | `tour_average_male_c0e2ca45.osim` | 88889 | `text/xml`         |
+| `spec` | `tour_average_male_4ee2c43d.json` | 85519 | `application/json` |
+| `urdf` | `tour_average_male_4ee2c43d.urdf` | 57439 | `text/xml`         |
+| `mjcf` | `tour_average_male_4ee2c43d.xml`  | 18287 | `text/xml`         |
+| `osim` | `tour_average_male_4ee2c43d.osim` | 88892 | `text/xml`         |
 
 **Web/API equivalent:** `POST /api/character-builder/export/{fmt}` for
 `fmt` in `spec`, `urdf`, `mjcf`, `osim` — the Export buttons in
@@ -176,6 +176,68 @@ This wrote a 36960-byte URDF and printed `Successfully built character and
 saved to golfer_pro_humanoid.urdf`. Use the spec-native path above for club
 swapping, appearance binding or engine export beyond URDF.
 
+## Step 5: Export and Animate a Skinned glTF Body
+
+`gltf` is a fifth export format. It writes a glTF 2.0 skinned mesh lofted
+from the compiled spec's skeleton, with one bone per spec body. You can
+view it in any glTF viewer with no physics engine:
+
+```python
+import json
+
+text, media_type, filename = export_character(compiled, "gltf")
+with open(filename, "w", encoding="utf-8") as f:
+    f.write(text)
+
+doc = json.loads(text)
+print(filename, len(text), media_type)
+# tour_average_male_4ee2c43d.gltf 334632 model/gltf+json
+print(len(doc["skins"][0]["joints"]))      # 24 bones
+print(doc["accessors"][0]["count"])        # 3416 vertices
+print(doc["extras"]["spec_sha256"][:8])    # 4ee2c43d
+```
+
+For the driver character from Step 1, this wrote a 334632-byte document
+with 24 bones and 3416 vertices. The bytes are identical on every run for
+the same spec. `extras.spec_sha256` ties the mesh back to Step 1's spec
+`4ee2c43d...`. The mesh is visual only and never changes mass, inertia or
+contact. Every vertex follows exactly one bone (rigid skinning); smooth
+blending across joints is still open (#11657).
+
+The static export has no animation. To play spec motion on the skin,
+build the body yourself, run the spec forward kinematics over a
+coordinate trajectory, and pass the poses in. This example turns the torso
+from 0 to 0.8 rad over 31 frames at 60 fps:
+
+```python
+from src.shared.python.model_appearance.skinned_body import (
+    build_skinned_body,
+    skinned_body_gltf_text,
+    spec_motion_bone_poses,
+)
+
+body = build_skinned_body(compiled.document, spec_sha256=compiled.sha256)
+frames = [{"TorsoInput": 0.8 * i / 30} for i in range(31)]
+motion = spec_motion_bone_poses(body, compiled.document, frames)
+print(motion.shape)  # (31, 24, 4, 4)
+
+with open("tour_average_male_4ee2c43d_turn.gltf", "w", encoding="utf-8") as f:
+    f.write(skinned_body_gltf_text(body, motion, fps=60.0))
+```
+
+Each frame is a mapping from spec coordinate name to value. Any coordinate
+you leave out is zero, and an unknown name raises `ValueError`. The
+document carries one LINEAR animation with 48 channels: a translation and
+a rotation channel per bone, keyed over 0.5 s.
+
+**Web/API equivalent:** `POST /api/character-builder/export/gltf` returns
+the static document; the **glTF** export button in `CharacterSpecPanel`
+sends this request. On the web Character Builder page, tick **Preview spec
+body (glTF)** to load that export into the 3D view, tinted with the
+appearance trunk colour. The preview refetches after each slider change. The desktop builder's **Export glTF** button writes
+`custom_<sha8>.gltf`, byte-identical to the API export for the same hash.
+Animated export is Python-only for now.
+
 ## Desktop Walkthrough
 
 Steps 1, 3 and 4 also run in the desktop builder: the **Character Builder**
@@ -192,7 +254,7 @@ the same widget offscreen and regenerates every image in this section.
 
 2. **Override the mass.** Set **Mass (kg)** to 90.0. Any edit switches
    **Preset** to **Custom** and recompiles at once. The spec hash is
-   `c0e2ca45...`, the same as Step 1, so the desktop and the API compile
+   `4ee2c43d...`, the same as Step 1, so the desktop and the API compile
    identical specs. The summary shows 86.6 kg total for the reason given in
    Step 1 (#12199).
 
@@ -214,7 +276,7 @@ the same widget offscreen and regenerates every image in this section.
 The desktop builder has no appearance picker yet. Dress the character
 through the API or the web Appearance panel (Step 2).
 
-## Step 5: Simulate (Requires MuJoCo)
+## Step 6: Simulate (Requires MuJoCo)
 
 This step needs the `mujoco` package, which is not installed on every
 host; it was not run as part of this tutorial's verification. Loading the
@@ -225,7 +287,7 @@ in `tests/unit/engines/mujoco/test_continuous_torque_simulate.py`:
 ```python
 import mujoco
 
-model = mujoco.MjModel.from_xml_path("tour_average_male_c0e2ca45.xml")
+model = mujoco.MjModel.from_xml_path("tour_average_male_4ee2c43d.xml")
 data = mujoco.MjData(model)
 
 for _ in range(100):

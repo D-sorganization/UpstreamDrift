@@ -1,0 +1,35 @@
+{
+  "harness_sha256": "9c45546b7788b08656198bdff7c4589f707485d4d14e404fb3402527d5bfa4cf",
+  "input_sha256": {
+    "request.json": "ba01112a4ea142d1b93e89a27b5f381829889fd3799aa613eb8e2efdd737174c",
+    "solution.sto": "0ba31fd0f6e6859ab4e8b20ed82cb7d9f9eb1092b8e279b0e3954990440b8996",
+    "source.osim": "6a098517bdba09b19b3eb99e4da7e795f27d10be8f42c0fca04fee20ce67e143",
+    "time_only_controls.sto": "0975347efabf63f2344348ab1e77e67375e725c8bf010a28c0abdc660fbaf50b"
+  },
+  "nonsecret_environment": {
+    "BLIS_NUM_THREADS": "1",
+    "CASADIPATH": "C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\opensim",
+    "MKL_NUM_THREADS": "1",
+    "NUMEXPR_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PYTHONPATH": "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-marker-calibration-12164",
+    "VECLIB_MAXIMUM_THREADS": "1"
+  },
+  "optimizer_invoked": false,
+  "sampled_rss_soft_threshold_bytes": 1073741824,
+  "schema": "native-retained-replay-invocation-v1",
+  "source_run": "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-marker-calibration-12164\\docs\\development\\feedback_controls\\experiments\\native_moco_refinement_solve_cecfcd98_root_20261011T080500Z\\solution_control_replay_inputs_final",
+  "timeout_seconds": 30.0,
+  "worker_command": [
+    "C:/Users/diete/Repositories/.venv-feedback-opensim/Scripts/python.exe",
+    "-m",
+    "tests.opensim.native_moco_ladder_worker",
+    "--replay-existing",
+    "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-marker-calibration-12164\\docs\\development\\feedback_controls\\experiments\\native_moco_refinement_solve_cecfcd98_root_20261011T080500Z\\solution_control_replay_inputs_final",
+    "--output",
+    "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-marker-calibration-12164\\docs\\development\\feedback_controls\\experiments\\native_moco_refinement_solve_cecfcd98_root_20261011T080500Z\\solution_control_replay_diagnostic_3bc787e36d_root\\retained_replay\\native_audit"
+  ],
+  "worker_sha256": "3a7f87e691db50531d12bd1228c6a9d402e5ecf198148d6ea89b6e66da5b9381",
+  "working_directory": "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-marker-calibration-12164"
+}

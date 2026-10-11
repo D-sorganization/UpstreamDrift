@@ -1,0 +1,87 @@
+"""Pure sequencing and validation for the source-bound zero-effort gate."""
+from __future__ import annotations
+
+from collections.abc import Callable, Sequence
+from typing import Any
+
+import numpy as np
+
+
+def _finite_vector(values: object, shape: tuple[int, ...], label: str) -> np.ndarray:
+    result = np.asarray(values, dtype=np.float64)
+    if result.shape != shape or not np.isfinite(result).all():
+        raise ValueError(f"{label} must be finite with shape {shape}")
+    return result.copy()
+
+
+def execute_zero_effort_gate(
+    plant: Any,
+    coordinate_order: Sequence[str],
+    q0: object,
+    v0: object,
+    observe_before_acceleration: Callable[[np.ndarray, np.ndarray], dict[str, object]],
+    *,
+    closure_tolerance: float = 1e-9,
+) -> dict[str, object]:
+    """Check source-shaped closure/rank before exactly one zero-effort solve.
+
+    ``observe_before_acceleration`` must use position/kinematic APIs only. The
+    returned geometry observation is validated before ``plant.acceleration``
+    is called. This helper deliberately performs no integration or projection.
+    """
+    names = tuple(coordinate_order)
+    nv = len(names)
+    if nv != 41 or len(set(names)) != nv:
+        raise ValueError("source coordinate order must contain 41 unique names")
+    if plant.coordinate_order != names:
+        raise ValueError("VectorPlant coordinate order differs from exact source")
+    if not np.isfinite(closure_tolerance) or closure_tolerance <= 0.0:
+        raise ValueError("closure tolerance must be finite and positive")
+    q = _finite_vector(q0, (nv,), "q0")
+    v = _finite_vector(v0, (nv,), "v0")
+    q_before, v_before = q.copy(), v.copy()
+
+    observation = observe_before_acceleration(q.copy(), v.copy())
+    observed_q = _finite_vector(observation.get("q"), (nv,), "observed q")
+    if not np.array_equal(observed_q, q):
+        raise ValueError("pre-acceleration geometry observation changed q identity")
+    pose = _finite_vector(
+        observation.get("weld_pose_residual_m_rad"), (6,), "weld pose residual"
+    )
+    rate = _finite_vector(
+        observation.get("weld_rate_residual_m_s_rad_s"),
+        (6,),
+        "weld rate residual",
+    )
+    jacobian = _finite_vector(
+        observation.get("weld_jacobian_6x41"), (6, nv), "weld Jacobian"
+    )
+    rank = observation.get("jacobian_rank")
+    if type(rank) is not int or rank != 6 or int(np.linalg.matrix_rank(jacobian)) != 6:
+        raise ValueError("pre-acceleration weld Jacobian must have rank six")
+    if float(np.max(np.abs(pose))) > closure_tolerance:
+        raise ValueError("pre-acceleration weld pose residual exceeds declared gate")
+    if float(np.max(np.abs(rate))) > closure_tolerance:
+        raise ValueError("pre-acceleration weld rate residual exceeds declared gate")
+
+    zero_effort = np.zeros(nv, dtype=np.float64)
+    acceleration = _finite_vector(
+        plant.acceleration(q.copy(), v.copy(), zero_effort.copy()),
+        (nv,),
+        "zero-effort acceleration",
+    )
+    if not np.array_equal(q, q_before) or not np.array_equal(v, v_before):
+        raise ValueError("probe mutated the frozen initial q/v state")
+    return {
+        "coordinate_order": names,
+        "q0": q.copy(),
+        "v0": v.copy(),
+        "effort": zero_effort,
+        "weld_pose_residual_m_rad": pose,
+        "weld_rate_residual_m_s_rad_s": rate,
+        "weld_jacobian_6x41": jacobian,
+        "jacobian_rank": rank,
+        "closure_tolerance_m_rad": float(closure_tolerance),
+        "acceleration": acceleration,
+        "acceleration_call_count": 1,
+    }

@@ -363,3 +363,45 @@ def test_apply_hip_calibration_records_zero_twist() -> None:
         assert np.linalg.det(rotation) == pytest.approx(1.0)
     assert new["subject"]["hip_zero_twist_deg"] == {"r": 15.2, "l": -8.7}
     assert "zero twist" in new["provenance"]
+
+
+def test_select_hip_zero_twist_modes() -> None:
+    """#12042: capture keeps the measured twist; neutral zeroes both hips."""
+    measured = module.HipRotationZero(offset_r_deg=45.1, offset_l_deg=-25.7)
+    assert module.HIP_ZERO_TWIST_MODES == ("capture", "neutral")
+    assert module.DEFAULT_HIP_ZERO_TWIST == "capture"
+    assert module.select_hip_zero_twist("capture", measured) is measured
+    neutral = module.select_hip_zero_twist("neutral", measured)
+    assert neutral.to_dict() == {"r": 0.0, "l": 0.0}
+    with pytest.raises(ValueError, match="capture, neutral"):
+        module.select_hip_zero_twist("bogus", measured)
+    with pytest.raises(TypeError, match="HipRotationZero"):
+        module.select_hip_zero_twist("capture", {"r": 1.0, "l": 2.0})  # type: ignore[arg-type]
+
+
+def test_hip_zero_twist_option_and_cli_flag() -> None:
+    from src.shared.python.motion_matching.pipeline.address import (
+        HipCalibrationOptions,
+    )
+    from src.shared.python.motion_matching.pipeline.cli import build_parser
+
+    assert HipCalibrationOptions().hip_zero_twist == "capture"
+    assert build_parser().parse_args([]).hip_zero_twist == "capture"
+    args = build_parser().parse_args(["--hip-zero-twist", "neutral"])
+    assert args.hip_zero_twist == "neutral"
+    with pytest.raises(SystemExit):
+        build_parser().parse_args(["--hip-zero-twist", "bogus"])
+
+
+def test_skip_hip_calibration_rejects_a_non_default_zero_twist() -> None:
+    """Skipping calibration keeps the input femur frames, so ``neutral`` would
+    be recorded in the receipt without being applied (#12248 review)."""
+    from src.shared.python.motion_matching.pipeline.address import (
+        HipCalibrationOptions,
+    )
+
+    assert HipCalibrationOptions(skip_hip_calibration=True).hip_zero_twist == (
+        "capture"
+    )
+    with pytest.raises(ValueError, match="skip_hip_calibration"):
+        HipCalibrationOptions(skip_hip_calibration=True, hip_zero_twist="neutral")

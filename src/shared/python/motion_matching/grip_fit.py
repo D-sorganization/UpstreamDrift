@@ -69,6 +69,70 @@ def grip_rotation(euler_deg: Sequence[float] | Array) -> Array:
     return np.asarray(Rotation.from_euler("xyz", e, degrees=True).as_matrix())
 
 
+def compose_rotation_deg(
+    base_deg: Sequence[float] | Array, correction_deg: Sequence[float] | Array
+) -> tuple[float, float, float]:
+    """Extrinsic x-y-z degrees of ``G(base) @ G(correction)``.
+
+    A fit made on a document that already carries ``base_deg`` yields a
+    correction; this is the total to record in the document. Postcondition:
+    ``grip_rotation(result)`` equals the matrix product to rounding.
+    """
+    total = grip_rotation(base_deg) @ grip_rotation(correction_deg)
+    x, y, z = Rotation.from_matrix(total).as_euler("xyz", degrees=True)
+    return (float(x), float(y), float(z))
+
+
+def _count(value: int, name: str) -> int:
+    if isinstance(value, bool) or not isinstance(value, (int, np.integer)):
+        raise ValueError(f"{name} must be an integer, got {value!r}")
+    if value < 0:
+        raise ValueError(f"{name} must be non-negative, got {value}")
+    return int(value)
+
+
+def weighted_frames(
+    stack: Array,
+    impact_frame: int | None = None,
+    *,
+    window_frames: int = 0,
+    window_weight: int = 0,
+    address_frames: int = 0,
+    address_weight: int = 0,
+) -> Array:
+    """The fit input of one run: the whole stack once, plus the
+    ``window_frames`` frames before ``impact_frame`` repeated ``window_weight``
+    times, plus the first ``address_frames`` frames repeated
+    ``address_weight`` times (concatenated along axis 0).
+
+    Repetition weights the squared excess of those frames in the fit. With
+    all weights zero the stack is returned unchanged. Raises ``ValueError``
+    for negative or non-integer counts, a missing or out-of-range
+    ``impact_frame`` when the window is active, or ``address_frames`` beyond
+    the stack.
+    """
+    m = np.asarray(stack, dtype=float)
+    n_window = _count(window_frames, "window_frames")
+    w_window = _count(window_weight, "window_weight")
+    n_address = _count(address_frames, "address_frames")
+    w_address = _count(address_weight, "address_weight")
+    parts = [m]
+    if n_window * w_window > 0:
+        if impact_frame is None or not n_window <= impact_frame <= len(m):
+            raise ValueError(
+                f"impact_frame must satisfy window_frames ({n_window}) <= "
+                f"impact_frame <= {len(m)}, got {impact_frame!r}"
+            )
+        parts += [m[impact_frame - n_window : impact_frame]] * w_window
+    if n_address > len(m):
+        raise ValueError(
+            f"address_frames ({n_address}) exceeds the {len(m)} frames given"
+        )
+    if n_address * w_address > 0:
+        parts += [m[:n_address]] * w_address
+    return np.concatenate(parts, axis=0)
+
+
 def wrist_angles(relative: Array, wrist_base: Array) -> Array:
     """Exact (pronation, cock, flexion) in radians, shape (frames, 3), such
     that ``Rz(p) @ wrist_base @ Rx(c) @ Rz(f)`` equals each relative rotation.

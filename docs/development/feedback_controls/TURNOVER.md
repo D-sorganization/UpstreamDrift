@@ -1,5 +1,36 @@
 # Feedback Controls Planning Turnover
 
+## F09c Full-Body MuJoCo Frozen Replay (#11898)
+
+The new `mujoco-full-body-generalized-rk4` provider binds a frozen T01 bundle
+to the full-body source spec and replays complete q/v state with all
+coordinate-ordered generalized-effort channels. Six root entries are required
+to be zero before entering the shared `VectorPlant` / fixed eight-substep RK4
+path. Projection, assembly, reset, hidden state, and feedback callbacks remain
+disabled during frozen replay; model-owned contact and weld forces are
+evaluated during the shared plant derivative calls. Initial and per-step
+closure residuals are observed without a new threshold. The paired feedback
+recorder calls a declared controller once per interval with detached complete
+q/v copies, rejects malformed or nonzero-root efforts before integration,
+holds the validated effort across the same eight RK4 substeps, and emits the
+existing T01 generalized-effort bundle plus an unqualified producer record.
+Tests use manufactured plants and verify 32 identical effort-bearing
+acceleration calls per interval and controller-free open-loop reproduction.
+They do not execute the production full-body model or qualify a real feedback
+law, bounded control, contact/grip, support, capture match, or physiology. See
+`F09C-NATIVE-EXECUTION.md` and canonical chapter 13.
+
+## F07 Native Moco Physical-Body Preflight (#12205)
+
+The maintained OpenSim Moco runner now requires the existing source/native
+body-inertia audit during preparation and repeats it immediately before solve,
+export and replay. An admitted SHA-bound sidecar cannot substitute for a fresh
+native readback. Invalid or missing physical evidence becomes an explicit
+blocker without hiding independent preparation failures. See chapter53 and
+`F07_MOCO_INERTIA_PREFLIGHT_TURNOVER.md`. The unchanged 557-muscle source
+remains physically unqualified; all 17 variants/six ecosystems and the
+full-horizon captured swing remain open.
+
 ## Physical Inertia Helper Handoff
 
 Issue #12183 fixes rotation-dependent acceptance and scale-masked asymmetry in
@@ -519,3 +550,92 @@ Manager seed regressions cover value and speed projection in mixed and
 mechanical prepared-state paths. See chapter48 and
 `F07_CONSTRAINED_MIXED_MOCO_TURNOVER.md`; the registry still contains zero
 approved calculations and release remains blocked.
+
+## F09Q OpenSim Mixed Replay Marker Scoring (#12195)
+
+The exact T01 mixed bundle is freshly replayed once, then every complete named
+native state and exact time is restored for model-owned OpenSim marker FK.
+Ordered PhysicalFrame paths and local station offsets are caller supplied;
+no coordinate-only reconstruction, assembly, or hidden integration is used.
+The existing observation aligner retains the measured clock/missingness mask
+and rejects extrapolation before computing canonical metrics. The OpenSim 4.6
+affected constrained-mixed module completed with 12 passes, including the
+synthetic integration and source/horizon negatives. Two portable tests reject
+qualification promotion through construction or `dataclasses.replace`.
+Marker/alignment arrays are bytes-backed. This is diagnostic, unqualified
+output, not an execution receipt, approved calibration, F01 admission, capture
+fit, or scientific validation. See chapter49 and
+`docs/development/feedback_controls/F09Q-OPENSIM-MIXED-MARKER-SCORING.md`.
+
+## F09R Drake Native Replay Import Isolation (#12203)
+
+The Drake engine and Drake-Python facades now defer implementation imports,
+so importing the native replay adapter no longer requires unrelated Drake
+simulation or wrench-processing dependencies. A clean subprocess regression
+blocks pydrake and bunkershot3d imports while loading the source-checkout
+adapter. The existing Drake 1.57.0 native synthetic replay tests pass 11/11
+with only the repository root on `PYTHONPATH`. This establishes neither an
+installed-wheel import path nor additional engine or scientific qualification.
+
+CI run 38082402009 exposed a standard-library exception difference:
+`dataclasses.replace` raises `ValueError` on Python 3.11 and `TypeError` on
+Python 3.13 for an `init=False` field. The regression accepts both runtime
+exceptions while requiring the `init=False` diagnostic. The affected test
+file passes on Python 3.11.17 and 3.13.5. The initial full unit run completed
+23,846 tests with this single failure before the test-only correction.
+
+## F07 Exact 557-Muscle Diagnostic Replay (#12182)
+
+The exact derived BUET–Hamner source now has a separate v3 excitation replay
+profile. The original one-equilibrium seed fails its unchanged source chart at
+the first 1 ms sample. An explicitly declared six-coordinate interior seed
+passes only a 0.2 ms saved-input/fresh-native replay with all 557 muscle
+channels and 17 observed couplers. The public hash-bound receipt and failed
+attempts are in `F07_EXACT_557_REPLAY_TURNOVER.md`; chapter50 records the
+calculation. Four invalid original body inertia tensors, physiological
+preparation, longer source-chart viability, real marker registration and
+capture matching remain open. The calculation registry stays unapproved.
+
+## F07 Source-Body Inertia Admission (#12191)
+
+`native_body_inertia.py` now checks exact source/native mass, body-frame COM,
+and inertia before a physical OpenSim claim. Its rotated-invalid and welded
+massless fixtures, source mutation and altered native readback are TDD
+regressions. Actual OpenSim 4.6 identifies exactly four invalid positive-mass
+bodies in the unchanged 557-muscle source; nine exact massless carriers use
+their explicit zero policy. See chapter52, the source-bound receipt and
+`F07_NATIVE_BODY_INERTIA_TURNOVER.md`. This gate neither changes source data
+nor upgrades the 0.2 ms #12182 diagnostic to a physiological or full-horizon
+result. All 17 required variants and six ecosystems remain open.
+
+## F07 Manufactured Native Diagnostics (#12275)
+
+The compact source-bound evidence archive is `experiments/manufactured_native_diagnostics_20261011/`.
+It retains exact synthetic MuJoCo geometry/zero-effort, 20-microsecond feedback and
+10-millisecond refinement receipts, plus OpenSim 4.6 muscle-property, Pinocchio
+geometry/acceleration and Drake geometry observations, with failed attempts and
+pure-test snapshots. `artifact-manifest.json` binds each archived byte sequence
+to its original path and SHA-256; model/runtime binaries and private captures
+remain external. The package README states each result's limits. None establishes
+supported equilibrium, calibrated contact, capture accuracy, physiology, or
+production replay; all 17 model/variant rows remain unqualified.
+
+A separate folder, `experiments/drake_candidate_lift_zero_effort_20261012_root_attempt1/`,
+now retains one Drake zero-effort acceleration observation and its exact
+receipt, metadata, log, and observer snapshots. The q input is identical to
+the retained Pinocchio and MuJoCo candidate inputs; qdd differences are
+descriptive and have no acceptance threshold. This is a near-touch free-fall
+sample, not supported equilibrium or cross-engine qualification. The original
+52-entry archive and manifest remain unchanged; all 17 rows remain unqualified.
+
+## Same-Input Lazy Package Exports (#11898)
+
+The `same_input` facade now resolves its established exports lazily. A clean
+subprocess test blocks `cv2`, historical-fit, pipeline, visualization, and
+reference/integrator imports while importing the closure submodule and
+requesting `project_to_closure`; the package does not initialize those
+dependencies. A separate subprocess verifies the full export set, provider
+object identities, `dir()` discoverability, and normal `AttributeError` for
+unknown names. The focused regression passes on the Python 3.13 host. This is
+an import-boundary fix only; it adds no native execution or qualification
+evidence.

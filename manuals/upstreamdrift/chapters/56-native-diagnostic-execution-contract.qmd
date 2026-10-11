@@ -1,0 +1,109 @@
+# Native Diagnostic Execution Contract
+
+This provisional chapter defines the shared request-bound contract for native
+OpenSim diagnostic preparation and execution. Software admission, runtime
+viability, and physical qualification are separate outcomes. Passing the first
+two never establishes the third. The contract is diagnostic-only and cannot
+issue a physical qualification.
+
+## Source-Bound Findings
+
+`NativeDiagnosticFinding` carries a registered code, source SHA-256, optional
+component path, optional evidence SHA-256, and registry-fixed execution and
+qualification effects. A caller cannot choose the effects. Unknown blocker
+strings map to a blocking observation-invalid finding until the registry is
+updated. Typed policy and optional qualification context are strict request
+fields; both bind to the exact model SHA-256 and contribute to request identity.
+Default request identity and the legacy passive-policy flag retain their
+existing serialization semantics.
+
+The optional `NativeQualificationContext` is limited to source-specific
+conditional-anatomy, support/contact/grip, and provisional-marker-registration
+gaps. Each finding binds its own evidence digest to explicit provenance
+references. The default request contains no such claims. Evidence for another
+source, missing evidence, unsupported codes, unregistered effects, or missing
+provenance rejects the request. Private evidence references remain in private
+request/assessment receipts.
+
+## Admission and Runtime Contract
+
+The assessment records three independent values:
+
+1. `software_admission` is blocked by any blocking finding. An explicit policy
+   can allow only registry-declared qualification-only findings; it cannot
+   allow an invalid body inertia, state, constraint, input, controller, force,
+   or native source.
+2. `runtime_viability` describes one exact native execution attempt, with a
+   native runtime identity, evidence digest, runtime phase, and finite observed
+   time interval. The initial optimizer gate requires a viable
+   `short-capability-probe`, not a full-capture optimization or replay.
+3. `physical_qualification` remains `not-established` or `unqualified`.
+   Neither an empty finding set nor successful execution can change it to a
+   qualified state.
+
+Optimizer admission additionally requires positive findings for source
+identity, complete state reconstruction, constraint reconstruction, input
+bindings, marker bindings, physical inertia, native mechanics, and completion
+of the short probe. These findings are generated from preparation audits;
+request JSON cannot supply or forge them. The probe retains the exact OpenSim
+runtime and native binary hashes, initial named state, discrete state, native
+default actuator controls and controller-free protocol, source-bound joint
+transform evaluations, native position/velocity/dynamics realization, finite
+state derivatives, muscle path lengths and actuation, and any declared
+constraint residual outcome. The recorded time window is the interval actually
+reached by the native integrator, which may be shorter than the requested
+optimization horizon. A failed probe retains its stage, exception class,
+bounded message, attempted horizon, and actually reached interval in a private
+receipt; an unavailable stack trace is not replaced by an inferred cause.
+
+An optional `NativeMechanicsExecutionProfile` can name exact-source
+`CustomJoint` and `MovingPathPoint` components whose native laws exceed the
+legacy analytic subset. It binds sorted component paths, concrete classes,
+serialized component hashes, and the profile digest to the exact model source.
+It is accepted only for constrained-muscle execution with an explicit typed
+diagnostic policy. The constrained-muscle provider delegates those mechanics
+to OpenSim during bundle construction and fresh replay. This does not establish
+end-to-end Moco solve, export, and replay support: the current bounded complex
+fixture reaches `MocoStudy.solve()` but has not returned a result. The profile
+does not expand controller, force, state, constraint, or physical-qualification
+permissions. Wrapped-path source closure remains a separate declaration.
+
+The initial capability profile fails closed on source controllers and
+uninventoried or unreproduced non-muscle forces. It evaluates OpenSim joint and
+function mechanics through the native API; it does not reimplement their
+equations. Expansion to inventoried, reproducible contact mechanics requires
+an explicit source profile and evidence. Hidden controllers, unreconstructible
+state, unsupported constraints, nonfinite mechanics, invalid physical
+inertias, and incomplete bindings remain hard blockers.
+
+## Findings Across the Execution Lifecycle
+
+Preparation writes the typed assessment with the exact request and blocker
+receipt. Solve changes only runtime phase/evidence to describe the optimizer
+attempt. Export carries the same assessment with the replay bundle. Independent
+replay records a validated `full-replay` assessment bound to the native output
+digest and exact output clock; scoring carries that assessment forward.
+Qualification effects and provenance are retained throughout. A successful
+optimizer, finite replay, marker score, or repeated numerical result cannot
+promote physical qualification.
+
+Wrapped-path closure findings come from Chapter 57's typed native source audit.
+That audit remains separate from this shared request/readiness contract, while
+its findings are validated through the same closed registry. Guide-work and
+global-chart gaps are qualification-only only when the exact source-bound
+policy explicitly opts in.
+
+## Validation
+
+The implementation is in `native_diagnostic_contract.py`,
+`native_capability_probe.py`, `native_moco_request.py`,
+`native_moco_runner.py`, and `native_moco_replay.py`. Focused actual OpenSim 4.6
+validation covers strict request JSON, source/evidence/provenance binding, hard
+blockers, Millard and Thelen preparation/solve/export/replay fixtures, score,
+and wrapped-path closure. A separate bounded complex Moco lifecycle fixture
+records its `optimizing` stage and times out while inside `MocoStudy.solve()`;
+that failure is retained and does not count as solve/export/replay support.
+Tests establish software behavior for their fixtures only; they do not
+establish full-model physical qualification, support/grip, measured anatomy,
+capture matching, or all-model parity. The calculation inventory remains empty
+and publication remains blocked.

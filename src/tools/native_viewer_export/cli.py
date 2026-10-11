@@ -105,6 +105,11 @@ def build_parser() -> argparse.ArgumentParser:
         "<swing>_<engine>_grip_wrench.json plot payload; pair with --views "
         "hands_closeup",
     )
+    p.add_argument(
+        "--no-ball",
+        action="store_true",
+        help="do not draw the decorative golf ball (shown until impact)",
+    )
     p.add_argument("--no-grid", action="store_true", help="skip the 2x2 clip")
     return p
 
@@ -144,6 +149,7 @@ def build_settings(args: argparse.Namespace) -> ExportSettings:
         multiview=not args.no_grid,
         grip=args.grip,
         hud=not args.no_hud,
+        ball=not args.no_ball,
         **(
             {"impact_speed": args.impact_speed} if args.impact_speed is not None else {}
         ),
@@ -184,6 +190,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         if r.skipped:
             sys.stdout.write(f"{r.engine}: SKIPPED ({r.skipped_reason})\n")
         else:
+            if r.ball is not None:
+                sys.stdout.write(f"{r.engine}: ball {r.ball}\n")
             sys.stdout.write(
                 f"{r.engine}: "
                 + ", ".join(
