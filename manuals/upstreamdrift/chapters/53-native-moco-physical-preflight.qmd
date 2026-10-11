@@ -1,0 +1,29 @@
+# Native Moco Physical-Body Preflight
+
+Issue #12205 connects the source-body audit in chapter52 to the maintained
+OpenSim Moco preparation and solve boundary. Preparation independently audits
+the exact source XML and a fresh native OpenSim model, writes the complete
+physical-body audit to a SHA-256-bound sidecar, and retains all other obtainable
+capture, guess, registration, passive-force and actuation blockers. A rejected
+or unavailable body audit is a distinct preparation blocker. Read-only model
+diagnostics remain possible; no physically unqualified source enters Moco
+optimization through this runner.
+
+Before solve, the runner requires a present, admitted audit sidecar matching
+the prepared digest. It reconstructs a fresh native model and repeats the
+chapter52 source/native mass, body-frame COM, six inertia-component and
+principal-moment audit. The new audit must match the frozen sidecar exactly,
+including the source, adapter, shared validator and native runtime identities.
+An old preparation without this evidence fails closed. Changing a sidecar,
+validator implementation or model bytes after preparation cannot authorize a
+solve. The same input-revalidation boundary protects later export and replay.
+
+The native test uses both Millard and Thelen muscle fixtures. A valid source
+binds an admitted audit. A rotated positive-definite tensor with invalid
+principal-moment triangle is rejected before solve; a malformed massless
+body retains its own physical blocker alongside independent preparation
+blockers. This necessary physical gate does not certify anatomy, passive
+physiology, contact/grip, captured-marker correspondence, a full swing, or
+muscle-only control. The unchanged 557-muscle source still fails for four
+positive-mass bodies. All 17 required variants across six ecosystems remain
+in the acceptance denominator, and publication remains blocked.

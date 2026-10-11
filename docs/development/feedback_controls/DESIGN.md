@@ -168,3 +168,45 @@ muscle-only default is unchanged. The 40 ms synthetic Moco/replay regression
 is software-path evidence, not a private capture, production anatomy/physics
 qualification, or release. See canonical chapter48 and
 `F07_CONSTRAINED_MIXED_MOCO_TURNOVER.md`.
+
+## Exact-Source 557-Muscle Replay Boundary (#12182)
+
+An opt-in version-three profile freezes the exact BUET–Hamner derived model
+bytes and native component inventory instead of widening the reviewed v1/v2
+class allowlists. Every clamped source range and the four source-coupled
+rotational coordinates have explicit units and chart declarations. Attached
+visual meshes are inventoried separately from dynamic resources. The
+prepared named state, native options, ordered 557 excitations and constraint
+policy are bound in T01; the shared scalar executor rejects initial
+projection and independently observes all 17 couplers at each knot. The
+original equilibrium seed fails the SC_z chart after 1 ms. A distinct
+six-coordinate interior diagnostic seed has only 0.2 ms replay evidence;
+neither result certifies source inertia, passive physiology, full native
+restart or a captured swing. Chapter50 and the exact replay turnover bind
+the inputs, equations, failures and acceptance limits.
+
+## Native Source-Body Inertia Admission (#12191)
+
+The OpenSim source-body gate reads exact BodySet properties and checks a fresh
+native model, without equilibrating, integrating or editing parameters. It
+uses the shared physical-inertia validator for positive masses and explicitly
+admits native welded/internal routing carriers only when both mass and all
+inertia components are exactly zero. Inertia is about the body-frame COM;
+native mass, COM and six components must equal the source. The unchanged
+557-muscle source fails the necessary principal-moment condition on both
+clavicles and both scapulae. The gate records all failing bodies and keeps
+the #12182 short replay diagnostic separate from physical admission. Chapter52
+and the public receipt bind source/runtime/adapter identities; source anatomy,
+passive forces, contact/grip and capture matching remain unqualified.
+
+## Native Moco Physical-Body Preflight (#12205)
+
+The maintained Moco preparation now binds the complete #12191 source/native
+body audit to a versioned, hashed sidecar while retaining every independent
+capture, guess, registration, passive-force and actuator blocker. A solve must
+have an admitted audit and repeat it against a fresh native model; source,
+adapter, shared validator and runtime identities must still match. Export and
+replay share the same revalidation boundary. A missing legacy audit or changed
+sidecar fails closed. The physical test is necessary for optimization, never
+sufficient for muscle physiology, captured-motion fit or release. See
+canonical chapter53 and `F07_MOCO_INERTIA_PREFLIGHT_TURNOVER.md`.
