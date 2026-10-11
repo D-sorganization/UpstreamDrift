@@ -8,6 +8,18 @@ mandatory. No supplied limits can be overridden, and independent excitation
 replay grants no muscle-matching qualification. Chapter55 and F07 unqualified
 feasibility turnover record TDD, native execution and remaining full-capture gates.
 
+## Native Wrapped-Path Source Closure (#12234)
+
+The opt-in wrapped-path declaration binds exact native wrap geometry, PathWrap
+ownership and target links, and ConditionalPathPoint coordinate ranges to the
+complete source hash. Fresh native source comparison is required before
+constrained replay. The strict default continues to reject wrapped components.
+Route observation is source-bound and read-only; unproven global transitions
+and guide-work bounds remain unqualified and require diagnostic opt-in. This
+does not admit nonlinear path functions, generalized joints, contact, or
+physiological claims. Chapter 57 records the closure profile and fixtures;
+runner-level typed finding aggregation depends on the shared Chapter 56 API.
+
 ## Coordinate-Invariant Physical Inertia Contract (#12183)
 
 The existing DIME inertia helper checks triangle feasibility on sorted principal
@@ -11142,4 +11154,3 @@ poses. Chapter54 and `F07_GENERIC_SHOULDER_LAMINA_TURNOVER.md` retain exact
 hashes, exclusions and reproduction. Tools #5503 and #12207 are pending;
 physiology, native force/work over a chart, contact/grip, head/markers,
 private full-horizon matching and all17/six-engine qualification remain open.
-

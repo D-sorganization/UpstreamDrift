@@ -211,6 +211,21 @@ def test_native_contract_adapter_blocks_mismatched_source_identity(
     assert finding.qualification_effect.name == "NONE"
 
 
+def test_native_contract_adapter_types_source_load_failure_as_execution_block(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "invalid.osim"
+    path.write_text("not an OpenSim model", encoding="utf-8")
+    source_sha256 = hashlib.sha256(path.read_bytes()).hexdigest()
+
+    audit = audit_native_wrapped_path_source(path, source_sha256, None)
+
+    assert len(audit.findings) == 1
+    assert audit.findings[0].code.value == "native_model_load_failed"
+    assert audit.findings[0].execution_effect.name == "BLOCK"
+    assert audit.findings[0].qualification_effect.name == "NONE"
+
+
 def test_native_contract_adapter_blocks_native_route_audit_failure(
     tmp_path: Path,
 ) -> None:

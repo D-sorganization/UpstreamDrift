@@ -249,8 +249,34 @@ def audit_native_wrapped_path_source(
 
     import opensim as osim
 
-    model = osim.Model(str(source))
-    model.finalizeConnections()
+    try:
+        model = osim.Model(str(source))
+    except (RuntimeError, ValueError) as exc:
+        failed_evidence = hashlib.sha256(
+            f"{source_sha256}:{type(exc).__name__}:{exc}".encode()
+        ).hexdigest()
+        finding = _diagnostic_finding(
+            "native_model_load_failed",
+            source_sha256,
+            failed_evidence,
+            "BLOCK",
+            "NONE",
+        )
+        return NativeWrappedPathAudit(source_sha256, None, None, (finding,))
+    try:
+        model.finalizeConnections()
+    except (RuntimeError, ValueError) as exc:
+        failed_evidence = hashlib.sha256(
+            f"{source_sha256}:{type(exc).__name__}:{exc}".encode()
+        ).hexdigest()
+        finding = _diagnostic_finding(
+            "wrapped_path_source_closure_invalid",
+            source_sha256,
+            failed_evidence,
+            "BLOCK",
+            "NONE",
+        )
+        return NativeWrappedPathAudit(source_sha256, None, None, (finding,))
     related = tuple(
         component
         for component in tuple(model.getComponentsList())
