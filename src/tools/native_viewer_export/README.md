@@ -86,7 +86,7 @@ which left the golfer at about a quarter of the frame height.
 (`projected_extent`). It also gives the camera distance that frames them with
 a 15 % margin (`fit_distance_m`).
 
-## Owner showcase driver
+## Owner Showcase Driver
 
 `python3 -m scripts.render_forces_showcase --capture capture-A --swing driver=driver.npz`
 renders the `clean/`, `club_forces/` and `grf/` clip set (1280x720, 60 fps,
