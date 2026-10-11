@@ -143,7 +143,7 @@
     {
       "id": "UP-D1-native-muscle-replay-inventory",
       "owner": "UpstreamDrift issue #11791",
-      "resolution": "Inventory the provisional native continuous-state excitation replay in tour_matching/muscle_replay.py and chapters/13-native-muscle-replay.qmd. Actual OpenSim 4.6 one-DOF compliant-muscle tests establish bounded input playback, continuous initialization and uninterrupted native stepping only. Discrete/plugin state, external-resource identity, passive/contact force policy, full-body anatomy, capture accuracy and full-horizon independent muscle/contact replay remain unqualified. Preserve cold-start policy and forbid weaker shared rigid-body/restarted/external-force evidence from qualifying the endpoint."
+      "resolution": "Inventory the provisional native continuous-state excitation replay in tour_matching/muscle_replay.py and chapters/13-native-muscle-replay.qmd. Actual OpenSim 4.6 one-DOF compliant-muscle tests establish bounded input playback, continuous initialization and uninterrupted native stepping only. A separate read-only OpenSim 4.6 probe observed activation time constants and minimum activation for two named muscles in one exact synthetic source without model initialization or integration; chapter 13 and the #12275 archive retain its identities and limits. Discrete/plugin state, external-resource identity, passive/contact force policy, full-body anatomy, capture accuracy and full-horizon independent muscle/contact replay remain unqualified. Preserve cold-start policy and forbid weaker shared rigid-body/restarted/external-force evidence from qualifying the endpoint."
     },
     {
       "id": "UP-D1-native-muscle-actuator-classification-inventory",
