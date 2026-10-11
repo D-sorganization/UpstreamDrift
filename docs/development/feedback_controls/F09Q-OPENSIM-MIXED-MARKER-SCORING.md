@@ -44,3 +44,16 @@ provider is unavailable; that skip is not native coverage. Canonical chapter:
 `manuals/upstreamdrift/chapters/49-native-opensim-mixed-marker-observation.qmd`.
 The engineering manual remains at zero registered calculations and
 `blocked-inventory-required`.
+
+## Main Integration and Canonical Receipt Preservation
+
+PR #12202 now targets main and preserves the concurrent remote integration
+history. Its failed unit gate was the existing ledger-freshness test: a
+formatter-only commit rewrote the serialized native Drake receipt after the
+ledger had been generated. The local test reproduced that failure.
+All nine JSON artifacts changed by that formatter commit were compared with
+their canonical #12216 source bytes at `7da0a29853`; their parsed content was
+identical. Restoring those exact source bytes and explicitly excluding those
+native artifacts from Prettier preserves provenance and the unchanged ledger
+check. No numerical values or acceptance rules were changed. The complete
+ledger suite is the focused regression; no native API changed in this repair.
