@@ -1232,21 +1232,13 @@ Full-clock private preflight retains unavailable passive admission and blocked
 independent replay. #12231 addresses strict visual asset closure; wrapped/chart,
 support/grip, captured matching and parity gates remain open.
 
-The bounded synthetic mesh-20 solve still has a failed independent replay.
-One corrected retained-input diagnostic completed under the unchanged 30-second
-limit and recorded full timewise state errors; endpoint target passed, while
-speed, activation and fiber-length thresholds failed. Saved excitation values
-matched at sampled knots, which does not establish continuous input equivalence.
-The completed offline activation analysis finds small reconstructed
-Hermite-Simpson residuals, while optimized flexor activation differs from both
-fresh replay and segmented scalar PWL integration by up to `1.1532e-4`.
-Fresh replay and scalar integration agree within `2.5751e-8`. The XML omits
-activation constants; calculations use OpenSim 4.6 source defaults, not
-installed-binary readback. This does not identify cause or qualify the failed
-replay. The bounded nonuniform refinement is implemented and pure-tested, but
-has not been run; native API/time-grid acceptance and any child solve/replay
-remain unverified and require separate review. See canonical chapter13 and
-`F07_NATIVE_MOCO_COMPLEXITY_LADDER_TURNOVER.md`.
+The synthetic refinement and corrected retained-input replay completed, but
+the replay remains outside its speed, activation and fiber-length limits. The
+21-interval child separately failed strict planned-clock validation at 9 of 43
+values by one ULP; the saved-clock diagnostic does not repair it. Offline
+activation analysis is diagnostic only and does not identify cause. Exact
+attempts, hashes, limits and failures remain in the historical appendices
+linked from `F07_NATIVE_MOCO_COMPLEXITY_LADDER_TURNOVER.md`.
 The agent-context catalog is unchanged because its `vendor/ud-tools` junction
 escapes to the frozen `feedback-drake-native-11838` donor; the context CLI
 rejected that path and the donor was not traversed or modified.

@@ -261,7 +261,8 @@ $5.66\times10^{-11}$ rad at common time knots, while flexor controls differ by
 up to $0.03523$ at those knots. The refinements therefore produce distinct
 optimized controls; this comparison does not identify the cause of the
 replay-state errors. The exact request, saved arrays, failed replay audit,
-timeouts, implementation hashes and reproduction details are retained in
+timeouts, implementation hashes and reproduction details are retained in the
+historical appendices linked from
 `docs/development/feedback_controls/F07_NATIVE_MOCO_COMPLEXITY_LADDER_TURNOVER.md`.
 These bounded synthetic runs establish neither full-body muscle feasibility
 nor physiology, capture matching, production replay, OpenSim muscle

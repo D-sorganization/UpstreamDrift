@@ -31,9 +31,10 @@ Fresh replay agrees with an independent segmented scalar PWL integration within
 `2.5751e-8`. Source XML omits activation constants, so the analysis uses OpenSim
 4.6 source defaults rather than installed-binary readback. This narrows the
 finding to a discrete optimized-state versus continuous-replay difference
-without identifying its cause. Chapter 13 and
-`F07_NATIVE_MOCO_COMPLEXITY_LADDER_TURNOVER.md` retain exact equations,
-acceptance limits, source/request hashes, failure statuses and output evidence.
+without identifying its cause. Chapter 13 and the current
+`F07_NATIVE_MOCO_COMPLEXITY_LADDER_TURNOVER.md` summary link to its two
+historical appendices, which retain exact equations, acceptance limits,
+source/request hashes, failure statuses and output evidence.
 This synthetic diagnostic does not qualify full-body muscle feasibility,
 physiology, capture matching, production replay or all-variant/ecosystem parity.
 
