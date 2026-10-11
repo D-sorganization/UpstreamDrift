@@ -1435,15 +1435,6 @@
       "expires_on": "2026-12-31"
     },
     {
-      "path": "scripts/research/shot_pattern_analysis/vector_rasterization.py",
-      "symbol": "render_vector",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - render_vector exceeds function-lines budget (191 > 100).",
-      "expires_on": "2026-12-31"
-    },
-    {
       "path": "src/tools/shot_pattern_analysis/matched_lean_control.py",
       "symbol": "analyze_explicit_source_pair",
       "rule": "function-lines",
