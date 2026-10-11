@@ -201,6 +201,44 @@ def test_update_frame_is_idempotent(ax, theme) -> None:
     assert handle in renderer._entries
 
 
+@pytest.mark.unit
+def test_update_frame_batches_triangle_vertices_without_reordering(
+    ax, theme, monkeypatch
+) -> None:
+    renderer = MatplotlibRenderer(ax)
+    handle = renderer.add_shape(
+        CylinderShape(length=1.0, radius=0.5, n_facets=20),
+        _fitted("cyl", n_frames=4),
+        theme,
+    )
+    entry = renderer._entries[handle]
+    expected = entry.world_vertices[2][entry.faces]
+    received: list[np.ndarray] = []
+    original_set_verts = entry.artist.set_verts
+
+    def capture_vertices(vertices, closed=True) -> None:
+        assert isinstance(vertices, np.ndarray)
+        received.append(vertices.copy())
+        original_set_verts(vertices, closed=closed)
+
+    monkeypatch.setattr(entry.artist, "set_verts", capture_vertices)
+    renderer.update_frame(handle, 2)
+
+    assert len(received) == 1
+    np.testing.assert_array_equal(received[0], expected)
+
+
+@pytest.mark.unit
+def test_empty_triangle_batch_is_accepted_by_matplotlib() -> None:
+    vertices = np.empty((0, 3), dtype=float)
+    faces = np.empty((0, 3), dtype=np.intp)
+    polygons = MatplotlibRenderer._face_polys(vertices, faces)
+    assert polygons.shape == (0, 3, 3)
+
+    collection = Poly3DCollection([])
+    collection.set_verts(polygons)
+
+
 def test_update_frame_unknown_handle_raises(ax) -> None:
     renderer = MatplotlibRenderer(ax)
     with pytest.raises(KeyError):
