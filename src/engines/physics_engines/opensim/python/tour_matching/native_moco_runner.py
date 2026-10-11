@@ -15,7 +15,7 @@ import math
 from pathlib import Path
 import time
 from types import MappingProxyType
-from typing import Any
+from typing import Any, Protocol
 
 import numpy as np
 from defusedxml import ElementTree as SafeET
@@ -258,18 +258,20 @@ def _atomic_write_progress(path: Path, payload: Mapping[str, Any]) -> None:
     atomic_write_bytes(path, encoded)
 
 
-def _native_solve_once(
+class _ProgressRecorder(Protocol):
+    def __call__(
+        self, stage: str, details: Mapping[str, Any] | None = None
+    ) -> None: ...
+
+
+def _make_progress_recorder(
     request: NativeMocoRequest,
-    registered: Path,
     directory: Path,
     wall: float,
     cpu: float,
-    *,
-    current_input_audit_elapsed_wall_seconds: float = 0.0,
-) -> NativeMocoSolve:
-    """Run and read back one exact native solver attempt."""
-    import opensim as osim
-
+    current_input_audit_elapsed_wall_seconds: float,
+) -> _ProgressRecorder:
+    """Bind one attempt's identity and clocks to its atomic event recorder."""
     progress_path = directory / "native_moco_progress.json"
     progress_events: list[dict[str, Any]] = []
 
@@ -307,6 +309,25 @@ def _native_solve_once(
         if details is not None:
             payload.update(details)
         _atomic_write_progress(progress_path, payload)
+
+    return record_progress
+
+
+def _native_solve_once(
+    request: NativeMocoRequest,
+    registered: Path,
+    directory: Path,
+    wall: float,
+    cpu: float,
+    *,
+    current_input_audit_elapsed_wall_seconds: float = 0.0,
+) -> NativeMocoSolve:
+    """Run and read back one exact native solver attempt."""
+    import opensim as osim
+
+    record_progress = _make_progress_recorder(
+        request, directory, wall, cpu, current_input_audit_elapsed_wall_seconds
+    )
 
     record_progress("building-study")
 

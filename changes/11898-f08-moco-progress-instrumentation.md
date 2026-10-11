@@ -10,3 +10,7 @@ records actual study-solver getter outcomes after the existing single-thread
 setting while preserving missing and error states. No model, request, physics,
 or solver policy changes; progress is diagnostic evidence only and does not
 qualify any production row.
+
+The event recorder is factored into a typed helper to keep the single-attempt
+solver within the architecture function budget without changing event fields,
+ordering, timing origins, or solver policy.
