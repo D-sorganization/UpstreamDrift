@@ -61,8 +61,21 @@ Native applied excitations
 are checked at output times separately from native muscle forces. This local
 receipt is a development adapter; the versioned Tools bundle remains the
 durable interchange authority. The model file alone is not a complete hash of
-arbitrary external resource dependencies, so such models need additional
-qualification before use.
+arbitrary external resource dependencies. The OpenSim muscle-bundle adapter
+therefore retains the unchanged T01 bundle for models without resources and
+wraps resource-bearing bundles in the local versioned
+`opensim-native-visual-resource-closure/1` envelope. That envelope admits only
+source-declared `.vtp` `Mesh` objects owned by a body's `attached_geometry`;
+each normalized relative path, component path, and asset SHA-256 is bound to
+the source-model SHA-256. Admission rejects missing, changed, duplicate,
+absolute, escaping, symlinked, or non-visual references. Replay copies the
+source and exact assets into an owned temporary snapshot, rebuilds the closure,
+and checks it again after native execution. The component-class exception is
+limited to those exact source-owned visual meshes; visual geometry does not
+authorize forces, contact, wrapping, or other mechanical inputs. This closure
+establishes asset identity and native visual-component loading only. It does
+not qualify wrapped/chart dynamics, contact, anatomical fidelity, or any
+full-body result.
 
 ## Evidence and Limits
 
