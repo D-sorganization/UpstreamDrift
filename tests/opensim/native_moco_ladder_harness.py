@@ -270,6 +270,7 @@ class RungResult:
     elapsed_seconds: float
     detail: str
     peak_sampled_tree_rss_bytes: int | None = None
+    owned_tree_cleanup_verified: bool = False
 
 
 class _WorkerTimeout(TimeoutError):
@@ -1087,6 +1088,7 @@ def _run_one_rung(
                 else f"worker process tree exceeded {timeout_seconds:g}s wall time"
             ),
             getattr(exc, "peak_rss", None),
+            True,
         )
     elapsed = time.monotonic() - started
     _write_worker_logs(directory, stdout, stderr)
@@ -1098,6 +1100,7 @@ def _run_one_rung(
             elapsed,
             f"worker exited {return_code}",
             peak_tree_rss,
+            True,
         )
     try:
         digest = _validate_success_receipt(directory, rung)
@@ -1109,8 +1112,9 @@ def _run_one_rung(
             elapsed,
             str(exc),
             peak_tree_rss,
+            True,
         )
-    return RungResult(rung.name, "passed", digest, elapsed, "", peak_tree_rss)
+    return RungResult(rung.name, "passed", digest, elapsed, "", peak_tree_rss, True)
 
 
 def run_retained_replay_diagnostic(

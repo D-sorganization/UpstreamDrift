@@ -182,9 +182,15 @@ def _build_mesh_grid_audit(
     child_request_refinement: dict[str, Any],
     solution_grid: Any,
 ) -> dict[str, Any]:
-    if any(
-        child_request_refinement.get(key) != refinement.get(key)
-        for key in ("attempt_id", "parent_hashes", "normalized_mesh_points")
+    plan_points = refinement.get("normalized_mesh_points")
+    request_points = child_request_refinement.get("normalized_mesh_points")
+    if (
+        not isinstance(plan_points, (list, tuple))
+        or not isinstance(request_points, (list, tuple))
+        or child_request_refinement.get("attempt_id") != refinement.get("attempt_id")
+        or child_request_refinement.get("parent_hashes")
+        != refinement.get("parent_hashes")
+        or list(request_points) != list(plan_points)
     ):
         raise ValueError("child request changed the retained refinement plan")
     seed_grid = child_request_refinement.get("native_guess_time_grid_seconds")
@@ -192,7 +198,7 @@ def _build_mesh_grid_audit(
         raise ValueError("child request omitted its seeded native guess grid")
     expected_grid = np.asarray(
         child_hs_grid(
-            refinement["normalized_mesh_points"],
+            plan_points,
             refinement["parent_request"]["horizon_seconds"],
         ),
         dtype=np.float64,

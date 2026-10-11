@@ -285,14 +285,17 @@ def test_refinement_grid_audit_reads_seed_grid_from_child_request() -> None:
     plan = {
         "attempt_id": "attempt",
         "parent_hashes": {"source_osim": "a" * 64},
-        "normalized_mesh_points": [0.0, 0.5, 1.0],
+        # The planner retains an immutable tuple; the configured request is
+        # JSON-native and therefore uses a list. Their numeric sequence must
+        # match exactly at the post-solve audit boundary.
+        "normalized_mesh_points": (0.0, 0.5, 1.0),
         "parent_request": {"horizon_seconds": 0.01},
     }
     grid = child_hs_grid(plan["normalized_mesh_points"], 0.01)
     child_request = {
         "attempt_id": "attempt",
         "parent_hashes": plan["parent_hashes"],
-        "normalized_mesh_points": plan["normalized_mesh_points"],
+        "normalized_mesh_points": list(plan["normalized_mesh_points"]),
         "native_guess_time_grid_seconds": list(grid),
     }
     audit = _build_mesh_grid_audit(plan, child_request, grid)
@@ -303,6 +306,44 @@ def test_refinement_grid_audit_reads_seed_grid_from_child_request() -> None:
     changed_request["normalized_mesh_points"] = [0.0, 0.25, 1.0]
     with pytest.raises(ValueError, match="changed the retained refinement plan"):
         _build_mesh_grid_audit(plan, changed_request, grid)
+
+
+def test_refinement_supervisor_stub_uses_exact_single_rung_protocol(
+    tmp_path: Path,
+) -> None:
+    from tests.opensim.native_moco_refinement import build_refinement_plan
+    from tests.opensim.native_moco_refinement_supervisor import run_stub
+
+    repository = Path(__file__).resolve().parents[2]
+    evidence_root = (
+        repository
+        / "docs/development/feedback_controls/experiments/native_moco_mesh20_e1548c5179"
+    )
+    plan = build_refinement_plan(
+        evidence_root / "plain", evidence_root / "activation_residual_analysis.json"
+    )
+    plan_path = tmp_path / "exact-plan.json"
+    plan_path.write_text(
+        json.dumps(plan, sort_keys=True, indent=2, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
+    output = tmp_path / "stub-output"
+    result = run_stub(plan_path, output, "sdk-python", repository)
+    command = result["worker_command"]
+    assert command[:5] == [
+        "sdk-python",
+        "-m",
+        "tests.opensim.native_moco_ladder_worker",
+        "--rung",
+        "plain",
+    ]
+    assert command[command.index("--mesh-intervals") + 1] == "21"
+    assert Path(command[command.index("--output") + 1]) == output / "plain"
+    staged_plan = Path(command[command.index("--refinement-plan") + 1])
+    assert staged_plan.read_bytes() == plan_path.read_bytes()
+    assert result["sdk_launched"] is False
+    assert result["status"] == "stub_preflight_pass_no_sdk_launch"
+    assert not (output / "plain").exists()
 
 
 def test_parent_refinement_guess_exports_state_table_and_restores_exact_initial(
@@ -1035,6 +1076,7 @@ def test_ladder_stops_after_first_worker_failure(tmp_path: Path) -> None:
     assert len(result) == 1
     assert result[0].status == "worker_failed"
     assert result[0].receipt_sha256 is None
+    assert result[0].owned_tree_cleanup_verified is True
 
 
 def test_ladder_bounds_worker_time_and_stops(tmp_path: Path) -> None:
@@ -1050,6 +1092,7 @@ def test_ladder_bounds_worker_time_and_stops(tmp_path: Path) -> None:
     assert invocations == ["plain"]
     assert len(result) == 1
     assert result[0].status == "timeout"
+    assert result[0].owned_tree_cleanup_verified is True
     assert result[0].elapsed_seconds < 3
     assert result[0].detail.endswith("wall time")
 
