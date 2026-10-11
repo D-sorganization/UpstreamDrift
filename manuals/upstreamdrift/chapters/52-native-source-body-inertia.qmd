@@ -1,0 +1,56 @@
+# Native OpenSim Source-Body Inertia Admission
+
+Issue #12191 adds a read-only gate between an OpenSim source model and a
+physical forward-dynamics claim. It uses the coordinate-invariant principal
+moment validator from #12183, then binds every declared `Body` mass, mass
+center, and six inertia entries to a fresh native OpenSim readback. The gate
+does not alter source XML, project tensors, scale anatomy, or optimize a model.
+
+## Source, Frame, and Native Readback
+
+The admitted source is one hash-bound `.osim` file with an explicit `BodySet`
+inventory. Each body supplies mass in kg, center of mass in its body frame in
+m, and the symmetric inertia about that center in kg m². For source entries
+`(Ixx,Iyy,Izz,Ixy,Ixz,Iyz)`, the audited tensor is
+
+$$I=\begin{bmatrix}
+I_{xx}&I_{xy}&I_{xz}\\ I_{xy}&I_{yy}&I_{yz}\\ I_{xz}&I_{yz}&I_{zz}
+\end{bmatrix}. $$
+
+The parser rejects missing, duplicate, nonfinite or malformed body properties.
+Source and freshly initialized native body names must agree exactly; every
+mass, center and inertia component must read back exactly. A source-byte
+change during admission also rejects. The receipt binds the source, adapter,
+shared principal-moment validator source, and three installed OpenSim native
+binary digests. Validator bytes are checked again after the audit. This is a body-property
+gate; external model assets and complete numerical restart require their
+separate source-closure and replay policies.
+
+Positive-mass bodies must pass the shared finite, symmetric,
+strictly-positive-principal-moment and triangle checks. The helper's existing
+absolute $10^{-9}$ kg m² numerical floor is a declared limitation, not a
+material uncertainty interval. An exact zero-mass, zero-inertia body may be
+admitted as a native internal/welded routing carrier; zero mass with nonzero
+inertia rejects. Native OpenSim itself rejects an external free/moving
+massless body. No epsilon mass or inertia is introduced.
+
+## Exact 557-Muscle Diagnostic Result
+
+The derived BUET–Hamner XML SHA-256
+`453e09c4e42dcc3f4b74a3b2efeff063e96c3820b3eee1efe95eef249579010d`
+has 40 source/native bodies. Nine exact massless routing carriers pass the
+separate zero policy. Four positive-mass bodies—bilateral clavicles and
+scapulae—fail the necessary principal-moment condition; the other 27 bodies
+pass this numeric gate. The four failures are inherited from the retained
+author-published upper/trunk donor, and native OpenSim 4.6 reads their source
+tensors exactly. The complete source and runtime identities, tests and failure
+names are in the public receipt and retained read-only provenance review.
+
+This blocks **physical admission** of that 557-muscle parameterization. Its
+0.2 ms saved-excitation replay remains a labeled diagnostic, and the failed
+1 ms chart run remains retained. A passing body gate on another source would
+still leave anatomy, passive-force physiology, assistance, native contact and
+grip, full-horizon replay, capture registration and all 17 variants across six
+ecosystems open. Neither a positive full-system mass matrix nor Moco
+initialization overrides an invalid individual source body. Publication is
+blocked until the governed calculation and scientific approvals are complete.
