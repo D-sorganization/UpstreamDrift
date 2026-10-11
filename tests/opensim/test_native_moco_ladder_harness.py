@@ -865,6 +865,50 @@ def test_custom_mesh_does_not_misreport_uniform_interval_getter() -> None:
         _validate_actual_solver_settings(request)
 
 
+def test_solver_settings_mismatch_persists_requested_and_actual_values(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from tests.opensim import native_moco_ladder_worker as worker
+
+    config = {
+        "mesh_intervals": 10,
+        "transcription_scheme": "hermite-simpson",
+        "interpolate_control_mesh_interior_points": True,
+        "parallel": 0,
+    }
+    actual = {
+        "mesh_intervals": 10,
+        "transcription_scheme": "hermite-simpson",
+        "interpolate_control_mesh_interior_points": True,
+        "parallel": 1,
+    }
+    monkeypatch.setattr(
+        worker, "_build_witness_seeded_problem", lambda *_a, **_k: (object(), object())
+    )
+    monkeypatch.setattr(worker, "_actual_solver_settings", lambda *_a, **_k: actual)
+
+    with pytest.raises(ValueError, match="differ from the bound request"):
+        worker._configure_rung_problem(
+            worker.DEFAULT_RUNGS[0],
+            tmp_path / "source.osim",
+            object(),
+            {},
+            0.300005,
+            {},
+            config,
+            tmp_path,
+            None,
+            object(),
+            {},
+            10,
+        )
+
+    attempt = json.loads((tmp_path / "request.json").read_text(encoding="utf-8"))
+    assert attempt["parallel"] == 0
+    assert attempt["actual_solver_settings"] == actual
+    assert attempt["solver_settings_validation_status"] == "pending"
+
+
 def test_preparation_witness_evidence_uses_persisted_witness_keys(
     tmp_path: Path,
 ) -> None:

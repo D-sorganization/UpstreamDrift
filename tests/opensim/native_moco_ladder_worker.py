@@ -622,8 +622,13 @@ def _configure_rung_problem(
         solver,
         refinement["normalized_mesh_points"] if refinement is not None else None,
     )
-    _validate_actual_solver_settings(config)
+    config["solver_settings_validation_status"] = "pending"
     config_path = output / "request.json"
+    # Keep the attempted request and native readback even when strict binding
+    # validation rejects them; this makes preparation failures diagnosable.
+    _write_json(config_path, config)
+    _validate_actual_solver_settings(config)
+    config["solver_settings_validation_status"] = "passed"
     _write_json(config_path, config)
     stages["preflight_and_solver_setup"] = _stage_finish(started)
     _write_progress(output, rung.name, stages)
