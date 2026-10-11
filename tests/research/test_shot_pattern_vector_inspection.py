@@ -11,6 +11,7 @@ from typing import Any
 
 import numpy as np
 import pytest
+from defusedxml.common import EntitiesForbidden
 
 try:
     import matplotlib
@@ -585,3 +586,15 @@ def test_inert_matplotlib_doctype_and_viewbox(tmp_path: Path, declaration: str) 
     result = inspect_svg(path, _write_file_and_hash(path, xml.encode()))
     assert result["view_box"]["width"] == 10
     assert result["ids"] == ["glyph"]
+
+
+def test_svg_tree_parser_rejects_entity_expansion() -> None:
+    """The second XML parse must reject entities even without the Expat preflight."""
+    from scripts.research.shot_pattern_analysis import vector_inspection as module
+
+    xml = (
+        b'<!DOCTYPE svg [<!ENTITY payload "EXPANDED">]>'
+        b'<svg xmlns="http://www.w3.org/2000/svg">&payload;</svg>'
+    )
+    with pytest.raises(EntitiesForbidden):
+        module.ET.fromstring(xml)

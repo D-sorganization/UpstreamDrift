@@ -9,12 +9,12 @@ import platform
 import re
 import sys
 import warnings
-import xml.etree.ElementTree as ET
 import xml.parsers.expat
 from pathlib import Path
 from typing import Any
 
 import pypdf
+from defusedxml import ElementTree as ET
 
 _DIMENSION_REGEX = re.compile(
     r"^([+-]?(?:(?:\d*\.\d+)|\d+)(?:[eE][+-]?\d+)?)\s*(pt|px|in|mm|cm)?$"
