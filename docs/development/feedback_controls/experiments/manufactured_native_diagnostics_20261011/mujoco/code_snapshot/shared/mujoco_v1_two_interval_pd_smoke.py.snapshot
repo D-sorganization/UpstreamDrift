@@ -1,0 +1,208 @@
+"""Pure contracts for a tiny unqualified full-body feedback/replay smoke."""
+from __future__ import annotations
+
+import hashlib
+import json
+from dataclasses import dataclass, field
+from typing import Any
+
+import numpy as np
+
+ROOT_COORDINATES = (
+    "TranslationInputX",
+    "TranslationInputY",
+    "TranslationInputZ",
+    "HipInputX",
+    "HipInputY",
+    "HipInputZ",
+)
+CONTROL_COORDINATE = "TorsoInput"
+STEPS = 2
+DT_SECONDS = 1e-5
+SUBSTEPS = 8
+RK_STAGES_PER_SUBSTEP = 4
+TARGET_OFFSET_RAD = 1e-3
+KP_NM_PER_RAD = 1e-3
+KD_NMS_PER_RAD = 1e-4
+EFFORT_LIMIT_NM = 1e-5
+
+
+def canonical_sha256(value: Any) -> str:
+    encoded = json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False)
+    return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+
+
+def controller_configuration() -> dict[str, Any]:
+    return {
+        "schema": "manufactured-pd-smoke-v1",
+        "coordinate": CONTROL_COORDINATE,
+        "target_offset": TARGET_OFFSET_RAD,
+        "target_offset_units": "rad",
+        "formula": "clip(Kp*(reference-q)-Kd*v,-limit,+limit)",
+        "kp": KP_NM_PER_RAD,
+        "kp_units": "N*m/rad",
+        "kd": KD_NMS_PER_RAD,
+        "kd_units": "N*m*s/rad",
+        "effort_limit": EFFORT_LIMIT_NM,
+        "effort_units": "N*m",
+        "steps": STEPS,
+        "dt_seconds": DT_SECONDS,
+        "root_effort_policy": "six source root coordinates exactly zero",
+        "other_actuated_efforts": "exactly zero",
+    }
+
+
+def validate_torso_rotational_mapping(
+    coordinate_order: tuple[str, ...], primitive_pairs: tuple[tuple[str, str], ...]
+) -> None:
+    names = tuple(name for name, _primitive in primitive_pairs)
+    if len(names) != len(coordinate_order) or len(set(names)) != len(names) or set(names) != set(coordinate_order):
+        raise ValueError("source must map each named coordinate to exactly one primitive")
+    if dict(primitive_pairs).get(CONTROL_COORDINATE) != "Rz":
+        raise ValueError("manufactured PD coordinate must be source-mapped to rotational Rz")
+
+
+@dataclass
+class ManufacturedPDController:
+    """Deterministic one-channel PD action with explicit numerical bounds."""
+
+    coordinate_order: tuple[str, ...]
+    reference_q: tuple[float, ...]
+    calls: list[dict[str, Any]] = field(default_factory=list)
+
+    def __post_init__(self) -> None:
+        if self.coordinate_order[:6] != ROOT_COORDINATES:
+            raise ValueError("feedback coordinate order must preserve six named roots")
+        if len(self.coordinate_order) != len(self.reference_q) or len(set(self.coordinate_order)) != len(self.coordinate_order):
+            raise ValueError("feedback reference must cover the complete unique coordinate order")
+        reference = np.asarray(self.reference_q, dtype=np.float64)
+        if not np.isfinite(reference).all() or CONTROL_COORDINATE not in self.coordinate_order:
+            raise ValueError("feedback reference must be finite and include its controlled coordinate")
+
+    def __call__(self, time_s: float, q: np.ndarray, v: np.ndarray) -> np.ndarray:
+        positions = np.asarray(q, dtype=np.float64).copy()
+        rates = np.asarray(v, dtype=np.float64).copy()
+        if positions.shape != (len(self.coordinate_order),) or rates.shape != positions.shape:
+            raise ValueError("feedback controller requires complete source q/v vectors")
+        if not np.isfinite(time_s) or not np.isfinite(positions).all() or not np.isfinite(rates).all():
+            raise ValueError("feedback controller inputs must be finite")
+        index = self.coordinate_order.index(CONTROL_COORDINATE)
+        target = np.asarray(self.reference_q, dtype=np.float64)
+        raw = KP_NM_PER_RAD * (target[index] - positions[index]) - KD_NMS_PER_RAD * rates[index]
+        torque = float(np.clip(raw, -EFFORT_LIMIT_NM, EFFORT_LIMIT_NM))
+        effort = np.zeros(len(self.coordinate_order), dtype=np.float64)
+        effort[index] = torque
+        if np.any(effort[:6] != 0.0) or np.max(np.abs(effort[index:index + 1])) > EFFORT_LIMIT_NM:
+            raise ValueError("manufactured feedback output violates its declared envelope")
+        self.calls.append({"time_s": float(time_s), "q": positions.tolist(), "v": rates.tolist(), "effort": effort.tolist()})
+        return effort
+
+
+def build_reference_q(coordinate_order: tuple[str, ...], q0: np.ndarray) -> tuple[float, ...]:
+    if coordinate_order[:6] != ROOT_COORDINATES:
+        raise ValueError("reference requires exact six-root source ordering")
+    reference = np.asarray(q0, dtype=np.float64).copy()
+    if reference.shape != (len(coordinate_order),) or not np.isfinite(reference).all():
+        raise ValueError("reference requires complete finite source q")
+    reference[coordinate_order.index(CONTROL_COORDINATE)] += TARGET_OFFSET_RAD
+    return tuple(float(value) for value in reference)
+
+
+def expected_phase_call_counts(steps: int = STEPS) -> dict[str, int]:
+    if type(steps) is not int or steps <= 0:
+        raise ValueError("step count must be a positive integer")
+    derivative = steps * SUBSTEPS * RK_STAGES_PER_SUBSTEP
+    pose_rate_observations = 1
+    pose_only_observations = steps
+    # MuJoCo's VectorPlant closure queries execute one hidden zero-effort
+    # acceleration each; this follows the exact checked provider implementation.
+    closure_accelerations = pose_rate_observations + pose_only_observations
+    return {
+        "rk4_derivative_acceleration_calls": derivative,
+        "closure_pose_rate_observations": pose_rate_observations,
+        "closure_pose_only_observations": pose_only_observations,
+        "hidden_closure_acceleration_calls": closure_accelerations,
+        "total_engine_acceleration_calls": derivative + closure_accelerations,
+    }
+
+
+def validate_controller_call_history(
+    *,
+    coordinate_order: tuple[str, ...],
+    calls: list[dict[str, Any]],
+    recorded_q: np.ndarray,
+    recorded_v: np.ndarray,
+    applied_efforts: np.ndarray,
+    steps: int = STEPS,
+) -> None:
+    """Bind each sampled controller input/output to its recorded interval."""
+    n = len(coordinate_order)
+    q = np.asarray(recorded_q, dtype=np.float64)
+    v = np.asarray(recorded_v, dtype=np.float64)
+    applied = np.asarray(applied_efforts, dtype=np.float64)
+    if len(calls) != steps or q.shape != (steps + 1, n) or v.shape != q.shape:
+        raise ValueError("controller calls must cover every complete recorded interval state")
+    if applied.shape != (steps, n) or not np.isfinite(applied).all():
+        raise ValueError("recorded applied effort table is incomplete or nonfinite")
+    target = coordinate_order.index(CONTROL_COORDINATE)
+    for index, call in enumerate(calls):
+        call_q = np.asarray(call.get("q"), dtype=np.float64)
+        call_v = np.asarray(call.get("v"), dtype=np.float64)
+        effort = np.asarray(call.get("effort"), dtype=np.float64)
+        if call.get("time_s") != index * DT_SECONDS:
+            raise ValueError("controller callback time differs from interval boundary")
+        if call_q.shape != (n,) or call_v.shape != (n,) or effort.shape != (n,):
+            raise ValueError("controller callback did not observe/return full named vectors")
+        if not np.isfinite(call_q).all() or not np.isfinite(call_v).all() or not np.isfinite(effort).all():
+            raise ValueError("controller call history contains nonfinite vectors")
+        if not np.array_equal(call_q, q[index]) or not np.array_equal(call_v, v[index]):
+            raise ValueError("controller did not observe the recorded interval-start state")
+        if not np.array_equal(effort, applied[index]):
+            raise ValueError("controller output differs from the effort applied in its interval")
+        if np.any(effort[:6] != 0.0) or np.any(effort[np.arange(n) != target] != 0.0):
+            raise ValueError("controller effort violates source-root or one-channel policy")
+        if abs(effort[target]) > EFFORT_LIMIT_NM:
+            raise ValueError("controller output exceeds its declared numerical envelope")
+
+
+def validate_feedback_replay_evidence(
+    *,
+    coordinate_order: tuple[str, ...],
+    times: np.ndarray,
+    frozen_efforts: np.ndarray,
+    recorded_q: np.ndarray,
+    recorded_v: np.ndarray,
+    replay_q: np.ndarray,
+    replay_v: np.ndarray,
+    controller_call_count_before_replay: int,
+    controller_call_count_after_replay: int,
+    steps: int = STEPS,
+) -> None:
+    """Fail closed unless a complete T01 history and fresh replay agree."""
+    n = len(coordinate_order)
+    if coordinate_order[:6] != ROOT_COORDINATES:
+        raise ValueError("replay evidence has wrong root coordinate order")
+    if np.asarray(times).shape != (steps + 1,) or not np.isfinite(times).all():
+        raise ValueError("replay evidence must cover the complete fixed time grid")
+    if not np.array_equal(times, np.arange(steps + 1, dtype=np.float64) * DT_SECONDS):
+        raise ValueError("replay evidence time grid differs from declared smoke clock")
+    efforts = np.asarray(frozen_efforts, dtype=np.float64)
+    if efforts.shape != (steps + 1, n) or not np.isfinite(efforts).all():
+        raise ValueError("T01 generalized effort table is incomplete or nonfinite")
+    if np.any(efforts[:, :6] != 0.0):
+        raise ValueError("T01 root generalized efforts must be exactly zero")
+    target_index = coordinate_order.index(CONTROL_COORDINATE)
+    if np.any(efforts[:, np.arange(n) != target_index] != 0.0):
+        raise ValueError("only the declared manufactured PD coordinate may receive effort")
+    if np.any(np.abs(efforts[:, target_index]) > EFFORT_LIMIT_NM):
+        raise ValueError("T01 PD effort exceeds the declared numerical envelope")
+    if not np.array_equal(efforts[-1], efforts[-2]):
+        raise ValueError("T01 terminal ZOH sentinel differs from the final applied effort")
+    q_expected, v_expected = (steps + 1, n), (steps + 1, n)
+    arrays = tuple(np.asarray(value, dtype=np.float64) for value in (recorded_q, recorded_v, replay_q, replay_v))
+    if any(value.shape != q_expected or not np.isfinite(value).all() for value in arrays):
+        raise ValueError("recorded or fresh replay state is incomplete or nonfinite")
+    if not np.array_equal(arrays[0], arrays[2]) or not np.array_equal(arrays[1], arrays[3]):
+        raise ValueError("fresh controller-off replay state differs from recorded rollout")
+    if controller_call_count_before_replay != steps or controller_call_count_after_replay != steps:
+        raise ValueError("fresh replay called the feedback controller or recording missed an interval")

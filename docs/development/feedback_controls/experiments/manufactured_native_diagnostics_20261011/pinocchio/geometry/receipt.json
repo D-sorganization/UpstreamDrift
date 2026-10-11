@@ -1,0 +1,484 @@
+{
+  "artifact_hashes_after": {
+    "candidate_observation": "9986c0791134234f3d3b4e19b2784b48d3758965f1f5fbac23261211f5922ac3",
+    "candidate_source": "2caa3ce94e596dd61d50172229ad04a98c5235be6388566b4376be4ba41e2fcf",
+    "full_body_spec": "09cff1393a48b7f44e2ceaac9132473c64a33f9f853823c5e7d7fef80802e6b3",
+    "probe_script": "40c521457a251cf9b5c905a950a3806d9573ccf8a34e4a1a09d5e3948bedb2b1",
+    "source_setup_helper": "2d619a9540920cf7093af61a1cbc8cdf865b0ca7cc56c968c631e2f879c78cb3",
+    "upper_geometry": "0202c8b2e08e8f2664a2dae453a58caa0eae2cabcea4c067fafdc4bc49933c1d"
+  },
+  "artifact_hashes_before": {
+    "candidate_observation": "9986c0791134234f3d3b4e19b2784b48d3758965f1f5fbac23261211f5922ac3",
+    "candidate_source": "2caa3ce94e596dd61d50172229ad04a98c5235be6388566b4376be4ba41e2fcf",
+    "full_body_spec": "09cff1393a48b7f44e2ceaac9132473c64a33f9f853823c5e7d7fef80802e6b3",
+    "probe_script": "40c521457a251cf9b5c905a950a3806d9573ccf8a34e4a1a09d5e3948bedb2b1",
+    "source_setup_helper": "2d619a9540920cf7093af61a1cbc8cdf865b0ca7cc56c968c631e2f879c78cb3",
+    "upper_geometry": "0202c8b2e08e8f2664a2dae453a58caa0eae2cabcea4c067fafdc4bc49933c1d"
+  },
+  "base_manifest_sha256": "c5ec40129d3b28368142eadfb33e8e1464f7c6e4d4505dd5a6d2f86870d4f569",
+  "candidate_json_external_input": true,
+  "candidate_json_path": "/home/dieterolson/native_engine_parity_telemetry_20261012/mujoco_v1_candidate_lift_20261011_root_attempt2/returned81_candidate.json",
+  "candidate_lift_observation_path": "/home/dieterolson/native_engine_parity_telemetry_20261012/mujoco_v1_candidate_lift_20261011_root_attempt2/native-observation.json",
+  "candidate_lift_observation_sha256": "9986c0791134234f3d3b4e19b2784b48d3758965f1f5fbac23261211f5922ac3",
+  "candidate_source_sha256": "2caa3ce94e596dd61d50172229ad04a98c5235be6388566b4376be4ba41e2fcf",
+  "contact_inventory_comparison": {
+    "force_or_residual_equality_asserted": false,
+    "mujoco_sphere_names": [
+      "forefoot_l",
+      "forefoot_r",
+      "heel_l",
+      "heel_r"
+    ],
+    "pinocchio_sphere_names": [
+      "forefoot_l",
+      "forefoot_r",
+      "heel_l",
+      "heel_r"
+    ],
+    "same_named_sphere_inventory": true
+  },
+  "created_utc": "2026-10-11T09:21:17.825960+00:00",
+  "execution_limits": {
+    "acceleration_or_dynamics": false,
+    "closure_correction": false,
+    "contact_equilibrium_claim": false,
+    "cross_engine_residual_equality_gate": false,
+    "optimizer": false,
+    "projection": false,
+    "trajectory_integration": false
+  },
+  "full_body_spec_sha256": "09cff1393a48b7f44e2ceaac9132473c64a33f9f853823c5e7d7fef80802e6b3",
+  "input": {
+    "candidate_upper_coordinate_names": [
+      "TranslationInputX",
+      "TranslationInputY",
+      "TranslationInputZ",
+      "HipInputX",
+      "HipInputY",
+      "HipInputZ",
+      "SpineInputX",
+      "SpineInputY",
+      "TorsoInput",
+      "LEInput",
+      "LFInput",
+      "LScapInputX",
+      "LScapInputY",
+      "LSInputX",
+      "LSInputY",
+      "LSInputZ",
+      "LWInputX",
+      "LWInputY",
+      "REInput",
+      "RFInput",
+      "RScapInputX",
+      "RScapInputY",
+      "RSInputX",
+      "RSInputY",
+      "RSInputZ",
+      "RWInputX",
+      "RWInputY"
+    ],
+    "coordinate_order": [
+      "TranslationInputX",
+      "TranslationInputY",
+      "TranslationInputZ",
+      "HipInputX",
+      "HipInputY",
+      "HipInputZ",
+      "SpineInputX",
+      "SpineInputY",
+      "TorsoInput",
+      "LEInput",
+      "LFInput",
+      "LScapInputX",
+      "LScapInputY",
+      "LSInputX",
+      "LSInputY",
+      "LSInputZ",
+      "LWInputX",
+      "LWInputY",
+      "REInput",
+      "RFInput",
+      "RScapInputX",
+      "RScapInputY",
+      "RSInputX",
+      "RSInputY",
+      "RSInputZ",
+      "RWInputX",
+      "RWInputY",
+      "hip_flexion_r",
+      "hip_adduction_r",
+      "hip_rotation_r",
+      "knee_angle_r",
+      "ankle_angle_r",
+      "subtalar_angle_r",
+      "mtp_angle_r",
+      "hip_flexion_l",
+      "hip_adduction_l",
+      "hip_rotation_l",
+      "knee_angle_l",
+      "ankle_angle_l",
+      "subtalar_angle_l",
+      "mtp_angle_l"
+    ],
+    "lower_limb_coordinates_exact_zero": true,
+    "q_after_lift_named": {
+      "HipInputX": -0.4377827427924873,
+      "HipInputY": -0.6158588028955452,
+      "HipInputZ": -0.3622628206386138,
+      "LEInput": 0.5787872860112752,
+      "LFInput": 1.2297646246407943,
+      "LSInputX": -0.48420929024927545,
+      "LSInputY": -1.9292366356245338,
+      "LSInputZ": -3.0771187922626493,
+      "LScapInputX": 0.519864636098773,
+      "LScapInputY": -0.6919743457429548,
+      "LWInputX": 0.578526156868253,
+      "LWInputY": -0.582350231590604,
+      "REInput": 0.49335104289401793,
+      "RFInput": 1.7895472095312865,
+      "RSInputX": -1.8147321975265407,
+      "RSInputY": -0.9038447417758703,
+      "RSInputZ": 0.5706786966830651,
+      "RScapInputX": 0.6168385424009584,
+      "RScapInputY": 0.6628167507105044,
+      "RWInputX": -0.6522661426339762,
+      "RWInputY": 0.4163459020632318,
+      "SpineInputX": -0.29539648085525116,
+      "SpineInputY": 0.04893335118800962,
+      "TorsoInput": -0.36226277729788264,
+      "TranslationInputX": 1.1630808160876724,
+      "TranslationInputY": 0.5085045494793508,
+      "TranslationInputZ": 0.7838524350905233,
+      "ankle_angle_l": 0.0,
+      "ankle_angle_r": 0.0,
+      "hip_adduction_l": 0.0,
+      "hip_adduction_r": 0.0,
+      "hip_flexion_l": 0.0,
+      "hip_flexion_r": 0.0,
+      "hip_rotation_l": 0.0,
+      "hip_rotation_r": 0.0,
+      "knee_angle_l": 0.0,
+      "knee_angle_r": 0.0,
+      "mtp_angle_l": 0.0,
+      "mtp_angle_r": 0.0,
+      "subtalar_angle_l": 0.0,
+      "subtalar_angle_r": 0.0
+    },
+    "rates_exact_zero": true,
+    "rates_named": {
+      "HipInputX": 0.0,
+      "HipInputY": 0.0,
+      "HipInputZ": 0.0,
+      "LEInput": 0.0,
+      "LFInput": 0.0,
+      "LSInputX": 0.0,
+      "LSInputY": 0.0,
+      "LSInputZ": 0.0,
+      "LScapInputX": 0.0,
+      "LScapInputY": 0.0,
+      "LWInputX": 0.0,
+      "LWInputY": 0.0,
+      "REInput": 0.0,
+      "RFInput": 0.0,
+      "RSInputX": 0.0,
+      "RSInputY": 0.0,
+      "RSInputZ": 0.0,
+      "RScapInputX": 0.0,
+      "RScapInputY": 0.0,
+      "RWInputX": 0.0,
+      "RWInputY": 0.0,
+      "SpineInputX": 0.0,
+      "SpineInputY": 0.0,
+      "TorsoInput": 0.0,
+      "TranslationInputX": 0.0,
+      "TranslationInputY": 0.0,
+      "TranslationInputZ": 0.0,
+      "ankle_angle_l": 0.0,
+      "ankle_angle_r": 0.0,
+      "hip_adduction_l": 0.0,
+      "hip_adduction_r": 0.0,
+      "hip_flexion_l": 0.0,
+      "hip_flexion_r": 0.0,
+      "hip_rotation_l": 0.0,
+      "hip_rotation_r": 0.0,
+      "knee_angle_l": 0.0,
+      "knee_angle_r": 0.0,
+      "mtp_angle_l": 0.0,
+      "mtp_angle_r": 0.0,
+      "subtalar_angle_l": 0.0,
+      "subtalar_angle_r": 0.0
+    }
+  },
+  "mujoco_reference": {
+    "jacobian_rank": 6,
+    "jacobian_singular_values": [
+      3.005839400235491,
+      2.520291587337795,
+      2.391316691627363,
+      0.7216372837046763,
+      0.556507634012051,
+      0.33849209959734444
+    ],
+    "pose_residual_m_rad": [
+      1.6986412276764895e-14,
+      4.475586568020162e-14,
+      -2.5979218776228663e-14,
+      1.6472455960519697e-13,
+      -5.626744107378138e-13,
+      -1.5551388712041276e-13
+    ],
+    "pose_vector_convention": "retained MuJoCo source receipt field weld_pose_residual_m_rad; reported as recorded, no cross-engine component equality asserted",
+    "rate_residual_m_s_rad_s": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "rate_vector_convention": "retained MuJoCo source receipt field weld_rate_residual_m_s_rad_s; reported as recorded",
+    "sphere_contacts": {
+      "forefoot_l": {
+        "bottom_height_m": 0.026594247646227365,
+        "center_world_m": [
+          1.188034912001878,
+          0.26567127344005853,
+          0.056594247646227364
+        ],
+        "friction_force_n": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "normal_force_n": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "penetration_m": 0.0
+      },
+      "forefoot_r": {
+        "bottom_height_m": -4.85722573273506e-17,
+        "center_world_m": [
+          1.0520911936673474,
+          0.16625793381106552,
+          0.02999999999999995
+        ],
+        "friction_force_n": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "normal_force_n": [
+          -0.0,
+          -0.0,
+          2.42861286636753e-12
+        ],
+        "penetration_m": 4.85722573273506e-17
+      },
+      "heel_l": {
+        "bottom_height_m": 0.05604688857980031,
+        "center_world_m": [
+          1.0970057398660744,
+          0.37980586658767757,
+          0.09104688857980031
+        ],
+        "friction_force_n": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "normal_force_n": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "penetration_m": 0.0
+      },
+      "heel_r": {
+        "bottom_height_m": 0.029452640933572916,
+        "center_world_m": [
+          0.9610620215315439,
+          0.2803925269586846,
+          0.06445264093357292
+        ],
+        "friction_force_n": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "normal_force_n": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "penetration_m": 0.0
+      }
+    }
+  },
+  "pinocchio_observation": {
+    "contact_law": {
+      "sphere_count": 4,
+      "spheres": {
+        "forefoot_l": {
+          "contact_point_world_m": [
+            1.188034912001878,
+            0.2656712734400585,
+            0.026594247646227046
+          ],
+          "friction_force_n": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normal_force_n": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "penetration_m": 0.0,
+          "penetration_rate_m_s": -0.0
+        },
+        "forefoot_r": {
+          "contact_point_world_m": [
+            1.0520911936673474,
+            0.16625793381106538,
+            -2.914335439641036e-16
+          ],
+          "friction_force_n": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normal_force_n": [
+            -0.0,
+            -0.0,
+            1.457167719820518e-11
+          ],
+          "penetration_m": 2.914335439641036e-16,
+          "penetration_rate_m_s": -0.0
+        },
+        "heel_l": {
+          "contact_point_world_m": [
+            1.0970057398660744,
+            0.3798058665876777,
+            0.05604688857979995
+          ],
+          "friction_force_n": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normal_force_n": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "penetration_m": 0.0,
+          "penetration_rate_m_s": -0.0
+        },
+        "heel_r": {
+          "contact_point_world_m": [
+            0.9610620215315436,
+            0.2803925269586846,
+            0.02945264093357261
+          ],
+          "friction_force_n": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normal_force_n": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "penetration_m": 0.0,
+          "penetration_rate_m_s": -0.0
+        }
+      }
+    },
+    "weld": {
+      "native_rate_jacobian": {
+        "condition_2": 8.880087316102891,
+        "numpy_default_rank_tolerance": 2.7364647305829287e-14,
+        "rank": 6,
+        "shape": [
+          6,
+          41
+        ],
+        "singular_values": [
+          3.0058394002355566,
+          2.5202915873378307,
+          2.391316691627289,
+          0.7216372837046799,
+          0.5565076340120452,
+          0.3384920995973604
+        ]
+      },
+      "pose_residual_minus_log6_c1Mc2_local_frame_m_rad": [
+        6.9297374603739904e-15,
+        -2.8042940136017086e-14,
+        4.5948225098493336e-14,
+        -1.9428902924141836e-16,
+        -2.453801051238713e-13,
+        -5.541123115904157e-13
+      ],
+      "rate_residual_native_constraint_jacobian_times_named_rates": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "probe_script_sha256": "40c521457a251cf9b5c905a950a3806d9573ccf8a34e4a1a09d5e3948bedb2b1",
+  "qualification": "none; manufactured source-bound pose, zero-rate geometry observations only",
+  "runtime": {
+    "pin_distribution_version": "3.8.0",
+    "pinocchio_version": "3.8.0",
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+    "python": "3.12.12 (main, Oct 10 2025, 08:52:57) [GCC 11.4.0]",
+    "source_imports": {
+      "bunkershot3d_package": "/home/dieterolson/native_engine_parity_20261011_final_50203626/src/bunkershot3d/__init__.py",
+      "bunkershot3d_package_sha256": "16fdb491cba2e67ca3574c8341aa6a393ae613c3845271c43ab6b2ca8255b39f",
+      "source_import_paths": [
+        "/home/dieterolson/native_engine_parity_20261011_final_50203626/src",
+        "/home/dieterolson/native_engine_parity_20261011_final_50203626/src/shared/python",
+        "/home/dieterolson/native_engine_parity_20261011_final_50203626"
+      ]
+    }
+  },
+  "schema_version": "pinocchio-mujoco-candidate-lift-geometry-parity-v1",
+  "source_and_artifacts_unchanged": true,
+  "source_commit": "9e5f87c4dd31fc3137fc204d98337633fa5c4855",
+  "source_hashes": {
+    "docs/development/full_body_models/full_body_spec_v1.json": "09cff1393a48b7f44e2ceaac9132473c64a33f9f853823c5e7d7fef80802e6b3",
+    "pyproject.toml": "c1866dde932edd353b22e57c79ad6d5e6352b22c728e75d13ae280430aec667a",
+    "src/bunkershot3d/__init__.py": "16fdb491cba2e67ca3574c8341aa6a393ae613c3845271c43ab6b2ca8255b39f",
+    "src/engines/physics_engines/pinocchio/python/native_model.py": "782402d13c152c7bdd0bee76d7b084e3bef8a697cb5c5b0805021d0fd81c8a92",
+    "src/shared/python/motion_matching/acceptance.py": "6cf5330b1527c78b5de1c53e2cd220fd24445d61a1b273c2cc3007d7495d9ae4",
+    "src/shared/python/motion_matching/contact_law.py": "1edc287e4d4d12a58558f6fc62f4bd9d291908f4dcade4232bb6644883dbe43c",
+    "src/shared/python/motion_matching/same_input/__init__.py": "e183d4d7b27799bd8790baa7e1c99d0aebeca9b709e0ec04554b8848059e1774",
+    "src/shared/python/motion_matching/same_input/closure.py": "77983f2018216d514d36d47d56d8f9c061f46ec69372189042c2ea4d3ad9679e",
+    "tests/conftest.py": "39f7aa2143bb6d626d0b4420eb73b47169aa2724ef8610c6c84029c291ed1332",
+    "tests/unit/motion_matching/test_pinocchio_full_body_builder.py": "3f99fa206f3ae7c28b69bb68a0a4dd945ae7cda1995c2becc6e3bc09c85905da"
+  },
+  "source_hashes_after": {
+    "docs/development/full_body_models/full_body_spec_v1.json": "09cff1393a48b7f44e2ceaac9132473c64a33f9f853823c5e7d7fef80802e6b3",
+    "pyproject.toml": "c1866dde932edd353b22e57c79ad6d5e6352b22c728e75d13ae280430aec667a",
+    "src/bunkershot3d/__init__.py": "16fdb491cba2e67ca3574c8341aa6a393ae613c3845271c43ab6b2ca8255b39f",
+    "src/engines/physics_engines/pinocchio/python/native_model.py": "782402d13c152c7bdd0bee76d7b084e3bef8a697cb5c5b0805021d0fd81c8a92",
+    "src/shared/python/motion_matching/acceptance.py": "6cf5330b1527c78b5de1c53e2cd220fd24445d61a1b273c2cc3007d7495d9ae4",
+    "src/shared/python/motion_matching/contact_law.py": "1edc287e4d4d12a58558f6fc62f4bd9d291908f4dcade4232bb6644883dbe43c",
+    "src/shared/python/motion_matching/same_input/__init__.py": "e183d4d7b27799bd8790baa7e1c99d0aebeca9b709e0ec04554b8848059e1774",
+    "src/shared/python/motion_matching/same_input/closure.py": "77983f2018216d514d36d47d56d8f9c061f46ec69372189042c2ea4d3ad9679e",
+    "tests/conftest.py": "39f7aa2143bb6d626d0b4420eb73b47169aa2724ef8610c6c84029c291ed1332",
+    "tests/unit/motion_matching/test_pinocchio_full_body_builder.py": "3f99fa206f3ae7c28b69bb68a0a4dd945ae7cda1995c2becc6e3bc09c85905da"
+  },
+  "source_setup_helper_sha256": "2d619a9540920cf7093af61a1cbc8cdf865b0ca7cc56c968c631e2f879c78cb3",
+  "status": "observed_kinematics_only"
+}

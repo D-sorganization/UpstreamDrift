@@ -1,0 +1,170 @@
+"""Prepare one owned 30 s / 1 GiB child run; no automatic retry."""
+from __future__ import annotations
+import argparse
+import hashlib
+import json
+import sys
+import time
+from pathlib import Path
+from mujoco_candidate_lift_bootstrap import (
+    EXPECTED_PYPROJECT_SHA256,
+    EXPECTED_TOOLS_COMMIT,
+    bounded_child_environment,
+    canonical_pythonpath,
+    pinned_tools_root,
+    recorded_environment,
+    tools_head,
+    tools_status,
+)
+
+PLANNING = Path(r"C:/Users/diete/Repositories/docs/development/feedback_controls_planning")
+REPO = Path(r"C:/Users/diete/Repositories/Worktrees/feedback-moco-state-binding-11791")
+SUPERVISOR_REPO = Path(r"C:/Users/diete/Repositories/Worktrees/feedback-marker-calibration-12164")
+SUPERVISOR_REL = Path("tests/opensim/native_moco_ladder_harness.py")
+SPEC = REPO / "docs/development/full_body_models/full_body_spec_v1.json"
+CANDIDATE = REPO / "docs/development/full_body_models/evidence/native_candidates/returned81_candidate.json"
+HELPER = PLANNING / "mujoco_v1_candidate_lift_geometry.py"
+DRIVER = PLANNING / "run_mujoco_v1_candidate_lift_geometry_20261012.py"
+TESTS = PLANNING / "test_mujoco_v1_candidate_lift_geometry.py"
+WRAPPER = PLANNING / "run_supervised_mujoco_v1_candidate_lift_geometry_20261012.py"
+BOOTSTRAP = PLANNING / "mujoco_candidate_lift_bootstrap.py"
+BOOTSTRAP_TESTS = PLANNING / "test_mujoco_candidate_lift_bootstrap.py"
+BOOTSTRAP_PREFLIGHT = PLANNING / "run_mujoco_candidate_lift_bootstrap_preflight.py"
+ACCEL_DRIVER = PLANNING / "run_mujoco_v1_zero_effort_acceleration_20261012.py"
+ACCEL_CORE = PLANNING / "mujoco_v1_zero_effort_acceleration.py"
+ACCEL_TESTS = PLANNING / "test_mujoco_v1_zero_effort_acceleration.py"
+FEEDBACK_DRIVER = PLANNING / "run_mujoco_v1_two_interval_pd_smoke_20261012.py"
+FEEDBACK_CORE = PLANNING / "mujoco_v1_two_interval_pd_smoke.py"
+FEEDBACK_TESTS = PLANNING / "test_mujoco_v1_two_interval_pd_smoke.py"
+FEEDBACK_SEED_RECEIPT = PLANNING / "mujoco_v1_zero_effort_20261011_root_attempt2/native-observation.json"
+SEED_RECEIPT = PLANNING / "mujoco_v1_candidate_lift_20261011_root_attempt2/native-observation.json"
+BOOTSTRAP_SOURCES = tuple(REPO / rel for rel in (
+    "pyproject.toml",
+    "tests/conftest.py",
+    "src/shared/python/_seam_redirect.py",
+    "src/shared/python/__init__.py",
+    "src/bunkershot3d/__init__.py",
+    "src/shared/python/simulation_backends/wrench_extractor.py",
+    "src/shared/python/biomechanics/__init__.py",
+))
+NATIVE_SOURCES = tuple(REPO / rel for rel in (
+    "src/engines/physics_engines/mujoco/python/full_body_model.py",
+    "src/engines/physics_engines/mujoco/python/full_body_mjcf.py",
+    "src/engines/physics_engines/mujoco/python/native_mjcf.py",
+    "src/engines/physics_engines/mujoco/python/native_model.py",
+    "src/engines/physics_engines/mujoco/python/full_body_ik.py",
+    "src/shared/python/motion_matching/contact_law.py",
+    "src/shared/python/motion_matching/constraint_kinematics.py",
+    "src/shared/python/motion_matching/full_body_ik.py",
+    "src/shared/python/motion_matching/same_input/__init__.py",
+    "src/shared/python/motion_matching/same_input/plant.py",
+    "src/shared/python/motion_matching/same_input/integrator.py",
+    "src/engines/physics_engines/mujoco/python/native_full_body_replay.py",
+))
+CHILD = Path(r"C:/Users/diete/Repositories/.venv-feedback-opensim/Scripts/python.exe")
+SUPERVISOR = SUPERVISOR_REPO / SUPERVISOR_REL
+MUJOCO_PACKAGE = CHILD.parent.parent / "Lib/site-packages/mujoco"
+FILE_SET = (SPEC, CANDIDATE, SEED_RECEIPT, FEEDBACK_SEED_RECEIPT, HELPER, DRIVER, TESTS, WRAPPER, BOOTSTRAP, BOOTSTRAP_TESTS, BOOTSTRAP_PREFLIGHT, ACCEL_DRIVER, ACCEL_CORE, ACCEL_TESTS, FEEDBACK_DRIVER, FEEDBACK_CORE, FEEDBACK_TESTS, *BOOTSTRAP_SOURCES, *NATIVE_SOURCES)
+THREAD_KEYS = ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS", "NUMEXPR_NUM_THREADS", "VECLIB_MAXIMUM_THREADS", "BLIS_NUM_THREADS")
+
+def sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for block in iter(lambda: stream.read(1 << 20), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+def hashes(paths) -> dict[str, str]:
+    return {str(path.resolve()): sha256(path) for path in paths}
+
+def provenance_unchanged(file_before: dict[str, str], file_after: dict[str, str], modules_before: dict[str, str], modules_after: dict[str, str]) -> bool:
+    return file_before == file_after and modules_before == modules_after
+
+def final_exit_code(payload: dict[str, object]) -> int:
+    if payload.get("status") != "exited" or not payload.get("provenance_unchanged") or not payload.get("child_receipt_present"):
+        return 1
+    return int(payload.get("returncode", 1))
+def mujoco_compiled_hashes() -> dict[str, str]:
+    if not MUJOCO_PACKAGE.is_dir():
+        raise FileNotFoundError(f"MuJoCo package directory missing: {MUJOCO_PACKAGE}")
+    compiled = sorted(path for path in MUJOCO_PACKAGE.rglob("*") if path.is_file() and path.suffix.lower() in {".pyd", ".dll", ".so", ".dylib"})
+    if not compiled:
+        raise FileNotFoundError("no compiled MuJoCo modules found to fingerprint")
+    return {str(path.resolve()): sha256(path) for path in compiled}
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--output-dir", type=Path, required=True)
+    parser.add_argument("--phase", choices=("geometry", "zero-effort-acceleration", "two-interval-feedback-replay"), default="geometry")
+    args = parser.parse_args()
+    output_dir = args.output_dir.resolve()
+    if output_dir.exists():
+        parser.error("output directory must be fresh; no overwrite or retry")
+    for path in (*FILE_SET, CHILD, SUPERVISOR):
+        if not path.is_file():
+            parser.error(f"required input file missing: {path}")
+    output_dir.mkdir(parents=True, exist_ok=False)
+    child_receipt = output_dir / "native-observation.json"
+    sys.path.insert(0, str(SUPERVISOR_REPO))
+    from tests.opensim.native_moco_ladder_harness import _WorkerTimeout, _supervise_process_tree
+
+    before = hashes((*FILE_SET, SUPERVISOR, CHILD))
+    mujoco_before = mujoco_compiled_hashes()
+    tools_before = tools_head(pinned_tools_root(REPO))
+    tools_status_before = tools_status(REPO / "vendor" / "ud-tools")
+    env = bounded_child_environment(REPO, PLANNING, THREAD_KEYS, base={})
+    env.update({"PYTHONSAFEPATH": "1", "PYTHONUTF8": "1", "PYTHONIOENCODING": "utf-8"})
+    selected_driver = {
+        "geometry": DRIVER,
+        "zero-effort-acceleration": ACCEL_DRIVER,
+        "two-interval-feedback-replay": FEEDBACK_DRIVER,
+    }[args.phase]
+    command = [str(CHILD), "-P", str(selected_driver), "--execute-native", "--output", str(child_receipt)]
+    payload: dict[str, object] = {
+        "schema_version":1, "phase":args.phase, "status":"starting", "command":command, "cwd":str(PLANNING),
+        "child_python":str(CHILD), "child_python_sha256":sha256(CHILD),
+        "supervisor_path":str(SUPERVISOR), "supervisor_sha256":sha256(SUPERVISOR),
+        "timeout_seconds":30, "sampled_owned_tree_rss_threshold_bytes":1 << 30,
+        "thread_environment":recorded_environment(env, (*THREAD_KEYS, "PYTHONPATH", "TOOLS_REPO_PATH", "PYTHONSAFEPATH", "PYTHONUTF8", "PYTHONIOENCODING")), "input_hashes_before":before,
+        "canonical_pythonpath":list(canonical_pythonpath(REPO, PLANNING, EXPECTED_PYPROJECT_SHA256)),
+        "tools_repo_path":str(pinned_tools_root(REPO)), "tools_commit_expected":EXPECTED_TOOLS_COMMIT,
+        "tools_commit_before":tools_before,
+        "mujoco_compiled_hashes_before":mujoco_before, "started_unix_seconds":time.time(),
+    }
+    try:
+        code, stdout, stderr, peak = _supervise_process_tree(command, PLANNING, 30.0, 1 << 30, env=env)
+        payload.update({"status":"exited", "returncode":code, "stdout":stdout, "stderr":stderr, "peak_sampled_owned_tree_rss_bytes":peak})
+    except _WorkerTimeout as exc:
+        payload.update({"status":"supervisor_stopped", "stop_reason":exc.stop_reason, "stdout":exc.stdout, "stderr":exc.stderr, "peak_sampled_owned_tree_rss_bytes":exc.peak_rss})
+    except BaseException as exc:
+        payload.update({"status":"supervisor_error", "exception_type":type(exc).__name__, "exception":str(exc)[:1000]})
+        raise
+    finally:
+        payload["ended_unix_seconds"] = time.time()
+        payload["input_hashes_after"] = hashes((*FILE_SET, SUPERVISOR, CHILD))
+        payload["inputs_unchanged"] = payload["input_hashes_before"] == payload["input_hashes_after"]
+        tools_after = tools_head(REPO / "vendor" / "ud-tools")
+        tools_status_after = tools_status(REPO / "vendor" / "ud-tools")
+        payload["tools_commit_after"] = tools_after
+        payload["tools_status_before"] = tools_status_before
+        payload["tools_status_after"] = tools_status_after
+        payload["tools_pin_unchanged"] = tools_before == tools_after == EXPECTED_TOOLS_COMMIT and tools_status_before == tools_status_after == ""
+        payload["mujoco_compiled_hashes_after"] = mujoco_compiled_hashes()
+        payload["mujoco_binaries_unchanged"] = payload["mujoco_compiled_hashes_before"] == payload["mujoco_compiled_hashes_after"]
+        payload["provenance_unchanged"] = provenance_unchanged(payload["input_hashes_before"], payload["input_hashes_after"], payload["mujoco_compiled_hashes_before"], payload["mujoco_compiled_hashes_after"]) and payload["tools_pin_unchanged"]
+        payload["child_receipt_present"] = child_receipt.is_file()
+        if child_receipt.is_file():
+            payload["child_receipt_path"] = str(child_receipt)
+            payload["child_receipt_sha256"] = sha256(child_receipt)
+        if not payload["inputs_unchanged"] or not payload["mujoco_binaries_unchanged"] or not payload["tools_pin_unchanged"]:
+            payload["status"] = "provenance_changed"
+        (output_dir / "supervisor-receipt.json").write_text(json.dumps(payload, indent=2, sort_keys=True) + chr(10), encoding="utf-8")
+    if payload.get("status") != "exited" or not payload.get("provenance_unchanged") or not payload.get("child_receipt_present"):
+        return 1
+    return int(payload.get("returncode", 1))
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+
+
+
