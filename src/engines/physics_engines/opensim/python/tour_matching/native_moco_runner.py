@@ -45,6 +45,7 @@ from .native_diagnostic_contract import (
     NativeDiagnosticAssessment,
     NativeDiagnosticFinding,
     NativeDiagnosticPolicy,
+    NativeDiagnosticRuntimeEvidence,
     NativeQualificationContext,
     RuntimePhase,
     RuntimeViability,
@@ -275,35 +276,9 @@ def _declared_chart_blockers(request: NativeMocoRequest) -> list[str]:
     return blockers
 
 
-def _native_preparation(
-    request: NativeMocoRequest,
-    *,
-    run_probe: bool = True,
-) -> tuple[
-    str | None,
-    str | None,
-    str | None,
-    list[str],
-    str | None,
-    str | None,
-    bool,
-    float | None,
-    float | None,
-    NativeProbeFailure | None,
-]:
-    """Read the actual prepared state and independent provider dispositions."""
-    import opensim as osim
-
-    from .muscle_replay import _restore_continuous_state
-
-    blockers: list[str] = _declared_chart_blockers(request)
-    loaded: str | None = None
-    model = osim.Model(str(request.model_path))
-    runtime_sha = _native_runtime_identity(osim)
-    probe_sha: str | None = None
-    probe_failure: NativeProbeFailure | None = None
-    probe_start = probe_end = None
-    blockers.extend(_observed_marker_bindings(model, request))
+def _audit_loaded_model_components(model: Any, request: NativeMocoRequest) -> list[str]:
+    """Check source-declared components before state restoration or integration."""
+    blockers = _observed_marker_bindings(model, request)
     if model.getControllerSet().getSize():
         blockers.append("native-source-controller-undeclared")
     if request.constrained_cold_start is not None:
@@ -358,6 +333,71 @@ def _native_preparation(
         blockers.append("native-constraint-policy-unavailable")
     if declared is not None and declared.lock_targets:
         blockers.append("native-moco-locked-coordinates-unsupported")
+    return blockers
+
+
+def _probe_native_state_if_eligible(
+    model: Any,
+    state: Any,
+    request: NativeMocoRequest,
+    runtime_sha: str,
+    blockers: list[str],
+    run_probe: bool,
+) -> tuple[str | None, bool, float | None, float | None, NativeProbeFailure | None]:
+    """Run the native probe only after every execution blocker has been audited."""
+    if not run_probe:
+        return None, False, None, None, None
+    start = float(state.getTime())
+    try:
+        probe_sha, start, end = _native_short_capability_probe(
+            model,
+            state,
+            request.config.duration_s,
+            request.model_sha256,
+            runtime_sha,
+            request.constrained_cold_start,
+        )
+        return probe_sha, True, start, end, None
+    except NativeProbeFailure as exc:
+        blockers.append(f"native-short-probe-failed:{exc.exception_type}")
+        if exc.window_seconds is not None:
+            return None, True, *exc.window_seconds, exc
+        return None, True, None, None, exc
+    except (OSError, ValueError, RuntimeError, TypeError) as exc:
+        blockers.append(f"native-short-probe-failed:{type(exc).__name__}")
+        return None, True, None, None, None
+
+
+def _native_preparation(
+    request: NativeMocoRequest,
+    *,
+    run_probe: bool = True,
+) -> tuple[
+    str | None,
+    str | None,
+    str | None,
+    list[str],
+    str | None,
+    str | None,
+    bool,
+    float | None,
+    float | None,
+    NativeProbeFailure | None,
+]:
+    """Read the actual prepared state and independent provider dispositions."""
+    import opensim as osim
+
+    from .muscle_replay import _restore_continuous_state
+
+    blockers: list[str] = _declared_chart_blockers(request)
+    loaded: str | None = None
+    model = osim.Model(str(request.model_path))
+    runtime_sha = _native_runtime_identity(osim)
+    probe_sha: str | None = None
+    probe_failure: NativeProbeFailure | None = None
+    probe_start = probe_end = None
+    blockers.extend(_audit_loaded_model_components(model, request))
+    declared = request.constrained_cold_start
     try:
         if declared is None:
             state, _, _ = _restore_continuous_state(
@@ -399,32 +439,19 @@ def _native_preparation(
     reference_sha, ref_blockers = _audit_reference_convention(request)
     blockers.extend(ref_blockers)
 
-    hard_before_probe = any(
+    probe_allowed = not any(
         blocker != "passive-policy-unavailable" for blocker in blockers
     )
-    probe_attempted = False
-    if run_probe and not hard_before_probe:
-        probe_attempted = True
-        probe_start = float(state.getTime())
-        probe_end = probe_start
-        try:
-            probe_sha, probe_start, probe_end = _native_short_capability_probe(
-                model,
-                state,
-                request.config.duration_s,
-                request.model_sha256,
-                runtime_sha,
-                request.constrained_cold_start,
-            )
-        except NativeProbeFailure as exc:
-            probe_failure = exc
-            if exc.window_seconds is not None:
-                probe_start, probe_end = exc.window_seconds
-            else:
-                probe_start = probe_end = None
-            blockers.append(f"native-short-probe-failed:{exc.exception_type}")
-        except (OSError, ValueError, RuntimeError, TypeError) as exc:
-            blockers.append(f"native-short-probe-failed:{type(exc).__name__}")
+    probe_sha, probe_attempted, probe_start, probe_end, probe_failure = (
+        _probe_native_state_if_eligible(
+            model,
+            state,
+            request,
+            runtime_sha,
+            blockers,
+            run_probe and probe_allowed,
+        )
+    )
 
     if _sha(request.model_path) != request.model_sha256:
         blockers.append("model-sha256-changed-during-preparation")
@@ -606,23 +633,7 @@ def _native_diagnostic_findings(
         raise TypeError("additional native findings must be source-bound typed values")
     findings.extend(additional_findings)
     for blocker in dict.fromkeys(blockers):
-        code = blocker_codes.get(blocker)
-        if blocker.startswith("native-short-probe-failed:"):
-            code = DiagnosticCode.NATIVE_SHORT_PROBE_FAILED
-        elif blocker.startswith(("muscle-disabled:", "muscle-overridden:")):
-            code = DiagnosticCode.NATIVE_PASSIVE_POLICY_INVALID
-        elif blocker.startswith(
-            (
-                "muscle-policy-options:",
-                "normalized-fiber-limit:",
-                "passive-elastic-force-limit:",
-                "tendon-force-limit:",
-            )
-        ):
-            code = DiagnosticCode.NATIVE_PASSIVE_LIMIT_EXCEEDED
-        if code is None:
-            # Fail closed when a future string blocker has not been classified.
-            code = DiagnosticCode.NATIVE_OBSERVATION_INVALID
+        code = _code_for_native_blocker(blocker, blocker_codes)
         disposition = _diagnostic_effects(code)
         findings.append(
             NativeDiagnosticFinding(
@@ -647,6 +658,27 @@ def _native_diagnostic_findings(
     return tuple(findings)
 
 
+def _code_for_native_blocker(
+    blocker: str, known_codes: Mapping[str, DiagnosticCode]
+) -> DiagnosticCode:
+    code = known_codes.get(blocker)
+    if blocker.startswith("native-short-probe-failed:"):
+        return DiagnosticCode.NATIVE_SHORT_PROBE_FAILED
+    if blocker.startswith(("muscle-disabled:", "muscle-overridden:")):
+        return DiagnosticCode.NATIVE_PASSIVE_POLICY_INVALID
+    if blocker.startswith(
+        (
+            "muscle-policy-options:",
+            "normalized-fiber-limit:",
+            "passive-elastic-force-limit:",
+            "tendon-force-limit:",
+        )
+    ):
+        return DiagnosticCode.NATIVE_PASSIVE_LIMIT_EXCEEDED
+    # Fail closed when a future string blocker has not been classified.
+    return code or DiagnosticCode.NATIVE_OBSERVATION_INVALID
+
+
 def _diagnostic_effects(
     code: DiagnosticCode,
 ) -> tuple[Any, Any]:
@@ -654,21 +686,23 @@ def _diagnostic_effects(
     return diagnostic_effects(code)
 
 
-def prepare_native_moco(
-    request: NativeMocoRequest, output_dir: Path
-) -> NativeMocoPreparation:
-    """Collect all independent, obtainable blockers before any expensive solve."""
-    directory = Path(output_dir)
-    directory.mkdir(parents=True, exist_ok=True)
-    wall = time.perf_counter()
-    cpu = time.process_time()
-    blockers: list[str] = []
-    if request.config.allow_unused_references:
-        blockers.append("unused-reference-policy")
-    if request.config.t_start_s != 0.0:
-        blockers.append("nonzero-native-replay-origin")
+@dataclass(frozen=True)
+class _NativePreflight:
+    actual_digests: dict[str, str | None]
+    source_blockers: list[str]
+    blockers: list[str]
+    physical_sha256: str | None
+    physical_qualified: bool
+    capture: TourCapture | None
+    clock_sha256: str | None
+    registered_sha256: str | None
+
+
+def _collect_native_preflight(
+    request: NativeMocoRequest, directory: Path, initial_blockers: list[str]
+) -> _NativePreflight:
     actual, source_blockers = _preparation_source_digests(request)
-    blockers.extend(source_blockers)
+    blockers = [*initial_blockers, *source_blockers]
     physical_sha = None
     physical_qualified = False
     if actual["model"] == request.model_sha256:
@@ -678,7 +712,6 @@ def prepare_native_moco(
         blockers.extend(physical_blockers)
     capture = None
     clock_sha = None
-    registered_sha = None
     if actual["capture"] == request.trc_sha256:
         capture, clock_sha, capture_blockers = _load_observation_capture(
             request, directory
@@ -700,120 +733,153 @@ def prepare_native_moco(
             )
         except (OSError, ValueError, RuntimeError):
             blockers.append("native-guess-invalid")
-    if request.registration is None:
-        blockers.append("capture-registration-unavailable")
-    elif capture is not None and "irregular-observation-clock" not in blockers:
-        try:
-            transformed = register_points(capture.points_m, request.registration)
-            registered = TourCapture(
-                capture.time_s, capture.labels, transformed, capture.valid
-            )
-            output = write_trc(
-                registered,
-                directory / "registered.trc",
-                rate_hz=1.0 / float(np.diff(capture.time_s)[0]),
-            )
-            if not np.array_equal(read_trc(output).time_s, capture.time_s):
-                blockers.append("registration-changed-observation-clock")
-            registered_sha = _sha(output)
-        except (OSError, ValueError):
-            blockers.append("capture-registration-failed")
+    registered_sha = _register_preflight_capture(request, directory, capture, blockers)
     if set(request.marker_bindings) != set(request.marker_weights):
         blockers.append("marker-binding-coverage")
-    wrapped_findings: tuple[NativeDiagnosticFinding, ...] = ()
-    if actual["model"] == request.model_sha256:
-        try:
-            wrapped_findings = audit_native_wrapped_path_source(
-                request.model_path,
-                request.model_sha256,
-                request.wrapped_path_declaration,
-                _reference_state_declaration(request),
-                request.reference_frame_path,
-            ).findings
-        except (OSError, ValueError, RuntimeError):
-            from .native_diagnostic_contract import (
-                ExecutionEffect,
-                QualificationEffect,
-            )
+    return _NativePreflight(
+        actual,
+        source_blockers,
+        blockers,
+        physical_sha,
+        physical_qualified,
+        capture,
+        clock_sha,
+        registered_sha,
+    )
 
-            wrap_error_sha = hashlib.sha256(
-                f"{request.model_sha256}:wrapped-path-source-audit-failed".encode()
-            ).hexdigest()
-            wrapped_findings = (
-                NativeDiagnosticFinding(
-                    code=DiagnosticCode.NATIVE_SOURCE_IDENTITY_INVALID,
-                    source_sha256=request.model_sha256,
-                    evidence_sha256=wrap_error_sha,
-                    execution_effect=ExecutionEffect.BLOCK,
-                    qualification_effect=QualificationEffect.NONE,
-                ),
-            )
-    loaded = reference_sha = passive_sha = None
-    runtime_sha = probe_sha = None
-    probe_failure = None
-    probe_attempted = False
-    probe_start = probe_end = None
-    if actual["model"] == request.model_sha256:
-        try:
-            run_probe = not blockers and not any(
-                finding.execution_effect.value == "block"
-                for finding in wrapped_findings
-            )
-            (
-                loaded,
-                reference_sha,
-                passive_sha,
-                native_blockers,
-                runtime_sha,
-                probe_sha,
-                probe_attempted,
-                probe_start,
-                probe_end,
-                probe_failure,
-            ) = _native_preparation(request, run_probe=run_probe)
-            blockers.extend(native_blockers)
-        except (OSError, ValueError, RuntimeError):
-            blockers.append("native-model-preparation-unavailable")
-    probe_failure_sha = None
-    if probe_failure is not None:
-        private_receipt = probe_failure.private_receipt(
-            request.identity_sha256, request.model_sha256
+
+def _register_preflight_capture(
+    request: NativeMocoRequest,
+    directory: Path,
+    capture: TourCapture | None,
+    blockers: list[str],
+) -> str | None:
+    if request.registration is None:
+        blockers.append("capture-registration-unavailable")
+        return None
+    if capture is None or "irregular-observation-clock" in blockers:
+        return None
+    try:
+        transformed = register_points(capture.points_m, request.registration)
+        registered = TourCapture(
+            capture.time_s, capture.labels, transformed, capture.valid
         )
-        private_receipt_bytes = json.dumps(
-            private_receipt, sort_keys=True, allow_nan=False
-        ).encode()
-        probe_failure_sha = hashlib.sha256(private_receipt_bytes).hexdigest()
-        (directory / "native_probe_failure_private.json").write_bytes(
-            private_receipt_bytes + b"\n"
+        output = write_trc(
+            registered,
+            directory / "registered.trc",
+            rate_hz=1.0 / float(np.diff(capture.time_s)[0]),
         )
-    evidence_payload = {
-        "source_digests": actual,
-        "loaded_model_sha256": loaded,
-        "reference_observation_sha256": reference_sha,
-        "passive_observation_sha256": passive_sha,
-        "physical_body_inertia_sha256": physical_sha,
-        "probe_sha256": probe_sha,
-        "probe_failure_receipt_sha256": probe_failure_sha,
-        "blockers": tuple(dict.fromkeys(blockers)),
-    }
-    diagnostic_evidence_sha = hashlib.sha256(
-        json.dumps(evidence_payload, sort_keys=True, allow_nan=False).encode()
-    ).hexdigest()
-    final_blockers = tuple(dict.fromkeys(blockers))
-    blocker_receipt_sha = hashlib.sha256(
-        json.dumps(final_blockers, allow_nan=False).encode()
-    ).hexdigest()
-    audit_codes: list[DiagnosticCode] = []
+        if not np.array_equal(read_trc(output).time_s, capture.time_s):
+            blockers.append("registration-changed-observation-clock")
+        return _sha(output)
+    except (OSError, ValueError):
+        blockers.append("capture-registration-failed")
+        return None
+
+
+@dataclass(frozen=True)
+class _NativeModelPreparation:
+    loaded_sha256: str | None
+    reference_sha256: str | None
+    passive_sha256: str | None
+    runtime_sha256: str | None
+    probe_sha256: str | None
+    probe_attempted: bool
+    probe_start: float | None
+    probe_end: float | None
+    probe_failure: NativeProbeFailure | None
+    wrapped_findings: tuple[NativeDiagnosticFinding, ...]
+
+
+def _prepare_native_model(
+    request: NativeMocoRequest,
+    actual: Mapping[str, str | None],
+    blockers: list[str],
+) -> _NativeModelPreparation:
+    empty = _NativeModelPreparation(
+        None, None, None, None, None, False, None, None, None, ()
+    )
+    if actual["model"] != request.model_sha256:
+        return empty
+    try:
+        wrapped = audit_native_wrapped_path_source(
+            request.model_path,
+            request.model_sha256,
+            request.wrapped_path_declaration,
+            _reference_state_declaration(request),
+            request.reference_frame_path,
+        ).findings
+    except (OSError, ValueError, RuntimeError):
+        from .native_diagnostic_contract import ExecutionEffect, QualificationEffect
+
+        digest = hashlib.sha256(
+            f"{request.model_sha256}:wrapped-path-source-audit-failed".encode()
+        ).hexdigest()
+        wrapped = (
+            NativeDiagnosticFinding(
+                code=DiagnosticCode.NATIVE_SOURCE_IDENTITY_INVALID,
+                source_sha256=request.model_sha256,
+                evidence_sha256=digest,
+                execution_effect=ExecutionEffect.BLOCK,
+                qualification_effect=QualificationEffect.NONE,
+            ),
+        )
+    try:
+        run_probe = not blockers and not any(
+            finding.execution_effect.value == "block" for finding in wrapped
+        )
+        (
+            loaded,
+            reference,
+            passive,
+            native_blockers,
+            runtime,
+            probe,
+            attempted,
+            start,
+            end,
+            failure,
+        ) = _native_preparation(request, run_probe=run_probe)
+        blockers.extend(native_blockers)
+        return _NativeModelPreparation(
+            loaded,
+            reference,
+            passive,
+            runtime,
+            probe,
+            attempted,
+            start,
+            end,
+            failure,
+            wrapped,
+        )
+    except (OSError, ValueError, RuntimeError):
+        blockers.append("native-model-preparation-unavailable")
+        return _NativeModelPreparation(
+            None, None, None, None, None, False, None, None, None, wrapped
+        )
+
+
+def _preparation_audit_codes(
+    request: NativeMocoRequest,
+    preflight: _NativePreflight,
+    model: _NativeModelPreparation,
+    blockers: list[str],
+) -> tuple[DiagnosticCode, ...]:
+    codes: list[DiagnosticCode] = []
     if (
-        not source_blockers
+        not preflight.source_blockers
         and "model-sha256-changed-during-preparation" not in blockers
-        and capture is not None
-        and actual["guess"] == request.states_guess_sha256
+        and preflight.capture is not None
+        and preflight.actual_digests["guess"] == request.states_guess_sha256
     ):
-        audit_codes.append(DiagnosticCode.NATIVE_SOURCE_IDENTITY_VERIFIED)
-    if loaded is not None and "complete-native-state-unavailable" not in blockers:
-        audit_codes.append(DiagnosticCode.NATIVE_STATE_RECONSTRUCTED)
-    if loaded is not None and not any(
+        codes.append(DiagnosticCode.NATIVE_SOURCE_IDENTITY_VERIFIED)
+    if (
+        model.loaded_sha256 is not None
+        and "complete-native-state-unavailable" not in blockers
+    ):
+        codes.append(DiagnosticCode.NATIVE_STATE_RECONSTRUCTED)
+    if model.loaded_sha256 is not None and not any(
         blocker in blockers
         for blocker in (
             "native-constraint-policy-unavailable",
@@ -821,8 +887,8 @@ def prepare_native_moco(
             "native-discrete-state-unreconstructible",
         )
     ):
-        audit_codes.append(DiagnosticCode.NATIVE_CONSTRAINTS_RECONSTRUCTED)
-    if loaded is not None and not any(
+        codes.append(DiagnosticCode.NATIVE_CONSTRAINTS_RECONSTRUCTED)
+    if model.loaded_sha256 is not None and not any(
         blocker in blockers
         for blocker in (
             "native-state-binding-coverage",
@@ -830,32 +896,83 @@ def prepare_native_moco(
             "native-input-coverage-invalid",
         )
     ):
-        audit_codes.append(DiagnosticCode.NATIVE_INPUT_BINDINGS_VERIFIED)
-    if loaded is not None and not any(
+        codes.append(DiagnosticCode.NATIVE_INPUT_BINDINGS_VERIFIED)
+    if model.loaded_sha256 is not None and not any(
         "marker" in blocker or "registration" in blocker for blocker in blockers
     ):
-        audit_codes.append(DiagnosticCode.NATIVE_MARKER_BINDINGS_VERIFIED)
-    if physical_qualified and physical_sha is not None:
-        audit_codes.append(DiagnosticCode.NATIVE_PHYSICAL_INERTIA_ADMITTED)
-    if probe_sha is not None:
-        audit_codes.extend(
+        codes.append(DiagnosticCode.NATIVE_MARKER_BINDINGS_VERIFIED)
+    if preflight.physical_qualified and preflight.physical_sha256 is not None:
+        codes.append(DiagnosticCode.NATIVE_PHYSICAL_INERTIA_ADMITTED)
+    if model.probe_sha256 is not None:
+        codes.extend(
             (
                 DiagnosticCode.NATIVE_MECHANICS_EVALUATED,
                 DiagnosticCode.NATIVE_SHORT_PROBE_COMPLETED,
             )
         )
+    return tuple(codes)
+
+
+def _private_probe_failure_digest(
+    request: NativeMocoRequest,
+    model: _NativeModelPreparation,
+    directory: Path,
+) -> str | None:
+    if model.probe_failure is None:
+        return None
+    raw = json.dumps(
+        model.probe_failure.private_receipt(
+            request.identity_sha256, request.model_sha256
+        ),
+        sort_keys=True,
+        allow_nan=False,
+    ).encode()
+    (directory / "native_probe_failure_private.json").write_bytes(raw + b"\n")
+    return hashlib.sha256(raw).hexdigest()
+
+
+def _assess_native_preparation(
+    request: NativeMocoRequest,
+    directory: Path,
+    preflight: _NativePreflight,
+    model: _NativeModelPreparation,
+) -> tuple[tuple[str, ...], NativeDiagnosticAssessment]:
+    """Bind audited inputs, probe evidence and blockers to one typed assessment."""
+    blockers = preflight.blockers
+    probe_failure_sha = _private_probe_failure_digest(request, model, directory)
+    evidence = hashlib.sha256(
+        json.dumps(
+            {
+                "source_digests": preflight.actual_digests,
+                "loaded_model_sha256": model.loaded_sha256,
+                "reference_observation_sha256": model.reference_sha256,
+                "passive_observation_sha256": model.passive_sha256,
+                "physical_body_inertia_sha256": preflight.physical_sha256,
+                "probe_sha256": model.probe_sha256,
+                "probe_failure_receipt_sha256": probe_failure_sha,
+                "blockers": tuple(dict.fromkeys(blockers)),
+            },
+            sort_keys=True,
+            allow_nan=False,
+        ).encode()
+    ).hexdigest()
+    final_blockers = tuple(dict.fromkeys(blockers))
+    receipt_sha = hashlib.sha256(
+        json.dumps(final_blockers, allow_nan=False).encode()
+    ).hexdigest()
+    codes = _preparation_audit_codes(request, preflight, model, blockers)
     from .native_diagnostic_contract import assess_native_diagnostic
 
-    attempt_evidence = probe_sha or diagnostic_evidence_sha
+    attempt_evidence = model.probe_sha256 or evidence
     assessment = assess_native_diagnostic(
         request.identity_sha256,
         request.model_sha256,
         _native_diagnostic_findings(
             blockers,
             request.model_sha256,
-            diagnostic_evidence_sha,
-            audit_codes=tuple(audit_codes),
-            additional_findings=wrapped_findings
+            evidence,
+            audit_codes=codes,
+            additional_findings=model.wrapped_findings
             + (
                 ()
                 if request.qualification_context is None
@@ -863,36 +980,89 @@ def prepare_native_moco(
             ),
         ),
         policy=request.effective_diagnostic_policy,
-        runtime_viability=(
-            RuntimeViability.VIABLE
-            if probe_sha is not None
-            else RuntimeViability.FAILED
-            if probe_attempted
-            else RuntimeViability.NOT_ATTEMPTED
+        runtime=NativeDiagnosticRuntimeEvidence(
+            viability=(
+                RuntimeViability.VIABLE
+                if model.probe_sha256 is not None
+                else RuntimeViability.FAILED
+                if model.probe_attempted
+                else RuntimeViability.NOT_ATTEMPTED
+            ),
+            phase=(
+                RuntimePhase.SHORT_CAPABILITY_PROBE
+                if model.probe_sha256 is not None or model.probe_attempted
+                else None
+            ),
+            window_seconds=(
+                (model.probe_start, model.probe_end)
+                if model.probe_start is not None and model.probe_end is not None
+                else None
+            ),
+            native_runtime_sha256=(
+                model.runtime_sha256
+                if model.probe_sha256 is not None or model.probe_attempted
+                else None
+            ),
+            evidence_sha256=(
+                attempt_evidence
+                if model.probe_sha256 is not None or model.probe_attempted
+                else None
+            ),
         ),
-        runtime_phase=(
-            RuntimePhase.SHORT_CAPABILITY_PROBE
-            if probe_sha is not None or probe_attempted
-            else None
-        ),
-        runtime_window_seconds=(
-            (probe_start, probe_end)
-            if probe_start is not None and probe_end is not None
-            else None
-        ),
-        native_runtime_sha256=runtime_sha
-        if probe_sha is not None or probe_attempted
-        else None,
-        runtime_evidence_sha256=attempt_evidence
-        if probe_sha is not None or probe_attempted
-        else None,
-        blocker_receipt_sha256=blocker_receipt_sha,
+        blocker_receipt_sha256=receipt_sha,
         qualification_provenance_references=(
             ()
             if request.qualification_context is None
             else request.qualification_context.provenance_references
         ),
     )
+    return final_blockers, assessment
+
+
+def prepare_native_moco(
+    request: NativeMocoRequest, output_dir: Path
+) -> NativeMocoPreparation:
+    """Collect all independent, obtainable blockers before any expensive solve."""
+    directory = Path(output_dir)
+    directory.mkdir(parents=True, exist_ok=True)
+    wall = time.perf_counter()
+    cpu = time.process_time()
+    blockers: list[str] = []
+    if request.config.allow_unused_references:
+        blockers.append("unused-reference-policy")
+    if request.config.t_start_s != 0.0:
+        blockers.append("nonzero-native-replay-origin")
+    preflight = _collect_native_preflight(request, directory, blockers)
+    actual = preflight.actual_digests
+    source_blockers = preflight.source_blockers
+    blockers = preflight.blockers
+    physical_sha = preflight.physical_sha256
+    physical_qualified = preflight.physical_qualified
+    capture = preflight.capture
+    clock_sha = preflight.clock_sha256
+    registered_sha = preflight.registered_sha256
+    model_result = _prepare_native_model(request, actual, blockers)
+    loaded = model_result.loaded_sha256
+    reference_sha = model_result.reference_sha256
+    passive_sha = model_result.passive_sha256
+    runtime_sha = model_result.runtime_sha256
+    probe_sha = model_result.probe_sha256
+    probe_failure = model_result.probe_failure
+    probe_attempted = model_result.probe_attempted
+    probe_start, probe_end = model_result.probe_start, model_result.probe_end
+    wrapped_findings = model_result.wrapped_findings
+    final_blockers, assessment = _assess_native_preparation(
+        request, directory, preflight, model_result
+    )
+    loaded = model_result.loaded_sha256
+    reference_sha = model_result.reference_sha256
+    passive_sha = model_result.passive_sha256
+    physical_sha = preflight.physical_sha256
+    physical_qualified = preflight.physical_qualified
+    capture = preflight.capture
+    clock_sha = preflight.clock_sha256
+    registered_sha = preflight.registered_sha256
+    actual = preflight.actual_digests
     report = NativeMocoPreparation(
         request.identity_sha256,
         actual["model"],

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from functools import lru_cache
 import hashlib
 import json
@@ -366,26 +367,32 @@ def _observe_final_state(
     return values, final_derivatives, final_forces, tuple(discrete_values)
 
 
-def _build_probe_payload(
-    source_sha256: str,
-    runtime_sha256: str,
-    start: float,
-    step: float,
-    reached_time: float,
-    initial_state: tuple[tuple[str, float], ...],
-    control_values: tuple[float, ...],
-    actuators: Any,
-    initial_discrete: tuple[tuple[str, float], ...],
-    constraint_payload: dict[str, Any],
-    initial_derivatives: tuple[tuple[str, float], ...],
-    values: np.ndarray,
-    final_derivatives: tuple[tuple[str, float], ...],
-    final_forces: tuple[tuple[str, float], ...],
-    observations: list[tuple[str, float]],
-    native_joint_evaluations: list[tuple[str, str]],
-    discrete_values: tuple[tuple[str, float], ...],
-) -> tuple[str, float]:
+@dataclass(frozen=True)
+class _NativeProbePayloadInputs:
+    source_sha256: str
+    runtime_sha256: str
+    start: float
+    step: float
+    reached_time: float
+    initial_state: tuple[tuple[str, float], ...]
+    control_values: tuple[float, ...]
+    actuator_paths: tuple[str, ...]
+    initial_discrete: tuple[tuple[str, float], ...]
+    constraint_payload: dict[str, Any]
+    initial_derivatives: tuple[tuple[str, float], ...]
+    values: np.ndarray
+    final_derivatives: tuple[tuple[str, float], ...]
+    final_forces: tuple[tuple[str, float], ...]
+    observations: list[tuple[str, float]]
+    native_joint_evaluations: list[tuple[str, str]]
+    discrete_values: tuple[tuple[str, float], ...]
+
+
+def _build_probe_payload(inputs: _NativeProbePayloadInputs) -> tuple[str, float]:
     """Bind probe evidence to exact model, runtime, inputs and observed outputs."""
+    source_sha256 = inputs.source_sha256
+    runtime_sha256 = inputs.runtime_sha256
+    start, step, reached_time = inputs.start, inputs.step, inputs.reached_time
     payload = {
         "probe_protocol": NATIVE_CAPABILITY_PROTOCOL,
         "probe_implementation_sha256": _sha(Path(__file__)),
@@ -395,43 +402,42 @@ def _build_probe_payload(
         "end_seconds": reached_time,
         "step_seconds": step,
         "initial_named_state_sha256": hashlib.sha256(
-            json.dumps(initial_state, allow_nan=False).encode()
+            json.dumps(inputs.initial_state, allow_nan=False).encode()
         ).hexdigest(),
         "initial_native_controls_sha256": hashlib.sha256(
             json.dumps(
                 {
-                    "control_values": control_values,
-                    "actuator_paths": tuple(
-                        str(actuators.get(i).getAbsolutePathString())
-                        for i in range(actuators.getSize())
-                    ),
+                    "control_values": inputs.control_values,
+                    "actuator_paths": inputs.actuator_paths,
                 },
                 allow_nan=False,
             ).encode()
         ).hexdigest(),
         "control_protocol": "source-controller-free native zero/default actuator controls",
         "initial_discrete_state_sha256": hashlib.sha256(
-            json.dumps(initial_discrete, allow_nan=False).encode()
+            json.dumps(inputs.initial_discrete, allow_nan=False).encode()
         ).hexdigest(),
         "declared_constraint_audit_sha256": hashlib.sha256(
-            json.dumps(constraint_payload, sort_keys=True, allow_nan=False).encode()
+            json.dumps(
+                inputs.constraint_payload, sort_keys=True, allow_nan=False
+            ).encode()
         ).hexdigest(),
-        "native_state_sha256": hashlib.sha256(values.tobytes()).hexdigest(),
+        "native_state_sha256": hashlib.sha256(inputs.values.tobytes()).hexdigest(),
         "initial_state_derivatives_sha256": hashlib.sha256(
-            json.dumps(initial_derivatives, allow_nan=False).encode()
+            json.dumps(inputs.initial_derivatives, allow_nan=False).encode()
         ).hexdigest(),
         "final_state_derivatives_sha256": hashlib.sha256(
-            json.dumps(final_derivatives, allow_nan=False).encode()
+            json.dumps(inputs.final_derivatives, allow_nan=False).encode()
         ).hexdigest(),
         "final_muscle_actuation_sha256": hashlib.sha256(
-            json.dumps(final_forces, allow_nan=False).encode()
+            json.dumps(inputs.final_forces, allow_nan=False).encode()
         ).hexdigest(),
         "mechanics_observation_sha256": hashlib.sha256(
-            json.dumps(observations, allow_nan=False).encode()
+            json.dumps(inputs.observations, allow_nan=False).encode()
         ).hexdigest(),
-        "native_joint_function_evaluations": native_joint_evaluations,
+        "native_joint_function_evaluations": inputs.native_joint_evaluations,
         "discrete_state_sha256": hashlib.sha256(
-            json.dumps(discrete_values, allow_nan=False).encode()
+            json.dumps(inputs.discrete_values, allow_nan=False).encode()
         ).hexdigest(),
     }
     if not math.isclose(reached_time, start + step, rel_tol=0.0, abs_tol=1e-10):
@@ -478,23 +484,28 @@ def _run_native_short_capability_probe(
     )
     reached_time = float(final_state.getTime())
     evidence_sha, reached_time = _build_probe_payload(
-        source_sha256,
-        runtime_sha256,
-        start,
-        step,
-        reached_time,
-        initial_state,
-        control_values,
-        actuators,
-        initial_discrete,
-        constraint_payload,
-        initial_derivatives,
-        values,
-        final_derivatives,
-        final_forces,
-        observations,
-        native_joint_evaluations,
-        discrete_values,
+        _NativeProbePayloadInputs(
+            source_sha256=source_sha256,
+            runtime_sha256=runtime_sha256,
+            start=start,
+            step=step,
+            reached_time=reached_time,
+            initial_state=initial_state,
+            control_values=control_values,
+            actuator_paths=tuple(
+                str(actuators.get(i).getAbsolutePathString())
+                for i in range(actuators.getSize())
+            ),
+            initial_discrete=initial_discrete,
+            constraint_payload=constraint_payload,
+            initial_derivatives=initial_derivatives,
+            values=values,
+            final_derivatives=final_derivatives,
+            final_forces=final_forces,
+            observations=observations,
+            native_joint_evaluations=native_joint_evaluations,
+            discrete_values=discrete_values,
+        )
     )
     del manager
     return evidence_sha, start, reached_time
