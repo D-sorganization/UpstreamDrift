@@ -192,12 +192,13 @@ def address_ball(swing: SwingInput, impact_time_s: float | None) -> BallPlacemen
 
 
 def attach_ball(
-    swing: SwingInput, settings: ExportSettings
+    swing: SwingInput, settings: ExportSettings, limitation: str | None = None
 ) -> tuple[SwingInput, dict[str, Any] | None]:
     """``swing`` carrying its ball placement, plus the manifest record.
 
     The record is ``None`` when ``settings.ball`` is off, the placement dict
-    when available, else ``{"unavailable": reason}`` (also logged). A ball
+    when available (with a ``limitation`` note when the backend cannot honour
+    hide-after-impact), else ``{"unavailable": reason}`` (also logged). A ball
     already on ``swing`` is kept so a caller can supply a measured one.
     """
     if not settings.ball:
@@ -208,4 +209,7 @@ def attach_ball(
     if isinstance(placed, str):
         logger.warning("no golf ball drawn: %s", placed)
         return replace(swing, ball=None), {"unavailable": placed}
-    return replace(swing, ball=placed), placed.to_dict()
+    record = placed.to_dict()
+    if limitation:
+        record["limitation"] = limitation
+    return replace(swing, ball=placed), record

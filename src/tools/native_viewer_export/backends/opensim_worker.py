@@ -180,22 +180,24 @@ def build_model(osim: Any, spec_bytes: bytes) -> tuple[Any, float]:
     return model, float(skeleton.ground.height_m)
 
 
-def attach_ball(osim: Any, model: Any, ball: dict[str, Any]) -> Any:
+def attach_ball(osim: Any, model: Any, ball: dict[str, Any]) -> None:
     """Attach the decorative ball as a sphere on the model's ground (visual only).
 
-    Returns the sphere geometry so the render loop can change its opacity.
+    Limitation: the simbody visualizer caches fixed model geometry when the
+    system is initialised, and toggling the Appearance visibility or opacity
+    afterwards does not redraw (verified by a smoke render), so the ball stays
+    visible after impact in OpenSim clips.
     """
     placement = BallPlacement.from_dict(ball)
-    geom = osim.Sphere(placement.radius_m)
     _attach(
-        osim, model.updGround(), np.eye(3), placement.position_m, geom, BALL_RGB, 9000
+        osim,
+        model.updGround(),
+        np.eye(3),
+        placement.position_m,
+        osim.Sphere(placement.radius_m),
+        BALL_RGB,
+        9000,
     )
-    return geom
-
-
-def set_ball_opacity(geom: Any, visible: bool) -> None:
-    """Show or hide the ball by Appearance opacity (the visualizer redraws it)."""
-    geom.upd_Appearance().set_opacity(1.0 if visible else 0.0)
 
 
 def set_camera(
@@ -218,7 +220,8 @@ def main(job_path: str) -> None:
     bundle = InputBundle.load(Path(job.bundle_path))
     q = np.load(job.q_path)
     model, ground_h = build_model(osim, bundle.spec_bytes)
-    ball_geom = attach_ball(osim, model, job.ball) if job.ball else None
+    if job.ball:
+        attach_ball(osim, model, job.ball)
     model.setUseVisualizer(True)
     state = model.initSystem()
     viz = model.updVisualizer().updSimbodyVisualizer()
@@ -235,8 +238,6 @@ def main(job_path: str) -> None:
         for name, value in zip(bundle.coordinate_order, q[k], strict=True):
             coords.get(name).setValue(state, float(value), False)
         model.realizePosition(state)
-        if ball_geom is not None and job.ball_visible:
-            set_ball_opacity(ball_geom, job.ball_visible[pos])
         for view in job.views:
             look = job.lookat_for(view, pos)
             set_camera(osim, viz, view, job, look)

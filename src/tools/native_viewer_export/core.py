@@ -619,7 +619,9 @@ def export_swing(
     out_dir = Path(out_dir)
     from src.tools.native_viewer_export.ball import attach_ball
 
-    swing, ball_record = attach_ball(swing, settings)
+    swing, ball_record = attach_ball(
+        swing, settings, getattr(backend, "ball_limitation", None)
+    )
     plans = clip_plans(swing, settings)
     out_dir.mkdir(parents=True, exist_ok=True)
     factory = writer_factory or functools.partial(imageio_writer, crf=settings.crf)

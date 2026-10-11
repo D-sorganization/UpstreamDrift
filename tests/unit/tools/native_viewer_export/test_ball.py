@@ -203,6 +203,18 @@ def test_attach_ball_records_placement_or_reason(
     assert kept.ball == placed and record == placed.to_dict()
 
 
+def test_attach_ball_records_backend_limitation() -> None:
+    from src.tools.native_viewer_export.backends.opensim_simbody import (
+        OpenSimSimbodyBackend,
+    )
+
+    swing = SwingInput(**{**_fixture_swing().__dict__, "ball": _placement()})
+    note = OpenSimSimbodyBackend.ball_limitation
+    _, record = attach_ball(swing, ExportSettings(), note)
+    assert record is not None and record["limitation"] == note
+    assert "after impact" in note
+
+
 # --- worker plumbing ---------------------------------------------------------
 
 
