@@ -1,3 +1,9 @@
+# Active: Measured Driver Club Cluster, #12221
+
+- Branch `claude/12221-driver-cluster`, stacked on `claude/12221-fixed-triad`. `evidence/club_markers/driver.json` (from the calibrated `anthro_driver_seeds` receipt at `1bef553457`) is now in the driver document. `anthro_driver`, `anthro_driver_seeds` and `anthro_driver_drake`, the OpenSim driver export, the inventory hashes and the tutorial hash `4ee2c43d` are regenerated.
+- Fixed cluster, fixture flags: capture face 5.50 / 14.96° (the canonical frame), model impact face 16.13°, speed −3.6 %, peak −0.3 ms. The canonical seeds receipt reads 7.5 / 30.5 / 82.6 mm (was 6.4 / 29.5 / 80.8). The nominal driver reads 41.7 / 46.1 / 73.6 mm (was 42.6 / 52.7 / 97.3).
+- Open: the same-input export of the fixed driver run diverges at impact; refit `grip_rotation_deg`; decide whether `--fix-club-markers` should be the default. Calc record: "Measured Driver Club Cluster".
+
 # Native Wrapped-Path Closure Handoff — #12234
 
 `native_wrapped_path.py` carries a source-hash-bound declaration for
@@ -1223,6 +1229,18 @@ See `F07_UNQUALIFIED_MOCO_FEASIBILITY_TURNOVER.md` and canonical chapter 55.
 Full-clock private preflight retains unavailable passive admission and blocked
 independent replay. #12231 addresses strict visual asset closure; wrapped/chart,
 support/grip, captured matching and parity gates remain open.
+
+The earlier 20-interval replay failed its speed, activation and fiber-length
+limits. Separately, the 21-interval child failed strict planned-clock validation
+at 9 of 43 values by one ULP. A later replay on those saved timestamps failed
+only the activation limit (`5.078110452592238e-5` versus `1e-8`); coordinate,
+speed, fiber-length and endpoint limits passed. This diagnostic does not repair
+the clock rejection or identify the activation discrepancy's cause. Exact
+attempts, hashes, limits and failures remain in the historical appendices
+linked from `F07_NATIVE_MOCO_COMPLEXITY_LADDER_TURNOVER.md`.
+The agent-context catalog is unchanged because its `vendor/ud-tools` junction
+escapes to the frozen `feedback-drake-native-11838` donor; the context CLI
+rejected that path and the donor was not traversed or modified.
 
 The #12198 CI receipt-preservation follow-up restores two canonical
 ground-support receipts to their recorded hashes and adds explicit formatter
