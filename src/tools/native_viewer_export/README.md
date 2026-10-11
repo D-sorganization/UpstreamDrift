@@ -118,12 +118,17 @@ plot strips are not rendered yet (GCV-19, #11725).
 `ExportSettings.impact_card` (default on, needs the HUD) draws the GCV-17
 `ImpactCard` as a semi-transparent right-hand panel from the impact frame to the
 end of each clip (`compositor.draw_impact_card`). `impact_card.impact_card_for`
-computes it once per swing from the displayed pose `q`: the MuJoCo plant of the
-specification export places the `Clubface Vector` body, central differences of
-`q` give the rates, `clubhead_series_from_mujoco` and
-`extract_impact_parameters` (impact state = last sample before the impact time,
-default `TargetFrame`) give the rows. Unavailable rows show "unavailable" and a
+computes it once per swing, on the unresampled source states (identical for
+every speed clip), from the displayed pose `q`: `club_pose.ClubPoseModel` (shared
+with the decorative ball) places the spec club body through MuJoCo and gives the
+true face centre, normal, toe and grip axes; `np.gradient` of the face-centre
+positions gives the velocity; `extract_impact_parameters` (impact state = last
+sample before the impact time) gives the rows. The specification has no target
+line, so the target direction is the horizontal part of the address (state 0)
+face normal (face square at address, as `plan_gaze` does), right-handed, Z-up;
+the card records `extras.target_source = "address_face_normal"`, so face angle
+and path are relative to that assumed line. Unavailable rows show "unavailable" and a
 reason, never zero. When no card can be computed (no MuJoCo, no club, speed
 below 1 m/s) nothing is drawn, `ExportResult.impact_card` holds the reason, and
-the showcase manifest records it. The panel shows model estimates in the default
-target frame (ADR-0041), not a measurement.
+the showcase manifest records it. The panel shows model estimates, not a
+measurement.

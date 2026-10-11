@@ -286,3 +286,97 @@ def test_impact_card_on_the_club_face_fixture() -> None:
     assert keys["clubhead_speed"].value > 0.0 and card.units == "mph"
     assert len(card.rows) == 10
     assert card.impact_time_s <= detect_time
+
+
+# --- true-face series (review fix) ---------------------------------------------------
+
+
+def _fixture_swing(path: Path = FIXTURE) -> SwingInput:
+    pytest.importorskip("mujoco")
+    if not (SPEC.exists() and path.exists()):
+        pytest.skip("capture-A specification or club-face fixture missing")
+    import json
+
+    q = np.load(path)["q"].astype(float)
+    names = tuple(json.loads(SPEC.read_text())["coordinate_order"])
+    z = np.zeros_like(q)
+    bundle = InputBundle(
+        spec_bytes=SPEC.read_bytes(),
+        coordinate_order=names,
+        dt_s=0.002,
+        q0=q[0],
+        v0=z[0],
+        efforts=np.zeros((len(q) - 1, len(names))),
+        reference_q=q,
+        reference_v=z,
+        reference_engine="mujoco",
+    )
+    return SwingInput(bundle, q, "driver", "Driver", "mujoco")
+
+
+def _line_series(heading, speed: float = 40.0):
+    from src.shared.python.impact_parameters import ClubheadSeries
+
+    t = np.arange(0.0, 0.2, 0.001)
+    n = len(t)
+    heading = np.asarray(heading, dtype=float)
+    return ClubheadSeries(
+        times_s=t,
+        face_center_m=np.outer(speed * t, heading),
+        velocity_mps=np.tile(speed * heading, (n, 1)),
+        face_normal=np.tile(heading, (n, 1)),
+        toe_axis=np.tile([0.0, 0.0, -1.0], (n, 1)),
+        grip_axis=np.tile([0.0, 0.0, 1.0], (n, 1)),
+    )
+
+
+def test_straight_square_swing_gives_known_parameters() -> None:
+    card = impact_card.card_from_series(_line_series([1.0, 0.0, 0.0]), 0.15)
+    rows = {r.key: r.value for r in card.rows}
+    assert rows["clubhead_speed"] == pytest.approx(89.48, rel=0.005)
+    assert rows["club_path_deg"] == pytest.approx(0.0, abs=0.05)
+    assert rows["face_angle_deg"] == pytest.approx(0.0, abs=0.05)
+    assert rows["attack_angle_deg"] == pytest.approx(0.0, abs=0.05)
+    assert card.extras["target_source"] == "address_face_normal"
+
+
+def test_target_follows_the_address_face_normal() -> None:
+    card = impact_card.card_from_series(_line_series([0.0, -1.0, 0.0]), 0.15)
+    rows = {r.key: r.value for r in card.rows}
+    assert rows["club_path_deg"] == pytest.approx(0.0, abs=0.05)
+    assert rows["face_angle_deg"] == pytest.approx(0.0, abs=0.05)
+
+
+def test_club_face_world_is_consistent_with_the_ball() -> None:
+    from src.shared.python.model_appearance.ball import (
+        BALL_RADIUS_M,
+        ball_position_at_address,
+    )
+    from src.tools.native_viewer_export.ball import address_ball
+    from src.tools.native_viewer_export.club_pose import ClubPoseModel
+
+    swing = _fixture_swing()
+    model = ClubPoseModel(swing.bundle.spec_bytes)
+    names = swing.bundle.coordinate_order
+    coords = dict(zip(names, map(float, swing.q[0]), strict=True))
+    face = model.face_world(coords)
+    assert np.linalg.norm(face.normal) == pytest.approx(1.0)
+    assert face.toe @ face.normal == pytest.approx(0.0, abs=1e-9)
+    assert np.cross(face.toe, face.normal) == pytest.approx(face.grip, abs=1e-9)
+    ball = ball_position_at_address(
+        face.centre_m, face.normal, ground_height_m=model.ground_height_m
+    )
+    assert ball[:2] - BALL_RADIUS_M * face.normal[:2] == pytest.approx(
+        face.centre_m[:2], abs=1e-3
+    )
+    placed = address_ball(swing, None)
+    if not isinstance(placed, str):  # the ball module uses the same helper
+        assert np.asarray(placed.position_m) == pytest.approx(ball, abs=1e-6)
+
+
+def test_fixture_series_uses_the_true_face() -> None:
+    swing = _fixture_swing()
+    series = impact_card._club_series(swing)
+    assert len(series) == swing.n_states
+    assert np.isfinite(series.velocity_mps).all()
+    assert np.allclose(np.linalg.norm(np.asarray(series.face_normal), axis=1), 1.0)
