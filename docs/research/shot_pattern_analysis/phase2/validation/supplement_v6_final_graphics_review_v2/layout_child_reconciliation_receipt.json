@@ -1,0 +1,779 @@
+{
+  "baseline_ledger_sha256": "b01de45bb20d8bc7b0d041fb69af2185d77275d19ec598f269fed0bb2589b293",
+  "baseline_pipeline_sha256": "035c65b249937a639d0ddfd5bd5df3aef8b46aaae351b98a4c6ae9e29e0b064a",
+  "changed_figure_count": 147,
+  "changed_figures": [
+    {
+      "baseline_sha256": "041ac14e683a80f06a85d2aa26f8223a72194f889225f97e6c9fd4c54a8a9b78",
+      "child_sha256": "fecd264410784a18545c5c558d8ad219998520bd3359a5333c8ee20ca604b4d0",
+      "relative_path": "comparisons/curve_strength_original_primary_1_driver_lean0_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_driver_lean0_curve2_rotation1_cov_facepath_negative__838c78daa1_density.pdf"
+    },
+    {
+      "baseline_sha256": "96b6e67a5fdabd5595a7d5bfe4a518bc76b5d1b20a60fdbb8e01297c4998fbf9",
+      "child_sha256": "447309dc1789eb18048846e4573350c7028bece5b4aedabca08d74abeea458d0",
+      "relative_path": "comparisons/curve_strength_original_primary_1_driver_lean0_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_driver_lean0_curve2_rotation1_cov_facepath_negative__838c78daa1_density.png"
+    },
+    {
+      "baseline_sha256": "24654b5df6f684809dbb3bfae15bf950f65fb84ee73b4a16e98c51ba836d469b",
+      "child_sha256": "85190f7b592fead4b11d20204c08e607c13a6f8eba5c00089433fda44ef9518c",
+      "relative_path": "comparisons/curve_strength_original_primary_1_driver_lean0_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_driver_lean0_curve2_rotation1_cov_facepath_negative__838c78daa1_density.svg"
+    },
+    {
+      "baseline_sha256": "8b2ff126864b38c0dace78eefb8f8dbda5a79cb8db3fafc28bffff9c5ddf7429",
+      "child_sha256": "7103536ea8b6d28008efcfd921d903d23a2057bcb4d7e2efb41e0e3398c71276",
+      "relative_path": "comparisons/curve_strength_original_primary_1_driver_lean0_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_driver_lean0_curve2_rotation1_cov_facepath_positive__8ea5caf30c_density.pdf"
+    },
+    {
+      "baseline_sha256": "69cad0f08f33e3f3b4589b7fa88e390c1587aa1b8165c3a181c2c3d508667a4d",
+      "child_sha256": "21bd368d68b9050c5e2d59c1e86473d502da053c272ed6624ebcd2a910eb32a1",
+      "relative_path": "comparisons/curve_strength_original_primary_1_driver_lean0_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_driver_lean0_curve2_rotation1_cov_facepath_positive__8ea5caf30c_density.png"
+    },
+    {
+      "baseline_sha256": "6279ac2a378a5b507405d0d321c0c3704219123fc5b72d6d6d191d8f0b3194bc",
+      "child_sha256": "7473a69b5756a2d1476654e8c00bb94fefdf0c4e541ca49728c282d33d3854ee",
+      "relative_path": "comparisons/curve_strength_original_primary_1_driver_lean0_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_driver_lean0_curve2_rotation1_cov_facepath_positive__8ea5caf30c_density.svg"
+    },
+    {
+      "baseline_sha256": "0863fe893af726ffa0d354d7978bf8f4814ceee4f90264defccb5e6b16d15e8b",
+      "child_sha256": "bf9e658f72054cf61f7ed80e1049bdb98be9d16eada681c1493d108df832aa6b",
+      "relative_path": "comparisons/curve_strength_original_primary_1_driver_lean0_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_driver_lean0_curve2_rotation2_cov_facepath_negative__17b24ecc36_density.pdf"
+    },
+    {
+      "baseline_sha256": "87650be42aa869922e2295b4ecc03616e9cc60531648e086070e0af209cb899f",
+      "child_sha256": "781e03660e24d0cbfa0408c9e3c4fe53ce8724f67a3805c6506dbfe3cfa7ba94",
+      "relative_path": "comparisons/curve_strength_original_primary_1_driver_lean0_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_driver_lean0_curve2_rotation2_cov_facepath_negative__17b24ecc36_density.png"
+    },
+    {
+      "baseline_sha256": "8952c94c621b3301aee4b773303aaaf43b1d54dff32c5e6499c32e777be311a9",
+      "child_sha256": "38ec8419f5a9c8f73ba46f28896d032c8f24cfae4c87eaa78b5eb3c9657b94fe",
+      "relative_path": "comparisons/curve_strength_original_primary_1_driver_lean0_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_driver_lean0_curve2_rotation2_cov_facepath_negative__17b24ecc36_density.svg"
+    },
+    {
+      "baseline_sha256": "1653dbcb1741069e04d5b25b4fec439960486c5ed791313cf82274b3799a439a",
+      "child_sha256": "368e75de23af9e2719ba90c6563eb4f6bbde45def0c17dadcbd07893b6701b7a",
+      "relative_path": "comparisons/curve_strength_original_primary_1_driver_lean0_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_driver_lean0_curve2_rotation2_cov_facepath_positive__d0b26b4574_density.pdf"
+    },
+    {
+      "baseline_sha256": "a70be774abf9ba2af5bf65df651581c822bb708d0c190056d32ad4ef4428a4bd",
+      "child_sha256": "db867fffc38998d6e537c1cff677f4409a6a0b5e9616826cdb5f3d44cdff5911",
+      "relative_path": "comparisons/curve_strength_original_primary_1_driver_lean0_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_driver_lean0_curve2_rotation2_cov_facepath_positive__d0b26b4574_density.png"
+    },
+    {
+      "baseline_sha256": "ae38938f6d5642157ede61e6c04eb0b5b76006cf388f530867f509174c65309f",
+      "child_sha256": "8320f8ae368934f14b465243804cd75c1637ac2a9a6cc62441592c7ba0a62981",
+      "relative_path": "comparisons/curve_strength_original_primary_1_driver_lean0_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_driver_lean0_curve2_rotation2_cov_facepath_positive__d0b26b4574_density.svg"
+    },
+    {
+      "baseline_sha256": "bb5d32d209bd787957b8cc315580dbe7759ffa7b583b76f0cd5147494678cfcb",
+      "child_sha256": "f41acdf621ab913e52b854a755cd1676a7bce7cb16e1686485cabf539d2dcc18",
+      "relative_path": "comparisons/curve_strength_original_primary_1_pitching_wedge_lean10_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_cov__e5334b6978_density.pdf"
+    },
+    {
+      "baseline_sha256": "4141cf79bb4c174c26314e6679a3120d639b75dacebeb61a79b1fede80eaa391",
+      "child_sha256": "8a8ac7a51d20b39de06738c9a7fe981c7dd9052fefb633584c0cebe2d41c3afc",
+      "relative_path": "comparisons/curve_strength_original_primary_1_pitching_wedge_lean10_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_cov__e5334b6978_density.png"
+    },
+    {
+      "baseline_sha256": "4954a67d407082628e615ea6f89449216b00dcd842c7322f64cb073ce7828a27",
+      "child_sha256": "f8a63f82f7e0cfbe07117dcf3b27b5f528ee7eebfca98e1be1fde54e8907cae3",
+      "relative_path": "comparisons/curve_strength_original_primary_1_pitching_wedge_lean10_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_cov__e5334b6978_density.svg"
+    },
+    {
+      "baseline_sha256": "9f4b61d3cc8ff10e515afc1dd6cc251f529d9a41ac3c87444b86fe5461f4c9f7",
+      "child_sha256": "cbdfcfab30567186d870cf1fdba319f1568c2a3195bd29b7e7ab21e8207d0022",
+      "relative_path": "comparisons/curve_strength_original_primary_1_pitching_wedge_lean10_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_cov__775ddd5af0_density.pdf"
+    },
+    {
+      "baseline_sha256": "3809ce7efa20bdecec95854a8589f88c9a0744544b250612a074b16521029053",
+      "child_sha256": "6d902ce0cc27778a33ef696553d0b457a96e497ff82cd05ad36ba42025ae3d2e",
+      "relative_path": "comparisons/curve_strength_original_primary_1_pitching_wedge_lean10_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_cov__775ddd5af0_density.png"
+    },
+    {
+      "baseline_sha256": "dd77049bd8227fae4373ef0872dc1a9ff6c47d802f72f76284cee76e1de182b2",
+      "child_sha256": "f5d12863736727dd02d95f5136f9f7275348b6de99caf81da5bc5a0a2d942918",
+      "relative_path": "comparisons/curve_strength_original_primary_1_pitching_wedge_lean10_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_cov__775ddd5af0_density.svg"
+    },
+    {
+      "baseline_sha256": "e8d57e595d166888fc7935ac00042c0c435858acb6c0e060180e35e5d973dd4a",
+      "child_sha256": "1932d6fe6df37964f67d4390bb2b4ea08a395c8d6873b27e5925cbf4e0f915fa",
+      "relative_path": "comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_fa_5ab5fdecf1_density.pdf"
+    },
+    {
+      "baseline_sha256": "4bcd7bc6748ffed1549b5949e217aec1eb86957a78f8089bbfc588872170a25c",
+      "child_sha256": "950da22a7742798aefa82ef510de7dbbfeb31810fb9d266185d4c7e675de4fed",
+      "relative_path": "comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_fa_5ab5fdecf1_density.png"
+    },
+    {
+      "baseline_sha256": "30681de549838cdcf36fec9d095bb96a57603e2e8e530d01cbaac537b660c9cb",
+      "child_sha256": "3d58f893276ba69a3ca003f0109bbd4ecfb9b211055355f403adf045eca4c9d7",
+      "relative_path": "comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_fa_5ab5fdecf1_density.svg"
+    },
+    {
+      "baseline_sha256": "07d0b71965cb2c00058b7bf7194c6dc3ed60da4c93739cf322f9910ac0b00c6c",
+      "child_sha256": "3a992f5db40d6784eabac4cb07ae4981e5537d0d8b991779cc55ba3312a16ceb",
+      "relative_path": "comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_fa_9c25ef1409_density.pdf"
+    },
+    {
+      "baseline_sha256": "a9abcaa8da4fa20bf13299cfe27639e5e46a0b9d8353a8d825f9f55f4f56cf85",
+      "child_sha256": "ce9ed97c4cc515b35d8bac07b9978a25361d240ce3b7e565511f5f209e117c33",
+      "relative_path": "comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_fa_9c25ef1409_density.png"
+    },
+    {
+      "baseline_sha256": "3f645d54697ebbc6889168ab802108005c38ecec955a338ef9f83a739def6284",
+      "child_sha256": "80c6736c64f879ae0375f140523a014724698af6a501b6cd61dbf9e0bdfff679",
+      "relative_path": "comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_fa_9c25ef1409_density.svg"
+    },
+    {
+      "baseline_sha256": "392423e92da06ac3e585a221f2a7a1ffc02300990103cd8c3ebfe596c7054822",
+      "child_sha256": "3bb80b6990d26dde24707e64da5751419d31d635ed5aa9294e76d87a0751e8ad",
+      "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean0_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_n_5b82526b18_density.pdf"
+    },
+    {
+      "baseline_sha256": "59c540f531e2f0e0e50befd19482cea855e3878fe0caaf16a24d6f49528ff4c1",
+      "child_sha256": "fa8a72d390d9ff701d00a783a100ca9cad95dfd14e0f92ec75c8a9d44cb0a01c",
+      "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean0_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_n_5b82526b18_density.png"
+    },
+    {
+      "baseline_sha256": "22a9d64b2f289f0bfdbce05be716106921441377b7c49018fa99559e978ab9d4",
+      "child_sha256": "690b812ff27a01315c1b184549dadfdfb17f953f404a88038b97ba4c1b6b89d1",
+      "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean0_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_n_5b82526b18_density.svg"
+    },
+    {
+      "baseline_sha256": "b7716ddc8c14dd63a9e26e9a5960b865cf69a838619440129a0bcab308f4844f",
+      "child_sha256": "f73093624925b455b99d99990e5a5121c000519a35addfb05f95d1d46b92d3cd",
+      "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean0_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepath_n_f3698df9e4_density.pdf"
+    },
+    {
+      "baseline_sha256": "9a0ac25321448aa10fff475a5479878e93a1038f6aa072d338d115eebdc664da",
+      "child_sha256": "f03b99c6e699941f7185034917fabe7ea3d3a23b5893396f2666839591fdc26a",
+      "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean0_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepath_n_f3698df9e4_density.png"
+    },
+    {
+      "baseline_sha256": "09290a74c74f56829ffeb5c2f1092dc7b2d62c39c612cae9356bcdc31d33a81c",
+      "child_sha256": "832f99882c50e396cbbf5171b785edef3b4e7bf407615282c20fc72fd0f1f6cf",
+      "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean0_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepath_n_f3698df9e4_density.svg"
+    },
+    {
+      "baseline_sha256": "44f44e45019a67ab8da8f3502dfd1498ac51095a11bd83c56ab4d32b0cd37b8c",
+      "child_sha256": "ef1a9094c486aa0f896f19e52b0a81825ad007ffdf2a8a538acc5d53e6b0681b",
+      "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean0_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepath_p_c779ac069a_density.pdf"
+    },
+    {
+      "baseline_sha256": "63611b0f01ba54c7e1e62df2688d0636e8b7d969659ebe5476d3916f675f4c5a",
+      "child_sha256": "9be0737b7c69dd2ea0157b2a859658722de2fcc9e4f6a93830e0cc76918e30b8",
+      "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean0_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepath_p_c779ac069a_density.png"
+    },
+    {
+      "baseline_sha256": "8b42ca4078e9984165dbeb1c4fb0ba6787ea995888449fcc5b36cbf385740f41",
+      "child_sha256": "8d04c7ed88e94cc1e12d3ad664ead7a9ad90a0d791880725a85806d925dceeb7",
+      "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean0_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepath_p_c779ac069a_density.svg"
+    },
+    {
+      "baseline_sha256": "fac25870dfc22622c6b5b65fdce30442b7edf9ec95fc0787cc7df20f47d777a8",
+      "child_sha256": "710caffb83f07891949e75c646ddf694962404169d44a14c7b0c210c974ab8e8",
+      "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve2_rotation1_cov_facepath_847a757ebc_density.pdf"
+    },
+    {
+      "baseline_sha256": "27da19d25e51be22d602e364768d7cc18c1db05bd28e2a7a9312217b1a8da344",
+      "child_sha256": "f80fa244748518460c68aabd1233b3054c81325484a34800c9c718a4c6b739c7",
+      "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve2_rotation1_cov_facepath_847a757ebc_density.png"
+    },
+    {
+      "baseline_sha256": "cbe9cc3757912065c359bb19fa2f22b95e8c13a691bcce9300471e3a015756c3",
+      "child_sha256": "616eca552a2df1c056e03197debe7e5232855bc50ca2fd96be46d06a7f2fc9a5",
+      "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve2_rotation1_cov_facepath_847a757ebc_density.svg"
+    },
+    {
+      "baseline_sha256": "ea278ec44a5e4fd0f0f83c64b351ed702e3536df0675f0b7dd2b1506f0a8e97a",
+      "child_sha256": "fea3f55d70e0e40acad791e5bf48441578c7bbfb231693fd12041097d1b9228a",
+      "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean10_curve2_rotation1_cov_facepath_5e6ca5fac4_density.pdf"
+    },
+    {
+      "baseline_sha256": "e2de27324e644ff22e9932860c20d9c1c38697a072164e5db8f740764fcc2b45",
+      "child_sha256": "5556eaf9b9b15bc6b2d9d64b0f342e4d37fb418e7b8839d294de103d8b590656",
+      "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean10_curve2_rotation1_cov_facepath_5e6ca5fac4_density.png"
+    },
+    {
+      "baseline_sha256": "a52ece63fa1700faa12c4e97edd247f3221e43d2ce48776a0d8480b464bfc0ad",
+      "child_sha256": "d57dc60551257e22d41ddf2f7c6d76d710c13fcc266dd9225f08106fdc662e60",
+      "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean10_curve2_rotation1_cov_facepath_5e6ca5fac4_density.svg"
+    },
+    {
+      "baseline_sha256": "5cf80d3e05e9ee222ce94de350b46db575fd27fa120e2daa60feb7e08f6e6224",
+      "child_sha256": "6f7d43e14e3a6333f57c46c88adfa48f2e3e9a9146680f9aeb37b2ed2a12304b",
+      "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve2_rotation2_cov_facepath_f8e8b97766_density.pdf"
+    },
+    {
+      "baseline_sha256": "0e4c5b5924269117b5227f4c9e4987357555c16bae490649ffd84375f22812bc",
+      "child_sha256": "afeec6113c3e58754c4125b658bd87367a3bf243765acf1966a56fde69f40bb4",
+      "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve2_rotation2_cov_facepath_f8e8b97766_density.png"
+    },
+    {
+      "baseline_sha256": "70aa466f6139dfd4c808b63069c00f993cb3fb7a2dd57c19505d85f7794080fc",
+      "child_sha256": "f1f19403805b0977f0f36d254105e45caaa2a218cc1106e43eec31d0704dc9ea",
+      "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve2_rotation2_cov_facepath_f8e8b97766_density.svg"
+    },
+    {
+      "baseline_sha256": "b98d4d07cdb8836fedaf165b376cb0b85116d547f527b0fa06934ef4d0b8a6e7",
+      "child_sha256": "74eed101ae235c0d5c3e09fb44a099b5cb50459e8a85c683e272a9a03c90e983",
+      "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_seven_iron_lean10_curve2_rotation2_cov_facepath_c9441357f0_density.pdf"
+    },
+    {
+      "baseline_sha256": "9247db74c87726b901db359730aae7c57bc9f0b9c03bce38c562c072f479a2b6",
+      "child_sha256": "b73fd26dd68013e7692a44958a4ecf58a94111d442b9778dd3259483bff75a98",
+      "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_seven_iron_lean10_curve2_rotation2_cov_facepath_c9441357f0_density.png"
+    },
+    {
+      "baseline_sha256": "b92819d7089243095809e118cb2eccde7f7d8b3631670b4bd06d7d7b9d8365a9",
+      "child_sha256": "c4076c101c82a950c3652b7ab6eec6189dd5bda7b38cfd3a5aa59a5a166d1bf1",
+      "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_seven_iron_lean10_curve2_rotation2_cov_facepath_c9441357f0_density.svg"
+    },
+    {
+      "baseline_sha256": "0431fcb99fbd3b1a544fafd0e4b3b2e37871699f4c3a84f6b133fccfb880bc63",
+      "child_sha256": "6a49949c9573a21d1a9ba36c50ba5ebed69dcd192b39af91966639234bc42484",
+      "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean5_curve2_rotation1_cov_facepath_n_6b7044781d_density.pdf"
+    },
+    {
+      "baseline_sha256": "61aecc0b01abbb42dbfb99326fd828043f7ca0b3b6b7226bcf54bb15e23dd268",
+      "child_sha256": "2124af9fb9deb2a7258f05110e888040d085959c737831628fa5bc2f9951f222",
+      "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean5_curve2_rotation1_cov_facepath_n_6b7044781d_density.png"
+    },
+    {
+      "baseline_sha256": "da2c4156605147c0c49307cda6e49a1565880b8016607971ae1b1439c65fed6f",
+      "child_sha256": "bbfbadb715c0ebfa32160b47085774decfbf0996ed3298a0e7a94870c2658e36",
+      "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean5_curve2_rotation1_cov_facepath_n_6b7044781d_density.svg"
+    },
+    {
+      "baseline_sha256": "4c722da5416b68fd9a2c8d304b9a994931aa19cbe443b81730f5abde7dad9363",
+      "child_sha256": "7fedebe92d306dc5e4a1fa33dde194ed9f6b5a2a3239481835fde0551ea0d474",
+      "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean5_curve2_rotation1_cov_facepath_p_93fd88fe40_density.pdf"
+    },
+    {
+      "baseline_sha256": "9c96e0d425b120f39680d303e5026f50449315ff114d7e83fbcb03cb4d04feac",
+      "child_sha256": "615359eb251cb43f4141a11942a2b98f0bb4477bd2e953c128ff8109e91a2200",
+      "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean5_curve2_rotation1_cov_facepath_p_93fd88fe40_density.png"
+    },
+    {
+      "baseline_sha256": "283cd54ccc63bcf8259fe73715e10c888e376d396dbaf7a12f413da690e87640",
+      "child_sha256": "0bd39403e051b8bb31398c38cc6f132b2ede4fddf7a1067fdda862ac207ed9b1",
+      "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean5_curve2_rotation1_cov_facepath_p_93fd88fe40_density.svg"
+    },
+    {
+      "baseline_sha256": "1124348f4baa205aecd5ca857a52208959f012ac479c5218f51b48b4c504ddab",
+      "child_sha256": "d1c136ef16a079aed3f2cf5836ae663ab8045534e42cdf7b0cc0ca7ec4035da3",
+      "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean5_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_seven_iron_lean5_curve2_rotation2_cov_facepath_n_7ec9af0963_density.pdf"
+    },
+    {
+      "baseline_sha256": "a7ab04546bc2fe6e1b83d6bdb278a15d44a6a907755472e574f25e63717ef43b",
+      "child_sha256": "c4c779e90dc2d51bfcfb21229054a2580533ad57d85a4b3051dee73daa70dbf4",
+      "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean5_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_seven_iron_lean5_curve2_rotation2_cov_facepath_n_7ec9af0963_density.png"
+    },
+    {
+      "baseline_sha256": "2fffc65387bc750a6ab6705ebed9ca67b971879d21eb5ccc2a58c9878ed79c00",
+      "child_sha256": "72267d909307cc430e623b991b2c4786110667c79521c9e822e1b8cc31334e38",
+      "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean5_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_seven_iron_lean5_curve2_rotation2_cov_facepath_n_7ec9af0963_density.svg"
+    },
+    {
+      "baseline_sha256": "de45294ba46f5a1ebbf8d75c294740ead0860e2bf2166edea2591e1e1e36a3f5",
+      "child_sha256": "60846aa9e7473ce582286ca62ef97e708469aa2d818f3e37a3f46bcf60ce1ace",
+      "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean5_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_seven_iron_lean5_curve2_rotation2_cov_facepath_p_d3fd9156d1_density.pdf"
+    },
+    {
+      "baseline_sha256": "8c3d1a130f1bad71934d3ddc32c2242fd3b38d105a0f0362c27fbfb77e21d2cc",
+      "child_sha256": "32b198e22c03de81845b36ff40cfce6a68e7d2733fb0e13e27faa3ccf95380b3",
+      "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean5_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_seven_iron_lean5_curve2_rotation2_cov_facepath_p_d3fd9156d1_density.png"
+    },
+    {
+      "baseline_sha256": "4ac1bb155be77c76b2b117e052fc84d56cff1d2ff25058fd419f8c14dc3b456f",
+      "child_sha256": "64690863699bb084eb939e93261202eaa4ee05c74a4f1007c3efbdcbb596dbdd",
+      "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean5_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_seven_iron_lean5_curve2_rotation2_cov_facepath_p_d3fd9156d1_density.svg"
+    },
+    {
+      "baseline_sha256": "cc50eabd1262e44dc90e0d419d2131b4de9538d543b733b28df0bcc692dc08d4",
+      "child_sha256": "73658775d947ba6c02c3992f3bf88df7d2de065f4a1c0aa077f5bc62b55261ef",
+      "relative_path": "comparisons/shaft_rotation_sd_original_control_1_seven_iron_lean10_curve1_rotation1_shaft_only_vs_original_control_1_seven_iron_lean10_curve1_rotation2_shaft_only_127p882m_76bc6350dd_density.pdf"
+    },
+    {
+      "baseline_sha256": "7c15093818735f1ffa91ae4f81248411018f7f6f8b4af70714af4d559b1cb085",
+      "child_sha256": "04e52993c0dbd819b505eea1560b0e29a2f81f19d59f77f59445aad136288cc3",
+      "relative_path": "comparisons/shaft_rotation_sd_original_control_1_seven_iron_lean10_curve1_rotation1_shaft_only_vs_original_control_1_seven_iron_lean10_curve1_rotation2_shaft_only_127p882m_76bc6350dd_density.png"
+    },
+    {
+      "baseline_sha256": "7f3dff23c7aee195195e01e8d46994f3209c397356a288caeed08134b0a6962f",
+      "child_sha256": "071fab683ba774491a628820feb16cb2ce3eb6caafeb7f0315a6edc847dbde04",
+      "relative_path": "comparisons/shaft_rotation_sd_original_control_1_seven_iron_lean10_curve1_rotation1_shaft_only_vs_original_control_1_seven_iron_lean10_curve1_rotation2_shaft_only_127p882m_76bc6350dd_density.svg"
+    },
+    {
+      "baseline_sha256": "4d5a8505574ebb4cd4b7e6d36d1493f20c0552c3befd8c7a69a450bc865ef374",
+      "child_sha256": "d2e0c2dee36c5264bd1d82b713593df7254a3352bdf8525db99fedf884f0c08f",
+      "relative_path": "comparisons/shaft_rotation_sd_original_control_1_seven_iron_lean10_curve2_rotation1_shaft_only_vs_original_control_1_seven_iron_lean10_curve2_rotation2_shaft_only_127p882m_5a3c726669_density.pdf"
+    },
+    {
+      "baseline_sha256": "1a27192a67da99a10fc482eff1286f3915facf6d48e39eea3ebbc0e7540ecda4",
+      "child_sha256": "db8eecf3dbf71908d903cab977710a95a0746a4bd6e5ab789a9552c3557d06a6",
+      "relative_path": "comparisons/shaft_rotation_sd_original_control_1_seven_iron_lean10_curve2_rotation1_shaft_only_vs_original_control_1_seven_iron_lean10_curve2_rotation2_shaft_only_127p882m_5a3c726669_density.png"
+    },
+    {
+      "baseline_sha256": "d926e801b7e7fb6c928061d00ab603645e7b67f4a7fa96bbd98efaf0ab280c06",
+      "child_sha256": "d1dc905cf1d8c2a0a6f7f4bb5aaae8de0f8165649a802bf7ef8623079cc6c57b",
+      "relative_path": "comparisons/shaft_rotation_sd_original_control_1_seven_iron_lean10_curve2_rotation1_shaft_only_vs_original_control_1_seven_iron_lean10_curve2_rotation2_shaft_only_127p882m_5a3c726669_density.svg"
+    },
+    {
+      "baseline_sha256": "5b6a65a3838a062506751e39492e98f7b7c017d4c5c8906915899e425006cdb8",
+      "child_sha256": "c0651beb817b867bf84d10b7adb931678df4447bf00f1206accc109e2bad3515",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_driver_lean0_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_driver_lean0_curve1_rotation2_cov_facepath_negati_2860bba7ee_density.pdf"
+    },
+    {
+      "baseline_sha256": "4a180629d2bb834127b8de64727b6f471ae7ff7058aaa1c8ddabeeaf6fcc0735",
+      "child_sha256": "472c5b949189e4696b526c9266b174db22f252ef96e10a91bd9adaf44f8cdfb1",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_driver_lean0_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_driver_lean0_curve1_rotation2_cov_facepath_negati_2860bba7ee_density.png"
+    },
+    {
+      "baseline_sha256": "72421274426771cd4f2331f13cd66c39cd47c253688c7ec4d870ab82116175d3",
+      "child_sha256": "363eb52a1a73bd68d55c2e14a1d2f8831667aa98ef5967dbbda3371967823ad0",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_driver_lean0_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_driver_lean0_curve1_rotation2_cov_facepath_negati_2860bba7ee_density.svg"
+    },
+    {
+      "baseline_sha256": "90e594ee39d62ac9eb429e3fdef25d596e2aee4c5cf7d32dd0777b2e4615ec3a",
+      "child_sha256": "164c9b7477c92d31eddaa0b94665bc68ee17751b19e1148e258890eee7d2d86a",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_driver_lean0_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_driver_lean0_curve1_rotation2_cov_facepath_positi_cf238e5d47_density.pdf"
+    },
+    {
+      "baseline_sha256": "36da3f199c386a3f6ab6881ef78346ee4a34408307dbc4616442aea0a3290fac",
+      "child_sha256": "a970ffdf9d51ad3ab9c829e6759df181b674268f971f5f175a7fc97240b252fd",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_driver_lean0_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_driver_lean0_curve1_rotation2_cov_facepath_positi_cf238e5d47_density.png"
+    },
+    {
+      "baseline_sha256": "8fd9818ff167208edc8dd66fdbb3db6fc37cf00deee717d602e2ec097b7f8ff1",
+      "child_sha256": "f6eb0f78279f561296c1c80001b3d11692639d816dba6515d5922bc73fc3a5be",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_driver_lean0_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_driver_lean0_curve1_rotation2_cov_facepath_positi_cf238e5d47_density.svg"
+    },
+    {
+      "baseline_sha256": "4bf01289906d04917f965aae8012e804629a3af6aa87543a94d8f61f7461a3d1",
+      "child_sha256": "22ddb5932b7ea4cad4851782b37249ac8f2ac00bff3317689fe1b7ca2777c944",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_driver_lean0_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_driver_lean0_curve2_rotation2_cov_facepath_negati_b4e77fb525_density.pdf"
+    },
+    {
+      "baseline_sha256": "4440c31e1bf858a2e7832f0e6aa7de3f0103dc8f7a9bb3613f11806bbeca95dc",
+      "child_sha256": "ff66bae02f9d5a6c2efb1ed29ce76c9405fe1411dc08aecc4190ba7b32b2845b",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_driver_lean0_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_driver_lean0_curve2_rotation2_cov_facepath_negati_b4e77fb525_density.png"
+    },
+    {
+      "baseline_sha256": "aadd21e533ab5b69ee9b19c486c7164e52f8bab611485c833a552177d899aad2",
+      "child_sha256": "a42f5cd95819fedfc71dcca15fafb995438e1a20b53751edae3460af7a1ca90b",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_driver_lean0_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_driver_lean0_curve2_rotation2_cov_facepath_negati_b4e77fb525_density.svg"
+    },
+    {
+      "baseline_sha256": "4802d81433d2e55d88e6dd6e9c98c55669d5285e0bdf6e1a2f9055e097c90ba8",
+      "child_sha256": "f42ff1f6965f31ba2e1ad80ccbac90f9ced7018796e81d1390d370c070917a54",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_driver_lean0_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_driver_lean0_curve2_rotation2_cov_facepath_positi_2501f0c7fe_density.pdf"
+    },
+    {
+      "baseline_sha256": "ba8749d8aba38cbc0b322a7a69e9816b464359f5b51a15126c7923a1c7887089",
+      "child_sha256": "ee64d9f6cfa87cfb9a772735dc3eaf1dc3a5960b73a8c05b1d1278d0ba01d103",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_driver_lean0_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_driver_lean0_curve2_rotation2_cov_facepath_positi_2501f0c7fe_density.png"
+    },
+    {
+      "baseline_sha256": "82e67f129a959616e20ed7679b574ca552046d96bf9e94ceef519ff9a9f32203",
+      "child_sha256": "fa92852bff6dde09dd13d12644b35b9c426fde192c099218491fbdaa30d25896",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_driver_lean0_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_driver_lean0_curve2_rotation2_cov_facepath_positi_2501f0c7fe_density.svg"
+    },
+    {
+      "baseline_sha256": "b4104518fcfcfb05892fc77379c13835f0786c37e7b7ccf1fa0d26787ea2411e",
+      "child_sha256": "eee053ea174b7633e8140df195d527c8ec57e017f9743de2b8ac61491d2f4637",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean10_curve1_rotation2_c_9e2108f574_density.pdf"
+    },
+    {
+      "baseline_sha256": "4ad963c52e2fd593a6646f429362e059ce264a55c883079bf6301bc48024dd6c",
+      "child_sha256": "63be821435f7eaef69ca56f1623872f6c0837b70e0c6363eb351efed2383b0cb",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean10_curve1_rotation2_c_9e2108f574_density.png"
+    },
+    {
+      "baseline_sha256": "7d14e5ca4c62cf281de8a32222396a949b633f954374d435e4d1fa81b64cf081",
+      "child_sha256": "d83cfffdb29cc894bed5d8fdaec1c8cc8cb32d52eca34d0d8389622afc9d08cd",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean10_curve1_rotation2_c_9e2108f574_density.svg"
+    },
+    {
+      "baseline_sha256": "4eacb195474f8b88a845aaf61a1255e8916a23bf6b2dd4f8d02064e487c8e38c",
+      "child_sha256": "73d1504a5f6f86bea0333c413ef87d47d7046805dc5b4335b0eb859f6c167400",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean10_curve1_rotation2_c_336a6453c6_density.pdf"
+    },
+    {
+      "baseline_sha256": "a7a5d01e35713b407e76b8948b6780237e1b8d786eb531780753286f3ef1c78d",
+      "child_sha256": "07868f395ab246d13fdeead1d3f7aa2b503a86c55d58b9171fe74a6226fd013d",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean10_curve1_rotation2_c_336a6453c6_density.png"
+    },
+    {
+      "baseline_sha256": "4e89d653a8fee31bb2af828538c88bda1d4d088ccdaf0eeb6a04c92ef1037490",
+      "child_sha256": "c26737b2dc6bee0580f4a22d925fbd4903826c3b53974a7d68bbeb2745358318",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean10_curve1_rotation2_c_336a6453c6_density.svg"
+    },
+    {
+      "baseline_sha256": "2995e5b605ffe73cef03664d2bc0dab1d7a997e20f6d6cd6e96e5ec0487ef24b",
+      "child_sha256": "bfc790dfb4c64c01032884f51e5f6a653bca7eec382dc329319bcfdab7494530",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_c_c2e7fba271_density.pdf"
+    },
+    {
+      "baseline_sha256": "4655ea78a2d7ea2c5a48089fc2ba462a6c786986129c3873a1b006d6a49da0eb",
+      "child_sha256": "c14978b4f0e09b28301d0f073988f9f8184063c818c4663c858c2fdd7a97b56a",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_c_c2e7fba271_density.png"
+    },
+    {
+      "baseline_sha256": "8c49cc73cb8f16293b9f5dc886717f8d0cb6d5dcbac558221ce6701aeba8b91d",
+      "child_sha256": "268d1d1e2f06ecc857a7db066bafaba71553ffad62b13603699838d4743e21b0",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_c_c2e7fba271_density.svg"
+    },
+    {
+      "baseline_sha256": "14935777f15cfe7fea02b300b0d72ab6030e3e4342f2a8670197186f2d019fcc",
+      "child_sha256": "24238361cd1cd175ab8da22675670a439b0a681e63f8dce8c6a0ed73c41bb134",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_c_3d992c2368_density.pdf"
+    },
+    {
+      "baseline_sha256": "cac845b68f8139801945ed1783ab13bd78037a16e20fbcac1ce4283d46f8ecf1",
+      "child_sha256": "29113b8b91fa23790a955500994712e3532885aab6d8e7c9b457c65649a67c9b",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_c_3d992c2368_density.png"
+    },
+    {
+      "baseline_sha256": "e94ce7d357bc7b6ecf2480b06b83f1fbfce3632f38dc54989787356a947a371e",
+      "child_sha256": "5a308c37d17a21adae9033baac296ad943b6d51e6cce55e8ac9772ebcd86a8a2",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_c_3d992c2368_density.svg"
+    },
+    {
+      "baseline_sha256": "0c8b784df3a51f2addfeb5d37b7d9abafee9cc4fd1e1c2ac8193ebecc63af4e6",
+      "child_sha256": "efc5c17ea15f3b82cff10bb4d08db27a8e62b32cd35fa87f441d6d682f3f36e1",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_6f6c1ff731_density.pdf"
+    },
+    {
+      "baseline_sha256": "e75f96a1a8d571feef79da64b25912af9372b13f9e681e48eee750230a94dec3",
+      "child_sha256": "a81d5bedfaba46dc9c6b2d428d355a3a02e633d762797871b604f8bb0e6a1e96",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_6f6c1ff731_density.png"
+    },
+    {
+      "baseline_sha256": "5ee3967fe06f91d058c832cbdabf6e27d2cd873a50255df1887dedd371268342",
+      "child_sha256": "bd8fe37ad978e4d1e413dfcc303237200a368fb01edd5abd9ea430d8e2906974",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_6f6c1ff731_density.svg"
+    },
+    {
+      "baseline_sha256": "f5623b8a9e86ab4075dec9648633a19f977fd82dd1acd4e303188051e9e678fa",
+      "child_sha256": "b355df39560a9ef2dafae867bef665fa2042fadeb006a5c5ece0b1e9276d9090",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_ff20bee33e_density.pdf"
+    },
+    {
+      "baseline_sha256": "0349b49e8ba96ced125484cbc02b52e6bf7e3f1fcbec05f290b8fd84e3fd5fcd",
+      "child_sha256": "07281ba10ce310b6adf1bb04681829d68c3e5e33b176b3394bbd761d0c07c199",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_ff20bee33e_density.png"
+    },
+    {
+      "baseline_sha256": "b3a4c7e07d0f347a31a3ee0df23c9eb8356640205c858d7da956346e0db934d8",
+      "child_sha256": "a5b7ed238a8d6460b361e2768672cff9a797d5a1c8253daf1358f09319b6870d",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_ff20bee33e_density.svg"
+    },
+    {
+      "baseline_sha256": "7774fc2efde1e784c9553a94d3863f35ab499405a13a3e7cf30c857552c4f085",
+      "child_sha256": "8b2e7f8416357acde42889ba2847c54586d6cce3be569b5e0fe3f483ed8a5545",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_041506eb4d_density.pdf"
+    },
+    {
+      "baseline_sha256": "5d7055ba0613b1e2b70d0eaa1f05c5e88d540660bc38f648b6f805060f2d74b6",
+      "child_sha256": "6a6a7650df9bbb242315f2de1654a0a0afaf418ec68bb9172085e974f211d422",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_041506eb4d_density.png"
+    },
+    {
+      "baseline_sha256": "e4d9ab5d0f11427ed559dca2032bf76df61af5c786f0f71a00ae1b470a2e858e",
+      "child_sha256": "7294bf14e58e942465b27e425cedca887f0b89100c88d839ae5f655d70e50e5d",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_041506eb4d_density.svg"
+    },
+    {
+      "baseline_sha256": "d594e65b62cc8a0e4a59315dc808509ebb427a52dbad32a2608df033c2ff95fc",
+      "child_sha256": "2622e829056d0169274ad839a35e82c4a44a7e0f5b8cd1762c91bb08ddd522e1",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_1430cd7a7c_density.pdf"
+    },
+    {
+      "baseline_sha256": "d02aa2c9ad5008dfed4766499364187a8a4ba2370e17011a0b0a5b041b9f7e21",
+      "child_sha256": "be001d7d06fc67d5df213400d1820ca5f0df5a11f63c4797cfd11e71ceae7c35",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_1430cd7a7c_density.png"
+    },
+    {
+      "baseline_sha256": "e8b8e1c0451ea8bb0f3ae12ab8e2ba6d406de4d70e5d61a22d09dbfba442fc63",
+      "child_sha256": "c568f11abe9922fc2daf92fae1ebbe2438fec84412e4b7e4206237f58e07b379",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_1430cd7a7c_density.svg"
+    },
+    {
+      "baseline_sha256": "47ae4c1d2a497cedd7f6c31577a26a1434f1763b51f9f4205013ca172969913f",
+      "child_sha256": "eefdc8dab33df721aff6098e43ebdef19012b2ed92efe3faeb3abf67d1f5627a",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_cov_facepat_f0357599d7_density.pdf"
+    },
+    {
+      "baseline_sha256": "9028ea95c6c22455a640a8668cfbe81b7a6f0997ea729a535f639ea261f6060a",
+      "child_sha256": "1264aa14b4f71ce5155775f7ac209125593f6191ec0368339783e78d1e3188f4",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_cov_facepat_f0357599d7_density.png"
+    },
+    {
+      "baseline_sha256": "e76576a4092f27c2fd7449d6c99af7177a0dbfa1cc34746d76e8685283c96d7b",
+      "child_sha256": "6437ae2e7279fdbbf5da784605bb8983667557f78c2b662e96f99c02be971ad4",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_cov_facepat_f0357599d7_density.svg"
+    },
+    {
+      "baseline_sha256": "5a6d1b77a33ae3576361075c94a8c63d6577718cb8fb0ec40f12789dbd1747e1",
+      "child_sha256": "20ac767f501847b094f3e1c9f75ad03d9152d51d68eac586a530692894db3d1c",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_cov_facepat_fad5a988c9_density.pdf"
+    },
+    {
+      "baseline_sha256": "524511c0e9c554363cf80bf06766991857020252fd5d498a4f2e33f39a8f6faf",
+      "child_sha256": "4e9369450d3ed2f70ce0579bcb8ff3d92ffa4bf496ef265d436e3041c9f37b66",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_cov_facepat_fad5a988c9_density.png"
+    },
+    {
+      "baseline_sha256": "0f66953d6dcbf072e2eebe023aea436249af8a47b258a4e405450c28010177e3",
+      "child_sha256": "0e256d7430b272ae0167bdff11279d5811e28cded8fa17bab7d63fa933d72701",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_cov_facepat_fad5a988c9_density.svg"
+    },
+    {
+      "baseline_sha256": "173cd1073c36e109804e3c97d354d70f284c83b7d97d86a008ead54b85f97eaf",
+      "child_sha256": "2c054a3064ca6417ee10be154419b0092b275aa70221712f236d1ecb903d1d4f",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_2af3259458_density.pdf"
+    },
+    {
+      "baseline_sha256": "4672033a181649e60fe08f5459aa590554e33e3094ec1292eeae9c1d2e10afa8",
+      "child_sha256": "73d213c29298e18fe44841edce458240c2285b94044729a8cd23aa405c360a8f",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_2af3259458_density.png"
+    },
+    {
+      "baseline_sha256": "f4bf13b4547bfe0640e00f7330610ecef23e0afb91944753ebed88c96e20e3c4",
+      "child_sha256": "371cf52293e0ce4c625ed47c2f59f9518c941ac1e40f067502e97f02998d9d88",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_2af3259458_density.svg"
+    },
+    {
+      "baseline_sha256": "3b6883ca7f8fb26a3d36e4bf1fb4e172f7bd095fa847cfb8a1d8ecfe2f540f9a",
+      "child_sha256": "223f7578f936ffff6d683e3f8e4c5c24593bbbda020b61aa44356db51682ffee",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_70b97095a0_density.pdf"
+    },
+    {
+      "baseline_sha256": "17db737f2b4b12a594390a9b8fa219133d1d90cac94aab5a689f4c38c7ad5a85",
+      "child_sha256": "4c7e92b5ab1e72ee896a4f28351be70b639ef1319581b7060878c265f7c9d78b",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_70b97095a0_density.png"
+    },
+    {
+      "baseline_sha256": "5877a7a72572083e29fc0693851e98b398fa5219cc23e910272fa595cfbb029d",
+      "child_sha256": "02cc7ec9d737f1fa0702c2a0f0e920019beaa4e6faa81294ba9e54e5b51a6bb7",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_70b97095a0_density.svg"
+    },
+    {
+      "baseline_sha256": "7a76fe15bafb461a79c260e81acdf999130bd4669e5527b6470946379a810918",
+      "child_sha256": "502b719bdf8ec104eb76a872e06d56786004389043c07b53f6ce7b2c1efdaf91",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facep_3b0f6549bb_density.pdf"
+    },
+    {
+      "baseline_sha256": "112d8606ed6b85ab8ec994e12d185de0fc22cb5c58e2b969b30ab2e912afc998",
+      "child_sha256": "8f76817cb76d4c7cc0d1d282da5f52ef0e2fcc88b61cec690a51d8a48ec773fd",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facep_3b0f6549bb_density.png"
+    },
+    {
+      "baseline_sha256": "0cff0af02a4b959db7757ba1d572ebd65127ff9995a0df08b4cc9a2f74b92f24",
+      "child_sha256": "b73215cda7d896a7bea4926b40cc31bcdaa5bcdf0d545ff3b18e46a10b3d349b",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facep_3b0f6549bb_density.svg"
+    },
+    {
+      "baseline_sha256": "7248225636bfcabaa1609192d419881012f6962f5d7996053f9e0e62003bc4ff",
+      "child_sha256": "370bbd67538bf9a1e30259dbd23f2d3060b11959463d35e347fb911933cf2d62",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facep_1c3b5350d4_density.pdf"
+    },
+    {
+      "baseline_sha256": "ae47683e179548bca5b35701403d558daaaf1ea8d6d148ed29485b7ab0f5a696",
+      "child_sha256": "2fa7480a9a28b586186f266908526278878af7fe3dba5f367182b06743c8f098",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facep_1c3b5350d4_density.png"
+    },
+    {
+      "baseline_sha256": "00b1014b8be695c78ad2b20d55a381ae7699cb68515bbfde940d1d6915f4a336",
+      "child_sha256": "45db980736621606475235660b49fc134862c2698a63a0095bb425c57bc0ac43",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facep_1c3b5350d4_density.svg"
+    },
+    {
+      "baseline_sha256": "fd262d5768ea46522c7a8a51b1d8609f5b6a8fca3626c9abe8d6aa3de9953c62",
+      "child_sha256": "4d3cefc3d1c13f22f1203de69a947c2a4b924a064e0de443b3eea927b30fd71f",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_shaft_only_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_shaft_only_149p744m_4e13359e62_density.pdf"
+    },
+    {
+      "baseline_sha256": "232d55f4c56153e4fa554cf41d90108284e4b6d97f51a380386d8a67a23b0bcf",
+      "child_sha256": "f895ffaca122243a5486dd6456d6ab65eac247f2cb66d65df18e255c8b220ac3",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_shaft_only_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_shaft_only_149p744m_4e13359e62_density.png"
+    },
+    {
+      "baseline_sha256": "f84f9463da000ffb00ced0934ffaaba49a310f3a3db2d5b59f39734d8347747d",
+      "child_sha256": "4bd6b6ca05f75555c61ea40ba0cdc813f4d2a295e79aeb2ca61932f6ada6dadd",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_shaft_only_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_shaft_only_149p744m_4e13359e62_density.svg"
+    },
+    {
+      "baseline_sha256": "e5f4fc8239076db9ce0af8b0bd96ef4f20d3e61aede92f6d6e01e5b29def2648",
+      "child_sha256": "10b4e0bd06f5ab0816a5b377a8dd2dc77ddef2115b5be5e8aecc261eda0f4fab",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_shaft_path_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_shaft_path_149p744m_ba17c43d4f_density.pdf"
+    },
+    {
+      "baseline_sha256": "3204e6b56927104ed8a875b6f10354119816c92d7bf7e6fb90a7b701d0f6dadb",
+      "child_sha256": "fae3c3dbba1af88589a94f10da6c6ed830597ff82f07544d36391e59c36f3c57",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_shaft_path_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_shaft_path_149p744m_ba17c43d4f_density.png"
+    },
+    {
+      "baseline_sha256": "19de32cb02fb97e4b80397392b85d3297d9f1b63e80a1b34fa7d8116e69e343f",
+      "child_sha256": "a4032d2adf0222cbaf4da53e653ebb4318adf6ebcfe16d95e5252801a113dca4",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_shaft_path_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_shaft_path_149p744m_ba17c43d4f_density.svg"
+    },
+    {
+      "baseline_sha256": "138d311dc79c50164c8489ee69cc05b33dc861706de7e1d57ea5e39678def24d",
+      "child_sha256": "a5702a7e91552c13377b9bfb82ed5cacef0c111ab246c474f0ed86ef30943305",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve2_rotation2_cov_facep_f965fbec72_density.pdf"
+    },
+    {
+      "baseline_sha256": "b68294e117e0c257435c2aaf68d3a9da3ee09e868eb00f2900b4875a5e1a0ce7",
+      "child_sha256": "b90bff4b653b8c8ad506531f9515efffd9322969c6554b67871e5813b189f234",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve2_rotation2_cov_facep_f965fbec72_density.png"
+    },
+    {
+      "baseline_sha256": "9795c152d5c6331fb3c523bba0613041c81db4257dc29b5682c16382443f5646",
+      "child_sha256": "fbfb9aaf07b3548104b98accd9af624b7abc016a01d05f569c2959cc6edfd419",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve2_rotation2_cov_facep_f965fbec72_density.svg"
+    },
+    {
+      "baseline_sha256": "9608fcc10ed72062a4973e703a54f5d830b2f1ff76cf14892685f3b8ca198ccb",
+      "child_sha256": "00836c8160986e3c6a7a786a019997e5738e34121773815f033c31947f0902d9",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean10_curve2_rotation2_cov_facep_47b0b2c54a_density.pdf"
+    },
+    {
+      "baseline_sha256": "cad29653607b9a6a5916fddeb40b2a0af403a2bfa9e021cc5363a6336e71c90b",
+      "child_sha256": "2272292ec3dad4f9db074f39595939cc36ab723ccccdadf50fc17bb483a1a32b",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean10_curve2_rotation2_cov_facep_47b0b2c54a_density.png"
+    },
+    {
+      "baseline_sha256": "332fa1afd5bb360804c9bd2660a61b1c49bc8a7e08316b54854ad0633131acd3",
+      "child_sha256": "d533ee0f62cdaf1dfcfd943c106addca87f254f8523ec673fab378b6eee2a523",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean10_curve2_rotation2_cov_facep_47b0b2c54a_density.svg"
+    },
+    {
+      "baseline_sha256": "b6e05783ebf6cca129c0a2bc1521c8df1bf51b564f96839518f2f8a8f8570522",
+      "child_sha256": "9a19f46360887f7406377cd82dd9089589b277b54a7a3ffef823a7af8098879d",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve2_rotation1_shaft_only_vs_original_primary_1_seven_iron_lean10_curve2_rotation2_shaft_only_149p744m_25f203b582_density.pdf"
+    },
+    {
+      "baseline_sha256": "bae09b6620d25c6b881f56dd43b37a3e2ec4a36ffbbfb92578c137c82955c397",
+      "child_sha256": "6f579d4fe7f401c4c1ba6cae7d37e30f532c78a7d2da1d797f3ac8bb7bc6e826",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve2_rotation1_shaft_only_vs_original_primary_1_seven_iron_lean10_curve2_rotation2_shaft_only_149p744m_25f203b582_density.png"
+    },
+    {
+      "baseline_sha256": "3bbdb3634af61561b0c97b07c2500813918f61e569c41a5507abb1ed1e9b6305",
+      "child_sha256": "05acd4bd46e725da76ac6778165f45af5ad9a17120664f73d43b200b4511b226",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve2_rotation1_shaft_only_vs_original_primary_1_seven_iron_lean10_curve2_rotation2_shaft_only_149p744m_25f203b582_density.svg"
+    },
+    {
+      "baseline_sha256": "9bbaf262108a5674d4665c4ec417e2f0c8ff5677c4f211bb3aeb5c3a79818ca6",
+      "child_sha256": "3596760a7f0645ec0ee41b34d2989becb3edc931975f9456b67771cd34889b8c",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve2_rotation1_shaft_path_vs_original_primary_1_seven_iron_lean10_curve2_rotation2_shaft_path_149p744m_916881f3d2_density.pdf"
+    },
+    {
+      "baseline_sha256": "f439dd9d82aead7bac7052a250a06ca4187e2fac0742bd861340bce844daec6d",
+      "child_sha256": "4c0bc76e4e2c325a5ef2c86d9ebb605b5ee35c76b9283ab80a64a59af7eec960",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve2_rotation1_shaft_path_vs_original_primary_1_seven_iron_lean10_curve2_rotation2_shaft_path_149p744m_916881f3d2_density.png"
+    },
+    {
+      "baseline_sha256": "622076ed52a3984e79777fe7e43f76cb0b2ccda43c86a38c4403b265d1544829",
+      "child_sha256": "591e24558287e89721f932c5460601f23ddcc9a62289efbef4b3533f45ac3a04",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve2_rotation1_shaft_path_vs_original_primary_1_seven_iron_lean10_curve2_rotation2_shaft_path_149p744m_916881f3d2_density.svg"
+    },
+    {
+      "baseline_sha256": "39dc42bd233cc2f9aaa06f29db5a9ab7f23975de4e99ba6ac99bb0ef035e45ca",
+      "child_sha256": "8e6906dab67dc36d5ba2af1d01f4247db6fdd8787fb1c64e0c3e37b96be66089",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean5_curve1_rotation2_cov_facepat_86bdaa18f7_density.pdf"
+    },
+    {
+      "baseline_sha256": "cf0b3ee305db52ca8a48cbe76c8898571e2b9106da3c285535902f4ee919b3ec",
+      "child_sha256": "b4c03f09616e9bef7b16a53e96785e2d68e2f7d2a8bf17e4b0b1c10c594745b8",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean5_curve1_rotation2_cov_facepat_86bdaa18f7_density.png"
+    },
+    {
+      "baseline_sha256": "3a26bc9ca48bb9f9e514ac70024a1f17b482258662048c6fe326b692123857fc",
+      "child_sha256": "9749b66000d34dbd11cbb786124d9c140064f482b2aae5f7d5fb955b4de9d100",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean5_curve1_rotation2_cov_facepat_86bdaa18f7_density.svg"
+    },
+    {
+      "baseline_sha256": "11f0a91b572622d6cfa6c1ff96841f40b9c151e67738755c0d9fffc861c99fa2",
+      "child_sha256": "8d9063f2a59ace34bed687536e7613c91b795f716c424cc458a1fd9d75d13847",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean5_curve1_rotation2_cov_facepat_737f7c1cd2_density.pdf"
+    },
+    {
+      "baseline_sha256": "6e67e71430fd59f59a4682cf131fc0aff0efbc45a59d1c62cf47ac0e92266a57",
+      "child_sha256": "2ceec8e1d10ca40eba10c66ca8609dd4b1ff185526a851b2f2facfe391a61933",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean5_curve1_rotation2_cov_facepat_737f7c1cd2_density.png"
+    },
+    {
+      "baseline_sha256": "93fd289a3d796c91504e20d80ff1531725872ae2a3818f0043c2784c8d739a30",
+      "child_sha256": "04e93b501953593c85749c98caa2d7fdd0581ed2ec9e8b477bba86ba1cec3a1d",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean5_curve1_rotation2_cov_facepat_737f7c1cd2_density.svg"
+    },
+    {
+      "baseline_sha256": "67639a292d21a2f0b288ff6cfb7fd2b955f7786e575da794101add155c502ecf",
+      "child_sha256": "bedd35f7a037497953d53016fcaaa3dcdf6fe3653b79a20c36d85682d1134107",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean5_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean5_curve2_rotation2_cov_facepat_085178bf8e_density.pdf"
+    },
+    {
+      "baseline_sha256": "1f88e270beba251bd98950041b18a8a91375df5cc5008673e89ba6a9a06a8a5f",
+      "child_sha256": "48377092dde648375b426a7c3947edcba6c5908ee5a748d298c5543e81129d4a",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean5_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean5_curve2_rotation2_cov_facepat_085178bf8e_density.png"
+    },
+    {
+      "baseline_sha256": "e8faed9162b5b3157e537288527c7827e801c54466f77f1d1cd3328f72a0bb42",
+      "child_sha256": "82c2ceb41db76945eb87b915293c6ed542cfef0fa2e04a567d7d6c515bdf23f0",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean5_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean5_curve2_rotation2_cov_facepat_085178bf8e_density.svg"
+    },
+    {
+      "baseline_sha256": "f02ed22162e298bebbdf3d046b482462a32c573b521bfd19a7f6d6020752a385",
+      "child_sha256": "ddd8c8c80ce9384405df84f9e7fc6d3ef3c70ff778ea0977590f5e91b629ec85",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean5_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean5_curve2_rotation2_cov_facepat_97bd2be36f_density.pdf"
+    },
+    {
+      "baseline_sha256": "5f30e7b83ba815d9a20fe97b6d0be62e38a2dfee3886e90165d60e1f7dfdcf65",
+      "child_sha256": "839c56aab84619f7d20334a3a1081ed83716d9803d484ff01a51037e65e21d18",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean5_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean5_curve2_rotation2_cov_facepat_97bd2be36f_density.png"
+    },
+    {
+      "baseline_sha256": "d986de90d9f817d3087129cf0f9f7d00082e7f22e2a81ddd55a6a6f2f4c5cf54",
+      "child_sha256": "a44de97f8dc3f652ccafbd41aea0901c4dc10878e5bb3847273dea5472b3d2c4",
+      "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean5_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean5_curve2_rotation2_cov_facepat_97bd2be36f_density.svg"
+    }
+  ],
+  "child_ledger_sha256": "88df51839e5531725d30b9e327c9ed1960324afc653eb519cd3701d69453ac12",
+  "child_pipeline_sha256": "033224c948fabee2cb77fd2b85d7daf11a52730fa96afd02d77259125723f702",
+  "figure_count": 6456,
+  "schema": "shot-pattern-layout-child-reconciliation/1",
+  "scope_sha256": "7599cc36a0008857c5579502512510f8521f8452f53b88b771e3d5db3462caba",
+  "unchanged_figure_count": 6309,
+  "unchanged_report_artifacts": {
+    "comparison_markdown": {
+      "relative_path": "REPORT_SUPPLEMENT_COMPARISONS.md",
+      "sha256": "b1693ff7268f1cb6c901dff1fee39a3135a80ca688b193079411e0d2fe9b3721"
+    },
+    "comparisons_csv": {
+      "relative_path": "REPORT_SUPPLEMENT_COMPARISONS.csv",
+      "sha256": "39a08d071373a6a30c0bbc2b06e4dd01630432ee5fe529ff24a858db6a20b9c8"
+    },
+    "comparisons_json": {
+      "relative_path": "REPORT_SUPPLEMENT_COMPARISONS.json",
+      "sha256": "c46738a38bb35ab86ba2163260e31a225aca07c807e021225d3c38fd09f0cf46"
+    },
+    "control_aliases": {
+      "relative_path": "control_aliases.json",
+      "sha256": "dcd7097475a1a0b67ceceaf1509e4c780655c7ec5f0cd0e041e25fcdcad2b87b"
+    },
+    "inventory": {
+      "relative_path": "REPORT_SUPPLEMENT.csv",
+      "sha256": "fe7f9e671f97122042e6a578b2aa8f21fe9a3eb4490831cb38bc3a1e88935848"
+    },
+    "original_source_inventory": {
+      "relative_path": "REPORT_ORIGINAL_SOURCE_INVENTORY.csv",
+      "sha256": "6a237d80f005b3a8da7d0b4502fc7e5ec0f0aae7d805c5b15c879f9e6f58c7d5"
+    },
+    "report": {
+      "relative_path": "REPORT_SUPPLEMENT.json",
+      "sha256": "6cdf53ca15bebb8829f42b5b3a1013571f1d8d4df83d054ab9935fa1bb5a8f0d"
+    }
+  },
+  "verdict": "pass"
+}

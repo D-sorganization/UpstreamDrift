@@ -1,0 +1,434 @@
+{
+  "schema": "independent-child-png-visual-review/1",
+  "reviewer": "Astra",
+  "accepted": true,
+  "scope": "Only 15 replacement academic-density PNGs, indices19\u201333. All15 before/after contacts, two native colorbar crops and four full-size child originals visually inspected.",
+  "full_publication_accepted": false,
+  "vector_visual_acceptance": false,
+  "numeric_recomputation_performed": false,
+  "inventory_hashes": {
+    "inventory.json": "8c914bfb4f82c179490bee0f79222c6eeb3242ab5eda3607759c05c54026fff6",
+    "colorbar_native_inventory.json": "eada37be2e5fd529620075b2572abb7afca6d1aaff43c305127128b6eec33209"
+  },
+  "checked_files_sha256": {
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/inventory.json": "8c914bfb4f82c179490bee0f79222c6eeb3242ab5eda3607759c05c54026fff6",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/colorbar_native_inventory.json": "eada37be2e5fd529620075b2572abb7afca6d1aaff43c305127128b6eec33209",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_control_1_seven_iron_lean10_curve1_rotation1_shaft_only_vs_original_control_1_seven_iron_lean10_curve1_rotation2_shaft_only_127p882m_76bc6350dd_density.png": "7c15093818735f1ffa91ae4f81248411018f7f6f8b4af70714af4d559b1cb085",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/shaft_rotation_sd_original_control_1_seven_iron_lean10_curve1_rotation1_shaft_only_vs_original_control_1_seven_iron_lean10_curve1_rotation2_shaft_only_127p882m_76bc6350dd_density.png": "04e52993c0dbd819b505eea1560b0e29a2f81f19d59f77f59445aad136288cc3",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/19_astra_shaft.jpg": "bf2c182afc06d8e31cf8a7460c211a13c73b9ec4816424eedf6a3503c15c7e38",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_control_1_seven_iron_lean10_curve1_rotation1_shaft_only_vs_original_control_1_seven_iron_lean10_curve1_rotation2_shaft_only_127p882m_76bc6350dd_density.svg": "7f3dff23c7aee195195e01e8d46994f3209c397356a288caeed08134b0a6962f",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_control_1_seven_iron_lean10_curve2_rotation1_shaft_only_vs_original_control_1_seven_iron_lean10_curve2_rotation2_shaft_only_127p882m_5a3c726669_density.png": "1a27192a67da99a10fc482eff1286f3915facf6d48e39eea3ebbc0e7540ecda4",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/shaft_rotation_sd_original_control_1_seven_iron_lean10_curve2_rotation1_shaft_only_vs_original_control_1_seven_iron_lean10_curve2_rotation2_shaft_only_127p882m_5a3c726669_density.png": "db8eecf3dbf71908d903cab977710a95a0746a4bd6e5ab789a9552c3557d06a6",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/20_astra_shaft.jpg": "510c571e08e39ee6dc3589a8c5b20fefdedd01668841e08eff363f5e792ef114",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_control_1_seven_iron_lean10_curve2_rotation1_shaft_only_vs_original_control_1_seven_iron_lean10_curve2_rotation2_shaft_only_127p882m_5a3c726669_density.svg": "d926e801b7e7fb6c928061d00ab603645e7b67f4a7fa96bbd98efaf0ab280c06",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_driver_lean0_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_driver_lean0_curve1_rotation2_cov_facepath_negati_2860bba7ee_density.png": "4a180629d2bb834127b8de64727b6f471ae7ff7058aaa1c8ddabeeaf6fcc0735",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/shaft_rotation_sd_original_primary_1_driver_lean0_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_driver_lean0_curve1_rotation2_cov_facepath_negati_2860bba7ee_density.png": "472c5b949189e4696b526c9266b174db22f252ef96e10a91bd9adaf44f8cdfb1",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/21_astra_shaft.jpg": "90681d6bc90bc8faeb76d51eb4401a4ae7aee97153fb7379606b023dd8e864dc",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_driver_lean0_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_driver_lean0_curve1_rotation2_cov_facepath_negati_2860bba7ee_density.svg": "72421274426771cd4f2331f13cd66c39cd47c253688c7ec4d870ab82116175d3",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_driver_lean0_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_driver_lean0_curve1_rotation2_cov_facepath_positi_cf238e5d47_density.png": "36da3f199c386a3f6ab6881ef78346ee4a34408307dbc4616442aea0a3290fac",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/shaft_rotation_sd_original_primary_1_driver_lean0_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_driver_lean0_curve1_rotation2_cov_facepath_positi_cf238e5d47_density.png": "a970ffdf9d51ad3ab9c829e6759df181b674268f971f5f175a7fc97240b252fd",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/22_astra_shaft.jpg": "597022a93f619200298cbf58ec609b7e1a9c49a0de667b7b43b86c34afa5ef6c",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_driver_lean0_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_driver_lean0_curve1_rotation2_cov_facepath_positi_cf238e5d47_density.svg": "8fd9818ff167208edc8dd66fdbb3db6fc37cf00deee717d602e2ec097b7f8ff1",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_driver_lean0_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_driver_lean0_curve2_rotation2_cov_facepath_negati_b4e77fb525_density.png": "4440c31e1bf858a2e7832f0e6aa7de3f0103dc8f7a9bb3613f11806bbeca95dc",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/shaft_rotation_sd_original_primary_1_driver_lean0_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_driver_lean0_curve2_rotation2_cov_facepath_negati_b4e77fb525_density.png": "ff66bae02f9d5a6c2efb1ed29ce76c9405fe1411dc08aecc4190ba7b32b2845b",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/23_astra_shaft.jpg": "2958f5d4849e44415bc3def94491e4795adb234c1ac9af3e61b3afb0a08d236c",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_driver_lean0_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_driver_lean0_curve2_rotation2_cov_facepath_negati_b4e77fb525_density.svg": "aadd21e533ab5b69ee9b19c486c7164e52f8bab611485c833a552177d899aad2",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_driver_lean0_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_driver_lean0_curve2_rotation2_cov_facepath_positi_2501f0c7fe_density.png": "ba8749d8aba38cbc0b322a7a69e9816b464359f5b51a15126c7923a1c7887089",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/shaft_rotation_sd_original_primary_1_driver_lean0_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_driver_lean0_curve2_rotation2_cov_facepath_positi_2501f0c7fe_density.png": "ee64d9f6cfa87cfb9a772735dc3eaf1dc3a5960b73a8c05b1d1278d0ba01d103",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/24_astra_shaft.jpg": "908d6ee9097e1776b3f4fbb321073cce57c58703278925a7b1f86a1b3a37fffe",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_driver_lean0_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_driver_lean0_curve2_rotation2_cov_facepath_positi_2501f0c7fe_density.svg": "82e67f129a959616e20ed7679b574ca552046d96bf9e94ceef519ff9a9f32203",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean10_curve1_rotation2_c_9e2108f574_density.png": "4ad963c52e2fd593a6646f429362e059ce264a55c883079bf6301bc48024dd6c",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean10_curve1_rotation2_c_9e2108f574_density.png": "63be821435f7eaef69ca56f1623872f6c0837b70e0c6363eb351efed2383b0cb",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/25_astra_shaft.jpg": "4b3755df5ed4907345029122136a50856ea2a3f8b404047b35eaf32ad362ba6b",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean10_curve1_rotation2_c_9e2108f574_density.svg": "7d14e5ca4c62cf281de8a32222396a949b633f954374d435e4d1fa81b64cf081",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean10_curve1_rotation2_c_336a6453c6_density.png": "a7a5d01e35713b407e76b8948b6780237e1b8d786eb531780753286f3ef1c78d",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean10_curve1_rotation2_c_336a6453c6_density.png": "07868f395ab246d13fdeead1d3f7aa2b503a86c55d58b9171fe74a6226fd013d",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/26_astra_shaft.jpg": "e7f6bc7931791cb94b71b4037f656cc48e0e9a180546f274027bf59804e4b232",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean10_curve1_rotation2_c_336a6453c6_density.svg": "4e89d653a8fee31bb2af828538c88bda1d4d088ccdaf0eeb6a04c92ef1037490",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_c_c2e7fba271_density.png": "4655ea78a2d7ea2c5a48089fc2ba462a6c786986129c3873a1b006d6a49da0eb",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_c_c2e7fba271_density.png": "c14978b4f0e09b28301d0f073988f9f8184063c818c4663c858c2fdd7a97b56a",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/27_astra_shaft.jpg": "8843147242027aaafb7018405a6475092072f381e621a7beeebe38855f0f9c5e",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_c_c2e7fba271_density.svg": "8c49cc73cb8f16293b9f5dc886717f8d0cb6d5dcbac558221ce6701aeba8b91d",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_c_3d992c2368_density.png": "cac845b68f8139801945ed1783ab13bd78037a16e20fbcac1ce4283d46f8ecf1",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_c_3d992c2368_density.png": "29113b8b91fa23790a955500994712e3532885aab6d8e7c9b457c65649a67c9b",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/28_astra_shaft.jpg": "627e2db8de4c7f85549b8f38df6d250652774aa117b48fde63cb8a3cfb964985",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_c_3d992c2368_density.svg": "e94ce7d357bc7b6ecf2480b06b83f1fbfce3632f38dc54989787356a947a371e",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_6f6c1ff731_density.png": "e75f96a1a8d571feef79da64b25912af9372b13f9e681e48eee750230a94dec3",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_6f6c1ff731_density.png": "a81d5bedfaba46dc9c6b2d428d355a3a02e633d762797871b604f8bb0e6a1e96",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/29_astra_shaft.jpg": "ad362b70fe67fc5cc06bf9cd40bbbaf2c5f74b442ae6d831e1ca0de6ba4ab4d2",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_6f6c1ff731_density.svg": "5ee3967fe06f91d058c832cbdabf6e27d2cd873a50255df1887dedd371268342",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_ff20bee33e_density.png": "0349b49e8ba96ced125484cbc02b52e6bf7e3f1fcbec05f290b8fd84e3fd5fcd",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_ff20bee33e_density.png": "07281ba10ce310b6adf1bb04681829d68c3e5e33b176b3394bbd761d0c07c199",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/30_astra_shaft.jpg": "3458cb09bdf51c74a905e81c42cdcc8f9409a44e0e214a4f2300c689c9fc9377",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_ff20bee33e_density.svg": "b3a4c7e07d0f347a31a3ee0df23c9eb8356640205c858d7da956346e0db934d8",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_041506eb4d_density.png": "5d7055ba0613b1e2b70d0eaa1f05c5e88d540660bc38f648b6f805060f2d74b6",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_041506eb4d_density.png": "6a6a7650df9bbb242315f2de1654a0a0afaf418ec68bb9172085e974f211d422",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/31_astra_shaft.jpg": "295bd8fefa52769c203359c388759306994d7e0c57de873eb5b7a75ead650a35",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_041506eb4d_density.svg": "e4d9ab5d0f11427ed559dca2032bf76df61af5c786f0f71a00ae1b470a2e858e",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_1430cd7a7c_density.png": "d02aa2c9ad5008dfed4766499364187a8a4ba2370e17011a0b0a5b041b9f7e21",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_1430cd7a7c_density.png": "be001d7d06fc67d5df213400d1820ca5f0df5a11f63c4797cfd11e71ceae7c35",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/32_astra_shaft.jpg": "edc5c59db9a750fe87f3ac0f78a4b2eb93dc801bb01c7e36a0912d0bfe2ce2c4",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_1430cd7a7c_density.svg": "e8b8e1c0451ea8bb0f3ae12ab8e2ba6d406de4d70e5d61a22d09dbfba442fc63",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_cov_facepat_f0357599d7_density.png": "9028ea95c6c22455a640a8668cfbe81b7a6f0997ea729a535f639ea261f6060a",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_cov_facepat_f0357599d7_density.png": "1264aa14b4f71ce5155775f7ac209125593f6191ec0368339783e78d1e3188f4",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/33_astra_shaft.jpg": "6342e152fd113f1ed8530adfd29adba27e921a33130cb821709c38e51e9ba3d0",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_cov_facepat_f0357599d7_density.svg": "e76576a4092f27c2fd7449d6c99af7177a0dbfa1cc34746d76e8685283c96d7b",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/19_astra_shaft_colorbar_native.jpg": "414eda97568d178188ef1c698a9741fe69fad987e05b768715e1d9ebe6a4de79",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/20_astra_shaft_colorbar_native.jpg": "67f71babef86ca6ccd9bffda97bd722cc25aea18c8287e6aba28dc8c648d8b2a"
+  },
+  "pre_post_hashes_unchanged": true,
+  "decisions": [
+    {
+      "baseline_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_control_1_seven_iron_lean10_curve1_rotation1_shaft_only_vs_original_control_1_seven_iron_lean10_curve1_rotation2_shaft_only_127p882m_76bc6350dd_density.png",
+      "baseline_png_sha256": "7c15093818735f1ffa91ae4f81248411018f7f6f8b4af70714af4d559b1cb085",
+      "baseline_svg_sha256": "7f3dff23c7aee195195e01e8d46994f3209c397356a288caeed08134b0a6962f",
+      "child_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/shaft_rotation_sd_original_control_1_seven_iron_lean10_curve1_rotation1_shaft_only_vs_original_control_1_seven_iron_lean10_curve1_rotation2_shaft_only_127p882m_76bc6350dd_density.png",
+      "child_png_sha256": "04e52993c0dbd819b505eea1560b0e29a2f81f19d59f77f59445aad136288cc3",
+      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/19_astra_shaft.jpg",
+      "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
+      "contact_sha256": "bf2c182afc06d8e31cf8a7460c211a13c73b9ec4816424eedf6a3503c15c7e38",
+      "failed_gates": [
+        "all_density_colorbar_diagnostic.json"
+      ],
+      "index": 19,
+      "reviewer": "astra_shaft",
+      "decision": "accepted_png_visual",
+      "full_size_child_inspected": true,
+      "native_colorbar_crop_inspected": true,
+      "observations": [
+        "Child legend and panel titles are visibly separated; six panels and axis labels remain legible.",
+        "Ordered SD1/SD2 conditions, target, common-six counts, 600-dot qualification, covariance units where applicable and model-conditional caveat remain present.",
+        "No clipping, glyph collision or new visual defect observed in the complete image/contact.",
+        "Native right-edge crop confirms Fade title clears the colorbar."
+      ]
+    },
+    {
+      "baseline_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_control_1_seven_iron_lean10_curve2_rotation1_shaft_only_vs_original_control_1_seven_iron_lean10_curve2_rotation2_shaft_only_127p882m_5a3c726669_density.png",
+      "baseline_png_sha256": "1a27192a67da99a10fc482eff1286f3915facf6d48e39eea3ebbc0e7540ecda4",
+      "baseline_svg_sha256": "d926e801b7e7fb6c928061d00ab603645e7b67f4a7fa96bbd98efaf0ab280c06",
+      "child_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/shaft_rotation_sd_original_control_1_seven_iron_lean10_curve2_rotation1_shaft_only_vs_original_control_1_seven_iron_lean10_curve2_rotation2_shaft_only_127p882m_5a3c726669_density.png",
+      "child_png_sha256": "db8eecf3dbf71908d903cab977710a95a0746a4bd6e5ab789a9552c3557d06a6",
+      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/20_astra_shaft.jpg",
+      "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
+      "contact_sha256": "510c571e08e39ee6dc3589a8c5b20fefdedd01668841e08eff363f5e792ef114",
+      "failed_gates": [
+        "all_density_colorbar_diagnostic.json"
+      ],
+      "index": 20,
+      "reviewer": "astra_shaft",
+      "decision": "accepted_png_visual",
+      "full_size_child_inspected": false,
+      "native_colorbar_crop_inspected": true,
+      "observations": [
+        "Child legend and panel titles are visibly separated; six panels and axis labels remain legible.",
+        "Ordered SD1/SD2 conditions, target, common-six counts, 600-dot qualification, covariance units where applicable and model-conditional caveat remain present.",
+        "No clipping, glyph collision or new visual defect observed in the complete image/contact.",
+        "Native right-edge crop confirms Fade title clears the colorbar."
+      ]
+    },
+    {
+      "baseline_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_driver_lean0_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_driver_lean0_curve1_rotation2_cov_facepath_negati_2860bba7ee_density.png",
+      "baseline_png_sha256": "4a180629d2bb834127b8de64727b6f471ae7ff7058aaa1c8ddabeeaf6fcc0735",
+      "baseline_svg_sha256": "72421274426771cd4f2331f13cd66c39cd47c253688c7ec4d870ab82116175d3",
+      "child_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/shaft_rotation_sd_original_primary_1_driver_lean0_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_driver_lean0_curve1_rotation2_cov_facepath_negati_2860bba7ee_density.png",
+      "child_png_sha256": "472c5b949189e4696b526c9266b174db22f252ef96e10a91bd9adaf44f8cdfb1",
+      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/21_astra_shaft.jpg",
+      "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
+      "contact_sha256": "90681d6bc90bc8faeb76d51eb4401a4ae7aee97153fb7379606b023dd8e864dc",
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
+      "index": 21,
+      "reviewer": "astra_shaft",
+      "decision": "accepted_png_visual",
+      "full_size_child_inspected": true,
+      "native_colorbar_crop_inspected": false,
+      "observations": [
+        "Child legend and panel titles are visibly separated; six panels and axis labels remain legible.",
+        "Ordered SD1/SD2 conditions, target, common-six counts, 600-dot qualification, covariance units where applicable and model-conditional caveat remain present.",
+        "No clipping, glyph collision or new visual defect observed in the complete image/contact."
+      ]
+    },
+    {
+      "baseline_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_driver_lean0_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_driver_lean0_curve1_rotation2_cov_facepath_positi_cf238e5d47_density.png",
+      "baseline_png_sha256": "36da3f199c386a3f6ab6881ef78346ee4a34408307dbc4616442aea0a3290fac",
+      "baseline_svg_sha256": "8fd9818ff167208edc8dd66fdbb3db6fc37cf00deee717d602e2ec097b7f8ff1",
+      "child_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/shaft_rotation_sd_original_primary_1_driver_lean0_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_driver_lean0_curve1_rotation2_cov_facepath_positi_cf238e5d47_density.png",
+      "child_png_sha256": "a970ffdf9d51ad3ab9c829e6759df181b674268f971f5f175a7fc97240b252fd",
+      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/22_astra_shaft.jpg",
+      "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
+      "contact_sha256": "597022a93f619200298cbf58ec609b7e1a9c49a0de667b7b43b86c34afa5ef6c",
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
+      "index": 22,
+      "reviewer": "astra_shaft",
+      "decision": "accepted_png_visual",
+      "full_size_child_inspected": false,
+      "native_colorbar_crop_inspected": false,
+      "observations": [
+        "Child legend and panel titles are visibly separated; six panels and axis labels remain legible.",
+        "Ordered SD1/SD2 conditions, target, common-six counts, 600-dot qualification, covariance units where applicable and model-conditional caveat remain present.",
+        "No clipping, glyph collision or new visual defect observed in the complete image/contact."
+      ]
+    },
+    {
+      "baseline_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_driver_lean0_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_driver_lean0_curve2_rotation2_cov_facepath_negati_b4e77fb525_density.png",
+      "baseline_png_sha256": "4440c31e1bf858a2e7832f0e6aa7de3f0103dc8f7a9bb3613f11806bbeca95dc",
+      "baseline_svg_sha256": "aadd21e533ab5b69ee9b19c486c7164e52f8bab611485c833a552177d899aad2",
+      "child_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/shaft_rotation_sd_original_primary_1_driver_lean0_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_driver_lean0_curve2_rotation2_cov_facepath_negati_b4e77fb525_density.png",
+      "child_png_sha256": "ff66bae02f9d5a6c2efb1ed29ce76c9405fe1411dc08aecc4190ba7b32b2845b",
+      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/23_astra_shaft.jpg",
+      "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
+      "contact_sha256": "2958f5d4849e44415bc3def94491e4795adb234c1ac9af3e61b3afb0a08d236c",
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
+      "index": 23,
+      "reviewer": "astra_shaft",
+      "decision": "accepted_png_visual",
+      "full_size_child_inspected": false,
+      "native_colorbar_crop_inspected": false,
+      "observations": [
+        "Child legend and panel titles are visibly separated; six panels and axis labels remain legible.",
+        "Ordered SD1/SD2 conditions, target, common-six counts, 600-dot qualification, covariance units where applicable and model-conditional caveat remain present.",
+        "No clipping, glyph collision or new visual defect observed in the complete image/contact."
+      ]
+    },
+    {
+      "baseline_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_driver_lean0_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_driver_lean0_curve2_rotation2_cov_facepath_positi_2501f0c7fe_density.png",
+      "baseline_png_sha256": "ba8749d8aba38cbc0b322a7a69e9816b464359f5b51a15126c7923a1c7887089",
+      "baseline_svg_sha256": "82e67f129a959616e20ed7679b574ca552046d96bf9e94ceef519ff9a9f32203",
+      "child_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/shaft_rotation_sd_original_primary_1_driver_lean0_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_driver_lean0_curve2_rotation2_cov_facepath_positi_2501f0c7fe_density.png",
+      "child_png_sha256": "ee64d9f6cfa87cfb9a772735dc3eaf1dc3a5960b73a8c05b1d1278d0ba01d103",
+      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/24_astra_shaft.jpg",
+      "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
+      "contact_sha256": "908d6ee9097e1776b3f4fbb321073cce57c58703278925a7b1f86a1b3a37fffe",
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
+      "index": 24,
+      "reviewer": "astra_shaft",
+      "decision": "accepted_png_visual",
+      "full_size_child_inspected": false,
+      "native_colorbar_crop_inspected": false,
+      "observations": [
+        "Child legend and panel titles are visibly separated; six panels and axis labels remain legible.",
+        "Ordered SD1/SD2 conditions, target, common-six counts, 600-dot qualification, covariance units where applicable and model-conditional caveat remain present.",
+        "No clipping, glyph collision or new visual defect observed in the complete image/contact."
+      ]
+    },
+    {
+      "baseline_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean10_curve1_rotation2_c_9e2108f574_density.png",
+      "baseline_png_sha256": "4ad963c52e2fd593a6646f429362e059ce264a55c883079bf6301bc48024dd6c",
+      "baseline_svg_sha256": "7d14e5ca4c62cf281de8a32222396a949b633f954374d435e4d1fa81b64cf081",
+      "child_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean10_curve1_rotation2_c_9e2108f574_density.png",
+      "child_png_sha256": "63be821435f7eaef69ca56f1623872f6c0837b70e0c6363eb351efed2383b0cb",
+      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/25_astra_shaft.jpg",
+      "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
+      "contact_sha256": "4b3755df5ed4907345029122136a50856ea2a3f8b404047b35eaf32ad362ba6b",
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
+      "index": 25,
+      "reviewer": "astra_shaft",
+      "decision": "accepted_png_visual",
+      "full_size_child_inspected": true,
+      "native_colorbar_crop_inspected": false,
+      "observations": [
+        "Child legend and panel titles are visibly separated; six panels and axis labels remain legible.",
+        "Ordered SD1/SD2 conditions, target, common-six counts, 600-dot qualification, covariance units where applicable and model-conditional caveat remain present.",
+        "No clipping, glyph collision or new visual defect observed in the complete image/contact."
+      ]
+    },
+    {
+      "baseline_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean10_curve1_rotation2_c_336a6453c6_density.png",
+      "baseline_png_sha256": "a7a5d01e35713b407e76b8948b6780237e1b8d786eb531780753286f3ef1c78d",
+      "baseline_svg_sha256": "4e89d653a8fee31bb2af828538c88bda1d4d088ccdaf0eeb6a04c92ef1037490",
+      "child_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean10_curve1_rotation2_c_336a6453c6_density.png",
+      "child_png_sha256": "07868f395ab246d13fdeead1d3f7aa2b503a86c55d58b9171fe74a6226fd013d",
+      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/26_astra_shaft.jpg",
+      "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
+      "contact_sha256": "e7f6bc7931791cb94b71b4037f656cc48e0e9a180546f274027bf59804e4b232",
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
+      "index": 26,
+      "reviewer": "astra_shaft",
+      "decision": "accepted_png_visual",
+      "full_size_child_inspected": false,
+      "native_colorbar_crop_inspected": false,
+      "observations": [
+        "Child legend and panel titles are visibly separated; six panels and axis labels remain legible.",
+        "Ordered SD1/SD2 conditions, target, common-six counts, 600-dot qualification, covariance units where applicable and model-conditional caveat remain present.",
+        "No clipping, glyph collision or new visual defect observed in the complete image/contact."
+      ]
+    },
+    {
+      "baseline_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_c_c2e7fba271_density.png",
+      "baseline_png_sha256": "4655ea78a2d7ea2c5a48089fc2ba462a6c786986129c3873a1b006d6a49da0eb",
+      "baseline_svg_sha256": "8c49cc73cb8f16293b9f5dc886717f8d0cb6d5dcbac558221ce6701aeba8b91d",
+      "child_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_c_c2e7fba271_density.png",
+      "child_png_sha256": "c14978b4f0e09b28301d0f073988f9f8184063c818c4663c858c2fdd7a97b56a",
+      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/27_astra_shaft.jpg",
+      "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
+      "contact_sha256": "8843147242027aaafb7018405a6475092072f381e621a7beeebe38855f0f9c5e",
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
+      "index": 27,
+      "reviewer": "astra_shaft",
+      "decision": "accepted_png_visual",
+      "full_size_child_inspected": false,
+      "native_colorbar_crop_inspected": false,
+      "observations": [
+        "Child legend and panel titles are visibly separated; six panels and axis labels remain legible.",
+        "Ordered SD1/SD2 conditions, target, common-six counts, 600-dot qualification, covariance units where applicable and model-conditional caveat remain present.",
+        "No clipping, glyph collision or new visual defect observed in the complete image/contact."
+      ]
+    },
+    {
+      "baseline_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_c_3d992c2368_density.png",
+      "baseline_png_sha256": "cac845b68f8139801945ed1783ab13bd78037a16e20fbcac1ce4283d46f8ecf1",
+      "baseline_svg_sha256": "e94ce7d357bc7b6ecf2480b06b83f1fbfce3632f38dc54989787356a947a371e",
+      "child_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_c_3d992c2368_density.png",
+      "child_png_sha256": "29113b8b91fa23790a955500994712e3532885aab6d8e7c9b457c65649a67c9b",
+      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/28_astra_shaft.jpg",
+      "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
+      "contact_sha256": "627e2db8de4c7f85549b8f38df6d250652774aa117b48fde63cb8a3cfb964985",
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
+      "index": 28,
+      "reviewer": "astra_shaft",
+      "decision": "accepted_png_visual",
+      "full_size_child_inspected": false,
+      "native_colorbar_crop_inspected": false,
+      "observations": [
+        "Child legend and panel titles are visibly separated; six panels and axis labels remain legible.",
+        "Ordered SD1/SD2 conditions, target, common-six counts, 600-dot qualification, covariance units where applicable and model-conditional caveat remain present.",
+        "No clipping, glyph collision or new visual defect observed in the complete image/contact."
+      ]
+    },
+    {
+      "baseline_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_6f6c1ff731_density.png",
+      "baseline_png_sha256": "e75f96a1a8d571feef79da64b25912af9372b13f9e681e48eee750230a94dec3",
+      "baseline_svg_sha256": "5ee3967fe06f91d058c832cbdabf6e27d2cd873a50255df1887dedd371268342",
+      "child_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_6f6c1ff731_density.png",
+      "child_png_sha256": "a81d5bedfaba46dc9c6b2d428d355a3a02e633d762797871b604f8bb0e6a1e96",
+      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/29_astra_shaft.jpg",
+      "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
+      "contact_sha256": "ad362b70fe67fc5cc06bf9cd40bbbaf2c5f74b442ae6d831e1ca0de6ba4ab4d2",
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
+      "index": 29,
+      "reviewer": "astra_shaft",
+      "decision": "accepted_png_visual",
+      "full_size_child_inspected": false,
+      "native_colorbar_crop_inspected": false,
+      "observations": [
+        "Child legend and panel titles are visibly separated; six panels and axis labels remain legible.",
+        "Ordered SD1/SD2 conditions, target, common-six counts, 600-dot qualification, covariance units where applicable and model-conditional caveat remain present.",
+        "No clipping, glyph collision or new visual defect observed in the complete image/contact."
+      ]
+    },
+    {
+      "baseline_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_ff20bee33e_density.png",
+      "baseline_png_sha256": "0349b49e8ba96ced125484cbc02b52e6bf7e3f1fcbec05f290b8fd84e3fd5fcd",
+      "baseline_svg_sha256": "b3a4c7e07d0f347a31a3ee0df23c9eb8356640205c858d7da956346e0db934d8",
+      "child_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_ff20bee33e_density.png",
+      "child_png_sha256": "07281ba10ce310b6adf1bb04681829d68c3e5e33b176b3394bbd761d0c07c199",
+      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/30_astra_shaft.jpg",
+      "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
+      "contact_sha256": "3458cb09bdf51c74a905e81c42cdcc8f9409a44e0e214a4f2300c689c9fc9377",
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
+      "index": 30,
+      "reviewer": "astra_shaft",
+      "decision": "accepted_png_visual",
+      "full_size_child_inspected": false,
+      "native_colorbar_crop_inspected": false,
+      "observations": [
+        "Child legend and panel titles are visibly separated; six panels and axis labels remain legible.",
+        "Ordered SD1/SD2 conditions, target, common-six counts, 600-dot qualification, covariance units where applicable and model-conditional caveat remain present.",
+        "No clipping, glyph collision or new visual defect observed in the complete image/contact."
+      ]
+    },
+    {
+      "baseline_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_041506eb4d_density.png",
+      "baseline_png_sha256": "5d7055ba0613b1e2b70d0eaa1f05c5e88d540660bc38f648b6f805060f2d74b6",
+      "baseline_svg_sha256": "e4d9ab5d0f11427ed559dca2032bf76df61af5c786f0f71a00ae1b470a2e858e",
+      "child_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_041506eb4d_density.png",
+      "child_png_sha256": "6a6a7650df9bbb242315f2de1654a0a0afaf418ec68bb9172085e974f211d422",
+      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/31_astra_shaft.jpg",
+      "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
+      "contact_sha256": "295bd8fefa52769c203359c388759306994d7e0c57de873eb5b7a75ead650a35",
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
+      "index": 31,
+      "reviewer": "astra_shaft",
+      "decision": "accepted_png_visual",
+      "full_size_child_inspected": false,
+      "native_colorbar_crop_inspected": false,
+      "observations": [
+        "Child legend and panel titles are visibly separated; six panels and axis labels remain legible.",
+        "Ordered SD1/SD2 conditions, target, common-six counts, 600-dot qualification, covariance units where applicable and model-conditional caveat remain present.",
+        "No clipping, glyph collision or new visual defect observed in the complete image/contact."
+      ]
+    },
+    {
+      "baseline_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_1430cd7a7c_density.png",
+      "baseline_png_sha256": "d02aa2c9ad5008dfed4766499364187a8a4ba2370e17011a0b0a5b041b9f7e21",
+      "baseline_svg_sha256": "e8b8e1c0451ea8bb0f3ae12ab8e2ba6d406de4d70e5d61a22d09dbfba442fc63",
+      "child_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_1430cd7a7c_density.png",
+      "child_png_sha256": "be001d7d06fc67d5df213400d1820ca5f0df5a11f63c4797cfd11e71ceae7c35",
+      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/32_astra_shaft.jpg",
+      "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
+      "contact_sha256": "edc5c59db9a750fe87f3ac0f78a4b2eb93dc801bb01c7e36a0912d0bfe2ce2c4",
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
+      "index": 32,
+      "reviewer": "astra_shaft",
+      "decision": "accepted_png_visual",
+      "full_size_child_inspected": false,
+      "native_colorbar_crop_inspected": false,
+      "observations": [
+        "Child legend and panel titles are visibly separated; six panels and axis labels remain legible.",
+        "Ordered SD1/SD2 conditions, target, common-six counts, 600-dot qualification, covariance units where applicable and model-conditional caveat remain present.",
+        "No clipping, glyph collision or new visual defect observed in the complete image/contact."
+      ]
+    },
+    {
+      "baseline_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_cov_facepat_f0357599d7_density.png",
+      "baseline_png_sha256": "9028ea95c6c22455a640a8668cfbe81b7a6f0997ea729a535f639ea261f6060a",
+      "baseline_svg_sha256": "e76576a4092f27c2fd7449d6c99af7177a0dbfa1cc34746d76e8685283c96d7b",
+      "child_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_cov_facepat_f0357599d7_density.png",
+      "child_png_sha256": "1264aa14b4f71ce5155775f7ac209125593f6191ec0368339783e78d1e3188f4",
+      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/33_astra_shaft.jpg",
+      "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
+      "contact_sha256": "6342e152fd113f1ed8530adfd29adba27e921a33130cb821709c38e51e9ba3d0",
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
+      "index": 33,
+      "reviewer": "astra_shaft",
+      "decision": "accepted_png_visual",
+      "full_size_child_inspected": true,
+      "native_colorbar_crop_inspected": false,
+      "observations": [
+        "Child legend and panel titles are visibly separated; six panels and axis labels remain legible.",
+        "Ordered SD1/SD2 conditions, target, common-six counts, 600-dot qualification, covariance units where applicable and model-conditional caveat remain present.",
+        "No clipping, glyph collision or new visual defect observed in the complete image/contact."
+      ]
+    }
+  ],
+  "limitations": [
+    "This receipt does not replace strict parent/child provenance validation or numerical parity evidence.",
+    "PDF/SVG native rendering is reviewed separately.",
+    "Contact crop truncation is intentional and was not treated as clipping of the complete output."
+  ]
+}

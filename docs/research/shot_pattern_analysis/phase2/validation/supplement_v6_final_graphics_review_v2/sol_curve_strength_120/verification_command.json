@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "/tmp/shot-pattern-validation-venv-20261009/bin/python",
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/sol_curve_strength_120/executed_verification.py.txt"
+  ],
+  "exit_code": 0,
+  "stdout": "{\"review_sha256\": \"bad63ce24b5d2197a55f752248db4afaabcbbf47ddbe3c8e26d17ba661824e41\", \"counts\": {\"pairs\": 12, \"png_decisions\": 72, \"contacts_inspected\": 36, \"full_size_originals_inspected\": 3, \"prior_exact_byte_social_density_matches\": 0, \"all_format_assets_hash_verified\": 192}}\n",
+  "stderr": ""
+}

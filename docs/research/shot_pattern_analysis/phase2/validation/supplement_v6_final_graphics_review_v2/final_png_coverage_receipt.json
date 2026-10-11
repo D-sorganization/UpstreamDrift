@@ -1,0 +1,406 @@
+{
+  "batches": [
+    {
+      "affected_baseline_pngs": 0,
+      "batch": "across_lean_000",
+      "command_sha256": "bde52a179f16d50e235aa62805d258dcba292821da5e9af829f51c956d4c528e",
+      "contacts": 36,
+      "inventory_sha256": "8f199f1c1b0b2382f347fcbcbc720171e7bb400ed3eba47d250ee9a61a30b1e6",
+      "pairs": 12,
+      "pngs": 72,
+      "review": "astra_across_lean_000/review.json",
+      "review_sha256": "a8a53090df9f5683c2ecd0b719cbf4b0af4bf3d83140b8d42e93239621fdda2b"
+    },
+    {
+      "affected_baseline_pngs": 0,
+      "batch": "across_lean_012",
+      "command_sha256": "4c9a42fbddb52d807fce4ae68c32086a7b31914ce3fb1f26cecdfe79c602a08f",
+      "contacts": 36,
+      "inventory_sha256": "a1e21dce6aefc220e3203626d25da0ac17dd88e39da1cdc886b26708682471ca",
+      "pairs": 12,
+      "pngs": 72,
+      "review": "root_across_lean_012/review.json",
+      "review_sha256": "46a7fef4777022cae2dd1bd0f98138209beb919a2ea80098c12b257e7fac2e22"
+    },
+    {
+      "affected_baseline_pngs": 0,
+      "batch": "across_lean_024_retry",
+      "command_sha256": "57be799bc8e0068434823b328792e8b14cfb4e982b27fdd2e89ed9be7be00d4e",
+      "contacts": 36,
+      "inventory_sha256": "64c0cf03da6780c4175a815e37172e235a39a51beee8273906b355d4d5d29628",
+      "pairs": 12,
+      "pngs": 72,
+      "review": "astra_across_lean_024_retry/review.json",
+      "review_sha256": "326d9a91aaf134b27ec17c51e19ac8a0b7b1a7184eeb41ee0efc65cb5e032ffd"
+    },
+    {
+      "affected_baseline_pngs": 0,
+      "batch": "across_lean_036",
+      "command_sha256": "f890d10fb017535e055f4136afeb6968b345efeafdfa6926b010978696e4c744",
+      "contacts": 36,
+      "inventory_sha256": "aad7c09f3a3505951e07b7ddf73261a8de89740830184eaed499c9506e93a4fc",
+      "pairs": 12,
+      "pngs": 72,
+      "review": "sol_across_lean_036/review.json",
+      "review_sha256": "eb18082318900f7239da9d058ae244a354c4eea470b2df1af61ef7ffcee7af12"
+    },
+    {
+      "affected_baseline_pngs": 0,
+      "batch": "across_lean_048",
+      "command_sha256": "cb680f682d4fc33a0ec05a747285e588788b37820b59b563987812c5126c5354",
+      "contacts": 24,
+      "inventory_sha256": "2bd25010fcf0987721d7486837061c9c9325896c8ef143355bee78fd58b33b17",
+      "pairs": 8,
+      "pngs": 48,
+      "review": "root_across_lean_048/review.json",
+      "review_sha256": "e63d53393759b2b956778f6860b84f0fd8e38b71a3159e3169414defab59ab59"
+    },
+    {
+      "affected_baseline_pngs": 0,
+      "batch": "curve_strength_000_retry",
+      "command_sha256": "4998c651bd48ae686a9d2147a6f4b83c0c79125bd28bfe5249d1abaa813cbeba",
+      "contacts": 36,
+      "inventory_sha256": "0e37f5c191d4f9391787674b857c92c791280ffbc32f53beb0fac701c49ca9fd",
+      "pairs": 12,
+      "pngs": 72,
+      "review": "root_curve_strength_000_retry/review.json",
+      "review_sha256": "5a6b5e4555d23b1c8bcec8157788d4dac6a3e9d12de23dd5bc4418a3713e43b0"
+    },
+    {
+      "affected_baseline_pngs": 0,
+      "batch": "curve_strength_012",
+      "command_sha256": "f0c7f2c682876facc7b3a6096f9e749d72b8462aabe5c0d82ca61d65bf8b7661",
+      "contacts": 36,
+      "inventory_sha256": "a0983fa7f2e9073d623e9b776b4493f66f46485fd881198ff619a31393ee006f",
+      "pairs": 12,
+      "pngs": 72,
+      "review": "sol_curve_strength_012/review.json",
+      "review_sha256": "67a4e37dd1f143fd4da4ac3cc49c6c89e588e61667b1ac51273135b53855313a"
+    },
+    {
+      "affected_baseline_pngs": 2,
+      "batch": "curve_strength_024",
+      "command_sha256": "116385d5d5fe2f0fb2b6bb84d1444513fc6e657fa5d159f8b70f855772012187",
+      "contacts": 36,
+      "inventory_sha256": "c7d68c75a80de9f5c7cc61bdaed48bfeaabcb17d629d77226ce7a299e5449a08",
+      "pairs": 12,
+      "pngs": 72,
+      "review": "astra_curve_strength_024/review.json",
+      "review_sha256": "e6b6183070c4113cb0f38e90568732182b589f02ff5d07b74b897b9764a38e33"
+    },
+    {
+      "affected_baseline_pngs": 2,
+      "batch": "curve_strength_036",
+      "command_sha256": "759b5ea6eddd5fb91d89e30ce2aed4dcf941b67ebac3a97f4807b59c3d848f59",
+      "contacts": 36,
+      "inventory_sha256": "f56ce0a8a85677af399ea96be0b3ea77f9ec3f733484c882bad5dc23bd3aa1d5",
+      "pairs": 12,
+      "pngs": 72,
+      "review": "sol_curve_strength_036/review.json",
+      "review_sha256": "b95d552ee24b99bb03da99ba3127d0ad8dd52797bf6bc93b002c855c0eb5e04a"
+    },
+    {
+      "affected_baseline_pngs": 0,
+      "batch": "curve_strength_048",
+      "command_sha256": "ad2a7b056c5de8532b27b7baeffc6a2e1966a8f1f3c8e1940a90d904e8682c98",
+      "contacts": 36,
+      "inventory_sha256": "2152a80125cc9f3c3b58ec8e8fd21815b59068fed78106a8b8cef12c5fceaadd",
+      "pairs": 12,
+      "pngs": 72,
+      "review": "root_curve_strength_048/review.json",
+      "review_sha256": "1c34241da2d4298455fd6eae41de25213f3c712c0dddb0d91b4ed4164061b072"
+    },
+    {
+      "affected_baseline_pngs": 0,
+      "batch": "curve_strength_060",
+      "command_sha256": "2dd065a6bfedd12f6076b201b162ba8b43350b7bb8963b9f966fa63357107298",
+      "contacts": 36,
+      "inventory_sha256": "8072d628e269e92f2c8b90238534f254c103d699d9c98efb663656151f204395",
+      "pairs": 12,
+      "pngs": 72,
+      "review": "sol_curve_strength_060/review.json",
+      "review_sha256": "5ed9d8ec13881e053e29ff9eeddca0ed10be4fa6ed863ef5938e684f26f31bb6"
+    },
+    {
+      "affected_baseline_pngs": 0,
+      "batch": "curve_strength_072",
+      "command_sha256": "271d528b97848a5fd48988ff55afbffcc8c06957f252eed039e08fb681844515",
+      "contacts": 36,
+      "inventory_sha256": "4e483832bd45ae5bc6503f2267aa53627986c970aa9a9a1828d68429628a450c",
+      "pairs": 12,
+      "pngs": 72,
+      "review": "sol_curve_strength_072/review.json",
+      "review_sha256": "8d7d4dd0ca9dda793bf2684f7aa4cb6a096cda959079eabc27eb1deb57f55b5b"
+    },
+    {
+      "affected_baseline_pngs": 2,
+      "batch": "curve_strength_084",
+      "command_sha256": "6a9561763cb784e5be0911bacadaea19dcce1f5a372b237ff8fd5458b4a94c66",
+      "contacts": 36,
+      "inventory_sha256": "1965b2f652233cb8937103c0d2401bc30fc205beeb523ff11d62944386ac0e17",
+      "pairs": 12,
+      "pngs": 72,
+      "review": "sol_curve_strength_084/review.json",
+      "review_sha256": "f30f63c3129e7fe378c7113d6511bcb5c0a70aaa4c20f6d54fc6a37034aadfba"
+    },
+    {
+      "affected_baseline_pngs": 1,
+      "batch": "curve_strength_096",
+      "command_sha256": "63092551eff7c1ef33f4b1b207f8176bc499fa0fac0410d50795f65b352f0d4d",
+      "contacts": 36,
+      "inventory_sha256": "3299c1c13e62aa8b66ff3c42af1baf840576be7f518643f22917e04bf15f5abf",
+      "pairs": 12,
+      "pngs": 72,
+      "review": "root_curve_strength_096/review.json",
+      "review_sha256": "af40c16fbfbb1fa905cb90474ec38b1cf9cc2f9141f699f38ab37463cd66d0d2"
+    },
+    {
+      "affected_baseline_pngs": 2,
+      "batch": "curve_strength_108",
+      "command_sha256": "0bde265c31ee0fbc2b00f27e4be994384afad7da481c60b45746b80cf2c77602",
+      "contacts": 36,
+      "inventory_sha256": "b5ba9775fa02d1c82fd05d8a5bba49fb24a0138c59c88ad36ebc2291826616b9",
+      "pairs": 12,
+      "pngs": 72,
+      "review": "sol_curve_strength_108/review.json",
+      "review_sha256": "a33ec7d4ca2c5727ec1732bc0058c06894397522c2e887a78467b8ccaae209c8"
+    },
+    {
+      "affected_baseline_pngs": 4,
+      "batch": "curve_strength_120",
+      "command_sha256": "5385162d95835ec8c6780cb5933fdd370a97d840f434beb475007c6eec964d3c",
+      "contacts": 36,
+      "inventory_sha256": "0490ccf7b7552f70d6f1f6a5cd40bc87310f7977ef335a8c8a6c57f935845c30",
+      "pairs": 12,
+      "pngs": 72,
+      "review": "sol_curve_strength_120/review.json",
+      "review_sha256": "bad63ce24b5d2197a55f752248db4afaabcbbf47ddbe3c8e26d17ba661824e41"
+    },
+    {
+      "affected_baseline_pngs": 2,
+      "batch": "curve_strength_132",
+      "command_sha256": "96ff15719736dc873d299f6fdf3b37838f17aaeb79f8f0b8eb1a74fb72163225",
+      "contacts": 36,
+      "inventory_sha256": "653ff3781a0556b730deabad9fce45aaf504d0179975f791481bbb4281afc262",
+      "pairs": 12,
+      "pngs": 72,
+      "review": "sol_curve_strength_132/review.json",
+      "review_sha256": "5b9b28453c36a5f048099db54d33792ff53648b662acf0e186ea0fefba3eb47d"
+    },
+    {
+      "affected_baseline_pngs": 2,
+      "batch": "curve_strength_144",
+      "command_sha256": "52494caf9667550db1b125b570900a1496ce740a9cea19e3ae69de27ee2ade3b",
+      "contacts": 36,
+      "inventory_sha256": "5751dd826818ef8262a013054aef35167ff98b7aed67e62da4c9f7273f32d0c1",
+      "pairs": 12,
+      "pngs": 72,
+      "review": "sol_curve_strength_144/review.json",
+      "review_sha256": "511ff44a66e5d88f4715601b928ca2bfb8b251bca2d9a204652d95dabca13f93"
+    },
+    {
+      "affected_baseline_pngs": 2,
+      "batch": "curve_strength_156",
+      "command_sha256": "b0d544db709b4bb65c3abc3d3618942a33098cd231532e401dd68e5dea11932d",
+      "contacts": 24,
+      "inventory_sha256": "296d7232ae44b9994493b8a5f6a5a029d09b7038bf0d2e60bd3b1e7df9e9a7e0",
+      "pairs": 8,
+      "pngs": 48,
+      "review": "astra_curve_strength_156/review.json",
+      "review_sha256": "2e8c39e9715c7ff261fe838b86ddb322737fa8dfe364afbb93587eaa9d8ecbe1"
+    },
+    {
+      "affected_baseline_pngs": 0,
+      "batch": "shaft_rotation_sd_000",
+      "command_sha256": "681d2753e2ab5db851becd7540e12207a5cca256bdf8712f826cc5c95f75b564",
+      "contacts": 36,
+      "inventory_sha256": "059b4a48db829e32a9ae475f80ed8874fc089a30e88e34a2cb8f2e1e29cd23b1",
+      "pairs": 12,
+      "pngs": 72,
+      "review": "astra_shaft_rotation_sd_000/review.json",
+      "review_sha256": "00e3425f7a115ccf309c3d0982591820315a06c72190599266a78bce31d154c1"
+    },
+    {
+      "affected_baseline_pngs": 2,
+      "batch": "shaft_rotation_sd_012",
+      "command_sha256": "1bd39418810325149443a0bb1a3150df24a7e6dbe92d0e844838a43221a1df49",
+      "contacts": 36,
+      "inventory_sha256": "ad6ea9ff507d4143fb9c1f82fe4019c440760afe2f1779663b60fc85bcf26030",
+      "pairs": 12,
+      "pngs": 72,
+      "review": "astra_shaft_rotation_sd_012/review.json",
+      "review_sha256": "ae0bea829d56da3f989a2002082cbce0fb29bf8991014f33ba4d40f78f8efda1"
+    },
+    {
+      "affected_baseline_pngs": 2,
+      "batch": "shaft_rotation_sd_024",
+      "command_sha256": "1b7df8b88fa4eca3164201a82e7116a7e1a0a74dd7d6db3db6b607807e0d0d3f",
+      "contacts": 36,
+      "inventory_sha256": "d27cc10b67301d897900c0e368c1e340279b0a670b49321b17c53d19bafbc4c7",
+      "pairs": 12,
+      "pngs": 72,
+      "review": "astra_shaft_rotation_sd_024/review.json",
+      "review_sha256": "cee17846cda55e5b349b884d1a38182face75b9b6fd2e71e4254adb21cd527b3"
+    },
+    {
+      "affected_baseline_pngs": 2,
+      "batch": "shaft_rotation_sd_036",
+      "command_sha256": "1cc363f353159f3388384dbc8d95c534c5761a1b86f5e3bc37161d7ae6d7a81b",
+      "contacts": 36,
+      "inventory_sha256": "4b9fef0d00dcd84983918c5e846df4b240b82a847cc6ec10494cfa3d5e7e1643",
+      "pairs": 12,
+      "pngs": 72,
+      "review": "astra_shaft_rotation_sd_036/review.json",
+      "review_sha256": "7c4b805af358844ed06939f5dc5e14c7190c500a806b1c23ae1fdaf189b563e6"
+    },
+    {
+      "affected_baseline_pngs": 0,
+      "batch": "shaft_rotation_sd_048",
+      "command_sha256": "094d87cacd6feae8aecf09baae23c3f45eeebd08f9feb55478eb1f9c225b4646",
+      "contacts": 36,
+      "inventory_sha256": "7c9876fb74a456db9784eeeae9c2ece1bb96bd78d24cf80a4c60b2d2aed8ed21",
+      "pairs": 12,
+      "pngs": 72,
+      "review": "root_shaft_rotation_sd_048/review.json",
+      "review_sha256": "b725b8416038e237eab35e12cf5677b4a10b3e7d408f71243d0c9b6ed8311a26"
+    },
+    {
+      "affected_baseline_pngs": 2,
+      "batch": "shaft_rotation_sd_060",
+      "command_sha256": "529ac1bcf29835ead133937241b02caa576accd73ce7456b7f066c18db10e047",
+      "contacts": 36,
+      "inventory_sha256": "a2111c546806b8efcff247f82d19cc8518f4c5d796840f914311965d3093d18b",
+      "pairs": 12,
+      "pngs": 72,
+      "review": "astra_shaft_rotation_sd_060/review.json",
+      "review_sha256": "3e291502a3bd181d792dfa3da4b40412503d248d93cc0b92d70c2ac8c7d44759"
+    },
+    {
+      "affected_baseline_pngs": 2,
+      "batch": "shaft_rotation_sd_072",
+      "command_sha256": "8657120fb83e408672c090b2241ce2439e759f44026b41b8aafd3994da4f7548",
+      "contacts": 36,
+      "inventory_sha256": "ebb09ae632f7eb9bc4b4c6613d6f160095609d06b2d2fa49850553846020b1ea",
+      "pairs": 12,
+      "pngs": 72,
+      "review": "root_shaft_rotation_sd_072/review.json",
+      "review_sha256": "86caf660931a1b945973c098739b477b3e05dd6c0f791eab71e2095d502d7eec"
+    },
+    {
+      "affected_baseline_pngs": 2,
+      "batch": "shaft_rotation_sd_084",
+      "command_sha256": "ee2a5ffaa326d3f66ec530617902860633ec4240f9585399df58d32e7eaa7ee4",
+      "contacts": 36,
+      "inventory_sha256": "6b8fc6a66bdf6a6dc231ee133765b66ff72aace60fec7980cbea2d636d991f8b",
+      "pairs": 12,
+      "pngs": 72,
+      "review": "root_shaft_rotation_sd_084/review.json",
+      "review_sha256": "73650859a956866e432cb8f1df666351efbc627888acbb8633eab4536b3d0d15"
+    },
+    {
+      "affected_baseline_pngs": 4,
+      "batch": "shaft_rotation_sd_096",
+      "command_sha256": "1d9720a7bf8ea459fc6af6ed0ade7982bdfc0167916626ed45d863a97733613a",
+      "contacts": 36,
+      "inventory_sha256": "cc0169cc2bdc5fec6740cc7423747e147e5ea1183ada0ed17bf7bbb2a34e528b",
+      "pairs": 12,
+      "pngs": 72,
+      "review": "astra_shaft_rotation_sd_096/review.json",
+      "review_sha256": "e8dc24e29eeccf0b9f93c31cf200cd122adfdc212c3c89197df7771c86a340db"
+    },
+    {
+      "affected_baseline_pngs": 3,
+      "batch": "shaft_rotation_sd_108",
+      "command_sha256": "eb724f075d948e75b18852c95ec784af5ea169a4a69364e2747a332cdfc2d914",
+      "contacts": 36,
+      "inventory_sha256": "f5724b99b339b330a3cb341fd95fde35e8d38130968760eaabeed0f77d61498d",
+      "pairs": 12,
+      "pngs": 72,
+      "review": "sol_shaft_rotation_sd_108/review.json",
+      "review_sha256": "d837799e64f7090fd5d919ceac0050bfb8239b706ba007ab62af05222a51d208"
+    },
+    {
+      "affected_baseline_pngs": 7,
+      "batch": "shaft_rotation_sd_120",
+      "command_sha256": "785e6356ae0c372e1af22f758ae2ad89880135e41dac301f826c5ba60de88cdc",
+      "contacts": 36,
+      "inventory_sha256": "a992927237ae94dea7bbc1407194c9c11935fac592f2b91c27bd8f5c56cb283f",
+      "pairs": 12,
+      "pngs": 72,
+      "review": "sol_shaft_rotation_sd_120/review.json",
+      "review_sha256": "c68f22fd3ace9e0a391391a51a4330261600bc10322063cafd8bf8fadd46376e"
+    },
+    {
+      "affected_baseline_pngs": 2,
+      "batch": "shaft_rotation_sd_132",
+      "command_sha256": "99206abb266dc303003e919f02a1dfc2ca354a36e19821f174c81b31f0e82a42",
+      "contacts": 36,
+      "inventory_sha256": "c5e20a77de580f2d43f64640d1fd01a041d4c6b7f633d43745ed03d71227417f",
+      "pairs": 12,
+      "pngs": 72,
+      "review": "root_shaft_rotation_sd_132/review.json",
+      "review_sha256": "a352e07f8d0e9af7d2760f84dd89753631b137ef96fba560a5dc8b286a8663f3"
+    },
+    {
+      "affected_baseline_pngs": 2,
+      "batch": "shaft_rotation_sd_144",
+      "command_sha256": "36b3114f62c2fd3ba474331c3ddce24e58f60779d02ce55474d652dc3e2fe6b1",
+      "contacts": 36,
+      "inventory_sha256": "152450a9efa2820c0cf8bf1cf2e9bce459b4df50a190919ff53cd61a1fa05ae9",
+      "pairs": 12,
+      "pngs": 72,
+      "review": "astra_shaft_rotation_sd_144/review.json",
+      "review_sha256": "79f94cc6ec094131020e5632bccae2806d867d0432242d804e84750883af7755"
+    },
+    {
+      "affected_baseline_pngs": 0,
+      "batch": "shaft_rotation_sd_156",
+      "command_sha256": "4b516d2af3bc175dcb0888b44b24973a94c2b66240e943c082727b3667ef3997",
+      "contacts": 24,
+      "inventory_sha256": "35330683a3396832156e26f10636f683521683f5a26e403380a189a7044cdb26",
+      "pairs": 8,
+      "pngs": 48,
+      "review": "sol_shaft_rotation_sd_156/review.json",
+      "review_sha256": "ebe0c80efd7565c7e21b29c68267222489696449dd30a9de0b7216cc1af81f17"
+    }
+  ],
+  "child_clearance_receipt_sha256": "decbca752833ccd2a2ac959ecbfdfa9f964301fc66812248d4382c0357177052",
+  "child_native_review_sha256": "60b6b1506abde49dad348ce6c7a502f2032c61a4d11b227e88c55edcf0621a1c",
+  "child_publication_receipt_sha256": "cb9501c25bb8dfbbc1741705a25181a024fb9ebc9f8c6dfdb08e31948d375c66",
+  "child_reconciliation_receipt_sha256": "4362a99963fbf8c35b5fd3988c8215856b9b9c7976b1376c3b3386b8f80a8918",
+  "child_reviews": [
+    {
+      "path": "root_layout_child_curve_review.json",
+      "pngs": 19,
+      "sha256": "c51f945515d78d08b5b8cfec5726505372448bf8d44126b45ab6c084c3f4bbb6"
+    },
+    {
+      "path": "astra_layout_child_019_033/review.json",
+      "pngs": 15,
+      "sha256": "d885fd67ba73bf003d6a7e93620aa55d9199c4660a24c5b4021b5f377639bde8"
+    },
+    {
+      "path": "sol_layout_child_shaft_34_48_review.json",
+      "pngs": 15,
+      "sha256": "8bd8c439be0b9d61fa39f3db0fb8a0885145a986fd500921f7330ada616517db"
+    }
+  ],
+  "child_strict_loader_receipt_sha256": "d7c60ea4c99f5e0d9dfc9225788adb0531cb77080fd62a26478a331422b01ac8",
+  "counts": {
+    "baseline_contacts_reviewed": 1152,
+    "baseline_pngs_overridden_by_measured_layout_scope": 49,
+    "baseline_pngs_reviewed": 2304,
+    "child_replacement_pngs_accepted": 49,
+    "final_accepted_pngs": 2304,
+    "pairs": 384,
+    "qualified_graphics_batches": 33,
+    "unchanged_baseline_pngs_accepted": 2255
+  },
+  "limitations": [
+    "Baseline visual acceptance is overridden for exactly 49 measured density PNG defects; use reviewed child replacements.",
+    "Native PDF/SVG review is separately scoped to the 49 changed pairs; no simulation rerun or numerical recomputation is claimed."
+  ],
+  "schema": "shot-pattern-final-png-coverage-v1",
+  "scope_sha256": "7599cc36a0008857c5579502512510f8521f8452f53b88b771e3d5db3462caba",
+  "status": "accepted_child_pngs_with_scoped_native_review"
+}

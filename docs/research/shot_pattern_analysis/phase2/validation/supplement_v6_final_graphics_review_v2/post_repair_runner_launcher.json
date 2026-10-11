@@ -1,0 +1,14 @@
+{
+  "pid": 1591157,
+  "start_ticks": 54830630,
+  "started_utc": "2026-10-11T00:43:20.004572+00:00",
+  "command": [
+    "/tmp/shot-pattern-validation-venv-20261009/bin/python",
+    "-u",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/run_post_repair_batches.py"
+  ],
+  "cwd": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift",
+  "script_sha256": "c1d41f28249eb8c5769ecc92c9d4c6fb30fa5210bacd26d02d7fab43769b1014",
+  "log": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/post_repair_runner.log",
+  "exit_receipt": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/post_repair_runner_exit.json"
+}

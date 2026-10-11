@@ -1,0 +1,53 @@
+{
+  "schema": "shot-pattern-layout-child-colorbar-crops/1",
+  "entries": [
+    {
+      "index": 19,
+      "reviewer": "astra_shaft",
+      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/19_astra_shaft_colorbar_native.jpg",
+      "sha256": "414eda97568d178188ef1c698a9741fe69fad987e05b768715e1d9ebe6a4de79",
+      "baseline_png_sha256": "7c15093818735f1ffa91ae4f81248411018f7f6f8b4af70714af4d559b1cb085",
+      "child_png_sha256": "04e52993c0dbd819b505eea1560b0e29a2f81f19d59f77f59445aad136288cc3"
+    },
+    {
+      "index": 20,
+      "reviewer": "astra_shaft",
+      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/20_astra_shaft_colorbar_native.jpg",
+      "sha256": "67f71babef86ca6ccd9bffda97bd722cc25aea18c8287e6aba28dc8c648d8b2a",
+      "baseline_png_sha256": "1a27192a67da99a10fc482eff1286f3915facf6d48e39eea3ebbc0e7540ecda4",
+      "child_png_sha256": "db8eecf3dbf71908d903cab977710a95a0746a4bd6e5ab789a9552c3557d06a6"
+    },
+    {
+      "index": 39,
+      "reviewer": "sol_shaft",
+      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/39_sol_shaft_colorbar_native.jpg",
+      "sha256": "a8610c23adf333b756a79071056cf9155fb8304e655437290b3f7dc9535db775",
+      "baseline_png_sha256": "232d55f4c56153e4fa554cf41d90108284e4b6d97f51a380386d8a67a23b0bcf",
+      "child_png_sha256": "f895ffaca122243a5486dd6456d6ab65eac247f2cb66d65df18e255c8b220ac3"
+    },
+    {
+      "index": 40,
+      "reviewer": "sol_shaft",
+      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/40_sol_shaft_colorbar_native.jpg",
+      "sha256": "0e6aa149df0fa858971b49560276fd28876521fad384bd083fc09e5fb089addc",
+      "baseline_png_sha256": "3204e6b56927104ed8a875b6f10354119816c92d7bf7e6fb90a7b701d0f6dadb",
+      "child_png_sha256": "fae3c3dbba1af88589a94f10da6c6ed830597ff82f07544d36391e59c36f3c57"
+    },
+    {
+      "index": 43,
+      "reviewer": "sol_shaft",
+      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/43_sol_shaft_colorbar_native.jpg",
+      "sha256": "c0303327c65de8f6be3d1f5dff7c5294cbbd85feb38f01f43e0c7fe5d8b31f4d",
+      "baseline_png_sha256": "bae09b6620d25c6b881f56dd43b37a3e2ec4a36ffbbfb92578c137c82955c397",
+      "child_png_sha256": "6f579d4fe7f401c4c1ba6cae7d37e30f532c78a7d2da1d797f3ac8bb7bc6e826"
+    },
+    {
+      "index": 44,
+      "reviewer": "sol_shaft",
+      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/44_sol_shaft_colorbar_native.jpg",
+      "sha256": "69a879d7a0d5407c3e6ad2667ae383e7595d2a52f4343a7d799b7404aa012da2",
+      "baseline_png_sha256": "f439dd9d82aead7bac7052a250a06ca4187e2fac0742bd861340bce844daec6d",
+      "child_png_sha256": "4c0bc76e4e2c325a5ef2c86d9ebb605b5ee35c76b9283ab80a64a59af7eec960"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+import json,hashlib
+from pathlib import Path
+P=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2');V=P/'validation/supplement_v6_final_graphics_review_v2';B=V/'shaft_rotation_sd_000';D=V/'astra_shaft_rotation_sd_000';N=P/'supplement_report_v1'
+def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
+def req(ok,msg):
+ if not ok:raise ValueError(msg)
+x=json.loads((B/'batch_inventory.json').read_text());C=V/'shaft_rotation_sd_000_command.json';c=json.loads(C.read_text());req(c['exit_code']==0,'command failed');req(c['batch_inventory_sha256']==sha(B/'batch_inventory.json'),'inventory binding')
+G=V/'all_density_layout_diagnostic.json';req(sha(G)=='25ba5afe85802c43a9118cd0df9bc517d556a46123b5862db5498e1519c05cae','diagnostic binding');g=json.loads(G.read_text());affected={Path(r['matching_png_path']).name for r in g['collisions']}
+records=json.loads((N/'REPORT_SUPPLEMENT_COMPARISONS.json').read_text())['comparisons'];assets={};contacts={};decisions=[];full={(0,'density.png'),(0,'overhead_social.png'),(9,'density.png'),(11,'density_draw_social.png')}
+for s in x['selected']:
+ i=s['index'];req(0<=i<=11 and s['record'] in records,'identity');req(s['record']['comparison_kind']=='shaft_rotation_sd','kind')
+ for f,h in s['asset_sha256'].items():
+  req(sha(N/f)==h,'asset '+f);assets[f]=h
+  if not f.endswith('.png'):continue
+  kind=f.removeprefix('figures/comparisons/'+s['stem']+'_');j=1 if kind in ['density_straight_social.png','density_draw_social.png'] else 2 if kind in ['density_fade_social.png','density.png'] else 3;contact=f'contact_{i:03d}_{j}.jpg';contacts[contact]=sha(B/contact);hold=Path(f).name in affected
+  decisions.append(dict(path=f,sha256=h,index=i,kind=kind,decision='pending_collision_replacement' if hold else 'accepted',contact_inspected=str((B/contact).relative_to(P)),full_size_inspected=(i,kind) in full,sources=s['record']['sources'],target_x_m=s['record']['target_x_m'],common_supported_n=s['record']['common_supported_n'],observation='Known issue #12243 collision; pending replacement.' if hold else 'Explicit varied shaft rotation SD, fixed lean/curve, ordered protocols, targets, all-six support and sampled/raw-flight labels are readable. No clipping or text overlap observed.'))
+for f,h in x['numeric_sha256'].items():req(sha(N/f)==h,'numeric '+f)
+for f,h in assets.items():req(sha(N/f)==h,'post asset '+f)
+for f,h in contacts.items():req(sha(B/f)==h,'post contact '+f)
+req(len(assets)==192 and len(decisions)==72 and len(contacts)==36,'closed scope')
+pending=sum(d['decision']!='accepted' for d in decisions);D.mkdir(exist_ok=True)
+r=dict(accepted=pending==0,scope='Shaft Rotation SD Batch 000 PNG Visual Review Only',full_publication_accepted=False,batch_inventory_sha256=sha(B/'batch_inventory.json'),command_receipt_sha256=sha(C),producer_sources=x['producer_sources'],completion_boundary=x['completion_boundary'],numeric_sha256=x['numeric_sha256'],diagnostic_sha256=sha(G),asset_sha256=assets,contact_sha256=contacts,png_decisions=decisions,accepted_png_count=72-pending,pending_png_count=pending,all_contacts_actually_viewed=True,full_size_png_count=4,prior_visual_reuse_claimed=False,limitations=['PDF/SVG bytes verified; no vector visual acceptance claimed.','Other batches and known issue #12243 remain outside this acceptance.'])
+(D/'review.json').write_text(json.dumps(r,indent=2)+'\n');(D/'executed_verification.py.txt').write_text(Path(__file__).read_text());(D/'REVIEW.md').write_text('# Shaft-Rotation SD Batch 000 Independent Review\n\nViewed all 36 contact sheets (72 PNGs) and four original figures: Driver speed-bound combined-noise academic density and social overhead, PW zero-lean shaft-only academic density, and PW 10-degree shaft-only Draw social density. The 12 ordered records match the numerical ledger. All 192 exported asset hashes, seven numerical hashes and 36 contact hashes were checked; command exit and inventory binding passed.\n\nAll 72 PNGs pass this scoped review. None belongs to the 14-file confirmed glyph-collision list. Shared axes and density scales, all-six conditioning, 600-dot sampling, raw-flight subsampling and lateral magnification are disclosed. Long protocol captions and narrow PW axes are readable. No new clipping or overlap was observed. Vector visual review and whole-publication acceptance remain separate.\n');print(json.dumps(dict(review_sha256=sha(D/'review.json'),accepted=72-pending,pending=pending)))

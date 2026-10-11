@@ -1,0 +1,24 @@
+import json,hashlib
+from pathlib import Path
+P=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2'); V=P/'validation/supplement_v6_final_graphics_review_v2'; B=V/'curve_strength_024';D=V/'astra_curve_strength_024';D.mkdir(exist_ok=True)
+def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
+def req(ok,msg):
+ if not ok:raise ValueError(msg)
+x=json.loads((B/'batch_inventory.json').read_text());numeric=P/'supplement_report_v1';records=json.loads((numeric/'REPORT_SUPPLEMENT_COMPARISONS.json').read_text())['comparisons'];cmd=V/'curve_strength_024_command.json'
+print(cmd.read_text()[:500])
+contacts={};assets={};decisions=[];full={(25,'density.png'),(33,'density.png'),(34,'density.png'),(34,'overhead_social.png'),(27,'density_draw_social.png')}
+for s in x['selected']:
+ req(s['record'] in records,'actual record');i=s['index'];req(24<=i<=35,'scope')
+ for f,h in s['asset_sha256'].items():
+  req(sha(numeric/f)==h,f);assets[f]=h
+  if not f.endswith('.png'):continue
+  kind=f.removeprefix('figures/comparisons/'+s['stem']+'_');c=1 if kind in ['density_straight_social.png','density_draw_social.png'] else 2 if kind in ['density_fade_social.png','density.png'] else 3
+  contact=f'contact_{i:03d}_{c}.jpg';contacts[contact]=sha(B/contact)
+  hold=i in [33,34] and kind=='density.png'
+  decisions.append({'path':f,'sha256':h,'index':i,'kind':kind,'decision':'spacing_review_pending' if hold else 'accepted','contact_inspected':str((B/contact).relative_to(P)),'full_size_inspected':(i,kind) in full,'sources':s['record']['sources'],'target_x_m':s['record']['target_x_m'],'common_supported_n':s['record']['common_supported_n'],'observation':'Legend and first-row titles are closely stacked; glyph overlap not established. Refer to existing geometry-clearance repair review.' if hold else 'Condition, protocol, target, population/subsampling labels and axes are legible; no clipping or overlap observed.'})
+for f,h in x['numeric_sha256'].items():req(sha(numeric/f)==h,'numeric '+f)
+for f,h in assets.items():req(sha(numeric/f)==h,'post '+f)
+req(len(decisions)==72 and len(assets)==192 and len(contacts)==36,'counts')
+result={'accepted':False,'scope':'All 72 PNGs in curve_strength_024; not vector or full-publication acceptance','batch_inventory_sha256':sha(B/'batch_inventory.json'),'command_receipt_sha256':sha(cmd),'producer_sources':x['producer_sources'],'completion_boundary':x['completion_boundary'],'numeric_sha256':x['numeric_sha256'],'asset_sha256':assets,'contact_sha256':contacts,'png_decisions':decisions,'accepted_png_count':70,'spacing_review_pending_png_count':2,'all_contacts_actually_viewed':True,'full_size_png_count':5,'prior_visual_reuse_claimed':False,'limitations':['PDF/SVG bytes rehashed, not visually reviewed here.','Narrow equal-aspect academic panels retain physical scales; detailed shapes are legible in social views.','Two closely stacked legend/title layouts need existing spacing-review disposition; no claim of proven glyph collision.']}
+(D/'review.json').write_text(json.dumps(result,indent=2)+'\n');(D/'executed_verification.py.txt').write_text(Path(__file__).read_text());(D/'REVIEW.md').write_text('# Curve-Strength Batch 024 Independent PNG Review\n\nActually viewed all 36 contact sheets containing 72 PNGs and five full-size figures. Reconciled the 12 exact ordered records with the numerical ledger and rehashed all 192 exported assets and seven numerical files. No source/output was modified.\n\nSeventy PNGs pass this scoped visual review. Academic density figures 33 and 34 (Driver lean 0°, SD 1°, positive/negative covariance) have closely stacked legend and first-row titles. Full-size inspection does not establish glyph collision, but these two remain pending the existing spacing-clearance review. Other titles, metadata, units, support counts, HDR legends, axes and raw-flight qualifications are readable. The complete batch and whole publication are not yet accepted. No prior visual acceptance was needed or inferred from byte matches.\n')
+print(json.dumps({'review_sha256':sha(D/'review.json'),'accepted':70,'pending':2,'assets':192,'contacts':36}))
