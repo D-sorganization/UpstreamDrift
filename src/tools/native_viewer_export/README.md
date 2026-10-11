@@ -50,7 +50,24 @@ python3 -m src.tools.native_viewer_export \
   `--impact-time`, else the bundle provenance `impact_time_s`, else
   `model_appearance.club_face.ball_passage` on the `Clubhead` frame (the
   sub-sample instant of closest approach to address, with the height and
-  ball-radius checks), else the last sample. No ball is drawn.
+  ball-radius checks), else the last sample.
+- The decorative golf ball (GCV-13, #11719; `--no-ball` disables it) is drawn at
+  address and hidden after impact, visual only (never in a dynamics model). One
+  placement per swing (`ball.py`, `BallPlacement`) is shared by every engine:
+  the bundle's recorded `ball_impact().ball_centre_m` (source
+  `bundle:ball_impact`, the ball every replay strikes), else the address
+  geometry (MuJoCo FK of the first state, face centre and normal through
+  `model_appearance.ball.ball_position_at_address`, source `address_geometry`).
+  When neither exists (no club, ungrounded first state, no MuJoCo) no ball is
+  drawn and the reason is logged and returned in `ExportResult.ball`
+  (`{"unavailable": reason}`, printed by the CLI); a placement is recorded with
+  its position, source and `hide_after_s`. MuJoCo and MyoSuite append a render
+  scene sphere per visible frame; Drake and Pinocchio MeshCat hold one `/ball`
+  sphere and toggle `visible`. **OpenSim limitation:** the simbody visualizer
+  caches fixed geometry, and toggling Appearance visibility or opacity after
+  `initSystem` does not redraw (verified by a smoke render), so the OpenSim ball
+  stays visible after impact; this is recorded as `limitation` in the result.
+  Post-impact flight is a later slice.
 - Force arrows use the `body_weight` scale mode when the model mass is known:
   one body weight is 0.5 m and the ceiling is 3 m (`default_glyph_style`).
 - `--speeds 1,0.5,0.25` (default: full, half, quarter) writes one clip set per playback speed, named
