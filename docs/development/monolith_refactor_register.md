@@ -40,10 +40,10 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1164 | `src/shared/python/physics/terrain_representation.py` |
 | 1163 | `src/launchers/settings_dialog.py` |
 | 1158 | `src/engines/simscape/adapter.py` |
-| 1154 | `src/engines/physics_engines/myosuite/python/native_direct_model_replay.py` |
 | 1153 | `src/tools/motion_matching/gui.py` |
 | 1152 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_widget.py` |
 | 1150 | `src/shared/python/chat/_chat_dock_widget_qt.py` |
+| 1146 | `src/engines/physics_engines/myosuite/python/native_direct_model_replay.py` |
 | 1146 | `src/tools/model_explorer/model_loader_dialog.py` |
 | 1139 | `src/api/routes/launch_monitor_analytics.py` |
 | 1134 | `src/shared/python/shadow_tracker/segmentation.py` |
@@ -146,6 +146,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 879 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/2D GUI/visualization/SkeletonPlotter.m` |
 | 878 | `src/launchers/launcher_layout_manager.py` |
 | 877 | `src/bunkershot3d/io/schema.py` |
+| 876 | `src/engines/physics_engines/opensim/python/tour_matching/native_moco_runner.py` |
 | 875 | `src/shared/python/sidekick/process_calculators/pressure_drop_calculator/pressure_drop_interface.py` |
 | 874 | `src/shared/python/tour_baselines/qualification.py` |
 | 872 | `src/shared/python/pendulum_simulator/gui/base_pendulum_widget.py` |
@@ -157,7 +158,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 855 | `src/tools/matched_swing_browser/gui.py` |
 | 853 | `src/shared/python/ai/gui/assistant_panel.py` |
 | 853 | `src/shared/python/sidekick/process_calculators/constants.py` |
-| 850 | `src/engines/physics_engines/opensim/python/tour_matching/native_moco_runner.py` |
 | 849 | `src/tools/training_controller/gui.py` |
 | 848 | `src/shared/python/motion_matching/club_only/reproduction.py` |
 | 846 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_render.m` |
