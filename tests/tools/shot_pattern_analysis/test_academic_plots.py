@@ -5,6 +5,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+from src.tools.shot_pattern_analysis.academic_plots import FigureOptions
+
 pytestmark = pytest.mark.unit
 
 
@@ -142,8 +144,7 @@ def test_academic_dispersion_figure_exports_all_formats_with_scenario_labels(
             },
         },
         target_point_m=(0.0, 0.0),
-        bins=16,
-        dpi=96,
+        options=FigureOptions(bins=16, dpi=96),
     )
 
     assert set(outputs) == {"png", "pdf", "svg"}
@@ -201,8 +202,7 @@ def test_density_metadata_caption_does_not_overlap_scenario(
         scenario=scenario,
         metadata=metadata,
         target_point_m=(1.0, 0.0),
-        bins=8,
-        dpi=96,
+        options=FigureOptions(bins=8, dpi=96),
     )
 
     figure = captured["figure"]
@@ -249,7 +249,7 @@ def test_overhead_figure_uses_raw_trajectories_and_exports_all_formats(
                 "Fade": 998,
             },
         },
-        dpi=96,
+        options=FigureOptions(dpi=96),
     )
 
     assert set(outputs) == {"png", "pdf", "svg"}
@@ -284,8 +284,7 @@ def test_density_overlay_is_a_disclosed_deterministic_subset(
         scenario="Synthetic Plot Subset",
         metadata={},
         target_point_m=(500.0, 500.0),
-        bins=32,
-        dpi=96,
+        options=FigureOptions(bins=32, dpi=96),
     )
     figure = captured["figure"]
     endpoint_axis = figure.axes[1]
@@ -314,8 +313,7 @@ def test_density_marginals_use_common_probability_scales(tmp_path, monkeypatch) 
         scenario="Synthetic Marginal Scale",
         metadata={},
         target_point_m=(0.0, 0.0),
-        bins=32,
-        dpi=96,
+        options=FigureOptions(bins=32, dpi=96),
     )
     axes = captured["figure"].axes
     assert axes[0].get_ylim() == axes[3].get_ylim()
@@ -341,7 +339,7 @@ def test_overhead_discloses_actual_axis_magnification_and_legible_paths(
         target_x_m=180.0,
         scenario="Synthetic Axis Contract",
         metadata={},
-        dpi=96,
+        options=FigureOptions(dpi=96),
     )
     figure = captured["figure"]
     figure.canvas.draw()
@@ -388,8 +386,7 @@ def test_social_presentation_keeps_data_and_uses_readable_16_by_9_layout(
         scenario="Lean 0° • Curve ×1",
         metadata=social_metadata,
         target_point_m=(180.0, 0.0),
-        presentation="social",
-        dpi=96,
+        options=FigureOptions(presentation="social", dpi=96),
     )
     write_overhead(
         {
@@ -400,8 +397,7 @@ def test_social_presentation_keeps_data_and_uses_readable_16_by_9_layout(
         target_x_m=180.0,
         scenario="Lean 0° • Curve ×1",
         metadata=social_metadata,
-        presentation="social",
-        dpi=96,
+        options=FigureOptions(presentation="social", dpi=96),
     )
     write_dispersion(
         endpoints,
@@ -409,7 +405,7 @@ def test_social_presentation_keeps_data_and_uses_readable_16_by_9_layout(
         scenario="Synthetic Academic Control",
         metadata=social_metadata,
         target_point_m=(180.0, 0.0),
-        dpi=96,
+        options=FigureOptions(dpi=96),
     )
     assert len(captured) == 3
     overhead_w, overhead_h = captured[1].get_size_inches()
@@ -462,7 +458,7 @@ def test_overhead_pilot_footer_remains_inside_figure_bounds(
         target_x_m=195.0,
         scenario="Synthetic Layout Pilot",
         metadata={"club": "driver", "shaft_rotation_sd_deg": 1.0},
-        dpi=96,
+        options=FigureOptions(dpi=96),
     )
 
     _assert_pilot_footer_is_inside_canvas(captured["figure"])
@@ -520,8 +516,7 @@ def test_density_rightmost_downrange_tick_does_not_overlap_marginal_zero_tick(
             "total_shots_by_pattern": {"Straight": 100, "Draw": 100, "Fade": 100},
         },
         target_point_m=(180.0, 0.0),
-        bins=16,
-        dpi=96,
+        options=FigureOptions(bins=16, dpi=96),
     )
     figure = captured["figure"]
     from matplotlib.backends.backend_agg import FigureCanvasAgg
@@ -618,8 +613,7 @@ def test_social_density_phone_preview_geometry_and_typography(
         scenario=scenario,
         metadata=metadata,
         target_point_m=(180.0, 0.0),
-        presentation="social",
-        dpi=96,
+        options=FigureOptions(presentation="social", dpi=96),
     )
     figure = captured["figure"]
     from matplotlib.backends.backend_agg import FigureCanvasAgg

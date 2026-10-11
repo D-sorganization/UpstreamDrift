@@ -8,7 +8,7 @@ from pathlib import Path
 
 import numpy as np
 
-from .academic_plots import write_academic_dispersion_figure
+from .academic_plots import FigureOptions, write_academic_dispersion_figure
 
 _PATTERNS = ("Straight", "Draw", "Fade")
 
@@ -157,7 +157,7 @@ def write_pair_social_density(
             scenario=f"{pattern}: {scenario}",
             metadata=pair_metadata,
             target_point_m=target_point_m,
-            presentation="social",
+            options=FigureOptions(presentation="social"),
         )
         outputs.update(
             {f"{pattern.lower()}_{kind}": path for kind, path in paths.items()}

@@ -1444,33 +1444,6 @@
       "expires_on": "2026-12-31"
     },
     {
-      "path": "src/tools/shot_pattern_analysis/academic_plots.py",
-      "symbol": "write_academic_dispersion_figure",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - write_academic_dispersion_figure exceeds function-lines budget (425 > 100).",
-      "expires_on": "2026-12-31"
-    },
-    {
-      "path": "src/tools/shot_pattern_analysis/academic_plots.py",
-      "symbol": "write_academic_dispersion_figure",
-      "rule": "parameters",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - write_academic_dispersion_figure exceeds parameters budget (9 > 8).",
-      "expires_on": "2026-12-31"
-    },
-    {
-      "path": "src/tools/shot_pattern_analysis/academic_plots.py",
-      "symbol": "write_overhead_trajectory_figure",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - write_overhead_trajectory_figure exceeds function-lines budget (171 > 100).",
-      "expires_on": "2026-12-31"
-    },
-    {
       "path": "src/tools/shot_pattern_analysis/core.py",
       "symbol": "run_analysis",
       "rule": "function-lines",

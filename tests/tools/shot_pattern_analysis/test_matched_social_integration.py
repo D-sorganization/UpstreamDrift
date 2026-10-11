@@ -174,7 +174,7 @@ def test_render_cell_figures_exports_dedicated_canonical_social_assets(
         assert "valid_shots_by_pattern" not in kwargs["metadata"]
         assert "total_shots_by_pattern" not in kwargs["metadata"]
         assert kwargs["metadata"]["figure_scope"] == "Saved Raw Flight Samples"
-        if kwargs["presentation"] == "social":
+        if kwargs["options"].presentation == "social":
             assert (
                 kwargs["metadata"]["Population"]
                 == "Saved Raw Trajectories; Not Paired by Shot Index"
@@ -189,7 +189,7 @@ def test_render_cell_figures_exports_dedicated_canonical_social_assets(
     social_call = next(
         kwargs
         for _, kwargs in calls["dispersion"]
-        if kwargs["presentation"] == "social"
+        if kwargs["options"].presentation == "social"
     )
     assert "Path SD 0.5°" in social_call["metadata"]["Delivery Noise"]
     assert "Speed SD 2 mph" in social_call["metadata"]["Delivery Noise"]
@@ -201,7 +201,7 @@ def test_render_cell_figures_exports_dedicated_canonical_social_assets(
     assert "Fixed-Target Control" in social_call["metadata"]["Matched Target"]
 
     overhead_social_call = next(
-        kwargs for _, kwargs in calls["overhead"] if kwargs["presentation"] == "social"
+        kwargs for _, kwargs in calls["overhead"] if kwargs["options"].presentation == "social"
     )
     assert "Protocol" in overhead_social_call["metadata"]
     assert overhead_social_call["metadata"]["Protocol"] == ref["source_protocol"]
@@ -445,7 +445,7 @@ def test_render_cell_figures_social_metadata_distinguishes_within_lean_and_contr
     captured_metadata = []
 
     def capture_dispersion(arrays, stem, **kwargs):
-        if kwargs.get("presentation") == "social":
+        if kwargs["options"].presentation == "social":
             captured_metadata.append(kwargs["metadata"])
         out = {}
         for ext in ("png", "pdf", "svg"):

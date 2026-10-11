@@ -36,8 +36,7 @@ def test_both_renderers_preserve_validation_order(
     api = _plots()
     options = {
         "scenario": scenario,
-        "dpi": dpi,
-        "presentation": presentation,
+        "options": api.FigureOptions(dpi=dpi, presentation=presentation),
         "metadata": {},
     }
     for render, extra in [

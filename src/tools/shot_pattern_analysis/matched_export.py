@@ -18,6 +18,7 @@ from tempfile import TemporaryDirectory
 from src.shared.python.physics.incremental_contact import contact_backend_info
 
 from .academic_plots import (
+    FigureOptions,
     write_academic_dispersion_figure,
     write_overhead_trajectory_figure,
 )
@@ -156,7 +157,7 @@ def _write_figures(
         scenario=scenario,
         metadata=metadata,
         target_point_m=(result.target_x_m, 0),
-        bins=48,
+        options=FigureOptions(bins=48),
     )
     _check_cancelled(cancelled)
     overhead = write_overhead_trajectory_figure(

@@ -6,6 +6,8 @@ from typing import Any
 import numpy as np
 import pytest
 
+from src.tools.shot_pattern_analysis.academic_plots import FigureOptions
+
 pytestmark = pytest.mark.unit
 
 
@@ -69,8 +71,7 @@ def test_actual_social_fonts_and_axis_legend_clearance(
             "total_shots_by_pattern": dict.fromkeys(names, 150),
         },
         target_point_m=(180, 0),
-        presentation="social",
-        dpi=96,
+        options=FigureOptions(presentation="social", dpi=96),
     )
     figure = captured[0]
     canvas_type(figure)
@@ -147,8 +148,7 @@ def test_main_tick_neighbors_keep_readable_gutter(
         scenario="Main Tick Review",
         metadata={"social_club": "7-Iron"},
         target_point_m=(center, 0),
-        presentation=presentation,
-        dpi=96,
+        options=FigureOptions(presentation=presentation, dpi=96),
     )
     figure = captured[0]
     canvas_type(figure)

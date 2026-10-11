@@ -5,6 +5,8 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+from src.tools.shot_pattern_analysis.academic_plots import FigureOptions
+
 pytestmark = pytest.mark.unit
 
 
@@ -37,8 +39,7 @@ def test_neighboring_marginal_tick_labels_have_readable_gutter(
         scenario="Marginal Tick Readability Review",
         metadata={"social_club": "Driver"},
         target_point_m=(180, 0),
-        presentation=presentation,
-        dpi=180,
+        options=FigureOptions(presentation=presentation, dpi=180),
     )
     estimate = academic_plots.shared_histogram_density(
         points, bins=64, target_point_m=(180, 0), region_masses=(0.50, 0.80, 0.95)
@@ -126,8 +127,7 @@ def test_main_to_marginal_tick_boundary_has_four_point_gutter(
         scenario="Main–Marginal Boundary Review",
         metadata={"social_club": "Driver"},
         target_point_m=(108, 0),
-        presentation=presentation,
-        dpi=180,
+        options=FigureOptions(presentation=presentation, dpi=180),
     )
     estimate = academic_plots.shared_histogram_density(
         points, bins=64, target_point_m=(108, 0), region_masses=(0.50, 0.80, 0.95)

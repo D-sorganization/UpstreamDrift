@@ -49,7 +49,7 @@ def test_social_pairs_reuse_canonical_density_without_changing_coordinates(
             np.testing.assert_array_equal(
                 plotted[condition], points[f"{pattern} · {condition}"]
             )
-        assert kwargs["presentation"] == "social"
+        assert kwargs["options"].presentation == "social"
         assert kwargs["target_point_m"] == (180.0, 0.0)
         assert pattern in kwargs["scenario"]
         metadata = kwargs["metadata"]
