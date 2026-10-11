@@ -83,6 +83,15 @@ class TestCrossEngineEquivalenceGating:
         assert "github.sha" not in group
         assert "format('{0}-{1}', github.event_name, github.ref)" in group
 
+    def test_workflow_lint_allows_conditional_cancel(self) -> None:
+        # The workflow-file lint greps for a literal ``cancel-in-progress:
+        # true``, so the conditional form above must be on its exception list.
+        lint = (WORKFLOWS / "lint-workflow-files.yml").read_text(encoding="utf-8")
+        allowlist = next(
+            line for line in lint.splitlines() if "nightly-publish.yml" in line
+        )
+        assert self.NAME in allowlist
+
     def test_dispatcher_exposes_heavy_flag(self) -> None:
         dispatcher = _load(self.NAME)["jobs"]["pick-runner"]
         _only_full_label_events_start(dispatcher["if"])
