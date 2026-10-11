@@ -141,7 +141,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `video_timing` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 36 | 0 | 0 |
-| **Total** | **399** | **274** | **121** | **1613** | **808** | **673** |
+| **Total** | **399** | **274** | **121** | **1614** | **808** | **673** |
 
 ## Diverged Files by Package
 

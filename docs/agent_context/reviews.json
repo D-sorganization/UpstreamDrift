@@ -73,7 +73,7 @@
       "rationale": "Reviewed canonical pose ownership and MuJoCo adapter protocol, explicit coordinate conventions and capability limits. Existing test_mujoco_protocol.py passed in the 41-test boundary run on 2026-09-09; no scientific validity assertion is added."
     },
     "project-task-native-replay": {
-      "fingerprint": "7ebaa8394d36173a32e41ffe404cff03493fb98b6f41208e156a5faae19b1453",
+      "fingerprint": "79cb89b6ecb2fcac03fd078a547326d23005be1524d13a02611216bacd051410",
       "inputs": {
         "docs/agent_context/contracts/project-task-native-replay.md": "754359ce3d2ccfe8d80a31a1cd8867f151dc5bd63bf0023231a2cc797fc3f254",
         "src/engines/myosuite_project_command_solve.py": "a8b3168dfb20b8f94322d2b8dc1e2b8570d4e11b3d4222f8b1300e71711cd2e2",
@@ -86,7 +86,7 @@
         "src/engines/native_replay_contracts.py": "df6428449120ae83e03cc03bc40be985f4d60419bee28d9f888530da3c5099ff",
         "src/engines/physics_engines/myosuite/python/native_direct_model_replay.py": "3a7be5ef4365714a5baa74cf1b0a9ace2203ba07b32bcd6c5a63be82e1aa80f7",
         "src/engines/project_task_replay_artifacts.py": "8ea937a502755fb456815c212bf5aa0c7fa4987be3eba570d3faf87d0b5449b2",
-        "src/shared/python/_seam_redirect.py": "3446b274ae8c8ae5407c2305a9e34d31eb4824bfed362b5661dd5bc829c41448",
+        "src/shared/python/_seam_redirect.py": "9b1bbc9aea81bd84a5d35583767bba2913ef3a4ad32f8411843a8a3483f82f3f",
         "src/shared/python/motion_matching/bounded_candidate_search.py": "b1f5c83ca8bcc686d68c76c12a759dbba333efdba8422028646ee40c789dae3d",
         "tests/unit/engines/myosuite/test_native_model_resource_closure.py": "662eb43722a90a9c77fe01128ca8d22483259f6492e8d36d7b22c65460abbbef",
         "tests/unit/engines/myosuite/test_prediction_integrity_boundaries.py": "96bbbbb810cfeae96dee33a88771cd6daf87db4677845793bbae279b3a1bf3e5",
@@ -100,7 +100,7 @@
         "tests/unit/motion_matching/test_bounded_candidate_search.py": "5a256b469fe1f4fdd502626f125cd50eb64a62b1ec304488eda64335ca72ee4d",
         "tests/unit/repo_hygiene/test_pinned_tools_package_loader.py": "98bf31807478472f8e15310c73d1e92552feb74a84988e32df905a80019c64c9"
       },
-      "rationale": "Reviewed the shared canonical SHA-256 validator and its MyoSuite replay resource and metadata consumers after the helper extraction. The helper accepts only lowercase 64-character hexadecimal strings; existing source-closure digest comparisons and failure paths remain unchanged. Tests: tests/unit/engines/test_native_replay_contracts.py and tests/unit/engines/myosuite/test_native_direct_model_replay.py (7 passed, 25 native/provider cases skipped in this system Python)."
+      "rationale": "PR #12268: retargeted movement-optimizer to pinned Tools package via _seam_redirect.py"
     }
   },
   "version": 1
