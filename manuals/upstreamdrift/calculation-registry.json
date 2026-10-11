@@ -338,6 +338,11 @@
       "id": "UP-D1-generic-shoulder-triangle-lamina-inventory",
       "owner": "UpstreamDrift issue #12211",
       "resolution": "Inventory provisional chapter54 and generic_shoulder_lamina.py: exact final 557-muscle source and retained CEINMS right mesh SHA-256s, explicitly hypothetical right identity placement and derived left local-z vertex reflection, a Tools-owned unsigned triangle-multiset fixed-mass lamina law, four COM/full-tensor replacements and explicit visual asset references only. Actual OpenSim4.6 reload of the separately identified candidate passes the 40-body source/native principal-inertia gate; sampled all-body transforms and QErr/UErr match the unmodified source at three declared poses. The original source remains physically rejected for four shoulder bodies; source anatomy, tissue ownership, passive physiology, native force/work chart, contact/grip, head/marker mapping, full-horizon replay, all17/six-engine parity and publication remain blocked."
+    },
+    {
+      "id": "UP-D1-native-mixed-marker-observation-inventory",
+      "owner": "UpstreamDrift issue #12195",
+      "resolution": "Inventory Chapter 49 and native_mixed_marker_observation.py: source-bound fresh constrained mixed replay, complete named-state native marker FK, immutable masked observation alignment and scorer diagnostics. The native and portable contract tests establish software behavior only; marker registration, physical support/grip, physiology, capture matching, all-model parity and authenticated production execution remain unqualified."
     }
   ],
   "inventory_commit": null,
