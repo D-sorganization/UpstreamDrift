@@ -62,12 +62,12 @@
   "affine_checks": "Quarto1.8.26 render; title case672 sources; render coverage253 URLs; article links/full site gate; 9 assets match; headless browser review; canonical consistency tests pass.",
   "local_delivery": "fd5506da87f5e619a550fb8cc871a0e8195b6fb98965a99809e3238a0f01508b",
   "architecture_issue": 12302,
-  "integration_work": "Archive restoration refactor committed4831146c7d; final footer helper uses PairSocialContext and all9footer/archive tests pass, including native9asset+3preview rendering.",
+  "integration_work": "Archive restoration refactor committed4831146c7d; footer helper and last architecture exemption removal committed8877a5fd54. Root8fast tests and1explicit slow native writer test pass.",
   "focused_dry": "49 committed shot-pattern/kernel source files at19b7d6d: zero findings. Not a full repository gate.",
   "architecture": "All67new #12278 architecture exceptions removed; both new document-size waivers removed. Changed-file architecture passes; no new waivers or relaxed limits.",
   "performance": "Renderer vectorization committed e8a81e53fd;26 tests pass with original1ms limit unchanged (#12303).",
   "affinedrift_commit": "0e33178d",
-  "integration_head": "14301b569b12187bbe74ead8e55ec4c9b98451ad",
+  "integration_head": "8877a5fd54",
   "upstream_merged_head": "aecd90783beab50cc091def25f13bbfdaeeb7834",
   "integration_report": "Fresh local Tectonic compile from integration sources plus14 tracked hash-verified figures succeeded:39 pages, no warnings; /tmp/shot-integration-report/shot_pattern_analysis.pdf SHA256 f589bbb54253666fbda5daaca3f651952a78db2665e660fea7b69da486f9799b. Desktop accepted version unchanged.",
   "post_merge_checks": "16 statistics/restoration/handoff checks;13 approach-scoring tests;50 adapter tests plus9 final checks;22 presentation/replay/layout tests;77 GUI-focused tests;20 native rasterization tests all passed. Relevant Ruff and rasterizer mypy pass. Full unchanged repository gates remain pending.",
@@ -102,6 +102,6 @@
     "default_timeout_seconds": 60,
     "new_slow_test_watchdog_seconds": 240,
     "evidence": "https://github.com/D-sorganization/UpstreamDrift/issues/12309#issuecomment-6114197016",
-    "note": "Final root suite exited0 with the committed slow-test watchdog; see footer_native_tests.txt. Ruff and scoped mypy pass."
+    "note": "Final root runs exited0:8fast tests (footer_fast_tests.txt) and explicit -m slow native integration test (footer_native_explicit.txt), verifying9assets and3previews. Ruff and scoped mypy pass."
   }
 }
