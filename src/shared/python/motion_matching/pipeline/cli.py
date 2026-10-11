@@ -33,6 +33,7 @@ from src.shared.python.motion_matching.hip_calibration import (
 from src.shared.python.motion_matching.pipeline.address import (
     AddressStageInputs,
     HipCalibrationOptions,
+    add_hip_zero_twist_argument,
     calibrated_address_summary,
     prepare_hip_spec,
     scaled_offsets,
@@ -406,6 +407,7 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     add_turn_split_arguments(parser)
+    add_hip_zero_twist_argument(parser)
     return parser
 
 
@@ -568,6 +570,7 @@ def _calibrate_and_scale(
             recalibrate_upper=args.recalibrate_upper,
             foot_half_width_m=getattr(args, "foot_half_width_m", None),
             torsional_patch_m=getattr(args, "torsional_patch_m", None),
+            hip_zero_twist=getattr(args, "hip_zero_twist", "capture"),
         ),
     )
     hipcal_path.write_text(

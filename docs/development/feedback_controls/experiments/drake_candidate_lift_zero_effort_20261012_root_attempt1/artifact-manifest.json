@@ -1,0 +1,35 @@
+{
+  "artifacts": [
+    {
+      "path": "drake-zero-effort.json",
+      "sha256": "53fc551702d092923fe79647f2a17692f6b8580716bbe087e5b8d9183756f024",
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\drake_v1_zero_effort_root_attempt1\\drake-zero-effort-root-attempt1.json",
+      "source_sha256": "53fc551702d092923fe79647f2a17692f6b8580716bbe087e5b8d9183756f024"
+    },
+    {
+      "path": "drake-zero-effort.meta.txt",
+      "sha256": "59fa02591fa49cdb280a541e20f5e86dc8029837c34fe32eb06be567d61d5cb7",
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\drake_v1_zero_effort_root_attempt1\\drake-zero-effort-root-attempt1.meta.txt",
+      "source_sha256": "59fa02591fa49cdb280a541e20f5e86dc8029837c34fe32eb06be567d61d5cb7"
+    },
+    {
+      "path": "drake-zero-effort.log",
+      "sha256": "cc1cfa852a7019971d20890d2e4f65482c47f2ccc77cea05bec4549a939ad7ee",
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\drake_v1_zero_effort_root_attempt1\\drake-zero-effort-root-attempt1.log",
+      "source_sha256": "cc1cfa852a7019971d20890d2e4f65482c47f2ccc77cea05bec4549a939ad7ee"
+    },
+    {
+      "path": "observers/drake_v1_candidate_lift_zero_effort_20261012.py.snapshot",
+      "sha256": "54e57448164542c752b4664c49d56d7681be2964ca55b55ec7ab37f5fe88b3ef",
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\drake_v1_candidate_lift_zero_effort_20261012.py",
+      "source_sha256": "54e57448164542c752b4664c49d56d7681be2964ca55b55ec7ab37f5fe88b3ef"
+    },
+    {
+      "path": "observers/test_drake_v1_candidate_lift_zero_effort_20261012.py.snapshot",
+      "sha256": "6b33f36da083ec603c8cc7e68560ca6a0ef95f644eb6d203ac49dc649b9ca9c6",
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\test_drake_v1_candidate_lift_zero_effort_20261012.py",
+      "source_sha256": "6b33f36da083ec603c8cc7e68560ca6a0ef95f644eb6d203ac49dc649b9ca9c6"
+    }
+  ],
+  "schema_version": "manufactured-native-diagnostic-artifact-manifest/v1"
+}

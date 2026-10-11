@@ -1818,37 +1818,37 @@
     "Marker_2:2:1": {
       "body": "Clubhead",
       "offset_m": [
-        -0.005013763277325188, -0.04723804658646823, -0.020422312849740262
+        0.0014236261251189483, -0.07311493220309755, -0.008604687430533628
       ]
     },
     "Marker_2:2:2": {
       "body": "Clubhead",
       "offset_m": [
-        0.039764746459329495, 0.033540927867569084, -0.021534496183147525
+        0.04934388630384107, -0.010268455189889931, -0.05649533212282851
       ]
     },
     "Marker_2:2:3": {
       "body": "Clubhead",
       "offset_m": [
-        0.05213033572826101, 0.014535978774719217, 0.025324102391800447
+        0.0622866156510181, 0.000823910819803318, -0.007326245237757357
       ]
     },
     "Marker_3:3:1": {
       "body": "Clubhead",
       "offset_m": [
-        -0.6889570460849377, -0.07981249704439086, -0.0394272179523681
+        -0.6836089803832125, -0.07775938316971392, -0.005741693174614749
       ]
     },
     "Marker_3:3:2": {
       "body": "Clubhead",
       "offset_m": [
-        -0.760691797691206, -0.07648040771272901, -0.0032467887386094605
+        -0.754133043520802, -0.050610533528774065, 0.021684806777813963
       ]
     },
     "Marker_3:3:3": {
       "body": "Clubhead",
       "offset_m": [
-        -0.8101014861494318, -0.08113826173535343, -0.035081864800729966
+        -0.8044805309230546, -0.07052190794175632, -0.0015704053780767567
       ]
     },
     "RAnkleOut": {
@@ -1904,7 +1904,7 @@
       "offset_m": [0.02, -0.15, 0.08]
     }
   },
-  "provenance": "anthropometric full-body candidate v1 at 1.710 m, 78.0 kg (build_anthropometric_spec.py; AN-1 #10099); upper body unqualified; marker offsets are anatomical seeds to be calibrated; left hip axes mirrored to the OpenSim convention (OSV-6 #11737); right knee axis mirrored to the OpenSim flexion-negative convention (#12057)",
+  "provenance": "anthropometric full-body candidate v1 at 1.710 m, 78.0 kg (build_anthropometric_spec.py; AN-1 #10099); upper body unqualified; marker offsets are anatomical seeds to be calibrated; left hip axes mirrored to the OpenSim convention (OSV-6 #11737); right knee axis mirrored to the OpenSim flexion-negative convention (#12057); club markers from driver.json (#12210)",
   "qualification": "full-body extension of native-derived geometry; dynamics unqualified",
   "schema_version": "full-body-v1",
   "subject": {

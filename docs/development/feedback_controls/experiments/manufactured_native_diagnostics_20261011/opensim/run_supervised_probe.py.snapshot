@@ -1,0 +1,260 @@
+"""Prepare/run the one-shot read-only property probe under the existing tree guard."""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import importlib.util
+import json
+import os
+import sys
+import tempfile
+from pathlib import Path
+from typing import Any, Callable
+from unittest.mock import patch
+
+HERE = Path(__file__).resolve().parent
+REPO = Path(
+    r"C:\Users\diete\Repositories\Worktrees\feedback-controls-main-integration-12202"
+)
+SUPERVISOR_SOURCE = REPO / "tests" / "opensim" / "native_moco_ladder_harness.py"
+SDK = Path(
+    r"C:\Users\diete\Repositories\.venv-feedback-opensim\Lib\site-packages\opensim"
+)
+INTERPRETER = Path(
+    r"C:\Users\diete\Repositories\.venv-feedback-opensim\Scripts\python.exe"
+)
+SYSTEM_INTERPRETER = Path(
+    r"C:\Users\diete\AppData\Local\Programs\Python\Python313\python.exe"
+)
+SOURCE = Path(
+    r"C:\Users\diete\Repositories\Worktrees\feedback-controls-main-integration-12202\docs\development\feedback_controls\experiments\native_moco_refinement_solve_cecfcd98_root_20261011T080500Z\solution_control_replay_inputs_final\source.osim"
+)
+THREAD_CAPS = {
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "NUMEXPR_NUM_THREADS": "1",
+    "VECLIB_MAXIMUM_THREADS": "1",
+    "BLIS_NUM_THREADS": "1",
+}
+EXPECTED_SOURCE_SHA256 = (
+    "6a098517bdba09b19b3eb99e4da7e795f27d10be8f42c0fca04fee20ce67e143"
+)
+
+
+def sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for block in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def load_fingerprint_paths() -> list[Path]:
+    manifest = json.loads((HERE / "fingerprints.json").read_text(encoding="utf-8"))
+    if manifest["source"]["sha256"] != EXPECTED_SOURCE_SHA256:
+        raise ValueError("prepared source hash in fingerprint manifest is unexpected")
+    return [Path(entry["path"]) for entry in manifest["files"]]
+
+
+def verify_prepared_fingerprints(actual: dict[str, str]) -> None:
+    manifest = json.loads((HERE / "fingerprints.json").read_text(encoding="utf-8"))
+    if manifest["source"]["sha256"] != actual[str(SOURCE)]:
+        raise ValueError("source differs from prepared fingerprint manifest")
+    for entry in manifest["files"]:
+        path = str(Path(entry["path"]))
+        if actual.get(path) != entry["sha256"]:
+            raise ValueError(f"runtime file differs from prepared fingerprint: {path}")
+
+
+def input_paths() -> list[Path]:
+    paths = [
+        SOURCE,
+        HERE / "probe_activation_properties.py",
+        HERE / "test_probe_activation_properties.py",
+        HERE / "run_supervised_probe.py",
+        HERE / "PROTOCOL.md",
+        HERE / "fingerprints.json",
+        INTERPRETER,
+        SYSTEM_INTERPRETER,
+        SUPERVISOR_SOURCE,
+        *load_fingerprint_paths(),
+    ]
+    return list(dict.fromkeys(paths))
+
+
+def require_all_inputs_exist(paths: list[Path]) -> None:
+    missing = [str(path) for path in paths if not path.is_file()]
+    if missing:
+        raise FileNotFoundError(f"Probe preflight inputs missing: {missing}")
+
+
+def build_child_command(output_path: Path) -> tuple[str, ...]:
+    return (
+        str(INTERPRETER),
+        str(HERE / "probe_activation_properties.py"),
+        "--source",
+        str(SOURCE),
+        "--output",
+        str(output_path),
+        "--expected-source-sha256",
+        EXPECTED_SOURCE_SHA256,
+        "--expected-opensim-version",
+        "4.6",
+    )
+
+
+def minimal_environment() -> dict[str, str]:
+    windows_root = os.environ.get("SystemRoot", r"C:\Windows")
+    return {
+        "SystemRoot": windows_root,
+        "WINDIR": windows_root,
+        "TEMP": os.environ.get("TEMP", str(HERE)),
+        "TMP": os.environ.get("TMP", str(HERE)),
+        "PATH": os.pathsep.join(
+            (str(SDK), str(INTERPRETER.parent), str(Path(windows_root) / "System32"))
+        ),
+        "CASADIPATH": str(SDK),
+        "PYTHONHASHSEED": "0",
+        **THREAD_CAPS,
+    }
+
+
+def atomic_json(path: Path, payload: dict[str, Any]) -> None:
+    encoded = json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n"
+    fd, temporary = tempfile.mkstemp(prefix=f".{path.name}.", dir=path.parent)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as stream:
+            stream.write(encoded)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, path)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
+
+
+def load_supervisor() -> Any:
+    if str(REPO) not in sys.path:
+        sys.path.insert(0, str(REPO))
+    spec = importlib.util.spec_from_file_location(
+        "feedback_native_moco_ladder_harness", SUPERVISOR_SOURCE
+    )
+    if spec is None or spec.loader is None:
+        raise RuntimeError("Could not load reviewed process-tree supervisor")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def run_prepared_probe(
+    output_root: Path,
+    supervisor: Callable[..., tuple[int, str, str, int]] | None = None,
+) -> dict[str, Any]:
+    if output_root.exists():
+        raise FileExistsError(
+            f"Refusing to reuse probe output directory: {output_root}"
+        )
+    paths = input_paths()
+    require_all_inputs_exist(paths)
+    before = {str(path): sha256(path) for path in paths}
+    verify_prepared_fingerprints(before)
+    output_root.mkdir(parents=True, exist_ok=False)
+    child_output = output_root / "native-observations.json"
+    receipt_path = output_root / "supervisor-receipt.json"
+    env = minimal_environment()
+    argv = build_child_command(child_output)
+    supervisor = supervisor or load_supervisor()._supervise_process_tree
+    result: dict[str, Any] = {
+        "status": "started",
+        "argv": list(argv),
+        "cwd": str(output_root),
+        "limits": {
+            "wall_seconds": 30,
+            "sampled_rss_threshold_bytes": 1024**3,
+            "thread_caps": THREAD_CAPS,
+        },
+        "environment_keys": sorted(env),
+        "effective_allowlisted_environment": env,
+        "input_sha256_before": before,
+    }
+    try:
+        with patch.dict(os.environ, env, clear=True):
+            return_code, stdout, stderr, peak_rss = supervisor(
+                argv,
+                output_root,
+                30.0,
+                1024**3,
+                env=env,
+            )
+        result.update(
+            {
+                "return_code": return_code,
+                "stdout": stdout,
+                "stderr": stderr,
+                "peak_sampled_tree_rss_bytes": peak_rss,
+            }
+        )
+        result["status"] = "completed" if return_code == 0 else "worker_failed"
+    except BaseException as exc:
+        result.update(
+            {
+                "status": "supervisor_or_worker_error",
+                "error_type": type(exc).__name__,
+                "error": str(exc),
+            }
+        )
+        for attr in ("stdout", "stderr", "stop_reason", "peak_rss"):
+            if hasattr(exc, attr):
+                result[attr] = getattr(exc, attr)
+        result["owned_tree_cleanup_verified"] = False
+        result["owned_tree_cleanup_status"] = "not_verified_after_exception"
+    else:
+        # The shared supervisor returns only after every still-owned child has exited.
+        result["owned_tree_cleanup_verified"] = True
+        result["owned_tree_cleanup_status"] = "verified_by_supervisor_normal_return"
+    after = {str(path): sha256(path) for path in paths}
+    result["input_sha256_after"] = after
+    result["provenance_unchanged"] = before == after
+    result["child_report_exists"] = child_output.is_file()
+    result["child_report_sha256"] = (
+        sha256(child_output) if child_output.is_file() else None
+    )
+    if child_output.is_file():
+        try:
+            child_report = json.loads(child_output.read_text(encoding="utf-8"))
+            result["opensim_version"] = child_report.get("opensim_version")
+            result["native_muscle_count"] = child_report.get("native_muscle_count")
+            result["native_observations"] = child_report.get("native_observations")
+        except (OSError, json.JSONDecodeError):
+            result["child_report_parse_error"] = True
+    if before != after:
+        result["status"] = "provenance_changed"
+    atomic_json(receipt_path, result)
+    return result
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--output-root", required=True, type=Path)
+    args = parser.parse_args()
+    result = run_prepared_probe(args.output_root)
+    print(
+        json.dumps(
+            {
+                "status": result["status"],
+                "receipt": str(args.output_root / "supervisor-receipt.json"),
+                "child_report_sha256": result["child_report_sha256"],
+            },
+            sort_keys=True,
+        )
+    )
+    return (
+        0 if result["status"] == "completed" and result["provenance_unchanged"] else 1
+    )
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

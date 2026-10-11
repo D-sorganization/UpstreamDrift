@@ -1,0 +1,377 @@
+<?xml version='1.0' encoding='utf-8'?>
+<OpenSimDocument Version="40600">
+	<Model name="model">
+		
+		<Ground name="ground">
+			
+			<FrameGeometry name="frame_geometry">
+				
+				<socket_frame>..</socket_frame>
+				
+				<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
+			</FrameGeometry>
+		</Ground>
+		
+		<gravity>0 0 0</gravity>
+		
+		<BodySet name="bodyset">
+			<objects>
+				<Body name="base">
+					
+					<FrameGeometry name="frame_geometry">
+						
+						<socket_frame>..</socket_frame>
+						
+						<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
+					</FrameGeometry>
+					
+					<mass>1</mass>
+					
+					<mass_center>0 0 0</mass_center>
+					
+					<inertia>0.10000000000000001 0.10000000000000001 0.10000000000000001 0 0 0</inertia>
+				</Body>
+				<Body name="follower">
+					
+					<FrameGeometry name="frame_geometry">
+						
+						<socket_frame>..</socket_frame>
+						
+						<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
+					</FrameGeometry>
+					
+					<mass>1</mass>
+					
+					<mass_center>0 0 0</mass_center>
+					
+					<inertia>0.10000000000000001 0.10000000000000001 0.10000000000000001 0 0 0</inertia>
+				</Body>
+				<Body name="anchor">
+					
+					<FrameGeometry name="frame_geometry">
+						
+						<socket_frame>..</socket_frame>
+						
+						<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
+					</FrameGeometry>
+					
+					<mass>1</mass>
+					
+					<mass_center>0 0 0</mass_center>
+					
+					<inertia>0.10000000000000001 0.10000000000000001 0.10000000000000001 0 0 0</inertia>
+				</Body>
+			</objects>
+			<groups />
+		</BodySet>
+		
+		<JointSet name="jointset">
+			<objects>
+				<PinJoint name="base">
+					
+					<socket_parent_frame>ground_offset</socket_parent_frame>
+					
+					<socket_child_frame>base_offset</socket_child_frame>
+					
+					<coordinates>
+						<Coordinate name="q">
+							
+							<default_value>0.29999999999999999</default_value>
+						</Coordinate>
+					</coordinates>
+					
+					<frames>
+						<PhysicalOffsetFrame name="ground_offset">
+							
+							<FrameGeometry name="frame_geometry">
+								
+								<socket_frame>..</socket_frame>
+								
+								<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
+							</FrameGeometry>
+							
+							<socket_parent>/ground</socket_parent>
+							
+							<translation>0 0 0</translation>
+							
+							<orientation>0 0 0</orientation>
+						</PhysicalOffsetFrame>
+						<PhysicalOffsetFrame name="base_offset">
+							
+							<FrameGeometry name="frame_geometry">
+								
+								<socket_frame>..</socket_frame>
+								
+								<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
+							</FrameGeometry>
+							
+							<socket_parent>/bodyset/base</socket_parent>
+							
+							<translation>0 0 0</translation>
+							
+							<orientation>0 0 0</orientation>
+						</PhysicalOffsetFrame>
+					</frames>
+				</PinJoint>
+				<PinJoint name="follower">
+					
+					<socket_parent_frame>ground_offset</socket_parent_frame>
+					
+					<socket_child_frame>follower_offset</socket_child_frame>
+					
+					<coordinates>
+						<Coordinate name="dependent">
+							
+							<default_value>0.59999999999999998</default_value>
+						</Coordinate>
+					</coordinates>
+					
+					<frames>
+						<PhysicalOffsetFrame name="ground_offset">
+							
+							<FrameGeometry name="frame_geometry">
+								
+								<socket_frame>..</socket_frame>
+								
+								<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
+							</FrameGeometry>
+							
+							<socket_parent>/ground</socket_parent>
+							
+							<translation>0 0 0</translation>
+							
+							<orientation>0 0 0</orientation>
+						</PhysicalOffsetFrame>
+						<PhysicalOffsetFrame name="follower_offset">
+							
+							<FrameGeometry name="frame_geometry">
+								
+								<socket_frame>..</socket_frame>
+								
+								<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
+							</FrameGeometry>
+							
+							<socket_parent>/bodyset/follower</socket_parent>
+							
+							<translation>0 0 0</translation>
+							
+							<orientation>0 0 0</orientation>
+						</PhysicalOffsetFrame>
+					</frames>
+				</PinJoint>
+				<PinJoint name="anchor">
+					
+					<socket_parent_frame>ground_offset</socket_parent_frame>
+					
+					<socket_child_frame>anchor_offset</socket_child_frame>
+					
+					<coordinates>
+						<Coordinate name="fixed">
+							
+							<default_value>0.20000000000000001</default_value>
+						</Coordinate>
+					</coordinates>
+					
+					<frames>
+						<PhysicalOffsetFrame name="ground_offset">
+							
+							<FrameGeometry name="frame_geometry">
+								
+								<socket_frame>..</socket_frame>
+								
+								<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
+							</FrameGeometry>
+							
+							<socket_parent>/ground</socket_parent>
+							
+							<translation>0 0 0</translation>
+							
+							<orientation>0 0 0</orientation>
+						</PhysicalOffsetFrame>
+						<PhysicalOffsetFrame name="anchor_offset">
+							
+							<FrameGeometry name="frame_geometry">
+								
+								<socket_frame>..</socket_frame>
+								
+								<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
+							</FrameGeometry>
+							
+							<socket_parent>/bodyset/anchor</socket_parent>
+							
+							<translation>0 0 0</translation>
+							
+							<orientation>0 0 0</orientation>
+						</PhysicalOffsetFrame>
+					</frames>
+				</PinJoint>
+			</objects>
+			<groups />
+		</JointSet>
+		
+		<ControllerSet name="controllerset">
+			<objects />
+			<groups />
+		</ControllerSet>
+		
+		<ConstraintSet name="constraintset">
+			<objects>
+				</objects>
+			<groups />
+		</ConstraintSet>
+		
+		<ForceSet name="forceset">
+			<objects>
+				<Millard2012EquilibriumMuscle name="flexor">
+					
+					<min_control>0.01</min_control>
+					
+					<max_control>1</max_control>
+					
+					<GeometryPath name="path">
+						
+						<Appearance>
+							
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
+						
+						<PathPointSet>
+							<objects>
+								<PathPoint name="origin">
+									
+									<socket_parent_frame>/ground</socket_parent_frame>
+									
+									<location>0 -0.14999999999999999 0</location>
+								</PathPoint>
+								<PathPoint name="insertion">
+									
+									<socket_parent_frame>/bodyset/base</socket_parent_frame>
+									
+									<location>0 0.14999999999999999 0</location>
+								</PathPoint>
+							</objects>
+							<groups />
+						</PathPointSet>
+					</GeometryPath>
+					
+					<max_isometric_force>10</max_isometric_force>
+					
+					<optimal_fiber_length>0.10000000000000001</optimal_fiber_length>
+					
+					<tendon_slack_length>0.20000000000000001</tendon_slack_length>
+					
+					<pennation_angle_at_optimal>0</pennation_angle_at_optimal>
+					
+					<ActiveForceLengthCurve name="flexor_ActiveForceLengthCurve">
+						
+						<minimum_value>0</minimum_value>
+					</ActiveForceLengthCurve>
+					
+					<ForceVelocityCurve name="flexor_ForceVelocityCurve">
+						
+						<concentric_slope_at_vmax>0</concentric_slope_at_vmax>
+						
+						<concentric_slope_near_vmax>0.25</concentric_slope_near_vmax>
+						
+						<isometric_slope>5</isometric_slope>
+						
+						<eccentric_slope_at_vmax>0</eccentric_slope_at_vmax>
+						
+						<eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
+						
+						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
+					</ForceVelocityCurve>
+					
+					<FiberForceLengthCurve name="flexor_FiberForceLengthCurve">
+						
+					</FiberForceLengthCurve>
+					
+					<TendonForceLengthCurve name="flexor_TendonForceLengthCurve">
+						
+					</TendonForceLengthCurve>
+				</Millard2012EquilibriumMuscle>
+				<Millard2012EquilibriumMuscle name="extensor">
+					
+					<min_control>0.01</min_control>
+					
+					<max_control>1</max_control>
+					
+					<GeometryPath name="path">
+						
+						<Appearance>
+							
+							<color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+						</Appearance>
+						
+						<PathPointSet>
+							<objects>
+								<PathPoint name="origin">
+									
+									<socket_parent_frame>/ground</socket_parent_frame>
+									
+									<location>0 -0.14999999999999999 0</location>
+								</PathPoint>
+								<PathPoint name="insertion">
+									
+									<socket_parent_frame>/bodyset/follower</socket_parent_frame>
+									
+									<location>0 0.14999999999999999 0</location>
+								</PathPoint>
+							</objects>
+							<groups />
+						</PathPointSet>
+					</GeometryPath>
+					
+					<max_isometric_force>10</max_isometric_force>
+					
+					<optimal_fiber_length>0.10000000000000001</optimal_fiber_length>
+					
+					<tendon_slack_length>0.20000000000000001</tendon_slack_length>
+					
+					<pennation_angle_at_optimal>0</pennation_angle_at_optimal>
+					
+					<ActiveForceLengthCurve name="extensor_ActiveForceLengthCurve">
+						
+						<minimum_value>0</minimum_value>
+					</ActiveForceLengthCurve>
+					
+					<ForceVelocityCurve name="extensor_ForceVelocityCurve">
+						
+						<concentric_slope_at_vmax>0</concentric_slope_at_vmax>
+						
+						<concentric_slope_near_vmax>0.25</concentric_slope_near_vmax>
+						
+						<isometric_slope>5</isometric_slope>
+						
+						<eccentric_slope_at_vmax>0</eccentric_slope_at_vmax>
+						
+						<eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
+						
+						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
+					</ForceVelocityCurve>
+					
+					<FiberForceLengthCurve name="extensor_FiberForceLengthCurve">
+						
+					</FiberForceLengthCurve>
+					
+					<TendonForceLengthCurve name="extensor_TendonForceLengthCurve">
+						
+					</TendonForceLengthCurve>
+				</Millard2012EquilibriumMuscle>
+			</objects>
+			<groups />
+		</ForceSet>
+		
+		<MarkerSet name="markerset">
+			<objects>
+				<Marker name="base_marker">
+					
+					<socket_parent_frame>/bodyset/base</socket_parent_frame>
+					
+					<location>0 -0.10000000000000001 0</location>
+				</Marker>
+			</objects>
+			<groups />
+		</MarkerSet>
+	</Model>
+</OpenSimDocument>
