@@ -145,9 +145,11 @@ class WrappedPathDeclaration:
             paths = [item.path for item in values]
             if len(paths) != len(set(paths)):
                 raise ValueError(f"duplicate {label} path in wrapped declaration")
-        if not self.wrap_objects or not self.path_wraps:
+        if not (self.wrap_objects or self.path_wraps or self.conditional_points):
+            raise ValueError("wrapped declaration needs at least one path component")
+        if bool(self.wrap_objects) != bool(self.path_wraps):
             raise ValueError(
-                "wrapped declaration needs wrap objects and PathWrap links"
+                "wrap objects and PathWrap links must be declared together"
             )
         object_paths = {item.path for item in self.wrap_objects}
         if any(item.wrap_object_path not in object_paths for item in self.path_wraps):
@@ -331,6 +333,9 @@ def audit_native_wrapped_path_source(
             "OBSERVATION",
         )
     ]
+    transition_owners = {item.owner_path for item in declaration.path_wraps} | {
+        item.owner_path for item in declaration.conditional_points
+    }
     findings.extend(
         _diagnostic_finding(
             "wrapped_path_transition_unqualified",
@@ -340,7 +345,7 @@ def audit_native_wrapped_path_source(
             "UNQUALIFIED",
             owner_path,
         )
-        for owner_path in sorted({item.owner_path for item in declaration.path_wraps})
+        for owner_path in sorted(transition_owners)
     )
 
     observation = None
@@ -360,7 +365,7 @@ def audit_native_wrapped_path_source(
                     failed_evidence,
                     "BLOCK",
                     "NONE",
-                    declaration.path_wraps[0].owner_path,
+                    sorted(transition_owners)[0],
                 )
             )
             return NativeWrappedPathAudit(

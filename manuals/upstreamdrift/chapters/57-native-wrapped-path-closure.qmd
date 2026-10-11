@@ -35,6 +35,15 @@ path, wrapped components remain rejected unless the caller explicitly supplies
 the typed declaration. The declaration hash is retained in the replay
 admission identity so it cannot be silently substituted on replay.
 
+The declaration must contain at least one recognized path component. Wrap
+objects and `PathWrap` links must be declared together; neither an unreferenced
+wrap object nor an orphan link is accepted. A model with conditional path
+points but no wrapping geometry is a valid conditional-only declaration: its
+wrap-object and `PathWrap` inventories remain empty, and no synthetic wrap is
+inferred. The conditional owner still receives an unqualified transition
+finding, so chart-transition evidence remains separate from source closure and
+runtime replay.
+
 ## Native Route Observation
 
 When a reference state is supplied, the audit reuses the maintained native
@@ -58,11 +67,15 @@ a separate dependency.
 `tests/opensim/test_native_wrapped_path.py` exercises actual OpenSim 4.6 native
 wrapping for cylinders, ellipsoids, and spheres; verifies source-hash and
 PathWrap-link mutation rejection; observes a conditional path point on both
-sides of its declared range; verifies default rejection; and performs an
-opt-in constrained replay. These fixtures establish implementation behavior
-for the declared synthetic cases only. They do not validate external model
-resources, the frozen full-body capture, global route work budgets, or human
-muscle limits.
+sides of its declared range; and performs opt-in constrained replay. A separate
+CPP-only fixture verifies exact declaration and fresh replay with no wrap
+objects or links, while retaining an unqualified transition finding. Empty and
+orphan wrap declarations and conditional source/dump/coordinate/range identity
+mutations remain rejected. CPP-only components remain rejected without the
+typed declaration, and an unrelated `WrapTorus` is not admitted by that
+declaration. These fixtures establish implementation behavior for the declared
+synthetic cases only. They do not validate external model resources, the frozen
+full-body capture, global route work budgets, or human muscle limits.
 
 The shared diagnostic contract in Chapter 56 is a dependency for runner-level
 request serialization and finding aggregation. Until that dependency is
