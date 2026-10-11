@@ -1,10 +1,10 @@
 {
   "status": "active",
-  "recorded_at_utc": "2026-10-11T23:07:58.346453+00:00",
+  "recorded_at_utc": "2026-10-11T23:29:07.151914+00:00",
   "checkpoint": "adc1fb0627",
   "branch": "codex/shot-pattern-safe-followup",
   "source_commit": "ef0f14a36b37f24a0e77fe09db3a30969d9af910",
-  "integration": "Merged2921f4b756 cleanly at35a6c8774c; fetch of newer remote9c9000 remains active. No force push.",
+  "integration": "Incoming9c9000 reconciled in isolated worktree; conflict resolutions staged and under focused validation. No force push.",
   "fixture_repair": {
     "commit": "ef0f14a36b",
     "change": "Include copied research scripts in frozen fixture source hashes",
@@ -30,7 +30,7 @@
       "receipt_sha256": "440baeeb1cb697716f1a1573c8a9e83efd25c07434fe6e56eccc809e14ca0078"
     }
   ],
-  "current_validation": "Locked-environment canonical mypy gate running; complete pre-PR remains pending after latest remote reconciliation.",
+  "current_validation": "Premerge canonical mypy gate passed60sourcefiles with corrected dependency overlay; merge-focused tests running; complete postmerge pre-PR pending.",
   "development_log_blocker": {
     "issue": 11935,
     "owned_by_other_session": true,
@@ -44,5 +44,19 @@
     "public_routes": "All four expected routes returned404; deployment acceptance pending"
   },
   "protected_merge": "pending",
-  "overall_complete": false
+  "overall_complete": false,
+  "premerge_mypy": {
+    "receipt": "premerge-mypy-pass.txt.gz",
+    "receipt_sha256": "618056f891f0c162bc6367e6cfaa5ad84ce251dd76033a4025f43820e0973d14",
+    "result": "PASS",
+    "source_files": 60,
+    "scope": "Before9c9000merge; not postmerge acceptance"
+  },
+  "postmerge_focused_validation": {
+    "ruff": "PASS",
+    "format": "PASS",
+    "first_test_attempt": "Timeout during Numba compilation after four passes; not completed, no assertion failure observed",
+    "non_numba_subset": "running",
+    "scientific_review": "Astra found no scientific parameter/results/tolerance change"
+  }
 }

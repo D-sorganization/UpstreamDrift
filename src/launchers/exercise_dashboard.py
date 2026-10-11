@@ -1,9 +1,11 @@
 """Cross-engine exercise dashboard."""
 
 import sys
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
     QApplication,
     QComboBox,
+    QDockWidget,
     QLabel,
     QMainWindow,
     QToolBar,
@@ -11,9 +13,26 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 from src.shared.python.biomech.exercise_registry import discover_exercise
+from src.shared.python.core.process_safety import narrow_catch
+from src.shared.python.lifting.pack_audit.names import LIFTS
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
+
+# Expected failure modes for the lift-baseline dock's lazy build: a missing
+# or malformed committed receipt is already handled inside LiftBaselinePanel
+# itself (it shows a message label instead of raising), so what reaches here
+# is an environment/import problem with the panel module or its Qt widgets.
+# Narrower than bare ``except Exception`` per ADR-0016 / narrow_catch, while
+# still keeping a panel failure from ever taking down the host dashboard
+# (#11748).
+_LIFT_PANEL_LOAD_ERRORS: tuple[type[Exception], ...] = (
+    ImportError,
+    OSError,
+    RuntimeError,
+    ValueError,
+    TypeError,
+)
 
 
 def _engine_load_error_widget(
@@ -96,6 +115,32 @@ class ExerciseDashboard(QMainWindow):
             self._on_engine_changed(initial_engine)
 
         self.engine_selector.currentTextChanged.connect(self._on_engine_changed)
+
+        self.lift_baseline_dock: QDockWidget | None = None
+        if exercise in LIFTS:
+            self.lift_baseline_dock = self._build_lift_baseline_dock()
+
+    def _build_lift_baseline_dock(self) -> QDockWidget:
+        """Dock showing the LIFT-1 cross-engine baseline for a canonical lift.
+
+        A failure building the panel (e.g. an environment/import problem)
+        must never take down the rest of the dashboard: it is logged and
+        replaced with an inline error label (issue #11748).
+        """
+        widget: QWidget | None = None
+        with narrow_catch(
+            *_LIFT_PANEL_LOAD_ERRORS,
+            log_message="building the lift baseline panel",
+        ):
+            from src.launchers.lift_baseline_panel import LiftBaselinePanel
+
+            widget = LiftBaselinePanel(initial_lift=self.exercise)
+        if widget is None:
+            widget = QLabel("Cross-engine lift baseline is unavailable.")
+        dock = QDockWidget("Cross-Engine Lift Baseline", self)
+        dock.setWidget(widget)
+        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, dock)
+        return dock
 
     def _on_engine_changed(self, name: str) -> None:
         """Swap the inner widget to the engine-specific dashboard, scoped to `self.exercise`."""

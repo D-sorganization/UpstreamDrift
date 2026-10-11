@@ -46,7 +46,7 @@ def _disk_source(
         return free, False
     coefficients = eigenvectors.T @ target
     squared_radius = radius * radius
-    low, high = 0.0, float(max(1.0, np.linalg.norm(target) / radius))
+    low, high = 0.0, max(1.0, float(np.linalg.norm(target) / radius))
     while (coefficients[0] / (eigenvalues[0] + high)) ** 2 + (
         coefficients[1] / (eigenvalues[1] + high)
     ) ** 2 > squared_radius:

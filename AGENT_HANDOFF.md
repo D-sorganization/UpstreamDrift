@@ -37,11 +37,11 @@
 
 ## Do-Not List and Next Steps
 
-- **Successor Integration**: Own branch `codex/shot-pattern-safe-followup` merges `2921f4b756` and repairs the frozen verifier fixture at `ef0f14a36b`; both verifier modules pass with the exact Tools pin. Newer remote `9c9000` is still fetching. Full gates remain pending; two environment-incomplete attempts are preserved separately. See [Successor Progress](docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/progress.json). AffineDrift #5005 metadata and scoped audit repairs are committed locally, full gates running; public routes remain 404.
+- **Successor Integration**: Own branch `codex/shot-pattern-safe-followup` merges `2921f4b756` and repairs the frozen verifier fixture at `ef0f14a36b`; both verifier modules pass with the exact Tools pin. Incoming remote `9c9000` is merged into the worktree; all conflicts are resolved and staged for validation. Full gates remain pending; two environment-incomplete attempts are preserved separately. See [Successor Progress](docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/progress.json). AffineDrift #5005 metadata and scoped audit repairs are committed locally, full gates running; public routes remain 404.
 
 - Preserve frozen science, baseline graphics, peer records, and armed Phase 1 PR state.
 - Do not claim player calibration, isolated causal curvature benefit, per-round strokes gained, or successful compilation in the built-in LaTeX editor.
-- PR #12278 remains unmerged. Integration branch `codex/shot-pattern-refinement-integration` includes remote `aecd90783b`; newer remote `2921f4b756` still needs reconciliation (active fetch session56550). Full repository DRY passes with the original approved baseline (#12299); receipt `phase2/validation/refinement_v3/full_repository_dry.txt`. All67 new architecture exceptions and both document-size waivers are removed (#12302). Current39-page report compiles from14 tracked hash-verified figures. Figure API regression #12309 has native writer tests. Full pre-PR remains outstanding; inherited main development-log issue #11935 has207 findings and143 active entries against75. AffineDrift final pre-PR passes at `0e33178d`, branch pushed; publication/deployment still pending. Follow `phase2/validation/refinement_v3/progress.json`; do not rerun frozen simulations.
+- PR #12278 remains unmerged. Integration branch `codex/shot-pattern-refinement-integration` includes remote `aecd90783b`; successor `codex/shot-pattern-safe-followup` reconciles `2921f4b756` and `9c9000`. Full repository DRY passes with the original approved baseline (#12299); receipt `phase2/validation/refinement_v3/full_repository_dry.txt`. All67 new architecture exceptions and both document-size waivers are removed (#12302). Current39-page report compiles from14 tracked hash-verified figures. Figure API regression #12309 has native writer tests. Full pre-PR remains outstanding; inherited main development-log issue #11935 has207 findings and143 active entries against75. AffineDrift historical pre-PR passed at `0e33178d`; successor publication repairs remain local, with full gates and deployment pending. Follow `phase2/validation/refinement_v3/progress.json`; do not rerun frozen simulations.
 - Keep empirical validation #11984 deferred and compiler blocker #12120 open; close implementation issues only with qualifying merged evidence.
 
 
@@ -55,3 +55,9 @@ The linked records preserve peer-reported status and provenance; this index does
 - [Handoff peer records, part 4](./AGENT_HANDOFF_PEER_RECORDS-04.md)
 - [Imported integration peer-record index](docs/agents/handoffs/shot-pattern-integration-peer-records.md)
 - [Snapshot integrity manifest](docs/agents/handoffs/shot-pattern-handoff-archive-manifest.json)
+
+- [Exact Incoming Main Handoff Snapshot](docs/agents/handoffs/archive/shot-pattern-integration-20261011/AGENT_HANDOFF.incoming-9c9000.md.archive)
+- [Incoming Main Peer Records, Part 1](./AGENT_HANDOFF_INCOMING_RECORDS-01.md)
+- [Incoming Main Peer Records, Part 2](./AGENT_HANDOFF_INCOMING_RECORDS-02.md)
+- [Incoming Main Peer Records, Part 3](./AGENT_HANDOFF_INCOMING_RECORDS-03.md)
+- [Incoming Main Peer Records, Part 4](./AGENT_HANDOFF_INCOMING_RECORDS-04.md)

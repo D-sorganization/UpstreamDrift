@@ -12,6 +12,12 @@
       "archive_path": "docs/agents/handoffs/archive/shot-pattern-integration-20261011/shot-pattern-integration-peer-records.original.md.archive",
       "size_bytes": 133820,
       "sha256": "bf292cd335b83d70a52c91ead19ff27781a857fe2d7f2513f8f5bbb5e243b564"
+    },
+    {
+      "original_path": "AGENT_HANDOFF.md@9c9000",
+      "archive_path": "docs/agents/handoffs/archive/shot-pattern-integration-20261011/AGENT_HANDOFF.incoming-9c9000.md.archive",
+      "size_bytes": 165415,
+      "sha256": "979d75755afa9d75fa6345815b0e803718563281c989ed87a4bc68dc961b45bf"
     }
   ],
   "splits": [
@@ -35,6 +41,17 @@
         "docs/agents/handoffs/shot-pattern-integration-peer-records-02.md",
         "docs/agents/handoffs/shot-pattern-integration-peer-records-03.md"
       ]
+    },
+    {
+      "source_archive_path": "docs/agents/handoffs/archive/shot-pattern-integration-20261011/AGENT_HANDOFF.incoming-9c9000.md.archive",
+      "source_start_byte": 6689,
+      "source_sha256": "0d62bdc91c250a91c67098e76cf7713c76e09c89bed138b3a963831ece5b38f4",
+      "chunks": [
+        "AGENT_HANDOFF_INCOMING_RECORDS-01.md",
+        "AGENT_HANDOFF_INCOMING_RECORDS-02.md",
+        "AGENT_HANDOFF_INCOMING_RECORDS-03.md",
+        "AGENT_HANDOFF_INCOMING_RECORDS-04.md"
+      ]
     }
   ],
   "legacy_archives": [
@@ -51,7 +68,11 @@
     "AGENT_HANDOFF_PEER_RECORDS-04.md",
     "docs/agents/handoffs/shot-pattern-integration-peer-records-01.md",
     "docs/agents/handoffs/shot-pattern-integration-peer-records-02.md",
-    "docs/agents/handoffs/shot-pattern-integration-peer-records-03.md"
+    "docs/agents/handoffs/shot-pattern-integration-peer-records-03.md",
+    "AGENT_HANDOFF_INCOMING_RECORDS-01.md",
+    "AGENT_HANDOFF_INCOMING_RECORDS-02.md",
+    "AGENT_HANDOFF_INCOMING_RECORDS-03.md",
+    "AGENT_HANDOFF_INCOMING_RECORDS-04.md"
   ],
   "root_index_prefix_bytes": 6679,
   "root_index_prefix_sha256": "effdd42242ce99570aea66835235a5ea6428fa25bd94342d5ef5fd0fda09d36a"

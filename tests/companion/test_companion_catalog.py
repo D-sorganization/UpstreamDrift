@@ -80,7 +80,7 @@ def test_catalog_reconciles_current_registries_without_schema_count_constants(
         "local_model_records": 68,
         "program_records": 81,
         "feature_records": 61,
-        "feature_surface_paths": 135,
+        "feature_surface_paths": 137,
         "workflow_records": 15,
         "executable_workflow_records": 14,
         "single_source_program_records": 35,
