@@ -29,6 +29,7 @@ from src.shared.python.force_overlay.glyphs import GlyphSet
 from src.shared.python.golf_view_presets import mujoco_camera_params
 from src.shared.python.motion_matching.same_input import InputBundle
 from src.shared.python.motion_matching.visual_skeleton import derive_visual_skeleton
+from src.tools.native_viewer_export.backends._ball import draw_job_ball
 from src.tools.native_viewer_export.backends._worker_job import WorkerJob
 
 SCENE_FILE = ("simhive", "myo_sim", "scene", "myosuite_quad.xml")
@@ -150,6 +151,7 @@ def main(job_path: str) -> None:
             renderer.update_scene(data, camera=cams[view], scene_option=option)
             if glyph_sets is not None:
                 add_glyphs_to_scene(renderer.scene, glyph_sets[pos])
+            draw_job_ball(renderer.scene, job, pos)
             np.save(job.frame_path(view, pos), renderer.render().copy())
 
 

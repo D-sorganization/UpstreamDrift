@@ -21,6 +21,10 @@ from src.shared.python.force_overlay.renderers.meshcat_glyphs import (
 )
 from src.shared.python.golf_view_presets import meshcat_camera
 from src.shared.python.motion_matching.visual_skeleton import derive_visual_skeleton
+from src.tools.native_viewer_export.backends._ball import (
+    MeshcatBall,
+    PythonMeshcatBallSink,
+)
 from src.tools.native_viewer_export.backends._club import club_parts
 from src.tools.native_viewer_export.backends._head import head_mesh_files
 from src.tools.native_viewer_export.backends._meshcat_page import (
@@ -181,10 +185,17 @@ class PinocchioMeshcatBackend:
             if overlay is not None
             else None
         )
+        ball = (
+            MeshcatBall(PythonMeshcatBallSink(node), swing.ball)
+            if swing.ball is not None
+            else None
+        )
         with MeshcatPage(node.url(), settings.width, settings.height, 3000) as page:
             looks = view_lookats(settings, indices, overlay)
             for pos, k in enumerate(indices):
                 set_state(k)
+                if ball is not None:
+                    ball.update(swing.time_s(k))
                 if glyphs is not None and overlay is not None:
                     glyphs.update(overlay.glyphs_at(k))
                 tiles: dict[str, Image8] = {}
