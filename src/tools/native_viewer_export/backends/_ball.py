@@ -72,6 +72,24 @@ class MeshcatBall:
         return visible
 
 
+def update_meshcat_frame(
+    ball: MeshcatBall | None,
+    glyphs: Any,
+    overlay: Any,
+    swing: SwingInput,
+    index: int,
+) -> None:
+    """Per-frame MeshCat decorations: ball visibility, then the force glyphs.
+
+    Shared by the Drake and Pinocchio backends; ``ball``, ``glyphs`` and
+    ``overlay`` may each be ``None`` (that decoration is then skipped).
+    """
+    if ball is not None:
+        ball.update(swing.time_s(index))
+    if glyphs is not None and overlay is not None:
+        glyphs.update(overlay.glyphs_at(index))
+
+
 class DrakeBallSink:
     """:class:`BallSink` over a ``pydrake`` ``Meshcat``."""
 
