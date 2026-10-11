@@ -636,6 +636,33 @@ def _write_outputs(
     return spec_path, receipt_path
 
 
+def _annotate_document(document: dict[str, Any], upper: dict[str, Any]) -> None:
+    """Copy the subject, anthropometry, ranges and visual hints into ``document``."""
+    document["subject"] = upper["subject"]
+    document["de_leva_table_sha256"] = de_leva_table_sha256()
+    document["anthropometry"] = {
+        "table": "de_leva_1996_male",
+        "de_leva_table_sha256": de_leva_table_sha256(),
+        "segments": de_leva_table_dict(),
+    }
+    document["coordinate_ranges_deg"] = {
+        **upper["coordinate_ranges_deg"],
+        **as_document(
+            {k: v for k, v in HUMAN_RANGES_DEG.items() if k[-2:] in ("_r", "_l")}
+        ),
+    }
+    document["address_seed_deg"] = upper["address_seed_deg"]
+    document["club"] = upper["club"]
+    document["visual_hints"] = upper["visual_hints"]
+    document["visual_hints"]["capsule_radius_m"].update(
+        {
+            f"{segment}_{side}": LEG_VISUAL_RADIUS_M[segment]
+            for segment in LEG_VISUAL_RADIUS_M
+            for side in ("r", "l")
+        }
+    )
+
+
 @dataclass(frozen=True)
 class AnthropometricDocument:
     """A composed candidate document plus the values its receipt records."""
@@ -732,29 +759,7 @@ def compose_anthropometric_document(
             "marker offsets are anatomical seeds to be calibrated" + club_note
         ),
     )
-    document["subject"] = upper["subject"]
-    document["de_leva_table_sha256"] = de_leva_table_sha256()
-    document["anthropometry"] = {
-        "table": "de_leva_1996_male",
-        "de_leva_table_sha256": de_leva_table_sha256(),
-        "segments": de_leva_table_dict(),
-    }
-    document["coordinate_ranges_deg"] = {
-        **upper["coordinate_ranges_deg"],
-        **as_document(
-            {k: v for k, v in HUMAN_RANGES_DEG.items() if k[-2:] in ("_r", "_l")}
-        ),
-    }
-    document["address_seed_deg"] = upper["address_seed_deg"]
-    document["club"] = upper["club"]
-    document["visual_hints"] = upper["visual_hints"]
-    document["visual_hints"]["capsule_radius_m"].update(
-        {
-            f"{segment}_{side}": LEG_VISUAL_RADIUS_M[segment]
-            for segment in LEG_VISUAL_RADIUS_M
-            for side in ("r", "l")
-        }
-    )
+    _annotate_document(document, upper)
     return AnthropometricDocument(
         document=document,
         subject=upper["subject"],
