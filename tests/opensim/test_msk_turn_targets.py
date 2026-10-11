@@ -236,6 +236,49 @@ def test_planted_feet_contracts() -> None:
         tt.PlantedFeet({"l": np.zeros(3)}, {}, {}, 1)
 
 
+# ------------------------------------------------------------- tracking inputs
+@dataclass
+class _TurnInputs:
+    t: np.ndarray
+    markers: dict[str, np.ndarray]
+    events: SwingEvents
+
+
+@pytest.fixture
+def synthetic_capture(monkeypatch: pytest.MonkeyPatch) -> _Capture:
+    """Foot capture whose turn inputs are synthetic (no club markers needed)."""
+    t = np.linspace(0.0, 0.5, 51)
+    markers = _synthetic_markers(40.0 * t / 0.5, 90.0 * t / 0.5)
+    inputs = _TurnInputs(t, markers, _events(t))
+    monkeypatch.setattr(tt, "capture_turn_inputs", lambda _capture: inputs)
+    return _foot_capture({"L": 10.0, "R": 5.0})
+
+
+def test_modes_are_the_single_source_of_truth() -> None:
+    assert tt.MODES == ("baseline", "turn", "turn_feet")
+
+
+def test_tracking_inputs_by_mode(synthetic_capture: _Capture) -> None:
+    times = [0.0, 0.25, 0.5]
+    assert tt.tracking_inputs(synthetic_capture, times, "baseline") == (None, None)
+    targets, feet = tt.tracking_inputs(synthetic_capture, times, "turn")
+    assert feet is None and targets is not None and len(targets) == len(times)
+    np.testing.assert_allclose(targets.pelvis_deg, [0.0, 20.0, 40.0], atol=1e-9)
+    targets, feet = tt.tracking_inputs(
+        synthetic_capture, times, "turn_feet", weight_rad=0.05
+    )
+    assert targets is not None and targets.weight_rad == 0.05
+    assert isinstance(feet, tt.PlantedFeet)
+
+
+def test_tracking_inputs_contracts(synthetic_capture: _Capture) -> None:
+    with pytest.raises(ValueError, match="turn_feet"):
+        tt.tracking_inputs(synthetic_capture, [0.0], "bogus")
+    for bad in ([], [[0.0]], [0.0, float("nan")], [0.2, 0.1]):
+        with pytest.raises(ValueError, match="times_s"):
+            tt.tracking_inputs(synthetic_capture, bad, "turn")
+
+
 # ------------------------------------------------------------- OpenSim tracking
 def test_retarget_reproduces_a_synthetic_marker_turn() -> None:
     """Tracked pelvis and thorax turn equal a known synthetic marker turn."""
