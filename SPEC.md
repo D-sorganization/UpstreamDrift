@@ -8,6 +8,36 @@ mandatory. No supplied limits can be overridden, and independent excitation
 replay grants no muscle-matching qualification. Chapter55 and F07 unqualified
 feasibility turnover record TDD, native execution and remaining full-capture gates.
 
+## Bounded Synthetic Native Moco Solve and Replay
+
+The source-bound two-muscle synthetic Moco ladder keeps native control limits,
+complete named cold state, solver settings, serialized arrays and fresh replay
+inputs in the request/evidence chain. The 10-interval OpenSim 4.6 solve
+converged, but independent replay failed speed, activation and fiber-length
+limits. A 20-interval solve converged with 41 saved nodes, but integrated replay
+and two earlier retained-input diagnostics stopped at the fixed 30-second wall
+deadline before state errors were recorded. A later, separately authorized
+retained-input replay finished and failed the speed, activation and fiber-length
+limits while passing the coordinate endpoint predicate. Its timewise audit
+records peak errors of `1.0189e-6` rad/s, `1.1532e-4` activation and
+`1.2169e-6` m; sampled peak RSS was 210,214,912 bytes. Applied control samples
+exactly matched saved knots, but this does not prove equality of the continuous
+control law. Solver convergence is distinct from replay acceptance. The common-knot
+optimized coordinates agree closely while controls differ materially, so the
+mesh comparison does not establish the cause of replay-state error. The completed
+offline activation analysis finds small reconstructed Hermite-Simpson residuals,
+while optimized flexor activation differs from fresh replay by up to `1.1532e-4`.
+Fresh replay agrees with an independent segmented scalar PWL integration within
+`2.5751e-8`. Source XML omits activation constants, so the analysis uses OpenSim
+4.6 source defaults rather than installed-binary readback. This narrows the
+finding to a discrete optimized-state versus continuous-replay difference
+without identifying its cause. Chapter 13 and the current
+`F07_NATIVE_MOCO_COMPLEXITY_LADDER_TURNOVER.md` summary link to its two
+historical appendices, which retain exact equations, acceptance limits,
+source/request hashes, failure statuses and output evidence.
+This synthetic diagnostic does not qualify full-body muscle feasibility,
+physiology, capture matching, production replay or all-variant/ecosystem parity.
+
 ## Native Wrapped-Path Source Closure (#12234)
 
 The opt-in wrapped-path declaration binds exact native wrap geometry, PathWrap
@@ -10669,6 +10699,31 @@ independently generated one-hinge model and do not qualify production rows.
 The receipt retains `state_reset_allowed=False` separately from an unknown
 reset count when the adapter does not instrument that counter; policy is not
 reported as a measured zero.
+
+F09c also has an explicitly bound full-body MuJoCo generalized-effort path.
+It consumes the exact source coordinate order, complete q/v state, and frozen
+ZOH generalized efforts with zero root entries. The shared `VectorPlant` and
+RK4 integrator run eight fixed substeps with projection disabled; model-owned
+contact and weld dynamics are evaluated during the engine-acceleration calls.
+The path does not call `mj_step`, assemble/reset state, or accept a feedback
+callback. It reports closure residuals without adding a qualification
+threshold, accepts only q/v-only state under its exact provider identity, and
+remains unqualified. This consumer does not claim that it generated its input
+history or that the history is a full capture.
+
+The paired `record_native_full_body_feedback` producer accepts a declared
+Python controller with caller-bound source/configuration/reference digests.
+Before any integrator stage, it requires a complete finite initial q/v state,
+validates each returned effort's full coordinate shape and finiteness, and
+rejects nonzero root efforts. The controller receives detached q/v copies once
+per fixed interval; each output is held across eight shared RK4 substeps (32
+acceleration-stage evaluations per outer interval). It returns the standard
+T01 frozen-input bundle plus an unqualified producer record with the exact
+applied efforts and generated trajectory digests. Fresh replay is controller
+free. Initial closure residuals are reported without a threshold, and no
+assembly, reset, or projection is performed. The producer declares no effort
+bounds and makes no bounded-control, capture-match, support/grip, or physiology
+claim. See canonical chapter13 and the F09C turnover.
 
 ## Native Marker Positions From Replay States (F09d, #11907)
 

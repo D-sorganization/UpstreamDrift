@@ -498,6 +498,110 @@ and $4.0^\circ$ (7-iron) between the malleolus-corrected ankle-to-toe axis and
 the forefoot normal. The $2^\circ$ criterion is tighter than that spread. The
 binding target stays the corrected axis.
 
+\section{Neutral Hip Zero-Twist and the Pelvis at Impact (\#12042)}
+\label{sec:neutral-twist}
+
+\paragraph{Problem.} The turn audit (\#12042) found the pelvis under-open at
+impact: on the canonical receipts the model's hip-centre line reaches
+$-40.1^\circ$ (capture-A) and $-34.5^\circ$ (capture-B) against
+$-49.8^\circ$ and $-41.7^\circ$ in the capture markers. The model's own
+\texttt{WaistLeft}/\texttt{WaistRight} sites, evaluated with the receipt's
+calibrated attachments, reach only $-42.6^\circ$ on capture-A. So the gap is a
+fitting deficit, not a difference in the line definition. At impact
+\texttt{hip\_rotation\_l} sits on its $+40^\circ$ bound on both captures.
+
+\paragraph{Mechanism.} \texttt{hip\_rotation\_zero} estimates the thigh twist
+$\tau$ over the first 24 frames, and \texttt{apply\_hip\_calibration} rotates
+each femur frame about its long axis by $\tau$. The coordinate zero is
+therefore the measured address twist, and the fixed $\pm40^\circ$ range of
+\texttt{hip\_rotation} (the lower-limb ranges of
+\texttt{range\_of\_motion}) becomes a window shifted by $\tau$ in
+pelvis-relative terms. Without the
+lateral-marker correction (Section~\ref{sec:zero}), the canonical
+\texttt{--static-seeds} specs carry $\tau = +45.1 / -25.7^\circ$ (lead /
+trail, capture-A) and $+46.7 / -21.9^\circ$ (capture-B). The address stance
+is square, so these are estimation errors, not posture. Even the corrected
+plane leaves $+25.5^\circ$ on the nearly straight lead knee. The lead window
+is shifted by tens of degrees, and the internal rotation the impact pose needs
+falls outside it.
+
+\paragraph{Option.} \texttt{--hip-zero-twist neutral}
+(\texttt{hip\_calibration.select\_hip\_zero\_twist}) applies $\tau = 0 / 0$:
+the femur frame is aligned with the calibrated pelvis frame (the hip-rewrite
+alignment of Section~\ref{sec:numerics-12109}). The $\pm40^\circ$ bound is
+then anatomical, and the address twist is solved as a coordinate value. The
+default \texttt{capture} reproduces the canonical receipts. Each receipt
+records \texttt{hip\_zero\_twist\_mode} and the measured twist
+(\texttt{hip\_zero\_twist\_measured\_deg}) next to the applied one. No bound
+or tolerance changes.
+
+\paragraph{Evidence.} MuJoCo, ControlTower \texttt{ud-sim}, canonical
+commands (driver \texttt{--static-seeds}, 7-iron \texttt{--static-seeds
+--zmp-filter}), same commit. The same-commit baselines reproduce the canonical
+receipts exactly. Turn errors are model minus markers (top / impact, degrees).
+FD is the whole-swing marker RMS, with address-to-impact / after-impact in
+brackets. Receipts: \path{docs/development/full_body_models/evidence/hip_zero_twist_12042/}.
+
+\begin{center}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lcccccc}
+\toprule
+Run & Pelvis & Upper & Shoulder & Lead hip rot. & Address / IK & FD \\
+ & & trunk & girdle & at impact & (mm) & (mm) \\
+\midrule
+Driver, capture & $-0.5$ / $+9.7$ & $+18.3$ / $+4.0$ & $+14.6$ / $-5.5$ & $40.0$ & 6.3 / 29.5 & 80.8 (34.2 / 145.0) \\
+Driver, neutral & $+3.2$ / $+2.5$ & $+17.7$ / $+5.6$ & $+12.0$ / $-9.0$ & $27.0$ & 5.3 / 25.6 & 51.2 (31.6 / 83.8) \\
+7-iron, capture & $+2.7$ / $+7.2$ & $+13.6$ / $+6.1$ & $+10.8$ / $+3.3$ & $40.0$ & 6.6 / 26.8 & 54.5 (30.1 / 92.1) \\
+7-iron, neutral & $+1.4$ / $+2.8$ & $+13.9$ / $+5.2$ & $+11.0$ / $+8.3$ & $27.7$ & 2.1 / 22.9 & 91.2 (34.0 / 165.3) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+With the neutral twist, the pelvis line is within $3.2^\circ$ of the markers
+at top and impact on both captures (the \#12042 bound is $5^\circ$). The lead
+hip leaves its bound at impact. The lead-leg IK residual falls from 36 to
+15~mm (capture-A) and from 40 to 16~mm (capture-B). The address marker RMS
+improves on both captures. Neither run has a range-of-motion flag.
+
+\paragraph{Limitations.}
+\begin{itemize}
+  \item The forward-dynamics replay is mixed. Capture-A improves at every
+    phase. On capture-B the address-to-impact FD rises by 3.9~mm, near the
+    about 3~mm noise floor measured for \#12042 slice 7, while after-impact FD
+    rises from 92 to 165~mm. That is the follow-through rollout sensitivity
+    already documented for \#12042.
+  \item The trail \texttt{hip\_rotation\_r} now reaches its $-40^\circ$ bound
+    late in the downswing on both captures ($-39.5$ / $-38.3^\circ$ at
+    impact).
+  \item The upper-trunk over-twist at the top ($+14$ to $+18^\circ$) is
+    unchanged, as is the shoulder-girdle line at impact. The neutral twist
+    does not address those (slice 7).
+  \item The neutral setting assumes zero femoral twist relative to the pelvis
+    frame at the coordinate zero. It does not model individual femoral version.
+    A functional knee axis over the swing remains the alternative estimate.
+  \item This is inverse kinematics plus feedback-assisted tracking, not an
+    open-loop dynamics result.
+\end{itemize}
+
+\paragraph{Failed Experiment: Widening the Hip Rotation Range.} With the
+range opened to $\pm60^\circ$ (an experiment-only override, never proposed),
+the capture-A IK runs straight to the new bound ($59.4^\circ$ at impact). On
+capture-B it lands on a different leg branch: the pelvis at impact gets worse
+($+10.5^\circ$) and FD rises to 120.7~mm. The range is not the cause; its
+placement is.
+
+\paragraph{Reproduce.}
+\begin{verbatim}
+python3 -m src.shared.python.motion_matching.pipeline.cli \
+  --spec docs/development/full_body_models/full_body_spec_anthro_driver.json \
+  --capture driver --static-seeds --hip-zero-twist neutral --out runs/hzn_driver
+python3 -m src.shared.python.motion_matching.pipeline.cli \
+  --spec docs/development/full_body_models/full_body_spec_anthro_iron7.json \
+  --capture iron --static-seeds --zmp-filter --hip-zero-twist neutral \
+  --out runs/hzn_iron
+\end{verbatim}
+
 \section{Limitations and Failed Experiments}
 
 \begin{itemize}
