@@ -1,10 +1,11 @@
 """#12030: the nominal (uncalibrated) receipts' trajectory IK stays in the
 address basin.
 
-The 7-iron anthropometric document carries the driver's head-triad offsets, so
+The 7-iron anthropometric document carried the driver's head-triad offsets, so
 before the triad-shape gate the face-orientation residual targeted a face
-rotated 40-80 degrees and dragged the nominal 7-iron IK to 265 mm RMS. These
-checks read the committed receipts, so a regeneration that regresses fails.
+rotated 40-80 degrees and dragged the nominal 7-iron IK to 265 mm RMS. Since
+#12210 the document carries the 7-iron's own cluster. These checks read the
+committed receipts, so a regeneration that regresses fails.
 """
 
 from __future__ import annotations
@@ -44,7 +45,11 @@ def test_nominal_ik_is_bounded_without_range_flags(run: str) -> None:
     assert ik["range_of_motion_flags"] == {}
 
 
-def test_nominal_iron_records_why_the_face_residual_is_off() -> None:
-    face = _receipt("anthro_iron")["ik"]["face_orientation"]
-    assert face["available"] is False
-    assert "do not match the captured triad" in face["reason"]
+@pytest.mark.parametrize("run", NOMINAL_RUNS)
+def test_nominal_face_residual_and_impact_split_are_observed(run: str) -> None:
+    """#12210: with its own club cluster the nominal 7-iron sees its face."""
+    ik = _receipt(run)["ik"]
+    face = ik["face_orientation"]
+    assert face.get("available", True) is True
+    assert face["targeted_frames"] > 0
+    assert ik["impact_split"]["source"] == "capture face-centre ball passage"
