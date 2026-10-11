@@ -74,6 +74,12 @@ jobs:
             echo "build=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Restore shot-pattern illustrated figures
+        if: steps.select.outputs.build == 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 scripts/ci/restore_shot_pattern_illustrated_figures.py
+
       - name: Document title case (changed files only)
         if: steps.select.outputs.build == 'true'
         run: |

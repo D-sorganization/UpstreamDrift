@@ -10,14 +10,40 @@ from typing import Any
 
 from .supplement_publication import sha256
 
+
+def _repo_relative(path: Path, root: Path) -> str:
+    return path.relative_to(root).as_posix()
+
+
 _WORKER = r"""
-import json,sys
+import importlib.util
+import json
+import sys
 from pathlib import Path
-root=Path(sys.argv[1]).resolve()
-sys.path.insert(0,str(root))
-from src.tools.shot_pattern_analysis import matched_supplement_pipeline as pipeline
-from src.tools.shot_pattern_analysis.matched_export import matched_source_snapshot
-if Path(pipeline.__file__).resolve()!=root/'src/tools/shot_pattern_analysis/matched_supplement_pipeline.py':
+
+root = Path(sys.argv[1]).resolve()
+
+def _load_module(name: str, relative: str):
+    path = (root / relative).resolve()
+    spec = importlib.util.spec_from_file_location(name, path)
+    if spec is None or spec.loader is None:
+        raise ValueError(f'parent verifier cannot load {relative}')
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+pipeline = _load_module(
+    'matched_supplement_pipeline',
+    'src/tools/shot_pattern_analysis/matched_supplement_pipeline.py',
+)
+export_mod = _load_module(
+    'matched_export',
+    'src/tools/shot_pattern_analysis/matched_export.py',
+)
+matched_source_snapshot = export_mod.matched_source_snapshot
+if Path(pipeline.__file__).resolve() != (
+    root / 'src/tools/shot_pattern_analysis/matched_supplement_pipeline.py'
+).resolve():
     raise ValueError('parent verifier import origin differs')
 expected=json.loads(sys.stdin.read())
 if matched_source_snapshot()!=expected:
@@ -58,7 +84,7 @@ def check_verifier_pin(binding: dict[str, Any], *, base: Path) -> tuple[Path, Pa
         raise ValueError("parent source commit differs")
     source_map = binding["source_sha256"]
     study_paths = {
-        str(path.relative_to(root))
+        _repo_relative(path, root)
         for folder in (
             "src/tools/shot_pattern_analysis",
             "scripts/research/shot_pattern_analysis",

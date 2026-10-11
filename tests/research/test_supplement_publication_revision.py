@@ -272,12 +272,24 @@ def test_parent_executable_pin_rejects_tamper(tmp_path):
 
 @pytest.fixture
 def verifier_pin(tmp_path):
+    import shutil
     import subprocess
     import sys
 
     root = tmp_path / "frozen"
+    study_scripts = (
+        Path(__file__).resolve().parents[2] / "scripts/research/shot_pattern_analysis"
+    )
+    shutil.copytree(
+        study_scripts,
+        root / "scripts/research/shot_pattern_analysis",
+        dirs_exist_ok=True,
+    )
+    for part in ("src", "src/tools", "src/tools/shot_pattern_analysis"):
+        (root / part).mkdir(parents=True, exist_ok=True)
+        (root / part / "__init__.py").write_text("", encoding="utf-8")
     package = root / "src/tools/shot_pattern_analysis"
-    package.mkdir(parents=True)
+    package.mkdir(parents=True, exist_ok=True)
     (package / "matched_supplement_pipeline.py").write_text(
         "def load_verified_supplement_artifacts(path):\n    return {'verified': True}\n"
     )
