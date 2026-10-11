@@ -518,7 +518,7 @@
     "motion_matching": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 294,
+      "ud-only": 295,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -15509,6 +15509,18 @@
       "spelling_only": false
     },
     {
+      "path": "motion_matching/execution/grip_rotation.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "execution",
+      "ud_bytes": 3529,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "motion_matching/execution/mjx_export.py",
       "classification": "ud-only",
       "package": "motion_matching",
@@ -15717,7 +15729,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "",
-      "ud_bytes": 8591,
+      "ud_bytes": 11197,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -16677,7 +16689,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "pipeline",
-      "ud_bytes": 30185,
+      "ud_bytes": 30186,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,

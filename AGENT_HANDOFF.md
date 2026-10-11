@@ -1,3 +1,9 @@
+# Active: Per-Capture Grip Refit on the Fixed Clusters, #12221
+
+- Branch `claude/12221-grip-refit`, stacked on #12265. Landed: refit tooling (`grip_fit.weighted_frames`, `compose_rotation_deg`, `apply_grip_rotation`, `scripts/set_spec_grip_rotation.py`), the per-capture fit receipts `fit_grip_rotation_receipt_driver.json` / `_iron7.json`, and the evidence. Documents are NOT changed.
+- Fixture flags with the cluster fixed: driver speed −1.9 %, face gap 0.56°; 7-iron −1.9 %, 0.62°; no wrist on its bound at address. The refit is invalid with the cluster free (static trial moves the capture face). Calc record: "Per-Capture Grip Rotation on the Fixed Clusters".
+- Open: owner decision on `--fix-club-markers` default; then apply with `scripts/set_spec_grip_rotation.py` and regenerate receipts; #12266 blocks the driver fixture export.
+
 # Active: 7-Iron MSK Grip Calibration, #12042
 
 - Branch `claude/12042-iron7-msk-cal` (stacked on #12247). `msk_club_grip_calibration.json` now has `iron7` entries for `golf_humanoid` (grip gaps 0.04 / 0.02 mm, landmark RMS 14.9 mm) and `golf_humanoid_scaled` (0.24 / 0.25 mm, 40.0 mm), from the existing `msk_club_calibration --club iron7` CLI. `render_msk_club.py` now draws and measures the `--club` it tracks: before, the viewer loaded `golf_humanoid.osim` with its committed driver, so a 7-iron render showed the driver.
