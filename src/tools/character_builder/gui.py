@@ -35,6 +35,7 @@ _EXPORTS = (
     ("urdf", "Export URDF"),
     ("mjcf", "Export MJCF"),
     ("osim", "Export OpenSim"),
+    ("gltf", "Export glTF"),
     ("appearance", "Export Appearance"),
 )
 # (appearance choice name, appearance_library() key, combo label)

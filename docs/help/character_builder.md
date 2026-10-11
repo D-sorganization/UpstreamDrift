@@ -75,9 +75,10 @@ including `average` (1.75 m, 75.0 kg), `athletic` (1.80 m, 80.0 kg),
 | `club`                                       | `driver` or `iron7`                                                                                       | Copied into the spec with its mass properties.                                                                                                                   |
 
 Outputs: the specification (sorted-key JSON, byte-identical for equal inputs,
-SHA-256 shown in the summary), a URDF, an MJCF and an OpenSim model. API:
-`GET /character-builder/presets`, `POST /character-builder/build`, `/preview`
-and `/export/{spec|urdf|mjcf|osim}`.
+SHA-256 shown in the summary), a URDF, an MJCF, an OpenSim model and a glTF
+skinned mesh (see below). API: `GET /character-builder/presets`,
+`POST /character-builder/build`, `/preview` and
+`/export/{spec|urdf|mjcf|osim|gltf}`.
 
 ### Web Character Builder
 
@@ -88,7 +89,7 @@ the same spec-native builder as a web panel: a preset select, sliders for
 ranges as the table above) and a club select (`driver`, `7 Iron`). Preview
 calls `/api/character-builder/preview` then `/api/character-builder/build`
 and shows total mass, body and joint counts, and a per-body mass table.
-Export buttons (Spec JSON, URDF, MJCF, OpenSim) download through
+Export buttons (Spec JSON, URDF, MJCF, OpenSim, glTF) download through
 `/api/character-builder/export/{fmt}`.
 
 `AppearancePanel` (`ui/src/components/character/AppearancePanel.tsx`) sits
@@ -135,6 +136,29 @@ materials are the same ones the web appearance/material picker offers
 (CMB-7e, #11658). Export Appearance writes an `appearance-v1` sidecar bound
 to the current spec hash, named to match the desktop spec export's own stem
 (`custom_<sha8>.appearance.json`), so it sits beside that spec file.
+
+### glTF Skinned Body Export
+
+`export_character(character, "gltf")` (and `/character-builder/export/gltf`,
+plus the desktop "Export glTF" button) returns a glTF 2.0 document built by
+`src/shared/python/model_appearance/skinned_body.py`: one bone per spec body,
+and a triangle mesh lofted from the same capsules `visual_skeleton.py` draws,
+rigidly skinned so every vertex is weighted 1.0 to the single bone whose
+capsule produced it (smooth blending across a joint is a follow-up). The mesh
+is procedurally generated from the spec skeleton alone — it contains no
+third-party assets; MakeHuman (CC0) and SMPL-X are not used in this slice,
+since SMPL-X's licence restricts commercial use and would need owner
+approval. The export is visual only: it never feeds back into mass, inertia
+or contact, and carries the compiled spec's SHA-256 in `extras.spec_sha256`
+so a viewed mesh can always be tied back to its physics spec. The scene is
+Y-up as glTF requires: the spec's up axis (opposite gravity, `+Z` for the
+shipped presets) is rotated onto `+Y`, and each bone node's local translation
+and rotation are the spec joint offset, so setting a bone's global transform
+to that rotation times its `spec_body_poses` pose reproduces the posed skin.
+Passing a spec-coordinate trajectory (`spec_motion_bone_poses`) to
+`skinned_body_gltf(body, motion, fps=...)` adds one glTF animation with a
+translation and a rotation channel per bone, so any glTF viewer (three.js
+included) plays spec motion on the skin without a physics engine.
 
 ## Outputs
 
