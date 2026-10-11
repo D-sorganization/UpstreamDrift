@@ -1,0 +1,39 @@
+{
+  "scope": "Source readiness only; generated report and PDF pending terminal production and inspection",
+  "utc": "2026-10-11T00:25:02.780875+00:00",
+  "publication_accepted": false,
+  "source_sha256": {
+    "docs/research/shot_pattern_analysis/shot_pattern_analysis.tex": "4da27a01c2c1f5046233b912cdc57a0422535f8eb2c8f496d7a45bab4964ba10",
+    "docs/research/shot_pattern_analysis/phase2/RESUME_HANDOFF.md": "7f24ed7ce685a69b9a7f37b98d2adee8a1301e3d6737286b972edbd3a0a83e8c",
+    "docs/research/shot_pattern_analysis/phase2/review_followups/FINAL_NARRATIVE_ACCEPTANCE.md": "62c06308cd4d483c535b7189d923f5c35a5741e65388d029485f0b22bb876abe",
+    "docs/research/shot_pattern_analysis/phase2/review_followups/PHASE_TWO_CONCLUSIONS_DRAFT.md": "e20b83cd8398a77d381e1a71093d8c999be560ee9ed416e15c9ef2176eea1367",
+    "scripts/research/shot_pattern_analysis/build_final_report.py": "196dd522869ceaa33d63f606b016abcaeabdd0d6cd91f81a103488d225c536d3",
+    "scripts/research/shot_pattern_analysis/final_report_inputs.py": "d651e71b3eb9bf17c08d70118d6b4d9d27aadda9094956614509b987ed28119c",
+    "scripts/research/shot_pattern_analysis/report_synthesis.py": "b30aea47fdebe1149075a955a39cbb742d11b5577a5029fc0a0e2377d789e58c",
+    "scripts/research/shot_pattern_analysis/report_tables.py": "9d7d41f2a97e50a075a06c5d7780f9dffa4474669201bbf47da7674b1c8c0902",
+    "src/tools/shot_pattern_analysis/matched_interpretation.py": "4ed78414a6daefa6e5215a376cdea5e36c03274c2190d3c823104fa180f3ce80"
+  },
+  "v7_evidence_files_present": [
+    "start.json",
+    "stderr.txt",
+    "stdout.txt"
+  ],
+  "pandoc": "/home/dieterolson/.local/bin/pandoc",
+  "findings": [
+    {
+      "kind": "stale_status",
+      "path": "docs/research/shot_pattern_analysis/shot_pattern_analysis.tex",
+      "line": 566,
+      "detail": "Article still-running graphical-publication wording should be revised only after actual publication review; source unchanged."
+    }
+  ],
+  "pending": [
+    "Verify terminal exit0 and REPORT_PUBLICATION_RECEIPT output/source hashes.",
+    "Reconcile generated 24 selected cells/72 rows, 12 direct contrasts and two fixed-target controls against qualified numerical ledger.",
+    "Check generated Markdown links and protocol/population captions.",
+    "Inspect every PDF page for numeric integrity, table width, legibility and missing figures.",
+    "Complete Sol PNG and Luna vector review; generation alone does not qualify appearance.",
+    "Retain deferred empirical11984 and standalone LaTeX compiler blocker12120."
+  ],
+  "operational_note": "Initial evidence-write shell used unavailable python executable and exited127 without writing files; repeated with python3."
+}

@@ -1,0 +1,66 @@
+{
+  "scope": "Strict Public Loader and Numeric/Inventory Gate; Visual Acceptance Pending",
+  "status": "passed",
+  "finished_utc": "2026-10-11T00:23:45.527266+00:00",
+  "python": "/tmp/shot-pattern-validation-venv-20261009/bin/python",
+  "producer_checkout": "/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift",
+  "producer_commit": "4023111d2aaf8b20449a36f8691a295f4a94ceff",
+  "public_loader": "src.tools.shot_pattern_analysis.matched_supplement_pipeline.load_verified_supplement_artifacts",
+  "terminal_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_rendering_revision_v6/exit.json",
+  "terminal_sha256": "bc0bb4e12f22194f0e8c8ceda53c7ef591af93dc32071957fb80c663f0b78fd5",
+  "pipeline_receipt_sha256": "035c65b249937a639d0ddfd5bd5df3aef8b46aaae351b98a4c6ae9e29e0b064a",
+  "ledger_sha256": "b01de45bb20d8bc7b0d041fb69af2185d77275d19ec598f269fed0bb2589b293",
+  "expected_numeric_reference_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/protocol_name_recovery_v6/expected_numeric_hashes.json",
+  "expected_numeric_reference_sha256": "59a922fbcd2c06b23674466538d992f5169628464783adbcb6353a4cfb921edd",
+  "numeric_sha256": {
+    "REPORT_ORIGINAL_SOURCE_INVENTORY.csv": "6a237d80f005b3a8da7d0b4502fc7e5ec0f0aae7d805c5b15c879f9e6f58c7d5",
+    "REPORT_SUPPLEMENT.csv": "fe7f9e671f97122042e6a578b2aa8f21fe9a3eb4490831cb38bc3a1e88935848",
+    "REPORT_SUPPLEMENT.json": "6cdf53ca15bebb8829f42b5b3a1013571f1d8d4df83d054ab9935fa1bb5a8f0d",
+    "REPORT_SUPPLEMENT_COMPARISONS.csv": "39a08d071373a6a30c0bbc2b06e4dd01630432ee5fe529ff24a858db6a20b9c8",
+    "REPORT_SUPPLEMENT_COMPARISONS.json": "c46738a38bb35ab86ba2163260e31a225aca07c807e021225d3c38fd09f0cf46",
+    "REPORT_SUPPLEMENT_COMPARISONS.md": "b1693ff7268f1cb6c901dff1fee39a3135a80ca688b193079411e0d2fe9b3721",
+    "control_aliases.json": "dcd7097475a1a0b67ceceaf1509e4c780655c7ec5f0cd0e041e25fcdcad2b87b"
+  },
+  "comparison_counts": {
+    "across_lean": 56,
+    "curve_strength": 164,
+    "shaft_rotation_sd": 164
+  },
+  "unique_cells": 26,
+  "figure_count": 6456,
+  "figure_formats": {
+    ".png": 2408,
+    ".pdf": 2024,
+    ".svg": 2024
+  },
+  "unique_normalized_paths": 6456,
+  "source_sha256": {
+    "matched_supplement_pipeline.py": "6590c485e5f8eb71b12ae2616ddb9c30b99e8a762aad781ddb3de64f2cd572f3",
+    "matched_formatting.py": "67971a489527c9bfe43d6948afc6248746a81d5124917032e56238907e1a472f",
+    "matched_supplement_figures.py": "8a61cc4df94a59b4a8ee8ab110d51899e2390587e1f76862a6c871ea884f5754",
+    "matched_figure_identity.py": "fc475ced792c889c2e63a216b7194da2f0ab27ca8e940e472fcbb15c2b68e4d1",
+    "matched_supplement_report.py": "048455151fc708504c7baa64160a245ccd526a034755e09a343601f0674dac8d",
+    "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
+    "matched_report.py": "0509d3bd122b6c5eec38b90921cd851840d6184534da248c9faeec9cae72e93c",
+    "matched_report_plots.py": "ff9461237861bd5fbc22a6e6be7a151bb35d8ea8b021a1d7ced4f4aef19a251b",
+    "academic_plots.py": "0a32b4176cb114d62e96b1cc56adb177a74d093a55f40379c1fe0cf47ff427cb",
+    "density.py": "d444779f6ba6179e0fd87348c9b60f901a853e4558afa4cae3e732ff675640ad",
+    "matched_sensitivity.py": "95b2aa389be3a21ee30b3a56ef49d5a07ccf2e649f7299fb9189aaad086729cf",
+    "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a",
+    "scenario_scoring.py": "5b472bfde3663f6d9c9904e95f247e2d7babe0d6c0ff5da79ddecf3636e2f12b",
+    "uncertainty.py": "fb62f5b8a98208bfac3756f692a8d2eb95ce38d0d042c31faa3fea2781857265",
+    "matched_pair_social.py": "16a4a48eb32432cbbb39648150b5e428c014af920845e006ddf12be0375fe369"
+  },
+  "input_sha256": {
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/matrix_plan.json": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_v1/matrix_plan.json": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_primary_face/matrix_plan.json": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_control_face/matrix_plan.json": "541f3d1ed651dc364c695182d38d116885e428e2806f30e25d72444221c73091",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/driver_control_speed/matrix_plan.json": "1adf7ae296cc1a3779f6563314b0878682c16299b697e2dc11def601132d4fc6",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/review_followups/SUPPLEMENTAL_EXECUTION_INVENTORY.json": "d414750473fde94622d35ce137dee6820a33e71c70e20635dec5c40dd6585117",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/source_transition_supplement.json": "cf622694964b0dc6c2ca0c24b92f9fa8ee5365721219069283aca1f6804a8981",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/common_targets.json": "79cac0bc5fcac90cdd2f708c75c3714401c5771a09512c259d8222e607375c75",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_pilot_v1/matrix_plan.json": "491a37dd430b4de0946089b75db11db5fe17016df3b98ff32d6c819f664af073",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/protocol_name_recovery_v6/expected_numeric_hashes.json": "59a922fbcd2c06b23674466538d992f5169628464783adbcb6353a4cfb921edd"
+  }
+}
