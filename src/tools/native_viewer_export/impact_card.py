@@ -16,6 +16,7 @@ Right-handed, Z-up. Unavailable is never zero: any failure returns a reason.
 
 from __future__ import annotations
 
+from dataclasses import replace
 import math
 from typing import TYPE_CHECKING
 
@@ -24,6 +25,7 @@ import numpy as np
 from src.shared.python.impact_parameters import (
     BallObservation,
     ClubheadSeries,
+    ImpactParameters,
     TargetFrame,
     extract_impact_parameters,
 )
@@ -38,6 +40,10 @@ if TYPE_CHECKING:
     from src.tools.native_viewer_export.core import SwingInput
 
 TARGET_SOURCE = "address_face_normal"
+#: Largest contact offset from the face centre still counted as a strike. It is
+#: wider than half the face height of every club, so a contact further out
+#: lies off the face (the model face passed the ball without striking it).
+MAX_FACE_OFFSET_M = 0.050
 #: Failures that become an "unavailable" reason rather than an exception
 #: (``BackendUnavailable`` is a ``RuntimeError``).
 _EXPECTED_ERRORS = (ValueError, KeyError, RuntimeError, OSError, TypeError)
@@ -110,6 +116,27 @@ def ball_contact_point(
     return centre - ball.radius_m * normal / length
 
 
+def _on_face_only(params: ImpactParameters) -> ImpactParameters:
+    """``params`` with an off-face contact replaced by an "unavailable" reason.
+
+    A contact point further than :data:`MAX_FACE_OFFSET_M` from the face centre
+    is not on any club face: the model face passed the ball without striking
+    it, so no strike location is claimed. The measured miss is kept in the
+    reason. Postcondition: a returned toe/high pair lies within the bound.
+    """
+    if params.toe_mm is None or params.high_mm is None:
+        return params
+    if math.hypot(params.toe_mm, params.high_mm) <= MAX_FACE_OFFSET_M * 1000.0:
+        return params
+    reason = (
+        f"ball contact off the face (toe {params.toe_mm:+.0f} mm, high "
+        f"{params.high_mm:+.0f} mm from the face centre): the model face misses "
+        "the ball"
+    )
+    unavailable = {**params.unavailable, "toe_mm": reason, "high_mm": reason}
+    return replace(params, toe_mm=None, high_mm=None, unavailable=unavailable)
+
+
 def card_from_series(
     series: ClubheadSeries,
     impact_time_s: float,
@@ -139,7 +166,7 @@ def card_from_series(
     params = extract_impact_parameters(
         series, address_target_frame(series), contact_index=contact, ball=observation
     )
-    card = build_impact_card(params)
+    card = build_impact_card(_on_face_only(params))
     card.extras["target_source"] = TARGET_SOURCE
     if ball is not None:
         card.extras["ball_source"] = ball.source

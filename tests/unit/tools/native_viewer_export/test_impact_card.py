@@ -429,6 +429,18 @@ def test_contact_offset_along_the_high_axis_is_high() -> None:
     assert _toe_high(card) == pytest.approx((0.0, 5.0), abs=0.5)
 
 
+def test_contact_off_the_face_is_unavailable_with_the_measured_miss() -> None:
+    # a contact point 80 mm toward the toe is beyond any club face: the model
+    # face missed the ball, so no strike location is claimed
+    series = _line_series([1.0, 0.0, 0.0])
+    toe = np.asarray(series.toe_axis[0])
+    card = impact_card.card_from_series(series, 0.15, _placement(series, 0.080 * toe))
+    row = _rows(card)["impact_location"]
+    assert row.value is None
+    assert "off the face" in row.reason
+    assert "toe +80" in row.reason
+
+
 def test_no_ball_leaves_impact_location_unavailable_with_a_reason() -> None:
     card = impact_card.card_from_series(_line_series([1.0, 0.0, 0.0]), 0.15)
     row = _rows(card)["impact_location"]
@@ -452,9 +464,11 @@ def test_fixture_card_with_the_address_ball_records_its_source() -> None:
     swing = dataclasses.replace(swing, ball=placed)
     card = impact_card.impact_card_for(swing, detect_impact_time_s(swing), swing.ball)
     assert isinstance(card, ImpactCard), card
-    # plumbing only: the committed fixture is a stale pose set (#12223), so the
-    # offset magnitude is not golf-realistic and is deliberately not asserted
-    assert np.isfinite(_toe_high(card)).all()
+    # the committed fixture face passes the address ball far from its centre
+    # (#12223), so the location is either a measured on-face strike or an
+    # off-face reason -- never an off-face number
+    row = _rows(card)["impact_location"]
+    assert row.value is not None or "off the face" in row.reason
     assert card.extras["ball_source"] == placed.source
     without = impact_card.impact_card_for(swing, detect_impact_time_s(swing))
     assert _rows(without)["impact_location"].value is None

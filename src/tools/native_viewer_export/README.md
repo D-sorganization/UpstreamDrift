@@ -163,7 +163,10 @@ sample, and toe/high are its offsets from the face centre along the face toe axi
 (positive toward the toe) and `toe x normal`; the card records
 `extras.ball_source` (the placement source, e.g. `address_geometry`). With the
 address-geometry ball this is the offset from the address face line, not a
-measured contact. Without a ball the row stays unavailable ("needs the ball
+measured contact. A contact more than 50 mm (`MAX_FACE_OFFSET_M`) from the face
+centre lies off every club face. That means the model face passed the ball
+without striking it, so the row is "unavailable" and its reason carries the
+measured miss. Without a ball the row stays unavailable ("needs the ball
 contact point (no ball placement supplied)"). When no card can be computed (no MuJoCo, no club, speed
 below 1 m/s) nothing is drawn, `ExportResult.impact_card` holds the reason, and
 the showcase manifest records it. The panel shows model estimates, not a
