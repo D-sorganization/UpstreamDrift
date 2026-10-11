@@ -1,3 +1,13 @@
+# Active: 7-Iron MSK Grip Calibration, #12042
+
+- Branch `claude/12042-iron7-msk-cal` (stacked on #12247). `msk_club_grip_calibration.json` now has `iron7` entries for `golf_humanoid` (grip gaps 0.04 / 0.02 mm, landmark RMS 14.9 mm) and `golf_humanoid_scaled` (0.24 / 0.25 mm, 40.0 mm), from the existing `msk_club_calibration --club iron7` CLI. `render_msk_club.py` now draws and measures the `--club` it tracks: before, the viewer loaded `golf_humanoid.osim` with its committed driver, so a 7-iron render showed the driver.
+
+# Active: Neutral Hip Zero-Twist and the MSK Turn Render, #12042
+
+- Branch `claude/12042-turn-slices`. `hip_rotation_zero` places `hip_rotation = 0` at the measured address thigh twist, and the ±40° bound moves with it. The canonical specs carry +45/−26° (lead/trail), so the lead hip is pinned at +40° at impact. `--hip-zero-twist neutral` (opt-in; default `capture` keeps the canonical receipts) uses 0/0. Pelvis turn is then within 3.2° of the markers at top and impact on both captures, with IK 25.6/22.9 mm. FD is 51.2 mm on the driver, but 91.2 mm on the 7-iron (after impact). Evidence: `evidence/hip_zero_twist_12042/`; calc record in `hip_axis_mirroring.tex`, section "Neutral Hip Zero-Twist and the Pelvis at Impact".
+- `render_msk_club.py --capture --club --mode` tracks with the capture turn targets and planted feet (shared `msk_turn_targets.tracking_inputs`).
+- Open: owner decision on the `neutral` default (regenerates canonical receipts and fixtures); trail hip now reaches −40°; upper-trunk over-twist at the top (slice 7).
+
 # Active: Measured Driver Club Cluster, #12221
 
 - Branch `claude/12221-driver-cluster`, stacked on `claude/12221-fixed-triad`. `evidence/club_markers/driver.json` (from the calibrated `anthro_driver_seeds` receipt at `1bef553457`) is now in the driver document. `anthro_driver`, `anthro_driver_seeds` and `anthro_driver_drake`, the OpenSim driver export, the inventory hashes and the tutorial hash `4ee2c43d` are regenerated.
@@ -1248,3 +1258,7 @@ exclusions. See `F07_NATIVE_BODY_INERTIA_TURNOVER.md` for the failed run,
 provenance and validation. Full epic qualification remains open.
 Concurrent remote ledger refresh `7877625369` is retained through a normal merge;
 the generated ledger is refreshed from the restored immutable receipt bytes.
+
+## Manufactured Native Diagnostics — #12275
+
+Exact synthetic MuJoCo geometry/zero-effort, short feedback replay, OpenSim property, Pinocchio and Drake observations are retained at `docs/development/feedback_controls/experiments/manufactured_native_diagnostics_20261011/`. See its README and SHA-bound manifest. Failed attempts are preserved. No capture, equilibrium, contact calibration, physiology, production replay or 17-row/six-ecosystem qualification is implied; all production variants remain unqualified.

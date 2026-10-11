@@ -490,6 +490,15 @@ class HipCalibrationOptions:
     torsional_patch_m: float | None = None
     hip_zero_twist: str = DEFAULT_HIP_ZERO_TWIST
 
+    def __post_init__(self) -> None:
+        """Reject a zero-twist mode that skipped calibration cannot apply."""
+        if self.skip_hip_calibration and self.hip_zero_twist != DEFAULT_HIP_ZERO_TWIST:
+            raise ValueError(
+                "skip_hip_calibration keeps the input femur frames, so "
+                f"hip_zero_twist={self.hip_zero_twist!r} cannot be applied; "
+                f"use {DEFAULT_HIP_ZERO_TWIST!r} or calibrate the hips"
+            )
+
 
 def add_hip_zero_twist_argument(parser: argparse.ArgumentParser) -> None:
     """Add ``--hip-zero-twist`` to a parser."""
