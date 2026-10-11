@@ -1424,15 +1424,6 @@
       "issue": 12278,
       "reason": "Issue #12278: shot pattern analysis integration - assemble_qualified_interpretation exceeds parameters budget (9 > 8).",
       "expires_on": "2026-12-31"
-    },
-    {
-      "path": "src/tools/shot_pattern_analysis/matched_supplement_pipeline.py",
-      "symbol": "build_final_supplement_report",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - build_final_supplement_report exceeds function-lines budget (236 > 100).",
-      "expires_on": "2026-12-31"
     }
   ]
 }

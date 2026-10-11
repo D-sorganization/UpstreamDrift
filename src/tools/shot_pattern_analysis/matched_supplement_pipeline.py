@@ -12,6 +12,7 @@ import json
 import re
 import sys
 from collections import defaultdict
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -666,38 +667,24 @@ def _estimate_ci(value: dict[str, Any], unit: str) -> str:
     return f"{estimate}{unit} {interval}"
 
 
-def build_final_supplement_report(
-    *,
-    original_primary_root: Path,
-    original_control_root: Path,
-    protocol_roots: dict[str, Path],
-    inventory_path: Path,
-    output_dir: Path,
-    transition_receipt_path: Path,
-    transition_receipt_sha256: str,
-    expected_numeric_hashes_path: Path | None = None,
-) -> dict[str, Path]:
-    """Validate accepted roots, compare common-index populations, and export.
+@dataclass(frozen=True)
+class _PipelineSources:
+    original_reports: dict
+    original_cells: list[dict]
+    supplement: dict
+    report_sources: dict
+    pair_specs: list[dict]
 
-    A source-transition receipt is required because the supplement execution
-    may differ from original matrix sources. The pair API validates it for each
-    cross-snapshot pair; same-snapshot pairs need no receipt.
-    """
-    output_dir = Path(output_dir).resolve()
-    if output_dir.exists() and any(output_dir.iterdir()):
-        raise FileExistsError("supplement report output directory must be empty")
-    numeric_reference = _load_numeric_parity_reference(expected_numeric_hashes_path)
-    original_reports: dict[str, dict] = {}
-    original_cells: list[dict[str, Any]] = []
-    for key, root in (
-        ("original_primary", original_primary_root),
-        ("original_control", original_control_root),
-    ):
-        report, refs = _load_original_sources(Path(root), key)
-        original_reports[key] = report
-        original_cells.extend(refs)
-    supplement = load_supplement_sources(protocol_roots, inventory_path, stage="final")
-    report_sources = _report_source_hashes()
+
+@dataclass(frozen=True)
+class _PublishedHashes:
+    artifact_names: dict[str, str]
+    artifact_sha256: dict[str, str]
+    source_cells_sha256: dict
+
+
+def _supplement_figure_sources(supplement: dict) -> list[dict]:
+    """Expand verified aliases while retaining their source and requested config."""
     supplement_cells = list(supplement["unique_cells"])
     for alias in supplement["aliases"]:
         if alias["proof_status"] == "verified":
@@ -718,20 +705,39 @@ def build_final_supplement_report(
             supplement_cells.append(alias_ref)
     for ref in supplement["unique_cells"]:
         ref["_execution"] = supplement["execution"]
+    return supplement_cells
+
+
+def _load_pipeline_sources(
+    original_primary_root: Path,
+    original_control_root: Path,
+    protocol_roots: dict[str, Path],
+    inventory_path: Path,
+) -> _PipelineSources:
+    original_reports: dict[str, dict] = {}
+    original_cells: list[dict[str, Any]] = []
+    for key, root in (
+        ("original_primary", original_primary_root),
+        ("original_control", original_control_root),
+    ):
+        report, refs = _load_original_sources(Path(root), key)
+        original_reports[key] = report
+        original_cells.extend(refs)
+    supplement = load_supplement_sources(protocol_roots, inventory_path, stage="final")
+    report_sources = _report_source_hashes()
+    supplement_cells = _supplement_figure_sources(supplement)
     cells = [*original_cells, *supplement_cells]
     pair_specs = select_explicit_pairs(cells)
     validate_planned_figure_identities(pair_specs, supplement["unique_cells"])
-    transition_path = Path(transition_receipt_path).resolve()
-    if (
-        not transition_path.is_file()
-        or _sha256(transition_path) != transition_receipt_sha256
-    ):
-        raise ValueError("source-transition receipt is missing or has the wrong hash")
-    _recheck_transition_evidence(transition_path, transition_receipt_sha256)
-    comparison_results = [
-        _pair_result(pair, transition_path, transition_receipt_sha256)
-        for pair in pair_specs
-    ]
+    return _PipelineSources(
+        original_reports, original_cells, supplement, report_sources, pair_specs
+    )
+
+
+def _write_numeric_artifacts(
+    sources: _PipelineSources, comparison_results: list[dict], output_dir: Path
+) -> dict[str, Path]:
+    supplement, original_reports = sources.supplement, sources.original_reports
     # Freeze the selected-cell inputs before any figure is written. Figures are
     # derived only from validated saved CSV/flight-sample data.
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -750,7 +756,13 @@ def build_final_supplement_report(
         render_comparison_markdown(comparison_results), encoding="utf-8"
     )
     paths["comparison_markdown"] = markdown_path
-    _check_numeric_parity_reference(numeric_reference, output_dir)
+    return paths
+
+
+def _write_pipeline_figures(
+    sources: _PipelineSources, comparison_results: list[dict], output_dir: Path
+) -> tuple[Path, list[dict]]:
+    supplement, pair_specs = sources.supplement, sources.pair_specs
     figure_dir = output_dir / "figures"
     figure_ledger = []
     for ref in supplement["unique_cells"]:
@@ -773,7 +785,15 @@ def build_final_supplement_report(
         + "\n",
         encoding="utf-8",
     )
-    paths["figure_ledger"] = ledger_path
+    return ledger_path, figure_ledger
+
+
+def _recheck_pipeline_inputs(
+    sources: _PipelineSources, roots: tuple[Path, Path], inventory_path: Path
+) -> None:
+    original_primary_root, original_control_root = roots
+    original_reports, original_cells = sources.original_reports, sources.original_cells
+    supplement = sources.supplement
     plan_hashes = {
         str(Path(original_primary_root).resolve()): original_reports[
             "original_primary"
@@ -796,11 +816,113 @@ def build_final_supplement_report(
         Path(original_control_root).resolve().parent,
         original_reports["original_control"]["common_target_provenance"],
     )
-    _recheck_transition_evidence(transition_path, transition_receipt_sha256)
-    if _report_source_hashes() != report_sources:
-        raise RuntimeError(
-            "reporting or figure source changed during output generation"
+
+
+def _original_source_receipts(original_reports: dict, roots: tuple[Path, Path]) -> dict:
+    original_primary_root, original_control_root = roots
+    return {
+        key: {
+            "root": str(Path(root).resolve()),
+            "plan_sha256": original_reports[key]["plan_sha256"],
+            "planned_cells": original_reports[key]["planned_cells"],
+            "counts": original_reports[key]["counts"],
+            "common_targets_sha256": original_reports[key].get("common_targets_sha256"),
+            "common_target_provenance": original_reports[key].get(
+                "common_target_provenance"
+            ),
+        }
+        for key, root in (
+            ("original_primary", original_primary_root),
+            ("original_control", original_control_root),
         )
+    }
+
+
+def _pipeline_receipt_payload(
+    sources: _PipelineSources,
+    roots: tuple[Path, Path],
+    inventory_path: Path,
+    output_dir: Path,
+    transition: tuple[Path, str],
+    comparison_results: list[dict],
+    artifacts: _PublishedHashes,
+    numeric_reference: dict | None,
+) -> dict:
+    original_reports, supplement = sources.original_reports, sources.supplement
+    report_sources = sources.report_sources
+    transition_path, transition_receipt_sha256 = transition
+    original_inventory_path = output_dir / "REPORT_ORIGINAL_SOURCE_INVENTORY.csv"
+    ledger_path = output_dir / "REPORT_SUPPLEMENT_FIGURES.json"
+    artifact_names, artifact_sha256 = (
+        artifacts.artifact_names,
+        artifacts.artifact_sha256,
+    )
+    source_cells_sha256 = artifacts.source_cells_sha256
+    return {
+        **(
+            {"numeric_parity_reference": numeric_reference}
+            if numeric_reference is not None
+            else {}
+        ),
+        "schema": "matched-supplement-pipeline-receipt/1",
+        "stage": "final",
+        "issue": 12000,
+        "original_sources": _original_source_receipts(original_reports, roots),
+        "supplement_inventory_sha256": supplement["inventory_sha256"],
+        "original_source_inventory_sha256": _sha256(original_inventory_path),
+        "source_transition_receipt_path": str(transition_path),
+        "inventory_path": str(Path(inventory_path).resolve()),
+        "artifact_sha256": artifact_sha256,
+        "artifact_paths": artifact_names,
+        "source_cells_sha256": source_cells_sha256,
+        "report_source_sha256": report_sources,
+        "supplement_protocols": supplement["protocols"],
+        "unique_executed_cells": supplement["unique_executed_cells"],
+        "verified_control_aliases": [
+            ref["alias_cell"]
+            for ref in supplement["control_aliases"]["references"]
+            if supplement["control_aliases"]["status_by_alias"]
+            .get(ref["alias_cell"], {})
+            .get("proof_status")
+            == "verified"
+        ],
+        "comparison_count": len(comparison_results),
+        "comparison_counts_by_kind": {
+            kind: sum(
+                result.get("comparison_kind") == kind for result in comparison_results
+            )
+            for kind in (
+                "curve_strength",
+                "shaft_rotation_sd",
+                "across_lean",
+                "speed_bound",
+            )
+        },
+        "source_transition_receipt_sha256": transition_receipt_sha256,
+        "comparison_analysis_source_sha256": sorted(
+            {
+                json.dumps(result.get("analysis_source_sha256", {}), sort_keys=True)
+                for result in comparison_results
+            }
+        ),
+        "postprocessing_source_sha256": report_sources,
+        "figure_ledger_sha256": _sha256(ledger_path),
+        "interpretation": "separate add-on report; original matrices and inventories remain unchanged",
+        "monte_carlo_uncertainty": "shared seeded primitive draws; paired intervals describe saved simulation samples, not independent replications or multiplicity-adjusted discoveries",
+    }
+
+
+def _write_pipeline_receipt(
+    sources: _PipelineSources,
+    roots: tuple[Path, Path],
+    inventory_path: Path,
+    output_dir: Path,
+    transition: tuple[Path, str],
+    comparison_results: list[dict],
+    figure_ledger: list[dict],
+    numeric_reference: dict | None,
+) -> Path:
+    original_cells, supplement = sources.original_cells, sources.supplement
     artifact_names = {
         "report": "REPORT_SUPPLEMENT.json",
         "inventory": "REPORT_SUPPLEMENT.csv",
@@ -819,88 +941,79 @@ def build_final_supplement_report(
     )
     _check_numeric_parity_reference(numeric_reference, output_dir)
     _verify_figure_assets(output_dir, {"figures": figure_ledger})
+    payload = _pipeline_receipt_payload(
+        sources,
+        roots,
+        inventory_path,
+        output_dir,
+        transition,
+        comparison_results,
+        _PublishedHashes(artifact_names, artifact_sha256, source_cells_sha256),
+        numeric_reference,
+    )
     pipeline_path = output_dir / "REPORT_SUPPLEMENT_PIPELINE.json"
     pipeline_path.write_text(
-        json.dumps(
-            {
-                **(
-                    {"numeric_parity_reference": numeric_reference}
-                    if numeric_reference is not None
-                    else {}
-                ),
-                "schema": "matched-supplement-pipeline-receipt/1",
-                "stage": "final",
-                "issue": 12000,
-                "original_sources": {
-                    key: {
-                        "root": str(Path(root).resolve()),
-                        "plan_sha256": original_reports[key]["plan_sha256"],
-                        "planned_cells": original_reports[key]["planned_cells"],
-                        "counts": original_reports[key]["counts"],
-                        "common_targets_sha256": original_reports[key].get(
-                            "common_targets_sha256"
-                        ),
-                        "common_target_provenance": original_reports[key].get(
-                            "common_target_provenance"
-                        ),
-                    }
-                    for key, root in (
-                        ("original_primary", original_primary_root),
-                        ("original_control", original_control_root),
-                    )
-                },
-                "supplement_inventory_sha256": supplement["inventory_sha256"],
-                "original_source_inventory_sha256": _sha256(original_inventory_path),
-                "source_transition_receipt_path": str(transition_path),
-                "inventory_path": str(Path(inventory_path).resolve()),
-                "artifact_sha256": artifact_sha256,
-                "artifact_paths": artifact_names,
-                "source_cells_sha256": source_cells_sha256,
-                "report_source_sha256": report_sources,
-                "supplement_protocols": supplement["protocols"],
-                "unique_executed_cells": supplement["unique_executed_cells"],
-                "verified_control_aliases": [
-                    ref["alias_cell"]
-                    for ref in supplement["control_aliases"]["references"]
-                    if supplement["control_aliases"]["status_by_alias"]
-                    .get(ref["alias_cell"], {})
-                    .get("proof_status")
-                    == "verified"
-                ],
-                "comparison_count": len(comparison_results),
-                "comparison_counts_by_kind": {
-                    kind: sum(
-                        result.get("comparison_kind") == kind
-                        for result in comparison_results
-                    )
-                    for kind in (
-                        "curve_strength",
-                        "shaft_rotation_sd",
-                        "across_lean",
-                        "speed_bound",
-                    )
-                },
-                "source_transition_receipt_sha256": transition_receipt_sha256,
-                "comparison_analysis_source_sha256": sorted(
-                    {
-                        json.dumps(
-                            result.get("analysis_source_sha256", {}), sort_keys=True
-                        )
-                        for result in comparison_results
-                    }
-                ),
-                "postprocessing_source_sha256": report_sources,
-                "figure_ledger_sha256": _sha256(ledger_path),
-                "interpretation": "separate add-on report; original matrices and inventories remain unchanged",
-                "monte_carlo_uncertainty": "shared seeded primitive draws; paired intervals describe saved simulation samples, not independent replications or multiplicity-adjusted discoveries",
-            },
-            indent=2,
-            sort_keys=True,
-        )
-        + "\n",
-        encoding="utf-8",
+        json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
-    paths["pipeline_receipt"] = pipeline_path
+    return pipeline_path
+
+
+def build_final_supplement_report(
+    *,
+    original_primary_root: Path,
+    original_control_root: Path,
+    protocol_roots: dict[str, Path],
+    inventory_path: Path,
+    output_dir: Path,
+    transition_receipt_path: Path,
+    transition_receipt_sha256: str,
+    expected_numeric_hashes_path: Path | None = None,
+) -> dict[str, Path]:
+    """Validate accepted roots, compare common-index populations, and export.
+
+    A source-transition receipt is required because the supplement execution
+    may differ from original matrix sources. The pair API validates it for each
+    cross-snapshot pair; same-snapshot pairs need no receipt.
+    """
+    output_dir = Path(output_dir).resolve()
+    if output_dir.exists() and any(output_dir.iterdir()):
+        raise FileExistsError("supplement report output directory must be empty")
+    numeric_reference = _load_numeric_parity_reference(expected_numeric_hashes_path)
+    roots = (original_primary_root, original_control_root)
+    sources = _load_pipeline_sources(*roots, protocol_roots, inventory_path)
+    transition_path = Path(transition_receipt_path).resolve()
+    if (
+        not transition_path.is_file()
+        or _sha256(transition_path) != transition_receipt_sha256
+    ):
+        raise ValueError("source-transition receipt is missing or has the wrong hash")
+    _recheck_transition_evidence(transition_path, transition_receipt_sha256)
+    comparison_results = [
+        _pair_result(pair, transition_path, transition_receipt_sha256)
+        for pair in sources.pair_specs
+    ]
+    paths = _write_numeric_artifacts(sources, comparison_results, output_dir)
+    _check_numeric_parity_reference(numeric_reference, output_dir)
+    ledger_path, figure_ledger = _write_pipeline_figures(
+        sources, comparison_results, output_dir
+    )
+    paths["figure_ledger"] = ledger_path
+    _recheck_pipeline_inputs(sources, roots, inventory_path)
+    _recheck_transition_evidence(transition_path, transition_receipt_sha256)
+    if _report_source_hashes() != sources.report_sources:
+        raise RuntimeError(
+            "reporting or figure source changed during output generation"
+        )
+    paths["pipeline_receipt"] = _write_pipeline_receipt(
+        sources,
+        roots,
+        inventory_path,
+        output_dir,
+        (transition_path, transition_receipt_sha256),
+        comparison_results,
+        figure_ledger,
+        numeric_reference,
+    )
     return paths
 
 
