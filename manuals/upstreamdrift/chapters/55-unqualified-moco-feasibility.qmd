@@ -1,0 +1,71 @@
+# Explicitly Unqualified Native Moco Feasibility
+
+## Purpose and Authority
+
+Issue #12225 implements the epic #11784 generic-model decision: unavailable
+human passive-force limits do not require inventing limits before a conditional
+numerical experiment. This opt-in permits the existing Moco solver and saved
+excitation replay to run. It grants no physiological, anatomical, capture,
+publication or full-swing qualification.
+
+## Model and Input Identity
+
+`NativeMocoRequest.allow_unqualified_passive_diagnostic` is an explicit boolean,
+defaulting to false. It is valid only when `passive_policy` is unavailable.
+Strings, integers and null are rejected. The true disposition contributes to
+the request SHA-256; default false preserves the existing request identity.
+The strict JSON entry point accepts the same optional field. Preparation saves
+the disposition, and solve/export reject disagreement with the frozen request.
+
+## Numerical Admission Equation
+
+Let P mean a present, admitted, source-bound physical-body audit, B the complete
+ordered preparation blocker tuple, D the explicit diagnostic disposition, and
+O a present native passive-observation digest. Software readiness is
+
+`P and (B is empty or (D and O and B == ("passive-policy-unavailable",)))`.
+
+The diagnostic branch does not remove the blocker. It permits exactly that
+single unavailable-policy disposition while keeping its native observation.
+No numeric muscle-force threshold, epsilon inertia, new optimizer or source
+law is introduced. Supplied passive limits cannot be overridden by this flag.
+
+## State, Force and Observation Semantics
+
+The existing fresh native source/state and passive observers still run. They
+must evaluate finite native quantities and preserve their original blockers.
+Complete named state, declared constraints/chart, capture registration, marker
+bindings, control coverage and any explicit mixed-actuation profile remain
+necessary. Missing observation evidence or any additional blocker prohibits
+the solve. The body-property sidecar is independently re-audited before solve
+and export; source, guess, original clock and registered reference remain bound.
+
+## Independent Replay and Interpretation
+
+The same solver, T01 saved control bundle, independent replay and marker score
+are used. The preparation retains `passive-policy-unavailable`; preparation and
+solve retain `not-qualified-for-muscle-matching`. Successful convergence or a
+finite replay score is not passive admission. Report observed fiber lengths,
+elastic/damping/tendon forces, assistance and all remaining scientific gates.
+Never silently modify muscle parameters to make a diagnostic fit plausible.
+
+## Validation and Reproduction
+
+`tests/opensim/test_native_moco_diagnostic.py` starts RED with the missing opt-in.
+Actual OpenSim 4.6 tests cover both Millard and Thelen laws: default refusal,
+opted-in solve/export/fresh replay/score, retained blocker and qualification,
+additional blocker/absent observer/invalid physical audit refusal, request and
+preparation drift, invalid booleans, JSON round-trip and supplied-policy refusal.
+
+Run serially with the installed SDK interpreter, matching native `CASADIPATH`:
+
+```text
+python -m pytest tests/opensim/test_native_moco_diagnostic.py -q -o addopts=''
+```
+
+The 10 ms software fixture is not capture evidence. The conditional 557-muscle
+model's initial 56-by-56 mass matrix was positive definite in a separate local
+diagnostic; neither that observation nor this opt-in qualifies the failed
+original model or the generic shoulder registration. Full driver/iron horizons,
+muscular control, own support/contact/grip, complete-state independent replay
+and all 17 model/variant rows across six ecosystems remain required.
