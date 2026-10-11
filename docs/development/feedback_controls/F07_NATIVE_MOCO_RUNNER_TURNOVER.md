@@ -160,7 +160,7 @@ central and forward; it rejects other values before MocoStudy creation.
 The builder applies the selected scheme to MocoCasADiSolver, reads it back,
 and refuses a mismatch before creating its initial guess. Because the serialized config participates in request
 identity, loading an older request with the omitted field supplies the default
-but produces a new typed identity; historical request bytes and receipts`nremain
+but produces a new typed identity; historical request bytes and receipts remain
 unchanged.
 
 The pinned OpenSim 4.6 property audit confirmed that a fresh solver stores and
