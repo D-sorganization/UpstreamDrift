@@ -39,7 +39,7 @@ are not native acceptance evidence.
 
 ## Current Status
 
-Draft PR #12232 remains in review on `fix/12231-source-bound-visual-assets`.
+PR #12232 remains in review on `fix/12231-source-bound-visual-assets`.
 The current integration includes a normal merge of main and regenerated
 agent-context views. OpenSim 4.6 regression validation passed 36 tests with
 zero skips across `test_native_muscle_bundle.py` and
@@ -53,3 +53,7 @@ its exact committed bytes restored. The explicit Prettier exclusion preserves
 its byte-bound provenance and ledger freshness. Normal commit/push hooks and
 remote CI must pass on the final head before merge. Issue #12231 remains open
 until merge; this contract supplies no full-capture or physical qualification.
+
+## Current Main Reconciliation
+
+Normal merge of main `9e5f87c4dd` preserves the current club-face calibration and fixture bytes. The concurrent visual-branch formatting-only commit was compared as parsed JSON before resolving its three fixture conflicts to current main. Explicit formatter exclusions retain those canonical bytes. Agent-context views were regenerated and checked; all boundary reviews match their source inputs. The pinned OpenSim 4.6 regression again passed 36 tests with zero skips. Chapter 49 is included with its unresolved inventory blocker; approved calculations remain zero and manual release stays blocked. Full-capture muscle matching, independent replay, physical support/grip and all 17 production parity rows remain open.
