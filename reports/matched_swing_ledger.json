@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-11T00:08:37Z",
+  "generated_at": "2026-10-11T00:10:03Z",
   "rows": [
     {
       "acceptance": null,
@@ -627,9 +627,9 @@
             "unit": "hash"
           },
           {
-            "measured": 0.06013985402912689,
+            "measured": 0.07884009162155549,
             "name": "whole_marker_rmse_m",
-            "reason": "whole RMSE 60.14 mm > 60.00 mm",
+            "reason": "whole RMSE 78.84 mm > 60.00 mm",
             "status": "failed",
             "threshold": 0.06,
             "unit": "m"
@@ -643,7 +643,7 @@
             "unit": "N"
           },
           {
-            "measured": 0.0037613261683073244,
+            "measured": 0.004496093891998727,
             "name": "max_closure_residual_m",
             "reason": "",
             "status": "passed",
@@ -651,9 +651,9 @@
             "unit": "m"
           },
           {
-            "measured": 0.0,
+            "measured": 0.009838090737446153,
             "name": "weight_fraction",
-            "reason": "weight fraction range [0.00, 3.97] outside [0.2, 3.0]",
+            "reason": "weight fraction range [0.01, 3.12] outside [0.2, 3.0]",
             "status": "failed",
             "threshold": 0.2,
             "unit": "BW"
@@ -709,15 +709,15 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
-        "fd_address_to_impact_rmse_m": null,
-        "fd_after_impact_rmse_m": null,
+        "fd_address_to_impact_rmse_m": 0.03428927707177974,
+        "fd_after_impact_rmse_m": 0.1410136616643837,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
-        "whole_marker_rmse_m": 0.06013985402912689
+        "whole_marker_rmse_m": 0.07884009162155549
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_driver_drake/receipt.json",
-      "sha256": "c8179ffc028db1d11224821c2171c76397e8590b2de51012a739d9459d013966"
+      "sha256": "2ffb446405e1a658575a3103ad3c008c6bc84a1e9c4a9f167c5d87382e7c7624"
     },
     {
       "acceptance": null,
