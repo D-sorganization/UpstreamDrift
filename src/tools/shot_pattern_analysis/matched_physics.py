@@ -43,6 +43,55 @@ class MatchedDeliveryOutcome:
     contact_loft_deg: float
 
 
+def _validate_delivery_inputs(
+    config: MatchedConfig,
+    nominal_face_deg: float,
+    path_deg: float,
+    shaft_rotation_deg: float,
+    contact_horizontal_m: float,
+    contact_vertical_m: float,
+) -> None:
+    """Reject unsupported geometry in the established diagnostic order."""
+    if not isinstance(config, MatchedConfig):
+        raise TypeError("config must be MatchedConfig")
+    values = (
+        nominal_face_deg,
+        path_deg,
+        shaft_rotation_deg,
+        contact_horizontal_m,
+        contact_vertical_m,
+    )
+    if not all(math.isfinite(value) for value in values):
+        raise UnsupportedShot("delivery_nonfinite")
+    if any(abs(value) > 30 for value in values[:3]):
+        raise UnsupportedShot("delivery_out_of_range")
+    h, v = contact_horizontal_m, contact_vertical_m
+    if abs(h) > config.face_half_width_m or abs(v) > config.face_half_height_m:
+        raise UnsupportedShot("off_face")
+
+
+def _solve_ball_contact(
+    contact_input: RigidContactInput,
+    config: MatchedConfig,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Route the selected contact law and require finite airborne launch velocity."""
+    if config.contact_law == "incremental_coulomb_energetic":
+        contact = solve_incremental_contact(
+            contact_input,
+            energetic_restitution=config.cor,
+            steps_per_compression=config.steps_per_compression,
+            backend=config.contact_backend,
+        )
+    else:
+        contact = solve_rigid_contact(contact_input)
+    ball_velocity = np.asarray(contact.ball_velocity_mps, dtype=float)
+    if not np.all(np.isfinite(ball_velocity)):
+        raise RuntimeError("contact produced nonfinite ball velocity")
+    if ball_velocity[2] <= 0:
+        raise UnsupportedShot("nonairborne_launch")
+    return ball_velocity, np.asarray(contact.ball_angular_velocity_rad_s, dtype=float)
+
+
 class MatchedShotPhysics:
     """Map explicit club delivery and bounded face contact into ball flight."""
 
@@ -85,22 +134,15 @@ class MatchedShotPhysics:
         Geometric or nonairborne samples raise ``UnsupportedShot`` for runner
         population accounting. Numerical solver and flight failures propagate.
         """
-        if not isinstance(config, MatchedConfig):
-            raise TypeError("config must be MatchedConfig")
-        values = (
+        _validate_delivery_inputs(
+            config,
             nominal_face_deg,
             path_deg,
             shaft_rotation_deg,
             contact_horizontal_m,
             contact_vertical_m,
         )
-        if not all(math.isfinite(value) for value in values):
-            raise UnsupportedShot("delivery_nonfinite")
-        if any(abs(value) > 30 for value in values[:3]):
-            raise UnsupportedShot("delivery_out_of_range")
         h, v = contact_horizontal_m, contact_vertical_m
-        if abs(h) > config.face_half_width_m or abs(v) > config.face_half_height_m:
-            raise UnsupportedShot("off_face")
 
         delivered = club_delivery(
             config.loft_deg,
@@ -148,23 +190,12 @@ class MatchedShotPhysics:
             restitution=config.cor,
             friction_coefficient=config.friction_coefficient,
         )
-        if config.contact_law == "incremental_coulomb_energetic":
-            contact = solve_incremental_contact(
-                contact_input,
-                energetic_restitution=config.cor,
-                steps_per_compression=config.steps_per_compression,
-                backend=config.contact_backend,
-            )
-        else:
-            contact = solve_rigid_contact(contact_input)
-        ball_velocity = np.asarray(contact.ball_velocity_mps, dtype=float)
-        if not np.all(np.isfinite(ball_velocity)):
-            raise RuntimeError("contact produced nonfinite ball velocity")
-        if ball_velocity[2] <= 0:
-            raise UnsupportedShot("nonairborne_launch")
+        ball_velocity, ball_angular_velocity = _solve_ball_contact(
+            contact_input, config
+        )
         outcome = outcome_from_launch(
             ball_velocity,
-            np.asarray(contact.ball_angular_velocity_rad_s, dtype=float),
+            ball_angular_velocity,
             flight=self._flight,
             max_time_s=config.max_time_s,
             dt_s=config.dt_s,

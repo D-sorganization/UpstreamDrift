@@ -326,6 +326,48 @@ def _paired_results(
     return scoring, comparisons
 
 
+def _supported_record(
+    inputs: _ShotInputs,
+    delivered: MatchedDeliveryOutcome,
+) -> MatchedShotRecord:
+    """Assemble a supported record while keeping numerical failures fatal."""
+    outcome = delivered.outcome
+    if not all(
+        math.isfinite(v)
+        for v in (outcome.carry_x_m, outcome.carry_y_m, outcome.spin_rpm)
+    ):
+        raise RuntimeError("matched flight returned nonfinite values")
+    return MatchedShotRecord(
+        **inputs,
+        face_deg=delivered.delivered_face_deg,
+        loft_deg=delivered.delivered_loft_deg,
+        contact_face_deg=delivered.contact_face_deg,
+        contact_loft_deg=delivered.contact_loft_deg,
+        carry_x_m=outcome.carry_x_m,
+        carry_y_m=outcome.carry_y_m,
+        spin_rpm=outcome.spin_rpm,
+        launch_azimuth_deg=outcome.launch_azimuth_deg,
+        spin_axis_tilt_deg=(
+            outcome.spin_axis_tilt_deg if outcome.spin_axis_defined else None
+        ),
+        launch_elevation_deg=outcome.launch_elevation_deg,
+        ball_speed_mps=outcome.ball_speed_mps,
+    )
+
+
+def _input_diagnostics(request: ExperimentConfig, errors: np.ndarray) -> dict:
+    """Summarize the original paired, untruncated input matrix in field order."""
+    return {
+        "fields": list(NOISE_FIELDS),
+        "requested_standard_deviations": list(request.noise.standard_deviations),
+        "requested_correlation": request.noise.correlation_matrix().tolist(),
+        "realized_standard_deviations": np.std(errors, axis=0, ddof=1).tolist(),
+        "realized_covariance": np.cov(errors, rowvar=False, ddof=1).tolist(),
+        "distribution": "untruncated_multivariate_normal_assumption",
+        "paired_inputs": True,
+    }
+
+
 def run_matched_analysis(
     request: ExperimentConfig,
     *,
@@ -395,32 +437,8 @@ def run_matched_analysis(
                 inputs["status"] = exc.reason
                 rows.append(MatchedShotRecord(**inputs))
             else:
+                rows.append(_supported_record(inputs, delivered))
                 outcome = delivered.outcome
-                if not all(
-                    math.isfinite(v)
-                    for v in (outcome.carry_x_m, outcome.carry_y_m, outcome.spin_rpm)
-                ):
-                    raise RuntimeError("matched flight returned nonfinite values")
-                rows.append(
-                    MatchedShotRecord(
-                        **inputs,
-                        face_deg=delivered.delivered_face_deg,
-                        loft_deg=delivered.delivered_loft_deg,
-                        contact_face_deg=delivered.contact_face_deg,
-                        contact_loft_deg=delivered.contact_loft_deg,
-                        carry_x_m=outcome.carry_x_m,
-                        carry_y_m=outcome.carry_y_m,
-                        spin_rpm=outcome.spin_rpm,
-                        launch_azimuth_deg=outcome.launch_azimuth_deg,
-                        spin_axis_tilt_deg=(
-                            outcome.spin_axis_tilt_deg
-                            if outcome.spin_axis_defined
-                            else None
-                        ),
-                        launch_elevation_deg=outcome.launch_elevation_deg,
-                        ball_speed_mps=outcome.ball_speed_mps,
-                    )
-                )
                 if index < 5:
                     paths.append(outcome.trajectory_xy_m)
             if progress is not None and (
@@ -436,15 +454,7 @@ def run_matched_analysis(
         for name in nominals
     }
     scoring, comparisons = _paired_results(records, request, target, include_scoring)
-    diagnostics = {
-        "fields": list(NOISE_FIELDS),
-        "requested_standard_deviations": list(request.noise.standard_deviations),
-        "requested_correlation": request.noise.correlation_matrix().tolist(),
-        "realized_standard_deviations": np.std(errors, axis=0, ddof=1).tolist(),
-        "realized_covariance": np.cov(errors, rowvar=False, ddof=1).tolist(),
-        "distribution": "untruncated_multivariate_normal_assumption",
-        "paired_inputs": True,
-    }
+    diagnostics = _input_diagnostics(request, errors)
     return MatchedAnalysisResult(
         request,
         target,

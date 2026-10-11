@@ -231,6 +231,31 @@ def _summarize(
     }
 
 
+def _simulate_pattern(
+    engine: PhysicsProtocol,
+    config: AnalysisConfig,
+    pattern: PatternConfig,
+    face_deg: float,
+    *,
+    sample_trajectory: bool,
+) -> ShotOutcome:
+    """Preserve fixed-loft dispatch and the optional nominal shaft-rotation input."""
+    if config.delivery_mode == "shaft_rotation":
+        return engine.simulate(
+            face_deg=face_deg,
+            path_deg=pattern.path_deg,
+            config=config,
+            sample_trajectory=sample_trajectory,
+            nominal_face_deg=pattern.face_deg,
+        )
+    return engine.simulate(
+        face_deg=face_deg,
+        path_deg=pattern.path_deg,
+        config=config,
+        sample_trajectory=sample_trajectory,
+    )
+
+
 def run_analysis(
     config: AnalysisConfig,
     *,
@@ -266,27 +291,11 @@ def run_analysis(
         ]
     }
 
-    def simulate_pattern(
-        pattern: PatternConfig, face_deg: float, *, sample_trajectory: bool
-    ) -> ShotOutcome:
-        if config.delivery_mode == "shaft_rotation":
-            return engine.simulate(
-                face_deg=face_deg,
-                path_deg=pattern.path_deg,
-                config=config,
-                sample_trajectory=sample_trajectory,
-                nominal_face_deg=pattern.face_deg,
-            )
-        return engine.simulate(
-            face_deg=face_deg,
-            path_deg=pattern.path_deg,
-            config=config,
-            sample_trajectory=sample_trajectory,
-        )
-
     nominal = {
         pattern.name: _validate_outcome(
-            simulate_pattern(pattern, pattern.face_deg, sample_trajectory=True)
+            _simulate_pattern(
+                engine, config, pattern, pattern.face_deg, sample_trajectory=True
+            )
         )
         for pattern in patterns
     }
@@ -305,8 +314,12 @@ def run_analysis(
                 raise AnalysisCancelled("shot pattern analysis cancelled")
             face = pattern.face_deg + float(deviation)
             outcome = _validate_outcome(
-                simulate_pattern(
-                    pattern, face, sample_trajectory=index in sample_indices
+                _simulate_pattern(
+                    engine,
+                    config,
+                    pattern,
+                    face,
+                    sample_trajectory=index in sample_indices,
                 )
             )
             ax, ay = _rotate_to_aim(outcome.carry_x_m, outcome.carry_y_m, aim)
