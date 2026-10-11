@@ -12,7 +12,7 @@ All 49 repaired PNGs passed scoped reviews by Root, Sol, and Astra. Luna rendere
 
 The prior 1,122 PDF text-box overflow flags were resolved against painted-glyph evidence. Receipt: `phase2/validation/supplement_v6_vector_review_v2/bbox_painted_ink_boundary_review.json` (SHA256 `d44b5982b3513bb6b93d52927328cdbefa555994ffb277884bcfac38611f7e60`). Across 10,842 word-edge probes, all flagged words had painted on-page ink with at least 6.4952 pt edge clearance, and no raster had ink in its outer 2-pt band. Six representative pages were visually inspected. The worker rendered all pages and flushed per-file results, then exited 1 only while serializing its aggregate summary due mixed float/string JSON keys; a separate finalizer completed the receipt with exit 0 from saved results, without rerendering. The detailed gzip record is `bbox_painted_ink_per_pdf.jsonl.gz` (SHA256 `0cc3e1581a32e6711260ec6586ee94c5fe5eeb548570caf4678f7859b22edc56`).
 
-These receipts must be present in the DELIVERY checkout before packaging. The report/PDF review and final `scripts.pre_pr` gates remain independently required. Record known baseline gate failures as failures; do not bypass them.
+These receipts must be present in the DELIVERY checkout before packaging. The report/PDF review is complete. The recorded `scripts.pre_pr` run failed, and a later focused retry will address Sol’s Expat import-policy fix only. Do not describe the repository-wide gate as passing. A research prerelease may be published at the exact pushed DELIVERY SHA with the unresolved gates disclosed in both the release notes and ready-for-review PR body; the PR must be explicitly blocked from merge until those gates are resolved. This path does not claim production readiness or merge readiness, and it does not bypass hooks or protection.
 
 ## Archive API and Fresh Restore Semantics
 
@@ -69,12 +69,12 @@ PY
 
 Stage copies under distinct actual basenames; `gh release upload` labels do not rename files. Enumerate every generated ZIP dynamically. Keep each bundle’s manifest separately prefixed because all three source manifests are named `archive_manifest.json`. The manifest contents retain original ZIP names, so download into isolated directories and remove exactly one `primary__`, `control__`, or `supplement__` prefix before verifying.
 
-Use a new phase-two tag only after final local gates pass and the exact final delivery commit has been pushed. The tag target is that pushed commit. No release/tag/upload has been performed by this plan.
+Use a new phase-two research prerelease tag at the exact pushed DELIVERY commit SHA. Record the same SHA in the ready-for-review PR and release notes, and disclose the failed repository-wide gate evidence plus the remaining disposition. The PR must carry a clear `Blocked:` section and must not claim merge readiness. The tag is a research artifact publication only; it does not establish production readiness. No release/tag/upload has been performed by this plan.
 
 ```bash
 set -euo pipefail
 REPO=D-sorganization/UpstreamDrift
-TAG=shot-pattern-phase2-2026-10-10
+TAG=shot-pattern-phase2-research-2026-10-10
 FINAL_PUSHED_DELIVERY_SHA='<exact pushed DELIVERY commit SHA>'
 PREP=/tmp/shot-pattern-delivery-resume/release-assets-primary-control-prepared
 SUP=/tmp/shot-pattern-delivery-resume/supplement-v2
@@ -90,8 +90,13 @@ cmp "$PREP/primary_archive_manifest.json" "$STAGE/primary__archive_manifest.json
 cmp "$PREP/control_archive_manifest.json" "$STAGE/control__archive_manifest.json"
 cmp "$SUP/archive_manifest.json" "$STAGE/supplement__archive_manifest.json"
 sha256sum "$STAGE"/* > /tmp/shot-pattern-delivery-resume/release-assets-v2.sha256
-# Execute only after approved local gates and exact pushed SHA are recorded.
-gh release create "$TAG" --repo "$REPO" --target "$FINAL_PUSHED_DELIVERY_SHA" --title 'Shot Pattern Phase Two Artifacts' --notes 'Reviewed phase-two shot-pattern graphics and manifests.'
+# Execute only after the exact pushed SHA and ready-for-review PR are recorded.
+NOTES=/tmp/shot-pattern-delivery-resume/release-notes-research-prerelease.md
+cat > "$NOTES" <<EOF
+Research prerelease at exact DELIVERY commit $FINAL_PUSHED_DELIVERY_SHA.
+Repository-wide pre-PR validation exited nonzero; see the ready-for-review PR for gate results and blocked merge disposition. This publication is not production or merge-readiness approval.
+EOF
+gh release create "$TAG" --repo "$REPO" --target "$FINAL_PUSHED_DELIVERY_SHA" --title 'Shot Pattern Phase Two Research Artifacts' --notes-file "$NOTES"
 gh release upload "$TAG" --repo "$REPO" "$STAGE"/*
 ```
 
@@ -100,7 +105,7 @@ Fresh remote download and verify (only after successful upload):
 ```bash
 set -euo pipefail
 REPO=D-sorganization/UpstreamDrift
-TAG=shot-pattern-phase2-2026-10-10
+TAG=shot-pattern-phase2-research-2026-10-10
 STAGE=/tmp/shot-pattern-delivery-resume/release-assets-v2
 RESTORE=/tmp/shot-pattern-delivery-resume/remote-restoration-v2
 mkdir -p "$RESTORE/primary" "$RESTORE/control" "$RESTORE/supplement"

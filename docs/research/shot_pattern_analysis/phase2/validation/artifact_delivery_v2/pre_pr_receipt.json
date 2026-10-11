@@ -35,6 +35,8 @@
     "DEVELOPMENT_LOG.md exceeds 200000-byte ceiling"
   ],
   "full_log": "/tmp/shot-pattern-delivery-resume/prepr-final-dac6618c58.log",
+  "full_log_compressed": "docs/research/shot_pattern_analysis/phase2/validation/artifact_delivery_v2/pre_pr_final_dac6618c58.log.gz",
+  "full_log_compressed_sha256": "373391d91bb4a5fc6ffe246a5a72827e582d0cb2b8c827cff7da5f4608708b18",
   "full_log_sha256": "7fa661e6b1a6541c04b7541dc42a89674b3a2ae36802391f56df871f6677f2a3",
   "gate_results": {
     "affected_tests": "fail",
@@ -46,6 +48,12 @@
     "semgrep_import_policy": "fail",
     "workflow_lint": "pass"
   },
+  "issue_references": {
+    "development_log_policy_debt": "#11935",
+    "other_stale_research_provenance": "#11940",
+    "unrelated_drake_abort": "#11934"
+  },
+  "publication_disposition": "Research prerelease may be tied to the exact pushed DELIVERY SHA with the nonzero repository gate disclosed in release notes and ready-for-review PR; PR remains blocked from merge. No production/merge-readiness claim or gate bypass.",
   "runtime": "/tmp/shot-pattern-validation-venv-20261009/bin/python",
   "schema": "shot-pattern-pre-pr-evidence/1",
   "semgrep_import_policy_failure": "scripts/research/shot_pattern_analysis/vector_inspection.py:12 raw xml.parsers.expat import remains flagged; defusedxml.ElementTree second parse is fixed, but the intentional custom Expat preflight remains a gate failure.",
