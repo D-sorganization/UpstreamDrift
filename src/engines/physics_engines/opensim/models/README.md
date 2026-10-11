@@ -92,7 +92,9 @@ following modifications:
    the generated model's hip, shoulder and elbow centres at the captured
    address and plants the feet (the generated feet are unobserved). The
    default coordinates are that address pose, so the face is square there
-   (0.18 deg by OpenSim FK).
+   (0.18 deg by OpenSim FK). The file holds one entry per model and club;
+   `--club iron7` writes the 7-iron entry (#12042), which `msk_club_tracking`
+   and `scripts/render_msk_club.py --club iron7` need.
 4. **Joint-torque actuators on every DOF.** A `CoordinateActuator` is
    added to the `ForceSet` for every `Coordinate` in the model
    (39 in total: 6-DOF pelvis root, lower-limb chains incl. knee*beta
