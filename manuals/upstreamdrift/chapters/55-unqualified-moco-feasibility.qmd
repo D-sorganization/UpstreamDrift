@@ -49,6 +49,27 @@ finite replay score is not passive admission. Report observed fiber lengths,
 elastic/damping/tendon forces, assistance and all remaining scientific gates.
 Never silently modify muscle parameters to make a diagnostic fit plausible.
 
+## Moco Build and Solver Progress Evidence
+
+The native runner atomically publishes the existing latest-stage fields in
+native_moco_progress.json and appends the same ordered stage observations to
+its events array. Each event binds the request and model hashes, records
+monotonic, wall and CPU times, and retains the established build-stage order.
+The wall/CPU elapsed fields keep their prior origin: immediately after
+solve_native_moco completes current-input and body-audit checks. The separate
+current_input_audit_elapsed_wall_seconds value makes that phase visible;
+monotonic_seconds can be compared with a supervisor's child-start monotonic
+clock to measure earlier import/setup time.
+
+Immediately before study.solve(), after solver.set_parallel(0), the
+optimizing event records each available MocoCasADiSolver getter as returned,
+missing, error, nonfinite or non-scalar evidence. This is readback from the
+constructed study solver, not a constructor-default probe. A missing or failed
+getter remains unknown; the observer does not substitute a default. No solver
+option, dynamics, transcription, mesh, bound, objective, or source law is
+changed. The event at optimizing marks API entry into the solve call; it does
+not prove IPOPT reached an iteration or completed any work.
+
 ## Validation and Reproduction
 
 `tests/opensim/test_native_moco_diagnostic.py` starts RED with the missing opt-in.
