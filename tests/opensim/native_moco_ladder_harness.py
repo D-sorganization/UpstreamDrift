@@ -293,7 +293,12 @@ class _ProcessIdentity:
 
 
 def _supervise_process_tree(
-    command: Sequence[str], cwd: Path, timeout_seconds: float, memory_limit_bytes: int
+    command: Sequence[str],
+    cwd: Path,
+    timeout_seconds: float,
+    memory_limit_bytes: int,
+    *,
+    env: dict[str, str] | None = None,
 ) -> tuple[int, str, str, int]:
     """Run and account for only this rung's PID/creation-time-owned tree."""
     import psutil
@@ -307,6 +312,7 @@ def _supervise_process_tree(
     process = subprocess.Popen(
         command,
         cwd=cwd,
+        env={**os.environ, **env} if env is not None else None,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         **process_options,
@@ -951,6 +957,124 @@ def _run_one_rung(
             peak_tree_rss,
         )
     return RungResult(rung.name, "passed", digest, elapsed, "", peak_tree_rss)
+
+
+def run_retained_replay_diagnostic(
+    source_run: Path,
+    output_root: Path,
+    *,
+    worker_python: str,
+    worker_environment: dict[str, str],
+) -> dict[str, Any]:
+    """Run one retained-input replay under the existing owned-tree supervisor."""
+    if output_root.exists():
+        raise FileExistsError(output_root)
+    allowed_environment = {
+        "CASADIPATH",
+        "PYTHONPATH",
+        "MYPYPATH",
+        "OMP_NUM_THREADS",
+        "OPENBLAS_NUM_THREADS",
+        "MKL_NUM_THREADS",
+        "NUMEXPR_NUM_THREADS",
+        "VECLIB_MAXIMUM_THREADS",
+        "BLIS_NUM_THREADS",
+    }
+    if set(worker_environment) - allowed_environment:
+        raise ValueError("worker environment contains an unapproved variable")
+    output_root.mkdir(parents=True, exist_ok=False)
+    source_root, command, invocation = _retained_replay_invocation(
+        source_run, output_root, worker_python, worker_environment
+    )
+    (output_root / "invocation.json").write_text(
+        json.dumps(invocation, sort_keys=True, indent=2) + "\n", encoding="utf-8"
+    )
+    result: dict[str, Any]
+    try:
+        return_code, stdout, stderr, peak_rss = _supervise_process_tree(
+            command,
+            source_root,
+            30.0,
+            1024**3,
+            env=worker_environment,
+        )
+        _write_diagnostic_supervisor_logs(output_root, stdout, stderr)
+        result = {
+            "status": "worker_exit" if return_code else "worker_returned",
+            "return_code": return_code,
+            "stop_reason": None,
+            "peak_sampled_tree_rss_bytes": peak_rss,
+            "owned_tree_cleanup_verified": True,
+        }
+    except _WorkerTimeout as exc:
+        _write_diagnostic_supervisor_logs(output_root, exc.stdout, exc.stderr)
+        result = {
+            "status": exc.stop_reason,
+            "return_code": None,
+            "stop_reason": exc.stop_reason,
+            "peak_sampled_tree_rss_bytes": exc.peak_rss,
+            "owned_tree_cleanup_verified": True,
+        }
+    except (OSError, RuntimeError, ValueError) as exc:
+        result = {
+            "status": "supervisor_error",
+            "return_code": None,
+            "stop_reason": type(exc).__name__,
+            "peak_sampled_tree_rss_bytes": None,
+            "owned_tree_cleanup_verified": False,
+        }
+        _write_diagnostic_supervisor_logs(output_root, "", repr(exc))
+    (output_root / "supervisor_result.json").write_text(
+        json.dumps(result, sort_keys=True, indent=2) + "\n", encoding="utf-8"
+    )
+    return result
+
+
+def _retained_replay_invocation(
+    source_run: Path,
+    output_root: Path,
+    worker_python: str,
+    worker_environment: dict[str, str],
+) -> tuple[Path, list[str], dict[str, Any]]:
+    worker_output = output_root / "native_audit"
+    source_root = Path(__file__).resolve().parents[2]
+    worker_path = source_root / "tests/opensim/native_moco_ladder_worker.py"
+    input_names = (
+        "source.osim",
+        "request.json",
+        "solution.sto",
+        "time_only_controls.sto",
+    )
+    command = [
+        worker_python,
+        "-m",
+        "tests.opensim.native_moco_ladder_worker",
+        "--replay-existing",
+        str(source_run.resolve()),
+        "--output",
+        str(worker_output.resolve()),
+    ]
+    invocation = {
+        "schema": "native-retained-replay-invocation-v1",
+        "worker_command": command,
+        "working_directory": str(source_root),
+        "source_run": str(source_run.resolve()),
+        "input_sha256": {name: _sha256(source_run / name) for name in input_names},
+        "worker_sha256": _sha256(worker_path),
+        "harness_sha256": _sha256(Path(__file__)),
+        "nonsecret_environment": dict(sorted(worker_environment.items())),
+        "timeout_seconds": 30.0,
+        "sampled_rss_soft_threshold_bytes": 1024**3,
+        "optimizer_invoked": False,
+    }
+    return source_root, command, invocation
+
+
+def _write_diagnostic_supervisor_logs(
+    output_root: Path, stdout: str, stderr: str
+) -> None:
+    (output_root / "supervisor.stdout.log").write_text(stdout, encoding="utf-8")
+    (output_root / "supervisor.stderr.log").write_text(stderr, encoding="utf-8")
 
 
 def _write_worker_logs(directory: Path, stdout: Any, stderr: Any) -> None:

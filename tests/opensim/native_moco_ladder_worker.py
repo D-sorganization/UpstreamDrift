@@ -80,10 +80,13 @@ def run_saved_replay_diagnostic(source_run: Path, output: Path) -> None:
     )
     _write_diagnostic_stage(output, "saved_inputs_loaded")
     _write_diagnostic_stage(output, "native_replay_started")
-    replay = replay_constrained_muscle_bundle(
-        bundle,
-        prepared["declaration"],
-        native_mechanics_profile=prepared["profile"],
+    replay = _run_with_periodic_replay_stack_dumps(
+        output,
+        lambda: replay_constrained_muscle_bundle(
+            bundle,
+            prepared["declaration"],
+            native_mechanics_profile=prepared["profile"],
+        ),
     )
     _write_diagnostic_stage(output, "native_replay_completed")
     audit = _make_replay_state_audit(
@@ -121,6 +124,29 @@ def run_saved_replay_diagnostic(source_run: Path, output: Path) -> None:
         },
     )
     _write_diagnostic_stage(output, "audit_written")
+
+
+def _run_with_periodic_replay_stack_dumps(
+    output: Path,
+    replay_call: Any,
+    *,
+    dump_later: Any = None,
+    cancel_dump: Any = None,
+) -> Any:
+    """Capture periodic Python stacks while a native replay is running."""
+    import faulthandler
+
+    schedule = dump_later or faulthandler.dump_traceback_later
+    cancel = cancel_dump or faulthandler.cancel_dump_traceback_later
+    trace_path = output / "native_replay_stack_traces.log"
+    with trace_path.open("a", encoding="utf-8", buffering=1) as traces:
+        schedule(10, repeat=True, file=traces)
+        try:
+            return replay_call()
+        finally:
+            cancel()
+            traces.flush()
+            os.fsync(traces.fileno())
 
 
 def _start_replay_diagnostic(output: Path) -> None:

@@ -569,6 +569,121 @@ def test_retained_replay_progress_is_flushed_before_native_imports(
         _start_replay_diagnostic(worker_output)
 
 
+def test_periodic_stack_dump_is_cancelled_after_success(tmp_path: Path) -> None:
+    from tests.opensim.native_moco_ladder_worker import (
+        _run_with_periodic_replay_stack_dumps,
+    )
+
+    events = []
+
+    def dump_later(timeout, *, repeat, file):
+        events.append(("scheduled", timeout, repeat, Path(file.name).name))
+        file.write("mock stack dump\n")
+        file.flush()
+
+    def cancel() -> None:
+        events.append(("cancelled",))
+
+    result = _run_with_periodic_replay_stack_dumps(
+        tmp_path, lambda: "replayed", dump_later=dump_later, cancel_dump=cancel
+    )
+
+    assert result == "replayed"
+    assert events == [
+        ("scheduled", 10, True, "native_replay_stack_traces.log"),
+        ("cancelled",),
+    ]
+    assert (tmp_path / "native_replay_stack_traces.log").read_text() == (
+        "mock stack dump\n"
+    )
+
+
+def test_periodic_stack_dump_is_cancelled_after_replay_exception(
+    tmp_path: Path,
+) -> None:
+    from tests.opensim.native_moco_ladder_worker import (
+        _run_with_periodic_replay_stack_dumps,
+    )
+
+    events = []
+
+    def dump_later(timeout, *, repeat, file):
+        events.append((timeout, repeat))
+
+    def cancel() -> None:
+        events.append("cancelled")
+
+    def fail() -> None:
+        raise RuntimeError("expected replay failure")
+
+    with pytest.raises(RuntimeError, match="expected replay failure"):
+        _run_with_periodic_replay_stack_dumps(
+            tmp_path, fail, dump_later=dump_later, cancel_dump=cancel
+        )
+
+    assert events == [(10, True), "cancelled"]
+
+
+def test_retained_replay_supervisor_persists_wall_timeout_and_logs(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import json
+
+    from tests.opensim import native_moco_ladder_harness as harness
+
+    source_run = tmp_path / "source_run"
+    source_run.mkdir()
+    for filename in (
+        "source.osim",
+        "request.json",
+        "solution.sto",
+        "time_only_controls.sto",
+    ):
+        (source_run / filename).write_text(filename)
+    output_root = tmp_path / "diagnostic"
+    observed = {}
+
+    def timeout(command, cwd, timeout_seconds, memory_limit_bytes, *, env=None):
+        observed.update(
+            command=command,
+            cwd=cwd,
+            timeout_seconds=timeout_seconds,
+            memory_limit_bytes=memory_limit_bytes,
+            env=env,
+        )
+        raise harness._WorkerTimeout(
+            "captured stdout", "captured stderr", "wall_timeout", 12345
+        )
+
+    monkeypatch.setattr(harness, "_supervise_process_tree", timeout)
+    result = harness.run_retained_replay_diagnostic(
+        source_run,
+        output_root,
+        worker_python="native-python",
+        worker_environment={"CASADIPATH": "sdk-path", "OMP_NUM_THREADS": "1"},
+    )
+
+    assert observed["timeout_seconds"] == 30
+    assert observed["memory_limit_bytes"] == 1024**3
+    assert observed["env"]["CASADIPATH"] == "sdk-path"
+    assert observed["command"][-1] == str(output_root / "native_audit")
+    assert not (output_root / "native_audit").exists()
+    assert (output_root / "supervisor.stdout.log").read_text() == "captured stdout"
+    assert (output_root / "supervisor.stderr.log").read_text() == "captured stderr"
+    manifest = json.loads((output_root / "invocation.json").read_text())
+    assert manifest["worker_command"] == observed["command"]
+    assert manifest["nonsecret_environment"] == {
+        "CASADIPATH": "sdk-path",
+        "OMP_NUM_THREADS": "1",
+    }
+    persisted = json.loads((output_root / "supervisor_result.json").read_text())
+    assert persisted["status"] == "wall_timeout"
+    assert persisted["stop_reason"] == "wall_timeout"
+    assert persisted["peak_sampled_tree_rss_bytes"] == 12345
+    assert persisted["owned_tree_cleanup_verified"] is True
+    assert result == persisted
+
+
 def test_solution_sto_roundtrip_allows_one_ulp_and_records_array_hashes(
     tmp_path: Path,
 ) -> None:
