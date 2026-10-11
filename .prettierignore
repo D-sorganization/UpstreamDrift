@@ -85,4 +85,6 @@ docs/development/full_body_models/evidence/head_gaze/fd_neck_closed_loop.json
 # Preserve canonical model/calibration fixture provenance from main #12202.
 tests/fixtures/club_face/address_poses.json
 tests/fixtures/club_face/provenance.json
+tests/fixtures/club_face/spec_driver.json
+tests/fixtures/club_face/spec_iron7.json
 src/engines/physics_engines/opensim/models/msk_club_grip_calibration.json
