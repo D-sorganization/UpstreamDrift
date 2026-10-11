@@ -574,7 +574,7 @@
       "status": "gap",
       "issue": 11717,
       "tiles": [],
-      "notes": "The desktop engine visual layers (MuJoCo, OpenSim, Drake and Pinocchio MeshCat exports, MyoSuite) draw the parametric club head, shaft and grip from one shared adapter (#11717, #11727). GCV-13 (#11719) landed the shared address-ball geometry (src/shared/python/model_appearance/ball.py) and the MuJoCo decorative ball visual geom; the native viewer exports (MuJoCo, MyoSuite, Drake and Pinocchio MeshCat, OpenSim) now draw the ball at address from one shared placement, visible until impact (OpenSim cannot hide it after impact). The web ClubHead component (#11717) still draws no ball, so the web app still draws the placeholder head."
+      "notes": "The desktop engine visual layers (MuJoCo, OpenSim, Drake and Pinocchio MeshCat exports, MyoSuite) draw the parametric club head, shaft and grip from one shared adapter (#11717, #11727). GCV-13 (#11719) landed the shared address-ball geometry (src/shared/python/model_appearance/ball.py) and the MuJoCo decorative ball visual geom; the native viewer exports (MuJoCo, MyoSuite, Drake and Pinocchio MeshCat, OpenSim) now draw the ball at address from one shared placement, visible until impact and hidden afterwards in every engine.The web ClubHead component (#11717) still draws no ball, so the web app still draws the placeholder head."
     }
   }
 }
