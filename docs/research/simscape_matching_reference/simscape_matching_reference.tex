@@ -5507,6 +5507,90 @@ the OpenSim exports, dependent hashes and the club-face fixtures (the driver
 fixture export is blocked by the trail-shoulder singularity, \#12266). No bound,
 tolerance or filter constant changed.
 
+\paragraph{Adoption of the Per-Capture Grip Rotation for the Driver (Issue \#12221).}
+The fitted driver rotation was applied to the committed driver document
+(\texttt{scripts/set\_spec\_grip\_rotation.py}, receipt
+\texttt{fit\_grip\_rotation\_receipt\_driver.json}), and the three driver
+ground-support receipts, the driver OpenSim export and the driver club-face fixture
+were regenerated on ControlTower \texttt{ud-sim} (commits \texttt{8d42b60dce} and
+\texttt{e44573633b}, identical documents). The calibrated driver commands now add
+\texttt{--fix-club-markers}, since the fit is valid only with the measured cluster
+held fixed. Address / IK / dynamics marker RMS (mm), before $\to$ after:
+
+\begin{center}
+\begin{tabular}{lrr}
+\hline
+Receipt & Before & After \\
+\hline
+Driver, \texttt{--static-seeds} & 7.5 / 30.5 / 82.6 & 11.0 / 30.3 / 82.0 \\
+Driver, Drake engine & 7.2 / 30.7 / 77.8 & 11.0 / 30.3 / 86.3 \\
+Driver, nominal & 41.7 / 46.1 / 73.6 & 50.9 / 46.5 / 71.9 \\
+\hline
+\end{tabular}
+\end{center}
+All three keep 0 IK range-of-motion flags. The Drake driver dynamics replay worsened
+($77.8 \to 86.3$~mm), and the nominal driver reference-ZMP outside fraction over
+1--1.5~s went from 140/180 to 158/180 frames.
+
+Control. The same commit with the old document and the cluster held fixed
+reproduces the earlier control exactly (driver 7.7 / 29.4 / 105.9~mm), so the grip
+refit, not code drift, explains the change against the cluster-fixed baseline:
+dynamics $105.9 \to 82.0$~mm.
+
+Sensitivity. The experiment document behind Result C differed from the applied
+document only by receipt rounding (about $10^{-5}$ in each wrist
+\texttt{child\_to\_follower} entry), yet its dynamics were 79.3~mm against 82.0~mm
+here, while address and IK agree within 0.3~mm. The tracking replay is therefore
+sensitive at the 3--15~mm level to tiny parameter changes. The fit is one per
+capture and is not independently validated.
+
+\paragraph{Driver Club-Face Fixture (Issue \#12221).}
+The driver club-face fixture (\texttt{tests/fixtures/club\_face}) was regenerated at
+\texttt{9fe74740a5} on ControlTower. The same-input export no longer stops at the
+trail-shoulder singularity (\#12266) on this document.
+
+\begin{center}
+\begin{tabular}{lrr}
+\hline
+Quantity & Before & After \\
+\hline
+Impact speed (model / capture, m/s) & --- & 50.02 / 51.32 \\
+Impact speed error (\%) & $-5.1$ & $-2.5$ \\
+Peak early (ms) & 1.8 & 4.4 \\
+Post-impact speed drop (\%) & $-43.2$ & $-4.5$ \\
+Face at address, model / capture (deg) & --- & 5.44 / 5.50 \\
+Face at impact, model / capture (deg) & --- & 16.88 / 14.96 \\
+\hline
+\end{tabular}
+\end{center}
+The fixture meets GCV-20 (3~\%, 5~ms, 10~\%) and OSV-10 (5~deg).
+The Rajagopal driver grip calibration reads this fixture's address pose, so it was
+re-run (grip gaps 0.03 and 0.2~mm) and the club of both musculoskeletal models
+rebuilt. Driven by this fixture, the OpenSim bushing grip exceeds its full-swing
+bounds only in the 6~ms ball-impact window (2.62~deg against 2~deg, 51.3~N
+against 50~N; the previous fixture peaked at 1.81~deg and 34.5~N at the same
+instant). The bounds are unchanged; the two driver cases carry a strict xfail
+and the decision is recorded on issue \#12272.
+
+The 7-iron is not adopted. Its refit meets GCV-20 and OSV-10 on the tracked swing
+($-1.9$~\%, $-0.2$~ms, impact face 2.59 against 3.21~deg), but its club-face fixture
+comes from the same-input export (open-loop replay of the recorded efforts at
+1~kHz), which gives $-5.0$~\%, peak $-5.1$~ms and an 8.71~deg impact face against
+the capture's 3.21~deg (a 5.50~deg gap; the top-of-backswing gap is 5.09~deg), both
+beyond the 5~deg limit. The committed 7-iron fixture gives $-3.9$~\%, $-3.9$~ms and
+2.83~deg, and the OSV-10 face tests run forward kinematics on the current document,
+so adopting the refit would turn eight passing face tests red. The 7-iron document,
+OpenSim export and receipts are unchanged, and
+\texttt{fit\_grip\_rotation\_receipt\_iron7.json} stays committed for a follow-up.
+
+Reproduce (ControlTower \texttt{ud-sim}, repository root):
+\begin{verbatim}
+python3 -m src.shared.python.motion_matching.pipeline.cli \
+  --spec docs/development/full_body_models/full_body_spec_anthro_driver.json \
+  --capture driver --static-seeds --fix-club-markers --out <dir>
+python3 -m scripts.regenerate_club_face_fixtures --work <dir> --capture driver
+\end{verbatim}
+
 Reproduce, once per capture (receipts \texttt{fit\_grip\_rotation\_receipt\_<club>.json}
 under \texttt{evidence/anthropometry/}):
 \begin{verbatim}
