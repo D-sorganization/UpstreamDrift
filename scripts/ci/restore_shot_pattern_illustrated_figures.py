@@ -47,7 +47,7 @@ def _download_archive(dest: Path) -> None:
         headers["Authorization"] = f"Bearer {token}"
     request = urllib.request.Request(url, headers=headers)
     # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
-    with urllib.request.urlopen(request) as response, dest.open("wb") as handle:  # noqa: S310
+    with urllib.request.urlopen(request) as response, dest.open("wb") as handle:  # nosec B310 # noqa: S310
         handle.write(response.read())
 
 
