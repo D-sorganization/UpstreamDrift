@@ -66,3 +66,18 @@ refresh. Preserve that commit through a normal merge, then run
 `python -m src.shared.python.motion_matching ledger --write` against the restored
 canonical receipt bytes. The 149-row generated ledger now indexes those original
 bytes; no remote history or scientific result is discarded.
+
+A subsequent integration of `main` at `7da0a29853` retains the new Drake IK
+parity evidence. The two MuJoCo receipts were verified semantically identical
+to their preserved originals before restoring their exact bytes. Regenerate
+the combined ledger after this merge; newly changed Drake artifacts retain
+their own current hashes and are not replaced by historical evidence.
+
+The normal pre-push formatter also touched nine byte-bound JSON inputs and
+receipts inherited from Drake parity PR #12216. Verify semantic equality,
+restore their exact merged bytes and add nine explicit formatter exclusions.
+Native revalidation passed 32 fixture cases and the separately supplied exact
+557-source case (33 distinct passing cases); the host-only central runner
+skipped native cases, so its skips are not used as native evidence. All five
+central gates passed with `MYPYPATH` set to the repository root, preserving
+canonical `src.*` package identity rather than duplicate root/src imports.
