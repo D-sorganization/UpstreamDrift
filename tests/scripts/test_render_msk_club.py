@@ -92,6 +92,35 @@ def test_no_capture_loads_no_inputs() -> None:
     assert _script().load_capture_inputs(None) is None
 
 
+@pytest.mark.parametrize("club", ["driver", "iron7"])
+def test_club_model_carries_the_tracked_club(tmp_path: Path, club: str) -> None:
+    from defusedxml import ElementTree as SafeET
+
+    from src.engines.physics_engines.opensim.python import msk_club as mc
+
+    script = _script()
+    model_path = mc.MODELS_DIR / "golf_humanoid.osim"
+    out = script.club_model(model_path, club, tmp_path)
+    assert out.parent == tmp_path and out.name == model_path.name
+    model = SafeET.parse(str(out)).getroot().find("Model")
+    (body,) = [b for b in model.iter("Body") if b.get("name") == mc.CLUB_BODY]
+    expected = mc.load_msk_club(club).dynamics.mass_kg
+    assert float(body.findtext("mass")) == pytest.approx(expected)
+    defaults = {
+        c.get("name"): float(c.findtext("default_value"))
+        for c in model.iter("Coordinate")
+        if c.findtext("default_value") is not None
+    }
+    address_q = mc.load_calibration("golf_humanoid", club).address_q
+    for name, value in address_q.items():
+        assert defaults[name] == pytest.approx(value), name
+
+
+def test_club_model_rejects_an_unknown_club(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="club"):
+        _script().club_model(Path("unused.osim"), "wedge", tmp_path)
+
+
 def test_render_refuses_the_real_display(monkeypatch) -> None:  # noqa: ANN001
     pytest.importorskip("opensim")
     monkeypatch.setenv("DISPLAY", ":0")

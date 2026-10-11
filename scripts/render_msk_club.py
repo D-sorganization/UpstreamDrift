@@ -31,6 +31,7 @@ import argparse
 import json
 import logging
 import sys
+import tempfile
 import time
 from pathlib import Path
 from typing import Any, NamedTuple
@@ -145,6 +146,29 @@ def load_capture_inputs(capture_path: Path | None) -> CaptureInputs | None:
     return CaptureInputs(capture, capture_turn_inputs(capture))
 
 
+def club_model(model_path: Path, club: str, out_dir: Path) -> Path:
+    """Copy of ``model_path`` holding ``club`` at its grip calibration.
+
+    The committed models carry the driver, so the viewer draws this copy (same
+    file name, written to ``out_dir``) to show the club that was tracked.
+    Raises ``ValueError`` for an unknown club and ``KeyError`` when the model
+    has no grip calibration for it.
+    """
+    if club not in CLUBS:
+        raise ValueError(f"club must be one of {CLUBS}, got {club!r}")
+    from defusedxml import ElementTree as SafeET
+
+    tree = SafeET.parse(str(model_path))
+    model = tree.getroot().find("Model")
+    if model is None:
+        raise ValueError(f"{model_path} has no <Model>")
+    calibration = mc.load_calibration(model_path.stem, club)
+    mc.attach_club(model, mc.load_msk_club(club), calibration)
+    out = Path(out_dir) / model_path.name
+    tree.write(out, encoding="utf-8", xml_declaration=True)
+    return out
+
+
 def clip_frames(n_frames: int) -> list[int]:
     """Fixture frames sampled so ``CLIP_FPS`` playback runs at ``SPEED``."""
     step_s = SPEED / CLIP_FPS
@@ -155,8 +179,11 @@ def clip_frames(n_frames: int) -> list[int]:
 class _Viewer:
     """Simbody visualizer of the golf humanoid on the virtual display."""
 
-    def __init__(self, osim: Any, model_path: Path, geometry: Path | None) -> None:
+    def __init__(
+        self, osim: Any, model_path: Path, geometry: Path | None, club: str
+    ) -> None:
         self.osim = osim
+        self.club = mc.load_msk_club(club)
         club_visuals.register_geometry_path()
         if geometry is not None:
             osim.ModelVisualizer.addDirToGeometrySearchPaths(str(geometry))
@@ -211,7 +238,7 @@ class _Viewer:
         return fit_to_size(frames[-1][:-UI_STRIP_PX], *SIZE)
 
     def face_deg(self) -> float:
-        return cal.face_angle_deg(self.model, self.state, mc.load_msk_club())
+        return cal.face_angle_deg(self.model, self.state, self.club)
 
 
 def _write_png(path: Path, frame: np.ndarray) -> None:
@@ -258,7 +285,8 @@ def render(
     )
     tracked = dict(zip(wanted, frames, strict=True))
     out.mkdir(parents=True, exist_ok=True)
-    viewer = _Viewer(osim, model_path, geometry)
+    with tempfile.TemporaryDirectory() as tmp:  # the model is read on load
+        viewer = _Viewer(osim, club_model(model_path, club, Path(tmp)), geometry, club)
     floor = cal.GeneratedSwing(club).floor_native_z
     viewer.pose(tracked[events["address"]].q)
     pelvis = viewer.model.getBodySet().get("pelvis")
