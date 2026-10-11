@@ -30,6 +30,12 @@ from src.shared.python.motion_matching.anthropometry import (
     de_leva_table_sha256,
 )
 from src.shared.python.motion_matching.club_models import CLUBS
+from src.shared.python.motion_matching.execution.assets import get_club_markers
+from src.shared.python.motion_matching.execution.club_markers import (
+    CLUB_MARKER_BODY,
+    Offset,
+    load_club_markers,
+)
 from src.shared.python.motion_matching.hip_calibration import hip_is_mirrored
 from src.shared.python.motion_matching.full_body_spec import (
     BodySpec,
@@ -368,16 +374,39 @@ def marker_seeds(
     upper_arm_m: float,
     forearm_m: float,
     native: dict[str, Any],
+    club_offsets: Mapping[str, Sequence[float]] | None = None,
 ) -> dict[str, MarkerAttachment]:
-    """Anatomical seed offsets in the new frames (x forward, y left, z up)."""
+    """Anatomical seed offsets in the new frames (x forward, y left, z up).
+
+    The ``Clubhead`` cluster comes from ``native`` (the driver-fitted
+    candidate) unless ``club_offsets`` gives the club's own cluster (#12210);
+    its labels must equal the native cluster's (``ValueError`` otherwise).
+    """
     club = {
         label: MarkerAttachment(native_body, tuple(offset))
         for label, native_body, offset in (
             (lbl, native["marker_bodies"][i], native["marker_offsets_m"][i])
             for i, lbl in enumerate(native["marker_labels"])
         )
-        if native_body == "Clubhead"
+        if native_body == CLUB_MARKER_BODY
     }
+    if club_offsets is not None:
+        if set(club_offsets) != set(club):
+            raise ValueError(
+                f"club marker labels {sorted(club_offsets)} must equal the "
+                f"native {CLUB_MARKER_BODY} cluster {sorted(club)}"
+            )
+        club = {
+            label: MarkerAttachment(
+                CLUB_MARKER_BODY,
+                (
+                    float(club_offsets[label][0]),
+                    float(club_offsets[label][1]),
+                    float(club_offsets[label][2]),
+                ),
+            )
+            for label in club
+        }
     seeds: dict[str, MarkerAttachment] = {
         "WaistLeft": MarkerAttachment("Hip", (0.02, 0.15, 0.08)),
         "WaistRight": MarkerAttachment("Hip", (0.02, -0.15, 0.08)),
@@ -479,7 +508,9 @@ def _create_contact_spec() -> ContactSpec:
 
 
 def _extract_marker_seeds(
-    upper: dict[str, Any], native_candidate_path: Path
+    upper: dict[str, Any],
+    native_candidate_path: Path,
+    club_offsets: Mapping[str, Sequence[float]] | None = None,
 ) -> tuple[float, dict[str, Any]]:
     hub_frame = next(f for f in upper["frames"] if f["name"] == "Hub")
     hub_h = float(np.asarray(hub_frame["placement"])[2, 3])
@@ -511,8 +542,30 @@ def _extract_marker_seeds(
         )
     )
     candidate = json.loads(native_candidate_path.read_text(encoding="utf-8"))
-    markers = marker_seeds(hub_h, clav, upper_arm, forearm, candidate)
+    markers = marker_seeds(hub_h, clav, upper_arm, forearm, candidate, club_offsets)
     return hub_h, markers
+
+
+def _club_marker_offsets(
+    club: str, path: Path | str | None
+) -> tuple[dict[str, Offset] | None, Path | None]:
+    """The club's own ``Clubhead`` cluster, or ``None`` for the native one.
+
+    Raises ``ValueError`` for a non-driver club without a cluster file, since
+    the native candidate's cluster is the driver's (#12210).
+    """
+    resolved = get_club_markers(club, path)
+    if resolved is None:
+        if club != "driver":
+            raise ValueError(
+                f"no club marker file for {club!r}; the native candidate's "
+                f"{CLUB_MARKER_BODY} cluster is the driver's"
+            )
+        return None, None
+    markers = load_club_markers(resolved)
+    if markers.club != club:
+        raise ValueError(f"{resolved} is for {markers.club!r}, not {club!r}")
+    return markers.offsets_m, resolved
 
 
 def _write_outputs(
@@ -574,8 +627,10 @@ def compose_anthropometric_document(
 
     Single source for the spec content: ``build_anthropometric_spec`` writes
     it with a receipt and the character builder (CMB-1, #11652) compiles
-    subject parameters through it. Postcondition: the document passed
-    ``validate_full_body_spec`` inside ``derive_full_body_spec``.
+    subject parameters through it. ``club_markers_path`` (kwarg) overrides
+    the club's ``Clubhead`` marker file (``assets.get_club_markers``); a
+    non-driver club without one raises ``ValueError``. Postcondition: the
+    document passed ``validate_full_body_spec`` inside ``derive_full_body_spec``.
     """
     trunk_scale = float(kwargs.get("trunk_scale", 1.0))
     arm_scale = float(kwargs.get("arm_scale", 1.0))
@@ -605,7 +660,15 @@ def compose_anthropometric_document(
         osim_path, stature_m, hip_frame
     )
     contact = _create_contact_spec()
-    hub_h, markers = _extract_marker_seeds(upper, native_candidate_path)
+    club_offsets, club_markers_path = _club_marker_offsets(
+        club, kwargs.get("club_markers_path")
+    )
+    hub_h, markers = _extract_marker_seeds(upper, native_candidate_path, club_offsets)
+    club_note = (
+        f"; {club} club markers from {club_markers_path.name} (#12210)"
+        if club_markers_path
+        else ""
+    )
 
     document = derive_full_body_spec(
         upper,
@@ -615,7 +678,7 @@ def compose_anthropometric_document(
         provenance=(
             f"anthropometric full-body candidate v1 at {stature_m:.3f} m, {mass_kg:.1f} kg "
             "(spec_builder.py; AN-1 #10099); upper body unqualified; "
-            "marker offsets are anatomical seeds to be calibrated"
+            "marker offsets are anatomical seeds to be calibrated" + club_note
         ),
     )
     document["subject"] = upper["subject"]
@@ -673,12 +736,14 @@ def build_anthropometric_spec(
         club=club,
         **kwargs,
     )
+    club_markers = get_club_markers(club, kwargs.get("club_markers_path"))
     return _write_outputs(
         document=built.document,
         output_dir=output_dir,
         spec_name=spec_name,
         subject=built.subject,
-        input_paths=(native_path, osim_path, native_candidate_path),
+        input_paths=(native_path, osim_path, native_candidate_path)
+        + ((club_markers,) if club_markers else ()),
         hip_half=built.hip_half_m,
         hub_h=built.hub_height_m,
         notes=built.notes,
@@ -719,6 +784,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--name", default=None, help="default full_body_spec_anthro_<club>"
     )
+    parser.add_argument(
+        "--club-markers",
+        type=Path,
+        default=None,
+        help="club-markers/1 file (default evidence/club_markers/<club>.json)",
+    )
     return parser
 
 
@@ -744,6 +815,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             tuple(args.trail_grip_rotation) if args.trail_grip_rotation else None
         ),
         name=args.name,
+        club_markers_path=args.club_markers,
     )
     return 0
 
