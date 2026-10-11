@@ -17,8 +17,10 @@ These six images select zero shaft lean, curve strength ×1, shaft-twist standar
 deviation 2°, and the combined2 profile: path SD 0.5°, speed SD 2 mph, and strike
 SD 0.25 in in each face-plane axis. Shaft-twist SD is not delivered-face SD.
 Each pattern attempts 10,000 shots. Exact supported counts and displayed samples
-are labelled in the images. The full report also covers SD 1°, stronger curves,
-other delivery profiles, shaft lean, and fixed-target controls.
+are labelled in the images. The illustrated report’s six primary single-condition
+plates use shaft-twist SD 1°; these social selections use SD 2°. The illustrated
+report also shows selected paired SD, curve-strength, and across-lean comparisons.
+Do not read the social images and the main plates as the same input scenario.
 
 ## Suggested Facebook Caption
 
@@ -33,10 +35,24 @@ other delivery profiles, shaft lean, and fixed-target controls.
 
 ## Report and Complete Data
 
-Use [Scientific Report](REPORT.md) for numerical results and population definitions.
-`REPORT.pdf` is a separately reviewed, 30-page portable version. It is not evidence
-that the built-in LaTeX editor compiler works; that external issue remains #12120.
-The [Artifact Delivery Plan](review_followups/ARTIFACT_DELIVERY_PLAN.md) explains
-archive names, hashes, restoration, and the repaired supplemental directory mapping.
-Local staging and offline restoration are verified; remote publication status must
-be taken from its own delivery receipt, not inferred from this guide.
+The reader-facing primary report is the accepted illustrated research PDF, staged
+locally as `ILLUSTRATED_REPORT.pdf` (33 pages, 13 source-bound figures). Its source
+package is `illustrated-report-source.zip`; the source and PDF hashes and fresh
+source-archive restoration are recorded in
+[staging inventory](validation/artifact_delivery_v3/release_staging_inventory_v3.json)
+and [fresh source restoration receipt](validation/artifact_delivery_v3/illustrated_report_source_restore_v3.json). The user-facing title is
+“Shot Pattern Analysis - Illustrated Research Report.”
+
+`REPORT.md` remains the detailed text and numerical reference. The staged
+`report__REPORT.pdf` is the earlier 30-page text-only historical PDF; retain it
+under that explicit role and do not present it as the illustrated primary report.
+The standalone local Tectonic build does not establish success in the built-in
+LaTeX editor, which remains blocked under #12120.
+
+The main illustrated report’s single-condition plates use shaft-twist SD 1°; the
+six social graphics above use SD 2°. Paired report plates show their stated
+contrasts. Keep these scenarios labelled distinctly. The [Artifact Delivery
+Plan](review_followups/ARTIFACT_DELIVERY_PLAN.md) explains archive names, hashes,
+restoration, and the repaired supplemental directory mapping. Current staging and
+offline restoration are verified locally; remote publication remains pending and
+must be confirmed from its own delivery receipt.

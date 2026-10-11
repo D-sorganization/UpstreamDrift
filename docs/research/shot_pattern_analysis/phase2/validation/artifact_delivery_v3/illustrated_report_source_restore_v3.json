@@ -1,0 +1,176 @@
+{
+  "accepted_build_source_sha256": "0b484b0393fa6cedbbd907f5ee603d7b0c74eb9908f455b596001bf283fde288",
+  "all_paths_confined_to_restore_root": true,
+  "archive_bytes": 3444211,
+  "archive_member_count": 15,
+  "archive_path": "/tmp/shot-pattern-delivery-resume/illustrated-report-source.zip",
+  "archive_sha256": "6567a9dcee60d6e18e4b1fe39ca34b3631eac09a578ce3eacd64914c93c7c1d2",
+  "compiled_pdf_sha256": "ca030b3c97fb759b384aab58b3da6be68687a194f353976754d43e7ffa69beda",
+  "figure_assets": [
+    {
+      "matches_selection": true,
+      "path": "phase2/final_figures_v1/details/driver_lean0_curve1_rotation1_combined2/density.pdf",
+      "restored_sha256": "0507952992a7c86cfc04deca758c183932e7b086527e7919b004215f4a58f067",
+      "selection_sha256": "0507952992a7c86cfc04deca758c183932e7b086527e7919b004215f4a58f067"
+    },
+    {
+      "matches_selection": true,
+      "path": "phase2/final_figures_v1/details/driver_lean0_curve1_rotation1_combined2/overhead.pdf",
+      "restored_sha256": "e4cd3d08b10eaad81a371f9e1c595d2afd9e994cab6c3abacf9a4940bee2ad43",
+      "selection_sha256": "e4cd3d08b10eaad81a371f9e1c595d2afd9e994cab6c3abacf9a4940bee2ad43"
+    },
+    {
+      "matches_selection": true,
+      "path": "phase2/final_figures_v1/details/seven_iron_lean0_curve1_rotation1_combined2/density.pdf",
+      "restored_sha256": "6c3a4d4c299eb1fd5db4f8cb6f689d829c10e1994557cccc94f61fa708ba6923",
+      "selection_sha256": "6c3a4d4c299eb1fd5db4f8cb6f689d829c10e1994557cccc94f61fa708ba6923"
+    },
+    {
+      "matches_selection": true,
+      "path": "phase2/final_figures_v1/details/seven_iron_lean0_curve1_rotation1_combined2/overhead.pdf",
+      "restored_sha256": "10cff8597c711a2e187ee1dec11fcd0ec6de3df08ad1745853a01c35b11371b5",
+      "selection_sha256": "10cff8597c711a2e187ee1dec11fcd0ec6de3df08ad1745853a01c35b11371b5"
+    },
+    {
+      "matches_selection": true,
+      "path": "phase2/final_figures_v1/details/pitching_wedge_lean0_curve1_rotation1_combined2/density.pdf",
+      "restored_sha256": "d937a11f678512683714b02796bc8ad8376eba44988e3036acc0686ec8ba9b12",
+      "selection_sha256": "d937a11f678512683714b02796bc8ad8376eba44988e3036acc0686ec8ba9b12"
+    },
+    {
+      "matches_selection": true,
+      "path": "phase2/final_figures_v1/details/pitching_wedge_lean0_curve1_rotation1_combined2/overhead.pdf",
+      "restored_sha256": "91193705e647fd05eb1494adbd3401efcdc711ced4d7a52512a0b8d87afa5744",
+      "selection_sha256": "91193705e647fd05eb1494adbd3401efcdc711ced4d7a52512a0b8d87afa5744"
+    },
+    {
+      "matches_selection": true,
+      "path": "phase2/supplement_report_v2_layout_repair/figures/comparisons/shaft_rotation_sd_original_control_1_driver_lean0_curve1_rotation1_combined2_vs_original_control_1_driver_lean0_curve1_rotation2_combined2_178p949m_3517439202_density.png",
+      "restored_sha256": "b4bc60a7aab17b932b5ac99366be5599db656837a9771392d62f990cec66e99e",
+      "selection_sha256": "b4bc60a7aab17b932b5ac99366be5599db656837a9771392d62f990cec66e99e"
+    },
+    {
+      "matches_selection": true,
+      "path": "phase2/supplement_report_v2_layout_repair/figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation1_combined2_vs_original_control_1_driver_lean0_curve2_rotation1_combined2_178p949m_56038f8c02_density.png",
+      "restored_sha256": "3b48720e713e9a7f315659f642c0bf48cae4e1aade85c940b47e86762da17215",
+      "selection_sha256": "3b48720e713e9a7f315659f642c0bf48cae4e1aade85c940b47e86762da17215"
+    },
+    {
+      "matches_selection": true,
+      "path": "phase2/supplement_report_v2_layout_repair/figures/comparisons/shaft_rotation_sd_original_control_1_seven_iron_lean0_curve1_rotation1_combined2_vs_original_control_1_seven_iron_lean0_curve1_rotation2_combined2_127p882m_df1aad6644_density.pdf",
+      "restored_sha256": "276b18ab2102fa281b89bb74bb8bac3e443338dd660914ff70f331fb0e39b8ac",
+      "selection_sha256": "276b18ab2102fa281b89bb74bb8bac3e443338dd660914ff70f331fb0e39b8ac"
+    },
+    {
+      "matches_selection": true,
+      "path": "phase2/supplement_report_v2_layout_repair/figures/comparisons/curve_strength_original_control_1_seven_iron_lean0_curve1_rotation1_combined2_vs_original_control_1_seven_iron_lean0_curve2_rotation1_combined2_127p882m_2d9a63d794_density.pdf",
+      "restored_sha256": "99d8d4846164306e35d4b6c29c4bf566602fe534eef3836bafbe926923e700c2",
+      "selection_sha256": "99d8d4846164306e35d4b6c29c4bf566602fe534eef3836bafbe926923e700c2"
+    },
+    {
+      "matches_selection": true,
+      "path": "phase2/supplement_report_v2_layout_repair/figures/comparisons/shaft_rotation_sd_original_control_1_pitching_wedge_lean0_curve1_rotation1_combined2_vs_original_control_1_pitching_wedge_lean0_curve1_rotation2_combined2_77p40_0a8f5f6cae_density.pdf",
+      "restored_sha256": "1bfad32b922f44c96182f9e073e471b8c6294858002d457d00c9984df342b7e1",
+      "selection_sha256": "1bfad32b922f44c96182f9e073e471b8c6294858002d457d00c9984df342b7e1"
+    },
+    {
+      "matches_selection": true,
+      "path": "phase2/supplement_report_v2_layout_repair/figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_combined2_77_14a48258b1_density.pdf",
+      "restored_sha256": "c3cc169d95d8d6f516c785f4df241ccb37d6ca32b6272d9bccfe1c7e2916493e",
+      "selection_sha256": "c3cc169d95d8d6f516c785f4df241ccb37d6ca32b6272d9bccfe1c7e2916493e"
+    },
+    {
+      "matches_selection": true,
+      "path": "phase2/supplement_report_v2_layout_repair/figures/comparisons/across_lean_original_control_1_driver_lean0_curve1_rotation2_combined2_vs_original_control_1_driver_lean5_curve1_rotation2_combined2_178p949m_e5c0a1a1e9_overhead.pdf",
+      "restored_sha256": "21b0dcf83ba76252949eaaecb661a432cfc84001f82355a4ccf902e6a8a584fd",
+      "selection_sha256": "21b0dcf83ba76252949eaaecb661a432cfc84001f82355a4ccf902e6a8a584fd"
+    }
+  ],
+  "figure_count": 13,
+  "fresh_restore_path": "/tmp/shot-pattern-delivery-resume/illustrated-report-source-restore-v3",
+  "restored_members": [
+    {
+      "bytes": 363,
+      "path": "README.txt",
+      "sha256": "557a82f4944add5696951ef4877f179d912acc08cfcdfa972c5c70be60ef2463"
+    },
+    {
+      "bytes": 128429,
+      "path": "phase2/final_figures_v1/details/driver_lean0_curve1_rotation1_combined2/density.pdf",
+      "sha256": "0507952992a7c86cfc04deca758c183932e7b086527e7919b004215f4a58f067"
+    },
+    {
+      "bytes": 104470,
+      "path": "phase2/final_figures_v1/details/driver_lean0_curve1_rotation1_combined2/overhead.pdf",
+      "sha256": "e4cd3d08b10eaad81a371f9e1c595d2afd9e994cab6c3abacf9a4940bee2ad43"
+    },
+    {
+      "bytes": 130479,
+      "path": "phase2/final_figures_v1/details/pitching_wedge_lean0_curve1_rotation1_combined2/density.pdf",
+      "sha256": "d937a11f678512683714b02796bc8ad8376eba44988e3036acc0686ec8ba9b12"
+    },
+    {
+      "bytes": 97393,
+      "path": "phase2/final_figures_v1/details/pitching_wedge_lean0_curve1_rotation1_combined2/overhead.pdf",
+      "sha256": "91193705e647fd05eb1494adbd3401efcdc711ced4d7a52512a0b8d87afa5744"
+    },
+    {
+      "bytes": 134972,
+      "path": "phase2/final_figures_v1/details/seven_iron_lean0_curve1_rotation1_combined2/density.pdf",
+      "sha256": "6c3a4d4c299eb1fd5db4f8cb6f689d829c10e1994557cccc94f61fa708ba6923"
+    },
+    {
+      "bytes": 105379,
+      "path": "phase2/final_figures_v1/details/seven_iron_lean0_curve1_rotation1_combined2/overhead.pdf",
+      "sha256": "10cff8597c711a2e187ee1dec11fcd0ec6de3df08ad1745853a01c35b11371b5"
+    },
+    {
+      "bytes": 82427,
+      "path": "phase2/supplement_report_v2_layout_repair/figures/comparisons/across_lean_original_control_1_driver_lean0_curve1_rotation2_combined2_vs_original_control_1_driver_lean5_curve1_rotation2_combined2_178p949m_e5c0a1a1e9_overhead.pdf",
+      "sha256": "21b0dcf83ba76252949eaaecb661a432cfc84001f82355a4ccf902e6a8a584fd"
+    },
+    {
+      "bytes": 1328862,
+      "path": "phase2/supplement_report_v2_layout_repair/figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation1_combined2_vs_original_control_1_driver_lean0_curve2_rotation1_combined2_178p949m_56038f8c02_density.png",
+      "sha256": "3b48720e713e9a7f315659f642c0bf48cae4e1aade85c940b47e86762da17215"
+    },
+    {
+      "bytes": 135281,
+      "path": "phase2/supplement_report_v2_layout_repair/figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_combined2_77_14a48258b1_density.pdf",
+      "sha256": "c3cc169d95d8d6f516c785f4df241ccb37d6ca32b6272d9bccfe1c7e2916493e"
+    },
+    {
+      "bytes": 158309,
+      "path": "phase2/supplement_report_v2_layout_repair/figures/comparisons/curve_strength_original_control_1_seven_iron_lean0_curve1_rotation1_combined2_vs_original_control_1_seven_iron_lean0_curve2_rotation1_combined2_127p882m_2d9a63d794_density.pdf",
+      "sha256": "99d8d4846164306e35d4b6c29c4bf566602fe534eef3836bafbe926923e700c2"
+    },
+    {
+      "bytes": 1077708,
+      "path": "phase2/supplement_report_v2_layout_repair/figures/comparisons/shaft_rotation_sd_original_control_1_driver_lean0_curve1_rotation1_combined2_vs_original_control_1_driver_lean0_curve1_rotation2_combined2_178p949m_3517439202_density.png",
+      "sha256": "b4bc60a7aab17b932b5ac99366be5599db656837a9771392d62f990cec66e99e"
+    },
+    {
+      "bytes": 137170,
+      "path": "phase2/supplement_report_v2_layout_repair/figures/comparisons/shaft_rotation_sd_original_control_1_pitching_wedge_lean0_curve1_rotation1_combined2_vs_original_control_1_pitching_wedge_lean0_curve1_rotation2_combined2_77p40_0a8f5f6cae_density.pdf",
+      "sha256": "1bfad32b922f44c96182f9e073e471b8c6294858002d457d00c9984df342b7e1"
+    },
+    {
+      "bytes": 140128,
+      "path": "phase2/supplement_report_v2_layout_repair/figures/comparisons/shaft_rotation_sd_original_control_1_seven_iron_lean0_curve1_rotation1_combined2_vs_original_control_1_seven_iron_lean0_curve1_rotation2_combined2_127p882m_df1aad6644_density.pdf",
+      "sha256": "276b18ab2102fa281b89bb74bb8bac3e443338dd660914ff70f331fb0e39b8ac"
+    },
+    {
+      "bytes": 81590,
+      "path": "shot_pattern_analysis.tex",
+      "sha256": "0b484b0393fa6cedbbd907f5ee603d7b0c74eb9908f455b596001bf283fde288"
+    }
+  ],
+  "schema": "shot-pattern-illustrated-source-restore/1",
+  "selected_figures_verified": true,
+  "selection_file": "/home/dieterolson/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/illustrated_article_v1/figure_selection.json",
+  "selection_sha256": "0d065e7f9d6581ab9c1ec491aed5fe71d19c6e4f519ae8439455ae8cb97936e9",
+  "simulation_or_compile_rerun": false,
+  "tex_path": "shot_pattern_analysis.tex",
+  "tex_sha256": "0b484b0393fa6cedbbd907f5ee603d7b0c74eb9908f455b596001bf283fde288",
+  "zip_integrity": "passed"
+}

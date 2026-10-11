@@ -1,0 +1,145 @@
+{
+  "asset_count": 21,
+  "assets": [
+    {
+      "bytes": 3575853,
+      "name": "ILLUSTRATED_REPORT.pdf",
+      "role": "illustrated_primary_report",
+      "sha256": "ca030b3c97fb759b384aab58b3da6be68687a194f353976754d43e7ffa69beda"
+    },
+    {
+      "bytes": 148477,
+      "name": "control__archive_manifest.json",
+      "role": "archive_or_manifest",
+      "sha256": "492962d0dc0a2f43ea95b143d352b4234331a8a2c42d10b33c1f7a55c9dbae9c"
+    },
+    {
+      "bytes": 168462247,
+      "name": "control__control_final_figures_v1_001.zip",
+      "role": "archive_or_manifest",
+      "sha256": "0101c2cbc5cba3ffb0b6bded0979cb63fb28adb52f446fbda1a4384c226e35c0"
+    },
+    {
+      "bytes": 3444211,
+      "name": "illustrated-report-source.zip",
+      "role": "illustrated_report_source_archive",
+      "sha256": "6567a9dcee60d6e18e4b1fe39ca34b3631eac09a578ce3eacd64914c93c7c1d2"
+    },
+    {
+      "bytes": 183464,
+      "name": "primary__archive_manifest.json",
+      "role": "archive_or_manifest",
+      "sha256": "3375d756c1aa39fb985ebccfb46600de8e1e07714f3dee5561ec7e5ae6229d44"
+    },
+    {
+      "bytes": 223739795,
+      "name": "primary__primary_final_figures_v1_001.zip",
+      "role": "archive_or_manifest",
+      "sha256": "6ba794355bf4575e2a6fb24a3dc7473dbd0279a628c3e99bbe191ce2a4785cc2"
+    },
+    {
+      "bytes": 97532,
+      "name": "report__REPORT.md",
+      "role": "historical_markdown_report",
+      "sha256": "ff281f76ee649c44c88afda58701329e7898e8964f9efb6d8aeec73dcd77d79b"
+    },
+    {
+      "bytes": 248862,
+      "name": "report__REPORT.pdf",
+      "role": "historical_text_only_report",
+      "sha256": "70a56243ff17ac833a60037562a07777b2bdac4aa4267a9956856a3492763b16"
+    },
+    {
+      "bytes": 661755,
+      "name": "social__driver__lean0_curve1_rotation2_combined2__density.png",
+      "role": "social_graphic",
+      "sha256": "3363450ec7288b422a346b9b671c766ce776b7ab4f1fae501978e4df0d805af0"
+    },
+    {
+      "bytes": 348393,
+      "name": "social__driver__lean0_curve1_rotation2_combined2__overhead.png",
+      "role": "social_graphic",
+      "sha256": "1ae4ef2267863b6c1f87a7ae293b61d1a816fa970c89cca1c74e182df44cad9a"
+    },
+    {
+      "bytes": 731382,
+      "name": "social__pitching_wedge__lean0_curve1_rotation2_combined2__density.png",
+      "role": "social_graphic",
+      "sha256": "917a2b3ed786cf2c655f69ada4e4fc422c001c079d3f2d9300dbc8493f070527"
+    },
+    {
+      "bytes": 346879,
+      "name": "social__pitching_wedge__lean0_curve1_rotation2_combined2__overhead.png",
+      "role": "social_graphic",
+      "sha256": "faf579bdf753d41742c7395f22be7375a3fd31c79b770d9bd375d86b01a55507"
+    },
+    {
+      "bytes": 742501,
+      "name": "social__seven_iron__lean0_curve1_rotation2_combined2__density.png",
+      "role": "social_graphic",
+      "sha256": "acb677f8b83e607746553b2eef53e138b67234044cb0ed0365539a40ea084c96"
+    },
+    {
+      "bytes": 366919,
+      "name": "social__seven_iron__lean0_curve1_rotation2_combined2__overhead.png",
+      "role": "social_graphic",
+      "sha256": "a425bd932dfbe63641441eee1431273e9f13373f2a04d70e9d0b75846d2a3d2f"
+    },
+    {
+      "bytes": 2733779,
+      "name": "supplement__archive_manifest.json",
+      "role": "archive_or_manifest",
+      "sha256": "5d776ea73d9564812431416a01c2661a3f9335de1554ef111d24673b23125f74"
+    },
+    {
+      "bytes": 499745789,
+      "name": "supplement__supplement_report_v2_layout_repair-001.zip",
+      "role": "archive_or_manifest",
+      "sha256": "ec83fbe79b0ed719a83ed0cdc72a3c15bce76cda14f09cc01e30752f56431213"
+    },
+    {
+      "bytes": 499031555,
+      "name": "supplement__supplement_report_v2_layout_repair-002.zip",
+      "role": "archive_or_manifest",
+      "sha256": "7241f510bb2f6fee12b88b7f552bb321aba2f5fec96edaa79af1aa9b30e10670"
+    },
+    {
+      "bytes": 499548341,
+      "name": "supplement__supplement_report_v2_layout_repair-003.zip",
+      "role": "archive_or_manifest",
+      "sha256": "2b3ffa5aa961f2c24497decb2e8d3714455cbbfcfef56a01e1ebca19c71c5eea"
+    },
+    {
+      "bytes": 499224726,
+      "name": "supplement__supplement_report_v2_layout_repair-004.zip",
+      "role": "archive_or_manifest",
+      "sha256": "85bd31e721e4347208a447dfaffb4efdb39a4c11bde22873ebe50d7a64634bee"
+    },
+    {
+      "bytes": 499866395,
+      "name": "supplement__supplement_report_v2_layout_repair-005.zip",
+      "role": "archive_or_manifest",
+      "sha256": "53af700ae57207d79427cc0c6e525671b72e3be12736a409566f5b1c6326a829"
+    },
+    {
+      "bytes": 247922196,
+      "name": "supplement__supplement_report_v2_layout_repair-006.zip",
+      "role": "archive_or_manifest",
+      "sha256": "0f4c6df8f51d44b18f8bbe89f87ece17025486fde4483a7e621f0ea5472505e4"
+    }
+  ],
+  "preserved_previous_inventory_sha256": "65f66433077e0ae6795dc480abd451b5e7f6c7de70e6c201abca08290c4541bc",
+  "report_roles": {
+    "historical_text_only_report": "report__REPORT.pdf",
+    "historical_text_only_report_sha256": "70a56243ff17ac833a60037562a07777b2bdac4aa4267a9956856a3492763b16",
+    "primary_report": "ILLUSTRATED_REPORT.pdf",
+    "primary_report_sha256": "ca030b3c97fb759b384aab58b3da6be68687a194f353976754d43e7ffa69beda",
+    "source_archive": "illustrated-report-source.zip",
+    "source_archive_sha256": "6567a9dcee60d6e18e4b1fe39ca34b3631eac09a578ce3eacd64914c93c7c1d2"
+  },
+  "scenario_note": "Illustrated report main plates use shaft-twist SD 1 degree with combined2; the six social PNGs use shaft-twist SD 2 degrees with combined2. These are distinct scenarios.",
+  "schema": "shot-pattern-release-staging-inventory/3",
+  "stage_path": "/tmp/shot-pattern-delivery-resume/release-assets-v2",
+  "uploaded": false,
+  "version": 3
+}
