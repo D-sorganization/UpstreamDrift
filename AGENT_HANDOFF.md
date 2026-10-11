@@ -4,6 +4,11 @@
 - `club_face.impact_frame` now enforces the 0.15 m ball radius on the peak-speed frame (the driver replay peaks 0.351 m short of the ball). OSV-8 and OSV-9 address-face tests compare with the capture's address face (2° unchanged). OSV-9 MSK grip calibration and both `golf_humanoid*.osim` regenerated (control reproduces main byte for byte). Calc record: `simscape_matching_reference.tex`, "Fixtures Regenerated on the Current Spec".
 - Strict xfails: 7-iron impact face 10.97 vs 3.21° (#12221, club-in-hand rotation); GCV-20 speed −6.1 / −10.2 % (#11767). Toe-out miss filed as #12222.
 
+# Active: Drake and MuJoCo IK Parity, Weld Rotation Row — #12039
+
+- Branch `claude/12039-drake-address-parity`. Drake's dual-grip weld rotation row was the small-angle vee with Jacobian `J_a - J_b` (up to 0.84 off finite differences); MuJoCo's is the principal log with its exact Jacobian. Both now use `full_body_ik._closure_rotation_row`; Drake `closure_error` reports the principal angle. Tests: `tests/unit/motion_matching/test_drake_mujoco_ik_parity.py`.
+- Address stages (static seeds, foot progression capture), Drake minus MuJoCo: driver +1.64 → 0.00 mm, 7-iron −0.54 → +0.02 mm; toe-out identical. Capture-A Drake receipt regenerated: 6.3 / 29.2 / 78.8 mm against MuJoCo's 6.3 / 29.5 / 80.8 mm. Evidence `evidence/foot_progression/drake_parity_12039/`; calc record "Weld Rotation Row Parity" in `simscape_matching_reference.tex`.
+
 # Active: Nominal 7-Iron IK and the Club-Face Triad Gate, #12030
 
 - Branch `claude/12030-nominal-iron-ik`. Root cause: `full_body_spec_anthro_iron7.json` carries the driver's clubhead triad offsets (edges 92/52/96 mm against the 7-iron capture's 106/127/40 mm), so the nominal run's face residual (OSV-10) fitted a meaningless rotation. `club_face_target.observe_frame_rotations` now raises `TriadShapeMismatchError` above a 5 mm median rigid residual (0.2 mm when matched, 42.4 mm here). Face targets, the impact split and the receipt's `ik.face_orientation` record the reason. The IK report adds `frame0_marker_rms_m`.
