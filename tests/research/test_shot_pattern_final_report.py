@@ -1127,3 +1127,131 @@ def test_f6_draft_conclusions_provenance_truthful_v5_pending():
     assert "completed v4 receipt" not in content
     assert "v4" in content.lower()
     assert "v5" in content.lower()
+
+
+def test_final_report_rendering_is_byte_deterministic_for_fixed_inputs():
+    import hashlib
+
+    primary = _matrix(
+        [
+            _cell("driver_lean0_curve1_rotation1_shaft_only"),
+            _cell("driver_lean10_curve1_rotation1_shaft_only", status="unavailable"),
+        ],
+        "final",
+    )
+    control = _matrix(
+        [_cell("driver_lean0_curve1_rotation1_shaft_only")], "control_final"
+    )
+    lean = {
+        "schema": "matched-across-lean/1",
+        "pairs": [],
+        "population": {"planned_pairs": 0},
+    }
+
+    rendered = build_final_report.render_final_report(primary, control, lean, {})
+
+    assert len(rendered) == 13_510
+    assert hashlib.sha256(rendered.encode()).hexdigest() == (
+        "62c9553c0d1b25d4eeb726bba3593fed1822d097c29c78ad295796b6da83a376"
+    )
+
+
+def test_report_builder_validates_inputs_before_first_publication_write(
+    tmp_path, monkeypatch
+):
+    from scripts.research.shot_pattern_analysis import build_final_report as builder
+
+    events = []
+    primary_root = tmp_path / "primary"
+    control_root = tmp_path / "control"
+    primary_root.mkdir()
+    control_root.mkdir()
+    primary_figures = tmp_path / "primary_figures"
+    control_figures = tmp_path / "control_figures"
+    primary_figures.mkdir()
+    control_figures.mkdir()
+    for root in (primary_figures, control_figures):
+        (root / "figure_manifest.json").write_bytes(b"manifest")
+    primary = {"cells": [], "plan_sha256": "p"}
+    control = {"cells": [], "plan_sha256": "c"}
+    matrix_calls = iter((primary, control))
+
+    monkeypatch.setattr(builder, "_report_source_hashes", lambda: {"stable": "hash"})
+    monkeypatch.setattr(
+        "src.tools.shot_pattern_analysis.matched_report.load_matrix_report",
+        lambda root: (events.append(f"load:{root.name}"), next(matrix_calls))[1],
+    )
+    monkeypatch.setattr(
+        builder,
+        "load_supplement_at_stable_receipt",
+        lambda root: (events.append("supplement"), ({}, "supplement-receipt"))[1],
+    )
+    monkeypatch.setattr(
+        "src.tools.shot_pattern_analysis.matched_report.load_reviewed_common_targets",
+        lambda root: (events.append("targets"), ({}, "target-receipt"))[1],
+    )
+    monkeypatch.setattr(
+        builder, "validate_final_plans", lambda *args, **kwargs: events.append("plans")
+    )
+    monkeypatch.setattr(
+        "src.tools.shot_pattern_analysis.matched_lean_control.analyze_across_lean",
+        lambda root: (events.append("lean"), {"pairs": []})[1],
+    )
+    monkeypatch.setattr(
+        builder,
+        "assemble_qualified_interpretation",
+        lambda *args, **kwargs: (
+            events.append("interpretation"),
+            {"supplement": {"receipt_sha256": "s"}},
+        )[1],
+    )
+    monkeypatch.setattr(
+        builder,
+        "render_final_report",
+        lambda *args, **kwargs: (events.append("render"), "report")[1],
+    )
+    monkeypatch.setattr(
+        builder,
+        "render_club_appendices",
+        lambda *args, **kwargs: (
+            events.append("appendices"),
+            {"driver": "d", "seven_iron": "i", "pitching_wedge": "w"},
+        )[1],
+    )
+    monkeypatch.setattr(
+        builder,
+        "assert_publication_inputs_unchanged",
+        lambda context: events.append("validate-inputs"),
+    )
+    original_write = builder._write_atomic
+
+    def record_write(path, content):
+        events.append(f"write:{Path(path).name}")
+        original_write(path, content)
+
+    monkeypatch.setattr(builder, "_write_atomic", record_write)
+    destination = tmp_path / "REPORT.md"
+
+    builder.build_final_report(
+        primary_root,
+        control_root,
+        destination,
+        primary_figures=primary_figures,
+        control_figures=control_figures,
+    )
+
+    first_write = next(
+        index for index, event in enumerate(events) if event.startswith("write:")
+    )
+    assert events.index("validate-inputs") < first_write
+    assert events[: events.index("validate-inputs")] == [
+        "load:primary",
+        "load:control",
+        "supplement",
+        "targets",
+        "plans",
+        "lean",
+        "interpretation",
+        "render",
+        "appendices",
+    ]

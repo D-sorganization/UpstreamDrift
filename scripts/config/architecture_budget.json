@@ -1370,60 +1370,6 @@
       "issue": 12278,
       "reason": "Issue #12278: shot pattern analysis integration - build_final_figures exceeds function-lines budget (214 > 100).",
       "expires_on": "2026-12-31"
-    },
-    {
-      "path": "scripts/research/shot_pattern_analysis/build_final_report.py",
-      "symbol": "render_final_report",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - render_final_report exceeds function-lines budget (123 > 100).",
-      "expires_on": "2026-12-31"
-    },
-    {
-      "path": "scripts/research/shot_pattern_analysis/build_final_report.py",
-      "symbol": "assert_publication_inputs_unchanged",
-      "rule": "parameters",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - assert_publication_inputs_unchanged exceeds parameters budget (11 > 8).",
-      "expires_on": "2026-12-31"
-    },
-    {
-      "path": "scripts/research/shot_pattern_analysis/build_final_report.py",
-      "symbol": "build_final_report",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - build_final_report exceeds function-lines budget (107 > 100).",
-      "expires_on": "2026-12-31"
-    },
-    {
-      "path": "scripts/research/shot_pattern_analysis/final_report_inputs.py",
-      "symbol": "assemble_resolved_selected_cells",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - assemble_resolved_selected_cells exceeds function-lines budget (114 > 100).",
-      "expires_on": "2026-12-31"
-    },
-    {
-      "path": "scripts/research/shot_pattern_analysis/final_report_inputs.py",
-      "symbol": "assemble_qualified_interpretation",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - assemble_qualified_interpretation exceeds function-lines budget (148 > 100).",
-      "expires_on": "2026-12-31"
-    },
-    {
-      "path": "scripts/research/shot_pattern_analysis/final_report_inputs.py",
-      "symbol": "assemble_qualified_interpretation",
-      "rule": "parameters",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - assemble_qualified_interpretation exceeds parameters budget (9 > 8).",
-      "expires_on": "2026-12-31"
     }
   ]
 }

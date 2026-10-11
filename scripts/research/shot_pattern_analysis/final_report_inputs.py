@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+from dataclasses import dataclass
 from pathlib import Path
 
 
@@ -369,6 +370,54 @@ def supplement_figure_links(
     return links
 
 
+def _index_source_cells(cells: list[dict], source: str) -> dict[str, dict]:
+    indexed: dict[str, dict] = {}
+    for cell in cells:
+        name = cell["cell"]
+        if name in indexed:
+            raise ValueError(f"duplicate {source} cell: {name}")
+        indexed[name] = cell
+    return indexed
+
+
+def _require_population_counts(record: dict, cell_name: str, prefix: str) -> None:
+    summary = record.get("summary", {})
+    for pattern in ("Straight", "Draw", "Fade"):
+        if pattern not in summary or "supported_n" not in summary[pattern]:
+            raise ValueError(
+                f"{prefix}cell lacks individual support count: {cell_name}"
+            )
+    paired = record.get("paired_comparisons", {})
+    if "paired_n" not in paired:
+        raise ValueError(f"{prefix}cell lacks common paired count: {cell_name}")
+
+
+def _resolve_selected_cell(
+    cell_name: str, primary_cell: dict, supplement_cells: dict
+) -> dict:
+    status = primary_cell.get("status")
+    if status == "completed":
+        _require_population_counts(primary_cell, cell_name, "")
+        return {**primary_cell, "source_protocol": "original_primary/1"}
+    if status == "unavailable":
+        if cell_name not in supplement_cells:
+            raise ValueError(
+                f"missing resolved supplement cell for unavailable primary: {cell_name}"
+            )
+        entry = supplement_cells[cell_name]
+        if entry.get("status") != "completed":
+            raise ValueError(f"supplement cell is not completed: {cell_name}")
+        summary = entry.get("summary", {})
+        _require_population_counts(summary, cell_name, "supplement ")
+        return {
+            **summary,
+            "cell": cell_name,
+            "source_protocol": entry.get("source_protocol"),
+            "original_status": "unavailable",
+        }
+    raise ValueError(f"cell has invalid status {status}: {cell_name}")
+
+
 def assemble_resolved_selected_cells(primary: dict, supplement: dict) -> list[dict]:
     """Assemble the resolved 24-cell zero-lean selection with explicit protocols.
 
@@ -383,20 +432,9 @@ def assemble_resolved_selected_cells(primary: dict, supplement: dict) -> list[di
     rotations = (1.0, 2.0)
     profiles = ("shaft_only", "combined2")
 
-    primary_cells: dict[str, dict] = {}
-    for cell in primary.get("cells", []):
-        name = cell["cell"]
-        if name in primary_cells:
-            raise ValueError(f"duplicate primary cell: {name}")
-        primary_cells[name] = cell
-
+    primary_cells = _index_source_cells(primary.get("cells", []), "primary")
     supp_report = supplement.get("report", {})
-    supp_unique: dict[str, dict] = {}
-    for entry in supp_report.get("unique_cells", []):
-        name = entry["cell"]
-        if name in supp_unique:
-            raise ValueError(f"duplicate supplement cell: {name}")
-        supp_unique[name] = entry
+    supp_unique = _index_source_cells(supp_report.get("unique_cells", []), "supplement")
 
     resolved: list[dict] = []
     seen: set[str] = set()
@@ -415,66 +453,11 @@ def assemble_resolved_selected_cells(primary: dict, supplement: dict) -> list[di
                     if cell_name not in primary_cells:
                         raise ValueError(f"missing requested primary cell: {cell_name}")
 
-                    p_cell = primary_cells[cell_name]
-                    status = p_cell.get("status")
-                    if status == "completed":
-                        summary = p_cell.get("summary", {})
-                        for pat in ("Straight", "Draw", "Fade"):
-                            if pat not in summary or "supported_n" not in summary[pat]:
-                                raise ValueError(
-                                    f"cell lacks individual support count: {cell_name}"
-                                )
-                        paired = p_cell.get("paired_comparisons", {})
-                        if "paired_n" not in paired:
-                            raise ValueError(
-                                f"cell lacks common paired count: {cell_name}"
-                            )
-
-                        resolved.append(
-                            {
-                                **p_cell,
-                                "source_protocol": "original_primary/1",
-                            }
+                    resolved.append(
+                        _resolve_selected_cell(
+                            cell_name, primary_cells[cell_name], supp_unique
                         )
-                    elif status == "unavailable":
-                        if cell_name not in supp_unique:
-                            raise ValueError(
-                                f"missing resolved supplement cell for unavailable primary: {cell_name}"
-                            )
-                        s_entry = supp_unique[cell_name]
-                        if s_entry.get("status") != "completed":
-                            raise ValueError(
-                                f"supplement cell is not completed: {cell_name}"
-                            )
-
-                        s_summary = s_entry.get("summary", {})
-                        pat_summary = s_summary.get("summary", {})
-                        for pat in ("Straight", "Draw", "Fade"):
-                            if (
-                                pat not in pat_summary
-                                or "supported_n" not in pat_summary[pat]
-                            ):
-                                raise ValueError(
-                                    f"supplement cell lacks individual support count: {cell_name}"
-                                )
-                        paired = s_summary.get("paired_comparisons", {})
-                        if "paired_n" not in paired:
-                            raise ValueError(
-                                f"supplement cell lacks common paired count: {cell_name}"
-                            )
-
-                        resolved.append(
-                            {
-                                **s_summary,
-                                "cell": cell_name,
-                                "source_protocol": s_entry.get("source_protocol"),
-                                "original_status": "unavailable",
-                            }
-                        )
-                    else:
-                        raise ValueError(
-                            f"cell has invalid status {status}: {cell_name}"
-                        )
+                    )
 
     if len(resolved) != 24:
         raise ValueError(f"expected exactly 24 resolved cells, got {len(resolved)}")
@@ -485,25 +468,17 @@ def assemble_resolved_selected_cells(primary: dict, supplement: dict) -> list[di
     return resolved
 
 
-def assemble_qualified_interpretation(
-    primary_root: Path,
-    primary: dict,
-    control_root: Path,
-    control: dict,
-    supplement: dict,
-    *,
-    primary_figures: Path,
-    control_figures: Path,
-    supplement_dir: Path,
-    report_root: Path,
-) -> dict:
-    """Compose selected interpretation from independently qualified inputs."""
-    from src.tools.shot_pattern_analysis.matched_interpretation import (
-        describe_saved_cell,
-        describe_scoring,
-    )
+@dataclass(frozen=True)
+class InterpretationAssets:
+    """Original/supplemental artifact roots and their publication root."""
 
-    report_root = Path(report_root).resolve()
+    primary_figures: Path
+    control_figures: Path
+    supplement_dir: Path
+    report_root: Path
+
+
+def _selected_interpretation_cells(primary: dict) -> list[dict]:
     selected = [
         cell
         for cell in primary["cells"]
@@ -526,29 +501,21 @@ def assemble_qualified_interpretation(
             cell["config"]["club"]["shaft_lean_deg"],
         )
     )
-    explained = [
-        describe_saved_cell(Path(primary_root) / cell["cell"]) for cell in selected
-    ]
-    scored = [(cell["cell"], describe_scoring(cell)) for cell in selected]
-    comparisons = supplement["comparisons"]
-    if comparisons.get("schema") != "matched-supplement-comparisons/1":
-        raise ValueError("qualified supplement comparison schema differs")
-    resolved_selected_cells = assemble_resolved_selected_cells(primary, supplement)
-    representative_effects = select_representative_interaction_pairs(
-        comparisons["comparisons"]
-    )
-    bounds_effects, bounds_unavailable = select_bounds_control_pairs(
-        comparisons["comparisons"]
-    )
+    return selected
+
+
+def _original_figure_assets(
+    primary: dict, control: dict, assets: InterpretationAssets, report_root: Path
+) -> tuple[list[dict], list[str]]:
     links = [
         *verified_original_figure_links(
-            primary_figures,
+            assets.primary_figures,
             primary,
             report_root=report_root,
             protocol="original_primary",
         ),
         *verified_original_figure_links(
-            control_figures,
+            assets.control_figures,
             control,
             report_root=report_root,
             protocol="original_control",
@@ -556,29 +523,24 @@ def assemble_qualified_interpretation(
     ]
     figure_inventories = [
         verified_original_figure_inventory(
-            primary_figures,
+            assets.primary_figures,
             primary,
             report_root=report_root,
             protocol="original_primary",
         ),
         verified_original_figure_inventory(
-            control_figures,
+            assets.control_figures,
             control,
             report_root=report_root,
             protocol="original_control",
         ),
     ]
-    ledger = supplement["figure_ledger"]
-    if ledger.get("schema") != "matched-supplement-figure-ledger/1":
-        raise ValueError("qualified supplement figure inventory differs")
-    links.extend(
-        supplement_figure_links(
-            ledger["figures"],
-            representative_effects + bounds_effects,
-            supplement_dir=supplement_dir,
-            report_root=report_root,
-        )
-    )
+    return links, figure_inventories
+
+
+def _qualified_supplement_identity(
+    supplement: dict, supplement_dir: Path
+) -> tuple[dict, dict]:
     report = supplement["report"]
     if (
         report.get("schema") != "matched-supplement-report/1"
@@ -602,6 +564,57 @@ def assemble_qualified_interpretation(
         != publication["receipt_sha256"]
     ):
         raise ValueError("supplement publication identity changed")
+    return report, publication
+
+
+def assemble_qualified_interpretation(
+    primary_root: Path,
+    primary: dict,
+    control_root: Path,
+    control: dict,
+    supplement: dict,
+    *,
+    assets: InterpretationAssets,
+) -> dict:
+    """Compose selected interpretation from independently qualified inputs."""
+    from src.tools.shot_pattern_analysis.matched_interpretation import (
+        describe_saved_cell,
+        describe_scoring,
+    )
+
+    report_root = Path(assets.report_root).resolve()
+    selected = _selected_interpretation_cells(primary)
+    explained = [
+        describe_saved_cell(Path(primary_root) / cell["cell"]) for cell in selected
+    ]
+    scored = [(cell["cell"], describe_scoring(cell)) for cell in selected]
+    comparisons = supplement["comparisons"]
+    if comparisons.get("schema") != "matched-supplement-comparisons/1":
+        raise ValueError("qualified supplement comparison schema differs")
+    resolved_selected_cells = assemble_resolved_selected_cells(primary, supplement)
+    representative_effects = select_representative_interaction_pairs(
+        comparisons["comparisons"]
+    )
+    bounds_effects, bounds_unavailable = select_bounds_control_pairs(
+        comparisons["comparisons"]
+    )
+    links, figure_inventories = _original_figure_assets(
+        primary, control, assets, report_root
+    )
+    ledger = supplement["figure_ledger"]
+    if ledger.get("schema") != "matched-supplement-figure-ledger/1":
+        raise ValueError("qualified supplement figure inventory differs")
+    links.extend(
+        supplement_figure_links(
+            ledger["figures"],
+            representative_effects + bounds_effects,
+            supplement_dir=assets.supplement_dir,
+            report_root=report_root,
+        )
+    )
+    report, publication = _qualified_supplement_identity(
+        supplement, assets.supplement_dir
+    )
     return {
         "selected_cells": explained,
         "resolved_selected_cells": resolved_selected_cells,
@@ -622,12 +635,13 @@ def assemble_qualified_interpretation(
             "receipt_sha256": publication["receipt_sha256"],
             "publication_identity": publication,
             "comparison_inventory": (
-                Path(supplement_dir).resolve() / "REPORT_SUPPLEMENT_COMPARISONS.csv"
+                Path(assets.supplement_dir).resolve()
+                / "REPORT_SUPPLEMENT_COMPARISONS.csv"
             )
             .relative_to(report_root)
             .as_posix(),
             "figure_inventory": (
-                Path(supplement_dir).resolve() / "REPORT_SUPPLEMENT_FIGURES.json"
+                Path(assets.supplement_dir).resolve() / "REPORT_SUPPLEMENT_FIGURES.json"
             )
             .relative_to(report_root)
             .as_posix(),
