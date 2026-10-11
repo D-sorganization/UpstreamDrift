@@ -78,6 +78,12 @@ def _measure(engine: str, bundle: InputBundle, segment_steps: int) -> dict[str, 
         "segments": len(segments),
         "max_coordinate_error_rad": max(s["coordinate_error_rad"] for s in segments),
         "max_frame_error_m": max(s["frame_error_m"] for s in segments),
+        "worst_segment_start_s": max(segments, key=lambda s: s["coordinate_error_rad"])[
+            "start_s"
+        ],
+        "coordinate_error_rad_by_segment": [
+            s["coordinate_error_rad"] for s in segments
+        ],
     }
     summary["wall_time_s"] = round(time.perf_counter() - started, 1)
     return summary
