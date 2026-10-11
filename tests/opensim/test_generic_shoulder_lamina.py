@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import hashlib
-import importlib
 import os
 from pathlib import Path
 import sys
@@ -23,6 +22,7 @@ from src.engines.physics_engines.opensim.python.tour_matching.generic_shoulder_l
     REGISTRATION,
     REVIEWED_557_SOURCE_SHA256,
     REVIEWED_RIGHT_MESH_SHA256,
+    _call_provider_worker,
 )
 
 pytestmark = pytest.mark.integration
@@ -32,21 +32,24 @@ def _sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-@pytest.fixture(autouse=True)
-def _pending_lamina_provider() -> None:
-    """Use the exact external Tools provider until its gitlink is merged."""
-    root = os.environ.get("LAMINA_TOOLS_ROOT")
-    if root is None:
-        pytest.skip("Tools #5503 provider is pending; set LAMINA_TOOLS_ROOT")
-    mesh_package = importlib.import_module(
-        "shared.python.humanoid_character_builder.mesh"
-    )
-    provider = Path(root) / "src/shared/python/humanoid_character_builder/mesh"
-    assert (provider / "triangle_lamina.py").is_file()
-    mesh_package.__path__.insert(0, str(provider))
-    for name in ("inertia_calculator", "triangle_lamina"):
-        sys.modules.pop(f"shared.python.humanoid_character_builder.mesh.{name}", None)
-    importlib.invalidate_caches()
+def test_pinned_provider_worker_does_not_mutate_parent_import_state() -> None:
+    before_path = tuple(sys.path)
+    package_prefix = "shared.python.humanoid_character_builder.mesh"
+    before_modules = {
+        name: module
+        for name, module in sys.modules.items()
+        if name == package_prefix or name.startswith(package_prefix + ".")
+    }
+    identity = _call_provider_worker()
+    after_modules = {
+        name: module
+        for name, module in sys.modules.items()
+        if name == package_prefix or name.startswith(package_prefix + ".")
+    }
+    assert tuple(sys.path) == before_path
+    assert after_modules == before_modules
+    assert len(identity["provider_sha256"]) == 64
+    assert len(identity["representation_sha256"]) == 64
 
 
 def _mesh(path: Path) -> None:
@@ -121,7 +124,18 @@ def test_candidate_preserves_only_declared_body_fields(
         assert derived.findtext("attached_geometry/Mesh/scale_factors") == "1 1 1"
     assert result.source_sha256 == manifest.source_sha256
     assert result.model_sha256 == _sha(result.model_path)
-    assert result.lamina_provider_sha256
+    vendor_src = Path(__file__).resolve().parents[2] / "vendor/ud-tools/src"
+    assert result.lamina_provider_sha256 == _sha(
+        vendor_src / "shared/python/humanoid_character_builder/mesh/triangle_lamina.py"
+    )
+    assert result.inertia_representation_sha256 == _sha(
+        vendor_src
+        / "shared/python/humanoid_character_builder/mesh/inertia_calculator.py"
+    )
+    assert result.provider_worker_sha256 == _sha(
+        Path(__file__).resolve().parents[2]
+        / "scripts/opensim/triangle_lamina_provider_worker.py"
+    )
 
 
 def test_left_is_exact_local_reflection_of_right_mass_moments(

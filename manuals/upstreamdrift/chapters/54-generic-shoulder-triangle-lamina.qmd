@@ -62,6 +62,15 @@ coordinate-invariant principal-moment law. It rechecks provider/geometry
 hashes and compares every native body transform plus QErr/UErr for three
 declared samples: initialized pelvis tilt and $\pm0.01$ SC_x offsets.
 
+The pinned Tools triangle-lamina provider runs in a bounded isolated Python
+worker because the UpstreamDrift checkout still owns the containing
+`humanoid_character_builder` package. The worker imports only from the pinned
+`vendor/ud-tools/src` tree, communicates through numeric NPZ input and JSON
+output, and returns exact kernel and inertia-representation source hashes.
+Candidate generation and later admission verify those bytes and the worker's
+own source hash. This keeps provider types and implementations out of the
+UpstreamDrift process and avoids combining two package trees.
+
 The current OpenSim 4.6 receipt identifies derived model SHA-256
 `5f2cdd22013c2700f95d625a4c42eb488ed6c5267721cd0d2acde38544754326`.
 Its 40-body native physical audit passes and the sampled maximum source versus
@@ -74,3 +83,12 @@ contact/grip, an independent head, private marker calibration, full-horizon
 muscle excitation replay, all 17 variants and six-engine parity remain open.
 No Moco solve or captured-motion fit is claimed. Calculation release and
 publication remain blocked.
+
+The pinned-provider CLI revalidation produced the same model SHA-256 as the
+prior provider run and passed the 40-body, three-pose native checks. Its receipt
+also binds the isolated worker source, in addition to the exact Tools kernel
+and inertia-representation hashes. Reproduction requires no development-only
+Tools root argument or in-process module injection. The preserved v6 receipt
+SHA-256 is
+`248065dd5a5338b1907b56a5777d69447efb044b4242d95c6def0b141e15994f` in fleet
+planning; prior v4 and v5 receipts remain unchanged historical evidence.
