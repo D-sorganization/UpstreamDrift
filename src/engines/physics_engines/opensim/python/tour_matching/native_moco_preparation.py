@@ -46,6 +46,7 @@ from .native_diagnostic_contract import (
     RuntimeViability,
     diagnostic_effects,
 )
+from .native_path_work_audit import native_path_optimizer_domains
 from .native_wrapped_path import (
     WrappedPathDeclaration,
     audit_native_wrapped_path_source,
@@ -239,6 +240,39 @@ def _preview_replay_capability(
         return []
     except (ValueError, RuntimeError):
         return ["independent-native-replay-unavailable"]
+
+
+def _native_path_optimizer_blockers(
+    model: Any, request: NativeMocoRequest, osim: Any
+) -> list[str]:
+    """Require every MPP optimizer box to fit its source function domain."""
+    try:
+        domains = native_path_optimizer_domains(
+            model, request.constrained_cold_start, osim
+        )
+    except (OSError, ValueError, RuntimeError, TypeError, AttributeError):
+        return ["native-moco-path-optimizer-domain-invalid"]
+    blockers = []
+    for coordinate_path, domain in domains.items():
+        optimizer_bounds = request.bindings.state_bounds.get(coordinate_path + "/value")
+        try:
+            invalid = (
+                not isinstance(optimizer_bounds, tuple)
+                or len(optimizer_bounds) != 2
+                or any(
+                    isinstance(value, bool) or not math.isfinite(value)
+                    for value in optimizer_bounds
+                )
+                or optimizer_bounds[0] > optimizer_bounds[1]
+                or optimizer_bounds[0] < domain[0]
+                or optimizer_bounds[1] > domain[1]
+            )
+        except (TypeError, ValueError):
+            invalid = True
+        if invalid:
+            blockers.append("native-moco-path-optimizer-domain-invalid")
+            break
+    return blockers
 
 
 def _declared_chart_blockers(request: NativeMocoRequest) -> list[str]:
@@ -443,6 +477,7 @@ def _native_preparation(
     blockers: list[str] = _declared_chart_blockers(request)
     loaded: str | None = None
     model = osim.Model(str(request.model_path))
+    blockers.extend(_native_path_optimizer_blockers(model, request, osim))
     runtime_sha = _native_runtime_identity(osim)
     probe_sha: str | None = None
     probe_failure: NativeProbeFailure | None = None
@@ -646,6 +681,7 @@ def _native_diagnostic_findings(
         "native-passive-or-constraint-observation-unavailable": DiagnosticCode.NATIVE_OBSERVATION_INVALID,
         "native-moco-chart-bounds-unqualified": DiagnosticCode.NATIVE_CONSTRAINT_REALIZATION_FAILED,
         "native-moco-linear-chart-bounds-unqualified": DiagnosticCode.NATIVE_CONSTRAINT_REALIZATION_FAILED,
+        "native-moco-path-optimizer-domain-invalid": DiagnosticCode.NATIVE_PATH_OPTIMIZER_DOMAIN_INVALID,
         "model-sha256-mismatch": DiagnosticCode.NATIVE_SOURCE_IDENTITY_INVALID,
         "capture-sha256-mismatch": DiagnosticCode.NATIVE_SOURCE_IDENTITY_INVALID,
         "guess-sha256-mismatch": DiagnosticCode.NATIVE_SOURCE_IDENTITY_INVALID,

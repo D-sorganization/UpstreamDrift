@@ -64,6 +64,7 @@ class DiagnosticCode(StrEnum):
     NATIVE_REPLAY_CAPABILITY_UNAVAILABLE = "native_replay_capability_unavailable"
     NATIVE_OBSERVATION_INVALID = "native_observation_invalid"
     NATIVE_CHART_PROOF_UNAVAILABLE = "native_chart_proof_unavailable"
+    NATIVE_PATH_OPTIMIZER_DOMAIN_INVALID = "native_path_optimizer_domain_invalid"
     NATIVE_SOURCE_IDENTITY_VERIFIED = "native_source_identity_verified"
     NATIVE_STATE_RECONSTRUCTED = "native_state_reconstructed"
     NATIVE_CONSTRAINTS_RECONSTRUCTED = "native_constraints_reconstructed"
@@ -237,6 +238,10 @@ _EXPECTED_EFFECTS: dict[DiagnosticCode, tuple[ExecutionEffect, QualificationEffe
     DiagnosticCode.NATIVE_CHART_PROOF_UNAVAILABLE: (
         ExecutionEffect.REQUIRES_OPT_IN,
         QualificationEffect.UNQUALIFIED,
+    ),
+    DiagnosticCode.NATIVE_PATH_OPTIMIZER_DOMAIN_INVALID: (
+        ExecutionEffect.BLOCK,
+        QualificationEffect.NONE,
     ),
     DiagnosticCode.NATIVE_SOURCE_IDENTITY_VERIFIED: (
         ExecutionEffect.PROCEED,
