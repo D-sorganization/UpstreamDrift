@@ -299,3 +299,32 @@ acceptance, and cannot qualify fiber lengths, kinematics, physiology, capture
 matching or production behavior. The child still requires the unchanged
 independent fresh replay checks. Native API and time-grid integration remain
 unverified pending separate review.
+
+
+### Retained Replay of the Grid-Rejected Child
+
+The 21-interval child optimizer reported an optimal solution, but its worker
+strictly rejected the exported time grid: 9 of 43 saved timestamps differ
+from the planned grid by one float64 ULP. The separate serialization audit
+remains within its existing 8-ULP bound; that bound does not override the
+strict mesh-grid check. The immutable child source, request, solution, grid
+audit and serialization audit are retained under
+`docs/development/feedback_controls/experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/`.
+
+A later one-time diagnostic replay used a byte-bound snapshot of those saved
+inputs and the solution's actual 43 timestamps. The fresh model applied both
+saved control channels exactly at all recorded samples and met the endpoint
+predicate. The state audit failed only activation: maximum absolute error
+`5.078110452592238e-5` at `0.0007500000000000001 s`, against the unchanged
+`1e-8` limit. Maximum coordinate, speed, and fiber-length errors were
+`6.577771660687404e-11 rad`, `3.859223773427893e-8 rad/s`, and
+`7.369955239144854e-8 m`, respectively, all within their existing limits.
+The diagnostic worker returned successfully with 213,254,144 bytes peak
+sampled tree RSS, verified owned-process cleanup, and unchanged provenance.
+The full audit SHA-256 is
+`dfcb7498c0aecd03928d82cade03c7bf1d867be1c88c44c2c2dd469c917ca97d`.
+
+This replay does not convert the failed grid audit into a passed child
+execution, explain the activation error, or establish physiology or capture
+matching. The synthetic result remains unqualified; the grid and state gates
+remain unchanged.
