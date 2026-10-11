@@ -183,3 +183,5 @@ above remain in force.
 ## Current Main Integration
 
 The provider follow-up normally merges main `9e5f87c4dd31fc3137fc204d98337633fa5c4855`. Generated divergence inventory is rebuilt against the unchanged exact Tools pin `6b6e4be55e7086a33db43b36d2632765be619bde`; context views are regenerated, with all recorded boundary inputs verified. The source-bound remote web build and served-asset receipt are retained. No physical qualification or private trajectory result is introduced by resolving generated-document conflicts.
+
+Validation after this main merge: all five central gates passed, including full diff mypy on six production files and affected tests (28 passed, eight optional/external-fixture cases skipped under system Python). The pinned SDK ran nine provider tests successfully; the exact 557-muscle test was then run separately with GENERIC_SHOULDER_FIXTURE_ROOT and passed, giving ten distinct provider tests with actual native boundary evidence. The portable acceptance/pin/inertia selection passed 39 tests. No prior private capture acceptance is inferred.
