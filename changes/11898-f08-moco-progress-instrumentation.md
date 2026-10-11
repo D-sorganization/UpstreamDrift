@@ -1,4 +1,7 @@
-# F08 Moco Progress Instrumentation
+---
+issue: 11898
+summary: "Instrument native Moco solve progress and solver-stage identity without changing model, request, physics, or solver policy"
+---
 
 The native Moco runner now atomically preserves its latest progress fields and
 an ordered request/source-bound stage journal, including the current-input
