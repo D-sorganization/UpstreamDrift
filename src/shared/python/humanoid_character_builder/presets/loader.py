@@ -230,7 +230,7 @@ def load_segment_template(
     """
     # For now, return default segment configuration
     # Can be extended to load from YAML files
-    from shared.python.humanoid_character_builder.core.segment_definitions import (
+    from src.shared.python.humanoid_character_builder.core.segment_definitions import (
         HUMANOID_SEGMENTS,
     )
 
