@@ -29,6 +29,13 @@ LOWER_LIMB_RANGES_DEG: dict[str, tuple[float, float]] = {
     "subtalar_angle": (-20.0, 20.0),
     "mtp_angle": (-30.0, 30.0),
 }
+# EXPERIMENT ONLY (#12042 slice 3 diagnostic, not for merge): override the hip
+# rotation bound to measure the range the IK needs to open the pelvis at impact.
+import os as _os  # noqa: E402
+
+if _os.environ.get("UD_EXP_HIP_ROT_DEG"):
+    _h = float(_os.environ["UD_EXP_HIP_ROT_DEG"])
+    LOWER_LIMB_RANGES_DEG["hip_rotation"] = (-_h, _h)
 UPPER_RANGES_DEG: dict[str, tuple[float, float]] = {
     "SpineInputX": (-35.0, 35.0),
     "SpineInputY": (-45.0, 45.0),
