@@ -15,30 +15,14 @@
     }
   },
   "document_grip_rotation_deg": {
-    "L": [
-      -90.0,
-      47.0,
-      0.0
-    ],
-    "R": [
-      -34.0,
-      46.0,
-      62.0
-    ]
+    "L": [-90.0, 47.0, 0.0],
+    "R": [-34.0, 46.0, 62.0]
   },
   "metric": "rms of the wrist and forearm excursions beyond coordinate_ranges_deg over all frames of all runs",
   "sides": {
     "lead": {
-      "coordinates": [
-        "LFInput",
-        "LWInputX",
-        "LWInputY"
-      ],
-      "rotation_deg": [
-        -14.53,
-        -30.689,
-        31.158
-      ],
+      "coordinates": ["LFInput", "LWInputX", "LWInputY"],
+      "rotation_deg": [-14.53, -30.689, 31.158],
       "cost_before_rms_excess_deg": 3.112,
       "cost_after_rms_excess_deg": 1.762,
       "max_excess_before_deg": {
@@ -52,38 +36,16 @@
         "flexion": 0.0
       },
       "angle_range_before_deg": {
-        "pronation": [
-          -44.0,
-          75.0
-        ],
-        "cock": [
-          -52.9,
-          52.3
-        ],
-        "flexion": [
-          -35.5,
-          23.2
-        ]
+        "pronation": [-44.0, 75.0],
+        "cock": [-52.9, 52.3],
+        "flexion": [-35.5, 23.2]
       },
       "angle_range_after_deg": {
-        "pronation": [
-          -14.3,
-          105.9
-        ],
-        "cock": [
-          -46.7,
-          36.2
-        ],
-        "flexion": [
-          -19.2,
-          61.7
-        ]
+        "pronation": [-14.3, 105.9],
+        "cock": [-46.7, 36.2],
+        "flexion": [-19.2, 61.7]
       },
-      "total_deg": [
-        -36.864,
-        57.315,
-        70.926
-      ],
+      "total_deg": [-36.864, 57.315, 70.926],
       "per_run_cock_deg": {
         "driver_free_wrists": {
           "address_before": -25.0,
@@ -101,33 +63,16 @@
             "flexion": 0.0
           },
           "angle_range_deg": {
-            "pronation": [
-              -14.3,
-              105.9
-            ],
-            "cock": [
-              -46.7,
-              36.2
-            ],
-            "flexion": [
-              -19.2,
-              61.7
-            ]
+            "pronation": [-14.3, 105.9],
+            "cock": [-46.7, 36.2],
+            "flexion": [-19.2, 61.7]
           }
         }
       }
     },
     "trail": {
-      "coordinates": [
-        "RFInput",
-        "RWInputX",
-        "RWInputY"
-      ],
-      "rotation_deg": [
-        27.0,
-        0.0,
-        15.75
-      ],
+      "coordinates": ["RFInput", "RWInputX", "RWInputY"],
+      "rotation_deg": [27.0, 0.0, 15.75],
       "cost_before_rms_excess_deg": 1.347,
       "cost_after_rms_excess_deg": 0.0,
       "max_excess_before_deg": {
@@ -141,38 +86,16 @@
         "flexion": 0.0
       },
       "angle_range_before_deg": {
-        "pronation": [
-          -42.1,
-          99.7
-        ],
-        "cock": [
-          -60.2,
-          11.1
-        ],
-        "flexion": [
-          -71.9,
-          54.9
-        ]
+        "pronation": [-42.1, 99.7],
+        "cock": [-60.2, 11.1],
+        "flexion": [-71.9, 54.9]
       },
       "angle_range_after_deg": {
-        "pronation": [
-          -32.6,
-          86.9
-        ],
-        "cock": [
-          -38.7,
-          24.8
-        ],
-        "flexion": [
-          -63.8,
-          58.1
-        ]
+        "pronation": [-32.6, 86.9],
+        "cock": [-38.7, 24.8],
+        "flexion": [-63.8, 58.1]
       },
-      "total_deg": [
-        9.769,
-        52.918,
-        83.914
-      ],
+      "total_deg": [9.769, 52.918, 83.914],
       "per_run_cock_deg": {
         "driver_free_wrists": {
           "address_before": -30.1,
@@ -190,18 +113,9 @@
             "flexion": 0.0
           },
           "angle_range_deg": {
-            "pronation": [
-              -32.6,
-              86.9
-            ],
-            "cock": [
-              -38.7,
-              24.8
-            ],
-            "flexion": [
-              -63.8,
-              58.1
-            ]
+            "pronation": [-32.6, 86.9],
+            "cock": [-38.7, 24.8],
+            "flexion": [-63.8, 58.1]
           }
         }
       }
