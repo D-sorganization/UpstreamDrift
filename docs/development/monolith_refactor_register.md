@@ -40,10 +40,10 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1164 | `src/shared/python/physics/terrain_representation.py` |
 | 1163 | `src/launchers/settings_dialog.py` |
 | 1158 | `src/engines/simscape/adapter.py` |
-| 1154 | `src/engines/physics_engines/myosuite/python/native_direct_model_replay.py` |
 | 1153 | `src/tools/motion_matching/gui.py` |
 | 1152 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_widget.py` |
 | 1150 | `src/shared/python/chat/_chat_dock_widget_qt.py` |
+| 1146 | `src/engines/physics_engines/myosuite/python/native_direct_model_replay.py` |
 | 1146 | `src/tools/model_explorer/model_loader_dialog.py` |
 | 1139 | `src/api/routes/launch_monitor_analytics.py` |
 | 1134 | `src/shared/python/shadow_tracker/segmentation.py` |
