@@ -185,7 +185,7 @@ def attach_ball(
     """
     if not settings.ball:
         return replace(swing, ball=None), None
-    placed = swing.ball
+    placed: BallPlacement | str | None = swing.ball
     if placed is None:
         placed = address_ball(swing, resolve_impact_time_s(swing, settings))
     if isinstance(placed, str):

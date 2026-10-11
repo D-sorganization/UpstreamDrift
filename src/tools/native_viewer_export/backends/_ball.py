@@ -11,6 +11,8 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import Any, Protocol
 
+import numpy as np
+
 from src.tools.native_viewer_export.ball import BALL_RGBA, BallPlacement
 from src.tools.native_viewer_export.core import SwingInput
 
@@ -104,10 +106,12 @@ class DrakeBallSink:
         rgba: tuple[float, float, float, float],
     ) -> None:
         from pydrake.geometry import Rgba, Sphere
-        from pydrake.math import RigidTransform
+        from pydrake.math import RigidTransform, RotationMatrix
 
         self._meshcat.SetObject(path, Sphere(radius_m), Rgba(*rgba))
-        self._meshcat.SetTransform(path, RigidTransform(list(position_m)))  # type: ignore[arg-type]
+        p = np.asarray(position_m, dtype=float)
+        pose = RigidTransform(RotationMatrix(), p)  # type: ignore[arg-type]  # pydrake stub dtype
+        self._meshcat.SetTransform(path, pose)
 
     def set_visible(self, path: str, visible: bool) -> None:
         self._meshcat.SetProperty(path, "visible", visible)
