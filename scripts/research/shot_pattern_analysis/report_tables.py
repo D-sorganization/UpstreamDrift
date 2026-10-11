@@ -8,8 +8,19 @@ from typing import Any
 from src.tools.shot_pattern_analysis.matched_formatting import format_sg_interval_record
 
 
-def resolved_selection_lines(cells: list[dict]) -> list[str]:
+def resolved_selection_lines(
+    cells: list[dict], *, club_id: str | None = None
+) -> list[str]:
     """Keep precise intervals in wide columns, and populations in their own table."""
+    indexed_cells = list(enumerate(cells, 1))
+    if club_id is not None:
+        indexed_cells = [
+            (index, cell)
+            for index, cell in indexed_cells
+            if cell["config"]["club"]["club_id"] == club_id
+        ]
+        if not indexed_cells:
+            raise ValueError(f"no resolved cells for club {club_id!r}")
     lines = [
         "### Resolved Zero-Lean Curve and Variability Comparison",
         "",
@@ -22,7 +33,7 @@ def resolved_selection_lines(cells: list[dict]) -> list[str]:
         "**Condition Key**",
         "",
     ]
-    for index, cell in enumerate(cells, 1):
+    for index, cell in indexed_cells:
         cfg = cell["config"]
         lines += [
             f"**C{index:02d}**: `{cell['cell']}`; protocol `{cell['source_protocol']}`. "
@@ -36,7 +47,7 @@ def resolved_selection_lines(cells: list[dict]) -> list[str]:
         "| Condition | Common-Three Scored / Attempted | Draw Δ SG [95%] | Fade Δ SG [95%] |",
         "| --- | ---: | --- | --- |",
     ]
-    for index, cell in enumerate(cells, 1):
+    for index, cell in indexed_cells:
         score = cell["course_scoring"]
         sg = score["paired_benefit_vs_straight"]
         lines.append(
@@ -53,7 +64,7 @@ def resolved_selection_lines(cells: list[dict]) -> list[str]:
         "| Condition | Straight | Draw | Fade |",
         "| --- | ---: | ---: | ---: |",
     ]
-    for index, cell in enumerate(cells, 1):
+    for index, cell in indexed_cells:
         counts = [
             f"{cell['summary'][name]['supported_n']:,} / {cell['summary'][name]['total_n']:,}"
             for name in ("Straight", "Draw", "Fade")

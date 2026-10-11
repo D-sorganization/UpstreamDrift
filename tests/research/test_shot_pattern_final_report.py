@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import csv
 import io
+import json
 from collections import Counter
 from pathlib import Path
 
@@ -335,7 +336,20 @@ def test_final_interpretation_uses_qualified_populations_and_additive_protocol()
     assert "9,998 / 10,000" in rendered
     assert "pw-primary-face-bounds/1" in rendered
     assert "supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.csv" in rendered
-    assert "final_figures_v1/social/details/driver/density.png" in rendered
+    assert "REPORT_DRIVER.md" in rendered
+    assert "final_figures_v1/social/details/driver/density.png" in "\n".join(
+        build_final_report.render_club_appendices(
+            _qualified_interpretation()
+            | {
+                "resolved_selected_cells": json.loads(
+                    (
+                        Path(__file__).parent
+                        / "fixtures/shot_pattern_selected_synthesis.json"
+                    ).read_text(encoding="utf-8")
+                )["cells"]
+            }
+        ).values()
+    )
     assert "not a causal" in rendered
 
 
@@ -571,23 +585,36 @@ def test_final_publication_receipt_binds_report_and_supplement(tmp_path):
     report = tmp_path / "REPORT.md"
     cells = tmp_path / "REPORT_CELLS.csv"
     lean = tmp_path / "REPORT_LEAN.csv"
-    for path in (report, cells, lean):
+    appendices = tuple(
+        tmp_path / f"REPORT_{club}.md"
+        for club in ("DRIVER", "SEVEN_IRON", "PITCHING_WEDGE")
+    )
+    for path in (report, cells, lean, *appendices):
         path.write_text(path.name, encoding="utf-8")
     receipt = build_final_report.final_publication_receipt(
-        output_paths=(report, cells, lean),
+        output_paths=(report, cells, lean, *appendices),
         source_sha256={"builder.py": "a" * 64},
         primary_plan_sha256="b" * 64,
         control_plan_sha256="c" * 64,
         figure_manifest_sha256={"primary": "d" * 64, "control": "e" * 64},
         supplement_receipt_sha256="f" * 64,
+        archive_provenance={
+            "supersedes_publication_receipt_sha256": "1" * 64,
+            "source_archive_manifest_sha256": "2" * 64,
+        },
     )
     assert receipt["schema"] == "matched-final-publication-receipt/1"
     assert receipt["source_sha256"]["builder.py"] == "a" * 64
     assert receipt["supplement_receipt_sha256"] == "f" * 64
+    assert receipt["supersedes_publication_receipt_sha256"] == "1" * 64
+    assert receipt["source_archive_manifest_sha256"] == "2" * 64
     assert set(receipt["output_sha256"]) == {
         "REPORT.md",
         "REPORT_CELLS.csv",
         "REPORT_LEAN.csv",
+        "REPORT_DRIVER.md",
+        "REPORT_SEVEN_IRON.md",
+        "REPORT_PITCHING_WEDGE.md",
     }
 
 

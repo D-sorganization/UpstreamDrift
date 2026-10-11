@@ -416,6 +416,24 @@ def _resolved_selected_comparison_lines(resolved_cells: list[dict]) -> list[str]
     return resolved_selection_lines(resolved_cells)
 
 
+def render_club_appendices(
+    interpretation: dict, *, report_filename: str = "REPORT.md"
+) -> dict[str, str]:
+    """Compatibility wrapper for the report's per-club Markdown appendices."""
+    from .report_publication_layout import render_club_appendices as render
+
+    return render(interpretation, report_filename=report_filename)
+
+
+def _assert_markdown_output_sizes(
+    outputs: Mapping[str, str], *, max_bytes: int = 51_200
+) -> None:
+    """Compatibility wrapper for the Markdown publication size guard."""
+    from .report_publication_layout import assert_markdown_output_sizes
+
+    assert_markdown_output_sizes(outputs, max_bytes=max_bytes)
+
+
 def _sensitivity_lines(sensitivity: dict[str, dict]) -> list[str]:
     lines = ["## Course-Dimension Sensitivity", ""]
     if not sensitivity:
@@ -589,7 +607,9 @@ def _conclusions_and_synthesis_lines(interpretation: dict) -> list[str]:
     return synthesis_lines(interpretation)
 
 
-def _qualified_interpretation_lines(interpretation: dict) -> list[str]:
+def _qualified_interpretation_lines(
+    interpretation: dict, *, report_filename: str = "REPORT.md"
+) -> list[str]:
     """Render only prevalidated cell, pair, and asset references."""
     from src.tools.shot_pattern_analysis.matched_interpretation import (
         render_cell_table,
@@ -635,26 +655,12 @@ def _qualified_interpretation_lines(interpretation: dict) -> list[str]:
             "",
         ]
     )
-    for figure in interpretation["figure_links"]:
-        path = Path(figure["relative_path"])
-        if path.is_absolute() or ".." in path.parts:
-            raise ValueError("figure link must remain relative to the report")
-        label = (
-            f"{figure['club'].replace('_', ' ').title()} "
-            f"{figure['kind'].replace('_', ' ').title()} "
-            f"({figure['presentation'].title()}, {figure['source_protocol']}, "
-            f"{figure['source_kind'].replace('_', ' ')})"
+    for club in ("driver", "seven_iron", "pitching_wedge"):
+        label = club.replace("_", " ").title()
+        appendix_name = f"{Path(report_filename).stem}_{club.upper()}.md"
+        lines.append(
+            f"- [{label} figure and resolved-result inventory]({appendix_name})"
         )
-        if figure.get("physical_pattern"):
-            label += f" · {figure['physical_pattern']}"
-        if figure.get("comparison_kind"):
-            label += " · " + str(figure["comparison_kind"]).replace(
-                "_", " "
-            ).title().replace("Sd", "SD")
-            label += " · " + " → ".join(figure["source_cells"])
-        lines.append(f"- [{label}]({path.as_posix()})")
-    if not interpretation["figure_links"]:
-        lines.append("No qualified figure asset is available for these selected cells.")
     for inventory_path in interpretation.get("figure_inventories", []):
         relative = Path(inventory_path)
         if relative.is_absolute() or ".." in relative.parts:
@@ -688,6 +694,7 @@ def render_final_report(
     sensitivity: dict[str, dict],
     *,
     interpretation: dict | None = None,
+    report_filename: str = "REPORT.md",
 ) -> str:
     """Describe only integrity-checked final cells; never infer unavailable outcomes."""
     primary_total, primary_done, primary_unavailable = _count_matrix(primary, "primary")
@@ -744,14 +751,27 @@ def render_final_report(
     if interpretation is None:
         lines.extend(_anchor_lines(primary))
     else:
-        lines.extend(_qualified_interpretation_lines(interpretation))
+        lines.extend(
+            _qualified_interpretation_lines(
+                interpretation, report_filename=report_filename
+            )
+        )
     lines.extend(_selected_comparison_lines(primary))
     if interpretation is not None and "resolved_selected_cells" in interpretation:
         lines.extend(
-            _resolved_selected_comparison_lines(
-                interpretation["resolved_selected_cells"]
+            (
+                "### Resolved Zero-Lean Curve and Variability Comparison",
+                "",
+                "The source-keyed condition details and paired/individual endpoint rows are preserved in the per-club inventories below. C01–C24 retain their original global identities.",
+                "",
             )
         )
+        for club in ("driver", "seven_iron", "pitching_wedge"):
+            appendix_name = f"{Path(report_filename).stem}_{club.upper()}.md"
+            lines.append(
+                f"- [{club.replace('_', ' ').title()} resolved comparisons]({appendix_name}#resolved-zero-lean-curve-and-variability-comparison)"
+            )
+        lines.append("")
     if interpretation is None:
         lines.extend(
             (
@@ -796,9 +816,14 @@ def render_final_report(
             "",
             "## Rebuild Commands",
             "",
+            "The complete reading set is this narrative report plus its three per-club result and figure inventories; each has a matching standalone PDF.",
+            "",
             "```bash",
             "python -m scripts.research.shot_pattern_analysis.build_final_report docs/research/shot_pattern_analysis/phase2/final_v1 docs/research/shot_pattern_analysis/phase2/control_final_v1 docs/research/shot_pattern_analysis/phase2/REPORT.md",
             "python -m scripts.research.shot_pattern_analysis.build_pdf docs/research/shot_pattern_analysis/phase2/REPORT.md docs/research/shot_pattern_analysis/phase2/REPORT.pdf",
+            "python -m scripts.research.shot_pattern_analysis.build_pdf docs/research/shot_pattern_analysis/phase2/REPORT_DRIVER.md docs/research/shot_pattern_analysis/phase2/REPORT_DRIVER.pdf",
+            "python -m scripts.research.shot_pattern_analysis.build_pdf docs/research/shot_pattern_analysis/phase2/REPORT_SEVEN_IRON.md docs/research/shot_pattern_analysis/phase2/REPORT_SEVEN_IRON.pdf",
+            "python -m scripts.research.shot_pattern_analysis.build_pdf docs/research/shot_pattern_analysis/phase2/REPORT_PITCHING_WEDGE.md docs/research/shot_pattern_analysis/phase2/REPORT_PITCHING_WEDGE.pdf",
             "```",
             "",
         )
@@ -874,6 +899,8 @@ def _report_source_hashes() -> dict[str, str]:
         repository / "scripts/research/shot_pattern_analysis/final_report_inputs.py",
         repository / "scripts/research/shot_pattern_analysis/report_synthesis.py",
         repository / "scripts/research/shot_pattern_analysis/report_tables.py",
+        repository
+        / "scripts/research/shot_pattern_analysis/report_publication_layout.py",
         repository / "scripts/research/shot_pattern_analysis/supplement_publication.py",
         repository
         / "scripts/research/shot_pattern_analysis/supplement_parent_verifier.py",
@@ -894,13 +921,14 @@ def _report_source_hashes() -> dict[str, str]:
 
 def final_publication_receipt(
     *,
-    output_paths: tuple[Path, Path, Path],
+    output_paths: tuple[Path, ...],
     source_sha256: dict[str, str],
     primary_plan_sha256: str,
     control_plan_sha256: str,
     figure_manifest_sha256: dict[str, str],
     supplement_receipt_sha256: str,
     supplement_publication_identity: dict | None = None,
+    archive_provenance: Mapping[str, str | None] | None = None,
 ) -> dict:
     """Bind every editable report output to its validated input identities."""
     if len({path.parent.resolve() for path in output_paths}) != 1:
@@ -916,11 +944,24 @@ def final_publication_receipt(
         "figure_manifest_sha256": dict(figure_manifest_sha256),
         "supplement_receipt_sha256": supplement_receipt_sha256,
         "supplement_publication_identity": supplement_publication_identity,
+        "supersedes_publication_receipt_sha256": (archive_provenance or {}).get(
+            "supersedes_publication_receipt_sha256"
+        ),
+        "source_archive_manifest_sha256": (archive_provenance or {}).get(
+            "source_archive_manifest_sha256"
+        ),
         "output_sha256": {
             path.name: hashlib.sha256(path.read_bytes()).hexdigest()
             for path in output_paths
         },
     }
+
+
+def _split_archive_provenance(report_root: Path) -> tuple[str | None, str | None]:
+    """Compatibility wrapper for archived report-split provenance validation."""
+    from .report_publication_layout import split_archive_provenance
+
+    return split_archive_provenance(report_root)
 
 
 def assert_publication_inputs_unchanged(
@@ -1046,7 +1087,28 @@ def build_final_report(
         report_root=report_root,
     )
     rendered = render_final_report(
-        primary, control, lean, sensitivity, interpretation=interpretation
+        primary,
+        control,
+        lean,
+        sensitivity,
+        interpretation=interpretation,
+        report_filename=destination.name,
+    )
+    appendix_paths = {
+        club: destination.with_name(f"{destination.stem}_{club.upper()}.md")
+        for club in ("driver", "seven_iron", "pitching_wedge")
+    }
+    appendix_contents = render_club_appendices(
+        interpretation, report_filename=destination.name
+    )
+    _assert_markdown_output_sizes(
+        {
+            destination.name: rendered,
+            **{
+                appendix_paths[club].name: appendix_contents[club]
+                for club in appendix_paths
+            },
+        }
     )
     assert_publication_inputs_unchanged(
         primary_root=primary_root,
@@ -1063,11 +1125,28 @@ def build_final_report(
     )
     cell_inventory_path = destination.with_name("REPORT_CELLS.csv")
     lean_inventory_path = destination.with_name("REPORT_LEAN.csv")
+    receipt_path = destination.with_name("REPORT_PUBLICATION_RECEIPT.json")
+    previous_receipt_sha256 = (
+        hashlib.sha256(receipt_path.read_bytes()).hexdigest()
+        if receipt_path.is_file()
+        else None
+    )
+    archived_receipt_sha256, archive_manifest_sha256 = _split_archive_provenance(
+        report_root
+    )
+    supersedes_receipt_sha256 = archived_receipt_sha256 or previous_receipt_sha256
     _write_atomic(cell_inventory_path, render_cell_inventory(primary, control))
     _write_atomic(lean_inventory_path, render_lean_inventory(lean))
     _write_atomic(destination, rendered)
+    for club, path in appendix_paths.items():
+        _write_atomic(path, appendix_contents[club])
     publication_receipt = final_publication_receipt(
-        output_paths=(destination, cell_inventory_path, lean_inventory_path),
+        output_paths=(
+            destination,
+            cell_inventory_path,
+            lean_inventory_path,
+            *appendix_paths.values(),
+        ),
         source_sha256=sources_before,
         primary_plan_sha256=primary["plan_sha256"],
         control_plan_sha256=control["plan_sha256"],
@@ -1078,9 +1157,13 @@ def build_final_report(
         supplement_publication_identity=interpretation["supplement"].get(
             "publication_identity"
         ),
+        archive_provenance={
+            "supersedes_publication_receipt_sha256": supersedes_receipt_sha256,
+            "source_archive_manifest_sha256": archive_manifest_sha256,
+        },
     )
     _write_atomic(
-        destination.with_name("REPORT_PUBLICATION_RECEIPT.json"),
+        receipt_path,
         json.dumps(publication_receipt, indent=2, sort_keys=True) + "\n",
     )
     return destination
