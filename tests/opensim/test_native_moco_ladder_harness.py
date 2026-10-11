@@ -386,6 +386,74 @@ def test_solution_sto_roundtrip_rejects_changed_or_over_budget_arrays(
         _require_solution_roundtrip(audit)
 
 
+def test_float64_ulp_distance_is_exact_across_binades_and_signs() -> None:
+    import numpy as np
+
+    from tests.opensim.native_moco_ladder_worker import _float64_ulp_distance
+
+    cases = (
+        (np.nextafter(1.0, -np.inf), np.inf),
+        (1.0, -np.inf),
+        (np.nextafter(-1.0, np.inf), -np.inf),
+        (-1.0, np.inf),
+    )
+    for start, direction in cases:
+        value = start
+        for _ in range(8):
+            value = np.nextafter(value, direction)
+        assert (
+            int(_float64_ulp_distance(np.asarray([start]), np.asarray([value]))[0]) == 8
+        )
+
+        value = np.nextafter(value, direction)
+        assert (
+            int(_float64_ulp_distance(np.asarray([start]), np.asarray([value]))[0]) == 9
+        )
+
+
+def test_float64_ulp_distance_collapses_signed_zero_and_counts_subnormals() -> None:
+    import numpy as np
+
+    from tests.opensim.native_moco_ladder_worker import _float64_ulp_distance
+
+    smallest = np.nextafter(0.0, 1.0)
+    actual = _float64_ulp_distance(
+        np.asarray([-0.0, -smallest, 0.0]),
+        np.asarray([0.0, 0.0, smallest]),
+    )
+    assert [int(value) for value in actual] == [0, 1, 1]
+
+
+def test_float64_ulp_distance_roundtrip_gate_accepts_eight_and_rejects_nine() -> None:
+    import numpy as np
+
+    from tests.opensim.native_moco_ladder_worker import (
+        _audit_solution_roundtrip,
+        _require_solution_roundtrip,
+    )
+
+    memory = {
+        "state_names": ("q",),
+        "control_names": ("u",),
+        "time": np.asarray([0.0, 0.005, 0.01]),
+        "states": np.asarray([[1.0], [1.0], [1.0]]),
+        "controls": np.asarray([[0.1], [0.1], [0.1]]),
+    }
+    persisted = {
+        key: value.copy() if hasattr(value, "copy") else value
+        for key, value in memory.items()
+    }
+    value = 1.0
+    for _ in range(8):
+        value = np.nextafter(value, np.inf)
+    persisted["states"][1, 0] = value
+    _require_solution_roundtrip(_audit_solution_roundtrip(memory, persisted))
+
+    persisted["states"][1, 0] = np.nextafter(value, np.inf)
+    with pytest.raises(ValueError, match="ULP"):
+        _require_solution_roundtrip(_audit_solution_roundtrip(memory, persisted))
+
+
 def test_success_provenance_checks_feature_and_runtime_evidence(tmp_path: Path) -> None:
     components = {
         name: hashlib.sha256(name.encode()).hexdigest()

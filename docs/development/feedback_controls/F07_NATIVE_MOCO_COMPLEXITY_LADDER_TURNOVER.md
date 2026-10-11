@@ -191,3 +191,11 @@ the repository's existing ignore rule:
 The ladder remains a synthetic software feasibility diagnostic. Even a future
 successful solve and fresh replay would not qualify muscle physiology, the
 captured swing, independent excitation parity, or production readiness.
+
+The serialization-fidelity gate now measures exact ordered IEEE-754 binary64
+representable-value distance, canonicalizing `-0.0` and `+0.0` to distance
+zero. This avoids treating a spacing-normalized delta as an exact ULP count at
+binade boundaries. Pure tests cover positive and negative power-of-two
+crossings, the 8-step acceptance/9-step rejection boundary, and subnormals.
+This correction has not been applied to the retained solve or used for another
+optimizer run; the earlier failed run remains immutable evidence.

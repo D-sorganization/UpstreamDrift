@@ -589,7 +589,7 @@ def _audit_solution_roundtrip(
         if in_memory[names_key] != persisted[names_key]:
             raise ValueError(f"serialized solution changed {names_key}")
     arrays = {}
-    max_ulp_error = 0.0
+    max_ulp_error = 0
     for name in ("time", "states", "controls"):
         left = np.asarray(in_memory[name], dtype=np.float64)
         right = np.asarray(persisted[name], dtype=np.float64)
@@ -598,15 +598,9 @@ def _audit_solution_roundtrip(
         if not np.isfinite(left).all() or not np.isfinite(right).all():
             raise ValueError(f"serialized solution contains non-finite {name}")
         delta = np.abs(left - right)
-        spacing = np.spacing(np.maximum(np.abs(left), np.abs(right)))
-        ulp_error = np.divide(
-            delta,
-            spacing,
-            out=np.zeros_like(delta),
-            where=delta != 0.0,
-        )
-        maximum_ulp = float(np.max(ulp_error))
-        if not np.isfinite(delta).all() or not np.isfinite(ulp_error).all():
+        ulp_error = _float64_ulp_distance(left, right)
+        maximum_ulp = int(np.max(ulp_error))
+        if not np.isfinite(delta).all():
             raise ValueError(f"serialized solution has invalid {name} round-trip error")
         max_ulp_error = max(max_ulp_error, maximum_ulp)
         arrays[name] = {
@@ -627,6 +621,29 @@ def _audit_solution_roundtrip(
         "state_names": list(in_memory["state_names"]),
         "control_names": list(in_memory["control_names"]),
     }
+
+
+def _float64_ulp_distance(left: np.ndarray, right: np.ndarray) -> np.ndarray:
+    """Return exact representable-value distances, treating signed zeros equally."""
+    left_values = np.asarray(left, dtype=np.float64)
+    right_values = np.asarray(right, dtype=np.float64)
+    if left_values.shape != right_values.shape:
+        raise ValueError("float64 ULP operands must have matching shapes")
+    if not np.isfinite(left_values).all() or not np.isfinite(right_values).all():
+        raise ValueError("float64 ULP operands must be finite")
+    sign_mask = np.uint64(1 << 63)
+
+    def ordered_keys(values: np.ndarray) -> np.ndarray:
+        bits = np.ascontiguousarray(values).view(np.uint64).copy()
+        bits[values == 0.0] = np.uint64(0)
+        negative = (bits & sign_mask) != 0
+        keys = bits | sign_mask
+        keys[negative] = ~bits[negative] + np.uint64(1)
+        return keys
+
+    left_keys = ordered_keys(left_values)
+    right_keys = ordered_keys(right_values)
+    return np.maximum(left_keys, right_keys) - np.minimum(left_keys, right_keys)
 
 
 def _array_sha256(values: np.ndarray, trajectory: dict[str, Any], name: str) -> str:
