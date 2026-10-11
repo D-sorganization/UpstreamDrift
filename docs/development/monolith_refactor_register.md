@@ -59,9 +59,11 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1100 | `src/shared/python/movement_optimizer/models/swingset.py`                                                                                                                     |
 | 1096 | `src/learning/retargeting/retargeter.py`                                                                                                                                      |
 | 1089 | `src/shared/python/motion_pipeline/contracts.py`                                                                                                                              |
+| 1089 | `src/tools/shot_pattern_analysis/matched_lean_control.py`                                                                                                                     |
 | 1086 | `src/shared/python/motion_matching/full_body_ik.py`                                                                                                                           |
 | 1073 | `src/shared/python/sidekick/calculators/thermo/steam_engine.py`                                                                                                               |
 | 1072 | `src/tools/bunker_shot_gui/model.py`                                                                                                                                          |
+| 1072 | `src/tools/shot_pattern_analysis/matched_supplement_figures.py`                                                                                                               |
 | 1068 | `src/shared/python/swing_comparison/metrics.py`                                                                                                                               |
 | 1066 | `src/tools/bunker_shot_gui/crosstier.py`                                                                                                                                      |
 | 1065 | `src/shared/python/pendulum_simulator/gui/toolstrip_widget.py`                                                                                                                |
@@ -103,6 +105,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 |  966 | `src/launchers/launcher_process_manager.py`                                                                                                                                   |
 |  965 | `src/shared/python/sidekick/process_calculators/pressure_drop_calculator/utils/gas_properties.py`                                                                             |
 |  962 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_whole_body_ik.m`                                                                    |
+|  961 | `src/tools/shot_pattern_analysis/matched_gui.py`                                                                                                                              |
 |  960 | `src/shared/python/signal_toolkit/widget_ui.py`                                                                                                                               |
 |  957 | `src/bunkershot3d/solvers/mpm/solver.py`                                                                                                                                      |
 |  955 | `src/shared/python/force_overlay/glyphs.py`                                                                                                                                   |
@@ -118,6 +121,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 |  942 | `src/bunkershot3d/solvers/shot.py`                                                                                                                                            |
 |  942 | `src/shared/python/estimation/dime_dynamics_window.py`                                                                                                                        |
 |  940 | `src/shared/python/sidekick/lab/bio/c3d_reader.py`                                                                                                                            |
+|  939 | `src/tools/shot_pattern_analysis/matched_supplement_pipeline.py`                                                                                                              |
 |  934 | `src/shared/python/sidekick/ui/tools_sidebar/os_terminal.py`                                                                                                                  |
 |  932 | `src/shared/python/model_generation/library/model_library.py`                                                                                                                 |
 |  926 | `src/shared/python/engine_core/cross_engine_validator.py`                                                                                                                     |
@@ -146,6 +150,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 |  879 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/2D GUI/visualization/SkeletonPlotter.m`                                                         |
 |  878 | `src/launchers/launcher_layout_manager.py`                                                                                                                                    |
 |  877 | `src/bunkershot3d/io/schema.py`                                                                                                                                               |
+|  877 | `src/tools/shot_pattern_analysis/academic_plots.py`                                                                                                                           |
 |  875 | `src/shared/python/sidekick/process_calculators/pressure_drop_calculator/pressure_drop_interface.py`                                                                          |
 |  874 | `src/shared/python/tour_baselines/qualification.py`                                                                                                                           |
 |  872 | `src/shared/python/pendulum_simulator/gui/base_pendulum_widget.py`                                                                                                            |

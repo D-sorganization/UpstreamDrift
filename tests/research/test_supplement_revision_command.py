@@ -17,9 +17,10 @@ def sha(path):
 
 @pytest.fixture
 def frozen(tmp_path):
+    from tests.research.frozen_source_fixture import create_frozen_study_package
+
     root = tmp_path / "frozen"
-    package = root / "src/tools/shot_pattern_analysis"
-    package.mkdir(parents=True)
+    package = create_frozen_study_package(root)
     (package / "matched_supplement_pipeline.py").write_text(
         "def _report_source_hashes():\n    return {}\n"
     )

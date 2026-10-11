@@ -1,0 +1,85 @@
+{
+  "schema": "shot-pattern-validation-followup/1",
+  "observed_utc": "2026-10-11T15:22:37.592130+00:00",
+  "authoritative_pr_head": "8c5ddfabc831c071450e1124caf222ac364326d9",
+  "local_validation_base": "438eab1184447e6902a8c949ffe008c93b82f96d",
+  "tools_pin": "86d0f28b1cc5acf61185e07e320c816c2d005512",
+  "ci_run": 38143483940,
+  "ci_unit_result": {
+    "failed": 13,
+    "passed": 25132,
+    "skipped": 1109,
+    "xfailed": 8
+  },
+  "focused_validation": {
+    "root_four_modules": {
+      "passed": 43,
+      "exit_code": 0
+    },
+    "registration_two_modules": {
+      "passed": 54,
+      "exit_code": 0
+    },
+    "peer_reconstruction_after_format": {
+      "passed": 2,
+      "exit_code": 0
+    },
+    "unique_total": 97,
+    "note": "Two peer preservation tests are included in root43; extra final rerun not counted twice. Worktree sources changed only scoped tests/config/docs."
+  },
+  "remaining_gates": [
+    "Architecture budget:67 CI findings (62 study,5 unrelated physics); no exemptions added",
+    "Doc size: frozen phase2/REPORT.md97532 bytes exceeds51200; left unchanged",
+    "Owner-confirmed development-log remediation #11935",
+    "Unrelated physics and divergence-inventory unit failures; not repaired in this diff",
+    "Complete canonical pre-PR acceptance not yet established"
+  ],
+  "preserved": [
+    "Frozen outputs, manifests, producer and publication receipts",
+    "Article source/editor and release; #12120 remains open",
+    "Phase One PR#11941 state"
+  ],
+  "logs": {
+    "unit-ci.log": {
+      "raw_sha256": "0da610ebdebb7c0d6db85299d6b8a67fdd031206cd680d57e26ed796a91bce21",
+      "gzip_sha256": "1205b2358e929241f9fb092aba5d8fbcba0d26333447b6bfd90951f6b57af3c6"
+    },
+    "structure-ci.log": {
+      "raw_sha256": "f061f282a18950cddb6755467e0cebc545e0c47c4aa8225bce65dedf86849524",
+      "gzip_sha256": "863798b7faea3eaa4b5a8ed95f4c722b95ac9ca310509eb041b08ab3f0812fd0"
+    },
+    "docs-ci.log": {
+      "raw_sha256": "00ff16f883d355cc820d12b48d2043782908d079116f7ab9d39b58b8a00079b7",
+      "gzip_sha256": "0bd4b267b08bd3560a3ff27a1d49baf35c39f41113b55ece45aeb06fff8eabbc"
+    },
+    "root-registration-red.log": {
+      "raw_sha256": "7d1e682827a9dbb2dbc564be8f47865d9a05c85a72fbb476c361cd5f669c6123",
+      "gzip_sha256": "096af3cbdd5c6f90a774a14457520b4c1b91c5e0bbda0321be6451248e2986ea"
+    },
+    "root-fixes-green.log": {
+      "raw_sha256": "5b6d1918e46bed631e82bac2021caa5a1a5ff5ceb88144e60da91526ab9e32b7",
+      "gzip_sha256": "1778cf07e51534c2a9cfa81de4dc6de0c654d5a5e3f11f8669029596aff9b97c"
+    },
+    "registration-red.log": {
+      "raw_sha256": "bd456864088b93af6791ab5ced37037355a8db29c9922e3eb3636f8a4fea9abf",
+      "gzip_sha256": "738fb04505c56ef15b609f1d2e8fad5bdd586fa3a2e396a60e5b7dbf9266a095"
+    },
+    "registration-green.log": {
+      "raw_sha256": "217401e6dd1180c620bf7ff6b635da6da08cb759701959def8b6f36fb22a1792",
+      "gzip_sha256": "bba3171541b628234ff2bcb8a34b5145c4f9517d1cece5e5c16ffdf54f1f4d78"
+    },
+    "registration-green-v2.log": {
+      "raw_sha256": "86b435e8625b2c6711d2b9a37fdc97acf5d8a41192ca6d0d0a62ed3180b60698",
+      "gzip_sha256": "742fc0ab3ca115252d4bc30430209494341cc2037f023e476f18d6b84ca4b758"
+    },
+    "peer-handoff-red.log": {
+      "raw_sha256": "e88b8ba99e98da0b458efd4656388191667e7e57256546412786a69a432c6aa5",
+      "gzip_sha256": "8be5c197d750f3ca90185aa6877db038b557ff61407e27a6cb2838583569bff4"
+    },
+    "peer-handoff-final-green.log": {
+      "raw_sha256": "49790d289be24a06614e923bc0f3ea662eab9a70b713ccfa1de4044ad68348fd",
+      "gzip_sha256": "ddce0be1b56a88657455b63233b9104eb88977e7003e825d6e12305e9bea268f"
+    }
+  },
+  "disposition": "Partial blocker repair; PR remains blocked; no complete-project or physical acceptance claim"
+}

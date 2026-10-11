@@ -2,7 +2,7 @@
 
 ## Active Study and Current Status
 
-- **User-Requested Resume**: Goal pursuit is active after the usage reset. Start with [Resume Handoff](docs/research/shot_pattern_analysis/phase2/RESUME_HANDOFF.md).
+- **User-Requested Follow-Up**: PR [#12278](https://github.com/D-sorganization/UpstreamDrift/pull/12278) is open, ready for review, and blocked. The separate validation follow-up uses `codex/shot-pattern-validation-followup`. Start with [Resume Handoff](docs/research/shot_pattern_analysis/phase2/RESUME_HANDOFF.md).
 - **Matched Delivery Study — Phase Two**: All 10.44 million attempted simulation rows are complete. Do not rerun simulations. Read [Scientific Report](docs/research/shot_pattern_analysis/phase2/REPORT.md) and [Design](docs/research/shot_pattern_analysis/phase2/DESIGN.md).
 - **Scientific Acceptance**: Astra accepted the report after 406 numeric/count checks and 52 source-hash checks. These are geometric, model-conditional results; no measured player benefit or universal best shot shape is established.
 - **Report PDF**: The illustrated LaTeX research report is accepted for document delivery: 33 pages, 13 source-bound figures, zero Tectonic warnings. PDF SHA256 `ca030b3c97fb759b384aab58b3da6be68687a194f353976754d43e7ffa69beda`; review receipt `docs/research/shot_pattern_analysis/phase2/validation/illustrated_article_v1/review.json`. Local PDF: STUDY `docs/research/shot_pattern_analysis/phase2/validation/illustrated_article_v1/final_build/shot_pattern_analysis.pdf`; user-facing name: “Shot Pattern Analysis - Illustrated Research Report.pdf”. Source archive: `/tmp/shot-pattern-delivery-resume/illustrated-report-source.zip` (SHA256 `6567a9dcee60d6e18e4b1fe39ca34b3631eac09a578ce3eacd64914c93c7c1d2`).

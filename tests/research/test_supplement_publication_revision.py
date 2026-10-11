@@ -274,10 +274,10 @@ def test_parent_executable_pin_rejects_tamper(tmp_path):
 def verifier_pin(tmp_path):
     import subprocess
     import sys
+    from tests.research.frozen_source_fixture import create_frozen_study_package
 
     root = tmp_path / "frozen"
-    package = root / "src/tools/shot_pattern_analysis"
-    package.mkdir(parents=True)
+    package = create_frozen_study_package(root)
     (package / "matched_supplement_pipeline.py").write_text(
         "def load_verified_supplement_artifacts(path):\n    return {'verified': True}\n"
     )
@@ -309,9 +309,7 @@ def verifier_pin(tmp_path):
         "source_commit": commit,
         "python_executable": sys.executable,
         "python_sha256": sha(Path(sys.executable)),
-        "source_sha256": {
-            str(p.relative_to(root)): sha(p) for p in package.glob("*.py")
-        },
+        "source_sha256": {str(p.relative_to(root)): sha(p) for p in root.rglob("*.py")},
         "execution": {"native": "pinned"},
     }
 
@@ -348,6 +346,40 @@ def test_frozen_subprocess_origin_and_runtime(verifier_pin, tmp_path, monkeypatc
     assert verify_parent_in_frozen_source(tmp_path, pin, base=tmp_path) == {
         "verified": True
     }
+
+
+def test_frozen_fixture_precedes_installed_regular_package(verifier_pin, tmp_path):
+    """An editable installation cannot override the pinned fixture's imports."""
+    import subprocess
+    import sys
+
+    root, _pin = verifier_pin
+    installed = tmp_path / "installed"
+    package = installed / "src/tools/shot_pattern_analysis"
+    package.mkdir(parents=True)
+    for directory in (installed / "src", installed / "src/tools", package):
+        (directory / "__init__.py").write_text("")
+    (package / "matched_export.py").write_text(
+        "def matched_source_snapshot():\n    return {'native': 'untrusted'}\n"
+    )
+    worker = """
+import sys
+from pathlib import Path
+sys.path.insert(0, sys.argv[1])
+sys.path.append(sys.argv[2])
+from src.tools.shot_pattern_analysis import matched_export
+assert Path(matched_export.__file__).resolve() == (
+    Path(sys.argv[1]) / 'src/tools/shot_pattern_analysis/matched_export.py'
+)
+assert matched_export.matched_source_snapshot() == {'native': 'pinned'}
+"""
+    result = subprocess.run(
+        [sys.executable, "-I", "-c", worker, str(root), str(installed)],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stderr
 
 
 def test_child_mutation_during_second_parent_validation_rejected(parent, tmp_path):
