@@ -74,6 +74,7 @@ def pipeline_argv(capture: str, run_dir: Path, face_weight: float) -> list[str]:
         "--capture",
         capture,
         *flags,
+        *__import__("os").environ.get("UD_FIXTURE_EXTRA", "").split(),
         "--foot-progression",
         FOOT_PROGRESSION,
         "--face-weight",
