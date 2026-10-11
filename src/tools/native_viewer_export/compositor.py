@@ -153,6 +153,13 @@ _CARD_ALPHA = 0.62
 _CARD_REASON_CHARS = 46
 
 
+def _short(reason: str) -> str:
+    """``reason`` limited to the panel width, marked with ``...`` when cut."""
+    if len(reason) <= _CARD_REASON_CHARS:
+        return reason
+    return reason[: _CARD_REASON_CHARS - 3].rstrip() + "..."
+
+
 def _card_value_text(row: Any) -> str:
     """Value text of a card row; ``None`` is shown as unavailable, never as 0."""
     if row.value is None:
@@ -173,12 +180,12 @@ def _card_lines(card: Any) -> list[tuple[str, str, bool]]:
     """``(label, value, unavailable)`` lines of ``card`` (reasons as sub-lines)."""
     if not card.available or not card.rows:
         reason = str(card.reason or "no rows")
-        return [("Unavailable", "", True), (reason[:_CARD_REASON_CHARS], "", True)]
+        return [("Unavailable", "", True), (_short(reason), "", True)]
     lines: list[tuple[str, str, bool]] = []
     for row in card.rows:
         lines.append((row.label, _card_value_text(row), row.value is None))
         if row.value is None and row.reason:
-            lines.append(("  " + str(row.reason)[:_CARD_REASON_CHARS], "", True))
+            lines.append(("  " + _short(str(row.reason)), "", True))
     return lines
 
 
