@@ -4394,7 +4394,7 @@
       "classification": "ud-only",
       "package": "body_part_viz",
       "subpackage": "renderers",
-      "ud_bytes": 9274,
+      "ud_bytes": 9457,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
