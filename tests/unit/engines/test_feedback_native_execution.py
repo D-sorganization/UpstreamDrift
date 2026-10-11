@@ -312,6 +312,150 @@ def test_receipt_rejects_unknown_native_output_type(
         validate_native_replay_output(row, binding, bundle, object())  # type: ignore[arg-type]
 
 
+def test_full_body_rk4_receipt_accepts_qv_only_and_remains_unqualified(
+    registry: FeedbackComparisonRegistry,
+) -> None:
+    from src.engines.physics_engines.mujoco.python.native_full_body_replay import (
+        NativeFullBodyReplay,
+        PROVIDER_ID,
+    )
+
+    row, source_bundle, binding = _bundle(registry)
+    state_schema = InitialStateSchema(
+        "mujoco-full-body-qv",
+        "1.0.0",
+        (
+            StateComponentSpec("qpos", StateComponentRole.POSITION, 1, "SI", "q"),
+            StateComponentSpec("qvel", StateComponentRole.VELOCITY, 1, "SI", "v"),
+        ),
+    )
+    model = replace(
+        source_bundle.model,
+        provider_id=PROVIDER_ID,
+        provider_sha256="f" * 64,
+        state_schema=state_schema,
+    )
+    bundle = build_experiment_replay_bundle(
+        source_bundle.experiment_id,
+        model,
+        source_bundle.capabilities,
+        (("qpos", (0.0,)), ("qvel", (0.0,))),
+        source_bundle.input_history.channels,
+        ActuationInputKind.GENERALIZED_EFFORT,
+        InputInterpolation.ZERO_ORDER_HOLD,
+        source_bundle.input_history.time_seconds,
+        source_bundle.input_history.values,
+        source_bundle.policy,
+    )
+    full_binding = replace(
+        binding,
+        native_execution_provider_id=PROVIDER_ID,
+        native_execution_provider_sha256=model.provider_sha256,
+        state_schema_sha256=bundle.state_schema_sha256,
+    )
+    output = NativeFullBodyReplay(
+        np.asarray(bundle.input_history.time_seconds),
+        np.zeros((3, 1)),
+        np.zeros((3, 1)),
+        np.asarray(bundle.input_history.values[:-1]),
+        np.asarray(bundle.input_history.values[:-1]),
+        np.zeros(6),
+        np.zeros(6),
+        np.zeros(2),
+        bundle.applied_input_sha256,
+        bundle.policy_sha256,
+    )
+
+    receipt = validate_native_replay_output(row, full_binding, bundle, output)
+
+    assert receipt.qualification == "unqualified"
+    assert receipt.state_reset_allowed is False
+    assert receipt.state_reset_count is None
+    assert receipt.full_state and receipt.full_horizon
+    with pytest.raises(
+        ValueError, match="generalized efforts differ from applied frozen effort"
+    ):
+        validate_native_replay_output(
+            row,
+            full_binding,
+            bundle,
+            replace(output, generalized_efforts=np.zeros((2, 1))),
+        )
+    with pytest.raises(ValueError, match="actual inputs differ from frozen bundle"):
+        validate_native_replay_output(
+            row,
+            full_binding,
+            bundle,
+            replace(output, applied_generalized_efforts=np.zeros((2, 1))),
+        )
+    with pytest.raises(ValueError, match="nonfinite evidence"):
+        validate_native_replay_output(
+            row,
+            full_binding,
+            bundle,
+            replace(output, initial_pose_closure_residual=np.full(6, np.nan)),
+        )
+    output.pose_closure_residuals[0] = 0.25
+    changed_closure_receipt = validate_native_replay_output(
+        row, full_binding, bundle, output
+    )
+    assert changed_closure_receipt.output_state_sha256 != receipt.output_state_sha256
+    malformed_closure = replace(output, pose_closure_residuals=np.zeros((2, 1)))
+    with pytest.raises(
+        ValueError, match="closure observations have incomplete dimensions"
+    ):
+        validate_native_replay_output(row, full_binding, bundle, malformed_closure)
+    with pytest.raises(
+        ValueError, match="closure observations have incomplete dimensions"
+    ):
+        validate_native_replay_output(
+            row,
+            full_binding,
+            bundle,
+            replace(output, initial_pose_closure_residual=np.zeros(5)),
+        )
+    with pytest.raises(
+        ValueError, match="closure observations have incomplete dimensions"
+    ):
+        validate_native_replay_output(
+            row,
+            full_binding,
+            bundle,
+            replace(output, initial_rate_closure_residual=np.zeros(7)),
+        )
+
+
+def test_existing_mujoco_provider_cannot_use_full_body_qv_only_state(
+    registry: FeedbackComparisonRegistry,
+) -> None:
+    row, source_bundle, binding = _bundle(registry)
+    qv_schema = InitialStateSchema(
+        "mujoco-full-body-qv",
+        "1.0.0",
+        (
+            StateComponentSpec("qpos", StateComponentRole.POSITION, 1, "SI", "q"),
+            StateComponentSpec("qvel", StateComponentRole.VELOCITY, 1, "SI", "v"),
+        ),
+    )
+    model = replace(source_bundle.model, state_schema=qv_schema)
+    bundle = build_experiment_replay_bundle(
+        source_bundle.experiment_id,
+        model,
+        source_bundle.capabilities,
+        (("qpos", (0.0,)), ("qvel", (0.0,))),
+        source_bundle.input_history.channels,
+        ActuationInputKind.ACTUATOR_TORQUE,
+        InputInterpolation.ZERO_ORDER_HOLD,
+        source_bundle.input_history.time_seconds,
+        source_bundle.input_history.values,
+        source_bundle.policy,
+    )
+    direct_binding = replace(binding, state_schema_sha256=bundle.state_schema_sha256)
+
+    with pytest.raises(ValueError, match="cannot preserve every declared state"):
+        validate_native_replay_output(row, direct_binding, bundle, _output(bundle))
+
+
 def test_report_keeps_all_six_engines_blocking_without_explicit_bindings(
     registry: FeedbackComparisonRegistry,
 ) -> None:

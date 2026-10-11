@@ -1,0 +1,94 @@
+# Generic Shoulder Triangle-Lamina Candidate
+
+Issue #12211 defines a separately identified mechanical hypothesis for the exact
+derived 557-muscle OpenSim source. The unchanged source remains physically
+rejected: its bilateral clavicle/scapula principal inertias fail chapter 52.
+This candidate does not recover absent author BUET meshes or measured tissue
+inertias. It retains the source's 557 muscles, joints, frames, path and wrap
+laws, forces, and all four scalar shoulder body masses. Only those bodies'
+centers of mass, six inertia components, and visual mesh references change.
+
+## Source and Frame Declaration
+
+The source XML SHA-256 is
+`453e09c4e42dcc3f4b74a3b2efeff063e96c3820b3eee1efe95eef249579010d`.
+It declares meters and unit-scale shoulder meshes attached directly to each
+body. The right geometry comes from exact retained CEINMS MoBL files:
+`clavicle.vtp` SHA-256
+`2846d6daaa33b694d9eb59a02ea4716c43ac5d64c420a44909333e37d1223ff8`
+and `scapula.vtp` SHA-256
+`a62232c10aaa3b7c66a794ca947124fd59fffa3dea51e0c8457da50e16742d6b`.
+Their identity placement in BUET body frames is an explicit generic
+registration hypothesis, not author-source byte identity. The declared left
+geometry reflects local right vertices with
+$S=\operatorname{diag}(1,1,-1)$ and reverses triangle winding. It does not
+insert the improper reflection matrix as a native body-frame rotation.
+The exact source has eight clavicle and 81 scapula path locations mirrored
+on each side under this $S$; these locations support but do not prove the
+derived geometric registration.
+
+## Area-Supported Mass Law
+
+The Tools `compute_triangle_lamina` provider assigns a fixed original body
+mass $m$ across the **triangle multiset** in proportion to unsigned area.
+For triangle $t$ with area $A_t$, its mass is
+$m_t=m A_t/\sum_j A_j$. Its centroid $c_t$ and within-triangle covariance
+$C_t=\sum_{i=1}^3(v_{ti}-c_t)(v_{ti}-c_t)^\mathsf{T}/12$ give
+
+$$
+c=\sum_t \frac{m_t}{m}c_t,\qquad
+C=\sum_t \frac{m_t}{m}\left[C_t+(c_t-c)(c_t-c)^\mathsf{T}\right],\qquad
+I_C=m\left[\operatorname{tr}(C)\mathbf{1}-C\right].
+$$
+
+Duplicate or overlapping faces retain multiplicity; there is no surface
+union, mesh repair, shell thickness, density measurement, volume or tensor
+projection. The right clavicle has three boundary and three nonmanifold edges;
+the right scapula has 13 and 23. A uniform **solid** interpretation remains
+rejected for these open meshes. Equal bilateral scalar masses imply the
+derived checks $c_L=S c_R$ and $I_L=S I_R S^\mathsf{T}$ in the corresponding
+body frames. The original source's whole-body mass is unchanged, while the
+shoulder first moments and origin inertias generally change; this is a new
+mechanical plant, not a correction to the old one.
+
+## Admission and Current Evidence
+
+The producer verifies exact source/right-mesh hashes, shoulder mesh sockets,
+unit scales, named body masses and mirrored source path locations before
+writing a new XML and four explicit geometry assets. A whole-tree semantic
+diff rejects any undeclared XML edit. The fresh native audit checks all 40
+body masses, body-frame COMs and tensors against XML, using the shared
+coordinate-invariant principal-moment law. It rechecks provider/geometry
+hashes and compares every native body transform plus QErr/UErr for three
+declared samples: initialized pelvis tilt and $\pm0.01$ SC_x offsets.
+
+The pinned Tools triangle-lamina provider runs in a bounded isolated Python
+worker because the UpstreamDrift checkout still owns the containing
+`humanoid_character_builder` package. The worker imports only from the pinned
+`vendor/ud-tools/src` tree, communicates through numeric NPZ input and JSON
+output, and returns exact kernel and inertia-representation source hashes.
+Candidate generation and later admission verify those bytes and the worker's
+own source hash. This keeps provider types and implementations out of the
+UpstreamDrift process and avoids combining two package trees.
+
+The current OpenSim 4.6 receipt identifies derived model SHA-256
+`5f2cdd22013c2700f95d625a4c42eb488ed6c5267721cd0d2acde38544754326`.
+Its 40-body native physical audit passes and the sampled maximum source versus
+candidate transform and constraint-residual differences are both zero. The
+unchanged source still fails the four bilateral clavicle/scapula physical
+checks. This proves only a necessary generic physical condition and sampled
+kinematic invariance. Native acceleration/work over a declared chart,
+physiological muscle/passive and tendon laws, source-region ownership,
+contact/grip, an independent head, private marker calibration, full-horizon
+muscle excitation replay, all 17 variants and six-engine parity remain open.
+No Moco solve or captured-motion fit is claimed. Calculation release and
+publication remain blocked.
+
+The pinned-provider CLI revalidation produced the same model SHA-256 as the
+prior provider run and passed the 40-body, three-pose native checks. Its receipt
+also binds the isolated worker source, in addition to the exact Tools kernel
+and inertia-representation hashes. Reproduction requires no development-only
+Tools root argument or in-process module injection. The preserved v6 receipt
+SHA-256 is
+`248065dd5a5338b1907b56a5777d69447efb044b4242d95c6def0b141e15994f` in fleet
+planning; prior v4 and v5 receipts remain unchanged historical evidence.

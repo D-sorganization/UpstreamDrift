@@ -97,3 +97,28 @@ def test_pelvis_rotation_is_a_proper_rotation_about_z_for_yaw() -> None:
     r = afe.pelvis_rotation({"HipInputX": 0.0, "HipInputY": 0.0, "HipInputZ": 90.0})
     assert r @ np.array([1.0, 0.0, 0.0]) == pytest.approx([0.0, 1.0, 0.0], abs=1e-12)
     assert np.linalg.det(r) == pytest.approx(1.0)
+
+
+def test_opensim_fk_matches_mujoco_toe_out_on_the_committed_address() -> None:
+    """OpenSim's Simbody FK of the shared address vector gives the MuJoCo feet."""
+    import json
+    from pathlib import Path
+
+    pytest.importorskip("opensim")
+    pytest.importorskip("mujoco")
+    run = Path(afe.__file__).resolve().parents[1] / (
+        "docs/development/full_body_models/evidence/foot_progression/osv6_myosuite/driver"
+    )
+    spec = json.loads((run / afe.SCALED_SPEC).read_text(encoding="utf-8"))
+    report = json.loads((run / afe.REPORT).read_text(encoding="utf-8"))
+    angles = report["address_coordinates_deg"]
+    shifts = report["address_translations_m"]
+    targets = {
+        s: report["foot_progression"]["feet"][s]["target_deg"]
+        for s in ("left", "right")
+    }
+    mujoco_pts, _ = afe.plant_points("mujoco", spec, angles, shifts)
+    opensim_pts, _ = afe.opensim_points(spec, angles, shifts)
+    reference = afe.score_engine(mujoco_pts, targets)["model_deg"]
+    measured = afe.score_engine(opensim_pts, targets)["model_deg"]
+    assert measured == pytest.approx(reference, abs=0.1)

@@ -3,15 +3,14 @@ import { getApiBase } from '@/api/backend';
 import { apiFetch } from '@/api/fetch';
 import { SpecSlider } from './SpecSlider';
 import {
-  DEFAULT_PARAMS,
   EXPORT_BUTTONS,
   errorMessage,
   type CharacterBuildSummary,
   type CharacterPresetSummary,
   type CharacterPreviewResponse,
   type ExportFormat,
-  type SliderParams,
 } from './characterSpecTypes';
+import type { CharacterSpecState } from './useCharacterSpec';
 
 /**
  * Spec-native Character Builder panel (CMB-7a, #11658).
@@ -20,13 +19,20 @@ import {
  * endpoints the desktop tool uses (`src/tools/character_builder/gui.py`):
  * presets, preview/build and spec/URDF/MJCF/OpenSim export. The legacy
  * mesh-URDF `/character-builder/generate` flow in `CharacterBuilder.tsx`
- * is untouched.
+ * is untouched. Preset/slider state is owned by `useCharacterSpec` (CMB-7d)
+ * so the appearance export's spec binding can read the same `requestBody`.
  */
-export function CharacterSpecPanel() {
+export function CharacterSpecPanel({ spec }: { spec: CharacterSpecState }) {
+  const {
+    selectedPresetId,
+    setSelectedPresetId,
+    params,
+    setParams,
+    requestBody,
+  } = spec;
+
   const [presets, setPresets] = useState<CharacterPresetSummary[]>([]);
   const [presetsError, setPresetsError] = useState<string | null>(null);
-  const [selectedPresetId, setSelectedPresetId] = useState('');
-  const [params, setParams] = useState<SliderParams>(DEFAULT_PARAMS);
 
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewError, setPreviewError] = useState<string | null>(null);
@@ -76,24 +82,7 @@ export function CharacterSpecPanel() {
       setSummary(null);
       setPreviewError(null);
     },
-    [presets],
-  );
-
-  // Overrides apply on top of a preset (CharacterSpecRequest semantics), so
-  // sending every current slider value alongside the preset id is always
-  // correct — selecting a preset fills these fields from its parameters,
-  // and any further edit simply becomes the override for that field.
-  const requestBody = useMemo(
-    () => ({
-      preset: selectedPresetId || null,
-      stature_m: params.stature_m,
-      mass_kg: params.mass_kg,
-      trunk_scale: params.trunk_scale,
-      arm_scale: params.arm_scale,
-      shoulder_scale: params.shoulder_scale,
-      club: params.club,
-    }),
-    [selectedPresetId, params],
+    [presets, setSelectedPresetId, setParams],
   );
 
   const handlePreview = useCallback(async () => {
@@ -202,7 +191,7 @@ export function CharacterSpecPanel() {
         {selectedPreset && (
           <div className="mt-1.5 text-xs text-gray-400 space-y-0.5">
             <p>{selectedPreset.description}</p>
-            <p className="text-gray-500">{selectedPreset.limitations}</p>
+            <p className="text-gray-400">{selectedPreset.limitations}</p>
           </div>
         )}
       </div>
@@ -345,7 +334,7 @@ export function CharacterSpecPanel() {
               type="button"
               onClick={() => void handleExport(fmt, ext)}
               disabled={exportingFmt !== null}
-              className="text-xs bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 disabled:text-gray-500 text-gray-200 px-2.5 py-1.5 rounded transition-colors"
+              className="text-xs bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 disabled:text-gray-400 text-gray-200 px-2.5 py-1.5 rounded transition-colors"
             >
               {exportingFmt === fmt ? 'Exporting…' : label}
             </button>

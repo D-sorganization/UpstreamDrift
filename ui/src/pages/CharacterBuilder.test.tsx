@@ -26,6 +26,13 @@ vi.mock('@/components/character/CharacterSpecPanel', () => ({
   CharacterSpecPanel: () => <div data-testid="character-spec-panel-mock" />,
 }));
 
+// AppearancePanel (CMB-7c, #11658) fetches the appearance library on mount,
+// same reasoning as the CharacterSpecPanel stub above. It has its own test
+// file (AppearancePanel.test.tsx); here it is a stub.
+vi.mock('@/components/character/AppearancePanel', () => ({
+  AppearancePanel: () => <div data-testid="appearance-panel-mock" />,
+}));
+
 import { CharacterBuilderPage } from './CharacterBuilder';
 
 describe('CharacterBuilderPage', () => {
@@ -66,6 +73,27 @@ describe('CharacterBuilderPage', () => {
     render(<CharacterBuilderPage />);
 
     expect(screen.getByTestId('character-spec-panel-mock')).toBeInTheDocument();
+  });
+
+  it('renders the Appearance panel (CMB-7c, #11658)', () => {
+    render(<CharacterBuilderPage />);
+
+    expect(screen.getByTestId('appearance-panel-mock')).toBeInTheDocument();
+  });
+
+  it('keeps the spec-body preview off by default and shows its status when toggled (CMB-7f, #11658)', () => {
+    render(<CharacterBuilderPage />);
+
+    const toggle = screen.getByLabelText(/Preview spec body/i) as HTMLInputElement;
+    expect(toggle.checked).toBe(false);
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+
+    fireEvent.click(toggle);
+
+    expect(toggle.checked).toBe(true);
+    expect(screen.getByRole('status')).toHaveTextContent('Loading spec body');
+    // The glTF export is debounced, so nothing has been fetched yet.
+    expect(mockFetch).not.toHaveBeenCalled();
   });
 
   it('has correct default slider ranges and values', () => {

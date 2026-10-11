@@ -5207,6 +5207,136 @@ engine-specific code. The residual applies in the full-capture IK, in the
 consistency re-solve, and in the optional ZMP-filter and shooting re-solves.
 \texttt{--face-weight 0} restores the marker-only fit.
 
+\subsection{Triad-Shape Validity Gate (Issue \#12030)}
+$R_{c,i}$ is meaningful only when the attached offsets $p_j$ describe the
+captured triad. Per observed frame the rigid residual is
+\[
+ e_i=\Bigl(\tfrac{1}{3}\textstyle\sum_j\bigl\lVert R_{c,i}(p_j-\bar p)-(x_{ij}-\bar x_i)\bigr\rVert^2\Bigr)^{1/2},
+\]
+with $x_{ij}$ the captured positions and bars the centroids.
+\texttt{observe\_frame\_rotations} raises \texttt{TriadShapeMismatchError} when
+the median of $e_i$ exceeds 5~mm. The face targets, the capture impact split
+and the face report are then recorded as unavailable with that reason; no
+rotation is fitted. Matching offsets give a median of 0.2~mm (p95 0.6~mm) on
+capture-A and capture-B, which is capture noise on a rigid triad.
+
+The nominal 7-iron document (\texttt{full\_body\_spec\_anthro\_iron7.json})
+carries the driver's head-triad offsets: edges 92/52/96~mm, against the
+7-iron capture's 106/127/40~mm, a median residual of 42.4~mm. Without
+\texttt{--static-seeds} those offsets are not recalibrated, so before the
+gate the face target was 40--80~deg off. At $w_f=3$ it pulled the trajectory
+IK off the address: 264.8~mm marker RMS and 1355~mm in dynamics. With the
+gate the nominal 7-iron reaches 67.9~mm IK (frame 0: 70.2~mm, against a
+70.4~mm address) and 79.2~mm dynamics. \texttt{--face-weight 0} on unmodified
+code gives the same 67.9~mm, which isolates the cause. The driver and every
+calibrated run match their capture triad, so their fits are unchanged.
+
+\paragraph{Per-Club Cluster (Issue \#12210).}
+The builder gave every club the native candidate's \texttt{Clubhead} cluster,
+which is the driver's head triad and shaft cluster (the shaft markers sat
+170~mm too far up the shorter 7-iron shaft). It now reads a per-club
+\texttt{club-markers/1} file and refuses a non-driver club without one. The
+7-iron file holds the six offsets of the static-seed calibrated
+\texttt{anthro\_iron\_seeds\_zmp} receipt at commit \texttt{1bef553457}; its
+head-triad edges are 40/106/128~mm and its median residual on capture-B is
+0.24~mm (the driver document on capture-A: 0.17~mm).
+
+\begin{center}
+\begin{tabular}{lrrrr}
+\hline
+7-Iron Receipt & Address & IK & Dynamics & After Impact \\
+\hline
+Nominal, driver cluster & 70.4 & 67.9 & 79.2 & 101.6 \\
+Nominal, 7-iron cluster & 41.5 & 45.2 & 104.9 & 184.6 \\
+Calibrated, driver cluster prior & 6.6 & 26.8 & 54.5 & 92.1 \\
+Calibrated, 7-iron cluster prior & 4.0 & 28.4 & 109.9 & 199.7 \\
+\hline
+\end{tabular}
+\end{center}
+Marker RMS in mm. On the nominal run the face residual is observed
+(separation RMS 1.41~deg) and the club segment falls from 117.3 to
+25.4~mm in IK. The calibrated run changes too, although its static trial
+recalibrates the cluster. A control at the parent commit reproduces the old
+receipt exactly. The static-trial calibration is therefore not a fixed point
+of its priors: it moves the club markers 25--54~mm and body markers up to
+32~mm. On the new placement the IK clubhead speed peak precedes the impact
+split by 7--18~ms at every candidate cutoff. The release cutoff then falls
+back to 30~Hz, from 18~Hz, and the after-impact replay error doubles.
+Failed experiment, recorded: the canonical 54.5~mm depended on a
+calibration seeded with the wrong club; which calibrated 7-iron result is
+canonical awaits an owner decision.
+
+Reproduce (ControlTower \texttt{ud-sim}, repository root; add
+\texttt{--static-seeds --zmp-filter} for the calibrated run):
+\begin{verbatim}
+python3 -m scripts.set_spec_club_markers apply \
+  docs/development/full_body_models/evidence/club_markers/iron7.json \
+  docs/development/full_body_models/full_body_spec_anthro_iron7.json
+python3 -m src.shared.python.motion_matching.pipeline.cli \
+  --spec docs/development/full_body_models/full_body_spec_anthro_iron7.json \
+  --capture iron --out runs/anthro_iron
+\end{verbatim}
+
+\paragraph{Fixed Club Cluster in the Static Trial (Issue \#12221).}
+The capture face is observed through the head-triad offsets in the
+\texttt{Clubhead} frame, and the static trial re-places those offsets with
+every other seed marker. A change of the hand-to-club rotation is therefore
+partly absorbed into the club offsets and moves the capture's own measured
+face (\#12221 slices 1--2: address face $+5.50 \to -11.28$~deg). The opt-in
+\texttt{--fix-club-markers} (needs \texttt{--static-seeds}) keeps the six
+\texttt{Clubhead} markers at the document's per-club offsets during the
+static trial; the leg calibration never moved them. Default off, so default
+receipts are unchanged; when set the receipt records
+\texttt{address.static\_trial.fixed\_marker\_bodies}.
+
+Measured with the club-face fixture flags (\texttt{--static-seeds
+--foot-progression capture --face-weight 3.0}, plus \texttt{--zmp-filter} on
+the 7-iron) at commit \texttt{87ba5b2f39}, with same-commit controls on
+ControlTower \texttt{ud-sim}; scored by
+\texttt{regenerate\_club\_face\_fixtures --reuse-run}:
+
+\begin{center}
+\begin{tabular}{lrrrrrr}
+\hline
+Run & Impact speed & Peak timing & Face at impact & Capture face & IK & Tracking \\
+ & (\%) & (ms) & model / capture (deg) & at address (deg) & (mm) & (mm) \\
+\hline
+7-iron control & $-15.6$ & $-8.4$ & 10.49 / 9.14 & 0.27 & 27.2 & 75.4 \\
+7-iron fixed & $-2.6$ & $0.0$ & 7.18 / 3.21 & $-5.35$ & 26.8 & 61.3 \\
+Driver control & $-5.1$ & $-1.8$ & 15.78 / 11.63 & 2.50 & 27.8 & 57.5 \\
+Driver fixed & $-2.4$ & $-4.1$ & $-4.75$ / $-15.35$ & $-20.79$ & 35.8 & 69.5 \\
+\hline
+\end{tabular}
+\end{center}
+Impact speed and peak timing are model minus capture (GCV-20 limits 3~\% and
+5~ms). The driver control reproduces the committed driver fixture exactly. The
+7-iron control is the committed fixture flags on the corrected 7-iron cluster
+(\#12210): the fixtures predate it, and regenerated without the flag they would
+fall to $-15.6$~\%. With the cluster fixed the 7-iron meets the speed and
+timing limits and its impact-face gap is 3.97~deg (OSV-10 limit 5~deg). The
+driver document still carries the native candidate's cluster: held fixed, it
+puts the capture's own address face at $-20.8$~deg, raises the IK error to
+35.8~mm and holds the trail wrist on its $-40$~deg bound for 462 frames, so
+that cluster is not a valid face frame and the driver result is rejected.
+Address ulnar deviation (\texttt{LWInputX} / \texttt{RWInputX}, bound
+$-40$~deg): 7-iron control $-33.5$ / $-36.5$, fixed $-35.7$ / $-40.0$; driver
+control $-25.9$ / $-30.0$, fixed $-35.6$ / $-40.0$. Fixing the cluster does
+not change the hand-to-club rotation, so the trail wrist still starts on its
+bound; that is the grip refit's job. Open: a measured driver cluster (the
+\#12210 procedure applied to the calibrated driver receipt), then the
+\texttt{grip\_rotation\_deg} refit on the fixed clusters. Fixtures are not
+regenerated and no bound, tolerance or filter constant changed.
+
+Reproduce (ControlTower \texttt{ud-sim}, repository root):
+\begin{verbatim}
+python3 -m src.shared.python.motion_matching.pipeline.cli \
+  --spec docs/development/full_body_models/full_body_spec_anthro_iron7.json \
+  --capture iron --static-seeds --zmp-filter --foot-progression capture \
+  --face-weight 3.0 --fix-club-markers --out runs/iron
+python3 -m scripts.regenerate_club_face_fixtures --work runs --capture iron \
+  --reuse-run   # scores into tests/fixtures; restore them afterwards
+\end{verbatim}
+
 \subsection{Impact and Top Definitions}
 At about 2400 deg/s of face closure near impact, one 360 Hz capture sample
 spans about 7 deg. A frame index is therefore too coarse. Impact is the
@@ -5277,8 +5407,9 @@ the ball. The model's clubhead therefore peaks earlier than the captured one.
 That timing difference is outside this change.
 
 \subsection{Verification and Limitations}
-\texttt{test\_face\_tracks\_the\_capture\_at\_address\_top\_and\_impact}
-places the head mesh by each engine's own forward kinematics (OpenSim,
+\texttt{test\_face\_tracks\_the\_capture\_at\_address\_and\_top} and
+\texttt{test\_face\_tracks\_the\_capture\_at\_impact} (split in \#12117, see
+below) place the head mesh by each engine's own forward kinematics (OpenSim,
 MuJoCo, Drake, Pinocchio, MyoSuite). It requires agreement within 5 deg with
 the capture-triad face at address, top and impact, with impact times within
 10 ms. The four engines that ran agree with each other to 0.01 deg. MyoSuite
@@ -5294,6 +5425,162 @@ Reproduction (repository root, \texttt{MUJOCO\_GL=egl PYTHONPATH=.:src}):
 python3 -m scripts.regenerate_club_face_fixtures --work RUNS --capture driver
 python3 -m scripts.regenerate_club_face_fixtures --work RUNS --capture iron
 python3 -m pytest tests/unit/model_appearance/test_clubface_square_at_address.py
+\end{verbatim}
+
+\subsection{Fixtures Regenerated on the Current Spec (\#12117)}
+\textbf{Why.} The fixtures above predate the \#12049 spec change and its
+\#12031 hip mirror. Driving the current spec with them lifts the feet 9--41 cm
+off the floor and splays the legs 60--90 deg in every viewer, so they are not
+valid evidence. They were regenerated by the same script with its unchanged
+flags (\texttt{--foot-progression off}) on the \#12145 sources
+(\texttt{657c811bcd}). Their input receipts (\texttt{anthro\_driver\_seeds},
+\texttt{anthro\_iron\_seeds\_zmp}) are value-identical to the canonical
+receipts on \texttt{main} restored by \#12166.
+
+\begin{center}
+\begin{tabular}{@{}lrr@{}}
+\toprule
+Quantity (old $\rightarrow$ new) & Driver (capture A) & 7-iron (capture B) \\
+\midrule
+Feet height at frame 0 (cm) & 9--41 $\rightarrow$ 3.2--3.8 & 12--38 $\rightarrow$ 3.2--3.8 \\
+Toe-out lead / trail (deg) & 83.0 / 26.7 $\rightarrow$ 30.8 / $-3.8$ & 90.9 / 29.1 $\rightarrow$ 30.1 / $-4.0$ \\
+Toe-out target (deg) & 16.4 / 4.0 & 15.0 / $-0.4$ \\
+Address face, model / capture (deg) & 5.43 / 5.50 & $-5.41$ / $-5.35$ \\
+Top face, model / capture (deg) & 95.55 / 95.10 & 113.70 / 113.24 \\
+Impact face, model / capture (deg) & 17.65 / 14.96 & 10.97 / 3.21 \\
+Impact speed, model / capture (m/s) & 48.18 / 51.32 ($-6.1$\,\%) & 37.07 / 41.26 ($-10.2$\,\%) \\
+Peak-speed lead vs capture (ms) & $-4.0$ & $-14.6$ \\
+Marker RMS, IK / tracked (mm) & 29.5 / 80.8 & 26.8 / 54.5 \\
+\bottomrule
+\end{tabular}
+\end{center}
+Face angles are open-positive and measured by MuJoCo forward kinematics of the
+fixture; at the 7-iron impact OpenSim, Drake and Pinocchio agree with it to
+0.001 deg.
+
+\textbf{Address face reference.} The golfers address the ball 5.50 deg open
+(capture A) and 5.35 deg closed (capture B). A fixture that follows the
+capture therefore cannot be square to the target axis at address. The OSV-8
+check (and the OSV-9 musculoskeletal check) is restated as
+$\lvert\theta_{\mathrm{model}}^{\mathrm{addr}} -
+\theta_{\mathrm{capture}}^{\mathrm{addr}}\rvert \le 2$ deg: the face roll
+constant must add no offset of its own. The tolerance is unchanged; only the
+reference moved from the target axis to the capture's own face.
+
+\textbf{Impact-frame correction.} \texttt{club\_face.impact\_frame} accepted
+the peak-speed sample when it lay within 0.10 m of the address height, without
+the 0.15 m ball-radius check its documentation states. The regenerated driver
+replay peaks early: its peak-speed sample is 0.351 m short of the ball at
+$+0.07$ m height and was returned as impact. Both the peak-speed sample and
+the closest-approach fallback must now lie within the ball radius; the driver
+impact frame moves to the ball passage (0.091 m). No tolerance changed.
+
+\textbf{Open physical gaps, recorded as strict expected failures.} The
+7-iron impact face misses capture B by 7.77 deg against 5 deg
+(\#12221: the club sits 25--40 deg rotated in the hands and pins the wrists on
+their ulnar bound through the release). The GCV-20 impact speed misses by
+6.1 and 10.2 \% against 3 \% (\#11767). The address toe-out misses by up to
+15 deg on the lead foot (\#12222); there is no fixture test for it yet.
+
+\textbf{Derived musculoskeletal calibration.} The OSV-9 grip calibration is
+fitted to \texttt{address\_poses.json}, so it was regenerated
+(\texttt{msk\_club\_calibration}) and the club re-attached to both committed
+models (\texttt{build\_humanoid\_osim.rebuild\_club}). The calibration ran on
+the committed models, which it strips of their club, because the Rajagopal
+base submodule was not on the implementing host. A control against
+\texttt{main}'s address poses reproduced the committed calibration exactly and
+both committed models byte for byte. At the new address the lead elbow is
+straight (22.3 $\rightarrow$ 0.0 deg) and the lead wrist deviation falls from
+35.0 to 25.5 deg; landmark RMS is 13.9 mm (13.1 before) and the grip-point
+gaps stay below 0.25 mm.
+
+Reproduction (repository root, \texttt{MUJOCO\_GL=egl PYTHONPATH=.:src}):
+\begin{verbatim}
+python3 -m scripts.regenerate_club_face_fixtures --work RUNS --capture driver
+python3 -m scripts.regenerate_club_face_fixtures --work RUNS --capture iron
+python3 -m src.engines.physics_engines.opensim.python.msk_club_calibration \
+  src/engines/physics_engines/opensim/models/golf_humanoid.osim \
+  src/engines/physics_engines/opensim/models/golf_humanoid_scaled.osim
+python3 -c "from pathlib import Path; from scripts.build_humanoid_osim import \
+  rebuild_club as r; d=Path('src/engines/physics_engines/opensim/models'); \
+  [r(d / f'{m}.osim') for m in ('golf_humanoid', 'golf_humanoid_scaled')]"
+python3 -m pytest tests/unit/model_appearance/test_clubface_square_at_address.py \
+  tests/opensim/test_msk_club.py tests/opensim/test_msk_club_tracking.py
+\end{verbatim}
+
+\subsection{Fixtures on the Capture Address Feet (\#12222)}
+\textbf{Finding.} With \texttt{--foot-progression capture} the address refit
+already puts each foot within 0.5 deg of the capture's toe-out (OSV-4). The
+fixtures still missed it. Every trajectory solve plants its stance spheres
+where they first touch, but it took that plant from the first frame's own
+fit, so frame 0 re-fitted the feet. On the 7-iron the trail toe-out drifted
+from $-0.88$ deg (swing IK) to $-1.40$ deg (consistency re-solve) and
+$-2.23$ deg (ZMP filter), against the $-0.37$ deg target.
+
+\textbf{Change.} \texttt{solve\_trajectory(anchor\_stance\_at\_init=True)}
+seeds the stance anchors from the start pose $q_0$:
+$a_s = \Pi_g\big(p_s(q_0)\big)$ for each stance sphere $s$, where $\Pi_g$ is
+the projection onto the ground plane. The later frames then keep these
+anchors as before. \texttt{address\_feet.planted\_stance(lane)} enables it
+when foot progression is on, for the swing IK (whose $q_0$ is the calibrated
+address), the consistency re-solve, the shooting refit and the ZMP filter.
+Each pass then keeps the feet of its input's first frame. With
+\texttt{off}, the anchors come from the first frame's fit, so the canonical
+receipts are unchanged. The fixture script now passes
+\texttt{--foot-progression capture} and commits the run's hip-calibrated,
+scaled document as \texttt{spec\_<club>.json}: the calibrated hip frames set
+the foot yaw, and the raw document's forward kinematics of the same pose
+turns the lead foot by 29--30 deg and lifts it 10--11 cm off the floor.
+
+\textbf{Result} (runs at \texttt{4bd77f5818} on ControlTower, MuJoCo forward
+kinematics of each fixture; old means \#12117):
+\begin{center}
+\begin{tabular}{@{}lrr@{}}
+\toprule
+Quantity (old $\rightarrow$ new) & Driver (capture A) & 7-iron (capture B) \\
+\midrule
+Toe-out lead / trail (deg) & 30.8 / $-3.8$ $\rightarrow$ 16.64 / 3.57 & 30.1 / $-4.0$ $\rightarrow$ 15.43 / $-0.96$ \\
+Toe-out target (deg) & 16.37 / 4.03 & 15.00 / $-0.37$ \\
+Feet height at frame 0 (cm) & 3.2--3.8 & 3.1--3.7 \\
+Address face, model / capture (deg) & 2.42 / 2.50 & $-8.23$ / $-8.19$ \\
+Top face, model / capture (deg) & 97.38 / 96.85 & 117.12 / 116.96 \\
+Impact face, model / capture (deg) & 15.78 / 11.63 & 2.83 / 0.71 \\
+Impact speed, model / capture (m/s) & 48.73 / 51.32 ($-5.1$\,\%) & 39.64 / 41.26 ($-3.9$\,\%) \\
+Peak-speed lead vs capture (ms) & $-4.0 \rightarrow -1.8$ & $-14.6 \rightarrow -3.9$ \\
+Marker RMS, IK / tracked (mm) & 29.5 / 80.8 $\rightarrow$ 27.8 / 57.5 & 26.8 / 54.5 $\rightarrow$ 24.4 / 52.8 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\textbf{Reading.}
+\begin{itemize}
+\item The toe-out now meets the 2 deg check on both feet of both clubs
+  (worst error $-0.59$ deg, the 7-iron trail foot).
+\item The 7-iron impact face comes within 5 deg of capture B on all four
+  engines that load (gap 2.1 deg), so its strict expected failure (\#12221)
+  is removed.
+\item The capture's own face moved with the run: the address face goes from
+  5.50 to 2.50 deg (A) and from $-5.35$ to $-8.19$ deg (B). The static
+  calibration refits the head-triad offsets in the face frame at the fitted
+  address, so changing the address changes the measured capture face. This
+  is the sensitivity recorded on \#12221. A face gap is therefore not
+  independent evidence until the offsets are fixed from the club geometry
+  (\#12210).
+\item The GCV-20 impact speed still misses its 3\,\% limit ($-5.1$ and
+  $-3.9$\,\%), so its strict expected failure stays, with the new numbers.
+  The peak timing now passes on both clubs.
+\end{itemize}
+The OSV-9 grip calibration was regenerated from the new address poses, by the
+route of the previous subsection: on \texttt{golf\_humanoid}, landmark RMS
+13.9 $\rightarrow$ 13.0 mm and lead wrist deviation 25.5 $\rightarrow$
+20.7 deg. \texttt{golf\_humanoid\_scaled} was already at 38.9 mm with the
+lead wrist on its 35 deg bound, and is now at 41.4 mm, still on the bound.
+
+Reproduction (repository root, \texttt{MUJOCO\_GL=egl PYTHONPATH=.:src}):
+\begin{verbatim}
+python3 -m scripts.regenerate_club_face_fixtures --work RUNS --capture driver
+python3 -m scripts.regenerate_club_face_fixtures --work RUNS --capture iron
+python3 -m pytest tests/unit/motion_matching/test_club_face_fixture_feet.py \
+  tests/unit/model_appearance/test_clubface_square_at_address.py
 \end{verbatim}
 
 \section{Two-Hand Grip Pose and Lead-Hand Closure (OSV-2)}
@@ -6216,6 +6503,65 @@ python3 -m src.shared.python.motion_matching ledger --write
 \end{verbatim}
 The capture-A run takes about 7 minutes on 5 cores and reads the private
 capture through \texttt{CAPTURE\_DATA\_DIR}.
+
+\subsection{Weld Rotation Row Parity (Issue \#12039)}
+After the coordinate-order fix, the Drake calibrated driver address was
+still 1.64~mm worse than MuJoCo's, although both plants have identical
+forward kinematics and marker Jacobians. The two least-squares problems
+differed in the dual-grip weld rotation row. MuJoCo uses the principal
+logarithm and its exact derivative,
+\[
+ r_{\mathrm{rot}}=\log\!\bigl(R_aR_b^{\top}\bigr)^{\vee},\qquad
+ \frac{\partial r_{\mathrm{rot}}}{\partial q}
+ =J_l^{-1}(r_{\mathrm{rot}})\,\bigl(J_{\omega,a}-R_aR_b^{\top}J_{\omega,b}\bigr),
+\]
+with $J_{\omega}$ the world-frame angular Jacobians and $J_l^{-1}$ the inverse
+left Jacobian of $SO(3)$. Drake used the small-angle
+$\tfrac12(R_aR_b^{\top}-R_bR_a^{\top})^{\vee}=\sin\theta\,\hat n$ with the
+Jacobian $J_{\omega,a}-J_{\omega,b}$. That is exact only at $\theta=0$, and it
+is not the derivative of its own residual elsewhere. At random poses with
+36--73~deg of weld error, it was up to 0.84 off central differences, while
+MuJoCo's was less than $10^{-9}$ off. The closure rotation weight defaults to 100
+in every pose solve, so each Drake address fit followed a different
+Levenberg--Marquardt path.
+
+Both adapters now use one shared row
+(\texttt{full\_body\_ik.\_closure\_rotation\_row}), and Drake's
+\texttt{closure\_error} reports the principal angle. On capture-A and
+capture-B (\texttt{--address-only --static-seeds --foot-progression capture})
+every address stage now agrees within 0.02~mm:
+
+\begin{center}
+\small
+\begin{tabular}{lrrrr}
+\toprule
+Drake $-$ MuJoCo (mm) & Driver Before & Driver After & 7-Iron Before & 7-Iron After \\
+\midrule
+Static trial & $-0.27$ & 0.00 & $+0.13$ & 0.00 \\
+Seed offsets & $-0.84$ & 0.00 & $-0.87$ & 0.00 \\
+Calibrated address & $+1.64$ & 0.00 & $-0.54$ & $+0.02$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The calibrated address is 7.13~mm in both plants for the driver, and 4.78
+(MuJoCo) and 4.80~mm (Drake) for the 7-iron. Drake toe-out now equals MuJoCo's
+(driver $+0.22/-0.11$~deg, 7-iron $+0.19/-0.05$~deg, lead/trail). The MuJoCo
+reports are byte-identical before and after, because the shared row is
+MuJoCo's existing formula. No bound, weight, prior or tolerance changed.
+Evidence: \texttt{evidence/foot\_progression/drake\_parity\_12039/}. Regression
+tests: \texttt{tests/unit/motion\_matching/test\_drake\_mujoco\_ik\_parity.py}.
+The closure rows and Jacobians match MuJoCo to $10^{-9}$ and $10^{-7}$, and
+\texttt{solve\_pose} from the same start reaches the same marker RMS within
+0.5~mm. Before the fix the two plants were 7.7~mm apart on that test.
+
+The capture-A Drake receipt (\texttt{anthro\_driver\_drake}) was regenerated
+at the fix with the command above. It reads address / IK / dynamics
+6.3 / 29.2 / 78.8~mm, against 6.3 / 29.5 / 80.8~mm for MuJoCo's canonical
+\texttt{anthro\_driver\_seeds}. The previous 7.9 / 34.6 / 60.1~mm Drake receipt
+predates both this fix and main's spec pelvis alignment (\#12109) and GCV-20
+impact-split reference (\#12145), so its dynamics figure is not comparable;
+MuJoCo moved from 75.4 to 80.8~mm on the GCV-20 code alone.
 \section{Phase-Split Forward-Dynamics Marker RMS (\#12042)}
 \label{sec:fd_phase_split}
 

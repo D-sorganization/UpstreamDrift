@@ -61,8 +61,21 @@ Native applied excitations
 are checked at output times separately from native muscle forces. This local
 receipt is a development adapter; the versioned Tools bundle remains the
 durable interchange authority. The model file alone is not a complete hash of
-arbitrary external resource dependencies, so such models need additional
-qualification before use.
+arbitrary external resource dependencies. The OpenSim muscle-bundle adapter
+therefore retains the unchanged T01 bundle for models without resources and
+wraps resource-bearing bundles in the local versioned
+`opensim-native-visual-resource-closure/1` envelope. That envelope admits only
+source-declared `.vtp` `Mesh` objects owned by a body's `attached_geometry`;
+each normalized relative path, component path, and asset SHA-256 is bound to
+the source-model SHA-256. Admission rejects missing, changed, duplicate,
+absolute, escaping, symlinked, or non-visual references. Replay copies the
+source and exact assets into an owned temporary snapshot, rebuilds the closure,
+and checks it again after native execution. The component-class exception is
+limited to those exact source-owned visual meshes; visual geometry does not
+authorize forces, contact, wrapping, or other mechanical inputs. This closure
+establishes asset identity and native visual-component loading only. It does
+not qualify wrapped/chart dynamics, contact, anatomical fidelity, or any
+full-body result.
 
 ## Evidence and Limits
 
@@ -102,3 +115,284 @@ model-owned state minima and every contact/force policy field. The combined
 actual OpenSim4.6 suite passes106 cases; two extra-geometry tests are inapplicable
 to SmoothSphereHalfSpace and are skipped explicitly. These synthetic probes do
 not qualify full-body anatomy, capture matching or production contact.
+
+## Bounded Synthetic Moco Solve and Independent Replay
+
+The development-only Moco ladder in
+`tests/opensim/native_moco_ladder_worker.py` uses a source-hashed synthetic
+OpenSim model, not a golf capture. Its ten named initial states include the
+base coordinate $q=0.3$ rad, dependent coordinate $2q=0.6$ rad, fixed anchor
+$0.2$ rad, zero coordinate speeds, activation $0.05$ for each of two Millard
+muscles, and their native fiber lengths $0.09541832200700395$ m and
+$0.08545580283920036$ m. Muscle command bounds are read from the loaded source
+(`min_control=0.01`, `max_control=1.0`) and bound into the request. A fixed
+0.05 excitation forward integration creates a feasible trajectory guess; it
+does not prescribe the subsequent optimized solution.
+The exact source-model SHA-256 is
+`6a098517bdba09b19b3eb99e4da7e795f27d10be8f42c0fca04fee20ce67e143`; the
+native runs used OpenSim 4.6-2026-06-22-85aaf64 with Python 3.12.10. The
+retained runtime fingerprint covers the Python extensions and Moco DLL only;
+it is not a closed hash of all transitive runtime libraries.
+
+For horizon $T=0.01$ s, the optimization holds the cold initial state and
+requires the base coordinate to reach
+$q_f=0.30000558574001657$ rad, with coordinate bounds $[0.2,0.4]$ rad. It
+minimizes the native Moco `effort` control goal. The request fixes
+Hermite-Simpson transcription, midpoint control interpolation enabled,
+parallelism 0, maximum 300 iterations, convergence tolerance $10^{-6}$ and
+constraint tolerance $10^{-7}$. Mesh refinement from 10 to 20 intervals
+changes the transcription mesh (21 versus 41 exported nodes); it retains the
+same horizon, target, source, state, controls policy and tolerances. The
+resulting time-only controls are reloaded from storage and applied to a fresh
+native model using piecewise-linear interpolation.
+
+Before interpreting a solve, source, provider, state, control and request
+identities are bound; solver settings must match their native readback. The
+serialized optimized time/state/control arrays must match the in-memory arrays
+within eight representable float64 values per element, with exact endpoint
+clock and strict clock/control shape checks. The observed solution export was
+within three ULP. Independent replay checks all ten named states at saved
+times, requires the initial state to match exactly, and requires both optimized
+and replayed endpoints to reach the target in the positive direction. Maximum
+optimized-to-replayed absolute errors must remain below $2\times10^{-7}$ rad
+for coordinates, $10^{-7}$ rad/s for speeds, $10^{-8}$ for activations, and
+$10^{-7}$ m for fiber lengths. A Moco solver status alone is never replay
+acceptance; worker states distinguish solve failure, wall or memory stop,
+incomplete evidence, replay rejection, and fully audited replay.
+
+At 10 intervals, OpenSim 4.6 `Solve_Succeeded` in 82 iterations with objective
+$4.9211583953665505\times10^{-6}$. The independent replay passed the endpoint
+check but failed the speed, activation and fiber-length limits: maxima were
+$4.278119184863939\times10^{-6}$ rad/s at 0.01 s,
+$4.2278841340708667\times10^{-4}$ at 0.001 s, and
+$5.394625915713935\times10^{-6}$ m at 0.01 s. Coordinate error was
+$1.524035136979407\times10^{-8}$ rad, within its limit. This is an explicitly
+failed replay, not a successful model match.
+
+At 20 intervals, the optimizer also returned `Solve_Succeeded` in 122
+iterations, objective $4.1654698156426359\times10^{-6}$, and endpoint
+$0.3000055857400166$ rad. The integrated replay reached its 30-second
+supervisor deadline without writing a replay audit. An earlier separate
+no-optimizer replay also reached that deadline, but a wrapper bookkeeping bug
+lost its sampled peak RSS. A corrected, separately authorized diagnostic
+loaded the exact retained source, request, solution and controls, completed
+fresh native replay, and recorded its full timewise state audit. The endpoint
+predicate passed with residual $3.80458\times10^{-9}$ rad; the replay failed
+speed ($1.01890\times10^{-6}$ rad/s versus $10^{-7}$), activation
+($1.15316\times10^{-4}$ versus $10^{-8}$), and fiber length
+($1.21692\times10^{-6}$ m versus $10^{-7}$) limits. Coordinate error was
+$3.80458\times10^{-9}$ rad, within its $2\times10^{-7}$ limit. The fixed
+30-second/1 GiB sampled-peak guard was unchanged; this diagnostic returned
+within the wall budget at 210,214,912-byte sampled peak RSS and verified owned
+process-tree cleanup.
+
+The replay applied the saved excitation values exactly at every sampled knot.
+The request uses Hermite-Simpson transcription with control-mesh interior
+interpolation; replay uses piecewise-linear interpolation of saved knots. Those
+observations make continuous control representation a testable candidate for
+the discrepancy, but do not prove it is causal. The source XML omits the
+activation/deactivation constants; their OpenSim 4.6 source defaults are
+`0.01/0.04` s, not installed-binary readback. The corrected offline analysis
+below narrows this comparison without promoting the failed replay to
+qualification.
+
+### Offline Activation Residual Analysis
+
+The source-bound diagnostic in
+`docs/development/feedback_controls/experiments/native_moco_mesh20_e1548c5179/activation_residual_analysis.json`
+uses the OpenSim 4.6 activation law. For activation $a$, excitation $u$, and
+minimum activation $a_{\min}$, it first bounds
+$\bar a=\min(1,\max(a,a_{\min}))$, then evaluates
+\[
+\dot a = \frac{u-\bar a}{\tau},\qquad
+\tau = \begin{cases}
+\tau_{\mathrm{act}}(0.5+1.5\bar a), & u>\bar a,\\
+\tau_{\mathrm{deact}}/(0.5+1.5\bar a), & u\leq\bar a.
+\end{cases}
+\]
+The retained model XML omits `activation_time_constant`,
+`deactivation_time_constant`, `minimum_activation`, and
+`ignore_activation_dynamics`; the analysis therefore uses 4.6 tag defaults
+`0.01 s`, `0.04 s`, `0.01`, and `false`, respectively. The exact source URL is
+`https://raw.githubusercontent.com/opensim-org/opensim-core/4.6/OpenSim/Actuators/MuscleFirstOrderActivationDynamicModel.cpp`.
+
+The 20-cell mesh has 41 exported rows, arranged as endpoint/midpoint/endpoint
+per Hermite-Simpson cell. For each cell width $h$, the reconstruction checks
+\[
+a_m = \frac{a_k+a_{k+1}}{2} + \frac{h}{8}(f_k-f_{k+1}),\qquad
+a_{k+1}-a_k = \frac{h}{6}(f_k+4f_m+f_{k+1}).
+\]
+The maximum midpoint and Simpson dynamics residuals are `1.1397e-10` and
+`2.0774e-9` for flexor, and `1.6274e-11` and `1.7293e-10` for extensor.
+Separately, SciPy DOP853 integrates the scalar activation equation across each
+saved piecewise-linear input interval. This continuous trace agrees with fresh
+native replay within `2.57503e-8` for flexor and `1.98e-15` for extensor.
+The optimized flexor activation differs from the replay/scalar trace by up to
+`1.15316e-4` at `0.00025 s` and `-8.10477e-5` at the endpoint, despite small
+reconstructed collocation residuals. The maximum replay-vs-scalar sensitivity
+under tighter tolerances is `3.78e-13`; it is a sensitivity estimate, not a
+rigorous integration error bound.
+
+This separates discrete collocation residual from the optimized-state versus
+continuous-replay difference, but does not identify its cause. The diagnostic
+does not change replay thresholds, invoke a native solver/replay, or qualify
+physiology, capture matching, or production execution. It is bound to the
+retained source, request, solution, controls and replay audit by the SHA-256
+identities in the JSON report.
+
+The report also compares a cell-local scalar trajectory, restarted from each
+cell's optimized left activation, with a continuously accumulated scalar
+trajectory. In the first flexor cell, saved excitation is
+`[0.10660435, 0.06055026, 0.01449617]`, while optimized activation is
+`[0.05000000, 0.05130361, 0.05131032]`. The cell-local integration gives
+`0.05141893` at the midpoint and `0.05140447` at the endpoint, respectively
+`1.15316e-4` and `9.41464e-5` above the optimized values. The accumulated
+scalar trajectory instead ends `8.10477e-5` below the optimized endpoint.
+Linear interpolation of the saved excitation-minus-activation samples
+estimates a branch crossing at `0.0003001872 s` in the second half of that
+cell. This estimate is based on sample chords, not a continuous activation
+event; it does not identify the cause of the discrepancy. Across cells, the
+largest local tolerance sensitivity is `3.7749e-13` for the two tested DOP853
+settings, which is a numerical sensitivity measure rather than a rigorous
+error bound. The extensor largest local endpoint difference is `1.7235e-10`.
+
+The 10- and 20-interval optimized coordinate traces differ by at most
+$5.66\times10^{-11}$ rad at common time knots, while flexor controls differ by
+up to $0.03523$ at those knots. The refinements therefore produce distinct
+optimized controls; this comparison does not identify the cause of the
+replay-state errors. The exact request, saved arrays, failed replay audit,
+timeouts, implementation hashes and reproduction details are retained in the
+historical appendices linked from
+`docs/development/feedback_controls/F07_NATIVE_MOCO_COMPLEXITY_LADDER_TURNOVER.md`.
+These bounded synthetic runs establish neither full-body muscle feasibility
+nor physiology, capture matching, production replay, OpenSim muscle
+qualification, or 17-variant/six-ecosystem parity. All remain unqualified.
+
+### Bounded Nonuniform Refinement Plan
+
+The separate pure planner in
+`tests/opensim/native_moco_refinement.py` consumes the hash-bound parent source,
+request, optimized solution, persisted time-only controls, replay audit and
+offline activation report. It marks a full Hermite-Simpson cell when the
+absolute local scalar activation midpoint or endpoint discrepancy exceeds the
+indicative `1e-8` threshold. For the retained mesh-20 case, only cell 0 is
+marked. The deterministic child mesh inserts its midpoint at normalized time
+`0.025` (physical time `0.00025 s`), giving 21 intervals. The planner permits
+at most four flagged cells and caps the child at 24 intervals; mismatched
+inputs, invalid grids and cap overflow fail before a worker starts. One child
+attempt is bound to its parent hashes, with no silent selection among excess
+indicators.
+
+The worker applies OpenSim Moco's user-defined normalized mesh API and seeds
+states from the retained parent trajectory, checking the exact declared initial
+values. It evaluates saved controls by piecewise-linear interpolation at every
+child endpoint and midpoint and writes those values directly into the guess.
+Control trajectory resampling, which could alter the PWL input law, is not
+used. Source-derived control bounds, horizon, initial named state, effort
+objective, transcription, midpoint-control interpolation, solver limits and
+replay thresholds remain bound in the attempt record. The 30-second wall
+limit, 1 GiB sampled soft RSS threshold and stop-on-failure policy remain
+unchanged.
+
+This is a bounded refinement design, not a native run or success claim. A
+smaller activation indicator does not guarantee solver convergence or replay
+acceptance, and cannot qualify fiber lengths, kinematics, physiology, capture
+matching or production behavior. The child still requires the unchanged
+independent fresh replay checks. Native API and time-grid integration remain
+unverified pending separate review.
+
+
+### Retained Replay of the Grid-Rejected Child
+
+The 21-interval child optimizer reported an optimal solution, but its worker
+strictly rejected the exported time grid: 9 of 43 saved timestamps differ
+from the planned grid by one float64 ULP. The separate serialization audit
+remains within its existing 8-ULP bound; that bound does not override the
+strict mesh-grid check. The immutable child source, request, solution, grid
+audit and serialization audit are retained under
+`docs/development/feedback_controls/experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/`.
+
+A later one-time diagnostic replay used a byte-bound snapshot of those saved
+inputs and the solution's actual 43 timestamps. The fresh model applied both
+saved control channels exactly at all recorded samples and met the endpoint
+predicate. The state audit failed only activation: maximum absolute error
+`5.078110452592238e-5` at `0.0007500000000000001 s`, against the unchanged
+`1e-8` limit. Maximum coordinate, speed, and fiber-length errors were
+`6.577771660687404e-11 rad`, `3.859223773427893e-8 rad/s`, and
+`7.369955239144854e-8 m`, respectively, all within their existing limits.
+The diagnostic worker returned successfully with 213,254,144 bytes peak
+sampled tree RSS, verified owned-process cleanup, and unchanged provenance.
+The full audit SHA-256 is
+`dfcb7498c0aecd03928d82cade03c7bf1d867be1c88c44c2c2dd469c917ca97d`.
+
+This replay does not convert the failed grid audit into a passed child
+execution, explain the activation error, or establish physiology or capture
+matching. The synthetic result remains unqualified; the grid and state gates
+remain unchanged.
+
+An offline activation-law analysis was then run against the byte-bound snapshot
+and the replay audit, using the saved 43-row time and control grids directly.
+It reports 42 adjacent saved-row spans for backward-compatible `interval_count`
+semantics, and separately identifies 21 collocation cells. The persisted cell
+widths are 0.00025 s for the first two cells and 0.0005 s for the remaining
+19; their mean is 0.0004761904761904762 s. Each cell uses its saved
+endpoint/midpoint/endpoint triple. No planned-grid reconstruction or one-ULP
+clock acceptance is introduced.
+
+Using the XML values when present and otherwise the OpenSim 4.6 source-tag
+defaults (activation time constant 0.01 s, deactivation time constant 0.04 s,
+minimum activation 0.01), segmented scalar integration differs from the
+flexor optimized activation by at most `5.078935403843299e-5`. The fresh
+replay differs from that scalar trajectory by at most `4.016980001408932e-8`,
+while the largest flexor cell-local integration-versus-optimized midpoint or
+endpoint difference is `9.262298642974398e-5`; accumulated integration's
+largest corresponding difference is `5.078935403843299e-5`. The maximum
+Simpson dynamics defect is `3.5819897541253427e-9`. These are numerical
+comparisons of the retained failed child, not a new replay or a qualification
+result. The source-tag defaults are inferred from XML/OpenSim 4.6 source; the
+installed native binary was not queried. The machine-readable report is
+`docs/development/feedback_controls/experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/solution_control_replay_diagnostic_3bc787e36d_root/retained_replay/offline_activation_residual_analysis.json`
+(SHA-256 `36c4866850ef7ed5ca1202cedd920d373b12d25245f5a42e847a1a79a84436d7`).
+
+The offline analyzer was rerun after its final source hardening and nonuniform-grid
+TDD update. The earlier report remains immutable at its recorded digest; this
+second report binds the final analyzer bytes and the same retained snapshot and
+audit. It confirms 21 collocation cells over 43 saved rows. Flexor optimized
+activation differs from independently segmented scalar integration by at most
+`5.078935403843299e-5`; replay differs from the scalar result by
+`4.016980001408932e-8`. The maximum local-cell optimized-state difference is
+`9.262298642974398e-5`, and the Simpson dynamics defect is
+`3.5819897541253427e-9`. Sampled chord estimates place excitation/activation
+branch crossings in cells 0 and 2; they are indicators, not native crossing
+proofs. Controls' saved midpoint values are linear interpolants within about
+`7e-18`. The optimized and replay trajectories differ despite small sampled
+collocation defects; no causal mesh-convergence inference follows. The installed
+OpenSim binary was not queried, and the result remains unqualified. The
+source-bound report is
+`docs/development/feedback_controls/experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/solution_control_replay_diagnostic_3bc787e36d_root/retained_replay/offline_activation_residual_analysis_finalsource_4e40b764.json`
+(SHA-256 `d78b4efbfa66a01de23ad6403971ab2dca7e7171ccac6c4f7809f6cdaf3cd45d`;
+analysis source SHA-256
+`31925492d691b40e42181b311f818b0b88038027cea2bd5641898310b5d650ca`).
+
+The saved midpoint check allows at most four ULPs at the local time-coordinate
+scale, solely for arithmetic representation; this retained clock differs by
+at most three such ULPs. It validates endpoint/midpoint structure and does not
+reconstruct the planned grid. A follow-up report using that check has SHA-256
+`fc6d1bf759c428e79d973b302ae81c96deadaf33d523d707623051352613ea93` at
+`docs/development/feedback_controls/experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/solution_control_replay_diagnostic_3bc787e36d_root/retained_replay/offline_activation_residual_analysis_midpointvalidated.json`;
+the retained strict one-ULP planned-grid rejection remains unchanged.
+
+After merging midpoint validation with the hardened XML parser, I reran the offline
+analysis from the unchanged source/request/solution/control snapshot and replay
+audit. The analyzer SHA-256 is
+`c247a4cfd5369f829b5224c551713f7697e74bf5f430fcffbc59bd8ab1d9218b`; it binds
+the new report at SHA-256
+`fa913993a25903120c27d02d529bd67579475935021a70f54723ae269e20832e`. The saved
+43-row clock still has 21 endpoint/midpoint cells, each midpoint admitted only
+within the declared four-local-ULP structural check; the observed retained
+clock's maximum is three ULPs. This structure check accepts the actual saved
+clock and leaves the distinct planned-grid rejection at 9 of 43 timestamps
+unchanged. Numerical summaries match the previous final-source report. This is
+offline analysis only; no native SDK, solver, or replay ran, and no physical or
+capture qualification is implied. The new report is
+`docs/development/feedback_controls/experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/solution_control_replay_diagnostic_3bc787e36d_root/retained_replay/offline_activation_residual_analysis_midpointvalidated_source_c247a4cf.json`.

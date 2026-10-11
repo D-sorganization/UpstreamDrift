@@ -2,6 +2,12 @@
 
 ## Status and Expanded Goal
 
+Physical inertia helper correction #12183 is documented in canonical chapter 51.
+Sorted principal moments make triangle feasibility independent of coordinate
+rotation; absolute symmetry tolerance prevents scale-dependent masking. This
+is a numerical contract fix with unchanged tensor values, not native model
+admission, anatomy validation or permission to repair imported parameters.
+
 Planning specification, 2026-10-08. Governing epic: [UpstreamDrift #11784](https://github.com/D-sorganization/UpstreamDrift/issues/11784); shared provider epic: [Tools #5460](https://github.com/D-sorganization/Tools/issues/5460). No capture, control algorithm or physiological model is qualified by this document.
 
 The program covers **all six current engines and their applicable model variants**: MuJoCo, Drake, Pinocchio/Crocoddyl, OpenSim, MyoSuite and Simscape. Track torque-driven, muscle-driven, rigid/flexible-club and reduced/full-body variants explicitly; a reduced-model success does not qualify a full-body model. New registered models inherit capability and parity conformance. The final product target is **muscle-driven OpenSim matching the available mocap**, with full-state, controller-off excitation replay and best defensible cross-engine biomechanical parity. Saved torque replay remains an essential intermediate gate.
@@ -145,3 +151,74 @@ Adopt the existing canonical model/variant/capability registry and stable engine
 [Astra Architecture Review](ASTRA_REVIEW.md) refines this design and its acceptance criteria. Record dynamics/contact/integration/actuator/restart implementations; common-model parity cannot qualify native muscle/contact replay. Required capabilities remain required when unavailable. Version full state, manifold operations, input boundaries and actual executed policies rather than silently broadening Euclidean torque fixtures.
 
 An optimized collocation trajectory must pass uninterrupted native integration and refinement checks. Score frozen nominal feedforward separately from replay of total feedback-generated input. Reserve/root assistance requires peak/RMS, integrated absolute effort and separate positive/negative work; zero signed work cannot prove muscle-only operation. Declare exact versus noisy/estimated/delayed state and validate that information pattern. Gain and recruitment estimates remain nonunique and require held-out perturbation and parameter/objective sensitivity evidence.
+
+## Constrained Mixed OpenSim Moco Boundary (#12173)
+
+The narrowly tested OpenSim composition is opt-in: a caller supplies an exact
+declared cold start, lock targets, constraint enforcement, coordinate charts
+and optional linear chart inequalities alongside the mixed muscle/mechanical
+profile. The native source constraints are retained and observed at each
+replay knot. Moco coordinate boxes must fit the declared chart; linear rules
+are checked by conservative interval extrema. A fresh replay rejects native
+Manager projection of the exact requested named-state seed or initial time.
+Mixed commands remain distinct from physical outputs: muscle excitation is
+dimensionless with nonlinear force in N, while CoordinateActuator commands
+are scaled into N or N\*m according to native coordinate motion. The strict
+muscle-only default is unchanged. The 40 ms synthetic Moco/replay regression
+is software-path evidence, not a private capture, production anatomy/physics
+qualification, or release. See canonical chapter48 and
+`F07_CONSTRAINED_MIXED_MOCO_TURNOVER.md`.
+
+## OpenSim Mixed Replay Marker Observation (#12195)
+
+The opt-in marker bridge validates a frozen T01 mixed bundle and performs one
+fresh native replay before observing positions. It restores every complete
+named state and the exact sample time, then uses model-owned PhysicalFrame
+stations with explicit ordered local offsets. It does not assemble or
+integrate during observation. The existing scorer aligns only 3-D positions
+to the retained measured clock and rejects extrapolation. The result remains
+diagnostic and unqualified; attachment calibration, physiology, contact,
+private capture, production variants, and all-engine parity remain open. See
+chapter49 and `F09Q-OPENSIM-MIXED-MARKER-SCORING.md`.
+
+## Exact-Source 557-Muscle Replay Boundary (#12182)
+
+An opt-in version-three profile freezes the exact BUET–Hamner derived model
+bytes and native component inventory instead of widening the reviewed v1/v2
+class allowlists. Every clamped source range and the four source-coupled
+rotational coordinates have explicit units and chart declarations. Attached
+visual meshes are inventoried separately from dynamic resources. The
+prepared named state, native options, ordered 557 excitations and constraint
+policy are bound in T01; the shared scalar executor rejects initial
+projection and independently observes all 17 couplers at each knot. The
+original equilibrium seed fails the SC_z chart after 1 ms. A distinct
+six-coordinate interior diagnostic seed has only 0.2 ms replay evidence;
+neither result certifies source inertia, passive physiology, full native
+restart or a captured swing. Chapter50 and the exact replay turnover bind
+the inputs, equations, failures and acceptance limits.
+
+## Native Source-Body Inertia Admission (#12191)
+
+The OpenSim source-body gate reads exact BodySet properties and checks a fresh
+native model, without equilibrating, integrating or editing parameters. It
+uses the shared physical-inertia validator for positive masses and explicitly
+admits native welded/internal routing carriers only when both mass and all
+inertia components are exactly zero. Inertia is about the body-frame COM;
+native mass, COM and six components must equal the source. The unchanged
+557-muscle source fails the necessary principal-moment condition on both
+clavicles and both scapulae. The gate records all failing bodies and keeps
+the #12182 short replay diagnostic separate from physical admission. Chapter52
+and the public receipt bind source/runtime/adapter identities; source anatomy,
+passive forces, contact/grip and capture matching remain unqualified.
+
+## Native Moco Physical-Body Preflight (#12205)
+
+The maintained Moco preparation now binds the complete #12191 source/native
+body audit to a versioned, hashed sidecar while retaining every independent
+capture, guess, registration, passive-force and actuator blocker. A solve must
+have an admitted audit and repeat it against a fresh native model; source,
+adapter, shared validator and runtime identities must still match. Export and
+replay share the same revalidation boundary. A missing legacy audit or changed
+sidecar fails closed. The physical test is necessary for optimization, never
+sufficient for muscle physiology, captured-motion fit or release. See
+canonical chapter53 and `F07_MOCO_INERTIA_PREFLIGHT_TURNOVER.md`.

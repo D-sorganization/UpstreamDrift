@@ -8,7 +8,7 @@ import json
 import logging
 from pathlib import Path
 import time
-from typing import Any, Literal
+from typing import Any, Literal, NamedTuple
 
 import numpy as np
 
@@ -33,6 +33,7 @@ from src.shared.python.motion_matching.hip_calibration import (
 from src.shared.python.motion_matching.pipeline.address import (
     AddressStageInputs,
     HipCalibrationOptions,
+    add_hip_zero_twist_argument,
     calibrated_address_summary,
     prepare_hip_spec,
     scaled_offsets,
@@ -85,6 +86,12 @@ from src.shared.python.motion_matching.pipeline.finish_feasibility import (
 )
 from src.shared.python.motion_matching.pipeline.gaze_residual import (
     head_gaze_receipt,
+)
+from src.shared.python.motion_matching.pipeline.gaze_tracking import (
+    NECK_REFERENCES,
+    apply_fd_neck,
+    fd_head_gaze_report,
+    fd_neck_feedback,
 )
 from src.shared.python.motion_matching.pipeline.lane import (
     Lane,
@@ -195,6 +202,17 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     parser.add_argument(
+        "--fd-neck",
+        choices=list(NECK_REFERENCES),
+        default="ik",
+        help=(
+            "neck reference for the forward-dynamics replay (OSV-3 #11729): "
+            "ik keeps the marker-driven neck (default); gaze tracks the gaze "
+            "schedule (modelled, not measured); gaze-closed also re-solves "
+            "the neck target on the simulated torso during the replay"
+        ),
+    )
+    parser.add_argument(
         "--capture",
         choices=list(CAPTURE_NAMES),
         default="driver",
@@ -257,6 +275,12 @@ def build_parser() -> argparse.ArgumentParser:
         "--static-seeds",
         action="store_true",
         help="place every marker from a neutral-spine static trial",
+    )
+    parser.add_argument(
+        "--fix-club-markers",
+        action="store_true",
+        help="keep the club cluster at the document's per-club offsets in the "
+        "static trial (needs --static-seeds; #12221)",
     )
     parser.add_argument(
         "--engine",
@@ -383,6 +407,7 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     add_turn_split_arguments(parser)
+    add_hip_zero_twist_argument(parser)
     return parser
 
 
@@ -400,6 +425,15 @@ def _attach_face_report(
         ik_report["face_orientation"] = _face_orientation_report(
             lane, cal_res, *q_pair, weight
         )
+    elif weight > 0 and lane.face_unavailable_reason:
+        ik_report["face_orientation"] = {
+            "weight": weight,
+            "frame": FACE_FRAME,
+            "triad": list(HEAD_TRIAD_LABELS),
+            "targeted_frames": 0,
+            "available": False,
+            "reason": lane.face_unavailable_reason,
+        }
 
 
 def _face_orientation_report(
@@ -536,6 +570,7 @@ def _calibrate_and_scale(
             recalibrate_upper=args.recalibrate_upper,
             foot_half_width_m=getattr(args, "foot_half_width_m", None),
             torsional_patch_m=getattr(args, "torsional_patch_m", None),
+            hip_zero_twist=getattr(args, "hip_zero_twist", "capture"),
         ),
     )
     hipcal_path.write_text(
@@ -558,6 +593,7 @@ def _calibrate_and_scale(
             hipcal_path=hipcal_path,
             static_seeds=args.static_seeds,
             fit_closure=args.fit_closure,
+            fix_club_markers=args.fix_club_markers,
             log=log,
         )
     )
@@ -971,30 +1007,71 @@ def _maybe_shooting_fit(
     return q_track, zmp, shooting_report
 
 
+@dataclass(frozen=True)
+class _FinalizeInputs:
+    """Artifacts, kinematic solutions and replay states to finalize the receipt."""
+
+    ik_report: dict[str, Any]
+    cal_res: _CalibrateAndScaleResult
+    weld_report: dict[str, Any]
+    q_ref: np.ndarray
+    q_track: np.ndarray | None = None
+    sim_q: np.ndarray | None = None
+    neck_solve: Any = None
+    fd_neck: str = "ik"
+    neck_feedback: Any = None
+
+
 def _finalize_receipt(
     ctx: PipelineContext,
     receipt: dict[str, Any],
     context: tuple[Lane, Any, Any, logging.Logger],
-    *,
-    ik_report: dict[str, Any],
-    cal_res: _CalibrateAndScaleResult,
-    weld_report: dict[str, Any],
-    q_ref: np.ndarray,
+    inputs: _FinalizeInputs,
 ) -> None:
     """Attach engine/gaze/weld metadata, run the optimiser stage and persist
     the receipt."""
     lane, kin, sim, log = context
     receipt["engine"] = ctx.engine
-    receipt["head_gaze"] = head_gaze_receipt(lane, kin, q_ref)
-    receipt["tracking_weld_projection"] = weld_report
-    _attach_turn_block(receipt, ctx, lane, kin, q_ref, cal_res, ik_report)
+    receipt["head_gaze"] = head_gaze_receipt(lane, kin, inputs.q_ref)
+    if (
+        "dynamics" in receipt
+        and inputs.q_track is not None
+        and inputs.sim_q is not None
+    ):
+        receipt["dynamics"]["head_gaze"] = fd_head_gaze_report(
+            lane,
+            kin,
+            inputs.q_ref,
+            inputs.q_track,
+            inputs.sim_q,
+            inputs.neck_solve,
+            inputs.fd_neck,
+            feedback=inputs.neck_feedback,
+        )
+    receipt["tracking_weld_projection"] = inputs.weld_report
+    _attach_turn_block(
+        receipt, ctx, lane, kin, inputs.q_ref, inputs.cal_res, inputs.ik_report
+    )
     _apply_trajectory_optimiser(
         ctx.args, ctx.out_dir, receipt, lane=lane, kin=kin, sim=sim
     )
     _write_receipt(ctx.out_dir, receipt)
     log_pipeline_summary(
-        log, receipt, ik_report, cal_res.calibration, cal_res.calibration2
+        log,
+        receipt,
+        inputs.ik_report,
+        inputs.cal_res.calibration,
+        inputs.cal_res.calibration2,
     )
+
+
+def _fd_neck(
+    args: Any, lane: Lane, kin: Any, q_ref: np.ndarray, q_track: np.ndarray
+) -> tuple[str, np.ndarray, Any, Any]:
+    """(mode, q_track, neck solve, closed-loop hook) for ``--fd-neck``."""
+    mode = getattr(args, "fd_neck", "ik")
+    q_track, solve = apply_fd_neck(mode, lane, kin, q_ref, q_track)
+    return mode, q_track, solve, fd_neck_feedback(mode, lane, kin, q_ref)
 
 
 def _simulate_and_receipt(
@@ -1011,19 +1088,21 @@ def _simulate_and_receipt(
 ) -> dict[str, Any]:
     """Execute forward dynamics tracking replay, renders, and receipt generation."""
     args = ctx.args
-    out_dir = ctx.out_dir
-    log = ctx.log
     tracking = getattr(args, "tracking", "kkt")
     q_track = smooth_lane(q_ref, lane, TRACKING_CUTOFF_HZ)
     zmp = lane_reference_zmp(sim, lane, q_track)
     q_track, zmp, zmp_filter_report, centroidal_report = _feasibility_filters(
-        args, (lane, kin, sim, log), q_track, zmp
+        args, (lane, kin, sim, ctx.log), q_track, zmp
     )
+    # After the filters, which re-pose the body; the ZMP keeps the IK neck.
+    fd_neck, q_track, neck_solve, hook = _fd_neck(args, lane, kin, q_ref, q_track)
     q_track, zmp, shooting_report = _maybe_shooting_fit(
-        args, (lane, kin, sim, log), q_track, q_ref, zmp, tracking
+        args, (lane, kin, sim, ctx.log), q_track, q_ref, zmp, tracking
     )
     q_track, weld_report = weld_consistent_track(kin, cal_res.scaled_spec, q_track)
-    record, sim_q = replay(sim, lane, q_track, tracking_backend=tracking)
+    record, sim_q = replay(
+        sim, lane, q_track, tracking_backend=tracking, reference_hook=hook
+    )
     finish = finish_feasibility_report(
         sim,
         times_track=lane.times,
@@ -1050,8 +1129,8 @@ def _simulate_and_receipt(
             finish_feasibility=finish,
         )
     )
-    _save_dynamics_record(out_dir, record, sim_errors, lane, q_track)
-    _render_playbacks(out_dir, cal_res, kin, lane, q_ref, sim_q)
+    _save_dynamics_record(ctx.out_dir, record, sim_errors, lane, q_track)
+    _render_playbacks(ctx.out_dir, cal_res, kin, lane, q_ref, sim_q)
     receipt = build_ground_support_receipt(
         GroundSupportReceiptInputs(
             backend=args.backend,
@@ -1059,8 +1138,8 @@ def _simulate_and_receipt(
             tracking_backend=tracking,
             base_spec=base_spec,
             spec_path=Path(args.spec),
-            scaled_path=out_dir / "full_body_spec_hipcal_scaled.json",
-            hipcal_path=out_dir / "full_body_spec_hipcal.json",
+            scaled_path=ctx.out_dir / "full_body_spec_hipcal_scaled.json",
+            hipcal_path=ctx.out_dir / "full_body_spec_hipcal.json",
             recalibrate_upper=args.recalibrate_upper,
             anthropometric=args.anthropometric,
             qualification_note=cal_res.qualification_note,
@@ -1081,11 +1160,18 @@ def _simulate_and_receipt(
     _finalize_receipt(
         ctx,
         receipt,
-        (lane, kin, sim, log),
-        ik_report=ik_report,
-        cal_res=cal_res,
-        weld_report=weld_report,
-        q_ref=q_ref,
+        (lane, kin, sim, ctx.log),
+        _FinalizeInputs(
+            ik_report=ik_report,
+            cal_res=cal_res,
+            weld_report=weld_report,
+            q_ref=q_ref,
+            q_track=q_track,
+            sim_q=sim_q,
+            neck_solve=neck_solve,
+            fd_neck=fd_neck,
+            neck_feedback=hook,
+        ),
     )
     return receipt
 

@@ -41,6 +41,7 @@ __all__ = [
     "foot_progression_report",
     "foot_progression_series",
     "model_feet_deg",
+    "planted_stance",
     "refine_foot_progression",
     "seed_document_feet",
     "seed_hip_rotation_deg",
@@ -362,6 +363,22 @@ def foot_progression_series(
         for side, deg in model_feet_deg(kin, q, targets).items():
             series[side].append(round(float(deg), 3))
     return series
+
+
+def planted_stance(lane: Any) -> dict[str, Any]:
+    """Stance keyword arguments of every trajectory (re-)solve on ``lane``.
+
+    The stance spheres are pinned flat and planted where they first touch.
+    With foot progression on (``lane.feet``) the plant starts at the solve's
+    start pose, so each pass keeps the feet of its input's first frame (the
+    calibrated address) instead of re-fitting them (#12222); off, the first
+    frame's own fit sets them, which keeps ``off`` receipts reproducible.
+    """
+    return {
+        "flat_feet_per_frame": lane.stance,
+        "plant_stance": True,
+        "anchor_stance_at_init": getattr(lane, "feet", None) is not None,
+    }
 
 
 def record_foot_progression(

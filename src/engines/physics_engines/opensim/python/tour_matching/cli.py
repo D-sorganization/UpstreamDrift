@@ -334,7 +334,16 @@ def cmd_moco_native(args: argparse.Namespace) -> int:
         logger.warning("Native Moco solve did not succeed: %s", solved.status)
         return 2
     exported = export_native_moco_bundle(request, prepared, solved, args.output_dir)
-    native = replay_native_moco_bundle(exported, request.model_path, args.output_dir)
+    native = replay_native_moco_bundle(
+        exported,
+        request.model_path,
+        args.output_dir,
+        constrained_cold_start=request.constrained_cold_start,
+        mixed_actuation=request.mixed_actuation,
+        wrapped_path_declaration=request.wrapped_path_declaration,
+        native_mechanics_profile=request.native_mechanics_profile,
+        contact_declaration=request.contact_declaration,
+    )
     score_native_moco_replay(
         request, prepared, solved, exported, native, args.output_dir
     )

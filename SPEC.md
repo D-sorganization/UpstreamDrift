@@ -1,3 +1,90 @@
+## Explicitly Unqualified Moco Feasibility (#12225)
+
+The native runner accepts a default-false boolean diagnostic disposition only
+when passive physiological limits are unavailable. True is request-bound and
+retained in preparation; the unavailable-policy blocker remains visible, and
+all other source, physical, state, chart, observation and control gates remain
+mandatory. No supplied limits can be overridden, and independent excitation
+replay grants no muscle-matching qualification. Chapter55 and F07 unqualified
+feasibility turnover record TDD, native execution and remaining full-capture gates.
+
+## Bounded Synthetic Native Moco Solve and Replay
+
+The source-bound two-muscle synthetic Moco ladder keeps native control limits,
+complete named cold state, solver settings, serialized arrays and fresh replay
+inputs in the request/evidence chain. The 10-interval OpenSim 4.6 solve
+converged, but independent replay failed speed, activation and fiber-length
+limits. A 20-interval solve converged with 41 saved nodes, but integrated replay
+and two earlier retained-input diagnostics stopped at the fixed 30-second wall
+deadline before state errors were recorded. A later, separately authorized
+retained-input replay finished and failed the speed, activation and fiber-length
+limits while passing the coordinate endpoint predicate. Its timewise audit
+records peak errors of `1.0189e-6` rad/s, `1.1532e-4` activation and
+`1.2169e-6` m; sampled peak RSS was 210,214,912 bytes. Applied control samples
+exactly matched saved knots, but this does not prove equality of the continuous
+control law. Solver convergence is distinct from replay acceptance. The common-knot
+optimized coordinates agree closely while controls differ materially, so the
+mesh comparison does not establish the cause of replay-state error. The completed
+offline activation analysis finds small reconstructed Hermite-Simpson residuals,
+while optimized flexor activation differs from fresh replay by up to `1.1532e-4`.
+Fresh replay agrees with an independent segmented scalar PWL integration within
+`2.5751e-8`. Source XML omits activation constants, so the analysis uses OpenSim
+4.6 source defaults rather than installed-binary readback. This narrows the
+finding to a discrete optimized-state versus continuous-replay difference
+without identifying its cause. Chapter 13 and the current
+`F07_NATIVE_MOCO_COMPLEXITY_LADDER_TURNOVER.md` summary link to its two
+historical appendices, which retain exact equations, acceptance limits,
+source/request hashes, failure statuses and output evidence.
+This synthetic diagnostic does not qualify full-body muscle feasibility,
+physiology, capture matching, production replay or all-variant/ecosystem parity.
+
+## Native Wrapped-Path Source Closure (#12234)
+
+The opt-in wrapped-path declaration binds exact native wrap geometry, PathWrap
+ownership and target links, and ConditionalPathPoint coordinate ranges to the
+complete source hash. Fresh native source comparison is required before
+constrained replay. The strict default continues to reject wrapped components.
+Route observation is source-bound and read-only; unproven global transitions
+and guide-work bounds remain unqualified and require diagnostic opt-in. This
+does not admit nonlinear path functions, generalized joints, contact, or
+physiological claims. Chapter 57 records the closure profile and fixtures;
+runner-level typed finding aggregation depends on the shared Chapter 56 API.
+
+## Native Contact Source Closure (#12244)
+
+Constrained contact replay requires an exact-source declaration for supported
+HuntCrossley or Smooth sphere/half-space contact, including serialized force
+and geometry component identities. The contact policy hash covers both the
+declaration/sampler and the executed `opensim_force_torque.py` wrench provider.
+The default remains rejecting. OpenSim 4.6 tests verify both force/geometry
+closures and finite constrained Smooth-contact wrench output; strict XML
+validation currently rejects the generated HuntCrossley fixture before replay.
+This does not authorize capture contact or establish support, grip, physical
+qualification, or full-horizon replay. Request-level integration remains
+pending. See provisional Chapter 58 and
+`docs/development/feedback_controls/F07_NATIVE_CONTACT_SOURCE_CLOSURE_TURNOVER.md`.
+
+## Native Path-Work Consistency Diagnostic (F07, #11856)
+
+The original single-pin diagnostic in `scripts/diagnostics/native_path_work.py`
+observes native unit-tension force, length and lengthening speed against refined
+geometry derivatives, with serialized model and actual runtime identities. A
+moving point followed by a fixed point on the same body reproduces a force/length
+difference; fixed-point controls agree. This is a workless-identity audit, not
+proof of a runtime defect. Physiological fitting, donor path/input-domain
+validation, contact, complete-state full-capture replay, and manual release remain
+blocked. Canonical calculation reference:
+`manuals/upstreamdrift/chapters/24-native-path-work.qmd`.
+
+## Coordinate-Invariant Physical Inertia Contract (#12183)
+
+The existing DIME inertia helper checks triangle feasibility on sorted principal
+moments and absolute symmetry tolerance. Chapter 51 records TDD evidence and
+the unchanged tensor-return contract. This helper correction introduces no native
+source-admission integration or optimizer-wide qualification. Imported body
+inertias still require explicit source/COM/frame/provenance validation; no
+automatic tensor repair or matching acceptance is authorized by this change.
+
 ## Native Feedback Platform Integration (#12060)
 
 The published native Moco preparation/seed/solve/replay path and owned Simscape
@@ -6,6 +93,15 @@ Keep admitted Tools 86d0f28 and one private replay contract identity. Canonical
 chapter 39 and F10i turnover separate actual affected runtime checks, optional SDK
 skips, capture-loader DLL failures and the outstanding full-model scientific gates.
 Reference-conventions chapter is now 40; project MyoSuite remains chapter 38.
+
+## MyoSuite Native Muscle Actuator Classification (#12249)
+
+`MyoSuiteMuscleAnalyzer` uses the installed MuJoCo named `mjDYN_MUSCLE` enum to
+select native muscle actuators. The native MuJoCo 3.8.0 regression mixes muscle,
+filter, and motor actuators without requiring Gym or MyoSuite environment
+registration. This fixes actuator-type classification only; it does not qualify
+muscle physiology, capture mapping, excitation replay, or engine parity. See
+chapter 31 and the F09q turnover.
 
 ## Project MyoSuite Bounded Native Command Solve (F09n)
 
@@ -10604,6 +10700,31 @@ The receipt retains `state_reset_allowed=False` separately from an unknown
 reset count when the adapter does not instrument that counter; policy is not
 reported as a measured zero.
 
+F09c also has an explicitly bound full-body MuJoCo generalized-effort path.
+It consumes the exact source coordinate order, complete q/v state, and frozen
+ZOH generalized efforts with zero root entries. The shared `VectorPlant` and
+RK4 integrator run eight fixed substeps with projection disabled; model-owned
+contact and weld dynamics are evaluated during the engine-acceleration calls.
+The path does not call `mj_step`, assemble/reset state, or accept a feedback
+callback. It reports closure residuals without adding a qualification
+threshold, accepts only q/v-only state under its exact provider identity, and
+remains unqualified. This consumer does not claim that it generated its input
+history or that the history is a full capture.
+
+The paired `record_native_full_body_feedback` producer accepts a declared
+Python controller with caller-bound source/configuration/reference digests.
+Before any integrator stage, it requires a complete finite initial q/v state,
+validates each returned effort's full coordinate shape and finiteness, and
+rejects nonzero root efforts. The controller receives detached q/v copies once
+per fixed interval; each output is held across eight shared RK4 substeps (32
+acceleration-stage evaluations per outer interval). It returns the standard
+T01 frozen-input bundle plus an unqualified producer record with the exact
+applied efforts and generated trajectory digests. Fresh replay is controller
+free. Initial closure residuals are reported without a threshold, and no
+assembly, reset, or projection is performed. The producer declares no effort
+bounds and makes no bounded-control, capture-match, support/grip, or physiology
+claim. See canonical chapter13 and the F09C turnover.
+
 ## Native Marker Positions From Replay States (F09d, #11907)
 
 `src/engines/feedback_native_markers.py` executes a frozen replay through the
@@ -11013,6 +11134,32 @@ reduction, native Moco, contact/grip, golfer marker registration, full-state
 replay or captured full-swing matching. Scientific publication stays blocked;
 all 17 variants and six engine families remain required.
 
+## Source-Preserving Native Zero-Subtalar Reduction (#12167)
+
+An exact-source bilateral locked-zero CustomJoint reduction creates a separate
+native OpenSim artifact from the assembled 557-muscle BUET–Hamner candidate.
+The one-coordinate spatial function, source/default/achieved lock target,
+native zero frame transform and absence of external coordinate consumers are
+admitted before the native weld. Fresh reloading and four common-state
+comparisons verify a rank-complete mobility lift, native body motion, muscle
+path lengths/speeds, mass, applied forces and constraints. Canonical chapter
+46 and the F07 turnover bind source/runtime/output identity and sampled
+limits. Abdominal and MTP composition, physiological muscle state, full native
+replay, Moco and capture matching remain open.
+## Source-Bound Native Zero-MTP CustomJoint Reduction (#12176)
+
+The assembled 557-muscle BUET–Hamner source has bilateral single-coordinate
+locked-zero MTP CustomJoints, not PinJoints. A separate exact source-profile
+reduction now admits their zero spatial laws and native lock targets before
+welding only those joints in a derived model. Fresh native reload and four
+sampled common-state comparisons preserve body motion, 557 muscle path
+lengths/speeds, constraints and rank-complete lifted mass and applied force.
+The existing PinJoint policy remains strict. The retained abdominal→subtalar
+parent admits this final MTP step. Independent original-to-final sampled
+mechanics and native Moco initialization pass at three prepared states; Moco
+solve, physiology, contact/grip and captured matching remain unqualified. Canonical
+chapter 47, native receipt and F07 turnover bind the calculation and limits.
+
 ## Assistance-Explicit OpenSim Replay (#12147)
 
 A distinct native mixed-actuation T01 profile freezes exact muscle and
@@ -11024,3 +11171,82 @@ provider, input, state and policy digests. Zero-assistance point bounds are
 supported. The original muscle-only profile remains strict. Canonical chapter
 27 and F07_MIXED_ACTUATION_TURNOVER document the calculation and limits; full
 factory topology, capture/physiology/contact/grip and 17-model parity remain open.
+
+The #12147 mixed Moco link reuses scalar bindings and chapter39's file-driven
+pipeline. The original mixed link bound ordered roles/bounds and preserved
+optimizer knots through independent T01 replay; combined constrained profiles
+were outside that snapshot's scope. Mixed NPZ evidence distinguishes
+actuations/controls and physical units, roles, powers and sampled work. This
+does not discharge anatomy, contact, private full-horizon or all-model gates.
+
+Child #12173 now exercises an explicitly declared constrained-plus-mixed
+Moco/replay path. Optimizer boxes are contained in declared coordinate and
+linear charts; fresh replay rejects Manager projection of the exact named
+state/time seed and records constraint enforcement/residuals at every sample.
+Muscle excitation, mechanical commands and resulting physical force/torque
+remain separate. The strict default muscle-only policy is unchanged. Its
+40 ms synthetic native Moco and fresh-replay regression is software evidence
+only; full-body qualification, private capture, all required variants and
+six-engine parity remain open. See canonical chapter48 and
+`F07_CONSTRAINED_MIXED_MOCO_TURNOVER.md`.
+Child #12195 adds an opt-in complete-state OpenSim mixed replay to explicit
+PhysicalFrame marker observation and the existing exact-observation-clock
+scorer. The model-owned FK restores saved named states without assembly; the
+diagnostic output remains unqualified and does not assert calibration or F01
+admission. See canonical chapter49 and
+`F09Q-OPENSIM-MIXED-MARKER-SCORING.md`.
+The F07 #12143 versioned constrained-muscle policy extends a declared
+native OpenSim cold start to exact ordered excitation T01 export, fresh
+source replay and marker sampling without reassembly. A coupler-only
+two-Millard source solves a reachable nonzero Moco endpoint and independently
+replays within declared fixture-specific per-unit state and q/u residual
+bounds; native locked-coordinate replay remains separate because installed
+OpenSim Moco rejects locked coordinates. The source-bound component audit
+admits only reviewed CustomJoint and coordinate-linear moving path laws.
+Canonical chapter42 and `F07_CONSTRAINED_MUSCLE_MOCO_TURNOVER.md` retain
+the failed zero-force/loose-transcription experiment and all 520-muscle,
+private-capture, contact, assistance and physiology gates.
+## Native Abdominal Zero-Translation Reduction
+
+Issue #12161 adds a separately identified guarded XML-derived abdominal reduction; chapter45 documents its exact zero manifold, state/force verification, provenance and unqualified status. No whole-joint weld, physiology adjustment or capture-matching claim is permitted.
+
+## Exact 557-Muscle Excitation Diagnostic (#12182)
+
+The opt-in v3 OpenSim profile accepts only the exact source-preserving
+BUET–Hamner derived XML and a frozen native path/class inventory. It binds
+visual-only mesh references, 40 clamped ranges, four audited rotational
+coupled-coordinate units, 1,226 complete continuous values, 17 couplers and
+557 ordered excitation inputs. The untouched one-equilibrium seed fails the
+SC_z chart at 1 ms. An explicitly different six-coordinate interior seed
+passes only a 0.2 ms fresh same-input replay; a final-knot excitation change
+preserves the preceding state and alters native activation. Chapter50 and
+`F07_EXACT_557_REPLAY_TURNOVER.md` retain the source-hashed failure and
+limited positive evidence. Original body inertia validity, source physiology,
+full-horizon capture matching and 17-variant/six-engine parity remain blocked.
+
+## Native Source-Body Inertia Admission (#12191)
+
+Physical use of a native OpenSim source now has a read-only body-property
+precondition. Every declared Body mass, body-frame COM and six inertia entries
+must equal fresh native readback. Positive-mass tensors use the corrected
+principal-moment validator from #12183; exact massless/zero-inertia internal
+carriers have a separate explicit policy. The unchanged 557-muscle source
+fails on bilateral clavicles and scapulae, while its short diagnostic replay
+remains separately labeled. Chapter52 and the source-body inertia turnover
+record the exact gate and evidence. No source repair, physiology qualification
+or full-swing matching follows from this necessary test.
+
+## Generic Shoulder Triangle-Lamina Candidate (#12211)
+
+The exact final 557-muscle source still fails four shoulder-body physical
+inertias. A separately identified candidate retains its joints, paths, laws
+and scalar masses while deriving bilateral clavicle/scapula COM and full
+tensor from exact right CEINMS triangle meshes through the Tools #5503
+lamina kernel. Right identity-frame placement and left local-z vertex
+reflection are declared generic registration assumptions, not recovered
+original anatomy. The new native model passes the 40-body physical gate and
+matches source body transforms and constraint residuals at three sampled
+poses. Chapter54 and `F07_GENERIC_SHOULDER_LAMINA_TURNOVER.md` retain exact
+hashes, exclusions and reproduction. Tools #5503 and #12207 are pending;
+physiology, native force/work over a chart, contact/grip, head/markers,
+private full-horizon matching and all17/six-engine qualification remain open.

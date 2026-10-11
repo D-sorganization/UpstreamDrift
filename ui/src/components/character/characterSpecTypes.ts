@@ -55,7 +55,7 @@ export interface CharacterBuildSummary {
   club: string;
 }
 
-export type ExportFormat = 'spec' | 'urdf' | 'mjcf' | 'osim';
+export type ExportFormat = 'spec' | 'urdf' | 'mjcf' | 'osim' | 'gltf';
 
 export interface SliderParams {
   stature_m: number;
@@ -76,6 +76,36 @@ export const DEFAULT_PARAMS: SliderParams = {
   club: 'driver',
 };
 
+/** The exact `CharacterSpecRequest` shape the server-side route expects. */
+export interface CharacterSpecRequestBody {
+  preset: string | null;
+  stature_m: number;
+  mass_kg: number;
+  trunk_scale: number;
+  arm_scale: number;
+  shoulder_scale: number;
+  club: string;
+}
+
+// Overrides apply on top of a preset (CharacterSpecRequest semantics), so
+// sending every current slider value alongside the preset id is always
+// correct — selecting a preset fills these fields from its parameters,
+// and any further edit simply becomes the override for that field.
+export function specRequestBody(
+  presetId: string,
+  params: SliderParams,
+): CharacterSpecRequestBody {
+  return {
+    preset: presetId || null,
+    stature_m: params.stature_m,
+    mass_kg: params.mass_kg,
+    trunk_scale: params.trunk_scale,
+    arm_scale: params.arm_scale,
+    shoulder_scale: params.shoulder_scale,
+    club: params.club,
+  };
+}
+
 // Matches EXPORT_FORMATS in spec_export.py — the fallback filename when the
 // server's Content-Disposition header is missing or unparsable.
 export const EXPORT_BUTTONS: { fmt: ExportFormat; label: string; ext: string }[] = [
@@ -83,6 +113,7 @@ export const EXPORT_BUTTONS: { fmt: ExportFormat; label: string; ext: string }[]
   { fmt: 'urdf', label: 'URDF', ext: 'urdf' },
   { fmt: 'mjcf', label: 'MJCF', ext: 'xml' },
   { fmt: 'osim', label: 'OpenSim', ext: 'osim' },
+  { fmt: 'gltf', label: 'glTF', ext: 'gltf' },
 ];
 
 export function errorMessage(err: unknown): string {

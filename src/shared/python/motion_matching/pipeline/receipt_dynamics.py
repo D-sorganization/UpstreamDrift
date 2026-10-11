@@ -542,6 +542,11 @@ class DynamicsReceipt(BaseModel):
         description="Optional contact-aware shooting fit report",
         json_schema_extra={"unit": "compound", "stage": "dynamics"},
     )
+    head_gaze: dict[str, Any] | None = Field(
+        None,
+        description="Optional OSV-3 head-gaze schedule tracking of the replay neck",
+        json_schema_extra={"unit": "compound", "stage": "dynamics"},
+    )
     mjx: dict[str, Any] | None = Field(
         None,
         description="Optional MJX differentiable trajectory optimization report",
