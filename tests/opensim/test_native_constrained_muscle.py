@@ -78,6 +78,7 @@ def _source(
     custom: bool = False,
     moving: bool = False,
     wrapped: bool = False,
+    welded: bool = False,
 ) -> tuple[Path, DeclaredColdStart]:
     osim = pytest.importorskip("opensim")
     model = osim.Model()
@@ -103,6 +104,19 @@ def _source(
             joint.updCoordinate().setDefaultLocked(True)
         model.addBody(body)
         model.addJoint(joint)
+    if welded:
+        welded_body = osim.Body("welded", 0.8, osim.Vec3(0), osim.Inertia(0.08))
+        weld = osim.WeldJoint(
+            "structural_weld",
+            model.getBodySet().get("base"),
+            osim.Vec3(0.03, -0.02, 0.01),
+            osim.Vec3(0.10, -0.06, 0.08),
+            welded_body,
+            osim.Vec3(-0.01, 0.02, 0.015),
+            osim.Vec3(-0.04, 0.03, 0.02),
+        )
+        model.addBody(welded_body)
+        model.addJoint(weld)
     coupler = osim.CoordinateCouplerConstraint()
     coupler.setName("coupler")
     names = osim.ArrayStr()
@@ -111,7 +125,8 @@ def _source(
     coupler.setDependentCoordinateName("dependent")
     coupler.setFunction(osim.LinearFunction(2.0, 0.0))
     model.addConstraint(coupler)
-    for muscle_name, body_name in (("flexor", "base"), ("extensor", "follower")):
+    flexor_body = "welded" if welded else "base"
+    for muscle_name, body_name in (("flexor", flexor_body), ("extensor", "follower")):
         muscle = osim.Millard2012EquilibriumMuscle(muscle_name, 10.0, 0.1, 0.2, 0.0)
         muscle.addNewPathPoint("origin", model.getGround(), osim.Vec3(0.0, -0.15, 0))
         muscle.addNewPathPoint(
@@ -160,6 +175,62 @@ def _source(
         residual_tolerance=1e-9,
     )
     return path, declaration
+
+
+def _welded_source_metrics(
+    path: Path, named_state: dict[str, float]
+) -> tuple[np.ndarray[Any, Any], np.ndarray[Any, Any]]:
+    """Observe weld-frame transforms and muscle lengths from a fresh XML load."""
+    from src.engines.physics_engines.opensim.python.tour_matching.native_constraint_state import (
+        _restore_named_state,
+    )
+
+    osim = pytest.importorskip("opensim")
+    model = osim.Model(str(path))
+    state = model.initSystem()
+    _restore_named_state(model, state, named_state)
+    model.realizePosition(state)
+    weld = model.getJointSet().get("structural_weld")
+    frames = (weld.getParentFrame(), weld.getChildFrame())
+    bodies = (model.getBodySet().get("base"), model.getBodySet().get("welded"))
+    transforms = []
+    for frame in (*frames, *bodies):
+        transform = frame.getTransformInGround(state)
+        translation = transform.p()
+        rotation = transform.R().asMat33()
+        transforms.append(
+            [
+                *(translation.get(index) for index in range(3)),
+                *(rotation.get(row, col) for row in range(3) for col in range(3)),
+            ]
+        )
+    lengths = [
+        model.getMuscles().get(index).getLength(state)
+        for index in range(model.getMuscles().getSize())
+    ]
+    return np.asarray(transforms, dtype=np.float64), np.asarray(
+        lengths, dtype=np.float64
+    )
+
+
+def _weld_socket_frame_node(tree: Any, weld_xml: Any, socket_name: str) -> Any:
+    socket = weld_xml.find(socket_name)
+    assert socket is not None and socket.text
+    socket_path = socket.text.rstrip("/")
+    parts = socket_path.split("/")
+    frame_name = parts[-1]
+    if socket_path.startswith("/jointset/structural_weld/"):
+        owner = weld_xml
+    elif len(parts) >= 3 and parts[1] == "bodyset":
+        owner = tree.find(f".//Body[@name='{parts[2]}']")
+    elif len(parts) >= 2 and parts[1] == "ground":
+        owner = tree.find(".//Ground")
+    else:
+        owner = weld_xml.find("frames")
+    assert owner is not None
+    frames = owner.findall(f".//PhysicalOffsetFrame[@name='{frame_name}']")
+    assert len(frames) == 1
+    return frames[0]
 
 
 def _controls(
@@ -334,6 +405,105 @@ def test_changed_future_excitation_preserves_prefix_then_changes_activation(
         )
         for audit in second.constraint_audits
     )
+
+
+def test_structural_weld_fresh_reload_and_saved_excitation_replay(
+    tmp_path: Path,
+) -> None:
+    from src.engines.physics_engines.opensim.python.tour_matching.native_constrained_muscle import (
+        build_constrained_muscle_bundle,
+        replay_constrained_muscle_bundle,
+    )
+
+    path, declaration = _source(tmp_path, locked=False, welded=True)
+    tree = ET.parse(path)
+    weld_xml = tree.find(".//WeldJoint[@name='structural_weld']")
+    assert weld_xml is not None
+    for socket_name in ("socket_parent_frame", "socket_child_frame"):
+        frame = _weld_socket_frame_node(tree, weld_xml, socket_name)
+        translation = frame.find("translation")
+        orientation = frame.find("orientation")
+        assert translation is not None and translation.text
+        assert orientation is not None and orientation.text
+        assert any(abs(float(value)) > 1e-6 for value in translation.text.split())
+        assert any(abs(float(value)) > 1e-6 for value in orientation.text.split())
+
+    source_transforms, source_lengths = _welded_source_metrics(
+        path, declaration.named_state
+    )
+    serialized = tmp_path / "roundtrip.osim"
+    import opensim as osim
+
+    reloaded_model = osim.Model(str(path))
+    reloaded_model.printToXML(str(serialized))
+    reloaded_transforms, reloaded_lengths = _welded_source_metrics(
+        serialized, declaration.named_state
+    )
+    np.testing.assert_allclose(
+        reloaded_transforms, source_transforms, atol=1e-12, rtol=0
+    )
+    np.testing.assert_allclose(reloaded_lengths, source_lengths, atol=1e-12, rtol=0)
+    np.testing.assert_allclose(
+        source_transforms[0], source_transforms[1], atol=1e-8, rtol=0
+    )
+
+    grid = np.array([0.0, 0.001, 0.002, 0.003])
+    reference = build_constrained_muscle_bundle(declaration, grid, _controls(grid, 0.1))
+    changed = build_constrained_muscle_bundle(
+        declaration,
+        grid,
+        {"flexor": np.array([0.1, 0.1, 0.9, 0.9]), "extensor": np.full(4, 0.15)},
+    )
+    first = replay_constrained_muscle_bundle(reference, declaration)
+    same_input = replay_constrained_muscle_bundle(reference, declaration)
+    second = replay_constrained_muscle_bundle(changed, declaration)
+    assert set(first.state_names) == set(declaration.named_state)
+    expected_initial = np.asarray(
+        [declaration.named_state[name] for name in first.state_names]
+    )
+    np.testing.assert_array_equal(first.states[0], expected_initial)
+    np.testing.assert_allclose(first.states, same_input.states, atol=1e-10, rtol=0)
+    np.testing.assert_allclose(first.states[:2], second.states[:2], atol=1e-10, rtol=0)
+    activation = first.state_names.index("/forceset/flexor/activation")
+    q_index = first.state_names.index("/jointset/base/q/value")
+    assert second.states[-1, activation] > first.states[-1, activation]
+    assert second.states[-1, q_index] != pytest.approx(
+        first.states[-1, q_index], abs=1e-12
+    )
+
+
+@pytest.mark.parametrize(
+    ("field", "replacement"),
+    [
+        ("parent_frame_orientation", "0.2 0.1 -0.1"),
+        ("socket_parent_frame", "/bodyset/follower"),
+    ],
+)
+def test_weld_transform_or_socket_mutation_invalidates_old_bundle(
+    tmp_path: Path, field: str, replacement: str
+) -> None:
+    from src.engines.physics_engines.opensim.python.tour_matching.native_constrained_muscle import (
+        build_constrained_muscle_bundle,
+        replay_constrained_muscle_bundle,
+    )
+
+    path, declaration = _source(tmp_path, locked=False, welded=True)
+    grid = np.array([0.0, 0.001])
+    bundle = build_constrained_muscle_bundle(declaration, grid, _controls(grid, 0.1))
+    tree = ET.parse(path)
+    weld_xml = tree.find(".//WeldJoint[@name='structural_weld']")
+    assert weld_xml is not None
+    if field == "parent_frame_orientation":
+        node = _weld_socket_frame_node(tree, weld_xml, "socket_parent_frame").find(
+            "orientation"
+        )
+    else:
+        node = weld_xml.find(field)
+    assert node is not None
+    node.text = replacement
+    tree.write(path, encoding="utf-8", xml_declaration=True)
+    with pytest.raises(ValueError, match="source"):
+        replay_constrained_muscle_bundle(bundle, declaration)
 
 
 def test_source_mutation_and_unreviewed_force_fail_closed(tmp_path: Path) -> None:
