@@ -171,14 +171,6 @@
       "code": "arg-type"
     },
     {
-      "path": "src/shared/python/movement_optimizer/trajectory/optimizer.py",
-      "line": 439,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 6 to \"evaluate_solution\" has incompatible type \"Callable[[CubicSpline[float64]], tuple[ndarray[tuple[Any, ...], dtype[Any]], ndarray[tuple[Any, ...], dtype[Any]], ndarray[tuple[Any, ...], dtype[Any]], ndarray[tuple[Any, ...], dtype[Any]]]]\"; expected \"_TrajectoryCallable\"",
-      "code": "arg-type"
-    },
-    {
       "path": "src/learning/imitation/_gail.py",
       "line": 474,
       "column": null,
@@ -811,46 +803,6 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/shared/python/movement_optimizer/tests/test_shared_theme_dependency.py",
-      "line": 18,
-      "column": null,
-      "severity": "error",
-      "message": "Module \"src.shared.python.theme\" has no attribute \"BUILTIN_THEMES\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/shared/python/movement_optimizer/tests/test_shared_theme_dependency.py",
-      "line": 18,
-      "column": null,
-      "severity": "error",
-      "message": "Module \"src.shared.python.theme\" has no attribute \"THEME_COLOR_KEYS\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/shared/python/movement_optimizer/tests/test_shared_theme_dependency.py",
-      "line": 18,
-      "column": null,
-      "severity": "error",
-      "message": "Module \"src.shared.python.theme\" has no attribute \"ThemedWindowMixin\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/shared/python/movement_optimizer/tests/test_shared_theme_dependency.py",
-      "line": 18,
-      "column": null,
-      "severity": "error",
-      "message": "Module \"src.shared.python.theme\" has no attribute \"generate_stylesheet\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/shared/python/movement_optimizer/tests/test_shared_theme_dependency.py",
-      "line": 18,
-      "column": null,
-      "severity": "error",
-      "message": "Module \"src.shared.python.theme\" has no attribute \"get_theme_manager\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_builders_mixin.py",
       "line": 181,
       "column": null,
@@ -971,14 +923,6 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/shared/python/movement_optimizer/theme_bridge.py",
-      "line": 20,
-      "column": null,
-      "severity": "error",
-      "message": "Module \"src.shared.python.theme\" has no attribute \"BUILTIN_THEMES\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/ui_setup_mixin.py",
       "line": 202,
       "column": null,
@@ -1043,14 +987,6 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/shared/python/movement_optimizer/theme_bridge.py",
-      "line": 21,
-      "column": null,
-      "severity": "error",
-      "message": "Module \"src.shared.python.theme\" has no attribute \"ThemedWindowMixin\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_render_mixin.py",
       "line": 215,
       "column": null,
@@ -1088,38 +1024,6 @@
       "column": null,
       "severity": "error",
       "message": "\"_SessionMixin\" has no attribute \"_load_xlsx\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/shared/python/movement_optimizer/tests/test_theming.py",
-      "line": 22,
-      "column": null,
-      "severity": "error",
-      "message": "Module \"src.shared.python.theme\" has no attribute \"BUILTIN_THEMES\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/shared/python/movement_optimizer/tests/test_theming.py",
-      "line": 22,
-      "column": null,
-      "severity": "error",
-      "message": "Module \"src.shared.python.theme\" has no attribute \"ThemeManager\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/shared/python/movement_optimizer/tests/test_theming.py",
-      "line": 22,
-      "column": null,
-      "severity": "error",
-      "message": "Module \"src.shared.python.theme\" has no attribute \"get_theme_manager\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/shared/python/movement_optimizer/theme_bridge.py",
-      "line": 22,
-      "column": null,
-      "severity": "error",
-      "message": "Module \"src.shared.python.theme\" has no attribute \"get_theme_manager\"",
       "code": "attr-defined"
     },
     {
@@ -3059,14 +2963,6 @@
       "code": "call-overload"
     },
     {
-      "path": "src/shared/python/movement_optimizer/trajectory/optimizer_diagnostics.py",
-      "line": 64,
-      "column": null,
-      "severity": "error",
-      "message": "No overload variant of \"minimize\" matches argument types \"Callable[[ndarray[tuple[Any, ...], dtype[Any]]], float]\", \"ndarray[tuple[Any, ...], dtype[Any]]\", \"str\", \"list[tuple[float, float]]\", \"list[dict[Any, Any]]\", \"Callable[[ndarray[tuple[Any, ...], dtype[Any]]], None]\", \"dict[str, float]\"",
-      "code": "call-overload"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_builders_mixin.py",
       "line": 360,
       "column": null,
@@ -3385,14 +3281,6 @@
       "severity": "error",
       "message": "The erased type of self \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui.PinocchioGUI\" is not a supertype of its class \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.ui_setup_mixin.UISetupMixin\"",
       "code": "misc"
-    },
-    {
-      "path": "src/shared/python/movement_optimizer/tests/test_scipy_dependency_contract.py",
-      "line": 10,
-      "column": null,
-      "severity": "error",
-      "message": "Name \"tomllib\" already defined (by an import)",
-      "code": "no-redef"
     },
     {
       "path": "src/api/versioning.py",
@@ -3973,54 +3861,6 @@
     {
       "path": "src/shared/python/pendulum_simulator/gui/optimization_widget.py",
       "line": 426,
-      "column": null,
-      "severity": "note",
-      "message": "def minimize(fun: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...], method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None, jac: Literal[True] | numpy.bool[Literal[True]] | Literal[1], hess: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: def (ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
-      "code": null
-    },
-    {
-      "path": "src/shared/python/movement_optimizer/trajectory/optimizer.py",
-      "line": 439,
-      "column": null,
-      "severity": "note",
-      "message": "\"_TrajectoryCallable.__call__\" has type \"def __call__(self, splines: object) -> tuple[ndarray[tuple[Any, ...], dtype[Any]], ndarray[tuple[Any, ...], dtype[Any]], ndarray[tuple[Any, ...], dtype[Any]], ndarray[tuple[Any, ...], dtype[Any]]]\"",
-      "code": null
-    },
-    {
-      "path": "src/shared/python/movement_optimizer/trajectory/optimizer_diagnostics.py",
-      "line": 64,
-      "column": null,
-      "severity": "note",
-      "message": "Possible overload variants:",
-      "code": null
-    },
-    {
-      "path": "src/shared/python/movement_optimizer/trajectory/optimizer_diagnostics.py",
-      "line": 64,
-      "column": null,
-      "severity": "note",
-      "message": "def [_Float1DT: ndarray[tuple[int], dtype[float64]]] minimize(fun: def (_Float1DT, /, *Any, **Any) -> _Float1DT, x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], args: tuple[object, ...] = ..., method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None = ..., jac: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Literal['2-point', '3-point', 'cs'] | Literal[False] | numpy.bool[Literal[False]] | Literal[0] | None = ..., hess: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: def (ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
-      "code": null
-    },
-    {
-      "path": "src/shared/python/movement_optimizer/trajectory/optimizer_diagnostics.py",
-      "line": 64,
-      "column": null,
-      "severity": "note",
-      "message": "def minimize(fun: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...] = ..., method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None = ..., jac: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Literal['2-point', '3-point', 'cs'] | Literal[False] | numpy.bool[Literal[False]] | Literal[0] | None = ..., hess: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: def (ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
-      "code": null
-    },
-    {
-      "path": "src/shared/python/movement_optimizer/trajectory/optimizer_diagnostics.py",
-      "line": 64,
-      "column": null,
-      "severity": "note",
-      "message": "def minimize(fun: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...] = ..., method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None = ..., *, jac: Literal[True] | numpy.bool[Literal[True]] | Literal[1], hess: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: def (ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
-      "code": null
-    },
-    {
-      "path": "src/shared/python/movement_optimizer/trajectory/optimizer_diagnostics.py",
-      "line": 64,
       "column": null,
       "severity": "note",
       "message": "def minimize(fun: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...], method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None, jac: Literal[True] | numpy.bool[Literal[True]] | Literal[1], hess: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: def (ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",

@@ -77,3 +77,66 @@ def test_fit_keeps_identity_when_nothing_is_out_of_range() -> None:
     fit = module.fit_grip_rotation(relative, BASE, RANGES, grid_step_deg=45.0)
     assert fit.cost_before == 0.0 and fit.cost_after == 0.0
     assert fit.rotation_deg == (0.0, 0.0, 0.0)
+
+
+def _count_stack(frames: int = 10) -> np.ndarray:
+    return np.arange(frames, dtype=float)[:, None, None] * np.ones((1, 3, 3))
+
+
+def test_weighted_frames_repeats_the_requested_slices() -> None:
+    stack = _count_stack()
+    out = module.weighted_frames(
+        stack, 8, window_frames=3, window_weight=2, address_frames=2, address_weight=3
+    )
+    expected = [*range(10), 5, 6, 7, 5, 6, 7, 0, 1, 0, 1, 0, 1]
+    assert out[:, 0, 0].tolist() == expected
+    assert out.shape == (len(expected), 3, 3)
+
+
+def test_weighted_frames_with_zero_weights_is_the_stack() -> None:
+    stack = _count_stack()
+    assert np.array_equal(module.weighted_frames(stack), stack)
+    assert np.array_equal(
+        module.weighted_frames(stack, window_frames=4, address_frames=3), stack
+    )
+
+
+def test_weighted_frames_window_ending_at_the_last_frame() -> None:
+    stack = _count_stack()
+    out = module.weighted_frames(stack, 10, window_frames=2, window_weight=1)
+    assert out[:, 0, 0].tolist() == [*range(10), 8, 9]
+
+
+def test_weighted_frames_preconditions() -> None:
+    stack = _count_stack()
+    with pytest.raises(ValueError, match="non-negative"):
+        module.weighted_frames(stack, 5, window_frames=-1)
+    with pytest.raises(ValueError, match="non-negative"):
+        module.weighted_frames(stack, address_weight=-2)
+    with pytest.raises(ValueError, match="integer"):
+        module.weighted_frames(stack, 5, window_frames=1.5)  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match="impact_frame"):
+        module.weighted_frames(stack, None, window_frames=2, window_weight=1)
+    with pytest.raises(ValueError, match="impact_frame"):
+        module.weighted_frames(stack, 1, window_frames=2, window_weight=1)
+    with pytest.raises(ValueError, match="impact_frame"):
+        module.weighted_frames(stack, 11, window_frames=2, window_weight=1)
+    with pytest.raises(ValueError, match="address_frames"):
+        module.weighted_frames(stack, address_frames=11, address_weight=1)
+
+
+def test_compose_rotation_identity_and_product() -> None:
+    assert np.allclose(
+        module.compose_rotation_deg((10, 20, 30), (0, 0, 0)), (10, 20, 30)
+    )
+    assert np.allclose(
+        module.compose_rotation_deg((0, 0, 0), (10, 20, 30)), (10, 20, 30)
+    )
+    base, corr = (12.0, -33.0, 41.0), (-7.0, 25.0, 60.0)
+    total = module.compose_rotation_deg(base, corr)
+    assert len(total) == 3 and all(isinstance(v, float) for v in total)
+    assert np.allclose(
+        module.grip_rotation(total),
+        module.grip_rotation(base) @ module.grip_rotation(corr),
+        atol=1e-12,
+    )

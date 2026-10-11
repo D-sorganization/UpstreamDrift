@@ -479,19 +479,21 @@ PEAK_TIMING_TOL_S = 0.005
 IMPACT_SPEED_TOL = 0.03
 
 
-@pytest.mark.xfail(
+_CAPTURE_B_SPEED_XFAIL = pytest.mark.xfail(
     strict=True,
     reason=(
-        "GCV-20 #11767 acceptance not met: the fixtures regenerated on the "
-        "capture address feet (#12222, 4bd77f5818) reach the ball at -5.1 % "
-        "(driver, 48.73 / 51.32 m/s) and -3.9 % (7-iron, 39.64 / 41.26 m/s) "
-        "against the 3 % limit; the peak timing passes (-1.8 ms and -3.9 ms "
-        "against 5 ms). On the #12117 fixtures the free-wrist IK asked for "
-        "48-54 deg of lead ulnar deviation at impact against the 40 deg "
-        "bound (#12221)"
+        "GCV-20 #11767 acceptance not met on capture-B: the 7-iron fixture "
+        "(#12222, 4bd77f5818) reaches the ball at -3.9 % (39.64 / 41.26 m/s) "
+        "against the 3 % limit; the peak timing passes (-3.9 ms against "
+        "5 ms). The #12221 grip refit passes on the tracked swing but not "
+        "through its same-input export (-5.0 %), so it is not adopted yet"
     ),
 )
-@pytest.mark.parametrize("capture", sorted(CAPTURES))
+
+
+@pytest.mark.parametrize(
+    "capture", ["A", pytest.param("B", marks=_CAPTURE_B_SPEED_XFAIL)]
+)
 def test_clubhead_speed_peaks_with_the_capture_and_matches_it_at_impact(
     capture: str,
 ) -> None:
