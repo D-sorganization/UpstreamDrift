@@ -8,6 +8,18 @@ mandatory. No supplied limits can be overridden, and independent excitation
 replay grants no muscle-matching qualification. Chapter55 and F07 unqualified
 feasibility turnover record TDD, native execution and remaining full-capture gates.
 
+## Native Path-Work Consistency Diagnostic (F07, #11856)
+
+The original single-pin diagnostic in `scripts/diagnostics/native_path_work.py`
+observes native unit-tension force, length and lengthening speed against refined
+geometry derivatives, with serialized model and actual runtime identities. A
+moving point followed by a fixed point on the same body reproduces a force/length
+difference; fixed-point controls agree. This is a workless-identity audit, not
+proof of a runtime defect. Physiological fitting, donor path/input-domain
+validation, contact, complete-state full-capture replay, and manual release remain
+blocked. Canonical calculation reference:
+`manuals/upstreamdrift/chapters/24-native-path-work.qmd`.
+
 ## Coordinate-Invariant Physical Inertia Contract (#12183)
 
 The existing DIME inertia helper checks triangle feasibility on sorted principal
@@ -11142,4 +11154,3 @@ poses. Chapter54 and `F07_GENERIC_SHOULDER_LAMINA_TURNOVER.md` retain exact
 hashes, exclusions and reproduction. Tools #5503 and #12207 are pending;
 physiology, native force/work over a chart, contact/grip, head/markers,
 private full-horizon matching and all17/six-engine qualification remain open.
-
