@@ -32,6 +32,7 @@ OPEN_SIM_MOCO_HERMITE_SIMPSON_DOCS = (
     "https://opensim-org.github.io/opensim-moco-site/docs/1.1.0/html_user/"
     "classOpenSim_1_1MocoDirectCollocationSolver.html"
 )
+SAVED_MIDPOINT_ROUNDING_ULPS = 4
 
 
 def sha256_file(path: Path) -> str:
@@ -96,6 +97,17 @@ def _validate_saved_time_grid(
         raise ValueError("saved time grid must be strictly increasing")
     if len(times) % 2 != 1:
         raise ValueError("saved time grid must contain endpoint/midpoint triples")
+    left, midpoint, right = times[:-2:2], times[1::2], times[2::2]
+    expected_midpoint = left + 0.5 * (right - left)
+    local_scale = np.maximum.reduce(
+        (np.abs(left), np.abs(midpoint), np.abs(right), right - left)
+    )
+    midpoint_tolerance = SAVED_MIDPOINT_ROUNDING_ULPS * np.spacing(local_scale)
+    if np.any(np.abs(midpoint - expected_midpoint) > midpoint_tolerance):
+        raise ValueError(
+            "saved midpoint differs from its temporal cell midpoint by more than "
+            f"{SAVED_MIDPOINT_ROUNDING_ULPS} local ULPs"
+        )
     cell_count = (len(times) - 1) // 2
     if mesh_intervals is not None and cell_count != mesh_intervals:
         raise ValueError("saved endpoint/midpoint rows do not match requested mesh")

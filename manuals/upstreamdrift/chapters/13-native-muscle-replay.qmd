@@ -352,3 +352,10 @@ result. The source-tag defaults are inferred from XML/OpenSim 4.6 source; the
 installed native binary was not queried. The machine-readable report is
 `docs/development/feedback_controls/experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/solution_control_replay_diagnostic_3bc787e36d_root/retained_replay/offline_activation_residual_analysis.json`
 (SHA-256 `4331b57dd1b772b4054932041b1b3e0e1c8148581933d58c5215a129fba72a58`).
+The saved midpoint check allows at most four ULPs at the local time-coordinate
+scale, solely for arithmetic representation; this retained clock differs by
+at most three such ULPs. It validates endpoint/midpoint structure and does not
+reconstruct the planned grid. A follow-up report using that check has SHA-256
+`7ca16e41087280a1f6fba9f40b59865c568a6c0e525f151309ff14ecd3b9d46f` at
+`docs/development/feedback_controls/experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/solution_control_replay_diagnostic_3bc787e36d_root/retained_replay/offline_activation_residual_analysis_midpointvalidated.json`;
+the retained strict one-ULP planned-grid rejection remains unchanged.
