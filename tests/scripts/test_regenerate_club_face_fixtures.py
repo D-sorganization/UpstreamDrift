@@ -27,12 +27,13 @@ def test_pipeline_argv_keeps_the_original_run_flags_and_the_weight() -> None:
         regen.pipeline_argv("owner", Path("o"), 3.0)
 
 
-@pytest.mark.parametrize("capture", sorted(regen.CAPTURE_RUNS))
-def test_fixture_runs_hold_the_measured_club_cluster_fixed(capture: str) -> None:
-    # The per-capture grip rotation is fitted on the fixed cluster; a free
-    # cluster re-absorbs it and moves the capture's own face (#12221).
-    argv = regen.pipeline_argv(capture, Path("r"), 3.0)
+def test_driver_fixture_run_holds_the_measured_club_cluster_fixed() -> None:
+    # The driver's grip rotation is fitted on the fixed cluster; a free
+    # cluster re-absorbs it and moves the capture's own face (#12221). The
+    # 7-iron keeps its free cluster and grip until its refit is adopted.
+    argv = regen.pipeline_argv("driver", Path("r"), 3.0)
     assert "--fix-club-markers" in argv and "--static-seeds" in argv
+    assert "--fix-club-markers" not in regen.pipeline_argv("iron", Path("r"), 3.0)
 
 
 def test_previous_fixture_is_measured_on_its_own_committed_model(
