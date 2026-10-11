@@ -9,10 +9,11 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 from collections import Counter
 import hashlib
-from importlib import import_module
 import json
 from pathlib import Path
-from types import ModuleType
+import subprocess
+import sys
+from tempfile import TemporaryDirectory
 from typing import Any, cast
 
 from defusedxml import ElementTree
@@ -36,11 +37,64 @@ def _sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def _module_source_hash(module: ModuleType) -> str:
-    source = module.__file__
-    if source is None:
-        raise ValueError("triangle lamina provider source is unavailable")
-    return _sha(Path(source))
+def _repository_root() -> Path:
+    return Path(__file__).resolve().parents[6]
+
+
+def _provider_worker() -> tuple[Path, Path]:
+    root = _repository_root()
+    worker = root / "scripts/opensim/triangle_lamina_provider_worker.py"
+    tools_src = root / "vendor/ud-tools/src"
+    if not worker.is_file() or not (tools_src / "shared/python").is_dir():
+        raise ValueError("pinned Tools triangle-lamina provider is unavailable")
+    return worker, tools_src
+
+
+def _call_provider_worker(input_path: Path | None = None) -> dict[str, Any]:
+    worker, tools_src = _provider_worker()
+    command = [sys.executable, "-I", str(worker), "--tools-src", str(tools_src)]
+    if input_path is not None:
+        command.extend(("--input", str(input_path)))
+    try:
+        process = subprocess.run(
+            command,
+            capture_output=True,
+            check=False,
+            cwd=tools_src.parent,
+            text=True,
+            timeout=120,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        raise ValueError("pinned Tools triangle-lamina worker failed") from exc
+    if process.returncode != 0:
+        raise ValueError(
+            "pinned Tools triangle-lamina worker failed: "
+            + process.stderr[-2000:].strip()
+        )
+    try:
+        result = json.loads(process.stdout)
+    except json.JSONDecodeError as exc:
+        raise ValueError("pinned Tools worker returned invalid JSON") from exc
+    if not isinstance(result, dict):
+        raise ValueError("pinned Tools worker returned an invalid response")
+    if result.get("worker_sha256") != _sha(worker):
+        raise ValueError("pinned Tools worker source changed during execution")
+    expected_paths = {
+        "provider_path": tools_src
+        / "shared/python/humanoid_character_builder/mesh/triangle_lamina.py",
+        "representation_path": tools_src
+        / "shared/python/humanoid_character_builder/mesh/inertia_calculator.py",
+    }
+    for path_field, expected_path in expected_paths.items():
+        if result.get(path_field) != str(expected_path.resolve()):
+            raise ValueError("pinned Tools provider resolved outside its source")
+    for hash_field, path_field in (
+        ("provider_sha256", "provider_path"),
+        ("representation_sha256", "representation_path"),
+    ):
+        if result.get(hash_field) != _sha(Path(result[path_field])):
+            raise ValueError("pinned Tools provider source changed during execution")
+    return result
 
 
 @dataclass(frozen=True, slots=True)
@@ -79,6 +133,7 @@ class ShoulderLaminaCandidate:
     source_sha256: str
     lamina_provider_sha256: str
     inertia_representation_sha256: str
+    provider_worker_sha256: str
     recipe_id: str
     registration_id: str
     bodies: dict[str, DerivedShoulderBody]
@@ -252,22 +307,37 @@ def _validate_geometry(body: ElementTree.Element, filename: str) -> None:
 
 
 def _derive_body(
-    mass: float, vertices: NDArray[np.float64], faces: NDArray[np.int64], mesh_sha: str
+    mass: float,
+    vertices: NDArray[np.float64],
+    faces: NDArray[np.int64],
+    mesh_sha: str,
+    provider_identity: dict[str, Any],
 ) -> DerivedShoulderBody:
-    triangle_lamina = import_module(
-        "shared.python.humanoid_character_builder.mesh.triangle_lamina"
-    )
-    result = triangle_lamina.compute_triangle_lamina(vertices, faces, mass)
-    inertia = result.inertia
+    with TemporaryDirectory(prefix="ud-tools-lamina-") as directory:
+        input_path = Path(directory) / "triangles.npz"
+        np.savez(input_path, vertices=vertices, faces=faces, mass=np.float64(mass))
+        response = _call_provider_worker(input_path)
+    if any(
+        response.get(field) != provider_identity.get(field)
+        for field in (
+            "provider_sha256",
+            "representation_sha256",
+            "worker_sha256",
+        )
+    ):
+        raise ValueError("pinned Tools provider changed during candidate derivation")
+    result = response.get("result")
+    if not isinstance(result, dict):
+        raise ValueError("pinned Tools worker omitted lamina moments")
     return DerivedShoulderBody(
         mass_kg=mass,
-        center_m=np.asarray(inertia.center_of_mass, dtype=np.float64),
-        inertia_kg_m2=inertia.as_matrix(),
+        center_m=np.asarray(result["center_m"], dtype=np.float64),
+        inertia_kg_m2=np.asarray(result["inertia_kg_m2"], dtype=np.float64),
         mesh_sha256=mesh_sha,
-        area_m2=result.total_area_m2,
-        boundary_edges=result.boundary_edges,
-        nonmanifold_edges=result.nonmanifold_edges,
-        duplicate_faces=result.duplicate_positive_area_triangles,
+        area_m2=float(result["area_m2"]),
+        boundary_edges=int(result["boundary_edges"]),
+        nonmanifold_edges=int(result["nonmanifold_edges"]),
+        duplicate_faces=int(result["duplicate_faces"]),
     )
 
 
@@ -316,6 +386,7 @@ def build_generic_shoulder_lamina(
     bodies = _source_bodies(root)
     derived: dict[str, DerivedShoulderBody] = {}
     parsed: dict[str, tuple[NDArray[np.float64], NDArray[np.int64]]] = {}
+    provider_identity = _call_provider_worker()
     for part, (path, expected) in meshes.items():
         vertices, faces = _read_vtp(path)
         parsed[part] = vertices, faces
@@ -326,7 +397,9 @@ def build_generic_shoulder_lamina(
             if not np.isfinite(mass) or mass <= 0:
                 raise ValueError("shoulder body mass must be positive and finite")
             points = vertices if side == "r" else vertices @ _REFLECTION
-            derived[name] = _derive_body(mass, points, faces, expected)
+            derived[name] = _derive_body(
+                mass, points, faces, expected, provider_identity
+            )
             _set_properties(bodies[name], derived[name])
             mesh_file = bodies[name].find("./attached_geometry/Mesh/mesh_file")
             assert mesh_file is not None
@@ -346,19 +419,16 @@ def build_generic_shoulder_lamina(
     target = output_dir / "generic-shoulder-lamina.osim"
     target.write_bytes(ElementTree.tostring(root, encoding="utf-8"))
     _assert_allowed_xml_changes(manifest.source_path.read_bytes(), target.read_bytes())
-    triangle_lamina = import_module(
-        "shared.python.humanoid_character_builder.mesh.triangle_lamina"
-    )
-    inertia_representation = import_module(
-        "shared.python.humanoid_character_builder.mesh.inertia_calculator"
-    )
+    if _call_provider_worker() != provider_identity:
+        raise ValueError("pinned Tools provider changed during candidate derivation")
     geometry_hashes = {path.name: _sha(path) for path in sorted(geometry.iterdir())}
     return ShoulderLaminaCandidate(
         model_path=target,
         model_sha256=_sha(target),
         source_sha256=manifest.source_sha256,
-        lamina_provider_sha256=_module_source_hash(triangle_lamina),
-        inertia_representation_sha256=_module_source_hash(inertia_representation),
+        lamina_provider_sha256=provider_identity["provider_sha256"],
+        inertia_representation_sha256=provider_identity["representation_sha256"],
+        provider_worker_sha256=provider_identity["worker_sha256"],
         recipe_id=RECIPE,
         registration_id=REGISTRATION,
         bodies=derived,
@@ -410,16 +480,16 @@ def _admit_candidate_artifacts(
         or candidate.registration_id != REGISTRATION
     ):
         raise ValueError("candidate source or recipe identity differs")
-    provider = import_module(
-        "shared.python.humanoid_character_builder.mesh.triangle_lamina"
-    )
-    representation = import_module(
-        "shared.python.humanoid_character_builder.mesh.inertia_calculator"
-    )
-    if _module_source_hash(provider) != candidate.lamina_provider_sha256:
+    provider_identity = _call_provider_worker()
+    if provider_identity["provider_sha256"] != candidate.lamina_provider_sha256:
         raise ValueError("triangle lamina provider changed")
-    if _module_source_hash(representation) != candidate.inertia_representation_sha256:
+    if (
+        provider_identity["representation_sha256"]
+        != candidate.inertia_representation_sha256
+    ):
         raise ValueError("triangle lamina inertia representation changed")
+    if provider_identity["worker_sha256"] != candidate.provider_worker_sha256:
+        raise ValueError("triangle lamina provider worker changed")
     expected_geometry = {
         f"generic_{part}_{side}.vtp" for part in _PARTS for side in "rl"
     }
