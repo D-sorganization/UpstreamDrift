@@ -391,3 +391,17 @@ def test_hip_zero_twist_option_and_cli_flag() -> None:
     assert args.hip_zero_twist == "neutral"
     with pytest.raises(SystemExit):
         build_parser().parse_args(["--hip-zero-twist", "bogus"])
+
+
+def test_skip_hip_calibration_rejects_a_non_default_zero_twist() -> None:
+    """Skipping calibration keeps the input femur frames, so ``neutral`` would
+    be recorded in the receipt without being applied (#12248 review)."""
+    from src.shared.python.motion_matching.pipeline.address import (
+        HipCalibrationOptions,
+    )
+
+    assert HipCalibrationOptions(skip_hip_calibration=True).hip_zero_twist == (
+        "capture"
+    )
+    with pytest.raises(ValueError, match="skip_hip_calibration"):
+        HipCalibrationOptions(skip_hip_calibration=True, hip_zero_twist="neutral")
