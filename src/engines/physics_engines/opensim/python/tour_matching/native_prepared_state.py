@@ -446,6 +446,7 @@ def _admission_identity(
     adapter_sha256: str,
     wrapped_path_declaration_sha256: str | None = None,
     native_mechanics_profile_sha256: str | None = None,
+    contact_declaration_sha256: str | None = None,
 ) -> str:
     payload = {
         "source_sha256": declaration.source_sha256,
@@ -465,6 +466,8 @@ def _admission_identity(
         payload["wrapped_path_declaration_sha256"] = wrapped_path_declaration_sha256
     if native_mechanics_profile_sha256 is not None:
         payload["native_mechanics_profile_sha256"] = native_mechanics_profile_sha256
+    if contact_declaration_sha256 is not None:
+        payload["contact_declaration_sha256"] = contact_declaration_sha256
     return hashlib.sha256(
         json.dumps(payload, sort_keys=True, allow_nan=False).encode()
     ).hexdigest()
