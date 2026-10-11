@@ -104,6 +104,21 @@ fleet planning as `generic_shoulder_lamina_12211_v6/candidate-receipt.json`,
 SHA-256 `248065dd5a5338b1907b56a5777d69447efb044b4242d95c6def0b141e15994f`.
 The earlier v4/v5 receipts remain unchanged as historical records.
 
+After the worker added an explicit fail-closed check for imports without source
+file paths, the no-override CLI was rerun into a distinct v7 directory. Its
+candidate model SHA remains
+`5f2cdd22013c2700f95d625a4c42eb488ed6c5267721cd0d2acde38544754326`; the final
+worker SHA is
+`66e65bcfacbfb668d5b3bfadd3a76147a490f409f07e6d98d052fd4815279200`, with the
+same Tools kernel SHA `3fd45937bed011c90b4d4e3fdf8bcf932a8bfd9a0816441ee708cc93cd4080ee`
+and inertia representation SHA
+`60a45fe471c2e1cbfb2ae80d9a6b3760b62b07f0fd5327a4d5e652a49f467e10`. The
+40-body native audit again reported zero maximum transform and constraint-error
+difference across three poses. The separate v7 receipt is
+`generic_shoulder_lamina_12211_v7/candidate-receipt.json`, SHA-256
+`76d89fdf93632217cbf9345d806c32cc728cae9bfb82b58c9d9bdd42b9c9087f`; v6
+remains the historical receipt for the prior worker bytes.
+
 The native test command used the dedicated OpenSim environment:
 
 ```powershell
