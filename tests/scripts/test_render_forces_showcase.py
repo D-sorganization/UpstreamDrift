@@ -160,7 +160,55 @@ def test_run_lays_out_directories_and_manifest(tmp_path: Path) -> None:
 
 def test_impact_card_is_no_longer_a_known_gap() -> None:
     assert not any("impact parameter card" in gap for gap in rfs.KNOWN_GAPS)
-    assert any("inset plot" in gap for gap in rfs.KNOWN_GAPS)
+    assert not any("inset plot" in gap for gap in rfs.KNOWN_GAPS)
+    assert rfs.KNOWN_GAPS == ()
+
+
+def _plan(kinds: tuple[str, ...]) -> rfs.ShowcasePlan:
+    return rfs.ShowcasePlan(
+        "capture-A",
+        {},
+        ("mujoco",),
+        Path("o"),
+        kinds,
+        rfs.HQ_SIZE,
+        (1.0,),
+        False,
+        False,
+    )
+
+
+def test_inset_strip_follows_the_overlay_clip_kinds() -> None:
+    plan = _plan(tuple(rfs.CLIP_KINDS))
+    assert rfs.settings_for(plan, "clean").inset_strip is False
+    grf = rfs.settings_for(plan, "grf")
+    assert grf.inset_strip is True and grf.grip is False  # GRF strip
+    club = rfs.settings_for(plan, "club_forces")
+    assert club.inset_strip is True and club.grip is True  # grip strip
+
+
+def test_manifest_records_the_strip_or_the_unavailable_reason(tmp_path: Path) -> None:
+    from src.tools.native_viewer_export.core import ExportResult
+
+    bundle = tmp_path / "b.npz"
+    bundle.write_bytes(b"x")
+    record = {"kind": "grf", "samples": 600, "panels": []}
+
+    def fake_runner(job, settings, **_kw):  # noqa: ANN001, ANN202
+        strip = {
+            "grf": record,
+            "club_forces": "grip strip unavailable: the grip overlay is not enabled",
+        }.get(job.out_dir.name)
+        return [ExportResult("mujoco", {}, 3, inset_strip=strip)]
+
+    argv = ["--swing", f"d={bundle}", "--out", str(tmp_path / "o")]
+    plan = rfs.plan_from_args(rfs.build_parser().parse_args(argv))
+    manifest = json.loads(rfs.run_showcase(plan, runner=fake_runner).read_text())
+    by_kind = {c["kind"]: c for c in manifest["clips"]}
+    assert by_kind["grf"]["inset_strip"] == record
+    assert "not enabled" in by_kind["club_forces"]["inset_strip"]
+    assert "inset_strip" not in by_kind["clean"]
+    assert manifest["known_gaps"] == []
 
 
 def test_impact_card_setting_follows_the_overlay_clip_kinds() -> None:

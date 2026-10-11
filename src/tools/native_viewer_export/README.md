@@ -110,8 +110,36 @@ a 15 % margin (`fit_distance_m`).
 renders the `clean/`, `club_forces/` and `grf/` clip set (1280x720, 60 fps,
 CRF 18) into `~/Videos/Parity Audit/forces_and_impact/` through this tool and
 writes `manifest_<capture>.json`. A missing bundle or unavailable engine stops
-the run with a message (`--skip-unavailable` records it instead). The inset
-plot strips are not rendered yet (GCV-19, #11725).
+the run with a message (`--skip-unavailable` records it instead). The `grf/` and
+`club_forces/` clips carry the impact card and an inset plot strip (see below);
+`clean/` carries neither.
+
+## Inset Plot Strips
+
+`ExportSettings.inset_strip` (default off; the showcase enables it for `grf/` and
+`club_forces/`) draws a translucent plot strip along the bottom of every frame
+(above the HUD), with a vertical time cursor at the frame's swing time
+(`inset_strip.py`, GCV-19, #11725). The strip kind follows `ExportSettings.grip`:
+
+- GRF strip (`grip=False`): left panel, vertical ground-reaction force of the
+  left foot, right foot and their net in body weights (BW; `Fz / reference_force_n`
+  of the glyph style, i.e. the golfer's `mass * g`); right panel, the net centre of
+  pressure world X and Y in metres (taken from the `contact:free_moment_net`
+  wrench, which sits at the net CoP).
+- Grip strip (`grip=True`): net grip force magnitude |F| in N and couple
+  magnitude |M| in N m from `OverlayFeed.grip_analyses`.
+
+Both show a dashed vertical line at the impact time and a legend. The curves are
+read once per swing from the SOURCE samples (at most 600, stride-thinned), not
+from the resampled clip frames, and rendered once per frame size with matplotlib
+Agg; per frame only the cursor changes, so every speed clip and the impact window
+share one strip. Unavailable samples (a foot without loaded contact, a CoP below
+the force threshold, a failed grip solve) are gaps in the line, never zero. When
+nothing can be plotted (no overlay feed, no body-weight scale, no loaded contact,
+grip overlay off, no grip wrench) no strip is drawn and `ExportResult.inset_strip`
+(and the showcase manifest) holds the reason; otherwise it holds the panels and
+per-curve sample counts. The values are model outputs of the shared contact law and
+grip extraction, not measurements.
 
 ## Impact Parameter Card
 
