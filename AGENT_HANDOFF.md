@@ -19,6 +19,12 @@ and numerical tolerances. Values are preserved on success. Native source
 admission and optimizer enforcement are separate integration work; physical
 source provenance, matching and all-model qualification remain open.
 
+# Active: Closed-Loop Gaze Neck, #11729
+
+- OSV-3d. Branch `claude/osv-3d-gaze-closed-loop` (PR #12194; builds on the merged #12154). `--fd-neck gaze-closed`: `GazeNeckFeedback` is a kkt `reference_hook(t, q, q_t, v_t)` (`tracking_controller.py`) that re-solves the neck on the simulated state once per capture frame and adds the correction and its rate to the neck position/velocity targets. Receipt: `dynamics.head_gaze.feedback`.
+- Result (`evidence/head_gaze/fd_neck_closed_loop.json`): release-window RMS 17.2→1.7 deg (driver), 8.6→1.2 deg (7-iron); driver hold window 1.1→2.9 deg (ball-impact torso transient). Position-only first version lagged (hold 4.8 deg); the rate term is required.
+- Open: MyoSuite/OpenSim neck actuation and other engines, a gaze schedule that lets the head turn with the torso (neck still at range on 93/69 updates).
+
 # Active: Forward-Dynamics Gaze Neck, #11729
 
 - Branch `claude/osv-3c-gaze-neck-tracking`. `motion_matching/pipeline/gaze_tracking.py`: `--fd-neck gaze` re-solves the tracked reference's neck to the gaze schedule (model FK, bounded, after the feasibility filters); `dynamics.head_gaze` reports schedule error per window for the tracked reference and the replay. `render_head_gaze_clips --trajectory replay` renders the replay; `scripts/summarize_fd_neck_tracking.py` writes `evidence/head_gaze/fd_neck_tracking.json`.
@@ -53,7 +59,6 @@ source provenance, matching and all-model qualification remain open.
 
 - Branch `claude/osv-2-grip-pose` (PR #12032), merged with main after OSV-9 (#11795). `model_appearance/grip_pose.py` is the club-agnostic grip definition; its lead (3.2 cm below the butt) and trail (10.82 cm) positions mirror the generated-spec `GripInterface`, the single source, and `tests/opensim/test_grip_closure_both_hands.py` fails on drift. `club_geometry`, `address.py` and the MyoSuite scene sites import it. The Rajagopal models keep the OSV-9 topology (lead `WeldJoint hand_l_to_club`, trail `WeldConstraint hand_r_to_club`); `msk_club_grip_calibration.json` is untouched.
 - Canned-swing closure residual (`python3 -m scripts.grip_closure_report --output r.json`): MuJoCo, Drake (ControlTower), Pinocchio, OpenSim full-body weld <= 1.8e-7 m; MyoSuite unavailable. Open: owner review of a 1.5 cm lead position (needs `msk_club_calibration` rerun for both models and clubs), finger meshes, stills and clips (slice 2), no `golf_humanoid` swing residual.
-  > > > > > > > origin/main
 
 # Active: Gaze Weight Selection, #11729
 
