@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-11T16:12:10Z",
+  "generated_at": "2026-10-11T16:16:54Z",
   "rows": [
     {
       "acceptance": null,
@@ -49,7 +49,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/anthropometry/fit_grip_rotation_receipt_driver.json",
-      "sha256": "8f6714f352cb41b53aaeb59fffeeb07dcc543916bf886c37f0e2bc3b45ce6a68"
+      "sha256": "1735f179df6d8980ee9b311e655994b88d28e598457b696b6ffb46f11f89dc1a"
     },
     {
       "acceptance": null,
@@ -74,7 +74,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/anthropometry/fit_grip_rotation_receipt_iron7.json",
-      "sha256": "bf7ba6ff0e1f672d2aeaf1c09e5b52ca854d9a25a91894197a0cbeedb40b06b0"
+      "sha256": "043c15c591fa736439041817d69f0e10b54d385e9b90773be569ef0186e741aa"
     },
     {
       "acceptance": null,
