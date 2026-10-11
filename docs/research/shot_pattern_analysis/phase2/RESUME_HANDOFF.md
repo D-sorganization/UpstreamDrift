@@ -10,8 +10,15 @@ receipt before using the generated report. No simulations are being repeated.
 The stop checkpoint below remains historical evidence.
 V7 and the initial v2 batch runner terminated with tool exit 143, without an
 intentional stop or established cause. Preserved receipts document this. V8 uses
-a detached wrapper; the batch runner continues from a fresh 024 retry. Batches
-000 and 012 have actual exit-0 receipts and scoped visual approval for 144 PNGs.
+a detached wrapper. All five across-lean batches now have actual exit-0 receipts
+and scoped visual approval for 336 PNGs (56 pairs). Strict loader receipt
+`validation/supplement_v6_final_graphics_review_v2/strict_loader_receipt.json`
+binds all 6,456 assets and unchanged numeric inputs. The original first curve
+batch failed a caption-parsing check; Sol repaired the harness with TDD and
+started a fresh curve retry. Frozen producer sources are unchanged. Luna runs
+disjoint native PDF and SVG checks; current Sharp 0.35.5 is explicitly qualified
+as a review-only runtime transition by 18 passing integration tests. Full vector
+and remaining PNG acceptance are pending.
 
 ## Prior User-Requested Stop
 
