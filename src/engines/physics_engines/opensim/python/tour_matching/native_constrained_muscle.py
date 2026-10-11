@@ -12,7 +12,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass, replace
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Protocol
 
 import numpy as np
 from numpy.typing import NDArray
@@ -57,6 +57,22 @@ class ConstrainedMuscleReplay:
     muscle_forces_n: NDArray[np.float64]
     constraint_audits: tuple[NativeConstraintStateAudit, ...]
     input_sha256: str
+
+
+class NativeNamedStateReplay(Protocol):
+    """Minimal named-trajectory interface required for marker FK."""
+
+    @property
+    def state_names(self) -> tuple[str, ...]: ...
+
+    @property
+    def times(self) -> NDArray[np.float64]: ...
+
+    @property
+    def states(self) -> NDArray[np.float64]: ...
+
+    @property
+    def input_sha256(self) -> str: ...
 
 
 def _audit_moving_path_points(
@@ -394,7 +410,7 @@ def replay_constrained_muscle_bundle(
 
 def observe_constrained_markers(
     declaration: DeclaredColdStart,
-    replay: ConstrainedMuscleReplay,
+    replay: NativeNamedStateReplay,
     bindings: Mapping[str, tuple[str, tuple[float, float, float]]],
     indices: NDArray[np.intp],
 ) -> tuple[NDArray[np.float64], str]:

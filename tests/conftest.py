@@ -738,7 +738,27 @@ def _protect_engine_modules() -> Generator[None, None, None]:
     # The teardown loop below already guards this the same way.
     protected_keys = {k for k in list(sys.modules) if _matches_protected(k)}
     saved = {k: sys.modules[k] for k in protected_keys}
+    saved_bindings: dict[tuple[str, str], tuple[bool, object | None]] = {}
+    for name in saved:
+        parent_name, separator, child_name = name.rpartition(".")
+        if not separator:
+            continue
+        parent = sys.modules.get(parent_name)
+        if parent is None:
+            continue
+        namespace = vars(parent)
+        saved_bindings[(parent_name, child_name)] = (
+            child_name in namespace,
+            namespace.get(child_name),
+        )
     yield
+    # Keep references to newly imported modules so stale package attributes
+    # can be removed after their sys.modules entries are discarded.
+    added = {
+        name: sys.modules[name]
+        for name in list(sys.modules)
+        if _matches_protected(name) and name not in saved
+    }
     # Remove any engine modules added or mutated during the test
     for k in list(sys.modules):  # list() needed: mutating dict during iteration
         if _matches_protected(k):
@@ -750,6 +770,25 @@ def _protect_engine_modules() -> Generator[None, None, None]:
     for k, v in saved.items():
         if k not in sys.modules:
             sys.modules[k] = v
+    for name, module in added.items():
+        parent_name, separator, child_name = name.rpartition(".")
+        if not separator:
+            continue
+        parent = sys.modules.get(parent_name)
+        if parent is None:
+            continue
+        current = vars(parent).get(child_name)
+        if current is module:
+            vars(parent).pop(child_name, None)
+    for (parent_name, child_name), (existed, value) in saved_bindings.items():
+        parent = sys.modules.get(parent_name)
+        if parent is None:
+            continue
+        namespace = vars(parent)
+        if existed:
+            namespace[child_name] = value
+        else:
+            namespace.pop(child_name, None)
 
 
 # ---------------------------------------------------------------------------
