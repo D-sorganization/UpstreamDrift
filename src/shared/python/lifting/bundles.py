@@ -317,7 +317,11 @@ def lift_to_full_body(
     ground = GroundPlane(normal=(0.0, 0.0, 1.0), height_m=0.0)
     locked = {n: float(seed[order.index(n)]) for n in UPPER_LIMB_COORDINATES}
     posture = dict.fromkeys(POSTURE_COORDINATES, (0.0, opts.posture_weight))
-    seed_points = dict(zip(LANDMARK_LABELS, kin.marker_positions(seed), strict=True))
+    seed_positions = kin.marker_positions(seed)
+    seed_points: dict[str, Array] = {
+        name: np.asarray(pos, dtype=float)
+        for name, pos in zip(LANDMARK_LABELS, seed_positions, strict=True)
+    }
     upright = _standing_targets(seed_points, _foot_frame(kin, seed, ground))
     standing = kin.solve_pose(
         upright,
@@ -331,7 +335,11 @@ def lift_to_full_body(
         posture_prior=posture,
     ).q
     frame = _foot_frame(kin, standing, ground)
-    points = dict(zip(LANDMARK_LABELS, kin.marker_positions(standing), strict=True))
+    standing_positions = kin.marker_positions(standing)
+    points: dict[str, Array] = {
+        name: np.asarray(pos, dtype=float)
+        for name, pos in zip(LANDMARK_LABELS, standing_positions, strict=True)
+    }
     targets = retarget_landmarks(solution, points, frame)
     locked |= {n: float(standing[order.index(n)]) for n in TOE_COORDINATES}
     q, fits = kin.solve_trajectory(
