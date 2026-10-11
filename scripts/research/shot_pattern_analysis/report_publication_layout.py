@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import gzip
 import hashlib
 import json
 from collections.abc import Mapping
@@ -75,31 +76,55 @@ def assert_markdown_output_sizes(
         )
 
 
+def _read_snapshot_payload(repository: Path, snapshot: Mapping[str, object]) -> bytes:
+    """Decode one archived payload and verify its storage and payload identities."""
+    path = (repository / str(snapshot["archive_path"])).resolve()
+    if not path.is_relative_to(repository.resolve()):
+        raise ValueError("report archive path escapes the repository")
+    stored = path.read_bytes()
+    if (
+        len(stored) != snapshot["storage_size_bytes"]
+        or hashlib.sha256(stored).hexdigest() != snapshot["storage_sha256"]
+    ):
+        raise ValueError("report archive storage failed integrity check")
+    encoding = snapshot["encoding"]
+    if encoding == "identity":
+        payload = stored
+    elif encoding == "gzip":
+        try:
+            payload = gzip.decompress(stored)
+        except OSError as exc:
+            raise ValueError("report archive gzip payload is invalid") from exc
+    else:
+        raise ValueError(f"unsupported report archive encoding: {encoding}")
+    if (
+        len(payload) != snapshot["payload_size_bytes"]
+        or hashlib.sha256(payload).hexdigest() != snapshot["payload_sha256"]
+    ):
+        raise ValueError("report archive payload failed integrity check")
+    return payload
+
+
 def split_archive_provenance(report_root: Path) -> tuple[str | None, str | None]:
-    """Validate and return the immutable pre-split publication receipt identity."""
+    """Validate archived source and receipt payloads and return their identities."""
     manifest_path = Path(report_root) / "REPORT_PUBLICATION_SPLIT_ARCHIVE.json"
     if not manifest_path.is_file():
         return None, None
     manifest_bytes = manifest_path.read_bytes()
     manifest = json.loads(manifest_bytes)
-    if manifest.get("schema") != "matched-report-split-archive/1":
+    if manifest.get("schema") != "matched-report-split-archive/2":
         raise ValueError("report split archive manifest has an unsupported schema")
-    snapshot = next(
+    snapshots = manifest.get("snapshots", [])
+    for snapshot in snapshots:
+        _read_snapshot_payload(Path(__file__).resolve().parents[3], snapshot)
+    receipt = next(
         (
             item
-            for item in manifest.get("snapshots", [])
+            for item in snapshots
             if item.get("original_path") == "REPORT_PUBLICATION_RECEIPT.json"
         ),
         None,
     )
-    if snapshot is None:
+    if receipt is None:
         raise ValueError("report split archive manifest lacks its original receipt")
-    repository = Path(__file__).resolve().parents[3]
-    snapshot_path = (repository / snapshot["archive_path"]).resolve()
-    if not snapshot_path.is_relative_to(repository.resolve()):
-        raise ValueError("report receipt archive path escapes the repository")
-    payload = snapshot_path.read_bytes()
-    digest = hashlib.sha256(payload).hexdigest()
-    if len(payload) != snapshot["size_bytes"] or digest != snapshot["sha256"]:
-        raise ValueError("pre-split publication receipt archive failed integrity check")
-    return digest, hashlib.sha256(manifest_bytes).hexdigest()
+    return receipt["payload_sha256"], hashlib.sha256(manifest_bytes).hexdigest()

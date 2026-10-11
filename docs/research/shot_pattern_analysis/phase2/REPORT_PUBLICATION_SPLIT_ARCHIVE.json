@@ -1,18 +1,24 @@
 {
   "captured_from_git_commit": "3202ce22464366449072885cdba7f3f91f60faa3",
-  "schema": "matched-report-split-archive/1",
+  "schema": "matched-report-split-archive/2",
   "snapshots": [
     {
-      "archive_path": "docs/research/shot_pattern_analysis/phase2/archive/report_publication_split_20261011/REPORT.original.md.archive",
+      "archive_path": "docs/research/shot_pattern_analysis/phase2/archive/report_publication_split_20261011/REPORT.original.md.archive.gz",
       "original_path": "REPORT.md",
-      "sha256": "ff281f76ee649c44c88afda58701329e7898e8964f9efb6d8aeec73dcd77d79b",
-      "size_bytes": 97532
+      "encoding": "gzip",
+      "storage_sha256": "8fc5374100a76e2cdf4dca5b41c9f32f0d52d6bc75cd330114f2b3696ff91391",
+      "storage_size_bytes": 15242,
+      "payload_sha256": "ff281f76ee649c44c88afda58701329e7898e8964f9efb6d8aeec73dcd77d79b",
+      "payload_size_bytes": 97532
     },
     {
       "archive_path": "docs/research/shot_pattern_analysis/phase2/archive/report_publication_split_20261011/REPORT_PUBLICATION_RECEIPT.original.json.archive",
       "original_path": "REPORT_PUBLICATION_RECEIPT.json",
-      "sha256": "ced5c82f3b4d48072eeca22a3190b6606afbef3aca6771363441ac06f0c122d7",
-      "size_bytes": 3077
+      "encoding": "identity",
+      "storage_sha256": "ced5c82f3b4d48072eeca22a3190b6606afbef3aca6771363441ac06f0c122d7",
+      "storage_size_bytes": 3077,
+      "payload_sha256": "ced5c82f3b4d48072eeca22a3190b6606afbef3aca6771363441ac06f0c122d7",
+      "payload_size_bytes": 3077
     }
   ],
   "successor_receipt_path": "REPORT_LAYOUT_SPLIT_RECEIPT.json"

@@ -6,6 +6,7 @@ import json
 import re
 from collections import Counter
 import hashlib
+import gzip
 from pathlib import Path
 
 import pytest
@@ -104,17 +105,34 @@ def test_club_appendices_partition_all_verified_figure_links() -> None:
 def test_published_split_preserves_original_rows_links_and_archive_receipt() -> None:
     manifest = json.loads((REPO_ROOT / ARCHIVE_MANIFEST).read_text(encoding="utf-8"))
     snapshots = {entry["original_path"]: entry for entry in manifest["snapshots"]}
-    archived_report = (REPO_ROOT / snapshots["REPORT.md"]["archive_path"]).read_bytes()
-    archived_receipt = (
-        REPO_ROOT / snapshots["REPORT_PUBLICATION_RECEIPT.json"]["archive_path"]
+    report_snapshot = snapshots["REPORT.md"]
+    archived_report_storage = (REPO_ROOT / report_snapshot["archive_path"]).read_bytes()
+    archived_report = gzip.decompress(archived_report_storage)
+    receipt_snapshot = snapshots["REPORT_PUBLICATION_RECEIPT.json"]
+    archived_receipt_storage = (
+        REPO_ROOT / receipt_snapshot["archive_path"]
     ).read_bytes()
-    assert len(archived_report) == snapshots["REPORT.md"]["size_bytes"]
+    archived_receipt = archived_receipt_storage
+    assert report_snapshot["encoding"] == "gzip"
+    assert len(archived_report_storage) == report_snapshot["storage_size_bytes"]
     assert (
-        hashlib.sha256(archived_report).hexdigest() == snapshots["REPORT.md"]["sha256"]
+        hashlib.sha256(archived_report_storage).hexdigest()
+        == report_snapshot["storage_sha256"]
     )
+    assert len(archived_report) == report_snapshot["payload_size_bytes"]
+    assert (
+        hashlib.sha256(archived_report).hexdigest() == report_snapshot["payload_sha256"]
+    )
+    assert receipt_snapshot["encoding"] == "identity"
+    assert len(archived_receipt_storage) == receipt_snapshot["storage_size_bytes"]
+    assert (
+        hashlib.sha256(archived_receipt_storage).hexdigest()
+        == receipt_snapshot["storage_sha256"]
+    )
+    assert len(archived_receipt) == receipt_snapshot["payload_size_bytes"]
     assert (
         hashlib.sha256(archived_receipt).hexdigest()
-        == snapshots["REPORT_PUBLICATION_RECEIPT.json"]["sha256"]
+        == receipt_snapshot["payload_sha256"]
     )
 
     output_paths = [
@@ -177,15 +195,24 @@ def test_published_split_preserves_original_rows_links_and_archive_receipt() -> 
     )
     assert "layout split only" in layout_receipt["purpose"]
     assert "no scientific report builder" in layout_receipt["purpose"]
+    assert manifest["schema"] == "matched-report-split-archive/2"
     assert manifest["successor_receipt_path"] == "REPORT_LAYOUT_SPLIT_RECEIPT.json"
     assert manifest["successor_receipt_path"] != "REPORT_PUBLICATION_RECEIPT.json"
+    manifest_digest = hashlib.sha256(
+        (REPO_ROOT / ARCHIVE_MANIFEST).read_bytes()
+    ).hexdigest()
+    assert layout_receipt["archive_manifest_sha256"] == manifest_digest
     assert (
-        layout_receipt["archive_manifest_sha256"]
-        == hashlib.sha256((REPO_ROOT / ARCHIVE_MANIFEST).read_bytes()).hexdigest()
+        layout_receipt["source_archived_report"]["path"]
+        == report_snapshot["archive_path"]
+    )
+    assert build_final_report._split_archive_provenance(REPO_ROOT / REPORT_DIR) == (
+        receipt_snapshot["payload_sha256"],
+        manifest_digest,
     )
     assert (
-        layout_receipt["source_archived_report"]["sha256"]
-        == snapshots["REPORT.md"]["sha256"]
+        layout_receipt["source_archived_report"]["payload_sha256"]
+        == report_snapshot["payload_sha256"]
     )
     assert set(layout_receipt["output_sha256"]) == {path.name for path in output_paths}
 
