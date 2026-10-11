@@ -75,3 +75,6 @@ docs/development/full_body_models/evidence/foot_progression/drake_parity_12039/b
 docs/development/full_body_models/evidence/ground_support/anthro_driver_drake/full_body_spec_hipcal.json
 docs/development/full_body_models/evidence/ground_support/anthro_driver_drake/full_body_spec_hipcal_scaled.json
 docs/development/full_body_models/evidence/ground_support/anthro_driver_drake/receipt.json
+
+# Preserve the byte-bound native closed-loop receipt serialization.
+docs/development/full_body_models/evidence/head_gaze/fd_neck_closed_loop.json
