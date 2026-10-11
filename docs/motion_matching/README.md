@@ -49,7 +49,7 @@ preview tool.
 
 ### Force Redistribution
 
-- [Convergence result contract](../design/force_redistribution_convergence.md)
+- [Convergence Result Contract](../design/force_redistribution_convergence.md)
   Distinguishes candidate feasibility from optimizer convergence.
 
 ### API reference
