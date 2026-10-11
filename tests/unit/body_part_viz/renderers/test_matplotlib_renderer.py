@@ -201,6 +201,7 @@ def test_update_frame_is_idempotent(ax, theme) -> None:
     assert handle in renderer._entries
 
 
+@pytest.mark.unit
 def test_face_polys_is_one_contiguous_gather(ax, theme, monkeypatch) -> None:
     """Faces are gathered in one ``(F, V, 3)`` array, not a per-face list (#12303).
 
