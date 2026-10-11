@@ -16,7 +16,6 @@ from __future__ import annotations
 import functools
 import json
 import math
-import types
 from collections.abc import Callable, Mapping
 from pathlib import Path
 
@@ -29,16 +28,9 @@ from src.shared.python.model_appearance.club_head_mesh import (
     load_club_head,
     measured_face_normal,
 )
+from tests.support.real_engines import real_module
 
 pytestmark = pytest.mark.unit
-
-
-def _real_module(name: str) -> types.ModuleType:
-    """Import ``name`` or skip; a mock another test left in ``sys.modules`` skips too."""
-    module = pytest.importorskip(name)
-    if not isinstance(module, types.ModuleType) or not hasattr(module, "__file__"):
-        pytest.skip(f"{name} in sys.modules is a test double, not the real package")
-    return module
 
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -156,7 +148,7 @@ def _myosuite(club: str) -> tuple[Pose, np.ndarray]:
 
 
 def _drake(club: str) -> tuple[Pose, np.ndarray]:
-    _real_module("pydrake")
+    real_module("pydrake")
     from pydrake.multibody.parsing import Parser
     from pydrake.multibody.plant import MultibodyPlant
 
@@ -189,7 +181,7 @@ def _drake(club: str) -> tuple[Pose, np.ndarray]:
 
 
 def _pinocchio(club: str) -> tuple[Pose, np.ndarray]:
-    pin = _real_module("pinocchio")
+    pin = real_module("pinocchio")
     from src.engines.physics_engines.pinocchio.python.native_model import (
         FullBodyPinocchioModel,
     )

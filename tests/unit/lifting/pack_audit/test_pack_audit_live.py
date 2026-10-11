@@ -4,12 +4,14 @@ from __future__ import annotations
 
 import pytest
 
+from tests.support.real_engines import real_module
+
 pytestmark = pytest.mark.unit
 
 
 def _baseline():
     for mod in ("mujoco", "pinocchio", "opensim", "pydrake.all"):
-        pytest.importorskip(mod)
+        real_module(mod)
     from src.shared.python.lifting.pack_audit.baseline import run_baseline
     from src.shared.python.lifting.pack_audit.names import ENGINES
     from src.shared.python.lifting.pack_audit.packs import locate_pack
@@ -42,7 +44,7 @@ def test_total_mass_agrees(receipt):
 
 def test_drake_inertia_is_about_com_not_body_origin():
     """Drake ``inertia_diag`` is COM-referenced (no parallel-axis term), #12073."""
-    pytest.importorskip("pydrake.all")
+    real_module("pydrake.all")
     import numpy as np
 
     from src.shared.python.lifting.pack_audit.adapters import create_adapter

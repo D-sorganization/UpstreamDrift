@@ -1,3 +1,9 @@
+# Character Builder Docs and Tutorial, CMB-12 #11663
+
+- User docs: `docs/help/character_builder.md`, `docs/user_guide/character_builder_quickstart.md`, `character_presets.md` and the end-to-end `character_builder_tutorial.md` (build, dress, swap the club, export spec/URDF/MJCF/OpenSim/glTF, desktop walkthrough, simulate in MuJoCo). Desktop screenshots regenerate with `scripts/capture_character_builder_screenshots.py`.
+- Every number in the tutorial is checked by `tests/unit/character_builder/test_cmb12_*.py`. The spec hash `4ee2c43d` follows the driver document, so a change to the canonical driver spec must update the tutorial and these tests together. Step 6 runs only where `mujoco` imports; its exported MJCF has no floor or actuators, so the body free-falls (-0.198 m after 0.2 s).
+- Open elsewhere: smooth skin blend weights and MuJoCo per-segment meshes (CMB-6 #11657), the Playwright flow (CMB-7 #11658, owner decision on adopting Playwright), lower limbs not scaling with `mass_kg` (#12199).
+
 # Active: Adopted Per-Capture Grip Rotation, #12221
 
 - Branch `claude/12221-grip-adopt`, stacked on #12270. Applies the fitted `grip_rotation_deg` to `full_body_spec_anthro_driver.json` only; calibrated driver commands now add `--fix-club-markers`. Driver receipts regenerated on ControlTower (address / IK / dynamics, mm): `anthro_driver_seeds` 11.0 / 30.3 / 82.0, `anthro_driver_drake` 11.0 / 30.3 / 86.3 (dynamics worse), `anthro_driver` 50.9 / 46.5 / 71.9. Replay is sensitive at 3 to 15 mm to tiny parameter changes (CANONICAL_RUN.md §2A).
@@ -1199,8 +1205,8 @@ The result and receipt digest are diagnostic records only, explicitly
 unqualified; they are not an authenticated native execution receipt or F01
 admission. Bindings remain caller-declared and no calibration is inferred.
 Private-capture fit, anatomy, resource closure, physiology, contact, production
-variants and six-engine parity remain open. Canonical chapter49 and turnover
-are `manuals/upstreamdrift/chapters/49-native-opensim-mixed-marker-observation.qmd`
+variants and six-engine parity remain open. Canonical chapter62 and turnover
+are `manuals/upstreamdrift/chapters/62-native-opensim-mixed-marker-observation.qmd`
 and `docs/development/feedback_controls/F09Q-OPENSIM-MIXED-MARKER-SCORING.md`.
 
 ## F07 Exact 557-Muscle Excitation Diagnostic (#12182)

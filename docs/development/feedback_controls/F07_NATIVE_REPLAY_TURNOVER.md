@@ -61,4 +61,11 @@ Final scoped provider-enabled check: 59 passed, 3 fixture-opt-in tests deselecte
 
 Native asset probe found zero muscles in all four shipped golf .osim models. The two generated club models contain contact geometry; geometry alone is not force qualification. The declarative muscle variant factory does not supply a native muscle model. Acquiring and validating that full-body asset remains a required F07 milestone.
 
+The later F09 child #12148 makes the factory boundary truthful: its eight legacy
+names remain declared targets, while executable channels and capability flags
+come only from initialized native readback. The shipped golf model remains
+observed empty; lack of an SDK remains unknown. This corrects capability
+advertising but does not change the missing full-body asset or any F07 replay,
+anatomy, contact, or capture gate.
+
 Final recursive admission check also rejects native muscle components omitted from the legacy muscle registry, so every dynamic muscle has a declared input channel. Constructing that negative fixture through a downcast temporary clone initially aborted the native process; constructing a fresh component with explicit path points produced the intended failing behavior and then passed after the registry audit. No new crash dump was found in the local crash-dump directory.

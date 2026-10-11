@@ -279,22 +279,32 @@ through the API or the web Appearance panel (Step 2).
 ## Step 6: Simulate (Requires MuJoCo)
 
 This step needs the `mujoco` package, which is not installed on every
-host; it was not run as part of this tutorial's verification. Loading the
-Step 4 MJCF follows the same pattern already documented in
-[Character Builder Quickstart](character_builder_quickstart.md) and used
-in `tests/unit/engines/mujoco/test_continuous_torque_simulate.py`:
+host. It loads the Step 4 MJCF with the same pattern as
+[Character Builder Quickstart](character_builder_quickstart.md) and
+`tests/unit/engines/mujoco/test_continuous_torque_simulate.py`:
 
 ```python
 import mujoco
 
 model = mujoco.MjModel.from_xml_path("tour_average_male_4ee2c43d.xml")
 data = mujoco.MjData(model)
+print(model.nq, model.nu, model.opt.timestep)  # 44 0 0.002
 
 for _ in range(100):
     mujoco.mj_step(model, data)
 
+print(data.time)      # 0.2
 print(data.qpos[:6])
 ```
+
+With MuJoCo 3.3.4 the model has 44 coordinates (the spec's 44, three root
+translations then hinge joints), no actuators and a 2 ms step. After 100
+steps (0.2 s) every coordinate is finite and `data.qpos[2]`, the vertical
+root translation, is -0.198 m. The exported MJCF carries no floor and no
+controller, so the unsupported body simply falls: 0.198 m against
+0.5·g·t² = 0.196 m. Add a ground plane and actuators before treating the
+result as a swing. `tests/unit/character_builder/test_cmb12_simulate_tutorial.py`
+runs this exact step and checks these numbers.
 
 ## Limitations
 

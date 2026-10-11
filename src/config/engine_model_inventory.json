@@ -440,8 +440,8 @@
           "id": "golf_humanoid_muscle_variant",
           "drive_mode": "muscle_excitation",
           "factory": "src.engines.physics_engines.opensim.python.tour_matching.model_variants:create_muscle_model_variant",
-          "support": "supported",
-          "scope_note": "Eight-muscle factory has activation/fiber states; full-swing physiological qualification is absent."
+          "support": "unsupported",
+          "scope_note": "The factory retains an eight-muscle target declaration, but the shipped golf artifact has zero native muscles; executable muscle support requires native model readback."
         }
       ],
       "required_assets": [],
