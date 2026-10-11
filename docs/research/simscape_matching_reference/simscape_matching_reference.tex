@@ -5277,6 +5277,66 @@ python3 -m src.shared.python.motion_matching.pipeline.cli \
   --capture iron --out runs/anthro_iron
 \end{verbatim}
 
+\paragraph{Fixed Club Cluster in the Static Trial (Issue \#12221).}
+The capture face is observed through the head-triad offsets in the
+\texttt{Clubhead} frame, and the static trial re-places those offsets with
+every other seed marker. A change of the hand-to-club rotation is therefore
+partly absorbed into the club offsets and moves the capture's own measured
+face (\#12221 slices 1--2: address face $+5.50 \to -11.28$~deg). The opt-in
+\texttt{--fix-club-markers} (needs \texttt{--static-seeds}) keeps the six
+\texttt{Clubhead} markers at the document's per-club offsets during the
+static trial; the leg calibration never moved them. Default off, so default
+receipts are unchanged; when set the receipt records
+\texttt{address.static\_trial.fixed\_marker\_bodies}.
+
+Measured with the club-face fixture flags (\texttt{--static-seeds
+--foot-progression capture --face-weight 3.0}, plus \texttt{--zmp-filter} on
+the 7-iron) at commit \texttt{87ba5b2f39}, with same-commit controls on
+ControlTower \texttt{ud-sim}; scored by
+\texttt{regenerate\_club\_face\_fixtures --reuse-run}:
+
+\begin{center}
+\begin{tabular}{lrrrrrr}
+\hline
+Run & Impact speed & Peak timing & Face at impact & Capture face & IK & Tracking \\
+ & (\%) & (ms) & model / capture (deg) & at address (deg) & (mm) & (mm) \\
+\hline
+7-iron control & $-15.6$ & $-8.4$ & 10.49 / 9.14 & 0.27 & 27.2 & 75.4 \\
+7-iron fixed & $-2.6$ & $0.0$ & 7.18 / 3.21 & $-5.35$ & 26.8 & 61.3 \\
+Driver control & $-5.1$ & $-1.8$ & 15.78 / 11.63 & 2.50 & 27.8 & 57.5 \\
+Driver fixed & $-2.4$ & $-4.1$ & $-4.75$ / $-15.35$ & $-20.79$ & 35.8 & 69.5 \\
+\hline
+\end{tabular}
+\end{center}
+Impact speed and peak timing are model minus capture (GCV-20 limits 3~\% and
+5~ms). The driver control reproduces the committed driver fixture exactly. The
+7-iron control is the committed fixture flags on the corrected 7-iron cluster
+(\#12210): the fixtures predate it, and regenerated without the flag they would
+fall to $-15.6$~\%. With the cluster fixed the 7-iron meets the speed and
+timing limits and its impact-face gap is 3.97~deg (OSV-10 limit 5~deg). The
+driver document still carries the native candidate's cluster: held fixed, it
+puts the capture's own address face at $-20.8$~deg, raises the IK error to
+35.8~mm and holds the trail wrist on its $-40$~deg bound for 462 frames, so
+that cluster is not a valid face frame and the driver result is rejected.
+Address ulnar deviation (\texttt{LWInputX} / \texttt{RWInputX}, bound
+$-40$~deg): 7-iron control $-33.5$ / $-36.5$, fixed $-35.7$ / $-40.0$; driver
+control $-25.9$ / $-30.0$, fixed $-35.6$ / $-40.0$. Fixing the cluster does
+not change the hand-to-club rotation, so the trail wrist still starts on its
+bound; that is the grip refit's job. Open: a measured driver cluster (the
+\#12210 procedure applied to the calibrated driver receipt), then the
+\texttt{grip\_rotation\_deg} refit on the fixed clusters. Fixtures are not
+regenerated and no bound, tolerance or filter constant changed.
+
+Reproduce (ControlTower \texttt{ud-sim}, repository root):
+\begin{verbatim}
+python3 -m src.shared.python.motion_matching.pipeline.cli \
+  --spec docs/development/full_body_models/full_body_spec_anthro_iron7.json \
+  --capture iron --static-seeds --zmp-filter --foot-progression capture \
+  --face-weight 3.0 --fix-club-markers --out runs/iron
+python3 -m scripts.regenerate_club_face_fixtures --work runs --capture iron \
+  --reuse-run   # scores into tests/fixtures; restore them afterwards
+\end{verbatim}
+
 \subsection{Impact and Top Definitions}
 At about 2400 deg/s of face closure near impact, one 360 Hz capture sample
 spans about 7 deg. A frame index is therefore too coarse. Impact is the
