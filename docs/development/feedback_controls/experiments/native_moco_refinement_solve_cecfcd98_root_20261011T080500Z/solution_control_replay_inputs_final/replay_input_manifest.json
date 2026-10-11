@@ -1,0 +1,23 @@
+{
+  "control_authority": "persisted_solution_sto_control_columns",
+  "derived_time_only_controls_sha256": "0975347efabf63f2344348ab1e77e67375e725c8bf010a28c0abdc660fbaf50b",
+  "diagnostic_only": true,
+  "failed_audit_sha256": {
+    "mesh_grid_audit.json": "93403801b94986fd51fe1136d3c21cb1a3e1595f90ad6787c2694a4aec8a15b5",
+    "solution_serialization_audit.json": "da7a3b732714a3b5bf219f9ab73168325cf7d0882f45fac911d735f81b940886"
+  },
+  "grid_authority": "persisted_solution_sto_time_column",
+  "physical_qualification": "unqualified",
+  "schema": "retained-solution-control-replay-inputs-v1",
+  "snapshot_sha256": {
+    "request.json": "ba01112a4ea142d1b93e89a27b5f381829889fd3799aa613eb8e2efdd737174c",
+    "solution.sto": "0ba31fd0f6e6859ab4e8b20ed82cb7d9f9eb1092b8e279b0e3954990440b8996",
+    "source.osim": "6a098517bdba09b19b3eb99e4da7e795f27d10be8f42c0fca04fee20ce67e143"
+  },
+  "source_run": "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-marker-calibration-12164\\docs\\development\\feedback_controls\\experiments\\native_moco_refinement_solve_cecfcd98_root_20261011T080500Z\\plain",
+  "source_sha256": {
+    "request.json": "ba01112a4ea142d1b93e89a27b5f381829889fd3799aa613eb8e2efdd737174c",
+    "solution.sto": "0ba31fd0f6e6859ab4e8b20ed82cb7d9f9eb1092b8e279b0e3954990440b8996",
+    "source.osim": "6a098517bdba09b19b3eb99e4da7e795f27d10be8f42c0fca04fee20ce67e143"
+  }
+}
