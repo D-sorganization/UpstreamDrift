@@ -65,18 +65,34 @@ This is a retained failure, not evidence of solve, export, or replay success.
 
 ## Validation
 
-Focused actual OpenSim 4.6 SDK validation passed 52 tests across the typed
-contract, request/runner diagnostics, inertia preflight, and native-mechanics
-profile suites. An earlier 107-test checkpoint also passed the constrained
-muscle, wrapped-path, and native-muscle bundle suites, including fixture-level
-Millard/Thelen solve, export, independent replay and score. The SDK interpreter was
+At final integrated head `3957ac912d90144d274b9615480d015cab0be783`, system
+Python 3.13 central pre-PR validation passed all five gates: lint/format, diff
+mypy (18 source files), affected tests, Semgrep/import policy, and policy/fragment
+validators. The affected selection reported 291 passed and 241 skipped. Native
+tests skipped only because the system interpreter does not have OpenSim; the
+OpenSim-specific selection below used the pinned SDK.
+
+The focused actual OpenSim 4.6 request/preparation/contact/wrapped/profile/runner
+selection produced 134 passing tests. Its first launch omitted `CASADIPATH` and
+10 solve-dependent nodes reported CasADi Ipopt DLL load errors (Win32 126). The
+DLL was present at the pinned SDK package path; rerunning only those 10 exact
+nodes with `CASADIPATH` set there and OMP/OpenBLAS/MKL thread counts at one passed
+all 10. These are 144 distinct passing SDK tests, not a claim that the broader
+suite passed. The bounded three-knot profile lifecycle node is a timeout-aware
+regression; its pass does not promote the retained Moco solve/export/replay
+claim. The prior broader 289-test SDK selection hit its independent 180-second
+process-tree cap at roughly 65% progress without a pytest summary and is retained
+as incomplete, not green. Path-work helper/native tests added in the child merge
+passed 24 tests under the pinned SDK. Post-merge ledger/context/monolith
+freshness tests passed 19 tests.
+
+The SDK interpreter was
 `C:\Users\diete\Repositories\.venv-feedback-opensim\Scripts\python.exe`,
-with `CASADIPATH` set to its installed OpenSim package and BLAS/OpenMP worker
-counts set to one. The normal wrapped-path merge preserved its commit history.
-Lint and formatting pass on the current Python changes. System-Python mypy is
-being rerun after moving the probe into its own module and narrowing the strict
-JSON parser. Full central gates remain to be run after final docs and regression
-changes.
+with `CASADIPATH=C:\Users\diete\Repositories\.venv-feedback-opensim\Lib\site-packages\opensim`
+and BLAS/OpenMP worker counts set to one. Normal merge hooks passed. The bounded
+557-component preparation/probe remains runtime-viable only over `[0, 0.001] s`;
+no optimizer or replay ran for that private source. The full-capture source,
+physical qualification, and full-horizon replay remain blocked.
 
 This test evidence covers the fixtures only. It does not qualify measured
 anatomy, passive physiology, support/grip, full-capture matching, all-model
