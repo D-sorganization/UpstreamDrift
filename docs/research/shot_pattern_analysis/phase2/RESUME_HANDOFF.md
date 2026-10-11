@@ -18,18 +18,17 @@ collision in academic density curve index149. The complete saved-SVG scan found
 14 pairs with actual glyph intersections; a broader 2 pt clearance check selected
 43 density pairs. Astra additionally held shaft-SD indices 21/23 for lower
 Fade title/colorbar occlusion. Issue #12243 covers the measured, selective
-layout repair; its final scope remains under review. Do not infer blanket v6
+layout repair; its final scope is 49 unique density triples (147 assets), rendered into `supplement_report_v2_layout_repair` from repair commit `5a1fdbfe51`. Do not infer blanket v6
 acceptance. Frozen producer sources and numerical outputs remain unchanged.
-Luna owns native PDF/SVG checks with two progressing workers. Root has reviewed
+Luna completed both native PDF/SVG workers with exit 0. Root has reviewed
 all 70 assigned native paths; the last receipt is
 `root_visual_review_20_29_50_59.json` (SHA256
 `9438ad0ff479bd24aba8c00f7351a05d58c21d8bae17520d601fc9debb8da701`).
 These are native-format comparisons, superseded for assets changed by the layout repair.
 Luna has reviewed
 102 of 102 assigned paths. Review-only Sharp 0.35.5 transition is qualified.
-All 2,024 SVG renders completed with exit 0; PDF/structural checks are still
-progressing. Full vector acceptance and graphics coverage remain pending.
-Root shaft-SD 048 PNG review is complete with no scoped defects.
+All 2,024 SVG and 2,024 PDF renders completed; 4,048 structural checks pass. The 1,122 PDF text-box overflow flags remain pending painted-glyph boundary review; successful parsing/rendering alone does not clear them. Full vector acceptance and graphics coverage remain pending.
+Root shaft-SD 048 PNG review is complete with no scoped defects. Root 072/084 reviews each accepted 70 PNGs and held two academic density PNGs; all contacts and four originals per batch were inspected and hashes rechecked. Astra completed 012/024/036/060 and is reviewing 096/curve156.
 Delivery integration contains study commit `9f9ad03ac8` at merge `3270a6e214`.
 
 The strict loader receipt in `validation/supplement_v6_final_graphics_review_v2`
