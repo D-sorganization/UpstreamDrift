@@ -302,6 +302,7 @@ def _synthetic_marker_evidence(
         marker_map_sha256="8" * 64,
         marker_output_sha256=_marker_output_sha256(native_output),
         native_output=native_output,
+        calibration_artifact_sha256="a" * 64,
     )
 
 
@@ -343,6 +344,7 @@ def test_campaign_scores_actual_positions_but_does_not_promote_registry_row(
     assert row.score.native_marker_replay_evidence_sha256
     assert row.score.native_execution_receipt_sha256 == marker_evidence.receipt_sha256
     assert row.score.native_marker_map_sha256 == "8" * 64
+    assert row.score.native_marker_calibration_sha256 == "a" * 64
     assert row.score.native_marker_output_sha256 == marker_evidence.marker_output_sha256
     assert row.score.acceptance_verdict.is_physically_accepted is False
     assert row.qualification == "unqualified"

@@ -530,3 +530,32 @@ Manager seed regressions cover value and speed projection in mixed and
 mechanical prepared-state paths. See chapter48 and
 `F07_CONSTRAINED_MIXED_MOCO_TURNOVER.md`; the registry still contains zero
 approved calculations and release remains blocked.
+
+## F09q Source-Bound Provisional Marker Calibration (#12164)
+
+`src/engines/feedback_marker_calibration.py` reuses `TourCapture`,
+`static_marker_offsets`, and `score_frozen_marker_offsets` to create a
+`native-marker-calibration/1.0.0` artifact. It binds capture and pose bytes,
+ordered marker labels and native frame IDs, capture clock/frame, inventory and
+native model/provider identities, in-sample residuals, and exact local offsets.
+`validate` rehashes supplied inputs, requires the expected pose-provider and
+capture coordinate identities, and recomputes estimates/residuals. The artifact carries no observations or private source path and creates an
+`NativeMarkerMap` whose content digest includes the artifact digest. The map and
+F09 observation receipt now surface that calibration digest explicitly.
+
+The artifact is `provisional_estimated`, with qualification and physiology
+unqualified and holdout `not_evaluated`. It is an integrity record, not an
+execution signature. Its training residual is not a predictive score. Existing
+anatomical seed maps remain unchanged. Portable synthetic tests exercise
+mutation and identity rejection; one actual OpenSim 4.6 fixture confirms the
+shared calibration estimate from native frame poses. This is not production
+model, private capture, independent holdout, physics or full-engine coverage.
+Canonical equations and limitations are recorded in chapter 13.
+
+The MuJoCo native-marker integration test also fits and revalidates this
+artifact from a full-state replay pose history, converts it to the existing
+native marker map, and verifies that the replay receipt binds the calibration
+digest. This closes only the tested software handoff. It adds no production
+marker attachments and does not make the position-level OpenSim geometry
+provider a full-state replay provider; Drake/Pinocchio handoff remains without
+an equivalent end-to-end calibration test.

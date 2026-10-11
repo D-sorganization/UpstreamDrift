@@ -147,6 +147,7 @@ class ObservationScoreReceipt:
     native_marker_replay_evidence_sha256: str
     native_execution_receipt_sha256: str
     native_marker_map_sha256: str
+    native_marker_calibration_sha256: str | None
     native_marker_output_sha256: str
     frame_id: str
     timebase_id: str
@@ -182,6 +183,7 @@ class ObservationScoreReceipt:
                 "native_marker_replay_evidence_sha256": self.native_marker_replay_evidence_sha256,
                 "native_execution_receipt_sha256": self.native_execution_receipt_sha256,
                 "native_marker_map_sha256": self.native_marker_map_sha256,
+                "native_marker_calibration_sha256": self.native_marker_calibration_sha256,
                 "native_marker_output_sha256": self.native_marker_output_sha256,
                 "frame_id": self.frame_id,
                 "timebase_id": self.timebase_id,
@@ -695,6 +697,7 @@ def _build_score_receipt(
         "native_marker_replay_evidence_sha256": marker_evidence_sha256,
         "native_execution_receipt_sha256": marker_evidence.receipt_sha256,
         "native_marker_map_sha256": marker_evidence.marker_map_sha256,
+        "native_marker_calibration_sha256": marker_evidence.calibration_artifact_sha256,
         "native_marker_output_sha256": marker_evidence.marker_output_sha256,
         "frame_id": alignment.frame_id,
         "timebase_id": alignment.timebase_id,
@@ -730,6 +733,7 @@ def _build_score_receipt(
         native_marker_replay_evidence_sha256=marker_evidence_sha256,
         native_execution_receipt_sha256=marker_evidence.receipt_sha256,
         native_marker_map_sha256=marker_evidence.marker_map_sha256,
+        native_marker_calibration_sha256=marker_evidence.calibration_artifact_sha256,
         native_marker_output_sha256=marker_evidence.marker_output_sha256,
         frame_id=alignment.frame_id,
         timebase_id=alignment.timebase_id,

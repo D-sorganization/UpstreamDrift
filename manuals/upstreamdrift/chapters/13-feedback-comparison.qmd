@@ -59,6 +59,42 @@ Synthetic tests establish this scoring boundary only. Anatomical attachments,
 noise models, private D02 splits, uncertainty and actual native muscle replay
 remain unqualified until separately evidenced.
 
+The F09 `calibrate_static_marker_attachments` producer accepts a
+`NativeMarkerCalibrationRequest` that groups capture, ordered native-frame
+mapping, pose history and clock, adapter binding, provider identity, and capture
+frame/timebase. Revalidation receives the same request and recomputes its
+integrity. The producer reuses
+`TourCapture` and the shared `static_marker_offsets` estimator. For marker
+$m$ attached to native frame $b_m$, it estimates the local point from the
+ordered valid calibration samples $V_m$ as
+
+$$
+\hat o_m = \frac{1}{|V_m|}\sum_{f\in V_m}
+R_{f,b_m}^{T}(y_{f,m}-t_{f,b_m}).
+$$
+
+It records the corresponding in-sample residual, exact marker order, frame IDs,
+capture frame and timebase, capture/pose digests, and source, loaded-model, and
+provider identities in `native-marker-calibration/1.0.0`. The artifact stores
+placement metadata and hashes, not observation arrays or private paths. Its
+status is `provisional_estimated`; holdout is `not_evaluated`, and qualification
+and physiology remain `unqualified`. Revalidation recomputes the estimate and
+residuals against supplied capture and pose bytes. This integrity check does
+not authenticate a serialized receipt or prove the named pose provider ran.
+The verifier requires the expected pose-provider identity and capture
+frame/timebase from its caller. The in-sample residual is not a predictive
+error and does not certify anatomy. The artifact can seed an explicitly
+provisional native marker map without human approval, while independent
+scoring and every physical qualification gate remain separate.
+
+The MuJoCo native-marker integration test exercises calibration from a
+full-state replay pose history, artifact revalidation against the capture
+clock, map construction, and propagation of the artifact digest into the
+existing replay receipt. This is fixture-level software integration evidence;
+it does not define production attachments or qualify a model. OpenSim's
+position-level geometry provider is not a full-state replay adapter, and the
+same end-to-end handoff is not yet tested for Drake or Pinocchio.
+
 Reproduce with `python3 -m pytest -o addopts='' tests/opensim/test_frozen_marker_scoring.py tests/opensim/test_marker_calibration.py`.
 
 An independent replay uses one saved full initial physical state and a
