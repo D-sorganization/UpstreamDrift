@@ -66,6 +66,8 @@ docs/development/full_body_models/evidence/head_gaze/fd_neck_tracking.json
 
 # Preserve the byte-bound native closed-loop receipt serialization.
 docs/development/full_body_models/evidence/head_gaze/fd_neck_closed_loop.json
+# Preserve report bytes whose SHA-256 is recorded in the Moco ladder turnover.
+docs/development/feedback_controls/experiments/native_moco_mesh20_e1548c5179/activation_residual_analysis.json
 # #12191/#12198: canonical ground-support evidence retains its recorded hashes.
 docs/development/full_body_models/evidence/ground_support/anthro_driver/receipt.json
 docs/development/full_body_models/evidence/ground_support/anthro_iron/receipt.json

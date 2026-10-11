@@ -24,8 +24,15 @@ records peak errors of `1.0189e-6` rad/s, `1.1532e-4` activation and
 exactly matched saved knots, but this does not prove equality of the continuous
 control law. Solver convergence is distinct from replay acceptance. The common-knot
 optimized coordinates agree closely while controls differ materially, so the
-mesh comparison does not establish the cause of replay-state error. Chapter 13
-and `F07_NATIVE_MOCO_COMPLEXITY_LADDER_TURNOVER.md` retain exact equations,
+mesh comparison does not establish the cause of replay-state error. The completed
+offline activation analysis finds small reconstructed Hermite-Simpson residuals,
+while optimized flexor activation differs from fresh replay by up to `1.1532e-4`.
+Fresh replay agrees with an independent segmented scalar PWL integration within
+`2.5751e-8`. Source XML omits activation constants, so the analysis uses OpenSim
+4.6 source defaults rather than installed-binary readback. This narrows the
+finding to a discrete optimized-state versus continuous-replay difference
+without identifying its cause. Chapter 13 and
+`F07_NATIVE_MOCO_COMPLEXITY_LADDER_TURNOVER.md` retain exact equations,
 acceptance limits, source/request hashes, failure statuses and output evidence.
 This synthetic diagnostic does not qualify full-body muscle feasibility,
 physiology, capture matching, production replay or all-variant/ecosystem parity.

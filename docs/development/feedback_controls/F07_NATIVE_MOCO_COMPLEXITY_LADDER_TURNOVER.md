@@ -657,24 +657,50 @@ worker and harness source hashes are respectively
 retained source, request, solution and controls stayed byte-identical to their
 pre-run hashes. No tolerance changed, and no additional native run is implied.
 
-## Next Diagnostic Proposal (Read-Only Analysis First)
+## Completed Offline Activation-Law Analysis
 
-The current result distinguishes saved-control fresh replay from the
-Moco-transcribed state trajectory; it does not show that optimized states are
-the realized states of the persisted control law. A narrowly scoped next step
-is to calculate the muscle activation ODE defect over each retained knot
-interval from the exact source properties, optimized activation knots and
-saved PWL excitation. A read-only midpoint estimate on the first 0.25 ms
-interval gives the optimized flexor activation secant `5.21445 s^-1` versus
-`3.29255 s^-1` from `(mean excitation - mean activation)/0.01 s`; the fresh
-replay secant is `5.67572 s^-1`. This is a screening residual only: it uses a
-midpoint approximation to a piecewise-linear input and the conventional
-two-time-constant first-order law, so it must be checked against the exact
-native law before interpretation. Bind the method, state/control columns, and
-units to the source/request hashes; report intervalwise residuals and any
-control-mesh midpoint law actually represented by Moco. Do not change the
-fixed acceptance limits or call this trajectory acceptance. For the user goal of
-controller-to-independent-open-loop replay, the existing forward-integrated
-controlled-baseline API is a more direct positive control: compare its saved
-PWL law and fresh replay independently before attributing this Moco-only
-disagreement. Any such run needs separate review and authorization.
+Initial screening treated adjacent output rows as Hermite-Simpson cells; that
+estimate was not a valid cell residual. The 41 exported rows cover 20 cells.
+Each cell uses endpoint, midpoint and endpoint rows over 0.5 ms. The corrected offline
+analysis in `experiments/native_moco_mesh20_e1548c5179/activation_residual_analysis.json`
+uses that three-row layout, the OpenSim 4.6 first-order activation equation,
+and a segmented SciPy DOP853 integration that restarts at every saved
+piecewise-linear excitation interval. It runs without importing OpenSim,
+constructing a model or replaying the native trajectory. The analysis code is
+`scripts/opensim/analyze_retained_activation_residual.py`; ten pure regression
+tests are in `tests/opensim/test_retained_activation_residual.py`.
+
+The flexor Hermite-Simpson midpoint-state and Simpson dynamics residual maxima
+are `1.1397e-10` and `2.0774e-9`; extensor maxima are `1.6274e-11` and
+`1.7293e-10`. The exported values therefore satisfy the reconstructed
+discrete collocation equations closely. The flexor activation in the optimized
+trajectory nevertheless differs from the independent segmented scalar trace
+by up to `1.15316e-4` at 0.00025 s, and by `-8.10477e-5` at the final time.
+Fresh native replay agrees with the segmented trace to `2.57503e-8` maximum
+absolute flexor activation difference and `1.98e-15` for extensor. The saved
+control midpoint differs from linear endpoint interpolation by no more than
+`5.21e-18` (flexor) or `6.94e-18` (extensor). The independent integration's
+change between tolerances `(1e-12, 1e-14)` and `(1e-13, 1e-15)` is at most
+`3.78e-13` for flexor and zero for extensor; this is a sensitivity estimate,
+not a rigorous error bound.
+
+The source XML omits `activation_time_constant`,
+`deactivation_time_constant`, `minimum_activation` and
+`ignore_activation_dynamics`. The calculation uses OpenSim 4.6 source defaults
+`0.01 s`, `0.04 s`, `0.01`, and `false`, respectively; these values were not
+read from the installed binary during this offline analysis. The law and Moco
+transcription references are recorded in the JSON. Exact source/request/solution/
+control/replay-audit SHA-256 values are also recorded there; report SHA-256 is
+`e1df460e90e1706609a04d7bda265d072673f5af056d4d0142ca0e4f13871e83`.
+
+The evidence separates a small reconstructed Hermite-Simpson defect from the
+larger optimized-state versus continuous-replay difference. It does not
+identify its cause, show physiological validity, change replay thresholds,
+or qualify either synthetic solve. In particular, sampled control identity
+does not establish whole-capture muscular prediction. Any follow-up numerical
+experiment requires separate review and authorization; no solver, optimizer,
+native replay, mesh refinement or tolerance change is authorized by this
+analysis. A separate offline follow-up could attribute the flexor error by
+cell, comparing local midpoint/end values from the retained PWL integration
+against the saved collocation states while preserving the same source and
+law. It would remain a numerical diagnostic, not a replay qualification.

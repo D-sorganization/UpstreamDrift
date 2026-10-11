@@ -1,0 +1,317 @@
+{
+  "analysis_runtime": {
+    "numpy": "2.4.1",
+    "scipy": "1.16.0"
+  },
+  "analysis_script_sha256": "1c791ca911d2f1b01fe52d966967375439ed50303c40c559464fc40af96c66bc",
+  "channels": {
+    "extensor": {
+      "activation_min_max": [
+        0.04468040845891781,
+        0.05
+      ],
+      "activation_parameters": {
+        "minimum_activation": 0.01,
+        "tau_activation": 0.01,
+        "tau_deactivation": 0.04
+      },
+      "excitation_min_max": [
+        0.01000010113709679,
+        0.01001552247375279
+      ],
+      "hermite_simpson_midpoint_state_defect": {
+        "max_abs": 1.6273954406287316e-11,
+        "rms": 3.731411195989066e-12,
+        "signed_sum": 2.9992425210068063e-11
+      },
+      "hermite_simpson_simpson_dynamics_defect": {
+        "max_abs": 1.7293322703742023e-10,
+        "rms": 8.058086014352615e-11,
+        "signed_sum": -1.3793886607482535e-09
+      },
+      "max_abs_control_midpoint_minus_endpoint_linear_interpolation": 6.938893903907228e-18,
+      "max_abs_simpson_defect_cell_index": 19,
+      "max_abs_simpson_defect_cell_seconds": [
+        0.0095,
+        0.01
+      ],
+      "max_solution_vs_scalar_error_time_seconds": 0.01,
+      "replay_activation_vs_segmented_scalar": {
+        "max_abs": 1.97758476261356e-15,
+        "rms": 1.1801429632172352e-15,
+        "signed_sum": 4.086314620010967e-14
+      },
+      "scalar_integration_sensitivity_rtol_1e-12_vs_1e-13": {
+        "max_abs": 0.0,
+        "rms": 0.0,
+        "signed_sum": 0.0
+      },
+      "segmented_scalar_activation_at_knots": [
+        0.05,
+        0.04985657664220398,
+        0.049713693328437204,
+        0.04957136704456826,
+        0.04942961466863655,
+        0.04928842338130177,
+        0.04914778044174925,
+        0.04900769220186861,
+        0.048868164972481705,
+        0.04872919147037714,
+        0.04859076445613349,
+        0.04845288172593018,
+        0.048315541088142434,
+        0.0481787401171722,
+        0.04804247640097342,
+        0.04790674745094538,
+        0.04777155079240879,
+        0.04763688399196173,
+        0.04750274462976325,
+        0.047369130294458606,
+        0.047236038588098855,
+        0.04710346712466114,
+        0.04697141353135372,
+        0.046839875448788364,
+        0.04670885053062607,
+        0.04657833644353385,
+        0.04644833086705043,
+        0.04631883149848564,
+        0.04618983604781631,
+        0.04606134223847023,
+        0.04593334780636573,
+        0.045805850524428426,
+        0.04567884817775697,
+        0.04555233862569299,
+        0.04542631973921141,
+        0.045300789020826376,
+        0.045175743986826625,
+        0.04505118247255329,
+        0.04492710232509455,
+        0.04480350946356724,
+        0.04468040977016707
+      ],
+      "solution_activation_vs_replay": {
+        "max_abs": 1.3112512395330178e-09,
+        "rms": 5.928522959576476e-10,
+        "signed_sum": -1.8169086048180905e-08
+      },
+      "solution_activation_vs_segmented_scalar": {
+        "max_abs": 1.3112492619482552e-09,
+        "rms": 5.928511498229957e-10,
+        "signed_sum": -1.8169045185034705e-08
+      },
+      "solution_vs_scalar_initial_and_final": [
+        0.0,
+        -1.3112492619482552e-09
+      ],
+      "xml_default_provenance": {
+        "effective_from_xml_or_4_6_defaults": {
+          "activation_time_constant": 0.01,
+          "deactivation_time_constant": 0.04,
+          "ignore_activation_dynamics": "false",
+          "minimum_activation": 0.01
+        },
+        "omitted_properties_use_tag_defaults": [
+          "activation_time_constant",
+          "deactivation_time_constant",
+          "ignore_activation_dynamics",
+          "minimum_activation"
+        ],
+        "source_overrides": {}
+      }
+    },
+    "flexor": {
+      "activation_min_max": [
+        0.04607006546005747,
+        0.05131032051274662
+      ],
+      "activation_parameters": {
+        "minimum_activation": 0.01,
+        "tau_activation": 0.01,
+        "tau_deactivation": 0.04
+      },
+      "excitation_min_max": [
+        0.01000252940327434,
+        0.1066043472144142
+      ],
+      "hermite_simpson_midpoint_state_defect": {
+        "max_abs": 1.1396993765400154e-10,
+        "rms": 3.625202744637757e-11,
+        "signed_sum": 2.79210682352371e-11
+      },
+      "hermite_simpson_simpson_dynamics_defect": {
+        "max_abs": 2.077352420507342e-09,
+        "rms": 4.740230512464786e-10,
+        "signed_sum": -3.002683667788393e-09
+      },
+      "max_abs_control_midpoint_minus_endpoint_linear_interpolation": 5.204170427930421e-18,
+      "max_abs_simpson_defect_cell_index": 0,
+      "max_abs_simpson_defect_cell_seconds": [
+        0.0,
+        0.0005
+      ],
+      "max_solution_vs_scalar_error_time_seconds": 0.00025,
+      "replay_activation_vs_segmented_scalar": {
+        "max_abs": 2.5750282357794863e-08,
+        "rms": 2.3340688611104774e-08,
+        "signed_sum": 9.32389658474253e-07
+      },
+      "scalar_integration_sensitivity_rtol_1e-12_vs_1e-13": {
+        "max_abs": 3.7748970616036104e-13,
+        "rms": 3.422083726713767e-13,
+        "signed_sum": 1.3670661824782826e-11
+      },
+      "segmented_scalar_activation_at_knots": [
+        0.05,
+        0.05141892903911,
+        0.05140446687161303,
+        0.051267559750079426,
+        0.051123112304738344,
+        0.05097520092469651,
+        0.050827876452763904,
+        0.05068118305595711,
+        0.050535164620992785,
+        0.05038972805488633,
+        0.05024478084931471,
+        0.05010037492936717,
+        0.049956561892263864,
+        0.04981333074974941,
+        0.04967067058093805,
+        0.0495285700835973,
+        0.04938701802465809,
+        0.04924601704985371,
+        0.04910556978688352,
+        0.04896567585095254,
+        0.048826334858164705,
+        0.04868753642650588,
+        0.04854927023697682,
+        0.04841154112509904,
+        0.04827435389493701,
+        0.048137706454731644,
+        0.04800159672420902,
+        0.04786602311284537,
+        0.04773098403849483,
+        0.04759647272618592,
+        0.047462482441243126,
+        0.04732901460805156,
+        0.04719607064082353,
+        0.047063648630193404,
+        0.046931746677103904,
+        0.046800361480283804,
+        0.04666948975727444,
+        0.046539128603682756,
+        0.046409275131472284,
+        0.04627993483391656,
+        0.046151113169459926
+      ],
+      "solution_activation_vs_replay": {
+        "max_abs": 0.00011531595562106617,
+        "rms": 8.72404101641866e-05,
+        "signed_sum": -0.003525345006465841
+      },
+      "solution_activation_vs_segmented_scalar": {
+        "max_abs": 0.00011531598344965976,
+        "rms": 8.721757324920282e-05,
+        "signed_sum": -0.0035244126168073667
+      },
+      "solution_vs_scalar_initial_and_final": [
+        0.0,
+        -8.10477094024542e-05
+      ],
+      "xml_default_provenance": {
+        "effective_from_xml_or_4_6_defaults": {
+          "activation_time_constant": 0.01,
+          "deactivation_time_constant": 0.04,
+          "ignore_activation_dynamics": "false",
+          "minimum_activation": 0.01
+        },
+        "omitted_properties_use_tag_defaults": [
+          "activation_time_constant",
+          "deactivation_time_constant",
+          "ignore_activation_dynamics",
+          "minimum_activation"
+        ],
+        "source_overrides": {}
+      }
+    }
+  },
+  "horizon_seconds": [
+    0.0,
+    0.01
+  ],
+  "input_sha256": {
+    "replay_audit": "ad6f872d5f385f67a8ff60e014cd9d330f7311f4b2b4f49c7407e9bf5653f1db",
+    "request": "86570790ab4fce02df7b8a1c899b0755a7518c36c541fa366a2dd467a6a8f1a9",
+    "solution_sto": "a13dfe3a7e793efff177a1c2cb64dbb055cd57e1704498a99e9fa3e80340578f",
+    "source_osim": "6a098517bdba09b19b3eb99e4da7e795f27d10be8f42c0fca04fee20ce67e143",
+    "time_only_controls_sto": "dced78b02cea4d36af31d6f08b881d9feaa87cff1ac5a87d2bebfa5d592a1796"
+  },
+  "interval_count": 40,
+  "method": {
+    "control_interpolation": "piecewise_linear",
+    "control_midpoint_policy": "request sets interpolate_control_mesh_interior_points=true; retained controls include the midpoint samples",
+    "hermite_simpson_equations": {
+      "dynamics": "x_right - x_left = h*(f_left + 4*f_mid + f_right)/6",
+      "midpoint": "x_mid = (x_left + x_right)/2 + h*(f_left - f_right)/8"
+    },
+    "mesh_interval_row_pattern": "41 trajectory rows for 20 Hermite-Simpson cells; each cell uses endpoint, midpoint, endpoint rows",
+    "mesh_interval_seconds": 0.0005,
+    "moco_transcription": "hermite-simpson",
+    "numerical_sensitivity_limitation": "difference between two tolerances is a sensitivity estimate, not a rigorous error bound",
+    "rtol_atol": [
+      [
+        1e-12,
+        1e-14
+      ],
+      [
+        1e-13,
+        1e-15
+      ]
+    ],
+    "runtime_limitation": "activation defaults come from OpenSim 4.6 source because omitted from XML; installed binary was not queried",
+    "segmented_integrator": "SciPy solve_ivp DOP853, each saved PWL interval separately"
+  },
+  "moco_transcription_references": [
+    "https://raw.githubusercontent.com/opensim-org/opensim-core/4.6/OpenSim/Moco/MocoDirectCollocationSolver.cpp",
+    "https://opensim-org.github.io/opensim-moco-site/docs/1.1.0/html_user/classOpenSim_1_1MocoDirectCollocationSolver.html"
+  ],
+  "replay_applied_controls_equal_saved_samples_exactly": true,
+  "replay_audit_declared_input_sha256": "9a6d69345a09a37a0a67b2cb8defec83f68e02a0adbbbbc876bfe4a7c06baa23",
+  "replay_status": "failed",
+  "sample_count": 41,
+  "schema_version": "retained-activation-residual-v1",
+  "source_law_reference": "https://raw.githubusercontent.com/opensim-org/opensim-core/4.6/OpenSim/Actuators/MuscleFirstOrderActivationDynamicModel.cpp",
+  "source_law_tag": "OpenSim 4.6",
+  "source_properties": {
+    "extensor": {
+      "effective_from_xml_or_4_6_defaults": {
+        "activation_time_constant": 0.01,
+        "deactivation_time_constant": 0.04,
+        "ignore_activation_dynamics": "false",
+        "minimum_activation": 0.01
+      },
+      "omitted_properties_use_tag_defaults": [
+        "activation_time_constant",
+        "deactivation_time_constant",
+        "ignore_activation_dynamics",
+        "minimum_activation"
+      ],
+      "source_overrides": {}
+    },
+    "flexor": {
+      "effective_from_xml_or_4_6_defaults": {
+        "activation_time_constant": 0.01,
+        "deactivation_time_constant": 0.04,
+        "ignore_activation_dynamics": "false",
+        "minimum_activation": 0.01
+      },
+      "omitted_properties_use_tag_defaults": [
+        "activation_time_constant",
+        "deactivation_time_constant",
+        "ignore_activation_dynamics",
+        "minimum_activation"
+      ],
+      "source_overrides": {}
+    }
+  },
+  "status": "offline_diagnostic_only"
+}

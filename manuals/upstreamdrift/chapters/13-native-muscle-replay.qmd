@@ -188,14 +188,57 @@ process-tree cleanup.
 
 The replay applied the saved excitation values exactly at every sampled knot.
 The request uses Hermite-Simpson transcription with control-mesh interior
-interpolation; replay uses piecewise-linear interpolation of saved knots.
-Those observations make continuous control representation a testable
-candidate for the discrepancy, but do not prove it is causal. Exact source
-activation/deactivation time constants were read as 0.01/0.04 s; an independent
-intervalwise activation-law residual and a positive forward-integrated control
-baseline would be needed to distinguish transcription defects from a replay
-input or model behavior issue. This completed audit is a failed replay, not a
-qualification result.
+interpolation; replay uses piecewise-linear interpolation of saved knots. Those
+observations make continuous control representation a testable candidate for
+the discrepancy, but do not prove it is causal. The source XML omits the
+activation/deactivation constants; their OpenSim 4.6 source defaults are
+`0.01/0.04` s, not installed-binary readback. The corrected offline analysis
+below narrows this comparison without promoting the failed replay to
+qualification.
+
+### Offline Activation Residual Analysis
+
+The source-bound diagnostic in
+`docs/development/feedback_controls/experiments/native_moco_mesh20_e1548c5179/activation_residual_analysis.json`
+uses the OpenSim 4.6 activation law. For activation $a$, excitation $u$, and
+minimum activation $a_{\min}$, it first bounds
+$\bar a=\min(1,\max(a,a_{\min}))$, then evaluates
+\[
+\dot a = \frac{u-\bar a}{\tau},\qquad
+\tau = \begin{cases}
+\tau_{\mathrm{act}}(0.5+1.5\bar a), & u>\bar a,\\
+\tau_{\mathrm{deact}}/(0.5+1.5\bar a), & u\leq\bar a.
+\end{cases}
+\]
+The retained model XML omits `activation_time_constant`,
+`deactivation_time_constant`, `minimum_activation`, and
+`ignore_activation_dynamics`; the analysis therefore uses 4.6 tag defaults
+`0.01 s`, `0.04 s`, `0.01`, and `false`, respectively. The exact source URL is
+`https://raw.githubusercontent.com/opensim-org/opensim-core/4.6/OpenSim/Actuators/MuscleFirstOrderActivationDynamicModel.cpp`.
+
+The 20-cell mesh has 41 exported rows, arranged as endpoint/midpoint/endpoint
+per Hermite-Simpson cell. For each cell width $h$, the reconstruction checks
+\[
+a_m = \frac{a_k+a_{k+1}}{2} + \frac{h}{8}(f_k-f_{k+1}),\qquad
+a_{k+1}-a_k = \frac{h}{6}(f_k+4f_m+f_{k+1}).
+\]
+The maximum midpoint and Simpson dynamics residuals are `1.1397e-10` and
+`2.0774e-9` for flexor, and `1.6274e-11` and `1.7293e-10` for extensor.
+Separately, SciPy DOP853 integrates the scalar activation equation across each
+saved piecewise-linear input interval. This continuous trace agrees with fresh
+native replay within `2.57503e-8` for flexor and `1.98e-15` for extensor.
+The optimized flexor activation differs from the replay/scalar trace by up to
+`1.15316e-4` at `0.00025 s` and `-8.10477e-5` at the endpoint, despite small
+reconstructed collocation residuals. The maximum replay-vs-scalar sensitivity
+under tighter tolerances is `3.78e-13`; it is a sensitivity estimate, not a
+rigorous integration error bound.
+
+This separates discrete collocation residual from the optimized-state versus
+continuous-replay difference, but does not identify its cause. The diagnostic
+does not change replay thresholds, invoke a native solver/replay, or qualify
+physiology, capture matching, or production execution. It is bound to the
+retained source, request, solution, controls and replay audit by the SHA-256
+identities in the JSON report.
 
 The 10- and 20-interval optimized coordinate traces differ by at most
 $5.66\times10^{-11}$ rad at common time knots, while flexor controls differ by

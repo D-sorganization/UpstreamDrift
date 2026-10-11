@@ -1223,10 +1223,14 @@ One corrected retained-input diagnostic completed under the unchanged 30-second
 limit and recorded full timewise state errors; endpoint target passed, while
 speed, activation and fiber-length thresholds failed. Saved excitation values
 matched at sampled knots, which does not establish continuous input equivalence.
-The next read-only step is an exact source-bound activation-law residual over
-the retained intervals and a comparison to the existing forward-integrated
-controlled baseline. No optimizer retry or qualification follows from this
-result; see canonical chapter13 and `F07_NATIVE_MOCO_COMPLEXITY_LADDER_TURNOVER.md`.
+The completed offline activation analysis finds small reconstructed
+Hermite-Simpson residuals, while optimized flexor activation differs from both
+fresh replay and segmented scalar PWL integration by up to `1.1532e-4`.
+Fresh replay and scalar integration agree within `2.5751e-8`. The XML omits
+activation constants; calculations use OpenSim 4.6 source defaults, not
+installed-binary readback. This does not identify cause or qualify the failed
+replay. No optimizer retry is authorized; see canonical chapter13 and
+`F07_NATIVE_MOCO_COMPLEXITY_LADDER_TURNOVER.md`.
 
 The #12198 CI receipt-preservation follow-up restores two canonical
 ground-support receipts to their recorded hashes and adds explicit formatter
