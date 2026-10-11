@@ -176,6 +176,68 @@ This wrote a 36960-byte URDF and printed `Successfully built character and
 saved to golfer_pro_humanoid.urdf`. Use the spec-native path above for club
 swapping, appearance binding or engine export beyond URDF.
 
+## Step 5: Export and Animate a Skinned glTF Body
+
+`gltf` is a fifth export format. It writes a glTF 2.0 skinned mesh lofted
+from the compiled spec's skeleton, with one bone per spec body. You can
+view it in any glTF viewer with no physics engine:
+
+```python
+import json
+
+text, media_type, filename = export_character(compiled, "gltf")
+with open(filename, "w", encoding="utf-8") as f:
+    f.write(text)
+
+doc = json.loads(text)
+print(filename, len(text), media_type)
+# tour_average_male_c0e2ca45.gltf 334632 model/gltf+json
+print(len(doc["skins"][0]["joints"]))      # 24 bones
+print(doc["accessors"][0]["count"])        # 3416 vertices
+print(doc["extras"]["spec_sha256"][:8])    # c0e2ca45
+```
+
+For the driver character from Step 1, this wrote a 334632-byte document
+with 24 bones and 3416 vertices. The bytes are identical on every run for
+the same spec. `extras.spec_sha256` ties the mesh back to Step 1's spec
+`c0e2ca45...`. The mesh is visual only and never changes mass, inertia or
+contact. Every vertex follows exactly one bone (rigid skinning); smooth
+blending across joints is still open (#11657).
+
+The static export has no animation. To play spec motion on the skin,
+build the body yourself, run the spec forward kinematics over a
+coordinate trajectory, and pass the poses in. This example turns the torso
+from 0 to 0.8 rad over 31 frames at 60 fps:
+
+```python
+from src.shared.python.model_appearance.skinned_body import (
+    build_skinned_body,
+    skinned_body_gltf_text,
+    spec_motion_bone_poses,
+)
+
+body = build_skinned_body(compiled.document, spec_sha256=compiled.sha256)
+frames = [{"TorsoInput": 0.8 * i / 30} for i in range(31)]
+motion = spec_motion_bone_poses(body, compiled.document, frames)
+print(motion.shape)  # (31, 24, 4, 4)
+
+with open("tour_average_male_c0e2ca45_turn.gltf", "w", encoding="utf-8") as f:
+    f.write(skinned_body_gltf_text(body, motion, fps=60.0))
+```
+
+Each frame is a mapping from spec coordinate name to value. Any coordinate
+you leave out is zero, and an unknown name raises `ValueError`. The
+document carries one LINEAR animation with 48 channels: a translation and
+a rotation channel per bone, keyed over 0.5 s.
+
+**Web/API equivalent:** `POST /api/character-builder/export/gltf` returns
+the static document; the **glTF** export button in `CharacterSpecPanel`
+sends this request. On the web Character Builder page, tick **Preview spec
+body (glTF)** to load that export into the 3D view, tinted with the
+appearance trunk colour. The preview refetches after each slider change. The desktop builder's **Export glTF** button writes
+`custom_<sha8>.gltf`, byte-identical to the API export for the same hash.
+Animated export is Python-only for now.
+
 ## Desktop Walkthrough
 
 Steps 1, 3 and 4 also run in the desktop builder: the **Character Builder**
@@ -214,7 +276,7 @@ the same widget offscreen and regenerates every image in this section.
 The desktop builder has no appearance picker yet. Dress the character
 through the API or the web Appearance panel (Step 2).
 
-## Step 5: Simulate (Requires MuJoCo)
+## Step 6: Simulate (Requires MuJoCo)
 
 This step needs the `mujoco` package, which is not installed on every
 host; it was not run as part of this tutorial's verification. Loading the

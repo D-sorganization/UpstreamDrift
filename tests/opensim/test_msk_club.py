@@ -1,8 +1,9 @@
 """OSV-9 (#11756): the improved club in the Rajagopal musculoskeletal models.
 
 Every Rajagopal-based OpenSim golf model carries the shared club (meshes, face
-roll, mass and inertia) held by both hands, square at the captured address
-pose. Pure-XML checks run everywhere; the OpenSim checks skip without it.
+roll, mass and inertia) held by both hands, at the captured address face at
+the captured address pose. Pure-XML checks run everywhere; the OpenSim checks
+skip without it.
 """
 
 from __future__ import annotations
@@ -36,6 +37,10 @@ MODELS = {
 }
 BUILDER = ROOT / "scripts" / "build_humanoid_osim.py"
 SQUARE_TOL_DEG = 2.0  # OSV-8 face-square tolerance
+#: Capture-A head-triad face at address, as measured by the fixture generator.
+CAPTURE_ADDRESS_FACE_DEG = json.loads(
+    (ROOT / "tests/fixtures/club_face/provenance.json").read_text(encoding="utf-8")
+)["clubs"]["driver"]["after"]["faces"]["capture"]["address_deg"]
 CLOSURE_TOL_M = 1e-6
 GRIP_GAP_TOL_M = 0.002  # anatomical grip point to the shaft grip point
 RAJAGOPAL_BODIES = 22
@@ -257,6 +262,12 @@ def test_init_system_closes_the_trail_hand_and_places_both_hands(
 
 @pytest.mark.parametrize("name", sorted(MODELS))
 def test_face_is_square_at_the_captured_address_pose(osim, name: str) -> None:  # noqa: ANN001
+    """The face roll adds no offset of its own at the captured address (#12117).
+
+    The reference is the capture's own address face (capture A addresses the
+    ball about 5.5 degrees open), not the target axis; the tolerance is
+    unchanged.
+    """
     from src.engines.physics_engines.opensim.python.msk_club_calibration import (
         face_angle_deg,
     )
@@ -264,7 +275,10 @@ def test_face_is_square_at_the_captured_address_pose(osim, name: str) -> None:  
     model, state = _loaded(osim, MODELS[name])
     model.realizePosition(state)
     angle = face_angle_deg(model, state, mc.load_msk_club("driver"))
-    assert abs(angle) <= SQUARE_TOL_DEG, angle
+    assert abs(angle - CAPTURE_ADDRESS_FACE_DEG) <= SQUARE_TOL_DEG, (
+        angle,
+        CAPTURE_ADDRESS_FACE_DEG,
+    )
 
 
 @pytest.mark.parametrize("name", sorted(MODELS))
