@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import math
+import warnings
+
 import numpy as np
 
 from src.shared.python.physics._contact_types import (
@@ -9,24 +11,41 @@ from src.shared.python.physics._contact_types import (
 )
 
 
-def compute_center_of_pressure(
+def compute_grip_pressure_centre(
     contacts: list[ContactPoint],
-) -> np.ndarray:
-    if not contacts:
-        return np.zeros(3)
+) -> np.ndarray | None:
+    """Normal-force-weighted centroid of the grip contacts.
 
+    This is a pressure centre on the *grip surface* (the contacts need not be
+    coplanar and carry their own normals), not the wrench-derived ground centre
+    of pressure of ``biomechanics.ground_reaction``, so it keeps its own
+    geometry.  Returns ``None`` (never the origin) when no contact is loaded.
+    """
     total_force = 0.0
     weighted_position = np.zeros(3)
 
-    for c in contacts:
+    for c in contacts or []:
         if c.normal_force > 0:
             total_force += c.normal_force
             weighted_position += c.normal_force * c.position
 
     if total_force < 1e-10:
-        return np.zeros(3)
+        return None
 
     return weighted_position / total_force
+
+
+def compute_center_of_pressure(
+    contacts: list[ContactPoint],
+) -> np.ndarray | None:
+    """Deprecated alias of :func:`compute_grip_pressure_centre`."""
+    warnings.warn(
+        "compute_center_of_pressure (grip) is deprecated; use "
+        "compute_grip_pressure_centre",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return compute_grip_pressure_centre(contacts)
 
 
 def compute_grip_torque(

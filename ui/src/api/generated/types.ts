@@ -319,6 +319,145 @@ export interface ArmShotResponse {
   state: string;
 }
 
+/**
+ * The browsable part library.
+ */
+export interface AssemblyCatalogResponse {
+  categories: AssemblyCategory[];
+  parts: AssemblyPart[];
+}
+
+/**
+ * A catalog category id and its display label.
+ */
+export interface AssemblyCategory {
+  id: string;
+  label: string;
+}
+
+/**
+ * Whether the candidate drop is allowed, and why.
+ */
+export interface AssemblyDropDecision {
+  accepted: boolean;
+  reason: string;
+  part_id: string;
+  host_port: string;
+  findings: AssemblyFinding[];
+}
+
+/**
+ * An assembly to rebuild and serialize.
+ */
+export interface AssemblyExportRequest {
+  /** Base part id */
+  base_part_id: string;
+  /** Drops applied in order */
+  steps?: AssemblyStep[];
+  /** Export format */
+  format: "urdf" | "mjcf";
+  /** Export despite validation errors */
+  force: boolean;
+}
+
+/**
+ * Serialized assembly content.
+ */
+export interface AssemblyExportResponse {
+  format: "urdf" | "mjcf";
+  content: string;
+  validation: AssemblyValidation;
+}
+
+/**
+ * One composition-validation finding.
+ */
+export interface AssemblyFinding {
+  code: string;
+  severity: string;
+  message: string;
+  elements?: string[];
+  category: string;
+}
+
+/**
+ * A catalog part that can be dragged into an assembly.
+ */
+export interface AssemblyPart {
+  part_id: string;
+  name: string;
+  category: string;
+  description: string;
+  ports: AssemblyPort[];
+}
+
+/**
+ * A part instance inside the assembly (base first).
+ */
+export interface AssemblyPlacedPart {
+  instance_id: string;
+  part_id: string;
+  host_port: string | null;
+  host_instance: string | null;
+  links: string[];
+  joints: string[];
+}
+
+/**
+ * An assembly to rebuild, plus an optional drop to evaluate (drag hover).
+ */
+export interface AssemblyPlanRequest {
+  /** Base part id */
+  base_part_id: string;
+  /** Drops applied in order */
+  steps?: AssemblyStep[];
+  /** Drop to evaluate without applying it */
+  candidate?: AssemblyStep | null;
+}
+
+/**
+ * A typed attachment port (``AttachmentPoint.to_dict`` shape).
+ */
+export interface AssemblyPort {
+  name: string;
+  link_name: string;
+  role: string;
+  interface_frame?: Record<string, number[]>;
+  tags?: string[];
+  max_payload_kg?: number | null;
+  port_type?: string | null;
+  polarity?: string | null;
+}
+
+/**
+ * The rebuilt assembly: tree, placed parts, free sockets, validation.
+ */
+export interface AssemblyStateResponse {
+  model: ModelExplorerResponse;
+  placed: AssemblyPlacedPart[];
+  free_sockets: AssemblyPort[];
+  validation: AssemblyValidation;
+  drop?: AssemblyDropDecision | null;
+}
+
+/**
+ * One drop: put ``part_id`` on the host socket ``host_port``.
+ */
+export interface AssemblyStep {
+  /** Catalog part id */
+  part_id: string;
+  /** Model-level name of the host socket */
+  host_port: string;
+}
+
+/**
+ * Composition validation for the assembled model.
+ */
+export interface AssemblyValidation {
+  ok: boolean;
+  findings: AssemblyFinding[];
+}
+
 export interface AssetRequest {
   id: string;
   source_path: string;
@@ -539,6 +678,33 @@ export interface Body_import_dataset_tools_data_explorer_import_post {
   file: string;
 }
 
+export interface Body_import_session_v2_api_tools_launch_monitor_analytics_v2_import_post {
+  file: string;
+  options: string;
+}
+
+export interface Body_import_session_v2_api_v1_tools_launch_monitor_analytics_v2_import_post {
+  file: string;
+  options: string;
+}
+
+export interface Body_import_session_v2_tools_launch_monitor_analytics_v2_import_post {
+  file: string;
+  options: string;
+}
+
+export interface Body_preview_import_v2_api_tools_launch_monitor_analytics_v2_import_preview_post {
+  file: string;
+}
+
+export interface Body_preview_import_v2_api_v1_tools_launch_monitor_analytics_v2_import_preview_post {
+  file: string;
+}
+
+export interface Body_preview_import_v2_tools_launch_monitor_analytics_v2_import_preview_post {
+  file: string;
+}
+
 export interface Body_upload_c3d_api_tools_motion_capture_upload_c3d_post {
   file: string;
 }
@@ -549,6 +715,139 @@ export interface Body_upload_c3d_api_v1_tools_motion_capture_upload_c3d_post {
 
 export interface Body_upload_c3d_tools_motion_capture_upload_c3d_post {
   file: string;
+}
+
+export interface BunkerCarryV1 {
+  carry_m: number;
+  verdict_status: string;
+  band_m: number[] | null;
+  band_reasons: string[];
+}
+
+export interface BunkerDeliveredV1 {
+  effective_loft_deg: number;
+  effective_marketed_bounce_deg: number;
+  presentation_bounce_deg: number;
+  aim_offset_deg: number;
+}
+
+/**
+ * A candidate sole; ``None`` keeps the grind preset's value.
+ */
+export interface BunkerDesignV1 {
+  name: string;
+  grind_preset?: string | null;
+  loft_deg?: number | null;
+  marketed_bounce_deg?: number | null;
+  sole_width_mm?: number | null;
+  entry_height_mm?: number | null;
+  leading_edge_radius_mm?: number | null;
+  camber_area_mm2?: number | null;
+  heel_relief_fraction?: number | null;
+  toe_relief_fraction?: number | null;
+}
+
+export interface BunkerObjectiveReportV1 {
+  use: string;
+  target_carry_m: number;
+  tolerance_fraction: number;
+  disposition: string;
+  nominal_carry_m: number | null;
+  degenerate: boolean;
+  ranking_permitted: boolean;
+  reason: string;
+}
+
+/**
+ * A carry-target playability objective and the use it is asked for.
+ */
+export interface BunkerObjectiveV1 {
+  use: "exploratory" | "predictive";
+  target_carry_m: number;
+  tolerance_fraction: number;
+}
+
+/**
+ * The playing condition; ``None`` keeps the preset's firmness.
+ */
+export interface BunkerSandV1 {
+  preset?: string | null;
+  firmness_kg_per_cm2?: number | null;
+}
+
+export interface BunkerShotMetricsV1 {
+  peak_force_n: number | null;
+  impulse_n_s: number | null;
+  entry_speed_mps: number | null;
+  exit_speed_mps: number | null;
+  max_depth_m: number | null;
+  contact_duration_s: number | null;
+  peak_inertial_fraction: number | null;
+}
+
+export interface BunkerSourceStampV1 {
+  basis: string;
+  source: string;
+}
+
+export interface BunkerSourcesV1 {
+  model: string;
+  sand: Record<string, BunkerSourceStampV1>;
+  carry_band: string | null;
+}
+
+/**
+ * The delivery; ``None`` keeps the workbench's splash-shot default.
+ */
+export interface BunkerSwingV1 {
+  clubhead_speed_mps?: number | null;
+  attack_angle_deg?: number | null;
+  face_open_deg?: number | null;
+  shaft_lean_deg?: number | null;
+  entry_distance_behind_ball_m?: number | null;
+  ball_depth_m?: number | null;
+  dynamic_terms_active?: boolean | null;
+}
+
+export interface BunkerVerdictV1 {
+  status: string;
+  headline: string;
+  caveats: string[];
+  reasons: string[];
+  reason_count: number;
+}
+
+/**
+ * The record returned for one evaluation; ``digest`` covers the rest.
+ */
+export interface BunkerWorkbenchEvaluationV1 {
+  schema_version: string;
+  conventions: Record<string, unknown>;
+  inputs: Record<string, unknown>;
+  tier: string;
+  tier_model: string;
+  verdict: BunkerVerdictV1;
+  stamp: string;
+  refused: boolean;
+  shot: BunkerShotMetricsV1;
+  delivered: BunkerDeliveredV1;
+  carry: BunkerCarryV1 | null;
+  unavailable: string[];
+  sources: BunkerSourcesV1;
+  objective: BunkerObjectiveReportV1 | null;
+  predictive: boolean;
+  digest: string;
+}
+
+/**
+ * One bounded nominal evaluation.
+ */
+export interface BunkerWorkbenchRequestV1 {
+  handedness: "right" | "left";
+  design: BunkerDesignV1;
+  sand?: BunkerSandV1;
+  swing?: BunkerSwingV1;
+  objective?: BunkerObjectiveV1 | null;
 }
 
 /**
@@ -704,6 +1003,28 @@ export interface CaptureSource {
 }
 
 /**
+ * Appearance picks, optionally bound to a compiled character spec. ``character``, when given, is compiled the same way as ``/character-builder/build`` and its spec hash is stamped onto the returned appearance document as ``spec_sha256``.
+ */
+export interface CharacterAppearanceRequest {
+  /** Optional character spec to bind spec_sha256 to */
+  character?: CharacterSpecRequest | null;
+  /** Skin tone material name */
+  skin_tone?: string | null;
+  /** Clothing preset name */
+  clothing?: string | null;
+  /** Club finish material name */
+  club_finish?: string | null;
+  /** 'none', 'hair' or 'cap' */
+  headwear?: string | null;
+  /** Hair/cap material name override */
+  headwear_material?: string | null;
+  /** Ground material name */
+  ground_material?: string | null;
+  /** Appearance document name (letters, digits, '_' or '-') */
+  name?: string | null;
+}
+
+/**
  * Request model for Character Builder URDF generation. Preconditions: - height_m must be in [1.5, 2.1] - mass_kg must be in [40, 150] - build_type must be athletic, average, heavy, or slim
  */
 export interface CharacterBuilderRequest {
@@ -715,11 +1036,37 @@ export interface CharacterBuilderRequest {
   build_type: string;
 }
 
+/**
+ * Request for the spec-native character builder (CMB-3, #11654). ``preset`` selects a shipped character preset as the base; any other field overrides that base (or the defaults when no preset is given). Bounds mirror ``spec_params.PARAMETER_RANGES``; the service re-validates.
+ */
+export interface CharacterSpecRequest {
+  /** Character preset id */
+  preset?: string | null;
+  stature_m?: number | null;
+  mass_kg?: number | null;
+  trunk_scale?: number | null;
+  arm_scale?: number | null;
+  shoulder_scale?: number | null;
+  grip_roll_deg?: number | null;
+  /** driver or iron7 */
+  club?: string | null;
+}
+
 export interface ClaimsV2 {
   vendor_comparison: "descriptive" | "matched_agreement";
   device_emulation: boolean;
   device_certification: boolean;
   causal_inference: boolean;
+}
+
+/**
+ * Bounded inline records and the PyQt Monitor Comparison tab's inputs. Mirrors ``_ComparisonParams`` from ``src/tools/launch_monitor_analytics/gui.py`` (``_read_comparison_params``): ``match_column`` is ``None`` when the Monitor Comparison tab's "Matched-Shot Column" combo reads "(unmatched)" (``_build_comparison_tab``), and an empty ``reference_monitor`` (the combo's blank state, ``currentText() or None``) is treated the same as ``None``, so the API and desktop paths accept identical inputs for :func:`compare_monitors`.
+ */
+export interface ComparisonPayloadV2 {
+  records: Record<string, unknown>[];
+  metric: string;
+  match_column?: string | null;
+  reference_monitor?: string | null;
 }
 
 export interface ConfidenceIntervalV1 {
@@ -1171,6 +1518,16 @@ export interface DisarmShotRequest {
 }
 
 /**
+ * Bounded inline records and the PyQt Dispersion tab's widget-derived inputs. Mirrors ``_DispersionParams`` from ``src/tools/launch_monitor_analytics/gui.py`` (``_read_dispersion_params``): ``group_column`` is ``None`` when the Dispersion tab's "Group By" combo box reads "(all shots)" (``_build_dispersion_tab``), so the API and desktop paths accept identical inputs for :func:`analyze_dispersion`.
+ */
+export interface DispersionPayloadV2 {
+  records: Record<string, unknown>[];
+  forward: string;
+  lateral: string;
+  group_column?: "monitor_vendor" | "session_id" | "club" | null;
+}
+
+/**
  * Renderer options; science remains in the shared calculation layer.
  */
 export interface DisplayRequest {
@@ -1354,6 +1711,15 @@ export interface FeatureReportModel {
 }
 
 /**
+ * Serialized form of one :class:`FilterRule`. ``operator`` is restricted to the operators :class:`FilterRule` accepts; ``value`` is the raw text the desktop filter table's value cell holds (``_filter_rules``), passed through verbatim.
+ */
+export interface FilterRulePayload {
+  column: string;
+  operator: "eq" | "ne" | "lt" | "le" | "gt" | "ge" | "contains" | "in";
+  value: string;
+}
+
+/**
  * Serialized form of :class:`FlexibleAnalysisRequest`.
  */
 export interface FlexibleAnalysisPayload {
@@ -1391,6 +1757,16 @@ export interface FlightModelListResponse {
 export type FlightModelType = "waterloo_penner" | "macdonald_hanzely" | "nathan" | "ballantyne" | "jcole" | "rospie_dl" | "charry_l3";
 
 /**
+ * Opt-in force/torque layer for a video export; off unless ``enabled``.
+ */
+export interface ForceLayerRequest {
+  enabled: boolean;
+  kinds?: WrenchKind[];
+  scale: number;
+  segment_shading: boolean;
+}
+
+/**
  * Request model for enabling/configuring force/torque overlays. Preconditions: - force_types must each be a known force type - scale_factor must be positive See issue #1199
  */
 export interface ForceOverlayRequest {
@@ -1406,42 +1782,36 @@ export interface ForceOverlayRequest {
   body_filter?: string[] | null;
   /** Show magnitude labels */
   show_labels: boolean;
+  /** Arrow scaling: fixed, body_weight or peak */
+  scale_mode: "fixed" | "body_weight" | "peak";
+  /** Body weight (N) for body_weight; series peak (N) for peak */
+  reference_force_n?: number | null;
+  /** Arrow length (m) for one reference force */
+  reference_length_m: number;
+  /** Per-WrenchKind length multipliers */
+  kind_scale?: Record<string, number> | null;
+  /** Enabled overlay groups (None = defaults) */
+  groups?: string[] | null;
 }
 
 /**
- * Response model for force/torque overlay data. See issue #1199
+ * Response model for force/torque overlay data. See issues #1199, #11307 (FTO-22).
  */
 export interface ForceOverlayResponse {
   /** Current simulation time */
   sim_time: number;
-  /** All active force vectors */
-  vectors?: ForceVector3D[];
+  /** Serialized GlyphSet (glyph-set-v1) drawing payload */
+  glyphs?: Record<string, unknown> | null;
+  /** Serialized ForceTorqueFrame (force-torque-frame-v1) physics inspection payload */
+  frame?: Record<string, unknown> | null;
+  /** Explanation if force overlays are unavailable, or None if available */
+  unavailable_reason?: string | null;
   /** Sum of all force magnitudes */
   total_force_magnitude: number;
   /** Sum of all torque magnitudes */
   total_torque_magnitude: number;
   /** Current overlay configuration */
   overlay_config?: Record<string, unknown>;
-}
-
-/**
- * A single force/torque vector for 3D overlay rendering. See issue #1199
- */
-export interface ForceVector3D {
-  /** Body this force acts on */
-  body_name: string;
-  /** Type: applied, gravity, contact, bias */
-  force_type: string;
-  /** Application point [x, y, z] */
-  origin: number[];
-  /** Force direction [dx, dy, dz] */
-  direction: number[];
-  /** Force magnitude (N or N*m) */
-  magnitude: number;
-  /** RGBA color for rendering */
-  color?: number[];
-  /** Optional display label */
-  label?: string | null;
 }
 
 /**
@@ -1535,6 +1905,49 @@ export interface GreenReadingResponse {
   slopes: number[][];
 }
 
+/**
+ * Per-hand grip force, net force and midpoint couple time series (GCV-10, #11716).
+ */
+export interface GripWrenchResponse {
+  run_id?: string | null;
+  engine?: string | null;
+  /** False when no grip data exists */
+  available: boolean;
+  /** Why the series is unavailable */
+  reason?: string | null;
+  time_s?: number[];
+  /** How the left/right split was obtained */
+  split_method: string;
+  split_method_by_sample?: string[];
+  unavailable_reasons?: string[];
+  events?: Record<string, number>;
+  units?: Record<string, string>;
+  labels?: Record<string, string>;
+  /** Per-trace x/y/z/magnitude lists; null marks unavailable samples */
+  traces?: Record<string, Record<string, (number | null)[]>>;
+}
+
+/**
+ * Per-foot and net ground reaction time series on the body (GCV-5, #11711).
+ */
+export interface GroundReactionResponse {
+  run_id?: string | null;
+  engine?: string | null;
+  /** False when no ground contact exists */
+  available: boolean;
+  /** Why the series is unavailable */
+  reason?: string | null;
+  time_s?: number[];
+  feet?: string[];
+  events?: Record<string, number>;
+  units?: Record<string, string>;
+  labels?: Record<string, string>;
+  /** Each foot's share of the summed vertical force; null below 10 N */
+  load_share?: Record<string, (number | null)[]>;
+  /** Per-trace x/y/z/magnitude lists; null marks unavailable samples */
+  traces?: Record<string, Record<string, (number | null)[]>>;
+}
+
 export interface GroupSummaryV1 {
   dimension: "player" | "session" | "club";
   group_value: string;
@@ -1560,6 +1973,37 @@ export interface IdentityRequest {
 }
 
 /**
+ * One launch-monitor row; ``value`` is null when unavailable (GCV-17).
+ */
+export interface ImpactParameterRow {
+  key: string;
+  label: string;
+  unit: string;
+  value?: number | null;
+  /** Why the value is unavailable */
+  reason?: string | null;
+  note?: string | null;
+}
+
+/**
+ * Target-relative impact parameters card for a run (GCV-17, #11723).
+ */
+export interface ImpactParametersResponse {
+  run_id?: string | null;
+  engine?: string | null;
+  /** False when no card can be computed */
+  available: boolean;
+  /** Why the card is unavailable */
+  reason?: string | null;
+  units: string;
+  impact_time_s?: number | null;
+  impact_time_source?: string | null;
+  frame?: Record<string, unknown>;
+  rows?: ImpactParameterRow[];
+  d_plane?: Record<string, number | null>;
+}
+
+/**
  * One ``swing_sim.ball_flight_trajectory/1`` record to import for overlay. ``record`` is accepted as an opaque JSON object rather than a typed model on purpose: the wire's own shape is validated by the vendored Tools reader (fail-closed), not re-declared here. Passing it through unmodified means every field the reader checks — unknown fields, missing fields, malformed provenance, non-monotone samples — is enforced exactly as the wire defines it, from either flight-model family (issue #9352, ADR-0047).
  */
 export interface ImportBallFlightTrajectoryRequest {
@@ -1576,6 +2020,30 @@ export interface ImportResponse {
   format: string;
   columns: string[];
   row_count: number;
+}
+
+/**
+ * Request model for importing a single trial from an OpenCap session.
+ */
+export interface ImportTrialRequest {
+  /** Path to the OpenCap session directory */
+  session_dir: string;
+  /** Trial name to load (defaults to first motion trial) */
+  trial?: string | null;
+}
+
+/**
+ * Response model for trial import.
+ */
+export interface ImportTrialResponse {
+  session_dir: string;
+  trial: string;
+  trials: string[];
+  subject: SubjectResponse;
+  model_file?: string | null;
+  has_kinematics: boolean;
+  kinematics_columns: string[];
+  notes: string[];
 }
 
 /**
@@ -1599,6 +2067,26 @@ export interface ImportedTrajectorySample {
   time_s: number;
   position_m: number[];
   velocity_mps?: number[] | null;
+}
+
+/**
+ * Request model for inspecting an OpenCap session.
+ */
+export interface InspectSessionRequest {
+  /** Path to the OpenCap session directory */
+  session_dir: string;
+}
+
+/**
+ * Response model for session inspection.
+ */
+export interface InspectSessionResponse {
+  session_dir: string;
+  trials: string[];
+  subject: SubjectResponse;
+  model_file?: string | null;
+  kinematics_trials: string[];
+  notes: string[];
 }
 
 /**
@@ -2025,6 +2513,18 @@ export interface ModelListResponse {
   models: Record<string, string>[];
 }
 
+/**
+ * Bounded inline records and the PyQt Models tab's widget-derived inputs. Mirrors ``_ModelParams`` from ``src/tools/launch_monitor_analytics/gui.py`` (``_read_model_params``): ``model`` offers the same five choices, ``random_seed`` keeps the same default and ``[0, 2_147_483_647]`` range as the "Random Seed" spinbox, and ``group_column`` is ``None`` when the "Grouped Holdout" combo reads "(random split)" (``_build_models_tab``), so the API and desktop paths accept identical inputs for :func:`fit_predictive_model`.
+ */
+export interface ModelPayloadV2 {
+  records: Record<string, unknown>[];
+  target: string;
+  features: string[];
+  model: "linear" | "ridge" | "lasso" | "elastic_net" | "mlp";
+  random_seed: number;
+  group_column?: "monitor_vendor" | "session_id" | "club" | null;
+}
+
 export interface ModelProvenanceV2 {
   model_id: string;
   version: string;
@@ -2038,6 +2538,22 @@ export interface ModelRequest {
   source_path: string;
   engine: "mujoco" | "drake" | "pinocchio" | "opensim" | "simscape";
   dofs: string[];
+}
+
+/**
+ * Bounded inline records and the PyQt Relationships tab's PCA/VIF inputs. Mirrors ``_compute_multivariate`` from ``src/tools/launch_monitor_analytics/gui.py``: the same ``metrics`` selection feeds both :func:`compute_pca` and :func:`compute_vif`, so the API and desktop paths accept identical inputs.
+ */
+export interface MultivariatePayloadV2 {
+  records: Record<string, unknown>[];
+  metrics: string[];
+}
+
+/**
+ * Request body for launching a native viewer backend on a run's NPZ.
+ */
+export interface NativeViewerLaunchRequest {
+  backend: string;
+  speed: number;
 }
 
 /**
@@ -2488,6 +3004,17 @@ export interface RefreshTokenResponse {
   expires_in: number;
 }
 
+/**
+ * Bounded inline records and the PyQt Relationships tab's widget inputs. Mirrors ``_RelationshipParams`` from ``src/tools/launch_monitor_analytics/gui.py`` (``_read_relationship_params``): ``method`` offers the same three choices, ``edge_threshold`` keeps the same default and ``[0, 1]`` range as the "Network Edge Threshold" spinbox (``_build_relationships_tab``), and controls that are also selected metrics are dropped as the desktop tab drops them, so the API and desktop paths accept identical inputs for :func:`compute_correlations`.
+ */
+export interface RelationshipsPayloadV2 {
+  records: Record<string, unknown>[];
+  metrics: string[];
+  controls?: string[];
+  method: "pearson" | "spearman" | "kendall";
+  edge_threshold: number;
+}
+
 export interface ReplayActionRequest {
   action: "play" | "pause" | "stop" | "seek" | "rate";
   target_time_s?: number | null;
@@ -2498,6 +3025,15 @@ export interface ReplayStatusResponse {
   playback_state: string;
   current_time_s: number;
   playback_rate: number;
+}
+
+/**
+ * Bounded inline records for the web Reports tab. Mirrors the inputs ``_refresh_report``/``export_data``/ ``export_manifest`` read from ``src/tools/launch_monitor_analytics/gui.py``, minus the desktop's imported-session state the web app does not have. ``project_name`` defaults to the desktop's ``clear_project`` default.
+ */
+export interface ReportPayloadV2 {
+  records: Record<string, unknown>[];
+  project_name: string;
+  treatment_audit_log?: Record<string, unknown>[];
 }
 
 export interface ResolveUncertainRequest {
@@ -2830,6 +3366,17 @@ export interface StrokesGainedUncertaintyV1 {
   assumptions: string[];
 }
 
+/**
+ * Subject anthropometry and model choice.
+ */
+export interface SubjectResponse {
+  mass_kg?: number | null;
+  height_m?: number | null;
+  sex?: string | null;
+  opensim_model?: string | null;
+  subject_id?: string | null;
+}
+
 export interface SubmissionReceiptResponse {
   shot_id: string;
   session_id: string;
@@ -3026,6 +3573,28 @@ export interface TransformRecordV2 {
 }
 
 /**
+ * Bounded inline records and the PyQt Data Treatment tab's widget inputs. Mirrors ``_read_treatment_config`` from ``src/tools/launch_monitor_analytics/gui.py``: ``robust_z_threshold`` keeps the same default and ``[1, 20]`` range as the "Modified Z Threshold" spinbox (``_build_treatment_tab``), and ``required_metrics``/ ``outlier_metrics`` behave like the comma-separated text fields — whitespace-only or empty entries are dropped — so the API and desktop paths accept identical inputs for :func:`apply_treatment`.
+ */
+export interface TreatmentPayloadV2 {
+  records: Record<string, unknown>[];
+  required_metrics?: string[];
+  outlier_metrics?: string[];
+  robust_z_threshold: number;
+  exclude_flagged: boolean;
+  filters?: FilterRulePayload[];
+}
+
+/**
+ * Bounded inline records and the PyQt Trends tab's widget-derived inputs. Mirrors ``_TrendParams`` from ``src/tools/launch_monitor_analytics/gui.py`` (``_read_trend_params``): ``rolling_window`` keeps the same default and the ``[3, 500]`` range as the Trends tab's spinbox (``_build_trends_tab``), so the API and desktop paths accept identical inputs for :func:`analyze_trend`.
+ */
+export interface TrendPayloadV2 {
+  records: Record<string, unknown>[];
+  metric: string;
+  time_column: string;
+  rolling_window: number;
+}
+
+/**
  * Descriptor for a single URDF joint. See issue #1201
  */
 export interface URDFJointDescriptor {
@@ -3199,6 +3768,10 @@ export interface VideoAnalysisResponse {
   pose_data: Record<string, unknown>[];
 }
 
+export interface VideoExportRequest {
+  force_layer?: ForceLayerRequest;
+}
+
 /**
  * How a tile is reachable from the web app (issue #7461). Mirrors ``src.config.launcher_manifest_loader.WebLaunchContract``.
  */
@@ -3219,3 +3792,8 @@ export interface WebSettings {
   notifications?: NotificationSettings;
   simulation_defaults?: SimulationDefaultsSettings;
 }
+
+/**
+ * Categorical origin of an overlay wrench.
+ */
+export type WrenchKind = "joint_actuator" | "joint_reaction" | "contact" | "grip" | "external" | "gravity" | "muscle";

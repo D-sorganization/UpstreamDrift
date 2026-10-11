@@ -8,7 +8,7 @@ import json
 import logging
 from pathlib import Path
 import time
-from typing import Any, Literal
+from typing import Any, Literal, NamedTuple
 
 import numpy as np
 
@@ -16,8 +16,19 @@ from src.shared.python.contracts import precondition
 from src.shared.python.motion_matching import (
     full_body_forward_dynamics as fs,
 )
+from src.shared.python.motion_matching.club_face_target import (
+    FACE_FRAME,
+    FACE_ORIENTATION_WEIGHT,
+    HEAD_TRIAD_LABELS,
+    face_fit_summary,
+    model_face_normals,
+    observe_capture_face,
+)
 from src.shared.python.motion_matching.full_body_spec import (
     validate_full_body_spec,
+)
+from src.shared.python.motion_matching.hip_calibration import (
+    pelvis_alignment_from_spec,
 )
 from src.shared.python.motion_matching.pipeline.address import (
     AddressStageInputs,
@@ -28,19 +39,28 @@ from src.shared.python.motion_matching.pipeline.address import (
     search_segment_scales,
     solve_address_stage,
 )
+from src.shared.python.motion_matching.pipeline.address_feet import (
+    build_foot_targets,
+    foot_progression_series,
+    model_feet_deg,
+    record_foot_progression,
+    seed_document_feet,
+    split_address_coordinates,
+)
 from src.shared.python.motion_matching.pipeline.constants import (
-    BUILD_RECEIPT,
     CANDIDATE,
-    CAPTURES,
+    CAPTURE_NAMES,
     CONSISTENCY_PRIOR,
+    DEFAULT_IK_RESTART_POLICY,
     DEFAULT_MJX_ITERATIONS,
+    IK_RESTART_POLICIES,
     LEG_SEEDS,
-    RATE_HZ,
     REFERENCE_CUTOFF_HZ,
     SHOOTING_RELAXATION,
     SPEC,
     TRACKING_CUTOFF_HZ,
     UPPER_SPEC,
+    capture_path,
 )
 from src.shared.python.motion_matching.pipeline.trajectory_optimiser import (
     TRAJECTORY_OPTIMISERS,
@@ -51,16 +71,40 @@ from src.shared.python.motion_matching.pipeline.dynamics import (
     DynamicsReportInputs,
     ShootingFitConfig,
     build_dynamics_report,
+    lane_reference_zmp,
     replay,
     score_reference,
     shooting_fit,
     zmp_filter,
 )
+from src.shared.python.motion_matching.pipeline.centroidal_filter import (
+    centroidal_filter,
+)
+from src.shared.python.motion_matching.pipeline.finish_feasibility import (
+    finish_feasibility_report,
+)
+from src.shared.python.motion_matching.pipeline.gaze_residual import (
+    head_gaze_receipt,
+)
+from src.shared.python.motion_matching.pipeline.gaze_tracking import (
+    NECK_REFERENCES,
+    apply_fd_neck,
+    fd_head_gaze_report,
+)
 from src.shared.python.motion_matching.pipeline.lane import (
     Lane,
     configure_lane,
+    document_seed,
+    expand_stance_for_width,
     fitted_grip,
     wrist_bounds,
+)
+from src.shared.python.motion_matching.pipeline.turn_split import (
+    DEFAULT_SHOULDER_GIRDLE_WEIGHT,
+    DEFAULT_THORAX_WEIGHT,
+    add_turn_split_arguments,
+    turn_split_active,
+    turn_split_report,
 )
 from src.shared.python.motion_matching.pipeline.receipt import (
     GroundSupportReceiptInputs,
@@ -74,13 +118,21 @@ from src.shared.python.motion_matching.pipeline.reference import (
     full_capture_ik,
     marker_errors,
     render_playback,
+    smooth_lane,
     smooth_reference,
+)
+from src.shared.python.motion_matching.pipeline.weld_projection import (
+    weld_consistent_track,
 )
 from src.shared.python.motion_matching.pipeline.plant import (
     get_plant,
 )
 
 logger = logging.getLogger(__name__)
+
+
+#: Receipt stride of the model toe-out time series (frames).
+FOOT_SERIES_STRIDE = 6
 
 
 def _positive_int(value: str) -> int:
@@ -93,12 +145,27 @@ def _positive_int(value: str) -> int:
     return val
 
 
+def _nonnegative_float(value: str) -> float:
+    try:
+        val = float(value)
+    except ValueError as e:
+        raise argparse.ArgumentTypeError(f"Invalid number: {value!r}") from e
+    if not np.isfinite(val) or val < 0:
+        raise argparse.ArgumentTypeError(f"weight must be >= 0, got {val}")
+    return val
+
+
 def build_parser() -> argparse.ArgumentParser:
     """Build the argument parser for the ground support pipeline runner."""
     parser = argparse.ArgumentParser(
         description="Ground-supported full-body pipeline runner with pluggable plant engines."
     )
     parser.add_argument("--out", type=Path, default=Path.cwd())
+    parser.add_argument(
+        "--address-only",
+        action="store_true",
+        help="stop after the calibrated address and write address_report.json",
+    )
     parser.add_argument(
         "--spec",
         type=Path,
@@ -123,8 +190,28 @@ def build_parser() -> argparse.ArgumentParser:
         help="calibrate the 25 upper-body offsets too (qualified offsets as prior)",
     )
     parser.add_argument(
+        "--gaze-weight",
+        type=_nonnegative_float,
+        default=0.0,
+        help=(
+            "soft head-gaze residual weight (eyes on the ball until impact + "
+            "0.03 s, then a 0.35 s release to the target line); 0 keeps the "
+            "marker-faithful head (default)"
+        ),
+    )
+    parser.add_argument(
+        "--fd-neck",
+        choices=list(NECK_REFERENCES),
+        default="ik",
+        help=(
+            "neck reference for the forward-dynamics replay (OSV-3 #11729): "
+            "ik keeps the marker-driven neck (default); gaze tracks the gaze "
+            "schedule (modelled, not measured)"
+        ),
+    )
+    parser.add_argument(
         "--capture",
-        choices=sorted(CAPTURES),
+        choices=list(CAPTURE_NAMES),
         default="driver",
         help="which canonical tour-average capture to match",
     )
@@ -160,6 +247,26 @@ def build_parser() -> argparse.ArgumentParser:
         "--zmp-filter",
         action="store_true",
         help="dynamics-filter reference to keep ZMP inside support polygon",
+    )
+    parser.add_argument(
+        "--centroidal-filter",
+        action="store_true",
+        help="centroidal feasibility filter v2: full ZMP, vertical force and "
+        "friction cone over the finish (runs after --zmp-filter)",
+    )
+    parser.add_argument(
+        "--foot-half-width-m",
+        type=float,
+        default=None,
+        help="add lateral heel/forefoot contact spheres at +/- this distance so "
+        "the foot is a sole, not a centre line (#11671)",
+    )
+    parser.add_argument(
+        "--torsional-patch-m",
+        type=float,
+        default=None,
+        help="torsional (spin) friction patch radius applied at every loaded "
+        "contact sphere (#11671)",
     )
     parser.add_argument(
         "--static-seeds",
@@ -202,9 +309,10 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--tracking",
-        choices=["kkt", "mj-inverse"],
+        choices=["kkt", "mj-inverse", "wrench-qp"],
         default="kkt",
-        help="computed-torque tracking backend (kkt or mj-inverse)",
+        help="computed-torque tracking backend (kkt, mj-inverse, or the opt-in "
+        "contact-wrench QP wrench-qp, #11670)",
     )
     parser.add_argument(
         "--trajectory-optimiser",
@@ -246,7 +354,98 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help="optional explicit path to qualified neural model checkpoint",
     )
+    parser.add_argument(
+        "--foot-progression",
+        choices=("off", "capture", "default"),
+        default="off",
+        help=(
+            "address foot toe-out (OSV-4, #11730): 'capture' sets each foot to the "
+            "capture's measured toe-out (flagged 20 deg default where the markers "
+            "are unreliable), 'default' forces 20 deg per foot, 'off' (default) "
+            "keeps the legacy multi-start result. Also squares the forefoot marker "
+            "seeds and records model vs capture angles in the receipt."
+        ),
+    )
+    parser.add_argument(
+        "--face-weight",
+        type=float,
+        default=FACE_ORIENTATION_WEIGHT,
+        help=(
+            "weight of the club-face orientation residual (OSV-10, #11759): the "
+            "IK pulls the rendered face normal onto the one the capture head "
+            "triad implies; 0 restores the marker-only fit"
+        ),
+    )
+    parser.add_argument(
+        "--ik-restart-policy",
+        choices=IK_RESTART_POLICIES,
+        default=DEFAULT_IK_RESTART_POLICY,
+        help=(
+            "trajectory IK restarts (#12042): 'free' jittered restarts, "
+            "'continuous' restarts that keep the prior on the previous frame "
+            "and reject a joint step above the peak joint speed, 'anchored' "
+            "restarts that only keep the prior on the previous frame, 'off'"
+        ),
+    )
+    parser.add_argument(
+        "--ik-posture-prior-weight",
+        type=_nonnegative_float,
+        default=0.0,
+        help=(
+            "weight of a weak prior pulling the toes and shoulder/forearm axial "
+            "rotation toward the address pose in the trajectory IK (#12042); "
+            "0 disables it (default)"
+        ),
+    )
+    add_turn_split_arguments(parser)
     return parser
+
+
+def _attach_face_report(
+    ik_report: dict[str, Any],
+    lane: Lane,
+    cal_res: Any,
+    q_pair: tuple[np.ndarray, np.ndarray],
+    weight: float,
+) -> None:
+    """Add the face residual's receipt block when the residual was active,
+    and the impact split (GCV-20) always."""
+    ik_report["impact_split"] = lane.impact_split_report()
+    if lane.face_targets is not None:
+        ik_report["face_orientation"] = _face_orientation_report(
+            lane, cal_res, *q_pair, weight
+        )
+    elif weight > 0 and lane.face_unavailable_reason:
+        ik_report["face_orientation"] = {
+            "weight": weight,
+            "frame": FACE_FRAME,
+            "triad": list(HEAD_TRIAD_LABELS),
+            "targeted_frames": 0,
+            "available": False,
+            "reason": lane.face_unavailable_reason,
+        }
+
+
+def _face_orientation_report(
+    lane: Lane, cal_res: Any, q_ik: np.ndarray, q_ref: np.ndarray, weight: float
+) -> dict[str, Any]:
+    """Receipt block of the face residual: weight and model-vs-capture fit."""
+    report: dict[str, Any] = {
+        "weight": weight,
+        "frame": FACE_FRAME,
+        "triad": list(HEAD_TRIAD_LABELS),
+        "targeted_frames": sum(t is not None for t in lane.face_targets or ()),
+    }
+    if not hasattr(cal_res.kin, "body_poses"):
+        report["reason"] = "IK provider has no body_poses; fit not measured"
+        return report
+    capture, _ = observe_capture_face(
+        lane.points, lane.valid, lane.labels, cal_res.attachments, cal_res.scaled_spec
+    )
+    for name, q in (("ik", q_ik), ("reference", q_ref)):
+        model = model_face_normals(cal_res.kin, q, cal_res.scaled_spec)
+        report[name] = face_fit_summary(model, capture)
+    return report
 
 
 @dataclass(frozen=True)
@@ -285,7 +484,7 @@ def _init_pipeline(args: argparse.Namespace) -> PipelineContext:
     return PipelineContext(
         args=args,
         out_dir=out_dir,
-        c3d_path=CAPTURES[args.capture],
+        c3d_path=capture_path(args.capture),
         engine=getattr(args, "engine", "mujoco"),
         log=logging.getLogger("ground_support"),
         t_start=time.perf_counter(),
@@ -321,6 +520,14 @@ def _validate_scaled_spec(
         validate_full_body_spec(scaled_spec, upper_base)
 
 
+def _pin_width_spheres(args: Any, lane: Lane, hip_spec: dict[str, Any]) -> None:
+    """Pin lateral foot spheres in the IK stance when a foot width is set."""
+    if getattr(args, "foot_half_width_m", None) is not None:
+        lane.stance = expand_stance_for_width(
+            lane.stance, [s["name"] for s in hip_spec["contact"]["spheres"]]
+        )
+
+
 def _calibrate_and_scale(
     ctx: PipelineContext,
     lane: Lane,
@@ -335,12 +542,10 @@ def _calibrate_and_scale(
     hipcal_path = ctx.out_dir / "full_body_spec_hipcal.json"
     scaled_path = ctx.out_dir / "full_body_spec_hipcal_scaled.json"
 
-    receipt_data = json.loads(BUILD_RECEIPT.read_text(encoding="utf-8"))
-    pelvis_alignment = receipt_data.get("pelvis_alignment", {})
+    # The alignment of the spec being rewritten, never another spec's build
+    # receipt: a foreign alignment rotates both hips (#12109).
     alignment_old = (
-        pelvis_alignment.get("hip_from_opensim_pelvis")
-        if not args.skip_hip_calibration
-        else None
+        pelvis_alignment_from_spec(base_spec) if not args.skip_hip_calibration else None
     )
     hip_spec, qualification_note, hip_report, fixed, seeds_all = prepare_hip_spec(
         lane,
@@ -353,12 +558,15 @@ def _calibrate_and_scale(
             skip_hip_calibration=args.skip_hip_calibration,
             anthropometric=tuple(args.anthropometric) if args.anthropometric else None,
             recalibrate_upper=args.recalibrate_upper,
+            foot_half_width_m=getattr(args, "foot_half_width_m", None),
+            torsional_patch_m=getattr(args, "torsional_patch_m", None),
         ),
     )
     hipcal_path.write_text(
         json.dumps(hip_spec, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
     hip_bytes = hipcal_path.read_bytes()
+    _pin_width_spheres(args, lane, hip_spec)
     lane.plant = get_plant(ctx.engine, hip_spec)
 
     stage2 = solve_address_stage(
@@ -377,11 +585,8 @@ def _calibrate_and_scale(
             log=log,
         )
     )
-    address = stage2.address
-    address_report = stage2.address_report
-    fixed = stage2.fixed
-    seeds_all = stage2.seeds_all
-    hip_spec = stage2.hip_spec
+    address, address_report = stage2.address, stage2.address_report
+    fixed, seeds_all, hip_spec = stage2.fixed, stage2.seeds_all, stage2.hip_spec
 
     offsets, calibration = lane.calibrate_legs(hip_bytes, fixed, seeds_all, address.q)
     scaled_spec, femur_scale, tibia_scale, scale_table = search_segment_scales(
@@ -405,6 +610,7 @@ def _calibrate_and_scale(
     address_report["calibrated"] = calibrated_address_summary(
         sim, kin, address2, lane, labels, adapter
     )
+    record_foot_progression(address_report, kin, address2.q, lane.feet)
     return _CalibrateAndScaleResult(
         scaled_spec,
         spec_bytes,
@@ -487,7 +693,7 @@ def _solve_pink_ik(
         )
         for r in pink_result.frame_residuals
     ]
-    q_smooth = smooth_reference(q_ik, RATE_HZ, REFERENCE_CUTOFF_HZ)
+    q_smooth = smooth_lane(q_ik, lane, REFERENCE_CUTOFF_HZ)
     audit_result = pink_service.audit_trajectory(q_smooth, solve_req, ik_opts)
     all_converged = bool(pink_result.passed)
     rate_limits_respected = bool(
@@ -579,7 +785,7 @@ def _solve_trajectory_ik(
         return _solve_pink_ik(ctx, lane, kin, scaled_spec, labels, initial_q)
     q_ik, fits = full_capture_ik(lane, kin, initial_q)
     errors = marker_errors(kin, q_ik, lane.points)
-    q_smooth = smooth_reference(q_ik, RATE_HZ, REFERENCE_CUTOFF_HZ)
+    q_smooth = smooth_lane(q_ik, lane, REFERENCE_CUTOFF_HZ)
     q_ref, ref_fits = consistency_resolve(
         lane, kin, q_smooth, prior_weight=CONSISTENCY_PRIOR, iterations=30
     )
@@ -587,17 +793,18 @@ def _solve_trajectory_ik(
     return q_ik, q_ref, fits, ref_fits, errors, ref_errors, None
 
 
-def _persist_dynamics_artifacts(
+def _save_dynamics_record(
     out_dir: Path,
     record: Any,
     sim_errors: np.ndarray,
-    cal_res: _CalibrateAndScaleResult,
-    kin: Any,
-    q_ref: np.ndarray,
-    sim_q: np.ndarray,
-    lookat: np.ndarray,
+    lane: Lane,
+    q_track: np.ndarray,
 ) -> None:
-    """Write dynamics NPZ and render IK / tracking playback GIFs."""
+    """Write ``dynamics_record.npz``.
+
+    The NPZ also keeps the tracked reference (``q_track`` on ``track_time_s``)
+    so same-input bundles can be rebuilt from a run directory (#11607).
+    """
     np.savez(
         out_dir / "dynamics_record.npz",
         time_s=record.time_s,
@@ -610,19 +817,92 @@ def _persist_dynamics_artifacts(
         inside=record.inside_support_polygon,
         lowest_sphere_height_m=record.lowest_sphere_height_m,
         sim_errors_m=sim_errors,
+        q_track=q_track,
+        track_time_s=lane.times,
     )
+
+
+def _render_playbacks(
+    out_dir: Path,
+    cal_res: _CalibrateAndScaleResult,
+    kin: Any,
+    lane: Lane,
+    q_ref: np.ndarray,
+    sim_q: np.ndarray,
+) -> None:
+    """Render IK and tracking playback GIFs.
+
+    The playback looks at the capture's first-frame marker centroid and runs
+    at the capture's own rate.
+    """
+    lookat = np.nanmean(lane.points[0], axis=0)
     names = tuple(kin.coordinate_order)
-    render_playback(
-        cal_res.spec_bytes, names, q_ref, lookat, out_dir / "ik_playback.gif"
-    )
-    render_playback(
-        cal_res.spec_bytes, names, sim_q, lookat, out_dir / "tracking_playback.gif"
-    )
+    for q, name in ((q_ref, "ik_playback.gif"), (sim_q, "tracking_playback.gif")):
+        render_playback(
+            cal_res.spec_bytes,
+            names,
+            q,
+            lookat,
+            out_dir / name,
+            rate_hz=lane.rate_hz,
+        )
 
 
 def _write_receipt(out_dir: Path, receipt: dict[str, Any]) -> None:
     (out_dir / "receipt.json").write_text(
         json.dumps(receipt, indent=2, default=float) + "\n", encoding="utf-8"
+    )
+
+
+def _attach_turn_block(
+    receipt: dict[str, Any],
+    ctx: PipelineContext,
+    lane: Lane,
+    kin: Any,
+    q_ref: np.ndarray,
+    cal_res: _CalibrateAndScaleResult,
+    ik_report: dict[str, Any],
+) -> None:
+    """Record shoulder/trunk/pelvis turn (markers vs model FK) on ``receipt``.
+
+    Model lines use the shared spec forward kinematics with the receipt's
+    calibrated attachments (hip centres, shoulder centres, thorax markers).
+    Descriptive only (issue #12042); a failure to evaluate is recorded, not raised.
+    """
+    from src.shared.python.motion_matching.tour_capture_contract import (  # noqa: PLC0415
+        load_tour_capture,
+    )
+    from src.shared.python.motion_matching.turn_receipt import (  # noqa: PLC0415
+        attach_turn_block,
+    )
+    from src.shared.python.swing_comparison.turn import (  # noqa: PLC0415
+        spec_model_points,
+        unavailable_turn_block,
+    )
+
+    try:
+        spec = json.loads(cal_res.spec_bytes.decode("utf-8"))
+        offsets = {
+            label: (att["body"], att["offset_m"])
+            for label, att in ik_report.get("attachments_m", {}).items()
+        }
+        points = spec_model_points(
+            spec,
+            q_ref,
+            coordinate_names=tuple(kin.coordinate_order),
+            marker_offsets=offsets or None,
+        )
+        capture = load_tour_capture(ctx.c3d_path)
+    except (KeyError, ValueError, TypeError, OSError) as exc:
+        ctx.log.warning("turn block inputs unavailable: %s", exc)
+        receipt["turn"] = unavailable_turn_block(f"inputs_failed: {exc!r}")
+        return
+    attach_turn_block(
+        receipt,
+        capture,
+        model_time_s=lane.times,
+        model_points=points,
+        model_source="mujoco_ik_reference_spec_fk",
     )
 
 
@@ -668,6 +948,109 @@ def _apply_trajectory_optimiser(
         receipt["trajectory_optimiser"] = opt_summary
 
 
+def _feasibility_filters(
+    args: argparse.Namespace,
+    context: tuple[Lane, Any, Any, logging.Logger],
+    q_track: np.ndarray,
+    zmp: dict[str, Any],
+) -> tuple[np.ndarray, dict[str, Any], dict[str, Any] | None, dict[str, Any] | None]:
+    """Run the optional cart-table and centroidal feasibility filters in order."""
+    lane, kin, sim, log = context
+    zmp_report: dict[str, Any] | None = None
+    centroidal_report: dict[str, Any] | None = None
+    if args.zmp_filter:
+        q_track, zmp, zmp_report = zmp_filter(lane, kin, sim, q_track, zmp, log)
+    if getattr(args, "centroidal_filter", False):
+        q_track, zmp, centroidal_report = centroidal_filter(
+            lane, kin, sim, q_track, zmp, log
+        )
+    return q_track, zmp, zmp_report, centroidal_report
+
+
+def _maybe_shooting_fit(
+    args: argparse.Namespace,
+    context: tuple[Lane, Any, Any, logging.Logger],
+    q_track: np.ndarray,
+    q_ref: np.ndarray,
+    zmp: dict[str, Any],
+    tracking: str,
+) -> tuple[np.ndarray, dict[str, Any], dict[str, Any] | None]:
+    """Run the optional multiple-shooting refit stage."""
+    lane, kin, sim, log = context
+    shooting_report: dict[str, Any] | None = None
+    if args.shooting_fit > 0:
+        q_track, zmp, shooting_report = shooting_fit(
+            lane,
+            kin,
+            sim,
+            q_track,
+            q_ref,
+            log,
+            ShootingFitConfig(
+                iterations=args.shooting_fit,
+                gain=args.shooting_gain,
+                tracking_backend=tracking,
+            ),
+        )
+    return q_track, zmp, shooting_report
+
+
+@dataclass(frozen=True)
+class _FinalizeInputs:
+    """Artifacts, kinematic solutions and replay states to finalize the receipt."""
+
+    ik_report: dict[str, Any]
+    cal_res: _CalibrateAndScaleResult
+    weld_report: dict[str, Any]
+    q_ref: np.ndarray
+    q_track: np.ndarray | None = None
+    sim_q: np.ndarray | None = None
+    neck_solve: Any = None
+    fd_neck: str = "ik"
+
+
+def _finalize_receipt(
+    ctx: PipelineContext,
+    receipt: dict[str, Any],
+    context: tuple[Lane, Any, Any, logging.Logger],
+    inputs: _FinalizeInputs,
+) -> None:
+    """Attach engine/gaze/weld metadata, run the optimiser stage and persist
+    the receipt."""
+    lane, kin, sim, log = context
+    receipt["engine"] = ctx.engine
+    receipt["head_gaze"] = head_gaze_receipt(lane, kin, inputs.q_ref)
+    if (
+        "dynamics" in receipt
+        and inputs.q_track is not None
+        and inputs.sim_q is not None
+    ):
+        receipt["dynamics"]["head_gaze"] = fd_head_gaze_report(
+            lane,
+            kin,
+            inputs.q_ref,
+            inputs.q_track,
+            inputs.sim_q,
+            inputs.neck_solve,
+            inputs.fd_neck,
+        )
+    receipt["tracking_weld_projection"] = inputs.weld_report
+    _attach_turn_block(
+        receipt, ctx, lane, kin, inputs.q_ref, inputs.cal_res, inputs.ik_report
+    )
+    _apply_trajectory_optimiser(
+        ctx.args, ctx.out_dir, receipt, lane=lane, kin=kin, sim=sim
+    )
+    _write_receipt(ctx.out_dir, receipt)
+    log_pipeline_summary(
+        log,
+        receipt,
+        inputs.ik_report,
+        inputs.cal_res.calibration,
+        inputs.cal_res.calibration2,
+    )
+
+
 def _simulate_and_receipt(
     ctx: PipelineContext,
     lane: Lane,
@@ -685,27 +1068,28 @@ def _simulate_and_receipt(
     out_dir = ctx.out_dir
     log = ctx.log
     tracking = getattr(args, "tracking", "kkt")
-    q_track = smooth_reference(q_ref, RATE_HZ, TRACKING_CUTOFF_HZ)
-    zmp = fs.reference_zmp(sim, lane.times, q_track, lane.ground)
-    zmp_filter_report: dict[str, Any] | None = None
-    if args.zmp_filter:
-        q_track, zmp, zmp_filter_report = zmp_filter(lane, kin, sim, q_track, zmp, log)
-    shooting_report: dict[str, Any] | None = None
-    if args.shooting_fit > 0:
-        q_track, zmp, shooting_report = shooting_fit(
-            lane,
-            kin,
-            sim,
-            q_track,
-            q_ref,
-            log,
-            ShootingFitConfig(
-                iterations=args.shooting_fit,
-                gain=args.shooting_gain,
-                tracking_backend=tracking,
-            ),
-        )
+    q_track = smooth_lane(q_ref, lane, TRACKING_CUTOFF_HZ)
+    zmp = lane_reference_zmp(sim, lane, q_track)
+    q_track, zmp, zmp_filter_report, centroidal_report = _feasibility_filters(
+        args, (lane, kin, sim, log), q_track, zmp
+    )
+    # After the filters, which re-pose the body; the ZMP keeps the IK neck.
+    fd_neck = getattr(args, "fd_neck", "ik")
+    q_track, neck_solve = apply_fd_neck(fd_neck, lane, kin, q_ref, q_track)
+    q_track, zmp, shooting_report = _maybe_shooting_fit(
+        args, (lane, kin, sim, log), q_track, q_ref, zmp, tracking
+    )
+    q_track, weld_report = weld_consistent_track(kin, cal_res.scaled_spec, q_track)
     record, sim_q = replay(sim, lane, q_track, tracking_backend=tracking)
+    finish = finish_feasibility_report(
+        sim,
+        times_track=lane.times,
+        q_track=q_track,
+        record=record,
+        zmp=zmp,
+        ground=lane.ground,
+        q_ik=q_ref,
+    )
     dynamics_report, sim_errors = build_dynamics_report(
         DynamicsReportInputs(
             lane=lane,
@@ -717,14 +1101,14 @@ def _simulate_and_receipt(
             q_ref=q_ref,
             zmp=zmp,
             zmp_filter_report=zmp_filter_report,
+            centroidal_filter_report=centroidal_report,
             shooting_report=shooting_report,
             tracking_backend=tracking,
+            finish_feasibility=finish,
         )
     )
-    lookat = np.nanmean(lane.points[0], axis=0)
-    _persist_dynamics_artifacts(
-        out_dir, record, sim_errors, cal_res, kin, q_ref, sim_q, lookat
-    )
+    _save_dynamics_record(out_dir, record, sim_errors, lane, q_track)
+    _render_playbacks(out_dir, cal_res, kin, lane, q_ref, sim_q)
     receipt = build_ground_support_receipt(
         GroundSupportReceiptInputs(
             backend=args.backend,
@@ -751,18 +1135,58 @@ def _simulate_and_receipt(
             elapsed_s=time.perf_counter() - ctx.t_start,
         )
     )
-    receipt["engine"] = ctx.engine
-    _apply_trajectory_optimiser(args, out_dir, receipt, lane=lane, kin=kin, sim=sim)
-    _write_receipt(out_dir, receipt)
-    log_pipeline_summary(
-        log, receipt, ik_report, cal_res.calibration, cal_res.calibration2
+    _finalize_receipt(
+        ctx,
+        receipt,
+        (lane, kin, sim, log),
+        _FinalizeInputs(
+            ik_report=ik_report,
+            cal_res=cal_res,
+            weld_report=weld_report,
+            q_ref=q_ref,
+            q_track=q_track,
+            sim_q=sim_q,
+            neck_solve=neck_solve,
+            fd_neck=fd_neck,
+        ),
     )
     return receipt
 
 
+def _save_ik_trajectory(
+    ctx: PipelineContext,
+    lane: Lane,
+    q_ik: np.ndarray,
+    q_ref: np.ndarray,
+    errors: np.ndarray,
+    ref_errors: np.ndarray,
+) -> None:
+    """Persist the IK and reference trajectories the MJX exporter reads back."""
+    np.savez(
+        ctx.out_dir / "ik_trajectory.npz",
+        time_s=lane.times,
+        q=q_ik,
+        q_ref=q_ref,
+        errors_m=errors,
+        ref_errors_m=ref_errors,
+        valid=lane.valid,
+    )
+
+
+@dataclass(frozen=True)
+class CalibratedRun:
+    """Pipeline state after hip calibration, the address solve and leg scaling."""
+
+    ctx: PipelineContext
+    lane: Lane
+    base_spec: dict[str, Any]
+    labels: tuple[str, ...]
+    cal_res: _CalibrateAndScaleResult
+
+
 @precondition(lambda args: args is not None, "args must not be None")
-def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
-    """Execute the full-body ground support matching pipeline."""
+def calibrate_run(args: argparse.Namespace) -> CalibratedRun:
+    """Run the pipeline through the calibrated address (no trajectory or dynamics)."""
     ctx = _init_pipeline(args)
     base_spec = json.loads(Path(args.spec).read_text(encoding="utf-8"))
     upper_base = json.loads(UPPER_SPEC.read_text(encoding="utf-8"))
@@ -776,13 +1200,67 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
     plant = get_plant(ctx.engine, base_spec)
     lane = Lane(labels, ctx.c3d_path, plant=plant)
     configure_lane(lane, base_spec)
+    lane.feet = build_foot_targets(lane, getattr(args, "foot_progression", "off"))
+    if lane.feet is not None:
+        seed_kin = plant.create_ik(lane.leg_seeds())
+        base_spec = seed_document_feet(
+            base_spec, seed_kin, lane.feet, document_seed(base_spec, seed_kin)
+        )
     if args.bound_wrists and args.free_wrists:
         raise ValueError("--bound-wrists and --free-wrists exclude each other")
     if args.bound_wrists or (fitted_grip(base_spec) and not args.free_wrists):
         lane.bounds |= wrist_bounds()
         ctx.log.info("wrists and forearms bounded to the human ranges in the IK")
 
+    lane.gaze_weight = float(getattr(args, "gaze_weight", 0.0))
+
     cal_res = _calibrate_and_scale(ctx, lane, base_spec, upper_base, upper, labels)
+    return CalibratedRun(ctx, lane, base_spec, labels, cal_res)
+
+
+def run_address_stage(args: argparse.Namespace) -> dict[str, Any]:
+    """Return the calibrated address report (``foot_progression`` included).
+
+    Adds ``hip_coordinates_deg``: the six hip coordinates at the calibrated
+    address, so a coordinate at its range limit is visible in the report.
+    """
+    cal_res = calibrate_run(args).cal_res
+    report = cal_res.address_report
+    names = list(cal_res.kin.coordinate_order)
+    report["hip_coordinates_deg"] = {
+        name: float(np.degrees(cal_res.address2.q[names.index(name)]))
+        for name in names
+        if name.startswith("hip_")
+    }
+    angles, translations = split_address_coordinates(names, cal_res.address2.q)
+    report["address_coordinates_deg"] = angles
+    report["address_translations_m"] = translations
+    out = Path(args.out) / "address_report.json"
+    out.write_text(json.dumps(report, indent=2, sort_keys=True, default=str) + "\n")
+    return report
+
+
+@precondition(lambda args: args is not None, "args must not be None")
+def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
+    """Execute the full-body ground support matching pipeline."""
+    run = calibrate_run(args)
+    ctx, lane, base_spec, labels, cal_res = (
+        run.ctx,
+        run.lane,
+        run.base_spec,
+        run.labels,
+        run.cal_res,
+    )
+    lane.set_club_targets(cal_res.attachments, cal_res.scaled_spec, args.face_weight)
+    lane.set_restart_policy(
+        getattr(args, "ik_restart_policy", DEFAULT_IK_RESTART_POLICY)
+    )
+    lane.posture_prior_weight = getattr(args, "ik_posture_prior_weight", 0.0)
+    lane.set_turn_split(
+        cal_res.attachments,
+        getattr(args, "thorax_weight", DEFAULT_THORAX_WEIGHT),
+        getattr(args, "shoulder_girdle_weight", DEFAULT_SHOULDER_GIRDLE_WEIGHT),
+    )
 
     (
         q_ik,
@@ -795,6 +1273,15 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
     ) = _solve_trajectory_ik(
         ctx, lane, cal_res.kin, cal_res.scaled_spec, labels, cal_res.address2.q
     )
+
+    if lane.feet is not None:
+        cal_res.address_report["foot_progression"]["trajectory"] = {
+            "stride_frames": FOOT_SERIES_STRIDE,
+            "finish_model_deg": model_feet_deg(cal_res.kin, q_ik[-1], lane.feet),
+            "series_model_deg": foot_progression_series(
+                cal_res.kin, q_ik, lane.feet, FOOT_SERIES_STRIDE
+            ),
+        }
 
     ik_report = build_ik_report(
         IKReportInputs(
@@ -820,15 +1307,12 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
             constrained_ik=constrained_ik_dict,
         )
     )
-    np.savez(
-        ctx.out_dir / "ik_trajectory.npz",
-        time_s=lane.times,
-        q=q_ik,
-        q_ref=q_ref,
-        errors_m=errors,
-        ref_errors_m=ref_errors,
-        valid=lane.valid,
-    )
+    lane.select_release_cutoff(cal_res.kin, cal_res.scaled_spec, q_ref)
+    _attach_face_report(ik_report, lane, cal_res, (q_ik, q_ref), args.face_weight)
+    ik_report["restart_policy"] = lane.restart_report()
+    if turn_split_active(lane):
+        ik_report["turn_split"] = turn_split_report(lane)
+    _save_ik_trajectory(ctx, lane, q_ik, q_ref, errors, ref_errors)
 
     return _simulate_and_receipt(
         ctx,
@@ -848,6 +1332,9 @@ def main() -> None:
     """CLI entry point."""
     parser = build_parser()
     args = parser.parse_args()
+    if args.address_only:
+        run_address_stage(args)
+        return
     run_pipeline(args)
 
 

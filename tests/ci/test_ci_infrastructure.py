@@ -388,6 +388,51 @@ class TestCIEnvironmentCompatibility:
         assert "scripts/ci/require_junit_test_passed.py" in workflow
         assert "test_jaxsim_pinocchio_free_body_dynamics_terms_match" in workflow
 
+    def test_cross_engine_equivalence_runs_force_overlay_parity_per_engine(
+        self,
+    ) -> None:
+        """Issue #11346: each engine runs the force-overlay parity file.
+
+        Every lane must install its engine, select ``requires_<engine>`` and
+        require a named testcase to pass so an all-skipped report fails.
+        """
+        try:
+            import yaml
+        except ImportError:
+            pytest.skip("PyYAML is required for workflow structure checks")
+
+        data = yaml.safe_load(
+            (
+                REPO_ROOT / ".github" / "workflows" / "cross-engine-equivalence.yml"
+            ).read_text(encoding="utf-8")
+        )
+        job = data["jobs"]["force-overlay-parity"]
+        lanes = {lane["engine"]: lane for lane in job["strategy"]["matrix"]["include"]}
+        assert set(lanes) == {"drake", "pinocchio", "opensim", "mujoco"}
+        for lane in lanes.values():
+            assert lane["install"]
+            assert lane["evidence"].startswith("test_")
+        steps = {step["name"]: step for step in job["steps"] if "name" in step}
+        run_step = next(
+            s for n, s in steps.items() if n.startswith("Run force-overlay")
+        )
+        assert (
+            "tests/integration/cross_engine/test_force_overlay_parity.py"
+            in (run_step["run"])
+        )
+        assert "requires_${{ matrix.engine }}" in run_step["run"]
+        guard = next(s for n, s in steps.items() if "actually ran" in n)
+        assert "scripts/ci/require_junit_test_passed.py" in guard["run"]
+        assert "${{ matrix.evidence }}" in guard["run"]
+        names = list(steps)
+        isolate = next(n for n in names if n.startswith("Isolate Python tool cache"))
+        setup = next(n for n in names if n.startswith("Set up Python"))
+        assert names.index(isolate) < names.index(setup)
+        # Shared contract changes must trigger the parity lanes (push and PR).
+        for trigger in ("push", "pull_request"):
+            triggers = data.get("on", data.get(True, {}))
+            assert "src/shared/python/force_overlay/**" in triggers[trigger]["paths"]
+
     def test_jaxsim_upgrade_guard_runs_pinned_equivalence_and_gradient_checks(
         self,
     ) -> None:
@@ -1020,7 +1065,7 @@ class TestCIEnvironmentCompatibility:
             "using serial pytest to avoid xdist worker termination" in core_step["run"]
         )
 
-    def test_unit_gate_fetches_pr_base_before_child_copy_guard(self) -> None:
+    def test_unit_gate_fetches_default_branch_before_child_copy_guard(self) -> None:
         """The unit ownership guard must have its fail-closed comparison ref."""
         try:
             import yaml
@@ -1035,14 +1080,20 @@ class TestCIEnvironmentCompatibility:
         steps = workflow["jobs"]["unit-test-gate"]["steps"]
         step_names = [step.get("name", "") for step in steps]
 
-        fetch_index = step_names.index("Fetch PR base for ownership guards")
+        fetch_index = step_names.index("Fetch default branch for ownership guards")
         unit_index = step_names.index("Run Green-Suite Unit Gate")
         fetch_step = steps[fetch_index]
 
         assert fetch_index < unit_index
-        assert fetch_step["if"] == "github.event_name == 'pull_request'"
+        # PR and merge_group runs need a real origin/<default> ref, not only
+        # FETCH_HEAD, including when a PR is stacked on a feature branch.
+        assert fetch_step["if"] == (
+            "github.event_name == 'pull_request' || github.event_name == 'merge_group'"
+        )
         assert (
-            'git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"'
+            "git fetch --no-tags --depth=1 origin "
+            '"${{ github.event.repository.default_branch }}:'
+            'refs/remotes/origin/${{ github.event.repository.default_branch }}"'
             in fetch_step["run"]
         )
 

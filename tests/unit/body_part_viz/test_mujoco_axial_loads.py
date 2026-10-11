@@ -101,3 +101,24 @@ def test_native_widget_exposes_shared_force_controls(monkeypatch):
     assert widget.axial_color_scale.enabled
     widget.close()
     app.processEvents()
+
+
+def _discovered_bodies(xml: str) -> set[int]:
+    model = mujoco.MjModel.from_xml_string(xml)
+    return set(MujocoAxialLoadSource(model)._axes)
+
+
+@pytest.mark.parametrize("geom_type", ["capsule", "cylinder"])
+def test_axis_discovery_accepts_capsule_and_cylinder_rods(geom_type):
+    """Geom/joint type ints from MjModel must match enums on every MuJoCo version."""
+    assert _discovered_bodies(ROD.replace("capsule", geom_type)) == {1}
+
+
+def test_axis_discovery_skips_free_bodies_and_non_rod_geoms():
+    free = ROD.replace('<joint type="hinge" axis="0 1 0"/>', "<freejoint/>")
+    assert _discovered_bodies(free) == set()
+    box = ROD.replace(
+        'type="capsule" fromto="0 0 0 0 0 -1" size="0.03"',
+        'type="box" size="0.1 0.1 0.1"',
+    )
+    assert _discovered_bodies(box) == set()

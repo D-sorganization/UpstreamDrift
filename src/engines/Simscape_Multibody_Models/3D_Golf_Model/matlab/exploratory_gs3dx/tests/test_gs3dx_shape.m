@@ -86,7 +86,9 @@ classdef test_gs3dx_shape < matlab.unittest.TestCase
         function kinematics_and_drawn_ellipsoids_match(testCase)
             % Same joint targets, same solid poses; drawn ellipsoids are their radii.
             jc = gs3dx_capture_joint_centres(gs3dx_capture_markers());
-            ik = gs3dx_whole_body_ik(jc, frames=[1 jc.impact_frame], calibration_frames=1:15:jc.impact_frame - 90);
+            % Explicitly pin historically Fit-based shape builder test call to variants.fit
+            ik = gs3dx_whole_body_ik(jc, model=char(gs3dx_names().variants.fit), ...
+                frames=[1 jc.impact_frame], calibration_frames=1:15:jc.impact_frame - 90);
             o = gs3dx_render(testCase.mdl, ik, stills=[1 2], output_dir=tempdir);
             o0 = gs3dx_render(testCase.base, ik, stills=[1 2], output_dir=tempdir);
             load_system(testCase.mdl);

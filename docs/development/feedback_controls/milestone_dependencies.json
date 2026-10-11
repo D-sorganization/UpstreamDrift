@@ -1,0 +1,158 @@
+{
+  "schema_version": "feedback-controls-milestone-dependencies/v1",
+  "edge_semantics": "Each depends_on entry is a prerequisite deliverable milestone, not closure of the governing issue.",
+  "status": "planning-unqualified",
+  "authority": "https://github.com/D-sorganization/UpstreamDrift/issues/11784",
+  "notes": [
+    "Milestones refine existing tasks; they do not create new issues or a second capability registry.",
+    "Private D03 supplies scientific evidence consumed by F07/F08/F09 acceptance.",
+    "D04 supplies final private reproduction evidence to F10.",
+    "F08_ready consumes F07_ready, never F07_accepted.",
+    "Optional F05 requires a report or not-selected disposition, not NMPC implementation."
+  ],
+  "milestones": [
+    {
+      "id": "F01",
+      "depends_on": [],
+      "deliverable": "Freeze capability/gate contracts; private inventory enriches coverage without blocking synthetic schema definition"
+    },
+    {
+      "id": "T01",
+      "depends_on": [],
+      "deliverable": "Shared versioned replay/input contract coordinated with F01"
+    },
+    {
+      "id": "D01",
+      "depends_on": [],
+      "deliverable": "Authorized private inventory using existing manifest; new-format export waits for T01"
+    },
+    {
+      "id": "T02_contract",
+      "depends_on": ["F01", "T01"],
+      "deliverable": "Shared evidence schema ready"
+    },
+    {
+      "id": "D02",
+      "depends_on": ["D01", "F01", "T01", "T02_contract"],
+      "deliverable": "Freeze private splits, uncertainty and evaluation protocol"
+    },
+    {
+      "id": "F06_early",
+      "depends_on": ["F01", "T01"],
+      "deliverable": "Independent native replay contract and smoke test"
+    },
+    {
+      "id": "F07_probe",
+      "depends_on": ["F01", "T01"],
+      "deliverable": "Native muscle/contact/state capability probe"
+    },
+    {
+      "id": "F02",
+      "depends_on": ["F01", "T01"],
+      "deliverable": "Executable distributed controller and allocation"
+    },
+    {
+      "id": "F03",
+      "depends_on": ["F01", "F06_early", "D02"],
+      "deliverable": "Benchmark runnable constrained fitting; synthetic development may precede D02"
+    },
+    {
+      "id": "F04",
+      "depends_on": ["F02", "F03", "D02"],
+      "deliverable": "Executable tuning and perturbation workflow"
+    },
+    {
+      "id": "F06_ready",
+      "depends_on": ["F06_early", "F02", "F03"],
+      "deliverable": "Integrated torque export and independent replay provider"
+    },
+    {
+      "id": "F07_ready",
+      "depends_on": ["F07_probe", "F03", "D01", "D02"],
+      "deliverable": "Pinned native muscle/contact/state model and tested forward API ready for F08"
+    },
+    {
+      "id": "T02_integrated",
+      "depends_on": ["T02_contract", "F06_ready", "F07_ready"],
+      "deliverable": "Native provider evidence interchange integration accepted"
+    },
+    {
+      "id": "T03_ready",
+      "depends_on": ["T01", "T02_contract", "F01"],
+      "deliverable": "Bounded resources and preview manifests implemented"
+    },
+    {
+      "id": "F08_ready",
+      "depends_on": ["F04", "F07_ready", "T01", "T02_contract", "D02"],
+      "deliverable": "Runnable muscle matching and independent excitation replay"
+    },
+    {
+      "id": "F09_ready",
+      "depends_on": [
+        "F06_ready",
+        "F07_ready",
+        "F08_ready",
+        "T02_integrated",
+        "T03_ready"
+      ],
+      "deliverable": "Runnable all-model six-engine conformance workflow"
+    },
+    {
+      "id": "D03",
+      "depends_on": [
+        "D02",
+        "F02",
+        "F03",
+        "F04",
+        "F06_ready",
+        "F07_ready",
+        "F08_ready",
+        "F09_ready"
+      ],
+      "deliverable": "Complete private staged native campaign evidence; stages start when their providers are ready"
+    },
+    {
+      "id": "T03_integrated",
+      "depends_on": ["T03_ready", "F09_ready"],
+      "deliverable": "Downstream resource/preview integration accepted"
+    },
+    {
+      "id": "D04",
+      "depends_on": ["D03", "T03_integrated"],
+      "deliverable": "Final private authorized-host replay, privacy audit and turnover"
+    },
+    {
+      "id": "F07_accepted",
+      "depends_on": ["F07_ready", "D03"],
+      "deliverable": "Scientific muscle/contact baseline acceptance"
+    },
+    {
+      "id": "F08_accepted",
+      "depends_on": ["F08_ready", "D03"],
+      "deliverable": "Full native muscle-driven match and excitation replay acceptance"
+    },
+    {
+      "id": "F09_accepted",
+      "depends_on": ["F09_ready", "D03"],
+      "deliverable": "All required model/engine conformance acceptance"
+    },
+    {
+      "id": "F05_disposition",
+      "depends_on": ["F02", "F03", "F04"],
+      "deliverable": "Optional NMPC benchmark report or explicit not-selected disposition"
+    },
+    {
+      "id": "F10",
+      "depends_on": [
+        "F07_accepted",
+        "F08_accepted",
+        "F09_accepted",
+        "D04",
+        "T02_integrated",
+        "T03_integrated",
+        "F05_disposition"
+      ],
+      "deliverable": "Final qualification campaign disposition"
+    }
+  ]
+}

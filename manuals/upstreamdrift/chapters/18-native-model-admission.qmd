@@ -1,0 +1,106 @@
+# Native Muscle-Model Artifact Admission
+
+## Status and Purpose
+
+Evidence class: observed structural facts, provisional. Child #11819 of F07
+#11791 adds `tour_matching.audit_muscle_model_asset` before expensive native
+optimization. This inventory is not anatomical, physiological, contact or replay
+qualification. The calculation registry and manual release remain blocked.
+
+The boundary reuses `validate_model_checkpoint`, native OpenSim `Model` loading
+and recursive component inheritance queries. It does not convert a model, change
+parameters, equilibrate muscles or integrate dynamics. Successful `initSystem`
+establishes initialization on this runtime, not an admissible replay checkpoint.
+
+## Source and Loaded Identity
+
+The caller supplies the complete SHA-256 of source `.osim` bytes. The source is
+checked before parsing, against the captured bytes and after native inventory.
+Mismatch raises an error. This detects ordinary concurrent modification, not an
+adversarial change-and-restore race or a filesystem transaction.
+
+The reader accepts native C++ scoped tags such as
+`HuntCrossleyForce::ContactParametersSet` without XML namespace interpretation.
+DTDs, entities and external XML references remain forbidden. Source bytes are
+never rewritten. Class-name suffixes identify only XML declarations; omitted
+properties remain null and plugin inheritance remains unresolved.
+
+Native initialization records the actual OpenSim version, SHA-256 of
+`model.dump()`, state names, coordinate facts and effective muscle options. A
+second SHA-256 binds those observations with the version using deterministic
+JSON. Caller region labels do not change this loaded identity. It covers recorded
+serialization and observations, not compiled binaries, plugin provenance or
+complete external resources. Those remain required before replay acceptance.
+
+## Structural Observations
+
+Recursive traversal reports exact native paths/classes for muscles, all forces,
+nonmuscle actuators, controllers, constraints, contact geometry, bodies and other
+components. Forces outside ForceSet remain visible. Actuator names do not prove
+reserve, physiological-support or passive roles; their disposition is unverified.
+Muscles outside the native muscle registry are reported separately and require
+registration resolution; recursive presence alone does not prove control access.
+
+Each muscle records its concrete law and effective `ignore_tendon_compliance`
+and `ignore_activation_dynamics`. Geometric paths provide point-parent and
+base-frame paths; non-geometric paths are explicitly unavailable. Conditional
+point activation, wrapping, continuity, moment arms and force capacity are not
+tested. For caller-declared regional frames $R_r$ and muscle attachment frames
+$P_m$, the reported set is only
+
+$$
+A_r = \{m : P_m \cap R_r \ne \varnothing\}.
+$$
+
+Membership does not establish joint crossing, moment-arm sign or muscle action.
+Unknown native frame paths fail, and unresolved muscle paths remain listed.
+Region labels and coordinate roles are caller declarations, never inferred from
+names or counts. Every region remains `anatomy_status = unverified`.
+
+Coordinate facts include native initialized locks/prescription, default values
+in their native units and exact declared roles. Native `nq` and `nu` are recorded
+separately; they are not independent DOF counts because constraint rank is
+unverified. No coordinate is universally relabelled as radians or degrees.
+
+## Resources and Unavailable Evidence
+
+Visual `Mesh.mesh_file` and `ContactMesh.filename` candidates are checked beside
+the source and in its `Geometry` directory. Existing files are hashed and labelled
+`local-candidate-unverified-use`; missing candidates stay missing. This does not
+validate their contents or prove native selection over global search paths.
+Other file/plugin dependencies and complete resource closure remain required.
+
+Missing bindings yield `native-unavailable`; native load/connection/initialization
+failure yields `native-load-failed`. Both retain source facts, declared maps and a
+native-initialization requirement. Source-only requests yield `serialized-only`;
+success yields `native-initialized-structural-only`. Every result remains
+scientifically `unqualified`, requiring license/ancestry, resources,
+anatomy/capacity, paths/parameters, full-state replay, contact and grip evidence.
+
+## Verification and Reproduction
+
+```python
+from src.engines.physics_engines.opensim.python.tour_matching import (
+    audit_muscle_model_asset,
+)
+
+inventory = audit_muscle_model_asset(
+    local_osim_path,
+    independently_pinned_sha256,
+    region_frames=reviewed_region_frame_declarations,
+    coordinate_roles=reviewed_coordinate_role_declarations,
+)
+facts = inventory.as_dict()
+```
+
+Run `python3 -m pytest tests/opensim/test_model_admission.py -o addopts='' -q`
+with the pinned native environment. Synthetic native cases cover Millard/Thelen
+options, locks, coupled constraints, auxiliary actuators, controllers, contact
+geometry, forces outside ForceSet, repeated/changed identities, mapping errors
+and load failure. Native cases skip when bindings are absent; such a run proves
+only pure contracts. The turnover records actual native execution separately.
+
+A generated 520-declaration source counterexample retains omitted properties,
+locked wrist-like structure, extra actuators and missing geometry without claiming
+full-body anatomy. No foreign model or private capture bytes are committed.
+These checks complete neither F07/F08, D03 nor the all-model six-engine goal.

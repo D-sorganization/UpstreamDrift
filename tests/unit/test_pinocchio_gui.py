@@ -11,8 +11,7 @@ from src.shared.python.engine_core.engine_availability import (
 )
 from src.shared.python.gui_pkg.gui_utils import get_qapp
 
-if PYQT6_AVAILABLE:
-    pass
+pytestmark = [pytest.mark.unit]
 
 
 @pytest.fixture(autouse=True, scope="module")

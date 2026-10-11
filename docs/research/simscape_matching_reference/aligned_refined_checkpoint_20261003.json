@@ -1,0 +1,401 @@
+{
+  "all_35_input_torque_axes_qualified": false,
+  "comparison": {
+    "model_saved": false,
+    "production_modified": false,
+    "qualification": "PRIVATE_REFINED_OBJECTIVE_WINDOW_COMPARISON_NOT_FULL_CAPTURE_CONTACT_OR_DYNAMICS",
+    "records": {
+      "capture_A": {
+        "angular_0_02_linear_0_5": {
+          "angular_weight": 0.02,
+          "interior_step_seconds": 0.002777777777777778,
+          "linear_weight": 0.5,
+          "max_interior_right_wrist_step_deg": 4.802957090081861,
+          "max_interior_root_step_mm": 2.149493533148385,
+          "mean_observed_target_rms_mm": 28.1327045832479,
+          "native_pose_rechecks": 48,
+          "peak_observed_target_rms_mm": 29.75911901985734,
+          "prefix_plus_window_pose_count": 48,
+          "seed_boundary_seconds": 0.016666666666666666,
+          "seed_root_step_mm": 8.64864636677185,
+          "window_pose_count": 8
+        },
+        "baseline": {
+          "angular_weight": 0,
+          "interior_step_seconds": 0.002777777777777778,
+          "linear_weight": 0,
+          "max_interior_right_wrist_step_deg": 4.612642600774194,
+          "max_interior_root_step_mm": 2.168549475441003,
+          "mean_observed_target_rms_mm": 28.091827835901043,
+          "native_pose_rechecks": 48,
+          "peak_observed_target_rms_mm": 29.752413795008994,
+          "prefix_plus_window_pose_count": 48,
+          "seed_boundary_seconds": 0.016666666666666666,
+          "seed_root_step_mm": 8.12874266715736,
+          "window_pose_count": 8
+        },
+        "linear_0_5": {
+          "angular_weight": 0,
+          "interior_step_seconds": 0.002777777777777778,
+          "linear_weight": 0.5,
+          "max_interior_right_wrist_step_deg": 4.7076444156357695,
+          "max_interior_root_step_mm": 2.1490390651944886,
+          "mean_observed_target_rms_mm": 28.080229057050207,
+          "native_pose_rechecks": 48,
+          "peak_observed_target_rms_mm": 29.750476888203515,
+          "prefix_plus_window_pose_count": 48,
+          "seed_boundary_seconds": 0.016666666666666666,
+          "seed_root_step_mm": 8.448989550357814,
+          "window_pose_count": 8
+        },
+        "zero": {
+          "angular_weight": 0,
+          "interior_step_seconds": 0.002777777777777778,
+          "linear_weight": 0,
+          "max_interior_right_wrist_step_deg": 4.612642600774194,
+          "max_interior_root_step_mm": 2.168549475441003,
+          "mean_observed_target_rms_mm": 28.091827835901043,
+          "native_pose_rechecks": 48,
+          "peak_observed_target_rms_mm": 29.752413795008994,
+          "prefix_plus_window_pose_count": 48,
+          "seed_boundary_seconds": 0.016666666666666666,
+          "seed_root_step_mm": 8.12874266715736,
+          "window_pose_count": 8
+        }
+      },
+      "capture_O": {
+        "angular_0_02_linear_0_5": {
+          "angular_weight": 0.02,
+          "interior_step_seconds": 0.004166666666666667,
+          "linear_weight": 0.5,
+          "max_interior_right_wrist_step_deg": 9.131854201971466,
+          "max_interior_root_step_mm": 4.8936720183944225,
+          "mean_observed_target_rms_mm": 19.256068100374243,
+          "native_pose_rechecks": 38,
+          "peak_observed_target_rms_mm": 23.905999714443467,
+          "prefix_plus_window_pose_count": 38,
+          "seed_boundary_seconds": 0.03333333333333333,
+          "seed_root_step_mm": 25.072776595194576,
+          "window_pose_count": 8
+        },
+        "baseline": {
+          "angular_weight": 0,
+          "interior_step_seconds": 0.004166666666666667,
+          "linear_weight": 0,
+          "max_interior_right_wrist_step_deg": 7.426563340749966,
+          "max_interior_root_step_mm": 5.3333427630495605,
+          "mean_observed_target_rms_mm": 19.229028237858387,
+          "native_pose_rechecks": 38,
+          "peak_observed_target_rms_mm": 23.896541386508407,
+          "prefix_plus_window_pose_count": 38,
+          "seed_boundary_seconds": 0.03333333333333333,
+          "seed_root_step_mm": 24.419644735399135,
+          "window_pose_count": 8
+        },
+        "linear_0_5": {
+          "angular_weight": 0,
+          "interior_step_seconds": 0.004166666666666667,
+          "linear_weight": 0.5,
+          "max_interior_right_wrist_step_deg": 7.441899765194704,
+          "max_interior_root_step_mm": 4.994139997171412,
+          "mean_observed_target_rms_mm": 19.19949596151372,
+          "native_pose_rechecks": 38,
+          "peak_observed_target_rms_mm": 23.879502226549164,
+          "prefix_plus_window_pose_count": 38,
+          "seed_boundary_seconds": 0.03333333333333333,
+          "seed_root_step_mm": 24.724050411349804,
+          "window_pose_count": 8
+        },
+        "zero": {
+          "angular_weight": 0,
+          "interior_step_seconds": 0.004166666666666667,
+          "linear_weight": 0,
+          "max_interior_right_wrist_step_deg": 7.426563340749966,
+          "max_interior_root_step_mm": 5.3333427630495605,
+          "mean_observed_target_rms_mm": 19.229028237858387,
+          "native_pose_rechecks": 38,
+          "peak_observed_target_rms_mm": 23.896541386508407,
+          "prefix_plus_window_pose_count": 38,
+          "seed_boundary_seconds": 0.03333333333333333,
+          "seed_root_step_mm": 24.419644735399135,
+          "window_pose_count": 8
+        }
+      }
+    },
+    "simulation_executed": false,
+    "whole_output_zero_parity": true
+  },
+  "conclusion": "Small root improvements accompany worse wrist increments; combined owner RMS also worsens. Unpromoted. Fresh saved-pose natural exit does not replace original fit shutdown failure.",
+  "contact_qualified": false,
+  "continuous_path_qualified": false,
+  "counts": {
+    "all_axes_input_torque_mode_verified": false,
+    "counts": {
+      "closed_arm_position_representation_values": 7,
+      "closed_arm_velocity_variables": 6,
+      "floating_ik_parameters": 37,
+      "leg_control_axes": 12,
+      "native_position_variables": 48,
+      "native_velocity_variables": 43,
+      "neck_control_axes": 2,
+      "passive_midfoot_velocity_variables": 2,
+      "requested_control_axes": 35,
+      "unactuated_root_velocity_variables": 6,
+      "upper_control_axes": 21
+    },
+    "global_rank_verified": false,
+    "model_loaded": false,
+    "qualification": "SAVED_NATIVE_METADATA_AND_CONTROL_AXIS_COUNTS_NOT_GLOBAL_RANK_ACTIVE_TORQUE_MODE_OR_DYNAMICS_ACCEPTANCE",
+    "simulation_executed": false,
+    "source_sha256": {
+      "gs3dx_ik_joint_roles.m": "2de2971885f375c910bba7442816e06188d2c2b04de8cd70ff049eab1e527aab",
+      "gs3dx_leg_reference.m": "2b4bb83cb8950db3a1a3d6a593ba0494c2ca544bb302b0caacfbad800532aa21",
+      "gs3dx_upper_body_joints.m": "60e5b4aacbd1ffa6f1721d3eb26ec2edbdb9de90bc6eda307dfd516f1b0c6f51",
+      "native-position-schema-private.csv": "e94e452f6d83379f879bc2870dfed709387bb16172374ee33f016fc5637c5df1",
+      "native-velocity-schema-private.csv": "ef9b16889bb2ad947dd2ec84de1d6a02e3c3055e9a40928c47b3b6cb2c4476fb"
+    },
+    "unique_inverse_dynamics_verified": false
+  },
+  "failed_recheck_receipts": [
+    {
+      "actual_process_exit_code": 1,
+      "done_marker": false,
+      "final_exit_code": 1,
+      "script_status": "failed",
+      "termination_reason": "natural_exit",
+      "timestamp": "2026-10-03T07:12:25.476508+00:00"
+    },
+    {
+      "actual_process_exit_code": 1,
+      "done_marker": false,
+      "final_exit_code": 1,
+      "script_status": "failed",
+      "termination_reason": "natural_exit",
+      "timestamp": "2026-10-03T07:16:36.164906+00:00"
+    }
+  ],
+  "forward_dynamics_qualified": false,
+  "fresh_recheck_receipt": {
+    "actual_process_exit_code": 0,
+    "done_marker": true,
+    "final_exit_code": 0,
+    "script_status": "success",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T07:22:17.616068+00:00"
+  },
+  "fresh_saved_pose_recheck": {
+    "checks": {
+      "capture_A": {
+        "angular_0_02_linear_0_5": {
+          "fresh_native_pose_count": 48,
+          "max_physical_pose_residual": 4.960524086056721e-16
+        },
+        "baseline": {
+          "fresh_native_pose_count": 48,
+          "max_physical_pose_residual": 4.960524086056721e-16
+        },
+        "linear_0_5": {
+          "fresh_native_pose_count": 48,
+          "max_physical_pose_residual": 5.495323605393213e-16
+        },
+        "zero": {
+          "fresh_native_pose_count": 48,
+          "max_physical_pose_residual": 4.960524086056721e-16
+        }
+      },
+      "capture_O": {
+        "angular_0_02_linear_0_5": {
+          "fresh_native_pose_count": 38,
+          "max_physical_pose_residual": 5.495323605393213e-16
+        },
+        "baseline": {
+          "fresh_native_pose_count": 38,
+          "max_physical_pose_residual": 4.960524086056721e-16
+        },
+        "linear_0_5": {
+          "fresh_native_pose_count": 38,
+          "max_physical_pose_residual": 4.960524086056721e-16
+        },
+        "zero": {
+          "fresh_native_pose_count": 38,
+          "max_physical_pose_residual": 4.960524086056721e-16
+        }
+      }
+    },
+    "fresh_native_pose_count": 344,
+    "model_saved": false,
+    "original_fit_wrapper_exit_code": 125,
+    "production_modified": false,
+    "qualification": "FRESH_SAVED_REFINED_POSE_RECHECK_AFTER_ORIGINAL_SHUTDOWN_FAILURE_NOT_CONTINUOUS_PATH_OR_DYNAMICS",
+    "simulation_executed": false,
+    "spherical_block_frames": {
+      "capture_A": [
+        {
+          "available_frame_and_mode_settings": {
+            "PxTorqueActuationMode": "NoTorque",
+            "PyTorqueActuationMode": "NoTorque",
+            "PzTorqueActuationMode": "NoTorque",
+            "SphActuationFrame": "FollowerFrame",
+            "SphSensingFrame": "FollowerFrame",
+            "SphTorqueActuationMode": "NoTorque"
+          },
+          "block": "GS3DX_Human/Hips and Torso Inputs/Hip Kinetically Driven/Hip Joint",
+          "standalone_spherical_frame_fields_available": false
+        },
+        {
+          "available_frame_and_mode_settings": {
+            "ActuationFrame": "FollowerFrame",
+            "SensingFrame": "FollowerFrame",
+            "TorqueActuationMode": "InputTorque"
+          },
+          "block": "GS3DX_Human/Left Shoulder Joint/Gimbal Joint/Kinetically Driven",
+          "standalone_spherical_frame_fields_available": false
+        },
+        {
+          "available_frame_and_mode_settings": {
+            "ActuationFrame": "FollowerFrame",
+            "SensingFrame": "FollowerFrame",
+            "TorqueActuationMode": "InputTorque"
+          },
+          "block": "GS3DX_Human/Lower Body/Left Hip Joint/Kinetically Driven",
+          "standalone_spherical_frame_fields_available": false
+        },
+        {
+          "available_frame_and_mode_settings": {
+            "ActuationFrame": "FollowerFrame",
+            "SensingFrame": "FollowerFrame",
+            "TorqueActuationMode": "InputTorque"
+          },
+          "block": "GS3DX_Human/Lower Body/Right Hip Joint/Kinetically Driven",
+          "standalone_spherical_frame_fields_available": false
+        },
+        {
+          "available_frame_and_mode_settings": {
+            "ActuationFrame": "FollowerFrame",
+            "SensingFrame": "FollowerFrame",
+            "TorqueActuationMode": "InputTorque"
+          },
+          "block": "GS3DX_Human/Right Shoulder Joint/Gimbal Joint/Kinetically Driven",
+          "standalone_spherical_frame_fields_available": false
+        }
+      ],
+      "capture_O": [
+        {
+          "available_frame_and_mode_settings": {
+            "PxTorqueActuationMode": "NoTorque",
+            "PyTorqueActuationMode": "NoTorque",
+            "PzTorqueActuationMode": "NoTorque",
+            "SphActuationFrame": "FollowerFrame",
+            "SphSensingFrame": "FollowerFrame",
+            "SphTorqueActuationMode": "NoTorque"
+          },
+          "block": "GS3DX_Human/Hips and Torso Inputs/Hip Kinetically Driven/Hip Joint",
+          "standalone_spherical_frame_fields_available": false
+        },
+        {
+          "available_frame_and_mode_settings": {
+            "ActuationFrame": "FollowerFrame",
+            "SensingFrame": "FollowerFrame",
+            "TorqueActuationMode": "InputTorque"
+          },
+          "block": "GS3DX_Human/Left Shoulder Joint/Gimbal Joint/Kinetically Driven",
+          "standalone_spherical_frame_fields_available": false
+        },
+        {
+          "available_frame_and_mode_settings": {
+            "ActuationFrame": "FollowerFrame",
+            "SensingFrame": "FollowerFrame",
+            "TorqueActuationMode": "InputTorque"
+          },
+          "block": "GS3DX_Human/Lower Body/Left Hip Joint/Kinetically Driven",
+          "standalone_spherical_frame_fields_available": false
+        },
+        {
+          "available_frame_and_mode_settings": {
+            "ActuationFrame": "FollowerFrame",
+            "SensingFrame": "FollowerFrame",
+            "TorqueActuationMode": "InputTorque"
+          },
+          "block": "GS3DX_Human/Lower Body/Right Hip Joint/Kinetically Driven",
+          "standalone_spherical_frame_fields_available": false
+        },
+        {
+          "available_frame_and_mode_settings": {
+            "ActuationFrame": "FollowerFrame",
+            "SensingFrame": "FollowerFrame",
+            "TorqueActuationMode": "InputTorque"
+          },
+          "block": "GS3DX_Human/Right Shoulder Joint/Gimbal Joint/Kinetically Driven",
+          "standalone_spherical_frame_fields_available": false
+        }
+      ]
+    },
+    "whole_output_zero_parity": true
+  },
+  "full_velocity_qualified": false,
+  "latex_pdf_verified": false,
+  "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+  "original_fit_receipt": {
+    "actual_process_exit_code": null,
+    "done_marker": true,
+    "final_exit_code": 125,
+    "script_status": "success",
+    "termination_reason": "hung_after_done",
+    "timestamp": "2026-10-03T07:08:34.518646+00:00"
+  },
+  "original_metric_harness_failure": {
+    "actual_process_exit_code": 1,
+    "done_marker": false,
+    "final_exit_code": 1,
+    "script_status": "failed",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T06:51:49.296723+00:00"
+  },
+  "parameter_tdd_receipt": {
+    "actual_process_exit_code": 0,
+    "done_marker": true,
+    "final_exit_code": 0,
+    "script_status": "success",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T06:49:00.490078+00:00"
+  },
+  "private_parameter_tdd": {
+    "green_failed": 0,
+    "green_incomplete": 0,
+    "green_passed": 8,
+    "model_loaded": false,
+    "production_modified": false,
+    "qualification": "PRIVATE_TRANSLATION_PARAMETER_PRECONDITIONS_NOT_FIT_OR_PHYSICS_ACCEPTANCE",
+    "red_failed": 8,
+    "red_incomplete": 0,
+    "red_passed": 0,
+    "simulation_executed": false
+  },
+  "prototype_promoted": false,
+  "qualification": "ALIGNED_REFINED_POSE_COMPARISON_AND_FRESH_SAVED_RECHECK_NOT_CONTINUOUS_PATH_OR_DYNAMICS",
+  "refined_baseline_fitter_sha256": "4a056356996d39afe81418141ad945a97cf890e468e582ac6a8bde304e4c1c63",
+  "selected_array_analysis_receipt": {
+    "actual_process_exit_code": 0,
+    "done_marker": true,
+    "final_exit_code": 0,
+    "script_status": "success",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T06:48:39.211495+00:00"
+  },
+  "selected_sparse_preview": {
+    "capture_A": {
+      "consecutive_transition_count": 0,
+      "largest_sampled_root_step_mm": 17.827028060562817,
+      "largest_step_interval_seconds": 0.033333333333333215,
+      "mean_observed_target_rms_mm": 16.573332007191688,
+      "pose_count": 55
+    },
+    "capture_O": {
+      "consecutive_transition_count": 0,
+      "largest_sampled_root_step_mm": 30.166184832236027,
+      "largest_step_interval_seconds": 0.033333333333333326,
+      "mean_observed_target_rms_mm": 19.8142737518559,
+      "pose_count": 46
+    }
+  }
+}

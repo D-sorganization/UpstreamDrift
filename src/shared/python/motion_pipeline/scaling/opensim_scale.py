@@ -43,6 +43,7 @@ class OpenSimScaleBackend:
         mass_kg: float = 75.0,
         height_m: float = 1.78,
         preserve_mass_distribution: bool = True,
+        allow_fallback: bool = False,
     ) -> None:
         """
         Args:
@@ -53,6 +54,8 @@ class OpenSimScaleBackend:
             mass_kg: Subject mass in kg used by ScaleTool.
             height_m: Subject height in metres.
             preserve_mass_distribution: Forwarded to ScaleTool config.
+            allow_fallback: If True, fall back to marker-distance scaling
+                when OpenSim is not installed.
         """
         if mass_kg <= 0 or not np.isfinite(mass_kg):
             raise ValueError("mass_kg must be a positive finite number")
@@ -64,6 +67,7 @@ class OpenSimScaleBackend:
         self.mass_kg = float(mass_kg)
         self.height_m = float(height_m)
         self.preserve_mass_distribution = bool(preserve_mass_distribution)
+        self.allow_fallback = bool(allow_fallback)
 
     # ------------------------------------------------------------------
     # Internal helpers
@@ -200,43 +204,51 @@ class OpenSimScaleBackend:
         if marker_to_segment is None:
             raise ValueError("marker_to_segment must be provided")
 
+        opensim_module = None
         try:
-            import opensim  # type: ignore[import-not-found]
+            import opensim as osim  # type: ignore[import-not-found]
+
+            opensim_module = osim
         except ImportError as exc:  # pragma: no cover - depends on env
-            raise RuntimeError("opensim not installed") from exc
-
-        with tempfile.TemporaryDirectory() as tmpdir:
-            tmp = Path(tmpdir)
-            trc_path = tmp / "static.trc"
-            self._write_static_trc(calibration_markers, trc_path)
-
-            scale_tool = opensim.ScaleTool()
-            scale_tool.setName(f"{rig.id}-scale")
-            scale_tool.setSubjectMass(self.mass_kg)
-            scale_tool.setSubjectHeight(self.height_m * 1000.0)  # mm
-
-            if self.generic_model_path is not None:
-                try:
-                    scale_tool.getGenericModelMaker().setModelFileName(
-                        str(self.generic_model_path)
-                    )
-                    out_osim = tmp / "scaled.osim"
-                    scale_tool.run()
-                    if out_osim.exists():
-                        logger.info("OpenSim ScaleTool produced %s", out_osim)
-                except (
-                    Exception  # noqa: BLE001 - OpenSim ScaleTool runtime failure
-                ) as exc:  # pragma: no cover - opensim runtime
-                    logger.warning(
-                        "OpenSim ScaleTool failed (%s); falling back to "
-                        "marker-distance estimate",
-                        exc,
-                    )
-
-            lengths = self._segment_lengths_from_markers(
-                rig, calibration_markers, marker_to_segment
+            if not self.allow_fallback:
+                raise RuntimeError("opensim not installed") from exc
+            logger.info(
+                "opensim not installed; falling back to marker-distance scaling"
             )
-            scaled = self._apply_lengths_to_rig(rig, lengths)
+
+        if opensim_module is not None:
+            with tempfile.TemporaryDirectory() as tmpdir:
+                tmp = Path(tmpdir)
+                trc_path = tmp / "static.trc"
+                self._write_static_trc(calibration_markers, trc_path)
+
+                scale_tool = opensim_module.ScaleTool()
+                scale_tool.setName(f"{rig.id}-scale")
+                scale_tool.setSubjectMass(self.mass_kg)
+                scale_tool.setSubjectHeight(self.height_m * 1000.0)  # mm
+
+                if self.generic_model_path is not None:
+                    try:
+                        scale_tool.getGenericModelMaker().setModelFileName(
+                            str(self.generic_model_path)
+                        )
+                        out_osim = tmp / "scaled.osim"
+                        scale_tool.run()
+                        if out_osim.exists():
+                            logger.info("OpenSim ScaleTool produced %s", out_osim)
+                    except (
+                        Exception  # noqa: BLE001 - OpenSim ScaleTool runtime failure
+                    ) as exc:  # pragma: no cover - opensim runtime
+                        logger.warning(
+                            "OpenSim ScaleTool failed (%s); falling back to "
+                            "marker-distance estimate",
+                            exc,
+                        )
+
+        lengths = self._segment_lengths_from_markers(
+            rig, calibration_markers, marker_to_segment
+        )
+        scaled = self._apply_lengths_to_rig(rig, lengths)
 
         # Postcondition: every segment length must be positive.
         for jname, jdef in scaled.joints.items():

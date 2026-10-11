@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <!-- Target line -->
+  <line x1="12" y1="62" x2="88" y2="62" stroke="white" stroke-width="2.5" stroke-dasharray="6 4" opacity="0.8" />
+  <!-- Club path arrow -->
+  <path d="M16,76 L78,52" stroke="white" stroke-width="3.5" fill="none" opacity="0.95" />
+  <path d="M70,50 L80,51 L75,60" stroke="white" stroke-width="3" fill="none" stroke-linejoin="round" opacity="0.95" />
+  <!-- Face normal arrow -->
+  <path d="M46,64 L60,34" stroke="#ffb74d" stroke-width="3.5" fill="none" opacity="0.95" />
+  <!-- Ball -->
+  <circle cx="82" cy="62" r="6" fill="white" opacity="0.95" />
+  <!-- Angle arc -->
+  <path d="M30,62 A16,16 0 0 0 33,69" stroke="white" stroke-width="2" fill="none" opacity="0.85" />
+</svg>

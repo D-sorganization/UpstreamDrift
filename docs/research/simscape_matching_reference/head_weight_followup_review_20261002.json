@@ -1,0 +1,179 @@
+{
+  "qualification": "PROSPECTIVE_KINEMATIC_SCREEN_PASSED_HEAD_01_PENDING_VISUAL_REVIEW_NOT_PHYSICAL_ACCEPTANCE",
+  "receipt_utc": "2026-10-02T13:48:01.938408Z",
+  "native_pid": 39732,
+  "natural_exit": 0,
+  "model_saved": false,
+  "simulation_executed": false,
+  "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+  "matlab_release": "2025b",
+  "direct_source_inventory": {
+    "gs3dx_whole_body_ik": "8a9f939526cdcb9defef9ee767effa09856f1eaf3eeeda5b6a0a157c9bf25e46",
+    "gs3dx_ik_initial_pose": "a6b6bf871677b6f259ce07036495247af008997721dc841a5c48ae07e635b223",
+    "gs3dx_initial_target_values": "4311cbf1638ab916fd5ccd437b4c14ef591e9d09ffed0a16e2b00b08bd6715db",
+    "gs3dx_whole_body_ik_preseed": "4b5704bb9475bb45b39aa51b27278e69a980df2f8900f42b09cc5173985a4cef",
+    "gs3dx_head_input_data": "084d1f545d51c341bb3ec872562a08bb55f10e16eba6ae0781eb24679a8a354d",
+    "gs3dx_orientation_residual": "00369171cc677e70992460507e230caea755f8fd2119bd9dd601c2ea7a82f9c4",
+    "gs3dx_foot_orientation_residual": "18287150535441f81e5e671d9ca6a947a7c28722e6b899481b07f6d4bda9611a",
+    "gs3dx_head_orientation_residual": "8e0b31c63b387382feb2f24aa227446205521a7427a8f693c6c2c047c3069723",
+    "gs3dx_head_target_orientation": "1965ac2b7c9a8169b62cb7b7d0550022cedd4c14ba5d8c46cf9180f56cd1619d",
+    "gs3dx_capture_head_frame": "d7f9a8fbef6354103eb56ad7727fe197b060589bda56866d0432dde92ea91161",
+    "gs3dx_capture_markers": "285e8c89c0c06b884e0f1a0e8819037d50f68e23fa719f087ee6766ca45684b5",
+    "gs3dx_capture_joint_centres": "875519b8c2d5a93f303f23eeee656933dfc7f474d17c536b1a8b36c0bac92044",
+    "gs3dx_capture_address_transform": "4282c6939aec5ec56d5641f43872423a331a7ef000524636df82822c2c6bfcc0",
+    "gs3dx_capture_points": "cb3b0698405263b753a1adcf91eec4c794fba7657dde83b254fd80021f5fd9d2",
+    "gs3dx_fit_human_visuals": "77994f7e7535375f8af8afa20d577aef9ed3ff6a611c610dc8298fd14999c480",
+    "gs3dx_ik_joint_roles": "4aae0267abfcaea02a08d36664c9d2cc447f67fc2fa4cba7d6c3e011911e3d9a",
+    "gs3dx_joint_keys": "a4f272516ddf3fb4321b3206228d4fa40e0f45ded854428f53f026b0e8a5658b",
+    "gs3dx_joint_rom": "9ca9c9f570f0cfd032d7b4f04309060f0f57f0489d4d0c34de0219a1de3248e0",
+    "resolve_capture": "66793492772e76bd01bb65d81a0be18e05ea026461edc4eeaded9c5a7567d862",
+    "gs3dx_whole_body_ik_baseline": "f153d381d52a51fbd38c0bd789c471251fa6944b36c313e745bcd3afe299e41f",
+    "gs3dx_foot_orientation_residual_baseline": "41f493300892a45534a9a43395a745dfb23d106e7c67a18b1ba2e2f57b7a7134",
+    "probe": "fc9bbacf41085442e2cc8d8445a82daa7bad4d79e6cd1e767c4296b4369ee524"
+  },
+  "inventory_is_full_transitive_closure": false,
+  "baseline_reused": "same-source seeded full comparison with native identity assertions",
+  "prospective_plan": {
+    "weights": [0.06, 0.1],
+    "positional_limits_relative_to_seeded_w0_mm": {
+      "mean": 0.5,
+      "maximum": 1
+    },
+    "positional_limits_relative_to_selected_desktop_mm": {
+      "mean": 0.5,
+      "maximum": 1
+    },
+    "head_heldout_mean_minimum_relative_improvement": 0.3,
+    "head_heldout_max_must_not_worsen": true,
+    "each_foot_max_allowed_increase_deg": 2,
+    "all_native_status_must_equal": 1,
+    "qualification": "KINEMATIC_SCREEN_ONLY_REQUIRE_BOTH_VIEW_VISUAL_REVIEW_BEFORE_PROMOTION",
+    "baseline_source": "completed same-source seeded-head-comparison with source inventory and model identity assertions",
+    "selected": {
+      "capture_A": {
+        "mean_rms_mm": 13.1880399457,
+        "max_rms_mm": 40.1212983773
+      },
+      "capture_O": {
+        "mean_rms_mm": 16.6429604052,
+        "max_rms_mm": 36.865017676
+      }
+    }
+  },
+  "records": {
+    "capture_A": {
+      "sampled_frames": 55,
+      "trials": {
+        "w_0_06": {
+          "weight": 0.06,
+          "mean_rms_mm": 13.446759745221854,
+          "peak_rms_mm": 41.38769411539158,
+          "head_post_address_mean_deg": 18.641388908420875,
+          "head_post_address_peak_deg": 33.92664379981334,
+          "head_relative_mean_improvement": 0.47328231575756974,
+          "foot_left_peak_deg": 12.800347938239584,
+          "foot_right_peak_deg": 19.811090294330455,
+          "valid_left_foot_frames": 55,
+          "valid_right_foot_frames": 55,
+          "gates": {
+            "all_native_status_one": true,
+            "head_mean_improvement_at_least_30_percent": true,
+            "head_peak_not_worse": true,
+            "body_mean_increase_vs_seeded_at_most_05mm": true,
+            "body_peak_increase_vs_seeded_at_most_1mm": true,
+            "body_mean_increase_vs_selected_at_most_05mm": true,
+            "body_peak_increase_vs_selected_at_most_1mm": false,
+            "foot_left_peak_increase_at_most_2deg": true,
+            "foot_right_peak_increase_at_most_2deg": true
+          },
+          "all_kinematic_screen_gates_passed": false,
+          "visual_review_complete": false,
+          "desktop_promoted": false
+        },
+        "w_0_1": {
+          "weight": 0.1,
+          "mean_rms_mm": 13.539606090606656,
+          "peak_rms_mm": 40.36786310027514,
+          "head_post_address_mean_deg": 10.670828170497716,
+          "head_post_address_peak_deg": 18.91774649737659,
+          "head_relative_mean_improvement": 0.698492750163348,
+          "foot_left_peak_deg": 12.785433768933538,
+          "foot_right_peak_deg": 19.808896865361213,
+          "valid_left_foot_frames": 55,
+          "valid_right_foot_frames": 55,
+          "gates": {
+            "all_native_status_one": true,
+            "head_mean_improvement_at_least_30_percent": true,
+            "head_peak_not_worse": true,
+            "body_mean_increase_vs_seeded_at_most_05mm": true,
+            "body_peak_increase_vs_seeded_at_most_1mm": true,
+            "body_mean_increase_vs_selected_at_most_05mm": true,
+            "body_peak_increase_vs_selected_at_most_1mm": true,
+            "foot_left_peak_increase_at_most_2deg": true,
+            "foot_right_peak_increase_at_most_2deg": true
+          },
+          "all_kinematic_screen_gates_passed": true,
+          "visual_review_complete": false,
+          "desktop_promoted": false
+        }
+      }
+    },
+    "capture_O": {
+      "sampled_frames": 46,
+      "trials": {
+        "w_0_06": {
+          "weight": 0.06,
+          "mean_rms_mm": 16.598533747670075,
+          "peak_rms_mm": 36.75846800871892,
+          "head_post_address_mean_deg": 19.3922964719899,
+          "head_post_address_peak_deg": 37.95171458230274,
+          "head_relative_mean_improvement": 0.46475655392284754,
+          "foot_left_peak_deg": 19.478787238090767,
+          "foot_right_peak_deg": 20.407066049139843,
+          "valid_left_foot_frames": 45,
+          "valid_right_foot_frames": 45,
+          "gates": {
+            "all_native_status_one": true,
+            "head_mean_improvement_at_least_30_percent": true,
+            "head_peak_not_worse": true,
+            "body_mean_increase_vs_seeded_at_most_05mm": true,
+            "body_peak_increase_vs_seeded_at_most_1mm": true,
+            "body_mean_increase_vs_selected_at_most_05mm": true,
+            "body_peak_increase_vs_selected_at_most_1mm": true,
+            "foot_left_peak_increase_at_most_2deg": true,
+            "foot_right_peak_increase_at_most_2deg": true
+          },
+          "all_kinematic_screen_gates_passed": true,
+          "visual_review_complete": false,
+          "desktop_promoted": false
+        },
+        "w_0_1": {
+          "weight": 0.1,
+          "mean_rms_mm": 16.75363897774976,
+          "peak_rms_mm": 36.987396368432904,
+          "head_post_address_mean_deg": 11.318101592895191,
+          "head_post_address_peak_deg": 22.16892132188402,
+          "head_relative_mean_improvement": 0.687611020779175,
+          "foot_left_peak_deg": 19.44523099023505,
+          "foot_right_peak_deg": 20.57273929029672,
+          "valid_left_foot_frames": 45,
+          "valid_right_foot_frames": 45,
+          "gates": {
+            "all_native_status_one": true,
+            "head_mean_improvement_at_least_30_percent": true,
+            "head_peak_not_worse": true,
+            "body_mean_increase_vs_seeded_at_most_05mm": true,
+            "body_peak_increase_vs_seeded_at_most_1mm": true,
+            "body_mean_increase_vs_selected_at_most_05mm": true,
+            "body_peak_increase_vs_selected_at_most_1mm": true,
+            "foot_left_peak_increase_at_most_2deg": true,
+            "foot_right_peak_increase_at_most_2deg": true
+          },
+          "all_kinematic_screen_gates_passed": true,
+          "visual_review_complete": false,
+          "desktop_promoted": false
+        }
+      }
+    }
+  }
+}

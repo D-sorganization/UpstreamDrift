@@ -1,0 +1,80 @@
+---
+title: "Native Drake Torque Replay"
+---
+
+# Native Drake Torque Replay
+
+## Calculation and Scope
+
+The F06b primitive restores the complete numeric discrete state of an owned,
+collision-free URDF plant and replays frozen post-limit revolute motor torques.
+It consumes Tools' canonical `ExperimentReplayBundle` through the UD seam.
+The native actuation matrix maps ordered motor inputs to generalized effort:
+\(\tau=B u\). Each interval audits actual native net actuation before
+stepping; the independent replay accepts no feedback or observations.
+
+All admitted motors have one input, finite positive effort limits, and a
+unit SimpleTransmission. Drake ignores nonunit URDF mechanical reductions;
+the adapter rejects those declarations. Collision geometry, mimic joints,
+extensions and external resources require other policies and fail admission.
+Unactuated coordinates remain native dynamic states. This slice does not
+qualify contact, muscle actuation, full-body anatomy or six-engine parity.
+
+## State and Numerical Policy
+
+Configuration and tangent velocity retain their distinct native dimensions.
+The synthetic floating-base fixture has eight positions and seven velocities.
+The complete discrete vector must contain finite values, and floating-base
+quaternions must already have unit norm within absolute tolerance `1e-12`.
+Invalid quaternions fail rather than being normalized.
+
+The native plant uses fixed discrete steps, unsampled output ports, and the
+actual recorded discrete contact solver and approximation. Unsampled ports
+avoid the native abstract output-history state. Continuous state, abstract
+state and unexpected discrete layouts are rejected. The adapter restores
+state, initializes the native Simulator once, verifies initialization did
+not alter it, and advances to every requested boundary without resetting.
+Input row \(u_k\) is held on each interval; the final unused sentinel must
+equal the preceding row. Torque limits must already have been applied.
+
+Drake 1.57.0 also has abstract *parameters*. An owned factory-default context
+admits its recorded boolean prefix and the two empty internal constraint
+maps only. Public native constraint queries must prove zero constraints;
+another version or layout requires review. Caller-supplied contexts and
+parameter changes are unavailable through this API. Numeric parameter
+identity hashes little-endian IEEE754 bytes, preserving native unused NaN
+sentinels without inserting nonfinite JSON values or altering parameters.
+Finite state and output remain mandatory.
+
+## Identity and Evidence
+
+Identity binds source URDF bytes, loaded topology and numeric/default-parameter
+identity, ordered native actuator channels, timestep, solver/approximation,
+adapter source and loaded parsing, plant, tree and analysis modules.
+Shared native admission helper bytes are included in both engine provider
+identities; Tools remains the sole replay-schema authority. A fresh
+execution plant is independently checked again after bundle validation.
+This is not complete transitive-library or source-to-binary attestation.
+
+Eleven tests pass with actual Drake 1.57.0 and Python 3.12 on local Linux.
+A saturated synthetic feedback rollout is reproduced by a fresh replay
+within absolute configuration/velocity tolerance `1e-12`, with exact initial
+state and independently queried motor effort. Negative checks cover missing
+state, invalid quaternion, effort/grid violations, changed source, unsupported
+model declarations and terminal input. This same-provider deterministic
+agreement does not establish integration convergence or a mocap match.
+
+## Primary Sources and Remaining Gates
+
+The [native Simulator documentation](https://drake.mit.edu/doxygen_cxx/classdrake_1_1systems_1_1_simulator.html)
+defines initialization and event boundaries. The
+[URDF parsing policy](https://drake.mit.edu/doxygen_cxx/group__multibody__parsing.html)
+describes transmission limitations; the
+[v1.57.0 plant source](https://github.com/RobotLocomotion/drake/blob/v1.57.0/multibody/plant/multibody_plant.cc)
+defines default constraint parameter maps. Source review supports this
+restricted policy and does not prove binary equivalence.
+
+F06 remains open for model variants, full-horizon provider integration,
+step refinement, contact/grip and the all-engine denominator. F07/F08 retain
+muscle feasibility and private-capture acceptance. Reproduction and failed
+experiments are recorded in `F06_DRAKE_NATIVE_TURNOVER.md`.

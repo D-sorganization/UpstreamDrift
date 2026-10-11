@@ -1,0 +1,35 @@
+{
+  "qualification": "NATIVE_BLOCK_BOUND_UPPER_REFERENCE_PREPARATION_NOT_DYNAMIC_EXECUTION",
+  "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+  "captures": {
+    "capture_A": {
+      "capture_alias": "capture-A",
+      "sample_count": 55,
+      "duration_s": 1.8,
+      "reference_rate_hz": 30,
+      "upper_actuator_coordinate_count": 21,
+      "maximum_filter_angle_parity_error_deg": 0,
+      "maximum_filter_rate_parity_error_deg_s": 0,
+      "all_native_block_ID_unit_bindings_verified": true,
+      "start_parity": true
+    },
+    "capture_O": {
+      "capture_alias": "capture-O",
+      "sample_count": 46,
+      "duration_s": 1.5,
+      "reference_rate_hz": 30,
+      "upper_actuator_coordinate_count": 21,
+      "maximum_filter_angle_parity_error_deg": 0,
+      "maximum_filter_rate_parity_error_deg_s": 0,
+      "all_native_block_ID_unit_bindings_verified": true,
+      "start_parity": true
+    }
+  },
+  "contract_tests_passed": 7,
+  "contract_tests_failed": 0,
+  "simulation_executed": false,
+  "model_saved": false,
+  "native_completed_UTC": "2026-10-03T02:21:45.360367+00:00",
+  "full_swing_dynamics_qualified": false,
+  "independent_replay_qualified": false
+}

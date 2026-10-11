@@ -466,6 +466,42 @@
       "evidence": "src/config/models.yaml",
       "acceptance_owner": "tests/config/test_launcher_registry_parity.py"
     },
+    "impact_parameters": {
+      "id": "impact_parameters",
+      "name": "Impact Parameters",
+      "entity_kind": "tile",
+      "primary_workspace": "analysis",
+      "secondary_links": ["simulation"],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/tools/impact_parameters_panel/gui.py",
+      "acceptance_owner": "tests/config/test_launcher_registry_parity.py"
+    },
+    "grip_wrench_plots": {
+      "id": "grip_wrench_plots",
+      "name": "Grip Wrench Plots",
+      "entity_kind": "tile",
+      "primary_workspace": "analysis",
+      "secondary_links": ["simulation"],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/tools/grip_wrench_plots/gui.py",
+      "acceptance_owner": "tests/config/test_launcher_registry_parity.py"
+    },
+    "ground_reaction_plots": {
+      "id": "ground_reaction_plots",
+      "name": "Ground Reaction Plots",
+      "entity_kind": "tile",
+      "primary_workspace": "analysis",
+      "secondary_links": ["simulation"],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/tools/ground_reaction_plots/gui.py",
+      "acceptance_owner": "tests/config/test_launcher_registry_parity.py"
+    },
     "force_overlays": {
       "id": "force_overlays",
       "name": "Force Overlays",
@@ -1258,6 +1294,42 @@
       "evidence": "src/tools/motion_matching/__main__.py",
       "acceptance_owner": "tests/config/test_launcher_registry_parity.py"
     },
+    "native_viewer_export": {
+      "id": "native_viewer_export",
+      "name": "Tools Package: native_viewer_export",
+      "entity_kind": "cli_tool",
+      "primary_workspace": "simulation",
+      "secondary_links": ["analysis"],
+      "provider_authority": "core",
+      "lifecycle": "intentionally_headless",
+      "alias_target": null,
+      "evidence": "src/tools/native_viewer_export/__init__.py",
+      "acceptance_owner": "tests/config/test_registry_exclusions.py"
+    },
+    "tools.native_viewer_export": {
+      "id": "tools.native_viewer_export",
+      "name": "Native per-engine viewer video export (CLI)",
+      "entity_kind": "feature",
+      "primary_workspace": "simulation",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "exempt",
+      "alias_target": null,
+      "evidence": "src/tools/native_viewer_export/cli.py",
+      "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
+    },
+    "export.video_speed_variants": {
+      "id": "export.video_speed_variants",
+      "name": "Time-based native video export with full- and half-speed clips and an impact slow-motion clip",
+      "entity_kind": "feature",
+      "primary_workspace": "simulation",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "exempt",
+      "alias_target": null,
+      "evidence": "src/tools/native_viewer_export/cli.py",
+      "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
+    },
     "contraction": {
       "id": "contraction",
       "name": "Tools Package: contraction",
@@ -1380,10 +1452,10 @@
     },
     "necromatcher": {
       "id": "necromatcher",
-      "name": "Necromatcher Historical Player Library",
+      "name": "Necromatcher Historical Player Workspace",
       "entity_kind": "tile",
-      "primary_workspace": "analysis",
-      "secondary_links": ["simulation", "capture"],
+      "primary_workspace": "capture",
+      "secondary_links": ["analysis", "simulation"],
       "provider_authority": "core",
       "lifecycle": "active_feature",
       "alias_target": null,
@@ -1414,6 +1486,30 @@
       "evidence": "src/shared/python/biomechanics/ztcf.py",
       "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
     },
+    "drake.gui_force_overlay": {
+      "id": "drake.gui_force_overlay",
+      "name": "Drake GUI force/torque arrows and live tension/compression shading",
+      "entity_kind": "feature",
+      "primary_workspace": "simulation",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "planned",
+      "alias_target": null,
+      "evidence": "src/engines/physics_engines/drake/python/src/drake_force_overlay.py",
+      "acceptance_owner": "tests/unit/engines/drake/test_drake_gui_force_overlay.py"
+    },
+    "mujoco.force_overlays": {
+      "id": "mujoco.force_overlays",
+      "name": "MuJoCo GUI force/torque overlays drawn through the shared glyph renderers (native viewer and MeshCat)",
+      "entity_kind": "feature",
+      "primary_workspace": "simulation",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "planned",
+      "alias_target": null,
+      "evidence": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_rendering_mixin.py",
+      "acceptance_owner": "tests/unit/engines/physics_engines/mujoco/mujoco_humanoid_golf/test_force_glyph_gui.py"
+    },
     "analysis.cross_engine_robustness": {
       "id": "analysis.cross_engine_robustness",
       "name": "Cross-engine robustness dashboard (perturbation/CV)",
@@ -1425,6 +1521,54 @@
       "alias_target": null,
       "evidence": "src/launchers/cross_engine_dashboard.py",
       "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
+    },
+    "render.body_appearance": {
+      "id": "render.body_appearance",
+      "name": "Golfer body appearance with a visible head, face and neck in every engine render",
+      "entity_kind": "feature",
+      "primary_workspace": "analysis",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "planned",
+      "alias_target": null,
+      "evidence": "src/shared/python/model_appearance/head.py",
+      "acceptance_owner": "tests/unit/model_appearance/test_head_model.py"
+    },
+    "render.club_head_and_ball": {
+      "id": "render.club_head_and_ball",
+      "name": "Realistic Club Head And Ball Rendering",
+      "entity_kind": "feature",
+      "primary_workspace": "analysis",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "planned",
+      "alias_target": null,
+      "evidence": "src/shared/python/model_appearance/club_head_mesh.py",
+      "acceptance_owner": "tests/unit/model_appearance/test_club_head_mesh.py"
+    },
+    "analysis.grip_wrench": {
+      "id": "analysis.grip_wrench",
+      "name": "Per-hand grip wrench on the club emitted as GRIP overlay frames",
+      "entity_kind": "feature",
+      "primary_workspace": "analysis",
+      "secondary_links": ["simulation"],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/tools/grip_wrench_plots/gui.py",
+      "acceptance_owner": "tests/unit/grip_overlay/test_grip_glyphs.py"
+    },
+    "analysis.ground_reaction": {
+      "id": "analysis.ground_reaction",
+      "name": "Ground reaction plots per foot and net",
+      "entity_kind": "feature",
+      "primary_workspace": "analysis",
+      "secondary_links": ["simulation"],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/tools/ground_reaction_plots/gui.py",
+      "acceptance_owner": "tests/unit/biomechanics/test_ground_reaction_plot_model.py"
     },
     "analysis.static_plots": {
       "id": "analysis.static_plots",
@@ -1446,6 +1590,18 @@
       "secondary_links": [],
       "provider_authority": "core",
       "lifecycle": "exempt",
+      "alias_target": null,
+      "evidence": "src/launchers/exercise_dashboard.py",
+      "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
+    },
+    "lifting.five_lift_viewing": {
+      "id": "lifting.five_lift_viewing",
+      "name": "Weightlifting viewing and analysis for the five lifts",
+      "entity_kind": "feature",
+      "primary_workspace": "analysis",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "planned",
       "alias_target": null,
       "evidence": "src/launchers/exercise_dashboard.py",
       "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
@@ -1858,6 +2014,18 @@
       "evidence": "src/tools/model_explorer/launch_model_explorer.py",
       "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
     },
+    "tools.model_explorer.frankenstein_assembly": {
+      "id": "tools.model_explorer.frankenstein_assembly",
+      "name": "Frankenstein drag-and-drop assembly with typed attachment ports",
+      "entity_kind": "feature",
+      "primary_workspace": "analysis",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "planned",
+      "alias_target": null,
+      "evidence": "src/tools/model_explorer/frankenstein_editor/assembly_panel.py",
+      "acceptance_owner": "tests/unit/tools/model_explorer/test_assembly_panel_gui.py"
+    },
     "tools.motion_matching": {
       "id": "tools.motion_matching",
       "name": "Motion Matching tool (full-body forward-dynamics matching of the tour captures)",
@@ -1896,14 +2064,26 @@
     },
     "tools.necromatcher": {
       "id": "tools.necromatcher",
-      "name": "Historical Player Library And Source Review",
+      "name": "Necromatcher Historical Player Workspace",
       "entity_kind": "feature",
-      "primary_workspace": "analysis",
-      "secondary_links": ["capture", "simulation"],
+      "primary_workspace": "capture",
+      "secondary_links": ["analysis", "simulation"],
       "provider_authority": "core",
       "lifecycle": "active_feature",
       "alias_target": null,
       "evidence": "src/tools/necromatcher/gui.py",
+      "acceptance_owner": "tests/unit/tools/test_necromatcher_gui.py"
+    },
+    "analysis.impact_parameters": {
+      "id": "analysis.impact_parameters",
+      "name": "Impact parameters panel (target-relative launch-monitor card)",
+      "entity_kind": "feature",
+      "primary_workspace": "analysis",
+      "secondary_links": ["simulation"],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/tools/impact_parameters_panel/gui.py",
       "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
     },
     "tools.putting_green": {
@@ -1954,29 +2134,29 @@
       "evidence": "src/shared/python/body_part_viz/force_color_controls.py",
       "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
     },
-    "necromatcher": {
-      "id": "necromatcher",
-      "name": "Necromatcher Historical Player Workspace",
-      "entity_kind": "tile",
-      "primary_workspace": "capture",
-      "secondary_links": ["analysis", "simulation"],
-      "provider_authority": "core",
-      "lifecycle": "active_feature",
-      "alias_target": null,
-      "evidence": "src/tools/necromatcher/gui.py",
-      "acceptance_owner": "tests/unit/tools/test_necromatcher_gui.py"
-    },
-    "tools.necromatcher": {
-      "id": "tools.necromatcher",
-      "name": "Necromatcher Historical Player Workspace",
+    "tools.video_analyzer": {
+      "id": "tools.video_analyzer",
+      "name": "Video Analyzer (pose tracking and force/torque overlay)",
       "entity_kind": "feature",
       "primary_workspace": "capture",
-      "secondary_links": ["analysis", "simulation"],
+      "secondary_links": ["analysis"],
       "provider_authority": "core",
       "lifecycle": "active_feature",
       "alias_target": null,
-      "evidence": "src/tools/necromatcher/gui.py",
-      "acceptance_owner": "tests/unit/tools/test_necromatcher_gui.py"
+      "evidence": "src/tools/video_analyzer/gui.py",
+      "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
+    },
+    "opencap.session_import": {
+      "id": "opencap.session_import",
+      "name": "OpenCap session import action and OpenSim engine handoff",
+      "entity_kind": "feature",
+      "primary_workspace": "capture",
+      "secondary_links": ["simulation"],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/engines/physics_engines/opensim/python/opencap_import_action.py",
+      "acceptance_owner": "tests/unit/engines/opensim/test_opencap_import_action.py"
     }
   },
   "fixtures": {

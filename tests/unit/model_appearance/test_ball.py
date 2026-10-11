@@ -1,0 +1,109 @@
+"""Ball placement at address: one shared function (OSV-3 #11729, GCV-13 #11719)."""
+
+from __future__ import annotations
+
+import numpy as np
+import pytest
+
+from src.shared.python.model_appearance.ball import (
+    BALL_RADIUS_M,
+    ball_position_at_address,
+    resolve_ball_visual,
+)
+
+pytestmark = pytest.mark.unit
+
+
+def test_radius_is_regulation_ball() -> None:
+    assert pytest.approx(0.021335) == BALL_RADIUS_M
+
+
+def test_ball_rests_on_ground_and_touches_face_plane() -> None:
+    face = np.array([0.0, 0.0, 0.03])
+    normal = np.array([1.0, 0.0, 0.0])
+    ball = ball_position_at_address(face, normal, ground_height_m=0.0)
+    assert ball[2] == pytest.approx(BALL_RADIUS_M)
+    assert ball[0] == pytest.approx(BALL_RADIUS_M)
+
+
+def test_normal_is_normalised_and_ground_height_respected() -> None:
+    ball = ball_position_at_address(
+        [1.0, 2.0, 0.55], [0.0, 3.0, 0.0], ground_height_m=0.5
+    )
+    assert ball == pytest.approx([1.0, 2.0 + BALL_RADIUS_M, 0.5 + BALL_RADIUS_M])
+
+
+def test_lofted_normal_keeps_horizontal_offset_only() -> None:
+    n = np.array([np.cos(np.radians(10)), 0.0, np.sin(np.radians(10))])
+    ball = ball_position_at_address([0.0, 0.0, 0.02], n, ground_height_m=0.0)
+    assert ball[0] == pytest.approx(BALL_RADIUS_M * np.cos(np.radians(10)))
+    assert ball[2] == pytest.approx(BALL_RADIUS_M)
+
+
+@pytest.mark.parametrize(
+    "face, normal",
+    [
+        ([0, 0], [1, 0, 0]),
+        ([0, 0, 0], [0, 0, 0]),
+        ([0, 0, np.nan], [1, 0, 0]),
+    ],
+)
+def test_rejects_bad_inputs(face, normal) -> None:
+    with pytest.raises(ValueError):
+        ball_position_at_address(face, normal)
+
+
+def test_rejects_nonpositive_radius() -> None:
+    with pytest.raises(ValueError):
+        ball_position_at_address([0, 0, 0], [1, 0, 0], radius_m=0.0)
+
+
+def test_resolve_ball_visual_disabled_returns_none() -> None:
+    assert (
+        resolve_ball_visual(
+            enabled=False,
+            position_m=None,
+            source="address_geometry",
+            face_centre_m=[0.0, 0.0, 0.03],
+            face_normal=[1.0, 0.0, 0.0],
+        )
+        is None
+    )
+
+
+def test_resolve_ball_visual_uses_explicit_position_verbatim() -> None:
+    pos, source = resolve_ball_visual(
+        enabled=True,
+        position_m=[1.0, 2.0, 3.0],
+        source="measured",
+    )
+    assert pos == pytest.approx([1.0, 2.0, 3.0])
+    assert source == "measured"
+
+
+def test_resolve_ball_visual_computes_address_geometry() -> None:
+    pos, source = resolve_ball_visual(
+        enabled=True,
+        position_m=None,
+        source="address_geometry",
+        face_centre_m=[0.0, 0.0, 0.03],
+        face_normal=[1.0, 0.0, 0.0],
+        ground_height_m=0.0,
+    )
+    expected = ball_position_at_address(
+        [0.0, 0.0, 0.03], [1.0, 0.0, 0.0], ground_height_m=0.0
+    )
+    assert pos == pytest.approx(expected)
+    assert source == "address_geometry"
+
+
+def test_resolve_ball_visual_requires_position_or_face_geometry() -> None:
+    with pytest.raises(ValueError, match="position_m.*face_centre_m"):
+        resolve_ball_visual(enabled=True, position_m=None, source="address_geometry")
+
+
+def test_resolve_ball_visual_rejects_malformed_explicit_position() -> None:
+    with pytest.raises(ValueError):
+        resolve_ball_visual(
+            enabled=True, position_m=[1.0, np.nan, 3.0], source="measured"
+        )

@@ -1,0 +1,91 @@
+# Derivative-Aware Bounded Native Control (Provisional)
+
+## Admitted Plant and Derivative
+
+F05b (#11910, parent #11789) compares a compiled, box-constrained
+[Crocoddyl BoxFDDP](https://gepettoweb.laas.fr/doc/loco-3d/crocoddyl/master/doxygen-html/classcrocoddyl_1_1SolverBoxFDDP.html)
+candidate with the F05a SciPy shooting controller. The executable native
+boundary remains one hinge, one direct unit-gain torque motor, no gravity,
+no contact, no muscle or activation state, and a fixed 10 ms MuJoCo RK4
+integration step. The controller observes exact simulated $(q,v)$ at each
+step. Nominal and perturbed masses are 0.30 and 0.42 kg; the latter is the
+execution plant. The two predeclared initial angles are 0.4 and 0.7 rad.
+The source-controlled paired receipt binds this scope, software versions,
+source hashes, full initial state, T01 policy and applied-input identities.
+
+For this restricted plant only,
+
+$$
+\dot x = F x + G u,\qquad
+F = \begin{bmatrix}0&1\\0&-b/I\end{bmatrix},\qquad
+G = \begin{bmatrix}0\\1/I\end{bmatrix},\quad x=(q,v).
+$$
+
+The discrete $A,B$ are the degree-four RK4 polynomial of the augmented
+generator $\begin{bmatrix}F&G\\0&0\end{bmatrix}$ at the native time step.
+This is an exact derivative of the admitted *linear* native RK4 step, not a
+general contact/manifold derivative. MuJoCo's
+[`mjd_transitionFD` implementation](https://github.com/google-deepmind/mujoco/blob/main/src/engine/engine_derivative_fd.c)
+rejects RK4, so F05b independently checks the analytic map against native
+`mj_step` and central finite differences on both plants. The run boundary
+rechecks the two loaded models' derivative identities before driving either
+plant. Different integrators, transmissions, passive-force laws, topology,
+gravity, hidden state or external contact fail admission.
+
+## Solver and Acceptance
+
+The two scenario states are augmented into one 4-state shooting problem
+with a *shared* bounded motor command. The compiled LQR action minimizes the
+mean scenario tracking cost; Crocoddyl BoxFDDP handles the input box. The
+candidate is then scored with the same maximum-scenario finite-horizon
+tracking criterion and explicit state/input limits used by F05a. It is
+admitted only if finite, feasible and strictly better than the independently
+verified fallback. Thus BoxFDDP's internal *mean* objective and the F05a
+shooting *max* objective differ; a paired run compares executed behavior and
+post-solve admission rather than asserting identical optimization problems.
+Each accepted plan is shifted for the next solve. Cancellation, stale
+observation, solver exception/failure, infeasibility, no benefit or elapsed
+budget produces a labeled fallback and clears the warm plan. An unsafe
+fallback raises before native actuation. The 10 ms solve budget is
+cooperative: it checks elapsed wall time after the provider returns and is
+not a hard real-time interruption guarantee.
+
+The controller exports the actual post-limit, per-native-step ZOH torque
+through the pinned Tools T01 bundle. A fresh native model receives the
+complete saved `mjSTATE_INTEGRATION` state and frozen time-only inputs,
+without optimizer or observation access. Position, velocity and full native
+integration states must reproduce the controlled trajectory within
+$10^{-12}$ absolute tolerance. Constraint reaction is a native plant output,
+not an injected control channel.
+
+## Measured Disposition
+
+The paired local run and full repeat in
+`docs/development/feedback_controls/F05B_NATIVE_PAIRED_RECEIPT_MJ38.json`
+and `F05B_NATIVE_PAIRED_RECEIPT_MJ38_REPEAT.json` record all eight controller
+calls in each predeclared trial. On MuJoCo
+3.8.0 / Crocoddyl 3.2.1, BoxFDDP admitted 8/8 commands for both initial
+angles. Approximate $(q)$ RMSE was 0.33856 and 0.60463 rad, versus SciPy
+shooting's 0.33857 and 0.60456 rad. Across both receipts BoxFDDP median
+controller-call times were 0.38–0.68 ms versus SciPy's 29–42 ms. Separately
+measured controlled execution, export and independent replay took 0.14–0.31 s
+for BoxFDDP and 0.40–0.59 s for SciPy; Box also incurred 4–18 ms derivative
+setup. Common cold T01 bootstrap took 1.93–4.15 s and is charged to either
+method's total time to accepted replay. The receipt excludes Python process
+launch and pytest collection, and the tiny fixture/load can change timing
+materially. The Box run precedes SciPy in each test, so provider-cache order
+is an additional limit on the total-time comparison.
+
+This supports keeping BoxFDDP as a **restricted one-hinge candidate** while
+retaining F02 TVLQR as the current broader control baseline. F05a's supported
+Windows TVLQR comparison still applies, but its latency is a separate host
+measurement and is not mixed into the WSL timing ratio. No native full-body,
+contact/grip, manifold, muscle, private-capture, six-engine or full-swing
+performance follows. The canonical calculation registry remains blocked;
+F05/F09/F10 retain those qualification gates.
+
+The [Crocoddyl overview](https://gepettoweb.laas.fr/doc/loco-3d/crocoddyl/master/doxygen-html/index.html)
+describes FDDP/BoxFDDP and derivatives for more general robot systems;
+[acados](https://docs.acados.org/) remains an alternative structured NMPC
+provider requiring its own runtime, model-derivative, contact and replay
+acceptance study before selection.

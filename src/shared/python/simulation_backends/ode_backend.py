@@ -3,7 +3,7 @@
 ``ODEBackend`` wraps the existing, well-tested analytical dynamics
 (:class:`DoublePendulumDynamics`) behind the frozen
 :class:`~simulation_backends.protocol.SimulationBackend` and
-:class:`~simulation_backends.protocol.DynamicsProvider` Protocols.
+:class:`~simulation_backends.protocol.EquationsOfMotionProvider` Protocols.
 
 Because it is a thin shim over the closed-form equations of motion, this backend
 is the *ground truth* against which the MuJoCo CPU and GPU backends are
@@ -46,7 +46,7 @@ class ODEBackend:
 
     Satisfies both :class:`~simulation_backends.protocol.SimulationBackend`
     (integration / stepping) and
-    :class:`~simulation_backends.protocol.DynamicsProvider` (mass matrix and
+    :class:`~simulation_backends.protocol.EquationsOfMotionProvider` (mass matrix and
     bias forces), giving an independent derivation of the equations of motion
     for cross-validating the MuJoCo backends.
 

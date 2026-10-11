@@ -29,11 +29,11 @@ from src.shared.python.motion_matching.full_body_forward_dynamics import (
 )
 from src.shared.python.motion_matching.pipeline import (
     BALANCE,
-    CAPTURES,
     OMEGA_RAD_S,
-    RATE_HZ,
     TRACKING_CUTOFF_HZ,
     Lane,
+    capture_path,
+    rate_from_times,
     smooth_reference,
 )
 
@@ -96,13 +96,30 @@ def _write_mjx_outputs(
     )
 
 
+def _tracked_reference(
+    receipt: dict[str, Any], times: np.ndarray, q_ref: np.ndarray
+) -> tuple[np.ndarray, float]:
+    """Smooth the reference trajectory, splitting the low-pass at the
+    run's impact (GCV-20, #11767); absent in older receipts."""
+    rate_hz = rate_from_times(times)
+    impact_split = receipt["ik"].get("impact_split", {})
+    q_track = smooth_reference(
+        q_ref,
+        rate_hz,
+        TRACKING_CUTOFF_HZ,
+        impact_index=impact_split.get("frame"),
+        pre_contact_cutoff_hz=impact_split.get("pre_contact_cutoff_hz"),
+    )
+    return q_track, rate_hz
+
+
 def export_mjx_package(run: Path | str, timestep: float = 5e-4) -> dict[str, Any]:
     run_path = Path(run)
     receipt = json.loads((run_path / "receipt.json").read_text(encoding="utf-8"))
     spec_bytes = (run_path / "full_body_spec_hipcal_scaled.json").read_bytes()
     times, q_ref, valid = _load_reference_trajectory(run_path, receipt)
     labels = tuple(receipt["labels"])
-    lane = Lane(labels, CAPTURES[receipt["capture"]])
+    lane = Lane(labels, capture_path(receipt["capture"]))
     from src.engines.physics_engines.mujoco.python.full_body_ik import (
         FullBodyMarkerKinematics,
     )
@@ -117,7 +134,7 @@ def export_mjx_package(run: Path | str, timestep: float = 5e-4) -> dict[str, Any
     }
     kin = FullBodyMarkerKinematics(adapter, {k: attachments[k] for k in labels})
     model = adapter.model
-    q_track = smooth_reference(q_ref, RATE_HZ, TRACKING_CUTOFF_HZ)
+    q_track, rate_hz = _tracked_reference(receipt, times, q_ref)
 
     xml = stiffen_weld(adapter.xml)
     root = DET.fromstring(xml)
@@ -168,7 +185,7 @@ def export_mjx_package(run: Path | str, timestep: float = 5e-4) -> dict[str, Any
             "note": "computed torque on the actuated coordinates with the root free; the MJX port omits the centre-of-mass balance term",
         },
         "timestep_s": timestep,
-        "rate_hz": RATE_HZ,
+        "rate_hz": rate_hz,
         "mass_kg": float(np.sum(model.body_mass)),
         "gravity_m_s2": list(map(float, model.opt.gravity)),
         "closure": {

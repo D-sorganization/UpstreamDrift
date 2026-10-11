@@ -27,7 +27,7 @@
     },
     "world_frame": {
       "type": "string",
-      "const": "world_Zup"
+      "enum": ["world_Zup", "adr0041_world"]
     },
     "units": {
       "type": "object",
@@ -57,6 +57,9 @@
         "units": { "type": "string", "const": "N" },
         "sign_convention": { "type": "string", "const": "tension-positive" }
       }
+    },
+    "metadata": {
+      "type": "object"
     }
   },
   "$defs": {

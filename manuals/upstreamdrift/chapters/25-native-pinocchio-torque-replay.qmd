@@ -1,0 +1,75 @@
+---
+title: "Native Pinocchio Torque Replay"
+---
+
+# Native Pinocchio Torque Replay
+
+## Calculation and Admission
+
+F06c #11900 extends the independent replay boundary to actual Pinocchio ABA
+through the existing public `PinocchioPhysicsEngine.step(..., integrator="rk4")`.
+It does not introduce another integrator or replay schema. Tools T01 supplies
+`ExperimentReplayBundle`; shared native admission checks its serialization,
+capabilities, fixed input grid, terminal sentinel and post-limit efforts.
+
+For this unconstrained policy the equations are
+\(\dot q=\mathcal{N}(q)v\),
+\(M(q)\dot v+h(q,v)=B u\).
+Each declared unit SimpleTransmission maps one ordered motor torque in N m
+to one native revolute tangent coordinate. Floating-base generalized forces
+remain zero. The adapter reads back the engine's effective `tau` before
+stepping. Pinocchio has generalized forces rather than a native motor object;
+the explicit source-declared unit mapping is part of this adapter's policy.
+
+Only fixed, floating and bounded revolute URDF joints are admitted. Motors
+need unique identities and finite positive native effort limits. Unsupported
+source tags, collision, mimic, damping/actuator extensions, external resources
+and nonunit reductions fail admission. Joint limit forces are not implemented
+by this policy; geometric feasibility remains a separate acceptance gate.
+
+## Complete State and Integration
+
+Physical state is complete native configuration and tangent velocity at time
+zero. The original fixture has `nq=8`, `nv=7`, including a floating quaternion.
+Inputs and state must be finite; configuration normalization must already hold
+within `1e-12`. No normalization, equilibrium operation or per-frame reset
+repairs an invalid state. Native Data quantities and the acceleration cache are
+derived from q/v and current torque; fresh execution recomputes them.
+
+The existing engine holds torque during its four ABA evaluations and uses
+`pin.integrate` for each configuration update. The adapter records this exact
+implementation, not a newly asserted global fourth-order Lie-group method.
+Every interval is fixed-duration zero-order hold. The last saved row equals
+the preceding row and is a sentinel, never executed. Replay receives no
+observation or controller and uses one fresh owned native engine continuously.
+
+## Provenance and Numerical Evidence
+
+Source URDF bytes, native `Model.saveToString()` output, ordered channels,
+complete state schema, stepping/input policy and loaded Pinocchio version are
+bound. Provider identity hashes the native Python extension, existing engine,
+adapter and shared admission source. This is not a transitive-library closure
+attestation; callers require exclusive process ownership and no monkeypatches.
+
+Commit `f273e45f2f` records missing-module RED tests before implementation.
+Twelve actual Pinocchio4.1.0 checks pass in Python3.12.14, including saturated
+closed-loop-to-open-loop reproduction with `1e-12` absolute q/v tolerance,
+native input scattering, model replacement and invalid state/input/source
+rejection. A 0.256-second synthetic constant-input probe compares 16, 8 and
+4 ms steps with a separately integrated 1 ms reference. Terminal error uses
+native `pin.difference` plus velocity norm and decreases under refinement.
+This establishes fixture-specific convergence, not full-swing accuracy.
+
+## Reproduction and Remaining Gates
+
+Use an isolated copy of `test_native_pinocchio_torque_replay.py` to avoid
+optional-provider mocks in the repository conftest. Set `PYTHONPATH` to the
+production repository plus pinned Tools `src` and `src/shared/python`, disable
+pytest plugin autoload and use one OMP/BLAS/MKL numerical worker. Execute with
+the actual native provider and retain its JUnit/run receipts. Provider skips
+do not qualify physics.
+
+Native contact/grip constraints, all production variants, capture-specific
+anatomy, muscular actuation, independently heldout prediction and all-model
+six-engine parity remain unqualified. Primitive replay is an execution
+prerequisite. It does not close the parent F06 or the full matching epic.

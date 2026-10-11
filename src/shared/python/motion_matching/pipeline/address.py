@@ -22,12 +22,14 @@ from src.shared.python.motion_matching.full_body_spec import (
     validate_full_body_spec,
 )
 from src.shared.python.motion_matching.hip_calibration import (
+    LATERAL_SEEDS_M,
     apply_hip_calibration,
     functional_hip_calibration,
     hip_rotation_zero,
 )
 from src.shared.python.motion_matching.marker_calibration import (
-    calibrate_marker_offsets,
+    PlacementPrior,
+    calibrate_constrained_marker_offsets,
     static_marker_offsets,
 )
 from src.shared.python.motion_matching import posture_metrics as post
@@ -46,7 +48,6 @@ from src.shared.python.motion_matching.pipeline.constants import (
     ELBOW_PIT_WEIGHT,
     ELBOW_PIT_WEIGHTS_NEUTRAL,
     FORWARD_AXIS,
-    LEG_SEEDS,
     NEUTRAL_BOUNDS_DEG,
     NEUTRAL_LOCKS,
     PRIOR,
@@ -57,6 +58,8 @@ from src.shared.python.motion_matching.pipeline.constants import (
     UP_AXIS,
 )
 from src.shared.python.motion_matching.pipeline.lane import (
+    add_foot_width_spheres,
+    add_torsional_friction,
     add_toe_spheres,
     wrist_bounds,
 )
@@ -150,11 +153,30 @@ def best_address(
         }
         axis_targets = lane.pit_targets_for(list(range(STATIC_FRAMES)), pit_weight)
 
+    def solve(q0: np.ndarray, extra_prior: Mapping[str, float] | None) -> Any:
+        return kin.solve_pose(
+            lane.points[0],
+            lane.valid[0],
+            q0,
+            ground=lane.ground,
+            prior_weight=PRIOR,
+            iterations=100,
+            flat_feet=lane.stance[0],
+            bounds=bounds,
+            locked=locked,
+            marker_weights=lane.marker_weights,
+            prior_weights={**lane.prior_weights, **(extra_prior or {})},
+            axis_targets=axis_targets,
+            balance_weight=balance,
+        )
+
     best = None
     rng = np.random.default_rng(0)
     for seed in ADDRESS_SEEDS_DEG:
         start = base.copy()
         for joint, value in seed.items():
+            if joint == "hip_rotation" and lane.feet is not None:
+                continue  # the shared foot-progression seed sets the foot yaw
             for side in ("r", "l"):
                 coord = f"{joint}_{side}"
                 if coord in kin.coordinate_order:
@@ -174,23 +196,16 @@ def best_address(
             for _ in range(ADDRESS_RESTARTS)
         ]
         for q0 in starts:
-            fit = kin.solve_pose(
-                lane.points[0],
-                lane.valid[0],
-                q0,
-                ground=lane.ground,
-                prior_weight=PRIOR,
-                iterations=100,
-                flat_feet=lane.stance[0],
-                bounds=bounds,
-                locked=locked,
-                marker_weights=lane.marker_weights,
-                prior_weights=lane.prior_weights,
-                axis_targets=axis_targets,
-                balance_weight=balance,
-            )
+            fit = solve(q0, None)
             if best is None or fit.marker_rms_m < best.marker_rms_m:
                 best = fit
+    feet = getattr(lane, "feet", None)
+    if feet is not None and best is not None:
+        from src.shared.python.motion_matching.pipeline.address_feet import (
+            refine_foot_progression,
+        )
+
+        best = refine_foot_progression(kin, best, feet, solve)
     if best is None:
         raise RuntimeError("No viable address fit found across multi-start seeds")
     return best
@@ -304,7 +319,16 @@ def calibrate_legs(
     seeds: Mapping[str, tuple[str, Sequence[float]]],
     q_start: np.ndarray,
 ) -> tuple[dict[str, tuple[str, tuple[float, float, float]]], Any]:
-    """Alternating marker calibration of ``seeds`` (others fixed) with stance pins."""
+    """Alternating marker calibration of ``seeds`` (others fixed) with stance pins.
+
+    With foot progression on (``lane.feet``), the lateral leg markers keep their
+    seed azimuth and the forefoot pair stays square, so hip rotation and foot
+    yaw stay observable (``leg_marker_constraints``, #11737).
+    """
+    from src.shared.python.motion_matching.pipeline.leg_marker_constraints import (
+        anatomical_leg_constraint,
+    )
+
     frames = lane.calibration_frames
     calibrated = tuple(seeds)
     cols = [lane.labels.index(m) for m in calibrated]
@@ -347,15 +371,18 @@ def calibrate_legs(
             state["kin"] = FullBodyMarkerKinematics(adapter, attachments)
         return lane.trajectory(state["kin"], q_start, frames=frames)[0]
 
-    result = calibrate_marker_offsets(
+    result = calibrate_constrained_marker_offsets(
         leg_capture,
         leg_bodies,
         pose_fn,
         ik_fn,
         initial_q=q_start,
         iterations=CALIBRATION_ITERATIONS,
-        prior_offsets={label: offset for label, (_, offset) in seeds.items()},
-        prior_weight=CALIBRATION_PRIOR_FRAMES,
+        prior=PlacementPrior(
+            {label: offset for label, (_, offset) in seeds.items()},
+            CALIBRATION_PRIOR_FRAMES,
+            None if lane.feet is None else anatomical_leg_constraint(seeds),
+        ),
     )
     offsets = {
         label: (
@@ -426,6 +453,32 @@ class HipCalibrationOptions:
     skip_hip_calibration: bool = False
     anthropometric: tuple[float, float] | None = None
     recalibrate_upper: bool = False
+    foot_half_width_m: float | None = None
+    torsional_patch_m: float | None = None
+
+
+def _calibrate_ground_height(
+    hip_spec: dict[str, Any], ground_height_m: float
+) -> dict[str, Any]:
+    """Return ``hip_spec`` with ``contact.ground`` set to the lane's toe calibration.
+
+    The base document ships ``contact.ground.height_m: null`` (defaulted to
+    0.0 m downstream), which only matches a capture whose toe-calibrated
+    ground height happens to be near zero. Different subjects (different
+    stance, marker placement) calibrate to a materially different height, so
+    every capture's contact ground is set from its own lane rather than
+    relying on that default.
+    """
+    if "contact" not in hip_spec or "ground" not in hip_spec["contact"]:
+        return hip_spec
+    hip_spec = dict(hip_spec)
+    hip_spec["contact"] = dict(hip_spec["contact"])
+    hip_spec["contact"]["ground"] = {
+        **hip_spec["contact"]["ground"],
+        "height_m": float(ground_height_m),
+        "calibrated": True,
+    }
+    return hip_spec
 
 
 def prepare_hip_spec(
@@ -434,7 +487,7 @@ def prepare_hip_spec(
     upper_base: Mapping[str, Any],
     labels: tuple[str, ...],
     upper: Mapping[str, tuple[str, Sequence[float]]],
-    alignment_old: Sequence[float] | None = None,
+    alignment_old: Any | None = None,
     options: HipCalibrationOptions | None = None,
 ) -> tuple[
     dict[str, Any],
@@ -458,8 +511,15 @@ def prepare_hip_spec(
         for label in MARKER_SEGMENTS["pelvis"]
     }
     hip_cal = functional_hip_calibration(lane.points, lane.valid, labels, waist_offsets)
+    # Foot progression on: remove the lateral-marker tilt from the zero twist
+    # (#11737). Off: the legacy plane the canonical receipts were made with.
     zero_twist = hip_rotation_zero(
-        lane.points, lane.valid, labels, waist_offsets, calibration=hip_cal
+        lane.points,
+        lane.valid,
+        labels,
+        waist_offsets,
+        calibration=hip_cal,
+        lateral_marker_offsets_m=(0.0, 0.0) if lane.feet is None else LATERAL_SEEDS_M,
     )
     if opts.skip_hip_calibration:
         hip_spec = add_toe_spheres(dict(base_spec))
@@ -473,6 +533,13 @@ def prepare_hip_spec(
                 base_spec, hip_cal, alignment_old, zero_twist_deg=zero_twist
             )
         )
+    if opts.foot_half_width_m is not None:
+        hip_spec = add_foot_width_spheres(
+            hip_spec, opts.foot_half_width_m, opts.torsional_patch_m
+        )
+    elif opts.torsional_patch_m is not None:
+        hip_spec = add_torsional_friction(hip_spec, opts.torsional_patch_m)
+    hip_spec = _calibrate_ground_height(hip_spec, lane.ground.height_m)
     unqualified = "unqualified" in str(base_spec.get("upper_body_qualification", ""))
     if opts.anthropometric:
         stature_m, mass_kg = opts.anthropometric
@@ -490,10 +557,10 @@ def prepare_hip_spec(
         qualification_note = "qualified upper body with functional hips"
 
     if opts.recalibrate_upper:
-        seeds_all = {**upper, **LEG_SEEDS}
+        seeds_all = {**upper, **lane.leg_seeds()}
         fixed = {}
     else:
-        seeds_all = dict(LEG_SEEDS)
+        seeds_all = lane.leg_seeds()
         fixed = dict(upper)
 
     hip_report = {
@@ -595,6 +662,9 @@ def solve_address_stage(inputs: AddressStageInputs) -> AddressStageResult:
     if inputs.fit_closure and not inputs.static_seeds:
         raise ValueError("--fit-closure needs --static-seeds")
 
+    from src.shared.python.motion_matching.pipeline.address_feet import (
+        record_foot_progression,
+    )
     from src.shared.python.motion_matching.pipeline.dynamics import segment_rms
     from src.shared.python.motion_matching.pipeline.lane import document_seed
     from src.shared.python.motion_matching.pipeline.reference import marker_errors
@@ -608,7 +678,7 @@ def solve_address_stage(inputs: AddressStageInputs) -> AddressStageResult:
     labels = inputs.labels
     log = inputs.log
 
-    adapter, kin = lane.kinematics(hip_bytes, {**inputs.upper, **LEG_SEEDS})
+    adapter, kin = lane.kinematics(hip_bytes, {**inputs.upper, **lane.leg_seeds()})
     q_seed = document_seed(dict(base_spec), kin)
     address = lane.best_address(kin, q_seed)
     address_report: dict[str, Any] = {
@@ -669,6 +739,8 @@ def solve_address_stage(inputs: AddressStageInputs) -> AddressStageResult:
                 closure_report["translation_change_m"] * 1e3,
                 address.marker_rms_m * 1e3,
             )
+
+    record_foot_progression(address_report, kin, address.q, lane.feet)
 
     return AddressStageResult(
         address=address,

@@ -1,0 +1,487 @@
+"""End-to-end musculoskeletal swing pipeline and receipt (issue #11617).
+
+Order of operations (each step is a function of the previous one's files):
+
+1. build the muscle model fitted to the golf humanoid and write it,
+2. map the matched swing kinematics (OpenSim IK states) onto the model
+   coordinates 1:1 by name, low-pass filter, and cut the analysis window,
+3. estimate the ground reactions needed for dynamic consistency,
+4. solve muscle redundancy with StaticOptimization,
+5. summarise activations next to the reserve and stand-in torques and write a
+   receipt that states the limitations plainly.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Mapping
+from dataclasses import dataclass, field, replace
+import hashlib
+import json
+import logging
+from pathlib import Path
+import time
+from typing import Any
+
+import numpy as np
+
+from src.engines.physics_engines.opensim.python import (
+    msk_club,
+    musculoskeletal_grf as grf,
+    musculoskeletal_solvers as solvers,
+    musculoskeletal_swing as swing,
+)
+from src.shared.python.contracts import require
+
+logger = logging.getLogger(__name__)
+
+RECEIPT_SCHEMA = "msk-swing/opensim-static-optimization-v1"
+LIMITATIONS: tuple[str, ...] = (
+    "The base model has 80 lower-limb muscles only: there are no trunk, shoulder, "
+    "arm or forearm muscles. Lumbar, shoulder, elbow, forearm and wrist demand is "
+    "carried by upper_* joint-torque actuators, not muscles.",
+    "No ground-reaction forces were measured. They are estimated from the "
+    "kinematics (force-free inverse dynamics + friction-limited NNLS on eight sole "
+    "points); the split between feet is statically indeterminate, so leg-muscle "
+    "forces depend on that assumption.",
+    "Kinematics are marker-based IK of a tour-average swing with no foot markers; "
+    "large trunk/arm angles and fast transitions make joint accelerations "
+    "(hence demands) unreliable, especially after the downswing begins.",
+    "Muscle strength is the generic Rajagopal-Lai-Uhlrich set scaled with the "
+    "segments; it is not calibrated to this golfer.",
+    "StaticOptimization has no activation dynamics and no tendon history; it is a "
+    "per-frame redundancy resolution, not a forward-dynamics replay.",
+)
+
+
+@dataclass(frozen=True)
+class PipelineConfig:
+    """Inputs of the musculoskeletal swing pipeline."""
+
+    golf_model: Path
+    states_file: Path
+    out_dir: Path
+    window: solvers.SolveWindow
+    cutoff_hz: float = 15.0
+    so_step: int = 2
+    phase_split_s: float = 1.08
+    base_model: Path | None = None
+    extra_notes: tuple[str, ...] = field(default_factory=tuple)
+    #: Shared club held in both hands (``msk_club.CLUBS``); ``None`` builds
+    #: the no-club control model.
+    club: str | None = "driver"
+    #: Keep the trail-hand weld in the solved model. Off by default: the IK
+    #: kinematics do not close the two-hand loop (see ``release_trail_weld``).
+    enforce_trail_weld: bool = False
+
+    def validate(self) -> None:
+        """Raise ``ValueError``/``FileNotFoundError`` on unusable inputs."""
+        require(self.cutoff_hz > 0, "cutoff_hz must be positive")
+        require(self.so_step >= 1, "so_step must be >= 1")
+        require(
+            self.club is None or self.club in msk_club.CLUBS,
+            f"club must be None or one of {msk_club.CLUBS}, got {self.club!r}",
+        )
+        require(
+            not self.enforce_trail_weld or self.club is not None,
+            "enforce_trail_weld needs a club",
+        )
+        for p in (self.golf_model, self.states_file):
+            if not Path(p).is_file():
+                raise FileNotFoundError(f"input not found: {p}")
+
+
+def sha256_file(path: str | Path) -> str:
+    """SHA-256 of a file's bytes."""
+    h = hashlib.sha256()
+    with Path(path).open("rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def _phase_rms(times: np.ndarray, values: np.ndarray, split: float) -> dict[str, float]:
+    """RMS of ``values`` before and after ``split`` (empty phase -> 0.0)."""
+    out: dict[str, float] = {}
+    for name, mask in (
+        ("before_split", times < split),
+        ("after_split", times >= split),
+    ):
+        out[name] = float(np.sqrt(np.mean(values[mask] ** 2))) if mask.any() else 0.0
+    return out
+
+
+def prepare_inputs(cfg: PipelineConfig) -> dict[str, Any]:
+    """Steps 1-3: model, mapped/filtered kinematics and estimated loads.
+
+    Returns a dict of paths and metrics; raises ``MappingError`` if any model
+    coordinate has no source column.
+    """
+    cfg.validate()
+    out = Path(cfg.out_dir)
+    out.mkdir(parents=True, exist_ok=True)
+    model, info = swing.build_musculoskeletal_model(
+        cfg.golf_model, cfg.base_model, club=cfg.club
+    )
+    if info["club"] is not None:
+        require(
+            info["grip_model"] == "weld",
+            "StaticOptimization needs the weld grip: the bushing club's free "
+            "coordinates have no source kinematics",
+        )
+    released = False
+    if not cfg.enforce_trail_weld:
+        released = swing.release_trail_weld(model)
+        model.initSystem()
+    info["trail_weld_released_for_so"] = released
+    model_path = out / "msk_model.osim"
+    model.printToXML(str(model_path))
+    times, cols = swing.read_states_table(cfg.states_file)
+    names = [c.getName() for c in model.getCoordinateSet()]
+    mapping = swing.map_coordinates(list(cols), names)
+    if mapping.unmapped_model:
+        raise swing.MappingError(
+            f"unmapped model coordinates: {mapping.unmapped_model}"
+        )
+    smooth = swing.smooth_kinematics(
+        times, {n: cols[mapping.mapped[n]] for n in names}, cfg.cutoff_hz
+    )
+    sel = (times >= cfg.window.t_start - 1e-9) & (times <= cfg.window.t_end + 1e-9)
+    require(int(sel.sum()) > 12, "analysis window contains too few frames")
+    tw = times[sel]
+    qw = {k: v[sel] for k, v in smooth.items()}
+    coords_path = swing.write_sto(out / "coords.sto", tw, qw)
+    est = grf.estimate_ground_reactions(model, tw, qw)
+    xml = grf.write_external_loads(
+        out, tw, est["forces"], est["points"], spins=est["spins"]
+    )
+    total = est["forces"].sum(axis=1)
+    bw = info["total_mass_kg"] * 9.80665
+    return {
+        "model": model,
+        "model_path": model_path,
+        "coords_path": coords_path,
+        "loads_xml": xml,
+        "times": tw,
+        "info": info,
+        "mapping": mapping,
+        "grf": {
+            "estimator": "force-free ID root wrench + friction-limited NNLS, 8 sole points",
+            "friction_coefficient": grf.DEFAULT_FRICTION,
+            "contact_height_tolerance_m": grf.DEFAULT_CONTACT_HEIGHT_TOL_M,
+            "floor_height_m": est["floor_y"],
+            "vertical_force_bw_mean": float(np.mean(total[:, 1]) / bw),
+            "vertical_force_bw_peak": float(np.max(total[:, 1]) / bw),
+            "horizontal_force_bw_peak": float(
+                np.max(np.hypot(total[:, 0], total[:, 2])) / bw
+            ),
+            "unexplained_wrench_rms": float(
+                np.sqrt(np.mean(est["residual_norm"] ** 2))
+            ),
+            "unexplained_wrench_max": float(np.max(est["residual_norm"])),
+            "unexplained_wrench_rms_by_phase": _phase_rms(
+                tw, est["residual_norm"], cfg.phase_split_s
+            ),
+            "required_wrench_rms": float(
+                np.sqrt(np.mean(np.sum(est["required"] ** 2, axis=1)))
+            ),
+        },
+    }
+
+
+def solve_and_summarise(cfg: PipelineConfig, prep: dict[str, Any]) -> dict[str, Any]:
+    """Steps 4-5: StaticOptimization and the activation/reserve summary."""
+    out = Path(cfg.out_dir)
+    start = time.time()
+    act_path = solvers.run_static_optimization(
+        prep["model_path"],
+        prep["coords_path"],
+        prep["loads_xml"],
+        out / "so",
+        cfg.window,
+        step_interval=cfg.so_step,
+    )
+    wall = time.time() - start
+    t, acts = solvers.activation_table_to_arrays(act_path)
+    muscle_names = [m.getName() for m in prep["model"].getMuscles()]
+    muscle_names = [m for m in muscle_names if m in acts]
+    summary = solvers.summarize_solution(
+        t,
+        acts,
+        muscle_names=muscle_names,
+        optimal_forces=prep["info"]["actuator_optimal_force"],
+    )
+
+    def summarize_phase(tt: np.ndarray, aa: dict[str, np.ndarray]) -> dict[str, Any]:
+        sub = solvers.summarize_solution(
+            tt,
+            aa,
+            muscle_names=muscle_names,
+            optimal_forces=prep["info"]["actuator_optimal_force"],
+        )
+        return {
+            "t_range_s": [float(tt[0]), float(tt[-1])],
+            "per_group": sub["per_group"],
+            "reserve_rms_max": sub["reserve_rms_max"],
+            "reserve_torques": sub["reserve_torques"],
+            "upper_body_torques": sub["upper_body_torques"],
+            "muscles_saturated_fraction": sub["muscles_saturated_fraction"],
+        }
+
+    summary["phases"] = {}
+    for name, mask in (
+        ("before_split", t < cfg.phase_split_s),
+        ("after_split", t >= cfg.phase_split_s),
+    ):
+        if int(mask.sum()) > 1:
+            summary["phases"][name] = summarize_phase(
+                t[mask], {k: v[mask] for k, v in acts.items()}
+            )
+    log_t, log_v = solvers.parse_static_optimization_log(
+        Path(act_path).parent / solvers.SO_LOG_NAME
+    )
+    converged = solvers.converged_frames(t, log_t, log_v)
+    summary["converged_mask"] = converged
+    summary["convergence"] = {
+        "criterion": "logged equality-constraint violation <= "
+        f"{solvers.SO_CONVERGED_VIOLATION:g}",
+        "frames": int(t.size),
+        "frames_converged": int(converged.sum()),
+        "first_unconverged_time_s": (
+            float(t[~converged][0]) if (~converged).any() else None
+        ),
+        "max_violation": float(log_v.max()) if log_v.size else None,
+    }
+    if int(converged.sum()) > 1:
+        summary["converged_only"] = summarize_phase(
+            t[converged], {k: v[converged] for k, v in acts.items()}
+        )
+    summary["wall_clock_s"] = wall
+    summary["activation_file"] = str(act_path)
+    return summary
+
+
+def build_receipt(
+    cfg: PipelineConfig, prep: dict[str, Any], summary: dict[str, Any]
+) -> dict[str, Any]:
+    """Assemble the receipt dict (JSON-serialisable)."""
+    info = prep["info"]
+    mapping = prep["mapping"]
+    top = sorted(summary["per_muscle"].items(), key=lambda kv: -kv[1]["peak"])[:20]
+    return {
+        "schema": RECEIPT_SCHEMA,
+        "issue": "#11617",
+        "epic": "#11605",
+        "status": "STATIC_OPTIMIZATION_ONLY_NOT_QUALIFIED",
+        "window_s": [cfg.window.t_start, cfg.window.t_end],
+        "inputs": {
+            "golf_model": str(cfg.golf_model),
+            "golf_model_sha256": sha256_file(cfg.golf_model),
+            "states_file": str(cfg.states_file),
+            "states_file_sha256": sha256_file(cfg.states_file),
+            "base_model": info["base_model"],
+            "base_model_sha256": sha256_file(info["base_model"]),
+            "musculoskeletal_model_sha256": sha256_file(prep["model_path"]),
+        },
+        "model": {
+            "n_muscles": info["n_muscles"],
+            "muscle_type": "Millard2012EquilibriumMuscle",
+            "n_coordinates": info["n_coordinates"],
+            "total_mass_kg": info["total_mass_kg"],
+            "body_scale_factors": info["body_scale_factors"],
+            "unlocked_coordinates": list(swing.UNLOCKED_COORDINATES),
+            "upper_body_actuators": "upper_* CoordinateActuator (optimal force "
+            f"{swing.UPPER_OPTIMAL_FORCE:g}; torques reported in N m)",
+            "reserve_actuators": "reserve_* CoordinateActuator (leg optimal force "
+            f"{swing.RESERVE_OPTIMAL_FORCE:g}, pelvis residual "
+            f"{swing.ROOT_OPTIMAL_FORCE:g}; reported in N or N m)",
+        },
+        "coordinate_mapping": {
+            "method": "1:1 by coordinate name from OpenSim IK states",
+            "mapped": len(mapping.mapped),
+            "of": info["n_coordinates"],
+            "unmapped_model_coordinates": list(mapping.unmapped_model),
+            "unmapped_source_columns": list(mapping.unmapped_source),
+            "notes": [
+                "knee_angle_*_beta follow the patellofemoral coupler constraint",
+                "mtp_angle_* are identically zero in the source and locked",
+                "kinematics low-passed at "
+                f"{cfg.cutoff_hz} Hz (zero-phase 2nd-order Butterworth)",
+            ],
+        },
+        "ground_reaction_estimate": prep["grf"],
+        "club": {
+            "issue": "#11756",
+            "club": info["club"],
+            "grip_model": info["grip_model"],
+            "mass_kg": info["club_mass_kg"],
+            "grip_calibration": info["grip_calibration"],
+            "trail_weld_released_for_so": info["trail_weld_released_for_so"],
+            "note": (
+                "The IK kinematics do not close the two-hand loop. With the "
+                "trail weld enforced, StaticOptimization could not meet any arm "
+                "coordinate's acceleration (14 arm coordinates at every one of "
+                "the 88 frames tried), so by default the solved model holds the "
+                "club with the lead hand only and the trail hand is free."
+            ),
+        },
+        "solver": {
+            "name": "opensim.StaticOptimization (AnalyzeTool)",
+            "activation_exponent": solvers.DEFAULT_ACTIVATION_EXPONENT,
+            "use_muscle_physiology": True,
+            "step_interval": cfg.so_step,
+            "wall_clock_s": summary["wall_clock_s"],
+            "converged": summary["convergence"]["frames_converged"]
+            == summary["convergence"]["frames"],
+            "convergence": summary["convergence"],
+            "convergence_note": (
+                "results cover every frame, including frames whose optimiser did "
+                "not converge (their actuator values are not solutions); "
+                "results.converged_only repeats the summary on converged frames"
+            ),
+        },
+        "results": {
+            "per_group": summary["per_group"],
+            "top_muscles_by_peak": dict(top),
+            "reserve_rms_max": summary["reserve_rms_max"],
+            "reserve_torques": summary["reserve_torques"],
+            "upper_body_torques": summary["upper_body_torques"],
+            "muscles_saturated_fraction": summary["muscles_saturated_fraction"],
+            "phases": summary["phases"],
+            "phase_split_s": cfg.phase_split_s,
+            "converged_only": summary.get("converged_only"),
+        },
+        "moco_inverse": {
+            "status": "NOT_RUN_TO_CONVERGENCE",
+            "note": "see limitations in the README; direct collocation with 80 "
+            "muscles took more than a minute per iteration on 4 cores even for a "
+            "10-interval pilot, so a full-swing solve was infeasible here",
+        },
+        "limitations": list(LIMITATIONS) + list(cfg.extra_notes),
+    }
+
+
+def club_load_comparison(
+    times_with: np.ndarray,
+    torques_with: Mapping[str, np.ndarray],
+    times_without: np.ndarray,
+    torques_without: Mapping[str, np.ndarray],
+    *,
+    valid: np.ndarray | None = None,
+) -> dict[str, Any]:
+    """Per-frame actuator torque difference, with club minus without (N m).
+
+    Both solves share the kinematics, so the difference isolates what the
+    club adds (its inertia and weight). ``valid`` (default: every frame)
+    selects the frames compared, normally those converged in both runs.
+
+    Raises ``ValueError`` unless both runs have the same frame times (within
+    1e-9 s) and the same actuator names, and ``valid`` matches the frames and
+    selects at least one. Postcondition: ``per_actuator`` has
+    ``delta_rms``/``delta_peak`` and each run's RMS for every actuator over
+    the valid frames, and ``largest_delta_rms`` names the actuator with the
+    largest ``delta_rms``.
+    """
+    tw = np.asarray(times_with, dtype=float)
+    to = np.asarray(times_without, dtype=float)
+    require(
+        tw.shape == to.shape and bool(np.allclose(tw, to, rtol=0.0, atol=1e-9)),
+        "with- and without-club runs must share frame times",
+    )
+    require(
+        set(torques_with) == set(torques_without),
+        "with- and without-club runs must have the same actuator names",
+    )
+    keep = np.ones(tw.size, dtype=bool) if valid is None else np.asarray(valid, bool)
+    require(
+        keep.shape == tw.shape and bool(keep.any()),
+        "valid must mark at least one of the compared frames",
+    )
+
+    def rms(v: np.ndarray) -> float:
+        return float(np.sqrt(np.mean(v**2)))
+
+    per: dict[str, dict[str, float]] = {}
+    for name in sorted(torques_with):
+        a = np.asarray(torques_with[name], dtype=float)[keep]
+        b = np.asarray(torques_without[name], dtype=float)[keep]
+        delta = a - b
+        per[name] = {
+            "delta_rms": rms(delta),
+            "delta_peak": float(np.abs(delta).max()),
+            "with_club_rms": rms(a),
+            "without_club_rms": rms(b),
+        }
+    largest = max(per, key=lambda k: per[k]["delta_rms"]) if per else None
+    return {
+        "method": "per-frame difference of StaticOptimization actuator torques, "
+        "same kinematics and window, with the club minus the no-club control",
+        "n_frames": int(keep.sum()),
+        "n_frames_excluded": int((~keep).sum()),
+        "per_actuator": per,
+        "largest_delta_rms": largest,
+    }
+
+
+def _upper_torque_series(
+    prep: dict[str, Any], summary: dict[str, Any]
+) -> tuple[np.ndarray, dict[str, np.ndarray]]:
+    t, acts = solvers.activation_table_to_arrays(summary["activation_file"])
+    info = prep["info"]
+    return t, solvers.actuator_torques(acts, info["actuator_optimal_force"], "upper_")
+
+
+def run_pipeline(
+    cfg: PipelineConfig,
+    receipt_path: str | Path,
+    *,
+    moco_pilot: tuple[float, float, float] | None = None,
+    moco_iterations: int = 25,
+    club_control: bool = False,
+) -> dict[str, Any]:
+    """Run all steps and write the receipt; return it.
+
+    ``moco_pilot=(t0, t1, mesh_s)`` additionally runs a short MocoInverse pilot
+    whose (usually unconverged) status is recorded verbatim in the receipt.
+    ``club_control=True`` (needs ``cfg.club``) also solves the no-club control
+    in ``out_dir/no_club_control`` and records :func:`club_load_comparison`
+    of the upper-body torques under ``club_load``.
+    """
+    require(
+        not club_control or cfg.club is not None,
+        "club_control needs a club to compare against",
+    )
+    prep = prepare_inputs(cfg)
+    summary = solve_and_summarise(cfg, prep)
+    receipt = build_receipt(cfg, prep, summary)
+    if club_control:
+        control = replace(cfg, club=None, out_dir=Path(cfg.out_dir) / "no_club_control")
+        prep_c = prepare_inputs(control)
+        summary_c = solve_and_summarise(control, prep_c)
+        both = summary["converged_mask"] & summary_c["converged_mask"]
+        comparison = club_load_comparison(
+            *_upper_torque_series(prep, summary),
+            *_upper_torque_series(prep_c, summary_c),
+            valid=both,
+        )
+        comparison["frames"] = "converged in both runs"
+        comparison["control_convergence"] = summary_c["convergence"]
+        for key, run in (("with_club", summary), ("control", summary_c)):
+            converged = run.get("converged_only") or {}
+            comparison[f"{key}_converged_reserve_rms_max"] = converged.get(
+                "reserve_rms_max"
+            )
+        receipt["club_load"] = comparison
+    if moco_pilot is not None:
+        t0, t1, mesh = moco_pilot
+        receipt["moco_inverse"] = solvers.solve_moco_pilot(
+            prep["model_path"],
+            prep["coords_path"],
+            prep["loads_xml"],
+            solvers.SolveWindow(t0, t1),
+            mesh_interval=mesh,
+            max_iterations=moco_iterations,
+        )
+    path = Path(receipt_path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n")
+    return receipt

@@ -75,7 +75,9 @@ classdef test_gs3dx_neck < matlab.unittest.TestCase
             % Straight neck: every solid where GS3DX_Shape has it.  Turned
             % neck: only the Neck and Head move, rigidly about the neck base.
             jc = gs3dx_capture_joint_centres(gs3dx_capture_markers());
-            ik = gs3dx_whole_body_ik(jc, frames=[1 jc.impact_frame], calibration_frames=1:15:jc.impact_frame - 90);
+            % Explicitly pin historically Fit-based neck test call to variants.fit
+            ik = gs3dx_whole_body_ik(jc, model=char(gs3dx_names().variants.fit), ...
+                frames=[1 jc.impact_frame], calibration_frames=1:15:jc.impact_frame - 90);
             [k0, id0] = gs3dx_joint_keys(char(ik.model));
             [~, r] = ismember(string(ik.joint_ids), id0);
             ik.joint_keys = [k0(r); "Hips and Torso Inputs/Neck Joint|Rx.q"; "Hips and Torso Inputs/Neck Joint|Ry.q"];

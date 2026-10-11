@@ -161,7 +161,7 @@ def _extract_metric(data: Mapping[str, Any], *keys: str) -> float | None:
     for key in keys:
         if key in data:
             val = data[key]
-            if isinstance(val, (int, float)) and not math.isnan(val):
+            if isinstance(val, (int, float)):
                 return float(val)
     # Check nested containers: shared_metrics, restart_uninterrupted_metrics, zero_displacement_parity
     for sub in (
@@ -188,6 +188,14 @@ def _check_rmse_gate(
 ) -> GateResult | None:
     if measured is None:
         return None
+    if math.isnan(measured):
+        return GateResult(
+            name=name,
+            status=GateStatus.FAILED,
+            threshold=threshold,
+            measured=measured,
+            reason=f"{label} RMSE is unmeasured (NaN)",
+        )
     if measured <= threshold:
         return GateResult(
             name=name,
@@ -280,12 +288,49 @@ def _evaluate_marker_rmse(
     return results
 
 
+def _check_yaw_gate(
+    name: str,
+    measured: float,
+    threshold: float,
+    unit: str,
+    label: str,
+    *,
+    fmt: str = ".4f",
+    use_abs: bool = False,
+) -> GateResult:
+    if math.isnan(measured):
+        return GateResult(
+            name=name,
+            status=GateStatus.FAILED,
+            threshold=threshold,
+            measured=measured,
+            unit=unit,
+            reason=f"{label} is unmeasured (NaN)",
+        )
+    val = abs(measured) if use_abs else measured
+    if val <= threshold:
+        return GateResult(
+            name=name,
+            status=GateStatus.PASSED,
+            threshold=threshold,
+            measured=measured,
+            unit=unit,
+        )
+    return GateResult(
+        name=name,
+        status=GateStatus.FAILED,
+        threshold=threshold,
+        measured=measured,
+        unit=unit,
+        reason=f"{label} {measured:{fmt}} {unit} > {threshold:{fmt}} {unit}",
+    )
+
+
 def _evaluate_pelvis_yaw(
     receipt: Mapping[str, Any],
     horizon: Horizon,
     gates: AcceptanceGates,
 ) -> list[GateResult]:
-    results: list[GateResult] = []
     thresh_yaw_rad = (
         gates.g1_pelvis_yaw_rmse_rad
         if horizon == Horizon.G1
@@ -296,77 +341,43 @@ def _evaluate_pelvis_yaw(
         )
     )
     val_yaw_rad = _extract_metric(receipt, "pelvis_yaw_rmse_rad")
-    val_yaw_pct = _extract_metric(receipt, "pelvis_yaw_error_pct")
-    val_yaw_deg = _extract_metric(receipt, "pelvis_yaw_diff_deg")
     if val_yaw_rad is not None:
-        if val_yaw_rad <= thresh_yaw_rad:
-            results.append(
-                GateResult(
-                    name="pelvis_yaw_rmse_rad",
-                    status=GateStatus.PASSED,
-                    threshold=thresh_yaw_rad,
-                    measured=val_yaw_rad,
-                    unit="rad",
-                )
+        return [
+            _check_yaw_gate(
+                "pelvis_yaw_rmse_rad",
+                val_yaw_rad,
+                thresh_yaw_rad,
+                unit="rad",
+                label="pelvis yaw RMSE",
+                fmt=".4f",
             )
-        else:
-            results.append(
-                GateResult(
-                    name="pelvis_yaw_rmse_rad",
-                    status=GateStatus.FAILED,
-                    threshold=thresh_yaw_rad,
-                    measured=val_yaw_rad,
-                    unit="rad",
-                    reason=f"pelvis yaw RMSE {val_yaw_rad:.4f} rad > {thresh_yaw_rad:.4f} rad",
-                )
+        ]
+    val_yaw_pct = _extract_metric(receipt, "pelvis_yaw_error_pct")
+    if val_yaw_pct is not None:
+        return [
+            _check_yaw_gate(
+                "pelvis_yaw_error_pct",
+                val_yaw_pct,
+                gates.g1_pelvis_yaw_error_pct,
+                unit="%",
+                label="pelvis yaw error",
+                fmt=".2f",
             )
-    elif val_yaw_pct is not None:
-        thresh_pct = gates.g1_pelvis_yaw_error_pct
-        if val_yaw_pct <= thresh_pct:
-            results.append(
-                GateResult(
-                    name="pelvis_yaw_error_pct",
-                    status=GateStatus.PASSED,
-                    threshold=thresh_pct,
-                    measured=val_yaw_pct,
-                    unit="%",
-                )
+        ]
+    val_yaw_deg = _extract_metric(receipt, "pelvis_yaw_diff_deg")
+    if val_yaw_deg is not None:
+        return [
+            _check_yaw_gate(
+                "pelvis_yaw_diff_deg",
+                val_yaw_deg,
+                math.degrees(thresh_yaw_rad),
+                unit="deg",
+                label="pelvis yaw diff",
+                fmt=".2f",
+                use_abs=True,
             )
-        else:
-            results.append(
-                GateResult(
-                    name="pelvis_yaw_error_pct",
-                    status=GateStatus.FAILED,
-                    threshold=thresh_pct,
-                    measured=val_yaw_pct,
-                    unit="%",
-                    reason=f"pelvis yaw error {val_yaw_pct:.2f}% > {thresh_pct:.2f}%",
-                )
-            )
-    elif val_yaw_deg is not None:
-        thresh_deg = math.degrees(thresh_yaw_rad)
-        if abs(val_yaw_deg) <= thresh_deg:
-            results.append(
-                GateResult(
-                    name="pelvis_yaw_diff_deg",
-                    status=GateStatus.PASSED,
-                    threshold=thresh_deg,
-                    measured=val_yaw_deg,
-                    unit="deg",
-                )
-            )
-        else:
-            results.append(
-                GateResult(
-                    name="pelvis_yaw_diff_deg",
-                    status=GateStatus.FAILED,
-                    threshold=thresh_deg,
-                    measured=val_yaw_deg,
-                    unit="deg",
-                    reason=f"pelvis yaw diff {val_yaw_deg:.2f} deg > {thresh_deg:.2f} deg",
-                )
-            )
-    return results
+        ]
+    return []
 
 
 def _evaluate_normal_contact_force(

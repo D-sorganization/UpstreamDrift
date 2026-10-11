@@ -24,6 +24,7 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 pytest.importorskip("PyQt6")
 pytest.importorskip("cv2")
 
+from PyQt6 import sip
 from PyQt6.QtWidgets import QApplication
 
 from src.shared.python.theme.colors import BUILTIN_THEMES
@@ -60,15 +61,33 @@ def _sources() -> list[Path]:
     return files
 
 
+def _forget_deleted_windows(manager: ThemeManager) -> None:
+    """Drop registered windows whose C++ object another test already deleted.
+
+    ``ThemeManager`` keeps weak references to every window styled through it,
+    and a dialog that an earlier test on the same xdist worker closed can have
+    its C++ object deleted while the Python wrapper is still alive. Restyling
+    that wrapper raises ``RuntimeError: wrapped C/C++ object ... has been
+    deleted`` at this fixture's teardown. Only dead entries are removed.
+    """
+    manager._registered_windows = [
+        ref
+        for ref in manager._registered_windows
+        if ref() is not None and not sip.isdeleted(ref())
+    ]
+
+
 @pytest.fixture
 def theme_manager() -> Iterator[ThemeManager]:
     """The singleton, with the operator's theme put back afterwards."""
     _app()
     manager = ThemeManager.instance()
+    _forget_deleted_windows(manager)
     before = manager.get_current_theme_name()
     try:
         yield manager
     finally:
+        _forget_deleted_windows(manager)
         manager.change_theme(before)
 
 

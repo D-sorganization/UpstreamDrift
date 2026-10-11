@@ -1,0 +1,497 @@
+{
+  "qualification": "NATIVE_REFERENCE_FILTER_CLOSURE_AND_POSITION_ROUNDTRIP_NOT_DYNAMICS_ACCEPTANCE",
+  "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+  "native_completed_UTC": "2026-10-03T02:51:02.504348+00:00",
+  "independent_angle_filter_assembly": {
+    "capture_A": {
+      "selected": {
+        "samples": 55,
+        "status_one_count": 55,
+        "exact_requested_assembly_count": 55,
+        "finite_output_count": 55,
+        "max_scalar_translation_target_error_m": 0,
+        "max_scalar_angle_target_error_deg": 2.842170943040401e-14,
+        "max_spherical_target_rotation_matrix_error": 1.2387820549587201e-15,
+        "first_left_min_clearance_m": -0.014540355628366966,
+        "first_right_min_clearance_m": 0.014540355628366872,
+        "first_clearance_spread_m": 0.03054320240685482
+      },
+      "filtered": {
+        "samples": 55,
+        "status_one_count": 0,
+        "exact_requested_assembly_count": 0,
+        "finite_output_count": 55,
+        "max_scalar_translation_target_error_m": 0,
+        "max_scalar_angle_target_error_deg": 9.246308656854865,
+        "max_spherical_target_rotation_matrix_error": 0.3263125715501451,
+        "first_left_min_clearance_m": -0.014540355628366966,
+        "first_right_min_clearance_m": 0.014540355628366872,
+        "first_clearance_spread_m": 0.03054320240685482
+      },
+      "accepted_stance": {
+        "samples": 1,
+        "status_one_count": 1,
+        "exact_requested_assembly_count": 1,
+        "finite_output_count": 1,
+        "max_scalar_translation_target_error_m": 0,
+        "max_scalar_angle_target_error_deg": 2.842170943040401e-14,
+        "max_spherical_target_rotation_matrix_error": 8.400361489980555e-16,
+        "first_left_min_clearance_m": 0.0002499999999783318,
+        "first_right_min_clearance_m": 0.0002500000000002032,
+        "first_clearance_spread_m": 0.0014624911501448512
+      },
+      "filtered_stance_start": {
+        "samples": 1,
+        "status_one_count": 0,
+        "exact_requested_assembly_count": 0,
+        "finite_output_count": 1,
+        "max_scalar_translation_target_error_m": 0,
+        "max_scalar_angle_target_error_deg": 0.0059879314230286695,
+        "max_spherical_target_rotation_matrix_error": 7.73493080077529e-5,
+        "first_left_min_clearance_m": 0.0002499999999784428,
+        "first_right_min_clearance_m": 0.0002500000000002032,
+        "first_clearance_spread_m": 0.0014624911501447402
+      }
+    },
+    "capture_O": {
+      "selected": {
+        "samples": 46,
+        "status_one_count": 46,
+        "exact_requested_assembly_count": 46,
+        "finite_output_count": 46,
+        "max_scalar_translation_target_error_m": 0,
+        "max_scalar_angle_target_error_deg": 2.842170943040401e-14,
+        "max_spherical_target_rotation_matrix_error": 1.26219223971514e-15,
+        "first_left_min_clearance_m": -0.007548702269003052,
+        "first_right_min_clearance_m": 0.007548702269002847,
+        "first_clearance_spread_m": 0.016199469958789736
+      },
+      "filtered": {
+        "samples": 46,
+        "status_one_count": 0,
+        "exact_requested_assembly_count": 0,
+        "finite_output_count": 46,
+        "max_scalar_translation_target_error_m": 0,
+        "max_scalar_angle_target_error_deg": 3.785987601376263,
+        "max_spherical_target_rotation_matrix_error": 0.08133405097639822,
+        "first_left_min_clearance_m": -0.007548702269003052,
+        "first_right_min_clearance_m": 0.007548702269002847,
+        "first_clearance_spread_m": 0.016199469958789736
+      },
+      "accepted_stance": {
+        "samples": 1,
+        "status_one_count": 1,
+        "exact_requested_assembly_count": 1,
+        "finite_output_count": 1,
+        "max_scalar_translation_target_error_m": 0,
+        "max_scalar_angle_target_error_deg": 1.4210854715202004e-14,
+        "max_spherical_target_rotation_matrix_error": 7.671793734223694e-16,
+        "first_left_min_clearance_m": 0.0002499999999783318,
+        "first_right_min_clearance_m": 0.0002500000000202982,
+        "first_clearance_spread_m": 0.0011020654209483727
+      },
+      "filtered_stance_start": {
+        "samples": 1,
+        "status_one_count": 0,
+        "exact_requested_assembly_count": 0,
+        "finite_output_count": 1,
+        "max_scalar_translation_target_error_m": 0,
+        "max_scalar_angle_target_error_deg": 0.00808512957262053,
+        "max_spherical_target_rotation_matrix_error": 0.00012409913179839814,
+        "first_left_min_clearance_m": 0.0002499999999783318,
+        "first_right_min_clearance_m": 0.0002500000000202982,
+        "first_clearance_spread_m": 0.0011020654209483727
+      }
+    }
+  },
+  "native_adjusted_full_target_recheck": {
+    "capture_A": {
+      "selected": {
+        "samples": 55,
+        "prior_status_values": 1,
+        "prior_status_counts": 55,
+        "recheck_status_one_count": 55,
+        "fully_verified_count": 55,
+        "max_scalar_target_error_deg": 2.842170943040401e-14,
+        "max_scalar_target_error_m": 0,
+        "max_spherical_rotation_matrix_target_error": 1.0370338861126152e-15,
+        "all_frames_qualified": true
+      },
+      "filtered": {
+        "samples": 55,
+        "prior_status_values": -1,
+        "prior_status_counts": 55,
+        "recheck_status_one_count": 55,
+        "fully_verified_count": 55,
+        "max_scalar_target_error_deg": 2.842170943040401e-14,
+        "max_scalar_target_error_m": 0,
+        "max_spherical_rotation_matrix_target_error": 1.1403455171351628e-15,
+        "all_frames_qualified": true
+      },
+      "accepted_stance": {
+        "samples": 1,
+        "prior_status_values": 1,
+        "prior_status_counts": 1,
+        "recheck_status_one_count": 1,
+        "fully_verified_count": 1,
+        "max_scalar_target_error_deg": 2.842170943040401e-14,
+        "max_scalar_target_error_m": 0,
+        "max_spherical_rotation_matrix_target_error": 8.1773032027145e-16,
+        "all_frames_qualified": true
+      },
+      "filtered_stance_start": {
+        "samples": 1,
+        "prior_status_values": -1,
+        "prior_status_counts": 1,
+        "recheck_status_one_count": 1,
+        "fully_verified_count": 1,
+        "max_scalar_target_error_deg": 2.842170943040401e-14,
+        "max_scalar_target_error_m": 0,
+        "max_spherical_rotation_matrix_target_error": 9.930136612989092e-16,
+        "all_frames_qualified": true
+      }
+    },
+    "capture_O": {
+      "selected": {
+        "samples": 46,
+        "prior_status_values": 1,
+        "prior_status_counts": 46,
+        "recheck_status_one_count": 46,
+        "fully_verified_count": 46,
+        "max_scalar_target_error_deg": 2.842170943040401e-14,
+        "max_scalar_target_error_m": 0,
+        "max_spherical_rotation_matrix_target_error": 9.171947447016606e-16,
+        "all_frames_qualified": true
+      },
+      "filtered": {
+        "samples": 46,
+        "prior_status_values": -1,
+        "prior_status_counts": 46,
+        "recheck_status_one_count": 46,
+        "fully_verified_count": 46,
+        "max_scalar_target_error_deg": 2.842170943040401e-14,
+        "max_scalar_target_error_m": 0,
+        "max_spherical_rotation_matrix_target_error": 1.0284555048505842e-15,
+        "all_frames_qualified": true
+      },
+      "accepted_stance": {
+        "samples": 1,
+        "prior_status_values": 1,
+        "prior_status_counts": 1,
+        "recheck_status_one_count": 1,
+        "fully_verified_count": 1,
+        "max_scalar_target_error_deg": 1.4210854715202004e-14,
+        "max_scalar_target_error_m": 0,
+        "max_spherical_rotation_matrix_target_error": 9.002395906635905e-16,
+        "all_frames_qualified": true
+      },
+      "filtered_stance_start": {
+        "samples": 1,
+        "prior_status_values": -1,
+        "prior_status_counts": 1,
+        "recheck_status_one_count": 1,
+        "fully_verified_count": 1,
+        "max_scalar_target_error_deg": 1.4210854715202004e-14,
+        "max_scalar_target_error_m": 0,
+        "max_spherical_rotation_matrix_target_error": 9.002395906635905e-16,
+        "all_frames_qualified": true
+      }
+    }
+  },
+  "dependent_arm_trials": {
+    "capture_A": {
+      "L": {
+        "selected": {
+          "samples": 55,
+          "positive_status_count": 55,
+          "status_one_count": 55,
+          "fully_verified_count": 55,
+          "max_fixed_representation_coefficient_difference_NOT_physical_error": 130.94463047640346,
+          "max_fixed_scalar_error_m": 0,
+          "max_fixed_scalar_error_deg": 2.842170943040401e-14,
+          "max_fixed_spherical_rotation_matrix_error": 1.2387820549587201e-15,
+          "max_full_target_recheck_error_native_units": 2.842170943040401e-14,
+          "max_dependent_scalar_change_deg": 0.0004691574412731825,
+          "max_dependent_shoulder_SO3_change_deg": 0.00033878142790588913,
+          "all_frames_qualified": true
+        },
+        "filtered": {
+          "samples": 55,
+          "positive_status_count": 54,
+          "status_one_count": 54,
+          "fully_verified_count": 53,
+          "max_fixed_representation_coefficient_difference_NOT_physical_error": 130.94463047640346,
+          "max_fixed_scalar_error_m": 0,
+          "max_fixed_scalar_error_deg": 0.7076819838425905,
+          "max_fixed_spherical_rotation_matrix_error": 0.07238677477590201,
+          "max_full_target_recheck_error_native_units": 0.006231774047357419,
+          "max_dependent_scalar_change_deg": 56.317574009404495,
+          "max_dependent_shoulder_SO3_change_deg": 47.71996434818763,
+          "all_frames_qualified": false
+        },
+        "accepted_stance": {
+          "samples": 1,
+          "positive_status_count": 1,
+          "status_one_count": 1,
+          "fully_verified_count": 1,
+          "max_fixed_representation_coefficient_difference_NOT_physical_error": 2.842170943040401e-14,
+          "max_fixed_scalar_error_m": 0,
+          "max_fixed_scalar_error_deg": 2.842170943040401e-14,
+          "max_fixed_spherical_rotation_matrix_error": 8.400361489980555e-16,
+          "max_full_target_recheck_error_native_units": 2.842170943040401e-14,
+          "max_dependent_scalar_change_deg": 1.4210854715202004e-14,
+          "max_dependent_shoulder_SO3_change_deg": 0,
+          "all_frames_qualified": true
+        },
+        "filtered_stance_start": {
+          "samples": 1,
+          "positive_status_count": 1,
+          "status_one_count": 1,
+          "fully_verified_count": 1,
+          "max_fixed_representation_coefficient_difference_NOT_physical_error": 2.842170943040401e-14,
+          "max_fixed_scalar_error_m": 0,
+          "max_fixed_scalar_error_deg": 2.842170943040401e-14,
+          "max_fixed_spherical_rotation_matrix_error": 8.400361489980555e-16,
+          "max_full_target_recheck_error_native_units": 2.842170943040401e-14,
+          "max_dependent_scalar_change_deg": 0.006931528273494081,
+          "max_dependent_shoulder_SO3_change_deg": 0.00477637010807139,
+          "all_frames_qualified": true
+        }
+      },
+      "R": {
+        "selected": {
+          "samples": 55,
+          "positive_status_count": 55,
+          "status_one_count": 55,
+          "fully_verified_count": 55,
+          "max_fixed_representation_coefficient_difference_NOT_physical_error": 130.94463047640346,
+          "max_fixed_scalar_error_m": 0,
+          "max_fixed_scalar_error_deg": 2.842170943040401e-14,
+          "max_fixed_spherical_rotation_matrix_error": 1.2387820549587201e-15,
+          "max_full_target_recheck_error_native_units": 2.842170943040401e-14,
+          "max_dependent_scalar_change_deg": 2.842170943040401e-14,
+          "max_dependent_shoulder_SO3_change_deg": 1.7075472925031877e-6,
+          "all_frames_qualified": true
+        },
+        "filtered": {
+          "samples": 55,
+          "positive_status_count": 54,
+          "status_one_count": 54,
+          "fully_verified_count": 54,
+          "max_fixed_representation_coefficient_difference_NOT_physical_error": 130.94463047640346,
+          "max_fixed_scalar_error_m": 0,
+          "max_fixed_scalar_error_deg": 0.21404691509776796,
+          "max_fixed_spherical_rotation_matrix_error": 0.00645009426564143,
+          "max_full_target_recheck_error_native_units": 2.842170943040401e-14,
+          "max_dependent_scalar_change_deg": 27.84582069469019,
+          "max_dependent_shoulder_SO3_change_deg": 31.44068918620313,
+          "all_frames_qualified": false
+        },
+        "accepted_stance": {
+          "samples": 1,
+          "positive_status_count": 1,
+          "status_one_count": 1,
+          "fully_verified_count": 1,
+          "max_fixed_representation_coefficient_difference_NOT_physical_error": 1.4210854715202004e-14,
+          "max_fixed_scalar_error_m": 0,
+          "max_fixed_scalar_error_deg": 1.4210854715202004e-14,
+          "max_fixed_spherical_rotation_matrix_error": 8.400361489980555e-16,
+          "max_full_target_recheck_error_native_units": 2.842170943040401e-14,
+          "max_dependent_scalar_change_deg": 2.842170943040401e-14,
+          "max_dependent_shoulder_SO3_change_deg": 0,
+          "all_frames_qualified": true
+        },
+        "filtered_stance_start": {
+          "samples": 1,
+          "positive_status_count": 1,
+          "status_one_count": 1,
+          "fully_verified_count": 1,
+          "max_fixed_representation_coefficient_difference_NOT_physical_error": 2.842170943040401e-14,
+          "max_fixed_scalar_error_m": 0,
+          "max_fixed_scalar_error_deg": 7.105427357601002e-15,
+          "max_fixed_spherical_rotation_matrix_error": 8.400361489980555e-16,
+          "max_full_target_recheck_error_native_units": 2.842170943040401e-14,
+          "max_dependent_scalar_change_deg": 0.0024519346958058463,
+          "max_dependent_shoulder_SO3_change_deg": 0.0016269839098750993,
+          "all_frames_qualified": true
+        }
+      }
+    },
+    "capture_O": {
+      "L": {
+        "selected": {
+          "samples": 46,
+          "positive_status_count": 46,
+          "status_one_count": 46,
+          "fully_verified_count": 46,
+          "max_fixed_representation_coefficient_difference_NOT_physical_error": 72.00485854820161,
+          "max_fixed_scalar_error_m": 0,
+          "max_fixed_scalar_error_deg": 2.842170943040401e-14,
+          "max_fixed_spherical_rotation_matrix_error": 1.26219223971514e-15,
+          "max_full_target_recheck_error_native_units": 2.842170943040401e-14,
+          "max_dependent_scalar_change_deg": 2.842170943040401e-14,
+          "max_dependent_shoulder_SO3_change_deg": 1.7075472925031877e-6,
+          "all_frames_qualified": true
+        },
+        "filtered": {
+          "samples": 46,
+          "positive_status_count": 46,
+          "status_one_count": 46,
+          "fully_verified_count": 46,
+          "max_fixed_representation_coefficient_difference_NOT_physical_error": 72.00485854820161,
+          "max_fixed_scalar_error_m": 0,
+          "max_fixed_scalar_error_deg": 2.842170943040401e-14,
+          "max_fixed_spherical_rotation_matrix_error": 1.191874962812805e-15,
+          "max_full_target_recheck_error_native_units": 2.842170943040401e-14,
+          "max_dependent_scalar_change_deg": 9.195935082201288,
+          "max_dependent_shoulder_SO3_change_deg": 7.399090792393182,
+          "all_frames_qualified": true
+        },
+        "accepted_stance": {
+          "samples": 1,
+          "positive_status_count": 1,
+          "status_one_count": 1,
+          "fully_verified_count": 1,
+          "max_fixed_representation_coefficient_difference_NOT_physical_error": 2.842170943040401e-14,
+          "max_fixed_scalar_error_m": 0,
+          "max_fixed_scalar_error_deg": 1.4210854715202004e-14,
+          "max_fixed_spherical_rotation_matrix_error": 7.671793734223694e-16,
+          "max_full_target_recheck_error_native_units": 2.842170943040401e-14,
+          "max_dependent_scalar_change_deg": 1.4210854715202004e-14,
+          "max_dependent_shoulder_SO3_change_deg": 0,
+          "all_frames_qualified": true
+        },
+        "filtered_stance_start": {
+          "samples": 1,
+          "positive_status_count": 1,
+          "status_one_count": 1,
+          "fully_verified_count": 1,
+          "max_fixed_representation_coefficient_difference_NOT_physical_error": 2.842170943040401e-14,
+          "max_fixed_scalar_error_m": 0,
+          "max_fixed_scalar_error_deg": 1.4210854715202004e-14,
+          "max_fixed_spherical_rotation_matrix_error": 7.671793734223694e-16,
+          "max_full_target_recheck_error_native_units": 2.842170943040401e-14,
+          "max_dependent_scalar_change_deg": 0.02562573620103592,
+          "max_dependent_shoulder_SO3_change_deg": 0.0180974805946296,
+          "all_frames_qualified": true
+        }
+      },
+      "R": {
+        "selected": {
+          "samples": 46,
+          "positive_status_count": 46,
+          "status_one_count": 46,
+          "fully_verified_count": 46,
+          "max_fixed_representation_coefficient_difference_NOT_physical_error": 376.28384992112433,
+          "max_fixed_scalar_error_m": 0,
+          "max_fixed_scalar_error_deg": 2.842170943040401e-14,
+          "max_fixed_spherical_rotation_matrix_error": 1.26219223971514e-15,
+          "max_full_target_recheck_error_native_units": 2.842170943040401e-14,
+          "max_dependent_scalar_change_deg": 2.842170943040401e-14,
+          "max_dependent_shoulder_SO3_change_deg": 1.7075472925031877e-6,
+          "all_frames_qualified": true
+        },
+        "filtered": {
+          "samples": 46,
+          "positive_status_count": 46,
+          "status_one_count": 46,
+          "fully_verified_count": 46,
+          "max_fixed_representation_coefficient_difference_NOT_physical_error": 72.00485854820161,
+          "max_fixed_scalar_error_m": 0,
+          "max_fixed_scalar_error_deg": 2.842170943040401e-14,
+          "max_fixed_spherical_rotation_matrix_error": 1.3460738804684947e-15,
+          "max_full_target_recheck_error_native_units": 2.842170943040401e-14,
+          "max_dependent_scalar_change_deg": 20.85780052561549,
+          "max_dependent_shoulder_SO3_change_deg": 13.367437272831527,
+          "all_frames_qualified": true
+        },
+        "accepted_stance": {
+          "samples": 1,
+          "positive_status_count": 1,
+          "status_one_count": 1,
+          "fully_verified_count": 1,
+          "max_fixed_representation_coefficient_difference_NOT_physical_error": 360,
+          "max_fixed_scalar_error_m": 0,
+          "max_fixed_scalar_error_deg": 1.4210854715202004e-14,
+          "max_fixed_spherical_rotation_matrix_error": 7.671793734223694e-16,
+          "max_full_target_recheck_error_native_units": 2.842170943040401e-14,
+          "max_dependent_scalar_change_deg": 1.4210854715202004e-14,
+          "max_dependent_shoulder_SO3_change_deg": 0,
+          "all_frames_qualified": true
+        },
+        "filtered_stance_start": {
+          "samples": 1,
+          "positive_status_count": 1,
+          "status_one_count": 1,
+          "fully_verified_count": 1,
+          "max_fixed_representation_coefficient_difference_NOT_physical_error": 2.842170943040401e-14,
+          "max_fixed_scalar_error_m": 0,
+          "max_fixed_scalar_error_deg": 1.4210854715202004e-14,
+          "max_fixed_spherical_rotation_matrix_error": 7.671793734223694e-16,
+          "max_full_target_recheck_error_native_units": 2.842170943040401e-14,
+          "max_dependent_scalar_change_deg": 0.010359243613251579,
+          "max_dependent_shoulder_SO3_change_deg": 0.004413872518763577,
+          "all_frames_qualified": true
+        }
+      }
+    }
+  },
+  "unfiltered_chart_conversion_roundtrip": {
+    "capture_A": {
+      "selected": {
+        "samples": 55,
+        "duration_s": 1.8,
+        "reference_rate_hz": 30,
+        "filter_applied": false,
+        "fully_verified_count": 55,
+        "all_native_status_one": true,
+        "max_scalar_target_error_deg": 2.842170943040401e-14,
+        "max_scalar_target_error_m": 0,
+        "max_spherical_rotation_matrix_target_error": 1.2088819800960863e-15
+      },
+      "filtered": {
+        "samples": 55,
+        "duration_s": 1.8,
+        "reference_rate_hz": 30,
+        "filter_applied": false,
+        "fully_verified_count": 55,
+        "all_native_status_one": true,
+        "max_scalar_target_error_deg": 2.842170943040401e-14,
+        "max_scalar_target_error_m": 0,
+        "max_spherical_rotation_matrix_target_error": 1.1683745737483645e-15
+      }
+    },
+    "capture_O": {
+      "selected": {
+        "samples": 46,
+        "duration_s": 1.5,
+        "reference_rate_hz": 30,
+        "filter_applied": false,
+        "fully_verified_count": 46,
+        "all_native_status_one": true,
+        "max_scalar_target_error_deg": 2.842170943040401e-14,
+        "max_scalar_target_error_m": 0,
+        "max_spherical_rotation_matrix_target_error": 9.59877536665409e-16
+      },
+      "filtered": {
+        "samples": 46,
+        "duration_s": 1.5,
+        "reference_rate_hz": 30,
+        "filter_applied": false,
+        "fully_verified_count": 46,
+        "all_native_status_one": true,
+        "max_scalar_target_error_deg": 2.842170943040401e-14,
+        "max_scalar_target_error_m": 0,
+        "max_spherical_rotation_matrix_target_error": 1.2085633081569536e-15
+      }
+    }
+  },
+  "contract_tests_passed": 8,
+  "contract_tests_failed": 0,
+  "simulation_executed": false,
+  "model_saved": false,
+  "velocity_tangent_consistency_verified": false,
+  "between_sample_closure_verified": false,
+  "all_upper_actuator_torque_channels_available_in_saved_holds": false,
+  "candidate_promoted": false
+}

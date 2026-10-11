@@ -518,7 +518,7 @@ These modules are used by engines but also available standalone:
 | `renderers/comparison.py`   | Cross-engine comparison plots           |
 | `renderers/dashboard.py`    | Summary dashboard                       |
 | `renderers/signal.py`       | Signal analysis plots                   |
-| `renderers/vectors.py`      | Force/torque vector overlays            |
+| `force_overlay/`            | Force/torque vector and glyph overlays  |
 
 ### Additional Visualization
 

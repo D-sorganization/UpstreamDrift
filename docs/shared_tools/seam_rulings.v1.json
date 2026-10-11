@@ -106,13 +106,15 @@
     },
     "data_processing": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "processor.py Tools newer (2026-08-20); the UD-only file is a drift test that becomes moot."
+      "status": "cleaned",
+      "rationale": "processor.py Tools newer (2026-08-20); the UD-only file is a drift test that becomes moot. UD copy retired 2026-10-04: __init__.py and tests/test_processor.py were byte-identical to the pinned tree, processor.py differed by import formatting only, and the UD-only drift test was deleted with the package.",
+      "cleaned_in": "UD #11503 (2026-10-04)"
     },
     "data_processor_io": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "rust_engine.py Tools newer (2026-08-20); added to UD by #8322."
+      "status": "cleaned",
+      "rationale": "rust_engine.py Tools newer (2026-08-20); added to UD by #8322. UD copy retired 2026-10-04: __init__.py and bulk_facade.py were byte-identical to the pinned tree; Tools was ahead on rust_engine.py (str() column-name normalization and df.query predicates validated through validate_pandas_formula).",
+      "cleaned_in": "UD #11503 (2026-10-04)"
     },
     "deprecation.py": {
       "ruling": "tools-canonical",

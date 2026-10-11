@@ -45,13 +45,11 @@ jobs:
     name: Verify Diff Substance
     runs-on: d-sorg-fleet-docker
     # Only gate Jules-generated branches. Other PRs pass through automatically.
-    if: >
-      github.event_name == 'workflow_dispatch' ||
-      startsWith(github.event.pull_request.head.ref, 'jules/') ||
-      startsWith(github.event.pull_request.head.ref, 'fix/jules') ||
-      startsWith(github.event.pull_request.head.ref, 'fix/pragmatic') ||
-      startsWith(github.event.pull_request.head.ref, 'fix/code-quality') ||
-      startsWith(github.event.pull_request.head.ref, 'auto-fix/')
+    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository) &&
+      (github.event_name == 'workflow_dispatch' || startsWith(github.event.pull_request.head.ref, 'jules/') || startsWith(github.event.pull_request.head.ref, 'fix/jules') || startsWith(github.event.pull_request.head.ref, 'fix/pragmatic') || startsWith(github.event.pull_request.head.ref, 'fix/code-quality') || startsWith(github.event.pull_request.head.ref, 'auto-fix/'))
     steps:
       - name: Checkout (for composite action)
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

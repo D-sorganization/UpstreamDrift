@@ -3,6 +3,42 @@
   "max_parameters": 8,
   "exceptions": [
     {
+      "path": "src/tools/capture_rig/overlay_render.py",
+      "symbol": "render_frame",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 11310,
+      "reason": "Issue #11310: FTO-25 added optional torque and force parameters to render_frame.",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/tools/capture_rig/overlay_render.py",
+      "symbol": "export_overlay",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 11310,
+      "reason": "Issue #11310: FTO-25 export_overlay writes comparison clips with force and torque rendering.",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/tools/capture_rig/overlay_render.py",
+      "symbol": "export_overlay",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 11310,
+      "reason": "Issue #11310: FTO-25 added optional torque and force parameters to export_overlay.",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/tools/capture_rig/reference_export.py",
+      "symbol": "export_comparison_video",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 11310,
+      "reason": "Issue #11310: FTO-25 export_comparison_video sidecar tracking for glyph receipts.",
+      "expires_on": "2026-12-31"
+    },
+    {
       "path": "scripts/companion_catalog.py",
       "symbol": "_catalog_payload",
       "rule": "function-lines",
@@ -1050,6 +1086,22 @@
       "expires_on": "2026-10-23"
     },
     {
+      "path": "shared_scripts/development_log_validator.py",
+      "symbol": "_validate_entry",
+      "rule": "function-lines",
+      "owner": "claude",
+      "reason": "Exact fleet bundle from Repository_Management b13150898be81bca3bbfe66d79614dbe0c7c12cc (change fragments, Repository_Management#1976); the digest pin in docs/development/change-fragment-bundle.json prevents local edits. Refactor at the central source and re-vendor before expiry.",
+      "expires_on": "2027-01-31"
+    },
+    {
+      "path": "shared_scripts/development_log_validator.py",
+      "symbol": "validate_devlog_content",
+      "rule": "function-lines",
+      "owner": "claude",
+      "reason": "Exact fleet bundle from Repository_Management b13150898be81bca3bbfe66d79614dbe0c7c12cc (change fragments, Repository_Management#1976); the digest pin in docs/development/change-fragment-bundle.json prevents local edits. Refactor at the central source and re-vendor before expiry.",
+      "expires_on": "2027-01-31"
+    },
+    {
       "path": "src/shared/python/shadow_tracker/service.py",
       "symbol": "DefaultShadowTrackerService.import_video",
       "rule": "function-lines",
@@ -1074,6 +1126,78 @@
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 11098,
       "reason": "Issue #11098: GUI model import_video forwards the imported-video parameter surface to the service (9 > 8 budget). Decompose at an #11127 follow-up.",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/shared/python/motion_matching/full_body_ik.py",
+      "symbol": "solve_full_body_ik_trajectory",
+      "rule": "parameters",
+      "owner": "codex / F07 #11903",
+      "issue": 11903,
+      "reason": "Issue #11903: preserve the existing eight-parameter public LM API while adding one explicit optional coordinate_bounds input; consolidate trajectory solver options compatibly before this exception expires. Native source bounds and qualification gates are not exempted.",
+      "expires_on": "2026-11-09"
+    },
+    {
+      "path": "src/shared/python/motion_matching/tracking_controller.py",
+      "symbol": "tracking_controller",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 11767,
+      "reason": "Issue #11767 (GCV-20): split_time_s is one explicit optional keyword added to the existing public computed-torque tracking API so the reference rates can be differentiated on each side of the ball impact. It is threaded through several callers (pipeline/dynamics.py, same_input/reference.py) as the same named keyword, so folding it into an options object is a wider call-site migration than this acceptance change; track that consolidation before this exception expires.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/engines/physics_engines/drake/python/motion_matching/humanoid_urdf.py",
+      "symbol": "_add_joint",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 11714,
+      "reason": "Issue #11714: pre-existing URDF joint emitter (10 > 8 budget) surfaced because GCV-8 adds right_hand_grip_analysis to this file; the function is untouched. Decompose at a follow-up.",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/engines/physics_engines/drake/python/motion_matching/humanoid_urdf.py",
+      "symbol": "_emit_segment",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 11714,
+      "reason": "Issue #11714: pre-existing URDF segment emitter (112 > 100 budget) surfaced because GCV-8 adds right_hand_grip_analysis to this file; the function is untouched. Decompose at a follow-up.",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/grip_contact_sim.py",
+      "symbol": "simulate_grip_contact",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 11739,
+      "reason": "Issue #11739: OSV-7 simulate_grip_contact carries the swing, pad model, windowing and trail-shift options for the cross-engine grip comparison (10 parameters).",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "docs/development/full_body_models/evidence/grip_kinetics/run_grip_contact_opensim.py",
+      "symbol": "main",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 11739,
+      "reason": "Issue #11739: OSV-7 OpenSim contact-grip evidence runner keeps argument parsing, simulation and artifact writing in one script entry point (125 lines).",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/engines/physics_engines/opensim/python/full_body_osim.py",
+      "symbol": "export_full_body_osim",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 11739,
+      "reason": "Issue #11739: OSV-7 export_full_body_osim gained the contact-grip option wiring (108 lines).",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/engines/physics_engines/opensim/python/full_body_osim.py",
+      "symbol": "export_full_body_osim",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 11739,
+      "reason": "Issue #11739: OSV-7 export_full_body_osim gained the contact-grip options (9 parameters).",
       "expires_on": "2026-12-31"
     }
   ]

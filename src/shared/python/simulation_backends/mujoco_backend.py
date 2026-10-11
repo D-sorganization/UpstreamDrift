@@ -3,7 +3,7 @@
 This backend wraps the reference C++ ``mujoco`` bindings on the CPU. It is the
 *lynchpin* of the epic's cross-validation strategy: it satisfies both
 :class:`~simulation_backends.protocol.SimulationBackend` (full simulation loop)
-**and** :class:`~simulation_backends.protocol.DynamicsProvider` (``mass_matrix``
+**and** :class:`~simulation_backends.protocol.EquationsOfMotionProvider` (``mass_matrix``
 / ``bias_forces``), giving an independent derivation of the equations of motion
 that must agree with the analytical model to ``~1e-9``.
 
@@ -51,7 +51,7 @@ class MuJoCoBackend:
     """CPU MuJoCo backend exposing simulation *and* dynamics primitives.
 
     Implements both the :class:`~simulation_backends.protocol.SimulationBackend`
-    and :class:`~simulation_backends.protocol.DynamicsProvider` Protocols.
+    and :class:`~simulation_backends.protocol.EquationsOfMotionProvider` Protocols.
 
     Args:
         params: The single-source-of-truth model parameters.
@@ -110,7 +110,7 @@ class MuJoCoBackend:
         )
 
     # ------------------------------------------------------------------ #
-    # DynamicsProvider
+    # EquationsOfMotionProvider
     # ------------------------------------------------------------------ #
     def mass_matrix(self, q: np.ndarray) -> np.ndarray:
         """Return the dense joint-space inertia matrix ``M(q)``.

@@ -12,6 +12,10 @@ from src.engines.physics_engines.pinocchio.python.marker_kinematics import Coord
 from src.engines.physics_engines.pinocchio.python.native_model import (
     FullBodyPinocchioModel,
 )
+from src.engines.physics_engines.pinocchio.python.pinocchio_force_torque import (
+    PinocchioForceTorqueSource,
+)
+from src.shared.python.biomechanics.grip_wrench import GripAnalysis
 from src.shared.python.motion_matching.multi_engine_torque_allocator import EngineType
 from src.shared.python.motion_matching.polynomial_actuation import ROOT_COORDINATES
 
@@ -135,6 +139,49 @@ class PinocchioForceAdapter:
         configuration = self._checked(q, "configuration")
         coordinates = dict(zip(self._names, configuration.tolist(), strict=True))
         return self._plant.closure_force_jacobian(coordinates).jacobian.copy()
+
+    def grip_analysis_from_allocation(
+        self, q: Array, lambda_grip: Array
+    ) -> GripAnalysis:
+        """Net grip analysis of one allocated ``lambda_grip`` (GCV-8, #11714).
+
+        ``lambda_grip`` is the allocator's 6-D closure wrench (linear then
+        angular, constraint LOCAL frame, ``J.T @ lambda`` the load on the
+        human).  It is rotated to the world and reported at the closure frame
+        origin through :meth:`PinocchioForceTorqueSource.grip_from_allocation`:
+        ``split_method="allocation"``, per-hand wrenches unavailable.
+        """
+        configuration = self._checked(q, "configuration")
+        wrench = np.asarray(lambda_grip, dtype=float)
+        if wrench.shape != (6,) or not np.isfinite(wrench).all():
+            raise ValueError(
+                f"lambda_grip must be a finite 6-vector, got shape {wrench.shape}"
+            )
+        coordinates = dict(zip(self._names, configuration.tolist(), strict=True))
+        rotation, origin = self._plant.closure_frame_pose(coordinates)
+        return PinocchioForceTorqueSource.grip_from_allocation(
+            wrench,
+            point_m=origin,
+            ordering="force_torque",
+            load_on="human",
+            rotation_world_from_frame=rotation,
+        )
+
+    def grip_analyses_from_allocation(
+        self, q_traj: Array, lambda_grip: Array
+    ) -> list[GripAnalysis]:
+        """:meth:`grip_analysis_from_allocation` for each frame of a trajectory."""
+        q_arr = np.asarray(q_traj, dtype=float)
+        lam_arr = np.asarray(lambda_grip, dtype=float)
+        if q_arr.ndim != 2 or lam_arr.shape != (q_arr.shape[0], 6):
+            raise ValueError(
+                "frame count mismatch: q_traj must be (n, nv) and lambda_grip "
+                f"(n, 6), got {q_arr.shape} and {lam_arr.shape}"
+            )
+        return [
+            self.grip_analysis_from_allocation(q_k, lam_k)
+            for q_k, lam_k in zip(q_arr, lam_arr, strict=True)
+        ]
 
     def verify_acceleration_parity(
         self, q: Array, v: Array, tau_effective: Array, a_target: Array

@@ -10,12 +10,12 @@ History (issue #4191):
     The original FK module merged via PRs #4158 / #4160 looked for body
     names ``hand_left`` / ``hand_right`` that **do not exist** in the
     canonical humanoid. PR #4149 anchors the grip and clubhead as
-    ``PhysicalOffsetFrame`` objects owned by the
-    ``/jointset/hand_r_to_club`` weld joint:
+    ``PhysicalOffsetFrame`` objects; since OSV-9 (#11756, two-hand club)
+    they are components of the bodies:
 
-    * ``hand_r_grip_offset``  (parent frame, on ``/bodyset/hand_r``)
-    * ``club_grip_offset``    (child frame, on ``/bodyset/Club``)
-    * ``club_head_offset``    (clubhead, on ``/bodyset/Club``)
+    * ``hand_r_grip_offset``  (trail grip frame, ``/bodyset/hand_r``)
+    * ``club_grip_offset``    (lead grip frame, ``/bodyset/Club``)
+    * ``club_head_offset``    (face centre, ``/bodyset/Club``)
 
     PR #4185 (issue #4120) shipped a parallel ``extract_full_pose`` to
     work around the bug. PR #4165 (issue #4116) shipped a third FK path.
@@ -73,10 +73,11 @@ __all__ = [
 GRIP_FRAME_NAME: str = "hand_r_grip_offset"
 CLUBHEAD_FRAME_NAME: str = "club_head_offset"
 
-# Fully-qualified component paths used with ``model.getComponent``. Frames
-# defined inside the WeldJoint live under ``/jointset/<joint_name>/...``.
-GRIP_FRAME_PATH: str = "/jointset/hand_r_to_club/hand_r_grip_offset"
-CLUBHEAD_FRAME_PATH: str = "/jointset/hand_r_to_club/club_head_offset"
+# Fully-qualified component paths used with ``model.getComponent``. Since the
+# two-hand club (OSV-9, #11756) the grip frames are components of the hand and
+# club bodies, shared by the lead weld, the trail closure and the bushings.
+GRIP_FRAME_PATH: str = "/bodyset/hand_r/hand_r_grip_offset"
+CLUBHEAD_FRAME_PATH: str = "/bodyset/Club/club_head_offset"
 
 CANONICAL_LANDMARKS: dict[str, str] = {
     "grip": GRIP_FRAME_PATH,
@@ -111,12 +112,18 @@ def _ensure_position_realised(model: Any, state: Any) -> None:
     state has been realised at least to ``Position``. This helper is
     idempotent (re-realising is cheap) and isolates the SWIG call.
 
+    The OpenSim Python ``State`` binding has no ``isValid`` (issue #11796),
+    so an uninitialised state is detected by its empty subsystem list.
+
     Raises:
-        RuntimeError: If realisation fails. The most common cause is a
-            state that was not produced by ``model.initSystem()``.
+        RuntimeError: If the state has no subsystems or realisation fails.
+            The most common cause is a state that was not produced by
+            ``model.initSystem()``.
     """
-    if not state.isValid():
-        raise RuntimeError("provided state is not valid")
+    if state.getNumSubsystems() < 1:
+        raise RuntimeError(
+            "provided state has no subsystems; create it with model.initSystem()"
+        )
     try:
         model.realizePosition(state)
     except Exception as exc:  # noqa: BLE001 — surface OpenSim errors uniformly
@@ -138,7 +145,7 @@ def _frame_pose_in_ground(
         model: An ``opensim.Model`` whose system has been initialised.
         state: A realised ``simbody::State`` (Position stage or higher).
         frame_path: Component path, e.g.
-            ``"/jointset/hand_r_to_club/hand_r_grip_offset"``.
+            ``"/bodyset/hand_r/hand_r_grip_offset"``.
 
     Returns:
         ``(pos, quat)`` — ``pos`` is ``(3,) float64`` in metres,
@@ -184,7 +191,7 @@ def extract_grip_pose(
         state: A ``simbody::State`` produced by ``model.initSystem()``;
             will be realised to Position stage if needed.
         model: The ``opensim.Model`` that exposes
-            ``/jointset/hand_r_to_club/hand_r_grip_offset``.
+            ``/bodyset/hand_r/hand_r_grip_offset``.
 
     Returns:
         ``(pos, quat)`` with ``pos`` shape ``(3,)`` metres, ``quat``
@@ -215,7 +222,7 @@ def extract_clubhead_pose(
     Args:
         state: Realised ``simbody::State``.
         model: ``opensim.Model`` exposing
-            ``/jointset/hand_r_to_club/club_head_offset``.
+            ``/bodyset/Club/club_head_offset``.
 
     Returns:
         ``(pos, quat)`` — see :func:`extract_grip_pose`.

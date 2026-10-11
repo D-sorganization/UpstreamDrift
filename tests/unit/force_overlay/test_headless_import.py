@@ -35,11 +35,14 @@ sys.meta_path.insert(0, HeadlessImportGuard())
 
 import src.shared.python.force_overlay as fo
 from src.shared.python.force_overlay import (
+    ForceGlyphStyle,
     ForceTorqueFrame,
     ForceTorqueProvider,
     ForceTorqueSeries,
+    GlyphSet,
     OverlayWrench,
     WrenchKind,
+    build_glyphs,
     read_force_torque_frame,
 )
 
@@ -59,6 +62,9 @@ frame = ForceTorqueFrame(
 )
 series = ForceTorqueSeries(frames=(frame,))
 assert series.frame_at(0.0) is frame
+
+glyphs = build_glyphs(frame, ForceGlyphStyle())
+assert isinstance(glyphs, GlyphSet)
 
 # Verify none of the banned modules are in sys.modules
 for mod in sys.modules:

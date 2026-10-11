@@ -1,0 +1,296 @@
+[info] 'flexor' Parameter update for the damped-model: ActiveForceLengthCurve minimum value was 0.1 but is now 0.
+[info] Loaded model synthetic_native_muscle_fixture from file C:\Users\diete\Repositories\docs\development\feedback_controls_planning\moco_native_bridge\synthetic_native_muscle.osim
+[info] Loaded model synthetic_native_muscle_fixture from file C:\Users\diete\Repositories\docs\development\feedback_controls_planning\moco_native_bridge\synthetic_native_muscle.osim
+[info] -------
+[info] Manager
+[info] -------
+[info] Starting integration at initial time 0.00 s...
+[info] Integration complete at final time 0.01 s.
+[info]  - CPU time elapsed: 0.000000 s
+[info]  - real time elapsed: 0.002328 s
+[info]  - ratio sim-to-real time: 2.148
+[info]  - integrator method: RungeKuttaMerson
+[info]  - number of realizations: 183
+[info]  - number of steps taken / attempted: 34 / 37
+[info]  - number of projections: 0
+[info]  - number of iterations: 37
+[info] -------
+[info] Manager
+[info] -------
+[info] Starting integration at initial time 0.01 s...
+[info] Integration complete at final time 0.01 s.
+[info]  - CPU time elapsed: 0.000000 s
+[info]  - real time elapsed: 0.000971 s
+[info]  - ratio sim-to-real time: 10.299
+[info]  - integrator method: RungeKuttaMerson
+[info]  - number of realizations: 273
+[info]  - number of steps taken / attempted: 52 / 55
+[info]  - number of projections: 0
+[info]  - number of iterations: 55
+[info] -------
+[info] Manager
+[info] -------
+[info] Starting integration at initial time 0.01 s...
+[info] Integration complete at final time 0.01 s.
+[info]  - CPU time elapsed: 0.000000 s
+[info]  - real time elapsed: 0.000632 s
+[info]  - ratio sim-to-real time: 23.719
+[info]  - integrator method: RungeKuttaMerson
+[info]  - number of realizations: 333
+[info]  - number of steps taken / attempted: 64 / 67
+[info]  - number of projections: 0
+[info]  - number of iterations: 67
+[info] -------
+[info] Manager
+[info] -------
+[info] Starting integration at initial time 0.01 s...
+[info] Integration complete at final time 0.02 s.
+[info]  - CPU time elapsed: 0.000000 s
+[info]  - real time elapsed: 0.000497 s
+[info]  - ratio sim-to-real time: 40.274
+[info]  - integrator method: RungeKuttaMerson
+[info]  - number of realizations: 378
+[info]  - number of steps taken / attempted: 73 / 76
+[info]  - number of projections: 0
+[info]  - number of iterations: 76
+[info] -------
+[info] Manager
+[info] -------
+[info] Starting integration at initial time 0.02 s...
+[info] Integration complete at final time 0.03 s.
+[info]  - CPU time elapsed: 0.000000 s
+[info]  - real time elapsed: 0.000399 s
+[info]  - ratio sim-to-real time: 62.625
+[info]  - integrator method: RungeKuttaMerson
+[info]  - number of realizations: 413
+[info]  - number of steps taken / attempted: 80 / 83
+[info]  - number of projections: 0
+[info]  - number of iterations: 83
+[info] -------
+[info] Manager
+[info] -------
+[info] Starting integration at initial time 0.03 s...
+[info] Integration complete at final time 0.03 s.
+[info]  - CPU time elapsed: 0.000000 s
+[info]  - real time elapsed: 0.000287 s
+[info]  - ratio sim-to-real time: 104.712
+[info]  - integrator method: RungeKuttaMerson
+[info]  - number of realizations: 438
+[info]  - number of steps taken / attempted: 85 / 88
+[info]  - number of projections: 0
+[info]  - number of iterations: 88
+[info] -------
+[info] Manager
+[info] -------
+[info] Starting integration at initial time 0.03 s...
+[info] Integration complete at final time 0.04 s.
+[info]  - CPU time elapsed: 0.000000 s
+[info]  - real time elapsed: 0.000220 s
+[info]  - ratio sim-to-real time: 159.453
+[info]  - integrator method: RungeKuttaMerson
+[info]  - number of realizations: 458
+[info]  - number of steps taken / attempted: 89 / 92
+[info]  - number of projections: 0
+[info]  - number of iterations: 92
+[info] -------
+[info] Manager
+[info] -------
+[info] Starting integration at initial time 0.04 s...
+[info] Integration complete at final time 0.04 s.
+[info]  - CPU time elapsed: 0.000000 s
+[info]  - real time elapsed: 0.000167 s
+[info]  - ratio sim-to-real time: 239.521
+[info]  - integrator method: RungeKuttaMerson
+[info]  - number of realizations: 473
+[info]  - number of steps taken / attempted: 92 / 95
+[info]  - number of projections: 0
+[info]  - number of iterations: 95
+[info] -------
+[info] Manager
+[info] -------
+[info] Starting integration at initial time 0.04 s...
+[info] Integration complete at final time 0.04 s.
+[info]  - CPU time elapsed: 0.000000 s
+[info]  - real time elapsed: 0.000159 s
+[info]  - ratio sim-to-real time: 282.663
+[info]  - integrator method: RungeKuttaMerson
+[info]  - number of realizations: 488
+[info]  - number of steps taken / attempted: 95 / 98
+[info]  - number of projections: 0
+[info]  - number of iterations: 98
+[info] -------
+[info] Manager
+[info] -------
+[info] Starting integration at initial time 0.04 s...
+[info] Integration complete at final time 0.05 s.
+[info]  - CPU time elapsed: 0.000000 s
+[info]  - real time elapsed: 0.000107 s
+[info]  - ratio sim-to-real time: 465.983
+[info]  - integrator method: RungeKuttaMerson
+[info]  - number of realizations: 498
+[info]  - number of steps taken / attempted: 97 / 100
+[info]  - number of projections: 0
+[info]  - number of iterations: 100
+[info] -------
+[info] Manager
+[info] -------
+[info] Starting integration at initial time 0.05 s...
+[info] Integration complete at final time 0.06 s.
+[info]  - CPU time elapsed: 0.000000 s
+[info]  - real time elapsed: 0.000156 s
+[info]  - ratio sim-to-real time: 353.698
+[info]  - integrator method: RungeKuttaMerson
+[info]  - number of realizations: 512
+[info]  - number of steps taken / attempted: 99 / 103
+[info]  - number of projections: 0
+[info]  - number of iterations: 103
+[info] -------
+[info] Manager
+[info] -------
+[info] Starting integration at initial time 0.06 s...
+[info] Integration complete at final time 0.06 s.
+[info]  - CPU time elapsed: 0.000000 s
+[info]  - real time elapsed: 0.000134 s
+[info]  - ratio sim-to-real time: 447.761
+[info]  - integrator method: RungeKuttaMerson
+[info]  - number of realizations: 522
+[info]  - number of steps taken / attempted: 101 / 105
+[info]  - number of projections: 0
+[info]  - number of iterations: 105
+[info] -------
+[info] Manager
+[info] -------
+[info] Starting integration at initial time 0.06 s...
+[info] Integration complete at final time 0.07 s.
+[info]  - CPU time elapsed: 0.000000 s
+[info]  - real time elapsed: 0.000160 s
+[info]  - ratio sim-to-real time: 406.758
+[info]  - integrator method: RungeKuttaMerson
+[info]  - number of realizations: 536
+[info]  - number of steps taken / attempted: 103 / 108
+[info]  - number of projections: 0
+[info]  - number of iterations: 108
+[info] -------
+[info] Manager
+[info] -------
+[info] Starting integration at initial time 0.07 s...
+[info] Integration complete at final time 0.07 s.
+[info]  - CPU time elapsed: 0.000000 s
+[info]  - real time elapsed: 0.000202 s
+[info]  - ratio sim-to-real time: 346.706
+[info]  - integrator method: RungeKuttaMerson
+[info]  - number of realizations: 555
+[info]  - number of steps taken / attempted: 106 / 112
+[info]  - number of projections: 0
+[info]  - number of iterations: 112
+[info] -------
+[info] Manager
+[info] -------
+[info] Starting integration at initial time 0.07 s...
+[info] Integration complete at final time 0.07 s.
+[info]  - CPU time elapsed: 0.000000 s
+[info]  - real time elapsed: 0.000159 s
+[info]  - ratio sim-to-real time: 472.888
+[info]  - integrator method: RungeKuttaMerson
+[info]  - number of realizations: 570
+[info]  - number of steps taken / attempted: 109 / 115
+[info]  - number of projections: 0
+[info]  - number of iterations: 115
+[info] -------
+[info] Manager
+[info] -------
+[info] Starting integration at initial time 0.07 s...
+[info] Integration complete at final time 0.08 s.
+[info]  - CPU time elapsed: 0.000000 s
+[info]  - real time elapsed: 0.000164 s
+[info]  - ratio sim-to-real time: 488.401
+[info]  - integrator method: RungeKuttaMerson
+[info]  - number of realizations: 585
+[info]  - number of steps taken / attempted: 112 / 118
+[info]  - number of projections: 0
+[info]  - number of iterations: 118
+[info] -------
+[info] Manager
+[info] -------
+[info] Starting integration at initial time 0.08 s...
+[info] Integration complete at final time 0.09 s.
+[info]  - CPU time elapsed: 0.000000 s
+[info]  - real time elapsed: 0.000161 s
+[info]  - ratio sim-to-real time: 528.607
+[info]  - integrator method: RungeKuttaMerson
+[info]  - number of realizations: 600
+[info]  - number of steps taken / attempted: 115 / 121
+[info]  - number of projections: 0
+[info]  - number of iterations: 121
+[info] -------
+[info] Manager
+[info] -------
+[info] Starting integration at initial time 0.09 s...
+[info] Integration complete at final time 0.09 s.
+[info]  - CPU time elapsed: 0.000000 s
+[info]  - real time elapsed: 0.000156 s
+[info]  - ratio sim-to-real time: 577.664
+[info]  - integrator method: RungeKuttaMerson
+[info]  - number of realizations: 614
+[info]  - number of steps taken / attempted: 117 / 124
+[info]  - number of projections: 0
+[info]  - number of iterations: 124
+[info] -------
+[info] Manager
+[info] -------
+[info] Starting integration at initial time 0.09 s...
+[info] Integration complete at final time 0.10 s.
+[info]  - CPU time elapsed: 0.000000 s
+[info]  - real time elapsed: 0.000154 s
+[info]  - ratio sim-to-real time: 618.490
+[info]  - integrator method: RungeKuttaMerson
+[info]  - number of realizations: 628
+[info]  - number of steps taken / attempted: 119 / 127
+[info]  - number of projections: 0
+[info]  - number of iterations: 127
+[info] -------
+[info] Manager
+[info] -------
+[info] Starting integration at initial time 0.10 s...
+[info] Integration complete at final time 0.10 s.
+[info]  - CPU time elapsed: 0.000000 s
+[info]  - real time elapsed: 0.000197 s
+[info]  - ratio sim-to-real time: 507.357
+[info]  - integrator method: RungeKuttaMerson
+[info]  - number of realizations: 647
+[info]  - number of steps taken / attempted: 122 / 131
+[info]  - number of projections: 0
+[info]  - number of iterations: 131
+[info] Loaded model synthetic_native_muscle_fixture from file C:\Users\diete\Repositories\docs\development\feedback_controls_planning\moco_native_bridge\synthetic_native_muscle.osim
+[info] Loaded model synthetic_native_muscle_fixture from file C:\Users\diete\Repositories\docs\development\feedback_controls_planning\moco_native_bridge\synthetic_native_muscle.osim
+[info] Loaded model synthetic_native_muscle_fixture from file C:\Users\diete\Repositories\docs\development\feedback_controls_planning\moco_native_bridge\synthetic_native_muscle.osim
+[info] Loaded model synthetic_native_muscle_fixture from file C:\Users\diete\Repositories\docs\development\feedback_controls_planning\moco_native_bridge\synthetic_native_muscle.osim
+[info] Loaded model synthetic_native_muscle_fixture from file C:\Users\diete\Repositories\docs\development\feedback_controls_planning\moco_native_bridge\synthetic_native_muscle.osim
+[info] Loaded model synthetic_native_muscle_fixture from file C:\Users\diete\Repositories\docs\development\feedback_controls_planning\moco_native_bridge\synthetic_native_muscle.osim
+[info] Loaded model synthetic_native_muscle_fixture from file C:\Users\diete\Repositories\docs\development\feedback_controls_planning\moco_native_bridge\synthetic_native_muscle.osim
+[info] Loaded model synthetic_native_muscle_fixture from file C:\Users\diete\Repositories\docs\development\feedback_controls_planning\moco_native_bridge\synthetic_native_muscle.osim
+[info] Loaded model synthetic_native_muscle_fixture from file C:\Users\diete\Repositories\docs\development\feedback_controls_planning\moco_native_bridge\synthetic_native_muscle.osim
+[info] Loaded model synthetic_native_muscle_fixture from file C:\Users\diete\Repositories\docs\development\feedback_controls_planning\moco_native_bridge\synthetic_native_muscle.osim
+[info] Loaded model synthetic_native_muscle_fixture from file C:\Users\diete\Repositories\docs\development\feedback_controls_planning\moco_native_bridge\synthetic_native_muscle.osim
+[info] Loaded model synthetic_native_muscle_fixture from file C:\Users\diete\Repositories\docs\development\feedback_controls_planning\moco_native_bridge\synthetic_native_muscle.osim
+[info] Loaded model synthetic_native_muscle_fixture from file C:\Users\diete\Repositories\docs\development\feedback_controls_planning\moco_native_bridge\synthetic_native_muscle.osim
+[info] Loaded model synthetic_native_muscle_fixture from file C:\Users\diete\Repositories\docs\development\feedback_controls_planning\moco_native_bridge\synthetic_native_muscle.osim
+[info] Loaded model synthetic_native_muscle_fixture from file C:\Users\diete\Repositories\docs\development\feedback_controls_planning\moco_native_bridge\synthetic_native_muscle.osim
+[info] Loaded model synthetic_native_muscle_fixture from file C:\Users\diete\Repositories\docs\development\feedback_controls_planning\moco_native_bridge\synthetic_native_muscle.osim
+[info] Loaded model synthetic_native_muscle_fixture from file C:\Users\diete\Repositories\docs\development\feedback_controls_planning\moco_native_bridge\synthetic_native_muscle.osim
+[info] Loaded model synthetic_native_muscle_fixture from file C:\Users\diete\Repositories\docs\development\feedback_controls_planning\moco_native_bridge\synthetic_native_muscle.osim
+[info] Loaded model synthetic_native_muscle_fixture from file C:\Users\diete\Repositories\docs\development\feedback_controls_planning\moco_native_bridge\synthetic_native_muscle.osim
+[info] Loaded model synthetic_native_muscle_fixture from file C:\Users\diete\Repositories\docs\development\feedback_controls_planning\moco_native_bridge\synthetic_native_muscle.osim
+[info] Loaded model synthetic_native_muscle_fixture from file C:\Users\diete\Repositories\docs\development\feedback_controls_planning\moco_native_bridge\synthetic_native_muscle.osim
+[info] Loaded model synthetic_native_muscle_fixture from file C:\Users\diete\Repositories\docs\development\feedback_controls_planning\moco_native_bridge\synthetic_native_muscle.osim
+{
+  "scope": "synthetic one-DOF compliant Millard muscle; no capture/production qualification",
+  "runtime": "4.6",
+  "executable": "C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Scripts\\python.exe",
+  "source_sha256": "1e109d8c7a314add0412fc40d6a9bd997d19b0af1b24adfc9db829c722c3b82e",
+  "model_sha256": "feb75b88e290ef0c90fc41c6e39ffd9c8c031ff1129b19b0b059230d0bdb0f32",
+  "error": "std::exception in 'OpenSim::MocoTrajectory OpenSim::MocoCasADiSolver::createGuess() const': No info available for state '/forceset/flexor/fiber_length'.\n\tThrown at MocoProblemRep.cpp:890 in getStateInfo().",
+  "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\moco_native_bridge\\experiment.py\", line 41, in <module>\n    study=build_moco_study(str(path),str(trc),str(guess),config)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\diete\\Repositories\\Worktrees\\feedback-opensim-bundle-11908\\src\\shared\\python\\contracts.py\", line 346, in wrapper\n    return func(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\diete\\Repositories\\Worktrees\\feedback-opensim-bundle-11908\\src\\engines\\physics_engines\\opensim\\python\\tour_matching\\moco_tracking.py\", line 288, in build_moco_study\n    guess = solver.createGuess()\n            ^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\opensim\\moco.py\", line 9106, in createGuess\n    return _moco.MocoCasADiSolver_createGuess(self, *args)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: std::exception in 'OpenSim::MocoTrajectory OpenSim::MocoCasADiSolver::createGuess() const': No info available for state '/forceset/flexor/fiber_length'.\n\tThrown at MocoProblemRep.cpp:890 in getStateInfo().\n",
+  "qualification": "failed; no optimization/replay acceptance",
+  "total_elapsed_s": 0.27336180000565946
+}

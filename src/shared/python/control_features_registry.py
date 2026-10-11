@@ -129,7 +129,7 @@ _FEATURE_DEFINITIONS: list[FeatureDescriptor] = [
         display_name="Drift Acceleration (Passive Dynamics)",
         description="Compute passive/drift acceleration with zero control inputs. "
         "Answers: 'What happens if all motors turn off?' "
-        "q̈_drift = M(q)⁻¹ · (C(q,v)v + g(q))",
+        "q̈_drift = M(q)⁻¹ · (-C(q,v)v - g(q))",
         category=FeatureCategory.ANALYSIS,
         return_type="np.ndarray (n_v,)",
         section="Section F: Drift-Control Decomposition",
@@ -179,9 +179,10 @@ _FEATURE_DEFINITIONS: list[FeatureDescriptor] = [
     FeatureDescriptor(
         name="compute_zvcf",
         display_name="Zero-Velocity Counterfactual (ZVCF)",
-        description="Compute acceleration with zero velocities, preserving configuration. "
-        "Isolates gravity/configuration effects from Coriolis/centrifugal. "
-        "Δa_velocity = a_full - a_ZVCF.",
+        description="Compute acceleration with zero velocities and zero applied "
+        "control, preserving configuration. Isolates gravity/configuration "
+        "effects from Coriolis/centrifugal and control. "
+        "Velocity-dependent drift = a_ZTCF - a_ZVCF.",
         category=FeatureCategory.COUNTERFACTUAL,
         requires_args=True,
         arg_specs=[

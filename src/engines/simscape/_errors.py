@@ -16,6 +16,7 @@ from __future__ import annotations
 from src.shared.python.core.error_utils import SimulationError
 
 __all__ = [
+    "SimscapeChannelUnavailableError",
     "SimscapeEngineStartupError",
     "SimscapeModelNotFoundError",
     "SimscapeNotInstalledError",
@@ -92,6 +93,23 @@ class SimscapeEngineStartupError(SimulationError):
     ) -> None:
         self.matlab_error_id = matlab_error_id
         super().__init__(message)
+
+
+class SimscapeChannelUnavailableError(SimulationError, RuntimeError):
+    """Raised when the model cannot supply a requested physical channel.
+
+    Unavailable is never zero: callers get this error with a reason instead
+    of a zero vector. It is also a ``RuntimeError``, the platform's signal
+    for an optional channel that is unavailable (the force API reports
+    ``None``; the dataset recorder marks the channel missing).
+    """
+
+    def __init__(self, channel: str, *, reason: str) -> None:
+        if not channel or not reason:
+            raise ValueError("channel and reason must be non-empty")
+        self.channel = channel
+        self.reason = reason
+        super().__init__(f"Simscape channel '{channel}' unavailable: {reason}")
 
 
 class SimscapeStateError(SimulationError):

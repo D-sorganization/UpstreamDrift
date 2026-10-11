@@ -185,10 +185,10 @@ class CandidateSession:
         if wrench is None:
             return None
         from src.shared.python.motion_matching.force_torque import (
-            compute_center_of_pressure,
+            wrench_center_of_pressure,
         )
 
-        return compute_center_of_pressure(wrench, f_threshold_n=fz_threshold)
+        return wrench_center_of_pressure(wrench, f_threshold_n=fz_threshold)
 
     def get_joint_torques_at(self, frame_idx: int) -> dict[str, float] | None:
         """Return joint torque mapping at frame_idx or None if tau channel absent."""

@@ -75,10 +75,26 @@ def _inertia(body: dict, follower: np.ndarray) -> dict[str, str]:
     for mass, point, inertia in zip(masses, centers, tensors, strict=True):
         d = point - center
         tensor += inertia + mass * (np.dot(d, d) * np.eye(3) - np.outer(d, d))
+    return {"mass": _numbers([total]), **_principal_inertia(center, tensor)}
+
+
+def _principal_inertia(center: np.ndarray, tensor: np.ndarray) -> dict[str, str]:
+    """Principal moments and axes, decomposed here in double precision.
+
+    MuJoCo diagonalises ``fullinertia`` at compile time with its own 3x3
+    eigen-solver, which loses ~1e-6 relative accuracy on elongated bodies
+    (the 7-iron club, eigenvalue ratio ~7e-3).  Emitting ``diaginertia`` and
+    ``quat`` from ``numpy.linalg.eigh`` keeps the compiled inertia exact to
+    round-off, as Drake and Pinocchio use it (#11607).
+    """
+    moments, axes = np.linalg.eigh(0.5 * (tensor + tensor.T))
+    if np.linalg.det(axes) < 0:
+        axes[:, 0] = -axes[:, 0]
+    xyzw = Rotation.from_matrix(axes).as_quat()
     return {
-        "mass": _numbers([total]),
         "pos": _numbers(center),
-        "fullinertia": _numbers(tensor[[0, 1, 2, 0, 0, 1], [0, 1, 2, 1, 2, 2]]),
+        "quat": _numbers(xyzw[[3, 0, 1, 2]]),
+        "diaginertia": _numbers(moments),
     }
 
 

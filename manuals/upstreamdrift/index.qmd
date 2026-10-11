@@ -12,3 +12,92 @@ The calculation inventory is empty and release remains blocked by UP-D1 through
 UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
 
 {{< include chapters/00-governance.qmd >}}
+
+{{< include chapters/10-ground-reaction.qmd >}}
+
+{{< include chapters/11-grip-wrench.qmd >}}
+{{< include chapters/12-impact-parameters.qmd >}}
+
+{{< include chapters/13-native-muscle-replay.qmd >}}
+{{< include chapters/37-compiled-actuator-command-admission.qmd >}}
+{{< include chapters/38-project-myosuite-task-replay.qmd >}}
+
+{{< include chapters/19-native-torque-replay.qmd >}}
+{{< include chapters/22-native-drake-torque-replay.qmd >}}
+{{< include chapters/25-native-pinocchio-torque-replay.qmd >}}
+{{< include chapters/13-feedback-comparison.qmd >}}
+
+{{< include chapters/28-native-marker-forward-kinematics.qmd >}}
+{{< include chapters/30-pinocchio-native-marker-forward-kinematics.qmd >}}
+
+{{< include chapters/17-native-muscle-contact.qmd >}}
+
+
+
+
+{{< include chapters/16-distributed-feedback.qmd >}}
+
+{{< include chapters/14-muscle-qualification-evidence.qmd >}}
+
+{{< include chapters/18-native-model-admission.qmd >}}
+
+{{< include chapters/15-lift-pack-audit.qmd >}}
+
+{{< include chapters/16-same-input-parity.qmd >}}
+
+{{< include chapters/17-sparse-collocation-benchmark.qmd >}}
+
+{{< include chapters/20-native-candidate-benchmark.qmd >}}
+
+{{< include chapters/21-control-loop-tuning.qmd >}}
+
+{{< include chapters/23-native-bounded-nmpc.qmd >}}
+
+{{< include chapters/24-native-box-fddp-candidate.qmd >}}
+
+{{< include chapters/25-native-manifold-derivative.qmd >}}
+
+{{< include chapters/26-native-manifold-box-fddp.qmd >}}
+
+{{< include chapters/36-native-activation-manifold.qmd >}}
+
+{{< include chapters/27-native-manifold-feedback.qmd >}}
+
+{{< include chapters/28-native-marker-fit.qmd >}}
+
+{{< include chapters/26-native-opensim-geometry.qmd >}}
+
+{{< include chapters/27-native-muscle-experiment-bundle.qmd >}}
+
+{{< include chapters/30-native-simscape-restart.qmd >}}
+
+{{< include chapters/32-native-constrained-state.qmd >}}
+
+{{< include chapters/35-native-moco-initial-bindings.qmd >}}
+
+{{< include chapters/33-native-passive-readiness.qmd >}}
+
+{{< include chapters/40-native-reference-conventions.qmd >}}
+
+{{< include chapters/41-native-declared-cold-start.qmd >}}
+
+{{< include chapters/42-native-constrained-muscle-moco.qmd >}}
+
+{{< include chapters/48-native-constrained-mixed-moco.qmd >}}
+
+{{< include chapters/39-native-offline-muscle-matching.qmd >}}
+
+{{< include chapters/34-owned-native-simscape-replay.qmd >}}
+
+{{< include chapters/43-native-zero-mtp-reduction.qmd >}}
+
+{{< include chapters/45-native-abdominal-zero-translation-reduction.qmd >}}
+
+{{< include chapters/51-physical-inertia-validation.qmd >}}
+
+{{< include chapters/44-native-buet-hamner-assembly.qmd >}}
+
+{{< include chapters/46-native-zero-subtalar-reduction.qmd >}}
+
+{{< include chapters/47-native-zero-custom-mtp-reduction.qmd >}}
+

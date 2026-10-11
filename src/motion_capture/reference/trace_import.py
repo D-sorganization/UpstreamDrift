@@ -24,10 +24,18 @@ def _preflight(path: Path) -> None:
                 raise ValueError(
                     "Trace reference cannot contain external or soft links"
                 )
-            dataset = handle[name]
-            if not isinstance(dataset, h5py.Dataset):
+            item = handle[name]
+            if name == "force_torque_series":
+                if not isinstance(item, h5py.Group):
+                    raise ValueError("force_torque_series must be an HDF5 group")
+                for subname in item:
+                    subitem = item[subname]
+                    if isinstance(subitem, h5py.Dataset):
+                        total += prod(subitem.shape) * subitem.dtype.itemsize
+                continue
+            if not isinstance(item, h5py.Dataset):
                 raise ValueError("Trace reference requires root datasets")
-            total += prod(dataset.shape) * dataset.dtype.itemsize
+            total += prod(item.shape) * item.dtype.itemsize
             if total > MAX_REFERENCE_BYTES:
                 raise ValueError("Decoded trace exceeds 64 MB; export a shorter motion")
 

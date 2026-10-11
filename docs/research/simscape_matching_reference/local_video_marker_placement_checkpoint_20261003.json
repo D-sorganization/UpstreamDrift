@@ -1,0 +1,26 @@
+{
+  "qualification": "LOCAL_ACQUISITION_AND_PRIVATE_CONTRACT_PROBES_NOT_FULL_MATCH_ACCEPTANCE",
+  "album_videos": 6,
+  "archive_bytes": 88753631,
+  "media_bytes": 88738421,
+  "archive_sha256": "20a43484a9445014f7798b492161824d4a69f2b656816771c49c3afe89a7b354",
+  "local_archive_and_each_mp4_hash_verified": true,
+  "visible_marker_placement": "SURFACE_REGIONS_REVIEWED_EXACT_LABELS_AND_ANATOMICAL_OFFSETS_UNVERIFIED",
+  "exact_trial_pairing": "UNVERIFIED",
+  "physical_video_clock": "UNKNOWN",
+  "private_software_probe": {
+    "baseline_tests_passed": 13,
+    "new_red_tests_failed": 9,
+    "new_green_tests_passed": 9,
+    "green_incomplete": 0,
+    "model_loaded": false,
+    "actual_owner_default_nonfunction_fields_exact_parity": true,
+    "actual_owner_default_all_marker_callbacks_exact_parity": true,
+    "masked_callbacks_match_masked_points": true,
+    "additional_unobserved_marker_frames": 23
+  },
+  "production_integration": "NOT_YET",
+  "candidate_promotion": false,
+  "full_forward_dynamics_and_independent_replay": "OPEN",
+  "latex_compile": "UNVERIFIED_PLATFORM_STANDARD_DIRECTORIES_FAILURE"
+}

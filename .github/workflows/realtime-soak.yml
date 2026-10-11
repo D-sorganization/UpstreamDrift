@@ -49,6 +49,11 @@ jobs:
     # GitHub-hosted we cap the schedule run at 6 h via SOAK_DURATION_SEC.
     timeout-minutes: 1500
     env:
+      # Per-job rustup state (checkout wipes the workspace): the runner image's
+      # ~/.rustup can hold a partially installed toolchain that rustup cannot
+      # upgrade in place (#11595).
+      RUSTUP_HOME: ${{ github.workspace }}/.rustup-home
+      CARGO_HOME: ${{ github.workspace }}/.cargo-home
       SOAK: "1"
       SOAK_DURATION_SEC: ${{ github.event.inputs.duration_sec || '86400' }}
       SOAK_PUBLISH_HZ: ${{ github.event.inputs.publish_hz || '1000' }}
@@ -80,6 +85,18 @@ jobs:
 
       - name: Purge pip cache
         run: python -m pip cache purge || true
+      - name: Bootstrap rustup without editing shell profiles
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          # dtolnay/rust-toolchain installs rustup WITHOUT --no-modify-path when
+          # rustup is not on PATH (always true with a per-job CARGO_HOME). On
+          # self-hosted runners that appends `. "$CARGO_HOME/env"` to the host's
+          # ~/.bashrc and ~/.bash_profile on every job (RM#2064).
+          if ! command -v rustup >/dev/null 2>&1; then
+            curl --proto '=https' --tlsv1.2 --retry 10 --retry-connrefused --location --silent --show-error --fail https://sh.rustup.rs | sh -s -- --default-toolchain none --no-modify-path -y
+            echo "${CARGO_HOME:-$HOME/.cargo}/bin" >> "$GITHUB_PATH"
+          fi
       - name: Set up Rust toolchain
         uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8
 

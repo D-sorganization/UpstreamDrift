@@ -68,7 +68,11 @@ function mockApiRoutes() {
       return Promise.resolve(JSON.parse(String(init?.body)));
     }
     if (path === '/api/v1/themes/' && method === 'GET') {
-      return Promise.resolve(structuredClone(THEME_LIST));
+      // Resolve late on purpose: the theme list is fetched separately from the
+      // settings, so tests must not assume its options exist once settings load.
+      return new Promise((resolve) =>
+        setTimeout(() => resolve(structuredClone(THEME_LIST)), 50),
+      );
     }
     if (path === '/api/v1/themes/active' && method === 'PUT') {
       return Promise.resolve({ success: true, message: 'ok' });
@@ -140,7 +144,13 @@ describe('SettingsPage', () => {
     renderPage();
     await screen.findByLabelText(/duration \(s\)/i);
 
-    fireEvent.change(screen.getByLabelText(/theme/i), { target: { value: 'Light' } });
+    // Settings and the theme list load independently; selecting an option that
+    // is not in the dropdown yet leaves the value empty.
+    const themeSelect = screen.getByLabelText(/theme/i) as HTMLSelectElement;
+    await waitFor(() => {
+      expect(Array.from(themeSelect.options).map((o) => o.value)).toContain('Light');
+    });
+    fireEvent.change(themeSelect, { target: { value: 'Light' } });
     fireEvent.change(screen.getByLabelText(/font scale/i), { target: { value: '1.5' } });
     fireEvent.click(screen.getByRole('button', { name: /save (settings|changes)/i }));
 

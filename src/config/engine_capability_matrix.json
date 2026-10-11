@@ -41,7 +41,7 @@
         "muscles": "none",
         "trajectory_opt": "none",
         "video_export": "full",
-        "dataset_export": "full",
+        "dataset_export": "partial",
         "force_visualization": "full",
         "model_positioning": "full",
         "measurements": "full"
@@ -60,7 +60,7 @@
       "capabilities": {
         "mass_matrix": "full",
         "jacobian": "full",
-        "contact_forces": "partial",
+        "contact_forces": "full",
         "inverse_dynamics": "full",
         "drift_acceleration": "full",
         "parameter_gradients": "partial",
@@ -89,7 +89,7 @@
       "capabilities": {
         "mass_matrix": "full",
         "jacobian": "full",
-        "contact_forces": "partial",
+        "contact_forces": "none",
         "inverse_dynamics": "full",
         "drift_acceleration": "full",
         "parameter_gradients": "full",
@@ -100,7 +100,7 @@
         "trajectory_opt": "full",
         "video_export": "none",
         "dataset_export": "full",
-        "force_visualization": "partial",
+        "force_visualization": "full",
         "model_positioning": "full",
         "measurements": "partial"
       },
@@ -145,10 +145,10 @@
       "failure_reasons": ["missing_engine_receipt"],
       "conformance_checks": ["engine_name_known"],
       "capabilities": {
-        "mass_matrix": "full",
-        "jacobian": "full",
+        "mass_matrix": "partial",
+        "jacobian": "partial",
         "contact_forces": "partial",
-        "inverse_dynamics": "full",
+        "inverse_dynamics": "none",
         "drift_acceleration": "partial",
         "parameter_gradients": "none",
         "state_control_gradients": "none",

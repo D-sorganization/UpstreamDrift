@@ -1,0 +1,119 @@
+{
+  "schema": "club-head-assets-v1",
+  "generator": "scripts/generate_club_head_assets.py",
+  "source": "rate_of_closure.club.stl_export.serialize_clubhead_stl",
+  "tools_pin": "3678409fc51024150ab28970b72e3b468935f345",
+  "units": "mm",
+  "head_frame": "x=target,y=up,z=toe",
+  "note": "Visual only; head mass and inertia stay as specified.",
+  "heads": {
+    "Driver 10.5°": {
+      "library_name": "Driver 10.5°",
+      "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/models/gs3dx_driver_head.stl",
+      "sha256": "16ec9cf2f8fb2c5cba7c11821229d2b84dc4f779b9264c28f43a7c833c475f40",
+      "loft_deg": 10.5,
+      "lie_deg": 56.0,
+      "club_type": "Driver",
+      "triangles": 1792
+    },
+    "3-Wood": {
+      "library_name": "3-Wood",
+      "path": "assets/club_heads/3-wood.stl",
+      "sha256": "c35c4c2d8889f0a1f74f4ae871274e26f5758f98dcf2b15f20b90c5591140adb",
+      "loft_deg": 15.0,
+      "lie_deg": 57.0,
+      "club_type": "Wood",
+      "triangles": 1792
+    },
+    "5-Wood": {
+      "library_name": "5-Wood",
+      "path": "assets/club_heads/5-wood.stl",
+      "sha256": "4bdeec6edc7c0d4034eb11a078260a86955979cb19149daa365184f29536bf51",
+      "loft_deg": 18.0,
+      "lie_deg": 58.0,
+      "club_type": "Wood",
+      "triangles": 1792
+    },
+    "3-Hybrid": {
+      "library_name": "3-Hybrid",
+      "path": "assets/club_heads/3-hybrid.stl",
+      "sha256": "5032d3e5f63cccda040da35f6df675d18ddd386115175fae8bd65c8d24481da0",
+      "loft_deg": 19.0,
+      "lie_deg": 59.0,
+      "club_type": "Hybrid",
+      "triangles": 1792
+    },
+    "3-Iron": {
+      "library_name": "3-Iron",
+      "path": "assets/club_heads/3-iron.stl",
+      "sha256": "81093318873f8de8f1bb8a3c6d847357d31d6e93a2a416e892b7a78cc9340b09",
+      "loft_deg": 21.0,
+      "lie_deg": 59.5,
+      "club_type": "Iron",
+      "triangles": 1792
+    },
+    "5-Iron": {
+      "library_name": "5-Iron",
+      "path": "assets/club_heads/5-iron.stl",
+      "sha256": "e1d84e1d36dcd2bf4ca0f614947923e492a970e4fe6e6731b3e9a33f1d99b204",
+      "loft_deg": 27.0,
+      "lie_deg": 61.0,
+      "club_type": "Iron",
+      "triangles": 1792
+    },
+    "7-Iron": {
+      "library_name": "7-Iron",
+      "path": "assets/club_heads/7-iron.stl",
+      "sha256": "944bbe0304d7527b0c3086726fb302ab831410afca9950bba6bcedadf55b1197",
+      "loft_deg": 34.0,
+      "lie_deg": 62.5,
+      "club_type": "Iron",
+      "triangles": 1792
+    },
+    "9-Iron": {
+      "library_name": "9-Iron",
+      "path": "assets/club_heads/9-iron.stl",
+      "sha256": "6f4d05d3f04613630800707b571bb176bc8d00672c48ca6ff98facd337fa1a51",
+      "loft_deg": 41.0,
+      "lie_deg": 64.0,
+      "club_type": "Iron",
+      "triangles": 1792
+    },
+    "Pitching Wedge": {
+      "library_name": "Pitching Wedge",
+      "path": "assets/club_heads/pitching-wedge.stl",
+      "sha256": "b86bc11459415d82532453706e66a8e647e1777d9523e4fe6bc8672b9a6c41ed",
+      "loft_deg": 46.0,
+      "lie_deg": 64.0,
+      "club_type": "Wedge",
+      "triangles": 1792
+    },
+    "Gap Wedge": {
+      "library_name": "Gap Wedge",
+      "path": "assets/club_heads/gap-wedge.stl",
+      "sha256": "5b4a9a7c2c8648ec94380e2ffb16499f0e1c72537b44bece57ea83d5b6ee23b3",
+      "loft_deg": 52.0,
+      "lie_deg": 64.0,
+      "club_type": "Wedge",
+      "triangles": 1792
+    },
+    "Sand Wedge": {
+      "library_name": "Sand Wedge",
+      "path": "assets/club_heads/sand-wedge.stl",
+      "sha256": "e3c07d08f1c9204e912d8245e6b3b83094d40e84d6aa7a008f974230596a8234",
+      "loft_deg": 56.0,
+      "lie_deg": 64.0,
+      "club_type": "Wedge",
+      "triangles": 1792
+    },
+    "Lob Wedge": {
+      "library_name": "Lob Wedge",
+      "path": "assets/club_heads/lob-wedge.stl",
+      "sha256": "45cfbb6237a0de61d7c098414d7a562b9826da7fbe10cba426687c1893b70df3",
+      "loft_deg": 60.0,
+      "lie_deg": 64.0,
+      "club_type": "Wedge",
+      "triangles": 1792
+    }
+  }
+}

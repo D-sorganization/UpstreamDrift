@@ -1,0 +1,132 @@
+{
+  "qualification": "PURE_HELPER_TESTS_ONLY",
+  "matlab_release": "R2025b",
+  "suites": [
+    {
+      "passed": 18,
+      "failed": 0,
+      "incomplete": 0,
+      "names": [
+        "test_gs3dx_initial_target_values/testIdentityPoseQuietDiagnostic",
+        "test_gs3dx_initial_target_values/testKnown90DegZRotation",
+        "test_gs3dx_initial_target_values/testKnown45DegXRotation",
+        "test_gs3dx_initial_target_values/testIndependentRotationOracleRoundtrip",
+        "test_gs3dx_initial_target_values/testClosedRightArmPreservation",
+        "test_gs3dx_initial_target_values/testLiteralTargetNeckAndMidfootValues",
+        "test_gs3dx_initial_target_values/testPermutationInvariance",
+        "test_gs3dx_initial_target_values/testRejectionMissingKeys",
+        "test_gs3dx_initial_target_values/testRejectionExtraKeys",
+        "test_gs3dx_initial_target_values/testRejectionDuplicateKeys",
+        "test_gs3dx_initial_target_values/testRejectionMalformedOrUnknownKey",
+        "test_gs3dx_initial_target_values/testRejectionWrongUnits",
+        "test_gs3dx_initial_target_values/testRejectionInvalidUnitAxis",
+        "test_gs3dx_initial_target_values/testIdentityZeroAxisAllowed",
+        "test_gs3dx_initial_target_values/testRejectionGimbalSingularity",
+        "test_gs3dx_initial_target_values/testRejectionNonFiniteQ",
+        "test_gs3dx_initial_target_values/testRejectionComplexQ",
+        "test_gs3dx_initial_target_values/testRejectionMatrixQ"
+      ],
+      "qualification": "PURE_MAPPING_TDD"
+    },
+    {
+      "passed": 8,
+      "failed": 0,
+      "incomplete": 0,
+      "names": [
+        "test_gs3dx_marker_cluster_frame/testIndependentKnownFrame",
+        "test_gs3dx_marker_cluster_frame/testRigidTransformAndTranslation",
+        "test_gs3dx_marker_cluster_frame/testPositiveScaleInvariance",
+        "test_gs3dx_marker_cluster_frame/testTinyAndLargeMetamorphicScaleInvariance",
+        "test_gs3dx_marker_cluster_frame/testProperRotationDetAndOrthogonality",
+        "test_gs3dx_marker_cluster_frame/testOneGapBetweenValidSamples",
+        "test_gs3dx_marker_cluster_frame/testCoincidentAndCollinearRelativeGuard",
+        "test_gs3dx_marker_cluster_frame/testWrongDimensionsAndComplexDbC"
+      ],
+      "qualification": "PURE_RIGID_FRAME_REVIEW"
+    }
+  ],
+  "parent_review_regressions": [
+    {
+      "contract": "One pose must be a vector, not a 3-by-16 matrix",
+      "red": {
+        "passed": 17,
+        "failed": 1,
+        "incomplete": 0,
+        "natural_exit_code": 1,
+        "receipt_utc": "2026-10-02T09:30:57.943208Z"
+      },
+      "green": {
+        "passed": 18,
+        "failed": 0,
+        "incomplete": 0,
+        "natural_exit_code": 0,
+        "receipt_utc": "2026-10-02T09:32:18.346573Z"
+      }
+    },
+    {
+      "contract": "Representable tiny clusters require a relative degeneracy guard",
+      "red": {
+        "passed": 7,
+        "failed": 1,
+        "incomplete": 0,
+        "natural_exit_code": 1,
+        "receipt_utc": "2026-10-02T09:42:54.901647Z"
+      },
+      "green": {
+        "passed": 8,
+        "failed": 0,
+        "incomplete": 0,
+        "natural_exit_code": 0,
+        "receipt_utc": "2026-10-02T09:44:07.514315Z"
+      }
+    }
+  ],
+  "native_target_expression_probe": {
+    "capture_alias": "capture-A",
+    "original_status": 1,
+    "mapped_status": -1,
+    "maximum_scalar_target_difference_deg": 16.319806700262056,
+    "natural_exit_code": 1,
+    "receipt_utc": "2026-10-02T09:46:26.130147Z",
+    "simulation_run": false,
+    "model_saved": false,
+    "qualification": "FAILED_TARGET_EXPRESSION_ROUNDTRIP",
+    "cause": "Stale masked start values after ModelWorkspace assignment; resolved after a compiled diagram update and fresh KinematicsSolver."
+  },
+  "limitations": "No dynamic initialization, head-constrained fit improvement, anatomy, contact or forward-dynamics qualification.",
+  "refreshed_native_target_expression_probe": {
+    "records": [
+      {
+        "capture_alias": "capture-A",
+        "joint_variable_count": 48,
+        "workspace_field_count": 66,
+        "literal_target_count": 4,
+        "max_translation_error_m": 4.440892098500626e-16,
+        "max_rotation_matrix_error": 1.1647424834813783e-15
+      },
+      {
+        "capture_alias": "capture-O",
+        "joint_variable_count": 48,
+        "workspace_field_count": 66,
+        "literal_target_count": 4,
+        "max_translation_error_m": 4.440892098500626e-16,
+        "max_rotation_matrix_error": 9.489007817100084e-15
+      }
+    ],
+    "qualification": "TARGET_EXPRESSION_FK_ROUNDTRIP_ONLY",
+    "simulation_run": false,
+    "diagram_update_run": true,
+    "model_saved": false,
+    "limitation": "State target Specify/priority and controller/motion references still require native initialization validation.",
+    "receipt": {
+      "actual_process_exit_code": 0,
+      "final_exit_code": 0,
+      "termination_reason": "natural_exit",
+      "done_marker": true,
+      "script_status": "success",
+      "command_identity": "run('native_initial_target_roundtrip.m')",
+      "timestamp": "2026-10-02T10:03:13.308622+00:00"
+    },
+    "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f"
+  }
+}

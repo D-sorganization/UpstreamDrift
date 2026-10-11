@@ -11,6 +11,7 @@ import numpy as np
 
 from src.shared.python.engine_core.engine_availability import is_engine_available
 from src.shared.python.motion_matching import posture_metrics as post
+from src.shared.python.motion_matching.club_face_target import merge_axis_targets
 from src.shared.python.motion_matching.contact_law import GroundPlane
 from src.shared.python.motion_matching.full_body_ik import BaseFullBodyIK
 from src.shared.python.motion_matching.pipeline.plant import (
@@ -25,21 +26,29 @@ from src.shared.python.motion_matching.pipeline.constants import (
     BOUND_WIDENING,
     CALIBRATION_STRIDE,
     CONTACT_STIFFNESS_N_M,
+    DEFAULT_IK_RESTART_POLICY,
     ELBOW_PIT_MARKERS,
     ELBOW_PIT_WEIGHT,
     HEAD_MARKER_WEIGHT,
+    IK_RESTART_POLICIES,
     IK_UNBOUNDED,
     LEG_LABELS,
+    LEG_SEEDS,
+    POSTURE_PRIOR_COORDINATES,
     PRIOR,
+    RESTART_MAX_JOINT_SPEED_RAD_S,
     SPIN_COORDINATES,
     SPIN_PRIOR,
     STANCE_TOLERANCE_M,
     TOE_SPHERES,
     TOE_STANDOFF_M,
+    TRACKING_CUTOFF_HZ,
     TRAJECTORY_RESTART_MARGIN_M,
     TRAJECTORY_RESTART_THRESHOLD_M,
     TRAJECTORY_RESTARTS,
     WRIST_COORDINATES,
+    rate_from_times,
+    square_forefoot_seeds,
 )
 from src.shared.python.motion_matching.range_of_motion import (
     HUMAN_RANGES_DEG,
@@ -121,6 +130,118 @@ def add_toe_spheres(document: dict[str, Any]) -> dict[str, Any]:
     out["provenance"] = (
         f"{prov} | toe contact spheres added on calcanei; stiffness {stiffness:.0e} N/m"
     )
+    return out
+
+
+FOOT_WIDTH_STEMS = ("heel", "forefoot")
+TORSION_TRANSITION_RAD_S = 0.5
+
+
+def add_foot_width_spheres(
+    document: dict[str, Any],
+    half_width_m: float,
+    torsional_patch_m: float | None = None,
+) -> dict[str, Any]:
+    """Return a copy of ``document`` whose feet are wide, not a centre line (#11671).
+
+    The heel and forefoot spheres get a lateral pair at ``+/- half_width_m``
+    along the calcaneus z axis (named ``<stem>_zp_<side>`` and
+    ``<stem>_zn_<side>``, so a foot side is still the name suffix). With three
+    spheres on one line a foot has no lateral or torsional support; the pair
+    turns the line into a sole. ``torsional_patch_m`` additionally records a
+    spin-friction patch radius that engines apply as a moment about the ground
+    normal at every loaded sphere.
+
+    Preconditions: ``half_width_m`` finite and positive; ``torsional_patch_m``
+    ``None`` or finite and nonnegative. Postconditions: the input is unchanged;
+    applying the function twice with the same width equals applying it once.
+    """
+    if not np.isfinite(half_width_m) or half_width_m <= 0:
+        raise ValueError("half_width_m must be finite and positive")
+    if torsional_patch_m is not None and (
+        not np.isfinite(torsional_patch_m) or torsional_patch_m < 0
+    ):
+        raise ValueError("torsional_patch_m must be None or finite and nonnegative")
+    if "contact" not in document:
+        raise ValueError("document must contain a 'contact' block")
+    contact = dict(document["contact"])
+    spheres = list(contact["spheres"])
+    names = {sphere["name"] for sphere in spheres}
+    for sphere in list(spheres):
+        stem, _, side = sphere["name"].rpartition("_")
+        if stem not in FOOT_WIDTH_STEMS or side not in ("r", "l"):
+            continue
+        for tag, sign in (("zp", 1.0), ("zn", -1.0)):
+            name = f"{stem}_{tag}_{side}"
+            if name in names:
+                continue
+            position = list(sphere["position_m"])
+            position[2] = position[2] + sign * float(half_width_m)
+            spheres.append({**sphere, "name": name, "position_m": position})
+    contact["spheres"] = spheres
+    note = f"foot width +/-{half_width_m * 1e3:.0f} mm on heel and forefoot"
+    out = dict(document)
+    out["contact"] = contact
+    prov = str(document.get("provenance", ""))
+    out["provenance"] = prov if note in prov else f"{prov} | {note}"
+    if torsional_patch_m is not None:
+        out = add_torsional_friction(out, torsional_patch_m)
+    return out
+
+
+def add_torsional_friction(
+    document: dict[str, Any], patch_radius_m: float
+) -> dict[str, Any]:
+    """Return a copy of ``document`` whose contact spheres resist spinning (#11671).
+
+    Records ``contact.torsion`` so the MuJoCo adapter applies a spin-friction
+    moment ``-mu f_n r tanh(w_n / w0)`` about the ground normal at every loaded
+    sphere. It changes no geometry, so a fitted pre-impact trajectory stays valid.
+
+    Preconditions: ``patch_radius_m`` finite and nonnegative.
+    """
+    if not np.isfinite(patch_radius_m) or patch_radius_m < 0:
+        raise ValueError("torsional_patch_m must be None or finite and nonnegative")
+    if "contact" not in document:
+        raise ValueError("document must contain a 'contact' block")
+    out = dict(document)
+    out["contact"] = {
+        **document["contact"],
+        "torsion": {
+            "patch_radius_m": float(patch_radius_m),
+            "transition_rad_s": TORSION_TRANSITION_RAD_S,
+        },
+    }
+    note = f"torsional patch {patch_radius_m * 1e3:.0f} mm"
+    prov = str(document.get("provenance", ""))
+    out["provenance"] = prov if note in prov else f"{prov} | {note}"
+    return out
+
+
+def expand_stance_for_width(
+    stance: Sequence[Sequence[str]], sphere_names: Sequence[str]
+) -> list[tuple[str, ...]]:
+    """Pin the lateral foot-width spheres wherever their centre-line sphere is pinned.
+
+    Without this the IK keeps the heel and forefoot on the ground but may tilt
+    the sole, so a lateral sphere hangs in the air or digs in and the plant
+    rolls the foot (#11671). Postcondition: every output frame contains its
+    input frame, plus the existing ``<stem>_zp_<side>`` / ``<stem>_zn_<side>``
+    siblings of each pinned heel or forefoot sphere.
+    """
+    available = set(sphere_names)
+    out: list[tuple[str, ...]] = []
+    for frame in stance:
+        pinned = list(frame)
+        for name in frame:
+            stem, _, side = name.rpartition("_")
+            if stem not in FOOT_WIDTH_STEMS:
+                continue
+            for tag in ("zp", "zn"):
+                sibling = f"{stem}_{tag}_{side}"
+                if sibling in available and sibling not in pinned:
+                    pinned.append(sibling)
+        out.append(tuple(pinned))
     return out
 
 
@@ -242,6 +363,260 @@ class Lane:
         }
         self.prior_weights: dict[str, float] = {}
         self.anthropometric = False
+        # Soft head-gaze residual (OSV-3, #11729); 0 keeps markers faithful.
+        self.gaze_weight = 0.0
+        self.gaze_face_offset_m = 0.0
+        self.gaze_axis_targets_cache: list[Any] | None = None
+        self.gaze_plan: Any = None
+        #: Address toe-out targets (OSV-4); None keeps the legacy behaviour.
+        self.feet: Any = None
+        #: Per-frame club-face orientation targets (OSV-10); None: marker-only.
+        self.face_targets: list[dict[str, Any] | None] | None = None
+        self.face_weight = 0.0
+        #: Why a requested face residual is unavailable (#12030); None if not.
+        self.face_unavailable_reason: str | None = None
+        #: Restart policy of the full-capture trajectory solve (#12042).
+        self.restart_policy = DEFAULT_IK_RESTART_POLICY
+        #: Weight of the address-pose posture prior (#12042); 0 disables it.
+        self.posture_prior_weight = 0.0
+        #: Last pre-contact capture frame (GCV-20); the reference low-pass is
+        #: split there. None filters across impact (no club triad observed).
+        self.impact_index: int | None = None
+        self.impact_split_reason = "not computed"
+        self.ball_impact: Any = None  # ImpactForce plan (GCV-20)
+        self.impact_time_s: float | None = None
+        #: Release-preserving pre-contact tracking cutoff (GCV-20); None keeps
+        #: the base cutoff on both sides of impact.
+        self.pre_contact_cutoff_hz: float | None = None
+        self.release_cutoff: dict[str, Any] | None = None
+        #: Thorax / shoulder-girdle turn split (#12042 slice 7); off until set.
+        self.thorax_targets: list[dict[str, Any] | None] | None = None
+        self.thorax_weight = 0.0
+        self.split_marker_weights: dict[str, float] = {}
+        self.shoulder_girdle_weight = 1.0
+
+    def set_restart_policy(self, policy: str) -> None:
+        """Select the trajectory IK restart policy (#12042), one of
+        ``IK_RESTART_POLICIES``. It applies to full-capture solves only;
+        calibration subsets keep the legacy restarts. Raises ``ValueError``
+        for an unknown policy."""
+        if policy not in IK_RESTART_POLICIES:
+            known = ", ".join(IK_RESTART_POLICIES)
+            raise ValueError(f"Unknown restart policy {policy!r}; expected {known}")
+        self.restart_policy = policy
+
+    def restart_settings(self, consecutive: bool = True) -> dict[str, Any]:
+        """``solve_trajectory`` restart keywords for the active policy.
+
+        ``consecutive`` is False for strided calibration subsets, whose frames
+        are not one sample apart, so the joint-speed bound does not apply.
+        """
+        policy = self.restart_policy if consecutive else "free"
+        return {
+            "restarts": 0 if policy == "off" else TRAJECTORY_RESTARTS,
+            "restart_threshold_m": TRAJECTORY_RESTART_THRESHOLD_M,
+            "restart_margin_m": TRAJECTORY_RESTART_MARGIN_M,
+            "restart_max_step_rad": (
+                RESTART_MAX_JOINT_SPEED_RAD_S / self.rate_hz
+                if policy == "continuous"
+                else None
+            ),
+            "restart_anchor_prior": policy in ("anchored", "stable", "continuous"),
+            "restart_seed_per_frame": policy in ("seeded", "stable"),
+        }
+
+    def posture_prior(
+        self, kin: BaseFullBodyIK, q_address: np.ndarray
+    ) -> dict[str, tuple[float, float]] | None:
+        """Address-pose posture prior on ``POSTURE_PRIOR_COORDINATES`` the
+        model has (#12042); None while ``posture_prior_weight`` is 0."""
+        weight = float(self.posture_prior_weight)
+        if not np.isfinite(weight) or weight < 0:
+            raise ValueError(f"posture prior weight must be >= 0, got {weight}")
+        if weight == 0:
+            return None
+        order = tuple(kin.coordinate_order)
+        return {
+            name: (float(q_address[order.index(name)]), weight)
+            for name in POSTURE_PRIOR_COORDINATES
+            if name in order
+        }
+
+    def restart_report(self) -> dict[str, Any]:
+        """Receipt block naming the restart policy and its bound (#12042)."""
+        settings = self.restart_settings()
+        step = settings["restart_max_step_rad"]
+        return {
+            "policy": self.restart_policy,
+            "restarts": settings["restarts"],
+            "threshold_m": settings["restart_threshold_m"],
+            "margin_m": settings["restart_margin_m"],
+            "max_joint_speed_rad_s": (
+                RESTART_MAX_JOINT_SPEED_RAD_S if step is not None else None
+            ),
+            "max_step_rad": step,
+            "anchor_prior": settings["restart_anchor_prior"],
+            "seed_per_frame": settings["restart_seed_per_frame"],
+            "posture_prior_weight": float(self.posture_prior_weight),
+        }
+
+    def set_face_targets(
+        self,
+        attachments: Mapping[str, tuple[str, Sequence[float]]],
+        spec: Mapping[str, Any],
+        weight: float,
+    ) -> None:
+        """Enable the face-orientation residual (OSV-10, #11759) for the
+        trajectory and consistency solves, from the calibrated head-triad
+        ``attachments`` and the document's rendered face. Raises
+        ``ValueError``/``TypeError`` for a negative or non-numeric weight."""
+        from src.shared.python.motion_matching.club_face_target import (
+            TriadShapeMismatchError,
+            face_axis_targets,
+            validate_face_weight,
+        )
+
+        validate_face_weight(weight)
+        self.face_weight = float(weight)
+        self.face_unavailable_reason = None
+        try:
+            targets = face_axis_targets(
+                self.points, self.valid, self.labels, attachments, spec, weight=weight
+            )
+        except TriadShapeMismatchError as exc:
+            # Triad offsets of another club: never fake a face target (#12030).
+            self.face_targets = None
+            self.face_unavailable_reason = str(exc)
+            return
+        self.face_targets = targets if any(targets) else None
+
+    def set_club_targets(
+        self,
+        attachments: Mapping[str, tuple[str, Sequence[float]]],
+        spec: Mapping[str, Any],
+        face_weight: float,
+    ) -> None:
+        """Face-orientation targets (OSV-10) and the capture impact (GCV-20)."""
+        self.set_face_targets(attachments, spec, face_weight)
+        self.set_impact_split(attachments, spec)
+
+    def set_impact_split(
+        self,
+        attachments: Mapping[str, tuple[str, Sequence[float]]],
+        spec: Mapping[str, Any],
+    ) -> None:
+        """Locate impact in the capture so smoothing does not cross it (GCV-20,
+        #11767). Impact is the capture face centre's ball passage; when the
+        club triad cannot be observed the split is unavailable and the reason
+        is kept for the receipt (never a guessed frame)."""
+        from src.shared.python.motion_matching.club_face_target import capture_impact
+        from src.shared.python.motion_matching.impact_force import (
+            PASSAGE_ARM_LEAD_S,
+            ImpactForce,
+        )
+
+        try:
+            hit = capture_impact(
+                self.times, self.points, self.valid, self.labels, attachments, spec
+            )
+            # Armed before the capture impact; the replay's own face passage
+            # starts the contact (``ImpactForce.at_address``).
+            self.ball_impact = ImpactForce.for_spec(
+                spec,
+                t_start_s=max(hit.time_s - PASSAGE_ARM_LEAD_S, float(self.times[0])),
+                swing_span_s=(float(self.times[0]), float(self.times[-1])),
+                ball_centre_m=hit.ball_centre_m,
+            )
+            self.impact_time_s = hit.time_s
+        except ValueError as exc:
+            self.impact_index = None
+            self.ball_impact = None
+            self.impact_time_s = None
+            self.impact_split_reason = f"unavailable: {exc}"
+        else:
+            self.impact_index = hit.frame_index
+            self.impact_split_reason = "capture face-centre ball passage"
+
+    def select_release_cutoff(
+        self, kin: Any, spec: Mapping[str, Any], q_ref: np.ndarray
+    ) -> None:
+        """Pick the pre-contact tracking cutoff that keeps the reference's
+        late release (GCV-20, #11767; DESIGN_DECISIONS section 11).
+
+        Needs the capture impact split; without it, or when the reference's
+        clubhead never passes the ball, the base cutoff stays and the reason
+        is kept for the receipt.
+        """
+        from src.shared.python.motion_matching.club_face_target import (
+            model_face_centres,
+        )
+        from src.shared.python.motion_matching.pipeline.release_cutoff import (
+            release_preserving_cutoff,
+        )
+
+        self.pre_contact_cutoff_hz = None
+        if self.impact_index is None:
+            self.release_cutoff = {"source": "no impact split"}
+            return
+        try:
+            result = release_preserving_cutoff(
+                self.times,
+                q_ref,
+                self.impact_index,
+                lambda q: model_face_centres(kin, q, spec),
+                base_cutoff_hz=TRACKING_CUTOFF_HZ,
+            )
+        except ValueError as exc:
+            self.release_cutoff = {"source": f"unavailable: {exc}"}
+            return
+        self.pre_contact_cutoff_hz = result.cutoff_hz
+        self.release_cutoff = result.to_record()
+
+    def impact_split_report(self) -> dict[str, Any]:
+        """Receipt block describing where the reference low-pass is split."""
+        report: dict[str, Any] = {"source": self.impact_split_reason}
+        if self.impact_index is not None:
+            report["frame"] = self.impact_index
+            report["time_s"] = float(self.times[self.impact_index] - self.times[0])
+        if self.impact_time_s is not None:
+            report["impact_time_s"] = float(self.impact_time_s)
+        if self.pre_contact_cutoff_hz is not None:
+            report["pre_contact_cutoff_hz"] = float(self.pre_contact_cutoff_hz)
+        if self.release_cutoff is not None:
+            report["release_cutoff"] = self.release_cutoff
+        return report
+
+    def set_turn_split(
+        self,
+        attachments: Mapping[str, tuple[str, Sequence[float]]],
+        thorax_weight: float,
+        shoulder_girdle_weight: float,
+    ) -> None:
+        """Enable the thorax-orientation residual and the shoulder-girdle
+        marker weights (#12042 slice 7) for the trajectory re-solves. Call it
+        after the address calibration so calibration stays marker-only.
+        Raises ``ValueError``/``TypeError`` for a negative or non-numeric weight."""
+        from src.shared.python.motion_matching.pipeline import turn_split
+
+        self.thorax_targets = turn_split.thorax_axis_targets(
+            self.points, self.valid, self.labels, attachments, thorax_weight
+        )
+        self.thorax_weight = float(thorax_weight) if self.thorax_targets else 0.0
+        self.split_marker_weights = turn_split.shoulder_girdle_weights(
+            self.labels, shoulder_girdle_weight
+        )
+        self.shoulder_girdle_weight = float(shoulder_girdle_weight)
+
+    def leg_seeds(self) -> dict[str, tuple[str, Sequence[float]]]:
+        """Leg marker seeds; forefoot markers squared when foot progression is on."""
+        if self.feet is None:
+            return dict(LEG_SEEDS)
+        return dict(square_forefoot_seeds(LEG_SEEDS))
+
+    @property
+    def rate_hz(self) -> float:
+        """Sample rate derived from capture timestamps (see ``rate_from_times``)."""
+        return rate_from_times(self.times)
 
     def kinematics(
         self,
@@ -318,11 +693,45 @@ class Lane:
         """One pit target set per capture frame (None where unobservable)."""
         return [self.pit_targets_for([f], weight) or None for f in range(self.frames)]
 
+    def axis_targets(self, kin: BaseFullBodyIK, q_start: np.ndarray) -> list | None:
+        """Per-frame axis targets: elbow pits plus the optional gaze residual.
+
+        With ``gaze_weight > 0`` the gaze schedule is planned once from a
+        marker-faithful pass (head markers keep their weights) and cached so
+        the consistency re-solve uses the same targets.
+        """
+        pits = self.pit_targets_per_frame(0.01) if self.anthropometric else None
+        if self.gaze_weight <= 0:
+            return pits
+        if self.gaze_axis_targets_cache is None:
+            from src.shared.python.motion_matching.pipeline import gaze_residual as gr
+
+            q0, _ = self._solve(kin, q_start, None, pits)
+            # Plan from the smoothed pass so impact detection is not driven by
+            # marker jitter in the speed signal.
+            self.gaze_plan, q0 = gr.plan_from_pass(self, kin, q0)
+            self.gaze_axis_targets_cache = gr.gaze_axis_targets(
+                self.gaze_plan, kin, q0, self.times, self.gaze_weight
+            )
+        return merge_axis_targets(pits, self.gaze_axis_targets_cache)
+
     def trajectory(
         self,
         kin: BaseFullBodyIK,
         q_start: np.ndarray,
         frames: Sequence[int] | None = None,
+    ) -> tuple[np.ndarray, list[Any]]:
+        if frames is not None:
+            pits = self.pit_targets_per_frame(0.01) if self.anthropometric else None
+            return self._solve(kin, q_start, frames, pits)
+        return self._solve(kin, q_start, frames, self.axis_targets(kin, q_start))
+
+    def _solve(
+        self,
+        kin: BaseFullBodyIK,
+        q_start: np.ndarray,
+        frames: Sequence[int] | None,
+        axis_targets: list | None,
     ) -> tuple[np.ndarray, list[Any]]:
         return kin.solve_trajectory(
             self.points,
@@ -334,14 +743,13 @@ class Lane:
             flat_feet_per_frame=self.stance,
             plant_stance=True,
             bounds=self.bounds,
-            marker_weights=self.marker_weights,
+            marker_weights={**self.marker_weights, **self.split_marker_weights},
             prior_weights=self.prior_weights,
-            axis_targets_per_frame=(
-                self.pit_targets_per_frame(0.01) if self.anthropometric else None
+            axis_targets_per_frame=merge_axis_targets(
+                axis_targets, self.face_targets, self.thorax_targets
             ),
-            restarts=TRAJECTORY_RESTARTS,
-            restart_threshold_m=TRAJECTORY_RESTART_THRESHOLD_M,
-            restart_margin_m=TRAJECTORY_RESTART_MARGIN_M,
+            posture_prior=None if frames else self.posture_prior(kin, q_start),
+            **self.restart_settings(consecutive=frames is None),
         )
 
     def pinned_rms(

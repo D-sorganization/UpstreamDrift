@@ -28,7 +28,12 @@ the contract.
 """
 
 from .context import InMemoryLauncherContext, LauncherContext
-from .contract import BackgroundableTool, EmbedCapabilities, EmbeddableTool
+from .contract import (
+    BackgroundableTool,
+    EmbedCapabilities,
+    EmbeddableTool,
+    release_widget,
+)
 from .registry import (
     EMBEDDABLE_TOOL_REGISTRY,
     get_embeddable_tool,
@@ -70,5 +75,6 @@ __all__ = [
     "get_embeddable_tool",
     "is_embeddable",
     "register_embeddable_tool",
+    "release_widget",
     "unregister_embeddable_tool",
 ]

@@ -1,0 +1,63 @@
+{
+  "qualification": "SOURCE_MASK_CONTRACT_AND_FULL_OWNER_IK_RESEARCH_NOT_PROMOTION_OR_DYNAMICS",
+  "native_default_parity": {
+    "qualification": "ACTUAL_TOUR_OWNER_DEFAULT_IMPORTER_AND_DERIVED_TARGET_PARITY",
+    "captures": {
+      "capture_A": {
+        "n_frames": 654,
+        "all_nonfunction_fields_exact_parity": true,
+        "all_marker_callbacks_exact_parity": true,
+        "derived_joint_centres_exact_parity": true,
+        "derived_head_frame_exact_parity": true
+      },
+      "capture_O": {
+        "n_frames": 367,
+        "all_nonfunction_fields_exact_parity": true,
+        "all_marker_callbacks_exact_parity": true,
+        "derived_joint_centres_exact_parity": true,
+        "derived_head_frame_exact_parity": true
+      }
+    },
+    "existing_passed": 13,
+    "new_passed": 9,
+    "model_loaded": false
+  },
+  "full_owner_frame_count": 46,
+  "control_export_score": {
+    "mean_frame_RMS_m": 0.016753638977749757,
+    "peak_frame_RMS_m": 0.0369873963684329,
+    "finite_target_frame_count": 635
+  },
+  "control_same_source_mask_score": {
+    "mean_frame_RMS_m": 0.01667658695974406,
+    "peak_frame_RMS_m": 0.0369873963684329,
+    "finite_target_frame_count": 627
+  },
+  "candidate_same_source_mask_score": {
+    "mean_frame_RMS_m": 0.01665773450025511,
+    "peak_frame_RMS_m": 0.037050001141599335,
+    "finite_target_frame_count": 627
+  },
+  "control_head_peak_deg": 22.16892132188402,
+  "candidate_head_peak_deg": 22.16892132188402,
+  "control_foot_peak_deg": 20.57273929029672,
+  "candidate_foot_peak_deg": 20.559535915471795,
+  "frozen_geometry_and_offsets": true,
+  "continuity": {
+    "control": {
+      "max_root_step_m": 0.05392632614617937,
+      "known_root_transition_m": 0.05392632614617937,
+      "largest_leg_coordinate_step_deg": 38.3799868689029,
+      "ROM_flagged_rows": 13
+    },
+    "source_mask": {
+      "max_root_step_m": 0.05529517811544039,
+      "known_root_transition_m": 0.054033182238730895,
+      "largest_leg_coordinate_step_deg": 38.31854556114014,
+      "ROM_flagged_rows": 13
+    }
+  },
+  "candidate_promoted": false,
+  "model_saved": false,
+  "simulation_executed": false
+}

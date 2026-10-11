@@ -1,0 +1,239 @@
+{
+  "qualification": "NATIVE_CONFIGURED_HUMAN_UPPER_LEARNING_WITH_FEEDBACK_NOT_FULL_FORWARD_REPLAY",
+  "source_base": "c71ca95372ef7701c0884523e9d7f33fa5aaf4f5",
+  "executed_source_sha256": "2e110d4d9f1c2839402f7e08924be7cd84068008c1d06d917c6a76b4bf4ff441",
+  "contract_test_sha256": "dc1f8019405ad01c429beb320ac759f954408cd2d70d2b1c33ad71f3db60f19d",
+  "tdd_red": {
+    "qualification": "NEW_CONFIGURED_LEARNING_CONTRACT_RED_ON_UNCHANGED_REPO",
+    "matlab_release": "2025b",
+    "passed": 1,
+    "failed": 13,
+    "incomplete": 13,
+    "names": [
+      "test_gs3dx_track_learn_configuration/test_configured_mode_rejects_empty_model_name",
+      "test_gs3dx_track_learn_configuration/test_configured_mode_rejects_unloaded_model",
+      "test_gs3dx_track_learn_configuration/test_legacy_mode_rejects_explicit_different_model",
+      "test_gs3dx_track_learn_configuration/test_preflight_rejects_missing_upper_body_track_time",
+      "test_gs3dx_track_learn_configuration/test_preflight_rejects_non_increasing_time",
+      "test_gs3dx_track_learn_configuration/test_preflight_rejects_non_uniformly_spaced_time",
+      "test_gs3dx_track_learn_configuration/test_preflight_rejects_insufficient_samples_for_filtfilt",
+      "test_gs3dx_track_learn_configuration/test_preflight_rejects_cutoff_at_or_above_nyquist",
+      "test_gs3dx_track_learn_configuration/test_preflight_rejects_unknown_feedforward_override_prefix",
+      "test_gs3dx_track_learn_configuration/test_preflight_rejects_mismatched_reference_matrix_dimension",
+      "test_gs3dx_track_learn_configuration/test_preflight_rejects_mismatched_feedforward_override_shape",
+      "test_gs3dx_track_learn_configuration/test_preflight_rejects_negative_or_misdimensioned_gains",
+      "test_gs3dx_track_learn_configuration/test_caller_loaded_dirty_model_survives_errors",
+      "test_gs3dx_track_learn_configuration/test_preflight_fails_before_dynamics_on_fixture"
+    ],
+    "helper_path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-simscape-matching-main-20261002\\src\\engines\\Simscape_Multibody_Models\\3D_Golf_Model\\matlab\\exploratory_gs3dx\\tools\\gs3dx_track_learn.m",
+    "note": "Negative/lifecycle preflight tests only; valid configured Human execution and owned-model lifecycle remain required",
+    "receipt": {
+      "actual_process_exit_code": 1,
+      "final_exit_code": 1,
+      "termination_reason": "natural_exit",
+      "done_marker": true,
+      "script_status": "failed",
+      "command_identity": "run('run_learning_configuration_red.m')",
+      "owned_pids": [94828],
+      "timestamp": "2026-10-02T16:25:32.583947+00:00"
+    }
+  },
+  "contract_green": {
+    "qualification": "CONFIGURED_LEARNING_PREFLIGHT_GREEN_NOT_NATIVE_VALID_EXECUTION",
+    "matlab_release": "2025b",
+    "passed": 19,
+    "failed": 0,
+    "incomplete": 0,
+    "receipt": {
+      "actual_process_exit_code": 0,
+      "final_exit_code": 0,
+      "termination_reason": "natural_exit",
+      "done_marker": true,
+      "script_status": "success",
+      "command_identity": "run('run_learning_configuration_green.m')",
+      "owned_pids": [64416],
+      "timestamp": "2026-10-02T16:36:31.394351+00:00"
+    }
+  },
+  "results": {
+    "capture_A": {
+      "capture_alias": "capture-A",
+      "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+      "model_saved": false,
+      "qualification": "VALID_CONFIGURED_UPPER_LEARNING_NATIVE_EXECUTION_NOT_FULL_FORWARD_DYNAMICS",
+      "matlab_release": "2025b",
+      "iterations_completed": 2,
+      "stop_time_s": 0.1,
+      "reference_sample_count": 16,
+      "caller_model_preserved": true,
+      "caller_dirty_state_preserved": true,
+      "workspace_values_verified_unchanged": 837,
+      "independently_snapshotted_parameter_value_count": 620,
+      "initial_upper_angle_max_error_deg": 2.6211921522190096e-11,
+      "initial_upper_rate_max_error_deg_s": 8.735654337515762e-19,
+      "configured_torso_start_rate_deg_s": 0.001,
+      "persisted_torso_velocity_target_expression": "StartVelocity",
+      "caller_torso_velocity_target_expression_preserved": true,
+      "caller_torso_parent_velocity_priority_preserved": "High",
+      "ignored_legacy_track_start_rate_deg_s": -12345,
+      "angle_rms_deg": [0.10474901139491563, 0.021832111452052733],
+      "feedback_rms_Nm": [5.09261326595733, 1.456886707881714],
+      "best_used_iteration": 2,
+      "balance_on": true,
+      "zero_leg_feedforward": true,
+      "neck_prescribed": true,
+      "physical_hold_qualified": false,
+      "independent_open_loop_qualified": false,
+      "native_receipt": {
+        "actual_process_exit_code": 0,
+        "final_exit_code": 0,
+        "termination_reason": "natural_exit",
+        "done_marker": true,
+        "script_status": "success",
+        "command_identity": "run('capture_A_native_configured_learning.m')",
+        "owned_pids": [55240],
+        "timestamp": "2026-10-02T17:08:02.171462+00:00"
+      },
+      "script_sha256": "b59e70734f97c0d5ddcfcc5cd8e53172bb88a954e0090facabf04bdbd80aff11"
+    },
+    "capture_O": {
+      "capture_alias": "capture-O",
+      "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+      "model_saved": false,
+      "qualification": "VALID_CONFIGURED_UPPER_LEARNING_NATIVE_EXECUTION_NOT_FULL_FORWARD_DYNAMICS",
+      "matlab_release": "2025b",
+      "iterations_completed": 2,
+      "stop_time_s": 0.1,
+      "reference_sample_count": 16,
+      "caller_model_preserved": true,
+      "caller_dirty_state_preserved": true,
+      "workspace_values_verified_unchanged": 837,
+      "independently_snapshotted_parameter_value_count": 620,
+      "initial_upper_angle_max_error_deg": 4.447052504019666e-9,
+      "initial_upper_rate_max_error_deg_s": 2.455516849642587e-18,
+      "configured_torso_start_rate_deg_s": 0.001,
+      "persisted_torso_velocity_target_expression": "StartVelocity",
+      "caller_torso_velocity_target_expression_preserved": true,
+      "caller_torso_parent_velocity_priority_preserved": "High",
+      "ignored_legacy_track_start_rate_deg_s": -12345,
+      "angle_rms_deg": [0.15220063532067188, 0.022886670475701615],
+      "feedback_rms_Nm": [8.80321641578488, 1.482411634451986],
+      "best_used_iteration": 2,
+      "balance_on": true,
+      "zero_leg_feedforward": true,
+      "neck_prescribed": true,
+      "physical_hold_qualified": false,
+      "independent_open_loop_qualified": false,
+      "native_receipt": {
+        "actual_process_exit_code": 0,
+        "final_exit_code": 0,
+        "termination_reason": "natural_exit",
+        "done_marker": true,
+        "script_status": "success",
+        "command_identity": "run('capture_O_native_configured_learning.m')",
+        "owned_pids": [11688],
+        "timestamp": "2026-10-02T17:17:16.385075+00:00"
+      },
+      "script_sha256": "9f78c4c8240488a26f54ade052b57019c088549230a618574506007822bab901"
+    }
+  },
+  "native_parent_mask_policy_trace": {
+    "qualification": "READ_ONLY_TORSO_TARGET_POLICY_INTERFACE_TRACE_NO_SIMULATION",
+    "hierarchy": [
+      {
+        "path": "Hips and Torso Inputs/Torso Kinetically Driven/Revolute Joint/Kinetically Driven Revolute",
+        "mask_initialization": "",
+        "target_parameters": {
+          "PositionTargetPriority": "High",
+          "VelocityTargetSpecify": "off",
+          "VelocityTargetPriority": "Low",
+          "VelocityTargetValue": "StartVelocity",
+          "VelocityTargetValue_conf": "compiletime",
+          "VelocityTargetValueUnits": "deg/s",
+          "SenseVelocity": "on"
+        }
+      },
+      {
+        "path": "Hips and Torso Inputs/Torso Kinetically Driven/Revolute Joint",
+        "mask_initialization": "% Joint target priority binding, issue #9927.\njointMaskAxes = {'Rz'};\njointTargetAxes = {''};\njointPrimitive = [gcb '/Kinetically Driven Revolute'];\nfor jointAxisIndex = 1:numel(jointMaskAxes)\n  for jointQuantity = {'Position','Velocity'}\n    jointMaskKey = [jointMaskAxes{jointAxisIndex} jointQuantity{1} 'TargetPriority'];\n    jointPriority = get_param(gcb, jointMaskKey);\n    assert(ismember(jointPriority, {'None','Low','High'}), 'Invalid joint target priority');\n    jointTargetKey = [jointTargetAxes{jointAxisIndex} jointQuantity{1} 'Target'];\n    if strcmp(jointPriority, 'None')\n      set_param(jointPrimitive, [jointTargetKey 'Specify'], 'off');\n    else\n      set_param(jointPrimitive, [jointTargetKey 'Specify'], 'on', ...\n        [jointTargetKey 'Priority'], jointPriority);\n    end\n  end\nend",
+        "target_parameters": {
+          "StartVelocity": "TorsoStartVelocity",
+          "RzPositionTargetPriority": "High",
+          "RzVelocityTargetPriority": "None"
+        }
+      },
+      {
+        "path": "Hips and Torso Inputs/Torso Kinetically Driven",
+        "mask_initialization": "",
+        "target_parameters": {
+          "ShowSubsystemReinitializePorts": "off"
+        }
+      },
+      {
+        "path": "Hips and Torso Inputs",
+        "mask_initialization": "",
+        "target_parameters": {
+          "ShowSubsystemReinitializePorts": "off"
+        }
+      }
+    ],
+    "before_kms": "on",
+    "after_kms": "off",
+    "after_delete": "off",
+    "receipt": {
+      "actual_process_exit_code": 0,
+      "final_exit_code": 0,
+      "termination_reason": "natural_exit",
+      "done_marker": true,
+      "script_status": "success",
+      "command_identity": "run('trace_torso_target_policy.m')",
+      "owned_pids": [45224],
+      "timestamp": "2026-10-02T16:57:58.966022+00:00"
+    }
+  },
+  "preserved_failed_attempts": [
+    {
+      "attempt": "capture-A-native-configured-learning",
+      "boundary": "Unsupported revolute mask parameter; before learning",
+      "receipt": {
+        "actual_process_exit_code": 1,
+        "final_exit_code": 1,
+        "termination_reason": "natural_exit",
+        "done_marker": false,
+        "script_status": "failed",
+        "command_identity": "run('capture_A_native_configured_learning.m')",
+        "owned_pids": [70500],
+        "timestamp": "2026-10-02T16:41:18.599825+00:00"
+      }
+    },
+    {
+      "attempt": "capture-A-native-configured-learning-corrected",
+      "boundary": "Incorrect assumed velocity expression; before learning",
+      "receipt": {
+        "actual_process_exit_code": 1,
+        "final_exit_code": 1,
+        "termination_reason": "natural_exit",
+        "done_marker": false,
+        "script_status": "failed",
+        "command_identity": "run('capture_A_native_configured_learning.m')",
+        "owned_pids": [33744],
+        "timestamp": "2026-10-02T16:44:05.865579+00:00"
+      }
+    },
+    {
+      "attempt": "capture-A-native-configured-learning-bound-target",
+      "boundary": "Two iterations completed but child target preservation failed: parent priority None overrides leaf switch during KMS import",
+      "receipt": {
+        "actual_process_exit_code": 1,
+        "final_exit_code": 1,
+        "termination_reason": "natural_exit",
+        "done_marker": false,
+        "script_status": "failed",
+        "command_identity": "run('capture_A_native_configured_learning.m')",
+        "owned_pids": [39404],
+        "timestamp": "2026-10-02T16:52:49.319194+00:00"
+      }
+    }
+  ],
+  "limits": "Short constant-reference upper-body learning with balance and feedback active, zero leg feedforward and prescribed neck. No full-swing, independent replay or physical hold acceptance is established."
+}

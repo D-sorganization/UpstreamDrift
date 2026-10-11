@@ -28,7 +28,7 @@ graphics in an invisible figure instead, and writes PNG stills
    plane are overlaid.
 
 ```matlab
-ik = gs3dx_whole_body_ik(jc, frames=1:jc.impact_frame);
+ik = gs3dx_whole_body_ik(jc, model='GS3DX_Fit', frames=1:jc.impact_frame);
 out = gs3dx_render('GS3DX_FitBalance', ik, stills=[1 320 jc.impact_frame], ...
     still_files=["addr.png" "top.png" "imp.png"], view="down-the-line", markers=mk);
 ```
@@ -63,3 +63,12 @@ down-the-line drew a face-on view from behind the golfer).
   centres the close-up on it; an unknown focus solid is an error.
 
 The ellipsoid path is checked on `GS3DX_Shape` (`tests/test_gs3dx_shape.m`).
+
+## Current Matching and Historical Examples
+
+New matching defaults to `GS3DX_Human`, the refined ellipsoid model.
+Use `gs3dx_match_export` with a configured capture registry for shareable
+outputs; the maintained research reference records capture identity, actual
+geometry, timing, pose-driving mode and validation limits. The explicit
+`GS3DX_Fit`/`GS3DX_FitBalance` example above reproduces the historical model
+progression. It is not the standard for new matching outputs.

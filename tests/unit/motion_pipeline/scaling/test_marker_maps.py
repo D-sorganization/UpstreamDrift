@@ -6,6 +6,7 @@ import pytest
 
 from src.shared.python.motion_pipeline.scaling.marker_maps import (
     IOR,
+    OPENCAP_LAI_UHLRICH_2022,
     MARKER_SETS,
     PLUG_IN_GAIT,
     THEIA,
@@ -30,7 +31,7 @@ def test_marker_set_names(marker_set: MarkerSet, expected_name: str) -> None:
 
 @pytest.mark.parametrize(
     "marker_set",
-    [PLUG_IN_GAIT, IOR, THEIA, VICON_FULL_BODY],
+    [PLUG_IN_GAIT, IOR, THEIA, VICON_FULL_BODY, OPENCAP_LAI_UHLRICH_2022],
 )
 def test_marker_sets_are_non_empty(marker_set: MarkerSet) -> None:
     assert len(marker_set.markers) > 0
@@ -40,7 +41,7 @@ def test_marker_sets_are_non_empty(marker_set: MarkerSet) -> None:
 
 @pytest.mark.parametrize(
     "marker_set",
-    [PLUG_IN_GAIT, IOR, THEIA, VICON_FULL_BODY],
+    [PLUG_IN_GAIT, IOR, THEIA, VICON_FULL_BODY, OPENCAP_LAI_UHLRICH_2022],
 )
 def test_marker_to_segment_keys_subset_of_markers(marker_set: MarkerSet) -> None:
     """Every key in marker_to_segment should be a real marker name."""
@@ -52,7 +53,7 @@ def test_marker_to_segment_keys_subset_of_markers(marker_set: MarkerSet) -> None
 
 @pytest.mark.parametrize(
     "marker_set",
-    [PLUG_IN_GAIT, IOR, THEIA, VICON_FULL_BODY],
+    [PLUG_IN_GAIT, IOR, THEIA, VICON_FULL_BODY, OPENCAP_LAI_UHLRICH_2022],
 )
 def test_segment_pairs_reference_valid_markers(marker_set: MarkerSet) -> None:
     for prox, dist in marker_set.segment_pairs:

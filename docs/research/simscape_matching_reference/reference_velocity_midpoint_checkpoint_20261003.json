@@ -1,0 +1,62 @@
+{
+  "qualification": "NATIVE_GRADIENT_VELOCITY_AND_CHART_MIDPOINT_AUDIT_NOT_DYNAMICS_ACCEPTANCE",
+  "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+  "native_completed_UTC": "2026-10-03T03:12:33.684883+00:00",
+  "captures": {
+    "capture_A": {
+      "sample_count": 55,
+      "position_variable_count": 48,
+      "velocity_variable_count": 43,
+      "zero_velocity_control_status_one_count": 55,
+      "gradient_velocity_exact_target_count": 0,
+      "gradient_velocity_missed_target_count": 55,
+      "gradient_velocity_other_status_count": 0,
+      "max_native_velocity_adjustment_deg_per_s": 1601.0230789770858,
+      "max_native_velocity_adjustment_m_per_s": 0,
+      "follower_xyz_rate_map_finite_difference_error_rad_per_s": 8.516471776406347e-9,
+      "midpoint_count": 54,
+      "midpoint_exact_target_count": 0,
+      "midpoint_missed_target_count": 54,
+      "midpoint_other_status_count": 0,
+      "max_midpoint_scalar_target_adjustment_deg": 37.89747039239472,
+      "max_midpoint_scalar_target_adjustment_m": 0,
+      "max_midpoint_spherical_rotation_matrix_adjustment": 1.1711052421944785
+    },
+    "capture_O": {
+      "sample_count": 46,
+      "position_variable_count": 48,
+      "velocity_variable_count": 43,
+      "zero_velocity_control_status_one_count": 46,
+      "gradient_velocity_exact_target_count": 0,
+      "gradient_velocity_missed_target_count": 46,
+      "gradient_velocity_other_status_count": 0,
+      "max_native_velocity_adjustment_deg_per_s": 375.745076086396,
+      "max_native_velocity_adjustment_m_per_s": 0,
+      "follower_xyz_rate_map_finite_difference_error_rad_per_s": 7.869740371969276e-9,
+      "midpoint_count": 45,
+      "midpoint_exact_target_count": 0,
+      "midpoint_missed_target_count": 45,
+      "midpoint_other_status_count": 0,
+      "max_midpoint_scalar_target_adjustment_deg": 4.710954534213627,
+      "max_midpoint_scalar_target_adjustment_m": 0,
+      "max_midpoint_spherical_rotation_matrix_adjustment": 0.10744035695559975
+    }
+  },
+  "spherical_velocity_frame_control": {
+    "native_status": 1,
+    "frame_angular_velocity_resolution": "follower",
+    "joint_spherical_angular_velocity_resolution_verified": "follower",
+    "max_frame_vector_error_deg_per_s": 7.850462293418876e-17,
+    "simulation_executed": false,
+    "model_saved": false,
+    "candidate_promoted": false
+  },
+  "frame_control_completed_UTC": "2026-10-03T03:14:25.261848+00:00",
+  "simulation_executed": false,
+  "model_saved": false,
+  "candidate_promoted": false,
+  "moving_velocity_exact_targets_verified": false,
+  "complete_chart_midpoint_exact_targets_verified": false,
+  "returned_moving_positions_unchanged_verified": false,
+  "returned_velocity_derivative_of_accepted_continuous_curve_verified": false
+}

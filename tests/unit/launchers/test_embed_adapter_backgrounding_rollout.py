@@ -72,6 +72,7 @@ _LIST_TRACKING_ADAPTERS = [
 # Adapters whose ``cleanup`` is a no-op or drops a single widget ref.
 _SIMPLE_ADAPTERS = [
     ("src.tools.ball_flight_gui._embed_adapter", "BallFlightGuiAdapter"),
+    ("src.tools.character_builder._embed_adapter", "CharacterBuilderAdapter"),
     ("src.tools.bunker_shot_gui._embed_adapter", "BunkerShotGuiAdapter"),
     ("src.tools.golf_environment._embed_adapter", "GolfEnvironmentAdapter"),
     ("src.tools.golf_simulation_suite._embed_adapter", "GolfSimulationSuiteAdapter"),

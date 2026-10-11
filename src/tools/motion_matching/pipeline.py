@@ -65,9 +65,9 @@ try:
 except FileNotFoundError:
     CANDIDATE = FULL_BODY / "evidence/native_candidates/returned81_candidate.json"
 
-CAPTURES = ("driver", "iron")
+CAPTURES = ("driver", "iron", "owner")
 CLUBS = ("driver", "iron7")
-CLUB_FOR_CAPTURE = {"driver": "driver", "iron": "iron7"}
+CLUB_FOR_CAPTURE = {"driver": "driver", "iron": "iron7", "owner": "driver"}
 BACKENDS = ("mujoco", "drake", "pinocchio", "opensim", "pink")
 IK_BACKENDS = ("lm", "mujoco-minimize")
 TRACKING_BACKENDS = ("kkt", "mj-inverse")

@@ -40,8 +40,9 @@ def leaderboard_cli(args: argparse.Namespace) -> int:
         return 1
 
     output_path = Path(args.output).resolve()
+    capture = getattr(args, "capture", None)
     try:
-        generate_report(results_dir, output_path)
+        generate_report(results_dir, output_path, capture=capture)
         return 0
     except Exception as exc:  # noqa: BLE001
         _print_error(f"failed to generate report from {results_dir}: {exc}")
@@ -197,6 +198,12 @@ def _build_parser() -> argparse.ArgumentParser:
         type=str,
         default="LEADERBOARD.md",
         help="Output file path (default: LEADERBOARD.md)",
+    )
+    leaderboard_parser.add_argument(
+        "--capture",
+        type=str,
+        default=None,
+        help="Filter by capture name (default: all captures)",
     )
 
     ledger_parser = subparsers.add_parser(

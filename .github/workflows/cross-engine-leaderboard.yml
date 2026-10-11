@@ -40,6 +40,10 @@ concurrency:
 
 jobs:
   regenerate:
+    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository)
     name: regenerate cross-engine leaderboard
     runs-on: d-sorg-fleet-docker
     timeout-minutes: 15

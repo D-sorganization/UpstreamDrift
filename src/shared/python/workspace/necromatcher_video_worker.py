@@ -9,11 +9,18 @@ import sys
 from typing import Any
 
 import mujoco  # noqa: F401 -- native SDK loaded before workspace rendering helpers
+import numpy as np
 
+from src.shared.python.force_overlay.contracts import ForceTorqueFrame
+from src.shared.python.motion_matching.pipeline.plants.mujoco_plant import (
+    MujocoMatchingPlant,
+)
 from .artifact_handoff import compute_file_sha256
 from .necromatcher import NecromatcherLibrary
 from .necromatcher_fit_jobs import fit_execution_stamp
+from .necromatcher_native import NativeFitBinding
 from .necromatcher_video import export_fit_video
+from .necromatcher_video_forces import ForceLayer
 from .necromatcher_video_jobs import (
     validate_video_scope,
     video_caption_options,
@@ -22,6 +29,50 @@ from .necromatcher_video_jobs import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+class MujocoFitSampler:
+    """Sample MuJoCo wrenches for one fitted state (q, v, a) of a bound native model."""
+
+    def __init__(self, binding: NativeFitBinding) -> None:
+        plant = binding.plant
+        if not isinstance(plant, MujocoMatchingPlant):
+            raise ValueError("Force layer requires a MuJoCo native plant")
+        # Deferred: shared -> engines is an inverted dependency at module level.
+        from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.force_torque_source import (  # noqa: E501
+            MujocoForceTorqueSource,
+        )
+
+        model = plant.adapter.model
+        self._model = model
+        self._data = mujoco.MjData(model)
+        self._source = MujocoForceTorqueSource(model)
+        joints = [
+            mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, name)
+            for name in plant.coordinate_order
+        ]
+        if min(joints) < 0:
+            raise ValueError("Native model lacks a declared coordinate joint")
+        self._qpos = model.jnt_qposadr[joints]
+        self._dof = model.jnt_dofadr[joints]
+
+    def sample(
+        self, q: np.ndarray, v: np.ndarray, a: np.ndarray, time_s: float
+    ) -> ForceTorqueFrame:
+        """Apply the inverse-dynamics generalized force so MuJoCo replays ``a``."""
+        data = self._data
+        data.time = float(time_s)
+        data.qpos[self._qpos] = q
+        data.qvel[self._dof] = v
+        data.qacc[self._dof] = a
+        data.qfrc_applied[:] = 0.0
+        mujoco.mj_inverse(self._model, data)
+        data.qfrc_applied[:] = data.qfrc_inverse
+        return self._source.sample(data)
+
+
+def mujoco_force_sampler(binding: NativeFitBinding) -> MujocoFitSampler:
+    return MujocoFitSampler(binding)
 
 
 def execute(request_path: Path) -> dict[str, Any]:
@@ -69,6 +120,9 @@ def execute(request_path: Path) -> dict[str, Any]:
     caption = video_caption_options(request)
     if caption is not None:
         additional["caption_overlay"] = caption
+    if request.get("force_layer"):
+        additional["force_layer"] = ForceLayer(**request["force_layer"])
+        additional["force_sampler_factory"] = mujoco_force_sampler
     export_fit_video(
         library,
         request["source_fit_id"],

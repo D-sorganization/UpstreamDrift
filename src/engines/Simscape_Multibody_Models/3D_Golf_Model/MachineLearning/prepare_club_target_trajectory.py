@@ -11,15 +11,23 @@ import numpy as np
 import pandas as pd
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-DEFAULT_WORKBOOK = (
-    SCRIPT_DIR.parent
-    / "matlab"
-    / "src"
-    / "apps"
-    / "golf_gui"
-    / "Motion Capture Plotter"
-    / "Wiffle_ProV1_club_3D_data.xlsx"
-)
+try:
+    from src.motion_capture.capture_registry import (
+        CaptureRegistryError,
+        resolve_capture,
+    )
+
+    DEFAULT_WORKBOOK = resolve_capture("club-workbook-wiffle")
+except CaptureRegistryError:
+    DEFAULT_WORKBOOK = (
+        SCRIPT_DIR.parent
+        / "matlab"
+        / "src"
+        / "apps"
+        / "golf_gui"
+        / "Motion Capture Plotter"
+        / "Wiffle_ProV1_club_3D_data.xlsx"
+    )
 DEFAULT_OUTPUT = SCRIPT_DIR / "data" / "processed" / "TW_ProV1_club_target.csv"
 LOGGER = logging.getLogger(__name__)
 

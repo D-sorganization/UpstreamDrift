@@ -1,0 +1,145 @@
+{
+  "issue": "#11739",
+  "epic": "#11726",
+  "meta": {
+    "spec_sha256": "a376e6889b2b9d3b05a0b2f110f386c83f17f4ec0c94c9f4b9289a887ba4643e",
+    "candidate_sha256": "f81216e8eb6a847081215eb5323b1b4e72a129a31d992ac7175f31628a1bf1d4",
+    "stiffness_scale": 1.0,
+    "bushing": {
+      "translational_stiffness_n_m": [
+        1000000.0,
+        1000000.0,
+        1000000.0
+      ],
+      "rotational_stiffness_nm_rad": [
+        1600.0,
+        1600.0,
+        1600.0
+      ],
+      "translational_damping_ns_m": [
+        335.67841753678476,
+        335.67841753678476,
+        335.67841753678476
+      ],
+      "rotational_damping_nms_rad": [
+        0.4293250516799596,
+        8.056282020882835,
+        8.056282020882835
+      ],
+      "source": "engineering default (see module docstring); stiffness x1"
+    },
+    "accuracy": 0.001,
+    "t_end_s": 1.3,
+    "prefilter": "zero-phase 4th-order Butterworth, 25 Hz"
+  },
+  "summary": {
+    "samples": 469,
+    "peak_time_s": 1.29166667,
+    "peak_force_n": {
+      "L": 5465.726884311405,
+      "R": 6626.370635177333
+    },
+    "peak_net_force_n": 1829.70875377547,
+    "max_translation_deflection_mm": {
+      "L": 5.4922303783065605,
+      "R": 6.6739676393905
+    },
+    "max_rotation_deflection_deg": {
+      "L": 8.940063639003956,
+      "R": 8.940063639003956
+    },
+    "left_force_share": {
+      "bushing_at_peak": 0.45200817108052066,
+      "bushing_median_loaded": 0.45782129428239504,
+      "min_norm_at_peak": 0.4766561927114192,
+      "min_norm_median_loaded": 0.48004780624709553
+    },
+    "left_force_difference_vs_min_norm_n": {
+      "max": 7720.608548420856,
+      "rms_loaded": 4389.107695006332
+    },
+    "peak_hand_power_w": {
+      "L": 94960.60682100685,
+      "R": 48774.470964043896
+    }
+  },
+  "static_hold": {
+    "club_weight_n": 3.0694814499999996,
+    "sum_hand_force_up_n": 3.069344939381752,
+    "relative_error": 4.4473511396395106e-05,
+    "left_force_n": [
+      2.507877880493787,
+      4.301965772301925,
+      -9.360305421811479
+    ],
+    "right_force_n": [
+      -2.508209371083577,
+      -4.301636492688729,
+      12.42965036119323
+    ]
+  },
+  "sensitivity": {
+    "0.1": {
+      "samples": 469,
+      "peak_time_s": 1.29444444,
+      "peak_force_n": {
+        "L": 1440.904308843349,
+        "R": 1814.1569662231118
+      },
+      "peak_net_force_n": 1074.192102669911,
+      "max_translation_deflection_mm": {
+        "L": 14.362797645285452,
+        "R": 18.110007459062516
+      },
+      "max_rotation_deflection_deg": {
+        "L": 30.27423376099006,
+        "R": 30.27423376099006
+      },
+      "left_force_share": {
+        "bushing_at_peak": 0.440910046796095,
+        "bushing_median_loaded": 0.445522904228699,
+        "min_norm_at_peak": 0.48117376364977493,
+        "min_norm_median_loaded": 0.479083368674813
+      },
+      "left_force_difference_vs_min_norm_n": {
+        "max": 2431.212169173293,
+        "rms_loaded": 1415.8054992920174
+      },
+      "peak_hand_power_w": {
+        "L": 13009.3231109856,
+        "R": 17233.64103049058
+      }
+    },
+    "10": {
+      "samples": 469,
+      "peak_time_s": 1.3,
+      "peak_force_n": {
+        "L": 4450.038259335367,
+        "R": 4928.36174569417
+      },
+      "peak_net_force_n": 1237.2200342195497,
+      "max_translation_deflection_mm": {
+        "L": 0.44593888713472724,
+        "R": 0.4872718408906644
+      },
+      "max_rotation_deflection_deg": {
+        "L": 0.6624663568304111,
+        "R": 0.6624663568304111
+      },
+      "left_force_share": {
+        "bushing_at_peak": 0.47449866255959,
+        "bushing_median_loaded": 0.46261656726445677,
+        "min_norm_at_peak": 0.4873261380080428,
+        "min_norm_median_loaded": 0.4819178576006559
+      },
+      "left_force_difference_vs_min_norm_n": {
+        "max": 4980.568063218703,
+        "rms_loaded": 2893.0581377766234
+      },
+      "peak_hand_power_w": {
+        "L": 44404.62864473573,
+        "R": 38564.72143160769
+      }
+    }
+  }
+}

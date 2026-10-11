@@ -11,7 +11,7 @@ conversion and `simulation_backends.mjcf.params_to_mjcf` render that same model.
 Read units on each parameter field: lengths and masses use SI, while explicit
 angle fields such as plane inclination retain their declared degrees.
 Use the shared `SimulationBackend` protocol and `Trace`/`BatchTrace` outputs.
-`DynamicsProvider` and `BatchedBackend` are optional capabilities and require
+`EquationsOfMotionProvider` and `BatchedBackend` are optional capabilities and require
 their own capability checks. Do not infer them from a backend name.
 
 ## Lifecycle and Failures

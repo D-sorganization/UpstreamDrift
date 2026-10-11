@@ -1,0 +1,21 @@
+<mujoco model="floating_muscle">
+  <compiler angle="radian"/>
+  <option timestep="0.001" gravity="0 0 0" integrator="Euler"/>
+  <worldbody>
+    <body name="root">
+      <freejoint name="floating"/>
+      <geom name="root_mass" type="sphere" size="0.08" mass="2"
+            contype="0" conaffinity="0"/>
+      <body name="arm" pos="0 0 0.2">
+        <joint name="hinge" type="hinge" axis="0 1 0" range="-1 1"
+               limited="true" damping="0.01"/>
+        <geom type="capsule" fromto="0 0 0 0 0 0.4" size="0.04" mass="0.5"
+              contype="0" conaffinity="0"/>
+      </body>
+    </body>
+  </worldbody>
+  <actuator>
+    <muscle name="drive" joint="hinge" gear="0.2" lengthrange="0.1 1.0"
+            force="100" scale="1" ctrlrange="0 1" ctrllimited="true"/>
+  </actuator>
+</mujoco>

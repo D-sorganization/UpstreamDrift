@@ -46,6 +46,10 @@ concurrency:
 
 jobs:
   check-leaderboard:
+    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository)
     name: check LEADERBOARD.md is committed
     runs-on: d-sorg-fleet-docker
     timeout-minutes: 5

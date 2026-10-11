@@ -9,7 +9,7 @@ import pytest
 from src.shared.python.motion_matching.force_torque import (
     ContactReaction,
     SpatialWrench,
-    compute_center_of_pressure,
+    wrench_center_of_pressure,
     transform_wrench,
 )
 
@@ -129,7 +129,7 @@ def test_center_of_pressure_defined_when_fz_above_threshold() -> None:
         force_n=(10.0, 5.0, 500.0),
         torque_nm=(25.0, -50.0, 2.0),
     )
-    cop = compute_center_of_pressure(wrench, f_threshold_n=5.0)
+    cop = wrench_center_of_pressure(wrench, f_threshold_n=5.0)
     assert cop is not None
     assert math.isclose(cop[0], 0.10, abs_tol=1e-6)
     assert math.isclose(cop[1], 0.05, abs_tol=1e-6)
@@ -144,7 +144,7 @@ def test_center_of_pressure_undefined_when_fz_below_threshold() -> None:
         force_n=(1.0, 1.0, 2.5),
         torque_nm=(1.0, 1.0, 0.0),
     )
-    assert compute_center_of_pressure(wrench_low, f_threshold_n=5.0) is None
+    assert wrench_center_of_pressure(wrench_low, f_threshold_n=5.0) is None
 
     # Case 2: Zero normal force
     wrench_zero = SpatialWrench(
@@ -153,7 +153,7 @@ def test_center_of_pressure_undefined_when_fz_below_threshold() -> None:
         force_n=(0.0, 0.0, 0.0),
         torque_nm=(0.0, 0.0, 0.0),
     )
-    assert compute_center_of_pressure(wrench_zero, f_threshold_n=5.0) is None
+    assert wrench_center_of_pressure(wrench_zero, f_threshold_n=5.0) is None
 
     # Case 3: Tension / negative normal force
     wrench_neg = SpatialWrench(
@@ -162,7 +162,7 @@ def test_center_of_pressure_undefined_when_fz_below_threshold() -> None:
         force_n=(0.0, 0.0, -50.0),
         torque_nm=(0.0, 0.0, 0.0),
     )
-    assert compute_center_of_pressure(wrench_neg, f_threshold_n=5.0) is None
+    assert wrench_center_of_pressure(wrench_neg, f_threshold_n=5.0) is None
 
 
 def test_contact_reaction_friction_utilization() -> None:

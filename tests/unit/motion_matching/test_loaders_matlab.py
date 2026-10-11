@@ -42,8 +42,16 @@ def _mat_path(name: str) -> Path | None:
 
 
 def _excel_path() -> Path | None:
-    p = repo_root() / _EXCEL_RELATIVE
-    return p if p.is_file() else None
+    try:
+        from src.motion_capture.capture_registry import (
+            CaptureRegistryError,
+            resolve_capture,
+        )
+
+        return resolve_capture("club-workbook-wiffle")
+    except CaptureRegistryError:
+        p = repo_root() / _EXCEL_RELATIVE
+        return p if p.is_file() else None
 
 
 def _clubhead_speed_at(target: ClubTarget) -> float:

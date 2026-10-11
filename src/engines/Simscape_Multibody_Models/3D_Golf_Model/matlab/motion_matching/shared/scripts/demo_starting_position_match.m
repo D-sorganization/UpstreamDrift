@@ -42,8 +42,12 @@ function out = demo_starting_position_match(varargin)
     addpath(genpath(fullfile(mat_root, 'src')));
 
     if isempty(char(args.xlsx))
-        args.xlsx = fullfile(mat_root, 'src', 'apps', 'golf_gui', ...
-            'Motion Capture Plotter', 'Wiffle_ProV1_club_3D_data.xlsx');
+        try
+            args.xlsx = resolve_capture("club-workbook-wiffle");
+        catch
+            args.xlsx = fullfile(mat_root, 'src', 'apps', 'golf_gui', ...
+                'Motion Capture Plotter', 'Wiffle_ProV1_club_3D_data.xlsx');
+        end
     end
 
     timestamp = datestr(datetime('now'), 'yyyymmdd_HHMMSS'); %#ok<DATST>

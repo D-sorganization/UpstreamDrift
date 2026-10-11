@@ -530,6 +530,9 @@ class KineticsRenderer(BaseRenderer):
 
         joint_edges = np.arange(heatmap_data.shape[0] + 1)
 
+        # Generic signed quantity convention (torque/power): RdBu_r uses red = positive,
+        # blue = negative. This is distinct from axial loads which use ColormapId.TENSION_COMPRESSION
+        # (blue = tension positive, red = compression negative; ADR-0052, #11289).
         im = ax.pcolormesh(
             time_edges,
             joint_edges,

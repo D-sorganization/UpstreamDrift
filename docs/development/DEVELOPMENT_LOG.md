@@ -17,31 +17,298 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#11596 · Commit Recovered Crocoddyl G1 Warm-Start IK and 0.60 s FDDP Stage Inputs Beside the Rk45, Rtol6 and B100 Receipts, Plus the W030r Chain-Root Candidate, With Sha256 Provenance
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #11596
+- **Branch:** chore/crocoddyl-warm-start-evidence-11596
+- **PR:** #11598
+- **Paths:** see #11598
+- **Started:** 2026-10-07
+- **Last verified:** 2026-10-07 (`d4a763d8`; collated from changes/11596-commit-recovered-crocoddyl-g1-warm-start.md)
+- **Summary:** Commit recovered Crocoddyl G1 warm-start IK and 0.60 s FDDP stage inputs beside the rk45, rtol6 and b100 receipts, plus the w030r chain-root candidate, with sha256 provenance
+- **Next step:** Merge PR #11598 once CI is green; then re-run the Crocoddyl G1 FDDP stage from the committed warm-start inputs.
+
+### DL-#11553 · Fix ZTCF/Drift Sign in Engine Contract Docs and Unify ZVCF on Simulation_Backends.Ztcf_Zvcf (Counterfactual Delegates)
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #11553
+- **Branch:** fix/11553-zvcf-sign-and-definition
+- **PR:** #11638, #11687
+- **Paths:** see #11638
+- **Started:** 2026-10-07
+- **Last verified:** 2026-10-07 (`71cc60b2`; collated from changes/11553-rename-the-two-unrelated-dynamicsprovide.md)
+- **Summary:** Fix ZTCF/drift sign in engine contract docs and unify ZVCF on simulation_backends.ztcf_zvcf (counterfactual delegates)
+- **Next step:** Reconcile the duplicate DynamicsProvider protocols (dime_contracts vs simulation_backends.protocol) in a follow-up API-change PR
+
+### DL-#11614 · Same-Input Parity LaTeX Research Reference (P-1 Pointwise Result)
+
+- **State:** in_progress
+- **Owner:** unassigned
+- **Issue:** #11614
+- **Branch:** docs/sip-9-parity-reference-11614
+- **PR:** #11616, #11625
+- **Paths:** see #11616
+- **Started:** 2026-10-07
+- **Last verified:** 2026-10-07 (`cf3e475f`; collated from changes/11614-document-full-swing-five-engine-same-inp.md)
+- **Summary:** Same-input parity LaTeX research reference (P-1 pointwise result)
+- **Next step:** Extend with P-2..P-5 trajectory and closed-loop results
+
+### DL-#11589 · Retire Stale Shared-Code Header Test
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #11589
+- **Branch:** chore/retire-unflagged-header-test-11589
+- **PR:** #11590
+- **Paths:** see #11590
+- **Started:** 2026-10-06
+- **Last verified:** 2026-10-06 (`a4031aa0`; collated from changes/11589-chore-tests-retire-stale-test-no-unflagg.md)
+- **Summary:** chore(tests): retire stale test_no_unflagged_shared_code header test and its unit-gate quarantine entry
+- **Next step:** Merge the PR; child-copy enforcement remains in test_tools_child_copy_contract.py.
+
+### DL-#11532 · MOSAIC Model-Aware Multi-Trial Matching Kernels, Methods Reference and DIME (#11421) Audit
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #11532
+- **Branch:** feat/mosaic-model-aware-matching
+- **PR:** #11555
+- **Paths:** see #11555
+- **Started:** 2026-10-05
+- **Last verified:** 2026-10-05 (`90df1e03`; collated from changes/11532-mosaic-model-aware-multi-trial-matching.md)
+- **Summary:** MOSAIC model-aware multi-trial matching kernels, methods reference and DIME (#11421) audit
+- **Next step:** Merge PR; start MOSAIC-01/02/13 (benchmark freeze, Pinocchio regressor provider, DIME defect remediation).
+
+### DL-#11513 · Point Contributors at Change Fragments in Post_Spec_Reminder
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #11513
+- **Branch:** fix/11513-post-spec-reminder-fragments
+- **PR:** #11519
+- **Paths:** see #11519
+- **Started:** 2026-10-05
+- **Last verified:** 2026-10-05 (`739df607`; collated from changes/11513-point-contributors-at-change-fragments-i.md)
+- **Summary:** Point contributors at change fragments in post_spec_reminder
+- **Next step:** Merge the PR.
+
+### DL-#11190 · Disable FastRestart for Solve_Starting_Pose and Resolve Model Path in Run_Leaderboard
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #11190
+- **Branch:** fix/11190-motion-matching-fast-restart
+- **PR:** #11518
+- **Paths:** see #11518
+- **Started:** 2026-10-05
+- **Last verified:** 2026-10-05 (`d816c998`; collated from changes/11190-disable-fastrestart-for-solve-starting-p.md)
+- **Summary:** Disable FastRestart for solve_starting_pose and resolve model path in run_leaderboard
+- **Next step:** Merge the PR.
+
+### DL-#9507 · Cone-Mode Sparse Checkout in Sidekick Wheel Smoke Job
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #9507
+- **Branch:** `claude/issue-9507`
+- **Paths:** `.github/workflows/package-standalone-sidekick.yml`, `tests/unit/packaging/test_standalone_sidekick_workflows.py`
+- **Started:** 2026-10-04
+- **Last verified:** 2026-10-05 (`43d63ce9`; collated from changes/9507-fail-fast-with-an-explicit-incomplete-ch.md)
+- **Summary:** `smoke-test-wheel` used non-cone sparse checkout, which leaves `core.sparseCheckout=true` in `.git/config` and poisons later jobs on reused self-hosted runners. Switched to cone mode on `tests/fixtures` and added a guard test over all workflows.
+- **Next step:** Merge the PR and confirm no runner reports tracked files missing after a Sidekick packaging run.
+- **PR:** #11522
+
+### DL-#10950 - Exploratory GS3DX Simscape Model: Quaternion Joints and Full-Body Under the 1,000-Block Budget
+
+- **State:** in_progress
+- **Owner:** codex (Gemini 3.8 CLI delegates)
+- **Issue:** #10950 (children #10951–#10959, #10979, #10985, #10986, #11011)
+- **PR:** #11256 (draft); original #11179 remains separate.
+- **Branch:** `feat/simscape-matching-review-main-20261002` (review continuation of `feat/simscape-gs3dx-exploratory`)
+- **Paths:** `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/`, `docs/research/simscape_matching_reference/`, `AGENTS.md`
+- **Started:** 2026-09-26
+- **Last verified:** 2026-10-03: production observation-export checkpoint passes 39 native contracts plus actual two-frame owner cache identity/reuse integration. Private rotational continuity helper passes 16 RED/GREEN tests; exact inactive whole-output parity passes on eight owner and 53 tour frames. Sparse/dense experiments recheck all 305 native poses and exit naturally; marker/step tradeoffs remain adverse and unpromoted, including owner root motion and tour wrist/root increments. Six owner-session originals and archive are hash-verified on a local machine, with deterministic supplemental acquisition provenance. Source-only LaTeX review reconciles current versus historical candidates, source-mask tensor indexing and source-verified balance units. See continuity_experiment_checkpoint_20261003.json. Normal current-main integration includes 4eb3051c3; optional-engine verification records five MuJoCo passes/four missing-mj_copyData failures and two OpenSim skips on this host. MATLAB sources are unchanged; protected CI/review and latest PDF qualification remain open.
+- **Summary:** Agent-editable GS3DX clones, LaTeX reference and documentation policy, truthful serialized execution, Human ellipsoid geometry adapter, joint-role mapping and calibrated full foot orientation. A is the tour reference; O is the owner capture. Marker residuals, offsets, orientation and provenance remain independently visible; videos are IK, not qualified forward dynamics.
+- **Next step:** Qualify full-rate whole-capture A/O paths with proper native derivatives, seed transitions, gap/branch diagnostics and independently frozen marker/anatomical calibration; retain failed trials without promotion. Bind accepted motion to physical stance/contact, recover all 35 actuator torques including neck and verify fresh independent full-swing replay. Complete #11268 catalog/backend/pairing gates through shared authorities; local acquisition and visible placement review are done, while #11269 additional acceptance remains open. Preserve peer #11351 work and existing Desktop media. Verify protected CI and built-in LaTeX compilation before delivery.
+
+Root-availability review (2026-10-03 UTC): saved-array analysis reproduces the legacy owner-window root-step maxima and associates the largest approximately 40 mm increment with restoration of seven derived lower-body targets. Waist-marker gaps can propagate through the pelvis-axis joint-centre estimator despite visible raw leg markers. This is association, not causation. The current refined preview uses a different head-axis, back-marker, spine/scapula and gap-weight objective; the legacy-window maximum does not establish its root error. The private translation-option TDD completed naturally with eight RED failures and eight GREEN passes, no incomplete tests and no model/simulation. The aligned refined port is now natively evaluated but remains private and unpromoted. See root_availability_checkpoint_20261003.json and the maintained LaTeX calculations. Full moving references, contact, all 35 actuators, independent replay and PDF qualification remain open.
+
+Original-fit regularity review (2026-10-03 UTC): the separate LaTeX reference and `tangent_c2_checkpoint_20261003.json` contain the equations, source hashes, actual receipts and rejected experiments. Full-clock rate fitting has an independent 2,042-pose audit; adding low/moderate acceleration regularization produces another 2,042 poses. The acceleration fitter saves its results but hangs at shutdown (watchdog 125); a fresh independent native process rechecks all new poses and exits naturally with process/wrapper 0 at 17:47:42 UTC. Stronger smoothing reduces the owner's maximum wrist step from 13.24 to 9.53 degrees, but increases root motion from 6.54 to 9.39 mm and worsens marker error. The tour also trades better shoulder continuity for worse wrist motion. No new best video is promoted. These sampled position checks and finite-window derivative proxies do not qualify continuous motion, contact or independent dynamics.
+
+The current 14-position-target objective includes the clubhead, not the grip centroid. Raw club triads provide an orientation observation with address fixture alignment, while changing relative head/grip orientation prevents an unsupported rigid observation assumption. Ten native input-contract tests verify scalar validation and mask isolation without model loading. Completed club-orientation window evaluation tests baseline, zero, and two positive weights across 536 window poses (four trials each, 75 tour poses and 59 owner poses per trial), establishing exact whole-output parity at zero weight. The original window fitter saves results and hangs at shutdown (watchdog 125); a fresh independent native audit rechecks all 536 new poses and exits naturally with process/wrapper 0 at 18:18:38 UTC. Mean club orientation error improves from 10.30 to 5.92 degrees for Tour (capture_A) and 19.20 to 10.73 degrees for Owner (capture_O), while position target error shifts from 27.242 to 27.248 mm (Tour) and 37.989 to 38.014 mm (Owner), with boundary transition tradeoffs from sparse dt 1/30 s into dense steps.
+
+A subsequent full source-clock club comparison evaluates 3,063 trial poses across both captures (three trials each, with 654 tour poses at 360 Hz and 367 owner poses at 240 Hz per trial), producing 2,042 new poses from positive weights (0.025 and 0.075) and retaining 1,021 rate-control poses without refitting. Observed club triads are available at 618 tour and 345 owner samples; missing frames remain excluded rather than counted as agreement. The original fitting process saved all poses before hanging at shutdown (receipt 125 at 19:13:08 UTC); a separate fresh native R2025b audit verified all 3,063 saved poses, club rotation matrices, observation masks, metrics, and source hashes with maximum physical joint residual <= 9.93e-16, exiting naturally with process/wrapper 0 at 19:15:18 UTC. For private video previews at 30 fps (55 tour display frames, 46 owner display frames), owner weight 0.025 and tour weight 0.075 are selected as a documented tradeoff: tour mean club error improves from 11.859 to 5.476 degrees with derived 14-target position RMS shifting from 16.887 to 16.944 mm and near-unchanged wrist and root steps, while owner weight 0.025 improves mean club error from 21.143 to 19.287 degrees, reduces derived position RMS from 20.800 to 20.762 mm, and reduces maximum wrist step from 13.240 to 13.060 degrees as well as shoulder geodesic and root displacement. The stronger owner weight 0.075 worsens maximum wrist step to 17.536 degrees (shoulder step to 12.534 degrees, root displacement to 7.006 mm) and is not selected for default preview.
+
+Eight Human ellipsoid H.264 MP4 previews are delivered on both Desktops in Simscape_Matches_20261003_Club_Refined_1080p, with a verified ZIP. Native render-to-pose parity, independent full decoding of 404 frames, 1080p/30fps/PTS checks, hashes and sampled visual review pass; the render process exits naturally with code 0 at 19:32:57 UTC. These previews remain inverse-kinematic (IK) visualizations, not forward dynamics (FD). Native actuator discovery on the nominal 80 kg model identifies 25 joint blocks (19 actuated spanning 35 active actuator axes, 6 passive/unactuated blocks) and 99 logged leaf series in an independent 0.02 s pilot with verified neck torque (+/-0.25 N*m) exiting naturally with code 0 at 18:48:51 UTC, but leaves expose state and acceleration quantities rather than measured actuator torque. Native peer and input-graph audits across 267 connection ports and 27 driving converters document native input parameter units in aggregate: 21 scalar converters with Unit 1 (7 revolute axes, 14 universal axes across 7 body joints), 2 neck converters with N*m (adapted torque drive), and 4 spherical vector converters with N\*m (FollowerFrame 3D torque vectors across 4 spherical joints). Input Unit 1 applies no scaling and does not by itself imply a torque-unit error; physical output units are inferred from the destination. This is a parameter inventory, not physical torque measurement. Moving swing, contact, and feedback-off replay across all 35 axes remain outstanding without speculative all-35 measurement or anatomical truth.
+
+The controller XYZ chart remains a separate concern: the owner's left-shoulder peak condition number rises from 21.2 to 54.2 after rate smoothing. Native joint inventory identifies 33 input-torque components plus two prescribed neck axes; only the bounded two-neck pilot has measured primitive-actuator evidence. The complete 35-axis moving/contact/open-loop goal remains open. Six owner session videos are locally downloaded and decoded; exact capture-system trial pairing and anatomical calibration remain unresolved. Existing Human ellipsoid Desktop previews remain kinematic fits. Canonical manual governance still reports two QMD sources, zero registered calculations and an owned inventory blocker. The existing LaTeX editor continues to report its standard-directories platform error; no compiled-PDF claim is made.
+
+Closed-arm regularity and foot review (2026-10-03 UTC): six additional assembled support poses retain all 101 original anchors and 11 prior projections. Native dense acceptance improves to A 1,295/1,297 and O 721/721; remaining two tour failures are midpoints. The returned velocities nevertheless reach right-wrist peaks of 113,025 and 169,742 degrees/s, and the owner has a 99.72-degree wrapped scalar step and 115.22-degree shoulder SO(3) step across consecutive accepted samples. Both curves remain rejected for moving-reference/dynamics promotion; pointwise compatibility is insufficient. A fresh native styled-foot audit shows forefoot-minus-rearfoot direction aligned with sole forward axis (dot above 0.9937), with small address yaw errors. Later right-foot horizontal reversals occur when projection lengths are small; their 3D marker-to-visual angles remain about 24 degrees for tour and 11 degrees for owner despite near-180-degree projected yaw. Preserve the documented ankle-marker-height/flat-sole calibration assumptions; no blind shoe flip is justified. Initial World-Frame uniqueness probe exit-one is retained alongside corrected natural-zero audits. See tangent_c2_checkpoint_20261003.json and the maintained LaTeX. Alternate coordinate-target allocation is a private unqualified hypothesis; no physical model/actuator authority change is claimed.
+
+Denser C2/fit review (2026-10-03 UTC): evaluating the SAME candidate curves at 2,018 source and midpoint samples reproduces all 1,010 source samples exactly, but native acceptance is A 1,294/1,297 and O 718/721: three new midpoint assembly failures per capture. Original source samples and all 101 anchors still pass; full-path acceptance is rejected. The new failure diagnostic finds six nearby assembled states with unchanged root translation and all 11 controls passing. A separate native dense fit audit exits naturally zero with original anchor point/RMS parity: mean/peak derived target RMS is 16.98/38.02 mm for A and 21.06/59.60 mm for O; mean/peak directly measured three-back-marker RMS is 26.77/54.66 mm and 38.41/88.12 mm respectively. Valid derived target coverage is 7..14 per frame, with gaps excluded. These mean per-frame RMS scores use different sampling from sparse previews and are not direct model/golfer rankings. No curve or video is promoted to full-path or forward-dynamics acceptance. See tangent_c2_checkpoint_20261003.json and the maintained LaTeX.
+
+Tangent/C2 review (2026-10-03 UTC): fresh native checking passes all 48 saved q/v states; original timeout 124 and tour shutdown 125 remain recorded. Private C2 TDD passes 19 tests. Closed-arm guess correction eliminates all 11 owner anchor mismatches while preserving independent targets bitwise; 6 tour and 5 owner assembly failures remain. Nearby assembled states pass fresh position gates, but a same-target closest-seed retry recovers none of the 11 failures (six controls pass). A controlled projected C2 curve adds eleven upper-limb support poses, preserves original 55/46 fitted anchors, root motion, lower body and unaffected curves, and naturally exits zero with ALL 649 tour and 361 owner source-rate q/v/fresh-state checks accepted. Maximum scalar/spherical target deformation is 0.112/0.173 degrees for A and 0.338/0.343 degrees for O; dense raw-marker RMS is not evaluated. Three axis-contract tests pass after real RED/GREEN correction. The candidate remains unpromoted pending between-state closure, acceleration, full raw-clock coverage, all 35 input torques including neck, contact and independent full-swing forward replay. Parent verifies 104 Desktop video hashes and 5,252 decoded 1080p frames; comparison topologies differ and Human ellipsoids remain the new matching standard. See tangent_c2_checkpoint_20261003.json and the maintained LaTeX. PDF compilation remains unavailable due to missing platform standard directories.
+
+Aligned refined-objective review (2026-10-03 UTC): actual sparse refined previews have zero consecutive source-frame transitions; largest root increments are 17.827 mm (A) and 30.166 mm (O) over 1/30 s. Address-prefix controlled eight-pose windows preserve the spine prior. Private parameter TDD has eight RED failures/eight GREEN passes. The original 344-pose fit wrapper returned 125 after completion; a fresh independent saved-pose recheck exited naturally with zero and verified all 344 poses plus exact whole-output zero parity. Small root improvements accompany worse wrist increments; no candidate is promoted. Native counts distinguish 48 position variables, 43 velocity variables, 37 floating IK parameters and 35 requested control axes. See aligned_refined_checkpoint_20261003.json and the maintained LaTeX. Full continuous references, contact, all 35 input torques including the neck, independent replay and PDF qualification remain open.
+
+### DL-#11161 — Capture Registry, Capture Export and Swing Comparison (Owner Swing vs Tour Average)
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #11161
+- **Branch:** `feat/capture-registry-11161`
+- **Paths:** `data/capture_registry.json`, `src/motion_capture/capture_registry.py`, `src/motion_capture/capture_export.py`, `src/shared/python/swing_comparison/`, `src/shared/python/motion_matching/leaderboard.py`, `src/shared/python/motion_matching/pipeline/`
+- **Started:** 2026-09-29
+- **Last verified:** 2026-10-03 — Part 1 merged (#11172); Part 2 (#11166, PR #11174): owner capture runs through the MuJoCo pipeline (IK 0.083 m); owner dynamics 0.567 m is a strict xfail; 95 pipeline unit tests pass.
+- **Summary:** Epic #11161: neutral-id capture registry with SHA-256 verification and private-data resolution, pure capture-export functions, engine-independent swing events and metrics, and Capture-O pipeline execution through MuJoCo. Engines (#11165-#11169) and the cross-engine comparison (#11170) follow.
+
+### DL-#11421 · Dynamics-Informed Mocap Matching With ZTCF Prediction and Continuous Forward Replay
+
+- **State:** in_progress
+- **Owner:** antigravity
+- **Issue:** #11421 (children #11422–#11430, #11434, #11435, #11437 closed; #11436 active)
+- **PR:** #11436
+- **Branch:** `feat/dime-11436-learned-initializers`
+- **Paths:** `src/shared/python/estimation/dime_learned_initializers.py`, `src/shared/python/estimation/__init__.py`, `tests/unit/estimation/test_dime_learned_initializers.py`
+- **Started:** 2026-10-04
+- **Last verified:** 2026-10-04: DIME-15 reusable matching initializers trained, qualified, and verified across 11 behavioral tests in test_dime_learned_initializers.py (RED/GREEN). Implements DimeLearnedInitializerModelCard recording architecture, model hash, training dataset hash, held-out splits, OOD thresholds, and truthful fail-closed limitations when learning curves are inconclusive; validates dataset splits against player overlap and unbuffered adjacent-window leakage (DataLeakageError); verifies model identity and DoF consistency (StaleModelIdentityError); verifies candidate finiteness, convergence, and residual tolerances (InvalidSyntheticCandidateError); verifies absolute actuator limits and rate-of-torque limits (UnrealisticTorqueError); implements calibrated OOD detection with fail-closed OutOfDistributionError; implements AdaptiveMatchingInitializer falling back deterministically to ClassicalPhysicalInitializer under OOD queries; enforces independent NativeCandidateGate verification without neural confidence shortcuts; executes systematic ablation study comparing full model, ablated drift, ablated ROM, and classical baselines; computes ComputeCostReport with truthful offline generation, training compute, and break-even amortization. All 295 estimation unit tests pass.
+- **Summary:** Epic #11421: ZTCF drift prediction, kinematics-informed mocap matching, calibrated uncertainty weighting, uninterrupted forward simulation replay without frame-to-frame resetting.
+- **Next step:** Create PR, verify CI Standard, squash-merge into origin/main.
+
+### DL-#11400 · OpenCap to OpenSim Integration
+
+- **State:** in_progress
+- **Owner:** antigravity
+- **Issue:** #11400; child #11408 (OpenCap: golf accuracy qualification against a marker reference; follows #11401–#11403, #11406, #11407, #11409, #11405)
+- **PR:** #11451
+- **Branch:** `docs/opencap-golf-accuracy-deferred-11408`
+- **Paths:** `docs/development/planning/catalog.json`, `docs/development/planning/DV-11408.md`, `docs/development/planning/source-11408.json`
+- **Started:** 2026-10-03
+- **Last verified:** 2026-10-03 at SELF — Child 7 (#11408): recorded OpenCap golf accuracy qualification against a marker reference in deferred-validation catalog (DV-11408) per fleet rules (physical simultaneous capture unavailable; synthetic numbers prohibited as acceptance). catalog.json, DV-11408.md, and source-11408.json verified via shared_scripts.deferred_validation and test_deferred_catalog_hook.
+- **Summary:** OpenCap to OpenSim integration complete across sidecar launcher, session import, marker augmentation, UI, and hosted download; golf accuracy qualification against physical marker reference recorded in deferred-validation catalog (DV-11408).
+- **Next step:** Merge PR, publish DV-11408 on main, close issue #11408, and close epic #11400.
+
+### DL-#11329 - Scapula and Quiet Torso Matching With Neutral 1080P Previews
+
+- **State:** in_review
+- **Owner:** codex (Gemini 3.8 Flash CLI reviews)
+- **Issue:** #11329
+- **PR:** #11351; depends on draft #11256 and shared-capture #11172.
+- **Branch:** `feat/simscape-scapula-protraction-20261002`
+- **Paths:** `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_whole_body_ik.m`, `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_spine_bounds.m`, `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_render.m`, `docs/research/simscape_matching_reference/simscape_matching_reference.tex`
+- **Started:** 2026-10-02
+- **Last verified:** 2026-10-03: 95 native R2025b contracts/regression tests pass with no failures/skips and natural exit 0. Final independent native replay checks all 1,313 sampled poses across 26 complete trajectories; final replay/export batches exit naturally with 0. All 104 neutral 1920x1080/30-fps videos across 13 moving-scapula models are delivered on Desktop, with both views and marker/clean modes. All 5,252 frames decoded; Desktop hashes and ZIP CRC/member hashes verified. Fixed-foot FullBody public-source fits reduce mean target RMS from 532/377 to 27/34 mm while preserving original offsets/model bytes; back RMS 52/61 mm remains a limitation. Final complete Human legacy/default parity passes. Source head bbe21592b6 preserves the qualified native tree after accepted-main sync; current documentation head requires CI verification. Built-in LaTeX compilation remains unavailable (platform directories missing).
+- **Summary:** Scapula address/backswing bands, direct measured back-marker fitting, native spine excursion bands through top with soft continuation afterwards, two-coordinate-neck head-axis guide, complete measured-marker overlays, cyan back/waist highlights, neutral Model Swing labels and undistorted native 1080P pixels. Full 3D head yaw remains imperfect and is separately reported. Fixed dimensions/position offsets and private source identities are preserved. Independent dynamics remains outside this scope and unqualified.
+- **Next step:** Verify current documentation-head CI and await scientific acceptance of parent drafts #11256/#11172 before protected source integration. Desktop matching/media deliverables are complete. Do not merge unqualified parent work through dependent draft #11351; no protected-main integration is claimed.
+
+### DL-#10950 - Exploratory GS3DX Simscape Model: Quaternion Joints and Full-Body Under the 1,000-Block Budget
+
+- **State:** in_progress
+- **Owner:** codex (Gemini 3.8 CLI delegates)
+- **Issue:** #10950 (children #10951–#10959, #10979, #10985, #10986, #11011)
+- **PR:** #11256 (draft); original #11179 remains separate.
+- **Branch:** `feat/simscape-matching-review-main-20261002` (review continuation of `feat/simscape-gs3dx-exploratory`)
+- **Paths:** `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/`, `docs/research/simscape_matching_reference/`, `AGENTS.md`
+- **Started:** 2026-09-26
+- **Last verified:** 2026-10-02: sampled leg feedforward passed 16 native seam/regression checks. Saved-state audit identified early transient dominance. Controlled 0–50 ms tour passed posture but rejected peak 2.000907 BW. Separate 20–50 ms ramp runs passed all five original one-second hold gates: tour 3.176 mm / 0.836 deg at 19:54:39Z; owner 2.321 mm / 0.699 deg at 20:01:28Z. Model unchanged. Both retain feedback/prescribed neck; full independent dynamics remains unqualified. Prior b21836863 checks passed; new changes need protected checks. Built-in compiler infrastructure remains unavailable.
+- **Summary:** Agent-editable GS3DX clones, LaTeX reference and documentation policy, truthful serialized execution, Human ellipsoid geometry adapter, joint-role mapping and calibrated full foot orientation. A is the tour reference; O is the owner capture. Marker residuals, offsets, orientation and provenance remain independently visible; videos are IK, not qualified forward dynamics.
+- **Next step:** Verify selected head-tracked cache timing, named IDs and units, then integrate moving references with explicit accepted-stance corrections and existing prospective gate authorities. Continue all-actuator/neck control recovery, full-swing tracking and independent replay. Six public-source served videos are privately acquired with rechecked hashes, while original camera provenance remains unresolved. Decode/grade them and freeze pairing/camera/timing/held-out protocols before comparison; selected named mapping passed all 101 frames without loading a model.
+
+### DL-#11313 · Necromatcher Video Export Force/Torque Layer
+
+- **State:** in_review
+- **Owner:** claude (Sonnet 5 CLI delegate)
+- **Issue:** #11313; parent #11285
+- **PR:** draft from `claude/issue-11313` (number on the PR; `Fixes #11313`)
+- **Branch:** `claude/issue-11313`
+- **Paths:** `src/shared/python/workspace/necromatcher_video_forces.py`, `src/shared/python/workspace/necromatcher_video.py`, `src/shared/python/workspace/necromatcher_video_worker.py`, `src/shared/python/workspace/necromatcher_video_jobs.py`, `src/api/routes/necromatcher.py`, `src/tools/necromatcher/video_dialog.py`, `ui/src/components/necromatcher/VideoExportControls.tsx`, `tests/unit/workspace/test_necromatcher_video_forces.py`
+- **Started:** 2026-10-04
+- **Last verified:** 2026-10-04 at SELF — opt-in force/torque and segment-shading layer on the fitted-model video export; focused Necromatcher, API, dialog and UI tests green.
+- **Summary:** Off-by-default `force_layer {enabled, kinds, scale, segment_shading}` drawn through the shared FTO-8 renderer with the fit's camera; analytic v/a from the preserved spline (kinematic-only fits report the layer unavailable); legend states research-fit, not measured forces; manifest and per-frame receipts are deterministic.
+- **Next step:** Frontier review of the draft PR, then rebase against paused draft #11359 (also edits `necromatcher_video.py`) before merge.
+
+### DL-#1900 · Merge-Queue Scoping for Core Test Lanes
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** D-sorganization/Repository_Management#1900
+- **Branch:** `claude/1900-ud-merge-group-tests`
+- **PR:** #11510
+- **Paths:** `.github/workflows/ci-standard.yml`, `tests/ci/test_merge_group_test_lanes.py`, `tests/ci/test_ci_infrastructure.py`
+- **Started:** 2026-10-04
+- **Last verified:** 2026-10-04 at SELF — contract tests green; every `merge_group` CI Standard run since the queue rollout failed `tests` (11.8 % vs 75 % coverage floor) and `unit-test-gate` (no `origin/main`).
+- **Summary:** `merge_group` runs diff the core lane against `merge_group.base_sha` and fetch the default branch for the Tools child-copy guard, matching pull-request behaviour.
+- **Next step:** Merge through the queue and confirm the next queued UpstreamDrift PR passes `tests` and `unit-test-gate`.
+
 ### DL-#11285 · Force and Torque Overlays for Every Engine
+
+- **State:** completed
+- **Owner:** antigravity
+- **Issue:** #11285; children #11286–#11315
+- **PR:** #11397
+- **Branch:** `feat/fto-30-gallery-docs-11315`
+- **Paths:** `scripts/render_force_overlay_gallery.py`, `tests/visual/force_overlay/**`, `docs/user_guide/force_overlay.md`, `src/config/feature_parity.json`
+- **Last verified:** 2026-10-03 at SELF — FTO-30 (#11315, PR #11397): Gallery generator, golden image visual regression tests (Matplotlib, OpenCV, MuJoCo), user guide (`docs/user_guide/force_overlay.md`), cross-links, and feature parity records completed; FTO-19 (#11304, PR #11399), FTO-26 (#11311, PR #11391), FTO-27 (#11312, PR #11393), and FTO-29 (#11314, PR #11395) merged to main. All parent dependencies consolidated.
+- **Summary:** One engine-agnostic force/torque contract, glyph builder and renderer adapters; real providers for MuJoCo, Drake, Pinocchio, OpenSim and Simscape; tension/compression producers for every engine; arrows, shaded model and legend over source footage. [Plan](force_torque_overlay_epic.md).
+- **Next step:** FTO core complete and shipped. Follow-up #11313 is tracked in DL-#11313.
+
+### DL-#11278 · COV-10 Model-Candidate Video Comparison
 
 - **State:** in_progress
 - **Owner:** claude
-- **Issue:** #11285; children #11286–#11315 (FTO-1 … FTO-30)
-- **PR:** not created
-- **Branch:** `feat/fto-11287-shared-conversions`
-- **Paths:** `docs/adr/0052-force-torque-overlay-contract.md`, `docs/development/force_torque_overlay_epic.md`, `src/shared/python/force_overlay/**`, `src/engines/simscape/force_channels.py`, `src/engines/physics_engines/opensim/python/opensim_force_torque.py`, `src/engines/physics_engines/drake/python/drake_force_torque.py`, `src/engines/physics_engines/pinocchio/python/pinocchio_force_torque.py`
-- **Started:** 2026-10-02
-- **Last verified:** 2026-10-03 at SELF — FTO-16 (#11301) added muscle_wrenches to the OpenSim provider; FTO-21 (#11306) added the cross-engine force-overlay parity suite (Drake, Pinocchio, OpenSim live, MuJoCo skips until FTO-9, Simscape loader row, sign guard); FTO-13 (#11298) added the Pinocchio provider; FTO-11 (#11296) added the Drake provider (DrakeForceTorqueSource, segment_axes helper, engine wiring); FTO-19 (#11304) added Python-side `SimscapeOutput.force_columns`/`to_force_series()` over the shared `force_series_from_columns` core (MATLAB exporter pending R2025b host); earlier: FTO-15 (#11300) added the OpenSim provider (`OpenSimForceTorqueSource`, engine accessors, contact_forces and force_visualization PARTIAL); 25 tests pass; earlier: FTO-2 (#11287) implemented shared force conversions in `src/shared/python/force_overlay/conversions.py` (`joint_torque_wrench`, `world_wrench_from_local`, `move_wrench_point`, `SegmentAxis`, `axial_loads_from_reactions`, `frame_with_axial_loads`); 13 unit tests pass; earlier: FTO-18 (#11303) added the Simscape CSV force loader; FTO-1 (#11286) implemented engine-agnostic contracts.
-- **Summary:** One engine-agnostic force/torque contract, glyph builder and renderer adapters; real providers for MuJoCo, Drake, Pinocchio, OpenSim and Simscape; tension/compression producers for every engine; arrows, shaded model and legend over source footage. [Plan](force_torque_overlay_epic.md).
-- **Next step:** Dispatch FTO-3 (#11288) glyph builder and FTO-24 (#11309) video camera projection.
+- **Issue:** #11278; parent #11268; blocked (real data) on #11165
+- **PR:** not created (Refs #11278)
+- **Branch:** `claude/issue-11278`
+- **Paths:** `src/motion_capture/reference/model_candidate_source.py`, `tests/unit/motion_capture/test_cov10_model_candidate_source.py`, `docs/development/capture-o-video/procedure.md`
+- **Started:** 2026-10-04
+- **Last verified:** 2026-10-04 at SELF — engine-generic comparison source landed with 13 synthetic unit tests passing; real GS3DX overlays and receipts not run.
+- **Summary:** Python-only engine-generic path projecting any model candidate into video views and comparing it through the COV-7 L2 receipt; real Simscape evidence needs a stored `capture-O` candidate from #11165 and an R2025b host.
+- **Next step:** After #11165 stores a candidate, run `compare_candidate_2d` on an R2025b host for every paired swing and record aggregate results on #11278.
 
 ### DL-#11268 · Capture-O Video Companion
 
-- **State:** proposed
-- **Owner:** claude
+- **State:** in_progress
+- **Owner:** local
 - **Issue:** #11268; children #11269–#11279; parent program #11161
-- **PR:** not created
-- **Branch:** `claude/elegant-tesla-f2heae` (planning only)
-- **Paths:** `docs/development/capture-o-video/**`
+- **PR:** #11502 (Closes #11271, Refs #11268)
+- **Branch:** `feat/cov-3-protocol-decision-11271`
+- **Paths:** `docs/development/capture-o-video/comparison-protocol.md`, `src/config/cov_comparison_profile.v1.json`, `src/config/cov_landmark_correspondence.json`, `tests/unit/motion_capture/test_cov3_protocol_and_correspondence.py`
+- **Started:** 2026-10-04
+- **Last verified:** 2026-10-04 at SELF — COV-3 (#11271): Ratified comparison protocol levels L0–L3 and 8 governed decisions (`docs/development/capture-o-video/comparison-protocol.md`), frozen comparison profile `cov_comparison_profile.v1.json`, machine-readable landmark correspondence `cov_landmark_correspondence.json` mapping Capture-34 to derived joint centres and 4 detector backends (MediaPipe-33, COCO-17, OpenPose-25, SMPL-22) with explicit exclusions and physical rationales; all 6 schema and integrity tests passing.
+- **Summary:** Ratify comparison protocol L0-L3, frozen comparison profile, and landmark correspondence table.
+- **Next step:** Merge PR for COV-3, complete Epic #11268.
+
+- **PR:** #11499 (Closes #11272, #11274, #11275, #11276, #11277, #11279, Refs #11268)
+- **Branch:** `feat/cov-benchmark-suite-11268`
+- **Paths:** `src/motion_capture/reference/**`, `docs/development/capture-o-video/**`, `tests/unit/motion_capture/test_cov*`
+- **Started:** 2026-10-04
+- **Last verified:** 2026-10-04 at SELF — COV-4/6/7/8/9/11 consolidated benchmark suite: virtual camera fitting and 2D variation envelope (`virtual_camera_fit.py`), swing pairing and similarity matrix (`swing_pairing.py`), 2D markerless backend comparison receipts (`comparison_2d.py`), marker-anchored anthropometry and Necromatcher owner project (`owner_project.py`), 3D monocular/refit comparison vs marker IK (`comparison_3d.py`), and error budget receipt with frozen guidance derivation (`error_budget.py`). All 50 unit tests across all 6 test files pass in 8.07s.
+- **Summary:** Complete implementation and verification of Capture-O Video benchmark suite spanning levels L0–L3, virtual camera projection, pairing confidence, marker-anchored subject scaling, 2D/3D residuals, and error budget reporting.
+- **Next step:** Merge consolidated PR, close superseded individual draft PRs, and close Epic #11268.
+
+- **PR:** #11416 (Closes #11270, Refs #11268)
+- **Branch:** `feat/cov-2-register-sources-11270`
 - **Started:** 2026-10-02
-- **Last verified:** 2026-10-02 at SELF — album link supplied and published by owner decision; COV-1 updated; no media acquired (cloud proxy 403) and no implementation performed.
+- **Last verified:** 2026-10-03 at SELF — COV-2 (#11270): registered capture-O video sources, timing evidence validation (`VideoTimingEvidence`), variable frame rate rejection (`VariableFrameRateError`), swing candidate intervals (`SwingWindow`, `validate_swing_windows`), usability grading rubric (`grade_swing_window`, `SwingGradeResult`), capture registry `video` kind schema extension, and catalog privacy invariants; all focused tests pass.
 - **Summary:** Bring the owner's capture-session video album into the markerless, Necromatcher and engine-matching pipelines, compare against the `capture-O` marker capture at graded levels L0–L3, and publish a single-view reconstruction error budget. [Procedure](capture-o-video/procedure.md).
-- **Next step:** A fleet agent downloads the public album and executes COV-1 (#11269).
+- **Next step:** Advance to COV-3 comparison protocol specification and level definitions (#11271).
+
+- **PR:** #11413 (Closes #11269, Refs #11268)
+- **Branch:** `feat/cov-1-acquisition-11269`
+- **Started:** 2026-10-02
+- **Last verified:** 2026-10-03 at SELF — COV-1 (#11269): `build_acquisition_receipt` implemented with fail-closed validation, SHA-256 integrity checks, ffprobe metadata embedding, lineage tracking, deterministic rerun idempotency, atomic persistence, and privacy path safety; 11 unit tests passing.
+- **Summary:** Bring the owner's capture-session video album into the markerless, Necromatcher and engine-matching pipelines, compare against the `capture-O` marker capture at graded levels L0–L3, and publish a single-view reconstruction error budget. [Procedure](capture-o-video/procedure.md).
+- **Next step:** Advance to COV-2 (#11270) video source registration and swing window grading.
+
+- **PR:** #11417 (Closes #11273, Refs #11268)
+- **Branch:** `feat/cov-5-runner-matrix-11273`
+- **Started:** 2026-10-02
+- **Last verified:** 2026-10-03 at HEAD — COV-5 (#11273): Added `--estimator` and `--estimator-option` to `scripts/historical_capture.py` backed by `src.shared.python.pose_estimation.registry.create_estimator`, explicit model-weights hash and package version recording in receipt detector identity, fail-closed availability and overwrite guards, and canonical 3D ingestion in `HMR2Adapter.to_canonical_observations` preserving metres and tagging missing focal/camera fields with typed unqualified flag. 6 focused unit tests passing.
+- **Summary:** Bring the owner's capture-session video album into the markerless, Necromatcher and engine-matching pipelines, compare against the `capture-O` marker capture at graded levels L0–L3, and publish a single-view reconstruction error budget. [Procedure](capture-o-video/procedure.md).
+- **Next step:** Advance to COV-6 validation harness and error budget report (#11274).
 
 ### DL-#11235 · Necromatcher Native Fit
 
@@ -1156,30 +1423,6 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Complete the client REST polling migration for #8941: both ActuatorPanel (1000 ms) and SimulationToolbar (1000 ms) now use the shared usePolling hook with visibility and simulation-running gating, eliminating background resource contention when tabs are hidden.
 - **Next step:** Publish force and analysis frames over /ws/simulate in #8936/#8940 to deprecate REST polling entirely.
 
-### DL-#10591 · Constrained Upper-Body Golfer Baseline (TB-06)
-
-- **State:** shipped
-- **Owner:** codex
-- **Issue:** #10591 (TB-06, parent #10584, program #10363)
-- **Branch:** feat/10591-upper-body-capture (merged)
-- **PR:** #10740 (`56ad6a8dcd13221699ec14442b13c1df6fc5729a`, merged)
-- **Paths:** src/shared/python/pendulum_simulator/upper_body_replay.py; src/shared/python/pendulum_simulator/simulation_core.py; src/shared/python/motion_matching/bernstein_controls.py; src/engines/physics_engines/pendulum/python/motion_matching/adapters_golfer.py; src/engines/physics_engines/pendulum/python/motion_matching/torque_optimization_golfer.py; src/engines/physics_engines/pendulum/python/motion_matching/torque_optimization.py; src/engines/physics_engines/pendulum/python/motion_matching/club_pendulum_match.py; src/engines/physics_engines/pendulum/python/motion_matching/upper_body_capture.py; scripts/motion_capture/upper_body_planarity_receipt.py; src/shared/python/tour_baselines/coverage.py; docs/plans/tour_baselines/coverage_matrix.md; docs/plans/tour_baselines/evidence/tb06_driver_planarity_receipt.json; docs/plans/tour_baselines/evidence/tb06_iron_planarity_receipt.json; reports/matched_swing_ledger.json; tests/unit/engines/physics_engines/pendulum/test_golfer_fit.py; tests/unit/pendulum_simulator/test_upper_body_replay.py; tests/unit/motion_matching/test_bernstein_controls.py; AGENT_HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
-- **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 — reproducible C3D preflight receipts preserve raw 360 Hz/654-frame Driver and 359 Hz/657-frame Iron clocks, shared 1 kHz evaluation grid, source hashes, and full coverage for six declared upper-body markers. Their 110.4/112.7 mm normal-RMSE lower bounds exceed the 55 mm profile ceiling, so both are rejected before unsupported planar attachment or torque fitting.
-- **Summary:** The native closed-loop replay and bounded torque fitter remain traceable, but the actual Driver and Iron source campaigns are scientifically disqualified by the fixed-plane lower bound. The coverage matrix and matched-swing ledger retain the two receipts as rejected outcomes rather than leaving a pending campaign or fabricating calibration.
-- **Next step:** Open a separately scoped spatial-topology issue only if a new model is authorized.
-
-### DL-#10592 · Reconcile Existing Reference and Full-Body Results (TB-07)
-
-- **State:** shipped
-- **Owner:** codex
-- **Issue:** #10592 (TB-07, parent #10584, program #10363)
-- **PR:** #10730 (merged)
-- **Paths:** src/shared/python/tour_baselines/coverage.py; src/shared/python/motion_matching/ledger.py; tests/unit/tour_baselines/test_coverage_matrix.py; tests/unit/motion_matching/test_ledger.py; docs/plans/tour_baselines/coverage_matrix.md; docs/development/matched_swing_program/README.md; reports/matched_swing_ledger.json; AGENT_HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
-- **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at `22b7fd7a534ddfbc0b1db943e6443fdc9ac7efb3` — merged after focused tests, Ruff, architecture/file-size budgets, and required PR checks passed.
-- **Summary:** Reconcile tour-baseline reporting with immutable TB-04 receipt verdicts. The coverage matrix and unified run ledger preserve replay evidence while rejecting the two disqualified candidates; historical/reduced evidence remains distinct from full-body G1/G2/G3 qualification.
-
 ### DL-#10385 · Pinocchio Driver/Iron G2-G3 Continuation and Independent Replay (MS-111)
 
 - **State:** in_progress
@@ -1219,32 +1462,6 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Last verified:** 2026-09-22 at SELF — merged origin/main through #10709/#10718/#10720/#10721; regenerated divergence inventory; removed duplicate SPEC #10721 key; PR #10707 squash auto-merge armed.
 - **Summary:** Software-contract qualification matrix over 6 engines × driver/iron × G1/G2/G3. Rows require MS-100 acceptance, MS-72 conformance, native replay, and numerical-convergence links; reduced Simscape oracle stays partial. Release stays blocked until every required cell is fully linked — no invented six-engine native pass.
 - **Next step:** Confirm CI green on PR #10707 after SPEC duplicate-key repair and allow squash auto-merge to land.
-
-### DL-#8887 · Wire Per-Engine Joint Limits Into Pose Studio's JointPanel
-
-- **State:** shipped
-- **Owner:** claude
-- **Issue:** #8887
-- **Branch:** fix/8887-pose-studio-joint-limits
-- **PR:** #10650
-- **Paths:** src/shared/python/pose_interchange/live_kinematics.py; src/shared/python/pose_interchange/services/\_mock.py; src/shared/python/pose_interchange/services/drake.py; src/shared/python/pose_interchange/services/mujoco.py; src/shared/python/pose_interchange/services/myosuite.py; src/shared/python/pose_interchange/services/opensim.py; src/shared/python/pose_interchange/services/pinocchio.py; src/shared/python/pose_interchange/services/simscape.py; src/tools/pose_studio/controllers/engine_controller.py; src/tools/pose_studio/gui.py; src/tools/pose_studio/widgets/joint_panel.py; tests/tools/pose_studio/test_engine_controller_internals.py; tests/unit/tools/pose_studio/test_gui.py; tests/unit/tools/pose_studio/test_joint_panel.py
-- **Started:** 2026-09-21
-- **Last verified:** 2026-09-22 at c3773d62c — merged to main via PR #10650.
-- **Summary:** `LiveKinematicsService.joint_limits()` extends the kinematics-service protocol (every engine service implements it, `{}` pending real anatomical data); `JointPanel.set_limits()`/`set_error()` re-range joints per engine and give visible feedback on a rejected edit; wired from `MainWidget` on init, engine switch, and angle-edit rejection/success.
-- **Next step:** N/A — shipped via #10650.
-
-### DL-#10379 · Reliable Motion-Matching Jobs, Recovery and Portable Results (MS-105)
-
-- **State:** shipped
-- **Owner:** local
-- **Issue:** #10379 (MS-105, epic #10363; folded PF-08 #10438)
-- **Branch:** feat/10379-ms105-jobs-recovery
-- **PR:** #10704
-- **Paths:** src/shared/python/motion_matching/jobs/; tests/unit/motion_matching/jobs/test_matching_jobs.py; docs/plans/matched_swing/evidence/ms105_jobs_recovery.json; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
-- **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at 901b2de5e — merged to main via PR #10704.
-- **Summary:** Matching job contracts with atomic manifests/checkpoints, compatible resume, fault recovery, process-tree cancel, portable packages, both-shell progress/failure views, and PF-08 service budgets (`guarantee=false`). Reuses `#8880`/`async_action` and `managed_popen`; no second scheduler.
-- **Next step:** N/A — shipped via #10704.
 
 ### DL-#8880 · GUI Thread-Blocking Simulation Migration to Async Action
 
@@ -1354,6 +1571,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Last verified:** 2026-09-21 (`98abb965f1`) — RED shown for the batching regression test (25 calls before the fix), then GREEN; numerical-equivalence and empty-trajectory tests pass; `tests/unit/physics/` shows no new failures versus unmodified main (three pre-existing rust-engine/tolerance failures reproduced identically via `git stash`); ruff check/format clean.
 - **Summary:** `BallFlightSimulator._post_process_rust` called the scalar `_calculate_forces_single` path once per trajectory point instead of the existing vectorized `_calculate_forces_batch` path; now builds the `(3, N)` batch once and calls force calculation a single time per trajectory.
 - **Next step:** Land the vectorization PR (#10648) if not already merged.
+
+### DL-#9545 · Versioned BunkerShot3D Workbench API Route
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #9545 (epic #9541)
+- **Branch:** claude/issue-9545-api
+- **PR:** #11516 (draft)
+- **Paths:** src/api/routes/bunker_workbench.py; src/tools/bunker_shot_gui/input_ranges.py; src/tools/bunker_shot_gui/design.py; src/tools/bunker_shot_gui/widgets.py; src/tools/bunker_shot_gui/report.py; src/tools/bunker_shot_gui/render.py; src/config/feature_parity.json; tests/bunkershot3d/test_bunker_workbench_api.py
+- **Started:** 2026-10-04
+- **Last verified:** 2026-10-04 at SELF (shared `INPUT_RANGES`: RED ImportError, GREEN 3 range tests + 45 panel GUI tests offscreen; route: RED collection ImportError, GREEN 24 contract tests; `tests/bunkershot3d -m "contract or unit"` 2955 passed, one unrelated xdist worker crash; LoD, file-size, error-handling, suite-marker and suppression gates clean)
+- **Summary:** `POST /tools/bunker-workbench/v1/evaluate` is a thin client of the headless `WorkbenchModel` (no Qt, no matplotlib): strict request models mirroring the PyQt panel ranges, explicit right-handed convention (left refused, not mirrored), bounded nominal solve with `include_playability=False`, tier/verdict/stamp/source stamps and a canonical SHA-256 digest equal to the model path; predictive playability objectives refused and exploratory ones reported but never ranked (#9239). `validity_stamp` and `TIER_MODEL_NAMES` moved from render.py to report.py (re-exported) so the API avoids matplotlib. Input ranges have one source of truth (`input_ranges.INPUT_RANGES`, re-exported by design.py) read by both the panels and the API.
+- **Next step:** Review the draft PR and list the route in the U15 entry of `src/config/bunkershot3d_qualification.json`.
 
 ### DL-#9544 · Bunker Contact Regimes and Coupled Club Rotation Across Fidelity Tiers
 
@@ -1465,20 +1695,6 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Confirm CI green and squash auto-merge of PR #10676.
 - **Evidence:** docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_103/{topology_report.json,terminal_breakdown.json,native_gate.json,runtime_license_receipt.json,parity_receipt.json,HANDOFF.md}; tests/unit/motion_matching/test_simscape_topology_ms61.py.
 
-### DL-#10347 · Simscape R2025b Run Management (Run-102 Package)
-
-- **State:** shipped
-- **Owner:** local
-- **Issue:** #10347 (MS-60, epic #10363)
-- **Branch:** fix/issue-10347-ms60-run-management
-- **PR:** #10669
-- **Paths:** scripts/matlab/run_simscape_candidate.ps1; src/shared/python/motion_matching/simscape_run_manifest.py; src/shared/python/motion_matching/candidate_convert.py; src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/shared/{write_run_manifest.m,export_candidate.m}; docs/development/simscape_tour_matching/{CHECKPOINTS.md,CHECKPOINTS_HISTORY.md}; docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_102/{candidate.npz,run_manifest.json,playback.gif}
-- **Started:** 2026-09-21
-- **Last verified:** 2026-09-21 (merged to main as #10669)
-- **Summary:** Documented one R2025b-only scripted replay path with fail-closed run manifest (host, release, model/candidate/replay SHAs, wall-clock), converted returned-replay NPZ into MatchedSwingCandidate via DRY reuse of returned81 layout, and committed run-102 playback GIF in-tree.
-- **Next step:** DeskComputer second-person replay under 30 minutes when MS-61 Fit is scheduled.
-- **Evidence:** docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_102/{candidate.npz,run_manifest.json,playback.gif,qualified_candidate_replay.json}; tests/unit/motion_matching/test_simscape_candidate_convert.py; docs/shared_tools/divergence_inventory.v1.json.
-
 ### DL-#10342 · OpenSim/MyoSuite Native Nightly Lane Receipts
 
 - **State:** in_review
@@ -1576,20 +1792,6 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Land PR #10498 via CI and proceed to PF-04.
 - **Evidence:** tests/unit/motion_matching/test_contact_force_allocator_pf03.py; tests/unit/motion_matching/test_contact_force_allocator.py.
 
-### DL-#10588 · Calibrate Swing Planes, Fixed Geometry and Feasible Initial States
-
-- **State:** shipped
-- **Owner:** local
-- **Issue:** #10588 (TB-03, parent #10584, program #10363)
-- **Branch:** feat/tb03-trajectory-fitting-10588
-- **PR:** #10631
-- **Paths:** src/shared/python/motion_matching/projection_2d.py; src/shared/python/tour_baselines/calibration.py; src/shared/python/tour_baselines/**init**.py; tests/unit/motion_matching/test_projection_2d.py; tests/unit/tour_baselines/test_tour_calibration.py; docs/plans/tour_baselines/plane_calibration_and_initial_states.md
-- **Started:** 2026-09-20
-- **Last verified:** 2026-09-20 (All 60 unit tests pass across tour baselines and projection_2d suites; architecture budget passes; DRY duplication gate passes; suite marker ratchet passes; ruff clean; mypy 0 errors across 15 files).
-- **Summary:** Replaced naive z-drop in `projection_2d.py` with `CalibratedSwingPlane` implementing rigid SE(3) transform, orthonormal right-handed SO(3) basis, inclination, azimuth, and `GeometricProjectionResidual` reporting RMSE and max deviation. Implemented `estimate_swing_plane` fitting one rigid plane per declared capture window, handling degeneracy (collinear points, rank < 2) and reflections. Implemented `calibrate_fixed_geometry` calibrating positive bounded link lengths (L1, L2) with frozen nonidentifiable mass/inertia priors and Fisher sensitivity rank diagnostic. Implemented `map_initial_state_double_pendulum` mapping t0 observations to generalized coordinates (theta1, theta2) and velocities with gap validation and verified forward kinematics. Implemented `compute_moving_hub_power` tracking external trajectory, velocity, power, and integrated work for prescribed moving hubs.
-- **Next step:** Shipped in PR #10631 (commit cfcc8dfbd). Proceeded to TB-04 (#10589).
-- **Evidence:** tests/unit/motion_matching/test_projection_2d.py; tests/unit/tour_baselines/test_tour_calibration.py; docs/plans/tour_baselines/plane_calibration_and_initial_states.md.
-
 ### DL-#10440 · Connect Qualified Matching Strategies to Existing Results and Engine Feature Contracts
 
 - **State:** in_progress
@@ -1683,104 +1885,6 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** PR #10768 merged into main; proceed with NM-08 (#10623).
 - **Evidence:** docs/plans/neural_motion_matching/forward_surrogates.md; docs/plans/neural_motion_matching/evidence/nm07_forward_surrogates_receipt.json
 
-### DL-#10621 · NM-06 Masked Trajectory-to-Control Proposals
-
-- **State:** shipped
-- **Owner:** local
-- **Issue:** #10621 (epic #10603)
-- **Branch:** feat/10621-nm06-masked-proposals
-- **PR:** #10709
-- **Paths:** src/shared/python/neural_motion/proposals/; src/shared/python/motion_matching/inverse/{**init**,masked_proposal,proposal_shared,proposal_training,regressor_training,basis_time,collapse}.py; src/shared/python/motion_matching/hybrid.py; tests/unit/neural_motion/test_masked_proposals_nm06.py; tests/unit/motion_matching/test_masked_proposals_nm06.py; tests/unit/motion_matching/test_inverse_regressor_training.py; docs/plans/neural_motion_matching/masked_proposals.md; docs/plans/neural_motion_matching/evidence/nm06_masked_proposals_receipt.json
-- **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 — merged via PR #10709 (`08bcec302`; tip `05f712281`)
-- **Summary:** neural_motion/proposals package binds task u_dim, masked conditioning, selection/mixture heads, observation+regularization training, hybrid fail-closed polish, and strict checkpoints; inverse proposal_shared consolidates duplicated contract logic; proposal_training and regressor_training stay under function-line/parameter budgets; inverse package lazily loads torch-backed cVAE/regressor exports for unit-lane collection.
-- **Next step:** N/A — shipped; check NM-07 #10622 claim before any start (do not steal claim:antigravity).
-- **Evidence:** docs/plans/neural_motion_matching/masked_proposals.md; docs/plans/neural_motion_matching/evidence/nm06_masked_proposals_receipt.json
-
-### DL-#10620 · NM-05 Classical and Small Neural Dynamics Baselines
-
-- **State:** shipped
-- **Owner:** local
-- **Issue:** #10620 (epic #10603)
-- **Branch:** feat/issue-10620-nm05-baselines
-- **PR:** #10701
-- **Paths:** src/shared/python/neural_motion/baselines/; src/shared/python/neural_motion/episodes/splits.py; tests/unit/neural_motion/test_dynamics_baselines_nm05.py; docs/plans/neural_motion_matching/dynamics_baselines.md; docs/plans/neural_motion_matching/evidence/nm05_dynamics_baselines_receipt.json
-- **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 — merged via PR #10701
-- **Summary:** Pilot dynamics baselines over NM-03 episode store: `DynamicsBaselineTrainerConfig`, split helpers, `FamilySplitPlan.ids_for`; analytical 1/2-DOF fixture map, ridge, nearest neighbor, optional small MLP; trial-level splits, train-only normalizer digest, inverse conditioning, identity-leakage and unavailable-torque guards; validation checkpointing with test untouched; honest analytical-vs-MLP comparison on fixtures.
-- **Next step:** Continue NM-06 (#10621) under frozen baselines and episode-store contracts.
-- **Evidence:** docs/plans/neural_motion_matching/dynamics_baselines.md; docs/plans/neural_motion_matching/evidence/nm05_dynamics_baselines_receipt.json
-
-### DL-#10619 · NM-04 Teacher Episodes and Active-Learning Candidates
-
-- **State:** shipped
-- **Owner:** local
-- **Issue:** #10619 (epic #10603)
-- **Branch:** local/nm-04-teacher-episodes
-- **PR:** #10698
-- **Paths:** src/shared/python/neural_motion/teachers/; src/shared/python/training/scheduler.py; src/shared/python/training/datasets.py; tests/unit/neural_motion/test_teacher_episodes_nm04.py; docs/plans/neural_motion_matching/teacher_episodes.md; docs/plans/neural_motion_matching/evidence/nm04_teacher_episodes_receipt.json
-- **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 — merged to main via #10698 (`2142d380b`)
-- **Summary:** Versioned teacher generation (`neural-teacher-episodes/1.0.0`) with near-baseline/stratified/low-discrepancy/random-torque paths, rejection ledger and quarantine, nested corpus stages with resume/duplicate-seed avoidance, and active acquisition (`neural-acquisition-log/1.0.0`) that cannot consume test labels. Reuses NM-03 EpisodeStore and NM-01 nested stage sizes; training scheduler admits teacher budgets via `neural_teacher_corpus_budget` and datasets register teacher corpus paths without all-RAM load.
-- **Next step:** Continue NM-05 (#10620) under frozen teacher and episode-store contracts.
-- **Evidence:** docs/plans/neural_motion_matching/teacher_episodes.md; docs/plans/neural_motion_matching/evidence/nm04_teacher_episodes_receipt.json.
-
-### DL-#10618 · NM-03 Episode Storage Splits and Dataset Views
-
-- **State:** shipped
-- **Owner:** local
-- **Issue:** #10618 (epic #10603)
-- **Branch:** feat/10618-nm03-episode-storage
-- **PR:** #10686
-- **Paths:** src/shared/python/neural_motion/episodes/; src/shared/python/neural_motion/json_io.py; src/shared/python/neural_motion/experiment.py; src/shared/python/training/datasets.py; tests/unit/neural_motion/test_episode_store_nm03.py; docs/plans/neural_motion_matching/episode_storage.md; docs/plans/neural_motion_matching/evidence/nm03_episode_storage_receipt.json
-- **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 — merged to main via #10686 (`800703cb`)
-- **Summary:** Versioned `neural-episode-store/1.0.0` HDF5 shards with content hashes; family-level splits with held-out strata and real-data eval bucket; compact-1.0 adapter via `CompactArrayBundle` preserves 27/189 layout; thin task views and transform-keyed window cache; training registry registers corpus paths without all-RAM load.
-- **Next step:** Continue NM-04 (#10619) under frozen episode-store contracts.
-- **Evidence:** docs/plans/neural_motion_matching/episode_storage.md; docs/plans/neural_motion_matching/evidence/nm03_episode_storage_receipt.json.
-
-### DL-#10617 · NM-02 Native Dataset Labels Complete and Semantically Correct
-
-- **State:** shipped
-- **Owner:** local
-- **Issue:** #10617 (epic #10603)
-- **Branch:** fix/10617-nm02-native-dataset-labels
-- **PR:** #10679
-- **Paths:** src/shared/python/data_io/dataset_generator/{core,channel_finalize,sim_buffers,sim_recording,models,labels,adapters,**init**}.py; src/shared/python/engine_core/mock_engine.py; tests/unit/data_io/test_dataset_labels_nm02.py; tests/unit/data_io/test_nm02_adapters.py; docs/plans/neural_motion_matching/dataset_labels.md; docs/plans/neural_motion_matching/evidence/nm02_first_wave_label_receipts.json; docs/shared_tools/divergence_inventory.v1.json
-- **Started:** 2026-09-21
-- **Last verified:** 2026-09-22 — merged to main via #10679 (`4bb10daa0`)
-- **Summary:** Completes DatasetGenerator channel evidence (no zero-as-measurement), native vs interval accelerations, requested/applied controls, DoF layout and root-force gate, restore StateError, residual helper, and first-wave mock+ODE qualification receipts keyed to NM-01 pilot roster. No training or speed claim.
-- **Next step:** Continue NM-03 (#10618) under frozen learning contracts.
-- **Evidence:** docs/plans/neural_motion_matching/dataset_labels.md; docs/plans/neural_motion_matching/evidence/nm02_first_wave_label_receipts.json.
-
-### DL-#10616 · NM-01 Freeze Learning Tasks Model Roster and Benefit Experiment
-
-- **State:** shipped
-- **Owner:** local
-- **Issue:** #10616 (epic #10603)
-- **Branch:** feat/nm01-freeze-learning-tasks
-- **PR:** #10672
-- **Paths:** src/shared/python/neural*motion/tasks.py; src/shared/python/neural_motion/roster.py; src/shared/python/neural_motion/experiment.py; src/shared/python/neural_motion/**init**.py; tests/unit/neural_motion/test_learning_tasks.py; tests/unit/neural_motion/test_model_roster.py; tests/unit/neural_motion/test_benefit_experiment.py; tests/unit/neural_motion/test_nm01_dbc_optimize.py; docs/plans/neural_motion_matching/learning_freeze.md; docs/plans/neural_motion_matching/evidence/nm01*\*.json
-- **Started:** 2026-09-21
-- **Last verified:** 2026-09-21 — merged to main via #10672 (`f2e625099`)
-- **Summary:** Freezes typed forward/inverse/masked learning-task contracts (dimensions from TB-00 identities; inverse non-uniqueness policy required), a 20-model neural roster with full-body deferred pending benefit, and the benefit experiment (nested 100/500/2000 stages, three seeds, five baselines, all-phase latency including failures, 2× median/non-worse p95 gates, break-even None when savings ≤ 0). No training or speed claim.
-- **Next step:** Continue NM-02 (#10617) under the frozen learning contracts.
-- **Evidence:** docs/plans/neural_motion_matching/learning_freeze.md; docs/plans/neural_motion_matching/evidence/nm01_learning_tasks_pilot.json; docs/plans/neural_motion_matching/evidence/nm01_model_roster.json; docs/plans/neural_motion_matching/evidence/nm01_benefit_experiment_receipt.json.
-
-### DL-#10615 · NM-00 Dataset Checkpoint and Training Claim Audit
-
-- **State:** shipped
-- **Owner:** local
-- **Issue:** #10615 (epic #10603)
-- **Branch:** fix/issue-10615-nm00-dataset-audit
-- **PR:** #10668
-- **Paths:** src/shared/python/neural_motion/; src/shared/python/motion_matching/surrogate/artifact_paths.py; src/shared/python/motion_matching/surrogate/nm00_audit.py; src/shared/python/motion_matching/surrogate/perstep/extract_dataset.py; tests/unit/neural_motion/; docs/plans/neural_motion_matching/artifact_audit.md; docs/plans/neural_motion_matching/evidence/; docs/shared_tools/divergence_inventory.v1.json
-- **Started:** 2026-09-21
-- **Last verified:** 2026-09-21 at 839b645dc (merged to main via #10668)
-- **Summary:** Fail-closed inventory of neural corpora, default checkpoints and historical training claims with retain/repair/migrate/reject/quarantine dispositions and a per-model coverage matrix keyed to TB-00 identities. No native training or speed claim.
-- **Next step:** Continue NM-01 (#10616) under the frozen audit inventory.
-- **Evidence:** docs/plans/neural_motion_matching/artifact_audit.md; docs/plans/neural_motion_matching/evidence/nm00_artifact_audit_receipt.json; docs/plans/neural_motion_matching/evidence/nm00_coverage_matrix.json.
-
 ### DL-#10602 · Club-Only Motion Matching Plan
 
 - **State:** in_review
@@ -1794,160 +1898,6 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Published bounded implementation issues with TDD/DbC/LoD/DRY prompts, dependency ordering, native validation gates and shared technical review. Planning artifacts do not qualify physical results or speedup.
 - **Next step:** CI green, review, merge.
 - **Evidence:** docs/plans/club_neural_review/REVIEW.md; docs/plans/club_neural_review/excel_audit.json.
-
-### DL-#10604 · CO-00 Freeze Club Workbook Identity
-
-- **State:** shipped
-- **Owner:** local
-- **Issue:** #10604 (epic #10602)
-- **Branch:** fix/issue-10604-co00-workbook-identity
-- **PR:** #10667 (merged)
-- **Paths:** src/shared/python/motion_matching/club_only/; src/shared/python/motion_matching/loaders/event_labels.py; src/shared/python/motion_matching/loaders/excel.py; src/engines/physics_engines/pinocchio/python/motion_training/club_trajectory_parser.py; tests/unit/motion_matching/test_club_workbook_identity.py; docs/plans/club_only_matching/evidence/club_workbook_identity.json
-- **Started:** 2026-09-21
-- **Last verified:** 2026-09-21 — merged via #10667 onto main as prerequisite for CO-01
-- **Summary:** Freezes hash-verified workbook manifests, four-trial lineage (Filtering Experiments aliases TW_ProV1), centimetre unit authority with inches declaration retained, native 240 Hz impact-relative events, and orientation derivation policy. Shared event-label normalization and axis-component helper remove silent NaN/zero bugs across Excel and Pinocchio loaders.
-- **Next step:** Continue on #10605 (CO-01) observation contracts.
-- **Evidence:** docs/plans/club_only_matching/evidence/club_workbook_identity.json; tests/unit/motion_matching/test_club_workbook_identity.py.
-
-### DL-#10605 · CO-01 Extend Canonical Club Observation Contracts and Calibration
-
-- **State:** shipped
-- **Owner:** local
-- **Issue:** #10605 (epic #10602)
-- **Branch:** fix/issue-10605-co01-club-observation
-- **PR:** #10670 (merged)
-- **Paths:** src/shared/python/motion_matching/club_only/observation.py; src/shared/python/motion_matching/club_only/adapters.py; src/shared/python/motion_matching/club_calibration.py; src/shared/python/motion_matching/target.py; tests/unit/motion_matching/test_club_observation_contracts.py; docs/plans/club_only_matching/evidence/club_observation_contracts.json; docs/shared_tools/divergence_inventory.v1.json; docs/shared_tools/divergence_inventory.md
-- **Started:** 2026-09-21
-- **Last verified:** 2026-09-21 — merged via #10670 onto main as prerequisite for CO-02
-- **Summary:** Adds `ClubObservation` with measured/derived/unobserved component masks, dual mid-hands/face frames and orientations, native 240 Hz clock, uncertainty/derivation metadata, SO(3) residuals/interpolation, catalog-backed `club_calibration` (fixed tool-to-model SE(3), grip-face rigidity, mid-hands→butt-end only with explicit offset), and legacy `ClubTarget` adapters that refuse invented identity quats.
-- **Next step:** Continue on #10606 (CO-02) plausibility priors and acceptance.
-- **Evidence:** docs/plans/club_only_matching/evidence/club_observation_contracts.json; tests/unit/motion_matching/test_club_observation_contracts.py.
-
-### DL-#10606 · CO-02 Define Golf Plausibility Priors, Ambiguity and Acceptance
-
-- **State:** shipped
-- **Owner:** local
-- **Issue:** #10606 (epic #10602)
-- **Branch:** feat/co02-golf-plausibility-priors
-- **PR:** #10675 (merged)
-- **Paths:** src/shared/python/motion_matching/club_only/priors.py; src/shared/python/motion_matching/club_only/profiles.py; src/shared/python/motion_matching/club_only/ambiguity.py; src/shared/python/motion_matching/club_only/acceptance.py; tests/unit/motion_matching/test_club_plausibility_acceptance.py; docs/plans/club_only_matching/evidence/club_plausibility_acceptance.json
-- **Started:** 2026-09-21
-- **Last verified:** 2026-09-21 — merged via #10675 onto main as prerequisite for CO-03
-- **Summary:** Freezes per-roster observation/physical/plausibility profiles, named GolfPlausibilityPriors (not measured truth), ambiguity retention for distinct body hashes on identical club residuals, and club-only acceptance that keeps kinematic preview, torque replay, scientific, and product statuses separate while preserving full-body G3 gates.
-- **Next step:** Continue on #10607 (CO-03) retrieval and constrained IK starting guesses.
-- **Evidence:** docs/plans/club_only_matching/evidence/club_plausibility_acceptance.json; tests/unit/motion_matching/test_club_plausibility_acceptance.py.
-
-### DL-#10607 · CO-03 Build Retrieval and Constrained IK Starting Guesses
-
-- **State:** shipped
-- **Owner:** local
-- **Issue:** #10607 (epic #10602)
-- **Branch:** feat/10607-co03-retrieval-constrained-ik
-- **PR:** #10678 (merged)
-- **Paths:** src/shared/python/motion_matching/club_only/hand_geometry.py; src/shared/python/motion_matching/club_only/retrieval.py; src/shared/python/motion_matching/club_only/constrained_ik.py; src/shared/python/motion_matching/club_only/seeds.py; tests/unit/motion_matching/test_club_starting_guesses.py; docs/plans/club_only_matching/evidence/club_starting_guesses.json; docs/shared_tools/divergence_inventory.v1.json
-- **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 — merged via #10678 onto main as prerequisite for CO-04/CO-05
-- **Summary:** Adds handedness-aware model hand-frame offsets, library retrieval with one rigid placement and native-clock preservation, constrained-IK seeds with distinct Pink/DLS capability records (unsupported constraints fail closed), and a geometry/profile-keyed seed cache. Four-trial retrieval-only and constrained-IK baselines are kinematic previews only.
-- **Next step:** Continue on #10608 (CO-04) and #10609 (CO-05) in parallel on non-overlapping paths.
-- **Evidence:** docs/plans/club_only_matching/evidence/club_starting_guesses.json; tests/unit/motion_matching/test_club_starting_guesses.py.
-
-### DL-#10608 · CO-04 Match Club-Only Motion With Double and Triple Pendulums
-
-- **State:** shipped
-- **Owner:** local
-- **Issue:** #10608 (epic #10602)
-- **Branch:** feat/issue-10608-co04-pendulum-club-match
-- **PR:** #10680 (merged)
-- **Paths:** src/shared/python/motion_matching/club_only/{hub_accounting,match_errors,pendulum_match,replay_package}.py; src/engines/physics_engines/pendulum/python/motion_matching/{club_pendulum_match,club_match_matrix}.py; tests/unit/motion_matching/test_club_pendulum_match.py; docs/plans/club_only_matching/evidence/club_pendulum_match.json; docs/shared_tools/divergence_inventory.v1.json
-- **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 — merged via #10680 onto main as prerequisite for CO-06
-- **Summary:** Club-only double/triple pendulum matching consumes driven adapters, separates in-plane vs 3D errors and fixed-pivot vs prescribed moving-hub IDs with external-work accounting, warm-starts from valid CO-03 seeds, scores frame 0 before integrate, retains best of cold vs retrieval, and saves replay packages without inventing native G1 pass. Fit orchestration lives in the pendulum engine package so shared never imports engines.
-- **Next step:** Continue on #10610 (CO-06).
-- **Evidence:** docs/plans/club_only_matching/evidence/club_pendulum_match.json; tests/unit/motion_matching/test_club_pendulum_match.py.
-
-### DL-#10609 · CO-05 Generate Plausible Upper-Body and Full-Body Candidates
-
-- **State:** shipped
-- **Owner:** local
-- **Issue:** #10609 (epic #10602)
-- **Branch:** feat/issue-10609-co05-plausible-body-candidates
-- **PR:** #10681 (merged)
-- **Paths:** src/shared/python/motion_matching/club_only/body_candidates.py; src/shared/python/motion_matching/club_only/topology_mapping.py; src/shared/python/motion_matching/club_only/nullspace_proposals.py; src/shared/python/motion_matching/club_only/observation.py; src/shared/python/motion_matching/club_only/profiles.py; src/shared/python/motion_matching/club_only/seeds.py; src/shared/python/motion_matching/club_only/**init**.py; tests/unit/motion_matching/test_club_body_candidates.py; docs/plans/club_only_matching/evidence/club_body_candidates.json; docs/plans/club_only_matching/TURNOVER.md; docs/development/monolith_refactor_register.md; docs/shared_tools/divergence_inventory.v1.json
-- **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 — merged via #10681 onto main as prerequisite for CO-06
-- **Summary:** Explicit reduced→body topology maps (no pelvis teleport / unlimited root / pasted club animation), local grip-Jacobian null-space proposals with closure reprojection, and a roster × trial candidate matrix with separated observation-fit, plausibility, contact/effort, and runtime lanes; missing-runtime cells stay unqualified with precise blockers.
-- **Next step:** Continue on #10610 (CO-06).
-- **Evidence:** docs/plans/club_only_matching/evidence/club_body_candidates.json; tests/unit/motion_matching/test_club_body_candidates.py.
-
-### DL-#10610 · CO-06 Recover Feasible Controls and Independently Replay Candidates
-
-- **State:** shipped
-- **Owner:** local
-- **Issue:** #10610 (epic #10602)
-- **Branch:** feat/10610-co06-controls-replay
-- **PR:** #10687 (merged)
-- **Paths:** src/shared/python/motion_matching/club_only/control_replay.py; src/shared/python/motion_matching/club_only/native_g1_gates.py; src/shared/python/motion_matching/club_only/replay_package.py; src/shared/python/motion_matching/club_only/**init**.py; tests/unit/motion_matching/test_club_control_replay.py; docs/plans/club_only_matching/evidence/club_control_replay.json; docs/plans/club_only_matching/TURNOVER.md; docs/development/HANDOFF.md; docs/development/monolith_refactor_register.md; docs/shared_tools/divergence_inventory.v1.json; SPEC.md
-- **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at f191dd09d — squash-merged to main via PR #10687; native G1 remains blocked on software-contract fixtures only.
-- **Summary:** Recover minimum-effort feasible controls from CO-04/CO-05 candidates, separate net torque / actuated / passive / reactions / root slack, independently open-loop replay from q0/v0 without measured-state resets, and retain named native G1 blockers on software-contract fixtures only.
-- **Next step:** Dispatch CO-07+ per club-only epic dependency order; do not invent native G1 pass.
-- **Evidence:** docs/plans/club_only_matching/evidence/club_control_replay.json; tests/unit/motion_matching/test_club_control_replay.py.
-
-### DL-#10611 · CO-07 Optimize Fast Matching and Expose Candidate Diversity
-
-- **State:** shipped
-- **Owner:** local
-- **Issue:** #10611 (epic #10602)
-- **Branch:** feat/10611-co07-fast-matching
-- **PR:** #10700 (merged)
-- **Paths:** src/shared/python/motion_matching/club_only/fast_matching.py; src/shared/python/motion_matching/club_only/**init**.py; tests/unit/motion_matching/test_club_fast_matching.py; docs/plans/club_only_matching/evidence/club_fast_matching.json; docs/shared_tools/divergence_inventory.v1.json; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; AGENT_HANDOFF.md; SPEC.md
-- **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at f9ece7f6a — squash-merged to main via PR #10700; native_g1_pass false on software-contract fixtures.
-- **Summary:** Adds bounded fast club-only matching orchestration with immutable cache keys, resumable checkpoints, cold/retrieval/reduced-to-full starts, feasibility-first pruning and Pareto diversity, optional neural proposal slot without weights, quality-vs-time curves, and profiling that includes verification time. Public knobs collapse onto FastMatchOptions for architecture parameter budgets.
-- **Next step:** Dispatch CO-08 (#10612) per club-only epic dependency order; do not invent native G1 pass.
-- **Evidence:** docs/plans/club_only_matching/evidence/club_fast_matching.json; tests/unit/motion_matching/test_club_fast_matching.py.
-
-### DL-#10612 · CO-08 Qualify the Club-Only Matrix and Plausibility Tradeoffs
-
-- **State:** shipped
-- **Owner:** local
-- **Issue:** #10612 (epic #10602)
-- **Branch:** feat/issue-10612-co08-matrix
-- **PR:** #10703 (merged)
-- **Paths:** src/shared/python/motion_matching/club_only/matrix_qualification.py; src/shared/python/motion_matching/club_only/profiles.py; src/shared/python/motion_matching/club_only/body_candidates.py; src/shared/python/motion_matching/fit_metrics.py; src/shared/python/motion_matching/acceptance.py; src/shared/python/motion_matching/plot_fit_quality_card.py; src/shared/python/motion_matching/club_only/**init**.py; tests/unit/motion_matching/test_club_matrix_qualification.py; tests/unit/motion_matching/test_club_plausibility_acceptance.py; docs/plans/club_only_matching/evidence/club_matrix_qualification.json; docs/plans/club_only_matching/TURNOVER.md; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; docs/shared_tools/divergence_inventory.v1.json; AGENT_HANDOFF.md; SPEC.md
-- **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at 17a0ee033 — squash-merged to main via PR #10703; native_g1_pass false on software-contract fixtures.
-- **Summary:** Independent matrix qualification over native observation times for four workbook trials × #10585 roster with frozen CO-02 gates, published failures, withheld-body experiment semantics, common-observable comparison across complexities, and fail-closed checks for tamper/leakage/phase/orientation/reset/geometry/false-native claims. Shared roster/matrix scope helpers live in club_only/profiles.py.
-- **Next step:** N/A — shipped; continue CO-09 (#10613).
-- **Evidence:** docs/plans/club_only_matching/evidence/club_matrix_qualification.json; tests/unit/motion_matching/test_club_matrix_qualification.py.
-
-### DL-#10613 · CO-09 Integrate Club-Only Matching Into Existing UI and Results
-
-- **State:** shipped
-- **Owner:** local
-- **Issue:** #10613 (epic #10602)
-- **Branch:** feat/co09-club-only-ui-10613
-- **PR:** #10711
-- **Paths:** src/shared/python/motion_matching/club_only/ui_integration.py; src/shared/python/motion_matching/club_only/**init**.py; src/shared/python/workspace/results_browser.py; src/tools/motion_matching/pipeline.py; src/tools/motion_matching/gui.py; src/tools/tour_matching_viewer/core.py; src/tools/tour_matching_viewer/**init**.py; src/config/feature_parity.json; tests/unit/motion_matching/test_club_ui_integration.py; tests/unit/tools/test_tour_matching_viewer_core.py; tests/unit/workspace/test_results_browser.py; docs/plans/club_only_matching/evidence/club_ui_integration.json; docs/plans/club_only_matching/TURNOVER.md; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
-- **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — rematched onto post-CO-10 main; LOD fix via `ClubOnlyUiSession.preset_name()`; review-gap harden GREEN; native_g1_pass false
-- **Summary:** Baseline UI integration shipped via #10711. Follow-up #10717 hardens workbook trial load, receipt-hashed ledger append/dedup, default JSON ResultsBrowser index, cancel/resume off-thread, and tour_matching_viewer observed/inferred compare without parallel frameworks.
-- **Next step:** Confirm CI green on PR #10717 and squash-merge; then check NM-07 #10622 claim (do not steal).
-- **Evidence:** docs/plans/club_only_matching/evidence/club_ui_integration.json; tests/unit/motion_matching/test_club_ui_integration.py.
-
-### DL-#10614 · CO-10 Publish Reproduction Guide and Final Club-Only Turnover
-
-- **State:** shipped
-- **Owner:** local
-- **Issue:** #10614 (epic #10602)
-- **Branch:** feat/10614-co10-reproduction-turnover
-- **PR:** #10718 (baseline) + #10720 (survivor; both merged); #10719 closed duplicate
-- **Paths:** src/shared/python/motion_matching/club_only/reproduction.py; src/shared/python/motion_matching/club_only/**init**.py; tests/unit/motion_matching/test_club_reproduction_turnover.py; docs/plans/club_only_matching/REPRODUCTION_GUIDE.md; docs/plans/club_only_matching/evidence/club_reproduction_turnover.json; docs/plans/club_only_matching/TURNOVER.md; docs/development/matched_swing_program/README.md; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; AGENT_HANDOFF.md; SPEC.md
-- **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 — merged via PR #10720 (`abd35e66b`); baseline #10718; duplicate #10719 stays closed
-- **Summary:** Baseline operator/reproduction turnover landed via #10718. Survivor #10720 rematched runnable `fast_preview_match`/`asset_paths` saved-job commands, architecture-budget helper split, and succession docs. Epic #10602 stays open; software-contract tests are not native evidence.
-- **Next step:** N/A — shipped; finish CO-09 review-gap PR #10717; schedule desk-native Fit/G1 for unresolved matrix cells.
-- **Evidence:** docs/plans/club_only_matching/evidence/club_reproduction_turnover.json; tests/unit/motion_matching/test_club_reproduction_turnover.py.
 
 ### DL-#10603 · Neural Motion Matching Plan
 
@@ -2032,76 +1982,6 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Integrated analytic pelvis-yaw orientation cost into the Crocoddyl full-body solver (`_NodeCost`, `ImplicitEulerAction`, `TerminalAction`). Augmented `FitWeights` with validated non-negative `pelvis_yaw: float = 0.0` and `MarkerTargets` with `waist_indices`. Wired exact Gauss-Newton Jacobian ($J_{yaw}^T J_{yaw}$) and configuration gradient ($J_{yaw}^T r_{yaw}$) into node dynamics. Added `--pelvis-yaw-weight` CLI argument to `full_body_fit.py` and updated `cost_breakdown` to include the `pelvis_yaw` term in trajectory receipts. Verified that aligned targets evaluate to zero cost and gradient, analytic gradients match central finite differences, and missing waist markers gracefully no-op.
 - **Next step:** Land PR #10599 with auto-merge enabled.
 - **Evidence:** tests/unit/motion_matching/test_crocoddyl_pelvis_yaw.py.
-
-### DL-#10431 · Freeze Fast-Matching Evidence, Schemas and Negative Acceptance Fixtures
-
-- **State:** shipped
-- **Owner:** local
-- **Issue:** #10431 (PF-01)
-- **Branch:** feat/issue-10431-pf01-fast-matching-evidence-schemas-fixtures
-- **PR:** #10495
-- **Paths:** src/shared/python/motion_matching/acceptance.py; src/shared/python/motion_matching/candidate.py; src/shared/python/motion_matching/candidate_convert.py; src/shared/python/motion_matching/candidate_io.py; src/shared/python/motion_matching/contact_force_allocator.py; src/shared/python/motion_matching/swing_evaluator.py; tests/unit/motion_matching/test_acceptance.py; tests/unit/motion_matching/test_candidate.py; tests/unit/motion_matching/test_contact_force_allocator.py; tests/unit/motion_matching/test_swing_evaluator.py
-- **Started:** 2026-09-19
-- **Last verified:** 2026-09-19 at HEAD (46 unit tests pass across test_candidate, test_contact_force_allocator, test_swing_evaluator, test_acceptance; ruff clean, black clean).
-- **Summary:** Preserved existing rejected driver/iron fast-matching receipts and candidate artifacts. Extended MatchedSwingCandidate schema, auxiliary blocks (root_forces, contact_modes, grip_wrench), metadata (solver_status, handedness, name_maps), and NPZ converter. Truthfully renamed AllocationObjective.MINIMUM_TRAIL_ARM with backwards-compatible 'trail_zero' parsing, added HARD_ZERO_TRAIL mode enforcing exact zero trail arm torques, enforced actuator bounds clipping post-solve, and evaluated Coulomb friction cone ratios. Updated SwingEvaluator to avoid fabricating impact phases without declared t_events, audit closure translation and rotation separately, and return NaN RMSE for empty marker populations. Added 7 negative acceptance fixtures in test_acceptance covering friction cone violation, torque bound overwrite, missing root histories, coordinate mismatch (44 vs 41), missing club coverage, truncated horizon, and synthetic engine false qualification.
-- **Next step:** Landed in main via PR #10495.
-- **Evidence:** tests/unit/motion_matching/test_candidate.py; tests/unit/motion_matching/test_contact_force_allocator.py; tests/unit/motion_matching/test_swing_evaluator.py; tests/unit/motion_matching/test_acceptance.py.
-
-### DL-#10350 · Unified Cross-Engine Parity Report
-
-- **State:** shipped
-- **Owner:** claude
-- **Issue:** #10350 (MS-70, epic #10363)
-- **Branch:** feat/10350-unified-parity-report
-- **PR:** #10582
-- **Paths:** src/shared/python/motion_matching/parity_schema.py; src/shared/python/motion_matching/parity_report.py; src/shared/python/motion_matching/cross_engine_replay.py; src/shared/python/motion_matching/leaderboard.py; src/engines/CROSS_ENGINE_PARITY_SPEC.md; evidence/matched/driver_g1/parity_report.json; evidence/matched/driver_g1/parity_report.md; tests/unit/motion_matching/test_parity_report.py
-- **Started:** 2026-09-20
-- **Last verified:** 2026-09-20 at HEAD (6 unit tests pass in tests/unit/motion_matching/test_parity_report.py; 39 leaderboard tests pass in tests/unit/motion_matching/test_leaderboard.py; evidence JSON and Markdown generated; cross-engine parity spec synchronized; merged into main).
-- **Summary:** Implemented `UnifiedParityReport` and `build_parity_report` running candidates across all available physics engines (MuJoCo, Drake, Pinocchio, OpenSim, Simscape, MyoSuite). Evaluates pointwise trajectory error, pointwise joint torque comparison with 1.0 N·m absolute floor, total mechanical work in Joules, contact forces, and wall-clock execution time. Categorizes cross-engine comparisons into explicit classes: same-model numerical, native-model observable, and experimental accuracy. Gracefully stamps native engines lacking local platform SDKs as unavailable with reasons without falsifying synthetic data. Extends `cross_engine_replay.py` and `leaderboard.py` to ingest unified parity reports. Synchronized Section 3 of `src/engines/CROSS_ENGINE_PARITY_SPEC.md`.
-- **Next step:** Shipped in PR #10582.
-- **Evidence:** evidence/matched/driver_g1/parity_report.json; evidence/matched/driver_g1/parity_report.md; tests/unit/motion_matching/test_parity_report.py.
-
-### DL-#10587 · TB-02: Define Versioned Baseline Packages, Fit Metrics, and Qualification Profiles
-
-- **State:** shipped
-- **Owner:** local
-- **Issue:** #10587 (parent #10584, program #10363)
-- **Branch:** feat/tb02-baseline-packages-10587
-- **PR:** #10630
-- **Paths:** src/shared/python/tour_baselines/baseline_package.py; src/shared/python/tour_baselines/fit_metrics.py; src/shared/python/tour_baselines/qualification_profiles.py; src/shared/python/tour_baselines/**init**.py; src/shared/python/motion_matching/tour_baselines.py; src/shared/python/motion_matching/acceptance.py; tests/unit/tour_baselines/test_fit_metrics.py; tests/unit/tour_baselines/test_baseline_packages.py; tests/unit/tour_baselines/test_qualification_profiles.py; docs/plans/tour_baselines/baseline_packages.md; docs/plans/tour_baselines/qualification_profiles.md; docs/plans/tour_baselines/README.md; docs/plans/tour_baselines/evidence/synthetic_valid_baseline_package.json; docs/plans/tour_baselines/evidence/synthetic_invalid_baseline_package.json; SPEC.md; docs/development/DEVELOPMENT_LOG.md; AGENT_HANDOFF.md
-- **Started:** 2026-09-20
-- **Last verified:** 2026-09-20 at HEAD (50/50 unit tests pass in tests/unit/tour_baselines/ and 45/45 motion-matching tests pass; ruff check clean; ruff format clean; mypy 0 issues in 14 source files; check_architecture_budget passes with 0 violations; check_file_size_budget passes; check_lod clean with 0 violations).
-- **Summary:** Established the canonical Baseline Package contract (`tour-baseline-package/1.0.0`) extending portable packaging (#10379, #10334). Implemented `BaselineIdentity` linking capture target, model topology, backend pin, fit mode, horizon, frame/plane conventions, measurement map version, fixed geometry/inertia hashes, q0/v0 hashes, controls hash, solver config, seed, budgets, ancestry, and environment hashes. Formulated `StatusBundle` separating solver convergence, kinematic accuracy, dynamic feasibility, scientific qualification, and product promotion into orthogonal statuses, enforcing that missing native replay forbids scientific qualification. Formulated physical 3D Euclidean marker RMSE, p95, max, per-marker, per-phase, endpoint, and impact errors, distinct from optimizer loss, bound to cryptographic landmark signatures. Froze numeric qualification profiles for authoritative full-body G1/G2/G3 and reduced educational models (planar driven pendulum, upper-body golfer, triple pendulum) with documented attainable-geometry rationale without relaxing full-body thresholds. Provided clean-machine export/import with array checksum validation.
-- **Next step:** Shipped in PR #10630. Proceeded to TB-03 (#10588).
-- **Evidence:** docs/plans/tour_baselines/evidence/synthetic_valid_baseline_package.json; docs/plans/tour_baselines/evidence/synthetic_invalid_baseline_package.json; docs/plans/tour_baselines/baseline_packages.md; docs/plans/tour_baselines/qualification_profiles.md; tests/unit/tour_baselines/test_fit_metrics.py; tests/unit/tour_baselines/test_baseline_packages.py; tests/unit/tour_baselines/test_qualification_profiles.py.
-
-### DL-#10586 · TB-01: Audit Tour Targets, Marker Semantics, Events, and Provenance
-
-- **State:** shipped
-- **Owner:** local
-- **Issue:** #10586 (parent #10584, program #10363)
-- **Branch:** feat/tb01-tour-targets-audit-10586
-- **PR:** #10601
-- **Paths:** src/shared/python/motion_matching/tour_capture_contract.py; src/shared/python/tour_baselines/audit.py; src/shared/python/tour_baselines/measurement_map.py; src/shared/python/tour_baselines/events.py; src/shared/python/tour_baselines/provenance.py; src/shared/python/tour_baselines/canonical_targets.py; src/shared/python/tour_baselines/**init**.py; tests/unit/tour_baselines/test_measurement_map.py; tests/unit/tour_baselines/test_tour_events.py; tests/unit/tour_baselines/test_target_audit.py; tests/unit/tour_baselines/test_canonical_targets.py; docs/plans/tour_baselines/target_audit.md; docs/plans/tour_baselines/evidence/driver_target_audit_receipt.json; docs/plans/tour_baselines/evidence/iron_target_audit_receipt.json
-- **Started:** 2026-09-20
-- **Last verified:** 2026-09-20 at HEAD (35/35 unit tests pass in tests/unit/tour_baselines/ and tests/opensim/test_tour_capture_contract.py; ruff check clean; ruff format clean; black clean; mypy 0 issues in 18 source files; check_architecture_budget passes; check_file_size_budget passes; divergence inventory synchronized; merged into main via PR #10601).
-- **Summary:** Implemented target audit, content-based SHA-256 verification (never path name alone), versioned measurement map (tour-measurement-map/1.0.0) distinguishing surface markers, inferred joint centers, and rigid cluster centroids while explicitly marking calibrated clubface orientation and contact points as UNAVAILABLE in raw C3D. Defined native-clock swing intervals (360.0 Hz driver vs 359.0 Hz iron) with trajectory-inferred events explicitly labeled as inferred. Recorded OpticalCapture optical provenance, separating shared player anatomy from capture-specific club geometry. Emitted reproducible receipts in docs/plans/tour_baselines/evidence/ and documented in target_audit.md.
-- **Next step:** Shipped in PR #10601.
-- **Evidence:** docs/plans/tour_baselines/evidence/driver_target_audit_receipt.json; docs/plans/tour_baselines/evidence/iron_target_audit_receipt.json; tests/unit/tour_baselines/test_target_audit.py; tests/unit/tour_baselines/test_measurement_map.py; tests/unit/tour_baselines/test_tour_events.py; tests/unit/tour_baselines/test_canonical_targets.py.
-
-### DL-#10585 · TB-00: Freeze Model Identities, Ownership, and the Two-Capture Coverage Matrix
-
-- **State:** shipped
-- **Owner:** local
-- **Issue:** #10585 (parent #10584, program #10363)
-- **Branch:** feat/tb00-model-identities-10585
-- **PR:** #10598
-- **Paths:** src/shared/python/tour_baselines/models.py; src/shared/python/tour_baselines/registry.py; src/shared/python/tour_baselines/coverage.py; src/shared/python/tour_baselines/reconciliation.py; src/shared/python/tour_baselines/**init**.py; src/shared/python/motion_matching/tour_baselines.py; tests/unit/tour_baselines/test_model_identities.py; tests/unit/tour_baselines/test_coverage_matrix.py; tests/unit/tour_baselines/test_reconciliation.py; docs/plans/tour_baselines/README.md; docs/plans/tour_baselines/model_identities.md; docs/plans/tour_baselines/coverage_matrix.md; docs/plans/tour_baselines/reconciliation.md; docs/development/matched_swing_program/README.md
-- **Started:** 2026-09-20
-- **Last verified:** 2026-09-20 at HEAD (13/13 unit tests pass in tests/unit/tour_baselines/; ruff check clean; ruff format clean; mypy 0 issues in 5 source files; document title case 0 violations across 4 docs; file size budget clean; merged into main).
-- **Summary:** Established the canonical Tour Baselines domain model and registry separating kinematic reconstruction models from torque-driven pendulums, upper-body golfer with closed kinematic loop, and flagship full-body engines. Evaluated upper-body golfer constraint Jacobian SVD proving rank 3 (5 independent DOFs). Implemented two-capture coverage matrix across Driver and 7-Iron, non-golf tool exclusions, and closed-issue reconciliation (#9914, #9921, #10003). Verified Tools pin at a9ed0e7c5c6905b1164082659051d6381068052d and published comprehensive documentation under docs/plans/tour_baselines/.
-- **Next step:** Shipped in PR #10598.
-- **Evidence:** tests/unit/tour_baselines/test_model_identities.py; tests/unit/tour_baselines/test_coverage_matrix.py; tests/unit/tour_baselines/test_reconciliation.py; docs/plans/tour_baselines/README.md.
 
 ### DL-#10533 · Reconcile, Audit, and Freeze Feature Preservation Across All Historical Boundaries
 
@@ -2325,20 +2205,6 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Push branch, open PR, enable auto-merge, release lease on #10517, and notify parent orchestrator.
 - **Evidence:** tests/unit/workspace/test_artifact_handoff.py; tests/unit/workspace/test_project_store.py; tests/unit/workspace/test_results_browser.py.
 
-### DL-#10527 · Surface Cross-Engine Comparison and Injury Indicators in Dedicated Workspaces
-
-- **State:** shipped
-- **Owner:** local
-- **Issue:** #10527 (ORG-18, epic #10508)
-- **Branch:** feat/issue-10527-org18-comparison-indicator-workspace
-- **PR:** #10568 (merged)
-- **Paths:** src/shared/python/workspace/**init**.py; src/shared/python/workspace/comparison_indicator_workspace.py; tests/integration/test_comparison_indicator_workspace.py
-- **Started:** 2026-09-20
-- **Last verified:** 2026-09-20 at HEAD (10 integration tests pass in test_comparison_indicator_workspace.py; 23 total workspace integration tests pass; ruff check & format clean; mypy 0 issues; LoD clean; file line budget 447 <= 500 LOC; merged to main at 8e6cadb5c).
-- **Summary:** Implemented `ComparisonIndicatorWorkspaceCoordinator` surfacing `canonical_core_comparison` and `injury_analysis` capabilities across `results_and_compare` and `exercise_analysis` workspace shells. Provides fail-closed validation on physical units, coordinate frame identifiers, timebase sample interval alignment, channel names, and model fidelity invariance (`ModelFidelityLevel` enum rejecting cross-tier comparisons with `IncompatibleArtifactError`). Integrates `CrossEngineComparisonAdapter` delegating trace alignment to `compare_traces` with SHA-256 provenance hashes, and `InjuryIndicatorAdapter` requiring physical load channels (`peak_compression_bw`, `peak_lateral_shear_bw`, `x_factor_stretch`) normalized by body weight without mock fallbacks, stamping every output with non-clinical disclaimers.
-- **Next step:** Shipped.
-- **Evidence:** tests/integration/test_comparison_indicator_workspace.py.
-
 ### DL-#10515 · Build Task-Oriented Desktop Navigation Over Existing Embedded Tools
 
 - **State:** completed
@@ -2366,21 +2232,6 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Enhanced the Motion Matching PyQt6 tile to display asynchronous animation playback (`ik_playback.gif` and `tracking_playback.gif`) via `QMovie`, populated five standardized headline metrics (`full_capture_ik_rms_mm`, `address_marker_rms_mm`, `backswing_root_error_max_mm`, `whole_run_root_rms_mm`, `inside_support_polygon_fraction`), acceptance verdict badge, and navigation handoffs to the Matched Swing Results Browser and Tour Matching Viewer. Upgraded `tools.motion_matching` in `feature_parity.json` from `gap` to `parity`.
 - **Next step:** Create PR, enable auto-merge, verify merge, and release lease.
 - **Evidence:** tests/tools/motion_matching/test_motion_matching_gui.py, tests/config/feature_parity/test_matrix_freshness.py.
-
-### DL-#10526 · Replace Canonical Estimation Shell With Bounded Estimator Coordinator
-
-- **State:** shipped
-- **Owner:** local
-- **Issue:** #10526 (ORG-17, epic #10508)
-- **Branch:** feat/issue-10526-org17-estimation-workflow
-- **PR:** #10565 (merged)
-
-- **Paths:** src/shared/python/workspace/**init**.py; src/shared/python/workspace/estimation_workspace.py; tests/integration/test_estimation_workspace.py
-- **Started:** 2026-09-20
-- **Last verified:** 2026-09-20 at HEAD (8 integration tests pass in test_estimation_workspace.py; ruff check & format clean; file line budget 447 <= 500 LOC; merged to main at 760a8470e).
-- **Summary:** Implemented `EstimationWorkspaceCoordinator` replacing placeholder canonical estimation shells with a bounded application service coordinator. Integrates `solve_single_trial_map`, `IdentifiabilityGateOptions`, parameter priors and bounds, and spline trajectory evaluation. Provides fail-closed validation for non-finite cost/trajectories and ill-conditioned systems, with complete provenance persistence round-trips.
-- **Next step:** Shipped.
-- **Evidence:** tests/integration/test_estimation_workspace.py.
 
 ### DL-#10512 · Replace Misleading Launches With Real Tasks or Explicit Nonlaunchable States
 
@@ -2423,20 +2274,6 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Built the canonical machine-checkable capability baseline inventory (`capability_migration.json`) and schema/validation engine (`capability_migration.py`) for Epic #10508. Enforced explicit contracts: IDs are unique, aliases are acyclic and resolve to retained targets, every capability has exactly one primary workspace domain, provider absence changes availability rather than identity, and preserved test fixtures retain golden byte hashes. Preserved ADR-0047 viewer identity and provider seam rulings. Created `scripts/generate_capability_baseline.py` producing `docs/development/ORG01_CAPABILITY_BASELINE.md` with freshness validation.
 - **Next step:** Push branch, open PR with auto-merge, complete lease on #10510.
 - **Evidence:** tests/config/test_capability_migration_coverage.py; docs/development/ORG01_CAPABILITY_BASELINE.md; src/config/capability_migration.json.
-
-### DL-#10521 · Integrate Existing Results Browser Work With Replay, Data, and Export
-
-- **State:** shipped
-- **Owner:** local
-- **Issue:** #10521 (ORG-13, epic #10508)
-- **Branch:** feat/issue-10521-org13-results-workspace-handoff
-- **PR:** #10548
-- **Paths:** `src/shared/python/workspace/__init__.py`; `src/shared/python/workspace/artifact_handoff.py`; `src/shared/python/workspace/results_workspace.py`; `src/tools/matched_swing_browser/__init__.py`; `src/tools/matched_swing_browser/model.py`; `tests/integration/test_results_workspace_handoff.py`; `tests/tools/matched_swing_browser/test_model.py`
-- **Started:** 2026-09-19
-- **Last verified:** 2026-09-19 at HEAD (5 integration tests pass in test_results_workspace_handoff.py, 13 unit tests pass in test_model.py; ruff clean; mypy clean; line budget clean).
-- **Summary:** Implemented `ResultsWorkspaceCoordinator` integrating canonical `ResultsBrowser` and #10353 `MatchedSwingBrowserModel` with Replay, Data Explorer, Plot, Compare, and Export actions. Enforces selected run context isolation (preventing global state leakage), artifact-type-aware action availability with diagnostic reasons, missing asset and unit mismatch validation (never guessing substitute files or silently comparing disparate units), and complete provenance retention during export and reimport (#8820).
-- **Next step:** Merged in PR #10548.
-- **Evidence:** tests/integration/test_results_workspace_handoff.py; tests/tools/matched_swing_browser/test_model.py.
 
 ### DL-#10513 · Validate Every Browser, Tauri, and Native Launch Destination
 
@@ -2493,104 +2330,6 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Implemented `SpatialWrench` and rigid-body `transform_wrench` with rotational mapping and cross-product moment arm calculation ($\tau_B = R \tau_A + r \times (R F_A)$). Implemented `compute_center_of_pressure` with strict threshold semantics ($F_z \le 5.0$ N returns `None` rather than fabricated zeros). Implemented `AccelerationDecomposition` (gravity, drift, control, ZTCF, ZVCF) and `create_counterfactual_rollout` with cryptographic baseline immutability assertion (SHA-256 byte check before and after execution). Enhanced `CandidateSession` with `get_wrench_at`, `get_center_of_pressure`, `get_joint_torques_at`, `get_closure_residual_at`, and `create_counterfactual_fork`. Added API endpoints `GET /analysis/candidate/forces` and `POST /analysis/candidate/counterfactual` (failing closed with 409 Conflict when session is absent or kinematic-only). Integrated `ForceInspectionWidget` into Tour Matching Viewer GUI synchronized with physical playback time.
 - **Next step:** Create PR #10504, enable auto-merge, and monitor until merged into main.
 - **Evidence:** tests/unit/motion_matching/test_force_torque.py; tests/unit/motion_matching/test_counterfactual.py; tests/unit/motion_matching/test_candidate_session_forces.py; tests/unit/api/test_candidate_session_analysis_routes.py; tests/unit/tools/test_tour_matching_viewer_forces.py.
-
-### DL-#10481 · Manage MeshCat and Gepetto Launch Lifecycle and URDF Loading
-
-- **State:** shipped
-- **Owner:** local
-- **Issue:** #10481 (MV-05, epic #10476)
-- **Branch:** feat/10481-meshcat-gepetto-lifecycle
-- **PR:** #10501 (merged)
-- **Paths:** scripts/launch_simulation_viewer.py; src/shared/python/model_generation/export/model_bundle.py; src/shared/python/motion_matching/native_viewers.py; src/shared/python/motion_matching/viewer_lifecycle.py; src/tools/tour_matching_viewer/gui.py; tests/unit/model_generation/test_urdf_precision_bundle.py; tests/unit/motion_matching/test_launch_simulation_viewer_cli.py; tests/unit/motion_matching/test_native_viewers_registry.py; tests/unit/motion_matching/test_viewer_lifecycle.py; tests/unit/tools/test_tour_matching_viewer_native_button.py
-- **Started:** 2026-09-19
-- **Last verified:** 2026-09-19 at HEAD (28 unit tests pass across viewer_lifecycle, native_viewers_registry, launch_simulation_viewer_cli, tour_matching_viewer_native_button, and urdf_precision_bundle; ruff clean; mypy 0 errors in 10 source files; Law of Demeter zero-growth clean; DRY gate clean; divergence inventory updated).
-- **Summary:** Implemented `ViewerProcessManager` with managed background process lifecycle, active port polling, existing listener detection without collision (`reuse_existing`), process ownership tracking (never terminates unowned processes), CORBA port 12321 protection, dynamic MeshCat URL parsing, and startup crash diagnostics. Registered native viewer backends (`open_in_native_viewer` for MuJoCo, MeshCat, Gepetto, OpenSim, and MATLAB) with fail-closed missing dependency handlers and explicit install hints. Enhanced `ModelBundle` with `extract_to` and direct directory bundle loading with mesh asset inventory parsing. Extended `launch_simulation_viewer.py` CLI to support `--model-bundle`, `--urdf`, `--view-mode` (static, fitted, native), `--speed`, `--stride`, `--loop`, and `--output-html`. Added `_open_native_btn` in Tour Matching Viewer GUI.
-- **Next step:** Merged into main in PR #10501.
-- **Evidence:** tests/unit/motion_matching/test_viewer_lifecycle.py; tests/unit/motion_matching/test_native_viewers_registry.py; tests/unit/motion_matching/test_launch_simulation_viewer_cli.py; tests/unit/tools/test_tour_matching_viewer_native_button.py; tests/unit/model_generation/test_urdf_precision_bundle.py.
-
-### DL-#10336 · Gate Ladder G1 -> G2 -> G3 for MuJoCo: Replay Pinocchio B100 Candidate
-
-- **State:** shipped
-- **Owner:** claude
-- **Issue:** #10336 (MS-21, epic #10363)
-- **Branch:** feat/10336-mujoco-candidate-replay-g1
-- **PR:** #10500 (merged)
-- **Paths:** src/engines/physics_engines/mujoco/python/candidate_replay.py; src/engines/physics_engines/mujoco/python/full_body_model.py; src/engines/physics_engines/mujoco/python/replay_contract.py; src/engines/physics_engines/mujoco/python/replay_evidence.py; tests/unit/motion_matching/test_mujoco_candidate_replay.py; evidence/matched/driver_g1_crocoddyl_rk45_b100_mujoco_replay/
-- **Started:** 2026-09-19
-- **Last verified:** 2026-09-19 at HEAD (22 unit tests pass in test_mujoco_candidate_replay.py under native MuJoCo 3.13.0 on ControlTower; full 307-frame forward replay generated; same-state FK error 2.51e-15 m; fail-closed G1 rejection recorded).
-- **Summary:** Upgraded MuJoCo candidate replay pipeline and full-body model to support MuJoCo 3.x mj_fullM(model, data, mass) signature alongside MuJoCo 2.x (model, mass, data.qM). Relaxed control array shape validation to support (N-1, n_act) control intervals standard in optimal control solvers. Executed full 0.85s (307 frames) uninterrupted forward replay in MuJoCo for the Crocoddyl b100 candidate without numerical failure, recording candidate receipt, playback GIF, and fail-closed MS-100 verdict.
-- **Next step:** PR #10500 created; auto-merge enabled.
-- **Evidence:** tests/unit/motion_matching/test_mujoco_candidate_replay.py; evidence/matched/driver_g1_crocoddyl_rk45_b100_mujoco_replay/receipt.json.
-
-### DL-#10340 · OpenSim IK on Shared Document With Validity Policy and Shared Receipt
-
-- **State:** shipped
-- **Owner:** claude
-- **Issue:** #10340 (MS-41, epic #10363)
-- **Branch:** feat/10340-opensim-document-ik
-- **PR:** #10489 (merged)
-- **Paths:** src/engines/physics_engines/opensim/python/full_body_osim.py; src/engines/physics_engines/opensim/python/tour_matching/marker_map.py; src/engines/physics_engines/opensim/python/tour_matching/document_ik.py; src/engines/physics_engines/opensim/python/tour_matching/cli.py; src/shared/python/motion_matching/pipeline/plants/opensim.py; src/shared/python/motion_matching/pipeline/plant.py; src/shared/python/motion_matching/pipeline/plants/**init**.py; docs/development/full_body_models/evidence/ground_support/anthro_driver_opensim/; reports/matched_swing_ledger.json; tests/opensim/test_document_ik.py; tests/unit/motion_matching/test_full_body_osim.py
-- **Started:** 2026-09-19
-- **Last verified:** 2026-09-19 at HEAD (Full 654-frame OpenSim IK executed in 50s on ControlTower; receipt.json validated; 6/6 native tests pass; 7 unit tests pass; architecture budget clean; ruff/black clean).
-- **Summary:** Executed OpenSim InverseKinematicsTool on the exported anthropometric document model (full_body_spec_anthro_driver.json / full_body_anthro_driver.osim) with marker weights from MARKER_VALIDITY_POLICY (MS-04). Implemented OpensimMatchingPlant (reporting dynamics not_run: use moco) and registered in plant registry. Generated evidence package {receipt.json, ik.mot, candidate.npz, ik_playback.gif} under docs/development/full_body_models/evidence/ground_support/anthro_driver_opensim/ and indexed in reports/matched_swing_ledger.json.
-- **Next step:** PR #10489 merged.
-- **Evidence:** docs/development/full_body_models/evidence/ground_support/anthro_driver_opensim/receipt.json; reports/matched_swing_ledger.json.
-
-### DL-#10480 · Reuse Shared Physical-Time Playback Across Qt React and Native Viewers
-
-- **State:** shipped
-- **Owner:** local
-- **Issue:** #10480 (MV-04, epic #10476)
-- **Branch:** feat/10480-physical-time-playback
-- **PR:** #10496 (merged)
-- **Paths:** src/shared/python/motion_matching/playback.py; src/shared/python/motion_matching/playback_adapters.py; src/tools/tour_matching_viewer/gui.py; tests/unit/motion_matching/test_physical_playback.py; tests/unit/motion_matching/test_playback_adapters.py; tests/unit/tools/test_tour_matching_viewer_playback.py
-- **Started:** 2026-09-19
-- **Last verified:** 2026-09-19 at HEAD (22 unit tests pass across physical_playback, playback_adapters, tour_matching_viewer_playback, and combo; ruff clean; Law of Demeter zero new violations; DRY gate clean; divergence inventory updated; architecture budget OK).
-- **Summary:** Reuses shared Tools playback transport (`rate_of_closure.simulation.playback_transport`) in `PhysicalTimePlayback` so continuous physical time is the evaluation authority instead of naive tick timers. Implemented quaternion SLERP with antipodal sign continuity, Euclidean coordinate LERP for markers and forces, non-uniform timestamp support, dropped-draw handling without timescale drift, and discrete knot stepping. Implemented PlaybackAdapter capabilities matrix across Qt, React (web JSON payload), MeshCat, Gepetto, and MediaVideo (with media-time offset and documented mute reason). Integrated `PlaybackTransportControls` in `TourMatchingViewerWidget` while preserving paused camera manipulation.
-- **Next step:** PR #10496 merged.
-- **Evidence:** tests/unit/motion_matching/test_physical_playback.py; tests/unit/motion_matching/test_playback_adapters.py; tests/unit/tools/test_tour_matching_viewer_playback.py.
-
-### DL-#10479 · Bind Saved Candidates to Viewer and Analysis Sessions
-
-- **State:** shipped
-- **Owner:** local
-- **Issue:** #10479 (MV-03, epic #10476)
-- **Branch:** feat/10479-viewer-analysis-sessions
-- **PR:** #10492 (merged)
-- **Paths:** src/api/routes/capabilities.py; src/api/services/simulation_service.py; src/shared/python/engine_core/wsl_probe.py; src/shared/python/motion_matching/candidate_session.py; src/tools/tour_matching_viewer/core.py; src/tools/tour_matching_viewer/gui.py; tests/unit/api/test_candidate_session_routes.py; tests/unit/engine_core/test_wsl_probe.py; tests/unit/motion_matching/test_candidate_session.py; tests/unit/tools/test_tour_matching_viewer_combo.py
-- **Started:** 2026-09-19
-- **Last verified:** 2026-09-19 at HEAD (23 unit tests pass across candidate_session, wsl_probe, viewer combo, and API routes; ruff clean; Law of Demeter zero new violations; DRY gate clean; divergence inventory updated; architecture budget OK).
-- **Summary:** Ingests saved candidate trajectories and model specifications into immutable CandidateSession objects with SHA-256 verification and coordinate order remapping. Missing force channels remain None without fabrication. Probes WSL physics engine environment so Linux-native SDKs are accurately reported. Upgrades Tour Matching Viewer with MultiCandidateReplay supporting up to 4 candidates overlaid with ENGINE_COLORS, runs ledger combo selection, conspicuous rejected fit banner, capability indicators, and animation GIF export.
-- **Next step:** PR #10492 merged.
-- **Evidence:** tests/unit/motion_matching/test_candidate_session.py; tests/unit/engine_core/test_wsl_probe.py; tests/unit/tools/test_tour_matching_viewer_combo.py; tests/unit/api/test_candidate_session_routes.py.
-
-### DL-#10478 · Anatomical Visual Assets and Skin Toggling Without Physics Mutation
-
-- **State:** shipped
-- **Owner:** local
-- **Issue:** #10478 (MV-02, epic #10476)
-- **Branch:** feat/10478-anatomical-visuals
-- **PR:** #10488 (merged)
-- **Paths:** src/engines/physics_engines/pinocchio/python/native_candidate_viewer.py; src/engines/physics_engines/pinocchio/python/viewer_presentation.py; src/shared/python/body_part_viz/anatomical_visuals.py; src/shared/python/model_generation/export/model_bundle.py; tests/unit/body_part_viz/test_anatomical_visuals.py; tests/unit/motion_matching/test_native_candidate_viewer.py; tests/unit/motion_matching/test_native_viewer_presentation.py
-- **Started:** 2026-09-19
-- **Last verified:** 2026-09-19 at HEAD (7 visuals tests pass, 4 presentation tests pass, 6 candidate viewer tests pass including native Pinocchio 4.1.0 in WSL Ubuntu-24.04 verifying physics immutability under visual skin toggles; ruff clean).
-- **Summary:** Added anatomical visual asset bindings, visual skin modes (NONE, INERTIA_ELLIPSOIDS, ANATOMICAL_MESH, COLLISION), and deterministic visible diagnostic fallback (magenta). Implemented viewer presentation cadence pacing and cross-platform gepetto playback lock. Verified that visual skin toggling in Pinocchio leaves mass, inertia, generalized coordinates, forward kinematics, and contact sphere positions strictly invariant.
-- **Next step:** PR #10488 merged.
-- **Evidence:** tests/unit/body_part_viz/test_anatomical_visuals.py; tests/unit/motion_matching/test_native_viewer_presentation.py; tests/unit/motion_matching/test_native_candidate_viewer.py.
-
-### DL-#10477 · Qualify Shared URDF Bundles and Preserve Numeric Precision
-
-- **State:** shipped
-- **Owner:** local
-- **Issue:** #10477 (MV-01, epic #10476)
-- **Branch:** feat/10477-urdf-bundle-precision
-- **PR:** #10485 (merged)
-- **Paths:** src/engines/physics_engines/drake/python/full_body_urdf.py; src/shared/python/model_generation/\_lazy_map.py; src/shared/python/model_generation/builders/urdf_writer.py; src/shared/python/model_generation/export/**init**.py; src/shared/python/model_generation/export/bundle_manifest.py; src/shared/python/model_generation/export/model_bundle.py; tests/integration/test_pinocchio_urdf_bundle_parity.py; tests/unit/model_generation/test_urdf_precision_bundle.py
-- **Started:** 2026-09-19
-- **Last verified:** 2026-09-19 at HEAD (7 unit tests pass; Pinocchio 4.1.0 parity verified in WSL native Ubuntu environment with < 1e-12 m transform and < 1e-11 mass matrix error; ruff clean).
-- **Summary:** Upgraded URDF numeric serialization from lossy 6g/4g to deterministic 17g representation. Implemented ModelBundle and ModelBundleManifest with SHA-256 integrity verification, canonical coordinate ordering, and zip archive export/import. Integrated with Drake full_body_urdf export. Verified numeric round-trip parity with native Pinocchio.
-- **Next step:** PR #10485 merged.
-- **Evidence:** tests/unit/model_generation/test_urdf_precision_bundle.py; tests/integration/test_pinocchio_urdf_bundle_parity.py.
 
 ### DL-#10460 · Consume Shared GSPro Open Connect V1 Codec From Tools
 
@@ -2803,34 +2542,6 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Run CI checks, commit, push, open PR referencing Closes #10334, enable auto-merge, release lease.
 - **Evidence:** docs/development/full_body_models/CANDIDATES.md; tests/unit/motion_matching/test_candidate.py; docs/development/full_body_models/evidence/replays/mujoco_returned81_candidate.npz; docs/development/full_body_models/evidence/viewer/opensim_os3b_candidate.npz.
 
-### DL-#10339 · Pure-XML OpenSim Full-Body Exporter (MS-40)
-
-- **State:** shipped
-- **Owner:** claude
-- **Issue:** #10339 (MS-40, epic #10363)
-- **Branch:** feat/10339-full-body-osim
-- **PR:** #10474 (merged)
-- **Paths:** src/engines/physics_engines/opensim/python/full_body_osim.py; src/engines/physics_engines/opensim/models/generated/full_body_anthro_driver.osim; src/engines/physics_engines/opensim/models/generated/full_body_anthro_iron7.osim; src/engines/physics_engines/opensim/models/generated/export_receipt.json; src/engines/physics_engines/opensim/models/README.md; tests/unit/motion_matching/test_full_body_osim.py; tests/opensim/test_full_body_osim_native.py
-- **Started:** 2026-09-19
-- **Last verified:** 2026-09-19 at HEAD (SELF; pure XML exporter generates 44-coordinate full-body .osim models from anthro specs with dual-grip weld closure, foot contact spheres, and 34 tour markers; unit tests pass without OpenSim SDK; native test tests/opensim/test_full_body_osim_native.py skips cleanly when opensim is not installed; architecture budget, ruff, mypy clean)
-- **Summary:** Implemented pure-XML ElementTree OpenSim exporter producing 44-coordinate full-body models (full_body_anthro_driver.osim and full_body_anthro_iron7.osim) from anthropometric specs without OpenSim runtime dependencies. Enforces 6-DOF dual-grip weld closure, Hunt-Crossley compliant foot contact spheres, 38 internal coordinate actuators, and 34 tour marker attachments with hash-verified provenance receipt.
-- **Next step:** Completed; PR #10474 merged into main.
-- **Evidence:** src/engines/physics_engines/opensim/models/generated/export_receipt.json; tests/unit/motion_matching/test_full_body_osim.py; tests/opensim/test_full_body_osim_native.py.
-
-### DL-#10352 · Shared Contact Law and Grip Closure Conformance (MS-72)
-
-- **State:** shipped
-- **Owner:** claude
-- **Issue:** #10352 (MS-72, epic #10363)
-- **Branch:** feat/10352-contact-closure-conformance
-- **PR:** #10465 (merged)
-- **Paths:** src/shared/python/motion_matching/contact_law.py; docs/development/matched_swing_program/CONTACT_CLOSURE_CONFORMANCE.md; tests/integration/cross_engine/test_contact_closure_conformance.py; tests/integration/cross_engine/divergence_registry.yaml
-- **Started:** 2026-09-18
-- **Last verified:** 2026-09-18 at 01c5ef0c6 (SELF; 10 contact closure conformance tests pass; frontmatter tolerance loading verified; ruff and mypy clean)
-- **Summary:** Formalized shared contact law (Hunt-Crossley compliant normal force with non-tensile clipping and regularized friction) and 6-DOF dual-grip spatial weld closure contracts across engines. Versioned via CONFORMANCE_VERSION 1.0.0 and registered divergences in divergence_registry.yaml.
-- **Next step:** Completed; PR #10465 merged into main.
-- **Evidence:** tests/integration/cross_engine/test_contact_closure_conformance.py; docs/development/matched_swing_program/CONTACT_CLOSURE_CONFORMANCE.md.
-
 ### DL-#10381 · Pinocchio G1 Qualification and Program Truth Reset (MS-107)
 
 - **State:** in_progress
@@ -2842,19 +2553,6 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Last verified:** 2026-09-19 (SELF; barrier-reduced continuation converged at 46.8 mm replay-identical, committed as rejected evidence; ledger regenerated)
 - **Summary:** Ledger is fail-closed. Same-integrator continuation (rtol 1e-6) gave 123.5 mm, barrier-dominated; with range-barrier weight 100 and raised trail-side effort bounds (now defaults, `--range-barrier-weight` flag) the 0.85 s stage converges at 46.8 mm whole, rollout == replay, 1.49 BW. Still REJECTED at G1 (early 25.7, terminal 64.3, yaw 9.3 deg, penetration 17 mm, weight-fraction floor).
 - **Next step:** From `stage_0.85s.npz`: 300 more iterations; terminal/club weight x3; MS-20 contact identification for the 17 mm penetration; pelvis-yaw cost term. One receipt per lever.
-
-### DL-#10338 · Native Crocoddyl Full-Body Fit & Balanced Contact Kinetics (Matched Swing Program MS-31 / #10415)
-
-- **State:** shipped
-- **Owner:** claude
-- **Issue:** #10338 (epic #10363, child epic #10415)
-- **Branch:** feat/10338-crocoddyl-native-fit
-- **PR:** #10411
-- **Paths:** src/engines/physics_engines/pinocchio/python/{crocoddyl_problem,crocoddyl_action,marker_kinematics,full_body_fit}.py; src/shared/python/motion_matching/{contact_force_allocator,swing_evaluator}.py; scripts/match_pinocchio_c3d.py; tests/unit/motion_matching/{test_match_pinocchio_c3d,test_contact_force_allocator,test_swing_evaluator}.py; docs/development/PINOCCHIO_C3D_MOTION_MATCHING_GUIDE.md; evidence/matched/{driver_full_pinocchio,iron_full_pinocchio}
-- **Started:** 2026-09-17
-- **Last verified:** 2026-09-18 (SELF; MS-31 closed on implementation scope via #10371/#10411; qualification continues under DL-#10381)
-- **Summary:** Solved full-swing (654-frame driver, 657-frame 7-iron) decoupled kinematic tracking via `MarkerIkSolver` with category weighting (club 50x, feet 20x), analytical foot non-penetration barrier, and constant-velocity extrapolation prior. Replaced algebraic trail-zero overwrite with rigorous QP-based `ContactForceAllocator` satisfying $M \ddot{q} + b = S^T \tau + J_{\text{ground}}^T f + J_{\text{grip}}^T \lambda + S_{\text{root}}^T \delta \tau_{\text{root}}$ under unilateral contact ($f_z \ge 0$) and exact dynamic equilibrium. Built `SwingEvaluator` for audit-grade segment and phase reporting. Driver club RMSE drops from 425.3 mm to 50.2 mm (G1 gate <= 60 mm met); max foot penetration drops from 111.2 mm to 10.1 mm; ABA acceleration parity residual verified to 0.00155 m/s². Continuous forward simulation replay verified stable without pose resets. Artifacts committed under `evidence/matched/driver_full_pinocchio/` and `evidence/matched/iron_full_pinocchio/`.
-- **Next step:** None here; continue in DL-#10381.
 
 ### DL-#9967 · Native Simscape Tour Matching
 
@@ -3073,6 +2771,409 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#11691 · Protect `.yml` and Related Filenames in the Title-Case Checker
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11691
+- **Branch:** merged via #11692
+- **PR:** #11692
+- **Paths:** see #11692
+- **Started:** 2026-10-07
+- **Last verified:** 2026-10-07 (`de0e48a1`; collated from changes/11691-protect-yml-and-related-filenames-in-the.md)
+- **Summary:** Protect `.yml` and Related Filenames in the Title-Case Checker
+- **Next step:** Shipped in PR #11692.
+
+### DL-#11641 · Register latex-references.yml in the Workflow Inventory so the Inventory Gate Passes on Main
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11641
+- **Branch:** merged via #11666
+- **PR:** #11666
+- **Paths:** see #11666
+- **Started:** 2026-10-07
+- **Last verified:** 2026-10-07 (`ee47b1ee`; collated from changes/11641-register-latex-references-yml-in-the-wor.md)
+- **Summary:** Register latex-references.yml in the workflow inventory so the inventory gate passes on main
+- **Next step:** Shipped in PR #11666.
+
+### DL-#11574 · Ci: Compile Docs/Research LaTeX References With Pinned Tectonic and Check Changed Title Case
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11574
+- **Branch:** merged via #11641
+- **PR:** #11641
+- **Paths:** see #11641
+- **Started:** 2026-10-07
+- **Last verified:** 2026-10-07 (`18a4a5bd`; collated from changes/11574-ci-compile-docs-research-latex-reference.md)
+- **Summary:** ci: compile docs/research LaTeX references with pinned Tectonic and check changed title case
+- **Next step:** Shipped in PR #11641.
+
+### DL-#11554 · Fixed-Size Window Residual: Typed DimeResidualEvaluationError Replaces the Np.Full(100, 1E8) Fake Residual; Bound Residuals Fixed-Length; DbC Postcondition on Residual Length. Single Shooting / Real Defects Deferred to MOSAIC-13 (#11545).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11554
+- **Branch:** fix/11554-fixed-size-residual
+- **PR:** #11637
+- **Paths:** src/shared/python/estimation/dime_dynamics_window.py
+- **Started:** 2026-10-07
+- **Last verified:** 2026-10-07 (`feb58aa1`; collated from changes/11554-fixed-size-window-residual-typed-dimeres.md)
+- **Summary:** Fixed-size window residual: typed DimeResidualEvaluationError replaces the np.full(100, 1e8) fake residual; bound residuals fixed-length; DbC postcondition on residual length. Single shooting / real defects deferred to MOSAIC-13 (#11545).
+- **Next step:** Shipped in PR #11637.
+
+### DL-#11635 · Bump Tornado to 6.5.10 and Remove the Three Stale Tornado Pip-Audit Waivers
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11635
+- **Branch:** merged via #11636
+- **PR:** #11636
+- **Paths:** see #11636
+- **Started:** 2026-10-07
+- **Last verified:** 2026-10-07 (`019a42d3`; collated from changes/11635-bump-tornado-to-6-5-10-and-remove-the-th.md)
+- **Summary:** Bump tornado to 6.5.10 and remove the three stale tornado pip-audit waivers
+- **Next step:** Shipped in PR #11636.
+
+### DL-#11617 · OpenSim Musculoskeletal Swing: GRF Estimate, StaticOptimization Pipeline, Receipt
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11617
+- **Branch:** merged via #11621
+- **PR:** #11621, #11627
+- **Paths:** see #11621
+- **Started:** 2026-10-07
+- **Last verified:** 2026-10-07 (`976b9ce4`; collated from changes/11617-phase-2-spec-driven-musculoskeletal-mode.md)
+- **Summary:** OpenSim musculoskeletal swing: GRF estimate, StaticOptimization pipeline, receipt
+- **Next step:** Shipped in PR #11621.
+
+### DL-#11612 · P-7: Spec Full-Body Model Loaded Through the MyoSuite Runtime Reproduces MuJoCo Bit-Exactly Under the Same Inputs (L0/L1/L2 Parity Receipt)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11612
+- **Branch:** merged via #11628
+- **PR:** #11628
+- **Paths:** see #11628
+- **Started:** 2026-10-07
+- **Last verified:** 2026-10-07 (`cf9fb216`; collated from changes/11612-p-7-spec-full-body-model-loaded-through.md)
+- **Summary:** P-7: spec full-body model loaded through the MyoSuite runtime reproduces MuJoCo bit-exactly under the same inputs (L0/L1/L2 parity receipt)
+- **Next step:** Shipped in PR #11628.
+
+### DL-#11611 · OpenSim Same-Input Parity Adapter (Exact Weld KKT, Shared Contact Law); Fix OSIM Exporter XYZ Euler Convention and 41-Coordinate Validation
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11611
+- **Branch:** merged via #11628
+- **PR:** #11628
+- **Paths:** see #11628
+- **Started:** 2026-10-07
+- **Last verified:** 2026-10-07 (`cf9fb216`; collated from changes/11611-opensim-same-input-parity-adapter-exact.md)
+- **Summary:** OpenSim same-input parity adapter (exact weld KKT, shared contact law); fix OSIM exporter XYZ Euler convention and 41-coordinate validation
+- **Next step:** Shipped in PR #11628.
+
+### DL-#11607 · Same-Input Parity P-2: Same-Input-Bundle/V1, Shared ZOH RK4 Integrator (8 Substeps for Stiff Contact Modes), Per-Step Closure Projection, MuJoCo Reference Generation, Replay Scoring; Pipeline Persists Q_Track
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11607
+- **Branch:** merged via #11628
+- **PR:** #11628
+- **Paths:** see #11628
+- **Started:** 2026-10-07
+- **Last verified:** 2026-10-07 (`cf9fb216`; collated from changes/11607-same-input-parity-p-2-same-input-bundle.md)
+- **Summary:** Same-input parity P-2: same-input-bundle/v1, shared ZOH RK4 integrator (8 substeps for stiff contact modes), per-step closure projection, MuJoCo reference generation, replay scoring; pipeline persists q_track
+- **Next step:** Shipped in PR #11628.
+
+### DL-#11606 · Same-Input Parity P-1: VectorPlant + Convention-Free Closure Projection; MuJoCo Exact-KKT Option; Pointwise MuJoCo/Drake/Pinocchio Acceleration Parity Gate and Receipt (Worst 1.1E-9 Relative Over 31 Frames)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11606
+- **Branch:** merged via #11615
+- **PR:** #11615
+- **Paths:** see #11615
+- **Started:** 2026-10-07
+- **Last verified:** 2026-10-07 (`f2def974`; collated from changes/11606-same-input-parity-p-1-vectorplant-conven.md)
+- **Summary:** Same-input parity P-1: VectorPlant + convention-free closure projection; MuJoCo exact-KKT option; pointwise MuJoCo/Drake/Pinocchio acceleration parity gate and receipt (worst 1.1e-9 relative over 31 frames)
+- **Next step:** Shipped in PR #11615.
+
+### DL-#11623 · Per-Workspace CARGO_HOME for Rust-Quickstart and Realtime-Soak; Contract Test Pins RUSTUP_HOME and CARGO_HOME for Every Rust Job (RM#2021)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11623
+- **Branch:** merged via #11624
+- **PR:** #11624
+- **Paths:** see #11624
+- **Started:** 2026-10-07
+- **Last verified:** 2026-10-07 (`17b3b95c`; collated from changes/11623-per-workspace-cargo-home-for-rust-quicks.md)
+- **Summary:** Per-workspace CARGO_HOME for rust-quickstart and realtime-soak; contract test pins RUSTUP_HOME and CARGO_HOME for every Rust job (RM#2021)
+- **Next step:** Shipped in PR #11624.
+
+### DL-#1893 · Archive HANDOFF.md and DEVELOPMENT_LOG.md Verbatim (RM#1893)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #1893
+- **Branch:** merged via #11620
+- **PR:** #11620
+- **Paths:** see #11620
+- **Started:** 2026-10-07
+- **Last verified:** 2026-10-07 (`7a4e3436`; collated from changes/1893-archive-handoff-devlog.md)
+- **Summary:** Archive HANDOFF.md And DEVELOPMENT_LOG.md Verbatim (RM#1893)
+- **Next step:** Shipped in PR #11620.
+
+### DL-#11584 · Settings_Dialog: Ignore Late Dependency-Check Results After Close; Worker Emits Failed for Any Exception
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11584
+- **Branch:** merged via #11618
+- **PR:** #11618
+- **Paths:** see #11618
+- **Started:** 2026-10-07
+- **Last verified:** 2026-10-07 (`1696354a`; collated from changes/11584-settings-dialog-ignore-late-dependency-c.md)
+- **Summary:** settings_dialog: ignore late dependency-check results after close; worker emits failed for any exception
+- **Next step:** Shipped in PR #11618.
+
+### DL-#11601 · Ci: Deleted-Test Guard Honours a Reviewed Allowlist (Scripts/Config/Reviewed_Test_Deletions.Json: Path + Issue + Reason, Fails Closed When Malformed) so an Approved Test Retirement Can Pass the Merge Queue; Unapproved Deletions Still Fail.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11601
+- **Branch:** merged via #11602
+- **PR:** #11602
+- **Paths:** see #11602
+- **Started:** 2026-10-06
+- **Last verified:** 2026-10-06 (`cf9f9ad8`; collated from changes/11601-ci-deleted-test-guard-honours-a-reviewed.md)
+- **Summary:** ci: deleted-test guard honours a reviewed allowlist (scripts/config/reviewed_test_deletions.json: path + issue + reason, fails closed when malformed) so an approved test retirement can pass the merge queue; unapproved deletions still fail.
+- **Next step:** Shipped in PR #11602.
+
+### DL-#1976 · Make the Change-Fragment Round-Trip Test Hermetic so Collating a Real DL-#1976 Entry Cannot Break It
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #1976
+- **Branch:** merged via #11592
+- **PR:** #11592
+- **Paths:** see #11592
+- **Started:** 2026-10-06
+- **Last verified:** 2026-10-06 (`d2086034`; collated from changes/1976-make-the-change-fragment-round-trip-test.md)
+- **Summary:** Make the change-fragment round-trip test hermetic so collating a real DL-#1976 entry cannot break it
+- **Next step:** Shipped in PR #11592.
+
+### DL-#11595 · Ci: Give Every Dtolnay/Rust-Toolchain Job a Per-Job RUSTUP_HOME (${{ Github.Workspace }}/.rustup-home) so Rustup Never Upgrades the Runner Image's Partially Installed ~/.rustup Toolchain in Place; Contract Test in Tests/Ci/test_unit_gate_rust_kernel.py.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11595
+- **Branch:** merged via #11597
+- **PR:** #11597
+- **Paths:** see #11597
+- **Started:** 2026-10-06
+- **Last verified:** 2026-10-06 (`39fbd017`; collated from changes/11595-ci-give-every-dtolnay-rust-toolchain-job.md)
+- **Summary:** ci: give every dtolnay/rust-toolchain job a per-job RUSTUP_HOME (${{ github.workspace }}/.rustup-home) so rustup never upgrades the runner image's partially installed ~/.rustup toolchain in place; contract test in tests/ci/test_unit_gate_rust_kernel.py.
+- **Next step:** Shipped in PR #11597.
+
+### DL-#2018 · Vendor Automerge_Guard and Requeue_Stalled_Merges (Stalled-Merge Requeue Tooling) From Repository_Management With Canonical Tests (Refs Repository_Management#2018)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #2018
+- **Branch:** merged via #11577
+- **PR:** #11577, #11586
+- **Paths:** see #11577
+- **Started:** 2026-10-06
+- **Last verified:** 2026-10-06 (`1943a1b7`; collated from changes/2018-resync-requeue.md)
+- **Summary:** Vendor automerge_guard and requeue_stalled_merges (stalled-merge requeue tooling) from Repository_Management with canonical tests (Refs Repository_Management#2018)
+- **Next step:** Shipped in PR #11577.
+
+### DL-#11593 · Clear the Security Findings Main Carries: Werkzeug 3.1.8 to 3.1.9 (CVE-2026-102598) and Fsspec 2026.1.0 to 2026.6.0 (CVE-2026-104851) in Both Python Lockfiles, and Source-Map-Js 1.2.1 to 1.2.2 (CVE-2026-93749 / GHSA-68Fv-2Mgg-Jv7q) in Ui/Package-Lock.Json; Lockfile-Only Upgrades, No New Waiver.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11593
+- **Branch:** merged via #11594
+- **PR:** #11594
+- **Paths:** see #11594
+- **Started:** 2026-10-06
+- **Last verified:** 2026-10-06 (`2d183206`; collated from changes/11593-bump-werkzeug-3-1-8-to-3-1-9-in-both-loc.md)
+- **Summary:** Clear the security findings main carries: werkzeug 3.1.8 to 3.1.9 (CVE-2026-102598) and fsspec 2026.1.0 to 2026.6.0 (CVE-2026-104851) in both Python lockfiles, and source-map-js 1.2.1 to 1.2.2 (CVE-2026-93749 / GHSA-68fv-2mgg-jv7q) in ui/package-lock.json; lockfile-only upgrades, no new waiver.
+- **Next step:** Shipped in PR #11594.
+
+### DL-#11577 · Fix(Tests): Wait for Settings-Dialog Dependency-Check Workers Before Teardown
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11577
+- **Branch:** merged via #11581
+- **PR:** #11581
+- **Paths:** see #11581
+- **Started:** 2026-10-06
+- **Last verified:** 2026-10-06 (`843e3e82`; collated from changes/11577-fix-tests-wait-for-settings-dialog-depen.md)
+- **Summary:** fix(tests): wait for settings-dialog dependency-check workers before teardown
+- **Next step:** Shipped in PR #11581.
+
+### DL-#11571 · Reconcile Engine Capability Matrix With Get_Capabilities and Add Consistency Test
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11571
+- **Branch:** merged via #11576
+- **PR:** #11576, #11580
+- **Paths:** see #11576
+- **Started:** 2026-10-05
+- **Last verified:** 2026-10-05 (`a40295cc`; collated from changes/11571-launcher-capability-tests.md)
+- **Summary:** Reconcile engine capability matrix with get_capabilities and add consistency test
+- **Next step:** Shipped in PR #11576.
+
+### DL-#11573 · Report NaN for Unmeasured Replay Metrics and Fail Closed in Acceptance Evaluation
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11573
+- **Branch:** merged via #11575
+- **PR:** #11575
+- **Paths:** see #11575
+- **Started:** 2026-10-05
+- **Last verified:** 2026-10-05 (`34cf0eb8`; collated from changes/11573-unmeasured-replay-metrics-nan.md)
+- **Summary:** Report NaN for unmeasured replay metrics and fail closed in acceptance evaluation
+- **Next step:** Shipped in PR #11575.
+
+### DL-#11567 · Drake Full-Body Fit Scores Forward Kinematics of the Drake Rollout Instead of the Warm-Start Candidate's Markers
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11567
+- **Branch:** merged via #11568
+- **PR:** #11568
+- **Paths:** see #11568
+- **Started:** 2026-10-05
+- **Last verified:** 2026-10-05 (`80dde80a`; collated from changes/11567-drake-full-body-fit-scores-forward-kinem.md)
+- **Summary:** Drake full-body fit scores forward kinematics of the Drake rollout instead of the warm-start candidate's markers
+- **Next step:** Shipped in PR #11568.
+
+### DL-#11556 · Ci(Security): Re-Vendor fork_pr_runner_guard.py and New fork_pr_guard_analysis.py From Repository_Management (RM#1996): Same-Repo if: Exemption and Sink-Based Head-Checkout Analysis.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11556
+- **Branch:** merged via #11556
+- **PR:** #11556
+- **Paths:** see #11556
+- **Started:** 2026-10-05
+- **Last verified:** 2026-10-05 (`b081650e`; collated from changes/11556-ci-security-re-vendor-fork-pr-runner-gua.md)
+- **Summary:** ci(security): re-vendor fork_pr_runner_guard.py and new fork_pr_guard_analysis.py from Repository_Management (RM#1996): same-repo if: exemption and sink-based head-checkout analysis.
+- **Next step:** Shipped in PR #11556.
+
+### DL-#11552 · Fix(Estimation): DIME Initialisers, Ablations and Manifest Report Not-Measured Instead of Constants or Ground-Truth-Derived Figures
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11552
+- **Branch:** merged via #11559
+- **PR:** #11559
+- **Paths:** see #11559
+- **Started:** 2026-10-05
+- **Last verified:** 2026-10-05 (`3637c80e`; collated from changes/11552-fix-estimation-dime-initialisers-ablatio.md)
+- **Summary:** fix(estimation): DIME initialisers, ablations and manifest report not-measured instead of constants or ground-truth-derived figures
+- **Next step:** Shipped in PR #11559.
+
+### DL-#11551 · DIME Replay and Engine Qualification Fail Closed on Missing Reference/Metrics; Replay Provenance Read From the Environment
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11551
+- **Branch:** merged via #11558
+- **PR:** #11558
+- **Paths:** see #11558
+- **Started:** 2026-10-05
+- **Last verified:** 2026-10-05 (`8dfd58bc`; collated from changes/11551-dime-replay-and-engine-qualification-fai.md)
+- **Summary:** DIME replay and engine qualification fail closed on missing reference/metrics; replay provenance read from the environment
+- **Next step:** Shipped in PR #11558.
+
+### DL-#11549 · Drift Prediction Propagates Covariance Through F = Df/Dx per Step, Steps the Full Horizon as H Steps of Dt, and Never Actuates the Floating-Base Root by Default
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11549
+- **Branch:** fix/11549-drift-covariance-propagation
+- **PR:** #11562
+- **Paths:** src/shared/python/estimation/drift_prediction.py
+- **Started:** 2026-10-05
+- **Last verified:** 2026-10-05 (`dc22a363`; collated from changes/11549-drift-prediction-propagates-covariance-t.md)
+- **Summary:** drift prediction propagates covariance through F = df/dx per step, steps the full horizon as H steps of dt, and never actuates the floating-base root by default
+- **Next step:** Shipped in PR #11562.
+
+### DL-#11548 · Multi-Trial MAP: Residual and Jacobian Prior Rows Share One Layout (Locked Priors Excluded From Both); Posterior Covariance Is the Schur Marginal Over the Shared Parameters, Reported as Unavailable (`covariance_status="rank_deficient"`, NaN) When the Fisher Matrix Is Singular; Calculation Documented in Docs/Conventions/canonical-v2.md §6.1
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11548
+- **Branch:** merged via #11557
+- **PR:** #11557
+- **Paths:** see #11557
+- **Started:** 2026-10-05
+- **Last verified:** 2026-10-05 (`efa445dd`; collated from changes/11548-multi-trial-map-residual-and-jacobian-pr.md)
+- **Summary:** Multi-trial MAP: residual and Jacobian prior rows share one layout (locked priors excluded from both); posterior covariance is the Schur marginal over the shared parameters, reported as unavailable (`covariance_status="rank_deficient"`, NaN) when the Fisher matrix is singular; calculation documented in docs/conventions/canonical-v2.md §6.1
+- **Next step:** Shipped in PR #11557.
+
+### DL-#11547 · DIME Solver Cache Key Now Covers Targets, Weights and Solver Options; Cost Breakdown Reports Measured Values or Not-Measured (None) Instead of Wall-Time Fractions
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11547
+- **Branch:** merged via #11561
+- **PR:** #11561
+- **Paths:** see #11561
+- **Started:** 2026-10-05
+- **Last verified:** 2026-10-05 (`d7b122a1`; collated from changes/11547-dime-solver-cache-key-now-covers-targets.md)
+- **Summary:** DIME solver cache key now covers targets, weights and solver options; cost breakdown reports measured values or not-measured (None) instead of wall-time fractions
+- **Next step:** Shipped in PR #11561.
+
+### DL-#11550 · DIME Manifold Retract and Local-Coordinate Jacobians Are Now the Exact Derivatives of the Right Quaternion Chart at Any Pose and Velocity (J_R^-1, dExp/Dv), Verified Against Central Finite Differences
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11550
+- **Branch:** merged via #11560
+- **PR:** #11560
+- **Paths:** see #11560
+- **Started:** 2026-10-05
+- **Last verified:** 2026-10-05 (`a9f33f14`; collated from changes/11550-dime-manifold-retract-and-local-coordina.md)
+- **Summary:** DIME manifold retract and local-coordinate Jacobians are now the exact derivatives of the right quaternion chart at any pose and velocity (J_r^-1, dExp/dv), verified against central finite differences
+- **Next step:** Shipped in PR #11560.
+
+### DL-#11525 · CLAUDE.md Is Prettier-Clean: Restored the Mangled Where-to-Edit Code Spans and Spaced the @AGENTS.md Import
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11525
+- **Branch:** merged via #11526
+- **PR:** #11526
+- **Paths:** see #11526
+- **Started:** 2026-10-05
+- **Last verified:** 2026-10-05 (`45110b2b`; collated from changes/11525-claude-md-is-prettier-clean-restored-the.md)
+- **Summary:** CLAUDE.md is prettier-clean: restored the mangled Where-to-edit code spans and spaced the @AGENTS.md import
+- **Next step:** Shipped in PR #11526.
+
+### DL-#1989 · Keep Fork PRs Off the Self-Hosted Fleet: Fork Guard on PR-Triggered Jobs, Hosted Route for the Quality-Gate Lane, and a Static Checker (RM#1989)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #1989
+- **Branch:** merged via #11523
+- **PR:** #11523
+- **Paths:** see #11523
+- **Started:** 2026-10-05
+- **Last verified:** 2026-10-05 (`c20fb0b7`; collated from changes/1989-fork-pr-self-hosted-guard.md)
+- **Summary:** Keep fork PRs off the self-hosted fleet: fork guard on PR-triggered jobs, hosted route for the quality-gate lane, and a static checker (RM#1989)
+- **Next step:** Shipped in PR #11523.
+
 ### DL-#10750 · Keep Test-Generated JSON Out of Committed Working Tree
 
 - **State:** shipped
@@ -3085,659 +3186,6 @@ open. Preserve explicit ground configuration in independent replay.
 - **Last verified:** 2026-09-23 (`008487870`)
 - **Summary:** Thread optional evidence_dir through save_fast_match_evidence and point tests at tmp_path; support optional config_path and avoid unconditional save_config on HumanoidLauncher instantiation so tests never rewrite committed JSON artifacts.
 - **Evidence:** PR #10761 merged cleanly to main at 008487870 with all CI checks passing.
-
-### DL-#8875 · Motion Pipeline Formats Documentation Reconcile
-
-- **State:** shipped
-- **Owner:** antigravity
-- **Issue:** #8875
-- **PR:** #10018 (merged)
-- **Paths:** src/shared/python/motion_pipeline/api.py, docs/motion_pipeline/formats.md, tests/unit/motion_pipeline/orchestrator/test_api.py, docs/development/DEVELOPMENT_LOG.md, SPEC.md, docs/agent_context/
-- **Started:** 2026-09-12
-- **Last verified:** 2026-09-12 (`3c17225ef`)
-- **Summary:** Reconcile motion pipeline API docstrings and OpenAPI schemas to advertise registered source formats and auto/passthrough instead of rejected formats (mat, fbx, generic json); remove the misleading 'Auto-generated' claim from formats.md; and add unit test coverage asserting format validation and schema accuracy.
-- **Evidence:** All CI passed including quality-gate and unit-test-gate; merged to main at 3c17225ef.
-
-### DL-#8695 · DRY Duplication Quarantine Tightening
-
-- **State:** shipped
-- **Owner:** claude
-- **Issue:** #8695
-- **PR:** #10005 (merged)
-- **Paths:** scripts/config/dry_duplication_quarantine.json, SPEC.md, docs/development/DEVELOPMENT_LOG.md
-- **Started:** 2026-09-11
-- **Last verified:** 2026-09-12 (`c578ca942`)
-- **Summary:** Pruned 72 dead quarantined fingerprints across supported scanner runtimes (666 -> 594); no entry raised, baseline not regenerated.
-- **Evidence:** All CI passed; merged to main at c578ca942.
-
-### DL-#9747 · Signed Release Tag Enforcement and Verification
-
-- **State:** shipped
-- **Owner:** claude
-- **Issue:** #9747
-- **PR:** #10008 (merged)
-- **Paths:** .github/workflows/release.yml, docs/operations/release-runbook.md, tests/ci/test_ci_infrastructure.py, SPEC.md, docs/development/DEVELOPMENT_LOG.md
-- **Started:** 2026-09-12
-- **Last verified:** 2026-09-12 (`c893a73ad`)
-- **Summary:** Enforce cryptographic signature verification on production release tags in release.yml and update release runbook.
-- **Evidence:** All CI passed including quality-gate and unit-test-gate; merged to main at c893a73ad.
-
-### DL-#9953 · Scalar Parameter Bounds
-
-- **State:** shipped
-- **Owner:** codex
-- **Issue:** #9953
-- **PR:** #9955 (merged)
-- **Paths:** src/shared/python/optimization/ocp/parameter_ocp.py; parameter OCP tests; calculation inventory.
-- **Started:** 2026-09-10
-- **Last verified:** 2026-09-10 (`32410babfd`)
-- **Summary:** Explicit constant interpolation gives each shared parameter a single-column bound, preserving limits and locked values.
-- **Evidence:** All CI passed, including Linux Bioptim OCP and both manufactured checks. Merged as32410babfd1e4741fa0c53bf05dd8403a51bf233.
-
-### DL-#9952 · Native Camera Setup
-
-- **State:** shipped
-- **Owner:** codex
-- **Issue:** #9952; parent #9906
-- **PR:** #9954 (merged)
-- **Paths:** src/tools/capture_rig/camera_setup\*.py; wizard/header; capability registry; tests and camera setup guide.
-- **Started:** 2026-09-10
-- **Last verified:** 2026-09-10 (`4b305df1d1`)
-- **Summary:** Background discovery, stable named bindings, immutable plan revisions and optional wizard entry reuse the rig pipeline.
-
-### DL-#9934 · Cross-Model Biomechanics Analysis
-
-- **State:** shipped
-- **Owner:** codex
-- **Issue:** #9934
-- **PR:** #9941 (merged)
-- **Paths:** src/shared/python/biomechanics, src/api/routes/biomechanics.py, src/shared/python/analysis/biomechanics_display.py, src/shared/python/dashboard, ui/src/components/analysis
-- **Started:** 2026-09-09
-- **Last verified:** 2026-09-10 (`300d96a1b2`)
-- **Summary:** Shared calibrated conventions and golf metrics across model inputs with explicit availability and configurable displays.
-- **Evidence:** Focused 63-test suite passes; API compute/convert/display and web plot tests pass.
-
-### DL-#9926 · Unified Model and Video Analysis
-
-- **State:** shipped
-- **Owner:** codex
-- **Issue:** #9926; children #9929, #9930, #9932, #9942
-- **PR:** #9933 (merged)
-- **Paths:** src/motion_capture/coaching; src/tools/capture_rig; src/tools/pose_studio
-- **Started:** 2026-09-09
-- **Last verified:** 2026-09-10 (`f04aa1a570`)
-- **Summary:** Shared geometry and model-only coaching; see [ledger](unified_analysis_9926.md).
-- **Evidence:** Comparison launch/save, PNG parity, snapshot video, cancellation and camera-evidence tests pass; Ruff/format, budgets and LoD pass; Driver comparison drawing UI and PNG inspected.
-
-### DL-#9921 · Native Simscape Tour-Average Matching
-
-- **State:** shipped
-- **Owner:** codex
-- **Issue:** #9921; implementation #9924, #9925, #9927
-- **PR:** #9948 (merged)
-- **Paths:** Simscape MATLAB motion_matching/shared, model initialization, shared Python prefix_fit, tests and simscape_tour_matching docs
-- **Started:** 2026-09-09
-- **Last verified:** 2026-09-11 (`156fcf2fa5`)
-- **Summary:** Reproducible forward-dynamics matching with fixed geometry and continuous polynomial torques; native starting pose verified, full swing fit outstanding.
-
-### DL-#9915 · Verified Agent Context
-
-- **State:** shipped
-- **Owner:** codex
-- **Issue:** #9915
-- **PR:** #9920 (merged)
-- **Paths:** `docs/agent_context`, `.github/workflows/ci-standard.yml`, `scripts/check_doc_size_budget.py`, `tests/ci`, `tests/scripts`
-- **Started:** 2026-09-09
-- **Last verified:** 2026-09-10 (final e83bd2e4 pins pass provider/seam, context, atlas and navigation controls; wheel passes launcher and calibration tests).
-- **Summary:** Twelve components and five reviewed integrations reuse the atlas and capture goals. Main276998030 is integrated; a required regression rejects divergent pip/source/Rust providers.
-
-### DL-#9914 · C3D Reference Fitting
-
-- **State:** shipped
-- **Owner:** codex
-- **Issue:** #9914
-- **PR:** #9918 (merged)
-- **Paths:** src/motion_capture
-- **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`6f2d63325` merge; protected CI, 20 club assets)
-- **Summary:** Fits, club/volume/handedness display; see [evidence](reference_fitting_epic.md).
-
-### DL-#9913 · Capture Journey Feedback and Detachable Views
-
-- **State:** shipped
-- **Owner:** codex
-- **Issue:** #9913; epic #9906
-- **PR:** #9917 (merged)
-- **Paths:** capture_rig source/tests, guide and parity registry
-- **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`8fce9f238` merge;445 local tests and protected CI pass)
-- **Summary:** Identity/history, linked help/provenance and retained detachable Qt views.
-
-### DL-#9912 · Impact Shaft Provider Integration
-
-- **State:** shipped
-- **Owner:** codex
-- **Issue:** #9912; parent #9703
-- **PR:** #9916 (merged)
-- **Paths:** vendor/ud-tools, tests/shared_contracts, docs/development/impact-acoustics
-- **Started:** 2026-09-09
-- **Last verified:** 2026-09-10 (PR #9916 and #9920 merged). Main pin e83bd2e4a7a29a2dcd8145ef2d1efa07123324f0 consistent across pins.
-- **Summary:** Qualify Tools shaft/theme provider; see PROVIDER_PIN_RESULTS.json.
-
-### DL-#9911 · Preview Discovery Failure Recovery
-
-- **State:** shipped
-- **Owner:** codex
-- **Issue:** #9911
-- **PR:** #9910 (merged)
-- **Paths:** src/tools/capture_rig/preview.py, tests/tools/capture_rig/test_preview.py
-- **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`18c8f922e` merge; recovery tests pass)
-- **Summary:** Report discovery imports/timeouts through preview status.
-
-### DL-#9907 · Guided Capture Outcomes
-
-- **State:** shipped
-- **Owner:** codex
-- **Issue:** #9907; #9908; epic #9906
-- **PR:** #9931 (merged)
-- **Paths:** `src/tools/capture_rig`; capability graph/generator; matching tests and guide.
-- **Started:** 2026-09-09
-- **Last verified:** 2026-09-10 (a74d5ebd2; 600 integrated regressions, normal push hooks, scoped mypy and Qt/browser review pass)
-- **Summary:** Standard Qt outcome wizard shares typed map metadata and existing editors/readiness; capture-owned resume, optional My Clubs, background status and safe map-plan import.
-
-### DL-#9905 · Player Bag and Capture Equipment
-
-- **State:** shipped
-- **Owner:** codex
-- **Issue:** #9905; epic #9902
-- **PR:** #9923 (merged)
-- **Paths:** club_data/player_clubs.py; rig/capture_notes.py and equipment.py; Capture Rig bag/editor/library; model/session.py; matching tests, guide and generated maps.
-- **Started:** 2026-09-09
-- **Last verified:** 2026-09-10 (`5ada5e6a68`)
-- **Summary:** My Clubs supports catalog/custom entries, partial measurements, notes, archive and capture assignment. Captures preserve club snapshots and editable-copy lineage; fit provenance retains evidence.
-
-### DL-#9904 · Offline Club Source Catalog
-
-- **State:** shipped
-- **Owner:** codex
-- **Issue:** #9904; epic #9902
-- **PR:** #9919 (merged)
-- **Paths:** club_data/catalog_sources.py, public_clubs.json, scripts/review_club_catalog.py and tests
-- **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`01831aa4c5`)
-- **Summary:** Three sourced builds, review diffs and preserved player overrides.
-
-### DL-#9903 · Attributed Club Catalog
-
-- **State:** shipped
-- **Owner:** codex
-- **Issue:** #9903; epic #9902
-- **PR:** #9919 (merged)
-- **Paths:** club_data/, test_club_catalog.py and club_catalog.md
-- **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`01831aa4c5`)
-- **Summary:** Attributed optional properties, explicit inference gates and lossless exchange.
-
-### DL-#9899 · Calibration Revision Status
-
-- **State:** shipped
-- **Owner:** codex
-- **Issue:** #9899
-- **PR:** #9959 (merged)
-- **Paths:** reconstruct; rig command; capture_rig result evidence; tests.
-- **Started:** 2026-09-10
-- **Last verified:** 2026-09-10 (`fff95d5780`)
-- **Summary:** Calibration and reconstruction fingerprints invalidate stale outputs; preserve results.
-
-### DL-#9898 · Common Reference Calibration
-
-- **State:** shipped
-- **Owner:** codex
-- **Issue:** #9898/#9900/#9909
-- **PR:** #9946 (merged)
-- **Paths:** reference_calibration, wizard, lens adapter
-- **Started:** 2026-09-09
-- **Last verified:** 2026-09-10 (732553479;28 pin/context checks pass)
-- **Summary:** Reviewed paper/ruler calibration and guided recovery. [Evidence and limits](common_reference_calibration.md).
-
-### DL-#9894 · Scoped Ubuntu CI Dependencies
-
-- **State:** shipped
-- **Owner:** codex
-- **Issue:** #9894
-- **PR:** #9896 (merged)
-- **Paths:** .github/workflows/ci-standard.yml, scripts/ci/, tests/scripts/
-- **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`5ef615e6fe22a046aec0bac4f80a1c241d03fef3`)
-- **Summary:** Signed per-job APT sources preserve shared-runner configuration; six Bash regressions and standard CI pass.
-
-### DL-#9892 · Fleet Guide Compatibility
-
-- **State:** shipped
-- **Owner:** codex
-- **Issue:** #9892
-- **PR:** #9896 (merged)
-- **Paths:** scripts/check_agent_docs_consistency.py, tests/architecture/test_check_agent_docs_consistency.py
-- **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`5ef615e6fe22a046aec0bac4f80a1c241d03fef3`)
-- **Summary:** Central managed guidance and legitimate external/optional paths pass without hiding real missing-file failures.
-
-### DL-#9883 · Instructor Reference Alignment Workspace
-
-- **State:** shipped
-- **Owner:** codex
-- **Issue:** #9883
-- **PR:** #9896 (merged)
-- **Paths:** src/tools/capture*rig/reference*\*.py, styling.py, tests/tools/capture_rig/
-- **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`5ef615e6fe22a046aec0bac4f80a1c241d03fef3`)
-- **Summary:** Responsive placement/timing/notes controls, event alignment, revision checks, preview/export parity and native layout evidence are delivered.
-- **Evidence:** Qualified candidate equals merged tree; standard unit gate passed 14,821 tests.
-
-### DL-#9882 · Comparison Rendering and Export Qualification
-
-- **State:** shipped
-- **Owner:** codex
-- **Issue:** #9882
-- **PR:** #9896 (merged)
-- **Paths:** src/tools/capture_rig/reference_rendering.py, reference_export.py
-- **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`5ef615e6fe22a046aec0bac4f80a1c241d03fef3`)
-- **Summary:** Shared compositor, coverage-aware expert homography and staged exports delivered with qualified product #9896.
-
-### DL-#9881 · Reference Timing and Camera Evidence
-
-- **State:** shipped
-- **Owner:** codex
-- **Issue:** #9881 (advanced reference epic #9863)
-- **PR:** #9885 (merged)
-- **Paths:** src/motion_capture/reference, src/motion_capture/reconstruct/overlay3d.py, src/tools/capture_rig/reference_comparison.py, src/tools/capture_rig/reference_export.py, related tests and benchmark
-- **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`8901f5804f`)
-- **Summary:** Immutable bounded event anchors, binary-search gap-aware sampling, actual camera/clock snapshots and stale-registration checks replace unsupported calibration assumptions.
-- **Evidence:** 12 adverse regressions failed before repair; 46 combined tests and 14-module mypy pass. Sampling medians: 0.157/0.093/0.304 ms for120/1200/12000 frames. CI typing/budget corrections pass16 tests.
-
-### DL-#9879 · Comparison State and Export Lifetime
-
-- **State:** shipped
-- **Owner:** codex
-- **Issue:** #9879 (advanced reference epic #9863)
-- **PR:** #9884 (merged)
-- **Paths:** src/motion_capture/reference/comparison.py, src/tools/capture_rig/reference_comparison.py, src/tools/capture_rig/swing_export_actions.py, tests/tools/capture_rig/test_reference_comparison_state.py
-- **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`2c99bc83ea`)
-- **Summary:** Preserve exact unrelated layer/registration fields, reject bad saved records, and reuse the existing export controller for safe thread ownership and deferred close.
-- **Evidence:** Nine adverse regressions preceded repair;31 comparison/cancellation/swing/coaching tests and three-module mypy pass.
-
-### DL-#9865 · Reference Scene Registration & Synchronization
-
-- **State:** shipped
-- **Owner:** codex
-- **Issue:** #9865 (advanced reference epic #9863)
-- **PR:** #9871 (merged)
-- **Paths:** src/motion_capture/reference/registration.py, src/motion_capture/reconstruct/overlay3d.py, related tests/docs
-- **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`10caddd219`)
-- **Summary:** Calibrated scene registration, event-anchor and offset time synchronization, missing-joint gap mask preservation across bounded interpolation, distortion-aware camera projection, and 2D expert video homography without 3D claims.
-- **Evidence:** 7 focused registration tests pass in tests/motion_capture/test_reference_registration.py. Strict round-trip serialization/deserialization validated. Projection tested with both pinhole and Brown-Conrady distortion. Ruff checks pass cleanly.
-
-### DL-#9864 · Expert Reference Asset Imports
-
-- **State:** shipped
-- **Owner:** codex
-- **Issue:** #9864 (advanced reference epic #9863)
-- **PR:** #9870 (merged)
-- **Paths:** src/motion_capture/reference, src/tools/capture_rig/reference_import.py, src/tools/capture_rig/reference_library_dialog.py, src/tools/capture_rig/library_dialog.py, src/shared/python/motion_pipeline/sources/c3d_adapter.py and related tests/docs/maps
-- **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`90b147e10`; local qualification complete)
-- **Summary:** Versioned portable reference assets retain explicit mapping, source hashes, timestamps and missing points; native library adds imports, notes/archive and background I/O. Expert videos remain linked 2D assets.
-- **Evidence:** 30 integration tests pass, including real C3D and fresh-process isolation. Four native UI tests, eight-module mypy and architecture checks pass after layout/helper corrections.
-
-### DL-#9862 · Saved Coaching References
-
-- **State:** shipped
-- **Owner:** codex
-- **Issue:** #9862 (product #9849)
-- **PR:** #9869 (merged)
-- **Paths:** src/motion_capture/coaching, src/tools/capture_rig/coaching_canvas.py, coaching_dialog.py, coaching_export.py and related integration/tests/docs
-- **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`77e6bca88`; protected PR merged)
-- **Summary:** Saved source-coordinate shapes; draw/edit/style/frame visibility, undo/redo, library/editor access and cancellable PNG/video export.
-- **Evidence:** 49 registry/atlas and19 drawing/export tests;12-module mypy;3012-file LoD clean. Visual minimums:496px references,465px editor.
-
-### DL-#9860 · Capture Editing and Library
-
-- **State:** shipped
-- **Owner:** codex
-- **Issue:** #9860, #9861 (product #9849)
-- **PR:** #9868 (merged)
-- **Paths:** src/motion_capture/rig/edits.py, ingest.py, src/tools/capture_rig/swing_editor.py, related tests and docs/development/capture_editing_integration.md
-- **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`4c89892d7`; protected PR merged)
-- **Summary:** Source-preserving trim/crop, capture notes/library, archive/storage/rename rollback, editable copies, cancellable export and timeline guards.
-- **Evidence:** 300 integrated, 12 library/UI and 5 editor tests; eight-module mypy. Visual QA: 850x650, minimum492px.
-
-### DL-#9851 · Capture Responsiveness and Recovery
-
-- **State:** shipped
-- **Owner:** codex
-- **Issue:** #9851, #9857 (epic #9849)
-- **PR:** #9859 (merged)
-- **Paths:** src/tools/capture_rig/player.py, process_runner.py, benchmark_capture_responsiveness.py and cache/process tests; docs/development/capture_product_review.md
-- **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`eaf8503ce`)
-- **Summary:** Capture Responsiveness and Recovery
-- **Acceptance:** Repeated frames decode once with isolated pixels; failed starts restore lifecycle/retry; benchmark limits documented.
-- **Evidence:** 241 camera tests after cache; six focused tests after recovery; duplicate median 196.788 to 12.613 ms.
-
-### DL-#9850 · Generated Capability Atlas
-
-- **State:** shipped
-- **Owner:** codex
-- **Issue:** #9850 (children #9852, #9853; product #9849)
-- **PR:** #9856 (merged)
-- **Paths:** `scripts/capability_atlas/`, `scripts/generate_capability_atlas.py`,
-- **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`9d6e6a872`)
-- **Summary:** Generated C4-style context, workflow/artifact maps, searchable capabilities and Mermaid from existing registries.
-
-### DL-#9830 · Independent Shooting Accuracy
-
-- **State:** shipped
-- **Owner:** codex
-- **Issue:** #9830
-- **PR:** #9841 (merged)
-- **Paths:** src/shared/python/optimization; docs/development/shooting_convergence_9830_turnover.md
-- **Started:** 2026-09-08
-- **Last verified:** 2026-09-09 (merged 28d9bf79e)
-- **Summary:** Adaptive reference defects; 21 native Bioptim/Casadi 3.6.7 passes. Casadi 3.8 failure and physical limits remain in the linked turnover.
-
-### DL-#9825 · Preserve Reviewed Manufactured Claims in Actual Registration
-
-- **State:** shipped
-- **Owner:** codex
-- **Issue:** #9825
-- **PR:** #9826 (merged)
-- **Paths:** docs/development/claim_preservation_9825_turnover.md; manufactured registration and evidence
-- **Started:** 2026-09-08
-- **Last verified:** 2026-09-09 (merged a410ae705)
-- **Summary:** Preserves 328 reviewed outcomes; 128 strict contracts and 11 publication controls pass. Linked turnover retains full provenance and physical limits.
-
-### DL-#9787 · Manufactured Authority Runtime and Provenance
-
-- **State:** shipped
-- **Owner:** codex
-- **Issue:** #9787
-- **PR:** #9804 (merged)
-- **Paths:** authority runtime pins, native provenance/CI contracts and manufactured_authority_9787_turnover.md.
-- **Started:** 2026-09-08
-- **Last verified:** 2026-09-08 (PR merged as 736ec2189 from b8da0c024)
-- **Summary:** Compatible native pins and runtime support merged. The merged revision differs from locally validated 6235789dc; its actual registration bypass and stale evidence require follow-up #9825. Historical test results do not certify differing merged bytes.
-
-### DL-#9783 · Reviewed Renderer Provider Compatibility
-
-- **State:** shipped
-- **Owner:** codex
-- **Issue:** #9783
-- **PR:** #9784 (merged)
-- **Paths:** `tests/shared_contracts/test_tools_provider_contracts.py`, `docs/development/renderer_reference_9783_turnover.md`
-- **Started:** 2026-09-08
-- **Last verified:** 2026-09-08 (`9aa26e4f83`)
-- **Summary:** Reproduced the candidate's exact old-hash failure before accepting the two reviewed source/hash pairs. Tolerances, immutable provider origin and the current vendor pin remain strict.
-
-### DL-#9762 · `bioptim` Optimal-Control Backend and the Swing-Dynamics Fixes
-
-- **State:** shipped
-- **Owner:** claude
-- **Issue:** #9762 (epic); prerequisites #9755, #9756, #9757, #9758, #9759, #9760, #9761
-- **PR:** #9768 (merged)
-- **Paths:** `src/shared/python/optimization/ocp/`,
-- **Started:** 2026-09-08
-- **Last verified:** 2026-09-08 (`af6923bc70`)
-- **Summary:** Adopts `pyomeca/bioptim` as an opt-in optimal-control layer
-
-### DL-#9733 · Fail Fast on the Uninitialized Vendored Tools Fallback
-
-- **State:** shipped
-- **Owner:** claude
-- **Issue:** #9733
-- **PR:** #9743 (merged)
-- **Paths:** `src/__init__.py`, `tests/unit/repo_hygiene/test_src_fallback_fail_fast_9733.py`
-- **Started:** 2026-09-08
-- **Last verified:** 2026-09-08 (`930543b24d`)
-- **Summary:** Uninitialized `vendor/ud-tools` raises actionable ImportError naming remediation command before finder installation.
-
-### DL-#9648 · RTMPose ONNX Pose Estimator Behind the Registry
-
-- **State:** shipped
-- **Owner:** claude
-- **Issue:** #9648
-- **PR:** #9739 (merged)
-- **Paths:** `src/shared/python/pose_estimation/rtmpose_onnx_estimator.py`, `src/shared/python/pose_estimation/rtmpose_models.py`, `src/shared/python/pose_estimation/registry.py`, `src/motion_capture/rig/ingest.py`, `src/motion_capture/reconstruct/layouts.py`, `pyproject.toml`
-- **Started:** 2026-09-08
-- **Last verified:** 2026-09-08 (`197e0a942`)
-- **Summary:** Registers `rtmpose_onnx` (SimCC decode via onnxruntime, COCO-17/Halpe-26, whole-frame letterbox) with `capture_source=False`; adds the optional `pose-onnx` extra; pins the official OpenMMLab ONNX model URLs/sizes with digests PENDING OWNER APPROVAL; teaches `RegisteredFrameEstimator` to honour instance-level `LANDMARK_MAP`/`LAYOUT_NAME`; extends `layouts.py` with the Halpe-26 `hip`→`mid_hip` alias.
-
-### DL-#9631 · Vendor Pin Carries the Tools#5048 Alias-Predicate Fix
-
-- **State:** shipped
-- **Owner:** claude
-- **Issue:** #9631
-- **PR:** #9722 (merged)
-- **Paths:** `vendor/ud-tools`, `tests/unit/repo_hygiene/test_pinned_import_alias_contract.py`
-- **Started:** 2026-09-08
-- **Last verified:** 2026-09-08 (`648d4c9213`)
-- **Summary:** Pinned `vendor/ud-tools` carries Tools#5049 flattened-install fix; added TDD contract test asserting pinned predicate in both layouts.
-
-### DL-#9612 · Video Upload Suffix Derived From Filename Allow-List
-
-- **State:** shipped
-- **Owner:** claude
-- **Issue:** `#9612`
-- **PR:** #9720 (merged)
-- **Paths:** `src/api/routes/video.py`, `tests/unit/api/test_routes_video.py`
-- **Started:** 2026-09-07
-- **Last verified:** 2026-09-08 (`4f705f508c`)
-- **Summary:** Video analysis uploads no longer default temp files to `.mp4`;
-
-### DL-#9607 · Authority Runtime Native Library Bootstrap for Cmeel Pinocchio Wheels
-
-- **State:** shipped
-- **Owner:** claude
-- **Issue:** #9607
-- **PR:** #9726 (merged)
-- **Paths:** `scripts/research/proximal_distal_energy/articulated_native_runtime.py`, `scripts/research/proximal_distal_energy/run_articulated_manufactured_solution.py`, `tests/research/test_articulated_native_runtime.py`
-- **Started:** 2026-09-08
-- **Last verified:** 2026-09-08 (`474ea6bf56`)
-- **Summary:** Resolves the authority lane's `liburdfdom_sensor.so.4.0` import failure by resolving `cmeel.prefix/lib` from the live venv, verifying the locked sonames with an explicit DbC diagnostic, and re-execing the authority profile with `LD_LIBRARY_PATH` prepended before `import pinocchio`.
-
-### DL-#9542 · Bunker Exit State Consistency, Provenance, and Result Envelope
-
-- **State:** shipped
-- **Owner:** claude
-- **Issue:** #9542
-- **PR:** #9728 (merged)
-- **Paths:** `src/bunkershot3d/ball/**`
-- **Started:** 2026-09-07
-- **Last verified:** 2026-09-08 (`ba6e6e2a30`)
-- **Summary:** `SandDelivery` now refuses contradictory exit speed/vector pairs and owns copies of list-supplied exit vectors so post-construction mutation cannot invalidate the frozen record; the `to_post_impact_state` boundary carries explicit `ExitVectorProvenance` labels, and `PostImpactEnvelope` wraps the flight handoff with the validity verdict, F0 tier, per-group frames, the proper `HEAD_FRAME_TO_FLIGHT_TRANSFORM`, a schema version, and a SHA-256 source digest with JSON round trip. Reflection rejection itself was already delivered by PR #9574 and is not redone.
-
-### DL-#9533 · Test-Only Extras Reachable From the Dev Lock
-
-- **State:** shipped
-- **Owner:** claude
-- **Issue:** `#9533`
-- **PR:** #9716 (merged)
-- **Paths:** `pyproject.toml`, `.github/workflows/lock-refresh.yml`, `requirements*.lock`, `environment.yml`
-- **Started:** 2026-09-08
-- **Last verified:** 2026-09-08 (`bae85ae4c4`)
-- **Summary:** `openpyxl` and `imageio` resolve through `dev` extra; lock regeneration delegated to `lock-refresh.yml`.
-
-### DL-#9499 · Spec Check Reminder Fail-Safe Extraction
-
-- **State:** shipped
-- **Owner:** claude
-- **Issue:** `#9499`
-- **PR:** #9719 (merged)
-- **Paths:** `.github/workflows/spec-check.yml`, `scripts/post_spec_reminder.py`, `tests/ci/test_spec_check_workflow.py`
-- **Started:** 2026-09-08
-- **Last verified:** 2026-09-08 (`e214fae7bd`)
-- **Summary:** The `Verify SPEC.md freshness` job posts its SPEC reminder
-
-### DL-#9494 · Resolve the CLAUDE.md `--no-verify` Contradiction by Fixing the Windows Hook Environment
-
-- **State:** shipped
-- **Owner:** claude
-- **Issue:** #9494
-- **PR:** #9744 (merged)
-- **Paths:** `CLAUDE.md`, `AGENT_HANDOFF.md`, `docs/development/DEVELOPMENT_LOG.md`, `SPEC.md`
-- **Started:** 2026-09-08
-- **Last verified:** 2026-09-08 (`dbc6727aa`)
-- **Summary:** CLAUDE.md forbade `git commit --no-verify` while agents on
-
-### DL-#9484 · Impact Explorer Web Route Has a CI Bundle Producer
-
-- **State:** shipped
-- **Owner:** W4_9484 (agent claude)
-- **Issue:** #9484
-- **PR:** #9724 (merged)
-- **Paths:** `.github/workflows/ci-standard.yml`, `scripts/check_declared_route_producers.py`, `tests/scripts/test_declared_route_producers.py`, `docs/workflows/WORKFLOW_TRACKING.md`
-- **Started:** 2026-09-08
-- **Last verified:** 2026-09-08 (`ba841ae524`)
-- **Summary:** The `rate_of_closure` tile declared `web.mode: route` for `/tools/impact-explorer` but no pipeline built `vendor/ud-tools/src/rate_of_closure/web/dist`, so a clean checkout served the honest fallback. CI Standard now builds the bundle from the pinned Tools tree with `npm run build -- --base=/impact-explorer-app/`, and `scripts/check_declared_route_producers.py` fails any declared route that no pipeline produces. Shipping the bundle inside the wheel/image remains an open maintainer decision (#9417).
-
-### DL-#9482 · Launcher Tile Logo Families and Registry Gate
-
-- **State:** shipped
-- **Owner:** claude
-- **Issue:** #9482
-- **PR:** #9725 (merged)
-- **Paths:** `src/config/launcher_manifest.json`, `assets/logos/**`,
-- **Started:** 2026-09-07
-- **Last verified:** 2026-09-07 (`191351bdf`)
-- **Summary:** Broke the launcher grid's worst logo reuse (data_explorer x9,
-
-### DL-#9478 · Launcher Registry Truth: `tools://` Provenance Scheme and Ready/Beta Maturity Gate
-
-- **State:** shipped
-- **Owner:** claude
-- **Issue:** #9478
-- **PR:** #9729 (merged)
-- **Paths:** `src/config/models.yaml`, `src/config/launcher_manifest.json`,
-- **Started:** 2026-09-07
-- **Last verified:** 2026-09-08 (`8c2c6fa4a1`)
-- **Summary:** `provider: tools` entries in `src/config/models.yaml` and
-
-### DL-#9476 · Re-Vendor the Corrected Spec Merge Driver and Pin Drift
-
-- **State:** shipped
-- **Owner:** claude
-- **Issue:** `#9476`
-- **PR:** #9736 (merged)
-- **Paths:** `scripts/install_spec_merge_driver.py`,
-- **Started:** 2026-09-08
-- **Last verified:** 2026-09-08 (`875cd501e`)
-- **Summary:** The vendored installer still stamped the withdrawn
-
-### DL-#9470 · Launch-Monitor Analysis Handlers Onto the Async_Action Worker
-
-- **State:** shipped
-- **Owner:** claude
-- **Issue:** #9470
-- **PR:** #9742 (merged)
-- **Paths:** `src/tools/launch_monitor_analytics/gui.py`, `src/tools/launch_monitor_analytics/_embed_adapter.py`, `tests/ui/tools/launch_monitor/test_async_actions.py`
-- **Started:** 2026-09-08
-- **Last verified:** 2026-09-08 (`af0aed1d57`)
-- **Summary:** All seven analysis handlers (`treatment`, `relationship`, `multivariate`, `model`, `comparison`, `dispersion`, `trend`) now run their compute on the #8880 `async_action` worker via one shared `AsyncActionBar`; synchronous `present(compute())` paths kept; embed adapter `cleanup()` cancels and joins the worker. First slice of the #9470 tool checklist; the remaining tools are follow-ups.
-
-### DL-#9409 · Always-On Quality Gate Lane and Conftest Src-Pivot Guard
-
-- **State:** shipped
-- **Owner:** `claude`
-- **Issue:** [#9409](https://github.com/D-sorganization/UpstreamDrift/issues/9409)
-- **PR:** #9723 (merged)
-- **Paths:** `.github/workflows/ci-standard.yml`, `tests/unit/repo_hygiene/test_no_conftest_src_module_pivot.py`, `docs/workflows/WORKFLOW_TRACKING.md`
-- **Started:** 2026-09-08
-- **Last verified:** 2026-09-08 (`6428062284`)
-- **Summary:** CI Standard gains an always-on, ≤10-minute `always-on-unit-lane` (verify_installation import smoke over the shared Tools alias roots, top-level smoke tests, contract tests) that `quality-gate` requires `success` on every PR including docs-only ones; a repo-hygiene guard forbids any conftest from pivoting `sys.modules["src"]` directly (must use `EngineSrcPivot`). Deferred on #9409: main-branch cancel exemption (RM campaign) and nightly cross-engine dedupe (#8725/#9002).
-
-### DL-#9387 · Unit-Gate Worker Corruption: `src`-Identity Sentinel and Leak Fixes
-
-- **State:** shipped
-- **Owner:** claude
-- **Issue:** #9387
-- **PR:** #9741 (merged)
-- **Paths:** `tests/unit/repo_hygiene/test_src_identity_sentinel.py`,
-- **Started:** 2026-09-08
-- **Last verified:** 2026-09-08 (`c70d5ddae`)
-- **Summary:** Static audit of `tests/` (conftests excluded) found 83
-
-### DL-#9249 · UI: Pin @vitejs/Plugin-React to ^5 Until Vite 8
-
-- **State:** shipped
-- **Owner:** claude
-- **Issue:** #9249
-- **PR:** #9718 (merged)
-- **Paths:** `.github/dependabot.yml`, `ui/README.md`
-- **Started:** 2026-09-08
-- **Last verified:** 2026-09-08 (`7cdbb0a3d`)
-- **Summary:** Dependabot ignores `@vitejs/plugin-react` major updates
-
-### DL-#9091 · Phantom-Guard Rule-3 False Positive on Shallow Base Fetch
-
-- **State:** shipped
-- **Owner:** claude
-- **Issue:** #9091
-- **PR:** #9717 (merged)
-- **Paths:** `.github/workflows/anti-phantom-merge.yml`, `scripts/ci/check_phantom_guard_paths.py`, `tests/scripts/test_check_phantom_guard_paths.py`
-- **Started:** 2026-09-08
-- **Last verified:** 2026-09-08 (`e55c4f3e19`)
-- **Summary:** The phantom-guard rule-3 closes-issue path-membership check
-
-### DL-#8943 · Cache API CPU Work Off the Event Loop
-
-- **State:** shipped
-- **Owner:** claude
-- **Issue:** #8943
-- **PR:** #9727 (merged)
-- **Paths:** `src/api/routes/analysis_plots.py`, `src/api/routes/model_explorer.py`, `src/api/routes/models.py`, `src/api/routes/launch_monitor_analytics.py`, `src/api/routes/_route_utils.py`
-- **Started:** 2026-09-08
-- **Last verified:** 2026-09-08 (`17beca5537`)
-- **Summary:** `GET /analysis/plot-data/{plot_type}` builds orchestrator once per recorder identity and serves results from an LRU off the event loop. Model explorer and models URDF handlers use LRU cache in worker threads.
-
-### DL-#8901 · Accessible Model Card Actions and Grid Navigation
-
-- **State:** shipped
-- **Owner:** claude
-- **Issue:** #8901
-- **PR:** #10006 (merged)
-- **Paths:** src/launchers/model_card.py, tests/launchers/test_model_card_accessibility.py
-- **Started:** 2026-09-12
-- **Last verified:** 2026-09-12 (`eb4a042cbb`)
-- **Summary:** Harden model card touch and keyboard accessibility, ensure WCAG target sizes, and add arrow-key grid navigation in launcher.
-
-### DL-#8360 · Bounded Launcher Splash and Optional-Provider Degradation
-
-- **State:** shipped
-- **Owner:** claude
-- **Issue:** #8360 (related #8339, #8358, #8359)
-- **PR:** #9951 (merged)
-- **Paths:** src/launchers/startup.py, src/launchers/startup_phases.py, src/launchers/startup_session.py, src/launchers/startup_failure_dialog.py, src/launchers/upstream_drift_launcher_main.py, src/launchers/launcher_orchestrator.py
-- **Started:** 2026-09-10
-- **Last verified:** 2026-09-11 (`35c69c2894`)
-- **Summary:** Bounded, timestamped startup phases with a StartupSession watchdog; optional Tools/Rate provider degrades the shell instead of stalling the splash; Retry / Continue / Copy diagnostics / Close dialog replaces quit-on-error.
-- **Evidence:** Deterministic tests inject successful, missing, exception-raising and never-completing providers and prove bounded splash lifetime, degraded shell startup, stale-generation isolation and deleted-widget guards.
-
-### DL-#1616 · Mermaid C4 Architecture Maps
-
-- **State:** shipped
-- **Owner:** local
-- **Issue:** #1616
-- **PR:** #9963 (merged)
-- **Paths:** docs/architecture/C4.md, scripts/architecture_map_contract.py
-- **Started:** 2026-09-10
-- **Last verified:** 2026-09-10 (`09f6d22da3`)
 
 ### DL-#10943 · Drift Wizard Sidekick Product Knowledge Pack
 
@@ -3864,3 +3312,46 @@ validation commands, historical evidence boundaries and remaining acceptance.
 No proposed optimized video export or new fit was started. This documentation
 checkpoint follows the published local research integration; the full goal is
 unfinished and is to be paused after normal commit/push and handoff publication.
+
+## Capture Registry Parent Integration - #11162 / #11172
+
+Accepted-main synchronization preserves capture-registry, export and swing-comparison source changes. Record conflicts retain distinct entries from both branches. All 133 ordered matched-swing ledger rows and non-timestamp metadata are identical; retain accepted-main timestamp. Regenerate the monolith register from merged source. Scientific matching/dynamics acceptance remains separate.
+
+Record validation: all five monolith-register tests pass; no duplicate primary headings or conflict markers; all 133 ledger rows and non-timestamp metadata preserved exactly; registry/export/comparison source unchanged. Broader capture tests are pending pinned Tools initialization; first collection attempt stopped on the missing submodule. Protected parent CI and full scoped rerun remain required before merge.
+
+## Capture Comparison DRY Gate Remediation - #11162 / #11172
+
+CI identified duplicated club endpoint selection in angular-speed and wrist metrics. A shared private helper preserves explicit endpoint precedence, measured-marker aliases, array identity and missing-endpoint/shaft-axis behavior. AGY Gemini Flash supplied the bounded extraction; root reviewed the exact diff. Existing focused regression suite passes 190 tests with 15 unavailable-private-workbook skips, zero errors/failures, natural exit 0. Ruff format/check and full DRY duplication gate pass without changing baselines. Regenerate the monolith register for the revised file length. Current-head protected CI remains required.
+
+## Capture Leaderboard Suite Classification - #11162 / #11172
+
+Protected CI verified the DRY extraction, then identified 14 net-new unmarked tests in TestPerCaptureLeaderboard. Mark this pure-Python class as unit; all 14 execute and pass under unit selection with no skips/errors. Full suite-marker ratchet passes without baseline changes. Broader focused capture/comparison qualification remains 190 passed and 15 unavailable-private-workbook skips. Protected current-head CI remains required before merge.
+
+## Capture Comparison Inventory Integration - #11162 / #11172
+
+CI at bd1ee9a8e passes repository structure and 20,546 unit cases; its only unit failure identifies five new swing_comparison paths missing from the shared-tools divergence inventory. Regenerate JSON and Markdown with the authoritative generator against the pinned Tools tree. All five paths classify as UD-only; existing overlap totals remain unchanged. All ten inventory tests pass with no errors/skips, including the committed-tree freshness test, and generator --check succeeds. Protected current-head CI remains required before merging.
+
+### Selected Club Continuity Update (2026-10-03)
+
+PR #11256 merged at `7db86ff173653a235ea63bb4af347af0a8a5ab83`. The eight verified Human ellipsoid MP4s remain on both Desktops in `Simscape_Matches_20261003_Club_Refined_1080p`; these are IK reconstructions. The source reference now presents this current selection before historical experiments.
+
+The selected club fits were tested at all anchors and midpoints using independent native position, velocity and fresh 91-state checks. Sequential seeding accepted 1,306/1,307 tour states and 732/733 owner states. A targeted diagnostic recovered the owner's rejected original anchor from its saved closed-arm seed; the previous accepted pose reproduced an alternate branch. A complete anchor-seeded rerun exited naturally at 20:31:23 UTC and accepted all 733 owner states (367 anchors and 366 midpoints), while the tour still rejected midpoint 998 at 1.3847222 s. All original anchors matched within 1.73e-15 physical residual. The peak accepted dependent angular rates remain approximately 1,639 and 4,118 deg/s; sampled-state acceptance does not qualify between-sample branch continuity, dependent acceleration, anatomy, contact or forward dynamics.
+
+The private production integration candidate passed 17 native pre-model contract cases (parent RED, candidate GREEN, 51 recorded checks) at 20:20:58 UTC. Numerical whole-output parity and positive-fit validation remain separate pending gates. Original failed runner receipts are preserved. A custom vector measurement block built successfully, but the eight-axis instrumented simulation hit the Home license's 1,000-nonvirtual-block limit. No all-35 measured torque or moving feedback-off replay claim follows from these tests. Original physical model files were not saved.
+
+See the separate editable research reference and the extended aggregate `tangent_c2_checkpoint_20261003.json` for scope and provenance. The built-in LaTeX compiler still fails with `Unable to find standard directories for platform`; PDF compilation/page review are unverified. Canonical calculation inventory and governed manual release remain blocked; this update grants neither a release exemption nor scientific approval.
+
+## F05d Native Manifold BoxFDDP Candidate (#11932; 2026-10-09)
+
+A test-first MuJoCo 3.8/Crocoddyl 3.2.1 child now solves the same
+contact-free floating-root/two-hinge physical state with a 16-dimensional
+configuration/velocity tangent, exact native Euler action derivative,
+bounded direct motor input and nonlinear native fallback admission. The
+paired source-hashed receipt measures BoxFDDP against SciPy native shooting
+under identical reference, truth, input box, horizon, iteration and
+cooperative wall budget, alternates solver order and charges a common
+Tools T01 bootstrap to both. Every applied input independently replays from
+complete native integration state. This is synthetic controller evidence,
+not a hard deadline, measured capture fit or full-body qualification;
+the F05 parent and canonical manual publication remain blocked. Read
+chapter 26 and `F05D_NATIVE_MANIFOLD_BOX_FDDP_TURNOVER.md`.

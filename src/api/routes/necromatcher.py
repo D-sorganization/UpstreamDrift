@@ -18,6 +18,7 @@ from starlette.concurrency import run_in_threadpool
 from src.api.routes.matched_swings import require_local_client
 from src.api.middleware.upload_limits import read_upload_file_bytes
 from src.shared.python.core.contracts.exceptions import StateError
+from src.shared.python.force_overlay.contracts import WrenchKind
 from src.shared.python.workspace import (
     DatasetMetadata,
     NecromatcherLibrary,
@@ -167,11 +168,24 @@ class RefitRequest(BaseModel):
         )
 
 
+class ForceLayerRequest(BaseModel):
+    """Opt-in force/torque layer for a video export; off unless ``enabled``."""
+
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+    enabled: bool = False
+    kinds: list[WrenchKind] = Field(
+        default_factory=lambda: [WrenchKind.JOINT_REACTION], min_length=1
+    )
+    scale: float = Field(default=1.0, gt=0, le=100)
+    segment_shading: bool = False
+
+
 class VideoExportRequest(BaseModel):
-    model_config = ConfigDict(extra="forbid", strict=True, allow_inf_nan=False)
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
     shaft_evidence: dict[str, Any] | None = None
     shape_overlay: dict[str, Any] | None = None
     caption_overlay: dict[str, Any] | None = None
+    force_layer: ForceLayerRequest = Field(default_factory=ForceLayerRequest)
 
 
 class IdentityRequest(BaseModel):
@@ -292,6 +306,7 @@ def submit_video_export(
     fit_id: str, exports: VideoExports, request: VideoExportRequest | None = None
 ) -> dict[str, Any]:
     """Queue a source-bound video review without accepting a host output path."""
+    layer = request.force_layer if request else None
     with _errors():
         try:
             if request is None:
@@ -301,19 +316,17 @@ def submit_video_export(
                 if request.shaft_evidence is not None
                 else None
             )
-            options: dict[str, Any] = (
-                {
-                    "shape_overlay": ShapeOverlayOptions.from_record(
-                        request.shape_overlay
-                    )
-                }
-                if request.shape_overlay is not None
-                else {}
-            )
+            options: dict[str, Any] = {}
+            if request.shape_overlay is not None:
+                options["shape_overlay"] = ShapeOverlayOptions.from_record(
+                    request.shape_overlay
+                )
             if request.caption_overlay is not None:
                 options["caption_overlay"] = CaptionOverlayOptions.from_record(
                     request.caption_overlay
                 )
+            if layer is not None and layer.enabled:
+                options["force_layer"] = layer.model_dump(mode="json")
             if evidence is None:
                 return exports.submit(fit_id, **options)
             return exports.submit(fit_id, evidence, **options)

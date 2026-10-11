@@ -128,7 +128,9 @@ classdef test_gs3dx_fit < matlab.unittest.TestCase
             % GS3DX_FIT_GRIP on that IK must return the model's own grip
             % variables (a fixed point of the estimate).
             f0 = testCase.jc.impact_frame;
-            ik = gs3dx_whole_body_ik(testCase.jc, frames=f0 - 90:6:f0, calibration_frames=1:15:f0 - 90);
+            % Explicitly pin historically Fit-based test harness call to variants.fit
+            ik = gs3dx_whole_body_ik(testCase.jc, model=char(gs3dx_names().variants.fit), ...
+                frames=f0 - 90:6:f0, calibration_frames=1:15:f0 - 90);
             testCase.verifyEqual(ik.status, ones(size(ik.status)), 'grip loop closed in every frame');
             worst = @(pat) max(ik.residual(contains(ik.names, pat), :), [], 'all');
             fprintf('out of sample: rms max %.1f mm; legs %.1f, wrists %.1f, club head %.1f mm\n', ...

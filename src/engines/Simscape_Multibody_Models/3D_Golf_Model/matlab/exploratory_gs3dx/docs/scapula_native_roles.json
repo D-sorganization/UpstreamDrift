@@ -1,0 +1,124 @@
+{
+  "evidence_scope": "Native joint-schema and mirrored address bounds; full trajectories validated for Human only",
+  "batch_limitation": "The first bulk run crashed after 12 variants; Human verified in a fresh independent natural-exit process",
+  "models": {
+    "baseline": {
+      "model": "GS3DX_Baseline",
+      "available": true,
+      "native_schema_checked": true,
+      "scapula_keys": ["j6.Rx", "j11.Rx"],
+      "parameter_signs": [1, -1],
+      "native_address_lower_deg": [5, -10],
+      "native_address_upper_deg": [10, -5]
+    },
+    "slim": {
+      "model": "GS3DX_Slim",
+      "available": true,
+      "native_schema_checked": true,
+      "scapula_keys": ["j6.Rx", "j11.Rx"],
+      "parameter_signs": [1, -1],
+      "native_address_lower_deg": [5, -10],
+      "native_address_upper_deg": [10, -5]
+    },
+    "quat": {
+      "model": "GS3DX_Quat",
+      "available": true,
+      "native_schema_checked": true,
+      "scapula_keys": ["j6.Rx", "j11.Rx"],
+      "parameter_signs": [1, -1],
+      "native_address_lower_deg": [5, -10],
+      "native_address_upper_deg": [10, -5]
+    },
+    "fullbody": {
+      "model": "GS3DX_FullBody",
+      "available": true,
+      "native_schema_checked": true,
+      "scapula_keys": ["j6.Rx", "j17.Rx"],
+      "parameter_signs": [1, -1],
+      "native_address_lower_deg": [5, -10],
+      "native_address_upper_deg": [10, -5]
+    },
+    "contact": {
+      "model": "GS3DX_FullBodyContact",
+      "available": true,
+      "native_schema_checked": true,
+      "scapula_keys": ["j6.Rx", "j17.Rx"],
+      "parameter_signs": [1, -1],
+      "native_address_lower_deg": [5, -10],
+      "native_address_upper_deg": [10, -5]
+    },
+    "golfer": {
+      "model": "GS3DX_Golfer",
+      "available": true,
+      "native_schema_checked": true,
+      "scapula_keys": ["j6.Rx", "j17.Rx"],
+      "parameter_signs": [1, -1],
+      "native_address_lower_deg": [5, -10],
+      "native_address_upper_deg": [10, -5]
+    },
+    "fit": {
+      "model": "GS3DX_Fit",
+      "available": true,
+      "native_schema_checked": true,
+      "scapula_keys": ["j6.Rx", "j17.Rx"],
+      "parameter_signs": [1, -1],
+      "native_address_lower_deg": [5, -10],
+      "native_address_upper_deg": [10, -5]
+    },
+    "fit_legs": {
+      "model": "GS3DX_FitLegs",
+      "available": true,
+      "native_schema_checked": true,
+      "scapula_keys": ["j6.Rx", "j17.Rx"],
+      "parameter_signs": [1, -1],
+      "native_address_lower_deg": [5, -10],
+      "native_address_upper_deg": [10, -5]
+    },
+    "fit_track": {
+      "model": "GS3DX_FitTrack",
+      "available": true,
+      "native_schema_checked": true,
+      "scapula_keys": ["j6.Rx", "j17.Rx"],
+      "parameter_signs": [1, -1],
+      "native_address_lower_deg": [5, -10],
+      "native_address_upper_deg": [10, -5]
+    },
+    "fit_balance": {
+      "model": "GS3DX_FitBalance",
+      "available": true,
+      "native_schema_checked": true,
+      "scapula_keys": ["j6.Rx", "j17.Rx"],
+      "parameter_signs": [1, -1],
+      "native_address_lower_deg": [5, -10],
+      "native_address_upper_deg": [10, -5]
+    },
+    "shape": {
+      "model": "GS3DX_Shape",
+      "available": true,
+      "native_schema_checked": true,
+      "scapula_keys": ["j6.Rx", "j17.Rx"],
+      "parameter_signs": [1, -1],
+      "native_address_lower_deg": [5, -10],
+      "native_address_upper_deg": [10, -5]
+    },
+    "neck": {
+      "model": "GS3DX_Neck",
+      "available": true,
+      "native_schema_checked": true,
+      "scapula_keys": ["j7.Rx", "j18.Rx"],
+      "parameter_signs": [1, -1],
+      "native_address_lower_deg": [5, -10],
+      "native_address_upper_deg": [10, -5]
+    },
+    "human": {
+      "model": "GS3DX_Human",
+      "available": true,
+      "native_schema_checked": true,
+      "parameter_signs": [1, -1],
+      "indices": [14, 36],
+      "native_address_lower_deg": [5, -10],
+      "native_address_upper_deg": [10, -5],
+      "scapula_keys": ["j7.Rx", "j20.Rx"]
+    }
+  }
+}

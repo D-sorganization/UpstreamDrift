@@ -30,8 +30,8 @@ vi.mock('@react-three/drei', () => ({
 
 // Mock ForceOverlay component
 vi.mock('./ForceOverlay', () => ({
-  ForceOverlay: ({ vectors }: { vectors: unknown[] }) => (
-    <div data-testid="force-overlay-mock" data-vectors-count={vectors?.length || 0} />
+  ForceOverlay: ({ glyphs }: { glyphs?: unknown }) => (
+    <div data-testid="force-overlay-mock" data-has-glyphs={glyphs ? 'true' : 'false'} />
   ),
 }));
 
@@ -73,6 +73,7 @@ vi.mock('three', () => {
 
 import { Scene3D } from './Scene3D';
 import type { SimulationFrame } from '@/api/client';
+import type { GlyphSetV1 } from '@/types/glyphs';
 
 describe('Scene3D', () => {
   it('reports loads for other model identifiers as unavailable', () => {
@@ -411,21 +412,16 @@ describe('Scene3D', () => {
       expect(screen.getByText('Rotate')).toBeInTheDocument();
     });
 
-    it('renders ForceOverlay component with vectors', () => {
-      const mockVectors = [
-        {
-          body_name: 'torso',
-          force_type: 'applied' as const,
-          origin: [0, 0, 0] as [number, number, number],
-          direction: [1, 0, 0] as [number, number, number],
-          magnitude: 10,
-          color: [1, 0, 0, 1] as [number, number, number, number],
-        },
-      ];
-      render(<Scene3D engine="mujoco" frame={null} forceOverlays={mockVectors} />);
+    it('passes the serialized GlyphSet to the ForceOverlay component', () => {
+      const glyphs = {
+        schema_version: 'glyph-set-v1',
+        arrows: [],
+        torque_arcs: [],
+      } as unknown as GlyphSetV1;
+      render(<Scene3D engine="mujoco" frame={null} glyphs={glyphs} />);
       const forceOverlay = screen.getByTestId('force-overlay-mock');
       expect(forceOverlay).toBeInTheDocument();
-      expect(forceOverlay).toHaveAttribute('data-vectors-count', '1');
+      expect(forceOverlay).toHaveAttribute('data-has-glyphs', 'true');
     });
   });
 });

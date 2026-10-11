@@ -15,11 +15,12 @@ engine. It also converts between model formats, validates and compares URDF
 files, composes models from parts, computes inertia tensors, and manages a
 local model library.
 
-The tile lives in the `web_catalog` half of the registry: `surfaces: ["web"]`
-with the reason "web page (/tools/character-builder); the native side is a
-CLI", `web.mode: route`, `web.route: /tools/character-builder`,
-`launcher.status: gui_ready`. The native entry point is
-`src/shared/python/model_generation/cli/main.py` (`model-gen`). Declared
+The tile opens a native PyQt6 builder (`src/tools/character_builder`) that
+compiles a golfer to the `full-body-v1` specification used by every physics
+engine and exports it as spec JSON, URDF, MJCF or OpenSim XML; the same
+operations are served by `/api/character-builder/*`. The original URDF
+command-line workflow (`model-gen`,
+`src/shared/python/model_generation/cli/main.py`) remains available. Declared
 capabilities: `urdf_generation`, `anthropometry`, `mesh_generation`,
 `collision_geometry`.
 
@@ -28,31 +29,31 @@ capabilities: `urdf_generation`, `anthropometry`, `mesh_generation`,
 CLI subcommands and their arguments, from the parser in
 `model_generation/cli/main.py`:
 
-| Subcommand | Arguments | Unit |
-| --- | --- | --- |
-| `generate` | `name`, `-o/--output`, `--height`, `--mass`, `--proportions` (JSON), `--humanoid` | -, path, m, kg, JSON object, flag |
-| `convert` | `input`, `-o/--output`, `--from-format`, `--to-format`, `-n/--name` | path, path, format id, format id, - |
-| `validate` | `input`, `--json` | path, flag |
-| `diff` | `file_a`, `file_b`, `--json` | path, path, flag |
-| `info` | `input`, `--json` | path, flag |
-| `library list` | `-c/--category`, `-s/--source`, `--search`, `--json` | - |
-| `library add` | `input`, `-n/--name`, `-c/--category`, `--tags` (comma separated) | path, -, -, - |
-| `library download` | `model_id`, `-o/--output` | -, path |
-| `library import` | `--query`, `--url`, `--min-stars` (default 10), `--limit` (default 10), `--json` | -, URL, count, count, flag |
-| `compose` | parts, `-o/--output` (required), `-n/--name` | path, path, - |
-| `inertia` | shape, `mass`, shape dimensions, `--json` | -, kg, m, flag |
+| Subcommand         | Arguments                                                                         | Unit                                |
+| ------------------ | --------------------------------------------------------------------------------- | ----------------------------------- |
+| `generate`         | `name`, `-o/--output`, `--height`, `--mass`, `--proportions` (JSON), `--humanoid` | -, path, m, kg, JSON object, flag   |
+| `convert`          | `input`, `-o/--output`, `--from-format`, `--to-format`, `-n/--name`               | path, path, format id, format id, - |
+| `validate`         | `input`, `--json`                                                                 | path, flag                          |
+| `diff`             | `file_a`, `file_b`, `--json`                                                      | path, path, flag                    |
+| `info`             | `input`, `--json`                                                                 | path, flag                          |
+| `library list`     | `-c/--category`, `-s/--source`, `--search`, `--json`                              | -                                   |
+| `library add`      | `input`, `-n/--name`, `-c/--category`, `--tags` (comma separated)                 | path, -, -, -                       |
+| `library download` | `model_id`, `-o/--output`                                                         | -, path                             |
+| `library import`   | `--query`, `--url`, `--min-stars` (default 10), `--limit` (default 10), `--json`  | -, URL, count, count, flag          |
+| `compose`          | parts, `-o/--output` (required), `-n/--name`                                      | path, path, -                       |
+| `inertia`          | shape, `mass`, shape dimensions, `--json`                                         | -, kg, m, flag                      |
 
 Global flags include `--verbose`, `--quiet` and `--version` (reported as
 `model-gen 1.0.0`).
 
 The Python surface documented in the quickstart takes body parameters directly:
 
-| Parameter | Meaning | Unit or range |
-| --- | --- | --- |
-| `height_m` | subject height | m |
-| `mass_kg` | subject mass | kg |
-| `muscularity` | build | 0.0 slim to 1.0 muscular |
-| `gender_factor` | build | 0.0 female to 1.0 male |
+| Parameter       | Meaning        | Unit or range            |
+| --------------- | -------------- | ------------------------ |
+| `height_m`      | subject height | m                        |
+| `mass_kg`       | subject mass   | kg                       |
+| `muscularity`   | build          | 0.0 slim to 1.0 muscular |
+| `gender_factor` | build          | 0.0 female to 1.0 male   |
 
 Presets supply these values instead. `character_presets.md` lists them,
 including `average` (1.75 m, 75.0 kg), `athletic` (1.80 m, 80.0 kg),
@@ -62,22 +63,93 @@ including `average` (1.75 m, 75.0 kg), `athletic` (1.80 m, 80.0 kg),
 (1.28 m, 26.0 kg, CDC growth charts 50th percentile) and `senior_70yo`
 (1.70 m, 72.0 kg, NHANES average).
 
+### Spec-Native Builder (Desktop Tool and API)
+
+| Input                                        | Unit / type                                                                                               | Notes                                                                                                                                                            |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Preset                                       | `tour_average_male`, `tour_average_female`, `junior`, `senior`, `anthro_driver`, `anthro_iron7` or Custom | JSON files in `humanoid_character_builder/presets/data`, validated by `character_preset.schema.json`. Editing any value switches to Custom.                      |
+| `stature_m`                                  | m, 1.20 to 2.30                                                                                           | Scales De Leva segment lengths.                                                                                                                                  |
+| `mass_kg`                                    | kg, 30 to 200                                                                                             | Distributed by De Leva mass fractions over the upper body. The lower limbs do not yet scale with it, so the compiled total is below the requested mass (#12199). |
+| `trunk_scale`, `arm_scale`, `shoulder_scale` | dimensionless, 0.7 to 1.4                                                                                 | Trunk length, arm lengths, biacromial breadth.                                                                                                                   |
+| `grip_roll_deg`                              | deg, -180 to 180                                                                                          | Hand roll about the shaft.                                                                                                                                       |
+| `club`                                       | `driver` or `iron7`                                                                                       | Copied into the spec with its mass properties.                                                                                                                   |
+
+Outputs: the specification (sorted-key JSON, byte-identical for equal inputs,
+SHA-256 shown in the summary), a URDF, an MJCF and an OpenSim model. API:
+`GET /character-builder/presets`, `POST /character-builder/build`, `/preview`
+and `/export/{spec|urdf|mjcf|osim}`.
+
+### Web Character Builder
+
+The React page `ui/src/pages/CharacterBuilder.tsx` embeds
+`CharacterSpecPanel` (`ui/src/components/character/CharacterSpecPanel.tsx`),
+the same spec-native builder as a web panel: a preset select, sliders for
+`stature_m`, `mass_kg`, `trunk_scale`, `arm_scale` and `shoulder_scale` (same
+ranges as the table above) and a club select (`driver`, `7 Iron`). Preview
+calls `/api/character-builder/preview` then `/api/character-builder/build`
+and shows total mass, body and joint counts, and a per-body mass table.
+Export buttons (Spec JSON, URDF, MJCF, OpenSim) download through
+`/api/character-builder/export/{fmt}`.
+
+`AppearancePanel` (`ui/src/components/character/AppearancePanel.tsx`) sits
+alongside it: selects for skin tone, clothing, club finish, headwear and
+ground, plus an Export Appearance download. The appearance export is bound
+to the current spec character: it sends the spec request body as
+`character` in the export request, and the server compiles that character,
+stamps the compiled spec's hash onto the appearance document as
+`spec_sha256`, and names the download `<preset>_<sha8>.appearance.json`.
+
+### Appearance (`appearance-v1`)
+
+An appearance document (schema version `appearance-v1`,
+`src/shared/python/model_appearance/schema.py`,
+`appearance_v1.schema.json`) is the purely visual counterpart to a physics
+spec: skin tone (`skin_light`, `skin_medium`, `skin_tan`, `skin_dark`),
+a clothing preset (`none`, `golf_polo_shorts`, `golf_polo_trousers` —
+each maps an anatomical part such as `torso` or `thigh` to a material; an
+unmapped part shows skin), a club finish (`satin_steel`, `chrome`,
+`graphite`, `black_pvd`), headwear (`none`, `hair`, `cap`, defaulting to
+`hair_brown` or `cap_navy`) and a ground material (`turf`, `studio_floor`).
+Named materials (`library.py`) are metallic-roughness PBR definitions
+(base colour, roughness, metallic, optional texture); an unknown name
+fails closed with `ValueError`.
+
+The sidecar lives beside its spec file, named by `appearance_path_for`
+(`<spec-stem>.appearance.json`), and appearance never changes the physics
+spec hash: `physics_spec_sha256` hashes the spec with `visual_hints` and
+`appearance` keys removed, so editing appearance alone cannot perturb a
+hash a simulation depends on. API: `GET
+/character-builder/appearance/library` lists every pickable choice and
+material; `POST /character-builder/appearance` builds and validates a
+document; `POST /character-builder/appearance/export` returns it as a
+downloadable JSON sidecar (route `src/api/routes/character_appearance.py`,
+service `src/api/services/character_appearance_service.py`).
+
 ## Outputs
 
-| Output | Description | Unit |
-| --- | --- | --- |
-| URDF XML | written to `--output` (parent directories created) or logged to the console | - |
-| Converted model | URDF, MJCF or Simscape output per `--to-format` | - |
-| Validation report | pass or fail with per-error messages; `--json` for machine reading | - |
-| Diff report | differences between two URDF files; `--json` available | - |
-| Model info | model summary for one URDF; `--json` available | - |
-| Library listing and entries | model id, name, category, source, tags | - |
-| Inertia tensor | for a named shape and mass | kg m^2 |
-| Exit status | 0 on success, 1 on a build failure, missing input or invalid JSON | - |
-| Subject record | schema-versioned JSON via `save_subject` in the anthropometrics pipeline | - |
-| URDF `<inertial>` blocks | one per segment, via `write_urdf_inertial` | mass in kg, inertia in kg m^2 |
+| Output                      | Description                                                                 | Unit                          |
+| --------------------------- | --------------------------------------------------------------------------- | ----------------------------- |
+| URDF XML                    | written to `--output` (parent directories created) or logged to the console | -                             |
+| Converted model             | URDF, MJCF or Simscape output per `--to-format`                             | -                             |
+| Validation report           | pass or fail with per-error messages; `--json` for machine reading          | -                             |
+| Diff report                 | differences between two URDF files; `--json` available                      | -                             |
+| Model info                  | model summary for one URDF; `--json` available                              | -                             |
+| Library listing and entries | model id, name, category, source, tags                                      | -                             |
+| Inertia tensor              | for a named shape and mass                                                  | kg m^2                        |
+| Exit status                 | 0 on success, 1 on a build failure, missing input or invalid JSON           | -                             |
+| Subject record              | schema-versioned JSON via `save_subject` in the anthropometrics pipeline    | -                             |
+| URDF `<inertial>` blocks    | one per segment, via `write_urdf_inertial`                                  | mass in kg, inertia in kg m^2 |
 
 ## Method
+
+The spec-native path compiles through `compose_anthropometric_document`
+(`motion_matching/execution/spec_builder.py`): the De Leva 1996 male table
+sets segment masses, centres of mass and inertias, the native upper body is
+rebuilt for the subject and the Rajagopal lower limbs are attached at the
+subject hip width. The desktop tool and the API share
+`humanoid_character_builder/spec_export.py`.
+
+The URDF command-line path works as follows.
 
 `cmd_generate` constructs a `ParametricBuilder` with the requested robot name,
 applies `set_height` and `set_mass` when given, parses `--proportions` as JSON
@@ -105,9 +177,12 @@ converters, library) and `src/shared/python/humanoid_character_builder`
 
 ## Limitations
 
-- There is no native GUI. The registry states plainly that the native side is a
-  CLI and that the interactive surface is the web route
-  `/tools/character-builder`. `launcher.status` is `gui_ready`, not `ready`.
+- The spec-native output is unqualified geometry: validated for structure and
+  loadability in MuJoCo, Drake, Pinocchio and OpenSim, not against measured
+  subjects. The De Leva male table and Rajagopal legs are always used, so the
+  female, junior and senior presets only change stature, mass and proportion
+  scales, and their values are nominal. The web page still drives only
+  `/character-builder/generate`.
 - Presets are parameter tables, not validated subjects. The percentile and
   survey attributions in `character_presets.md` describe where the height and
   mass came from; they do not make a generated model a validated
@@ -129,6 +204,8 @@ converters, library) and `src/shared/python/humanoid_character_builder`
   running and validating them is the physics engines' job.
 
 ## See Also
+
+- [Build, Dress and Export a Golfer tutorial](../user_guide/character_builder_tutorial.md)
 - [Character Builder quickstart](../user_guide/character_builder_quickstart.md)
 - [Anthropometrics user guide](../user_guide/anthropometrics.md)
 - [Character presets reference](../user_guide/character_presets.md)

@@ -1,0 +1,77 @@
+{
+  "folder": "Best_Human_Matches_20261002_HeadTracked",
+  "archive": "Best_Human_Matches_20261002_HeadTracked.zip",
+  "archive_sha256": "48c34d60a50610879f9f9f12ee90526c9fe091d45c72dc1d1c7744cb93089108",
+  "archive_bytes": 1408673,
+  "visual_review": {
+    "status": "PASS_FOR_SHAREABLE_IK_MEDIA",
+    "scope": "ALL_DECODED_SAMPLED_FRAMES_BOTH_VIEWS",
+    "checks": [
+      "Refined Human ellipsoid style consistent across captures",
+      "Chronological sampled frame progression",
+      "No obvious projected limb/head flips or scene clipping",
+      "Frame counts, full decode, H264, hashes and sampled timing verified"
+    ],
+    "limitations": [
+      "No anatomical or physical acceptance",
+      "Ground is decorative",
+      "No skill judgment from avatar motion",
+      "Head targets are cluster-relative after address calibration"
+    ]
+  },
+  "clips": [
+    {
+      "file": "capture-A_ik_face-on.mp4",
+      "sha256": "7a0ac1f3b97b2b66aef252b5c8a7075e6c3cfa8fb0dcd9d22e3dccf8aedfcc8b",
+      "fully_decoded_frames": 55,
+      "fps": 30.0,
+      "codec": "h264",
+      "dimensions": [800, 600],
+      "sampled_time_span_s": 1.8,
+      "container_duration_s": 1.8333333333333333,
+      "qualification": "VERIFIED_MEDIA_NOT_PHYSICAL_ACCEPTANCE"
+    },
+    {
+      "file": "capture-A_ik_down-the-line.mp4",
+      "sha256": "8958481135be5882f8fee1d0217c6324f05ef1ab522b8fe67114184deaabf53e",
+      "fully_decoded_frames": 55,
+      "fps": 30.0,
+      "codec": "h264",
+      "dimensions": [800, 600],
+      "sampled_time_span_s": 1.8,
+      "container_duration_s": 1.8333333333333333,
+      "qualification": "VERIFIED_MEDIA_NOT_PHYSICAL_ACCEPTANCE"
+    },
+    {
+      "file": "capture-O_ik_face-on.mp4",
+      "sha256": "7784bee066aa716507514891989d9ccc9c5fddf81e9684f1c71600b189719b7f",
+      "fully_decoded_frames": 46,
+      "fps": 30.0,
+      "codec": "h264",
+      "dimensions": [800, 600],
+      "sampled_time_span_s": 1.5,
+      "container_duration_s": 1.5333333333333334,
+      "qualification": "VERIFIED_MEDIA_NOT_PHYSICAL_ACCEPTANCE"
+    },
+    {
+      "file": "capture-O_ik_down-the-line.mp4",
+      "sha256": "dae560cd87de0c2af36323977c906dbb6e3171a618fabf90590311b35f20dcc6",
+      "fully_decoded_frames": 46,
+      "fps": 30.0,
+      "codec": "h264",
+      "dimensions": [800, 600],
+      "sampled_time_span_s": 1.5,
+      "container_duration_s": 1.5333333333333334,
+      "qualification": "VERIFIED_MEDIA_NOT_PHYSICAL_ACCEPTANCE"
+    }
+  ],
+  "native_render_receipt": {
+    "actual_process_exit_code": 0,
+    "final_exit_code": 0,
+    "termination_reason": "natural_exit",
+    "done_marker": true,
+    "script_status": "success",
+    "owned_pids": [20020],
+    "timestamp": "2026-10-02T14:02:59.939917+00:00"
+  }
+}

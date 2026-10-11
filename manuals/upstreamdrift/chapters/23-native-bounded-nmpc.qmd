@@ -1,0 +1,83 @@
+# Bounded Native NMPC and Frozen Torque Replay (Provisional)
+
+## Control and Evidence Boundary
+
+F05a (#11904, parent #11789) evaluates an optional robust nonlinear model
+predictive controller against the F02 TVLQR controller. The current executable
+boundary is a native MuJoCo one-hinge, direct unit-motor, contact-free fixture.
+The controller sees exact simulated state at each native 10 ms step; this is not
+a camera/marker estimator or a delayed-feedback experiment. A nominal 0.30 kg
+prediction model and a 0.42 kg perturbation scenario are declared before the
+two initial-angle trials (0.4 and 0.7 rad). The 0.42 kg model is also the
+execution plant. The nominal trajectory is the zero angle and zero velocity.
+
+For state $x=(q,v)$, applied motor torque $u$, scenario models $f_s$, horizon
+$H=4$, and reference $r$, each attempted plan solves the finite robust problem
+
+$$
+\min_{u_{0:H-1}}\;\max_s\left[\sum_{k=1}^{H}
+  \|f_s^{(k)}(x,u)-r_k\|_Q^2 + \|u_{k-1}\|_R^2
+  + \|f_s^{(H)}(x,u)-r_H\|_{Q_f}^2\right],
+$$
+
+subject to per-scenario state bounds, actuator bounds and optional input-slew
+bounds. The current solver is SciPy SLSQP shooting with finite-difference
+derivatives, a 500-evaluation limit and a cooperative 1 s wall budget. It may
+overrun the native step; neither the budget nor a successful solve is a hard
+real-time guarantee. Candidate first inputs are admitted only after independent
+bound checks and a strict objective improvement over the predeclared verified
+fallback. Timeout, cancellation, stale observations, solver failure,
+infeasibility and no benefit preserve a labeled fallback command; an unsafe
+fallback raises rather than entering the plant. Warm plans shift only after an
+accepted solve. Input receipts retain status, evaluation count, elapsed time,
+scenario count and the actual post-limit actuator command.
+
+The native adapter preflights the complete `mjSTATE_INTEGRATION` initial state,
+model, actuator, time grid and Tools T01 policy with F06. The controlled plant
+steps exactly once per command. Afterward the adapter exports the executed ZOH
+motor torques and independently replays them in a fresh native instance with a
+time-only input player. Position, velocity and full native integration state
+must match the controlled trajectory within $10^{-12}$ absolute tolerance.
+The same independent replay is required for F02 TVLQR in both paired trials.
+No observed state or optimizer callback reaches the frozen replay.
+
+## Paired Trial and Selection
+
+The source-controlled receipt
+`docs/development/feedback_controls/F05_NATIVE_PAIRED_RECEIPT_MJ38.json`
+binds the supported MuJoCo version, source hashes, exact Tools pin, model,
+initial-state, policy and input digests. It records both predeclared trials,
+including failed and fallback solves, native replay, angle RMSE, applied effort,
+controller-call p50/p95/worst wall times and evaluation counts. The separate
+`F05_NATIVE_PAIRED_RECEIPT.json` records an earlier unsupported 3.3.4
+development run. Hardware and process load can move latency and even the number
+of plans that meet the cooperative budget. Results are not cherry-picked for a
+solver-win claim. The accepted engineering disposition is to retain F02 TVLQR
+for native-step execution and reject this SciPy shooting prototype as the
+real-time/full-swing provider. Its useful result is a fail-closed optimizer,
+fallback and independent replay boundary for future derivative-based solvers.
+
+On the supported Windows Python 3.12.10 / MuJoCo 3.8.0 run, the 0.4 rad trial
+timed out on all 8 optimizer calls: NMPC angle RMSE was 0.400 versus TVLQR
+0.348 rad. At 0.7 rad, only 2 of 8 plans optimized: RMSE was 0.617 versus
+0.622 rad. NMPC median controller-call time was about 1.002 s in each trial,
+over 100 times the 10 ms native step. A second complete supported-provider
+run retained the same 0/8 and 2/8 optimized counts and RMSE values, with
+median call times about 1.001 and 1.002 s. The earlier unsupported 3.3.4
+development environment produced different accepted-plan counts; this
+underscores why provider and load identity belong in the receipt. The small
+0.7 rad tracking gain does not offset the native-step latency and the adverse
+0.4 rad result.
+
+Reproduce the paired receipt with a supported MuJoCo Python environment:
+
+```powershell
+$env:F05_BENCHMARK_RECEIPT='1'
+python -m pytest -q -n 0 -o junit_family=legacy tests/unit/motion_matching/test_bounded_nmpc_native.py --junitxml native-paired.xml
+python scripts/f05_native_paired_receipt.py --junit native-paired.xml --host-alias local-host --output docs/development/feedback_controls/F05_NATIVE_PAIRED_RECEIPT_MJ38.json
+```
+
+The receipt is a one-hinge software benchmark, not evidence of contact/grip
+reactions, muscles, manifold dynamics, participant generalization, private
+capture accuracy, six-engine parity or full-swing replay. Those gates remain
+open under F05/F09/F10; the design-manual calculation registry stays blocked.

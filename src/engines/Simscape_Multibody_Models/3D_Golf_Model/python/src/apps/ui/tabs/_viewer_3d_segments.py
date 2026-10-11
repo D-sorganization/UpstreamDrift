@@ -35,6 +35,7 @@ from src.shared.python.body_part_viz.shapes import (
     MeshShape,
 )
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.plot_style.color_utils import rgba_to_hex
 
 from ...core.models import C3DDataModel
 from ...services.segment_set_io import SegmentSpec, spec_v1_to_v2
@@ -52,14 +53,6 @@ _GROUP_COLORS: dict[str, tuple[float, float, float, float]] = {
     "auto": (0.30, 0.30, 0.30, 1.0),
     "default": (0.30, 0.30, 0.30, 1.0),
 }
-
-
-def _rgba_to_hex(rgba: tuple[float, float, float, float]) -> str:
-    r, g, b, _a = rgba
-    rh = int(round(r * 255))
-    gh = int(round(g * 255))
-    bh = int(round(b * 255))
-    return f"#{rh:02x}{gh:02x}{bh:02x}"
 
 
 def _build_shape_from_spec(
@@ -313,7 +306,7 @@ class UserSegmentRenderer:
     def _theme_for_spec(spec: SegmentVizSpec) -> ShapeTheme:
         rgba = _GROUP_COLORS.get(spec.theme.group, _GROUP_COLORS["auto"])
         if spec.theme.color == "#1f77b4" and spec.theme.group in _GROUP_COLORS:
-            color = _rgba_to_hex(rgba)
+            color = rgba_to_hex(rgba, include_alpha=False)
             return ShapeTheme(
                 color=color,
                 opacity=spec.theme.opacity,

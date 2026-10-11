@@ -93,7 +93,7 @@ def build_ground_support_receipt(
     }
 
     # Top of backswing posture at ~0.83 s
-    tob_frame = min(int(round(0.83 * RATE_HZ)), len(q_ref) - 1)
+    tob_frame = min(int(round(0.83 * lane.rate_hz)), len(q_ref) - 1)
     tob_posture = posture_summary(kin, q_ref[tob_frame])
 
     receipt_dict = {

@@ -22,7 +22,7 @@ from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pen
 )
 from src.shared.python.simulation_backends import (
     BackendCapabilities,
-    DynamicsProvider,
+    EquationsOfMotionProvider,
     GolfModelParams,
     SimState,
     SimulationBackend,
@@ -72,10 +72,10 @@ def _analytical_mass(dyn: DoublePendulumDynamics, theta2: float) -> np.ndarray:
 @pytest.mark.requires_mujoco
 @_skip_no_mujoco
 def test_satisfies_both_protocols() -> None:
-    """The backend is a runtime SimulationBackend *and* DynamicsProvider."""
+    """The backend is a runtime SimulationBackend *and* EquationsOfMotionProvider."""
     backend = _make_backend()
     assert isinstance(backend, SimulationBackend)
-    assert isinstance(backend, DynamicsProvider)
+    assert isinstance(backend, EquationsOfMotionProvider)
 
 
 @pytest.mark.requires_mujoco
@@ -113,7 +113,7 @@ def test_constructor_rejects_bad_params_type() -> None:
 
 
 # --------------------------------------------------------------------------- #
-# DynamicsProvider cross-validation
+# EquationsOfMotionProvider cross-validation
 # --------------------------------------------------------------------------- #
 @pytest.mark.requires_mujoco
 @_skip_no_mujoco

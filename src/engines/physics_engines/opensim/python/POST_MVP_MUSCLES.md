@@ -85,8 +85,12 @@ The new tests live at `tests/opensim/test_muscle_cmc.py`.
 
 ## OpenSim Golf Model Muscle Qualification (OG-08, #10402)
 
-Under OpenSim epic #10394 / #10363, muscle and tendon extensions are qualified
-without replacing the certified joint-torque baseline:
+Under OpenSim epic #10394 / #10363, the following lower-level checks support
+muscle and tendon qualification without replacing the joint-torque baseline.
+Their presence does not establish that a model passed them. The parameter-only
+`qualify_muscle_extensions` orchestrator runs anatomy and parameter checks only;
+F07 #11791 keeps its remaining audit fields false and native replay absent until
+actual model/runtime evidence is independently evaluated.
 
 1. **Explicit Anatomy Scope:**
    - A lower-extremity model (e.g. Rajagopal2015 80-muscle) is **not** a full golf
@@ -108,6 +112,6 @@ without replacing the certified joint-torque baseline:
    - Initial muscle-tendon states must satisfy static equilibrium ($F_{\text{fiber}}\cos\alpha = F_{\text{tendon}}$)
      before forward simulation or replay; non-equilibrated states raise `UninitializedTendonStateError`.
 5. **Acceptance & Validation Governance:**
-   - Receipts report reserve actuator torques and pelvic residuals ($F_x, F_y, F_z, M_x, M_y, M_z$).
+   - Verified native receipts must report actual reserve actuator torques and pelvic residuals ($F_x, F_y, F_z, M_x, M_y, M_z$). The parameter-only orchestrator emits no short-replay receipt; a manually constructed metrics record defaults to `UNVERIFIED_NATIVE_REPLAY` and cannot certify its own evidence.
    - Muscle-complete status remains `IN_PROGRESS_QUALIFICATION` and independent
      scientific validation remains `PENDING_10375` until clinical force validation completes.

@@ -53,7 +53,15 @@ from src.shared.python.motion_matching.club_only.workbook_identity import (
 pytestmark = pytest.mark.unit
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-CLUB_DATA = REPO_ROOT / "data" / "Club_Data.xlsx"
+try:
+    from src.motion_capture.capture_registry import (
+        CaptureRegistryError,
+        resolve_capture,
+    )
+
+    CLUB_DATA = resolve_capture("club-workbook-main")
+except CaptureRegistryError:
+    CLUB_DATA = REPO_ROOT / "data" / "Club_Data.xlsx"
 EVIDENCE = (
     REPO_ROOT
     / "docs"
@@ -301,8 +309,9 @@ def test_four_trial_bounded_seeds_retrieval_and_ik_baselines() -> None:
 
 
 def test_workbook_smoke_descriptor_uses_native_clock() -> None:
-    if not CLUB_DATA.is_file():
-        pytest.skip("Club_Data.xlsx not present")
+    from src.motion_capture.capture_registry import require_capture
+
+    club_data = require_capture("club-workbook-main")
     from src.shared.python.motion_matching.club_only.adapters import (
         club_target_to_observation,
     )
@@ -315,7 +324,7 @@ def test_workbook_smoke_descriptor_uses_native_clock() -> None:
         time_alignment="impact",
         impact_target_t_s=0.05,
     )
-    target = load_club_target_excel(CLUB_DATA, "TW_wiffle", opts)
+    target = load_club_target_excel(club_data, "TW_wiffle", opts)
     try:
         obs = club_target_to_observation(target, trial_id="TW_wiffle")
     except ValueError as exc:

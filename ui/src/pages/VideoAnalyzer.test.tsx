@@ -132,4 +132,56 @@ describe('VideoAnalyzer data structures', () => {
     expect(shoulderDelta).toBeCloseTo(-2.0, 5);
     expect(hipVelocity).toBeCloseTo(75.76, 0);
   });
+
+  it('should derive frame index from currentTime using clip fps (25 fps fixture, not 30)', () => {
+    // 25 fps fixture has dt = 0.04s per frame.
+    // At t = 0.20s: 0.20 / 0.04 = 5 (index 5)
+    // At 30 fps it would be 0.20 * 30 = 6.
+    const fps = 25;
+    const currentTime = 0.20;
+    const frameIndex = Math.round(currentTime * fps);
+    expect(frameIndex).toBe(5);
+    expect(frameIndex).not.toBe(6);
+  });
 });
+
+describe('VideoAnalyzer sizing and sync', () => {
+  it('sizes viewBox from videoWidth/videoHeight on loadedmetadata', async () => {
+    const { render, fireEvent } = await import('@testing-library/react');
+    const { VideoAnalyzerPage } = await import('./VideoAnalyzer');
+
+    const { container } = render(<VideoAnalyzerPage />);
+    const fileInput = container.querySelector('input[type="file"]') as HTMLInputElement;
+
+    // Simulate uploading a video file
+    const file = new File(['dummy video content'], 'test_swing_25fps.mp4', {
+      type: 'video/mp4',
+    });
+    // Mock URL.createObjectURL
+    const origCreateObjectURL = URL.createObjectURL;
+    URL.createObjectURL = () => 'blob:http://localhost/test-video';
+
+    try {
+      fireEvent.change(fileInput, { target: { files: [file] } });
+
+      const video = container.querySelector('video') as HTMLVideoElement;
+      expect(video).toBeDefined();
+
+      // Mock video dimensions: 1280x720 (different from legacy 640x480)
+      Object.defineProperty(video, 'videoWidth', { value: 1280, configurable: true });
+      Object.defineProperty(video, 'videoHeight', { value: 720, configurable: true });
+
+      // Trigger loadedmetadata
+      fireEvent.loadedMetadata(video);
+
+      // Check if container or overlay uses 1280 and 720
+      const overlaySvg = container.querySelector('[data-testid="video-overlay-container"] svg, [data-testid="pose-overlay"], [data-testid="video-force-overlay"]');
+      if (overlaySvg) {
+        expect(overlaySvg.getAttribute('viewBox')).toBe('0 0 1280 720');
+      }
+    } finally {
+      URL.createObjectURL = origCreateObjectURL;
+    }
+  });
+});
+

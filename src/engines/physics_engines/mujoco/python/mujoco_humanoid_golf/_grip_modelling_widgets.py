@@ -166,6 +166,8 @@ class ContactMetricsWidget(QtWidgets.QWidget):
         self.lbl_slip_status = QtWidgets.QLabel("No slip")
         self.lbl_slip_margin = QtWidgets.QLabel("N/A")
         self.lbl_equilibrium = QtWidgets.QLabel("Unknown")
+        self.lbl_grip_weld = QtWidgets.QLabel("unavailable (no data yet)")
+        self.lbl_grip_weld.setWordWrap(True)
 
         layout.addRow("Normal Force:", self.lbl_normal_force)
         layout.addRow("Tangent Force:", self.lbl_tangent_force)
@@ -173,6 +175,13 @@ class ContactMetricsWidget(QtWidgets.QWidget):
         layout.addRow("Slip Status:", self.lbl_slip_status)
         layout.addRow("Min Slip Margin:", self.lbl_slip_margin)
         layout.addRow("Equilibrium:", self.lbl_equilibrium)
+        layout.addRow("Weld Grip Force:", self.lbl_grip_weld)
+
+    def update_grip_weld(self, text: str) -> None:
+        """Show the hand-on-club weld summary (GCV-8, #11714)."""
+        if not text:
+            raise ValueError("text must be provided")
+        self.lbl_grip_weld.setText(text)
 
     def update_metrics(
         self,

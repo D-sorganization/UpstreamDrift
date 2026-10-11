@@ -102,4 +102,5 @@ def test_cli_capture_synthetic_writes_manifest_and_exits_zero(tmp_path: Path) ->
     assert manifest.is_file()
     text = manifest.read_text(encoding="utf-8")
     assert '"outcome": "supported"' in text
-    assert '"tools_schema"' in text and '"status": "unavailable"' in text
+    assert '"tools_schema"' in text
+    assert f'"status": "{probe_tools_schema().status}"' in text

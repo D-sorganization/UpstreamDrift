@@ -36,8 +36,11 @@ classdef test_smoke_fit_wiffle_proV1 < matlab.unittest.TestCase
 
     methods (Test, TestTags = {'IsSlow'})
         function test_wiffle_ProV1_grip_rmse_below_5mm(testCase)
-            xlsx = locate_relpath(testCase, testCase.XLSX_RELPATH, ...
-                "Wiffle_ProV1_club_3D_data.xlsx");
+            try
+                xlsx = string(resolve_capture("club-workbook-wiffle"));
+            catch exc
+                testCase.assumeFail("skipped — club-workbook-wiffle not available: " + string(exc.message));
+            end
             impact_mat = locate_relpath(testCase, testCase.IMPACT_MAT_RELPATH, ...
                 "3DModelInputs_Impact.mat");
             testCase.assumeTrue(exist("GolfSwing3D_Kinetic", "file") ~= 0, ...

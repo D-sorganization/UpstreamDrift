@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import copy
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Literal
 
@@ -225,22 +224,7 @@ class CompositionUxController:
 
 
 def _clone_model(model: URDFModel) -> URDFModel:
-    from src.tools.model_explorer.frankenstein_editor.model import URDFModel
-
-    return URDFModel(
-        file_path=model.file_path,
-        robot_name=model.robot_name,
-        links={name: copy.deepcopy(link) for name, link in model.links.items()},
-        joints={name: copy.deepcopy(joint) for name, joint in model.joints.items()},
-        materials={
-            name: copy.deepcopy(material) for name, material in model.materials.items()
-        },
-        other_elements=[copy.deepcopy(element) for element in model.other_elements],
-        attachment_points=tuple(
-            copy.deepcopy(point) for point in model.attachment_points
-        ),
-        is_modified=model.is_modified,
-    )
+    return model.clone()
 
 
 def _validation_blocker(result: CompositionValidationResult) -> str:

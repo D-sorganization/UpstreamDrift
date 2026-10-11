@@ -33,7 +33,6 @@ ai/workflow_definitions.py
 ai/workflow_engine.py
 calc_backend/api/standard_response.py
 calc_backend/tests/test_standard_response.py
-data_processing/tests/test_data_processing_drift.py
 data_processor/__init__.py
 data_processor/rust_engine.py
 gui_launcher/panel_popout_manager.py

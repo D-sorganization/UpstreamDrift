@@ -1,0 +1,158 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\geometry{margin=25mm}
+\hypersetup{colorlinks=true,linkcolor=blue!60!black,urlcolor=blue!60!black}
+
+\title{MyoSuite Kinematic Retarget Map From Anthro Coordinates}
+\author{UpstreamDrift Research Reference (\#11729)}
+\date{Editable standalone research source; not the engineering design manual}
+
+\begin{document}
+\maketitle
+
+\section{Scope and Status}
+
+This reference describes the map from the Simscape anthro document
+coordinates to the joints of the pinned \texttt{myo\_sim}
+\texttt{body/myobody\_simpleupper.xml} (commit
+\texttt{33f3ded946f55adbdcf963c99999587aadaf975f}), used for MyoSuite
+kinematic replay. The map lives in
+\path{src/engines/physics_engines/myosuite/python/coordinate_map_anthro.json}
+and is applied by
+\path{src/engines/physics_engines/myosuite/python/retarget.py}. It is
+\emph{diagnostic only} (\texttt{qualification.diagnostic\_only}). It is a
+kinematic correspondence and does not establish dynamics equivalence, marker
+parity or gaze behaviour. The decision record is sections~18 and~19 of
+\path{docs/development/full_body_models/DESIGN_DECISIONS_2.md}.
+
+\section{Model, Frames and Units}
+
+All angles are in radians. Source coordinates are the anthro generalised
+coordinates, built by
+\path{src/shared/python/motion_matching/anthropometric_geometry.py}. Target
+coordinates are the named MyoSuite hinges. The relevant source joints are:
+\begin{itemize}[nosep]
+  \item \texttt{LowerTorso} relative to \texttt{world}:
+    $P_x P_y P_z\,R_x(\texttt{HipInputX})\,R_y(\texttt{HipInputY})\,R_z(\texttt{HipInputZ})$.
+    This is the pelvis root, not a lumbar joint.
+  \item Scapula (\texttt{Hubto\{L,R\}S}):
+    $R_x(\texttt{ScapInputX})\,R_z(\texttt{ScapInputY})$.
+  \item Shoulder (\texttt{\{L,R\}UpperArm}):
+    $R_x(\texttt{SInputX})\,R_y(\texttt{SInputY})\,R_z(\texttt{SInputZ})$.
+  \item Neck: $R_x(\texttt{NeckInputX})\,R_y(\texttt{NeckInputY})\,R_z(\texttt{NeckInputZ})$
+    with the head forward axis on $+x$. So $X$ is lateral bending, $Y$ is
+    flexion/extension and $Z$ is axial rotation.
+\end{itemize}
+
+\section{Equations}
+
+Let $\mathcal{M}$ be the set of mapping entries $(s, t, k_s)$, with source
+index $s$, target index $t$ and non-zero multiplier $k_s$. The map is required
+to be one-to-one: no source and no target appears twice. The retargeted vector
+is
+\begin{equation}
+  q^{\mathrm{myo}}_t =
+  \begin{cases}
+    k_s\, q^{\mathrm{src}}_s & (s,t,k_s)\in\mathcal{M},\\
+    q^{\mathrm{myo}}_{a(t)} & t \text{ unmapped, mapped chain ancestor } a(t),\\
+    \bar q_t & \text{otherwise (neutral)},
+  \end{cases}
+\end{equation}
+and the inverse on mapped sources is exact:
+\begin{equation}
+  q^{\mathrm{src}}_s = q^{\mathrm{myo}}_t / k_s, \qquad (s,t,k_s)\in\mathcal{M}.
+\end{equation}
+\texttt{load\_retarget\_map} raises \texttt{ValueError} for a repeated target,
+a repeated source or $k_s=0$, so the cases above cannot overlap.
+
+\section{Parameters}
+
+Every mapped entry has $k_s=+1$, except $\texttt{NeckInputY}\to
+\texttt{neck\_flexion}$ with $k_s=-1$. That sign comes from forward
+kinematics (section~18; evidence
+\path{docs/development/full_body_models/evidence/myosuite_neck/neck_flexion_sign.json}).
+
+\begin{table}[h]
+\centering
+\caption{Omitted Source Coordinates}
+\begin{tabularx}{\linewidth}{@{}lX@{}}
+\toprule
+Source & Reason \\
+\midrule
+\texttt{TranslationInput\{X,Y,Z\}} & Root translation, carried by the free joint outside the hinge map. \\
+\texttt{HipInput\{X,Y,Z\}} & Pelvis orientation relative to the world, not a lumbar angle. The replay does not yet drive the free-joint orientation. \\
+\texttt{\{L,R\}ScapInput\{X,Y\}} & No scapular DOF in \texttt{myobody\_simpleupper}. \texttt{ScapInputY} is a rotation about $z$ and does not match the $y$ axis of \texttt{arm\_flex}. \\
+\texttt{NeckInputX} & Lateral bending; the myo\_sim head has only \texttt{neck\_rotation} and \texttt{neck\_flexion}. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Failed and Rejected Approaches}
+
+\begin{itemize}
+  \item \textbf{Weighted secondary entries} ($0.25\,\texttt{HipInput*}\to
+    \texttt{lumbar\_*}$, $0.5\,\texttt{\{R,L\}ScapInputY}\to\texttt{arm\_flex}$,
+    $0.5\,\texttt{RScapInputX}\to\texttt{arm\_add\_r}$,
+    $0.5\,\texttt{NeckInputY}\to\texttt{neck\_rotation}$). The retarget assigns
+    rather than accumulates, so each of these overwrote its primary.
+    \texttt{SpineInputX}, \texttt{SpineInputY}, \texttt{TorsoInput},
+    \texttt{RSInputX}, \texttt{RSInputY}, \texttt{LSInputY} and
+    \texttt{NeckInputZ} had no effect. The entries were removed (\#11768
+    removed the neck entry).
+  \item \textbf{Accumulating the weighted entries.} Rejected. The weights were
+    never derived from kinematics, the axes do not correspond, and the inverse
+    would be under-determined.
+  \item \textbf{$\texttt{NeckInputX}\to\texttt{neck\_flexion}$}. Rejected: it
+    replays lateral bending as a nod.
+\end{itemize}
+
+\section{Related Change: Neck Torque Capacities}
+
+The MyoFullBody torque neck
+(\path{src/shared/python/myofullbody/neck.py}) uses the same neck axes.
+Its capacities are $\texttt{NeckInputX}=36$~N\,m (lateral bending),
+$\texttt{NeckInputY}=30$~N\,m (flexion) and $\texttt{NeckInputZ}=15$~N\,m
+(axial rotation). The X and Y values were swapped before \#11729. Receipts
+produced earlier record the old assignment and are historical.
+
+\section{Acceptance Criteria and Evidence}
+
+Software criteria only, not physical acceptance:
+\begin{itemize}[nosep]
+  \item each primary source alone drives its target (no overwrite);
+  \item the map is one-to-one, and every source is either mapped or listed as
+    omitted with a note;
+  \item \texttt{project\_to\_source} inverts \texttt{retarget\_frame} on mapped
+    sources to $10^{-12}$;
+  \item the loader rejects many-to-one targets, duplicate sources and zero
+    signs.
+\end{itemize}
+Tests: \path{tests/unit/engines/myosuite/test_retarget.py} and
+\path{tests/unit/engines/myofullbody/test_myofullbody_neck.py}. All of the new
+tests failed before the fix.
+
+\section{Limitations}
+
+No shoulder-girdle motion and no pelvis orientation reach MyoSuite replay.
+Scapula absorption, if wanted, needs a forward-kinematics fit of the
+scapula and shoulder chain, not a fixed weight. MyoSuite replay receipts
+produced with the earlier map are historical and were not regenerated.
+
+\section{Reproduction}
+
+\begin{verbatim}
+python3 -m pytest tests/unit/engines/myosuite/test_retarget.py \
+    tests/unit/engines/myofullbody/test_myofullbody_neck.py -q
+cd docs/research/myosuite_retarget_map && tectonic myosuite_retarget_map.tex
+\end{verbatim}
+
+\end{document}

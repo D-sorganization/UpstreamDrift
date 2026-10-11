@@ -1,0 +1,327 @@
+"""Engine-agnostic overlay frame provider for same-input bundles (NV-3, #11676).
+
+Builds :class:`ForceTorqueFrame` series from a same-input bundle without
+touching any engine SDK:
+
+* bundle efforts -> one joint-torque wrench per joint anchor (coordinates that
+  share an anchor, e.g. the three hip rotations, merge into one vector);
+* the shared contact law (``evaluate_contact_samples`` of any full-body model)
+  -> the ground-reaction breakdown of the shared core (GCV-1, #11707; GCV-2,
+  #11708): per-foot and net force at the wrench-derived centre of pressure,
+  free moment and moment about the centre of mass;
+* the centre of mass -> the system weight, as a gravity wrench at the CoM.
+
+Engine adapters only have to supply the two small protocols below.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Mapping, Sequence
+import json
+import math
+import re
+from typing import Any, NamedTuple, Protocol, TypeAlias, runtime_checkable
+
+import numpy as np
+from numpy.typing import NDArray
+
+from src.shared.python.biomechanics.grip_extraction import unavailable_analysis
+from src.shared.python.biomechanics.grip_wrench import GripAnalysis
+from src.shared.python.biomechanics.ground_reaction_wrenches import (
+    ground_reaction_overlay,
+)
+from src.shared.python.force_overlay.contracts import (
+    ForceTorqueFrame,
+    OverlayWrench,
+    WrenchKind,
+)
+from src.shared.python.force_overlay.conversions import joint_torque_wrench
+from src.shared.python.force_overlay.grip_frame import grip_wrenches_and_metadata
+from src.shared.python.force_overlay.series import ForceTorqueSeries
+from src.shared.python.motion_matching.same_input import InputBundle
+
+Array: TypeAlias = NDArray[np.float64]
+Vec3 = tuple[float, float, float]
+_LABEL_SAFE = re.compile(r"[^A-Za-z0-9_.-]+")
+_ANCHOR_DECIMALS = 5
+
+
+class JointFrame(NamedTuple):
+    """World-frame anchor and unit rotation axis of one rotational coordinate."""
+
+    body: str
+    anchor_m: Vec3
+    axis_world: Vec3
+
+
+@runtime_checkable
+class KinematicsSource(Protocol):
+    """Kinematics an engine adapter supplies for torque and weight glyphs."""
+
+    total_mass_kg: float
+
+    def joint_frames(
+        self, coordinates: Mapping[str, float]
+    ) -> Mapping[str, JointFrame]:
+        """Rotational coordinates only, keyed by coordinate name."""
+        ...
+
+    def center_of_mass_m(self, coordinates: Mapping[str, float]) -> Vec3:
+        """System centre of mass in the world frame."""
+        ...
+
+
+@runtime_checkable
+class ContactSource(Protocol):
+    """The shared contact law, e.g. any full-body model adapter."""
+
+    def evaluate_contact_samples(
+        self, coordinates: Mapping[str, float], rates: Mapping[str, float]
+    ) -> Mapping[str, Any]:
+        """Per-sphere ``ContactSample`` values."""
+        ...
+
+
+def _label_part(text: str) -> str:
+    return _LABEL_SAFE.sub("_", text).strip("_") or "x"
+
+
+def _tuple3(vec: Sequence[float] | Array) -> Vec3:
+    return (float(vec[0]), float(vec[1]), float(vec[2]))
+
+
+@runtime_checkable
+class GripSource(Protocol):
+    """An engine adapter that can report the hands' wrench on the club (GCV-8)."""
+
+    def grip_analysis(
+        self,
+        coordinates: Mapping[str, float],
+        rates: Mapping[str, float],
+        primitive_efforts: Mapping[str, float],
+    ) -> GripAnalysis:
+        """Per-hand wrenches ON THE CLUB at the given state."""
+        ...
+
+
+_GRIP_FAILURES = (ValueError, ArithmeticError, RuntimeError, np.linalg.LinAlgError)
+
+
+class BundleOverlayProvider:
+    """Time series of overlay frames for one bundle (or a replay of it).
+
+    Preconditions: ``q``/``v`` default to the bundle reference states and must
+    have shape ``(steps + 1, nv)``; ``efforts`` come from the bundle.
+    Postconditions: every frame lies on the bundle time grid ``k * dt_s``.
+    """
+
+    def __init__(
+        self,
+        bundle: InputBundle,
+        contact: ContactSource,
+        kinematics: KinematicsSource,
+        *,
+        engine: str,
+        q: Array | None = None,
+        v: Array | None = None,
+        torque_floor_nm: float = 0.0,
+        include_weight: bool = True,
+    ) -> None:
+        if not isinstance(bundle, InputBundle):
+            raise TypeError(
+                f"bundle must be an InputBundle, got {type(bundle).__name__}"
+            )
+        if not engine:
+            raise ValueError("engine must be a non-empty string")
+        self._grip: GripSource | None = None
+        self._grip_cache: dict[int, GripAnalysis] = {}
+        self._grip_source = f"{engine}:grip"
+        if not (math.isfinite(torque_floor_nm) and torque_floor_nm >= 0.0):
+            raise ValueError("torque_floor_nm must be finite and non-negative")
+        expected = bundle.reference_q.shape
+        self._q = bundle.reference_q if q is None else np.asarray(q, dtype=float)
+        self._v = bundle.reference_v if v is None else np.asarray(v, dtype=float)
+        if self._q.shape != expected or self._v.shape != expected:
+            raise ValueError(f"q and v must have shape {expected}")
+        spec = json.loads(bundle.spec_bytes)
+        self._bundle = bundle
+        self._contact = contact
+        self._kin = kinematics
+        self._engine = engine
+        self._floor = float(torque_floor_nm)
+        self._include_weight = include_weight
+        self._gravity = np.asarray(
+            spec.get("gravity_m_s2", (0.0, 0.0, -9.80665)), float
+        )
+        self._sphere_body = {
+            s["name"]: s["body"] for s in spec.get("contact", {}).get("spheres", ())
+        }
+
+    def with_grip(
+        self, grip: GripSource, source: str | None = None
+    ) -> BundleOverlayProvider:
+        """Add the hands' wrench on the club (GCV-10); returns ``self``.
+
+        ``source`` labels where the extraction came from (frame metadata
+        ``grip_source``).  Raises ``TypeError`` if ``grip`` has no
+        ``grip_analysis``.
+        """
+        if not isinstance(grip, GripSource):
+            raise TypeError("grip must provide grip_analysis(coords, rates, efforts)")
+        self._grip = grip
+        self._grip_cache.clear()
+        if source:
+            self._grip_source = source
+        return self
+
+    def __len__(self) -> int:
+        return int(self._q.shape[0])
+
+    def frame_at(self, index: int) -> ForceTorqueFrame:
+        """Overlay frame at state ``index`` (effort ``min(index, steps - 1)``)."""
+        if not 0 <= index < len(self):
+            raise IndexError(f"frame index {index} outside [0, {len(self) - 1}]")
+        names = self._bundle.coordinate_order
+        coords = dict(zip(names, map(float, self._q[index]), strict=True))
+        rates = dict(zip(names, map(float, self._v[index]), strict=True))
+        efforts = self._bundle.efforts[min(index, self._bundle.steps - 1)]
+        named_efforts = dict(zip(names, efforts, strict=True))
+        wrenches = [
+            *self._contact_wrenches(coords, rates),
+            *self._torque_wrenches(coords, named_efforts),
+            *self._weight_wrenches(coords),
+        ]
+        metadata: dict[str, Any] = {
+            "source": "same_input_bundle",
+            "spec_sha256": self._bundle.spec_sha256,
+        }
+        grip_wrenches, grip_meta = self._grip_wrenches(
+            index, coords, rates, named_efforts
+        )
+        wrenches.extend(grip_wrenches)
+        metadata.update(grip_meta)
+        return ForceTorqueFrame(
+            time_s=float(index * self._bundle.dt_s),
+            engine=self._engine,
+            wrenches=tuple(wrenches),
+            metadata=metadata,
+        )
+
+    def grip_analyses(self, indices: Sequence[int]) -> list[GripAnalysis]:
+        """Grip analyses at ``indices`` (cached; needs a ``grip`` source)."""
+        if self._grip is None:
+            raise ValueError("this provider was built without a grip source")
+        for k in indices:
+            self.frame_at(k)
+        return [self._grip_cache[k] for k in indices]
+
+    def _grip_wrenches(
+        self,
+        index: int,
+        coords: Mapping[str, float],
+        rates: Mapping[str, float],
+        efforts: Mapping[str, float],
+    ) -> tuple[tuple[OverlayWrench, ...], dict[str, Any]]:
+        """Grip wrenches and metadata; a failed solve is unavailable with a reason."""
+        if self._grip is None:
+            return (), {}
+        analysis = self._grip_cache.get(index)
+        if analysis is None:
+            try:
+                analysis = self._grip.grip_analysis(coords, rates, efforts)
+            except _GRIP_FAILURES as exc:
+                analysis = unavailable_analysis(f"grip solve failed: {exc}")
+            self._grip_cache[index] = analysis
+        wrenches, meta = grip_wrenches_and_metadata(analysis, source=self._grip_source)
+        return wrenches, {**meta, "grip_source": self._grip_source}
+
+    def series(self, stride: int = 1) -> ForceTorqueSeries:
+        """Frames at every ``stride``-th state."""
+        if not isinstance(stride, int) or stride < 1:
+            raise ValueError(f"stride must be a positive integer, got {stride!r}")
+        frames = tuple(self.frame_at(k) for k in range(0, len(self), stride))
+        return ForceTorqueSeries(frames=frames, engine=self._engine)
+
+    def _contact_wrenches(
+        self, coords: Mapping[str, float], rates: Mapping[str, float]
+    ) -> list[OverlayWrench]:
+        """Per-foot and net GRF breakdown of the shared contact law (GCV-2, GCV-6).
+
+        Loaded contact spheres become ground-contact wrenches on their body;
+        the shared ground-reaction core groups them by foot and reports the
+        per-foot and net force, CoP, free moment and moment about the CoM.
+        """
+        samples = self._contact.evaluate_contact_samples(coords, rates)
+        ground: list[OverlayWrench] = []
+        for name, sample in samples.items():
+            force = np.asarray(sample.normal_force_n) + np.asarray(
+                sample.friction_force_n
+            )
+            if float(np.linalg.norm(force)) <= 1e-9:
+                continue
+            body = self._sphere_body.get(name, name.rsplit("_", 1)[-1])
+            ground.append(
+                OverlayWrench(
+                    WrenchKind.CONTACT,
+                    f"contact:{_label_part(name)}",
+                    body,
+                    _tuple3(np.asarray(sample.contact_point_m, float)),
+                    force_n=_tuple3(force),
+                    source=f"{self._engine}:shared_contact_law",
+                )
+            )
+        return list(
+            ground_reaction_overlay(
+                ground,
+                self._kin.center_of_mass_m(coords),
+                source=f"{self._engine}:shared_contact_law",
+            )
+        )
+
+    def _torque_wrenches(
+        self, coords: Mapping[str, float], effort: Mapping[str, float]
+    ) -> list[OverlayWrench]:
+        groups: dict[tuple[float, ...], list[tuple[str, JointFrame]]] = {}
+        for coord, frame in self._kin.joint_frames(coords).items():
+            key = tuple(np.round(frame.anchor_m, _ANCHOR_DECIMALS))
+            groups.setdefault(key, []).append((coord, frame))
+        out: list[OverlayWrench] = []
+        used: set[str] = set()
+        for _, items in sorted(groups.items()):
+            taus = [float(effort[c]) for c, _ in items]
+            axes = np.array([f.axis_world for _, f in items], dtype=float)
+            net = np.asarray(taus) @ axes
+            if float(np.linalg.norm(net)) < max(self._floor, 1e-9):
+                continue
+            body = items[0][1].body
+            label = f"actuator:{_label_part(body)}"
+            n = 2
+            while label in used:
+                label, n = f"actuator:{_label_part(body)}_{n}", n + 1
+            used.add(label)
+            out.append(
+                joint_torque_wrench(
+                    label,
+                    body,
+                    taus,
+                    axes,
+                    items[0][1].anchor_m,
+                    f"{self._engine}:bundle_efforts",
+                )
+            )
+        return out
+
+    def _weight_wrenches(self, coords: Mapping[str, float]) -> list[OverlayWrench]:
+        if not self._include_weight:
+            return []
+        weight = float(self._kin.total_mass_kg) * self._gravity
+        return [
+            OverlayWrench(
+                WrenchKind.GRAVITY,
+                "gravity:com",
+                "system",
+                _tuple3(self._kin.center_of_mass_m(coords)),
+                force_n=_tuple3(weight),
+                source=f"{self._engine}:system_weight",
+            )
+        ]

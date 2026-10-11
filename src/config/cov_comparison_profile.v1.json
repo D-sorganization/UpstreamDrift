@@ -1,0 +1,323 @@
+{
+  "$schema": "cov-comparison-profile/1.0.0",
+  "version": "1.0.0",
+  "profile_id": "cov_comparison_profile_v1",
+  "governing_issue": 11271,
+  "parent_epic": 11268,
+  "description": "Capture-O Video Companion frozen comparison gate profile defining metric thresholds, units, aggregations, levels L0-L3, and classification boundaries",
+  "claim_boundary": "Thresholds in this profile classify observational agreement (e.g. trustworthy, indicative, unresolvable, or outside envelope). They do not discard imperfect data or assert predictive biomechanical validity beyond the declared comparison level.",
+  "comparison_levels": {
+    "L0": {
+      "name": "L0_qualitative",
+      "prerequisites": ["graded_video_swing_A_to_C"],
+      "allowed_claims": "Visual agreement only via synchronized or side-by-side overlays",
+      "reporting_scope": ["qualitative_notes", "visual_inspection", "grade"]
+    },
+    "L1": {
+      "name": "L1_envelope",
+      "prerequisites": ["virtual_camera_fit"],
+      "allowed_claims": "Video swing trajectory containment within capture-O 13-swing variation envelope",
+      "reporting_scope": [
+        "landmark_fractions_inside",
+        "dtw_envelope_ratio",
+        "envelope_signed_distances"
+      ]
+    },
+    "L2": {
+      "name": "L2_paired_2d",
+      "prerequisites": ["pairing_confidence_ge_tau_pair", "event_time_mapping"],
+      "allowed_claims": "Per-frame 2D landmark agreement with specific paired capture swing",
+      "reporting_scope": [
+        "pixel_residuals",
+        "body_height_normalized_residuals",
+        "event_timing_error_frames"
+      ]
+    },
+    "L3": {
+      "name": "L3_paired_3d",
+      "prerequisites": ["L2_prerequisites", "3d_source_model_or_fit"],
+      "allowed_claims": "3D joint positions and joint kinematics agreement vs marker IK with rigid scale fixation",
+      "reporting_scope": [
+        "mpjpe_mm",
+        "pa_mpjpe_mm",
+        "depth_axis_residual_mm",
+        "joint_angles_deg",
+        "kinematic_sequence_timing"
+      ]
+    }
+  },
+  "hyperparameters": {
+    "pairing": {
+      "tau_pair": 0.65,
+      "min_abstention_margin": 0.05,
+      "candidate_swings_count": 13,
+      "features": [
+        "wrist_trajectory_dtw",
+        "tempo_ratio",
+        "top_position",
+        "finish_position"
+      ],
+      "club_metrics_in_pairing": false
+    },
+    "virtual_camera": {
+      "fitted_parameters": ["R", "T", "f"],
+      "principal_point_fixed_at_center": true,
+      "radial_distortion_k1_fixed_zero": true,
+      "fitting_frames": ["address_pose"],
+      "reference_backend": "mediapipe",
+      "held_out_from_own_evaluation": true
+    },
+    "offset_calibration": {
+      "forbidden_on_evaluation_frames": true,
+      "require_disjoint_holdout_frames": true,
+      "min_calibration_frames": 15
+    },
+    "time_mapping": {
+      "anchors": ["address", "top", "impact", "finish"],
+      "interpolation": "piecewise_linear",
+      "unknown_clock_policy": "phase_normalized_only_no_velocities"
+    }
+  },
+  "phase_bins": {
+    "P1": { "label": "address", "start_phase": 0.0, "end_phase": 0.1 },
+    "P2": { "label": "takeaway", "start_phase": 0.1, "end_phase": 0.25 },
+    "P3": { "label": "mid_backswing", "start_phase": 0.25, "end_phase": 0.45 },
+    "P4": { "label": "top", "start_phase": 0.45, "end_phase": 0.55 },
+    "P5": { "label": "early_downswing", "start_phase": 0.55, "end_phase": 0.7 },
+    "P6": {
+      "label": "shaft_horizontal_down",
+      "start_phase": 0.7,
+      "end_phase": 0.8
+    },
+    "P7": { "label": "impact", "start_phase": 0.8, "end_phase": 0.85 },
+    "P8": {
+      "label": "shaft_horizontal_follow",
+      "start_phase": 0.85,
+      "end_phase": 0.9
+    },
+    "P9": {
+      "label": "mid_follow_through",
+      "start_phase": 0.9,
+      "end_phase": 0.95
+    },
+    "P10": { "label": "finish", "start_phase": 0.95, "end_phase": 1.0 }
+  },
+  "metrics": [
+    {
+      "id": "transverse_2d_landmarks",
+      "level": "L2",
+      "quantity": "transverse_2d_landmarks",
+      "metric": "residual_norm",
+      "unit": "norm",
+      "aggregation": "p95",
+      "trustworthy_bound": 0.02,
+      "indicative_bound": 0.04,
+      "unresolvable_bound": null,
+      "description": "Body-height-normalized 2D residual distance across transverse landmarks (wrists, shoulders, hips)"
+    },
+    {
+      "id": "lead_wrist_residual_2d",
+      "level": "L2",
+      "quantity": "lead_wrist",
+      "metric": "residual_norm",
+      "unit": "norm",
+      "aggregation": "p95",
+      "trustworthy_bound": 0.025,
+      "indicative_bound": 0.05,
+      "unresolvable_bound": null,
+      "description": "Body-height-normalized 2D residual distance for lead wrist"
+    },
+    {
+      "id": "trail_wrist_residual_2d",
+      "level": "L2",
+      "quantity": "trail_wrist",
+      "metric": "residual_norm",
+      "unit": "norm",
+      "aggregation": "p95",
+      "trustworthy_bound": 0.025,
+      "indicative_bound": 0.05,
+      "unresolvable_bound": null,
+      "description": "Body-height-normalized 2D residual distance for trail wrist"
+    },
+    {
+      "id": "lead_shoulder_residual_2d",
+      "level": "L2",
+      "quantity": "lead_shoulder",
+      "metric": "residual_norm",
+      "unit": "norm",
+      "aggregation": "p95",
+      "trustworthy_bound": 0.02,
+      "indicative_bound": 0.04,
+      "unresolvable_bound": null,
+      "description": "Body-height-normalized 2D residual distance for lead shoulder"
+    },
+    {
+      "id": "trail_shoulder_residual_2d",
+      "level": "L2",
+      "quantity": "trail_shoulder",
+      "metric": "residual_norm",
+      "unit": "norm",
+      "aggregation": "p95",
+      "trustworthy_bound": 0.02,
+      "indicative_bound": 0.04,
+      "unresolvable_bound": null,
+      "description": "Body-height-normalized 2D residual distance for trail shoulder"
+    },
+    {
+      "id": "lead_hip_residual_2d",
+      "level": "L2",
+      "quantity": "lead_hip",
+      "metric": "residual_norm",
+      "unit": "norm",
+      "aggregation": "p95",
+      "trustworthy_bound": 0.02,
+      "indicative_bound": 0.04,
+      "unresolvable_bound": null,
+      "description": "Body-height-normalized 2D residual distance for lead hip"
+    },
+    {
+      "id": "trail_hip_residual_2d",
+      "level": "L2",
+      "quantity": "trail_hip",
+      "metric": "residual_norm",
+      "unit": "norm",
+      "aggregation": "p95",
+      "trustworthy_bound": 0.02,
+      "indicative_bound": 0.04,
+      "unresolvable_bound": null,
+      "description": "Body-height-normalized 2D residual distance for trail hip"
+    },
+    {
+      "id": "event_timing_error",
+      "level": "L2",
+      "quantity": "event_timing",
+      "metric": "timing_error",
+      "unit": "frames",
+      "aggregation": "p95",
+      "trustworthy_bound": 2.0,
+      "indicative_bound": 4.0,
+      "unresolvable_bound": null,
+      "description": "Event timing synchronization error in frames at swing key events (address, top, impact, finish)"
+    },
+    {
+      "id": "envelope_containment_fraction",
+      "level": "L1",
+      "quantity": "variation_envelope",
+      "metric": "containment_fraction",
+      "unit": "fraction",
+      "aggregation": "p50",
+      "trustworthy_bound": 0.9,
+      "indicative_bound": 0.75,
+      "unresolvable_bound": null,
+      "description": "Fraction of video landmark trajectory samples falling within capture-O p5-p95 variation envelope"
+    },
+    {
+      "id": "dtw_envelope_ratio",
+      "level": "L1",
+      "quantity": "variation_envelope",
+      "metric": "dtw_ratio",
+      "unit": "ratio",
+      "aggregation": "p50",
+      "trustworthy_bound": 1.0,
+      "indicative_bound": 1.5,
+      "unresolvable_bound": null,
+      "description": "DTW trajectory distance normalized by the median inter-swing distance among the 13 capture-O swings"
+    },
+    {
+      "id": "full_body_mpjpe",
+      "level": "L3",
+      "quantity": "full_body_mpjpe",
+      "metric": "mpjpe",
+      "unit": "mm",
+      "aggregation": "p95",
+      "trustworthy_bound": 45.0,
+      "indicative_bound": 75.0,
+      "unresolvable_bound": null,
+      "description": "Mean per-joint position error in 3D relative to marker IK with scale fixed by subject anthropometry"
+    },
+    {
+      "id": "full_body_pa_mpjpe",
+      "level": "L3",
+      "quantity": "full_body_pa_mpjpe",
+      "metric": "pa_mpjpe",
+      "unit": "mm",
+      "aggregation": "p95",
+      "trustworthy_bound": 30.0,
+      "indicative_bound": 50.0,
+      "unresolvable_bound": null,
+      "description": "Procrustes-aligned mean per-joint position error in 3D"
+    },
+    {
+      "id": "image_plane_residual",
+      "level": "L3",
+      "quantity": "image_plane_residual",
+      "metric": "image_plane",
+      "unit": "mm",
+      "aggregation": "p95",
+      "trustworthy_bound": 25.0,
+      "indicative_bound": 40.0,
+      "unresolvable_bound": null,
+      "description": "Orthogonal projection error components parallel to camera image plane"
+    },
+    {
+      "id": "depth_axis_residual",
+      "level": "L3",
+      "quantity": "depth_axis_residual",
+      "metric": "depth_error",
+      "unit": "mm",
+      "aggregation": "p95",
+      "trustworthy_bound": 40.0,
+      "indicative_bound": 80.0,
+      "unresolvable_bound": null,
+      "description": "Error component along the camera optical (depth) axis"
+    },
+    {
+      "id": "pelvis_rotation_top",
+      "level": "L3",
+      "quantity": "pelvis_rotation_top",
+      "metric": "angle_error",
+      "unit": "deg",
+      "aggregation": "p95",
+      "trustworthy_bound": 5.0,
+      "indicative_bound": 10.0,
+      "unresolvable_bound": null,
+      "description": "Transverse pelvis rotation angle error at top-of-backswing"
+    },
+    {
+      "id": "x_factor",
+      "level": "L3",
+      "quantity": "x_factor",
+      "metric": "angle_error",
+      "unit": "deg",
+      "aggregation": "p95",
+      "trustworthy_bound": 6.0,
+      "indicative_bound": 12.0,
+      "unresolvable_bound": null,
+      "description": "Thorax-pelvis relative axial separation angle error at top-of-backswing"
+    },
+    {
+      "id": "kinematic_sequence_order",
+      "level": "L3",
+      "quantity": "kinematic_sequence_order",
+      "metric": "timing_error",
+      "unit": "phase_pct",
+      "aggregation": "p95",
+      "trustworthy_bound": 0.05,
+      "indicative_bound": 0.1,
+      "unresolvable_bound": null,
+      "description": "Peak angular velocity sequence timing discrepancy as fraction of swing phase"
+    },
+    {
+      "id": "hand_path_depth",
+      "level": "L3",
+      "quantity": "hand_path_depth",
+      "metric": "depth_error",
+      "unit": "mm",
+      "aggregation": "p95",
+      "trustworthy_bound": 40.0,
+      "indicative_bound": 80.0,
+      "unresolvable_bound": 80.0,
+      "description": "Downswing hand-path optical depth component; unresolvable from single view without multi-view geometry"
+    }
+  ]
+}

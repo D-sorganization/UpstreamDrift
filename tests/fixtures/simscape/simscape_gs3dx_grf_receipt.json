@@ -1,0 +1,38 @@
+{
+  "issue": "#11709",
+  "matlab_release": "2025b",
+  "matlab_version": "25.2.0.3177638 (R2025b) Update 5",
+  "model": "GS3DX_FullBodyContact",
+  "model_sha256": "0df5e17384ddf91f3f7051872279e666ddc7ec1eb714d7f506d0a24dcb799391",
+  "rest": true,
+  "stop_time_s": 0.3,
+  "sim_wall_clock_s": 139.8192026,
+  "mass_kg": 109.38781783574679,
+  "weight_n": 1072.7280437789261,
+  "ground_height_m": -1.0012,
+  "newton_residual_max_ns": 0.69970792898952139,
+  "newton_bound_ns": 3.2181841313367783,
+  "support_bw_min": 3.0046669403098138e-36,
+  "support_bw_max": 1.0843172490408779,
+  "slip_m": {
+    "L": 0.0018325352302332014,
+    "R": 0.0021322666097676165
+  },
+  "lift_m": {
+    "L": 0,
+    "R": 0
+  },
+  "contact_gap_m": {
+    "min": -0.0048915408486533973,
+    "max": -1.9193427948982489e-5
+  },
+  "contact_gap_if_R_transposed_m": {
+    "min": -0.0039992324060074136,
+    "max": -1.9465346824398821e-5
+  },
+  "samples": 301,
+  "fixture_rows": 31,
+  "fixture_csv": "simscape_gs3dx_grf_fixture.csv",
+  "fixture_sha256": "24de84e7c01cbef07a2fea1d31b98f6fbff788c049ad0e4c22c60f74941cef9d",
+  "convention": "ground on foot, world Z-up, SI; point = sphere lowest point"
+}

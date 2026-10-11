@@ -42,6 +42,7 @@
     "benchmarks",
     "build_hooks.py",
     "candidates",
+    "changes",
     "conftest.py",
     "data",
     "deploy",

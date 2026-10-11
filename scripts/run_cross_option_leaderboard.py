@@ -63,19 +63,6 @@ METRICS_JSON = RESULTS_DIR.parent / "leaderboard_metrics.json"
 REPORT_MD = RESULTS_DIR.parent / "CROSS_OPTION_LEADERBOARD_REPORT.md"
 VIZ_DIR = RESULTS_DIR.parent / "visualizations"
 
-WIFFLE_XLSX = (
-    REPO_ROOT
-    / "src"
-    / "engines"
-    / "Simscape_Multibody_Models"
-    / "3D_Golf_Model"
-    / "matlab"
-    / "src"
-    / "apps"
-    / "golf_gui"
-    / "Motion Capture Plotter"
-    / "Wiffle_ProV1_club_3D_data.xlsx"
-)
 
 # Canonical test trial set; from #4081 / #4086.
 CANONICAL_TRIALS: tuple[str, ...] = ("TW_ProV1", "TW_wiffle", "GW_wiffle", "GW_ProV11")
@@ -272,19 +259,29 @@ def _json_safe_float(value: float) -> float | None:
     return value if math.isfinite(value) else None
 
 
+def _wiffle_workbook() -> Path:
+    """Resolve the Wiffle club workbook through the capture registry.
+
+    Raises ``CaptureDataUnavailable`` (a ``FileNotFoundError``) when the
+    private capture data is not present.
+    """
+    from src.motion_capture.capture_registry import resolve_capture
+
+    return resolve_capture("club-workbook-wiffle")
+
+
 def _load_target(trial: str) -> Any:
     """Load the canonical ClubTarget for trial from the Wiffle xlsx.
 
     Raises ImportError or FileNotFoundError if the loader / data aren't
     available; the caller treats those as honest skips.
     """
-    if not WIFFLE_XLSX.exists():
-        raise FileNotFoundError(f"canonical Wiffle xlsx not found: {WIFFLE_XLSX}")
+    workbook = _wiffle_workbook()
     # Late import: avoid forcing pandas / openpyxl install on report-only runs.
     sys.path.insert(0, str(REPO_ROOT))
     from src.shared.python.motion_matching import load_club_target_excel
 
-    return load_club_target_excel(WIFFLE_XLSX, sheet=trial)
+    return load_club_target_excel(workbook, sheet=trial)
 
 
 def _load_option_driver(option: str):
@@ -576,9 +573,9 @@ def _generate_leaderboard_markdown(results_dir: Path) -> str:
     return "\n".join(lines)
 
 
-def _generate_insights_report(summary: LeaderboardSummary, results_dir: Path) -> str:
-    """Generate insights report with trade-off analysis."""
-    lines = [
+def _insights_executive_summary_lines(summary: LeaderboardSummary) -> list[str]:
+    """Return the executive-summary section lines for the insights report."""
+    return [
         "# Cross-Option Leaderboard Report — Insights & Trade-offs",
         "",
         "## Executive Summary",
@@ -590,89 +587,97 @@ def _generate_insights_report(summary: LeaderboardSummary, results_dir: Path) ->
         "",
     ]
 
+
+def _insights_aggregate_metrics_lines(summary: LeaderboardSummary) -> list[str]:
+    """Return the aggregate-metrics section lines for the insights report."""
+    lines = [
+        "## Aggregate Metrics (across all successful runs)",
+        "",
+        f"- **Average grip RMSE:** {summary.avg_grip_rmse_mm:.2f} mm",
+        f"- **Best grip RMSE:** {summary.best_grip_rmse_mm:.2f} mm",
+        f"- **Worst grip RMSE:** {summary.worst_grip_rmse_mm:.2f} mm",
+        f"- **Average wall-clock time:** {summary.avg_wall_time_s:.3f} s",
+        f"- **Total elapsed time:** {summary.total_wall_time_s:.1f} s",
+        "",
+    ]
+    return lines
+
+
+def _insights_per_option_lines(summary: LeaderboardSummary) -> list[str]:
+    """Return the per-option analysis section lines for the insights report."""
+    lines = ["## Per-Option Analysis", ""]
+    for option, results_list in sorted(summary.results_by_option.items()):
+        if not results_list:
+            continue
+        rmses = [r.grip_rmse_mm for r in results_list]
+        times = [r.wall_clock_s for r in results_list]
+        mems = [r.peak_memory_mb for r in results_list]
+
+        lines.append(f"### {option.upper()}")
+        lines.append("")
+        lines.append(f"- **Runs:** {len(results_list)}")
+        lines.append(f"- **Grip RMSE:** {np.mean(rmses):.2f} mm (±{np.std(rmses):.2f})")
+        lines.append(f"- **Wall time:** {np.mean(times):.3f} s (±{np.std(times):.3f})")
+        lines.append(f"- **Peak memory:** {np.mean(mems):.1f} MB")
+        lines.append("")
+    return lines
+
+
+def _insights_tradeoff_lines() -> list[str]:
+    """Return the fixed trade-off summary section lines for the insights report."""
+    return [
+        "## Trade-off Summary",
+        "",
+        "Each option represents a different point in the accuracy/speed/complexity trade-off space:",
+        "",
+        "- **Option 1 (fmincon):** Baseline direct optimization",
+        "  - Accuracy: Ground truth (all others compared against this)",
+        "  - Speed: Slowest (~10 min per fit)",
+        "  - Advantage: Highest reliability; documented behavior",
+        "",
+        "- **Option 2 (NN surrogate):** Fast inference via trained surrogate",
+        "  - Accuracy: Depends on surrogate training dataset",
+        "  - Speed: Sub-second if model available",
+        "  - Advantage: Real-time inference for production use",
+        "",
+        "- **Option 3 (Inverse cVAE):** Generative inverse model",
+        "  - Accuracy: Varies with training data distribution",
+        "  - Speed: Millisecond-scale inverse queries",
+        "  - Advantage: Handles out-of-distribution swings gracefully",
+        "",
+        "- **Option 4 (Python bridge):** External optimization (JAX/scipy)",
+        "  - Accuracy: Depends on optimizer configuration",
+        "  - Speed: Typically 1-10 seconds",
+        "  - Advantage: Access to advanced gradient-based methods",
+        "",
+    ]
+
+
+def _insights_recommendations_lines() -> list[str]:
+    """Return the fixed recommendations section lines for the insights report."""
+    return [
+        "## Recommendations",
+        "",
+        "1. **For baseline fitting:** Use Option 1 (fmincon) for ground-truth results.",
+        "",
+        "2. **For production inference:** Train Option 2 surrogate and use for sub-second fits.",
+        "",
+        "3. **For real-time inverse queries:** Deploy Option 3 cVAE for millisecond responses.",
+        "",
+        "4. **For research optimization:** Use Option 4 bridge to experiment with advanced solvers.",
+        "",
+    ]
+
+
+def _generate_insights_report(summary: LeaderboardSummary, results_dir: Path) -> str:
+    """Generate insights report with trade-off analysis."""
+    lines = _insights_executive_summary_lines(summary)
+
     if summary.successful_fits > 0:
-        lines.append("## Aggregate Metrics (across all successful runs)")
-        lines.append("")
-        lines.append(f"- **Average grip RMSE:** {summary.avg_grip_rmse_mm:.2f} mm")
-        lines.append(f"- **Best grip RMSE:** {summary.best_grip_rmse_mm:.2f} mm")
-        lines.append(f"- **Worst grip RMSE:** {summary.worst_grip_rmse_mm:.2f} mm")
-        lines.append(f"- **Average wall-clock time:** {summary.avg_wall_time_s:.3f} s")
-        lines.append(f"- **Total elapsed time:** {summary.total_wall_time_s:.1f} s")
-        lines.append("")
-
-        # Per-option analysis
-        lines.append("## Per-Option Analysis")
-        lines.append("")
-
-        for option, results_list in sorted(summary.results_by_option.items()):
-            if results_list:
-                rmses = [r.grip_rmse_mm for r in results_list]
-                times = [r.wall_clock_s for r in results_list]
-                mems = [r.peak_memory_mb for r in results_list]
-
-                lines.append(f"### {option.upper()}")
-                lines.append("")
-                lines.append(f"- **Runs:** {len(results_list)}")
-                lines.append(
-                    f"- **Grip RMSE:** {np.mean(rmses):.2f} mm (±{np.std(rmses):.2f})"
-                )
-                lines.append(
-                    f"- **Wall time:** {np.mean(times):.3f} s (±{np.std(times):.3f})"
-                )
-                lines.append(f"- **Peak memory:** {np.mean(mems):.1f} MB")
-                lines.append("")
-
-        # Trade-off summary
-        lines.append("## Trade-off Summary")
-        lines.append("")
-        lines.append(
-            "Each option represents a different point in the accuracy/speed/complexity trade-off space:"
-        )
-        lines.append("")
-        lines.append("- **Option 1 (fmincon):** Baseline direct optimization")
-        lines.append("  - Accuracy: Ground truth (all others compared against this)")
-        lines.append("  - Speed: Slowest (~10 min per fit)")
-        lines.append("  - Advantage: Highest reliability; documented behavior")
-        lines.append("")
-        lines.append(
-            "- **Option 2 (NN surrogate):** Fast inference via trained surrogate"
-        )
-        lines.append("  - Accuracy: Depends on surrogate training dataset")
-        lines.append("  - Speed: Sub-second if model available")
-        lines.append("  - Advantage: Real-time inference for production use")
-        lines.append("")
-        lines.append("- **Option 3 (Inverse cVAE):** Generative inverse model")
-        lines.append("  - Accuracy: Varies with training data distribution")
-        lines.append("  - Speed: Millisecond-scale inverse queries")
-        lines.append("  - Advantage: Handles out-of-distribution swings gracefully")
-        lines.append("")
-        lines.append(
-            "- **Option 4 (Python bridge):** External optimization (JAX/scipy)"
-        )
-        lines.append("  - Accuracy: Depends on optimizer configuration")
-        lines.append("  - Speed: Typically 1-10 seconds")
-        lines.append("  - Advantage: Access to advanced gradient-based methods")
-        lines.append("")
-
-        lines.append("## Recommendations")
-        lines.append("")
-        lines.append(
-            "1. **For baseline fitting:** Use Option 1 (fmincon) for ground-truth results."
-        )
-        lines.append("")
-        lines.append(
-            "2. **For production inference:** Train Option 2 surrogate and use for sub-second fits."
-        )
-        lines.append("")
-        lines.append(
-            "3. **For real-time inverse queries:** Deploy Option 3 cVAE for millisecond responses."
-        )
-        lines.append("")
-        lines.append(
-            "4. **For research optimization:** Use Option 4 bridge to experiment with advanced solvers."
-        )
-        lines.append("")
-
+        lines.extend(_insights_aggregate_metrics_lines(summary))
+        lines.extend(_insights_per_option_lines(summary))
+        lines.extend(_insights_tradeoff_lines())
+        lines.extend(_insights_recommendations_lines())
     else:
         lines.append(
             "No successful fits were completed. Check logs for import/data issues."
@@ -682,18 +687,9 @@ def _generate_insights_report(summary: LeaderboardSummary, results_dir: Path) ->
     return "\n".join(lines)
 
 
-def _generate_visualizations(results_dir: Path, viz_dir: Path) -> None:
-    """Generate convergence and comparison charts (requires matplotlib)."""
-    try:
-        import matplotlib.pyplot as plt
-    except ImportError:
-        LOGGER.warning("matplotlib not available; skipping visualization generation")
-        return
-
-    viz_dir.mkdir(parents=True, exist_ok=True)
-
-    # Collect all results
-    all_results = []
+def _collect_visualization_results(results_dir: Path) -> list[dict[str, Any]]:
+    """Collect per-option result records from ``results_dir`` for plotting."""
+    all_results: list[dict[str, Any]] = []
     for trial_dir in results_dir.iterdir():
         if not trial_dir.is_dir():
             continue
@@ -711,16 +707,16 @@ def _generate_visualizations(results_dir: Path, viz_dir: Path) -> None:
                 )
             except (json.JSONDecodeError, KeyError):
                 pass
+    return all_results
 
-    if not all_results:
-        LOGGER.info("no results to visualize")
-        return
 
-    # Bar chart: accuracy by option
+def _plot_comparison_bar_charts(
+    plt: Any, all_results: list[dict[str, Any]], viz_dir: Path
+) -> None:
+    """Save a bar-chart comparison of accuracy and speed by option."""
     try:
         fig, axes = plt.subplots(1, 2, figsize=(14, 5))
 
-        # Accuracy comparison
         options = sorted({r["option"] for r in all_results})
         grip_rmses_by_option = {
             opt: [r["grip_rmse_mm"] for r in all_results if r["option"] == opt]
@@ -732,7 +728,6 @@ def _generate_visualizations(results_dir: Path, viz_dir: Path) -> None:
         ax.set_title("Motion-Matching Options: Accuracy Comparison")
         ax.grid(axis="y", alpha=0.3)
 
-        # Speed comparison
         times_by_option = {
             opt: [r["wall_clock_s"] for r in all_results if r["option"] == opt]
             for opt in options
@@ -752,7 +747,11 @@ def _generate_visualizations(results_dir: Path, viz_dir: Path) -> None:
     except (ValueError, RuntimeError) as e:
         LOGGER.warning("failed to generate bar chart: %s", e)
 
-    # Scatter: accuracy vs speed
+
+def _plot_accuracy_speed_scatter(
+    plt: Any, all_results: list[dict[str, Any]], viz_dir: Path
+) -> None:
+    """Save a scatter plot of accuracy vs speed trade-off by option."""
     try:
         fig, ax = plt.subplots(figsize=(10, 6))
 
@@ -783,6 +782,25 @@ def _generate_visualizations(results_dir: Path, viz_dir: Path) -> None:
 
     except (ValueError, RuntimeError) as e:
         LOGGER.warning("failed to generate scatter plot: %s", e)
+
+
+def _generate_visualizations(results_dir: Path, viz_dir: Path) -> None:
+    """Generate convergence and comparison charts (requires matplotlib)."""
+    try:
+        import matplotlib.pyplot as plt
+    except ImportError:
+        LOGGER.warning("matplotlib not available; skipping visualization generation")
+        return
+
+    viz_dir.mkdir(parents=True, exist_ok=True)
+
+    all_results = _collect_visualization_results(results_dir)
+    if not all_results:
+        LOGGER.info("no results to visualize")
+        return
+
+    _plot_comparison_bar_charts(plt, all_results, viz_dir)
+    _plot_accuracy_speed_scatter(plt, all_results, viz_dir)
 
 
 # --- Main --------------------------------------------------------------------

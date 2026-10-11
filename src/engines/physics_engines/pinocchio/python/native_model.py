@@ -265,6 +265,18 @@ class NativePinocchioModel:
             raise ValueError("Native coordinates must be finite")
         return q
 
+    def velocity(self, rates: Mapping[str, float]) -> NDArray[np.float64]:
+        """Generalised velocity for named coordinate rates (1-DOF primitives)."""
+        return self._velocity_vector(rates)
+
+    def body_placement(self, name: str) -> tuple[int, Any]:
+        """``(joint index, SE3 of the spec body frame in that joint frame)``.
+
+        Raises:
+            KeyError: for an unknown body name.
+        """
+        return self._bodies[name]
+
     def frame_poses(
         self, coordinates: Mapping[str, float]
     ) -> dict[str, NDArray[np.float64]]:
@@ -402,6 +414,24 @@ class NativePinocchioModel:
             raise ValueError("Invalid native weld force Jacobian")
         jacobian.setflags(write=False)
         return NativeClosureForceJacobian(names, jacobian)
+
+    def closure_frame_pose(
+        self, coordinates: Mapping[str, float]
+    ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+        """World rotation and origin of the weld's constraint LOCAL frame.
+
+        This is the frame in which :meth:`closure_force_jacobian` expresses its
+        wrench dual.  Preconditions: exactly the native coordinate inventory.
+        Postconditions: owned ``(3, 3)`` rotation and ``(3,)`` origin.
+        """
+        q = self.configuration(coordinates)
+        self._pin.forwardKinematics(self.model, self.data, q)
+        constraint = self.constraints[0]
+        pose = self.data.oMi[constraint.joint1_id] * constraint.joint1_placement
+        return (
+            np.array(pose.rotation, dtype=float, copy=True),
+            np.array(pose.translation, dtype=float, copy=True),
+        )
 
     def closure_trajectory_residuals(
         self,

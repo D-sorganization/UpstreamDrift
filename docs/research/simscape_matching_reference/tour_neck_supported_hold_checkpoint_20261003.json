@@ -1,0 +1,37 @@
+{
+  "qualification": "SUPPORTED_HOLD_NECK_PRIMITIVE_TORQUES_RECOVERED_NOT_FULL_SWING",
+  "torques": {
+    "Rx": {
+      "unit": "N*m",
+      "basis": "COMPUTED_PRIMITIVE_ACTUATION_TORQUE_VIA_VERIFIED_PS_SIMULINK_CONVERTER",
+      "samples": 1587,
+      "RMS_N_m": 3.827225658533465,
+      "peak_abs_N_m": 7.366211393474477
+    },
+    "Ry": {
+      "unit": "N*m",
+      "basis": "COMPUTED_PRIMITIVE_ACTUATION_TORQUE_VIA_VERIFIED_PS_SIMULINK_CONVERTER",
+      "samples": 1587,
+      "RMS_N_m": 2.061589272406074,
+      "peak_abs_N_m": 3.9598038858371787
+    }
+  },
+  "neck_still_prescribed": true,
+  "feedback_still_present": true,
+  "model_saved": false,
+  "capture_alias": "capture-A",
+  "native_completed_UTC": "2026-10-03T02:04:26.834199Z",
+  "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+  "supported_hold_gates": {
+    "both_feet_settled_minimum_005BW": true,
+    "settled_total_080_to_120BW": true,
+    "whole_run_peak_at_most_200BW": true,
+    "pelvis_displacement_at_most_5mm": true,
+    "pelvis_rotation_change_at_most_1deg": true
+  },
+  "pelvis_max_displacement_m": 0.0031758025861935895,
+  "pelvis_max_rotation_change_deg": 0.8362225500100023,
+  "temporary_logging_blocks": 4,
+  "full_swing_qualified": false,
+  "independent_replay_qualified": false
+}

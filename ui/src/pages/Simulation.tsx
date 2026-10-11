@@ -29,7 +29,7 @@ import {
   FALLBACK_CAMERA_PRESETS,
 } from '@/api/simulationControls';
 import { ForceOverlayPanel } from '@/components/visualization/ForceOverlayPanel';
-import type { ForceVector3D } from '@/components/visualization/ForceOverlay';
+import type { GlyphSetV1 } from '@/types/glyphs';
 import type { SimulationFrame } from '@/api/client';
 import { LivePlot } from '@/components/analysis/LivePlot';
 import { ConnectionStatus } from '@/components/ui/ConnectionStatus';
@@ -60,7 +60,7 @@ export function SimulationPage() {
 
   // ── Local state (component-specific) ──────────────────────────────────
   const { showSuccess, showError, showInfo } = useToast();
-  const [forceVectors, setForceVectors] = useState<ForceVector3D[]>([]);
+  const [forceGlyphs, setForceGlyphs] = useState<GlyphSetV1 | null>(null);
   const [speedFactor, setSpeedFactor] = useState<number>(1.0);
   const [comparisonSelection, setComparisonSelection] = useState<string[]>([]);
   const [comparisonFrames, setComparisonFrames] = useState<
@@ -282,17 +282,6 @@ export function SimulationPage() {
     }
   }, [wsError, showError]);
 
-  // See issue #1199: Convert force vectors to Scene3D overlay format
-  const sceneForceOverlays = useMemo(() => {
-    return forceVectors.map((v) => ({
-      origin: v.origin as [number, number, number],
-      direction: v.direction as [number, number, number],
-      magnitude: v.magnitude,
-      color: `rgb(${Math.round(v.color[0] * 255)}, ${Math.round(v.color[1] * 255)}, ${Math.round(v.color[2] * 255)})`,
-      label: v.label ?? undefined,
-    }));
-  }, [forceVectors]);
-
   const canStart = effectiveEngine !== null && !isRunning;
 
   const comparisonOptions = useMemo(
@@ -450,7 +439,7 @@ export function SimulationPage() {
             engine={effectiveEngine || 'mujoco'}
             frame={currentFrame}
             frames={frames}
-            forceOverlays={sceneForceOverlays}
+            glyphs={forceGlyphs}
             cameraCommand={cameraCommand}
           />
 
@@ -496,8 +485,10 @@ export function SimulationPage() {
         {/* See issue #1199: Force overlay controls */}
         <div className="mb-4">
           <ForceOverlayPanel
-            onVectorsChange={setForceVectors}
+            onGlyphsChange={setForceGlyphs}
             isRunning={isRunning}
+            isConnected={connectionStatus === 'connected'}
+            socketForceOverlay={currentFrame?.force_overlay as GlyphSetV1 | null}
           />
         </div>
 

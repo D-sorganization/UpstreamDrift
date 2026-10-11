@@ -1,0 +1,254 @@
+{
+  "qualification": "OBSERVABILITY_AND_NATIVE_UNOFFSET_GEOMETRY_CHECKPOINT_NOT_ANATOMICAL_OR_DYNAMIC_ACCEPTANCE",
+  "marker_proxy_observability": {
+    "qualification": "MARKER_PROXY_OBSERVABILITY_AND_OFFSET_AUDIT_NOT_NATIVE_ANATOMICAL_OR_DYNAMIC_ACCEPTANCE",
+    "captures": {
+      "capture_A": {
+        "alias": "capture-A",
+        "source_rate_hz": 360,
+        "source_impact_frame": 476,
+        "source_frames": [517, 529],
+        "physical_time_s": [1.4333333333333333, 1.4666666666666666],
+        "offset_norm_mm": {
+          "pelvis": 11.13480823543796,
+          "hip_L": 7.6461444283018976,
+          "hip_R": 7.421149728630778,
+          "knee_L": 14.23022635764719,
+          "knee_R": 19.700837459156478,
+          "ankle_L": 7.577715327609644,
+          "ankle_R": 10.523038694882876,
+          "shoulder_L": 10.292808544062257,
+          "shoulder_R": 48.532322427486044,
+          "elbow_L": 7.023053253436898,
+          "elbow_R": 23.945750434373995,
+          "wrist_L": 26.314524314997126,
+          "wrist_R": 24.281444930265792,
+          "club_head": 29.285010819130285
+        },
+        "marker_arm_proxies": {
+          "L": {
+            "address_proxy_flexion_deg": 44.668578484004534,
+            "address_markers_valid": true,
+            "sampled_measured_proxy_min_deg": 37.881419865309596,
+            "sampled_measured_proxy_max_deg": 136.14553381777452,
+            "proxy_not_native_or_signed_anatomical_calibration": true
+          },
+          "R": {
+            "address_proxy_flexion_deg": 39.81017166261754,
+            "address_markers_valid": true,
+            "sampled_measured_proxy_min_deg": 38.66421561183378,
+            "sampled_measured_proxy_max_deg": 117.37218924799116,
+            "proxy_not_native_or_signed_anatomical_calibration": true
+          }
+        },
+        "marker_leg_proxies": {
+          "L": {
+            "pelvis_relative_thigh_direction_step_deg": 1.5682980701220477,
+            "both_endpoints_measured": true,
+            "endpoint_valid": [true, true],
+            "axial_twist_not_observable_from_direction": true
+          },
+          "R": {
+            "pelvis_relative_thigh_direction_step_deg": 3.3022017912828066,
+            "both_endpoints_measured": true,
+            "endpoint_valid": [true, true],
+            "axial_twist_not_observable_from_direction": true
+          }
+        },
+        "measured_pelvis_orientation_step_deg": 9.021758375396576,
+        "pelvis_endpoints_valid": [true, true],
+        "generic_joint_centre_offsets_m": {
+          "hip_half_width": 0.09,
+          "hip_drop": 0.1,
+          "knee_inset": 0.05,
+          "ankle_inset": 0.035,
+          "shoulder_drop": 0.04
+        },
+        "proxy_anatomy_is_not_subject_specific_measured_calibration": true
+      },
+      "capture_O": {
+        "alias": "capture-O",
+        "source_rate_hz": 240,
+        "source_impact_frame": 246,
+        "source_frames": [241, 249],
+        "physical_time_s": [1, 1.0333333333333334],
+        "offset_norm_mm": {
+          "pelvis": 27.123272206430663,
+          "hip_L": 11.705220416120158,
+          "hip_R": 10.379039487410614,
+          "knee_L": 8.723073492177178,
+          "knee_R": 29.087915562652398,
+          "ankle_L": 3.977895176673806,
+          "ankle_R": 15.37238955612567,
+          "shoulder_L": 23.050332135540323,
+          "shoulder_R": 13.812295515498516,
+          "elbow_L": 20.067039595197514,
+          "elbow_R": 10.352275830896659,
+          "wrist_L": 56.48362644130154,
+          "wrist_R": 63.50297236570185,
+          "club_head": 105.58728706687089
+        },
+        "marker_arm_proxies": {
+          "L": {
+            "address_proxy_flexion_deg": 29.036418076871918,
+            "address_markers_valid": true,
+            "sampled_measured_proxy_min_deg": 28.88612509063601,
+            "sampled_measured_proxy_max_deg": 137.0945947702576,
+            "proxy_not_native_or_signed_anatomical_calibration": true
+          },
+          "R": {
+            "address_proxy_flexion_deg": 35.6845276028735,
+            "address_markers_valid": true,
+            "sampled_measured_proxy_min_deg": 35.35677902403475,
+            "sampled_measured_proxy_max_deg": 128.41128631342923,
+            "proxy_not_native_or_signed_anatomical_calibration": true
+          }
+        },
+        "marker_leg_proxies": {
+          "L": {
+            "pelvis_relative_thigh_direction_step_deg": 9.699130014469219,
+            "both_endpoints_measured": false,
+            "endpoint_valid": [false, true],
+            "axial_twist_not_observable_from_direction": true
+          },
+          "R": {
+            "pelvis_relative_thigh_direction_step_deg": 7.778248176750408,
+            "both_endpoints_measured": false,
+            "endpoint_valid": [false, true],
+            "axial_twist_not_observable_from_direction": true
+          }
+        },
+        "measured_pelvis_orientation_step_deg": null,
+        "pelvis_endpoints_valid": [false, true],
+        "generic_joint_centre_offsets_m": {
+          "hip_half_width": 0.09,
+          "hip_drop": 0.1,
+          "knee_inset": 0.05,
+          "ankle_inset": 0.035,
+          "shoulder_drop": 0.04
+        },
+        "proxy_anatomy_is_not_subject_specific_measured_calibration": true
+      }
+    }
+  },
+  "native_clean_geometry": {
+    "A_selected": {
+      "native_reviewed_stage_count": 4,
+      "address_unsigned_clean_elbow_flexion_deg": {
+        "left": 47.68756269331785,
+        "right": 39.063896933698636
+      },
+      "address_primitive_sign": {
+        "LE": "POSITIVE",
+        "RE": "NEGATIVE"
+      },
+      "maximum_unsigned_geometry_vs_absolute_primitive_difference_deg": 1.2789769243681803e-13,
+      "anatomical_direction_calibration_verified": false
+    },
+    "O_selected": {
+      "native_reviewed_stage_count": 4,
+      "address_unsigned_clean_elbow_flexion_deg": {
+        "left": 27.79959252900611,
+        "right": 40.401886295470995
+      },
+      "address_primitive_sign": {
+        "LE": "NEGATIVE",
+        "RE": "POSITIVE"
+      },
+      "maximum_unsigned_geometry_vs_absolute_primitive_difference_deg": 9.947598300641403e-14,
+      "anatomical_direction_calibration_verified": false
+    },
+    "O_selective": {
+      "native_reviewed_stage_count": 4,
+      "address_unsigned_clean_elbow_flexion_deg": {
+        "left": 27.79959252900611,
+        "right": 40.401886295470995
+      },
+      "address_primitive_sign": {
+        "LE": "NEGATIVE",
+        "RE": "POSITIVE"
+      },
+      "maximum_unsigned_geometry_vs_absolute_primitive_difference_deg": 8.526512829121202e-14,
+      "anatomical_direction_calibration_verified": false
+    }
+  },
+  "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+  "solver_sha256": "45ef16f9f1120f2129aca5fda283be684412330d98d6f1eca424a4e4de7cf6e8",
+  "model_saved": false,
+  "simulation_executed": false,
+  "pelvis_cluster_alignment": {
+    "qualification": "NATIVE_FK_VERIFIED_ROOT_TO_MARKER_CLUSTER_ALIGNMENT_AUDIT_NOT_ANATOMICAL_OR_DYNAMIC_ACCEPTANCE",
+    "captures": {
+      "capture_A": {
+        "selected": {
+          "measured_frame_count": 55,
+          "missing_frame_count": 0,
+          "mean_cluster_relative_orientation_error_deg": 9.830647444631111,
+          "peak_cluster_relative_orientation_error_deg": 35.01749586085406,
+          "source_frame_at_peak": 649,
+          "native_root_world_mapping_max_matrix_error": 1.1657341758564144e-15,
+          "address_relative_calibration_only": true,
+          "anatomical_pelvis_calibration": false,
+          "missing_errors_remain_NaN": true
+        }
+      },
+      "capture_O": {
+        "selected": {
+          "measured_frame_count": 45,
+          "missing_frame_count": 1,
+          "mean_cluster_relative_orientation_error_deg": 11.493978184205915,
+          "peak_cluster_relative_orientation_error_deg": 38.66579748425477,
+          "source_frame_at_peak": 361,
+          "native_root_world_mapping_max_matrix_error": 9.43689570931383e-16,
+          "address_relative_calibration_only": true,
+          "anatomical_pelvis_calibration": false,
+          "missing_errors_remain_NaN": true
+        },
+        "selective": {
+          "measured_frame_count": 45,
+          "missing_frame_count": 1,
+          "mean_cluster_relative_orientation_error_deg": 11.476509774700677,
+          "peak_cluster_relative_orientation_error_deg": 38.665396517986565,
+          "source_frame_at_peak": 361,
+          "native_root_world_mapping_max_matrix_error": 9.43689570931383e-16,
+          "address_relative_calibration_only": true,
+          "anatomical_pelvis_calibration": false,
+          "missing_errors_remain_NaN": true
+        }
+      }
+    }
+  },
+  "native_receipts": {
+    "capture-observability-offset-reviewed.log.receipt.json": {
+      "actual_process_exit_code": 0,
+      "final_exit_code": 0,
+      "termination_reason": "natural_exit",
+      "done_marker": true,
+      "script_status": "success",
+      "command_identity": "run('audit_capture_observability_reviewed.m')",
+      "owned_pids": [30444],
+      "timestamp": "2026-10-02T21:53:49.424989+00:00"
+    },
+    "candidate-anatomy-review/native-clean-joint-geometry-reviewed.log.receipt.json": {
+      "actual_process_exit_code": 0,
+      "final_exit_code": 0,
+      "termination_reason": "natural_exit",
+      "done_marker": true,
+      "script_status": "success",
+      "command_identity": "run('probe_candidate_geometry_reviewed.m')",
+      "owned_pids": [72060],
+      "timestamp": "2026-10-02T21:57:38.834916+00:00"
+    },
+    "pelvis-cluster-alignment-reviewed.log.receipt.json": {
+      "actual_process_exit_code": 0,
+      "final_exit_code": 0,
+      "termination_reason": "natural_exit",
+      "done_marker": true,
+      "script_status": "success",
+      "command_identity": "run('audit_pelvis_cluster_alignment_reviewed.m')",
+      "owned_pids": [28276],
+      "timestamp": "2026-10-02T22:00:13.714150+00:00"
+    }
+  },
+  "candidate_promoted": false
+}

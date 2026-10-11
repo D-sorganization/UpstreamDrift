@@ -1,4 +1,10 @@
-"""Pure-XML tests for optional OpenSim compliant club attachment."""
+"""Pure-XML tests for the builder's two-hand club attachment (OSV-7/OSV-9).
+
+The builder attaches the shared club with the ``weld`` grip (lead WeldJoint,
+trail WeldConstraint) by default or the ``bushing`` grip (free club, one
+BushingForce per hand). Runs on a minimal stand-in base model so no OpenSim or
+opensim-models checkout is needed.
+"""
 
 from __future__ import annotations
 
@@ -7,7 +13,10 @@ import sys
 from pathlib import Path
 from xml.etree import ElementTree as ET
 
+import numpy as np
 import pytest
+
+from src.engines.physics_engines.opensim.python import msk_club as mc
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 BUILDER_PATH = REPO_ROOT / "scripts" / "build_humanoid_osim.py"
@@ -30,7 +39,7 @@ def _write_minimal_base_osim(tmp_path: Path) -> Path:
 	<Model name="OpenSense_Subject">
 		<BodySet name="bodyset">
 			<objects>
-				<Body name="ground_body" />
+				<Body name="hand_l" />
 				<Body name="hand_r" />
 			</objects>
 		</BodySet>
@@ -43,6 +52,9 @@ def _write_minimal_base_osim(tmp_path: Path) -> Path:
 				</PinJoint>
 			</objects>
 		</JointSet>
+		<ConstraintSet name="constraintset">
+			<objects />
+		</ConstraintSet>
 		<ForceSet name="forceset">
 			<objects />
 		</ForceSet>
@@ -54,152 +66,89 @@ def _write_minimal_base_osim(tmp_path: Path) -> Path:
     return base_path
 
 
-def _build_model(tmp_path: Path, *, club_attachment=None) -> ET.Element:
+def _calibration(tmp_path: Path) -> Path:
+    path = tmp_path / "calibration.json"
+    mc.store_calibration(
+        mc.GripCalibration(
+            model="golf_humanoid",
+            club="driver",
+            hand_frames={"L": np.eye(4), "R": np.eye(4)},
+            address_q={"wrist_flex_r": 0.25},
+            club_in_ground=np.eye(4),
+            report={},
+        ),
+        path,
+    )
+    return path
+
+
+def _build_model(tmp_path: Path, grip_model: str = "weld") -> ET.Element:
     builder = _load_builder()
-    builder.BASE_OSIM = _write_minimal_base_osim(tmp_path)
-    output_path = tmp_path / "golf_humanoid.osim"
-    if club_attachment is None:
-        builder.build(output_path=output_path)
-    else:
-        builder.build(output_path=output_path, club_attachment=club_attachment)
-    root = ET.parse(output_path).getroot()
-    model = root.find("Model")
+    out = builder.build(
+        output_path=tmp_path / "golf_humanoid.osim",
+        grip_model=grip_model,
+        base_osim=_write_minimal_base_osim(tmp_path),
+        calibration_path=_calibration(tmp_path),
+    )
+    model = ET.parse(out).getroot().find("Model")
     assert model is not None
     return model
 
 
-def _joint_objects(model: ET.Element) -> ET.Element:
-    jointset = model.find("JointSet")
-    assert jointset is not None
-    objects = jointset.find("objects")
+def _tags(model: ET.Element, set_tag: str) -> list[tuple[str, str | None]]:
+    objects = model.find(f"{set_tag}/objects")
     assert objects is not None
-    return objects
-
-
-def _force_objects(model: ET.Element) -> ET.Element:
-    forceset = model.find("ForceSet")
-    assert forceset is not None
-    objects = forceset.find("objects")
-    assert objects is not None
-    return objects
+    return [(e.tag, e.get("name")) for e in objects]
 
 
 @pytest.mark.unit
-def test_default_builder_keeps_rigid_club_weld_and_no_bushing(tmp_path: Path) -> None:
+def test_default_builder_holds_the_club_with_both_hands(tmp_path: Path) -> None:
     model = _build_model(tmp_path)
-
-    welds = [
-        joint
-        for joint in _joint_objects(model)
-        if joint.tag == "WeldJoint" and joint.get("name") == "hand_r_to_club"
-    ]
-    bushings = [
-        force
-        for force in _force_objects(model)
-        if force.tag == "BushingForce" and force.get("name") == "hand_r_to_club_bushing"
-    ]
-
-    assert len(welds) == 1
-    assert bushings == []
+    assert ("WeldJoint", "hand_l_to_club") in _tags(model, "JointSet")
+    assert ("WeldConstraint", "hand_r_to_club") in _tags(model, "ConstraintSet")
+    assert not [t for t in _tags(model, "ForceSet") if t[0] == "BushingForce"]
+    default = model.find(".//Coordinate[@name='wrist_flex_r']/default_value")
+    assert default is not None and float(default.text) == 0.25  # address pose
 
 
 @pytest.mark.unit
-def test_compliant_club_attachment_emits_bushing_without_rigid_weld(
-    tmp_path: Path,
-) -> None:
-    builder = _load_builder()
-    config = builder.CompliantClubAttachmentConfig(
-        translational_stiffness=(1000.0, 1100.0, 1200.0),
-        rotational_stiffness=(10.0, 11.0, 12.0),
-        translational_damping=(50.0, 51.0, 52.0),
-        rotational_damping=(1.0, 1.1, 1.2),
-    )
-
-    model = _build_model(tmp_path, club_attachment=config)
-
-    welds = [
-        joint
-        for joint in _joint_objects(model)
-        if joint.tag == "WeldJoint" and joint.get("name") == "hand_r_to_club"
-    ]
-    bushings = [
-        force
-        for force in _force_objects(model)
-        if force.tag == "BushingForce" and force.get("name") == "hand_r_to_club_bushing"
-    ]
-
-    assert welds == []
-    assert len(bushings) == 1
-    bushing = bushings[0]
-    assert bushing.findtext("socket_frame1") == "hand_r_grip_offset"
-    assert bushing.findtext("socket_frame2") == "club_grip_offset"
-    assert bushing.findtext("translational_stiffness") == "1000.0 1100.0 1200.0"
-    assert bushing.findtext("rotational_stiffness") == "10.0 11.0 12.0"
-    assert bushing.findtext("translational_damping") == "50.0 51.0 52.0"
-    assert bushing.findtext("rotational_damping") == "1.0 1.1 1.2"
-    assert bushing.findtext("translational_units") == "N_per_m"
-    assert bushing.findtext("rotational_units") == "N_m_per_rad"
+def test_bushing_grip_frees_the_club_with_one_bushing_per_hand(tmp_path: Path) -> None:
+    model = _build_model(tmp_path, "bushing")
+    assert ("FreeJoint", "ground_to_club") in _tags(model, "JointSet")
+    assert not [t for t in _tags(model, "JointSet") if t[0] == "WeldJoint"]
+    forces = _tags(model, "ForceSet")
+    assert ("BushingForce", "grip_bushing_left") in forces
+    assert ("BushingForce", "grip_bushing_right") in forces
+    # the free club coordinates stay passive: actuators only for the skeleton
+    actuators = [n for t, n in forces if t == "CoordinateActuator"]
+    assert actuators == ["tau_wrist_flex_r"]
 
 
 @pytest.mark.unit
-def test_compliant_club_attachment_rejects_invalid_parameters() -> None:
-    builder = _load_builder()
-
-    invalid_cases = [
-        (
-            {"translational_stiffness": (-1.0, 0.0, 0.0)},
-            "translational_stiffness values must be non-negative",
-        ),
-        (
-            {"rotational_damping": (0.0, -0.1, 0.0)},
-            "rotational_damping values must be non-negative",
-        ),
-        ({"parent_body": ""}, "parent_body must be a non-empty body name"),
-        (
-            {"child_body": "   "},
-            "child_body must be a non-empty body name",
-        ),
-        (
-            {"translational_units": "N/mm"},
-            "Unsupported translational_units",
-        ),
-        (
-            {"rotational_units": "deg"},
-            "Unsupported rotational_units",
-        ),
-    ]
-
-    for kwargs, message in invalid_cases:
-        with pytest.raises(ValueError, match=message):
-            builder.CompliantClubAttachmentConfig(**kwargs)
+def test_builder_rejects_unknown_grip_model(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="grip_model"):
+        _build_model(tmp_path, "contact")
 
 
 @pytest.mark.unit
-def test_compliant_club_attachment_rejects_missing_model_body(
-    tmp_path: Path,
-) -> None:
+def test_builder_requires_a_grip_calibration(tmp_path: Path) -> None:
     builder = _load_builder()
-    builder.BASE_OSIM = _write_minimal_base_osim(tmp_path)
-    config = builder.CompliantClubAttachmentConfig(parent_body="missing_hand")
-
-    with pytest.raises(
-        ValueError,
-        match="Compliant club attachment references missing body names: missing_hand",
-    ):
-        builder.build(output_path=tmp_path / "invalid.osim", club_attachment=config)
+    with pytest.raises(KeyError, match="no grip calibration"):
+        builder.build(
+            output_path=tmp_path / "other_model.osim",
+            base_osim=_write_minimal_base_osim(tmp_path),
+            calibration_path=_calibration(tmp_path),
+        )
 
 
 @pytest.mark.unit
-def test_compliant_club_attachment_serialization_is_deterministic(
-    tmp_path: Path,
-) -> None:
-    builder = _load_builder()
-    builder.BASE_OSIM = _write_minimal_base_osim(tmp_path)
-    config = builder.CompliantClubAttachmentConfig()
-    first = tmp_path / "first.osim"
-    second = tmp_path / "second.osim"
-
-    builder.build(output_path=first, club_attachment=config)
-    builder.build(output_path=second, club_attachment=config)
-
-    assert first.read_bytes() == second.read_bytes()
+def test_two_hand_build_is_deterministic(tmp_path: Path) -> None:
+    first = (tmp_path / "a").resolve()
+    second = (tmp_path / "b").resolve()
+    first.mkdir()
+    second.mkdir()
+    _build_model(first)
+    _build_model(second)
+    assert (first / "golf_humanoid.osim").read_bytes() == (
+        second / "golf_humanoid.osim"
+    ).read_bytes()

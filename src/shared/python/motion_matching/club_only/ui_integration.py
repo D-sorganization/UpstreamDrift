@@ -401,7 +401,15 @@ def load_club_only_workbook_observation(
     if trial_id not in CANONICAL_TRIAL_SHEETS:
         raise ValueError(f"unknown trial_id={trial_id!r}")
     root = Path(repo_root)
-    workbook = root / CLUB_DATA_RELATIVE
+    from src.motion_capture.capture_registry import (
+        CaptureRegistryError,
+        resolve_capture,
+    )
+
+    try:
+        workbook = resolve_capture("club-workbook-main", repo_root=root)
+    except CaptureRegistryError:
+        workbook = root / CLUB_DATA_RELATIVE
     if not workbook.is_file():
         raise FileNotFoundError(f"club workbook missing: {workbook}")
     verify_workbook_hash(workbook, CLUB_DATA_SHA256)

@@ -45,6 +45,10 @@ permissions:
 
 jobs:
   pick-runner:
+    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository)
     # Dispatcher placement only. This repo is public, so a hosted runner is
     # free and unmetered; pinning the dispatcher meant every run waited for a
     # self-hosted slot just to decide where to run. The runner it SELECTS is
@@ -64,6 +68,10 @@ jobs:
           echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
 
   drift-check:
+    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository)
     needs: pick-runner
     name: Verify humanoid models match shared YAML
     runs-on: ${{ needs.pick-runner.outputs.runner }}

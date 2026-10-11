@@ -81,15 +81,18 @@ class MuJoCoSimWidget(  # type: ignore[misc]
 
     loading_started = QtCore.pyqtSignal()
     loading_finished = QtCore.pyqtSignal(bool)
+    force_legend_changed = QtCore.pyqtSignal(str)
 
     def _init_visualization_toggles(self) -> None:
         from src.shared.python.body_part_viz import ForceColorScale
 
         self.axial_color_scale = ForceColorScale()
+        self.force_legend_text = ""
         self.show_force_vectors = False
         self.show_torque_vectors = False
         self.force_scale = 0.1
         self.torque_scale = 0.1
+        self.force_style_options: dict[str, Any] | None = None
 
         self.show_induced_vectors = False
         self.show_cf_vectors = False
@@ -683,6 +686,13 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         if scale is not None:
             self.force_scale = scale
 
+    def set_force_style_options(self, options: dict[str, Any] | None) -> None:
+        """Set GRF scale mode, reference and group toggles (GCV-4, #11710).
+
+        ``None`` restores the slider-driven fixed scale.
+        """
+        self.force_style_options = None if options is None else dict(options)
+
     def set_ellipsoid_visualization(
         self, mobility_enabled: bool, force_enabled: bool
     ) -> None:  # noqa: E501
@@ -837,7 +847,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         self.cf_vector_type = cf_type
 
     def set_contact_force_visualization(self, enabled: bool) -> None:
-        """Toggle native MuJoCo contact force rendering."""
+        """Toggle the optional MuJoCo native contact debug view (mjVIS_CONTACTFORCE)."""
         self.show_contact_forces = enabled
         self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_CONTACTFORCE] = enabled
         self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT] = enabled

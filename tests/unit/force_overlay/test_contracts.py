@@ -439,6 +439,7 @@ def test_force_torque_frame_dict_roundtrip() -> None:
     assert frame_rt.engine == frame.engine
     assert frame_rt.wrenches == frame.wrenches
     assert frame_rt.axial_loads is not None
+    assert frame.axial_loads is not None
     assert frame_rt.axial_loads.values_n == frame.axial_loads.values_n
     assert frame_rt.axial_loads.source == frame.axial_loads.source
 

@@ -29,6 +29,10 @@ from src.shared.python.motion_pipeline.sources.sto_mot_adapter import (
 from src.shared.python.motion_pipeline.sources.opencap_adapter import (
     OpenCapSessionAdapter,
 )
+from src.shared.python.motion_pipeline.sources.opencap_download import (
+    OpenCapHostedSettings,
+    download_opencap_session,
+)
 from src.shared.python.motion_pipeline.sources.mediapipe_json_adapter import (
     MediaPipeJSONAdapter,
 )
@@ -83,6 +87,7 @@ __all__ = [
     "MediaPipeJSONAdapter",
     "MocapSourceAdapter",
     "OpenPoseJSONAdapter",
+    "OpenCapHostedSettings",
     "OpenCapSessionAdapter",
     "OpenSimSTOMOTAdapter",
     "Pose2SimAdapter",
@@ -92,6 +97,7 @@ __all__ = [
     "TRCAdapter",
     "UnsupportedFormatError",
     "detect_format",
+    "download_opencap_session",
     "list_formats",
     "load_pose2sim_calibration",
     "load_pose2sim_observations",

@@ -115,3 +115,69 @@ def test_overlay_cli_and_command_builder(tmp_path: Path) -> None:
     assert out.is_file()
     with pytest.raises(Exception, match="view"):
         commands.overlay_command(root, " ", out)
+
+
+def test_render_frame_joint_torques_toggle() -> None:
+    from src.shared.python.force_overlay.contracts import (
+        ForceTorqueFrame,
+        OverlayWrench,
+        WrenchKind,
+    )
+    from src.shared.python.force_overlay.series import ForceTorqueSeries
+
+    camera = _camera()
+    image = np.zeros((SIZE[1], SIZE[0], 3), dtype=np.uint8)
+    px = np.zeros((1, len(JOINT_NAMES), 2))
+    px[0, :, 0] = np.linspace(20, 120, len(JOINT_NAMES))
+    px[0, :, 1] = 100.0
+    track = Track(
+        "v",
+        "joints",
+        "v joints",
+        PALETTE[3],
+        px,
+        np.ones((1, len(JOINT_NAMES)), bool),
+        skeleton_edges(),
+        False,
+        JOINT_NAMES,
+    )
+
+    w = OverlayWrench(
+        kind=WrenchKind.JOINT_ACTUATOR,
+        label="actuator:knee_z",
+        body="knee",
+        point_m=(0.0, 1.0, 0.0),
+        force_n=None,
+        torque_nm=(0.0, 0.0, 15.0),
+        source="capture-model",
+    )
+    frame = ForceTorqueFrame(
+        time_s=0.0,
+        engine="capture_model",
+        world_frame="adr0041_world",
+        wrenches=(w,),
+    )
+    series = ForceTorqueSeries(engine="capture_model", frames=(frame,))
+
+    out_base = render_frame(image, [track], 0, legend=False)
+    out_off = render_frame(
+        image,
+        [track],
+        0,
+        legend=False,
+        joint_torques=False,
+        force_series=series,
+        camera=camera,
+    )
+    np.testing.assert_array_equal(out_off, out_base)
+
+    out_on = render_frame(
+        image,
+        [track],
+        0,
+        legend=False,
+        joint_torques=True,
+        force_series=series,
+        camera=camera,
+    )
+    assert not np.array_equal(out_on, out_off)

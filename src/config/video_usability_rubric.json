@@ -1,0 +1,39 @@
+{
+  "version": "1.0.0",
+  "name": "capture_o_video_usability_rubric",
+  "description": "Versioned usability grading thresholds for capture-O companion video sources (#11270).",
+  "grades": {
+    "A": {
+      "min_fps": 59.0,
+      "full_body_visible": true,
+      "full_club_visible": true,
+      "impact_blur": "low",
+      "camera_motion": "static",
+      "usable_levels": ["L0", "L1", "L2", "L3"],
+      "description": "Full body + club visible address to finish, >= 60 fps, low blur at impact, static camera"
+    },
+    "B": {
+      "min_fps": 29.0,
+      "full_body_visible": true,
+      "full_club_visible": false,
+      "impact_blur": "medium",
+      "camera_motion": "static",
+      "usable_levels": ["L0", "L1", "L2"],
+      "description": "Full body visible, club partly lost/blurred in the downswing, or 30 fps"
+    },
+    "C": {
+      "min_fps": 0.0,
+      "full_body_visible": false,
+      "full_club_visible": false,
+      "impact_blur": "high",
+      "camera_motion": "any",
+      "usable_levels": ["L0", "L1"],
+      "description": "Body partly cropped / heavy occlusion / moving camera, but the swing is identifiable"
+    },
+    "R": {
+      "min_fps": 0.0,
+      "usable_levels": [],
+      "description": "Not a swing, or unusable (reasons recorded); retained, not deleted"
+    }
+  }
+}

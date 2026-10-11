@@ -22,8 +22,16 @@ EXCEL_RELATIVE = (
 
 
 def _excel_path():
-    p = repo_root() / EXCEL_RELATIVE
-    return p if p.is_file() else None
+    try:
+        from src.motion_capture.capture_registry import (
+            CaptureRegistryError,
+            resolve_capture,
+        )
+
+        return resolve_capture("club-workbook-wiffle")
+    except CaptureRegistryError:
+        p = repo_root() / EXCEL_RELATIVE
+        return p if p.is_file() else None
 
 
 def test_inches_to_metres_constant_matches_legacy_loader() -> None:

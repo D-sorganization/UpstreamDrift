@@ -8,6 +8,14 @@ from pathlib import Path
 from typing import Any
 
 from src.shared.python.logging_pkg.logger_utils import get_logger
+from src.shared.python.model_generation.editor.attachment_ports import (
+    PortPolarity,
+    PortType,
+    TypedPort,
+    parse_port_polarity,
+    parse_port_type,
+    side_from_tags,
+)
 
 logger = get_logger(__name__)
 
@@ -35,6 +43,24 @@ class AttachmentPoint:
     interface_frame: AttachmentInterfaceFrame = AttachmentInterfaceFrame()
     max_payload_kg: float | None = None
     tags: tuple[str, ...] = ()
+    port_type: PortType | None = None
+    polarity: PortPolarity | None = None
+
+    @property
+    def is_typed(self) -> bool:
+        """Whether this point declares a port type and polarity."""
+        return self.port_type is not None and self.polarity is not None
+
+    def typed_port(self) -> TypedPort | None:
+        """Return the mating description, or None for legacy untyped points."""
+        if self.port_type is None or self.polarity is None:
+            return None
+        return TypedPort(
+            port_type=self.port_type,
+            polarity=self.polarity,
+            side=side_from_tags(self.tags),
+            max_payload_kg=self.max_payload_kg,
+        )
 
     def to_dict(self) -> dict[str, Any]:
         payload: dict[str, Any] = {
@@ -46,6 +72,10 @@ class AttachmentPoint:
         }
         if self.max_payload_kg is not None:
             payload["max_payload_kg"] = self.max_payload_kg
+        if self.port_type is not None:
+            payload["port_type"] = self.port_type.value
+        if self.polarity is not None:
+            payload["polarity"] = self.polarity.value
         return payload
 
 
@@ -119,14 +149,18 @@ def _parse_manifest(raw: Any) -> tuple[list[AttachmentPoint], list[str]]:
 
     points: list[AttachmentPoint] = []
     for index, entry in enumerate(entries):
-        point, entry_warnings = _parse_point(entry, f"attachment_points[{index}]")
+        point, entry_warnings = parse_attachment_point(
+            entry, f"attachment_points[{index}]"
+        )
         warnings.extend(entry_warnings)
         if point is not None:
             points.append(point)
     return points, warnings
 
 
-def _parse_point(raw: Any, path: str) -> tuple[AttachmentPoint | None, list[str]]:
+def parse_attachment_point(
+    raw: Any, path: str
+) -> tuple[AttachmentPoint | None, list[str]]:
     warnings: list[str] = []
     if not isinstance(raw, dict):
         return None, [f"{path} must be an object"]
@@ -146,6 +180,7 @@ def _parse_point(raw: Any, path: str) -> tuple[AttachmentPoint | None, list[str]
         warnings,
     )
     tags = _parse_tags(raw.get("tags", ()), f"{path}.tags", warnings)
+    port_type, polarity = _parse_port_typing(raw, path, warnings)
 
     return (
         AttachmentPoint(
@@ -155,9 +190,31 @@ def _parse_point(raw: Any, path: str) -> tuple[AttachmentPoint | None, list[str]
             interface_frame=frame,
             max_payload_kg=max_payload_kg,
             tags=tags,
+            port_type=port_type,
+            polarity=polarity,
         ),
         warnings,
     )
+
+
+def _parse_port_typing(
+    raw: dict[str, Any], path: str, warnings: list[str]
+) -> tuple[PortType | None, PortPolarity | None]:
+    """Parse the optional ``port_type``/``polarity`` pair (both or neither)."""
+    port_type: PortType | None = None
+    polarity: PortPolarity | None = None
+    try:
+        if raw.get("port_type") is not None:
+            port_type = parse_port_type(raw["port_type"])
+        if raw.get("polarity") is not None:
+            polarity = parse_port_polarity(raw["polarity"])
+    except (TypeError, ValueError) as exc:
+        warnings.append(f"{path}: {exc}")
+        return None, None
+    if (port_type is None) != (polarity is None):
+        warnings.append(f"{path}: port_type and polarity must be declared together")
+        return None, None
+    return port_type, polarity
 
 
 def _required_text(

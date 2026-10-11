@@ -44,12 +44,24 @@ from src.shared.python.version_info import get_repo_root
 from .artifact_handoff import compute_file_sha256
 from .necromatcher import NecromatcherLibrary
 from .necromatcher_fit_jobs import fit_execution_stamp
-from .necromatcher_shaft_evidence import BoundShaftEvidence, bind_fit_shaft_evidence
-from src.shared.python.motion_matching.historical_fit import ShaftAxisEvidence
 from src.shared.python.body_part_viz.overlay_options import ShapeOverlayOptions
-from .necromatcher_caption import CaptionOverlayOptions, validate_caption_manifest
-from .necromatcher_shape_overlay import shape_overlay_provenance
-from .necromatcher_video import video_scope_provenance, validate_video_shaft_domain
+from src.shared.python.motion_matching.historical_fit import ShaftAxisEvidence
+from src.shared.python.workspace.necromatcher_caption import (
+    CaptionOverlayOptions,
+    validate_caption_manifest,
+)
+from src.shared.python.workspace.necromatcher_shaft_evidence import (
+    BoundShaftEvidence,
+    bind_fit_shaft_evidence,
+)
+from src.shared.python.workspace.necromatcher_shape_overlay import (
+    shape_overlay_provenance,
+)
+from src.shared.python.workspace.necromatcher_video import (
+    validate_video_shaft_domain,
+    video_scope_provenance,
+)
+from src.shared.python.workspace.necromatcher_video_forces import ForceLayer
 
 _BUDGET_WALL_S = 600.0
 _BLOCKERS = (
@@ -309,6 +321,10 @@ def _outputs(root: Path, request: dict[str, Any]) -> tuple[dict[str, Any], list[
             expected is False and manifest.get(name) is not False
         ):
             raise ValueError("Overlay manifest identity or qualification mismatch")
+    if (request.get("force_layer") or {}).get("enabled") and (
+        manifest.get("force_layer", {}).get("settings") != request["force_layer"]
+    ):
+        raise ValueError("Overlay force-layer settings differ from the request")
     requested = {f"frame-{index:06d}.png" for index in request["selected_frames"]}
     if {record["path"] for record in manifest["pngs"]} != requested:
         raise ValueError("Overlay selected stills differ from the request")
@@ -445,8 +461,13 @@ class NativeVideoSession:
         *,
         shape_overlay: ShapeOverlayOptions | None = None,
         caption_overlay: CaptionOverlayOptions | None = None,
+        force_layer: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
-        """Schedule a new overlay with owned paths and first/middle/last stills."""
+        """Schedule a new overlay with owned paths and first/middle/last stills.
+
+        ``force_layer`` is an opt-in settings record; it is validated here and
+        omitted from the request (and its job digest) when absent.
+        """
         if caption_overlay is not None and not isinstance(
             caption_overlay, CaptionOverlayOptions
         ):
@@ -460,6 +481,7 @@ class NativeVideoSession:
             if shape_overlay is not None
             else None
         )
+        layer = ForceLayer(**force_layer).to_dict() if force_layer else None
         with self._lock:
             if self._closed:
                 raise RuntimeError("Video session is closed")
@@ -514,6 +536,12 @@ class NativeVideoSession:
                 if not isinstance(hash_options, dict):
                     hash_options = {"selected_frames": hash_options}
                 hash_options["caption_overlay"] = request["caption_overlay"]
+            if layer is not None:
+                request["force_layer"] = layer
+                if not isinstance(hash_options, dict):
+                    hash_options = [request["selected_frames"], layer]
+                else:
+                    hash_options["force_layer"] = layer
             hash_options = _scope_hash_options(fit, request, hash_options)
             spec = MatchingJobSpec(
                 root.name,

@@ -19,7 +19,7 @@ concurrency:
 jobs:
   check-kill-switch:
     timeout-minutes: 30
-    runs-on: d-sorg-fleet-docker
+    runs-on: ${{ github.event_name == 'issue_comment' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}
     outputs:
       enabled: ${{ steps.check.outputs.enabled }}
     steps:
@@ -36,7 +36,7 @@ jobs:
   pick-runner:
     needs: check-kill-switch
     if: needs.check-kill-switch.outputs.enabled == 'true'
-    runs-on: d-sorg-fleet-docker
+    runs-on: ${{ github.event_name == 'issue_comment' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}
     timeout-minutes: 2
     outputs:
       runner: ${{ steps.check.outputs.runner }}
@@ -45,14 +45,15 @@ jobs:
         id: check
         run: |
           mkdir -p "$(dirname "$GITHUB_OUTPUT")"
-          echo "runner=d-sorg-fleet-docker" >> "$GITHUB_OUTPUT"
-          echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
+          # issue_comment only: comments on fork PRs must stay hosted (RM#1989).
+          echo "runner=ubuntu-latest" >> "$GITHUB_OUTPUT"
+          echo "issue_comment event: selected ubuntu-latest"
 
   issue-mention-handler:
     timeout-minutes: 30
     needs: [check-kill-switch, pick-runner]
     if: needs.check-kill-switch.outputs.enabled == 'true'
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: ${{ github.event_name == 'issue_comment' && 'ubuntu-latest' || needs.pick-runner.outputs.runner }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:

@@ -19,38 +19,6 @@
       "code": "arg-type"
     },
     {
-      "path": "src/shared/python/validation_pkg/comparative_analysis.py",
-      "line": 126,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"mean\" has incompatible type \"ndarray[tuple[int, ...], dtype[number[Any, int | float | complex]]]\"; expected \"_SupportsArray[dtype[numpy.bool[builtins.bool]] | dtype[integer[Any]] | dtype[floating[Any]]] | _NestedSequence[_SupportsArray[dtype[numpy.bool[builtins.bool]] | dtype[integer[Any]] | dtype[floating[Any]]]] | builtins.bool | int | float | _NestedSequence[builtins.bool | int | float]\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/shared/python/validation_pkg/comparative_analysis.py",
-      "line": 129,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"std\" has incompatible type \"ndarray[tuple[Any, ...], dtype[float64 | complex128]]\"; expected \"_SupportsArray[dtype[numpy.bool[builtins.bool]] | dtype[integer[Any]] | dtype[floating[Any]] | dtype[complexfloating[Any, Any]]] | _NestedSequence[_SupportsArray[dtype[numpy.bool[builtins.bool]] | dtype[integer[Any]] | dtype[floating[Any]] | dtype[complexfloating[Any, Any]]]] | builtins.bool | int | float | complex | _NestedSequence[builtins.bool | int | float | complex]\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/shared/python/validation_pkg/comparative_analysis.py",
-      "line": 130,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"corrcoef\" has incompatible type \"ndarray[tuple[Any, ...], dtype[float64 | complex128]]\"; expected \"_SupportsArray[dtype[numpy.bool[builtins.bool]] | dtype[integer[Any]] | dtype[floating[Any]]] | _NestedSequence[_SupportsArray[dtype[numpy.bool[builtins.bool]] | dtype[integer[Any]] | dtype[floating[Any]]]] | builtins.bool | int | float | _NestedSequence[builtins.bool | int | float]\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/shared/python/validation_pkg/comparative_analysis.py",
-      "line": 130,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 2 to \"corrcoef\" has incompatible type \"ndarray[tuple[Any, ...], dtype[float64 | complex128]]\"; expected \"_SupportsArray[dtype[numpy.bool[builtins.bool]] | dtype[integer[Any]] | dtype[floating[Any]]] | _NestedSequence[_SupportsArray[dtype[numpy.bool[builtins.bool]] | dtype[integer[Any]] | dtype[floating[Any]]]] | builtins.bool | int | float | _NestedSequence[builtins.bool | int | float] | None\"",
-      "code": "arg-type"
-    },
-    {
       "path": "src/api/routes/auth.py",
       "line": 135,
       "column": null,
@@ -87,7 +55,7 @@
       "line": 173,
       "column": null,
       "severity": "error",
-      "message": "Argument 2 to \"savez_compressed\" has incompatible type \"**dict[str, ndarray[Any, Any]]\"; expected \"bool\"",
+      "message": "Argument 2 to \"savez_compressed\" has incompatible type \"**dict[str, ndarray[tuple[Any, ...], dtype[Any]]]\"; expected \"bool\"",
       "code": "arg-type"
     },
     {
@@ -127,7 +95,7 @@
       "line": 282,
       "column": null,
       "severity": "error",
-      "message": "Argument 2 to \"savez\" has incompatible type \"**dict[str, ndarray[tuple[int, ...], dtype[Any]]]\"; expected \"bool\"",
+      "message": "Argument 2 to \"savez\" has incompatible type \"**dict[str, ndarray[tuple[Any, ...], dtype[Any]]]\"; expected \"bool\"",
       "code": "arg-type"
     },
     {
@@ -144,6 +112,14 @@
       "column": null,
       "severity": "error",
       "message": "Argument 1 to \"get\" of \"dict\" has incompatible type \"Any | None\"; expected \"str\"",
+      "code": "arg-type"
+    },
+    {
+      "path": "src/shared/python/data_io/swing_capture_import.py",
+      "line": 360,
+      "column": null,
+      "severity": "error",
+      "message": "Argument \"frame_rate\" to \"JointTrajectory\" has incompatible type \"floating[Any] | float\"; expected \"float\"",
       "code": "arg-type"
     },
     {
@@ -179,11 +155,19 @@
       "code": "arg-type"
     },
     {
+      "path": "src/shared/python/data_io/swing_capture_import.py",
+      "line": 419,
+      "column": null,
+      "severity": "error",
+      "message": "Argument \"frame_rate\" to \"JointTrajectory\" has incompatible type \"floating[Any] | float\"; expected \"float\"",
+      "code": "arg-type"
+    },
+    {
       "path": "src/shared/python/pendulum_simulator/gui/perturbation_panel.py",
       "line": 427,
       "column": null,
       "severity": "error",
-      "message": "Argument 1 to \"_display_summary\" of \"PerturbationPanel\" has incompatible type \"dict[str, float | ndarray[Any, Any]]\"; expected \"PerturbationSummary\"",
+      "message": "Argument 1 to \"_display_summary\" of \"PerturbationPanel\" has incompatible type \"dict[str, float | ndarray[tuple[Any, ...], dtype[Any]]]\"; expected \"PerturbationSummary\"",
       "code": "arg-type"
     },
     {
@@ -191,7 +175,7 @@
       "line": 439,
       "column": null,
       "severity": "error",
-      "message": "Argument 6 to \"evaluate_solution\" has incompatible type \"Callable[[CubicSpline[float64]], tuple[ndarray[tuple[int, ...], dtype[Any]], ndarray[tuple[int, ...], dtype[Any]], ndarray[tuple[int, ...], dtype[Any]], ndarray[tuple[int, ...], dtype[Any]]]]\"; expected \"_TrajectoryCallable\"",
+      "message": "Argument 6 to \"evaluate_solution\" has incompatible type \"Callable[[CubicSpline[float64]], tuple[ndarray[tuple[Any, ...], dtype[Any]], ndarray[tuple[Any, ...], dtype[Any]], ndarray[tuple[Any, ...], dtype[Any]], ndarray[tuple[Any, ...], dtype[Any]]]]\"; expected \"_TrajectoryCallable\"",
       "code": "arg-type"
     },
     {
@@ -199,143 +183,7 @@
       "line": 474,
       "column": null,
       "severity": "error",
-      "message": "Argument 2 to \"savez\" has incompatible type \"**dict[str, ndarray[tuple[int, ...], dtype[Any]]]\"; expected \"bool\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 501,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"require\" has incompatible type \"str\"; expected \"bool\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 501,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 2 to \"require\" has incompatible type \"Callable[[], bool]\"; expected \"str\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 508,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"require\" has incompatible type \"str\"; expected \"bool\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 508,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 2 to \"require\" has incompatible type \"Callable[[], bool]\"; expected \"str\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 536,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"require\" has incompatible type \"str\"; expected \"bool\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 536,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 2 to \"require\" has incompatible type \"Callable[[], bool]\"; expected \"str\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 544,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"require\" has incompatible type \"str\"; expected \"bool\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 544,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 2 to \"require\" has incompatible type \"Callable[[], bool]\"; expected \"str\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 552,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"require\" has incompatible type \"str\"; expected \"bool\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 552,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 2 to \"require\" has incompatible type \"Callable[[], bool]\"; expected \"str\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/humanoid_config_tab.py",
-      "line": 553,
-      "column": null,
-      "severity": "error",
-      "message": "Argument \"signal_obj\" to \"_show_generator_dialog\" of \"HumanoidConfigTab\" has incompatible type \"pyqtBoundSignal\"; expected \"pyqtSignal\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 560,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"require\" has incompatible type \"str\"; expected \"bool\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 560,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 2 to \"require\" has incompatible type \"Callable[[], bool]\"; expected \"str\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 568,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"require\" has incompatible type \"str\"; expected \"bool\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 568,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 2 to \"require\" has incompatible type \"Callable[[], bool]\"; expected \"str\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 574,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"require\" has incompatible type \"str\"; expected \"bool\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 574,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 2 to \"require\" has incompatible type \"Callable[[], bool]\"; expected \"str\"",
+      "message": "Argument 2 to \"savez\" has incompatible type \"**dict[str, ndarray[tuple[Any, ...], dtype[Any]]]\"; expected \"bool\"",
       "code": "arg-type"
     },
     {
@@ -355,334 +203,6 @@
       "code": "arg-type"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 597,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"require\" has incompatible type \"str\"; expected \"bool\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 597,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 2 to \"require\" has incompatible type \"Callable[[], bool]\"; expected \"str\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 624,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"require\" has incompatible type \"str\"; expected \"bool\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 624,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 2 to \"require\" has incompatible type \"Callable[[], bool]\"; expected \"str\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 639,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"require\" has incompatible type \"str\"; expected \"bool\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 639,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 2 to \"require\" has incompatible type \"Callable[[], bool]\"; expected \"str\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 648,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"require\" has incompatible type \"str\"; expected \"bool\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 648,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 2 to \"require\" has incompatible type \"Callable[[], bool]\"; expected \"str\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 663,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"require\" has incompatible type \"str\"; expected \"bool\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 663,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 2 to \"require\" has incompatible type \"Callable[[], bool]\"; expected \"str\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 671,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"require\" has incompatible type \"str\"; expected \"bool\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 671,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 2 to \"require\" has incompatible type \"Callable[[], bool]\"; expected \"str\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 683,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"require\" has incompatible type \"str\"; expected \"bool\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 683,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 2 to \"require\" has incompatible type \"Callable[[], bool]\"; expected \"str\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 691,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"require\" has incompatible type \"str\"; expected \"bool\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 691,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 2 to \"require\" has incompatible type \"Callable[[], bool]\"; expected \"str\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 703,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"require\" has incompatible type \"str\"; expected \"bool\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 703,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 2 to \"require\" has incompatible type \"Callable[[], bool]\"; expected \"str\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 710,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"require\" has incompatible type \"str\"; expected \"bool\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 710,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 2 to \"require\" has incompatible type \"Callable[[], bool]\"; expected \"str\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 722,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"require\" has incompatible type \"str\"; expected \"bool\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 722,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 2 to \"require\" has incompatible type \"Callable[[], bool]\"; expected \"str\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 730,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"require\" has incompatible type \"str\"; expected \"bool\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 730,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 2 to \"require\" has incompatible type \"Callable[[], bool]\"; expected \"str\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 739,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"require\" has incompatible type \"str\"; expected \"bool\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 739,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 2 to \"require\" has incompatible type \"Callable[[], bool]\"; expected \"str\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 750,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"require\" has incompatible type \"str\"; expected \"bool\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 750,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 2 to \"require\" has incompatible type \"Callable[[], bool]\"; expected \"str\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 756,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"require\" has incompatible type \"str\"; expected \"bool\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 756,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 2 to \"require\" has incompatible type \"Callable[[], bool]\"; expected \"str\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 761,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"require\" has incompatible type \"str\"; expected \"bool\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 761,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 2 to \"require\" has incompatible type \"Callable[[], bool]\"; expected \"str\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 786,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"require\" has incompatible type \"str\"; expected \"bool\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 786,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 2 to \"require\" has incompatible type \"Callable[[], bool]\"; expected \"str\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 804,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"require\" has incompatible type \"str\"; expected \"bool\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 804,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 2 to \"require\" has incompatible type \"Callable[[], bool]\"; expected \"str\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/tools/contraction/verifier.py",
-      "line": 81,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 2 to \"_estimate_single_rate\" of \"ContractionVerifier\" has incompatible type \"ndarray[tuple[int, ...], dtype[floating[Any]]]\"; expected \"ndarray[tuple[int, ...], dtype[float64]]\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 811,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"require\" has incompatible type \"str\"; expected \"bool\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 811,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 2 to \"require\" has incompatible type \"Callable[[], bool]\"; expected \"str\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/shared/python/golf_viz/_colors.py",
-      "line": 100,
-      "column": null,
-      "severity": "error",
-      "message": "Incompatible types in assignment (expression has type \"ndarray[tuple[int, ...], dtype[float64]]\", variable has type \"ndarray[tuple[int], dtype[Any]]\")",
-      "code": "assignment"
-    },
-    {
-      "path": "src/shared/python/golf_viz/_colors.py",
-      "line": 101,
-      "column": null,
-      "severity": "error",
-      "message": "Incompatible types in assignment (expression has type \"ndarray[tuple[int, ...], dtype[Any]]\", variable has type \"ndarray[tuple[int], dtype[Any]]\")",
-      "code": "assignment"
-    },
-    {
       "path": "src/shared/python/model_generation/tests/test_physics_validation.py",
       "line": 188,
       "column": null,
@@ -691,27 +211,27 @@
       "code": "assignment"
     },
     {
-      "path": "src/engines/physics_engines/pinocchio/python/perturbation/analyzer.py",
-      "line": 239,
+      "path": "src/shared/python/body_part_viz/shapes/_mesh_io.py",
+      "line": 21,
       "column": null,
       "severity": "error",
-      "message": "Incompatible types in assignment (expression has type \"ndarray[tuple[int, ...], dtype[float64]]\", variable has type \"ndarray[tuple[int], dtype[float64]]\")",
+      "message": "Incompatible types in assignment (expression has type \"None\", variable has type Module)",
       "code": "assignment"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/motion_matching/jacobians.py",
-      "line": 262,
+      "path": "src/shared/python/body_part_viz/shapes/_mesh_io.py",
+      "line": 22,
       "column": null,
       "severity": "error",
-      "message": "Incompatible types in assignment (expression has type \"ndarray[tuple[int, ...], dtype[float64]]\", variable has type \"ndarray[tuple[int, int], dtype[float64]]\")",
+      "message": "Incompatible types in assignment (expression has type \"None\", variable has type \"Callable[[Any, Any, Any, Any, Any], Any]\")",
       "code": "assignment"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/motion_matching/jacobians.py",
-      "line": 316,
+      "path": "src/shared/python/body_part_viz/shapes/_mesh_decimation.py",
+      "line": 26,
       "column": null,
       "severity": "error",
-      "message": "Incompatible types in assignment (expression has type \"ndarray[tuple[int, ...], dtype[float64]]\", variable has type \"ndarray[tuple[int, int], dtype[float64]]\")",
+      "message": "Incompatible types in assignment (expression has type \"None\", variable has type Module)",
       "code": "assignment"
     },
     {
@@ -731,14 +251,6 @@
       "code": "assignment"
     },
     {
-      "path": "src/research/differentiable/engine.py",
-      "line": 553,
-      "column": null,
-      "severity": "error",
-      "message": "Incompatible types in assignment (expression has type \"ndarray[tuple[int, ...], dtype[float64]]\", variable has type \"ndarray[tuple[int, int], dtype[float64]]\")",
-      "code": "assignment"
-    },
-    {
       "path": "src/shared/python/model_generation/tests/test_physics_validation.py",
       "line": 56,
       "column": null,
@@ -755,35 +267,11 @@
       "code": "assignment"
     },
     {
-      "path": "src/engines/physics_engines/pinocchio/python/motion_matching/fit_swing.py",
-      "line": 580,
-      "column": null,
-      "severity": "error",
-      "message": "Incompatible types in assignment (expression has type \"ndarray[tuple[int, ...], dtype[float64]]\", variable has type \"ndarray[tuple[int, int], dtype[float64]]\")",
-      "code": "assignment"
-    },
-    {
-      "path": "src/engines/physics_engines/pinocchio/python/motion_matching/fit_swing.py",
-      "line": 583,
-      "column": null,
-      "severity": "error",
-      "message": "Incompatible types in assignment (expression has type \"ndarray[tuple[int, ...], dtype[float64]]\", variable has type \"ndarray[tuple[int, int], dtype[float64]]\")",
-      "code": "assignment"
-    },
-    {
       "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/advanced_export.py",
       "line": 62,
       "column": null,
       "severity": "error",
       "message": "Incompatible types in assignment (expression has type \"bool | ExportOutcome\", variable has type \"bool\")",
-      "code": "assignment"
-    },
-    {
-      "path": "src/research/differentiable/engine.py",
-      "line": 643,
-      "column": null,
-      "severity": "error",
-      "message": "Incompatible types in assignment (expression has type \"ndarray[tuple[int, ...], dtype[Any]]\", variable has type \"ndarray[tuple[int], dtype[Any]]\")",
       "code": "assignment"
     },
     {
@@ -847,7 +335,7 @@
       "line": 94,
       "column": null,
       "severity": "error",
-      "message": "Incompatible types in assignment (expression has type \"ndarray[Any, Any] | None\", base class \"SimulationMixin\" defined the type as \"ndarray[Any, Any]\")",
+      "message": "Incompatible types in assignment (expression has type \"ndarray[tuple[Any, ...], dtype[Any]] | None\", base class \"SimulationMixin\" defined the type as \"ndarray[tuple[Any, ...], dtype[Any]]\")",
       "code": "assignment"
     },
     {
@@ -855,7 +343,7 @@
       "line": 95,
       "column": null,
       "severity": "error",
-      "message": "Incompatible types in assignment (expression has type \"ndarray[Any, Any] | None\", base class \"SimulationMixin\" defined the type as \"ndarray[tuple[int], dtype[float64]]\")",
+      "message": "Incompatible types in assignment (expression has type \"ndarray[tuple[Any, ...], dtype[Any]] | None\", base class \"SimulationMixin\" defined the type as \"ndarray[tuple[int], dtype[float64]]\")",
       "code": "assignment"
     },
     {
@@ -1635,22 +1123,6 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/visualization_mixin.py",
-      "line": 222,
-      "column": null,
-      "severity": "error",
-      "message": "\"PinocchioGUI\" has no attribute \"spn_f_scale\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/visualization_mixin.py",
-      "line": 223,
-      "column": null,
-      "severity": "error",
-      "message": "\"PinocchioGUI\" has no attribute \"spn_t_scale\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_builders_mixin.py",
       "line": 223,
       "column": null,
@@ -1696,14 +1168,6 @@
       "column": null,
       "severity": "error",
       "message": "\"_SessionMixin\" has no attribute \"events\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/visualization_mixin.py",
-      "line": 229,
-      "column": null,
-      "severity": "error",
-      "message": "\"Data\" has no attribute \"f\"",
       "code": "attr-defined"
     },
     {
@@ -1760,14 +1224,6 @@
       "column": null,
       "severity": "error",
       "message": "\"_SessionMixin\" has no attribute \"poses\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/visualization_mixin.py",
-      "line": 234,
-      "column": null,
-      "severity": "error",
-      "message": "\"Data\" has no attribute \"f\"",
       "code": "attr-defined"
     },
     {
@@ -1872,14 +1328,6 @@
       "column": null,
       "severity": "error",
       "message": "\"_SessionMixin\" has no attribute \"_pose_trajectory_buttons\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/visualization_mixin.py",
-      "line": 259,
-      "column": null,
-      "severity": "error",
-      "message": "\"PinocchioGUI\" has no attribute \"spn_f_scale\"",
       "code": "attr-defined"
     },
     {
@@ -2152,14 +1600,6 @@
       "column": null,
       "severity": "error",
       "message": "\"_RenderMixin\" has no attribute \"ax\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/visualization_mixin.py",
-      "line": 293,
-      "column": null,
-      "severity": "error",
-      "message": "\"PinocchioGUI\" has no attribute \"spn_t_scale\"",
       "code": "attr-defined"
     },
     {
@@ -2467,14 +1907,6 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/visualization_mixin.py",
-      "line": 337,
-      "column": null,
-      "severity": "error",
-      "message": "\"Model\" has no attribute \"inertias\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_builders_mixin.py",
       "line": 339,
       "column": null,
@@ -2488,22 +1920,6 @@
       "column": null,
       "severity": "error",
       "message": "\"PinocchioGUI\" has no attribute \"mode_selector\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/visualization_mixin.py",
-      "line": 341,
-      "column": null,
-      "severity": "error",
-      "message": "\"Model\" has no attribute \"names\"; maybe \"name\" or \"nframes\"?",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/visualization_mixin.py",
-      "line": 342,
-      "column": null,
-      "severity": "error",
-      "message": "\"SE3\" has no attribute \"homogeneous\"",
       "code": "attr-defined"
     },
     {
@@ -2648,14 +2064,6 @@
       "column": null,
       "severity": "error",
       "message": "\"_RenderMixin\" has no attribute \"ax\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/visualization_mixin.py",
-      "line": 372,
-      "column": null,
-      "severity": "error",
-      "message": "\"Model\" has no attribute \"names\"; maybe \"name\" or \"nframes\"?",
       "code": "attr-defined"
     },
     {
@@ -2955,14 +2363,6 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/humanoid_config_tab.py",
-      "line": 489,
-      "column": null,
-      "severity": "error",
-      "message": "\"pyqtSignal\" has no attribute \"connect\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/_pose_library.py",
       "line": 49,
       "column": null,
@@ -3220,7 +2620,7 @@
     },
     {
       "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "line": 654,
+      "line": 663,
       "column": null,
       "severity": "error",
       "message": "\"MuJoCoSimWidget\" has no attribute \"open_meshcat_browser\"",
@@ -3579,14 +2979,6 @@
       "code": "call-arg"
     },
     {
-      "path": "src/research/multi_robot/system.py",
-      "line": 355,
-      "column": null,
-      "severity": "error",
-      "message": "Too many arguments for \"step\" of \"PhysicsEngineProtocol\"",
-      "code": "call-arg"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/widgets/run_fit_button.py",
       "line": 63,
       "column": null,
@@ -3615,7 +3007,7 @@
       "line": 149,
       "column": null,
       "severity": "error",
-      "message": "No overload variant of \"minimize\" matches argument types \"Callable[[ndarray[Any, Any]], float]\", \"ndarray[tuple[int], Any]\", \"str\", \"list[tuple[float, float]]\", \"Any\", \"dict[str, int]\"",
+      "message": "No overload variant of \"minimize\" matches argument types \"Callable[[ndarray[tuple[Any, ...], dtype[Any]]], float]\", \"ndarray[tuple[int], dtype[Any]]\", \"str\", \"list[tuple[float, float]]\", \"Any\", \"dict[str, int]\"",
       "code": "call-overload"
     },
     {
@@ -3639,7 +3031,7 @@
       "line": 295,
       "column": null,
       "severity": "error",
-      "message": "No overload variant of \"minimize\" matches argument types \"Callable[[ndarray[tuple[int, ...], dtype[float64]]], float]\", \"ndarray[tuple[int, ...], dtype[float64]]\", \"str\", \"list[tuple[float, float]]\", \"dict[str, float]\"",
+      "message": "No overload variant of \"minimize\" matches argument types \"Callable[[ndarray[tuple[Any, ...], dtype[float64]]], float]\", \"ndarray[tuple[Any, ...], dtype[float64]]\", \"str\", \"list[tuple[float, float]]\", \"dict[str, float]\"",
       "code": "call-overload"
     },
     {
@@ -3647,7 +3039,7 @@
       "line": 380,
       "column": null,
       "severity": "error",
-      "message": "No overload variant of \"minimize\" matches argument types \"Callable[[ndarray[tuple[int, ...], dtype[float64]]], float]\", \"ndarray[tuple[int, ...], dtype[floating[Any]]]\", \"str\", \"dict[str, object]\", \"list[tuple[float, float]]\"",
+      "message": "No overload variant of \"minimize\" matches argument types \"Callable[[ndarray[tuple[Any, ...], dtype[float64]]], float]\", \"ndarray[tuple[Any, ...], dtype[floating[Any]]]\", \"str\", \"dict[str, object]\", \"list[tuple[float, float]]\"",
       "code": "call-overload"
     },
     {
@@ -3655,7 +3047,7 @@
       "line": 413,
       "column": null,
       "severity": "error",
-      "message": "No overload variant of \"minimize\" matches argument types \"Callable[[ndarray[Any, Any]], float]\", \"ndarray[tuple[int], Any]\", \"str\", \"list[dict[Any, Any]]\", \"dict[str, float]\"",
+      "message": "No overload variant of \"minimize\" matches argument types \"Callable[[ndarray[tuple[Any, ...], dtype[Any]]], float]\", \"ndarray[tuple[int], dtype[Any]]\", \"str\", \"list[dict[Any, Any]]\", \"dict[str, float]\"",
       "code": "call-overload"
     },
     {
@@ -3663,7 +3055,7 @@
       "line": 426,
       "column": null,
       "severity": "error",
-      "message": "No overload variant of \"minimize\" matches argument types \"Callable[..., Any]\", \"ndarray[Any, Any]\", \"str\", \"dict[str, int]\", \"Callable[[Any], bool]\"",
+      "message": "No overload variant of \"minimize\" matches argument types \"Callable[..., Any]\", \"ndarray[tuple[Any, ...], dtype[Any]]\", \"str\", \"dict[str, int]\", \"Callable[[Any], bool]\"",
       "code": "call-overload"
     },
     {
@@ -3671,7 +3063,7 @@
       "line": 64,
       "column": null,
       "severity": "error",
-      "message": "No overload variant of \"minimize\" matches argument types \"Callable[[ndarray[tuple[int, ...], dtype[Any]]], float]\", \"ndarray[tuple[int, ...], dtype[Any]]\", \"str\", \"list[tuple[float, float]]\", \"list[dict[Any, Any]]\", \"Callable[[ndarray[tuple[int, ...], dtype[Any]]], None]\", \"dict[str, float]\"",
+      "message": "No overload variant of \"minimize\" matches argument types \"Callable[[ndarray[tuple[Any, ...], dtype[Any]]], float]\", \"ndarray[tuple[Any, ...], dtype[Any]]\", \"str\", \"list[tuple[float, float]]\", \"list[dict[Any, Any]]\", \"Callable[[ndarray[tuple[Any, ...], dtype[Any]]], None]\", \"dict[str, float]\"",
       "code": "call-overload"
     },
     {
@@ -3739,43 +3131,11 @@
       "code": "list-item"
     },
     {
-      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/visualization_mixin.py",
-      "line": 106,
-      "column": null,
-      "severity": "error",
-      "message": "The erased type of self \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui.PinocchioGUI\" is not a supertype of its class \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.visualization_mixin.VisualizationMixin\"",
-      "code": "misc"
-    },
-    {
       "path": "src/shared/python/calc_backend/routers/pressure_drop.py",
       "line": 116,
       "column": null,
       "severity": "error",
       "message": "\"None\" not callable",
-      "code": "misc"
-    },
-    {
-      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/simulation_mixin.py",
-      "line": 120,
-      "column": null,
-      "severity": "error",
-      "message": "Invalid self argument \"PinocchioGUI\" to attribute function \"_update_viewer\" with type \"Callable[[PinocchioGUI], None]\"",
-      "code": "misc"
-    },
-    {
-      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/simulation_mixin.py",
-      "line": 124,
-      "column": null,
-      "severity": "error",
-      "message": "Invalid self argument \"PinocchioGUI\" to attribute function \"_toggle_frames\" with type \"Callable[[PinocchioGUI, bool], None]\"",
-      "code": "misc"
-    },
-    {
-      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/simulation_mixin.py",
-      "line": 126,
-      "column": null,
-      "severity": "error",
-      "message": "Invalid self argument \"PinocchioGUI\" to attribute function \"_toggle_coms\" with type \"Callable[[PinocchioGUI, bool], None]\"",
       "code": "misc"
     },
     {
@@ -3792,14 +3152,6 @@
       "column": null,
       "severity": "error",
       "message": "The erased type of self \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.main_window.PinocchioGUI\" is not a supertype of its class \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.analysis_mixin.AnalysisMixin\"",
-      "code": "misc"
-    },
-    {
-      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/visualization_mixin.py",
-      "line": 131,
-      "column": null,
-      "severity": "error",
-      "message": "The erased type of self \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui.PinocchioGUI\" is not a supertype of its class \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.visualization_mixin.VisualizationMixin\"",
       "code": "misc"
     },
     {
@@ -3835,43 +3187,11 @@
       "code": "misc"
     },
     {
-      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/main_window.py",
-      "line": 173,
-      "column": null,
-      "severity": "error",
-      "message": "Invalid self argument \"PinocchioGUI\" to attribute function \"_update_viewer\" with type \"Callable[[PinocchioGUI], None]\"",
-      "code": "misc"
-    },
-    {
       "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/analysis_mixin.py",
       "line": 178,
       "column": null,
       "severity": "error",
       "message": "The erased type of self \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.main_window.PinocchioGUI\" is not a supertype of its class \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.analysis_mixin.AnalysisMixin\"",
-      "code": "misc"
-    },
-    {
-      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/main_window.py",
-      "line": 181,
-      "column": null,
-      "severity": "error",
-      "message": "Invalid self argument \"PinocchioGUI\" to attribute function \"_update_viewer\" with type \"Callable[[PinocchioGUI], None]\"",
-      "code": "misc"
-    },
-    {
-      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/visualization_mixin.py",
-      "line": 185,
-      "column": null,
-      "severity": "error",
-      "message": "The erased type of self \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui.PinocchioGUI\" is not a supertype of its class \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.visualization_mixin.VisualizationMixin\"",
-      "code": "misc"
-    },
-    {
-      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/visualization_mixin.py",
-      "line": 212,
-      "column": null,
-      "severity": "error",
-      "message": "The erased type of self \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui.PinocchioGUI\" is not a supertype of its class \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.visualization_mixin.VisualizationMixin\"",
       "code": "misc"
     },
     {
@@ -3907,14 +3227,6 @@
       "code": "misc"
     },
     {
-      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/visualization_mixin.py",
-      "line": 238,
-      "column": null,
-      "severity": "error",
-      "message": "The erased type of self \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui.PinocchioGUI\" is not a supertype of its class \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.visualization_mixin.VisualizationMixin\"",
-      "code": "misc"
-    },
-    {
       "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/simulation_mixin.py",
       "line": 238,
       "column": null,
@@ -3928,14 +3240,6 @@
       "column": null,
       "severity": "error",
       "message": "The erased type of self \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.main_window.PinocchioGUI\" is not a supertype of its class \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.simulation_mixin.SimulationMixin\"",
-      "code": "misc"
-    },
-    {
-      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/visualization_mixin.py",
-      "line": 25,
-      "column": null,
-      "severity": "error",
-      "message": "The erased type of self \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui.PinocchioGUI\" is not a supertype of its class \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.visualization_mixin.VisualizationMixin\"",
       "code": "misc"
     },
     {
@@ -3964,26 +3268,10 @@
     },
     {
       "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/simulation_mixin.py",
-      "line": 260,
-      "column": null,
-      "severity": "error",
-      "message": "Invalid self argument \"PinocchioGUI\" to attribute function \"_update_viewer\" with type \"Callable[[PinocchioGUI], None]\"",
-      "code": "misc"
-    },
-    {
-      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/simulation_mixin.py",
       "line": 262,
       "column": null,
       "severity": "error",
       "message": "The erased type of self \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.main_window.PinocchioGUI\" is not a supertype of its class \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.simulation_mixin.SimulationMixin\"",
-      "code": "misc"
-    },
-    {
-      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/visualization_mixin.py",
-      "line": 275,
-      "column": null,
-      "severity": "error",
-      "message": "The erased type of self \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui.PinocchioGUI\" is not a supertype of its class \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.visualization_mixin.VisualizationMixin\"",
       "code": "misc"
     },
     {
@@ -4011,14 +3299,6 @@
       "code": "misc"
     },
     {
-      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/visualization_mixin.py",
-      "line": 300,
-      "column": null,
-      "severity": "error",
-      "message": "The erased type of self \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui.PinocchioGUI\" is not a supertype of its class \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.visualization_mixin.VisualizationMixin\"",
-      "code": "misc"
-    },
-    {
       "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/simulation_mixin.py",
       "line": 31,
       "column": null,
@@ -4035,35 +3315,11 @@
       "code": "misc"
     },
     {
-      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/visualization_mixin.py",
-      "line": 316,
-      "column": null,
-      "severity": "error",
-      "message": "The erased type of self \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui.PinocchioGUI\" is not a supertype of its class \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.visualization_mixin.VisualizationMixin\"",
-      "code": "misc"
-    },
-    {
       "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/simulation_mixin.py",
       "line": 321,
       "column": null,
       "severity": "error",
       "message": "The erased type of self \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.main_window.PinocchioGUI\" is not a supertype of its class \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.simulation_mixin.SimulationMixin\"",
-      "code": "misc"
-    },
-    {
-      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/visualization_mixin.py",
-      "line": 331,
-      "column": null,
-      "severity": "error",
-      "message": "The erased type of self \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui.PinocchioGUI\" is not a supertype of its class \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.visualization_mixin.VisualizationMixin\"",
-      "code": "misc"
-    },
-    {
-      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/visualization_mixin.py",
-      "line": 345,
-      "column": null,
-      "severity": "error",
-      "message": "The erased type of self \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui.PinocchioGUI\" is not a supertype of its class \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.visualization_mixin.VisualizationMixin\"",
       "code": "misc"
     },
     {
@@ -4075,43 +3331,11 @@
       "code": "misc"
     },
     {
-      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/visualization_mixin.py",
-      "line": 362,
-      "column": null,
-      "severity": "error",
-      "message": "The erased type of self \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui.PinocchioGUI\" is not a supertype of its class \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.visualization_mixin.VisualizationMixin\"",
-      "code": "misc"
-    },
-    {
       "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/simulation_mixin.py",
       "line": 369,
       "column": null,
       "severity": "error",
       "message": "The erased type of self \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.main_window.PinocchioGUI\" is not a supertype of its class \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.simulation_mixin.SimulationMixin\"",
-      "code": "misc"
-    },
-    {
-      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/visualization_mixin.py",
-      "line": 378,
-      "column": null,
-      "severity": "error",
-      "message": "The erased type of self \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui.PinocchioGUI\" is not a supertype of its class \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.visualization_mixin.VisualizationMixin\"",
-      "code": "misc"
-    },
-    {
-      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/simulation_mixin.py",
-      "line": 385,
-      "column": null,
-      "severity": "error",
-      "message": "Invalid self argument \"PinocchioGUI\" to attribute function \"_update_viewer\" with type \"Callable[[PinocchioGUI], None]\"",
-      "code": "misc"
-    },
-    {
-      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/visualization_mixin.py",
-      "line": 387,
-      "column": null,
-      "severity": "error",
-      "message": "The erased type of self \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui.PinocchioGUI\" is not a supertype of its class \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.visualization_mixin.VisualizationMixin\"",
       "code": "misc"
     },
     {
@@ -4131,35 +3355,11 @@
       "code": "misc"
     },
     {
-      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/visualization_mixin.py",
-      "line": 53,
-      "column": null,
-      "severity": "error",
-      "message": "The erased type of self \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui.PinocchioGUI\" is not a supertype of its class \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.visualization_mixin.VisualizationMixin\"",
-      "code": "misc"
-    },
-    {
-      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/visualization_mixin.py",
-      "line": 67,
-      "column": null,
-      "severity": "error",
-      "message": "The erased type of self \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui.PinocchioGUI\" is not a supertype of its class \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.visualization_mixin.VisualizationMixin\"",
-      "code": "misc"
-    },
-    {
       "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/ui_setup_mixin.py",
       "line": 75,
       "column": null,
       "severity": "error",
       "message": "The erased type of self \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui.PinocchioGUI\" is not a supertype of its class \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.ui_setup_mixin.UISetupMixin\"",
-      "code": "misc"
-    },
-    {
-      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/main_window.py",
-      "line": 79,
-      "column": null,
-      "severity": "error",
-      "message": "Invalid self argument \"PinocchioGUI\" to attribute function \"_init_meshcat_viewer\" with type \"Callable[[PinocchioGUI], None]\"",
       "code": "misc"
     },
     {
@@ -4211,6 +3411,14 @@
       "code": "operator"
     },
     {
+      "path": "src/shared/python/validation_pkg/kaggle_validation.py",
+      "line": 327,
+      "column": null,
+      "severity": "error",
+      "message": "Unsupported operand types for * (\"None\" and \"float\")",
+      "code": "operator"
+    },
+    {
       "path": "src/shared/python/qt_utils/wheel_event_filter.py",
       "line": 32,
       "column": null,
@@ -4225,14 +3433,6 @@
       "severity": "error",
       "message": "Argument 2 of \"eventFilter\" is incompatible with supertype \"PyQt6.QtCore.QObject\"; supertype defines the argument type as \"QEvent | None\"",
       "code": "override"
-    },
-    {
-      "path": "src/research/mpc/controller.py",
-      "line": 504,
-      "column": null,
-      "severity": "error",
-      "message": "Value of type variable \"_Shape2T\" of \"cho_factor\" cannot be \"tuple[int, ...]\"",
-      "code": "type-var"
     },
     {
       "path": "src/shared/python/analysis/basic_stats.py",
@@ -4431,7 +3631,7 @@
       "line": 128,
       "column": null,
       "severity": "note",
-      "message": "Error code \"union-attr\" not covered by \"type: ignore\" comment",
+      "message": "Error code \"union-attr\" not covered by \"type: ignore[assignment]\" comment",
       "code": null
     },
     {
@@ -4439,7 +3639,7 @@
       "line": 13,
       "column": null,
       "severity": "note",
-      "message": "Error code \"misc\" not covered by \"type: ignore\" comment",
+      "message": "Error code \"misc\" not covered by \"type: ignore[assignment]\" comment",
       "code": null
     },
     {
@@ -4447,7 +3647,7 @@
       "line": 134,
       "column": null,
       "severity": "note",
-      "message": "Error code \"misc\" not covered by \"type: ignore\" comment",
+      "message": "Error code \"misc\" not covered by \"type: ignore[attr-defined]\" comment",
       "code": null
     },
     {
@@ -4535,7 +3735,7 @@
       "line": 257,
       "column": null,
       "severity": "note",
-      "message": "Error code \"call-overload\" not covered by \"type: ignore\" comment",
+      "message": "Error code \"call-overload\" not covered by \"type: ignore[arg-type]\" comment",
       "code": null
     },
     {
@@ -4648,6 +3848,14 @@
       "column": null,
       "severity": "note",
       "message": "This violates the Liskov substitution principle",
+      "code": null
+    },
+    {
+      "path": "src/shared/python/validation_pkg/kaggle_validation.py",
+      "line": 327,
+      "column": null,
+      "severity": "note",
+      "message": "Left operand is of type \"float | None\"",
       "code": null
     },
     {
@@ -4775,7 +3983,7 @@
       "line": 439,
       "column": null,
       "severity": "note",
-      "message": "\"_TrajectoryCallable.__call__\" has type \"def __call__(self, splines: object) -> tuple[ndarray[tuple[int, ...], dtype[Any]], ndarray[tuple[int, ...], dtype[Any]], ndarray[tuple[int, ...], dtype[Any]], ndarray[tuple[int, ...], dtype[Any]]]\"",
+      "message": "\"_TrajectoryCallable.__call__\" has type \"def __call__(self, splines: object) -> tuple[ndarray[tuple[Any, ...], dtype[Any]], ndarray[tuple[Any, ...], dtype[Any]], ndarray[tuple[Any, ...], dtype[Any]], ndarray[tuple[Any, ...], dtype[Any]]]\"",
       "code": null
     },
     {

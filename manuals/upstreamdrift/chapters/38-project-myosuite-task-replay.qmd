@@ -1,0 +1,484 @@
+# Project MyoSuite Task and Independent Native Replay
+
+Issue #11983 implements an explicitly project-defined task using the actual
+MyoSuite 3.0.0 `MyoGymnasiumEnv` lifecycle on MuJoCo 3.6.0. It is not an
+official supplied golf benchmark. The independent physics executor retains
+its MuJoCo identity, separately from the MyoSuite inventory correspondence.
+All six ecosystems and all 17 required model/variant rows remain required.
+
+## Model, State, and Action Semantics
+
+`myosuite_project_task_producer.py` loads the original MJCF path with its
+relative resource layout. The SDK performs reset, action clipping, one native
+step and forward realization, observation construction and reward bookkeeping.
+The project observations contain native configuration, velocity and activation;
+the constant bookkeeping reward is not a motion-matching score. The original
+model defines units, frames, actuator order, dynamics, timestep and integrator.
+This integration does not recalibrate anatomy or contact.
+
+For action $c_k$, the recorded command is the actual native control readback
+$u_k=\operatorname{clip}(c_k,\ell,h)$. Compiled limited channels retain their
+finite bounds. Unlimited channels use infinite action bounds; unused native
+`ctrlrange` entries are not zero limits. The production driver and iron have
+14 motor and 86 muscle channels, 100 commands and 86 activations. Their inputs
+remain mixed `ACTUATOR_COMMAND`, not generalized torques or pure excitation.
+
+The state $S_k$ is the complete native `mjSTATE_INTEGRATION` vector, including
+native time, configuration, velocity, activation, controls and numerical
+history. It is read after the SDK's native forward realization. Record
+$N$ commands with $N+1$ state/time samples. The exporter repeats the last command
+once as the T01 ZOH terminal boundary value; the executor integrates only the
+first $N$ commands. No terminal step is invented.
+
+## Clock and Restart Policy
+
+Initialization policy `mujoco-integration-state-restore-forward` version 1.1.0
+restores the complete hashed native state and derives its actual native clock
+origin $t_0$ from `data.time`. T01 time remains simulation-relative:
+
+$$\tau_k=t_k-t_0,\qquad t_k=t_0+\tau_k.$$
+
+Native state rows retain absolute epochs. Returned replay timestamps are
+measured elapsed times, not the requested grid substituted into output. Initial
+forward realization must preserve time exactly. Version 1.0.0 retains its
+zero-native-origin restriction. Nonzero applied external forces remain forbidden
+in this native-own-contact pathway.
+
+Every observed interval must be finite, strictly positive and satisfy
+
+$$|\Delta t-\delta|\leq
+\max(10^{-9}\delta,64\operatorname{ulp}(\delta)),\qquad
+\text{tolerance}<\delta/2.$$
+
+This is the existing T04 numerical clock precision policy, not an experimental
+physical acceptance threshold. It uses neither absolute-epoch ULPs nor a
+completed-step count. Elapsed-horizon agreement is checked separately. Large
+finite epochs that stall or materially distort a native step fail admission.
+Suffix replay restores $S_j$ and applies $u_j$ next, preserving the original
+boundary state's prior control until that input is applied.
+
+## Interchange, Verification, and Provenance
+
+`project_task_replay_artifacts.py` builds the existing Tools T01 replay bundle
+and compiled-actuator profile. `native_direct_model_provider.py` creates a fresh
+native model/data pair with no SDK step, reset, observation or reward methods.
+`native_direct_model_replay.py` owns the existing independent stepping loop.
+No second replay format or physics engine is introduced.
+
+Source entry-point and resource-closure bytes are frozen before SDK model
+construction and checked after loading, around recording and at export.
+Rehashed comments or whitespace that leave the compiled MJB unchanged still
+fail original-source admission. A post-hoc equivalent compilation cannot prove
+the exact source bytes that produced a history.
+
+The freezer admits SDK/task/source identity, complete finite dimensions,
+state-clock consistency, native control bounds and the original transitive
+include/mesh/texture closure. It compiles that closure against the producer's
+executed MJB digest. The existing direct executor then independently verifies
+every claimed state, command and elapsed time before artifacts are returned.
+This adds one linear native replay to export; it does not rerun an optimizer.
+
+SDK version/base source and project source are retained separately from the
+native replay provider, binary/runtime, compiled model, resource closure,
+ordered actuator laws, state/input schemas, initial-state digest and profile.
+Method replacement checks are misuse guards. Integrity records are not
+signatures; caller-supplied provenance requires independent lineage verification.
+The exact reviewed SDK base-source SHA-256 is
+`53ad8bc71fc07a2e7fcead164ca027a33418b9ac1aa953ea6c4042fa48eed154`.
+An actual reset/step execution profile identified the CPU accessor in that
+same file and the concrete `envs/muscle_stages.py` helper. Its reviewed digest
+is `eb2d5af2b2c4e842626aa3b29eb1a9c77c93a62a4650a6a50bda492832d3b107`;
+distribution METADATA is separately bound to
+`39e5fbbea88bb4aa29c42fc1d13f5846877b179094402d7c80e839f25ceb9698`.
+This is a bounded execution-source audit, not recursive package attestation.
+
+MuJoCo 3.6.0 and 3.8.0 use exact reviewed required actuator field sets.
+Only 3.6 omits its nonexistent `actuator_armature`, `actuator_damping` and
+`actuator_dampingpoly` fields. Missing required fields and unknown versions fail;
+absent values are never manufactured. Shared schema identity does not imply
+that different native runtimes or compiled models are physically interchangeable.
+
+### Model Fingerprint Scratch Ownership
+
+Every pre-step and post-step compiled-model check remains in place. Recording
+owns one writable, contiguous, one-dimensional `uint8` scratch array of exactly
+the current native serialized-model size. It zeros the array before every save
+and hashes its memory view immediately after serialization. Scratch is neither
+shared across runs nor retained in history. The optional buffer rejects invalid
+storage instead of silently copying it. This preserves zero-padding semantics
+and avoids repeated allocation and the extra bytes copy.
+
+A production-driver serialization microbenchmark on MuJoCo 3.6 used a
+29,487,449-byte model. Twenty original allocation/save/copy/hash operations took
+0.9078 s; twenty zero-fill/save/view/hash operations took 0.5152 s, with identical
+digests throughout. This measures fingerprint overhead only. It does not
+establish full-rollout or optimization speed. Native regression checks compare
+prefilled scratch against external MJB bytes and detect model-mass changes.
+
+## Evidence and Reproduction
+
+The 2026-10-09 actual MyoSuite 3.0.0/MuJoCo 3.6.0 campaign passed 70 tests with
+zero skips, including both unchanged production resource closures, T01 reload,
+complete-state uninterrupted/suffix/changed-future replay, real SDK lifecycle,
+mixed control mapping, poisoned SDK hooks during independent replay, source and
+law/channel mutations, malformed histories, unexecuted transitions and large
+epoch clock failures. Earlier RED attempts are retained. Separate MuJoCo 3.8
+regression evidence is 44 passes and three explicitly unavailable fixture or
+environment skips; it is not substituted for the actual SDK runtime.
+After the exporter architecture refactor and scratch optimization, the current
+actual SDK campaign passed 76 tests with zero failures, errors or skips. This
+includes six buffer-equivalence, mutation and storage-contract regressions in
+addition to the original integration/adversarial cases.
+
+Run with the reviewed actual SDK/native pair, exact Tools pin and retained
+complete public production resource root:
+
+```powershell
+$env:FEEDBACK_MYOSUITE_PRODUCTION_ROOT = '<complete-myosuite-resource-root>'
+python -m pytest --noconftest -o addopts= `
+  tests/unit/engines/myosuite/test_project_task_producer.py `
+  tests/unit/engines/myosuite/test_project_task_artifact_admission.py `
+  tests/unit/engines/myosuite/test_native_model_resource_closure.py `
+  --junitxml='<retained-attempt-path>.xml'
+```
+
+The production positive is a three-step numerical integration probe, with
+nonzero activation and velocity and nonconstant mixed commands. Its suffix and
+changed future are correspondingly short. This is not a full-capture fit,
+physiological force validation, convergence study, muscle-only assistance
+qualification or parity completion. Complete capture horizon, calibration,
+anatomy, contact/grip and fully muscle-driven OpenSim acceptance remain open.
+
+A separate nominal viability experiment completed 1,814 driver and 1,828 iron
+native steps, spanning the respective capture durations, using zero motor
+commands and constant 0.05 muscle commands. Both original producer runs had no
+native warnings and exact complete-state, command and clock replay through the
+serialized T01 pathway. These were executed with the original producer, before
+the scratch-buffer optimization. They use capture duration only and contain no
+feedback fit. Maximum observed contact penetration was about 0.0317 m; the
+maximum absolute native constraint residual was about 1.0498 in mixed native
+units and must not be interpreted as a distance or an accepted equality error.
+These diagnostics preserve the unresolved contact/constraint readiness gate.
+
+### Initial Assembly and Support Admission
+
+Read-only native forward evaluation of all 1,815 driver and 1,829 iron saved
+states located the largest weld residual at reset, before the later collapse.
+Both saved reset poses exactly equal compiled `qpos0`. Right and left
+hand-to-club grip-site origins start about 1.1703 m and 0.9940 m apart, with
+active site welds. MuJoCo permits site welds to start separated and align during
+simulation ([MuJoCo 3.6 weld reference](https://mujoco.readthedocs.io/en/3.6.0/XMLreference.html#equality-weld)).
+This identifies an initial-assembly admission concern; it does not prove a
+defective source model or an infeasible assembled pose.
+
+The auxiliary foot welds join bodies with declared relative poses. Their
+body-origin separation is not a weld error, and collision-disabled auxiliary
+spheres do not establish floor support. Native `ncon` is zero at reset. Later
+maximum penetration is skull against the included scene's cylinder platform,
+approximately 0.0317 m, distinct from the named floor plane. Site-frame closure,
+body-weld relative pose, joint limits and named physical contact pairs require
+separate units and acceptance criteria. One mixed `efc_pos` norm cannot qualify
+all of them.
+
+Before controller fitting, freeze an explicit initial-pose and support policy.
+Preserve the original complete state and distinguish `source_default`,
+`reference_derived` and `optimizer_assembled` provenance. Assembly must use
+bounded native tangent-space motion on the unchanged compiled model, retain
+source ranges and equality activation, and independently reload complete
+integration state before checking grip closure, joint feasibility, support
+identity, penetration and allowed displacement. An assembled pose alone does
+not prove capture correspondence or dynamic force balance. No qualified
+MyoSuite capture-marker map or assembled production initial state is
+demonstrated by the present nominal experiment.
+
+Diagnostic scripts rechecked entry XML, compiled MJB and saved-history hashes;
+they did not independently revalidate the entire transitive resource closure.
+The observed Desk scene bytes differ from local scene bytes. The producer's
+separate full resource-closure evidence remains separate. Desktop previews
+restore saved states and render without integration, labeled **No Mocap Fit**.
+
+## Owned Current-State SDK Forecasts
+
+F09k (#12009) supplies `ProjectTaskForecaster` as a reusable shooting primitive.
+Construction creates a distinct SDK task from the same original source closure
+and requires an identical compiled native model. The live task's native handles,
+source/resource lineage and SDK bindings remain pinned. Each prediction accepts
+an observation whose complete integration state and individual native fields
+exactly match the current live plant. Matching values establish consistency,
+not authenticated snapshot origin; sample index remains caller bookkeeping.
+
+Command conversion occurs inside a live-state guard. Recheck before any owned
+execution, then SDK-reset only the owned task, restore every
+`mjSTATE_INTEGRATION` field, call native forward preparation and verify exact
+readback. This includes the absolute epoch, activation, controls and warmstart.
+The existing SDK recorder executes the candidate and returns its existing
+producer history. Native contacts and actuator laws remain those of the source
+model. Independent export and replay still require the existing T01/profile
+admission and native executor; a forecast is not replay qualification.
+
+Reuse the existing replay restoration/admission check before any owned execution:
+nonzero applied external loads are refused, and native callbacks/plugins retain
+their existing restrictions. Astra's external-load review produced two actual
+SDK RED regressions before repair. The final MyoSuite 3.0/MuJoCo 3.6 combined
+campaign passes 109 cases, zero failures/errors/skips, including unchanged
+production driver/iron suffix forecasts with exact full-state independent replay.
+All twelve executed source/test hashes match. Retained source-bound evidence is
+listed in F09k turnover. Two-step production predictions do not establish a
+fitted capture, stable stance or physiological validity.
+
+Every attempt checks the live state, model/source identity and global callback
+policy on exit, including failures. No successful partial history is returned.
+The forecaster detects caller mutation without rollback. A nonblocking ownership
+lock rejects concurrent/reentrant use. Idempotent close releases only the owned
+task; constructor failures after the owned factory returns also close it. The
+factory's own pre-return failures remain governed by its existing implementation.
+The forecast adapter has a separate guarded source digest.
+
+`construction_seconds` measures allocation/admission; `last_attempt_seconds`
+includes prediction admission, conversion, restoration, stepping and final
+live validation, including failed attempts. Independent replay has its own cost.
+No online deadline, optimizer, fitted control gains or production speedup is
+established. Perfect-state prediction is distinct from state estimation and
+robustness to model error or delayed measurements. Retain uncertainty and
+capture-calibration requirements before promoting any tracking result.
+
+## State-Dependent SDK Feedback Recording
+
+F09j (#12003) adds a feedback input source to the same admitted SDK recording
+loop. At sample k the policy receives immutable copied native-order qpos, qvel,
+activation, control and complete integration state, plus absolute native time
+and ordered actuator IDs. It receives no simulator handle. qpos and tangent
+velocity dimensions remain distinct. The policy computes the next ordered
+command; existing native bounds and SDK mapping determine the applied input.
+The recorder retains N actual inputs and N+1 complete states.
+
+Before integration, reject changed plant state, model fingerprints, SDK methods,
+global callbacks, changed declared policy source and malformed/nonfinite actions.
+Numeric command conversion occurs inside the callback guard, so a custom array
+conversion cannot mutate the plant after validation. Policy exceptions propagate
+without a successful partial recording; completed native steps remain and no
+rollback or retry is implied. The fixed
+action-table interface retains its pre-execution whole-table validation. Both
+interfaces use one stepping loop and the same state/clock/source admission.
+
+The feedback recording carries declared controller name/version, source-file
+digest, caller-declared parameter digest and feedback-adapter source digest.
+Separate `initial_state_array_sha256` and `applied_command_array_sha256` fields
+hash raw array bytes; these are not the schema/channel/clock-bound T01 digests.
+Preserve that provenance alongside the existing command history and
+exported T01 artifacts. It is not a new replay format or a signature; source
+guards do not attest hidden dependencies, mutable controller parameters or the
+truth of caller declarations. Native provider identity stays separate from
+controller identity. Independent replay consumes only the frozen state and
+applied commands and does not invoke feedback or SDK lifecycle hooks.
+
+The actual MyoSuite 3.0/MuJoCo 3.6 combined campaign passed 89 tests with zero
+skips, including thirteen feedback/snapshot/adversarial tests and the prior 76
+integration/resource cases. A four-step native fixture used velocity feedback
+to produce changing motor commands and independently reproduced every complete
+state. An actual native regression first reproduced a deferred-conversion state
+mutation, then passed after conversion moved inside the guard. A second-call
+exception test verifies exactly one completed step and no successful record.
+This is neither learned control tuning nor production pose, capture-fit,
+physiology, muscle-only actuation or all-model qualification. Initial assembly,
+qualified observation mapping and whole-horizon controller optimization remain
+required before the muscular OpenSim endpoint can be accepted.
+
+## Provisional Persistent Native Search and Guarded Promotion
+
+F09l (#12014) adds `ProjectTaskNativeSearch` beside the owned SDK forecaster.
+Allocate a separately owned original-source native context from a genuinely
+frozen, independently verified seed. Reuse the existing direct-command kernel;
+there is no alternate integration loop or weakened SDK recording mode.
+Each candidate starts from the complete current live integration state and an
+explicit finite horizon bounded by `max_steps`. Inputs are ordered post-mapping
+native controls. Native control limits are enforced without implicit clamping.
+Unsupported applied external loads are refused before owned restoration.
+
+Source, compiled-model, live-state, adapter and callback checks surround every
+attempt. Owned model fingerprints are checked at invocation boundaries, rather
+than the SDK producer's per-step model checks. Consequently every returned
+trajectory and ranking is provisional. Immutable arrays accompany the existing
+genuine T01 planned bundle, retaining model/provider, current initial state,
+channel, clock, policy and input identity. This is a planned input artifact;
+it does not qualify the candidate trajectory or establish execution.
+
+`promote` accepts commands alone. Recompute the entire plan through the guarded
+SDK forecast, require exact applied-command correspondence, and evaluate both
+caller numerical callbacks on bytes-backed immutable history arrays. Hard
+criteria must return the Boolean `True`, and the objective must be finite.
+Existing export verifies complete transitions with an independent native model;
+its canonical admission serializes and reloads T01 before replay. A poisoned
+provisional state or score cannot supply the promoted objective. Callbacks can
+still depend on undeclared external data: their returned scalar is a numerical
+result, not authenticated scientific scoring. The optimizer layer must bind
+reference, scales, objective and hard-criterion provenance independently.
+
+A validated future plan is distinct from the live executed prefix. Search and
+promotion never reset or step the live task. Owned reset clears only owned
+warning/history state; full state readback includes nonzero epoch, activation,
+controls and warmstart. Reject reentrancy and stale snapshots. Preserve
+failure→A recovery even after a real owned step has completed. Idempotent
+closure releases only the search context; the caller retains its forecaster.
+
+Actual SDK API-absence RED contains seven failures. The first native GREEN has
+seven passes in 23.22 seconds. Astra then identified writable owning arrays at
+the promotion callback boundary; two actual regressions failed before the
+immutable-copy fix. The subsequent twelve-case campaign passed in 28.89 seconds.
+These are distinct historical checkpoints, not a claim that later expanded
+source is covered by earlier receipts. Retain final combined JUnit and all
+executed source/test hashes as specified in F09l turnover.
+
+The final expanded actual SDK campaign passes 130 cases with zero failures,
+errors or skips in 126.06 seconds. All fourteen executed source/test hashes
+match. This includes both unchanged original production driver/iron models:
+twenty-step A→B→A search histories exactly match the guarded SDK full histories,
+and promotion independently replays every state, command and clock. Separate
+partial-owned-execution failure recovery also matches every guarded state row.
+The numerical finite-state criterion in those production tests establishes no
+contact/constraint feasibility, fitted motion or physiological acceptance.
+
+`construction_seconds`, `last_attempt_seconds` and plan `validation_seconds`
+include their admission/final-guard overhead and failed attempts. A separate
+unchanged-source twenty-step prototype measured four full histories exactly
+equal to guarded SDK histories: persistent native attempts took approximately
+0.45–0.51 seconds and guarded forecasts 2.49–2.66 seconds. These uncontrolled
+diagnostics do not establish a general speedup, real-time operation or an
+accepted optimizer. Full capture, calibrated markers/ground, contact/grip,
+physiological validity, all seventeen model rows and six ecosystems remain
+required, with muscular OpenSim and full-horizon independent excitation replay
+as the final endpoint.
+
+## Frozen Native Tracking Objective
+
+`myosuite_project_tracking.py` adds frozen native reference and physical-scale
+objects plus a source-bound `ProjectTaskTrackingObjective`. It uses owned scratch
+MjData and native `mj_differentiatePos` to compare positions on the configuration
+manifold. It never forwards, integrates, resets or commands the live task.
+Velocity residuals compare native qvel coordinates without transporting twists.
+Activation and exact post-mapping command increments retain native units.
+Positive physical scales make each squared residual dimensionless. These costs
+are discrete sums on one frozen grid, not timestep-invariant integrals. Slew
+cost is a soft penalty; the optimizer must separately enforce hard slew bounds.
+
+Freeze absolute reference clocks, reference provenance declaration, all scales,
+complete initial integration state, previous native controls, ordered actuators,
+compiled/source/resource-closure identities and implementation hashes. Reject
+changed parameters, live anchors, clocks, command bounds and model/source/SDK/
+producer lineage. Preserve bytes-backed immutable reference arrays. A digest
+binds a declaration; it does not authenticate anatomy, measured subject identity
+or arbitrary provisional arrays. Callers serialize live task mutation.
+
+Use the same scorer for provisional native predictions and fully guarded SDK
+histories. `history_cost` is admissible as the existing promotion objective:
+source/full-state live guards can nest, while the scorer owns its own scratch
+lock. Guarded promotion recomputes commands and independently replays complete
+serialized/reloaded T01 histories. Numerical costs cannot override hard physical
+admission. A validated future plan is separate from an executed live prefix.
+
+Actual API-absence RED contains ten failures; first native GREEN has ten passes
+in 18.92 seconds. Two additional genuine lineage regressions fail before their
+checks are added. The expanded sixteen-case actual SDK campaign passes in
+56.23 seconds, including both unchanged original production golfer models and
+full twenty-step guarded promotion plus independent replay. These tests use
+hold references and finite-state admission, not private-capture physical gates.
+See F09m turnover for final combined evidence and bounded-search integration.
+The final seven-module actual SDK campaign passes 146 tests with zero failures,
+errors or skips in 179.14 seconds; all sixteen executed source/test hashes match.
+All seventeen production rows, six ecosystems and muscular OpenSim remain open.
+
+## Bounded Native Command Solve With Guarded Fallback
+
+F09n (#12036) connects the native predictor and frozen tracking objective to
+the shared F02 bounded candidate search. `NativeCommandSolveProblem` freezes
+ordered post-mapping initial/fallback plans, channel bounds, per-sample command
+increments and a caller-declared hard-criteria provenance digest. Parameter
+and callback-identity checks reject changed solve declarations. The digest is
+an integrity binding of a declaration, not physiological authentication.
+
+For each native sample, require lower and upper command bounds and
+`abs(c[k]-c[k-1]) <= increment`, with `c[-1]` equal to the actual observed
+previous control. These are applied-command constraints, not coefficient bounds
+or continuous rates. Require explicit nonempty finite complete-state signed
+margins throughout the horizon. Their physical laws, units and tolerances are
+model-specific caller obligations; dummy finite-state fixture margins cannot
+admit native contact or physiology. The shared optimizer's numerical feasibility
+tolerance does not relax the exact guarded command/increment checks.
+
+Promote and independently replay the full fallback before numerical search.
+Numerical success proposes commands only. Recompute selected commands through
+the guarded SDK history, recompute full-horizon hard criteria and objective,
+and independently replay the existing serialized/reloaded T01 artifact.
+Require improvement over the guarded fallback cost. Rejection, cancellation or
+budget expiry retains the admitted fallback; changed live anchor, source,
+identity or solve parameters cause failure. No live command is applied here.
+Future prefix execution still requires current-state admission.
+
+The receipt measures fallback, search and promotion overhead within this solve.
+Complete time-to-accepted-match also includes external preparation, model/provider
+construction, reference mapping, failed solves and export. Cooperative budgets
+cannot establish a hard real-time guarantee, and native contact smoothness is
+not assumed for SLSQP. The synthetic motor/activation fixture demonstrates a
+real numerical improvement and guarded replay; it does not qualify a private
+swing, production hard margins, muscle physiology or full-model parity.
+Current-source evidence and remaining integration gates are recorded in F09n
+turnover. All seventeen model rows, six ecosystems and muscular OpenSim remain
+required.
+
+The final affected actual MyoSuite 3.0/MuJoCo 3.6 campaign passes 170 tests with
+zero failures/errors/skips in 250.31 seconds. Twenty executed source/test hashes
+match before/after and the current worktree. In the synthetic three-step case,
+the objective falls from 16.3614474 to 0.000299930 in 189 numerical evaluations;
+whole solve elapsed time is 44.93 seconds. This establishes a correct numerical
+baseline and a measured performance bottleneck, not rapid matching. Profile
+native guard/prediction work and derivative strategy under the same source,
+state and physical admission requirements before claiming production speed.
+
+## Admitted Dependency and Private Contract Integration
+
+F09o (#12044) integrates the admitted F01b/Tools-main source and private replay
+consumer migration into the native solve stack. The consumed Tools revision is
+`86d0f28b1cc5acf61185e07e320c816c2d005512`; Python requirements, Rust dependency
+and gitlink must agree. Native replay contracts load through the existing
+`load_pinned_tools_package` seam into one private module/class identity, without
+grafting the vendor package into UpstreamDrift's public namespace. This changes
+executed provider lineage and requires fresh actual-SDK replay evidence.
+
+Preserve previous source/pin-specific receipts. Acceptance metadata advances
+only after actual capability probes and served-artifact verification at the
+new dependency. Native source/runtime hashes and affected admission/forecast/
+tracking/solve tests must be rechecked together. Neither a pin update nor an
+import identity check establishes capture correspondence, hard-contact validity,
+muscle physiology, rapid matching or all-model parity. See the F09o plan and
+turnover for exact executed evidence and remaining gates.
+
+## Prediction Integrity Boundaries and Measured Work
+
+F09p (#12055) consolidates redundant preparation checks without retaining a
+provider digest across invocations. Each successful provisional prediction
+performs three full provider verifications: invocation entry, final preparation
+before native execution, and invocation exit. The final preparation boundary
+follows supplied-command conversion, bundle construction, contract validation
+and bundle identity admission. It verifies complete live-state preservation,
+owned native handles, source bytes, native model identity, kernel identity and
+absence of global callbacks, then uses the existing native execution validator
+for actuator laws, solver, integration policy, channels, bounds and clock.
+Independent guarded SDK promotion and canonical replay remain unchanged.
+
+The genuine native RED campaign found four full provider checks and a changed
+environment data handle that was rejected only after two native steps. Moving
+verification after preparation rejects that mutation before any step. Model,
+source, callback and live-state preparation mutations must also reach no native
+step. Repeated commands still verify complete bytes on every invocation.
+No file timestamp, cross-call cache or relaxed physical tolerance is introduced.
+
+An alternating baseline/candidate/baseline/candidate measurement used the
+actual MyoSuite 3.0/MuJoCo 3.6 two-channel fixture. Fourteen predictions per run
+included two timing warmups. All fourteen full native-state digests agreed
+across the four runs. Provider verifications fell from 56 to 42 and native
+library bytes read from 623,816,704 to 467,862,528 per run, exactly 25 percent.
+Measured medians were 97.91/86.51 ms and 108.58/67.61 ms respectively. Timing
+varies with machine load; these paired observations are not a statistical
+production-speed result, real-time guarantee or full-capture matching result.
+See F09p turnover for exact source correspondence and regression evidence.
+All-model parity and muscular OpenSim private-reference matching remain open.

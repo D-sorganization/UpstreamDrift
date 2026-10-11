@@ -103,6 +103,10 @@ _REGISTRATION_ORDER: tuple[str, ...] = (
     "analysis_tools",
     "force_overlays",
     "actuator_controls",
+    # model_explorer_assembly must precede model_explorer: its literal
+    # "/tools/model-explorer/parts" would otherwise be shadowed by the
+    # parameterized "/tools/model-explorer/{model_name}" (first-match-wins).
+    "model_explorer_assembly",
     "model_explorer",
     "aip",
     "putting_green",
@@ -110,6 +114,7 @@ _REGISTRATION_ORDER: tuple[str, ...] = (
     "data_explorer",
     "motion_capture",
     "matched_swings",
+    "opencap",
 )
 
 
@@ -248,6 +253,7 @@ _PUBLIC_ROUTERS: frozenset[str] = frozenset(
         "capabilities",
         "launcher",
         "matched_swings",
+        "lifting",
     }
 )
 

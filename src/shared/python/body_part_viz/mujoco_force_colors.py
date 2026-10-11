@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from ..plot_style.color_utils import hex_to_rgba
 from .axial_loads import AxialLoadFrame
 from .force_colors import ForceColorScale
 
@@ -37,4 +38,4 @@ def apply_mujoco_scene_colors(
         name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, body)
         color = scale.color(frame.values_n.get(name), "")
         if color:
-            geom.rgba[:3] = [int(color[i : i + 2], 16) / 255 for i in (1, 3, 5)]
+            geom.rgba[:3] = hex_to_rgba(color)[:3]

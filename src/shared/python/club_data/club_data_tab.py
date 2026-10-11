@@ -278,10 +278,19 @@ class ClubDataTab(QtWidgets.QWidget):  # type: ignore[misc]
                 return
 
         # Try to load default club data
-        if self._data_dir and self._data_dir.exists():
-            club_file = self._data_dir / "Club_Data.xlsx"
-            if club_file.exists():
-                self._load_club_file(str(club_file))
+        try:
+            from src.motion_capture.capture_registry import (
+                CaptureRegistryError,
+                resolve_capture,
+            )
+
+            club_file = resolve_capture("club-workbook-main")
+            self._load_club_file(str(club_file))
+        except CaptureRegistryError:
+            if self._data_dir and self._data_dir.exists():
+                club_file = self._data_dir / "Club_Data.xlsx"
+                if club_file.exists():
+                    self._load_club_file(str(club_file))
 
     def _on_load_clubs(self) -> None:
         """Handle load clubs button click."""
@@ -297,6 +306,18 @@ class ClubDataTab(QtWidgets.QWidget):  # type: ignore[misc]
 
     def _load_default_club_data(self) -> None:
         """Load the default Club_Data.xlsx file."""
+        try:
+            from src.motion_capture.capture_registry import (
+                CaptureRegistryError,
+                resolve_capture,
+            )
+
+            club_file = resolve_capture("club-workbook-main")
+            self._load_club_file(str(club_file))
+            return
+        except CaptureRegistryError:
+            pass
+
         if self._data_dir is None:
             return
 

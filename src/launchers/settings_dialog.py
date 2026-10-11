@@ -901,6 +901,7 @@ class SettingsWidget(SettingsCloseContract, SettingsAuxiliaryTabsMixin, QWidget)
         """Guard an active Docker build and unsaved preferences (#8895/#8896)."""
         if not self.confirm_close(event):
             return
+        self.detach_dependency_checks()
         super().closeEvent(event)
 
     def timerEvent(self, event: Any) -> None:
@@ -1035,6 +1036,13 @@ class SettingsWidget(SettingsCloseContract, SettingsAuxiliaryTabsMixin, QWidget)
         )
         worker.start()
 
+    def detach_dependency_checks(self) -> None:
+        """Ignore results of in-flight dependency checks once the UI is closing."""
+        workers = list(self._dep_check_workers.values())
+        self._dep_check_workers.clear()
+        for worker in workers:
+            worker.detach()
+
     def _restore_dependency_check_button(
         self, worker_key: str, button: QPushButton, original_text: str
     ) -> None:
@@ -1051,6 +1059,8 @@ class SettingsWidget(SettingsCloseContract, SettingsAuxiliaryTabsMixin, QWidget)
     ) -> None:
         from PyQt6.QtWidgets import QMessageBox
 
+        if worker_key not in self._dep_check_workers:
+            return  # detached: the dialog closed while the check ran
         self._restore_dependency_check_button(worker_key, button, original_text)
         html = self._generate_dep_table_html(
             report.table_title, report.environment_name, report.check_results
@@ -1068,6 +1078,8 @@ class SettingsWidget(SettingsCloseContract, SettingsAuxiliaryTabsMixin, QWidget)
     ) -> None:
         from PyQt6.QtWidgets import QMessageBox
 
+        if worker_key not in self._dep_check_workers:
+            return  # detached: the dialog closed while the check ran
         self._restore_dependency_check_button(worker_key, button, original_text)
         if severity == "critical":
             QMessageBox.critical(self, title, html)
@@ -1142,6 +1154,7 @@ class SettingsDialog(QDialog):
         """Delegate both close guards to the inner widget (#8896)."""
         if not self.widget.confirm_close(event):
             return
+        self.widget.detach_dependency_checks()
         super().closeEvent(event)
 
     @property

@@ -161,6 +161,7 @@ class ModelPackage:
     required_assets: tuple[str, ...] = ()
     muscle_tendon: Mapping[str, Any] | None = None
     workspace_init: Mapping[str, Any] | None = None
+    matching_variants: tuple[Mapping[str, Any], ...] = ()
 
     def __post_init__(self) -> None:
         require(
@@ -244,6 +245,7 @@ class ModelPackage:
             "workspace_init": None
             if self.workspace_init is None
             else dict(self.workspace_init),
+            "matching_variants": [dict(v) for v in self.matching_variants],
             "identity_hash": self.identity_hash(),
         }
 
@@ -378,6 +380,7 @@ def _parse_package(raw: Mapping[str, Any]) -> ModelPackage:
         required_assets=tuple(str(a) for a in assets),
         muscle_tendon=_optional_mapping(raw.get("muscle_tendon")),
         workspace_init=_optional_mapping(raw.get("workspace_init")),
+        matching_variants=tuple(dict(v) for v in raw.get("matching_variants", [])),
     )
 
 

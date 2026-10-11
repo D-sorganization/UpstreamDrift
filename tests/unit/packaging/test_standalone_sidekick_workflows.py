@@ -57,8 +57,26 @@ def test_package_workflow_limits_recursive_checkout_to_the_build_job() -> None:
     assert build_checkout["with"]["persist-credentials"] is False
     assert smoke_checkout["with"]["submodules"] is False
     assert smoke_checkout["with"]["persist-credentials"] is False
-    assert smoke_checkout["with"]["sparse-checkout"] == "tests/fixtures/wgs.json"
-    assert smoke_checkout["with"]["sparse-checkout-cone-mode"] is False
+    # Cone mode keeps core.sparseCheckout in config.worktree, which a later
+    # `git sparse-checkout disable` can retract (#9507).
+    assert smoke_checkout["with"]["sparse-checkout"] == "tests/fixtures"
+    assert "sparse-checkout-cone-mode" not in smoke_checkout["with"]
+
+
+def test_no_workflow_uses_non_cone_sparse_checkout() -> None:
+    """Non-cone sparse checkout poisons reused self-hosted workspaces (#9507)."""
+    offenders = []
+    for path in sorted((ROOT / ".github" / "workflows").glob("*.y*ml")):
+        document = _load_workflow(path)
+        if not isinstance(document, dict):
+            continue
+        for job_name, job in (document.get("jobs") or {}).items():
+            for step in job.get("steps", []) if isinstance(job, dict) else []:
+                with_block = step.get("with") or {}
+                if with_block.get("sparse-checkout-cone-mode") is False:
+                    offenders.append(f"{path.name}:{job_name}")
+
+    assert offenders == []
 
 
 def test_package_workflow_tracks_canonical_and_extension_sources() -> None:

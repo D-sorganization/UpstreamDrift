@@ -11,7 +11,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, ClassVar, Protocol, runtime_checkable
 
-__all__ = ["BackgroundableTool", "EmbedCapabilities", "EmbeddableTool"]
+__all__ = [
+    "BackgroundableTool",
+    "EmbedCapabilities",
+    "EmbeddableTool",
+    "release_widget",
+]
 
 
 @dataclass(frozen=True, slots=True)
@@ -228,3 +233,16 @@ class BackgroundableTool(Protocol):
         Expected default: ``True``.
         """
         ...
+
+
+def release_widget(widget: Any | None) -> None:
+    """Schedule ``widget`` for Qt deletion; a ``None`` or plain object is a no-op.
+
+    Adapters call this from an idempotent :meth:`EmbeddableTool.cleanup` after
+    dropping their own reference, so no PyQt6 import is needed here.
+    """
+    if widget is None:
+        return
+    delete_later = getattr(widget, "deleteLater", None)
+    if callable(delete_later):
+        delete_later()

@@ -1,0 +1,89 @@
+# Ground Reaction Breakdown
+
+## Status
+
+Evidence class: derived, provisional. This chapter records the ground-reaction
+calculation delivered by GCV-1 (#11707) so it can be inventoried. It is not
+approved: the registry blocker `UP-D1-ground-reaction-breakdown-inventory`
+stays open until UP-D1 inventories the pathway and a human reviews it.
+
+## Purpose
+
+Reduce the contact forces between each foot and the ground to the quantities
+shown by every engine and display surface: per-foot force, centre of pressure
+(CoP), free moment, the net (both-feet) wrench with its own CoP and free moment,
+and the moments of each foot and of the net wrench about the whole-body centre
+of mass (CoM).
+
+## Conventions
+
+- World frame, Z up, ground plane $z = z_g$ (default $z_g = 0$).
+- SI units: force in N, position in m, moment in N·m, time in s.
+- Sign: the force is exerted **by the ground on the foot** (on the body).
+- Inputs per foot $f$: contact forces $F_i$ at points $p_i$, with optional
+  contact torques $\tau_i$, all finite and in the world frame. A foot may have
+  no contacts.
+- The CoM position $c$ is a finite world 3-vector supplied by the caller.
+
+## Equations
+
+1. Foot resultant about the world origin $O$:
+   $$F_f = \sum_i F_i, \qquad M_{O,f} = \sum_i \left(p_i \times F_i + \tau_i\right)$$
+2. CoP of a resultant $(F, M_O)$ on the ground plane, defined only when
+   $F_z \ge F_{z,\min}$ with $F_{z,\min} = 10$ N (`COP_MIN_FZ_N`):
+   $$x_{cop} = \frac{z_g F_x - M_{O,y}}{F_z}, \qquad
+     y_{cop} = \frac{M_{O,x} + z_g F_y}{F_z}, \qquad z_{cop} = z_g$$
+3. Free moment about the CoP, reported as a vertical vector:
+   $$T_z = M_{O,z} - \left(x_{cop} F_y - y_{cop} F_x\right)$$
+4. Net wrench: $F_{net} = \sum_f F_f$ and $M_{O,net} = \sum_f M_{O,f}$; the net
+   CoP and net free moment apply equations 2 and 3 to the net wrench. The net
+   free moment is in general not $\sum_f T_{z,f}$: each foot's free moment is
+   about its own CoP, and the shear forces acting at offset CoPs contribute a
+   vertical moment to the net. The two agree when the foot CoPs coincide.
+5. Moment about the CoM (full wrench):
+   $$M_{c,f} = M_{O,f} - c \times F_f$$
+   which equals $(cop_f - c) \times F_f + T_{z,f}\,\hat z$ when the CoP exists.
+   The force-only term $(cop_f - c) \times F_f$ is reported separately.
+   $M_{c,net} = \sum_f M_{c,f}$ exactly.
+
+## Unavailable Values
+
+Below the vertical-force threshold, or with no loaded contact, the CoP, the free
+moment and the force-only CoM moment are unavailable (`None` in a breakdown,
+NaN in a series, `null` over the API). They are never reported as zero. A foot
+with no contact reports zero force and `in_contact = False`. Vertical load
+share, used by the plots, is unavailable while the feet together carry less
+than the same 10 N.
+
+## Implementation
+
+| Symbol | Location |
+| --- | --- |
+| `foot_reaction`, `analyze_ground_reaction`, `GroundReactionBreakdown` | `src/shared/python/biomechanics/ground_reaction.py` |
+| `GroundReactionSeries` (stacked breakdowns, NaN for unavailable) | `src/shared/python/biomechanics/ground_reaction.py` |
+| `to_overlay_wrenches` (overlay labels `contact:grf_*`, `contact:free_moment_*`, `contact:moment_com_*`) | `src/shared/python/biomechanics/ground_reaction.py` |
+
+The module is pure numpy with no engine imports. Engines supply the contact
+forces and points; the per-engine adapters are outside this chapter.
+
+## Tests and Reproduction
+
+```bash
+python3 -m pytest tests/unit/biomechanics/test_ground_reaction.py -q
+```
+
+These tests check the algebra against hand-computed wrenches and the stated
+invariants (net CoM moment equals the sum of the feet; unavailable values below
+the threshold). They do not check any engine's contact model.
+
+## Assumptions and Limitations
+
+- Flat, horizontal ground at a known height; no slope or compliance is modelled
+  here.
+- The 10 N threshold is a numerical guard against dividing by a small vertical
+  force, not a physiological or instrument threshold.
+- Results are only as valid as the contact forces each engine supplies.
+  Software outputs of a contact model are not force-plate measurements, and no
+  comparison with measured force-plate data has been made for this pathway.
+- No uncertainty or tolerance against an external reference has been
+  established; none is claimed.

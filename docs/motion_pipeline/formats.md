@@ -8,7 +8,7 @@
 | ------------------- | ---------------------- | ----------------------- | --------------------------- | ---------- | -------- | ------------------------------------------------------------------------- |
 | **BVH**             | `.bvh`                 | `BVHAdapter`            | ✅ Yes                      | ❌ No      | ✅ Yes   | Euler order varies (XYZ vs ZXY)                                           |
 | **TRC**             | `.trc`                 | `TRCAdapter`            | ✅ Yes                      | ❌ No      | ✅ Yes   | OpenSim / Vicon Nexus / Theia, Y-up                                       |
-| **OpenCap Session** | directory              | `OpenCapSessionAdapter` | ✅ Yes                      | ❌ No      | ✅ Yes   | Augmented-marker TRC to canonical observations                            |
+| **OpenCap Session** | directory              | `OpenCapSessionAdapter` | ✅ Yes                      | ❌ No      | ✅ Yes   | Markers, scaled model and IK via `load_opencap_session`                   |
 | **OpenSim STO/MOT** | `.sto`, `.mot`         | `STOMotAdapter`         | n/a (joint angles)          | ❌ No      | ✅ Yes   | `inDegrees` flag honored                                                  |
 | **OpenPose**        | `.json`                | `OpenPoseJSONAdapter`   | ❌ 2D only                  | ✅ Yes     | ✅ Yes   | BODY_25 or COCO_18 schema                                                 |
 | **AlphaPose**       | `.json`                | `AlphaPoseJSONAdapter`  | ❌ 2D only                  | ✅ Yes     | ✅ Yes   | COCO-17 multi-frame                                                       |
@@ -47,14 +47,31 @@
 
 ### OpenCap
 
-- **Session Layout**: accepts an OpenCap session directory and finds an
-  augmented-marker TRC file under the session tree.
-- **Output Contract**: returns `CanonicalObservations`, preserving session
-  metadata and source provenance.
-- **Marker Names**: normalizes common OpenCap labels such as `R_ASIS` and
-  `R_Shoulder` to OpenSim marker-site names such as `R.ASIS` and `R.Acromium`.
-- **Units**: delegates TRC parsing to `TRCAdapter`, so millimeters are converted
-  to meters before observations reach downstream IK.
+- **Session Layout**: an OpenCap session directory as written by
+  `opencap-core` and downloaded by `opencap-processing`:
+  `sessionMetadata.yaml`, `MarkerData/<trial>.trc`,
+  `OpenSimData/Model/<model>_scaled.osim` and
+  `OpenSimData/Kinematics/<trial>.mot`. Hand-assembled sessions with TRC
+  files elsewhere in the tree and JSON metadata still load.
+- **Trials**: the `neutral` static trial is never chosen implicitly. A session
+  with several motion trials must be loaded with an explicit trial
+  (`load_opencap_session(session, trial="swing1")`, or the trial's TRC path).
+- **Whole Session**: `load_opencap_session` in
+  `motion_pipeline/sources/opencap_session.py` returns the trial's
+  observations, the scaled model, IK kinematics and subject mass and height.
+- **Marker Names**: real OpenCap augmented markers keep their LaiUhlrich2022
+  names (`r.ASIS_study`, `RHJC_study`, ...; 43 markers defined once in
+  `sources/opencap_markers.py`), so IK against the OpenCap scaled model needs
+  no renaming. Legacy labels such as `R_ASIS` and `R.Acromium` map onto that
+  vocabulary. Detector keypoints OpenCap keeps in the same file (`Neck`,
+  `RShoulder`, ...) are reported separately and never merged into augmented
+  markers; two labels that map to the same name are rejected.
+- **Units**: TRC parsing is delegated to `TRCAdapter` (OpenCap writes metres).
+  IK kinematics use the scaled model to tell rotations (degrees converted to
+  radians) from translations (`pelvis_tx/ty/tz`, metres, unchanged). Without
+  a scaled model the kinematics are skipped and the session's `notes` say so.
+- **Evidence Level**: OpenCap kinematics are model-conditioned estimates
+  (learned augmenter plus IK), not observed 3-D markers (ADR-0053).
 
 ### OpenPose
 

@@ -49,13 +49,6 @@ class URDFEditorWindow(QMainWindow):
         """Initialize the URDF editor window."""
         super().__init__(parent)
 
-    def _show_status(self, message: str) -> None:
-        """Show a message in the status bar."""
-        if message is None:
-            raise ValueError("message must be provided")
-        status_bar = self.statusBar()
-        if status_bar:
-            status_bar.showMessage(message)
         self.current_file: Path | None = None
         self.urdf_content: str = ""
         self._is_modified: bool = False
@@ -69,6 +62,14 @@ class URDFEditorWindow(QMainWindow):
         self.setMinimumSize(1400, 900)
 
         logger.info("URDF Editor window initialized")
+
+    def _show_status(self, message: str) -> None:
+        """Show a message in the status bar."""
+        if message is None:
+            raise ValueError("message must be provided")
+        status_bar = self.statusBar()
+        if status_bar:
+            status_bar.showMessage(message)
 
     def _setup_ui(self) -> None:
         """Set up the main user interface."""
@@ -244,6 +245,7 @@ class URDFEditorWindow(QMainWindow):
         # Frankenstein signals
         frankenstein_tree = self.frankenstein.right_panel.tree
         frankenstein_tree.itemSelectionChanged.connect(self._on_frankenstein_update)
+        self.frankenstein.assembly_urdf_changed.connect(self._on_urdf_modified)
 
         # Chain manipulation signals
         self.chain_tools.chain_modified.connect(self._on_urdf_modified)

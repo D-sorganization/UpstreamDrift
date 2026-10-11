@@ -1,0 +1,179 @@
+# Native Moco Initial-State Bindings
+
+## Status and Scope
+
+This provisional F07/F08 pathway is scoped by child #11949 under parent #11791 and the full feedback
+control epic #11784. It fixes an executable Moco initialization boundary and
+records genuine synthetic optimization followed by independent native muscle
+replay. It does not close production model, physiology, capture, contact/grip,
+complete native state, six-engine parity, or manual publication gates.
+
+`tour_matching.MocoInitialBindings` supplies immutable caller-declared state
+bounds, fixed initial continuous state, and scalar actuator-control bounds to
+`build_moco_study(..., initial_bindings=bindings)`. The builder applies them
+before `initCasADiSolver()` and `createGuess()`. Previously, a compliant muscle's
+`/fiber_length` state had no bound information when guess creation occurred;
+the native failure is retained with the evidence. Guess values are numerical
+seeds, not initial-state constraints.
+
+The optional argument preserves existing exploratory callers. Supplying no
+bindings does not create a complete initialization or qualification claim.
+The binding object is not arbitrary SimTK state serialization. The independent
+replay admission and evidence limits in the native muscle replay and experiment
+bundle chapters remain authoritative.
+
+## Contract and Equations
+
+For exact native continuous-state names $s_i$, caller intervals $[l_i,u_i]$ and
+frozen values $x_{i,0}$, the binding enforces
+
+$$l_i\le x_i(t)\le u_i,\qquad x_i(t_0)=x_{i,0},\qquad
+l_i\le x_{i,0}\le u_i.$$
+
+State-bound and initial-value names must match each other and the unchanged
+initialized model's named continuous states. Control bounds must cover the
+actual native scalar actuator paths. Values must be finite real numbers;
+booleans, reversed intervals, unknown/missing paths and initial values outside
+bounds fail. Fixed-width bounds are permitted. Source maps are copied and
+exposed read-only. No physiological bounds are invented from suffixes in the API.
+
+Existing controllers and `PositionMotion` require a separate binding policy and
+are rejected recursively before native initialization. Multi-control actuators
+are unsupported. This is not a general inventory of Moco Input-controller
+variables, registered discrete state, modeling options, locks, constraints or
+plugin state. Caller bounds cannot qualify those mechanisms. Native model
+initialization discovers names without equilibrating supplied initial values,
+adding reserves, processing anatomy, or changing muscle laws.
+
+The experiment minimizes marker tracking and control effort over $[0,.1]$ s:
+
+$$J=w_m\int\|p(x(t))-p_{\rm ref}(t)\|^2\,dt
++w_u\int u(t)^2\,dt,$$
+
+with $w_m=1$ and $w_u=10^{-8}$. Here $p_{\rm ref}$ is Moco's spline reference
+constructed from the written TRC, not the linear diagnostic reference used below.
+The weights are experiment choices, not physiological acceptance limits.
+
+## Actual Native Fixture and Numerical Policy
+
+The unchanged native fixture has a 1 kg body, one SliderJoint, zero gravity,
+one `Millard2012EquilibriumMuscle`, fixed path points and a marker at the moving
+body origin. Nominal maximum isometric force is 10 N, optimal fiber length .1 m,
+tendon slack length .2 m and pennation zero. It contains no reserve/assistance
+actuator, contact force, or capture data. The marker's world x position equals
+the slider coordinate for this fixture only.
+
+The prepared four-state initial condition is slider position .31 m, speed zero,
+activation .05 and compliant fiber length .108573946282611 m. Initial muscle
+equilibration occurs once during fixture preparation, before export/freeze; it
+is not rerun after replay restoration. Explicit experiment bounds are position
+[.2,.4] m, speed [-2,2] m/s, activation [.001,1], fiber length [.05,.2] m and
+excitation [.001,1]. These are synthetic numerical bounds, not donor-derived
+physiological limits.
+
+The teacher is native forward dynamics under $u(t)=.3+2t$, sampled at 21 times
+with 200 Hz TRC metadata. A constant initial-state trajectory seeds Moco. Actual
+OpenSim 4.6, CasADi/IPOPT, one solver worker and 10/20/40/80 mesh intervals were used;
+optimization convergence and constraint tolerances were $10^{-7}$, with at most
+60 iterations. The executed SDK's Hermite-Simpson/explicit-dynamics defaults and
+linear control-interior-point policy were reviewed. The final receipts record
+the explicitly set solver options; do not infer a fully serialized solver
+configuration from those fields alone.
+
+The existing F06 muscle bundle replays the optimized excitation with a fresh
+native model and the frozen initial state, with no access to marker observations,
+feedback or state resets. Its native input is piecewise linear in physical time.
+Default replay integration accuracy is $10^{-8}$; an independent accuracy
+$10^{-10}$ run checks integration sensitivity. Before F06 replay, the actual T01
+bundle is serialized, saved as `native_replay_bundle.json`, and reloaded through
+the Tools authority. The output-grid refinement preserves every original control
+knot and value exactly and adds 101 requested physical-time probes. The resulting
+unions contain 101/121/161/241 samples for 10/20/40/80 intervals. The maximum
+control-function difference on 1001 check points is $5.55112\times10^{-17}$.
+
+Scoring uses the same 101 requested probe times for every mesh, selecting a
+coincident original knot without retiming it; maximum observed probe-clock
+difference is $1.38778\times10^{-17}$ s. Averaging every union sample would
+change the scoring weights across meshes and is not the reported metric.
+These are output/probe grids, not the adaptive integrator's internal step
+sequence or a continuous collocation defect proof.
+
+## Measured Results and Remaining State Disagreement
+
+All four native public-API solves returned `Solve_Succeeded`. Values below
+come from the corrected archived `grid-preserving-final-mesh-*` receipts/logs.
+They use common 101-point scoring, not the differing union sample counts:
+
+| Quantity | 10 Intervals | 20 Intervals | 40 Intervals | 80 Intervals |
+|---|---:|---:|---:|---:|
+| IPOPT iterations | 25 | 23 | 12 | 12 |
+| NLP constraint violation | 5.62008e-8 | 3.52779e-8 | 5.95911e-8 | 9.56112e-9 |
+| Maximum variable-bound violation | 0 | 0 | 0 | 0 |
+| Optimized versus replay position maximum, m | 8.02227e-6 | 8.15248e-7 | 2.17795e-8 | 1.20421e-7 |
+| Optimized versus replay speed maximum, m/s | 1.70995e-4 | 2.46326e-5 | 3.62531e-6 | 1.57986e-6 |
+| Optimized versus replay activation maximum | .00723379 | .00189424 | .000589070 | .0000929729 |
+| Optimized versus replay fiber-length maximum, m | 6.38536e-5 | 1.73917e-5 | 4.55531e-6 | 1.07075e-6 |
+| Common-probe replay marker RMSE versus native teacher, m | 6.24609e-6 | 2.91968e-6 | 3.39637e-6 | 3.74765e-6 |
+| Common-probe replay RMSE versus linear rounded TRC, m | 8.58593e-6 | 5.18683e-6 | 4.15497e-6 | 4.38346e-6 |
+| Repeated native replay full-state maximum difference | 0 | 0 | 0 | 0 |
+| Solve time, s | .5051 | .8373 | .9420 | 1.7031 |
+| Total experiment time, s | 1.2267 | 1.5948 | 1.7855 | 2.6203 |
+
+The default-versus-tighter integration activation differences are 4.95820e-8,
+6.34056e-8, 6.68852e-9 and 2.50735e-9, much smaller than the corresponding
+collocation-versus-native discrepancies. Activation, speed and fiber-length
+agreement improve across these refinements, but position error increases from
+40 to 80 intervals. Marker RMSE also is not monotone. Four successful solves do
+not establish asymptotic convergence, global optimality or a passed full-state
+acceptance tolerance. The remaining 80-interval activation discrepancy is
+.0000929729; no physiological or numerical threshold is invented after the run.
+
+Recovery of the synthetic teacher is a separate comparison. At .1 s, the
+80-interval dense native replay activation is .45835647 while teacher activation
+is .47638623, a difference of .01802976. The corresponding 20-interval difference
+is .09342181. Neither is the optimized-versus-replay activation error in the
+table. The current marker/effort objective has not recovered the teacher's state;
+this observation alone does not prove universal structural non-identifiability.
+
+The native-teacher comparison uses separately integrated unrounded truth. The
+other diagnostic uses linear interpolation of the six-decimal written TRC.
+Neither is Moco's spline tracking objective. Timings describe this local
+synthetic process, not fleet throughput or production scaling.
+
+## Superseded Dense Diagnostics
+
+The original `public-mesh-10-final` and `public-mesh-20-final` archives remain
+byte-for-byte intact. Their original-grid optimized-versus-native state errors
+remain valid. Their dense diagnostic procedure resampled controls on a plain
+101-point grid, which omitted some original 20-mesh control knots and could
+change the input function. Those dense metrics and related teacher comparisons
+are superseded by the corrected four-mesh evidence, even where rounded numbers
+are nearly unchanged. The earlier desktop preview binds the old 20-mesh receipt
+and must not be relabeled as a corrected run. No historical receipt was rewritten.
+
+## Runtime and Durable Provenance
+
+OpenSim 4.6 and its existing DLLs provide the native evidence. A preceding plugin
+search failure is retained. Setting `CASADIPATH` and prepending the existing
+OpenSim package directory to the child process `PATH` enabled CasADi/IPOPT
+loading; no installation or permanent environment mutation was performed.
+
+The archived final receipts bind the exact executed experiment script, the four
+producer/replay source modules, synthetic model/TRC/guess/solution/NPZ artifacts,
+and installed native DLL/PYD hashes. Each corrected run also archives the exact
+serialized T01 bundle used through the existing source-bound F06 seam; this does
+not expand that seam's bounded native-state admission. Historical executed script
+bytes remain text evidence, separate from maintained executable source.
+
+See `docs/development/moco_state_binding_11791/DESIGN.md` and `TURNOVER.md` for
+reproduction and publication handoff, and the local evidence `MANIFEST.json` for
+exact archive hashes. The 31-test actual OpenSim SDK run covers state/general/
+control bounds, fixed initial constraints despite a conflicting guess, malformed
+maps, controller refusal and a native six-control `BodyActuator` refusal. A
+default-runtime skip is not native evidence.
+
+Production anatomy and passive readiness, actual capture attachments and frozen
+training calibration, native constraints/contact/grip, full-state admission,
+independent full-horizon replay, uncertainty/perturbation validation and all
+required six-engine/model variants remain required. Canonical calculation
+coverage, generated-document parity and publication approval remain blocked.

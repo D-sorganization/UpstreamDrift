@@ -7,7 +7,7 @@ both :func:`load_club_target_c3d` and :func:`load_body_target_c3d` plus the
 fallback behaviour and the unknown-label error path.
 
 Synthetic C3D data is built with :func:`_synthetic_c3d_dict` and patched into
-the canonical I/O entry point so the loaders see real-shaped ezc3d
+the canonical reader's ezc3d entry point so the loaders see real-shaped ezc3d
 dictionaries without any C3D file having to live in the repo.
 """
 
@@ -147,25 +147,32 @@ def _build_body_dict(
 
 @pytest.fixture
 def fake_c3d_path(tmp_path: Path) -> Path:
-    """Return a real, on-disk path satisfying ``Path.exists()`` preconditions.
+    """Return an on-disk path that passes the reader's C3D header check.
 
-    ezc3d itself is bypassed via the ``patch_load_c3d`` fixture below.
+    The reader validates the header magic byte before handing the path to
+    ezc3d; ezc3d itself is bypassed via :func:`_patch_load_c3d` below.
     """
+    from src.shared.python.sidekick.lab.bio import c3d_reader
+
     p = tmp_path / "synthetic.c3d"
-    p.write_bytes(b"")  # contents irrelevant; load_c3d is monkeypatched
+    header = bytes([0x02, c3d_reader.C3D_HEADER_MAGIC_BYTE])
+    p.write_bytes(header.ljust(512, b"\x00"))
     return p
 
 
 def _patch_load_c3d(monkeypatch: pytest.MonkeyPatch, payload: dict[str, Any]) -> None:
-    """Replace the canonical ``load_c3d`` so the loader sees ``payload``."""
-    from sidekick.lab.bio import _c3d_io, c3d_reader
-    from src.shared.python.sidekick.lab.bio import (
-        _c3d_io as canonical_c3d_io,
-        c3d_reader as canonical_c3d_reader,
-    )
+    """Make the canonical reader's ezc3d entry point return ``payload``.
 
-    for module in (_c3d_io, c3d_reader, canonical_c3d_io, canonical_c3d_reader):
-        monkeypatch.setattr(module, "load_c3d", lambda _p: payload)
+    The motion-matching loaders use
+    ``src.shared.python.sidekick.lab.bio.c3d_reader.C3DDataReader``, whose
+    only file-parsing call is ``ezc3d.c3d(path)``.
+    """
+    from types import SimpleNamespace
+
+    from src.shared.python.sidekick.lab.bio import c3d_reader
+
+    fake_ezc3d = SimpleNamespace(c3d=lambda _p: payload)
+    monkeypatch.setattr(c3d_reader, "ezc3d", fake_ezc3d)
 
 
 # --------------------------------------------------------------------------

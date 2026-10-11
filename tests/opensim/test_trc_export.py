@@ -36,7 +36,7 @@ def test_roundtrip_preserves_values_and_blanks_invalid(tmp_path: Path) -> None:
     assert lines[4].split("\t")[2:5] == ["X1", "Y1", "Z1"]
     back = trc.read_trc(path)
     assert back.labels == ("A", "B")
-    np.testing.assert_allclose(back.time_s, _capture().time_s)
+    np.testing.assert_array_equal(back.time_s, _capture().time_s)
     np.testing.assert_array_equal(back.valid, _capture().valid)
     np.testing.assert_allclose(
         back.points_m[back.valid], _capture().points_m[_capture().valid]

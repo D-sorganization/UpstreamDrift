@@ -1,0 +1,322 @@
+{
+  "qualification": "SOFTWARE_CONTRACTS_AND_NATIVE_KINEMATIC_DIAGNOSTICS_NOT_PHYSICAL_ACCEPTANCE",
+  "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+  "model_saved": false,
+  "head_matching_simulation_executed": false,
+  "direct_source_inventory": {
+    "gs3dx_whole_body_ik": "1c8d2ae5983f9639d8ed3b3963336911035bc9fc99e3f6e0458e301df5150504",
+    "gs3dx_head_input_data": "084d1f545d51c341bb3ec872562a08bb55f10e16eba6ae0781eb24679a8a354d",
+    "gs3dx_orientation_residual": "00369171cc677e70992460507e230caea755f8fd2119bd9dd601c2ea7a82f9c4",
+    "gs3dx_foot_orientation_residual": "18287150535441f81e5e671d9ca6a947a7c28722e6b899481b07f6d4bda9611a",
+    "gs3dx_head_orientation_residual": "8e0b31c63b387382feb2f24aa227446205521a7427a8f693c6c2c047c3069723",
+    "gs3dx_head_target_orientation": "1965ac2b7c9a8169b62cb7b7d0550022cedd4c14ba5d8c46cf9180f56cd1619d",
+    "gs3dx_capture_head_frame": "d7f9a8fbef6354103eb56ad7727fe197b060589bda56866d0432dde92ea91161",
+    "gs3dx_capture_markers": "285e8c89c0c06b884e0f1a0e8819037d50f68e23fa719f087ee6766ca45684b5",
+    "gs3dx_capture_joint_centres": "875519b8c2d5a93f303f23eeee656933dfc7f474d17c536b1a8b36c0bac92044",
+    "gs3dx_capture_address_transform": "4282c6939aec5ec56d5641f43872423a331a7ef000524636df82822c2c6bfcc0",
+    "gs3dx_capture_points": "cb3b0698405263b753a1adcf91eec4c794fba7657dde83b254fd80021f5fd9d2",
+    "gs3dx_fit_human_visuals": "77994f7e7535375f8af8afa20d577aef9ed3ff6a611c610dc8298fd14999c480",
+    "gs3dx_ik_joint_roles": "4aae0267abfcaea02a08d36664c9d2cc447f67fc2fa4cba7d6c3e011911e3d9a",
+    "gs3dx_joint_keys": "a4f272516ddf3fb4321b3206228d4fa40e0f45ded854428f53f026b0e8a5658b",
+    "gs3dx_joint_rom": "9ca9c9f570f0cfd032d7b4f04309060f0f57f0489d4d0c34de0219a1de3248e0",
+    "resolve_capture": "66793492772e76bd01bb65d81a0be18e05ea026461edc4eeaded9c5a7567d862",
+    "gs3dx_whole_body_ik_baseline": "f153d381d52a51fbd38c0bd789c471251fa6944b36c313e745bcd3afe299e41f",
+    "gs3dx_foot_orientation_residual_baseline": "41f493300892a45534a9a43395a745dfb23d106e7c67a18b1ba2e2f57b7a7134",
+    "probe": "5395695d1806c1b294c080ca96f57559fc82762812c625c474dc0a6cd4489678"
+  },
+  "inventory_is_full_transitive_closure": false,
+  "geometry_lifecycle": {
+    "close_reload_reset_personal_geometry": true,
+    "reset_field_count": 7,
+    "red": {
+      "actual_process_exit_code": 1,
+      "final_exit_code": 1,
+      "termination_reason": "natural_exit",
+      "done_marker": false,
+      "script_status": "failed",
+      "owned_pids": [41180],
+      "timestamp": "2026-10-02T11:36:37.463894+00:00"
+    },
+    "green": {
+      "actual_process_exit_code": 0,
+      "final_exit_code": 0,
+      "termination_reason": "natural_exit",
+      "done_marker": true,
+      "script_status": "success",
+      "owned_pids": [85064],
+      "timestamp": "2026-10-02T11:38:16.015451+00:00"
+    },
+    "first_unpersonalized_probe_not_selection_evidence": true
+  },
+  "combined_native_tests": {
+    "passed": 267,
+    "failed": 0,
+    "incomplete": 0,
+    "receipt": {
+      "actual_process_exit_code": 0,
+      "final_exit_code": 0,
+      "termination_reason": "natural_exit",
+      "done_marker": true,
+      "script_status": "success",
+      "owned_pids": [55140],
+      "timestamp": "2026-10-02T12:34:19.515972+00:00"
+    }
+  },
+  "quiet_reference_guard_red": {
+    "passed": 19,
+    "failed": 2,
+    "incomplete": 0
+  },
+  "quiet_reference_units": {
+    "leg_angle": "deg",
+    "leg_rate": "deg/s",
+    "upper_angle": "deg",
+    "upper_rate": "deg/s",
+    "upper_feedforward": "N*m",
+    "neck_prescribed_motion": "rad",
+    "neck_initial_target": "deg"
+  },
+  "coarse_comparison": {
+    "captures": {
+      "capture-A": {
+        "frames": [1, 217, 433, 649],
+        "personalized_geometry_checked_before_all_solves": true,
+        "zero_weight_joint_max_diff": 0,
+        "zero_weight_predicted_points_max_diff": 0,
+        "no_head_joint_max_diff": 0,
+        "no_head_predicted_points_max_diff": 0,
+        "trials": {
+          "w_0": {
+            "weight": 0,
+            "frame_count": 4,
+            "all_native_status_1": true,
+            "mean_position_rms_mm": 29.39744050406861,
+            "maximum_position_rms_mm": 42.38130535380343,
+            "head_post_address_mean_deg": 50.743923759864174,
+            "head_post_address_maximum_deg": 81.44727399109647,
+            "left_foot_valid_frame_count": 4,
+            "right_foot_valid_frame_count": 4,
+            "left_foot_maximum_deg": 4.097221504688394,
+            "right_foot_maximum_deg": 14.061748812685938
+          },
+          "w_0_01": {
+            "weight": 0.01,
+            "frame_count": 4,
+            "all_native_status_1": true,
+            "mean_position_rms_mm": 27.60461732681164,
+            "maximum_position_rms_mm": 69.06094195907929,
+            "head_post_address_mean_deg": 67.19873782661888,
+            "head_post_address_maximum_deg": 137.46851268481228,
+            "left_foot_valid_frame_count": 4,
+            "right_foot_valid_frame_count": 4,
+            "left_foot_maximum_deg": 6.377425633754322,
+            "right_foot_maximum_deg": 14.096252632137485
+          },
+          "w_0_03": {
+            "weight": 0.03,
+            "frame_count": 4,
+            "all_native_status_1": true,
+            "mean_position_rms_mm": 31.378198966877083,
+            "maximum_position_rms_mm": 43.098193086831685,
+            "head_post_address_mean_deg": 78.92237347639251,
+            "head_post_address_maximum_deg": 175.025042971629,
+            "left_foot_valid_frame_count": 4,
+            "right_foot_valid_frame_count": 4,
+            "left_foot_maximum_deg": 5.06305317766758,
+            "right_foot_maximum_deg": 13.31100207905229
+          }
+        },
+        "coarse_screen_outcomes": {
+          "w_0_01": "REJECT",
+          "w_0_03": "REJECT"
+        }
+      },
+      "capture-O": {
+        "frames": [1, 169, 249, 361],
+        "personalized_geometry_checked_before_all_solves": true,
+        "zero_weight_joint_max_diff": 0,
+        "zero_weight_predicted_points_max_diff": 0,
+        "no_head_joint_max_diff": 0,
+        "no_head_predicted_points_max_diff": 0,
+        "trials": {
+          "w_0": {
+            "weight": 0,
+            "frame_count": 4,
+            "all_native_status_1": true,
+            "mean_position_rms_mm": 88.45439395083632,
+            "maximum_position_rms_mm": 141.690033262853,
+            "head_post_address_mean_deg": 111.32951261454913,
+            "head_post_address_maximum_deg": 177.57767295512534,
+            "left_foot_valid_frame_count": 4,
+            "right_foot_valid_frame_count": 4,
+            "left_foot_maximum_deg": 21.439825651480454,
+            "right_foot_maximum_deg": 20.107713626708435
+          },
+          "w_0_01": {
+            "weight": 0.01,
+            "frame_count": 4,
+            "all_native_status_1": true,
+            "mean_position_rms_mm": 59.22018456218796,
+            "maximum_position_rms_mm": 132.5302800145407,
+            "head_post_address_mean_deg": 140.4336344427355,
+            "head_post_address_maximum_deg": 179.97448648139667,
+            "left_foot_valid_frame_count": 4,
+            "right_foot_valid_frame_count": 4,
+            "left_foot_maximum_deg": 17.843825985583802,
+            "right_foot_maximum_deg": 19.55187465659924
+          },
+          "w_0_03": {
+            "weight": 0.03,
+            "frame_count": 4,
+            "all_native_status_1": true,
+            "mean_position_rms_mm": 62.12434900824185,
+            "maximum_position_rms_mm": 88.7657986253271,
+            "head_post_address_mean_deg": 62.03697084156905,
+            "head_post_address_maximum_deg": 75.3261896054051,
+            "left_foot_valid_frame_count": 4,
+            "right_foot_valid_frame_count": 4,
+            "left_foot_maximum_deg": 23.436948963585778,
+            "right_foot_maximum_deg": 16.893247661398156
+          }
+        },
+        "coarse_screen_outcomes": {
+          "w_0_01": "REJECT",
+          "w_0_03": "PASS_SCREEN_ONLY"
+        }
+      }
+    },
+    "receipt": {
+      "actual_process_exit_code": 0,
+      "final_exit_code": 0,
+      "termination_reason": "natural_exit",
+      "done_marker": true,
+      "script_status": "success",
+      "owned_pids": [38376],
+      "timestamp": "2026-10-02T11:55:53.389318+00:00"
+    }
+  },
+  "prospective_coarse_screen": {
+    "fixed_before_result": true,
+    "minimum_head_mean_improvement_fraction": 0.3,
+    "maximum_mean_position_increase_mm": 0.5,
+    "maximum_position_increase_mm": 1,
+    "maximum_head_increase_deg": 0,
+    "maximum_each_foot_increase_deg": 2,
+    "head_holdout_scope": "ADDRESS_HEAD_ALIGNMENT_ONLY_BODY_GEOMETRY_AND_OFFSETS_INHERITED",
+    "qualifies_video_selection": false
+  },
+  "full_sampled_owner_comparison": {
+    "scope": "FULL_SAMPLED_CHAIN_FIXED_OFFSETS_COLD_START_NOT_CALIBRATION_REPLAY",
+    "frame_count": 46,
+    "trials": {
+      "w_0": {
+        "weight": 0,
+        "frame_count": 46,
+        "all_native_status_1": true,
+        "mean_position_rms_mm": 38.52426430470756,
+        "maximum_position_rms_mm": 81.11870308188504,
+        "head_post_address_mean_deg": 75.51742348334187,
+        "head_post_address_maximum_deg": 129.2969136198888,
+        "left_foot_valid_frame_count": 45,
+        "right_foot_valid_frame_count": 45,
+        "left_foot_maximum_deg": 20.98622139176995,
+        "right_foot_maximum_deg": 22.46847634222751
+      },
+      "w_0_03": {
+        "weight": 0.03,
+        "frame_count": 46,
+        "all_native_status_1": true,
+        "mean_position_rms_mm": 26.61211729478519,
+        "maximum_position_rms_mm": 37.60624672012035,
+        "head_post_address_mean_deg": 27.455581642217485,
+        "head_post_address_maximum_deg": 54.16293393390982,
+        "left_foot_valid_frame_count": 45,
+        "right_foot_valid_frame_count": 45,
+        "left_foot_maximum_deg": 19.5562882832404,
+        "right_foot_maximum_deg": 20.345063218065793
+      }
+    },
+    "receipt": {
+      "actual_process_exit_code": 0,
+      "final_exit_code": 0,
+      "termination_reason": "natural_exit",
+      "done_marker": true,
+      "script_status": "success",
+      "owned_pids": [50488],
+      "timestamp": "2026-10-02T12:33:07.988015+00:00"
+    },
+    "replacement_selected": false,
+    "rejection_reason": "HEAD_CANDIDATE_MEAN_POSITION_RMS_EXCEEDS_SELECTED_OWNER_CLIP",
+    "selected_owner_position_mean_mm": 16.642960405237172,
+    "selected_owner_position_maximum_mm": 36.86501767597344
+  },
+  "owner_contact_parameter_audit": {
+    "receipt": {
+      "actual_process_exit_code": 0,
+      "final_exit_code": 0,
+      "termination_reason": "natural_exit",
+      "done_marker": true,
+      "script_status": "success",
+      "owned_pids": [88148],
+      "timestamp": "2026-10-02T12:06:25.106952+00:00"
+    },
+    "native_fk_status": 1,
+    "contact_sphere_count": 10,
+    "minimum_clearance_mm": -64.46154040378158,
+    "maximum_clearance_mm": -48.26206200418891,
+    "clearance_spread_mm": 16.199478399592675,
+    "ground_pose_source": "VALIDATED_STORED_NATIVE_RIGID_TRANSFORM_PARAMETERS",
+    "ground_pose_solver_output": false,
+    "actual_assembled_initial_state_verified": false,
+    "simulation_executed": false,
+    "quiet_stance_qualified": false
+  },
+  "desktop_package_changed": false,
+  "open_gates": ["11156", "11160", "11173"],
+  "owner_assembled_20ms_diagnostic": {
+    "qualification": "ASSEMBLED_T0_AND_20MS_DIAGNOSTIC_NOT_EQUILIBRIUM_ACCEPTANCE",
+    "receipt": {
+      "actual_process_exit_code": 0,
+      "final_exit_code": 0,
+      "termination_reason": "natural_exit",
+      "done_marker": true,
+      "script_status": "success",
+      "owned_pids": [38472],
+      "timestamp": "2026-10-02T12:38:27.452938+00:00"
+    },
+    "simulation_executed": true,
+    "stop_time_s": 0.02,
+    "model_saved": false,
+    "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+    "actual_total_mass_kg": 104.69292359999999,
+    "balance_on": false,
+    "upper_body_tracking": true,
+    "zero_upper_feedforward": true,
+    "neck_motion_unit": "rad",
+    "scalar_t0_max_error_by_native_unit": {
+      "deg": 5.429498628473084e-9,
+      "m": 0
+    },
+    "spherical_t0_rotation_invariant_verified": true,
+    "assembled_t0_fk_status": 1,
+    "assembled_minimum_clearance_mm": -64.46154040378158,
+    "assembled_maximum_clearance_mm": -48.26206200418891,
+    "initial_left_normal_force_N": 32205.262784357183,
+    "initial_right_normal_force_N": 24406.606391644647,
+    "final_left_normal_force_N": 106.68406387568439,
+    "final_right_normal_force_N": 0,
+    "pelvis_maximum_displacement_mm": 38.37016741031267,
+    "quiet_stance_qualified": false,
+    "spherical_joint_count": 5,
+    "maximum_spherical_rotation_matrix_error": 1.3353684083279006e-10,
+    "rotation_audit_receipt": {
+      "actual_process_exit_code": 0,
+      "final_exit_code": 0,
+      "termination_reason": "natural_exit",
+      "done_marker": true,
+      "script_status": "success",
+      "owned_pids": [59876],
+      "timestamp": "2026-10-02T12:47:09.456965+00:00"
+    }
+  }
+}

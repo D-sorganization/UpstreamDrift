@@ -1,0 +1,29 @@
+{
+  "qualification": "PRIVATE_ROSTER_HASH_AND_C3D_HEADER_VERIFICATION_NOT_VIDEO_PAIRING_OR_MODEL_ACCEPTANCE",
+  "audit_utc": "2026-10-03T00:09:15.706639+00:00",
+  "software_versions": {
+    "python": "3.12.10",
+    "ezc3d": "1.6.3",
+    "numpy": "2.2.6",
+    "platform": "Windows-11-10.0.26200-SP0"
+  },
+  "verified_roster_count": 13,
+  "all_input_hashes_unchanged": true,
+  "roster_declared_rates_hz": [240.0],
+  "roster_units": ["m"],
+  "roster_point_label_counts": [35],
+  "roster_frame_count_min": 361,
+  "roster_frame_count_max": 391,
+  "selected_export_frames": 367,
+  "selected_export_point_label_count": 38,
+  "selected_source_trial_index": 12,
+  "selected_manifest_source_hash_matches_roster": true,
+  "all_populated_header_event_counts_zero": true,
+  "all_EVENT_parameter_groups_absent": true,
+  "all_trial_club_types_qualified": false,
+  "event_correspondence_qualified": false,
+  "exact_video_pairing_identified": false,
+  "shared_physical_clock_identified": false,
+  "multi_trial_envelope_qualified": false,
+  "selected_export_preserved": true
+}

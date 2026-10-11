@@ -113,3 +113,50 @@ def test_parity_harness_reports_max_differences_between_adapters() -> None:
     assert report["states"] == 20 and report["penetrating_states"] > 0
     with pytest.raises(ValueError):
         module.contact_parity_report({"only": reference}, states, radius=0.03)
+
+
+def test_torsional_moment_opposes_spin_and_is_bounded() -> None:
+    kw = {"patch_radius_m": 0.02, "friction": 0.8, "transition_rad_s": 0.5}
+    load = np.array([0.0, 0.0, 300.0])
+    spin = np.array([0.1, -0.2, 4.0])
+    moment = module.torsional_friction_moment(load, spin, _ground(), **kw)
+    assert moment[0] == 0.0 and moment[1] == 0.0
+    assert moment[2] < 0.0
+    assert abs(moment[2]) <= 0.8 * 300.0 * 0.02 + 1e-12
+    reverse = module.torsional_friction_moment(load, -spin, _ground(), **kw)
+    assert reverse[2] == pytest.approx(-moment[2])
+
+
+def test_torsional_moment_vanishes_without_load_patch_or_spin() -> None:
+    kw = {"patch_radius_m": 0.02, "friction": 0.8, "transition_rad_s": 0.5}
+    spin = np.array([0.0, 0.0, 3.0])
+    zero_load = module.torsional_friction_moment(np.zeros(3), spin, _ground(), **kw)
+    assert not zero_load.any()
+    no_patch = module.torsional_friction_moment(
+        np.array([0.0, 0.0, 300.0]),
+        spin,
+        _ground(),
+        **{**kw, "patch_radius_m": 0.0},
+    )
+    assert not no_patch.any()
+    still = module.torsional_friction_moment(
+        np.array([0.0, 0.0, 300.0]), np.zeros(3), _ground(), **kw
+    )
+    assert not still.any()
+
+
+@pytest.mark.parametrize(
+    "bad",
+    [
+        {"patch_radius_m": -0.01},
+        {"friction": -0.1},
+        {"transition_rad_s": 0.0},
+        {"patch_radius_m": float("nan")},
+    ],
+)
+def test_torsional_moment_rejects_invalid_parameters(bad: dict) -> None:
+    kw = {"patch_radius_m": 0.02, "friction": 0.8, "transition_rad_s": 0.5} | bad
+    with pytest.raises(ValueError):
+        module.torsional_friction_moment(
+            np.array([0.0, 0.0, 1.0]), np.zeros(3), _ground(), **kw
+        )

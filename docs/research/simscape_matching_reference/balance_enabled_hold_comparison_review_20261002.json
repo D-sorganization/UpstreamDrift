@@ -1,0 +1,134 @@
+{
+  "qualification": "SAME_STANCE_BALANCE_ON_CONSTANT_REFERENCE_HOLD_COMPARISON_NOT_INDEPENDENT_FORWARD_REPLAY",
+  "matlab_release": "R2025b",
+  "registered_gates_changed": false,
+  "gain_tuning_performed": false,
+  "gain_interface_evidence": "human_ankle_gain_interface_review_20261002.json",
+  "results": {
+    "capture_A": {
+      "capture_alias": "capture-A",
+      "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+      "qualification": "CONSTANT_REFERENCE_1S_BALANCE_ON_HYBRID_PD_HOLD_DIAGNOSTIC_NOT_OPEN_LOOP",
+      "simulation_executed": true,
+      "model_saved": false,
+      "stop_time_s": 1,
+      "hold_screen_passed": false,
+      "prospective_hold_gates": {
+        "both_feet_settled_minimum_005BW": true,
+        "settled_total_080_to_120BW": true,
+        "whole_run_peak_at_most_200BW": true,
+        "pelvis_displacement_at_most_5mm": false,
+        "pelvis_rotation_change_at_most_1deg": false
+      },
+      "pelvis_max_displacement_m": 0.020041021966138554,
+      "pelvis_max_rotation_change_deg": 5.5820985871380975,
+      "bodyweight_N": 788.3852642219401,
+      "actual_total_mass_kg": 80.39292360000002,
+      "balance_settings": {
+        "BalanceKp": 3,
+        "BalanceKd": 0.4,
+        "BalanceFootKp": 1,
+        "BalanceLimit": 0.1,
+        "BalanceCOMTau": 0.01,
+        "LegServoKp": [100, 100, 100, 100, 50, 50, 100, 100, 100, 100, 50, 50],
+        "LegServoKd": [2, 2, 2, 2, 1, 1, 2, 2, 2, 2, 1, 1]
+      },
+      "balance_reference_provenance": "SAME_ACCEPTED_ASSEMBLED_STANCE_NATIVE_COM_AND_VERIFIED_ANKLE_SENSOR",
+      "balance_on": true,
+      "upper_body_tracking": true,
+      "zero_upper_feedforward": true,
+      "neck_motion_unit": "rad",
+      "scalar_t0_max_error_by_native_unit": {
+        "deg": 2.6211921522190096e-11,
+        "m": 0
+      },
+      "assembled_spherical_matrix_max_error": 1.1663684164777967e-14,
+      "ground_pose_source": "ACCEPTED_BOUNDED_BILATERAL_POSE_AND_FIXED_NORMAL_PLANE",
+      "native_receipt": {
+        "actual_process_exit_code": 0,
+        "final_exit_code": 0,
+        "termination_reason": "natural_exit",
+        "done_marker": true,
+        "script_status": "success",
+        "command_identity": "run('capture_A_bilateral_balance_on_hold_1s.m')",
+        "owned_pids": [59556],
+        "timestamp": "2026-10-02T16:10:59.716380+00:00"
+      },
+      "script_sha256": "17745d7b603b1ba64bfc7749975c67e009e79eb3e45bcebd6a0645af083e67a7",
+      "zero_leg_feedforward": true,
+      "controller_ankle_sensor_vs_verified_fk_preflight_bound_m": 1e-8,
+      "normal_force_summary_N": {
+        "final_left": 433.40174506365975,
+        "final_right": 355.19094348555745,
+        "settled_min_left": 403.0825526528418,
+        "settled_min_right": 340.9602361303865,
+        "settled_min_total": 786.1890719087598,
+        "settled_max_total": 821.3050641755599,
+        "whole_run_peak_total": 1562.1176808141176
+      }
+    },
+    "capture_O": {
+      "capture_alias": "capture-O",
+      "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+      "qualification": "CONSTANT_REFERENCE_1S_BALANCE_ON_HYBRID_PD_HOLD_DIAGNOSTIC_NOT_OPEN_LOOP",
+      "simulation_executed": true,
+      "model_saved": false,
+      "stop_time_s": 1,
+      "hold_screen_passed": false,
+      "prospective_hold_gates": {
+        "both_feet_settled_minimum_005BW": true,
+        "settled_total_080_to_120BW": true,
+        "whole_run_peak_at_most_200BW": true,
+        "pelvis_displacement_at_most_5mm": false,
+        "pelvis_rotation_change_at_most_1deg": false
+      },
+      "pelvis_max_displacement_m": 0.014817765173749445,
+      "pelvis_max_rotation_change_deg": 4.407635703374804,
+      "bodyweight_N": 1026.6868592219398,
+      "actual_total_mass_kg": 104.69292359999999,
+      "balance_settings": {
+        "BalanceKp": 3,
+        "BalanceKd": 0.4,
+        "BalanceFootKp": 1,
+        "BalanceLimit": 0.1,
+        "BalanceCOMTau": 0.01,
+        "LegServoKp": [100, 100, 100, 100, 50, 50, 100, 100, 100, 100, 50, 50],
+        "LegServoKd": [2, 2, 2, 2, 1, 1, 2, 2, 2, 2, 1, 1]
+      },
+      "balance_reference_provenance": "SAME_ACCEPTED_ASSEMBLED_STANCE_NATIVE_COM_AND_VERIFIED_ANKLE_SENSOR",
+      "balance_on": true,
+      "upper_body_tracking": true,
+      "zero_upper_feedforward": true,
+      "neck_motion_unit": "rad",
+      "scalar_t0_max_error_by_native_unit": {
+        "deg": 4.447052504019666e-9,
+        "m": 0
+      },
+      "assembled_spherical_matrix_max_error": 1.0944495202382062e-10,
+      "ground_pose_source": "ACCEPTED_BOUNDED_BILATERAL_POSE_AND_FIXED_NORMAL_PLANE",
+      "native_receipt": {
+        "actual_process_exit_code": 0,
+        "final_exit_code": 0,
+        "termination_reason": "natural_exit",
+        "done_marker": true,
+        "script_status": "success",
+        "command_identity": "run('capture_O_bilateral_balance_on_hold_1s.m')",
+        "owned_pids": [41300],
+        "timestamp": "2026-10-02T16:17:37.131580+00:00"
+      },
+      "script_sha256": "b856358409eea43396f046ecf299e7ddcd6422731793b23d23fc42855a194f3a",
+      "zero_leg_feedforward": true,
+      "controller_ankle_sensor_vs_verified_fk_preflight_bound_m": 1e-8,
+      "normal_force_summary_N": {
+        "final_left": 574.6239783787554,
+        "final_right": 452.9954886721307,
+        "settled_min_left": 558.8197678526124,
+        "settled_min_right": 428.52368598392854,
+        "settled_min_total": 1020.9118854505555,
+        "settled_max_total": 1049.1065585882916,
+        "whole_run_peak_total": 1776.2655556074992
+      }
+    }
+  },
+  "limits": "Upper tracking, leg feedback and prescribed neck remain active. This hold is not full-swing or independently replayed open-loop dynamics."
+}

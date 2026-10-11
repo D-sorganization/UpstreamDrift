@@ -330,6 +330,7 @@ def double_forward_kinematics(
         return None
 
     return {
+        "hub": (0.0, 0.0),
         "shoulder": (0.0, 0.0),
         "wrist": (float(result["wrist_x"]), float(result["wrist_y"])),
         "tip": (float(result["club_tip_x"]), float(result["club_tip_y"])),

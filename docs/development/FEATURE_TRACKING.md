@@ -362,15 +362,15 @@ EDUCATIONAL                       STANDARD                           RESEARCH
 
 ### 3D Visualization Features
 
-| Feature                    | Status | Notes                         |
-| -------------------------- | ------ | ----------------------------- |
-| Real-time 3D Rendering     | `[x]`  | 60 FPS capable                |
-| Multiple Camera Views      | `[x]`  | Side, front, top, follow, DTL |
-| Force Vector Visualization | `[x]`  | Adjustable scaling            |
-| Torque Visualization       | `[x]`  | Joint torque display          |
-| Contact Force Display      | `[x]`  | GRF visualization             |
-| Trajectory Trails          | `[x]`  | Motion path display           |
-| Biomechanical Overlays     | `[x]`  | Metrics on screen             |
+| Feature                    | Status | Notes                                                                         |
+| -------------------------- | ------ | ----------------------------------------------------------------------------- |
+| Real-time 3D Rendering     | `[x]`  | 60 FPS capable                                                                |
+| Multiple Camera Views      | `[x]`  | Side, front, top, follow, DTL                                                 |
+| Force Vector Visualization | `[x]`  | Engine-agnostic FTO-1–30 (#11285), ADR-0052, docs/user_guide/force_overlay.md |
+| Torque Visualization       | `[x]`  | Shaded torque arcs across all engines (FTO-6–29, #11285)                      |
+| Contact Force Display      | `[x]`  | GRF visualization via WrenchKind.CONTACT (FTO-1–30)                           |
+| Trajectory Trails          | `[x]`  | Motion path display                                                           |
+| Biomechanical Overlays     | `[x]`  | Metrics on screen                                                             |
 
 ### 2D Plotting Types
 

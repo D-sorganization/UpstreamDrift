@@ -3,7 +3,7 @@
 This module reproduces the **ZTCF** (zero-torque counterfactual) and **ZVCF**
 (zero-velocity counterfactual) decompositions of the golf double-pendulum's
 acceleration, expressed entirely in terms of the backend-agnostic
-:class:`~simulation_backends.protocol.DynamicsProvider` primitives
+:class:`~simulation_backends.protocol.EquationsOfMotionProvider` primitives
 (``mass_matrix`` and ``bias_forces``). Because the ODE reference backend and the
 MuJoCo CPU backend both implement that Protocol, the *same* functions evaluate
 on either engine and must agree (cross-validation, epic task M7).
@@ -21,9 +21,12 @@ as ZVCF because it answers a different intervention question.
 For the planar double pendulum the bias force is ``C(q, v) v + g(q) + d(v)``.
 At ``v = 0`` the Coriolis term (quadratic in velocity) and the viscous damping
 term (linear in velocity) both vanish, so ``bias(q, 0) == g(q)``. The ZVCF
-expression therefore reduces to ``solve(M, tau - g(q))``, matching the
-analytical ground truth in
-:meth:`PendulumPhysicsEngine.compute_zvcf`.
+expression therefore reduces to ``solve(M, -g(q))``, matching the analytical
+ground truth in :meth:`PendulumPhysicsEngine.compute_zvcf`.
+
+This module holds the repository's single ZVCF definition (issue #11553): the
+row/column projection ``-M(q)^-1 Y(q, 0, 0) pi`` of the inertial regressor in
+the methods reference. ``motion_matching.counterfactual`` delegates to it.
 
 # AGENT-NOTE: These are POINTWISE / INSTANTANEOUS decompositions evaluated at
 # each measured state along a trajectory -- they are NOT forward-integrated
@@ -49,7 +52,7 @@ from src.shared.python.core.contracts import check_finite, require
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:
-    from .protocol import DynamicsProvider
+    from .protocol import EquationsOfMotionProvider
 
 logger = get_logger(__name__)
 
@@ -77,7 +80,7 @@ class CanonicalDynamicsTrajectory:
 
     This is an analysis-boundary adapter: engine adapters convert native state
     layouts to ``canonical-v2`` before constructing this value, and the math in
-    this module still runs only through ``DynamicsProvider`` primitives.
+    this module still runs only through ``EquationsOfMotionProvider`` primitives.
 
     ``q`` is configuration-space data and may be longer than ``v`` in
     canonical-v2 because a floating-base quaternion has one redundant
@@ -236,12 +239,12 @@ def _as_state_vector(name: str, value: np.ndarray) -> np.ndarray:
 
 
 def _solve_mass(
-    provider: DynamicsProvider, q: np.ndarray, rhs: np.ndarray
+    provider: EquationsOfMotionProvider, q: np.ndarray, rhs: np.ndarray
 ) -> np.ndarray:
     """Solve ``M(q) x = rhs`` using the provider's inertia matrix.
 
     Args:
-        provider: Any object satisfying :class:`DynamicsProvider` (LOD: only its
+        provider: Any object satisfying :class:`EquationsOfMotionProvider` (LOD: only its
             ``mass_matrix`` method is touched here).
         q: Joint positions ``(n,)`` at which to evaluate ``M``.
         rhs: Right-hand side ``(n,)``.
@@ -295,7 +298,7 @@ def _require_compatible_configuration_shape(
 
 
 def ztcf_acceleration(
-    provider: DynamicsProvider, q: np.ndarray, v: np.ndarray
+    provider: EquationsOfMotionProvider, q: np.ndarray, v: np.ndarray
 ) -> np.ndarray:
     """Zero-torque counterfactual (ZTCF) acceleration at a single state.
 
@@ -310,7 +313,7 @@ def ztcf_acceleration(
 
     Args:
         provider: Backend exposing ``mass_matrix`` and ``bias_forces`` (the
-            :class:`DynamicsProvider` Protocol; ODE or MuJoCo CPU backend).
+            :class:`EquationsOfMotionProvider` Protocol; ODE or MuJoCo CPU backend).
         q: Joint positions ``(n,)`` [rad].
         v: Joint velocities ``(n,)`` [rad/s].
 
@@ -335,7 +338,7 @@ def ztcf_acceleration(
     return _solve_mass(provider, q_arr, -bias)
 
 
-def zvcf_acceleration(provider: DynamicsProvider, q: np.ndarray) -> np.ndarray:
+def zvcf_acceleration(provider: EquationsOfMotionProvider, q: np.ndarray) -> np.ndarray:
     """Canonical ZVCF acceleration at one fixed configuration/internal state.
 
     ZVCF is instantaneous and sets both velocity and the declared applied
@@ -367,7 +370,7 @@ def zvcf_acceleration(provider: DynamicsProvider, q: np.ndarray) -> np.ndarray:
 
 
 def zero_velocity_control_preserved_acceleration(
-    provider: DynamicsProvider, q: np.ndarray, tau: np.ndarray
+    provider: EquationsOfMotionProvider, q: np.ndarray, tau: np.ndarray
 ) -> np.ndarray:
     """Evaluate zero-velocity acceleration while preserving applied control.
 
@@ -392,7 +395,7 @@ def zero_velocity_control_preserved_acceleration(
 
 
 def evaluate_ztcf_along_trajectory(
-    provider: DynamicsProvider, q_traj: np.ndarray, v_traj: np.ndarray
+    provider: EquationsOfMotionProvider, q_traj: np.ndarray, v_traj: np.ndarray
 ) -> np.ndarray:
     """Evaluate the ZTCF acceleration pointwise at every sampled state.
 
@@ -442,7 +445,7 @@ def evaluate_ztcf_along_trajectory(
 
 
 def drift_and_control_split(
-    provider: DynamicsProvider,
+    provider: EquationsOfMotionProvider,
     q: np.ndarray,
     v: np.ndarray,
     tau: np.ndarray,
@@ -488,7 +491,7 @@ def drift_and_control_split(
 
 
 def evaluate_ztcf_zvcf_on_canonical_trajectory(
-    provider: DynamicsProvider,
+    provider: EquationsOfMotionProvider,
     trajectory: CanonicalDynamicsTrajectory,
 ) -> ZtcfZvcfResult:
     """Evaluate pointwise ZTCF/ZVCF on canonical-v2 state samples.

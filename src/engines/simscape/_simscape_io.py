@@ -131,9 +131,10 @@ def logsout_to_simscape_output(logsout: dict[str, Any]) -> SimscapeOutput:
     ``time``, ``q``, ``qd``, ``qdd``, ``tau``, ``omega``,
     ``r_butt``, ``r_clubhead``, ``q_club``, ``v_clubhead``.
 
-    An optional ``forces`` key (#11304) maps dataset column names to
+    An optional ``forces`` key (#11304, FTO-19) maps dataset column names to
     per-sample vectors and becomes ``SimscapeOutput.force_columns``;
-    old producers that omit it keep working.
+    produced by ``extract_sim_out.m`` on MATLAB forward calls. Old producers
+    that omit it keep working.
 
     The MATLAB side guarantees that ``time`` starts at 0 and
     ``q_club`` rows are unit-norm; we re-validate via

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import math
 from collections.abc import Sequence
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
@@ -556,7 +556,19 @@ class MeasurementRequest(BaseModel):
 #  AIP JSON-RPC (#1199, #1198, #1200, #763)
 # ──────────────────────────────────────────────────────────────
 
-VALID_FORCE_TYPES = {"applied", "gravity", "contact", "bias", "all"}
+VALID_FORCE_TYPES = {
+    "all",
+    "applied",
+    "bias",
+    "contact",
+    "external",
+    "gravity",
+    "grip",
+    "joint_actuator",
+    "joint_reaction",
+    "muscle",
+    "reaction",
+}
 
 VALID_ACTUATOR_CONTROL_TYPES = {"constant", "polynomial", "pd_gains", "trajectory"}
 
@@ -587,6 +599,23 @@ class ForceOverlayRequest(BaseModel):
         None, description="Only show forces on these bodies (None = all)"
     )
     show_labels: bool = Field(False, description="Show magnitude labels")
+    scale_mode: Literal["fixed", "body_weight", "peak"] = Field(
+        "fixed", description="Arrow scaling: fixed, body_weight or peak"
+    )
+    reference_force_n: float | None = Field(
+        None,
+        gt=0,
+        description="Body weight (N) for body_weight; series peak (N) for peak",
+    )
+    reference_length_m: float = Field(
+        0.5, gt=0, description="Arrow length (m) for one reference force"
+    )
+    kind_scale: dict[str, float] | None = Field(
+        None, description="Per-WrenchKind length multipliers"
+    )
+    groups: list[str] | None = Field(
+        None, description="Enabled overlay groups (None = defaults)"
+    )
 
     @field_validator("force_types")
     @classmethod
@@ -719,3 +748,23 @@ class CharacterBuilderRequest(BaseModel):
         if normalized not in {"athletic", "average", "heavy", "slim"}:
             raise ValueError("build_type must be athletic, average, heavy, or slim")
         return normalized
+
+
+class CharacterSpecRequest(BaseModel):
+    """Request for the spec-native character builder (CMB-3, #11654).
+
+    ``preset`` selects a shipped character preset as the base; any other
+    field overrides that base (or the defaults when no preset is given).
+    Bounds mirror ``spec_params.PARAMETER_RANGES``; the service re-validates.
+    """
+
+    preset: str | None = Field(None, description="Character preset id")
+    stature_m: float | None = Field(None, ge=1.2, le=2.3)
+    mass_kg: float | None = Field(None, ge=30.0, le=200.0)
+    trunk_scale: float | None = Field(None, ge=0.7, le=1.4)
+    arm_scale: float | None = Field(None, ge=0.7, le=1.4)
+    shoulder_scale: float | None = Field(None, ge=0.7, le=1.4)
+    grip_roll_deg: float | None = Field(None, ge=-180.0, le=180.0)
+    club: str | None = Field(None, description="driver or iron7")
+
+    model_config = {"extra": "forbid"}

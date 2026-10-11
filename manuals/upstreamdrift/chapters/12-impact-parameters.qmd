@@ -1,0 +1,158 @@
+# Club Impact Parameters
+
+## Status
+
+Evidence class: derived, provisional. This chapter records the
+launch-monitor-style impact parameters delivered by GCV-15 (#11721) so they can
+be inventoried. It is not approved. The registry blocker
+`UP-D1-impact-parameters-inventory` stays open until UP-D1 inventories the
+pathway and a human reviews it.
+
+## Purpose
+
+Report, from a world-frame clubhead series and an explicit target line, the
+delivery quantities a launch monitor shows: clubhead speed, attack angle, club
+path, face angle, face-to-path, dynamic loft, spin loft, swing direction,
+swing-plane angle, low point, impact location on the face and smash factor.
+Every value is computed or reported unavailable with a reason. Nothing is
+invented.
+
+## Conventions
+
+- World frame, SI units: position in m, velocity in m/s, time in s. Angles are
+  reported in degrees; speed is also reported in mph
+  ($1\ \text{m/s} = 2.2369362920544\ \text{mph}$).
+- Target frame (`TargetFrame`): $x_t$ is the horizontal unit target direction,
+  $z_t$ the unit up vector and $y_t = z_t \times x_t$, which points left of the
+  target for a right-handed golfer. $x_t$ and $z_t$ must be unit vectors and
+  orthogonal within $10^{-9}$. The frame record (`frame_id`, axes, ball
+  position, handedness, ground height) is stored with every result.
+- Default frame (ADR-0041): Z-up world, golfer faces $-X$, target line along
+  $-Y$; `frame_id = "ud_world:z_up,target_-y(adr-0041)"`.
+- Handedness sign $s = +1$ for a right-handed golfer and $s = -1$ for a
+  left-handed golfer. Left-handedness mirrors lateral signs only.
+- $v$ is the face-centre velocity and $n$ the face normal at the impact state.
+  For a vector $u$, $u_x = u \cdot x_t$, $u_y = u \cdot y_t$,
+  $u_z = u \cdot z_t$ and $|u_h| = \sqrt{u_x^2 + u_y^2}$.
+- Impact state: the last pre-contact sample, `contact_index - 1`, when a
+  contact index is given. Otherwise it is the explicit `impact_index`, or the
+  peak face-centre speed sample from the shared `detect_impact_index`. The
+  source is recorded as `last_pre_contact`, `explicit` or
+  `peak_clubhead_speed`.
+
+## Equations
+
+1. Clubhead speed: $|v|$, in m/s and mph.
+2. Attack angle (negative is descending):
+   $$\mathrm{AoA} = \operatorname{atan2}\left(v_z, |v_h|\right)$$
+3. Club path (positive is in-to-out):
+   $$\mathrm{path} = \operatorname{atan2}\left(-s\,v_y, v_x\right)$$
+4. Face angle (positive is open), the same heading applied to the face normal:
+   $$\mathrm{face} = \operatorname{atan2}\left(-s\,n_y, n_x\right)$$
+5. Face-to-path, wrapped to $[-180°, 180°)$:
+   $$\mathrm{FtP} = \operatorname{wrap}\left(\mathrm{face} - \mathrm{path}\right)$$
+6. Dynamic loft:
+   $$\mathrm{loft}_{dyn} = \operatorname{atan2}\left(n_z, |n_h|\right)$$
+7. Spin loft, the three-dimensional angle between velocity and face normal:
+   $$\mathrm{loft}_{spin} = \arccos\left(\frac{v \cdot n}{|v|\,|n|}\right)$$
+8. Swing direction and swing-plane angle. Fit a least-squares plane, by
+   singular value decomposition, through the face-centre samples within
+   $\pm 20$ ms of impact. With unit plane normal $\hat p$, the in-plane travel
+   is $v_p = v - (v \cdot \hat p)\,\hat p$. Swing direction is the heading of
+   $v_p$ by equation 3, and the swing-plane angle is
+   $$\theta_{plane} = \arccos\left|\hat p \cdot z_t\right|$$
+9. Low point. Let $h_k = p_k \cdot z_t$ for face-centre positions $p_k$. Take
+   the top of the swing $k_{top} = \arg\max_{k \le k_{imp}} h_k$ and the low
+   point $k_{low} = \arg\min_{k \ge k_{top}} h_k$ to the end of the series.
+   Report
+   $$d_{low} = \left(p_{k_{low}} - b\right) \cdot x_t, \qquad
+     z_{low} = h_{k_{low}} - z_g$$
+   with ball position $b$ and ground height $z_g$. A positive $d_{low}$ is on
+   the target side of the ball.
+10. Impact location on the face. With unit face normal $\hat n$, project the
+    toe axis $a$ onto the face, $\hat t = \operatorname{unit}\left(a - (a
+    \cdot \hat n)\,\hat n\right)$, and set $\hat u = \hat t \times \hat n$.
+    For ball contact point $c$ and face centre $p$:
+    $$\mathrm{toe} = 10^3\,(c - p) \cdot \hat t, \qquad
+      \mathrm{high} = 10^3\,(c - p) \cdot \hat u \quad \text{(mm)}$$
+11. Smash factor: impact-model ball speed divided by $|v|$, labelled with the
+    impact model's calibration status.
+
+## Tools D-Plane Estimates
+
+When the face is observable and Tools is importable, the extractor also
+returns the Tools delivery and D-plane values (`ToolsDeliveryEstimate`),
+labelled as model estimates. They add the planar spin loft and the spin-axis
+tilt, which UpstreamDrift does not compute. `tools_gateway.py` owns no delivery
+physics. It maps the target frame into the Tools app frame:
+$$x_{app} = v_x, \qquad y_{app} = v_z, \qquad z_{app} = -s\,v_y$$
+The largest absolute difference between the UpstreamDrift and Tools angles is
+recorded as `tools_max_deviation_deg`. The gateway fails closed: if Tools
+cannot be imported, `tools_estimates` is unavailable with the reason.
+
+## Unavailable Values
+
+- A clubhead speed below `min_speed_mps` (default 1 m/s) at the impact state
+  raises `ValueError`. No parameter is defined then.
+- Club path is unavailable when $v$ has no horizontal component, and face angle
+  and face-to-path when $n$ has none (threshold $10^{-12}$).
+- When club axial rotation is unobservable (for example mocap-matched swings,
+  MS-108), `ClubheadSeries.face_normal` is `None` with a required
+  `face_unobservable_reason`. Face angle, face-to-path, dynamic loft, spin loft
+  and the Tools estimates are then unavailable with that reason.
+- Swing direction and plane angle are unavailable with fewer than 3 samples in
+  the $\pm 20$ ms window, when the path is collinear (second singular value
+  below $10^{-3}$ of the first), or when the in-plane travel has no horizontal
+  component.
+- Toe and high offsets need the face geometry (GCV-11) and a ball contact point
+  (GCV-13). They are unavailable without them, or when the toe axis is
+  parallel to the face normal.
+- Smash factor needs an impact-model ball speed and its calibration status.
+
+Each unavailable field is `None` in the result and `null` over the API, with
+its reason in `unavailable`. It is never reported as zero.
+
+## Implementation
+
+| Symbol | Location |
+| --- | --- |
+| `TargetFrame`, ADR-0041 default frame | `src/shared/python/impact_parameters/target_frame.py` |
+| `ClubheadSeries` | `src/shared/python/impact_parameters/clubhead_series.py` |
+| `extract_impact_parameters`, `ImpactParameters`, `BallObservation` | `src/shared/python/impact_parameters/extract.py` |
+| `ToolsDeliveryGateway`, `ToolsDeliveryEstimate` | `src/shared/python/impact_parameters/tools_gateway.py` |
+| `select_impact_index` (GCV-16 integration point) | `src/shared/python/impact_parameters/adapters/impact_time.py` |
+| Per-engine clubhead series adapters | `src/shared/python/impact_parameters/adapters/` |
+
+The extractor is engine-agnostic numpy. The per-engine adapters, the API
+service and the Impact Parameters panel consume it and are outside this
+chapter.
+
+## Tests and Reproduction
+
+```bash
+python3 -m pytest tests/unit/impact_parameters/test_extract.py \
+  tests/unit/impact_parameters/test_adapters.py -q
+```
+
+These tests check the definitions against constructed clubhead series with
+known angles, invariance under a world rotation applied to the series and the
+frame, the handedness mirror, the impact-state selection, the unavailable
+reasons, the fail-closed Tools gateway and agreement of the Tools mapping with
+these definitions within 0.01°. They do not check any
+engine's clubhead kinematics, impact detection on a real swing, or agreement
+with a launch monitor.
+
+## Assumptions and Limitations
+
+- The face centre, face normal and toe axis are taken from the engine's club
+  model. Their accuracy bounds every face-derived value.
+- The default impact state is the peak-speed sample until the checked
+  closest-approach rule (OSV-8/OSV-10) is wired in through
+  `select_impact_index`. Peak speed can precede true contact.
+- The values are kinematic definitions evaluated on simulation or
+  reconstruction outputs, not launch-monitor measurements. No comparison with
+  a launch monitor has been made for this pathway.
+- The $\pm 20$ ms plane window, the 1 m/s speed floor and the collinearity
+  ratio are numerical guards, not measured or physiological limits.
+- No uncertainty or tolerance against an external reference has been
+  established; none is claimed.

@@ -517,3 +517,17 @@ def test_engine_contact_forces_zero_without_contact_model(tmp_path: Path) -> Non
     path = tmp_path / "synthetic_pendulum.osim"
     model.printToXML(str(path))
     np.testing.assert_allclose(_engine_with(path).compute_contact_forces(), (0, 0, 0))
+
+
+# --- GCV-8 (#11714): grip is explicitly unavailable, never zero ----------------
+
+
+def test_grip_analysis_is_unavailable_with_reason_not_zero() -> None:
+    model, state = _pendulum()
+    source = OpenSimForceTorqueSource(model)
+    grip = source.grip_analysis()
+    assert grip.split_method == "unavailable"
+    assert grip.net_force_n is None and grip.left is None and grip.right is None
+    assert "placeholder" in grip.unavailable_reason
+    frame = source.sample(state)
+    assert not [w for w in frame.wrenches if w.kind is WrenchKind.GRIP]

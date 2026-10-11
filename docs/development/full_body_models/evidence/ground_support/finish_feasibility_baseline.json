@@ -1,0 +1,87 @@
+{
+  "provenance": {
+    "issue": 11668,
+    "note": "Finish-feasibility of the saved driver and 7-iron static-seed trajectories (--static-seeds; iron with --zmp-filter) recomputed by finish_feasibility_cli. The committed canonical receipts' dynamics_record.npz is not committed and the pipeline does not reproduce their spec hash bit-for-bit on this machine, so these blocks are a companion baseline, not an edit of the receipts.",
+    "scaled_spec_sha256": {
+      "anthro_driver_seeds": "2d36810168f90941fc786edb20e0a34eddf9d0dccd406150d0f8fbfbacc7180b",
+      "anthro_iron_seeds_zmp": "0c1f5ca2f4f61f3fa63a7a88963aff1774f24ce89c18997922c7649387f297ce"
+    },
+    "reproduce": "python -m src.shared.python.motion_matching.pipeline.finish_feasibility_cli --run-dir <run>"
+  },
+  "anthro_driver_seeds": {
+    "description": "finish-window feasibility of the tracked reference (the load its inverse dynamics demands) and of the simulation (the load the plant delivers); reference friction uses the net ground reaction, the simulation the larger of the two feet; an unloaded frame is never inside the support polygon",
+    "window_s": [
+      1.0,
+      1.8138888888888889
+    ],
+    "zmp_window_s": [
+      1.0,
+      1.5
+    ],
+    "friction_limit_mu": 0.8,
+    "friction_saturation_fraction": 0.95,
+    "min_load_bw": 0.1,
+    "reference": {
+      "zmp_inside_fraction_1_0_to_1_5s": 0.29444444444444445,
+      "zmp_inside_fraction_finish": 0.1870748299319728,
+      "friction_utilisation_max": 3.1773168730418493,
+      "friction_saturated_fraction": 0.23129251700680273,
+      "foot_slide_mm_max": 153.6655816411381,
+      "foot_yaw_pivot_deg_max": 130.88874528692065,
+      "pelvis_yaw_error_deg_max": null,
+      "pelvis_yaw_error_deg_final": null,
+      "vertical_force_bw_min": 0.3013241271585421,
+      "vertical_force_bw_max": 1.8484422271683774
+    },
+    "simulation": {
+      "zmp_inside_fraction_1_0_to_1_5s": 0.9397590361445783,
+      "zmp_inside_fraction_finish": 0.9411764705882353,
+      "friction_utilisation_max": 1.0,
+      "friction_saturated_fraction": 0.5615384615384615,
+      "foot_slide_mm_max": 86.7257214258552,
+      "foot_yaw_pivot_deg_max": 103.85877243112293,
+      "pelvis_yaw_error_deg_max": 23.509196738494303,
+      "pelvis_yaw_error_deg_final": -20.995123039492917,
+      "vertical_force_bw_min": 0.0,
+      "vertical_force_bw_max": 2.456862798370335
+    }
+  },
+  "anthro_iron_seeds_zmp": {
+    "description": "finish-window feasibility of the tracked reference (the load its inverse dynamics demands) and of the simulation (the load the plant delivers); reference friction uses the net ground reaction, the simulation the larger of the two feet; an unloaded frame is never inside the support polygon",
+    "window_s": [
+      1.0,
+      1.8272980501392757
+    ],
+    "zmp_window_s": [
+      1.0,
+      1.5
+    ],
+    "friction_limit_mu": 0.8,
+    "friction_saturation_fraction": 0.95,
+    "min_load_bw": 0.1,
+    "reference": {
+      "zmp_inside_fraction_1_0_to_1_5s": 0.55,
+      "zmp_inside_fraction_finish": 0.3523489932885906,
+      "friction_utilisation_max": 4.006746312693975,
+      "friction_saturated_fraction": 0.1040268456375839,
+      "foot_slide_mm_max": 151.96996575503374,
+      "foot_yaw_pivot_deg_max": 103.26874747125893,
+      "pelvis_yaw_error_deg_max": null,
+      "pelvis_yaw_error_deg_final": null,
+      "vertical_force_bw_min": 0.20440396376621522,
+      "vertical_force_bw_max": 2.0603963978675774
+    },
+    "simulation": {
+      "zmp_inside_fraction_1_0_to_1_5s": 0.9819277108433735,
+      "zmp_inside_fraction_finish": 0.855072463768116,
+      "friction_utilisation_max": 1.0000000000000002,
+      "friction_saturated_fraction": 0.5702479338842975,
+      "foot_slide_mm_max": 301.61263185818945,
+      "foot_yaw_pivot_deg_max": 88.9539165173733,
+      "pelvis_yaw_error_deg_max": 7.993613975976496,
+      "pelvis_yaw_error_deg_final": -2.4269010775504976,
+      "vertical_force_bw_min": 0.0,
+      "vertical_force_bw_max": 3.2242074460884345
+    }
+  }
+}

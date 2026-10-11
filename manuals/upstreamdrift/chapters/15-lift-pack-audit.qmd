@@ -1,0 +1,306 @@
+# Lift Model Pack Audit
+
+## Status
+
+Evidence class: derived, provisional. This chapter records the cross-engine
+audit of the four lift model packs delivered by LIFT-1 (#11741) so it can be
+inventoried. It is the first LIFT-11 (#11751) slice. A later slice adds the
+LIFT-4 (#11744) static-hold bar wrench. It is not approved. The
+registry blocker `UP-D1-lift-pack-audit-inventory` stays open until UP-D1
+inventories the pathway and a human reviews it.
+
+## Purpose
+
+Compare the MuJoCo, OpenSim, Drake and Pinocchio lift packs (back squat,
+deadlift, bench press, snatch, clean and jerk) on the same inputs. The audit
+reduces each engine's own forward kinematics to bar, hand and foot geometry,
+compares the engines pose by pose, checks masses and joint limits against the
+biomech parity standard, and derives the list of discrepancies with their
+tracking issues. It measures software parity between the packs only. It does
+not simulate a lift, and it does not compute joint moments, spine loads or
+muscle forces.
+
+## Conventions
+
+- Canonical frame from the parity standard: $+Z$ up, $+X$ forward, $+Y$ left,
+  SI units. MuJoCo, Drake and Pinocchio already use it. OpenSim is Y-up, and
+  its world vectors are rotated by
+  $$R_{os} = \begin{pmatrix} 1 & 0 & 0 \\ 0 & 0 & -1 \\ 0 & 1 & 0
+  \end{pmatrix}, \qquad p_{can} = R_{os}\,p_{os}$$
+- Inputs are canonical joint angles in radians, applied relative to the
+  standard's all-zero pose and mapped to each engine's native coordinate
+  names and zero offsets.
+- Positions are body-frame origins in the world frame. For an evaluated pose
+  the pelvis is placed at $(0, 0, 1)$ m unless the pack's start pose is used.
+- Reference lifter: 80 kg, 1.78 m. Bar: 20 kg competition bar plus 50 kg per
+  side, 120 kg in total.
+
+## Equations
+
+1. Bar frame. With shaft origin $c$ and sleeve origins $s_L$, $s_R$:
+   $$\hat a = \frac{s_L - s_R}{\lVert s_L - s_R \rVert}$$
+   The axis is undefined, and the audit raises `ValueError`, when the sleeves
+   coincide ($\lVert s_L - s_R \rVert < 10^{-9}$ m). The axis is built from
+   the sleeve origins, so a pack's local bar-axis convention does not matter.
+2. Hand-to-bar geometry, per side $k \in \{l, r\}$, with hand origin $h_k$ and
+   $r_k = h_k - c$:
+   $$\ell_k = r_k \cdot \hat a, \qquad
+     d_k = \lVert r_k - \ell_k\,\hat a \rVert$$
+   $\ell_k$ is the signed lateral offset along the bar (positive toward the
+   left sleeve) and $d_k$ the perpendicular distance to the bar axis. A hand
+   that grips the bar has $d_k \approx 0$. A back-squat bar rides on the back,
+   so $d_k \approx 0.59$ m is expected there.
+3. Placement-independent pose summary. With the foot midpoint
+   $f = \tfrac{1}{2}(p_{foot,l} + p_{foot,r})$, the bar centre and hand
+   positions are reported as $c - f$ and $h_k - f$. The grip width is
+   $\lVert h_l - h_r \rVert$.
+4. Same-input parity. For a body $b$ in pose $q$ the pelvis-relative position
+   is $\rho_b = p_b - p_{pelvis}$. For an engine pair $(i, j)$ and a body set
+   $B$:
+   $$\Delta_B = \max_{b \in B} \lVert \rho_b^{(i)} - \rho_b^{(j)} \rVert_\infty$$
+   It is evaluated for the segment origins, the hands, the feet and the bar
+   centre, and reported as the worst value over all engine pairs and poses.
+   The pose set is the standard's zero, flexion, frontal and axial poses plus
+   four generic lift shapes (hip hinge, front rack, overhead, squat bottom).
+   None of these is any pack's own phase data.
+5. Lifter-only centre of mass. The bar and bench links have zero mass-centre
+   offset in every pack, so with total mass $M$, whole-model CoM $x_G$ and
+   removed links $e$ of mass $m_e$ at origin $p_e$:
+   $$x_{lifter} = \frac{M\,x_G - \sum_e m_e\,p_e}{M - \sum_e m_e} - p_{pelvis}$$
+   It is unavailable when no lifter mass remains.
+6. Segment mass deviation, against the standard's segment mass $m^{std}_s$ at
+   its standard body mass $M^{std}$, scaled to the lifter mass $M_L$:
+   $$\varepsilon_s = \frac{\left| m_s - m^{std}_s\,M_L / M^{std} \right|}
+     {m^{std}_s\,M_L / M^{std}}$$
+7. Joint limits. A native limit $[\underline q, \overline q]$ with zero
+   offset $o$ is compared in canonical angles as
+   $\max\left(|\underline q - o - \underline q^{std}|,
+   |\overline q - o - \overline q^{std}|\right)$.
+8. Grip width. The intended half-width is $|\ell_l|$ at the zero pose and the
+   achievable half-spacing is $\tfrac{1}{2}\lVert h_l - h_r \rVert$ at the same
+   pose. The mismatch is their difference.
+9. Start pose. The sole height $z_{sole}$ is the lowest point of the foot
+   contact geometry: MuJoCo and Pinocchio foot boxes, OpenSim contact-sphere
+   surfaces, and the lowest Drake foot sole corner. The bar height above the sole is
+   $c_z - z_{sole}$. For floor pulls (deadlift, snatch, clean and jerk) its
+   target is the 0.225 m plate radius of a 450 mm plate.
+10. Reference FK. Each engine's pelvis-relative origins are compared with the
+    standard's reference FK scaled to the lifter height, as the worst
+    component difference over the common segments. It is not evaluated for
+    the bench press.
+
+## Tolerances and Thresholds
+
+| Quantity | Value | Source |
+| --- | --- | --- |
+| Cross-engine position | 0.02 m | parity standard `cross_engine_position_abs_m` |
+| Mass | $10^{-6}$ relative | parity standard `mass_rel` |
+| Joint limit | $10^{-4}$ rad | parity standard `limit_abs_rad` |
+| Grip mismatch and native start closure | 0.01 m | audit threshold |
+| Floor-pull bar height | 0.225 m $\pm$ 0.05 m | 450 mm plate radius, audit threshold |
+
+The audit thresholds flag discrepancies for tracking. They are not acceptance
+limits for a lift simulation.
+
+## Discrepancy Derivation
+
+`derive_gaps` computes every discrepancy from the measured rows. None is
+entered by hand. The classes are: grip attachment, grip width, start pose,
+joint limits, phase count, left-only phase targets, phase keys that do not
+resolve to model coordinates, bench mass convention, start-pose contact force,
+segment inertia and missing ground reaction. Each class maps to the per-pack
+issues in the model repositories and to the LIFT child of epic #11740 expected
+to close it.
+
+## Unavailable Values
+
+- Drake and Pinocchio packs expose no contact model, so start-pose ground
+  contact force is unavailable with a reason, never zero.
+- Native hand-to-bar closure is reported only where the engine defines it
+  (MuJoCo welds, OpenSim weld constraint after assembly). It is unavailable
+  for Drake and Pinocchio.
+- The lifter-only CoM is unavailable when no lifter mass remains, and the bar
+  height is unavailable when no foot contact geometry is found.
+- Missing bodies, non-finite positions and coincident sleeves raise
+  `ValueError`. No geometric value is filled in.
+
+## Implementation
+
+| Symbol | Location |
+| --- | --- |
+| `to_canonical`, `from_canonical` | `src/shared/python/lifting/pack_audit/frames.py` |
+| `bar_frame`, `hand_bar_metrics`, `pose_summary`, `max_abs_difference` | `src/shared/python/lifting/pack_audit/geometry.py` |
+| `lift_shape_poses`, `reference_origins` | `src/shared/python/lifting/pack_audit/poses.py` |
+| `body_com_rel_pelvis`, `compare_engines`, `run_baseline` | `src/shared/python/lifting/pack_audit/baseline.py` |
+| `mass_rows`, `limit_rows`, `grip_rows`, `start_rows`, `parity_rows` | `src/shared/python/lifting/pack_audit/analysis.py` |
+| `derive_gaps` | `src/shared/python/lifting/pack_audit/gaps.py` |
+| Per-engine adapters | `src/shared/python/lifting/pack_audit/adapters/` |
+| Baseline runner and stills | `scripts/lifting/run_pack_parity_baseline.py`, `scripts/lifting/render_pack_stills.py` |
+| `EngineAdapter.bar_hold_wrench`, `unavailable_bar_hold` | `src/shared/python/lifting/pack_audit/model.py` |
+| MuJoCo static-hold bar wrench | `src/shared/python/lifting/pack_audit/adapters/mujoco_bar_hold.py` |
+| Weld `efc_force` extraction (GCV-8) | `src/engines/physics_engines/mujoco/python/grip_efc.py` |
+| Grip couple reduction (GCV-7) | `src/shared/python/biomechanics/grip_wrench.py` |
+
+The geometry, frame and analysis functions are engine-independent numpy over
+plain data. The adapters load each pack and supply canonical body origins,
+masses, coordinates, contact force and closure.
+
+## Recorded Baseline
+
+The measured baseline, generated by the runner and not edited by hand, is
+`docs/development/lifting/PACK_PARITY_BASELINE.md`, with the receipt
+`docs/development/lifting/pack_parity_baseline.json`. It records the pack
+commits and engine versions used. Its main findings:
+
+- Segment, hand and foot parity is within the 0.02 m tolerance for every lift
+  (worst segment 0.0115 m, OpenSim against Drake at the flexion pose).
+- Bar-centre differences reach 0.24 m. They come from the packs' different
+  grip offsets, not from forward kinematics.
+- The lifter-only CoM differs by up to 0.079 m between MuJoCo and OpenSim at
+  the squat-bottom pose, which exceeds the position tolerance.
+- The right hand is not attached to the bar in the Drake and Pinocchio packs,
+  and the grip half-width does not match the achievable hand spacing in all
+  four packs.
+- No floor-pull start pose places the bar at the plate radius.
+
+## Static-Hold Bar Wrench
+
+Evidence class: derived, provisional (LIFT-4 #11744 scope 3, MuJoCo slice).
+The registry blocker `UP-D1-lift-bar-hold-wrench-inventory` stays open until
+the pathway is inventoried and reviewed.
+
+The question is what force each hand exerts on the bar when the lifter holds
+the pack's start pose still. It is answered for the MuJoCo pack only. The
+other packs report it unavailable until their slices land.
+
+### Method
+
+1. Rigid lifter. On a private copy of the model, every degree of freedom that
+   does not belong to a body whose name starts with `barbell` gets
+   `dof_armature` $= 10^{9}$. The lifter therefore cannot accelerate under the
+   bar load. Only the bar moves.
+2. No support but the hands. Every barbell geom gets `contype` and
+   `conaffinity` 0, so the floor, rack or bench never carries the load.
+3. Settled hold. From the pack's first keyframe (else `qpos0`) at zero
+   velocity, the model is stepped for $T_s = 1$ s, then `mj_forward` is
+   called. The pack welds use MuJoCo's default `solref` time constant of
+   0.02 s, so $T_s$ is 50 time constants. A single `mj_forward` from rest is
+   not used, because it reports only the impedance-scaled first-instant
+   constraint force, about 5 % short of the weight at the default `solimp`.
+4. Per-hand wrench. For each hand-to-bar weld $k \in \{L, R\}$ the equality
+   rows of `efc_force` are mapped to a world-frame wrench $(F_k, \tau_k)$ on
+   the bar at the bar-side anchor $p_k$, by the GCV-8 extraction
+   (`grip_efc.py`). The sign follows ADR-0052:
+   the wrench is the one exerted by the hand on the bar, so a held bar has
+   $F_{k,z} > 0$. The GCV-7 grip reduction (`grip_wrench.py`) then forms the
+   couple. No second wrench-transport routine is used.
+
+### Equations
+
+11. Bar weight, with $m_{bar}$ the summed mass of the `barbell` bodies:
+    $$W = m_{bar}\,\lVert g \rVert$$
+    $m_{bar} \le 0$ or $\lVert g \rVert \le 0$ raises `ValueError`.
+12. Static equilibrium residual:
+    $$\varepsilon_W = \frac{\left| F_{L,z} + F_{R,z} - W \right|}{W}$$
+13. Left-hand share of the vertical load:
+    $$s_L = \frac{F_{L,z}}{F_{L,z} + F_{R,z}}$$
+    It raises `ValueError` when $|F_{L,z} + F_{R,z}| < 10^{-9}$ N.
+14. Couple about the anchor midpoint $m = \tfrac{1}{2}(p_L + p_R)$:
+    $$C = \sum_k (p_k - m) \times F_k + \sum_k \tau_k$$
+    The anchor is the weld's bar-side site, else the bar body origin. With
+    body-to-body welds both anchors are the bar body origin, so $m$ is that
+    origin and $C = \tau_L + \tau_R$.
+15. Rest check. The bar's residual world-frame linear acceleration is
+    $$a_{bar} = \max_{b} \lVert a^{prop}_b + g \rVert$$
+    over the `barbell` bodies, where $a^{prop}_b$ is the proper acceleration
+    from `mj_rnePostConstraint` and `mj_objectAcceleration`. It is reported,
+    so the static-hold assumption is checked rather than assumed.
+
+### Acceptance and Measured Values
+
+| Quantity | Acceptance | Source |
+| --- | --- | --- |
+| $\varepsilon_W$ | $\le 0.01$ | #11744 acceptance |
+| $\lvert s_L - 0.5 \rvert$, symmetric grip | $\le 10^{-6}$ | test tolerance |
+| $a_{bar}$ | $< 10^{-3}$ m/s² | test tolerance |
+
+Measured on MuJoCo_Models `284b9b2` with the 120 kg reference bar (desk-lead,
+PR #12189): for the deadlift, bench press, snatch and clean and jerk,
+$\varepsilon_W \le 3.3 \times 10^{-7}$, $\lvert s_L - 0.5 \rvert \le
+3 \times 10^{-16}$ and $a_{bar} \le 3.3 \times 10^{-6}$ m/s². The back
+squat is unavailable, because its bar is welded to the torso.
+
+### Unavailable Cases
+
+Each case returns `available: false`, a reason, and `None` in every numeric
+field, never zero:
+
+- No hand-to-bar weld for one or both hands. The reason names the bodies the
+  bar is attached to instead, for example the torso in the back squat.
+- No `barbell` body has a joint. The bar is then fixed to the world, its
+  weight never enters the dynamics and no weld reaction can carry it.
+- The weld reaction for a hand cannot be extracted, for example an inactive
+  weld or a rank-deficient weld Jacobian.
+- The engine adapter has no implementation. This is the base-class default
+  and applies to OpenSim, Drake and Pinocchio for now.
+
+### Limitations
+
+- Two welds on one rigid bar make the hold statically indeterminate. Only
+  the total vertical force is fixed by equilibrium. The left/right split, the
+  horizontal forces and the free torques come from MuJoCo's soft-constraint
+  regularization, which gives equal impedance to both welds. They are not a
+  prediction of how a lifter shares the load. $s_L = 0.5$ for a symmetric
+  grip confirms symmetry of the model, not physiology.
+- The lifter is held rigid by armature, so no joint moment, muscle force or
+  spine load follows from this result. The hold is the start pose only, not
+  a lift trajectory.
+- The weld reaction includes no grip compliance, friction or slip.
+- No force-instrumented bar data exist. The values are software results,
+  validated only against the bar's own weight.
+
+## Tests and Reproduction
+
+```bash
+python3 -m pytest tests/unit/lifting/pack_audit/test_pack_audit_geometry.py \
+  tests/unit/lifting/pack_audit/test_pack_audit_frames_names.py \
+  tests/unit/lifting/pack_audit/test_pack_audit_report.py \
+  tests/unit/lifting/pack_audit/test_bar_hold_wrench.py -q
+```
+
+These tests check the bar frame, hand-bar metrics and pose summary on
+constructed positions, and the frame rotations and name mappings. The report
+tests check the committed receipt: every lift and engine is covered, FK parity
+holds except for the bar, every derived gap maps to an issue in a known
+repository, and the committed Markdown matches the receipt. They need no
+engine.
+`test_pack_audit_live.py` runs the adapters against checked-out packs and
+skips when the packs or engines are absent.
+`test_bar_hold_wrench.py` checks the static-hold bar wrench on a two-hand
+MuJoCo fixture (weight balance, even split, bar at rest, upward hand force),
+the torso-weld and world-fixed-bar cases (unavailable, every numeric field
+`None`), and the four hand-held lifts of the MuJoCo pack. The fixture and pack
+cases need MuJoCo, and the pack cases also need a MuJoCo pack checkout (for
+example under `LIFT_PACK_ROOT`); they skip otherwise. Regenerate the baseline with
+`python3 scripts/lifting/run_pack_parity_baseline.py`, with the four pack
+checkouts found under `LIFT_PACK_ROOT`.
+
+## Assumptions and Limitations
+
+- The audit compares body-frame origins. It does not compare geometry
+  surfaces, inertia tensors beyond the inertia gap class, or dynamics.
+- Bar and bench links are assumed to have zero mass-centre offset, which holds
+  for every pack at the recorded commits. The lifter-only CoM is wrong if a
+  pack changes that.
+- MuJoCo phase values may be absolute positions or reference-relative angles.
+  The audit reads them as canonical angles, so MuJoCo phase out-of-range flags
+  depend on that reading and are not used as gaps.
+- OpenSim start-pose values are after model assembly, which moves coordinates
+  off their defaults.
+- OpenSim, Drake and Pinocchio stills are skeleton plots of each engine's own
+  FK, not native renders.
+- No Simscape or MATLAB lift models exist, and nothing was substituted for
+  them.
+- No lift motion-capture or force-plate data exist. The baseline records
+  software parity between packs, not physical validity of any lift, and no
+  uncertainty against measured lifts is claimed.

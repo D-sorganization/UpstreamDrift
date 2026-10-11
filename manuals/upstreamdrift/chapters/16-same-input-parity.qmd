@@ -1,0 +1,156 @@
+# Same-Input Cross-Engine Dynamics Parity
+
+## Status
+
+Evidence class: software consistency, provisional. This chapter records the
+same-input parity pathway of epic #11605 (children P-1 to P-8), so it can be
+inventoried. It is not approved. The registry blocker
+`UP-D1-same-input-parity-inventory` stays open until UP-D1 inventories the
+pathway and a human reviews it. The calculation-level reference, with every
+table and receipt hash, is the editable research source
+`docs/research/same_input_parity/same_input_parity.tex` (P-9, #11614). It is
+separate from this manual.
+
+## Purpose
+
+One full-body specification, driven by the same initial state and the same
+joint torques, must produce the same motion in MuJoCo, Drake, Pinocchio,
+OpenSim, MyoSuite and Simscape. Agreement shows that the spec-built models are
+dynamically identical and that remaining differences come from documented
+numerical policy. It says nothing about whether the model matches a human
+golfer.
+
+## Conventions
+
+- One specification JSON builds every engine adapter: 44 generalized
+  coordinates in spec order, SI units (m, rad, s, N·m).
+- The root is a floating base (`TranslationInputX/Y/Z`, `HipInputX/Y/Z`). It is
+  unactuated, and root efforts are set to zero.
+- The hands are welded to the club by a dual-grip closure. Ground contact uses
+  one shared Hunt–Crossley law with common parameters.
+- MuJoCo is the reference engine for the trajectory levels.
+
+## Equations
+
+1. Constrained dynamics. With mass matrix $M(q)$, bias
+   $h = C(q,v)\,v + g(q)$, efforts $\tau$ and weld rate map $D(q)$ ($D v$ is the
+   weld rate residual), the accelerations $a$ and constraint forces $\lambda$
+   solve the KKT system
+   $$\begin{bmatrix} M & D^{\top} \\ D & 0 \end{bmatrix}
+     \begin{bmatrix} a \\ \lambda \end{bmatrix}
+     = \begin{bmatrix} \tau - h \\ -\dot{D}\,v \end{bmatrix}$$
+   Drake and Pinocchio solve it exactly. MuJoCo adds a $10^{-6}$ Tikhonov term
+   by default (`kkt_regularization`); parity runs set it to $0$.
+2. Closure projection. Each engine linearises a violated weld in its own frame,
+   so raw recorded states are formulation dependent. The convention-free
+   correction is the closest point $q^{*}$ on the closure manifold:
+   $$q^{*} - q_0 \in \operatorname{row}\!\left(D(q^{*})\right), \qquad
+     r(q^{*}) = 0, \qquad v^{*} = v - D^{+} D\, v$$
+   It is solved as a fixed point with an inner Newton search (central-difference
+   residual Jacobian, step $10^{-7}$). The search stops at
+   $\max|r| \le 10^{-13}$, with a cap of 25 iterations, and otherwise raises
+   `ArithmeticError`.
+3. Integration. Classical RK4 with efforts held zero-order over each step, a
+   1 ms step with 8 substeps (effective 0.125 ms) and closure projection after
+   every step. A single 1 ms step would amplify the stiff contact modes near
+   $-9.9 \times 10^{3}\,\mathrm{s}^{-1}$ by $|R| \approx 274$; 8 substeps bring
+   them inside the RK4 stability region.
+4. Pointwise gate (L1): $|\Delta a| \le 10^{-6} + 10^{-8} \max|a|$.
+
+## Input Bundle
+
+Schema `same-input-bundle/v1` is exported by the MuJoCo reference and replayed
+by every other engine. It holds the spec hash, the closure-consistent
+$q_0, v_0$, the per-step efforts $\tau_k$, the contact parameters, the marker
+attachments and the integration policy above.
+
+## Acceptance Levels
+
+These numbers are initial. They must not be loosened without a
+`Tolerance-Change-Evidence` issue.
+
+| Level | Criterion | Result |
+| --- | --- | --- |
+| L0, model identity | masses, inertias, frames, $M(q)$ and bias agree to $\le 10^{-9}$ relative | passed |
+| L1, pointwise dynamics | constrained accelerations at projected states meet the gate above | passed for MuJoCo, Drake and Pinocchio |
+| L2, open-loop trajectory | coordinate error $\le 10^{-6}$ rad and marker error $\le 1$ mm against MuJoCo, or the growth exponent and agreement horizon recorded | passed in 50 ms segments; full horizon recorded |
+| L3, closed-loop same controller | the identical tracking controller reproduces the MuJoCo match to $\le 1$ mm | passed for Drake, Pinocchio, OpenSim and MyoSuite |
+
+## Measured Results
+
+Software-consistency results, generated 2026-10-06 on host `brick`. The
+receipt hashes and per-frame tables are in the LaTeX reference.
+
+- L0: total mass identical (79.358 kg); $M(q)$ agrees to $9 \times 10^{-13}$
+  and the bias to $8 \times 10^{-10}$ N·m.
+- L1: all 31 sampled frames pass. The worst projected acceleration difference is
+  $1.4 \times 10^{-4}$ rad/s² at a contact spike where $\max|a| \approx 1.3
+  \times 10^{5}$ (relative $1.1 \times 10^{-9}$, inside the
+  $\epsilon\,\operatorname{cond}(M) \approx 1.4 \times 10^{-7}$ round-off bound).
+  At the raw states the difference reaches 41.8 rad/s², which is what the
+  projection removes.
+- L2 and L3, driver and 7-iron: the worst coordinate error against MuJoCo is
+  $\le 1.1 \times 10^{-9}$ rad for Drake and Pinocchio and $\le 7.4 \times
+  10^{-12}$ rad for OpenSim. MyoSuite is bit-identical, because it wraps the
+  MuJoCo core.
+- A single full-horizon open-loop run grows perturbations at 39–41 s⁻¹, so any
+  engine pair leaves $10^{-6}$ rad after about 0.5–0.6 s. This is a property
+  of the unstable open-loop swing, not an engine disagreement.
+- Simscape (P-8, #11613) is pending on the MATLAB R2025b host.
+
+## Failed Experiments
+
+- Raw-state comparison with MuJoCo's default regularisation gave differences up
+  to 0.62 rad/s². Removing the regularisation alone was not enough; the closure
+  violation had to be projected out.
+- Projecting along $D(q_0)$ at the violated state left a $6 \times 10^{-8}$
+  state spread between engines. The closest-point version evaluates $D$ on the
+  manifold and reduces it to $3 \times 10^{-14}$.
+- MJCF `fullinertia` is eigen-decomposed by MuJoCo to only about
+  $1.1 \times 10^{-6}$ relative, which produced $3.3 \times 10^{-5}$ rad iron
+  errors. The native exporter now emits `diaginertia` and `quat` from numpy
+  `eigh`, with a determinant correction that keeps the frame right-handed.
+
+## Implementation
+
+| Symbol | Location |
+| --- | --- |
+| `VectorPlant`, `PARITY_ENGINES`, `OPTIONAL_ENGINES` | `src/shared/python/motion_matching/same_input/plant.py` |
+| `project_to_closure`, `ClosureProjection` | `src/shared/python/motion_matching/same_input/closure.py` |
+| `zoh_rk4_step`, `integrate`, `open_loop`, `StepPolicy`, `ROOT_COORDINATES` | `src/shared/python/motion_matching/same_input/integrator.py` |
+| `InputBundle`, `SCHEMA` | `src/shared/python/motion_matching/same_input/bundle.py` |
+| `generate_reference_bundle`, `closed_loop` | `src/shared/python/motion_matching/same_input/reference.py` |
+| `score_replay`, `segmented_replay`, `growth_rate` | `src/shared/python/motion_matching/same_input/scoring.py` |
+| Pointwise receipt (L1) | `docs/development/full_body_models/evidence/same_input/pointwise_parity_receipt.json` |
+| Bundle export, replay and closed-loop CLI | `scripts/same_input_bundle.py` |
+
+## Tests and Reproduction
+
+```bash
+python3 -m pytest tests/unit/motion_matching/same_input -m "" -q
+MUJOCO_GL=egl PYTHONPATH=.:src python3 -m scripts.same_input_pointwise_parity
+```
+
+The first command runs the behavioural tests; engine rows skip where an engine
+is not installed. The second rewrites the L1 receipt. The full-swing bundles
+and their 16 receipts are reproduced with `scripts/same_input_bundle.py`
+(`export`, `replay`, `closed-loop`), as listed in the LaTeX reference.
+
+## Assumptions and Limitations
+
+- Two bundles were compared (one driver, one 7-iron), each from one
+  anthropometric spec.
+- The compared states are projected onto the grip closure, not the raw
+  recorded states.
+- The zero-order-hold reference tracks the capture more loosely than the
+  canonical pipeline (joint RMS 0.017 versus 0.004 rad). It is a dynamics-parity
+  input, not a capture-matching result.
+- Contact spikes are ill conditioned ($\operatorname{cond}(M) \approx 6 \times
+  10^{8}$), so the relative tolerance is bounded by round-off, not by physics.
+- The OpenSim adapter works around two exporter defects (an escaped invalid XML
+  element name and a marker set that references a nonexistent `Hub` body).
+- The full-swing receipts live outside the repository; only their hashes are
+  recorded.
+- This is a software-consistency result. It is not scientific qualification
+  against capture data, and no uncertainty against an external reference is
+  claimed.

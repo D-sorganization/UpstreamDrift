@@ -52,7 +52,15 @@ from src.shared.python.motion_matching.loaders.excel import load_club_target_exc
 pytestmark = pytest.mark.unit
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-CLUB_DATA = REPO_ROOT / "data" / "Club_Data.xlsx"
+try:
+    from src.motion_capture.capture_registry import (
+        CaptureRegistryError,
+        resolve_capture,
+    )
+
+    CLUB_DATA = resolve_capture("club-workbook-main")
+except CaptureRegistryError:
+    CLUB_DATA = REPO_ROOT / "data" / "Club_Data.xlsx"
 EVIDENCE = (
     REPO_ROOT
     / "docs"
@@ -281,7 +289,10 @@ def test_legacy_excel_load_behavior_unchanged() -> None:
         time_alignment="impact",
         impact_target_t_s=0.05,
     )
-    target = load_club_target_excel(CLUB_DATA, "TW_ProV1", opts)
+    from src.motion_capture.capture_registry import require_capture
+
+    club_data = require_capture("club-workbook-main")
+    target = load_club_target_excel(club_data, "TW_ProV1", opts)
     assert isinstance(target, ClubTarget)
     assert target.time[0] == pytest.approx(0.0)
     assert target.butt.shape[1] == 3

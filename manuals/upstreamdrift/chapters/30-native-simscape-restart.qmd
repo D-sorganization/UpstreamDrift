@@ -1,0 +1,85 @@
+# Native Simscape Operating-Point Restart
+
+## Scope and Authority
+
+Issue #11921 establishes an R2025b native restart prerequisite. It does not
+qualify a production golf model, a fitted capture, muscle recruitment or
+six-engine parity. The generated fixture combines a physical mass, spring,
+damper, ideal force source and position sensor with a discrete Unit Delay.
+Required production model/variant rows remain visible and unqualified.
+
+Tools #5470 owns the separately versioned opaque native artifact/envelope
+contract. This native fixture currently tests MATLAB semantics independently;
+it does not yet consume a published exact Tools1.1 dependency. Existing numeric
+T01 state vectors cannot replace hidden Simscape state.
+
+## Physical Model and Numerical Method
+
+The scalar physical network uses mass 1 kg, spring stiffness 40 N/m and damping
+2 N*s/m, satisfying $m \ddot{x}+c \dot{x}+k x=f(t)$. Inputs use physical seconds and
+force units N. The MATLAB constructor owns model creation and explicit native
+solver settings. Review effective settings, converter behavior, input
+interpolation and block reduction before admitting a replay policy. No fitted
+reserve, feedback or observation-based correction drives the fixture.
+
+Compare uninterrupted native integration to a split run saved at 0.2 s and
+continued to 0.4 s after MAT serialization and restoration. The native
+`Simulink.op.ModelOperatingPoint` is the restart authority, including hidden
+physical, block, solver and execution state. The saved native clock is retained;
+never retime an operating point to zero or restore only its logged numeric view.
+Restore once at the beginning of the requested replay interval; no resets are
+permitted within that interval.
+
+## Identity, Ownership and Failure Contracts
+
+Bind actual R2025b runtime, expected native class, source/loaded model identity,
+snapshot time, effective solver/configuration and exact saved input rows. Native
+compatibility and decoded values must agree with the declaration. A MAT-file
+hash identifies serialized bytes; it does not prove canonical semantic-state
+encoding or a complete dependency closure. Shared contracts verify owned bytes
+before decoding; native consumers must execute those verified bytes without
+reopening a mutable caller path.
+
+Reject missing/tampered artifacts, wrong class/model/runtime/clock, changed
+solver policy, numeric-observable substitution and input-order/identity changes.
+Transport equality is separate from executed input readback. Log the actual
+injection boundary and declare whether it is a physical force, actuator command
+or excitation. Preserve interpolation, limits, converter/filter policy and
+relative-to-native clock translation. Large epoch rounding must not distort
+physical intervals or an explicitly declared solver step.
+
+## Evidence and Acceptance Limits
+
+Native R2025b feature and physical-library probes succeeded on the owned fleet
+worker. The first fixture test failed before its implementation existed. A
+nontrivial-motion negative was also observed before correction. The final actual R2025b Update 5 native batch exits successfully: decoded
+snapshot and resumed clock are both 0.2 s; physical position error is 0 m over
+366 post-split samples, discrete error is 0 over 21 samples, and executed
+converter-boundary input error is 0 N. Interpolation is explicitly ZOH with
+hold-after-final behavior, converter units are N with zero derivative/filtering
+policy, and block reduction is off. Missing, wrong model/time/runtime/blob/class
+snapshot negatives pass. Retain source-bound native receipts and failed attempts. Successful
+synthetic restart is a prerequisite and does not certify the production adapter.
+
+Production acceptance requires complete native snapshots for every declared
+model/variant, actual applied torque/excitation readback, independent full-horizon
+replay, refinement checks, source/parameter readiness and the frozen private
+capture protocol. World/anatomical registration, contact support and muscle
+state remain separate scientific gates. All-model parity stays open.
+
+## Reproduction and Turnover
+
+Use explicit `C:/Program Files/MATLAB/R2025b/bin/matlab.exe` on the fleet worker
+and run `test_native_simscape_restart` with an owned writable output directory.
+Keep native MAT/SLX files in bounded run directories, receipt hashes in the
+turnover, and preview videos in the requested Desktop preview folder. Reuse
+existing runtime/checkouts; do not mutate another worker's environment or remove
+borrowed Git object stores while retiring merged worktrees.
+
+## Primary References
+
+[MathWorks R2025b ModelOperatingPoint](https://www.mathworks.com/help/releases/R2025b/simulink/slref/simulink.op.modeloperatingpoint.html)
+defines native state and the read-only snapshot clock; its logged-state view
+excludes internal Simscape state.
+[MathWorks R2025b Operating-Point Workflow](https://www.mathworks.com/help/releases/R2025b/simulink/ug/model-operating-point-for-faster-simulation.html)
+documents compatibility, block reduction and effective solver configuration.

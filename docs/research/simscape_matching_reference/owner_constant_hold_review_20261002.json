@@ -1,0 +1,42 @@
+{
+  "qualification": "REJECTED_1S_CONSTANT_REFERENCE_HYBRID_PD_HOLD_NOT_OPEN_LOOP",
+  "capture_alias": "capture-O",
+  "matlab_release": "2025b",
+  "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+  "native_receipt": {
+    "actual_process_exit_code": 0,
+    "final_exit_code": 0,
+    "termination_reason": "natural_exit",
+    "done_marker": true,
+    "script_status": "success",
+    "command_identity": "run('capture_O_bilateral_hold_1s.m')",
+    "owned_pids": [74176],
+    "timestamp": "2026-10-02T15:23:43.202802+00:00"
+  },
+  "simulation_executed": true,
+  "stop_time_s": 1,
+  "model_saved": false,
+  "hold_screen_passed": false,
+  "prospective_hold_gates": {
+    "both_feet_settled_minimum_005BW": true,
+    "settled_total_080_to_120BW": true,
+    "whole_run_peak_at_most_200BW": true,
+    "pelvis_displacement_at_most_5mm": false,
+    "pelvis_rotation_change_at_most_1deg": false
+  },
+  "gravity_vector_m_s2": [0, 0, -9.80665],
+  "bodyweight_N": 1026.6868592219398,
+  "total_mass_kg": 104.69292359999999,
+  "settled_window_s": [0.5, 1],
+  "normal_force_final_left_N": 531.6588902509711,
+  "normal_force_final_right_N": 499.52033009095635,
+  "pelvis_max_displacement_mm": 118.10926139238208,
+  "pelvis_max_rotation_change_deg": 7.86554412331582,
+  "upper_body_tracking": true,
+  "balance_on": false,
+  "zero_upper_feedforward": true,
+  "neck_prescribed": true,
+  "independent_open_loop": false,
+  "executed_probe_sha256": "ee958896cc7282e6ba6ab887b6d9f501631a571df7178a371b4f03e6c4027632",
+  "conclusion": "Force support gates pass; pelvis drift and rotation gates fail. Causal diagnosis remains open."
+}

@@ -7,13 +7,16 @@ from dataclasses import dataclass
 from types import TracebackType
 from typing import TypeAlias
 
+import math
+
 import cv2
 import numpy as np
 import numpy.typing as npt
 
 from src.motion_capture.coaching import DrawingLayer, ReferenceGeometry
 from src.motion_capture.reconstruct.cameras import PinholeCamera
-from src.motion_capture.reference.comparison import ComparisonLayer
+from src.motion_capture.reference.comparison import ComparisonLayer, ForceLayer
+from src.motion_capture.reference.force_alignment import force_frame_for_video
 from src.motion_capture.reference.model import Asset, ReferenceMotion, ReferenceVideo
 from src.motion_capture.reference.registration import (
     ReferenceRegistration,
@@ -21,6 +24,17 @@ from src.motion_capture.reference.registration import (
     project_reference_to_camera,
 )
 from src.motion_capture.rig.edits import CropRect
+from src.shared.python.force_overlay.glyphs import (
+    ForceGlyphStyle,
+    build_glyphs,
+    scale_for_view,
+)
+from src.shared.python.force_overlay.renderers.opencv_glyphs import (
+    PinholeProjector,
+    VideoGlyphReceipt,
+    VideoGlyphStyle,
+    draw_glyphs_on_frame,
+)
 from src.shared.python.pose_estimation.observations import CameraCalibration
 
 from .clips import ClipRendering, _rendered
@@ -46,6 +60,7 @@ class ComparisonRenderContext:
     drawings: DrawingLayer | None = None
     geometry: ReferenceGeometry | None = None
     scene_id: str | None = None
+    force_layer: ForceLayer | None = None
 
     def __post_init__(self) -> None:
         if self.geometry is not None and self.geometry.scene_id != self.scene_id:
@@ -62,8 +77,20 @@ def _motion_image(
     projected, visibility = project_reference_to_camera(world, mask, camera)
     club_edges = set(ctx.asset.club_edges)
     body_edges = tuple(edge for edge in ctx.asset.edges if edge not in club_edges)
+    loads = None
+    if ctx.force_layer is not None and ctx.force_layer.series is not None:
+        try:
+            ft_frame = force_frame_for_video(
+                ctx.force_layer.series,
+                video_time_s=time,
+                registration=ctx.registration,
+            )
+            if ft_frame is not None:
+                loads = ft_frame.axial_loads
+        except (KeyError, ValueError, AttributeError, RuntimeError):
+            loads = None
     drawn = draw_segment_volumes(
-        frame, world[0], mask[0], body_edges, camera, layer
+        frame, world[0], mask[0], body_edges, camera, layer, loads=loads
     ).copy()
     points, visible = projected[0], visibility[0]
     if not layer.draw_club:
@@ -130,12 +157,68 @@ def _image_matrix(
     return matrix
 
 
+def _render_force_layer(
+    frame: Image,
+    force_layer: ForceLayer,
+    time: float,
+    ctx: ComparisonRenderContext,
+    camera: Camera,
+) -> tuple[Image, VideoGlyphReceipt | None]:
+    if not force_layer.visible or force_layer.opacity <= 0 or camera is None:
+        return frame, None
+    if force_layer.series is None:
+        return frame, None
+    ft_frame = force_frame_for_video(
+        force_layer.series,
+        video_time_s=time,
+        registration=ctx.registration,
+    )
+    if ft_frame is None:
+        return frame, None
+
+    style = (
+        force_layer.style
+        if isinstance(force_layer.style, ForceGlyphStyle)
+        else ForceGlyphStyle()
+    )
+    glyphs = build_glyphs(ft_frame, style)
+    scale = float(getattr(ctx.layer, "force_scale", 1.0))
+    if scale != 1.0 and math.isfinite(scale) and scale > 0:
+        glyphs = scale_for_view(glyphs, scale)
+
+    projector = PinholeProjector(camera, world_frame=ft_frame.world_frame)
+    legend_box = bool(getattr(ctx.layer, "draw_legend", True))
+    vstyle = VideoGlyphStyle(legend_box=legend_box)
+    qualification = ft_frame.metadata.get(
+        "provenance", "capture-model inverse dynamics (point-mass model)"
+    )
+    drawn = frame.copy()
+    receipt = draw_glyphs_on_frame(
+        drawn,
+        glyphs,
+        projector,
+        style=vstyle,
+        world_frame=ft_frame.world_frame,
+        inplace=True,
+        qualification=qualification,
+    )
+    blended = np.asarray(
+        cv2.addWeighted(
+            drawn, force_layer.opacity, frame, 1.0 - force_layer.opacity, 0
+        ),
+        dtype=np.uint8,
+    )
+    return blended, receipt
+
+
 class ComparisonRenderer:
     """Own one expert decoder; release it on asset changes or dialog/export close."""
 
     def __init__(self, asset: Asset) -> None:
         self.asset = asset
         self.reader: VideoReader | None = None
+        self.receipts: list[VideoGlyphReceipt] = []
+        self.last_receipt: VideoGlyphReceipt | None = None
 
     def _video_frame(self, asset: ReferenceVideo, index: int) -> Image:
         if self.reader is None:
@@ -161,26 +244,40 @@ class ComparisonRenderer:
             raise ValueError("Renderer belongs to a different reference asset")
         if ctx.geometry is not None:
             frame = render_geometry(frame, ctx.geometry, camera, time)
-        if not ctx.layer.visible or ctx.layer.opacity <= 0:
-            return frame
-        asset = self.asset
-        if isinstance(asset, ReferenceMotion):
-            return _motion_image(frame, ctx, camera, time)
-        time_mapping = ctx.registration.time_mapping
-        reference_time = time_mapping.scene_to_reference(time)
-        if reference_time < 0 or reference_time >= asset.frames / asset.fps:
-            return frame
-        index = min(round(reference_time * asset.fps), asset.frames - 1)
-        image = self._video_frame(asset, index)
-        matrix = _image_matrix(asset, frame, ctx.registration)
-        size = (frame.shape[1], frame.shape[0])
-        # Warp both premultiplied colour and coverage. Valid black expert pixels
-        # remain visible; uncovered player pixels are never darkened by borders.
-        warped = cv2.warpPerspective(image.astype(np.float32), matrix, size)
-        mask = cv2.warpPerspective(np.ones(image.shape[:2], np.float32), matrix, size)
-        alpha = ctx.layer.opacity
-        mixed = warped * alpha + frame * (1 - mask[:, :, None] * alpha)
-        return np.asarray(np.clip(np.rint(mixed), 0, 255), dtype=np.uint8)
+
+        force_layer = (
+            ctx.force_layer
+            if ctx.force_layer is not None
+            else (ctx.layer if isinstance(ctx.layer, ForceLayer) else None)
+        )
+
+        if ctx.layer.visible and ctx.layer.opacity > 0:
+            asset = self.asset
+            if isinstance(asset, ReferenceMotion):
+                frame = _motion_image(frame, ctx, camera, time)
+            else:
+                time_mapping = ctx.registration.time_mapping
+                reference_time = time_mapping.scene_to_reference(time)
+                if 0 <= reference_time < asset.frames / asset.fps:
+                    index = min(round(reference_time * asset.fps), asset.frames - 1)
+                    image = self._video_frame(asset, index)
+                    matrix = _image_matrix(asset, frame, ctx.registration)
+                    size = (frame.shape[1], frame.shape[0])
+                    warped = cv2.warpPerspective(image.astype(np.float32), matrix, size)
+                    mask = cv2.warpPerspective(
+                        np.ones(image.shape[:2], np.float32), matrix, size
+                    )
+                    alpha = ctx.layer.opacity
+                    mixed = warped * alpha + frame * (1 - mask[:, :, None] * alpha)
+                    frame = np.asarray(np.clip(np.rint(mixed), 0, 255), dtype=np.uint8)
+
+        if force_layer is not None:
+            frame, receipt = _render_force_layer(frame, force_layer, time, ctx, camera)
+            if receipt is not None:
+                self.last_receipt = receipt
+                self.receipts.append(receipt)
+
+        return frame
 
     def rendering(
         self,
@@ -192,6 +289,8 @@ class ComparisonRenderer:
         progress: Callable[[int, int], None] = lambda done, total: None,
     ) -> ClipRendering:
         """Return the same pose/drawing/reference/crop/clock recipe for both paths."""
+        self.receipts.clear()
+        self.last_receipt = None
         registration = ctx.registration
 
         def overlay(frame: Image, index: int) -> Image:

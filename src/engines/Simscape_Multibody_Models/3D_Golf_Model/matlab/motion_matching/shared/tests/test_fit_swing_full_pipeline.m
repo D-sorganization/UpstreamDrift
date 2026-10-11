@@ -207,16 +207,12 @@ end
 
 %% =====================================================================
 function xlsx = locate_xlsx_or_skip(testCase)
-    here = fileparts(mfilename("fullpath"));
-    candidate = fullfile(here, ...
-        "..", "..", "..", "src", "apps", "golf_gui", ...
-        "Motion Capture Plotter", "Wiffle_ProV1_club_3D_data.xlsx");
-    if exist(candidate, "file") ~= 2
+    try
+        xlsx = string(resolve_capture("club-workbook-wiffle"));
+    catch exc
         testCase.assumeFail( ...
-            "skipped — Wiffle_ProV1_club_3D_data.xlsx not present at " + ...
-            string(candidate));
+            "skipped — club-workbook-wiffle not available: " + string(exc.message));
     end
-    xlsx = string(candidate);
 end
 
 

@@ -4,7 +4,7 @@ This test guards against the regression that motivated issue #4191:
 the original ``opensim_golf/fk.py`` looked for body names ``hand_left`` /
 ``hand_right`` that **do not exist** in the canonical
 ``golf_humanoid.osim``. The shipped model exposes the grip and clubhead
-as ``PhysicalOffsetFrame`` objects on the ``hand_r_to_club`` weld joint
+as ``PhysicalOffsetFrame`` components of the hand and club bodies (OSV-9)
 (``hand_r_grip_offset`` and ``club_head_offset``).
 
 The canonical FK module under test is
@@ -79,8 +79,8 @@ def test_fk_module_exposes_canonical_frame_constants() -> None:
 
     assert fk.GRIP_FRAME_NAME == "hand_r_grip_offset"
     assert fk.CLUBHEAD_FRAME_NAME == "club_head_offset"
-    assert fk.GRIP_FRAME_PATH == "/jointset/hand_r_to_club/hand_r_grip_offset"
-    assert fk.CLUBHEAD_FRAME_PATH == "/jointset/hand_r_to_club/club_head_offset"
+    assert fk.GRIP_FRAME_PATH == "/bodyset/hand_r/hand_r_grip_offset"
+    assert fk.CLUBHEAD_FRAME_PATH == "/bodyset/Club/club_head_offset"
     # Catalogue keys are the cross-engine SimOut landmark names.
     assert set(fk.CANONICAL_LANDMARKS) == {"grip", "clubhead"}
     assert fk.CANONICAL_LANDMARKS["grip"] == fk.GRIP_FRAME_PATH
@@ -133,6 +133,49 @@ def test_canonical_extractors_reject_none_inputs() -> None:
             func(None, object())
         with pytest.raises(ValueError, match="state and model"):
             func(object(), None)
+
+
+class _FakeState:
+    """Mirrors the OpenSim 4.6 ``State`` binding: no ``isValid`` (issue #11796)."""
+
+    def __init__(self, n_subsystems: int) -> None:
+        self._n_subsystems = n_subsystems
+
+    def getNumSubsystems(self) -> int:  # noqa: N802 - OpenSim binding name
+        return self._n_subsystems
+
+
+class _FakeModel:
+    def __init__(self) -> None:
+        self.realized: list[object] = []
+
+    def realizePosition(self, state: object) -> None:  # noqa: N802 - OpenSim name
+        self.realized.append(state)
+
+
+@pytest.mark.unit
+def test_position_realisation_works_without_state_isvalid() -> None:
+    """A state from ``initSystem()`` is realised; the binding has no ``isValid``."""
+    from src.engines.physics_engines.opensim.python.opensim_golf.fk import (
+        _ensure_position_realised,
+    )
+
+    model, state = _FakeModel(), _FakeState(n_subsystems=3)
+    _ensure_position_realised(model, state)
+    assert model.realized == [state]
+
+
+@pytest.mark.unit
+def test_position_realisation_rejects_uninitialised_state() -> None:
+    """A state with no subsystems never came from ``initSystem()``."""
+    from src.engines.physics_engines.opensim.python.opensim_golf.fk import (
+        _ensure_position_realised,
+    )
+
+    model = _FakeModel()
+    with pytest.raises(RuntimeError, match="initSystem"):
+        _ensure_position_realised(model, _FakeState(n_subsystems=0))
+    assert model.realized == []
 
 
 # ---------------------------------------------------------------------------

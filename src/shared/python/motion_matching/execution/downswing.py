@@ -32,12 +32,12 @@ from src.shared.python.motion_matching import (
 )
 from src.shared.python.motion_matching.pipeline import (
     BALANCE,
-    CAPTURES,
     DT_S,
     OMEGA_RAD_S,
-    RATE_HZ,
     Lane,
+    capture_path,
     marker_errors,
+    rate_from_times,
     segment_rms,
 )
 
@@ -133,7 +133,7 @@ def _load_downswing_run(
     document = json.loads(spec_bytes.decode("utf-8"))
     ik = np.load(run / "ik_trajectory.npz")
     labels = tuple(receipt["labels"])
-    lane = Lane(labels, CAPTURES[receipt["capture"]])
+    lane = Lane(labels, capture_path(receipt["capture"]))
     adapter = NativeMujocoFullBodyModel(spec_bytes)
     attachments = {
         label: (a["body"], a["offset_m"])
@@ -310,6 +310,7 @@ def _compute_downswing_metrics(
         ctx.args, duration, reference, ctx.q_ref, a_ref, m
     )
 
+    rate_hz = rate_from_times(ctx.times)
     out: dict[str, Any] = {
         "run": ctx.run.name,
         "name": ctx.args.name,
@@ -317,15 +318,15 @@ def _compute_downswing_metrics(
         "reference": ref_metrics,
         "elapsed_s": round(elapsed, 1),
         "root_error_timeline_m": {
-            f"{t:.2f}": float(root_err[int(round(t * RATE_HZ))])
+            f"{t:.2f}": float(root_err[int(round(t * rate_hz))])
             for t in (0.0, 0.5, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.75)
-            if t <= duration
+            if t <= duration and int(round(t * rate_hz)) < len(root_err)
         },
         "root_error_max_m": float(root_err.max()),
         "root_tilt_timeline_deg": {
-            f"{t:.2f}": float(root_tilt[int(round(t * RATE_HZ))])
+            f"{t:.2f}": float(root_tilt[int(round(t * rate_hz))])
             for t in (0.5, 1.0, 1.2, 1.3, 1.4, 1.5, 1.75)
-            if t <= duration
+            if t <= duration and int(round(t * rate_hz)) < len(root_tilt)
         },
         "joint_tracking_rms_deg": float(
             np.degrees(np.sqrt(np.mean((sim_q[:, 6:] - ctx.q_ref[keep, 6:]) ** 2)))
@@ -404,7 +405,7 @@ def run_downswing_experiment(args: argparse.Namespace) -> dict[str, Any]:
         controller,
         duration_s=duration,
         dt_s=args.dt,
-        record_every=int(round(1.0 / (RATE_HZ * args.dt))),
+        record_every=int(round(1.0 / (rate_from_times(times) * args.dt))),
     )
     elapsed = time.perf_counter() - t0
 

@@ -1,0 +1,14 @@
+{
+  "schema_version": "character-preset-v1",
+  "id": "junior",
+  "name": "Junior",
+  "description": "Nominal adolescent golfer, 7-iron.",
+  "category": "age",
+  "parameters": {
+    "stature_m": 1.52,
+    "mass_kg": 45.0,
+    "club": "iron7"
+  },
+  "provenance": "Nominal adolescent values chosen for the builder.",
+  "limitations": "Nominal values, not measured data; review before scientific use. Adult De Leva proportions are scaled; growth-related proportion changes are not modelled."
+}

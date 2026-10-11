@@ -22,6 +22,7 @@ Design by Contract
 from __future__ import annotations
 
 import logging
+from typing import Any
 
 import numpy as np
 from PyQt6.QtCore import QPoint, QPointF, QRect, Qt
@@ -280,7 +281,9 @@ class PendulumWidget(BasePendulumWidget):
         """
         assert self._result is not None
         pos = self._result.positions_at(self._current_idx)
-        shoulder = self._world_to_pixel(*pos.get("shoulder", pos["hub"]))
+        shoulder = self._world_to_pixel(
+            *(pos.get("shoulder") or pos.get("hub", (0.0, 0.0)))
+        )
         tip = self._world_to_pixel(*pos["tip"])
 
         loads = (
@@ -415,30 +418,17 @@ class PendulumWidget(BasePendulumWidget):
         if not forces:
             return
 
-        magnitudes = [np.hypot(f[0], f[1]) for f in forces.values()]
-        max_mag = max(1.0, max(magnitudes))
-        scale = 0.4 * self._pixels_per_meter * self._force_scale / max_mag
+        from src.shared.python.force_overlay.contracts import WrenchKind
 
-        joint_map = {
-            "shoulder": pos.get("shoulder"),
-            "wrist": pos.get("wrist"),
-            "wrist1": pos.get("wrist1"),
-            "wrist2": pos.get("wrist2"),
-        }
-
-        painter.setPen(QPen(self.COLOR_FORCE, 2))
-        for key, force in forces.items():
-            if self._visible_segments is not None and key not in self._visible_segments:
-                continue
-            joint_pos = joint_map.get(key)
-            if joint_pos is None:
-                continue
-            fx, fy = force
-            end = (
-                joint_pos[0] + fx * scale / self._pixels_per_meter,
-                joint_pos[1] + fy * scale / self._pixels_per_meter,
-            )
-            self._draw_arrow(painter, joint_pos, end)
+        self._render_force_overlay_2d(
+            painter,
+            forces,
+            pos,
+            kind=WrenchKind.JOINT_REACTION,
+            label_prefix="joint",
+            color_name=self.COLOR_FORCE.name(),
+            engine_name="pendulum",
+        )
 
     def _draw_zero_torque_force_vectors(self, painter: QPainter, pos: dict) -> None:
         """Draw zero-torque (passive drift) force vectors at each joint."""
@@ -448,66 +438,17 @@ class PendulumWidget(BasePendulumWidget):
         forces = self._zero_torque_forces[self._current_idx]
         if not forces:
             return
+        from src.shared.python.force_overlay.contracts import WrenchKind
 
-        magnitudes = [np.hypot(f[0], f[1]) for f in forces.values()]
-        max_mag = max(1.0, max(magnitudes))
-        scale = 0.4 * self._pixels_per_meter * self._force_scale / max_mag
-
-        joint_map = {
-            "shoulder": pos.get("shoulder"),
-            "wrist": pos.get("wrist"),
-            "wrist1": pos.get("wrist1"),
-            "wrist2": pos.get("wrist2"),
-        }
-
-        pen = QPen(self.COLOR_ZERO_TORQUE, 2, Qt.PenStyle.DashLine)
-        painter.setPen(pen)
-        for key, force in forces.items():
-            if self._visible_segments is not None and key not in self._visible_segments:
-                continue
-            joint_pos = joint_map.get(key)
-            if joint_pos is None:
-                continue
-            fx, fy = force
-            end = (
-                joint_pos[0] + fx * scale / self._pixels_per_meter,
-                joint_pos[1] + fy * scale / self._pixels_per_meter,
-            )
-            self._draw_arrow(painter, joint_pos, end)
-
-    def _draw_arrow(self, painter: QPainter, origin: tuple, end: tuple) -> None:
-        """Draw a force/torque vector with a filled triangular arrowhead."""
-        assert painter is not None, "painter must be provided"
-        p0 = self._world_to_pixel(origin[0], origin[1])
-        p1 = self._world_to_pixel(end[0], end[1])
-        painter.drawLine(p0, p1)
-
-        dx = p1.x() - p0.x()
-        dy = p1.y() - p0.y()
-        length = max(1.0, np.hypot(dx, dy))
-        ux, uy = dx / length, dy / length
-        arrow_len = 10.0
-        arrow_w = 4.0
-
-        left = QPointF(
-            p1.x() - arrow_len * ux + arrow_w * uy,
-            p1.y() - arrow_len * uy - arrow_w * ux,
+        self._render_force_overlay_2d(
+            painter,
+            forces,
+            pos,
+            kind=WrenchKind.JOINT_ACTUATOR,
+            label_prefix="ztcf",
+            color_name=self.COLOR_ZERO_TORQUE.name(),
+            engine_name="pendulum",
         )
-        right = QPointF(
-            p1.x() - arrow_len * ux - arrow_w * uy,
-            p1.y() - arrow_len * uy + arrow_w * ux,
-        )
-
-        path = QPainterPath()
-        path.moveTo(p1)
-        path.lineTo(left)
-        path.lineTo(right)
-        path.closeSubpath()
-
-        old_brush = painter.brush()
-        painter.setBrush(QBrush(painter.pen().color()))
-        painter.drawPath(path)
-        painter.setBrush(old_brush)
 
     # ------------------------------------------------------------------
     # Torque vector drawing (#1119, #1170)

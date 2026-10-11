@@ -1,0 +1,532 @@
+{
+ "capture": "capture-A driver",
+ "engine": "mujoco",
+ "weights": {
+  "0": {
+   "marker_rms_mm": 27.992946284950182,
+   "head_gaze": {
+    "gaze_weight": 0.0,
+    "regularised": false,
+    "note": "marker-faithful head",
+    "plan": {
+     "ball_at_address_m": [
+      0.08204359890982453,
+      -0.012935500236819834,
+      0.021592780104875565
+     ],
+     "ball_radius_m": 0.021335,
+     "impact_index": 476,
+     "impact_time_s": 1.3222222222222222,
+     "impact_rule": "lowest clubhead point within 0.05 s of peak speed",
+     "target_line_direction": [
+      0.12082166927091735,
+      -0.9926742286543905,
+      0.0
+     ],
+     "t_hold_s": 0.03,
+     "t_release_s": 0.35,
+     "eye_offset_head_m": [
+      0.09,
+      0.0,
+      0.128
+     ],
+     "gaze_axis_head": [
+      0.7996918891918305,
+      -0.06809718667236761,
+      -0.5965363824010314
+     ],
+     "gaze_axis_rule": "head-frame direction of the address line of sight to the ball"
+    },
+    "address_to_impact": {
+     "eye_translation_range_mm": [
+      56.20021361361982,
+      122.83637106011092,
+      30.736313602893304
+     ],
+     "head_yaw_range_deg": 46.51760264596709,
+     "head_pitch_range_deg": 8.82337100898388,
+     "head_roll_range_deg": 71.94692632510596,
+     "theta_gaze_max_deg": 39.10325849717293,
+     "theta_gaze_rms_deg": 21.2608946798828,
+     "frames": 477
+    },
+    "address_to_impact_nominal_axis": {
+     "theta_gaze_max_deg": 41.95672789886498,
+     "theta_gaze_rms_deg": 37.23050430982362,
+     "note": "head +x axis as the gaze axis (not calibrated at address)"
+    },
+    "neck_ik_schedule": {
+     "frames": 109,
+     "stride": 6,
+     "frames_with_clamping": 2,
+     "max_residual_deg": 9.772258992056732e-05
+    },
+    "neck_range_deg": {
+     "NeckInputX": [
+      -15.527967281559379,
+      37.63985371169315
+     ],
+     "NeckInputY": [
+      -25.617951366016005,
+      1.8867033543568816
+     ],
+     "NeckInputZ": [
+      -80.0,
+      71.19245817281123
+     ]
+    }
+   }
+  },
+  "0.3": {
+   "marker_rms_mm": 30.496173872188326,
+   "head_gaze": {
+    "gaze_weight": 0.3,
+    "regularised": true,
+    "note": "gaze-regularised head is a soft prior, not measured",
+    "plan": {
+     "ball_at_address_m": [
+      0.08321134454558723,
+      -0.011903301394040132,
+      0.021592780104875565
+     ],
+     "ball_radius_m": 0.021335,
+     "impact_index": 477,
+     "impact_time_s": 1.325,
+     "impact_rule": "lowest clubhead point within 0.05 s of peak speed",
+     "target_line_direction": [
+      0.15369635898973485,
+      -0.9881181251415736,
+      0.0
+     ],
+     "t_hold_s": 0.03,
+     "t_release_s": 0.35,
+     "eye_offset_head_m": [
+      0.09,
+      0.0,
+      0.128
+     ],
+     "gaze_axis_head": [
+      0.798516120830064,
+      -0.06557596411040735,
+      -0.5983910073735209
+     ],
+     "gaze_axis_rule": "head-frame direction of the address line of sight to the ball"
+    },
+    "address_to_impact": {
+     "eye_translation_range_mm": [
+      60.144901983866795,
+      128.07590793374393,
+      23.27085963562525
+     ],
+     "head_yaw_range_deg": 31.770558479667216,
+     "head_pitch_range_deg": 7.723143437516963,
+     "head_roll_range_deg": 31.374932948596165,
+     "theta_gaze_max_deg": 20.46180014054957,
+     "theta_gaze_rms_deg": 7.627404446711159,
+     "frames": 478
+    },
+    "address_to_impact_nominal_axis": {
+     "theta_gaze_max_deg": 37.32678799532032,
+     "theta_gaze_rms_deg": 35.70800026161604,
+     "note": "head +x axis as the gaze axis (not calibrated at address)"
+    },
+    "neck_ik_schedule": {
+     "frames": 109,
+     "stride": 6,
+     "frames_with_clamping": 0,
+     "max_residual_deg": 9.624948956063093e-05
+    },
+    "neck_range_deg": {
+     "NeckInputX": [
+      -9.546834804910487,
+      20.523823039217614
+     ],
+     "NeckInputY": [
+      -32.428528205469625,
+      1.5359895557966672
+     ],
+     "NeckInputZ": [
+      -80.0,
+      80.0
+     ]
+    }
+   }
+  },
+  "1": {
+   "marker_rms_mm": 32.727184250425644,
+   "head_gaze": {
+    "gaze_weight": 1.0,
+    "regularised": true,
+    "note": "gaze-regularised head is a soft prior, not measured",
+    "plan": {
+     "ball_at_address_m": [
+      0.08321134454558723,
+      -0.011903301394040132,
+      0.021592780104875565
+     ],
+     "ball_radius_m": 0.021335,
+     "impact_index": 477,
+     "impact_time_s": 1.325,
+     "impact_rule": "lowest clubhead point within 0.05 s of peak speed",
+     "target_line_direction": [
+      0.15369635898973485,
+      -0.9881181251415736,
+      0.0
+     ],
+     "t_hold_s": 0.03,
+     "t_release_s": 0.35,
+     "eye_offset_head_m": [
+      0.09,
+      0.0,
+      0.128
+     ],
+     "gaze_axis_head": [
+      0.798516120830064,
+      -0.06557596411040735,
+      -0.5983910073735209
+     ],
+     "gaze_axis_rule": "head-frame direction of the address line of sight to the ball"
+    },
+    "address_to_impact": {
+     "eye_translation_range_mm": [
+      56.89772146248584,
+      104.69037930131925,
+      26.398024552318546
+     ],
+     "head_yaw_range_deg": 27.459639129403314,
+     "head_pitch_range_deg": 4.087240214878381,
+     "head_roll_range_deg": 18.55555856376037,
+     "theta_gaze_max_deg": 6.502749002009109,
+     "theta_gaze_rms_deg": 1.7779415295737429,
+     "frames": 478
+    },
+    "address_to_impact_nominal_axis": {
+     "theta_gaze_max_deg": 38.140761130231866,
+     "theta_gaze_rms_deg": 36.73476172955636,
+     "note": "head +x axis as the gaze axis (not calibrated at address)"
+    },
+    "neck_ik_schedule": {
+     "frames": 109,
+     "stride": 6,
+     "frames_with_clamping": 0,
+     "max_residual_deg": 8.840577721688402e-05
+    },
+    "neck_range_deg": {
+     "NeckInputX": [
+      -11.724536052254424,
+      18.361229185002344
+     ],
+     "NeckInputY": [
+      -34.78244564603342,
+      13.13747948364427
+     ],
+     "NeckInputZ": [
+      -80.0,
+      80.0
+     ]
+    }
+   }
+  },
+  "3": {
+   "marker_rms_mm": 33.42453459799543,
+   "head_gaze": {
+    "gaze_weight": 3.0,
+    "regularised": true,
+    "note": "gaze-regularised head is a soft prior, not measured",
+    "plan": {
+     "ball_at_address_m": [
+      0.08321134454558723,
+      -0.011903301394040132,
+      0.021592780104875565
+     ],
+     "ball_radius_m": 0.021335,
+     "impact_index": 477,
+     "impact_time_s": 1.325,
+     "impact_rule": "lowest clubhead point within 0.05 s of peak speed",
+     "target_line_direction": [
+      0.15369635898973485,
+      -0.9881181251415736,
+      0.0
+     ],
+     "t_hold_s": 0.03,
+     "t_release_s": 0.35,
+     "eye_offset_head_m": [
+      0.09,
+      0.0,
+      0.128
+     ],
+     "gaze_axis_head": [
+      0.798516120830064,
+      -0.06557596411040735,
+      -0.5983910073735209
+     ],
+     "gaze_axis_rule": "head-frame direction of the address line of sight to the ball"
+    },
+    "address_to_impact": {
+     "eye_translation_range_mm": [
+      57.183451205996995,
+      108.53909698440845,
+      25.792162929567652
+     ],
+     "head_yaw_range_deg": 29.0766257529381,
+     "head_pitch_range_deg": 3.2844168943665117,
+     "head_roll_range_deg": 17.972572125828286,
+     "theta_gaze_max_deg": 1.8560749265046743,
+     "theta_gaze_rms_deg": 0.7666386201810982,
+     "frames": 478
+    },
+    "address_to_impact_nominal_axis": {
+     "theta_gaze_max_deg": 38.077068881847644,
+     "theta_gaze_rms_deg": 37.10925326750337,
+     "note": "head +x axis as the gaze axis (not calibrated at address)"
+    },
+    "neck_ik_schedule": {
+     "frames": 109,
+     "stride": 6,
+     "frames_with_clamping": 0,
+     "max_residual_deg": 8.697602956156152e-05
+    },
+    "neck_range_deg": {
+     "NeckInputX": [
+      -12.684857885917639,
+      18.094115165027667
+     ],
+     "NeckInputY": [
+      -37.312614661935875,
+      13.834079133359081
+     ],
+     "NeckInputZ": [
+      -80.0,
+      80.0
+     ]
+    }
+   }
+  },
+  "10": {
+   "marker_rms_mm": 33.779283337010426,
+   "head_gaze": {
+    "gaze_weight": 10.0,
+    "regularised": true,
+    "note": "gaze-regularised head is a soft prior, not measured",
+    "plan": {
+     "ball_at_address_m": [
+      0.08321134454558723,
+      -0.011903301394040132,
+      0.021592780104875565
+     ],
+     "ball_radius_m": 0.021335,
+     "impact_index": 477,
+     "impact_time_s": 1.325,
+     "impact_rule": "lowest clubhead point within 0.05 s of peak speed",
+     "target_line_direction": [
+      0.15369635898973485,
+      -0.9881181251415736,
+      0.0
+     ],
+     "t_hold_s": 0.03,
+     "t_release_s": 0.35,
+     "eye_offset_head_m": [
+      0.09,
+      0.0,
+      0.128
+     ],
+     "gaze_axis_head": [
+      0.798516120830064,
+      -0.06557596411040735,
+      -0.5983910073735209
+     ],
+     "gaze_axis_rule": "head-frame direction of the address line of sight to the ball"
+    },
+    "address_to_impact": {
+     "eye_translation_range_mm": [
+      55.26919359768612,
+      99.19074337325155,
+      22.72386571060503
+     ],
+     "head_yaw_range_deg": 28.90889537830492,
+     "head_pitch_range_deg": 3.097294043563931,
+     "head_roll_range_deg": 17.18337189380867,
+     "theta_gaze_max_deg": 2.136361650490066,
+     "theta_gaze_rms_deg": 0.7953517968538362,
+     "frames": 478
+    },
+    "address_to_impact_nominal_axis": {
+     "theta_gaze_max_deg": 38.09858212364402,
+     "theta_gaze_rms_deg": 37.292589940685765,
+     "note": "head +x axis as the gaze axis (not calibrated at address)"
+    },
+    "neck_ik_schedule": {
+     "frames": 109,
+     "stride": 6,
+     "frames_with_clamping": 0,
+     "max_residual_deg": 8.789723047013567e-05
+    },
+    "neck_range_deg": {
+     "NeckInputX": [
+      -13.41622746005544,
+      18.52765737232283
+     ],
+     "NeckInputY": [
+      -36.120754448081826,
+      11.85009329301595
+     ],
+     "NeckInputZ": [
+      -80.0,
+      80.0
+     ]
+    }
+   }
+  },
+  "30": {
+   "marker_rms_mm": 33.92956709610574,
+   "head_gaze": {
+    "gaze_weight": 30.0,
+    "regularised": true,
+    "note": "gaze-regularised head is a soft prior, not measured",
+    "plan": {
+     "ball_at_address_m": [
+      0.08321134454558723,
+      -0.011903301394040132,
+      0.021592780104875565
+     ],
+     "ball_radius_m": 0.021335,
+     "impact_index": 477,
+     "impact_time_s": 1.325,
+     "impact_rule": "lowest clubhead point within 0.05 s of peak speed",
+     "target_line_direction": [
+      0.15369635898973485,
+      -0.9881181251415736,
+      0.0
+     ],
+     "t_hold_s": 0.03,
+     "t_release_s": 0.35,
+     "eye_offset_head_m": [
+      0.09,
+      0.0,
+      0.128
+     ],
+     "gaze_axis_head": [
+      0.798516120830064,
+      -0.06557596411040735,
+      -0.5983910073735209
+     ],
+     "gaze_axis_rule": "head-frame direction of the address line of sight to the ball"
+    },
+    "address_to_impact": {
+     "eye_translation_range_mm": [
+      57.215380482442455,
+      92.95084125618358,
+      24.315019130417337
+     ],
+     "head_yaw_range_deg": 28.999916780839072,
+     "head_pitch_range_deg": 2.904680409468913,
+     "head_roll_range_deg": 17.101408617086395,
+     "theta_gaze_max_deg": 2.2873579501503487,
+     "theta_gaze_rms_deg": 0.9625236109277484,
+     "frames": 478
+    },
+    "address_to_impact_nominal_axis": {
+     "theta_gaze_max_deg": 38.30344331193996,
+     "theta_gaze_rms_deg": 37.36729293485487,
+     "note": "head +x axis as the gaze axis (not calibrated at address)"
+    },
+    "neck_ik_schedule": {
+     "frames": 109,
+     "stride": 6,
+     "frames_with_clamping": 0,
+     "max_residual_deg": 8.512084717621605e-05
+    },
+    "neck_range_deg": {
+     "NeckInputX": [
+      -13.142553422184559,
+      16.69645543484873
+     ],
+     "NeckInputY": [
+      -37.62931447231686,
+      13.201064084665136
+     ],
+     "NeckInputZ": [
+      -80.0,
+      80.0
+     ]
+    }
+   }
+  },
+  "100": {
+   "marker_rms_mm": 33.83947955421608,
+   "head_gaze": {
+    "gaze_weight": 100.0,
+    "regularised": true,
+    "note": "gaze-regularised head is a soft prior, not measured",
+    "plan": {
+     "ball_at_address_m": [
+      0.08321134454558723,
+      -0.011903301394040132,
+      0.021592780104875565
+     ],
+     "ball_radius_m": 0.021335,
+     "impact_index": 477,
+     "impact_time_s": 1.325,
+     "impact_rule": "lowest clubhead point within 0.05 s of peak speed",
+     "target_line_direction": [
+      0.15369635898973485,
+      -0.9881181251415736,
+      0.0
+     ],
+     "t_hold_s": 0.03,
+     "t_release_s": 0.35,
+     "eye_offset_head_m": [
+      0.09,
+      0.0,
+      0.128
+     ],
+     "gaze_axis_head": [
+      0.798516120830064,
+      -0.06557596411040735,
+      -0.5983910073735209
+     ],
+     "gaze_axis_rule": "head-frame direction of the address line of sight to the ball"
+    },
+    "address_to_impact": {
+     "eye_translation_range_mm": [
+      53.40817074294335,
+      95.59121093218792,
+      29.244121081314802
+     ],
+     "head_yaw_range_deg": 28.337149500472833,
+     "head_pitch_range_deg": 2.7672096891167506,
+     "head_roll_range_deg": 16.50222249562367,
+     "theta_gaze_max_deg": 2.185653777974434,
+     "theta_gaze_rms_deg": 0.9659672837155439,
+     "frames": 478
+    },
+    "address_to_impact_nominal_axis": {
+     "theta_gaze_max_deg": 38.23587771252093,
+     "theta_gaze_rms_deg": 37.379363665685325,
+     "note": "head +x axis as the gaze axis (not calibrated at address)"
+    },
+    "neck_ik_schedule": {
+     "frames": 109,
+     "stride": 6,
+     "frames_with_clamping": 0,
+     "max_residual_deg": 7.792760202002266e-05
+    },
+    "neck_range_deg": {
+     "NeckInputX": [
+      -11.955793598572768,
+      15.551726982618417
+     ],
+     "NeckInputY": [
+      -36.15387164199974,
+      10.132101462322913
+     ],
+     "NeckInputZ": [
+      -80.0,
+      80.0
+     ]
+    }
+   }
+  }
+ },
+ "command": "python -m src.shared.python.motion_matching.pipeline.cli --spec docs/development/full_body_models/full_body_spec_anthro_driver.json --skip-hip-calibration --static-seeds --capture driver --gaze-weight W --out RUN"
+}

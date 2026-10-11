@@ -43,6 +43,7 @@ import numpy as np
 
 from src.engines.simscape._cache import _ResultCache, make_cache_key
 from src.engines.simscape._errors import (
+    SimscapeChannelUnavailableError,
     SimscapeModelNotFoundError,
     SimscapeNotInstalledError,
     SimscapeSimulationError,
@@ -716,13 +717,24 @@ class SimscapeAdapter:
         return self._deferred_array("compute_control_acceleration")
 
     def compute_contact_forces(self) -> np.ndarray:
-        """Return ground-reaction force vector (skeleton: zero vector)."""
+        """Ground-reaction force: unavailable for ``GolfSwing3D_Kinetic``.
+
+        The model has no foot-ground contact, so there is no GRF to report
+        and a zero vector would be a false measurement (#11709).
+
+        Raises:
+            SimscapeStateError: the model is not loaded.
+            SimscapeChannelUnavailableError: always, once loaded.
+        """
         self._lifecycle.require(
             AdapterState.LOADED,
             AdapterState.RUNNING,
             operation="compute_contact_forces",
         )
-        return np.zeros(3, dtype=np.float64)
+        raise SimscapeChannelUnavailableError(
+            "contact_forces",
+            reason="GolfSwing3D_Kinetic has no foot-ground contact (#11709)",
+        )
 
     def load_force_series(
         self, path: str | Path, *, rotation_tol: float = DEFAULT_ROTATION_TOL

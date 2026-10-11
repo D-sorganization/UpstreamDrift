@@ -1,0 +1,14 @@
+{
+  "schema_version": "character-preset-v1",
+  "id": "tour_average_female",
+  "name": "Tour Average Female",
+  "description": "Nominal professional female golfer, driver.",
+  "category": "tour",
+  "parameters": {
+    "stature_m": 1.68,
+    "mass_kg": 62.0,
+    "club": "driver"
+  },
+  "provenance": "Nominal professional-tour averages chosen for the builder; not derived from a specific capture.",
+  "limitations": "Nominal values, not measured data; review before scientific use. The De Leva male table is still used, so segment proportions are male-referenced and only scaled to the female stature and mass."
+}

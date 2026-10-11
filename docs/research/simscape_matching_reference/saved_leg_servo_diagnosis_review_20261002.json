@@ -1,0 +1,228 @@
+{
+  "qualification": "READ_ONLY_SAVED_NATIVE_SERVO_AND_LATE_WINDOW_DIAGNOSTIC_NOT_STATIC_GRAVITY_IDENTIFICATION",
+  "matlab_release": "R2025b",
+  "receipt": {
+    "actual_process_exit_code": 0,
+    "final_exit_code": 0,
+    "termination_reason": "natural_exit",
+    "done_marker": true,
+    "script_status": "success",
+    "command_identity": "run('diagnose_saved_leg_servo_loaded_path.m')",
+    "owned_pids": [69156],
+    "timestamp": "2026-10-02T17:47:04.841720+00:00"
+  },
+  "script_sha256": "7f21f6c43723254e65c44ac32a7b5e9626441c6ae040f40b971a82835ba76f5a",
+  "results": {
+    "capture_A": {
+      "alias": "capture-A",
+      "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+      "qualification": "SAVED_NATIVE_LEG_SERVO_FEEDBACK_AND_SETTLING_DIAGNOSTIC_EXCLUDES_BALANCE",
+      "simulation_executed": false,
+      "diagnostic_sample_time_s": 0.002,
+      "diagnostic_time_range_s": [0, 1],
+      "t0_reference_closure_max_error_deg": 2.1316282072803006e-14,
+      "servo_torque_rms_N_m": {
+        "left_leg": 208.39722191575092,
+        "right_leg": 243.4135085097803,
+        "overall": 226.5828085129624,
+        "per_axis_12": [
+          55.478733673887845, 210.5953673012869, 152.68887425721087,
+          397.04125498826886, 91.9543138807236, 154.06773727333513,
+          155.68960017321808, 147.82372349947332, 167.33201073028042,
+          494.79365831196935, 17.555899864802768, 190.47502770194447
+        ]
+      },
+      "analysis_window_s": [0.5, 1],
+      "window_is_diagnostic_not_verified_static_equilibrium": true,
+      "input_mat_sha256": "72178304085751e74a0099e938d5c7d55f98979904ee6fb53ff74840e978e3d8",
+      "input_hold_report_sha256": "610a726bcf32bd89b7648001e8311a0c5a0c362308dfa303997df44b1c358384",
+      "native_source_receipt": {
+        "actual_process_exit_code": 0,
+        "final_exit_code": 0,
+        "termination_reason": "natural_exit",
+        "done_marker": true,
+        "script_status": "success",
+        "command_identity": "run('capture_A_bilateral_balance_on_hold_1s.m')",
+        "owned_pids": 59556,
+        "timestamp": "2026-10-02T16:10:59.716380+00:00"
+      },
+      "model_saved": false,
+      "model_loaded_only_for_native_log_block_path_resolution": true,
+      "native_fk_executed": false,
+      "late_window_state_diagnostics": {
+        "joint_rate_rms_deg_s": [
+          0.6728451020001301, 4.588484041736977, 3.543800979901309,
+          4.805217721722375, 3.92188343668739, 6.567315167495327,
+          2.923884950459433, 3.522381498297302, 3.203110681221733,
+          6.027800980718999, 1.6042764501263982, 7.690516878407284
+        ],
+        "joint_angle_range_deg": [
+          0.08583298406604456, 2.107054995391344, 1.707478848685252,
+          1.9656966527240805, 1.8132200033280164, 3.1368554821849415,
+          1.3236772840790056, 1.6272897287541142, 1.5391377761437768,
+          2.8091905031217106, 0.6850692562060079, 3.713380796133231
+        ],
+        "servo_torque_rms_N_m": [
+          28.84358108436042, 190.9606858872358, 139.15611928664754,
+          392.51677417275084, 79.69218000701792, 142.80442137969303,
+          128.0522196275791, 140.38458421123744, 145.5045880032743,
+          465.0129995877434, 12.482718926666093, 172.29824054744935
+        ],
+        "pelvis_translation_change_m": 0.010439004625891243,
+        "pelvis_max_displacement_within_window_m": 0.010439004625891243,
+        "pelvis_max_rotation_within_window_deg": 3.147029003436414,
+        "pelvis_max_disp_from_t0_m": 0.020041021966138554,
+        "pelvis_geodesic_rotation_change_deg": 3.147029003436414,
+        "pelvis_max_rotation_from_t0_deg": 5.577136165319561
+      },
+      "existing_hold_gate_screen": {
+        "both_feet_settled_minimum_005BW": true,
+        "settled_total_080_to_120BW": true,
+        "whole_run_peak_at_most_200BW": true,
+        "pelvis_displacement_at_most_5mm": false,
+        "pelvis_rotation_change_at_most_1deg": false
+      },
+      "existing_hold_passed": false,
+      "actual_saved_logsout_names": [
+        "total_mass",
+        "com_p",
+        "pelvis_R",
+        "pelvis_p",
+        "FootContactForces",
+        "LAnkleLogs",
+        "LHipLogs",
+        "LKneeLogs",
+        "RAnkleLogs",
+        "RHipLogs",
+        "RKneeLogs"
+      ],
+      "balance_active_in_source_capture": true,
+      "servo_diagnostic_disclaimers": {
+        "pure_servo_computation_excludes_balance_correction": true,
+        "no_claim_of_total_actuation_or_pure_pd_support": true,
+        "no_claim_that_upper_body_internal_torques_cannot_shift_forces": true,
+        "no_new_physical_acceptance_gates": true
+      }
+    },
+    "capture_O": {
+      "alias": "capture-O",
+      "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+      "qualification": "SAVED_NATIVE_LEG_SERVO_FEEDBACK_AND_SETTLING_DIAGNOSTIC_EXCLUDES_BALANCE",
+      "simulation_executed": false,
+      "diagnostic_sample_time_s": 0.002,
+      "diagnostic_time_range_s": [0, 1],
+      "t0_reference_closure_max_error_deg": 2.1316282072803006e-14,
+      "servo_torque_rms_N_m": {
+        "left_leg": 230.9087114236937,
+        "right_leg": 241.734974859107,
+        "overall": 236.38383096299515,
+        "per_axis_12": [
+          124.770170167401, 42.85935715880139, 54.333712454582084,
+          531.900133811326, 36.00811136990223, 123.86278483226897,
+          148.2100881131282, 43.10316004703703, 140.74908418046243,
+          538.3833916477828, 8.994798993482142, 130.54803057693084
+        ]
+      },
+      "analysis_window_s": [0.5, 1],
+      "window_is_diagnostic_not_verified_static_equilibrium": true,
+      "input_mat_sha256": "523e50fef0d0dfabbd1927e20375352a4e480021b7e7555c3cfc158c31049ab4",
+      "input_hold_report_sha256": "f47cadbbe029ff0b38923448a6ee36644d8f961b6105d913e58a7cbcd29ce265",
+      "native_source_receipt": {
+        "actual_process_exit_code": 0,
+        "final_exit_code": 0,
+        "termination_reason": "natural_exit",
+        "done_marker": true,
+        "script_status": "success",
+        "command_identity": "run('capture_O_bilateral_balance_on_hold_1s.m')",
+        "owned_pids": 41300,
+        "timestamp": "2026-10-02T16:17:37.131580+00:00"
+      },
+      "model_saved": false,
+      "model_loaded_only_for_native_log_block_path_resolution": true,
+      "native_fk_executed": false,
+      "late_window_state_diagnostics": {
+        "joint_rate_rms_deg_s": [
+          1.9504001216904294, 0.5507025041339529, 1.0771953278328918,
+          7.274721152934782, 1.3002230860141852, 4.601360925121718,
+          2.432221918430231, 0.9640867936888008, 3.0014531955962225,
+          7.0850615541386155, 0.7125166505727881, 5.341861102332142
+        ],
+        "joint_angle_range_deg": [
+          0.6047259261548987, 0.18901791467817475, 0.4091450431802883,
+          1.9028412038401825, 0.3654757218869715, 1.1793287827643042,
+          0.6628413088549827, 0.3924843048604103, 0.7406542820407727,
+          1.760143176132754, 0.19834307642615556, 1.3464034566610243
+        ],
+        "servo_torque_rms_N_m": [
+          76.94663089395196, 42.50058468640749, 43.44535640719246,
+          438.30090276298995, 22.572006176803725, 92.06659297054877,
+          104.62318397715214, 11.87605173866796, 88.91246475770262,
+          432.0778153840442, 9.337222075840945, 90.87290035056459
+        ],
+        "pelvis_translation_change_m": 0.004820642183044698,
+        "pelvis_max_displacement_within_window_m": 0.005892885963465364,
+        "pelvis_max_rotation_within_window_deg": 1.2828589605264515,
+        "pelvis_max_disp_from_t0_m": 0.013928799927481327,
+        "pelvis_geodesic_rotation_change_deg": 0.7892665129263704,
+        "pelvis_max_rotation_from_t0_deg": 3.7251045093663606
+      },
+      "existing_hold_gate_screen": {
+        "both_feet_settled_minimum_005BW": true,
+        "settled_total_080_to_120BW": true,
+        "whole_run_peak_at_most_200BW": true,
+        "pelvis_displacement_at_most_5mm": false,
+        "pelvis_rotation_change_at_most_1deg": false
+      },
+      "existing_hold_passed": false,
+      "actual_saved_logsout_names": [
+        "total_mass",
+        "com_p",
+        "pelvis_R",
+        "pelvis_p",
+        "FootContactForces",
+        "LAnkleLogs",
+        "LHipLogs",
+        "LKneeLogs",
+        "RAnkleLogs",
+        "RHipLogs",
+        "RKneeLogs"
+      ],
+      "balance_active_in_source_capture": true,
+      "servo_diagnostic_disclaimers": {
+        "pure_servo_computation_excludes_balance_correction": true,
+        "no_claim_of_total_actuation_or_pure_pd_support": true,
+        "no_claim_that_upper_body_internal_torques_cannot_shift_forces": true,
+        "no_new_physical_acceptance_gates": true
+      }
+    }
+  },
+  "failed_attempts": [
+    {
+      "receipt": {
+        "actual_process_exit_code": 1,
+        "final_exit_code": 1,
+        "termination_reason": "natural_exit",
+        "done_marker": false,
+        "script_status": "failed",
+        "command_identity": "run('diagnose_saved_leg_servo_reviewed.m')",
+        "owned_pids": [87356],
+        "timestamp": "2026-10-02T17:40:22.396487+00:00"
+      },
+      "reason": "Relative block stem did not resolve a persisted native node"
+    },
+    {
+      "receipt": {
+        "actual_process_exit_code": 1,
+        "final_exit_code": 1,
+        "termination_reason": "natural_exit",
+        "done_marker": false,
+        "script_status": "failed",
+        "command_identity": "run('diagnose_saved_leg_servo_full_path.m')",
+        "owned_pids": [96792],
+        "timestamp": "2026-10-02T17:41:57.215550+00:00"
+      },
+      "reason": "Full Simulink block path requires a loaded model for native findNode"
+    }
+  ],
+  "limits": "Only the baseline servo component is reconstructed; active balance and net actuation are not recovered. The analysis window is not verified equilibrium; no mean torque is promoted to gravity feedforward."
+}

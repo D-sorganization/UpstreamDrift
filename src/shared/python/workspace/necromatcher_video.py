@@ -19,6 +19,7 @@ from typing import Any, Sequence, cast
 import numpy as np
 
 from src.shared.python.motion_matching import default_body_segments
+from src.shared.python.body_part_viz.overlay_options import ShapeOverlayOptions
 from src.shared.python.motion_matching.historical_fit import (
     AuthoredShaftAxis,
     ShaftAxisAssessment,
@@ -26,21 +27,32 @@ from src.shared.python.motion_matching.historical_fit import (
     ShaftAxisResidualTerm,
     resolve_authored_shaft_axis,
 )
-from src.shared.python.body_part_viz.overlay_options import ShapeOverlayOptions
-from .necromatcher_shape_overlay import NativeShapeOverlay
-from .necromatcher_caption import (
+from src.shared.python.shadow_tracker.source_records import VariableFrameRateError
+from src.shared.python.workspace.necromatcher import NecromatcherLibrary
+from src.shared.python.workspace.necromatcher_caption import (
     CaptionFrame,
     CaptionOverlayOptions,
     authored_seed_status,
-    restricted_seed_status,
     caption_layout,
     caption_provenance,
     draw_caption,
+    restricted_seed_status,
 )
-from .necromatcher import NecromatcherLibrary
-from .necromatcher_native import NativeFitBinding, load_native_fit_binding
-from .necromatcher_review import CaptureReview
-from .necromatcher_shaft_evidence import BoundShaftEvidence, bind_fit_shaft_evidence
+from src.shared.python.workspace.necromatcher_native import (
+    NativeFitBinding,
+    load_native_fit_binding,
+)
+from src.shared.python.workspace.necromatcher_review import CaptureReview
+from src.shared.python.workspace.necromatcher_shaft_evidence import (
+    BoundShaftEvidence,
+    bind_fit_shaft_evidence,
+)
+from src.shared.python.workspace.necromatcher_shape_overlay import NativeShapeOverlay
+from src.shared.python.workspace.necromatcher_video_forces import (
+    ForceLayer,
+    ForceLayerRenderer,
+    ForceSamplerFactory,
+)
 
 _OBSERVED = (90, 230, 90)
 _NATIVE = (255, 170, 30)
@@ -234,8 +246,12 @@ def source_frame_rate(
         ticks, numerator, denominator = cast(list[int], values)
         times.append(Fraction(ticks * numerator, denominator))
     steps = [b - a for a, b in zip(times, times[1:], strict=False)]
-    if steps[0] <= 0 or any(step != steps[0] for step in steps):
-        raise ValueError("Video source PTS must be strictly increasing and uniform")
+    if steps[0] <= 0:
+        raise ValueError("Video source PTS must be strictly increasing")
+    if any(step != steps[0] for step in steps):
+        raise VariableFrameRateError(
+            "Video source PTS must be strictly increasing and uniform"
+        )
     return 1 / steps[0]
 
 
@@ -349,7 +365,7 @@ def _rigid_segments(binding: NativeFitBinding) -> list[dict[str, str]]:
 
 def _draw_rigid_skeleton(
     binding: NativeFitBinding, pose: np.ndarray, image: np.ndarray
-) -> None:
+) -> dict[str, np.ndarray]:
     edges = _rigid_segments(binding)
     names = sorted({name for edge in edges for name in edge.values()})
     poses = binding.plant.frame_poses({name: (name, (0, 0, 0)) for name in names}, pose)
@@ -365,6 +381,7 @@ def _draw_rigid_skeleton(
         a, b = points[edge["a"]], points[edge["b"]]
         if np.linalg.norm(a - b) > 1e-9:
             _line(image, a, b, _NATIVE, 2)
+    return {name: np.asarray(poses[name][1], dtype=float) for name in names}
 
 
 def _observations(row: dict[str, Any]) -> dict[str, np.ndarray]:
@@ -389,6 +406,7 @@ def _render(
     shaft: ShaftVideoOverlay | None = None,
     shapes: NativeShapeOverlay | None = None,
     captions: CaptionOverlayOptions | None = None,
+    force: ForceLayerRenderer | None = None,
 ) -> tuple[np.ndarray, dict[str, Any]]:
     import cv2
 
@@ -416,7 +434,8 @@ def _render(
     )
     if shapes is not None:
         image = shapes.composite(binding, pose, image)
-    _draw_rigid_skeleton(binding, pose, image)
+    origins = _draw_rigid_skeleton(binding, pose, image)
+    layer_record = force.draw(image, position, pose, origins) if force else {}
     for segment in default_body_segments(tuple(anatomical)):
         _line(image, anatomical[segment.a], anatomical[segment.b], _NATIVE, 2)
     observed = _observations(row)
@@ -441,7 +460,7 @@ def _render(
     )
     compact = None
     if captions is None:
-        _render_caption(image, index, pts, rms, len(errors), shaft_lines)
+        _render_caption(image, index, pts, rms, len(errors), shaft_lines, force)
     else:
         compact = caption_layout(
             (image.shape[1], image.shape[0]),
@@ -464,6 +483,7 @@ def _render(
         "original_png_sha256": hashlib.sha256(original_png).hexdigest(),
         "matched_marker_count": len(errors),
         "matched_rms_pixels": rms,
+        **layer_record,
     }
     if shaft is not None:
         record["shaft_overlay"] = shaft_record
@@ -497,11 +517,15 @@ def _render_caption(
     rms: float | None,
     count: int,
     shaft_lines: list[str],
+    force: ForceLayerRenderer | None = None,
 ) -> None:
     metric = (
         f"Matched RMS {rms:.2f} px ({count} markers)"
         if rms is not None
         else "Matched RMS unavailable (no common observed markers)"
+    )
+    unavailable = (
+        [f"Force layer unavailable: {force.reason}"] if force and force.reason else []
     )
     _caption(
         image,
@@ -511,6 +535,7 @@ def _render_caption(
             metric,
             "Green: observations | Blue: native rig/seeds | Yellow: residuals",
             *shaft_lines,
+            *unavailable,
         ],
     )
 
@@ -550,14 +575,23 @@ def export_fit_video(
     shaft_evidence: ShaftAxisEvidence | None = None,
     shape_overlay: ShapeOverlayOptions | None = None,
     caption_overlay: CaptionOverlayOptions | None = None,
+    force_layer: ForceLayer | None = None,
+    force_sampler_factory: ForceSamplerFactory | None = None,
 ) -> dict[str, Any]:
     """Publish a new MP4/PNG/manifest directory only after complete codec verification.
 
     Preconditions: hash-bound native fit, contiguous uniform source PTS and selected
     PNG indices inside that fit. Postcondition: source bytes remain untouched and
     output hashes, frame identities and unqualified scientific status are recorded.
+    An enabled ``force_layer`` additionally requires ``force_sampler_factory``.
     """
     _validate_overlay_options(shape_overlay, caption_overlay)
+    if (
+        force_layer is not None
+        and force_layer.enabled
+        and force_sampler_factory is None
+    ):
+        raise ValueError("An enabled force layer requires a force sampler factory")
     destination = Path(destination)
     if destination.exists():
         raise FileExistsError(destination)
@@ -584,6 +618,13 @@ def export_fit_video(
             anatomy,
             missing,
             overlays,
+            ForceLayerRenderer(
+                binding, force_layer, force_sampler_factory, _rigid_segments(binding)
+            )
+            if force_layer is not None
+            and force_layer.enabled
+            and force_sampler_factory is not None
+            else None,
         )
         _verify_export_binding(library, binding, overlays.shaft)
         _publish(staging, destination)
@@ -720,14 +761,12 @@ def _render_layers(
     index: int,
     anatomy: dict[str, Any],
     overlays: VideoOverlayLayers | None,
+    force: ForceLayerRenderer | None = None,
 ) -> tuple[np.ndarray, dict[str, Any]]:
     shaft = overlays.shaft if overlays else None
     shapes = overlays.shapes if overlays else None
-    if overlays and overlays.captions:
-        return _render(
-            binding, review, index, anatomy, shaft, shapes, overlays.captions
-        )
-    return _render(binding, review, index, anatomy, shaft, shapes)
+    captions = overlays.captions if overlays else None
+    return _render(binding, review, index, anatomy, shaft, shapes, captions, force)
 
 
 def _write_export(
@@ -739,6 +778,7 @@ def _write_export(
     anatomy: dict[str, Any],
     missing: list[str],
     overlays: VideoOverlayLayers | None = None,
+    force: ForceLayerRenderer | None = None,
 ) -> dict[str, Any]:
     import cv2
 
@@ -757,7 +797,7 @@ def _write_export(
                 raise ValueError("MP4 encoder could not open")
             for index in binding.fit["frame_indices"]:
                 image, record = _render_layers(
-                    binding, review, index, anatomy, overlays
+                    binding, review, index, anatomy, overlays, force
                 )
                 writer.write(image)
                 records.append(record)
@@ -782,7 +822,7 @@ def _write_export(
         },
     }
     manifest = _export_manifest(
-        binding, library, records, pngs, anatomy, missing, overlays, media
+        binding, library, records, pngs, anatomy, missing, overlays, media, force
     )
     _save_manifest(staging, manifest)
     return manifest
@@ -815,6 +855,7 @@ def _export_manifest(
     missing: list[str],
     overlays: VideoOverlayLayers | None,
     media: dict[str, Any],
+    force: ForceLayerRenderer | None = None,
 ) -> dict[str, Any]:
     import cv2
 
@@ -873,6 +914,8 @@ def _export_manifest(
             manifest["authored_initialization_seed"] = True
         if restricted_seed_status(binding.fit):
             manifest["restricted_initialization_seed"] = True
+    if force is not None:
+        manifest["force_layer"] = force.manifest()
     return manifest
 
 

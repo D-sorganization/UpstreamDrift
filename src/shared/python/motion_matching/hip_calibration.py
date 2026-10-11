@@ -28,6 +28,8 @@ from src.shared.python.motion_matching.marker_calibration import (
 
 Array: TypeAlias = NDArray[np.float64]
 
+_ALIGNMENT_AGREEMENT_TOL = 1.0e-6
+
 
 @dataclass(frozen=True)
 class SphereFit:
@@ -189,6 +191,56 @@ def functional_hip_calibration(
     )
 
 
+#: Distance of the lateral knee (epicondyle) and ankle (malleolus) markers from
+#: the femur and tibia long axes, from the ``LEG_SEEDS`` attachments in
+#: ``pipeline/constants.py`` (a unit test keeps the two in step).
+KNEE_OUT_LATERAL_M: float = 0.06
+ANKLE_OUT_LATERAL_M: float = float(np.hypot(0.01, 0.055))
+LATERAL_SEEDS_M: tuple[float, float] = (KNEE_OUT_LATERAL_M, ANKLE_OUT_LATERAL_M)
+_AXIS_ITERATIONS = 50
+_MIN_FLEXION_SIN = 1.0e-3
+
+
+def knee_flexion_axis(
+    hip: Sequence[float],
+    knee_out: Sequence[float],
+    ankle_out: Sequence[float],
+    *,
+    side: int,
+    lateral: tuple[float, float] = LATERAL_SEEDS_M,
+) -> Array:
+    """Unit knee flexion axis, pointing to the leg's lateral side (#11737).
+
+    The flexion plane holds the hip, knee and ankle *centres*. The lateral
+    markers sit ``lateral`` metres outside the knee and ankle centres along
+    this axis, so the plane through the hip centre and the two markers is
+    tilted (about 25 degrees at 20 degrees of knee flexion). The axis is found
+    by fixed-point iteration: move the markers medially along the current
+    estimate and refit the plane. ``side`` 0 is the right leg, 1 the left.
+    Raises ``ValueError`` for a leg too straight to define the plane.
+    """
+    if side not in (0, 1):
+        raise ValueError("side must be 0 (right) or 1 (left)")
+    w_knee, w_ankle = (float(v) for v in lateral)
+    if not (np.isfinite(w_knee) and np.isfinite(w_ankle)) or min(w_knee, w_ankle) < 0:
+        raise ValueError("lateral offsets must be finite and nonnegative")
+    h, k0, a0 = (np.asarray(p, dtype=float) for p in (hip, knee_out, ankle_out))
+    k, a = k0, a0
+    axis = np.zeros(3)
+    for _ in range(_AXIS_ITERATIONS):
+        thigh, shank = k - h, a - k
+        normal = np.cross(shank, thigh) if side == 0 else np.cross(thigh, shank)
+        size = float(np.linalg.norm(normal))
+        if size <= _MIN_FLEXION_SIN * np.linalg.norm(thigh) * np.linalg.norm(shank):
+            raise ValueError("knee flexion too small to define the flexion plane")
+        new_axis = normal / size
+        if float(np.linalg.norm(new_axis - axis)) < 1.0e-12:
+            break
+        axis = new_axis
+        k, a = k0 - w_knee * axis, a0 - w_ankle * axis
+    return new_axis
+
+
 def hip_rotation_zero(
     points: Array,
     valid: NDArray[Any],
@@ -201,8 +253,15 @@ def hip_rotation_zero(
     calibration: HipCalibration | None = None,
     superior_axis: Sequence[float] = (0.0, 0.0, 1.0),
     max_frames: int = 24,
+    lateral_marker_offsets_m: tuple[float, float] = (0.0, 0.0),
 ) -> HipRotationZero:
     """Estimate the zero-twist rotation angle offsets (deg) for right and left hips.
+
+    ``lateral_marker_offsets_m`` (knee, ankle) removes the tilt the lateral
+    markers give the ankle-fallback flexion plane (:func:`knee_flexion_axis`).
+    The default ``(0, 0)`` keeps the legacy plane that the canonical receipts
+    were produced with; :data:`LATERAL_SEEDS_M` is the corrected estimate
+    (#11737).
 
     The angle measures the rotation of the thigh around its longitudinal axis in
     the anatomical pelvis frame (X forward, Y up, Z right). For each leg:
@@ -288,14 +347,15 @@ def hip_rotation_zero(
             elif a_out_cols is not None and mask[f, a_out_cols[side]]:
                 p_a_out = rotation.T @ (pts[f, a_out_cols[side]] - translation)
                 c_hip = centres[side]
-                v_thigh = axes.T @ (p_k_out - c_hip)
-                v_shank = axes.T @ (p_a_out - p_k_out)
-                if side == 0:
-                    v_lat = np.cross(v_shank, v_thigh)
-                    theta = float(np.degrees(np.arctan2(v_lat[0], v_lat[2])))
-                else:
-                    v_lat = np.cross(v_thigh, v_shank)
-                    theta = float(np.degrees(np.arctan2(-v_lat[0], -v_lat[2])))
+                v_lat = knee_flexion_axis(
+                    (0.0, 0.0, 0.0),
+                    axes.T @ (p_k_out - c_hip),
+                    axes.T @ (p_a_out - c_hip),
+                    side=side,
+                    lateral=lateral_marker_offsets_m,
+                )
+                sign = 1.0 if side == 0 else -1.0
+                theta = float(np.degrees(np.arctan2(sign * v_lat[0], sign * v_lat[2])))
                 angles_list.append(theta)
 
     if not angles_r or not angles_l:
@@ -312,6 +372,69 @@ def _matrix(value: Any) -> Array:
     if m.shape != (4, 4) or not np.isfinite(m).all():
         raise ValueError("Expected a finite 4x4 transform")
     return m
+
+
+def _twist_axis_sign(child_to_follower: Any) -> float:
+    """-1 if the hip's ``Rz`` axis (follower z) runs down the femur (-y), else +1.
+
+    ``hip_rotation_zero`` offsets are twists about the thigh's long axis pointing
+    up. A hip mirrored to OpenSim's left-side convention
+    (``spec_builder.HIP_MIRROR``) has its ``Rz`` axis pointing down the femur, so
+    the same physical twist is ``Rz(-theta)``. Other layouts (the v1 spec's
+    permutation) keep the unsigned ``Rz(theta)`` they always had.
+    """
+    return -1.0 if hip_is_mirrored({"child_to_follower": child_to_follower}) else 1.0
+
+
+def hip_is_mirrored(joint: Mapping[str, Any]) -> bool:
+    """True when a hip's ``Rz`` (rotation) axis runs down the femur (-y)."""
+    return float(_matrix(joint["child_to_follower"])[1, 2]) < -0.5
+
+
+def pelvis_alignment_from_spec(
+    document: Mapping[str, Any], *, hip_frame: str = "Hip"
+) -> Array:
+    """The 4x4 OpenSim-pelvis -> ``hip_frame`` alignment ``document`` was built with.
+
+    OpenSim's hip has unrotated parent and child frames, so at zero hip
+    coordinates the femur frame has the pelvis orientation. A builder writes
+    the hip as ``P = H A F S`` and ``C = G S`` (``parent_to_base`` and
+    ``child_to_follower``; ``F``/``G`` the unrotated Rajagopal frames, ``S``
+    the builder's axis layout: permutation, mirror or identity), so each hip
+    gives ``A = (H^-1 P) C^T`` (rotation blocks). This is the
+    ``hip_from_pelvis_old`` that :func:`apply_hip_calibration` needs; taking it
+    from another spec's build receipt rotates the hips (#12109). The
+    translation is the hip-centre midpoint; :func:`apply_hip_calibration` does
+    not depend on it.
+
+    Raises ``ValueError`` when ``hip_frame`` or a hip joint is missing, or when
+    the two hips disagree on the rotation (a spec not built this way).
+    Postcondition: the rotation block is proper orthonormal.
+    """
+    frames = {f["name"]: f for f in document["frames"]}
+    if hip_frame not in frames:
+        raise ValueError(f"Document has no frame named {hip_frame}")
+    h_inv = np.linalg.inv(_matrix(frames[hip_frame]["placement"]))
+    joints = {j["name"]: j for j in document["joints"]}
+    rotations, origins = [], []
+    for name in ("hip_r", "hip_l"):
+        if name not in joints:
+            raise ValueError(f"Document has no {name} joint")
+        base = h_inv @ _matrix(joints[name]["parent_to_base"])
+        layout = _matrix(joints[name]["child_to_follower"])[:3, :3]
+        rotations.append(base[:3, :3] @ layout.T)
+        origins.append(base[:3, 3])
+    if float(np.max(np.abs(rotations[0] - rotations[1]))) > _ALIGNMENT_AGREEMENT_TOL:
+        raise ValueError("hip_r and hip_l disagree on the pelvis alignment")
+    rotation = rotations[0]
+    if not np.allclose(rotation.T @ rotation, np.eye(3), atol=1e-9) or (
+        abs(np.linalg.det(rotation) - 1.0) > 1e-9
+    ):
+        raise ValueError("Recovered pelvis alignment is not a proper rotation")
+    out = np.eye(4)
+    out[:3, :3] = rotation
+    out[:3, 3] = np.mean(origins, axis=0)
+    return out
 
 
 def apply_hip_calibration(
@@ -377,7 +500,7 @@ def apply_hip_calibration(
             new = h @ a_new @ x
             twist = twist_r if is_r else twist_l
             if twist != 0.0:
-                rad = np.radians(twist)
+                rad = np.radians(twist) * _twist_axis_sign(joint["child_to_follower"])
                 c, s = np.cos(rad), np.sin(rad)
                 rz = np.array(
                     [

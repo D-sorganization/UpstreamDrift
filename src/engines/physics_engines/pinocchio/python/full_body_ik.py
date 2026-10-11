@@ -1,7 +1,7 @@
 """Pinocchio full-body inverse kinematics and marker tracking adapter (FB-4).
 
 Supplies forward kinematics (``pose_fn``), dual-grip weld loop-closure residuals,
-and least-squares inverse kinematics over the 41 full-body coordinates.
+and least-squares inverse kinematics over the 41- or 44-coordinate full-body specs.
 """
 
 from __future__ import annotations
@@ -12,6 +12,7 @@ from typing import Any, TypeAlias
 import numpy as np
 from numpy.typing import NDArray
 
+from src.engines.physics_engines.pinocchio.python.marker_kinematics import CoordinateMap
 from src.engines.physics_engines.pinocchio.python.native_model import (
     FullBodyPinocchioModel,
 )
@@ -32,8 +33,16 @@ class PinocchioFullBodyIK(BaseFullBodyIK):
         self.coordinate_order: tuple[str, ...] = tuple(
             self.specification["coordinate_order"]
         )
-        if len(self.coordinate_order) != 41:
-            raise ValueError("Expected exactly 41 full-body coordinates")
+        # Same inventories as the Drake adapter: v2 (41) and the anthropometric
+        # specs with wrist coordinates (44).
+        if len(self.coordinate_order) not in (41, 44):
+            raise ValueError(
+                f"Expected 41 or 44 full-body coordinates, got {len(self.coordinate_order)}"
+            )
+        # Pinocchio adds the scalar primitives in depth-first tree order, which
+        # permutes the spine/torso/arm/neck slots relative to the spec order
+        # (#12042); every array API of this adapter stays spec-ordered.
+        self._coordinate_map = CoordinateMap.from_plant(self.model)
 
         # Map marker bodies to Pinocchio frame ID or body tuple
         self._frame_ids: dict[str, int] = {}
@@ -61,8 +70,9 @@ class PinocchioFullBodyIK(BaseFullBodyIK):
         if q_arr.size != len(self.coordinate_order):
             raise ValueError(f"Expected {len(self.coordinate_order)} coordinates")
 
+        q_pin = self._coordinate_map.to_pin_q(q_arr, self._pin_model.nq)
         pin = self.model._pin
-        pin.forwardKinematics(self._pin_model, self._pin_data, q_arr)
+        pin.forwardKinematics(self._pin_model, self._pin_data, q_pin)
         pin.updateFramePlacements(self._pin_model, self._pin_data)
 
         poses: dict[str, Pose] = {}

@@ -17,9 +17,9 @@ artist rebuilds, no scene clears.
 
 from __future__ import annotations
 
-import csv
 import logging
-import re
+from collections.abc import Mapping
+from pathlib import Path
 from typing import Any
 
 import matplotlib.pyplot as plt
@@ -37,6 +37,7 @@ from src.shared.python.body_part_viz import (
 from src.shared.python.body_part_viz.force_color_controls import (
     install_force_color_action,
 )
+from src.shared.python.force_overlay.contracts import AxialLoadFrame, WrenchKind
 from src.shared.python.motion_matching.body_skeleton import (
     default_body_segments,
 )
@@ -54,9 +55,23 @@ from ...core.models import C3DDataModel
 from ...services.segment_set_io import SegmentSpec
 from ..widgets.mpl_canvas import MplCanvas
 from ._plot_style_helpers import StylePersistence, default_style_for
+from ._viewer_3d_forces import ViewerForceOverlayManager
+from ._viewer_3d_helpers import (
+    export_markers_to_csv,
+    finalize_scene_view,
+    transform_positions_by_screen_axes,
+)
+from ._viewer_3d_helpers import (
+    is_club_marker as _is_club_marker,
+)
+from ._viewer_3d_helpers import (
+    validate_frame as _validate_frame,
+)
+from ._viewer_3d_helpers import (
+    validate_speed as _validate_speed,
+)
 from ._viewer_3d_segments import UserSegmentRenderer
 from .marker_plot_tab import _open_style_dialog
-from .overview_tab import _scalar_value
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -70,34 +85,6 @@ _VIEW_PRESETS: dict[str, tuple[float, float]] = {
 
 _PLAYBACK_SPEEDS: tuple[float, ...] = (0.1, 0.25, 0.5, 1.0, 2.0, 4.0)
 _DEFAULT_SPEED_INDEX = 3  # 1.0×
-
-# Cluster/club marker name patterns — generic, not vendor-specific.
-_CLUB_MARKER_RE = re.compile(r"^Marker_\d+:\d+:", re.IGNORECASE)
-
-
-def _is_club_marker(name: str) -> bool:
-    """Return True when ``name`` looks like a club / cluster marker."""
-    return bool(_CLUB_MARKER_RE.match(name))
-
-
-def _validate_speed(speed: float) -> float:
-    """Validate a playback speed multiplier."""
-    if isinstance(speed, bool) or not isinstance(speed, (int, float)):
-        raise TypeError(f"speed must be a real number, got {type(speed).__name__}")
-    if not np.isfinite(speed) or speed <= 0.0:
-        raise ValueError(f"speed must be positive and finite, got {speed!r}")
-    return float(speed)
-
-
-def _validate_frame(frame: int, n_frames: int) -> int:
-    """Validate a frame index against ``n_frames``."""
-    if isinstance(frame, bool) or not isinstance(frame, int):
-        raise TypeError(f"frame must be int, got {type(frame).__name__}")
-    if n_frames <= 0:
-        raise ValueError("no frames loaded")
-    if not 0 <= frame < n_frames:
-        raise ValueError(f"frame {frame} out of range [0, {n_frames})")
-    return frame
 
 
 class Viewer3DTab(QtWidgets.QWidget):
@@ -122,6 +109,7 @@ class Viewer3DTab(QtWidgets.QWidget):
         self._event_buttons: list[QtWidgets.QToolButton] = []
 
         self._user_segment_renderer = UserSegmentRenderer(self._transform_positions)
+        self._force_overlay = ViewerForceOverlayManager(self)
 
         # Playback timer.
         self._timer = QTimer(self)
@@ -159,6 +147,18 @@ class Viewer3DTab(QtWidgets.QWidget):
         button.setObjectName("segment_force_colors")
         button.setDefaultAction(install_force_color_action(menu, lambda: [self]))
         left_panel.addWidget(button)
+
+        force_row = QtWidgets.QHBoxLayout()
+        force_row.addWidget(self._force_overlay.check_forces)
+        force_row.addWidget(self._force_overlay.check_torques)
+        force_row.addWidget(self._force_overlay.check_grip)
+        left_panel.addLayout(force_row)
+        left_panel.addWidget(self._force_overlay.label_legend)
+
+        self._force_overlay.check_forces.toggled.connect(self._on_force_toggle_changed)
+        self._force_overlay.check_torques.toggled.connect(self._on_force_toggle_changed)
+        self._force_overlay.check_grip.toggled.connect(self._on_force_toggle_changed)
+
         layout.addLayout(left_panel, 1)
 
         right_panel = self._build_right_panel()
@@ -365,11 +365,26 @@ class Viewer3DTab(QtWidgets.QWidget):
         self._clear_event_buttons()
 
         if model is None:
+            self._force_overlay.clear()
             self._n_frames = 0
             self.slider_frame.setMaximum(0)
             self._teardown_artists()
             self.canvas_3d.clear_axes()
             return
+
+        if getattr(model, "force_series", None) is not None:
+            self._force_overlay.set_force_series(
+                model.force_series, getattr(model, "force_missing", ())
+            )
+        elif model.filepath and (
+            model.filepath.endswith(".csv")
+            or Path(model.filepath).suffix.lower() == ".csv"
+        ):
+            series, missing = self._force_overlay.load_force_series(model.filepath)
+            model.force_series = series
+            model.force_missing = missing
+        else:
+            self._force_overlay.clear()
 
         for name in model.marker_names():
             self.list_markers_3d.addItem(name)
@@ -394,7 +409,10 @@ class Viewer3DTab(QtWidgets.QWidget):
         if body_segments_present:
             self.select_body_markers()
         elif marker_names:
-            self.list_markers_3d.setCurrentRow(0)
+            if item := self.list_markers_3d.item(0):
+                item.setSelected(True)
+        elif getattr(model, "force_series", None) is not None and self._n_frames > 0:
+            self._rebuild_scene()
 
     # ------------------------------------------------------- Selection
 
@@ -596,59 +614,8 @@ class Viewer3DTab(QtWidgets.QWidget):
 
     def _transform_positions(self, pos: np.ndarray) -> np.ndarray:
         """Apply axis convention transformation based on X_SCREEN and Y_SCREEN."""
-        if self.model is None or pos.size == 0:
-            return pos
-        raw = self.model.raw_parameters or {}
-        point = raw.get("POINT", {}) if isinstance(raw, dict) else {}
-
-        x_screen = point.get("X_SCREEN") if isinstance(point, dict) else None
-        y_screen = point.get("Y_SCREEN") if isinstance(point, dict) else None
-
-        x_val = _scalar_value(x_screen) if x_screen is not None else None
-        y_val = _scalar_value(y_screen) if y_screen is not None else None
-
-        # If no convention parameters, defaults are +X and +Z
-        x_str = str(x_val).upper().strip() if x_val else "+X"
-        y_str = str(y_val).upper().strip() if y_val else "+Z"
-
-        # Validate format (must be like +X, -Y, etc.)
-        def parse_axis(
-            s: str, default_axis: int, default_sign: float
-        ) -> tuple[int, float]:
-            if len(s) >= 2 and s[0] in ("+", "-") and s[1] in ("X", "Y", "Z"):
-                axis = {"X": 0, "Y": 1, "Z": 2}[s[1]]
-                sign = 1.0 if s[0] == "+" else -1.0
-                return axis, sign
-            # Fallback if sign is omitted, e.g. "X"
-            if len(s) == 1 and s in ("X", "Y", "Z"):
-                return {"X": 0, "Y": 1, "Z": 2}[s], 1.0
-            return default_axis, default_sign
-
-        x_axis, x_sign = parse_axis(x_str, 0, 1.0)
-        z_axis, z_sign = parse_axis(y_str, 2, 1.0)
-
-        # If axes are same (invalid convention), fallback to identity
-        if x_axis == z_axis:
-            return pos
-
-        y_axis = 3 - x_axis - z_axis
-
-        # Levi-Civita permutation symbol
-        def levi_civita(i: int, j: int, k: int) -> float:
-            if {i, j, k} != {0, 1, 2}:
-                return 0.0
-            if (i, j, k) in ((0, 1, 2), (1, 2, 0), (2, 0, 1)):
-                return 1.0
-            return -1.0
-
-        y_sign = x_sign * z_sign * levi_civita(x_axis, y_axis, z_axis)
-
-        # Apply transformation: pos has shape (..., 3)
-        transformed = np.empty_like(pos)
-        transformed[..., 0] = pos[..., x_axis] * x_sign
-        transformed[..., 1] = pos[..., y_axis] * y_sign
-        transformed[..., 2] = pos[..., z_axis] * z_sign
-        return transformed
+        raw = self.model.raw_parameters if self.model is not None else None
+        return transform_positions_by_screen_axes(pos, raw)
 
     def _rebuild_scene(self) -> None:
         """Tear down and recreate artists when the selection changes."""
@@ -659,6 +626,15 @@ class Viewer3DTab(QtWidgets.QWidget):
 
         self._teardown_artists()
         if not selected:
+            if (
+                self._force_overlay.series is not None
+                and len(self._force_overlay.series) > 0
+                and self._n_frames > 0
+            ):
+                self.canvas_3d.fig.clear()
+                self._ax = self.canvas_3d.add_subplot(111, projection="3d")
+                self._render_current_frame()
+                return
             self.canvas_3d.fig.clear()
             self.canvas_3d.draw_idle()
             self.label_frame_info.setText("Frame: - / Time: -")
@@ -763,26 +739,7 @@ class Viewer3DTab(QtWidgets.QWidget):
     def _finalize_scene_view(
         self, ax: Any, positions: np.ndarray, selected: list[str]
     ) -> None:
-        ax.set_xlabel("X")
-        ax.set_ylabel("Y")
-        ax.set_zlabel("Z")
-        ax.set_title("3D Marker Trajectories")
-
-        # Equal aspect.
-        finite = positions[np.isfinite(positions).all(axis=2)]
-        if finite.size > 0:
-            mn = finite.min(axis=0)
-            mx = finite.max(axis=0)
-            max_range = float(np.max(mx - mn))
-            if max_range > 0.0:
-                mid = 0.5 * (mx + mn)
-                half = max_range / 2.0
-                ax.set_xlim(mid[0] - half, mid[0] + half)
-                ax.set_ylim(mid[1] - half, mid[1] + half)
-                ax.set_zlim(mid[2] - half, mid[2] + half)
-
-        if len(selected) <= 12:
-            ax.legend(loc="upper right", fontsize=8)
+        finalize_scene_view(ax, positions, selected)
 
     def _teardown_artists(self) -> None:
         self._trail_lines = []
@@ -791,6 +748,7 @@ class Viewer3DTab(QtWidgets.QWidget):
         self._skeleton_collection = None
         self._skeleton_segments = ()
         self._user_segment_renderer.clear()
+        self._force_overlay.clear_artists()
         # plot_style renderer is recreated per scene rebuild — drop the
         # handle so update_style/update_frame don't mis-reference the
         # previous axes.
@@ -975,16 +933,41 @@ class Viewer3DTab(QtWidgets.QWidget):
         self.canvas_3d.draw_idle()
 
     def set_segment_axial_loads(
-        self, loads: SegmentLoadSeries | None, segment_indices: dict[str, int]
+        self,
+        loads: AxialLoadFrame | SegmentLoadSeries | None,
+        segment_indices: Mapping[str, int] | None = None,
     ) -> None:
-        """Attach qualified section loads with explicit IDs and exact model clock."""
-        if loads is not None:
-            if not isinstance(loads, SegmentLoadSeries):
-                raise TypeError("loads must be SegmentLoadSeries or None")
-            times = None if self.model is None else self.model.point_time
-            if times is None or not np.array_equal(times, loads.time_s):
-                raise ValueError("load times must match model point times")
-        self._user_segment_renderer.set_axial_loads(loads, segment_indices)
+        """Attach qualified section loads or frame loads with explicit IDs."""
+        if loads is None:
+            self._user_segment_renderer.set_axial_loads(None, {})
+            self.canvas_3d.draw_idle()
+            return
+
+        if isinstance(loads, AxialLoadFrame):
+            if segment_indices is None:
+                segment_indices = {
+                    name: i
+                    for i, name in enumerate(loads.values_n.keys())
+                    if i < len(self._user_segment_renderer._segments)
+                }
+            non_none = any(v is not None for v in loads.values_n.values())
+            if non_none and segment_indices:
+                series = SegmentLoadSeries(
+                    (loads.time_s,),
+                    {k: (v,) for k, v in loads.values_n.items() if v is not None},
+                    loads.source,
+                )
+                self._user_segment_renderer.set_axial_loads(series, segment_indices)
+            self.canvas_3d.draw_idle()
+            return
+
+        if not isinstance(loads, SegmentLoadSeries):
+            raise TypeError("loads must be AxialLoadFrame, SegmentLoadSeries or None")
+
+        times = None if self.model is None else self.model.point_time
+        if times is None or not np.array_equal(times, loads.time_s):
+            raise ValueError("load times must match model point times")
+        self._user_segment_renderer.set_axial_loads(loads, dict(segment_indices or {}))
         self.canvas_3d.draw_idle()
 
     def set_user_segments(
@@ -1025,66 +1008,98 @@ class Viewer3DTab(QtWidgets.QWidget):
             return
         frame = self.slider_frame.value()
         self._update_frame_label()
-        if self._selected_positions.size == 0:
-            return
+        if self._selected_positions.size > 0:
+            pts = self._selected_positions[:, frame, :]  # (M,3)
+            finite_mask = np.isfinite(pts).all(axis=1)
 
-        pts = self._selected_positions[:, frame, :]  # (M,3)
-        finite_mask = np.isfinite(pts).all(axis=1)
+            # Update current-frame scatter (legacy path retained for layout
+            # bounds — the visible glyphs are owned by the plot_style
+            # renderer below).
+            if self._point_artist is not None:
+                valid = pts[finite_mask]
+                if valid.size > 0:
+                    self._point_artist._offsets3d = (
+                        valid[:, 0],
+                        valid[:, 1],
+                        valid[:, 2],
+                    )
+                else:
+                    self._point_artist._offsets3d = ([], [], [])
 
-        # Update current-frame scatter (legacy path retained for layout
-        # bounds — the visible glyphs are owned by the plot_style
-        # renderer below).
-        if self._point_artist is not None:
-            valid = pts[finite_mask]
-            if valid.size > 0:
-                self._point_artist._offsets3d = (
-                    valid[:, 0],
-                    valid[:, 1],
-                    valid[:, 2],
-                )
-            else:
-                self._point_artist._offsets3d = ([], [], [])
+            # Push the same offsets through the plot_style renderer so its
+            # scatter follows the slider too.
+            if (
+                self._marker_style_renderer is not None
+                and self._marker_style_handle is not None
+            ):
+                valid = pts[finite_mask]
+                if valid.size > 0:
+                    record = self._marker_style_renderer._handles.get(  # type: ignore[attr-defined]
+                        self._marker_style_handle
+                    )
+                    if record is not None and record.artists:
+                        art = record.artists[0]
+                        if hasattr(art, "_offsets3d"):
+                            art._offsets3d = (
+                                valid[:, 0],
+                                valid[:, 1],
+                                valid[:, 2],
+                            )
 
-        # Push the same offsets through the plot_style renderer so its
-        # scatter follows the slider too.
+            # Update labels at the current point.
+            for i, txt in enumerate(self._label_texts):
+                if finite_mask[i]:
+                    p = pts[i]
+                    txt.set_position((float(p[0]), float(p[1])))
+                    # set_3d_properties for the z-coord on text3d.
+                    if hasattr(txt, "set_3d_properties"):
+                        txt.set_3d_properties(float(p[2]))
+
+            # Update skeleton segments.
+            self._update_skeleton_segments()
+
+            # Update user-defined segments via the body_part_viz renderer.
+            self._user_segment_renderer.update_frame(frame, self._n_frames)
+
+        # Update force and torque overlay glyphs and live axial loads
         if (
-            self._marker_style_renderer is not None
-            and self._marker_style_handle is not None
+            self._force_overlay.series is not None
+            and len(self._force_overlay.series) > 0
         ):
-            valid = pts[finite_mask]
-            if valid.size > 0:
-                # The renderer's update_frame indexes into the (T, M, D)
-                # array we'd have given it. Since we registered with a
-                # single static frame, we instead poke the artist offsets
-                # directly to keep the path simple.
-                record = self._marker_style_renderer._handles.get(  # type: ignore[attr-defined]
-                    self._marker_style_handle
+            t = (
+                float(self.model.point_time[frame])
+                if (
+                    self.model is not None
+                    and self.model.point_time is not None
+                    and frame < len(self.model.point_time)
                 )
-                if record is not None and record.artists:
-                    art = record.artists[0]
-                    if hasattr(art, "_offsets3d"):
-                        art._offsets3d = (
-                            valid[:, 0],
-                            valid[:, 1],
-                            valid[:, 2],
-                        )
-
-        # Update labels at the current point.
-        for i, txt in enumerate(self._label_texts):
-            if finite_mask[i]:
-                p = pts[i]
-                txt.set_position((float(p[0]), float(p[1])))
-                # set_3d_properties for the z-coord on text3d.
-                if hasattr(txt, "set_3d_properties"):
-                    txt.set_3d_properties(float(p[2]))
-
-        # Update skeleton segments.
-        self._update_skeleton_segments()
-
-        # Update user-defined segments via the body_part_viz renderer.
-        self._user_segment_renderer.update_frame(frame, self._n_frames)
+                else float(frame * 0.01)
+            )
+            dt = (
+                (1.0 / self.model.point_rate)
+                if (
+                    self.model is not None
+                    and getattr(self.model, "point_rate", 0.0) > 0
+                )
+                else 0.01
+            )
+            _, axial_loads = self._force_overlay.update_frame(t, dt, self._ax)
+            self.set_segment_axial_loads(axial_loads)
 
         self.canvas_3d.draw_idle()
+
+    @property
+    def force_glyph_count(self) -> int:
+        """Number of force/torque glyph artists currently rendered."""
+        return len(self._force_overlay.artists)
+
+    @property
+    def active_force_kinds(self) -> frozenset[WrenchKind]:
+        """Currently active wrench kinds enabled by GUI toggles."""
+        return self._force_overlay.active_kinds()
+
+    def _on_force_toggle_changed(self) -> None:
+        self._render_current_frame()
 
     def _update_skeleton_segments(self) -> None:
         if (
@@ -1139,42 +1154,8 @@ class Viewer3DTab(QtWidgets.QWidget):
     # ----------------------------------------------------------- CSV
 
     def export_selected_markers_csv(self, path: str) -> None:
-        """Write the currently selected markers' trajectories to CSV.
-
-        Columns: frame, time_s, <marker>_x, <marker>_y, <marker>_z, …
-        """
-        if not isinstance(path, str) or not path:
-            raise ValueError("path must be a non-empty string")
-        if self.model is None:
-            raise ValueError("no model loaded")
-        names = self._selected_names or self.model.marker_names()
-        if not names:
-            raise ValueError("no markers selected to export")
-
-        header = ["frame", "time_s"]
-        for name in names:
-            header += [f"{name}_x", f"{name}_y", f"{name}_z"]
-
-        n = self._n_frames
-        time_arr = (
-            self.model.point_time
-            if self.model.point_time is not None
-            else np.full(n, np.nan)
-        )
-
-        with open(path, "w", newline="", encoding="utf-8") as f:
-            writer = csv.writer(f)
-            writer.writerow(header)
-            for fr in range(n):
-                row: list[Any] = [fr, float(time_arr[fr]) if fr < len(time_arr) else ""]
-                for name in names:
-                    m = self.model.markers.get(name)
-                    if m is None or m.position.size == 0 or fr >= m.position.shape[0]:
-                        row += ["", "", ""]
-                    else:
-                        x, y, z = m.position[fr]
-                        row += [float(x), float(y), float(z)]
-                writer.writerow(row)
+        """Write the currently selected markers' trajectories to CSV."""
+        export_markers_to_csv(path, self.model, self._selected_names, self._n_frames)
 
     # -------------------------------------------------- Show/Hide events
 

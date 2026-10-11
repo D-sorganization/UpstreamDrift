@@ -18,7 +18,8 @@ function check = gs3dx_contact_check(info, opts)
 %     .feet       per side: .slip (max horizontal ankle travel, m),
 %                 .lift (max vertical ankle rise, m) from the ankle joint
 %                 GlobalPosition, relative to t = 0, and .p (3xN, World,
-%                 m) the ankle position itself
+%                 m) the ankle position itself, and .R (3x3xN) the ankle
+%                 frame's logged Rotation_Transform when the bus carries it
 %     .contacts   per-contact forces (3 x contacts x N, World axes, N) in
 %                 the order of 'FootContactForces' (left contacts first)
 %     .pelvis     max distance of the pelvis frame from its t = 0 position (m)
@@ -138,6 +139,10 @@ function check = gs3dx_contact_check(info, opts)
         vert = up.' * d;
         horiz = d - up * vert;
         check.feet.(P) = struct('slip', max(vecnorm(horiz)), 'lift', max(vert), 'p', a);
+        if isfield(logs.get([P 'AnkleLogs']).Values, 'Rotation_Transform')
+            [tr, R] = local_bus_leaf(logs, [P 'AnkleLogs'], 'Rotation_Transform');
+            check.feet.(P).R = reshape(at(tr, R), 3, 3, []);
+        end
     end
     check.signals = struct();
     for name = opts.signals

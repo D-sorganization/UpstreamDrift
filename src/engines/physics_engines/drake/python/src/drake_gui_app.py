@@ -44,9 +44,11 @@ if TYPE_CHECKING or HAS_QT:
             MultibodyPlant,
             Parser,
             RigidTransform,
+            SceneGraph,
             Simulator,
         )
     except ImportError:
+        SceneGraph = None  # type: ignore[misc, assignment]
         AddMultibodyPlantSceneGraph = None  # type: ignore[misc, assignment]
         Context = None  # type: ignore[misc, assignment]
         Diagram = None  # type: ignore[misc, assignment]
@@ -86,6 +88,24 @@ try:
     from .manipulability import DrakeManipulabilityAnalyzer
 except ImportError:
     DrakeManipulabilityAnalyzer = None  # type: ignore
+
+# Force/torque overlay (FTO-12, #11297)
+try:
+    from src.engines.physics_engines.drake.python.drake_force_torque import (
+        DrakeForceTorqueSource,
+    )
+except ImportError:
+    DrakeForceTorqueSource = None  # type: ignore[misc, assignment]
+from src.shared.python.body_part_viz.meshcat_force_colors import (  # noqa: E402
+    MeshcatForceColors,
+)
+
+from .drake_force_overlay import (  # noqa: E402
+    ForceOverlayController,
+    drake_color_bindings,
+    illustration_base_rgba,
+)
+from .drake_meshcat_sink import DrakeMeshcatSink  # noqa: E402
 
 # Constants
 TIME_STEP_S = 0.001
@@ -134,6 +154,7 @@ class DrakeSimApp(  # type: ignore[misc, no-any-unimported]
         )
 
         self.segment_force_colors = MeshcatForceColorSession()
+        self._force_overlay: ForceOverlayController | None = None
 
         # Simulation State
         self.simulator: Simulator | None = None  # type: ignore[no-any-unimported]
@@ -170,7 +191,9 @@ class DrakeSimApp(  # type: ignore[misc, no-any-unimported]
         # UI Setup
         self._setup_ui()
 
-        install_force_color_menu(self, lambda: [self.segment_force_colors])
+        install_force_color_menu(
+            self, lambda: [self._force_overlay or self.segment_force_colors]
+        )
 
         # Sync initial state to UI
         self._sync_kinematic_sliders()
@@ -278,9 +301,54 @@ class DrakeSimApp(  # type: ignore[misc, no-any-unimported]
             self._populate_manip_checkboxes()
 
         self._reset_state()
+        self._rebuild_force_overlay()
 
         if hasattr(self, "recorder"):
             self.recorder.engine = self
+
+    def _rebuild_force_overlay(self) -> None:
+        """(Re)create the force overlay and bind segment shading to MeshCat paths.
+
+        Called after every diagram build. Needs a live Meshcat; without one the
+        overlay stays off. Bindings come from the SceneGraph illustration
+        geometry (see ``drake_force_overlay`` for the path mapping).
+        """
+        if self._force_overlay is not None:
+            self._force_overlay.clear()
+        self._force_overlay = None
+        if self.meshcat is None or self.plant is None or self.diagram is None:
+            return
+        source = DrakeForceTorqueSource(self.plant, self.diagram)
+
+        def provider(include_gravity: bool) -> Any:
+            if self.context is None:
+                return None
+            ctx = self.plant.GetMyContextFromRoot(self.context)  # type: ignore[union-attr]
+            try:
+                return source.sample(ctx, include_gravity=include_gravity)
+            except (RuntimeError, ValueError):
+                LOGGER.exception("Force/torque sampling failed")
+                return None
+
+        overlay = ForceOverlayController(
+            provider, DrakeMeshcatSink(self.meshcat), self.segment_force_colors
+        )
+        self.segment_force_colors.update(self.plant, 0.0)
+        for system in self.diagram.GetSystems():
+            if isinstance(system, SceneGraph):
+                inspector = system.model_inspector()
+                bindings = drake_color_bindings(
+                    self.plant,
+                    inspector,
+                    source.body_labels,
+                    base_rgba_of=illustration_base_rgba(inspector),
+                )
+                self.segment_force_colors.bind(
+                    MeshcatForceColors(self.meshcat.SetProperty, bindings),
+                    self.plant,
+                )
+                break
+        self._force_overlay = overlay
 
     def _build_custom_urdf_diagram(self, urdf_path: str) -> None:
         """Build a simple diagram for a custom URDF."""

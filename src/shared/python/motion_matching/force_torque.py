@@ -11,6 +11,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 import math
+import warnings
 from typing import Any, Mapping, Sequence
 
 import numpy as np
@@ -116,27 +117,43 @@ def compute_center_of_pressure(
     wrench: SpatialWrench,
     f_threshold_n: float = 5.0,
 ) -> tuple[float, float] | None:
-    """Calculate Center of Pressure (CoP) coordinates in the contact plane.
+    """Deprecated shim for :func:`biomechanics.ground_reaction.center_of_pressure`.
 
-    Returns None when vertical force F_z <= f_threshold_n or non-finite.
-    Formulas:
-        x_cop = p_x - tau_y / F_z
-        y_cop = p_y + tau_x / F_z
+    The wrench is moved to the world origin (``M_O = tau + p x F``) and the
+    canonical formula is evaluated on the plane through ``wrench.point_m``,
+    which reproduces the historical ``(p_x - tau_y/F_z, p_y + tau_x/F_z)``.
+    Returns ``None`` when ``F_z <= f_threshold_n`` or non-finite.
     """
-    F_z = wrench.force_n[2]
-    if not math.isfinite(F_z) or F_z <= f_threshold_n:
-        return None
+    warnings.warn(
+        "compute_center_of_pressure is deprecated; use "
+        "src.shared.python.biomechanics.ground_reaction.center_of_pressure",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return wrench_center_of_pressure(wrench, f_threshold_n)
 
-    tau_x = wrench.torque_nm[0]
-    tau_y = wrench.torque_nm[1]
-    p_x = wrench.point_m[0]
-    p_y = wrench.point_m[1]
 
-    x_cop = float(p_x - (tau_y / F_z))
-    y_cop = float(p_y + (tau_x / F_z))
-    if not (math.isfinite(x_cop) and math.isfinite(y_cop)):
+def wrench_center_of_pressure(
+    wrench: SpatialWrench, f_threshold_n: float = 5.0
+) -> tuple[float, float] | None:
+    """Plane CoP ``(x, y)`` of ``wrench`` via the canonical core, else ``None``.
+
+    ``None`` when ``F_z <= f_threshold_n``, non-finite, or the CoP is not finite.
+    """
+    from src.shared.python.biomechanics.ground_reaction import center_of_pressure
+
+    force = np.asarray(wrench.force_n, dtype=float)
+    f_z = float(force[2])
+    if not math.isfinite(f_z) or f_z <= f_threshold_n:
         return None
-    return (x_cop, y_cop)
+    point = np.asarray(wrench.point_m, dtype=float)
+    moment = np.asarray(wrench.torque_nm, dtype=float) + np.cross(point, force)
+    cop = center_of_pressure(
+        force, moment, ground_height_m=float(point[2]), min_fz=f_threshold_n
+    )
+    if cop is None or not np.isfinite(cop).all():
+        return None
+    return (float(cop[0]), float(cop[1]))
 
 
 @dataclass(frozen=True)

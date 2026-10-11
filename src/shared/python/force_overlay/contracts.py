@@ -43,6 +43,7 @@ _ALLOWED_FRAME_KEYS = frozenset(
         "units",
         "wrenches",
         "axial_loads",
+        "metadata",
     }
 )
 
@@ -180,6 +181,7 @@ class ForceTorqueFrame:
     axial_loads: AxialLoadFrame | None = None
     world_frame: str = "world_Zup"
     units: Mapping[str, str] = field(default_factory=_default_overlay_units)
+    metadata: Mapping[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         if not math.isfinite(self.time_s):
@@ -188,8 +190,10 @@ class ForceTorqueFrame:
         if not isinstance(self.engine, str) or not self.engine.strip():
             raise ValueError("engine must be a non-empty string")
 
-        if self.world_frame != "world_Zup":
-            raise ValueError("world_frame must be 'world_Zup'")
+        if self.world_frame not in ("world_Zup", "adr0041_world"):
+            raise ValueError(
+                f"world_frame must be 'world_Zup' or 'adr0041_world', got '{self.world_frame}'"
+            )
 
         wrenches_tuple = tuple(self.wrenches)
         labels: set[str] = set()
@@ -216,6 +220,10 @@ class ForceTorqueFrame:
             raise TypeError("units must be a mapping")
         object.__setattr__(self, "units", MappingProxyType(dict(self.units)))
 
+        if not isinstance(self.metadata, Mapping):
+            raise TypeError("metadata must be a mapping")
+        object.__setattr__(self, "metadata", MappingProxyType(dict(self.metadata)))
+
     def by_kind(self, kind: WrenchKind) -> tuple[OverlayWrench, ...]:
         """Return all wrenches matching the requested kind."""
         return tuple(w for w in self.wrenches if w.kind == kind)
@@ -232,6 +240,7 @@ class ForceTorqueFrame:
             "axial_loads": self.axial_loads.to_dict()
             if self.axial_loads is not None
             else None,
+            "metadata": dict(self.metadata),
         }
 
     @classmethod
@@ -261,6 +270,7 @@ class ForceTorqueFrame:
 
         world_frame = data.get("world_frame", "world_Zup")
         units = data.get("units", DEFAULT_OVERLAY_UNITS)
+        metadata = data.get("metadata", {})
 
         return cls(
             time_s=float(data["time_s"]),
@@ -269,6 +279,7 @@ class ForceTorqueFrame:
             axial_loads=axial_loads,
             world_frame=world_frame,
             units=units,
+            metadata=metadata,
         )
 
 

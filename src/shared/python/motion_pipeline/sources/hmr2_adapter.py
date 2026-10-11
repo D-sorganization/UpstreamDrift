@@ -26,9 +26,12 @@ from pathlib import Path
 
 from src.shared.python.motion_pipeline.contracts import (
     Calibration,
+    CanonicalObservationFrame,
+    CanonicalObservations,
     Keypoint,
     KeypointFrame,
     KeypointSequence,
+    Marker,
 )
 from src.shared.python.motion_pipeline.sources.base import (
     MocapSourceAdapter,
@@ -278,6 +281,89 @@ class HMR2Adapter(MocapSourceAdapter):
                 "source_file": str(p),
                 "joints": joints,
                 "unit_system": "meters",
+                "smpl_body_joints": list(SMPL_BODY_JOINTS),
+            },
+        )
+
+    def to_canonical_observations(
+        self,
+        path: Path | KeypointSequence,
+        calibration: Calibration | None = None,
+    ) -> CanonicalObservations:
+        """Convert HMR2 sidecar outputs into a canonical observation stream (#11273).
+
+        Keeps 3D positions in meters with the declared coordinate frame.
+        When camera calibration or focal parameters are missing, sets a
+        typed unqualified flag rather than fabricating a guessed scale.
+        """
+        if isinstance(path, KeypointSequence):
+            sequence = path
+            source_path = Path(sequence.metadata.get("source_file", "hmr2.csv"))
+        else:
+            p = Path(path)
+            csv_path = p if p.is_file() else p / "joints3d.csv"
+            loaded = self.load_checked(csv_path, calibration=calibration)
+            if not isinstance(loaded, KeypointSequence):
+                raise TypeError(
+                    f"Expected KeypointSequence from HMR2 load, got {type(loaded)}"
+                )
+            sequence = loaded
+            source_path = csv_path
+
+        sidecar_meta = _sidecar_metadata(source_path)
+        has_focal = False
+        if calibration is not None and calibration.cameras:
+            for cam_data in calibration.cameras.values():
+                intrinsics = cam_data.get("intrinsics", {})
+                if any(k in intrinsics for k in ("focal_length", "fx", "fy")):
+                    has_focal = True
+                    break
+        if sidecar_meta is not None:
+            if any(k in sidecar_meta for k in ("focal_length", "focal", "camera")):
+                has_focal = True
+
+        declared_frame = "camera"
+        qualification = "qualified" if has_focal else "unqualified"
+        unqualified_reason = (
+            None
+            if has_focal
+            else "Missing focal/camera parameters; monocular scale is unverified"
+        )
+
+        frames: list[CanonicalObservationFrame] = []
+        for kf in sequence.frames:
+            markers: dict[str, Marker] = {}
+            for i, kp in enumerate(kf.keypoints):
+                m_name = kp.name or f"joint_{i}"
+                markers[m_name] = Marker(
+                    name=m_name,
+                    x=kp.x,
+                    y=kp.y,
+                    z=kp.z if kp.z is not None else 0.0,
+                )
+            frames.append(
+                CanonicalObservationFrame(
+                    timestamp=kf.timestamp,
+                    frame_index=kf.frame_index,
+                    markers=markers,
+                    keypoints=kf.keypoints,
+                    metadata={"declared_frame": declared_frame},
+                )
+            )
+
+        return CanonicalObservations(
+            id=f"hmr2-{sequence.id}",
+            frames=frames,
+            calibration=calibration,
+            marker_set_name="SMPL-22",
+            metadata={
+                "source_file": str(source_path),
+                "unit_system": "meters",
+                "declared_frame": declared_frame,
+                "qualification": qualification,
+                "scale_qualification": qualification,
+                "unqualified": not has_focal,
+                "unqualified_reason": unqualified_reason,
                 "smpl_body_joints": list(SMPL_BODY_JOINTS),
             },
         )

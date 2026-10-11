@@ -24,6 +24,10 @@ EXCLUDED_PARTS = {
     "build",
     "vendor",
 }
+# Verbatim archives of HANDOFF.md / DEVELOPMENT_LOG.md are historical by
+# definition and exempt from the size budget (RM#1893).
+ARCHIVE_DIR = "docs/development/archive"
+DEVLOG_ARCHIVE_PREFIX = "docs/development/DEVELOPMENT_LOG_ARCHIVE_"
 
 
 @dataclass(frozen=True)
@@ -61,6 +65,11 @@ def _relative_path(path: Path) -> str:
 
 def _is_document(path: Path) -> bool:
     return path.suffix.lower() in DOC_EXTENSIONS
+
+
+def _is_archive(rel_path: str) -> bool:
+    """Return whether a path is a verbatim HANDOFF/DEVELOPMENT_LOG archive."""
+    return rel_path.startswith((f"{ARCHIVE_DIR}/", DEVLOG_ARCHIVE_PREFIX))
 
 
 def _is_excluded(path: Path) -> bool:
@@ -104,7 +113,7 @@ def main() -> int:
     for document in _iter_documents():
         rel_path = _relative_path(document)
         byte_count = document.stat().st_size
-        if byte_count <= max_bytes:
+        if byte_count <= max_bytes or _is_archive(rel_path):
             continue
         exception = exceptions.get(rel_path)
         if exception is not None and exception.is_active(today):

@@ -45,6 +45,10 @@ concurrency:
 jobs:
   # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:
+    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository)
     # Dispatcher placement only. This repo is public, so a hosted runner is
     # free and unmetered; pinning the dispatcher meant every run waited for a
     # self-hosted slot just to decide where to run. The runner it SELECTS is
@@ -63,11 +67,19 @@ jobs:
           echo "runner=d-sorg-fleet-docker" >> "$GITHUB_OUTPUT"
           echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
   check:
+    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository)
     needs: pick-runner
     name: Check (Rust + TypeScript)
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 25
     env:
+      # Per-job rustup state (checkout wipes the workspace): the runner image's
+      # ~/.rustup can hold a partially installed toolchain that rustup cannot
+      # upgrade in place (#11595).
+      RUSTUP_HOME: ${{ github.workspace }}/.rustup-home
       CARGO_HOME: ${{ github.workspace }}/.cargo-tauri-check
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -77,6 +89,18 @@ jobs:
         with:
           node-version: "24"
 
+      - name: Bootstrap rustup without editing shell profiles
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          # dtolnay/rust-toolchain installs rustup WITHOUT --no-modify-path when
+          # rustup is not on PATH (always true with a per-job CARGO_HOME). On
+          # self-hosted runners that appends `. "$CARGO_HOME/env"` to the host's
+          # ~/.bashrc and ~/.bash_profile on every job (RM#2064).
+          if ! command -v rustup >/dev/null 2>&1; then
+            curl --proto '=https' --tlsv1.2 --retry 10 --retry-connrefused --location --silent --show-error --fail https://sh.rustup.rs | sh -s -- --default-toolchain none --no-modify-path -y
+            echo "${CARGO_HOME:-$HOME/.cargo}/bin" >> "$GITHUB_PATH"
+          fi
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8
         with:
@@ -151,7 +175,11 @@ jobs:
   build:
     name: Build (${{ matrix.artifact_name }})
     needs: check
-    if: github.event_name == 'release' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository) &&
+      (github.event_name == 'release' || (github.event_name == 'push' && github.ref == 'refs/heads/main'))
     strategy:
       fail-fast: false
       matrix:
@@ -171,6 +199,10 @@ jobs:
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 30
     env:
+      # Per-job rustup state (checkout wipes the workspace): the runner image's
+      # ~/.rustup can hold a partially installed toolchain that rustup cannot
+      # upgrade in place (#11595).
+      RUSTUP_HOME: ${{ github.workspace }}/.rustup-home
       WINDOWS_TAURI_RELEASE_ENABLED: ${{ vars.TAURI_WINDOWS_RELEASE_ENABLED == 'true' && 'true' || 'false' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -183,6 +215,18 @@ jobs:
           cache: "npm"
           cache-dependency-path: ui/package-lock.json
 
+      - name: Bootstrap rustup without editing shell profiles
+        if: (matrix.os != 'windows') && runner.os != 'Windows'
+        shell: bash
+        run: |
+          # dtolnay/rust-toolchain installs rustup WITHOUT --no-modify-path when
+          # rustup is not on PATH (always true with a per-job CARGO_HOME). On
+          # self-hosted runners that appends `. "$CARGO_HOME/env"` to the host's
+          # ~/.bashrc and ~/.bash_profile on every job (RM#2064).
+          if ! command -v rustup >/dev/null 2>&1; then
+            curl --proto '=https' --tlsv1.2 --retry 10 --retry-connrefused --location --silent --show-error --fail https://sh.rustup.rs | sh -s -- --default-toolchain none --no-modify-path -y
+            echo "${CARGO_HOME:-$HOME/.cargo}/bin" >> "$GITHUB_PATH"
+          fi
       - name: Setup Rust (Unix)
         if: matrix.os != 'windows'
         uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8

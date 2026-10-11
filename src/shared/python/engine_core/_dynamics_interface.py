@@ -149,7 +149,7 @@ class DynamicsInterface(Protocol):
         Section F Requirement: Drift component = passive dynamics (Coriolis, centrifugal, gravity, constraints)
         with all applied torques/muscle activations set to zero.
 
-        Mathematically: q̈_drift = M(q)⁻¹ · (C(q,v)v + g(q))
+        Mathematically: q̈_drift = M(q)⁻¹ · (-C(q,v)v - g(q))
 
         This is the answer to: "What would happen if all motors/muscles turned off right now?"
 
@@ -220,7 +220,8 @@ class DynamicsInterface(Protocol):
         **Purpose**: Answer "What would happen if all actuators turned off RIGHT NOW?"
 
         **Physics**: With τ=0, acceleration is purely passive:
-            q̈_ZTCF = M(q)⁻¹ · (C(q,v)·v + g(q) + J^T·λ)
+            q̈_ZTCF = M(q)⁻¹ · (J^T·λ₀ - C(q,v)·v - g(q))
+            (λ₀: constraint reactions recomputed under τ = 0)
 
         **Causal Interpretation**:
             Δa_control = a_full - a_ZTCF
@@ -303,9 +304,10 @@ class DynamicsInterface(Protocol):
             ValueError: If array dimensions don't match model
 
         Note:
-            Only velocity is zeroed; configuration (q) and control (τ) preserved.
-            Centrifugal barrier analysis uses ZVCF to find configurations where
-            q̈(q,0,τ) prevents motion even with applied torque.
+            Velocity and applied control are zeroed; configuration (q) is kept.
+            The control-preserved variant q̈(q, 0, τ), used for centrifugal
+            barrier analysis, is a distinct diagnostic
+            (zero_velocity_control_preserved_acceleration) and never a ZVCF.
 
         See Also:
             - compute_ztcf: Zero-torque counterfactual

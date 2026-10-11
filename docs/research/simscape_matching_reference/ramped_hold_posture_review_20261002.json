@@ -1,0 +1,180 @@
+{
+  "qualification": "READ_ONLY_SAVED_NATIVE_HOLD_POSTURE_NOT_CAUSAL_IDENTIFICATION",
+  "rotation_basis": "initial pelvis frame axes, not calibrated anatomical pitch",
+  "simulation_executed": false,
+  "model_loaded": false,
+  "model_saved": false,
+  "captures": {
+    "capture_A": {
+      "capture_alias": "capture-A",
+      "input_sha256": "cb563a5d739537666b61175064c52b0393fb01c5bb534428a982d8f73803ed5e",
+      "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+      "reference_time_s": [0, 0.05, 0.2, 0.5, 1],
+      "phases": [
+        {
+          "interval_s": [0, 0.05],
+          "max_displacement_m": 0.0005574656955525652,
+          "max_rotation_deg": 0.5166787609798806,
+          "terminal_world_translation_m": [
+            0.0003310407838546803, -0.00018727120391716368,
+            0.00034203562411527777
+          ],
+          "terminal_initial_pelvis_rotation_vector_deg": [
+            0.2363329443285601, -0.3511957911380449, 0.2962519160437972
+          ]
+        },
+        {
+          "interval_s": [0.05, 0.2],
+          "max_displacement_m": 0.00634621959791617,
+          "max_rotation_deg": 2.719104714470084,
+          "terminal_world_translation_m": [
+            0.004032546710799403, -0.0017617827056776447, 0.004572656985623494
+          ],
+          "terminal_initial_pelvis_rotation_vector_deg": [
+            1.6739687263722465, -2.047975045407492, 0.6302042246520544
+          ]
+        },
+        {
+          "interval_s": [0.2, 0.5],
+          "max_displacement_m": 0.011012138140553669,
+          "max_rotation_deg": 2.7728755669903253,
+          "terminal_world_translation_m": [
+            0.009061266967058071, -0.0017934724016725329, 0.003433368849833432
+          ],
+          "terminal_initial_pelvis_rotation_vector_deg": [
+            1.1062053245296695, -1.1923691064720152, 0.23395954191759805
+          ]
+        },
+        {
+          "interval_s": [0.5, 1],
+          "max_displacement_m": 0.009834028451936082,
+          "max_rotation_deg": 1.6343762435491551,
+          "terminal_world_translation_m": [
+            5.982919811103882e-5, 0.00027591139564238365,
+            -0.00033499730157517116
+          ],
+          "terminal_initial_pelvis_rotation_vector_deg": [
+            -0.13246508739472318, -0.1332049460426342, 0.09337660194495788
+          ]
+        }
+      ],
+      "first_5mm_crossing_s": 0.1671712876231436,
+      "first_1deg_crossing_s": 0.07528781171217261,
+      "vertical_displacement_range_m": [
+        -0.0018390636656643589, 0.005630778158865729
+      ],
+      "max_horizontal_displacement_m": 0.009797893913309564,
+      "terminal_world_translation_m": [
+        5.982919811103882e-5, 0.00027591139564238365, -0.00033499730157517116
+      ],
+      "terminal_initial_pelvis_rotation_vector_deg": [
+        -0.13246508739472318, -0.1332049460426342, 0.09337660194495788
+      ],
+      "terminal_com_world_displacement_m": [
+        -5.162705903088982e-5, -0.00035262325199116214, -0.0009991886533273209
+      ],
+      "terminal_com_relative_to_pelvis_change_m": [
+        -0.00011145625714192864, -0.0006285346476335458, -0.0006641913517521497
+      ],
+      "original_fixed_gate_results": {
+        "both_feet_settled_minimum_005BW": true,
+        "settled_total_080_to_120BW": true,
+        "whole_run_peak_at_most_200BW": true,
+        "pelvis_displacement_at_most_5mm": false,
+        "pelvis_rotation_change_at_most_1deg": false
+      },
+      "terminal_displacement_m": 0.00043809796079710765,
+      "terminal_rotation_change_deg": 0.2097850014169265
+    },
+    "capture_O": {
+      "capture_alias": "capture-O",
+      "input_sha256": "8042aeab7168b8ec4956ef84af4080a5042fd557e34e353dd2581c1e3f9dd69d",
+      "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+      "reference_time_s": [0, 0.05, 0.2, 0.5, 1],
+      "phases": [
+        {
+          "interval_s": [0, 0.05],
+          "max_displacement_m": 0.0007494218903279916,
+          "max_rotation_deg": 0.45953624646985675,
+          "terminal_world_translation_m": [
+            9.267960529764363e-5, -0.0004060395259499888, 0.00062303736953008
+          ],
+          "terminal_initial_pelvis_rotation_vector_deg": [
+            0.30654822026396567, -0.21188804359623264, 0.2688962763847077
+          ]
+        },
+        {
+          "interval_s": [0.05, 0.2],
+          "max_displacement_m": 0.006174462064376053,
+          "max_rotation_deg": 2.1613247303946865,
+          "terminal_world_translation_m": [
+            0.004203984568809299, -0.0012611996231167086, 0.004342795302599761
+          ],
+          "terminal_initial_pelvis_rotation_vector_deg": [
+            1.3418173368855086, -1.582276042048324, 0.6060143161749858
+          ]
+        },
+        {
+          "interval_s": [0.2, 0.5],
+          "max_displacement_m": 0.007255897635504038,
+          "max_rotation_deg": 2.171485213764128,
+          "terminal_world_translation_m": [
+            0.0021916163893464236, -0.0005826224687732716, -0.001514826167947056
+          ],
+          "terminal_initial_pelvis_rotation_vector_deg": [
+            0.009655186375234857, 0.20078738584580472, -0.019604998048307797
+          ]
+        },
+        {
+          "interval_s": [0.5, 1],
+          "max_displacement_m": 0.002711881200741762,
+          "max_rotation_deg": 0.5942213069827939,
+          "terminal_world_translation_m": [
+            0.001050554737746831, -0.0003687277332543662, 0.00041288594021363784
+          ],
+          "terminal_initial_pelvis_rotation_vector_deg": [
+            0.2616644534854936, -0.28246258797094426, 0.1842708531116808
+          ]
+        }
+      ],
+      "first_5mm_crossing_s": 0.1610932002691156,
+      "first_1deg_crossing_s": 0.08634642139392809,
+      "vertical_displacement_range_m": [
+        -0.0022023164871279866, 0.004362703687597544
+      ],
+      "max_horizontal_displacement_m": 0.006414017592307932,
+      "terminal_world_translation_m": [
+        0.001050554737746831, -0.0003687277332543662, 0.00041288594021363784
+      ],
+      "terminal_initial_pelvis_rotation_vector_deg": [
+        0.2616644534854936, -0.28246258797094426, 0.1842708531116808
+      ],
+      "terminal_com_world_displacement_m": [
+        0.0012439098385392255, -0.00045749272262112905, -0.0020731436664192388
+      ],
+      "terminal_com_relative_to_pelvis_change_m": [
+        0.00019335510079239449, -8.876498936676285e-5, -0.0024860296066328766
+      ],
+      "original_fixed_gate_results": {
+        "both_feet_settled_minimum_005BW": true,
+        "settled_total_080_to_120BW": true,
+        "whole_run_peak_at_most_200BW": true,
+        "pelvis_displacement_at_most_5mm": false,
+        "pelvis_rotation_change_at_most_1deg": false
+      },
+      "terminal_displacement_m": 0.0011874763988809695,
+      "terminal_rotation_change_deg": 0.426859633987113
+    }
+  },
+  "receipt": {
+    "actual_process_exit_code": 0,
+    "final_exit_code": 0,
+    "termination_reason": "natural_exit",
+    "done_marker": true,
+    "script_status": "success",
+    "command_identity": "run('audit_ramped_hold_posture_reviewed.m')",
+    "owned_pids": [50096],
+    "timestamp": "2026-10-02T19:37:01.981745+00:00"
+  },
+  "private_probe_sha256": "0c879fc8f375e718827b95230d994d2eac5f793e587ebc0fcad1c8c9e0de3c86"
+}

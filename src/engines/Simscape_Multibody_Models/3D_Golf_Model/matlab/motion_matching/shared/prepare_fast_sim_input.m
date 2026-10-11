@@ -23,6 +23,10 @@ function in = prepare_fast_sim_input(theta_or_struct, opts)
 %                           the Impact MAT).  Each field is the workspace
 %                           variable name; value is the override.
 %     .joint_names          string array; auto-resolved if empty.
+%     .fast_restart         logical, default true. When false, FastRestart
+%                           is explicitly set to 'off' so non-tunable initial
+%                           joint targets (e.g. solve_starting_pose) are
+%                           recompiled and applied every trial.
 %     .high_precision       logical, default false. When true the solver's
 %                           MaxStep is tightened to 0.0001 (10x smaller
 %                           than the persistent model default of 0.001),
@@ -64,6 +68,7 @@ function in = prepare_fast_sim_input(theta_or_struct, opts)
     if ~isfield(opts, 'input_overrides'); opts.input_overrides = struct();          end
     if ~isfield(opts, 'joint_names');   opts.joint_names   = string([]);            end
     if ~isfield(opts, 'high_precision'); opts.high_precision = false;               end
+    if ~isfield(opts, 'fast_restart');  opts.fast_restart  = true;                  end
 
     if ~bdIsLoaded(opts.model_name)
         load_system(opts.model_name);
@@ -76,7 +81,11 @@ function in = prepare_fast_sim_input(theta_or_struct, opts)
     end
 
     in = in.setModelParameter('StopTime',          num2str(double(opts.stop_time)));
-    in = in.setModelParameter('FastRestart',       'on');
+    if logical(opts.fast_restart)
+        in = in.setModelParameter('FastRestart',   'on');
+    else
+        in = in.setModelParameter('FastRestart',   'off');
+    end
     in = in.setModelParameter('SaveOutput',        'on');
     in = in.setModelParameter('ReturnWorkspaceOutputs', 'on');
     in = in.setModelParameter('SimscapeLogType',   char(opts.simscape_log));
@@ -96,13 +105,13 @@ function in = prepare_fast_sim_input(theta_or_struct, opts)
         coeff_struct = theta_to_polynomial_struct(theta_or_struct, joint_names);
         f = fieldnames(coeff_struct);
         for k = 1:numel(f)
-            in = in.setVariable(f{k}, coeff_struct.(f{k}));
+            in = in.setVariable(f{k}, coeff_struct.(f{k}), 'Workspace', opts.model_name);
         end
     end
 
     % Layer caller-supplied overrides on top.
     f = fieldnames(opts.input_overrides);
     for k = 1:numel(f)
-        in = in.setVariable(f{k}, opts.input_overrides.(f{k}));
+        in = in.setVariable(f{k}, opts.input_overrides.(f{k}), 'Workspace', opts.model_name);
     end
 end

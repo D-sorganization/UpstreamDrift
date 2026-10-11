@@ -23,6 +23,11 @@ outputs:
 runs:
   using: composite
   steps:
+    # Fail fast, naming the runner, when a self-hosted workspace is missing
+    # tracked files after checkout (#9507); also logs the sparse-checkout state.
+    - name: Assert checkout complete
+      shell: bash
+      run: python3 scripts/ci/assert_checkout_complete.py
     - name: Resolve pinned Tools revision
       id: pin
       shell: bash

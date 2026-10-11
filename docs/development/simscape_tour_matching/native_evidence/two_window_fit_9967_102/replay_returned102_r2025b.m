@@ -1,4 +1,4 @@
-function report = replay_returned102_r2025b(repo)
+function [report, replay] = replay_returned102_r2025b(repo, write_outputs)
 %REPLAY_RETURNED102_R2025B Qualified independent R2025b forward replay of returned102.
 % Incorporates:
 % 1. Qualified solver settings (ode15s, RelTol 1e-6, MaxStep 1/1440 s) demonstrating 61 um parity
@@ -6,8 +6,12 @@ function report = replay_returned102_r2025b(repo)
 % 3. World translational forces preservation without duplicate rot_wb rotation
 % 4. Robust 2-component pelvis yaw alignment (< 5.0%)
 % 5. Compact MAT saving (< 1 MB) without Simulink simulation objects
+% The optional second output is the simulate_golf_markers replay (its
+% raw_output carries CombinedSignalBus, e.g. for grip-wrench export, #11778).
+% WRITE_OUTPUTS = false skips writing the qualified JSON/MAT evidence files.
     arguments
         repo (1,1) string = "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-simscape-tour-runtime"
+        write_outputs (1,1) logical = true
     end
 
     rel = version('-release');
@@ -202,20 +206,22 @@ function report = replay_returned102_r2025b(repo)
         'gate4_clubhead_60mm', club_cluster_rms_m <= 0.060, ...
         'gate5_pelvis_yaw_5pct', pelvis_yaw_error_pct <= 5.0);
 
-    out_json = fullfile(evidence_dir, 'qualified_candidate_replay.json');
-    fid = fopen(out_json, 'w');
-    fprintf(fid, '%s', jsonencode(report, PrettyPrint=true));
-    fclose(fid);
+    if write_outputs
+        out_json = fullfile(evidence_dir, 'qualified_candidate_replay.json');
+        fid = fopen(out_json, 'w');
+        fprintf(fid, '%s', jsonencode(report, PrettyPrint=true));
+        fclose(fid);
 
-    % Save compact MAT (< 1 MB) without Simulink simulation objects
-    out_mat = fullfile(evidence_dir, 'qualified_candidate_replay.mat');
-    time_s = double(time_s);
-    q = double(replay.q);
-    qd = double(replay.qd);
-    qdd = double(replay.qdd);
-    tau = double(replay.tau);
-    omega = double(replay.omega);
-    save(out_mat, 'report', 'prediction', 'time_s', 'q', 'qd', 'qdd', 'tau', 'omega', '-v7');
+        % Save compact MAT (< 1 MB) without Simulink simulation objects
+        out_mat = fullfile(evidence_dir, 'qualified_candidate_replay.mat');
+        time_s = double(time_s);
+        q = double(replay.q);
+        qd = double(replay.qd);
+        qdd = double(replay.qdd);
+        tau = double(replay.tau);
+        omega = double(replay.omega);
+        save(out_mat, 'report', 'prediction', 'time_s', 'q', 'qd', 'qdd', 'tau', 'omega', '-v7');
+    end
 
     clear guard;
     close_system('GolfSwing3D_Kinetic', 0);

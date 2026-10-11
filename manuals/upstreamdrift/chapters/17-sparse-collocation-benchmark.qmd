@@ -1,0 +1,83 @@
+# Sparse Collocation Benchmark Spike (Provisional)
+
+## Model and Transcription
+
+F03 (#11787) adds a bounded, **synthetic** sparse inverse-dynamics collocation
+spike and benchmark receipt. It does not solve the native full-body golf swing.
+The known one-coordinate truth plant is
+
+$$
+m\ddot q+c\dot q+kq=\tau, \qquad m>0,\ c,k\ge0.
+$$
+
+Units are SI: the synthetic rotary $q$ is in radians, $\dot q$ in rad/s,
+$m$ denotes rotary inertia in kg m², $c$ is in N m s/rad, $k$ is in
+N m/rad, and $\tau$ is in N m. This is a mathematical rotary fixture, not a
+calibrated anatomical joint. Inputs are held constant over each interval,
+in accord with the exact applied-input ZOH contract.
+
+For $h_k=t_{k+1}-t_k$, midpoint inverse dynamics and kinematics are enforced
+as hard sparse equalities:
+
+$$
+\frac{q_{k+1}-q_k}{h_k}-\frac{v_{k+1}+v_k}{2}=0,
+\quad
+m\frac{v_{k+1}-v_k}{h_k}
++c\frac{v_{k+1}+v_k}{2}
++k\frac{q_{k+1}+q_k}{2}-u_k=0.
+$$
+
+The initial $(q_0,v_0)$ is fixed. The decision vector contains all later
+positions, velocities and interval inputs. Each defect row touches only its
+two neighboring nodes and one input; `defect_jacobian()` returns the exact
+sparse Jacobian. Bounded `trust-constr` solves the quadratic observation,
+effort and rate objective subject to both equations, hard input bounds and
+hard input-rate constraints. No contact/grip or manifold dynamics is inferred
+from this linear fixture.
+
+## Independent Forward Check and Benchmark Receipt
+
+After optimization, the candidate's post-solve ZOH inputs are applied to a
+fresh initial state by adaptive RK45 integration. That forward path is separate
+from midpoint collocation. The receipt reports optimizer convergence,
+maximal physical dynamics defect, input/rate violations, node objective,
+fresh forward state gap and observation RMSE as distinct values. A deliberately
+coarse stiff-plant case has small collocation defect yet exceeds a predeclared
+fresh replay gap; node feasibility cannot be promoted to independent replay.
+
+`benchmark_backends` accepts named backend adapters, predeclared starts and
+explicit replay, observation, bound and per-defect-kind feasibility limits.
+Each attempt records cold or warm status, failures, solve time, independent
+post-solve replay time, total callback time and Python-tracked peak allocation
+on a named host with Python/NumPy/SciPy versions. Summaries retain p50/p95
+solve, replay and total times, and elapsed time through the first accepted
+attempt. The total timer includes callback setup, derivative construction,
+solve, fresh replay and receipt assembly. The existing shooting adapter's
+solver timer includes its internal unsegmented replay; the separately timed
+replay is a second fresh post-solve rollout. These component timers therefore
+cover different internal work. The total timer excludes external data
+preparation, private capture calibration, native resource loading and artifact
+export; therefore it is **not** a full time-to-accepted-capture-match result.
+Python allocation is not process RSS, native library allocation, GPU memory or
+a system-wide peak. No production backend is selected from this fixture.
+
+The synthetic test also runs the repo's existing `fit_multiple_shooting` on
+the same second-order truth plant, horizon and target. Its adapted candidate
+uses one constant torque parameter, while sparse collocation uses one torque
+per interval. The receipt records input degrees of freedom and distinct
+`shooting_state` versus `midpoint_inverse_dynamics` defect kinds so those
+numbers cannot silently be compared as the same constraint. The common
+post-hoc objective and fresh forward error are comparable fixture diagnostics;
+the different input parameterizations and solver objectives preclude declaring
+a winning production backend. Crocoddyl/FDDP remains the native FDDP authority.
+A future native comparison must use the same model, actual input kind,
+observation mask/covariance, horizon, hard bounds, starts and resource budget,
+then pass the early F06 independent native replay validator.
+It must bind dynamics/contact/integrator/actuator/restart identities and report
+all rejected starts. D02's private protocol must be frozen before any capture
+fitting. This chapter and its associated calculation-registry entry are
+provisional; no six-engine, own-contact, muscle or real-capture qualification
+is implied.
+
+Reproduce the synthetic derivative and rollout checks with
+`python -m pytest tests/unit/motion_matching/test_sparse_collocation_spike.py -q`.

@@ -1,0 +1,113 @@
+{
+  "issue": 11612,
+  "epic": 11605,
+  "decision": "spec model in MyoSuite runtime; MyoHub body excluded from torque parity (unrelated topology, 11/44 coords)",
+  "versions": {
+    "myosuite": "2.12.2",
+    "mujoco": "3.6.0",
+    "numpy": "2.5.3"
+  },
+  "spec": "full_body_spec_hipcal_scaled.json",
+  "spec_sha256": "36702e052dcc2731b76d07cafcb92c9534b1274d2d374a0f6214af6eb52206c4",
+  "myosuite_loader": "myosuite.envs.env_base.MujocoEnv (MjSpec.from_file -> compile)",
+  "kkt_regularization": 0.0,
+  "L0": {
+    "max_abs_mass_error_kg": 0.0,
+    "max_abs_mass_matrix_error": 0.0
+  },
+  "L1": {
+    "0": {
+      "max_abs_acceleration_error": 0.0,
+      "max_abs_acceleration": 706.5981432075697,
+      "bound": 8.065981432075698e-06
+    },
+    "400": {
+      "max_abs_acceleration_error": 0.0,
+      "max_abs_acceleration": 1375.8712818403096,
+      "bound": 1.4758712818403097e-05
+    },
+    "420": {
+      "max_abs_acceleration_error": 0.0,
+      "max_abs_acceleration": 130979.53373017421,
+      "bound": 0.001310795337301742
+    }
+  },
+  "L2_30ms": {
+    "duration_s": 0.03,
+    "steps": 30,
+    "dt_s": 0.001,
+    "max_abs_q_error_rad": 0.0,
+    "max_abs_v_error_rad_s": 0.0,
+    "bit_exact": true,
+    "q_error_history": {
+      "time_s": [
+        0.0,
+        0.01,
+        0.02,
+        0.03
+      ],
+      "max_abs_q_error_rad": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "extended_200ms": {
+    "duration_s": 0.2,
+    "steps": 200,
+    "dt_s": 0.001,
+    "max_abs_q_error_rad": 0.0,
+    "max_abs_v_error_rad_s": 0.0,
+    "bit_exact": true,
+    "q_error_history": {
+      "time_s": [
+        0.0,
+        0.01,
+        0.02,
+        0.03,
+        0.04,
+        0.05,
+        0.06,
+        0.07,
+        0.08,
+        0.09,
+        0.1,
+        0.11,
+        0.12,
+        0.13,
+        0.14,
+        0.15,
+        0.16,
+        0.17,
+        0.18,
+        0.19,
+        0.2
+      ],
+      "max_abs_q_error_rad": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  }
+}

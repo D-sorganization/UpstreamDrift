@@ -37,9 +37,22 @@ from .colormaps import ColormapId, resolve_colormap_alias
 __all__ = [
     "ColorScale",
     "DataDrivenColor",
+    "FORCE_KIND_PALETTE",
     "PaletteColor",
     "StaticColor",
 ]
+
+# Colour-blind-safe Okabe-Ito hues for force/torque overlay glyph kinds (ADR-0052, #11288).
+# Reserved fills: #0000ff (tension) and #ff0000 (compression) must NEVER be used here.
+FORCE_KIND_PALETTE: dict[str, str] = {
+    "joint_actuator": "#E69F00",
+    "joint_reaction": "#CC79A7",
+    "contact": "#009E73",
+    "grip": "#56B4E9",
+    "external": "#000000",
+    "gravity": "#999999",
+    "muscle": "#D55E00",
+}
 
 
 def _hex_to_rgba(hex_value: str) -> RGBATuple:
@@ -57,7 +70,10 @@ def _get_matplotlib_colormap(cmap_id: ColormapId) -> Colormap:
         return cast(Colormap, colormaps[resolved.value])
     except (KeyError, ValueError):
         # Fallback: matplotlib older API
-        return cast(Colormap, cm.get_cmap(resolved.value))
+        get_cmap = getattr(cm, "get_cmap", None)
+        if get_cmap is not None:
+            return cast(Colormap, get_cmap(resolved.value))
+        raise
 
 
 @dataclass(frozen=True)

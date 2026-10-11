@@ -1,6 +1,6 @@
 import { apiFetch, apiFetchForm } from './fetch';
 import { getApiBase } from './backend';
-import type { AssetRequest, IdentityRequest, ModelRequest, SwingRequest } from './generated/types';
+import type { AssetRequest, ForceLayerRequest, IdentityRequest, ModelRequest, RefitRequest, SwingRequest, VideoExportRequest } from './generated/types';
 
 const root = '/api/v1/necromatcher';
 export interface SourceFitScope {
@@ -75,8 +75,24 @@ export interface VideoExportRun extends ResearchRun {
   producer_source_commit?: string | null;
   shape_overlay?: {opacity: number};
 }
-export type VideoOverlayOptions = {shaft_evidence?: Record<string, unknown>; shape_overlay?: {opacity: number}};
-export const submitVideoExport = (fit: string, options?: VideoOverlayOptions) => apiFetch<VideoExportRun>(`${root}/fits/${encodeURIComponent(fit)}/video-exports`, {method: 'POST', ...(options ? {body: JSON.stringify(options)} : {})});
+export type ForceLayer = Required<ForceLayerRequest>;
+export type VideoOverlayOptions = {
+  shaft_evidence?: Record<string, unknown>;
+  shape_overlay?: { opacity: number };
+  force_layer?: ForceLayer;
+};
+export const submitVideoExport = (fit: string, optionsOrLayer?: VideoOverlayOptions | ForceLayer) => {
+  if (!optionsOrLayer) {
+    return apiFetch<VideoExportRun>(`${root}/fits/${encodeURIComponent(fit)}/video-exports`, { method: 'POST' });
+  }
+  const body = 'enabled' in optionsOrLayer
+    ? (optionsOrLayer.enabled ? ({ force_layer: optionsOrLayer } satisfies VideoExportRequest) : undefined)
+    : optionsOrLayer;
+  return apiFetch<VideoExportRun>(
+    `${root}/fits/${encodeURIComponent(fit)}/video-exports`,
+    body ? { method: 'POST', body: JSON.stringify(body) } : { method: 'POST' }
+  );
+};
 export const fetchVideoExport = (run: string) => apiFetch<VideoExportRun>(`${root}/video-exports/${encodeURIComponent(run)}`);
 export const cancelVideoExport = (run: string) => apiFetch<VideoExportRun>(`${root}/video-exports/${encodeURIComponent(run)}/cancel`, {method: 'POST'});
 export const videoExportDownloadUrl = (run: string) => `${getApiBase()}${root}/video-exports/${encodeURIComponent(run)}/download`;

@@ -32,14 +32,20 @@ _REPO = Path(__file__).resolve().parents[5]
 _PACKAGE_DIR = _REPO / "src" / "tools" / "starting_pose_matcher"
 _CORE_PY = _PACKAGE_DIR / "core.py"
 _MATCHER_PY = _PACKAGE_DIR / "gui.py"
-# Wiffle xlsx is still in the legacy MATLAB tree (it's a subject-specific
-# motion-capture asset, not part of the matcher's own package).
-_WIFFLE_XLSX = (
-    _REPO
-    / "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui"
-    / "Motion Capture Plotter"
-    / "Wiffle_ProV1_club_3D_data.xlsx"
-)
+try:
+    from src.motion_capture.capture_registry import (
+        CaptureRegistryError,
+        resolve_capture,
+    )
+
+    _WIFFLE_XLSX = resolve_capture("club-workbook-wiffle")
+except CaptureRegistryError:
+    _WIFFLE_XLSX = (
+        _REPO
+        / "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui"
+        / "Motion Capture Plotter"
+        / "Wiffle_ProV1_club_3D_data.xlsx"
+    )
 
 
 def _load_module_by_path(name: str, path: Path):
@@ -526,15 +532,16 @@ class TestSkeletonModelling:
 # --------------------------------------------------------------------------- #
 
 
-def _require_xlsx() -> None:
-    if not _WIFFLE_XLSX.exists():
-        pytest.skip(f"Wiffle xlsx fixture not available: {_WIFFLE_XLSX}")
+def _require_xlsx() -> Path:
+    from src.motion_capture.capture_registry import require_capture
+
+    return require_capture("club-workbook-wiffle")
 
 
 class TestXlsxLoaders:
     def test_load_mocap_xlsx_columns(self, core):
-        _require_xlsx()
-        df = core.load_mocap_xlsx(str(_WIFFLE_XLSX), "TW_ProV1")
+        xlsx = _require_xlsx()
+        df = core.load_mocap_xlsx(str(xlsx), "TW_ProV1")
         assert len(df) > 100
         assert {
             "time",
@@ -549,8 +556,8 @@ class TestXlsxLoaders:
     def test_load_mocap_xlsx_units_are_metres(self, core):
         """Sanity-check: median shaft length is plausible (0.7-1.4 m).
         Catches the cm/inches mix-up bug."""
-        _require_xlsx()
-        df = core.load_mocap_xlsx(str(_WIFFLE_XLSX), "TW_ProV1")
+        xlsx = _require_xlsx()
+        df = core.load_mocap_xlsx(str(xlsx), "TW_ProV1")
         shaft = np.linalg.norm(
             df[["club_X", "club_Y", "club_Z"]].values
             - df[["mid_X", "mid_Y", "mid_Z"]].values,
@@ -564,8 +571,8 @@ class TestXlsxLoaders:
         )
 
     def test_event_header_for_prov1(self, core):
-        _require_xlsx()
-        ev = core.read_event_header(str(_WIFFLE_XLSX), "TW_ProV1")
+        xlsx = _require_xlsx()
+        ev = core.read_event_header(str(xlsx), "TW_ProV1")
         for k in ("A", "T", "I", "F"):
             v = getattr(ev, f"{k}_sample")
             assert v == v and v > 0, f"Missing {k}_sample"

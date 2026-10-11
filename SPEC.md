@@ -1,4 +1,751 @@
+## Coordinate-Invariant Physical Inertia Contract (#12183)
+
+The existing DIME inertia helper checks triangle feasibility on sorted principal
+moments and absolute symmetry tolerance. Chapter 51 records TDD evidence and
+the unchanged tensor-return contract. This helper correction introduces no native
+source-admission integration or optimizer-wide qualification. Imported body
+inertias still require explicit source/COM/frame/provenance validation; no
+automatic tensor repair or matching acceptance is authorized by this change.
+
+## Native Feedback Platform Integration (#12060)
+
+The published native Moco preparation/seed/solve/replay path and owned Simscape
+protocol coexist with guarded command search and six-engine replay entry points.
+Keep admitted Tools 86d0f28 and one private replay contract identity. Canonical
+chapter 39 and F10i turnover separate actual affected runtime checks, optional SDK
+skips, capture-loader DLL failures and the outstanding full-model scientific gates.
+Reference-conventions chapter is now 40; project MyoSuite remains chapter 38.
+
+## Project MyoSuite Bounded Native Command Solve (F09n)
+
+F09n #12036 connects the source-bound native objective and persistent native
+predictor to the existing shared F02 bounded search kernel. Freeze command
+plans, native bounds, first/subsequent command increments and declared hard
+criteria; verify unchanged parameters/callback identity. Independently admit
+and replay the complete fallback before search. Promote commands only through
+guarded SDK recomputation, full-horizon criteria and canonical replay; require
+guarded improvement. Return the admitted fallback on numerical or hard-criterion
+rejection, cancellation or timeout. Changed native/source/state identities fail.
+The adapter applies no live command. Its elapsed metric includes this solve's
+validation overhead; external preparation remains part of campaign timing.
+Chapter 38 and F09n turnover preserve source-specific proof and the remaining
+all-model muscular OpenSim endpoint. No physiology/private-fit acceptance follows.
+
+## Project MyoSuite Native Tracking Objective (F09m)
+
+F09m #12023 adds source-bound frozen native tracking costs shared by provisional
+search and guarded SDK histories. Decode complete states only on owned scratch
+data. Native configuration differences handle quaternion antipodes; native
+qvel differences, activation and exact command increments use explicit positive
+physical scales. Bind reference declaration, scales, absolute grid, complete
+initial state, previous controls, actuator order and source identities.
+Reject stale/changed lineage, clocks, bounds and solve parameters. The discrete
+cost does not grant physical feasibility, timestep-invariant integration or
+capture/physiological validity. Recompute selected commands through guarded
+promotion and independent full-horizon native replay. Chapter 38 and F09m
+turnover retain the evidence and remaining all-model muscular OpenSim endpoint.
+
+## Project MyoSuite Native Search, Forecast, Feedback and Independent Replay (F09i–F09l)
+
+F09l #12014 adds `ProjectTaskNativeSearch`, a persistent separately owned native
+context using the existing direct-command kernel and genuine Tools T01 bundles.
+Its invocation-boundary model guards leave every candidate explicitly
+provisional. Return immutable copied arrays plus the existing planned bundle
+binding the current initial state, model, channels, clock and policy. Commands
+are ordered post-mapping controls, bounded by native actuator limits and an
+explicit positive maximum horizon; no implicit clamping is allowed.
+
+Promotion accepts commands only and recomputes the entire plan through the
+guarded SDK forecaster. Both numerical callbacks receive bytes-backed immutable
+history arrays. Hard criteria must return `True`; objective must be finite.
+Existing export independently replays the serialized/reloaded T01 contract.
+No provisional states or scores qualify the plan. A validated future plan is
+separate from a live executed prefix, capture acceptance and physiological
+validation. Chapter 38 and F09l turnover retain the boundaries and evidence.
+
+F09k #12009 adds a reusable owned SDK forecasting plant for current-state
+shooting. Every candidate restores complete native integration state, including
+absolute time, activation, controls and warmstart, and runs the existing command
+recorder. The live plant is never reset or stepped by the forecaster. Exact
+current-state correspondence is checked before candidate execution, including
+caller conversion side effects. Source/model/SDK identity and live state are
+checked on success and failure. Timing includes admission and restoration;
+no real-time deadline or optimization convergence is established. Forecast
+history uses the existing independent replay boundary. Chapter 38 and F09k
+turnover preserve the unresolved calibration, physiology and parity gates.
+
+F09j #12003 provides copied immutable native feedback observations and reuses the
+admitted SDK loop for state-dependent commands. Retain controller provenance
+beside actual-input artifacts; reject callback state/model/source mutations
+before integration. Independent replay has no feedback dependency. The actual
+combined SDK campaign passes 89 tests; it does not establish a captured swing.
+
+Actual MyoSuite 3.0/MuJoCo 3.6 project tasks retain mixed native action bounds and
+exercise SDK lifecycle hooks. Freeze original source/resource bytes before
+native construction, retain concrete SDK helper/distribution identity, export
+existing T01/profile artifacts and verify every claimed state using the existing
+independent executor. Initialization 1.1 preserves absolute native epochs with
+measured relative clocks for suffix replay. Chapter 38 and F09i turnover govern
+the pathway. Three-step production probes do not qualify full capture,
+physiology, muscle-only drive, six-engine parity or the muscular OpenSim endpoint.
+Separate original-source nominal full-duration rollouts replay exactly for both
+variants but retain unqualified contact/constraint diagnostics. Invocation-local
+zero-filled fingerprint scratch preserves all per-step integrity checks while
+avoiding allocation/copy overhead. Python/Rust installs must match the actual
+vendored Tools revision, with feature-pin authority stated explicitly.
+Read-only reset diagnosis requires explicit initial assembly and physical support
+admission before fitting. Preserve default/reference/assembled provenance and
+independently reload full state; a mixed constraint norm does not qualify grip,
+joint limits or contact. Pose assembly alone does not prove capture correspondence.
+
+## Native Prediction Integrity Consolidation (F09p, #12055)
+
+Provisional predictions verify provider bytes at entry, after all preparation
+before native execution, and at exit. Preserve live state, owned handles,
+source/model/kernel identity, callback exclusion, full actuator/solver/clock
+admission and independent guarded promotion/replay. Changed preparation must
+reach no native step. Controlled short-fixture evidence reduces repeated
+native-library reads by 25 percent, without a cross-call cache or real-time claim.
+Canonical chapter 38 and F09p turnover retain source-specific proof and limits.
+Full seventeen-row/six-ecosystem/private muscular OpenSim acceptance remains open.
+
+## Native Tools Integration (F09o, #12044)
+
+The native command solve stack consumes admitted Tools main
+`86d0f28b1cc5acf61185e07e320c816c2d005512` with the F01b replay and private
+contract consumer migration. Python/Rust pins and the gitlink agree; native
+recording and independent replay share one private contract class identity
+through the existing governed loader. Actual affected SDK tests and provider
+source closure must be rerun. Impact acceptance is reconciled only after real
+capability probes and served-bundle verification. All-model parity, private
+motion fitting and muscular OpenSim matching/replay remain open.
+
+## Unit Gate Rust Installation State (#11977)
+
+The unit-test gate allocates distinct empty Rust and Cargo homes under runtime
+`RUNNER_TEMP` and publishes them through `GITHUB_ENV` before installing Rust.
+Missing runtime paths or invalid environment destinations fail setup explicitly.
+Existing toolchains remain untouched. Toolchain verification, wheel build and
+the unit suite remain required; local preparation tests do not qualify a CI run.
+
+## Native Muscle Replay Development Boundary (F07, #11791)
+
+Child #11867 restricts recursive native admission before `initSystem` to exact `Millard2012EquilibriumMuscle` and `Thelen2003Muscle` concrete identities. Inheritance-compatible unknown laws fail closed; supported native casts still supply model-owned state limits. Adapter `native-muscle-replay/1.3.1` hashes an explicit exact-class policy. The negative identity-proxy test is not compiled-plugin qualification, and neither this guard nor the positive native fixtures establish full-body/capture acceptance.
+
+`tour_matching.replay_muscle_excitations` restores complete named continuous state, plays bounded linear native muscle excitation inputs, and cold-starts Runge-Kutta-Merson once without observations, feedback or resets. It audits actual native applied excitations and binds state/input/model/policy identities. Existing controllers, prescribed coordinates, non-muscle actuators and undeclared non-muscle forces fail closed. This early fixture does not qualify discrete/plugin initialization, contact, full-body anatomy or mocap matching; #11791 remains open. The revised feedback-controls milestone DAG separates schema/provider readiness from scientific acceptance and private evidence delivery.
+
+## Native Muscle Contact Replay (F07b, #11815)
+
+Independent native excitation replay accepts an explicit exact contact-force path allowlist for supported native sphere/half-space laws. It reuses OpenSimForceTorqueSource and fails on incomplete wrench evidence. Policy/hash records native law identity; arbitrary external forces, controllers, reserves and state corrections remain forbidden. Native synthetic contact/refinement tests do not qualify full-body golf anatomy, contact/grip calibration or private mocap matching.
+
+## Native Muscle-Model Asset Admission (F07 Child #11819)
+
+`tour_matching.audit_muscle_model_asset` requires a pinned source SHA-256 and
+returns serialized declarations plus optional actual native initialization,
+recursive components, effective muscle options, path attachment frames,
+coordinate locks/prescription, state names and runtime/loaded-serialization
+identity. Region and coordinate-role maps use exact native paths and retain
+unverified anatomical status. Unknown paths fail; unavailable native loading
+retains source facts and required evidence. Local mesh candidates are hashed
+without claiming complete native dependency closure. This API never qualifies
+anatomy, muscle capacity, model provenance, contact, full state or replay.
+See canonical manual chapter 18 and F07_MODEL_ADMISSION_TURNOVER.md; F07 #11791
+and the full feedback-controls epic #11784 remain open.
+
+## Capture-O Video Companion: Error Budget, Guidance Derivation, and Public Summary (COV-11, #11279)
+
+Specifies machine-readable error budgeting, frozen-rule guidance classification, and privacy-preserving summary generation (#11268, #11279):
+- **Error Budget Schema (`src/motion_capture/reference/error_budget.py`)**:
+  - `ErrorBudgetCell`: frozen data structure recording `source`, `joint_or_landmark`, `phase_bin`, `view`, `grade`, `comparison_level`, `metric`, `unit`, `n_swings`, `n_frames`, `p50`, `p95`, `worst`, `camera_uncertainty_spread`, `resolvable`, and `source_receipt_hashes`.
+  - Non-zero swing invariant: `n_swings <= 0` is strictly forbidden and raises `ValueError`. Missing data produces no cell and is recorded in `ErrorBudget.not_measured` (`NotMeasuredRecord`).
+  - `build_error_budget`: pure aggregation over COV-7/COV-9/COV-10 summaries with deterministic cell sorting and SHA-256 digest computation (`receipt_digest`), yielding byte-identical serialization across reruns (`to_json`).
+- **Frozen Guidance Derivation (`derive_guidance`, `GuidanceRule`, `GuidanceItem`, `GuidanceReport`)**:
+  - Encapsulates frozen comparison thresholds for historical player consumers (Tiger #11226, Hogan #11229, Necromatcher #11232/#11235).
+  - Classifies quantities into `trustworthy at p95 < X`, `indicative`, or `not recoverable from single view`.
+  - Level contract enforcement: an L1 cell can never be classified as `trustworthy` for a per-frame quantity; attempting to do so raises `ValueError`.
+  - Frozen-rule guard: modifying thresholds without bumping `ERROR_BUDGET_SCHEMA_VERSION` fails closed with `ValueError`.
+  - Resolvability guard: when camera uncertainty spread renders a metric unresolvable (`resolvable == False`), guidance reports `not recoverable from single view`.
+- **Public Summary Generator (`generate_public_summary`)**:
+  - Generates neutral Markdown summaries referencing only `capture-O` and `subject-O` with body-height-normalized numbers.
+  - Fail-closed privacy guards: strictly prohibits `cov-NN` frame indices, absolute filesystem paths, and private store filenames (`.mp4`, `.c3d`, `originals/`).
+  - Requires affirmative `owner_approved=True` parameter.
+
+## 3D Comparison: Monocular Backends and Necromatcher Fits vs Capture-O Marker IK (COV-9, #11277)
+
+Specifies 3D comparison of monocular video 3D backends (HMR2) and Necromatcher native forward kinematics fits (marker-anchored and generic) against capture-O reference marker IK under Design by Contract (DbC), Law of Demeter (LoD), and fail-closed integrity (#11268, #11277):
+- **3D Error Metric Separation & Procrustes Alignment (`src/motion_capture/reference/comparison_3d.py`)**:
+  - `align_trajectories_rigid_fixed_scale`: computes rigid transform ($R, t$) on address-phase frames using Kabsch alignment, preserving scale fixed ($s = 1.0$) from reference anthropometry.
+  - `compute_mpjpe_and_pa_mpjpe`: evaluates fixed-scale MPJPE alongside Procrustes-aligned PA-MPJPE (per-frame optimal similarity $s, R, t$) in millimeters. Uniform scale errors remain visible in MPJPE while neutralized in PA-MPJPE.
+  - `compute_depth_and_image_plane_errors`: decomposes 3D residual vectors into the camera optical depth axis component ($e_d = \Delta \mathbf{p} \cdot \hat{\mathbf{d}}$) and orthogonal image-plane component ($\Delta \mathbf{p}_{\perp} = \Delta \mathbf{p} - e_d \hat{\mathbf{d}}$), isolating single-view monocular depth ambiguity.
+- **Fail-Closed Laterality & Clock Qualification**:
+  - `validate_laterality`: validates coronal vector alignment between bilateral joint pairs (shoulders, hips); swapped left and right joints fail closed with `ValueError` rather than averaging.
+  - Clock qualification: when `physical_clock == "unknown"`, comparisons operate strictly in phase-normalized units and omit all velocity metrics (`velocity_metrics is None`). Velocity metrics are emitted only when `physical_clock == "known"` and frame rate is authenticated.
+- **Architecture Law of Demeter & Solver Isolation**:
+  - Comparison harness interfaces exclusively with native forward kinematics landmark positions $(T, K, 3)$; direct imports or dependencies on Necromatcher solver internals, optimizer routines, or raw generalized coordinates ($q$-vectors) are forbidden.
+- **Anthropometry Ablation & L1-3D Envelope Evaluation**:
+  - `compute_anthropometry_ablation`: computes anchored-minus-generic delta ($\Delta = \text{MPJPE}_{\text{anchored}} - \text{MPJPE}_{\text{generic}}$) and fraction of error attributable to body-size estimation.
+  - `compute_l1_3d_envelope_comparison`: measures trajectory agreement fraction inside the 13-swing 3D variation envelope ($[p_5, p_{95}]$ bounds) per joint and per swing phase.
+- **Governed 3D Comparison Receipt (`Comparison3DReceipt`, `build_3d_comparison_receipt`)**:
+  - Encapsulates neutral swing identifiers, backend name, comparison level (`L3` or `L1_3D`), and verified 64-character hexadecimal SHA-256 digests (`reference_hash`, `predicted_hash`, `pairing_hash`); corrupted or stale hashes fail closed.
+
+## Marker-Anchored Anthropometry and Necromatcher Owner Project Contracts (COV-8, #11276)
+
+Specifies the Necromatcher owner player project, marker-anchored anthropometry fitting, fail-closed privacy guards, and immutable capture/swing ingestion (#11268, #11276):
+- **Fail-Closed Privacy Guard (`create_owner_project`)**:
+  - Requires `CAPTURE_DATA_DIR` environment variable or parameter when `private=True`.
+  - Refuses library paths outside `CAPTURE_DATA_DIR` with `ValueError`, ensuring owner data never lands in default public library roots or Git trees.
+  - Automatically initializes or loads `NecromatcherLibrary` and registers the owner player (`subject-O`).
+- **Marker-Anchored Anthropometry Fitting (`compute_marker_anchored_anthropometry`, `MarkerAnchoredAnthropometry`, `SegmentLengthEstimate`)**:
+  - Computes segment lengths from marker joint centres (median across swings with spread and uncertainty).
+  - Explicit provenance tagging: marks marker-measured segments as `'observed (marker-derived)'` and unobserved segments as `'population-prior'` from de Leva male tables scaled to height. Missing or unrecognised provenance tags strictly raise `ValueError`.
+  - Enforces strictly positive and finite segment lengths, raising `ValueError` naming the offending segment on invalid values.
+  - Enforces bilateral length symmetry bounds between paired limbs (`thigh_r`/`thigh_l`, `upper_arm_r`/`upper_arm_l`, `shank_r`/`shank_l`, `forearm_r`/`forearm_l`, `hand_r`/`hand_l`, `foot_r`/`foot_l`), raising `ValueError` naming the segment when asymmetry exceeds the declared bound.
+  - Records owner-reported height and mass with explicit `owner_reported` provenance.
+- **Immutable-Version Capture and Swing Ingestion (`import_video_swings_to_owner_project`)**:
+  - Ingests graded video swings (grades A–C) under registered player `subject-O`, skipping rejected swings (`grade="R"`).
+  - Archives observations from historical-capture run directories via `build_capture_archive`.
+  - Re-importing existing capture archives maintains immutable versioning without duplicating assets or overwriting files on disk.
+
+## 2D Comparison of Markerless Backends vs Projected Capture-O Landmarks (COV-7, #11275)
+
+Specifies 2D comparison between markerless backends and projected capture-O reference landmarks at the highest level each swing supports (COV-7, #11275, parent epic #11268):
+- **Comparison Level Separation (`ComparisonLevel`)**:
+  - `L1` (Envelope comparison, applicable to all graded A–C swings): evaluates fraction of frames inside the 13-swing variation envelope ($p_5 \le \text{observed} \le p_{95}$), signed distance to envelope median ($p_{50}$) in pixels and body-height-normalized units, and DTW distance relative to inter-swing spread.
+  - `L2` (Paired comparison): strictly requires paired swing status (`PairingDecisionStatus.PAIRED`) with confidence margin $\Delta \ge \tau_{\text{pair}}$ and non-null `paired_capture_swing_id`. An unpaired or ambiguous swing raises `ValueError`.
+- **Per-Landmark Residuals & Missingness Tracking (`L2ComparisonResult`)**:
+  - Reports pixel residuals and body-height-normalized residuals as $p_{50}$, $p_{95}$, and worst (maximum) per landmark and aggregated.
+  - Dual RMSE variants: visibility-weighted RMSE ($\sqrt{\sum v_i r_i^2 / \sum v_i}$) and unweighted RMSE.
+  - Missing and occluded landmarks ($v_i = 0$ or non-finite) are excluded from visibility weighting and counted in the structured `missingness_report`, never filled with zeros.
+- **Leakage Guard for Keypoint Offset Calibration**:
+  - Calibration frames used for offset estimation are strictly excluded from the evaluation set.
+  - If a caller supplies an evaluated set containing calibration frames, the leakage guard raises `ValueError`.
+- **Camera Uncertainty Propagation (`propagate_camera_uncertainty`, `MetricSpread`)**:
+  - Propagates virtual camera parameter covariance by sampling camera extrinsics perturbations and reprojecting reference landmarks to establish empirical metric spread ($p_{95} - p_5$).
+  - Larger camera covariance yields wider metric spread.
+  - When comparing backend differences, any difference smaller than the camera metric spread is reported as `is_resolvable = False` and status `"not resolvable"`.
+- **Receipt Input Hash Integrity (`build_2d_comparison_receipt`, `Comparison2DReceipt`)**:
+  - Enforces bitwise input hash verification across observations, camera, pairing, and profile SHA-256 digests.
+  - A stale or mismatched hash raises immediate refusal (`ValueError`).
+
+## Capture-O Video Companion: Swing Pairing, Similarity Matrix, Confidence and Abstention Contracts (COV-6, #11274)
+
+Specifies evidence-grounded video swing to capture-O marker swing pairing, DTW similarity matrices normalized by inter-capture variation, confidence estimation, and fail-closed abstention rules (#11268, #11274):
+- **Phase-Normalized Trajectory DTW & Inter-Capture Normalization (`src/motion_capture/reference/swing_pairing.py`)**:
+  - `compute_inter_capture_envelope_median`: computes median channel-averaged DTW distance across all distinct unordered pairs of capture swings in the given camera view.
+  - Inter-swing envelope serves as empirical null baseline: distance to capture swings is normalized as $d_{\text{norm}}(V, C_k) = d(V, C_k) / \text{median}(D_{\text{inter}})$.
+- **Confidence, Margin & Abstention Rule (`PairingDecisionStatus`, `PairingConfidence`)**:
+  - Evaluates margin $\Delta = d_{(2)} - d_{(1)}$ between best and second-best normalized distances.
+  - Fail-closed abstention: returns `UNPAIRED` when no capture swing is closer than envelope median ($\min_k d_{\text{norm}}(V, C_k) \ge 1.0$).
+  - Returns `AMBIGUOUS` when the top two candidates are within $\varepsilon$ ($\Delta < \varepsilon$, default 0.05) or margin fails threshold ($\Delta < \tau_{\text{pair}}$, default 0.20).
+  - Returns `PAIRED` with designated `paired_capture_swing_id` and confidence metrics when $\Delta \ge \tau_{\text{pair}}$ and $d_{(1)} < 1.0$.
+  - Strictly permutation-invariant across capture-swing order and deterministic in tie-breaking.
+- **Leakage Guard & Provenance Contracts**:
+  - `_check_leakage`: verifies video observations originate from the designated reference backend (`backend="reference"`), rejecting evaluation backends under test (`ValueError("leakage guard: ...")`).
+  - Asserts reference receipt hashes when expected hashes are provided.
+- **Time Mapping & Side Evidence (`TimeMapping`, `SideEvidence`)**:
+  - Paired swings build invertible `TimeMapping` from event anchors (`EventAnchors`) without altering physical time claims.
+  - Side evidence (owner recollection, file creation time, club-speed rank) is recorded in pairing results and serialized matrices but never overrides the geometric distance rule.
+
+## Virtual Camera Fitting and 2D Swing Variation Envelope (COV-4, #11272)
+
+Specifies the virtual camera estimation and 2D swing-to-swing envelope projection for comparing owner video swings against the 13 capture-O reference swings (COV-4, #11272, parent #11268):
+- **Virtual Camera Fitting (`src/motion_capture/reference/virtual_camera_fit.py`)**:
+  - `fit_virtual_camera` estimates camera extrinsics mapping ADR-0041 world coordinates (Y-up, X toward target, Z golfer's right) into 2D video pixel views using non-linear least squares reprojection minimization.
+  - Returns `VirtualCameraResult` recording estimated camera parameters, parameter covariance matrix, fit reprojection RMS in pixels, Jacobian condition number, `CameraFitOutcome` (`fitted` or `degraded`), and optional `degraded_reason`.
+  - Degeneracy handling: correspondences with coplanar or collinear geometry (rank < 3) or ill-conditioned normal equations ($\kappa(J) > \text{max\_condition\_number}$) yield `CameraFitOutcome.degraded` with declared reason and hold camera parameters at priors, refusing to report false sharp fits.
+  - Coordinate axis and chirality validation: enforces ADR-0041 convention where Y is the vertical height axis (rejecting unconverted Y-up C3D inputs missing `y_up_to_z_up`) and detects mirrored projections via chirality sign tests.
+- **2D Swing Variation Envelope (`compute_2d_envelope`, `SwingEnvelope2D`)**:
+  - Projects all 13 capture-O swings into the virtual camera view and computes phase-normalized per-landmark percentile bands ($p_5 \le p_{50} \le p_{95}$) in pixel and body-height-normalized units.
+  - Enforces monotonicity ($p_5 \le p_{50} \le p_{95}$), asserts 13-swing input completeness, and explicitly tracks valid sample counts per landmark and phase bin when marker occlusions/NaNs are present.
+- **Projection Adapters**:
+  - Tested bidirectional adapter between `PinholeCamera` (world-from-camera convention) and `CameraProjection` (world-to-camera convention) preserving camera matrix, rotation, translation, and projection geometry.
+
+## Dynamics-Informed Mocap Matching: Train and Qualify Reusable Matching Initializers (DIME-15, #11436)
+
+Specifies reproducible training recipes, model cards, multi-strategy matching initialization, anti-leakage defenses, torque realism enforcement, calibrated OOD rejection with classical physical fallback, independent native gating, ablation protocols, and truthful compute cost accounting (#11421, #11436):
+- **Reusable Initializer Model Card (`DimeLearnedInitializerModelCard`)**:
+  - Encapsulates model architecture, model hash, training dataset hash, held-out validation splits (player, session, geometry), calibrated OOD thresholds, and canonical SI units.
+  - Fail-closed learning curve monitoring: inconclusive or negative learning curves set `scale_up_halted = True` and truthfully register limitations without hiding results or claiming fake convergence.
+- **Anti-Leakage Data Partitioning (`validate_dataset_split`)**:
+  - Rejects overlapping player identities between training and evaluation splits fail-closed (`DataLeakageError`).
+  - Enforces minimum temporal buffer gap $\Delta t_{\text{gap}} \ge \Delta t_{\text{buffer}}$ between adjacent windows within the same session/player to prevent autoregressive window contamination.
+- **Model Identity & Checkpoint Verification (`verify_checkpoint_identity`)**:
+  - Verifies that checkpoint model hash and generalized coordinate dimensions ($u_{\text{dim}}$) match the active provider/task. Mismatched or stale checkpoints raise `StaleModelIdentityError`.
+- **Torque Realism & Actuator Bounds (`verify_torque_realism`)**:
+  - Validates feedforward control proposals against absolute actuator torque limits $|\tau_i| \le \tau_{\max, i}$ and dynamic rate-of-torque limits $|d\tau_i/dt| \le \dot{\tau}_{\max, i}$, rejecting unphysical or step-impulse interpolations fail-closed (`UnrealisticTorqueError`).
+- **Calibrated OOD Detection & Classical Fallback (`AdaptiveMatchingInitializer`)**:
+  - Evaluates subject dimensions and contact modes against training distribution bounds.
+  - Out-of-distribution inputs raise `OutOfDistributionError` internally and trigger deterministic fallback to `ClassicalPhysicalInitializer` (zero-torque / constant velocity physical warm start) with structured fallback provenance.
+- **Independent Native Gate Enforcement (`NativeCandidateGate`)**:
+  - Disallows automatic acceptance of proposals based on neural confidence alone.
+  - Every candidate is strictly evaluated by an independent native residual check $\|\mathbf{r}\| \le \text{tol}_{\text{accept}}$ before acceptance.
+- **Systematic Ablation Protocol (`run_initializer_ablation_study`)**:
+  - Compares full model against ablated drift features, ablated ROM priors, and classical physical baselines across acceptance rates, residuals, and solve iterations.
+- **Truthful Compute Accounting & Break-Even Amortization (`ComputeCostReport`)**:
+  - Tracks offline teacher episode generation cost, training compute, per-solve speedup $\Delta T_{\text{solve}} = T_{\text{classical}} - T_{\text{learned}}$, and required solve volume for full amortization $N_{\text{breakeven}} = T_{\text{offline}} / \Delta T_{\text{solve}}$.
+
+## Dynamics-Informed Mocap Matching: Native Drift and Window Solver Profiling & Acceleration (DIME-14, #11435)
+
+Specifies structured caching for drift evaluations, full steps, Jacobians, assembly/factorization, and window solves, with multi-tiered identity validation, explicit validity radiuses, impact discontinuity invalidation, and mandatory independent replay profiling (#11421, #11435):
+- **Multi-Tiered Cache Identity (`DimeCacheIdentity`)**:
+  - Partitions cache lookups across model hash, parameter hash, contact policy, solver configuration, camera configuration, and job ID.
+  - Guarantees strict cross-job native state isolation; different `job_id` queries cannot access or contaminate other jobs' cached states.
+  - Automatic and targeted invalidation: `invalidate_on_camera_change` purges camera-dependent entries; `invalidate_on_body_change` purges body/inertia-dependent entries; `invalidate_job` purges job session entries.
+- **Local Model Approximation (`LocalModelApproximation`)**:
+  - Evaluates first-order Taylor expansion local approximations $\delta x_{k+1} = A \delta x_k + B \delta u_k$ around nominal trajectories.
+  - Enforces explicit validity radius $R_{\text{valid}}$: queries with displacement $\|\delta x\| > R_{\text{valid}}$ fail closed with `PreconditionError`, preventing unverified extrapolations.
+- **Impact Phase Discontinuity Guard (`store_jacobian_with_impact_check`)**:
+  - Rejects caching or serving smooth derivative approximations across contact impact transitions where velocity or ground reaction impulses undergo jump discontinuities.
+- **Mandatory Replay Enforcement & Granular Profiling (`accelerated_solve_dynamics_window`, `DimeCostBreakdown`)**:
+  - Preserves identical provider semantics: independent continuous replay execution is strictly mandatory and cannot be skipped or short-circuited to fake speedup claims.
+  - Records comprehensive cost breakdowns: drift count/time, full step count/time, Jacobian count/time, assembly/factorization time, window solve time, independent replay time, failure costs, and cold/warm p50/p95 speeds.
+## Dynamics-Informed Mocap Matching: Per-Engine and Capture Qualification Matrix (DIME-12, #11433)
+
+Specifies the cross-engine and capture qualification matrix, per-engine capability inspection, and provenance tracking across physics engines and capture datasets (#11421, #11433):
+- **Engine Capability & Provenance Contracts (`EngineCapabilitySpec`, `CaptureProvenance`)**:
+  - `EngineCapabilitySpec`: Specifies engine identity, native SDK presence, coordinate conventions, supported contact representations, actuation support (generalized torque vs muscle activation), and independent forward replay integration.
+  - `CaptureProvenance`: Captures dataset origin, observation mode (marked, markerless, hybrid), ground truth modality, calibration protocol, privacy clearance, and native sample clocks.
+- **Fail-Closed Qualification Invariants (`evaluate_engine_qualification`, `EngineQualificationEntry`)**:
+  - Contact-free engines cannot qualify contact-dependent capture scenarios.
+  - Synthetic test data cannot qualify product-grade matching runs.
+  - Joint convention and coordinate frame mismatches reject qualification fail-closed.
+  - Missing native platform dependencies invalidate advertised capabilities with diagnostic reasons.
+  - Breaching tolerance thresholds transitions status to `unqualified` or `degraded`.
+  - Missing solve receipts or missing/non-finite gated metrics (`max_drift_m`, `max_angular_drift_rad`, `alignment`) fail closed to `unqualified`; matrix and manifest totals report `total_unqualified` alongside qualified/blocked/rejected/unsupported so they reconcile with `total_evaluated`.
+- **Fleet Matrix Aggregation & Report Bundle (`build_fleet_qualification_matrix`, `export_qualification_bundle`)**:
+  - Aggregates qualification verdicts across all combinations of physics engines (MuJoCo, Drake, Pinocchio, OpenSim, Simscape, MyoSuite, Pendulum) and benchmark captures.
+  - Exports immutable JSON qualification bundle and human-readable Markdown summary table.
+
+## Dynamics-Informed Mocap Matching: Shared Reports, GUI Strategy Selection and LaTeX Methods (DIME-11, #11432)
+
+Specifies shared estimation reports, GUI strategy selection with graceful explicit unavailability states, distinct pointwise vs integrated ZTCF registration, and verifiable LaTeX methods documentation (#11421, #11432):
+- **Truthful Strategy Selection Service (`DimeStrategySelectionService`)**:
+  - Exposes estimation strategies (`IK`, `INVERSE_DYNAMICS`, `FORWARD_DYNAMICS`, `DIME_MHE`, `CONTINUOUS_REPLAY`, `NEURAL_ESTIMATOR`) with explicit capability status (`implemented`, `qualified`, `unavailable`).
+  - Graceful unavailability: uncertified or experimental strategies (e.g. neural estimator awaiting comparative study) return `status="unavailable"` with clear explanation reason rather than failing silently or substituting synthetic outputs.
+  - Fail-closed validation: offering or reporting an unqualified engine as validated (`require_validated=True`) raises `PreconditionError`.
+- **Output Report Contract (`DimeReportArtifact`)**:
+  - Supports `Full` and `Custom` report scopes with selectable channels and plot figures.
+  - Mandatory report sections include kinematics, selected net controls, ground reaction force provenance, drift vs controlled prediction, parameter and trajectory uncertainty, contact/replay residuals, video overlays, and unavailable-capability explanations.
+  - Preserves model digest, parameters hash, engine version, git commit, and execution seed across dictionary and JSON serialization (`to_dict` / `from_dict`, `to_json` / `from_json`).
+- **Distinct Pointwise vs Integrated ZTCF (`ZtcfRecord`)**:
+  - Pointwise ZTCF evaluates instantaneous unactuated acceleration: $a_{\mathrm{ztcf}}(t) = \mathbf{M}(\mathbf{q})^{-1} (-\mathbf{C}\mathbf{v} - \mathbf{g} + \mathbf{J}_c^T \boldsymbol{\lambda})$ in $[\mathrm{m/s^2}]$.
+  - Integrated ZTCF evaluates continuous forward-simulated zero-control drift displacement: $x_{\mathrm{ztcf}}(t) = x(t_0) + \int_{t_0}^t f_{\mathrm{ztcf}}(x(\tau))\, d\tau$ in $[\mathrm{m}]$.
+  - Both metrics are registered distinctly with separate arrays and physical semantics.
+- **Fail-Closed Invariant Enforcements**:
+  - IK run mislabeled as forward dynamics raises `PreconditionError`.
+  - Missing native GRF rendered or substituted as numeric zeros raises `PreconditionError`; missing kinetic channels must be typed `ReportForceProvenance.UNAVAILABLE` with `forces_n = None` and a recorded reason.
+  - Unqualified engine claimed as validated raises `PreconditionError`.
+  - Mismatched timestamp or frame counts between video overlays and kinematics time series raises `TimingViolationError`.
+- **LaTeX Methods Documentation Generator (`to_latex_summary`)**:
+  - Generates verifiable LaTeX documentation recording equations of motion, ZTCF definitions, canonical SI units, model/seed provenance, and explicit interpretation limitations.
+- **Headless GUI ViewModel (`DimeStrategySelectionViewModel`)**:
+  - Manages strategy selection, report scope, channel selections, and availability offscreen without unattended GUI launch.
+
+## Dynamics-Informed Mocap Matching: Torque-Independent Drift Feasibility and Missing-Data Prediction (DIME-16, #11437)
+
+Specifies rank-revealing input-effect subspace decomposition, scale-invariant covariance whitening, orthogonal-complement torque-independent drift feasibility tests, bounded control feasibility, changing contact rank tracking, and missing-data prediction with calibrated uncertainty bounds (#11421, #11437):
+- **Input-Effect Subspace Decomposition (`decompose_input_subspace`, `SubspaceDecomposition`)**:
+  - Computes scale-invariant covariance whitening operator $W = \Sigma^{-1/2}$ via symmetric eigendecomposition. Scaling observation covariance $\Sigma \to \alpha \Sigma$ scales whitening by $1/\sqrt{\alpha}$ and Mahalanobis norm by $1/\alpha$.
+  - Decomposes whitened input-effect matrix $B_w = W B$ via full SVD $B_w = U \Sigma V^T$ with rank thresholding $\text{tol} = \max(s) \cdot \max(n, m) \cdot 10^{-12}$.
+  - Separates actuated subspace basis $U_{\parallel} = U[:, :r]$ from unactuated/torque-independent orthogonal complement basis $U_{\perp} = U[:, r:]$.
+- **Torque-Independent Drift Feasibility (`evaluate_input_subspace_feasibility`)**:
+  - Incorporates eliminated contact reactions $a_{\text{contact}} = M^{-1} J_c^T \lambda$ into effective drift $a_{\text{drift, eff}} = a_{\text{drift}} + a_{\text{contact}}$.
+  - Projects whitened acceleration discrepancy $r_w = W (\ddot{q}_{\text{cand}} - a_{\text{drift, eff}})$ onto the unactuated subspace $r_{\perp} = U_{\perp}^T r_w$.
+  - Since $U_{\perp}^T B_w = 0$, no admissible control torque $\tau$ can affect $r_{\perp}$. Dynamically impossible motion outside the input subspace is detected and rejected fail-closed ($\chi^2_{\perp} > \text{threshold}$).
+  - Fully actuated free systems ($r = n$) yield empty $U_{\perp}$ and zero orthogonal norm ($\chi^2_{\perp} = 0$), adding no redundant restrictions beyond control bounds.
+- **Bounded Control Feasibility Inside the Input Subspace**:
+  - Inverts within the actuated subspace to obtain optimal minimum-norm control effort $\tau^* = \arg\min_{\tau} \| B_w \tau - r_w \|$.
+  - Validates $\tau^*$ against declared `ControlBand` $[\tau_{\min}, \tau_{\max}]$, enforcing control feasibility inside the physically reachable subspace.
+- **Missing-Data Prediction (`predict_masked_interval`, `MaskedPredictionResult`)**:
+  - Across masked observation intervals, propagates state and covariance without conjuring artificial certainty: unactuated coordinates are strictly bounded by drift and model discrepancy, while actuated coordinates broaden according to control prior uncertainty.
+- **Runtime Factor Exclusivity (`DimeInputSubspaceFactor`, `RuntimeExclusivityContract`)**:
+  - Defaults to diagnostic proposal-screening factor (`contributes_to_objective=False`). When configured as an alternative reduced inference formulation (`contributes_to_objective=True`), the runtime exclusivity contract strictly rejects duplicate full-dynamics or explicit-control factors on overlapping time intervals.
+
+## Dynamics-Informed Mocap Matching: Ablation Study and Accuracy-Runtime Acceptance (DIME-10, #11431)
+
+Specifies the preregistered ablation benchmark protocol comparing the six baseline and method variants across systematic perturbations (noise, occlusion, torque initialization bias, contact transitions, model/camera errors) under marked, markerless, and hybrid observation modes (#11421, #11431):
+- **Preregistered Baseline and Method Variants (`DimeAblationVariant`)**:
+  - `KINEMATIC_IK`: Pure kinematic inverse kinematics tracking baseline without dynamics or drift guidance.
+  - `CLASSICAL_MHE`: Moving horizon estimation with classical inverse-dynamics effort penalty without drift-centered priors.
+  - `DRIFT_PRIOR_ZTCF`: Dynamics-informed MHE with uncertain-control ZTCF prediction and drift dominance acceleration bounds.
+  - `DRIFT_CONTACT_CONSTRAINED`: Dynamics-informed estimation with explicit bilateral contact reaction and unilateral ground reaction constraints.
+  - `DRIFT_OFFLINE_SMOOTHED`: Coupled window estimation followed by bidirectional backward smoothing and single-shot continuous forward replay.
+  - `DRIFT_ACCELERATED_PROPOSAL`: Fast proposal initializer and short physical refinement with reduced solve latency.
+- **Systematic Perturbations and Observation Modes (`PerturbationKind`, `ObservationMode`)**:
+  - Perturbations: `NOISE` (anisotropic/whitened sensor noise), `OCCLUSION` (observation dropout and temporal masking), `TORQUE_BIAS` (non-zero control prior offset), `CONTACT_CHANGE` (step contact transitions and phase shifts), `MODEL_CAMERA_ERROR` (parameter scale and camera extrinsics offset).
+  - Observation modes: `MARKED` (3D markers), `MARKERLESS` (2D keypoints), `HYBRID` (joint 3D markers and 2D projections).
+- **Anti-Leakage and Fail-Closed Defenses**:
+  - Seeded data leakage fails closed: training/evaluation split overlap or explicit leakage flags raise `PreconditionError`.
+  - Test-set tuning fails closed: hyperparameter optimization directly on evaluation data raises `PreconditionError`.
+  - Winning-trial filtering fails closed: reporting only winning trials is forbidden; all trials, failures, and unqualified statuses must be retained in `AblationSummaryTable`.
+- **Accuracy-Runtime Metrics & Dominance Guard**:
+  - `compute_ablation_dominance_metric`: calculates ratio $\|\bar a_{\mathrm{drift}}\| / (\|\bar a_{\mathrm{drift}}\| + \|\bar a_{\mathrm{control}}\|)$ with `"guarded_zero"` policy returning `0.0` to eliminate zero-division risks.
+  - Empirical uncertainty coverage: evaluates fraction of ground-truth state trajectories contained within calibrated $\pm 2\sigma$ confidence intervals.
+  - Latency accounting: p50 latency, p95 latency, and global-refinement cost are recorded separately in milliseconds.
+
+## Dynamics-Informed Mocap Matching: Offline Smoothing and Independent Continuous Replay (DIME-09, #11430)
+
+Specifies offline backward smoothing using marginalized arrival information, fail-closed prohibition of reverse-time contact integration, single-shot continuous forward replay from saved initial state, structured replay receipts with reset and assistance tracking, and independent replay metric recomputation separated from optimization cost (#11421, #11430):
+- **Independent Continuous Replay Execution (`execute_continuous_replay`)**:
+  - Simulates forward dynamics strictly once from a single saved initial state $x_0 = (q_0, v_0)$ under saved control signals and declared configuration.
+  - Independently resets the dynamics provider state exactly once at initialization (`reset_count = 1`).
+  - Intermediate / per-frame state resets are strictly forbidden and rejected fail-closed with `PreconditionError`.
+  - Floating-base root coordinates (DoFs 0..5) have strictly zero artificial actuator forces (`has_undeclared_root_forces = False`). Undeclared root wrenches fail closed.
+  - Rejects hidden target-force feedback: unmodeled external assistance forces fail closed (`allow_hidden_feedback = False`).
+  - Model verification: verifies `model_hash` match between initial state, controls, and dynamics provider; model changes fail closed.
+  - Validates control channels: enforces complete channel coverage matching `provider.capability.control_channels`.
+- **Structured Replay Receipt (`ReplayReceipt`)**:
+  - Implements versioned receipt (`schema_version = "dime-continuous-replay-receipt/1.0"`).
+  - Explicitly records `reset_count`, `assistance_channels`, `declared_controller`, `declared_contact_policy`, `has_undeclared_root_forces`, `is_physically_accepted`, and `provenance` (`DimeProvenanceRecord`).
+  - Supports round-trip dictionary serialization (`to_dict` / `from_dict`).
+- **Independent Replay Metric Recomputation (`IndependentReplayMetrics`)**:
+  - Separates optimization solve cost from independently recomputed replay metrics.
+  - Evaluates maximum and RMS position drift, velocity drift, angular drift, cosine alignment metric, and vertical GRF static equilibrium error against frozen thresholds in `NumericAcceptanceThresholds` (`reproducibility_atol = 1e-9`, `max_drift_m = 0.015`).
+- **Offline Backward Smoothing (`smooth_backward_trajectory`)**:
+  - Propagates future observation information backward using marginalized arrival factors $R_k, r_k$ to produce a continuous smoothed trajectory without per-frame discontinuities.
+  - Reverse-time contact integration is strictly prohibited and fails closed with `PreconditionError` if attempted or if negative $\Delta t$ is supplied.
+  - Returns `SmoothedTrajectoryResult` verifying `is_continuous` and tracking `max_step_jump` and `continuity_metric`.
+- **Public API Adapters**:
+  - `to_shadow_tracker_rollout_request`: maps replay parameters to Shadow Tracker's `RolloutRequest`.
+  - `to_simscape_continuous_trajectory`: maps continuous replay results to Simscape's `ContinuousReplayTrajectory`.
+
+## Dynamics-Informed Mocap Matching: Observable Global Calibration and Consistent Prior Updates (DIME-08, #11429)
+
+Specifies outer-loop observable global calibration, physical gauge anchor verification (metric scale, gravity frame, mass, measured contact force), identifiability analysis via SVD with rank-deficiency nullspace freezing, realizable physical inertia tensor validation (symmetry, positive-definiteness, triangle inequalities on principal moments), and frozen-prior revision guards for dynamics-informed mocap matching (#11421, #11429):
+- **Physical Gauge Policies (`src/shared/python/estimation/dime_global_calibration.py`)**:
+  - `PhysicalGauge`: enumerated reference anchors (`METRIC_SCALE`, `GRAVITY_FRAME`, `MASS_ANCHOR`, `MEASURED_FORCE_ANCHOR`).
+  - `PhysicalGaugePolicy`: validates required anchors for calibration candidates. Monocular camera scale ambiguity requires `METRIC_SCALE`; unmeasured contact dynamics mass/torque ambiguity requires `MASS_ANCHOR` or `MEASURED_FORCE_ANCHOR`. Missing anchors are rejected fail-closed with `PreconditionError`.
+- **Identifiability & Rank Deficiency (`RankDeficiencyPolicy`, `probe_identifiability`)**:
+  - SVD probe of stacked observation Jacobians: singular values below threshold define unobservable parameter combinations.
+  - `FAIL_CLOSED`: rank-deficient parameter blocks raise `PreconditionError`.
+  - `FREEZE_NULLSPACE`: identifies unobservable parameter combinations via right singular vectors and locks unobservable parameters at nominal values while optimizing free observable parameters.
+- **Physical Inertia Realizability (`validate_physical_inertia`)**:
+  - Rigid body inertia tensors must satisfy physical realizability: $3 \times 3$ symmetry, positive definiteness ($I > 0$), and triangle inequalities on principal moments ($I_{xx} + I_{yy} \ge I_{zz}$, $I_{yy} + I_{zz} \ge I_{xx}$, $I_{zz} + I_{xx} \ge I_{yy}$). Unphysical tensors fail closed with `PreconditionError`.
+- **Frozen Prior Protection & Revision Lineage**:
+  - When priors are declared frozen (`is_prior_frozen=True`), modifying calibrated values without an explicit revision tag (`prior_revision_tagged=True`) is strictly rejected fail-closed.
+- **Latency Accounting & Structured Receipts (`GlobalCalibrationResult`)**:
+  - Separates high-frequency inner-loop window estimator latency (`inner_loop_latency_s`) from outer-loop global calibration solver runtime (`outer_loop_time_s`), tracking cumulative latency and full cost breakdowns.
+  - Losses roundtrip losslessly through JSON-compatible dictionary serialization.
+
+## Dynamics-Informed Mocap Matching: Hierarchical Human Dimensions and Coupled Range-of-Motion Priors (DIME-13, #11434)
+
+Specifies versioned human population priors, correlated hierarchical dimension distributions, Bayesian updating from sparse subject measurements, physical dimension bounds, coupled joint range-of-motion constraints, and inertia realizability checks (#11421, #11434):
+- **Population Priors & Hierarchical Dimensions (`src/shared/python/estimation/dime_human_priors.py`)**:
+  - `PopulationPriorVersion`: standardized prior models (e.g. `ANSUR2_V1`, `DE_LEVA_1996_V1`).
+  - `HierarchicalDimensionPrior`: multi-segment mean vector and factor-analysis covariance structure modeling correlated limb and body proportions.
+  - Supports both symmetric and asymmetric representations (`allow_asymmetry=True`), admitting natural bilateral asymmetry when measured rather than enforcing rigid equality.
+- **Sparse Bayesian Posterior Update (`update_hierarchical_dimension_posterior`)**:
+  - Combines population prior with sparse subject measurements (`SubjectDimensionMeasurement`) using numerically stable Joseph-form covariance updates.
+  - Unobserved or occluded limbs retain prior uncertainty through marginalization without artificial confidence shrinkage.
+  - Evaluates joint Mahalanobis compatibility (`evaluate_human_prior_compatibility`), admitting unusual but correlated proportions (e.g. tall stature with proportional wingspan) while identifying true physical outliers.
+- **Physical Bounds & Consistency Verification (`PhysicalDimensionBounds`)**:
+  - Validates hard physical bounds $[0.50, 2.50]\,\text{m}$ and verifies longitudinal segment sum consistency against measured total height, rejecting contradictory measurements fail-closed with `PreconditionError`.
+- **Coupled Range-of-Motion Constraints (`CoupledRangeOfMotionPrior`, `RangeOfMotionBound`)**:
+  - Enforces radian units on all angular limits ($\le 2\pi$), rejecting values passed in degrees fail-closed.
+  - Implements physiological joint couplings (e.g. scapulohumeral rhythm where arm elevation restricts axial rotation).
+- **Physical Realizability for Segment Inertia (`validate_inertia_realizability`)**:
+  - Strictly enforces positive mass, positive eigenvalues, and the classical triangle inequalities:
+    \[
+    I_{xx} + I_{yy} \ge I_{zz}, \quad I_{xx} + I_{zz} \ge I_{yy}, \quad I_{yy} + I_{zz} \ge I_{xx}
+    \]
+
+## Dynamics-Informed Mocap Matching: Extend Existing MHE With Arrival Information and Safe Window Commits (DIME-07, #11428)
+
+Specifies square-root quadratic arrival factor representation, rank-revealing marginalization with tested gauge policy, safe window commit validation and failure diagnostics retention, late/irregular sample handling, and measurement accumulation guard preventing double counting across window advances (#11421, #11428):
+- **Arrival Information Representation (`ArrivalFactor`)**:
+  - Represents arrival prior density in tangent coordinates about a reference state $\bar{x}$:
+    \[
+    c_{\text{arrival}}(x) = \frac{1}{2} \| R (x - \bar{x}) - r \|_2^2
+    \]
+    where $R$ is the square-root information matrix ($R^T R = \Lambda$) and $r$ is the residual offset.
+  - Carries revealed rank, optional linearization coordinates, and linearization metadata (timestamp, window index, model hash, provenance, scheme label).
+  - Exposes `evaluate_residual`, `evaluate_cost`, `evaluate_jacobian`, and `is_rank_deficient`.
+- **Rank-Revealing Marginalization (`marginalize_arrival_factor`)**:
+  - Eliminates the oldest state $\delta x_0$ from the coupled linear system $A_0 \delta x_0 + A_1 \delta x_1 \approx b$ using full SVD decomposition $A_0 = U \Sigma V^T$.
+  - When $A_0$ is singular or rank-deficient, the unobserved nullspace directions are decoupled; the resulting arrival factor on $\delta x_1$ retains the exact rank deficiency without adding artificial diagonal jitter.
+  - Tested gauge policies:
+    - `"retain_rank_deficiency"` (default): retains revealed rank $r < n_1$ and sets below-threshold singular values to zero without diagonal inflation.
+    - `"fail_closed"`: raises `PreconditionError` if singular/unsupported directions exist in $A_0$.
+  - Exact equivalence with batch MAP on linear-Gaussian systems within frozen numerical tolerance ($10^{-5}$).
+- **Safe Window Commits & Failure Diagnostics (`WindowCommitStatus`, `FailureDiagnostics`)**:
+  - Validates window optimization results before committing state: checks solver success, finite coefficients, finite residuals, and absence of non-finite evaluations / sentinel replacements.
+  - If a solve fails, diverges, or encounters non-finite values, commit status is set to `REJECTED_NONFINITE` or `REJECTED_UNSUCCESSFUL`.
+  - Rejected solves do not replace `last_accepted_coefficients` or `last_accepted_trajectory`, preventing future warm-start poisoning.
+  - Detailed failure diagnostics (`FailureDiagnostics`) are recorded separately in bounded history (`max_history_diagnostics`).
+  - Subsequent successful windows recover deterministically using the last valid accepted state.
+- **Late & Irregular Sample Handling (`LateSamplePolicy`)**:
+  - `REJECT`: strictly enforces monotonic sample advance, raising `PreconditionError` on non-positive time differences or duplicates.
+  - `DROP_LATE`: gracefully drops out-of-order or duplicate timestamps while keeping valid advancing samples.
+  - Supports non-uniform sampling intervals ($\Delta t_i \ne \Delta t_j$) natively in spline and window solves.
+- **Accumulation Guard (`AccumulationGuard`)**:
+  - Tracks all sample indices and timestamps that have been marginalized into the arrival factor.
+  - Prevents double counting by raising `PreconditionError` if an already-marginalized measurement is reintroduced as an active observation factor.
+- **Bounded Memory & Latency Budget**:
+  - Retains strictly $O(1)$ memory across long horizons by bounding sample buffers and failure history.
+  - Records achieved per-window latency in milliseconds (`latency_ms`) alongside configured budget (`latency_budget_ms`).
+
+## Dynamics-Informed Mocap Matching: Ground Reaction Balance and Contact Constraints (DIME-06, #11427)
+
+Specifies unilateral ground support constraints, Coulomb friction cone bounding, unactuated floating-base root dynamic equilibrium, bilateral contact force allocation ambiguity tracking, and discrete contact mode transitions for dynamics-informed mocap matching (#11421, #11427):
+- **Unilateral Ground Support (`src/shared/python/estimation/dime_contact_constraints.py`)**:
+  - `ContactMode`: enumerated contact states (`STANCE`, `FLIGHT`, `IMPACT`, `LIFTOFF`).
+  - Contact geometry (`ContactPointGeometry`) specifies local attachment point on body segment, sphere radius $r$, and candidate contact locations.
+  - Normal force non-negativity: $f_n = f \cdot n_{\text{ground}} \ge 0$. Adhesive ground tension ($f_n < 0$) is inadmissible and rejected fail-closed with `PreconditionError`.
+- **Coulomb Friction Cone Bounding (`ContactPointAdmissibleForce`)**:
+  - Tangential ground reaction $\|f_t\|_2 \le \mu f_n$ with static friction coefficient $\mu$.
+  - Slipping contact points ($\|f_t\| > \mu f_n$) are detected and flagged (`is_slipping=True`), with confidence downweighted by excess frictional tangential ratio.
+- **Unactuated Floating-Base Root Dynamic Equilibrium (`verify_unactuated_root_integrity`)**:
+  - Floating-base coordinates (DoFs 0..5) have zero actuators; direct root actuator torques or fictitious pelvis support shortcuts are strictly rejected fail-closed with `PreconditionError`.
+  - Floating-base root equations of motion:
+    \[
+    M(q)_{\text{root}, :} \ddot{q} + h(q, v)_{\text{root}} = \sum_{i} J_{c, i}(q)^T_{\text{root}, :} f_i
+    \]
+    All root inertial and gravitational loads must be balanced exclusively by admissible ground reaction forces.
+- **Bilateral Force Allocation Ambiguity (`BilateralAllocationStatus`)**:
+  - In double stance where only net ground reaction force $F_{\text{net}}$ and center of pressure are measured, distributing force between bilateral feet is underdetermined.
+  - Returns admissible interval bounds $[f_{i, \text{min}}, f_{i, \text{max}}]$ and explicitly flags `is_identified=False` to prevent unwarranted confidence claims on individual limb loading.
+- **Force Provenance & Discrete Mode Transitions**:
+  - Explicit force provenance tracking (`ForceProvenance.MEASURED` vs `ForceProvenance.INFERRED`).
+  - Contact Jacobian differentiability contract: continuous contact derivatives are declared valid (`derivatives_valid=True`) during persistent stance; discrete mode switches (impact, liftoff) declare `derivatives_valid=False`.
+
+## Dynamics-Informed Mocap Matching: Coupled State-Control Full-Dynamics Window Factors (DIME-05, #11426)
+
+Specifies coupled state-control window estimation, exact vs soft integrated defect transcription, bounded model discrepancy slack, actuator limits, underactuated root constraints, control variation regularization, and comprehensive cost and residual reporting (#11421, #11426):
+- **Defect Transcription Modes (`DefectMode`)**:
+  - `EXACT`: integrated dynamic transition defects $x_{k+1} - f(x_k, u_k)$ are enforced as hard feasibility constraints.
+  - `SOFT`: defect residuals enter the optimization objective weighted by transition defect penalty matrices.
+- **Model Discrepancy Slack Bounds (`ModelDiscrepancyBounds`)**:
+  - Validates model discrepancy slack norm against declared maximum slack bound $\|s\| \le s_{\text{max}}$, rejecting excessive unphysical slacks with `PreconditionError`.
+  - Evaluates quadratic penalty cost $\frac{1}{2} s^T W_{\text{slack}} s$ for allowed discrepancy slacks.
+- **Coupled Window Factor (`DimeDynamicsWindowFactor`)**:
+  - Computes single-step integrated transition defect vectors $d_k = x_{k+1} - f(x_k, u_k)$ across the window horizon.
+  - Computes central finite-difference state Jacobians $J_{x_0}, J_{x_1}$ and control Jacobian $J_u$ on the discrete step map.
+  - Exports `as_interval_factor` as `explicit_input_likelihood` factor registered in `RuntimeExclusivityContract`.
+- **Underactuated Constraints & Control Variation (`DimeDynamicsWindowProblem`)**:
+  - Enforces underactuated root constraints: validates declared control channels against provider selection map, rejecting arbitrary root torque shortcuts on passive degrees of freedom with `PreconditionError`.
+  - Enforces actuator limits $[u_{\text{min}}, u_{\text{max}}]$ and penalizes control rate of change $\frac{1}{2} w_{\text{rate}} \|u_k - u_{k-1}\|^2$.
+- **Window Optimization & Structured Receipts (`solve_dime_dynamics_window`, `DimeDynamicsWindowResult`)**:
+  - Solves coupled nonlinear least-squares optimization using Trust Region Reflective (TRF) algorithm with box bounds.
+  - Structured receipt exports recovered state trajectory, control trajectory, transition defects, actuator bound residuals, control variation residuals, root constraint residuals, and full cost breakdown (`observation_cost`, `transition_cost`, `control_effort_cost`, `control_rate_cost`, `discrepancy_cost`, `total_cost`).
+  - Fail-closed handling for divergent or non-finite dynamics simulation, returning invalid result without corrupting state.
+
+## Dynamics-Informed Mocap Matching: Uncertain-Control ZTCF Prediction and Estimation Criterion (DIME-04, #11425)
+
+Specifies ZTCF-anchored one-step and multi-step dynamics prediction, control influence linearization, exact parallelotope reachable acceleration interval bounding, Gaussian uncertain-control covariance propagation, authority-bounded drift dominance indexing, and DIME transition proposals with fail-closed receipts and runtime factor exclusivity (#11421, #11425):
+- **Input-Affine Dynamics Decomposition (`src/shared/python/estimation/drift_prediction.py`)**:
+  - In contact-free flight, smooth multi-body equations of motion are affine in generalized controls $\tau$:
+    \[
+    a(q, v, \tau) = f(q, v) + B(q) \tau, \quad f(q, v) = M(q)^{-1} (-h(q, v)), \quad B(q) = M(q)^{-1} S^T
+    \]
+  - Pointwise zero-torque counterfactual (ZTCF) drift acceleration $f(q, v)$ is evaluated via `src.shared.python.simulation_backends.ztcf_zvcf.ztcf_acceleration` without requiring applied torques, anchoring the motion proposal.
+  - Providers expose only `mass_matrix` and `bias_forces` (LOD $\le 2$). Ill-conditioned or singular mass matrices are detected via condition number tracking ($\kappa(M) = \|M\| \|M^{-1}\|$).
+- **Exact Box-Reachable Acceleration Hull (`reachable_acceleration_interval`)**:
+  - For actuator box limits $\tau \in [u_{\text{min}}, u_{\text{max}}]$, the image $f + B \tau$ forms a parallelotope.
+  - The exact axis-aligned bounding hull is computed as:
+    \[
+    a_{\text{centre}} = f + B \left(\frac{u_{\text{min}} + u_{\text{max}}}{2}\right), \quad a_{\text{half}} = |B| \left(\frac{u_{\text{max}} - u_{\text{min}}}{2}\right)
+    \]
+  - Admissible deviations from the ZTCF anchor are strictly bounded by actuator authority.
+- **Gaussian Uncertain-Control Propagation (`uncertain_control_prediction`, `transition_jacobian`, `PropagatedStateCovariance`, #11549)**:
+  - State $x = (q, v) \in \mathbb{R}^{2n}$ in local coordinates. One step of the constant-acceleration map with zero-order-hold torque, re-linearised at $x_k$:
+    \[
+    x_{k+1} = \Phi(x_k, \tau_k) = \begin{bmatrix} q_k + \Delta t\, v_k + \tfrac{\Delta t^2}{2} a_k \\ v_k + \Delta t\, a_k \end{bmatrix}, \quad a_k = f(q_k, v_k) + B(q_k) \tau_k
+    \]
+  - For uncertain inputs $\tau \sim \mathcal{N}(\mu_u, \Sigma_u)$, prior state covariance $P_k = \operatorname{Cov}(x_k)$ and model process noise $Q_w$, the covariance propagates through the Jacobian of the full one-step map, not a kinematic chain:
+    \[
+    P_{k+1} = F_k P_k F_k^T + G_k \Sigma_u G_k^T + Q_w, \quad F_k = \left.\frac{\partial \Phi}{\partial x}\right|_{(x_k, \mu_u)}, \quad G_k = \begin{bmatrix} \frac{\Delta t^2}{2} B(q_k) \\ \Delta t\, B(q_k) \end{bmatrix}
+    \]
+  - $F_k$ carries the dynamics sensitivity $\partial a / \partial q$ and $\partial a / \partial v$. The superseded kinematic matrix $A = \begin{bmatrix} I & \Delta t I \\ 0 & I \end{bmatrix}$ equals $F_k$ only when $f$ is independent of $x$; it is not used.
+  - Numerical method: dynamics providers expose no analytic state derivatives, so `transition_jacobian` computes $F_k$ by central finite differences of $\Phi$ (re-evaluating $f$ and $B$ at each perturbed state), $F_{:,j} = \frac{\Phi(x + h_j e_j) - \Phi(x - h_j e_j)}{2 h_j}$ with $h_j = 10^{-6} \max(1, |x_j|)$, reusing `identifiability.finite_difference_jacobian` ($2 \cdot 2n$ provider evaluations per step, $O(h^2)$ truncation error).
+  - Contract: a prior covariance is accepted only as `PropagatedStateCovariance(covariance=P_k, transition=F_k)`, so $P_k$ cannot be supplied without the $F_k$ that maps it; both must be finite, square and of equal size, and $P_k$, $\Sigma_u$, $Q_w$ must be symmetric positive semi-definite. The output is symmetrised, $P_{k+1} \leftarrow \tfrac{1}{2}(P_{k+1} + P_{k+1}^T)$.
+  - Declared zero-mean control is an initialization with finite covariance, never an assertion that the joints are inactive.
+- **Authority-Bounded Drift Dominance Index (`drift_dominance_index`)**:
+  - Share of admissible acceleration budget owed to drift:
+    \[
+    \eta = \frac{\|f\|_2}{\|f\|_2 + \||B| \Delta u_{\text{half}}\|_2} \in [0, 1]
+    \]
+  - Compares drift against control *authority* rather than realized net acceleration ($a_{\text{net}} = f + B \tau$), ensuring $\eta$ remains strictly bounded in $[0, 1]$ even when opposing control cancels drift ($a_{\text{net}} \approx 0$).
+- **Fail-Closed DIME Transition Protocol (`predict_dime_transition`)**:
+  - `DimeTransitionRequest`: inputs `DimeCompleteState`, control mean $\mu_u$, covariance $\Sigma_u$, step $\Delta t$, horizon $H$, mode (`"marginalized"` or `"explicit"`), optional state covariance $P_0$ (zero when omitted), model uncertainty $Q_w$, selection matrix $S$, root policy (`root_policy: RootActuationPolicy`), and contact flag.
+  - Horizon integration: a horizon $H$ is $H$ steps of $\Delta t$, never one step of $H \Delta t$. Both the native zero-control branch ($\tau = 0$, the ZTCF anchor) and the controlled prediction re-linearise $f$, $B$ (and $F_k$, $G_k$) at the current state of every step $k = 0, \dots, H-1$, and $Q_w$ is added once per step. The reported factor spans $[t, t + H \Delta t]$; the drift dominance index $\eta$ is evaluated at the initial state over the box $\mu_u \pm 3 \sqrt{\operatorname{diag} \Sigma_u}$.
+  - Root actuation: the floating-base root is unactuated by default so the zero-torque reading of the root stays torque-free. With `selection=None` the selection is $S = I_n$ with the rows and columns of the declared root DOFs zeroed. `RootActuationPolicy()` declares `DEFAULT_FLOATING_BASE_ROOT_DOFS = (0, 1, 2, 3, 4, 5)` (matching `ContinuousReplayOptions.floating_base_root_dofs`); fixed-base models pass `root_policy=FIXED_BASE` (no root DOFs). Root DOF indices must be distinct and lie in $[0, n)$, so a model with $n < 6$ and no declared base fails closed with `PreconditionError`. An explicit $S$ with a non-zero root row is rejected with `PreconditionError` unless the caller declares `RootActuationPolicy(allow_root_actuation=True)`. The same policy applies to `linearize_drift`, `integrate_step` and `transition_jacobian`.
+  - `DimeTransitionPrediction`: outputs `valid: bool`, receipt dictionary, native zero-control branch $(q_0, v_0)$, per-step controlled predictions `controlled_trajectory` (a tuple of exactly $H$ `UncertainPrediction(mean, covariance)` entries $(x_1, P_1), \dots, (x_H, P_H)$, each covariance finite, symmetric and positive semi-definite; empty when refused), the final controlled prediction `controlled_prediction` (the last trajectory entry), drift dominance $\eta$, and registered interval factor.
+  - Fail-closed receipts:
+    - Active contact (`contact_active=True`): returns `valid=False` with `{"code": "CONTACT_ACTIVE_REJECTED", "status": "disabled"}`.
+    - Invalid time step or horizon ($\Delta t$ not finite and positive, or $H$ not an integer $\ge 1$, including non-integer and Boolean values): returns `valid=False` with `{"code": "INVALID_HORIZON", "status": "disabled"}`.
+    - Manifold coordinates ($n_q \neq n_v$, e.g. quaternions): returns `valid=False` with `{"code": "MANIFOLD_UNSUPPORTED", "status": "disabled"}`.
+    - Mutual exclusivity: registers `EstimationIntervalFactor` with `RuntimeExclusivityContract`. If an overlapping factor of opposing type exists, returns `valid=False` with `{"code": "EXCLUSIVITY_VIOLATION", "status": "rejected"}`.
+- **Limitations**:
+  - Linearised Gaussian propagation: $P_{k+1}$ is exact only for a step map that is affine in $x$ and $\tau$; for nonlinear dynamics it is a first-order (EKF-style) approximation about the controlled mean, and the finite-difference $F_k$ adds $O(h^2)$ error.
+  - Constant acceleration over each step in local coordinates; quaternion or other manifold configurations ($n_q \neq n_v$) are refused, as is active contact.
+  - The default root policy assumes a 6-DOF floating base at indices $0..5$; models with a different base layout must declare it.
+  - Acceptance evidence is synthetic: an analytic linear system ($P$ matched to the closed-form recursion to `rtol=1e-7`), an $H$-step versus one-step-of-$H\Delta t$ rollout on the 2-DOF `make_backend("ode", GolfModelParams.default())` model (zero-control branch and controlled mean match an $H$-step reference to `atol=1e-12`), and root-selection contracts. No physical capture validates the covariance.
+- **Reproduction**:
+  - `python -m pytest -q -o addopts="" -p no:cacheprovider tests/unit/estimation/test_dime_drift_covariance_propagation.py tests/unit/estimation/test_dime_drift_prediction.py`
+
+## Dynamics-Informed Mocap Matching: Robust Marker and Markerless Observation Factors (DIME-03, #11424)
+
+Specifies unified observation factors for marked (3D markers) and markerless (2D keypoint detections) observations, calibrated confidence and anisotropic noise covariance whitening, robust loss kernels, held-out partitioning, camera transform inversion, chirality validation, and quaternion sign equivalence (#11421, #11424):
+- **Unified Observation Factor Interface (`src/shared/python/estimation/dime_observation_factors.py`)**:
+  - `DimeObservationFactor`: abstract unified interface for observation factors declaring modality (`"marker_3d"`, `"markerless_2d"`), canonical units (`"m"` for markers, `"px"` for 2D detections), residual dimensions, unwhitened raw residuals, robust whitened residuals, analytical/finite-difference Jacobians on candidate states/parameters, and held-out evaluation reports.
+  - `Marker3DObservationFactor`: metric 3D marker observation factor supporting forward kinematics callbacks, local marker attachment semantics (`MarkerAttachment`), anisotropic noise covariance whitening, and robust downweighting.
+  - `Markerless2DObservationFactor`: 2D pixel observation factor combining forward kinematics with calibrated pinhole camera projection, Brown-Conrady lens distortion, and strict depth chirality checks.
+- **Calibrated Covariance Whitening & Decoupled Detector Scores**:
+  - `_build_whitening_operators`: supports isotropic variance, per-axis diagonal variances, and full $D \times D$ positive-definite covariance matrices via Cholesky factor inversion ($L^{-1}$).
+  - Strictly decouples physical noise covariance ($\text{m}^2$ or $\text{px}^2$) from detector confidence scores $[0, 1]$; non-positive variances or non-positive-definite covariance matrices fail closed with `CovarianceValidationError`.
+- **Robust Loss Kernels (`RobustLossKernel`)**:
+  - Kernels: `"linear"`, `"huber"`, `"cauchy"`, `"tukey"`, and `"pseudo_huber"`.
+  - Applied separately from noise whitening via iteratively reweighted least squares (IRLS) square-root weights $\sqrt{w(r)}$.
+  - Inliers ($r \le \delta$) receive exact unperturbed weight 1.0; gross outliers receive sub-quadratic penalties (Huber, Cauchy, Pseudo-Huber) or complete rejection (Tukey biweight cutoff $c$).
+- **Clean Partitioning & Zero-Filling Prevention**:
+  - Occlusion masks (`valid_mask`): occluded or missing markers/keypoints are strictly masked out of the fitting residual vector and never zero-filled with $[0, 0, 0]$ or $[0, 0]$, preventing artificial distortion of the optimization landscape.
+  - Held-out partition (`held_out_mask`): held-out observations are completely excluded from the fitting residual vector and Jacobian ($N_{\text{fit}} = N_{\text{valid}} - N_{\text{held\_out}}$).
+  - `HeldOutEvaluationReport`: reports out-of-sample RMSE and max error in declared canonical units without contaminating the solver objective.
+- **Camera Inversion, Chirality & Quaternion Sign Equivalence**:
+  - `DimeCameraParameters` & `invert_camera_extrinsics`: exact rigid $SE(3)$ transform inversion $(R, t) \leftrightarrow (R^T, -t R)$ with right-handed $SO(3)$ orthonormality and $\det(R) = +1$ enforcement. Reflection matrices ($\det(R) = -1$) and negative camera depth ($Z_{\text{cam}} \le 0$) fail closed with `ChiralityViolationError`.
+  - Quaternion sign equivalence: states parameterized by antipodal unit quaternions $q \equiv -q$ produce identically zero residual difference ($\Delta r = 0$) in forward kinematics and camera projections.
+- **Strict Timing Monotonicity (`ObservationTiming`)**:
+  - Validates strictly positive monotonic timestamps ($\Delta t > 0$), finite real numbers, and consistent sample rates; non-monotonic or non-finite sequences raise `TimingViolationError`.
+
+## Dynamics-Informed Mocap Matching: State, Observation and Dynamics Provider Contracts (DIME-02, #11423)
+
+Specifies versioned complete-state, observation-window, provider capability, SE(3)/quaternion manifold operations with sign equivalence, fail-closed qualification rules, snapshot rollback, ZTCF proposals, and runtime factor exclusivity (#11421, #11423):
+- **Versioned Complete State and Observation Window (`src/shared/python/estimation/dime_contracts.py`)**:
+  - `DimeCompleteState`: versioned complete state encapsulation with generalized coordinates $q \in \mathbb{R}^{n_q}$, velocities $v \in \mathbb{R}^{n_v}$, optional accelerations $\dot{v}$, internal memory mapping, SHA-256 model hash, validated SI units, and declared coordinate frames. Enforces read-only array protections, numeric real bounds, and rejection of boolean coercion.
+  - `DimeObservationWindow`: windowed observation container enforcing strict temporal monotonicity ($\Delta t > 0$), interval containment ($t_{\text{start}} \le t_0, t_N \le t_{\text{end}}$), observation shape alignment, and typed uncertainty specifications (`"gaussian"`, `"laplace"`, `"covariance"`, `"unweighted"`).
+- **Manifold Operations & Quaternion Sign Equivalence (`src/shared/python/estimation/dime_manifold.py`)**:
+  - `ManifoldContract`, `VectorSpaceManifold`, `QuaternionManifold`, `SE3Manifold`: public retraction and local-coordinate mappings supporting dimension differences ($n_q \neq n_v$, e.g. $n_q=4, n_v=3$ for unit quaternions, $n_q=7, n_v=6$ for SE(3) poses).
+  - Explicit quaternion sign equivalence: in $SO(3)$, antipodal unit quaternions $q \equiv -q$ yield identically zero tangent distance in local coordinates ($\|v\| = 0$).
+  - Declared retract Jacobians $d(\text{retract})/dv$ and local coordinate Jacobians with frame conventions.
+- **Provider Capability, Snapshot Rollback & Fail-Closed Rules (`ProviderCapability`, `check_qualification_rules`)**:
+  - Truthful capability status (`"implemented"`, `"qualified"`, `"unavailable"`) separated from method existence.
+  - Muscle-driven models: control channels declaring `"excitation"` strictly require full activation dynamics (`has_activation_dynamics == True`) and internal activation state semantics; silent substitution with generalized torques is rejected.
+  - Contact policy: strictly enforces binary selection between native eliminated reactions (`"native_eliminated"`) and explicit constrained reaction variables (`"explicit_constrained"`); simultaneous or conflicting contact models fail closed.
+  - Retained passive loads: inventoried and evaluated where modeled; range-of-motion (ROM) priors cannot supply an unmeasured passive stiffness law.
+  - Exception state restoration: provider mutations take pre-mutation snapshots; any step exception rolls back provider state to pre-call snapshot.
+  - Unavailable providers strictly raise errors and never return zero error as a false success.
+- **Intervention Contract Integration & ZTCF Zero-Input Proposals (`DimeZeroInputProposal`)**:
+  - Integrates the #10286 intervention contract (`AccelerationDecomposition` from `src/shared/python/motion_matching/counterfactual.py`) without duplication.
+  - `compute_zero_input_proposal`: generates forward rollouts under zero control ($u=0$), verifying exact acceleration superposition ($a_{\text{full}} = a_{\text{grav}} + a_{\text{drift}} + a_{\text{ctrl}}$) and Zero-Torque Counterfactual (ZTCF) drift trajectories.
+- **Runtime Factor Exclusivity (`RuntimeExclusivityContract`)**:
+  - Enforces strict mutual exclusivity on overlapping time intervals: an estimation window cannot simultaneously register a marginalized-input transition factor and an explicit-input likelihood factor.
+  - Permitted diagnostics cannot contribute duplicate factors to the estimation objective (`contributes_to_objective == False` enforced).
+- **Deterministic and Analytic Dynamics Providers (`src/shared/python/estimation/dime_providers.py`)**:
+  - `DeterministicFakeProvider`: synthetic reference provider fulfilling identical contracts without claiming native qualification.
+  - `AnalyticPendulumProvider`: harmonic oscillator dynamics provider integrating with `make_fixed_base_pendulum_fixture`.
+  - `UnderactuatedAnalyticProvider`: underactuated two-link fixture provider with passive root DOF ($\tau_0 = 0$) integrating with `make_underactuated_analytic_fixture`.
+
+## Remove Deprecated Force Vectors and Vectors Shims (FTO-7 Follow-Up, #11347)
+
+Retires obsolete deprecated plotting shims per ADR-0052, #11292, and #11347 after migration to `src.shared.python.force_overlay.renderers.matplotlib_glyphs`:
+- **Retired Modules**:
+  - `ForceVectorRenderer` in module `src.shared.python.plotting.renderers.force_vectors` (retired per ADR-0052, #11292).
+  - `VectorOverlayRenderer` in module `src.shared.python.plotting.renderers.vectors` (retired per ADR-0052, #11292).
+- **Retirement Verification Tests**:
+  - `tests/unit/force_overlay/test_renderer_shims.py`.
+  - `tests/unit/plotting/test_force_vector_renderer.py`.
+- **Plotting Suite Updates**:
+  - Cleaned up `tests/unit/test_plotting_renderers.py` to remove `VectorOverlayRenderer` references.
+- **Inventory & Schema Sync**:
+  - Regenerated `docs/shared_tools/divergence_inventory.v1.json` and `docs/shared_tools/divergence_inventory.md` reflecting the retired files.
+
+## Dynamics-Informed Mocap Matching: Baseline and Frozen Benchmark Protocol (DIME-01, #11422)
+
+Specifies versioned benchmark manifest, native capability status, fail-closed qualification rules, and frozen acceptance thresholds (#11421, #11422):
+- **Versioned Benchmark Manifest (`src/shared/python/estimation/dime_manifest.py`)**:
+  - `DimeBenchmarkManifest`: versioned, immutable manifest encapsulating dataset/model/engine revisions, disjoint calibration/holdout frame splits, phase-specific partition, SI unit constraints, observation type, known ground truth, force classification, provenance, privacy/licensing, and frozen numeric acceptance thresholds.
+  - Manifest serialization with privacy protection: `to_dict` and `save_json` enforce strict redaction of local filesystem paths, ensuring private capture datasets cannot be leaked.
+- **Fail-Closed Qualification Protocol (`evaluate_qualification`)**:
+  - Evaluates qualification status under fail-closed scientific integrity rules:
+    - *Wrong units*: all coordinates and quantities must be canonical SI (`"m"`, `"rad"`, `"s"`, `"kg"`, `"N"`, `"N*m"`); non-canonical units (e.g. `"mm"` or `"deg"`) fail qualification.
+    - *Missing provenance*: required provenance fields (`engine`, `engine_version`, `model_hash`, `git_commit`, `created_at`) must be complete and non-empty.
+    - *Force-derived test kinematics*: test kinematics derived from forces create circularity and cannot be marked qualified (`kinematics_source != "force_derived"` required).
+    - *Skeleton contact output*: kinematic skeletons lack unilateral ground reaction contact physics; skeleton models asserting contact forces cannot be marked qualified (`has_skeleton_contact == False` required).
+  - Unqualified models that exist are marked as `implemented`, not `qualified`, preserving truthful distinction between method existence and physical qualification.
+- **Truthful Native Capability Reporting (`report_native_capabilities`)**:
+  - Distinguishes Python method existence on engine classes from physical qualification status (`"implemented"`, `"qualified"`, `"unavailable"`), avoiding false qualification claims.
+- **Shared Deterministic Fixtures (`src/shared/python/estimation/synthetic_fixtures.py`)**:
+  - `make_fixed_base_pendulum_fixture`: deterministic single-DOF fixed-base pendulum with exact harmonic linear oscillator truth, pin reaction forces, zero control torques, and documented mathematical derivation.
+  - `make_underactuated_analytic_fixture`: deterministic planar two-link system with unactuated root DOF ($\tau_0 = 0$), sinusoidal actuated joint ($\tau_1(t)$), and degree of underactuation 1.
+  - `make_native_stance_fixture`: static equilibrium ground stance fixture validating vertical ground reaction force $\text{GRF}_z = m \cdot g$, zero horizontal forces, and static joint holding torques.
+- **Metrics, Zero-Denominator Policy, and Frozen Thresholds**:
+  - `compute_alignment_metric`: normalized cosine alignment with explicit `ZeroDenominatorPolicy` (`"guarded_zero"`, `"epsilon"`, `"raise"`).
+  - `compute_cancellation_metric`: net residual force cancellation ratio with zero-denominator guard.
+  - `compute_phase_drift_and_control`: phase-stratified kinematic drift and control magnitudes across split phases.
+  - `NumericAcceptanceThresholds`: frozen acceptance thresholds (max drift $\le 0.015\text{ m}$, max angular drift $\le 0.05\text{ rad}$, max control $\le 250\text{ N}\cdot\text{m}$, min alignment $\ge 0.95$, max cancellation $\le 0.10$, reproducibility atol $\le 10^{-9}$) fixed before solver comparison.
+  - `ConditioningScale`: explicit scaling and nondimensionalization factors for state, angle, velocity, torque, and time.
+
+
+## Capture-O Video Companion: Source Registration, Timing Evidence, Swing Windows, and Grades (COV-2, #11270)
+
+Specifies registration of capture-O video sources, timing evidence validation, swing interval extraction, and usability grading (#11268, #11270):
+- **Capture Registry Extension (`src/motion_capture/capture_registry.py`)**:
+  - Extends `CaptureInfo` schema with `kind` (defaulting to `"c3d"`, explicit `"video"` for video clips).
+  - Pure function `register_capture(info, repo_root=...)` registers neutral IDs `capture-O-video/cov-NN` under `$CAPTURE_DATA_DIR/capture-O-video/originals/` with SHA-256 and container facts.
+  - Fail-closed SHA-256 integrity verification raises `CaptureIntegrityError` upon content mismatches.
+- **Timing Evidence & Clock Qualification (`src/shared/python/shadow_tracker/source_records.py`)**:
+  - `VideoTimingEvidence`: frozen dataclass holding `container_fps`, `r_frame_rate`, `avg_frame_rate`, `is_vfr`, `physical_clock`, `slow_motion_tags`, `rotation_degrees`, `rotation_applied`, `creation_time`, `capture_fps`, `playback_fps`, `capture_to_playback_ratio`.
+  - Fail-closed clock classification: missing slow-motion tags require `physical_clock == "unknown"`; attempting to declare `"known"` or `"ratio_known"` without slow-motion tags raises `ValueError`.
+  - Rotation handling: camera rotation (e.g. 90°) is explicitly flagged with `rotation_applied = False` and `rotation_degrees in {0, 90, 180, 270}`.
+- **Variable Frame Rate (VFR) Rejection (`VariableFrameRateError`)**:
+  - Streams with varying frame rates are flagged (`is_vfr = True`).
+  - Uniform-PTS consumer `source_frame_rate` in `necromatcher_video.py` strictly rejects non-uniform PTS sequences with typed `VariableFrameRateError` (subclassing `ValueError`).
+- **Swing Window Intervals & View Classification (`SwingWindow`, `validate_swing_windows`)**:
+  - Represents continuous swing candidates with half-open intervals `[start_pts_s, end_pts_s)`.
+  - `validate_swing_windows` strictly forbids overlapping intervals for the same clip, raising `ValueError`.
+- **Usability Grading Rubric (`grade_swing_window`, `SwingGradeResult`)**:
+  - Pure function returning `SwingGradeResult` with mandatory reasons (empty reasons raise `ValueError`).
+  - Classifies swings into grades:
+    - **A**: Full body + club visible address to finish, >= 60 fps, low blur at impact, static camera (usable for L0-L3).
+    - **B**: Full body visible, club partly lost/blurred in downswing, or 30 fps (usable for L0-L2).
+    - **C**: Body partly cropped / heavy occlusion / moving camera, but swing is identifiable (usable for L0-L1).
+    - **R**: Not a swing or unusable; retained with mandatory recorded reasons.
+- **Catalog Privacy Protection (`docs/development/historical_capture/source-catalog.json`)**:
+  - Public catalog entries for private sources declare `private: true` and strictly exclude `original_filename`, `source_url`, and `title`.
+
+## Capture-O Video Companion: Acquisition Receipt and Provenance Contracts (COV-1, #11269)
+
+Specifies fail-closed video asset acquisition, SHA-256 integrity verification, ffprobe metadata embedding, lineage tracking, and atomic receipt emission for the capture-O companion video program (#11268, #11269):
+- **Fail-Closed Acquisition & Hash Integrity (`src/motion_capture/acquisition_receipt.py`)**:
+  - `build_acquisition_receipt(directory, ...)` assigns deterministic neutral identifiers `cov-01`, `cov-02`, … in sorted original-filename order.
+  - Fail-closed rejections: empty directory raises `EmptyDirectoryError` (subclassing `ValueError`); non-video files raise `NonVideoFileError`; probe or ffprobe execution failures raise `FFProbeError` naming the problematic file.
+  - Integrity validation: changes to existing file bytes raise `HashMismatchError` with expected vs actual digest evidence; unchanged runs produce byte-identical deterministic receipts.
+  - Lineage tracking: preserves original captures alongside re-encoded or album copies (`lineage: original` or `lineage: album-copy-of <cov_id>`) without overwriting evidence.
+  - Privacy and path safety: strictly strips and prohibits absolute local paths from all receipt entries, structured probe dictionaries, and JSON serializations.
+  - Atomic persistence: `AcquisitionReceipt.write_atomic` writes via sibling temporary files with flush/fsync before atomic replacement.
+
+
+## Markerless Backend Matrix Runner and Registry-Selected Estimators (COV-5, #11273)
+
+Specifies the unified markerless observation runner across registered estimators, receipt verification, overwrite safety, and canonical 3D ingestion:
+- **Historical Capture Matrix Runner (`scripts/historical_capture.py`)**:
+  - Configurable `--estimator NAME` (default `mediapipe`, backward-compatible) and `--estimator-option KEY=VALUE`.
+  - Resolves estimators through `src.shared.python.pose_estimation.registry.create_estimator`.
+  - Refuses execution if destination directory already exists (overwrite guard).
+  - Validates `estimator_availability(name)`; exits non-zero with `install_hint` reason and writes no partial receipt if unavailable or unknown.
+  - Receipt detector identity records registry name, package version, and model-weights SHA-256 without implicit network downloads.
+- **HMR2 Monocular 3D Canonicalization (`src/shared/python/motion_pipeline/sources/hmr2_adapter.py`)**:
+  - `to_canonical_observations` canonicalizes HMR2 `joints3d.csv` output into `CanonicalObservations` (SMPL-22 marker set).
+  - Preserves 3D joint positions in metres under declared coordinate frame (`declared_frame="camera"`).
+  - Flags missing focal length or camera intrinsics with a typed `unqualified` status (`qualification="unqualified"`, `unqualified=True`) rather than fabricating guessed scale.
+
+## Force and Torque Overlay Gallery, Golden Regressions, and User Guide (FTO-30, #11315)
+
+Specifies reproducible cross-engine gallery generation, golden-image visual regression thresholds, authoritative overlay user guide, and parity ledger close-out for the force/torque overlay program (FTO-1–30, #11285):
+- **Reproducible Gallery Generator (`scripts/render_force_overlay_gallery.py`)**:
+  - Headless execution across all supported engines and renderers under `MPLBACKEND=Agg`, `QT_QPA_PLATFORM=offscreen`, and `MUJOCO_GL=egl`.
+  - Generates sharp stills, clip manifests, and interactive `index.html` recording engine versions, model hashes, and `VideoGlyphReceipt` verification metrics (`drawn`, `skipped_behind_camera`, `skipped_out_of_frame`, `unavailable_labels`).
+  - Unsupported or uninstalled engines fail open with structured skip reasons rather than crashing.
+- **Golden Image Visual Regression Suite (`tests/visual/force_overlay/test_golden_force_overlays.py`)**:
+  - Headless 320x240 golden regression fixtures verifying Matplotlib 3D, OpenCV calibrated pinhole projection, and MuJoCo EGL native offscreen renders against committed golden images.
+  - Perceptual tolerance enforced strictly via `MAX_MEAN_ABS_DIFF = 2.0` on $[0, 255]$ ($2/255$ scale); threshold relaxation is prohibited.
+- **Authoritative Force Overlay Documentation & Parity Records**:
+  - User Guide in `docs/user_guide/force_overlay.md` detailing the 7-kind `FORCE_KIND_PALETTE`, axial tension/compression color scales, desktop GUI controls, web Three.js/SVG toggles, video compositing labels, and engine-specific limits.
+  - Cross-linked from `docs/user_guide/body_part_viz/force_colors.md` and `docs/agents/shared-infrastructure.md`.
+  - Feature parity ledger (`src/config/feature_parity.json`) updated to record multi-engine producer wiring, and `force_overlays` tile in `launcher_manifest.json` promoted to `ready`.
+
 ## Pinocchio Native Fitting and Cross-Engine Torque Transfer (MMR-09, #11093)
+
 
 Specifies native Pinocchio fitting, cross-engine torque transfer, candidate promotion gating, and quaternion/spherical joint virtual-work duality:
 - **Candidate Promotion and Gate Isolation Contracts (`src/shared/python/motion_matching/pinocchio_g2_g3.py`)**:
@@ -354,6 +1101,20 @@ Specifies neural silhouette segmentation provider interface, model card and chec
 - **Verification (`tests/unit/shadow_tracker/test_silhouette_segmentation.py`)**:
   - Unit tests verifying fail-closed checkpoint validation on corrupt weights, lazy optional initialization, zero hidden downloads, distinct person and club binary channels, artifact provenance hashes, manual workflow fallback with parent-revision branching, and multi-clip benchmark evaluation.
 
+## Benchmark MATLAB Iteration Throughput and Portable Model Exchange (MMR-18, #11104)
+Specifies MATLAB iteration throughput benchmarking, Fast Restart / warm session reuse contracts, content-addressed cache invalidation, and portable model exchange conformance:
+- **Throughput Benchmarking & Memory Contracts (`src/shared/python/motion_matching/portable_exchange.py`)**:
+  - `IterationBenchmarkSample` and `record_iteration_benchmark`: records cold and warm execution timings, speedup ratio, and peak memory across identical captures and hardware with fail-closed validation on non-positive or non-finite inputs.
+- **Content-Addressed Cache Invalidation**:
+  - `compute_content_cache_key`: computes canonical 64-character SHA-256 digest covering all seven invalidation axes: model (ID and SHA-256), geometry, marker map, initial state, solver configuration/tolerances, controls, and provider revision.
+- **Session Reuse & Mandatory Rebuild Guard**:
+  - `evaluate_session_reuse` and `SessionRebuildDecision`: verifies that model topology changes (coordinate count, joint tree, neck DOFs) and operating-point changes (PlaneTilt, ground offset, gravity, cadence) mandate full model rebuilds (`SessionRebuildRequiredError`), permitting warm session reuse only for tunable controls.
+- **Metric Parity & Optimization Winner Cold Replay**:
+  - `evaluate_metric_parity`: enforces strict numerical agreement between cold and warm or repeat iterations within declared tolerances, failing closed (`ParityToleranceExceededError`) on numerical drift.
+  - `verify_optimization_winner_cold_replay`: mandates that winning candidate proposals from iterative optimizations receive an uncached native cold replay (`is_uncached_cold=True`) reproducing declared metrics within tolerance.
+- **Fail-Closed Portable Model Exchange**:
+  - `InterchangeConformanceMatrix`: defines engine support matrix across rigid multibody, polynomial actuation, torque actuation, independent neck DOFs, Hill-type muscle dynamics, and volumetric penalty contact.
+  - `export_portable_model` and `import_portable_model`: preserves named coordinates, frames, mass/inertia, contacts, and actuation while rejecting unsupported neck, contact, and muscle mappings (`UnsupportedMappingError`) to prevent silent loss of dynamics.
 ## Ship the Historical-Video Evidence Review Workflow (MMR-12, #11098)
 Specifies the historical video evidence review workflow, multi-shot isolation, timing preservation, downstream invalidation, and GUI review integration:
 - **Shadow Tracker Review Service (`src/shared/python/shadow_tracker/service.py`)**:
@@ -7716,12 +8477,120 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
  |
 | 2026-10-03 | #11376 | Add versioned typed native camera/model hypothesis admission, real source/model/ownership/hash authentication, exact saved-final Hermite rebinding, SDK-first fixed worker initialization and immutable unoptimized seed lineage/recall. Reuse canonical capture clock, native binding, body metrics, initializer and store; preserve legacy refit transport and research rejection. Fixture-only validation; no historical calibration or public release. Register exact reviewed three-page partial solver-budget and four-page fixed row-time supplement sources with compact independent/delivery receipts and external portable graphics; record actual 56-case support/rejection and twelve-pose exact ROI parity with sampled timing guards, preserve historical checkpoints and physical-calibration/qualification limits. Record four independently decoded full shape videos and ControlTower delivery, 52-frame canonical diagnostic-seen shaft binding with the Hogan 375 overlap, authoritative telemetry implementation and the reviewed eight-page full-video report; preserve historical producers, unavailable legacy counts and provisional camera/anatomy/shutter/ROM status. |
 | 2026-10-02 | #11318 | Add native historical image fitting using canonical spline MAP estimation, explicit camera hypotheses, immutable evidence, efficient derivatives and measured Hogan/Tiger residuals; preserve exact source-bound research fit versions through library recall/export, add verified native/web projection review with a clean-interpreter SDK worker, add source-stamped warm-start job execution with explicit rejection and cancellation-safe publication, record committed Hogan/Tiger refits and clean-worker environment regressions, expose native/web submit-status-cancel controls through the canonical session with durable research run recall, add unit-preserving model/fit-bound authored effort profiles with strict import/recall/export checks and canonical unqualified handoff transport, add compiled scalar-unit verification and shared native fit/control bindings, verify both actual player resources from committed source, add bounded authored open-loop replay with fresh-resource step refinement and canonical SI trace metadata, add immutable replay admission/recall/export and shared local API transport with source/parent/clock/control checks, add explicit source-linked ground/camera placement hypotheses with all-frame conservation and lineage validation, record actual committed Hogan/Tiger placement revisions and remaining cropped-foot/closure failures, preserve research qualification, repair native frame-alias queries and finite-angle grip IK derivatives, add source-stamped discrete authored bounded repair with explicit soft constraints and pixel tradeoffs, record full-track failed LM probes and add opt-in native analytic bounded TRF with fixed contact rows and preserved locked states, add canonical sequential warm starts, source-sized native joint-tree MP4/PNG overlays with exact source PTS and immutable manifests, and a compiled reproducible LaTeX methods report/Desktop review package tracked by #11246/#11247; add owned native/web video export jobs, clean SDK workers, durable status/cancellation, guarded downloads, native transfer hash verification and bounded canonical Windows atomic-promotion retries; add public scaled 6D native grip/ground Jacobians, opt-in interior spline constraints with source-only image evidence, immutable tested-time receipts and independently assessed cubic coordinate extrema; add opt-in canonical whole-Hermite Bernstein coordinate bounds with named native limits, infeasible-seed rejection, immutable physical coefficients and exact decoder Jacobian chaining; separate historical overlay execution from present artifact readiness through bounded metadata baselines and guarded legacy verification; add explicit authored feasible initialization with immutable knot-change and coefficient-hash receipts, actual original-observation RMS, unchanged pose priors and truthful optimizer execution; bind exact authored radian ranges to captured native definition bytes, exported XML and compiled scalar units with unbounded names recorded; preserve separate initializer-only fit versions through owned jobs, record actual source-stamped V8 seeds/bounded fits and independent original-frame/midpoint/extrema audits, verify all 960 new overlay frames and live Hogan download recall, and expand the reviewed compiled methods report to 25 pages with detailed failure/restart/stance provenance; repair governed inventories and continue qualified replay and downstream handoffs under #11235.; add immutable exact Hermite restart snapshots with native model/order/clock/hash checks, zero resampling or reauthoring, explicit native/web starting-method choice, authoritative complete bound/contact recipe retention and canonical nested API transport with ambiguous legacy mixing rejected. Record source-stamped actual V9 exact restarts, independent scalar/finite nonlinear audits, verified original-footage overlays and a live complete-recipe API submission; repair fractional HTML number admission and ES2020 endpoint access, retain Desktop evidence and polished report figures while historical acceptance remains rejected. Add capture-bound authored phase-contact schedules, exact rational boundary/review identity validation, continuing nonpenetration and phase-preserving recipe summaries; retain source review uncertainty and finite-only assessment. Record actual V10 exact-start phase trials, independently reproduced pixel/bounds passes and contact-target failures, source-bound video exports and live complete-recipe web submission; preserve rejected candidates and repeatable detailed methods/evidence. Add immutable explicit fitting-coordinate expansion and canonical unoptimized seed persistence under #11281, preserving full native motion before new trials; add fit-scoped durable native overlay recall and guarded saves under #11282, with parent/manifest/research-status rejection and actual offscreen player-package evidence. Verify both SDK-free and SDK-first clean historical-fitting startup, repair serializer facade import order and retain an actual driver preflight before numerical execution. Record four source-frozen V11 matched continuation/wrist trials with independent restart/provenance/bounds audits, true Tiger held-out regression and Hogan remaining penetration failure; retain rejected candidates, all 960 verified new original-footage overlay frames/six visually reviewed stills and recoverable exclusive export journals. Update the polished methods report and Desktop repeatability evidence without claiming historical physical qualification. Record four frozen V12 regularization/probe-density trials with fresh independent exact-start, unchanged-evidence and nonlinear audits; Hogan passes all five finite targets while scientific acceptance remains rejected and Tiger failures persist. Explicitly retain increased aggregate penalty mass as a density-trial confound. Verify 960 new overlay frames/six actual stills and native V11 stored-run recall with normalized path-whitelist failure evidence; preserve detailed LaTeX and Desktop reproducibility artifacts. Record four authored twelve-versus-six V13 seed/strict-fit outputs with matched55interior/78union geometry times and936rows, explicit different starting curves, independent bound/contact audits and rejected seed closure failures; verify210 actual six-knot Tiger overlay frames and three visually reviewed stills through source-stamped guarded exports. Record two exact-six V14 collective4x geometry-weight continuations with independent unchanged-evidence/row-factor checks; retain four finite target passes and2mm ground failure, including a between-node toe penetration missed by objective probes. Preserve exclusive Desktop numerical inputs/full audits, ground diagnosis and all earlier evidence; no V14 overlay or scientific acceptance claim. Add an SDK-free sanitized historical-player research provider under #11317 using canonical immutable recall, explicit independent audit pins, original-source rehashing, exact rational video clocks, deterministic generic-player JSON and rejected local-only distribution; preserve the separate AffineDrift #4828 consumer boundary and track original-video club evidence under #11318. Actual source6654881 export and Affine local draft admission/recall/Quarto/browser preview bind Tiger V14/Hogan V12 with exact independent pins, retaining rejected status and unauthorized publication. Repair actual Windows request-read sharing races through the canonical atomic-I/O provider with shared bounded promotion/read retry logic, fresh native error capture, explicit precedence and deterministic plus owned-handle regressions; preserve malformed-data failures and polling semantics. Record actual V15 mass-normalized78/178-node continuations, fixed finite target passes without convergence or physical acceptance, verified210-frame source overlay and three separately reviewed mismatched stills. Publish the independently reviewed60-page methods report with1,102 hash-verified retained Desktop artifacts and preserve the prior49-page edition. Final expanded source regression passed476 cases; V15 provider adapter is validated in the working tree (64 provider/selection cases), without actual new-cohort export; club Slice A source-bound DTO/binder/authored solid-axis resolution now passes57 focused red-to-green cases, Ruff and pinned mypy, with independent frozen-source review. Record actual committed605 latest V15/V12 export and committed8fde local admission, exact browser/reproduction receipts and sparse source-bound shaft annotations. Add opt-in typed infinite-axis residuals with separate raw metrics, independent sparse-time bases and strict protocol/diagnostic guards; 112 combined cases and33 independent review cases pass. Add canonical native/capture/PNG/clock/axis admission with one compile reuse;96 combined cases and28 independent cases pass. Publish reviewed66-page methods report and1,216-artifact Desktop index while preserving exact60/49-page editions. Opt-in source-bound queue/worker/persistence and native/web import controls are implemented:102 combined/19 independent jobs,32 independent offscreen native,30 web and41 stable video/job/API cases pass. Optional original-source shaft overlays preserve exact clock/evidence and separate raw line metrics;20 renderer/80 combined cases pass. Record actual committed 3ab canonical V2 holdout admission and four matched saved-final-start Tiger V16/Hogan V13 trials: training shaft RMS improves but Tiger holdout worsens and Hogan is essentially unchanged; all four finite historical target sets pass while optimizers remain nonconverged/rejected. Verify four display-only original-footage exports across 1,920 frames with exact source PTS and separate selected-image review, retaining Tiger encoder clock rounding. Publish the independently reviewed 74-page report and 1,504-artifact Desktop manifest while preserving exact 66-page/index snapshots; measured heads/physical endpoints/time/dynamics qualification and #11318 completion remain open. Continue in PR #11359 with opt-in shared projective model surfaces, checked opacity, retained skeleton and model-proxy provenance under #11356. Record the 960-frame source-only shutter audit, conditional saved-camera descriptions, generic morphology and anatomical-ROM qualification procedure under #11357; preserve original evidence and distinguish inspected labels from unseen validation. Verify 124 matched-review files and a separate 77-file source-audit supplement package on ControlTower Desktop. Actual shaded exports and physical qualification remain pending clean-producer execution. |
+| 2026-10-09 | #11914 | Extend frozen native replay receipts and model-owned marker FK to actual Pinocchio q/v output, with frame-local marker transforms and nq=8/nv=7 identity-bound synthetic verification. |
+| 2026-10-07 | #11692 | Protect `.yml` and Related Filenames in the Title-Case Checker |
+| 2026-10-07 | #11666 | Register latex-references.yml in the workflow inventory so the inventory gate passes on main |
+| 2026-10-07 | #11598 | Commit recovered Crocoddyl G1 warm-start IK and 0.60 s FDDP stage inputs beside the rk45, rtol6 and b100 receipts, plus the w030r chain-root candidate, with sha256 provenance |
+| 2026-10-07 | #11687 | Rename the two unrelated DynamicsProvider protocols to DimeDynamicsProvider and EquationsOfMotionProvider; old name kept as a deprecated alias for one release |
+| 2026-10-07 | #11638 | Fix ZTCF/drift sign in engine contract docs and unify ZVCF on simulation_backends.ztcf_zvcf (counterfactual delegates) |
+| 2026-10-07 | #11641 | ci: compile docs/research LaTeX references with pinned Tectonic and check changed title case |
+| 2026-10-07 | #11637 | Fixed-size window residual: typed DimeResidualEvaluationError replaces the np.full(100, 1e8) fake residual; bound residuals fixed-length; DbC postcondition on residual length. Single shooting / real defects deferred to MOSAIC-13 (#11545). |
+| 2026-10-07 | #11636 | Bump tornado to 6.5.10 and remove the three stale tornado pip-audit waivers |
+| 2026-10-07 | #11627 | Phase 2: spec-driven musculoskeletal model, exact contact, per-frame static optimisation |
+| 2026-10-07 | #11621 | OpenSim musculoskeletal swing: GRF estimate, StaticOptimization pipeline, receipt |
+| 2026-10-07 | #11628 | Same-input parity P-2: same-input-bundle/v1, shared ZOH RK4 integrator (8 substeps for stiff contact modes), per-step closure projection, MuJoCo reference generation, replay scoring; pipeline persists q_track; OpenSim same-input parity adapter (exact weld KKT, shared contact law); fix OSIM exporter XYZ Euler convention and 41-coordinate validation; P-7: spec full-body model loaded through the MyoSuite runtime reproduces MuJoCo bit-exactly under the same inputs (L0/L1/L2 parity receipt) |
+| 2026-10-07 | #11615 | Same-input parity P-1: VectorPlant + convention-free closure projection; MuJoCo exact-KKT option; pointwise MuJoCo/Drake/Pinocchio acceleration parity gate and receipt (worst 1.1e-9 relative over 31 frames) |
+| 2026-10-07 | #11624 | Per-workspace CARGO_HOME for rust-quickstart and realtime-soak; contract test pins RUSTUP_HOME and CARGO_HOME for every Rust job (RM#2021) |
+| 2026-10-07 | #11625 | Document full-swing five-engine same-input parity results (L2/L3) in the research reference |
+| 2026-10-07 | #11620 | Archive HANDOFF.md And DEVELOPMENT_LOG.md Verbatim (RM#1893) |
+| 2026-10-07 | #11618 | settings_dialog: ignore late dependency-check results after close; worker emits failed for any exception |
+| 2026-10-07 | #11616 | Same-input parity LaTeX research reference (P-1 pointwise result) |
+| 2026-10-06 | #11590 | chore(tests): retire stale test_no_unflagged_shared_code header test and its unit-gate quarantine entry |
+| 2026-10-06 | #11602 | ci: deleted-test guard honours a reviewed allowlist (scripts/config/reviewed_test_deletions.json: path + issue + reason, fails closed when malformed) so an approved test retirement can pass the merge queue; unapproved deletions still fail. |
+| 2026-10-06 | #11592 | Make the change-fragment round-trip test hermetic so collating a real DL-#1976 entry cannot break it |
+| 2026-10-06 | #11597 | ci: give every dtolnay/rust-toolchain job a per-job RUSTUP_HOME (${{ github.workspace }}/.rustup-home) so rustup never upgrades the runner image's partially installed ~/.rustup toolchain in place; contract test in tests/ci/test_unit_gate_rust_kernel.py. |
+| 2026-10-06 | #11586 | Re-sync vendored automerge_guard and requeue_stalled_merges (and tests) to Repository_Management canonical (Refs Repository_Management#2018) |
+| 2026-10-06 | #11577 | Vendor automerge_guard and requeue_stalled_merges (stalled-merge requeue tooling) from Repository_Management with canonical tests (Refs Repository_Management#2018) |
+| 2026-10-06 | #11594 | Clear the security findings main carries: werkzeug 3.1.8 to 3.1.9 (CVE-2026-102598) and fsspec 2026.1.0 to 2026.6.0 (CVE-2026-104851) in both Python lockfiles, and source-map-js 1.2.1 to 1.2.2 (CVE-2026-93749 / GHSA-68fv-2mgg-jv7q) in ui/package-lock.json; lockfile-only upgrades, no new waiver. |
+| 2026-10-06 | #11581 | fix(tests): wait for settings-dialog dependency-check workers before teardown |
+| 2026-10-05 | #11580 | Align launcher API capability tests with reconciled capability matrix |
+| 2026-10-05 | #11576 | Reconcile engine capability matrix with get_capabilities and add consistency test |
+| 2026-10-05 | #11575 | Report NaN for unmeasured replay metrics and fail closed in acceptance evaluation |
+| 2026-10-05 | #11568 | Drake full-body fit scores forward kinematics of the Drake rollout instead of the warm-start candidate's markers |
+| 2026-10-05 | #11556 | ci(security): re-vendor fork_pr_runner_guard.py and new fork_pr_guard_analysis.py from Repository_Management (RM#1996): same-repo if: exemption and sink-based head-checkout analysis. |
+| 2026-10-05 | #11555 | MOSAIC model-aware multi-trial matching kernels, methods reference and DIME (#11421) audit |
+| 2026-10-05 | #11559 | fix(estimation): DIME initialisers, ablations and manifest report not-measured instead of constants or ground-truth-derived figures |
+| 2026-10-05 | #11558 | DIME replay and engine qualification fail closed on missing reference/metrics; replay provenance read from the environment |
+| 2026-10-05 | #11562 | drift prediction propagates covariance through F = df/dx per step, steps the full horizon as H steps of dt, and never actuates the floating-base root by default |
+| 2026-10-05 | #11557 | Multi-trial MAP: residual and Jacobian prior rows share one layout (locked priors excluded from both); posterior covariance is the Schur marginal over the shared parameters, reported as unavailable (`covariance_status="rank_deficient"`, NaN) when the Fisher matrix is singular; calculation documented in docs/conventions/canonical-v2.md §6.1 |
+| 2026-10-05 | #11561 | DIME solver cache key now covers targets, weights and solver options; cost breakdown reports measured values or not-measured (None) instead of wall-time fractions |
+| 2026-10-05 | #11560 | DIME manifold retract and local-coordinate Jacobians are now the exact derivatives of the right quaternion chart at any pose and velocity (J_r^-1, dExp/dv), verified against central finite differences |
+| 2026-10-04 | #11516 | Versioned BunkerShot3D workbench route `POST /tools/bunker-workbench/v1/evaluate` over the headless `WorkbenchModel`: strict DbC input validation (units, PyQt panel ranges, explicit right-handed convention), bounded nominal solve, tier/verdict/stamp/source stamps plus canonical SHA-256 digest, and predictive or degenerate playability objectives refused (#9239); closes the `api: null` parity gap. |
+| 2026-10-05 | #11526 | CLAUDE.md is prettier-clean: restored the mangled Where-to-edit code spans and spaced the @AGENTS.md import |
+| 2026-10-05 | #11522 | fail fast with an explicit incomplete-checkout error naming the runner, and log sparse-checkout state, after checkout in fetch-pinned-tools |
+| 2026-10-05 | #11523 | Keep fork PRs off the self-hosted fleet: fork guard on PR-triggered jobs, hosted route for the quality-gate lane, and a static checker (RM#1989) |
+| 2026-10-05 | #11519 | Point contributors at change fragments in post_spec_reminder |
+| 2026-10-05 | #11518 | Disable FastRestart for solve_starting_pose and resolve model path in run_leaderboard |
+| 2026-10-04 | #11511 | Vendor the RM-5 change-fragment tooling (`shared_scripts/changes_fragment.py` and siblings, byte-identical with Repository_Management, digests pinned in `docs/development/change-fragment-bundle.json`), add `changes/` and `scripts/ci/check_spec_freshness.py`, which accepts a valid fragment in place of a SPEC.md edit (Repository_Management#1976). |
+| 2026-10-04 | #11510 | Merge-queue runs scope the core `tests` lane to `merge_group.base_sha` and fetch `origin/<default>` for the unit-gate child-copy guard, so queued PRs no longer fail the whole-src coverage floor or the guard (RM#1900). |
+| 2026-10-04 | #11507 | Switch the `smoke-test-wheel` sparse checkout to cone mode on `tests/fixtures` and add a guard test that no workflow sets `sparse-checkout-cone-mode: false` (#9507). |
+| 2026-10-04 | #11506 | Retired the tools-canonical `data_processing` and `data_processor_io` UD copies (#11503): both roots now resolve to the pinned Tools tree via `REDIRECTED_ROOTS`, their `shadow_modules.yaml` ledger lines and the drift-test waiver in `tools_child_copy_missing_counterparts.txt` are removed. |
+| 2026-10-04 | #11509 | [FTO-28] Opt-in force/torque and segment-shading layer for the Necromatcher fitted-model video export: `ForceLayer` settings (off by default), spline-derivative `v`/`a` from the preserved fit, MuJoCo provider injected only in the SDK worker, FTO-8 glyph rendering through the fit's camera with the research-fit qualification legend, manifest and per-frame receipts, `force_layer` request field, desktop and web toggles (#11313). |
+| 2026-10-04 | #11508 | [COV-10] Engine-generic model-candidate comparison source (`model_candidate_source.py`): provenance-carrying landmark sources for any engine, shared COV-7 L2 path, qualification-aware receipts (Python-only part; real GS3DX evidence blocked on #11165, refs #11278). |
+| 2026-10-04 | #11502 | [COV-3] Capture-O comparison protocol ratification, landmark correspondence table, and frozen profile config: comparison levels L0-L3, 8 governed decisions and rationales, cov_comparison_profile.v1.json, and cov_landmark_correspondence.json mapping Capture-34 to derived joint centres and 4 detector backends (#11271, refs #11268). |
+| 2026-10-04 | #11499 | [COV-4/6/7/8/9/11] Capture-O Video Benchmark Suite: virtual camera fitting and 2D envelope (#11272), swing pairing and similarity matrix (#11274), 2D markerless backend comparison (#11275), marker-anchored anthropometry and owner project (#11276), 3D monocular/refit comparison vs marker IK (#11277), and error-budget receipt with frozen guidance (#11279, refs #11268). |
+| 2026-10-04 | #11496 | [DIME-12] Per-engine and capture qualification matrix: EngineCapabilitySpec, CaptureProvenance, EngineQualificationEntry, EngineQualificationMatrix, evaluate_engine_qualification, build_fleet_qualification_matrix, and export_qualification_bundle (#11433, refs #11421). |
+| 2026-10-04 | #11432 | [DIME-11] Shared reports, GUI strategy selection and LaTeX methods: EstimatorStrategy, RunClassification, ReportScope, ReportForceProvenance, KinematicsPayload, ZtcfRecord, GroundReactionForceReport, VideoOverlaySpec, DimeReportOptions, DimeReportArtifact, DimeStrategySelectionService, DimeStrategySelectionViewModel (#11432, refs #11421). |
+| 2026-10-04 | #11430 | [DIME-09] Offline smoothing and independent continuous replay: ContinuousReplayOptions, ReplayReceipt, IndependentReplayMetrics, ContinuousReplayResult, execute_continuous_replay, smooth_backward_trajectory with forbidden reverse-time contact, and Shadow Tracker / Simscape adapters (#11430, refs #11421). |
+| 2026-10-04 | #11495 | [CI] Optimize import hook hygiene test with fast-filter and functools.cache, prune 125 stale baseline errors, and support merge_group event in MyPy steps (#11492, refs #1890). |
+| 2026-10-04 | #11490 | [DIME-16] Torque-independent drift feasibility and missing-data prediction: SubspaceDecomposition, SubspaceContactInteraction, MaskedIntervalControlPrior, MaskedPredictionResult, DimeInputSubspaceFactor, decompose_input_subspace, evaluate_input_subspace_feasibility, and predict_masked_interval (#11437, refs #11421). |
+| 2026-10-04 | #11488 | [DIME-10] Ablation study and accuracy-runtime acceptance: DimeAblationVariant, PerturbationKind, ObservationMode, AblationTrialSpec, AblationTrialResult, AblationSummaryTable, AblationBenchmarkSuite, compute_ablation_dominance_metric, run_ablation_trial, and run_dime_ablation_suite (#11431, refs #11421). |
+| 2026-10-04 | #11467 | [DIME-08] Observable global calibration and consistent prior updates: PhysicalGauge, PhysicalGaugePolicy, CalibrationParameter, validate_physical_inertia, GlobalCalibrationProblem, GlobalCalibrationResult, and calibrate_global_parameters (#11429, refs #11421). |
+| 2026-10-04 | #11428 | [DIME-07] Extend existing MHE with arrival information and safe window commits: ArrivalFactor square-root representation, rank-revealing marginalization with tested gauge policy, safe window commit validation and failure diagnostics, late/irregular sample handling, and accumulation guard (#11428, refs #11421). |
+| 2026-10-04 | #11461 | [DIME-05] Coupled state-control full-dynamics window factors: DefectMode, ModelDiscrepancyBounds, DimeDynamicsWindowFactor, DimeDynamicsWindowProblem, DimeDynamicsWindowResult, solve_dime_dynamics_window (#11426, refs #11421). |
+| 2026-10-04 | #11460 | [DIME-04] Uncertain-control ZTCF prediction and estimation criterion: input-affine dynamics decomposition, parallelotope reachable acceleration interval, Gaussian uncertain-control covariance propagation, drift dominance index, and predict_dime_transition (#11425, refs #11421). |
+| 2026-10-04 | #11457 | [DIME-03] Robust marker and markerless observation factors: Marker3DObservationFactor, Markerless2DObservationFactor, calibrated confidence and anisotropic covariance whitening, robust loss kernels (Huber, Tukey, Cauchy, Pseudo-Huber), held-out partitioning, camera inversion and chirality validation, and quaternion sign equivalence (#11424, refs #11421). |
+| 2026-10-04 | #11455 | [DIME-02] State, observation and dynamics provider contracts: DimeCompleteState, DimeObservationWindow, SE(3)/quaternion manifold operations with sign equivalence, fail-closed qualification rules, snapshot rollback, ZTCF proposals, and runtime factor exclusivity (#11423, refs #11421). |
+| 2026-10-03 | #11452 | [FTO-7 follow-up] Remove deprecated force_vectors and vectors shims, drop obsolete shim tests, update test_plotting_renderers, and update divergence inventory (#11347). |
+| 2026-10-04 | #11453 | [DIME-01] Baseline and frozen benchmark protocol: DimeBenchmarkManifest, fail-closed qualification evaluation, native capability status vs method existence, deterministic fixtures, privacy protection, and frozen thresholds (#11422, refs #11421). |
+| 2026-10-03 | #11451 | [OpenCap] Record golf accuracy qualification against a simultaneous physical marker reference in deferred-validation catalog DV-11408 (refs #11408). |
+| 2026-10-03 | #11448 | [OpenCap] Marker augmenter on triangulated keypoints with OpenCapMarkerAugmenter, model-conditioned evidence labeling per ADR-0041, OpenSimScaleBackend and OpenSimIKBackend fallback integration (#11405). |
+| 2026-10-03 | #11441 | Settings page test no longer races the asynchronously loaded theme list: it waits for the Light option before selecting it, and the shared mock now resolves the theme list late so the ordering bug reproduces every run |
+| 2026-10-03 | #11444 | [OpenCap] Local opencap-core sidecar runner with OpenCapLauncher, process safety via managed_popen, Docker and venv discovery, ADR-0053 licensing guards, and OpenCapOutputAdapter (#11406). |
+| 2026-10-03 | #11415 | [OpenCap] Opt-in hosted session download client with affirmative consent verification, typed OpenCapHostedSettings, and full session layout reconstruction matching load_opencap_session (#11407). |
+| 2026-10-03 | #11182 | swing_comparison kinematic sequence: thorax yaw from BackLeft/BackRight (shoulder-line fallback, proxy recorded in `thorax_proxy`) and post-impact search margin in seconds instead of frames (#11182). |
+| 2026-10-03 | #11270 | [COV-2] Register capture-O video sources, timing evidence, swing windows and usability grades: VideoTimingEvidence, VariableFrameRateError, SwingWindow, grade_swing_window, capture registry video kind, and catalog privacy invariants (#11270). |
+| 2026-10-03 | #11362 | [FTO] Remove the deprecated `ForceVector3D` model, `ForceOverlayResponse.vectors` and `glyphs_to_legacy_vectors` from the force overlay API; regenerate UI API types and drop the dead `vectors`/`onVectorsChange`/`forceOverlays` React plumbing (#11362, refs #11285). |
+| 2026-10-03 | #11269 | [COV-1] Acquisition receipt and provenance contracts for capture-O video companion: build_acquisition_receipt, SHA-256 verification, ffprobe metadata embedding, lineage tracking, and atomic persistence (#11269). |
+| 2026-10-03 | #11273 | [COV-5] Markerless backend matrix runner and registry-selected estimators: add `--estimator` and `--estimator-option`, explicit model-weights verification, fail-closed availability/overwrite guards in `scripts/historical_capture.py`, and HMR2 canonical 3D meters and unqualified scale flag in `sources/hmr2_adapter.py` (#11273). |
+| 2026-10-02 | #11256 | Default future matches to refined Human ellipsoids; add capture-bound exports, calibrated foot/head orientation, keyed starts, selective gap weights and source observation masks with native default-parity tests and caller-bound export/cache contracts. Support configured upper-body learning, native block-bound Human moving references with explicit geometry-preserving conversion; native moving-velocity/midpoint, dense branch, derived-target availability and source-masked full-pose continuity experiments recorded without promotion; distinguish the refined-preview objective, verify private translation parameter contracts and native address-prefix comparison with independent 344-pose rechecking, and twelve-axis leg feedforward; preserve failed exit receipts and separate 48/43/37/35 native coordinate/control counts; fresh 48-state tangent recheck passes; original source-rate C2 rejection retained, guess correction preserves anchors, and refined/alternate-chart dense candidates remain rejected; record the GS3DX canonical-manual inventory blocker without release promotion; independently recheck all 2,042 full-source-clock fitted poses after retained shutdown failure, audit tour1307/1307 and owner729/733 C2 states plus bounded measured InputTorque neck capability; retain the earlier 536 saved-window-pose review after retained shutdown failure, measure capture-specific fit/continuity tradeoffs and native RED/GREEN normalized-rate helper contracts without full-path promotion; dense target/back-marker fit and projection-conditioned visual foot direction independently measured; parent verifies 104 comparison MP4s without dynamics promotion. Maintain calculation-level LaTeX, failed-trial evidence and tour/owner Desktop H.264 IK videos. Contact-supported one-second holds pass their fixed gates; full-swing torque recovery, independent replay, PDF qualification and protected delivery remain open. Earlier staged evidence: Default new matching to the Human ellipsoid model with keyed starts, calibrated head/foot constraints and reviewed Desktop H.264 IK videos; preserve explicit legacy consumers. Reject leg-IK half-turn false success with shared SO(3) residuals. Add configured upper learning with lifecycle and signal contracts: 19 native contract tests, two tour/owner probes preserving 837 workspace values, and 311 earlier native/legacy checks passed. Add sampled leg feedforward with 16 native seam/regression tests and traced net actuator effort. Controlled contact-guarded startup ramps pass all five fixed one-second hold gates for tour and owner; earlier rejected ramps and stiffness trials remain documented. Update the same LaTeX equations, failed receipts and handoffs; full independent replay, PDF review and protected delivery remain open. Add a native saved-posture startup-transient audit; preserve rejected intermediate outcomes and distinguish the passing supported-posture screen from independent full-swing qualification. Add selective missing-position weights with native RED/GREEN (10 new and 35 existing passing tests), exact native default-output parity and a full owner trial reducing the root transition to 17.350 mm without worsening marker fit; retain unpromoted discontinuity/ROM/visual and full-dynamics gates. Record native SO(3), implementation-ROM, marker-observability, unoffset elbow geometry and pelvis-cluster audits; preserve unchecked anatomical conventions and alternate owner seed/orientation work. Record six native loop-closing owner seed families and reject both alternative fixed-offset address fits; retain calibration/held-out and independent full-dynamics gates. |
+| 2026-10-01 | #11173 | Require LaTeX modeling references; enforce contact-face acceptance, truthful native-run receipts, and capture-specific IK export timing and provenance. |
+| 2026-09-29 | #11161 | Capture registry (#11162: neutral ids, SHA-256 verified, private data via `CAPTURE_DATA_DIR`, Python and MATLAB resolvers; club-workbook consumers rewired and skip without private data), capture-export pure functions (#11163) and engine-independent swing events and metrics (#11164) for comparing the owner's swing with the tour-average reference. |
+| 2026-10-03 | #11409 | OpenCap session import action in PyQt6 and React/Tauri (#11409): added OpenCapImportAction and OpenCapImportDialog to PyQt6 OpenSim GUI with trial selection and engine handoff; inspect_opencap_session and OpenCapSessionMetadata in motion pipeline; OpenCapImportModal component in React/Tauri; FastAPI routes in src/api/routes/opencap.py; feature_parity.json entry and regenerated matrix. |
+| 2026-10-03 | #11400 | OpenCap session import (#11401–#11403): ADR-0053 sets the sidecar, licence and privacy boundary; augmented markers keep the LaiUhlrich2022 names (`sources/opencap_markers.py`, `OpenCap-LaiUhlrich2022` marker set) with legacy aliases and collision rejection; `load_opencap_session` returns the trial, scaled model, IK kinematics (translations kept in metres via `osim_coordinates`) and subject from `sessionMetadata.yaml`; `OpenSimSTOMOTAdapter` gains `translational_coordinates`. |
+| 2026-10-03 | #11397 | [FTO-30] Force overlay gallery, golden-image visual regression tests, user guide, and parity ledger close-out: render_force_overlay_gallery, golden images in tests/visual/force_overlay, docs/user_guide/force_overlay.md, and feature parity update (#11315). |
+| 2026-10-03 | #11399 | [FTO-19] Simscape simulation output: carry logged force channels and joint rotations through SimscapeOutput (R2025b host) (#11304). |
+| 2026-10-03 | #11395 | [FTO-29] Video force/torque overlay component in web UI: fix VideoAnalyzer dynamic viewBox sizing and requestVideoFrameCallback time sync, add server-projected 2D SVG force glyph endpoint with DRY shared projector, halo polylines, and controls (#11314). |
+| 2026-10-03 | #11351 | Refine mirrored scapula protraction and measured-back-marker torso matching with preserved dimensions/offsets. Cover all 13 native variants, including fixed-foot FullBody alternating fits. Native R2025b 95 tests, final Human legacy/default parity and 1,313-pose independent replay have natural exit-zero receipts. Deliver 104 neutral 1080P/30-fps both-view marker/clean videos; all 5,252 frames decoded and Desktop/ZIP hashes verified. Head yaw and fixed-foot back fit remain limitations; dynamics is unqualified; source PR is ready for review and depends on #11256/#11172 acceptance. |
+| 2026-10-03 | #11391 | [FTO-26] Engine-agnostic model-on-footage layer: projected segment meshes with tension/compression fill, Painter's algorithm depth sorting, Lambertian shading, and triangle budget enforcement (#11311). |
+| 2026-10-03 | #11393 | [FTO-27] Calibrated MuJoCo mesh render composited onto source footage: camera mapping from K, R, t via `mujoco_camera_from_pinhole`, enlarged-frame crop for off-centre principal point, lens distortion footage undistortion policy, segmentation alpha compositing with feathering, and force glyph/color shading integration (#11312). |
+| 2026-10-03 | #11377 | [FTO-23] Web Three.js force overlay: render serialized GlyphSet with pure geometry mapping, eliminate lossy client-side round-trip, live torque arcs, ForceLegend overlay, WebSocket streaming with REST polling fallback, and Playwright screenshot evidence (#11308). |
+| 2026-10-03 | #11353 | [FTO-17] OpenSim animated playback: record_force_series and record_force_and_segment_series (opensim_force_recording.py), generic render_force_playback (force_overlay/playback.py) with segment tension/compression shading, 3D glyphs, legend, and fixed camera bounds, plus CLI entrypoint (#11302). |
+| 2026-10-03 | #11354 | [FTO-20] Simscape 3D viewer: force/torque arrows and live tension/compression shading from loaded dataset, toggle controls, and peak force verification (#11305). |
+| 2026-10-03 | #11363 | [FTO-22] Force overlay API and WebSocket: stream real provider force/torque frames; ForceOverlayService; remove fabricated overlay geometry; emit serialized GlyphSet and ForceTorqueFrame; backward-compatible vectors; follow-up issue #11362 (#11307). |
+| 2026-10-03 | #11390 | [FTO-25] Force/torque arrow layer in reference-comparison and capture-rig video compositors: ForceLayer with cv2.addWeighted, sidecar glyph_receipts/force_series_hash, kinetics_to_force_series, and compositor UI toggles (#11310). |
+| 2026-10-03 | #11346 | `force-overlay-parity` mujoco lane now requires the real `test_hanging_pendulum_reaction_is_weight_up_and_tension[mujoco]` case to pass instead of the stand-in MJCF statics check, now that the MuJoCo provider row is on main |
+| 2026-10-03 | #11297 | [FTO-12] Drake GUI draws real force/torque glyphs through MeshcatGlyphRenderer (new Gravity checkbox, headless `ForceOverlayController`) replacing the gravity-only drawing, and feeds the segment force-colour session from the provider's axial loads with illustration-geometry path bindings. |
+| 2026-10-03 | #11378 | [FTO-24] Align force/torque series with video frames and trace import: force_frame_for_video, load_trace_forces/write_trace_forces HDF5 group, series_to_viewport_payload_wrench (#11309). |
+| 2026-10-03 | #11295 | [FTO-10] MuJoCo GUI draws force/torque overlays through the shared renderers: native viewer adds shaded 3D geoms via `add_glyphs_to_scene` and MeshCat uses `MeshcatGlyphRenderer`, both fed by one `get_force_torque_frame()` sample per frame and a headless toggle-to-glyph mapping; legacy cv2 arrow code and the flat `xaxis[3*j]` slices removed; legend line in the status bar; native contact view relabelled as a debug view. |
+| 2026-10-03 | #11375 | `cross-engine-equivalence.yml` gains per-engine `force-overlay-parity` lanes (drake, pinocchio, opensim, mujoco) that run the FTO-21 parity file with the engine installed and fail via `require_junit_test_passed.py` when the evidence testcase did not pass (all-skipped guard); lanes are not required checks. |
+| 2026-10-03 | #11381 | MuJoCo provider labels joint reactions by joint name (`reaction:<joint>`, body name only when a body has no joint) to match Drake, Pinocchio and OpenSim; the FTO-21 MuJoCo pendulum MJCF gains a non-colliding rod so the native axial source reports; found by the first run of the per-engine parity lanes |
+| 2026-10-03 | #11379 | [FTO-14] Pinocchio GUI: consolidate visualization mixins onto shared force overlay view, real MeshCat 3D glyphs, live segment force shading, and eliminate duplicate _draw_arrow (#11299). |
+| 2026-10-03 | #11348 | [FTO-7] Matplotlib 3D and QPainter 2D glyph renderers; deprecation shims for force_vectors and vectors; retire duplicate arrow code (#11292). |
+| 2026-10-03 | #11361 | [FTO-9] MuJoCo force/torque provider: MujocoForceTorqueSource (world-frame joint actuator torques, internal joint reactions via cfrc_int with com-to-anchor transform, contact forces, and external wrenches), synchronized with MujocoAxialLoadSource on internal scratch MjData; engine get_force_torque_frame/get_segment_axial_loads/get_contact_forces, force_visualization=FULL (#11294). |
+| 2026-10-03 | #11342 | [FTO-8] OpenCV video glyph renderer: draw GlyphSet through calibrated camera onto frame, PinholeProjector and HypothesisProjector adapters, dark haloing, resolution-scaled lines/heads, legend box (#11293). |
+| 2026-10-02 | #11337 | [FTO-5] MeshCat glyph renderer: real cylinder+cone arrows and torque arcs, MeshcatSink protocol, caching, and Drake sink (#11290). |
+| 2026-10-02 | #11355 | [FTO-6] MuJoCo MjvScene glyph renderer: 3D arrow geoms, torque arc capsules and arrow heads, buffer overflow protection, and offscreen render support (#11291). |
+| 2026-10-03 | #11349 | `MujocoAxialLoadSource` axis discovery compares geom/joint types via `int()` so it works on mujoco 3.14 (enum vs numpy int); regression tests added. |
+| 2026-10-03 | #11344 | OpenSim engine `set_state`/`set_control` fixed for OpenSim 4.x: `Vector(list)` replaces the removed single-argument constructor, controls go through `Model.setControls` (valid, so actuators read them) and are retained across `set_state` and ZTCF/ZVCF; length mismatches raise `ValueError`. |
 | 2026-10-03 | #11306 | [FTO-21] Cross-engine force/torque overlay parity suite (`tests/integration/cross_engine/test_force_overlay_parity.py`): hanging and held-inverted pendulum and resting-body statics asserted on every engine's `get_force_torque_frame()` (Drake, Pinocchio, OpenSim live; MuJoCo skips until FTO-9) plus a Simscape-loader convention row and a sign-convention guard. |
 | 2026-10-03 | #11301 | [FTO-16] OpenSim muscle lines of action: `OpenSimForceTorqueSource.muscle_wrenches` emits `MUSCLE` wrenches (tendon force along the effective end directions) at each enabled muscle's origin and insertion, labels `muscle:<name>:origin`/`:insertion`; only end attachments drawn. |
 | 2026-10-02 | #11298 | [FTO-13] Pinocchio force/torque provider: `PinocchioForceTorqueSource` (world-frame RNEA joint reactions, applied-torque actuator wrenches, contact pass-through, axial loads), engine `get_force_torque_frame`/`get_segment_axial_loads`/`get_applied_torques`, `force_visualization=FULL`. |
 | 2026-10-02 | #11296 | [FTO-11] Drake force/torque provider: DrakeForceTorqueSource over reaction, net-actuation and point/hydroelastic contact ports, axial loads, shared segment_axes helper, force_visualization=FULL. |
 | 2026-10-03 | #11304 | [FTO-19] Carry optional logged force channels through `SimscapeOutput.force_columns` and `logsout_to_simscape_output` (`forces` key); `SimscapeOutput.to_force_series()` delegates to the shared `force_series_from_columns` core (Python side only; MATLAB exporter pending R2025b host). |
 | 2026-10-03 | #11300 | [FTO-15] OpenSim force/torque provider: `OpenSimForceTorqueSource` (world Z-up joint reactions, coordinate-actuator torques, Hunt-Crossley/smooth sphere contacts moved to the sphere bottom, axial loads), engine `get_force_torque_frame`/`get_segment_axial_loads`/`compute_contact_forces`, `contact_forces` and `force_visualization` PARTIAL. |
+| 2026-10-02 | #11289 | [FTO-4] Colour utilities DRY: one hex/RGBA helper and a registered tension/compression colormap (#11289). |
+| 2026-10-02 | #11288 | [FTO-3] Implement glyph builder (ForceGlyphStyle, build_glyphs, scale_for_view), glyph-set-v1 wire schema and examples, and FORCE_KIND_PALETTE registration (#11288). |
 | 2026-10-02 | #11287 | [FTO-2] Implement shared force conversions: joint torque to moment vector, local to world, point translation with moment-arm adjustment, and reaction wrenches to axial loads (#11287). |
 | 2026-10-02 | #11303 | [FTO-18] Add the pure-Python Simscape force loader `load_simscape_force_series` (declarative channel table, logged-R rotation, orthonormality validation) and `SimscapeAdapter.load_force_series`; documented in CROSS_ENGINE_PARITY_SPEC section 3.1. |
 | 2026-10-02 | #11286 | [FTO-1] Implement engine-agnostic force/torque overlay contract, ForceTorqueFrame wire schema, ForceTorqueSeries with linear interpolation and allow_pickle=False NPZ, and shared fixtures (#11286). |
@@ -9639,3 +10508,591 @@ Establishes the independent qualification service for candidate tour baseline pa
 - **BitNet Bounded Safety and Encodability (`BitnetAdapter._build_validated_prompt`)**:
   - Validates prompt text as strict UTF-8 before subprocess creation to guard against runtime encoding panics across platforms.
   - Enforces `_MAX_PROMPT_BYTES` (65,536 bytes) limit to prevent oversized argv allocations and process-spawn failures.
+
+
+
+
+### Capture Registry Comparison Integration - #11172
+
+Accepted-main records and ledger metadata are reconciled while preserving all 133 receipt rows. Club endpoint lookup is shared between angular-speed and wrist metrics with identical fallback behavior. Focused validation: 190 passed, 15 private-workbook skips; Ruff and the full DRY gate pass. Protected CI and physical matching acceptance remain separate.
+
+The 14 new per-capture leaderboard contracts are explicitly unit tests; selected execution and the full suite-marker ratchet pass without changing baselines.
+
+Shared-tools divergence inventory is regenerated for all five new swing_comparison source paths; ten inventory checks and current-tree freshness pass.
+
+### Capture-O MuJoCo Ground Support Pipeline Execution - #11166 (#11174)
+
+Enables owner capture (`capture-O`) resolution through the MuJoCo native ground-support pipeline:
+- `rate_from_times` provides unified capture rate calculation adhering to DbC without silent frequency defaults.
+- Contact ground calibration via `prepare_hip_spec` aligns toe contact boundaries to meet ground-support specification tolerances.
+- Timeline samples past capture durations are skipped cleanly rather than clamped; short capture root errors report `None` safely.
+- Divergence inventory and matched swing ledger reconciled with full unit test coverage.
+## Native Feedback Observation Scoring and Full-State Identity (F09b, #11837)
+
+`src/engines/feedback_observation_qualification.py` consumes F01's existing
+comparison registry, a validated Tools `ExperimentReplayBundle` v1, native
+marker-position outputs, and measured marker positions. Admission cross-checks
+the bundle against F01 model/provider, state schema, ordered channel mapping,
+applied-input history and grid, integration policy, replay mode, horizon, and
+timebase. Replay identity also binds T01's actual full `initial_state_sha256`,
+model-identity digest, and capability-declaration digest; state-schema-only or
+partial-coordinate identity is insufficient. Changes to the full initial
+state, applied inputs, or executed policy invalidate a reused identity.
+
+Native 3-D positions are sampled at the exact observation clock through the
+F09a positions-only interpolation API, with no extrapolation. The workflow
+reuses canonical replay metrics and `motion_matching.acceptance.evaluate`,
+retaining the output and observation clocks, score receipt hashes, exact
+criterion identifiers/configuration, and existing verdict. It introduces no
+new tolerance. Reports preserve all required registry rows and the six-engine
+denominator; unavailable/missing evidence remains visible, and scoring never
+promotes F01 qualification. Synthetic tests prove contract integrity only;
+they are not native physics, private-capture, physiology, or cross-engine
+acceptance evidence. Canonical calculation notes are in
+`manuals/upstreamdrift/chapters/13-feedback-comparison.qmd`.
+
+# Native Torque Replay Development Boundary
+
+F06a (#11823, parent #11790) consumes the Tools experiment-replay bundle through
+actual native MuJoCo stepping for unit hinge motors. Full `mjSTATE_INTEGRATION`,
+distinct `nq`/`nv`, post-limit held torque, exact model/provider/policy identity
+and uninterrupted no-reset execution are required. Canonical calculation
+reference: `manuals/upstreamdrift/chapters/19-native-torque-replay.qmd`.
+Turnover: `docs/development/feedback_controls/F06_NATIVE_TORQUE_TURNOVER.md`.
+Tools T01 is consumed through merged pin
+`2e7665111b06f92ffbfe178b92d74d6a81c95388` and the UD-owned seam helper.
+Six-engine and muscular OpenSim real-capture gates remain open.
+
+## Independent Native Candidate Benchmark (F03b, #11824)
+
+`native_candidate_benchmark.py` extends F03's synthetic rotary comparison with
+an independent matrix-exponential solution for exact held-input truth and F06's
+fresh native MuJoCo replay. It binds the executed post-limit motor torque,
+complete initial `mjSTATE_INTEGRATION`, model and policy identities, and exact
+native step grid through the versioned Tools replay bundle. The gate keeps
+midpoint transcription defect, native-to-node gap, native-to-exact integrator
+gap, continuous RK45-to-exact gap, observation error, torque and slew residuals
+separate. Torque and slew are recomputed from applied input, not trusted from a
+solver report. A coarse stiff regression rejects low-defect transcription when
+native replay disagrees; native step refinement is checked independently.
+
+The serial benchmark retains failed and warm attempts, preparation, solve,
+native replay and receipt-export costs, cumulative time to first accepted
+attempt, p50/p95 wall time, and Python-tracked peak allocation with named
+hardware. The fixture is a no-contact one-hinge motor with synthetic node
+observations. The shooting adapter and collocation spike have unequal input
+degrees of freedom, so this is a provisional solver/replay boundary test, not a
+production backend selection or real-capture qualification. Capture
+preprocessing, D02/D03 frozen protocol, F09 observation-clock alignment,
+full-body/contact resources and muscle/six-engine gates remain open. Canonical
+calculation: `manuals/upstreamdrift/chapters/20-native-candidate-benchmark.qmd`.
+Turnover: `docs/development/feedback_controls/F03B_NATIVE_CANDIDATE_TURNOVER.md`.
+
+## Strict Native Replay Execution Boundary (F09c, #11898)
+
+`src/engines/feedback_native_execution.py` executes a frozen Tools T01 replay
+bundle through an explicitly selected native adapter and preserves the
+authoritative F01 comparison row. Its `NativeAdapterBinding` keeps the F01
+inventory provider/source identity separate from the T01 native adapter,
+loaded model, state-schema, and ordered input-channel identities. No provider
+or model variant is inferred from a package name. The current supported
+execution pairs are the reviewed MuJoCo and Drake direct-torque adapters and
+the Pinocchio native torque adapter. Other required engines remain in the
+six-engine denominator as unsupported or unavailable until an explicit
+adapter exists.
+
+The executor accepts only a complete `experiment-replay/1.0.0` bundle with
+native-own-contact policy, no observation/state-feedback access, reset policy
+forbidden, and simulation-relative zero-order-held actuator torque. It invokes
+the adapter with the local model source and frozen bundle, then verifies exact
+model, provider, initial physical and numerical state, policy, time grid,
+applied torque, full output horizon, and finite native state/effect arrays.
+The path to a local model is not copied into public receipts. Receipts bind the
+initial-state, input, policy, grid, channel schema, and output-state digests,
+but remain unqualified. A successful execution means only that the declared
+adapter replayed those bytes; it does not establish observation accuracy,
+physiological validity, or cross-engine equivalence. Contract tests use an
+independently generated one-hinge model and do not qualify production rows.
+The receipt retains `state_reset_allowed=False` separately from an unknown
+reset count when the adapter does not instrument that counter; policy is not
+reported as a measured zero.
+
+## Native Marker Positions From Replay States (F09d, #11907)
+
+`src/engines/feedback_native_markers.py` executes a frozen replay through the
+existing F09c boundary and passes its actual configuration trajectory to the
+selected native model's forward-kinematics implementation. A versioned
+`NativeMarkerMap` declares ordered marker labels, exact native body/frame
+identities, finite local points in metres, world output frame, simulation
+timebase, model/source/provider identities, and a canonical SHA-256 mapping
+identity. No marker is synthesized from generalized coordinates, quaternion
+components, or native integration-state arrays.
+
+The initial public FK consumers are the existing MuJoCo and Drake direct-torque
+adapters and the existing Pinocchio frozen-replay adapter. Their frame loading
+rechecks the exact Tools bundle model identity and uses native FK for every
+full-horizon output configuration. Pinocchio retains complete `qpos` and
+`qvel` with distinct `nq` and `nv`; derived frame placements use the public
+`PinocchioPhysicsEngine` path. Its cache initialization policy is bound without
+inventing a cache payload or claiming a measured reset count. The output retains
+native sample times and ordered 3-D points; its unqualified receipt binds the
+F09c execution receipt, state-output digest, marker-map digest, and position
+output digest. It contains no local model path. OpenSim marker geometry is
+owned by F07 #11903 and is consumed only once a matching full-state replay
+interface is available. MyoSuite, Simscape, and unavailable providers remain
+explicit in the six-engine denominator. Marker FK does not
+score observations or qualify anatomy, muscle physiology, contact, or model
+equivalence. `NativeMarkerReplayReport` keeps all inventory rows and six
+required engines visible; FK coverage is not qualification. Canonical note:
+`manuals/upstreamdrift/chapters/28-native-marker-forward-kinematics.qmd`.
+
+## Pinocchio Native Marker Forward Kinematics (F09e, #11914)
+
+F09e extends the F09d marker-output boundary with Pinocchio's existing native replay adapter and `PinocchioPhysicsEngine`. It evaluates only the actual q trajectory emitted by a validated, uninterrupted frozen torque replay. The complete state is Pinocchio configuration and tangent velocity (`nq` and `nv` remain distinct); cached frame poses are derived by the engine and are not fabricated extra state. Each ordered marker is an explicitly named native frame plus a finite local offset in metres, mapped by the frame's world transform.
+
+The F01 inventory package/variant/drive provider remains distinct from the T01/F06 native model, adapter provider, loaded-model, state-schema, input, and executed-policy identities. The mapping binds both namespaces and rejects mismatches. Synthetic Pinocchio 4.1 fixtures use an actual floating base (`nq=8`, `nv=7`), nonzero base translation/rotation, hinge configuration, and marker offset; expected points are computed from independent transform equations. A successful marker result remains unqualified and does not establish model physics, observation fit, contact, anatomy, or parity. The six-engine and all registered model/drive rows remain in the readiness denominator.
+
+
+## Native Thelen Replay Boundary (F07b, #11826)
+
+Early native excitation replay explicitly admits compliant Thelen2003Muscle
+alongside Millard2012EquilibriumMuscle. Model-owned state minima, positive fiber
+length, complete restoration, ordered law identity and ignored-mode refusal
+are required. Canonical reference: native muscle replay chapter; turnover:
+`docs/development/feedback_controls/F07_THELEN_REPLAY_TURNOVER.md`. Full-body,
+contact/grip, licensing and real-capture scientific gates remain open.
+
+## Controlled-Swing Comparison Admission (F01, #11785)
+
+`src/engines/feedback_comparison.py` projects the authoritative
+`engine_model_inventory.json` into stable package/variant/drive rows for all
+six required engines, including both OpenSim native humanoid factories. Each
+row records required capabilities separately from declared support, runtime
+availability, and scientific qualification. Transcription feasibility,
+independent input reproduction, and observation accuracy have distinct
+receipts. Missing rows, stale model or
+provider identities, absent SHA-256 bindings, feedback-driven or reset replay,
+mixed torque/excitation, and incomparable same-input horizons/channels/policies
+fail closed. Truncated replay cannot establish within-engine or same-input
+levels; observation scoring requires its own time-grid digest, distinct from
+the applied-input grid. Contract `feedback-comparison/1.1.0` additionally
+requires the exact Tools T01 initial-state payload digest for every independent
+replay level and equality of that digest for same-input comparison; older
+unbound receipts remain limited to identity/transcription admission. The legacy Euclidean `same-input-bundle/v1` cannot satisfy the
+new replay admission because it does not bind execution policy and applied
+inputs. Baselines must include independent polynomial, computed torque,
+MOSAIC+TVLQR, and selected OCP under one observation identity, horizon, and
+budget. This is an admission contract, not a successful native replay or
+scientific match; numerical gate qualification belongs to follow-on issues.
+
+## Distributed Task and Phase Feedback (F02, #11786)
+
+`src/shared/python/motion_matching/distributed_feedback.py` consumes MOSAIC
+time-varying LQR gains, a frozen nominal feedforward trajectory, and explicit
+tangent-model and task adapters. Named pelvis/feet, trunk, arms, wrists/hands,
+and club tasks have phase masks, priorities, framed targets, and a single
+post-allocation actuator boundary. Exact simulated-state information, channel
+order, unit-constant transmission, unactuated roots, native contact dynamics
+and step-wise zero-order hold are checked; unsupported mappings fail closed.
+The controller records nominal, feedback, requested and applied torques
+separately. Existing contact/grip QP reactions are predictions, never hidden
+inputs to a native plant. The analytic sign/stability, rate, conflict,
+permutation, manifold and native one-joint tests are local evidence only;
+native six-engine and muscle capture qualification remain open.
+
+## Coupled Distributed Loop Tuning (F04, #11788)
+
+`src/shared/python/motion_matching/control_loop_tuning.py` bounds F02 gain and
+task-weight fitting by declared parameter limits, scaled trust regions,
+per-stage rollout budgets, cross-group regression and constraint gates. It
+retains accepted and rejected block-coordinate and joint-refinement attempts,
+then evaluates full and reduced controllers on distinct heldout trials. A
+frozen-controller phase/group Jacobian and finite-difference objective
+cross-Hessian quantify local associations; SVD exposes rank-deficient gain
+directions, while pooled/within-phase covariance stays explicitly noncausal.
+Perturbation comparison reports the frozen policy before a separately labeled
+refit, with exact parameter identity and feedforward held fixed. The tests use
+an actual F02 controller driving a synthetic coupled two-coordinate plant;
+native full-body, real capture, muscle and scientific runtime claims remain
+open under the same blocked calculation registry.
+
+### Native Drake Frozen Torque Replay (F06b, #11838)
+
+`src/engines/physics_engines/drake/python/native_torque_replay.py` builds and
+independently consumes the canonical Tools experiment replay bundle. An owned
+collision-free URDF plant restores complete finite numeric discrete state,
+retains native configuration/tangent dimensions, audits actual net actuator
+effort, and advances frozen bounded inputs without feedback or state resets.
+Source, loaded topology, numeric parameter bytes, reviewed factory-default
+abstract parameter policy, solver/approximation and provider identity are
+bound and revalidated. The supported policy is Drake1.57.0, unit revolute
+motors, fixed steps and unsampled outputs; unsupported modes fail closed.
+Eleven actual native synthetic tests establish deterministic same-provider
+replay only. Canonical chapter22 and turnover preserve failed native probes
+and remaining full-body, contact, convergence, muscle and capture gates.
+
+
+## Sparse Collocation and Shooting Benchmark Spike (F03, #11787)
+
+`sparse_collocation_spike.py` adds a bounded synthetic rotary fixture with
+sparse analytic midpoint inverse-dynamics defects, hard ZOH torque and slew
+constraints, and fresh adaptive forward reintegration. It also adapts the
+existing multiple-shooting solver to the same synthetic truth and target.
+Backend receipts retain input degrees of freedom, defect type, objective,
+feasibility, replay gap and observation error separately, with predeclared
+cold/warm starts, failures, timing and Python-tracked peak memory. The shooting
+fixture uses one constant torque while the spike uses one input per interval,
+so no production backend is selected from these results. Native F06 replay,
+private protocol D02, contact and full-body engine evidence remain open.
+
+## Native Pinocchio Frozen Torque Replay (#11900)
+
+The F06c adapter uses the existing public native ABA/RK4 integration kernel with complete configuration/tangent velocity, explicit unit motor scattering and immutable uninterrupted replay evidence. Canonical chapter25 and F06_PINOCCHIO_NATIVE_TURNOVER record source/model/provider identity, actual native RED/GREEN, fixture refinement and all remaining contact, muscle, capture and required-model parity gates. Tools owns the replay schema; common native admission is shared with Drake/MuJoCo and remains provider-hashed.
+## MyoSuite Native Muscle-Excitation Replay (F09f, #11918)
+
+`src/engines/physics_engines/myosuite/python/native_excitation_replay.py` consumes the versioned Tools T01 experiment bundle through a direct native MyoSuite/MuJoCo plant. Its input is normalized post-mapping muscle excitation written to ordered native `data.ctrl`; a Gym `[-1, 1]` action is not excitation and is never inverse-transformed. The fixed policy binds the registered environment, source and loaded model, provider/runtime identity, solver/integrator, frame skip, wrapper chain, state schema, time grid, applied inputs, and policy. It checks actual control readback and restores q/v, muscle activation, actuator controls, full `mjSTATE_INTEGRATION`, and the explicitly supported wrapper state before a fixed-horizon ZOH replay. The adapter does not call Gym `step`, task observation, reward, termination, tracking, or reset paths.
+
+An actual MyoSuite 3.0.0/MuJoCo 3.6.0 smoke on the public elbow pose fixture validates only the native excitation adapter seam. It does not bind the required MyoSuite golfer driver or iron rows. Both remain unqualified; all six engines and every registered model row stay in the denominator. No physiology, marker accuracy, production support, cross-engine equivalence, or scientific gate verdict follows from a successful receipt. The generic engine's legacy four-value Gym step path is unaffected and needs its own separately scoped compatibility test if supported. Canonical note: `manuals/upstreamdrift/chapters/31-myosuite-native-excitation-replay.qmd`.
+
+## Frozen Marker Holdout Scoring (#11899)
+
+The shared marker calibration provider exposes score_frozen_marker_offsets for fixed placements and predicted poses on the original observation clock. It performs no fitting and rejects missing support or invalid rigid transforms. Existing exploratory OpenSim holdout refitting remains available and is not independent predictive evidence. Training-only model, anthropometry, attachment and split provenance remains a campaign gate; no real capture or F07/F08 qualification is claimed. See canonical chapter 13 and F07_FROZEN_HOLDOUT_TURNOVER.md.
+
+## Native OpenSim Marker Geometry (F07/F08, #11903)
+
+Explicit native model/frame/station bindings supply actual OpenSim geometry to
+shared calibration and trajectory IK. Selected coordinates must be independent;
+native assembly must achieve them, preserve other independent coordinates and
+respect every source range, including dependent coordinates. Metadata-only
+geometry, zero closure and no-op dynamics are rejected. Explicit finite bounds
+opt into TRF in the existing shared trajectory solver; default LM is unchanged.
+The three-sample pelvis diagnostic retains source clock, hashes, native identity,
+residuals and failures through existing frozen-loader/TRC contracts. Its source
+candidate reaches a pelvis rotation bound and remains unqualified: fixed frame
+registration and anatomical calibration are unresolved. Canonical authority is
+chapter26; no capture, whole-body or full-state replay acceptance is claimed.
+
+## Bounded Native NMPC Evaluation (F05a, #11904; Parent #11789)
+
+`bounded_nmpc.py` is an optional finite-budget robust shooting controller with
+explicit state/input channel identity, units, Euclidean tangent-state semantics,
+hard state/torque/slew bounds, nominal and perturbation prediction models, and
+a verified fallback. Solver timeout, cancellation, stale observation,
+infeasibility, failure and no benefit remain labeled in per-step receipts. It
+does not promise a hard real-time deadline. `native_nmpc_tracking.py` drives a
+contact-free native MuJoCo hinge at one controller call per integration step,
+exports only actual post-limit ZOH torques through the F06/Tools T01 bundle,
+and checks an independent fresh native replay of position, speed and complete
+integration state. A paired test does the same for F02 TVLQR on predeclared
+0.4/0.7 rad starts and a 40% execution-mass perturbation, retaining solve
+failures and fallback counts. Its source-controlled receipt reports measured
+controller-call latency, replay identities, tracking and effort. Native-step
+provider selection retains TVLQR and rejects this SciPy shooting prototype;
+the one-hinge result does not qualify contact, muscle, capture, six-engine
+equivalence or a full swing. The canonical calculation is provisional chapter
+23, and turnover is `docs/development/feedback_controls/F05A_NATIVE_NMPC_TURNOVER.md`.
+
+## Derivative-Aware Native BoxFDDP Candidate (F05b, #11910; Parent #11789)
+
+`native_box_fddp_hinge.py` admits only an exact-state one-hinge, direct
+unit-motor, no-gravity/no-contact native MuJoCo RK4 plant. It computes the
+analytic discrete RK4 derivative of that linear plant and checks it against
+native steps and finite differences. `box_fddp_tracking.py` binds nominal and
+perturbed loaded-model derivative identities, solves a two-scenario bounded
+Crocoddyl BoxFDDP problem, and independently admits only a finite,
+state/input-feasible improvement over a verified fallback. The native
+execution adapter exports actual post-limit per-step ZOH torque through Tools
+T01, then checks a fresh complete-initial-state replay at 1e-12 tolerance.
+The two source-controlled supported-provider paired receipts retain all
+predeclared solver statuses, source/runtime identities, common cold bootstrap,
+derivative setup and controlled execution/export/replay time. The internal
+BoxFDDP mean-scenario objective differs from F05a's max-scenario shooting
+objective; both use the max-scenario postcheck. BoxFDDP is a restricted
+one-hinge candidate, while F02 TVLQR remains the broader default. Contact,
+manifold, muscle, private capture, six-engine and full-swing gates remain
+unqualified and F05 #11789 stays open. The provisional canonical calculation
+is chapter 24 and turnover is
+`docs/development/feedback_controls/F05B_NATIVE_BOX_FDDP_TURNOVER.md`.
+
+## Native Multi-DOF Manifold Derivative Boundary (F05c, #11920)
+
+`native_tangent_derivative.py` admits a gravity-free, contact-free floating
+root with two connected hinges and two bounded direct unit motors. Its
+$n_q=9$, $n_v=8$ state requires a quaternion configuration tangent: native
+MuJoCo Euler `mjd_transitionFD` produces $A\in\mathbb R^{16\times16}$ and
+$B\in\mathbb R^{16\times2}$, checked against independently perturbed native
+steps using `mj_integratePos` and `mj_differentiatePos`. RK4, hidden gravity
+compensation, invalid motor topology/order and out-of-limit commands reject.
+The pinned F06/Tools T01 path binds a complete native integration state,
+ordered post-limit ZOH torque history, model and policy; a fresh native model
+replays the same full integration-state trajectory to 1e-12. The supported
+MuJoCo 3.8 source-hashed receipt retains all four predeclared tests and
+derivative/bundle/replay wall times. This is a plant derivative and input
+reproduction slice, not an optimized multi-DOF controller, measured capture
+fit, hard-real-time bound, contact/muscle or full-body six-engine gate. F05
+parent #11789 remains open. The provisional canonical calculation is chapter
+25 and turnover is
+`docs/development/feedback_controls/F05C_NATIVE_TANGENT_TURNOVER.md`.
+
+## Native Multi-DOF Manifold BoxFDDP Candidate (F05d, #11932)
+
+`native_manifold_box_fddp.py` builds a Crocoddyl `StateAbstract` with physical
+$n_x=17$ and tangent $n_{dx}=16$ for F05c's contact-free floating-root,
+two-hinge MuJoCo model. MuJoCo manifold difference/retraction and the actual
+Euler `mj_step`/`mjd_transitionFD` keep the optimizer's quaternion and
+native-step conventions aligned. The bounded direct-motor BoxFDDP plan is
+admitted only after whole-plan nonlinear native scoring improves a verified
+fallback within the cooperative wall budget. Loaded model/callback/order
+and observation-clock mismatches reject. The common native torque executor
+exports actual post-limit ZOH commands through Tools T01 and verifies a
+fresh full `mjSTATE_INTEGRATION` replay to 1e-12. A matched SciPy SLSQP
+native-shooting comparator shares exactly the nonlinear score, reference,
+truth plant, input bounds and budget. The supported-provider receipt keeps
+both ordered starts, all accepted/fallback statuses, source hashes and
+cold/common plus per-method end-to-end timing. This small synthetic test
+retains F02 TVLQR as the broad default and F05 #11789 open; no hard 10 ms
+deadline, state/anatomical limit, contact, muscle, private capture,
+full-body or six-engine qualification is claimed. The provisional manual
+calculation is chapter 26; turnover is
+`docs/development/feedback_controls/F05D_NATIVE_MANIFOLD_BOX_FDDP_TURNOVER.md`.
+
+## Native Activation-Aware Manifold Boundary (F05e, #11958)
+
+Both native manifold adapters share difference/retraction Jacobians and
+Gauss–Newton tracking derivatives in `native_manifold_calculus.py`. Model-specific
+state admission and native stepping remain at each boundary. Activation replay
+identity binds adapter and shared-helper bytes; mutation rejects the previous
+identity. The F05e receipt is regenerated against this closure. Existing F05d
+paired timings retain their pre-extraction hashes and historical scope, distinct
+from the twenty native regression cases run after extraction.
+
+`native_activation_manifold.py` admits a self-contained, contact-free
+MuJoCo 3.8.0 Euler floating-root model with built-in joint muscles,
+bounded dimensionless actuator commands, and disabled warmstart/autoreset.
+It defines the Crocoddyl physical state $(q,v,a)$ and local tangent
+$(\delta q,\delta v,\delta a)$, preserving quaternion manifold operations
+and native activation dynamics. Complete `mjSTATE_INTEGRATION` is a separate
+restart artifact rather than an undifferentiated optimizer axis. Native
+`mjd_transitionFD` activation-aware derivatives are independently checked
+at interior states and source/model/compiled-law identities are bound.
+The actual held command history and complete initial state are frozen in
+the pinned Tools T01 bundle and replayed by a fresh native model without
+feedback. The source-hashed supported-provider diagnostic receipt is
+`docs/development/feedback_controls/F05E_NATIVE_ACTIVATION_RECEIPT_MJ38.json`;
+the provisional canonical calculation is chapter 36. The fixture has no
+contact, golfer anatomy, measured capture, mixed production actuation,
+optimal-control acceptance, hard timing claim or six-engine qualification.
+F05 #11789 and manual publication remain open. Turnover is
+`docs/development/feedback_controls/F05E_NATIVE_ACTIVATION_TURNOVER.md`.
+
+## Native Floating-Root F02 Feedback Baseline (#11946)
+
+`src/engines/physics_engines/mujoco/python/native_distributed_feedback.py`
+provides the first actual floating-root native F02 baseline. It reuses F05c
+native tangent/plant admission, MuJoCo's current-minus-reference
+`mj_differentiatePos` and native inverse mass for $n_q=9$, $n_v=8$, rather
+than applying Euclidean quaternion subtraction. The F02 law reads exact
+simulated $(q,v)$ at each native Euler boundary, maps only to the two named
+direct hinge motors, and saves the post-limit held torque. The F06 common
+runner builds a pinned Tools T01 bundle from complete
+`mjSTATE_INTEGRATION` and independently replays each full state within
+$10^{-12}$. Native MuJoCo 3.8 tests demonstrate quaternion sign equivalence,
+synthetic perturbation correction, saturation and negative contact/channel
+admission. Provisional manual chapter 27 and the source-hashed F02 native
+receipt govern this child. It does not qualify a golfer, marker fit, contact,
+muscle input, multi-engine parity or a hard runtime deadline; F02 remains open.
+The native nominal-policy builder consumes a pinned T01 time-only torque
+replay with nonconstant model-derived states and inputs. It verifies each
+autonomous native successor, computes F05c tangent $A_k,B_k$ and MOSAIC
+TVLQR gains, then supplies F02 a frozen nominal feedforward schedule.
+A held-out native perturbation produces separate frozen-input and total-
+feedback bundles with matched model/initial-state/policy/grid identities,
+different applied-input hashes and exact full-state independent replay.
+This is not an F03 optimizer-to-native handoff: F03 currently exports only
+the one-dimensional synthetic sparse-collocation result.
+
+## Native Muscle Experiment Bundle (#11908)
+
+The native OpenSim T01 seam binds all admitted continuous state, registered discrete/modeling options, physical units, source/loaded/provider identity and cold-start policy. A reviewed fixed-path Millard/Slider-or-Pin subset executes owned frozen model bytes through the existing kernel. Canonical chapter27 and F07_MUSCLE_BUNDLE_TURNOVER preserve exclusions; native geometry, full-body constraints/contact, capture matching and required parity remain unqualified.
+
+## Native Moco Initial-State Bindings (#11949)
+
+The optional `MocoInitialBindings` contract in the existing OpenSim tracking
+provider binds complete caller-declared continuous state, scalar-control bounds
+and fixed initial values before native solver initialization and guess creation.
+Unknown/omitted states or controls, nonfinite/boolean values, unsupported existing
+controllers/PositionMotion and multi-control actuators fail before optimization.
+Existing callers retain their previous API behavior. Canonical chapter35 and
+`docs/development/moco_state_binding_11791` preserve actual OpenSim4.6 native tests,
+four-mesh collocation versus independent replay evidence, exact control knots,
+failed attempts and input nonidentifiability. Discrete/hidden native state,
+production anatomy, contact/grip, capture and physiological acceptance remain
+separate open gates. The per-child fragment owns later PR-keyed log collation.
+## Native Source Reference-Conventions Audit (F07f, #11962)
+
+`tour_matching.native_reference_conventions` observes exact XML/loaded OpenSim
+model identity, the declared post-`initSystem` reference frame and clock,
+achieved versus serialized coordinate defaults, joint/coupler dependencies,
+concrete muscle geometry paths, moving/conditional points, engaged wrap-curve
+readback and law/options. OpenSim `initSystem()` includes native initialization
+assembly; complete named continuous restoration afterward does not trigger a
+second assembly and is not a complete native restart. Explicit candidate
+correspondence binds both observation hashes and a proper rigid frame
+registration. Scalar coordinate mappings are existence-checked only; equal
+names, pelvis registration and path-length differences do not certify anatomy.
+The bounded unchanged 520-muscle Wilkinson and 318-muscle Pose2Sim diagnostics
+are unqualified for source-resource closure, physiology, contact/grip, capture
+matching or independent excitation replay. Canonical method is provisional
+chapter 40 and the source/turnover receipt remains local.
+
+## Native Offline OpenSim Muscle Matching (#11968)
+
+The maintained `tour_matching.cli moco-native` command consumes a strict,
+file-driven request binding native source, marker reference, state/control
+bounds, exact source and observation hashes, selected marker correspondence,
+weights, units, registration, passive policy and native exclusions. Preparation
+retains every independent blocker before solver construction. The solve stage
+revalidates source and registered observation bytes, calls the existing Moco
+builder, reads back native marker weights, rejects incomplete state/control
+names, and retains numbered attempts including failed solves.
+
+A successful native solution is exported at every original control knot plus
+each original observation time to the versioned T01 excitation bundle. The
+saved bundle is serialized and reloaded before a fresh observation-free native
+model replay; its exact state and input identities remain separate from the
+Moco transcription. Scoring uses original observation times and validity
+masks, while optimized objective, independent replay marker error and
+optimized-versus-replayed full-state disagreement remain distinct quantities.
+The tested two-DOF/two-muscle synthetic fixtures support ordered controls and
+two mesh refinements; native integration refinement was measured at common
+times under distinct declared numerical policies. No solver-success or
+synthetic result qualifies whole-body biomechanics or the private capture.
+
+The unchanged pinned 520-muscle source and frozen driver/iron references were
+prepared without constructing a solve. Missing source-valid guess, registration,
+marker placements, passive policy, nonmuscle-assistance policy, native
+constraint policy and complete prepared native state remain explicit blockers.
+Private marker arrays and identities stay outside the public repository.
+Canonical chapter39 and `F07_NATIVE_MOCO_RUNNER_TURNOVER.md` hold equations,
+tests, exact diagnostic scope and continuation instructions. All six engines
+and 17 required production rows remain in the acceptance denominator.
+
+## Source-Bound Native Moco Numerical Guess (#11990)
+
+The `moco-native-guess` command reads exact source XML and the existing frozen
+TRC clock, initializes the source through native OpenSim assembly and muscle
+equilibration, and writes every native named continuous state at every original
+time in a 17-digit STO table. Native readback must preserve complete ordered
+names, values and clock exactly. The receipt hashes source, loaded model,
+runtime/provider, state order/values, clock and serialized artifact, while
+declaring external-resource closure unavailable. The existing Moco builder
+checks complete state-table names and actual created state/control guess
+channels before accepting caller bindings; no control bounds are inferred.
+
+This is a numerical optimization seed only. It is not observed motion,
+physiological readiness, static equilibrium or a complete SimTK restart. The
+unchanged 520-muscle source produced 1,348 finite states at the driver and
+iron clocks. Both #11968 private preparations then lost exactly the artificial
+guess-file blocker, retaining six scientific/native blockers and doing no solve.
+Canonical chapter39 and the child turnover preserve the proof and limits.
+## Owned Native Simscape Diagnostic Replay
+
+F06d2 (#11942, parent #11921) consumes the separate Tools native-state envelope
+through immutable owned bytes. Actual R2025b class/clock/configuration and
+explicit simulation-checksum bindings precede strict complete-state restore.
+Native tests cover suffix-only and changed-future forces, independent full-run
+outputs, conflicting workspace inputs, byte identity and failure cleanup.
+The v5 source boundary additionally rejects a two-ULP snapshot-clock change,
+nonfinite or nonscalar saved time, wrong/missing saved provider identity and
+loaded-SLX path mismatch before native replay. The public evidence manifest
+binds an immutable 59-file fleet-local archive of source, request, model,
+operating point, native logs and outputs. The archive is a synthetic diagnostic
+artifact, not production-model or capture evidence.
+Canonical reference: `manuals/upstreamdrift/chapters/34-owned-native-simscape-replay.qmd`;
+turnover and source-hashed receipt: `docs/development/feedback_controls/F06D2_OWNED_SIMSCAPE_TURNOVER.md`
+and `F06D2_NATIVE_OWNED_RECEIPT.json`. This trusted synthetic diagnostic does not
+qualify production variants, muscle physiology, private capture or parity.
+
+## Source-Preserving BUET–Hamner OpenSim Candidate (#12157)
+
+An explicit version-one native factory now composes reviewed BUET upper/trunk
+and Hamner distal-leg source components into a separate 40-body, 557-muscle
+OpenSim artifact. Fresh XML reload, exact regional property identity and three
+sampled native body/path geometry and velocity checks establish a narrow
+mechanical source-preservation result. The entrypoint XML and loaded-runtime
+hashes are recorded in chapter 44 and the F07 turnover. This candidate has
+not passed source resource closure, passive physiology, partial abdominal lock
+reduction, native Moco, contact/grip, golfer marker registration, full-state
+replay or captured full-swing matching. Scientific publication stays blocked;
+all 17 variants and six engine families remain required.
+
+## Source-Preserving Native Zero-Subtalar Reduction (#12167)
+
+An exact-source bilateral locked-zero CustomJoint reduction creates a separate
+native OpenSim artifact from the assembled 557-muscle BUET–Hamner candidate.
+The one-coordinate spatial function, source/default/achieved lock target,
+native zero frame transform and absence of external coordinate consumers are
+admitted before the native weld. Fresh reloading and four common-state
+comparisons verify a rank-complete mobility lift, native body motion, muscle
+path lengths/speeds, mass, applied forces and constraints. Canonical chapter
+46 and the F07 turnover bind source/runtime/output identity and sampled
+limits. Abdominal and MTP composition, physiological muscle state, full native
+replay, Moco and capture matching remain open.
+## Source-Bound Native Zero-MTP CustomJoint Reduction (#12176)
+
+The assembled 557-muscle BUET–Hamner source has bilateral single-coordinate
+locked-zero MTP CustomJoints, not PinJoints. A separate exact source-profile
+reduction now admits their zero spatial laws and native lock targets before
+welding only those joints in a derived model. Fresh native reload and four
+sampled common-state comparisons preserve body motion, 557 muscle path
+lengths/speeds, constraints and rank-complete lifted mass and applied force.
+The existing PinJoint policy remains strict. The retained abdominal→subtalar
+parent admits this final MTP step. Independent original-to-final sampled
+mechanics and native Moco initialization pass at three prepared states; Moco
+solve, physiology, contact/grip and captured matching remain unqualified. Canonical
+chapter 47, native receipt and F07 turnover bind the calculation and limits.
+
+## Assistance-Explicit OpenSim Replay (#12147)
+
+A distinct native mixed-actuation T01 profile freezes exact muscle and
+CoordinateActuator channels, complete state/options, physical role declarations,
+bounds, gains and native units. Independent replay retains one owned native
+Manager and checks actual physical time and applied saved commands. Forces,
+powers and sampled work retain root/upper/leg assistance labels and source,
+provider, input, state and policy digests. Zero-assistance point bounds are
+supported. The original muscle-only profile remains strict. Canonical chapter
+27 and F07_MIXED_ACTUATION_TURNOVER document the calculation and limits; full
+factory topology, capture/physiology/contact/grip and 17-model parity remain open.
+
+The #12147 mixed Moco link reuses scalar bindings and chapter39's file-driven
+pipeline. The original mixed link bound ordered roles/bounds and preserved
+optimizer knots through independent T01 replay; combined constrained profiles
+were outside that snapshot's scope. Mixed NPZ evidence distinguishes
+actuations/controls and physical units, roles, powers and sampled work. This
+does not discharge anatomy, contact, private full-horizon or all-model gates.
+
+Child #12173 now exercises an explicitly declared constrained-plus-mixed
+Moco/replay path. Optimizer boxes are contained in declared coordinate and
+linear charts; fresh replay rejects Manager projection of the exact named
+state/time seed and records constraint enforcement/residuals at every sample.
+Muscle excitation, mechanical commands and resulting physical force/torque
+remain separate. The strict default muscle-only policy is unchanged. Its
+40 ms synthetic native Moco and fresh-replay regression is software evidence
+only; full-body qualification, private capture, all required variants and
+six-engine parity remain open. See canonical chapter48 and
+`F07_CONSTRAINED_MIXED_MOCO_TURNOVER.md`.
+The F07 #12143 versioned constrained-muscle policy extends a declared
+native OpenSim cold start to exact ordered excitation T01 export, fresh
+source replay and marker sampling without reassembly. A coupler-only
+two-Millard source solves a reachable nonzero Moco endpoint and independently
+replays within declared fixture-specific per-unit state and q/u residual
+bounds; native locked-coordinate replay remains separate because installed
+OpenSim Moco rejects locked coordinates. The source-bound component audit
+admits only reviewed CustomJoint and coordinate-linear moving path laws.
+Canonical chapter42 and `F07_CONSTRAINED_MUSCLE_MOCO_TURNOVER.md` retain
+the failed zero-force/loose-transcription experiment and all 520-muscle,
+private-capture, contact, assistance and physiology gates.
+## Native Abdominal Zero-Translation Reduction
+
+Issue #12161 adds a separately identified guarded XML-derived abdominal reduction; chapter45 documents its exact zero manifold, state/force verification, provenance and unqualified status. No whole-joint weld, physiology adjustment or capture-matching claim is permitted.
+

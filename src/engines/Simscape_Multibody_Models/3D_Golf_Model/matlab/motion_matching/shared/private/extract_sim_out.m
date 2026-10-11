@@ -106,7 +106,13 @@ function sim_out = extract_sim_out(simOut, joint_names, opts)
     sim_out.v_clubhead = local_pull_named(simOut, ["CHGlobalVelocity","ClubheadVelocity","v_clubhead"], time, 3);
     sim_out.omega_club = local_pull_named(simOut, ["ClubAngularVelocity","ClubOmega","omega_club"], time, 3);
 
-    % --- 6. Postconditions -------------------------------------------------
+    % --- 6. Populate optional force channels (issue #11304, FTO-19) --------
+    forces = local_extract_forces(simOut, time);
+    if ~isempty(fieldnames(forces))
+        sim_out.forces = forces;
+    end
+
+    % --- 7. Postconditions -------------------------------------------------
     assert(abs(sim_out.time(1)) < 1e-9, ...
         "extract_sim_out:timeStart", ...
         "Postcondition: sim_out.time(1) must be 0 (got %g)", sim_out.time(1));
@@ -123,6 +129,19 @@ function sim_out = extract_sim_out(simOut, joint_names, opts)
     assert(ismember(sim_out.solver_status, ["success","warning","failed"]), ...
         "extract_sim_out:badStatus", ...
         "Postcondition: solver_status must be one of {success,warning,failed}");
+    if isfield(sim_out, "forces")
+        fn = fieldnames(sim_out.forces);
+        for k = 1:numel(fn)
+            col_data = sim_out.forces.(fn{k});
+            assert(numel(col_data) == N, ...
+                "extract_sim_out:forceRowMismatch", ...
+                "Postcondition: forces.%s must have N=%d rows (got %d)", ...
+                fn{k}, N, numel(col_data));
+            assert(all(isfinite(col_data)), ...
+                "extract_sim_out:forceNonFinite", ...
+                "Postcondition: forces.%s contains non-finite values", fn{k});
+        end
+    end
 end
 
 %% ----------------------------------------------------------------------
@@ -317,4 +336,106 @@ function time = local_solver_time(simOut)
     if isprop(simOut, 'tout') || isfield(simOut, 'tout')
         time = double(simOut.tout(:));
     end
+end
+
+%% ----------------------------------------------------------------------
+function forces = local_extract_forces(simOut, time)
+%LOCAL_EXTRACT_FORCES Extract logged force/torque and rotation channels.
+%   Reuses extractSignalsFromSimOut (and extractFromCombinedSignalBus /
+%   extractSimscapeDataRecursive) to pull flattened signals from
+%   CombinedSignalBus, logsout, or simlog, and interpolates them onto the
+%   canonical master timegrid.
+    forces = struct();
+    try
+        has_bus = (isprop(simOut, 'CombinedSignalBus') || isfield(simOut, 'CombinedSignalBus')) && ...
+                  ~isempty(simOut.CombinedSignalBus);
+        has_logsout = (isprop(simOut, 'logsout') || isfield(simOut, 'logsout')) && ...
+                      ~isempty(simOut.logsout);
+        has_simlog = (isprop(simOut, 'simlog') || isfield(simOut, 'simlog')) && ...
+                     ~isempty(simOut.simlog);
+        if ~has_bus && ~has_logsout && ~has_simlog
+            return;
+        end
+
+        opts = struct('verbose', false, ...
+                      'extract_combined_bus', has_bus, ...
+                      'extract_logsout', has_logsout, ...
+                      'extract_simscape', has_simlog);
+        data_table = extractSignalsFromSimOut(simOut, opts);
+        if isempty(data_table) || width(data_table) == 0
+            return;
+        end
+
+        src_time = double(data_table.time(:));
+        if isempty(src_time) || all(isnan(src_time))
+            return;
+        end
+
+        [unique_t, iu] = unique(src_time, 'last');
+        N = numel(time);
+
+        candidate_cols = local_force_channel_names();
+        table_vars = string(data_table.Properties.VariableNames);
+
+        for k = 1:numel(candidate_cols)
+            col_name = char(candidate_cols(k));
+            if any(table_vars == col_name)
+                raw_data = double(data_table.(col_name));
+                if numel(unique_t) == 1
+                    col_interp = repmat(raw_data(1), N, 1);
+                else
+                    col_interp = interp1(unique_t, raw_data(iu), time, 'linear', 'extrap');
+                end
+                if all(isfinite(col_interp))
+                    forces.(col_name) = col_interp(:);
+                end
+            end
+        end
+    catch
+        % Optional: errors in force extraction never fail the forward sim
+        forces = struct();
+    end
+end
+
+%% ----------------------------------------------------------------------
+function candidate_cols = local_force_channel_names()
+%LOCAL_FORCE_CHANNEL_NAMES Canonical column names defined in FTO-18.
+    joints = ["LScap", "RScap", "LS", "RS", "LF", "RF", "Spine", "Torso"];
+    suffixes_3 = ["1", "2", "3"];
+    candidate_cols = string.empty(1, 0);
+
+    for j = 1:numel(joints)
+        joint = joints(j);
+        candidate_cols = [candidate_cols, joint + "Logs_GlobalPosition_" + suffixes_3]; %#ok<AGROW>
+        candidate_cols = [candidate_cols, joint + "Logs_ConstraintForceLocal_" + suffixes_3]; %#ok<AGROW>
+        candidate_cols = [candidate_cols, joint + "Logs_ConstraintTorqueLocal_" + suffixes_3]; %#ok<AGROW>
+        candidate_cols = [candidate_cols, joint + "Logs_ForceLocal_" + suffixes_3]; %#ok<AGROW>
+        candidate_cols = [candidate_cols, joint + "Logs_TorqueLocal_" + suffixes_3]; %#ok<AGROW>
+        for r = 1:3
+            for c = 1:3
+                candidate_cols = [candidate_cols, sprintf('%sLogs_Rotation_Transform_I%d%d', joint, r, c)]; %#ok<AGROW>
+            end
+        end
+    end
+
+    candidate_cols = [candidate_cols, ...
+        "LScapLogs_ActuatorTorqueX", "LScapLogs_ActuatorTorqueY", ...
+        "RScapLogs_ActuatorTorqueX", "RScapLogs_ActuatorTorqueY", ...
+        "LSLogs_ActuatorTorqueX", "LSLogs_ActuatorTorqueY", "LSLogs_ActuatorTorqueZ", ...
+        "RSLogs_ActuatorTorqueX", "RSLogs_ActuatorTorqueY", "RSLogs_ActuatorTorqueZ", ...
+        "LFLogs_ActuatorTorqueZ", "RFLogs_ActuatorTorqueZ", ...
+        "SpineLogs_ActuatorTorqueX", "SpineLogs_ActuatorTorqueY", ...
+        "HipLogs_BaseonHipForceGlobal_" + suffixes_3, ...
+        "HipLogs_BaseonHipTorqueGlobal_" + suffixes_3, ...
+        "HipLogs_HipGlobalPosition_dim" + suffixes_3, ...
+        "CalculatedSignalsLogs_TotalHandForceGlobal_" + suffixes_3, ...
+        "CalculatedSignalsLogs_TotalHandTorqueGlobal_" + suffixes_3, ...
+        "MidpointCalcsLogs_MPGlobalPosition_" + suffixes_3, ...
+        "MomentandCoupleLogs_LHMOFonClubGlobal_" + suffixes_3, ...
+        "LWLogs_LHGlobalPosition_" + suffixes_3, ...
+        "MomentandCoupleLogs_RHMOFonClubGlobal_" + suffixes_3, ...
+        "RWLogs_RHGlobalPosition_" + suffixes_3, ...
+        "MomentandCoupleLogs_EquivalentMidpointCoupleGlobal_" + suffixes_3];
+
+    candidate_cols = unique(candidate_cols);
 end

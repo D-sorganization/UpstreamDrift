@@ -21,12 +21,28 @@ import xml.etree.ElementTree as ET  # noqa: S405  # nosemgrep: python.lang.secur
 import numpy as np
 from scipy.spatial.transform import Rotation
 
+from src.engines.physics_engines.opensim.python import club_visuals
+from src.engines.physics_engines.opensim.python.full_body_grip_topology import (
+    build_bushing_spec,
+)
 from src.shared.python.contracts import precondition
+from src.engines.physics_engines.opensim.python.full_body_grip_contact import (
+    ContactGripConfig,
+    build_contact_grip,
+)
+from src.shared.python.grip_contact import GripInterface
+from src.shared.python.model_appearance.club_assembly import assembly_from_spec
 
 logger = logging.getLogger(__name__)
 
 SUPPORTED_SCHEMA_VERSIONS = {"full-body-v1"}
 DEFAULT_CLOSURE_TYPE = "weld"
+CLUB_BODY = (
+    "Clubhead"  # OpenSim name of the spec's club body (head, shaft, grip solids)
+)
+DEFAULT_CLUB_GEOMETRY_REF = ""  # bare names; loaders register models/geometry/club
+GRIP_MODELS = ("weld", "bushing", "contact")
+DEFAULT_GRIP_MODEL = "weld"
 
 
 def _format_numbers(values: Sequence[float] | np.ndarray) -> str:
@@ -44,9 +60,14 @@ def _validate_spec(spec: Mapping[str, Any]) -> None:
     for required_key in ("bodies", "joints", "coordinate_order", "contact", "closure"):
         if required_key not in spec:
             raise ValueError(f"Missing required key in specification: {required_key!r}")
-    if len(spec["coordinate_order"]) != 44:
+    primitives = [p["coordinate"] for j in spec["joints"] for p in j["primitives"]]
+    if sorted(primitives) != sorted(spec["coordinate_order"]) or len(
+        set(primitives)
+    ) != len(primitives):
         raise ValueError(
-            f"Expected 44 coordinates, found {len(spec['coordinate_order'])}"
+            "coordinate_order must list each joint primitive coordinate exactly "
+            f"once; found {len(spec['coordinate_order'])} coordinates and "
+            f"{len(primitives)} joint primitives"
         )
 
 
@@ -65,7 +86,13 @@ def _validate_rigid_transform(matrix_like: Any) -> np.ndarray:
 
 
 def _rotation_matrix_to_xyz_euler(r_mat: np.ndarray) -> tuple[float, float, float]:
-    """Convert a 3x3 rotation matrix to body-fixed XYZ Euler angles in radians."""
+    """Convert a 3x3 rotation matrix to body-fixed (intrinsic) XYZ Euler angles.
+
+    OpenSim ``orientation`` properties are Simbody body-fixed X-Y-Z sequences,
+    ``R = Rx(a) Ry(b) Rz(c)``, which is scipy's intrinsic ``"XYZ"``; the
+    lowercase extrinsic ``"xyz"`` gives ``Rz Ry Rx`` and silently mis-orients
+    any frame whose rotation is not a single-axis one (#11611).
+    """
     import warnings
 
     with warnings.catch_warnings():
@@ -73,7 +100,7 @@ def _rotation_matrix_to_xyz_euler(r_mat: np.ndarray) -> tuple[float, float, floa
             "ignore", message="Gimbal lock detected.*", category=UserWarning
         )
         r = Rotation.from_matrix(r_mat)
-        angles = r.as_euler("xyz")
+        angles = r.as_euler("XYZ")
     return float(angles[0]), float(angles[1]), float(angles[2])
 
 
@@ -168,6 +195,7 @@ OPENSIM_BODY_MAP: dict[str, str] = {
     "solid_reference:GolfSwing3D_Kinetic/Right Forearm/RLowerForearm": "RF",
     "solid_reference:GolfSwing3D_Kinetic/Club/Clubface Vector": "Clubhead",
     "solid_reference:GolfSwing3D_Kinetic/Grip/RHandStandoff": "Grip",
+    "solid_reference:GolfSwing3D_Kinetic/Grip/LHandBody": "LGrip",
 }
 
 
@@ -181,8 +209,18 @@ def clean_osim_joint_name(jname: str, child_name: str) -> str:
     return f"joint_{clean_osim_body_name(child_name)}"
 
 
-def _build_bodyset(model: ET.Element, spec: Mapping[str, Any]) -> dict[str, str]:
-    """Construct BodySet from specification and return body name mappings."""
+def _build_bodyset(
+    model: ET.Element,
+    spec: Mapping[str, Any],
+    club_geometry_ref: str | None = None,
+    club_finish: str = club_visuals.DEFAULT_FINISH,
+) -> dict[str, str]:
+    """Construct BodySet from specification and return body name mappings.
+
+    With ``club_geometry_ref`` the club body gets shaft, grip and head
+    ``<Mesh>`` geometry from the shared club assembly (visual only).
+    """
+    club = assembly_from_spec(spec) if club_geometry_ref is not None else None
     bodyset = ET.SubElement(model, "BodySet", attrib={"name": "bodyset"})
     objects = ET.SubElement(bodyset, "objects")
     body_map: dict[str, str] = {}
@@ -202,6 +240,10 @@ def _build_bodyset(model: ET.Element, spec: Mapping[str, Any]) -> dict[str, str]
         ET.SubElement(fg, "socket_frame").text = ".."
         ET.SubElement(fg, "scale_factors").text = "0.2 0.2 0.2"
         ET.SubElement(body_elem, "attached_geometry")
+        if club is not None and club_geometry_ref is not None and bname == CLUB_BODY:
+            club_visuals.attach_club_meshes(
+                body_elem, club.head_alias, club_geometry_ref, club_finish
+            )
 
         wrap = ET.SubElement(
             body_elem, "WrapObjectSet", attrib={"name": "wrapobjectset"}
@@ -275,6 +317,43 @@ def _attach_spatial_transform(
         )
 
 
+def _build_free_joint(
+    objects: ET.Element, joint: Mapping[str, Any], jname: str
+) -> list[str]:
+    """Emit a 6-coordinate ``FreeJoint`` (rotations x, y, z, then translations)."""
+    prims = joint["primitives"]
+    if [p["primitive"] for p in prims] != ["Rx", "Ry", "Rz", "Px", "Py", "Pz"]:
+        raise ValueError("free joint needs primitives Rx, Ry, Rz, Px, Py, Pz in order")
+    elem = ET.SubElement(objects, "FreeJoint", attrib={"name": jname})
+    parent_frame, child_frame = f"{jname}_parent_offset", f"{jname}_child_offset"
+    ET.SubElement(elem, "socket_parent_frame").text = parent_frame
+    ET.SubElement(elem, "socket_child_frame").text = child_frame
+    coords = ET.SubElement(elem, "coordinates")
+    for prim in prims:
+        coord = ET.SubElement(coords, "Coordinate", attrib={"name": prim["coordinate"]})
+        ET.SubElement(coord, "default_value").text = "0"
+        ET.SubElement(coord, "default_speed_value").text = "0"
+        if prim["primitive"].startswith("P"):
+            ET.SubElement(coord, "range").text = "-10 10"
+        ET.SubElement(coord, "clamped").text = "false"
+        ET.SubElement(coord, "locked").text = "false"
+    frames = ET.SubElement(elem, "frames")
+    for fname, key, body in (
+        (parent_frame, "parent_to_base", joint["parent"]),
+        (child_frame, "child_to_follower", joint["child"]),
+    ):
+        t = _validate_rigid_transform(joint[key])
+        sock = (
+            "/ground" if body == "world" else f"/bodyset/{clean_osim_body_name(body)}"
+        )
+        frames.append(
+            _make_physical_offset_frame(
+                fname, sock, t[:3, 3], _rotation_matrix_to_xyz_euler(t[:3, :3])
+            )
+        )
+    return [p["coordinate"] for p in prims]
+
+
 def _build_jointset(model: ET.Element, spec: Mapping[str, Any]) -> list[str]:
     """Construct JointSet with CustomJoints in document order."""
     jointset = ET.SubElement(model, "JointSet", attrib={"name": "jointset"})
@@ -293,6 +372,9 @@ def _build_jointset(model: ET.Element, spec: Mapping[str, Any]) -> list[str]:
         child = joint["child"]
         jname = clean_osim_joint_name(raw_jname, child)
 
+        if joint.get("type") == "free":
+            all_coords.extend(_build_free_joint(objects, joint, jname))
+            continue
         joint_elem = ET.SubElement(objects, "CustomJoint", attrib={"name": jname})
         parent_frame_name = f"{jname}_parent_offset"
         child_frame_name = f"{jname}_child_offset"
@@ -365,6 +447,8 @@ def _build_constraintset(
     objects = ET.SubElement(constraintset, "objects")
     ET.SubElement(constraintset, "groups")
 
+    if "grip_bushing" in spec:
+        return  # compliant grip: no rigid closure (bushing forces instead)
     closure = spec["closure"]
     body_a = clean_osim_body_name(closure["body_a"])
     body_b = clean_osim_body_name(closure["body_b"])
@@ -489,7 +573,8 @@ def _build_forceset(
 
     # Coordinate Actuators
     actuated = coordinates if actuate_root else coordinates[6:]
-    for coord in actuated:
+    passive = set(spec.get("passive_coordinates", ()))
+    for coord in (c for c in actuated if c not in passive):
         act = ET.SubElement(
             objects, "CoordinateActuator", attrib={"name": f"tau_{coord}"}
         )
@@ -498,6 +583,62 @@ def _build_forceset(
         ET.SubElement(act, "max_control").text = "Inf"
         ET.SubElement(act, "coordinate").text = coord
         ET.SubElement(act, "optimal_force").text = "1"
+
+
+def _build_bushing_forces(
+    model: ET.Element, spec: Mapping[str, Any], interface: GripInterface
+) -> None:
+    """Append one ``BushingForce`` per hand (frame1 = hand, frame2 = club).
+
+    OpenSim applies the bushing force to frame2, so the recorded wrench is the
+    loading exerted ON THE CLUB.  Stiffness axes are the hand-side frame axes,
+    which coincide with the shaft-aligned grip frame in the weld pose.
+    """
+    objects = model.find("ForceSet/objects")
+    assert objects is not None
+    bp = interface.bushing
+    for side, name in (("L", "left"), ("R", "right")):
+        g = spec["grip_bushing"][side]
+        force = ET.SubElement(
+            objects, "BushingForce", attrib={"name": f"grip_bushing_{name}"}
+        )
+        ET.SubElement(force, "socket_frame1").text = f"grip_hand_frame_{name}"
+        ET.SubElement(force, "socket_frame2").text = f"grip_club_frame_{name}"
+        ET.SubElement(force, "rotational_stiffness").text = _format_numbers(
+            bp.rotational_stiffness_nm_rad
+        )
+        ET.SubElement(force, "translational_stiffness").text = _format_numbers(
+            bp.translational_stiffness_n_m
+        )
+        ET.SubElement(force, "rotational_damping").text = _format_numbers(
+            bp.rotational_damping_nms_rad
+        )
+        ET.SubElement(force, "translational_damping").text = _format_numbers(
+            bp.translational_damping_ns_m
+        )
+        frames = ET.SubElement(force, "frames")
+        for kind, body_key, frame_key in (
+            ("hand", "hand_body", "hand_frame"),
+            ("club", "club_body", "club_frame"),
+        ):
+            t = _validate_rigid_transform(g[frame_key])
+            frames.append(
+                _make_physical_offset_frame(
+                    f"grip_{kind}_frame_{name}",
+                    f"/bodyset/{clean_osim_body_name(g[body_key])}",
+                    t[:3, 3],
+                    _rotation_matrix_to_xyz_euler(t[:3, :3]),
+                )
+            )
+
+
+def _grip_body_names(spec: Mapping[str, Any]) -> dict[str, str]:
+    """Spec body name -> OpenSim body name for the hand and club grip bodies."""
+    names = {}
+    for side in spec["grip_bushing"].values():
+        for key in ("hand_body", "club_body"):
+            names[side[key]] = clean_osim_body_name(side[key])
+    return names
 
 
 def _build_markerset(model: ET.Element, spec: Mapping[str, Any]) -> None:
@@ -518,6 +659,48 @@ def _build_markerset(model: ET.Element, spec: Mapping[str, Any]) -> None:
         ET.SubElement(marker_elem, "fixed").text = "false"
 
 
+def _club_geometry_meta(
+    spec: Mapping[str, Any], club_geometry_ref: str | None
+) -> dict[str, Any] | None:
+    club = assembly_from_spec(spec) if club_geometry_ref is not None else None
+    if club is None:
+        return None
+    return {
+        "directory": club_geometry_ref,
+        "head_alias": club.head_alias,
+        "files": [
+            club_visuals.asset_filename(club.head_alias, p) for p in club_visuals.PARTS
+        ],
+    }
+
+
+def _parse_spec_input(
+    spec_or_bytes: Mapping[str, Any] | bytes | str,
+) -> tuple[bytes, dict[str, Any]]:
+    """Return the hashed raw bytes and the decoded spec for any accepted input."""
+    if isinstance(spec_or_bytes, bytes):
+        return spec_or_bytes, json.loads(spec_or_bytes.decode("utf-8"))
+    if isinstance(spec_or_bytes, str):
+        return spec_or_bytes.encode("utf-8"), json.loads(spec_or_bytes)
+    raw_bytes = json.dumps(spec_or_bytes, sort_keys=True).encode("utf-8")
+    return raw_bytes, dict(spec_or_bytes)
+
+
+def _check_grip_model(
+    grip_model: str, grip_contact: ContactGripConfig | None = None
+) -> None:
+    """Reject an unknown grip model and a contact grip without its configuration."""
+    if grip_model not in GRIP_MODELS:
+        raise ValueError(f"grip_model must be one of {GRIP_MODELS}, got {grip_model!r}")
+    if grip_model == "contact" and grip_contact is None:
+        raise ValueError(
+            "grip_model='contact' needs grip_contact (pad model and an absolute "
+            "mesh_dir for the closed grip meshes)"
+        )
+    if grip_model != "contact" and grip_contact is not None:
+        raise ValueError("grip_contact is only valid with grip_model='contact'")
+
+
 @precondition(
     lambda spec, **kwargs: bool(spec), "spec mapping or bytes must not be empty"
 )
@@ -527,6 +710,11 @@ def export_full_body_osim(
     model_name: str = "full_body_anthro_driver",
     closure_type: str = DEFAULT_CLOSURE_TYPE,
     actuate_root: bool = False,
+    club_geometry_ref: str | None = DEFAULT_CLUB_GEOMETRY_REF,
+    club_finish: str = club_visuals.DEFAULT_FINISH,
+    grip_model: str = DEFAULT_GRIP_MODEL,
+    grip_interface: GripInterface | None = None,
+    grip_contact: ContactGripConfig | None = None,
 ) -> tuple[str, dict[str, Any]]:
     """Export anthropometric full-body specification to OpenSim 4.0 XML string.
 
@@ -540,23 +728,35 @@ def export_full_body_osim(
         Grip loop-closure formulation ("weld" or "point_pair").
     actuate_root : bool
         Whether to generate CoordinateActuators for root 6-DOF coordinates.
+    club_geometry_ref : str | None
+        Directory, as the saved model references it (relative to the model
+        file, or absolute), holding the club STLs written by
+        ``club_visuals.write_club_assets``; ``None`` leaves the club bare.
+    club_finish : str
+        Appearance-library material for the shaft and head.
+    grip_model : str
+        ``"weld"`` (default, rigid closure), ``"bushing"`` (free club, one
+        six-axis ``BushingForce`` per hand; wrench is the force on the club)
+        or ``"contact"`` (free club held by pad spheres on closed grip meshes
+        through ``ElasticFoundationForce``; needs ``grip_contact``).
+    grip_interface : GripInterface | None
+        Grip frames and bushing parameters for ``"bushing"`` and ``"contact"``;
+        built from the spec with engineering-default parameters when omitted.
+    grip_contact : ContactGripConfig | None
+        Pad model, foundation parameters and mesh directory for ``"contact"``.
 
     Returns
     -------
     tuple[str, dict[str, Any]]
         (osim_xml_string, metadata_receipt)
     """
-    if isinstance(spec_or_bytes, bytes):
-        raw_bytes = spec_or_bytes
-        spec = json.loads(spec_or_bytes.decode("utf-8"))
-    elif isinstance(spec_or_bytes, str):
-        raw_bytes = spec_or_bytes.encode("utf-8")
-        spec = json.loads(spec_or_bytes)
-    else:
-        raw_bytes = json.dumps(spec_or_bytes, sort_keys=True).encode("utf-8")
-        spec = dict(spec_or_bytes)
-
+    raw_bytes, spec = _parse_spec_input(spec_or_bytes)
+    _check_grip_model(grip_model, grip_contact)
     _validate_spec(spec)
+    interface: GripInterface | None = None
+    if grip_model in ("bushing", "contact"):
+        interface = grip_interface or GripInterface.from_spec(spec)
+        spec = build_bushing_spec(spec, interface)
 
     root = ET.Element("OpenSimDocument", attrib={"Version": "40000"})
     model = ET.SubElement(root, "Model", attrib={"name": model_name})
@@ -568,7 +768,7 @@ def export_full_body_osim(
     ET.SubElement(model, "length_units").text = "m"
     ET.SubElement(model, "force_units").text = "N"
 
-    _build_bodyset(model, spec)
+    _build_bodyset(model, spec, club_geometry_ref, club_finish)
     coords = _build_jointset(model, spec)
 
     # ControllerSet (empty container for OpenSim compliance)
@@ -578,8 +778,15 @@ def export_full_body_osim(
 
     _build_constraintset(model, spec, closure_type=closure_type)
     _build_forceset(model, spec, coords, actuate_root=actuate_root)
+    if interface is not None and grip_model == "bushing":
+        _build_bushing_forces(model, spec, interface)
     _build_markerset(model, spec)
     _build_contact_geometries(model, spec)
+    contact_receipt = None
+    if interface is not None and grip_contact is not None:
+        contact_receipt = build_contact_grip(
+            model, spec, interface, grip_contact, _grip_body_names(spec)
+        )
 
     xml_text = ET.tostring(root, encoding="utf-8").decode("utf-8")
     model_sha = hashlib.sha256(raw_bytes).hexdigest()
@@ -596,9 +803,24 @@ def export_full_body_osim(
         "contact_sphere_count": len(spec["contact"]["spheres"]),
         "closure_type": closure_type,
         "actuate_root": actuate_root,
+        "club_geometry": _club_geometry_meta(spec, club_geometry_ref),
+        "grip_model": grip_model,
     }
+    if interface is not None:
+        metadata["free_body_coordinates"] = list(spec["passive_coordinates"])
+    if contact_receipt is not None:
+        metadata["grip_contact"] = contact_receipt
 
     return xml_text, metadata
+
+
+def _write_club_assets(spec: Mapping[str, Any], directory: Path) -> None:
+    """Write the club STLs the exported model references (default: committed dir)."""
+    club = assembly_from_spec(spec)
+    if club is None:
+        return
+    club_visuals.write_club_assets(club, directory)
+    logger.info("Wrote club meshes to %s", directory)
 
 
 def main() -> int:
@@ -624,6 +846,30 @@ def main() -> int:
         help="Closure constraint formulation",
     )
     parser.add_argument(
+        "--club-geometry-ref",
+        type=str,
+        default=DEFAULT_CLUB_GEOMETRY_REF,
+        help="Directory prefix written into mesh_file ('' = bare file names)",
+    )
+    parser.add_argument(
+        "--no-club-geometry",
+        action="store_true",
+        help="Leave the club without visual meshes",
+    )
+    parser.add_argument(
+        "--club-geometry-dir",
+        type=Path,
+        default=club_visuals.GEOMETRY_DIR,
+        help="Where the club STLs are written",
+    )
+    parser.add_argument(
+        "--grip-model",
+        type=str,
+        choices=[m for m in GRIP_MODELS if m != "contact"],
+        default=DEFAULT_GRIP_MODEL,
+        help="Hand-club interface: rigid weld or bushing (contact is library-only)",
+    )
+    parser.add_argument(
         "--actuate-root",
         action="store_true",
         help="Generate CoordinateActuators for root floating-base coordinates",
@@ -643,11 +889,15 @@ def main() -> int:
         model_name=name,
         closure_type=args.closure_type,
         actuate_root=args.actuate_root,
+        club_geometry_ref=None if args.no_club_geometry else args.club_geometry_ref,
+        grip_model=args.grip_model,
     )
 
     out_path = args.out.resolve()
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(xml_str, encoding="utf-8")
+    if not args.no_club_geometry:
+        _write_club_assets(json.loads(spec_bytes), args.club_geometry_dir.resolve())
     logger.info("Wrote OpenSim model to %s", out_path)
 
     if args.receipt:

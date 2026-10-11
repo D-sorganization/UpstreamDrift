@@ -90,6 +90,130 @@ where available, split counts, and the recipe seed.
 All public functions validate required columns and minimum sample sizes with
 descriptive `ValueError` messages.
 
+`POST /tools/launch-monitor-analytics/v2/trend` runs `analyze_trend` on inline
+`records` with the desktop Trends tab's inputs: `metric`, `time_column`
+(default `captured_at`) and `rolling_window` (default 10, range 3 to 500). The
+response carries every `TemporalTrendResult` field, the rolling series as rows,
+and the change candidates. Statistics that cannot be computed are `null`, never
+`0`. An unknown column or too few observations returns 400.
+
+`POST /tools/launch-monitor-analytics/v2/dispersion` runs `analyze_dispersion`
+on inline `records` with the desktop Dispersion tab's inputs: `forward`
+(default `carry_distance`), `lateral` (default `lateral_carry`), and an
+optional `group_column` (`monitor_vendor`, `session_id`, or `club`; omitted or
+absent from the records means the desktop tab's "(all shots)" choice). The
+response carries every `DispersionResult` field per group. Statistics that
+cannot be computed are `null`, never `0`. A missing column or fewer than three
+complete shots in a group returns 400.
+
+`POST /tools/launch-monitor-analytics/v2/relationships` runs
+`compute_correlations` on inline `records` with the desktop Relationships tab's
+inputs: at least two `metrics`, optional partial-correlation `controls` (any
+control that is also a selected metric is dropped, as on the desktop),
+`method` (`pearson`, `spearman` or `kendall`; default `pearson`) and
+`edge_threshold` (default 0.3, range 0 to 1). The response carries every
+`CorrelationResult` field: the coefficient, p-value, FDR-adjusted p-value,
+pair-count and (with controls) partial-coefficient matrices as rows in
+`metrics` order, the derived and boolean-projected metric names, and the
+screened dependency edges. Statistics that cannot be computed are `null`, never
+`0`. A column absent from the records returns 400.
+
+`POST /tools/launch-monitor-analytics/v2/multivariate` runs `compute_pca` and
+`compute_vif` on inline `records` with the same `metrics` selection the
+desktop Relationships tab's multivariate action reads (at least two
+columns). The response carries every `PCAResult` field (explained variance
+ratio, loadings, scores, sample count) under `pca`, and every `VIFResult`
+field (metric-keyed values, sample count, warning metrics at VIF >= 5) under
+`vif`. An infinite VIF from perfectly collinear metrics serializes as `null`,
+never `0`. An unknown metric or too few complete rows returns 400.
+
+`POST /tools/launch-monitor-analytics/v2/comparison` runs `compare_monitors`
+on inline `records` with the desktop Monitor Comparison tab's inputs: a
+`metric`, an optional `match_column` (unset means the desktop's
+"(unmatched)") and an optional `reference_monitor` (an empty string means
+none, as on the desktop). The response carries every per-monitor summary and
+every pairwise comparison field, including each pairwise `warning`; unmatched
+results are descriptive, not calibration evidence. Statistics that cannot be
+computed are `null`, never `0`. Fewer than two monitors, an unknown reference
+monitor or a missing column returns 400.
+
+`POST /tools/launch-monitor-analytics/v2/model` runs `fit_predictive_model` on
+inline `records` with the desktop Models tab's inputs: a `target`, one or more
+distinct `features`, `model` (`linear`, `ridge`, `lasso`, `elastic_net` or
+`mlp`; default `linear`), `random_seed` (default 42) and an optional
+`group_column` (`session_id`, `monitor_vendor` or `club`; unset means the
+desktop's random split). The response carries every `PredictiveModelResult`
+field, with the held-out predictions as rows. Coefficients are `null` for a
+model that has none, and non-finite metrics are `null`, never `0`. An unknown
+column or too few complete rows returns 400; a model whose optional dependency
+is missing returns 503.
+
+`POST /tools/launch-monitor-analytics/v2/treatment` runs `apply_treatment` on
+inline `records` with the desktop Data Treatment tab's inputs:
+`required_metrics` and `outlier_metrics` (lists; blank entries are dropped, as
+the desktop's comma-separated fields drop them), `robust_z_threshold` (modified
+Z, default 4.5, range 1 to 20), `exclude_flagged` (default false) and
+structured `filters` (`column`, `operator` — `eq`, `ne`, `lt`, `le`, `gt`,
+`ge`, `contains` or `in` — and the raw `value` text). The response carries
+every `TreatmentResult` field: the analysis view as `data` rows, the row-level
+`flags`, and the `audit_log` actions, plus `shot_count` and `flag_count`.
+Missing values are `null`, never `0`, and timestamps are ISO strings. The input
+records are never mutated. An unknown column returns 400.
+
+`POST /tools/launch-monitor-analytics/v2/report` builds the Reports tab's
+plain-text report for inline `records`, a `project_name` (default
+`"Untitled Launch Monitor Study"`, the desktop's `clear_project` default), and
+`treatment_audit_log`. The web app has no import step, so `session_count` is
+the number of distinct non-null `session_id` values in `records` (0 when the
+column is absent) and `import_warning_count` is always 0. The response
+carries `report_text`, `project_name`, `session_count`, `shot_count`,
+`canonical_metrics`, and `treatment_action_count`. A blank `project_name`
+returns 400.
+
+`POST /tools/launch-monitor-analytics/v2/export` takes the same payload and
+builds the canonical CSV export and reproducibility manifest the desktop
+Reports tab's `export_data`/`export_manifest` build — CSV only; Parquet export
+stays desktop-only. The response carries `csv` (the CSV text, with the
+leading `# export_id=... exported_at=...` comment row), `data_export` (the
+export's id, timestamp, file name, and SHA-256 of the CSV bytes), and
+`manifest` (the reproducibility manifest, with `sessions` always `[]` since
+the web app has no imported-session manifests).
+
+`POST /tools/launch-monitor-analytics/v2/import/preview` takes a multipart
+`file` upload and mirrors the construction half of the desktop Sessions tab's
+`ImportMappingDialog`: it reads the headers, runs `detect_profile`, and
+computes every profile's automatic mapping so a client can offer the same
+profile switcher without a second round trip. The response carries
+`filename`, `headers`, `detected_profile_id`, `detection_confidence`,
+`profiles` (`profile_id`/`vendor` pairs), `auto_mappings` (keyed by
+`profile_id`, each a source-column-to-target mapping), `targets` (the
+selectable per-header mapping targets), and `measurement_statuses`. Nothing is
+written to durable storage; the upload is parsed from a
+`tempfile.TemporaryDirectory` that is removed before the response is built. An
+unsupported file extension returns 415.
+
+`POST /tools/launch-monitor-analytics/v2/import` takes the same multipart
+`file` plus a form field `options` holding the JSON-encoded reviewed mapping
+(`profile_id`, `mappings` — each a `source_column`/`target_column` with
+optional `source_unit`, `multiplier`, `measurement_status` override —
+`session_name`, `player`, `monitor_model`, `software_version`, `tags`) and
+calls the same `import_session` the desktop Sessions tab's `import_file`
+calls, so the web and desktop import paths share one implementation. A header
+absent from `mappings` falls back to the profile's automatic mapping, exactly
+like leaving that header's dialog combo at its auto-detected value, and an
+omitted `profile_id` is auto-detected from the headers. The response carries
+`session_id`, `name`, `manifest`, `columns`, `records`, and `row_count`.
+Nothing is persisted server side: the upload is written to a
+`tempfile.TemporaryDirectory` and removed before the response is built, and
+`manifest.source_path` is the uploaded filename, never the server-side temp
+path — error messages are sanitized the same way. Missing values are `null`,
+never `0`, and timestamps are ISO strings. An unsupported file extension
+returns 415; an import producing more than 20,000 rows returns 413; an unknown
+profile, mapping target, multiplier, measurement status, or a source with no
+rows returns 422. Private-corpus loading (`load_private_corpus_sessions`,
+which needs `LAUNCH_MONITOR_DATA_ROOT`) stays desktop-only, and removing an
+imported session is client-side state on the web — neither has a web route.
+
 ## Analysis Contract V2
 
 UpstreamDrift is the canonical Python and API authority for launch-monitor

@@ -14,7 +14,13 @@ import numpy as np
 from src.shared.python.biomechanics.biomechanics_data import BiomechanicalData
 from src.shared.python.body_part_viz import AxialLoadFrame, ForceColorScale
 from src.shared.python.body_part_viz.meshcat_force_colors import MeshcatForceColors
+from src.shared.python.force_overlay.glyphs import GlyphSet
+from src.shared.python.force_overlay.renderers.meshcat_glyphs import (
+    MeshcatGlyphRenderer,
+    MeshcatPythonSink,
+)
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.plot_style.color_utils import rgba_to_hex
 
 try:
     import meshcat
@@ -33,6 +39,7 @@ class MuJoCoMeshcatAdapter:
 
     def __init__(self, model: mujoco.MjModel | None = None) -> None:
         self._force_colors: MeshcatForceColors | None = None
+        self._glyph_renderer: MeshcatGlyphRenderer | None = None
         if meshcat is None:
             logger.warning("Meshcat not installed. Visualization disabled.")
             self.vis = None
@@ -89,7 +96,7 @@ class MuJoCoMeshcatAdapter:
 
             # Material/Color
             material = g.MeshPhongMaterial(
-                color=self._rgba_to_hex(rgba), opacity=rgba[3]
+                color=self._rgba_to_int(rgba), opacity=rgba[3]
             )  # noqa: E501
 
             shape = None
@@ -207,55 +214,26 @@ class MuJoCoMeshcatAdapter:
 
             self.vis["visuals"][name].set_transform(T)
 
-    def draw_vectors(  # noqa: C901
-        self,
-        data: mujoco.MjData,
-        show_force: bool,
-        show_torque: bool,
-        force_scale: float = 0.1,
-        torque_scale: float = 0.1,
-    ) -> None:
+    def draw_glyphs(self, glyphs: GlyphSet | None) -> None:
+        """Draw force/torque glyphs through the shared MeshCat renderer.
+
+        ``None`` removes every force overlay node. Labels that disappear from
+        one call to the next are deleted by the renderer.
         """
-        Draws force/torque vectors at joints.
-        """
-        if data is None:
-            raise ValueError("data must be provided")
-        if self.vis is None or self.model is None:
+        renderer = self._get_glyph_renderer()
+        if renderer is None:
             return
+        if glyphs is None:
+            renderer.clear()
+        else:
+            renderer.update(glyphs)
 
-        model = self.model
-
-        if not show_force:
-            self.vis["overlays/forces"].delete()
-        if not show_torque:
-            self.vis["overlays/torques"].delete()
-
-        if not (show_force or show_torque):
-            return
-
-        # Iterate over bodies (skipping world 0)
-        for i in range(1, model.nbody):
-            body_name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, i)
-            if not body_name:
-                body_name = f"body_{i}"
-
-            if data.cfrc_int is None:
-                continue
-            wrench = data.cfrc_int[i]  # type: ignore[index]
-            f = wrench[3:]
-            t = wrench[:3]
-
-            pos = data.xpos[i]
-
-            if show_force and np.linalg.norm(f) > 1e-3:
-                self._draw_arrow(
-                    f"overlays/forces/{body_name}", pos, f * force_scale, 0xFF0000
-                )  # noqa: E501
-
-            if show_torque and np.linalg.norm(t) > 1e-3:
-                self._draw_arrow(
-                    f"overlays/torques/{body_name}", pos, t * torque_scale, 0x0000FF
-                )  # noqa: E501
+    def _get_glyph_renderer(self) -> MeshcatGlyphRenderer | None:
+        renderer = getattr(self, "_glyph_renderer", None)
+        if renderer is None and self.vis is not None:
+            renderer = MeshcatGlyphRenderer(MeshcatPythonSink(self.vis))
+            self._glyph_renderer = renderer
+        return renderer
 
     def draw_induced_vectors(  # noqa: C901
         self,
@@ -314,7 +292,7 @@ class MuJoCoMeshcatAdapter:
                 continue
 
             joint_pos = data.xpos[body_id]
-            joint_axis = data.xaxis[3 * j : 3 * j + 3]
+            joint_axis = data.xaxis[j]
 
             arrow_len = acc * scale * 0.5
             arrow_dir = joint_axis * arrow_len
@@ -362,7 +340,7 @@ class MuJoCoMeshcatAdapter:
 
             body_id = self.model.jnt_bodyid[j]
             joint_pos = data.xpos[body_id]
-            joint_axis = data.xaxis[3 * j : 3 * j + 3]
+            joint_axis = data.xaxis[j]
 
             arrow_len = val * scale * 0.5
             arrow_dir = joint_axis * arrow_len
@@ -519,8 +497,8 @@ class MuJoCoMeshcatAdapter:
             )
         )
 
-    def _rgba_to_hex(self, rgba: Any) -> int:
+    def _rgba_to_int(self, rgba: Any) -> int:
         if rgba is None:
             return 0
-        r, g, b = (int(c * 255) for c in rgba[:3])
-        return (r << 16) + (g << 8) + b
+        hex_str = rgba_to_hex(rgba, include_alpha=False)
+        return int(hex_str[1:], 16)

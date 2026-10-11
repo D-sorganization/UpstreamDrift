@@ -1,0 +1,114 @@
+# latex-references.yml - Typeset the calculation-level LaTeX references (#11574)
+#
+# PURPOSE: AGENTS.md requires every substantive modeling change to update the
+#          LaTeX reference under docs/research/, but nothing used to typeset
+#          them, so a broken macro only surfaced when a human built the PDF.
+#          This job compiles every reference whose directory changed and fails
+#          with the LaTeX error in the log.
+#
+# SCOPE:   Each docs/research/<name>/<name>.tex is the main file of one
+#          reference. proximal_distal_energy_transfer is excluded: its .tex is
+#          generated from the QMD source (non-editable) and needs a full
+#          Quarto/TeX Live toolchain, not this self-contained build.
+#
+# NOT A REQUIRED CHECK: it only runs when docs/research/**/*.tex changes, so it
+#          must not be a required context, and it needs no merge_group trigger.
+
+name: LaTeX References
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - "docs/research/**/*.tex"
+      - ".github/workflows/latex-references.yml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  TECTONIC_VERSION: "0.15.0"
+  TECTONIC_SHA256: "dfb82876f2986862996e564fa507a9e576e0c1e3bee63c2c1bd677c2543e6407"
+
+jobs:
+  compile:
+    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository)
+    name: compile-latex-references
+    runs-on: ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Select changed references
+        id: select
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          set -euo pipefail
+          excluded="proximal_distal_energy_transfer"
+          git diff --name-only --diff-filter=ACMR "origin/${BASE_REF}...HEAD" \
+            | grep -E '^docs/research/.+\.tex$' > changed_tex.txt || true
+          : > references.txt
+          while IFS= read -r file; do
+            name="$(echo "$file" | cut -d/ -f3)"
+            main="docs/research/${name}/${name}.tex"
+            case " ${excluded} " in *" ${name} "*) continue ;; esac
+            if [ -f "$main" ] && ! grep -qx "$main" references.txt; then
+              echo "$main" >> references.txt
+            fi
+          done < changed_tex.txt
+          echo "Changed .tex files:"; cat changed_tex.txt
+          echo "References to build:"; cat references.txt
+          if [ -s references.txt ]; then
+            echo "build=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "build=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Document title case (changed files only)
+        if: steps.select.outputs.build == 'true'
+        run: |
+          set -euo pipefail
+          # shellcheck disable=SC2046
+          python3 scripts/check_document_title_case.py $(cat changed_tex.txt)
+
+      - name: Install pinned Tectonic
+        if: steps.select.outputs.build == 'true'
+        run: |
+          set -euo pipefail
+          url="https://github.com/tectonic-typesetting/tectonic/releases/download/tectonic%40${TECTONIC_VERSION}/tectonic-${TECTONIC_VERSION}-x86_64-unknown-linux-musl.tar.gz"
+          curl -fsSL -o "${RUNNER_TEMP}/tectonic.tar.gz" "$url"
+          echo "${TECTONIC_SHA256}  ${RUNNER_TEMP}/tectonic.tar.gz" | sha256sum -c -
+          mkdir -p "${RUNNER_TEMP}/tectonic"
+          tar -xzf "${RUNNER_TEMP}/tectonic.tar.gz" -C "${RUNNER_TEMP}/tectonic"
+          echo "${RUNNER_TEMP}/tectonic" >> "$GITHUB_PATH"
+
+      - name: Compile references
+        if: steps.select.outputs.build == 'true'
+        run: |
+          set -euo pipefail
+          mkdir -p latex-pdfs
+          # Tectonic halts on the first LaTeX error and prints it to the log.
+          while IFS= read -r main; do
+            echo "::group::${main}"
+            tectonic -X compile --keep-logs --outdir latex-pdfs "$main"
+            echo "::endgroup::"
+          done < references.txt
+
+      - name: Upload PDFs
+        if: steps.select.outputs.build == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: latex-reference-pdfs
+          path: latex-pdfs/*.pdf
+          if-no-files-found: error
+          retention-days: 14

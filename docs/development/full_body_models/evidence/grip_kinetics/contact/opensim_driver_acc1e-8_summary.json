@@ -1,0 +1,45 @@
+{
+  "club": "driver",
+  "engine": "opensim_contact",
+  "integrator": "OpenSim Manager, CPodes, error controlled",
+  "accuracy": 1e-8,
+  "wall_time_s": 355.05604780104477,
+  "build_time_s": 2.4686289000092074,
+  "squeeze_per_hand_n": 1104.2355584729612,
+  "pad_stiffness_shared_n_m": 171112.05941414234,
+  "foundation_stiffness_n_m3": 4532862699.768211,
+  "foundation_preload_penetration_m": 0.0010755481546748467,
+  "shared_preload_penetration_m": 0.0005377740773374233,
+  "dissipation_s_m": 0.38119785714729637,
+  "friction_static": 0.9,
+  "friction_dynamic": 0.7,
+  "transition_velocity_m_s": 0.001,
+  "mesh_segments": 96,
+  "ring_pitch_m": 0.001,
+  "t_end_s": 1.814,
+  "opensim_contact": {
+    "peak_force_L_n": 696.9386213169015,
+    "peak_force_R_n": 803.5728897970921,
+    "lead_share_at_peak_net": 0.5053195122803382,
+    "peak_net_n": 427.99674253299116,
+    "peak_internal_n": 728.1400543862536,
+    "peak_squeeze_n": 150.9031163287614,
+    "peak_couple_nm": 129.26918169270965
+  },
+  "opensim_bushing_same_window": {
+    "peak_force_L_n": 515.1578323854484,
+    "peak_force_R_n": 564.0251922380963,
+    "lead_share_at_peak_net": 0.42534172237190193,
+    "peak_net_n": 439.29195018254387,
+    "peak_internal_n": 509.80903513399784,
+    "peak_squeeze_n": 3.2844880589147536,
+    "peak_couple_nm": 99.50809242568974
+  },
+  "contact_slip": {
+    "peak_roll_slip_rad": 0.008701162996009816,
+    "peak_axial_slip_mm": 0.3848202109616503
+  },
+  "pad_normal_force_sum_peak_n": 1365.2786991920657,
+  "hand_to_club_displacement_peak_mm": 0.5907526253875488,
+  "hand_to_club_rotation_peak_deg": 0.7489983045621245
+}

@@ -100,6 +100,40 @@ def test_world_channels_exact(tmp_path: Path) -> None:
     assert "grip:total_hand:force" not in missing
 
 
+def _hand_cols() -> dict:
+    cols: dict = {"time": [0.0, 0.01]}
+    cols |= _vec("LWLogs_LHGlobalPosition_", [(0.4, 0.5, 1.0)] * 2)
+    cols |= _vec("LWLogs_LHonClubFGlobal_", [(1, 2, 3), (4, 5, 6)])
+    cols |= _vec("LWLogs_LHonClubTGlobal_", [(0, 0, 1), (0, 0, 2)])
+    cols |= _vec("RWLogs_RHGlobalPosition_", [(0.6, 0.5, 1.0)] * 2)
+    cols |= _vec("RWLogs_RHonClubFGlobal_", [(-1, 0, 0), (-2, 0, 0)])
+    return cols
+
+
+def test_per_hand_grip_channels_exact(tmp_path: Path) -> None:
+    """#11715: per-hand force/torque of the hand ON the club, world frame."""
+    series, missing = load_simscape_force_series(_write(tmp_path, _hand_cols()))
+    by = {w.label: w for w in series[1].wrenches}
+    left, right = by["grip:hand_left"], by["grip:hand_right"]
+    assert left.kind is WrenchKind.GRIP and left.body == "club"
+    assert left.force_n == (4.0, 5.0, 6.0) and left.torque_nm == (0.0, 0.0, 2.0)
+    assert left.point_m == (0.4, 0.5, 1.0)
+    assert right.force_n == (-2.0, 0.0, 0.0) and right.point_m == (0.6, 0.5, 1.0)
+    # Right-hand torque columns are absent: unavailable, never zero.
+    assert right.torque_nm is None
+    assert "grip:hand_right:torque" in missing
+    assert "grip:hand_left:force" not in missing
+
+
+def test_per_hand_grip_unavailable_without_columns(tmp_path: Path) -> None:
+    series, missing = load_simscape_force_series(_write(tmp_path, _world_cols()))
+    labels = {w.label for w in series[0].wrenches}
+    assert not labels & {"grip:hand_left", "grip:hand_right"}
+    for side in ("left", "right"):
+        assert f"grip:hand_{side}:force" in missing
+        assert f"grip:hand_{side}:torque" in missing
+
+
 def test_local_joint_rotated_by_logged_r(tmp_path: Path) -> None:
     series, _ = load_simscape_force_series(_write(tmp_path, _joint_cols()))
     w = {x.label: x for x in series[0].wrenches}["joint_reaction:LS"]

@@ -164,20 +164,9 @@ def test_measurement_result_required() -> None:
     assert res.distance == 1.0
 
 
-def test_force_vector3d_defaults() -> None:
-    fv = m.ForceVector3D(
-        body_name="a",
-        force_type="applied",
-        origin=[0, 0, 0],
-        direction=[1, 0, 0],
-        magnitude=1.0,
-    )
-    assert fv.color == [1.0, 0.0, 0.0, 1.0]
-
-
 def test_force_overlay_response_defaults() -> None:
     r = m.ForceOverlayResponse(sim_time=0.0)
-    assert r.vectors == []
+    assert not hasattr(r, "vectors")
     assert r.total_force_magnitude == 0.0
 
 

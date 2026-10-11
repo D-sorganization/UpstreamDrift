@@ -22,6 +22,7 @@ Design by Contract
 from __future__ import annotations
 
 import logging
+from typing import Any
 
 import numpy as np
 from PyQt6.QtCore import QPointF, QRect, Qt
@@ -334,61 +335,18 @@ class GolferPendulumWidget(BasePendulumWidget):
             return
         if not forces:
             return
-
         pos = self._result.positions_at(self._current_idx)
-        magnitudes = [np.hypot(f[0], f[1]) for f in forces.values()]
-        max_mag = max(1.0, max(magnitudes))
-        scale = 0.4 * self._pixels_per_meter * self._force_scale / max_mag
+        from src.shared.python.force_overlay.contracts import WrenchKind
 
-        joint_pos_map = {
-            "hub": pos.get("hub"),
-            "re": pos.get("re"),
-            "rh": pos.get("rh"),
-            "le": pos.get("le"),
-            "lh": pos.get("lh"),
-            "club_tip": pos.get("club_tip"),
-        }
-
-        painter.setPen(QPen(self.COLOR_FORCE, 2))
-        for key, force in forces.items():
-            if self._visible_segments is not None and key not in self._visible_segments:
-                continue
-            jp = joint_pos_map.get(key)
-            if jp is None:
-                continue
-            fx, fy = force
-            end = (
-                jp[0] + fx * scale / self._pixels_per_meter,
-                jp[1] + fy * scale / self._pixels_per_meter,
-            )
-            p1 = self._world_to_pixel(*jp)
-            p2 = self._world_to_pixel(*end)
-            painter.drawLine(p1, p2)
-
-            # Filled arrowhead
-            dx = p2.x() - p1.x()
-            dy = p2.y() - p1.y()
-            arrow_l = max(1.0, np.hypot(dx, dy))
-            ux, uy = dx / arrow_l, dy / arrow_l
-            a_len = 10.0
-            a_w = 4.0
-            left = QPointF(
-                p2.x() - a_len * ux + a_w * uy,
-                p2.y() - a_len * uy - a_w * ux,
-            )
-            right = QPointF(
-                p2.x() - a_len * ux - a_w * uy,
-                p2.y() - a_len * uy + a_w * ux,
-            )
-            path = QPainterPath()
-            path.moveTo(p2)
-            path.lineTo(left)
-            path.lineTo(right)
-            path.closeSubpath()
-            old_brush = painter.brush()
-            painter.setBrush(QBrush(painter.pen().color()))
-            painter.drawPath(path)
-            painter.setBrush(old_brush)
+        self._render_force_overlay_2d(
+            painter,
+            forces,
+            pos,
+            kind=WrenchKind.JOINT_REACTION,
+            label_prefix="joint",
+            color_name=self.COLOR_FORCE.name(),
+            engine_name="golfer_pendulum",
+        )
 
     def _draw_zero_torque_force_vectors(self, painter: QPainter) -> None:
         """Draw zero-torque (passive drift) force vectors at each joint (#1148)."""
@@ -398,61 +356,18 @@ class GolferPendulumWidget(BasePendulumWidget):
         forces = self._zero_torque_forces[self._current_idx]
         if not forces:
             return
-
         pos = self._result.positions_at(self._current_idx)
-        magnitudes = [np.hypot(f[0], f[1]) for f in forces.values()]
-        max_mag = max(1.0, max(magnitudes))
-        scale = 0.4 * self._pixels_per_meter * self._force_scale / max_mag
+        from src.shared.python.force_overlay.contracts import WrenchKind
 
-        joint_pos_map = {
-            "hub": pos.get("hub"),
-            "re": pos.get("re"),
-            "rh": pos.get("rh"),
-            "le": pos.get("le"),
-            "lh": pos.get("lh"),
-            "club_tip": pos.get("club_tip"),
-        }
-
-        pen = QPen(self.COLOR_ZERO_TORQUE, 2, Qt.PenStyle.DashLine)
-        painter.setPen(pen)
-        for key, force in forces.items():
-            if self._visible_segments is not None and key not in self._visible_segments:
-                continue
-            jp = joint_pos_map.get(key)
-            if jp is None:
-                continue
-            fx, fy = force
-            end = (
-                jp[0] + fx * scale / self._pixels_per_meter,
-                jp[1] + fy * scale / self._pixels_per_meter,
-            )
-            p1 = self._world_to_pixel(*jp)
-            p2 = self._world_to_pixel(*end)
-            painter.drawLine(p1, p2)
-
-            # Arrowhead
-            dx = p2.x() - p1.x()
-            dy = p2.y() - p1.y()
-            arrow_l = max(1.0, np.hypot(dx, dy))
-            ux, uy = dx / arrow_l, dy / arrow_l
-            a_len, a_w = 8.0, 3.0
-            left = QPointF(
-                p2.x() - a_len * ux + a_w * uy,
-                p2.y() - a_len * uy - a_w * ux,
-            )
-            right = QPointF(
-                p2.x() - a_len * ux - a_w * uy,
-                p2.y() - a_len * uy + a_w * ux,
-            )
-            path = QPainterPath()
-            path.moveTo(p2)
-            path.lineTo(left)
-            path.lineTo(right)
-            path.closeSubpath()
-            old_brush = painter.brush()
-            painter.setBrush(QBrush(self.COLOR_ZERO_TORQUE))
-            painter.drawPath(path)
-            painter.setBrush(old_brush)
+        self._render_force_overlay_2d(
+            painter,
+            forces,
+            pos,
+            kind=WrenchKind.JOINT_ACTUATOR,
+            label_prefix="ztcf",
+            color_name=self.COLOR_ZERO_TORQUE.name(),
+            engine_name="golfer_pendulum",
+        )
 
     # ------------------------------------------------------------------
     # Torque vector drawing (#1119, #1170)

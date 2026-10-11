@@ -200,5 +200,11 @@ class TestReminderBodyContent:
             post_spec_reminder.FALLBACK_POLICY_URL
         )
         assert "SPECIFICATION_DRIVEN_DEVELOPMENT_POLICY.md" in body
+        assert "changes_fragment.py" in body
+        assert "python shared_scripts/changes_fragment.py new --issue" in body
         assert "| YYYY-MM-DD | #<pr> | summary |" in body
+        # Fragments must be mentioned first before the direct-row fallback
+        assert body.index("changes_fragment.py") < body.index(
+            "| YYYY-MM-DD | #<pr> | summary |"
+        )
         assert "spec-exempt" in body

@@ -23,31 +23,48 @@ concurrency:
 jobs:
   # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:
+    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository)
     # Dispatcher placement only. This repo is public, so a hosted runner is
     # free and unmetered; pinning the dispatcher meant every run waited for a
     # self-hosted slot just to decide where to run. The runner it SELECTS is
     # unchanged, so no workload moves off the fleet.
+    # issue_comment never reaches the fleet: github.event.pull_request is unset
+    # for it, so the fork guard above is true for comments on fork PRs (RM#1989).
     runs-on:
-      ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' &&
-      'ubuntu-latest' || 'd-sorg-fleet-docker' }}
+      ${{ github.event_name == 'issue_comment' && 'ubuntu-latest' ||
+      (!github.event.repository.private && vars.CI_RUNNER_MODE != 'local' &&
+      'ubuntu-latest' || 'd-sorg-fleet-docker') }}
     timeout-minutes: 2
     outputs:
       runner: ${{ steps.check.outputs.runner }}
     steps:
       - name: Set runner
         id: check
+        env:
+          EVENT_NAME: ${{ github.event_name }}
         run: |
           mkdir -p "$(dirname "$GITHUB_OUTPUT")"
-          echo "runner=d-sorg-fleet-docker" >> "$GITHUB_OUTPUT"
-          echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
+          if [ "$EVENT_NAME" = "issue_comment" ]; then
+            # Comments on fork PRs arrive as issue_comment; keep them hosted.
+            echo "runner=ubuntu-latest" >> "$GITHUB_OUTPUT"
+            echo "issue_comment event: selected ubuntu-latest"
+          else
+            echo "runner=d-sorg-fleet-docker" >> "$GITHUB_OUTPUT"
+            echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
+          fi
   collect-comment:
     timeout-minutes: 30
     needs: pick-runner
     # Only run on PR comments (not issue comments)
-    if: |
-      (github.event_name == 'pull_request_review_comment') ||
-      (github.event_name == 'issue_comment' && github.event.issue.pull_request != null)
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository) &&
+      ((github.event_name == 'pull_request_review_comment') || (github.event_name == 'issue_comment' && github.event.issue.pull_request != null))
+    runs-on: ${{ github.event_name == 'issue_comment' && 'ubuntu-latest' || needs.pick-runner.outputs.runner }}
     steps:
       - name: Filter Bot Comments
         id: filter

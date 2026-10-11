@@ -13,6 +13,7 @@ Implementation split across:
 from __future__ import annotations
 
 import os
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -20,6 +21,7 @@ import mujoco
 import numpy as np
 from PyQt6 import QtCore, QtWidgets
 
+from src.engines.physics_engines.mujoco.python.grip_efc import grip_analysis_from_efc
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.physics.grip_contact_model import (
     GripContactExporter,
@@ -47,6 +49,41 @@ logger = get_logger(__name__)
 # this is the load the grip must support. Sourced here as a named constant
 # instead of an unexplained literal at the call site.
 CLUB_WEIGHT_N = 3.0
+
+
+@dataclass(frozen=True)
+class GripWeldSummary:
+    """Net hand-on-club weld force for display (GCV-8, #11714).
+
+    ``net_force_n`` is ``None`` when unavailable; ``text`` then says why.
+    """
+
+    available: bool
+    net_force_n: float | None
+    text: str
+
+
+def grip_weld_wrench_summary(
+    model: mujoco.MjModel, data: mujoco.MjData
+) -> GripWeldSummary:
+    """Summarise the ``grip_weld_l``/``grip_weld_r`` wrench via ``grip_efc``.
+
+    Reuses :func:`grip_analysis_from_efc` rather than reading constraint forces
+    here.  Scenes that hold the object by contact only have no grip welds and
+    are reported unavailable with the helper's reason, never as zero.
+
+    Raises:
+        ValueError: if ``model`` or ``data`` is ``None``.
+    """
+    if model is None or data is None:
+        raise ValueError("model and data must be provided")
+    analysis = grip_analysis_from_efc(model, data)
+    if analysis.net_force_n is None:
+        return GripWeldSummary(
+            False, None, f"unavailable ({analysis.unavailable_reason})"
+        )
+    net = float(np.linalg.norm(analysis.net_force_n))
+    return GripWeldSummary(True, net, f"{net:.1f} N net ({analysis.split_method})")
 
 
 def _geom_point_velocity(
@@ -752,6 +789,8 @@ class GripModellingTab(QtWidgets.QWidget):
         model = self.sim_widget.model
         data = self.sim_widget.data
 
+        self.metrics_widget.update_grip_weld(grip_weld_wrench_summary(model, data).text)
+
         if data.ncon == 0:
             self.pressure_widget.clear()
             self.metrics_widget.update_metrics(0, 0, 0, 0, 0.0, False)
@@ -839,5 +878,7 @@ class GripModellingTab(QtWidgets.QWidget):
 __all__ = [
     "ContactMetricsWidget",
     "GripModellingTab",
+    "GripWeldSummary",
     "PressureVisualizationWidget",
+    "grip_weld_wrench_summary",
 ]

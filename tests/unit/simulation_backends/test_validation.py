@@ -3,7 +3,7 @@
 Two tiers of tests:
 
 * **Pure-logic tier** (always runs): drives :mod:`validation` with lightweight
-  in-process fakes that satisfy the ``DynamicsProvider`` / ``SimulationBackend``
+  in-process fakes that satisfy the ``EquationsOfMotionProvider`` / ``SimulationBackend``
   Protocols. These exercise the tolerance semantics, precondition guards, and
   report wiring with no optional dependency.
 * **MuJoCo cross-validation tier** (``@pytest.mark.requires_mujoco``): builds the
@@ -39,7 +39,7 @@ pytestmark = pytest.mark.unit
 
 
 class _FakeProvider:
-    """Minimal ``DynamicsProvider`` with a configurable constant skew.
+    """Minimal ``EquationsOfMotionProvider`` with a configurable constant skew.
 
     ``skew`` is added to every entry of the mass matrix and bias vector so a
     test can dial the discrepancy above or below a tolerance.
@@ -68,7 +68,7 @@ class _LinearBackend:
     State integrates as ``q_{k+1} = q_k + dt * v_k`` and ``v`` is held constant
     (passive) so the trajectory is exactly reproducible. A ``bias`` offset lets
     a test inject a controlled trajectory discrepancy. Also satisfies
-    ``DynamicsProvider`` with a constant identity mass matrix, which makes
+    ``EquationsOfMotionProvider`` with a constant identity mass matrix, which makes
     kinetic energy ``0.5 * |v|^2`` — conserved for the constant-``v`` rollout.
     """
 

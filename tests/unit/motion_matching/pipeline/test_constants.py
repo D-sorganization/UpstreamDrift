@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import numpy as np
 import pytest
 
 pytestmark = pytest.mark.unit
@@ -46,3 +47,74 @@ def test_pipeline_default_paths_and_captures() -> None:
     assert constants.SPEC.name == "full_body_spec_v2.json"
     assert constants.BUILD_RECEIPT.name == "build_receipt_v2.json"
     assert constants.CANDIDATE.name == "returned81_candidate.json"
+
+
+def test_captures_lazy_owner() -> None:
+    from unittest.mock import patch
+    import os
+    from src.shared.python.motion_matching.pipeline import constants
+    from src.motion_capture.capture_registry import CaptureDataUnavailable
+
+    assert constants.CAPTURE_NAMES == ("driver", "iron", "owner")
+    # CAPTURES itself never grows an 'owner' key: it is a plain dict of the
+    # two public fixtures, so dict(), copy(), and json all behave normally.
+    assert set(constants.CAPTURES) == {"driver", "iron"}
+    assert dict(constants.CAPTURES) == constants.CAPTURES
+
+    # Resolving owner when CAPTURE_DATA_DIR is unset raises without breaking import
+    with patch.dict(os.environ, {"CAPTURE_DATA_DIR": ""}, clear=False):
+        with pytest.raises(CaptureDataUnavailable):
+            _ = constants.capture_path("owner")
+
+    # driver and iron still resolve normally
+    assert constants.capture_path("driver").is_file()
+    assert constants.capture_path("iron").is_file()
+
+
+def test_capture_path_rejects_unknown_name() -> None:
+    from src.shared.python.motion_matching.pipeline import constants
+
+    with pytest.raises(ValueError, match="Unknown capture name"):
+        constants.capture_path("nonexistent")
+
+
+def test_rate_from_times_driver_and_owner_rates() -> None:
+    from src.shared.python.motion_matching.pipeline.constants import rate_from_times
+
+    driver_times = np.arange(654) / 360.0
+    assert rate_from_times(driver_times) == pytest.approx(360.0)
+
+    owner_times = np.arange(367) / 240.0
+    assert rate_from_times(owner_times) == pytest.approx(240.0)
+
+
+def test_rate_from_times_rejects_too_few_samples() -> None:
+    from src.shared.python.motion_matching.pipeline.constants import rate_from_times
+
+    with pytest.raises(ValueError, match="at least 2 samples"):
+        rate_from_times([0.0])
+    with pytest.raises(ValueError, match="at least 2 samples"):
+        rate_from_times([])
+
+
+def test_rate_from_times_rejects_nonpositive_spacing() -> None:
+    from src.shared.python.motion_matching.pipeline.constants import rate_from_times
+
+    with pytest.raises(ValueError, match="positive"):
+        rate_from_times([0.0, 0.0, 0.1])
+    with pytest.raises(ValueError, match="positive"):
+        rate_from_times([0.0, -0.1])
+
+
+def test_rate_from_times_rejects_nonuniform_spacing() -> None:
+    from src.shared.python.motion_matching.pipeline.constants import rate_from_times
+
+    with pytest.raises(ValueError, match="uniform"):
+        rate_from_times([0.0, 0.1, 0.25])
+
+
+def test_rate_from_times_tolerates_float_roundoff() -> None:
+    from src.shared.python.motion_matching.pipeline.constants import rate_from_times
+
+    times = np.cumsum([0.0] + [1.0 / 360.0] * 653)
+    assert rate_from_times(times) == pytest.approx(360.0, rel=1e-3)

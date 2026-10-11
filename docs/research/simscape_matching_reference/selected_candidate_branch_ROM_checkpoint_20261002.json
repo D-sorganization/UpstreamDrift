@@ -1,0 +1,844 @@
+{
+  "qualification": "NAMED_COORDINATE_SO3_AND_IMPLEMENTATION_ROM_AUDIT_NOT_PHYSICAL_ACCEPTANCE",
+  "reports": {
+    "tour_selected": {
+      "sampled_frames": 55,
+      "largest_leg_coordinate_channel": "LHipZ",
+      "largest_leg_coordinate_step_deg": 22.312295185415422,
+      "source_frame_before": 517,
+      "source_frame_after": 529,
+      "coordinate_before_deg": -33.70380322048688,
+      "coordinate_after_deg": -56.016098405902305,
+      "rotations": {
+        "pelvis": {
+          "max_adjacent_SO3_step_deg": 21.91902597178889,
+          "source_frame_before": 517,
+          "source_frame_after": 529,
+          "SO3_step_at_largest_leg_coordinate_step_deg": 21.91902597178889
+        },
+        "left_hip": {
+          "max_adjacent_SO3_step_deg": 24.581214070412045,
+          "source_frame_before": 517,
+          "source_frame_after": 529,
+          "SO3_step_at_largest_leg_coordinate_step_deg": 24.581214070412045
+        },
+        "right_hip": {
+          "max_adjacent_SO3_step_deg": 23.30757095878853,
+          "source_frame_before": 481,
+          "source_frame_after": 493,
+          "SO3_step_at_largest_leg_coordinate_step_deg": 18.638612806218543
+        }
+      },
+      "ROM_checked_row_count": 25,
+      "ROM_failure_row_count": 12,
+      "ROM_failures": [
+        {
+          "joint": "Neck",
+          "key": "Hips and Torso Inputs/Neck Joint|Rx.q",
+          "motion": "neck flexion",
+          "min_deg": -50.310285369205815,
+          "max_deg": -16.711736184999268,
+          "span_deg": 33.59854918420654,
+          "excess_deg": 5.310285369205815,
+          "frames": 5,
+          "ok": false
+        },
+        {
+          "joint": "Spine",
+          "key": "Hips and Torso Inputs/Spine Tilt Kinetically Driven/Universal Joint/Kinetically Driven Universal Joint|Ry.q",
+          "motion": "trunk lateral bend to trail",
+          "min_deg": -4.6054716976721295,
+          "max_deg": 64.39352022778041,
+          "span_deg": 68.99899192545254,
+          "excess_deg": 29.393520227780414,
+          "frames": 19,
+          "ok": false
+        },
+        {
+          "joint": "RE",
+          "key": "Right Elbow Joint/Revolute Joint/Kinetically Driven Revolute|Rz.q",
+          "motion": "trail elbow flexion",
+          "min_deg": -76.50042543765437,
+          "max_deg": 116.53669859166628,
+          "span_deg": 193.03712402932064,
+          "excess_deg": 71.50042543765437,
+          "frames": 11,
+          "ok": false
+        },
+        {
+          "joint": "LF",
+          "key": "Left Forearm/Revolute Joint/Kinetically Driven Revolute|Rz.q",
+          "motion": "lead forearm pronation",
+          "min_deg": -23.99433816864712,
+          "max_deg": 116.72621979671464,
+          "span_deg": 140.7205579653618,
+          "excess_deg": 36.726219796714645,
+          "frames": 23,
+          "ok": false
+        },
+        {
+          "joint": "RF",
+          "key": "Right Forearm/Revolute Joint/Kinetically Driven Revolute|Rz.q",
+          "motion": "trail forearm pronation",
+          "min_deg": -101.9290631540789,
+          "max_deg": 30.28218527929141,
+          "span_deg": 132.21124843337037,
+          "excess_deg": 21.929063154078904,
+          "frames": 10,
+          "ok": false
+        },
+        {
+          "joint": "LScap",
+          "key": "Left Scapula Joint/Universal Joint/Kinetically Driven Universal Joint|Rx.q",
+          "motion": "lead shoulder girdle protraction",
+          "min_deg": -43.02634895398552,
+          "max_deg": 39.90683037145777,
+          "span_deg": 82.93317932544329,
+          "excess_deg": 32.93317932544329,
+          "frames": 35,
+          "ok": false
+        },
+        {
+          "joint": "LScap",
+          "key": "Left Scapula Joint/Universal Joint/Kinetically Driven Universal Joint|Ry.q",
+          "motion": "lead shoulder girdle elevation",
+          "min_deg": -24.133647662223098,
+          "max_deg": 14.428424367127889,
+          "span_deg": 38.562072029350986,
+          "excess_deg": 14.133647662223098,
+          "frames": 12,
+          "ok": false
+        },
+        {
+          "joint": "RScap",
+          "key": "Right Scapula Joint/Universal Joint/Kinetically Driven Universal Joint|Rx.q",
+          "motion": "trail shoulder girdle protraction",
+          "min_deg": -81.389763721169,
+          "max_deg": 24.319152121211374,
+          "span_deg": 105.70891584238035,
+          "excess_deg": 56.389763721169004,
+          "frames": 24,
+          "ok": false
+        },
+        {
+          "joint": "RScap",
+          "key": "Right Scapula Joint/Universal Joint/Kinetically Driven Universal Joint|Ry.q",
+          "motion": "trail shoulder girdle elevation",
+          "min_deg": -15.828439550089797,
+          "max_deg": 33.72104005263208,
+          "span_deg": 49.549479602721874,
+          "excess_deg": 5.828439550089797,
+          "frames": 24,
+          "ok": false
+        },
+        {
+          "joint": "LW",
+          "key": "Left Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint|Rx.q",
+          "motion": "lead wrist radial deviation",
+          "min_deg": null,
+          "max_deg": null,
+          "span_deg": 93.46972570349392,
+          "excess_deg": 43.46972570349392,
+          "frames": 0,
+          "ok": false
+        },
+        {
+          "joint": "RW",
+          "key": "Right Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint|Rx.q",
+          "motion": "trail wrist radial deviation",
+          "min_deg": null,
+          "max_deg": null,
+          "span_deg": 103.94818574034375,
+          "excess_deg": 53.948185740343746,
+          "frames": 0,
+          "ok": false
+        },
+        {
+          "joint": "LA",
+          "key": "Lower Body/Left Ankle Joint/Kinetically Driven Universal Joint|Ry.q",
+          "motion": "lead ankle dorsiflexion",
+          "min_deg": -0.4942941503431939,
+          "max_deg": 25.307034095502274,
+          "span_deg": 25.801328245845454,
+          "excess_deg": 5.307034095502274,
+          "frames": 9,
+          "ok": false
+        }
+      ],
+      "ROM_rows_with_no_absolute_neutral": [
+        "lead wrist radial deviation",
+        "lead wrist flexion",
+        "trail wrist radial deviation",
+        "trail wrist flexion"
+      ],
+      "hips_and_free_pelvis_absolute_ROM_not_covered_by_table": true,
+      "position_targets": {
+        "pelvis": {
+          "measured_samples": 55,
+          "missing_samples": 0,
+          "measured_RMS_mm": 11.640103497509672,
+          "peak_measured_residual_mm": 28.77219581104034
+        },
+        "hip_L": {
+          "measured_samples": 55,
+          "missing_samples": 0,
+          "measured_RMS_mm": 15.245504958127722,
+          "peak_measured_residual_mm": 45.866164493256214
+        },
+        "hip_R": {
+          "measured_samples": 55,
+          "missing_samples": 0,
+          "measured_RMS_mm": 19.319925732532056,
+          "peak_measured_residual_mm": 40.79167128609889
+        },
+        "knee_L": {
+          "measured_samples": 55,
+          "missing_samples": 0,
+          "measured_RMS_mm": 16.107417732260966,
+          "peak_measured_residual_mm": 32.26399229277939
+        },
+        "knee_R": {
+          "measured_samples": 55,
+          "missing_samples": 0,
+          "measured_RMS_mm": 28.835390806814342,
+          "peak_measured_residual_mm": 70.46833777484824
+        },
+        "ankle_L": {
+          "measured_samples": 55,
+          "missing_samples": 0,
+          "measured_RMS_mm": 9.665510327389859,
+          "peak_measured_residual_mm": 21.15525893738691
+        },
+        "ankle_R": {
+          "measured_samples": 55,
+          "missing_samples": 0,
+          "measured_RMS_mm": 17.6002375764598,
+          "peak_measured_residual_mm": 42.68107257626754
+        },
+        "shoulder_L": {
+          "measured_samples": 55,
+          "missing_samples": 0,
+          "measured_RMS_mm": 13.505306673768663,
+          "peak_measured_residual_mm": 40.981439578699245
+        },
+        "shoulder_R": {
+          "measured_samples": 55,
+          "missing_samples": 0,
+          "measured_RMS_mm": 14.80363116351481,
+          "peak_measured_residual_mm": 28.541278218600183
+        },
+        "elbow_L": {
+          "measured_samples": 55,
+          "missing_samples": 0,
+          "measured_RMS_mm": 11.532054181413155,
+          "peak_measured_residual_mm": 37.974526677427804
+        },
+        "elbow_R": {
+          "measured_samples": 55,
+          "missing_samples": 0,
+          "measured_RMS_mm": 23.426870987296454,
+          "peak_measured_residual_mm": 94.55304132632358
+        },
+        "wrist_L": {
+          "measured_samples": 55,
+          "missing_samples": 0,
+          "measured_RMS_mm": 14.056817605840141,
+          "peak_measured_residual_mm": 45.032826716719725
+        },
+        "wrist_R": {
+          "measured_samples": 55,
+          "missing_samples": 0,
+          "measured_RMS_mm": 14.509035816902479,
+          "peak_measured_residual_mm": 28.5997627940967
+        },
+        "club_head": {
+          "measured_samples": 52,
+          "missing_samples": 3,
+          "measured_RMS_mm": 17.529738812745574,
+          "peak_measured_residual_mm": 37.32463187075932
+        }
+      },
+      "gap_targets_before_largest_step": [],
+      "gap_targets_after_largest_step": ["club_head"],
+      "model_loaded": false,
+      "filtering_applied": false,
+      "candidate_promoted": false
+    },
+    "owner_selected": {
+      "sampled_frames": 46,
+      "largest_leg_coordinate_channel": "LHipZ",
+      "largest_leg_coordinate_step_deg": 38.3799868689029,
+      "source_frame_before": 241,
+      "source_frame_after": 249,
+      "coordinate_before_deg": 46.143641173491396,
+      "coordinate_after_deg": 7.763654304588498,
+      "rotations": {
+        "pelvis": {
+          "max_adjacent_SO3_step_deg": 25.08029502344391,
+          "source_frame_before": 241,
+          "source_frame_after": 249,
+          "SO3_step_at_largest_leg_coordinate_step_deg": 25.08029502344391
+        },
+        "left_hip": {
+          "max_adjacent_SO3_step_deg": 30.025247451692955,
+          "source_frame_before": 241,
+          "source_frame_after": 249,
+          "SO3_step_at_largest_leg_coordinate_step_deg": 30.025247451692955
+        },
+        "right_hip": {
+          "max_adjacent_SO3_step_deg": 23.81529884115869,
+          "source_frame_before": 241,
+          "source_frame_after": 249,
+          "SO3_step_at_largest_leg_coordinate_step_deg": 23.81529884115869
+        }
+      },
+      "ROM_checked_row_count": 25,
+      "ROM_failure_row_count": 13,
+      "ROM_failures": [
+        {
+          "joint": "Spine",
+          "key": "Hips and Torso Inputs/Spine Tilt Kinetically Driven/Universal Joint/Kinetically Driven Universal Joint|Rx.q",
+          "motion": "trunk flexion",
+          "min_deg": -44.332633732632274,
+          "max_deg": 3.3314726325659763,
+          "span_deg": 47.66410636519826,
+          "excess_deg": 19.332633732632274,
+          "frames": 9,
+          "ok": false
+        },
+        {
+          "joint": "Spine",
+          "key": "Hips and Torso Inputs/Spine Tilt Kinetically Driven/Universal Joint/Kinetically Driven Universal Joint|Ry.q",
+          "motion": "trunk lateral bend to trail",
+          "min_deg": -3.3507686299133184,
+          "max_deg": 36.94405243263577,
+          "span_deg": 40.29482106254908,
+          "excess_deg": 1.9440524326357718,
+          "frames": 2,
+          "ok": false
+        },
+        {
+          "joint": "LE",
+          "key": "Left Elbow Joint/Revolute Joint/Kinetically Driven Revolute|Rz.q",
+          "motion": "lead elbow flexion",
+          "min_deg": -119.44709075964599,
+          "max_deg": -27.77360464973063,
+          "span_deg": 91.67348610991537,
+          "excess_deg": 114.44709075964599,
+          "frames": 46,
+          "ok": false
+        },
+        {
+          "joint": "RE",
+          "key": "Right Elbow Joint/Revolute Joint/Kinetically Driven Revolute|Rz.q",
+          "motion": "trail elbow flexion",
+          "min_deg": -122.76000175398747,
+          "max_deg": -38.547894178172385,
+          "span_deg": 84.21210757581505,
+          "excess_deg": 117.76000175398747,
+          "frames": 46,
+          "ok": false
+        },
+        {
+          "joint": "LF",
+          "key": "Left Forearm/Revolute Joint/Kinetically Driven Revolute|Rz.q",
+          "motion": "lead forearm pronation",
+          "min_deg": -65.70665204640058,
+          "max_deg": 91.75980138052864,
+          "span_deg": 157.4664534269292,
+          "excess_deg": 11.759801380528643,
+          "frames": 11,
+          "ok": false
+        },
+        {
+          "joint": "RF",
+          "key": "Right Forearm/Revolute Joint/Kinetically Driven Revolute|Rz.q",
+          "motion": "trail forearm pronation",
+          "min_deg": -67.38871616242255,
+          "max_deg": 91.82386971418477,
+          "span_deg": 159.21258587660733,
+          "excess_deg": 11.823869714184767,
+          "frames": 3,
+          "ok": false
+        },
+        {
+          "joint": "LScap",
+          "key": "Left Scapula Joint/Universal Joint/Kinetically Driven Universal Joint|Rx.q",
+          "motion": "lead shoulder girdle protraction",
+          "min_deg": -44.21158957721303,
+          "max_deg": 44.531592522706404,
+          "span_deg": 88.74318209991945,
+          "excess_deg": 38.74318209991945,
+          "frames": 33,
+          "ok": false
+        },
+        {
+          "joint": "LScap",
+          "key": "Left Scapula Joint/Universal Joint/Kinetically Driven Universal Joint|Ry.q",
+          "motion": "lead shoulder girdle elevation",
+          "min_deg": -20.504902650964482,
+          "max_deg": 22.88332408895866,
+          "span_deg": 43.38822673992314,
+          "excess_deg": 10.504902650964482,
+          "frames": 3,
+          "ok": false
+        },
+        {
+          "joint": "RScap",
+          "key": "Right Scapula Joint/Universal Joint/Kinetically Driven Universal Joint|Rx.q",
+          "motion": "trail shoulder girdle protraction",
+          "min_deg": -88.63563459263338,
+          "max_deg": -2.0182247231195163,
+          "span_deg": 86.61740986951386,
+          "excess_deg": 63.63563459263338,
+          "frames": 22,
+          "ok": false
+        },
+        {
+          "joint": "RScap",
+          "key": "Right Scapula Joint/Universal Joint/Kinetically Driven Universal Joint|Ry.q",
+          "motion": "trail shoulder girdle elevation",
+          "min_deg": -13.593277049530741,
+          "max_deg": 13.30027154019669,
+          "span_deg": 26.89354858972744,
+          "excess_deg": 3.593277049530741,
+          "frames": 2,
+          "ok": false
+        },
+        {
+          "joint": "LW",
+          "key": "Left Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint|Rx.q",
+          "motion": "lead wrist radial deviation",
+          "min_deg": null,
+          "max_deg": null,
+          "span_deg": 71.17349642333807,
+          "excess_deg": 21.173496423338065,
+          "frames": 0,
+          "ok": false
+        },
+        {
+          "joint": "RW",
+          "key": "Right Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint|Rx.q",
+          "motion": "trail wrist radial deviation",
+          "min_deg": null,
+          "max_deg": null,
+          "span_deg": 134.3495595836599,
+          "excess_deg": 84.3495595836599,
+          "frames": 0,
+          "ok": false
+        },
+        {
+          "joint": "LA",
+          "key": "Lower Body/Left Ankle Joint/Kinetically Driven Universal Joint|Ry.q",
+          "motion": "lead ankle dorsiflexion",
+          "min_deg": -5.260621990051618,
+          "max_deg": 23.782053985568012,
+          "span_deg": 29.042675975619613,
+          "excess_deg": 3.7820539855680124,
+          "frames": 9,
+          "ok": false
+        }
+      ],
+      "ROM_rows_with_no_absolute_neutral": [
+        "lead wrist radial deviation",
+        "lead wrist flexion",
+        "trail wrist radial deviation",
+        "trail wrist flexion"
+      ],
+      "hips_and_free_pelvis_absolute_ROM_not_covered_by_table": true,
+      "position_targets": {
+        "pelvis": {
+          "measured_samples": 45,
+          "missing_samples": 1,
+          "measured_RMS_mm": 23.56280351451604,
+          "peak_measured_residual_mm": 49.52012902036472
+        },
+        "hip_L": {
+          "measured_samples": 45,
+          "missing_samples": 1,
+          "measured_RMS_mm": 26.22079925048269,
+          "peak_measured_residual_mm": 53.00720401668932
+        },
+        "hip_R": {
+          "measured_samples": 45,
+          "missing_samples": 1,
+          "measured_RMS_mm": 19.343406212637603,
+          "peak_measured_residual_mm": 34.58843319603935
+        },
+        "knee_L": {
+          "measured_samples": 45,
+          "missing_samples": 1,
+          "measured_RMS_mm": 20.96525356474045,
+          "peak_measured_residual_mm": 45.807770011108424
+        },
+        "knee_R": {
+          "measured_samples": 45,
+          "missing_samples": 1,
+          "measured_RMS_mm": 35.77181430407488,
+          "peak_measured_residual_mm": 71.6477852422776
+        },
+        "ankle_L": {
+          "measured_samples": 45,
+          "missing_samples": 1,
+          "measured_RMS_mm": 11.305301580148459,
+          "peak_measured_residual_mm": 25.240991477762307
+        },
+        "ankle_R": {
+          "measured_samples": 45,
+          "missing_samples": 1,
+          "measured_RMS_mm": 17.967580578649745,
+          "peak_measured_residual_mm": 33.63094509663127
+        },
+        "shoulder_L": {
+          "measured_samples": 46,
+          "missing_samples": 0,
+          "measured_RMS_mm": 12.871856256772057,
+          "peak_measured_residual_mm": 27.375223018605762
+        },
+        "shoulder_R": {
+          "measured_samples": 46,
+          "missing_samples": 0,
+          "measured_RMS_mm": 13.094275274967362,
+          "peak_measured_residual_mm": 21.06427615796902
+        },
+        "elbow_L": {
+          "measured_samples": 46,
+          "missing_samples": 0,
+          "measured_RMS_mm": 10.633009238950251,
+          "peak_measured_residual_mm": 17.995901999229435
+        },
+        "elbow_R": {
+          "measured_samples": 46,
+          "missing_samples": 0,
+          "measured_RMS_mm": 15.10616088729651,
+          "peak_measured_residual_mm": 35.20107209348644
+        },
+        "wrist_L": {
+          "measured_samples": 46,
+          "missing_samples": 0,
+          "measured_RMS_mm": 25.79545838857655,
+          "peak_measured_residual_mm": 56.34071334591811
+        },
+        "wrist_R": {
+          "measured_samples": 46,
+          "missing_samples": 0,
+          "measured_RMS_mm": 19.33253244045077,
+          "peak_measured_residual_mm": 43.36570103753252
+        },
+        "club_head": {
+          "measured_samples": 44,
+          "missing_samples": 2,
+          "measured_RMS_mm": 13.201416831586883,
+          "peak_measured_residual_mm": 30.923601635821296
+        }
+      },
+      "gap_targets_before_largest_step": [
+        "pelvis",
+        "hip_L",
+        "hip_R",
+        "knee_L",
+        "knee_R",
+        "ankle_L",
+        "ankle_R"
+      ],
+      "gap_targets_after_largest_step": [],
+      "model_loaded": false,
+      "filtering_applied": false,
+      "candidate_promoted": false
+    },
+    "owner_selective": {
+      "sampled_frames": 46,
+      "largest_leg_coordinate_channel": "LHipZ",
+      "largest_leg_coordinate_step_deg": 34.0900304808911,
+      "source_frame_before": 241,
+      "source_frame_after": 249,
+      "coordinate_before_deg": 41.64307598232157,
+      "coordinate_after_deg": 7.553045501430471,
+      "rotations": {
+        "pelvis": {
+          "max_adjacent_SO3_step_deg": 12.125867795058953,
+          "source_frame_before": 225,
+          "source_frame_after": 233,
+          "SO3_step_at_largest_leg_coordinate_step_deg": 10.679495108161863
+        },
+        "left_hip": {
+          "max_adjacent_SO3_step_deg": 26.710446544247144,
+          "source_frame_before": 241,
+          "source_frame_after": 249,
+          "SO3_step_at_largest_leg_coordinate_step_deg": 26.710446544247144
+        },
+        "right_hip": {
+          "max_adjacent_SO3_step_deg": 10.881399269910597,
+          "source_frame_before": 241,
+          "source_frame_after": 249,
+          "SO3_step_at_largest_leg_coordinate_step_deg": 10.881399269910597
+        }
+      },
+      "ROM_checked_row_count": 25,
+      "ROM_failure_row_count": 13,
+      "ROM_failures": [
+        {
+          "joint": "Spine",
+          "key": "Hips and Torso Inputs/Spine Tilt Kinetically Driven/Universal Joint/Kinetically Driven Universal Joint|Rx.q",
+          "motion": "trunk flexion",
+          "min_deg": -44.33396844485182,
+          "max_deg": 2.425469248098949,
+          "span_deg": 46.759437692950776,
+          "excess_deg": 19.33396844485182,
+          "frames": 9,
+          "ok": false
+        },
+        {
+          "joint": "Spine",
+          "key": "Hips and Torso Inputs/Spine Tilt Kinetically Driven/Universal Joint/Kinetically Driven Universal Joint|Ry.q",
+          "motion": "trunk lateral bend to trail",
+          "min_deg": -3.3507686299133184,
+          "max_deg": 37.17947672263355,
+          "span_deg": 40.53024535254685,
+          "excess_deg": 2.1794767226335523,
+          "frames": 3,
+          "ok": false
+        },
+        {
+          "joint": "LE",
+          "key": "Left Elbow Joint/Revolute Joint/Kinetically Driven Revolute|Rz.q",
+          "motion": "lead elbow flexion",
+          "min_deg": -119.44719040929384,
+          "max_deg": -27.77360464973063,
+          "span_deg": 91.67358575956322,
+          "excess_deg": 114.44719040929384,
+          "frames": 46,
+          "ok": false
+        },
+        {
+          "joint": "RE",
+          "key": "Right Elbow Joint/Revolute Joint/Kinetically Driven Revolute|Rz.q",
+          "motion": "trail elbow flexion",
+          "min_deg": -122.76000175398747,
+          "max_deg": -38.547894178172385,
+          "span_deg": 84.21210757581505,
+          "excess_deg": 117.76000175398747,
+          "frames": 46,
+          "ok": false
+        },
+        {
+          "joint": "LF",
+          "key": "Left Forearm/Revolute Joint/Kinetically Driven Revolute|Rz.q",
+          "motion": "lead forearm pronation",
+          "min_deg": -65.7443107530905,
+          "max_deg": 91.75980138052864,
+          "span_deg": 157.50411213361915,
+          "excess_deg": 11.759801380528643,
+          "frames": 11,
+          "ok": false
+        },
+        {
+          "joint": "RF",
+          "key": "Right Forearm/Revolute Joint/Kinetically Driven Revolute|Rz.q",
+          "motion": "trail forearm pronation",
+          "min_deg": -67.38753244378103,
+          "max_deg": 91.82388966874797,
+          "span_deg": 159.211422112529,
+          "excess_deg": 11.823889668747967,
+          "frames": 3,
+          "ok": false
+        },
+        {
+          "joint": "LScap",
+          "key": "Left Scapula Joint/Universal Joint/Kinetically Driven Universal Joint|Rx.q",
+          "motion": "lead shoulder girdle protraction",
+          "min_deg": -44.22918452927675,
+          "max_deg": 44.531592522706404,
+          "span_deg": 88.76077705198317,
+          "excess_deg": 38.76077705198317,
+          "frames": 33,
+          "ok": false
+        },
+        {
+          "joint": "LScap",
+          "key": "Left Scapula Joint/Universal Joint/Kinetically Driven Universal Joint|Ry.q",
+          "motion": "lead shoulder girdle elevation",
+          "min_deg": -20.619469760144824,
+          "max_deg": 22.88332408895866,
+          "span_deg": 43.502793849103504,
+          "excess_deg": 10.619469760144824,
+          "frames": 4,
+          "ok": false
+        },
+        {
+          "joint": "RScap",
+          "key": "Right Scapula Joint/Universal Joint/Kinetically Driven Universal Joint|Rx.q",
+          "motion": "trail shoulder girdle protraction",
+          "min_deg": -88.63563459263338,
+          "max_deg": -2.017585468348699,
+          "span_deg": 86.61804912428468,
+          "excess_deg": 63.63563459263338,
+          "frames": 22,
+          "ok": false
+        },
+        {
+          "joint": "RScap",
+          "key": "Right Scapula Joint/Universal Joint/Kinetically Driven Universal Joint|Ry.q",
+          "motion": "trail shoulder girdle elevation",
+          "min_deg": -13.461612600610636,
+          "max_deg": 13.304811007687391,
+          "span_deg": 26.766423608298012,
+          "excess_deg": 3.4616126006106356,
+          "frames": 2,
+          "ok": false
+        },
+        {
+          "joint": "LW",
+          "key": "Left Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint|Rx.q",
+          "motion": "lead wrist radial deviation",
+          "min_deg": null,
+          "max_deg": null,
+          "span_deg": 71.17349642333807,
+          "excess_deg": 21.173496423338065,
+          "frames": 0,
+          "ok": false
+        },
+        {
+          "joint": "RW",
+          "key": "Right Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint|Rx.q",
+          "motion": "trail wrist radial deviation",
+          "min_deg": null,
+          "max_deg": null,
+          "span_deg": 134.34786777017578,
+          "excess_deg": 84.34786777017578,
+          "frames": 0,
+          "ok": false
+        },
+        {
+          "joint": "LA",
+          "key": "Lower Body/Left Ankle Joint/Kinetically Driven Universal Joint|Ry.q",
+          "motion": "lead ankle dorsiflexion",
+          "min_deg": -5.260625240513718,
+          "max_deg": 23.782053985568012,
+          "span_deg": 29.04267922608171,
+          "excess_deg": 3.7820539855680124,
+          "frames": 9,
+          "ok": false
+        }
+      ],
+      "ROM_rows_with_no_absolute_neutral": [
+        "lead wrist radial deviation",
+        "lead wrist flexion",
+        "trail wrist radial deviation",
+        "trail wrist flexion"
+      ],
+      "hips_and_free_pelvis_absolute_ROM_not_covered_by_table": true,
+      "position_targets": {
+        "pelvis": {
+          "measured_samples": 45,
+          "missing_samples": 1,
+          "measured_RMS_mm": 23.55667054902226,
+          "peak_measured_residual_mm": 49.519870045468494
+        },
+        "hip_L": {
+          "measured_samples": 45,
+          "missing_samples": 1,
+          "measured_RMS_mm": 26.195508283670243,
+          "peak_measured_residual_mm": 52.99664169589964
+        },
+        "hip_R": {
+          "measured_samples": 45,
+          "missing_samples": 1,
+          "measured_RMS_mm": 19.327567708728218,
+          "peak_measured_residual_mm": 34.581285369272656
+        },
+        "knee_L": {
+          "measured_samples": 45,
+          "missing_samples": 1,
+          "measured_RMS_mm": 20.966756298621892,
+          "peak_measured_residual_mm": 45.811703271585756
+        },
+        "knee_R": {
+          "measured_samples": 45,
+          "missing_samples": 1,
+          "measured_RMS_mm": 35.76451367748646,
+          "peak_measured_residual_mm": 71.62057617864792
+        },
+        "ankle_L": {
+          "measured_samples": 45,
+          "missing_samples": 1,
+          "measured_RMS_mm": 11.308648650460704,
+          "peak_measured_residual_mm": 25.247866560989923
+        },
+        "ankle_R": {
+          "measured_samples": 45,
+          "missing_samples": 1,
+          "measured_RMS_mm": 17.967877466788522,
+          "peak_measured_residual_mm": 33.630850698189974
+        },
+        "shoulder_L": {
+          "measured_samples": 46,
+          "missing_samples": 0,
+          "measured_RMS_mm": 12.827622932292227,
+          "peak_measured_residual_mm": 27.375052347915005
+        },
+        "shoulder_R": {
+          "measured_samples": 46,
+          "missing_samples": 0,
+          "measured_RMS_mm": 13.143225425032414,
+          "peak_measured_residual_mm": 21.06427615796902
+        },
+        "elbow_L": {
+          "measured_samples": 46,
+          "missing_samples": 0,
+          "measured_RMS_mm": 10.64224207008821,
+          "peak_measured_residual_mm": 17.9959505179309
+        },
+        "elbow_R": {
+          "measured_samples": 46,
+          "missing_samples": 0,
+          "measured_RMS_mm": 15.111247752920072,
+          "peak_measured_residual_mm": 35.19574290929296
+        },
+        "wrist_L": {
+          "measured_samples": 46,
+          "missing_samples": 0,
+          "measured_RMS_mm": 25.79363827462614,
+          "peak_measured_residual_mm": 56.33786801735965
+        },
+        "wrist_R": {
+          "measured_samples": 46,
+          "missing_samples": 0,
+          "measured_RMS_mm": 19.33347701911592,
+          "peak_measured_residual_mm": 43.36570103753252
+        },
+        "club_head": {
+          "measured_samples": 44,
+          "missing_samples": 2,
+          "measured_RMS_mm": 13.203898712144419,
+          "peak_measured_residual_mm": 30.923601635821296
+        }
+      },
+      "gap_targets_before_largest_step": [
+        "pelvis",
+        "hip_L",
+        "hip_R",
+        "knee_L",
+        "knee_R",
+        "ankle_L",
+        "ankle_R"
+      ],
+      "gap_targets_after_largest_step": [],
+      "model_loaded": false,
+      "filtering_applied": false,
+      "candidate_promoted": false
+    }
+  },
+  "native_receipt": {
+    "actual_process_exit_code": 0,
+    "final_exit_code": 0,
+    "termination_reason": "natural_exit",
+    "done_marker": true,
+    "script_status": "success",
+    "command_identity": "run('audit_selected_and_candidate_branches_reviewed.m')",
+    "owned_pids": [75488],
+    "timestamp": "2026-10-02T21:48:02.592358+00:00"
+  },
+  "preceding_audit_report_shape": "REJECTED_STRUCT_ARRAY_EXPANSION_PRESERVED_PRIVATELY",
+  "implementation_ROM_is_not_capture_specific_anatomical_calibration": true
+}

@@ -1,0 +1,215 @@
+{
+  "qualification": "NATIVE_SAVED_HOLD_ENDPOINT_DIAGNOSTIC_NOT_PHYSICAL_ACCEPTANCE",
+  "matlab_release": "R2025b",
+  "native_receipt": {
+    "actual_process_exit_code": 0,
+    "final_exit_code": 0,
+    "termination_reason": "natural_exit",
+    "done_marker": true,
+    "script_status": "success",
+    "command_identity": "run('diagnose_native_saved_holds.m')",
+    "owned_pids": [68632],
+    "timestamp": "2026-10-02T15:54:34.735042+00:00"
+  },
+  "script_sha256": "0020d9e28a9999aa81542c920288ce7939c3394bcf9bc264c455399f85f2aa1d",
+  "simulation_executed": false,
+  "model_saved": false,
+  "method": {
+    "native_targets": "Exact 48 joint IDs, keys and native units cross-checked against saved states and initial manifest",
+    "spherical_error": "Relative rotation angle from explicit ax_x/ax_y/ax_z/q order, angle converted deg to rad",
+    "scalar_errors": "Grouped by native unit; metre coordinates are floating-root translation, not rotational servo errors",
+    "foot_motion": "Native ankle follower and ten individual contact-sphere center positions at t=0 and t=1 s",
+    "support_margin": "Minimum inward signed edge distance from projected COM to ground-plane convex hull of projected sphere centers",
+    "active_hull": "Endpoint normal sphere force >1 N; diagnostic threshold, not a physical acceptance gate",
+    "potential_hull": "All sphere centers regardless of normal load; initial active hull unavailable because forces are zero",
+    "scope_limits": "Endpoint horizontal displacements do not measure continuous tangential contact slip; COM projection is a support diagnostic, not a dynamic stability certificate",
+    "servo_parameters": "Native unchanged model workspace plus reviewed hold script: LegTorqueCommand and gains are not overridden"
+  },
+  "failed_preliminary_probe": {
+    "natural_exit": 1,
+    "timestamp": "2026-10-02T15:51:21.156940Z",
+    "reason": "Incorrect rigid-body assumption for all five spheres on one foot rejected by native reconstruction; midfoot articulation permits deformation",
+    "preserved_source_sha256": "7431f01865c19edd3d0c86474f15b87a39db396e9afaa32fc2e7d6df2857f685",
+    "repair": "Measure ankle-follower rotation directly and retain constellation rigid-fit residual only as an observation"
+  },
+  "results": {
+    "capture_A": {
+      "capture_alias": "capture-A",
+      "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+      "input_mat_sha256": "5c35733556b167703d08dde8260c899e7129a50f913557783e75855a5cd94a12",
+      "qualification": "SAVED_NATIVE_ENDPOINT_DIAGNOSTIC_NOT_CAUSAL_OR_DYNAMIC_ACCEPTANCE",
+      "simulation_executed": false,
+      "native_fk_executed": true,
+      "model_saved": false,
+      "terminal_scalar_reference_error_by_native_unit": {
+        "deg": 1.5695075117444244,
+        "m": 0.24580097631754688
+      },
+      "terminal_spherical_reference_errors": [
+        {
+          "joint": "Hips and Torso Inputs/Hip Kinetically Driven/Hip Joint",
+          "terminal_rotation_error_deg": 14.989180283786087
+        },
+        {
+          "joint": "Left Shoulder Joint/Gimbal Joint/Kinetically Driven",
+          "terminal_rotation_error_deg": 0.31900709430040547
+        },
+        {
+          "joint": "Lower Body/Left Hip Joint/Kinetically Driven",
+          "terminal_rotation_error_deg": 0.6541588482611556
+        },
+        {
+          "joint": "Lower Body/Right Hip Joint/Kinetically Driven",
+          "terminal_rotation_error_deg": 0.6623695865420847
+        },
+        {
+          "joint": "Right Shoulder Joint/Gimbal Joint/Kinetically Driven",
+          "terminal_rotation_error_deg": 0.3948585861539716
+        }
+      ],
+      "feet": {
+        "L": {
+          "centroid_horizontal_displacement_m": 0.004146433201558242,
+          "centroid_normal_displacement_m": 0.016960905495973955,
+          "ankle_follower_rotation_change_deg": 12.485208675097155,
+          "ankle_follower_horizontal_displacement_m": 0.019401218264845685,
+          "ankle_follower_normal_displacement_m": 0.03904653571638439,
+          "sphere_constellation_rigid_fit_max_residual_m": 0.000466239103287568,
+          "maximum_sphere_horizontal_displacement_m": 0.008078827428281447
+        },
+        "R": {
+          "centroid_horizontal_displacement_m": 0.0036912732500165,
+          "centroid_normal_displacement_m": 0.014986355635272397,
+          "ankle_follower_rotation_change_deg": 12.476491251974796,
+          "ankle_follower_horizontal_displacement_m": 0.019204559129264706,
+          "ankle_follower_normal_displacement_m": 0.037665031994484566,
+          "sphere_constellation_rigid_fit_max_residual_m": 0.0004210093047450749,
+          "maximum_sphere_horizontal_displacement_m": 0.007805916656906009
+        }
+      },
+      "support_endpoints": [
+        {
+          "time_s": 0,
+          "potential_margin_m": 0.06199395485684548,
+          "active_margin_m": null,
+          "active_hull_available": false,
+          "active_spheres_above_1N": 0,
+          "minimum_clearance_m": 0.0002499999999784428
+        },
+        {
+          "time_s": 1,
+          "potential_margin_m": -0.16703031732550494,
+          "active_margin_m": -0.16703031732550494,
+          "active_hull_available": true,
+          "active_spheres_above_1N": 3,
+          "minimum_clearance_m": -0.003844895150317598
+        }
+      ],
+      "support_margin_sign": "positive_inside_convex_hull",
+      "active_sphere_threshold_N": 1,
+      "com_max_horizontal_displacement_m": 0.2308024115300365,
+      "com_max_absolute_normal_displacement_m": 0.027401188244046228,
+      "actual_total_mass_kg": 80.39292360000002,
+      "unmodified_model_workspace_servo_parameters": {
+        "LegTorqueCommand": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "LegServoKp": [100, 100, 100, 100, 50, 50, 100, 100, 100, 100, 50, 50],
+        "LegServoKd": [2, 2, 2, 2, 1, 1, 2, 2, 2, 2, 1, 1],
+        "BalanceKp": 3,
+        "BalanceKd": 0.4,
+        "BalanceFootKp": 1,
+        "BalanceLimit": 0.1
+      },
+      "servo_parameter_provenance": "unchanged model workspace; hold overrides checked separately against saved script"
+    },
+    "capture_O": {
+      "capture_alias": "capture-O",
+      "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+      "input_mat_sha256": "59e0f6ae94fc02f19ff9c8eb5487875dcac46233a04b5bd66d2adfc40e827dea",
+      "qualification": "SAVED_NATIVE_ENDPOINT_DIAGNOSTIC_NOT_CAUSAL_OR_DYNAMIC_ACCEPTANCE",
+      "simulation_executed": false,
+      "native_fk_executed": true,
+      "model_saved": false,
+      "terminal_scalar_reference_error_by_native_unit": {
+        "deg": 2.085137803336328,
+        "m": 0.11725187810997227
+      },
+      "terminal_spherical_reference_errors": [
+        {
+          "joint": "Hips and Torso Inputs/Hip Kinetically Driven/Hip Joint",
+          "terminal_rotation_error_deg": 7.8655441233160035
+        },
+        {
+          "joint": "Left Shoulder Joint/Gimbal Joint/Kinetically Driven",
+          "terminal_rotation_error_deg": 0.483134340887932
+        },
+        {
+          "joint": "Lower Body/Left Hip Joint/Kinetically Driven",
+          "terminal_rotation_error_deg": 1.1493538174591584
+        },
+        {
+          "joint": "Lower Body/Right Hip Joint/Kinetically Driven",
+          "terminal_rotation_error_deg": 1.0398083860401155
+        },
+        {
+          "joint": "Right Shoulder Joint/Gimbal Joint/Kinetically Driven",
+          "terminal_rotation_error_deg": 0.7777179898341229
+        }
+      ],
+      "feet": {
+        "L": {
+          "centroid_horizontal_displacement_m": 0.00095732611791751,
+          "centroid_normal_displacement_m": 0.002239979812212356,
+          "ankle_follower_rotation_change_deg": 4.069091382665528,
+          "ankle_follower_horizontal_displacement_m": 0.00506209394069685,
+          "ankle_follower_normal_displacement_m": 0.009500138809225622,
+          "sphere_constellation_rigid_fit_max_residual_m": 0.0005986152021494232,
+          "maximum_sphere_horizontal_displacement_m": 0.0015001742799998405
+        },
+        "R": {
+          "centroid_horizontal_displacement_m": 0.0003693532477666899,
+          "centroid_normal_displacement_m": 0.0025453168062032905,
+          "ankle_follower_rotation_change_deg": 4.5246210602560355,
+          "ankle_follower_horizontal_displacement_m": 0.005568838880787644,
+          "ankle_follower_normal_displacement_m": 0.010623720031484263,
+          "sphere_constellation_rigid_fit_max_residual_m": 0.0005185747757856692,
+          "maximum_sphere_horizontal_displacement_m": 0.002423248001647119
+        }
+      },
+      "support_endpoints": [
+        {
+          "time_s": 0,
+          "potential_margin_m": 0.0961822489809105,
+          "active_margin_m": null,
+          "active_hull_available": false,
+          "active_spheres_above_1N": 0,
+          "minimum_clearance_m": 0.0002499999999783318
+        },
+        {
+          "time_s": 1,
+          "potential_margin_m": -0.013899200559910287,
+          "active_margin_m": -0.013899200559910287,
+          "active_hull_available": true,
+          "active_spheres_above_1N": 4,
+          "minimum_clearance_m": -0.003648376968907288
+        }
+      ],
+      "support_margin_sign": "positive_inside_convex_hull",
+      "active_sphere_threshold_N": 1,
+      "com_max_horizontal_displacement_m": 0.11076565056839714,
+      "com_max_absolute_normal_displacement_m": 0.013841580442620502,
+      "actual_total_mass_kg": 104.69292359999999,
+      "unmodified_model_workspace_servo_parameters": {
+        "LegTorqueCommand": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "LegServoKp": [100, 100, 100, 100, 50, 50, 100, 100, 100, 100, 50, 50],
+        "LegServoKd": [2, 2, 2, 2, 1, 1, 2, 2, 2, 2, 1, 1],
+        "BalanceKp": 3,
+        "BalanceKd": 0.4,
+        "BalanceFootKp": 1,
+        "BalanceLimit": 0.1
+      },
+      "servo_parameter_provenance": "unchanged model workspace; hold overrides checked separately against saved script"
+    }
+  },
+  "causal_defect_identified": false,
+  "next_required_boundary": "Native Human analytical ankle FK/gain compatibility, then same-stance balance-enabled hold with unchanged physical gates"
+}

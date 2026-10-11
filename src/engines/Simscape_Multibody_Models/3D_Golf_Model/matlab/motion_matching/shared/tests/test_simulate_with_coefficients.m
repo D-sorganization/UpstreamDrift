@@ -101,7 +101,7 @@ classdef test_simulate_with_coefficients < matlab.unittest.TestCase
     end
 
     %% ---------------- Tests requiring Simulink + the .slx ------------------
-    methods (Test, TestTags = {"RequiresSimulink"})
+    methods (Test, TestTags = {'RequiresSimulink'})
 
         function test_zero_coefficients_produces_static_pose(testCase)
             testCase.assumeSimulinkAvailable();
@@ -198,6 +198,24 @@ classdef test_simulate_with_coefficients < matlab.unittest.TestCase
             b = simulate_with_coefficients(theta, o);
             testCase.verifyTrue(b.cache_hit, "Second call should hit cache");
             testCase.verifyEqual(a.r_clubhead, b.r_clubhead, "AbsTol", 1e-12);
+        end
+
+        function test_output_struct_carries_optional_forces_when_logged(testCase)
+            testCase.assumeSimulinkAvailable();
+            theta = zeros(testCase.n_joints * 7, 1);
+            sim_out = simulate_with_coefficients(theta, testCase.opts);
+            testCase.verifyEqual(sim_out.solver_status, "success");
+            % When CombinedSignalBus logs are present in GolfSwing3D_Kinetic,
+            % sim_out.forces should be populated as a struct with signal channels.
+            if isfield(sim_out, 'forces') && ~isempty(sim_out.forces)
+                testCase.verifyTrue(isstruct(sim_out.forces), ...
+                    "sim_out.forces must be a struct when present");
+                fn = fieldnames(sim_out.forces);
+                testCase.verifyGreaterThan(numel(fn), 200, ...
+                    "GolfSwing3D_Kinetic must carry >200 force/rotation channels");
+                testCase.verifyEqual(numel(sim_out.forces.(fn{1})), numel(sim_out.time), ...
+                    "forces channel length must match sim_out.time");
+            end
         end
     end
 

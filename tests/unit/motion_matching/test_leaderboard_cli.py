@@ -217,3 +217,129 @@ def test_leaderboard_cli_malformed_result_json_reports_path(
     assert result.returncode == 1
     assert "could not parse" in result.stderr
     assert str(bad_file.resolve()) in result.stderr
+
+
+@pytest.mark.unit
+def test_leaderboard_cli_capture_filter_filters_results(tmp_path: Path) -> None:
+    """The --capture CLI option filters results to the specified capture."""
+    results_dir = tmp_path / "results"
+    trial_dir = results_dir / "test_trial"
+
+    _write_fit_result(
+        trial_dir,
+        "simscape",
+        {
+            "engine": "simscape",
+            "solver": "test_solver",
+            "grip_rmse_mm": 2.5,
+            "clubhead_rmse_mm": 3.0,
+            "body_marker_rmse_mm": 3.0,
+            "total_work_J": 100.0,
+            "wall_clock_s": 10.0,
+            "commit": "abc1234567890",
+            "run_at": "2026-05-05T12:00:00Z",
+            "capture": "driver",
+        },
+    )
+    _write_fit_result(
+        trial_dir,
+        "mujoco",
+        {
+            "engine": "mujoco",
+            "solver": "test_solver",
+            "grip_rmse_mm": 1.5,
+            "clubhead_rmse_mm": 2.0,
+            "body_marker_rmse_mm": 2.0,
+            "total_work_J": 100.0,
+            "wall_clock_s": 5.0,
+            "commit": "abc1234567890",
+            "run_at": "2026-05-05T12:00:00Z",
+            "capture": "owner",
+        },
+    )
+
+    output_file = tmp_path / "leaderboard_owner.md"
+
+    cmd = [
+        sys.executable,
+        "-m",
+        "src.shared.python.motion_matching",
+        "leaderboard",
+        "--results-dir",
+        str(results_dir),
+        "--output",
+        str(output_file),
+        "--capture",
+        "owner",
+    ]
+    result = subprocess.run(cmd, cwd=_REPO_ROOT, env=_SUBPROCESS_ENV)
+
+    assert result.returncode == 0
+    assert output_file.exists()
+    content = output_file.read_text(encoding="utf-8")
+    assert "mujoco" in content
+    # simscape was driver only, filtered out of the report
+    assert "simscape" not in content
+
+
+@pytest.mark.unit
+def test_leaderboard_cli_default_all_captures(tmp_path: Path) -> None:
+    """When --capture is not provided, the CLI includes all captures."""
+    results_dir = tmp_path / "results"
+    trial_dir = results_dir / "test_trial"
+
+    _write_fit_result(
+        trial_dir,
+        "simscape",
+        {
+            "engine": "simscape",
+            "solver": "test_solver",
+            "grip_rmse_mm": 2.5,
+            "clubhead_rmse_mm": 3.0,
+            "body_marker_rmse_mm": 3.0,
+            "total_work_J": 100.0,
+            "wall_clock_s": 10.0,
+            "commit": "abc1234567890",
+            "run_at": "2026-05-05T12:00:00Z",
+            "capture": "driver",
+        },
+    )
+    _write_fit_result(
+        trial_dir,
+        "mujoco",
+        {
+            "engine": "mujoco",
+            "solver": "test_solver",
+            "grip_rmse_mm": 1.5,
+            "clubhead_rmse_mm": 2.0,
+            "body_marker_rmse_mm": 2.0,
+            "total_work_J": 100.0,
+            "wall_clock_s": 5.0,
+            "commit": "abc1234567890",
+            "run_at": "2026-05-05T12:00:00Z",
+            "capture": "owner",
+        },
+    )
+
+    output_file = tmp_path / "leaderboard_all.md"
+
+    cmd = [
+        sys.executable,
+        "-m",
+        "src.shared.python.motion_matching",
+        "leaderboard",
+        "--results-dir",
+        str(results_dir),
+        "--output",
+        str(output_file),
+    ]
+    result = subprocess.run(cmd, cwd=_REPO_ROOT, env=_SUBPROCESS_ENV)
+
+    assert result.returncode == 0
+    assert output_file.exists()
+    content = output_file.read_text(encoding="utf-8")
+    assert "simscape" in content
+    assert "mujoco" in content
+    assert "Capture: driver" in content
+    assert "Capture: owner" in content
+    assert "Side-by-Side Comparison" in content

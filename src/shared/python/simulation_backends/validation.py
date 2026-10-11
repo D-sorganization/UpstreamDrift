@@ -4,7 +4,7 @@ This module is the *correctness harness* that proves the interchangeable
 simulation backends (ODE reference, MuJoCo CPU, MuJoCo Warp GPU) agree on the
 physics they compute: mass matrices, bias forces, integrated trajectories, and
 energy behaviour. It depends only on the frozen Protocols
-(:class:`~simulation_backends.protocol.DynamicsProvider`,
+(:class:`~simulation_backends.protocol.EquationsOfMotionProvider`,
 :class:`~simulation_backends.protocol.SimulationBackend`) so any conforming
 backend can be cross-checked without this module importing a concrete class.
 
@@ -54,7 +54,7 @@ from .protocol import SimState
 if TYPE_CHECKING:
     from collections.abc import Iterable, Sequence
 
-    from .protocol import DynamicsProvider, SimulationBackend
+    from .protocol import EquationsOfMotionProvider, SimulationBackend
 
 logger = get_logger(__name__)
 
@@ -179,8 +179,8 @@ def _compare(
 
 
 def cross_validate_mass_matrix(
-    a: DynamicsProvider,
-    b: DynamicsProvider,
+    a: EquationsOfMotionProvider,
+    b: EquationsOfMotionProvider,
     q_samples: Sequence[np.ndarray] | Iterable[np.ndarray],
     rtol: float = 1e-7,
     atol: float = 1e-9,
@@ -223,8 +223,8 @@ def cross_validate_mass_matrix(
 
 
 def cross_validate_bias(
-    a: DynamicsProvider,
-    b: DynamicsProvider,
+    a: EquationsOfMotionProvider,
+    b: EquationsOfMotionProvider,
     states: Iterable[tuple[np.ndarray, np.ndarray]],
     rtol: float = 1e-6,
     atol: float = 1e-8,
@@ -330,7 +330,9 @@ def cross_validate_trajectory(
     return _compare("trajectory", stacked_a, stacked_b, rtol, atol, detail)
 
 
-def kinetic_energy(provider: DynamicsProvider, q: np.ndarray, v: np.ndarray) -> float:
+def kinetic_energy(
+    provider: EquationsOfMotionProvider, q: np.ndarray, v: np.ndarray
+) -> float:
     """Return the kinetic energy ``0.5 * v^T M(q) v`` [J].
 
     Args:
@@ -354,7 +356,7 @@ def kinetic_energy(provider: DynamicsProvider, q: np.ndarray, v: np.ndarray) -> 
 
 def check_energy_conservation(
     backend: SimulationBackend,
-    provider: DynamicsProvider,
+    provider: EquationsOfMotionProvider,
     initial: SimState,
     horizon: int,
     dt: float,
@@ -374,7 +376,7 @@ def check_energy_conservation(
         backend: The backend to roll out (must be configured conservative).
         provider: Dynamics provider supplying ``M(q)`` for the energy integral
             (typically the *same* backend if it also implements
-            :class:`~simulation_backends.protocol.DynamicsProvider`).
+            :class:`~simulation_backends.protocol.EquationsOfMotionProvider`).
         initial: Initial :class:`SimState` (must carry non-zero velocity for a
             meaningful relative tolerance).
         horizon: Number of passive steps to integrate (``> 0``).
@@ -462,7 +464,7 @@ def _validate_controls(controls: np.ndarray | None, horizon: int) -> np.ndarray 
     return arr
 
 
-def _mass_matrix_2x2(provider: DynamicsProvider, q: np.ndarray) -> np.ndarray:
+def _mass_matrix_2x2(provider: EquationsOfMotionProvider, q: np.ndarray) -> np.ndarray:
     """Return ``provider.mass_matrix(q)`` validated as a ``(2, 2)`` array.
 
     Args:
@@ -482,7 +484,7 @@ def _mass_matrix_2x2(provider: DynamicsProvider, q: np.ndarray) -> np.ndarray:
 
 
 def _bias_forces_vec(
-    provider: DynamicsProvider, q: np.ndarray, v: np.ndarray
+    provider: EquationsOfMotionProvider, q: np.ndarray, v: np.ndarray
 ) -> np.ndarray:
     """Return ``provider.bias_forces(q, v)`` validated as a ``(2,)`` array.
 

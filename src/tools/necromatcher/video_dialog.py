@@ -10,8 +10,9 @@ from typing import Any
 
 from PyQt6.QtCore import QTimer
 from PyQt6.QtWidgets import (
-    QComboBox,
     QCheckBox,
+    QComboBox,
+    QDialog,
     QDoubleSpinBox,
     QFileDialog,
     QLabel,
@@ -83,6 +84,12 @@ class VideoExportDialog(ReviewedShaftDialog):
         layout.addWidget(self.stored_runs)
         self._build_shaft_inputs(layout)
         self._build_shape_inputs(layout)
+        self.force_layer = QCheckBox(
+            "Draw force and torque glyphs (research fit; not measured forces)"
+        )
+        self.segment_shading = QCheckBox("Shade body segments")
+        layout.addWidget(self.force_layer)
+        layout.addWidget(self.segment_shading)
         self.start = QPushButton("Render Original-Footage Overlay")
         self.cancel = QPushButton("Cancel Export")
         self.save = QPushButton("Save Checked ZIP")
@@ -176,6 +183,17 @@ class VideoExportDialog(ReviewedShaftDialog):
             return dict(guarded_view(self.source_fit_id, run_id))
         return dict(self.session.view(run_id))
 
+    def force_layer_settings(self) -> dict[str, Any] | None:
+        """Opt-in layer settings, or None so the default export is unchanged."""
+        if not self.force_layer.isChecked():
+            return None
+        return {
+            "enabled": True,
+            "kinds": ["joint_reaction"],
+            "scale": 1.0,
+            "segment_shading": self.segment_shading.isChecked(),
+        }
+
     def _work(self, operation: str, target: Callable[[], Any]) -> None:
         def guarded() -> Any:
             try:
@@ -205,10 +223,15 @@ class VideoExportDialog(ReviewedShaftDialog):
             if self.shape_enabled.isChecked()
             else None
         )
+        layer = self.force_layer_settings()
 
         def submit() -> dict[str, Any]:
             evidence = read_reviewed_shaft_evidence(path)
-            options = {"shape_overlay": shape} if shape is not None else {}
+            options: dict[str, Any] = (
+                {"shape_overlay": shape} if shape is not None else {}
+            )
+            if layer:
+                options["force_layer"] = layer
             return (
                 self.session.submit(source, **options)
                 if evidence is None

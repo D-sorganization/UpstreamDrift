@@ -1,0 +1,142 @@
+{
+  "qualification": "KINEMATIC_COMPARISON_AND_CONTACT_DIAGNOSTIC_NOT_PHYSICAL_ACCEPTANCE",
+  "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+  "release": "2025b",
+  "model_saved": false,
+  "seeded_comparison": {
+    "natural_exit": 0,
+    "native_pid": 83988,
+    "receipt_utc": "2026-10-02T13:26:50.877707Z",
+    "records": {
+      "capture_A": {
+        "explicit_human_default_full_struct_parity_exact": true,
+        "parity_frame_count": 3,
+        "trials": {
+          "w_0": {
+            "weight": 0,
+            "sampled_frames": 55,
+            "all_native_status_one": true,
+            "mean_rms_mm": 13.364978094348654,
+            "max_rms_mm": 41.38477262356163,
+            "head_post_address_mean_deg": 35.391613887489825,
+            "head_post_address_max_deg": 61.418306832760095,
+            "foot_left_max_deg": 12.83120567847241,
+            "foot_right_max_deg": 19.816585945689738
+          },
+          "w_0_03": {
+            "weight": 0.03,
+            "sampled_frames": 55,
+            "all_native_status_one": true,
+            "mean_rms_mm": 13.349398567677827,
+            "max_rms_mm": 42.11583306742987,
+            "head_post_address_mean_deg": 27.331284377763755,
+            "head_post_address_max_deg": 50.31524304089066,
+            "foot_left_max_deg": 12.822612409191978,
+            "foot_right_max_deg": 19.80544133012815,
+            "head_relative_mean_improvement": 0.2277468762896745,
+            "head_30_percent_gate_passed": false,
+            "selected_for_desktop": false
+          }
+        }
+      },
+      "capture_O": {
+        "explicit_human_default_full_struct_parity_exact": true,
+        "parity_frame_count": 3,
+        "trials": {
+          "w_0": {
+            "weight": 0,
+            "sampled_frames": 46,
+            "all_native_status_one": true,
+            "mean_rms_mm": 16.621273782201776,
+            "max_rms_mm": 36.86463772182846,
+            "head_post_address_mean_deg": 36.23079668535466,
+            "head_post_address_max_deg": 66.0563277359588,
+            "foot_left_max_deg": 19.556278477505355,
+            "foot_right_max_deg": 20.299256952959038
+          },
+          "w_0_03": {
+            "weight": 0.03,
+            "sampled_frames": 46,
+            "all_native_status_one": true,
+            "mean_rms_mm": 16.595559397238258,
+            "max_rms_mm": 36.74622278620133,
+            "head_post_address_mean_deg": 27.666630986629176,
+            "head_post_address_max_deg": 54.063906827314135,
+            "foot_left_max_deg": 19.524772015400966,
+            "foot_right_max_deg": 20.347839987310373,
+            "head_relative_mean_improvement": 0.23637806734145927,
+            "head_30_percent_gate_passed": false,
+            "selected_for_desktop": false
+          }
+        }
+      }
+    },
+    "direct_source_inventory": {
+      "gs3dx_whole_body_ik": "8a9f939526cdcb9defef9ee767effa09856f1eaf3eeeda5b6a0a157c9bf25e46",
+      "gs3dx_ik_initial_pose": "a6b6bf871677b6f259ce07036495247af008997721dc841a5c48ae07e635b223",
+      "gs3dx_initial_target_values": "4311cbf1638ab916fd5ccd437b4c14ef591e9d09ffed0a16e2b00b08bd6715db",
+      "gs3dx_whole_body_ik_preseed": "4b5704bb9475bb45b39aa51b27278e69a980df2f8900f42b09cc5173985a4cef",
+      "gs3dx_head_input_data": "084d1f545d51c341bb3ec872562a08bb55f10e16eba6ae0781eb24679a8a354d",
+      "gs3dx_orientation_residual": "00369171cc677e70992460507e230caea755f8fd2119bd9dd601c2ea7a82f9c4",
+      "gs3dx_foot_orientation_residual": "18287150535441f81e5e671d9ca6a947a7c28722e6b899481b07f6d4bda9611a",
+      "gs3dx_head_orientation_residual": "8e0b31c63b387382feb2f24aa227446205521a7427a8f693c6c2c047c3069723",
+      "gs3dx_head_target_orientation": "1965ac2b7c9a8169b62cb7b7d0550022cedd4c14ba5d8c46cf9180f56cd1619d",
+      "gs3dx_capture_head_frame": "d7f9a8fbef6354103eb56ad7727fe197b060589bda56866d0432dde92ea91161",
+      "gs3dx_capture_markers": "285e8c89c0c06b884e0f1a0e8819037d50f68e23fa719f087ee6766ca45684b5",
+      "gs3dx_capture_joint_centres": "875519b8c2d5a93f303f23eeee656933dfc7f474d17c536b1a8b36c0bac92044",
+      "gs3dx_capture_address_transform": "4282c6939aec5ec56d5641f43872423a331a7ef000524636df82822c2c6bfcc0",
+      "gs3dx_capture_points": "cb3b0698405263b753a1adcf91eec4c794fba7657dde83b254fd80021f5fd9d2",
+      "gs3dx_fit_human_visuals": "77994f7e7535375f8af8afa20d577aef9ed3ff6a611c610dc8298fd14999c480",
+      "gs3dx_ik_joint_roles": "4aae0267abfcaea02a08d36664c9d2cc447f67fc2fa4cba7d6c3e011911e3d9a",
+      "gs3dx_joint_keys": "a4f272516ddf3fb4321b3206228d4fa40e0f45ded854428f53f026b0e8a5658b",
+      "gs3dx_joint_rom": "9ca9c9f570f0cfd032d7b4f04309060f0f57f0489d4d0c34de0219a1de3248e0",
+      "resolve_capture": "66793492772e76bd01bb65d81a0be18e05ea026461edc4eeaded9c5a7567d862",
+      "gs3dx_whole_body_ik_baseline": "f153d381d52a51fbd38c0bd789c471251fa6944b36c313e745bcd3afe299e41f",
+      "gs3dx_foot_orientation_residual_baseline": "41f493300892a45534a9a43395a745dfb23d106e7c67a18b1ba2e2f57b7a7134",
+      "probe": "9aa2198c5764846b60552e0623a6e2e04f7ac328d7681a50e33a988e932227f5"
+    },
+    "inventory_is_full_transitive_closure": false,
+    "receipt": {
+      "actual_process_exit_code": 0,
+      "final_exit_code": 0,
+      "termination_reason": "natural_exit",
+      "done_marker": true,
+      "script_status": "success",
+      "owned_pids": [83988],
+      "timestamp": "2026-10-02T13:26:50.877707+00:00"
+    }
+  },
+  "minimum_touch_boundary": {
+    "natural_exit": 0,
+    "native_pid": 80296,
+    "receipt_utc": "2026-10-02T13:30:55.363519Z",
+    "qualification": "MINIMUM_TOUCH_UNILATERAL_BOUNDARY_DIAGNOSTIC_NOT_BILATERAL_ACCEPTANCE",
+    "stop_time_s": 0.02,
+    "ground_normal_shift_mm": -64.46154040378158,
+    "minimum_clearance_mm": 8.673617379884035e-15,
+    "maximum_clearance_mm": 16.19947839959269,
+    "initial_normal_force_left_N": 0,
+    "initial_normal_force_right_N": 0,
+    "final_normal_force_left_N": 588.49541022214,
+    "final_normal_force_right_N": 0,
+    "maximum_pelvis_displacement_mm": 1.5048460455101933,
+    "scalar_pose_max_error_by_native_unit": {
+      "deg": 5.429498628473084e-9,
+      "m": 0
+    },
+    "actual_total_mass_kg": 104.69292359999999,
+    "upper_body_tracking": true,
+    "balance_correction": false,
+    "upper_feedforward": "ZERO_NOT_GRAVITY_COMPENSATION",
+    "quiet_stance_qualified": false,
+    "receipt": {
+      "actual_process_exit_code": 0,
+      "final_exit_code": 0,
+      "termination_reason": "natural_exit",
+      "done_marker": true,
+      "script_status": "success",
+      "owned_pids": [80296],
+      "timestamp": "2026-10-02T13:30:55.363519+00:00"
+    }
+  }
+}

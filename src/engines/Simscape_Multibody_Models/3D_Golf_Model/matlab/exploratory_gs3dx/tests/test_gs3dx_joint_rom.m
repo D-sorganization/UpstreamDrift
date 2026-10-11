@@ -75,9 +75,10 @@ classdef test_gs3dx_joint_rom < matlab.unittest.TestCase
             frames = unique([1:10:f0 f0]);
             cal = 1:15:f0 - 90;
             reg = {'posture_weight', 0.01, 'smooth_weight', 0.02, 'backward', false, 'gap_weight', 0.5};
-            off = gs3dx_whole_body_ik(jc, frames=1, calibration_frames=cal).offsets;
-            free = gs3dx_whole_body_ik(jc, 'frames', frames, 'offsets', off, reg{:});
-            held = gs3dx_whole_body_ik(jc, 'frames', frames, 'offsets', off, reg{:}, 'rom_weight', 3);
+            % Explicitly pin historically Fit-based ROM test calls to variants.fit
+            off = gs3dx_whole_body_ik(jc, 'model', fit, frames=1, calibration_frames=cal).offsets;
+            free = gs3dx_whole_body_ik(jc, 'model', fit, 'frames', frames, 'offsets', off, reg{:});
+            held = gs3dx_whole_body_ik(jc, 'model', fit, 'frames', frames, 'offsets', off, reg{:}, 'rom_weight', 3);
             testCase.verifyEqual(held.regularization.rom_weight, 3);
             r0 = gs3dx_rom_check(testCase.rom, gs3dx_rom_from_ik(free, testCase.rom));
             r = gs3dx_rom_check(testCase.rom, gs3dx_rom_from_ik(held, testCase.rom));

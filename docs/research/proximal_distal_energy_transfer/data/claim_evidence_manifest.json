@@ -4262,8 +4262,8 @@
   },
   "local_artifacts": {
     ".github/workflows/ci-optional-stack.yml": {
-      "sha256": "45b6723efebd2c7b193bb300fbe862dd6058912cdf0ca95b72a8f1c72a7fbc33",
-      "bytes": 32728,
+      "sha256": "8abbe34264b27b138e254ae4ce8819f35d029ff5116a1afb1b609f96447f3182",
+      "bytes": 33460,
       "referenced_by": [
         "PD-CLAIM-297",
         "PD-CLAIM-298",
@@ -8233,8 +8233,8 @@
       ]
     },
     "src/shared/python/simulation_backends/ztcf_zvcf.py": {
-      "sha256": "6488076bf95b10bab775c4599ec257704b37c0bc77a060584e834710778bccb2",
-      "bytes": 23743,
+      "sha256": "634e7c146e1bc3fe5c9ef831c621e502e0e6abebfa43f28982dad0dffe843c4a",
+      "bytes": 24078,
       "referenced_by": [
         "PD-CLAIM-095"
       ]

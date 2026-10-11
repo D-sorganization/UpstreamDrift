@@ -35,7 +35,7 @@ adapter boundary, then expose it through the registry, API, or UI.
 | Shared adapter helpers         | `src/shared/python/pose_interchange/adapters/_base.py`                                             | Quaternion order helpers, Euler conversion, default joint layouts, and joint encode/decode helpers.                            |
 | Engine capability API (CC-5)   | `src/shared/python/engine_core/capabilities.py`                                                    | `CapabilityLevel` and immutable `EngineCapabilities`.                                                                          |
 | Capability taxonomy            | [`docs/architecture/engine_capability_taxonomy.md`](../architecture/engine_capability_taxonomy.md) | Defines `FULL`, `PARTIAL`, and `NONE` promotion criteria for gradient, rollout, contact, and optimization surfaces.            |
-| Backend trace API              | `src/shared/python/simulation_backends/protocol.py`                                                | `SimState`, `Trace`, `BatchTrace`, and optional `DynamicsProvider` / `BatchedBackend` protocols for rollout-style backends.    |
+| Backend trace API              | `src/shared/python/simulation_backends/protocol.py`                                                | `SimState`, `Trace`, `BatchTrace`, and optional `EquationsOfMotionProvider` / `BatchedBackend` protocols for rollout-style backends.    |
 | Model generation/export (CC-3) | `src/shared/python/model_generation/`                                                              | URDF generation, URDF/MJCF conversion, validation, and library APIs used by model-export flows.                                |
 
 The worked examples to read before authoring a new adapter are:
@@ -61,7 +61,7 @@ dynamics/rollout.
 Pick the narrowest existing protocol that matches the engine surface:
 
 - Pose or starting-state interchange: implement `PoseConventionAdapter`.
-- Rollout backend: implement `SimulationBackend`; add `DynamicsProvider` only
+- Rollout backend: implement `SimulationBackend`; add `EquationsOfMotionProvider` only
   when mass matrix and bias forces are verified.
 - Full engine integration: expose a `get_capabilities()` method returning
   `EngineCapabilities` and keep optional native imports lazy.

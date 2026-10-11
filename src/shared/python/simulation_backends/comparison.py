@@ -4,7 +4,7 @@ The service runs the same input through selected simulation backends and
 returns a structured, provenance-stamped report over the shared ``Trace``
 schema. It deliberately stays above concrete adapter implementations: engines
 only need the ``SimulationBackend`` Protocol, with ZTCF/ZVCF panels enabled
-when a backend also satisfies ``DynamicsProvider``.
+when a backend also satisfies ``EquationsOfMotionProvider``.
 """
 
 from __future__ import annotations
@@ -18,7 +18,7 @@ import numpy as np
 
 from src.shared.python.core.contracts import check_finite, require
 
-from .protocol import DynamicsProvider, SimState, SimulationBackend, Trace
+from .protocol import EquationsOfMotionProvider, SimState, SimulationBackend, Trace
 from .ztcf_zvcf import evaluate_ztcf_along_trajectory, zvcf_acceleration
 
 if TYPE_CHECKING:
@@ -683,13 +683,13 @@ def _trace_wrench(run: EngineRun) -> np.ndarray | None:
 
 
 def _ztcf_series(run: EngineRun) -> np.ndarray | None:
-    if not isinstance(run.engine, DynamicsProvider):
+    if not isinstance(run.engine, EquationsOfMotionProvider):
         return None
     return evaluate_ztcf_along_trajectory(run.engine, run.trace.q, run.trace.v)
 
 
 def _zvcf_series(run: EngineRun) -> np.ndarray | None:
-    if not isinstance(run.engine, DynamicsProvider):
+    if not isinstance(run.engine, EquationsOfMotionProvider):
         return None
     rows = run.trace.q.shape[0]
     out = np.empty((rows, run.trace.q.shape[1]), dtype=float)

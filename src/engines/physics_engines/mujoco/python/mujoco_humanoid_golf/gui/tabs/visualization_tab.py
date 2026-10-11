@@ -24,6 +24,13 @@ if TYPE_CHECKING:
 logger = get_logger(__name__)
 
 
+FORCE_SCALE_MODE_LABELS: tuple[tuple[str, str], ...] = (
+    ("fixed", "Fixed (Slider)"),
+    ("body_weight", "Body Weight"),
+    ("peak", "Series Peak"),
+)
+
+
 class VisualizationTab(QtWidgets.QWidget):
     """Tab for visualization settings and camera controls."""
 
@@ -332,15 +339,25 @@ class VisualizationTab(QtWidgets.QWidget):
         self._create_force_checkboxes(force_layout)
         self._create_torque_scale_controls(force_layout)
         self._create_force_scale_controls(force_layout)
+        self._create_grf_style_controls(force_layout)
         self._create_advanced_vector_overlays(force_layout)
 
-        self.show_contacts_cb = QtWidgets.QCheckBox("Show Contact Forces")
+        self.show_contacts_cb = QtWidgets.QCheckBox("MuJoCo native contact debug")
         self.show_contacts_cb.stateChanged.connect(self.on_show_contacts_changed)
         force_layout.addWidget(self.show_contacts_cb)
+        self._connect_force_legend_to_status_bar()
 
         ellipsoid_group = self._create_ellipsoid_group()
 
         return force_group, ellipsoid_group
+
+    def _connect_force_legend_to_status_bar(self) -> None:
+        """Show the force overlay legend line in the status bar while it is on."""
+        status_bar = getattr(self.window(), "statusBar", None)
+        signal = getattr(self.sim_widget, "force_legend_changed", None)
+        if status_bar is None or signal is None:
+            return
+        signal.connect(lambda text: status_bar().showMessage(text))
 
     def _create_force_checkboxes(self, force_layout: QtWidgets.QVBoxLayout) -> None:
         if force_layout is None:
@@ -395,6 +412,89 @@ class VisualizationTab(QtWidgets.QWidget):
         force_scale_layout.addRow("Force Scale:", self.force_scale_slider)
         force_scale_layout.addRow("", self.force_scale_label)
         force_layout.addLayout(force_scale_layout)
+
+    def _create_grf_style_controls(self, force_layout: QtWidgets.QVBoxLayout) -> None:
+        """Arrow scale mode, reference length and group toggles (GCV-4, #11710)."""
+        if force_layout is None:
+            raise ValueError("force_layout must be provided")
+        from src.shared.python.force_overlay.glyphs import (
+            DEFAULT_GROUPS,
+            GROUP_LABELS,
+        )
+
+        form = QtWidgets.QFormLayout()
+        self.force_scale_mode_combo = QtWidgets.QComboBox()
+        self.force_scale_mode_combo.setAccessibleName("Force Scale Mode")
+        self.force_scale_mode_combo.setToolTip(
+            "Fixed: slider scale. Body Weight: 1 BW = reference length. "
+            "Peak: peak force = reference length."
+        )
+        for mode, label in FORCE_SCALE_MODE_LABELS:
+            self.force_scale_mode_combo.addItem(label, mode)
+        self.force_scale_mode_combo.currentIndexChanged.connect(
+            self.on_force_style_changed
+        )
+        form.addRow("Scale Mode:", self.force_scale_mode_combo)
+
+        self.body_mass_spin = self._make_force_spin(75.0, 1.0, 300.0, " kg", 1)
+        self.peak_force_spin = self._make_force_spin(2000.0, 10.0, 20000.0, " N", 0)
+        self.reference_length_spin = self._make_force_spin(0.5, 0.05, 3.0, " m", 2)
+        form.addRow("Body Mass:", self.body_mass_spin)
+        form.addRow("Peak Force:", self.peak_force_spin)
+        form.addRow("Length per Reference:", self.reference_length_spin)
+        force_layout.addLayout(form)
+
+        self.force_group_checkboxes: dict[str, QtWidgets.QCheckBox] = {}
+        for group, label in GROUP_LABELS.items():
+            box = QtWidgets.QCheckBox(label)
+            box.setChecked(group in DEFAULT_GROUPS)
+            box.stateChanged.connect(self.on_force_style_changed)
+            self.force_group_checkboxes[group] = box
+            force_layout.addWidget(box)
+
+    def _make_force_spin(
+        self, value: float, low: float, high: float, suffix: str, decimals: int
+    ) -> QtWidgets.QDoubleSpinBox:
+        spin = QtWidgets.QDoubleSpinBox()
+        spin.setRange(low, high)
+        spin.setDecimals(decimals)
+        spin.setSuffix(suffix)
+        spin.setValue(value)
+        spin.valueChanged.connect(self.on_force_style_changed)
+        return spin
+
+    def on_force_style_changed(self, *_args: object) -> None:
+        """Push scale mode, references and group toggles to the viewport."""
+        require(self.sim_widget is not None, "sim_widget is set")
+        from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.force_glyph_overlay import (
+            style_options_from_controls,
+        )
+
+        mode = str(self.force_scale_mode_combo.currentData())
+        self.body_mass_spin.setEnabled(mode == "body_weight")
+        self.peak_force_spin.setEnabled(mode == "peak")
+        self.reference_length_spin.setEnabled(mode != "fixed")
+        if mode == "fixed":
+            self.sim_widget.set_force_style_options(
+                {"groups": self._enabled_force_groups()}
+            )
+            return
+        self.sim_widget.set_force_style_options(
+            style_options_from_controls(
+                scale_mode=mode,
+                body_mass_kg=self.body_mass_spin.value(),
+                peak_force_n=self.peak_force_spin.value(),
+                reference_length_m=self.reference_length_spin.value(),
+                groups=self._enabled_force_groups(),
+            )
+        )
+
+    def _enabled_force_groups(self) -> frozenset[str]:
+        return frozenset(
+            group
+            for group, box in self.force_group_checkboxes.items()
+            if box.isChecked()
+        )
 
     def _create_advanced_vector_overlays(
         self, force_layout: QtWidgets.QVBoxLayout
@@ -498,14 +598,14 @@ class VisualizationTab(QtWidgets.QWidget):
     def on_camera_changed(self, camera_name: str) -> None:
         if camera_name is None:
             raise ValueError("camera_name must be provided")
-        require("sim_widget is set", lambda: self.sim_widget is not None)
+        require(self.sim_widget is not None, "sim_widget is set")
         """Handle camera view change."""
         self.sim_widget.set_camera(camera_name)
         # Update sliders to match camera preset
         self.update_camera_sliders()
 
     def update_camera_sliders(self) -> None:
-        require("sim_widget is set", lambda: self.sim_widget is not None)
+        require(self.sim_widget is not None, "sim_widget is set")
         """Update camera control sliders to match current camera state."""
         if self.sim_widget.camera is not None:
             # Update azimuth (0-360)
@@ -533,7 +633,7 @@ class VisualizationTab(QtWidgets.QWidget):
     def on_azimuth_changed(self, value: int) -> None:
         if value is None:
             raise ValueError("value must be provided")
-        require("sim_widget is set", lambda: self.sim_widget is not None)
+        require(self.sim_widget is not None, "sim_widget is set")
         """Handle azimuth slider change."""
         self.sim_widget.set_camera_azimuth(float(value))
         self.azimuth_label.setText(f"{value}\u00b0")
@@ -541,7 +641,7 @@ class VisualizationTab(QtWidgets.QWidget):
     def on_elevation_changed(self, value: int) -> None:
         if value is None:
             raise ValueError("value must be provided")
-        require("sim_widget is set", lambda: self.sim_widget is not None)
+        require(self.sim_widget is not None, "sim_widget is set")
         """Handle elevation slider change."""
         self.sim_widget.set_camera_elevation(float(value))
         self.elevation_label.setText(f"{value}\u00b0")
@@ -549,7 +649,7 @@ class VisualizationTab(QtWidgets.QWidget):
     def on_distance_changed(self, value: int) -> None:
         if value is None:
             raise ValueError("value must be provided")
-        require("sim_widget is set", lambda: self.sim_widget is not None)
+        require(self.sim_widget is not None, "sim_widget is set")
         """Handle distance slider change."""
         # Convert slider value (1-500) to distance (0.1-50.0)
         distance = 0.1 + (value - 1) / 499.0 * (50.0 - 0.1)
@@ -557,7 +657,7 @@ class VisualizationTab(QtWidgets.QWidget):
         self.distance_label.setText(f"{distance:.2f}")
 
     def on_lookat_changed(self) -> None:
-        require("sim_widget is set", lambda: self.sim_widget is not None)
+        require(self.sim_widget is not None, "sim_widget is set")
         """Handle lookat position change."""
         x = self.lookat_x_spin.value()
         y = self.lookat_y_spin.value()
@@ -565,13 +665,13 @@ class VisualizationTab(QtWidgets.QWidget):
         self.sim_widget.set_camera_lookat(x, y, z)
 
     def on_reset_camera(self) -> None:
-        require("sim_widget is set", lambda: self.sim_widget is not None)
+        require(self.sim_widget is not None, "sim_widget is set")
         """Reset camera to default position."""
         self.sim_widget.reset_camera()
         self.update_camera_sliders()
 
     def on_sky_color_clicked(self) -> None:
-        require("sim_widget is set", lambda: self.sim_widget is not None)
+        require(self.sim_widget is not None, "sim_widget is set")
         """Handle sky color button click - open color picker."""
         current_color = QtGui.QColor(
             int(self.sim_widget.sky_color[0] * 255),
@@ -594,7 +694,7 @@ class VisualizationTab(QtWidgets.QWidget):
             )
 
     def on_ground_color_clicked(self) -> None:
-        require("sim_widget is set", lambda: self.sim_widget is not None)
+        require(self.sim_widget is not None, "sim_widget is set")
         """Handle ground color button click - open color picker."""
         current_color = QtGui.QColor(
             int(self.sim_widget.ground_color[0] * 255),
@@ -621,7 +721,7 @@ class VisualizationTab(QtWidgets.QWidget):
             )
 
     def on_reset_background(self) -> None:
-        require("sim_widget is set", lambda: self.sim_widget is not None)
+        require(self.sim_widget is not None, "sim_widget is set")
         """Reset background colors to defaults."""
         default_sky = [0.2, 0.3, 0.4, 1.0]
         default_ground = [0.2, 0.2, 0.2, 1.0]
@@ -636,7 +736,7 @@ class VisualizationTab(QtWidgets.QWidget):
     def on_live_kinematics_changed(self, state: int = 0) -> None:
         if state is None:
             raise ValueError("state must be provided")
-        require("sim_widget is set", lambda: self.sim_widget is not None)
+        require(self.sim_widget is not None, "sim_widget is set")
         """Handle live kinematics visualization toggle."""
         self.sim_widget.set_live_kinematics_visualization(
             euler=self.show_live_euler_cb.isChecked(),
@@ -645,7 +745,7 @@ class VisualizationTab(QtWidgets.QWidget):
         )
 
     def on_open_meshcat(self) -> None:
-        require("sim_widget is set", lambda: self.sim_widget is not None)
+        require(self.sim_widget is not None, "sim_widget is set")
         """Open the Meshcat visualizer in the default browser."""
         if (
             hasattr(self.sim_widget, "meshcat_adapter")
@@ -660,7 +760,7 @@ class VisualizationTab(QtWidgets.QWidget):
     def on_show_torques_changed(self, state: int) -> None:
         if state is None:
             raise ValueError("state must be provided")
-        require("sim_widget is set", lambda: self.sim_widget is not None)
+        require(self.sim_widget is not None, "sim_widget is set")
         """Handle torque visualization toggle."""
         enabled = state == QtCore.Qt.CheckState.Checked.value
         self.sim_widget.set_torque_visualization(enabled)
@@ -668,7 +768,7 @@ class VisualizationTab(QtWidgets.QWidget):
     def on_torque_scale_changed(self, value: int) -> None:
         if value is None:
             raise ValueError("value must be provided")
-        require("sim_widget is set", lambda: self.sim_widget is not None)
+        require(self.sim_widget is not None, "sim_widget is set")
         """Handle torque scale slider change."""
         scale = value / 100.0  # Convert to 0.01 - 1.0
         self.torque_scale_label.setText(f"{scale:.2f}%")
@@ -680,7 +780,7 @@ class VisualizationTab(QtWidgets.QWidget):
     def on_show_forces_changed(self, state: int) -> None:
         if state is None:
             raise ValueError("state must be provided")
-        require("sim_widget is set", lambda: self.sim_widget is not None)
+        require(self.sim_widget is not None, "sim_widget is set")
         """Handle force visualization toggle."""
         enabled = state == QtCore.Qt.CheckState.Checked.value
         self.sim_widget.set_force_visualization(enabled)
@@ -688,7 +788,7 @@ class VisualizationTab(QtWidgets.QWidget):
     def on_force_scale_changed(self, value: int) -> None:
         if value is None:
             raise ValueError("value must be provided")
-        require("sim_widget is set", lambda: self.sim_widget is not None)
+        require(self.sim_widget is not None, "sim_widget is set")
         """Handle force scale slider change."""
         scale = value / 10.0
         self.force_scale_label.setText(f"{scale:.1f}%")
@@ -700,14 +800,14 @@ class VisualizationTab(QtWidgets.QWidget):
     def on_isolate_forces_changed(self, state: int) -> None:
         if state is None:
             raise ValueError("state must be provided")
-        require("sim_widget is set", lambda: self.sim_widget is not None)
+        require(self.sim_widget is not None, "sim_widget is set")
         """Handle isolate forces toggle."""
         enabled = state == QtCore.Qt.CheckState.Checked.value
         if hasattr(self.sim_widget, "set_isolate_forces_visualization"):
             self.sim_widget.set_isolate_forces_visualization(enabled)
 
     def on_advanced_vector_changed(self) -> None:
-        require("sim_widget is set", lambda: self.sim_widget is not None)
+        require(self.sim_widget is not None, "sim_widget is set")
         """Handle advanced vector visualization changes."""
         self.sim_widget.set_advanced_vector_visualization(
             self.show_induced_cb.isChecked(),
@@ -719,7 +819,7 @@ class VisualizationTab(QtWidgets.QWidget):
     def on_show_contacts_changed(self, state: int) -> None:
         if state is None:
             raise ValueError("state must be provided")
-        require("sim_widget is set", lambda: self.sim_widget is not None)
+        require(self.sim_widget is not None, "sim_widget is set")
         """Handle contact force visualization toggle."""
         enabled = state == QtCore.Qt.CheckState.Checked.value
         self.sim_widget.set_contact_force_visualization(enabled)
@@ -727,7 +827,7 @@ class VisualizationTab(QtWidgets.QWidget):
     def on_ellipsoid_visualization_changed(self, state: int) -> None:
         if state is None:
             raise ValueError("state must be provided")
-        require("sim_widget is set", lambda: self.sim_widget is not None)
+        require(self.sim_widget is not None, "sim_widget is set")
         """Handle ellipsoid visualization toggle."""
         show_mobility = self.show_mobility_ellipsoid_cb.isChecked()
         show_force = self.show_force_ellipsoid_cb.isChecked()
@@ -736,7 +836,7 @@ class VisualizationTab(QtWidgets.QWidget):
     def on_swing_plane_changed(self, state: int = 0) -> None:
         if state is None:
             raise ValueError("state must be provided")
-        require("sim_widget is set", lambda: self.sim_widget is not None)
+        require(self.sim_widget is not None, "sim_widget is set")
         """Handle swing plane / trajectory visualization toggle."""
         self.sim_widget.set_swing_plane_visualization(
             show_plane=self.show_swing_plane_cb.isChecked(),
@@ -747,18 +847,18 @@ class VisualizationTab(QtWidgets.QWidget):
     def on_tracked_body_changed(self, body_name: str) -> None:
         if body_name is None:
             raise ValueError("body_name must be provided")
-        require("sim_widget is set", lambda: self.sim_widget is not None)
+        require(self.sim_widget is not None, "sim_widget is set")
         """Handle tracked body change for trajectory recording."""
         if body_name:
             self.sim_widget.swing_plane_body_name = body_name
 
     def on_reset_trajectory(self) -> None:
-        require("sim_widget is set", lambda: self.sim_widget is not None)
+        require(self.sim_widget is not None, "sim_widget is set")
         """Reset recorded trajectory and swing plane data."""
         self.sim_widget.reset_swing_plane()
 
     def on_change_body_color(self) -> None:
-        require("sim_widget is set", lambda: self.sim_widget is not None)
+        require(self.sim_widget is not None, "sim_widget is set")
         """Handle body color change."""
         body_name = self.viz_body_combo.currentText()
         if not body_name:
@@ -783,7 +883,7 @@ class VisualizationTab(QtWidgets.QWidget):
             self.sim_widget.set_body_color(body_name, rgba)
 
     def on_reset_body_color(self) -> None:
-        require("sim_widget is set", lambda: self.sim_widget is not None)
+        require(self.sim_widget is not None, "sim_widget is set")
         """Handle body color reset."""
         body_name = self.viz_body_combo.currentText()
         if not body_name:
@@ -801,14 +901,14 @@ class VisualizationTab(QtWidgets.QWidget):
     ) -> None:
         if cond is None:
             raise ValueError("cond must be provided")
-        require("sim_widget is set", lambda: self.sim_widget is not None)
+        require(self.sim_widget is not None, "sim_widget is set")
         """Update matrix analysis labels."""
         self.jacobian_cond_label.setText(f"Condition: {cond}")
         self.constraint_rank_label.setText(f"Rank: {rank}")
         self.nefc_label.setText(f"Constraints: {nefc}")
 
     def update_body_list(self) -> None:
-        require("sim_widget is set", lambda: self.sim_widget is not None)
+        require(self.sim_widget is not None, "sim_widget is set")
         """Update body selection list and actuator list."""
         if not self.sim_widget.has_model():
             return

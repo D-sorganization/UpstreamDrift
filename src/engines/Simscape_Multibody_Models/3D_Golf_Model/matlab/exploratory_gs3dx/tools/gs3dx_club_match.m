@@ -12,7 +12,8 @@ function M = gs3dx_club_match(ref, sim, t, phases)
 %     .face_normal  3xN, unit, World, club-face normal
 %   T is 1xN, s, strictly increasing.  PHASES gives 1-based frame indices
 %   with 1 <= address < top <= impact <= N (address, top of backswing and
-%   ball impact, matching GS3DX_CAPTURE_MARKERS.impact_frame).
+%   a declared impact event). Capture impact_frame is a peak-speed proxy;
+%   explicit PHASES.contact is required for contact-face qualification.
 %
 %   Per-frame errors:
 %     head_err_m, grip_err_m   Euclidean distance, SIM to REF
@@ -38,7 +39,10 @@ function M = gs3dx_club_match(ref, sim, t, phases)
 %              row: it is a property of the impact instant, not the span)
 %     .ok      struct against the #11160 targets (LOCAL_TARGETS), measured
 %              on the 'address_to_impact' row: .head_rms, .head_max,
-%              .shaft, .speed (each a logical) and .all, their conjunction
+%              .shaft, .speed, .face (each a logical) and .all, their conjunction.
+%              Face requires PHASES.contact, the measured contact frame (not
+%              peak head speed). A missing contact keeps .face false.
+%     .contact struct: frame, t and face_err_deg at contact, or NaN if absent
 %     .targets the LOCAL_TARGETS struct these were checked against
 %
 %   Precondition: REF and SIM share N with matching finite 3xN/1xN fields
@@ -56,9 +60,12 @@ function M = gs3dx_club_match(ref, sim, t, phases)
     local_check_track(ref, n, 'ref');
     local_check_track(sim, n, 'sim');
     local_check_phases(phases, n);
+    reference_speed = local_speed(ref.head, t);
+    assert(reference_speed(phases.impact) > eps, 'gs3dx:club_match', ...
+        'Reference impact speed must be positive for a relative error');
 
     M.frame = table(t(:), local_err(sim.head - ref.head), local_err(sim.grip - ref.grip), ...
-        local_shaft_err(ref, sim), local_face_err(ref, sim), local_speed(ref.head, t), local_speed(sim.head, t), ...
+        local_shaft_err(ref, sim), local_face_err(ref, sim), reference_speed, local_speed(sim.head, t), ...
         'VariableNames', {'t', 'head_err_m', 'grip_err_m', 'shaft_err_deg', 'face_err_deg', ...
         'head_speed_ref_mps', 'head_speed_sim_mps'});
 
@@ -82,12 +89,21 @@ function M = gs3dx_club_match(ref, sim, t, phases)
     M.ok.head_max = a.head_max_mm <= M.targets.head_max_mm;
     M.ok.shaft = a.shaft_max_deg <= M.targets.shaft_deg;
     M.ok.speed = abs(a.impact_speed_err_pct) <= M.targets.speed_pct;
-    M.ok.all = M.ok.head_rms && M.ok.head_max && M.ok.shaft && M.ok.speed;
+    M.contact = struct('frame', NaN, 't', NaN, 'face_err_deg', NaN);
+    M.ok.face = false;
+    if isfield(phases, 'contact')
+        c = phases.contact;
+        M.contact = struct('frame', c, 't', t(c), ...
+            'face_err_deg', M.frame.face_err_deg(c));
+        M.ok.face = M.contact.face_err_deg <= M.targets.face_deg;
+    end
+    M.ok.all = M.ok.head_rms && M.ok.head_max && M.ok.shaft && M.ok.speed && M.ok.face;
 end
 
 function targets = local_targets()
 % The #11160 acceptance targets, address to impact, in one place.
-    targets = struct('head_rms_mm', 10, 'head_max_mm', 20, 'shaft_deg', 2, 'speed_pct', 2);
+    targets = struct('head_rms_mm', 10, 'head_max_mm', 20, ...
+        'shaft_deg', 2, 'speed_pct', 2, 'face_deg', 2);
 end
 
 function local_check_track(s, n, label)
@@ -98,14 +114,25 @@ function local_check_track(s, n, label)
         assert(all(isfinite(v), 'all'), 'gs3dx:club_match', '%s.%s has non-finite values', label, f);
     end
     assert(all(abs(vecnorm(s.face_normal) - 1) < 1e-3), 'gs3dx:club_match', '%s.face_normal is not unit length', label);
+    assert(all(vecnorm(s.head - s.grip) > eps), 'gs3dx:club_match', ...
+        '%s shaft length must be positive', label);
 end
 
 function local_check_phases(p, n)
     for f = ["address", "top", "impact"]
         assert(isfield(p, f), 'gs3dx:club_match', 'phases is missing field %s', f);
+        v = p.(f);
+        assert(isnumeric(v) && isscalar(v) && isfinite(v) && v == fix(v), ...
+            'gs3dx:club_match', 'phases.%s must be a finite integer scalar', f);
     end
     assert(1 <= p.address && p.address < p.top && p.top <= p.impact && p.impact <= n, 'gs3dx:club_match', ...
         'phases must satisfy 1 <= address (%d) < top (%d) <= impact (%d) <= %d', p.address, p.top, p.impact, n);
+    if isfield(p, 'contact')
+        c = p.contact;
+        assert(isnumeric(c) && isscalar(c) && isfinite(c) && ...
+            c == fix(c) && p.address <= c && c <= n, 'gs3dx:club_match', ...
+            'phases.contact must be a finite integer within the tracked capture');
+    end
 end
 
 function e = local_err(d)
@@ -121,8 +148,12 @@ end
 function a = local_face_err(ref, sim)
 % Angle between face normals projected onto the plane normal to REF's shaft.
     shaft = local_unit(ref.head - ref.grip);
-    pr = local_unit(local_project(ref.face_normal, shaft));
-    ps = local_unit(local_project(sim.face_normal, shaft));
+    pr_raw = local_project(ref.face_normal, shaft);
+    ps_raw = local_project(sim.face_normal, shaft);
+    assert(all(vecnorm(pr_raw) > eps) && all(vecnorm(ps_raw) > eps), ...
+        'gs3dx:club_match', 'Face normals must have a nonzero shaft-normal projection');
+    pr = local_unit(pr_raw);
+    ps = local_unit(ps_raw);
     a = local_angle(pr, ps);
 end
 

@@ -1,0 +1,65 @@
+# Native Marker Forward Kinematics From Replay States
+
+## Scope and Evidence Boundary
+
+F09d (#11907) maps a validated native replay's actual model configurations to
+3-D marker positions by each engine's own forward kinematics. It does not
+interpret coordinates as markers, resimulate the replay, score observations,
+or qualify a model. A marker is a named point attached to an explicitly named
+native body or frame by a finite local offset in metres.
+
+## Mapping Contract
+
+For output sample $i$ and ordered marker $j$, the engine evaluates the native
+body/frame transform $T_{w b_j}(q_i)$ and local marker point $r_j$:
+
+$$
+p_{ij}^{w} = T_{w b_j}(q_i)\begin{bmatrix}r_j\\1\end{bmatrix}.
+$$
+
+The mapping binds stable marker labels, exact native frame identifiers,
+body-local offsets, output frame, simulation-relative timebase, source and
+loaded-model digests, engine/provider identity, and the ordered mapping digest.
+The resulting array has shape $(N, K, 3)$ and preserves the replay's actual
+native output clock. Unknown frames, stale model/provider identity, duplicate
+labels, invalid offsets, non-finite values, or incomplete output horizons fail
+closed.
+
+## Current Native Consumers
+
+MuJoCo computes each position with the loaded model's forward pass and body
+pose. Drake sets each replay configuration in its loaded plant context and
+evaluates named frame points in world. Pinocchio F09e uses the existing native
+replay adapter and `PinocchioPhysicsEngine` frame transforms, retaining complete
+q/v with distinct `nq` and `nv`. All use the same loaded model identity that
+was admitted by the native replay bundle. A separate native output
+receipt binds F09c state/input/policy evidence to the marker-map and position
+digests. This receipt remains unqualified.
+
+The report retains every registered model/variant/drive cell and all six
+required engines. Missing maps, unsupported providers, unavailable runtimes,
+and rejected identities remain blockers. Full FK coverage means only that
+every required row produced named positions; it does not promote model
+qualification or establish observation agreement.
+
+OpenSim geometry mapping belongs to F07 (#11903) and may be consumed here only
+when its adapter supports the same complete replay state and model identity.
+MyoSuite and Simscape remain visible and blocking until native providers are
+implemented. No synthetic marker map is inferred from `q`, quaternions, mesh
+vertices, coordinate names, or a capture.
+
+## Synthetic Verification
+
+Independent fixtures use a floating-base model, nonzero generalized
+configuration, and nonzero body-local marker offset. The MuJoCo fixture uses
+analytic quaternion and hinge rotations for the expected world point. The
+Drake fixture compares its point result against the independent composition
+of the native body's world pose and local offset while preserving $n_q\ne n_v$.
+The Pinocchio 4.1 fixture independently composes a nonzero free-flyer pose,
+revolute hinge, joint-origin transform, and frame-local marker offset while
+preserving $n_q=8$, $n_v=7$.
+These fixtures test software integration and identity checks only; they do not
+establish anatomical marker attachment, observation fit, contact behavior,
+muscle physiology, or scientific acceptance.
+
+The calculation registry remains empty and manual release remains blocked.

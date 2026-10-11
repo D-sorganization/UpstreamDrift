@@ -6,7 +6,8 @@ function overrides = solve_starting_pose(target, base_input_mat, opts)
 %   Stage-1 fit described in GRIP_FIT_PLAYBOOK.md.  It picks a small set of
 %   model-workspace start-position variables (default: 8 DOF spanning hip
 %   translation, hip rotation, shoulder Y, and elbow scalars), wraps each
-%   candidate in a 5 ms FastRestart Simulink call, and returns the
+%   candidate in a 5 ms Simulink call (FastRestart=off so non-tunable
+%   joint targets recompile and take effect on every trial), and returns the
 %   perturbations that minimise
 %
 %     J(x) = w_pos * ||grip_model(0) - target.grip(addr_idx, :)||^2
@@ -294,6 +295,7 @@ function [r_grip_pos, r_grip_R] = local_run_inner_sim(x, vars, base_input_mat, o
         'model_name',      opts.model_name, ...
         'stop_time',       opts.stop_time, ...
         'simscape_log',    'all', ...
+        'fast_restart',    false, ...
         'input_overrides', base_overrides);
 
     try

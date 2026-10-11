@@ -7,5 +7,6 @@ self-hosted-runner:
     - ubuntu-22.04
     - ubuntu-24.04
 config-variables:
+  - CI_RUNNER_MODE
   - JULES_ENABLED
   - REPOSITORY_MANAGEMENT_REPOSITORY

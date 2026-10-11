@@ -12,27 +12,19 @@ import { useRef, useMemo, useState, useCallback, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Grid, Environment, TransformControls } from '@react-three/drei';
 import * as THREE from 'three';
-import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
+type OrbitControlsImpl = React.ComponentRef<typeof OrbitControls>;
 import type { SimulationFrame } from '@/api/client';
 import { URDFViewer } from './URDFViewer';
 import type { URDFModel } from './URDFViewer';
 import { GolferModel, ClubTrajectory } from './GolferModel';
 import { ForceOverlay as ForceOverlayComponent } from './ForceOverlay';
-import type { ForceVector3D } from './ForceOverlay';
+import { ForceLegend } from './ForceLegend';
+import type { GlyphSetV1 } from '@/types/glyphs';
 import { ForceColorControls } from './ForceColorControls';
 import { ForceColorLayer } from './ForceColorLayer';
 import { defaultForceColorScale } from './forceColors';
 import { segmentForcesAtTime } from './segmentForceFrame';
 import type { SegmentForceFrame } from './segmentForceFrame';
-
-/** Force/torque overlay data for visualization. See issue #1179 */
-export interface ForceOverlay {
-  origin: [number, number, number];
-  direction: [number, number, number];
-  magnitude: number;
-  color?: string;
-  label?: string;
-}
 
 interface Props {
   /** Qualified signed axial loads synchronized to frame.time; absent means unavailable. */
@@ -44,8 +36,8 @@ interface Props {
   urdfModel?: URDFModel | null;
   /** Whether to show joint axes on the URDF model */
   showJointAxes?: boolean;
-  /** Force vectors to display as overlays. See issue #1179 */
-  forceOverlays?: (ForceOverlay | ForceVector3D)[];
+  /** Serialized GlyphSet for real force/torque visualization (ADR-0052, #11308) */
+  glyphs?: GlyphSetV1 | null;
   /** Callback when gizmo is dragged to send position/rotation changes */
   onGizmoDrag?: (bodyName: string, position: number[], rotation: number[]) => void;
   /**
@@ -103,7 +95,7 @@ export function Scene3D({
   frames,
   urdfModel,
   showJointAxes = false,
-  forceOverlays,
+  glyphs,
   onGizmoDrag,
   cameraCommand,
 }: Props) {
@@ -120,30 +112,6 @@ export function Scene3D({
   const [selectedObject, setSelectedObject] = useState<THREE.Object3D | null>(null);
   const [transformMode, setTransformMode] = useState<'translate' | 'rotate'>('translate');
   const [followMode, setFollowMode] = useState<boolean>(false);
-
-  // Map input force overlays to standard ForceVector3D format
-  const mappedVectors = useMemo(() => {
-    if (!forceOverlays) return [];
-    return forceOverlays.map((fo) => {
-      if ('force_type' in fo && Array.isArray(fo.color)) {
-        return fo as ForceVector3D;
-      }
-      let parsedColor: [number, number, number, number] = [1, 0, 0, 1];
-      if (typeof fo.color === 'string') {
-        const temp = new THREE.Color(fo.color);
-        parsedColor = [temp.r, temp.g, temp.b, 1];
-      }
-      return {
-        body_name: 'unknown',
-        force_type: 'contact',
-        origin: fo.origin,
-        direction: fo.direction,
-        magnitude: fo.magnitude,
-        color: parsedColor,
-        label: fo.label || null,
-      } as ForceVector3D;
-    });
-  }, [forceOverlays]);
 
   // Handle camera presets
   const handleCameraPreset = useCallback((preset: 'front' | 'side' | 'top') => {
@@ -306,12 +274,16 @@ export function Scene3D({
         <ClubTrajectory frames={frames} />
         <ForceColorLayer rootRef={rootRef} segmentIds={segmentIds} forces={segmentForces} scale={forceScale} />
 
-        {/* See issue #1179, #1199: Force/torque overlays */}
-        <ForceOverlayComponent vectors={mappedVectors} />
+        {/* See issue #1179, #1199, #11308: Force/torque overlays */}
+        <ForceOverlayComponent glyphs={glyphs} />
 
         <axesHelper args={[1]} />
         <Environment preset="studio" />
       </Canvas>
+      {/* Legend overlay for force/torque glyphs (ADR-0052, #11308) */}
+      {glyphs && (
+        <ForceLegend glyphs={glyphs} className="absolute bottom-16 right-4 z-20 max-w-xs" />
+      )}
       <details className="absolute top-2 right-2 z-20 max-h-[70%] overflow-auto rounded bg-gray-900/95 text-white">
         <summary className="cursor-pointer p-2">Segment Force Colors</summary>
         <ForceColorControls scale={forceScale} onChange={setForceScale} />

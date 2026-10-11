@@ -40,6 +40,10 @@ concurrency:
 jobs:
   # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:
+    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository)
     # Dispatcher placement only. This repo is public, so a hosted runner is
     # free and unmetered; pinning the dispatcher meant every run waited for a
     # self-hosted slot just to decide where to run. The runner it SELECTS is
@@ -67,14 +71,11 @@ jobs:
       RUNNER_CHECK_TOKEN_VALUE: ${{ secrets.RUNNER_CHECK_TOKEN }}
       DEFAULT_GITHUB_TOKEN: ${{ github.token }}
     # Only run for bot-authored PRs or scheduled/manual runs
-    if: |
-      github.event_name == 'schedule' ||
-      github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'pull_request' &&
-       (contains(github.event.pull_request.user.login, 'bot') ||
-        contains(github.event.pull_request.user.login, 'github-actions') ||
-        contains(github.event.pull_request.user.login, 'google-labs-jules') ||
-        github.event.pull_request.user.type == 'Bot'))
+    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository) &&
+      (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && (contains(github.event.pull_request.user.login, 'bot') || contains(github.event.pull_request.user.login, 'github-actions') || contains(github.event.pull_request.user.login, 'google-labs-jules') || github.event.pull_request.user.type == 'Bot')))
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1

@@ -1,6 +1,7 @@
-"""Data models for C3D Viewer application."""
+from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import Any
 
 import numpy as np
 import numpy.typing as npt
@@ -46,6 +47,8 @@ class C3DDataModel:
     metadata: dict[str, str] = field(default_factory=dict)
     events: list[C3DEvent] = field(default_factory=list)
     raw_parameters: dict | None = None
+    force_series: Any | None = None
+    force_missing: tuple[str, ...] = ()
 
     def marker_names(self) -> list[str]:
         """Return list of marker names."""

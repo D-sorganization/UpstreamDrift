@@ -157,6 +157,42 @@ def sphere_ground_contact(
     return ContactSample(penetration, rate, point, normal_force, friction)
 
 
+def torsional_friction_moment(
+    normal_force_n: Array,
+    angular_velocity_rad_s: Array,
+    ground: GroundPlane,
+    *,
+    patch_radius_m: float,
+    friction: float,
+    transition_rad_s: float,
+) -> Array:
+    """Spin (pivot) friction moment of one contact patch about the ground normal.
+
+    A sphere is a point contact and carries no torque about the ground normal.
+    A real sole presses a patch of radius ``patch_radius_m``, which resists
+    spinning with at most ``friction * f_n * patch_radius_m``. The moment is
+    regularised like the tangential law: ``M = -mu f_n r tanh(w_n / w0) n``.
+
+    Preconditions: finite 3-vectors; ``patch_radius_m >= 0``, ``friction >= 0``,
+    ``transition_rad_s > 0``. Postconditions: the moment is along the ground
+    normal, opposes the spin and is zero without load or with a zero patch, so
+    it can only dissipate energy.
+    """
+    force = _vector(normal_force_n, "normal_force_n")
+    omega = _vector(angular_velocity_rad_s, "angular_velocity_rad_s")
+    if not math.isfinite(patch_radius_m) or patch_radius_m < 0:
+        raise ValueError("Torsional patch radius must be finite and nonnegative")
+    if not math.isfinite(friction) or friction < 0:
+        raise ValueError("Torsional friction must be finite and nonnegative")
+    if not math.isfinite(transition_rad_s) or transition_rad_s <= 0:
+        raise ValueError("Torsional transition rate must be positive")
+    normal = np.asarray(ground.normal)
+    load = max(0.0, float(normal @ force))
+    spin = float(normal @ omega)
+    limit = friction * load * patch_radius_m
+    return -normal * limit * math.tanh(spin / transition_rad_s)
+
+
 ContactAdapter = Callable[[Array, Array, float], ContactSample]
 
 

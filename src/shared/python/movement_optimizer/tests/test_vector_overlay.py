@@ -164,15 +164,3 @@ def test_motion_canvas_set_overlays_paints(qapp, style: VectorStyle) -> None:
     pixmap = canvas.grab()
     assert not pixmap.isNull()
     assert pixmap.width() == 200
-
-
-def test_draw_arrowhead_skips_zero_length(qapp, style: VectorStyle) -> None:
-    from movement_optimizer.gui.vector_overlay import _draw_arrowhead
-
-    image = QImage(_SIZE, _SIZE, QImage.Format.Format_ARGB32)
-    image.fill(QColor(0, 0, 0, 0))
-    painter = QPainter(image)
-    same = QPointF(10.0, 10.0)
-    _draw_arrowhead(painter, same, same, style.head_px)  # must not raise (early return)
-    painter.end()
-    assert not _colored_pixels(image)

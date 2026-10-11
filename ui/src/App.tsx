@@ -100,12 +100,22 @@ const MatchedSwingsPage = lazy(() =>
     default: m.MatchedSwingsPage,
   })),
 );
+const LaunchMonitorAnalyticsPage = lazy(() =>
+  import("./pages/LaunchMonitorAnalytics").then((m) => ({
+    default: m.LaunchMonitorAnalyticsPage,
+  })),
+);
 const NecromatcherPage = lazy(() =>
   import("./pages/Necromatcher").then((m) => ({ default: m.NecromatcherPage })),
 );
 const CrossEngineDashboardPage = lazy(() =>
   import("./pages/CrossEngineDashboard").then((m) => ({
     default: m.CrossEngineDashboardPage,
+  })),
+);
+const LiftBaselinePage = lazy(() =>
+  import("./pages/LiftBaseline").then((m) => ({
+    default: m.LiftBaselinePage,
   })),
 );
 /** Themed full-viewport fallback shown while a route chunk loads (#7433). */
@@ -152,11 +162,17 @@ export function RoutedContent() {
           <Route path="/tools/data-explorer" element={<DataExplorerPage />} />
           <Route path="/tools/motion-capture" element={<MotionCapturePage />} />
           <Route path="/tools/matched-swings" element={<MatchedSwingsPage />} />
+          <Route
+            path="/tools/launch-monitor-analytics"
+            element={<LaunchMonitorAnalyticsPage />}
+          />
           <Route path="/tools/necromatcher" element={<NecromatcherPage />} />
           <Route
             path="/tools/cross-engine"
             element={<CrossEngineDashboardPage />}
           />
+          {/* Lift Baseline (LIFT-8 slice 3, #11748) */}
+          <Route path="/tools/lift-baseline" element={<LiftBaselinePage />} />
           <Route path="/tools/terrain" element={<TerrainPage />} />
           <Route path="/tools/dataset" element={<DatasetGeneratorPage />} />
           <Route path="/tools/analysis" element={<AnalysisToolsPage />} />

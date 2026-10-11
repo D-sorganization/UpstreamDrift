@@ -10,7 +10,6 @@
     "tests/unit/ai/gui/test_assistant_submodules.py::TestBackwardCompat::test_stream_worker_same_object",
     "tests/unit/ai/gui/test_assistant_submodules.py::TestBackwardCompat::test_submodule_classes_are_same_objects",
     "tests/unit/repo_hygiene/test_no_duplicate_toplevel_packages.py::test_no_new_toplevel_package_name_collisions",
-    "tests/unit/repo_hygiene/test_no_unflagged_shared_code.py::test_all_shared_files_have_warning_header",
     "tests/unit/shared_python/ai/adapters/test_anthropic_adapter.py::test_anthropic_adapter_format_messages_empty_current_message",
     "tests/unit/shared_python/ai/adapters/test_ollama_adapter.py::test_ollama_adapter_format_messages_empty_current_message",
     "tests/unit/shared_python/ai/adapters/test_ollama_adapter.py::test_send_message_errors",

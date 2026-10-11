@@ -63,19 +63,6 @@ sys.path.insert(0, str(REPO_ROOT))
 
 RESULTS_DIR = REPO_ROOT / "motion_matching" / "results"
 LEADERBOARD_MD = RESULTS_DIR / "CROSS_ENGINE_LEADERBOARD.md"
-WIFFLE_XLSX = (
-    REPO_ROOT
-    / "src"
-    / "engines"
-    / "Simscape_Multibody_Models"
-    / "3D_Golf_Model"
-    / "matlab"
-    / "src"
-    / "apps"
-    / "golf_gui"
-    / "Motion Capture Plotter"
-    / "Wiffle_ProV1_club_3D_data.xlsx"
-)
 
 # Canonical test trial set; same four sheets wired by #4081 / #4086.
 CANONICAL_TRIALS: tuple[str, ...] = ("TW_ProV1", "TW_wiffle", "GW_wiffle", "GW_ProV11")
@@ -244,6 +231,17 @@ def _now_iso() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+def _wiffle_workbook() -> Path:
+    """Resolve the Wiffle club workbook through the capture registry.
+
+    Raises ``CaptureDataUnavailable`` (a ``FileNotFoundError``) when the
+    private capture data is not present.
+    """
+    from src.motion_capture.capture_registry import resolve_capture
+
+    return resolve_capture("club-workbook-wiffle")
+
+
 def _load_target(trial: str, trials_dir: Path | None = None) -> Any:
     """Load the canonical ``ClubTarget`` for ``trial`` from the Wiffle xlsx or a fixture.
 
@@ -279,12 +277,11 @@ def _load_target(trial: str, trials_dir: Path | None = None) -> Any:
                 ),
             )
 
-    if not WIFFLE_XLSX.exists():
-        raise FileNotFoundError(f"canonical Wiffle xlsx not found: {WIFFLE_XLSX}")
+    workbook = _wiffle_workbook()
     # Late import: avoid forcing pandas / openpyxl install on report-only runs.
     from src.shared.python.motion_matching import AlignOptions, load_club_target_excel
 
-    return load_club_target_excel(WIFFLE_XLSX, sheet=trial, opts=AlignOptions())
+    return load_club_target_excel(workbook, sheet=trial, opts=AlignOptions())
 
 
 def _load_fit_driver(engine: str) -> Any:

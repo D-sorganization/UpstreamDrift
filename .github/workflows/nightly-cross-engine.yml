@@ -41,6 +41,10 @@ permissions:
 jobs:
   # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:
+    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository)
     # Dispatcher placement only. This repo is public, so a hosted runner is
     # free and unmetered; pinning the dispatcher meant every run waited for a
     # self-hosted slot just to decide where to run. The runner it SELECTS is
@@ -59,6 +63,10 @@ jobs:
           echo "runner=d-sorg-fleet-docker" >> "$GITHUB_OUTPUT"
           echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
   cross-engine-validation:
+    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository)
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 60
@@ -314,7 +322,11 @@ jobs:
   publish-dashboard:
     timeout-minutes: 10
     needs: [pick-runner, cross-engine-validation]
-    if: always()
+    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository) &&
+      (always())
     runs-on: ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' || needs.pick-runner.outputs.runner }}
 
     steps:

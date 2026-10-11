@@ -24,6 +24,12 @@ vi.mock('@/pages/CrossEngineDashboard', () => ({
   ),
 }));
 
+vi.mock('@/pages/LiftBaseline', () => ({
+  LiftBaselinePage: () => (
+    <div data-testid="lift-baseline-page-mock">LiftBaselinePage Mock</div>
+  ),
+}));
+
 import App from './App';
 
 const createWrapper = () => {
@@ -101,5 +107,11 @@ describe('App', () => {
     window.history.pushState({}, '', '/tools/cross-engine');
     render(<App />, { wrapper: createWrapper() });
     expect(await screen.findByTestId('cross-engine-page-mock')).toBeInTheDocument();
+  });
+
+  it('renders LiftBaselinePage at /tools/lift-baseline (#11748)', async () => {
+    window.history.pushState({}, '', '/tools/lift-baseline');
+    render(<App />, { wrapper: createWrapper() });
+    expect(await screen.findByTestId('lift-baseline-page-mock')).toBeInTheDocument();
   });
 });

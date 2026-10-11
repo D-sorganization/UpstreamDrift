@@ -29,12 +29,24 @@ from src.engines.physics_engines.pinocchio.python.motion_training.club_trajector
 
 pytestmark = pytest.mark.unit
 
+from src.motion_capture.capture_registry import require_capture
+
 REPO_ROOT = Path(__file__).resolve().parents[3]
-CLUB_DATA = REPO_ROOT / "data" / "Club_Data.xlsx"
-WIFFLE = (
-    REPO_ROOT / "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/"
-    "golf_gui/Motion Capture Plotter/Wiffle_ProV1_club_3D_data.xlsx"
-)
+try:
+    from src.motion_capture.capture_registry import (
+        CaptureRegistryError,
+        resolve_capture,
+    )
+
+    CLUB_DATA = resolve_capture("club-workbook-main")
+    WIFFLE = resolve_capture("club-workbook-wiffle")
+except CaptureRegistryError:
+    CLUB_DATA = REPO_ROOT / "data" / "Club_Data.xlsx"
+    WIFFLE = (
+        REPO_ROOT
+        / "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/"
+        "golf_gui/Motion Capture Plotter/Wiffle_ProV1_club_3D_data.xlsx"
+    )
 
 
 def test_normalize_event_label_accepts_bare_and_equals() -> None:
@@ -61,8 +73,10 @@ def test_axis_component_preserves_real_zero() -> None:
 
 
 def test_workbook_hashes_match_frozen_manifests() -> None:
-    assert verify_workbook_hash(CLUB_DATA, CLUB_DATA_SHA256) == CLUB_DATA_SHA256
-    assert verify_workbook_hash(WIFFLE, WIFFLE_PROV1_SHA256) == WIFFLE_PROV1_SHA256
+    club_path = require_capture("club-workbook-main")
+    wiffle_path = require_capture("club-workbook-wiffle")
+    assert verify_workbook_hash(club_path, CLUB_DATA_SHA256) == CLUB_DATA_SHA256
+    assert verify_workbook_hash(wiffle_path, WIFFLE_PROV1_SHA256) == WIFFLE_PROV1_SHA256
 
 
 def test_workbook_hash_mismatch_fails_closed(tmp_path: Path) -> None:
@@ -73,16 +87,18 @@ def test_workbook_hash_mismatch_fails_closed(tmp_path: Path) -> None:
 
 
 def test_trailing_blanks_excluded_from_sample_counts() -> None:
+    club_path = require_capture("club-workbook-main")
     for sheet, expected in EXPECTED_SAMPLE_COUNTS.items():
         if sheet == "Filtering Experiments":
             continue
-        count = count_numeric_samples(CLUB_DATA, sheet)
+        count = count_numeric_samples(club_path, sheet)
         assert count == expected
         assert count < 885
 
 
 def test_read_excel_event_markers_tw_wiffle_a_equals() -> None:
-    markers = read_excel_event_markers(CLUB_DATA, "TW_wiffle")
+    club_path = require_capture("club-workbook-main")
+    markers = read_excel_event_markers(club_path, "TW_wiffle")
     assert markers.A_sample == 240.0
     assert markers.T_sample == 412.0
     assert markers.I_sample == 519.0
@@ -91,15 +107,17 @@ def test_read_excel_event_markers_tw_wiffle_a_equals() -> None:
 
 
 def test_read_excel_event_markers_bare_labels() -> None:
-    markers = read_excel_event_markers(CLUB_DATA, "TW_ProV1")
+    club_path = require_capture("club-workbook-main")
+    markers = read_excel_event_markers(club_path, "TW_ProV1")
     assert markers.A_sample == 240.0
     assert markers.I_sample == 525.0
 
 
 def test_shared_and_identity_events_agree_on_all_trials() -> None:
+    club_path = require_capture("club-workbook-main")
     for sheet in ("TW_wiffle", "TW_ProV1", "GW_wiffle", "GW_ProV11"):
-        shared = read_sheet_event_samples(CLUB_DATA, sheet)
-        excel = read_excel_event_markers(CLUB_DATA, sheet)
+        shared = read_sheet_event_samples(club_path, sheet)
+        excel = read_excel_event_markers(club_path, sheet)
         assert shared["A"] == excel.A_sample
         assert shared["T"] == excel.T_sample
         assert shared["I"] == excel.I_sample
@@ -108,7 +126,8 @@ def test_shared_and_identity_events_agree_on_all_trials() -> None:
 
 
 def test_pinocchio_parser_accepts_bare_and_equals_events() -> None:
-    parser = ClubTrajectoryParser(CLUB_DATA)
+    club_path = require_capture("club-workbook-main")
+    parser = ClubTrajectoryParser(club_path)
     equals_events = parser._parse_events_list(
         ["Wiffle", None, "A=", 240, "T=", 412, "I=", 519, "F=", 832, "CHS", 114.5]
     )
@@ -122,6 +141,8 @@ def test_pinocchio_parser_accepts_bare_and_equals_events() -> None:
 
 
 def test_build_club_workbook_identity_four_trial_table() -> None:
+    require_capture("club-workbook-main")
+    require_capture("club-workbook-wiffle")
     identity = build_club_workbook_identity(REPO_ROOT)
     assert identity.schema == IDENTITY_SCHEMA
     assert len(identity.manifests) == 2
@@ -143,6 +164,8 @@ def test_build_club_workbook_identity_four_trial_table() -> None:
 
 
 def test_identity_write_json_round_trip(tmp_path: Path) -> None:
+    require_capture("club-workbook-main")
+    require_capture("club-workbook-wiffle")
     identity = build_club_workbook_identity(REPO_ROOT)
     out = tmp_path / "club_workbook_identity.json"
     identity.write_json(out)

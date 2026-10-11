@@ -209,3 +209,74 @@ def test_dropout_removes_keypoints_but_keeps_projection_records() -> None:
     assert len(frame.keypoints) == 1
     assert frame.keypoints[0].name == "empty"
     assert frame.keypoints[0].confidence == 0.0
+
+
+@pytest.mark.unit
+def test_shared_fixed_base_pendulum_fixture_specification() -> None:
+    """Verify deterministic fixed-base pendulum initial state, controls, sampling, and truth."""
+    from src.shared.python.estimation.synthetic_fixtures import (
+        make_fixed_base_pendulum_fixture,
+    )
+
+    n_frames = 12
+    fps = 100.0
+    pendulum = make_fixed_base_pendulum_fixture(
+        n_frames=n_frames, fps=fps, theta_0=0.15
+    )
+
+    assert pendulum.units == "m"
+    assert pendulum.sampling_rate_hz == 100.0
+    assert pendulum.initial_state == (0.15, 0.0)
+    assert len(pendulum.frames) == n_frames
+    assert np.all(pendulum.controls == 0.0)
+    assert "Harmonic linear oscillator" in pendulum.exact_truth_derivation
+
+    # Ensure camera projection works with the pendulum skeleton
+    cameras = tuple(SyntheticCamera(*p) for p in make_fixture_cameras()[:1])
+    forward_model = SkeletonRigForwardModel(pendulum.skeleton)
+    rig = SyntheticObservationRig(cameras, forward_model, seed=42)
+    obs = rig.generate(pendulum.trajectory)
+    assert len(obs.projection_records) == n_frames * pendulum.skeleton.num_joints
+
+
+@pytest.mark.unit
+def test_shared_underactuated_analytic_fixture_specification() -> None:
+    """Verify underactuated analytic fixture passive root, controls, and dynamic coupling."""
+    from src.shared.python.estimation.synthetic_fixtures import (
+        make_underactuated_analytic_fixture,
+    )
+
+    n_frames = 15
+    fps = 60.0
+    fixture = make_underactuated_analytic_fixture(n_frames=n_frames, fps=fps)
+
+    assert fixture.units == "m"
+    assert fixture.sampling_rate_hz == 60.0
+    assert fixture.is_underactuated is True
+    assert fixture.unactuated_dofs == (0,)
+    assert fixture.degree_of_underactuation == 1
+    assert np.all(fixture.controls[:, 0] == 0.0)
+    assert np.any(fixture.controls[:, 1] != 0.0)
+    assert "Joint 0 passive" in fixture.exact_truth_derivation
+
+
+@pytest.mark.unit
+def test_shared_native_stance_fixture_specification() -> None:
+    """Verify native stance fixture equilibrium contact force GRF_z = m*g and holding torques."""
+    from src.shared.python.estimation.synthetic_fixtures import (
+        make_native_stance_fixture,
+    )
+
+    mass = 80.0
+    g = 9.81
+    stance = make_native_stance_fixture(
+        n_frames=8, fps=50.0, mass_kg=mass, gravity_m_s2=g
+    )
+
+    assert stance.units == "m"
+    assert stance.sampling_rate_hz == 50.0
+    assert stance.is_stance is True
+    assert np.isclose(stance.ground_reaction_force_z, mass * g, atol=1e-5)
+    assert stance.ground_reaction_force_xy == (0.0, 0.0)
+    assert len(stance.frames) == 8
+    assert "GRF_z = mass*g" in stance.exact_truth_derivation

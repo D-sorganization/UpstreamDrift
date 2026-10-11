@@ -16,10 +16,14 @@ function probe_swing_sheets(xlsx_path)
 %   errors and prints them so all four sheets get reported even if some fail.
 
     if nargin < 1 || strlength(string(xlsx_path)) == 0
-        here = fileparts(mfilename("fullpath"));
-        xlsx_path = fullfile(here, "..", "..", "..", "src", "apps", ...
-            "golf_gui", "Motion Capture Plotter", ...
-            "Wiffle_ProV1_club_3D_data.xlsx");
+        try
+            xlsx_path = resolve_capture("club-workbook-wiffle");
+        catch
+            here = fileparts(mfilename("fullpath"));
+            xlsx_path = fullfile(here, "..", "..", "..", "src", "apps", ...
+                "golf_gui", "Motion Capture Plotter", ...
+                "Wiffle_ProV1_club_3D_data.xlsx");
+        end
     end
     xlsx_path = string(xlsx_path);
 

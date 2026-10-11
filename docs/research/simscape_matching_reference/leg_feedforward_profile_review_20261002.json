@@ -1,0 +1,89 @@
+{
+  "qualification": "NATIVE_LEG_FEEDFORWARD_PROFILE_TDD_AND_LEGACY_BALANCE_REGRESSION",
+  "red": {
+    "phase": "RED",
+    "passed": 1,
+    "failed": 8,
+    "incomplete": 4,
+    "names": [
+      "test_gs3dx_leg_feedforward_profile/test_constant_column_and_row_equivalence",
+      "test_gs3dx_leg_feedforward_profile/test_time_varying_profile_endpoints_and_interior_interp",
+      "test_gs3dx_leg_feedforward_profile/test_clamping_outside_time_grid",
+      "test_gs3dx_leg_feedforward_profile/test_zero_initial_ramp",
+      "test_gs3dx_leg_feedforward_profile/test_offbalance_feedforward_retained",
+      "test_gs3dx_leg_feedforward_profile/test_malformed_shape_fails",
+      "test_gs3dx_leg_feedforward_profile/test_nonfinite_fails",
+      "test_gs3dx_leg_feedforward_profile/test_complex_type_fails",
+      "test_gs3dx_leg_feedforward_profile/test_higher_dimension_shape_fails"
+    ]
+  },
+  "green": {
+    "phase": "GREEN_WITH_EXISTING_BALANCE_REGRESSION",
+    "passed": 16,
+    "failed": 0,
+    "incomplete": 0,
+    "names": [
+      "test_gs3dx_leg_feedforward_profile/test_constant_column_and_row_equivalence",
+      "test_gs3dx_leg_feedforward_profile/test_time_varying_profile_endpoints_and_interior_interp",
+      "test_gs3dx_leg_feedforward_profile/test_clamping_outside_time_grid",
+      "test_gs3dx_leg_feedforward_profile/test_zero_initial_ramp",
+      "test_gs3dx_leg_feedforward_profile/test_offbalance_feedforward_retained",
+      "test_gs3dx_leg_feedforward_profile/test_malformed_shape_fails",
+      "test_gs3dx_leg_feedforward_profile/test_nonfinite_fails",
+      "test_gs3dx_leg_feedforward_profile/test_complex_type_fails",
+      "test_gs3dx_leg_feedforward_profile/test_higher_dimension_shape_fails",
+      "test_gs3dx_fit_balance/reference_is_an_offset_or_a_path_not_both",
+      "test_gs3dx_fit_balance/balance_off_is_the_leg_servo",
+      "test_gs3dx_fit_balance/balance_shifts_against_the_error_up_to_the_limit",
+      "test_gs3dx_fit_balance/each_leg_moves_its_foot_back",
+      "test_gs3dx_fit_balance/gain_shifts_the_pelvis_over_fixed_feet",
+      "test_gs3dx_fit_balance/model_closes_the_balance_loop",
+      "test_gs3dx_fit_balance/balance_holds_the_centre_of_mass"
+    ]
+  },
+  "red_receipt": {
+    "actual_process_exit_code": 0,
+    "final_exit_code": 0,
+    "termination_reason": "natural_exit",
+    "done_marker": true,
+    "script_status": "success",
+    "command_identity": "run('run_leg_feedforward_profile_red.m')",
+    "owned_pids": [20780],
+    "timestamp": "2026-10-02T18:44:24.146272+00:00"
+  },
+  "green_receipt": {
+    "actual_process_exit_code": 0,
+    "final_exit_code": 0,
+    "termination_reason": "natural_exit",
+    "done_marker": true,
+    "script_status": "success",
+    "command_identity": "run('run_leg_feedforward_profile_green.m')",
+    "owned_pids": [31768],
+    "timestamp": "2026-10-02T18:51:03.347335+00:00"
+  },
+  "balance_command_sha256": "904abca11df99b5533d59aeec63d64db122234f7bb80fdb5ab3dae7e5efd3c19",
+  "test_sha256": "e9f91a122e525ee8f1a1564f1347aafa9648da3133bc3f9a9774d515ad9f4e4d",
+  "full_human_forward_dynamics_qualified": false,
+  "legacy_0_3s_replay": {
+    "COM_error_RMS_mm_rounded": 10.1,
+    "COM_error_max_mm_rounded": 16.5,
+    "registered_max_COM_mm": 17.5
+  },
+  "contracts": [
+    "real finite numeric torque",
+    "constant 12-vector or 12-by-numel(T) matrix",
+    "no higher-dimensional input",
+    "same reference time interpolation and endpoint clamping",
+    "feedforward remains active when balance correction disabled"
+  ],
+  "delegation": {
+    "cli": "agy",
+    "model": "gemini-3.8-flash-high",
+    "conversation_id": "680c7edc-c4eb-4ec4-957e-da2e9c1c9698",
+    "parent_corrections": [
+      "remove workstation-specific test path",
+      "compare ramp increment to zero feedforward at the same time",
+      "reject complex and higher-dimensional torque input"
+    ]
+  }
+}

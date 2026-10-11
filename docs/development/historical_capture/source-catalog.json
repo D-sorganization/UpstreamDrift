@@ -92,6 +92,16 @@
       "physical_playback_scale": null,
       "film_lineage_status": "unreviewed; may repeat owner-supplied recordings",
       "publication_permitted": false
+    },
+    {
+      "subject_id": "subject-O",
+      "source_id": "cov-01",
+      "private": true,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0,
+      "presentation_fps": 30.0,
+      "rights_status": "restricted",
+      "publication_permitted": false
     }
   ],
   "candidates": [

@@ -69,3 +69,20 @@ def test_frozen_assignment_raises() -> None:
     caps = EmbedCapabilities()
     with pytest.raises(dataclasses.FrozenInstanceError):
         caps.supports_embedded = False  # type: ignore[misc]
+
+
+@pytest.mark.unit
+def test_release_widget_schedules_qt_deletion_once() -> None:
+    """``release_widget`` calls ``deleteLater`` and tolerates ``None``/plain objects."""
+    from src.shared.python.launcher_embed import release_widget
+
+    calls: list[str] = []
+
+    class _Widget:
+        def deleteLater(self) -> None:  # noqa: N802 - Qt naming
+            calls.append("deleted")
+
+    release_widget(_Widget())
+    release_widget(None)
+    release_widget(object())
+    assert calls == ["deleted"]

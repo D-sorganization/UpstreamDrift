@@ -46,7 +46,7 @@ function skel = load_impact_starting_position(opts)
     input_file = char(opts.input_file);
     if ~isfile(input_file)
         % Fallback: search for the file under src/model/inputs.
-        candidate = fullfile(matlab_root, 'src', 'model', 'inputs', '3DModelInputs_Impact.mat');
+        candidate = default_impact_input_mat();
         if isfile(candidate)
             input_file = candidate;
         else
@@ -166,9 +166,7 @@ end
 
 %% =====================================================================
 function opts = local_fill_defaults(opts)
-    here = fileparts(mfilename('fullpath'));
-    matlab_root = fileparts(fileparts(here));
-    default_input = fullfile(matlab_root, 'src', 'model', 'inputs', '3DModelInputs_Impact.mat');
+    default_input = default_impact_input_mat();
     defaults = struct( ...
         'model_name', 'GolfSwing3D_Kinetic', ...
         'input_file', default_input, ...

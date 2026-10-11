@@ -17,26 +17,26 @@ Generator", and URDF is the format it writes.
 
 ## Inputs
 
-| Input | Format / units |
-| --- | --- |
-| Model file (File > Open) | `*.urdf`, `*.xml`, `*.mjcf`, `*.osim` (the file dialog filter in `gui.py`) |
-| OpenSim model | `.osim`, converted to URDF text by `osim_loader.OsimLoader.to_urdf` before display |
-| Library model | A category plus model key chosen in the library panel; golf-club models are generated on demand, human models are resolved to a file on disk |
-| Segment definition | A dict of link/joint properties supplied by the segment panel: geometry, mass in kg, inertia, and joint limits in rad (revolute/continuous) or m (prismatic) |
-| Attachment manifest | JSON validated against `src/tools/model_explorer/attachment_manifest.schema.json` |
+| Input                    | Format / units                                                                                                                                               |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Model file (File > Open) | `*.urdf`, `*.xml`, `*.mjcf`, `*.osim` (the file dialog filter in `gui.py`)                                                                                   |
+| OpenSim model            | `.osim`, converted to URDF text by `osim_loader.OsimLoader.to_urdf` before display                                                                           |
+| Library model            | A category plus model key chosen in the library panel; golf-club models are generated on demand, human models are resolved to a file on disk                 |
+| Segment definition       | A dict of link/joint properties supplied by the segment panel: geometry, mass in kg, inertia, and joint limits in rad (revolute/continuous) or m (prismatic) |
+| Attachment manifest      | JSON validated against `src/tools/model_explorer/attachment_manifest.schema.json`                                                                            |
 
 Joint types the segment editor offers are fixed, revolute, prismatic,
 continuous, floating, and planar.
 
 ## Outputs
 
-| Output | Format / units |
-| --- | --- |
-| Saved model | URDF XML written as `*.urdf` or `*.xml`, UTF-8 |
-| Engine export | URDF XML via `export_for_engine(engine, default_filename)` |
-| `urdf_generated` signal | The current URDF document as a `str`, emitted to the launcher host |
-| `segment_added` / `segment_removed` signals | Segment dict / segment name |
-| Web tree response | `ModelExplorerResponse` JSON from the REST API, a collapsible node tree parsed from the model file |
+| Output                                      | Format / units                                                                                     |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Saved model                                 | URDF XML written as `*.urdf` or `*.xml`, UTF-8                                                     |
+| Engine export                               | URDF XML via `export_for_engine(engine, default_filename)`                                         |
+| `urdf_generated` signal                     | The current URDF document as a `str`, emitted to the launcher host                                 |
+| `segment_added` / `segment_removed` signals | Segment dict / segment name                                                                        |
+| Web tree response                           | `ModelExplorerResponse` JSON from the REST API, a collapsible node tree parsed from the model file |
 
 ## Method
 
@@ -59,6 +59,16 @@ URDF/MJCF file into a node tree
 (`GET /tools/model-explorer/{model_name}`,
 `POST /tools/model-explorer/inspect`) and can diff two models
 (`POST /tools/model-explorer/compare`, "Frankenstein mode").
+`src/api/routes/model_explorer_assembly.py` exposes the typed-port assembly
+session that backs the desktop assembly panel. The routes are stateless. The
+client sends an ordered plan (a base part plus drops), and the server replays
+it on every call:
+
+- `GET /tools/model-explorer/parts` lists the part catalog.
+- `POST /tools/model-explorer/assembly` returns the tree, placed parts, free
+  sockets and validation, and can also evaluate a candidate drop without
+  applying it.
+- `POST /tools/model-explorer/assembly/export` writes URDF or MJCF.
 
 ## Limitations
 
@@ -79,6 +89,7 @@ URDF/MJCF file into a node tree
   are present. Treat this page, not that README, as current.
 
 ## See Also
+
 - [Model Explorer package README](../../src/tools/model_explorer/README.md)
   (stale in the ways noted above)
 - [Attachment manifests](../model_explorer/attachment-manifests.md)
