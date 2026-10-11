@@ -198,6 +198,16 @@ _SOLVER_PROGRESS_GETTERS = {
 }
 
 
+def _solver_progress_error(getter_name: str, error: Exception) -> dict[str, Any]:
+    """Format an observational getter error without changing its failure detail."""
+    return {
+        "getter": getter_name,
+        "status": "error",
+        "error_type": type(error).__name__,
+        "error_message": str(error)[:500],
+    }
+
+
 def _solver_progress_properties(
     solver: Any, getter_names: Mapping[str, str] = _SOLVER_PROGRESS_GETTERS
 ) -> dict[str, dict[str, Any]]:
@@ -207,12 +217,7 @@ def _solver_progress_properties(
         try:
             getter = getattr(solver, getter_name, None)
         except Exception as error:  # noqa: BLE001 - introspection must remain observational
-            result[name] = {
-                "getter": getter_name,
-                "status": "error",
-                "error_type": type(error).__name__,
-                "error_message": str(error)[:500],
-            }
+            result[name] = _solver_progress_error(getter_name, error)
             continue
         if not callable(getter):
             result[name] = {"getter": getter_name, "status": "missing"}
@@ -220,12 +225,7 @@ def _solver_progress_properties(
         try:
             value = getter()
         except Exception as error:  # noqa: BLE001 - introspection must remain observational
-            result[name] = {
-                "getter": getter_name,
-                "status": "error",
-                "error_type": type(error).__name__,
-                "error_message": str(error)[:500],
-            }
+            result[name] = _solver_progress_error(getter_name, error)
             continue
         if type(value) is float and not math.isfinite(value):
             result[name] = {

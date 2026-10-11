@@ -214,6 +214,36 @@ def test_solver_progress_getters_preserve_missing_error_and_nonfinite() -> None:
     assert "value" not in result["object"]
 
 
+def test_solver_progress_error_record_is_same_for_descriptor_and_call_errors() -> None:
+    class GetterFailures:
+        @property
+        def get_descriptor_value(self) -> Any:
+            raise RuntimeError("descriptor unavailable")
+
+        def get_call_value(self) -> float:
+            raise ValueError("getter unavailable")
+
+    result = native_moco_runner._solver_progress_properties(
+        GetterFailures(),
+        {"descriptor": "get_descriptor_value", "call": "get_call_value"},
+    )
+
+    assert result == {
+        "descriptor": {
+            "getter": "get_descriptor_value",
+            "status": "error",
+            "error_type": "RuntimeError",
+            "error_message": "descriptor unavailable",
+        },
+        "call": {
+            "getter": "get_call_value",
+            "status": "error",
+            "error_type": "ValueError",
+            "error_message": "getter unavailable",
+        },
+    }
+
+
 def test_progress_atomic_write_leaves_previous_snapshot_on_serialization_error(
     tmp_path: Path,
 ) -> None:
