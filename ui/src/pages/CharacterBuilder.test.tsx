@@ -81,6 +81,21 @@ describe('CharacterBuilderPage', () => {
     expect(screen.getByTestId('appearance-panel-mock')).toBeInTheDocument();
   });
 
+  it('keeps the spec-body preview off by default and shows its status when toggled (CMB-7f, #11658)', () => {
+    render(<CharacterBuilderPage />);
+
+    const toggle = screen.getByLabelText(/Preview spec body/i) as HTMLInputElement;
+    expect(toggle.checked).toBe(false);
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+
+    fireEvent.click(toggle);
+
+    expect(toggle.checked).toBe(true);
+    expect(screen.getByRole('status')).toHaveTextContent('Loading spec body');
+    // The glTF export is debounced, so nothing has been fetched yet.
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
   it('has correct default slider ranges and values', () => {
     render(<CharacterBuilderPage />);
 
