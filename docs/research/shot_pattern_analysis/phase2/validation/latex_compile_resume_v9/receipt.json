@@ -1,0 +1,12 @@
+{
+  "utc": "2026-10-11T01:59:41.756505+00:00",
+  "tool": "mcp__codex_app__compile_latex_document",
+  "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/shot_pattern_analysis.tex",
+  "source_sha256": "bfd7bfccc9dbf8ff6503d361a4b6ff82fd526e2470344f4412a19c1f331a6fc6",
+  "status": "compile-failed",
+  "failure_stage": "Tectonic bundle retrieval before source parse",
+  "diagnostic": "src/config.rs:154:18: Result::unwrap() on Err: this bundle is not cached and could not be fetched from https://relay.fullyjustified.net/default_bundle_v33.tar.index.gz; RUST_BACKTRACE hint",
+  "issue": 12120,
+  "source_change": "Replaced stale still-running graphics status; no mathematical changes",
+  "scope": "No successful LaTeX compilation claimed; separate REPORT.pdf is not this article"
+}

@@ -1,0 +1,469 @@
+{
+  "scope": "PNG visual component review only; not whole publication or vector acceptance",
+  "status": "accepted",
+  "reviewer": "root",
+  "utc": "2026-10-11T02:10:20.636712+00:00",
+  "batch_inventory_sha256": "0e37f5c191d4f9391787674b857c92c791280ffbc32f53beb0fac701c49ca9fd",
+  "command_receipt_sha256": "4998c651bd48ae686a9d2147a6f4b83c0c79125bd28bfe5249d1abaa813cbeba",
+  "all_assets_rehashed": 192,
+  "numeric_sha256": {
+    "REPORT_ORIGINAL_SOURCE_INVENTORY.csv": "6a237d80f005b3a8da7d0b4502fc7e5ec0f0aae7d805c5b15c879f9e6f58c7d5",
+    "REPORT_SUPPLEMENT.csv": "fe7f9e671f97122042e6a578b2aa8f21fe9a3eb4490831cb38bc3a1e88935848",
+    "REPORT_SUPPLEMENT.json": "6cdf53ca15bebb8829f42b5b3a1013571f1d8d4df83d054ab9935fa1bb5a8f0d",
+    "REPORT_SUPPLEMENT_COMPARISONS.csv": "39a08d071373a6a30c0bbc2b06e4dd01630432ee5fe529ff24a858db6a20b9c8",
+    "REPORT_SUPPLEMENT_COMPARISONS.json": "c46738a38bb35ab86ba2163260e31a225aca07c807e021225d3c38fd09f0cf46",
+    "REPORT_SUPPLEMENT_COMPARISONS.md": "b1693ff7268f1cb6c901dff1fee39a3135a80ca688b193079411e0d2fe9b3721",
+    "control_aliases.json": "dcd7097475a1a0b67ceceaf1509e4c780655c7ec5f0cd0e041e25fcdcad2b87b"
+  },
+  "inspected_contacts": [
+    {
+      "path": "contact_000_1.jpg",
+      "sha256": "2444575bb12c2ec878b973bd902335d0310373e1b8af6e1310ef56199fd8622f"
+    },
+    {
+      "path": "contact_000_2.jpg",
+      "sha256": "aac27b344ddc7d8effb78147c4c959929d5ea206b605e642714998f1de923799"
+    },
+    {
+      "path": "contact_000_3.jpg",
+      "sha256": "8680edd0426db316ac44f52b3b99c08d1ac6b3e72edac43a25d29f0557c066b4"
+    },
+    {
+      "path": "contact_001_1.jpg",
+      "sha256": "ca03c71d1b054da1343b776531acbcd3fec40801b1a6cc496293dd2aedceffa5"
+    },
+    {
+      "path": "contact_001_2.jpg",
+      "sha256": "426b1f19387cd56b3c942a67c90e5671393f1606e5a84ba00290bb3bba178a7f"
+    },
+    {
+      "path": "contact_001_3.jpg",
+      "sha256": "51fd1e3c7fc63e22622c916fa9496234b8a381a3113ffc21538d7f0b768e87fe"
+    },
+    {
+      "path": "contact_002_1.jpg",
+      "sha256": "040437edced823945e1c44ceb8a666c93ba17d1bdc83b5094bc38218c493b5fc"
+    },
+    {
+      "path": "contact_002_2.jpg",
+      "sha256": "d7a2fe8d6101b446fe6e33743e7fd80c5a4c4ecc9b811a806c0f24f4e4ec0ad5"
+    },
+    {
+      "path": "contact_002_3.jpg",
+      "sha256": "bbb01f4e81b1dac2c3d7eb0c02b462fd30695e2101be4a8cf31cd3e04856d1ce"
+    },
+    {
+      "path": "contact_003_1.jpg",
+      "sha256": "7c13b7dd149ba92774c27f0b3f5cde6a403d91031cd6deb39998e72cfec4f106"
+    },
+    {
+      "path": "contact_003_2.jpg",
+      "sha256": "50b2edbb6e7ebd4d23e1f800e2b14bc75c4552bc4a0c7b9a21d9c2924681a2af"
+    },
+    {
+      "path": "contact_003_3.jpg",
+      "sha256": "3de2740ccf4d373051dde132d6747f28a5255908a8154ae757822b093a5dca55"
+    },
+    {
+      "path": "contact_004_1.jpg",
+      "sha256": "aa79e2f078bd7535e6f1ad2ed23b8855f343c44a3f7cae64c69747f3437b4ca4"
+    },
+    {
+      "path": "contact_004_2.jpg",
+      "sha256": "47b6040132006ea78e94c557dcd95b041be99477aed063d15d5881c03dab4d5c"
+    },
+    {
+      "path": "contact_004_3.jpg",
+      "sha256": "2f3dabf25fce2052d8467c58f8747edbf09c85c10406827eb1dfb43f09b2037f"
+    },
+    {
+      "path": "contact_005_1.jpg",
+      "sha256": "11252c82c38e5dabbd49b2203e2b85b9370aa90cc001f070010b31bb004c6588"
+    },
+    {
+      "path": "contact_005_2.jpg",
+      "sha256": "818aef8926c456c2aaf7ef8eae1703c6dfbfb7a85070926d45c885067c27887a"
+    },
+    {
+      "path": "contact_005_3.jpg",
+      "sha256": "ae5b92c6bb821ce49238f76dae287def5a626a3ae3ae74d21f007ce8b85980a2"
+    },
+    {
+      "path": "contact_006_1.jpg",
+      "sha256": "a994a24343a3299f71234bf8b4c4eb1b65d13a191e96248b527ca59500f98b24"
+    },
+    {
+      "path": "contact_006_2.jpg",
+      "sha256": "432df4469e87a8904899845055a3387d575e7d1f3b8a5e4c61c197685f6ecf89"
+    },
+    {
+      "path": "contact_006_3.jpg",
+      "sha256": "e1095ab934158440186bafc2359937f85db5ac292c4b1ef2f78c1a6d8ecfc135"
+    },
+    {
+      "path": "contact_007_1.jpg",
+      "sha256": "39aa2602c60e4faf98f94da1184d4c80e0792a8480efd6b64adc3d94a4191680"
+    },
+    {
+      "path": "contact_007_2.jpg",
+      "sha256": "ca4f654c5495763569db551a542c0addb104cd25027130b14a9337450eac19b0"
+    },
+    {
+      "path": "contact_007_3.jpg",
+      "sha256": "9be3ab952664f241ae582a16c79f8875abbffaa05c3a04be969fcfaf6a4386e3"
+    },
+    {
+      "path": "contact_008_1.jpg",
+      "sha256": "068ed35c5995b6462c0dfc1f170e0bcfdd63673490261f8b506caa76ed1d40d2"
+    },
+    {
+      "path": "contact_008_2.jpg",
+      "sha256": "6f73450424d12e465ae59067e6119f71dab7b89ebc982180b67f7a8430f153fe"
+    },
+    {
+      "path": "contact_008_3.jpg",
+      "sha256": "3eef8cc4646aa8c31991aa9209018de5a8606394093b567102165e2da54b65c7"
+    },
+    {
+      "path": "contact_009_1.jpg",
+      "sha256": "285c26ac7ebfb64f60d0520a71071250dc6d11af76372df52c94d34efd945fa9"
+    },
+    {
+      "path": "contact_009_2.jpg",
+      "sha256": "ad3d864cfc7f43612f0ec74fdc3ec2e369f9074ecb707ee2fa371a5da2bbb03f"
+    },
+    {
+      "path": "contact_009_3.jpg",
+      "sha256": "5aa1ae303d40d342c170af1cbc6e774ef5bd8cd444c3447057b5722dcbea7506"
+    },
+    {
+      "path": "contact_010_1.jpg",
+      "sha256": "26b52aa9c1719ba9d09876a99009c83a1edbacef09b0683d7fb7c6255c612a9c"
+    },
+    {
+      "path": "contact_010_2.jpg",
+      "sha256": "fed74f3ca34a109474a1266757d53ca7baf123470f805f479992117b1a0a4e33"
+    },
+    {
+      "path": "contact_010_3.jpg",
+      "sha256": "594c31d8911228bc75aae2dc40e267f1e64cf8346d605de5a68f6c812d634297"
+    },
+    {
+      "path": "contact_011_1.jpg",
+      "sha256": "b4ec8e887bb11fd837218fb797f778cdd552b5116088b2f2012cf4801407562d"
+    },
+    {
+      "path": "contact_011_2.jpg",
+      "sha256": "71f468a90a2381a450748cf1905f860454f48595cb9d94680b91c939d37aa18f"
+    },
+    {
+      "path": "contact_011_3.jpg",
+      "sha256": "24fa9c34f53c1c3ae1bc84b7b46737b5d717570b1ddf862fc86823b6752b5eda"
+    }
+  ],
+  "full_size_originals_viewed": [
+    {
+      "path": "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_shaft_only_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_shaft_only__77e806d784_density.png",
+      "sha256": "90753f78c27a5d7813e20b51f275925163117277a04323892204ac87860b9c6a"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_shaft_only_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_shaft_only__77e806d784_overhead_social.png",
+      "sha256": "1ef53cfa8ae559a4557dbd8609f728fb2366c961150495a8e2c47c74036253dd"
+    }
+  ],
+  "records": [
+    {
+      "index": 0,
+      "stem": "curve_strength_original_control_1_driver_lean0_curve1_rotation1_combined2_vs_original_control_1_driver_lean0_curve2_rotation1_combined2_178p949m_56038f8c02",
+      "asset_sha256": {
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation1_combined2_vs_original_control_1_driver_lean0_curve2_rotation1_combined2_178p949m_56038f8c02_density_straight_social.png": "e4e8697cf87e35f3f6098f0a7175a930e8da975f8e36eae5a96b4a88f207bcea",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation1_combined2_vs_original_control_1_driver_lean0_curve2_rotation1_combined2_178p949m_56038f8c02_density_straight_social.pdf": "aa8e27a0a3586849ce910690b4440c06f008c0219fbe488fa0d38659d1d9178d",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation1_combined2_vs_original_control_1_driver_lean0_curve2_rotation1_combined2_178p949m_56038f8c02_density_straight_social.svg": "ab2df88d60d8ecd95828b649cd42253d527d5bf2365de0ebd9349c7eda9d453c",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation1_combined2_vs_original_control_1_driver_lean0_curve2_rotation1_combined2_178p949m_56038f8c02_density_draw_social.png": "705d4fa9a8782c513a606443c0e4b6c28e381fd36aec44907cd47db03684c1b4",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation1_combined2_vs_original_control_1_driver_lean0_curve2_rotation1_combined2_178p949m_56038f8c02_density_draw_social.pdf": "7796bf833232484ffa041fd054a72112ac683f5ce68852cc368552e048949f7f",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation1_combined2_vs_original_control_1_driver_lean0_curve2_rotation1_combined2_178p949m_56038f8c02_density_draw_social.svg": "e098babca5a62f69096aa0e81a8976014b7b70dd3966aed0ba073df20e2e7f7e",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation1_combined2_vs_original_control_1_driver_lean0_curve2_rotation1_combined2_178p949m_56038f8c02_density_fade_social.png": "dddcdc7da1c283b9eb073fa375294c9fee5683d8b3168dedd98007be2e5d0a47",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation1_combined2_vs_original_control_1_driver_lean0_curve2_rotation1_combined2_178p949m_56038f8c02_density_fade_social.pdf": "013d023532bbc953c49ce3a3d45da310f25759de4b914561453cb5f93d49876d",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation1_combined2_vs_original_control_1_driver_lean0_curve2_rotation1_combined2_178p949m_56038f8c02_density_fade_social.svg": "3bdb6c1777c65f98e07a412bd2032958e91b9e40ad49671f8a46cbfc5e8f8455",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation1_combined2_vs_original_control_1_driver_lean0_curve2_rotation1_combined2_178p949m_56038f8c02_density.png": "3b48720e713e9a7f315659f642c0bf48cae4e1aade85c940b47e86762da17215",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation1_combined2_vs_original_control_1_driver_lean0_curve2_rotation1_combined2_178p949m_56038f8c02_density.pdf": "274c69b7a6e54dc56f800c76855e714a3a1ebadc8ee72cef8f6dbb0d91c4b12c",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation1_combined2_vs_original_control_1_driver_lean0_curve2_rotation1_combined2_178p949m_56038f8c02_density.svg": "09ad2094dc511806c419598c15a3fe07ae73f836be9cd6ac49751a078d96427e",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation1_combined2_vs_original_control_1_driver_lean0_curve2_rotation1_combined2_178p949m_56038f8c02_overhead.png": "54df2dd2973967d81cc62d31f40c256b01b8b22b3bae017018303b5b7df86f6a",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation1_combined2_vs_original_control_1_driver_lean0_curve2_rotation1_combined2_178p949m_56038f8c02_overhead.pdf": "73408cee15b0d23d132f995dee38580e45acc9a7fd317296f86bda7434171e3c",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation1_combined2_vs_original_control_1_driver_lean0_curve2_rotation1_combined2_178p949m_56038f8c02_overhead.svg": "e94d213d80d1a64513782d77972596d91c168d01320ff7946b3006f0d5e5326d",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation1_combined2_vs_original_control_1_driver_lean0_curve2_rotation1_combined2_178p949m_56038f8c02_overhead_social.png": "8dd1396c97b0c3583952c95e8e268d7ff20971dbdad5eb1c1c50fe7d0d1df0e8"
+      },
+      "status": "accepted",
+      "finding": "No visible clipping, overlap, or missing content in three inspected contact sheets."
+    },
+    {
+      "index": 1,
+      "stem": "curve_strength_original_control_1_driver_lean0_curve1_rotation1_shaft_only_vs_original_control_1_driver_lean0_curve2_rotation1_shaft_only_178p949m_bc1e5ef5dd",
+      "asset_sha256": {
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation1_shaft_only_vs_original_control_1_driver_lean0_curve2_rotation1_shaft_only_178p949m_bc1e5ef5dd_density_straight_social.png": "f72034a8dfe84271bbe762fa1eae5bccf46dce5ed8ac0a68db44b3f0192de78e",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation1_shaft_only_vs_original_control_1_driver_lean0_curve2_rotation1_shaft_only_178p949m_bc1e5ef5dd_density_straight_social.pdf": "d27d3ef9198ce9f07989f651dae0d09e88e171fdc5861015cd36482cb56d51a1",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation1_shaft_only_vs_original_control_1_driver_lean0_curve2_rotation1_shaft_only_178p949m_bc1e5ef5dd_density_straight_social.svg": "aaf6ed8bc98a3219587ca3d2798efa1b5e63a0b2fed20e99b43e06ff8f035c99",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation1_shaft_only_vs_original_control_1_driver_lean0_curve2_rotation1_shaft_only_178p949m_bc1e5ef5dd_density_draw_social.png": "8d7215e2ee34eb840423c46db25b9cb20a55db1ac8461b68cc675df14071b621",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation1_shaft_only_vs_original_control_1_driver_lean0_curve2_rotation1_shaft_only_178p949m_bc1e5ef5dd_density_draw_social.pdf": "c4f1c172a4cd43583af3ce429bc4c1aac0b6d186298735865e5e76fe6b2477f0",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation1_shaft_only_vs_original_control_1_driver_lean0_curve2_rotation1_shaft_only_178p949m_bc1e5ef5dd_density_draw_social.svg": "22f820c7b48b588065a4629a888c7ed814c59ff9cca77237622d549c472529ab",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation1_shaft_only_vs_original_control_1_driver_lean0_curve2_rotation1_shaft_only_178p949m_bc1e5ef5dd_density_fade_social.png": "d208b1174542daad77c03aebb411c7643da7c25bcfbc5324040fda3620001bd2",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation1_shaft_only_vs_original_control_1_driver_lean0_curve2_rotation1_shaft_only_178p949m_bc1e5ef5dd_density_fade_social.pdf": "a41b33898714f72f30ed9c872e2b6ebc9256df564eebbc989f9ba8a81e0d46b9",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation1_shaft_only_vs_original_control_1_driver_lean0_curve2_rotation1_shaft_only_178p949m_bc1e5ef5dd_density_fade_social.svg": "df11fe8651f1e3e0795591dfd86f0e61e5cd6fb5ccf24ba93cb1b2c301b1e5dd",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation1_shaft_only_vs_original_control_1_driver_lean0_curve2_rotation1_shaft_only_178p949m_bc1e5ef5dd_density.png": "adbf4b389bb7561fccd02375744252f092e769ae102f1254ef21c0de397d57aa",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation1_shaft_only_vs_original_control_1_driver_lean0_curve2_rotation1_shaft_only_178p949m_bc1e5ef5dd_density.pdf": "d6fab262dc4e69a4102c213713dd598779ce09a219548b78708eacbfceca7838",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation1_shaft_only_vs_original_control_1_driver_lean0_curve2_rotation1_shaft_only_178p949m_bc1e5ef5dd_density.svg": "32e2f4e077a98b59d9a02023601352627ad94946c1563c20eb70966b986f276e",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation1_shaft_only_vs_original_control_1_driver_lean0_curve2_rotation1_shaft_only_178p949m_bc1e5ef5dd_overhead.png": "1a115cc180540461160eb313a0a40d65a911b08c039d59a4d1c8f5b659e50a55",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation1_shaft_only_vs_original_control_1_driver_lean0_curve2_rotation1_shaft_only_178p949m_bc1e5ef5dd_overhead.pdf": "dfb44778bcebe9dfe05f2c7cf7b7846a6115c06284d9f6dab9ae506b81a67750",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation1_shaft_only_vs_original_control_1_driver_lean0_curve2_rotation1_shaft_only_178p949m_bc1e5ef5dd_overhead.svg": "e110602bd159e454055af597b104efdeb53c2e687a2c956e975f64b4df37e96a",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation1_shaft_only_vs_original_control_1_driver_lean0_curve2_rotation1_shaft_only_178p949m_bc1e5ef5dd_overhead_social.png": "a43b3446aa2801dbce7e6b03eeae5843c840a4bdcae01520b3cf25d8d039f5f9"
+      },
+      "status": "accepted",
+      "finding": "No visible clipping, overlap, or missing content in three inspected contact sheets."
+    },
+    {
+      "index": 2,
+      "stem": "curve_strength_original_control_1_driver_lean0_curve1_rotation2_combined2_vs_original_control_1_driver_lean0_curve2_rotation2_combined2_178p949m_0b64ecd346",
+      "asset_sha256": {
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation2_combined2_vs_original_control_1_driver_lean0_curve2_rotation2_combined2_178p949m_0b64ecd346_density_straight_social.png": "38031f1376de9945fbf5bb3d6706ee0682c9aa9d154b2d84f990ee23f9e69c4b",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation2_combined2_vs_original_control_1_driver_lean0_curve2_rotation2_combined2_178p949m_0b64ecd346_density_straight_social.pdf": "df720c58d41dfb97a3ca746664554ed7f8c5af2c351df37a579a5823207dae4e",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation2_combined2_vs_original_control_1_driver_lean0_curve2_rotation2_combined2_178p949m_0b64ecd346_density_straight_social.svg": "93295e3091de8cd6d064a261f48bea99f97999756fbe4d88c50824d5c6961138",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation2_combined2_vs_original_control_1_driver_lean0_curve2_rotation2_combined2_178p949m_0b64ecd346_density_draw_social.png": "97bc404130c18e7291957c1e042c187294be83446ccc1341c48f5e16a9755e23",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation2_combined2_vs_original_control_1_driver_lean0_curve2_rotation2_combined2_178p949m_0b64ecd346_density_draw_social.pdf": "56908dba3540b37f9cb54cae2e9847dc4c05e513d895fc041a4f3c48363743d7",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation2_combined2_vs_original_control_1_driver_lean0_curve2_rotation2_combined2_178p949m_0b64ecd346_density_draw_social.svg": "71cfaf8d2599deb893d14a7b5da8952b1c147a6cffaa5040de2a8b3ab9f8a81b",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation2_combined2_vs_original_control_1_driver_lean0_curve2_rotation2_combined2_178p949m_0b64ecd346_density_fade_social.png": "d35e0fe88e60d189f18ed9173e7c35a22a9d5f1f8ca3011936efbb5d16fd1578",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation2_combined2_vs_original_control_1_driver_lean0_curve2_rotation2_combined2_178p949m_0b64ecd346_density_fade_social.pdf": "6bd817f0d593f5c7b87f82bbcf0fc3673f80397f1695e7fba38c57fbb7237ff0",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation2_combined2_vs_original_control_1_driver_lean0_curve2_rotation2_combined2_178p949m_0b64ecd346_density_fade_social.svg": "f13a19646f05f92a7ebda14279bd982914a483342250d02e87d1f5889f543588",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation2_combined2_vs_original_control_1_driver_lean0_curve2_rotation2_combined2_178p949m_0b64ecd346_density.png": "a4e77e9a6d7471dc077dd079eedf7f5287eb578466767b213bc1c6b1e4583824",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation2_combined2_vs_original_control_1_driver_lean0_curve2_rotation2_combined2_178p949m_0b64ecd346_density.pdf": "e38ad9a0e5ca6b5559704dcec1d25cf0ffa9e2d26cce76cd394c6fbe4f49ee34",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation2_combined2_vs_original_control_1_driver_lean0_curve2_rotation2_combined2_178p949m_0b64ecd346_density.svg": "f0c8efeef5075bce15a32072139d50096ae61f0daebd2081c73aed962dc5a021",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation2_combined2_vs_original_control_1_driver_lean0_curve2_rotation2_combined2_178p949m_0b64ecd346_overhead.png": "137ff5bcc3fa02c24fb48ba37a3a69d22033b1264fc86c41e0e02c1902933279",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation2_combined2_vs_original_control_1_driver_lean0_curve2_rotation2_combined2_178p949m_0b64ecd346_overhead.pdf": "b993f0a2575f0d9baf8059846d5399a1e77a13cf6f19f5054d23a32d11187263",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation2_combined2_vs_original_control_1_driver_lean0_curve2_rotation2_combined2_178p949m_0b64ecd346_overhead.svg": "e562bb554bead9b1212b6ff2279b231320d44f49fadf101ec9f2a2091d08e341",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation2_combined2_vs_original_control_1_driver_lean0_curve2_rotation2_combined2_178p949m_0b64ecd346_overhead_social.png": "6a55fc00442b352c2e4cbb11462539846f06402fb20d474381bf7d6c38bce022"
+      },
+      "status": "accepted",
+      "finding": "No visible clipping, overlap, or missing content in three inspected contact sheets."
+    },
+    {
+      "index": 3,
+      "stem": "curve_strength_original_control_1_driver_lean0_curve1_rotation2_shaft_only_vs_original_control_1_driver_lean0_curve2_rotation2_shaft_only_178p949m_e49ad8257a",
+      "asset_sha256": {
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation2_shaft_only_vs_original_control_1_driver_lean0_curve2_rotation2_shaft_only_178p949m_e49ad8257a_density_straight_social.png": "78e6c2fd87e3cea067e664ddb3e25d17a9f02fc579c7caaeb3ef84cad6ade266",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation2_shaft_only_vs_original_control_1_driver_lean0_curve2_rotation2_shaft_only_178p949m_e49ad8257a_density_straight_social.pdf": "a0a529fb0246c1040c522c449011c0703049dbb15cd9a48db9d32ba27fd84ea5",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation2_shaft_only_vs_original_control_1_driver_lean0_curve2_rotation2_shaft_only_178p949m_e49ad8257a_density_straight_social.svg": "bc5cee3e23b56193067c409b2ca77faefe4ec0c1bb8c57606a6606f5a94c6cdf",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation2_shaft_only_vs_original_control_1_driver_lean0_curve2_rotation2_shaft_only_178p949m_e49ad8257a_density_draw_social.png": "4640c49c8949fbd454d72ac48d986ec70a4572406dc6a32897d969eac95839b1",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation2_shaft_only_vs_original_control_1_driver_lean0_curve2_rotation2_shaft_only_178p949m_e49ad8257a_density_draw_social.pdf": "ddd86ff762c5bdd62396cf1077dac2acf06980c79e5d07ba79c36746589096f7",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation2_shaft_only_vs_original_control_1_driver_lean0_curve2_rotation2_shaft_only_178p949m_e49ad8257a_density_draw_social.svg": "02fc96afbcdfb21c043b8d2e77497d03f3469443eb94eccd972abef1913f32d7",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation2_shaft_only_vs_original_control_1_driver_lean0_curve2_rotation2_shaft_only_178p949m_e49ad8257a_density_fade_social.png": "97a3c6120901ac2ab9877066a6fa57f92855c252836ac0d87e8e0028a4d41027",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation2_shaft_only_vs_original_control_1_driver_lean0_curve2_rotation2_shaft_only_178p949m_e49ad8257a_density_fade_social.pdf": "bc7057f67c39b1e337084e709cfdaa02644164410ebda175c187789cdb149250",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation2_shaft_only_vs_original_control_1_driver_lean0_curve2_rotation2_shaft_only_178p949m_e49ad8257a_density_fade_social.svg": "23c05d2a1c48623fb085b3767ea41b3b7014d5355c688f5d21e8d6f13b30e486",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation2_shaft_only_vs_original_control_1_driver_lean0_curve2_rotation2_shaft_only_178p949m_e49ad8257a_density.png": "4b75ef7e0dcb6d6e4de6822e80f47a2fe1e0e97a2891b1fe770bf8f8e2dda7cd",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation2_shaft_only_vs_original_control_1_driver_lean0_curve2_rotation2_shaft_only_178p949m_e49ad8257a_density.pdf": "600b3d13760bd47bfef8f975516819e9f6b69f6e8cac3786b9722f76e21c1344",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation2_shaft_only_vs_original_control_1_driver_lean0_curve2_rotation2_shaft_only_178p949m_e49ad8257a_density.svg": "6c668905b332cf625c35dad904baab780427fc434b3bb214370eb6407192c36e",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation2_shaft_only_vs_original_control_1_driver_lean0_curve2_rotation2_shaft_only_178p949m_e49ad8257a_overhead.png": "8999bb60bd0f7b1b489b32592597eaece61e91a84554d2e1012a0e24bdb8b2b4",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation2_shaft_only_vs_original_control_1_driver_lean0_curve2_rotation2_shaft_only_178p949m_e49ad8257a_overhead.pdf": "93d10203e4648446e93000c285f1fc068a3bd880ed42b92fbf602e914c0f2b4a",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation2_shaft_only_vs_original_control_1_driver_lean0_curve2_rotation2_shaft_only_178p949m_e49ad8257a_overhead.svg": "420ba53ed9624d87f28d1970bf0f3fae17f7b47f71262c5f816da137c6cf3cb1",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation2_shaft_only_vs_original_control_1_driver_lean0_curve2_rotation2_shaft_only_178p949m_e49ad8257a_overhead_social.png": "83381727452becbae453958e8d528b2a426528cded987fbccd0902b27c692954"
+      },
+      "status": "accepted",
+      "finding": "No visible clipping, overlap, or missing content in three inspected contact sheets."
+    },
+    {
+      "index": 4,
+      "stem": "curve_strength_original_control_1_driver_lean5_curve1_rotation1_combined2_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation1_combined2_178p949m_cb58695e5c",
+      "asset_sha256": {
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation1_combined2_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation1_combined2_178p949m_cb58695e5c_density_straight_social.png": "ea18b5c9ecdf1d3e83f6ad9b225432e45bf5820f5ec9347551e2802a9834090d",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation1_combined2_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation1_combined2_178p949m_cb58695e5c_density_straight_social.pdf": "ede2a6160fb3e94006594eef9ee79ac72a275f84ae70082ae82167ca4d441f12",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation1_combined2_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation1_combined2_178p949m_cb58695e5c_density_straight_social.svg": "75025802a66534e72491c7e2250a77548079fd034d56be9cb766304c32867718",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation1_combined2_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation1_combined2_178p949m_cb58695e5c_density_draw_social.png": "2d7782c0fb7784c103c5e1978351d70abf957785a07431a8dba1a1283dfdd8b7",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation1_combined2_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation1_combined2_178p949m_cb58695e5c_density_draw_social.pdf": "588515bcd69b66e6a131cf6c42fcbebb3839537b7e9c3c003db32053b9ab2084",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation1_combined2_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation1_combined2_178p949m_cb58695e5c_density_draw_social.svg": "efd911fdea8bf0d397937f916af50d3084488cdcbe2d0026504e6e373a57bc69",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation1_combined2_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation1_combined2_178p949m_cb58695e5c_density_fade_social.png": "bc4b93905e2243ef79cb863621da544e40b848eabb4ce1511c4fa00e6bef948b",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation1_combined2_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation1_combined2_178p949m_cb58695e5c_density_fade_social.pdf": "4b782eef6fb454348a6c448442d1aa7183c9a5f8ef22d5f58739a2c31d4964de",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation1_combined2_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation1_combined2_178p949m_cb58695e5c_density_fade_social.svg": "39fe248debb8666de6c982d4bcbab35a37038c0f2a63128dc033e605fe62cec7",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation1_combined2_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation1_combined2_178p949m_cb58695e5c_density.png": "4c87a722d41fdb036330dda5be5944c8ea31b9f72eaeb418c580a5708817bbe7",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation1_combined2_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation1_combined2_178p949m_cb58695e5c_density.pdf": "2c32c373e210eb407bb920a8ba78bd122092e12ebde7bd68ff4a8bdd899b59a5",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation1_combined2_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation1_combined2_178p949m_cb58695e5c_density.svg": "03aa988546c5efeb4d92ea348fca517e3d920d8514f94016880190443bf64edc",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation1_combined2_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation1_combined2_178p949m_cb58695e5c_overhead.png": "c50930ff49b48b879319376375f401c82cf9da2ab3a16390020c0993eb9dd120",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation1_combined2_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation1_combined2_178p949m_cb58695e5c_overhead.pdf": "51e75a5ec0181854c57ac6c4ea950e21666b8a967213ee82c4fc5301cb5eba7a",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation1_combined2_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation1_combined2_178p949m_cb58695e5c_overhead.svg": "16c068c5741b6f3d803722a0b042459a1351f977bdbb90f47d047078549579a7",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation1_combined2_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation1_combined2_178p949m_cb58695e5c_overhead_social.png": "d2e2fc8405a0c8cb11956f4ea8273a30237e95feb33bd84f89edb518c850fec5"
+      },
+      "status": "accepted",
+      "finding": "No visible clipping, overlap, or missing content in three inspected contact sheets."
+    },
+    {
+      "index": 5,
+      "stem": "curve_strength_original_control_1_driver_lean5_curve1_rotation1_shaft_only_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation1_shaft_only_178p949m_ced935eb40",
+      "asset_sha256": {
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation1_shaft_only_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation1_shaft_only_178p949m_ced935eb40_density_straight_social.png": "76d053fc995c8ab72a1d1165924d3d0cd991d9f81ec66833f52d1f4612a408bd",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation1_shaft_only_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation1_shaft_only_178p949m_ced935eb40_density_straight_social.pdf": "d463cdda2c9d49dd9a95f7c5a26dcfb05afccd7eb4ae52a118a6ea7713ad743d",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation1_shaft_only_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation1_shaft_only_178p949m_ced935eb40_density_straight_social.svg": "a8d231ccd22bbb6d244e83fad39e42442a1e7da14cda126ea1cb05429208f3c9",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation1_shaft_only_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation1_shaft_only_178p949m_ced935eb40_density_draw_social.png": "0e662bbff90f1a32fa76aa80c0a2d7910149f57ad20c509a6d5db4be1c201d4e",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation1_shaft_only_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation1_shaft_only_178p949m_ced935eb40_density_draw_social.pdf": "b6c743b27acd9a2ef50ff1b3ae74872a6cef9c8b7044d613be5aa630c63861cf",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation1_shaft_only_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation1_shaft_only_178p949m_ced935eb40_density_draw_social.svg": "b148a019aafda60e2f434c935095dfda1d9864e360e86d17e91a521200d7a67b",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation1_shaft_only_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation1_shaft_only_178p949m_ced935eb40_density_fade_social.png": "251fcadbb7cdeefe77de444b91ac1ffe24aa7054495ee2df6cf58068bfa72ef4",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation1_shaft_only_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation1_shaft_only_178p949m_ced935eb40_density_fade_social.pdf": "750562a58700e686fee5d7af3d757294b67577325bf2e0909bf3bc3035733ae8",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation1_shaft_only_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation1_shaft_only_178p949m_ced935eb40_density_fade_social.svg": "4259550054984f69a7f17f29b767e701c12d1d729e6d1cf152d36ef7b1986330",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation1_shaft_only_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation1_shaft_only_178p949m_ced935eb40_density.png": "3dfe2d73ff75268cc5b9078d10adef334d25bc81af8d67b7175e675e6402e24a",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation1_shaft_only_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation1_shaft_only_178p949m_ced935eb40_density.pdf": "59efe64d78a4f52198d98475d999788bf021062ed4f9cd330a383b005b2845ee",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation1_shaft_only_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation1_shaft_only_178p949m_ced935eb40_density.svg": "2857381f76e43ed62c802b813fd25f1a4b433bcc482dd29300fc628aad7a6c7f",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation1_shaft_only_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation1_shaft_only_178p949m_ced935eb40_overhead.png": "f8aff923ed8aaa0d25e57e1d588ea3f6c5d1f838e326e651e73b6e35fbf1d338",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation1_shaft_only_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation1_shaft_only_178p949m_ced935eb40_overhead.pdf": "0dae546f91b9337469073da456833f6ae694d6c1d23868a5ab670ff56251c5a6",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation1_shaft_only_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation1_shaft_only_178p949m_ced935eb40_overhead.svg": "2d8777b29f6f7b570898b1c8a687732d6a8ba02010ccb8ca1cce22794e8aea48",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation1_shaft_only_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation1_shaft_only_178p949m_ced935eb40_overhead_social.png": "50e969fa337dcb6b3bf563ea68693730dbaa0f2952fc3d7074daf0bee2acf9df"
+      },
+      "status": "accepted",
+      "finding": "No visible clipping, overlap, or missing content in three inspected contact sheets."
+    },
+    {
+      "index": 6,
+      "stem": "curve_strength_original_control_1_driver_lean5_curve1_rotation2_combined2_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation2_combined2_178p949m_44469a2741",
+      "asset_sha256": {
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation2_combined2_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation2_combined2_178p949m_44469a2741_density_straight_social.png": "c0dd2888a22b99acb6f9fc0d4c8941d5e3541655c31e54148f4e5f0f596e3fb8",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation2_combined2_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation2_combined2_178p949m_44469a2741_density_straight_social.pdf": "aa6ab4f0a9f3bd67227bfc29a5ce381e05a829532a4dfd93a21e7705b88d4821",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation2_combined2_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation2_combined2_178p949m_44469a2741_density_straight_social.svg": "2b3deb665a18d59deb41d53ba4a9f94a435d14ac99de58db3af5a988a5836df6",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation2_combined2_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation2_combined2_178p949m_44469a2741_density_draw_social.png": "bdbb32374f5c9a7ff38959739508fd26ede32be66fd73701175932505336488a",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation2_combined2_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation2_combined2_178p949m_44469a2741_density_draw_social.pdf": "a121062ba86c8be43a0856ca47bda51d208af2b67466a1e8447ea6d5a4709b97",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation2_combined2_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation2_combined2_178p949m_44469a2741_density_draw_social.svg": "95e2b4406d756f4cc02ca7d8633cbd3983983563f1790c6932167fde2aa8bc73",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation2_combined2_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation2_combined2_178p949m_44469a2741_density_fade_social.png": "76b03575e0c4b50b0b68a1ad14394d940ba64c2cda19876c7f2e6a3fb1e362c7",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation2_combined2_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation2_combined2_178p949m_44469a2741_density_fade_social.pdf": "c5c9ce80d697378d24568cc807ea406e7eb3d070c243dc90dd54ef082e7da73f",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation2_combined2_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation2_combined2_178p949m_44469a2741_density_fade_social.svg": "1c922a7df9599e61509290e7a21c4ece4d040d19da75ca6b9d1f9b26678f8a48",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation2_combined2_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation2_combined2_178p949m_44469a2741_density.png": "3dbba28d250ed2283bbd7f0cb07dfaba7ca1e7b78659f89131a595fc836161e6",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation2_combined2_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation2_combined2_178p949m_44469a2741_density.pdf": "6098bcf2dfc6daa2c437e4e02c44a9b13f458bdd8d09be6fed896581794ae17d",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation2_combined2_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation2_combined2_178p949m_44469a2741_density.svg": "62fbb2c340033bf8799fffb526404bc5e406902d5f8ac32f3777ad9e875c6837",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation2_combined2_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation2_combined2_178p949m_44469a2741_overhead.png": "f0fb8c2795ff0ab873803d84f3b51a186bd1e33bba884e082deddc0cc8546acf",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation2_combined2_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation2_combined2_178p949m_44469a2741_overhead.pdf": "954b0a387b6c0c3fa04609220ac158c3da0228fa185f5ab461a2ce5e2280af67",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation2_combined2_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation2_combined2_178p949m_44469a2741_overhead.svg": "f04c768a706718adef926c3652546a6055faed8091ec58ae9440198d05096c78",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation2_combined2_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation2_combined2_178p949m_44469a2741_overhead_social.png": "122cef96aa9d19d692ccdfb487a1a2b99f58c04b47338d8a34026526fb466b60"
+      },
+      "status": "accepted",
+      "finding": "No visible clipping, overlap, or missing content in three inspected contact sheets."
+    },
+    {
+      "index": 7,
+      "stem": "curve_strength_original_control_1_driver_lean5_curve1_rotation2_shaft_only_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation2_shaft_only_178p949m_ae0f46ed66",
+      "asset_sha256": {
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation2_shaft_only_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation2_shaft_only_178p949m_ae0f46ed66_density_straight_social.png": "11ca4752f83f13c49d5848fc9bad7aeffe7bb6ed5c4266e209e1de5080ccbc0a",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation2_shaft_only_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation2_shaft_only_178p949m_ae0f46ed66_density_straight_social.pdf": "04bd5ba0a43765c6d69e077931f0cbdbbc1cf326e5e34f1a64bad1142b8d839e",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation2_shaft_only_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation2_shaft_only_178p949m_ae0f46ed66_density_straight_social.svg": "79d70aada8d007ce8e0de7ca530f2f5ce320b89f1ebc2ab7e92f1a6ae28b1811",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation2_shaft_only_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation2_shaft_only_178p949m_ae0f46ed66_density_draw_social.png": "c55861f46862e914529517b250df194efc05e20ac38a4ff096a90f47db78b58b",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation2_shaft_only_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation2_shaft_only_178p949m_ae0f46ed66_density_draw_social.pdf": "e6b83ce64c4a11044db4ebcc6e1ad60afad22c344f0f693804d38985677dc27f",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation2_shaft_only_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation2_shaft_only_178p949m_ae0f46ed66_density_draw_social.svg": "4f945aeb9cd43281305ef1ef1db4e96442e5dd199137e3c4991b376213d4dc70",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation2_shaft_only_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation2_shaft_only_178p949m_ae0f46ed66_density_fade_social.png": "5db7452e682cc7da629ff7f9578990ffec9a5eebde5613ed0f65bb52c30eddf7",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation2_shaft_only_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation2_shaft_only_178p949m_ae0f46ed66_density_fade_social.pdf": "a0e3f36fcbe3491d70b528f9edd4d8774c77630929918191019291dade77517d",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation2_shaft_only_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation2_shaft_only_178p949m_ae0f46ed66_density_fade_social.svg": "a9da132d6785c623f099b37600d5b87263c026193cf50881073aeacd9dddd413",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation2_shaft_only_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation2_shaft_only_178p949m_ae0f46ed66_density.png": "03e00571c7d9185f54441ee6f89a76e774a2541f91070eabceb257ddf0609673",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation2_shaft_only_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation2_shaft_only_178p949m_ae0f46ed66_density.pdf": "10f8eb13173f22bc38342fd1a6aca73748e787d8802e23786da779f7ce2277f3",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation2_shaft_only_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation2_shaft_only_178p949m_ae0f46ed66_density.svg": "af451deeb1269ce85b5e16c43c87f70c4736f945e23ac54b8a179721077368c3",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation2_shaft_only_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation2_shaft_only_178p949m_ae0f46ed66_overhead.png": "dc7288bf826eaae2771011ac461f12518ed60747d2d460835c44a3c5776e0ff9",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation2_shaft_only_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation2_shaft_only_178p949m_ae0f46ed66_overhead.pdf": "8b9158c44da02ee7b9ee006a87970eef8a3dd11b2f349767dd7bfc4900eb3a1a",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation2_shaft_only_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation2_shaft_only_178p949m_ae0f46ed66_overhead.svg": "63550d0d1fedec0d2ebaabf6aa1613e5bde0e091e537cc2bba018e144e3c88d1",
+        "figures/comparisons/curve_strength_original_control_1_driver_lean5_curve1_rotation2_shaft_only_vs_driver-control-speed-bounds_1_driver_lean5_curve2_rotation2_shaft_only_178p949m_ae0f46ed66_overhead_social.png": "e77ba31e0d892ab0a7d88a0e9d78bad70d38e9bb1b2c08ae580036a5ccc8fc9c"
+      },
+      "status": "accepted",
+      "finding": "No visible clipping, overlap, or missing content in three inspected contact sheets."
+    },
+    {
+      "index": 8,
+      "stem": "curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_combined2_77_14a48258b1",
+      "asset_sha256": {
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_combined2_77_14a48258b1_density_straight_social.png": "ae5623e23c54ab99fe25721b8a093af706d5b607eeb525713119fb1b388ec7c2",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_combined2_77_14a48258b1_density_straight_social.pdf": "1ad7aaf2bc98054a44159698fe2aac978efeac044359b4b1b734e3a89bd10cb0",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_combined2_77_14a48258b1_density_straight_social.svg": "fbdbfa813f91f63f207fb17f616cc78c42e3d906f8651d75057a10a72e8b6eca",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_combined2_77_14a48258b1_density_draw_social.png": "c3882852c4a1517e0c4fccb89b298a796329ea7c49409ba28d03d72a438336ac",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_combined2_77_14a48258b1_density_draw_social.pdf": "c4ae42776919f9a8fd367b96117fe7693524106af43140a27836039ebf1f821d",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_combined2_77_14a48258b1_density_draw_social.svg": "8537877bbddc4f65b0a39faed5a7102d36eec4d06fe5f09446d4db5de62ea2e2",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_combined2_77_14a48258b1_density_fade_social.png": "5c535c8c1c41bec2d55574c37422a7ba1f2d0175f31cc2508c6cbd028e8e5bcd",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_combined2_77_14a48258b1_density_fade_social.pdf": "b466d5f8a8c390620a80c287eab8b6e6357a62b31784430ca9c5f3aa9094d24c",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_combined2_77_14a48258b1_density_fade_social.svg": "c0e148b991b454456eec5577a011ba31933a636a28292cfc671d1751005b47a0",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_combined2_77_14a48258b1_density.png": "4c3efd33f52008440329d9293388df736c8a2f8f6ea5ec22c92b1cc2170b7bdc",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_combined2_77_14a48258b1_density.pdf": "c3cc169d95d8d6f516c785f4df241ccb37d6ca32b6272d9bccfe1c7e2916493e",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_combined2_77_14a48258b1_density.svg": "6e0e9a0780574237307c93b11011d5a59d2b37a825b9e25b38a6d50452285aff",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_combined2_77_14a48258b1_overhead.png": "a9572e4f1d8691bc81c2961c724abccd60147a91ce87e3e3dffa5975c188022b",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_combined2_77_14a48258b1_overhead.pdf": "a5524da6dbb8f3b62cc290e70faa40aca715a669ae21ce2e19c0aac1a0e9e341",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_combined2_77_14a48258b1_overhead.svg": "fcfa0ed0e871687439b4ca61eee8722254c6476faa92a243411b6a8349bc8ebb",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_combined2_77_14a48258b1_overhead_social.png": "738c54887b2b5a736420676e8aca9a5844539b3df8ee1aa122ce91e924e53731"
+      },
+      "status": "accepted",
+      "finding": "No visible clipping, overlap, or missing content in three inspected contact sheets."
+    },
+    {
+      "index": 9,
+      "stem": "curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_shaft_only__8f40e7c636",
+      "asset_sha256": {
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_shaft_only__8f40e7c636_density_straight_social.png": "2b985d22eabac21667321541a079582f5f8062e4614e16fb11846ad5836694b1",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_shaft_only__8f40e7c636_density_straight_social.pdf": "be057595f0ef2ab784a85267db654b6138c6ea8eef745cc22f5c73c32a9db7c0",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_shaft_only__8f40e7c636_density_straight_social.svg": "ca6f2a863c5337cfc63c33fbeaf870c874c3d38c020cbfc7ffac0c32d4708ed3",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_shaft_only__8f40e7c636_density_draw_social.png": "4a45d1b228a9fadb1169d1d2f297ad1c690b516e1241a52bf064fa78b00db450",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_shaft_only__8f40e7c636_density_draw_social.pdf": "d9346756f9e914d4f7897be1126123ae4ce599894d7ecd3c94c0987eb8e482b7",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_shaft_only__8f40e7c636_density_draw_social.svg": "13a318a7a2f5bf9e986725176e0b5687ab76475e59e074601967a142b652135c",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_shaft_only__8f40e7c636_density_fade_social.png": "5cb30d69495d9f6b8d9fdd74ad4e99df73abc82f57a5349cb8e1cae743ae5c1a",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_shaft_only__8f40e7c636_density_fade_social.pdf": "d81b454f2bf1c2bc50adda37638dfc06850448c6bbcb5556ddf9fbc4d7459a0a",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_shaft_only__8f40e7c636_density_fade_social.svg": "a8a479cff458cc7981ea802a71e73f11e1eca58a6679b4036d5c707c9e6d3765",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_shaft_only__8f40e7c636_density.png": "c2e19652030f63975ee7c0a64cc5a437e4b6533fcd10bd67c9872116076ae6a2",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_shaft_only__8f40e7c636_density.pdf": "d6fa04106e4a6cc7b5fad6575ecdb5e5796336201d9f3fc5bb5f1455edac1874",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_shaft_only__8f40e7c636_density.svg": "08396edeecd27373840a58e03503612a4fcb0310eebf9bd1f95d1c0d3b0eadfa",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_shaft_only__8f40e7c636_overhead.png": "72584b38b975b1808c91180b57a7a82f9c50e6b489186de57e6fc0038d2ee998",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_shaft_only__8f40e7c636_overhead.pdf": "4168495bb346cf8850e56db0c67cd80bea4ec2d7ff0651b2efa5710ee75462ff",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_shaft_only__8f40e7c636_overhead.svg": "12816fbc9e28182292f8d0f5f827466e302b339687f19469ace708693dec6309",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_shaft_only__8f40e7c636_overhead_social.png": "3d279ed5efaed83acdbffb0834f45fc350e41c4d3844bdf8fef60e379e48bc85"
+      },
+      "status": "accepted",
+      "finding": "No visible clipping, overlap, or missing content in three inspected contact sheets."
+    },
+    {
+      "index": 10,
+      "stem": "curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_combined2_77_3b97647710",
+      "asset_sha256": {
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_combined2_77_3b97647710_density_straight_social.png": "d2f57411233a07c17eec4b430273b383866484e11741bdb9b150126ae2eec23b",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_combined2_77_3b97647710_density_straight_social.pdf": "b8a1940b61d274a0fa33dc2b6f54c08118b4a1303c0b33d0dcfd7c5acea604c0",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_combined2_77_3b97647710_density_straight_social.svg": "c46ceb91ce3f8de868c8e313c9021ec62283864772339de306140e22750075ce",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_combined2_77_3b97647710_density_draw_social.png": "fd6f3d4675ea6ca04d0bca3f8489999430dd9ccad85b6ff092511417618f99b4",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_combined2_77_3b97647710_density_draw_social.pdf": "caf1709d5608b3b621aedcfc09539ccaec56c9dbf2c7c2c869e0dda27067de62",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_combined2_77_3b97647710_density_draw_social.svg": "a97687e2e291afb2e635e69a1cbee4e88c3ca9afc9faf5b621e98edf5284e408",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_combined2_77_3b97647710_density_fade_social.png": "df47c723754dba239d7633fc9a91fe52c80c796f267a091cedd4c217f1bd5526",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_combined2_77_3b97647710_density_fade_social.pdf": "d73f75ac1c7c75f6668013e0e783f4a61fe94db858c9b03a424575c5a3900424",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_combined2_77_3b97647710_density_fade_social.svg": "3436f5e302651f9066de60c8b8db3e4a9367adadfb7c717ba93b0b2e8643754e",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_combined2_77_3b97647710_density.png": "fa98e9c327f4119149bfdea9fe37a14c1db3051fca8c587169f80686aa317049",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_combined2_77_3b97647710_density.pdf": "bf98a1af644baad1ee177abdef8df94d96544d27adedfea8000aae0ccfbf5dd3",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_combined2_77_3b97647710_density.svg": "c898e166a8854491f7637ab5f4273490239fe5af1c09c630b0cea38671fcb53a",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_combined2_77_3b97647710_overhead.png": "fb266911d6ce500afa3f6ca4ef7bed697fab8e4698468594ccfc147469a5866f",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_combined2_77_3b97647710_overhead.pdf": "62becc7759aea5ef193a6b31cc75f0af24550129a60a057ef0c10219af557d61",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_combined2_77_3b97647710_overhead.svg": "be5ba5e77bee9a75bfd5156a3f60de4ca31c69ad36e4b1d93ecd8b0eb9522608",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_combined2_77_3b97647710_overhead_social.png": "b70ff68d3eeb5b34fb9b60354b403f7c32b79e2d7dfa655074c9e9ba8fae944f"
+      },
+      "status": "accepted",
+      "finding": "No visible clipping, overlap, or missing content in three inspected contact sheets."
+    },
+    {
+      "index": 11,
+      "stem": "curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_shaft_only_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_shaft_only__77e806d784",
+      "asset_sha256": {
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_shaft_only_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_shaft_only__77e806d784_density_straight_social.png": "41a3340e77061d23225c19e5f67c57b3e2509a48c7ca83b7c01db90269cef598",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_shaft_only_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_shaft_only__77e806d784_density_straight_social.pdf": "60c47e426838c4f1ab52441ae6597915c64d04bb0d79a35b9ed383beb56bd2f5",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_shaft_only_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_shaft_only__77e806d784_density_straight_social.svg": "aab417b467f2d3f74e491ce0d4338dfc66bf08a8cd34552407bf642262fde3fd",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_shaft_only_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_shaft_only__77e806d784_density_draw_social.png": "140dc677afb539f32efe59d2be567faa452a9cfd18c604abd5fa8e5732ae8c8b",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_shaft_only_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_shaft_only__77e806d784_density_draw_social.pdf": "6818f5dd5040cc5e25bcfbeea6ec2a859fea789135d42c6ea0b7c082f7f823bb",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_shaft_only_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_shaft_only__77e806d784_density_draw_social.svg": "bfd2dea8766834ee55bcebb208b9e0c9c164bb1c80dee3caf3703ffc1826785d",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_shaft_only_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_shaft_only__77e806d784_density_fade_social.png": "14c1717ff6a746cf9a4d9fda47c541e06c42646cb9531e5c29ec414b8e2bf731",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_shaft_only_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_shaft_only__77e806d784_density_fade_social.pdf": "ef357a414f3d0570a3085a2b29c58011a710f018f9eccdbbaa693ba95f2d96a7",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_shaft_only_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_shaft_only__77e806d784_density_fade_social.svg": "a3fc911990462c3ef4513fe8d39f6a9d82b11c67be25b5a80a39ae9d3bf62541",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_shaft_only_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_shaft_only__77e806d784_density.png": "90753f78c27a5d7813e20b51f275925163117277a04323892204ac87860b9c6a",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_shaft_only_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_shaft_only__77e806d784_density.pdf": "a6262cf5ccdeabde783aa66563e38621c88094e717b6e74f426c7c249b3b0f4c",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_shaft_only_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_shaft_only__77e806d784_density.svg": "de2a07e466cc2fb2c35152d37ac4d1bbb235efb5f13d847f8a8b3080c070c454",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_shaft_only_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_shaft_only__77e806d784_overhead.png": "2fca03cc3ed86a340da551f7c2c4c97b1341883b6a72b688f0901507f4b8a3c1",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_shaft_only_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_shaft_only__77e806d784_overhead.pdf": "306799c619c59dc66b3f2d49b1a036f4078ce622f078a64d3bfafdedad8dd6d6",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_shaft_only_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_shaft_only__77e806d784_overhead.svg": "4243d086c30c0daf76a3d009ecc55459e2158024cbeecaa58c97dbe6ae7a1933",
+        "figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_shaft_only_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_shaft_only__77e806d784_overhead_social.png": "1ef53cfa8ae559a4557dbd8609f728fb2366c961150495a8e2c47c74036253dd"
+      },
+      "status": "accepted",
+      "finding": "No visible clipping, overlap, or missing content in three inspected contact sheets."
+    }
+  ],
+  "findings": [],
+  "notes": [
+    "All 36 contact sheets inspected across continuation; record 11 academic density and social overhead additionally viewed at full size.",
+    "Baseline bytes only; any selectively repaired assets require new review."
+  ]
+}
