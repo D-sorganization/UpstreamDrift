@@ -1248,6 +1248,39 @@ def _validate_actual_solver_settings(config: dict[str, Any]) -> None:
         raise ValueError("native solver settings differ from the bound request")
 
 
+def _validate_preparation_request_bindings(
+    plan: dict[str, Any], config: dict[str, Any]
+) -> None:
+    """Bind wrapper observations to the exact request and refinement plan."""
+    from tests.opensim.native_moco_refinement import child_hs_grid
+
+    _validate_actual_solver_settings(config)
+    points = list(plan["normalized_mesh_points"])
+    settings = config["actual_solver_settings"]
+    refinement = config.get("mesh_refinement")
+    if (
+        settings.get("set_mesh_requested_normalized_points") != points
+        or settings.get("set_mesh_requested_interval_count") != len(points) - 1
+        or not isinstance(refinement, dict)
+        or refinement.get("normalized_mesh_points") != points
+    ):
+        raise ValueError("prepared custom mesh differs from the reviewed plan")
+    expected_grid = child_hs_grid(
+        plan["normalized_mesh_points"],
+        plan["preserved_contract"]["horizon_seconds"],
+    )
+    actual_grid = refinement.get("native_guess_time_grid_seconds")
+    if not isinstance(actual_grid, list) or tuple(actual_grid) != expected_grid:
+        raise ValueError("prepared native guess clock differs from the reviewed plan")
+    if (
+        config.get("interpolate_control_mesh_interior_points") is not True
+        or config.get("replay_control_interpolation") != "piecewise_linear"
+    ):
+        raise ValueError(
+            "prepared control interpolation differs from the reviewed plan"
+        )
+
+
 def _trajectory_arrays(trajectory: Any) -> dict[str, Any]:
     state_names = tuple(str(name) for name in trajectory.getStateNames())
     control_names = tuple(str(name) for name in trajectory.getControlNames())

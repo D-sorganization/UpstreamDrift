@@ -146,9 +146,10 @@ def test_bounded_refinement_marks_one_parent_cell_and_preserves_contract(
         _actual_solver_settings,
         _refinement_request_fields,
         _rung_config,
-        _validate_actual_solver_settings,
+        _validate_preparation_request_bindings,
         _validate_refinement_request,
     )
+    from tests.opensim.native_moco_refinement import child_hs_grid
     from types import SimpleNamespace
 
     _validate_refinement_request(
@@ -166,6 +167,10 @@ def test_bounded_refinement_marks_one_parent_cell_and_preserves_contract(
         mesh_intervals=len(plan["normalized_mesh_points"]) - 1,
     )
     request_config["mesh_refinement"] = _refinement_request_fields(plan)
+    request_config["mesh_refinement"]["native_guess_time_grid_seconds"] = list(
+        child_hs_grid(plan["normalized_mesh_points"], request["horizon_seconds"])
+    )
+    request_config["replay_control_interpolation"] = "piecewise_linear"
     request_config["actual_solver_settings"] = _actual_solver_settings(
         SimpleNamespace(
             get_transcription_scheme=lambda: "hermite-simpson",
@@ -175,12 +180,18 @@ def test_bounded_refinement_marks_one_parent_cell_and_preserves_contract(
         ),
         request_config["mesh_refinement"]["normalized_mesh_points"],
     )
-    _validate_actual_solver_settings(request_config)
+    _validate_preparation_request_bindings(plan, request_config)
     request_config["actual_solver_settings"]["set_mesh_requested_normalized_points"][
         1
     ] += 0.001
     with pytest.raises(ValueError, match="differ from the bound request"):
-        _validate_actual_solver_settings(request_config)
+        _validate_preparation_request_bindings(plan, request_config)
+    request_config["actual_solver_settings"]["set_mesh_requested_normalized_points"] = (
+        list(plan["normalized_mesh_points"])
+    )
+    request_config["mesh_refinement"]["native_guess_time_grid_seconds"][1] += 1e-12
+    with pytest.raises(ValueError, match="native guess clock"):
+        _validate_preparation_request_bindings(plan, request_config)
     for field, mutate in (
         (
             "normalized_mesh_points",
