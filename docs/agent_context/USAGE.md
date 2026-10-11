@@ -9,19 +9,23 @@ registries keep their authority; this catalog adds development boundaries.
 
 ## Setup and Retrieval
 
-Use the repository's virtual environment and initialize the exact Tools pin:
+Initialize the exact Tools pin, then run the context CLI from that pinned
+checkout. `PYTHONPATH=vendor/ud-tools/src` selects the provider source directly,
+so a separately installed `agent_context` package cannot silently supply a
+different revision. The provider is lightweight and this does not install the
+full application Tools package.
 
 ```bash
 git submodule update --init vendor/ud-tools
-python3 -m pip install ./vendor/ud-tools/packages/agent-context
-python3 -m agent_context --root . status
-python3 -m agent_context --root . search "QUERY"
-python3 -m agent_context --root . context COMPONENT --max-chars 16000
+PYTHONPATH=vendor/ud-tools/src python3 -m agent_context --root . status
+PYTHONPATH=vendor/ud-tools/src python3 -m agent_context --root . search "QUERY"
+PYTHONPATH=vendor/ud-tools/src python3 -m agent_context --root . context COMPONENT --max-chars 16000
 ```
 
 Replace QUERY and COMPONENT with the relevant concept and returned component ID.
-Reinstall after changing the provider pin with `python3 -m pip install --force-reinstall ./vendor/ud-tools/packages/agent-context`. A runtime built from another Tools
-revision is not verified merely because the submodule itself is clean.
+In PowerShell, set `$env:PYTHONPATH = (Join-Path (Get-Location) 'vendor/ud-tools/src')`
+before invoking the same commands. A runtime built from another Tools revision
+is not verified merely because the submodule itself is clean.
 
 The application Tools dependency in `requirements-tools.txt` and the Rust
 `Cargo.toml` revision must match the same gitlink. The required context tests
