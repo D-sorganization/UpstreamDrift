@@ -80,10 +80,10 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `launch_monitor` | 0 | 0 | 0 | 0 | 30 | 0 |
 | `launcher_embed` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `launcher_factory.py` | 0 | 0 | 0 | 1 | 0 | 0 |
-| `lifting` | 0 | 0 | 0 | 27 | 0 | 0 |
+| `lifting` | 0 | 0 | 0 | 28 | 0 | 0 |
 | `logging_pkg` | 0 | 0 | 0 | 0 | 3 | 0 |
 | `math_utils` | 0 | 0 | 0 | 2 | 0 | 0 |
-| `model_appearance` | 0 | 0 | 0 | 14 | 0 | 0 |
+| `model_appearance` | 0 | 0 | 0 | 15 | 0 | 0 |
 | `model_generation` | 27 | 52 | 14 | 20 | 1 | 79 |
 | `motion_matching` | 0 | 0 | 0 | 295 | 0 | 0 |
 | `motion_pipeline` | 0 | 0 | 0 | 60 | 0 | 0 |
