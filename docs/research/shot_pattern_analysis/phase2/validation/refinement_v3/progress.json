@@ -9,12 +9,12 @@
   "replay_sha256": "93fb01c874c007f4af7badc6603d887bddd90a02aaa5a4e1d478f26ad73dbdcd",
   "affinedrift_worktree": "/home/dieterolson/.codex/worktrees/shot-pattern-affinedrift-publication",
   "affinedrift_issue": 5004,
-  "affinedrift_status": "Article/render/asset hash/OG/link/title/sitegate checks passed; canonical prePR now running, no push.",
+  "affinedrift_status": "Local page/asset/link/title/sitegate checks pass; canonical prePR failed missing bs4 and inherited development-log limits (77 active >75). Separate exact site dependency environment is being prepared; no push.",
   "upstream_status": "PR12278 unmerged. Restored approved DRY baseline leaves14 fingerprint groups in6 semantic families; refactors active.67 new architecture allowances audited as unresolved.",
   "live_processes": {
-    "affine_prepr": {
-      "session": 57447,
-      "log": "/tmp/shot-affine-prepr.log"
+    "affine_environment": {
+      "session": 63920,
+      "log": "/tmp/shot-affine-env-install.log"
     }
   },
   "next": [
@@ -42,14 +42,17 @@
     "fb1bb97809",
     "a2ab3aa3c5",
     "e8ed9c02e1",
-    "19b7d6d08d"
+    "19b7d6d08d",
+    "1904afc749",
+    "048bb958f4",
+    "e2b1032e02"
   ],
   "affine_checks": "Rendercoverage253URLs passes and titlecase672sources passes; final localassets/page render stillpending",
   "local_delivery": "fd5506da87f5e619a550fb8cc871a0e8195b6fb98965a99809e3238a0f01508b",
   "architecture_issue": 12302,
   "integration_work": "Matrix CLI+provenance, deterministic viewport tests, plot-option validation and GUI preview deduplication committed. Kernel/contact and supplement rendering refactors active.",
   "focused_dry": "49 committed shot-pattern/kernel source files at19b7d6d: zero findings. Not a full repository gate.",
-  "architecture": "Six new exceptions removed with parity evidence; remaining61 require decomposition or historical-evidence treatment (#12302).",
+  "architecture": "Seven new exceptions removed (six refactored, one verified stale);60 remain under issue12302. Academic and pair/metric refactors active.",
   "performance": "Isolated body_part_viz update_frame performance test still fails; Luna profiling, no threshold change.",
   "affinedrift_commit": "5fae3163493ca7ade3139b2da18ace2e3deac1c0"
 }
