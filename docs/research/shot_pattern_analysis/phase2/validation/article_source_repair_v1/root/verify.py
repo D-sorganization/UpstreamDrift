@@ -131,119 +131,119 @@ def number(display: str, want: Any) -> None:
         raise ValueError(("display precision mismatch", display, want))
 
 
-def verify(s: str) -> dict[str, Any]:
-    seen: collections.defaultdict[str, set[Any]] = collections.defaultdict(set)
-    n = 0
-    for line in s.splitlines():
-        f = [v.strip() for v in line.rstrip("\\ ").split("&")]
-        nums = re.findall(r"\\numtext\{([^}]+)\}", line)
-        if re.match(r"C\d\d & (Straight|Draw|Fade)", line):
-            key, pat = f[:2]
-            r = rows[key, pat]
-            group = "geometry" if len(f) == 7 else "paired"
-            identity = (key, pat)
-            if group == "geometry":
-                if int(f[2]) != r["supported_n"]:
-                    raise ValueError("endpoint count")
-                want = [
-                    r[k]
-                    for k in [
-                        "lateral_sd_m",
-                        "downrange_sd_m",
-                        "target_rmse_m",
-                        "mean_sg_strokes",
-                    ]
-                ]
-            else:
-                if int(f[2]) != r["scoring_paired_n"]:
-                    raise ValueError("scoring count")
-                want = [
-                    r["paired_sg_vs_straight"][k]
-                    for k in ["estimate", "lower_95", "upper_95"]
-                ]
-        elif re.match(r"[EF]\d\d? & (Draw|Fade)", line):
-            key, pat = f[:2]
-            r = effects[key]
-            group = "effect"
-            identity = (key, pat)
-            if int(f[2]) != r["common_supported_n"]:
-                raise ValueError("common six count")
+def _verify_identity_row(line: str, f: list[str], seen: Any) -> bool:
+    if re.match(r"E\d\d & (Twist|Curve)", line):
+        key = f[0]
+        ids = []
+        for item in f[2:4]:
+            ck, pc = item.split("/")
+            ids.append((proto[pc], cells[ck]["cell"]))
+        if ids != expected_e[key] or key in seen["keys"]:
+            raise ValueError("interaction identity")
+        seen["keys"].add(key)
+        return True
+    if re.match(r"C\d\d & (Driver|7-Iron|Pitching Wedge)", line):
+        key = f[0]
+        c = cells[key]
+        cfg = c["config"]
+        club = {
+            "driver": "Driver",
+            "seven_iron": "7-Iron",
+            "pitching_wedge": "Pitching Wedge",
+        }[cfg["club"]["club_id"]]
+        expected_fields = [
+            key,
+            club,
+            str(int(cfg["curve_scale"])),
+            str(int(cfg["noise"]["standard_deviations"][0])),
+            "S" if c["cell"].endswith("shaft_only") else "C",
+            next(k for k, v in proto.items() if v == c["source_protocol"]),
+        ]
+        if f != expected_fields or key in seen["conditions"]:
+            raise ValueError("condition key metadata")
+        seen["conditions"].add(key)
+        return True
+    return False
+
+
+def _synthesis_row(f: list[str]) -> tuple[str, Any, list[Any]]:
+    club = {
+        "Driver": "driver",
+        "7-Iron": "seven_iron",
+        "Pitching Wedge": "pitching_wedge",
+    }[f[0]]
+    pat = f[1]
+    items = [
+        r["paired_sg_vs_straight"]
+        for r in rows.values()
+        if r["club"] == club and r["pattern"] == pat
+    ]
+    counts = [
+        sum(x["lower_95"] > 0 for x in items),
+        sum(x["upper_95"] < 0 for x in items),
+        sum(x["lower_95"] <= 0 <= x["upper_95"] for x in items),
+    ]
+    if f[4] != "/".join(map(str, counts)):
+        raise ValueError("interval direction counts")
+    group = "synthesis"
+    identity = (club, pat)
+    want = [
+        min(x["estimate"] for x in items),
+        max(x["estimate"] for x in items),
+    ]
+    return group, identity, want
+
+
+def _numeric_row(line: str, f: list[str]) -> tuple[str, Any, list[Any]] | None:
+    if re.match(r"C\d\d & (Straight|Draw|Fade)", line):
+        key, pat = f[:2]
+        r = rows[key, pat]
+        group = "geometry" if len(f) == 7 else "paired"
+        identity = (key, pat)
+        if group == "geometry":
+            if int(f[2]) != r["supported_n"]:
+                raise ValueError("endpoint count")
             want = [
-                r["course_scoring_effect_modification"][pat][k]
-                for k in ["estimate", "lower_95", "upper_95"]
-            ]
-        elif re.match(r"F[12][AB] &", line):
-            key, pat = f[:2]
-            group = "nominal"
-            identity = (key, pat)
-            r = nominals[key][pat]
-            want = [r[k] for k in ["face_deg", "path_deg", "speed_mps", "residual_m"]]
-        elif re.match(r"E\d\d & (Twist|Curve)", line):
-            key = f[0]
-            ids = []
-            for item in f[2:4]:
-                ck, pc = item.split("/")
-                ids.append((proto[pc], cells[ck]["cell"]))
-            if ids != expected_e[key] or key in seen["keys"]:
-                raise ValueError("interaction identity")
-            seen["keys"].add(key)
-            continue
-        elif re.match(r"C\d\d & (Driver|7-Iron|Pitching Wedge)", line):
-            key = f[0]
-            c = cells[key]
-            cfg = c["config"]
-            club = {
-                "driver": "Driver",
-                "seven_iron": "7-Iron",
-                "pitching_wedge": "Pitching Wedge",
-            }[cfg["club"]["club_id"]]
-            expected_fields = [
-                key,
-                club,
-                str(int(cfg["curve_scale"])),
-                str(int(cfg["noise"]["standard_deviations"][0])),
-                "S" if c["cell"].endswith("shaft_only") else "C",
-                next(k for k, v in proto.items() if v == c["source_protocol"]),
-            ]
-            if f != expected_fields or key in seen["conditions"]:
-                raise ValueError("condition key metadata")
-            seen["conditions"].add(key)
-            continue
-        elif re.match(r"(Driver|7-Iron|Pitching Wedge) & (Draw|Fade)", line):
-            club = {
-                "Driver": "driver",
-                "7-Iron": "seven_iron",
-                "Pitching Wedge": "pitching_wedge",
-            }[f[0]]
-            pat = f[1]
-            items = [
-                r["paired_sg_vs_straight"]
-                for r in rows.values()
-                if r["club"] == club and r["pattern"] == pat
-            ]
-            counts = [
-                sum(x["lower_95"] > 0 for x in items),
-                sum(x["upper_95"] < 0 for x in items),
-                sum(x["lower_95"] <= 0 <= x["upper_95"] for x in items),
-            ]
-            if f[4] != "/".join(map(str, counts)):
-                raise ValueError("interval direction counts")
-            group = "synthesis"
-            identity = (club, pat)
-            want = [
-                min(x["estimate"] for x in items),
-                max(x["estimate"] for x in items),
+                r[k]
+                for k in [
+                    "lateral_sd_m",
+                    "downrange_sd_m",
+                    "target_rmse_m",
+                    "mean_sg_strokes",
+                ]
             ]
         else:
-            continue
-        if identity in seen[group]:
-            raise ValueError("duplicate row")
-        seen[group].add(identity)
-        if len(nums) != len(want):
-            raise ValueError("field count")
-        for a, b in zip(nums, want, strict=True):
-            number(a, b)
-            n += 1
+            if int(f[2]) != r["scoring_paired_n"]:
+                raise ValueError("scoring count")
+            want = [
+                r["paired_sg_vs_straight"][k]
+                for k in ["estimate", "lower_95", "upper_95"]
+            ]
+    elif re.match(r"[EF]\d\d? & (Draw|Fade)", line):
+        key, pat = f[:2]
+        r = effects[key]
+        group = "effect"
+        identity = (key, pat)
+        if int(f[2]) != r["common_supported_n"]:
+            raise ValueError("common six count")
+        want = [
+            r["course_scoring_effect_modification"][pat][k]
+            for k in ["estimate", "lower_95", "upper_95"]
+        ]
+    elif re.match(r"F[12][AB] &", line):
+        key, pat = f[:2]
+        group = "nominal"
+        identity = (key, pat)
+        r = nominals[key][pat]
+        want = [r[k] for k in ["face_deg", "path_deg", "speed_mps", "residual_m"]]
+    elif re.match(r"(Driver|7-Iron|Pitching Wedge) & (Draw|Fade)", line):
+        return _synthesis_row(f)
+    else:
+        return None
+    return group, identity, want
+
+
+def _verify_coverage(seen: Any) -> None:
     expected = {
         "geometry": set(rows),
         "paired": {k for k in rows if k[1] != "Straight"},
@@ -259,6 +259,29 @@ def verify(s: str) -> dict[str, Any]:
     }
     if dict(seen) != expected:
         raise ValueError("incomplete identity coverage")
+
+
+def verify(s: str) -> dict[str, Any]:
+    seen: collections.defaultdict[str, set[Any]] = collections.defaultdict(set)
+    n = 0
+    for line in s.splitlines():
+        f = [v.strip() for v in line.rstrip("\\ ").split("&")]
+        nums = re.findall(r"\\numtext\{([^}]+)\}", line)
+        if _verify_identity_row(line, f, seen):
+            continue
+        row = _numeric_row(line, f)
+        if row is None:
+            continue
+        group, identity, want = row
+        if identity in seen[group]:
+            raise ValueError("duplicate row")
+        seen[group].add(identity)
+        if len(nums) != len(want):
+            raise ValueError("field count")
+        for a, b in zip(nums, want, strict=True):
+            number(a, b)
+            n += 1
+    _verify_coverage(seen)
     residual = re.search(
         r"maximum residual among the 72 selected nominal solutions is \\numtext\{([^}]+)\}",
         s,

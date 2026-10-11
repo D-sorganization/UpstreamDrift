@@ -1210,15 +1210,6 @@
       "expires_on": "2026-12-31"
     },
     {
-      "path": "docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py",
-      "symbol": "verify",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - verify exceeds function-lines budget (142 > 100).",
-      "expires_on": "2026-12-31"
-    },
-    {
       "path": "docs/research/shot_pattern_analysis/phase2/validation/independent_final_audit.py",
       "symbol": "audit_cell",
       "rule": "function-lines",
@@ -1252,24 +1243,6 @@
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 12278,
       "reason": "Issue #12278: shot pattern analysis integration - run exceeds function-lines budget (104 > 100).",
-      "expires_on": "2026-12-31"
-    },
-    {
-      "path": "docs/research/shot_pattern_analysis/phase2/validation/selected_renderer_representative_v1/qualify.py",
-      "symbol": "prepare",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - prepare exceeds function-lines budget (103 > 100).",
-      "expires_on": "2026-12-31"
-    },
-    {
-      "path": "docs/research/shot_pattern_analysis/phase2/validation/selected_renderer_representative_v1/qualify.py",
-      "symbol": "worker",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - worker exceeds function-lines budget (130 > 100).",
       "expires_on": "2026-12-31"
     },
     {

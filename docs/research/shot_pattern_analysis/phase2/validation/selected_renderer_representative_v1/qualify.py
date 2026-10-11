@@ -67,6 +67,86 @@ def data_value(value):
     return value
 
 
+def _source_snapshots(row, roots, inputs):
+    """Bind Source Manifests and Files Before Pair Reconstruction."""
+    snapshots = {}
+    for proof in row["sources"]:
+        root = roots[proof["protocol_id"]]
+        directory = root / proof["cell"]
+        manifest = directory / "manifest.json"
+        m = json.loads(manifest.read_text())
+        summary = json.loads((directory / "summary.json").read_text())
+        assert digest(manifest) == proof["source_cell_manifest_sha256"]
+        assert digest(root / "matrix_plan.json") == proof["source_plan_sha256"]
+        inputs[str(manifest)] = digest(manifest)
+        inputs[str(root / "matrix_plan.json")] = digest(root / "matrix_plan.json")
+        for name, sha in m["files_sha256"].items():
+            assert digest(directory / name) == sha
+            inputs[str(directory / name)] = sha
+        snapshots[f"{proof['protocol_id']}:{proof['cell']}"] = {
+            "source_root": str(root),
+            "status": summary["status"],
+            "config": summary["config"],
+            "manifest_sha256": digest(manifest),
+            "summary_sha256": m["files_sha256"]["summary.json"],
+            "csv_sha256": m["files_sha256"]["shots.csv.gz"],
+        }
+    return snapshots
+
+
+def _capture_figure(fig):
+    """Capture the Same Axes, Text Bounds, and Canvas Evidence."""
+    import matplotlib
+
+    fig.canvas.draw()
+    renderer = fig.canvas.get_renderer()
+    axes = []
+    for ax in fig.axes:
+        axes.append(
+            {
+                "xlim": list(ax.get_xlim()),
+                "ylim": list(ax.get_ylim()),
+                "lines": [
+                    {
+                        "x": data_value(np.asarray(line.get_xdata())),
+                        "y": data_value(np.asarray(line.get_ydata())),
+                    }
+                    for line in ax.lines
+                ],
+                "collections": [
+                    {
+                        "array": data_value(np.asarray(c.get_array()))
+                        if c.get_array() is not None
+                        else None,
+                        "offsets": data_value(np.asarray(c.get_offsets())),
+                        "clim": list(c.get_clim()),
+                    }
+                    for c in ax.collections
+                ],
+            }
+        )
+    texts = []
+    for text in fig.findobj(matplotlib.text.Text):
+        if text.get_visible() and text.get_text():
+            box = text.get_window_extent(renderer)
+            texts.append(
+                {
+                    "text": text.get_text(),
+                    "bbox": list(box.bounds),
+                    "font_pt": text.get_fontsize(),
+                    "outside_canvas": box.x0 < -0.5
+                    or box.y0 < -0.5
+                    or box.x1 > fig.bbox.width + 0.5
+                    or box.y1 > fig.bbox.height + 0.5,
+                }
+            )
+    return {
+        "axes": axes,
+        "texts": texts,
+        "canvas_px": list(fig.bbox.bounds),
+    }
+
+
 def prepare(out):
     sys.path.insert(0, str(CANDIDATE))
     from scripts.research.shot_pattern_analysis.supplement_revision_adapter import (
@@ -125,28 +205,7 @@ def prepare(out):
             ]
         assert matches, label
         row = sorted(matches, key=lambda r: tuple(s["cell"] for s in r["sources"]))[0]
-        snapshots = {}
-        for proof in row["sources"]:
-            root = roots[proof["protocol_id"]]
-            directory = root / proof["cell"]
-            manifest = directory / "manifest.json"
-            m = json.loads(manifest.read_text())
-            summary = json.loads((directory / "summary.json").read_text())
-            assert digest(manifest) == proof["source_cell_manifest_sha256"]
-            assert digest(root / "matrix_plan.json") == proof["source_plan_sha256"]
-            inputs[str(manifest)] = digest(manifest)
-            inputs[str(root / "matrix_plan.json")] = digest(root / "matrix_plan.json")
-            for name, sha in m["files_sha256"].items():
-                assert digest(directory / name) == sha
-                inputs[str(directory / name)] = sha
-            snapshots[f"{proof['protocol_id']}:{proof['cell']}"] = {
-                "source_root": str(root),
-                "status": summary["status"],
-                "config": summary["config"],
-                "manifest_sha256": digest(manifest),
-                "summary_sha256": m["files_sha256"]["summary.json"],
-                "csv_sha256": m["files_sha256"]["shots.csv.gz"],
-            }
+        snapshots = _source_snapshots(row, roots, inputs)
         a, b = row["sources"]
         record = {
             "comparison_kind": kind,
@@ -209,53 +268,7 @@ def worker(root, mode, out, pairs_path):
         key = (current["label"], kind)
         if key not in seen:
             seen.add(key)
-            fig.canvas.draw()
-            renderer = fig.canvas.get_renderer()
-            axes = []
-            for ax in fig.axes:
-                axes.append(
-                    {
-                        "xlim": list(ax.get_xlim()),
-                        "ylim": list(ax.get_ylim()),
-                        "lines": [
-                            {
-                                "x": data_value(np.asarray(line.get_xdata())),
-                                "y": data_value(np.asarray(line.get_ydata())),
-                            }
-                            for line in ax.lines
-                        ],
-                        "collections": [
-                            {
-                                "array": data_value(np.asarray(c.get_array()))
-                                if c.get_array() is not None
-                                else None,
-                                "offsets": data_value(np.asarray(c.get_offsets())),
-                                "clim": list(c.get_clim()),
-                            }
-                            for c in ax.collections
-                        ],
-                    }
-                )
-            texts = []
-            for text in fig.findobj(matplotlib.text.Text):
-                if text.get_visible() and text.get_text():
-                    box = text.get_window_extent(renderer)
-                    texts.append(
-                        {
-                            "text": text.get_text(),
-                            "bbox": list(box.bounds),
-                            "font_pt": text.get_fontsize(),
-                            "outside_canvas": box.x0 < -0.5
-                            or box.y0 < -0.5
-                            or box.x1 > fig.bbox.width + 0.5
-                            or box.y1 > fig.bbox.height + 0.5,
-                        }
-                    )
-            current.setdefault("figures", {})[kind] = {
-                "axes": axes,
-                "texts": texts,
-                "canvas_px": list(fig.bbox.bounds),
-            }
+            current.setdefault("figures", {})[kind] = _capture_figure(fig)
         path.parent.mkdir(parents=True, exist_ok=True)
         if mode == "baseline":
             path.write_bytes(b"BASELINE CAPTURE ONLY - NOT A GRAPHIC")
