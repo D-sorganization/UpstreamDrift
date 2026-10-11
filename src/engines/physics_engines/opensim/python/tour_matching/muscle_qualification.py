@@ -420,12 +420,27 @@ def compute_path_length_finite_difference_moment_arm(
 ) -> float:
     """Compute muscle moment arm via negative central finite difference of path length.
 
-    By virtual work: r_i(q) = -d(l_MT)/d(q_i).
+    For a workless transmission, virtual work gives r_i(q) = -d(l_MT)/d(q_i).
+    Moving guides can perform work: their length derivative need not equal the
+    force-defined native moment arm without a separate guide-work model.
     """
-    require(dq > 0.0, "dq must be positive")
+    if not (math.isfinite(q) and math.isfinite(dq) and dq > 0.0):
+        raise ValueError("q must be finite and dq must be finite and positive")
+    if not (
+        math.isfinite(q + dq)
+        and math.isfinite(q - dq)
+        and math.isfinite(2.0 * dq)
+        and q - dq < q < q + dq
+    ):
+        raise ValueError("finite-difference stencil must be finite and resolvable")
     l_plus = path_length_fn(q + dq)
     l_minus = path_length_fn(q - dq)
-    return float(-(l_plus - l_minus) / (2.0 * dq))
+    if not (math.isfinite(l_plus) and math.isfinite(l_minus)):
+        raise ValueError("sampled path lengths must be finite")
+    result = float(-(l_plus - l_minus) / (2.0 * dq))
+    if not math.isfinite(result):
+        raise ValueError("finite-difference moment arm must be finite")
+    return result
 
 
 def validate_moment_arm_consistency(
@@ -435,8 +450,14 @@ def validate_moment_arm_consistency(
     tol: float = 1e-3,
     dq: float = 1e-5,
 ) -> None:
-    """Assert agreement between analytical moment arm and finite-difference path length derivative."""
-    require(np.isfinite(moment_arm), "moment_arm must be finite")
+    """Audit the workless path identity at one declared numerical tolerance.
+
+    The caller must establish the workless-transmission assumption before using
+    this as moment-arm validation. A moving-guide rejection alone is not proof
+    of a native force defect; guide work needs separate physical accounting.
+    """
+    if not math.isfinite(moment_arm) or not math.isfinite(tol) or tol <= 0.0:
+        raise ValueError("moment_arm must be finite and tol finite and positive")
     fd_arm = compute_path_length_finite_difference_moment_arm(path_length_fn, q, dq)
     diff = abs(moment_arm - fd_arm)
     if diff > tol:
