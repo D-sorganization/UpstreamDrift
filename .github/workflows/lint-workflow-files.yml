@@ -97,9 +97,11 @@ jobs:
             fi
             # Check cancel-in-progress: true (only if concurrency exists)
             # Exception allowlist — workflows where cancel-in-progress: false is legitimate
-            # (publishes/releases should not be interrupted mid-stream)
+            # (publishes/releases should not be interrupted mid-stream).
+            # cross-engine-equivalence.yml cancels PR runs only, via an
+            # expression, so a running main run always finishes (#12285).
             case "$(basename "$f")" in
-              publish-artifacts.yml|release.yml|publish.yml|deploy.yml|nightly-publish.yml)
+              publish-artifacts.yml|release.yml|publish.yml|deploy.yml|nightly-publish.yml|cross-engine-equivalence.yml)
                 echo "::notice::Skipping cancel-in-progress check for $f (intentional exception)"
                 ;;
               *)
