@@ -34,7 +34,8 @@ Rendered on brick with the MyoSuite venv (`NATIVE_VIEWER_MYOSUITE_PYTHON`) from 
 | 7-iron (capture-B) | [gcv19_showcase_iron_myosuite_impact.png](gcv19_showcase_iron_myosuite_impact.png) |
 
 - **Clip set:** 15 MP4s per club (5 kind-view pairs × 1x, 0.5x and 0.1x), all 60 fps at 1920×1080 by cv2.
-- **Impact card:** the driver card reads Impact Location unavailable, because the ball contact is off the face (toe −70 mm). That is #12292's off-face reason, not a strike location.
+- **Impact card:** Impact Location reads unavailable on both clubs, because the ball contact is off the face (toe −70 mm on the driver, −87 mm on the 7-iron). That is #12292's off-face reason, not a strike location.
+- **Re-rendered iron clips:** the two 7-iron `grf` impact-window clips were rendered again after the first run was stopped mid-encode.
 - **Full clips:** on brick under `~/Videos/Parity Audit/forces_and_impact/s42_gcv19_{driver,iron}_myosuite/` (not committed).
 
 A rendered clip is presentation evidence only. It is not physical acceptance of the replay.
