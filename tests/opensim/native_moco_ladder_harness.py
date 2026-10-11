@@ -834,10 +834,14 @@ def _validate_bounded_runtime_fingerprint(path: Path, expected_sha256: str) -> N
 
 
 def worker_command(
-    rung: LadderRung, directory: Path, python_executable: str = sys.executable
+    rung: LadderRung,
+    directory: Path,
+    python_executable: str = sys.executable,
+    mesh_intervals: int = 10,
 ) -> tuple[str, ...]:
     """Return the isolated worker command for one rung."""
-    return (
+    mesh_intervals = _validate_mesh_intervals(mesh_intervals)
+    command = (
         python_executable,
         "-m",
         "tests.opensim.native_moco_ladder_worker",
@@ -846,6 +850,15 @@ def worker_command(
         "--output",
         str(directory),
     )
+    if mesh_intervals != 10:
+        command += ("--mesh-intervals", str(mesh_intervals))
+    return command
+
+
+def _validate_mesh_intervals(value: object) -> int:
+    if isinstance(value, bool) or not isinstance(value, int) or not 1 <= value <= 100:
+        raise ValueError("mesh interval count must be an integer in [1, 100]")
+    return value
 
 
 def run_ladder(

@@ -455,3 +455,28 @@ harness/builder SHA-256 is
 `62ed9de2d82713ed36be87decfc83a4a3e63c9f2886ad4573e85d9fd0ed77a07`. The
 state-error matrix SHA-256 is
 `a2eec5558da62a25088b31069757fa96a33f3be49476cba83c71c407eedf2b57`.
+
+## Prepared Mesh-Refinement Candidate (Not Run)
+
+The next diagnostic candidate is a single `plain` rung with 20 Hermite-Simpson
+mesh intervals over the same 0.01-second horizon. It keeps the exact source,
+source-derived `[0.01, 1.0]` muscle control limits, named cold states,
+constant-0.05 forward witness, target construction, ten-state replay checks,
+all acceptance tolerances, solver parallel setting 0, and saved time-only
+piecewise-linear replay law. The finer mesh changes the discretization and
+number of optimized mesh samples; it does not switch the control law to a
+different interpolant. No endpoint, horizon, activation, or integration
+tolerance is changed.
+
+The worker now accepts an explicit mesh interval count while retaining 10 as
+its default, and the request records both requested and read-back native solver
+settings. The solver is explicitly configured as `hermite-simpson` with
+`interpolate_control_mesh_interior_points=true`; request creation fails if the
+native getter values do not exactly match those settings. A native setup test
+constructs both the unchanged 10-interval baseline and a 20-interval candidate
+without solving, checking transcription, midpoint interpolation, parallelism,
+and mesh count. A separate contract test verifies the CLI's 20-interval flag
+and keeps the 10-interval default flag-free. Expected exported solution size is
+41 rows for the 20-interval mesh, versus 21 rows in the historical 10-interval
+runs. The candidate is not yet executed; it awaits review of this committed
+configuration before any new optimizer run.

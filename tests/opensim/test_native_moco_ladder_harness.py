@@ -34,6 +34,42 @@ def test_default_ladder_adds_one_feature_per_rung() -> None:
         "wrap",
         "coupler",
     )
+
+
+def test_mesh_refinement_request_keeps_other_solver_contract_fixed() -> None:
+    from tests.opensim.native_moco_ladder_harness import worker_command
+    from tests.opensim.native_moco_ladder_worker import _rung_config
+
+    baseline = _rung_config(DEFAULT_RUNGS[0], 0.300005, "a" * 64, 0.3)
+    refined = _rung_config(DEFAULT_RUNGS[0], 0.300005, "a" * 64, 0.3, mesh_intervals=20)
+    assert baseline["mesh_intervals"] == 10
+    assert refined["mesh_intervals"] == 20
+    assert "--mesh-intervals" not in worker_command(
+        DEFAULT_RUNGS[0], Path("plain"), "worker-python", 10
+    )
+    assert worker_command(DEFAULT_RUNGS[0], Path("plain"), "worker-python", 20)[
+        -2:
+    ] == (
+        "--mesh-intervals",
+        "20",
+    )
+    for config in (baseline, refined):
+        assert config["horizon_seconds"] == 0.01
+        assert config["target_q"] == baseline["target_q"]
+        assert config["initial_q"] == baseline["initial_q"]
+        assert config["transcription_scheme"] == "hermite-simpson"
+        assert config["interpolate_control_mesh_interior_points"] is True
+        assert config["replay_control_interpolation"] == "piecewise_linear"
+        assert config["convergence_tolerance"] == 1e-6
+        assert config["constraint_tolerance"] == 1e-7
+
+
+@pytest.mark.parametrize("value", [True, 0, -1, 101, 1.5])
+def test_mesh_interval_count_rejects_invalid_values(value: object) -> None:
+    from tests.opensim.native_moco_ladder_harness import _validate_mesh_intervals
+
+    with pytest.raises(ValueError, match="mesh interval count"):
+        _validate_mesh_intervals(value)
     assert all(
         len(current.features) - len(previous.features) == 1
         and set(previous.features) < set(current.features)
@@ -230,12 +266,14 @@ def test_forward_witness_has_exact_saved_clock_and_nonzero_endpoint(
     )
     from tests.opensim.native_moco_ladder_harness import build_synthetic_rung
     from tests.opensim.native_moco_ladder_worker import (
+        _actual_solver_settings,
         _build_feasible_witness,
         _build_witness_seeded_problem,
         _set_witness_guess,
         _rung_config,
         _synthetic_state_bounds,
         _witness_request_metadata,
+        _validate_actual_solver_settings,
     )
 
     osim = pytest.importorskip("opensim")
@@ -288,11 +326,43 @@ def test_forward_witness_has_exact_saved_clock_and_nonzero_endpoint(
     _, solver = _build_witness_seeded_problem(
         path, declaration, witness, witness["target_q"], osim
     )
+    settings = _actual_solver_settings(solver)
+    assert settings == {
+        "mesh_intervals": 10,
+        "transcription_scheme": "hermite-simpson",
+        "interpolate_control_mesh_interior_points": True,
+        "parallel": 0,
+    }
     assert set(solver.getGuess().getStateNames()) == set(witness["state_names"])
     assert set(solver.getGuess().getControlNames()) == {
         "/forceset/flexor",
         "/forceset/extensor",
     }
+    _, refined_solver = _build_witness_seeded_problem(
+        path,
+        declaration,
+        witness,
+        witness["target_q"],
+        osim,
+        mesh_intervals=20,
+    )
+    refined_settings = _actual_solver_settings(refined_solver)
+    assert refined_settings["mesh_intervals"] == 20
+    assert refined_settings["transcription_scheme"] == "hermite-simpson"
+    assert refined_settings["interpolate_control_mesh_interior_points"] is True
+    assert refined_settings["parallel"] == 0
+    refined_request = _rung_config(
+        DEFAULT_RUNGS[0],
+        witness["target_q"],
+        source_hash,
+        witness["initial_q"],
+        mesh_intervals=20,
+    )
+    refined_request["actual_solver_settings"] = refined_settings
+    _validate_actual_solver_settings(refined_request)
+    refined_request["actual_solver_settings"]["mesh_intervals"] = 10
+    with pytest.raises(ValueError, match="differ from the bound request"):
+        _validate_actual_solver_settings(refined_request)
 
 
 def test_ladder_stops_after_first_worker_failure(tmp_path: Path) -> None:

@@ -20,7 +20,11 @@ from typing import Any
 
 import numpy as np
 
-from tests.opensim.native_moco_ladder_harness import DEFAULT_RUNGS, build_synthetic_rung
+from tests.opensim.native_moco_ladder_harness import (
+    DEFAULT_RUNGS,
+    _validate_mesh_intervals,
+    build_synthetic_rung,
+)
 
 _SERIALIZATION_MAX_ULPS = 8
 
@@ -47,14 +51,14 @@ def _write_progress(
     _write_json(path, {"rung": rung, "stage_metrics": stages})
 
 
-def run_rung(rung_name: str, output: Path) -> None:
+def run_rung(rung_name: str, output: Path, mesh_intervals: int = 10) -> None:
     import opensim as osim
 
     rung = next(item for item in DEFAULT_RUNGS if item.name == rung_name)
     # The supervisor creates the per-rung directory before launching us.
     output.mkdir(parents=True, exist_ok=True)
     stages: dict[str, dict[str, float]] = {}
-    prepared = _prepare_rung(rung, output, stages, osim)
+    prepared = _prepare_rung(rung, output, stages, osim, mesh_intervals)
     solved = _solve_and_export(prepared, stages, osim)
     replay_path = _fresh_native_replay(prepared, solved, stages)
     _write_success_receipt(prepared, solved, replay_path, stages, osim)
@@ -174,7 +178,9 @@ def _load_saved_replay_inputs(
     return prepared, solution, grid, controls, bundle
 
 
-def _prepare_rung(rung: Any, output: Path, stages: dict, osim: Any) -> dict[str, Any]:
+def _prepare_rung(
+    rung: Any, output: Path, stages: dict, osim: Any, mesh_intervals: int = 10
+) -> dict[str, Any]:
     from src.engines.physics_engines.opensim.python.tour_matching.native_mechanics_profile import (
         declare_native_mechanics_execution_profile,
     )
@@ -222,7 +228,9 @@ def _prepare_rung(rung: Any, output: Path, stages: dict, osim: Any) -> dict[str,
     _write_progress(output, rung.name, stages)
     target_q = witness["target_q"]
     initial_q = witness["initial_q"]
-    config = _rung_config(rung, target_q, source_hash, initial_q)
+    config = _rung_config(
+        rung, target_q, source_hash, initial_q, mesh_intervals=mesh_intervals
+    )
     model = osim.Model(str(source))
     control_bounds = _native_control_bounds(
         model, {f"/forceset/{name}" for name in witness["controls"]}
@@ -236,12 +244,24 @@ def _prepare_rung(rung: Any, output: Path, stages: dict, osim: Any) -> dict[str,
         "property": "Muscle.min_control/max_control",
     }
     config.update(_witness_request_metadata(declaration, profile, witness))
-    config_path = output / "request.json"
-    _write_json(config_path, config)
     started = _stage_start()
     study, solver = _build_witness_seeded_problem(
-        source, declaration, witness, target_q, osim, control_bounds
+        source,
+        declaration,
+        witness,
+        target_q,
+        osim,
+        control_bounds,
+        mesh_intervals=mesh_intervals,
+        transcription_scheme=config["transcription_scheme"],
+        interpolate_control_mesh_interior_points=config[
+            "interpolate_control_mesh_interior_points"
+        ],
     )
+    config["actual_solver_settings"] = _actual_solver_settings(solver)
+    _validate_actual_solver_settings(config)
+    config_path = output / "request.json"
+    _write_json(config_path, config)
     stages["preflight_and_solver_setup"] = _stage_finish(started)
     _write_progress(output, rung.name, stages)
     return {
@@ -476,6 +496,10 @@ def _build_witness_seeded_problem(
     target_q: float,
     osim: Any,
     control_bounds: dict[str, tuple[float, float]] | None = None,
+    *,
+    mesh_intervals: int = 10,
+    transcription_scheme: str = "hermite-simpson",
+    interpolate_control_mesh_interior_points: bool = True,
 ) -> tuple[Any, Any]:
     from src.engines.physics_engines.opensim.python.tour_matching.moco_initial_bindings import (
         MocoInitialBindings,
@@ -518,7 +542,12 @@ def _build_witness_seeded_problem(
     )
     problem.addGoal(osim.MocoControlGoal("effort"))
     solver = osim.MocoCasADiSolver.safeDownCast(study.initCasADiSolver())
-    _configure_solver(solver)
+    _configure_solver(
+        solver,
+        mesh_intervals,
+        transcription_scheme,
+        interpolate_control_mesh_interior_points,
+    )
     _set_witness_guess(solver, witness, state_bounds, optimal, osim)
     return study, solver
 
@@ -682,8 +711,14 @@ def _verify_native_wrap(
 
 
 def _rung_config(
-    rung: Any, target_q: float, source_sha256: str, initial_q: float
+    rung: Any,
+    target_q: float,
+    source_sha256: str,
+    initial_q: float,
+    *,
+    mesh_intervals: int = 10,
 ) -> dict[str, Any]:
+    mesh_intervals = _validate_mesh_intervals(mesh_intervals)
     features = rung.features
     return {
         "rung": rung.name,
@@ -693,7 +728,10 @@ def _rung_config(
         "target_q": target_q,
         "initial_q": initial_q,
         "horizon_seconds": 0.01,
-        "mesh_intervals": 10,
+        "mesh_intervals": mesh_intervals,
+        "transcription_scheme": "hermite-simpson",
+        "interpolate_control_mesh_interior_points": True,
+        "replay_control_interpolation": "piecewise_linear",
         "parallel": 0,
         "maximum_iterations": 300,
         "solution_serialization_max_ulps": _SERIALIZATION_MAX_ULPS,
@@ -735,12 +773,50 @@ def _flush_file(path: Path) -> None:
         os.fsync(stream.fileno())
 
 
-def _configure_solver(solver: Any) -> None:
-    solver.set_num_mesh_intervals(10)
+def _configure_solver(
+    solver: Any,
+    mesh_intervals: int = 10,
+    transcription_scheme: str = "hermite-simpson",
+    interpolate_control_mesh_interior_points: bool = True,
+) -> None:
+    mesh_intervals = _validate_mesh_intervals(mesh_intervals)
+    if transcription_scheme != "hermite-simpson":
+        raise ValueError("synthetic ladder requires Hermite-Simpson transcription")
+    if not isinstance(interpolate_control_mesh_interior_points, bool):
+        raise TypeError("control midpoint interpolation setting must be boolean")
+    solver.set_num_mesh_intervals(mesh_intervals)
+    solver.set_transcription_scheme(transcription_scheme)
+    solver.set_interpolate_control_mesh_interior_points(
+        interpolate_control_mesh_interior_points
+    )
     solver.set_parallel(0)
     solver.set_optim_max_iterations(300)
     solver.set_optim_convergence_tolerance(1e-6)
     solver.set_optim_constraint_tolerance(1e-7)
+
+
+def _actual_solver_settings(solver: Any) -> dict[str, Any]:
+    return {
+        "mesh_intervals": int(solver.get_num_mesh_intervals()),
+        "transcription_scheme": str(solver.get_transcription_scheme()),
+        "interpolate_control_mesh_interior_points": bool(
+            solver.get_interpolate_control_mesh_interior_points()
+        ),
+        "parallel": int(solver.get_parallel()),
+    }
+
+
+def _validate_actual_solver_settings(config: dict[str, Any]) -> None:
+    expected = {
+        "mesh_intervals": config["mesh_intervals"],
+        "transcription_scheme": config["transcription_scheme"],
+        "interpolate_control_mesh_interior_points": config[
+            "interpolate_control_mesh_interior_points"
+        ],
+        "parallel": config["parallel"],
+    }
+    if config.get("actual_solver_settings") != expected:
+        raise ValueError("native solver settings differ from the bound request")
 
 
 def _trajectory_arrays(trajectory: Any) -> dict[str, Any]:
@@ -1346,6 +1422,7 @@ def main() -> None:
     parser.add_argument("--rung")
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--replay-existing", type=Path)
+    parser.add_argument("--mesh-intervals", type=int, default=10)
     args = parser.parse_args()
     if args.replay_existing is not None:
         if args.rung is not None:
@@ -1354,7 +1431,7 @@ def main() -> None:
         return
     if args.rung is None:
         parser.error("--rung is required unless --replay-existing is supplied")
-    run_rung(args.rung, args.output)
+    run_rung(args.rung, args.output, _validate_mesh_intervals(args.mesh_intervals))
 
 
 if __name__ == "__main__":
