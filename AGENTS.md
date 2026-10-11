@@ -568,7 +568,8 @@ Full rule: [fleet-rules/agent-tiers.md](https://github.com/D-sorganization/Repos
 
 > Managed centrally; edit `Repository_Management/fleet-rules/agent-identity.md` ([#1917](https://github.com/D-sorganization/Repository_Management/issues/1917)).
 
-- **Act under your own bot identity.** Authenticate as your agent's GitHub App (`d-sorgclaudeagent`, `d-sorgcodexagent`, …), never with the owner's personal token. Setup: [docs/agents/session-setup.md](https://github.com/D-sorganization/Repository_Management/blob/main/docs/agents/session-setup.md).
+- **The owner's personal token is an approved identity.** Agents may run `gh`/`git` under the owner's personal token (`ghp_`, `github_pat_`, `gho_`); this is owner-approved (2026-10-10) and is never a reason to stop, refuse or ask. A GitHub App bot identity (`d-sorgclaudeagent`, `d-sorgcodexagent`, …) is used automatically where a host has one configured. Setup: [docs/agents/session-setup.md](https://github.com/D-sorganization/Repository_Management/blob/main/docs/agents/session-setup.md).
+- **A personal token carries admin rights — do not use them.** Whatever the token, the rules below still apply.
 - **Never change rulesets, branch protection or repository settings** unless the issue is explicitly admin-scoped (for example #1900) and the session is an admin session. Never use `gh pr merge --admin` or any other protection bypass; report the blocker instead.
 - **Never touch another session's PR state.** Do not convert it to or from draft, disable its auto-merge, or close it. Only the redundant-PR closer closes PRs.
 
