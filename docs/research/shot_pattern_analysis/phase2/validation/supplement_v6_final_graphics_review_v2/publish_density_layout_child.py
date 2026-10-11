@@ -32,21 +32,8 @@ def write_json(path: Path, value: object) -> None:
     path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n")
 
 
-def main() -> int:
-    if not BASELINE.is_dir() or not CHILD.is_dir():
-        raise FileNotFoundError("baseline and copied child publication must exist")
-    if not (
-        REPAIR_SOURCE / "src/tools/shot_pattern_analysis/matched_supplement_figures.py"
-    ).is_file():
-        raise FileNotFoundError("isolated repair source is missing")
-    sys.path.insert(0, str(REPAIR_SOURCE))
-    from src.tools.shot_pattern_analysis.matched_figure_identity import (
-        pair_comparison_slug,
-    )
-    from src.tools.shot_pattern_analysis.matched_supplement_figures import (
-        render_selected_pair_figures,
-    )
-
+def _load_repair_scope() -> tuple[Path, dict, Path, dict, list, dict, dict]:
+    """Check measured scope and unchanged baseline bytes before rendering."""
     scope_path = EVIDENCE / "density_layout_repair_scope.json"
     scope = json.loads(scope_path.read_text())
     targets = {Path(item["svg_path"]).name: item for item in scope["affected"]}
@@ -84,6 +71,81 @@ def main() -> int:
         protocol: json.loads((root / "matrix_plan.json").read_text())["cells"]
         for protocol, root in roots.items()
     }
+
+    return scope_path, targets, pipeline_path, pipeline, comparisons, roots, plans
+
+
+def _publish_repair_receipt(
+    targets: dict,
+    repairs: list,
+    ledger_path: Path,
+    ledger: dict,
+    pipeline_path: Path,
+    scope_path: Path,
+) -> int:
+    """Bind the selected replacements and source lineage to child receipts."""
+    if len(repairs) != 147:
+        raise ValueError("rendered scope differs from measured 49 triples")
+    write_json(ledger_path, ledger)
+    child_pipeline = json.loads(pipeline_path.read_text())
+    ledger_sha = sha(ledger_path)
+    child_pipeline["artifact_sha256"]["figure_ledger"] = ledger_sha
+    child_pipeline["figure_ledger_sha256"] = ledger_sha
+    child_pipeline["graphics_layout_repair"] = {
+        "scope_sha256": sha(scope_path),
+        "source_commit": "5a1fdbfe51",
+        "replaced_density_triples": 49,
+        "baseline_pipeline_sha256": sha(pipeline_path),
+    }
+    write_json(CHILD / "REPORT_SUPPLEMENT_PIPELINE.json", child_pipeline)
+    receipt = {
+        "schema": "supplement-density-layout-child-publication/1",
+        "baseline": str(BASELINE),
+        "child": str(CHILD),
+        "scope_path": str(scope_path),
+        "scope_sha256": sha(scope_path),
+        "repair_source_commit": "5a1fdbfe51",
+        "baseline_pipeline_sha256": sha(pipeline_path),
+        "child_pipeline_sha256": sha(CHILD / "REPORT_SUPPLEMENT_PIPELINE.json"),
+        "baseline_figure_ledger_sha256": sha(
+            BASELINE / "REPORT_SUPPLEMENT_FIGURES.json"
+        ),
+        "child_figure_ledger_sha256": ledger_sha,
+        "replacements": repairs,
+    }
+    receipt_path = EVIDENCE / "layout_repair_child_publication_receipt.json"
+    write_json(receipt_path, receipt)
+    sys.stdout.write(
+        json.dumps(
+            {
+                "receipt": str(receipt_path),
+                "sha256": sha(receipt_path),
+                "replacements": len(repairs),
+            }
+        )
+        + "\n"
+    )
+    return 0
+
+
+def main() -> int:
+    if not BASELINE.is_dir() or not CHILD.is_dir():
+        raise FileNotFoundError("baseline and copied child publication must exist")
+    if not (
+        REPAIR_SOURCE / "src/tools/shot_pattern_analysis/matched_supplement_figures.py"
+    ).is_file():
+        raise FileNotFoundError("isolated repair source is missing")
+    sys.path.insert(0, str(REPAIR_SOURCE))
+    from src.tools.shot_pattern_analysis.matched_figure_identity import (
+        pair_comparison_slug,
+    )
+    from src.tools.shot_pattern_analysis.matched_supplement_figures import (
+        render_selected_pair_figures,
+    )
+
+    scope_path, targets, pipeline_path, pipeline, comparisons, roots, plans = (
+        _load_repair_scope()
+    )
 
     def source_ref(src: dict) -> dict:
         protocol, cell = src["protocol_id"], src["cell"]
@@ -158,48 +220,11 @@ def main() -> int:
                     "child_sha256": entry["sha256"],
                 }
             )
-    if matched != set(targets) or len(repairs) != 147:
+    if matched != set(targets):
         raise ValueError("rendered scope differs from measured 49 triples")
-    write_json(ledger_path, ledger)
-    child_pipeline = json.loads(pipeline_path.read_text())
-    ledger_sha = sha(ledger_path)
-    child_pipeline["artifact_sha256"]["figure_ledger"] = ledger_sha
-    child_pipeline["figure_ledger_sha256"] = ledger_sha
-    child_pipeline["graphics_layout_repair"] = {
-        "scope_sha256": sha(scope_path),
-        "source_commit": "5a1fdbfe51",
-        "replaced_density_triples": 49,
-        "baseline_pipeline_sha256": sha(pipeline_path),
-    }
-    write_json(CHILD / "REPORT_SUPPLEMENT_PIPELINE.json", child_pipeline)
-    receipt = {
-        "schema": "supplement-density-layout-child-publication/1",
-        "baseline": str(BASELINE),
-        "child": str(CHILD),
-        "scope_path": str(scope_path),
-        "scope_sha256": sha(scope_path),
-        "repair_source_commit": "5a1fdbfe51",
-        "baseline_pipeline_sha256": sha(pipeline_path),
-        "child_pipeline_sha256": sha(CHILD / "REPORT_SUPPLEMENT_PIPELINE.json"),
-        "baseline_figure_ledger_sha256": sha(
-            BASELINE / "REPORT_SUPPLEMENT_FIGURES.json"
-        ),
-        "child_figure_ledger_sha256": ledger_sha,
-        "replacements": repairs,
-    }
-    receipt_path = EVIDENCE / "layout_repair_child_publication_receipt.json"
-    write_json(receipt_path, receipt)
-    sys.stdout.write(
-        json.dumps(
-            {
-                "receipt": str(receipt_path),
-                "sha256": sha(receipt_path),
-                "replacements": len(repairs),
-            }
-        )
-        + "\n"
+    return _publish_repair_receipt(
+        targets, repairs, ledger_path, ledger, pipeline_path, scope_path
     )
-    return 0
 
 
 if __name__ == "__main__":

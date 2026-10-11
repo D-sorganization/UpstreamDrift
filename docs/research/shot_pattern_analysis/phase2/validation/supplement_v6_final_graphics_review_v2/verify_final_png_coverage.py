@@ -75,11 +75,10 @@ def review_contacts(review: dict) -> dict[str, str]:
     return {Path(item["path"]).name: item["sha256"] for item in contacts}
 
 
-def main() -> None:
-    scope_path = ROOT / "density_layout_repair_scope.json"
-    scope = read(scope_path)
-    affected = {Path(item["matching_png_path"]).name for item in scope["affected"]}
-    require(len(affected) == 49, "Repair scope must contain 49 unique PNGs")
+def _baseline_reviews(
+    affected: set[str],
+) -> tuple[list[dict], dict[str, str], int, int]:
+    """Verify every qualified batch before accepting child replacements."""
     rows = []
     baseline_assets: dict[str, str] = {}
     baseline_contacts = 0
@@ -165,6 +164,11 @@ def main() -> None:
         == affected,
         "Repair scope not covered by baseline batches",
     )
+    return rows, baseline_assets, baseline_contacts, total_pairs
+
+
+def _child_reviews(affected: set[str]) -> tuple[list[dict], dict[str, str]]:
+    """Check replacement PNG identities against independent child decisions."""
     replacements = read(ROOT / "layout_repair_child_publication_receipt.json")[
         "replacements"
     ]
@@ -202,6 +206,16 @@ def main() -> None:
         set(child_decisions) == affected,
         "Child review coverage differs from repair scope",
     )
+    return child_reviews, child_decisions
+
+
+def main() -> None:
+    scope_path = ROOT / "density_layout_repair_scope.json"
+    scope = read(scope_path)
+    affected = {Path(item["matching_png_path"]).name for item in scope["affected"]}
+    require(len(affected) == 49, "Repair scope must contain 49 unique PNGs")
+    rows, baseline_assets, baseline_contacts, total_pairs = _baseline_reviews(affected)
+    child_reviews, child_decisions = _child_reviews(affected)
     native_path = ROOT / "layout_child_native_vector_review.json"
     native = read(native_path)
     require(len(native["identities"]) == 49, "Native review does not cover changed 49")

@@ -17,11 +17,10 @@ def sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def main() -> int:
-    publication = json.loads(
-        (HERE / "layout_repair_child_publication_receipt.json").read_text()
-    )
-    scope_path = HERE / "density_layout_repair_scope.json"
+def _validated_figure_changes(
+    scope_path: Path, publication: dict
+) -> tuple[set[str], dict[str, dict], list[dict]]:
+    """Prove the selected figure inventory and replacement bytes."""
     scope = json.loads(scope_path.read_text())["affected"]
     expected = {
         "comparisons/" + Path(item["svg_path"]).with_suffix(suffix).name
@@ -62,6 +61,15 @@ def main() -> int:
     reported = {r["relative_path"]: r for r in publication["replacements"]}
     if len(reported) != 147 or any(reported[r["relative_path"]] != r for r in changed):
         raise ValueError("publication receipt differs from selected replacements")
+    return expected, base_by_path, changed
+
+
+def main() -> int:
+    publication = json.loads(
+        (HERE / "layout_repair_child_publication_receipt.json").read_text()
+    )
+    scope_path = HERE / "density_layout_repair_scope.json"
+    expected, base_by_path, changed = _validated_figure_changes(scope_path, publication)
     base_pipeline = json.loads(
         (BASELINE / "REPORT_SUPPLEMENT_PIPELINE.json").read_text()
     )

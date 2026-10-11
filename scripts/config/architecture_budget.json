@@ -1226,42 +1226,6 @@
       "issue": 12278,
       "reason": "Issue #12278: shot pattern analysis integration - run exceeds function-lines budget (104 > 100).",
       "expires_on": "2026-12-31"
-    },
-    {
-      "path": "docs/research/shot_pattern_analysis/phase2/validation/supplement_pilot_figures_v1/render_diagnostics.py",
-      "symbol": "main",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - main exceeds function-lines budget (112 > 100).",
-      "expires_on": "2026-12-31"
-    },
-    {
-      "path": "docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/publish_density_layout_child.py",
-      "symbol": "main",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - main exceeds function-lines budget (168 > 100).",
-      "expires_on": "2026-12-31"
-    },
-    {
-      "path": "docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/reconcile_layout_child.py",
-      "symbol": "main",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - main exceeds function-lines budget (101 > 100).",
-      "expires_on": "2026-12-31"
-    },
-    {
-      "path": "docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/verify_final_png_coverage.py",
-      "symbol": "main",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - main exceeds function-lines budget (175 > 100).",
-      "expires_on": "2026-12-31"
     }
   ]
 }
