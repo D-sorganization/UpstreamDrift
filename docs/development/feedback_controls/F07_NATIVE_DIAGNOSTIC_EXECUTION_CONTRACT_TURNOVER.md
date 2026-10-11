@@ -65,6 +65,12 @@ This is a retained failure, not evidence of solve, export, or replay success.
 
 ## Validation
 
+The first #12250 CI run found a Law of Demeter violation in reference-state
+construction (`request.bindings.initial_state.items`). Bind the request's
+bindings locally before enumerating its named state; the state contents,
+source identity, admission policy and qualification effects are unchanged.
+No lint baseline exception or waiver is added.
+
 At final integrated head `3957ac912d90144d274b9615480d015cab0be783`, system
 Python 3.13 central pre-PR validation passed all five gates: lint/format, diff
 mypy (18 source files), affected tests, Semgrep/import policy, and policy/fragment
