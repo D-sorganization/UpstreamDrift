@@ -16,6 +16,7 @@ Tests cover:
 from __future__ import annotations
 
 from collections.abc import Generator
+from unittest.mock import MagicMock
 
 import pytest
 from pydantic import ValidationError
@@ -42,6 +43,9 @@ from src.api.models.responses import (
 
 try:
     from fastapi.testclient import TestClient
+    from src.api import route_registry
+    from src.api.auth.models import User
+    from src.api.route_registry import _global_auth_dependency
     from src.api.server import app
 
     HAS_FASTAPI = True
@@ -284,11 +288,61 @@ class TestResponseModels:
 # ──────────────────────────────────────────────────────────────
 @pytest.fixture()
 def client() -> Generator[TestClient, None, None]:
-    """Create test client."""
+    """Create a test client authenticated as a stub user (issue #11995).
+
+    The physics router sits behind ``_global_auth_dependency``, which answers
+    401 in remote mode before the endpoint runs. The dependency is overridden
+    for the duration of the fixture only, so production auth defaults are
+    untouched and the override is removed on teardown.
+    """
     if not HAS_FASTAPI:
         pytest.skip("FastAPI not available")
+    app.dependency_overrides[_global_auth_dependency] = lambda: MagicMock(
+        spec=User, is_active=True
+    )
+    try:
+        with TestClient(app) as c:
+            yield c
+    finally:
+        app.dependency_overrides.pop(_global_auth_dependency, None)
+
+
+@pytest.fixture()
+def unauthenticated_client(
+    monkeypatch: pytest.MonkeyPatch,
+) -> Generator[TestClient, None, None]:
+    """Create a test client in remote mode with no credentials and no override."""
+    if not HAS_FASTAPI:
+        pytest.skip("FastAPI not available")
+    monkeypatch.setattr(route_registry, "is_auth_disabled", lambda: False)
+    app.dependency_overrides.pop(_global_auth_dependency, None)
     with TestClient(app) as c:
         yield c
+
+
+class TestUnauthenticatedContract:
+    """Remote-mode requests without a bearer token must be rejected (401)."""
+
+    @pytest.mark.parametrize(
+        ("method", "path", "body"),
+        [
+            ("post", "/simulation/camera", {"preset": "side"}),
+            ("get", "/simulation/stats", None),
+            ("get", "/simulation/control/actuators", None),
+        ],
+    )
+    def test_missing_token_returns_401(
+        self,
+        unauthenticated_client: TestClient,
+        method: str,
+        path: str,
+        body: dict | None,
+    ) -> None:
+        """No Authorization header -> 401 before the endpoint executes."""
+        resp = getattr(unauthenticated_client, method)(
+            path, **({"json": body} if body is not None else {})
+        )
+        assert resp.status_code == 401
 
 
 class TestCameraPresetAPI:
