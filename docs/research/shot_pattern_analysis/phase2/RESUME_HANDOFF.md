@@ -5,8 +5,8 @@
 The goal is active after the user resumed. All 10.44 million attempted simulation
 rows are complete. Do not rerun simulations. The scientific report, all assigned
 baseline PNG reviews, and the 49 selective density-layout replacement reviews
-are complete within their recorded scopes. Exact aggregate coverage, final
-integration gates, and remote delivery are being finalized.
+are complete within their recorded scopes. Exact aggregate coverage accepts 2,304 pair PNGs and 104 cell PNGs.
+Repository gate failures and remote delivery remain explicit below.
 
 Astra accepted the narrative after 406 numeric/count checks and 52 bound-source
 hash checks: `validation/final_narrative_independent_review_v8/review.json`.
@@ -15,6 +15,25 @@ The unchanged `REPORT.md` SHA256 is
 All 30 pages of report PDF v9 were visually reviewed; nine pagination tests pass
 and body tokens match v8. See `validation/final_report_pdf_v9/visual_review.json`.
 This report PDF is separate from the built-in LaTeX editor preview.
+
+The phase-two-first illustrated LaTeX article is accepted for document delivery:
+33 pages, 13 source-bound figures, zero Tectonic warnings. Final PDF SHA256
+`ca030b3c97fb759b384aab58b3da6be68687a194f353976754d43e7ffa69beda`; review
+receipt: `validation/illustrated_article_v1/review.json`. Local compiled output is
+`validation/illustrated_article_v1/final_build/shot_pattern_analysis.pdf` in the
+STUDY checkout. The user-facing PDF is titled “Shot Pattern Analysis - Illustrated
+Research Report.pdf”. Its source archive is
+`/tmp/shot-pattern-delivery-resume/illustrated-report-source.zip` (15 members;
+SHA256 `6567a9dcee60d6e18e4b1fe39ca34b3631eac09a578ce3eacd64914c93c7c1d2`).
+The built-in Codex LaTeX editor/compiler still fails before parsing on its
+Tectonic bundle fetch (#12120); standalone CLI success does not clear that issue.
+The local compile command, run from the article directory, was:
+
+```bash
+tectonic --keep-logs --keep-intermediates \
+  --outdir phase2/validation/illustrated_article_v1/final_build \
+  shot_pattern_analysis.tex
+```
 
 ## Checkouts and Ownership
 
@@ -80,18 +99,24 @@ trusted manifest comparison, and full archive/member verification.
 
 ## Remaining Gates and Blockers
 
-1. Integrate Sol's final evidence/coverage commit into delivery, preserving its
-   current root handoff and peer index. Never reset delivery to the older study tree.
-2. Commit current documentation and final archive receipts. Run canonical RM
-   `python -m scripts.pre_pr` with Repository_Management first on `PYTHONPATH`.
-   Resolve owned regressions; record unrelated repository failures truthfully.
-3. Push the delivery branch, publish and verify the immutable artifact release,
-   and open/attach a ready PR with a Handoff section and change fragments. Arm
-   only through `scripts/automerge_guard.py`; never bypass hooks or protection.
-4. Built-in LaTeX compilation remains blocked before source parsing by Tectonic's
-   unavailable bundle fetch (#12120). Latest evidence:
-   `validation/latex_compile_resume_v9/receipt.json`. Keep the existing article
-   open; no alternate LaTeX PDF proves that the right-panel compiler works.
+1. Final review evidence is integrated. Never reset delivery to the older study
+   tree. Preserve its current root handoff and peer index.
+2. Canonical RM pre-PR ran at `dac6618c58`: Ruff, mypy, consistency, fragments,
+   and workflow checks pass. Affected tests: 5,861 passes, 34 failures, seven
+   errors in unchanged outside-study test files. That is path-scope evidence, not
+   an independent runtime baseline reproduction. Fleet development-log policy
+   fails. The remaining raw-XML import-policy finding is being repaired with
+   targeted tests; record its follow-up separately. Full log and receipts live
+   in `validation/artifact_delivery_v2/`. Do not waive or describe these gates as green.
+3. Stage the accepted illustrated PDF and its source archive, refresh the release
+   asset inventory, and verify fresh restoration before any remote publication.
+   Then push and open/attach a reviewable PR with explicit blocked gates, a Handoff
+   section, and change fragments. Never bypass hooks or protection.
+4. The illustrated article has a successful local Tectonic CLI compile and accepted
+   33-page visual review. The separate built-in LaTeX editor remains blocked before
+   parsing by its bundle fetch failure (#12120); local CLI success does not resolve
+   that editor issue. The accepted PDF and source archive still need verified
+   inclusion in the refreshed release inventory before publication.
 
 ## Scientific Limits and Reproduction
 

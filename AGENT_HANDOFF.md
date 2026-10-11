@@ -5,11 +5,11 @@
 - **User-Requested Resume**: Goal pursuit is active after the usage reset. Start with [Resume Handoff](docs/research/shot_pattern_analysis/phase2/RESUME_HANDOFF.md).
 - **Matched Delivery Study — Phase Two**: All 10.44 million attempted simulation rows are complete. Do not rerun simulations. Read [Scientific Report](docs/research/shot_pattern_analysis/phase2/REPORT.md) and [Design](docs/research/shot_pattern_analysis/phase2/DESIGN.md).
 - **Scientific Acceptance**: Astra accepted the report after 406 numeric/count checks and 52 source-hash checks. These are geometric, model-conditional results; no measured player benefit or universal best shot shape is established.
-- **Report PDF**: All 30 pages of PDF v9 were visually reviewed; body text is preserved and nine pagination regression tests pass (#12242).
-- **Graphics**: All assigned baseline PNG reviews are complete. The 49 density-layout replacements (#12243) have root/Sol/Astra PNG acceptance and native PDF/SVG review. Sol is consolidating exact coverage; Luna is packaging the accepted child publication and verifying a fresh restoration.
+- **Report PDF**: The illustrated LaTeX research report is accepted for document delivery: 33 pages, 13 source-bound figures, zero Tectonic warnings. PDF SHA256 `ca030b3c97fb759b384aab58b3da6be68687a194f353976754d43e7ffa69beda`; review receipt `docs/research/shot_pattern_analysis/phase2/validation/illustrated_article_v1/review.json`. Local PDF: STUDY `docs/research/shot_pattern_analysis/phase2/validation/illustrated_article_v1/final_build/shot_pattern_analysis.pdf`; user-facing name: “Shot Pattern Analysis - Illustrated Research Report.pdf”. Source archive: `/tmp/shot-pattern-delivery-resume/illustrated-report-source.zip` (SHA256 `6567a9dcee60d6e18e4b1fe39ca34b3631eac09a578ce3eacd64914c93c7c1d2`).
+- **Graphics**: All assigned baseline PNG reviews are complete. The 49 density-layout replacements (#12243) have root/Sol/Astra PNG acceptance and native PDF/SVG review. Coverage reconciliation accepts 2,304 pair PNGs plus 104 unchanged cell PNGs. All three archive bundles passed fresh local restoration.
 - **Native Formats**: All 2,024 PDF and 2,024 SVG baseline renders completed. The 1,122 PDF bounding-box warnings were checked against painted pixels: 10,842 probes, minimum 6.4952 pt visible-ink clearance, no clipped edge ink. The renderer's final summary failed serialization; a separate successful finalizer preserved that distinction.
-- **Integration**: Branch `codex/shot-pattern-main-integration` contains study checkpoint `242c9c7074`, density repair `44c774fff6`, fragment `4efe168c3a`, and precondition guard `a221007665`. Further review evidence is being merged before final gates.
-- **External Blocker**: Built-in LaTeX compiler fails before parsing because its Tectonic bundle cannot be fetched (#12120). The standalone article is preserved; the report PDF does not establish right-panel compilation.
+- **Integration**: Branch `codex/shot-pattern-main-integration` contains study checkpoint `242c9c7074`, density repair `44c774fff6`, fragment `4efe168c3a`, and precondition guard `a221007665`. Review evidence is integrated; exact gate results are in `phase2/validation/artifact_delivery_v2/`.
+- **LaTeX Editor Blocker**: The local Tectonic 0.15.0 CLI compiled and visually reviewed the illustrated report successfully; the separate built-in Codex editor/compiler still fails before parsing because it cannot fetch its Tectonic bundle (#12120). Local CLI success does not clear the editor issue.
 
 ## In-Flight Branch Stacking and Dependencies
 
@@ -29,14 +29,14 @@
 - `python scripts/check_document_title_case.py AGENT_HANDOFF.md`
 - `python -m src.tools.check_markdown_links AGENT_HANDOFF.md`
 - Root's 282 provider/scoring/GUI/report/contact tests and Astra's 71 launcher-boundary tests passed; exact receipts live under `phase2/validation/`.
-- Run canonical `python -m scripts.pre_pr` with Repository_Management first on `PYTHONPATH`; preserve failures and resolve owned regressions without bypasses.
+- Canonical pre-PR ran at `dac6618c58`: Ruff, mypy, consistency, fragments, and workflow checks pass. Affected tests report 5,861 passes, 34 failures, and seven errors in unchanged outside-study test files; this is scope evidence, not runtime-baseline proof. Fleet development-log policy also fails. The subsequent XML parser fix passed 41 focused vector tests, Ruff, mypy, and the central import-policy check; Semgrep was unavailable and advisory-skipped. The full suite has not been rerun.
 - Verify archive manifests and every restored member before publication. Upload success alone is insufficient.
 
 ## Do-Not List and Next Steps
 
 - Preserve frozen science, baseline graphics, peer records, and armed Phase 1 PR state.
-- Do not claim player calibration, isolated causal curvature benefit, per-round strokes gained, or successful LaTeX compilation.
-- Finish coverage receipt integration, bundle restoration, final gates, and the ready PR; publish and verify remote assets against their trusted manifests.
+- Do not claim player calibration, isolated causal curvature benefit, per-round strokes gained, or successful compilation in the built-in LaTeX editor.
+- Before remote publication, stage the accepted illustrated PDF and source archive, refresh and verify the complete release inventory, and perform fresh restoration checks. Then push a reviewable PR with explicit unresolved repository gates; do not claim merge readiness or waive protection.
 - Keep empirical validation #11984 deferred and compiler blocker #12120 open; close implementation issues only with qualifying merged evidence.
 
 ## Imported Peer Handoff Records Index
