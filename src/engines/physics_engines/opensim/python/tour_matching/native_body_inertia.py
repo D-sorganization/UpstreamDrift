@@ -11,10 +11,7 @@ from defusedxml import ElementTree
 import numpy as np
 
 from src.shared.python.core.contracts import PreconditionError
-from src.shared.python.estimation import dime_global_calibration
-from src.shared.python.estimation.dime_global_calibration import (
-    validate_physical_inertia,
-)
+from src.shared.python.core.physical_inertia import validate_physical_inertia
 
 Vec3 = tuple[float, float, float]
 Inertia6 = tuple[float, float, float, float, float, float]
@@ -152,7 +149,7 @@ def audit_native_body_inertia(
     source_sha = hashlib.sha256(raw).hexdigest()
     if source_sha != expected_source_sha256:
         raise ValueError("source model hash mismatch")
-    validator_path = Path(dime_global_calibration.__file__)
+    validator_path = Path(validate_physical_inertia.__code__.co_filename)
     validator_sha = _sha(validator_path)
     rows = _source_bodies(raw)
     model = osim.Model(str(source_model_path))
