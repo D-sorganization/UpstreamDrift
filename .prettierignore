@@ -78,3 +78,8 @@ docs/development/full_body_models/evidence/ground_support/anthro_driver_drake/re
 
 # Preserve the byte-bound native closed-loop receipt serialization.
 docs/development/full_body_models/evidence/head_gaze/fd_neck_closed_loop.json
+
+# Preserve canonical model/calibration fixture provenance from main #12202.
+tests/fixtures/club_face/address_poses.json
+tests/fixtures/club_face/provenance.json
+src/engines/physics_engines/opensim/models/msk_club_grip_calibration.json
