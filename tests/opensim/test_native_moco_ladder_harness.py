@@ -346,6 +346,61 @@ def test_refinement_supervisor_stub_uses_exact_single_rung_protocol(
     assert not (output / "plain").exists()
 
 
+def test_refinement_supervisor_retains_bounded_failure_and_parent_bindings(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from tests.opensim import native_moco_refinement_supervisor as supervisor
+    from tests.opensim.native_moco_refinement import build_refinement_plan
+
+    repository = Path(__file__).resolve().parents[2]
+    evidence_root = (
+        repository
+        / "docs/development/feedback_controls/experiments/native_moco_mesh20_e1548c5179"
+    )
+    plan = build_refinement_plan(
+        evidence_root / "plain", evidence_root / "activation_residual_analysis.json"
+    )
+    plan_path = tmp_path / "exact-plan.json"
+    plan_path.write_text(
+        json.dumps(plan, sort_keys=True, indent=2, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
+    fingerprint = {"coverage": "test-double", "components": {}}
+    monkeypatch.setattr(supervisor, "_runtime_fingerprint", lambda _: fingerprint)
+    monkeypatch.setattr(
+        supervisor,
+        "_interpreter_fingerprint",
+        lambda _: {"path": "test-interpreter", "sha256": "a" * 64},
+    )
+
+    def failed_worker(root: Path, worker_python: str):
+        command = supervisor._worker_argv(
+            root / "plain", root / "refinement_plan.json", worker_python
+        )
+        return (
+            supervisor.RungResult(
+                "plain", "timeout", None, 30.0, "wall timeout", 12, True
+            ),
+            command,
+        )
+
+    monkeypatch.setattr(supervisor, "_run_one", failed_worker)
+    output = tmp_path / "failed-attempt"
+    result = supervisor.run_attempt(
+        plan_path,
+        output,
+        sys.executable,
+        tmp_path,
+        repository,
+    )
+    retained = json.loads((output / "supervisor_result.json").read_text())
+    assert result["final_status"] == "timeout"
+    assert retained["result"]["owned_tree_cleanup_verified"] is True
+    assert retained["parent_inputs_unchanged"] is True
+    assert retained["plan_files_unchanged"] is True
+    assert retained["retry_count"] == 0
+
+
 def test_parent_refinement_guess_exports_state_table_and_restores_exact_initial(
     tmp_path: Path,
 ) -> None:
