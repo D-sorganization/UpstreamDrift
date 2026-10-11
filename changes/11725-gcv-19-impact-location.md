@@ -1,7 +1,7 @@
 ---
 issue: 11725
 summary: "GCV-19: the native-export impact card fills Impact Location (toe, high) from the decorative ball (contact point = ball centre - radius x face normal at the impact sample, card extras ball_source records the placement source); without a ball the row stays unavailable with an accurate reason instead of the stale GCV-11/GCV-13 text"
-title: "GCV-19: Impact Location From The Decorative Ball"
+title: "GCV-19: Impact Location From the Decorative Ball"
 branch: "claude/gcv-19-impact-location"
 ---
 
