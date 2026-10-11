@@ -320,6 +320,7 @@ def unauthenticated_client(
         yield c
 
 
+@pytest.mark.unit
 class TestUnauthenticatedContract:
     """Remote-mode requests without a bearer token must be rejected (401)."""
 
