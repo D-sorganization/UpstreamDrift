@@ -1,0 +1,165 @@
+from __future__ import annotations
+
+import numpy as np
+import pytest
+from pathlib import Path
+from types import SimpleNamespace
+
+from run_mujoco_v1_zero_effort_acceleration_20261012 import (
+    EXPECTED_MODULES,
+    SOURCE_FILES,
+    _module_provenance_from,
+)
+from mujoco_v1_zero_effort_acceleration import execute_zero_effort_gate
+
+
+NAMES = (
+    "TranslationInputX",
+    "TranslationInputY",
+    "TranslationInputZ",
+    "HipInputX",
+    "HipInputY",
+    "HipInputZ",
+    *(f"coordinate_{index}" for index in range(35)),
+)
+
+
+def test_module_provenance_does_not_require_unloaded_integrator(tmp_path: Path) -> None:
+    repo = tmp_path / "checkout"
+    repo.mkdir()
+    source = repo / "plant.py"
+    source.write_text("# source-bound acceleration owner\n", encoding="utf-8")
+    expected = ("same_input.plant",)
+    loaded = {expected[0]: SimpleNamespace(__file__=str(source))}
+
+    records = _module_provenance_from(loaded, expected, repo, lambda path: "source-digest")
+
+    assert records == [{"module": "same_input.plant", "origin": str(source), "sha256": "source-digest"}]
+    assert "same_input.integrator" not in {record["module"] for record in records}
+
+
+def test_acceleration_phase_hashes_but_does_not_require_integrator_loaded() -> None:
+    integrator = "src/shared/python/motion_matching/same_input/integrator.py"
+
+    assert "src.shared.python.motion_matching.same_input.integrator" not in EXPECTED_MODULES
+    assert any(path.as_posix().endswith(integrator) for path in SOURCE_FILES)
+
+
+def test_module_provenance_fails_before_native_work_for_missing_required_owner(tmp_path: Path) -> None:
+    with pytest.raises(RuntimeError, match="required native module has no source origin"):
+        _module_provenance_from({}, ("same_input.plant",), tmp_path, lambda _path: "unused")
+
+
+def _observation(q: np.ndarray) -> dict[str, object]:
+    jacobian = np.zeros((6, 41))
+    jacobian[:, :6] = np.eye(6)
+    return {
+        "q": q.tolist(),
+        "weld_pose_residual_m_rad": np.zeros(6).tolist(),
+        "weld_rate_residual_m_s_rad_s": np.zeros(6).tolist(),
+        "weld_jacobian_6x41": jacobian.tolist(),
+        "jacobian_rank": 6,
+    }
+
+
+class _SourceShapedPlant:
+    def __init__(self, events: list[str], acceleration: np.ndarray | None = None) -> None:
+        self.coordinate_order = NAMES
+        self.events = events
+        self.calls: list[tuple[np.ndarray, np.ndarray, np.ndarray]] = []
+        self.result = np.zeros(41) if acceleration is None else acceleration
+
+    def acceleration(self, q: np.ndarray, v: np.ndarray, tau: np.ndarray) -> np.ndarray:
+        self.events.append("acceleration")
+        self.calls.append((q.copy(), v.copy(), tau.copy()))
+        return self.result.copy()
+
+
+def test_gate_observes_full_source_closure_then_calls_one_zero_effort_solve() -> None:
+    events: list[str] = []
+    plant = _SourceShapedPlant(events)
+    q, v = np.linspace(-0.3, 0.4, 41), np.zeros(41)
+
+    def observe(q_observed: np.ndarray, v_observed: np.ndarray) -> dict[str, object]:
+        events.append("observe")
+        np.testing.assert_array_equal(v_observed, v)
+        return _observation(q_observed)
+
+    result = execute_zero_effort_gate(plant, NAMES, q, v, observe)
+
+    assert events == ["observe", "acceleration"]
+    assert len(plant.calls) == result["acceleration_call_count"] == 1
+    np.testing.assert_array_equal(plant.calls[0][0], q)
+    np.testing.assert_array_equal(plant.calls[0][1], v)
+    np.testing.assert_array_equal(plant.calls[0][2], np.zeros(41))
+    assert result["jacobian_rank"] == 6
+    assert result["acceleration"].shape == (41,)
+
+
+@pytest.mark.parametrize(
+    "change, message",
+    [
+        (lambda row: row.update(jacobian_rank=5), "rank six"),
+        (
+            lambda row: row.update(weld_pose_residual_m_rad=[2e-9, 0, 0, 0, 0, 0]),
+            "pose residual exceeds",
+        ),
+        (
+            lambda row: row.update(weld_rate_residual_m_s_rad_s=[0, 0, 0, 0, 0, 2e-9]),
+            "rate residual exceeds",
+        ),
+        (lambda row: row.update(q=np.ones(41).tolist()), "changed q identity"),
+    ],
+)
+def test_bad_pre_acceleration_observation_stops_before_dynamics(change, message) -> None:
+    events: list[str] = []
+    plant = _SourceShapedPlant(events)
+
+    def observe(q: np.ndarray, _v: np.ndarray) -> dict[str, object]:
+        events.append("observe")
+        row = _observation(q)
+        change(row)
+        return row
+
+    with pytest.raises(ValueError, match=message):
+        execute_zero_effort_gate(plant, NAMES, np.zeros(41), np.zeros(41), observe)
+    assert events == ["observe"]
+    assert plant.calls == []
+
+
+@pytest.mark.parametrize("bad_output", [np.full(41, np.nan), np.zeros(40)])
+def test_nonfinite_or_incomplete_acceleration_fails_after_exactly_one_call(bad_output) -> None:
+    events: list[str] = []
+    plant = _SourceShapedPlant(events, bad_output)
+    with pytest.raises(ValueError, match="zero-effort acceleration"):
+        execute_zero_effort_gate(
+            plant,
+            NAMES,
+            np.zeros(41),
+            np.zeros(41),
+            lambda q, _v: _observation(q),
+        )
+    assert events == ["acceleration"]
+    assert len(plant.calls) == 1
+
+
+def test_acceleration_receives_detached_state_vectors() -> None:
+    events: list[str] = []
+
+    class MutatingPlant(_SourceShapedPlant):
+        def acceleration(self, q: np.ndarray, v: np.ndarray, tau: np.ndarray) -> np.ndarray:
+            super().acceleration(q, v, tau)
+            q[:] = 123.0
+            v[:] = 456.0
+            tau[:] = 789.0
+            return np.zeros(41)
+
+    plant = MutatingPlant(events)
+    q, v = np.arange(41, dtype=float), np.zeros(41)
+    q_original, v_original = q.copy(), v.copy()
+    execute_zero_effort_gate(
+        plant, NAMES, q, v, lambda observed_q, _observed_v: _observation(observed_q)
+    )
+    np.testing.assert_array_equal(q, q_original)
+    np.testing.assert_array_equal(v, v_original)
+    assert len(plant.calls) == 1

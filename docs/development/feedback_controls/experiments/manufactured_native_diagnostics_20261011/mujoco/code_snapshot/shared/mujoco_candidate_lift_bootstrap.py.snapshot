@@ -1,0 +1,123 @@
+"""Build the source-bound Python environment for the MuJoCo preflight."""
+from __future__ import annotations
+
+import os
+import hashlib
+import subprocess
+import tomllib
+from pathlib import Path
+
+EXPECTED_TOOLS_COMMIT = "6b6e4be55e7086a33db43b36d2632765be619bde"
+EXPECTED_PYPROJECT_SHA256 = "c1866dde932edd353b22e57c79ad6d5e6352b22c728e75d13ae280430aec667a"
+
+
+def canonical_pythonpath(
+    repo_root: Path,
+    planning_dir: Path,
+    expected_pyproject_sha256: str | None = None,
+) -> tuple[str, ...]:
+    """Resolve the exact ordered pytest pythonpath entries plus planning code."""
+    root = repo_root.resolve(strict=True)
+    planning = planning_dir.resolve(strict=True)
+    pyproject = root / "pyproject.toml"
+    if expected_pyproject_sha256 is not None:
+        digest = hashlib.sha256(pyproject.read_bytes()).hexdigest()
+        if digest != expected_pyproject_sha256.lower():
+            raise ValueError(f"pyproject.toml SHA mismatch: expected {expected_pyproject_sha256}, found {digest}")
+    config = tomllib.loads(pyproject.read_text(encoding="utf-8"))
+    entries = config.get("tool", {}).get("pytest", {}).get("ini_options", {}).get("pythonpath")
+    if not isinstance(entries, list) or not entries or not all(isinstance(item, str) for item in entries):
+        raise ValueError("pyproject.toml must define a nonempty pytest pythonpath list")
+    resolved: list[str] = [str(planning)]
+    for entry in entries:
+        path = (root / entry).resolve(strict=True)
+        if not path.is_dir():
+            raise ValueError(f"configured pythonpath entry is not a directory: {entry}")
+        try:
+            path.relative_to(root)
+        except ValueError as exc:
+            raise ValueError(f"configured pythonpath entry escapes source checkout: {entry}") from exc
+        value = str(path)
+        if value not in resolved:
+            resolved.append(value)
+    return tuple(resolved)
+
+
+def pinned_tools_root(repo_root: Path, expected_commit: str = EXPECTED_TOOLS_COMMIT) -> Path:
+    """Return vendor/ud-tools only when its checked-out commit matches the pin."""
+    root = repo_root.resolve(strict=True)
+    vendor = (root / "vendor" / "ud-tools").resolve(strict=True)
+    actual = tools_head(vendor)
+    if actual != expected_commit.lower():
+        raise ValueError(f"Tools source pin mismatch: expected {expected_commit}, found {actual}")
+    status = subprocess.run(
+        ["git", "-C", str(vendor), "status", "--porcelain"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout
+    if status.strip():
+        raise ValueError("pinned Tools checkout has local changes")
+    return vendor
+
+
+def tools_head(vendor_root: Path) -> str:
+    """Read the checked-out Tools commit without modifying the checkout."""
+    return subprocess.run(
+        ["git", "-C", str(vendor_root), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip().lower()
+
+
+def tools_status(vendor_root: Path) -> str:
+    """Return porcelain status for immutable-checkout before/after comparison."""
+    return subprocess.run(
+        ["git", "-C", str(vendor_root), "status", "--porcelain"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout
+
+
+def child_environment(
+    repo_root: Path,
+    planning_dir: Path,
+    base: dict[str, str] | None = None,
+    expected_tools_commit: str = EXPECTED_TOOLS_COMMIT,
+    expected_pyproject_sha256: str = EXPECTED_PYPROJECT_SHA256,
+) -> dict[str, str]:
+    """Copy an environment and prepend canonical source and pinned Tools paths."""
+    environment = dict(os.environ if base is None else base)
+    paths = canonical_pythonpath(repo_root, planning_dir, expected_pyproject_sha256)
+    tools = pinned_tools_root(repo_root, expected_tools_commit)
+    environment["PYTHONPATH"] = os.pathsep.join(paths)
+    environment["TOOLS_REPO_PATH"] = str(tools)
+    return environment
+
+
+def bounded_child_environment(
+    repo_root: Path,
+    planning_dir: Path,
+    thread_keys: tuple[str, ...],
+    base: dict[str, str] | None = None,
+    expected_tools_commit: str = EXPECTED_TOOLS_COMMIT,
+    expected_pyproject_sha256: str = EXPECTED_PYPROJECT_SHA256,
+) -> dict[str, str]:
+    """Build an allowlisted environment and set every requested thread cap last."""
+    environment = child_environment(
+        repo_root,
+        planning_dir,
+        base=base,
+        expected_tools_commit=expected_tools_commit,
+        expected_pyproject_sha256=expected_pyproject_sha256,
+    )
+    for key in thread_keys:
+        environment[key] = "1"
+    return environment
+
+
+def recorded_environment(environment: dict[str, str], allowed_keys: tuple[str, ...]) -> dict[str, str]:
+    """Serialize only explicitly allowlisted child environment variables."""
+    return {key: environment[key] for key in allowed_keys if key in environment}

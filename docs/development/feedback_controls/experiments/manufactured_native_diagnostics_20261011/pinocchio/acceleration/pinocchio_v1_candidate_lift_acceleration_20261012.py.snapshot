@@ -1,0 +1,405 @@
+"""Prepare one exact-state Pinocchio zero-effort acceleration observation.
+
+This is a separate, non-qualifying diagnostic phase. It uses the already
+verified manufactured candidate pose and rates, checks source closure before
+calling constrained dynamics exactly once, and does not integrate or project.
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import importlib.metadata
+import json
+import platform
+import sys
+from datetime import UTC, datetime
+from pathlib import Path
+from typing import Any, Mapping
+
+import numpy as np
+
+import pinocchio_fullbody_source_assembly_20261012 as source_setup
+import pinocchio_v1_candidate_lift_parity_20261012 as geometry_probe
+
+
+MAX_PRE_ACCEL_CLOSURE_COMPONENT = 1e-9
+GEOMETRY_PROBE_SHA256 = (
+    "40c521457a251cf9b5c905a950a3806d9573ccf8a34e4a1a09d5e3948bedb2b1"
+)
+MUJOCO_ACCELERATION = Path(
+    "/home/dieterolson/native_engine_parity_telemetry_20261012/"
+    "mujoco_v1_zero_effort_20261011_root_attempt2/native-observation.json"
+)
+MUJOCO_ACCELERATION_SHA256 = (
+    "70d5ed01ee63bef2c161745d7ca0f7e955af8249c9e7529ea20ebc6e2258a49a"
+)
+SOURCE_ACCELERATION_API = "FullBodyPinocchioModel.accelerations -> pin.constraintDynamics(model,data,q,v,tau,constraints,constraint_data)"
+MUJOCO_REFERENCE_SOURCE_HASHES = {
+    "src/engines/physics_engines/mujoco/python/full_body_model.py": "c900a6ebc1072a66d259a4e2f03de3f3c6b9647ffbbcab1aa5fbb21db64185b3",
+    "src/shared/python/motion_matching/same_input/plant.py": "ff61ed1b6b98b85d7f4f118d44b470c5e9e4e744423c0052f926f6bf1a0826c5",
+    "docs/development/feedback_controls_planning/mujoco_v1_zero_effort_acceleration.py": "28d8f114bd58d91b5caa6243784ed84128f34de03820f9c9720ee7ad4e6d61de",
+    "docs/development/feedback_controls_planning/run_mujoco_v1_zero_effort_acceleration_20261012.py": "1fc46a2c9bfcbe9236a51168ca8869cc6c0f9fcd180b505d940fb8c2392f6731",
+}
+
+
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for block in iter(lambda: stream.read(1 << 20), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def _validated_pre_acceleration(
+    closure: Mapping[str, Any],
+    coordinates: Mapping[str, float],
+    rates: Mapping[str, float],
+    coordinate_order: tuple[str, ...],
+) -> tuple[np.ndarray, np.ndarray]:
+    """Require the exact source-sized, finite, closed, zero-rate state first."""
+    if tuple(coordinates) != coordinate_order or tuple(rates) != coordinate_order:
+        raise ValueError(
+            "candidate state mappings must preserve exact source coordinate order"
+        )
+    q = np.asarray([coordinates[name] for name in coordinate_order], dtype=np.float64)
+    v = np.asarray([rates[name] for name in coordinate_order], dtype=np.float64)
+    if q.shape != (41,) or v.shape != (41,) or not np.isfinite(np.r_[q, v]).all():
+        raise ValueError("candidate q/rates must be finite source-sized 41-vectors")
+    if np.any(v != 0.0):
+        raise ValueError(
+            "acceleration diagnostic requires the exact retained zero-rate state"
+        )
+    residual = np.asarray(
+        closure.get("pose_residual_minus_log6_c1Mc2_local_frame_m_rad"),
+        dtype=np.float64,
+    )
+    jacobian = closure.get("native_rate_jacobian")
+    if residual.shape != (6,) or not np.isfinite(residual).all():
+        raise ValueError("pre-acceleration weld residual must be a finite six-vector")
+    rate_residual = np.asarray(
+        closure.get("rate_residual_native_constraint_jacobian_times_named_rates"),
+        dtype=np.float64,
+    )
+    if rate_residual.shape != (6,) or not np.isfinite(rate_residual).all():
+        raise ValueError(
+            "pre-acceleration weld rate residual must be a finite six-vector"
+        )
+    if not isinstance(jacobian, Mapping) or jacobian.get("shape") != [6, 41]:
+        raise ValueError("pre-acceleration native weld Jacobian must be 6x41")
+    if jacobian.get("rank") != 6:
+        raise ValueError("pre-acceleration native weld Jacobian must have rank six")
+    if (
+        max(float(np.max(np.abs(residual))), float(np.max(np.abs(rate_residual))))
+        > MAX_PRE_ACCEL_CLOSURE_COMPONENT
+    ):
+        raise ValueError("pre-acceleration pose/rate closure guard failed")
+    return q, np.r_[residual, rate_residual]
+
+
+def validate_mujoco_reference(
+    reference: Mapping[str, Any],
+    coordinate_order: tuple[str, ...],
+    coordinates: Mapping[str, float],
+) -> np.ndarray:
+    """Verify the retained one-call KKT=0 reference and exact initial q/v/tau."""
+    if (
+        reference.get("native_engine") != "MuJoCo"
+        or reference.get("acceleration_call_count") != 1
+        or reference.get("execution_scope")
+        != "one VectorPlant.acceleration call; no projection, integration, callback, or optimizer"
+    ):
+        raise ValueError(
+            "retained MuJoCo receipt is not the expected one-call diagnostic"
+        )
+    initial = reference.get("initial_state")
+    if not isinstance(initial, Mapping):
+        raise ValueError("retained MuJoCo receipt has no initial state")
+    q = np.asarray(initial.get("qpos"), dtype=np.float64)
+    v = np.asarray(initial.get("qvel"), dtype=np.float64)
+    effort = np.asarray(initial.get("effort"), dtype=np.float64)
+    expected_q = np.asarray([coordinates[name] for name in coordinate_order])
+    if (
+        tuple(initial.get("coordinate_order", ())) != coordinate_order
+        or q.shape != (41,)
+        or v.shape != (41,)
+        or effort.shape != (41,)
+        or not np.isfinite(np.r_[q, v, effort]).all()
+        or not np.array_equal(q, expected_q)
+        or np.any(v != 0.0)
+        or np.any(effort != 0.0)
+    ):
+        raise ValueError(
+            "retained MuJoCo receipt does not bind identical zero-effort q/v"
+        )
+    source = reference.get("source")
+    hashes = source.get("source_hashes_after") if isinstance(source, Mapping) else None
+    if not isinstance(hashes, Mapping):
+        raise ValueError("retained MuJoCo receipt has no source hash inventory")
+    for suffix, expected in MUJOCO_REFERENCE_SOURCE_HASHES.items():
+        matches = [
+            value
+            for path, value in hashes.items()
+            if str(path).replace("\\", "/").endswith(suffix)
+        ]
+        if matches != [expected]:
+            raise ValueError(f"retained MuJoCo source identity differs for {suffix}")
+    values = np.asarray(reference.get("zero_effort_acceleration"), dtype=np.float64)
+    if values.shape != (41,) or not np.isfinite(values).all():
+        raise ValueError(
+            "retained MuJoCo acceleration must be a finite source-sized vector"
+        )
+    return values
+
+
+def call_one_acceleration(
+    owner: Any,
+    coordinates: Mapping[str, float],
+    rates: Mapping[str, float],
+    coordinate_order: tuple[str, ...],
+    closure: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Call native constrained acceleration once, only after geometry gates."""
+    q, residual = _validated_pre_acceleration(
+        closure, coordinates, rates, coordinate_order
+    )
+    original_coordinates = dict(coordinates)
+    original_rates = dict(rates)
+    zero_efforts = dict.fromkeys(coordinate_order, 0.0)
+    attempted_calls = 1  # increment before entering native code
+    try:
+        native = owner.accelerations(coordinates, rates, zero_efforts)
+        if (
+            not np.array_equal(
+                np.asarray([coordinates[name] for name in coordinate_order]), q
+            )
+            or dict(rates) != original_rates
+            or coordinates != original_coordinates
+        ):
+            raise ValueError(
+                "native acceleration call mutated the frozen input q/v mappings"
+            )
+        if not isinstance(native, Mapping) or set(native) != set(coordinate_order):
+            raise ValueError("native acceleration names differ from source coordinates")
+        values = np.asarray(
+            [native[name] for name in coordinate_order], dtype=np.float64
+        )
+        if values.shape != (41,) or not np.isfinite(values).all():
+            raise FloatingPointError(
+                "native acceleration must be a finite source-sized 41-vector"
+            )
+        return {
+            "status": "one_native_acceleration_observed",
+            "phase": "pinocchio_constraint_dynamics",
+            "attempted_acceleration_calls": attempted_calls,
+            "pre_acceleration_pose_or_rate_residual_max_abs": float(
+                np.max(np.abs(residual))
+            ),
+            "zero_efforts_named": zero_efforts,
+            "coordinate_order": list(coordinate_order),
+            "acceleration_named": {
+                name: float(native[name]) for name in coordinate_order
+            },
+            "all_accelerations_finite": True,
+        }
+    except Exception as exc:
+        return {
+            "status": "native_acceleration_failed",
+            "phase": "pinocchio_constraint_dynamics",
+            "attempted_acceleration_calls": attempted_calls,
+            "pre_acceleration_pose_or_rate_residual_max_abs": float(
+                np.max(np.abs(residual))
+            ),
+            "error_type": type(exc).__name__,
+            "error_message": str(exc)[:500],
+        }
+
+
+def observe(repo: Path, output: Path, script_path: Path) -> dict[str, Any]:
+    """Bind exact source and call the native constrained-acceleration API once."""
+    if output.exists():
+        raise FileExistsError("output receipt path must be fresh; no overwrite")
+    source_hashes = source_setup.verify_sources(repo)
+    geometry_sha = geometry_probe.verify_artifact(
+        Path(geometry_probe.OBSERVATION),
+        geometry_probe.OBSERVATION_SHA256,
+        "MuJoCo candidate-lift geometry receipt",
+    )
+    candidate_sha = geometry_probe.verify_artifact(
+        Path(geometry_probe.CANDIDATE),
+        geometry_probe.CANDIDATE_SHA256,
+        "external candidate source JSON",
+    )
+    setup_sha = sha256_file(Path(source_setup.__file__).resolve())
+    geometry_script = Path(geometry_probe.__file__).resolve()
+    geometry_script_sha = sha256_file(geometry_script)
+    if geometry_script_sha != GEOMETRY_PROBE_SHA256:
+        raise ValueError("source-bound geometry probe helper hash mismatch")
+    if setup_sha != geometry_probe.SOURCE_HELPER_SHA256:
+        raise ValueError("source-bound setup helper hash mismatch")
+    mujoco_sha = geometry_probe.verify_artifact(
+        MUJOCO_ACCELERATION,
+        MUJOCO_ACCELERATION_SHA256,
+        "retained MuJoCo zero-effort acceleration receipt",
+    )
+    payload = json.loads(Path(geometry_probe.OBSERVATION).read_text(encoding="utf-8"))
+    candidate = json.loads(Path(geometry_probe.CANDIDATE).read_text(encoding="utf-8"))
+    upper_path = repo / geometry_probe.UPPER
+    upper = json.loads(upper_path.read_text(encoding="utf-8"))
+    from src.shared.python.motion_matching.full_body_spec import load_full_body_spec
+
+    spec = load_full_body_spec(repo / geometry_probe.SPEC, upper)
+    order = tuple(spec["coordinate_order"])
+    coordinates, rates = geometry_probe.candidate_named_state(
+        payload, order, tuple(candidate["coordinate_names"])
+    )
+    mujoco_reference = json.loads(MUJOCO_ACCELERATION.read_text(encoding="utf-8"))
+    mujoco_acceleration = validate_mujoco_reference(
+        mujoco_reference, order, coordinates
+    )
+
+    pin, model_type, _, import_details = source_setup.import_native_support(repo)
+    if str(getattr(pin, "__version__", "unknown")) != "3.8.0":
+        raise RuntimeError("expected Pinocchio 3.8.0")
+    owner = model_type(spec)
+    # This source query refreshes the native constraint placement/Jacobian only;
+    # unlike closure_residuals, it does not request acceleration.
+    contacts = geometry_probe.pinocchio_contact_observation(owner, coordinates, rates)
+    if contacts["sphere_count"] != 4:
+        raise ValueError("source contact inventory must contain exactly four spheres")
+    closure = geometry_probe.pinocchio_weld_observation(
+        owner, pin, coordinates, rates, order
+    )
+    acceleration = call_one_acceleration(owner, coordinates, rates, order, closure)
+
+    result: dict[str, Any] = {
+        "schema_version": "pinocchio-candidate-lift-zero-effort-acceleration-v1",
+        "created_utc": datetime.now(UTC).isoformat(),
+        "status": acceleration["status"],
+        "qualification": "none; one manufactured-state zero-effort native acceleration observation",
+        "source_commit": source_setup.COMMIT,
+        "base_manifest_sha256": source_setup.MANIFEST_SHA256,
+        "source_hashes": source_hashes,
+        "source_setup_helper_sha256": setup_sha,
+        "geometry_probe_sha256": geometry_script_sha,
+        "acceleration_probe_sha256": sha256_file(script_path),
+        "candidate_geometry_receipt_sha256": geometry_sha,
+        "candidate_sha256": candidate_sha,
+        "native_model_sha256": source_hashes.get(
+            "src/engines/physics_engines/pinocchio/python/native_model.py"
+        ),
+        "runtime": {
+            "python": sys.version,
+            "platform": platform.platform(),
+            "pinocchio_version": str(pin.__version__),
+            "pin_distribution_version": importlib.metadata.version("pin"),
+            "source_imports": import_details,
+        },
+        "source_physics": {
+            "gravity_m_s2": list(spec["gravity_m_s2"]),
+            "closure_type": "one Pinocchio CONTACT_6D RigidConstraintModel in ReferenceFrame.LOCAL",
+            "constraint_initialization": "source calls initConstraintDynamics with default arguments; no gains/stabilizer overrides added",
+            "contact_law": spec["contact"],
+            "acceleration_api": SOURCE_ACCELERATION_API,
+            "contact_forces_in_pin_acceleration_call": True,
+            "pin_contact_policy": "FullBodyPinocchioModel override evaluates the shared sphere contact law and maps penetrating-sphere forces through native frame Jacobians before constraintDynamics",
+            "mujoco_zero_effort_reference": {
+                "receipt_sha256": mujoco_sha,
+                "call_count": mujoco_reference["acceleration_call_count"],
+                "solver": "VectorPlant with explicit KKT weld solve and kkt_regularization=0.0, per retained runner source",
+                "acceleration_named": dict(
+                    zip(order, map(float, mujoco_acceleration), strict=True)
+                ),
+                "cross_engine_acceleration_equality_asserted": False,
+            },
+            "solver_difference": "Pinocchio CONTACT_6D LOCAL native constraintDynamics with default initConstraintDynamics settings; MuJoCo explicit mass-matrix KKT solve at regularization 0.0. The source APIs differ; this probe reports both vectors without asserting equality.",
+            "solver_or_model_parameters_changed": False,
+        },
+        "input": {
+            "coordinate_order": list(order),
+            "q_named": coordinates,
+            "rates_named": rates,
+            "all_rates_exact_zero": all(value == 0.0 for value in rates.values()),
+            "primitive_efforts_exact_zero": True,
+        },
+        "pre_acceleration_gates": {
+            "native_weld": closure,
+            "contact_law_samples": contacts,
+            "closure_guard_max_abs_component": MAX_PRE_ACCEL_CLOSURE_COMPONENT,
+            "closure_guard_role": "call-order diagnostic guard only; not physical acceptance or qualification",
+            "passed": acceleration.get("attempted_acceleration_calls") == 1,
+        },
+        "acceleration": acceleration,
+        "mujoco_reference_acceleration": dict(
+            zip(order, map(float, mujoco_acceleration), strict=True)
+        ),
+        "cross_engine_acceleration_difference_abs_max_descriptive_only": (
+            float(
+                np.max(
+                    np.abs(
+                        np.asarray(list(acceleration["acceleration_named"].values()))
+                        - mujoco_acceleration
+                    )
+                )
+            )
+            if acceleration.get("status") == "one_native_acceleration_observed"
+            else None
+        ),
+        "execution_limits": {
+            "native_acceleration_calls_max": 1,
+            "native_acceleration_calls_attempted": acceleration.get(
+                "attempted_acceleration_calls", 0
+            ),
+            "projection": False,
+            "optimizer": False,
+            "integration": False,
+            "contact_equilibrium_claim": False,
+            "physical_qualification": False,
+        },
+    }
+    hashes_after = source_setup.verify_sources(repo)
+    result["source_hashes_after"] = hashes_after
+    artifact_hashes_before = {
+        "geometry_receipt": geometry_sha,
+        "candidate": candidate_sha,
+        "mujoco_acceleration_receipt": mujoco_sha,
+        "geometry_probe": geometry_script_sha,
+        "source_setup": setup_sha,
+        "acceleration_probe": sha256_file(script_path),
+    }
+    artifact_hashes_after = {
+        "geometry_receipt": sha256_file(Path(geometry_probe.OBSERVATION)),
+        "candidate": sha256_file(Path(geometry_probe.CANDIDATE)),
+        "mujoco_acceleration_receipt": sha256_file(MUJOCO_ACCELERATION),
+        "geometry_probe": sha256_file(geometry_script),
+        "source_setup": sha256_file(Path(source_setup.__file__).resolve()),
+        "acceleration_probe": sha256_file(script_path),
+    }
+    result["artifact_hashes_before"] = artifact_hashes_before
+    result["artifact_hashes_after"] = artifact_hashes_after
+    result["source_unchanged"] = (
+        hashes_after == source_hashes
+        and artifact_hashes_before == artifact_hashes_after
+    )
+    if not result["source_unchanged"]:
+        result["status"] = "provenance_changed"
+    source_setup.write_json_atomic(output, result)
+    return result
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--repo-root", type=Path, required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args()
+    result = observe(
+        args.repo_root.resolve(), args.output.resolve(), Path(__file__).resolve()
+    )
+    print(
+        json.dumps({"status": result["status"], "output": str(args.output.resolve())})
+    )
+    return 0 if result["status"] == "one_native_acceleration_observed" else 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
