@@ -6,6 +6,7 @@ import { getApiBase } from './backend';
 
 export interface RunCapabilities {
   has_candidate_npz: boolean;
+  has_video_export: boolean;
   has_animation_gif: boolean;
   has_parity_report: boolean;
   candidate_profile: string | null;
@@ -124,8 +125,15 @@ export function matchedSwingAnimationFrameUrl(runId: string, index: number): str
   );
 }
 
-export function matchedSwingReportUrl(runId: string): string {
-  return apiUrl(`/api/v1/matched-swings/${encodeURIComponent(runId)}/report`);
+export function matchedSwingReportUrl(runId: string, format: 'md' | 'pdf' = 'md'): string {
+  const suffix = format === 'pdf' ? '?format=pdf' : '';
+  return apiUrl(`/api/v1/matched-swings/${encodeURIComponent(runId)}/report${suffix}`);
+}
+
+export function matchedSwingVideoUrl(runId: string, format: 'gif' | 'mp4'): string {
+  return apiUrl(
+    `/api/v1/matched-swings/${encodeURIComponent(runId)}/video?format=${format}`,
+  );
 }
 
 export async function fetchCandidatePreviewFrame(

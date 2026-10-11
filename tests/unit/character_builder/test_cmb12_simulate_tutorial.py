@@ -44,7 +44,7 @@ def stepped(tmp_path_factory):
 
 def test_simulate_step_matches_tutorial(stepped, tutorial_text: str) -> None:
     filename, model, data = stepped
-    assert filename == "tour_average_male_4ee2c43d.xml"
+    assert filename == "tour_average_male_2bba2beb.xml"
     assert (model.nq, model.nu, model.opt.timestep) == (44, 0, 0.002)
     assert np.isfinite(data.qpos).all()
     assert data.time == pytest.approx(0.2)

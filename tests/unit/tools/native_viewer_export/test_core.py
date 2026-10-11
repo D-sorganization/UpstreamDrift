@@ -74,7 +74,7 @@ class _FakeBackend:
     def unavailable_reason(self) -> str | None:
         return self.reason
 
-    def render(self, swing, settings, indices, overlay):
+    def render(self, swing, settings, indices, overlay, ball=None):
         self.calls.append(tuple(indices))
         for _k in indices:
             yield {
@@ -219,8 +219,8 @@ def test_overlay_feed_counts_glyphs_and_legend_in_hud(tmp_path: Path) -> None:
 
 def test_short_backend_is_an_error(tmp_path: Path) -> None:
     class _Short(_FakeBackend):
-        def render(self, swing, settings, indices, overlay):
-            yield from super().render(swing, settings, indices[:1], overlay)
+        def render(self, swing, settings, indices, overlay, ball=None):
+            yield from super().render(swing, settings, indices[:1], overlay, ball)
 
     with pytest.raises(RuntimeError, match="expected"):
         export_swing(
