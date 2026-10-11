@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import os
 import subprocess
 import sys
@@ -237,14 +238,17 @@ class RungResult:
     receipt_sha256: str | None
     elapsed_seconds: float
     detail: str
-    peak_tree_rss_bytes: int | None = None
+    peak_sampled_tree_rss_bytes: int | None = None
 
 
 class _WorkerTimeout(TimeoutError):
-    def __init__(self, stdout: str, stderr: str, peak_rss: int) -> None:
-        super().__init__("worker process tree exceeded its deadline")
+    def __init__(
+        self, stdout: str, stderr: str, stop_reason: str, peak_rss: int
+    ) -> None:
+        super().__init__(f"worker process tree stopped: {stop_reason}")
         self.stdout = stdout
         self.stderr = stderr
+        self.stop_reason = stop_reason
         self.peak_rss = peak_rss
 
 
@@ -299,7 +303,7 @@ def _supervise_process_tree(
     for reader in readers:
         reader.start()
     peak_rss = 0
-    timed_out = False
+    stop_reason = None
     while True:
         process.poll()  # Reap a launcher that exited after creating its child.
         _record_owned_descendants(owned, psutil)
@@ -307,20 +311,35 @@ def _supervise_process_tree(
         peak_rss = max(peak_rss, rss)
         if active == 0:
             break
-        if time.monotonic() - started >= timeout_seconds or rss >= memory_limit_bytes:
-            timed_out = True
+        stop_reason = _process_stop_reason(
+            time.monotonic() - started, rss, timeout_seconds, memory_limit_bytes
+        )
+        if stop_reason is not None:
             break
         time.sleep(0.01)
-    if timed_out:
+    if stop_reason is not None:
         _terminate_owned_tree(owned, psutil)
     process.wait(timeout=5)
     for reader in readers:
         reader.join(timeout=5)
     stdout = b"".join(output).decode(errors="replace")
     stderr = b"".join(errors).decode(errors="replace")
-    if timed_out:
-        raise _WorkerTimeout(stdout, stderr, peak_rss)
+    if stop_reason is not None:
+        raise _WorkerTimeout(stdout, stderr, stop_reason, peak_rss)
     return process.returncode, stdout, stderr, peak_rss
+
+
+def _process_stop_reason(
+    elapsed_seconds: float,
+    sampled_tree_rss_bytes: int,
+    timeout_seconds: float,
+    sampled_rss_threshold_bytes: int,
+) -> str | None:
+    if sampled_tree_rss_bytes >= sampled_rss_threshold_bytes:
+        return "sampled_rss_threshold"
+    if elapsed_seconds >= timeout_seconds:
+        return "wall_timeout"
+    return None
 
 
 def _parent_created_time(process: Any, psutil: Any) -> float | None:
@@ -422,10 +441,19 @@ def _validate_success_receipt(directory: Path, rung: LadderRung) -> str:
     for key, expected in required.items():
         if receipt.get(key) != expected:
             raise ValueError(f"worker receipt has invalid {key}")
+    request, replay = _validate_retained_artifacts(directory, rung, receipt)
+    _validate_replay_result(request, receipt, replay)
+    _validate_stage_metrics(receipt)
+    return _sha256(receipt_path)
+
+
+def _validate_retained_artifacts(
+    directory: Path, rung: LadderRung, receipt: dict[str, Any]
+) -> tuple[dict[str, Any], dict[str, Any]]:
     for field in (
         "source_sha256",
         "worker_sha256",
-        "opensim_runtime_sha256",
+        "opensim_runtime_fingerprint_sha256",
         "request_sha256",
         "saved_solution_sha256",
         "saved_time_only_controls_sha256",
@@ -460,6 +488,13 @@ def _validate_success_receipt(directory: Path, rung: LadderRung) -> str:
     )
     if receipt["worker_sha256"] != expected_worker_sha:
         raise ValueError("worker receipt does not identify this worker source")
+    runtime_path = directory / "opensim_runtime_fingerprint.json"
+    if not runtime_path.is_file():
+        raise ValueError("bounded OpenSim runtime fingerprint is missing")
+    _validate_request_rung_binding(request, receipt, rung)
+    _validate_bounded_runtime_fingerprint(
+        runtime_path, receipt["opensim_runtime_fingerprint_sha256"]
+    )
     replay = json.loads((directory / "fresh_replay.json").read_text(encoding="utf-8"))
     if (
         replay.get("fresh_model") is not True
@@ -468,18 +503,131 @@ def _validate_success_receipt(directory: Path, rung: LadderRung) -> str:
         raise ValueError("fresh replay evidence is not bound to time-only controls")
     if replay.get("physical_qualification") != "unqualified":
         raise ValueError("synthetic software replay must remain physically unqualified")
-    if not isinstance(receipt.get("objective"), (int, float)):
+    return request, replay
+
+
+def _validate_replay_result(
+    request: dict[str, Any], receipt: dict[str, Any], replay: dict[str, Any]
+) -> None:
+    if not isinstance(request.get("target_q"), (int, float)) or isinstance(
+        request.get("target_q"), bool
+    ):
+        raise ValueError("request has no finite target coordinate")
+    target_q = request["target_q"]
+    if not math.isfinite(target_q):
+        raise ValueError("request has no finite target coordinate")
+    initial_q = request.get("initial_q")
+    if (
+        isinstance(initial_q, bool)
+        or not isinstance(initial_q, (int, float))
+        or not math.isfinite(initial_q)
+        or (target_q - initial_q) == 0
+    ):
+        raise ValueError("request has no distinct finite initial coordinate")
+    if isinstance(receipt.get("target_q"), bool) or receipt.get("target_q") != target_q:
+        raise ValueError("receipt target differs from retained request")
+    if (
+        isinstance(receipt.get("initial_q"), bool)
+        or receipt.get("initial_q") != initial_q
+    ):
+        raise ValueError("receipt initial coordinate differs from retained request")
+    if not isinstance(receipt.get("achieved_q"), (int, float)) or isinstance(
+        receipt.get("achieved_q"), bool
+    ):
+        raise ValueError("receipt optimized endpoint is invalid")
+    if (
+        not math.isfinite(receipt["achieved_q"])
+        or abs(receipt["achieved_q"] - target_q) >= 2e-7
+    ):
+        raise ValueError("optimized solution endpoint misses requested target")
+    if (
+        not isinstance(receipt.get("objective"), (int, float))
+        or isinstance(receipt.get("objective"), bool)
+        or not math.isfinite(receipt["objective"])
+    ):
         raise ValueError("worker receipt is missing its solver objective")
+    replay_errors = replay.get("max_state_error_by_unit")
+    expected_error_limits = {
+        "coordinates_rad": 2e-7,
+        "speeds_rad_s": 1e-7,
+        "activations": 1e-8,
+        "fiber_lengths_m": 1e-7,
+    }
+    if not isinstance(replay_errors, dict) or set(replay_errors) != set(
+        expected_error_limits
+    ):
+        raise ValueError("fresh replay receipt is missing per-unit state errors")
+    if any(
+        isinstance(replay_errors[key], bool)
+        or not isinstance(replay_errors[key], (int, float))
+        or not math.isfinite(replay_errors[key])
+        or replay_errors[key] >= limit
+        for key, limit in expected_error_limits.items()
+    ):
+        raise ValueError("fresh replay state error exceeds positive-fixture limits")
+    if replay.get("target_endpoint_within_tolerance") is not True:
+        raise ValueError("fresh replay did not reach the requested endpoint")
+    for field in ("optimized_endpoint_q", "replayed_endpoint_q"):
+        value = replay.get(field)
+        if (
+            isinstance(value, bool)
+            or not isinstance(value, (int, float))
+            or not math.isfinite(value)
+            or abs(value - target_q) >= 2e-7
+        ):
+            raise ValueError(f"fresh replay has invalid {field}")
+        if (value - initial_q) * (target_q - initial_q) <= 0:
+            raise ValueError(f"fresh replay {field} moves in the wrong direction")
+        if abs(value - initial_q) <= 2e-6:
+            raise ValueError(f"fresh replay {field} misses nonzero motion")
+
+
+def _validate_stage_metrics(receipt: dict[str, Any]) -> None:
     metrics = receipt.get("stage_metrics")
     if not isinstance(metrics, dict) or not metrics:
         raise ValueError("worker receipt is missing per-stage measurements")
     for stage in metrics.values():
         if not isinstance(stage, dict) or any(
-            not isinstance(stage.get(field), (int, float)) or stage[field] < 0
+            isinstance(stage.get(field), bool)
+            or not isinstance(stage.get(field), (int, float))
+            or not math.isfinite(stage[field])
+            or stage[field] < 0
             for field in ("wall_seconds", "cpu_seconds")
         ):
             raise ValueError("worker stage measurements must contain wall and CPU time")
-    return _sha256(receipt_path)
+
+
+def _validate_request_rung_binding(
+    request: dict[str, Any], receipt: dict[str, Any], rung: LadderRung
+) -> None:
+    if (
+        request.get("rung") != rung.name
+        or request.get("features") != list(rung.features)
+        or receipt.get("features") != list(rung.features)
+    ):
+        raise ValueError("request or receipt does not bind the declared rung features")
+
+
+def _validate_bounded_runtime_fingerprint(path: Path, expected_sha256: str) -> None:
+    runtime = json.loads(path.read_text(encoding="utf-8"))
+    if (
+        runtime.get("schema") != "opensim-bounded-runtime-fingerprint-v1"
+        or not isinstance(runtime.get("version"), str)
+        or runtime.get("coverage_note")
+        != "bounded Python extension and Moco DLL fingerprint; not a closed dependency-runtime identity"
+        or not isinstance(runtime.get("components"), dict)
+        or set(runtime["components"])
+        != {"_common.pyd", "_simulation.pyd", "_moco.pyd", "osimMoco.dll"}
+        or _sha256(path) != expected_sha256
+    ):
+        raise ValueError("bounded OpenSim runtime fingerprint does not match receipt")
+    if any(
+        not isinstance(component_sha, str)
+        or len(component_sha) != 64
+        or any(char not in "0123456789abcdef" for char in component_sha)
+        for component_sha in runtime["components"].values()
+    ):
+        raise ValueError("runtime fingerprint component hash is invalid")
 
 
 def worker_command(
@@ -542,12 +690,20 @@ def _run_one_rung(
         _write_worker_logs(
             directory, getattr(exc, "stdout", ""), getattr(exc, "stderr", "")
         )
+        memory_stop = (
+            isinstance(exc, _WorkerTimeout)
+            and exc.stop_reason == "sampled_rss_threshold"
+        )
         return RungResult(
             rung.name,
-            "timeout",
+            "memory_limit" if memory_stop else "timeout",
             None,
             time.monotonic() - started,
-            f"worker exceeded {timeout_seconds:g}s",
+            (
+                "sampled aggregate worker-tree RSS reached the soft 1 GiB threshold"
+                if memory_stop
+                else f"worker process tree exceeded {timeout_seconds:g}s wall time"
+            ),
             getattr(exc, "peak_rss", None),
         )
     elapsed = time.monotonic() - started

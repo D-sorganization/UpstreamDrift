@@ -121,7 +121,8 @@ def _prepare_rung(rung: Any, output: Path, stages: dict, osim: Any) -> dict[str,
             audit_wrapped_path_source,
         )
     target_q = declaration.named_state["/jointset/base/q/value"] + 5e-6
-    config = _rung_config(rung, target_q, source_hash)
+    initial_q = declaration.named_state["/jointset/base/q/value"]
+    config = _rung_config(rung, target_q, source_hash, initial_q)
     config_path = output / "request.json"
     _write_json(config_path, config)
     study = _moco_problem(source, declaration, target_q=target_q)
@@ -169,7 +170,9 @@ def _verify_native_wrap(
         raise ValueError("synthetic wrap did not produce a native wrapped route")
 
 
-def _rung_config(rung: Any, target_q: float, source_sha256: str) -> dict[str, Any]:
+def _rung_config(
+    rung: Any, target_q: float, source_sha256: str, initial_q: float
+) -> dict[str, Any]:
     features = rung.features
     return {
         "rung": rung.name,
@@ -177,6 +180,7 @@ def _rung_config(rung: Any, target_q: float, source_sha256: str) -> dict[str, An
         "source_sha256": source_sha256,
         "target_coordinate": "/jointset/base/q/value",
         "target_q": target_q,
+        "initial_q": initial_q,
         "horizon_seconds": 0.01,
         "mesh_intervals": 10,
         "parallel": 0,
@@ -258,11 +262,18 @@ def _solve_and_export(
     _write_progress(output, rung.name, stages)
 
     started = _stage_start()
+    saved_grid, saved_controls = _load_time_only_controls(
+        osim, controls_path, grid, tuple(controls)
+    )
+    stages["saved_replay_input_reload"] = _stage_finish(started)
+    _write_progress(output, rung.name, stages)
+
+    started = _stage_start()
     try:
         bundle = build_constrained_muscle_bundle(
             prepared["declaration"],
-            grid,
-            controls,
+            saved_grid,
+            saved_controls,
             wrapped_path_declaration=prepared["wrapped"],
             native_mechanics_profile=prepared["profile"],
         )
@@ -284,7 +295,8 @@ def _solve_and_export(
     _write_progress(output, rung.name, stages)
     return {
         "solution": solution,
-        "grid": grid,
+        "grid": saved_grid,
+        "controls": saved_controls,
         "solution_path": solution_path,
         "controls_path": controls_path,
         "bundle": bundle,
@@ -307,6 +319,71 @@ def _write_time_only_controls(
     osim.STOFileAdapter.write(table, str(path))
 
 
+def _load_time_only_controls(
+    osim: Any,
+    path: Path,
+    expected_grid: np.ndarray,
+    muscle_names: tuple[str, ...],
+) -> tuple[np.ndarray, dict[str, np.ndarray]]:
+    table = osim.TimeSeriesTable(str(path))
+    independent = table.getIndependentColumn()
+    grid = np.asarray(
+        [independent[index] for index in range(table.getNumRows())],
+        dtype=np.float64,
+    )
+    labels = tuple(str(label) for label in table.getColumnLabels())
+    controls = {
+        label.removeprefix("/forceset/"): np.asarray(
+            [
+                table.getDependentColumn(label)[index]
+                for index in range(table.getNumRows())
+            ],
+            dtype=np.float64,
+        )
+        for label in labels
+        if label.startswith("/forceset/")
+    }
+    expected_labels = tuple(f"/forceset/{name}" for name in muscle_names)
+    _validate_saved_control_data(grid, labels, controls, expected_grid, muscle_names)
+    if labels != expected_labels:
+        raise ValueError("saved time-only controls changed ordered muscle channels")
+    return grid, controls
+
+
+def _validate_saved_control_data(
+    grid: np.ndarray,
+    labels: tuple[str, ...],
+    controls: dict[str, np.ndarray],
+    expected_grid: np.ndarray,
+    muscle_names: tuple[str, ...],
+) -> None:
+    expected_labels = tuple(f"/forceset/{name}" for name in muscle_names)
+    if labels != expected_labels:
+        raise ValueError("saved time-only controls changed ordered muscle channels")
+    if (
+        grid.ndim != 1
+        or len(grid) == 0
+        or len(grid) != len(expected_grid)
+        or not np.isfinite(grid).all()
+        or not np.array_equal(grid, expected_grid)
+        or grid[0] != 0.0
+        or np.any(np.diff(grid) <= 0.0)
+    ):
+        raise ValueError("saved time-only control knots differ from the solved grid")
+    if set(controls) != set(muscle_names):
+        raise ValueError("saved controls do not exactly cover the declared muscles")
+    for name in muscle_names:
+        values = controls[name]
+        if (
+            values.ndim != 1
+            or len(values) != len(grid)
+            or not np.isfinite(values).all()
+            or np.any(values < 0.0)
+            or np.any(values > 1.0)
+        ):
+            raise ValueError(f"saved controls for {name} are invalid or out of bounds")
+
+
 def _fresh_native_replay(prepared: dict[str, Any], solved: dict, stages: dict) -> Path:
     from src.engines.physics_engines.opensim.python.tour_matching.native_constrained_muscle import (
         replay_constrained_muscle_bundle,
@@ -323,6 +400,14 @@ def _fresh_native_replay(prepared: dict[str, Any], solved: dict, stages: dict) -
     grid = solved["grid"]
     if not np.isfinite(replay.states).all() or not np.array_equal(replay.times, grid):
         raise ValueError("fresh replay differs from saved time-only controls")
+    state_audit = _compare_replayed_states(
+        solved["solution"],
+        replay.states,
+        replay.state_names,
+        grid,
+        prepared["target_q"],
+        prepared["declaration"].named_state[prepared["config"]["target_coordinate"]],
+    )
     replay_path = output / "fresh_replay.json"
     _write_json(
         replay_path,
@@ -332,6 +417,7 @@ def _fresh_native_replay(prepared: dict[str, Any], solved: dict, stages: dict) -
             "input_sha256": replay.input_sha256,
             "time_count": len(grid),
             "state_names": replay.state_names,
+            **state_audit,
             "state_matrix_sha256": hashlib.sha256(
                 np.asarray(replay.states, dtype=np.float64).tobytes()
             ).hexdigest(),
@@ -344,6 +430,80 @@ def _fresh_native_replay(prepared: dict[str, Any], solved: dict, stages: dict) -
     return replay_path
 
 
+def _compare_replayed_states(
+    solution: Any,
+    replay_states: np.ndarray,
+    state_names: tuple[str, ...],
+    saved_grid: np.ndarray,
+    target_q: float,
+    initial_q: float,
+) -> dict[str, Any]:
+    solution_grid = np.asarray(solution.getTimeMat(), dtype=np.float64).reshape(-1)
+    optimized = np.column_stack(
+        [
+            np.asarray(solution.getStateMat(name), dtype=np.float64).reshape(-1)
+            for name in state_names
+        ]
+    )
+    if (
+        not np.array_equal(solution_grid, saved_grid)
+        or optimized.shape != replay_states.shape
+        or optimized.shape[0] != len(saved_grid)
+        or not np.isfinite(optimized).all()
+        or not np.isfinite(replay_states).all()
+    ):
+        raise ValueError(
+            "optimized and fresh replay states differ in shape or finiteness"
+        )
+    groups = {
+        "coordinates_rad": tuple(
+            i for i, name in enumerate(state_names) if name.endswith("/value")
+        ),
+        "speeds_rad_s": tuple(
+            i for i, name in enumerate(state_names) if name.endswith("/speed")
+        ),
+        "activations": tuple(
+            i for i, name in enumerate(state_names) if name.endswith("/activation")
+        ),
+        "fiber_lengths_m": tuple(
+            i for i, name in enumerate(state_names) if name.endswith("/fiber_length")
+        ),
+    }
+    if not all(groups.values()) or set(sum(groups.values(), ())) != set(
+        range(len(state_names))
+    ):
+        raise ValueError("replay states include an unclassified native state variable")
+    difference = np.abs(optimized - replay_states)
+    limits = {
+        "coordinates_rad": 2e-7,
+        "speeds_rad_s": 1e-7,
+        "activations": 1e-8,
+        "fiber_lengths_m": 1e-7,
+    }
+    errors = {
+        group: float(np.max(difference[:, indices]))
+        for group, indices in groups.items()
+    }
+    if any(errors[group] >= limit for group, limit in limits.items()):
+        raise ValueError(f"fresh replay state error exceeds limits: {errors}")
+    coordinate_index = state_names.index("/jointset/base/q/value")
+    optimized_endpoint = float(optimized[-1, coordinate_index])
+    replay_endpoint = float(replay_states[-1, coordinate_index])
+    endpoints = (optimized_endpoint, replay_endpoint)
+    if any(abs(value - target_q) >= 2e-7 for value in endpoints):
+        raise ValueError("optimized or replay endpoint misses requested target")
+    if any((value - initial_q) * (target_q - initial_q) <= 0 for value in endpoints):
+        raise ValueError("optimized or replay endpoint moves in the wrong direction")
+    if any(abs(value - initial_q) <= 2e-6 for value in endpoints):
+        raise ValueError("optimized or replay endpoint did not move to nonzero target")
+    return {
+        "max_state_error_by_unit": errors,
+        "optimized_endpoint_q": optimized_endpoint,
+        "replayed_endpoint_q": replay_endpoint,
+        "target_endpoint_within_tolerance": True,
+    }
+
+
 def _write_success_receipt(
     prepared: dict[str, Any], solved: dict, replay_path: Path, stages: dict, osim: Any
 ) -> None:
@@ -351,19 +511,30 @@ def _write_success_receipt(
     coordinate = prepared["config"]["target_coordinate"]
     achieved_q = float(solution.getStateMat(coordinate)[-1])
     output = prepared["config_path"].parent
+    replay_evidence = json.loads(
+        (output / "fresh_replay.json").read_text(encoding="utf-8")
+    )
+    runtime_path = _write_runtime_fingerprint(osim, output)
+    objective = float(solution.getObjective())
+    if not np.isfinite(objective):
+        raise ValueError("native Moco solver objective must be finite")
     receipt = {
         "rung": prepared["rung"].name,
+        "features": list(prepared["rung"].features),
         "status": "solved_and_replayed",
         "fresh_model_replay": True,
-        "nonzero_target_reached": abs(achieved_q - prepared["target_q"]) <= 1e-5
-        and abs(achieved_q - prepared["declaration"].named_state[coordinate]) > 2e-6,
+        "nonzero_target_reached": replay_evidence.get(
+            "target_endpoint_within_tolerance"
+        )
+        is True,
         "target_q": prepared["target_q"],
+        "initial_q": prepared["config"]["initial_q"],
         "achieved_q": achieved_q,
-        "objective": float(solution.getObjective()),
+        "objective": objective,
         "solver_status": str(solution.getStatus()),
         "source_sha256": prepared["source_hash"],
         "worker_sha256": _sha256(Path(__file__).resolve()),
-        "opensim_runtime_sha256": _runtime_sha256(osim),
+        "opensim_runtime_fingerprint_sha256": _sha256(runtime_path),
         "request_sha256": _sha256(prepared["config_path"]),
         "saved_solution_sha256": _sha256(solved["solution_path"]),
         "saved_time_only_controls_sha256": _sha256(solved["controls_path"]),
@@ -374,17 +545,26 @@ def _write_success_receipt(
     _write_json(output / "receipt.json", receipt)
 
 
-def _runtime_sha256(osim: Any) -> str:
-    digest = hashlib.sha256()
+def _write_runtime_fingerprint(osim: Any, output: Path) -> Path:
+    components = {}
     package = Path(osim.__file__).resolve().parent
     for filename in ("_common.pyd", "_simulation.pyd", "_moco.pyd", "osimMoco.dll"):
         path = package / filename
         if not path.is_file():
             raise ValueError(f"OpenSim runtime component is missing: {filename}")
-        digest.update(filename.encode())
-        digest.update(bytes.fromhex(_sha256(path)))
-    digest.update(str(osim.GetVersionAndDate()).encode())
-    return digest.hexdigest()
+        components[filename] = _sha256(path)
+    path = output / "opensim_runtime_fingerprint.json"
+    _write_json(
+        path,
+        {
+            "schema": "opensim-bounded-runtime-fingerprint-v1",
+            "version": str(osim.GetVersionAndDate()),
+            "components": components,
+            "coverage_note": "bounded Python extension and Moco DLL fingerprint; "
+            "not a closed dependency-runtime identity",
+        },
+    )
+    return path
 
 
 def main() -> None:
