@@ -34,6 +34,14 @@
     "143 active DEVELOPMENT_LOG entries exceed ceiling 75",
     "DEVELOPMENT_LOG.md exceeds 200000-byte ceiling"
   ],
+  "focused_followup": {
+    "central_import_policy": "pass; Semgrep unavailable/advisory skipped",
+    "commit": "c8dff74a0a",
+    "mypy": "passed",
+    "ruff": "passed",
+    "scope": "focused vector/import-policy validation only; broad pre-PR suite not rerun",
+    "vector_tests": "41 passed"
+  },
   "full_log": "/tmp/shot-pattern-delivery-resume/prepr-final-dac6618c58.log",
   "full_log_compressed": "docs/research/shot_pattern_analysis/phase2/validation/artifact_delivery_v2/pre_pr_final_dac6618c58.log.gz",
   "full_log_compressed_sha256": "373391d91bb4a5fc6ffe246a5a72827e582d0cb2b8c827cff7da5f4608708b18",
@@ -53,7 +61,7 @@
     "other_stale_research_provenance": "#11940",
     "unrelated_drake_abort": "#11934"
   },
-  "publication_disposition": "Research prerelease may be tied to the exact pushed DELIVERY SHA with the nonzero repository gate disclosed in release notes and ready-for-review PR; PR remains blocked from merge. No production/merge-readiness claim or gate bypass.",
+  "publication_disposition": "Remote publication is on hold pending a polished research-grade report with embedded shot-pattern and dispersion graphics and human visual acceptance. After report acceptance, only a research prerelease at exact pushed DELIVERY SHA is contemplated, with remaining nonzero repository gates disclosed and PR blocked from merge.",
   "runtime": "/tmp/shot-pattern-validation-venv-20261009/bin/python",
   "schema": "shot-pattern-pre-pr-evidence/1",
   "semgrep_import_policy_failure": "scripts/research/shot_pattern_analysis/vector_inspection.py:12 raw xml.parsers.expat import remains flagged; defusedxml.ElementTree second parse is fixed, but the intentional custom Expat preflight remains a gate failure.",
