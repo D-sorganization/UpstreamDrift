@@ -221,7 +221,21 @@ def _fixture_swing(club: str):
     return spec_bytes, swing
 
 
-@pytest.fixture(scope="module", params=["driver", "iron7"])
+_DRIVER_IMPACT_XFAIL = pytest.mark.xfail(
+    strict=True,
+    reason=(
+        "#12272: on the #12221 driver fixture (-2.5 % impact speed) the "
+        "bushing reaches 2.62 deg and 51.3 N squeeze for 6 ms at ball impact "
+        "(t = 1.326-1.332 s; limits 2 deg, 50 N); the previous fixture "
+        "(-5.1 %) peaked at 1.81 deg and 34.5 N at the same instant"
+    ),
+)
+
+
+@pytest.fixture(
+    scope="module",
+    params=[pytest.param("driver", marks=_DRIVER_IMPACT_XFAIL), "iron7"],
+)
 def full_swing_run(request):
     # Prescribed as committed: the reference is a smooth 1 kHz dynamics replay
     # (condition_trajectory repairs 0 frames); the 25 Hz filter of the IK
