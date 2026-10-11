@@ -5438,8 +5438,8 @@ without the refit):
 \footnotesize
 \begin{tabular}{lrrrrrrrr}
 \hline
-Run & Speed & Peak & Face model / & Address & IK / track & Address L / R & \multicolumn{2}{c}{Frames on bound} \\
- & (\%) & (ms) & capture (deg) & face (deg) & (mm) & \texttt{WInputX} & L & R \\
+Run & Speed & Peak & Face model / & Address & IK / track & Address cock & \multicolumn{2}{c}{On bound} \\
+ & (\%) & (ms) & capture (deg) & face (deg) & (mm) & L / R (deg) & L & R \\
 \hline
 Driver control & $-3.6$ & $-0.3$ & 16.13 / 14.96 & 5.50 & 29.0 / 63.8 & $-34.6$ / $-30.1$ & 101 & 3 \\
 Driver refit & $-1.9$ & $-2.7$ & 15.52 / 14.96 & 5.50 & 28.4 / 58.1 & $-12.3$ / $-8.1$ & 6 & 0 \\
@@ -5448,7 +5448,8 @@ Driver refit & $-1.9$ & $-2.7$ & 15.52 / 14.96 & 5.50 & 28.4 / 58.1 & $-12.3$ / 
 \hline
 \end{tabular}
 \end{center}
-Frames on bound are pre-impact frames at the $-40$~deg cock bound. Both refit runs
+``On bound'' counts the pre-impact frames at the $-40$~deg cock bound
+(\texttt{WInputX}). Both refit runs
 meet GCV-20 (speed within 3~\%, peak within 5~ms) and the OSV-10 5~deg face limit,
 and neither wrist starts on its bound. The 7-iron control already met the limits at
 this commit; the refit keeps that and frees the wrists. The release cutoff moved
@@ -5466,8 +5467,8 @@ into the club triad and moves the capture's own face (driver address face
 $5.50 \to -10.93$~deg, 7-iron $-5.35 \to 2.12$~deg), 7-iron dynamics rise
 $109.9 \to 148.3$~mm, and the driver tracks $-6.3$~\% at $-7.5$~ms with the lead
 wrist on its bound for 195 pre-impact frames. This is the failure mode of the
-whole-swing ($-20.7$~\%, 140~mm) and release-weighted ($-22.9$~\%) refits of
-sessions 30 and 32.
+whole-swing ($-20.7$~\%, 140~mm) and release-weighted ($-22.9$~\%) refits
+recorded earlier on \#12221.
 
 Result C, canonical flags (address / IK / dynamics marker RMS, mm, as in
 \texttt{CANONICAL\_RUN.md}):
@@ -5477,7 +5478,7 @@ Result C, canonical flags (address / IK / dynamics marker RMS, mm, as in
 \hline
 Run & Driver (\texttt{--static-seeds}) & 7-iron (+ \texttt{--zmp-filter}) \\
 \hline
-Committed receipts (cluster free, old grip) & 7.5 / 30.5 / 82.6 & 4.0 / 28.4 / 109.9 \\
+Committed (cluster free, old grip) & 7.5 / 30.5 / 82.6 & 4.0 / 28.4 / 109.9 \\
 Cluster fixed, old grip (control) & 7.7 / 29.4 / 105.9 & 9.2 / 28.1 / 185.9 \\
 Cluster fixed, refit & 10.7 / 30.3 / 79.3 & 8.4 / 29.2 / 102.7 \\
 Cluster free, refit & n/a / 33.4 / 78.5 & 5.0 / 30.4 / 148.3 \\
@@ -5506,12 +5507,11 @@ the OpenSim exports, dependent hashes and the club-face fixtures (the driver
 fixture export is blocked by the trail-shoulder singularity, \#12266). No bound,
 tolerance or filter constant changed.
 
-Reproduce (per capture; receipts
-\texttt{fit\_grip\_rotation\_receipt\_driver.json} and
-\texttt{fit\_grip\_rotation\_receipt\_iron7.json} under
-\texttt{evidence/anthropometry/}):
+Reproduce, once per capture (receipts \texttt{fit\_grip\_rotation\_receipt\_<club>.json}
+under \texttt{evidence/anthropometry/}):
 \begin{verbatim}
-python3 docs/development/full_body_models/evidence/anthropometry/fit_grip_rotation.py \
+python3 docs/development/full_body_models/evidence/\
+anthropometry/fit_grip_rotation.py \
   --run <free-wrist run> --window-frames 30 --window-weight 10 \
   --address-frames 30 --address-weight 20 --receipt <receipt>
 python3 -m scripts.set_spec_grip_rotation apply <receipt> <document>
