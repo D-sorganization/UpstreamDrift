@@ -23,6 +23,7 @@ from src.tools.native_viewer_export.ball import (
     attach_ball,
 )
 from src.tools.native_viewer_export.core import ExportSettings, SwingInput
+from tests.support.real_engines import real_module
 
 pytestmark = [pytest.mark.unit, pytest.mark.headless_safe]
 
@@ -317,10 +318,7 @@ def test_meshcat_ball_sets_sphere_once_and_toggles_visibility() -> None:
 
 
 def test_drake_sink_uses_meshcat_object_and_visible_property() -> None:
-    pydrake = pytest.importorskip("pydrake")
-    if not hasattr(pydrake, "__file__"):
-        # tests/unit/conftest.py installs a MagicMock when pydrake is absent
-        pytest.skip("pydrake in sys.modules is a test double, not the real package")
+    real_module("pydrake")
     meshcat = SimpleNamespace(
         SetObject=lambda *a: calls.append(("object", a[0])),
         SetTransform=lambda *a: calls.append(("transform", a[0])),

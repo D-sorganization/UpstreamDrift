@@ -1247,8 +1247,8 @@ The result and receipt digest are diagnostic records only, explicitly
 unqualified; they are not an authenticated native execution receipt or F01
 admission. Bindings remain caller-declared and no calibration is inferred.
 Private-capture fit, anatomy, resource closure, physiology, contact, production
-variants and six-engine parity remain open. Canonical chapter49 and turnover
-are `manuals/upstreamdrift/chapters/49-native-opensim-mixed-marker-observation.qmd`
+variants and six-engine parity remain open. Canonical chapter62 and turnover
+are `manuals/upstreamdrift/chapters/62-native-opensim-mixed-marker-observation.qmd`
 and `docs/development/feedback_controls/F09Q-OPENSIM-MIXED-MARKER-SCORING.md`.
 
 ## F07 Exact 557-Muscle Excitation Diagnostic (#12182)
