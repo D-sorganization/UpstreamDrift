@@ -4,8 +4,8 @@
 
 - **User-Requested Resume**: Goal pursuit is active after the usage reset. Start with [Resume Handoff](docs/research/shot_pattern_analysis/phase2/RESUME_HANDOFF.md).
 - **Matched Delivery Study — Phase Two**: This integration includes study checkpoint `e941f1a746`. Read [Turnover](docs/research/shot_pattern_analysis/phase2/TURNOVER.md) and the newer receipts in the study checkout for subsequent progress. Final acceptance is pending.
-- **Simulation and Exporter State**: All simulation data and v6 exports are complete. Frozen report construction v8 is active in presentation checkout `4023111d2a`; preserve that checkout and its environment.
-- **Graphics Qualification**: Original primary/control graphics are accepted. All 56 supplemental shaft-lean pairs have scoped PNG approval (336 images). Other PNG comparisons, full vector review, report pages, remote delivery, and ready PR remain pending. A TDD repair corrects curve-caption count parsing in the review harness without altering the frozen producer.
+- **Simulation and Exporter State**: All simulation data and v6 exports are complete. Frozen report construction v8 completed from presentation checkout `4023111d2a`; preserve that checkout and its environment. Narrative acceptance remains pending.
+- **Graphics Qualification**: Original primary/control graphics are accepted. All 56 supplemental shaft-lean pairs have scoped PNG approval (336 images). Other PNG comparisons, full vector review, remote delivery, and ready PR remain pending. PDF v9 has all 30 pages visually reviewed and text preservation verified; pagination regression repair #12242 passes nine tests. A newly confirmed academic density legend/title collision is being scoped by Sol before selective repair. A TDD repair corrects curve-caption count parsing in the review harness without altering the frozen producer.
 - **Integration Branch Status**: Branch `codex/shot-pattern-main-integration` contains reviewed local merge `7bdb71016c` of exact `main` `fa7ee92f5cddd753099d7418fc974b142b7ebb54` into `2953c52b37001a8a3893e07943fb3cf2b6c38b45`; model registries are preserved. Final publication and pre-PR gates remain pending.
 - **Validation Evidence**: Root has independently executed 282 provider/scoring/GUI/report/contact tests (all pass), and Astra 71 launcher boundary tests pass (review recorded after fingerprint verification; context render/check/evaluate pass). Do not rely on terminal merge worker report.
 - **External Blockers**: LaTeX editor compiler pre-parse bundle download failure (#12120) remains an external unresolved blocker.
@@ -42,7 +42,7 @@
 
 ## Short-Term Roadmap and Next Steps
 
-- Finish frozen report v8 and the active supplemental PNG/vector reviews; retain actual terminal receipts.
+- Finish scientific narrative acceptance and supplemental PNG/vector reviews, including the confirmed legend collision; retain actual terminal receipts.
 - Complete supplemental graphic review, report composition, and remote asset delivery.
 - Bring forward final publication updates after study checkpoint `e941f1a746`.
 - Retain completed root/Astra integration evidence; complete publication and final gates before a ready PR.

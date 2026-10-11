@@ -131,3 +131,59 @@ def test_long_table_keeps_last_four_body_rows_together(tmp_path):
     assert len(pages) == 2
     tail = pages[-1].extract_text() or ""
     assert all(f"row-{index:02}" in tail for index in range(28, 32))
+
+
+def test_heading_before_table_does_not_orphan_at_page_bottom(tmp_path):
+    source = tmp_path / "orphan_heading_table.md"
+    source.write_text(
+        "# Pagination Quality\n\n## Section Overview\n\n"
+        + (
+            "Filler paragraph describing measured baseline conditions with explicit bounds.\n\n"
+            * 28
+        )
+        + "### Absolute Course Scoring by Actual Context\n\n"
+        + "| Cell | Context | Outcome |\n| --- | --- | --- |\n"
+        + "".join(
+            f"| row-{i:02d} | context description for cell | 0.123 |\n"
+            for i in range(20)
+        ),
+        encoding="utf-8",
+    )
+    output = tmp_path / "orphan_heading_table.pdf"
+    build_pdf.render_markdown_to_pdf(source, output)
+    reader = pypdf.PdfReader(output)
+    assert len(reader.pages) >= 2
+    page1 = reader.pages[0].extract_text() or ""
+    page2 = reader.pages[1].extract_text() or ""
+    assert "Absolute Course Scoring by Actual Context" not in page1
+    assert "Absolute Course Scoring by Actual Context" in page2
+    assert "row-00" in page2
+
+
+def test_bold_paragraph_heading_does_not_orphan_before_paragraph(tmp_path):
+    source = tmp_path / "orphan_bold_heading.md"
+    source.write_text(
+        "# Pagination Quality\n\n## Section Overview\n\n"
+        + (
+            "Filler paragraph describing measured baseline conditions with explicit bounds.\n\n"
+            * 29
+        )
+        + "**Individual Supported Endpoints**\n\n"
+        + "These individual populations can exceed the common-three scored intersection. "
+        "Each entry is supported / attempted; no unsupported shots are retried.\n\n"
+        + "| Condition | Straight | Draw | Fade |\n| --- | ---: | ---: | ---: |\n"
+        + "".join(
+            f"| C{i:02d} | 10,000 / 10,000 | 10,000 / 10,000 | 10,000 / 10,000 |\n"
+            for i in range(1, 10)
+        ),
+        encoding="utf-8",
+    )
+    output = tmp_path / "orphan_bold_heading.pdf"
+    build_pdf.render_markdown_to_pdf(source, output)
+    reader = pypdf.PdfReader(output)
+    assert len(reader.pages) >= 2
+    page1 = reader.pages[0].extract_text() or ""
+    page2 = reader.pages[1].extract_text() or ""
+    assert "Individual Supported Endpoints" not in page1
+    assert "Individual Supported Endpoints" in page2
+    assert "These individual populations can exceed" in page2

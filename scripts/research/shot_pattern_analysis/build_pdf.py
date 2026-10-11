@@ -214,6 +214,7 @@ class _FlowBuilder:
             widths[0] = self.width * 0.22
             widths[1:] = [(self.width - widths[0]) / (columns - 1)] * (columns - 1)
         table = LongTable(rows, colWidths=widths, repeatRows=len(header), hAlign="LEFT")
+        table.spaceBefore = 6
         table.setStyle(
             TableStyle(
                 [
@@ -266,9 +267,10 @@ class _FlowBuilder:
         )
 
         flow = []
-        for node in nodes:
+        for index, node in enumerate(nodes):
             kind = node["t"]
             data: Any = node.get("c")
+            next_node = nodes[index + 1] if index + 1 < len(nodes) else None
             if kind == "Header":
                 level, _, inlines = data
                 style = "H1" if level == 1 else "H2" if level == 2 else "H3"
@@ -291,10 +293,23 @@ class _FlowBuilder:
                     )
                     equation.hAlign = "CENTER"
                     flow.extend((Spacer(1, 5), equation, Spacer(1, 8)))
+                elif (
+                    len(data) == 1
+                    and data[0]["t"] == "Strong"
+                    and next_node is not None
+                    and next_node["t"]
+                    in ("Para", "Plain", "OrderedList", "BulletList", "BlockQuote")
+                ):
+                    heading = self._paragraph(data)
+                    heading.keepWithNext = True
+                    flow.append(heading)
                 else:
                     flow.append(self._paragraph(data))
             elif kind == "Table":
-                flow.extend((Spacer(1, 6), self._table(data), Spacer(1, 9)))
+                # Declare spaceBefore on LongTable directly so preceding
+                # headings keep with the table without an intervening spacer.
+                flow.extend((self._table(data), Spacer(1, 9)))
+
             elif kind in ("OrderedList", "BulletList"):
                 items = data[1] if kind == "OrderedList" else data
                 for index, item in enumerate(items, start=1):
