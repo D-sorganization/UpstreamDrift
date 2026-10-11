@@ -46,7 +46,8 @@ class BarPathReplay:
     ``bar_m`` (steps + 1, 3) is the replay engine's bar landmark;
     ``deviation_m`` its distance from the recorded MuJoCo bar path and
     ``coordinate_error_rad`` the largest coordinate error per state against
-    the bundle reference.  ``failure`` is the integrator's failure reason, if
+    the bundle reference and ``final_coordinate_error_rad`` (nv,) the
+    per-coordinate error of the last reached state.  ``failure`` is the integrator's failure reason, if
     the replay stopped early.
     """
 
@@ -55,6 +56,7 @@ class BarPathReplay:
     bar_m: Array
     deviation_m: Array
     coordinate_error_rad: Array
+    final_coordinate_error_rad: Array
     failure: str | None
 
     @property
@@ -133,13 +135,13 @@ def replay_bar_path(
     )
     reached = rollout.q.shape[0]
     bar = bar_path(plant, rollout.q)
+    errors = np.abs(rollout.q - bundle.reference_q[:reached])
     return BarPathReplay(
         engine=engine,
         dt_s=float(bundle.dt_s),
         bar_m=bar,
         deviation_m=np.linalg.norm(bar - recorded[:reached], axis=1),
-        coordinate_error_rad=np.abs(rollout.q - bundle.reference_q[:reached]).max(
-            axis=1
-        ),
+        coordinate_error_rad=errors.max(axis=1),
+        final_coordinate_error_rad=errors[-1],
         failure=rollout.failure,
     )

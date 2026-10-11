@@ -23,6 +23,8 @@ import time
 from pathlib import Path
 from typing import Any
 
+import numpy as np
+
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
@@ -32,7 +34,11 @@ from src.shared.python.lifting.bar_path_parity import (  # noqa: E402
     replay_bar_path,
 )
 from src.shared.python.lifting.bundles import BACK_SQUAT_BUNDLE  # noqa: E402
-from src.shared.python.motion_matching.same_input import InputBundle  # noqa: E402
+from src.shared.python.motion_matching.same_input import (  # noqa: E402
+    InputBundle,
+    VectorPlant,
+    segmented_replay,
+)
 
 logger = logging.getLogger("measure_lift_bar_path_parity")
 ENGINE_MODULES = {
@@ -54,13 +60,25 @@ def _git(*args: str) -> str:
     return out.stdout.strip()
 
 
-def _measure(engine: str, bundle: InputBundle) -> dict[str, Any]:
+def _measure(engine: str, bundle: InputBundle, segment_steps: int) -> dict[str, Any]:
     try:
         importlib.import_module(ENGINE_MODULES[engine])
     except (ImportError, OSError) as exc:
         return {"unavailable": True, "reason": f"{ENGINE_MODULES[engine]}: {exc}"}
     started = time.perf_counter()
-    summary = replay_bar_path(engine, bundle).summary()
+    replay = replay_bar_path(engine, bundle)
+    summary = replay.summary()
+    worst = int(np.argmax(replay.final_coordinate_error_rad))
+    summary["worst_final_coordinate"] = bundle.coordinate_order[worst]
+    segments = segmented_replay(
+        VectorPlant(engine, bundle.spec_bytes), bundle, segment_steps=segment_steps
+    )
+    summary["segmented"] = {
+        "segment_steps": segment_steps,
+        "segments": len(segments),
+        "max_coordinate_error_rad": max(s["coordinate_error_rad"] for s in segments),
+        "max_frame_error_m": max(s["frame_error_m"] for s in segments),
+    }
     summary["wall_time_s"] = round(time.perf_counter() - started, 1)
     return summary
 
@@ -69,6 +87,17 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--bundle", type=Path, default=BACK_SQUAT_BUNDLE)
     parser.add_argument("--out", type=Path, default=BAR_PATH_PARITY_RECORD)
+    parser.add_argument(
+        "--source-commit",
+        default=None,
+        help="commit measured (default: git rev-parse HEAD)",
+    )
+    parser.add_argument(
+        "--segment-steps",
+        type=int,
+        default=20,
+        help="re-anchored segment length for the segmented replay",
+    )
     parser.add_argument(
         "--engines", default=",".join(ENGINE_MODULES), help="comma separated"
     )
@@ -81,7 +110,7 @@ def main(argv: list[str] | None = None) -> int:
     bundle = InputBundle.load(args.bundle)
     engines: dict[str, Any] = {}
     for engine in args.engines.split(","):
-        engines[engine] = _measure(engine, bundle)
+        engines[engine] = _measure(engine, bundle, args.segment_steps)
         logger.info("%s %s", engine, json.dumps(engines[engine]))
     record = {
         "lift": bundle.provenance.get("lift"),
@@ -90,7 +119,7 @@ def main(argv: list[str] | None = None) -> int:
         "bundle_steps": bundle.steps,
         "dt_s": bundle.dt_s,
         "reference": "window_bar_path_m (MuJoCo, recorded at bundle generation)",
-        "source_commit": _git("rev-parse", "HEAD"),
+        "source_commit": args.source_commit or _git("rev-parse", "HEAD"),
         "generator": "scripts/measure_lift_bar_path_parity.py",
         "engines": engines,
     }
