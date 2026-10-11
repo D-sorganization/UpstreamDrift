@@ -1444,42 +1444,6 @@
       "expires_on": "2026-12-31"
     },
     {
-      "path": "src/tools/shot_pattern_analysis/gui.py",
-      "symbol": "MainWidget._build_ui",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - MainWidget._build_ui exceeds function-lines budget (211 > 100).",
-      "expires_on": "2026-12-31"
-    },
-    {
-      "path": "src/tools/shot_pattern_analysis/gui.py",
-      "symbol": "MainWidget._run_cli",
-      "rule": "parameters",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - MainWidget._run_cli exceeds parameters budget (14 > 8).",
-      "expires_on": "2026-12-31"
-    },
-    {
-      "path": "src/tools/shot_pattern_analysis/matched_gui.py",
-      "symbol": "format_matched_course_scoring",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - format_matched_course_scoring exceeds function-lines budget (148 > 100).",
-      "expires_on": "2026-12-31"
-    },
-    {
-      "path": "src/tools/shot_pattern_analysis/matched_gui.py",
-      "symbol": "MatchedStudyWidget._build_ui",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - MatchedStudyWidget._build_ui exceeds function-lines budget (268 > 100).",
-      "expires_on": "2026-12-31"
-    },
-    {
       "path": "src/tools/shot_pattern_analysis/matched_lean_control.py",
       "symbol": "analyze_explicit_source_pair",
       "rule": "function-lines",

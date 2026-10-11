@@ -31,6 +31,72 @@ _is_finite_real = is_finite_real
 _format_sg_value = format_sg_value
 
 
+def _format_scenario_context(
+    scoring: Mapping[str, Any], effective_club: str | None, target_x_m: float | None
+) -> str:
+    """Describe the saved course context without inventing missing distances."""
+    driver = effective_club == "driver"
+    hole_distance = scoring.get("hole_distance_m")
+    fairway_width = scoring.get("fairway_half_width_m")
+    green_radius = scoring.get("green_radius_m")
+    target_distance = (
+        scoring.get("target_x_m")
+        if scoring.get("target_x_m") is not None
+        else target_x_m
+    )
+
+    scenario = scoring.get("scenario")
+    if not scenario:
+        if driver or hole_distance is not None:
+            scenario = "Historical PGA tee shot on a flat hole with a fairway corridor"
+        else:
+            scenario = "Historical PGA approach to a centered circular green with rough outside"
+
+    context_details: list[str] = []
+    if driver or hole_distance is not None:
+        if _is_finite_real(hole_distance) and f"{hole_distance:g} m" not in scenario:
+            context_details.append(f"{hole_distance:g} m hole")
+        if (
+            _is_finite_real(fairway_width)
+            and f"{2 * fairway_width:g} m" not in scenario
+        ):
+            context_details.append(f"{2 * fairway_width:g} m fairway corridor")
+    else:
+        if (
+            _is_finite_real(target_distance)
+            and f"{target_distance:.1f} m" not in scenario
+        ):
+            context_details.append(f"{target_distance:.1f} m fairway start")
+        if _is_finite_real(green_radius) and f"{green_radius:g} m" not in scenario:
+            context_details.append(f"{green_radius:g} m green radius")
+
+    detail_str = f" ({', '.join(context_details)})" if context_details else ""
+    return f"Scenario: {scenario}{detail_str}."
+
+
+def _format_supported_population(scoring: Mapping[str, Any]) -> str:
+    """Retain the saved pairing denominator and conditioning statement."""
+    status = scoring.get("status")
+    paired_n = scoring.get("paired_n")
+    total_n = scoring.get("total_n")
+    if (
+        isinstance(paired_n, int)
+        and not isinstance(paired_n, bool)
+        and isinstance(total_n, int)
+        and not isinstance(total_n, bool)
+    ):
+        if status == "conditional_only" or paired_n < total_n:
+            pop_line = (
+                f"Common supported pairs: {paired_n}/{total_n} "
+                "(conditional on common supported indices only; full population unavailable due to unsupported terminal lies)."
+            )
+        else:
+            pop_line = f"Common supported pairs: {paired_n}/{total_n} (all samples)."
+    else:
+        pop_line = "Common supported pairs: unspecified population."
+    return pop_line
+
+
 def format_matched_course_scoring(
     scoring: Mapping[str, Any] | None,
     *,
@@ -72,63 +138,9 @@ def format_matched_course_scoring(
             )
         return f"Model-conditional strokes gained is unavailable for this configuration: {reason}."
 
-    # Parse scenario context
-    driver = effective_club == "driver"
-    hole_distance = scoring.get("hole_distance_m")
-    fairway_width = scoring.get("fairway_half_width_m")
-    green_radius = scoring.get("green_radius_m")
-    target_distance = (
-        scoring.get("target_x_m")
-        if scoring.get("target_x_m") is not None
-        else target_x_m
-    )
+    context_line = _format_scenario_context(scoring, effective_club, target_x_m)
 
-    scenario = scoring.get("scenario")
-    if not scenario:
-        if driver or hole_distance is not None:
-            scenario = "Historical PGA tee shot on a flat hole with a fairway corridor"
-        else:
-            scenario = "Historical PGA approach to a centered circular green with rough outside"
-
-    context_details: list[str] = []
-    if driver or hole_distance is not None:
-        if _is_finite_real(hole_distance) and f"{hole_distance:g} m" not in scenario:
-            context_details.append(f"{hole_distance:g} m hole")
-        if (
-            _is_finite_real(fairway_width)
-            and f"{2 * fairway_width:g} m" not in scenario
-        ):
-            context_details.append(f"{2 * fairway_width:g} m fairway corridor")
-    else:
-        if (
-            _is_finite_real(target_distance)
-            and f"{target_distance:.1f} m" not in scenario
-        ):
-            context_details.append(f"{target_distance:.1f} m fairway start")
-        if _is_finite_real(green_radius) and f"{green_radius:g} m" not in scenario:
-            context_details.append(f"{green_radius:g} m green radius")
-
-    detail_str = f" ({', '.join(context_details)})" if context_details else ""
-    context_line = f"Scenario: {scenario}{detail_str}."
-
-    # Common supported population
-    paired_n = scoring.get("paired_n")
-    total_n = scoring.get("total_n")
-    if (
-        isinstance(paired_n, int)
-        and not isinstance(paired_n, bool)
-        and isinstance(total_n, int)
-        and not isinstance(total_n, bool)
-    ):
-        if status == "conditional_only" or paired_n < total_n:
-            pop_line = (
-                f"Common supported pairs: {paired_n}/{total_n} "
-                "(conditional on common supported indices only; full population unavailable due to unsupported terminal lies)."
-            )
-        else:
-            pop_line = f"Common supported pairs: {paired_n}/{total_n} (all samples)."
-    else:
-        pop_line = "Common supported pairs: unspecified population."
+    pop_line = _format_supported_population(scoring)
 
     # Pattern mean SG
     patterns = scoring.get("patterns")
@@ -232,7 +244,13 @@ class MatchedStudyWidget(QtWidgets.QWidget):
         self.controls_scroll.setWidgetResizable(True)
         self.controls_scroll.setWidget(controls)
         root.addWidget(self.controls_scroll, stretch=2)
+        self._build_general_controls(controls_layout)
+        self._build_club_controls(controls_layout)
+        self._build_noise_controls(controls_layout)
+        self._build_correlation_controls(controls_layout)
+        self._build_result_widgets(root)
 
+    def _build_general_controls(self, controls_layout: QtWidgets.QVBoxLayout) -> None:
         self.output_edit = QtWidgets.QLineEdit(
             str(Path.cwd() / "matched_delivery_results")
         )
@@ -297,6 +315,7 @@ class MatchedStudyWidget(QtWidgets.QWidget):
         form.addRow("Speed Maximum (× reference club speed)", self.speed_factor_max)
         controls_layout.addLayout(form)
 
+    def _build_club_controls(self, controls_layout: QtWidgets.QVBoxLayout) -> None:
         club_box = QtWidgets.QGroupBox("Illustrative Club Assumptions")
         club_form = QtWidgets.QFormLayout(club_box)
         self.club_choice = QtWidgets.QComboBox()
@@ -361,6 +380,7 @@ class MatchedStudyWidget(QtWidgets.QWidget):
         controls_layout.addWidget(club_box)
         self._set_club_values(self.club_config)
 
+    def _build_noise_controls(self, controls_layout: QtWidgets.QVBoxLayout) -> None:
         noise_box = QtWidgets.QGroupBox("Delivery Variation (Gaussian SD Assumptions)")
         noise_form = QtWidgets.QFormLayout(noise_box)
         self.noise_inputs: dict[str, QtWidgets.QDoubleSpinBox] = {}
@@ -382,6 +402,9 @@ class MatchedStudyWidget(QtWidgets.QWidget):
             noise_form.addRow(label, control)
         controls_layout.addWidget(noise_box)
 
+    def _build_correlation_controls(
+        self, controls_layout: QtWidgets.QVBoxLayout
+    ) -> None:
         corr_box = QtWidgets.QGroupBox("Editable Input Correlation Matrix")
         corr_layout = QtWidgets.QVBoxLayout(corr_box)
         self.correlation_table = QtWidgets.QTableWidget(7, 7)
@@ -437,6 +460,7 @@ class MatchedStudyWidget(QtWidgets.QWidget):
         corr_layout.addWidget(self.correlation_help)
         controls_layout.addWidget(corr_box)
 
+    def _build_result_widgets(self, root: QtWidgets.QVBoxLayout) -> None:
         actions = QtWidgets.QHBoxLayout()
         self.run_button = QtWidgets.QPushButton("Run Matched Study")
         self.save_config_button = QtWidgets.QPushButton("Export Config JSON…")

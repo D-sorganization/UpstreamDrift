@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+from dataclasses import dataclass
 from pathlib import Path
 import sys
 import tempfile
@@ -26,6 +27,23 @@ class _ProcessOutput(NamedTuple):
     log: str
 
 
+@dataclass(frozen=True)
+class _AnalysisRequest:
+    output_dir: Path
+    shots: int
+    seed: int
+    face_sd: float
+    curve_scale: float
+    delivery_mode: str
+    lie_deg: float
+    shaft_lean_deg: float
+    club_speed_mps: float
+    loft_deg: float
+    attack_angle_deg: float
+    clubhead_mass_kg: float
+    club_id: str
+
+
 class MainWidget(QtWidgets.QWidget):
     """Run the bundled headless analysis in a cancellable background process."""
 
@@ -36,6 +54,46 @@ class MainWidget(QtWidgets.QWidget):
         self._build_ui()
 
     def _build_ui(self) -> None:
+        title, description, output_row = self._build_general_controls()
+        self._build_club_controls()
+        control_row, delivery_row, club_row = self._build_control_rows()
+        self._build_result_widgets()
+        legacy_page = QtWidgets.QWidget(self)
+        layout = QtWidgets.QVBoxLayout(legacy_page)
+        layout.addWidget(title)
+        layout.addWidget(description)
+        layout.addLayout(output_row)
+        layout.addLayout(control_row)
+        layout.addLayout(delivery_row)
+        layout.addLayout(club_row)
+        layout.addWidget(self.preset_assumption)
+        layout.addWidget(self.action_bar)
+        layout.addWidget(self.summary_table)
+        self.delivery_assumption = QtWidgets.QLabel("")
+        self.delivery_assumption.setWordWrap(True)
+        self._delivery_mode_changed(self.delivery_mode.currentIndex())
+        layout.addWidget(self.delivery_assumption)
+        layout.addWidget(self.scoring_label)
+        layout.addWidget(self.figures, stretch=1)
+        layout.addWidget(self.status_label)
+
+        self.mode_tabs = QtWidgets.QTabWidget(self)
+        legacy_scroll = QtWidgets.QScrollArea()
+        legacy_scroll.setObjectName("independentPatternScroll")
+        legacy_scroll.setWidgetResizable(True)
+        legacy_scroll.setWidget(legacy_page)
+        self.mode_tabs.addTab(legacy_scroll, "Independent Pattern Comparison")
+        from .matched_gui import MatchedStudyWidget
+
+        self.matched_study = MatchedStudyWidget(self.mode_tabs)
+        self.mode_tabs.addTab(self.matched_study, "Matched Delivery Study")
+        root_layout = QtWidgets.QVBoxLayout(self)
+        root_layout.setContentsMargins(0, 0, 0, 0)
+        root_layout.addWidget(self.mode_tabs)
+
+    def _build_general_controls(
+        self,
+    ) -> tuple[QtWidgets.QLabel, QtWidgets.QLabel, QtWidgets.QHBoxLayout]:
         title = QtWidgets.QLabel("Shot Pattern Analysis")
         title.setObjectName("title")
         title.setStyleSheet("font-size: 22px; font-weight: 700;")
@@ -76,6 +134,9 @@ class MainWidget(QtWidgets.QWidget):
         self.curve_scale.setSuffix("×")
         self.face_sd.valueChanged.connect(self._update_description)
         self.curve_scale.valueChanged.connect(self._update_curve_description)
+        return title, description, output_row
+
+    def _build_club_controls(self) -> None:
         self.delivery_mode = QtWidgets.QComboBox()
         self.delivery_mode.addItem("Fixed Delivered Loft", "fixed_loft")
         self.delivery_mode.addItem("Shaft Rotation Coupling", "shaft_rotation")
@@ -136,6 +197,10 @@ class MainWidget(QtWidgets.QWidget):
         ):
             input_widget.valueChanged.connect(self._update_delivery_description)
             input_widget.valueChanged.connect(self._mark_custom_preset)
+
+    def _build_control_rows(
+        self,
+    ) -> tuple[QtWidgets.QHBoxLayout, QtWidgets.QHBoxLayout, QtWidgets.QHBoxLayout]:
         self.run_button = QtWidgets.QPushButton("Run Analysis")
         self.run_button.setObjectName("runAnalysis")
         self.run_button.clicked.connect(self.run_analysis)
@@ -162,7 +227,9 @@ class MainWidget(QtWidgets.QWidget):
         club_row.addWidget(self.loft)
         club_row.addWidget(self.attack_angle)
         club_row.addWidget(self.clubhead_mass)
+        return control_row, delivery_row, club_row
 
+    def _build_result_widgets(self) -> None:
         self.action_bar = AsyncActionBar()
         self.action_bar.set_trigger_buttons(self.run_button)
         self.action_bar.cancelled.connect(self._cancelled)
@@ -213,39 +280,6 @@ class MainWidget(QtWidgets.QWidget):
             image.setScaledContents(False)
             self.figure_labels[key] = image
             self.figures.addTab(image, label)
-
-        legacy_page = QtWidgets.QWidget(self)
-        layout = QtWidgets.QVBoxLayout(legacy_page)
-        layout.addWidget(title)
-        layout.addWidget(description)
-        layout.addLayout(output_row)
-        layout.addLayout(control_row)
-        layout.addLayout(delivery_row)
-        layout.addLayout(club_row)
-        layout.addWidget(self.preset_assumption)
-        layout.addWidget(self.action_bar)
-        layout.addWidget(self.summary_table)
-        self.delivery_assumption = QtWidgets.QLabel("")
-        self.delivery_assumption.setWordWrap(True)
-        self._delivery_mode_changed(self.delivery_mode.currentIndex())
-        layout.addWidget(self.delivery_assumption)
-        layout.addWidget(self.scoring_label)
-        layout.addWidget(self.figures, stretch=1)
-        layout.addWidget(self.status_label)
-
-        self.mode_tabs = QtWidgets.QTabWidget(self)
-        legacy_scroll = QtWidgets.QScrollArea()
-        legacy_scroll.setObjectName("independentPatternScroll")
-        legacy_scroll.setWidgetResizable(True)
-        legacy_scroll.setWidget(legacy_page)
-        self.mode_tabs.addTab(legacy_scroll, "Independent Pattern Comparison")
-        from .matched_gui import MatchedStudyWidget
-
-        self.matched_study = MatchedStudyWidget(self.mode_tabs)
-        self.mode_tabs.addTab(self.matched_study, "Matched Delivery Study")
-        root_layout = QtWidgets.QVBoxLayout(self)
-        root_layout.setContentsMargins(0, 0, 0, 0)
-        root_layout.addWidget(self.mode_tabs)
 
     def _browse_output(self) -> None:
         directory = QtWidgets.QFileDialog.getExistingDirectory(
@@ -366,56 +400,31 @@ class MainWidget(QtWidgets.QWidget):
         if not output_text:
             self.status_label.setText("Choose an output folder first.")
             return
-        output_dir = Path(output_text).expanduser()
-        shots = self.shot_count.value()
-        seed = self.seed.value()
-        face_sd = self.face_sd.value()
-        curve_scale = self.curve_scale.value()
-        delivery_mode = str(self.delivery_mode.currentData())
-        lie_deg = self.lie.value()
-        shaft_lean_deg = self.shaft_lean.value()
-        club_speed_mps = self.club_speed.value()
-        loft_deg = self.loft.value()
-        attack_angle_deg = self.attack_angle.value()
-        clubhead_mass_kg = self.clubhead_mass.value()
-        club_id = str(self.club_preset.currentData())
+        request = _AnalysisRequest(
+            output_dir=Path(output_text).expanduser(),
+            shots=self.shot_count.value(),
+            seed=self.seed.value(),
+            face_sd=self.face_sd.value(),
+            curve_scale=self.curve_scale.value(),
+            delivery_mode=str(self.delivery_mode.currentData()),
+            lie_deg=self.lie.value(),
+            shaft_lean_deg=self.shaft_lean.value(),
+            club_speed_mps=self.club_speed.value(),
+            loft_deg=self.loft.value(),
+            attack_angle_deg=self.attack_angle.value(),
+            clubhead_mass_kg=self.clubhead_mass.value(),
+            club_id=str(self.club_preset.currentData()),
+        )
         self.action_bar.start(
             "Shot pattern analysis",
-            lambda ctx: self._run_cli(
-                output_dir,
-                shots,
-                seed,
-                face_sd,
-                curve_scale,
-                delivery_mode,
-                lie_deg,
-                shaft_lean_deg,
-                club_speed_mps,
-                loft_deg,
-                attack_angle_deg,
-                clubhead_mass_kg,
-                club_id,
-                ctx,
-            ),
+            lambda ctx: self._run_cli(request, ctx),
             on_finished=self._completed,
             on_failed=self._failed,
         )
 
     @staticmethod
     def _run_cli(
-        output_dir: Path,
-        shots: int,
-        seed: int,
-        face_sd: float,
-        curve_scale: float,
-        delivery_mode: str,
-        lie_deg: float,
-        shaft_lean_deg: float,
-        club_speed_mps: float,
-        loft_deg: float,
-        attack_angle_deg: float,
-        clubhead_mass_kg: float,
-        club_id: str,
+        request: _AnalysisRequest,
         ctx: WorkerContext,
     ) -> dict[str, Any]:
         root = Path(__file__).resolve().parents[3]
@@ -424,31 +433,31 @@ class MainWidget(QtWidgets.QWidget):
             "-m",
             "src.tools.shot_pattern_analysis",
             "--output",
-            str(output_dir),
+            str(request.output_dir),
             "--shots",
-            str(shots),
+            str(request.shots),
             "--seed",
-            str(seed),
+            str(request.seed),
             "--face-sd",
-            f"{face_sd:g}",
+            f"{request.face_sd:g}",
             "--curve-scale",
-            f"{curve_scale:g}",
+            f"{request.curve_scale:g}",
             "--delivery-mode",
-            delivery_mode,
+            request.delivery_mode,
             "--lie-deg",
-            f"{lie_deg:g}",
+            f"{request.lie_deg:g}",
             "--shaft-lean-deg",
-            f"{shaft_lean_deg:g}",
+            f"{request.shaft_lean_deg:g}",
             "--club-speed-mps",
-            f"{club_speed_mps:g}",
+            f"{request.club_speed_mps:g}",
             "--loft-deg",
-            f"{loft_deg:g}",
+            f"{request.loft_deg:g}",
             "--attack-angle-deg",
-            f"{attack_angle_deg:g}",
+            f"{request.attack_angle_deg:g}",
             "--clubhead-mass-kg",
-            f"{clubhead_mass_kg:g}",
+            f"{request.clubhead_mass_kg:g}",
             "--club-preset",
-            club_id,
+            request.club_id,
         ]
         env = {
             **os.environ,
@@ -457,7 +466,7 @@ class MainWidget(QtWidgets.QWidget):
             "MUJOCO_GL": "egl",
             "SDL_VIDEODRIVER": "dummy",
         }
-        output_dir.mkdir(parents=True, exist_ok=True)
+        request.output_dir.mkdir(parents=True, exist_ok=True)
         output = MainWidget._run_command(command, root, env, ctx)
         if output.returncode != 0:
             raise RuntimeError(
@@ -465,11 +474,11 @@ class MainWidget(QtWidgets.QWidget):
                 f"{output.log[-2000:]}"
             )
         ctx.raise_if_cancelled()
-        summary_path = output_dir / "summary.json"
+        summary_path = request.output_dir / "summary.json"
         if not summary_path.is_file():
             raise RuntimeError("Analysis completed without summary.json")
         summary = json.loads(summary_path.read_text(encoding="utf-8"))
-        return {"output_dir": output_dir, "summary": summary}
+        return {"output_dir": request.output_dir, "summary": summary}
 
     @staticmethod
     def _run_command(
