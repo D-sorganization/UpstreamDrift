@@ -88,41 +88,25 @@ def _hdr_summaries(
     return thresholds, achieved
 
 
-def shared_histogram_density(
+@dataclass(frozen=True)
+class _DensityInputs:
+    """Validated samples and grid controls in caller-specified iteration order."""
+
+    points: dict[str, FloatArray]
+    target: FloatArray
+    shape: tuple[int, int]
+    masses: tuple[float, ...]
+
+
+def _validated_density_inputs(
     points_by_pattern: Mapping[str, object],
-    *,
-    bins: int | tuple[int, int] = 64,
-    target_point_m: tuple[float, float] = (0.0, 0.0),
-    padding_fraction: float = 0.05,
-    constant_axis_half_width_m: float = 0.5,
-    region_masses: Sequence[float] = (0.50, 0.80, 0.95),
-) -> DensityComparison:
-    """Build comparable 2D histogram densities from endpoint coordinates.
-
-    Input coordinates are used as supplied (for example, raw downrange and
-    right-positive lateral endpoints). ``target_point_m`` adds the target to
-    the common plot bounds and anchors the zero-error marker; it does not
-    translate, aim-adjust, or otherwise transform any endpoint.
-
-    Histogram density is ``count / (n * bin area)`` and integrates to one for
-    every pattern. No smoothing is applied. For a constant coordinate, the
-    plotting grid receives a support window of ``constant_axis_half_width_m``
-    on either side, but observations remain in their observed bin; this adds
-    no sample variation. HDR cutoffs use whole bins and report the achieved
-    mass, which may exceed the requested mass when bins tie.
-
-    Args:
-        points_by_pattern: Non-empty mapping of pattern names to N×2 arrays.
-        bins: Number of shared bins on both axes or per-axis bin counts.
-        target_point_m: Explicit target coordinates in the same frame as data.
-        padding_fraction: Fraction of each non-constant data span added per side.
-        constant_axis_half_width_m: Display-only half-span for a constant axis.
-        region_masses: Requested empirical HDR masses, each strictly between 0
-            and 1.
-
-    Raises:
-        ValueError: If coordinates, grid controls or HDR probabilities are invalid.
-    """
+    target_point_m: tuple[float, float],
+    padding_fraction: float,
+    constant_axis_half_width_m: float,
+    bins: int | tuple[int, int],
+    region_masses: Sequence[float],
+) -> _DensityInputs:
+    """Validate input and grid contracts before any histogram calculation."""
     if not isinstance(points_by_pattern, Mapping) or not points_by_pattern:
         raise ValueError("points_by_pattern must contain at least one pattern")
     points = {
@@ -160,6 +144,59 @@ def shared_histogram_density(
         or any(not math.isfinite(value) or not 0 < value < 1 for value in masses)
     ):
         raise ValueError("region_masses must be unique probabilities in (0, 1)")
+
+    return _DensityInputs(points, target, shape, masses)
+
+
+def shared_histogram_density(
+    points_by_pattern: Mapping[str, object],
+    *,
+    bins: int | tuple[int, int] = 64,
+    target_point_m: tuple[float, float] = (0.0, 0.0),
+    padding_fraction: float = 0.05,
+    constant_axis_half_width_m: float = 0.5,
+    region_masses: Sequence[float] = (0.50, 0.80, 0.95),
+) -> DensityComparison:
+    """Build comparable 2D histogram densities from endpoint coordinates.
+
+    Input coordinates are used as supplied (for example, raw downrange and
+    right-positive lateral endpoints). ``target_point_m`` adds the target to
+    the common plot bounds and anchors the zero-error marker; it does not
+    translate, aim-adjust, or otherwise transform any endpoint.
+
+    Histogram density is ``count / (n * bin area)`` and integrates to one for
+    every pattern. No smoothing is applied. For a constant coordinate, the
+    plotting grid receives a support window of ``constant_axis_half_width_m``
+    on either side, but observations remain in their observed bin; this adds
+    no sample variation. HDR cutoffs use whole bins and report the achieved
+    mass, which may exceed the requested mass when bins tie.
+
+    Args:
+        points_by_pattern: Non-empty mapping of pattern names to N×2 arrays.
+        bins: Number of shared bins on both axes or per-axis bin counts.
+        target_point_m: Explicit target coordinates in the same frame as data.
+        padding_fraction: Fraction of each non-constant data span added per side.
+        constant_axis_half_width_m: Display-only half-span for a constant axis.
+        region_masses: Requested empirical HDR masses, each strictly between 0
+            and 1.
+
+    Raises:
+        ValueError: If coordinates, grid controls or HDR probabilities are invalid.
+    """
+    inputs = _validated_density_inputs(
+        points_by_pattern,
+        target_point_m,
+        padding_fraction,
+        constant_axis_half_width_m,
+        bins,
+        region_masses,
+    )
+    points, target, shape, masses = (
+        inputs.points,
+        inputs.target,
+        inputs.shape,
+        inputs.masses,
+    )
 
     all_points = np.concatenate((*points.values(), target.reshape(1, 2)), axis=0)
     lows = np.min(all_points, axis=0)

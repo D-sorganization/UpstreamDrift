@@ -21,6 +21,62 @@ import numpy as np
 Point2D: TypeAlias = tuple[float, float]
 
 
+def _validated_dispersion_inputs(
+    points: Iterable[tuple[float, float]],
+    target_x_m: float,
+    nominal_point: tuple[float, float] | None,
+) -> tuple[np.ndarray, np.ndarray | None]:
+    """Validate the target before consuming a possibly single-use point iterable."""
+    if not isinstance(target_x_m, (int, float)) or not math.isfinite(target_x_m):
+        raise ValueError("target_x_m must be finite")
+    try:
+        coordinates = np.asarray(list(points), dtype=float)
+    except (TypeError, ValueError) as exc:
+        raise ValueError("points must be finite (x, y) pairs") from exc
+    if coordinates.ndim != 2 or coordinates.shape[1] != 2 or len(coordinates) < 2:
+        raise ValueError("points must contain at least two (x, y) pairs")
+    if not np.isfinite(coordinates).all():
+        raise ValueError("points must be finite")
+
+    nominal: np.ndarray | None = None
+    if nominal_point is not None:
+        try:
+            nominal = np.asarray(nominal_point, dtype=float)
+        except (TypeError, ValueError) as exc:
+            raise ValueError("nominal_point must be a finite (x, y) pair") from exc
+        if nominal.shape != (2,) or not np.isfinite(nominal).all():
+            raise ValueError("nominal_point must be a finite (x, y) pair")
+
+    return coordinates, nominal
+
+
+def _sample_correlation(left: np.ndarray, right: np.ndarray) -> float | None:
+    """Return sample correlation only when both sample variances are nonzero."""
+    left_std = float(np.std(left, ddof=1))
+    right_std = float(np.std(right, ddof=1))
+    if left_std == 0.0 or right_std == 0.0:
+        return None
+    return float(np.corrcoef(left, right)[0, 1])
+
+
+def _principal_axis(covariance: np.ndarray) -> tuple[np.ndarray, float | None]:
+    """Return descending eigenvalues and the unoriented axis, absent for a tie."""
+    eigenvalues, eigenvectors = np.linalg.eigh(covariance)
+    eigenvalues = eigenvalues[::-1]
+    principal_orientation: float | None = None
+    if not np.isclose(eigenvalues[0], eigenvalues[1], rtol=1e-12, atol=1e-15):
+        axis = eigenvectors[:, -1]
+        principal_orientation = float(
+            (
+                math.degrees(math.atan2(float(axis[1]), float(axis[0])) + math.pi / 2)
+                % 180.0
+            )
+            - 90.0
+        )
+
+    return eigenvalues, principal_orientation
+
+
 def landing_dispersion(
     points: Iterable[tuple[float, float]],
     target_x_m: float,
@@ -43,25 +99,9 @@ def landing_dispersion(
     Raises:
         ValueError: If coordinates, target, or nominal point are invalid.
     """
-    if not isinstance(target_x_m, (int, float)) or not math.isfinite(target_x_m):
-        raise ValueError("target_x_m must be finite")
-    try:
-        coordinates = np.asarray(list(points), dtype=float)
-    except (TypeError, ValueError) as exc:
-        raise ValueError("points must be finite (x, y) pairs") from exc
-    if coordinates.ndim != 2 or coordinates.shape[1] != 2 or len(coordinates) < 2:
-        raise ValueError("points must contain at least two (x, y) pairs")
-    if not np.isfinite(coordinates).all():
-        raise ValueError("points must be finite")
-
-    nominal: np.ndarray | None = None
-    if nominal_point is not None:
-        try:
-            nominal = np.asarray(nominal_point, dtype=float)
-        except (TypeError, ValueError) as exc:
-            raise ValueError("nominal_point must be a finite (x, y) pair") from exc
-        if nominal.shape != (2,) or not np.isfinite(nominal).all():
-            raise ValueError("nominal_point must be a finite (x, y) pair")
+    coordinates, nominal = _validated_dispersion_inputs(
+        points, target_x_m, nominal_point
+    )
 
     target = np.array((float(target_x_m), 0.0))
     errors = coordinates - target
@@ -72,27 +112,9 @@ def landing_dispersion(
     lateral_variance = float(covariance[1, 1])
     cross_covariance = float(covariance[0, 1])
 
-    def correlation(left: np.ndarray, right: np.ndarray) -> float | None:
-        left_std = float(np.std(left, ddof=1))
-        right_std = float(np.std(right, ddof=1))
-        if left_std == 0.0 or right_std == 0.0:
-            return None
-        return float(np.corrcoef(left, right)[0, 1])
-
     radial_error = np.hypot(downrange_error, lateral_error)
     radial_carry = np.hypot(coordinates[:, 0], coordinates[:, 1])
-    eigenvalues, eigenvectors = np.linalg.eigh(covariance)
-    eigenvalues = eigenvalues[::-1]
-    principal_orientation: float | None = None
-    if not np.isclose(eigenvalues[0], eigenvalues[1], rtol=1e-12, atol=1e-15):
-        axis = eigenvectors[:, -1]
-        principal_orientation = float(
-            (
-                math.degrees(math.atan2(float(axis[1]), float(axis[0])) + math.pi / 2)
-                % 180.0
-            )
-            - 90.0
-        )
+    eigenvalues, principal_orientation = _principal_axis(covariance)
 
     n = len(coordinates)
     quadrants = {
@@ -118,8 +140,10 @@ def landing_dispersion(
         "downrange_variance_m2": downrange_variance,
         "lateral_variance_m2": lateral_variance,
         "covariance_downrange_lateral_m2": cross_covariance,
-        "corr_lateral_downrange_error": correlation(lateral_error, downrange_error),
-        "corr_lateral_radial_carry": correlation(lateral_error, radial_carry),
+        "corr_lateral_downrange_error": _sample_correlation(
+            lateral_error, downrange_error
+        ),
+        "corr_lateral_radial_carry": _sample_correlation(lateral_error, radial_carry),
         "median_radial_target_error_m": float(np.median(radial_error)),
         "p95_radial_target_error_m": float(np.quantile(radial_error, 0.95)),
         "principal_axis_eigenvalues_m2": tuple(float(x) for x in eigenvalues),

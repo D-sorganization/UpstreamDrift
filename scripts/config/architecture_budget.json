@@ -1453,24 +1453,6 @@
       "expires_on": "2026-12-31"
     },
     {
-      "path": "src/tools/shot_pattern_analysis/density.py",
-      "symbol": "shared_histogram_density",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - shared_histogram_density exceeds function-lines budget (123 > 100).",
-      "expires_on": "2026-12-31"
-    },
-    {
-      "path": "src/tools/shot_pattern_analysis/dispersion_stats.py",
-      "symbol": "landing_dispersion",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - landing_dispersion exceeds function-lines budget (127 > 100).",
-      "expires_on": "2026-12-31"
-    },
-    {
       "path": "src/tools/shot_pattern_analysis/gui.py",
       "symbol": "MainWidget._build_ui",
       "rule": "function-lines",
