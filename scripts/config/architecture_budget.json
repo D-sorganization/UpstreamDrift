@@ -1399,15 +1399,6 @@
       "expires_on": "2026-12-31"
     },
     {
-      "path": "scripts/research/shot_pattern_analysis/build_pdf.py",
-      "symbol": "render_markdown_to_pdf",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - render_markdown_to_pdf exceeds function-lines budget (104 > 100).",
-      "expires_on": "2026-12-31"
-    },
-    {
       "path": "scripts/research/shot_pattern_analysis/final_report_inputs.py",
       "symbol": "assemble_resolved_selected_cells",
       "rule": "function-lines",

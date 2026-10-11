@@ -7,6 +7,7 @@ The source remains authoritative; this builder never edits Markdown or figures.
 from __future__ import annotations
 
 import argparse
+from collections.abc import Callable
 import html
 import json
 import os
@@ -438,6 +439,28 @@ def _styles() -> dict[str, Any]:
     }
 
 
+def _page_furniture(
+    title: str, page_w: float, page_h: float, margin_x: float
+) -> Callable[[Any, Any], None]:
+    """Create consistent page headers and footers without changing flow layout."""
+    from reportlab.lib import colors
+
+    def furniture(canvas: Any, doc: Any) -> None:
+        canvas.saveState()
+        canvas.setStrokeColor(colors.HexColor("#A7C8CF"))
+        canvas.setLineWidth(0.6)
+        canvas.line(margin_x, page_h - 44, page_w - margin_x, page_h - 44)
+        canvas.setFont("DejaVu", 7.5)
+        canvas.setFillColor(colors.HexColor("#56707B"))
+        canvas.drawString(margin_x, page_h - 35, title[:85])
+        canvas.line(margin_x, 39, page_w - margin_x, 39)
+        canvas.drawString(margin_x, 27, "UpstreamDrift  |  Research Reference")
+        canvas.drawRightString(page_w - margin_x, 27, f"Page {doc.page}")
+        canvas.restoreState()
+
+    return furniture
+
+
 def render_markdown_to_pdf(
     source: Path,
     output: Path,
@@ -446,7 +469,6 @@ def render_markdown_to_pdf(
 ) -> Path:
     """Build a PDF atomically from one authoritative Markdown research file."""
     from pypdf import PdfReader
-    from reportlab.lib import colors
     from reportlab.lib.pagesizes import A4
     from reportlab.platypus import BaseDocTemplate, Frame, PageTemplate
 
@@ -480,19 +502,6 @@ def render_markdown_to_pdf(
                     level=flowable._outline_level,
                     closed=False,
                 )
-
-    def furniture(canvas: Any, doc: Any) -> None:
-        canvas.saveState()
-        canvas.setStrokeColor(colors.HexColor("#A7C8CF"))
-        canvas.setLineWidth(0.6)
-        canvas.line(margin_x, page_h - 44, page_w - margin_x, page_h - 44)
-        canvas.setFont("DejaVu", 7.5)
-        canvas.setFillColor(colors.HexColor("#56707B"))
-        canvas.drawString(margin_x, page_h - 35, title[:85])
-        canvas.line(margin_x, 39, page_w - margin_x, 39)
-        canvas.drawString(margin_x, 27, "UpstreamDrift  |  Research Reference")
-        canvas.drawRightString(page_w - margin_x, 27, f"Page {doc.page}")
-        canvas.restoreState()
 
     output.parent.mkdir(parents=True, exist_ok=True)
     with TemporaryDirectory(prefix="shot-pattern-pdf-") as directory:
@@ -532,7 +541,7 @@ def render_markdown_to_pdf(
                             bottomPadding=0,
                         )
                     ],
-                    onPage=furniture,
+                    onPage=_page_furniture(title, page_w, page_h, margin_x),
                 )
             )
             doc.build(flow)
