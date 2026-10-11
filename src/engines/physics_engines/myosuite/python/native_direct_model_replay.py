@@ -27,6 +27,7 @@ from defusedxml.common import DefusedXmlException
 from src.engines.native_replay_contracts import (
     native_replay_admission_bytes,
     native_clock_interval_matches,
+    require_sha256_digest,
     require_native_step_clock,
     require_no_global_mujoco_callbacks,
     validate_native_replay_bundle,
@@ -125,15 +126,6 @@ _TEXTURE_FACE_ATTRIBUTES = (
     "fileright",
     "fileup",
 )
-
-
-def _require_sha256(value: str, field_name: str) -> None:
-    if (
-        not isinstance(value, str)
-        or len(value) != 64
-        or any(character not in "0123456789abcdef" for character in value)
-    ):
-        raise ValueError(f"{field_name} must be a lowercase SHA-256 digest")
 
 
 def _time_grid_matches_step(times: NDArray[np.float64], step_size: float) -> bool:
@@ -353,7 +345,7 @@ class DeclaredModelResource:
 
     def __post_init__(self) -> None:
         _require_text(self.relative_path, "model resource path")
-        _require_sha256(self.sha256, "model resource sha256")
+        require_sha256_digest(self.sha256, "model resource sha256")
 
 
 @dataclass(frozen=True, slots=True)
@@ -407,7 +399,7 @@ class DirectModelRegistration:
             "environment_class_sha256",
             "factory_source_sha256",
         ):
-            _require_sha256(getattr(self, field_name), field_name)
+            require_sha256_digest(getattr(self, field_name), field_name)
         channels = tuple(self.ordered_channel_ids)
         if not channels or any(
             not isinstance(channel, str) or not channel.strip() for channel in channels
@@ -498,7 +490,7 @@ def resource_closure_sha256(
     discovered, spec = _discover_native_resource_files(model, root)
     _verified_discovered_resource_hashes(discovered, root, entries)
     if expected_loaded_native_model_sha256 is not None:
-        _require_sha256(
+        require_sha256_digest(
             expected_loaded_native_model_sha256,
             "expected loaded native model sha256",
         )
