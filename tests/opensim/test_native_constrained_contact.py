@@ -249,3 +249,87 @@ def test_supported_contact_laws_bind_force_and_geometry_closure(
         "ContactSphere",
     }
     validate_native_contact_execution(model, declaration, cold_start.source_sha256)
+
+
+def test_hunt_crossley_request_admits_only_exact_runner_contact_closure(
+    tmp_path: Path,
+) -> None:
+    from src.engines.physics_engines.opensim.python.tour_matching.moco_initial_bindings import (
+        MocoInitialBindings,
+    )
+    from src.engines.physics_engines.opensim.python.tour_matching.moco_tracking import (
+        MocoTrackingConfig,
+    )
+    from src.engines.physics_engines.opensim.python.tour_matching.native_contact_policy import (
+        declare_native_contact_execution,
+    )
+    from src.engines.physics_engines.opensim.python.tour_matching.native_diagnostic_contract import (
+        DiagnosticCode,
+        NativeDiagnosticPolicy,
+    )
+    from src.engines.physics_engines.opensim.python.tour_matching.native_mechanics_profile import (
+        declare_native_mechanics_execution_profile,
+    )
+    from src.engines.physics_engines.opensim.python.tour_matching.native_moco_preparation import (
+        _audit_loaded_model_components,
+    )
+    from src.engines.physics_engines.opensim.python.tour_matching.native_moco_request import (
+        NativeMocoRequest,
+    )
+    from src.engines.physics_engines.opensim.python.tour_matching.native_wrapped_path import (
+        declare_wrapped_path_source,
+    )
+
+    path, cold_start, model, _osim = _contact_source(tmp_path, "hunt_crossley")
+    source_sha256 = hashlib.sha256(path.read_bytes()).hexdigest()
+    cold_start = replace(cold_start, source_sha256=source_sha256)
+    state_bounds = {
+        name: (
+            (0.0, 1.0)
+            if name.endswith(("/activation", "/fiber_length"))
+            else (-10.0, 10.0)
+        )
+        for name in cold_start.named_state
+    }
+    bindings = MocoInitialBindings(
+        state_bounds,
+        cold_start.named_state,
+        {"/forceset/flexor": (0.001, 1.0), "/forceset/extensor": (0.001, 1.0)},
+    )
+    declaration = declare_native_contact_execution(path, source_sha256)
+    request = NativeMocoRequest(
+        model_path=path,
+        trc_path=path,
+        states_guess_path=path,
+        model_sha256=source_sha256,
+        trc_sha256="a" * 64,
+        states_guess_sha256="b" * 64,
+        bindings=bindings,
+        config=MocoTrackingConfig(horizon_s=0.01),
+        marker_weights={"base_marker": 1.0},
+        marker_bindings={"base_marker": ("/bodyset/base", (0.0, 0.0, 0.0))},
+        registration=None,
+        reference_frame_path="/ground",
+        passive_policy=None,
+        excluded_markers={},
+        constrained_cold_start=cold_start,
+        diagnostic_policy=NativeDiagnosticPolicy(
+            source_sha256,
+            (DiagnosticCode.PASSIVE_POLICY_UNAVAILABLE,),
+            "explicit native contact diagnostic test",
+        ),
+        wrapped_path_declaration=declare_wrapped_path_source(path),
+        native_mechanics_profile=declare_native_mechanics_execution_profile(
+            path, source_sha256
+        ),
+        contact_declaration=declaration,
+    )
+    blockers = _audit_loaded_model_components(model, request)
+    assert "native-contact-declaration-invalid" not in blockers
+    assert "native-external-force-uninventoried" not in blockers
+
+    changed_force = replace(declaration.forces[0], serialized_sha256="e" * 64)
+    changed = replace(declaration, forces=(changed_force,))
+    changed_request = replace(request, contact_declaration=changed)
+    changed_blockers = _audit_loaded_model_components(model, changed_request)
+    assert "native-contact-declaration-invalid" in changed_blockers

@@ -26,6 +26,7 @@ from src.engines.physics_engines.opensim.python.tour_matching.native_diagnostic_
     NativeDiagnosticFinding,
     NativeDiagnosticPolicy,
     NativeQualificationContext,
+    PhysicalQualification,
     QualificationEffect,
 )
 from src.engines.physics_engines.opensim.python.tour_matching.native_moco_replay import (
@@ -118,7 +119,7 @@ def test_opt_in_solves_and_replays_without_claiming_passive_admission(
     )
 
 
-def test_diagnostic_never_waives_other_blockers_or_missing_native_observation(
+def test_diagnostic_never_waives_other_blockers_or_physical_qualification(
     muscle_fixture: tuple[Path, dict[str, float]], tmp_path: Path
 ) -> None:
     request = replace(
@@ -126,8 +127,15 @@ def test_diagnostic_never_waives_other_blockers_or_missing_native_observation(
     )
     directory = tmp_path / "prepared"
     prepared = prepare_native_moco(request, directory)
+    # Passive admission is explicitly unqualified, but may be opted into for
+    # software execution. Removing its optional observation does not certify it.
+    without_passive_observation = replace(prepared, passive_observation_sha256=None)
+    assert without_passive_observation.ready_for_software_solve
+    assert (
+        without_passive_observation.diagnostic_assessment.physical_qualification
+        is PhysicalQualification.UNQUALIFIED
+    )
     for changed in (
-        replace(prepared, passive_observation_sha256=None),
         replace(prepared, physical_body_inertia_qualified=False),
         replace(
             prepared, blockers=prepared.blockers + ("native-state-binding-coverage",)
@@ -207,6 +215,63 @@ def test_native_mechanics_profile_json_recomputes_digest_and_rejects_unknown_fie
         _parse_native_mechanics_profile({**payload, "profile_sha256": "c" * 64})
     with pytest.raises(ValueError, match="unknown fields"):
         _parse_native_mechanics_profile({**payload, "unexpected": True})
+
+
+def test_native_contact_declaration_json_recomputes_digest_and_rejects_unknown_fields() -> (
+    None
+):
+    from src.engines.physics_engines.opensim.python.tour_matching.native_contact_policy import (
+        NativeContactExecutionDeclaration,
+        NativeContactForceIdentity,
+        NativeContactGeometryIdentity,
+    )
+    from src.engines.physics_engines.opensim.python.tour_matching.native_moco_request import (
+        _parse_native_contact_declaration,
+    )
+
+    declaration = NativeContactExecutionDeclaration(
+        "native-sphere-halfspace-contact-v1",
+        "a" * 64,
+        (
+            NativeContactForceIdentity(
+                "/forceset/contact", "HuntCrossleyForce", "b" * 64
+            ),
+        ),
+        (
+            NativeContactGeometryIdentity(
+                "/contactgeometryset/floor", "ContactHalfSpace", "c" * 64
+            ),
+            NativeContactGeometryIdentity(
+                "/contactgeometryset/sphere", "ContactSphere", "d" * 64
+            ),
+        ),
+    )
+    payload = {
+        "schema_version": declaration.schema_version,
+        "source_sha256": declaration.source_sha256,
+        "forces": [
+            {
+                "absolute_path": item.absolute_path,
+                "concrete_class": item.concrete_class,
+                "serialized_sha256": item.serialized_sha256,
+            }
+            for item in declaration.forces
+        ],
+        "geometries": [
+            {
+                "absolute_path": item.absolute_path,
+                "concrete_class": item.concrete_class,
+                "serialized_sha256": item.serialized_sha256,
+            }
+            for item in declaration.geometries
+        ],
+        "declaration_sha256": declaration.declaration_sha256,
+    }
+    assert _parse_native_contact_declaration(payload) == declaration
+    with pytest.raises(ValueError, match="digest"):
+        _parse_native_contact_declaration({**payload, "declaration_sha256": "e" * 64})
+    with pytest.raises(ValueError, match="unknown fields"):
+        _parse_native_contact_declaration({**payload, "extra": True})
 
 
 def test_native_mechanics_profile_requires_scoped_typed_request_policy(

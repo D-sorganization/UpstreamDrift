@@ -62,6 +62,7 @@ class NativeMocoExport:
     cpu_seconds: float
     diagnostic_assessment: NativeDiagnosticAssessment | None = None
     native_mechanics_profile_sha256: str | None = None
+    contact_declaration_sha256: str | None = None
 
 
 @dataclass(frozen=True)
@@ -221,6 +222,7 @@ def export_native_moco_bundle(
             experiment_id="offline-native-moco-constrained-independent-replay",
             wrapped_path_declaration=request.wrapped_path_declaration,
             native_mechanics_profile=request.native_mechanics_profile,
+            contact_declaration=request.contact_declaration,
         )
     contracts = native_replay_contract_types()
     payload = contracts.dumps_experiment_replay_bundle(bundle)
@@ -242,6 +244,9 @@ def export_native_moco_bundle(
         None
         if request.native_mechanics_profile is None
         else request.native_mechanics_profile.profile_sha256,
+        None
+        if request.contact_declaration is None
+        else request.contact_declaration.declaration_sha256,
     )
     (directory / "export.json").write_text(
         json.dumps(
@@ -324,6 +329,7 @@ def _persist_native_replay(
             {
                 "bundle_sha256": exported.bundle_sha256,
                 "native_mechanics_profile_sha256": exported.native_mechanics_profile_sha256,
+                "contact_declaration_sha256": exported.contact_declaration_sha256,
                 "native_output_sha256": _sha(evidence),
                 "state_count": len(result.state_names),
                 "sample_count": len(result.times),
@@ -349,6 +355,7 @@ def replay_native_moco_bundle(
     mixed_actuation: MixedActuationProfile | None = None,
     wrapped_path_declaration: Any | None = None,
     native_mechanics_profile: Any | None = None,
+    contact_declaration: Any | None = None,
 ) -> Any:
     """Execute the saved T01 inputs on a fresh model, without a reference API."""
     directory = Path(output_dir)
@@ -368,6 +375,11 @@ def replay_native_moco_bundle(
     )
     if profile_sha256 != exported.native_mechanics_profile_sha256:
         raise ValueError("Native mechanics profile changed before independent replay")
+    contact_sha256 = (
+        None if contact_declaration is None else contact_declaration.declaration_sha256
+    )
+    if contact_sha256 != exported.contact_declaration_sha256:
+        raise ValueError("Native contact declaration changed before independent replay")
     wall = time.perf_counter()
     cpu = time.process_time()
     result: NativeMuscleReplayResult | ConstrainedMuscleReplay | NativeMixedReplayResult
@@ -392,6 +404,7 @@ def replay_native_moco_bundle(
             constrained_cold_start,
             wrapped_path_declaration=wrapped_path_declaration,
             native_mechanics_profile=native_mechanics_profile,
+            contact_declaration=contact_declaration,
         )
     _persist_native_replay(exported, result, directory, wall, cpu)
     return result

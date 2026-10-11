@@ -37,6 +37,7 @@ from .registration import CaptureRegistration
 
 if TYPE_CHECKING:
     from .native_mechanics_profile import NativeMechanicsExecutionProfile
+    from .native_contact_policy import NativeContactExecutionDeclaration
 
 
 @dataclass(frozen=True)
@@ -64,6 +65,7 @@ class NativeMocoRequest:
     wrapped_path_declaration: WrappedPathDeclaration | None = None
     qualification_context: NativeQualificationContext | None = None
     native_mechanics_profile: NativeMechanicsExecutionProfile | None = None
+    contact_declaration: NativeContactExecutionDeclaration | None = None
 
     def __post_init__(self) -> None:
         self.config.validate()
@@ -104,6 +106,23 @@ class NativeMocoRequest:
             if self.diagnostic_policy is None:
                 raise ValueError(
                     "native mechanics profile requires an explicit typed diagnostic policy"
+                )
+        if self.contact_declaration is not None:
+            from .native_contact_policy import NativeContactExecutionDeclaration
+
+            if not isinstance(
+                self.contact_declaration, NativeContactExecutionDeclaration
+            ):
+                raise TypeError("native contact declaration must be typed")
+            if self.contact_declaration.source_sha256 != self.model_sha256:
+                raise ValueError("native contact declaration source differs from model")
+            if self.constrained_cold_start is None or self.mixed_actuation is not None:
+                raise ValueError(
+                    "native contact declaration requires constrained-muscle execution"
+                )
+            if self.diagnostic_policy is None:
+                raise ValueError(
+                    "native contact declaration requires an explicit typed diagnostic policy"
                 )
         if (
             self.allow_unqualified_passive_diagnostic
@@ -254,6 +273,10 @@ class NativeMocoRequest:
         if self.native_mechanics_profile is not None:
             payload["native_mechanics_profile_sha256"] = (
                 self.native_mechanics_profile.profile_sha256
+            )
+        if self.contact_declaration is not None:
+            payload["native_contact_declaration_sha256"] = (
+                self.contact_declaration.declaration_sha256
             )
         if self.allow_unqualified_passive_diagnostic:
             payload["allow_unqualified_passive_diagnostic"] = True
@@ -609,6 +632,66 @@ def _parse_native_mechanics_profile(
     return profile
 
 
+def _parse_native_contact_declaration(data: Any) -> Any:
+    if data is None:
+        return None
+    from .native_contact_policy import (
+        NativeContactExecutionDeclaration,
+        NativeContactForceIdentity,
+        NativeContactGeometryIdentity,
+    )
+
+    checked = _keys(
+        data,
+        {
+            "schema_version",
+            "source_sha256",
+            "forces",
+            "geometries",
+            "declaration_sha256",
+        },
+        {
+            "schema_version",
+            "source_sha256",
+            "forces",
+            "geometries",
+            "declaration_sha256",
+        },
+    )
+    if not isinstance(checked["forces"], list) or not isinstance(
+        checked["geometries"], list
+    ):
+        raise ValueError("Native contact identities must be JSON arrays")
+    forces = tuple(
+        NativeContactForceIdentity(**item)
+        for raw in checked["forces"]
+        for item in (
+            _keys(
+                raw,
+                {field.name for field in fields(NativeContactForceIdentity)},
+                {field.name for field in fields(NativeContactForceIdentity)},
+            ),
+        )
+    )
+    geometries = tuple(
+        NativeContactGeometryIdentity(**item)
+        for raw in checked["geometries"]
+        for item in (
+            _keys(
+                raw,
+                {field.name for field in fields(NativeContactGeometryIdentity)},
+                {field.name for field in fields(NativeContactGeometryIdentity)},
+            ),
+        )
+    )
+    declaration = NativeContactExecutionDeclaration(
+        checked["schema_version"], checked["source_sha256"], forces, geometries
+    )
+    if checked["declaration_sha256"] != declaration.declaration_sha256:
+        raise ValueError("Native contact declaration digest does not match contents")
+    return declaration
+
+
 def load_native_moco_request(path: Path) -> NativeMocoRequest:
     """Read explicit files, mapping and policies without deriving anatomy."""
     request_path = Path(path).resolve()
@@ -674,6 +757,7 @@ def load_native_moco_request(path: Path) -> NativeMocoRequest:
         _parse_wrapped_path_declaration(payload.get("wrapped_path_declaration")),
         _parse_qualification_context(payload.get("qualification_context")),
         _parse_native_mechanics_profile(payload.get("native_mechanics_profile")),
+        _parse_native_contact_declaration(payload.get("contact_declaration")),
     )
 
 

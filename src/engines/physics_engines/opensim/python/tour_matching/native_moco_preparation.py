@@ -95,11 +95,6 @@ class NativeMocoPreparation:
             and self.physical_body_inertia_sha256 is not None
             and self.diagnostic_assessment is not None
             and self.diagnostic_assessment.blocker_receipt_sha256 == blocker_receipt
-            and not (
-                DiagnosticCode.PASSIVE_POLICY_UNAVAILABLE
-                in self.diagnostic_assessment.allowed_unqualified_findings
-                and self.passive_observation_sha256 is None
-            )
             and self.diagnostic_assessment.execution_permitted
         )
 
@@ -234,6 +229,7 @@ def _preview_replay_capability(
                 experiment_id="offline-moco-constrained-replay-capability-preview",
                 wrapped_path_declaration=request.wrapped_path_declaration,
                 native_mechanics_profile=request.native_mechanics_profile,
+                contact_declaration=request.contact_declaration,
             )
         return []
     except (ValueError, RuntimeError):
@@ -296,6 +292,23 @@ def _audit_loaded_model_components(model: Any, request: NativeMocoRequest) -> li
                     blockers.append("native-mechanics-profile-invalid")
         except (OSError, ValueError, RuntimeError, TypeError):
             blockers.append("native-mechanics-profile-invalid")
+    if request.contact_declaration is not None:
+        from .native_contact_policy import (
+            declare_native_contact_execution,
+            validate_native_contact_execution,
+        )
+
+        try:
+            expected_contacts = declare_native_contact_execution(
+                request.model_path, request.model_sha256
+            )
+            validate_native_contact_execution(
+                model, request.contact_declaration, request.model_sha256
+            )
+            if expected_contacts != request.contact_declaration:
+                blockers.append("native-contact-declaration-invalid")
+        except (OSError, ValueError, RuntimeError, TypeError):
+            blockers.append("native-contact-declaration-invalid")
     actuators = {
         str(model.getActuators().get(i).getAbsolutePathString())
         for i in range(model.getActuators().getSize())
@@ -305,8 +318,14 @@ def _audit_loaded_model_components(model: Any, request: NativeMocoRequest) -> li
         for i in range(model.getMuscles().getSize())
     }
     forces = model.getForceSet()
+    declared_contacts = (
+        set()
+        if request.contact_declaration is None
+        else set(request.contact_declaration.force_paths)
+    )
     if any(
-        str(forces.get(i).getAbsolutePathString()) not in actuators | muscles
+        str(forces.get(i).getAbsolutePathString())
+        not in actuators | muscles | declared_contacts
         for i in range(forces.getSize())
     ):
         blockers.append("native-external-force-uninventoried")
