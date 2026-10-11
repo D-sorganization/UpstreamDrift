@@ -16,12 +16,12 @@ section "Neutral Hip Zero-Twist and the Pelvis at Impact (#12042)".
 Turn errors are model minus capture markers, in degrees (top / impact). FD is
 the whole-swing marker RMS, with address-to-impact / after-impact in brackets.
 
-| Run | Pelvis | Upper Trunk | Shoulder Girdle | Lead `hip_rotation` at Impact | Address / IK (mm) | FD (mm) |
-| --- | --- | --- | --- | --- | --- | --- |
-| Driver, `capture` (canonical) | -0.5 / +9.7 | +18.3 / +4.0 | +14.6 / -5.5 | 40.0 (bound) | 6.3 / 29.5 | 80.8 (34.2 / 145.0) |
-| Driver, `neutral` | +3.2 / +2.5 | +17.7 / +5.6 | +12.0 / -9.0 | 27.0 | 5.3 / 25.6 | 51.2 (31.6 / 83.8) |
-| 7-iron, `capture` (canonical) | +2.7 / +7.2 | +13.6 / +6.1 | +10.8 / +3.3 | 40.0 (bound) | 6.6 / 26.8 | 54.5 (30.1 / 92.1) |
-| 7-iron, `neutral` | +1.4 / +2.8 | +13.9 / +5.2 | +11.0 / +8.3 | 27.7 | 2.1 / 22.9 | 91.2 (34.0 / 165.3) |
+| Run                           | Pelvis      | Upper Trunk  | Shoulder Girdle | Lead `hip_rotation` at Impact | Address / IK (mm) | FD (mm)             |
+| ----------------------------- | ----------- | ------------ | --------------- | ----------------------------- | ----------------- | ------------------- |
+| Driver, `capture` (canonical) | -0.5 / +9.7 | +18.3 / +4.0 | +14.6 / -5.5    | 40.0 (bound)                  | 6.3 / 29.5        | 80.8 (34.2 / 145.0) |
+| Driver, `neutral`             | +3.2 / +2.5 | +17.7 / +5.6 | +12.0 / -9.0    | 27.0                          | 5.3 / 25.6        | 51.2 (31.6 / 83.8)  |
+| 7-iron, `capture` (canonical) | +2.7 / +7.2 | +13.6 / +6.1 | +10.8 / +3.3    | 40.0 (bound)                  | 6.6 / 26.8        | 54.5 (30.1 / 92.1)  |
+| 7-iron, `neutral`             | +1.4 / +2.8 | +13.9 / +5.2 | +11.0 / +8.3    | 27.7                          | 2.1 / 22.9        | 91.2 (34.0 / 165.3) |
 
 - **Pelvis:** with `neutral` it is within 3.2 deg of the markers at top and
   impact on both captures, inside the 5 deg #12042 bound.

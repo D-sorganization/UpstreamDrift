@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "source_commit": "c6b2b4ededfc8999e51ac8a7e98ee2722e076b33",
+  "scope": "Selected synthetic native WeldJoint fixture tests only",
+  "outcome": "3 passed, 0 failed, 0 skipped",
+  "files": [
+    {
+      "sha256": "7af00226c8cb8b93674f9869f311aac4dd8431c4246a487af7e8ee7828797c1c",
+      "path": "child-tests.json",
+      "bytes": 1004
+    },
+    {
+      "sha256": "c7595b98a0b90486b9b1d5e6ed4ebe610a168c99d2f179b1646f838ef29bd502",
+      "path": "junit.xml",
+      "bytes": 775
+    }
+  ]
+}
