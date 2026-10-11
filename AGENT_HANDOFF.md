@@ -1190,6 +1190,14 @@ three sampled poses. See chapter54 and
 Tools #5503 and #12207 are integrated. No source anatomy, physiology,
 force/work chart, contact/grip, captured match or parity claim follows.
 
+## Explicitly Unqualified Moco Feasibility — #12225
+
+Draft PR #12228 contains the diagnostic opt-in and 51 actual native test passes.
+See `F07_UNQUALIFIED_MOCO_FEASIBILITY_TURNOVER.md` and canonical chapter 55.
+Full-clock private preflight retains unavailable passive admission and blocked
+independent replay. #12231 addresses strict visual asset closure; wrapped/chart,
+support/grip, captured matching and parity gates remain open.
+
 The #12198 CI receipt-preservation follow-up restores two canonical
 ground-support receipts to their recorded hashes and adds explicit formatter
 exclusions. See `F07_NATIVE_BODY_INERTIA_TURNOVER.md` for the failed run,
