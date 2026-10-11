@@ -14,6 +14,7 @@ import tempfile
 import numpy as np
 
 from src.shared.python.force_overlay.glyphs import GlyphSet
+from src.tools.native_viewer_export.backends._ball import ball_visibility
 from src.tools.native_viewer_export.backends._worker_job import WorkerJob
 from src.tools.native_viewer_export.core import (
     ExportSettings,
@@ -58,6 +59,7 @@ def stage_job(
         )
     frames = work / "frames"
     frames.mkdir()
+    visible = ball_visibility(swing, indices)
     return WorkerJob(
         bundle_path=str(bundle_path),
         q_path=str(q_path),
@@ -73,6 +75,8 @@ def stage_job(
             v: [list(p) for p in points]
             for v, points in view_lookats(settings, indices, overlay).items()
         },
+        ball=swing.ball.to_dict() if swing.ball is not None else None,
+        ball_visible=visible,
     )
 
 

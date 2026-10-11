@@ -130,18 +130,22 @@ def test_speed_timing_record_is_json_ready() -> None:
 
 
 # ------------------------------------------- committed fixtures (GCV-20)
-@pytest.mark.xfail(
+_IRON7_SPEED_XFAIL = pytest.mark.xfail(
     strict=True,
     reason=(
-        "GCV-20 #11767 acceptance not met: the full re-solve at 5f8ee41fe5 "
-        "meets the 5 ms peak timing (driver -3.7 ms, 7-iron -4.2 ms) but its "
-        "impact speed is -7.4 % (driver) and -4.1 % (7-iron) against the 3 % "
-        "limit, so the committed provenance fixture is not regenerated "
-        "(DESIGN_DECISIONS decision 11 amendment) and carries no "
-        "after.speed_timing record yet"
+        "GCV-20 #11767 acceptance not met on the 7-iron: its fixture "
+        "(4bd77f5818) reaches the ball at -3.9 % (3 % limit), peaks 3.9 ms "
+        "early and loses 38.7 % less speed through the ball (10 % limit). The "
+        "#12221 grip refit meets GCV-20 on the tracked swing (-1.9 %, "
+        "-0.2 ms), but its same-input export gives -5.0 %, -5.1 ms and an "
+        "8.7 deg impact face, so the 7-iron is not regenerated yet"
     ),
 )
-@pytest.mark.parametrize("club", ["driver", "iron7"])
+
+
+@pytest.mark.parametrize(
+    "club", ["driver", pytest.param("iron7", marks=_IRON7_SPEED_XFAIL)]
+)
 def test_committed_fixture_speed_timing_matches_the_capture(club: str) -> None:
     """Regenerated fixtures: peak within 5 ms, impact speed within 3 %, and
     the ball's post-impact speed drop within 10 %."""
