@@ -39,6 +39,11 @@ from .native_mechanics_profile import (
     NativeMechanicsExecutionProfile,
     validate_native_mechanics_execution_profile,
 )
+from .native_contact_policy import (
+    NativeContactExecutionDeclaration,
+    native_contact_provider_sha256,
+    validate_native_contact_execution,
+)
 
 if TYPE_CHECKING:
     from sidekick.lab.mocap import ExperimentReplayBundle
@@ -65,6 +70,7 @@ class ConstrainedMuscleReplay:
     muscle_forces_n: NDArray[np.float64]
     constraint_audits: tuple[NativeConstraintStateAudit, ...]
     input_sha256: str
+    contact_wrenches: tuple[tuple[Any, ...], ...] = ()
 
 
 def _audit_moving_path_points(
@@ -122,6 +128,7 @@ def _audit_source_components(
     mechanical_paths: frozenset[str] = frozenset(),
     wrapped_path_declaration: WrappedPathDeclaration | None = None,
     native_mechanics_profile: NativeMechanicsExecutionProfile | None = None,
+    contact_declaration: NativeContactExecutionDeclaration | None = None,
 ) -> None:
     import opensim as osim
 
@@ -133,45 +140,18 @@ def _audit_source_components(
         validate_native_mechanics_execution_profile(
             model, native_mechanics_profile, declaration.source_sha256
         )
-    delegated_paths = (
-        set()
-        if native_mechanics_profile is None
-        else {item.absolute_path for item in native_mechanics_profile.components}
-    )
-    wrapped_components = {
-        "WrapCylinder",
-        "WrapEllipsoid",
-        "WrapSphere",
-        "PathWrap",
-        "PathWrapPoint",
-        "ConditionalPathPoint",
-    }
+    if contact_declaration is not None:
+        validate_native_contact_execution(
+            model, contact_declaration, declaration.source_sha256
+        )
     components = tuple(model.getComponentsList())
-    for component in components:
-        kind = component.getConcreteClassName()
-        declared_mechanical = (
-            kind == "CoordinateActuator"
-            and component.getAbsolutePathString() in mechanical_paths
-        )
-        declared_wrap_component = (
-            wrapped_path_declaration is not None and kind in wrapped_components
-        )
-        if (
-            kind not in _ALLOWED_COMPONENTS
-            and not declared_mechanical
-            and not declared_wrap_component
-        ):
-            raise ValueError(f"unreviewed constrained muscle component: {kind}")
-        if osim.Controller.safeDownCast(component) is not None:
-            raise ValueError("source controller is forbidden in excitation replay")
-        if osim.PositionMotion.safeDownCast(component) is not None:
-            raise ValueError("prescribed motion is forbidden in excitation replay")
-        if (
-            osim.Force.safeDownCast(component) is not None
-            and osim.Muscle.safeDownCast(component) is None
-            and not declared_mechanical
-        ):
-            raise ValueError("non-muscle force is forbidden in this policy")
+    _audit_component_policy(
+        components,
+        mechanical_paths,
+        wrapped_path_declaration is not None,
+        contact_declaration,
+        osim,
+    )
     registered = {
         muscles.get(index).getAbsolutePathString() for index in range(muscles.getSize())
     }
@@ -183,11 +163,84 @@ def _audit_source_components(
     if registered != recursive or not registered:
         raise ValueError("native muscle registry must cover every recursive muscle")
     _audit_moving_path_points(components, declaration, osim, native_mechanics_profile)
+    _audit_source_constraints(model)
+    delegated_paths = (
+        set()
+        if native_mechanics_profile is None
+        else {item.absolute_path for item in native_mechanics_profile.components}
+    )
+    _audit_custom_joint_charts(model, delegated_paths, osim)
+
+
+def _audit_component_policy(
+    components: tuple[Any, ...],
+    mechanical_paths: frozenset[str],
+    wrapped_declared: bool,
+    contact_declaration: NativeContactExecutionDeclaration | None,
+    osim: Any,
+) -> None:
+    """Reject source components outside the declared replay ownership policy."""
+    declared_contact_paths = (
+        frozenset()
+        if contact_declaration is None
+        else frozenset(contact_declaration.force_paths)
+    )
+    wrapped_components = {
+        "WrapCylinder",
+        "WrapEllipsoid",
+        "WrapSphere",
+        "PathWrap",
+        "PathWrapPoint",
+        "ConditionalPathPoint",
+    }
+    for component in components:
+        kind = component.getConcreteClassName()
+        declared_mechanical = (
+            kind == "CoordinateActuator"
+            and component.getAbsolutePathString() in mechanical_paths
+        )
+        declared_wrap_component = wrapped_declared and kind in wrapped_components
+        declared_contact_force = (
+            component.getAbsolutePathString() in declared_contact_paths
+        )
+        declared_contact_geometry = contact_declaration is not None and kind in {
+            "ContactSphere",
+            "ContactHalfSpace",
+        }
+        if (
+            kind not in _ALLOWED_COMPONENTS
+            and not declared_mechanical
+            and not declared_wrap_component
+            and not declared_contact_force
+            and not declared_contact_geometry
+        ):
+            raise ValueError(f"unreviewed constrained muscle component: {kind}")
+        if osim.Controller.safeDownCast(component) is not None:
+            raise ValueError("source controller is forbidden in excitation replay")
+        if osim.PositionMotion.safeDownCast(component) is not None:
+            raise ValueError("prescribed motion is forbidden in excitation replay")
+        if (
+            osim.Force.safeDownCast(component) is not None
+            and osim.Muscle.safeDownCast(component) is None
+            and not declared_mechanical
+            and not declared_contact_force
+        ):
+            raise ValueError("non-muscle force is forbidden in this policy")
+
+
+def _audit_source_constraints(model: Any) -> None:
+    """Limit this cold-start constraint policy to native coordinate couplers."""
     constraints = model.getConstraintSet()
     for index in range(constraints.getSize()):
         constraint = constraints.get(index)
         if constraint.getConcreteClassName() != "CoordinateCouplerConstraint":
             raise ValueError("only coordinate couplers have this constraint policy")
+
+
+def _audit_custom_joint_charts(
+    model: Any, delegated_paths: set[str], osim: Any
+) -> None:
+    """Validate every non-delegated CustomJoint as the reviewed scalar chart."""
     joints = model.getJointSet()
     for index in range(joints.getSize()):
         joint = joints.get(index)
@@ -228,6 +281,7 @@ def _owned_prepared(
     controls: Mapping[str, NDArray[np.float64]],
     wrapped_path_declaration: WrappedPathDeclaration | None = None,
     native_mechanics_profile: NativeMechanicsExecutionProfile | None = None,
+    contact_declaration: NativeContactExecutionDeclaration | None = None,
 ) -> Any:
     """Yield a fresh model with one time-only player and explicit lock recipe."""
     from contextlib import contextmanager
@@ -250,6 +304,7 @@ def _owned_prepared(
                 declaration,
                 wrapped_path_declaration=wrapped_path_declaration,
                 native_mechanics_profile=native_mechanics_profile,
+                contact_declaration=contact_declaration,
             )
             muscles = model.getMuscles()
             names = tuple(muscles.get(i).getName() for i in range(muscles.getSize()))
@@ -290,6 +345,7 @@ def _bundle_for(
     experiment_id: str,
     wrapped_path_declaration: WrappedPathDeclaration | None = None,
     native_mechanics_profile: NativeMechanicsExecutionProfile | None = None,
+    contact_declaration: NativeContactExecutionDeclaration | None = None,
 ) -> ExperimentReplayBundle:
     contracts = native_replay_contract_types()
     with _owned_prepared(
@@ -298,6 +354,7 @@ def _bundle_for(
         controls,
         wrapped_path_declaration,
         native_mechanics_profile,
+        contact_declaration,
     ) as (
         model,
         state,
@@ -307,69 +364,141 @@ def _bundle_for(
         names = tuple(muscles.get(i).getName() for i in range(muscles.getSize()))
         state_names = tuple(declaration.named_state)
         options = native_muscle_bundle._registered_options(model, state, muscles)
-        identity = native_muscle_bundle._identity(
-            declaration.model_path,
+        identity, adapter_sha = _constrained_bundle_identity(
+            declaration,
             model,
+            state,
             state_names,
             names,
             options,
             contracts,
             native_mechanics_profile,
         )
-        adapter_sha = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
-        provider_sha = hashlib.sha256(
-            bytes.fromhex(identity.provider_sha256)
-            + bytes.fromhex(adapter_sha)
-            + Path(__file__).with_name("native_prepared_state.py").read_bytes()
-            + Path(__file__).with_name("native_constraint_state.py").read_bytes()
-            + Path(__file__).with_name("native_mechanics_profile.py").read_bytes()
-            + Path(__file__).with_name("native_muscle_bundle.py").read_bytes()
-        ).hexdigest()
-        identity = replace(
+        policy = _constrained_bundle_policy(
+            declaration,
             identity,
-            variant_id="declared-constrained-muscles",
-            model_version=_VERSION,
-            provider_sha256=provider_sha,
+            adapter_sha,
+            wrapped_path_declaration,
+            native_mechanics_profile,
+            contact_declaration,
+            contracts,
         )
-        policy = native_muscle_bundle._policy(identity, contracts)
-        policy = replace(
-            policy,
-            initialization_policy_id="declared-coupler-lock-muscle-cold-start",
-            initialization_policy_version=_VERSION,
-            contact_policy_id="native-coupler-lock-no-contact",
-            contact_policy_version=_VERSION,
-            contact_policy_sha256=_admission_identity(
-                declaration,
-                adapter_sha,
-                wrapped_path_declaration.declaration_sha256
-                if wrapped_path_declaration is not None
-                else None,
-                native_mechanics_profile.profile_sha256
-                if native_mechanics_profile is not None
-                else None,
-            ),
-        )
-        values = tuple(
-            (name, (declaration.named_state[name],)) for name in state_names
-        ) + tuple(options.items())
-        capability = contracts.CapabilityDeclaration(
-            "declared-native-constrained-muscle-cold-start",
-            True,
-            contracts.CapabilitySupport.SUPPORTED,
-            contracts.CapabilityAvailability.AVAILABLE,
+        values, capability, channels = _constrained_bundle_channels(
+            declaration, state_names, options, names, contracts
         )
         return contracts.build_experiment_replay_bundle(
             experiment_id,
             identity,
             (capability,),
             values,
-            tuple(contracts.InputChannel(name, name, "1") for name in names),
+            channels,
             contracts.ActuationInputKind.MUSCLE_EXCITATION,
             contracts.InputInterpolation.LINEAR,
             tuple(grid),
             tuple(tuple(controls[name][i] for name in names) for i in range(len(grid))),
             policy,
         )
+
+
+def _constrained_bundle_identity(
+    declaration: DeclaredColdStart,
+    model: Any,
+    state: Any,
+    state_names: tuple[str, ...],
+    muscle_names: tuple[str, ...],
+    options: Mapping[str, Any],
+    contracts: Any,
+    mechanics_profile: NativeMechanicsExecutionProfile | None,
+) -> tuple[Any, str]:
+    identity = native_muscle_bundle._identity(
+        declaration.model_path,
+        model,
+        state_names,
+        muscle_names,
+        options,
+        contracts,
+        mechanics_profile,
+    )
+    adapter_sha = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+    provider_sources = (
+        Path(__file__).with_name("native_prepared_state.py"),
+        Path(__file__).with_name("native_constraint_state.py"),
+        Path(__file__).with_name("native_mechanics_profile.py"),
+        Path(__file__).with_name("native_muscle_bundle.py"),
+        Path(__file__).with_name("native_contact_policy.py"),
+        Path(__file__).parents[1] / "opensim_force_torque.py",
+    )
+    provider_sha = hashlib.sha256(
+        bytes.fromhex(identity.provider_sha256)
+        + bytes.fromhex(adapter_sha)
+        + b"".join(path.read_bytes() for path in provider_sources)
+    ).hexdigest()
+    return (
+        replace(
+            identity,
+            variant_id="declared-constrained-muscles",
+            model_version=_VERSION,
+            provider_sha256=provider_sha,
+        ),
+        adapter_sha,
+    )
+
+
+def _constrained_bundle_policy(
+    declaration: DeclaredColdStart,
+    identity: Any,
+    adapter_sha: str,
+    wrapped_path_declaration: WrappedPathDeclaration | None,
+    mechanics_profile: NativeMechanicsExecutionProfile | None,
+    contact_declaration: NativeContactExecutionDeclaration | None,
+    contracts: Any,
+) -> Any:
+    policy = native_muscle_bundle._policy(identity, contracts)
+    return replace(
+        policy,
+        initialization_policy_id="declared-coupler-lock-muscle-cold-start",
+        initialization_policy_version=_VERSION,
+        contact_policy_id=(
+            "native-declared-sphere-halfspace-contact"
+            if contact_declaration is not None
+            else "native-coupler-lock-no-contact"
+        ),
+        contact_policy_version=_VERSION,
+        contact_policy_sha256=_admission_identity(
+            declaration,
+            adapter_sha,
+            wrapped_path_declaration.declaration_sha256
+            if wrapped_path_declaration is not None
+            else None,
+            mechanics_profile.profile_sha256 if mechanics_profile is not None else None,
+            contact_declaration.declaration_sha256
+            if contact_declaration is not None
+            else None,
+            native_contact_provider_sha256()
+            if contact_declaration is not None
+            else None,
+        ),
+    )
+
+
+def _constrained_bundle_channels(
+    declaration: DeclaredColdStart,
+    state_names: tuple[str, ...],
+    options: Mapping[str, Any],
+    muscle_names: tuple[str, ...],
+    contracts: Any,
+) -> tuple[tuple[tuple[str, tuple[float, ...]], ...], Any, tuple[Any, ...]]:
+    values = tuple(
+        (name, (declaration.named_state[name],)) for name in state_names
+    ) + tuple(options.items())
+    capability = contracts.CapabilityDeclaration(
+        "declared-native-constrained-muscle-cold-start",
+        True,
+        contracts.CapabilitySupport.SUPPORTED,
+        contracts.CapabilityAvailability.AVAILABLE,
+    )
+    channels = tuple(contracts.InputChannel(name, name, "1") for name in muscle_names)
+    return values, capability, channels
 
 
 def build_constrained_muscle_bundle(
@@ -380,6 +509,7 @@ def build_constrained_muscle_bundle(
     experiment_id: str = "native-constrained-muscle-replay",
     wrapped_path_declaration: WrappedPathDeclaration | None = None,
     native_mechanics_profile: NativeMechanicsExecutionProfile | None = None,
+    contact_declaration: NativeContactExecutionDeclaration | None = None,
 ) -> ExperimentReplayBundle:
     """Bind native source, complete initial muscle state and declared constraints."""
     if (
@@ -403,6 +533,7 @@ def build_constrained_muscle_bundle(
         experiment_id,
         wrapped_path_declaration,
         native_mechanics_profile,
+        contact_declaration,
     )
 
 
@@ -412,10 +543,9 @@ def replay_constrained_muscle_bundle(
     *,
     wrapped_path_declaration: WrappedPathDeclaration | None = None,
     native_mechanics_profile: NativeMechanicsExecutionProfile | None = None,
+    contact_declaration: NativeContactExecutionDeclaration | None = None,
 ) -> ConstrainedMuscleReplay:
     """Independently reconstruct and replay the same frozen excitation policy."""
-    import opensim as osim
-
     contracts = native_replay_contract_types()
     bundle = validate_native_replay_bundle(bundle, contracts)
     history = bundle.input_history
@@ -440,63 +570,94 @@ def replay_constrained_muscle_bundle(
             experiment_id=bundle.experiment_id,
             wrapped_path_declaration=wrapped_path_declaration,
             native_mechanics_profile=native_mechanics_profile,
+            contact_declaration=contact_declaration,
         )
-        for field in (
-            "model",
-            "initial_state",
-            "policy",
-            "input_history",
-            "capabilities",
-        ):
-            if getattr(bundle, field) != getattr(expected, field):
-                raise ValueError(
-                    "native constrained muscle policy or input identity differs"
-                )
-        with _owned_prepared(
+        _require_matching_constrained_bundle(bundle, expected)
+        return _replay_constrained_snapshot(
+            bundle,
             frozen,
             grid,
             controls,
             wrapped_path_declaration,
             native_mechanics_profile,
-        ) as (model, state, initial_audit):
-            muscles = model.getMuscles()
-            names = tuple(muscles.get(i).getName() for i in range(muscles.getSize()))
-            state_names = tuple(declaration.named_state)
-            domains = muscle_replay._muscle_state_domains(model, osim)
-            from .native_scalar_replay import (
-                NativeScalarReplayPolicy,
-                integrate_native_scalar_replay,
+            contact_declaration,
+        )
+
+
+def _require_matching_constrained_bundle(
+    bundle: ExperimentReplayBundle, expected: ExperimentReplayBundle
+) -> None:
+    for field in ("model", "initial_state", "policy", "input_history", "capabilities"):
+        if getattr(bundle, field) != getattr(expected, field):
+            raise ValueError(
+                "native constrained muscle policy or input identity differs"
             )
 
-            paths = tuple(
-                muscles.get(i).getAbsolutePathString() for i in range(muscles.getSize())
+
+def _replay_constrained_snapshot(
+    bundle: ExperimentReplayBundle,
+    declaration: DeclaredColdStart,
+    grid: NDArray[np.float64],
+    controls: Mapping[str, NDArray[np.float64]],
+    wrapped_path_declaration: WrappedPathDeclaration | None,
+    native_mechanics_profile: NativeMechanicsExecutionProfile | None,
+    contact_declaration: NativeContactExecutionDeclaration | None,
+) -> ConstrainedMuscleReplay:
+    """Integrate and detach numeric replay output before native teardown."""
+    import opensim as osim
+    from .native_scalar_replay import (
+        NativeScalarReplayPolicy,
+        integrate_native_scalar_replay,
+    )
+
+    with _owned_prepared(
+        declaration,
+        grid,
+        controls,
+        wrapped_path_declaration,
+        native_mechanics_profile,
+        contact_declaration,
+    ) as (model, state, initial_audit):
+        muscles = model.getMuscles()
+        names = tuple(muscles.get(i).getName() for i in range(muscles.getSize()))
+        state_names = tuple(declaration.named_state)
+        paths = tuple(
+            muscles.get(i).getAbsolutePathString() for i in range(muscles.getSize())
+        )
+        samples = integrate_native_scalar_replay(
+            model,
+            state,
+            state_names,
+            paths,
+            grid,
+            muscle_replay._muscle_state_domains(model, osim),
+            NativeScalarReplayPolicy(
+                _ACCURACY,
+                contact_force_paths=(
+                    ()
+                    if contact_declaration is None
+                    else contact_declaration.force_paths
+                ),
+                constrained_cold_start=declaration,
+            ),
+        )
+        states, forces, applied = (
+            samples.states,
+            samples.actuations,
+            samples.applied_controls,
+        )
+        audits = samples.state_observations
+        if audits[0] != initial_audit:
+            raise RuntimeError(
+                "native prepared state changed before first replay sample"
             )
-            samples = integrate_native_scalar_replay(
-                model,
-                state,
-                state_names,
-                paths,
-                grid,
-                domains,
-                NativeScalarReplayPolicy(_ACCURACY, constrained_cold_start=frozen),
-            )
-            states, forces, applied = (
-                samples.states,
-                samples.actuations,
-                samples.applied_controls,
-            )
-            audits = samples.state_observations
-            if audits[0] != initial_audit:
-                raise RuntimeError(
-                    "native prepared state changed before first replay sample"
-                )
-            expected_input = np.column_stack([controls[name] for name in names])
-            if not np.allclose(applied, expected_input, rtol=0, atol=1e-12):
-                raise RuntimeError("native applied excitation differs from saved input")
+        expected_input = np.column_stack([controls[name] for name in names])
+        if not np.allclose(applied, expected_input, rtol=0, atol=1e-12):
+            raise RuntimeError("native applied excitation differs from saved input")
     for array in (grid, states, forces, applied):
         array.setflags(write=False)
     return ConstrainedMuscleReplay(
-        state_names,
+        tuple(declaration.named_state),
         names,
         grid,
         states,
@@ -504,6 +665,7 @@ def replay_constrained_muscle_bundle(
         forces,
         tuple(audits),
         bundle.applied_input_sha256,
+        samples.contact_wrenches,
     )
 
 
@@ -539,7 +701,9 @@ def observe_constrained_markers(
             if frame is None:
                 raise ValueError("marker placement is not attached to a physical frame")
             frames.append((frame, offset))
-        points = np.empty((len(indices), len(frames), 3), dtype=float)
+        points: NDArray[np.float64] = np.empty(
+            (len(indices), len(frames), 3), dtype=float
+        )
         for row, index in enumerate(indices):
             _restore_named_state(
                 model,

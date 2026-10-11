@@ -349,6 +349,11 @@
       "id": "UP-D1-native-wrapped-path-closure-inventory",
       "owner": "UpstreamDrift issue #12234",
       "resolution": "Inventory provisional chapter57 and native_wrapped_path.py: exact source hash, supported WrapCylinder/WrapEllipsoid/WrapSphere identities and geometry, closed PathWrap ownership/target/method/range, ConditionalPathPoint coordinate/range, exact native source revalidation, and reused native route observation. OpenSim 4.6 fixtures exercise all three shapes, default rejection, source/link mutation rejection, conditional-state observations and opt-in replay. This narrow software admission does not prove global path worklessness, guide-work bounds, anatomy, physiology, contact/grip, capture matching or full-horizon acceptance. Shared Chapter56 request/findings integration is a required dependency; keep calculation inventory empty and publication blocked."
+    },
+    {
+      "id": "UP-D1-native-contact-source-closure-inventory",
+      "owner": "UpstreamDrift issue #12244",
+      "resolution": "Inventory provisional chapter58 and native_contact_policy.py: exact source-bound HuntCrossleyForce/SmoothSphereHalfSpaceForce and ContactSphere/ContactHalfSpace closures, shared native wrench sampler implementation identity including opensim_force_torque.py, constrained replay policy binding, default rejection and native source/component mutation checks. OpenSim 4.6 synthetic fixtures exercise both declared force types and finite Smooth-contact wrench replay; legacy tests exercise both laws through the shared sampler. This does not authorize capture contact, establish calibrated support/grip, qualify either contact law physiologically, prove a full-body Moco solve or full-horizon replay, or establish all-model parity. Request-level integration remains a dependency; keep calculation inventory empty and publication blocked."
     }
   ],
   "calculations": []

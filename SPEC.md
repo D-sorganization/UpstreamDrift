@@ -20,6 +20,20 @@ does not admit nonlinear path functions, generalized joints, contact, or
 physiological claims. Chapter 57 records the closure profile and fixtures;
 runner-level typed finding aggregation depends on the shared Chapter 56 API.
 
+## Native Contact Source Closure (#12244)
+
+Constrained contact replay requires an exact-source declaration for supported
+HuntCrossley or Smooth sphere/half-space contact, including serialized force
+and geometry component identities. The contact policy hash covers both the
+declaration/sampler and the executed `opensim_force_torque.py` wrench provider.
+The default remains rejecting. OpenSim 4.6 tests verify both force/geometry
+closures and finite constrained Smooth-contact wrench output; strict XML
+validation currently rejects the generated HuntCrossley fixture before replay.
+This does not authorize capture contact or establish support, grip, physical
+qualification, or full-horizon replay. Request-level integration remains
+pending. See provisional Chapter 58 and
+`docs/development/feedback_controls/F07_NATIVE_CONTACT_SOURCE_CLOSURE_TURNOVER.md`.
+
 ## Coordinate-Invariant Physical Inertia Contract (#12183)
 
 The existing DIME inertia helper checks triangle feasibility on sorted principal

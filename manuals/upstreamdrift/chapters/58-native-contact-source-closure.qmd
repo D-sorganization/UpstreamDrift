@@ -1,0 +1,51 @@
+# Native Contact Source Closure
+
+This provisional F07 calculation records a narrow, opt-in source declaration
+for native sphere/half-space contact in constrained-muscle replay. It binds
+OpenSim contact force and geometry components to the exact model bytes and
+records native wrench observations. It does not add contact to any capture
+model, establish ground calibration, qualify contact parameters, or establish
+support, grip, physical validity, full-horizon replay, or scientific
+qualification. Publication remains blocked.
+
+## Exact Declaration and Executed Provider
+
+The declaration is limited to `HuntCrossleyForce` and
+`SmoothSphereHalfSpaceForce` with `ContactSphere` and `ContactHalfSpace`
+geometry. Each force and geometry is identified by absolute component path,
+concrete class, and the hash of its native component serialization. The
+declaration also binds the full model SHA-256. Any changed model bytes or
+force/geometry component invalidates the declaration. Unsupported contact
+geometry and undeclared forces remain rejected.
+
+The policy identity covers both the declaration and the code that executes it:
+the source-bound contact policy/sampler and `opensim_force_torque.py`, which
+provides native force and torque sampling. Constrained replay incorporates
+that provider digest into its policy identity. Mutating the provider therefore
+changes the identity even when model bytes and declaration data are unchanged.
+The existing native wrench sampler remains shared with the legacy replay path;
+this declaration does not introduce a second contact law.
+
+Contact execution is available only when the caller supplies a valid typed
+declaration. The default constrained path continues to reject contact-bearing
+models. The declaration is not yet a request-level authorization for a
+particular private capture, and it cannot override unrelated source, state,
+constraint, or execution blockers.
+
+## Evidence and Limits
+
+OpenSim 4.6 synthetic fixtures exercise declared Smooth and Hunt-Crossley
+source closure, the corresponding sphere and half-space geometry identities,
+contact-free default rejection, source/component mutation rejection, and
+finite native wrench output from a constrained Smooth-contact replay. Existing
+legacy replay fixtures exercise both contact laws through the shared sampler.
+The generated Hunt-Crossley source fixture is rejected by the strict
+self-contained XML gate, so this evidence does not claim constrained
+Hunt-Crossley replay.
+These are bounded software tests. They do not establish that either law or
+geometry is appropriate for a human capture, nor do they demonstrate a
+contact-bearing full-body Moco solve or full-horizon independent replay.
+
+Keep contact, support/grip, anatomy, passive physiology, capture matching,
+full-horizon replay, and all-model parity unqualified. The calculation
+registry remains empty and publication remains blocked.
