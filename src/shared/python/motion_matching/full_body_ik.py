@@ -16,6 +16,7 @@ from typing import Any, Literal, TypeAlias
 import numpy as np
 from numpy.typing import NDArray
 from scipy.optimize import least_squares
+from scipy.spatial.transform import Rotation
 
 from src.shared.python.motion_matching.contact_law import GroundPlane
 from src.shared.python.motion_matching.constraint_kinematics import (
@@ -87,6 +88,10 @@ class SolveTrajectoryOptions:
     frames: Sequence[int] | None = None
     flat_feet_per_frame: Sequence[Sequence[str]] | None = None
     plant_stance: bool = False
+    #: Seed the stance anchors from ``q_init`` instead of the first frame's
+    #: own fit, so a calibrated address start keeps its feet (#12222).
+    #: Requires ``plant_stance``.
+    anchor_stance_at_init: bool = False
     prior_trajectory: Array | None = None
     restarts: int = 0
     restart_threshold_m: float = 0.0
@@ -114,6 +119,42 @@ def _rotation_error(r_a: Array, r_b: Array) -> Array:
     """Small-angle rotation vector taking frame b onto frame a (world axes)."""
     r = r_a @ r_b.T
     return 0.5 * np.array([r[2, 1] - r[1, 2], r[0, 2] - r[2, 0], r[1, 0] - r[0, 1]])
+
+
+def _finite_rotation_error(r_a: Array, r_b: Array) -> Array:
+    """Principal world-axis rotation vector taking frame b onto frame a.
+
+    The principal logarithm has a branch discontinuity at a half turn;
+    its norm still reports pi instead of falsely reporting alignment.
+    """
+    return np.asarray(Rotation.from_matrix(r_a @ r_b.T).as_rotvec(), dtype=float)
+
+
+def _rotation_log_jacobian(phi: Array) -> Array:
+    """Inverse SO(3) left Jacobian for a finite world-axis rotation vector."""
+    theta = float(np.linalg.norm(phi))
+    x, y, z = phi
+    skew = np.array([[0.0, -z, y], [z, 0.0, -x], [-y, x, 0.0]])
+    coefficient = (
+        1.0 / 12.0 + theta**2 / 720.0
+        if theta < 1e-5
+        else (1.0 - 0.5 * theta / np.tan(0.5 * theta)) / theta**2
+    )
+    return np.eye(3) - 0.5 * skew + coefficient * skew @ skew
+
+
+def _closure_rotation_row(
+    r_a: Array, r_b: Array, jr_a: Array, jr_b: Array
+) -> tuple[Array, Array]:
+    """Weld rotation residual ``log(R_a R_b^T)`` and its exact Jacobian.
+
+    ``jr_a`` and ``jr_b`` are the world-frame angular Jacobians of the two
+    closure frames over the same coordinates. Every engine adapter uses this
+    one row so their least-squares problems are identical (#12039).
+    """
+    rot = _finite_rotation_error(r_a, r_b)
+    relative = r_a @ r_b.T
+    return rot, _rotation_log_jacobian(rot) @ (jr_a - relative @ jr_b)
 
 
 def _skew3(v: Array) -> Array:
@@ -961,6 +1002,8 @@ class BaseFullBodyIK:
             raise ValueError("flat_feet_per_frame needs one entry per capture frame")
         if opts.plant_stance and opts.flat_feet_per_frame is None:
             raise ValueError("plant_stance needs flat_feet_per_frame")
+        if opts.anchor_stance_at_init and not opts.plant_stance:
+            raise ValueError("anchor_stance_at_init needs plant_stance")
         prior: Array | None = None
         if opts.prior_trajectory is not None:
             prior = np.asarray(opts.prior_trajectory, dtype=float)
@@ -1019,7 +1062,11 @@ class BaseFullBodyIK:
         rng = np.random.default_rng(0)
         q = np.asarray(q_init, dtype=float)
         fits: list[PoseFit] = []
-        anchors: dict[str, Array] = {}
+        anchors: dict[str, Array] = (
+            dict(self.sphere_ground_points(q, ground))
+            if opts.anchor_stance_at_init
+            else {}
+        )
 
         for k in indices:
             if opts.restart_seed_per_frame:

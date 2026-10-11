@@ -380,7 +380,7 @@
       "web": "ui/src/pages/CharacterBuilder.tsx",
       "status": "parity",
       "tiles": ["character_builder"],
-      "notes": "Desktop and API share humanoid_character_builder.spec_export (build, preview, export spec/URDF/MJCF/OSIM, presets). The web page now drives presets, preview/build and spec/URDF/MJCF/OSIM export through the spec API (CMB-7a, #11658), and picks skin tone, clothing, club finish, headwear and ground from the model_appearance library with a recoloured preview and an appearance-v1 sidecar export (CMB-7b/7c, #11658; the desktop tool has no appearance editor yet, engines read the same sidecar). The glTF skinned preview remains under CMB-6 #11657."
+      "notes": "Desktop and API share humanoid_character_builder.spec_export (build, preview, export spec/URDF/MJCF/OSIM/glTF, presets). The web page now drives presets, preview/build and spec/URDF/MJCF/OSIM/glTF export through the spec API (CMB-7a, #11658), and picks skin tone, clothing, club finish, headwear and ground from the model_appearance library with a recoloured preview and an appearance-v1 sidecar export (CMB-7b/7c, #11658); the desktop tool now also picks the same appearance choices and exports the same appearance-v1 sidecar through the shared character_appearance_service (CMB-7e, #11658). A rigidly skinned glTF export of the spec skeleton landed under CMB-6 (#11657). The web page can preview that glTF body live, refetched (debounced) as the spec sliders move and tinted with the appearance trunk colour (CMB-7f, #11658); the desktop tool keeps its primitive preview."
     },
     "tools.data_explorer": {
       "title": "Data Explorer (import/filter/visualize datasets)",

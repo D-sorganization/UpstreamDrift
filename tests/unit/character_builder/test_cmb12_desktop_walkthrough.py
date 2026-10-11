@@ -37,7 +37,7 @@ def test_tutorial_embeds_every_committed_screenshot() -> None:
         assert (TUTORIAL.parent / rel).is_file(), rel
 
 
-@pytest.mark.parametrize("fmt", ["spec", "urdf", "mjcf", "osim"])
+@pytest.mark.parametrize("fmt", ["spec", "urdf", "mjcf", "osim", "gltf"])
 def test_desktop_custom_edit_matches_api_preset_override(
     tmp_path: Path, fmt: str
 ) -> None:

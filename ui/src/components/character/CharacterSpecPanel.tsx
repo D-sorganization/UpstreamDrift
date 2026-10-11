@@ -191,7 +191,7 @@ export function CharacterSpecPanel({ spec }: { spec: CharacterSpecState }) {
         {selectedPreset && (
           <div className="mt-1.5 text-xs text-gray-400 space-y-0.5">
             <p>{selectedPreset.description}</p>
-            <p className="italic">{selectedPreset.limitations}</p>
+            <p className="text-gray-400">{selectedPreset.limitations}</p>
           </div>
         )}
       </div>
