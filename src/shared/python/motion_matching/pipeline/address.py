@@ -521,6 +521,17 @@ def prepare_hip_spec(
         calibration=hip_cal,
         lateral_marker_offsets_m=(0.0, 0.0) if lane.feet is None else LATERAL_SEEDS_M,
     )
+    # EXPERIMENT ONLY (#12042 slice 3, not for merge): override the zero twist
+    # with "<left>,<right>" degrees to test where the hip rotation window sits.
+    import os as _os  # noqa: PLC0415
+
+    if _os.environ.get("UD_EXP_ZERO_TWIST"):
+        from src.shared.python.motion_matching.hip_calibration import (  # noqa: PLC0415
+            HipRotationZero,
+        )
+
+        _l, _r = (float(v) for v in _os.environ["UD_EXP_ZERO_TWIST"].split(","))
+        zero_twist = HipRotationZero(offset_r_deg=_r, offset_l_deg=_l)
     if opts.skip_hip_calibration:
         hip_spec = add_toe_spheres(dict(base_spec))
     else:
