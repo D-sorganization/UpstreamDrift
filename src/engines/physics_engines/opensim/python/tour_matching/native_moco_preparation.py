@@ -93,6 +93,10 @@ class NativeMocoPreparation:
         return (
             self.physical_body_inertia_qualified
             and self.physical_body_inertia_sha256 is not None
+            and (
+                not self.allow_unqualified_passive_diagnostic
+                or self.passive_observation_sha256 is not None
+            )
             and self.diagnostic_assessment is not None
             and self.diagnostic_assessment.blocker_receipt_sha256 == blocker_receipt
             and self.diagnostic_assessment.execution_permitted

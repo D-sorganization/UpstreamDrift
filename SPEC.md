@@ -64,6 +64,15 @@ chapter 39 and F10i turnover separate actual affected runtime checks, optional S
 skips, capture-loader DLL failures and the outstanding full-model scientific gates.
 Reference-conventions chapter is now 40; project MyoSuite remains chapter 38.
 
+## MyoSuite Native Muscle Actuator Classification (#12249)
+
+`MyoSuiteMuscleAnalyzer` uses the installed MuJoCo named `mjDYN_MUSCLE` enum to
+select native muscle actuators. The native MuJoCo 3.8.0 regression mixes muscle,
+filter, and motor actuators without requiring Gym or MyoSuite environment
+registration. This fixes actuator-type classification only; it does not qualify
+muscle physiology, capture mapping, excitation replay, or engine parity. See
+chapter 31 and the F09q turnover.
+
 ## Project MyoSuite Bounded Native Command Solve (F09n)
 
 F09n #12036 connects the source-bound native objective and persistent native

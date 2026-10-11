@@ -131,3 +131,11 @@ files. Their parsed content was verified identical, then their exact committed
 bytes were restored and those explicit provenance inputs were excluded from
 Prettier. Numerical values, native source XML, fixtures and acceptance rules
 were not changed by this formatter repair.
+
+The subsequent full CI unit suite found two additional byte-bound specification
+files that had been reformatted in inherited history. Both parsed JSON objects
+were identical to main checkpoint `9e5f87c4dd31fc3137fc204d98337633fa5c4855`.
+Restore its exact `spec_driver.json` and `spec_iron7.json` bytes after checking
+their SHA-256 values against the existing provenance, and explicitly exclude
+both from Prettier. Preserve the original run-document hashes and numerical
+contents; no acceptance or provenance record is rewritten.

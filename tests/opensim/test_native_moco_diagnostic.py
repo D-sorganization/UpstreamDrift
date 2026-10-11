@@ -119,7 +119,7 @@ def test_opt_in_solves_and_replays_without_claiming_passive_admission(
     )
 
 
-def test_diagnostic_never_waives_other_blockers_or_physical_qualification(
+def test_diagnostic_never_waives_other_blockers_or_missing_native_observation(
     muscle_fixture: tuple[Path, dict[str, float]], tmp_path: Path
 ) -> None:
     request = replace(
@@ -127,15 +127,16 @@ def test_diagnostic_never_waives_other_blockers_or_physical_qualification(
     )
     directory = tmp_path / "prepared"
     prepared = prepare_native_moco(request, directory)
-    # Passive admission is explicitly unqualified, but may be opted into for
-    # software execution. Removing its optional observation does not certify it.
+    # Passive admission remains unqualified, and the native observation is a
+    # separate mandatory execution input even when policy limits are unavailable.
     without_passive_observation = replace(prepared, passive_observation_sha256=None)
-    assert without_passive_observation.ready_for_software_solve
+    assert not without_passive_observation.ready_for_software_solve
     assert (
         without_passive_observation.diagnostic_assessment.physical_qualification
         is PhysicalQualification.UNQUALIFIED
     )
     for changed in (
+        without_passive_observation,
         replace(prepared, physical_body_inertia_qualified=False),
         replace(
             prepared, blockers=prepared.blockers + ("native-state-binding-coverage",)

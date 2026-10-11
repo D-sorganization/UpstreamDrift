@@ -146,6 +146,11 @@
       "resolution": "Inventory the provisional native continuous-state excitation replay in tour_matching/muscle_replay.py and chapters/13-native-muscle-replay.qmd. Actual OpenSim 4.6 one-DOF compliant-muscle tests establish bounded input playback, continuous initialization and uninterrupted native stepping only. Discrete/plugin state, external-resource identity, passive/contact force policy, full-body anatomy, capture accuracy and full-horizon independent muscle/contact replay remain unqualified. Preserve cold-start policy and forbid weaker shared rigid-body/restarted/external-force evidence from qualifying the endpoint."
     },
     {
+      "id": "UP-D1-native-muscle-actuator-classification-inventory",
+      "owner": "UpstreamDrift issue #12249",
+      "resolution": "Inventory the MyoSuite muscle-analysis actuator classifier in src/engines/physics_engines/myosuite/python/muscle_analysis.py and chapter 31. Classification uses the installed MuJoCo mjDYN_MUSCLE enum; a mixed native MuJoCo 3.8.0 fixture excludes filter and motor actuators without Gym registration. This verifies actuator dynamic-type selection only, not muscle physiology, capture mapping, excitation replay, native MyoSuite task execution or cross-engine parity."
+    },
+    {
       "id": "UP-D1-frozen-marker-holdout-inventory",
       "owner": "UpstreamDrift issue #11899",
       "resolution": "Inventory score_frozen_marker_offsets and chapter 13 frozen marker scoring: supplied body-local placements and proper predicted transforms, pooled valid-sample Euclidean RMS, fail-closed missing support, and unchanged observation clock. Existing exploratory heldout placement refitting is not independent prediction. This pure scoring boundary cannot establish training-only provenance, anthropometry, anatomical attachments, independent subject/trial splits or native replay qualification; private D02 and publication remain blocked."
@@ -341,6 +346,16 @@
       "resolution": "Inventory provisional chapter55: explicit boolean request-bound numerical feasibility permits only retained passive-policy-unavailable with native observation and admitted physical bodies. All other blockers enforce, supplied limits cannot be overridden, and no scientific qualification is granted. Native Millard/Thelen solve, export and independent replay tests pass. Full private muscle-driven capture, support/grip and all17/six-engine parity remain open. Publication blocked."
     },
     {
+      "id": "UP-D1-native-path-work-inventory",
+      "owner": "UpstreamDrift issue #11856",
+      "resolution": "Inventory original native PathActuator fixed/moving-point force-length diagnostic in scripts/diagnostics/native_path_work.py and chapters/24-native-path-work.qmd. Actual native unit-tension acceleration agrees with native moment arm while the moving same-body segment produces a persistent geometric derivative difference. Existing consistency gate rejects nonfinite and numerically unresolved evidence; original native tests retain the difference rather than changing runtime or donor anatomy. Exact source and runtime identities are separate and source-to-binary verification is unavailable. Physiological fitting, donor path/input-domain validation, contact, complete-state full-capture replay, and manual release remain blocked."
+    },
+    {
+      "id": "UP-D1-native-mixed-marker-observation-inventory",
+      "owner": "UpstreamDrift issue #12195",
+      "resolution": "Inventory Chapter 49 and native_mixed_marker_observation.py: source-bound fresh constrained mixed replay, complete named-state native marker FK, immutable masked observation alignment and scorer diagnostics. The native and portable contract tests establish software behavior only; marker registration, physical support/grip, physiology, capture matching, all-model parity and authenticated production execution remain unqualified."
+    },
+    {
       "id": "UP-D1-native-diagnostic-execution-contract-inventory",
       "owner": "UpstreamDrift issue #12236",
       "resolution": "Inventory provisional chapter56 and native_diagnostic_contract.py/native_capability_probe.py: source-bound closed-registry findings separate software admission, exact runtime phase/identity/time window, and non-promotable physical qualification. Optional source-specific context binds only registered anatomy/support/marker gaps to evidence digests and provenance references. Optimizer admission requires generated positive audit coverage plus a native-dynamics-closed-source-v1 capability probe whose runtime libraries and implementation bytes are bound. Constrained-muscle provider profiles delegate exact CustomJoint/MovingPathPoint laws to OpenSim and revalidate at bundle build/replay. A bounded 557-component native preparation/probe completed with runtime viable over [0, 0.001] s and physical qualification unqualified; no optimizer or replay ran. The separate bounded three-knot Moco lifecycle fixture remains stopped in MocoStudy.solve(), so solve/export/replay support is unestablished. Focused fixtures do not qualify full capture, anatomy, support/grip, physiology or all-model parity. Calculation inventory remains empty and publication blocked."
@@ -354,16 +369,6 @@
       "id": "UP-D1-native-contact-source-closure-inventory",
       "owner": "UpstreamDrift issue #12244",
       "resolution": "Inventory provisional chapter58 and native_contact_policy.py: exact source-bound HuntCrossleyForce/SmoothSphereHalfSpaceForce and ContactSphere/ContactHalfSpace closures, shared native wrench sampler implementation identity including opensim_force_torque.py, constrained replay policy binding, default rejection and native source/component mutation checks. A defused namespace-disabled XML parser accepts OpenSim C++-qualified names without rewriting source bytes while retaining DTD, entity, external-resource and prefixed-resource rejection. OpenSim 4.6 synthetic fixtures exercise both declared force types and finite native wrench replay for both constrained contact laws; legacy fixtures exercise both laws through the shared sampler. This does not authorize capture contact, establish calibrated support/grip, qualify either contact law physiologically, prove a full-body Moco solve or full-horizon replay, or establish all-model parity. Strict NativeMocoRequest JSON parsing, preparation closure, export identity, and fresh-replay declaration matching are integrated; an actual HuntCrossley request audit blocks on a mutated declaration; keep calculation inventory empty and publication blocked."
-    },
-    {
-      "id": "UP-D1-native-path-work-inventory",
-      "owner": "UpstreamDrift issue #11856",
-      "resolution": "Inventory original native PathActuator fixed/moving-point force-length diagnostic in scripts/diagnostics/native_path_work.py and chapters/24-native-path-work.qmd. Actual native unit-tension acceleration agrees with native moment arm while the moving same-body segment produces a persistent geometric derivative difference. Existing consistency gate rejects nonfinite and numerically unresolved evidence; original native tests retain the difference rather than changing runtime or donor anatomy. Exact source and runtime identities are separate and source-to-binary verification is unavailable. Physiological fitting, donor path/input-domain validation, contact, complete-state full-capture replay, and manual release remain blocked."
-    },
-    {
-      "id": "UP-D1-native-mixed-marker-observation-inventory",
-      "owner": "UpstreamDrift issue #12195",
-      "resolution": "Inventory Chapter 49 and native_mixed_marker_observation.py: source-bound fresh constrained mixed replay, complete named-state native marker FK, immutable masked observation alignment and scorer diagnostics. The native and portable contract tests establish software behavior only; marker registration, physical support/grip, physiology, capture matching, all-model parity and authenticated production execution remain unqualified."
     }
   ],
   "calculations": []

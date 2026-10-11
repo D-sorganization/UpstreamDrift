@@ -25,7 +25,7 @@ else:
 
 
 # Constants for muscle analysis
-MJDYN_MUSCLE = 2  # MuJoCo dyntype constant for muscle actuators
+MJDYN_MUSCLE = mujoco.mjtDyn.mjDYN_MUSCLE if MUJOCO_AVAILABLE else None
 FINITE_DIFF_PERTURBATION = (
     1e-6  # Perturbation for finite difference moment arm computation [rad or m]
 )
@@ -114,7 +114,7 @@ class MyoSuiteMuscleAnalyzer:
         if not MUJOCO_AVAILABLE:
             return muscle_ids
 
-        # MuJoCo muscle actuators have dyntype == mjDYN_MUSCLE (2)
+        # MuJoCo muscle actuators use the runtime's named muscle dynamic type.
         try:
             for i in range(self.model.nu):
                 # Access actuator dyntype

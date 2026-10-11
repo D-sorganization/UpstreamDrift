@@ -16,7 +16,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1638 | `src/tools/launch_monitor_analytics/gui.py` |
 | 1584 | `src/shared/python/motion_matching/full_body_forward_dynamics.py` |
 | 1465 | `src/shared/python/motion_matching/acceptance.py` |
-| 1355 | `src/shared/python/motion_matching/pipeline/cli.py` |
+| 1362 | `src/shared/python/motion_matching/pipeline/cli.py` |
 | 1319 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/scripts/dataset_generator/runSimulation.m` |
 | 1199 | `src/api/services/simulation_service.py` |
 | 1199 | `src/launchers/launcher_model_handlers.py` |
@@ -40,16 +40,16 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1164 | `src/shared/python/physics/terrain_representation.py` |
 | 1163 | `src/launchers/settings_dialog.py` |
 | 1158 | `src/engines/simscape/adapter.py` |
-| 1154 | `src/engines/physics_engines/myosuite/python/native_direct_model_replay.py` |
 | 1153 | `src/tools/motion_matching/gui.py` |
 | 1152 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_widget.py` |
 | 1150 | `src/shared/python/chat/_chat_dock_widget_qt.py` |
+| 1146 | `src/engines/physics_engines/myosuite/python/native_direct_model_replay.py` |
 | 1146 | `src/tools/model_explorer/model_loader_dialog.py` |
 | 1139 | `src/api/routes/launch_monitor_analytics.py` |
+| 1134 | `src/engines/physics_engines/opensim/python/tour_matching/native_moco_preparation.py` |
 | 1134 | `src/shared/python/shadow_tracker/segmentation.py` |
 | 1134 | `src/tools/model_explorer/model_library.py` |
 | 1133 | `src/shared/python/motion_matching/full_body_ik.py` |
-| 1129 | `src/engines/physics_engines/opensim/python/tour_matching/native_moco_preparation.py` |
 | 1128 | `src/tools/starting_pose_matcher/gui_main_widget.py` |
 | 1118 | `src/motion_capture/rig/__main__.py` |
 | 1115 | `src/bunkershot3d/ball/qualification.py` |
@@ -57,6 +57,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1113 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/functions/dataset_generator/PostProcessingModule.m` |
 | 1106 | `src/shared/python/motion_matching/leaderboard.py` |
 | 1102 | `src/launchers/launcher_dialogs.py` |
+| 1101 | `src/engines/feedback_native_execution.py` |
 | 1100 | `src/shared/python/motion_matching/club_only/control_replay.py` |
 | 1100 | `src/shared/python/movement_optimizer/models/swingset.py` |
 | 1096 | `src/learning/retargeting/retargeter.py` |
@@ -81,7 +82,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1020 | `src/tools/bunker_shot_gui/render3d_vtk.py` |
 | 1019 | `src/shared/python/optimization/casadi_backend.py` |
 | 1017 | `src/shared/python/shadow_tracker/contracts.py` |
-| 1016 | `src/engines/feedback_native_execution.py` |
 | 1015 | `src/shared/python/motion_matching/gs3dx_variants.py` |
 | 1012 | `src/shared/python/config/model_source_providers.py` |
 | 1007 | `src/launchers/launcher_ui_setup.py` |
@@ -178,8 +178,8 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 831 | `src/tools/starting_pose_matcher/gui_builders_mixin.py` |
 | 830 | `src/research/deformable/objects.py` |
 | 830 | `src/shared/python/motion_pipeline/preprocessing/gap_fill.py` |
+| 829 | `src/shared/python/motion_matching/pipeline/lane.py` |
 | 828 | `src/bunkershot3d/solvers/envelope.py` |
-| 828 | `src/shared/python/motion_matching/pipeline/lane.py` |
 | 826 | `src/shared/python/motion_matching/execution/spec_builder.py` |
 | 822 | `src/tools/capture_rig/layout_editor.py` |
 | 819 | `src/shared/python/model_generation/converters/simscape/simscape_converter.py` |
@@ -187,6 +187,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 813 | `src/engines/physics_engines/drake/python/src/drake_golf_model.py` |
 | 813 | `src/robotics/control/whole_body/wbc_controller.py` |
 | 813 | `src/shared/python/gui_pkg/help_system.py` |
+| 813 | `src/shared/python/motion_matching/pipeline/address.py` |
 | 813 | `src/tools/model_explorer/urdf_code_editor.py` |
 | 812 | `src/tools/starting_pose_matcher/live_view_controller.py` |
 | 811 | `src/engines/physics_engines/drake/python/src/pose_editor_tab.py` |
