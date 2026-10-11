@@ -456,7 +456,7 @@ harness/builder SHA-256 is
 state-error matrix SHA-256 is
 `a2eec5558da62a25088b31069757fa96a33f3be49476cba83c71c407eedf2b57`.
 
-## Prepared Mesh-Refinement Candidate (Not Run)
+## Mesh-Refinement Candidate Configuration
 
 The next diagnostic candidate is a single `plain` rung with 20 Hermite-Simpson
 mesh intervals over the same 0.01-second horizon. It keeps the exact source,
@@ -478,5 +478,70 @@ without solving, checking transcription, midpoint interpolation, parallelism,
 and mesh count. A separate contract test verifies the CLI's 20-interval flag
 and keeps the 10-interval default flag-free. Expected exported solution size is
 41 rows for the 20-interval mesh, versus 21 rows in the historical 10-interval
-runs. The candidate is not yet executed; it awaits review of this committed
-configuration before any new optimizer run.
+runs. This candidate configuration was committed before its separately
+authorized run, whose result follows.
+
+## Bounded 20-Interval Plain-Rung Run
+
+One plain-rung run was authorized at exact HEAD
+`e1548c51790b71e4db2b70ba26feb8a56bbaaba1`, with the same 30-second
+per-rung wall deadline, sampled 1 GiB soft worker-tree RSS threshold, stop-on-
+first-nonpass policy, single-thread environment, solver parallel 0, and all
+previous acceptance tolerances. The unchanged source was
+`6a098517bdba09b19b3eb99e4da7e795f27d10be8f42c0fca04fee20ce67e143`. The
+request confirms the native solver read back 20 intervals,
+`hermite-simpson`, midpoint interpolation true, and parallel 0; replay remains
+piecewise linear with the same 0.01-second horizon, target
+`0.30000558574001657` rad, initial q 0.3, named cold state, and source-derived
+muscle bounds `[0.01, 1.0]`.
+
+The optimizer converged (`Solve_Succeeded`) in 122 iterations with objective
+`4.1654698156426359e-6`, solver duration 18.044235 seconds, equality
+constraint violation `2.0773524207241822e-9`, and overall NLP error
+`1.2395367043207645e-7`. The solution contains the expected 41 rows from 0 to
+0.01 seconds at 0.00025-second spacing; its final q is
+`0.3000055857400166` rad, `5.551115123125783e-17` rad from target. Controls
+are within the native lower limit: flexor range
+`0.010002529403274341` to `0.1066043472144142`; extensor range
+`0.01000010113709679` to `0.010015522473752789`. Solution serialization
+round-trip remains within 3 ULP.
+
+The supervisor reached its 30-second deadline at 30.228 seconds while the
+worker was in the fresh native replay call. Peak sampled process-tree RSS was
+219,119,616 bytes; the supervisor terminated and reaped the owned process
+tree, and a post-run scan found no remaining native ladder worker. The request,
+solution, saved controls, serialization audit, source, and logs are present,
+but no `fresh_replay.json`, receipt, or replay-state error metrics were
+produced. Therefore this is a successful mesh-20 optimizer solve followed by
+an incomplete replay diagnostic, not a passing rung. The run does not establish
+whether refinement improves independent replay agreement. The lower objective
+than the 10-interval result is not directly comparable evidence of replay
+quality because the optimized mesh sample count also changed. No second run or
+later rung was started.
+
+Stage measurements were 4.190 seconds source build/state equilibration,
+0.967 seconds forward witness, 0.589 seconds preflight and solver setup,
+18.068 seconds solve, 0.137 seconds solution/control export, 0.175 seconds
+replay-input preflight, and 0.008 seconds reload. The progress file contains no
+completed `fresh_native_replay` stage because that call had not returned before
+the parent deadline.
+
+Retained files under
+`experiments/native_moco_mesh20_e1548c5179/plain/` have these SHA-256 values:
+
+| Artifact                            | SHA-256                                                            |
+| ----------------------------------- | ------------------------------------------------------------------ |
+| `request.json`                      | `86570790ab4fce02df7b8a1c899b0755a7518c36c541fa366a2dd467a6a8f1a9` |
+| `solution.sto`                      | `a13dfe3a7e793efff177a1c2cb64dbb055cd57e1704498a99e9fa3e80340578f` |
+| `time_only_controls.sto`            | `dced78b02cea4d36af31d6f08b881d9feaa87cff1ac5a87d2bebfa5d592a1796` |
+| `solution_serialization_audit.json` | `61b09b3d1d0efcf311d335231e63df14b836365028f58e7c6e536a39c9685f8f` |
+| `progress.json`                     | `f9cc524d1334175f843e927803b8fe7758adf26ee58b3192f2bf1c2d4a039844` |
+| `worker.stdout.log`                 | `04ef384237a2618fa74cefb36b20535496792415b178e5c6aa7230a8fd6e1d63` |
+| `worker.stderr.log`                 | `11b47947f5283764fe1aabf32eb6563f9ca10af8f54d8e63c53429f1f3a9f579` |
+
+The worker source hash in the request is
+`98a375933f0e64fac364e2223eb803743000120d2ff6a3bf1d3b309d09b94a43`, the
+harness/builder hash is
+`55afad2bbc57ad8b471ba1addd3cecec53b1aea275420151876941f04c8d6ae2`, and
+the replay mechanics profile hash is
+`189c5d07c24b6b8c993aedba8cb794dbe82925bb6b368fef98be1327c2057fbf`.
