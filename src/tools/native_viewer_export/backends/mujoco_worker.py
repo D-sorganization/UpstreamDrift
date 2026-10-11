@@ -25,6 +25,7 @@ from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.force_glyphs
 )
 from src.shared.python.model_appearance import document_from_dict
 from src.shared.python.motion_matching.same_input import InputBundle
+from src.tools.native_viewer_export.backends._ball import draw_job_ball
 from src.tools.native_viewer_export.backends._worker_job import WorkerJob
 from src.tools.native_viewer_export.backends.myosuite_worker import make_camera
 
@@ -72,6 +73,7 @@ def main(job_path: str) -> None:
                 renderer.update_scene(data, camera=cams[view])
                 if glyph_sets is not None:
                     add_glyphs_to_scene(renderer.scene, glyph_sets[pos])
+                draw_job_ball(renderer.scene, job, pos)
                 np.save(job.frame_path(view, pos), renderer.render().copy())
     finally:
         renderer.close()
