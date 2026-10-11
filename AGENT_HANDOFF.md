@@ -20,6 +20,8 @@
 
 ## Must-Read Architecture Pointers
 
+- Upstream renamed the native OpenSim mixed-marker observation reference to chapter 62: `manuals/upstreamdrift/chapters/62-native-opensim-mixed-marker-observation.qmd`. Archived peer records retain their historical chapter numbers.
+
 - [Architecture Map](docs/architecture/C4.md) and [Shared Infrastructure](docs/agents/shared-infrastructure.md).
 - [Resume Handoff](docs/research/shot_pattern_analysis/phase2/RESUME_HANDOFF.md), [Turnover](docs/research/shot_pattern_analysis/phase2/TURNOVER.md), and [Artifact Delivery Plan](docs/research/shot_pattern_analysis/phase2/review_followups/ARTIFACT_DELIVERY_PLAN.md).
 - [CLAUDE.md](CLAUDE.md) and [AGENTS.md](AGENTS.md) govern integration, issue closure, and PR delivery.

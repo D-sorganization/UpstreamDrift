@@ -3,6 +3,7 @@
 from __future__ import annotations
 import hashlib
 import json
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -18,8 +19,19 @@ def sha(path):
 @pytest.fixture
 def frozen(tmp_path):
     root = tmp_path / "frozen"
+    study_scripts = (
+        Path(__file__).resolve().parents[2] / "scripts/research/shot_pattern_analysis"
+    )
+    shutil.copytree(
+        study_scripts,
+        root / "scripts/research/shot_pattern_analysis",
+        dirs_exist_ok=True,
+    )
+    for part in ("src", "src/tools", "src/tools/shot_pattern_analysis"):
+        (root / part).mkdir(parents=True, exist_ok=True)
+        (root / part / "__init__.py").write_text("", encoding="utf-8")
     package = root / "src/tools/shot_pattern_analysis"
-    package.mkdir(parents=True)
+    package.mkdir(parents=True, exist_ok=True)
     (package / "matched_supplement_pipeline.py").write_text(
         "def _report_source_hashes():\n    return {}\n"
     )

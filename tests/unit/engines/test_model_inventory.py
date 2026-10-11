@@ -124,6 +124,22 @@ class TestInventoryLoad:
         missing = inventory.uncovered_launcher_tiles()
         assert missing == [], f"Advertised physics tiles lack inventory: {missing}"
 
+    def test_opensim_muscle_variant_stays_in_denominator_without_fake_support(
+        self, inventory: EngineModelInventory
+    ) -> None:
+        package = next(
+            p for p in inventory.packages if p.id == "opensim/native-golf-humanoid"
+        )
+        variant = next(
+            row
+            for row in package.matching_variants
+            if row["id"] == "golf_humanoid_muscle_variant"
+        )
+
+        assert variant["drive_mode"] == "muscle_excitation"
+        assert variant["support"] == "unsupported"
+        assert "zero native muscles" in variant["scope_note"]
+
     def test_ready_flagship_packages_have_model_hashes(
         self, inventory: EngineModelInventory
     ) -> None:

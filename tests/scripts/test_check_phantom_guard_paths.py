@@ -176,7 +176,7 @@ def test_resolve_prefers_git_diff(
         raise AssertionError("API must not be consulted when git succeeds")
 
     monkeypatch.setattr(mod, "_git_changed_files", lambda b, h, r: ["src/b.py"])
-    files, source = mod._resolve_changed_files(base, head, "", api_loader)
+    files, source = mod._resolve_changed_files(base, head, "", "", api_loader)
     assert files == ["src/b.py"]
     assert source == "git"
 
@@ -189,7 +189,7 @@ def test_resolve_falls_back_to_env_list_when_merge_base_fails(
 
     monkeypatch.setattr(mod, "_git_changed_files", lambda b, h, r: None)
     files, source = mod._resolve_changed_files(
-        "base", "head", "src/dashboard/main.py\n", api_loader
+        "base", "head", "src/dashboard/main.py\n", "", api_loader
     )
     assert files == ["src/dashboard/main.py"]
     assert source == "env"
@@ -200,7 +200,7 @@ def test_resolve_falls_back_to_api_list(monkeypatch: pytest.MonkeyPatch) -> None
         return ["src/dashboard/main.py"]
 
     monkeypatch.setattr(mod, "_git_changed_files", lambda b, h, r: None)
-    files, source = mod._resolve_changed_files(None, None, "", api_loader)
+    files, source = mod._resolve_changed_files(None, None, "", "", api_loader)
     assert files == ["src/dashboard/main.py"]
     assert source == "api"
 
@@ -213,7 +213,7 @@ def test_resolve_fails_closed_with_diagnostic_when_both_missing(
 
     monkeypatch.setattr(mod, "_git_changed_files", lambda b, h, r: None)
     with pytest.raises(mod.ChangedFilesUnavailableError, match="shallow"):
-        mod._resolve_changed_files(None, None, "", api_loader)
+        mod._resolve_changed_files(None, None, "", "", api_loader)
 
 
 # ----- rule-3 evaluation -----

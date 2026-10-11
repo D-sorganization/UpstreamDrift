@@ -17,6 +17,10 @@ _STUDY_FOLDERS = (
 )
 
 
+def _repo_relative(path: Path, root: Path) -> str:
+    return path.relative_to(root).as_posix()
+
+
 def create_parent_pin(
     source_root: Path,
     python: Path,
@@ -34,7 +38,7 @@ def create_parent_pin(
         raise ValueError("execution evidence hash differs")
     execution = json.loads(execution_path.read_text())
     actual = {
-        str(p.relative_to(root)): sha256(p)
+        _repo_relative(p, root): sha256(p)
         for folder in _STUDY_FOLDERS
         for p in (root / folder).rglob("*.py")
     }

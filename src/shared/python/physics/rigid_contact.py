@@ -261,25 +261,35 @@ def _sliding_impulse(
     def cone_vector(impulse: np.ndarray) -> np.ndarray:
         return np.array([cone(impulse)], dtype=float)
 
-    solution = minimize(
-        objective,
-        pure_normal,
-        jac=gradient,
-        method="SLSQP",
-        constraints=(
-            LinearConstraint(normal @ k, normal_target, normal_target),
-            NonlinearConstraint(cone_vector, 0.0, math.inf),
-        ),
-        options={"ftol": 1e-12, "maxiter": 150},
-    )
-    impulse = np.asarray(solution.x, dtype=float)
-    if (
-        not solution.success
-        or not np.isfinite(impulse).all()
-        or abs(float(normal @ k @ impulse) - normal_target) > 1e-8
-        or cone(impulse) < -1e-8
-        or float(impulse @ normal) < -1e-10
-    ):
+    tangential_velocity = relative_velocity - float(relative_velocity @ normal) * normal
+    guesses = [pure_normal]
+    if float(np.linalg.norm(tangential_velocity)) > 1e-12:
+        guesses.append(pure_normal + tangential_velocity * (normal_target / 10.0))
+
+    impulse: np.ndarray | None = None
+    for guess in guesses:
+        solution = minimize(
+            objective,
+            guess,
+            jac=gradient,
+            method="SLSQP",
+            constraints=(
+                LinearConstraint(normal @ k, normal_target, normal_target),
+                NonlinearConstraint(cone_vector, 0.0, math.inf),
+            ),
+            options={"ftol": 1e-12, "maxiter": 400},
+        )
+        candidate = np.asarray(solution.x, dtype=float)
+        if (
+            solution.success
+            and np.isfinite(candidate).all()
+            and abs(float(normal @ k @ candidate) - normal_target) <= 1e-8
+            and cone(candidate) >= -1e-8
+            and float(candidate @ normal) >= -1e-10
+        ):
+            impulse = candidate
+            break
+    if impulse is None:
         raise RuntimeError("sliding contact optimization did not converge")
     return impulse
 

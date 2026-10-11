@@ -50,7 +50,6 @@ from src.engines.physics_engines.opensim.python.tour_matching.full_swing_trackin
     detect_swing_events,
 )
 from src.engines.physics_engines.opensim.python.tour_matching.model_variants import (
-    ActuationType,
     GolfModelAdapter,
     GolfModelVariant,
 )
@@ -362,9 +361,7 @@ def build_golf_view_package(
     dt = float(times[1] - times[0]) if len(times) > 1 else 1.0 / 360.0
     fps = float(1.0 / max(dt, 1e-6))
 
-    act = model_variant.actuation
-    act_type = act.actuation_type
-    muscles_avail = act_type == ActuationType.MUSCLE_TENDON
+    muscles_avail = model_variant.get_capabilities()["supports_muscle_forces"]
 
     layers = VisualLayerOptions(
         show_bones=True,
