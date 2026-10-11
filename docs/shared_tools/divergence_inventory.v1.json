@@ -13,7 +13,7 @@
   "totals": {
     "identical": 400,
     "diverged": 273,
-    "ud-only": 1776,
+    "ud-only": 1777,
     "tools-only": 805,
     "spelling-only": 121
   },
@@ -483,7 +483,7 @@
     "lifting": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 25,
+      "ud-only": 26,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -12621,7 +12621,19 @@
       "classification": "ud-only",
       "package": "lifting",
       "subpackage": "pack_audit",
-      "ud_bytes": 8013,
+      "ud_bytes": 8181,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "lifting/pack_audit/adapters/drake_bar_hold.py",
+      "classification": "ud-only",
+      "package": "lifting",
+      "subpackage": "pack_audit",
+      "ud_bytes": 7914,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
