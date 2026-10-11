@@ -9,6 +9,7 @@ from src.engines.physics_engines.opensim.python.tour_matching.native_diagnostic_
     NativeDiagnosticFinding,
     NativeDiagnosticPolicy,
     PhysicalQualification,
+    RuntimePhase,
     RuntimeViability,
     QualificationEffect,
     assess_native_diagnostic,
@@ -59,6 +60,8 @@ def test_qualification_finding_is_independent_and_requires_source_bound_opt_in()
         (finding,),
         policy=policy,
         runtime_viability=RuntimeViability.VIABLE,
+        runtime_phase=RuntimePhase.SHORT_CAPABILITY_PROBE,
+        native_runtime_sha256="e" * 64,
         runtime_evidence_sha256="d" * 64,
     )
 
@@ -66,6 +69,29 @@ def test_qualification_finding_is_independent_and_requires_source_bound_opt_in()
     assert opted_in.runtime_viability is RuntimeViability.VIABLE
     assert opted_in.execution_permitted
     assert opted_in.physical_qualification is PhysicalQualification.UNQUALIFIED
+
+
+@pytest.mark.parametrize(
+    "findings",
+    [
+        (),
+        (
+            NativeDiagnosticFinding(
+                code=DiagnosticCode.WRAPPED_PATH_SOURCE_CLOSED,
+                source_sha256=SOURCE,
+                execution_effect=ExecutionEffect.PROCEED,
+                qualification_effect=QualificationEffect.OBSERVATION,
+            ),
+        ),
+    ],
+)
+def test_empty_or_observation_only_assessment_never_establishes_qualification(
+    findings: tuple[NativeDiagnosticFinding, ...],
+) -> None:
+    assessment = assess_native_diagnostic(REQUEST, SOURCE, findings)
+
+    assert assessment.physical_qualification is PhysicalQualification.NOT_ESTABLISHED
+    assert not assessment.execution_permitted
 
 
 def test_explicit_opt_in_never_waives_execution_blockers() -> None:
@@ -85,6 +111,8 @@ def test_explicit_opt_in_never_waives_execution_blockers() -> None:
         (blocked,),
         policy=policy,
         runtime_viability=RuntimeViability.VIABLE,
+        runtime_phase=RuntimePhase.SHORT_CAPABILITY_PROBE,
+        native_runtime_sha256="e" * 64,
         runtime_evidence_sha256="d" * 64,
     )
 
@@ -144,8 +172,49 @@ def test_nonviable_or_unattempted_native_trajectory_cannot_run_optimizer() -> No
             (finding,),
             policy=policy,
             runtime_viability=viability,
+            runtime_phase=(
+                None
+                if viability is RuntimeViability.NOT_ATTEMPTED
+                else RuntimePhase.SHORT_CAPABILITY_PROBE
+            ),
+            native_runtime_sha256=(
+                None if viability is RuntimeViability.NOT_ATTEMPTED else "e" * 64
+            ),
             runtime_evidence_sha256=(
                 "d" * 64 if viability is RuntimeViability.FAILED else None
             ),
         )
         assert not assessment.execution_permitted
+
+
+def test_viable_runtime_requires_phase_and_both_exact_evidence_identities() -> None:
+    with pytest.raises(ValueError, match="native runtime identity"):
+        assess_native_diagnostic(
+            REQUEST,
+            SOURCE,
+            (),
+            runtime_viability=RuntimeViability.VIABLE,
+            runtime_phase=RuntimePhase.SHORT_CAPABILITY_PROBE,
+            runtime_evidence_sha256="d" * 64,
+        )
+
+    completed_optimizer = assess_native_diagnostic(
+        REQUEST,
+        SOURCE,
+        (),
+        runtime_viability=RuntimeViability.VIABLE,
+        runtime_phase=RuntimePhase.OPTIMIZATION,
+        native_runtime_sha256="e" * 64,
+        runtime_evidence_sha256="d" * 64,
+    )
+    assert not completed_optimizer.execution_permitted
+
+    with pytest.raises(ValueError, match="explicit phase"):
+        assess_native_diagnostic(
+            REQUEST,
+            SOURCE,
+            (),
+            runtime_viability=RuntimeViability.VIABLE,
+            native_runtime_sha256="e" * 64,
+            runtime_evidence_sha256="d" * 64,
+        )
