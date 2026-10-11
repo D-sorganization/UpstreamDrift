@@ -139,6 +139,31 @@ class VectorPlant:
             columns.append(self.closure_residuals(q, unit)[1])
         return np.column_stack(columns)
 
+    def contact_samples(self, q: Array, v: Array) -> dict[str, Any]:
+        """Shared-law ``ContactSample`` per contact sphere at ``(q, v)``.
+
+        Each engine supplies only the sphere kinematics; the law is shared.
+        """
+        named_q, named_v = self._named(q), self._named(v)
+        evaluate = getattr(self._adapter, "evaluate_contact_samples", None)
+        if evaluate is None:
+            evaluate = self._adapter.contact_forces
+        return dict(evaluate(named_q, named_v))
+
+    def grip_analysis(self, q: Array, v: Array, tau: Array) -> Any:
+        """Per-hand wrench ON THE CLUB from the engine's closure multiplier.
+
+        Raises:
+            NotImplementedError: When the engine adapter has no KKT grip
+                extraction (callers report it unavailable, never zero).
+        """
+        extract = getattr(self._adapter, "grip_analysis", None)
+        if extract is None:
+            raise NotImplementedError(
+                f"{self.engine} adapter has no closure-multiplier grip analysis"
+            )
+        return extract(self._named(q), self._named(v), self._named(tau))
+
     def kinematic_frames(self, q: Array) -> dict[str, Array]:
         """Engine forward kinematics of the spec frames at ``q`` (4x4 poses)."""
         return {
