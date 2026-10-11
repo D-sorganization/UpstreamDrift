@@ -16,7 +16,7 @@ from typing import Any
 
 import numpy as np
 
-from ..grip_fit import grip_rotation
+from src.shared.python.motion_matching.grip_fit import grip_rotation
 
 #: Hand body of each side (see ``anthropometric_geometry``): the lead (left)
 #: hand is the club, the trail (right) hand the standoff body.
