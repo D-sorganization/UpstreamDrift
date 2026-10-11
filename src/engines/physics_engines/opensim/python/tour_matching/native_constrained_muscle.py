@@ -35,6 +35,10 @@ from .native_wrapped_path import (
     WrappedPathDeclaration,
     validate_wrapped_path_declaration,
 )
+from .native_mechanics_profile import (
+    NativeMechanicsExecutionProfile,
+    validate_native_mechanics_execution_profile,
+)
 
 if TYPE_CHECKING:
     from sidekick.lab.mocap import ExperimentReplayBundle
@@ -64,8 +68,16 @@ class ConstrainedMuscleReplay:
 
 
 def _audit_moving_path_points(
-    components: tuple[Any, ...], declaration: DeclaredColdStart, osim: Any
+    components: tuple[Any, ...],
+    declaration: DeclaredColdStart,
+    osim: Any,
+    native_mechanics_profile: NativeMechanicsExecutionProfile | None = None,
 ) -> None:
+    delegated = (
+        set()
+        if native_mechanics_profile is None
+        else {item.absolute_path for item in native_mechanics_profile.components}
+    )
     for component in components:
         if component.getConcreteClassName() != "MovingPathPoint":
             continue
@@ -82,6 +94,12 @@ def _audit_moving_path_points(
                 or coordinate.getAbsolutePathString() not in declaration.chart_bounds
             ):
                 raise ValueError("moving path coordinate needs a declared chart")
+            if component.getAbsolutePathString() in delegated:
+                if osim.Function.safeDownCast(function) is None:
+                    raise ValueError(
+                        "delegated moving path law is not an OpenSim function"
+                    )
+                continue
             if (linear := osim.LinearFunction.safeDownCast(function)) is not None:
                 values = (
                     linear.getCoefficients().get(0),
@@ -103,6 +121,7 @@ def _audit_source_components(
     declaration: DeclaredColdStart,
     mechanical_paths: frozenset[str] = frozenset(),
     wrapped_path_declaration: WrappedPathDeclaration | None = None,
+    native_mechanics_profile: NativeMechanicsExecutionProfile | None = None,
 ) -> None:
     import opensim as osim
 
@@ -110,6 +129,15 @@ def _audit_source_components(
         validate_wrapped_path_declaration(
             model, wrapped_path_declaration, declaration.source_sha256
         )
+    if native_mechanics_profile is not None:
+        validate_native_mechanics_execution_profile(
+            model, native_mechanics_profile, declaration.source_sha256
+        )
+    delegated_paths = (
+        set()
+        if native_mechanics_profile is None
+        else {item.absolute_path for item in native_mechanics_profile.components}
+    )
     wrapped_components = {
         "WrapCylinder",
         "WrapEllipsoid",
@@ -154,7 +182,7 @@ def _audit_source_components(
     }
     if registered != recursive or not registered:
         raise ValueError("native muscle registry must cover every recursive muscle")
-    _audit_moving_path_points(components, declaration, osim)
+    _audit_moving_path_points(components, declaration, osim, native_mechanics_profile)
     constraints = model.getConstraintSet()
     for index in range(constraints.getSize()):
         constraint = constraints.get(index)
@@ -166,6 +194,8 @@ def _audit_source_components(
         if joint.getConcreteClassName() != "CustomJoint":
             continue
         custom = osim.CustomJoint.safeDownCast(joint)
+        if joint.getAbsolutePathString() in delegated_paths:
+            continue
         if custom is None or custom.numCoordinates() != 1:
             raise ValueError("CustomJoint needs the reviewed one-coordinate chart")
         transform = custom.getSpatialTransform()
@@ -197,6 +227,7 @@ def _owned_prepared(
     grid: NDArray[np.float64],
     controls: Mapping[str, NDArray[np.float64]],
     wrapped_path_declaration: WrappedPathDeclaration | None = None,
+    native_mechanics_profile: NativeMechanicsExecutionProfile | None = None,
 ) -> Any:
     """Yield a fresh model with one time-only player and explicit lock recipe."""
     from contextlib import contextmanager
@@ -218,6 +249,7 @@ def _owned_prepared(
                 model.getMuscles(),
                 declaration,
                 wrapped_path_declaration=wrapped_path_declaration,
+                native_mechanics_profile=native_mechanics_profile,
             )
             muscles = model.getMuscles()
             names = tuple(muscles.get(i).getName() for i in range(muscles.getSize()))
@@ -257,9 +289,16 @@ def _bundle_for(
     controls: Mapping[str, NDArray[np.float64]],
     experiment_id: str,
     wrapped_path_declaration: WrappedPathDeclaration | None = None,
+    native_mechanics_profile: NativeMechanicsExecutionProfile | None = None,
 ) -> ExperimentReplayBundle:
     contracts = native_replay_contract_types()
-    with _owned_prepared(declaration, grid, controls, wrapped_path_declaration) as (
+    with _owned_prepared(
+        declaration,
+        grid,
+        controls,
+        wrapped_path_declaration,
+        native_mechanics_profile,
+    ) as (
         model,
         state,
         _audit,
@@ -269,7 +308,13 @@ def _bundle_for(
         state_names = tuple(declaration.named_state)
         options = native_muscle_bundle._registered_options(model, state, muscles)
         identity = native_muscle_bundle._identity(
-            declaration.model_path, model, state_names, names, options, contracts
+            declaration.model_path,
+            model,
+            state_names,
+            names,
+            options,
+            contracts,
+            native_mechanics_profile,
         )
         adapter_sha = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
         provider_sha = hashlib.sha256(
@@ -277,6 +322,8 @@ def _bundle_for(
             + bytes.fromhex(adapter_sha)
             + Path(__file__).with_name("native_prepared_state.py").read_bytes()
             + Path(__file__).with_name("native_constraint_state.py").read_bytes()
+            + Path(__file__).with_name("native_mechanics_profile.py").read_bytes()
+            + Path(__file__).with_name("native_muscle_bundle.py").read_bytes()
         ).hexdigest()
         identity = replace(
             identity,
@@ -296,6 +343,9 @@ def _bundle_for(
                 adapter_sha,
                 wrapped_path_declaration.declaration_sha256
                 if wrapped_path_declaration is not None
+                else None,
+                native_mechanics_profile.profile_sha256
+                if native_mechanics_profile is not None
                 else None,
             ),
         )
@@ -329,6 +379,7 @@ def build_constrained_muscle_bundle(
     *,
     experiment_id: str = "native-constrained-muscle-replay",
     wrapped_path_declaration: WrappedPathDeclaration | None = None,
+    native_mechanics_profile: NativeMechanicsExecutionProfile | None = None,
 ) -> ExperimentReplayBundle:
     """Bind native source, complete initial muscle state and declared constraints."""
     if (
@@ -351,6 +402,7 @@ def build_constrained_muscle_bundle(
         controls,
         experiment_id,
         wrapped_path_declaration,
+        native_mechanics_profile,
     )
 
 
@@ -359,6 +411,7 @@ def replay_constrained_muscle_bundle(
     declaration: DeclaredColdStart,
     *,
     wrapped_path_declaration: WrappedPathDeclaration | None = None,
+    native_mechanics_profile: NativeMechanicsExecutionProfile | None = None,
 ) -> ConstrainedMuscleReplay:
     """Independently reconstruct and replay the same frozen excitation policy."""
     import opensim as osim
@@ -386,6 +439,7 @@ def replay_constrained_muscle_bundle(
             controls,
             experiment_id=bundle.experiment_id,
             wrapped_path_declaration=wrapped_path_declaration,
+            native_mechanics_profile=native_mechanics_profile,
         )
         for field in (
             "model",
@@ -398,11 +452,13 @@ def replay_constrained_muscle_bundle(
                 raise ValueError(
                     "native constrained muscle policy or input identity differs"
                 )
-        with _owned_prepared(frozen, grid, controls, wrapped_path_declaration) as (
-            model,
-            state,
-            initial_audit,
-        ):
+        with _owned_prepared(
+            frozen,
+            grid,
+            controls,
+            wrapped_path_declaration,
+            native_mechanics_profile,
+        ) as (model, state, initial_audit):
             muscles = model.getMuscles()
             names = tuple(muscles.get(i).getName() for i in range(muscles.getSize()))
             state_names = tuple(declaration.named_state)

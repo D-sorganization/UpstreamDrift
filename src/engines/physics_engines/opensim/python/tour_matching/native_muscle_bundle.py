@@ -154,7 +154,11 @@ def _prepare(
     return model, state, names, muscle_names, options
 
 
-def _coordinate_units(model: Any) -> dict[str, str]:
+def _coordinate_units(
+    model: Any,
+    *,
+    native_mechanics_profile: Any | None = None,
+) -> dict[str, str]:
     import opensim as osim
 
     units = {}
@@ -167,11 +171,44 @@ def _coordinate_units(model: Any) -> dict[str, str]:
         elif motion == osim.Coordinate.Translational:
             unit = "m"
         else:
-            raise ValueError("coordinate motion units need another native policy")
+            unit = _custom_joint_coordinate_unit(
+                model, coordinate, native_mechanics_profile, osim
+            )
+            if unit is None:
+                raise ValueError("coordinate motion units need another native policy")
         prefix = coordinate.getAbsolutePathString()
         units[prefix + "/value"] = unit
         units[prefix + "/speed"] = unit + "/s"
     return units
+
+
+def _custom_joint_coordinate_unit(
+    model: Any, coordinate: Any, profile: Any | None, osim: Any
+) -> str | None:
+    if profile is None:
+        return None
+    delegated_paths = {
+        item.absolute_path
+        for item in profile.components
+        if item.concrete_class == "CustomJoint"
+    }
+    coordinate_path = coordinate.getAbsolutePathString()
+    units: set[str] = set()
+    joints = model.getJointSet()
+    for index in range(joints.getSize()):
+        joint = osim.CustomJoint.safeDownCast(joints.get(index))
+        if joint is None or joint.getAbsolutePathString() not in delegated_paths:
+            continue
+        transform = joint.getSpatialTransform()
+        for axis_index in range(6):
+            axis = transform.getTransformAxis(axis_index)
+            names = axis.getCoordinateNames()
+            if any(
+                str(names.getValue(name_index)) == coordinate.getName()
+                for name_index in range(names.size())
+            ):
+                units.add("rad" if axis_index < 3 else "m")
+    return next(iter(units)) if len(units) == 1 else None
 
 
 def _state_specs(
@@ -179,8 +216,9 @@ def _state_specs(
     names: tuple[str, ...],
     options: Mapping[str, tuple[float, ...]],
     contracts: Any,
+    native_mechanics_profile: Any | None = None,
 ) -> tuple[Any, ...]:
-    units = _coordinate_units(model)
+    units = _coordinate_units(model, native_mechanics_profile=native_mechanics_profile)
     roles = {
         "value": contracts.StateComponentRole.POSITION,
         "speed": contracts.StateComponentRole.VELOCITY,
@@ -222,6 +260,7 @@ def _identity(
     muscles: tuple[str, ...],
     options: Mapping[str, tuple[float, ...]],
     contracts: Any,
+    native_mechanics_profile: Any | None = None,
 ) -> Any:
     import opensim as osim
 
@@ -255,7 +294,7 @@ def _identity(
         contracts.InitialStateSchema(
             "opensim-native-continuous-and-registered-options",
             _VERSION,
-            _state_specs(model, names, options, contracts),
+            _state_specs(model, names, options, contracts, native_mechanics_profile),
         ),
         muscles,
         hashlib.sha256(model.dump().encode()).hexdigest(),
