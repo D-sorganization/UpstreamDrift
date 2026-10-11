@@ -11,7 +11,13 @@ import subprocess
 import numpy as np
 
 from .course_score_vectors import score_course_endpoint_vectors
-from .scoring import SOURCE_PDF_SHA256, build_broadie_approx_baseline
+from .scoring import (
+    SOURCE_PDF_SHA256,
+    YARDS_PER_METRE,
+    build_broadie_approx_baseline,
+    load_pattern_endpoints,
+)
+from .scoring_cache import source_backed_score_cache
 from .uncertainty import paired_mean_difference
 
 
@@ -95,18 +101,7 @@ def score_corrected_bundle(output_dir: Path) -> Path:
     club_id = summary["config"]["club_id"]
     target = float(summary["target_x_m"])
     seed = int(summary["config"]["seed"])
-    endpoints: dict[str, list[tuple[int, float, float]]] = {
-        name: [] for name in ("Straight", "Draw", "Fade")
-    }
-    with (output_dir / "shots.csv").open(newline="") as handle:
-        for row in csv.DictReader(handle):
-            endpoints[row["pattern"]].append(
-                (
-                    int(row["shot_index"]),
-                    float(row["aimed_x_m"]),
-                    float(row["aimed_y_m"]),
-                )
-            )
+    endpoints = load_pattern_endpoints(output_dir / "shots.csv")
 
     def sensitivity(**changes: float) -> dict:
         try:

@@ -92,7 +92,16 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
         historical shot-pattern landing convention.
         """
         result = self._simulate_native(launch, max_time, dt)
-        points = result.get_final_points()
+        if hasattr(result, "get_final_points"):
+            points = result.get_final_points()
+        elif hasattr(result, "get_points"):
+            pts = result.get_points()
+            points = pts[-2:] if len(pts) >= 2 else pts
+        elif hasattr(result, "points"):
+            pts = result.points
+            points = pts[-2:] if len(pts) >= 2 else pts
+        else:
+            raise RuntimeError("Unknown ball trajectory result representation")
         if len(points) < 2 or points[-1].z > 0.0:
             raise RuntimeError("flight exceeded max_time before landing")
         previous, final = points
