@@ -12,8 +12,59 @@ tests/fixtures/launch_monitor/longitudinal_attested_v1.csv text eol=lf
 *.cff text eol=lf
 *.sh text eol=lf
 *.osim text eol=lf
+docs/development/feedback_controls/experiments/native_moco_mesh20_e1548c5179/plain/source.osim -text whitespace=cr-at-eol,-blank-at-eol,-blank-at-eof
+docs/development/feedback_controls/experiments/native_moco_mesh20_e1548c5179/plain/request.json -text
+docs/development/feedback_controls/experiments/native_moco_mesh20_e1548c5179/plain/solution.sto -text whitespace=cr-at-eol,-blank-at-eol,-blank-at-eof
+docs/development/feedback_controls/experiments/native_moco_mesh20_e1548c5179/plain/time_only_controls.sto -text whitespace=cr-at-eol,-blank-at-eol,-blank-at-eof
+docs/development/feedback_controls/experiments/native_moco_mesh20_e1548c5179/diagnostic_retained_replay_fauldump_3e195b0e/native_audit/fresh_replay_diagnostic.json -text
+docs/development/feedback_controls/experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/plain/source.osim -text -eol
+docs/development/feedback_controls/experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/plain/solution.sto -text -eol
+docs/development/feedback_controls/experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/solution_control_replay_inputs_final/source.osim -text -eol
+docs/development/feedback_controls/experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/solution_control_replay_inputs_final/solution.sto -text -eol
+docs/development/feedback_controls/experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/solution_control_replay_inputs_final/replay_input_manifest.json -text -eol
+docs/development/feedback_controls/experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/invocation.json -text -eol
+docs/development/feedback_controls/experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/supervisor_result.json -text -eol
+docs/development/feedback_controls/experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/solution_control_replay_diagnostic_3bc787e36d_root/invocation.json -text -eol
+docs/development/feedback_controls/experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/solution_control_replay_diagnostic_3bc787e36d_root/supervisor_result.json -text -eol
+docs/development/feedback_controls/experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/solution_control_replay_diagnostic_3bc787e36d_root/retained_replay/invocation.json -text -eol
+docs/development/feedback_controls/experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/solution_control_replay_diagnostic_3bc787e36d_root/retained_replay/supervisor_result.json -text -eol
 requirements*.lock text eol=lf
 
 # Exclude archived legacy code from language statistics
 engines/pendulum_models/archive/** linguist-vendored
 engines/pendulum_models/archive/** linguist-documentation
+# Preserve exact bytes for the final-source-bound offline analysis receipt.
+docs/development/feedback_controls/experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/solution_control_replay_diagnostic_3bc787e36d_root/retained_replay/offline_activation_residual_analysis_finalsource_4e40b764.json -text -eol
+
+# Keep retained native evidence byte-exact while treating CRLF as line endings.
+docs/development/feedback_controls/experiments/native_moco_ladder_856803317e/plain/source.osim -text whitespace=cr-at-eol,-blank-at-eol,-blank-at-eof
+docs/development/feedback_controls/experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/invocation.json -text whitespace=cr-at-eol
+docs/development/feedback_controls/experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/plain/solution.sto -text whitespace=cr-at-eol
+docs/development/feedback_controls/experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/plain/source.osim -text whitespace=cr-at-eol,-blank-at-eol,-blank-at-eof
+docs/development/feedback_controls/experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/solution_control_replay_diagnostic_3bc787e36d_root/invocation.json -text whitespace=cr-at-eol
+docs/development/feedback_controls/experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/solution_control_replay_diagnostic_3bc787e36d_root/retained_replay/invocation.json -text whitespace=cr-at-eol
+docs/development/feedback_controls/experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/solution_control_replay_diagnostic_3bc787e36d_root/retained_replay/offline_activation_residual_analysis_finalsource_4e40b764.json -text whitespace=cr-at-eol
+docs/development/feedback_controls/experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/solution_control_replay_diagnostic_3bc787e36d_root/retained_replay/supervisor_result.json -text whitespace=cr-at-eol
+docs/development/feedback_controls/experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/solution_control_replay_diagnostic_3bc787e36d_root/supervisor_result.json -text whitespace=cr-at-eol
+docs/development/feedback_controls/experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/solution_control_replay_inputs_final/replay_input_manifest.json -text whitespace=cr-at-eol
+docs/development/feedback_controls/experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/solution_control_replay_inputs_final/solution.sto -text whitespace=cr-at-eol
+docs/development/feedback_controls/experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/solution_control_replay_inputs_final/source.osim -text whitespace=cr-at-eol,-blank-at-eol,-blank-at-eof
+docs/development/feedback_controls/experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/supervisor_result.json -text whitespace=cr-at-eol
+docs/development/feedback_controls/experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/solution_control_replay_diagnostic_3bc787e36d_root/retained_replay/offline_activation_residual_analysis_midpointvalidated_source_c247a4cf.json -text whitespace=cr-at-eol
+
+## Preserve immutable synthetic native diagnostics and historical source snapshots byte-for-byte.
+docs/development/feedback_controls/experiments/manufactured_native_diagnostics_20261011/**/*.json -text whitespace=cr-at-eol
+docs/development/feedback_controls/experiments/manufactured_native_diagnostics_20261011/**/*.log -text whitespace=cr-at-eol
+docs/development/feedback_controls/experiments/manufactured_native_diagnostics_20261011/**/*.meta.txt -text whitespace=cr-at-eol
+docs/development/feedback_controls/experiments/manufactured_native_diagnostics_20261011/**/*.snapshot -text whitespace=cr-at-eol
+docs/development/feedback_controls/experiments/manufactured_native_diagnostics_20261011/opensim/PROTOCOL.md -text whitespace=cr-at-eol
+docs/development/feedback_controls/experiments/manufactured_native_diagnostics_20261011/mujoco/code_snapshot/geometry/run_supervised_mujoco_v1_candidate_lift_geometry_20261012.py.snapshot -text whitespace=cr-at-eol,-blank-at-eof
+docs/development/feedback_controls/experiments/manufactured_native_diagnostics_20261011/mujoco/code_snapshot/shared/mujoco_v1_candidate_lift_geometry.py.snapshot -text whitespace=cr-at-eol,-blank-at-eof
+docs/development/feedback_controls/experiments/manufactured_native_diagnostics_20261011/mujoco/code_snapshot/shared/test_mujoco_v1_candidate_lift_geometry.py.snapshot -text whitespace=cr-at-eol,-blank-at-eof
+
+# Preserve the separate byte-exact Drake zero-effort observation.
+docs/development/feedback_controls/experiments/drake_candidate_lift_zero_effort_20261012_root_attempt1/artifact-manifest.json -text
+docs/development/feedback_controls/experiments/drake_candidate_lift_zero_effort_20261012_root_attempt1/drake-zero-effort.json -text
+docs/development/feedback_controls/experiments/drake_candidate_lift_zero_effort_20261012_root_attempt1/drake-zero-effort.log -text
+docs/development/feedback_controls/experiments/drake_candidate_lift_zero_effort_20261012_root_attempt1/drake-zero-effort.meta.txt -text
+docs/development/feedback_controls/experiments/drake_candidate_lift_zero_effort_20261012_root_attempt1/observers/*.snapshot -text

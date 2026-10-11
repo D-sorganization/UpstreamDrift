@@ -1,0 +1,220 @@
+"""Prepared read-only OpenSim activation-property probe; not executed natively yet."""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import math
+import os
+import tempfile
+from pathlib import Path
+from typing import Any
+from defusedxml import ElementTree as ET
+
+EXPECTED_SOURCE_SHA256 = (
+    "6a098517bdba09b19b3eb99e4da7e795f27d10be8f42c0fca04fee20ce67e143"
+)
+EXPECTED_MUSCLES = ("flexor", "extensor")
+EXPECTED_SOURCE_CLASS = "Millard2012EquilibriumMuscle"
+EXPECTED_ACTIVATION_CLASS = "MuscleFirstOrderActivationDynamicModel"
+FALLBACK_VALUES = {
+    "activation_time_constant_s": 0.01,
+    "deactivation_time_constant_s": 0.04,
+    "minimum_activation": 0.01,
+}
+PROPERTY_GETTERS = {
+    "activation_time_constant_s": (
+        "getActivationTimeConstant",
+        "get_activation_time_constant",
+    ),
+    "deactivation_time_constant_s": (
+        "getDeactivationTimeConstant",
+        "get_deactivation_time_constant",
+    ),
+    "minimum_activation": ("getMinimumActivation", "get_minimum_activation"),
+}
+
+
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as source:
+        for chunk in iter(lambda: source.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def source_inventory(source_path: Path) -> dict[str, Any]:
+    root = ET.parse(source_path).getroot()
+    muscles = {}
+    for element in root.iter():
+        if element.tag.rsplit("}", 1)[-1] == EXPECTED_SOURCE_CLASS:
+            name = element.attrib.get("name")
+            if name:
+                muscles[name] = {child.tag.rsplit("}", 1)[-1] for child in element}
+    if tuple(sorted(muscles)) != tuple(sorted(EXPECTED_MUSCLES)):
+        raise ValueError(
+            f"Expected exactly {EXPECTED_MUSCLES}; found {tuple(sorted(muscles))}"
+        )
+    explicit = {
+        name: sorted(
+            tags.intersection(
+                {
+                    "activation_time_constant",
+                    "deactivation_time_constant",
+                    "minimum_activation",
+                }
+            )
+        )
+        for name, tags in muscles.items()
+    }
+    return {"muscle_names": sorted(muscles), "explicit_activation_properties": explicit}
+
+
+def require_fresh_output(path: Path) -> None:
+    if path.exists():
+        raise FileExistsError(f"Refusing to overwrite existing probe output: {path}")
+
+
+def finite_number(value: Any, label: str) -> float:
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ValueError(f"{label} must be a numeric scalar")
+    converted = float(value)
+    if not math.isfinite(converted):
+        raise ValueError(f"{label} must be finite")
+    return converted
+
+
+def read_properties(muscle: Any) -> dict[str, Any]:
+    muscle_class = muscle.getConcreteClassName()
+    if muscle_class != EXPECTED_SOURCE_CLASS:
+        raise ValueError(f"Unexpected muscle class: {muscle_class!r}")
+    activation = muscle.getActivationModel()
+    activation_class = activation.getConcreteClassName()
+    if activation_class != EXPECTED_ACTIVATION_CLASS:
+        raise ValueError(f"Unexpected activation-model class: {activation_class!r}")
+    values: dict[str, Any] = {}
+    for key, (muscle_getter, component_getter) in PROPERTY_GETTERS.items():
+        muscle_value = finite_number(
+            getattr(muscle, muscle_getter)(), f"{key} muscle getter"
+        )
+        component_value = finite_number(
+            getattr(activation, component_getter)(), f"{key} activation-model getter"
+        )
+        if muscle_value != component_value:
+            raise ValueError(
+                f"{key} disagrees between muscle and activation-model getters"
+            )
+        values[key] = muscle_value
+    if (
+        values["activation_time_constant_s"] <= 0
+        or values["deactivation_time_constant_s"] <= 0
+    ):
+        raise ValueError("Activation and deactivation time constants must be positive")
+    if not 0 <= values["minimum_activation"] < 1:
+        raise ValueError("Minimum activation must be in [0, 1)")
+    return {
+        "muscle_class": muscle_class,
+        "activation_model_class": activation_class,
+        "properties": values,
+        "matches_prior_fallback": values == FALLBACK_VALUES,
+        "fallback_comparison": "comparison only; fallback values are not treated as source declarations",
+    }
+
+
+def collect_probe(
+    source_path: Path,
+    expected_source_sha256: str,
+    opensim_module: Any,
+    expected_sdk_version: str = "4.6",
+) -> dict[str, Any]:
+    before_hash = sha256_file(source_path)
+    if before_hash != expected_source_sha256:
+        raise ValueError("Source hash does not match the reviewed source identity")
+    inventory = source_inventory(source_path)
+    sdk_version = getattr(opensim_module, "__version__", None)
+    if sdk_version != expected_sdk_version:
+        raise ValueError(
+            f"Expected OpenSim {expected_sdk_version}; found {sdk_version!r}"
+        )
+    # Model construction reads the XML object graph. Do not call initSystem, assemble,
+    # realize, Manager, Moco, integration, or optimization in this probe.
+    model = opensim_module.Model(str(source_path))
+    force_set = model.getMuscles()
+    native_muscles = list(force_set)
+    muscle_count = len(native_muscles)
+    if muscle_count != len(EXPECTED_MUSCLES):
+        raise ValueError(f"Expected exactly two native muscles; found {muscle_count}")
+    native_names = [muscle.getName() for muscle in native_muscles]
+    if sorted(native_names) != sorted(EXPECTED_MUSCLES):
+        raise ValueError(
+            f"Native muscle inventory differs from source declaration: {native_names}"
+        )
+    muscles_by_name = {muscle.getName(): muscle for muscle in native_muscles}
+    rows = []
+    for name in EXPECTED_MUSCLES:
+        muscle = muscles_by_name[name]
+        muscle = opensim_module.Millard2012EquilibriumMuscle.safeDownCast(muscle)
+        if muscle is None:
+            raise ValueError(f"Could not downcast {name} to {EXPECTED_SOURCE_CLASS}")
+        rows.append(
+            {
+                "name": name,
+                "absolute_path": muscle.getAbsolutePathString(),
+                **read_properties(muscle),
+            }
+        )
+    after_hash = sha256_file(source_path)
+    if after_hash != before_hash:
+        raise ValueError("Source bytes changed during the probe")
+    if [row["name"] for row in rows] != list(EXPECTED_MUSCLES):
+        raise ValueError("Native model returned unexpected muscle ordering or names")
+    return {
+        "status": "observed",
+        "source": {
+            "path": str(source_path),
+            "sha256_before": before_hash,
+            "sha256_after": after_hash,
+            **inventory,
+        },
+        "opensim_version": sdk_version,
+        "native_muscle_count": muscle_count,
+        "probe_scope": "Model load and property getters only; no system initialization or dynamics",
+        "native_observations": rows,
+    }
+
+
+def write_json(path: Path, value: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload = json.dumps(value, indent=2, sort_keys=True, allow_nan=False) + "\n"
+    fd, temporary = tempfile.mkstemp(prefix=f".{path.name}.", dir=path.parent)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as stream:
+            stream.write(payload)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, path)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--source", required=True, type=Path)
+    parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--expected-source-sha256", default=EXPECTED_SOURCE_SHA256)
+    parser.add_argument("--expected-opensim-version", default="4.6")
+    args = parser.parse_args()
+    require_fresh_output(args.output)
+    import opensim  # Deliberately lazy; pure tests do not load native modules.
+
+    result = collect_probe(
+        args.source, args.expected_source_sha256, opensim, args.expected_opensim_version
+    )
+    write_json(args.output, result)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

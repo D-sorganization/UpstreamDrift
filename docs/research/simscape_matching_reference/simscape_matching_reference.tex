@@ -5337,6 +5337,65 @@ python3 -m scripts.regenerate_club_face_fixtures --work runs --capture iron \
   --reuse-run   # scores into tests/fixtures; restore them afterwards
 \end{verbatim}
 
+\paragraph{Measured Driver Club Cluster (Issue \#12221).}
+The \#12210 procedure applied to the driver: \texttt{evidence/club\_markers/driver.json}
+holds the six \texttt{Clubhead} offsets of the static-seed calibrated
+\texttt{anthro\_driver\_seeds} receipt at commit \texttt{1bef553457}, and
+\texttt{scripts/set\_spec\_club\_markers.py} applies them to the driver
+document. The triad shape is unchanged (52/92/96~mm); the calibration only
+re-places it on the club, moving the head markers 14--44~mm and the shaft
+markers about 34~mm, which is the face rotation the native placement lacked.
+Runs on ControlTower \texttt{ud-sim} at \texttt{6438169a61}; the face and
+speed columns are \texttt{measure\_swing} of the tracked trajectory, because
+the same-input reference export of the fixed run diverges at impact
+(non-finite MuJoCo acceleration in \texttt{generate\_reference\_bundle}):
+
+\begin{center}
+\begin{tabular}{lrrrrr}
+\hline
+Driver run & Impact speed & Peak timing & Face at impact & Capture face & IK \\
+ & (\%) & (ms) & model / capture (deg) & at address (deg) & (mm) \\
+\hline
+Fixture flags, native cluster fixed & $-0.4$ & $-2.1$ & $-9.97$ / $-15.35$ & $-20.79$ & 35.8 \\
+Fixture flags, measured cluster fixed & $-3.6$ & $-0.3$ & 16.13 / 14.96 & 5.50 & 29.1 \\
+Fixture flags, measured cluster free & $-11.7$ & $-11.7$ & 21.58 / 21.99 & 11.94 & 28.8 \\
+Canonical \texttt{--static-seeds}, control & $-4.3$ & $-2.9$ & 15.88 / 14.96 & 5.50 & 29.5 \\
+Canonical \texttt{--static-seeds}, measured & $-6.2$ & $-3.0$ & 20.04 / 19.50 & 9.38 & 30.5 \\
+Nominal, measured cluster & $-0.1$ & $-0.6$ & 13.70 / 14.96 & 5.50 & 46.1 \\
+\hline
+\end{tabular}
+\end{center}
+Held fixed, the measured cluster gives the capture the same face frame as
+the canonical calibration (address 5.50~deg, impact 14.96~deg) and an
+impact-face gap of 1.17~deg; impact speed misses the 3~\% GCV-20 limit by
+0.6 points. Left free, the static trial moves even its own output again
+(address face 5.50 $\to$ 9.38~deg canonical, 11.94~deg with the fixture
+flags), so the calibration is not a fixed point of its club priors on the
+driver either. Regenerated receipts (marker RMS address / IK / dynamics):
+canonical \texttt{anthro\_driver\_seeds} 6.4/29.5/80.8 $\to$
+7.5/30.5/82.6~mm, with a parent-commit control that reproduces the old
+receipt; \texttt{anthro\_driver\_drake} 6.4/29.2/78.8 $\to$
+7.2/30.8/77.8~mm; nominal \texttt{anthro\_driver} 42.6/52.7/97.3 $\to$
+41.7/46.1/73.6~mm, face separation RMS 2.65 $\to$ 0.97~deg. The fixtures
+are not regenerated; the open items are the same-input export divergence,
+the \texttt{grip\_rotation\_deg} refit on the fixed clusters, and whether
+calibrated runs should hold the measured cluster fixed by default.
+
+Reproduce (ControlTower \texttt{ud-sim}, repository root):
+\begin{verbatim}
+python3 -m scripts.set_spec_club_markers derive --club driver \
+  --receipt-commit 1bef55345715f5c4787ab80f2b54bc19736df633 \
+  docs/development/full_body_models/evidence/ground_support/anthro_driver_seeds/receipt.json \
+  docs/development/full_body_models/evidence/club_markers/driver.json
+python3 -m scripts.set_spec_club_markers apply \
+  docs/development/full_body_models/evidence/club_markers/driver.json \
+  docs/development/full_body_models/full_body_spec_anthro_driver.json
+python3 -m src.shared.python.motion_matching.pipeline.cli \
+  --spec docs/development/full_body_models/full_body_spec_anthro_driver.json \
+  --capture driver --static-seeds --foot-progression capture \
+  --face-weight 3.0 --fix-club-markers --out runs/driver
+\end{verbatim}
+
 \subsection{Impact and Top Definitions}
 At about 2400 deg/s of face closure near impact, one 360 Hz capture sample
 spans about 7 deg. A frame index is therefore too coarse. Impact is the

@@ -1,0 +1,265 @@
+"""Pure source-shaped tests for the candidate-lift Pinocchio probe."""
+
+from __future__ import annotations
+
+import hashlib
+from typing import NamedTuple
+from pathlib import Path
+
+import numpy as np
+import pytest
+
+from pinocchio_v1_candidate_lift_parity_20261012 import (
+    candidate_named_state,
+    observe,
+    pinocchio_contact_observation,
+    pinocchio_weld_observation,
+    svd_report,
+    validate_external_candidate_path,
+    verify_artifact,
+    sha256_file,
+)
+import pinocchio_v1_candidate_lift_parity_20261012 as probe
+
+
+def _observation() -> dict[str, object]:
+    return {
+        "before_shift": {"q": [1.0, 2.0, 3.0, 0.2, -0.1, 0.0]},
+        "after_shift": {"q": [1.0, 1.5, 2.75, 0.2, -0.1, 0.0]},
+        "full_rate_vector": [0.0] * 6,
+        "synthetic_floor_translation": {
+            "root_coordinate_deltas_native_units": {
+                "TranslationInputX": 0.0,
+                "TranslationInputY": -0.5,
+                "TranslationInputZ": -0.25,
+            }
+        },
+    }
+
+
+def test_candidate_state_maps_exact_q_and_zero_rates_in_source_order() -> None:
+    order = (
+        "TranslationInputX",
+        "TranslationInputY",
+        "TranslationInputZ",
+        "HipInputX",
+        "HipInputY",
+        "lower_coordinate",
+    )
+    coordinates, rates = candidate_named_state(_observation(), order, order[:5])
+    assert coordinates == dict(zip(order, (1.0, 1.5, 2.75, 0.2, -0.1, 0.0)))
+    assert rates == dict.fromkeys(order, 0.0)
+
+
+@pytest.mark.parametrize(
+    "mutate, message",
+    [
+        (lambda d: d["full_rate_vector"].__setitem__(0, 1e-9), "zero-rate"),
+        (lambda d: d["after_shift"]["q"].__setitem__(5, 0.1), "lower-limb"),
+        (lambda d: d["after_shift"]["q"].__setitem__(3, 0.3), "outside the declared"),
+    ],
+)
+def test_candidate_state_rejects_changed_rates_lower_or_unbound_pose(
+    mutate, message
+) -> None:
+    observation = _observation()
+    mutate(observation)
+    order = (
+        "TranslationInputX",
+        "TranslationInputY",
+        "TranslationInputZ",
+        "HipInputX",
+        "HipInputY",
+        "lower_coordinate",
+    )
+    with pytest.raises(ValueError, match=message):
+        candidate_named_state(observation, order, order[:5])
+
+
+def test_candidate_state_rejects_non_source_order_candidate_names() -> None:
+    order = (
+        "TranslationInputX",
+        "TranslationInputY",
+        "TranslationInputZ",
+        "HipInputX",
+        "HipInputY",
+        "lower_coordinate",
+    )
+    with pytest.raises(ValueError, match="source-order prefix"):
+        candidate_named_state(_observation(), order, ("HipInputY", "HipInputX"))
+
+
+def test_candidate_is_an_external_input_and_is_not_inside_source_manifest_root(
+    tmp_path,
+) -> None:
+    source_root = tmp_path / "frozen-source"
+    source_root.mkdir()
+    external = tmp_path / "telemetry" / "returned81_candidate.json"
+    external.parent.mkdir()
+    external.write_text("{}", encoding="utf-8")
+    validate_external_candidate_path(external, source_root)
+
+    copied_into_source = source_root / "returned81_candidate.json"
+    copied_into_source.write_text("{}", encoding="utf-8")
+    with pytest.raises(ValueError, match="external telemetry input"):
+        validate_external_candidate_path(copied_into_source, source_root)
+
+
+def test_preflight_requires_external_candidate_bytes_and_exact_hash(tmp_path) -> None:
+    artifact = tmp_path / "candidate.json"
+    artifact.write_text('{"candidate": true}', encoding="utf-8")
+    expected = hashlib.sha256(artifact.read_bytes()).hexdigest()
+    assert verify_artifact(artifact, expected, "candidate") == expected
+    with pytest.raises(ValueError, match="SHA-256 mismatch"):
+        verify_artifact(artifact, "0" * 64, "candidate")
+    with pytest.raises(FileNotFoundError, match="is missing"):
+        verify_artifact(tmp_path / "absent.json", expected, "candidate")
+
+
+def test_missing_upper_geometry_fails_before_native_import(
+    tmp_path, monkeypatch
+) -> None:
+    repo = tmp_path / "frozen-source"
+    repo.mkdir()
+    spec = repo / "spec.json"
+    spec.write_text("{}", encoding="utf-8")
+    external = tmp_path / "telemetry" / "candidate.json"
+    external.parent.mkdir()
+    external.write_text("candidate", encoding="utf-8")
+    observation = external.parent / "observation.json"
+    observation.write_text("observation", encoding="utf-8")
+    monkeypatch.setattr(probe, "CANDIDATE", external)
+    monkeypatch.setattr(probe, "CANDIDATE_SHA256", sha256_file(external))
+    monkeypatch.setattr(probe, "OBSERVATION", observation)
+    monkeypatch.setattr(probe, "OBSERVATION_SHA256", sha256_file(observation))
+    monkeypatch.setattr(probe, "UPPER", Path("missing-upper.json"))
+    monkeypatch.setattr(probe, "UPPER_SHA256", "0" * 64)
+    monkeypatch.setattr(probe, "SPEC", Path("spec.json"))
+    monkeypatch.setattr(probe, "EXPECTED_SPEC_SHA256", sha256_file(spec))
+    monkeypatch.setattr(
+        probe, "SOURCE_HELPER_SHA256", sha256_file(Path(probe.source_setup.__file__))
+    )
+    monkeypatch.setattr(
+        probe.source_setup,
+        "verify_sources",
+        lambda _root: {
+            "src/engines/physics_engines/pinocchio/python/native_model.py": probe.NATIVE_MODEL_SHA256,
+            "src/shared/python/motion_matching/contact_law.py": probe.CONTACT_LAW_SHA256,
+        },
+    )
+    monkeypatch.setattr(
+        probe.source_setup,
+        "import_native_support",
+        lambda _root: pytest.fail(
+            "native import must follow all candidate/spec preflight checks"
+        ),
+    )
+    with pytest.raises(
+        FileNotFoundError, match="upper-body source geometry is missing"
+    ):
+        observe(repo, tmp_path / "result.json", Path(__file__))
+
+
+def test_weld_observation_uses_source_named_jacobian_without_acceleration() -> None:
+    class NativeJacobian(NamedTuple):
+        names: tuple[str, ...]
+        jacobian: np.ndarray
+
+    class Transform:
+        pass
+
+    class Owner:
+        coordinate_names = ("c0", "c1", "c2", "c3", "c4", "c5")
+        constraint_data = [type("ConstraintData", (), {"c1Mc2": Transform()})()]
+
+        def closure_force_jacobian(self, coordinates):
+            assert tuple(coordinates) == Owner.coordinate_names
+            return NativeJacobian(Owner.coordinate_names, np.eye(6))
+
+        def accelerations(self, *_args):  # pragma: no cover - should never execute
+            raise AssertionError("geometry probe must not call constrained dynamics")
+
+    class Log:
+        vector = np.arange(6, dtype=np.float64)
+
+    class Pin:
+        @staticmethod
+        def log6(_transform):
+            return Log()
+
+    owner = Owner()
+    rates = dict.fromkeys(owner.coordinate_names, 0.0)
+    report = pinocchio_weld_observation(
+        owner,
+        Pin,
+        dict.fromkeys(owner.coordinate_names, 0.0),
+        rates,
+        owner.coordinate_names,
+    )
+    assert report["pose_residual_minus_log6_c1Mc2_local_frame_m_rad"] == [
+        0.0,
+        -1.0,
+        -2.0,
+        -3.0,
+        -4.0,
+        -5.0,
+    ]
+    assert (
+        report["rate_residual_native_constraint_jacobian_times_named_rates"]
+        == [0.0] * 6
+    )
+    assert report["native_rate_jacobian"]["rank"] == 6
+
+
+def test_weld_observation_rejects_malformed_native_jacobian_shape() -> None:
+    class NativeJacobian(NamedTuple):
+        names: tuple[str, ...]
+        jacobian: np.ndarray
+
+    class Owner:
+        constraint_data = [type("ConstraintData", (), {"c1Mc2": object()})()]
+
+        @staticmethod
+        def closure_force_jacobian(_coordinates):
+            return NativeJacobian(tuple(reversed(order)), np.eye(6))
+
+    order = tuple(f"c{index}" for index in range(6))
+    with pytest.raises(ValueError, match="names/shape"):
+        pinocchio_weld_observation(
+            Owner(),
+            object(),
+            dict.fromkeys(order, 0.0),
+            dict.fromkeys(order, 0.0),
+            order,
+        )
+
+
+def test_contact_observation_retains_four_named_source_samples() -> None:
+    class Sample(NamedTuple):
+        penetration_m: float
+        penetration_rate_m_s: float
+        contact_point_m: np.ndarray
+        normal_force_n: np.ndarray
+        friction_force_n: np.ndarray
+
+    class Owner:
+        @staticmethod
+        def contact_forces(_coordinates, _rates):
+            return {
+                name: Sample(0.0, 0.0, np.zeros(3), np.zeros(3), np.zeros(3))
+                for name in ("forefoot_l", "forefoot_r", "heel_l", "heel_r")
+            }
+
+    result = pinocchio_contact_observation(Owner(), {}, {})
+    assert result["sphere_count"] == 4
+    assert set(result["spheres"]) == {
+        "forefoot_l",
+        "forefoot_r",
+        "heel_l",
+        "heel_r",
+    }
+
+
+def test_svd_report_rejects_nonfinite_native_geometry() -> None:
+    with pytest.raises(ValueError, match="finite matrix"):
+        svd_report(np.array([[float("nan")]]))

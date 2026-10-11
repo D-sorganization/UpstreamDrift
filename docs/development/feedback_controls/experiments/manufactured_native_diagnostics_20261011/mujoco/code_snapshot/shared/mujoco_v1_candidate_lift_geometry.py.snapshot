@@ -1,0 +1,173 @@
+"""Pure source-bound utilities for the prepared MuJoCo v1 geometry probe."""
+from __future__ import annotations
+
+from collections.abc import Mapping, Sequence
+import numpy as np
+
+
+def lift_named_upper(
+    source_names: Sequence[str],
+    candidate_names: Sequence[str],
+    candidate_q: Sequence[float],
+    compiled_qpos0_by_name: Mapping[str, float],
+) -> np.ndarray:
+    """Lift exact named candidate prefix over native-compiled source defaults."""
+    names = tuple(source_names)
+    candidate = tuple(candidate_names)
+    q_upper = np.asarray(candidate_q, dtype=np.float64)
+    if not names or len(set(names)) != len(names):
+        raise ValueError("source coordinate names must be nonempty and unique")
+    if not candidate or len(candidate) > len(names) or candidate != names[: len(candidate)]:
+        raise ValueError("candidate coordinates must exactly match source prefix")
+    if q_upper.shape != (len(candidate),) or not np.isfinite(q_upper).all():
+        raise ValueError("candidate coordinate values must be finite and complete")
+    if set(compiled_qpos0_by_name) != set(names):
+        raise ValueError("compiled qpos0 readback must cover exact source names")
+    q0 = np.asarray([compiled_qpos0_by_name[name] for name in names], dtype=np.float64)
+    if not np.isfinite(q0).all():
+        raise ValueError("compiled qpos0 values must be finite")
+    q0[: len(candidate)] = q_upper
+    return q0
+
+
+def root_translation_axes_world(root_joint: Mapping[str, object]) -> tuple[tuple[str, ...], np.ndarray]:
+    """Return all three source translation axes as world-space columns."""
+    primitives = root_joint.get("primitives")
+    if not isinstance(primitives, list):
+        raise ValueError("root joint must declare primitive coordinates")
+    translations = [p for p in primitives if isinstance(p, dict) and p.get("primitive") in {"Px", "Py", "Pz"}]
+    by_primitive = {p["primitive"]: p for p in translations}
+    if len(translations) != 3 or set(by_primitive) != {"Px", "Py", "Pz"}:
+        raise ValueError("root joint must declare exactly one each of Px, Py, and Pz")
+    names = tuple(str(by_primitive[k].get("coordinate", "")) for k in ("Px", "Py", "Pz"))
+    if any(not name for name in names) or len(set(names)) != 3:
+        raise ValueError("root translation coordinate identities must be unique")
+    transform = np.asarray(root_joint.get("parent_to_base"), dtype=np.float64)
+    if transform.shape != (4, 4) or not np.isfinite(transform).all():
+        raise ValueError("parent_to_base must be a finite 4x4 transform")
+    rotation = transform[:3, :3]
+    if not np.allclose(rotation.T @ rotation, np.eye(3), atol=1e-12) or not np.isclose(np.linalg.det(rotation), 1.0, atol=1e-12):
+        raise ValueError("parent_to_base rotation must be proper orthonormal")
+    axes = rotation @ np.eye(3)
+    if not np.isfinite(axes).all() or abs(float(np.linalg.det(axes))) < 1e-12:
+        raise ValueError("root translation axes must span world translation")
+    return names, axes
+
+
+def root_translation_axis_world(root_joint: Mapping[str, object]) -> np.ndarray:
+    """Return the source Pz axis (compatibility helper for pure tests)."""
+    names, axes = root_translation_axes_world(root_joint)
+    del names
+    return axes[:, 2].copy()
+
+
+def root_translation_world_z_deltas(
+    target_delta_world_z_m: float, root_joint: Mapping[str, object]
+) -> dict[str, float]:
+    """Solve all source translation coordinates for a pure world-Z shift."""
+    if not np.isfinite(target_delta_world_z_m):
+        raise ValueError("world-Z shift must be finite")
+    names, axes = root_translation_axes_world(root_joint)
+    delta = np.linalg.solve(axes, np.array([0.0, 0.0, target_delta_world_z_m]))
+    if delta.shape != (3,) or not np.isfinite(delta).all():
+        raise ValueError("world-Z translation solve produced invalid coordinates")
+    if not np.allclose(axes @ delta, [0.0, 0.0, target_delta_world_z_m], atol=1e-12, rtol=1e-12):
+        raise ValueError("root coordinate solution does not produce pure world-Z shift")
+    return {name: float(value) for name, value in zip(names, delta, strict=True)}
+
+
+def shift_root_translation_world_z(
+    q: Sequence[float], coordinate_names: Sequence[str], target_delta_world_z_m: float,
+    root_joint: Mapping[str, object],
+) -> np.ndarray:
+    """Return a copy shifted only by the three source root translation axes."""
+    names = tuple(coordinate_names)
+    values = np.asarray(q, dtype=np.float64)
+    if values.shape != (len(names),) or not np.isfinite(values).all():
+        raise ValueError("q must be finite and match source coordinate names")
+    result = values.copy()
+    for coordinate, delta in root_translation_world_z_deltas(target_delta_world_z_m, root_joint).items():
+        if coordinate not in names:
+            raise ValueError("source translation coordinate must occur in source order")
+        result[names.index(coordinate)] += delta
+    return result
+
+
+def observe_source_geometry(
+    native: object,
+    facade: object,
+    coordinates: Sequence[float],
+    source_names: Sequence[str],
+    rates: Sequence[float],
+    options: object,
+) -> dict[str, object]:
+    """Run one source-shaped position/contact observation without dynamics.
+
+    `native` follows NativeMujocoFullBodyModel's mapping-valued `_spheres`;
+    `facade` follows FullBodyMarkerKinematics.constraint_residual_jacobian.
+    """
+    names = tuple(source_names)
+    q = np.asarray(coordinates, dtype=np.float64)
+    v = np.asarray(rates, dtype=np.float64)
+    if len(names) != 41 or len(set(names)) != 41 or q.shape != (41,) or v.shape != (41,):
+        raise ValueError("full source q/v and 41 unique coordinate names are required")
+    if not np.isfinite(q).all() or not np.isfinite(v).all():
+        raise ValueError("full source q/v must be finite")
+    native_spheres = getattr(native, "_spheres", None)
+    if not isinstance(native_spheres, dict) or len(native_spheres) != 4:
+        raise ValueError("native model must expose the exact four sphere mapping")
+    if any(not isinstance(entry, dict) or "site_id" not in entry or "radius" not in entry for entry in native_spheres.values()):
+        raise ValueError("native model sphere entries must be mappings with site_id/radius")
+    qmap = dict(zip(names, map(float, q), strict=True))
+    vmap = dict(zip(names, map(float, v), strict=True))
+    linearization = facade.constraint_residual_jacobian(q, options)
+    residual_all = np.asarray(linearization.residual, dtype=np.float64)
+    jacobian_all = np.asarray(linearization.jacobian, dtype=np.float64)
+    expected_rows = 6 + len(native_spheres)
+    if residual_all.shape != (expected_rows,) or jacobian_all.shape != (expected_rows, 41):
+        raise ValueError("kinematic facade must return six weld rows plus all four ground rows")
+    if not np.isfinite(residual_all).all() or not np.isfinite(jacobian_all).all():
+        raise FloatingPointError("native residual/Jacobian rows must be finite")
+    residual = residual_all[:6].copy()
+    jacobian = jacobian_all[:6, :].copy()
+    rate_residual = jacobian @ v
+    contacts = native.evaluate_contact_samples(qmap, vmap)
+    if not isinstance(contacts, dict) or set(contacts) != set(native_spheres):
+        raise ValueError("contact sample identities must match the four native spheres")
+    data = getattr(native, "data", None)
+    ground = getattr(native, "ground_plane", None)
+    centers = getattr(data, "site_xpos", None)
+    normal = np.asarray(getattr(ground, "normal", ()), dtype=np.float64)
+    height_m = float(getattr(ground, "height_m", np.nan))
+    if normal.shape != (3,) or not np.isfinite(normal).all() or not np.isfinite(height_m):
+        raise ValueError("native ground plane must provide a finite normal and height")
+    sphere_data: dict[str, object] = {}
+    for name, entry in native_spheres.items():
+        if not isinstance(entry, dict) or "site_id" not in entry or "radius" not in entry:
+            raise ValueError("native sphere entries must expose site_id and radius mapping keys")
+        site = int(entry["site_id"])
+        radius = float(entry["radius"])
+        center = np.asarray(centers[site], dtype=np.float64).copy()
+        sample = contacts[name]
+        normal_force = np.asarray(sample.normal_force_n, dtype=np.float64)
+        friction_force = np.asarray(sample.friction_force_n, dtype=np.float64)
+        bottom_height = float(np.dot(center, normal) - radius - height_m)
+        penetration = float(sample.penetration_m)
+        if radius <= 0 or center.shape != (3,) or normal_force.shape != (3,) or friction_force.shape != (3,):
+            raise ValueError(f"malformed native contact geometry for {name}")
+        if not all(np.isfinite(value).all() for value in (center, normal_force, friction_force)) or not np.isfinite([bottom_height, penetration]).all():
+            raise FloatingPointError(f"nonfinite native contact geometry for {name}")
+        sphere_data[name] = {
+            "center_world_m": center.tolist(), "bottom_height_m": bottom_height,
+            "penetration_m": penetration, "normal_force_n": normal_force.tolist(),
+            "friction_force_n": friction_force.tolist(),
+        }
+    singular = np.linalg.svd(jacobian, compute_uv=False)
+    return {
+        "q": q.tolist(), "weld_pose_residual_m_rad": residual.tolist(),
+        "weld_rate_residual_m_s_rad_s": rate_residual.tolist(),
+        "weld_jacobian_6x41": jacobian.tolist(),
+        "jacobian_singular_values": singular.tolist(),
+        "jacobian_rank": int(np.linalg.matrix_rank(jacobian)), "spheres": sphere_data,
+    }
+
