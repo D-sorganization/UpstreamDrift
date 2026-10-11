@@ -130,7 +130,7 @@ ADDRESS_BOUND_REASONS = {
 }
 
 
-def grip_hand_rotation(side: str, shaft: Sequence[float]) -> np.ndarray:
+def grip_hand_rotation(side: str, shaft: Sequence[float] | np.ndarray) -> np.ndarray:
     """Specified ground rotation of hand ``side`` holding a shaft along ``shaft``.
 
     ``shaft`` points from the grip to the head (club +y). The hand's
