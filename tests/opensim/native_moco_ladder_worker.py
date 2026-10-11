@@ -110,6 +110,7 @@ def _prepare_rung(rung: Any, output: Path, stages: dict, osim: Any) -> dict[str,
     config.update(_witness_request_metadata(declaration, profile, witness))
     config_path = output / "request.json"
     _write_json(config_path, config)
+    started = _stage_start()
     study, solver = _build_witness_seeded_problem(
         source, declaration, witness, target_q, osim
     )
@@ -322,11 +323,12 @@ def _witness_request_metadata(
         "witness_provider_sha256": witness["provider_sha256"],
         "witness_worker_sha256": witness["worker_sha256"],
         "witness_builder_sha256": witness["builder_sha256"],
+        "native_mechanics_profile_sha256": profile.profile_sha256,
         "witness_time_knots": witness["times"].tolist(),
         "witness_excitation_by_channel": dict.fromkeys(witness["controls"], 0.05),
         "witness_profile": "constant-0.05-forward-integrated-v1",
         "witness_source_sha256": witness["source_sha256"],
-        "cold_start_named_state": declaration.named_state,
+        "cold_start_named_state": dict(declaration.named_state),
         "cold_start_state_units": _state_units(declaration.named_state),
         "cold_start_time_seconds": declaration.time_seconds,
         "cold_start_lock_targets": dict(declaration.lock_targets),

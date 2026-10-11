@@ -118,6 +118,7 @@ def test_forward_witness_has_exact_saved_clock_and_nonzero_endpoint(
         _build_feasible_witness,
         _build_witness_seeded_problem,
         _set_witness_guess,
+        _rung_config,
         _synthetic_state_bounds,
         _witness_request_metadata,
     )
@@ -130,6 +131,17 @@ def test_forward_witness_has_exact_saved_clock_and_nonzero_endpoint(
         path, declaration, profile, None, tmp_path / "witness", osim
     )
     metadata = _witness_request_metadata(declaration, profile, witness)
+    config = _rung_config(
+        DEFAULT_RUNGS[0], witness["target_q"], source_hash, witness["initial_q"]
+    )
+    config.update(metadata)
+    round_trip = json.loads(json.dumps(config, sort_keys=True, allow_nan=False))
+    assert round_trip["cold_start_named_state"] == dict(declaration.named_state)
+    assert round_trip["cold_start_state_units"] == metadata["cold_start_state_units"]
+    assert round_trip["native_mechanics_profile"] == json.loads(
+        json.dumps(metadata["native_mechanics_profile"])
+    )
+    assert round_trip["native_mechanics_profile_sha256"] == profile.profile_sha256
     assert metadata["cold_start_named_state"] == declaration.named_state
     assert set(metadata["cold_start_state_units"]) == set(declaration.named_state)
     assert metadata["native_mechanics_profile"]["source_sha256"] == source_hash

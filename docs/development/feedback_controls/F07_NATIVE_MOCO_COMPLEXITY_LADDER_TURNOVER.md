@@ -92,6 +92,48 @@ replay. This remains unqualified synthetic software work.
 Any new optimizer attempt needs a separately reviewed bounded plan and fresh
 authorization; do not increase the timeout or automatically rerun this ladder.
 
+## Bounded Run at Witness Checkpoint `8d14ce84cd89bb6b32577eb158320fce72896489`
+
+One fresh serial invocation was authorized with a 30-second per-rung ceiling,
+solver parallelism 0, native thread limits set to 1, 1 GiB sampled process-tree
+RSS stop threshold, and stop-on-first-nonpass. The system Python 3.13 supervisor
+used `psutil 7.0.0`; the worker used OpenSim `4.6-2026-06-22-85aaf64` from the
+dedicated SDK interpreter. The `plain` rung stopped after 3.369 seconds with
+`worker_failed` and peak sampled tree RSS 209,031,168 bytes (about 199.3 MiB).
+The fixed-excitation native forward witness completed in 0.745 seconds wall /
+0.641 seconds CPU, after source build/equilibration took 0.193 seconds wall /
+0.094 seconds CPU. No Moco solver was constructed or run; no optimization,
+optimized trajectory, saved-controls comparison, per-unit optimized/replay
+error report, or fresh optimized-solution replay exists. No later rung launched
+and no retry was made. A process query after termination found no Python ladder
+worker.
+
+Failure occurred while serializing the complete request: the cold named state
+was exposed as an immutable `mappingproxy`, which `json.dump` cannot encode.
+The staged source hash was `6a098517bdba09b19b3eb99e4da7e795f27d10be8f42c0fca04fee20ce67e143`.
+The authorized worker and harness hashes were respectively
+`f248255db92cbb4b5e0e7a32970ec3072cc811bc0a30db42052119e53b3ff864` and
+`3cfa7341cd8dbcf5aa8330367c28bd38b3f5351c4c41ef418c59297a4f217922`.
+The incomplete `request.json` bytes hash to
+`fbad04a56dfe5c639003060c100e3cd0f2398da721a8426c26d806987e8413c6` and are
+not a valid request. The complete request serialization now has a regression
+that round-trips the whole rung configuration, exact cold state and units,
+native profile, and its profile digest. Solver-setup stage timing now starts
+after witness construction. This correction is a new checkpoint and has not
+been run as a ladder. Synthetic feasibility remains unqualified.
+
+Run files remain locally retained under
+`experiments/native_moco_ladder_8d14ce84/plain/`; existing repository ignore
+rules exclude worker logs. Their hashes are:
+
+| Artifact                  | SHA-256                                                            |
+| ------------------------- | ------------------------------------------------------------------ |
+| `source.osim`             | `6a098517bdba09b19b3eb99e4da7e795f27d10be8f42c0fca04fee20ce67e143` |
+| incomplete `request.json` | `fbad04a56dfe5c639003060c100e3cd0f2398da721a8426c26d806987e8413c6` |
+| `progress.json`           | `346a67c71a282cce4988a02a430a9b720f93aa5deefccf909f6cce064693b7a1` |
+| `worker.stderr.log`       | `920734f0dc5d744bf8dc74fe8d6831c02ab5004c7c535d9d3eab0345bb1bf373` |
+| `worker.stdout.log`       | `e7d2618ebf54c04d3da82be34647918e6534f9480e6d6261e36221e53331db36` |
+
 The ladder remains a synthetic software feasibility diagnostic. Even a future
 successful solve and fresh replay would not qualify muscle physiology, the
 captured swing, independent excitation parity, or production readiness.

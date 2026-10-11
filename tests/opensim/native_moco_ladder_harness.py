@@ -655,9 +655,22 @@ def _validate_witness_request(request: dict[str, Any], receipt: dict[str, Any]) 
         or not cold_state
         or set(units or {}) != set(cold_state)
         or not isinstance(profile, dict)
+        or set(profile) != {"schema_version", "source_sha256", "components"}
+        or profile.get("schema_version") != "native-sdk-mechanics-v1"
         or profile.get("source_sha256") != receipt["source_sha256"]
+        or not isinstance(profile.get("components"), list)
     ):
         raise ValueError("witness request omits its complete source-bound cold state")
+    profile_payload = {
+        "schema_version": profile.get("schema_version"),
+        "source_sha256": profile.get("source_sha256"),
+        "components": profile.get("components"),
+    }
+    profile_digest = hashlib.sha256(
+        json.dumps(profile_payload, sort_keys=True, allow_nan=False).encode("utf-8")
+    ).hexdigest()
+    if request.get("native_mechanics_profile_sha256") != profile_digest:
+        raise ValueError("witness request does not bind the exact native profile")
     if any(
         isinstance(value, bool)
         or not isinstance(value, (int, float))
