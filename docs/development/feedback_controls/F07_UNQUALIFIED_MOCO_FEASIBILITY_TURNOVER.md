@@ -125,3 +125,9 @@ diagnostics and inertia preflight, and native path-work auditing. All five
 parent-relative central gates passed; the affected-test mapper selected no
 tests in that separate system-interpreter run. Context check and canonical
 manual governance passed. No physical acceptance is inferred from these checks.
+
+The first normal push hook reformatted three inherited main model/fixture JSON
+files. Their parsed content was verified identical, then their exact committed
+bytes were restored and those explicit provenance inputs were excluded from
+Prettier. Numerical values, native source XML, fixtures and acceptance rules
+were not changed by this formatter repair.
