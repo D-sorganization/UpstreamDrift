@@ -9,12 +9,13 @@ import platform
 import re
 import sys
 import warnings
-import xml.parsers.expat
 from pathlib import Path
 from typing import Any
 
 import pypdf
 from defusedxml import ElementTree as ET
+from defusedxml import minidom as SafeDOM
+from defusedxml.common import DefusedXmlException, EntitiesForbidden
 
 _DIMENSION_REGEX = re.compile(
     r"^([+-]?(?:(?:\d*\.\d+)|\d+)(?:[eE][+-]?\d+)?)\s*(pt|px|in|mm|cm)?$"
@@ -313,54 +314,55 @@ def _parse_viewbox(raw_viewbox: str | None) -> dict[str, float] | None:
 def _validate_and_parse_svg_xml(
     raw_bytes: bytes,
 ) -> tuple[ET.Element, list[str]]:
-    """Parse SVG with safe Expat restrictions against DTD and entity declarations."""
+    """Parse SVG through hardened DOM and ElementTree with inert-DTD policy."""
     comments: list[str] = []
-    parser = xml.parsers.expat.ParserCreate()
-
-    def handle_comment(data: str) -> None:
-        comments.append(data.strip())
-
-    def handle_doctype(
-        name: str,
-        system_id: str | None,
-        public_id: str | None,
-        has_internal_subset: int,
-    ) -> None:
-        if has_internal_subset:
-            raise ValueError("XML DTD internal subset rejected")
-        if name != "svg":
-            raise ValueError(f"Disallowed DOCTYPE root: {name}")
-        if public_id and public_id != "-//W3C//DTD SVG 1.1//EN":
-            raise ValueError(f"Disallowed DTD public ID: {public_id}")
-        if system_id and system_id not in (
-            "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd",
-            "",
-        ):
-            raise ValueError(f"Disallowed DTD system ID: {system_id}")
-
-    def handle_entity(*_args: Any) -> None:
-        raise ValueError("XML entity declaration rejected")
-
-    parser.CommentHandler = handle_comment
-    parser.StartDoctypeDeclHandler = handle_doctype
-    parser.EntityDeclHandler = handle_entity
-
-    def handle_pi(target: str, data: str) -> None:
-        if target.lower() == "xml-stylesheet":
-            raise ValueError("External stylesheet processing instruction rejected")
-
-    parser.ProcessingInstructionHandler = handle_pi
-    parser.ExternalEntityRefHandler = lambda *_args: 0
-    parser.SetParamEntityParsing(xml.parsers.expat.XML_PARAM_ENTITY_PARSING_NEVER)
+    try:
+        document = SafeDOM.parseString(
+            raw_bytes, forbid_dtd=False, forbid_entities=True, forbid_external=True
+        )
+    except EntitiesForbidden as exc:
+        raise ValueError("XML entity declaration rejected") from exc
+    except DefusedXmlException as exc:
+        raise ValueError(f"Malformed SVG XML: {exc}") from exc
+    except Exception as exc:
+        raise ValueError(f"Malformed SVG XML: {exc}") from exc
 
     try:
-        parser.Parse(raw_bytes, True)
-    except xml.parsers.expat.ExpatError as exc:
-        raise ValueError(f"Malformed SVG XML: {exc}") from exc
+        doctype = document.doctype
+        if doctype is not None:
+            if doctype.internalSubset is not None:
+                raise ValueError("XML DTD internal subset rejected")
+            name = doctype.name
+            system_id = doctype.systemId
+            public_id = doctype.publicId
+            if name != "svg":
+                raise ValueError(f"Disallowed DOCTYPE root: {name}")
+            if public_id and public_id != "-//W3C//DTD SVG 1.1//EN":
+                raise ValueError(f"Disallowed DTD public ID: {public_id}")
+            if system_id and system_id not in (
+                "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd",
+                "",
+            ):
+                raise ValueError(f"Disallowed DTD system ID: {system_id}")
+
+        def visit(node: Any) -> None:
+            # DOM nodeType 8 is Comment; 7 is ProcessingInstruction.
+            if node.nodeType == 8:
+                comments.append(node.data.strip())
+            elif node.nodeType == 7 and node.target.lower() == "xml-stylesheet":
+                raise ValueError("External stylesheet processing instruction rejected")
+            for child in node.childNodes:
+                visit(child)
+
+        visit(document)
+    finally:
+        document.unlink()
 
     try:
         root = ET.fromstring(raw_bytes)
     except ET.ParseError as exc:
+        raise ValueError(f"Malformed SVG XML: {exc}") from exc
+    except DefusedXmlException as exc:
         raise ValueError(f"Malformed SVG XML: {exc}") from exc
 
     root_tag = root.tag

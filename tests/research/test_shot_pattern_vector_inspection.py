@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ast
 import hashlib
 import io
 import json
@@ -598,3 +599,39 @@ def test_svg_tree_parser_rejects_entity_expansion() -> None:
     )
     with pytest.raises(EntitiesForbidden):
         module.ET.fromstring(xml)
+
+
+def test_svg_inspector_uses_only_hardened_xml_parsers() -> None:
+    """Untrusted SVG bytes must never reach a raw stdlib XML parser."""
+    from scripts.research.shot_pattern_analysis import vector_inspection as module
+
+    source = Path(module.__file__).read_text(encoding="utf-8")
+    imports = [
+        node
+        for node in ast.walk(ast.parse(source))
+        if isinstance(node, (ast.Import, ast.ImportFrom))
+    ]
+    imported_modules = [
+        alias.name
+        for node in imports
+        if isinstance(node, ast.Import)
+        for alias in node.names
+    ] + [node.module or "" for node in imports if isinstance(node, ast.ImportFrom)]
+    assert all(
+        name != "xml" and not name.startswith("xml.") for name in imported_modules
+    )
+
+
+@pytest.mark.parametrize("subset", ["[]", "[ <!-- inert --> ]"])
+def test_svg_rejects_even_inert_internal_dtd_subset(
+    tmp_path: Path, subset: str
+) -> None:
+    """The permitted Matplotlib DOCTYPE must not gain an internal subset."""
+    xml = (
+        f"<!DOCTYPE svg {subset}>"
+        '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/>'
+    )
+    path = tmp_path / "internal_subset.svg"
+    digest = _write_file_and_hash(path, xml.encode())
+    with pytest.raises(ValueError, match="DTD internal subset rejected"):
+        inspect_svg(path, digest)
