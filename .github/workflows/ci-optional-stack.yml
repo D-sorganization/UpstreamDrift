@@ -55,8 +55,9 @@ jobs:
     # other job needs this one, so skipping it skips the whole lane.
     if: >-
       (!github.event.pull_request ||
-      (github.event.pull_request.head.repo.full_name == github.repository &&
-      contains(github.event.pull_request.labels.*.name, 'ci:full'))) &&
+      github.event.pull_request.head.repo.full_name == github.repository) &&
+      (!github.event.pull_request ||
+      contains(github.event.pull_request.labels.*.name, 'ci:full')) &&
       (github.event.action != 'labeled' ||
       github.event.label.name == 'ci:full')
     # Dispatcher placement only. This repo is public, so a hosted runner is
