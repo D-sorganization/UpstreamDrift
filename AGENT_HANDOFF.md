@@ -1,3 +1,9 @@
+# Active: Club-Face Fixtures on the Current Spec, #12117
+
+- Branch `claude/12117-club-face-fixtures`. Fixtures from `657c811bcd` (#12145 sources; input receipts value-identical to main's #12166 receipts). Feet now flat (3.2–3.8 cm), address face follows the capture (5.43 / −5.41° vs 5.50 / −5.35°).
+- `club_face.impact_frame` now enforces the 0.15 m ball radius on the peak-speed frame (the driver replay peaks 0.351 m short of the ball). OSV-8 and OSV-9 address-face tests compare with the capture's address face (2° unchanged). OSV-9 MSK grip calibration and both `golf_humanoid*.osim` regenerated (control reproduces main byte for byte). Calc record: `simscape_matching_reference.tex`, "Fixtures Regenerated on the Current Spec".
+- Strict xfails: 7-iron impact face 10.97 vs 3.21° (#12221, club-in-hand rotation); GCV-20 speed −6.1 / −10.2 % (#11767). Toe-out miss filed as #12222.
+
 # Active: Drake and MuJoCo IK Parity, Weld Rotation Row — #12039
 
 # Active: Necromatcher Reviewed Fitting Scope — #11414
