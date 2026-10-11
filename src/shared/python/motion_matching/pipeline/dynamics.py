@@ -108,17 +108,24 @@ def build_tracking_controller(
     *,
     tracking_backend: str = "kkt",
     split_time_s: float | None = None,
+    reference_hook: Any = None,
 ):
     """Build a computed-torque controller for the selected tracking backend.
 
     ``split_time_s`` (ball impact, GCV-20) splits the kkt controller's
-    reference rates at impact; the other backends do not support it.
+    reference rates at impact, and ``reference_hook`` (closed-loop gaze neck,
+    OSV-3d) replaces its position target from the simulated state; the other
+    backends support neither.
     """
     from src.shared.python.motion_matching import full_body_forward_dynamics as fs
 
     tracking_backend = validate_tracking_backend(tracking_backend)
     if split_time_s is not None and tracking_backend != "kkt":
         raise ValueError(f"split_time_s needs the kkt backend, not {tracking_backend}")
+    if reference_hook is not None and tracking_backend != "kkt":
+        raise ValueError(
+            f"reference_hook needs the kkt backend, not {tracking_backend}"
+        )
     if tracking_backend == "mj-inverse":
         from src.engines.physics_engines.mujoco.python.inverse_dynamics import (
             tracking_controller_mj_inverse,
@@ -157,6 +164,7 @@ def build_tracking_controller(
         zeta=1.0,
         balance=BALANCE,
         split_time_s=split_time_s,
+        reference_hook=reference_hook,
     )
 
 
@@ -203,6 +211,7 @@ def replay(
     q_track: np.ndarray,
     *,
     tracking_backend: str = "kkt",
+    reference_hook: Any = None,
 ) -> tuple[fs.SimulationRecord, np.ndarray]:
     """Track ``q_track`` with computed torque from preloaded feet.
 
@@ -215,6 +224,8 @@ def replay(
         lane: Coordination lane providing times.
         q_track: (N, nq) reference trajectory to track.
         tracking_backend: ``kkt`` (default plant affine solve) or ``mj-inverse``.
+        reference_hook: optional kkt position-target hook from the simulated
+            state (closed-loop gaze neck, OSV-3d #11729).
 
     Returns:
         (record, sim_q): simulation record and state resampled on the capture times.
@@ -234,6 +245,7 @@ def replay(
         q_track,
         tracking_backend=tracking_backend,
         split_time_s=split,
+        reference_hook=reference_hook,
     )
     rate_hz = lane.rate_hz
     record = sim.run(
