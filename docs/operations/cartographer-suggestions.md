@@ -9,7 +9,7 @@ coordination).
 
 ## Suggestion Log
 
-### 2026-10-11 — UpstreamDrift — `docs/codemap/` referenced a retired in-tree copy
+### 2026-10-11 — UpstreamDrift — `docs/codemap/` Referenced a Retired In-Tree Copy
 
 **Current state**: `docs/codemap/README.md` and `docs/codemap/agents.md`
 described `src/shared/python/codemap/` as a byte-identical in-tree copy of
@@ -29,7 +29,7 @@ diagnosing a problem the map itself caused.
 **Priority**: Medium
 **Status**: Implemented (this pass)
 
-### 2026-10-11 — UpstreamDrift — `codemap_tools.py` API-resolution fallback looks dead
+### 2026-10-11 — UpstreamDrift — `codemap_tools.py` API-Resolution Fallback Looks Dead
 
 **Current state**: `src/shared/python/ai/tools/codemap_tools.py` resolves
 the codemap API via `_try_tools_api()` first and `_try_local_api()` as a
@@ -53,7 +53,7 @@ correctly), but worth a small follow-up PR by whoever next touches this
 file rather than a cartographer-authored behavior change.
 **Status**: Logged
 
-### 2026-10-11 — UpstreamDrift — `PROJECT_MAP.md` tile count is stale background, not wrong per se
+### 2026-10-11 — UpstreamDrift — `PROJECT_MAP.md` Tile Count Is Stale Background, Not Wrong per Se
 
 **Current state**: `docs/architecture/PROJECT_MAP.md` §1 lists "11 tiles
 currently visible in the launcher" (dated 2026-06-10), while
