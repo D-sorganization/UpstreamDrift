@@ -36,7 +36,7 @@
         "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
         "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414"
       },
-      "rationale": "GCV-13 #11719: only the notes text of feature_parity render.club_head_and_ball changed (the OpenSim export now hides the ball after impact too). No tile, path or schema change; the regenerated capability atlas passes."
+      "rationale": "Sync launcher-atlas boundary review with origin/main after GCV-13 #11719"
     },
     "model-backends": {
       "fingerprint": "da739fcd3c56f6c4a3923b4f31202e515023487a49d54ca449090d33186a9685",
