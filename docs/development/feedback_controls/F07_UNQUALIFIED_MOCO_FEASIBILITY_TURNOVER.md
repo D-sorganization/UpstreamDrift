@@ -158,3 +158,21 @@ remain bounded by the existing 30-second deadline, unchanged state tolerances,
 and the source-hashed cold state. No capture, muscle physiology, full-body
 feasibility, or 17-variant/six-ecosystem parity is established. The canonical
 calculation inventory remains empty and the scientific goal remains open.
+
+The later 21-interval synthetic child optimizer converged, but strict post-solve
+clock auditing rejected 9 of 43 saved timestamps at one float64 ULP. A separate
+no-optimizer diagnostic replayed its saved controls at the actual saved clock.
+The controls matched exactly at recorded samples and endpoint checks passed;
+the state audit failed only activation (`5.078110452592238e-5` at
+`0.0007500000000000001 s`, unchanged limit `1e-8`). Coordinate, speed and fiber
+limits passed. This diagnostic does not repair the child grid rejection or
+establish the cause of the activation error. Exact inputs and the replay audit
+are recorded in the linked ladder turnover; the scientific result remains
+unqualified.
+
+The subsequent full CI unit suite found two additional byte-bound specification
+files that had been reformatted in inherited history. Both parsed JSON objects
+matched main checkpoint `9e5f87c4dd31fc3137fc204d98337633fa5c4855`; their exact
+bytes were restored from that checkpoint and both paths were excluded from
+Prettier. This preserved the original run-document hashes and numerical
+contents without rewriting acceptance or provenance records.

@@ -96,6 +96,10 @@ class NativeMocoPreparation:
             and self.diagnostic_assessment is not None
             and self.diagnostic_assessment.blocker_receipt_sha256 == blocker_receipt
             and self.diagnostic_assessment.execution_permitted
+            and (
+                not self.allow_unqualified_passive_diagnostic
+                or self.passive_observation_sha256 is not None
+            )
         )
 
 

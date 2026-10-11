@@ -100,3 +100,6 @@ src/engines/physics_engines/opensim/models/msk_club_grip_calibration.json
 docs/development/monolith_refactor_register.md
 manuals/upstreamdrift/calculation-registry.json
 docs/development/full_body_models/evidence/head_gaze/fd_neck_closed_loop.json
+
+## Preserve generated matched-swing status freshness bytes.
+docs/development/matched_swing_program/README.md

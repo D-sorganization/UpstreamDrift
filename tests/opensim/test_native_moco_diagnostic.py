@@ -127,10 +127,9 @@ def test_diagnostic_never_waives_other_blockers_or_physical_qualification(
     )
     directory = tmp_path / "prepared"
     prepared = prepare_native_moco(request, directory)
-    # Passive admission is explicitly unqualified, but may be opted into for
-    # software execution. Removing its optional observation does not certify it.
+    # Explicit passive opt-in still requires a source-bound observation receipt.
     without_passive_observation = replace(prepared, passive_observation_sha256=None)
-    assert without_passive_observation.ready_for_software_solve
+    assert not without_passive_observation.ready_for_software_solve
     assert (
         without_passive_observation.diagnostic_assessment.physical_qualification
         is PhysicalQualification.UNQUALIFIED
