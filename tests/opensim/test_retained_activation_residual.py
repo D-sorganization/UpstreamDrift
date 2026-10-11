@@ -97,13 +97,12 @@ def test_full_cell_allocation_restarts_at_optimized_left_state_and_records_cross
     excitation = np.array([0.1, 0.3, 0.1])
     result = _full_cell_allocation(times, optimized, excitation, PARAMETERS)
     assert result["cell_count"] == 1
-    cell = result["cells"][0]
-    assert cell["local_scalar_activation"][0] == optimized[0]
-    assert cell["local_tolerance_sensitivity"][0] < 1e-12
-    assert len(cell["branch_crossings"]) == 2
-    assert (
-        cell["branch_crossings"][0]["classification"] == "linear sign change estimate"
-    )
+    local_values = result["local_scalar_activation_endpoint_midpoint_endpoint"]
+    assert local_values[0][0] == optimized[0]
+    assert result["local_tolerance_sensitivity_midpoint_endpoint"][0][0] < 1e-12
+    crossings = result["sampled_chord_branch_crossings"]
+    assert len(crossings) == 2
+    assert crossings[0]["classification"] == "linear sign change estimate"
 
 
 def test_nonfinite_inputs_are_rejected() -> None:

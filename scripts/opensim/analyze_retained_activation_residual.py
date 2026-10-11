@@ -187,7 +187,15 @@ def _full_cell_allocation(
     accumulated = _integrate_channel(
         times, excitation, float(solution[0]), parameters, rtol=1e-12, atol=1e-14
     )
-    rows: list[dict[str, Any]] = []
+    cell_times: list[list[float]] = []
+    optimized_values: list[list[float]] = []
+    excitation_values: list[list[float]] = []
+    local_values: list[list[float]] = []
+    accumulated_values: list[list[float]] = []
+    local_errors: list[list[float]] = []
+    accumulated_errors: list[list[float]] = []
+    sensitivities: list[list[float]] = []
+    crossings: list[dict[str, Any]] = []
     for cell in range((len(times) - 1) // 2):
         indices = slice(2 * cell, 2 * cell + 3)
         local_times = times[indices]
@@ -208,39 +216,46 @@ def _full_cell_allocation(
             rtol=1e-13,
             atol=1e-15,
         )
-        rows.append(
-            {
-                "cell_index": cell,
-                "time_seconds": [
-                    float(local_times[0]),
-                    float(local_times[1]),
-                    float(local_times[2]),
-                ],
-                "optimized_activation": [float(value) for value in solution[indices]],
-                "saved_excitation": [float(value) for value in local_excitation],
-                "local_scalar_activation": [float(value) for value in local],
-                "local_scalar_minus_optimized": [
-                    float(local[1] - solution[2 * cell + 1]),
-                    float(local[2] - solution[2 * cell + 2]),
-                ],
-                "accumulated_scalar_activation": [
-                    float(accumulated[2 * cell + 1]),
-                    float(accumulated[2 * cell + 2]),
-                ],
-                "accumulated_scalar_minus_optimized": [
-                    float(accumulated[2 * cell + 1] - solution[2 * cell + 1]),
-                    float(accumulated[2 * cell + 2] - solution[2 * cell + 2]),
-                ],
-                "local_tolerance_sensitivity": [
-                    float(local[1] - tighter[1]),
-                    float(local[2] - tighter[2]),
-                ],
-                "branch_crossings": _branch_crossings(
-                    local_times, solution[indices], local_excitation
-                ),
-            }
+        cell_times.append([float(value) for value in local_times])
+        optimized_values.append([float(value) for value in solution[indices]])
+        excitation_values.append([float(value) for value in local_excitation])
+        local_values.append([float(value) for value in local])
+        accumulated_values.append(
+            [float(accumulated[2 * cell + 1]), float(accumulated[2 * cell + 2])]
         )
-    return {"cell_count": len(rows), "cells": rows}
+        local_errors.append(
+            [
+                float(local[1] - solution[2 * cell + 1]),
+                float(local[2] - solution[2 * cell + 2]),
+            ]
+        )
+        accumulated_errors.append(
+            [
+                float(accumulated[2 * cell + 1] - solution[2 * cell + 1]),
+                float(accumulated[2 * cell + 2] - solution[2 * cell + 2]),
+            ]
+        )
+        sensitivities.append(
+            [float(local[1] - tighter[1]), float(local[2] - tighter[2])]
+        )
+        crossings.extend(
+            {"cell_index": cell, **crossing}
+            for crossing in _branch_crossings(
+                local_times, solution[indices], local_excitation
+            )
+        )
+    return {
+        "cell_count": len(cell_times),
+        "time_seconds_endpoint_midpoint_endpoint": cell_times,
+        "optimized_activation_endpoint_midpoint_endpoint": optimized_values,
+        "saved_excitation_endpoint_midpoint_endpoint": excitation_values,
+        "local_scalar_activation_endpoint_midpoint_endpoint": local_values,
+        "accumulated_scalar_activation_midpoint_endpoint": accumulated_values,
+        "local_scalar_minus_optimized_midpoint_endpoint": local_errors,
+        "accumulated_scalar_minus_optimized_midpoint_endpoint": accumulated_errors,
+        "local_tolerance_sensitivity_midpoint_endpoint": sensitivities,
+        "sampled_chord_branch_crossings": crossings,
+    }
 
 
 def _hermite_simpson_defects(
