@@ -484,6 +484,10 @@ def _validate_retained_artifacts(
     for field in (
         "source_sha256",
         "worker_sha256",
+        "harness_builder_sha256",
+        "witness_provider_sha256",
+        "witness_states_sha256",
+        "witness_controls_sha256",
         "opensim_runtime_fingerprint_sha256",
         "request_sha256",
         "saved_solution_sha256",
@@ -503,6 +507,8 @@ def _validate_retained_artifacts(
         raise ValueError("worker source hash does not match preserved model")
     file_hashes = {
         "request.json": "request_sha256",
+        "witness/witness_states.sto": "witness_states_sha256",
+        "witness/witness_time_only_controls.sto": "witness_controls_sha256",
         "solution.sto": "saved_solution_sha256",
         "time_only_controls.sto": "saved_time_only_controls_sha256",
         "fresh_replay.json": "fresh_replay_sha256",
@@ -523,6 +529,7 @@ def _validate_retained_artifacts(
     if not runtime_path.is_file():
         raise ValueError("bounded OpenSim runtime fingerprint is missing")
     _validate_request_rung_binding(request, receipt, rung)
+    _validate_witness_request(request, receipt)
     _validate_bounded_runtime_fingerprint(
         runtime_path, receipt["opensim_runtime_fingerprint_sha256"]
     )
@@ -639,6 +646,94 @@ def _validate_request_rung_binding(
         raise ValueError("request or receipt does not bind the declared rung features")
 
 
+def _validate_witness_request(request: dict[str, Any], receipt: dict[str, Any]) -> None:
+    cold_state = request.get("cold_start_named_state")
+    units = request.get("cold_start_state_units")
+    profile = request.get("native_mechanics_profile")
+    if (
+        not isinstance(cold_state, dict)
+        or not cold_state
+        or set(units or {}) != set(cold_state)
+        or not isinstance(profile, dict)
+        or profile.get("source_sha256") != receipt["source_sha256"]
+    ):
+        raise ValueError("witness request omits its complete source-bound cold state")
+    if any(
+        isinstance(value, bool)
+        or not isinstance(value, (int, float))
+        or not math.isfinite(value)
+        for value in cold_state.values()
+    ):
+        raise ValueError("witness cold state contains an invalid numeric value")
+    expected_units = {
+        name: (
+            "rad"
+            if name.endswith("/value")
+            else "rad/s"
+            if name.endswith("/speed")
+            else "1"
+            if name.endswith("/activation")
+            else "m"
+            if name.endswith("/fiber_length")
+            else None
+        )
+        for name in cold_state
+    }
+    if any(
+        units.get(name) != unit or unit is None for name, unit in expected_units.items()
+    ):
+        raise ValueError("witness cold-state units do not cover native state names")
+    if (
+        request.get("cold_start_time_seconds") != 0.0
+        or not isinstance(request.get("cold_start_lock_targets"), dict)
+        or not isinstance(request.get("cold_start_chart_bounds"), dict)
+        or not isinstance(request.get("cold_start_constraint_enforcement"), dict)
+        or request.get("cold_start_residual_tolerance") != 1e-9
+        or request.get("initial_q") != cold_state.get("/jointset/base/q/value")
+        or request.get("witness_profile") != "constant-0.05-forward-integrated-v1"
+        or request.get("witness_excitation_by_channel")
+        != {"flexor": 0.05, "extensor": 0.05}
+    ):
+        raise ValueError("witness request omits its explicit synthetic policy")
+    if request.get("witness_source_sha256") != receipt["source_sha256"]:
+        raise ValueError("forward witness does not bind the request source")
+    bindings = (
+        ("witness_states_sha256", "witness_states_sha256"),
+        ("witness_controls_sha256", "witness_controls_sha256"),
+        ("witness_provider_sha256", "witness_provider_sha256"),
+        ("witness_worker_sha256", "worker_sha256"),
+        ("witness_builder_sha256", "harness_builder_sha256"),
+    )
+    if any(request.get(left) != receipt.get(right) for left, right in bindings):
+        raise ValueError(
+            "witness implementation or artifact hashes differ from receipt"
+        )
+    expected_builder = _sha256(Path(__file__))
+    provider_path = (
+        Path(__file__).resolve().parents[2]
+        / "src/engines/physics_engines/opensim/python/tour_matching/native_constrained_muscle.py"
+    )
+    if receipt.get("harness_builder_sha256") != expected_builder:
+        raise ValueError("witness receipt does not identify this harness builder")
+    if receipt.get("witness_provider_sha256") != _sha256(provider_path):
+        raise ValueError("witness receipt does not identify the replay provider")
+    knots = request.get("witness_time_knots")
+    if (
+        not isinstance(knots, list)
+        or len(knots) != 11
+        or any(
+            isinstance(value, bool)
+            or not isinstance(value, (int, float))
+            or not math.isfinite(value)
+            for value in knots
+        )
+        or knots[0] != 0.0
+        or knots[-1] != 0.01
+        or any(right <= left for left, right in zip(knots, knots[1:], strict=False))
+    ):
+        raise ValueError("witness request does not retain its exact full 10 ms clock")
+
+
 def _validate_bounded_runtime_fingerprint(path: Path, expected_sha256: str) -> None:
     runtime = json.loads(path.read_text(encoding="utf-8"))
     if (
@@ -688,7 +783,13 @@ def run_ladder(
     Each worker receives a new output directory. A nonzero exit, timeout, or
     incomplete/mismatched evidence is terminal for this ladder invocation.
     """
-    if timeout_seconds <= 0 or timeout_seconds > 30.0:
+    if (
+        isinstance(timeout_seconds, bool)
+        or not isinstance(timeout_seconds, (int, float))
+        or not math.isfinite(timeout_seconds)
+        or timeout_seconds <= 0
+        or timeout_seconds > 30.0
+    ):
         raise ValueError("per-rung timeout must be in (0, 30] seconds")
     output_root.mkdir(parents=True, exist_ok=True)
     results: list[RungResult] = []

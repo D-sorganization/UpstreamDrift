@@ -8,11 +8,13 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import inspect
 import json
+import math
 import os
 import shutil
 import time
-from dataclasses import replace
+from dataclasses import asdict, replace
 from pathlib import Path
 from typing import Any
 
@@ -67,7 +69,6 @@ def _prepare_rung(rung: Any, output: Path, stages: dict, osim: Any) -> dict[str,
         audit_wrapped_path_source,
         declare_wrapped_path_source,
     )
-    from tests.opensim.test_native_constrained_muscle import _moco_problem
 
     started = _stage_start()
     built_path, declaration = build_synthetic_rung(rung, output / "build")
@@ -97,14 +98,21 @@ def _prepare_rung(rung: Any, output: Path, stages: dict, osim: Any) -> dict[str,
             ReferenceStateDeclaration,
             audit_wrapped_path_source,
         )
-    target_q = declaration.named_state["/jointset/base/q/value"] + 5e-6
-    initial_q = declaration.named_state["/jointset/base/q/value"]
+    started = _stage_start()
+    witness = _build_feasible_witness(
+        source, declaration, profile, wrapped, output / "witness", osim
+    )
+    stages["fixed_excitation_forward_witness"] = _stage_finish(started)
+    _write_progress(output, rung.name, stages)
+    target_q = witness["target_q"]
+    initial_q = witness["initial_q"]
     config = _rung_config(rung, target_q, source_hash, initial_q)
+    config.update(_witness_request_metadata(declaration, profile, witness))
     config_path = output / "request.json"
     _write_json(config_path, config)
-    study = _moco_problem(source, declaration, target_q=target_q)
-    solver = osim.MocoCasADiSolver.safeDownCast(study.initCasADiSolver())
-    _configure_solver(solver)
+    study, solver = _build_witness_seeded_problem(
+        source, declaration, witness, target_q, osim
+    )
     stages["preflight_and_solver_setup"] = _stage_finish(started)
     _write_progress(output, rung.name, stages)
     return {
@@ -118,7 +126,344 @@ def _prepare_rung(rung: Any, output: Path, stages: dict, osim: Any) -> dict[str,
         "config": config,
         "config_path": config_path,
         "study": study,
+        "solver": solver,
+        "witness": witness,
     }
+
+
+def _build_feasible_witness(
+    source: Path,
+    declaration: Any,
+    profile: Any,
+    wrapped: Any,
+    output: Path,
+    osim: Any,
+) -> dict[str, Any]:
+    from src.engines.physics_engines.opensim.python.tour_matching.native_constrained_muscle import (
+        build_constrained_muscle_bundle,
+        replay_constrained_muscle_bundle,
+    )
+
+    source_hash = _sha256(source)
+    if source_hash != declaration.source_sha256 or profile.source_sha256 != source_hash:
+        raise ValueError("forward witness source identity differs from declarations")
+    grid = np.linspace(0.0, 0.01, 11, dtype=np.float64)
+    muscle_names = _source_muscle_names(source, osim)
+    controls = {
+        name: np.full(grid.shape, 0.05, dtype=np.float64) for name in muscle_names
+    }
+    bundle = build_constrained_muscle_bundle(
+        declaration,
+        grid,
+        controls,
+        experiment_id="synthetic-fixed-excitation-witness-v1",
+        wrapped_path_declaration=wrapped,
+        native_mechanics_profile=profile,
+    )
+    replay = replay_constrained_muscle_bundle(
+        bundle,
+        declaration,
+        wrapped_path_declaration=wrapped,
+        native_mechanics_profile=profile,
+    )
+    witness = _persist_and_validate_witness(
+        replay, grid, controls, source_hash, declaration, output, osim
+    )
+    provider_source = inspect.getsourcefile(build_constrained_muscle_bundle)
+    if provider_source is None:
+        raise ValueError("forward witness provider source identity is unavailable")
+    witness.update(
+        {
+            "provider_sha256": _sha256(Path(provider_source)),
+            "worker_sha256": _sha256(Path(__file__)),
+            "builder_sha256": _sha256(
+                Path(__file__).with_name("native_moco_ladder_harness.py")
+            ),
+        }
+    )
+    return witness
+
+
+def _source_muscle_names(source: Path, osim: Any) -> tuple[str, ...]:
+    model = osim.Model(str(source))
+    muscles = model.getMuscles()
+    names = tuple(
+        str(muscles.get(index).getName()) for index in range(muscles.getSize())
+    )
+    if not names or len(set(names)) != len(names):
+        raise ValueError("witness source has no unique muscle control channels")
+    return names
+
+
+def _persist_and_validate_witness(
+    replay: Any,
+    grid: np.ndarray,
+    controls: dict[str, np.ndarray],
+    source_hash: str,
+    declaration: Any,
+    output: Path,
+    osim: Any,
+) -> dict[str, Any]:
+    output.mkdir(parents=True, exist_ok=True)
+    times = np.asarray(replay.times, dtype=np.float64)
+    states = np.asarray(replay.states, dtype=np.float64)
+    names = tuple(replay.state_names)
+    if times.shape != grid.shape or not np.array_equal(times, grid):
+        raise ValueError("forward witness clock differs from its declared knots")
+    if states.shape != (len(grid), len(names)) or not np.isfinite(states).all():
+        raise ValueError("forward witness state matrix is incomplete or non-finite")
+    for name, expected in declaration.named_state.items():
+        actual = float(states[0, names.index(name)])
+        if abs(actual - expected) > 1e-12:
+            raise ValueError("forward witness initial state differs from cold start")
+    constraint_errors = [
+        float(error)
+        for audit in replay.constraint_audits
+        for error in (*audit.position_errors, *audit.velocity_errors)
+    ]
+    if any(
+        not math.isfinite(error) or abs(error) > declaration.residual_tolerance
+        for error in constraint_errors
+    ):
+        raise ValueError("forward witness does not preserve native constraints")
+    q_column = names.index("/jointset/base/q/value")
+    initial_q = float(states[0, q_column])
+    target_q = float(states[-1, q_column])
+    if target_q - initial_q <= 2e-6:
+        raise ValueError("fixed excitation witness has no positive target motion")
+    fiber_columns = [
+        index for index, name in enumerate(names) if name.endswith("/fiber_length")
+    ]
+    if not fiber_columns or np.any(states[:, fiber_columns] <= 0.0):
+        raise ValueError("forward witness contains non-positive fiber length")
+    state_path = output / "witness_states.sto"
+    control_path = output / "witness_time_only_controls.sto"
+    _write_witness_states(osim, times, names, states, state_path)
+    _write_time_only_controls(osim, times, controls, control_path)
+    return {
+        "times": times,
+        "states": states,
+        "state_names": names,
+        "controls": controls,
+        "source_sha256": source_hash,
+        "initial_q": initial_q,
+        "target_q": target_q,
+        "state_path": state_path,
+        "control_path": control_path,
+        "states_sha256": _sha256(state_path),
+        "controls_sha256": _sha256(control_path),
+    }
+
+
+def _write_witness_states(
+    osim: Any, times: np.ndarray, names: tuple[str, ...], values: np.ndarray, path: Path
+) -> None:
+    table = osim.TimeSeriesTable()
+    labels = osim.StdVectorString()
+    for name in names:
+        labels.append(name)
+    table.setColumnLabels(labels)
+    for row_index, time_value in enumerate(times):
+        row = osim.RowVector(len(names))
+        for column_index in range(len(names)):
+            row[column_index] = float(values[row_index, column_index])
+        table.appendRow(float(time_value), row)
+    osim.STOFileAdapter.write(table, str(path))
+
+
+def _synthetic_state_bounds(
+    initial: dict[str, float], optimal_fiber_lengths: dict[str, float]
+) -> dict[str, tuple[float, float]]:
+    bounds = {}
+    for name, value in initial.items():
+        if name.endswith("/activation"):
+            bound = (max(0.01, value - 0.1), min(0.15, value + 0.1))
+        elif name.endswith("/fiber_length"):
+            muscle_path = name.removesuffix("/fiber_length")
+            optimal = optimal_fiber_lengths.get(muscle_path)
+            if optimal is None or not math.isfinite(optimal) or optimal <= 0.0:
+                raise ValueError("synthetic fiber bounds lack a positive source scale")
+            bound = (0.5 * optimal, 2.0 * optimal)
+        else:
+            bound = (value - 1.0, value + 1.0)
+        if not all(math.isfinite(item) for item in bound) or bound[0] >= bound[1]:
+            raise ValueError("synthetic Moco state bounds are invalid")
+        if not bound[0] <= value <= bound[1]:
+            raise ValueError("cold-start state is outside synthetic Moco bounds")
+        bounds[name] = bound
+    return bounds
+
+
+def _state_units(named_state: dict[str, float]) -> dict[str, str]:
+    units = {}
+    for name in named_state:
+        if name.endswith("/value"):
+            unit = "rad"
+        elif name.endswith("/speed"):
+            unit = "rad/s"
+        elif name.endswith("/activation"):
+            unit = "1"
+        elif name.endswith("/fiber_length"):
+            unit = "m"
+        else:
+            raise ValueError(
+                f"synthetic witness has an unclassified state unit: {name}"
+            )
+        units[name] = unit
+    return units
+
+
+def _witness_request_metadata(
+    declaration: Any, profile: Any, witness: dict[str, Any]
+) -> dict[str, Any]:
+    return {
+        "witness_controls_sha256": witness["controls_sha256"],
+        "witness_states_sha256": witness["states_sha256"],
+        "witness_provider_sha256": witness["provider_sha256"],
+        "witness_worker_sha256": witness["worker_sha256"],
+        "witness_builder_sha256": witness["builder_sha256"],
+        "witness_time_knots": witness["times"].tolist(),
+        "witness_excitation_by_channel": dict.fromkeys(witness["controls"], 0.05),
+        "witness_profile": "constant-0.05-forward-integrated-v1",
+        "witness_source_sha256": witness["source_sha256"],
+        "cold_start_named_state": declaration.named_state,
+        "cold_start_state_units": _state_units(declaration.named_state),
+        "cold_start_time_seconds": declaration.time_seconds,
+        "cold_start_lock_targets": dict(declaration.lock_targets),
+        "cold_start_chart_bounds": {
+            name: list(bounds) for name, bounds in declaration.chart_bounds.items()
+        },
+        "cold_start_constraint_enforcement": dict(declaration.constraint_enforcement),
+        "cold_start_residual_tolerance": declaration.residual_tolerance,
+        "native_mechanics_profile": asdict(profile),
+    }
+
+
+def _build_witness_seeded_problem(
+    source: Path, declaration: Any, witness: dict[str, Any], target_q: float, osim: Any
+) -> tuple[Any, Any]:
+    from src.engines.physics_engines.opensim.python.tour_matching.moco_initial_bindings import (
+        MocoInitialBindings,
+        apply_moco_initial_bindings,
+    )
+
+    if _sha256(source) != witness["source_sha256"]:
+        raise ValueError("witness source changed before Moco problem construction")
+    model = osim.Model(str(source))
+    optimal = {
+        f"/forceset/{model.getMuscles().get(index).getName()}": float(
+            model.getMuscles().get(index).getOptimalFiberLength()
+        )
+        for index in range(model.getMuscles().getSize())
+    }
+    state_bounds = _synthetic_state_bounds(declaration.named_state, optimal)
+    _validate_witness_inside_bounds(witness, state_bounds)
+    bindings = MocoInitialBindings(
+        state_bounds,
+        declaration.named_state,
+        dict.fromkeys(optimal, (0.0, 1.0)),
+    )
+    study = osim.MocoStudy()
+    problem = study.updProblem()
+    problem.setModelProcessor(osim.ModelProcessor(str(source)))
+    problem.setTimeBounds(float(witness["times"][0]), float(witness["times"][-1]))
+    apply_moco_initial_bindings(problem, str(source), bindings, osim)
+    problem.setStateInfo(
+        "/jointset/base/q/value",
+        osim.MocoBounds(0.2, 0.4),
+        osim.MocoInitialBounds(witness["initial_q"]),
+        osim.MocoFinalBounds(target_q),
+    )
+    problem.addGoal(osim.MocoControlGoal("effort"))
+    solver = osim.MocoCasADiSolver.safeDownCast(study.initCasADiSolver())
+    _configure_solver(solver)
+    _set_witness_guess(solver, witness, state_bounds, optimal, osim)
+    return study, solver
+
+
+def _validate_witness_inside_bounds(
+    witness: dict[str, Any], state_bounds: dict[str, tuple[float, float]]
+) -> None:
+    for column, name in enumerate(witness["state_names"]):
+        low, high = state_bounds[name]
+        values = witness["states"][:, column]
+        if np.any(values < low) or np.any(values > high):
+            raise ValueError(f"forward witness leaves synthetic bounds for {name}")
+
+
+def _set_witness_guess(
+    solver: Any,
+    witness: dict[str, Any],
+    state_bounds: dict[str, tuple[float, float]],
+    optimal_fiber_lengths: dict[str, float],
+    osim: Any,
+) -> Any:
+    if _sha256(witness["state_path"]) != witness["states_sha256"]:
+        raise ValueError("saved witness states changed before Moco guess loading")
+    if _sha256(witness["control_path"]) != witness["controls_sha256"]:
+        raise ValueError("saved witness controls changed before Moco guess loading")
+    states_table = osim.TimeSeriesTable(str(witness["state_path"]))
+    controls_table = osim.TimeSeriesTable(str(witness["control_path"]))
+    state_names = tuple(str(value) for value in states_table.getColumnLabels())
+    control_names = tuple(str(value) for value in controls_table.getColumnLabels())
+    expected_controls = tuple(optimal_fiber_lengths)
+    if (
+        state_names != tuple(witness["state_names"])
+        or set(state_names) != set(state_bounds)
+        or control_names != expected_controls
+    ):
+        raise ValueError(
+            "saved witness state/control channels differ from Moco bindings"
+        )
+    _validate_saved_witness_tables(states_table, controls_table, witness)
+    guess = solver.createGuess()
+    guess.insertStatesTrajectory(states_table, True)
+    guess.insertControlsTrajectory(controls_table, True)
+    if set(guess.getStateNames()) != set(state_bounds) or set(
+        guess.getControlNames()
+    ) != set(expected_controls):
+        raise ValueError("Moco witness guess channels differ from request")
+    solver.setGuess(guess)
+    return guess
+
+
+def _validate_saved_witness_tables(
+    states_table: Any, controls_table: Any, witness: dict[str, Any]
+) -> None:
+    expected = (
+        (states_table, tuple(witness["state_names"])),
+        (
+            controls_table,
+            tuple(f"/forceset/{name}" for name in witness["controls"]),
+        ),
+    )
+    for table, expected_names in expected:
+        labels = tuple(str(name) for name in table.getColumnLabels())
+        independent = table.getIndependentColumn()
+        times = np.asarray(
+            [independent[index] for index in range(table.getNumRows())],
+            dtype=np.float64,
+        )
+        if labels != expected_names or not np.array_equal(times, witness["times"]):
+            raise ValueError("persisted witness channels or clock changed")
+    for name, expected_values in witness["controls"].items():
+        saved = controls_table.getDependentColumn(f"/forceset/{name}")
+        actual = np.asarray(
+            [saved[index] for index in range(controls_table.getNumRows())],
+            dtype=np.float64,
+        )
+        if not np.array_equal(actual, expected_values):
+            raise ValueError("persisted witness excitation values changed")
+    for index, name in enumerate(witness["state_names"]):
+        saved = states_table.getDependentColumn(name)
+        actual = np.asarray(
+            [saved[row] for row in range(states_table.getNumRows())],
+            dtype=np.float64,
+        )
+        if not np.isfinite(actual).all() or not np.allclose(
+            actual, witness["states"][:, index], rtol=0.0, atol=1e-14
+        ):
+            raise ValueError("persisted witness state values changed")
 
 
 def _verify_native_wrap(
@@ -497,6 +842,10 @@ def _write_success_receipt(
         "solver_status": str(solution.getStatus()),
         "source_sha256": prepared["source_hash"],
         "worker_sha256": _sha256(Path(__file__).resolve()),
+        "harness_builder_sha256": prepared["witness"]["builder_sha256"],
+        "witness_provider_sha256": prepared["witness"]["provider_sha256"],
+        "witness_states_sha256": prepared["witness"]["states_sha256"],
+        "witness_controls_sha256": prepared["witness"]["controls_sha256"],
         "opensim_runtime_fingerprint_sha256": _sha256(runtime_path),
         "request_sha256": _sha256(prepared["config_path"]),
         "saved_solution_sha256": _sha256(solved["solution_path"]),

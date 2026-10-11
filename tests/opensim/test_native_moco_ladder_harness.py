@@ -91,6 +91,82 @@ def test_native_loaded_mpp_curve_rejects_collinear_law(tmp_path: Path) -> None:
         _verify_native_mpp_curvature(linear_model, linear_model.initSystem(), osim)
 
 
+def test_synthetic_fiber_bounds_are_finite_and_strictly_positive() -> None:
+    from tests.opensim.native_moco_ladder_worker import _synthetic_state_bounds
+
+    initial = {
+        "/forceset/flexor/fiber_length": 0.095,
+        "/forceset/flexor/activation": 0.05,
+        "/jointset/base/q/value": 0.3,
+    }
+    optimal = {"/forceset/flexor": 0.1}
+    bounds = _synthetic_state_bounds(initial, optimal)
+    low, high = bounds["/forceset/flexor/fiber_length"]
+    assert 0.0 < low < initial["/forceset/flexor/fiber_length"] < high
+    assert high < float("inf")
+    assert bounds["/forceset/flexor/activation"] == (0.01, 0.15)
+
+
+def test_forward_witness_has_exact_saved_clock_and_nonzero_endpoint(
+    tmp_path: Path,
+) -> None:
+    from src.engines.physics_engines.opensim.python.tour_matching.native_mechanics_profile import (
+        declare_native_mechanics_execution_profile,
+    )
+    from tests.opensim.native_moco_ladder_harness import build_synthetic_rung
+    from tests.opensim.native_moco_ladder_worker import (
+        _build_feasible_witness,
+        _build_witness_seeded_problem,
+        _set_witness_guess,
+        _synthetic_state_bounds,
+        _witness_request_metadata,
+    )
+
+    osim = pytest.importorskip("opensim")
+    path, declaration = build_synthetic_rung(DEFAULT_RUNGS[0], tmp_path / "source")
+    source_hash = hashlib.sha256(path.read_bytes()).hexdigest()
+    profile = declare_native_mechanics_execution_profile(path, source_hash)
+    witness = _build_feasible_witness(
+        path, declaration, profile, None, tmp_path / "witness", osim
+    )
+    metadata = _witness_request_metadata(declaration, profile, witness)
+    assert metadata["cold_start_named_state"] == declaration.named_state
+    assert set(metadata["cold_start_state_units"]) == set(declaration.named_state)
+    assert metadata["native_mechanics_profile"]["source_sha256"] == source_hash
+    assert metadata["witness_source_sha256"] == source_hash
+    assert witness["times"].shape == (11,)
+    assert witness["times"][0] == 0.0
+    assert witness["times"][-1] == 0.01
+    assert witness["source_sha256"] == source_hash
+    assert witness["target_q"] - witness["initial_q"] > 2e-6
+    assert all((values == 0.05).all() for values in witness["controls"].values())
+    model = osim.Model(str(path))
+    optimal = {
+        f"/forceset/{model.getMuscles().get(index).getName()}": float(
+            model.getMuscles().get(index).getOptimalFiberLength()
+        )
+        for index in range(model.getMuscles().getSize())
+    }
+    initial = {
+        name: float(witness["states"][0, index])
+        for index, name in enumerate(witness["state_names"])
+    }
+    bounds = _synthetic_state_bounds(initial, optimal)
+    controls_bytes = witness["control_path"].read_bytes()
+    witness["control_path"].write_bytes(controls_bytes + b"tamper")
+    with pytest.raises(ValueError, match="changed"):
+        _set_witness_guess(object(), witness, bounds, optimal, osim)
+    witness["control_path"].write_bytes(controls_bytes)
+    _, solver = _build_witness_seeded_problem(
+        path, declaration, witness, witness["target_q"], osim
+    )
+    assert set(solver.getGuess().getStateNames()) == set(witness["state_names"])
+    assert set(solver.getGuess().getControlNames()) == {
+        "/forceset/flexor",
+        "/forceset/extensor",
+    }
+
+
 def test_ladder_stops_after_first_worker_failure(tmp_path: Path) -> None:
     invocations: list[str] = []
 
@@ -259,6 +335,21 @@ def test_ladder_timeout_is_hard_capped_at_thirty_seconds(tmp_path: Path) -> None
             lambda *_: (sys.executable,),
             tmp_path,
             timeout_seconds=31,
+        )
+
+
+@pytest.mark.parametrize(
+    "invalid_timeout", [True, float("nan"), float("inf"), -float("inf")]
+)
+def test_ladder_rejects_nonfinite_or_boolean_timeout(
+    tmp_path: Path, invalid_timeout: float
+) -> None:
+    with pytest.raises(ValueError, match="timeout"):
+        run_ladder(
+            DEFAULT_RUNGS[:1],
+            lambda *_: (sys.executable,),
+            tmp_path,
+            timeout_seconds=invalid_timeout,
         )
 
 
