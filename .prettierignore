@@ -105,3 +105,9 @@ docs/development/full_body_models/evidence/head_gaze/fd_neck_closed_loop.json
 ## Preserve generated matched-swing status freshness bytes.
 docs/development/matched_swing_program/README.md
 docs/development/feedback_controls/experiments/manufactured_native_diagnostics_20261011/**/*.json
+# Preserve hash-bound #12042 native-evidence files without formatter rewrites.
+docs/development/full_body_models/evidence/hip_zero_twist_12042/README.md
+docs/development/full_body_models/evidence/hip_zero_twist_12042/driver/full_body_spec_hipcal_scaled.json
+docs/development/full_body_models/evidence/hip_zero_twist_12042/driver/receipt.json
+docs/development/full_body_models/evidence/hip_zero_twist_12042/iron/full_body_spec_hipcal_scaled.json
+docs/development/full_body_models/evidence/hip_zero_twist_12042/iron/receipt.json
