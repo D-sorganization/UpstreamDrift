@@ -34,6 +34,11 @@ def test_default_ladder_adds_one_feature_per_rung() -> None:
         "wrap",
         "coupler",
     )
+    assert all(
+        len(current.features) - len(previous.features) == 1
+        and set(previous.features) < set(current.features)
+        for previous, current in zip(DEFAULT_RUNGS, DEFAULT_RUNGS[1:], strict=False)
+    )
 
 
 def test_mesh_refinement_request_keeps_other_solver_contract_fixed() -> None:
@@ -70,11 +75,6 @@ def test_mesh_interval_count_rejects_invalid_values(value: object) -> None:
 
     with pytest.raises(ValueError, match="mesh interval count"):
         _validate_mesh_intervals(value)
-    assert all(
-        len(current.features) - len(previous.features) == 1
-        and set(previous.features) < set(current.features)
-        for previous, current in zip(DEFAULT_RUNGS, DEFAULT_RUNGS[1:], strict=False)
-    )
 
 
 def test_moving_path_spline_is_bounded_monotone_and_curved() -> None:
