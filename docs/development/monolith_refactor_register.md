@@ -152,7 +152,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 |  870 | `src/shared/python/model_generation/cli/main.py`                                                                                                                              |
 |  865 | `src/shared/python/signal_toolkit/fitting.py`                                                                                                                                 |
 |  864 | `src/tools/simulation_backends_launcher/gui.py`                                                                                                                               |
-|  862 | `src/engines/feedback_observation_qualification.py`                                                                                                                           |
 |  862 | `src/shared/python/pendulum_simulator/gui/pendulum_widget.py`                                                                                                                 |
 |  859 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/functions/dataset_generator/extractAllSignalsFromBus.m`                                                       |
 |  855 | `src/tools/matched_swing_browser/gui.py`                                                                                                                                      |
@@ -180,6 +179,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 |  830 | `src/shared/python/motion_pipeline/preprocessing/gap_fill.py`                                                                                                                 |
 |  828 | `src/bunkershot3d/solvers/envelope.py`                                                                                                                                        |
 |  828 | `src/shared/python/motion_matching/pipeline/lane.py`                                                                                                                          |
+|  826 | `src/shared/python/motion_matching/execution/spec_builder.py`                                                                                                                 |
 |  822 | `src/tools/capture_rig/layout_editor.py`                                                                                                                                      |
 |  819 | `src/shared/python/model_generation/converters/simscape/simscape_converter.py`                                                                                                |
 |  819 | `src/shared/python/motion_matching/club_only/ui_integration.py`                                                                                                               |

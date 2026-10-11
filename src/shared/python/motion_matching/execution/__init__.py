@@ -9,6 +9,7 @@ from __future__ import annotations
 from .assets import (
     get_candidate_geometry_spec,
     get_capture_c3d,
+    get_club_markers,
     get_native_geometry_spec,
     get_opensim_model,
     resolve_output_root,
@@ -29,6 +30,7 @@ __all__ = [
     "export_mjx_package",
     "get_candidate_geometry_spec",
     "get_capture_c3d",
+    "get_club_markers",
     "get_native_geometry_spec",
     "get_opensim_model",
     "leg_extension",
