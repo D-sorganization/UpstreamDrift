@@ -7,6 +7,8 @@ import pytest
 
 from src.tools.shot_pattern_analysis import matched_pair_social as social
 
+pytestmark = pytest.mark.unit
+
 
 def _points():
     return {
