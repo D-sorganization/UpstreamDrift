@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-11T17:56:58Z",
+  "generated_at": "2026-10-11T20:23:32Z",
   "rows": [
     {
       "acceptance": null,
@@ -677,9 +677,9 @@
             "unit": "hash"
           },
           {
-            "measured": 0.08634585224299426,
+            "measured": 0.07779739751167294,
             "name": "whole_marker_rmse_m",
-            "reason": "whole RMSE 86.35 mm > 60.00 mm",
+            "reason": "whole RMSE 77.80 mm > 60.00 mm",
             "status": "failed",
             "threshold": 0.06,
             "unit": "m"
@@ -693,17 +693,17 @@
             "unit": "N"
           },
           {
-            "measured": 0.0038645895617442907,
+            "measured": 0.005889003594229558,
             "name": "max_closure_residual_m",
-            "reason": "",
-            "status": "passed",
+            "reason": "closure residual 5.89 mm > 5.00 mm",
+            "status": "failed",
             "threshold": 0.005,
             "unit": "m"
           },
           {
-            "measured": 0.13652111559811,
+            "measured": 0.07831510481582554,
             "name": "weight_fraction",
-            "reason": "weight fraction range [0.14, 2.85] outside [0.2, 3.0]",
+            "reason": "weight fraction range [0.08, 2.33] outside [0.2, 3.0]",
             "status": "failed",
             "threshold": 0.2,
             "unit": "BW"
@@ -759,15 +759,15 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
-        "fd_address_to_impact_rmse_m": 0.04272642205041449,
-        "fd_after_impact_rmse_m": 0.1507481147217007,
+        "fd_address_to_impact_rmse_m": 0.038546758230282065,
+        "fd_after_impact_rmse_m": 0.13578493424886132,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
-        "whole_marker_rmse_m": 0.08634585224299426
+        "whole_marker_rmse_m": 0.07779739751167294
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_driver_drake/receipt.json",
-      "sha256": "e3fb4171b148389faa36bc78c7e68e42d9ebcd8ec4755bf8e6e9fbd47745dac9"
+      "sha256": "085de0daced0c7e74b31b1ef824775ebc0c8314f37597bd76ec0a4dd32af30ac"
     },
     {
       "acceptance": null,
