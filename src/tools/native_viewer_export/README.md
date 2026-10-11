@@ -63,11 +63,12 @@ python3 -m src.tools.native_viewer_export \
   (`{"unavailable": reason}`, printed by the CLI); a placement is recorded with
   its position, source and `hide_after_s`. MuJoCo and MyoSuite append a render
   scene sphere per visible frame; Drake and Pinocchio MeshCat hold one `/ball`
-  sphere and toggle `visible`. **OpenSim limitation:** the simbody visualizer
-  caches fixed geometry, and toggling Appearance visibility or opacity after
-  `initSystem` does not redraw (verified by a smoke render), so the OpenSim ball
-  stays visible after impact; this is recorded as `limitation` in the result.
-  Post-impact flight is a later slice.
+  sphere and toggle `visible`. OpenSim's simbody visualizer caches fixed
+  geometry at `initSystem` (toggling Appearance visibility does not redraw), so
+  its worker hangs the sphere on a tiny render-only body on a slider joint from
+  ground and slides it 1 km out of view after impact (`ball_slide_m`); body
+  poses are redrawn from the state every frame. Post-impact flight is a later
+  slice.
 - Force arrows use the `body_weight` scale mode when the model mass is known:
   one body weight is 0.5 m and the ceiling is 3 m (`default_glyph_style`).
 - `--speeds 1,0.5,0.25` (default: full, half, quarter) writes one clip set per playback speed, named
@@ -156,7 +157,18 @@ line, so the target direction is the horizontal part of the address (state 0)
 face normal (face square at address, as `plan_gaze` does), right-handed, Z-up;
 the card records `extras.target_source = "address_face_normal"`, so face angle
 and path are relative to that assumed line. Unavailable rows show "unavailable" and a
-reason, never zero. When no card can be computed (no MuJoCo, no club, speed
+reason, never zero. Impact Location (toe, high) uses the decorative ball
+(`SwingInput.ball`, passed explicitly by `export_swing`): the contact point is the
+ball surface point facing the club, `ball_centre - radius * n_face` at the impact
+sample, and toe/high are its offsets from the face centre along the face toe axis
+(positive toward the toe) and `toe x normal`; the card records
+`extras.ball_source` (the placement source, e.g. `address_geometry`). With the
+address-geometry ball this is the offset from the address face line, not a
+measured contact. A contact more than 50 mm (`MAX_FACE_OFFSET_M`) from the face
+centre lies off every club face. That means the model face passed the ball
+without striking it, so the row is "unavailable" and its reason carries the
+measured miss. Without a ball the row stays unavailable ("needs the ball
+contact point (no ball placement supplied)"). When no card can be computed (no MuJoCo, no club, speed
 below 1 m/s) nothing is drawn, `ExportResult.impact_card` holds the reason, and
 the showcase manifest records it. The panel shows model estimates, not a
 measurement.

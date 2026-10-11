@@ -84,13 +84,16 @@ on:
 concurrency:
   # PR runs cancel superseded pushes of the same PR; label events other than
   # ci:full land in their own group so tagging a PR never cancels its run.
-  # Main, scheduled and dispatched runs are grouped per SHA and run to
-  # completion -- per-ref cancellation meant no main run ever finished.
+  # Main, scheduled and dispatched runs are never cancelled once running --
+  # per-ref cancellation meant no main run ever finished. They are grouped per
+  # event and ref, so GitHub keeps the running run plus only the newest pending
+  # one; per-SHA groups queued a run for every main push (#12285).
   group: >-
     ${{ github.workflow }}-${{ github.event_name == 'pull_request' &&
     format('{0}-{1}', github.ref, github.event.action == 'labeled' &&
-    github.event.label.name != 'ci:full' && 'label' || 'run') || github.sha }}
-  cancel-in-progress: true
+    github.event.label.name != 'ci:full' && 'label' || 'run') ||
+    format('{0}-{1}', github.event_name, github.ref) }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read

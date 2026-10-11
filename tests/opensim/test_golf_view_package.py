@@ -13,7 +13,7 @@ TDD tests verifying:
    - Reset to address returns t0, q0 with verified bilateral grip closure and face-on view.
    - Scrub to time returns smooth, interpolated coordinates across swing horizon.
    - Camera presets (FRONT_VIEW, DOWN_THE_LINE, SIDE_VIEW, OVERHEAD) decouple viewing from kinematics.
-   - Muscle toggle indicates 'Unavailable' on torque baseline variant.
+   - Muscle toggle indicates 'Unavailable' unless native muscles were read back.
    - Clear labelling of IK playback, rejected replay, and accepted dynamic motion statuses.
 3. Release evidence packaging:
    - Generation of keyframe stills (address, top, impact, finish) with camera records.
@@ -210,10 +210,10 @@ def test_view_package_builds_torque_baseline_package(tmp_path: Path) -> None:
     assert pkg.keyframe_stills.all_stills_present
 
 
-def test_view_package_shows_muscles_available_for_muscle_variant(
+def test_view_package_hides_muscles_without_native_muscle_components(
     tmp_path: Path,
 ) -> None:
-    """Verify that muscle variant marks muscles_available as True."""
+    """A declared muscle target list does not enable an empty native layer."""
     variant = create_muscle_model_variant(_OS3B_MODEL_PATH)
     traj = _make_dummy_trajectory(654)
 
@@ -228,7 +228,8 @@ def test_view_package_shows_muscles_available_for_muscle_variant(
         export_video=False,
     )
 
-    assert pkg.muscles_available is True
+    assert pkg.muscles_available is False
+    assert pkg.layers.show_muscles is False
     assert pkg.motion_status == MotionStatus.IK_PLAYBACK
     assert pkg.camera_preset == CameraPreset.DOWN_THE_LINE
 

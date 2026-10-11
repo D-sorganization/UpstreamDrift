@@ -16,13 +16,16 @@ Right-handed, Z-up. Unavailable is never zero: any failure returns a reason.
 
 from __future__ import annotations
 
+from dataclasses import replace
 import math
 from typing import TYPE_CHECKING
 
 import numpy as np
 
 from src.shared.python.impact_parameters import (
+    BallObservation,
     ClubheadSeries,
+    ImpactParameters,
     TargetFrame,
     extract_impact_parameters,
 )
@@ -33,9 +36,14 @@ from src.shared.python.impact_parameters.panel_model import (
 from src.tools.native_viewer_export.club_pose import ClubPoseModel
 
 if TYPE_CHECKING:
+    from src.tools.native_viewer_export.ball import BallPlacement
     from src.tools.native_viewer_export.core import SwingInput
 
 TARGET_SOURCE = "address_face_normal"
+#: Largest contact offset from the face centre still counted as a strike. It is
+#: wider than half the face height of every club, so a contact further out
+#: lies off the face (the model face passed the ball without striking it).
+MAX_FACE_OFFSET_M = 0.050
 #: Failures that become an "unavailable" reason rather than an exception
 #: (``BackendUnavailable`` is a ``RuntimeError``).
 _EXPECTED_ERRORS = (ValueError, KeyError, RuntimeError, OSError, TypeError)
@@ -89,8 +97,58 @@ def address_target_frame(series: ClubheadSeries) -> TargetFrame:
     return TargetFrame(target_dir=(float(x), float(y), 0.0), handedness="right")
 
 
-def card_from_series(series: ClubheadSeries, impact_time_s: float) -> ImpactCard:
+def ball_contact_point(
+    series: ClubheadSeries, index: int, ball: BallPlacement
+) -> np.ndarray:
+    """Point of the ball surface facing the face at sample ``index``.
+
+    ``ball_centre - radius * n_face``: the face normal points from the face to
+    the ball, so the ball surface point facing the club lies one radius back
+    along the normal. Raises ``ValueError`` without a face normal series.
+    """
+    if series.face_normal is None:
+        raise ValueError("face normal unobservable: no ball contact point")
+    normal = np.asarray(series.face_normal[index], dtype=float)
+    length = float(np.linalg.norm(normal))
+    if length < 1e-9:
+        raise ValueError("face normal has zero length: no ball contact point")
+    centre = np.asarray(ball.position_m, dtype=float)
+    return centre - ball.radius_m * normal / length
+
+
+def _on_face_only(params: ImpactParameters) -> ImpactParameters:
+    """``params`` with an off-face contact replaced by an "unavailable" reason.
+
+    A contact point further than :data:`MAX_FACE_OFFSET_M` from the face centre
+    is not on any club face: the model face passed the ball without striking
+    it, so no strike location is claimed. The measured miss is kept in the
+    reason. Postcondition: a returned toe/high pair lies within the bound.
+    """
+    if params.toe_mm is None or params.high_mm is None:
+        return params
+    if math.hypot(params.toe_mm, params.high_mm) <= MAX_FACE_OFFSET_M * 1000.0:
+        return params
+    reason = (
+        f"ball contact off the face (toe {params.toe_mm:+.0f} mm, high "
+        f"{params.high_mm:+.0f} mm from the face centre): the model face misses "
+        "the ball"
+    )
+    unavailable = {**params.unavailable, "toe_mm": reason, "high_mm": reason}
+    return replace(params, toe_mm=None, high_mm=None, unavailable=unavailable)
+
+
+def card_from_series(
+    series: ClubheadSeries,
+    impact_time_s: float,
+    ball: BallPlacement | None = None,
+) -> ImpactCard:
     """Card of ``series`` at ``impact_time_s`` (last sample before it).
+
+    With a ``ball`` the contact point is its surface point facing the face at
+    the impact sample and the toe/high rows are filled (offsets of that point
+    from the face centre along the face toe and high axes); ``extras["ball_source"]``
+    records where the placement came from. Without one those rows stay
+    unavailable.
 
     Raises ``ValueError`` for a non-finite time, an address normal without a
     horizontal part, or a club head slower than the extractor minimum.
@@ -99,18 +157,32 @@ def card_from_series(series: ClubheadSeries, impact_time_s: float) -> ImpactCard
         raise ValueError(f"impact_time_s must be finite, got {impact_time_s}")
     later = np.nonzero(series.times_s >= impact_time_s)[0]
     contact = max(int(later[0]) if later.size else len(series) - 1, 1)
+    observation = None
+    if ball is not None:
+        # the extractor's impact state is the last pre-contact sample
+        observation = BallObservation(
+            contact_m=ball_contact_point(series, contact - 1, ball)
+        )
     params = extract_impact_parameters(
-        series, address_target_frame(series), contact_index=contact
+        series, address_target_frame(series), contact_index=contact, ball=observation
     )
-    card = build_impact_card(params)
+    card = build_impact_card(_on_face_only(params))
     card.extras["target_source"] = TARGET_SOURCE
+    if ball is not None:
+        card.extras["ball_source"] = ball.source
     return card
 
 
-def impact_card_for(swing: SwingInput, impact_time_s: float) -> ImpactCard | str:
+def impact_card_for(
+    swing: SwingInput,
+    impact_time_s: float,
+    ball: BallPlacement | None = None,
+) -> ImpactCard | str:
     """Impact card of ``swing`` at ``impact_time_s``, or the reason it is unavailable.
 
-    Preconditions: ``impact_time_s`` is finite (``ValueError``). Postcondition:
+    ``ball`` is the decorative ball placement (``swing.ball`` of the export);
+    without it impact location is unavailable. Preconditions: ``impact_time_s``
+    is finite (``ValueError``). Postcondition:
     a returned ``ImpactCard`` carries computed values or per-row reasons, never
     zero fill; MuJoCo missing, no club, too-slow club head or an extractor
     failure give a non-empty reason string.
@@ -118,6 +190,6 @@ def impact_card_for(swing: SwingInput, impact_time_s: float) -> ImpactCard | str
     if not math.isfinite(impact_time_s):
         raise ValueError(f"impact_time_s must be finite, got {impact_time_s}")
     try:
-        return card_from_series(_club_series(swing), impact_time_s)
+        return card_from_series(_club_series(swing), impact_time_s, ball)
     except _EXPECTED_ERRORS as exc:
         return f"impact card unavailable: {exc}"

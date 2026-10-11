@@ -43,6 +43,10 @@ SETTLE_S = 0.6
 _GREY = (0.75, 0.78, 0.85)
 _SHAPE_GREY = (0.7, 0.72, 0.8)
 BALL_RGB = BALL_RGBA[:3]
+BALL_BODY = "ud_ball"
+BALL_BODY_MASS_KG = 1e-6
+#: slide of the hidden ball (m): a 21 mm sphere 1 km away is sub-pixel
+BALL_HIDE_OFFSET_M = 1000.0
 
 
 def require_virtual_display() -> str:
@@ -180,24 +184,50 @@ def build_model(osim: Any, spec_bytes: bytes) -> tuple[Any, float]:
     return model, float(skeleton.ground.height_m)
 
 
-def attach_ball(osim: Any, model: Any, ball: dict[str, Any]) -> None:
-    """Attach the decorative ball as a sphere on the model's ground (visual only).
+def attach_ball(osim: Any, model: Any, ball: dict[str, Any]) -> str:
+    """Attach the decorative ball to this render model; return its slide coordinate.
 
-    Limitation: the simbody visualizer caches fixed model geometry when the
-    system is initialised, and toggling the Appearance visibility or opacity
-    afterwards does not redraw (verified by a smoke render), so the ball stays
-    visible after impact in OpenSim clips.
+    The simbody visualizer caches fixed geometry at ``initSystem`` (toggling
+    Appearance visibility afterwards does not redraw), but it redraws body
+    poses from the state every frame. So the sphere rides a tiny body on a
+    slider joint from ground at the ball position: slide 0 is the address
+    ball, :data:`BALL_HIDE_OFFSET_M` puts it out of view. Visual only: this
+    model is built per render and never integrated.
     """
     placement = BallPlacement.from_dict(ball)
-    _attach(
-        osim,
+    tiny = BALL_BODY_MASS_KG
+    body = osim.Body(BALL_BODY, tiny, osim.Vec3(0), osim.Inertia(tiny, tiny, tiny))
+    joint = osim.SliderJoint(
+        f"{BALL_BODY}_slide",
         model.updGround(),
-        np.eye(3),
-        placement.position_m,
-        osim.Sphere(placement.radius_m),
-        BALL_RGB,
-        9000,
+        osim.Vec3(*map(float, placement.position_m)),
+        osim.Vec3(0),
+        body,
+        osim.Vec3(0),
+        osim.Vec3(0),
     )
+    geom = osim.Sphere(placement.radius_m)
+    geom.setColor(osim.Vec3(*BALL_RGB))
+    body.attachGeometry(geom)
+    geom.thisown = False
+    model.addBody(body)
+    body.thisown = False
+    model.addJoint(joint)
+    joint.thisown = False
+    return str(joint.get_coordinates(0).getName())
+
+
+def ball_slide_m(visible: list[bool] | None, position: int) -> float:
+    """Slide (m) of the ball body at frame ``position`` of the job.
+
+    ``visible`` is the job's per-position ball visibility; ``None`` keeps the
+    ball in place. Raises ``ValueError`` for a position outside the list.
+    """
+    if visible is None:
+        return 0.0
+    if not 0 <= position < len(visible):
+        raise ValueError(f"position {position} outside {len(visible)} frames")
+    return 0.0 if visible[position] else BALL_HIDE_OFFSET_M
 
 
 def set_camera(
@@ -220,8 +250,7 @@ def main(job_path: str) -> None:
     bundle = InputBundle.load(Path(job.bundle_path))
     q = np.load(job.q_path)
     model, ground_h = build_model(osim, bundle.spec_bytes)
-    if job.ball:
-        attach_ball(osim, model, job.ball)
+    ball_coord = attach_ball(osim, model, job.ball) if job.ball else None
     model.setUseVisualizer(True)
     state = model.initSystem()
     viz = model.updVisualizer().updSimbodyVisualizer()
@@ -237,6 +266,9 @@ def main(job_path: str) -> None:
     for pos, k in enumerate(job.indices):
         for name, value in zip(bundle.coordinate_order, q[k], strict=True):
             coords.get(name).setValue(state, float(value), False)
+        if ball_coord is not None:
+            slide = ball_slide_m(job.ball_visible, pos)
+            coords.get(ball_coord).setValue(state, slide, False)
         model.realizePosition(state)
         for view in job.views:
             look = job.lookat_for(view, pos)

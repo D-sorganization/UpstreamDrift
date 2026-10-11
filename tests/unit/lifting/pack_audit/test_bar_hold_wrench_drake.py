@@ -26,6 +26,8 @@ from typing import Any
 
 import pytest
 
+from tests.support.real_engines import real_module
+
 pytestmark = pytest.mark.unit
 
 _UNAVAILABLE_NUMERIC = (
@@ -152,9 +154,7 @@ def test_bar_hold_wrench_rejects_object_without_plant() -> None:
 
 
 def _drake_lift_adapter(lift: str):
-    pydrake = pytest.importorskip("pydrake")
-    if not hasattr(pydrake, "__file__"):
-        pytest.skip("pydrake in sys.modules is a test double, not the real package")
+    real_module("pydrake")
     from src.shared.python.lifting.pack_audit.adapters import create_adapter
     from src.shared.python.lifting.pack_audit.model import Anthropometry
     from src.shared.python.lifting.pack_audit.packs import locate_pack
