@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ast
+from collections.abc import Callable, Mapping
 import gzip
 import hashlib
 import html
@@ -10,8 +11,9 @@ import json
 from pathlib import Path
 import re
 import shutil
+import sys
 from types import SimpleNamespace
-from typing import Any
+from typing import Any, NamedTuple
 
 from PIL import Image, ImageDraw, ImageFont
 import pytest
@@ -22,11 +24,76 @@ SOURCE = BASE / "v6_output_review_harness_v1/review_batch.py"
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.parametrize("boundary_ready", [False, True])
+def test_missing_figure_provider_fails_before_output(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, boundary_ready: bool
+) -> None:
+    """The archived entry point resolved figure identities before any receipt."""
+    import runpy
+    from src.tools.shot_pattern_analysis import (
+        matched_supplement_figures as figures,
+        matched_supplement_pipeline as pipeline,
+    )
+
+    report = tmp_path / "report"
+    report.mkdir()
+    (report / "REPORT_SUPPLEMENT.json").write_text('{"unique_cells":[]}')
+    output = tmp_path / "review"
+    module = runpy.run_path(str(SOURCE))
+    entry = module["main"]
+    entry.__globals__["completion_boundary"] = lambda *_args: (
+        {} if boundary_ready else None
+    )
+    monkeypatch.setattr(pipeline, "_report_source_hashes", dict)
+    monkeypatch.setattr(
+        pipeline,
+        "_load_numeric_parity_reference",
+        lambda _path: {"artifact_sha256": {}},
+    )
+    monkeypatch.setattr(
+        pipeline, "_check_numeric_parity_reference", lambda *_args: None
+    )
+    monkeypatch.delattr(figures, "_slug")
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            str(SOURCE),
+            "--repo",
+            str(ROOT),
+            "--report",
+            str(report),
+            "--completion-receipt",
+            str(tmp_path / "completion.json"),
+            "--start-receipt",
+            str(tmp_path / "start.json"),
+            "--start-sha256",
+            "pinned",
+            "--expected-numeric",
+            str(tmp_path / "numeric.json"),
+            "--output",
+            str(output),
+            "--group",
+            "cells",
+        ],
+    )
+    with pytest.raises(ImportError):
+        entry()
+    assert not output.exists()
+
+
 def _load(source: str) -> dict[str, Any]:
-    nodes = [n for n in ast.parse(source).body if isinstance(n, ast.FunctionDef)]
+    nodes = [
+        n
+        for n in ast.parse(source).body
+        if isinstance(n, (ast.FunctionDef, ast.ClassDef))
+    ]
     namespace = {
         "Path": Path,
         "Any": Any,
+        "Callable": Callable,
+        "Mapping": Mapping,
+        "NamedTuple": NamedTuple,
         "hashlib": hashlib,
         "html": html,
         "re": re,
@@ -104,12 +171,13 @@ def test_component_capture_preserves_artifact_hashes_contact_pixels_and_errors(
         "exec",
     )
     current = _load(SOURCE.read_text())
+    identity = current["_figure_identity_provider"]()
     if changed:
         with pytest.raises(ValueError, match="completed artifact changed"):
             exec(code, namespace)
         with pytest.raises(ValueError, match="completed artifact changed"):
             current["_review_components"](
-                args, values["records"], suffixes, values["boundary"]
+                args, values["records"], suffixes, values["boundary"], identity
             )
     else:
         exec(code, namespace)
@@ -122,7 +190,7 @@ def test_component_capture_preserves_artifact_hashes_contact_pixels_and_errors(
         args.output.mkdir()
         assert (
             current["_review_components"](
-                args, values["records"], suffixes, values["boundary"]
+                args, values["records"], suffixes, values["boundary"], identity
             )
             == expected
         )
@@ -190,7 +258,10 @@ def test_selection_order_and_export_kinds_match_archive(
         ),
         namespace,
     )
-    assert _load(SOURCE.read_text())["_selected_records"](args) == (
+    current = _load(SOURCE.read_text())
+    assert current["_selected_records"](
+        args, current["_figure_identity_provider"]()
+    ) == (
         namespace["records"],
         namespace["suffixes"],
     )

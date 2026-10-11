@@ -8,10 +8,28 @@ import html
 import json
 import re
 import sys
+from collections.abc import Callable, Mapping
 from pathlib import Path
-from typing import Any
+from typing import Any, NamedTuple
 
 from PIL import Image, ImageDraw, ImageFont
+
+
+class FigureIdentityProvider(NamedTuple):
+    slug: Callable[[str], str]
+    pair_slug: Callable[[Mapping[str, Any]], str]
+    pair_identity: Callable[[Mapping[str, Any]], tuple[str, str, str, str, str, float]]
+
+
+def _figure_identity_provider() -> FigureIdentityProvider:
+    """Resolve all figure identities before boundary checks or output writes."""
+    from src.tools.shot_pattern_analysis.matched_supplement_figures import (
+        _slug,
+        pair_comparison_identity,
+        pair_comparison_slug,
+    )
+
+    return FigureIdentityProvider(_slug, pair_comparison_slug, pair_comparison_identity)
 
 
 def sha(path: Path) -> str:
@@ -167,22 +185,18 @@ def _review_components(
     records: list[dict[str, Any]],
     suffixes: list[str],
     boundary: dict[str, Any],
+    identity: FigureIdentityProvider,
 ) -> list[dict[str, Any]]:
     """Capture Bound Components Without Claiming Visual Acceptance."""
-    from src.tools.shot_pattern_analysis.matched_supplement_figures import (
-        _slug,
-        pair_comparison_slug,
-    )
-
     reviewed: list[dict[str, Any]] = []
     font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 22)
     for index, record in enumerate(
         records[args.offset : args.offset + args.limit], args.offset
     ):
         stem = (
-            pair_comparison_slug(record)
+            identity.pair_slug(record)
             if args.group == "pairs"
-            else _slug(record["cell"])
+            else identity.slug(record["cell"])
         )
         directory = "comparisons" if args.group == "pairs" else "cells"
         files = [args.report / "figures" / directory / f"{stem}_{s}" for s in suffixes]
@@ -235,19 +249,17 @@ def _review_components(
     return reviewed
 
 
-def _selected_records(args: Any) -> tuple[list[dict[str, Any]], list[str]]:
+def _selected_records(
+    args: Any, identity: FigureIdentityProvider
+) -> tuple[list[dict[str, Any]], list[str]]:
     """Select the Same Ordered Records and Complete Export Components."""
-    from src.tools.shot_pattern_analysis.matched_supplement_figures import (
-        pair_comparison_identity,
-    )
-
     if args.group == "pairs":
         records = json.loads(
             (args.report / "REPORT_SUPPLEMENT_COMPARISONS.json").read_text()
         )["comparisons"]
         if args.kind:
             records = [r for r in records if r["comparison_kind"] == args.kind]
-        records.sort(key=pair_comparison_identity)
+        records.sort(key=identity.pair_identity)
         suffixes = [
             f"density_{p}_social.{e}"
             for p in ("straight", "draw", "fade")
@@ -291,6 +303,7 @@ def main() -> None:
             "Use a fresh evidence directory and a nonnegative bounded selection"
         )
     sys.path.insert(0, str(args.repo.resolve()))
+    identity = _figure_identity_provider()
     from src.tools.shot_pattern_analysis.matched_supplement_pipeline import (
         _check_numeric_parity_reference,
         _load_numeric_parity_reference,
@@ -326,11 +339,10 @@ def main() -> None:
         )
     _check_numeric_parity_reference(reference, args.report)
     numeric = {name: sha(args.report / name) for name in reference["artifact_sha256"]}
-    records, suffixes = _selected_records(args)
+    records, suffixes = _selected_records(args, identity)
     args.output.mkdir(parents=True)
-    reviewed: list[dict[str, Any]] = []
     pending: list[dict[str, Any]] = []
-    reviewed = _review_components(args, records, suffixes, boundary)
+    reviewed = _review_components(args, records, suffixes, boundary, identity)
     if source_before != _report_source_hashes():
         raise ValueError("reviewed source changed")
     verify_files(args.report, [args.report / name for name in numeric], numeric)
