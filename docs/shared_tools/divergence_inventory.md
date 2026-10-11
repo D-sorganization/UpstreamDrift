@@ -31,7 +31,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `assessment` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `biomech` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `biomechanics` | 0 | 0 | 0 | 37 | 0 | 0 |
-| `body_part_viz` | 0 | 0 | 0 | 38 | 0 | 0 |
+| `body_part_viz` | 0 | 0 | 0 | 35 | 0 | 0 |
 | `calc_backend` | 31 | 14 | 5 | 2 | 0 | 45 |
 | `camera` | 0 | 0 | 0 | 0 | 4 | 0 |
 | `canonical_core` | 0 | 0 | 0 | 2 | 0 | 0 |
@@ -59,7 +59,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `docker_config.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `engine_core` | 0 | 0 | 0 | 24 | 0 | 0 |
 | `engine_loaders.py` | 0 | 0 | 0 | 1 | 0 | 0 |
-| `estimation` | 0 | 0 | 0 | 43 | 0 | 0 |
+| `estimation` | 0 | 0 | 0 | 40 | 0 | 0 |
 | `exceptions.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `feature_registry` | 0 | 0 | 0 | 6 | 0 | 0 |
 | `file_watcher` | 0 | 0 | 0 | 0 | 2 | 0 |
@@ -80,14 +80,13 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `launch_monitor` | 0 | 0 | 0 | 0 | 30 | 0 |
 | `launcher_embed` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `launcher_factory.py` | 0 | 0 | 0 | 1 | 0 | 0 |
-| `lifting` | 0 | 0 | 0 | 27 | 0 | 0 |
+| `lifting` | 0 | 0 | 0 | 29 | 0 | 0 |
 | `logging_pkg` | 0 | 0 | 0 | 0 | 3 | 0 |
 | `math_utils` | 0 | 0 | 0 | 2 | 0 | 0 |
-| `model_appearance` | 0 | 0 | 0 | 14 | 0 | 0 |
+| `model_appearance` | 0 | 0 | 0 | 15 | 0 | 0 |
 | `model_generation` | 27 | 52 | 14 | 20 | 1 | 79 |
-| `motion_matching` | 0 | 0 | 0 | 303 | 0 | 0 |
+| `motion_matching` | 0 | 0 | 0 | 294 | 0 | 0 |
 | `motion_pipeline` | 0 | 0 | 0 | 60 | 0 | 0 |
-| `movement_optimizer` | 0 | 0 | 0 | 169 | 0 | 0 |
 | `myofullbody` | 0 | 0 | 0 | 14 | 0 | 0 |
 | `native_lanes` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `neural_motion` | 0 | 0 | 0 | 60 | 0 | 0 |
@@ -141,8 +140,8 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `video_timing` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
-| `workspace` | 0 | 0 | 0 | 62 | 0 | 0 |
-| **Total** | **399** | **274** | **121** | **1820** | **808** | **673** |
+| `workspace` | 0 | 0 | 0 | 36 | 0 | 0 |
+| **Total** | **399** | **274** | **121** | **1613** | **808** | **673** |
 
 ## Diverged Files by Package
 
