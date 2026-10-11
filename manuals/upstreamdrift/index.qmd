@@ -21,6 +21,7 @@ UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
 {{< include chapters/13-native-muscle-replay.qmd >}}
 {{< include chapters/37-compiled-actuator-command-admission.qmd >}}
 {{< include chapters/38-project-myosuite-task-replay.qmd >}}
+{{< include chapters/31-myosuite-native-excitation-replay.qmd >}}
 
 {{< include chapters/19-native-torque-replay.qmd >}}
 {{< include chapters/22-native-drake-torque-replay.qmd >}}
@@ -67,7 +68,7 @@ UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
 
 {{< include chapters/28-native-marker-fit.qmd >}}
 
-{{< include chapters/26-native-opensim-geometry.qmd >}}
+{{< include chapters/60-native-opensim-geometry.qmd >}}
 
 {{< include chapters/27-native-muscle-experiment-bundle.qmd >}}
 
@@ -81,13 +82,15 @@ UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
 
 {{< include chapters/40-native-reference-conventions.qmd >}}
 
+{{< include chapters/61-opensim-native-muscle-capability.qmd >}}
+
 {{< include chapters/41-native-declared-cold-start.qmd >}}
 
 {{< include chapters/42-native-constrained-muscle-moco.qmd >}}
 
 {{< include chapters/48-native-constrained-mixed-moco.qmd >}}
 
-{{< include chapters/49-native-opensim-mixed-marker-observation.qmd >}}
+{{< include chapters/62-native-opensim-mixed-marker-observation.qmd >}}
 
 {{< include chapters/39-native-offline-muscle-matching.qmd >}}
 
@@ -105,7 +108,7 @@ UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
 
 {{< include chapters/47-native-zero-custom-mtp-reduction.qmd >}}
 
-{{< include chapters/49-native-opensim-mixed-marker-observation.qmd >}}
+{{< include chapters/49-calibrated-marker-replay-scoring.qmd >}}
 
 {{< include chapters/50-native-exact-557-excitation-diagnostic.qmd >}}
 
@@ -114,10 +117,6 @@ UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
 {{< include chapters/53-native-moco-physical-preflight.qmd >}}
 
 {{< include chapters/54-generic-shoulder-triangle-lamina.qmd >}}
-{{< include chapters/55-unqualified-moco-feasibility.qmd >}}
-
-{{< include chapters/24-native-path-work.qmd >}}
-
 {{< include chapters/55-unqualified-moco-feasibility.qmd >}}
 
 {{< include chapters/56-native-diagnostic-execution-contract.qmd >}}

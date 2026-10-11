@@ -150,6 +150,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 874 | `src/shared/python/tour_baselines/qualification.py` |
 | 872 | `src/shared/python/pendulum_simulator/gui/base_pendulum_widget.py` |
 | 870 | `src/shared/python/model_generation/cli/main.py` |
+| 866 | `src/engines/feedback_observation_qualification.py` |
 | 865 | `src/shared/python/signal_toolkit/fitting.py` |
 | 864 | `src/tools/simulation_backends_launcher/gui.py` |
 | 862 | `src/shared/python/pendulum_simulator/gui/pendulum_widget.py` |
@@ -188,6 +189,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 813 | `src/robotics/control/whole_body/wbc_controller.py` |
 | 813 | `src/shared/python/gui_pkg/help_system.py` |
 | 813 | `src/tools/model_explorer/urdf_code_editor.py` |
+| 812 | `src/engines/physics_engines/opensim/python/tour_matching/model_variants.py` |
 | 812 | `src/tools/starting_pose_matcher/live_view_controller.py` |
 | 811 | `src/engines/physics_engines/drake/python/src/pose_editor_tab.py` |
 | 811 | `src/tools/model_explorer/joint_manipulator.py` |

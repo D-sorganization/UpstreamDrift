@@ -4,7 +4,7 @@
 
 Child #11903, parent F07 #11791 and F08 #11792. Source branch
 `feat/feedback-native-markers-11903`; canonical calculation authority is
-`manuals/upstreamdrift/chapters/26-native-opensim-geometry.qmd`. This implements
+`manuals/upstreamdrift/chapters/60-native-opensim-geometry.qmd`. This implements
 native geometric callbacks and rejects metadata-only physical placeholders.
 It does not complete the generic grip/ground IK adapter or dynamics integration.
 

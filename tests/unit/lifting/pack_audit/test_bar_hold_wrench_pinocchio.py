@@ -19,6 +19,8 @@ import math
 import numpy as np
 import pytest
 
+from tests.support.real_engines import real_module
+
 pytestmark = pytest.mark.unit
 
 _G = 9.81
@@ -134,10 +136,7 @@ def test_bar_hold_wrench_unavailable_when_right_grip_missing() -> None:
 
 
 def _pinocchio_lift_adapter(lift: str):
-    pin = pytest.importorskip("pinocchio")
-    if not hasattr(pin, "__file__"):
-        # tests/unit/conftest.py installs a MagicMock when pinocchio is absent.
-        pytest.skip("pinocchio in sys.modules is a test double, not the real package")
+    real_module("pinocchio")
     from src.shared.python.lifting.pack_audit.adapters import create_adapter
     from src.shared.python.lifting.pack_audit.model import Anthropometry
     from src.shared.python.lifting.pack_audit.packs import locate_pack
