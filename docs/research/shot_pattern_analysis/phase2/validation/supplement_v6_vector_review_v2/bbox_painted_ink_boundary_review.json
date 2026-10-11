@@ -1,0 +1,154 @@
+{
+  "bbox_margin_groups": {
+    "-0.142485pt": {
+      "empty_or_unresolved_probe": 0,
+      "flagged_pdf_count": 4,
+      "ink_touches_page_edge": 0,
+      "minimum_ink_clearance_pt": 6.4977,
+      "outside_word_counts": {
+        "(m;": 4,
+        "Endpoint": 4,
+        "Lateral": 4,
+        "Positive)": 4,
+        "Right": 4
+      },
+      "painted_ink_inside_page": 20,
+      "word_edge_probes": 20
+    },
+    "-0.283110pt": {
+      "empty_or_unresolved_probe": 0,
+      "flagged_pdf_count": 177,
+      "ink_touches_page_edge": 0,
+      "minimum_ink_clearance_pt": 6.497,
+      "outside_word_counts": {
+        "(m;": 341,
+        "Endpoint": 13,
+        "Lateral": 341,
+        "Positive)": 341,
+        "Right": 341
+      },
+      "painted_ink_inside_page": 1377,
+      "word_edge_probes": 1377
+    },
+    "-1.029468pt": {
+      "empty_or_unresolved_probe": 0,
+      "flagged_pdf_count": 889,
+      "ink_touches_page_edge": 0,
+      "minimum_ink_clearance_pt": 6.9958,
+      "outside_word_counts": {
+        "(m;": 1791,
+        "Endpoint": 1791,
+        "Lateral": 1791,
+        "Positive)": 1791,
+        "Right": 1791
+      },
+      "painted_ink_inside_page": 8955,
+      "word_edge_probes": 8955
+    },
+    "-8.164759pt": {
+      "empty_or_unresolved_probe": 0,
+      "flagged_pdf_count": 52,
+      "ink_touches_page_edge": 0,
+      "minimum_ink_clearance_pt": 6.4952,
+      "outside_word_counts": {
+        "(m;": 52,
+        "Comparison": 26,
+        "Driver:": 4,
+        "Flight": 26,
+        "Flight-Trajectory": 26,
+        "Lateral": 52,
+        "Overhead": 26,
+        "Paths": 26,
+        "Pitching": 22,
+        "Position": 52,
+        "Positive)": 52,
+        "Raw": 26,
+        "Right": 52,
+        "Sample": 26,
+        "Wedge:": 22
+      },
+      "painted_ink_inside_page": 490,
+      "word_edge_probes": 490
+    }
+  },
+  "flagged_pdf_count": 1122,
+  "global_minimum_ink_clearance_pt": 6.4952,
+  "interpretation": "All measured flagged-word regions contain painted glyph ink, and each glyph has positive measured clearance from its flagged edge. No dark pixels entered page-wide outer 2 pt bands. The bbox flags reflect text extraction boxes extending beyond the page, not clipped painted glyphs, for this set under the recorded native renderer; they are not accepted solely from the parser result.",
+  "manual_full_page_visual_review_count": 6,
+  "manual_visual_representatives": [
+    {
+      "manual_visual_review": "full_page_inspected_no_clipping_at_flagged_edges",
+      "path": "cells/pitching_wedge_lean0_curve2_rotation1_combined1_dd970d80dc_overhead.pdf",
+      "png_path": "/tmp/shot-pattern-delivery-resume/bbox_painted_ink_v1/representatives/0001_c99f42027138.png",
+      "png_sha256": "3e0cc6548fab5fb3a7213404ca689d7663163b9c7f98291d870266faa5d3fa37",
+      "source_sha256": "c99f42027138cb2129aaf7056a0bde790d689192011b8bf0599f4c16cf6bfd45"
+    },
+    {
+      "manual_visual_review": "full_page_inspected_no_clipping_at_flagged_edges",
+      "path": "cells/pitching_wedge_lean0_curve2_rotation1_shaft_strike_714f205b45_density.pdf",
+      "png_path": "/tmp/shot-pattern-delivery-resume/bbox_painted_ink_v1/representatives/0017_3cac1c3d4ddc.png",
+      "png_sha256": "95cce23518be77c5edd11326b032e5c5c8e293200daab248202fcac4d30a2353",
+      "source_sha256": "3cac1c3d4ddc1be2c5962f14c2deff5ff381eafb0a2ba03435e49d82987e13d1"
+    },
+    {
+      "manual_visual_review": "full_page_inspected_no_clipping_at_flagged_edges",
+      "path": "cells/pitching_wedge_lean0_curve2_rotation1_shaft_strike_714f205b45_density_social.pdf",
+      "png_path": "/tmp/shot-pattern-delivery-resume/bbox_painted_ink_v1/representatives/0018_e370347c6536.png",
+      "png_sha256": "9ee41ae5546554e919577ee147bc9f61bf3bce50dada1399052ebe289383e6cb",
+      "source_sha256": "e370347c6536f8416ff6bed1eb7f1bbd63534b25128b4b0afb8a2c3c11935758"
+    },
+    {
+      "manual_visual_review": "full_page_inspected_no_clipping_at_flagged_edges",
+      "path": "cells/driver_lean5_curve2_rotation1_combined2_deedbe331c_density.pdf",
+      "png_path": "/tmp/shot-pattern-delivery-resume/bbox_painted_ink_v1/representatives/0071_e5f1ee0913a7.png",
+      "png_sha256": "4ec52f37ced527f0ae29e2fefb5cbb14366f502680bfa1da4b03c5366dd820eb",
+      "source_sha256": "e5f1ee0913a7c523533b93875c9b9d04971894cc640b51bb71fa830adff098de"
+    },
+    {
+      "manual_visual_review": "full_page_inspected_no_clipping_at_flagged_edges",
+      "path": "cells/driver_lean5_curve2_rotation2_shaft_only_9115e9cd23_overhead.pdf",
+      "png_path": "/tmp/shot-pattern-delivery-resume/bbox_painted_ink_v1/representatives/0081_f97f6c67167c.png",
+      "png_sha256": "179af4ca1c4f5ed60bb58e7703e64a7aad1451a4f5aa46cd3e08e9a1c20c4fd2",
+      "source_sha256": "f97f6c67167cf4d6c3d437d684637b17a42f8776eec81a737a93219ee3f4f26a"
+    },
+    {
+      "manual_visual_review": "full_page_inspected_no_clipping_at_flagged_edges",
+      "path": "cells/driver_lean5_curve2_rotation2_shaft_only_9115e9cd23_overhead_social.pdf",
+      "png_path": "/tmp/shot-pattern-delivery-resume/bbox_painted_ink_v1/representatives/0082_d8b14e76ada4.png",
+      "png_sha256": "e549c750fa68055bdf781760ae9ab88e1b416f26b2a0e545d7ca84078ee31364",
+      "source_sha256": "d8b14e76ada43c858d2d28fefc6ed567251b38621e36125af4aee9c49c291722"
+    }
+  ],
+  "measurement_finalizer": {
+    "detail": "Recomputed grouped summary from all 1122 durable per-PDF rows; no PDF was rerendered by finalizer.",
+    "exit_code": 0,
+    "final_receipt_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_vector_review_v2/bbox_painted_ink_boundary_review.json"
+  },
+  "nonzero_page_edge_band_counts": {},
+  "original_render_process": {
+    "exit_code": 1,
+    "pid": 1923641,
+    "terminal_error": "TypeError sorting mixed float/string keys in post-render JSON summary; all 1122 per-PDF render rows were flushed before this finalization error"
+  },
+  "pdftoppm_path": "/home/dieterolson/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/override/pdftoppm",
+  "pdftoppm_version": "26.05.0",
+  "per_pdf_measurements_compression": "gzip JSONL; one record per flagged PDF, including source hash, raster hash, every flagged word/edge probe, ink clearance, page-edge band counts.",
+  "per_pdf_measurements_path": "supplement_v6_vector_review_v2/bbox_painted_ink_per_pdf.jsonl.gz",
+  "per_pdf_measurements_sha256": "0cc3e1581a32e6711260ec6586ee94c5fe5eeb548570caf4678f7859b22edc56",
+  "potential_clipping_or_unresolved_probes": [],
+  "qualified_vector_rasterization_helper_sha256": "0bff9dc885094f3d320cb97f69766cb70b4a9d9a3cdfb70cf52a06396300f736",
+  "render_dpi": 144,
+  "render_failure_count": 0,
+  "rendered_count": 1122,
+  "schema": "bbox-painted-ink-edge-review/1",
+  "source_hash_mismatch_count": 0,
+  "source_hash_mismatches": [],
+  "source_hashes_verified_after_render": 1122,
+  "status": "measurements_complete_with_finalizer_repair",
+  "strict_loader_receipt_sha256": "0153d81e1a7c7c91c66c6f0f378081ca8474efdf8a5d2b4a94f15fd16e898bf4",
+  "structural_summary_sha256": "b9a56a881156d717fbef7fb3ba912dc51312ed07cdf355f7c99a699c5648df56",
+  "threshold": "RGB/gray luminance < 245 counted as painted ink; for each Poppler-flagged word, inspected raster ink within its page-clipped word bbox expanded by 2 pt and measured clearance to the flagged page edge; page-wide outer 2-pt bands also counted.",
+  "word_edge_probe_status_counts": {
+    "painted_ink_inside_page": 10842
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "command": [
+    "/tmp/shot-pattern-validation-venv-20261009/bin/python",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/build_png_reuse_candidates.py"
+  ],
+  "workdir": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift",
+  "actual_exit_code": 0,
+  "script_sha256": "1583e6780461b2bbf1aaab2be9c62658e4b98461ac70fb444f77333fbfa1e3e3",
+  "output_sha256": "edff8bd3738cbcc01b385cc79938c4ad4058d89f3cb07be824303321067e0bb3",
+  "recorded_utc": "2026-10-11T00:28:47.815597+00:00"
+}

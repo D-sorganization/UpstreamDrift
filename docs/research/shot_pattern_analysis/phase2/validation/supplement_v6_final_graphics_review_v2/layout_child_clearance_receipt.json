@@ -1,0 +1,21 @@
+{
+  "checks": [
+    {
+      "diagnostic": "all_density_clearance_diagnostic.py",
+      "receipt": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_top_clearance.json",
+      "receipt_sha256": "bb70a68d4807ef2b4fe6c9b9d41466a3dddc3b88c965f450325c7fc18fa89de6",
+      "source_sha256": "472a2008b7bf68cf91eff4554b30416777c1dda8db605a4807d9b2debefdd890"
+    },
+    {
+      "diagnostic": "all_density_colorbar_diagnostic.py",
+      "receipt": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_right_clearance.json",
+      "receipt_sha256": "aa6292766b0ff06ab3737a8f023566e7680702e62c20b50720f097f1da327143",
+      "source_sha256": "239d8f753bdcc78e72509d5892c9f14381ca8c72c000198cbdd97bcf89f54996"
+    }
+  ],
+  "child_figures": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons",
+  "schema": "shot-pattern-layout-child-clearance/1",
+  "svg_count": 384,
+  "threshold_pt": 2.0,
+  "verdict": "pass"
+}
