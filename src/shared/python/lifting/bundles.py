@@ -239,7 +239,9 @@ def _foot_frame(kin: Any, q: Array, ground: Any) -> SagittalFrame:
         forward += points[f"forefoot_{side}"] - points[f"heel_{side}"]
     up = np.asarray(ground.normal, dtype=float)
     forward = forward - (forward @ up) * up
-    return SagittalFrame(forward=tuple(forward), up=tuple(up))
+    fx, fy, fz = (float(x) for x in forward)
+    ux, uy, uz = (float(x) for x in up)
+    return SagittalFrame(forward=(fx, fy, fz), up=(ux, uy, uz))
 
 
 def _standing_targets(points: Mapping[str, Array], frame: SagittalFrame) -> Array:
@@ -315,11 +317,6 @@ def lift_to_full_body(
     ground = GroundPlane(normal=(0.0, 0.0, 1.0), height_m=0.0)
     locked = {n: float(seed[order.index(n)]) for n in UPPER_LIMB_COORDINATES}
     posture = dict.fromkeys(POSTURE_COORDINATES, (0.0, opts.posture_weight))
-    common = {
-        "ground": ground,
-        "prior_weight": opts.prior_weight,
-        "posture_prior": posture,
-    }
     seed_points = dict(zip(LANDMARK_LABELS, kin.marker_positions(seed), strict=True))
     upright = _standing_targets(seed_points, _foot_frame(kin, seed, ground))
     standing = kin.solve_pose(
@@ -329,7 +326,9 @@ def lift_to_full_body(
         locked=locked,
         flat_feet=STANCE_SPHERES,
         iterations=opts.standing_iterations,
-        **common,
+        ground=ground,
+        prior_weight=opts.prior_weight,
+        posture_prior=posture,
     ).q
     frame = _foot_frame(kin, standing, ground)
     points = dict(zip(LANDMARK_LABELS, kin.marker_positions(standing), strict=True))
@@ -342,7 +341,9 @@ def lift_to_full_body(
         locked=locked,
         flat_feet_per_frame=[STANCE_SPHERES] * len(targets),
         iterations=opts.iterations,
-        **common,
+        ground=ground,
+        prior_weight=opts.prior_weight,
+        posture_prior=posture,
     )
     residual, bar, closure, lowest = _fit_arrays(kin, fits)
     return FullBodyLift(
