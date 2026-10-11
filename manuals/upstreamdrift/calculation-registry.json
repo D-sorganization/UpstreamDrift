@@ -146,6 +146,11 @@
       "resolution": "Inventory the provisional native continuous-state excitation replay in tour_matching/muscle_replay.py and chapters/13-native-muscle-replay.qmd. Actual OpenSim 4.6 one-DOF compliant-muscle tests establish bounded input playback, continuous initialization and uninterrupted native stepping only. Discrete/plugin state, external-resource identity, passive/contact force policy, full-body anatomy, capture accuracy and full-horizon independent muscle/contact replay remain unqualified. Preserve cold-start policy and forbid weaker shared rigid-body/restarted/external-force evidence from qualifying the endpoint."
     },
     {
+      "id": "UP-D1-native-muscle-actuator-classification-inventory",
+      "owner": "UpstreamDrift issue #12249",
+      "resolution": "Inventory the MyoSuite muscle-analysis actuator classifier in src/engines/physics_engines/myosuite/python/muscle_analysis.py and chapter 31. Classification uses the installed MuJoCo mjDYN_MUSCLE enum; a mixed native MuJoCo 3.8.0 fixture excludes filter and motor actuators without Gym registration. This verifies actuator dynamic-type selection only, not muscle physiology, capture mapping, excitation replay, native MyoSuite task execution or cross-engine parity."
+    },
+    {
       "id": "UP-D1-frozen-marker-holdout-inventory",
       "owner": "UpstreamDrift issue #11899",
       "resolution": "Inventory score_frozen_marker_offsets and chapter 13 frozen marker scoring: supplied body-local placements and proper predicted transforms, pooled valid-sample Euclidean RMS, fail-closed missing support, and unchanged observation clock. Existing exploratory heldout placement refitting is not independent prediction. This pure scoring boundary cannot establish training-only provenance, anthropometry, anatomical attachments, independent subject/trial splits or native replay qualification; private D02 and publication remain blocked."
@@ -334,6 +339,16 @@
       "id": "UP-D1-generic-shoulder-triangle-lamina-inventory",
       "owner": "UpstreamDrift issue #12211",
       "resolution": "Inventory provisional chapter54 and generic_shoulder_lamina.py: exact final 557-muscle source and retained CEINMS right mesh SHA-256s, explicitly hypothetical right identity placement and derived left local-z vertex reflection, a Tools-owned unsigned triangle-multiset fixed-mass lamina law, four COM/full-tensor replacements and explicit visual asset references only. Actual OpenSim4.6 reload of the separately identified candidate passes the 40-body source/native principal-inertia gate; sampled all-body transforms and QErr/UErr match the unmodified source at three declared poses. The original source remains physically rejected for four shoulder bodies; source anatomy, tissue ownership, passive physiology, native force/work chart, contact/grip, head/marker mapping, full-horizon replay, all17/six-engine parity and publication remain blocked."
+    },
+    {
+      "id": "UP-D1-unqualified-moco-feasibility-inventory",
+      "owner": "UpstreamDrift issue #12225",
+      "resolution": "Inventory provisional chapter55: explicit boolean request-bound numerical feasibility permits only retained passive-policy-unavailable with native observation and admitted physical bodies. All other blockers enforce, supplied limits cannot be overridden, and no scientific qualification is granted. Native Millard/Thelen solve, export and independent replay tests pass. Full private muscle-driven capture, support/grip and all17/six-engine parity remain open. Publication blocked."
+    },
+    {
+      "id": "UP-D1-native-path-work-inventory",
+      "owner": "UpstreamDrift issue #11856",
+      "resolution": "Inventory original native PathActuator fixed/moving-point force-length diagnostic in scripts/diagnostics/native_path_work.py and chapters/24-native-path-work.qmd. Actual native unit-tension acceleration agrees with native moment arm while the moving same-body segment produces a persistent geometric derivative difference. Existing consistency gate rejects nonfinite and numerically unresolved evidence; original native tests retain the difference rather than changing runtime or donor anatomy. Exact source and runtime identities are separate and source-to-binary verification is unavailable. Physiological fitting, donor path/input-domain validation, contact, complete-state full-capture replay, and manual release remain blocked."
     },
     {
       "id": "UP-D1-native-mixed-marker-observation-inventory",

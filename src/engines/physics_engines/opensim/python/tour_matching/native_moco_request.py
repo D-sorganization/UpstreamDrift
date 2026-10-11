@@ -205,6 +205,7 @@ def load_native_moco_request(path: Path) -> NativeMocoRequest:
         payload["excluded_markers"],
         declared,
         _parse_mixed_profile(payload.get("mixed_actuation")),
+        payload.get("allow_unqualified_passive_diagnostic", False),
     )
 
 
