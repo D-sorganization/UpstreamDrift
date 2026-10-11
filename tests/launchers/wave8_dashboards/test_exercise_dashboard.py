@@ -298,6 +298,69 @@ class TestExerciseDashboard:
             win.close()
 
 
+class TestLiftBaselineDock:
+    """The Cross-Engine Lift Baseline dock (LIFT-8, #11748)."""
+
+    def test_squat_has_lift_baseline_dock(
+        self, qapp, patched_child_dashboards, monkeypatch
+    ) -> None:
+        monkeypatch.setattr(
+            "src.launchers.exercise_dashboard.discover_exercise",
+            lambda x: ["MuJoCo_Models"],
+        )
+        from src.launchers.exercise_dashboard import ExerciseDashboard
+
+        win = ExerciseDashboard("squat")
+        try:
+            assert win.lift_baseline_dock is not None
+            assert win.lift_baseline_dock.windowTitle() == "Cross-Engine Lift Baseline"
+        finally:
+            win.close()
+
+    def test_gait_has_no_lift_baseline_dock(
+        self, qapp, patched_child_dashboards, monkeypatch
+    ) -> None:
+        monkeypatch.setattr(
+            "src.launchers.exercise_dashboard.discover_exercise",
+            lambda x: ["MuJoCo_Models"],
+        )
+        from src.launchers.exercise_dashboard import ExerciseDashboard
+
+        win = ExerciseDashboard("gait")
+        try:
+            assert win.lift_baseline_dock is None
+        finally:
+            win.close()
+
+    def test_panel_failure_does_not_crash_dashboard(
+        self, qapp, patched_child_dashboards, monkeypatch
+    ) -> None:
+        """A broken lift-baseline panel must fall back to an error label."""
+        monkeypatch.setattr(
+            "src.launchers.exercise_dashboard.discover_exercise",
+            lambda x: ["MuJoCo_Models"],
+        )
+        import src.launchers.lift_baseline_panel as panel_mod
+        from unittest.mock import MagicMock
+
+        monkeypatch.setattr(
+            panel_mod,
+            "LiftBaselinePanel",
+            MagicMock(side_effect=RuntimeError("boom")),
+        )
+        from PyQt6.QtWidgets import QLabel
+
+        from src.launchers.exercise_dashboard import ExerciseDashboard
+
+        win = ExerciseDashboard("squat")
+        try:
+            assert win.lift_baseline_dock is not None
+            assert isinstance(win.lift_baseline_dock.widget(), QLabel)
+            assert "unavailable" in win.lift_baseline_dock.widget().text().lower()
+        finally:
+            win.close()
+
+
 class TestGetDockableUi:
     def test_uses_env_variable(
         self, qapp, patched_child_dashboards, monkeypatch
