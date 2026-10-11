@@ -142,6 +142,46 @@ def inspect_native_path_work_identity(
     osim: Any,
 ) -> NativePathWorkIdentity:
     """Derive coordinate, ConditionalPathPoint and function bounds natively."""
+    source_components = _loaded_path_components(
+        model,
+        declaration,
+        path_component=path_component,
+        moving_point_path=moving_point_path,
+        coordinate_path=coordinate_path,
+        osim=osim,
+    )
+    chart_bounds, active_bounds, function_bounds = _native_path_domains(
+        declaration,
+        coordinate_path=coordinate_path,
+        moving_point=source_components[0],
+        coordinate=source_components[1],
+        point_set=source_components[2],
+        point_index=source_components[3],
+        osim=osim,
+    )
+    return NativePathWorkIdentity(
+        source_sha256=declaration.source_sha256,
+        path_component=path_component,
+        coordinate_path=coordinate_path,
+        point_paths=source_components[4],
+        source_component_paths=source_components[5],
+        chart_bounds=chart_bounds,
+        active_bounds=active_bounds,
+        function_bounds=function_bounds,
+        domain_provenance="native-loaded-source",
+    )
+
+
+def _loaded_path_components(
+    model: Any,
+    declaration: DeclaredColdStart,
+    *,
+    path_component: str,
+    moving_point_path: str,
+    coordinate_path: str,
+    osim: Any,
+) -> tuple[Any, Any, Any, int, tuple[str, ...], tuple[str, ...]]:
+    """Verify the requested path/point/coordinate against the loaded source."""
     source_bytes = declaration.model_path.read_bytes()
     if hashlib.sha256(source_bytes).hexdigest() != declaration.source_sha256:
         raise ValueError(
@@ -176,10 +216,30 @@ def inspect_native_path_work_identity(
         raise ValueError(
             "moving point is absent from the declared path point set"
         ) from error
+    return (
+        native_point,
+        native_coordinate,
+        point_set,
+        point_index,
+        ordered_points,
+        tuple(by_path),
+    )
 
+
+def _native_path_domains(
+    declaration: DeclaredColdStart,
+    *,
+    coordinate_path: str,
+    moving_point: Any,
+    coordinate: Any,
+    point_set: Any,
+    point_index: int,
+    osim: Any,
+) -> tuple[tuple[float, float], tuple[float, float], tuple[float, float]]:
+    """Read coordinate, adjacent conditional point and spline domains."""
     native_bounds = (
-        float(native_coordinate.getRangeMin()),
-        float(native_coordinate.getRangeMax()),
+        float(coordinate.getRangeMin()),
+        float(coordinate.getRangeMax()),
     )
     declared_bounds = declaration.chart_bounds.get(coordinate_path)
     if declared_bounds is None:
@@ -209,9 +269,9 @@ def inspect_native_path_work_identity(
 
     function_domains: list[tuple[float, float]] = []
     for coordinate_for_axis, function in (
-        (native_point.getXCoordinate(), native_point.get_x_location()),
-        (native_point.getYCoordinate(), native_point.get_y_location()),
-        (native_point.getZCoordinate(), native_point.get_z_location()),
+        (moving_point.getXCoordinate(), moving_point.get_x_location()),
+        (moving_point.getYCoordinate(), moving_point.get_y_location()),
+        (moving_point.getZCoordinate(), moving_point.get_z_location()),
     ):
         if (
             coordinate_for_axis is None
@@ -242,17 +302,7 @@ def inspect_native_path_work_identity(
     )
     if function_bounds[0] >= function_bounds[1]:
         raise ValueError("moving path functions have no shared coordinate domain")
-    return NativePathWorkIdentity(
-        source_sha256=declaration.source_sha256,
-        path_component=path_component,
-        coordinate_path=coordinate_path,
-        point_paths=ordered_points,
-        source_component_paths=tuple(by_path),
-        chart_bounds=chart_bounds,
-        active_bounds=active_bounds,
-        function_bounds=function_bounds,
-        domain_provenance="native-loaded-source",
-    )
+    return chart_bounds, active_bounds, function_bounds
 
 
 @dataclass(frozen=True)
