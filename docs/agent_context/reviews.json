@@ -19,7 +19,7 @@
       "rationale": "Preserve capture boundary review under baseline capability inventory ORG-01"
     },
     "launcher-atlas": {
-      "fingerprint": "279446322560959cce7fd7062e4f2c7864b715363053c138c38aa7e058a64d06",
+      "fingerprint": "0cb24014914b311443f1bee75a0ff34f3325b637e34183f5a6f4dff8afc08ea7",
       "inputs": {
         "docs/agent_context/contracts/launcher-atlas.md": "f5976baa4ef78bcf71ede27afb4e7a85f3f72cfedbb3cdbe9b40e48d4016ae94",
         "scripts/capability_atlas/goals.py": "a4c449dbd07dc398530d7c85eefc697d36b6acaee48b7953b7e060fb413cc131",
@@ -29,14 +29,14 @@
         "src/config/feature_parity.json": "0d1b2e3c3fc7e02e2b583febb5bf525cde1a74703457a0217e7de80d413988f8",
         "src/config/launcher_manifest.json": "45b6cea9134f9896b1a719c23c6fc77d59d4aed751bfe62908ad888acdc86037",
         "src/config/launcher_manifest_loader.py": "aed6769fbdfc595400d0bd5d15bb75e8fbfda80243a586894d73d36b2d056a00",
-        "src/config/models.yaml": "53b2f7a9d74064517de570dd96cf2e2b565e9a8b0f95ff5ca02417cc611a0897",
+        "src/config/models.yaml": "2a2e303aa92f6dda0ef3868fcc881ccbdbc54cf362ac3aae931333163969b90f",
         "src/tools/capture_rig/goal_catalog.py": "0461380a7c083812bed54c56e28a763a70679e083767303167b0ce07ef43d4e5",
         "src/tools/capture_rig/goal_planner.py": "3bb60b46953b477d13fc358baf6fad5fecdcf4860ce840998d325bff0bec3121",
         "tests/scripts/test_capability_atlas.py": "1d06a18c83571769b61d9b02cc86bbff3e22a089a9a8f11f7944fca44d72cc5b",
         "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
         "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414"
       },
-      "rationale": "Independently reviewed merged launcher/models, web metadata and feature-parity registries against the launcher-atlas contract and capability builder/renderers. Confirmed source-backed IDs and parity/gap/exempt distinctions, valid capture-goal bindings, deterministic generated views, and rejection of duplicate/dangling/unsafe graph declarations. Ran atlas, launcher-manifest, capture-goal-catalog and goal-planner suites: 71 passed (108 warnings) in 84.10 s; all relation inputs and additional review sources unchanged before/after. Exact pinned Tools agent_context module was loaded via isolated PYTHONPATH; no review was automatically renewed. This qualifies the registry-to-atlas projection only, not engine runtime health, web parity beyond declared status, physical acceptance or study publication."
+      "rationale": "Reviewed the launcher-atlas contract, public config facade and LauncherManifest loader, and capability_atlas model/render/goals consumers. This follow-up adds only the shot_pattern_analysis help path; atlas identity, category, status, path, capability, parity/gap/exempt fields and capture-goal prerequisites are unchanged. Governed atlas regeneration updates only the models.yaml input hash in graph.json. The launcher-manifest, capability-atlas, capture-goal-catalog and goal-planner suites passed all 71 tests after a reproduced generated-freshness failure. Exact Tools pin 86d0f28 is verified by agent-context status. This qualifies metadata projection and generated freshness only, not runtime availability, scientific qualification or repository-wide acceptance."
     },
     "model-backends": {
       "fingerprint": "da739fcd3c56f6c4a3923b4f31202e515023487a49d54ca449090d33186a9685",

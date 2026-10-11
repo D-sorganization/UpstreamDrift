@@ -8,4 +8,4 @@ branch: "codex/shot-pattern-validation-followup"
 paths: "src/config/models.yaml,docs/help/shot_pattern_analysis.md,tests/research,tests/companion,docs/agents/handoffs"
 ---
 
-PR #12278 remains blocked. Separate user-authorized follow-up; 97 focused tests pass after failing-first fixes. Full canonical acceptance remains outstanding; no frozen study output or publication receipt changed.
+PR #12278 remains blocked. Separate user-authorized follow-up; 168 focused tests pass after failing-first fixes. Full canonical acceptance remains outstanding; no frozen study output or publication receipt changed.

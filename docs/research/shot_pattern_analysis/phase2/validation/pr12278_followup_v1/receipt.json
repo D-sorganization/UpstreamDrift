@@ -30,8 +30,15 @@
       "passed": 2,
       "exit_code": 0
     },
-    "unique_total": 97,
-    "note": "Two peer preservation tests are included in root43; extra final rerun not counted twice. Worktree sources changed only scoped tests/config/docs."
+    "unique_total": 168,
+    "note": "Two peer preservation tests are included in root43; extra final rerun not counted twice. Worktree sources changed only scoped tests/config/docs.",
+    "launcher_boundary": {
+      "passed": 71,
+      "exit_code": 0,
+      "runtime": "/tmp/shot-pattern-validation-venv-20261009/bin/python",
+      "command": "python -m pytest tests/scripts/test_capability_atlas.py tests/config/test_launcher_manifest.py tests/tools/capture_rig/test_goal_catalog.py tests/tools/capture_rig/test_goal_planner.py -p no:pytestqt -q",
+      "scope": "metadata-only launcher/atlas boundary; initial freshness failure then governed regeneration and green rerun"
+    }
   },
   "remaining_gates": [
     "Architecture budget:67 CI findings (62 study,5 unrelated physics); no exemptions added",
@@ -85,6 +92,18 @@
     "peer-handoff-final-green.log": {
       "raw_sha256": "49790d289be24a06614e923bc0f3ea662eab9a70b713ccfa1de4044ad68348fd",
       "gzip_sha256": "ddce0be1b56a88657455b63233b9104eb88977e7003e825d6e12305e9bea268f"
+    },
+    "launcher-boundary-red.log": {
+      "raw_sha256": "ac8c66fa124368b108ce379fd38a2f024fade81d4b3e92da803ad49f86c0f473",
+      "gzip_sha256": "6596bc7f8d16977a886240e0c68b8a853e17e9e2c41b005a4606a1803daa65f5"
+    },
+    "launcher-boundary-green.log": {
+      "raw_sha256": "a89475b037b52e0f204e4210752fe93236dfcc67a2c60ff24dbf2516f36e251f",
+      "gzip_sha256": "9262079928eb8027c44715f6c4c8a5bc812b7ce945ae2cf582129df6843b31fb"
+    },
+    "context-red.log": {
+      "raw_sha256": "9eba65079a7f1126d757f4801221e5974bed7c8d4d90cd441b8a990f1af9c6a8",
+      "gzip_sha256": "afb76abbb2b24ce006a24442177e93311e616768926d9edfdadbd42d32844990"
     }
   },
   "disposition": "Partial blocker repair; PR remains blocked; no complete-project or physical acceptance claim",
@@ -94,5 +113,21 @@
     "MPLBACKEND": "Agg",
     "MUJOCO_GL": "egl",
     "SDL_VIDEODRIVER": "dummy"
+  },
+  "development_context": {
+    "boundary": "launcher-atlas",
+    "review": "Manually renewed only after source/contract review and71passing tests",
+    "render": "generated README.md and index.html",
+    "check": {
+      "ok": true,
+      "errors": []
+    },
+    "evaluate": {
+      "correct": 12,
+      "total": 12,
+      "passed": true
+    },
+    "tools_runtime": "matched exact86d0f28b1cc5acf61185e07e320c816c2d005512",
+    "scope": "Registered source freshness and retrieval only; no physical or full repository acceptance"
   }
 }

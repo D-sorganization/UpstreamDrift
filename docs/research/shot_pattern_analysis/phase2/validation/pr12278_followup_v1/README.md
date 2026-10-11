@@ -8,7 +8,8 @@ peer-handoff split preserves all original bytes when its four parts are joined
 with one newline between parts. No frozen report, simulation, manifest, article,
 or publication receipt changed.
 
-The focused suites pass 97 distinct tests. The two peer tests were rerun after
+The focused suites pass 168 distinct tests, including 71 launcher/atlas boundary
+tests after governed atlas regeneration and explicit contract review. The two peer tests were rerun after
 formatting and remain included in that total. See `receipt.json` and compressed
 logs for exact scopes. These results were collected at the recorded local base
 with the scoped uncommitted changes; integration against the newer remote PR
