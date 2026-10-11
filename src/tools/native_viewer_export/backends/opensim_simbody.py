@@ -31,6 +31,11 @@ class OpenSimSimbodyBackend:
     """OpenSim's simbody-visualizer captured under xvfb."""
 
     engine = "opensim"
+    #: recorded in the export result: the ball cannot be hidden after impact
+    ball_limitation = (
+        "ball stays visible after impact: the simbody visualizer caches fixed "
+        "geometry, so it cannot be hidden per frame"
+    )
 
     def unavailable_reason(self) -> str | None:
         if find_spec("opensim") is None:

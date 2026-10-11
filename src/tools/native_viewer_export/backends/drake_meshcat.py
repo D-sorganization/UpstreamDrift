@@ -21,6 +21,11 @@ from src.shared.python.force_overlay.renderers.meshcat_glyphs import (
 )
 from src.shared.python.golf_view_presets import drake_meshcat_camera_pose
 from src.shared.python.motion_matching.visual_skeleton import derive_visual_skeleton
+from src.tools.native_viewer_export.backends._ball import (
+    DrakeBallSink,
+    MeshcatBall,
+    update_meshcat_frame,
+)
 from src.tools.native_viewer_export.backends._club import club_parts, write_obj
 from src.tools.native_viewer_export.backends._head import head_mesh_files
 from src.tools.native_viewer_export.backends._meshcat_page import (
@@ -204,12 +209,16 @@ class DrakeMeshcatBackend:
             if overlay is not None
             else None
         )
+        ball = (
+            MeshcatBall(DrakeBallSink(meshcat), swing.ball)
+            if swing.ball is not None
+            else None
+        )
         with MeshcatPage(meshcat.web_url(), settings.width, settings.height) as page:
             looks = view_lookats(settings, indices, overlay)
             for pos, k in enumerate(indices):
                 set_state(k)
-                if glyphs is not None and overlay is not None:
-                    glyphs.update(overlay.glyphs_at(k))
+                update_meshcat_frame(ball, glyphs, overlay, swing, k)
                 tiles: dict[str, Image8] = {}
                 for view in settings.views:
                     eye, target = drake_meshcat_camera_pose(

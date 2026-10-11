@@ -27,6 +27,7 @@ from src.shared.python.golf_view_presets import (
 )
 from src.shared.python.motion_matching.same_input import InputBundle
 from src.shared.python.motion_matching.visual_skeleton import derive_visual_skeleton
+from src.tools.native_viewer_export.ball import BALL_RGBA, BallPlacement
 from src.tools.native_viewer_export.backends._club import club_parts
 from src.tools.native_viewer_export.backends._head import head_mesh_files
 from src.tools.native_viewer_export.backends._scene import (
@@ -41,6 +42,7 @@ FOV_Y_RAD = VIEWER_FOV_Y_RAD
 SETTLE_S = 0.6
 _GREY = (0.75, 0.78, 0.85)
 _SHAPE_GREY = (0.7, 0.72, 0.8)
+BALL_RGB = BALL_RGBA[:3]
 
 
 def require_virtual_display() -> str:
@@ -178,6 +180,26 @@ def build_model(osim: Any, spec_bytes: bytes) -> tuple[Any, float]:
     return model, float(skeleton.ground.height_m)
 
 
+def attach_ball(osim: Any, model: Any, ball: dict[str, Any]) -> None:
+    """Attach the decorative ball as a sphere on the model's ground (visual only).
+
+    Limitation: the simbody visualizer caches fixed model geometry when the
+    system is initialised, and toggling the Appearance visibility or opacity
+    afterwards does not redraw (verified by a smoke render), so the ball stays
+    visible after impact in OpenSim clips.
+    """
+    placement = BallPlacement.from_dict(ball)
+    _attach(
+        osim,
+        model.updGround(),
+        np.eye(3),
+        placement.position_m,
+        osim.Sphere(placement.radius_m),
+        BALL_RGB,
+        9000,
+    )
+
+
 def set_camera(
     osim: Any, viz: Any, view: str, job: WorkerJob, lookat_m: list[float]
 ) -> None:
@@ -198,6 +220,8 @@ def main(job_path: str) -> None:
     bundle = InputBundle.load(Path(job.bundle_path))
     q = np.load(job.q_path)
     model, ground_h = build_model(osim, bundle.spec_bytes)
+    if job.ball:
+        attach_ball(osim, model, job.ball)
     model.setUseVisualizer(True)
     state = model.initSystem()
     viz = model.updVisualizer().updSimbodyVisualizer()
