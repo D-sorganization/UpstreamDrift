@@ -49,6 +49,18 @@ The optional bounded search implementation has one numerical boundary: a finite 
 
 ## OpenSim Muscle Endpoint
 
+### Source-Bound Structural Weld Admission (#12280)
+
+The constrained-muscle source policy may admit an exact native `WeldJoint`
+only after its native cast succeeds, it has zero coordinates, and its parent
+and child resolve to distinct absolute-path `Body`, `Ground`, or
+`PhysicalOffsetFrame` objects. The source model bytes bind the socket and
+offset transforms. This rule does not add `WeldJoint` to the strict base
+component set or authorize `WeldConstraint`, plugins, controllers, prescribed
+motion, or undeclared forces. The native synthetic fixture and independent
+saved-excitation replay remain pending a bounded execution review; no physical
+or production-model qualification follows from this software admission.
+
 Before any controller or muscle parameter tuning, run the F07f native source
 reference observer on each exact source artifact and a declared post-initSystem
 or complete named continuous state at the initialized clock. Record achieved
