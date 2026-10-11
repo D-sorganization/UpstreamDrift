@@ -4,16 +4,38 @@ Machine-readable record: [`src/config/impact_acceptance.json`](../../src/config/
 gated by `tests/config/impact_acceptance/test_impact_acceptance_matrix.py`.
 This page restates it for review; the JSON is authoritative.
 
-| Field                                               | Value                                                                                                                      |
-| --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| Audit snapshot (UpstreamDrift / Tools)              | `1f69a51fce997932f04a6ad1dd95bf4d065ba971` / `3d93bb2c89813e17551814d3be7e895f791e29af` (2026-09-04)                       |
-| Reconciled against (UpstreamDrift base / Tools pin) | `df9f3b95386433fe4c3a45559498b3e3f501cfdf` / `86d0f28b1cc5acf61185e07e320c816c2d005512` (2026-10-10 UTC; F09o integration) |
-| Release claim                                       | `code_verified_only`; no predictive-accuracy claim                                                                         |
-| Supported Python matrix                             | 3.11 and 3.12 (CI Standard); 3.12 for the lock and Docker image                                                            |
+| Field                                               | Value                                                                                                                               |
+| --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Audit snapshot (UpstreamDrift / Tools)              | `1f69a51fce997932f04a6ad1dd95bf4d065ba971` / `3d93bb2c89813e17551814d3be7e895f791e29af` (2026-09-04)                                |
+| Reconciled against (UpstreamDrift base / Tools pin) | `cdb3c84e8abf3b3fab6adb54ebcfbadd8b12a193` / `6b6e4be55e7086a33db43b36d2632765be619bde` (2026-10-11 UTC; provider follow-up #12246) |
+| Release claim                                       | `code_verified_only`; no predictive-accuracy claim                                                                                  |
+| Supported Python matrix                             | 3.11 and 3.12 (CI Standard); 3.12 for the lock and Docker image                                                                     |
 
 ## Model-Capability Matrix
 
-### Current F09o Pin Reconciliation
+### Current Provider Pin Reconciliation
+
+The provider follow-up #12246 advances the Tools dependency to the merged
+triangle-lamina provider revision. The existing exact-pin test first failed
+against the old reconciliation record. Before updating that record, all 26
+other matrix/capability probes passed. An archive of the exact new Tools pin
+was built on DeskComputer with Node 25.9.0/npm 11.12.1, then the transferred
+bundle was actually served and verified locally with Python 3.13.5,
+FastAPI 0.128.0 and httpx 0.28.1. Verification covered 76 assets, five
+JavaScript assets, 2,801,426 bytes, exact revision/mount/digests and the
+missing-file 404. The complete matrix suite then passed all 27 tests. The immutable served receipt is
+[`F07_PROVIDER_12246_IMPACT_SERVED_RECEIPT.json`](feedback_controls/F07_PROVIDER_12246_IMPACT_SERVED_RECEIPT.json).
+
+The source archive SHA-256 is
+`8425b48a6446139b660ccc8cf7f27a33f3fc1f574d575a2cb03cf2cb9446fee7`;
+the transferred bundle archive SHA-256 is
+`24343fc598c573ca4c899559000a9cb47d9a94ca1b00d3211c545e66d52bd91f`.
+This exact-pin software recheck does not advance physical qualification or
+predictive accuracy. Historical receipts below retain their original pins.
+Reproduce using the build/serve commands below with the current pin
+`6b6e4be55e7086a33db43b36d2632765be619bde` in both revision arguments.
+
+### Previous F09o Pin Reconciliation
 
 F09o #12044 integrates the F01b/private-consumer branch `d232efcc69` into the
 F09n base shown above. Before advancing the JSON, all 26 applicable capability
