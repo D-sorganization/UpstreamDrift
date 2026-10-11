@@ -3,7 +3,7 @@
     "numpy": "2.4.1",
     "scipy": "1.16.0"
   },
-  "analysis_script_sha256": "1c791ca911d2f1b01fe52d966967375439ed50303c40c559464fc40af96c66bc",
+  "analysis_script_sha256": "3963e6007445cae55d6751c7018290c4d8be3578389f1befa8923458dc917456",
   "channels": {
     "extensor": {
       "activation_min_max": [
@@ -19,6 +19,811 @@
         0.01000010113709679,
         0.01001552247375279
       ],
+      "full_cell_local_vs_accumulated_allocation": {
+        "cell_count": 20,
+        "cells": [
+          {
+            "accumulated_scalar_activation": [
+              0.04985657664220398,
+              0.049713693328437204
+            ],
+            "accumulated_scalar_minus_optimized": [
+              2.951729138889192e-12,
+              6.353653714263885e-12
+            ],
+            "branch_crossings": [],
+            "cell_index": 0,
+            "local_scalar_activation": [
+              0.05,
+              0.04985657664220398,
+              0.049713693328437204
+            ],
+            "local_scalar_minus_optimized": [
+              2.951729138889192e-12,
+              6.353653714263885e-12
+            ],
+            "local_tolerance_sensitivity": [
+              0.0,
+              0.0
+            ],
+            "optimized_activation": [
+              0.05,
+              0.04985657663925225,
+              0.04971369332208355
+            ],
+            "saved_excitation": [
+              0.01001552247375279,
+              0.01000781180542479,
+              0.01000010113709679
+            ],
+            "time_seconds": [
+              0.0,
+              0.00025,
+              0.0005
+            ]
+          },
+          {
+            "accumulated_scalar_activation": [
+              0.04957136704456826,
+              0.04942961466863655
+            ],
+            "accumulated_scalar_minus_optimized": [
+              1.1023439105972699e-11,
+              1.6322380946842685e-11
+            ],
+            "branch_crossings": [],
+            "cell_index": 1,
+            "local_scalar_activation": [
+              0.04971369332208355,
+              0.049571367038239715,
+              0.04942961466233302
+            ],
+            "local_scalar_minus_optimized": [
+              4.694897248747054e-12,
+              1.0018846863246722e-11
+            ],
+            "local_tolerance_sensitivity": [
+              0.0,
+              0.0
+            ],
+            "optimized_activation": [
+              0.04971369332208355,
+              0.04957136703354482,
+              0.04942961465231417
+            ],
+            "saved_excitation": [
+              0.01000010113709679,
+              0.01000325895796772,
+              0.01000641677883864
+            ],
+            "time_seconds": [
+              0.0005,
+              0.0007500000000000001,
+              0.001
+            ]
+          },
+          {
+            "accumulated_scalar_activation": [
+              0.04928842338130177,
+              0.04914778044174925
+            ],
+            "accumulated_scalar_minus_optimized": [
+              2.4334020909400067e-11,
+              3.1635041808364406e-11
+            ],
+            "branch_crossings": [],
+            "cell_index": 2,
+            "local_scalar_activation": [
+              0.04942961465231417,
+              0.04928842336504385,
+              0.04914778042555547
+            ],
+            "local_scalar_minus_optimized": [
+              8.076095348030776e-12,
+              1.5441259382242833e-11
+            ],
+            "local_tolerance_sensitivity": [
+              0.0,
+              0.0
+            ],
+            "optimized_activation": [
+              0.04942961465231417,
+              0.04928842335696775,
+              0.04914778041011421
+            ],
+            "saved_excitation": [
+              0.01000641677883864,
+              0.01000389905913145,
+              0.01000138133942426
+            ],
+            "time_seconds": [
+              0.001,
+              0.00125,
+              0.0015
+            ]
+          },
+          {
+            "accumulated_scalar_activation": [
+              0.04900769220186861,
+              0.048868164972481705
+            ],
+            "accumulated_scalar_minus_optimized": [
+              4.155836785812994e-11,
+              5.326068752697921e-11
+            ],
+            "branch_crossings": [],
+            "cell_index": 3,
+            "local_scalar_activation": [
+              0.04914778041011421,
+              0.04900769217035834,
+              0.04886816494109563
+            ],
+            "local_scalar_minus_optimized": [
+              1.0048094301051691e-11,
+              2.1874613231886997e-11
+            ],
+            "local_tolerance_sensitivity": [
+              0.0,
+              0.0
+            ],
+            "optimized_activation": [
+              0.04914778041011421,
+              0.04900769216031024,
+              0.04886816491922102
+            ],
+            "saved_excitation": [
+              0.01000138133942426,
+              0.01000382391165187,
+              0.01000626648387948
+            ],
+            "time_seconds": [
+              0.0015,
+              0.00175,
+              0.002
+            ]
+          },
+          {
+            "accumulated_scalar_activation": [
+              0.04872919147037714,
+              0.04859076445613349
+            ],
+            "accumulated_scalar_minus_optimized": [
+              6.868412089078291e-11,
+              8.450301569595808e-11
+            ],
+            "branch_crossings": [],
+            "cell_index": 4,
+            "local_scalar_activation": [
+              0.04886816491922102,
+              0.048729191417326206,
+              0.04859076440329137
+            ],
+            "local_scalar_minus_optimized": [
+              1.5633189187624907e-11,
+              3.1660896127050364e-11
+            ],
+            "local_tolerance_sensitivity": [
+              0.0,
+              0.0
+            ],
+            "optimized_activation": [
+              0.04886816491922102,
+              0.04872919140169302,
+              0.04859076437163047
+            ],
+            "saved_excitation": [
+              0.01000626648387948,
+              0.01000608068329265,
+              0.01000589488270582
+            ],
+            "time_seconds": [
+              0.002,
+              0.00225,
+              0.0025
+            ]
+          },
+          {
+            "accumulated_scalar_activation": [
+              0.04845288172593018,
+              0.048315541088142434
+            ],
+            "accumulated_scalar_minus_optimized": [
+              1.0310949316583162e-10,
+              1.2223651257858847e-10
+            ],
+            "branch_crossings": [],
+            "cell_index": 5,
+            "local_scalar_activation": [
+              0.04859076437163047,
+              0.04845288164175955,
+              0.048315541004302666
+            ],
+            "local_scalar_minus_optimized": [
+              1.8938864365658503e-11,
+              3.839674411754146e-11
+            ],
+            "local_tolerance_sensitivity": [
+              0.0,
+              0.0
+            ],
+            "optimized_activation": [
+              0.04859076437163047,
+              0.04845288162282069,
+              0.04831554096590592
+            ],
+            "saved_excitation": [
+              0.01000589488270582,
+              0.01000587979640602,
+              0.01000586471010623
+            ],
+            "time_seconds": [
+              0.0025,
+              0.00275,
+              0.003
+            ]
+          },
+          {
+            "accumulated_scalar_activation": [
+              0.0481787401171722,
+              0.04804247640097342
+            ],
+            "accumulated_scalar_minus_optimized": [
+              1.441827490733516e-10,
+              1.666045287840312e-10
+            ],
+            "branch_crossings": [],
+            "cell_index": 6,
+            "local_scalar_activation": [
+              0.04831554096590592,
+              0.04817873999541583,
+              0.04804247627969502
+            ],
+            "local_scalar_minus_optimized": [
+              2.2426380197337892e-11,
+              4.532612479790643e-11
+            ],
+            "local_tolerance_sensitivity": [
+              0.0,
+              0.0
+            ],
+            "optimized_activation": [
+              0.04831554096590592,
+              0.04817873997298945,
+              0.04804247623436889
+            ],
+            "saved_excitation": [
+              0.01000586471010623,
+              0.01000588216131507,
+              0.01000589961252391
+            ],
+            "time_seconds": [
+              0.003,
+              0.003249999999999999,
+              0.0035
+            ]
+          },
+          {
+            "accumulated_scalar_activation": [
+              0.04790674745094538,
+              0.04777155079240879
+            ],
+            "accumulated_scalar_minus_optimized": [
+              1.9177856525054437e-10,
+              2.17407855607199e-10
+            ],
+            "branch_crossings": [],
+            "cell_index": 7,
+            "local_scalar_activation": [
+              0.04804247623436889,
+              0.04790674728499443,
+              0.04777155062710846
+            ],
+            "local_scalar_minus_optimized": [
+              2.5827617822216098e-11,
+              5.210752662687668e-11
+            ],
+            "local_tolerance_sensitivity": [
+              0.0,
+              0.0
+            ],
+            "optimized_activation": [
+              0.04804247623436889,
+              0.04790674725916681,
+              0.04777155057500093
+            ],
+            "saved_excitation": [
+              0.01000589961252391,
+              0.01000589909436795,
+              0.01000589857621198
+            ],
+            "time_seconds": [
+              0.0035,
+              0.00375,
+              0.004
+            ]
+          },
+          {
+            "accumulated_scalar_activation": [
+              0.04763688399196173,
+              0.04750274462976325
+            ],
+            "accumulated_scalar_minus_optimized": [
+              2.4573554996409896e-10,
+              2.7449376105437295e-10
+            ],
+            "branch_crossings": [],
+            "cell_index": 8,
+            "local_scalar_activation": [
+              0.04777155057500093,
+              0.04763688377540568,
+              0.04750274441405512
+            ],
+            "local_scalar_minus_optimized": [
+              2.917949909475581e-11,
+              5.878563608119336e-11
+            ],
+            "local_tolerance_sensitivity": [
+              0.0,
+              0.0
+            ],
+            "optimized_activation": [
+              0.04777155057500093,
+              0.04763688374622618,
+              0.04750274435526949
+            ],
+            "saved_excitation": [
+              0.01000589857621198,
+              0.01000589552221295,
+              0.01000589246821391
+            ],
+            "time_seconds": [
+              0.004,
+              0.00425,
+              0.004500000000000001
+            ]
+          },
+          {
+            "accumulated_scalar_activation": [
+              0.047369130294458606,
+              0.047236038588098855
+            ],
+            "accumulated_scalar_minus_optimized": [
+              3.058930123089887e-10,
+              3.376944834876383e-10
+            ],
+            "branch_crossings": [],
+            "cell_index": 9,
+            "local_scalar_activation": [
+              0.04750274435526949,
+              0.04736913002103894,
+              0.04723603831574838
+            ],
+            "local_scalar_minus_optimized": [
+              3.2473343458683246e-11,
+              6.534400798230422e-11
+            ],
+            "local_tolerance_sensitivity": [
+              0.0,
+              0.0
+            ],
+            "optimized_activation": [
+              0.04750274435526949,
+              0.04736912998856559,
+              0.04723603825040437
+            ],
+            "saved_excitation": [
+              0.01000589246821391,
+              0.01000588408968696,
+              0.01000587571116
+            ],
+            "time_seconds": [
+              0.004500000000000001,
+              0.00475,
+              0.005
+            ]
+          },
+          {
+            "accumulated_scalar_activation": [
+              0.04710346712466114,
+              0.04697141353135372
+            ],
+            "accumulated_scalar_minus_optimized": [
+              3.7207727870969265e-10,
+              4.068319917061025e-10
+            ],
+            "branch_crossings": [],
+            "cell_index": 10,
+            "local_scalar_activation": [
+              0.04723603825040437,
+              0.04710346678828635,
+              0.04697141319629266
+            ],
+            "local_scalar_minus_optimized": [
+              3.570248957585065e-11,
+              7.177092947729946e-11
+            ],
+            "local_tolerance_sensitivity": [
+              0.0,
+              0.0
+            ],
+            "optimized_activation": [
+              0.04723603825040437,
+              0.04710346675258386,
+              0.04697141312452173
+            ],
+            "saved_excitation": [
+              0.01000587571116,
+              0.01000586124167598,
+              0.01000584677219197
+            ],
+            "time_seconds": [
+              0.005,
+              0.00525,
+              0.005500000000000001
+            ]
+          },
+          {
+            "accumulated_scalar_activation": [
+              0.046839875448788364,
+              0.04670885053062607
+            ],
+            "accumulated_scalar_minus_optimized": [
+              4.4410630034574794e-10,
+              4.817192547634797e-10
+            ],
+            "branch_crossings": [],
+            "cell_index": 11,
+            "local_scalar_activation": [
+              0.04697141312452173,
+              0.046839875043544255,
+              0.04670885012696265
+            ],
+            "local_scalar_minus_optimized": [
+              3.886219124282775e-11,
+              7.805583956965734e-11
+            ],
+            "local_tolerance_sensitivity": [
+              0.0,
+              0.0
+            ],
+            "optimized_activation": [
+              0.04697141312452173,
+              0.04683987500468206,
+              0.04670885004890681
+            ],
+            "saved_excitation": [
+              0.01000584677219197,
+              0.0100058263738965,
+              0.01000580597560103
+            ],
+            "time_seconds": [
+              0.005500000000000001,
+              0.00575,
+              0.006
+            ]
+          },
+          {
+            "accumulated_scalar_activation": [
+              0.04657833644353385,
+              0.04644833086705043
+            ],
+            "accumulated_scalar_minus_optimized": [
+              5.217886053787701e-10,
+              5.621625040475031e-10
+            ],
+            "branch_crossings": [],
+            "cell_index": 12,
+            "local_scalar_activation": [
+              0.04670885004890681,
+              0.0465783359636924,
+              0.046448330389078286
+            ],
+            "local_scalar_minus_optimized": [
+              4.194715408356586e-11,
+              8.419036301443583e-11
+            ],
+            "local_tolerance_sensitivity": [
+              0.0,
+              0.0
+            ],
+            "optimized_activation": [
+              0.04670885004890681,
+              0.04657833592174525,
+              0.04644833030488792
+            ],
+            "saved_excitation": [
+              0.01000580597560103,
+              0.01000577968830058,
+              0.01000575340100013
+            ],
+            "time_seconds": [
+              0.006,
+              0.00625,
+              0.006500000000000001
+            ]
+          },
+          {
+            "accumulated_scalar_activation": [
+              0.04631883149848564,
+              0.04618983604781631
+            ],
+            "accumulated_scalar_minus_optimized": [
+              6.049301892740999e-10,
+              6.479695391359286e-10
+            ],
+            "branch_crossings": [],
+            "cell_index": 13,
+            "local_scalar_activation": [
+              0.04644833030488792,
+              0.04631883093851181,
+              0.046189835490021265
+            ],
+            "local_scalar_minus_optimized": [
+              4.495635808066112e-11,
+              9.017449287274104e-11
+            ],
+            "local_tolerance_sensitivity": [
+              0.0,
+              0.0
+            ],
+            "optimized_activation": [
+              0.04644833030488792,
+              0.04631883089355545,
+              0.04618983539984677
+            ],
+            "saved_excitation": [
+              0.01000575340100013,
+              0.01000572404428331,
+              0.0100056946875665
+            ],
+            "time_seconds": [
+              0.006500000000000001,
+              0.006750000000000001,
+              0.006999999999999999
+            ]
+          },
+          {
+            "accumulated_scalar_activation": [
+              0.04606134223847023,
+              0.04593334780636573
+            ],
+            "accumulated_scalar_minus_optimized": [
+              6.933463247982274e-10,
+              7.38972549818584e-10
+            ],
+            "branch_crossings": [],
+            "cell_index": 14,
+            "local_scalar_activation": [
+              0.04618983539984677,
+              0.0460613415930203,
+              0.045933347163424065
+            ],
+            "local_scalar_minus_optimized": [
+              4.789639518332223e-11,
+              9.603088463316922e-11
+            ],
+            "local_tolerance_sensitivity": [
+              0.0,
+              0.0
+            ],
+            "optimized_activation": [
+              0.04618983539984677,
+              0.0460613415451239,
+              0.04593334706739318
+            ],
+            "saved_excitation": [
+              0.0100056946875665,
+              0.01000566275847932,
+              0.01000563082939214
+            ],
+            "time_seconds": [
+              0.006999999999999999,
+              0.00725,
+              0.0075
+            ]
+          },
+          {
+            "accumulated_scalar_activation": [
+              0.045805850524428426,
+              0.04567884817775697
+            ],
+            "accumulated_scalar_minus_optimized": [
+              7.868983936676344e-10,
+              8.350774169385566e-10
+            ],
+            "branch_crossings": [],
+            "cell_index": 15,
+            "local_scalar_activation": [
+              0.04593334706739318,
+              0.04580584978832584,
+              0.04567884744451143
+            ],
+            "local_scalar_minus_optimized": [
+              5.079580506217596e-11,
+              1.0183187626466861e-10
+            ],
+            "local_tolerance_sensitivity": [
+              0.0,
+              0.0
+            ],
+            "optimized_activation": [
+              0.04593334706739318,
+              0.04580584973753003,
+              0.04567884734267955
+            ],
+            "saved_excitation": [
+              0.01000563082939214,
+              0.01000561019299001,
+              0.01000558955658787
+            ],
+            "time_seconds": [
+              0.0075,
+              0.007750000000000001,
+              0.008
+            ]
+          },
+          {
+            "accumulated_scalar_activation": [
+              0.04555233862569299,
+              0.04542631973921141
+            ],
+            "accumulated_scalar_minus_optimized": [
+              8.855406893881757e-10,
+              9.362770489462768e-10
+            ],
+            "branch_crossings": [],
+            "cell_index": 16,
+            "local_scalar_activation": [
+              0.04567884734267955,
+              0.04555233779385479,
+              0.04542631891059791
+            ],
+            "local_scalar_minus_optimized": [
+              5.370249384073489e-11,
+              1.0766355168501107e-10
+            ],
+            "local_tolerance_sensitivity": [
+              0.0,
+              0.0
+            ],
+            "optimized_activation": [
+              0.04567884734267955,
+              0.0455523377401523,
+              0.04542631880293436
+            ],
+            "saved_excitation": [
+              0.01000558955658787,
+              0.01000561522255066,
+              0.01000564088851344
+            ],
+            "time_seconds": [
+              0.008,
+              0.00825,
+              0.0085
+            ]
+          },
+          {
+            "accumulated_scalar_activation": [
+              0.045300789020826376,
+              0.045175743986826625
+            ],
+            "accumulated_scalar_minus_optimized": [
+              9.893074831568427e-10,
+              1.0426680421837808e-09
+            ],
+            "branch_crossings": [],
+            "cell_index": 17,
+            "local_scalar_activation": [
+              0.04542631880293436,
+              0.04530078808817669,
+              0.04517574305778807
+            ],
+            "local_scalar_minus_optimized": [
+              5.665779650998459e-11,
+              1.1362948776350024e-10
+            ],
+            "local_tolerance_sensitivity": [
+              0.0,
+              0.0
+            ],
+            "optimized_activation": [
+              0.04542631880293436,
+              0.04530078803151889,
+              0.04517574294415858
+            ],
+            "saved_excitation": [
+              0.01000564088851344,
+              0.01000549838188906,
+              0.01000535587526469
+            ],
+            "time_seconds": [
+              0.0085,
+              0.00875,
+              0.009000000000000001
+            ]
+          },
+          {
+            "accumulated_scalar_activation": [
+              0.04505118247255329,
+              0.04492710232509455
+            ],
+            "accumulated_scalar_minus_optimized": [
+              1.0967204921996654e-09,
+              1.1477537739668087e-09
+            ],
+            "branch_crossings": [],
+            "cell_index": 18,
+            "local_scalar_activation": [
+              0.04517574294415858,
+              0.04505118143391991,
+              0.04492710129047781
+            ],
+            "local_scalar_minus_optimized": [
+              5.808711150967483e-11,
+              1.1313703446313994e-10
+            ],
+            "local_tolerance_sensitivity": [
+              0.0,
+              0.0
+            ],
+            "optimized_activation": [
+              0.04517574294415858,
+              0.0450511813758328,
+              0.04492710117734078
+            ],
+            "saved_excitation": [
+              0.01000535587526469,
+              0.01000521796551635,
+              0.01000508005576801
+            ],
+            "time_seconds": [
+              0.009000000000000001,
+              0.009250000000000001,
+              0.0095
+            ]
+          },
+          {
+            "accumulated_scalar_activation": [
+              0.04480350946356724,
+              0.04468040977016707
+            ],
+            "accumulated_scalar_minus_optimized": [
+              1.2138850757903441e-09,
+              1.3112492619482552e-09
+            ],
+            "branch_crossings": [],
+            "cell_index": 19,
+            "local_scalar_activation": [
+              0.04492710117734078,
+              0.04480350832024946,
+              0.04468040863126544
+            ],
+            "local_scalar_minus_optimized": [
+              7.05672950629399e-11,
+              1.723476292236903e-10
+            ],
+            "local_tolerance_sensitivity": [
+              0.0,
+              0.0
+            ],
+            "optimized_activation": [
+              0.04492710117734078,
+              0.04480350824968216,
+              0.04468040845891781
+            ],
+            "saved_excitation": [
+              0.01000508005576801,
+              0.01000949951826483,
+              0.01001391898076166
+            ],
+            "time_seconds": [
+              0.0095,
+              0.00975,
+              0.01
+            ]
+          }
+        ]
+      },
       "hermite_simpson_midpoint_state_defect": {
         "max_abs": 1.6273954406287316e-11,
         "rms": 3.731411195989066e-12,
@@ -133,6 +938,819 @@
         0.01000252940327434,
         0.1066043472144142
       ],
+      "full_cell_local_vs_accumulated_allocation": {
+        "cell_count": 20,
+        "cells": [
+          {
+            "accumulated_scalar_activation": [
+              0.05141892903911,
+              0.05140446687161303
+            ],
+            "accumulated_scalar_minus_optimized": [
+              0.00011531598344965976,
+              9.414635886640516e-05
+            ],
+            "branch_crossings": [
+              {
+                "classification": "linear sign change estimate",
+                "left_excitation_minus_activation": 0.009246646848691135,
+                "right_excitation_minus_activation": -0.036814147918457864,
+                "segment_index": 1,
+                "time_seconds_linear_difference_estimate": 0.0003001871868225227
+              }
+            ],
+            "cell_index": 0,
+            "local_scalar_activation": [
+              0.05,
+              0.05141892903911,
+              0.05140446687161303
+            ],
+            "local_scalar_minus_optimized": [
+              0.00011531598344965976,
+              9.414635886640516e-05
+            ],
+            "local_tolerance_sensitivity": [
+              0.0,
+              3.7748970616036104e-13
+            ],
+            "optimized_activation": [
+              0.05,
+              0.05130361305566034,
+              0.05131032051274662
+            ],
+            "saved_excitation": [
+              0.1066043472144142,
+              0.06055025990435148,
+              0.01449617259428876
+            ],
+            "time_seconds": [
+              0.0,
+              0.00025,
+              0.0005
+            ]
+          },
+          {
+            "accumulated_scalar_activation": [
+              0.051267559750079426,
+              0.051123112304738344
+            ],
+            "accumulated_scalar_minus_optimized": [
+              9.377392272049562e-05,
+              9.340144267016431e-05
+            ],
+            "branch_crossings": [],
+            "cell_index": 1,
+            "local_scalar_activation": [
+              0.05131032051274662,
+              0.05117378559631061,
+              0.05102971060542086
+            ],
+            "local_scalar_minus_optimized": [
+              -2.3104831936571202e-10,
+              -2.566473214504761e-10
+            ],
+            "local_tolerance_sensitivity": [
+              0.0,
+              0.0
+            ],
+            "optimized_activation": [
+              0.05131032051274662,
+              0.05117378582735893,
+              0.05102971086206818
+            ],
+            "saved_excitation": [
+              0.01449617259428876,
+              0.01224994883573082,
+              0.01000372507717288
+            ],
+            "time_seconds": [
+              0.0005,
+              0.0007500000000000001,
+              0.001
+            ]
+          },
+          {
+            "accumulated_scalar_activation": [
+              0.05097520092469651,
+              0.050827876452763904
+            ],
+            "accumulated_scalar_minus_optimized": [
+              9.302974528864472e-05,
+              9.265978140898107e-05
+            ],
+            "branch_crossings": [],
+            "cell_index": 2,
+            "local_scalar_activation": [
+              0.05102971086206818,
+              0.050882171180026955,
+              0.050735216671147436
+            ],
+            "local_scalar_minus_optimized": [
+              6.190881141066029e-13,
+              -2.0748680551463394e-13
+            ],
+            "local_tolerance_sensitivity": [
+              0.0,
+              0.0
+            ],
+            "optimized_activation": [
+              0.05102971086206818,
+              0.05088217117940787,
+              0.05073521667135492
+            ],
+            "saved_excitation": [
+              0.01000372507717288,
+              0.01000326858281441,
+              0.01000281208845593
+            ],
+            "time_seconds": [
+              0.001,
+              0.00125,
+              0.0015
+            ]
+          },
+          {
+            "accumulated_scalar_activation": [
+              0.05068118305595711,
+              0.050535164620992785
+            ],
+            "accumulated_scalar_minus_optimized": [
+              9.229155443088444e-05,
+              9.192506238291792e-05
+            ],
+            "branch_crossings": [],
+            "cell_index": 3,
+            "local_scalar_activation": [
+              0.05073521667135492,
+              0.0505888915013427,
+              0.050443239555821036
+            ],
+            "local_scalar_minus_optimized": [
+              -1.8352680486444228e-13,
+              -2.788831665601066e-12
+            ],
+            "local_tolerance_sensitivity": [
+              0.0,
+              0.0
+            ],
+            "optimized_activation": [
+              0.05073521667135492,
+              0.05058889150152623,
+              0.05044323955860987
+            ],
+            "saved_excitation": [
+              0.01000281208845593,
+              0.01002844503346196,
+              0.01005407797846798
+            ],
+            "time_seconds": [
+              0.0015,
+              0.00175,
+              0.002
+            ]
+          },
+          {
+            "accumulated_scalar_activation": [
+              0.05038972805488633,
+              0.05024478084931471
+            ],
+            "accumulated_scalar_minus_optimized": [
+              9.156027792251581e-05,
+              9.119716800631839e-05
+            ],
+            "branch_crossings": [],
+            "cell_index": 4,
+            "local_scalar_activation": [
+              0.05044323955860987,
+              0.05029816777625293,
+              0.050153583679798955
+            ],
+            "local_scalar_minus_optimized": [
+              -7.108896804552955e-13,
+              -1.5094384075986511e-12
+            ],
+            "local_tolerance_sensitivity": [
+              0.0,
+              0.0
+            ],
+            "optimized_activation": [
+              0.05044323955860987,
+              0.05029816777696382,
+              0.05015358368130839
+            ],
+            "saved_excitation": [
+              0.01005407797846798,
+              0.01002964648781749,
+              0.010005214997167
+            ],
+            "time_seconds": [
+              0.002,
+              0.00225,
+              0.0025
+            ]
+          },
+          {
+            "accumulated_scalar_activation": [
+              0.05010037492936717,
+              0.049956561892263864
+            ],
+            "accumulated_scalar_minus_optimized": [
+              9.08357371997015e-05,
+              9.047599029711473e-05
+            ],
+            "branch_crossings": [],
+            "cell_index": 5,
+            "local_scalar_activation": [
+              0.05015358368130839,
+              0.050009539192293576,
+              0.04986608590465965
+            ],
+            "local_scalar_minus_optimized": [
+              1.2610745780960997e-13,
+              2.6929014573795484e-12
+            ],
+            "local_tolerance_sensitivity": [
+              0.0,
+              0.0
+            ],
+            "optimized_activation": [
+              0.05015358368130839,
+              0.05000953919216747,
+              0.04986608590196675
+            ],
+            "saved_excitation": [
+              0.010005214997167,
+              0.01001097139178813,
+              0.01001672778640926
+            ],
+            "time_seconds": [
+              0.0025,
+              0.00275,
+              0.003
+            ]
+          },
+          {
+            "accumulated_scalar_activation": [
+              0.04981333074974941,
+              0.04967067058093805
+            ],
+            "accumulated_scalar_minus_optimized": [
+              9.011792281189007e-05,
+              8.976151924331571e-05
+            ],
+            "branch_crossings": [],
+            "cell_index": 6,
+            "local_scalar_activation": [
+              0.04986608590196675,
+              0.04972321283903808,
+              0.04958090909136984
+            ],
+            "local_scalar_minus_optimized": [
+              1.2100556667782314e-11,
+              2.9675109591842386e-11
+            ],
+            "local_tolerance_sensitivity": [
+              0.0,
+              0.0
+            ],
+            "optimized_activation": [
+              0.04986608590196675,
+              0.04972321282693752,
+              0.04958090906169473
+            ],
+            "saved_excitation": [
+              0.01001672778640926,
+              0.01001789229593488,
+              0.01001905680546049
+            ],
+            "time_seconds": [
+              0.003,
+              0.003249999999999999,
+              0.0035
+            ]
+          },
+          {
+            "accumulated_scalar_activation": [
+              0.0495285700835973,
+              0.04938701802465809
+            ],
+            "accumulated_scalar_minus_optimized": [
+              8.94067705848392e-05,
+              8.905366501556211e-05
+            ],
+            "branch_crossings": [],
+            "cell_index": 7,
+            "local_scalar_activation": [
+              0.04958090906169473,
+              0.04943916333861647,
+              0.049297964418268725
+            ],
+            "local_scalar_minus_optimized": [
+              2.5604011966162687e-11,
+              5.862619417706938e-11
+            ],
+            "local_tolerance_sensitivity": [
+              0.0,
+              0.0
+            ],
+            "optimized_activation": [
+              0.04958090906169473,
+              0.04943916331301246,
+              0.04929796435964253
+            ],
+            "saved_excitation": [
+              0.01001905680546049,
+              0.01001539036892595,
+              0.0100117239323914
+            ],
+            "time_seconds": [
+              0.0035,
+              0.00375,
+              0.004
+            ]
+          },
+          {
+            "accumulated_scalar_activation": [
+              0.04924601704985371,
+              0.04910556978688352
+            ],
+            "accumulated_scalar_minus_optimized": [
+              8.870219440945681e-05,
+              8.835234372137069e-05
+            ],
+            "branch_crossings": [],
+            "cell_index": 8,
+            "local_scalar_activation": [
+              0.04929796435964253,
+              0.04915731489600801,
+              0.04901721752453805
+            ],
+            "local_scalar_minus_optimized": [
+              4.0563760683731687e-11,
+              8.137589907475373e-11
+            ],
+            "local_tolerance_sensitivity": [
+              0.0,
+              0.0
+            ],
+            "optimized_activation": [
+              0.04929796435964253,
+              0.04915731485544425,
+              0.04901721744316215
+            ],
+            "saved_excitation": [
+              0.0100117239323914,
+              0.01001094810444637,
+              0.01001017227650134
+            ],
+            "time_seconds": [
+              0.004,
+              0.00425,
+              0.004500000000000001
+            ]
+          },
+          {
+            "accumulated_scalar_activation": [
+              0.04896567585095254,
+              0.048826334858164705
+            ],
+            "accumulated_scalar_minus_optimized": [
+              8.800410529517105e-05,
+              8.765746735710234e-05
+            ],
+            "branch_crossings": [],
+            "cell_index": 9,
+            "local_scalar_activation": [
+              0.04901721744316215,
+              0.04887767178801879,
+              0.04873867747356903
+            ],
+            "local_scalar_minus_optimized": [
+              4.236141992741693e-11,
+              8.276142965391031e-11
+            ],
+            "local_tolerance_sensitivity": [
+              0.0,
+              0.0
+            ],
+            "optimized_activation": [
+              0.04901721744316215,
+              0.04887767174565737,
+              0.0487386773908076
+            ],
+            "saved_excitation": [
+              0.01001017227650134,
+              0.01001060708429519,
+              0.01001104189208903
+            ],
+            "time_seconds": [
+              0.004500000000000001,
+              0.00475,
+              0.005
+            ]
+          },
+          {
+            "accumulated_scalar_activation": [
+              0.04868753642650588,
+              0.04854927023697682
+            ],
+            "accumulated_scalar_minus_optimized": [
+              8.731242077650997e-05,
+              8.696895220514783e-05
+            ],
+            "branch_crossings": [],
+            "cell_index": 10,
+            "local_scalar_activation": [
+              0.0487386773908076,
+              0.048600224046179065,
+              0.04846230136275326
+            ],
+            "local_scalar_minus_optimized": [
+              4.0449692206845356e-11,
+              7.798158646599163e-11
+            ],
+            "local_tolerance_sensitivity": [
+              0.0,
+              0.0
+            ],
+            "optimized_activation": [
+              0.0487386773908076,
+              0.04860022400572937,
+              0.04846230128477167
+            ],
+            "saved_excitation": [
+              0.01001104189208903,
+              0.01000709398867362,
+              0.01000314608525821
+            ],
+            "time_seconds": [
+              0.005,
+              0.00525,
+              0.005500000000000001
+            ]
+          },
+          {
+            "accumulated_scalar_activation": [
+              0.04841154112509904,
+              0.04827435389493701
+            ],
+            "accumulated_scalar_minus_optimized": [
+              8.662705618091987e-05,
+              8.628672282046113e-05
+            ],
+            "branch_crossings": [],
+            "cell_index": 11,
+            "local_scalar_activation": [
+              0.04846230128477167,
+              0.048324914105561514,
+              0.048188067241489156
+            ],
+            "local_scalar_minus_optimized": [
+              3.6643396650326565e-11,
+              6.937260488282249e-11
+            ],
+            "local_tolerance_sensitivity": [
+              0.0,
+              0.0
+            ],
+            "optimized_activation": [
+              0.04846230128477167,
+              0.04832491406891812,
+              0.04818806717211655
+            ],
+            "saved_excitation": [
+              0.01000314608525821,
+              0.01000326994621935,
+              0.01000339380718049
+            ],
+            "time_seconds": [
+              0.005500000000000001,
+              0.00575,
+              0.006
+            ]
+          },
+          {
+            "accumulated_scalar_activation": [
+              0.048137706454731644,
+              0.04800159672420902
+            ],
+            "accumulated_scalar_minus_optimized": [
+              8.594794709057552e-05,
+              8.561071972310041e-05
+            ],
+            "branch_crossings": [],
+            "cell_index": 12,
+            "local_scalar_activation": [
+              0.04818806717211655,
+              0.04805175854038227,
+              0.04791598606906719
+            ],
+            "local_scalar_minus_optimized": [
+              3.274119864116187e-11,
+              6.458127088659893e-11
+            ],
+            "local_tolerance_sensitivity": [
+              0.0,
+              0.0
+            ],
+            "optimized_activation": [
+              0.04818806717211655,
+              0.04805175850764107,
+              0.04791598600448592
+            ],
+            "saved_excitation": [
+              0.01000339380718049,
+              0.01000373619565865,
+              0.0100040785841368
+            ],
+            "time_seconds": [
+              0.006,
+              0.00625,
+              0.006500000000000001
+            ]
+          },
+          {
+            "accumulated_scalar_activation": [
+              0.04786602311284537,
+              0.04773098403849483
+            ],
+            "accumulated_scalar_minus_optimized": [
+              8.527503897307054e-05,
+              8.494089927840037e-05
+            ],
+            "branch_crossings": [],
+            "cell_index": 13,
+            "local_scalar_activation": [
+              0.04791598600448592,
+              0.04778074811178293,
+              0.047646043223700446
+            ],
+            "local_scalar_minus_optimized": [
+              3.791062602731543e-11,
+              8.448401700444919e-11
+            ],
+            "local_tolerance_sensitivity": [
+              0.0,
+              0.0
+            ],
+            "optimized_activation": [
+              0.04791598600448592,
+              0.0477807480738723,
+              0.04764604313921643
+            ],
+            "saved_excitation": [
+              0.0100040785841368,
+              0.01000490699724384,
+              0.01000573541035088
+            ],
+            "time_seconds": [
+              0.006500000000000001,
+              0.006750000000000001,
+              0.006999999999999999
+            ]
+          },
+          {
+            "accumulated_scalar_activation": [
+              0.04759647272618592,
+              0.047462482441243126
+            ],
+            "accumulated_scalar_minus_optimized": [
+              8.460828472641596e-05,
+              8.427717366741444e-05
+            ],
+            "branch_crossings": [],
+            "cell_index": 14,
+            "local_scalar_activation": [
+              0.04764604313921643,
+              0.04751186449062138,
+              0.04737820535593052
+            ],
+            "local_scalar_minus_optimized": [
+              4.916187595904731e-11,
+              8.83548095798048e-11
+            ],
+            "local_tolerance_sensitivity": [
+              0.0,
+              0.0
+            ],
+            "optimized_activation": [
+              0.04764604313921643,
+              0.0475118644414595,
+              0.04737820526757571
+            ],
+            "saved_excitation": [
+              0.01000573541035088,
+              0.01000413240681261,
+              0.01000252940327434
+            ],
+            "time_seconds": [
+              0.006999999999999999,
+              0.00725,
+              0.0075
+            ]
+          },
+          {
+            "accumulated_scalar_activation": [
+              0.04732901460805156,
+              0.04719607064082353
+            ],
+            "accumulated_scalar_minus_optimized": [
+              8.3947566572741e-05,
+              8.361946040163354e-05
+            ],
+            "branch_crossings": [],
+            "cell_index": 15,
+            "local_scalar_activation": [
+              0.04737820526757571,
+              0.04724506707907607,
+              0.04711245125815283
+            ],
+            "local_scalar_minus_optimized": [
+              3.759724476193327e-11,
+              7.773093280150078e-11
+            ],
+            "local_tolerance_sensitivity": [
+              0.0,
+              0.0
+            ],
+            "optimized_activation": [
+              0.04737820526757571,
+              0.04724506704147882,
+              0.0471124511804219
+            ],
+            "saved_excitation": [
+              0.01000252940327434,
+              0.01000305631559474,
+              0.01000358322791513
+            ],
+            "time_seconds": [
+              0.0075,
+              0.007750000000000001,
+              0.008
+            ]
+          },
+          {
+            "accumulated_scalar_activation": [
+              0.047063648630193404,
+              0.046931746677103904
+            ],
+            "accumulated_scalar_minus_optimized": [
+              8.329284906454654e-05,
+              8.296772212596643e-05
+            ],
+            "branch_crossings": [],
+            "cell_index": 16,
+            "local_scalar_activation": [
+              0.0471124511804219,
+              0.04698035582621946,
+              0.046848779047527725
+            ],
+            "local_scalar_minus_optimized": [
+              4.509060486102001e-11,
+              9.254978727835095e-11
+            ],
+            "local_tolerance_sensitivity": [
+              0.0,
+              0.0
+            ],
+            "optimized_activation": [
+              0.0471124511804219,
+              0.04698035578112886,
+              0.04684877895497794
+            ],
+            "saved_excitation": [
+              0.01000358322791513,
+              0.01000437452228055,
+              0.01000516581664598
+            ],
+            "time_seconds": [
+              0.008,
+              0.00825,
+              0.0085
+            ]
+          },
+          {
+            "accumulated_scalar_activation": [
+              0.046800361480283804,
+              0.04666948975727444
+            ],
+            "accumulated_scalar_minus_optimized": [
+              8.264407270706237e-05,
+              8.232188958493675e-05
+            ],
+            "branch_crossings": [],
+            "cell_index": 17,
+            "local_scalar_activation": [
+              0.04684877895497794,
+              0.046717717459291465,
+              0.04658716797213261
+            ],
+            "local_scalar_minus_optimized": [
+              5.171472278187039e-11,
+              1.0444310694079917e-10
+            ],
+            "local_tolerance_sensitivity": [
+              0.0,
+              0.0
+            ],
+            "optimized_activation": [
+              0.04684877895497794,
+              0.04671771740757674,
+              0.0465871678676895
+            ],
+            "saved_excitation": [
+              0.01000516581664598,
+              0.01000542724584287,
+              0.01000568867503976
+            ],
+            "time_seconds": [
+              0.0085,
+              0.00875,
+              0.009000000000000001
+            ]
+          },
+          {
+            "accumulated_scalar_activation": [
+              0.046539128603682756,
+              0.046409275131472284
+            ],
+            "accumulated_scalar_minus_optimized": [
+              8.200116510009847e-05,
+              8.168188723956665e-05
+            ],
+            "branch_crossings": [],
+            "cell_index": 18,
+            "local_scalar_activation": [
+              0.0465871678676895,
+              0.046457127493278266,
+              0.04632759335131743
+            ],
+            "local_scalar_minus_optimized": [
+              5.46956091529438e-11,
+              1.0708470915554713e-10
+            ],
+            "local_tolerance_sensitivity": [
+              0.0,
+              0.0
+            ],
+            "optimized_activation": [
+              0.0465871678676895,
+              0.04645712743858266,
+              0.04632759324423272
+            ],
+            "saved_excitation": [
+              0.01000568867503976,
+              0.01000562356367204,
+              0.01000555845230433
+            ],
+            "time_seconds": [
+              0.009000000000000001,
+              0.009250000000000001,
+              0.0095
+            ]
+          },
+          {
+            "accumulated_scalar_activation": [
+              0.04627993483391656,
+              0.046151113169459926
+            ],
+            "accumulated_scalar_minus_optimized": [
+              8.136406608383329e-05,
+              8.10477094024542e-05
+            ],
+            "branch_crossings": [],
+            "cell_index": 19,
+            "local_scalar_activation": [
+              0.04632759324423272,
+              0.046198570834712425,
+              0.046070065621946134
+            ],
+            "local_scalar_minus_optimized": [
+              6.687969622554135e-11,
+              1.6188866219790654e-10
+            ],
+            "local_tolerance_sensitivity": [
+              0.0,
+              0.0
+            ],
+            "optimized_activation": [
+              0.04632759324423272,
+              0.04619857076783273,
+              0.04607006546005747
+            ],
+            "saved_excitation": [
+              0.01000555845230433,
+              0.0100098741156372,
+              0.01001418977897007
+            ],
+            "time_seconds": [
+              0.0095,
+              0.00975,
+              0.01
+            ]
+          }
+        ]
+      },
       "hermite_simpson_midpoint_state_defect": {
         "max_abs": 1.1396993765400154e-10,
         "rms": 3.625202744637757e-11,
@@ -247,6 +1865,8 @@
   },
   "interval_count": 40,
   "method": {
+    "branch_crossing_method": "linear sign-change estimate from saved excitation and optimized activation samples; not an event located on a continuous trajectory",
+    "cell_allocation": "each Hermite-Simpson cell starts scalar integration at its optimized left activation; accumulated integration starts once at the initial optimized activation",
     "control_interpolation": "piecewise_linear",
     "control_midpoint_policy": "request sets interpolate_control_mesh_interior_points=true; retained controls include the midpoint samples",
     "hermite_simpson_equations": {

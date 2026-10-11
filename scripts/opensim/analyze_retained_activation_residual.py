@@ -132,6 +132,117 @@ def _integrate_channel(
     return result
 
 
+def _integrate_cell(
+    times: np.ndarray,
+    excitations: np.ndarray,
+    initial: float,
+    parameters: dict[str, float],
+    *,
+    rtol: float,
+    atol: float,
+) -> np.ndarray:
+    """Integrate one HS cell from its optimized left state through its midpoint."""
+    return _integrate_channel(
+        times, excitations, initial, parameters, rtol=rtol, atol=atol
+    )
+
+
+def _branch_crossings(
+    times: np.ndarray, activation: np.ndarray, excitation: np.ndarray
+) -> list[dict[str, Any]]:
+    """Locate excitation-minus-activation sign changes over saved linear segments."""
+    crossings: list[dict[str, Any]] = []
+    for index in range(len(times) - 1):
+        left, right = (
+            excitation[index] - activation[index],
+            excitation[index + 1] - activation[index + 1],
+        )
+        if left == 0.0 or right == 0.0 or left * right < 0.0:
+            fraction = (
+                0.0 if left == 0.0 else 1.0 if right == 0.0 else -left / (right - left)
+            )
+            crossings.append(
+                {
+                    "segment_index": index,
+                    "time_seconds_linear_difference_estimate": float(
+                        times[index] + fraction * (times[index + 1] - times[index])
+                    ),
+                    "left_excitation_minus_activation": float(left),
+                    "right_excitation_minus_activation": float(right),
+                    "classification": "endpoint equality"
+                    if left == 0.0 or right == 0.0
+                    else "linear sign change estimate",
+                }
+            )
+    return crossings
+
+
+def _full_cell_allocation(
+    times: np.ndarray,
+    solution: np.ndarray,
+    excitation: np.ndarray,
+    parameters: dict[str, float],
+) -> dict[str, Any]:
+    """Separate cell-local defect from accumulated scalar integration error."""
+    accumulated = _integrate_channel(
+        times, excitation, float(solution[0]), parameters, rtol=1e-12, atol=1e-14
+    )
+    rows: list[dict[str, Any]] = []
+    for cell in range((len(times) - 1) // 2):
+        indices = slice(2 * cell, 2 * cell + 3)
+        local_times = times[indices]
+        local_excitation = excitation[indices]
+        local = _integrate_cell(
+            local_times,
+            local_excitation,
+            float(solution[2 * cell]),
+            parameters,
+            rtol=1e-12,
+            atol=1e-14,
+        )
+        tighter = _integrate_cell(
+            local_times,
+            local_excitation,
+            float(solution[2 * cell]),
+            parameters,
+            rtol=1e-13,
+            atol=1e-15,
+        )
+        rows.append(
+            {
+                "cell_index": cell,
+                "time_seconds": [
+                    float(local_times[0]),
+                    float(local_times[1]),
+                    float(local_times[2]),
+                ],
+                "optimized_activation": [float(value) for value in solution[indices]],
+                "saved_excitation": [float(value) for value in local_excitation],
+                "local_scalar_activation": [float(value) for value in local],
+                "local_scalar_minus_optimized": [
+                    float(local[1] - solution[2 * cell + 1]),
+                    float(local[2] - solution[2 * cell + 2]),
+                ],
+                "accumulated_scalar_activation": [
+                    float(accumulated[2 * cell + 1]),
+                    float(accumulated[2 * cell + 2]),
+                ],
+                "accumulated_scalar_minus_optimized": [
+                    float(accumulated[2 * cell + 1] - solution[2 * cell + 1]),
+                    float(accumulated[2 * cell + 2] - solution[2 * cell + 2]),
+                ],
+                "local_tolerance_sensitivity": [
+                    float(local[1] - tighter[1]),
+                    float(local[2] - tighter[2]),
+                ],
+                "branch_crossings": _branch_crossings(
+                    local_times, solution[indices], local_excitation
+                ),
+            }
+        )
+    return {"cell_count": len(rows), "cells": rows}
+
+
 def _hermite_simpson_defects(
     times: np.ndarray,
     activations: np.ndarray,
@@ -359,6 +470,9 @@ def _activation_channel_report(
             np.max(np.abs(midpoint_delta))
         ),
         "segmented_scalar_activation_at_knots": segmented.tolist(),
+        "full_cell_local_vs_accumulated_allocation": _full_cell_allocation(
+            times, solution, excitation, parameters
+        ),
     }
 
 
@@ -410,6 +524,8 @@ def _analysis_method(request: dict[str, Any], times: np.ndarray) -> dict[str, An
         "control_midpoint_policy": "request sets interpolate_control_mesh_interior_points=true; retained controls include the midpoint samples",
         "numerical_sensitivity_limitation": "difference between two tolerances is a sensitivity estimate, not a rigorous error bound",
         "runtime_limitation": "activation defaults come from OpenSim 4.6 source because omitted from XML; installed binary was not queried",
+        "cell_allocation": "each Hermite-Simpson cell starts scalar integration at its optimized left activation; accumulated integration starts once at the initial optimized activation",
+        "branch_crossing_method": "linear sign-change estimate from saved excitation and optimized activation samples; not an event located on a continuous trajectory",
     }
 
 

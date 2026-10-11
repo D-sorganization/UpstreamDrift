@@ -240,6 +240,22 @@ physiology, capture matching, or production execution. It is bound to the
 retained source, request, solution, controls and replay audit by the SHA-256
 identities in the JSON report.
 
+The report also compares a cell-local scalar trajectory, restarted from each
+cell's optimized left activation, with a continuously accumulated scalar
+trajectory. In the first flexor cell, saved excitation is
+`[0.10660435, 0.06055026, 0.01449617]`, while optimized activation is
+`[0.05000000, 0.05130361, 0.05131032]`. The cell-local integration gives
+`0.05141893` at the midpoint and `0.05140447` at the endpoint, respectively
+`1.15316e-4` and `9.41464e-5` above the optimized values. The accumulated
+scalar trajectory instead ends `8.10477e-5` below the optimized endpoint.
+Linear interpolation of the saved excitation-minus-activation samples
+estimates a branch crossing at `0.0003001872 s` in the second half of that
+cell. This estimate is based on sample chords, not a continuous activation
+event; it does not identify the cause of the discrepancy. Across cells, the
+largest local tolerance sensitivity is `3.7749e-13` for the two tested DOP853
+settings, which is a numerical sensitivity measure rather than a rigorous
+error bound. The extensor largest local endpoint difference is `1.7235e-10`.
+
 The 10- and 20-interval optimized coordinate traces differ by at most
 $5.66\times10^{-11}$ rad at common time knots, while flexor controls differ by
 up to $0.03523$ at those knots. The refinements therefore produce distinct

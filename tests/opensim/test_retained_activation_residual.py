@@ -7,6 +7,7 @@ import pytest
 
 from scripts.opensim.analyze_retained_activation_residual import (
     _hermite_simpson_defects,
+    _full_cell_allocation,
     _integrate_channel,
     activation_derivative,
 )
@@ -86,6 +87,23 @@ def test_hermite_simpson_defect_requires_actual_midpoint_rows() -> None:
             np.array([0.2, 0.2]),
             PARAMETERS,
         )
+
+
+def test_full_cell_allocation_restarts_at_optimized_left_state_and_records_crossing() -> (
+    None
+):
+    times = np.array([0.0, 0.0005, 0.001])
+    optimized = np.array([0.2, 0.2001, 0.2002])
+    excitation = np.array([0.1, 0.3, 0.1])
+    result = _full_cell_allocation(times, optimized, excitation, PARAMETERS)
+    assert result["cell_count"] == 1
+    cell = result["cells"][0]
+    assert cell["local_scalar_activation"][0] == optimized[0]
+    assert cell["local_tolerance_sensitivity"][0] < 1e-12
+    assert len(cell["branch_crossings"]) == 2
+    assert (
+        cell["branch_crossings"][0]["classification"] == "linear sign change estimate"
+    )
 
 
 def test_nonfinite_inputs_are_rejected() -> None:

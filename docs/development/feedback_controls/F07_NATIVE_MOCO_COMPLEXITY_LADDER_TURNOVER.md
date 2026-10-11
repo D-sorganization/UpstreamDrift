@@ -668,7 +668,8 @@ and a segmented SciPy DOP853 integration that restarts at every saved
 piecewise-linear excitation interval. It runs without importing OpenSim,
 constructing a model or replaying the native trajectory. The analysis code is
 `scripts/opensim/analyze_retained_activation_residual.py`; ten pure regression
-tests are in `tests/opensim/test_retained_activation_residual.py`.
+tests are in `tests/opensim/test_retained_activation_residual.py` (11 tests
+after adding the per-cell restart and branch-crossing regression).
 
 The flexor Hermite-Simpson midpoint-state and Simpson dynamics residual maxima
 are `1.1397e-10` and `2.0774e-9`; extensor maxima are `1.6274e-11` and
@@ -690,8 +691,8 @@ The source XML omits `activation_time_constant`,
 `0.01 s`, `0.04 s`, `0.01`, and `false`, respectively; these values were not
 read from the installed binary during this offline analysis. The law and Moco
 transcription references are recorded in the JSON. Exact source/request/solution/
-control/replay-audit SHA-256 values are also recorded there; report SHA-256 is
-`e1df460e90e1706609a04d7bda265d072673f5af056d4d0142ca0e4f13871e83`.
+control/replay-audit SHA-256 values are also recorded there; the report digest
+is recorded below after adding the per-cell allocation.
 
 The evidence separates a small reconstructed Hermite-Simpson defect from the
 larger optimized-state versus continuous-replay difference. It does not
@@ -700,7 +701,23 @@ or qualify either synthetic solve. In particular, sampled control identity
 does not establish whole-capture muscular prediction. Any follow-up numerical
 experiment requires separate review and authorization; no solver, optimizer,
 native replay, mesh refinement or tolerance change is authorized by this
-analysis. A separate offline follow-up could attribute the flexor error by
-cell, comparing local midpoint/end values from the retained PWL integration
-against the saved collocation states while preserving the same source and
-law. It would remain a numerical diagnostic, not a replay qualification.
+analysis.
+
+A second offline-only calculation allocates the error per full Hermite-Simpson
+cell. Each 0.5 ms cell's scalar integration starts at that cell's saved
+optimized left activation and traverses its two saved piecewise-linear input
+half-intervals; a separate trace accumulates continuously from the initial
+state across all cells. For flexor, the largest local midpoint discrepancy is
+`1.1531598e-4` in the first cell and the largest local endpoint discrepancy is
+`9.4146359e-5`. The continuously accumulated scalar trace ends `-8.1047709e-5`
+from the optimized activation. The first-cell saved excitation is
+`[0.10660435, 0.06055026, 0.01449617]` and optimized activation is
+`[0.05000000, 0.05130361, 0.05131032]`; the sampled chord's excitation-minus-
+activation changes sign in its second half at the linearly estimated time
+`0.0003001872 s`. This is a sample-based branch-crossing estimate, not a
+continuous event location. The largest local tolerance sensitivity was
+`3.7749e-13` between the two DOP853 settings. These comparisons localize the
+discrepancy numerically but do not establish why it occurs. The extensor local
+endpoint discrepancy maximum is `1.7235e-10`. All inputs retain the same
+source/request/solution/control/replay hashes; the new report SHA-256 is
+`9e0ff02cb67ebb90eb9d6c7dcfe1f0de98b15d7911f618317460265148f25a23`.
