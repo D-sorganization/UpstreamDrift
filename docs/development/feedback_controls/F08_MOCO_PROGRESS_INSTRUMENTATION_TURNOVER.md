@@ -17,7 +17,7 @@ clock; it does not reinterpret the existing elapsed fields.
 At the optimizing event, after the existing set_parallel(0) call and
 immediately before study.solve(), the runner records actual MocoCasADiSolver
 getter outcomes for solver, Hessian, sparsity, finite-difference scheme,
-transcription, dynamics mode, verbosity, parallelism, iteration/tolerance and
+transcription, dynamics mode, mesh intervals, verbosity, parallelism, iteration/tolerance and
 IPOPT print properties. Returned scalars are distinguished from missing,
 error, nonfinite and non-scalar outcomes. No missing value is filled from a
 constructor default.

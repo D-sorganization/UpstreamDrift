@@ -11,6 +11,10 @@ from typing import Any
 import pytest
 
 from src.engines.physics_engines.opensim.python.tour_matching import native_moco_runner
+from src.engines.physics_engines.opensim.python.tour_matching.native_diagnostic_contract import (
+    DiagnosticSoftwareAdmission,
+    PhysicalQualification,
+)
 
 
 pytestmark = pytest.mark.unit
@@ -40,6 +44,7 @@ class _FakeSolver:
             "get_transcription_scheme": "hermite-simpson",
             "get_multibody_dynamics_mode": "explicit",
             "get_verbosity": 2,
+            "get_num_mesh_intervals": 2,
             "get_optim_max_iterations": 5,
             "get_optim_convergence_tolerance": 1e-3,
             "get_optim_constraint_tolerance": 1e-3,
@@ -164,6 +169,8 @@ def test_native_solve_progress_is_atomic_identity_bound_and_stage_ordered(
     properties = optimizing["solver_properties_after_set_parallel"]
     assert properties["parallel"]["status"] == "returned"
     assert properties["parallel"]["value"] == 0
+    assert properties["num_mesh_intervals"]["status"] == "returned"
+    assert properties["num_mesh_intervals"]["value"] == 2
     assert solver.set_parallel_calls == [0]
     assert study.solve_calls == 1
 
@@ -217,3 +224,66 @@ def test_progress_atomic_write_leaves_previous_snapshot_on_serialization_error(
         native_moco_runner._atomic_write_progress(path, {"not_json": math.nan})
     assert path.read_bytes() == original
     assert list(tmp_path.glob(".progress-*.tmp")) == []
+
+
+def test_solve_wrapper_separates_current_input_audit_from_legacy_timer(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    request_id = "a" * 64
+    source_id = "b" * 64
+    assessment = native_moco_runner.NativeDiagnosticAssessment(
+        request_sha256=request_id,
+        source_sha256=source_id,
+        findings=(),
+        software_admission=DiagnosticSoftwareAdmission.ADMITTED,
+        runtime_viability=native_moco_runner.RuntimeViability.VIABLE,
+        physical_qualification=PhysicalQualification.NOT_ESTABLISHED,
+        runtime_phase=native_moco_runner.RuntimePhase.SHORT_CAPABILITY_PROBE,
+        runtime_window_seconds=(0.0, 0.001),
+        native_runtime_sha256="c" * 64,
+        runtime_evidence_sha256="d" * 64,
+    )
+    prepared = SimpleNamespace(diagnostic_assessment=assessment)
+    request = SimpleNamespace(
+        identity_sha256=request_id,
+        config=SimpleNamespace(t_start_s=0.0, horizon_s=0.01),
+    )
+    audit_completed: list[float] = []
+    solver_call: dict[str, Any] = {}
+
+    def audit(*args: Any, **kwargs: Any) -> Path:
+        time.sleep(0.02)
+        audit_completed.append(time.perf_counter())
+        return Path("registered.trc")
+
+    def run_once(
+        request_arg: Any,
+        registered: Path,
+        directory: Path,
+        wall: float,
+        cpu: float,
+        *,
+        current_input_audit_elapsed_wall_seconds: float,
+    ) -> native_moco_runner.NativeMocoSolve:
+        solver_call["wall"] = wall
+        solver_call["cpu"] = cpu
+        solver_call["audit_seconds"] = current_input_audit_elapsed_wall_seconds
+        assert registered == Path("registered.trc")
+        assert wall >= audit_completed[0]
+        return native_moco_runner.NativeMocoSolve(
+            False, "injected-no-solve", None, 0, None, None, None, None, 0.0, 0.0
+        )
+
+    monkeypatch.setattr(native_moco_runner, "_require_current_inputs", audit)
+    monkeypatch.setattr(native_moco_runner, "_native_solve_once", run_once)
+    result = native_moco_runner.solve_native_moco(request, prepared, tmp_path)
+
+    assert solver_call["audit_seconds"] >= 0.015
+    assert solver_call["wall"] >= audit_completed[0]
+    assert result.success is False
+    receipt = json.loads((tmp_path / "solve.json").read_text(encoding="utf-8"))
+    assert receipt["wall_seconds"] == 0.0
+    assert (
+        receipt["diagnostic_assessment"]["runtime_phase"]
+        == native_moco_runner.RuntimePhase.OPTIMIZATION.value
+    )

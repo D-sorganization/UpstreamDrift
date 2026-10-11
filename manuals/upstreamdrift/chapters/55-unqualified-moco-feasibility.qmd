@@ -62,8 +62,10 @@ monotonic_seconds can be compared with a supervisor's child-start monotonic
 clock to measure earlier import/setup time.
 
 Immediately before study.solve(), after solver.set_parallel(0), the
-optimizing event records each available MocoCasADiSolver getter as returned,
-missing, error, nonfinite or non-scalar evidence. This is readback from the
+optimizing event records available MocoCasADiSolver getters for solver,
+Hessian, sparsity, finite differences, transcription, dynamics, mesh interval
+count, verbosity, parallelism, limits and IPOPT print level. Returned, missing,
+error, nonfinite or non-scalar outcomes remain distinct. This is readback from the
 constructed study solver, not a constructor-default probe. A missing or failed
 getter remains unknown; the observer does not substitute a default. No solver
 option, dynamics, transcription, mesh, bound, objective, or source law is

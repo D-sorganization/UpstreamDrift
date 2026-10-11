@@ -12,9 +12,7 @@ from dataclasses import asdict, dataclass, replace
 import hashlib
 import json
 import math
-import os
 from pathlib import Path
-import tempfile
 import time
 from types import MappingProxyType
 from typing import Any
@@ -60,6 +58,7 @@ from .native_wrapped_path import (
 from .trc import read_trc, write_trc
 from src.shared.python.motion_matching.tour_capture_contract import TourCapture
 from src.shared.python.estimation import dime_global_calibration
+from src.shared.python.motion_matching.jobs.io_atomic import atomic_write_bytes
 
 
 def _sha(path: Path) -> str:
@@ -191,6 +190,7 @@ _SOLVER_PROGRESS_GETTERS = {
     "multibody_dynamics_mode": "get_multibody_dynamics_mode",
     "verbosity": "get_verbosity",
     "parallel": "get_parallel",
+    "num_mesh_intervals": "get_num_mesh_intervals",
     "optim_max_iterations": "get_optim_max_iterations",
     "optim_convergence_tolerance": "get_optim_convergence_tolerance",
     "optim_constraint_tolerance": "get_optim_constraint_tolerance",
@@ -251,27 +251,11 @@ def _solver_progress_properties(
 
 
 def _atomic_write_progress(path: Path, payload: Mapping[str, Any]) -> None:
-    """Atomically preserve the last complete progress snapshot."""
-    path.parent.mkdir(parents=True, exist_ok=True)
-    staged: Path | None = None
-    try:
-        with tempfile.NamedTemporaryFile(
-            mode="w",
-            encoding="utf-8",
-            dir=path.parent,
-            prefix=f".{path.stem}-",
-            suffix=".tmp",
-            delete=False,
-        ) as stream:
-            staged = Path(stream.name)
-            json.dump(dict(payload), stream, sort_keys=True, allow_nan=False)
-            stream.write("\n")
-            stream.flush()
-            os.fsync(stream.fileno())
-        os.replace(staged, path)
-    finally:
-        if staged is not None:
-            staged.unlink(missing_ok=True)
+    """Serialize finite progress JSON, then use shared atomic byte publication."""
+    encoded = (
+        json.dumps(dict(payload), sort_keys=True, allow_nan=False) + "\n"
+    ).encode("utf-8")
+    atomic_write_bytes(path, encoded)
 
 
 def _native_solve_once(
