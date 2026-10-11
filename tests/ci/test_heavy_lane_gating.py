@@ -9,7 +9,8 @@ completed. These tests pin the gating contract:
 * heavy jobs run on ``schedule``, ``workflow_dispatch`` or a PR carrying the
   ``ci:full`` label;
 * label events other than ``ci:full`` neither start work nor cancel a run;
-* non-PR runs are never cancelled, and a nightly failure files an issue.
+* non-PR runs are never cancelled once running, only the newest pending one
+  is kept (#12285), and a nightly failure files an issue.
 """
 
 from __future__ import annotations
@@ -66,13 +67,30 @@ class TestCrossEngineEquivalenceGating:
         assert on["schedule"], "heavy lanes need a nightly schedule"
         assert "workflow_dispatch" in on
 
-    def test_only_pr_runs_are_cancelled_and_labels_do_not_cancel(self) -> None:
+    def test_only_pr_runs_cancel_in_progress(self) -> None:
         concurrency = _load(self.NAME)["concurrency"]
-        assert concurrency["cancel-in-progress"] in (
-            "${{ github.event_name == 'pull_request' }}",
-            True,
+        assert (
+            concurrency["cancel-in-progress"]
+            == "${{ github.event_name == 'pull_request' }}"
         )
-        assert "github.sha" in concurrency["group"]
+
+    def test_non_pr_runs_keep_only_the_newest_pending_run(self) -> None:
+        # #12285: a per-SHA group queued one main run per push and never
+        # dropped the stale ones. Grouped per event and ref without
+        # cancel-in-progress, GitHub keeps the running run plus only the
+        # newest pending one, and a push never displaces the nightly run.
+        group = _load(self.NAME)["concurrency"]["group"]
+        assert "github.sha" not in group
+        assert "format('{0}-{1}', github.event_name, github.ref)" in group
+
+    def test_workflow_lint_allows_conditional_cancel(self) -> None:
+        # The workflow-file lint greps for a literal ``cancel-in-progress:
+        # true``, so the conditional form above must be on its exception list.
+        lint = (WORKFLOWS / "lint-workflow-files.yml").read_text(encoding="utf-8")
+        allowlist = next(
+            line for line in lint.splitlines() if "nightly-publish.yml" in line
+        )
+        assert self.NAME in allowlist
 
     def test_dispatcher_exposes_heavy_flag(self) -> None:
         dispatcher = _load(self.NAME)["jobs"]["pick-runner"]

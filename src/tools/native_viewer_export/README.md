@@ -63,11 +63,12 @@ python3 -m src.tools.native_viewer_export \
   (`{"unavailable": reason}`, printed by the CLI); a placement is recorded with
   its position, source and `hide_after_s`. MuJoCo and MyoSuite append a render
   scene sphere per visible frame; Drake and Pinocchio MeshCat hold one `/ball`
-  sphere and toggle `visible`. **OpenSim limitation:** the simbody visualizer
-  caches fixed geometry, and toggling Appearance visibility or opacity after
-  `initSystem` does not redraw (verified by a smoke render), so the OpenSim ball
-  stays visible after impact; this is recorded as `limitation` in the result.
-  Post-impact flight is a later slice.
+  sphere and toggle `visible`. OpenSim's simbody visualizer caches fixed
+  geometry at `initSystem` (toggling Appearance visibility does not redraw), so
+  its worker hangs the sphere on a tiny render-only body on a slider joint from
+  ground and slides it 1 km out of view after impact (`ball_slide_m`); body
+  poses are redrawn from the state every frame. Post-impact flight is a later
+  slice.
 - Force arrows use the `body_weight` scale mode when the model mass is known:
   one body weight is 0.5 m and the ceiling is 3 m (`default_glyph_style`).
 - `--speeds 1,0.5,0.25` (default: full, half, quarter) writes one clip set per playback speed, named
