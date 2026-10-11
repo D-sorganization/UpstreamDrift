@@ -77,8 +77,15 @@ def _contact_source(
     return path, declaration, model, osim
 
 
+@pytest.mark.parametrize(
+    ("contact_kind", "expected_label"),
+    [
+        ("smooth", "contact:base_contact_force"),
+        ("hunt_crossley", "contact:base_contact_force"),
+    ],
+)
 def test_exact_source_contact_declaration_replays_and_samples_native_wrench(
-    tmp_path: Path,
+    tmp_path: Path, contact_kind: str, expected_label: str
 ) -> None:
     from src.engines.physics_engines.opensim.python.tour_matching.native_constrained_muscle import (
         build_constrained_muscle_bundle,
@@ -95,7 +102,7 @@ def test_exact_source_contact_declaration_replays_and_samples_native_wrench(
     )
     from tests.opensim.test_native_constrained_muscle import _controls
 
-    path, cold_start, _model, _osim = _contact_source(tmp_path)
+    path, cold_start, _model, _osim = _contact_source(tmp_path, contact_kind)
     contacts = declare_native_contact_execution(path, cold_start.source_sha256)
     mechanics = declare_native_mechanics_execution_profile(
         path, cold_start.source_sha256
@@ -103,6 +110,22 @@ def test_exact_source_contact_declaration_replays_and_samples_native_wrench(
     wrapped = declare_wrapped_path_source(path)
     grid = np.array([0.0, 0.001, 0.002])
     controls = _controls(grid, 0.25)
+
+    # The test harness restores src.engines modules between test cases. Rebuild
+    # this immutable declaration with the active class so that the fixture's
+    # collection-time class object does not cross that isolation boundary.
+    from dataclasses import fields
+    from src.engines.physics_engines.opensim.python.tour_matching.native_scalar_replay import (
+        DeclaredColdStart as ActiveColdStart,
+    )
+
+    if not isinstance(cold_start, ActiveColdStart):
+        cold_start = ActiveColdStart(
+            **{
+                field.name: getattr(cold_start, field.name)
+                for field in fields(cold_start)
+            }
+        )
 
     bundle = build_constrained_muscle_bundle(
         cold_start,
@@ -122,7 +145,7 @@ def test_exact_source_contact_declaration_replays_and_samples_native_wrench(
     assert len(replay.contact_wrenches) == len(grid)
     assert all(len(frame) == 1 for frame in replay.contact_wrenches)
     wrench = replay.contact_wrenches[-1][0]
-    assert wrench.label == "contact:base_contact_force"
+    assert wrench.label == expected_label
     assert wrench.force_n is not None and wrench.torque_nm is not None
     assert np.isfinite((*wrench.force_n, *wrench.torque_nm, *wrench.point_m)).all()
 
@@ -241,6 +264,11 @@ def test_supported_contact_laws_bind_force_and_geometry_closure(
     )
 
     path, cold_start, model, _osim = _contact_source(tmp_path, contact_kind)
+    from src.engines.physics_engines.opensim.python.tour_matching.native_muscle_bundle import (
+        _validate_self_contained_source,
+    )
+
+    _validate_self_contained_source(path.read_bytes())
     declaration = declare_native_contact_execution(path, cold_start.source_sha256)
     assert len(declaration.forces) == 1
     assert declaration.forces[0].concrete_class == expected_class
@@ -333,3 +361,33 @@ def test_hunt_crossley_request_admits_only_exact_runner_contact_closure(
     changed_request = replace(request, contact_declaration=changed)
     changed_blockers = _audit_loaded_model_components(model, changed_request)
     assert "native-contact-declaration-invalid" in changed_blockers
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        b'<!DOCTYPE OpenSimDocument [<!ENTITY x "bad">]><OpenSimDocument><Model>&x;</Model></OpenSimDocument>',
+        b'<!DOCTYPE OpenSimDocument SYSTEM "file:///C:/Windows/win.ini"><OpenSimDocument><Model/></OpenSimDocument>',
+        b"<OpenSimDocument><Model><mesh_file>external.vtp</mesh_file></Model></OpenSimDocument>",
+        b'<OpenSimDocument xmlns:x="urn:test"><Model><Geometry x:href="external.vtp"/></Model></OpenSimDocument>',
+        b'<OpenSimDocument xmlns:x="urn:test"><Model><x:filename>external.vtp</x:filename></Model></OpenSimDocument>',
+        b"<OpenSimDocument><Model></OpenSimDocument>",
+    ],
+    ids=[
+        "internal-entity",
+        "external-dtd",
+        "external-resource-reference",
+        "prefixed-resource-attribute",
+        "prefixed-resource-element",
+        "malformed-xml",
+    ],
+)
+def test_self_contained_xml_gate_rejects_dtd_entities_and_resources(
+    raw: bytes,
+) -> None:
+    from src.engines.physics_engines.opensim.python.tour_matching.native_muscle_bundle import (
+        _validate_self_contained_source,
+    )
+
+    with pytest.raises(ValueError):
+        _validate_self_contained_source(raw)
