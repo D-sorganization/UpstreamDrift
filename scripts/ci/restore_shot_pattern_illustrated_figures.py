@@ -38,12 +38,16 @@ def _required_paths() -> list[Path]:
 def _download_archive(dest: Path) -> None:
     repo = os.environ.get("GITHUB_REPOSITORY", DEFAULT_REPO)
     url = f"https://github.com/{repo}/releases/download/{RELEASE_TAG}/{ARCHIVE_NAME}"
+    if not url.startswith("https://github.com/"):
+        msg = f"Insecure download URL: {url}"
+        raise ValueError(msg)
     headers: dict[str, str] = {}
     token = os.environ.get("GITHUB_TOKEN", "")
     if token:
         headers["Authorization"] = f"Bearer {token}"
     request = urllib.request.Request(url, headers=headers)
-    with urllib.request.urlopen(request) as response, dest.open("wb") as handle:
+    # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
+    with urllib.request.urlopen(request) as response, dest.open("wb") as handle:  # noqa: S310
         handle.write(response.read())
 
 
