@@ -87,6 +87,8 @@ UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
 
 {{< include chapters/48-native-constrained-mixed-moco.qmd >}}
 
+{{< include chapters/49-native-opensim-mixed-marker-observation.qmd >}}
+
 {{< include chapters/39-native-offline-muscle-matching.qmd >}}
 
 {{< include chapters/34-owned-native-simscape-replay.qmd >}}
@@ -112,6 +114,9 @@ UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
 {{< include chapters/53-native-moco-physical-preflight.qmd >}}
 
 {{< include chapters/54-generic-shoulder-triangle-lamina.qmd >}}
+{{< include chapters/55-unqualified-moco-feasibility.qmd >}}
+
+{{< include chapters/24-native-path-work.qmd >}}
 
 {{< include chapters/55-unqualified-moco-feasibility.qmd >}}
 
