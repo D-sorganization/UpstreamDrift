@@ -33,3 +33,5 @@ requirements*.lock text eol=lf
 # Exclude archived legacy code from language statistics
 engines/pendulum_models/archive/** linguist-vendored
 engines/pendulum_models/archive/** linguist-documentation
+# Preserve exact bytes for the final-source-bound offline analysis receipt.
+docs/development/feedback_controls/experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/solution_control_replay_diagnostic_3bc787e36d_root/retained_replay/offline_activation_residual_analysis_finalsource_4e40b764.json -text -eol

@@ -352,3 +352,23 @@ result. The source-tag defaults are inferred from XML/OpenSim 4.6 source; the
 installed native binary was not queried. The machine-readable report is
 `docs/development/feedback_controls/experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/solution_control_replay_diagnostic_3bc787e36d_root/retained_replay/offline_activation_residual_analysis.json`
 (SHA-256 `4331b57dd1b772b4054932041b1b3e0e1c8148581933d58c5215a129fba72a58`).
+
+The offline analyzer was rerun after its final source hardening and nonuniform-grid
+TDD update. The earlier report remains immutable at its recorded digest; this
+second report binds the final analyzer bytes and the same retained snapshot and
+audit. It confirms 21 collocation cells over 43 saved rows. Flexor optimized
+activation differs from independently segmented scalar integration by at most
+`5.078935403843299e-5`; replay differs from the scalar result by
+`4.016980001408932e-8`. The maximum local-cell optimized-state difference is
+`9.262298642974398e-5`, and the Simpson dynamics defect is
+`3.5819897541253427e-9`. Sampled chord estimates place excitation/activation
+branch crossings in cells 0 and 2; they are indicators, not native crossing
+proofs. Controls' saved midpoint values are linear interpolants within about
+`7e-18`. The optimized and replay trajectories differ despite small sampled
+collocation defects; no causal mesh-convergence inference follows. The installed
+OpenSim binary was not queried, and the result remains unqualified. The
+source-bound report is
+`docs/development/feedback_controls/experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/solution_control_replay_diagnostic_3bc787e36d_root/retained_replay/offline_activation_residual_analysis_finalsource_4e40b764.json`
+(SHA-256 `d78b4efbfa66a01de23ad6403971ab2dca7e7171ccac6c4f7809f6cdaf3cd45d`;
+analysis source SHA-256
+`31925492d691b40e42181b311f818b0b88038027cea2bd5641898310b5d650ca`).

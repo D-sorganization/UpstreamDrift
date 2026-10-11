@@ -819,3 +819,19 @@ The complete replay audit is `experiments/native_moco_refinement_solve_cecfcd98_
 The offline analyzer was generalized to use the exact saved time grid for nonuniform Hermite-Simpson cells. It retains `interval_count` as 42 adjacent row spans and adds the separate 21-cell count, saved cell widths, saved midpoint times, and mean duration; the first two cells are 0.00025 s and the remaining 19 are 0.0005 s (mean `0.0004761904761904762 s`). It validates finite, strictly increasing times, endpoint/midpoint row structure, and agreement between the saved cell count and the request. No planned grid is reconstructed, so the separate strict one-ULP rejection remains unchanged.
 
 The source-bound offline result is `experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/solution_control_replay_diagnostic_3bc787e36d_root/retained_replay/offline_activation_residual_analysis.json`, SHA-256 `4331b57dd1b772b4054932041b1b3e0e1c8148581933d58c5215a129fba72a58`. It imports no OpenSim SDK. For flexor, scalar integration from the optimized initial state differs from optimized activation by at most `5.078935403843299e-5`; replay differs from that scalar trajectory by at most `4.016980001408932e-8`. Per-cell integration restarted from each optimized left state reaches a maximum midpoint/endpoint difference of `9.262298642974398e-5`, versus `5.078935403843299e-5` for accumulated integration. The maximum Simpson dynamics defect is `3.5819897541253427e-9`. Flexor activation parameters use explicit XML values when present and otherwise OpenSim 4.6 source-tag defaults (0.01 s activation, 0.04 s deactivation, 0.01 minimum); the installed binary was not queried. These scalar/defect comparisons do not explain the failed replay or change qualification.
+
+After the separate analyzer hardening and nonuniform-grid update, I regenerated
+the offline analysis to a new file using the final source bytes, the existing
+immutable snapshot, and the same fresh-replay audit. The prior report and its
+source identity remain preserved. New report SHA-256 is
+`d78b4efbfa66a01de23ad6403971ab2dca7e7171ccac6c4f7809f6cdaf3cd45d`; analyzer
+SHA-256 is `31925492d691b40e42181b311f818b0b88038027cea2bd5641898310b5d650ca`.
+It confirms 21 cells/43 rows. Flexor optimized-versus-scalar maximum error is
+`5.078935403843299e-5`, replay-versus-scalar is `4.016980001408932e-8`,
+maximum local-cell optimized-state difference is `9.262298642974398e-5`, and
+maximum Simpson dynamics defect is `3.5819897541253427e-9`. Sampled chord
+branch-crossing estimates lie in cells 0 and 2; saved controls are linear at
+midpoints to about `7e-18`. These are local indicators, not proof of continuous
+collocation error or causality. No native SDK was run, no thresholds or source
+states changed, and the result remains unqualified. The final report path is
+`experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/solution_control_replay_diagnostic_3bc787e36d_root/retained_replay/offline_activation_residual_analysis_finalsource_4e40b764.json`.
