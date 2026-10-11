@@ -1,3 +1,7 @@
+# Active: 7-Iron MSK Grip Calibration, #12042
+
+- Branch `claude/12042-iron7-msk-cal`. `msk_club_grip_calibration.json` now has `iron7` entries for `golf_humanoid` (grip gaps 0.04 / 0.02 mm, landmark RMS 14.9 mm) and `golf_humanoid_scaled` (0.24 / 0.25 mm, 40.0 mm), from the existing `msk_club_calibration --club iron7` CLI. The 7-iron MSK render (`render_msk_club.py --club iron7`, #12247) needs it.
+
 # Active: Club-Face Fixtures on the Current Spec, #12117
 
 - Branch `claude/12117-club-face-fixtures`. Fixtures from `657c811bcd` (#12145 sources; input receipts value-identical to main's #12166 receipts). Feet now flat (3.2–3.8 cm), address face follows the capture (5.43 / −5.41° vs 5.50 / −5.35°).
