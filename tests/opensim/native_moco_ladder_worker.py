@@ -66,20 +66,26 @@ def run_rung(rung_name: str, output: Path, mesh_intervals: int = 10) -> None:
 
 def run_saved_replay_diagnostic(source_run: Path, output: Path) -> None:
     """Replay retained solution inputs without constructing or running a solver."""
+    _start_replay_diagnostic(output)
     import opensim as osim
+
+    _write_diagnostic_stage(output, "opensim_imported")
     from src.engines.physics_engines.opensim.python.tour_matching.native_constrained_muscle import (
         replay_constrained_muscle_bundle,
     )
 
-    output.mkdir(parents=True, exist_ok=False)
+    _write_diagnostic_stage(output, "replay_provider_imported")
     prepared, solution, grid, controls, bundle = _load_saved_replay_inputs(
         source_run, output, osim
     )
+    _write_diagnostic_stage(output, "saved_inputs_loaded")
+    _write_diagnostic_stage(output, "native_replay_started")
     replay = replay_constrained_muscle_bundle(
         bundle,
         prepared["declaration"],
         native_mechanics_profile=prepared["profile"],
     )
+    _write_diagnostic_stage(output, "native_replay_completed")
     audit = _make_replay_state_audit(
         solution,
         replay.states,
@@ -114,6 +120,16 @@ def run_saved_replay_diagnostic(source_run: Path, output: Path) -> None:
             "acceptance_failures": audit["acceptance_failures"],
         },
     )
+    _write_diagnostic_stage(output, "audit_written")
+
+
+def _start_replay_diagnostic(output: Path) -> None:
+    output.mkdir(parents=True, exist_ok=False)
+    _write_diagnostic_stage(output, "worker_started")
+
+
+def _write_diagnostic_stage(output: Path, stage: str) -> None:
+    _write_json(output / "diagnostic_progress.json", {"stage": stage})
 
 
 def _load_saved_replay_inputs(

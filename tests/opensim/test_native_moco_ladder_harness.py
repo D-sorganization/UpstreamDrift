@@ -543,6 +543,32 @@ def test_diagnostic_replay_records_failed_status_without_promoting_it(
     assert json.loads(path.read_text(encoding="utf-8")) == failed
 
 
+def test_retained_replay_progress_is_flushed_before_native_imports(
+    tmp_path: Path,
+) -> None:
+    from tests.opensim.native_moco_ladder_worker import (
+        _start_replay_diagnostic,
+        _write_diagnostic_stage,
+    )
+
+    supervisor_directory = tmp_path / "supervisor"
+    supervisor_directory.mkdir()
+    (supervisor_directory / "supervisor.stdout.log").write_text("")
+    worker_output = supervisor_directory / "worker"
+    _start_replay_diagnostic(worker_output)
+    progress_path = worker_output / "diagnostic_progress.json"
+    assert json.loads(progress_path.read_text(encoding="utf-8")) == {
+        "stage": "worker_started"
+    }
+    _write_diagnostic_stage(worker_output, "opensim_imported")
+    assert json.loads(progress_path.read_text(encoding="utf-8")) == {
+        "stage": "opensim_imported"
+    }
+
+    with pytest.raises(FileExistsError):
+        _start_replay_diagnostic(worker_output)
+
+
 def test_solution_sto_roundtrip_allows_one_ulp_and_records_array_hashes(
     tmp_path: Path,
 ) -> None:

@@ -545,3 +545,11 @@ harness/builder hash is
 `55afad2bbc57ad8b471ba1addd3cecec53b1aea275420151876941f04c8d6ae2`, and
 the replay mechanics profile hash is
 `189c5d07c24b6b8c993aedba8cb794dbe82925bb6b368fef98be1327c2057fbf`.
+
+## Retained-Input Replay Diagnostic Attempt
+
+After the mesh-20 solve timed out during its integrated replay stage, one separately authorized no-optimizer diagnostic was launched against the saved `plain/` source, request, solution, and controls. It used the same 30-second wall deadline, one-thread environment, sampled 1 GiB soft process-tree RSS threshold, and owned-tree cleanup. The supervisor ended with `wall_timeout`, `return_code=null`, and peak sampled tree RSS 154,619,904 bytes. A subsequent process scan found no worker matching the replay command. No saved-replay audit or diagnostic status was emitted, and no solver was run.
+
+The diagnostic stage is unknown. The worker imports OpenSim and replay modules before creating its audit output, and the retained supervisor logs are empty; the recorded artifacts therefore do not establish that native replay began. The output directory was prepared for supervisor logs before worker launch, while `run_saved_replay_diagnostic()` currently creates that same directory with `exist_ok=False`. This is a possible startup collision after imports and must be resolved before any future authorized attempt. The result is an incomplete diagnostic timeout, not evidence about mesh-20 replay agreement. No retry or later rung was started.
+
+The only diagnostic files are empty `supervisor.stdout.log` and `supervisor.stderr.log`, each with SHA-256 `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855`.
