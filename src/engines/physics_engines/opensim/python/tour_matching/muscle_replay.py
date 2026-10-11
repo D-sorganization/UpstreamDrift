@@ -148,37 +148,18 @@ def _audit_drive_components(
 
 def _contact_sampler(model: Any, paths: tuple[str, ...]) -> Any:
     """Reuse the existing native wrench provider, requiring complete contact output."""
-    if not paths:
-        return None
-    from src.engines.physics_engines.opensim.python.opensim_force_torque import (
-        OpenSimForceTorqueSource,
-    )
+    from .native_contact_policy import contact_sampler
 
-    sampler = OpenSimForceTorqueSource(model, include_muscles=False)
-    sampler.validate_ground_contact_paths(paths)
-    return sampler
+    return contact_sampler(model, paths)
 
 
 def _sample_contacts(
     sampler: Any, state: Any, paths: tuple[str, ...]
 ) -> tuple[OverlayWrench, ...]:
     """Fail on unsupported geometry or omitted evidence rather than filling zeros."""
-    if sampler is None:
-        return ()
-    from src.shared.python.force_overlay import WrenchKind
+    from .native_contact_policy import sample_native_contacts
 
-    contacts = tuple(sampler.sample(state).by_kind(WrenchKind.CONTACT))
-    expected = {"contact:" + path.rsplit("/", 1)[-1] for path in paths}
-    if len(contacts) != len(paths) or {w.label for w in contacts} != expected:
-        raise ValueError("native contact wrench evidence is incomplete or unsupported")
-    for wrench in contacts:
-        if wrench.force_n is None or wrench.torque_nm is None:
-            raise ValueError(
-                "native contact wrench evidence needs both force and torque"
-            )
-        if not np.isfinite((*wrench.force_n, *wrench.torque_nm, *wrench.point_m)).all():
-            raise RuntimeError("native contact wrench evidence must be finite")
-    return contacts
+    return sample_native_contacts(sampler, state, paths)
 
 
 def _muscle_state_domains(model: Any, osim: Any) -> dict[str, tuple[float, float]]:
