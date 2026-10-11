@@ -29,6 +29,7 @@ EXPORT_FORMATS: dict[str, tuple[str, str]] = {
     "urdf": ("text/xml", "urdf"),
     "mjcf": ("text/xml", "xml"),
     "osim": ("text/xml", "osim"),
+    "gltf": ("model/gltf+json", "gltf"),
 }
 
 
@@ -132,6 +133,15 @@ def export_character(character: CompiledCharacter, fmt: str) -> tuple[str, str, 
         )
 
         text = export_full_body_osim(character.document)[0]
+    elif fmt == "gltf":
+        from src.shared.python.model_appearance.skinned_body import (
+            build_skinned_body,
+            skinned_body_gltf_text,
+        )
+
+        text = skinned_body_gltf_text(
+            build_skinned_body(character.document, spec_sha256=character.sha256)
+        )
     stem = character.preset_id or "custom"
     return text, media_type, f"{stem}_{character.sha256[:8]}.{ext}"
 

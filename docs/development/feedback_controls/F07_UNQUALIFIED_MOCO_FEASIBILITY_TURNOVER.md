@@ -33,6 +33,13 @@ grip, muscle-only replay and 17-row/six-ecosystem parity remain open.
 
 The five-suite actual OpenSim 4.6 regression passed 51 tests without skips in 83.29 seconds, including the 14 diagnostic tests and existing pure/mixed Moco, constrained-mixed and physical-preflight tests. Exact command: SDK python -m pytest tests/opensim/test_native_moco_diagnostic.py tests/opensim/test_native_moco_runner.py tests/opensim/test_native_moco_inertia_preflight.py tests/opensim/test_native_mixed_moco.py tests/opensim/test_native_constrained_mixed.py -q -o addopts=''. No complete private swing was executed by this regression.
 
+After normal integration of parent #12198 through `d3d284d6f3` and main
+`9b93fb2a41`, the same dedicated native command passed all 51 cases without
+skips in 107.23 seconds at merge `8fc02fc367`. The generated agent context
+was regenerated and checked successfully. This preserves existing diagnostic
+behavior after the main integration; it does not establish private full-clock
+matching, contact/grip qualification or independent full-horizon replay.
+
 RM-6 passed all five central gates after an explicit heterogeneous request-payload
 type annotation corrected the initial mypy failure (`12225-central-gates-v2.log`).
 Its default Python lacks OpenSim and skipped 30 native cases; the separate

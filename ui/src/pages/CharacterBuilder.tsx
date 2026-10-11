@@ -5,6 +5,8 @@ import { getApiBase } from '@/api/backend';
 import { CharacterSpecPanel } from '@/components/character/CharacterSpecPanel';
 import { AppearancePanel } from '@/components/character/AppearancePanel';
 import { useCharacterSpec } from '@/components/character/useCharacterSpec';
+import { useSpecBodyPreview } from '@/components/character/useSpecBodyPreview';
+import { SPEC_BODY_DEFAULT_COLOR } from '@/components/character/skinnedBodyPreview';
 import type { AppearancePalette } from '@/components/character/appearanceTypes';
 
 interface SegmentBreakdown {
@@ -142,7 +144,15 @@ export function CharacterBuilderPage() {
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [palette, setPalette] = useState<AppearancePalette | null>(null);
+  const [showSpecBody, setShowSpecBody] = useState(false);
   const spec = useCharacterSpec();
+  // Live spec-body preview: the skinned glTF lofted over the compiled spec
+  // skeleton (CMB-7f, #11658; CMB-6 #11657), refetched as the sliders move.
+  const specBody = useSpecBodyPreview(
+    showSpecBody,
+    spec.requestBody,
+    palette?.trunk ?? SPEC_BODY_DEFAULT_COLOR,
+  );
 
   const breakdown = useMemo(() => {
     return SEGMENT_RATIOS.map((seg) => {
@@ -282,6 +292,31 @@ export function CharacterBuilderPage() {
             />
           </div>
 
+          {/* Live spec-body preview toggle (CMB-7f, #11658) */}
+          <div className="border-t border-gray-700 pt-6">
+            <label
+              htmlFor="spec-body-toggle"
+              className="flex items-center gap-2 text-xs font-semibold text-gray-300"
+            >
+              <input
+                id="spec-body-toggle"
+                type="checkbox"
+                checked={showSpecBody}
+                onChange={(e) => setShowSpecBody(e.target.checked)}
+              />
+              Preview spec body (glTF)
+            </label>
+            {showSpecBody && (
+              <p className="mt-2 text-xs text-gray-400" role="status">
+                {specBody.error
+                  ? `Spec body unavailable: ${specBody.error}`
+                  : specBody.loading
+                    ? 'Loading spec body…'
+                    : 'Spec body follows the sliders above.'}
+              </p>
+            )}
+          </div>
+
           {/* Segment breakdown */}
           <div className="border-t border-gray-700 pt-6">
             <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
@@ -349,12 +384,16 @@ export function CharacterBuilderPage() {
             cellColor="#374151"
             sectionColor="#4b5563"
           />
-          <CharacterPreview
-            height={height}
-            weight={weight}
-            buildType={buildType}
-            palette={palette}
-          />
+          {specBody.scene ? (
+            <primitive object={specBody.scene} />
+          ) : (
+            <CharacterPreview
+              height={height}
+              weight={weight}
+              buildType={buildType}
+              palette={palette}
+            />
+          )}
           <Environment preset="studio" />
         </Canvas>
 
