@@ -147,7 +147,7 @@ class FrankensteinEditor(ClipboardMixin, ModificationMixin):
         self._save_state()
 
         # Create base link with minimal inertia
-        from shared.python.model_generation.core.types import Inertia
+        from src.shared.python.model_generation.core.types import Inertia
 
         base_link = Link(
             name=base_link_name,

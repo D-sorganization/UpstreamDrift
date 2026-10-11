@@ -16,8 +16,8 @@ Available packages:
 Preferred imports:
     from shared.python.theme import ThemeManager, get_theme_manager  # theme: keep prefix
     from shared.python import ai  # package-level assistant helpers
-    from shared.python.humanoid_character_builder import CharacterBuilder, BodyParameters
-    from shared.python.model_generation import quick_urdf, ManualBuilder, FrankensteinEditor
+    from src.shared.python.humanoid_character_builder import CharacterBuilder, BodyParameters
+    from src.shared.python.model_generation import quick_urdf, ManualBuilder, FrankensteinEditor
     from shared.python.signal_toolkit import Signal, SignalGenerator, FunctionFitter
     from shared.python.sidekick.process_calculators import FlareCalculator
     from shared.python.gui_launcher import GUIType, LaunchConfig, register_gui
