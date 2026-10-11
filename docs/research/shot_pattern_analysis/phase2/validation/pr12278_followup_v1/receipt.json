@@ -184,5 +184,12 @@
     "remote_models_blob": "2ff7ffd67fdbd72ab7ca867450e4cbbe2e0ad6ab",
     "local_base_models_blob": "2ff7ffd67fdbd72ab7ca867450e4cbbe2e0ad6ab"
   },
-  "recorded_utc": "2026-10-11T15:43:21.642764+00:00"
+  "recorded_utc": "2026-10-11T15:43:21.642764+00:00",
+  "final_remote_pr_state": {
+    "state": "open",
+    "merged": false,
+    "head": "1732772b69aabb3cf905bdfc324bb3f6ec963c61",
+    "blocked": true,
+    "note": "Remote advanced again during follow-up. Latest commit formats peer grip receipts; no integration or push attempted from older local base."
+  }
 }
