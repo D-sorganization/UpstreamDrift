@@ -13,7 +13,7 @@ import logging
 import math
 from pathlib import Path
 from collections.abc import Mapping
-from typing import Any
+from typing import Any, Callable
 
 import numpy as np
 
@@ -253,6 +253,7 @@ def build_moco_study(
     *,
     initial_bindings: MocoInitialBindings | None = None,
     marker_weights: Mapping[str, float] | None = None,
+    progress_callback: Callable[[str], None] | None = None,
 ) -> Any:
     """Build a MocoStudy problem configured for marker tracking with initial guess.
 
@@ -267,12 +268,18 @@ def build_moco_study(
 
     study = opensim.MocoStudy()
     study.setName(f"golf_moco_tracking_{int(config.horizon_s * 1000)}ms")
+    if progress_callback is not None:
+        progress_callback("study-created")
 
     problem = study.updProblem()
     problem.setModelProcessor(opensim.ModelProcessor(model_path))
     problem.setTimeBounds(config.t_start_s, config.horizon_s)
+    if progress_callback is not None:
+        progress_callback("model-and-time-bounds-set")
     if initial_bindings is not None:
         apply_moco_initial_bindings(problem, model_path, initial_bindings, opensim)
+    if progress_callback is not None:
+        progress_callback("initial-bindings-set")
 
     # Effort minimization goal
     effort = opensim.MocoControlGoal("effort")
@@ -309,6 +316,8 @@ def build_moco_study(
     marker_tracking.setMarkersReference(mr)
     marker_tracking.setAllowUnusedReferences(config.allow_unused_references)
     problem.addGoal(marker_tracking)
+    if progress_callback is not None:
+        progress_callback("goals-set")
 
     # Configure CasADi solver
     solver = opensim.MocoCasADiSolver.safeDownCast(study.initCasADiSolver())
@@ -316,20 +325,28 @@ def build_moco_study(
     solver.set_optim_max_iterations(config.optim_max_iterations)
     solver.set_optim_convergence_tolerance(config.optim_convergence_tolerance)
     solver.set_optim_constraint_tolerance(config.optim_constraint_tolerance)
+    if progress_callback is not None:
+        progress_callback("solver-configured")
 
     # Seed with IK initial guess trajectory
     guess = solver.createGuess()
+    if progress_callback is not None:
+        progress_callback("guess-created")
     states_table = opensim.TimeSeriesTable(states_guess_path)
     if initial_bindings is not None and set(states_table.getColumnLabels()) != set(
         initial_bindings.state_bounds
     ):
         raise ValueError("Native numerical guess state names are incomplete")
     guess.insertStatesTrajectory(states_table, True)
+    if progress_callback is not None:
+        progress_callback("guess-trajectory-inserted")
     if initial_bindings is not None and (
         set(guess.getStateNames()) != set(initial_bindings.state_bounds)
         or set(guess.getControlNames()) != set(initial_bindings.control_bounds)
     ):
         raise ValueError("Native Moco guess state/control names differ from problem")
     solver.setGuess(guess)
+    if progress_callback is not None:
+        progress_callback("guess-set")
 
     return study

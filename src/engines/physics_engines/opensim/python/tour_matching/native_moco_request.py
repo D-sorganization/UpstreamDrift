@@ -2,16 +2,19 @@
 
 from __future__ import annotations
 
-from dataclasses import MISSING, fields
+from dataclasses import MISSING, asdict, dataclass, fields
+import hashlib
 import json
+import math
 from pathlib import Path
-from typing import Any
+from collections.abc import Mapping
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
 from .moco_initial_bindings import MocoInitialBindings
 from .moco_tracking import MocoTrackingConfig
-from .native_moco_runner import NativeMocoRequest
 from .native_prepared_state import DeclaredColdStart
 from .native_mixed_actuation import ActuationRole, MixedChannel, MixedActuationProfile
 from .native_passive_readiness import MusclePassiveLimits, PassiveReadinessPolicy
@@ -31,6 +34,247 @@ from .native_wrapped_path import (
     WrappedPathDeclaration,
 )
 from .registration import CaptureRegistration
+
+if TYPE_CHECKING:
+    from .native_mechanics_profile import NativeMechanicsExecutionProfile
+
+
+@dataclass(frozen=True)
+class NativeMocoRequest:
+    """Only the files and reviewed native bindings needed for one offline fit."""
+
+    model_path: Path
+    trc_path: Path
+    states_guess_path: Path
+    model_sha256: str
+    trc_sha256: str
+    states_guess_sha256: str
+    bindings: MocoInitialBindings
+    config: MocoTrackingConfig
+    marker_weights: Mapping[str, float]
+    marker_bindings: Mapping[str, tuple[str, tuple[float, float, float]]]
+    registration: CaptureRegistration | None
+    reference_frame_path: str
+    passive_policy: PassiveReadinessPolicy | None
+    excluded_markers: Mapping[str, str]
+    constrained_cold_start: DeclaredColdStart | None = None
+    mixed_actuation: MixedActuationProfile | None = None
+    allow_unqualified_passive_diagnostic: bool = False
+    diagnostic_policy: NativeDiagnosticPolicy | None = None
+    wrapped_path_declaration: WrappedPathDeclaration | None = None
+    qualification_context: NativeQualificationContext | None = None
+    native_mechanics_profile: NativeMechanicsExecutionProfile | None = None
+
+    def __post_init__(self) -> None:
+        self.config.validate()
+        if not isinstance(self.allow_unqualified_passive_diagnostic, bool):
+            raise TypeError("passive diagnostic disposition must be boolean")
+        if self.diagnostic_policy is not None and not isinstance(
+            self.diagnostic_policy, NativeDiagnosticPolicy
+        ):
+            raise TypeError("native diagnostic policy must be typed")
+        if self.diagnostic_policy is not None:
+            if self.diagnostic_policy.source_sha256 != self.model_sha256:
+                raise ValueError("native diagnostic policy source differs from model")
+            if self.allow_unqualified_passive_diagnostic:
+                raise ValueError("legacy and typed diagnostic policies cannot combine")
+        if self.wrapped_path_declaration is not None:
+            if not isinstance(self.wrapped_path_declaration, WrappedPathDeclaration):
+                raise TypeError("wrapped-path declaration must be typed")
+            if self.wrapped_path_declaration.source_sha256 != self.model_sha256:
+                raise ValueError("wrapped-path declaration source differs from model")
+        if self.qualification_context is not None:
+            if not isinstance(self.qualification_context, NativeQualificationContext):
+                raise TypeError("qualification context must be typed")
+            if self.qualification_context.source_sha256 != self.model_sha256:
+                raise ValueError("qualification context source differs from model")
+        if self.native_mechanics_profile is not None:
+            from .native_mechanics_profile import NativeMechanicsExecutionProfile
+
+            if not isinstance(
+                self.native_mechanics_profile, NativeMechanicsExecutionProfile
+            ):
+                raise TypeError("native mechanics profile must be typed")
+            if self.native_mechanics_profile.source_sha256 != self.model_sha256:
+                raise ValueError("native mechanics profile source differs from model")
+            if self.constrained_cold_start is None or self.mixed_actuation is not None:
+                raise ValueError(
+                    "native mechanics profile requires constrained-muscle execution"
+                )
+            if self.diagnostic_policy is None:
+                raise ValueError(
+                    "native mechanics profile requires an explicit typed diagnostic policy"
+                )
+        if (
+            self.allow_unqualified_passive_diagnostic
+            and self.passive_policy is not None
+        ):
+            raise ValueError(
+                "diagnostic disposition requires unavailable passive policy"
+            )
+        if self.mixed_actuation is not None:
+            if not isinstance(self.mixed_actuation, MixedActuationProfile):
+                raise TypeError("mixed Moco requires a typed actuation profile")
+            if dict(self.bindings.control_bounds) != {
+                channel.path: channel.control_bounds
+                for channel in self.mixed_actuation.channels
+            }:
+                raise ValueError("mixed Moco control bounds differ from profile")
+        for name in ("model_sha256", "trc_sha256", "states_guess_sha256"):
+            value = getattr(self, name)
+            if len(value) != 64 or any(
+                char not in "0123456789abcdef" for char in value
+            ):
+                raise ValueError(f"{name} must be a lowercase SHA-256")
+        if not self.reference_frame_path.startswith("/"):
+            raise ValueError("Native reference frame path must be absolute")
+        weights = dict(self.marker_weights)
+        bindings = dict(self.marker_bindings)
+        exclusions = dict(self.excluded_markers)
+        for value in weights.values():
+            if isinstance(value, bool) or not math.isfinite(value) or value <= 0:
+                raise ValueError("Marker weights must be finite and positive")
+        for label, placement in bindings.items():
+            if (
+                not label
+                or len(placement) != 2
+                or not isinstance(placement[0], str)
+                or not placement[0].startswith("/")
+                or len(placement[1]) != 3
+                or not all(math.isfinite(float(value)) for value in placement[1])
+            ):
+                raise ValueError("Native marker placement requires frame and 3D offset")
+        if any(not reason.strip() for reason in exclusions.values()):
+            raise ValueError("Excluded marker reasons must be explicit")
+        if set(exclusions) & set(weights):
+            raise ValueError("A selected marker cannot also be excluded")
+        if self.constrained_cold_start is not None:
+            declared = self.constrained_cold_start
+            if (
+                declared.model_path != self.model_path.resolve()
+                or declared.source_sha256 != self.model_sha256
+                or dict(declared.named_state) != dict(self.bindings.initial_state)
+                or declared.time_seconds != self.config.t_start_s
+                or declared.constant_commands
+                or declared.source_controller_replacement is not None
+                or declared.allow_source_controllers_for_observation
+            ):
+                raise ValueError(
+                    "constrained cold start differs from Moco source or state"
+                )
+        object.__setattr__(self, "marker_weights", MappingProxyType(weights))
+        object.__setattr__(self, "marker_bindings", MappingProxyType(bindings))
+        object.__setattr__(self, "excluded_markers", MappingProxyType(exclusions))
+
+    @property
+    def identity_sha256(self) -> str:
+        """Bind every caller policy and placement across all execution stages."""
+        registration = self.registration
+        declared = self.constrained_cold_start
+        payload: dict[str, Any] = {
+            "model_path": str(self.model_path.resolve()),
+            "trc_path": str(self.trc_path.resolve()),
+            "guess_path": str(self.states_guess_path.resolve()),
+            "source_hashes": (
+                self.model_sha256,
+                self.trc_sha256,
+                self.states_guess_sha256,
+            ),
+            "state_bounds": dict(self.bindings.state_bounds),
+            "initial_state": dict(self.bindings.initial_state),
+            "control_bounds": dict(self.bindings.control_bounds),
+            "config": asdict(self.config),
+            "marker_weights": dict(self.marker_weights),
+            "marker_bindings": dict(self.marker_bindings),
+            "registration": None
+            if registration is None
+            else {
+                "rotation": registration.rotation.tolist(),
+                "translation": registration.translation.tolist(),
+                "source_frame": registration.source_frame,
+                "target_frame": registration.target_frame,
+            },
+            "reference_frame_path": self.reference_frame_path,
+            "passive_policy": (
+                None if self.passive_policy is None else asdict(self.passive_policy)
+            ),
+            "excluded_markers": dict(self.excluded_markers),
+            "mixed_actuation": None
+            if self.mixed_actuation is None
+            else asdict(self.mixed_actuation),
+            "constrained_cold_start": None
+            if declared is None
+            else {
+                "lock_targets": dict(declared.lock_targets),
+                "chart_bounds": dict(declared.chart_bounds),
+                "linear_chart_bounds": {
+                    name: (dict(terms), lower, upper)
+                    for name, (
+                        terms,
+                        lower,
+                        upper,
+                    ) in declared.linear_chart_bounds.items()
+                },
+                "constraint_enforcement": dict(declared.constraint_enforcement),
+                "residual_tolerance": declared.residual_tolerance,
+            },
+        }
+        if self.diagnostic_policy is not None:
+            payload["diagnostic_policy"] = {
+                "source_sha256": self.diagnostic_policy.source_sha256,
+                "allowed_unqualified_findings": sorted(
+                    code.value
+                    for code in self.diagnostic_policy.allowed_unqualified_findings
+                ),
+                "provenance": self.diagnostic_policy.provenance,
+            }
+        if self.wrapped_path_declaration is not None:
+            payload["wrapped_path_declaration_sha256"] = (
+                self.wrapped_path_declaration.declaration_sha256
+            )
+        if self.qualification_context is not None:
+            payload["qualification_context"] = {
+                "source_sha256": self.qualification_context.source_sha256,
+                "findings": [
+                    {
+                        "code": finding.code.value,
+                        "source_sha256": finding.source_sha256,
+                        "component_path": finding.component_path,
+                        "evidence_sha256": finding.evidence_sha256,
+                        "execution_effect": finding.execution_effect.value,
+                        "qualification_effect": finding.qualification_effect.value,
+                    }
+                    for finding in self.qualification_context.findings
+                ],
+                "provenance_references": [
+                    {"evidence_sha256": evidence_sha, "references": references}
+                    for evidence_sha, references in self.qualification_context.provenance_references
+                ],
+            }
+        if self.native_mechanics_profile is not None:
+            payload["native_mechanics_profile_sha256"] = (
+                self.native_mechanics_profile.profile_sha256
+            )
+        if self.allow_unqualified_passive_diagnostic:
+            payload["allow_unqualified_passive_diagnostic"] = True
+        return hashlib.sha256(
+            json.dumps(payload, sort_keys=True, allow_nan=False).encode()
+        ).hexdigest()
+
+    @property
+    def effective_diagnostic_policy(self) -> NativeDiagnosticPolicy | None:
+        """Normalize the legacy passive-only switch into the typed policy."""
+        if self.diagnostic_policy is not None:
+            return self.diagnostic_policy
+        if self.allow_unqualified_passive_diagnostic:
+            return NativeDiagnosticPolicy(
+                source_sha256=self.model_sha256,
+                allowed_unqualified_findings=(
+                    DiagnosticCode.PASSIVE_POLICY_UNAVAILABLE,
+                ),
+                provenance="legacy passive diagnostic compatibility",
+            )
+        return None
 
 
 def _keys(value: Any, allowed: set[str], required: set[str]) -> dict[str, Any]:
@@ -329,6 +573,42 @@ def _parse_wrapped_path_declaration(data: Any) -> WrappedPathDeclaration | None:
     )
 
 
+def _parse_native_mechanics_profile(
+    data: Any,
+) -> NativeMechanicsExecutionProfile | None:
+    if data is None:
+        return None
+    from .native_mechanics_profile import (
+        NativeMechanicsComponentIdentity,
+        NativeMechanicsExecutionProfile,
+    )
+
+    checked = _keys(
+        data,
+        {"schema_version", "source_sha256", "components", "profile_sha256"},
+        {"schema_version", "source_sha256", "components", "profile_sha256"},
+    )
+    if not isinstance(checked["components"], list):
+        raise ValueError("Native mechanics profile components must be an array")
+    components = tuple(
+        NativeMechanicsComponentIdentity(**item)
+        for raw in checked["components"]
+        for item in (
+            _keys(
+                raw,
+                {field.name for field in fields(NativeMechanicsComponentIdentity)},
+                {field.name for field in fields(NativeMechanicsComponentIdentity)},
+            ),
+        )
+    )
+    profile = NativeMechanicsExecutionProfile(
+        checked["schema_version"], checked["source_sha256"], components
+    )
+    if checked["profile_sha256"] != profile.profile_sha256:
+        raise ValueError("Native mechanics profile digest does not match its contents")
+    return profile
+
+
 def load_native_moco_request(path: Path) -> NativeMocoRequest:
     """Read explicit files, mapping and policies without deriving anatomy."""
     request_path = Path(path).resolve()
@@ -393,6 +673,7 @@ def load_native_moco_request(path: Path) -> NativeMocoRequest:
         _parse_diagnostic_policy(payload.get("diagnostic_policy")),
         _parse_wrapped_path_declaration(payload.get("wrapped_path_declaration")),
         _parse_qualification_context(payload.get("qualification_context")),
+        _parse_native_mechanics_profile(payload.get("native_mechanics_profile")),
     )
 
 

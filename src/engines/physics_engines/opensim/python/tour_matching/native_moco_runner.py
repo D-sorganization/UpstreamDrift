@@ -9,13 +9,10 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import asdict, dataclass, replace
-from functools import lru_cache
 import hashlib
 import json
 import math
 from pathlib import Path
-import platform
-import sys
 import time
 from types import MappingProxyType
 from typing import Any
@@ -25,6 +22,12 @@ from defusedxml import ElementTree as SafeET
 
 from .moco_initial_bindings import MocoInitialBindings
 from .moco_tracking import MocoTrackingConfig, build_moco_study
+from .native_moco_request import NativeMocoRequest
+from .native_capability_probe import (
+    NativeProbeFailure,
+    _native_runtime_identity,
+    _native_short_capability_probe,
+)
 from .native_passive_readiness import (
     PassiveReadinessPolicy,
     audit_native_passive_readiness,
@@ -40,6 +43,7 @@ from .native_body_inertia import NativeBodyInertiaAudit, audit_native_body_inert
 from .native_diagnostic_contract import (
     DiagnosticCode,
     NativeDiagnosticAssessment,
+    NativeDiagnosticFinding,
     NativeDiagnosticPolicy,
     NativeQualificationContext,
     RuntimePhase,
@@ -57,404 +61,6 @@ from src.shared.python.estimation import dime_global_calibration
 
 def _sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
-
-
-@lru_cache(maxsize=2)
-def _native_runtime_identity(opensim: Any) -> str:
-    """Hash the pinned Python runtime and the OpenSim native binaries it loads."""
-    package = Path(opensim.__file__).resolve().parent
-    binaries = []
-    for path in sorted(package.rglob("*")):
-        if path.is_file() and path.suffix.lower() in {".dll", ".pyd"}:
-            binaries.append(
-                {
-                    "path": path.relative_to(package).as_posix(),
-                    "sha256": _sha(path),
-                }
-            )
-    payload = {
-        "opensim_version": str(opensim.__version__),
-        "python_version": sys.version,
-        "platform": platform.platform(),
-        "binding_sha256": _sha(Path(opensim.__file__)),
-        "native_binaries": binaries,
-    }
-    return hashlib.sha256(
-        json.dumps(payload, sort_keys=True, allow_nan=False).encode()
-    ).hexdigest()
-
-
-def _native_short_capability_probe(
-    model: Any,
-    state: Any,
-    horizon_s: float,
-    source_sha256: str,
-    runtime_sha256: str,
-    declared: DeclaredColdStart | None,
-) -> tuple[str, float, float]:
-    """Exercise OpenSim's native paths, joints and integrator without feedback."""
-    import opensim as osim
-
-    model.realizePosition(state)
-    observations: list[tuple[str, float]] = []
-    joints = model.getJointSet()
-    for index in range(joints.getSize()):
-        joint = joints.get(index)
-        parent = joint.getParentFrame().getTransformInGround(state)
-        child = joint.getChildFrame().getTransformInGround(state)
-        for name, transform in (("parent", parent), ("child", child)):
-            translation = transform.p()
-            quaternion = osim.Rotation.convertRotationToQuaternion(transform.R())
-            values = np.asarray(
-                [translation.get(i) for i in range(3)]
-                + [quaternion.get(i) for i in range(4)],
-                dtype=float,
-            )
-            if not np.isfinite(values).all():
-                raise ValueError("Native joint transform is nonfinite")
-            observations.append(
-                (f"joint:{index}:{name}", float(np.linalg.norm(values)))
-            )
-
-    coordinates = model.getCoordinateSet()
-    muscles = model.getMuscles()
-    for muscle_index in range(muscles.getSize()):
-        muscle = muscles.get(muscle_index)
-        length = float(muscle.getLength(state))
-        if not math.isfinite(length) or length <= 0:
-            raise ValueError("Native muscle path length is invalid")
-        observations.append((f"muscle:{muscle_index}:length", length))
-        for coordinate_index in range(coordinates.getSize()):
-            arm = float(
-                muscle.computeMomentArm(state, coordinates.get(coordinate_index))
-            )
-            if not math.isfinite(arm):
-                raise ValueError("Native muscle moment arm is nonfinite")
-            observations.append(
-                (f"muscle:{muscle_index}:moment-arm:{coordinate_index}", arm)
-            )
-
-    start = float(state.getTime())
-    state_names = model.getStateVariableNames()
-    initial_state = tuple(
-        (str(state_names.get(i)), float(model.getStateVariableValues(state).get(i)))
-        for i in range(state_names.getSize())
-    )
-    if not initial_state or not all(math.isfinite(value) for _, value in initial_state):
-        raise ValueError("Native capability probe initial named state is invalid")
-    actuators = model.getActuators()
-    initial_controls = model.getControls(state)
-    control_values = tuple(
-        float(initial_controls.get(i)) for i in range(model.getNumControls())
-    )
-    if any(not math.isfinite(value) for value in control_values):
-        raise ValueError("Native capability probe default controls are nonfinite")
-    discrete_names = model.getDiscreteVariableNames()
-    initial_discrete = tuple(
-        (
-            str(discrete_names.get(i)),
-            float(model.getDiscreteVariableValue(state, str(discrete_names.get(i)))),
-        )
-        for i in range(discrete_names.getSize())
-    )
-    if any(not math.isfinite(value) for _, value in initial_discrete):
-        raise ValueError("Native capability probe initial discrete state is nonfinite")
-    constraint_payload: dict[str, Any] = {"declared": declared is not None}
-    if declared is not None:
-        from .native_prepared_state import observe_declared_native_sample
-
-        audit = observe_declared_native_sample(model, state, declared)
-        constraint_payload = {
-            "declared": True,
-            "constraint_enforcement": dict(declared.constraint_enforcement),
-            "position_errors": audit.position_errors,
-            "velocity_errors": audit.velocity_errors,
-            "residual_tolerance": declared.residual_tolerance,
-        }
-    duration = float(horizon_s)
-    step = min(0.001, duration / 10.0)
-    if not math.isfinite(step) or step <= 0:
-        raise ValueError("Native capability probe requires a positive horizon")
-    manager = osim.Manager(model)
-    manager.setIntegratorAccuracy(1e-6)
-    manager.initialize(state)
-    final_state = manager.integrate(start + step)
-    state_values = model.getStateVariableValues(final_state)
-    state_names = model.getStateVariableNames()
-    values = np.asarray(
-        [state_values.get(index) for index in range(state_names.getSize())],
-        dtype=float,
-    )
-    if values.size == 0 or not np.isfinite(values).all():
-        raise ValueError("Native capability probe produced nonfinite state")
-    discrete_names = model.getDiscreteVariableNames()
-    discrete_values = []
-    for index in range(discrete_names.getSize()):
-        name = str(discrete_names.get(index))
-        value = float(model.getDiscreteVariableValue(final_state, name))
-        if not math.isfinite(value):
-            raise ValueError("Native probe discrete state is nonfinite")
-        discrete_values.append((name, value))
-    payload = {
-        "source_sha256": source_sha256,
-        "runtime_sha256": runtime_sha256,
-        "start_seconds": start,
-        "end_seconds": float(final_state.getTime()),
-        "step_seconds": step,
-        "initial_named_state_sha256": hashlib.sha256(
-            json.dumps(initial_state, allow_nan=False).encode()
-        ).hexdigest(),
-        "initial_native_controls_sha256": hashlib.sha256(
-            json.dumps(
-                {
-                    "control_values": control_values,
-                    "actuator_paths": tuple(
-                        str(actuators.get(i).getAbsolutePathString())
-                        for i in range(actuators.getSize())
-                    ),
-                },
-                allow_nan=False,
-            ).encode()
-        ).hexdigest(),
-        "control_protocol": "source-controller-free native zero/default actuator controls",
-        "initial_discrete_state_sha256": hashlib.sha256(
-            json.dumps(initial_discrete, allow_nan=False).encode()
-        ).hexdigest(),
-        "declared_constraint_audit_sha256": hashlib.sha256(
-            json.dumps(constraint_payload, sort_keys=True, allow_nan=False).encode()
-        ).hexdigest(),
-        "native_state_sha256": hashlib.sha256(values.tobytes()).hexdigest(),
-        "mechanics_observation_sha256": hashlib.sha256(
-            json.dumps(observations, allow_nan=False).encode()
-        ).hexdigest(),
-        "discrete_state_sha256": hashlib.sha256(
-            json.dumps(discrete_values, allow_nan=False).encode()
-        ).hexdigest(),
-    }
-    if not math.isclose(
-        payload["end_seconds"], start + step, rel_tol=0.0, abs_tol=1e-10
-    ):
-        raise RuntimeError("Native capability probe did not reach its exact end time")
-    evidence_sha = hashlib.sha256(
-        json.dumps(payload, sort_keys=True, allow_nan=False).encode()
-    ).hexdigest()
-    return evidence_sha, start, float(final_state.getTime())
-
-
-@dataclass(frozen=True)
-class NativeMocoRequest:
-    """Only the files and reviewed native bindings needed for one offline fit."""
-
-    model_path: Path
-    trc_path: Path
-    states_guess_path: Path
-    model_sha256: str
-    trc_sha256: str
-    states_guess_sha256: str
-    bindings: MocoInitialBindings
-    config: MocoTrackingConfig
-    marker_weights: Mapping[str, float]
-    marker_bindings: Mapping[str, tuple[str, tuple[float, float, float]]]
-    registration: CaptureRegistration | None
-    reference_frame_path: str
-    passive_policy: PassiveReadinessPolicy | None
-    excluded_markers: Mapping[str, str]
-    constrained_cold_start: DeclaredColdStart | None = None
-    mixed_actuation: MixedActuationProfile | None = None
-    allow_unqualified_passive_diagnostic: bool = False
-    diagnostic_policy: NativeDiagnosticPolicy | None = None
-    wrapped_path_declaration: WrappedPathDeclaration | None = None
-    qualification_context: NativeQualificationContext | None = None
-
-    def __post_init__(self) -> None:
-        self.config.validate()
-        if not isinstance(self.allow_unqualified_passive_diagnostic, bool):
-            raise TypeError("passive diagnostic disposition must be boolean")
-        if self.diagnostic_policy is not None and not isinstance(
-            self.diagnostic_policy, NativeDiagnosticPolicy
-        ):
-            raise TypeError("native diagnostic policy must be typed")
-        if self.diagnostic_policy is not None:
-            if self.diagnostic_policy.source_sha256 != self.model_sha256:
-                raise ValueError("native diagnostic policy source differs from model")
-            if self.allow_unqualified_passive_diagnostic:
-                raise ValueError("legacy and typed diagnostic policies cannot combine")
-        if self.wrapped_path_declaration is not None:
-            if not isinstance(self.wrapped_path_declaration, WrappedPathDeclaration):
-                raise TypeError("wrapped-path declaration must be typed")
-            if self.wrapped_path_declaration.source_sha256 != self.model_sha256:
-                raise ValueError("wrapped-path declaration source differs from model")
-        if self.qualification_context is not None:
-            if not isinstance(self.qualification_context, NativeQualificationContext):
-                raise TypeError("qualification context must be typed")
-            if self.qualification_context.source_sha256 != self.model_sha256:
-                raise ValueError("qualification context source differs from model")
-        if (
-            self.allow_unqualified_passive_diagnostic
-            and self.passive_policy is not None
-        ):
-            raise ValueError(
-                "diagnostic disposition requires unavailable passive policy"
-            )
-        if self.mixed_actuation is not None:
-            if not isinstance(self.mixed_actuation, MixedActuationProfile):
-                raise TypeError("mixed Moco requires a typed actuation profile")
-            if dict(self.bindings.control_bounds) != {
-                channel.path: channel.control_bounds
-                for channel in self.mixed_actuation.channels
-            }:
-                raise ValueError("mixed Moco control bounds differ from profile")
-        for name in ("model_sha256", "trc_sha256", "states_guess_sha256"):
-            value = getattr(self, name)
-            if len(value) != 64 or any(
-                char not in "0123456789abcdef" for char in value
-            ):
-                raise ValueError(f"{name} must be a lowercase SHA-256")
-        if not self.reference_frame_path.startswith("/"):
-            raise ValueError("Native reference frame path must be absolute")
-        weights = dict(self.marker_weights)
-        bindings = dict(self.marker_bindings)
-        exclusions = dict(self.excluded_markers)
-        for value in weights.values():
-            if isinstance(value, bool) or not math.isfinite(value) or value <= 0:
-                raise ValueError("Marker weights must be finite and positive")
-        for label, placement in bindings.items():
-            if (
-                not label
-                or len(placement) != 2
-                or not isinstance(placement[0], str)
-                or not placement[0].startswith("/")
-                or len(placement[1]) != 3
-                or not all(math.isfinite(float(value)) for value in placement[1])
-            ):
-                raise ValueError("Native marker placement requires frame and 3D offset")
-        if any(not reason.strip() for reason in exclusions.values()):
-            raise ValueError("Excluded marker reasons must be explicit")
-        if set(exclusions) & set(weights):
-            raise ValueError("A selected marker cannot also be excluded")
-        if self.constrained_cold_start is not None:
-            declared = self.constrained_cold_start
-            if (
-                declared.model_path != self.model_path.resolve()
-                or declared.source_sha256 != self.model_sha256
-                or dict(declared.named_state) != dict(self.bindings.initial_state)
-                or declared.time_seconds != self.config.t_start_s
-                or declared.constant_commands
-                or declared.source_controller_replacement is not None
-                or declared.allow_source_controllers_for_observation
-            ):
-                raise ValueError(
-                    "constrained cold start differs from Moco source or state"
-                )
-        object.__setattr__(self, "marker_weights", MappingProxyType(weights))
-        object.__setattr__(self, "marker_bindings", MappingProxyType(bindings))
-        object.__setattr__(self, "excluded_markers", MappingProxyType(exclusions))
-
-    @property
-    def identity_sha256(self) -> str:
-        """Bind every caller policy and placement across all execution stages."""
-        registration = self.registration
-        declared = self.constrained_cold_start
-        payload: dict[str, Any] = {
-            "model_path": str(self.model_path.resolve()),
-            "trc_path": str(self.trc_path.resolve()),
-            "guess_path": str(self.states_guess_path.resolve()),
-            "source_hashes": (
-                self.model_sha256,
-                self.trc_sha256,
-                self.states_guess_sha256,
-            ),
-            "state_bounds": dict(self.bindings.state_bounds),
-            "initial_state": dict(self.bindings.initial_state),
-            "control_bounds": dict(self.bindings.control_bounds),
-            "config": asdict(self.config),
-            "marker_weights": dict(self.marker_weights),
-            "marker_bindings": dict(self.marker_bindings),
-            "registration": None
-            if registration is None
-            else {
-                "rotation": registration.rotation.tolist(),
-                "translation": registration.translation.tolist(),
-                "source_frame": registration.source_frame,
-                "target_frame": registration.target_frame,
-            },
-            "reference_frame_path": self.reference_frame_path,
-            "passive_policy": (
-                None if self.passive_policy is None else asdict(self.passive_policy)
-            ),
-            "excluded_markers": dict(self.excluded_markers),
-            "mixed_actuation": None
-            if self.mixed_actuation is None
-            else asdict(self.mixed_actuation),
-            "constrained_cold_start": None
-            if declared is None
-            else {
-                "lock_targets": dict(declared.lock_targets),
-                "chart_bounds": dict(declared.chart_bounds),
-                "linear_chart_bounds": {
-                    name: (dict(terms), lower, upper)
-                    for name, (
-                        terms,
-                        lower,
-                        upper,
-                    ) in declared.linear_chart_bounds.items()
-                },
-                "constraint_enforcement": dict(declared.constraint_enforcement),
-                "residual_tolerance": declared.residual_tolerance,
-            },
-        }
-        if self.diagnostic_policy is not None:
-            payload["diagnostic_policy"] = {
-                "source_sha256": self.diagnostic_policy.source_sha256,
-                "allowed_unqualified_findings": sorted(
-                    code.value
-                    for code in self.diagnostic_policy.allowed_unqualified_findings
-                ),
-                "provenance": self.diagnostic_policy.provenance,
-            }
-        if self.wrapped_path_declaration is not None:
-            payload["wrapped_path_declaration_sha256"] = (
-                self.wrapped_path_declaration.declaration_sha256
-            )
-        if self.qualification_context is not None:
-            payload["qualification_context"] = {
-                "source_sha256": self.qualification_context.source_sha256,
-                "findings": [
-                    {
-                        "code": finding.code.value,
-                        "source_sha256": finding.source_sha256,
-                        "component_path": finding.component_path,
-                        "evidence_sha256": finding.evidence_sha256,
-                        "execution_effect": finding.execution_effect.value,
-                        "qualification_effect": finding.qualification_effect.value,
-                    }
-                    for finding in self.qualification_context.findings
-                ],
-                "provenance_references": [
-                    {"evidence_sha256": evidence_sha, "references": references}
-                    for evidence_sha, references in self.qualification_context.provenance_references
-                ],
-            }
-        if self.allow_unqualified_passive_diagnostic:
-            payload["allow_unqualified_passive_diagnostic"] = True
-        return hashlib.sha256(
-            json.dumps(payload, sort_keys=True, allow_nan=False).encode()
-        ).hexdigest()
-
-    @property
-    def effective_diagnostic_policy(self) -> NativeDiagnosticPolicy | None:
-        """Normalize the legacy passive-only switch into the typed policy."""
-        if self.diagnostic_policy is not None:
-            return self.diagnostic_policy
-        if self.allow_unqualified_passive_diagnostic:
-            return NativeDiagnosticPolicy(
-                source_sha256=self.model_sha256,
-                allowed_unqualified_findings=(
-                    DiagnosticCode.PASSIVE_POLICY_UNAVAILABLE,
-                ),
-                provenance="legacy passive diagnostic compatibility",
-            )
-        return None
 
 
 @dataclass(frozen=True)
@@ -630,6 +236,8 @@ def _preview_replay_capability(
                 np.array([0.0, request.config.duration_s]),
                 preview,
                 experiment_id="offline-moco-constrained-replay-capability-preview",
+                wrapped_path_declaration=request.wrapped_path_declaration,
+                native_mechanics_profile=request.native_mechanics_profile,
             )
         return []
     except (ValueError, RuntimeError):
@@ -669,6 +277,8 @@ def _declared_chart_blockers(request: NativeMocoRequest) -> list[str]:
 
 def _native_preparation(
     request: NativeMocoRequest,
+    *,
+    run_probe: bool = True,
 ) -> tuple[
     str | None,
     str | None,
@@ -679,6 +289,7 @@ def _native_preparation(
     bool,
     float | None,
     float | None,
+    NativeProbeFailure | None,
 ]:
     """Read the actual prepared state and independent provider dispositions."""
     import opensim as osim
@@ -690,10 +301,31 @@ def _native_preparation(
     model = osim.Model(str(request.model_path))
     runtime_sha = _native_runtime_identity(osim)
     probe_sha: str | None = None
+    probe_failure: NativeProbeFailure | None = None
     probe_start = probe_end = None
     blockers.extend(_observed_marker_bindings(model, request))
     if model.getControllerSet().getSize():
         blockers.append("native-source-controller-undeclared")
+    if request.constrained_cold_start is not None:
+        from .native_mechanics_profile import (
+            declare_native_mechanics_execution_profile,
+            validate_native_mechanics_execution_profile,
+        )
+
+        try:
+            expected_profile = declare_native_mechanics_execution_profile(
+                request.model_path, request.model_sha256
+            )
+            if expected_profile.components and request.native_mechanics_profile is None:
+                blockers.append("native-mechanics-profile-required")
+            elif request.native_mechanics_profile is not None:
+                validate_native_mechanics_execution_profile(
+                    model, request.native_mechanics_profile, request.model_sha256
+                )
+                if expected_profile != request.native_mechanics_profile:
+                    blockers.append("native-mechanics-profile-invalid")
+        except (OSError, ValueError, RuntimeError, TypeError):
+            blockers.append("native-mechanics-profile-invalid")
     actuators = {
         str(model.getActuators().get(i).getAbsolutePathString())
         for i in range(model.getActuators().getSize())
@@ -736,7 +368,7 @@ def _native_preparation(
                 model, state = prepared.model, prepared.state
     except (ValueError, RuntimeError):
         blockers.append("complete-native-state-unavailable")
-        return loaded, None, None, blockers, runtime_sha, None, False, None, None
+        return loaded, None, None, blockers, runtime_sha, None, False, None, None, None
     discrete_names = model.getDiscreteVariableNames()
     for index in range(discrete_names.getSize()):
         name = str(discrete_names.get(index))
@@ -770,7 +402,11 @@ def _native_preparation(
     hard_before_probe = any(
         blocker != "passive-policy-unavailable" for blocker in blockers
     )
-    if not hard_before_probe:
+    probe_attempted = False
+    if run_probe and not hard_before_probe:
+        probe_attempted = True
+        probe_start = float(state.getTime())
+        probe_end = probe_start
         try:
             probe_sha, probe_start, probe_end = _native_short_capability_probe(
                 model,
@@ -780,6 +416,13 @@ def _native_preparation(
                 runtime_sha,
                 request.constrained_cold_start,
             )
+        except NativeProbeFailure as exc:
+            probe_failure = exc
+            if exc.window_seconds is not None:
+                probe_start, probe_end = exc.window_seconds
+            else:
+                probe_start = probe_end = None
+            blockers.append(f"native-short-probe-failed:{exc.exception_type}")
         except (OSError, ValueError, RuntimeError, TypeError) as exc:
             blockers.append(f"native-short-probe-failed:{type(exc).__name__}")
 
@@ -792,9 +435,10 @@ def _native_preparation(
         blockers,
         runtime_sha,
         probe_sha,
-        not hard_before_probe,
+        probe_attempted,
         probe_start,
         probe_end,
+        probe_failure,
     )
 
 
@@ -948,6 +592,8 @@ def _native_diagnostic_findings(
         "guess-sha256-mismatch": DiagnosticCode.NATIVE_SOURCE_IDENTITY_INVALID,
         "model-sha256-changed-during-preparation": DiagnosticCode.NATIVE_SOURCE_IDENTITY_INVALID,
         "native-model-preparation-unavailable": DiagnosticCode.NATIVE_MODEL_LOAD_FAILED,
+        "native-mechanics-profile-required": DiagnosticCode.NATIVE_SOURCE_IDENTITY_INVALID,
+        "native-mechanics-profile-invalid": DiagnosticCode.NATIVE_SOURCE_IDENTITY_INVALID,
         "unused-reference-policy": DiagnosticCode.NATIVE_INPUT_COVERAGE_INVALID,
         "nonzero-native-replay-origin": DiagnosticCode.NATIVE_INPUT_COVERAGE_INVALID,
     }
@@ -1074,43 +720,7 @@ def prepare_native_moco(
             blockers.append("capture-registration-failed")
     if set(request.marker_bindings) != set(request.marker_weights):
         blockers.append("marker-binding-coverage")
-    loaded = reference_sha = passive_sha = None
-    runtime_sha = probe_sha = None
-    probe_attempted = False
-    probe_start = probe_end = None
-    if actual["model"] == request.model_sha256:
-        try:
-            (
-                loaded,
-                reference_sha,
-                passive_sha,
-                native_blockers,
-                runtime_sha,
-                probe_sha,
-                probe_attempted,
-                probe_start,
-                probe_end,
-            ) = _native_preparation(request)
-            blockers.extend(native_blockers)
-        except (OSError, ValueError, RuntimeError):
-            blockers.append("native-model-preparation-unavailable")
-    evidence_payload = {
-        "source_digests": actual,
-        "loaded_model_sha256": loaded,
-        "reference_observation_sha256": reference_sha,
-        "passive_observation_sha256": passive_sha,
-        "physical_body_inertia_sha256": physical_sha,
-        "probe_sha256": probe_sha,
-        "blockers": tuple(dict.fromkeys(blockers)),
-    }
-    diagnostic_evidence_sha = hashlib.sha256(
-        json.dumps(evidence_payload, sort_keys=True, allow_nan=False).encode()
-    ).hexdigest()
-    final_blockers = tuple(dict.fromkeys(blockers))
-    blocker_receipt_sha = hashlib.sha256(
-        json.dumps(final_blockers, allow_nan=False).encode()
-    ).hexdigest()
-    wrapped_findings = ()
+    wrapped_findings: tuple[NativeDiagnosticFinding, ...] = ()
     if actual["model"] == request.model_sha256:
         try:
             wrapped_findings = audit_native_wrapped_path_source(
@@ -1123,22 +733,80 @@ def prepare_native_moco(
         except (OSError, ValueError, RuntimeError):
             from .native_diagnostic_contract import (
                 ExecutionEffect,
-                NativeDiagnosticFinding,
                 QualificationEffect,
             )
 
+            wrap_error_sha = hashlib.sha256(
+                f"{request.model_sha256}:wrapped-path-source-audit-failed".encode()
+            ).hexdigest()
             wrapped_findings = (
                 NativeDiagnosticFinding(
                     code=DiagnosticCode.NATIVE_SOURCE_IDENTITY_INVALID,
                     source_sha256=request.model_sha256,
-                    evidence_sha256=diagnostic_evidence_sha,
+                    evidence_sha256=wrap_error_sha,
                     execution_effect=ExecutionEffect.BLOCK,
                     qualification_effect=QualificationEffect.NONE,
                 ),
             )
+    loaded = reference_sha = passive_sha = None
+    runtime_sha = probe_sha = None
+    probe_failure = None
+    probe_attempted = False
+    probe_start = probe_end = None
+    if actual["model"] == request.model_sha256:
+        try:
+            run_probe = not blockers and not any(
+                finding.execution_effect.value == "block"
+                for finding in wrapped_findings
+            )
+            (
+                loaded,
+                reference_sha,
+                passive_sha,
+                native_blockers,
+                runtime_sha,
+                probe_sha,
+                probe_attempted,
+                probe_start,
+                probe_end,
+                probe_failure,
+            ) = _native_preparation(request, run_probe=run_probe)
+            blockers.extend(native_blockers)
+        except (OSError, ValueError, RuntimeError):
+            blockers.append("native-model-preparation-unavailable")
+    probe_failure_sha = None
+    if probe_failure is not None:
+        private_receipt = probe_failure.private_receipt(
+            request.identity_sha256, request.model_sha256
+        )
+        private_receipt_bytes = json.dumps(
+            private_receipt, sort_keys=True, allow_nan=False
+        ).encode()
+        probe_failure_sha = hashlib.sha256(private_receipt_bytes).hexdigest()
+        (directory / "native_probe_failure_private.json").write_bytes(
+            private_receipt_bytes + b"\n"
+        )
+    evidence_payload = {
+        "source_digests": actual,
+        "loaded_model_sha256": loaded,
+        "reference_observation_sha256": reference_sha,
+        "passive_observation_sha256": passive_sha,
+        "physical_body_inertia_sha256": physical_sha,
+        "probe_sha256": probe_sha,
+        "probe_failure_receipt_sha256": probe_failure_sha,
+        "blockers": tuple(dict.fromkeys(blockers)),
+    }
+    diagnostic_evidence_sha = hashlib.sha256(
+        json.dumps(evidence_payload, sort_keys=True, allow_nan=False).encode()
+    ).hexdigest()
+    final_blockers = tuple(dict.fromkeys(blockers))
+    blocker_receipt_sha = hashlib.sha256(
+        json.dumps(final_blockers, allow_nan=False).encode()
+    ).hexdigest()
     audit_codes: list[DiagnosticCode] = []
     if (
         not source_blockers
+        and "model-sha256-changed-during-preparation" not in blockers
         and capture is not None
         and actual["guess"] == request.states_guess_sha256
     ):
@@ -1210,11 +878,6 @@ def prepare_native_moco(
         runtime_window_seconds=(
             (probe_start, probe_end)
             if probe_start is not None and probe_end is not None
-            else (
-                request.config.t_start_s,
-                request.config.t_start_s + min(0.001, request.config.duration_s / 10.0),
-            )
-            if probe_attempted
             else None
         ),
         native_runtime_sha256=runtime_sha
@@ -1365,6 +1028,27 @@ def _native_solve_once(
     """Run and read back one exact native solver attempt."""
     import opensim as osim
 
+    progress_path = directory / "native_moco_progress.json"
+
+    def record_progress(stage: str) -> None:
+        progress_path.write_text(
+            json.dumps(
+                {
+                    "request_sha256": request.identity_sha256,
+                    "source_sha256": request.model_sha256,
+                    "stage": stage,
+                    "elapsed_wall_seconds": time.perf_counter() - wall,
+                    "elapsed_cpu_seconds": time.process_time() - cpu,
+                },
+                sort_keys=True,
+                allow_nan=False,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+
+    record_progress("building-study")
+
     study = build_moco_study(
         str(request.model_path),
         str(registered),
@@ -1372,7 +1056,9 @@ def _native_solve_once(
         request.config,
         initial_bindings=request.bindings,
         marker_weights=request.marker_weights,
+        progress_callback=record_progress,
     )
+    record_progress("study-built")
     weights = _native_goal_weights(study)
     if weights != dict(request.marker_weights):
         raise ValueError("Native marker goal did not preserve selected weights")
@@ -1381,7 +1067,9 @@ def _native_solve_once(
     ).hexdigest()
     solver = osim.MocoCasADiSolver.safeDownCast(study.updSolver())
     solver.set_parallel(0)
+    record_progress("optimizing")
     solution = study.solve()
+    record_progress("optimization-returned")
     success = bool(solution.success())
     status = str(solution.getStatus())
     objective = float(solution.getObjective()) if success else None

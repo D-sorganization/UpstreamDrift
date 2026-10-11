@@ -171,11 +171,12 @@ def _coordinate_units(
         elif motion == osim.Coordinate.Translational:
             unit = "m"
         else:
-            unit = _custom_joint_coordinate_unit(
+            custom_unit = _custom_joint_coordinate_unit(
                 model, coordinate, native_mechanics_profile, osim
             )
-            if unit is None:
+            if custom_unit is None:
                 raise ValueError("coordinate motion units need another native policy")
+            unit = custom_unit
         prefix = coordinate.getAbsolutePathString()
         units[prefix + "/value"] = unit
         units[prefix + "/speed"] = unit + "/s"
