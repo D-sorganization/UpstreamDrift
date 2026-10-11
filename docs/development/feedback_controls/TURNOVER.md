@@ -216,7 +216,8 @@ Child issue #11837 adds `src/engines/feedback_observation_qualification.py`
 and uses the F01 `FeedbackComparisonRegistry`, F09a position sampler,
 canonical replay metrics, pelvis-yaw calculation, and existing acceptance
 gates. Each scored case carries the actual Tools T01
-`ExperimentReplayBundle`. The adapter checks the complete ordered initial
+`ExperimentReplayBundle` and existing `NativeMarkerReplayEvidence`; a marker
+array or mapping alone is not accepted. The adapter checks the complete ordered initial
 state and binds its actual `initial_state_sha256` with the model and capability
 payload hashes; it does not infer state identity from a schema digest. It also
 checks the model/provider, state schema, channel ordering/schema, actual input
@@ -224,6 +225,17 @@ history and grid, policy, evidence mode, timebase, and horizon against F01.
 An altered full state or input cannot be rebound to stale comparison evidence.
 Replay admission requires F01c `feedback-comparison/1.1.0`; observation-
 accuracy admission receives the retained F09a observation-grid digest.
+Before scoring, marker evidence and execution receipt digests are verified,
+the exact marker output bytes are rehashed, and the native execution receipt
+is compared with the F01 row and T01 bundle identities. This includes the
+distinct inventory and native provider identities, initial-state payload,
+ordered inputs, applied-input history, policy, timebase, and full horizon. The
+native marker clock must equal the replay input grid; observation sampling
+continues on the independent retained F09a observation clock. The score now
+records the marker evidence, native execution receipt, explicit marker-map,
+and marker-output hashes. These remain integrity and lineage assertions, not
+authentication of arbitrary serialized receipts or a new qualification
+authority.
 
 The report preserves every required registry cell and all six engine IDs.
 Missing evidence remains missing, unavailable stays in the denominator, and
@@ -234,11 +246,10 @@ The canonical calculation description is in
 limits and commands are in
 `docs/development/feedback_controls/F09B-OBSERVATION-QUALIFICATION.md`.
 
-The F09b focused suite has twelve passing synthetic tests, including full
-initial-state identity binding and applied-input tamper rejection. These tests
-do not provide a native run, private capture acceptance, model qualification,
-or physiology evidence. F09 remains open for the native consumer and further
-per-engine qualification workflow.
+The focused F09b suite covers synthetic identity/tamper rejection and a native
+MuJoCo marker-replay-to-scorer handoff. This software evidence does not provide
+private capture acceptance, model qualification, or physiology evidence. F09
+remains open for other native consumers and per-engine qualification workflow.
 
 ## F09c Strict Native Replay Execution
 
@@ -533,6 +544,20 @@ semantics, reproduction and remaining donor/resource/anatomy gates are in
 chapter 38. Neither the previous 520-muscle source nor Pose2Sim is qualified
 for capture-matched muscle-driven forward dynamics by this diagnostic.
 
+## F09q OpenSim Variant Capability Readback (#12148)
+
+The legacy golf muscle-variant factory retains its eight target names only as
+declarations. Executable actuator/state names and muscle-law capability flags
+now require source-bound initialized OpenSim readback. The shipped golf model
+reads back zero native muscles under OpenSim 4.6; without bindings the status is
+unknown, not observed absent. Viewer muscle availability follows native
+readback, and the legacy control API reports validation rather than simulation.
+The required OpenSim muscle-variant row remains in the parity denominator and
+is unsupported for this zero-muscle source. See
+`F09Q-OPEN_SIM_NATIVE_MUSCLE_CAPABILITY.md` and canonical chapter 41. These
+structural checks do not qualify anatomy, physiology, contact, grip or native
+full-horizon replay.
+
 ## F07 Constrained Mixed Moco and Replay (#12173)
 
 The opt-in combined route composes declared native constraint/cold-start
@@ -550,6 +575,72 @@ Manager seed regressions cover value and speed projection in mixed and
 mechanical prepared-state paths. See chapter48 and
 `F07_CONSTRAINED_MIXED_MOCO_TURNOVER.md`; the registry still contains zero
 approved calculations and release remains blocked.
+
+## F09q Source-Bound Provisional Marker Calibration (#12164)
+
+`src/engines/feedback_marker_calibration.py` reuses `TourCapture`,
+`static_marker_offsets`, and `score_frozen_marker_offsets` to create a
+`native-marker-calibration/1.0.0` artifact. It binds capture and pose bytes,
+ordered marker labels and native frame IDs, capture clock/frame, inventory and
+native model/provider identities, in-sample residuals, and exact local offsets.
+`validate` rehashes supplied inputs, requires the expected pose-provider and
+capture coordinate identities, and recomputes estimates/residuals. The artifact carries no observations or private source path and creates an
+`NativeMarkerMap` whose content digest includes the artifact digest. The map and
+F09 observation receipt now surface that calibration digest explicitly.
+
+The artifact is `provisional_estimated`, with qualification and physiology
+unqualified and holdout `not_evaluated`. It is an integrity record, not an
+execution signature. Its training residual is not a predictive score. Existing
+anatomical seed maps remain unchanged. Portable synthetic tests exercise
+mutation and identity rejection; one actual OpenSim 4.6 fixture confirms the
+shared calibration estimate from native frame poses. This is not production
+model, private capture, independent holdout, physics or full-engine coverage.
+Canonical equations and limitations are recorded in chapter 13.
+
+The MuJoCo native-marker integration test fits and revalidates this artifact
+from a full-state replay pose history, converts it to the existing native
+marker map, executes a fresh marker replay, and sends its positions through the
+existing observation scorer. The score carries the calibration-artifact,
+map, execution, marker-output, observation, and alignment identities. This
+closes only the tested software handoff. It adds no production marker
+attachments and does not make the position-level OpenSim geometry provider a
+full-state replay provider. The later F09r slice now also exercises the same
+calibration-to-scoring handoff through native Drake and Pinocchio fixtures.
+
+## F09r Calibrated Marker Replay to Observation Scoring (#12178)
+
+`test_observation_score_consumes_native_mujoco_marker_receipt` composes the
+existing calibration artifact, native map, fresh native marker replay, and F09
+observation scorer using one independent synthetic MuJoCo model. Calibration
+uses native full-state replay poses on the exact simulation-relative grid and
+rejects changed clock and offset inputs. The scored output is produced by a
+second replay from the same frozen bundle; synthetic observations differ by a
+known 1 mm z offset. The resulting report retains all 17 required rows, scores
+only the fixture row, and remains unqualified. No scorer or calibration
+authority was duplicated, and no private capture was used.
+
+The changed integration test plus calibration, marker FK, and scorer modules
+completed with 31 passed and 2 skipped in the retained Windows Python 3.13
+test environment using the exact pinned Tools donor for the uninitialized
+submodule. The two skips are optional engine runtime cases. Separate actual
+WSL runs passed the calibration-to-score native marker tests for Drake 1.57
+and Pinocchio 4.1 (one test each):
+`test_drake_markers_use_native_fk_with_floating_base_and_local_offset` and
+`test_pinocchio_markers_use_native_fk_with_floating_base_and_local_offset`.
+Both used a copied isolated test module
+outside the checkout with `UPSTREAMDRIFT_REPO_ROOT` pointing at the source
+checkout, avoiding repository-wide pytest configuration collection. The
+Pinocchio test used ordinary imports. The Drake test preloaded only namespace
+package objects for `src.engines.physics_engines.drake` and its `.python`
+submodule, each with `__path__` set to the real checkout source, before
+loading the real provider and native SDK. The minimal Drake environment lacks
+`structlog` and `simpleeval`; even a temporary 65 KB `structlog` 24.1.0
+overlay did not complete the broad repository package initializer. No native
+provider or physics code was mocked, but ordinary public package bootstrap is
+not verified. OpenSim remains position-level in this pathway. Production
+attachments, private captures, held-out scoring, physics and qualification
+remain open.
+Canonical detail is in chapter 49 and the F09q calibration note.
 
 ## F09Q OpenSim Mixed Replay Marker Scoring (#12195)
 
