@@ -19,6 +19,7 @@ from urllib.parse import urlsplit
 
 from defusedxml import ElementTree as SafeET
 from defusedxml.common import DefusedXmlException
+from src.engines.native_replay_contracts import require_sha256_digest
 
 _SCHEMA_VERSION = "opensim-native-visual-resource-closure/1"
 _MAX_SOURCE_BYTES = 128 * 1024 * 1024
@@ -51,7 +52,7 @@ class SourceVisualResource:
             self.component_path, str
         ) or not self.component_path.startswith("/bodyset/"):
             raise ValueError("visual mesh must belong to an attached body geometry")
-        _validate_sha256(self.sha256, "visual resource sha256")
+        require_sha256_digest(self.sha256, "visual resource sha256")
         if self.purpose != _VISUAL_PURPOSE:
             raise ValueError("resource purpose must be attached-geometry visual mesh")
 
@@ -69,7 +70,7 @@ class NativeMuscleResourceEnvelope:
     def __post_init__(self) -> None:
         if self.schema_version != _SCHEMA_VERSION:
             raise ValueError(f"schema_version must be {_SCHEMA_VERSION!r}")
-        _validate_sha256(self.source_model_sha256, "source model sha256")
+        require_sha256_digest(self.source_model_sha256, "source model sha256")
         if (
             getattr(
                 getattr(self.replay_bundle, "model", None), "source_model_sha256", None
@@ -98,15 +99,6 @@ class NativeMuscleResourceEnvelope:
         if self.closure_sha256 != expected:
             raise ValueError("visual resource closure digest differs")
         object.__setattr__(self, "resources", resources)
-
-
-def _validate_sha256(value: str, field_name: str) -> None:
-    if (
-        not isinstance(value, str)
-        or len(value) != 64
-        or any(character not in "0123456789abcdef" for character in value)
-    ):
-        raise ValueError(f"{field_name} must be a lowercase SHA-256 digest")
 
 
 def _validate_relative_path(value: str) -> PurePosixPath:
