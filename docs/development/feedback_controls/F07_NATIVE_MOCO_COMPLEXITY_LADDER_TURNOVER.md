@@ -379,3 +379,79 @@ evidence that the mismatch caused the earlier replay errors. The earlier
 replay artifact has no persisted applied-control matrix; the code records such
 samples for future runs, but this historical artifact is not being rerun or
 rewritten. No new optimizer run has been authorized yet.
+
+## Bounded Run With Source-Derived Control Bounds
+
+One additional serial ladder was authorized at exact harness HEAD
+`5a41243536c72ee06e456a6cc3692d1e5428b75d`, with the same 30-second limit per
+rung, sampled 1 GiB soft RSS stop threshold, single-thread environment,
+solver `parallel=0`, and stop-on-first-nonpass policy. The system-Python
+supervisor was Python 3.13.5 with psutil 7.0.0; the isolated worker was Python
+3.12.10 with OpenSim 4.6-2026-06-22-85aaf64. Only the `plain` rung ran; no
+later rung started.
+
+The solver reached `Solve_Succeeded` after 82 iterations with objective
+`4.9211583953665505e-6` and solver duration 4.948 seconds. The staged source
+was unchanged at SHA-256
+`6a098517bdba09b19b3eb99e4da7e795f27d10be8f42c0fca04fee20ce67e143`. The
+request bound both muscle controls to their native `[0.01, 1.0]` limits. All
+21 persisted flexor and extensor controls are at or above 0.01: flexor range
+`0.01000507697736689` to `0.08944407793890985`; extensor range
+`0.010018064141171771` to `0.01006776583851479`. The first five controls were
+also within their source limits. Solver equality-constraint violation was
+`2.9318385382209183e-10` (configured tolerance `1e-7`), overall NLP error was
+`8.593230782349099e-7`, and persisted solution round-trip error was at most 3
+float64 ULP.
+
+Independent fresh replay failed the unchanged criteria for speeds,
+activations, and flexor fiber length. It used the persisted time-only control
+law, and the replay object recorded exact equality between all applied control
+samples and saved control samples (maximum absolute sample error 0). The first
+mismatch appears at 0.0005 seconds: flexor activation error
+`1.620052036322081e-4`, flexor fiber-length error `3.130300580411749e-7` m,
+and base speed error `2.1240543793358277e-9` rad/s. Maxima were
+`4.278119184863939e-6` rad/s speed error at 0.01 s (limit `1e-7`),
+`4.2278841340708667e-4` activation error at 0.001 s (limit `1e-8`), and
+`5.394625915713935e-6` m fiber error at 0.01 s (limit `1e-7`). Coordinate
+error peaked at `1.524035136979407e-8` rad at 0.01 s (limit `2e-7`). The
+request target is `0.30000558574001657` rad; optimized endpoint was
+`0.3000055857400166` rad and replay endpoint was `0.300005600980368` rad, a
+`+1.524035142530522e-8` rad target residual inside the unchanged endpoint
+limit. All ten initial named states matched exactly.
+
+Source-derived control limits remove the below-minimum control condition, but
+the same replay gates still fail. This shows the prior bounds mismatch was not
+sufficient to explain divergence; it does not establish another cause. Mesh
+transcription/discretization remains a candidate to test separately from
+control interpolation. No physical qualification or production admission is
+inferred.
+
+The worker completed in 13.636 seconds total supervisor elapsed time and
+sampled peak process-tree RSS was 227,188,736 bytes. Recorded stage times were
+0.662 s source build/equilibration, 2.081 s forward witness, 0.032 s solver
+preflight, 4.964 s solve, 0.130 s solution export/control staging, 0.090 s
+replay input preflight, and 0.007 s saved-input reload. The worker exited 1
+after writing the failed replay audit, as required by fail-closed acceptance.
+A post-run scan found no remaining native ladder worker process. No timeout or
+memory stop occurred.
+
+Artifacts are retained under
+`experiments/native_moco_ladder_nativebounds_5a412435/plain/`:
+
+| Artifact                            | SHA-256                                                            |
+| ----------------------------------- | ------------------------------------------------------------------ |
+| `request.json`                      | `b21492734171be2163f585447425a779f79d44a2020a7e2c2e03815328c073f3` |
+| `solution.sto`                      | `558ceea7fd5fdc1f507dbd2042812385fbc186d516ff2cf8923013a4212f19b1` |
+| `time_only_controls.sto`            | `9bc9b709d3a199152c17d11ec182ff98991fddeb066d101f1c0e0e99fc7c030a` |
+| `solution_serialization_audit.json` | `aa15a6e8c1b5bf6c3086f083f47c688567258fd6ea5c2b788b61bc343d070fdd` |
+| `fresh_replay.json`                 | `ba5f9f309beabe10216e0c0d27167e15bfecd4670827aaabf3f8fd9d2f81bee6` |
+| `worker.stdout.log`                 | `7f702fbf36fe9fb8763800b40d8d87ba5191b530a439fc20bd41bf577c36ed63` |
+| `worker.stderr.log`                 | `47cb62f37b764b3995f99fc4f6af557ce945feb20226f2b03c618e8fe3d76aea` |
+| `progress.json`                     | `5b1a30c4564291c706804844d883aa823d1254cd4abd4d0b33d66a420f5f8049` |
+
+The worker source SHA-256 recorded in the request is
+`f8fc7c19ff7835d8f5ebe569f7e0f67186143a8b79fa4733cb8dfac7f7d84e06`; the
+harness/builder SHA-256 is
+`62ed9de2d82713ed36be87decfc83a4a3e63c9f2886ad4573e85d9fd0ed77a07`. The
+state-error matrix SHA-256 is
+`a2eec5558da62a25088b31069757fa96a33f3be49476cba83c71c407eedf2b57`.
