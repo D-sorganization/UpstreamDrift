@@ -4,6 +4,12 @@
 - `render_msk_club.py --capture --club --mode` tracks with the capture turn targets and planted feet (shared `msk_turn_targets.tracking_inputs`).
 - Open: owner decision on the `neutral` default (regenerates canonical receipts and fixtures); trail hip now reaches −40°; upper-trunk over-twist at the top (slice 7).
 
+# Active: Club-Face Fixtures on the Current Spec, #12117
+
+- Branch `claude/12117-club-face-fixtures`. Fixtures from `657c811bcd` (#12145 sources; input receipts value-identical to main's #12166 receipts). Feet now flat (3.2–3.8 cm), address face follows the capture (5.43 / −5.41° vs 5.50 / −5.35°).
+- `club_face.impact_frame` now enforces the 0.15 m ball radius on the peak-speed frame (the driver replay peaks 0.351 m short of the ball). OSV-8 and OSV-9 address-face tests compare with the capture's address face (2° unchanged). OSV-9 MSK grip calibration and both `golf_humanoid*.osim` regenerated (control reproduces main byte for byte). Calc record: `simscape_matching_reference.tex`, "Fixtures Regenerated on the Current Spec".
+- Strict xfails: 7-iron impact face 10.97 vs 3.21° (#12221, club-in-hand rotation); GCV-20 speed −6.1 / −10.2 % (#11767). Toe-out miss filed as #12222.
+
 # Active: Drake and MuJoCo IK Parity, Weld Rotation Row — #12039
 
 - Branch `claude/12039-drake-address-parity`. Drake's dual-grip weld rotation row was the small-angle vee with Jacobian `J_a - J_b` (up to 0.84 off finite differences); MuJoCo's is the principal log with its exact Jacobian. Both now use `full_body_ik._closure_rotation_row`; Drake `closure_error` reports the principal angle. Tests: `tests/unit/motion_matching/test_drake_mujoco_ik_parity.py`.
@@ -1119,6 +1125,26 @@ one optional provider skip. Canonical calculation is chapter48; turnover is
 The calculation registry remains empty and release blocked; full-body
 anatomy, calibration, physiology, contact/grip, capture horizon, production
 variants and six-engine parity remain unresolved.
+
+## OpenSim Mixed Replay Marker Scoring (#12195)
+
+Issue #12195 adds `native_mixed_marker_observation.py` on the constrained
+mixed replay seam. It consumes an exact frozen T01 bundle and runs the
+maintained fresh native replay once. For marker FK it restores the full
+ordered named state and exact replay clock, then evaluates explicit
+PhysicalFrame/local-offset bindings through the existing no-assembly native
+observer. Existing position alignment/scoring retains the separate measured
+clock and rejects extrapolation. The actual OpenSim 4.6 constrained-mixed
+module reports 12 passed, including source-mismatch and out-of-horizon
+negatives. Two portable contract tests protect the unqualified status.
+
+The result and receipt digest are diagnostic records only, explicitly
+unqualified; they are not an authenticated native execution receipt or F01
+admission. Bindings remain caller-declared and no calibration is inferred.
+Private-capture fit, anatomy, resource closure, physiology, contact, production
+variants and six-engine parity remain open. Canonical chapter49 and turnover
+are `manuals/upstreamdrift/chapters/49-native-opensim-mixed-marker-observation.qmd`
+and `docs/development/feedback_controls/F09Q-OPENSIM-MIXED-MARKER-SCORING.md`.
 
 ## F07 Exact 557-Muscle Excitation Diagnostic (#12182)
 
