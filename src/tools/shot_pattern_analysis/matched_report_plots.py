@@ -16,7 +16,7 @@ from typing import Any
 import numpy as np
 from numpy.typing import NDArray
 
-from .noise import NoiseSpec
+from .noise import NOISE_DISPLAY_LABELS, NoiseSpec
 
 PATTERNS = ("Straight", "Draw", "Fade")
 CLUBS = ("driver", "seven_iron", "pitching_wedge")
@@ -293,15 +293,7 @@ def _derive_delivery_noise(cells: Sequence[Mapping[str, Any]]) -> str | None:
     if not parts:
         parts.append("Zero Primitive Noise")
 
-    names = (
-        "Shaft Twist",
-        "Path",
-        "Speed",
-        "Horizontal Strike",
-        "Vertical Strike",
-        "Shaft Lean",
-        "Attack Angle",
-    )
+    names = NOISE_DISPLAY_LABELS
     correlation = spec.correlation_matrix()
     corr_parts: list[str] = []
     if sd[0] and sd[1] and abs(correlation[0, 1]) > 1e-6:

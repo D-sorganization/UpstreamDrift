@@ -1653,28 +1653,10 @@
     {
       "path": "src/tools/shot_pattern_analysis/matched_supplement_figures.py",
       "symbol": "_write_pair_density_figure",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - _write_pair_density_figure exceeds function-lines budget (185 > 100).",
-      "expires_on": "2026-12-31"
-    },
-    {
-      "path": "src/tools/shot_pattern_analysis/matched_supplement_figures.py",
-      "symbol": "_write_pair_density_figure",
       "rule": "parameters",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 12278,
       "reason": "Issue #12278: shot pattern analysis integration - _write_pair_density_figure exceeds parameters budget (10 > 8).",
-      "expires_on": "2026-12-31"
-    },
-    {
-      "path": "src/tools/shot_pattern_analysis/matched_supplement_figures.py",
-      "symbol": "_create_pair_overhead_figure",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - _create_pair_overhead_figure exceeds function-lines budget (162 > 100).",
       "expires_on": "2026-12-31"
     },
     {

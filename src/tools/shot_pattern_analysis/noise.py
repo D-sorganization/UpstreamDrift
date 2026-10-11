@@ -22,6 +22,17 @@ NOISE_FIELDS = (
 )
 
 
+NOISE_DISPLAY_LABELS = (
+    "Shaft Twist",
+    "Path",
+    "Speed",
+    "Horizontal Strike",
+    "Vertical Strike",
+    "Shaft Lean",
+    "Attack Angle",
+)
+
+
 @dataclass(frozen=True)
 class NoiseSpec:
     """Standard deviations and an optional PSD correlation in field order."""

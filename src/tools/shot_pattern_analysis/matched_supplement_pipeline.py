@@ -118,6 +118,7 @@ def _report_source_hashes() -> dict[str, str]:
     names = (
         "matched_supplement_pipeline.py",
         "matched_formatting.py",
+        "noise.py",
         "matched_supplement_figures.py",
         "matched_figure_identity.py",
         "matched_supplement_report.py",

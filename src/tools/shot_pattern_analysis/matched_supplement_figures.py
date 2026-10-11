@@ -6,6 +6,7 @@ import hashlib
 import json
 import re
 import textwrap
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Literal, Mapping
 
@@ -21,13 +22,13 @@ from .matched_figure_identity import (
     pair_comparison_slug as pair_comparison_slug,
     validate_planned_figure_identities as validate_planned_figure_identities,
 )
-from .density import shared_histogram_density
+from .density import DensityComparison, shared_histogram_density
 from .matched_matrix import PROFILES
 from .matched_pair_social import write_pair_social_density
 from .matched_report import load_individually_supported_endpoints
 from .matched_sensitivity import _supported_endpoints
 from .provenance import manifest_files_match
-from .noise import NoiseSpec
+from .noise import NOISE_DISPLAY_LABELS, NoiseSpec
 
 CLOSED_SELECTED_FIGURE_KINDS: frozenset[str] = frozenset(
     {
@@ -116,15 +117,7 @@ def _noise_profile_description(
     for label, value in (("Shaft Lean", sd[5]), ("Attack Angle", sd[6])):
         if value:
             parts.append(f"{label} SD {value:g}°")
-    names = (
-        "Shaft Twist",
-        "Path",
-        "Speed",
-        "Horizontal Strike",
-        "Vertical Strike",
-        "Shaft Lean",
-        "Attack Angle",
-    )
+    names = NOISE_DISPLAY_LABELS
     correlation = spec.correlation_matrix()
     for i in range(len(names)):
         for j in range(i + 1, len(names)):
@@ -398,29 +391,46 @@ def _displayed_sample_indices(point_count: int, maximum: int = 600) -> np.ndarra
     return np.linspace(0, point_count - 1, min(point_count, maximum), dtype=int)
 
 
-def _write_pair_density_figure(
-    point_sets: dict[str, list[tuple[float, float]]],
-    *,
+@dataclass
+class _HeaderStack:
+    """Place wrapped figure headers with gaps measured in physical points."""
+
+    figure: Any
+    renderer: Any
+    y_cursor: float
+
+    def add(
+        self, text: str, fontsize: float, gap_pt: float = 3.5, wrap_chars: int = 180
+    ) -> Any:
+        figure = self.figure
+        gap_frac = (gap_pt / 72.0) / (figure.bbox.height / figure.dpi)
+        wrapped = textwrap.fill(text, width=wrap_chars, break_long_words=False)
+        artist = figure.text(
+            0.06,
+            self.y_cursor - gap_frac,
+            wrapped,
+            ha="left",
+            va="top",
+            fontsize=fontsize,
+        )
+        self.y_cursor = artist.get_window_extent(self.renderer).y0 / figure.bbox.height
+        return artist
+
+
+def _pair_density_grid_top(
+    figure: Any,
     first: dict,
     second: dict,
     comparison: str,
-    first_label: str,
-    second_label: str,
+    labels: tuple[str, str],
     target_x: float,
     common_n: int,
-    output_stem: Path,
-    formats: tuple[str, ...] = ("png", "pdf", "svg"),
-) -> dict[str, Path]:
-    """Plot two conditions in six panels on common bins and density scale."""
-    import matplotlib.pyplot as plt
+) -> float:
+    """Lay out captions and legend, returning the available panel ceiling."""
     from matplotlib.lines import Line2D
-    from matplotlib.colors import Normalize
     from matplotlib.backends.backend_agg import FigureCanvasAgg
 
-    estimate = shared_histogram_density(
-        point_sets, bins=64, target_point_m=(target_x, 0.0)
-    )
-    figure = plt.figure(figsize=(16, 9), facecolor="white")
+    first_label, second_label = labels
     canvas = FigureCanvasAgg(figure)
     renderer = canvas.get_renderer()
 
@@ -433,24 +443,9 @@ def _write_pair_density_figure(
         fontsize=16,
         fontweight="bold",
     )
-    y_cursor = t_title.get_window_extent(renderer).y0 / figure.bbox.height
-
-    def _add_density_header(
-        text: str, fontsize: float, gap_pt: float = 3.5, wrap_chars: int = 180
-    ) -> Any:
-        nonlocal y_cursor
-        gap_frac = (gap_pt / 72.0) / (figure.bbox.height / figure.dpi)
-        wrapped = textwrap.fill(text, width=wrap_chars, break_long_words=False)
-        t = figure.text(
-            0.06,
-            y_cursor - gap_frac,
-            wrapped,
-            ha="left",
-            va="top",
-            fontsize=fontsize,
-        )
-        y_cursor = t.get_window_extent(renderer).y0 / figure.bbox.height
-        return t
+    header = _HeaderStack(
+        figure, renderer, t_title.get_window_extent(renderer).y0 / figure.bbox.height
+    )
 
     total_n = int(first["config"]["n_shots"])
     comp_text = (
@@ -458,22 +453,22 @@ def _write_pair_density_figure(
         f"{common_n:,}/{total_n:,} shots common to six populations; "
         f"{min(common_n, 600):,} evenly spaced dots per panel"
     )
-    _add_density_header(comp_text, fontsize=8.5, gap_pt=5.0, wrap_chars=180)
+    header.add(comp_text, fontsize=8.5, gap_pt=5.0, wrap_chars=180)
 
     cap1 = f"{first_label}: {_condition_caption(first)} · {first['source_protocol']}"
-    _add_density_header(cap1, fontsize=7.7, gap_pt=3.5, wrap_chars=180)
+    header.add(cap1, fontsize=7.7, gap_pt=3.5, wrap_chars=180)
 
     cap2 = f"{second_label}: {_condition_caption(second)} · {second['source_protocol']}"
-    _add_density_header(cap2, fontsize=7.7, gap_pt=3.5, wrap_chars=180)
+    header.add(cap2, fontsize=7.7, gap_pt=3.5, wrap_chars=180)
 
     disc_text = (
         "Illustrative Simulation | Assumed Head Properties | Carry Only · "
         "Raw coordinates; no aim correction. Matched-condition changes include nominal re-matching."
     )
-    _add_density_header(disc_text, fontsize=9.0, gap_pt=3.5, wrap_chars=180)
+    header.add(disc_text, fontsize=9.0, gap_pt=3.5, wrap_chars=180)
 
     leg_gap_frac = (7.0 / 72.0) / (figure.bbox.height / figure.dpi)
-    legend_top = y_cursor - leg_gap_frac
+    legend_top = header.y_cursor - leg_gap_frac
     hdr_styles: tuple[tuple[float, Literal["solid", "dashed", "dotted"]], ...] = (
         (0.50, "solid"),
         (0.80, "dashed"),
@@ -503,13 +498,20 @@ def _write_pair_density_figure(
     )
     leg_bottom = legend.get_window_extent(renderer).y0 / figure.bbox.height
     margin_frac = (14.0 / 72.0) / (figure.bbox.height / figure.dpi)
-    grid_top = min(0.76, leg_bottom - margin_frac)
+    return min(0.76, leg_bottom - margin_frac)
 
-    grid = figure.add_gridspec(
-        2, 3, left=0.06, right=0.91, top=grid_top, bottom=0.13, hspace=0.36, wspace=0.24
-    )
-    first_condition, second_condition = _condition(first), _condition(second)
-    row_conditions = ((first_label, first_condition), (second_label, second_condition))
+
+def _draw_pair_density_panels(
+    figure: Any,
+    grid: Any,
+    estimate: DensityComparison,
+    point_sets: dict[str, list[tuple[float, float]]],
+    row_conditions: tuple[tuple[str, dict], tuple[str, dict]],
+    target_x: float,
+) -> None:
+    """Render paired populations with their common density normalization."""
+    from matplotlib.colors import Normalize
+
     norm = Normalize(vmin=0.0, vmax=estimate.density_vmax_per_m2)
     color_mesh = None
     pattern_colors = {"Straight": "#286090", "Draw": "#c66a19", "Fade": "#7b4a9e"}
@@ -577,12 +579,143 @@ def _write_pair_density_figure(
             color_mesh, ax=figure.axes, fraction=0.018, pad=0.055
         )
         colorbar.set_label("Endpoint Probability Density (m⁻²); Common Scale")
+
+
+def _write_pair_density_figure(
+    point_sets: dict[str, list[tuple[float, float]]],
+    *,
+    first: dict,
+    second: dict,
+    comparison: str,
+    first_label: str,
+    second_label: str,
+    target_x: float,
+    common_n: int,
+    output_stem: Path,
+    formats: tuple[str, ...] = ("png", "pdf", "svg"),
+) -> dict[str, Path]:
+    """Plot two conditions in six panels on common bins and density scale."""
+    import matplotlib.pyplot as plt
+
+    estimate = shared_histogram_density(
+        point_sets, bins=64, target_point_m=(target_x, 0.0)
+    )
+    figure = plt.figure(figsize=(16, 9), facecolor="white")
+    grid_top = _pair_density_grid_top(
+        figure,
+        first,
+        second,
+        comparison,
+        (first_label, second_label),
+        target_x,
+        common_n,
+    )
+
+    grid = figure.add_gridspec(
+        2, 3, left=0.06, right=0.91, top=grid_top, bottom=0.13, hspace=0.36, wspace=0.24
+    )
+    first_condition, second_condition = _condition(first), _condition(second)
+    row_conditions = ((first_label, first_condition), (second_label, second_condition))
+    _draw_pair_density_panels(
+        figure, grid, estimate, point_sets, row_conditions, target_x
+    )
     if formats == ("png", "pdf", "svg"):
         outputs = _save_figure(figure, output_stem)
     else:
         outputs = _save_figure(figure, output_stem, formats=formats)
     plt.close(figure)
     return outputs
+
+
+def _decorate_pair_overhead(
+    figure: Any,
+    trajectory_sets: dict[str, list[Any]],
+    conditions: tuple[tuple[str, dict, str], tuple[str, dict, str]],
+    comparison: str,
+    target_x: float,
+    social: bool,
+    colors: dict[str, str],
+) -> None:
+    """Place overhead captions and the pattern/condition legend."""
+    from matplotlib.lines import Line2D
+
+    (first_label, first, _), (second_label, second, _) = conditions
+    font_scale = 1.0 if social else 0.92
+    from matplotlib.backends.backend_agg import FigureCanvasAgg
+
+    canvas = FigureCanvasAgg(figure)
+    renderer = canvas.get_renderer()
+
+    t_title = figure.text(
+        0.06,
+        0.975,
+        "Saved Raw Flight Paths by Pattern and Matched Condition",
+        ha="left",
+        va="top",
+        fontsize=17 * font_scale,
+        fontweight="bold",
+    )
+    header = _HeaderStack(
+        figure, renderer, t_title.get_window_extent(renderer).y0 / figure.bbox.height
+    )
+
+    wrap_w = 175 if not social else 165
+    header.add(
+        f"{_comparison_title(comparison)} · Target {target_x:.3f} m",
+        fontsize=10 * font_scale,
+        gap_pt=5.0,
+        wrap_chars=wrap_w,
+    )
+    header.add(
+        f"{first_label}: {_condition_caption(first)} · {first['source_protocol']}",
+        fontsize=8.5 * font_scale,
+        gap_pt=3.5,
+        wrap_chars=wrap_w,
+    )
+    header.add(
+        f"{second_label}: {_condition_caption(second)} · {second['source_protocol']}",
+        fontsize=8.5 * font_scale,
+        gap_pt=3.5,
+        wrap_chars=wrap_w,
+    )
+    path_counts = {key: len(value) for key, value in trajectory_sets.items()}
+    first_counts = ", ".join(
+        f"{pattern} {path_counts[f'{pattern} · {first_label}']}"
+        for pattern in _PATTERNS
+    )
+    second_counts = ", ".join(
+        f"{pattern} {path_counts[f'{pattern} · {second_label}']}"
+        for pattern in _PATTERNS
+    )
+    header.add(
+        f"Saved paths (not paired by shot index): {first_label} {first_counts} · {second_label} {second_counts}",
+        fontsize=8.5 * font_scale,
+        gap_pt=3.5,
+        wrap_chars=wrap_w,
+    )
+    header.add(
+        "Illustrative Simulation | Assumed Head Properties | Carry Only · Lateral display magnified 6×; physical axis limits are shared.",
+        fontsize=8.5 * font_scale,
+        gap_pt=3.5,
+        wrap_chars=wrap_w,
+    )
+    pattern_handles = [
+        Line2D([0], [0], color=colors[pattern], label=pattern) for pattern in _PATTERNS
+    ]
+    condition_handles = [
+        Line2D([0], [0], color="#333333", linestyle=style, label=condition)
+        for condition, _, style in conditions
+    ]
+    leg_gap_frac = (7.0 / 72.0) / (figure.bbox.height / figure.dpi)
+    legend_top = header.y_cursor - leg_gap_frac
+    figure.legend(
+        handles=pattern_handles + condition_handles,
+        loc="upper center",
+        bbox_to_anchor=(0.57, legend_top),
+        ncol=5,
+        frameon=False,
+        fontsize=9 * font_scale,
+    )
 
 
 def _create_pair_overhead_figure(
@@ -597,7 +730,6 @@ def _create_pair_overhead_figure(
     social: bool,
 ):
     import matplotlib.pyplot as plt
-    from matplotlib.lines import Line2D
 
     all_points = [
         np.asarray(path, dtype=float)
@@ -656,95 +788,8 @@ def _create_pair_overhead_figure(
         # A disclosed 6× vertical display magnification keeps long carry paths legible.
         axis.set_aspect(6.0, adjustable="box")
 
-    from matplotlib.backends.backend_agg import FigureCanvasAgg
-
-    canvas = FigureCanvasAgg(figure)
-    renderer = canvas.get_renderer()
-
-    t_title = figure.text(
-        0.06,
-        0.975,
-        "Saved Raw Flight Paths by Pattern and Matched Condition",
-        ha="left",
-        va="top",
-        fontsize=17 * font_scale,
-        fontweight="bold",
-    )
-    y_cursor = t_title.get_window_extent(renderer).y0 / figure.bbox.height
-
-    def _add_overhead_text(
-        text: str, fontsize: float, gap_pt: float = 3.5, wrap_chars: int = 175
-    ) -> Any:
-        nonlocal y_cursor
-        gap_frac = (gap_pt / 72.0) / (figure.bbox.height / figure.dpi)
-        wrapped = textwrap.fill(text, width=wrap_chars, break_long_words=False)
-        t = figure.text(
-            0.06,
-            y_cursor - gap_frac,
-            wrapped,
-            ha="left",
-            va="top",
-            fontsize=fontsize,
-        )
-        y_cursor = t.get_window_extent(renderer).y0 / figure.bbox.height
-        return t
-
-    wrap_w = 175 if not social else 165
-    _add_overhead_text(
-        f"{_comparison_title(comparison)} · Target {target_x:.3f} m",
-        fontsize=10 * font_scale,
-        gap_pt=5.0,
-        wrap_chars=wrap_w,
-    )
-    _add_overhead_text(
-        f"{first_label}: {_condition_caption(first)} · {first['source_protocol']}",
-        fontsize=8.5 * font_scale,
-        gap_pt=3.5,
-        wrap_chars=wrap_w,
-    )
-    _add_overhead_text(
-        f"{second_label}: {_condition_caption(second)} · {second['source_protocol']}",
-        fontsize=8.5 * font_scale,
-        gap_pt=3.5,
-        wrap_chars=wrap_w,
-    )
-    path_counts = {key: len(value) for key, value in trajectory_sets.items()}
-    first_counts = ", ".join(
-        f"{pattern} {path_counts[f'{pattern} · {first_label}']}"
-        for pattern in _PATTERNS
-    )
-    second_counts = ", ".join(
-        f"{pattern} {path_counts[f'{pattern} · {second_label}']}"
-        for pattern in _PATTERNS
-    )
-    _add_overhead_text(
-        f"Saved paths (not paired by shot index): {first_label} {first_counts} · {second_label} {second_counts}",
-        fontsize=8.5 * font_scale,
-        gap_pt=3.5,
-        wrap_chars=wrap_w,
-    )
-    _add_overhead_text(
-        "Illustrative Simulation | Assumed Head Properties | Carry Only · Lateral display magnified 6×; physical axis limits are shared.",
-        fontsize=8.5 * font_scale,
-        gap_pt=3.5,
-        wrap_chars=wrap_w,
-    )
-    pattern_handles = [
-        Line2D([0], [0], color=colors[pattern], label=pattern) for pattern in _PATTERNS
-    ]
-    condition_handles = [
-        Line2D([0], [0], color="#333333", linestyle=style, label=condition)
-        for condition, _, style in conditions
-    ]
-    leg_gap_frac = (7.0 / 72.0) / (figure.bbox.height / figure.dpi)
-    legend_top = y_cursor - leg_gap_frac
-    figure.legend(
-        handles=pattern_handles + condition_handles,
-        loc="upper center",
-        bbox_to_anchor=(0.57, legend_top),
-        ncol=5,
-        frameon=False,
-        fontsize=9 * font_scale,
+    _decorate_pair_overhead(
+        figure, trajectory_sets, conditions, comparison, target_x, social, colors
     )
     return plt, figure
 
