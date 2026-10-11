@@ -1280,15 +1280,6 @@
       "issue": 12278,
       "reason": "Issue #12278: shot pattern analysis integration - main exceeds function-lines budget (175 > 100).",
       "expires_on": "2026-12-31"
-    },
-    {
-      "path": "docs/research/shot_pattern_analysis/phase2/validation/v6_output_review_harness_v1/review_batch.py",
-      "symbol": "main",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - main exceeds function-lines budget (184 > 100).",
-      "expires_on": "2026-12-31"
     }
   ]
 }

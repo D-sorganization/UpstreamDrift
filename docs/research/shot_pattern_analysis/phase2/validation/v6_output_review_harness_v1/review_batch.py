@@ -162,96 +162,19 @@ def verify_social_caption(record: dict, group: str, text: str) -> None:
                 raise ValueError("incorrect individual endpoint count")
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--repo", type=Path, required=True)
-    parser.add_argument("--report", type=Path, required=True)
-    parser.add_argument("--completion-receipt", type=Path, required=True)
-    parser.add_argument("--start-receipt", type=Path, required=True)
-    parser.add_argument("--start-sha256", required=True)
-    parser.add_argument("--expected-numeric", type=Path, required=True)
-    parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--group", choices=("pairs", "cells"), required=True)
-    parser.add_argument(
-        "--kind", choices=("across_lean", "curve_strength", "shaft_rotation_sd")
-    )
-    parser.add_argument("--offset", type=int, default=0)
-    parser.add_argument("--limit", type=int, default=12)
-    args = parser.parse_args()
-    if args.offset < 0 or args.limit < 1 or args.output.exists():
-        raise ValueError(
-            "Use a fresh evidence directory and a nonnegative bounded selection"
-        )
-    sys.path.insert(0, str(args.repo.resolve()))
+def _review_components(
+    args: Any,
+    records: list[dict[str, Any]],
+    suffixes: list[str],
+    boundary: dict[str, Any],
+) -> list[dict[str, Any]]:
+    """Capture Bound Components Without Claiming Visual Acceptance."""
     from src.tools.shot_pattern_analysis.matched_supplement_figures import (
         _slug,
-        pair_comparison_identity,
         pair_comparison_slug,
     )
-    from src.tools.shot_pattern_analysis.matched_supplement_pipeline import (
-        _check_numeric_parity_reference,
-        _load_numeric_parity_reference,
-        _report_source_hashes,
-    )
 
-    source_before = _report_source_hashes()
-    boundary = completion_boundary(
-        args.report,
-        args.completion_receipt,
-        source_before,
-        (args.start_receipt, args.start_sha256),
-    )
-    if boundary is None:
-        args.output.mkdir(parents=True)
-        (args.output / "batch_inventory.json").write_text(
-            json.dumps(
-                {
-                    "accepted": False,
-                    "status": "pending_completed_producer_boundary",
-                    "assets_read": 0,
-                    "script_sha256": sha(Path(__file__)),
-                },
-                indent=2,
-            )
-            + "\n"
-        )
-        return
-    reference = _load_numeric_parity_reference(args.expected_numeric)
-    if reference is None:
-        raise ValueError(
-            f"expected numeric parity reference could not be loaded from {args.expected_numeric}"
-        )
-    _check_numeric_parity_reference(reference, args.report)
-    numeric = {name: sha(args.report / name) for name in reference["artifact_sha256"]}
-    if args.group == "pairs":
-        records = json.loads(
-            (args.report / "REPORT_SUPPLEMENT_COMPARISONS.json").read_text()
-        )["comparisons"]
-        if args.kind:
-            records = [r for r in records if r["comparison_kind"] == args.kind]
-        records.sort(key=pair_comparison_identity)
-        suffixes = [
-            f"density_{p}_social.{e}"
-            for p in ("straight", "draw", "fade")
-            for e in ("png", "pdf", "svg")
-        ]
-        suffixes += [
-            f"{k}.{e}" for k in ("density", "overhead") for e in ("png", "pdf", "svg")
-        ]
-        suffixes += ["overhead_social.png"]
-    else:
-        records = json.loads((args.report / "REPORT_SUPPLEMENT.json").read_text())[
-            "unique_cells"
-        ]
-        records.sort(key=lambda r: (r["source_protocol"], r["cell"]))
-        suffixes = [
-            f"{k}.{e}"
-            for k in ("density", "density_social", "overhead", "overhead_social")
-            for e in ("png", "pdf", "svg")
-        ]
-    args.output.mkdir(parents=True)
     reviewed: list[dict[str, Any]] = []
-    pending: list[dict[str, Any]] = []
     font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 22)
     for index, record in enumerate(
         records[args.offset : args.offset + args.limit], args.offset
@@ -309,6 +232,105 @@ def main() -> None:
                 "visual_review": "pending",
             }
         )
+    return reviewed
+
+
+def _selected_records(args: Any) -> tuple[list[dict[str, Any]], list[str]]:
+    """Select the Same Ordered Records and Complete Export Components."""
+    from src.tools.shot_pattern_analysis.matched_supplement_figures import (
+        pair_comparison_identity,
+    )
+
+    if args.group == "pairs":
+        records = json.loads(
+            (args.report / "REPORT_SUPPLEMENT_COMPARISONS.json").read_text()
+        )["comparisons"]
+        if args.kind:
+            records = [r for r in records if r["comparison_kind"] == args.kind]
+        records.sort(key=pair_comparison_identity)
+        suffixes = [
+            f"density_{p}_social.{e}"
+            for p in ("straight", "draw", "fade")
+            for e in ("png", "pdf", "svg")
+        ]
+        suffixes += [
+            f"{k}.{e}" for k in ("density", "overhead") for e in ("png", "pdf", "svg")
+        ]
+        suffixes += ["overhead_social.png"]
+    else:
+        records = json.loads((args.report / "REPORT_SUPPLEMENT.json").read_text())[
+            "unique_cells"
+        ]
+        records.sort(key=lambda r: (r["source_protocol"], r["cell"]))
+        suffixes = [
+            f"{k}.{e}"
+            for k in ("density", "density_social", "overhead", "overhead_social")
+            for e in ("png", "pdf", "svg")
+        ]
+    return records, suffixes
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--repo", type=Path, required=True)
+    parser.add_argument("--report", type=Path, required=True)
+    parser.add_argument("--completion-receipt", type=Path, required=True)
+    parser.add_argument("--start-receipt", type=Path, required=True)
+    parser.add_argument("--start-sha256", required=True)
+    parser.add_argument("--expected-numeric", type=Path, required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--group", choices=("pairs", "cells"), required=True)
+    parser.add_argument(
+        "--kind", choices=("across_lean", "curve_strength", "shaft_rotation_sd")
+    )
+    parser.add_argument("--offset", type=int, default=0)
+    parser.add_argument("--limit", type=int, default=12)
+    args = parser.parse_args()
+    if args.offset < 0 or args.limit < 1 or args.output.exists():
+        raise ValueError(
+            "Use a fresh evidence directory and a nonnegative bounded selection"
+        )
+    sys.path.insert(0, str(args.repo.resolve()))
+    from src.tools.shot_pattern_analysis.matched_supplement_pipeline import (
+        _check_numeric_parity_reference,
+        _load_numeric_parity_reference,
+        _report_source_hashes,
+    )
+
+    source_before = _report_source_hashes()
+    boundary = completion_boundary(
+        args.report,
+        args.completion_receipt,
+        source_before,
+        (args.start_receipt, args.start_sha256),
+    )
+    if boundary is None:
+        args.output.mkdir(parents=True)
+        (args.output / "batch_inventory.json").write_text(
+            json.dumps(
+                {
+                    "accepted": False,
+                    "status": "pending_completed_producer_boundary",
+                    "assets_read": 0,
+                    "script_sha256": sha(Path(__file__)),
+                },
+                indent=2,
+            )
+            + "\n"
+        )
+        return
+    reference = _load_numeric_parity_reference(args.expected_numeric)
+    if reference is None:
+        raise ValueError(
+            f"expected numeric parity reference could not be loaded from {args.expected_numeric}"
+        )
+    _check_numeric_parity_reference(reference, args.report)
+    numeric = {name: sha(args.report / name) for name in reference["artifact_sha256"]}
+    records, suffixes = _selected_records(args)
+    args.output.mkdir(parents=True)
+    reviewed: list[dict[str, Any]] = []
+    pending: list[dict[str, Any]] = []
+    reviewed = _review_components(args, records, suffixes, boundary)
     if source_before != _report_source_hashes():
         raise ValueError("reviewed source changed")
     verify_files(args.report, [args.report / name for name in numeric], numeric)
