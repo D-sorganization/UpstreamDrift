@@ -1,0 +1,12 @@
+{
+  "issue": 12299,
+  "broken_pr_head": "3172c3986afd17f49589814b45efc3685ea8e046",
+  "approved_source_commit": "522260f674a8d92cb62a2fe6cbf7d75a3ed6de26",
+  "before_entry_count": 3099,
+  "approved_entry_count": 5001,
+  "restored_file_sha256": "fd172a47a383aaf4e1ae702baa9d7840bbbd4dee43e442f969ecaf12dedc62ba",
+  "logged_failure_fingerprints": 588,
+  "all_logged_prefixes_previously_approved": true,
+  "method": "Exact byte restoration from approved main; no fresh baseline generation or raised ceiling beyond that approved file",
+  "validation": "First local scan terminated143 without summary; durable retry currently live; no pass claimed"
+}
