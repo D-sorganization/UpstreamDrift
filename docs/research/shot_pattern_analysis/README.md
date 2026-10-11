@@ -16,8 +16,10 @@ All original and supplemental final simulations, saved-data audits, and archive
 restorations are complete. The original inventories retain 54 primary and 20
 control cases unavailable within their search bounds. The separately labelled
 26-cell supplement adds 780,000 attempted shot rows, including 288 unsupported
-rows that remain explicitly exported. Final graphics and combined publication
-review are still in progress; consult the turnover for current acceptance.
+rows that remain explicitly exported. Scientific narrative and assigned graphic
+reviews are complete, including selective density-layout repairs. Final repository
+gates and remote delivery are tracked in the [Current Resume Handoff](phase2/RESUME_HANDOFF.md).
+See the [Sharing Guide](phase2/SHARING_GUIDE.md) for the six selected Facebook images.
 
 The following sections preserve the separate **phase-one** experiment. Its
 nominal aiming adjustments, club presets, and constant-loft controls must not be
