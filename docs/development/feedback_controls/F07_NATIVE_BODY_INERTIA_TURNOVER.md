@@ -60,3 +60,9 @@ Validation passed: existing `test_ledger_freshness` (one test),
 `test_prettierignore_gate_owned_files.py` (two tests), and all five RM-6 central
 gates. These checks repair publication provenance and do not rerun or qualify
 the physical model experiments.
+
+The remote advanced concurrently to `7877625369` with a generated-ledger hash
+refresh. Preserve that commit through a normal merge, then run
+`python -m src.shared.python.motion_matching ledger --write` against the restored
+canonical receipt bytes. The 149-row generated ledger now indexes those original
+bytes; no remote history or scientific result is discarded.

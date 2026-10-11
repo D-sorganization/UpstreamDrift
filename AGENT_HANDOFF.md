@@ -1150,3 +1150,5 @@ The #12198 CI receipt-preservation follow-up restores two canonical
 ground-support receipts to their recorded hashes and adds explicit formatter
 exclusions. See `F07_NATIVE_BODY_INERTIA_TURNOVER.md` for the failed run,
 provenance and validation. Full epic qualification remains open.
+Concurrent remote ledger refresh `7877625369` is retained through a normal merge;
+the generated ledger is refreshed from the restored immutable receipt bytes.
