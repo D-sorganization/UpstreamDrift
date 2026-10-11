@@ -287,7 +287,7 @@ def audit_native_wrapped_path_source(
         return NativeWrappedPathAudit(source_sha256, None, None, ())
 
     if declaration is None:
-        findings = tuple(
+        required_findings = tuple(
             _diagnostic_finding(
                 "wrapped_path_declaration_required",
                 source_sha256,
@@ -298,7 +298,7 @@ def audit_native_wrapped_path_source(
             )
             for component in related
         )
-        return NativeWrappedPathAudit(source_sha256, None, None, findings)
+        return NativeWrappedPathAudit(source_sha256, None, None, required_findings)
 
     try:
         validate_wrapped_path_declaration(model, declaration, source_sha256)
@@ -411,6 +411,7 @@ def _identity_from_model(model: Any, source_sha256: str) -> WrappedPathDeclarati
         concrete_class = component.getConcreteClassName()
         if concrete_class in _SHAPES:
             wrap = component
+            parameters: tuple[tuple[str, float], ...]
             if concrete_class == "WrapCylinder":
                 parameters = (
                     ("length_m", _finite(wrap.get_length(), "cylinder length")),
@@ -431,13 +432,15 @@ def _identity_from_model(model: Any, source_sha256: str) -> WrappedPathDeclarati
                     wrap.getAbsolutePathString(),
                     concrete_class,
                     wrap.getFrame().getAbsolutePathString(),
-                    tuple(
-                        _finite(wrap.get_translation().get(i), "wrap translation")
-                        for i in range(3)
+                    (
+                        _finite(wrap.get_translation().get(0), "wrap translation"),
+                        _finite(wrap.get_translation().get(1), "wrap translation"),
+                        _finite(wrap.get_translation().get(2), "wrap translation"),
                     ),
-                    tuple(
-                        _finite(wrap.get_xyz_body_rotation().get(i), "wrap rotation")
-                        for i in range(3)
+                    (
+                        _finite(wrap.get_xyz_body_rotation().get(0), "wrap rotation"),
+                        _finite(wrap.get_xyz_body_rotation().get(1), "wrap rotation"),
+                        _finite(wrap.get_xyz_body_rotation().get(2), "wrap rotation"),
                     ),
                     bool(wrap.get_active()),
                     str(wrap.get_quadrant()),
@@ -459,9 +462,9 @@ def _identity_from_model(model: Any, source_sha256: str) -> WrappedPathDeclarati
                     target.getAbsolutePathString(),
                     str(path_wrap.getWrapObjectName()),
                     str(path_wrap.getMethodName()),
-                    tuple(
-                        _finite(path_wrap.get_range(i), "PathWrap range")
-                        for i in range(2)
+                    (
+                        _finite(path_wrap.get_range(0), "PathWrap range"),
+                        _finite(path_wrap.get_range(1), "PathWrap range"),
                     ),
                     _sha_dump(path_wrap),
                 )
@@ -475,9 +478,9 @@ def _identity_from_model(model: Any, source_sha256: str) -> WrappedPathDeclarati
                     point.getAbsolutePathString(),
                     point.getOwner().getAbsolutePathString(),
                     point.getCoordinate().getAbsolutePathString(),
-                    tuple(
-                        _finite(point.get_range(i), "conditional active range")
-                        for i in range(2)
+                    (
+                        _finite(point.get_range(0), "conditional active range"),
+                        _finite(point.get_range(1), "conditional active range"),
                     ),
                     _sha_dump(point),
                 )
