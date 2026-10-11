@@ -12,6 +12,7 @@ import hashlib
 import json
 from pathlib import Path
 
+from .matched_config import add_common_matrix_cli_arguments
 from .matched_matrix import matched_matrix_cells, run_matched_matrix
 
 
@@ -199,14 +200,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("protocol", choices=tuple(SUPPLEMENTS))
     parser.add_argument("output", type=Path)
-    parser.add_argument("--stage", choices=("pilot", "final"), default="pilot")
-    parser.add_argument("--shots", type=int, default=32)
-    parser.add_argument("--acceptance", type=Path)
-    parser.add_argument("--shard-index", type=int, default=0)
-    parser.add_argument("--shard-count", type=int, default=1)
-    parser.add_argument(
-        "--figures", choices=("none", "selected", "all"), default="selected"
-    )
+    add_common_matrix_cli_arguments(parser)
     args = parser.parse_args()
     run_supplement_matrix(
         args.protocol,

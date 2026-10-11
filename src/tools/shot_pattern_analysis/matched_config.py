@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass, replace
+from pathlib import Path
+from typing import Any
 
 
 @dataclass(frozen=True)
@@ -119,3 +121,26 @@ def matched_preset(club_id: str) -> MatchedConfig:
             face_half_height_m=0.025,
         )
     raise ValueError(f"unknown matched-delivery club: {club_id}")
+
+
+PRIMITIVE_DIMENSION_NAMES: tuple[str, ...] = (
+    "Shaft Twist",
+    "Path",
+    "Speed",
+    "Horizontal Strike",
+    "Vertical Strike",
+    "Shaft Lean",
+    "Attack Angle",
+)
+
+
+def add_common_matrix_cli_arguments(parser: Any) -> None:
+    """Register common CLI flags for matched matrix and supplement sweeps."""
+    parser.add_argument("--stage", choices=("pilot", "final"), default="pilot")
+    parser.add_argument("--shots", type=int, default=32)
+    parser.add_argument("--acceptance", type=Path)
+    parser.add_argument("--shard-index", type=int, default=0)
+    parser.add_argument("--shard-count", type=int, default=1)
+    parser.add_argument(
+        "--figures", choices=("none", "selected", "all"), default="selected"
+    )

@@ -16,6 +16,7 @@ from typing import Any
 import numpy as np
 from numpy.typing import NDArray
 
+from .matched_config import PRIMITIVE_DIMENSION_NAMES
 from .noise import NoiseSpec
 
 PATTERNS = ("Straight", "Draw", "Fade")
@@ -293,15 +294,7 @@ def _derive_delivery_noise(cells: Sequence[Mapping[str, Any]]) -> str | None:
     if not parts:
         parts.append("Zero Primitive Noise")
 
-    names = (
-        "Shaft Twist",
-        "Path",
-        "Speed",
-        "Horizontal Strike",
-        "Vertical Strike",
-        "Shaft Lean",
-        "Attack Angle",
-    )
+    names = PRIMITIVE_DIMENSION_NAMES
     correlation = spec.correlation_matrix()
     corr_parts: list[str] = []
     if sd[0] and sd[1] and abs(correlation[0, 1]) > 1e-6:

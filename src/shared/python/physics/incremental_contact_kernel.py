@@ -116,11 +116,11 @@ def _integrate_source(
     rebound_work = 0.0
     slipped = False
     compression_done = False
-    for _ in range(10 * steps_per_compression):
-        step = base_step
-        delta, before, after, is_sliding = trial_solver(
+
+    def _step_trial(step_val: float) -> tuple[np.ndarray, float, float, bool]:
+        return trial_solver(
             impulse,
-            step,
+            step_val,
             relative_initial,
             normal,
             inverse_mass,
@@ -131,43 +131,20 @@ def _integrate_source(
             friction,
             disk_solver,
         )
+
+    for _ in range(10 * steps_per_compression):
+        step = base_step
+        delta, before, after, is_sliding = _step_trial(step)
         if after <= 0:
             lo, hi = 0.0, step
             for _ in range(48):
                 mid = (lo + hi) * 0.5
-                if (
-                    trial_solver(
-                        impulse,
-                        mid,
-                        relative_initial,
-                        normal,
-                        inverse_mass,
-                        tangent,
-                        tangent_mass,
-                        eigenvalues,
-                        eigenvectors,
-                        friction,
-                        disk_solver,
-                    )[2]
-                    > 0
-                ):
+                if _step_trial(mid)[2] > 0:
                     lo = mid
                 else:
                     hi = mid
             step = hi
-            delta, before, after, is_sliding = trial_solver(
-                impulse,
-                step,
-                relative_initial,
-                normal,
-                inverse_mass,
-                tangent,
-                tangent_mass,
-                eigenvalues,
-                eigenvectors,
-                friction,
-                disk_solver,
-            )
+            delta, before, after, is_sliding = _step_trial(step)
             compression_done = True
         impulse += delta
         compression_work += 0.5 * (before + after) * step
@@ -186,56 +163,20 @@ def _integrate_source(
             rebound_done = True
             break
         step = base_step
-        delta, before, after, is_sliding = trial_solver(
-            impulse,
-            step,
-            relative_initial,
-            normal,
-            inverse_mass,
-            tangent,
-            tangent_mass,
-            eigenvalues,
-            eigenvectors,
-            friction,
-            disk_solver,
-        )
+        delta, before, after, is_sliding = _step_trial(step)
         gained = -0.5 * (before + after) * step
         if gained >= target_work - rebound_work:
             lo, hi = 0.0, step
             for _ in range(48):
                 mid = (lo + hi) * 0.5
-                _, start_mid, end_mid, _ = trial_solver(
-                    impulse,
-                    mid,
-                    relative_initial,
-                    normal,
-                    inverse_mass,
-                    tangent,
-                    tangent_mass,
-                    eigenvalues,
-                    eigenvectors,
-                    friction,
-                    disk_solver,
-                )
+                _, start_mid, end_mid, _ = _step_trial(mid)
                 work_mid = -0.5 * (start_mid + end_mid) * mid
                 if work_mid < target_work - rebound_work:
                     lo = mid
                 else:
                     hi = mid
             step = hi
-            delta, before, after, is_sliding = trial_solver(
-                impulse,
-                step,
-                relative_initial,
-                normal,
-                inverse_mass,
-                tangent,
-                tangent_mass,
-                eigenvalues,
-                eigenvectors,
-                friction,
-                disk_solver,
-            )
+            delta, before, after, is_sliding = _step_trial(step)
             gained = -0.5 * (before + after) * step
         impulse += delta
         rebound_work += gained

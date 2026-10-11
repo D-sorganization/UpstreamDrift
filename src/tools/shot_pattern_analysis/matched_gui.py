@@ -946,13 +946,10 @@ class MatchedStudyWidget(QtWidgets.QWidget):
         for label in (self.preview, self.overhead_preview):
             source = label.property("sourcePixmap")
             if isinstance(source, QPixmap) and not source.isNull():
-                label.setPixmap(
-                    source.scaled(
-                        label.size(),
-                        QtCore.Qt.AspectRatioMode.KeepAspectRatio,
-                        QtCore.Qt.TransformationMode.SmoothTransformation,
-                    )
-                )
+                target_size = label.size()
+                aspect = QtCore.Qt.AspectRatioMode.KeepAspectRatio
+                transform = QtCore.Qt.TransformationMode.SmoothTransformation
+                label.setPixmap(source.scaled(target_size, aspect, transform))
 
     def delete_when_idle(self) -> None:
         self.action_bar.finished.connect(self.deleteLater)

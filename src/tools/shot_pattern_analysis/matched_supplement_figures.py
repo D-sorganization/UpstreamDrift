@@ -22,6 +22,7 @@ from .matched_figure_identity import (
     validate_planned_figure_identities as validate_planned_figure_identities,
 )
 from .density import shared_histogram_density
+from .matched_config import PRIMITIVE_DIMENSION_NAMES
 from .matched_matrix import PROFILES
 from .matched_pair_social import write_pair_social_density
 from .matched_report import load_individually_supported_endpoints
@@ -116,15 +117,7 @@ def _noise_profile_description(
     for label, value in (("Shaft Lean", sd[5]), ("Attack Angle", sd[6])):
         if value:
             parts.append(f"{label} SD {value:g}°")
-    names = (
-        "Shaft Twist",
-        "Path",
-        "Speed",
-        "Horizontal Strike",
-        "Vertical Strike",
-        "Shaft Lean",
-        "Attack Angle",
-    )
+    names = PRIMITIVE_DIMENSION_NAMES
     correlation = spec.correlation_matrix()
     for i in range(len(names)):
         for j in range(i + 1, len(names)):
@@ -398,6 +391,31 @@ def _displayed_sample_indices(point_count: int, maximum: int = 600) -> np.ndarra
     return np.linspace(0, point_count - 1, min(point_count, maximum), dtype=int)
 
 
+class _FigureTextPlacer:
+    """Manages vertical text layout on a Matplotlib figure."""
+
+    def __init__(self, figure: Any, renderer: Any, start_y: float) -> None:
+        self.figure = figure
+        self.renderer = renderer
+        self.cursor = start_y
+
+    def add(
+        self, text: str, fontsize: float, gap_pt: float = 3.5, wrap_chars: int = 180
+    ) -> Any:
+        gap_frac = (gap_pt / 72.0) / (self.figure.bbox.height / self.figure.dpi)
+        wrapped = textwrap.fill(text, width=wrap_chars, break_long_words=False)
+        t = self.figure.text(
+            0.06,
+            self.cursor - gap_frac,
+            wrapped,
+            ha="left",
+            va="top",
+            fontsize=fontsize,
+        )
+        self.cursor = t.get_window_extent(self.renderer).y0 / self.figure.bbox.height
+        return t
+
+
 def _write_pair_density_figure(
     point_sets: dict[str, list[tuple[float, float]]],
     *,
@@ -435,22 +453,8 @@ def _write_pair_density_figure(
     )
     y_cursor = t_title.get_window_extent(renderer).y0 / figure.bbox.height
 
-    def _add_density_header(
-        text: str, fontsize: float, gap_pt: float = 3.5, wrap_chars: int = 180
-    ) -> Any:
-        nonlocal y_cursor
-        gap_frac = (gap_pt / 72.0) / (figure.bbox.height / figure.dpi)
-        wrapped = textwrap.fill(text, width=wrap_chars, break_long_words=False)
-        t = figure.text(
-            0.06,
-            y_cursor - gap_frac,
-            wrapped,
-            ha="left",
-            va="top",
-            fontsize=fontsize,
-        )
-        y_cursor = t.get_window_extent(renderer).y0 / figure.bbox.height
-        return t
+    placer = _FigureTextPlacer(figure, renderer, y_cursor)
+    _add_density_header = placer.add
 
     total_n = int(first["config"]["n_shots"])
     comp_text = (
@@ -473,7 +477,7 @@ def _write_pair_density_figure(
     _add_density_header(disc_text, fontsize=9.0, gap_pt=3.5, wrap_chars=180)
 
     leg_gap_frac = (7.0 / 72.0) / (figure.bbox.height / figure.dpi)
-    legend_top = y_cursor - leg_gap_frac
+    legend_top = placer.cursor - leg_gap_frac
     hdr_styles: tuple[tuple[float, Literal["solid", "dashed", "dotted"]], ...] = (
         (0.50, "solid"),
         (0.80, "dashed"),
@@ -672,22 +676,8 @@ def _create_pair_overhead_figure(
     )
     y_cursor = t_title.get_window_extent(renderer).y0 / figure.bbox.height
 
-    def _add_overhead_text(
-        text: str, fontsize: float, gap_pt: float = 3.5, wrap_chars: int = 175
-    ) -> Any:
-        nonlocal y_cursor
-        gap_frac = (gap_pt / 72.0) / (figure.bbox.height / figure.dpi)
-        wrapped = textwrap.fill(text, width=wrap_chars, break_long_words=False)
-        t = figure.text(
-            0.06,
-            y_cursor - gap_frac,
-            wrapped,
-            ha="left",
-            va="top",
-            fontsize=fontsize,
-        )
-        y_cursor = t.get_window_extent(renderer).y0 / figure.bbox.height
-        return t
+    placer = _FigureTextPlacer(figure, renderer, y_cursor)
+    _add_overhead_text = placer.add
 
     wrap_w = 175 if not social else 165
     _add_overhead_text(
@@ -737,7 +727,7 @@ def _create_pair_overhead_figure(
         for condition, _, style in conditions
     ]
     leg_gap_frac = (7.0 / 72.0) / (figure.bbox.height / figure.dpi)
-    legend_top = y_cursor - leg_gap_frac
+    legend_top = placer.cursor - leg_gap_frac
     figure.legend(
         handles=pattern_handles + condition_handles,
         loc="upper center",
