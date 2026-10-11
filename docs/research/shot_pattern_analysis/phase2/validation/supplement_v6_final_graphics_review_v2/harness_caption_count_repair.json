@@ -1,0 +1,17 @@
+{
+  "schema": "narrow-validation-harness-repair/1",
+  "created_utc": "2026-10-11T00:43:12.752071+00:00",
+  "original_harness_sha256": "1db7be642e097377afeb44874687e41639a29c32c0440f13b3055eb3457d0bf6",
+  "repaired_harness_sha256": "36f0bcc867043148c7ec8e71a810e1a9460d0e56e009c4304d1716f3db897d87",
+  "repaired_test_sha256": "89a82c55c1f98ad3b96a36a8e28cf77241bcfe3ec73cb842cddd0a08205e5540",
+  "failed_command_receipt": "docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/curve_strength_000_command.json",
+  "failed_output": "docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/curve_strength_000",
+  "defect": "Whitespace flattening makes Curve \u00d71 followed by 10,000/10,000 contiguous; regex rejects the valid count because it sees the label digit immediately before it.",
+  "repair": "Validate two complete labeled population clauses with exact common-six numerator and denominator; retain fail-closed count checking.",
+  "validation": {
+    "red": "pytest -q test_review_batch.py -k curve_labels_adjacent_to_correct_counts_pass failed as expected",
+    "green": "pytest -q test_review_batch.py exit 0; pytest -q tests/research/test_validation_helper_contracts.py exit 0; ruff check both files exit 0"
+  },
+  "producer_source_mutated": false,
+  "prior_completed_batches_remain_bound_to_original_harness": true
+}

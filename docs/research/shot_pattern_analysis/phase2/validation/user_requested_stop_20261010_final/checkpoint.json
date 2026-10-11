@@ -1,0 +1,194 @@
+{
+  "utc": "2026-10-10T23:20:20.009440+00:00",
+  "status": "user_requested_stop_not_complete",
+  "partial_review_archive_sha256": "263649aefb0c08586fd8aa46f41ee5514426463e14bf8e57b14d3dd942ac2e6b",
+  "members": [
+    {
+      "path": "across_lean_000/batch_inventory.json",
+      "bytes": 298840,
+      "sha256": "8f199f1c1b0b2382f347fcbcbc720171e7bb400ed3eba47d250ee9a61a30b1e6"
+    },
+    {
+      "path": "across_lean_000/contact_000_1.jpg",
+      "bytes": 912914,
+      "sha256": "6e9e95afa3f437aaa4884b587438b024de41e23683df95821a3ca66db277d953"
+    },
+    {
+      "path": "across_lean_000/contact_000_2.jpg",
+      "bytes": 750352,
+      "sha256": "3d89fe1e21d8ba97592977f116447d2547fe50fda2198553fce3d56ffb1a7639"
+    },
+    {
+      "path": "across_lean_000/contact_000_3.jpg",
+      "bytes": 430245,
+      "sha256": "0bcc2f87975914eb066e0cd2621fb95f2a04250ce5e5f609fcdae6eba0b83340"
+    },
+    {
+      "path": "across_lean_000/contact_001_1.jpg",
+      "bytes": 793770,
+      "sha256": "4175cd62451cb1c38ee429f38727180ab0430b3e9fe01146ef6c8ef6e5fd1adf"
+    },
+    {
+      "path": "across_lean_000/contact_001_2.jpg",
+      "bytes": 684951,
+      "sha256": "91e2f4254eeb161ef972e6ccc8a7bfad517d4db1bdf9412f7ac457d698ca8c67"
+    },
+    {
+      "path": "across_lean_000/contact_001_3.jpg",
+      "bytes": 405540,
+      "sha256": "2a99db2a048053fa87380820b42c47f13368008baab0a026bfa1ff82642d1e89"
+    },
+    {
+      "path": "across_lean_000/contact_002_1.jpg",
+      "bytes": 881717,
+      "sha256": "2ea41e8bfa08c868e113dcddae0c0a8045427ed766007cafa8b2678c720939fe"
+    },
+    {
+      "path": "across_lean_000/contact_002_2.jpg",
+      "bytes": 727412,
+      "sha256": "a857b625d18ca33aed19bf88a9381cbf3a72beca5dbf3db7c6dfa9d16069236a"
+    },
+    {
+      "path": "across_lean_000/contact_002_3.jpg",
+      "bytes": 480049,
+      "sha256": "23a65827eca8f02c7bf05a813e9362c64d027d70f3ba52016cf3e4f16a6c3949"
+    },
+    {
+      "path": "across_lean_000/contact_003_1.jpg",
+      "bytes": 797366,
+      "sha256": "f0cddd32642ae35572ff1d55d5d90875ccfca792674a7efe9b94eb5c2636c509"
+    },
+    {
+      "path": "across_lean_000/contact_003_2.jpg",
+      "bytes": 660216,
+      "sha256": "4fa0691fe887490225afdf6af7e5f2b70a660f27901ab5889ba0b6ecd5c04f89"
+    },
+    {
+      "path": "across_lean_000/contact_003_3.jpg",
+      "bytes": 453453,
+      "sha256": "3f4d2a5d924c56892ed192cb234a6d021c25bc89739b075c21696a03c9ad6f20"
+    },
+    {
+      "path": "across_lean_000/contact_004_1.jpg",
+      "bytes": 912149,
+      "sha256": "47bfb561e97fdb565872bdd3494ff825775f48a8d5b38a4f2d43075646450983"
+    },
+    {
+      "path": "across_lean_000/contact_004_2.jpg",
+      "bytes": 748618,
+      "sha256": "48f2fed3d2b212eaf22ee0aecb9aac46de874745959fe34ef0d01d61119c37e0"
+    },
+    {
+      "path": "across_lean_000/contact_004_3.jpg",
+      "bytes": 438672,
+      "sha256": "9e8ef6a333ca097aae29a204fc1bb4fecdda75dcba17981ed44aef2930e323a0"
+    },
+    {
+      "path": "across_lean_000/contact_005_1.jpg",
+      "bytes": 800162,
+      "sha256": "890a11afc3533a5abf0c233c3da127c127831d65fa0288d242ac0f7c27bc9cb0"
+    },
+    {
+      "path": "across_lean_000/contact_005_2.jpg",
+      "bytes": 666883,
+      "sha256": "d03a5d8fa09659c8255b483946d05c76a0851b7224e666d9d244d288b5120362"
+    },
+    {
+      "path": "across_lean_000/contact_005_3.jpg",
+      "bytes": 420760,
+      "sha256": "037824300364a4567ba12e525148537cd1126235be71ddd2755cd9c5a96513c5"
+    },
+    {
+      "path": "across_lean_000/contact_006_1.jpg",
+      "bytes": 882479,
+      "sha256": "b52e837db6b0cb6a47c6c2194aaefe7c95d6ebb4c7f7fe2717cf3320752f6748"
+    },
+    {
+      "path": "across_lean_000/contact_006_2.jpg",
+      "bytes": 735528,
+      "sha256": "2baa7f0cc0da7dee9ab742eda6312367b83f49a2c84460e9cb378f54e4cbf84b"
+    },
+    {
+      "path": "across_lean_000/contact_006_3.jpg",
+      "bytes": 485967,
+      "sha256": "5faa7f9574a261aeeff84bc64e760755dd3abf2382f29af66e8c798858778ef1"
+    },
+    {
+      "path": "across_lean_000/contact_007_1.jpg",
+      "bytes": 802852,
+      "sha256": "0dda31b06e444a2aa95ecf9949195628b7b6d188d5bb387a80dab44fb547ad04"
+    },
+    {
+      "path": "across_lean_000/contact_007_2.jpg",
+      "bytes": 665789,
+      "sha256": "a5bac9acbf265f04cd7512463240e0ba821768e7d219f6fdb5737bc93bf7c562"
+    },
+    {
+      "path": "across_lean_000/contact_007_3.jpg",
+      "bytes": 460933,
+      "sha256": "2cbde244587083946f5621c3452aa9eb1b4809a7bc908617135b05617d35f92c"
+    },
+    {
+      "path": "across_lean_000/contact_008_1.jpg",
+      "bytes": 959871,
+      "sha256": "ddec934d8508191d9daaf8927a48faa2d032c5cc647d12cdf75c5cd4bc1bc582"
+    },
+    {
+      "path": "across_lean_000/contact_008_2.jpg",
+      "bytes": 734456,
+      "sha256": "80acfa5c5663ebb3a852b85576a874387648b5c77b43148ba77510637e08f7e1"
+    },
+    {
+      "path": "across_lean_000/contact_008_3.jpg",
+      "bytes": 348923,
+      "sha256": "ed4e8082ebc4505d5ed72cce3e5c781c9b9e9fce368608ce574f22b08239a83d"
+    },
+    {
+      "path": "across_lean_000/contact_009_1.jpg",
+      "bytes": 967801,
+      "sha256": "d5e2964b9e57c43578b8c56bf246dff3c133974d1006ab3e3f13e30d90e472a1"
+    },
+    {
+      "path": "across_lean_000/contact_009_2.jpg",
+      "bytes": 747997,
+      "sha256": "4e82d568f7072ea75625c2ae181cf41577e6d1c51135af294bbc7d65ce786e81"
+    },
+    {
+      "path": "across_lean_000/contact_009_3.jpg",
+      "bytes": 346479,
+      "sha256": "7647d7b4f50a791569b1f5017cab75b726dbd1900090a444817c709f2432b689"
+    },
+    {
+      "path": "across_lean_000/contact_010_1.jpg",
+      "bytes": 800392,
+      "sha256": "2ec727efd2b2fca9ebe455d2e060085bd732784c46f05f92a65cf3ccae38dc59"
+    },
+    {
+      "path": "across_lean_000/contact_010_2.jpg",
+      "bytes": 660327,
+      "sha256": "ecb42180f4f76d294816d613a30aeebe074a924dbc0b1faf207d99b1c3325434"
+    },
+    {
+      "path": "across_lean_000/contact_010_3.jpg",
+      "bytes": 346221,
+      "sha256": "7cce2db81ec9c9d02c37bce92420b910c8994156b38eebbe9dd1596545854eaa"
+    },
+    {
+      "path": "across_lean_000/contact_011_1.jpg",
+      "bytes": 804372,
+      "sha256": "b8c80195f37f4f666f332897d325652d524ea062783ae3d7245cb46de995633d"
+    },
+    {
+      "path": "across_lean_000/contact_011_2.jpg",
+      "bytes": 664978,
+      "sha256": "228ab473fb382d9b0e97b952084322c734c7ab5f4c942f41f8441d8e5d06a6c3"
+    },
+    {
+      "path": "across_lean_000/contact_011_3.jpg",
+      "bytes": 344163,
+      "sha256": "873e9e363e2bc747f9fd4a19c865a3442bf2bca4253c8907013805d0ba507621"
+    }
+  ],
+  "review_scope": "Partial contact preparation only; no visual acceptance. Report intentionally SIGTERM, actual exit -15. All checked review/report PIDs absent.",
+  "vector_review": "Not started; redundant loader interrupted; no parser/rasterizer/selection evidence."
+}

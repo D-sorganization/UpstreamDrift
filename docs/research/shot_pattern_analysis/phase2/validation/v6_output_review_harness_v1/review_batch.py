@@ -138,10 +138,17 @@ def verify_social_caption(record: dict, group: str, text: str) -> None:
             raise ValueError("incorrect population caption")
         count_text = flat.split("Valid/Total:", 1)[-1].split("Model-Conditional", 1)[0]
         count = f"{record['common_supported_n']:,}/{record['total_n_per_population']:,}"
-        matches = re.findall(
-            r"(?<![0-9,])" + re.escape(count) + r"(?![0-9,])", count_text
+        # A flattened caption places the count directly after labels such as
+        # "Curve ×1". Anchor each complete labeled population instead of
+        # mistaking the label's final digit for part of the count.
+        population = (
+            r"(?:Lean\d+(?:\.\d+)?°|Curve×\d+|RotationSD\d+(?:\.\d+)?°)"
+            + re.escape(count)
+            + r"valid"
         )
-        if len(matches) != 2:
+        if len(count_text.split(";")) != 2 or not all(
+            re.fullmatch(population, part) for part in count_text.split(";")
+        ):
             raise ValueError("incorrect common-six counts")
     else:
         if "IndividuallySupportedEndpointsbyPhysicalPattern" not in flat:

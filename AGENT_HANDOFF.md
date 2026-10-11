@@ -1,11 +1,11 @@
 # Agent Handoff: Current-State Index
 
-## Paused Study and Current Status
+## Active Study and Current Status
 
-- **User-Requested Stop**: Goal pursuit stops for credit conservation. Start with [Resume Handoff](docs/research/shot_pattern_analysis/phase2/RESUME_HANDOFF.md). The exporter completed successfully; report/review processes are stopped and no monitoring is scheduled.
-- **Matched Delivery Study — Phase Two**: Full truthful current study handoff lives at [docs/research/shot_pattern_analysis/phase2/TURNOVER.md](docs/research/shot_pattern_analysis/phase2/TURNOVER.md) in the separate `shot-pattern-analysis` worktree on branch `codex/shot-pattern-matched-delivery`; the integration includes checkpoint `dd2c235a0a`; study commits through `9b69defcf9` and its archive follow-up still need bringing forward. Read the current Resume Handoff in the study checkout, since this integration copy predates the final stop. Do not invent final acceptance.
-- **Simulation and Exporter State**: All simulation data is complete; final publication remains pending. The v6 exporter finished with exit 0. Report construction was intentionally stopped (exit -15); partial first-batch contacts have no visual acceptance. Preserve frozen presentation checkout `4023111d2a`.
-- **Graphics Qualification**: Original primary/control graphics are accepted; supplemental graphic review, report composition, remote asset delivery, and ready PR remain pending.
+- **User-Requested Resume**: Goal pursuit is active after the usage reset. Start with [Resume Handoff](docs/research/shot_pattern_analysis/phase2/RESUME_HANDOFF.md).
+- **Matched Delivery Study — Phase Two**: This integration includes study checkpoint `e941f1a746`. Read [Turnover](docs/research/shot_pattern_analysis/phase2/TURNOVER.md) and the newer receipts in the study checkout for subsequent progress. Final acceptance is pending.
+- **Simulation and Exporter State**: All simulation data and v6 exports are complete. Frozen report construction v8 is active in presentation checkout `4023111d2a`; preserve that checkout and its environment.
+- **Graphics Qualification**: Original primary/control graphics are accepted. All 56 supplemental shaft-lean pairs have scoped PNG approval (336 images). Other PNG comparisons, full vector review, report pages, remote delivery, and ready PR remain pending. A TDD repair corrects curve-caption count parsing in the review harness without altering the frozen producer.
 - **Integration Branch Status**: Branch `codex/shot-pattern-main-integration` contains reviewed local merge `7bdb71016c` of exact `main` `fa7ee92f5cddd753099d7418fc974b142b7ebb54` into `2953c52b37001a8a3893e07943fb3cf2b6c38b45`; model registries are preserved. Final publication and pre-PR gates remain pending.
 - **Validation Evidence**: Root has independently executed 282 provider/scoring/GUI/report/contact tests (all pass), and Astra 71 launcher boundary tests pass (review recorded after fingerprint verification; context render/check/evaluate pass). Do not rely on terminal merge worker report.
 - **External Blockers**: LaTeX editor compiler pre-parse bundle download failure (#12120) remains an external unresolved blocker.
@@ -34,7 +34,7 @@
 ## Do-Not List
 
 - Do not touch armed Phase 1 PR #11941 on branch `codex/shot-pattern-analysis`.
-- Do not terminate, signal, or modify live PID 51475 frozen v6 supplementary exporter in `4023111d2a`.
+- Do not disturb active report/review workers; use their current durable launcher and terminal receipts rather than historical PIDs.
 - Do not integrate guard `c7a2f41fc8` until the frozen final report is fully completed.
 - Do not run installs, receipt refreshes, or reruns against historical science/frozen presentation pinned at `3678409`.
 - Do not infer peer work completion, discard peer records, or claim independent validation for imported peer records.
@@ -42,9 +42,9 @@
 
 ## Short-Term Roadmap and Next Steps
 
-- Monitor completion of live exporter PID 51475 in frozen presentation checkout `4023111d2a`.
+- Finish frozen report v8 and the active supplemental PNG/vector reviews; retain actual terminal receipts.
 - Complete supplemental graphic review, report composition, and remote asset delivery.
-- Resume only when authorized; bring forward final publication updates after study checkpoint `dd2c235a0a`.
+- Bring forward final publication updates after study checkpoint `e941f1a746`.
 - Retain completed root/Astra integration evidence; complete publication and final gates before a ready PR.
 
 ## Imported Peer Handoff Records Index

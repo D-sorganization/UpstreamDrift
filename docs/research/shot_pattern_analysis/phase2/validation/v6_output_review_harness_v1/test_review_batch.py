@@ -31,6 +31,27 @@ def test_actual_shaped_caption_passes():
     m.verify_social_caption(PAIR, "pairs", TEXT)
 
 
+def test_curve_labels_adjacent_to_correct_counts_pass():
+    record = {
+        **PAIR,
+        "comparison_kind": "curve_strength",
+        "common_supported_n": 10000,
+        "sources": [
+            {"protocol_id": "original_control/1", "cell": "driver_lean0_curve1_rotation1_combined1"},
+            {"protocol_id": "original_control/1", "cell": "driver_lean0_curve2_rotation1_combined1"},
+        ],
+    }
+    caption = TEXT.replace(
+        "Lean 0° 9,999/10,000 valid; Lean 10° 9,999/10,000 valid",
+        "Curve ×1 10,000/10,000 valid; Curve ×2 10,000/10,000 valid",
+    )
+    m.verify_social_caption(record, "pairs", caption)
+    with pytest.raises(ValueError, match="common-six counts"):
+        m.verify_social_caption(
+            record, "pairs", caption.replace("Curve ×2 10,000", "Curve ×2 9,999")
+        )
+
+
 @pytest.mark.parametrize(
     "text",
     [
