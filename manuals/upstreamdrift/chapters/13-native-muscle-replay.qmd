@@ -412,6 +412,14 @@ single-state Pinocchio/Drake observations are described with their units,
 source identities and limits in the archive README.
 A separate same-input 10 ms Pinocchio replay also retained all-sample q/v differences against the frozen MuJoCo T01 history; it is descriptive and carries no formal parity threshold.
 
+One later Drake zero-effort acceleration observation for the same manufactured
+candidate is archived separately at
+`experiments/drake_candidate_lift_zero_effort_20261012_root_attempt1/`. It used
+the bit-identical 41-coordinate q and zero v/effort already retained for
+Pinocchio and MuJoCo. Its finite qdd vector and descriptive cross-engine
+differences have no acceptance threshold; the near-touch pose is free fall,
+not supported equilibrium. No production row is qualified by this observation.
+
 These are bounded synthetic diagnostics. Near-zero residuals at one manufactured
 pose and exact short-horizon numerical replay do not establish supported
 equilibrium, calibrated contact, anatomy, physiological feasibility, capture

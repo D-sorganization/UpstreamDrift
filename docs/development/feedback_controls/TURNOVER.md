@@ -620,6 +620,14 @@ remain external. The package README states each result's limits. None establishe
 supported equilibrium, calibrated contact, capture accuracy, physiology, or
 production replay; all 17 model/variant rows remain unqualified.
 
+A separate folder, `experiments/drake_candidate_lift_zero_effort_20261012_root_attempt1/`,
+now retains one Drake zero-effort acceleration observation and its exact
+receipt, metadata, log, and observer snapshots. The q input is identical to
+the retained Pinocchio and MuJoCo candidate inputs; qdd differences are
+descriptive and have no acceptance threshold. This is a near-touch free-fall
+sample, not supported equilibrium or cross-engine qualification. The original
+52-entry archive and manifest remain unchanged; all 17 rows remain unqualified.
+
 ## Same-Input Lazy Package Exports (#11898)
 
 The `same_input` facade now resolves its established exports lazily. A clean

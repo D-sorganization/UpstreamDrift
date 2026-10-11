@@ -61,3 +61,10 @@ docs/development/feedback_controls/experiments/manufactured_native_diagnostics_2
 docs/development/feedback_controls/experiments/manufactured_native_diagnostics_20261011/mujoco/code_snapshot/geometry/run_supervised_mujoco_v1_candidate_lift_geometry_20261012.py.snapshot -text whitespace=cr-at-eol,-blank-at-eof
 docs/development/feedback_controls/experiments/manufactured_native_diagnostics_20261011/mujoco/code_snapshot/shared/mujoco_v1_candidate_lift_geometry.py.snapshot -text whitespace=cr-at-eol,-blank-at-eof
 docs/development/feedback_controls/experiments/manufactured_native_diagnostics_20261011/mujoco/code_snapshot/shared/test_mujoco_v1_candidate_lift_geometry.py.snapshot -text whitespace=cr-at-eol,-blank-at-eof
+
+# Preserve the separate byte-exact Drake zero-effort observation.
+docs/development/feedback_controls/experiments/drake_candidate_lift_zero_effort_20261012_root_attempt1/artifact-manifest.json -text
+docs/development/feedback_controls/experiments/drake_candidate_lift_zero_effort_20261012_root_attempt1/drake-zero-effort.json -text
+docs/development/feedback_controls/experiments/drake_candidate_lift_zero_effort_20261012_root_attempt1/drake-zero-effort.log -text
+docs/development/feedback_controls/experiments/drake_candidate_lift_zero_effort_20261012_root_attempt1/drake-zero-effort.meta.txt -text
+docs/development/feedback_controls/experiments/drake_candidate_lift_zero_effort_20261012_root_attempt1/observers/*.snapshot -text
