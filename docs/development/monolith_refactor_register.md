@@ -29,7 +29,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1184 | `src/bunkershot3d/ball/splash.py`                                                                                                                                             |
 | 1178 | `src/engines/physics_engines/pinocchio/python/full_body_fit.py`                                                                                                               |
 | 1173 | `src/launchers/upstream_drift_launcher.py`                                                                                                                                    |
-| 1171 | `src/shared/python/movement_optimizer/gui/motion_tabs.py`                                                                                                                     |
 | 1170 | `src/config/launcher_manifest_loader.py`                                                                                                                                      |
 | 1168 | `src/api/routes/data_explorer.py`                                                                                                                                             |
 | 1168 | `src/shared/python/shadow_tracker/ingestion.py`                                                                                                                               |
@@ -57,7 +56,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1106 | `src/shared/python/motion_matching/leaderboard.py`                                                                                                                            |
 | 1102 | `src/launchers/launcher_dialogs.py`                                                                                                                                           |
 | 1100 | `src/shared/python/motion_matching/club_only/control_replay.py`                                                                                                               |
-| 1100 | `src/shared/python/movement_optimizer/models/swingset.py`                                                                                                                     |
 | 1096 | `src/learning/retargeting/retargeter.py`                                                                                                                                      |
 | 1089 | `src/shared/python/motion_pipeline/contracts.py`                                                                                                                              |
 | 1073 | `src/shared/python/sidekick/calculators/thermo/steam_engine.py`                                                                                                               |

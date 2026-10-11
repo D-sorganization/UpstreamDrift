@@ -1,11 +1,14 @@
 name: Maturin Movement Optimizer
-# Builds the vendored shared `movement_optimizer` sub-app's Rust accelerator
+# Builds the pinned Tools `movement_optimizer` sub-app's Rust accelerator
 # (`movement_optimizer_core`), installs the wheel, hard-asserts the extension
 # imports, and runs its parity suite NON-SKIPPED.
 #
 # Why a dedicated workflow (issue #7604):
-#   The sub-app is vendored in-tree at `src/shared/python/movement_optimizer/`
-#   and its `rust_core/Cargo.toml` declares its own standalone `[workspace]`,
+#   The sub-app is consumed from the pinned Tools submodule at
+#   `vendor/ud-tools/src/movement_optimizer/` (the in-tree copy under
+#   `src/shared/python/` was retired by #12267, so this gate now proves the
+#   exact Tools revision UpstreamDrift pins). Its `rust_core/Cargo.toml`
+#   declares its own standalone `[workspace]`,
 #   so it is intentionally NOT a member of the repo-root Rust workspace
 #   (`Cargo.toml`) and is not built by the `rust-wheel-parity` job. Building it
 #   here keeps the two lanes independent and mirrors the Tools-side maturin gate
@@ -20,12 +23,12 @@ on:
   push:
     branches: [main]
     paths:
-      - "src/shared/python/movement_optimizer/**"
+      - "vendor/ud-tools"
       - ".github/workflows/maturin-movement-optimizer.yml"
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
     paths:
-      - "src/shared/python/movement_optimizer/**"
+      - "vendor/ud-tools"
       - ".github/workflows/maturin-movement-optimizer.yml"
   workflow_dispatch:
 
@@ -57,6 +60,11 @@ jobs:
         shell: bash
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      # CI checkouts skip submodules; the crate and its parity suite live in
+      # the pinned Tools tree.
+      - name: Fetch pinned Tools packages
+        uses: ./.github/actions/fetch-pinned-tools
 
       - name: Isolate Python tool cache (prevent shared-cache races)
         if: runner.os != 'Windows'
@@ -95,7 +103,7 @@ jobs:
           path: |
             ${{ env.CARGO_HOME }}/registry
             ${{ env.CARGO_HOME }}/git
-          key: ${{ runner.os }}-cargo-movement-optimizer-${{ hashFiles('src/shared/python/movement_optimizer/rust_core/Cargo.toml') }}
+          key: ${{ runner.os }}-cargo-movement-optimizer-${{ hashFiles('vendor/ud-tools/src/movement_optimizer/rust_core/Cargo.toml') }}
           restore-keys: |
             ${{ runner.os }}-cargo-movement-optimizer-
 
@@ -105,28 +113,28 @@ jobs:
           source "$RUNNER_TEMP/mo-venv/bin/activate"
           python -m pip install --upgrade pip maturin "numpy<2" scipy pytest
           python -m maturin build --release \
-            -m src/shared/python/movement_optimizer/rust_core/Cargo.toml
+            -m vendor/ud-tools/src/movement_optimizer/rust_core/Cargo.toml
           echo "Wheel built:"
-          ls src/shared/python/movement_optimizer/rust_core/target/wheels/
+          ls vendor/ud-tools/src/movement_optimizer/rust_core/target/wheels/
 
       - name: Install wheel + hard-assert import
         run: |
           source "$RUNNER_TEMP/mo-venv/bin/activate"
           python -m pip install --force-reinstall --no-deps \
-            src/shared/python/movement_optimizer/rust_core/target/wheels/*.whl
+            vendor/ud-tools/src/movement_optimizer/rust_core/target/wheels/*.whl
           # Fail-closed: the extension MUST import. A skipped parity test is a
           # bug, not an acceptable outcome, on this gate.
           python -c "import movement_optimizer_core; print('movement_optimizer_core import OK')"
 
       - name: Run parity suite (extension mandatory, non-skipped)
         env:
-          PYTHONPATH: src/shared/python
+          PYTHONPATH: vendor/ud-tools/src
         run: |
           source "$RUNNER_TEMP/mo-venv/bin/activate"
           # -c /dev/null ignores the sub-app's own pyproject pytest config
           # (it references pytest-qt's `qt_api` option, unused for this suite).
           python -m pytest \
-            src/shared/python/movement_optimizer/tests/test_rust_parity.py \
+            vendor/ud-tools/src/movement_optimizer/tests/test_rust_parity.py \
             -c /dev/null -o addopts="" -p no:cacheprovider \
             -v
           echo "Parity suite executed with the Rust extension installed."
@@ -136,7 +144,7 @@ jobs:
         run: |
           {
             echo "## movement_optimizer_core build + parity (issue #7604)"
-            echo "- vendored sub-app: src/shared/python/movement_optimizer/"
+            echo "- pinned sub-app: vendor/ud-tools/src/movement_optimizer/"
             echo "- Rust wheel built via maturin and installed"
             echo "- import movement_optimizer_core hard-asserted"
             echo "- tests/test_rust_parity.py executed NON-SKIPPED"
