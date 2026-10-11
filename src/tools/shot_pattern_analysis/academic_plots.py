@@ -32,6 +32,16 @@ _HDR_STYLES = {
 _MAX_OVERLAY_DOTS = 600
 
 
+def _validate_figure_options(scenario: str, dpi: int, presentation: str) -> None:
+    """Validate shared options before reading data or creating output files."""
+    if not isinstance(scenario, str) or not scenario.strip():
+        raise ValueError("scenario must be a non-empty string")
+    if not isinstance(dpi, int) or not 72 <= dpi <= 600:
+        raise ValueError("dpi must be an integer in [72, 600]")
+    if presentation not in ("academic", "social"):
+        raise ValueError("presentation must be academic or social")
+
+
 def _space_shared_x_ticks(figure: Any, axes: Sequence[Any]) -> None:
     """Keep shared scales and fonts while reserving a four-point label gutter."""
     if not axes:
@@ -279,12 +289,7 @@ def write_academic_dispersion_figure(
     Returns:
         Paths keyed by ``png``, ``pdf`` and ``svg``.
     """
-    if not isinstance(scenario, str) or not scenario.strip():
-        raise ValueError("scenario must be a non-empty string")
-    if not isinstance(dpi, int) or not 72 <= dpi <= 600:
-        raise ValueError("dpi must be an integer in [72, 600]")
-    if presentation not in ("academic", "social"):
-        raise ValueError("presentation must be academic or social")
+    _validate_figure_options(scenario, dpi, presentation)
     metadata_caption = _validate_metadata(metadata)
     estimate = shared_histogram_density(
         points_by_pattern,
@@ -725,12 +730,7 @@ def write_overhead_trajectory_figure(
         raise ValueError("overhead trajectory input must be raw, not aim-adjusted")
     if not isinstance(target_x_m, (int, float)) or not math.isfinite(target_x_m):
         raise ValueError("target_x_m must be finite")
-    if not isinstance(scenario, str) or not scenario.strip():
-        raise ValueError("scenario must be a non-empty string")
-    if not isinstance(dpi, int) or not 72 <= dpi <= 600:
-        raise ValueError("dpi must be an integer in [72, 600]")
-    if presentation not in ("academic", "social"):
-        raise ValueError("presentation must be academic or social")
+    _validate_figure_options(scenario, dpi, presentation)
     metadata_caption = _validate_metadata(metadata)
     trajectories = _validated_trajectories(trajectories_by_pattern)
     names_tuple = tuple(trajectories)
