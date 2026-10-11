@@ -79,6 +79,8 @@ docs/development/full_body_models/evidence/ground_support/anthro_driver_drake/re
 # Byte-bound inherited club-face provenance inputs from #12117.
 tests/fixtures/club_face/address_poses.json
 tests/fixtures/club_face/provenance.json
+tests/fixtures/club_face/spec_driver.json
+tests/fixtures/club_face/spec_iron7.json
 src/engines/physics_engines/opensim/models/msk_club_grip_calibration.json
 manuals/upstreamdrift/calculation-registry.json
 docs/development/monolith_refactor_register.md
