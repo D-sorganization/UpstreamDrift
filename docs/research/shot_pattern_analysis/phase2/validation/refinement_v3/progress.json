@@ -9,7 +9,7 @@
   "replay_sha256": "93fb01c874c007f4af7badc6603d887bddd90a02aaa5a4e1d478f26ad73dbdcd",
   "affinedrift_worktree": "/home/dieterolson/.codex/worktrees/shot-pattern-affinedrift-publication",
   "affinedrift_issue": 5004,
-  "affinedrift_status": "QMD draft and navigation/resources prepared; assets and validation pending",
+  "affinedrift_status": "Reviewed39page PDF and8PNGassets copied with hash manifest; Quarto1.8.26 local article render succeeded. Final site checks/commit in progress; not published.",
   "upstream_status": "PR12278 unmerged. Restored approved DRY baseline leaves14 fingerprint groups in6 semantic families; refactors active.67 new architecture allowances audited as unresolved.",
   "live_processes": {},
   "next": [
@@ -19,7 +19,7 @@
     "Push/merge safely; verify public report and social preview"
   ],
   "upstream_dry_issue": 12299,
-  "checks": "21 presentation/replay tests and2 social tests pass; mypy on5sources passes; Ruff passed after duplicate provenancekey removal",
+  "checks": "Presentation/replay/social tests passed; matrix CLI28/provenanceCLI21; viewport24; plot option+academic suite and matched GUI suite exit0; Ruff on changed batches passes.",
   "quarto": {
     "version": "1.8.26",
     "path": "/tmp/shot-pattern-quarto-1.8.26/opt/quarto/bin/quarto",
@@ -29,8 +29,14 @@
     "bb1292a246",
     "b15aa53c45",
     "242ce075c6",
-    "0ef05631ea"
+    "0ef05631ea",
+    "e2c3b22c93",
+    "bf82043a75",
+    "7d710819f7",
+    "27714d77c3"
   ],
   "affine_checks": "Rendercoverage253URLs passes and titlecase672sources passes; final localassets/page render stillpending",
-  "local_delivery": "fd5506da87f5e619a550fb8cc871a0e8195b6fb98965a99809e3238a0f01508b"
+  "local_delivery": "fd5506da87f5e619a550fb8cc871a0e8195b6fb98965a99809e3238a0f01508b",
+  "architecture_issue": 12302,
+  "integration_work": "Matrix CLI+provenance, deterministic viewport tests, plot-option validation and GUI preview deduplication committed. Kernel/contact and supplement rendering refactors active."
 }
