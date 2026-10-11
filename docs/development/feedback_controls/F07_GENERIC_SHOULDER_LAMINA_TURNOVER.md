@@ -1,5 +1,20 @@
 # F07 Generic Shoulder Triangle-Lamina Turnover
 
+## Provider Pin Impact Reconciliation Follow-Up
+
+PR #12246's full CI suite found one stale exact-pin impact acceptance record:
+24,025 tests passed and one failed because the record still referenced Tools
+`86d0f28b1cc5acf61185e07e320c816c2d005512`. The failure was reproduced locally
+before updating metadata. All 26 remaining capability probes passed against
+the new pin. DeskComputer built an archive of exact Tools commit
+`6b6e4be55e7086a33db43b36d2632765be619bde`; the transferred bundle was served
+and verified locally, covering 76 assets, five JavaScript assets, 2,801,426
+bytes and the missing-artifact 404. See
+[`F07_PROVIDER_12246_IMPACT_SERVED_RECEIPT.json`](F07_PROVIDER_12246_IMPACT_SERVED_RECEIPT.json)
+and the [impact acceptance record](../impact_acceptance_matrix.md) for exact
+toolchains, archive hashes and reproduction. Historical receipts and all
+scientific qualification limits remain unchanged.
+
 Issue #12211 adds a **new** candidate plant, not an edit or accepted repair
 of the original derived 557-muscle source. The exact original source and
 author-right CEINMS mesh SHA-256s are fixed in
