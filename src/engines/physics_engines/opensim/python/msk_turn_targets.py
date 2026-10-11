@@ -66,6 +66,7 @@ THORAX_HALF_WIDTH_M = 0.1
 NATIVE_UP = np.array([0.0, 0.0, 1.0])
 FOOT_MARKERS = ("AnkleOut", "ToeIn", "ToeOut")
 _SIDES = {"l": "L", "r": "R"}
+_FootSample = tuple[np.ndarray, np.ndarray, np.ndarray, float, float]
 
 
 class BodyProbe(Protocol):
@@ -468,14 +469,14 @@ def foot_track_from_capture(capture: Any, times_s: Any) -> FootTrack:
     }
     ok_cols = list(cols.values())
     n = native.shape[0]
-    cur = {
+    cur: dict[str, _FootSample] = {
         s: (address.ankle[s], address.axis[s], address.lateral[s], 0.0, 0.0)
         for s in _SIDES
     }
-    series: dict[str, list[tuple[np.ndarray, ...]]] = {s: [] for s in _SIDES}
+    series: dict[str, list[_FootSample]] = {s: [] for s in _SIDES}
     fallback = 0
     for i in range(n):
-        frame: dict[str, tuple] | None = None
+        frame: dict[str, _FootSample] | None = None
         if valid[i, ok_cols].all() and np.isfinite(native[i, ok_cols]).all():
             try:
                 frame = {}
