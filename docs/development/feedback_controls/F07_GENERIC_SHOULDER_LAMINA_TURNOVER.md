@@ -1,5 +1,20 @@
 # F07 Generic Shoulder Triangle-Lamina Turnover
 
+## Provider Pin Impact Reconciliation Follow-Up
+
+PR #12246's full CI suite found one stale exact-pin impact acceptance record:
+24,025 tests passed and one failed because the record still referenced Tools
+`86d0f28b1cc5acf61185e07e320c816c2d005512`. The failure was reproduced locally
+before updating metadata. All 26 remaining capability probes passed against
+the new pin. DeskComputer built an archive of exact Tools commit
+`6b6e4be55e7086a33db43b36d2632765be619bde`; the transferred bundle was served
+and verified locally, covering 76 assets, five JavaScript assets, 2,801,426
+bytes and the missing-artifact 404. See
+[`F07_PROVIDER_12246_IMPACT_SERVED_RECEIPT.json`](F07_PROVIDER_12246_IMPACT_SERVED_RECEIPT.json)
+and the [impact acceptance record](../impact_acceptance_matrix.md) for exact
+toolchains, archive hashes and reproduction. Historical receipts and all
+scientific qualification limits remain unchanged.
+
 Issue #12211 adds a **new** candidate plant, not an edit or accepted repair
 of the original derived 557-muscle source. The exact original source and
 author-right CEINMS mesh SHA-256s are fixed in
@@ -11,12 +26,20 @@ muscle paths, joints, wraps, force laws and scalar body masses remain in the
 source XML. Any other semantic XML edit rejects.
 
 The provider is Tools #5503 `shared.python.humanoid_character_builder.mesh`
-`triangle_lamina`, with source hashes for both its kernel and inertia result
-representation. The Tools gitlink remains unchanged while #5503 is unmerged;
-the reproducible local command accepts an explicit development Tools root.
-No lamina tensor formula is copied into UpstreamDrift. The exact mesh is
-open/nonmanifold, so the solid-volume route stays failed. The zero-thickness
-triangle-multiset recipe is a separate fixed-mass mechanical hypothesis.
+`triangle_lamina`, with source hashes for its kernel and inertia result
+representation. The pinned Tools tree is the provider authority. Because the
+UpstreamDrift checkout still owns a local `humanoid_character_builder` package,
+the established seam deliberately refuses to fill missing modules from Tools;
+doing so would create a mixed package. The producer therefore invokes a small
+isolated worker with only `vendor/ud-tools/src` first on that child process's
+import path. It exchanges numeric input/output through NPZ/JSON files and
+returns the exact kernel, inertia-representation and worker source hashes.
+Generation and subsequent candidate admission independently recheck those
+identities. Neither the parent process's `sys.path` nor `sys.modules` is
+modified, and no lamina tensor formula is copied into UpstreamDrift. The exact
+mesh is open/nonmanifold, so the solid-volume route stays failed. The
+zero-thickness triangle-multiset recipe is a separate fixed-mass mechanical
+hypothesis.
 
 TDD began with a missing-module RED. Synthetic four-body tests now cover
 hash-mismatched source/mesh, altered source frame/scale, undeclared mass XML
@@ -41,11 +64,12 @@ These are conditional diagnostic results; visual meshes for other bodies were
 not present during the OpenSim reload and do not enter this mass derivation.
 
 Reproduction uses
-`scripts/opensim/derive_generic_shoulder_lamina.py --source <exact-final-557.osim> --right-clavicle <exact-clavicle.vtp> --right-scapula <exact-scapula.vtp> --output <new-directory> --development-tools-root <exact-Tools-5503-checkout>`
-with the OpenSim 4.6 Python environment and its native `CASADIPATH`. Once
-Tools #5503 is merged and pinned, omit the development-root argument and
-revalidate the provider source hashes. Keep the PR draft/unarmed while Tools
-and #12207 remain prerequisites.
+`scripts/opensim/derive_generic_shoulder_lamina.py --source <exact-final-557.osim> --right-clavicle <exact-clavicle.vtp> --right-scapula <exact-scapula.vtp> --output <new-directory>`
+with the OpenSim 4.6 Python environment and its native `CASADIPATH`. It needs
+no development Tools root or test-only import injection. The same producer
+path serves the focused tests and CLI, and fails closed unless both pinned
+provider files and the worker match their recorded SHA-256 values. Keep the PR
+draft/unarmed while remaining integration prerequisites are unresolved.
 
 Remaining science gates include actual source-region/mesh ownership, full
 native force/work/acceleration chart evidence, passive muscle/tendon laws,
@@ -68,6 +92,64 @@ failure and a real branch conflict. Those are not corrected by #12211 and
 must be reconciled separately before treating its ancestry as accepted.
 This branch must not be presented as a replacement for the original 557
 source's failed physical-body audit or as completed full-swing matching.
+
+## Pinned Provider and CLI Revalidation (2026-10-10)
+
+The consumer now pins Tools gitlink `vendor/ud-tools` at
+`6b6e4be55e7086a33db43b36d2632765be619bde`. The isolated worker resolves
+`triangle_lamina.py` and `inertia_calculator.py` only from that gitlink, checks
+their exact paths and bytes, and binds its own source digest into each
+candidate. Synthetic tests exercise the provider without modifying parent
+import state; a dedicated test snapshots and verifies the parent `sys.path`
+and Tools mesh-module entries remain unchanged. The OpenSim 4.6 focused suite
+passes all ten tests against the pinned provider.
+
+The default CLI, without a `--development-tools-root`, reproduced candidate
+v6 model SHA-256
+`5f2cdd22013c2700f95d625a4c42eb488ed6c5267721cd0d2acde38544754326`, unchanged
+from v5. Kernel SHA-256 is
+`3fd45937bed011c90b4d4e3fdf8bcf932a8bfd9a0816441ee708cc93cd4080ee`, the
+inertia representation SHA-256 remains
+`60a45fe471c2e1cbfb2ae80d9a6b3760b62b07f0fd5327a4d5e652a49f467e10`, and the
+worker SHA-256 is
+`4309279807a6ac439b3b215dc3cf2414f4a93edaa445030c5a7dd085fc8e1bbf`. Its
+40-body physical audit and three-pose comparison passed with zero maximum
+transform and constraint-error difference. Receipt bytes are preserved in
+fleet planning as `generic_shoulder_lamina_12211_v6/candidate-receipt.json`,
+SHA-256 `248065dd5a5338b1907b56a5777d69447efb044b4242d95c6def0b141e15994f`.
+The earlier v4/v5 receipts remain unchanged as historical records.
+
+After the worker added an explicit fail-closed check for imports without source
+file paths, the no-override CLI was rerun into a distinct v7 directory. Its
+candidate model SHA remains
+`5f2cdd22013c2700f95d625a4c42eb488ed6c5267721cd0d2acde38544754326`; the final
+worker SHA is
+`66e65bcfacbfb668d5b3bfadd3a76147a490f409f07e6d98d052fd4815279200`, with the
+same Tools kernel SHA `3fd45937bed011c90b4d4e3fdf8bcf932a8bfd9a0816441ee708cc93cd4080ee`
+and inertia representation SHA
+`60a45fe471c2e1cbfb2ae80d9a6b3760b62b07f0fd5327a4d5e652a49f467e10`. The
+40-body native audit again reported zero maximum transform and constraint-error
+difference across three poses. The separate v7 receipt is
+`generic_shoulder_lamina_12211_v7/candidate-receipt.json`, SHA-256
+`76d89fdf93632217cbf9345d806c32cc728cae9bfb82b58c9d9bdd42b9c9087f`; v6
+remains the historical receipt for the prior worker bytes.
+
+The native test command used the dedicated OpenSim environment:
+
+```powershell
+$env:GENERIC_SHOULDER_FIXTURE_ROOT='C:\Users\diete\Repositories\docs\development\feedback_controls_planning'
+$env:CASADIPATH='C:\Users\diete\Repositories\.venv-feedback-opensim\Lib\site-packages\opensim'
+& 'C:\Users\diete\Repositories\.venv-feedback-opensim\Scripts\python.exe' -m pytest -q -o addopts= tests/opensim/test_generic_shoulder_lamina.py
+```
+
+The CLI v6 command used the same source and retained author-right meshes, with
+no development provider override:
+
+```powershell
+$env:PYTHONPATH='C:\Users\diete\Repositories\Worktrees\feedback-controls-main-integration-12202'
+$env:CASADIPATH='C:\Users\diete\Repositories\.venv-feedback-opensim\Lib\site-packages\opensim'
+& 'C:\Users\diete\Repositories\.venv-feedback-opensim\Scripts\python.exe' scripts/opensim/derive_generic_shoulder_lamina.py --source 'C:\Users\diete\Repositories\docs\development\feedback_controls_planning\composed_reduction_12161_v2\03-custom-mtp.osim' --right-clavicle 'C:\Users\diete\Repositories\docs\development\feedback_controls_planning\generic_shoulder_mesh_triage_v1\clavicle.vtp' --right-scapula 'C:\Users\diete\Repositories\docs\development\feedback_controls_planning\generic_shoulder_mesh_triage_v1\scapula.vtp' --output 'C:\Users\diete\Repositories\docs\development\feedback_controls_planning\generic_shoulder_lamina_12211_v6'
+```
 
 ## Provider Source Revalidation (2026-10-10)
 
@@ -97,3 +179,9 @@ has not yet merged; the consumer gitlink therefore remains unchanged. Repeat
 the native suite and receipt derivation against the merged Tools pin before
 arming or merging the consumer PR. All scientific limitations and open gates
 above remain in force.
+
+## Current Main Integration
+
+The provider follow-up normally merges main `9e5f87c4dd31fc3137fc204d98337633fa5c4855`. Generated divergence inventory is rebuilt against the unchanged exact Tools pin `6b6e4be55e7086a33db43b36d2632765be619bde`; context views are regenerated, with all recorded boundary inputs verified. The source-bound remote web build and served-asset receipt are retained. No physical qualification or private trajectory result is introduced by resolving generated-document conflicts.
+
+Validation after this main merge: all five central gates passed, including full diff mypy on six production files and affected tests (28 passed, eight optional/external-fixture cases skipped under system Python). The pinned SDK ran nine provider tests successfully; the exact 557-muscle test was then run separately with GENERIC_SHOULDER_FIXTURE_ROOT and passed, giving ten distinct provider tests with actual native boundary evidence. The portable acceptance/pin/inertia selection passed 39 tests. No prior private capture acceptance is inferred.
