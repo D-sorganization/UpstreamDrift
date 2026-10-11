@@ -27,8 +27,12 @@ The existing native wrench sampler remains shared with the legacy replay path;
 this declaration does not introduce a second contact law.
 
 Contact execution is available only when the caller supplies a valid typed
-declaration. The default constrained path continues to reject contact-bearing
-models. The declaration is not yet a request-level authorization for a
+declaration. `NativeMocoRequest` accepts this declaration only for
+constrained-muscle execution with a typed diagnostic policy. Strict JSON
+loading recomputes its digest, request identity binds it, preparation
+reconstructs and validates the force and geometry closure, and export/fresh
+replay require the same declaration digest. The default constrained path
+continues to reject contact-bearing models. This is not authorization for a
 particular private capture, and it cannot override unrelated source, state,
 constraint, or execution blockers.
 
@@ -46,11 +50,14 @@ OpenSim 4.6 synthetic fixtures exercise declared Smooth and Hunt-Crossley
 source closure, the corresponding sphere and half-space geometry identities,
 contact-free default rejection, source/component mutation rejection, and
 finite native wrench output from constrained Smooth and Hunt-Crossley replays.
+An actual OpenSim Hunt-Crossley request also passes the runner's loaded-model
+audit only with the exact declaration; a mutated force digest blocks it. JSON
+digest and unknown-field negatives are covered. These tests do not demonstrate
+a contact-bearing full-body Moco solve or the complete Moco export lifecycle.
 Parser fixtures exercise OpenSim's C++-qualified serialized name
 alongside DTD, entity, external-resource, and prefixed-resource rejection.
 These are bounded software tests. They do not establish that either law or
-geometry is appropriate for a human capture, nor do they demonstrate a
-contact-bearing full-body Moco solve or full-horizon independent replay.
+geometry is appropriate for a human capture or full-horizon replay.
 
 Keep contact, support/grip, anatomy, passive physiology, capture matching,
 full-horizon replay, and all-model parity unqualified. The calculation

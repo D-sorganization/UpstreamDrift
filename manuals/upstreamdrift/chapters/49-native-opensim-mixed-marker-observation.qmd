@@ -1,0 +1,65 @@
+# OpenSim Mixed Replay Marker Observation and Scoring
+
+This provisional software pathway connects an exact T01 mixed-actuation
+experiment bundle to a fresh native OpenSim replay, model-owned marker
+forward kinematics, and the existing observation alignment and scoring
+contract. It is an observation handoff, not a new physics or qualification
+authority. The calculation registry remains empty and release remains blocked.
+
+## Replay and Full-State Marker Geometry
+
+`replay_and_score_native_mixed_markers` validates the frozen T01 bundle and
+executes `replay_native_mixed_bundle` once on a fresh model. The caller supplies
+an exact source-bound `DeclaredColdStart`, mixed-actuation profile, model path,
+and ordered marker bindings. Each binding names a native OpenSim
+`PhysicalFrame` path and a finite local station offset in metres. Labels and
+frame attachments are explicit; no aliases or anatomy are inferred from
+coordinate names.
+
+For every replay sample, the observer restores the complete ordered named
+state, restores that sample's simulation-relative time, checks the declared
+constraint observations, realizes position, and evaluates each frame-local
+station in ground. It does not integrate, assemble, project, or replace the
+saved state with a coordinate-only reconstruction. The result identity binds
+the T01 source/provider/state/input/policy/time identities, compiled profile,
+ordered marker bindings, actual replayed state and actuation arrays, native
+constraint audits, executed loaded-model identity, observer source, and output
+clock. The score wrapper snapshots the generated positions into immutable
+bytes-backed arrays; aligned positions and observed data are also copied into
+bytes-backed read-only storage before the diagnostic score is returned.
+
+## Observation Clock and Metrics
+
+Native input/replay knots and measured observation times are separate clocks.
+The bridge declares the `opensim-ground` frame and requires the observation
+timebase to match the frozen simulation-relative bundle. It delegates ordered
+marker/frame/timebase validation, missing-value masks, interpolation, and
+no-extrapolation checks to `align_native_positions_to_observations`. The
+canonical five metrics consume positions sampled on the exact retained
+observation clock; generalized coordinates and native states are never
+interpolated for scoring. Non-finite metric values are serialized as `null`,
+while the metrics API retains its established numeric representation.
+
+## Evidence and Limits
+
+The actual OpenSim 4.6 synthetic regression exercises a fresh coupled mixed
+replay, complete-state frame observation, alignment, scoring, immutable output,
+source-identity refusal, and rejection of observations beyond the replay
+horizon. Three focused cases pass. This is software-path evidence for a small
+synthetic fixture only. It does not validate marker-attachment calibration,
+anatomy, source resource closure, muscle physiology, contact/grip, private
+capture fit, a full capture horizon, any production variant, or six-engine
+parity. The output is explicitly `unqualified`; it is not an F01 admission
+receipt and it does not fabricate a native execution receipt.
+
+Reproduce with the repository's already-installed OpenSim 4.6 Python runtime
+and its temporary minimal pytest configuration:
+
+```powershell
+& <opensim-sdk-python> -m pytest -c <temporary-pytest-config> `
+  tests/opensim/test_native_constrained_mixed.py::test_coupled_mixed_replay_produces_observation_scorer_positions `
+  tests/opensim/test_native_constrained_mixed.py::test_mixed_marker_scorer_rejects_changed_declared_source `
+  tests/opensim/test_native_constrained_mixed.py::test_mixed_marker_scorer_rejects_observations_beyond_replay_horizon -q
+```
+
+The manual governance inventory intentionally records no approved calculation.

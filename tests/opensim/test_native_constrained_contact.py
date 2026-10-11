@@ -352,6 +352,10 @@ def test_hunt_crossley_request_admits_only_exact_runner_contact_closure(
         ),
         contact_declaration=declaration,
     )
+    assert (
+        request.identity_sha256
+        != replace(request, contact_declaration=None).identity_sha256
+    )
     blockers = _audit_loaded_model_components(model, request)
     assert "native-contact-declaration-invalid" not in blockers
     assert "native-external-force-uninventoried" not in blockers

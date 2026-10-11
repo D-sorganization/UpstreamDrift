@@ -40,6 +40,124 @@ if TYPE_CHECKING:
     from .native_contact_policy import NativeContactExecutionDeclaration
 
 
+def _validate_request_policies(request: NativeMocoRequest) -> None:
+    """Validate typed disposition and exact-source declarations together."""
+    if not isinstance(request.allow_unqualified_passive_diagnostic, bool):
+        raise TypeError("passive diagnostic disposition must be boolean")
+    if request.diagnostic_policy is not None:
+        if not isinstance(request.diagnostic_policy, NativeDiagnosticPolicy):
+            raise TypeError("native diagnostic policy must be typed")
+        if request.diagnostic_policy.source_sha256 != request.model_sha256:
+            raise ValueError("native diagnostic policy source differs from model")
+        if request.allow_unqualified_passive_diagnostic:
+            raise ValueError("legacy and typed diagnostic policies cannot combine")
+    if request.wrapped_path_declaration is not None:
+        if not isinstance(request.wrapped_path_declaration, WrappedPathDeclaration):
+            raise TypeError("wrapped-path declaration must be typed")
+        if request.wrapped_path_declaration.source_sha256 != request.model_sha256:
+            raise ValueError("wrapped-path declaration source differs from model")
+    if request.qualification_context is not None:
+        if not isinstance(request.qualification_context, NativeQualificationContext):
+            raise TypeError("qualification context must be typed")
+        if request.qualification_context.source_sha256 != request.model_sha256:
+            raise ValueError("qualification context source differs from model")
+    if request.native_mechanics_profile is not None:
+        from .native_mechanics_profile import NativeMechanicsExecutionProfile
+
+        if not isinstance(
+            request.native_mechanics_profile, NativeMechanicsExecutionProfile
+        ):
+            raise TypeError("native mechanics profile must be typed")
+        if request.native_mechanics_profile.source_sha256 != request.model_sha256:
+            raise ValueError("native mechanics profile source differs from model")
+        if (
+            request.constrained_cold_start is None
+            or request.mixed_actuation is not None
+        ):
+            raise ValueError(
+                "native mechanics profile requires constrained-muscle execution"
+            )
+        if request.diagnostic_policy is None:
+            raise ValueError(
+                "native mechanics profile requires an explicit typed diagnostic policy"
+            )
+    if request.contact_declaration is not None:
+        from .native_contact_policy import NativeContactExecutionDeclaration
+
+        if not isinstance(
+            request.contact_declaration, NativeContactExecutionDeclaration
+        ):
+            raise TypeError("native contact declaration must be typed")
+        if request.contact_declaration.source_sha256 != request.model_sha256:
+            raise ValueError("native contact declaration source differs from model")
+        if (
+            request.constrained_cold_start is None
+            or request.mixed_actuation is not None
+        ):
+            raise ValueError(
+                "native contact declaration requires constrained-muscle execution"
+            )
+        if request.diagnostic_policy is None:
+            raise ValueError(
+                "native contact declaration requires an explicit typed diagnostic policy"
+            )
+    if (
+        request.allow_unqualified_passive_diagnostic
+        and request.passive_policy is not None
+    ):
+        raise ValueError("diagnostic disposition requires unavailable passive policy")
+    if request.mixed_actuation is not None:
+        if not isinstance(request.mixed_actuation, MixedActuationProfile):
+            raise TypeError("mixed Moco requires a typed actuation profile")
+        if dict(request.bindings.control_bounds) != {
+            channel.path: channel.control_bounds
+            for channel in request.mixed_actuation.channels
+        }:
+            raise ValueError("mixed Moco control bounds differ from profile")
+
+
+def _validate_request_inputs(request: NativeMocoRequest) -> None:
+    """Validate immutable file identities, marker bindings, and state seed."""
+    for name in ("model_sha256", "trc_sha256", "states_guess_sha256"):
+        value = getattr(request, name)
+        if len(value) != 64 or any(char not in "0123456789abcdef" for char in value):
+            raise ValueError(f"{name} must be a lowercase SHA-256")
+    if not request.reference_frame_path.startswith("/"):
+        raise ValueError("Native reference frame path must be absolute")
+    weights = dict(request.marker_weights)
+    bindings = dict(request.marker_bindings)
+    exclusions = dict(request.excluded_markers)
+    for value in weights.values():
+        if isinstance(value, bool) or not math.isfinite(value) or value <= 0:
+            raise ValueError("Marker weights must be finite and positive")
+    for label, placement in bindings.items():
+        if (
+            not label
+            or len(placement) != 2
+            or not isinstance(placement[0], str)
+            or not placement[0].startswith("/")
+            or len(placement[1]) != 3
+            or not all(math.isfinite(float(value)) for value in placement[1])
+        ):
+            raise ValueError("Native marker placement requires frame and 3D offset")
+    if any(not reason.strip() for reason in exclusions.values()):
+        raise ValueError("Excluded marker reasons must be explicit")
+    if set(exclusions) & set(weights):
+        raise ValueError("A selected marker cannot also be excluded")
+    if request.constrained_cold_start is not None:
+        declared = request.constrained_cold_start
+        if (
+            declared.model_path != request.model_path.resolve()
+            or declared.source_sha256 != request.model_sha256
+            or dict(declared.named_state) != dict(request.bindings.initial_state)
+            or declared.time_seconds != request.config.t_start_s
+            or declared.constant_commands
+            or declared.source_controller_replacement is not None
+            or declared.allow_source_controllers_for_observation
+        ):
+            raise ValueError("constrained cold start differs from Moco source or state")
+
+
 @dataclass(frozen=True)
 class NativeMocoRequest:
     """Only the files and reviewed native bindings needed for one offline fit."""
@@ -69,118 +187,11 @@ class NativeMocoRequest:
 
     def __post_init__(self) -> None:
         self.config.validate()
-        if not isinstance(self.allow_unqualified_passive_diagnostic, bool):
-            raise TypeError("passive diagnostic disposition must be boolean")
-        if self.diagnostic_policy is not None and not isinstance(
-            self.diagnostic_policy, NativeDiagnosticPolicy
-        ):
-            raise TypeError("native diagnostic policy must be typed")
-        if self.diagnostic_policy is not None:
-            if self.diagnostic_policy.source_sha256 != self.model_sha256:
-                raise ValueError("native diagnostic policy source differs from model")
-            if self.allow_unqualified_passive_diagnostic:
-                raise ValueError("legacy and typed diagnostic policies cannot combine")
-        if self.wrapped_path_declaration is not None:
-            if not isinstance(self.wrapped_path_declaration, WrappedPathDeclaration):
-                raise TypeError("wrapped-path declaration must be typed")
-            if self.wrapped_path_declaration.source_sha256 != self.model_sha256:
-                raise ValueError("wrapped-path declaration source differs from model")
-        if self.qualification_context is not None:
-            if not isinstance(self.qualification_context, NativeQualificationContext):
-                raise TypeError("qualification context must be typed")
-            if self.qualification_context.source_sha256 != self.model_sha256:
-                raise ValueError("qualification context source differs from model")
-        if self.native_mechanics_profile is not None:
-            from .native_mechanics_profile import NativeMechanicsExecutionProfile
-
-            if not isinstance(
-                self.native_mechanics_profile, NativeMechanicsExecutionProfile
-            ):
-                raise TypeError("native mechanics profile must be typed")
-            if self.native_mechanics_profile.source_sha256 != self.model_sha256:
-                raise ValueError("native mechanics profile source differs from model")
-            if self.constrained_cold_start is None or self.mixed_actuation is not None:
-                raise ValueError(
-                    "native mechanics profile requires constrained-muscle execution"
-                )
-            if self.diagnostic_policy is None:
-                raise ValueError(
-                    "native mechanics profile requires an explicit typed diagnostic policy"
-                )
-        if self.contact_declaration is not None:
-            from .native_contact_policy import NativeContactExecutionDeclaration
-
-            if not isinstance(
-                self.contact_declaration, NativeContactExecutionDeclaration
-            ):
-                raise TypeError("native contact declaration must be typed")
-            if self.contact_declaration.source_sha256 != self.model_sha256:
-                raise ValueError("native contact declaration source differs from model")
-            if self.constrained_cold_start is None or self.mixed_actuation is not None:
-                raise ValueError(
-                    "native contact declaration requires constrained-muscle execution"
-                )
-            if self.diagnostic_policy is None:
-                raise ValueError(
-                    "native contact declaration requires an explicit typed diagnostic policy"
-                )
-        if (
-            self.allow_unqualified_passive_diagnostic
-            and self.passive_policy is not None
-        ):
-            raise ValueError(
-                "diagnostic disposition requires unavailable passive policy"
-            )
-        if self.mixed_actuation is not None:
-            if not isinstance(self.mixed_actuation, MixedActuationProfile):
-                raise TypeError("mixed Moco requires a typed actuation profile")
-            if dict(self.bindings.control_bounds) != {
-                channel.path: channel.control_bounds
-                for channel in self.mixed_actuation.channels
-            }:
-                raise ValueError("mixed Moco control bounds differ from profile")
-        for name in ("model_sha256", "trc_sha256", "states_guess_sha256"):
-            value = getattr(self, name)
-            if len(value) != 64 or any(
-                char not in "0123456789abcdef" for char in value
-            ):
-                raise ValueError(f"{name} must be a lowercase SHA-256")
-        if not self.reference_frame_path.startswith("/"):
-            raise ValueError("Native reference frame path must be absolute")
+        _validate_request_policies(self)
+        _validate_request_inputs(self)
         weights = dict(self.marker_weights)
         bindings = dict(self.marker_bindings)
         exclusions = dict(self.excluded_markers)
-        for value in weights.values():
-            if isinstance(value, bool) or not math.isfinite(value) or value <= 0:
-                raise ValueError("Marker weights must be finite and positive")
-        for label, placement in bindings.items():
-            if (
-                not label
-                or len(placement) != 2
-                or not isinstance(placement[0], str)
-                or not placement[0].startswith("/")
-                or len(placement[1]) != 3
-                or not all(math.isfinite(float(value)) for value in placement[1])
-            ):
-                raise ValueError("Native marker placement requires frame and 3D offset")
-        if any(not reason.strip() for reason in exclusions.values()):
-            raise ValueError("Excluded marker reasons must be explicit")
-        if set(exclusions) & set(weights):
-            raise ValueError("A selected marker cannot also be excluded")
-        if self.constrained_cold_start is not None:
-            declared = self.constrained_cold_start
-            if (
-                declared.model_path != self.model_path.resolve()
-                or declared.source_sha256 != self.model_sha256
-                or dict(declared.named_state) != dict(self.bindings.initial_state)
-                or declared.time_seconds != self.config.t_start_s
-                or declared.constant_commands
-                or declared.source_controller_replacement is not None
-                or declared.allow_source_controllers_for_observation
-            ):
-                raise ValueError(
-                    "constrained cold start differs from Moco source or state"
-                )
         object.__setattr__(self, "marker_weights", MappingProxyType(weights))
         object.__setattr__(self, "marker_bindings", MappingProxyType(bindings))
         object.__setattr__(self, "excluded_markers", MappingProxyType(exclusions))
@@ -632,7 +643,9 @@ def _parse_native_mechanics_profile(
     return profile
 
 
-def _parse_native_contact_declaration(data: Any) -> Any:
+def _parse_native_contact_declaration(
+    data: Any,
+) -> NativeContactExecutionDeclaration | None:
     if data is None:
         return None
     from .native_contact_policy import (

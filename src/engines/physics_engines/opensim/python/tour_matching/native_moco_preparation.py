@@ -383,6 +383,34 @@ def _probe_native_state_if_eligible(
         return None, True, None, None, None
 
 
+def _audit_native_state_bindings(
+    model: Any, state: Any, request: NativeMocoRequest, blockers: list[str]
+) -> str:
+    """Check reconstructible discrete state and complete native bindings."""
+    discrete_names = model.getDiscreteVariableNames()
+    for index in range(discrete_names.getSize()):
+        name = str(discrete_names.get(index))
+        if not name.endswith("/override_actuation"):
+            blockers.append("native-discrete-state-unreconstructible")
+            continue
+        value = float(model.getDiscreteVariableValue(state, name))
+        if not math.isfinite(value) or value != 0.0:
+            blockers.append("native-discrete-state-unreconstructible")
+    loaded = hashlib.sha256(model.dump().encode()).hexdigest()
+    names = model.getStateVariableNames()
+    native_states = {str(names.get(i)) for i in range(names.getSize())}
+    if set(request.bindings.state_bounds) != native_states:
+        blockers.append("native-state-binding-coverage")
+    actuators = model.getActuators()
+    native_controls = {
+        str(actuators.get(i).getAbsolutePathString())
+        for i in range(actuators.getSize())
+    }
+    if set(request.bindings.control_bounds) != native_controls:
+        blockers.append("native-control-binding-coverage")
+    return loaded
+
+
 def _native_preparation(
     request: NativeMocoRequest,
     *,
@@ -427,27 +455,7 @@ def _native_preparation(
     except (ValueError, RuntimeError):
         blockers.append("complete-native-state-unavailable")
         return loaded, None, None, blockers, runtime_sha, None, False, None, None, None
-    discrete_names = model.getDiscreteVariableNames()
-    for index in range(discrete_names.getSize()):
-        name = str(discrete_names.get(index))
-        if not name.endswith("/override_actuation"):
-            blockers.append("native-discrete-state-unreconstructible")
-            continue
-        value = float(model.getDiscreteVariableValue(state, name))
-        if not math.isfinite(value) or value != 0.0:
-            blockers.append("native-discrete-state-unreconstructible")
-    loaded = hashlib.sha256(model.dump().encode()).hexdigest()
-    names = model.getStateVariableNames()
-    native_states = {str(names.get(i)) for i in range(names.getSize())}
-    if set(request.bindings.state_bounds) != native_states:
-        blockers.append("native-state-binding-coverage")
-    native_actuators = model.getActuators()
-    native_controls = {
-        str(native_actuators.get(i).getAbsolutePathString())
-        for i in range(native_actuators.getSize())
-    }
-    if set(request.bindings.control_bounds) != native_controls:
-        blockers.append("native-control-binding-coverage")
+    loaded = _audit_native_state_bindings(model, state, request, blockers)
 
     passive_sha, passive_blockers = _audit_native_passive(
         model, state, request.passive_policy, request.mixed_actuation, declared

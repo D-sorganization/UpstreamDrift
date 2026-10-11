@@ -68,3 +68,32 @@ failure and a real branch conflict. Those are not corrected by #12211 and
 must be reconciled separately before treating its ancestry as accepted.
 This branch must not be presented as a replacement for the original 557
 source's failed physical-body audit or as completed full-swing matching.
+
+## Provider Source Revalidation (2026-10-10)
+
+The Tools provider source was narrowed for an explicit tuple type annotation in
+`triangle_lamina.py`; the prior source commit remains preserved in Tools
+history. The updated provider commit is
+`920e6fd633e796cf311cfd16f294fd45f5ad8cb1`, with kernel SHA-256
+`3fd45937bed011c90b4d4e3fdf8bcf932a8bfd9a0816441ee708cc93cd4080ee`.
+The inertia representation dependency is unchanged at SHA-256
+`60a45fe471c2e1cbfb2ae80d9a6b3760b62b07f0fd5327a4d5e652a49f467e10`.
+
+Against that exact Tools checkout, the OpenSim 4.6 focused suite passed all
+nine tests. A new native derivation used the reviewed source and mesh inputs,
+producing the same candidate model SHA-256
+`5f2cdd22013c2700f95d625a4c42eb488ed6c5267721cd0d2acde38544754326`.
+Its 40-body physical audit and three-pose native comparison passed with zero
+maximum transform and constraint-error difference. The source model remains
+physically rejected for the same four bilateral clavicle/scapula bodies. The
+new immutable receipt is
+`docs/development/feedback_controls_planning/generic_shoulder_lamina_12211_v5/candidate-receipt.json`
+in the fleet workspace, SHA-256
+`74b205b34f81df5ee2f476a9aa44f7e3d1e15493e1ed67a9c55f6eefbf41554a`.
+The earlier v4 receipt remains unchanged as the historical source-hash record.
+
+This revalidation used the external development Tools root because Tools #5503
+has not yet merged; the consumer gitlink therefore remains unchanged. Repeat
+the native suite and receipt derivation against the merged Tools pin before
+arming or merging the consumer PR. All scientific limitations and open gates
+above remain in force.

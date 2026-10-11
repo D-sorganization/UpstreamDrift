@@ -75,3 +75,10 @@ docs/development/full_body_models/evidence/foot_progression/drake_parity_12039/b
 docs/development/full_body_models/evidence/ground_support/anthro_driver_drake/full_body_spec_hipcal.json
 docs/development/full_body_models/evidence/ground_support/anthro_driver_drake/full_body_spec_hipcal_scaled.json
 docs/development/full_body_models/evidence/ground_support/anthro_driver_drake/receipt.json
+
+# Byte-bound inherited club-face provenance inputs from #12117.
+tests/fixtures/club_face/address_poses.json
+tests/fixtures/club_face/provenance.json
+src/engines/physics_engines/opensim/models/msk_club_grip_calibration.json
+manuals/upstreamdrift/calculation-registry.json
+docs/development/monolith_refactor_register.md
