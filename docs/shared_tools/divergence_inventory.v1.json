@@ -11,11 +11,11 @@
     "utils": "vendor/ud-tools/src/python/src/utils"
   },
   "totals": {
-    "identical": 400,
-    "diverged": 273,
-    "ud-only": 1776,
+    "identical": 398,
+    "diverged": 275,
+    "ud-only": 1777,
     "tools-only": 805,
-    "spelling-only": 121
+    "spelling-only": 123
   },
   "packages": {
     "README.md": {
@@ -509,11 +509,11 @@
       "spelling-only": 0
     },
     "model_generation": {
-      "identical": 27,
-      "diverged": 52,
+      "identical": 25,
+      "diverged": 54,
       "ud-only": 20,
       "tools-only": 1,
-      "spelling-only": 14
+      "spelling-only": 16
     },
     "motion_matching": {
       "identical": 0,
@@ -851,6 +851,13 @@
       "tools-only": 1,
       "spelling-only": 0
     },
+    "ud_import_alias_policy.py": {
+      "identical": 0,
+      "diverged": 0,
+      "ud-only": 1,
+      "tools-only": 0,
+      "spelling-only": 0
+    },
     "ui": {
       "identical": 0,
       "diverged": 0,
@@ -945,9 +952,9 @@
       "classification": "diverged",
       "package": "__init__.py",
       "subpackage": "",
-      "ud_bytes": 2296,
+      "ud_bytes": 2304,
       "tools_bytes": 1588,
-      "byte_delta": 708,
+      "byte_delta": 716,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -10953,9 +10960,9 @@
       "classification": "diverged",
       "package": "humanoid_character_builder",
       "subpackage": "",
-      "ud_bytes": 2946,
+      "ud_bytes": 2974,
       "tools_bytes": 2916,
-      "byte_delta": 30,
+      "byte_delta": 58,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -11121,9 +11128,9 @@
       "classification": "diverged",
       "package": "humanoid_character_builder",
       "subpackage": "generators",
-      "ud_bytes": 20430,
+      "ud_bytes": 20438,
       "tools_bytes": 20417,
-      "byte_delta": 13,
+      "byte_delta": 21,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -11181,9 +11188,9 @@
       "classification": "diverged",
       "package": "humanoid_character_builder",
       "subpackage": "generators",
-      "ud_bytes": 4532,
+      "ud_bytes": 4544,
       "tools_bytes": 4519,
-      "byte_delta": 13,
+      "byte_delta": 25,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -11193,9 +11200,9 @@
       "classification": "diverged",
       "package": "humanoid_character_builder",
       "subpackage": "generators",
-      "ud_bytes": 13797,
+      "ud_bytes": 13809,
       "tools_bytes": 13469,
-      "byte_delta": 328,
+      "byte_delta": 340,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -11277,9 +11284,9 @@
       "classification": "diverged",
       "package": "humanoid_character_builder",
       "subpackage": "generators",
-      "ud_bytes": 7657,
+      "ud_bytes": 7669,
       "tools_bytes": 7653,
-      "byte_delta": 4,
+      "byte_delta": 16,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": true
@@ -11289,9 +11296,9 @@
       "classification": "diverged",
       "package": "humanoid_character_builder",
       "subpackage": "generators",
-      "ud_bytes": 17451,
+      "ud_bytes": 17463,
       "tools_bytes": 17447,
-      "byte_delta": 4,
+      "byte_delta": 16,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": true
@@ -11373,9 +11380,9 @@
       "classification": "diverged",
       "package": "humanoid_character_builder",
       "subpackage": "interfaces",
-      "ud_bytes": 22312,
+      "ud_bytes": 22320,
       "tools_bytes": 22284,
-      "byte_delta": 28,
+      "byte_delta": 36,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": true
@@ -11553,9 +11560,9 @@
       "classification": "diverged",
       "package": "humanoid_character_builder",
       "subpackage": "mesh",
-      "ud_bytes": 15766,
+      "ud_bytes": 15784,
       "tools_bytes": 15676,
-      "byte_delta": 90,
+      "byte_delta": 108,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -11661,9 +11668,9 @@
       "classification": "diverged",
       "package": "humanoid_character_builder",
       "subpackage": "presets",
-      "ud_bytes": 11927,
+      "ud_bytes": 11931,
       "tools_bytes": 9060,
-      "byte_delta": 2867,
+      "byte_delta": 2871,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -13089,9 +13096,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "",
-      "ud_bytes": 3337,
+      "ud_bytes": 3345,
       "tools_bytes": 3333,
-      "byte_delta": 4,
+      "byte_delta": 12,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": true
@@ -13113,9 +13120,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "api",
-      "ud_bytes": 1539,
+      "ud_bytes": 1543,
       "tools_bytes": 1535,
-      "byte_delta": 4,
+      "byte_delta": 8,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": true
@@ -13137,9 +13144,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "api",
-      "ud_bytes": 15287,
+      "ud_bytes": 15356,
       "tools_bytes": 15081,
-      "byte_delta": 206,
+      "byte_delta": 275,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -13197,9 +13204,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "api",
-      "ud_bytes": 9160,
+      "ud_bytes": 9217,
       "tools_bytes": 8854,
-      "byte_delta": 306,
+      "byte_delta": 363,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -13257,9 +13264,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "builders",
-      "ud_bytes": 9372,
+      "ud_bytes": 9380,
       "tools_bytes": 7312,
-      "byte_delta": 2060,
+      "byte_delta": 2068,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -13269,9 +13276,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "builders",
-      "ud_bytes": 18466,
+      "ud_bytes": 18470,
       "tools_bytes": 18450,
-      "byte_delta": 16,
+      "byte_delta": 20,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": true
@@ -13281,9 +13288,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "builders",
-      "ud_bytes": 21897,
+      "ud_bytes": 21901,
       "tools_bytes": 21887,
-      "byte_delta": 10,
+      "byte_delta": 14,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -13293,9 +13300,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "builders",
-      "ud_bytes": 26699,
+      "ud_bytes": 26703,
       "tools_bytes": 25102,
-      "byte_delta": 1597,
+      "byte_delta": 1601,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -13326,15 +13333,15 @@
     },
     {
       "path": "model_generation/cli/main.py",
-      "classification": "identical",
+      "classification": "diverged",
       "package": "model_generation",
       "subpackage": "cli",
-      "ud_bytes": 28491,
+      "ud_bytes": 28543,
       "tools_bytes": 28491,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": 52,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": false
+      "spelling_only": true
     },
     {
       "path": "model_generation/converters/__init__.py",
@@ -13377,9 +13384,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "converters",
-      "ud_bytes": 8073,
+      "ud_bytes": 8106,
       "tools_bytes": 8078,
-      "byte_delta": -5,
+      "byte_delta": 28,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -13389,9 +13396,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "converters",
-      "ud_bytes": 23452,
+      "ud_bytes": 23501,
       "tools_bytes": 21758,
-      "byte_delta": 1694,
+      "byte_delta": 1743,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -13461,9 +13468,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "converters",
-      "ud_bytes": 28850,
+      "ud_bytes": 28854,
       "tools_bytes": 28842,
-      "byte_delta": 8,
+      "byte_delta": 12,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": true
@@ -13473,9 +13480,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "converters",
-      "ud_bytes": 29632,
+      "ud_bytes": 29636,
       "tools_bytes": 22419,
-      "byte_delta": 7213,
+      "byte_delta": 7217,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -13530,15 +13537,15 @@
     },
     {
       "path": "model_generation/core/physics_validation.py",
-      "classification": "identical",
+      "classification": "diverged",
       "package": "model_generation",
       "subpackage": "core",
-      "ud_bytes": 19697,
+      "ud_bytes": 19709,
       "tools_bytes": 19697,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": 12,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": false
+      "spelling_only": true
     },
     {
       "path": "model_generation/core/types.py",
@@ -13557,9 +13564,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "core",
-      "ud_bytes": 16171,
+      "ud_bytes": 16179,
       "tools_bytes": 16150,
-      "byte_delta": 21,
+      "byte_delta": 29,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -13617,9 +13624,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "editor",
-      "ud_bytes": 6322,
+      "ud_bytes": 6326,
       "tools_bytes": 6095,
-      "byte_delta": 227,
+      "byte_delta": 231,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -13629,9 +13636,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "editor",
-      "ud_bytes": 24993,
+      "ud_bytes": 25013,
       "tools_bytes": 22376,
-      "byte_delta": 2617,
+      "byte_delta": 2637,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -13653,9 +13660,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "editor",
-      "ud_bytes": 22074,
+      "ud_bytes": 22078,
       "tools_bytes": 21744,
-      "byte_delta": 330,
+      "byte_delta": 334,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -13713,9 +13720,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "explorer",
-      "ud_bytes": 782,
+      "ud_bytes": 790,
       "tools_bytes": 817,
-      "byte_delta": -35,
+      "byte_delta": -27,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -13809,9 +13816,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "inertia",
-      "ud_bytes": 15098,
+      "ud_bytes": 15118,
       "tools_bytes": 20962,
-      "byte_delta": -5864,
+      "byte_delta": -5844,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -13833,7 +13840,7 @@
       "classification": "ud-only",
       "package": "model_generation",
       "subpackage": "inertia",
-      "ud_bytes": 5235,
+      "ud_bytes": 5243,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -14049,9 +14056,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "library",
-      "ud_bytes": 30932,
+      "ud_bytes": 30936,
       "tools_bytes": 30690,
-      "byte_delta": 242,
+      "byte_delta": 246,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -38717,6 +38724,18 @@
       "spelling_only": false
     },
     {
+      "path": "ud_import_alias_policy.py",
+      "classification": "ud-only",
+      "package": "ud_import_alias_policy.py",
+      "subpackage": "",
+      "ud_bytes": 4111,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "ui/__init__.py",
       "classification": "tools-only",
       "package": "ui",
@@ -39969,9 +39988,9 @@
     {
       "path": "__init__.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-09-26",
-        "commit": "d8371dbf7b064710a56bc6e3a54f342942a44425"
+        "author": "fleet-orchestrator",
+        "date": "2026-10-10",
+        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -41387,8 +41406,8 @@
       "path": "contracts.py",
       "ud": {
         "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
+        "date": "2026-10-10",
+        "commit": "99a6fd48a2d12049ae3d36b6ace86d9a168e9cb5"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -41451,9 +41470,9 @@
     {
       "path": "humanoid_character_builder/__init__.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-09-26",
-        "commit": "c45ad7a38939bec68b81f2af6eb0e7083dd28f9a"
+        "author": "fleet-orchestrator",
+        "date": "2026-10-10",
+        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -41542,9 +41561,9 @@
     {
       "path": "humanoid_character_builder/generators/_makehuman_generator.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
+        "author": "fleet-orchestrator",
+        "date": "2026-10-10",
+        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -41568,9 +41587,9 @@
     {
       "path": "humanoid_character_builder/generators/_primitive_generator.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
+        "author": "fleet-orchestrator",
+        "date": "2026-10-10",
+        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -41581,9 +41600,9 @@
     {
       "path": "humanoid_character_builder/generators/_smplx_generator.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-09",
-        "commit": "6e743d9c9e12961ce7c407e0ef78bbecd5e2ca88"
+        "author": "fleet-orchestrator",
+        "date": "2026-10-10",
+        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -41607,9 +41626,9 @@
     {
       "path": "humanoid_character_builder/generators/mesh_generator_primitive.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
+        "author": "fleet-orchestrator",
+        "date": "2026-10-10",
+        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -41620,9 +41639,9 @@
     {
       "path": "humanoid_character_builder/generators/mesh_generator_smplx.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
+        "author": "fleet-orchestrator",
+        "date": "2026-10-10",
+        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -41659,9 +41678,9 @@
     {
       "path": "humanoid_character_builder/interfaces/api.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
+        "author": "fleet-orchestrator",
+        "date": "2026-10-10",
+        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -41712,8 +41731,8 @@
       "path": "humanoid_character_builder/mesh/primitive_inertia.py",
       "ud": {
         "author": "Dieter Olson",
-        "date": "2026-08-03",
-        "commit": "78bbb85531045057fb34b72bd13c54a193b45e29"
+        "date": "2026-10-10",
+        "commit": "01ba652eb63caf380bf52e222e07e7cd8461f063"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -41737,9 +41756,9 @@
     {
       "path": "humanoid_character_builder/presets/loader.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-10-07",
-        "commit": "5b607519924a610ff6588749084c928e7051701e"
+        "author": "fleet-orchestrator",
+        "date": "2026-10-10",
+        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -41790,8 +41809,8 @@
       "path": "import_aliases.py",
       "ud": {
         "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
+        "date": "2026-10-10",
+        "commit": "76c2dcc23c5a072fef9f249d11530685d6c3d3be"
       },
       "tools": {
         "author": "d-sorgclaudeagent[bot]",
@@ -41815,9 +41834,9 @@
     {
       "path": "model_generation/_convenience.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
+        "author": "fleet-orchestrator",
+        "date": "2026-10-10",
+        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -41841,9 +41860,9 @@
     {
       "path": "model_generation/api/__init__.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
+        "author": "fleet-orchestrator",
+        "date": "2026-10-10",
+        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -41867,9 +41886,9 @@
     {
       "path": "model_generation/api/rest_api_assets.py",
       "ud": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-09-07",
-        "commit": "1a45c4ad4009e8efffa09956d230d725be55c965"
+        "author": "fleet-orchestrator",
+        "date": "2026-10-10",
+        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -41919,9 +41938,9 @@
     {
       "path": "model_generation/api/rest_api_generation.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-09-21",
-        "commit": "a94c2ed3df4b4016ee7a8d1ce48f430b8b1b785d"
+        "author": "fleet-orchestrator",
+        "date": "2026-10-10",
+        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -41958,9 +41977,9 @@
     {
       "path": "model_generation/builders/base_builder.py",
       "ud": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-09-06",
-        "commit": "feb4902c94567652afb9d7d35c0dcd85edc969a6"
+        "author": "fleet-orchestrator",
+        "date": "2026-10-10",
+        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -41971,9 +41990,9 @@
     {
       "path": "model_generation/builders/manual_builder.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
+        "author": "fleet-orchestrator",
+        "date": "2026-10-10",
+        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -41984,9 +42003,9 @@
     {
       "path": "model_generation/builders/parametric_builder.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
+        "author": "fleet-orchestrator",
+        "date": "2026-10-10",
+        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -41997,9 +42016,9 @@
     {
       "path": "model_generation/builders/urdf_writer.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-09-19",
-        "commit": "2ad5bc7aabdfe0a7251a270a3d4df021e95f5269"
+        "author": "fleet-orchestrator",
+        "date": "2026-10-10",
+        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -42021,6 +42040,19 @@
       }
     },
     {
+      "path": "model_generation/cli/main.py",
+      "ud": {
+        "author": "fleet-orchestrator",
+        "date": "2026-10-10",
+        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-08-20",
+        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
+      }
+    },
+    {
       "path": "model_generation/converters/__init__.py",
       "ud": {
         "author": "Dieter Olson",
@@ -42036,9 +42068,9 @@
     {
       "path": "model_generation/converters/format_utils.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
+        "author": "fleet-orchestrator",
+        "date": "2026-10-10",
+        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -42049,9 +42081,9 @@
     {
       "path": "model_generation/converters/mjcf_converter.py",
       "ud": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-09-07",
-        "commit": "d91f660c4ccd5b1c86e2bf367697985ef2704b10"
+        "author": "fleet-orchestrator",
+        "date": "2026-10-10",
+        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -42088,9 +42120,9 @@
     {
       "path": "model_generation/converters/simscape/simscape_converter.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
+        "author": "fleet-orchestrator",
+        "date": "2026-10-10",
+        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -42101,9 +42133,9 @@
     {
       "path": "model_generation/converters/urdf_parser.py",
       "ud": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-09-07",
-        "commit": "711afe5d0696d8ab34f73a68ad9d85080d8c3432"
+        "author": "fleet-orchestrator",
+        "date": "2026-10-10",
+        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -42138,6 +42170,19 @@
       }
     },
     {
+      "path": "model_generation/core/physics_validation.py",
+      "ud": {
+        "author": "fleet-orchestrator",
+        "date": "2026-10-10",
+        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-26",
+        "commit": "3678409fc51024150ab28970b72e3b468935f345"
+      }
+    },
+    {
       "path": "model_generation/core/types.py",
       "ud": {
         "author": "d-sorgclaudeagent[bot]",
@@ -42153,9 +42198,9 @@
     {
       "path": "model_generation/core/validation.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
+        "author": "fleet-orchestrator",
+        "date": "2026-10-10",
+        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -42179,9 +42224,9 @@
     {
       "path": "model_generation/editor/editor_clipboard.py",
       "ud": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-09-06",
-        "commit": "feb4902c94567652afb9d7d35c0dcd85edc969a6"
+        "author": "fleet-orchestrator",
+        "date": "2026-10-10",
+        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -42192,9 +42237,9 @@
     {
       "path": "model_generation/editor/editor_modifications.py",
       "ud": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-09-07",
-        "commit": "90a921c70e117bdc9671a171e6c669ec2a532d2c"
+        "author": "fleet-orchestrator",
+        "date": "2026-10-10",
+        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -42218,9 +42263,9 @@
     {
       "path": "model_generation/editor/frankenstein_editor.py",
       "ud": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-09-07",
-        "commit": "d2e4e3e608045a66232b2a859b915c568fd8b14a"
+        "author": "fleet-orchestrator",
+        "date": "2026-10-10",
+        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -42244,9 +42289,9 @@
     {
       "path": "model_generation/explorer/__init__.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
+        "author": "fleet-orchestrator",
+        "date": "2026-10-10",
+        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -42309,9 +42354,9 @@
     {
       "path": "model_generation/inertia/calculator.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-09-27",
-        "commit": "ca0e305f7e181e7e10b95c9915b45f4e65ef4afd"
+        "author": "fleet-orchestrator",
+        "date": "2026-10-10",
+        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -42387,9 +42432,9 @@
     {
       "path": "model_generation/library/model_library.py",
       "ud": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-09-07",
-        "commit": "c9a9c7446b0f2d9cf0ec20ab94f298b41a9610f5"
+        "author": "fleet-orchestrator",
+        "date": "2026-10-10",
+        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
       },
       "tools": {
         "author": "Dieter Olson",
