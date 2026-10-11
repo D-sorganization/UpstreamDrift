@@ -1,0 +1,319 @@
+{
+  "artifacts": [
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\drake_v1_candidate_lift_geometry_root_attempt1\\drake_candidate_root_attempt1.log",
+      "sha256": "788116d1bce87308f043683c9c88c22b2c34d05dd8e25d8bc5f616f79f0072e9",
+      "source_sha256": "788116d1bce87308f043683c9c88c22b2c34d05dd8e25d8bc5f616f79f0072e9",
+      "path": "drake/geometry/attempt1.log"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\drake_v1_candidate_lift_geometry_root_attempt1\\drake_candidate_root_attempt1.meta.txt",
+      "sha256": "635c44ad912db0c9e9a82e23f1de756b711d915545232e994781c8ee5d5885ba",
+      "source_sha256": "635c44ad912db0c9e9a82e23f1de756b711d915545232e994781c8ee5d5885ba",
+      "path": "drake/geometry/attempt1.meta.txt"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\drake_v1_candidate_lift_geometry_root_attempt2\\drake_candidate_root_attempt2.meta.txt",
+      "sha256": "977391d8b5ab00da1bd3cb0906dad8ccba9df32ee82e2015df8195d1b3c7b0ee",
+      "source_sha256": "977391d8b5ab00da1bd3cb0906dad8ccba9df32ee82e2015df8195d1b3c7b0ee",
+      "path": "drake/geometry/attempt2.meta.txt"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\drake_v1_candidate_lift_geometry_root_attempt2\\drake_candidate_root_attempt2.json",
+      "sha256": "7bef055e4e2b452652144ded97dfd6acac68db68601e0adf63c5b19c86f6afa4",
+      "source_sha256": "7bef055e4e2b452652144ded97dfd6acac68db68601e0adf63c5b19c86f6afa4",
+      "path": "drake/geometry/attempt2.receipt.json"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\drake_v1_candidate_lift_geometry_20261012.pre-origin-guard-fix.snapshot.py",
+      "sha256": "64957b49499d222fb5a55acc0d38516807ba60ade0973fdd094c9fb5a1a41f7c",
+      "source_sha256": "64957b49499d222fb5a55acc0d38516807ba60ade0973fdd094c9fb5a1a41f7c",
+      "path": "drake/geometry/drake_v1_candidate_lift_geometry_20261012.pre-origin-guard-fix.snapshot.py.snapshot"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\drake_v1_candidate_lift_geometry_20261012.py",
+      "sha256": "a8ed9212f6f709a1ec21d63cbe6757eeef34a144537b7fbe3b0cdccb6106b870",
+      "source_sha256": "a8ed9212f6f709a1ec21d63cbe6757eeef34a144537b7fbe3b0cdccb6106b870",
+      "path": "drake/geometry/drake_v1_candidate_lift_geometry_20261012.py.snapshot"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\test_drake_v1_candidate_lift_geometry_20261012.py",
+      "sha256": "4868c79988236876fbcf4cdb6c43b1586e797f42410832936ca3a4188bd47817",
+      "source_sha256": "4868c79988236876fbcf4cdb6c43b1586e797f42410832936ca3a4188bd47817",
+      "path": "drake/geometry/test_drake_v1_candidate_lift_geometry_20261012.py.snapshot"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\mujoco_v1_two_interval_pd_20261011_root_attempt1\\code_snapshot\\run_supervised_mujoco_v1_candidate_lift_geometry_20261012.py",
+      "sha256": "8f46efed80c0c243502219461a18f34be7fff9dfa34c7fdba61daca9a3c823d7",
+      "source_sha256": "8f46efed80c0c243502219461a18f34be7fff9dfa34c7fdba61daca9a3c823d7",
+      "path": "mujoco/code_snapshot/geometry/run_supervised_mujoco_v1_candidate_lift_geometry_20261012.py.snapshot"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\mujoco_v1_zoh_history_refinement_20261011_root_attempt1\\code_snapshot\\mujoco_v1_zoh_history_refinement.py",
+      "sha256": "e466e386158b2955a239f5be4bbfc1e55b96fac531c1591135577400a82e2bfd",
+      "source_sha256": "e466e386158b2955a239f5be4bbfc1e55b96fac531c1591135577400a82e2bfd",
+      "path": "mujoco/code_snapshot/refinement/mujoco_v1_zoh_history_refinement.py.snapshot"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\mujoco_v1_zoh_history_refinement_20261011_root_attempt1\\code_snapshot\\run_mujoco_v1_zoh_history_refinement_20261012.py",
+      "sha256": "cd7d6dee093f8aeeefee5656d049628194d73ca0cbd3fabd8f9c18a287d7a84b",
+      "source_sha256": "cd7d6dee093f8aeeefee5656d049628194d73ca0cbd3fabd8f9c18a287d7a84b",
+      "path": "mujoco/code_snapshot/refinement/run_mujoco_v1_zoh_history_refinement_20261012.py.snapshot"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\mujoco_v1_zoh_history_refinement_20261011_root_attempt1\\code_snapshot\\run_supervised_mujoco_v1_zoh_history_refinement_20261012.py",
+      "sha256": "2c7d658f115c001cb8a6a4ddea8231cb18075eeff79ad974e2cb5478a41e3e09",
+      "source_sha256": "2c7d658f115c001cb8a6a4ddea8231cb18075eeff79ad974e2cb5478a41e3e09",
+      "path": "mujoco/code_snapshot/refinement/run_supervised_mujoco_v1_zoh_history_refinement_20261012.py.snapshot"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\mujoco_v1_zoh_history_refinement_20261011_root_attempt1\\code_snapshot\\test_mujoco_v1_zoh_history_refinement.py",
+      "sha256": "3a7ff7d5e1a817e17e79dc07416110897c299b5c16bf8e169fe2e5dad4b718db",
+      "source_sha256": "3a7ff7d5e1a817e17e79dc07416110897c299b5c16bf8e169fe2e5dad4b718db",
+      "path": "mujoco/code_snapshot/refinement/test_mujoco_v1_zoh_history_refinement.py.snapshot"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\mujoco_v1_two_interval_pd_20261011_root_attempt1\\code_snapshot\\mujoco_candidate_lift_bootstrap.py",
+      "sha256": "7f74ebd0077cf080821e64e6d2c7f265e25a86864eedbe79c1f10a76aab472e6",
+      "source_sha256": "7f74ebd0077cf080821e64e6d2c7f265e25a86864eedbe79c1f10a76aab472e6",
+      "path": "mujoco/code_snapshot/shared/mujoco_candidate_lift_bootstrap.py.snapshot"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\mujoco_v1_candidate_lift_geometry.py",
+      "sha256": "66b568d211c5881a0f7e8d116318e761a3b871a4e73a5d084111400123b59f7f",
+      "source_sha256": "66b568d211c5881a0f7e8d116318e761a3b871a4e73a5d084111400123b59f7f",
+      "path": "mujoco/code_snapshot/shared/mujoco_v1_candidate_lift_geometry.py.snapshot"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\mujoco_v1_two_interval_pd_20261011_root_attempt1\\code_snapshot\\mujoco_v1_two_interval_pd_smoke.py",
+      "sha256": "cb2af3f01072a030387fbe723ae5108e77f1a4ba79e27e9e1429dcf1fa451233",
+      "source_sha256": "cb2af3f01072a030387fbe723ae5108e77f1a4ba79e27e9e1429dcf1fa451233",
+      "path": "mujoco/code_snapshot/shared/mujoco_v1_two_interval_pd_smoke.py.snapshot"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\mujoco_v1_zero_effort_acceleration.py",
+      "sha256": "28d8f114bd58d91b5caa6243784ed84128f34de03820f9c9720ee7ad4e6d61de",
+      "source_sha256": "28d8f114bd58d91b5caa6243784ed84128f34de03820f9c9720ee7ad4e6d61de",
+      "path": "mujoco/code_snapshot/shared/mujoco_v1_zero_effort_acceleration.py.snapshot"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\mujoco_v1_two_interval_pd_20261011_root_attempt1\\code_snapshot\\run_mujoco_v1_two_interval_pd_smoke_20261012.py",
+      "sha256": "f1d4b034014fd1b45554478a45995ed4675877d84b5143f51ace407b1e427126",
+      "source_sha256": "f1d4b034014fd1b45554478a45995ed4675877d84b5143f51ace407b1e427126",
+      "path": "mujoco/code_snapshot/shared/run_mujoco_v1_two_interval_pd_smoke_20261012.py.snapshot"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\run_mujoco_v1_zero_effort_acceleration_20261012.py",
+      "sha256": "1fc46a2c9bfcbe9236a51168ca8869cc6c0f9fcd180b505d940fb8c2392f6731",
+      "source_sha256": "1fc46a2c9bfcbe9236a51168ca8869cc6c0f9fcd180b505d940fb8c2392f6731",
+      "path": "mujoco/code_snapshot/shared/run_mujoco_v1_zero_effort_acceleration_20261012.py.snapshot"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\test_mujoco_candidate_lift_bootstrap.py",
+      "sha256": "69f9b88baa1e0d7f2f854abbb7fee303433f60d1be638c6a49d30f7c280e4869",
+      "source_sha256": "69f9b88baa1e0d7f2f854abbb7fee303433f60d1be638c6a49d30f7c280e4869",
+      "path": "mujoco/code_snapshot/shared/test_mujoco_candidate_lift_bootstrap.py.snapshot"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\test_mujoco_v1_candidate_lift_geometry.py",
+      "sha256": "314cb2ae953d2f8f4af61ddbbe17e8efa697bef84f42553b853de7804fe7c9c4",
+      "source_sha256": "314cb2ae953d2f8f4af61ddbbe17e8efa697bef84f42553b853de7804fe7c9c4",
+      "path": "mujoco/code_snapshot/shared/test_mujoco_v1_candidate_lift_geometry.py.snapshot"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\mujoco_v1_two_interval_pd_20261011_root_attempt1\\code_snapshot\\test_mujoco_v1_two_interval_pd_smoke.py",
+      "sha256": "3235aa50b002288b12af2616b815d1898efe48a5c2de7c97e5dc069c048091ee",
+      "source_sha256": "3235aa50b002288b12af2616b815d1898efe48a5c2de7c97e5dc069c048091ee",
+      "path": "mujoco/code_snapshot/shared/test_mujoco_v1_two_interval_pd_smoke.py.snapshot"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\test_mujoco_v1_zero_effort_acceleration.py",
+      "sha256": "4580d12c211d51bcab9647acac8346922933e46000ba8b8dcde7937f82bbd10a",
+      "source_sha256": "4580d12c211d51bcab9647acac8346922933e46000ba8b8dcde7937f82bbd10a",
+      "path": "mujoco/code_snapshot/shared/test_mujoco_v1_zero_effort_acceleration.py.snapshot"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\mujoco_v1_zoh_history_refinement_20261011_root_attempt1\\frozen-t01-bundle.json",
+      "sha256": "e4a93dce80da2539b07f3a6c5f8f664389d77a55491e2b1f35002ca8782180a4",
+      "source_sha256": "e4a93dce80da2539b07f3a6c5f8f664389d77a55491e2b1f35002ca8782180a4",
+      "path": "mujoco/feedback_10ms_refinement/frozen-t01-bundle.json"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\mujoco_v1_zoh_history_refinement_20261011_root_attempt1\\native-observation.json",
+      "sha256": "6f8a369f2721a1ac3307a9b7172c7c2ead643f8f2e871e6289bc704c3d0d8acb",
+      "source_sha256": "6f8a369f2721a1ac3307a9b7172c7c2ead643f8f2e871e6289bc704c3d0d8acb",
+      "path": "mujoco/feedback_10ms_refinement/native-observation.json"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\mujoco_v1_zoh_history_refinement_20261011_root_attempt1\\supervisor-receipt.json",
+      "sha256": "b5834c4d496184376862cdd5cb03622213eb63402e1e99c7044d56dcb7cf51ab",
+      "source_sha256": "b5834c4d496184376862cdd5cb03622213eb63402e1e99c7044d56dcb7cf51ab",
+      "path": "mujoco/feedback_10ms_refinement/supervisor-receipt.json"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\mujoco_v1_two_interval_pd_20261011_root_attempt1\\frozen-t01-bundle.json",
+      "sha256": "78a22f238c9e260871c7ca2d83102a80b866124ce773155e41871529c1559cdd",
+      "source_sha256": "78a22f238c9e260871c7ca2d83102a80b866124ce773155e41871529c1559cdd",
+      "path": "mujoco/feedback_20us/frozen-t01-bundle.json"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\mujoco_v1_two_interval_pd_20261011_root_attempt1\\native-observation.json",
+      "sha256": "425f0b6bcca08ae0008d338e9f9f1b4da3ac83255ea37d72edcf2038eb51b1e4",
+      "source_sha256": "425f0b6bcca08ae0008d338e9f9f1b4da3ac83255ea37d72edcf2038eb51b1e4",
+      "path": "mujoco/feedback_20us/native-observation.json"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\mujoco_v1_two_interval_pd_20261011_root_attempt1\\supervisor-receipt.json",
+      "sha256": "b1f512b571f7de0c96d9bdae256aeac3e91444e96e5f1aa7391c6da10714ca54",
+      "source_sha256": "b1f512b571f7de0c96d9bdae256aeac3e91444e96e5f1aa7391c6da10714ca54",
+      "path": "mujoco/feedback_20us/supervisor-receipt.json"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\mujoco_v1_candidate_lift_20261011_root_attempt1\\supervisor-receipt.json",
+      "sha256": "af3f75d904a784ca0ffb0b482bd0de9e2efd3d9219a34d01d29caa6fdd07eb0e",
+      "source_sha256": "af3f75d904a784ca0ffb0b482bd0de9e2efd3d9219a34d01d29caa6fdd07eb0e",
+      "path": "mujoco/geometry/attempt1/supervisor-receipt.json"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\mujoco_v1_candidate_lift_20261011_root_attempt2\\native-observation.json",
+      "sha256": "9986c0791134234f3d3b4e19b2784b48d3758965f1f5fbac23261211f5922ac3",
+      "source_sha256": "9986c0791134234f3d3b4e19b2784b48d3758965f1f5fbac23261211f5922ac3",
+      "path": "mujoco/geometry/attempt2/native-observation.json"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\mujoco_v1_candidate_lift_20261011_root_attempt2\\supervisor-receipt.json",
+      "sha256": "53b33231dbf5757ee56153e602544560e9f045bc2c0b5713665fe37ee3431482",
+      "source_sha256": "53b33231dbf5757ee56153e602544560e9f045bc2c0b5713665fe37ee3431482",
+      "path": "mujoco/geometry/attempt2/supervisor-receipt.json"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\mujoco_v1_zero_effort_20261011_root_attempt1\\supervisor-receipt.json",
+      "sha256": "4bd63d9715b318b153fe50b7a6754e8fdf8a520386ccbe2c3c3b34766bb3a692",
+      "source_sha256": "4bd63d9715b318b153fe50b7a6754e8fdf8a520386ccbe2c3c3b34766bb3a692",
+      "path": "mujoco/zero_effort/attempt1/supervisor-receipt.json"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\mujoco_v1_zero_effort_20261011_root_attempt2\\native-observation.json",
+      "sha256": "70d5ed01ee63bef2c161745d7ca0f7e955af8249c9e7529ea20ebc6e2258a49a",
+      "source_sha256": "70d5ed01ee63bef2c161745d7ca0f7e955af8249c9e7529ea20ebc6e2258a49a",
+      "path": "mujoco/zero_effort/attempt2/native-observation.json"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\mujoco_v1_zero_effort_20261011_root_attempt2\\supervisor-receipt.json",
+      "sha256": "e6c11bfc34e864ff07f4d204f6479d44a9ccc8453c6513b2b972e78d90539bed",
+      "source_sha256": "e6c11bfc34e864ff07f4d204f6479d44a9ccc8453c6513b2b972e78d90539bed",
+      "path": "mujoco/zero_effort/attempt2/supervisor-receipt.json"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\opensim_activation_property_probe_20261011\\PROTOCOL.md",
+      "sha256": "953c2085ffb0571c661d7e909e216a849aec8496e74e82f6b4f677bb76315a97",
+      "source_sha256": "953c2085ffb0571c661d7e909e216a849aec8496e74e82f6b4f677bb76315a97",
+      "path": "opensim/PROTOCOL.md"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\opensim_activation_property_probe_20261011\\fingerprints.json",
+      "sha256": "b30491c5b27c1bce80c54a4ed7f7f4bf4b1c765028bd92471afe964ca281b8d3",
+      "source_sha256": "b30491c5b27c1bce80c54a4ed7f7f4bf4b1c765028bd92471afe964ca281b8d3",
+      "path": "opensim/fingerprints.json"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\opensim_activation_property_probe_20261011\\runs\\activation_properties_6a098517_reviewed_run\\native-observations.json",
+      "sha256": "bd4fa75f6421714fb8547711edc7e106e3e520ff6a803adc132afe375a8b91b4",
+      "source_sha256": "bd4fa75f6421714fb8547711edc7e106e3e520ff6a803adc132afe375a8b91b4",
+      "path": "opensim/native-observations.json"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\opensim_activation_property_probe_20261011\\probe_activation_properties.py",
+      "sha256": "a1362b3a75a3a8d04096504a332612ef2e857f77eb58a0360765e5c890d8c1c3",
+      "source_sha256": "a1362b3a75a3a8d04096504a332612ef2e857f77eb58a0360765e5c890d8c1c3",
+      "path": "opensim/probe_activation_properties.py.snapshot"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\opensim_activation_property_probe_20261011\\run_supervised_probe.py",
+      "sha256": "51aca655699dd532f2a548ea8c74e3bf285a3971c26d989223247d2b9e61ebf3",
+      "source_sha256": "51aca655699dd532f2a548ea8c74e3bf285a3971c26d989223247d2b9e61ebf3",
+      "path": "opensim/run_supervised_probe.py.snapshot"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\opensim_activation_property_probe_20261011\\runs\\activation_properties_6a098517_reviewed_run\\supervisor-receipt.json",
+      "sha256": "f13dd2d93e440be3734e64cc9b2d456476d645644e58f7e4a78a61c57a8a5417",
+      "source_sha256": "f13dd2d93e440be3734e64cc9b2d456476d645644e58f7e4a78a61c57a8a5417",
+      "path": "opensim/supervisor-receipt.json"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\opensim_activation_property_probe_20261011\\test_probe_activation_properties.py",
+      "sha256": "29e62b47487e68db9027f0b611bdd20730adec2b1daa1aeda90c84ec93a3fc2b",
+      "source_sha256": "29e62b47487e68db9027f0b611bdd20730adec2b1daa1aeda90c84ec93a3fc2b",
+      "path": "opensim/test_probe_activation_properties.py.snapshot"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\pinocchio_v1_candidate_lift_acceleration_20261012.py",
+      "sha256": "ceae97c200ef3afce73d802c8b43c1ee19a4ab06a75dbb7f659d35c23b195a11",
+      "source_sha256": "ceae97c200ef3afce73d802c8b43c1ee19a4ab06a75dbb7f659d35c23b195a11",
+      "path": "pinocchio/acceleration/pinocchio_v1_candidate_lift_acceleration_20261012.py.snapshot"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\pinocchio_v1_candidate_lift_acceleration_root_attempt1\\pin_acceleration_root_attempt1.json",
+      "sha256": "7bf8d34656683d0e6624eea6d34ba6ac0ce37e5ec868f9ecb3e385915be62e0f",
+      "source_sha256": "7bf8d34656683d0e6624eea6d34ba6ac0ce37e5ec868f9ecb3e385915be62e0f",
+      "path": "pinocchio/acceleration/receipt.json"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\test_pinocchio_v1_candidate_lift_acceleration_20261012.py",
+      "sha256": "36230afec47ee8c8164073b2f50a884e662ce1dec8490b7086907b6f5d34c293",
+      "source_sha256": "36230afec47ee8c8164073b2f50a884e662ce1dec8490b7086907b6f5d34c293",
+      "path": "pinocchio/acceleration/test_pinocchio_v1_candidate_lift_acceleration_20261012.py.snapshot"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\pinocchio_fullbody_source_assembly_20261012.py",
+      "sha256": "2d619a9540920cf7093af61a1cbc8cdf865b0ca7cc56c968c631e2f879c78cb3",
+      "source_sha256": "2d619a9540920cf7093af61a1cbc8cdf865b0ca7cc56c968c631e2f879c78cb3",
+      "path": "pinocchio/geometry/pinocchio_fullbody_source_assembly_20261012.py.snapshot"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\pinocchio_v1_candidate_lift_parity_20261012.py",
+      "sha256": "40c521457a251cf9b5c905a950a3806d9573ccf8a34e4a1a09d5e3948bedb2b1",
+      "source_sha256": "40c521457a251cf9b5c905a950a3806d9573ccf8a34e4a1a09d5e3948bedb2b1",
+      "path": "pinocchio/geometry/pinocchio_v1_candidate_lift_parity_20261012.py.snapshot"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\pinocchio_v1_candidate_lift_parity_root_attempt2\\pin_candidate_root_attempt2.json",
+      "sha256": "55ee3bad5c440f529bcf12226ab62984e031c7651b4fd1ba97d53735c097eb92",
+      "source_sha256": "55ee3bad5c440f529bcf12226ab62984e031c7651b4fd1ba97d53735c097eb92",
+      "path": "pinocchio/geometry/receipt.json"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\test_pinocchio_v1_candidate_lift_parity_20261012.py",
+      "sha256": "7709c8383f50d07539a4717e79bc514d563cd1b05ca64345fa1c940a794c5e93",
+      "source_sha256": "7709c8383f50d07539a4717e79bc514d563cd1b05ca64345fa1c940a794c5e93",
+      "path": "pinocchio/geometry/test_pinocchio_v1_candidate_lift_parity_20261012.py.snapshot"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\pinocchio_same_input_t01_root_attempt1\\pin_t01_same_input_root_attempt1.json",
+      "sha256": "0d5d149587506c06e01a684f237a965844bddcd6b73c3863c0ea69c07da4a443",
+      "source_sha256": "0d5d149587506c06e01a684f237a965844bddcd6b73c3863c0ea69c07da4a443",
+      "path": "pinocchio/same_input_t01/observation.json"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\run_pinocchio_same_input_t01_20261012.py",
+      "sha256": "0f23549db435339b039e90b2c83d0f5065f8a8eb8981543c4e068bce05e3dcd3",
+      "source_sha256": "0f23549db435339b039e90b2c83d0f5065f8a8eb8981543c4e068bce05e3dcd3",
+      "path": "pinocchio/same_input_t01/run_pinocchio_same_input_t01_20261012.py.snapshot"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\pinocchio_same_input_t01_root_attempt1\\pin_t01_same_input_root_attempt1.meta.txt",
+      "sha256": "614ba7486222635674074bb7a1cb90a6917c5c1d98af44c269b889dd90f15af5",
+      "source_sha256": "614ba7486222635674074bb7a1cb90a6917c5c1d98af44c269b889dd90f15af5",
+      "path": "pinocchio/same_input_t01/supervisor.meta.txt"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\test_run_pinocchio_same_input_t01_20261012.py",
+      "sha256": "71b90fb278f8c07875c8d7b18c221b622fe9637a53de0c62b716da38d7f5358c",
+      "source_sha256": "71b90fb278f8c07875c8d7b18c221b622fe9637a53de0c62b716da38d7f5358c",
+      "path": "pinocchio/same_input_t01/test_run_pinocchio_same_input_t01_20261012.py.snapshot"
+    }
+  ],
+  "schema": "manufactured-native-diagnostics-manifest-v1",
+  "receipt_bytes_verified": true,
+  "created_utc": "2026-10-11T10:03:00Z"
+}

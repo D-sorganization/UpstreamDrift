@@ -171,6 +171,11 @@ class DrakeAdapter(EngineAdapter):
             "reason": "pack exposes no contact-results API (Drake_Models#371)",
         }
 
+    def bar_hold_wrench(self) -> dict[str, Any]:
+        from .drake_bar_hold import bar_hold_wrench as _bar_hold_wrench
+
+        return _bar_hold_wrench(self.loaded)
+
     def smoke_step(self) -> dict[str, Any]:
         mod_plant = importlib.import_module("pydrake.multibody.plant")
         analysis = importlib.import_module("pydrake.systems.analysis")

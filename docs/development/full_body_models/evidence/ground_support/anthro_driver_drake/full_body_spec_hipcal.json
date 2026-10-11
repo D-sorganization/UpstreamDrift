@@ -3199,21 +3199,21 @@
       "child": "solid_reference:GolfSwing3D_Kinetic/Club/Clubface Vector",
       "child_to_follower": [
         [
-          -0.5343338817661774,
-          -0.7357083276751796,
-          0.4161977407267835,
+          -0.5081477570916182,
+          -0.5389020166087571,
+          0.6718411072997638,
           -0.02501411692651008
         ],
         [
-          0.30908343009591993,
-          0.28822496143962084,
-          0.9063077870366498,
+          0.8182511949624285,
+          -0.05862039888744794,
+          0.5718641716149336,
           -1.1239999999999999
         ],
         [
-          -0.7867367641319611,
-          0.6129107832242139,
-          0.07338689100003808,
+          -0.2687951616106874,
+          0.8403262850400977,
+          0.47074504327225064,
           0.05908933628725997
         ],
         [
@@ -3530,21 +3530,21 @@
       "child": "solid_reference:GolfSwing3D_Kinetic/Grip/RHandStandoff",
       "child_to_follower": [
         [
-          0.8598872403227148,
-          0.19501971017073785,
-          0.47176397337557163,
+          0.8805386396180525,
+          0.1734467360006889,
+          0.4410985535119072,
           0.0
         ],
         [
-          0.3261223507816858,
-          -0.9208415297808589,
-          -0.21376409743330366,
+          0.06392620905854039,
+          -0.96559408915801,
+          0.2520743834238559,
           0.0
         ],
         [
-          0.3927316466123055,
-          0.3376657958333494,
-          -0.8554201681474538,
+          0.4696436350414996,
+          -0.19376347631537966,
+          -0.8613306979965281,
           0.0127
         ],
         [
@@ -4349,49 +4349,49 @@
     "Marker_2:2:1": {
       "body": "Clubhead",
       "offset_m": [
-        -0.005013763277325188,
-        -0.04723804658646823,
-        -0.020422312849740262
+        0.0014236261251189483,
+        -0.07311493220309755,
+        -0.008604687430533628
       ]
     },
     "Marker_2:2:2": {
       "body": "Clubhead",
       "offset_m": [
-        0.039764746459329495,
-        0.033540927867569084,
-        -0.021534496183147525
+        0.04934388630384107,
+        -0.010268455189889931,
+        -0.05649533212282851
       ]
     },
     "Marker_2:2:3": {
       "body": "Clubhead",
       "offset_m": [
-        0.05213033572826101,
-        0.014535978774719217,
-        0.025324102391800447
+        0.0622866156510181,
+        0.000823910819803318,
+        -0.007326245237757357
       ]
     },
     "Marker_3:3:1": {
       "body": "Clubhead",
       "offset_m": [
-        -0.6889570460849377,
-        -0.07981249704439086,
-        -0.0394272179523681
+        -0.6836089803832125,
+        -0.07775938316971392,
+        -0.005741693174614749
       ]
     },
     "Marker_3:3:2": {
       "body": "Clubhead",
       "offset_m": [
-        -0.760691797691206,
-        -0.07648040771272901,
-        -0.0032467887386094605
+        -0.754133043520802,
+        -0.050610533528774065,
+        0.021684806777813963
       ]
     },
     "Marker_3:3:3": {
       "body": "Clubhead",
       "offset_m": [
-        -0.8101014861494318,
-        -0.08113826173535343,
-        -0.035081864800729966
+        -0.8044805309230546,
+        -0.07052190794175632,
+        -0.0015704053780767567
       ]
     },
     "RAnkleOut": {
@@ -4483,7 +4483,7 @@
       ]
     }
   },
-  "provenance": "anthropometric full-body candidate v1 at 1.710 m, 78.0 kg (build_anthropometric_spec.py; AN-1 #10099); upper body unqualified; marker offsets are anatomical seeds to be calibrated; left hip axes mirrored to the OpenSim convention (OSV-6 #11737); right knee axis mirrored to the OpenSim flexion-negative convention (#12057) | hip joints relocated to functional centres from the capture (radii 0.4040/0.3829 m, sphere sd 1.9/2.0 mm over 649 frames) with zero twist calibrated (R: -25.73 deg, L: 45.08 deg) | toe contact spheres added on calcanei; stiffness 5e+04 N/m",
+  "provenance": "anthropometric full-body candidate v1 at 1.710 m, 78.0 kg (build_anthropometric_spec.py; AN-1 #10099); upper body unqualified; marker offsets are anatomical seeds to be calibrated; left hip axes mirrored to the OpenSim convention (OSV-6 #11737); right knee axis mirrored to the OpenSim flexion-negative convention (#12057); club markers from driver.json (#12210); grip rotation refitted per capture from docs/development/full_body_models/evidence/anthropometry/fit_grip_rotation_receipt_driver.json (#12221) | hip joints relocated to functional centres from the capture (radii 0.4040/0.3829 m, sphere sd 1.9/2.0 mm over 649 frames) with zero twist calibrated (R: -25.73 deg, L: 45.08 deg) | toe contact spheres added on calcanei; stiffness 5e+04 N/m",
   "qualification": "full-body extension of native-derived geometry; dynamics unqualified",
   "schema_version": "full-body-v1",
   "subject": {
@@ -4492,14 +4492,14 @@
     "grip_roll_deg": 0.0,
     "grip_rotation_deg": {
       "L": [
-        -90.0,
-        47.0,
-        0.0
+        -36.864,
+        57.315,
+        70.926
       ],
       "R": [
-        -34.0,
-        46.0,
-        62.0
+        9.769,
+        52.918,
+        83.914
       ]
     },
     "hip_zero_twist_deg": {

@@ -1,0 +1,78 @@
+{
+  "status": "prepared_not_executed",
+  "source": {
+    "path": "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-controls-main-integration-12202\\docs\\development\\feedback_controls\\experiments\\native_moco_refinement_solve_cecfcd98_root_20261011T080500Z\\solution_control_replay_inputs_final\\source.osim",
+    "sha256": "6a098517bdba09b19b3eb99e4da7e795f27d10be8f42c0fca04fee20ce67e143"
+  },
+  "runtime_fingerprint_scope": "bounded fingerprint; not closed dependency-runtime identity",
+  "files": [
+    {
+      "path": "C:\\Users\\diete\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "sha256": "5341746f92483a93e44c313de830f2fba2956f0759094404a16b2fed06c9a2ed"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Scripts\\python.exe",
+      "sha256": "0b471133e110cfb53a061cad528ce8e517d7b9ac41a0a396c39ad795a487fc14"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\opensim\\simulation.py",
+      "sha256": "ac31197f5a3d31ecfc0ff97e9f5d303742e8eb0d2b526f9be0ee5f8406b668e1"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\opensim\\actuators.py",
+      "sha256": "c66d91600ed413af76668b5a41c79db0f56bcbcd446022665b6b156c36ecdcb7"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\opensim\\_simulation.pyd",
+      "sha256": "950241f649dab8a113c4bb754a080d16db4a3f5f0aa1710ed2e53d03206eb09e"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\opensim\\_actuators.pyd",
+      "sha256": "61c6d7810088ca8030eea967e9bfa71f7f7998d3c5601c5e1939367346238cc2"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\opensim\\_common.pyd",
+      "sha256": "9955fe0ad26079a9123a17af32bbd75761fa4388f2bb4cb72d2a56471d7a69c1"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\opensim\\_moco.pyd",
+      "sha256": "8309ab612033c5f68056b32384d154d026eb201e5c910e8ae68f7cf66b463664"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\opensim\\osimSimulation.dll",
+      "sha256": "76a890959d13a392f2575ae13509b7c29c8bd3edb307f92ebd37ddc12e842d68"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\opensim\\osimActuators.dll",
+      "sha256": "5532cb7c5e95ad0f4067e0ae3038b943b777d3f96121b96ba535af072c6cc5ac"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\opensim\\osimMoco.dll",
+      "sha256": "c8553d8ee1c71ff3df9c4e3485e3dd2916ade712b2c28c28be6bf45f2b2a60ca"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\opensim\\version.py",
+      "sha256": "0c2487db13a6b15aeb0e15c4c7e25bc840bd3605425f7e646f8d818c12a77850"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\.venv-feedback-opensim\\Lib\\site-packages\\opensim\\__init__.py",
+      "sha256": "a0715593991a4268e4185f894dde2c32a25a03d50d71ef50f68f1a8ec647d375"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\opensim_activation_property_probe_20261011\\probe_activation_properties.py",
+      "sha256": "a1362b3a75a3a8d04096504a332612ef2e857f77eb58a0360765e5c890d8c1c3"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\opensim_activation_property_probe_20261011\\run_supervised_probe.py",
+      "sha256": "51aca655699dd532f2a548ea8c74e3bf285a3971c26d989223247d2b9e61ebf3"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\opensim_activation_property_probe_20261011\\test_probe_activation_properties.py",
+      "sha256": "29e62b47487e68db9027f0b611bdd20730adec2b1daa1aeda90c84ec93a3fc2b"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-controls-main-integration-12202\\tests\\opensim\\native_moco_ladder_harness.py",
+      "sha256": "8f707e636e646e82b049861035a3fa7ae5b85d8c933690690bb93c010cc4b337"
+    }
+  ]
+}

@@ -1,3 +1,26 @@
+# Active: Adopted Per-Capture Grip Rotation, #12221
+
+- Branch `claude/12221-grip-adopt`, stacked on #12270. Applies the fitted `grip_rotation_deg` to `full_body_spec_anthro_driver.json` only; calibrated driver commands now add `--fix-club-markers`. Driver receipts regenerated on ControlTower (address / IK / dynamics, mm): `anthro_driver_seeds` 11.0 / 30.3 / 82.0, `anthro_driver_drake` 11.0 / 30.3 / 86.3 (dynamics worse), `anthro_driver` 50.9 / 46.5 / 71.9. Replay is sensitive at 3 to 15 mm to tiny parameter changes (CANONICAL_RUN.md §2A).
+- Driver club-face fixture regenerated at `9fe74740a5` (impact speed -2.5 %, peak 4.4 ms early, face 16.88 / 14.96 deg; meets GCV-20 and OSV-10); #12266 no longer blocks it. The MSK driver grip calibration and both `golf_humanoid*.osim` clubs were regenerated from it (`rebuild_club`). The OpenSim bushing grip exceeds its 2 deg / 50 N full-swing bounds only in the 6 ms ball-impact window (2.62 deg, 51.3 N): strict xfail, decision on #12272.
+- 7-iron deferred: document, OpenSim export and receipts unchanged (4.0 / 28.4 / 109.9 and 41.5 / 45.2 / 104.9). Its refit passes on the tracked swing but its same-input export gives -5.0 %, -5.1 ms, 8.71 deg face, which would redden eight face tests; fit receipt stays committed for a follow-up.
+- The PR awaits the owner decision on making `--fix-club-markers` the calibrated default.
+
+# Active: Per-Capture Grip Refit on the Fixed Clusters, #12221
+
+- Branch `claude/12221-grip-refit`, stacked on #12265. Landed: refit tooling (`grip_fit.weighted_frames`, `compose_rotation_deg`, `apply_grip_rotation`, `scripts/set_spec_grip_rotation.py`), the per-capture fit receipts `fit_grip_rotation_receipt_driver.json` / `_iron7.json`, and the evidence. Documents are NOT changed.
+- Fixture flags with the cluster fixed: driver speed −1.9 %, face gap 0.56°; 7-iron −1.9 %, 0.62°; no wrist on its bound at address. The refit is invalid with the cluster free (static trial moves the capture face). Calc record: "Per-Capture Grip Rotation on the Fixed Clusters".
+- Open: owner decision on `--fix-club-markers` default; then apply with `scripts/set_spec_grip_rotation.py` and regenerate receipts; #12266 blocks the driver fixture export.
+
+# Active: 7-Iron MSK Grip Calibration, #12042
+
+- Branch `claude/12042-iron7-msk-cal` (stacked on #12247). `msk_club_grip_calibration.json` now has `iron7` entries for `golf_humanoid` (grip gaps 0.04 / 0.02 mm, landmark RMS 14.9 mm) and `golf_humanoid_scaled` (0.24 / 0.25 mm, 40.0 mm), from the existing `msk_club_calibration --club iron7` CLI. `render_msk_club.py` now draws and measures the `--club` it tracks: before, the viewer loaded `golf_humanoid.osim` with its committed driver, so a 7-iron render showed the driver.
+
+# Active: Neutral Hip Zero-Twist and the MSK Turn Render, #12042
+
+- Branch `claude/12042-turn-slices`. `hip_rotation_zero` places `hip_rotation = 0` at the measured address thigh twist, and the ±40° bound moves with it. The canonical specs carry +45/−26° (lead/trail), so the lead hip is pinned at +40° at impact. `--hip-zero-twist neutral` (opt-in; default `capture` keeps the canonical receipts) uses 0/0. Pelvis turn is then within 3.2° of the markers at top and impact on both captures, with IK 25.6/22.9 mm. FD is 51.2 mm on the driver, but 91.2 mm on the 7-iron (after impact). Evidence: `evidence/hip_zero_twist_12042/`; calc record in `hip_axis_mirroring.tex`, section "Neutral Hip Zero-Twist and the Pelvis at Impact".
+- `render_msk_club.py --capture --club --mode` tracks with the capture turn targets and planted feet (shared `msk_turn_targets.tracking_inputs`).
+- Open: owner decision on the `neutral` default (regenerates canonical receipts and fixtures); trail hip now reaches −40°; upper-trunk over-twist at the top (slice 7).
+
 # Active: Measured Driver Club Cluster, #12221
 
 - Branch `claude/12221-driver-cluster`, stacked on `claude/12221-fixed-triad`. `evidence/club_markers/driver.json` (from the calibrated `anthro_driver_seeds` receipt at `1bef553457`) is now in the driver document. `anthro_driver`, `anthro_driver_seeds` and `anthro_driver_drake`, the OpenSim driver export, the inventory hashes and the tutorial hash `4ee2c43d` are regenerated.
@@ -1248,3 +1271,7 @@ exclusions. See `F07_NATIVE_BODY_INERTIA_TURNOVER.md` for the failed run,
 provenance and validation. Full epic qualification remains open.
 Concurrent remote ledger refresh `7877625369` is retained through a normal merge;
 the generated ledger is refreshed from the restored immutable receipt bytes.
+
+## Manufactured Native Diagnostics — #12275
+
+Exact synthetic MuJoCo geometry/zero-effort, short feedback replay, OpenSim property, Pinocchio and Drake observations are retained at `docs/development/feedback_controls/experiments/manufactured_native_diagnostics_20261011/`. See its README and SHA-bound manifest. Failed attempts are preserved. No capture, equilibrium, contact calibration, physiology, production replay or 17-row/six-ecosystem qualification is implied; all production variants remain unqualified.
