@@ -709,16 +709,6 @@ def _run_one_rung(
     elapsed = time.monotonic() - started
     _write_worker_logs(directory, stdout, stderr)
     if return_code != 0:
-        failure = _read_blocked_failure(directory)
-        if failure is not None:
-            return RungResult(
-                rung.name,
-                "blocked",
-                None,
-                elapsed,
-                f"{failure['code']}: {failure['detail']}",
-                peak_tree_rss,
-            )
         return RungResult(
             rung.name,
             "worker_failed",
@@ -739,25 +729,6 @@ def _run_one_rung(
             peak_tree_rss,
         )
     return RungResult(rung.name, "passed", digest, elapsed, "", peak_tree_rss)
-
-
-def _read_blocked_failure(directory: Path) -> dict[str, str] | None:
-    path = directory / "failure.json"
-    if not path.is_file() or not (directory / "source.osim").is_file():
-        return None
-    try:
-        failure = json.loads(path.read_text(encoding="utf-8"))
-        source_sha = _sha256(directory / "source.osim")
-    except (OSError, json.JSONDecodeError):
-        return None
-    if (
-        failure.get("status") != "blocked"
-        or failure.get("source_sha256") != source_sha
-        or not isinstance(failure.get("code"), str)
-        or not isinstance(failure.get("detail"), str)
-    ):
-        return None
-    return {"code": failure["code"], "detail": failure["detail"]}
 
 
 def _write_worker_logs(directory: Path, stdout: Any, stderr: Any) -> None:

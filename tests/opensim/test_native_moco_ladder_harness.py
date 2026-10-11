@@ -19,7 +19,6 @@ from tests.opensim.native_moco_ladder_harness import (
     _validate_bounded_runtime_fingerprint,
     _validate_request_rung_binding,
     _process_stop_reason,
-    _read_blocked_failure,
     run_ladder,
 )
 
@@ -201,29 +200,6 @@ def test_ladder_rejects_success_exit_without_native_evidence(tmp_path: Path) -> 
     assert len(result) == 1
     assert result[0].status == "invalid_evidence"
     assert result[0].receipt_sha256 is None
-
-
-def test_blocked_failure_requires_exact_preserved_source_binding(
-    tmp_path: Path,
-) -> None:
-    source = tmp_path / "source.osim"
-    source.write_bytes(b"synthetic source")
-    source_sha = hashlib.sha256(source.read_bytes()).hexdigest()
-    failure_path = tmp_path / "failure.json"
-    payload = {
-        "status": "blocked",
-        "source_sha256": source_sha,
-        "code": "conditional_path_point_replay_policy_unavailable",
-        "detail": "fails closed",
-    }
-    failure_path.write_text(json.dumps(payload), encoding="utf-8")
-    assert _read_blocked_failure(tmp_path) == {
-        "code": payload["code"],
-        "detail": payload["detail"],
-    }
-    payload["source_sha256"] = "0" * 64
-    failure_path.write_text(json.dumps(payload), encoding="utf-8")
-    assert _read_blocked_failure(tmp_path) is None
 
 
 def test_ladder_timeout_is_hard_capped_at_thirty_seconds(tmp_path: Path) -> None:

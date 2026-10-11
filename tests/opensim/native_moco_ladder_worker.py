@@ -21,14 +21,6 @@ import numpy as np
 from tests.opensim.native_moco_ladder_harness import DEFAULT_RUNGS, build_synthetic_rung
 
 
-class NativeRungFailure(RuntimeError):
-    """A typed, source-bound stop in the synthetic native ladder."""
-
-    def __init__(self, code: str, message: str) -> None:
-        super().__init__(message)
-        self.code = code
-
-
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -58,25 +50,10 @@ def run_rung(rung_name: str, output: Path) -> None:
     # The supervisor creates the per-rung directory before launching us.
     output.mkdir(parents=True, exist_ok=True)
     stages: dict[str, dict[str, float]] = {}
-    try:
-        prepared = _prepare_rung(rung, output, stages, osim)
-        solved = _solve_and_export(prepared, stages, osim)
-        replay_path = _fresh_native_replay(prepared, solved, stages)
-        _write_success_receipt(prepared, solved, replay_path, stages, osim)
-    except NativeRungFailure as exc:
-        _write_json(
-            output / "failure.json",
-            {
-                "rung": rung.name,
-                "source_sha256": _sha256(output / "source.osim"),
-                "status": "blocked",
-                "code": exc.code,
-                "detail": str(exc),
-                "stage_metrics": stages,
-                "physical_qualification": "unqualified",
-            },
-        )
-        raise
+    prepared = _prepare_rung(rung, output, stages, osim)
+    solved = _solve_and_export(prepared, stages, osim)
+    replay_path = _fresh_native_replay(prepared, solved, stages)
+    _write_success_receipt(prepared, solved, replay_path, stages, osim)
 
 
 def _prepare_rung(rung: Any, output: Path, stages: dict, osim: Any) -> dict[str, Any]:
@@ -108,10 +85,10 @@ def _prepare_rung(rung: Any, output: Path, stages: dict, osim: Any) -> dict[str,
     profile = declare_native_mechanics_execution_profile(source, source_hash)
     wrapped = (
         declare_wrapped_path_source(source)
-        if "intersecting_wrap" in rung.features
+        if {"intersecting_wrap", "conditional_path_point"} & set(rung.features)
         else None
     )
-    if wrapped is not None:
+    if "intersecting_wrap" in rung.features:
         _verify_native_wrap(
             source,
             wrapped,
@@ -269,28 +246,13 @@ def _solve_and_export(
     _write_progress(output, rung.name, stages)
 
     started = _stage_start()
-    try:
-        bundle = build_constrained_muscle_bundle(
-            prepared["declaration"],
-            saved_grid,
-            saved_controls,
-            wrapped_path_declaration=prepared["wrapped"],
-            native_mechanics_profile=prepared["profile"],
-        )
-    except ValueError as exc:
-        if (
-            "conditional_path_point" in prepared["rung"].features
-            and "intersecting_wrap" not in prepared["rung"].features
-            and str(exc)
-            == "unreviewed constrained muscle component: ConditionalPathPoint"
-        ):
-            raise NativeRungFailure(
-                "conditional_path_point_replay_policy_unavailable",
-                "CPP-only rung fails closed: current constrained replay policy "
-                "requires a source-bound wrap declaration to admit conditional "
-                "path points.",
-            ) from exc
-        raise
+    bundle = build_constrained_muscle_bundle(
+        prepared["declaration"],
+        saved_grid,
+        saved_controls,
+        wrapped_path_declaration=prepared["wrapped"],
+        native_mechanics_profile=prepared["profile"],
+    )
     stages["replay_input_preflight"] = _stage_finish(started)
     _write_progress(output, rung.name, stages)
     return {
