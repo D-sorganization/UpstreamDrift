@@ -143,8 +143,13 @@ def test_bounded_refinement_marks_one_parent_cell_and_preserves_contract(
 
     plan = build_refinement_plan(parent, report_path)
     from tests.opensim.native_moco_ladder_worker import (
+        _actual_solver_settings,
+        _refinement_request_fields,
+        _rung_config,
+        _validate_actual_solver_settings,
         _validate_refinement_request,
     )
+    from types import SimpleNamespace
 
     _validate_refinement_request(
         plan, request["source_sha256"], plan["preserved_contract"]
@@ -153,6 +158,29 @@ def test_bounded_refinement_marks_one_parent_cell_and_preserves_contract(
     _validate_refinement_request(
         reloaded_plan, request["source_sha256"], plan["preserved_contract"]
     )
+    request_config = _rung_config(
+        DEFAULT_RUNGS[0],
+        request["target_q"],
+        request["source_sha256"],
+        request["initial_q"],
+        mesh_intervals=len(plan["normalized_mesh_points"]) - 1,
+    )
+    request_config["mesh_refinement"] = _refinement_request_fields(plan)
+    request_config["actual_solver_settings"] = _actual_solver_settings(
+        SimpleNamespace(
+            get_transcription_scheme=lambda: "hermite-simpson",
+            get_interpolate_control_mesh_interior_points=lambda: True,
+            get_parallel=lambda: 0,
+            get_num_mesh_intervals=lambda: 100,
+        ),
+        request_config["mesh_refinement"]["normalized_mesh_points"],
+    )
+    _validate_actual_solver_settings(request_config)
+    request_config["actual_solver_settings"]["set_mesh_requested_normalized_points"][
+        1
+    ] += 0.001
+    with pytest.raises(ValueError, match="differ from the bound request"):
+        _validate_actual_solver_settings(request_config)
     for field, mutate in (
         (
             "normalized_mesh_points",

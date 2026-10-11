@@ -576,7 +576,9 @@ def _refinement_request_fields(refinement: dict[str, Any]) -> dict[str, Any]:
         "parent_hashes": refinement["parent_hashes"],
         "analysis_sha256": refinement["analysis_sha256"],
         "flagged_parent_cells": refinement["flagged_parent_cells"],
-        "normalized_mesh_points": refinement["normalized_mesh_points"],
+        # Native readback is represented as a JSON list; canonicalize the
+        # planner's tuple at this request boundary for exact in-memory equality.
+        "normalized_mesh_points": list(refinement["normalized_mesh_points"]),
         "preserved_contract": refinement["preserved_contract"],
         "control_seed": refinement["control_seed"],
         "status": "attempted_unqualified_until_fresh_replay_passes",
