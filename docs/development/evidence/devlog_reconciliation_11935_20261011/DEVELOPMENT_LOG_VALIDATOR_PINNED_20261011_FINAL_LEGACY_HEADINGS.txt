@@ -1,0 +1,3 @@
+WARNING: development log portfolio WIP breach
+  - DEVELOPMENT_LOG.md [portfolio_wip_breach]: 20 concurrent WIP entries (in_progress) exceeds the 'golf' portfolio cap of 8.
+      Remediation: Park or ship entries to bring WIP to <= 8 before starting new work.

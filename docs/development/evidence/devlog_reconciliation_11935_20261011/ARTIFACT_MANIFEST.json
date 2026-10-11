@@ -1,0 +1,232 @@
+{
+  "title": "11935 Development Log Reconciliation Evidence Inventory",
+  "artifacts": [
+    {
+      "path": "../../changes/11935-reconcile-development-log-provenance-leg.md",
+      "bytes": 327,
+      "sha256": "785135a0b29d6940783c8a51d4c4d7913f58c81f6a6247b8ed506363e0dd749d"
+    },
+    {
+      "path": "DEVELOPMENT_LOG.md",
+      "bytes": 193876,
+      "sha256": "a954ba0adf47ba05ffde0ba250a52d19c89bb7f0cfe8ed84b037d6163c73474b"
+    },
+    {
+      "path": "DEVELOPMENT_LOG_ARCHIVE_2026.md",
+      "bytes": 218446,
+      "sha256": "ff19451640b913ad056967f9a6c9e5cb5af813c9b7ba90262709aa677307ddf8"
+    },
+    {
+      "path": "DEVELOPMENT_LOG_RECONCILIATION_SOURCE_ORIGINAL_20261011.md",
+      "bytes": 336131,
+      "sha256": "d9268879c0527199ae588dcf91a93a50556d1f29dac28924a658a2a43bca4bdb"
+    },
+    {
+      "path": "archive/DEVELOPMENT_LOG_RECONCILIATION_11935_20261011.md",
+      "bytes": 8433,
+      "sha256": "f4dc87ad1f0a2b4a1eedf3cc2fbefd4b66cab176921fe278e30b2b27a4130ec1"
+    },
+    {
+      "path": "archive/DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "bytes": 104813,
+      "sha256": "8d49d012e39a4bedf7f0ac5aeb27e1ac7a9165f688effecd8768b26a9fc8789a"
+    },
+    {
+      "path": "archive/DEVELOPMENT_LOG_RECONCILIATION_SOURCE_20261011.md",
+      "bytes": 23820,
+      "sha256": "03179796850ee77db2c8f518933c2989f20456875b8f677756bedd951a33aeaa"
+    },
+    {
+      "path": "evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_10943_MANUAL_MERGE_ASSOCIATION_20261011.json",
+      "bytes": 1086,
+      "sha256": "0ccfddc74e3bf539017fc27f32876933d14cf85a6f5ba3b4ac89a7995a10ff39"
+    },
+    {
+      "path": "evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_10943_MANUAL_MERGE_ASSOCIATION_20261011.json.raw.snapshot",
+      "bytes": 1094,
+      "sha256": "b5abd7bee31e9aaa944acc038bde9110cf988e3c75bd7490990618599fb15bee"
+    },
+    {
+      "path": "evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_11596_W030R_IDENTITY_20261011.json",
+      "bytes": 1251,
+      "sha256": "5977e95671aafab0d1447d1f9d0084adcc61a627ef49af1418adbfcfdd761db8"
+    },
+    {
+      "path": "evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_ARCHIVE_2026_PRE_FORMAT_20261011.md.snapshot",
+      "bytes": 218447,
+      "sha256": "7a8fadb4f0bcf3b01f132d9ee7eb67e111291c86c27e63d1284874090fd200ae"
+    },
+    {
+      "path": "evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_ARCHIVE_PRE_LEGACY_HEADING_RECONCILIATION_20261011.md.snapshot",
+      "bytes": 217249,
+      "sha256": "11b21a0dfa758881e21b3bd39d63e769d8c0a3fbe61f9ff7672f123957979155"
+    },
+    {
+      "path": "evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_CURRENT_SOURCE_METADATA_AUDIT_e68_20261011.json",
+      "bytes": 793040,
+      "sha256": "00b887373d8c906b1646df94dce460c55cd1040ab0ca96c97f0ae7b0c8932e16"
+    },
+    {
+      "path": "evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_METADATA_SOURCE_20261011.json",
+      "bytes": 4451,
+      "sha256": "fded3e9d3ce0e98a5d61efa35d4be6b4cd99e2fad9e9eb44aa530187c1b829a7"
+    },
+    {
+      "path": "evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_PRE_COMPRESSION_20261011.md.snapshot",
+      "bytes": 214602,
+      "sha256": "f7e36093ebdda2841596f2e89bb722b7f0de12b1a6e7e942f77765dfe1d4ff37"
+    },
+    {
+      "path": "evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_PRE_LEGACY_HEADING_RECONCILIATION_20261011.md.snapshot",
+      "bytes": 198717,
+      "sha256": "ba14c2837a7ffeb9c5fbc60ef8cd9e6b0791d63bdf175dcfe4714e3ed9cca82b"
+    },
+    {
+      "path": "evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_RAW_HEADING_COVERAGE_20261011.json",
+      "bytes": 6008,
+      "sha256": "7945efd35d09356073d0dcb23c05fa319bd3b2751c10e31f39a813841cae6d38"
+    },
+    {
+      "path": "evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_RECONCILIATION_66_APPLIED_20261011.json",
+      "bytes": 40063,
+      "sha256": "42e247006cb9d86e037092e51c202ad8c3a4d9ac73148a5f406fc6c925e3e65a"
+    },
+    {
+      "path": "evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_RECONCILIATION_66_APPLIED_20261011.json.raw.snapshot",
+      "bytes": 40071,
+      "sha256": "917383c07be4eeeeb73a792682cd512a6e7e25195414e0f154205e21656cb1c7"
+    },
+    {
+      "path": "evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_RECONCILIATION_66_CANDIDATE_PLAN_20261011.json",
+      "bytes": 194869,
+      "sha256": "20919d178c6137be0e59f39cfb85a817a5346561fab944f96c5a185b70023307"
+    },
+    {
+      "path": "evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_RECONCILIATION_66_CANDIDATE_PLAN_20261011.json.raw.snapshot",
+      "bytes": 195941,
+      "sha256": "013a8dbcc9cae87f67be896c8ae6b1075c56e531b2ceb92b1d4208545ff14b4c"
+    },
+    {
+      "path": "evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_RECONCILIATION_AUDIT_20261011.json",
+      "bytes": 7216,
+      "sha256": "e28f864d6cfaea7137bd16cdc9fde02825e69a7acc5b25e5f737598bc6e8b98a"
+    },
+    {
+      "path": "evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_RECONCILIATION_AUDIT_20261011.json.raw.snapshot",
+      "bytes": 7306,
+      "sha256": "65c3e0a973e25e77583720f0a1e9abb70501d39b8ccaa44823f4861acda82800"
+    },
+    {
+      "path": "evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_VALIDATOR_20261011.json",
+      "bytes": 37246,
+      "sha256": "1d18eee770304bc7d392b7de74eb914d1efe3f111e8d402011b3af2d06c43a77"
+    },
+    {
+      "path": "evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_VALIDATOR_20261011_AFTER_MAIN_RECONCILIATION.json",
+      "bytes": 37247,
+      "sha256": "392438130d8e5803274f938c04668af70013ed9b5a1d6f24f22e3da2aa61c004"
+    },
+    {
+      "path": "evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_VALIDATOR_PINNED_20261011.json",
+      "bytes": 40738,
+      "sha256": "31c81f5e03c8b5bc5b286333d4412458f24212e2b2b50ddc77099dbda135cd72"
+    },
+    {
+      "path": "evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_VALIDATOR_PINNED_20261011_AFTER_METADATA.json",
+      "bytes": 1539,
+      "sha256": "708f2a23c822285e300153441f498c19d9f5cfedf2a63631e4d9c0db4df49d8b"
+    },
+    {
+      "path": "evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_VALIDATOR_PINNED_20261011_FINAL_LEGACY_HEADINGS.json",
+      "bytes": 1507,
+      "sha256": "7488972fdf5b266dd4d482da8d492b7a209c22002b4add1e407e98b8a03305f1"
+    },
+    {
+      "path": "evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_VALIDATOR_PINNED_20261011_FINAL_LEGACY_HEADINGS.txt",
+      "bytes": 262,
+      "sha256": "949225b3886f2a239a98689c83e40cd23d5093ca77d2878bc4a21e737891123c"
+    },
+    {
+      "path": "evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_VALIDATOR_PINNED_20261011_FINAL_WORKTREE.json",
+      "bytes": 35398,
+      "sha256": "bceae896dc9f687143c8f41cdfca8afb9a44cff70e59c1464f71b079aa3f8135"
+    },
+    {
+      "path": "evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_VALIDATOR_PINNED_20261011_FINAL_WORKTREE.txt",
+      "bytes": 16359,
+      "sha256": "638d3473ad2880a24493c183e47323989d0f7559d03794f4dd806ea7ea0f03d8"
+    },
+    {
+      "path": "evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_VALIDATOR_PINNED_20261011_POST_REPAIR.json",
+      "bytes": 1539,
+      "sha256": "e97a8454af2857d3b74482e047f8cfccc493df6319bb258367815a2c96d3f670"
+    },
+    {
+      "path": "evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_VALIDATOR_PINNED_20261011_RECOVERY_SHADOW.txt",
+      "bytes": 16359,
+      "sha256": "638d3473ad2880a24493c183e47323989d0f7559d03794f4dd806ea7ea0f03d8"
+    },
+    {
+      "path": "evidence/devlog_reconciliation_11935_20261011/FORMAT_PRESERVATION_MAP_20261011.json",
+      "bytes": 5704,
+      "sha256": "c8ec816c4cd7edd044eb7a4bd186303cad0152bca0334cec83713ee7b38065f2"
+    },
+    {
+      "path": "evidence/devlog_reconciliation_11935_20261011/GITHUB_METADATA_11175_10799_11285_20261011.json",
+      "bytes": 22465,
+      "sha256": "aae6da997619068af2c1998b3bb40b8f458c34897ed25a9d4a9b5fb53d54caa4"
+    },
+    {
+      "path": "evidence/devlog_reconciliation_11935_20261011/GITHUB_METADATA_11175_10799_11285_20261011.json.raw.snapshot",
+      "bytes": 17764,
+      "sha256": "733201266d9800ea6b057dd401f03c782964862448c705836554bed614886ced"
+    },
+    {
+      "path": "evidence/devlog_reconciliation_11935_20261011/RECOVERY_SHADOW_DEVELOPMENT_LOG_RECONCILIATION_AUDIT_20261011.json",
+      "bytes": 4056,
+      "sha256": "0d7ec8ce4e11a398e5afd127bc74fab56ad769db04b911cbbb2f3755a126aaac"
+    },
+    {
+      "path": "evidence/devlog_reconciliation_11935_20261011/dl-10943-11719-response.json",
+      "bytes": 1704,
+      "sha256": "f9c0d44a0a186fbb63f253c4c76866423d7c625b2f0fcd26bdc36ec189c54cdf"
+    },
+    {
+      "path": "evidence/devlog_reconciliation_11935_20261011/dl-10943-11719-response.json.raw.snapshot",
+      "bytes": 1213,
+      "sha256": "b496bd3dfe669b242b6ce2ff3dcd71887ef8be248114399d4ce4549d7ac4e396"
+    },
+    {
+      "path": "evidence/devlog_reconciliation_11935_20261011/dl-full-source-validator-audit.json",
+      "bytes": 338156,
+      "sha256": "a6ee001db1a9f6c94afa78d6429b4858ae15974ddaed608311277215484b2df7"
+    },
+    {
+      "path": "evidence/devlog_reconciliation_11935_20261011/dl-full-source-validator-audit.json.raw.snapshot",
+      "bytes": 342983,
+      "sha256": "4a05c0365f69b6efd97d500a36bc4520984fd48ef0e183b59eadf6ce0c901ab6"
+    },
+    {
+      "path": "evidence/devlog_reconciliation_11935_20261011/dl-github-closure-audit.json",
+      "bytes": 111753,
+      "sha256": "aec0ec9ff45f8ad497925d41d201e080ffa2e927e96acbfa5473074259128f60"
+    },
+    {
+      "path": "evidence/devlog_reconciliation_11935_20261011/dl-github-closure-audit.json.raw.snapshot",
+      "bytes": 118358,
+      "sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb"
+    },
+    {
+      "path": "evidence/devlog_reconciliation_11935_20261011/dl-metadata-root-response-20261011.json",
+      "bytes": 22465,
+      "sha256": "aae6da997619068af2c1998b3bb40b8f458c34897ed25a9d4a9b5fb53d54caa4"
+    },
+    {
+      "path": "evidence/devlog_reconciliation_11935_20261011/dl-metadata-root-response-20261011.json.raw.snapshot",
+      "bytes": 17764,
+      "sha256": "733201266d9800ea6b057dd401f03c782964862448c705836554bed614886ced"
+    }
+  ],
+  "generated_utc": "2026-10-11",
+  "artifact_count": 45
+}

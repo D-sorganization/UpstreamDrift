@@ -1,0 +1,198 @@
+WARNING: development log portfolio WIP breach
+  - DEVELOPMENT_LOG.md [portfolio_wip_breach]: 19 concurrent WIP entries (in_progress) exceeds the 'golf' portfolio cap of 8.
+      Remediation: Park or ship entries to bring WIP to <= 8 before starting new work.
+ERROR: development log
+  - DEVELOPMENT_LOG.md:47 [placeholder]: DL-#10965 field 'Summary' holds a placeholder.
+      Remediation: Replace angle-bracket placeholders with real values.
+  - DEVELOPMENT_LOG.md:73 [missing_field]: DL-#11285 is missing required field 'Started'.
+      Remediation: Add '- **Started:** ...' to DL-#11285.
+  - DEVELOPMENT_LOG.md:73 [unusable_last_verified]: DL-#11285 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:183 [missing_field]: DL-#11161 is missing required field 'PR'.
+      Remediation: Add '- **PR:** ...' to DL-#11161.
+  - DEVELOPMENT_LOG.md:183 [missing_field]: DL-#11161 is missing required field 'Next step'.
+      Remediation: Add '- **Next step:** ...' to DL-#11161.
+  - DEVELOPMENT_LOG.md:183 [unusable_last_verified]: DL-#11161 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:194 [unusable_last_verified]: DL-#11421 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:207 [unusable_last_verified]: DL-#11400 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:246 [unusable_last_verified]: DL-#11313 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:259 [unusable_last_verified]: DL-#1900 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:272 [unusable_last_verified]: DL-#11278 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:285 [unusable_last_verified]: DL-#11268 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:366 [missing_field]: DL-#11234 is missing required field 'Started'.
+      Remediation: Add '- **Started:** ...' to DL-#11234.
+  - DEVELOPMENT_LOG.md:366 [unusable_last_verified]: DL-#11234 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:377 [missing_field]: DL-#11230 is missing required field 'Started'.
+      Remediation: Add '- **Started:** ...' to DL-#11230.
+  - DEVELOPMENT_LOG.md:377 [missing_field]: DL-#11230 is missing required field 'Next step'.
+      Remediation: Add '- **Next step:** ...' to DL-#11230.
+  - DEVELOPMENT_LOG.md:388 [missing_state]: DL-#11095 has no State field.
+      Remediation: Add '- **State:** <one of ['abandoned', 'in_progress', 'in_review', 'parked', 'proposed', 'shipped']>'.
+  - DEVELOPMENT_LOG.md:388 [missing_field]: DL-#11095 is missing required field 'State'.
+      Remediation: Add '- **State:** ...' to DL-#11095.
+  - DEVELOPMENT_LOG.md:388 [missing_field]: DL-#11095 is missing required field 'Owner'.
+      Remediation: Add '- **Owner:** ...' to DL-#11095.
+  - DEVELOPMENT_LOG.md:388 [missing_field]: DL-#11095 is missing required field 'PR'.
+      Remediation: Add '- **PR:** ...' to DL-#11095.
+  - DEVELOPMENT_LOG.md:388 [missing_field]: DL-#11095 is missing required field 'Started'.
+      Remediation: Add '- **Started:** ...' to DL-#11095.
+  - DEVELOPMENT_LOG.md:396 [missing_state]: DL-#11096 has no State field.
+      Remediation: Add '- **State:** <one of ['abandoned', 'in_progress', 'in_review', 'parked', 'proposed', 'shipped']>'.
+  - DEVELOPMENT_LOG.md:396 [missing_field]: DL-#11096 is missing required field 'State'.
+      Remediation: Add '- **State:** ...' to DL-#11096.
+  - DEVELOPMENT_LOG.md:396 [missing_field]: DL-#11096 is missing required field 'Owner'.
+      Remediation: Add '- **Owner:** ...' to DL-#11096.
+  - DEVELOPMENT_LOG.md:396 [missing_field]: DL-#11096 is missing required field 'PR'.
+      Remediation: Add '- **PR:** ...' to DL-#11096.
+  - DEVELOPMENT_LOG.md:396 [missing_field]: DL-#11096 is missing required field 'Started'.
+      Remediation: Add '- **Started:** ...' to DL-#11096.
+  - DEVELOPMENT_LOG.md:404 [missing_state]: DL-#11094 has no State field.
+      Remediation: Add '- **State:** <one of ['abandoned', 'in_progress', 'in_review', 'parked', 'proposed', 'shipped']>'.
+  - DEVELOPMENT_LOG.md:404 [missing_field]: DL-#11094 is missing required field 'State'.
+      Remediation: Add '- **State:** ...' to DL-#11094.
+  - DEVELOPMENT_LOG.md:404 [missing_field]: DL-#11094 is missing required field 'PR'.
+      Remediation: Add '- **PR:** ...' to DL-#11094.
+  - DEVELOPMENT_LOG.md:404 [missing_field]: DL-#11094 is missing required field 'Started'.
+      Remediation: Add '- **Started:** ...' to DL-#11094.
+  - DEVELOPMENT_LOG.md:414 [unusable_last_verified]: DL-#11083 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:440 [unusable_last_verified]: DL-#11058 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:453 [unusable_last_verified]: DL-#11059 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:466 [unusable_last_verified]: DL-#11051 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:479 [unusable_last_verified]: DL-#11055 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:492 [unusable_last_verified]: DL-#11049 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:505 [unusable_last_verified]: DL-#11046 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:518 [unusable_last_verified]: DL-#11052 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:531 [unusable_last_verified]: DL-#11044 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:544 [unusable_last_verified]: DL-#11043 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:557 [unusable_last_verified]: DL-#11039 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:570 [unusable_last_verified]: DL-#11037 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:583 [unusable_last_verified]: DL-#11032 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:596 [unusable_last_verified]: DL-#11029 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:609 [unusable_last_verified]: DL-#11024 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:622 [unusable_last_verified]: DL-#11021 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:635 [unusable_last_verified]: DL-#11014 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:648 [unusable_last_verified]: DL-#11003 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:712 [unusable_last_verified]: DL-#1755 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:725 [unusable_last_verified]: DL-#10286 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:738 [missing_field]: DL-#9619 is missing required field 'PR'.
+      Remediation: Add '- **PR:** ...' to DL-#9619.
+  - DEVELOPMENT_LOG.md:738 [unusable_last_verified]: DL-#9619 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:763 [unusable_last_verified]: DL-#9688 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:776 [unusable_last_verified]: DL-#9613 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:828 [unusable_last_verified]: DL-#9415 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:854 [unusable_last_verified]: DL-#8907 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:894 [unusable_last_verified]: DL-#8941 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:907 [unusable_last_verified]: DL-#10385 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:921 [unusable_last_verified]: DL-#10271 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:934 [unusable_last_verified]: DL-#10378 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:947 [unusable_last_verified]: DL-#8880 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:974 [unusable_last_verified]: DL-#10345 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:987 [unusable_last_verified]: DL-#9545 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:1000 [unusable_last_verified]: DL-#9544 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:1028 [missing_state]: DL-#9546 has no State field.
+      Remediation: Add '- **State:** <one of ['abandoned', 'in_progress', 'in_review', 'parked', 'proposed', 'shipped']>'.
+  - DEVELOPMENT_LOG.md:1028 [missing_field]: DL-#9546 is missing required field 'State'.
+      Remediation: Add '- **State:** ...' to DL-#9546.
+  - DEVELOPMENT_LOG.md:1028 [missing_field]: DL-#9546 is missing required field 'Owner'.
+      Remediation: Add '- **Owner:** ...' to DL-#9546.
+  - DEVELOPMENT_LOG.md:1028 [missing_field]: DL-#9546 is missing required field 'Started'.
+      Remediation: Add '- **Started:** ...' to DL-#9546.
+  - DEVELOPMENT_LOG.md:1028 [placeholder]: DL-#9546 field 'Summary' holds a placeholder.
+      Remediation: Replace angle-bracket placeholders with real values.
+  - DEVELOPMENT_LOG.md:1039 [unusable_last_verified]: DL-#10590 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:1068 [unusable_last_verified]: DL-#10349 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:1082 [missing_field]: DL-#10342 is missing required field 'PR'.
+      Remediation: Add '- **PR:** ...' to DL-#10342.
+  - DEVELOPMENT_LOG.md:1082 [unusable_last_verified]: DL-#10342 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:1095 [unusable_last_verified]: DL-#9422 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:1109 [missing_field]: DL-#9162 is missing required field 'PR'.
+      Remediation: Add '- **PR:** ...' to DL-#9162.
+  - DEVELOPMENT_LOG.md:1109 [unusable_last_verified]: DL-#9162 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:1121 [missing_field]: DL-#9410 is missing required field 'PR'.
+      Remediation: Add '- **PR:** ...' to DL-#9410.
+  - DEVELOPMENT_LOG.md:1133 [unusable_last_verified]: DL-#10602 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:1147 [unusable_last_verified]: DL-#10603 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:1203 [unusable_last_verified]: DL-#10355 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:1232 [unusable_last_verified]: DL-#10402 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:1246 [unusable_last_verified]: DL-#10400 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:1260 [unusable_last_verified]: DL-#10399 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:1274 [unusable_last_verified]: DL-#10398 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:1288 [unusable_last_verified]: DL-#10396 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:1316 [missing_field]: DL-#9967 is missing required field 'PR'.
+      Remediation: Add '- **PR:** ...' to DL-#9967.
+  - DEVELOPMENT_LOG.md:1316 [unusable_last_verified]: DL-#9967 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:1342 [unusable_last_verified]: DL-#10188 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:1356 [unusable_last_verified]: DL-#10003 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:1370 [unusable_last_verified]: DL-#10062 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:1479 [unusable_last_verified]: DL-#8869 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:1493 [unusable_last_verified]: DL-#9193 'Last verified' has no commit SHA.
+      Remediation: Include the verifying commit SHA in 'Last verified'.
+  - DEVELOPMENT_LOG.md:1506 [missing_state]: DL-#9349 has no State field.
+      Remediation: Add '- **State:** <one of ['abandoned', 'in_progress', 'in_review', 'parked', 'proposed', 'shipped']>'.
+  - DEVELOPMENT_LOG.md:1506 [missing_field]: DL-#9349 is missing required field 'State'.
+      Remediation: Add '- **State:** ...' to DL-#9349.
+  - DEVELOPMENT_LOG.md:1506 [missing_field]: DL-#9349 is missing required field 'Owner'.
+      Remediation: Add '- **Owner:** ...' to DL-#9349.
+  - DEVELOPMENT_LOG.md:1662 [missing_field]: DL-#11233 is missing required field 'Started'.
+      Remediation: Add '- **Started:** ...' to DL-#11233.
+  - DEVELOPMENT_LOG.md [size_ceiling]: Development log exceeds 200000 bytes.
+      Remediation: Move shipped entries to DEVELOPMENT_LOG_ARCHIVE_<year>.md.
