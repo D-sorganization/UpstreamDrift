@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import math
 from pathlib import Path
 
@@ -85,6 +86,143 @@ def test_original_native_probe_records_workless_identity_failure(
                 assert row["full_minus_native_m"] == pytest.approx(
                     0.03 if case["moving"] else 0.0, abs=1e-10
                 )
+
+
+@pytest.mark.parametrize("moving", [False, True])
+def test_generic_audit_consumes_native_path_and_independent_force_fixture(
+    tmp_path: Path, moving: bool
+) -> None:
+    osim = pytest.importorskip("opensim")
+    from src.engines.physics_engines.opensim.python.tour_matching.native_path_work_audit import (
+        audit_native_path_work,
+        inspect_native_path_work_identity,
+    )
+    from src.engines.physics_engines.opensim.python.tour_matching.native_prepared_state import (
+        DeclaredColdStart,
+    )
+    from scripts.diagnostics.native_path_work import INERTIA_KG_M2, _build_fixture
+
+    source_path = tmp_path / ("moving.osim" if moving else "fixed.osim")
+    source_model = _build_fixture(osim, moving)
+    if moving:
+        source_cable = osim.PathActuator.safeDownCast(
+            source_model.updForceSet().get("cable")
+        )
+        source_path_point = osim.MovingPathPoint.safeDownCast(
+            source_cable.updGeometryPath().getPathPointSet().get(1)
+        )
+        spline = osim.SimmSpline()
+        spline.addPoint(-0.3, 0.091)
+        spline.addPoint(0.3, 0.109)
+        source_path_point.set_x_location(spline)
+    source_model.printToXML(str(source_path))
+    source_bytes = source_path.read_bytes()
+    model = osim.Model(str(source_path))
+    initial = model.initSystem()
+    coordinate = model.updCoordinateSet().get("angle")
+    cable = osim.PathActuator.safeDownCast(model.updForceSet().get("cable"))
+    path = cable.getGeometryPath()
+    points = path.getPathPointSet()
+    state_names = model.getStateVariableNames()
+    named_state = {
+        state_names.get(index): float(
+            model.getStateVariableValue(initial, state_names.get(index))
+        )
+        for index in range(state_names.getSize())
+    }
+    declaration = DeclaredColdStart(
+        model_path=source_path,
+        source_sha256=hashlib.sha256(source_bytes).hexdigest(),
+        named_state=named_state,
+        time_seconds=0.0,
+        lock_targets={},
+        chart_bounds={coordinate.getAbsolutePathString(): (-0.5, 0.5)},
+        constraint_enforcement={},
+        residual_tolerance=1e-9,
+    )
+    if moving:
+        identity = inspect_native_path_work_identity(
+            model,
+            declaration,
+            path_component=path.getAbsolutePathString(),
+            moving_point_path=points.get(1).getAbsolutePathString(),
+            coordinate_path=coordinate.getAbsolutePathString(),
+            osim=osim,
+        )
+        assert identity.domain_provenance == "native-loaded-source"
+        assert identity.function_bounds == pytest.approx((-0.3, 0.3))
+    else:
+        from src.engines.physics_engines.opensim.python.tour_matching.native_path_work_audit import (
+            NativePathWorkIdentity,
+        )
+
+        component_paths = (
+            path.getAbsolutePathString(),
+            coordinate.getAbsolutePathString(),
+            *(
+                points.get(index).getAbsolutePathString()
+                for index in range(points.getSize())
+            ),
+        )
+        identity = NativePathWorkIdentity(
+            source_sha256=declaration.source_sha256,
+            path_component=path.getAbsolutePathString(),
+            coordinate_path=coordinate.getAbsolutePathString(),
+            point_paths=tuple(
+                points.get(index).getAbsolutePathString()
+                for index in range(points.getSize())
+            ),
+            source_component_paths=component_paths,
+            chart_bounds=(-0.5, 0.5),
+            active_bounds=(-0.5, 0.5),
+            function_bounds=(-1.0, 1.0),
+        )
+        assert identity.function_bounds == pytest.approx((-1.0, 1.0))
+
+    def sample_path(q: float) -> tuple[float, float]:
+        state = osim.State(initial)
+        coordinate.setValue(state, q, False)
+        model.realizePosition(state)
+        return float(coordinate.getValue(state)), float(path.getLength(state))
+
+    def force_observation(q: float) -> tuple[float, float]:
+        state = osim.State(initial)
+        coordinate.setValue(state, q, False)
+        coordinate.setSpeedValue(state, 0.0)
+        model.realizeVelocity(state)
+        model.setControls(state, osim.Vector(1, 1.0))
+        model.realizeAcceleration(state)
+        native_arm = float(path.computeMomentArm(state, coordinate))
+        force_arm = float(
+            coordinate.getAccelerationValue(state)
+            * INERTIA_KG_M2
+            / cable.getActuation(state)
+        )
+        return native_arm, force_arm
+
+    audit = audit_native_path_work(
+        identity,
+        source_bytes,
+        q_values=(-0.2, 0.0, 0.2),
+        step_sizes=(1e-4, 1e-5),
+        sample_path=sample_path,
+        native_moment_arm=lambda q: force_observation(q)[0],
+        force_moment_arm=lambda q: force_observation(q)[1],
+    )
+    assert all(
+        sample.achieved_span_rad == pytest.approx(2 * sample.step_rad)
+        for sample in audit.samples
+    )
+    assert max(sample.force_residual_m for sample in audit.samples) < 1e-11
+    if moving:
+        assert audit.status == "workless_identity_not_satisfied"
+        assert all(
+            sample.workless_residual_m == pytest.approx(0.03, abs=1e-10)
+            for sample in audit.samples
+        )
+    else:
+        assert audit.status == "workless_identity_satisfied_at_tested_samples"
+        assert max(sample.workless_residual_m for sample in audit.samples) < 1e-7
 
 
 @pytest.mark.parametrize("level", ["warn", "off"])

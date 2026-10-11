@@ -61,3 +61,43 @@ the optimizer cannot repair a different native force plant.
 The sparse Tools checkout borrows its objects from the retained native-admission
 worktree. Do not delete that object store until this borrower is repacked and
 verified independent. Public fixture XML requires no foreign asset download.
+
+## Child #12233: Source-Bound Chart Survey
+
+`native_path_work_audit.py` adds a typed diagnostic contract over exact source
+bytes, a loaded native component-path inventory, path/coordinate/path-point
+identities, and the intersection of declared chart, conditional activity, and
+function domains. It reuses the existing finite-difference provider and records
+achieved coordinate spans, full path-length derivatives, native moment arms,
+and independently force-derived moment arms for every requested stencil.
+Out-of-domain samples, mutated source bytes, component identities not in the
+loaded inventory, and unresolved native states fail closed. Its status is
+sampled-domain evidence only; it does not change any replay admission or expand
+the production MovingPathPoint law policy.
+
+The fixed and moving synthetic native `PathActuator` fixtures are consumers of
+the same audit. Native unit-tension acceleration independently reproduces the
+native moment arm on both fixtures; the fixed-path full derivative passes the
+1e-7 m/rad diagnostic threshold, while the moving-guide difference remains
+0.03 m/rad at every tested stencil. The result classifies the workless identity
+only and does not establish a runtime defect or donor acceptance. Dedicated
+OpenSim 4.6 validation: 24 tests pass across the generic source/chart contract
+and native fixture consumer. Full source-chart or wrapped-path qualification
+remains outside this child.
+
+## Private Source-Bound Survey (Not a Replay Gate)
+
+The private full-chart report is bound to mesh-free derivative model
+`80a01950aaa9eb6d8b8cb00446caefe1fdf35b5784421866971db29bc692a243`, with
+state-audit bytes `77d3023f13c0f050db1cab1cad235f2b3882ea334e45d58ab8aaff43e211ec6f`
+whose parent source is `7090a6bd577745a2d514579c0650bb0d73241511f715ea6273b428b649abb93b`.
+The report digest is
+`a0a6f82ee151c9a0c873a9d04c922126bcf241d0f90dcc923c704045cf81ce91`. It
+contains 240 sampled comparisons across active/inactive conditional-path
+regions, transition sides, and three stencils. Two bilateral vastus
+intermedius coarse `1e-3` rad samples exceed the fixed `1e-7` m/rad threshold
+(maximum `2.25495e-7`); both pass at `1e-4` and `1e-5` rad. These sampled
+observations do not establish a global bound, full wrapped-path behavior, or
+replay qualification. Model and captured-state assets remain in their private
+repository; this summary does not represent direct execution on the parent
+7090 model.

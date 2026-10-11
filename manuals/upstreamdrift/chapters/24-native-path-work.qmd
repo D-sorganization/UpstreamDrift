@@ -115,3 +115,16 @@ part of this child. The donor ECRL wrapping discrepancy, anatomical input
 bounds, notice conditions, grip/contact, force capacity and full-capture
 full-state replay remain open. The existing milestone DAG and model parity
 denominator are unchanged. Manual release remains blocked.
+
+## Source-Bound Chart Survey (F07 Child #12233)
+
+`native_path_work_audit.py` records a source-bound, finite sample set for a
+native path. The source digest, path component, coordinate, path-point
+inventory, declared coordinate chart, conditional active interval, and function
+domain are separate inputs; the sampled interval is their intersection. Each
+finite-difference stencil records achieved coordinates and is checked against
+both the native path moment arm and an independent force-derived moment arm.
+The audit reuses the finite-difference implementation above and returns a
+sampled-domain disposition only. It does not make a global error bound, admit
+SimmSpline paths to production replay, or close any physiological, wrap,
+full-source, or capture gate.
