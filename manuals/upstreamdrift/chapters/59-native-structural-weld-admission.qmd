@@ -1,0 +1,24 @@
+# Native Structural Weld Admission
+
+This provisional F07 software slice admits one exact structural component in
+the constrained-muscle replay policy: a native `WeldJoint` with zero
+coordinates and valid, distinct parent and child physical frames. The
+`WeldJoint` itself must pass OpenSim's native concrete-class cast. Frame
+references must resolve to reviewed `Body`, `Ground`, or
+`PhysicalOffsetFrame` components and carry absolute component paths. The
+source model hash binds socket selection and all serialized frame transforms.
+
+This admission is separate from the strict base muscle-bundle component set;
+that set remains unchanged. `WeldConstraint`, plugin or substitute classes,
+controllers, prescribed motion, and undeclared non-muscle forces remain
+rejected. A weld does not waive state, constraint, force, wrapped-path,
+contact, or native initialization checks.
+
+The fixture prepared for issue #12280 uses nonzero weld-frame translation and
+rotation, attaches a muscle path to the welded body, and retains movable and
+coupled coordinates. Its native tests are separate from the pure admission
+tests and require a reviewed bounded OpenSim run. A passing synthetic replay
+would establish only this software path: it would not establish capture
+matching, anatomy, support or grip, physiological validity, full-clock
+replay, or qualification of a production model. The calculation registry
+remains release-blocked.
