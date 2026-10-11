@@ -20,6 +20,7 @@ from pathlib import Path
 from typing import Any, Callable, Sequence
 
 from defusedxml import ElementTree as ET
+from src.shared.python.motion_matching.jobs.io_atomic import atomic_write_json
 
 
 @dataclass(frozen=True)
@@ -1186,6 +1187,298 @@ def run_retained_replay_diagnostic(
         json.dumps(result, sort_keys=True, indent=2) + "\n", encoding="utf-8"
     )
     return result
+
+
+def prepare_solution_controls_snapshot(
+    source_run: Path, snapshot: Path
+) -> dict[str, Any]:
+    """Copy a retained solve and derive a replay table from its persisted controls.
+
+    This is for diagnosis when a solved trajectory was rejected by a separate
+    mesh audit before the ordinary time-only control table could be written.
+    It preserves the source/request/solution bytes and never changes the failed
+    attempt directory.
+    """
+    import shutil
+
+    if snapshot.exists():
+        raise FileExistsError(snapshot)
+    required = ("source.osim", "request.json", "solution.sto")
+    audit_names = ("mesh_grid_audit.json", "solution_serialization_audit.json")
+    source_hashes = {name: _sha256(source_run / name) for name in required}
+    audit_hashes = {name: _sha256(source_run / name) for name in audit_names}
+    request = json.loads((source_run / "request.json").read_text(encoding="utf-8"))
+    bounds = request.get("native_control_bounds")
+    if not isinstance(bounds, dict) or not bounds:
+        raise ValueError("retained request has no source-bound control channels")
+    snapshot.mkdir(parents=True, exist_ok=False)
+    for name in required:
+        shutil.copyfile(source_run / name, snapshot / name)
+    controls_path = snapshot / "time_only_controls.sto"
+    solution_controls_to_sto(snapshot / "solution.sto", controls_path, bounds)
+    manifest = {
+        "schema": "retained-solution-control-replay-inputs-v1",
+        "source_run": str(source_run.resolve()),
+        "source_sha256": source_hashes,
+        "failed_audit_sha256": audit_hashes,
+        "snapshot_sha256": {name: _sha256(snapshot / name) for name in required},
+        "derived_time_only_controls_sha256": _sha256(controls_path),
+        "control_authority": "persisted_solution_sto_control_columns",
+        "grid_authority": "persisted_solution_sto_time_column",
+        "diagnostic_only": True,
+        "physical_qualification": "unqualified",
+    }
+    atomic_write_json(snapshot / "replay_input_manifest.json", manifest)
+    if manifest["source_sha256"] != manifest["snapshot_sha256"]:
+        raise ValueError("retained solution snapshot differs from its source bytes")
+    return manifest
+
+
+def solution_controls_to_sto(
+    solution_path: Path,
+    controls_path: Path,
+    control_bounds: dict[str, list[float]],
+) -> None:
+    """Extract exact saved time/control tokens into a time-only STO table."""
+    selected_labels, rows = _solution_control_table_rows(solution_path, control_bounds)
+    header = ["DataType=double", "version=3", "endheader"]
+    controls_path.write_text(
+        "\n".join([*header, "\t".join(selected_labels)])
+        + "\n"
+        + "\n".join("\t".join(row) for row in rows)
+        + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+
+
+def _solution_control_table_rows(
+    solution_path: Path, control_bounds: dict[str, list[float]]
+) -> tuple[list[str], list[list[str]]]:
+    lines = solution_path.read_text(encoding="utf-8").splitlines()
+    try:
+        end_header = next(
+            index
+            for index, line in enumerate(lines)
+            if line.strip().lower() == "endheader"
+        )
+    except StopIteration as exc:
+        raise ValueError("solution STO has no endheader") from exc
+    if end_header + 2 >= len(lines):
+        raise ValueError("solution STO has no column labels and data")
+    labels = lines[end_header + 1].split()
+    if not labels or labels[0] != "time" or len(set(labels)) != len(labels):
+        raise ValueError("solution STO has invalid ordered columns")
+    header_values = {
+        key.strip().lower(): value.strip()
+        for line in lines[:end_header]
+        if "=" in line
+        for key, value in (line.split("=", 1),)
+    }
+    expected_bounds = {
+        (str(name) if str(name).startswith("/forceset/") else f"/forceset/{name}"): (
+            float(bounds[0]),
+            float(bounds[1]),
+        )
+        for name, bounds in control_bounds.items()
+        if isinstance(bounds, list) and len(bounds) == 2
+    }
+    if len(expected_bounds) != len(control_bounds):
+        raise ValueError("request control bounds are malformed")
+    expected_labels = set(expected_bounds)
+    declared_controls = int(header_values.get("num_controls", "-1"))
+    control_indices = [
+        index for index, label in enumerate(labels) if label in expected_labels
+    ]
+    if (
+        declared_controls != len(expected_labels)
+        or len(control_indices) != declared_controls
+        or {labels[index] for index in control_indices} != expected_labels
+    ):
+        raise ValueError(
+            "solution STO control columns differ from source-bound request"
+        )
+    for name, (lower, upper) in expected_bounds.items():
+        if not math.isfinite(lower) or not math.isfinite(upper) or lower > upper:
+            raise ValueError(f"request bounds for {name} are invalid")
+    selected_labels = ["time", *(labels[index] for index in control_indices)]
+    rows: list[list[str]] = []
+    last_time = -math.inf
+    for line in lines[end_header + 2 :]:
+        if not line.strip():
+            continue
+        fields = line.split()
+        if len(fields) != len(labels):
+            raise ValueError("solution STO row width differs from its header")
+        values = [float(fields[index]) for index in [0, *control_indices]]
+        if not all(math.isfinite(value) for value in values):
+            raise ValueError("solution STO time or control is non-finite")
+        if values[0] <= last_time:
+            raise ValueError("solution STO times are not strictly increasing")
+        if any(
+            not expected_bounds[labels[index]][0]
+            <= value
+            <= expected_bounds[labels[index]][1]
+            for index, value in zip(control_indices, values[1:], strict=True)
+        ):
+            raise ValueError("solution STO control is outside request source bounds")
+        last_time = values[0]
+        rows.append([fields[0], *(fields[index] for index in control_indices)])
+    if len(rows) < 2 or float(rows[0][0]) != 0.0:
+        raise ValueError("solution STO clock lacks the required replay interval")
+    if (
+        header_values.get("nrows") is not None
+        and int(header_values["nrows"]) != len(rows)
+    ) or (
+        header_values.get("ncolumns") is not None
+        and int(header_values["ncolumns"]) != len(labels)
+    ):
+        raise ValueError("solution STO declared dimensions differ from its data")
+    return selected_labels, rows
+
+
+def run_bound_solution_replay_diagnostic(
+    failed_run: Path,
+    snapshot: Path,
+    output_root: Path,
+    *,
+    worker_python: str,
+    worker_environment: dict[str, str],
+    casadi_path: Path,
+    repo_root: Path,
+) -> dict[str, Any]:
+    """Run retained controls with before/after evidence and mutation checks."""
+    if output_root.exists():
+        raise FileExistsError(output_root)
+    before = _solution_replay_provenance(
+        failed_run, snapshot, worker_python, casadi_path, repo_root
+    )
+    _validate_solution_replay_snapshot(failed_run, snapshot, before)
+    output_root.mkdir(parents=True, exist_ok=False)
+    _, command, worker_invocation = _retained_replay_invocation(
+        snapshot,
+        output_root / "retained_replay",
+        worker_python,
+        worker_environment,
+    )
+    invocation = {
+        "schema": "source-bound-retained-solution-replay-invocation-v1",
+        "provenance": before,
+        "worker_command": command,
+        "worker_invocation": worker_invocation,
+        "worker_environment": dict(sorted(worker_environment.items())),
+        "wall_timeout_seconds": 30,
+        "sampled_rss_soft_threshold_bytes": 1024**3,
+        "optimizer_invoked": False,
+    }
+    atomic_write_json(output_root / "invocation.json", invocation)
+    result = run_retained_replay_diagnostic(
+        snapshot,
+        output_root / "retained_replay",
+        worker_python=worker_python,
+        worker_environment=worker_environment,
+    )
+    after = _solution_replay_provenance(
+        failed_run, snapshot, worker_python, casadi_path, repo_root
+    )
+    unchanged = before == after
+    receipt = {
+        "schema": "source-bound-retained-solution-replay-v1",
+        "before": before,
+        "after": after,
+        "provenance_unchanged": unchanged,
+        "replay_result": result,
+        "final_status": result["status"] if unchanged else "provenance_changed",
+        "optimizer_invoked": False,
+        "physical_qualification": "unqualified",
+    }
+    atomic_write_json(output_root / "supervisor_result.json", receipt)
+    return receipt
+
+
+def _solution_replay_provenance(
+    failed_run: Path,
+    snapshot: Path,
+    worker_python: str,
+    casadi_path: Path,
+    repo_root: Path,
+) -> dict[str, Any]:
+    import subprocess
+
+    failed_names = (
+        "source.osim",
+        "request.json",
+        "solution.sto",
+        "mesh_grid_audit.json",
+        "solution_serialization_audit.json",
+    )
+    snapshot_names = (
+        "source.osim",
+        "request.json",
+        "solution.sto",
+        "time_only_controls.sto",
+        "replay_input_manifest.json",
+    )
+    code_paths = (
+        Path(__file__),
+        repo_root / "tests/opensim/native_moco_ladder_worker.py",
+        repo_root / "tests/opensim/native_moco_refinement.py",
+    )
+    runtime_names = ("_common.pyd", "_simulation.pyd", "_moco.pyd", "osimMoco.dll")
+    head = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=repo_root,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    return {
+        "head": head,
+        "failed_run_sha256": {
+            name: _sha256(failed_run / name) for name in failed_names
+        },
+        "snapshot_sha256": {name: _sha256(snapshot / name) for name in snapshot_names},
+        "code_sha256": {
+            str(path.relative_to(repo_root)): _sha256(path) for path in code_paths
+        },
+        "worker_interpreter": {
+            "path": str(Path(worker_python).resolve()),
+            "sha256": _sha256(Path(worker_python)),
+        },
+        "runtime_sha256": {name: _sha256(casadi_path / name) for name in runtime_names},
+        "runtime_coverage": "bounded Python extensions and Moco DLL; not a closed dependency identity",
+    }
+
+
+def _validate_solution_replay_snapshot(
+    failed_run: Path, snapshot: Path, provenance: dict[str, Any]
+) -> None:
+    manifest = json.loads(
+        (snapshot / "replay_input_manifest.json").read_text(encoding="utf-8")
+    )
+    expected_original = {
+        name: provenance["failed_run_sha256"][name]
+        for name in ("source.osim", "request.json", "solution.sto")
+    }
+    expected_snapshot = {
+        name: provenance["snapshot_sha256"][name]
+        for name in ("source.osim", "request.json", "solution.sto")
+    }
+    if (
+        manifest.get("source_sha256") != expected_original
+        or manifest.get("failed_audit_sha256")
+        != {
+            name: provenance["failed_run_sha256"][name]
+            for name in ("mesh_grid_audit.json", "solution_serialization_audit.json")
+        }
+        or manifest.get("snapshot_sha256") != expected_snapshot
+        or manifest.get("derived_time_only_controls_sha256")
+        != provenance["snapshot_sha256"]["time_only_controls.sto"]
+        or expected_original != expected_snapshot
+        or manifest.get("diagnostic_only") is not True
+        or manifest.get("physical_qualification") != "unqualified"
+    ):
+        raise ValueError("replay input snapshot is not bound to the failed solution")
 
 
 def _retained_replay_invocation(

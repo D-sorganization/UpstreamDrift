@@ -1763,3 +1763,162 @@ def test_windows_timeout_kills_launcher_descendant_tree(tmp_path: Path) -> None:
     assert result[0].peak_sampled_tree_rss_bytes is not None
     time.sleep(0.8)
     assert not marker.exists()
+
+
+def test_solution_controls_snapshot_preserves_failed_solve_and_actual_grid(
+    tmp_path: Path,
+) -> None:
+    import hashlib
+
+    from tests.opensim.native_moco_ladder_harness import (
+        prepare_solution_controls_snapshot,
+    )
+
+    source_run = tmp_path / "failed_child"
+    source_run.mkdir()
+    (source_run / "source.osim").write_bytes(b"source bytes")
+    (source_run / "request.json").write_bytes(
+        b'{"native_control_bounds":{"/forceset/extensor":[0.01,1.0],'
+        b'"/forceset/flexor":[0.01,1.0]},"physical_qualification":"unqualified"}\n'
+    )
+    solution = (
+        "name=fixture\nnRows=3\nnColumns=13\nnum_states=10\n"
+        "num_controls=2\ninDegrees=no\nendheader\n"
+        "time /jointset/base/q/value /jointset/follower/dependent/value "
+        "/jointset/anchor/fixed/value /jointset/base/q/speed "
+        "/jointset/follower/dependent/speed /jointset/anchor/fixed/speed "
+        "/forceset/flexor/activation /forceset/flexor/fiber_length "
+        "/forceset/extensor/activation /forceset/extensor/fiber_length "
+        "/forceset/flexor /forceset/extensor\n"
+        "0 0.1 0.2 0.3 0 0 0 0.05 0.09 0.05 0.08 0.011 0.021\n"
+        "0.005000000000000001 0.2 0.3 0.4 0 0 0 0.05 0.09 0.05 0.08 0.012 0.022\n"
+        "0.01 0.3 0.4 0.5 0 0 0 0.05 0.09 0.05 0.08 0.013 0.023\n"
+    )
+    (source_run / "solution.sto").write_text(solution, encoding="utf-8")
+    (source_run / "mesh_grid_audit.json").write_text("failed grid audit")
+    (source_run / "solution_serialization_audit.json").write_text("passed roundtrip")
+    original = {
+        name: hashlib.sha256((source_run / name).read_bytes()).hexdigest()
+        for name in ("source.osim", "request.json", "solution.sto")
+    }
+
+    snapshot = tmp_path / "replay_inputs"
+    manifest = prepare_solution_controls_snapshot(source_run, snapshot)
+
+    assert manifest["source_sha256"] == original
+    assert manifest["snapshot_sha256"] == original
+    assert set(manifest["failed_audit_sha256"]) == {
+        "mesh_grid_audit.json",
+        "solution_serialization_audit.json",
+    }
+    assert manifest["grid_authority"] == "persisted_solution_sto_time_column"
+    assert manifest["control_authority"] == "persisted_solution_sto_control_columns"
+    assert manifest["diagnostic_only"] is True
+    assert (source_run / "solution.sto").read_text(encoding="utf-8") == solution
+    controls = (snapshot / "time_only_controls.sto").read_text(encoding="utf-8")
+    assert "DataType=double\nversion=3\nendheader\n" in controls
+    assert (
+        "time\t/forceset/flexor\t/forceset/extensor\n"
+        "0\t0.011\t0.021\n"
+        "0.005000000000000001\t0.012\t0.022\n"
+        "0.01\t0.013\t0.023\n"
+    ) in controls
+
+
+def test_bound_retained_replay_records_provenance_changes_and_failed_result(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import json
+
+    from tests.opensim import native_moco_ladder_harness as harness
+
+    repo_root = Path(__file__).resolve().parents[2]
+    failed_run = tmp_path / "failed_run"
+    failed_run.mkdir()
+    (failed_run / "source.osim").write_bytes(b"model")
+    (failed_run / "request.json").write_text(
+        json.dumps(
+            {
+                "native_control_bounds": {
+                    "/forceset/flexor": [0.01, 1.0],
+                    "/forceset/extensor": [0.01, 1.0],
+                },
+                "physical_qualification": "unqualified",
+            }
+        )
+    )
+    (failed_run / "solution.sto").write_text(
+        "nRows=2\nnColumns=4\nnum_controls=2\nendheader\n"
+        "time /jointset/q/value /forceset/flexor /forceset/extensor\n"
+        "0 0.1 0.01 0.02\n0.01 0.2 0.03 0.04\n"
+    )
+    (failed_run / "mesh_grid_audit.json").write_text("grid audit")
+    (failed_run / "solution_serialization_audit.json").write_text("roundtrip")
+    snapshot = tmp_path / "snapshot"
+    harness.prepare_solution_controls_snapshot(failed_run, snapshot)
+    runtime = tmp_path / "runtime"
+    runtime.mkdir()
+    for name in ("_common.pyd", "_simulation.pyd", "_moco.pyd", "osimMoco.dll"):
+        (runtime / name).write_bytes(name.encode())
+
+    def fail_after_mutation(*args, **kwargs):
+        (failed_run / "mesh_grid_audit.json").write_text("mutated audit")
+        return {
+            "status": "worker_exit",
+            "return_code": 1,
+            "owned_tree_cleanup_verified": True,
+        }
+
+    monkeypatch.setattr(harness, "run_retained_replay_diagnostic", fail_after_mutation)
+    result = harness.run_bound_solution_replay_diagnostic(
+        failed_run,
+        snapshot,
+        tmp_path / "diagnostic",
+        worker_python=sys.executable,
+        worker_environment={"CASADIPATH": "sdk"},
+        casadi_path=runtime,
+        repo_root=repo_root,
+    )
+
+    assert result["final_status"] == "provenance_changed"
+    assert result["replay_result"]["status"] == "worker_exit"
+    assert (
+        result["before"]["failed_run_sha256"]["mesh_grid_audit.json"]
+        != result["after"]["failed_run_sha256"]["mesh_grid_audit.json"]
+    )
+    invocation = json.loads((tmp_path / "diagnostic" / "invocation.json").read_text())
+    assert invocation["wall_timeout_seconds"] == 30
+    assert invocation["sampled_rss_soft_threshold_bytes"] == 1024**3
+    assert invocation["optimizer_invoked"] is False
+    saved = json.loads((tmp_path / "diagnostic" / "supervisor_result.json").read_text())
+    assert saved == result
+
+
+@pytest.mark.parametrize(
+    "row, message",
+    [
+        ("0.005 0.2 0.012 nan", "non-finite"),
+        ("0.005 0.2 0.009 0.02", "request source bounds"),
+        ("0.005 0.2 0.012 1.1", "request source bounds"),
+        ("0.005 0.2 0.012", "row width"),
+    ],
+)
+def test_solution_controls_export_rejects_malformed_retained_rows(
+    tmp_path: Path, row: str, message: str
+) -> None:
+    from tests.opensim.native_moco_ladder_harness import solution_controls_to_sto
+
+    solution = tmp_path / "solution.sto"
+    output = tmp_path / "controls.sto"
+    solution.write_text(
+        "nRows=2\nnColumns=4\nnum_controls=2\nendheader\n"
+        "time /jointset/q/value /forceset/flexor /forceset/extensor\n"
+        f"0 0.1 0.01 0.02\n{row}\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match=message):
+        solution_controls_to_sto(
+            solution,
+            output,
+            {"/forceset/flexor": [0.01, 1.0], "/forceset/extensor": [0.01, 1.0]},
+        )
