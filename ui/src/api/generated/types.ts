@@ -693,6 +693,18 @@ export interface Body_import_session_v2_tools_launch_monitor_analytics_v2_import
   options: string;
 }
 
+export interface Body_import_source_scope_review_api_necromatcher_fits__fit_id__source_scope_reviews_post {
+  file: string;
+}
+
+export interface Body_import_source_scope_review_api_v1_necromatcher_fits__fit_id__source_scope_reviews_post {
+  file: string;
+}
+
+export interface Body_import_source_scope_review_necromatcher_fits__fit_id__source_scope_reviews_post {
+  file: string;
+}
+
 export interface Body_preview_import_v2_api_tools_launch_monitor_analytics_v2_import_preview_post {
   file: string;
 }
@@ -2003,6 +2015,12 @@ export interface ImpactParametersResponse {
   d_plane?: Record<string, number | null>;
 }
 
+export interface ImpactRunRequest {
+  geometry: Record<string, unknown>;
+  selection: Record<string, unknown>;
+  budget_wall_s: number;
+}
+
 /**
  * One ``swing_sim.ball_flight_trajectory/1`` record to import for overlay. ``record`` is accepted as an opaque JSON object rather than a typed model on purpose: the wire's own shape is validated by the vendored Tools reader (fail-closed), not re-declared here. Passing it through unmodified means every field the reader checks — unknown fields, missing fields, malformed provenance, non-monotone samples — is enforced exactly as the wire defines it, from either flight-model family (issue #9352, ADR-0047).
  */
@@ -2522,7 +2540,7 @@ export interface ModelPayloadV2 {
   features: string[];
   model: "linear" | "ridge" | "lasso" | "elastic_net" | "mlp";
   random_seed: number;
-  group_column?: "monitor_vendor" | "session_id" | "club" | null;
+  group_column?: "session_id" | "monitor_vendor" | "club" | null;
 }
 
 export interface ModelProvenanceV2 {
@@ -2986,6 +3004,11 @@ export interface RefitRequest {
   closure_weight: number;
   unknown_visibility_weight: number;
   budget_wall_s: number;
+  config?: Record<string, unknown> | null;
+  shaft_evidence?: Record<string, unknown> | null;
+  source_scope?: Record<string, unknown> | null;
+  operation: "fit" | "author_initialization" | "restrict_initialization";
+  initialization_source: "sampled_parent" | "preserved_spline" | "restricted_spline";
 }
 
 /**
@@ -3034,6 +3057,21 @@ export interface ReportPayloadV2 {
   records: Record<string, unknown>[];
   project_name: string;
   treatment_audit_log?: Record<string, unknown>[];
+}
+
+export interface ResearchAim {
+  source_to_target_rotation: number[][];
+  revision: number;
+}
+
+export interface ResearchPrepareRequest {
+  replay_id: string;
+  run_id: string;
+  shot_id: string;
+  session_id: string;
+  created_at_utc: string;
+  aim_context: ResearchAim;
+  context_revision: number;
 }
 
 export interface ResolveUncertainRequest {
@@ -3769,6 +3807,9 @@ export interface VideoAnalysisResponse {
 }
 
 export interface VideoExportRequest {
+  shaft_evidence?: Record<string, unknown> | null;
+  shape_overlay?: Record<string, unknown> | null;
+  caption_overlay?: Record<string, unknown> | null;
   force_layer?: ForceLayerRequest;
 }
 
