@@ -216,7 +216,7 @@ def _solver_progress_properties(
     for name, getter_name in getter_names.items():
         try:
             getter = getattr(solver, getter_name, None)
-        except Exception as error:  # noqa: BLE001 - introspection must remain observational
+        except (AttributeError, TypeError, RuntimeError, ValueError) as error:
             result[name] = _solver_progress_error(getter_name, error)
             continue
         if not callable(getter):
@@ -224,7 +224,14 @@ def _solver_progress_properties(
             continue
         try:
             value = getter()
-        except Exception as error:  # noqa: BLE001 - introspection must remain observational
+        except (
+            AttributeError,
+            TypeError,
+            RuntimeError,
+            ValueError,
+            LookupError,
+            OSError,
+        ) as error:
             result[name] = _solver_progress_error(getter_name, error)
             continue
         if type(value) is float and not math.isfinite(value):
