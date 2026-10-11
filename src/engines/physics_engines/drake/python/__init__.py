@@ -1,26 +1,32 @@
-"""Drake physics engine Python package."""
+"""Public Drake API facade with lazy imports for optional dependencies."""
 
-from src.engines.physics_engines.drake.python.simulate_with_coefficients import (
-    CANONICAL_COORDINATE_NAMES,
-    CLUBHEAD_FRAME_NAME,
-    COEFFS_PER_JOINT,
-    DEFAULT_GOLFER_URDF,
-    GRIP_FRAME_NAME,
-    POLY_BOUNDS,
-    POLY_DEGREE,
-    EngineJointMap,
-    SimOptions,
-    SimOut,
-    SynthesizeOptions,
-    evaluate_bernstein_torque,
-    evaluate_polynomial_torque,
-    evaluate_torque_polynomial,
-    get_drake_canonical_joint_map,
-    is_drake_available,
-    polynomial_torque_bounds,
-    simulate_with_coefficients,
-    synthesize_target_from_coefficients,
-)
+from __future__ import annotations
+
+from importlib import import_module
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from src.engines.physics_engines.drake.python.simulate_with_coefficients import (
+        CANONICAL_COORDINATE_NAMES,
+        CLUBHEAD_FRAME_NAME,
+        COEFFS_PER_JOINT,
+        DEFAULT_GOLFER_URDF,
+        GRIP_FRAME_NAME,
+        POLY_BOUNDS,
+        POLY_DEGREE,
+        EngineJointMap,
+        SimOptions,
+        SimOut,
+        SynthesizeOptions,
+        evaluate_bernstein_torque,
+        evaluate_polynomial_torque,
+        evaluate_torque_polynomial,
+        get_drake_canonical_joint_map,
+        is_drake_available,
+        polynomial_torque_bounds,
+        simulate_with_coefficients,
+        synthesize_target_from_coefficients,
+    )
 
 __all__ = [
     "CANONICAL_COORDINATE_NAMES",
@@ -43,3 +49,14 @@ __all__ = [
     "simulate_with_coefficients",
     "synthesize_target_from_coefficients",
 ]
+
+
+def __getattr__(name: str) -> Any:
+    if name in __all__:
+        module = import_module(".simulate_with_coefficients", __package__)
+        return getattr(module, name)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
+def __dir__() -> list[str]:
+    return sorted(set(globals()) | set(__all__))
