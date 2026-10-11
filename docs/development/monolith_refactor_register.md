@@ -48,9 +48,9 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1139 | `src/api/routes/launch_monitor_analytics.py` |
 | 1134 | `src/shared/python/shadow_tracker/segmentation.py` |
 | 1134 | `src/tools/model_explorer/model_library.py` |
+| 1133 | `src/shared/python/motion_matching/full_body_ik.py` |
 | 1129 | `src/engines/physics_engines/opensim/python/tour_matching/native_moco_preparation.py` |
 | 1128 | `src/tools/starting_pose_matcher/gui_main_widget.py` |
-| 1123 | `src/shared/python/motion_matching/full_body_ik.py` |
 | 1118 | `src/motion_capture/rig/__main__.py` |
 | 1115 | `src/bunkershot3d/ball/qualification.py` |
 | 1114 | `src/engines/physics_engines/drake/python/motion_matching/humanoid_urdf.py` |
@@ -172,14 +172,15 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 836 | `src/shared/python/perturbation/cross_engine_runner.py` |
 | 834 | `src/shared/python/engine_core/engine_probes.py` |
 | 833 | `src/shared/python/ui/qt/widgets/signal_toolkit_ui_mixin.py` |
-| 832 | `src/shared/python/motion_matching/pipeline/dynamics.py` |
 | 831 | `src/bunkershot3d/solvers/mpm/constitutive.py` |
+| 831 | `src/shared/python/motion_matching/pipeline/dynamics.py` |
 | 831 | `src/shared/python/signal_toolkit/widget_processing.py` |
 | 831 | `src/tools/starting_pose_matcher/gui_builders_mixin.py` |
 | 830 | `src/research/deformable/objects.py` |
 | 830 | `src/shared/python/motion_pipeline/preprocessing/gap_fill.py` |
 | 828 | `src/bunkershot3d/solvers/envelope.py` |
 | 828 | `src/shared/python/motion_matching/pipeline/lane.py` |
+| 826 | `src/shared/python/motion_matching/execution/spec_builder.py` |
 | 822 | `src/tools/capture_rig/layout_editor.py` |
 | 819 | `src/shared/python/model_generation/converters/simscape/simscape_converter.py` |
 | 819 | `src/shared/python/motion_matching/club_only/ui_integration.py` |

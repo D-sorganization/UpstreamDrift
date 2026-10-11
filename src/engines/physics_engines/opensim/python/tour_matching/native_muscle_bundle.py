@@ -8,6 +8,7 @@ and unreviewed component classes require separate policies.
 from __future__ import annotations
 
 import hashlib
+import json
 import re
 from collections.abc import Mapping
 from pathlib import Path
@@ -27,6 +28,9 @@ from src.engines.native_replay_contracts import (
 )
 
 import src.engines.physics_engines.opensim.python.tour_matching.muscle_replay as muscle_replay
+from src.engines.physics_engines.opensim.python.tour_matching import (
+    native_visual_resources,
+)
 
 if TYPE_CHECKING:
     from sidekick.lab.mocap import ExperimentReplayBundle
@@ -98,17 +102,30 @@ def _registered_options(
     return options
 
 
-def _audit_components(model: Any) -> None:
+def _audit_components(
+    model: Any, visual_mesh_paths: frozenset[str] = frozenset()
+) -> None:
     """Reject unreviewed component semantics before and after native initialization."""
+    observed_visual_meshes: set[str] = set()
     for component in tuple(model.getComponentsList()):
-        if component.getConcreteClassName() not in _COMPONENTS:
+        kind = component.getConcreteClassName()
+        path = component.getAbsolutePathString()
+        if kind == "Mesh" and path in visual_mesh_paths:
+            observed_visual_meshes.add(path)
+            continue
+        if kind not in _COMPONENTS:
             raise ValueError(
                 "component needs a separately reviewed native replay policy"
             )
+    if observed_visual_meshes != set(visual_mesh_paths):
+        raise ValueError("source-bound visual Mesh component ownership differs")
 
 
-def _validate_self_contained_source(raw: bytes) -> None:
-    """Require one inline model so frozen source bytes cover its dependencies."""
+def _validate_self_contained_source(
+    raw: bytes,
+    visual_resources: tuple[native_visual_resources.SourceVisualResource, ...] = (),
+) -> None:
+    """Require an inline model and an exact source-owned visual resource list."""
     try:
         document = safe_parse_string(
             raw,
@@ -134,9 +151,10 @@ def _validate_self_contained_source(raw: bytes) -> None:
         # prefix cannot hide an external reference from this gate.
         tag = element.tagName.rsplit(":", 1)[-1].lower()
         if tag in {"file", "filename", "file_name"} or tag.endswith("_file"):
-            raise ValueError(
-                "external source resources need a separate identity policy"
-            )
+            if not visual_resources or tag != "mesh_file":
+                raise ValueError(
+                    "external source resources need a separate identity policy"
+                )
         if any(
             element.attributes.item(index).name.rsplit(":", 1)[-1].lower()
             in {"file", "filename", "href"}
@@ -145,21 +163,45 @@ def _validate_self_contained_source(raw: bytes) -> None:
             raise ValueError(
                 "external source references need a separate identity policy"
             )
+    if visual_resources:
+        references = native_visual_resources.discover_visual_meshes(raw)
+        expected = tuple(
+            sorted(
+                (
+                    item.relative_path,
+                    item.component_path,
+                )
+                for item in visual_resources
+            )
+        )
+        actual = tuple(
+            sorted((item.relative_path, item.component_path) for item in references)
+        )
+        if actual != expected:
+            raise ValueError(
+                "external source resources need an exact source-bound visual closure"
+            )
 
 
 def _prepare(
     path: Path,
     initial: Mapping[str, float],
     controls: Mapping[str, NDArray[np.float64]],
+    visual_resources: tuple[native_visual_resources.SourceVisualResource, ...] = (),
 ) -> tuple[Any, Any, tuple[str, ...], tuple[str, ...], dict[str, tuple[float, ...]]]:
     import opensim as osim
 
     raw = path.read_bytes()
-    _validate_self_contained_source(raw)
+    _validate_self_contained_source(raw, visual_resources)
+    if native_visual_resources.capture_visual_resources(path, raw) != visual_resources:
+        raise ValueError("native visual resource closure changed during admission")
+    visual_paths = native_visual_resources.visual_mesh_component_paths(visual_resources)
     model = osim.Model(str(path))
     if raw != path.read_bytes():
         raise ValueError("source model changed during native load")
-    _audit_components(model)
+    if native_visual_resources.capture_visual_resources(path, raw) != visual_resources:
+        raise ValueError("native visual resources changed during model load")
+    _audit_components(model, visual_paths)
     muscles, muscle_names = muscle_replay._admit_native_muscles(model, controls, ())
     coordinates = model.getCoordinateSet()
     if any(
@@ -167,7 +209,7 @@ def _prepare(
     ):
         raise ValueError("clamped coordinates require another native policy")
     state, names, _ = muscle_replay._restore_continuous_state(model, initial, 0.0)
-    _audit_components(model)
+    _audit_components(model, visual_paths)
     if state.getNY() != len(names):
         raise ValueError("native continuous state coverage is incomplete")
     model.realizeDynamics(state)
@@ -283,6 +325,7 @@ def _identity(
     options: Mapping[str, tuple[float, ...]],
     contracts: Any,
     native_mechanics_profile: Any | None = None,
+    visual_resources: tuple[native_visual_resources.SourceVisualResource, ...] = (),
 ) -> Any:
     import opensim as osim
 
@@ -297,6 +340,10 @@ def _identity(
         *native_extensions,
     )
     for artifact in artifacts:
+        provider.update(artifact.name.encode())
+        provider.update(artifact.read_bytes())
+    if visual_resources:
+        artifact = Path(native_visual_resources.__file__)
         provider.update(artifact.name.encode())
         provider.update(artifact.read_bytes())
     provider.update(osim.GetVersionAndDate().encode())
@@ -360,8 +407,14 @@ def build_native_muscle_replay_bundle(
     if grid[0] != 0:
         raise ValueError("native bundle requires simulation-relative time zero")
     path = Path(model_path)
-    model, _, names, muscles, options = _prepare(path, initial, controls)
-    identity = _identity(path, model, names, muscles, options, contracts)
+    raw = path.read_bytes()
+    visual_resources = native_visual_resources.capture_visual_resources(path, raw)
+    model, _, names, muscles, options = _prepare(
+        path, initial, controls, visual_resources
+    )
+    identity = _identity(
+        path, model, names, muscles, options, contracts, visual_resources
+    )
     values = tuple((name, (initial[name],)) for name in names) + tuple(options.items())
     capability = contracts.CapabilityDeclaration(
         "reviewed-native-muscle-cold-start",
@@ -369,7 +422,7 @@ def build_native_muscle_replay_bundle(
         contracts.CapabilitySupport.SUPPORTED,
         contracts.CapabilityAvailability.AVAILABLE,
     )
-    return contracts.build_experiment_replay_bundle(
+    bundle = contracts.build_experiment_replay_bundle(
         experiment_id,
         identity,
         (capability,),
@@ -381,6 +434,11 @@ def build_native_muscle_replay_bundle(
         tuple(tuple(controls[name][i] for name in muscles) for i in range(len(grid))),
         _policy(identity, contracts),
     )
+    if visual_resources:
+        return native_visual_resources.make_resource_envelope(
+            bundle, identity.source_model_sha256, visual_resources
+        )
+    return bundle
 
 
 def _bundle_inputs(
@@ -403,36 +461,99 @@ def _bundle_inputs(
 
 
 def replay_native_muscle_bundle(
-    bundle: ExperimentReplayBundle, model_path: str | Path
+    bundle: ExperimentReplayBundle
+    | native_visual_resources.NativeMuscleResourceEnvelope,
+    model_path: str | Path,
 ) -> muscle_replay.NativeMuscleReplayResult:
     """Revalidate identity and execute fresh native integration with no feedback."""
     contracts = native_replay_contract_types()
-    bundle = validate_native_replay_bundle(bundle, contracts)
-    initial, grid, controls = _bundle_inputs(bundle)
-    raw = Path(model_path).read_bytes()
-    if hashlib.sha256(raw).hexdigest() != bundle.model.source_model_sha256:
+    envelope = (
+        bundle
+        if isinstance(bundle, native_visual_resources.NativeMuscleResourceEnvelope)
+        else None
+    )
+    shared_bundle = envelope.replay_bundle if envelope is not None else bundle
+    shared_bundle = validate_native_replay_bundle(shared_bundle, contracts)
+    initial, grid, controls = _bundle_inputs(shared_bundle)
+    path = Path(model_path)
+    raw = path.read_bytes()
+    if hashlib.sha256(raw).hexdigest() != shared_bundle.model.source_model_sha256:
         raise ValueError("native source model identity differs")
-    with TemporaryDirectory(prefix="opensim-frozen-replay-") as directory:
-        # This policy excludes external-resource component classes. Owned frozen
-        # bytes bind admission and execution without reopening the caller's file.
-        snapshot = Path(directory) / "frozen.osim"
-        snapshot.write_bytes(raw)
-        expected = build_native_muscle_replay_bundle(
-            snapshot, initial, grid, controls, experiment_id=bundle.experiment_id
-        )
-        if expected.capabilities[0] not in bundle.capabilities:
-            raise ValueError("required native replay capability identity differs")
-        for field in ("model", "initial_state", "policy", "input_history"):
-            if getattr(bundle, field) != getattr(expected, field):
+    if envelope is None:
+        _validate_self_contained_source(raw)
+        with TemporaryDirectory(prefix="opensim-frozen-replay-") as directory:
+            # This policy excludes external-resource component classes. Owned frozen
+            # bytes bind admission and execution without reopening the caller's file.
+            snapshot = Path(directory) / "frozen.osim"
+            snapshot.write_bytes(raw)
+            expected = build_native_muscle_replay_bundle(
+                snapshot,
+                initial,
+                grid,
+                controls,
+                experiment_id=shared_bundle.experiment_id,
+            )
+            if expected != shared_bundle:
                 raise ValueError(
                     "native model, state, registered options or executed policy identity differs"
                 )
+            result = muscle_replay.replay_muscle_excitations(
+                snapshot, initial, grid, controls, accuracy=_ACCURACY
+            )
+            if (
+                result.model_sha256 != shared_bundle.model.source_model_sha256
+                or snapshot.read_bytes() != raw
+            ):
+                raise ValueError("executed native source model identity differs")
+            return result
+
+    if hashlib.sha256(raw).hexdigest() != envelope.source_model_sha256:
+        raise ValueError("visual resource envelope source identity differs")
+    if (
+        native_visual_resources.capture_visual_resources(path, raw)
+        != envelope.resources
+    ):
+        raise ValueError(
+            "visual resource closure differs from its source-bound manifest"
+        )
+    with native_visual_resources.freeze_source_and_resources(
+        path, raw, envelope.resources
+    ) as snapshot:
+        expected = build_native_muscle_replay_bundle(
+            snapshot,
+            initial,
+            grid,
+            controls,
+            experiment_id=shared_bundle.experiment_id,
+        )
+        if expected != envelope:
+            raise ValueError("native source or visual resource identity differs")
         result = muscle_replay.replay_muscle_excitations(
             snapshot, initial, grid, controls, accuracy=_ACCURACY
         )
         if (
-            result.model_sha256 != bundle.model.source_model_sha256
+            result.model_sha256 != shared_bundle.model.source_model_sha256
             or snapshot.read_bytes() != raw
+            or native_visual_resources.capture_visual_resources(snapshot, raw)
+            != envelope.resources
         ):
-            raise ValueError("executed native source model identity differs")
+            raise ValueError("executed native source/resource identity differs")
         return result
+
+
+def dumps_native_muscle_resource_bundle(
+    envelope: native_visual_resources.NativeMuscleResourceEnvelope,
+) -> str:
+    """Serialize a resource-bearing bundle using its explicit adapter schema."""
+    return native_visual_resources.dumps_resource_envelope(
+        envelope, native_replay_contract_types()
+    )
+
+
+def loads_native_muscle_resource_bundle(
+    text: str,
+) -> native_visual_resources.NativeMuscleResourceEnvelope:
+    """Load a versioned resource envelope without changing shared T01 schema."""
+    return native_visual_resources.loads_resource_envelope(
+        text, native_replay_contract_types()
+    )

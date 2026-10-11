@@ -407,6 +407,58 @@ def test_planted_stance_spheres_do_not_slide(
         )
 
 
+def test_stance_anchored_at_the_start_pose_holds_the_first_frame(
+    kinematics: module.FullBodyMarkerKinematics,
+) -> None:
+    """``anchor_stance_at_init`` plants the first frame at ``q_init`` (#12222).
+
+    Without it the first frame's own fit sets the anchors, so its feet can
+    drift off the calibrated address the run starts from.
+    """
+    n = len(kinematics.coordinate_order)
+    q_up = np.zeros(n)
+    q_up[2] = 1.0
+    stance = [("heel_l", "forefoot_l"), ("heel_l", "forefoot_l")]
+    common = {
+        "ground": GROUND,
+        "closure_weight": 0.0,
+        "prior_weight": 1e-6,
+        "flat_feet_per_frame": stance,
+        "plant_stance": True,
+        "ground_weight": 1e4,
+    }
+    # The start pose is a grounded address, as the calibrated address is.
+    q_a = kinematics.solve_trajectory(
+        np.stack([kinematics.marker_positions(q_up)] * 2),
+        np.ones((2, len(kinematics.marker_positions(q_up))), dtype=bool),
+        q_up,
+        **common,
+    )[0][0]
+    q_b = q_a.copy()
+    q_b[0] += 0.05  # the markers of the first frame say the body moved 5 cm
+    targets = np.stack([kinematics.marker_positions(q_b)] * 2)
+    valid = np.ones(targets.shape[:2], dtype=bool)
+    start = kinematics.sphere_ground_points(q_a, GROUND)["heel_l"]
+    free, _ = kinematics.solve_trajectory(targets, valid, q_a, **common)
+    held, _ = kinematics.solve_trajectory(
+        targets, valid, q_a, anchor_stance_at_init=True, **common
+    )
+    for k in (0, 1):
+        moved_free = kinematics.sphere_ground_points(free[k], GROUND)["heel_l"]
+        moved_held = kinematics.sphere_ground_points(held[k], GROUND)["heel_l"]
+        assert np.linalg.norm(moved_free - start) > 0.03
+        assert np.linalg.norm(moved_held - start) < 2e-3
+    with pytest.raises(ValueError, match="anchor_stance_at_init needs plant_stance"):
+        kinematics.solve_trajectory(
+            targets,
+            valid,
+            q_a,
+            ground=GROUND,
+            flat_feet_per_frame=stance,
+            anchor_stance_at_init=True,
+        )
+
+
 def test_marker_weights_drop_a_marker_from_the_fit(
     kinematics: module.FullBodyMarkerKinematics,
 ) -> None:
