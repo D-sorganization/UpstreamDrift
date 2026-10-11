@@ -23,12 +23,21 @@ from src.engines.physics_engines.opensim.python import club_visuals
 from src.shared.python.force_overlay.glyphs import GlyphSet
 from src.shared.python.golf_view_presets import (
     VIEWER_FOV_Y_RAD,
+    get_view_preset,
     simbody_camera_transform,
 )
 from src.shared.python.motion_matching.same_input import InputBundle
 from src.shared.python.motion_matching.visual_skeleton import derive_visual_skeleton
 from src.tools.native_viewer_export.ball import BALL_RGBA, BallPlacement
 from src.tools.native_viewer_export.backends._club import club_parts
+from src.tools.native_viewer_export.backends._opensim_framing import (
+    fitted_distance_m,
+    fitted_lookat_m,
+    framing_body_names,
+    principal_crop,
+    simbody_fov_y_rad,
+    sole_points,
+)
 from src.tools.native_viewer_export.backends._head import head_mesh_files
 from src.tools.native_viewer_export.backends._scene import (
     fit_to_size,
@@ -230,11 +239,44 @@ def ball_slide_m(visible: list[bool] | None, position: int) -> float:
     return 0.0 if visible[position] else BALL_HIDE_OFFSET_M
 
 
+def collect_framing_points(
+    model: Any,
+    state: Any,
+    coordinate_names: list[str],
+    q: np.ndarray,
+    ground_h: float,
+) -> np.ndarray:
+    """``(n, 3)`` foot, head and clubhead points (plus soles) over every row of ``q``.
+
+    Postcondition: finite points, ``2 * rows * framing bodies`` of them.
+    """
+    coords = model.getCoordinateSet()
+    bodies = model.getBodySet()
+    names = framing_body_names(
+        [bodies.get(i).getName() for i in range(bodies.getSize())]
+    )
+    if not names:
+        raise ValueError("model has no foot, head or clubhead body to frame")
+    out: list[list[float]] = []
+    for row in q:
+        for name, value in zip(coordinate_names, row, strict=True):
+            coords.get(name).setValue(state, float(value), False)
+        model.realizePosition(state)
+        for body in names:
+            p = bodies.get(body).getPositionInGround(state)
+            out.append([p.get(0), p.get(1), p.get(2)])
+    return sole_points(np.asarray(out, dtype=float), ground_h)
+
+
 def set_camera(
-    osim: Any, viz: Any, view: str, job: WorkerJob, lookat_m: list[float]
+    osim: Any,
+    viz: Any,
+    view: str,
+    distance_m: float | None,
+    lookat_m: list[float],
 ) -> None:
     """Point the simbody camera for a golf view preset at ``lookat_m``."""
-    rows, pos = simbody_camera_transform(view, lookat_m, job.distance_m)
+    rows, pos = simbody_camera_transform(view, lookat_m, distance_m)
     mat = osim.Mat33()
     for i in range(3):
         for j in range(3):
@@ -259,10 +301,34 @@ def main(job_path: str) -> None:
     viz.setShowSimTime(False)
     viz.setSystemUpDirection(osim.CoordinateDirection(osim.CoordinateAxis(2)))
     viz.setGroundHeight(ground_h)
-    viz.setCameraFieldOfView(FOV_Y_RAD)
     coords = model.getCoordinateSet()
     glyph_sets = job.load_glyph_sets()
     time.sleep(3.0)
+    # The window is not the clip's aspect: crop about the principal point and set
+    # the simbody lens so the visible crop has the shared viewer lens (#12308).
+    viz.drawFrameNow(state)
+    time.sleep(SETTLE_S)
+    window_hw = grab_window().shape[:2]
+    y0, y1, x0, x1 = principal_crop(window_hw, UI_STRIP_PX, (job.width, job.height))
+    fov = simbody_fov_y_rad(FOV_Y_RAD, window_hw[0], y1 - y0)
+    viz.setCameraFieldOfView(fov)
+    points = collect_framing_points(
+        model, state, list(bundle.coordinate_order), q[job.indices], ground_h
+    )
+    aspect = job.width / job.height
+    # fixed views are fitted to the trajectory unless the caller fixed the distance
+    fitted = [
+        v
+        for v in job.views
+        if get_view_preset(v).tracks is None and job.distance_m is None
+    ]
+    fit_looks = {v: fitted_lookat_m(v, points, job.lookat_m) for v in fitted}
+    distances = {
+        v: fitted_distance_m(v, points, fit_looks[v], None, FOV_Y_RAD, aspect)
+        if v in fit_looks
+        else job.distance_m
+        for v in job.views
+    }
     for pos, k in enumerate(job.indices):
         for name, value in zip(bundle.coordinate_order, q[k], strict=True):
             coords.get(name).setValue(state, float(value), False)
@@ -271,8 +337,8 @@ def main(job_path: str) -> None:
             coords.get(ball_coord).setValue(state, slide, False)
         model.realizePosition(state)
         for view in job.views:
-            look = job.lookat_for(view, pos)
-            set_camera(osim, viz, view, job, look)
+            look = fit_looks.get(view) or job.lookat_for(view, pos)
+            set_camera(osim, viz, view, distances[view], look)
             viz.drawFrameNow(state)
             time.sleep(SETTLE_S)
             window = grab_window()
@@ -280,14 +346,14 @@ def main(job_path: str) -> None:
                 cam = pinhole_for_view(
                     view,
                     look,
-                    job.distance_m,
-                    FOV_Y_RAD,
+                    distances[view],
+                    fov,
                     (window.shape[1], window.shape[0]),
                 )
                 window = draw_glyphs_rgb(window, glyph_sets[pos], cam)
-            # drop the visualizer's own toolbar strip (drawn after overlays so the
-            # projection still matches the full window)
-            frame = fit_to_size(window[:-UI_STRIP_PX], job.width, job.height)
+            # crop about the principal point, clear of the visualizer's toolbar
+            # strip (drawn after overlays so the projection matches the window)
+            frame = fit_to_size(window[y0:y1, x0:x1], job.width, job.height)
             np.save(job.frame_path(view, pos), frame)
 
 
