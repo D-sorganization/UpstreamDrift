@@ -10700,6 +10700,31 @@ The receipt retains `state_reset_allowed=False` separately from an unknown
 reset count when the adapter does not instrument that counter; policy is not
 reported as a measured zero.
 
+F09c also has an explicitly bound full-body MuJoCo generalized-effort path.
+It consumes the exact source coordinate order, complete q/v state, and frozen
+ZOH generalized efforts with zero root entries. The shared `VectorPlant` and
+RK4 integrator run eight fixed substeps with projection disabled; model-owned
+contact and weld dynamics are evaluated during the engine-acceleration calls.
+The path does not call `mj_step`, assemble/reset state, or accept a feedback
+callback. It reports closure residuals without adding a qualification
+threshold, accepts only q/v-only state under its exact provider identity, and
+remains unqualified. This consumer does not claim that it generated its input
+history or that the history is a full capture.
+
+The paired `record_native_full_body_feedback` producer accepts a declared
+Python controller with caller-bound source/configuration/reference digests.
+Before any integrator stage, it requires a complete finite initial q/v state,
+validates each returned effort's full coordinate shape and finiteness, and
+rejects nonzero root efforts. The controller receives detached q/v copies once
+per fixed interval; each output is held across eight shared RK4 substeps (32
+acceleration-stage evaluations per outer interval). It returns the standard
+T01 frozen-input bundle plus an unqualified producer record with the exact
+applied efforts and generated trajectory digests. Fresh replay is controller
+free. Initial closure residuals are reported without a threshold, and no
+assembly, reset, or projection is performed. The producer declares no effort
+bounds and makes no bounded-control, capture-match, support/grip, or physiology
+claim. See canonical chapter13 and the F09C turnover.
+
 ## Native Marker Positions From Replay States (F09d, #11907)
 
 `src/engines/feedback_native_markers.py` executes a frozen replay through the

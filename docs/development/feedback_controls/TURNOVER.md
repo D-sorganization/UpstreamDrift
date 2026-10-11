@@ -1,5 +1,25 @@
 # Feedback Controls Planning Turnover
 
+## F09c Full-Body MuJoCo Frozen Replay (#11898)
+
+The new `mujoco-full-body-generalized-rk4` provider binds a frozen T01 bundle
+to the full-body source spec and replays complete q/v state with all
+coordinate-ordered generalized-effort channels. Six root entries are required
+to be zero before entering the shared `VectorPlant` / fixed eight-substep RK4
+path. Projection, assembly, reset, hidden state, and feedback callbacks remain
+disabled during frozen replay; model-owned contact and weld forces are
+evaluated during the shared plant derivative calls. Initial and per-step
+closure residuals are observed without a new threshold. The paired feedback
+recorder calls a declared controller once per interval with detached complete
+q/v copies, rejects malformed or nonzero-root efforts before integration,
+holds the validated effort across the same eight RK4 substeps, and emits the
+existing T01 generalized-effort bundle plus an unqualified producer record.
+Tests use manufactured plants and verify 32 identical effort-bearing
+acceleration calls per interval and controller-free open-loop reproduction.
+They do not execute the production full-body model or qualify a real feedback
+law, bounded control, contact/grip, support, capture match, or physiology. See
+`F09C-NATIVE-EXECUTION.md` and canonical chapter 13.
+
 ## F07 Native Moco Physical-Body Preflight (#12205)
 
 The maintained OpenSim Moco runner now requires the existing source/native
@@ -599,3 +619,15 @@ to its original path and SHA-256; model/runtime binaries and private captures
 remain external. The package README states each result's limits. None establishes
 supported equilibrium, calibrated contact, capture accuracy, physiology, or
 production replay; all 17 model/variant rows remain unqualified.
+
+## Same-Input Lazy Package Exports (#11898)
+
+The `same_input` facade now resolves its established exports lazily. A clean
+subprocess test blocks `cv2`, historical-fit, pipeline, visualization, and
+reference/integrator imports while importing the closure submodule and
+requesting `project_to_closure`; the package does not initialize those
+dependencies. A separate subprocess verifies the full export set, provider
+object identities, `dir()` discoverability, and normal `AttributeError` for
+unknown names. The focused regression passes on the Python 3.13 host. This is
+an import-boundary fix only; it adds no native execution or qualification
+evidence.

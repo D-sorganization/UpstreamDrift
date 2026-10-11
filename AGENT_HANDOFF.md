@@ -1,3 +1,9 @@
+# Active: Measured Driver Club Cluster, #12221
+
+- Branch `claude/12221-driver-cluster`, stacked on `claude/12221-fixed-triad`. `evidence/club_markers/driver.json` (from the calibrated `anthro_driver_seeds` receipt at `1bef553457`) is now in the driver document. `anthro_driver`, `anthro_driver_seeds` and `anthro_driver_drake`, the OpenSim driver export, the inventory hashes and the tutorial hash `4ee2c43d` are regenerated.
+- Fixed cluster, fixture flags: capture face 5.50 / 14.96° (the canonical frame), model impact face 16.13°, speed −3.6 %, peak −0.3 ms. The canonical seeds receipt reads 7.5 / 30.5 / 82.6 mm (was 6.4 / 29.5 / 80.8). The nominal driver reads 41.7 / 46.1 / 73.6 mm (was 42.6 / 52.7 / 97.3).
+- Open: the same-input export of the fixed driver run diverges at impact; refit `grip_rotation_deg`; decide whether `--fix-club-markers` should be the default. Calc record: "Measured Driver Club Cluster".
+
 # Native Wrapped-Path Closure Handoff — #12234
 
 `native_wrapped_path.py` carries a source-hash-bound declaration for
@@ -384,14 +390,6 @@ model, raw capture, native optimizer or replay was qualified by this slice.
 # Active: Feedback Controls Planning — #11784
 
 Documentation branch `docs/feedback-controls-11784`; commit `SELF`. Read [Design](docs/development/feedback_controls/DESIGN.md), [Issue Dependencies](docs/development/feedback_controls/IMPLEMENTATION_PLAN.md) and [Turnover](docs/development/feedback_controls/TURNOVER.md). Goal: all-model six-engine parity culminating in muscle-driven OpenSim and independent excitation replay. Planning only; no new model/video is qualified. Next: F01 inventory/gate freeze, coordinate MOSAIC #11532 and parity #11605.
-
-# Active: MyoSuite Native Muscle Actuator Classification — #12249
-
-`MyoSuiteMuscleAnalyzer` now compares compiled actuator dynamics to the
-installed MuJoCo `mjDYN_MUSCLE` enum. The actual MuJoCo 3.8.0 mixed-actuator
-fixture runs without Gym/MyoSuite registration. See the F09q turnover and
-canonical chapter 31. Classification does not qualify physiology, capture
-mapping, excitation replay, or cross-engine parity.
 
 # Active: Impact-Phase Bushing Grip, OSV-7 #11739
 

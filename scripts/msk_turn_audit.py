@@ -60,7 +60,7 @@ from src.shared.python.swing_comparison.turn import (  # noqa: E402
 
 logger = logging.getLogger(__name__)
 
-MODES = ("baseline", "turn", "turn_feet")
+MODES = tt.MODES
 #: Generated-model bodies whose origins are the source hip and shoulder centres.
 SOURCE_BODIES = {
     "hip_l": "femur_l",
@@ -100,7 +100,7 @@ def audit(
     capture = load_tour_capture(capture_path)
     cap = capture_turn_inputs(capture)
     events = cap.events
-    markers = marker_turn_lines(cap.markers, cap.t, events)
+    markers = marker_turn_lines(cap.markers, cap.t, events)  # reported below
     fixture = mc.REPO_ROOT / "tests" / "fixtures" / "club_face" / f"swing_q_{club}.npz"
     all_rows = np.load(fixture)["q"]
     idx = row_indices(
@@ -109,12 +109,9 @@ def audit(
         [events.address_time, events.top_time, events.impact_time],
     )
     rows, times = all_rows[idx], idx * mt.FIXTURE_DT_S
-    targets = (
-        None
-        if mode == "baseline"
-        else tt.turn_targets_from_lines(markers, times, weight_rad=turn_weight_rad)
+    targets, feet = tt.tracking_inputs(
+        capture, times, mode, turn_weight_rad, turn_inputs=cap
     )
-    feet = tt.planted_feet_from_capture(capture) if mode == "turn_feet" else None
     start = time.monotonic()
     frames = mt.track_swing(
         mc.MODELS_DIR / "golf_humanoid.osim",

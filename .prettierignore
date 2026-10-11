@@ -95,6 +95,7 @@ tests/fixtures/club_face/provenance.json
 tests/fixtures/club_face/spec_driver.json
 tests/fixtures/club_face/spec_iron7.json
 src/engines/physics_engines/opensim/models/msk_club_grip_calibration.json
+docs/development/full_body_models/evidence/head_gaze/fd_neck_closed_loop.json
 
 # Preserve generated register and source-bound canonical club fixture specifications.
 docs/development/monolith_refactor_register.md
