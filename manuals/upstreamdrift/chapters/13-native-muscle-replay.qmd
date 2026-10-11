@@ -410,6 +410,7 @@ activation constants of 0.01 s, 0.04 s and a 0.01 minimum activation. It did
 not initialize or integrate the model. The short MuJoCo feedback replays and
 single-state Pinocchio/Drake observations are described with their units,
 source identities and limits in the archive README.
+A separate same-input 10 ms Pinocchio replay also retained all-sample q/v differences against the frozen MuJoCo T01 history; it is descriptive and carries no formal parity threshold.
 
 These are bounded synthetic diagnostics. Near-zero residuals at one manufactured
 pose and exact short-horizon numerical replay do not establish supported

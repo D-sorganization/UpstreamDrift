@@ -205,6 +205,12 @@
       "path": "mujoco/zero_effort/attempt2/supervisor-receipt.json"
     },
     {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\opensim_activation_property_probe_20261011\\PROTOCOL.md",
+      "sha256": "953c2085ffb0571c661d7e909e216a849aec8496e74e82f6b4f677bb76315a97",
+      "source_sha256": "953c2085ffb0571c661d7e909e216a849aec8496e74e82f6b4f677bb76315a97",
+      "path": "opensim/PROTOCOL.md"
+    },
+    {
       "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\opensim_activation_property_probe_20261011\\fingerprints.json",
       "sha256": "b30491c5b27c1bce80c54a4ed7f7f4bf4b1c765028bd92471afe964ca281b8d3",
       "source_sha256": "b30491c5b27c1bce80c54a4ed7f7f4bf4b1c765028bd92471afe964ca281b8d3",
@@ -221,12 +227,6 @@
       "sha256": "a1362b3a75a3a8d04096504a332612ef2e857f77eb58a0360765e5c890d8c1c3",
       "source_sha256": "a1362b3a75a3a8d04096504a332612ef2e857f77eb58a0360765e5c890d8c1c3",
       "path": "opensim/probe_activation_properties.py.snapshot"
-    },
-    {
-      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\opensim_activation_property_probe_20261011\\PROTOCOL.md",
-      "sha256": "953c2085ffb0571c661d7e909e216a849aec8496e74e82f6b4f677bb76315a97",
-      "source_sha256": "953c2085ffb0571c661d7e909e216a849aec8496e74e82f6b4f677bb76315a97",
-      "path": "opensim/PROTOCOL.md"
     },
     {
       "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\opensim_activation_property_probe_20261011\\run_supervised_probe.py",
@@ -287,6 +287,30 @@
       "sha256": "7709c8383f50d07539a4717e79bc514d563cd1b05ca64345fa1c940a794c5e93",
       "source_sha256": "7709c8383f50d07539a4717e79bc514d563cd1b05ca64345fa1c940a794c5e93",
       "path": "pinocchio/geometry/test_pinocchio_v1_candidate_lift_parity_20261012.py.snapshot"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\pinocchio_same_input_t01_root_attempt1\\pin_t01_same_input_root_attempt1.json",
+      "sha256": "0d5d149587506c06e01a684f237a965844bddcd6b73c3863c0ea69c07da4a443",
+      "source_sha256": "0d5d149587506c06e01a684f237a965844bddcd6b73c3863c0ea69c07da4a443",
+      "path": "pinocchio/same_input_t01/observation.json"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\run_pinocchio_same_input_t01_20261012.py",
+      "sha256": "0f23549db435339b039e90b2c83d0f5065f8a8eb8981543c4e068bce05e3dcd3",
+      "source_sha256": "0f23549db435339b039e90b2c83d0f5065f8a8eb8981543c4e068bce05e3dcd3",
+      "path": "pinocchio/same_input_t01/run_pinocchio_same_input_t01_20261012.py.snapshot"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\pinocchio_same_input_t01_root_attempt1\\pin_t01_same_input_root_attempt1.meta.txt",
+      "sha256": "614ba7486222635674074bb7a1cb90a6917c5c1d98af44c269b889dd90f15af5",
+      "source_sha256": "614ba7486222635674074bb7a1cb90a6917c5c1d98af44c269b889dd90f15af5",
+      "path": "pinocchio/same_input_t01/supervisor.meta.txt"
+    },
+    {
+      "source_path": "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\test_run_pinocchio_same_input_t01_20261012.py",
+      "sha256": "71b90fb278f8c07875c8d7b18c221b622fe9637a53de0c62b716da38d7f5358c",
+      "source_sha256": "71b90fb278f8c07875c8d7b18c221b622fe9637a53de0c62b716da38d7f5358c",
+      "path": "pinocchio/same_input_t01/test_run_pinocchio_same_input_t01_20261012.py.snapshot"
     }
   ],
   "schema": "manufactured-native-diagnostics-manifest-v1",
