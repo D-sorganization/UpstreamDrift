@@ -129,6 +129,20 @@ def test_nonuniform_hermite_simpson_uses_each_exact_cell_width() -> None:
     np.testing.assert_array_equal(defects["simpson_dynamics"], np.zeros(2))
 
 
+def test_saved_grid_rejects_displaced_cell_midpoint() -> None:
+    with pytest.raises(ValueError, match="temporal cell midpoint"):
+        _validate_saved_time_grid(np.array([0.0, 0.2, 0.5]))
+
+
+def test_saved_grid_accepts_midpoint_from_alternate_floating_arithmetic() -> None:
+    left = 0.0020988837305415584
+    right = 0.010943381622927757
+    alternate_midpoint = 0.5 * left + 0.5 * right
+    times = np.array([left, alternate_midpoint, right])
+    assert alternate_midpoint != left + 0.5 * (right - left)
+    _validate_saved_time_grid(times, mesh_intervals=1)
+
+
 @pytest.mark.parametrize(
     "times, mesh_intervals, message",
     [

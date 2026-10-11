@@ -835,3 +835,18 @@ midpoints to about `7e-18`. These are local indicators, not proof of continuous
 collocation error or causality. No native SDK was run, no thresholds or source
 states changed, and the result remains unqualified. The final report path is
 `experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/solution_control_replay_diagnostic_3bc787e36d_root/retained_replay/offline_activation_residual_analysis_finalsource_4e40b764.json`.
+
+A follow-up exact-input analysis additionally checks each stored middle row against the arithmetic midpoint of its adjacent saved endpoints within four ULPs at the local time-coordinate scale. The retained child differs by at most three such ULPs. This check validates endpoint/midpoint structure only; it does not reconstruct or accept the planned clock and leaves the separate 9-of-43 one-ULP planned-grid rejection intact. The follow-up report is `experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/solution_control_replay_diagnostic_3bc787e36d_root/retained_replay/offline_activation_residual_analysis_midpointvalidated.json`, SHA-256 `7ca16e41087280a1f6fba9f40b59865c568a6c0e525f151309ff14ecd3b9d46f`.
+
+Following the midpoint validator merge, I regenerated the offline report using
+the final integrated analyzer and unchanged retained inputs. Analyzer SHA-256:
+`c247a4cfd5369f829b5224c551713f7697e74bf5f430fcffbc59bd8ab1d9218b`; report
+SHA-256: `fa913993a25903120c27d02d529bd67579475935021a70f54723ae269e20832e`.
+The 43 saved rows represent 21 cells. The arithmetic midpoint check permits at
+most four local ULPs and the retained midpoint offsets are at most three; it
+accepts the persisted clock without reconstructing the planned grid. The strict
+9-of-43 planned-grid rejection remains unchanged. Metrics agree with the prior
+final-source offline report. This run used only saved files and did not launch
+OpenSim, a solver, or replay; scientific qualification remains unestablished.
+The new report path is
+`experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/solution_control_replay_diagnostic_3bc787e36d_root/retained_replay/offline_activation_residual_analysis_midpointvalidated_source_c247a4cf.json`.

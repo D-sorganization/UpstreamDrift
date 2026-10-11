@@ -372,3 +372,26 @@ source-bound report is
 (SHA-256 `d78b4efbfa66a01de23ad6403971ab2dca7e7171ccac6c4f7809f6cdaf3cd45d`;
 analysis source SHA-256
 `31925492d691b40e42181b311f818b0b88038027cea2bd5641898310b5d650ca`).
+
+The saved midpoint check allows at most four ULPs at the local time-coordinate
+scale, solely for arithmetic representation; this retained clock differs by
+at most three such ULPs. It validates endpoint/midpoint structure and does not
+reconstruct the planned grid. A follow-up report using that check has SHA-256
+`7ca16e41087280a1f6fba9f40b59865c568a6c0e525f151309ff14ecd3b9d46f` at
+`docs/development/feedback_controls/experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/solution_control_replay_diagnostic_3bc787e36d_root/retained_replay/offline_activation_residual_analysis_midpointvalidated.json`;
+the retained strict one-ULP planned-grid rejection remains unchanged.
+
+After merging midpoint validation with the hardened XML parser, I reran the offline
+analysis from the unchanged source/request/solution/control snapshot and replay
+audit. The analyzer SHA-256 is
+`c247a4cfd5369f829b5224c551713f7697e74bf5f430fcffbc59bd8ab1d9218b`; it binds
+the new report at SHA-256
+`fa913993a25903120c27d02d529bd67579475935021a70f54723ae269e20832e`. The saved
+43-row clock still has 21 endpoint/midpoint cells, each midpoint admitted only
+within the declared four-local-ULP structural check; the observed retained
+clock's maximum is three ULPs. This structure check accepts the actual saved
+clock and leaves the distinct planned-grid rejection at 9 of 43 timestamps
+unchanged. Numerical summaries match the previous final-source report. This is
+offline analysis only; no native SDK, solver, or replay ran, and no physical or
+capture qualification is implied. The new report is
+`docs/development/feedback_controls/experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/solution_control_replay_diagnostic_3bc787e36d_root/retained_replay/offline_activation_residual_analysis_midpointvalidated_source_c247a4cf.json`.
