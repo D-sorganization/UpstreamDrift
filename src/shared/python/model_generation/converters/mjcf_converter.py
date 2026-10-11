@@ -450,7 +450,7 @@ class MJCFConverter:
             self._parse_mjcf_body(worldbody, None, links, joints)
 
         # Convert materials to proper type
-        from shared.python.model_generation.core.types import Material
+        from src.shared.python.model_generation.core.types import Material
 
         proper_materials = {}
         for name, mat in materials.items():
@@ -511,7 +511,7 @@ class MJCFConverter:
         """Parse visual geometry and material from an MJCF body element."""
         if body_elem is None:
             raise ValueError("body_elem must be provided")
-        from shared.python.model_generation.core.types import Material
+        from src.shared.python.model_generation.core.types import Material
 
         geom_elems = body_elem.findall("geom")
         if not geom_elems:
@@ -541,7 +541,10 @@ class MJCFConverter:
         """Parse joint elements and create a URDF joint connecting to parent."""
         if body_elem is None:
             raise ValueError("body_elem must be provided")
-        from shared.python.model_generation.core.types import JointDynamics, JointLimits
+        from src.shared.python.model_generation.core.types import (
+            JointDynamics,
+            JointLimits,
+        )
 
         joint_elems = body_elem.findall("joint")
         if not joint_elems:

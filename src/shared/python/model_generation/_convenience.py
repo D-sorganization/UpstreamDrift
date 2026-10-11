@@ -47,7 +47,7 @@ def quick_urdf(
     Example:
         urdf = quick_urdf(height_m=1.85, preset="athletic")
     """
-    from shared.python.model_generation.builders.parametric_builder import (
+    from src.shared.python.model_generation.builders.parametric_builder import (
         ParametricBuilder,
     )
 
@@ -92,7 +92,7 @@ def quick_build(
         raise ValueError("height_m must be provided")
     from pathlib import Path
 
-    from shared.python.model_generation.builders.parametric_builder import (
+    from src.shared.python.model_generation.builders.parametric_builder import (
         ParametricBuilder,
     )
 

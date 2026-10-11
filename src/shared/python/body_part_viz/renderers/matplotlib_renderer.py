@@ -239,7 +239,11 @@ class MatplotlibRenderer:
         ]
 
     @staticmethod
-    def _face_polys(vertices: np.ndarray, faces: np.ndarray) -> list[np.ndarray]:
-        if faces.shape[0] == 0:
-            return []
-        return [vertices[face] for face in faces]
+    def _face_polys(vertices: np.ndarray, faces: np.ndarray) -> np.ndarray:
+        """Gather all face vertices in one contiguous ``(F, V, 3)`` array.
+
+        A per-face Python list doubled the ``update_frame`` cost past the
+        1 ms budget (#12303); one fancy-index gather keeps face and vertex
+        order unchanged.
+        """
+        return vertices[faces]
