@@ -30,3 +30,12 @@ integration tests skipped because MyoSuite/Gym is unavailable. Ruff check and
 format, the design-manual governance check, SPEC duplicate check, and tracked
 file-size budget passed. A full-repository title-case scan reports existing
 violations outside this change; no whole-repository title edits were made.
+
+The full `Repository_Management/scripts/pre_pr.py --base-ref origin/main` run
+on source commit `fc17a35c8f72b7d42e79a8c73fc1aebb08e3bba5` passed all five gates:
+lint/format, diff mypy, affected tests, Semgrep/import policy, and policy/fragment
+validators. Its affected-test selection reported 40 passed and two optional
+skips. The repository-wide CI Law-of-Demeter command also passed its no-growth
+scan: 3,965 source files scanned, 469 baseline occurrences, and 79 reductions.
+Subsequent edits only clarified this evidence and added the generated #12249
+change fragment; no executable source changed after the central run.
