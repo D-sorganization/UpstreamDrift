@@ -1,3 +1,9 @@
+# Active: Club-Face Fixtures on the Current Spec, #12117
+
+- Branch `claude/12117-club-face-fixtures`. Fixtures from `657c811bcd` (#12145 sources; input receipts value-identical to main's #12166 receipts). Feet now flat (3.2–3.8 cm), address face follows the capture (5.43 / −5.41° vs 5.50 / −5.35°).
+- `club_face.impact_frame` now enforces the 0.15 m ball radius on the peak-speed frame (the driver replay peaks 0.351 m short of the ball). OSV-8 and OSV-9 address-face tests compare with the capture's address face (2° unchanged). OSV-9 MSK grip calibration and both `golf_humanoid*.osim` regenerated (control reproduces main byte for byte). Calc record: `simscape_matching_reference.tex`, "Fixtures Regenerated on the Current Spec".
+- Strict xfails: 7-iron impact face 10.97 vs 3.21° (#12221, club-in-hand rotation); GCV-20 speed −6.1 / −10.2 % (#11767). Toe-out miss filed as #12222.
+
 # Active: Drake and MuJoCo IK Parity, Weld Rotation Row — #12039
 
 - Branch `claude/12039-drake-address-parity`. Drake's dual-grip weld rotation row was the small-angle vee with Jacobian `J_a - J_b` (up to 0.84 off finite differences); MuJoCo's is the principal log with its exact Jacobian. Both now use `full_body_ik._closure_rotation_row`; Drake `closure_error` reports the principal angle. Tests: `tests/unit/motion_matching/test_drake_mujoco_ik_parity.py`.
@@ -59,7 +65,6 @@ source provenance, matching and all-model qualification remain open.
 
 - Branch `claude/osv-2-grip-pose` (PR #12032), merged with main after OSV-9 (#11795). `model_appearance/grip_pose.py` is the club-agnostic grip definition; its lead (3.2 cm below the butt) and trail (10.82 cm) positions mirror the generated-spec `GripInterface`, the single source, and `tests/opensim/test_grip_closure_both_hands.py` fails on drift. `club_geometry`, `address.py` and the MyoSuite scene sites import it. The Rajagopal models keep the OSV-9 topology (lead `WeldJoint hand_l_to_club`, trail `WeldConstraint hand_r_to_club`); `msk_club_grip_calibration.json` is untouched.
 - Canned-swing closure residual (`python3 -m scripts.grip_closure_report --output r.json`): MuJoCo, Drake (ControlTower), Pinocchio, OpenSim full-body weld <= 1.8e-7 m; MyoSuite unavailable. Open: owner review of a 1.5 cm lead position (needs `msk_club_calibration` rerun for both models and clubs), finger meshes, stills and clips (slice 2), no `golf_humanoid` swing residual.
-  > > > > > > > origin/main
 
 # Active: Gaze Weight Selection, #11729
 
@@ -345,6 +350,14 @@ model, raw capture, native optimizer or replay was qualified by this slice.
 # Active: Feedback Controls Planning — #11784
 
 Documentation branch `docs/feedback-controls-11784`; commit `SELF`. Read [Design](docs/development/feedback_controls/DESIGN.md), [Issue Dependencies](docs/development/feedback_controls/IMPLEMENTATION_PLAN.md) and [Turnover](docs/development/feedback_controls/TURNOVER.md). Goal: all-model six-engine parity culminating in muscle-driven OpenSim and independent excitation replay. Planning only; no new model/video is qualified. Next: F01 inventory/gate freeze, coordinate MOSAIC #11532 and parity #11605.
+
+# Active: MyoSuite Native Muscle Actuator Classification — #12249
+
+`MyoSuiteMuscleAnalyzer` now compares compiled actuator dynamics to the
+installed MuJoCo `mjDYN_MUSCLE` enum. The actual MuJoCo 3.8.0 mixed-actuator
+fixture runs without Gym/MyoSuite registration. See the F09q turnover and
+canonical chapter 31. Classification does not qualify physiology, capture
+mapping, excitation replay, or cross-engine parity.
 
 # Active: Impact-Phase Bushing Grip, OSV-7 #11739
 
@@ -1114,3 +1127,80 @@ one optional provider skip. Canonical calculation is chapter48; turnover is
 The calculation registry remains empty and release blocked; full-body
 anatomy, calibration, physiology, contact/grip, capture horizon, production
 variants and six-engine parity remain unresolved.
+
+## OpenSim Mixed Replay Marker Scoring (#12195)
+
+Issue #12195 adds `native_mixed_marker_observation.py` on the constrained
+mixed replay seam. It consumes an exact frozen T01 bundle and runs the
+maintained fresh native replay once. For marker FK it restores the full
+ordered named state and exact replay clock, then evaluates explicit
+PhysicalFrame/local-offset bindings through the existing no-assembly native
+observer. Existing position alignment/scoring retains the separate measured
+clock and rejects extrapolation. The actual OpenSim 4.6 constrained-mixed
+module reports 12 passed, including source-mismatch and out-of-horizon
+negatives. Two portable contract tests protect the unqualified status.
+
+The result and receipt digest are diagnostic records only, explicitly
+unqualified; they are not an authenticated native execution receipt or F01
+admission. Bindings remain caller-declared and no calibration is inferred.
+Private-capture fit, anatomy, resource closure, physiology, contact, production
+variants and six-engine parity remain open. Canonical chapter49 and turnover
+are `manuals/upstreamdrift/chapters/49-native-opensim-mixed-marker-observation.qmd`
+and `docs/development/feedback_controls/F09Q-OPENSIM-MIXED-MARKER-SCORING.md`.
+
+## F07 Exact 557-Muscle Excitation Diagnostic (#12182)
+
+The exact-derived-source v3 profile is stacked on #12181 and merges the
+reviewed #12173 shared scalar executor. It does not widen v1/v2. The
+original 1,226-state seed exits its source SC_z chart at 1 ms; the retained
+failure remains authoritative. A separately declared six-coordinate
+interior diagnostic seed independently replays 557 saved excitations for
+only 0.2 ms on two fresh OpenSim 4.6 models with 17 native couplers observed.
+Changed future excitation alters native activation while preserving the
+prefix. See chapter50 and `F07_EXACT_557_REPLAY_TURNOVER.md` for source,
+runtime, input, policy and failure hashes. Four invalid original body
+inertias, physiology, visual assets, full-horizon private capture fit, and
+all-variant/six-engine qualification remain open. Keep the stacked PR
+unarmed until prerequisites merge.
+
+## F07 Native Source-Body Inertia Gate (#12191)
+
+The read-only OpenSim body gate reuses #12183's coordinate-invariant inertia
+validator and binds XML to fresh native Body mass, COM and inertia for every
+source body. A welded exact-zero-mass/zero-inertia routing carrier is distinct
+from a positive-mass solid. Actual OpenSim 4.6 tests include the rotated
+invalid case, native readback mutation and unchanged 557 source: bilateral
+clavicle/scapula tensors fail. The diagnostic replay in #12182 is unchanged
+and remains physically unqualified. See chapter52,
+`F07_NATIVE_BODY_INERTIA_TURNOVER.md` and the source-bound receipt; no
+parameter repair or private data was committed. This slice depends on #12183
+and #12182 and must remain unarmed until prerequisites merge.
+
+## F07 Generic Shoulder Lamina Candidate (#12211)
+
+The branch `feat/f07-generic-shoulder-lamina-12211` adds a separately
+identified generic 557-muscle shoulder mass candidate. It binds the exact
+reduced source and retained right CEINMS meshes, explicitly hypothesizes
+right identity and left local-z reflection, and calls the pending Tools
+#5503 triangle-lamina provider without changing the vendored pin. An actual
+OpenSim 4.6 candidate reload passes the 40-body physical audit, while the
+original retains four failures; native all-body FK and QErr/UErr agree at
+three sampled poses. See chapter54 and
+`F07_GENERIC_SHOULDER_LAMINA_TURNOVER.md`. Keep the PR draft/unarmed until
+Tools #5503 and #12207 are integrated. No source anatomy, physiology,
+force/work chart, contact/grip, captured match or parity claim follows.
+
+## Explicitly Unqualified Moco Feasibility — #12225
+
+Draft PR #12228 contains the diagnostic opt-in and 51 actual native test passes.
+See `F07_UNQUALIFIED_MOCO_FEASIBILITY_TURNOVER.md` and canonical chapter 55.
+Full-clock private preflight retains unavailable passive admission and blocked
+independent replay. #12231 addresses strict visual asset closure; wrapped/chart,
+support/grip, captured matching and parity gates remain open.
+
+The #12198 CI receipt-preservation follow-up restores two canonical
+ground-support receipts to their recorded hashes and adds explicit formatter
+exclusions. See `F07_NATIVE_BODY_INERTIA_TURNOVER.md` for the failed run,
+provenance and validation. Full epic qualification remains open.
+Concurrent remote ledger refresh `7877625369` is retained through a normal merge;
+the generated ledger is refreshed from the restored immutable receipt bytes.

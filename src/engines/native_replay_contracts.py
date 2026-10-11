@@ -25,6 +25,16 @@ _MUJOCO_GLOBAL_CALLBACKS = (
 )
 
 
+def require_sha256_digest(value: object, field_name: str) -> None:
+    """Require one canonical lowercase SHA-256 hexadecimal digest."""
+    if (
+        not isinstance(value, str)
+        or len(value) != 64
+        or any(character not in "0123456789abcdef" for character in value)
+    ):
+        raise ValueError(f"{field_name} must be a lowercase SHA-256 digest")
+
+
 def native_clock_interval_matches(represented: float, requested: float) -> bool:
     """Apply T04's interval precision independently of epoch and run length."""
     if (

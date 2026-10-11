@@ -126,6 +126,17 @@ document; `POST /character-builder/appearance/export` returns it as a
 downloadable JSON sidecar (route `src/api/routes/character_appearance.py`,
 service `src/api/services/character_appearance_service.py`).
 
+### Desktop Appearance Picker
+
+The desktop builder's Appearance group box picks a skin tone, clothing
+preset, club finish, headwear and ground material from the shared
+`model_appearance` library (`src/tools/character_builder/core.py`), reusing
+`src/api/services/character_appearance_service.py` so the picked names and
+materials are the same ones the web appearance/material picker offers
+(CMB-7e, #11658). Export Appearance writes an `appearance-v1` sidecar bound
+to the current spec hash, named to match the desktop spec export's own stem
+(`custom_<sha8>.appearance.json`), so it sits beside that spec file.
+
 ### glTF Skinned Body Export
 
 `export_character(character, "gltf")` (and `/character-builder/export/gltf`,

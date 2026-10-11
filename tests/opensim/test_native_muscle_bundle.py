@@ -29,6 +29,35 @@ def _bundle(fixture: NativeFixture) -> Any:
     return build(path, initial, np.linspace(0, 0.04, 9), {"flexor": np.full(9, 0.4)})
 
 
+def _add_visual_mesh(
+    fixture: NativeFixture, monkeypatch: pytest.MonkeyPatch
+) -> NativeFixture:
+    """Attach one real native Mesh backed by a small source-local VTP file."""
+    import opensim as osim
+
+    path, initial = fixture
+    monkeypatch.chdir(path.parent)
+    mesh_path = path.parent / "visual.vtp"
+    mesh_path.write_text(
+        '<?xml version="1.0"?>'
+        '<VTKFile type="PolyData" version="0.1" byte_order="LittleEndian">'
+        '<PolyData><Piece NumberOfPoints="3" NumberOfVerts="0" NumberOfLines="0" '
+        'NumberOfStrips="0" NumberOfPolys="1"><Points><DataArray type="Float32" '
+        'NumberOfComponents="3" format="ascii">0 0 0 1 0 0 0 1 0</DataArray></Points>'
+        '<Polys><DataArray type="Int32" Name="connectivity" format="ascii">0 1 2'
+        '</DataArray><DataArray type="Int32" Name="offsets" format="ascii">3'
+        "</DataArray></Polys></Piece></PolyData></VTKFile>",
+        encoding="utf-8",
+    )
+    model = osim.Model(str(path))
+    mesh = osim.Mesh("visual.vtp")
+    mesh.setName("synthetic_visual")
+    model.getBodySet().get("load").attachGeometry(mesh)
+    model.finalizeConnections()
+    model.printToXML(str(path))
+    return path, initial
+
+
 def _rebuild(bundle: Any, **changes: Any) -> Any:
     """Create valid wire integrity so admission tests reach native semantics."""
     from src.engines.native_replay_contracts import native_replay_contract_types
@@ -55,6 +84,7 @@ def test_native_bundle_replays_complete_state_and_actual_excitation(
 ) -> None:
     path, initial = muscle_fixture
     bundle = _bundle(muscle_fixture)
+    assert not hasattr(bundle, "resources")
     _, replay = _api()
     first, second = replay(bundle, path), replay(bundle, path)
     np.testing.assert_array_equal(first.states[0], list(initial.values()))
@@ -171,6 +201,48 @@ def test_external_resource_reference_is_rejected_before_native_load(
     build, _ = _api()
     with pytest.raises(ValueError, match="external|source"):
         build(path, initial, np.array([0.0, 0.01]), {"flexor": np.array([0.1, 0.1])})
+
+
+def test_source_bound_visual_mesh_has_an_exercised_native_consumer(
+    muscle_fixture: NativeFixture, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    build, replay = _api()
+    times = np.linspace(0, 0.02, 5)
+    controls = {"flexor": np.full(5, 0.4)}
+    baseline_bundle = build(muscle_fixture[0], muscle_fixture[1], times, controls)
+    baseline = replay(baseline_bundle, muscle_fixture[0])
+    path, initial = _add_visual_mesh(muscle_fixture, monkeypatch)
+    bundle = build(path, initial, times, controls)
+    assert bundle.__class__.__name__ == "NativeMuscleResourceEnvelope"
+    assert len(bundle.resources) == 1
+    result = replay(bundle, path)
+    np.testing.assert_allclose(result.states, baseline.states, atol=1e-12, rtol=0)
+    np.testing.assert_allclose(
+        result.muscle_forces_n, baseline.muscle_forces_n, atol=1e-12, rtol=0
+    )
+    np.testing.assert_allclose(result.applied_excitations, 0.4, atol=1e-12, rtol=0)
+
+
+def test_visual_resource_bundle_round_trip_and_changed_asset_rejection(
+    muscle_fixture: NativeFixture, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from src.engines.physics_engines.opensim.python.tour_matching.native_muscle_bundle import (
+        dumps_native_muscle_resource_bundle,
+        loads_native_muscle_resource_bundle,
+    )
+
+    path, initial = _add_visual_mesh(muscle_fixture, monkeypatch)
+    build, replay = _api()
+    bundle = build(
+        path, initial, np.array([0.0, 0.01]), {"flexor": np.array([0.2, 0.2])}
+    )
+    decoded = loads_native_muscle_resource_bundle(
+        dumps_native_muscle_resource_bundle(bundle)
+    )
+    assert decoded == bundle
+    (path.parent / "visual.vtp").write_text("changed", encoding="utf-8")
+    with pytest.raises(ValueError, match="digest|closure|resource"):
+        replay(decoded, path)
 
 
 def test_changed_source_model_is_rejected(muscle_fixture: NativeFixture) -> None:

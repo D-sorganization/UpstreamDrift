@@ -364,7 +364,9 @@ def build_grip_hand_mesh(
     parts: list[HandComponent] = []
     for finger in FINGER_NAMES:
         r = k * params.finger_radius_m[finger]
-        lengths = tuple(k * x for x in params.phalanx_lengths_m[finger])
+        p = params.phalanx_lengths_m[finger]
+        lengths = (k * p[0], k * p[1], k * p[2])
+
         d, z, on_grip = radius + clearance + r, stack[finger], True
         if hand is Hand.TRAIL and finger == "little" and pose.linked_fingers():
             z, d = _linked_little(pose, params, radius, r)
