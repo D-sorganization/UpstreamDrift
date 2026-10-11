@@ -4,7 +4,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from src.engines.physics_engines.opensim.python.tour_matching.native_moco_runner import (
+from src.engines.physics_engines.opensim.python.tour_matching.native_moco_preparation import (
     _declared_chart_blockers,
 )
 
