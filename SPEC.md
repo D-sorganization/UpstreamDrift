@@ -11077,6 +11077,12 @@ remain separate. The strict default muscle-only policy is unchanged. Its
 only; full-body qualification, private capture, all required variants and
 six-engine parity remain open. See canonical chapter48 and
 `F07_CONSTRAINED_MIXED_MOCO_TURNOVER.md`.
+Child #12195 adds an opt-in complete-state OpenSim mixed replay to explicit
+PhysicalFrame marker observation and the existing exact-observation-clock
+scorer. The model-owned FK restores saved named states without assembly; the
+diagnostic output remains unqualified and does not assert calibration or F01
+admission. See canonical chapter49 and
+`F09Q-OPENSIM-MIXED-MARKER-SCORING.md`.
 The F07 #12143 versioned constrained-muscle policy extends a declared
 native OpenSim cold start to exact ordered excitation T01 export, fresh
 source replay and marker sampling without reassembly. A coupler-only
@@ -11091,4 +11097,45 @@ private-capture, contact, assistance and physiology gates.
 ## Native Abdominal Zero-Translation Reduction
 
 Issue #12161 adds a separately identified guarded XML-derived abdominal reduction; chapter45 documents its exact zero manifold, state/force verification, provenance and unqualified status. No whole-joint weld, physiology adjustment or capture-matching claim is permitted.
+
+## Exact 557-Muscle Excitation Diagnostic (#12182)
+
+The opt-in v3 OpenSim profile accepts only the exact source-preserving
+BUET–Hamner derived XML and a frozen native path/class inventory. It binds
+visual-only mesh references, 40 clamped ranges, four audited rotational
+coupled-coordinate units, 1,226 complete continuous values, 17 couplers and
+557 ordered excitation inputs. The untouched one-equilibrium seed fails the
+SC_z chart at 1 ms. An explicitly different six-coordinate interior seed
+passes only a 0.2 ms fresh same-input replay; a final-knot excitation change
+preserves the preceding state and alters native activation. Chapter50 and
+`F07_EXACT_557_REPLAY_TURNOVER.md` retain the source-hashed failure and
+limited positive evidence. Original body inertia validity, source physiology,
+full-horizon capture matching and 17-variant/six-engine parity remain blocked.
+
+## Native Source-Body Inertia Admission (#12191)
+
+Physical use of a native OpenSim source now has a read-only body-property
+precondition. Every declared Body mass, body-frame COM and six inertia entries
+must equal fresh native readback. Positive-mass tensors use the corrected
+principal-moment validator from #12183; exact massless/zero-inertia internal
+carriers have a separate explicit policy. The unchanged 557-muscle source
+fails on bilateral clavicles and scapulae, while its short diagnostic replay
+remains separately labeled. Chapter52 and the source-body inertia turnover
+record the exact gate and evidence. No source repair, physiology qualification
+or full-swing matching follows from this necessary test.
+
+## Generic Shoulder Triangle-Lamina Candidate (#12211)
+
+The exact final 557-muscle source still fails four shoulder-body physical
+inertias. A separately identified candidate retains its joints, paths, laws
+and scalar masses while deriving bilateral clavicle/scapula COM and full
+tensor from exact right CEINMS triangle meshes through the Tools #5503
+lamina kernel. Right identity-frame placement and left local-z vertex
+reflection are declared generic registration assumptions, not recovered
+original anatomy. The new native model passes the 40-body physical gate and
+matches source body transforms and constraint residuals at three sampled
+poses. Chapter54 and `F07_GENERIC_SHOULDER_LAMINA_TURNOVER.md` retain exact
+hashes, exclusions and reproduction. Tools #5503 and #12207 are pending;
+physiology, native force/work over a chart, contact/grip, head/markers,
+private full-horizon matching and all17/six-engine qualification remain open.
 
