@@ -90,7 +90,7 @@ concurrency:
     ${{ github.workflow }}-${{ github.event_name == 'pull_request' &&
     format('{0}-{1}', github.ref, github.event.action == 'labeled' &&
     github.event.label.name != 'ci:full' && 'label' || 'run') || github.sha }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -541,7 +541,7 @@ jobs:
     name: Report Nightly Heavy-Lane Result
     needs: [equivalence, force-overlay-parity]
     if: always() && github.event_name == 'schedule'
-    runs-on: ubuntu-latest
+    runs-on: d-sorg-fleet-docker
     timeout-minutes: 5
     permissions:
       issues: write
