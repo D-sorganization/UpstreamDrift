@@ -55,7 +55,7 @@ export interface CharacterBuildSummary {
   club: string;
 }
 
-export type ExportFormat = 'spec' | 'urdf' | 'mjcf' | 'osim';
+export type ExportFormat = 'spec' | 'urdf' | 'mjcf' | 'osim' | 'gltf';
 
 export interface SliderParams {
   stature_m: number;
@@ -113,6 +113,7 @@ export const EXPORT_BUTTONS: { fmt: ExportFormat; label: string; ext: string }[]
   { fmt: 'urdf', label: 'URDF', ext: 'urdf' },
   { fmt: 'mjcf', label: 'MJCF', ext: 'xml' },
   { fmt: 'osim', label: 'OpenSim', ext: 'osim' },
+  { fmt: 'gltf', label: 'glTF', ext: 'gltf' },
 ];
 
 export function errorMessage(err: unknown): string {
