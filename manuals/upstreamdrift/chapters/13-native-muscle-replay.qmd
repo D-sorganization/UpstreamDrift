@@ -328,3 +328,27 @@ This replay does not convert the failed grid audit into a passed child
 execution, explain the activation error, or establish physiology or capture
 matching. The synthetic result remains unqualified; the grid and state gates
 remain unchanged.
+
+An offline activation-law analysis was then run against the byte-bound snapshot
+and the replay audit, using the saved 43-row time and control grids directly.
+It reports 42 adjacent saved-row spans for backward-compatible `interval_count`
+semantics, and separately identifies 21 collocation cells. The persisted cell
+widths are 0.00025 s for the first two cells and 0.0005 s for the remaining
+19; their mean is 0.0004761904761904762 s. Each cell uses its saved
+endpoint/midpoint/endpoint triple. No planned-grid reconstruction or one-ULP
+clock acceptance is introduced.
+
+Using the XML values when present and otherwise the OpenSim 4.6 source-tag
+defaults (activation time constant 0.01 s, deactivation time constant 0.04 s,
+minimum activation 0.01), segmented scalar integration differs from the
+flexor optimized activation by at most `5.078935403843299e-5`. The fresh
+replay differs from that scalar trajectory by at most `4.016980001408932e-8`,
+while the largest flexor cell-local integration-versus-optimized midpoint or
+endpoint difference is `9.262298642974398e-5`; accumulated integration's
+largest corresponding difference is `5.078935403843299e-5`. The maximum
+Simpson dynamics defect is `3.5819897541253427e-9`. These are numerical
+comparisons of the retained failed child, not a new replay or a qualification
+result. The source-tag defaults are inferred from XML/OpenSim 4.6 source; the
+installed native binary was not queried. The machine-readable report is
+`docs/development/feedback_controls/experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/solution_control_replay_diagnostic_3bc787e36d_root/retained_replay/offline_activation_residual_analysis.json`
+(SHA-256 `4331b57dd1b772b4054932041b1b3e0e1c8148581933d58c5215a129fba72a58`).

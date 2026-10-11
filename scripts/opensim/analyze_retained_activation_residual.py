@@ -84,6 +84,23 @@ def _linear_excitation(t: float, t0: float, t1: float, e0: float, e1: float) -> 
     return e0 + fraction * (e1 - e0)
 
 
+def _validate_saved_time_grid(
+    times: np.ndarray, mesh_intervals: int | None = None
+) -> None:
+    """Require a finite increasing endpoint/midpoint grid with consistent cells."""
+    if times.ndim != 1 or len(times) < 3:
+        raise ValueError("saved time grid must contain endpoint/midpoint triples")
+    if not np.all(np.isfinite(times)):
+        raise ValueError("saved time grid must contain finite endpoint/midpoint rows")
+    if np.any(np.diff(times) <= 0):
+        raise ValueError("saved time grid must be strictly increasing")
+    if len(times) % 2 != 1:
+        raise ValueError("saved time grid must contain endpoint/midpoint triples")
+    cell_count = (len(times) - 1) // 2
+    if mesh_intervals is not None and cell_count != mesh_intervals:
+        raise ValueError("saved endpoint/midpoint rows do not match requested mesh")
+
+
 def _integrate_channel(
     times: np.ndarray,
     excitations: np.ndarray,
@@ -94,6 +111,9 @@ def _integrate_channel(
     atol: float,
 ) -> np.ndarray:
     """Integrate independently on each exact piecewise-linear input interval."""
+    _validate_saved_time_grid(times)
+    if len(excitations) != len(times) or not np.all(np.isfinite(excitations)):
+        raise ValueError("saved excitation must be finite and match the time grid")
     result = np.empty_like(times)
     result[0] = initial
     current = initial
@@ -265,12 +285,11 @@ def _hermite_simpson_defects(
     parameters: dict[str, float],
 ) -> dict[str, np.ndarray]:
     """Evaluate Hermite-Simpson defects on endpoint/midpoint triples."""
-    if (
-        len(times) % 2 != 1
-        or len(activations) != len(times)
-        or len(excitations) != len(times)
-    ):
+    _validate_saved_time_grid(times)
+    if len(activations) != len(times) or len(excitations) != len(times):
         raise ValueError("Hermite-Simpson output requires endpoint/midpoint triples")
+    if not np.all(np.isfinite(activations)) or not np.all(np.isfinite(excitations)):
+        raise ValueError("Hermite-Simpson state and excitation values must be finite")
     cell_count = (len(times) - 1) // 2
     midpoint_defects = np.empty(cell_count, dtype=np.float64)
     simpson_defects = np.empty(cell_count, dtype=np.float64)
@@ -355,6 +374,10 @@ def _load_retained_data(experiment: Path, replay_audit: Path) -> RetainedData:
     control_names, control_matrix = read_sto(controls)
     times = state_matrix[:, 0]
     control_times = control_matrix[:, 0]
+    requested_cells = request_data.get("mesh_intervals")
+    if isinstance(requested_cells, bool) or not isinstance(requested_cells, int):
+        raise ValueError("request mesh_intervals must be an integer")
+    _validate_saved_time_grid(times, requested_cells)
     if not np.array_equal(times, control_times):
         raise ValueError("saved solution and controls must share exact knot times")
     replay_times = np.asarray(audit_data["times_seconds"], dtype=np.float64)
@@ -512,6 +535,9 @@ def _report_document(data: RetainedData, channels: dict[str, Any]) -> dict[str, 
         "source_properties": data.muscle_defaults,
         "sample_count": int(len(times)),
         "interval_count": int(len(times) - 1),
+        "interval_count_semantics": "adjacent saved-row spans; retained for backward compatibility",
+        "trajectory_row_count": int(len(times)),
+        "collocation_cell_count": int((len(times) - 1) // 2),
         "horizon_seconds": [float(times[0]), float(times[-1])],
         "replay_status": audit["status"],
         "replay_applied_controls_equal_saved_samples_exactly": audit[
@@ -523,15 +549,22 @@ def _report_document(data: RetainedData, channels: dict[str, Any]) -> dict[str, 
 
 def _analysis_method(request: dict[str, Any], times: np.ndarray) -> dict[str, Any]:
     """Describe the exact discretization, integration method and limitations."""
+    _validate_saved_time_grid(times, request["mesh_intervals"])
+    widths = times[2::2] - times[:-2:2]
+    midpoints = times[1::2]
     return {
         "moco_transcription": request["transcription_scheme"],
         "control_interpolation": request["replay_control_interpolation"],
         "segmented_integrator": "SciPy solve_ivp DOP853, each saved PWL interval separately",
         "rtol_atol": [[1e-12, 1e-14], [1e-13, 1e-15]],
-        "mesh_interval_seconds": float(
-            (times[-1] - times[0]) / request["mesh_intervals"]
-        ),
-        "mesh_interval_row_pattern": "41 trajectory rows for 20 Hermite-Simpson cells; each cell uses endpoint, midpoint, endpoint rows",
+        "collocation_cell_count": int(len(widths)),
+        "trajectory_row_count": int(len(times)),
+        "saved_collocation_cell_widths_seconds": [float(value) for value in widths],
+        "saved_collocation_midpoint_times_seconds": [
+            float(value) for value in midpoints
+        ],
+        "mean_collocation_cell_duration_seconds": float(np.mean(widths)),
+        "collocation_row_pattern": "each Hermite-Simpson cell uses its saved endpoint, midpoint, endpoint rows; widths and times come from the exact retained solution grid",
         "hermite_simpson_equations": {
             "midpoint": "x_mid = (x_left + x_right)/2 + h*(f_left - f_right)/8",
             "dynamics": "x_right - x_left = h*(f_left + 4*f_mid + f_right)/6",
