@@ -321,7 +321,7 @@ def lift_to_full_body(
     upright = _standing_targets(seed_points, _foot_frame(kin, seed, ground))
     standing = kin.solve_pose(
         upright,
-        np.isfinite(upright).all(axis=1),
+        np.asarray(np.isfinite(upright).all(axis=1), dtype=bool),
         seed,
         locked=locked,
         flat_feet=STANCE_SPHERES,
