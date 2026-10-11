@@ -502,7 +502,7 @@ def _write_pair_density_figure(
         frameon=False,
     )
     leg_bottom = legend.get_window_extent(renderer).y0 / figure.bbox.height
-    margin_frac = (8.0 / 72.0) / (figure.bbox.height / figure.dpi)
+    margin_frac = (14.0 / 72.0) / (figure.bbox.height / figure.dpi)
     grid_top = min(0.76, leg_bottom - margin_frac)
 
     grid = figure.add_gridspec(
@@ -574,7 +574,7 @@ def _write_pair_density_figure(
                 axis.set_ylabel("Lateral (m; Right Positive)")
     if color_mesh is not None:
         colorbar = figure.colorbar(
-            color_mesh, ax=figure.axes, fraction=0.018, pad=0.025
+            color_mesh, ax=figure.axes, fraction=0.018, pad=0.055
         )
         colorbar.set_label("Endpoint Probability Density (m⁻²); Common Scale")
     if formats == ("png", "pdf", "svg"):

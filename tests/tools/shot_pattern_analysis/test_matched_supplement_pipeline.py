@@ -940,3 +940,150 @@ def test_pipeline_provenance_binds_shared_numeric_formatter():
         _report_source_hashes()["matched_formatting.py"]
         == hashlib.sha256(path.read_bytes()).hexdigest()
     )
+
+@pytest.mark.slow
+def test_pair_density_long_caption_keeps_legend_clear_of_panel_titles(
+    tmp_path, monkeypatch
+):
+    """A multi-line covariance caption must not push the legend onto row one."""
+    try:
+        import matplotlib  # noqa: F401
+        import numpy as np
+    except (ImportError, OSError) as exc:
+        pytest.skip(f"matplotlib/numpy not loadable: {exc}")
+    import re
+
+    from src.tools.shot_pattern_analysis import matched_supplement_figures as figures
+
+    covariance = (
+        "Seven Iron · Covariance Profile (Path SD 0.5°, Speed SD 1 mph, "
+        "Strike SD 0.25 in on Each Axis, Shaft Twist–Path Correlation r = -0.6, "
+        "Shaft Twist–Speed Correlation r = +0.2, Path–Speed Correlation "
+        "r = -0.12, Path–Horizontal Strike Correlation r = +0.24, "
+        "Speed–Vertical Strike Correlation r = +0.244949) · Lean 5° · "
+        "Curve ×1 · Shaft Twist SD 1°"
+    )
+    monkeypatch.setattr(figures, "_condition_caption", lambda ref: covariance)
+    from matplotlib.figure import Figure
+
+    original_add_gridspec = Figure.add_gridspec
+    measured_gutters_pt = []
+
+    def capture_grid_gutter(figure, *args, **kwargs):
+        if "top" in kwargs and figure.legends:
+            renderer = figure.canvas.get_renderer()
+            legend_bottom = figure.legends[-1].get_window_extent(renderer).y0
+            grid_top = kwargs["top"] * figure.bbox.height
+            measured_gutters_pt.append((legend_bottom - grid_top) * 72.0 / figure.dpi)
+        return original_add_gridspec(figure, *args, **kwargs)
+
+    monkeypatch.setattr(Figure, "add_gridspec", capture_grid_gutter)
+    first = _ref("a", "seven_iron", 5, 1, 1, target=139.903)
+    second = _ref("b", "seven_iron", 5, 2, 1, target=139.903)
+    rng = np.random.default_rng(3)
+    point_sets = {
+        f"{pattern} · {condition}": (rng.normal(size=(40, 2)) + np.array([139.903, 0.0])).tolist()
+        for pattern in ("Straight", "Draw", "Fade")
+        for condition in ("Curve ×1", "Curve ×2")
+    }
+    paths = figures._write_pair_density_figure(
+        point_sets,
+        first=first,
+        second=second,
+        comparison="curve_strength",
+        first_label="Curve ×1",
+        second_label="Curve ×2",
+        target_x=139.903,
+        common_n=40,
+        output_stem=tmp_path / "long-caption-density",
+        formats=("svg",),
+    )
+    svg = paths["svg"].read_text()
+
+    from matplotlib.font_manager import FontProperties
+    from matplotlib.textpath import TextPath
+    from matplotlib.transforms import Affine2D
+
+    def glyph(label):
+        match = re.search(
+            r"<!-- " + re.escape(label) + r" -->\s*"
+            r'<g transform="translate\(([\d.]+) ([\d.]+)\) scale\(0\.1 -0\.1\)">',
+            svg,
+        )
+        assert match is not None, label
+        x, y = (float(value) for value in match.groups())
+        return TextPath(
+            (0, 0), label, prop=FontProperties(family="DejaVu Sans", size=10)
+        ).transformed(Affine2D().scale(1, -1).translate(x, y))
+
+    for panel, legend in (
+        ("Straight · Curve ×1", "50% Simulated-Sample HDR"),
+        ("Draw · Curve ×1", "80% Simulated-Sample HDR"),
+        ("Fade · Curve ×1", "Common Target"),
+    ):
+        panel_path, legend_path = glyph(panel), glyph(legend)
+        assert not panel_path.intersects_path(legend_path, filled=True)
+        assert panel_path.get_extents().y0 - legend_path.get_extents().y1 >= 2.0
+    assert measured_gutters_pt and min(measured_gutters_pt) >= 12.0
+
+@pytest.mark.slow
+def test_pair_density_narrow_downrange_keeps_fade_title_clear_of_colorbar(tmp_path):
+    """A narrow downrange cloud must leave its lower Fade title fully visible."""
+    try:
+        import matplotlib  # noqa: F401
+        import numpy as np
+    except (ImportError, OSError) as exc:
+        pytest.skip(f"matplotlib/numpy not loadable: {exc}")
+    import re
+
+    from matplotlib.font_manager import FontProperties
+    from matplotlib.textpath import TextPath
+    from matplotlib.transforms import Affine2D
+    from src.tools.shot_pattern_analysis.matched_supplement_figures import (
+        _write_pair_density_figure,
+    )
+
+    target = 127.882
+    first = _ref("a", "seven_iron", 10, 1, 1, target=target)
+    second = _ref("b", "seven_iron", 10, 1, 2, target=target)
+    rng = np.random.default_rng(21)
+    point_sets = {
+        f"{pattern} · {condition}": (
+            rng.normal(size=(40, 2)) * np.array([1.0, 8.0])
+            + np.array([target, 0.0])
+        ).tolist()
+        for pattern in ("Straight", "Draw", "Fade")
+        for condition in ("Rotation SD 1°", "Rotation SD 2°")
+    }
+    paths = _write_pair_density_figure(
+        point_sets,
+        first=first,
+        second=second,
+        comparison="shaft_rotation_sd",
+        first_label="Rotation SD 1°",
+        second_label="Rotation SD 2°",
+        target_x=target,
+        common_n=40,
+        output_stem=tmp_path / "narrow-density",
+        formats=("svg",),
+    )
+    svg = paths["svg"].read_text()
+    title = "Fade · Rotation SD 2°"
+    match = re.search(
+        r"<!-- " + re.escape(title) + r" -->\s*"
+        r'<g transform="translate\(([\d.]+) ([\d.]+)\) scale\(0\.1 -0\.1\)">',
+        svg,
+    )
+    assert match is not None
+    x, y = (float(value) for value in match.groups())
+    title_path = TextPath(
+        (0, 0), title, prop=FontProperties(family="DejaVu Sans", size=10)
+    ).transformed(Affine2D().scale(1, -1).translate(x, y))
+    match = re.search(
+        r'<g id="axes_7">\s*<g id="patch_\d+">\s*'
+        r'<path d="M ([\d.]+) ([\d.]+)',
+        svg,
+    )
+    assert match is not None
+    colorbar_left = float(match.group(1))
+    assert colorbar_left - title_path.get_extents().x1 >= 2.0
