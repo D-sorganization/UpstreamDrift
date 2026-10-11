@@ -1469,33 +1469,6 @@
       "issue": 12278,
       "reason": "Issue #12278: shot pattern analysis integration - load_supplement_sources exceeds function-lines budget (207 > 100).",
       "expires_on": "2026-12-31"
-    },
-    {
-      "path": "src/tools/shot_pattern_analysis/overview.py",
-      "symbol": "_plot_scoring_forest",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - _plot_scoring_forest exceeds function-lines budget (103 > 100).",
-      "expires_on": "2026-12-31"
-    },
-    {
-      "path": "src/tools/shot_pattern_analysis/reporting.py",
-      "symbol": "_save_dispersion",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - _save_dispersion exceeds function-lines budget (121 > 100).",
-      "expires_on": "2026-12-31"
-    },
-    {
-      "path": "src/tools/shot_pattern_analysis/sensitivity.py",
-      "symbol": "render_sensitivity",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - render_sensitivity exceeds function-lines budget (119 > 100).",
-      "expires_on": "2026-12-31"
     }
   ]
 }

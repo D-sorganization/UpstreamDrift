@@ -10,7 +10,7 @@ import math
 import platform
 from dataclasses import asdict, replace
 from pathlib import Path
-from typing import Mapping
+from typing import Any, Mapping
 
 import numpy as np
 from scipy.spatial.transform import Rotation
@@ -261,6 +261,67 @@ def write_sensitivity(output: Path) -> dict:
     return result
 
 
+def _draw_sensitivity_club(
+    ax: Any, name: str, club: dict, labels: dict[str, str], directions: list[str]
+) -> None:
+    """Draw one recorded club panel and append its direction caption."""
+    for mode, color, label in (
+        ("fixed_loft", "#64748b", "Fixed Loft"),
+        ("shaft_rotation", "#1764c0", "Shaft Rotation"),
+    ):
+        rows = [
+            row
+            for row in club["face_error_axis_grid"]
+            if row["shaft_lean_deg"] == 0 and row["delivery_mode"] == mode
+        ]
+        x = [row["face_error_deg"] for row in rows]
+        y = [row["carry_delta_m"] for row in rows]
+        ax.plot(x, y, marker="o", markersize=8, linewidth=3, color=color, label=label)
+        if mode == "shaft_rotation":
+            for index in (0, 4):
+                row = rows[index]
+                ax.annotate(
+                    f"{row['dynamic_loft_deg']:.2f}° Loft",
+                    (x[index], y[index]),
+                    xytext=(8 if index == 0 else -8, 15 if y[index] >= 0 else -28),
+                    textcoords="offset points",
+                    ha="left" if index == 0 else "right",
+                    color=color,
+                    fontsize=13,
+                    fontweight="bold",
+                )
+    left, right = rows[0]["carry_delta_m"], rows[-1]["carry_delta_m"]
+    directions.append(
+        f"{labels.get(name, name)}: {'Long' if left > 0 else 'Short'}-Left/{'Long' if right > 0 else 'Short'}-Right"
+    )
+    ax.axhline(0, color="#cbd5e1", linewidth=1)
+    ax.axvline(0, color="#cbd5e1", linewidth=1)
+    ax.set_xlim(-2.35, 2.35)
+    ax.set_ylim(-8, 4)
+    ax.set_xticks([-2, -1, 0, 1, 2])
+    ax.set_yticks([-8, -6, -4, -2, 0, 2, 4])
+    ax.grid(axis="y", alpha=0.16)
+    ax.spines[["top", "right"]].set_visible(False)
+    ax.set_xlabel("Face Error from Nominal (°)", labelpad=13)
+    ax.set_title(
+        f"{labels.get(name, name)}\nNominal Carry: {club['nominal']['carry_m']:.1f} m",
+        fontsize=21,
+        fontweight="bold",
+        pad=24,
+    )
+    config = club["config"]
+    ax.text(
+        0.5,
+        -0.20,
+        f"{config['club_speed_mps']:g} m/s • {config['loft_deg']:g}° Nominal Loft\n{config['attack_angle_deg']:g}° Attack • {config['lie_deg']:g}° Shaft Elevation",
+        transform=ax.transAxes,
+        ha="center",
+        va="top",
+        fontsize=13,
+        color="#475569",
+    )
+
+
 def render_sensitivity(result: dict, output: Path) -> None:
     """Render the recorded lean-zero controls without rerunning any physics."""
     import matplotlib
@@ -276,65 +337,9 @@ def render_sensitivity(result: dict, output: Path) -> None:
         "seven_iron": "7-Iron",
         "pitching_wedge": "Pitching Wedge",
     }
-    directions = []
+    directions: list[str] = []
     for ax, (name, club) in zip(axes, result["clubs"].items(), strict=True):
-        for mode, color, label in (
-            ("fixed_loft", "#64748b", "Fixed Loft"),
-            ("shaft_rotation", "#1764c0", "Shaft Rotation"),
-        ):
-            rows = [
-                row
-                for row in club["face_error_axis_grid"]
-                if row["shaft_lean_deg"] == 0 and row["delivery_mode"] == mode
-            ]
-            x = [row["face_error_deg"] for row in rows]
-            y = [row["carry_delta_m"] for row in rows]
-            ax.plot(
-                x, y, marker="o", markersize=8, linewidth=3, color=color, label=label
-            )
-            if mode == "shaft_rotation":
-                for index in (0, 4):
-                    row = rows[index]
-                    ax.annotate(
-                        f"{row['dynamic_loft_deg']:.2f}° Loft",
-                        (x[index], y[index]),
-                        xytext=(8 if index == 0 else -8, 15 if y[index] >= 0 else -28),
-                        textcoords="offset points",
-                        ha="left" if index == 0 else "right",
-                        color=color,
-                        fontsize=13,
-                        fontweight="bold",
-                    )
-        left, right = rows[0]["carry_delta_m"], rows[-1]["carry_delta_m"]
-        directions.append(
-            f"{labels.get(name, name)}: {'Long' if left > 0 else 'Short'}-Left/{'Long' if right > 0 else 'Short'}-Right"
-        )
-        ax.axhline(0, color="#cbd5e1", linewidth=1)
-        ax.axvline(0, color="#cbd5e1", linewidth=1)
-        ax.set_xlim(-2.35, 2.35)
-        ax.set_ylim(-8, 4)
-        ax.set_xticks([-2, -1, 0, 1, 2])
-        ax.set_yticks([-8, -6, -4, -2, 0, 2, 4])
-        ax.grid(axis="y", alpha=0.16)
-        ax.spines[["top", "right"]].set_visible(False)
-        ax.set_xlabel("Face Error from Nominal (°)", labelpad=13)
-        ax.set_title(
-            f"{labels.get(name, name)}\nNominal Carry: {club['nominal']['carry_m']:.1f} m",
-            fontsize=21,
-            fontweight="bold",
-            pad=24,
-        )
-        config = club["config"]
-        ax.text(
-            0.5,
-            -0.20,
-            f"{config['club_speed_mps']:g} m/s • {config['loft_deg']:g}° Nominal Loft\n{config['attack_angle_deg']:g}° Attack • {config['lie_deg']:g}° Shaft Elevation",
-            transform=ax.transAxes,
-            ha="center",
-            va="top",
-            fontsize=13,
-            color="#475569",
-        )
+        _draw_sensitivity_club(ax, name, club, labels, directions)
     axes[0].set_ylabel("Carry Change from Nominal (m)", labelpad=12)
     fig.suptitle(
         "Face–Loft Coupling Changes Carry Differently by Club",

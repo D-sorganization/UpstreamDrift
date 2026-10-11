@@ -369,41 +369,46 @@ def _plot_scoring_forest(
                         capsize=3,
                         linewidth=1.5,
                     )
-        fig.suptitle(
-            f"Paired Model-Conditional Strokes-Gained Effects — {delivery_mode.replace('_', ' ').title()}",
-            fontsize=23,
-            fontweight="bold",
-            y=0.96,
-        )
-        fig.supxlabel(
-            "Paired Strokes Gained vs. Straight (Strokes; Positive Is Better)", y=0.14
-        )
-        fig.legend(
-            handles=_pattern_legend_handles(),
-            loc="upper center",
-            bbox_to_anchor=(0.5, 0.91),
-            ncol=2,
-            frameon=False,
-        )
-        fig.text(
-            0.5,
-            0.065,
-            "Driver: Hypothetical Tee Shot on a 400 m Hole to Fairway/Rough. 7-Iron and PW: Approach to Green/Rough.",
-            ha="center",
-            fontsize=11,
-        )
-        fig.text(
-            0.5,
-            0.03,
-            "Historical Tour Benchmark • Carry-Only • Model-Conditional, Not Player-Score Predictions • 95% Monte Carlo Intervals",
-            ha="center",
-            fontsize=11,
-        )
-        fig.subplots_adjust(left=0.09, right=0.98, bottom=0.22, top=0.80, wspace=0.25)
+        _decorate_scoring_forest(fig, delivery_mode)
         output.parent.mkdir(parents=True, exist_ok=True)
         fig.savefig(output, dpi=100)
         plt.close(fig)
     return output
+
+
+def _decorate_scoring_forest(fig: Any, delivery_mode: str) -> None:
+    """Add the shared scoring title, legend, caveats, and layout."""
+    fig.suptitle(
+        f"Paired Model-Conditional Strokes-Gained Effects — {delivery_mode.replace('_', ' ').title()}",
+        fontsize=23,
+        fontweight="bold",
+        y=0.96,
+    )
+    fig.supxlabel(
+        "Paired Strokes Gained vs. Straight (Strokes; Positive Is Better)", y=0.14
+    )
+    fig.legend(
+        handles=_pattern_legend_handles(),
+        loc="upper center",
+        bbox_to_anchor=(0.5, 0.91),
+        ncol=2,
+        frameon=False,
+    )
+    fig.text(
+        0.5,
+        0.065,
+        "Driver: Hypothetical Tee Shot on a 400 m Hole to Fairway/Rough. 7-Iron and PW: Approach to Green/Rough.",
+        ha="center",
+        fontsize=11,
+    )
+    fig.text(
+        0.5,
+        0.03,
+        "Historical Tour Benchmark • Carry-Only • Model-Conditional, Not Player-Score Predictions • 95% Monte Carlo Intervals",
+        ha="center",
+        fontsize=11,
+    )
+    fig.subplots_adjust(left=0.09, right=0.98, bottom=0.22, top=0.80, wspace=0.25)
 
 
 def _pattern_legend_handles() -> list[Any]:

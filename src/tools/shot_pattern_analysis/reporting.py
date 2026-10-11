@@ -243,18 +243,10 @@ def _equal_range_diagnostic(result: AnalysisResult) -> dict:
     }
 
 
-def _save_dispersion(
-    result: AnalysisResult, path: Path, *, equal_range: bool = False
+def _decorate_dispersion_header(
+    fig: Any, result: AnalysisResult, equal_range: bool
 ) -> None:
-    import matplotlib
-
-    matplotlib.use("Agg")
-    import matplotlib.pyplot as plt
-    from matplotlib.patches import Circle
-
-    _style()
-    fig, axes = plt.subplots(1, 3, figsize=(16, 9), dpi=120, sharex=True, sharey=True)
-    fig.subplots_adjust(left=0.075, right=0.97, top=0.79, bottom=0.20, wspace=0.09)
+    """Place the selected diagnostic title and common shot context."""
     title = (
         "Equal-Range Dispersion Diagnostic"
         if equal_range
@@ -279,6 +271,21 @@ def _save_dispersion(
         fontsize=11,
         color="#d1deeb",
     )
+
+
+def _save_dispersion(
+    result: AnalysisResult, path: Path, *, equal_range: bool = False
+) -> None:
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    from matplotlib.patches import Circle
+
+    _style()
+    fig, axes = plt.subplots(1, 3, figsize=(16, 9), dpi=120, sharex=True, sharey=True)
+    fig.subplots_adjust(left=0.075, right=0.97, top=0.79, bottom=0.20, wspace=0.09)
+    _decorate_dispersion_header(fig, result, equal_range)
     all_rows = {
         name: [r for r in result.shots if r.pattern == name] for name in _COLORS
     }
