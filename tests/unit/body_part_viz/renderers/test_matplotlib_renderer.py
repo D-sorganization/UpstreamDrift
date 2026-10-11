@@ -201,6 +201,41 @@ def test_update_frame_is_idempotent(ax, theme) -> None:
     assert handle in renderer._entries
 
 
+@pytest.mark.unit
+def test_face_polys_is_one_contiguous_gather(ax, theme, monkeypatch) -> None:
+    """Faces are gathered in one ``(F, V, 3)`` array, not a per-face list (#12303).
+
+    Vertex coordinates, face order and per-face vertex order must match the
+    per-face reference exactly, and ``update_frame`` must hand that geometry
+    to the existing ``Poly3DCollection``.
+    """
+    renderer = MatplotlibRenderer(ax)
+    shape = CylinderShape(length=1.0, radius=0.5, n_facets=20)
+    handle = renderer.add_shape(shape, _fitted("cyl", n_frames=4), theme)
+    entry = renderer._entries[handle]
+    verts = entry.world_vertices[2]
+
+    polys = MatplotlibRenderer._face_polys(verts, entry.faces)
+
+    assert isinstance(polys, np.ndarray)
+    assert polys.shape == (*entry.faces.shape, 3)
+    assert polys.flags.c_contiguous
+    expected = np.stack([verts[face] for face in entry.faces])
+    np.testing.assert_array_equal(polys, expected)
+
+    received: list[np.ndarray] = []
+    original_set_verts = entry.artist.set_verts
+
+    def spy_set_verts(new_verts, *args, **kwargs):
+        received.append(new_verts)
+        return original_set_verts(new_verts, *args, **kwargs)
+
+    monkeypatch.setattr(entry.artist, "set_verts", spy_set_verts)
+    renderer.update_frame(handle, 2)
+    assert len(received) == 1
+    np.testing.assert_array_equal(received[0], expected)
+
+
 def test_update_frame_unknown_handle_raises(ax) -> None:
     renderer = MatplotlibRenderer(ax)
     with pytest.raises(KeyError):

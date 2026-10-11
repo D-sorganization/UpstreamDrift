@@ -17,7 +17,10 @@ Contract:
 
 Limits: the lower limbs and De Leva table are the male Rajagopal/De Leva
 references; stature and mass scale them, proportion scales reshape trunk,
-arms and shoulders. Output is unqualified geometry, like its builder.
+arms and shoulders. The legs keep the Rajagopal mass distribution and carry
+whatever part of ``mass_kg`` the upper body does not, so the body mass
+without the club equals ``mass_kg`` (#12199). Output is unqualified
+geometry, like its builder.
 """
 
 from __future__ import annotations
@@ -131,6 +134,7 @@ def compile_full_body_spec(
         arm_scale=params.arm_scale,
         shoulder_scale=params.shoulder_scale,
         grip_roll_deg=params.grip_roll_deg,
+        match_subject_mass=True,
     )
     return built.document
 
