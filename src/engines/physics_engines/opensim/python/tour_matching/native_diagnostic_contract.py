@@ -80,6 +80,14 @@ class RuntimeViability(StrEnum):
     FAILED = "failed"
 
 
+class RuntimePhase(StrEnum):
+    """Scope of the exact trajectory whose runtime disposition is recorded."""
+
+    SHORT_CAPABILITY_PROBE = "short-capability-probe"
+    OPTIMIZATION = "optimization"
+    FULL_REPLAY = "full-replay"
+
+
 class PhysicalQualification(StrEnum):
     """The diagnostic contract is deliberately unable to certify physical fit."""
 
@@ -307,6 +315,7 @@ class NativeDiagnosticAssessment:
     software_admission: DiagnosticSoftwareAdmission
     runtime_viability: RuntimeViability
     physical_qualification: PhysicalQualification
+    runtime_phase: RuntimePhase | None = None
     allowed_unqualified_findings: tuple[DiagnosticCode, ...] = ()
     policy_sha256: str | None = None
     native_runtime_sha256: str | None = None
@@ -315,15 +324,15 @@ class NativeDiagnosticAssessment:
     def __post_init__(self) -> None:
         _require_sha256(self.request_sha256, "request SHA-256")
         _require_sha256(self.source_sha256, "assessment source SHA-256")
-        if any(
-            finding.source_sha256 != self.source_sha256 for finding in self.findings
-        ):
-            raise ValueError("diagnostic finding source differs from assessment source")
         if not isinstance(self.findings, tuple) or any(
             not isinstance(finding, NativeDiagnosticFinding)
             for finding in self.findings
         ):
             raise TypeError("assessment findings must be typed native findings")
+        if any(
+            finding.source_sha256 != self.source_sha256 for finding in self.findings
+        ):
+            raise ValueError("diagnostic finding source differs from assessment source")
         if not isinstance(self.allowed_unqualified_findings, tuple) or any(
             not isinstance(code, DiagnosticCode) or code not in _OPT_IN_CODES
             for code in self.allowed_unqualified_findings
@@ -339,16 +348,30 @@ class NativeDiagnosticAssessment:
             _require_sha256(self.policy_sha256, "diagnostic policy SHA-256")
         if not isinstance(self.runtime_viability, RuntimeViability):
             raise TypeError("runtime viability must be a RuntimeViability")
+        if self.runtime_phase is not None and not isinstance(
+            self.runtime_phase, RuntimePhase
+        ):
+            raise TypeError("runtime phase must be a RuntimePhase or unavailable")
         if not isinstance(self.physical_qualification, PhysicalQualification):
             raise TypeError("physical qualification must be a PhysicalQualification")
         if self.native_runtime_sha256 is not None:
             _require_sha256(self.native_runtime_sha256, "native runtime SHA-256")
         if self.runtime_viability is RuntimeViability.NOT_ATTEMPTED:
-            if self.runtime_evidence_sha256 is not None:
-                raise ValueError("unattempted runtime cannot carry probe evidence")
-        elif self.runtime_evidence_sha256 is None:
-            raise ValueError("attempted runtime requires source-bound probe evidence")
+            if (
+                self.runtime_evidence_sha256 is not None
+                or self.native_runtime_sha256 is not None
+                or self.runtime_phase is not None
+            ):
+                raise ValueError("unattempted runtime cannot carry execution evidence")
         else:
+            if self.runtime_evidence_sha256 is None:
+                raise ValueError(
+                    "attempted runtime requires source-bound probe evidence"
+                )
+            if self.native_runtime_sha256 is None:
+                raise ValueError("attempted runtime requires native runtime identity")
+            if self.runtime_phase is None:
+                raise ValueError("attempted runtime requires an explicit phase")
             _require_sha256(self.runtime_evidence_sha256, "runtime evidence SHA-256")
         expected_admission = (
             DiagnosticSoftwareAdmission.BLOCKED
@@ -371,9 +394,12 @@ class NativeDiagnosticAssessment:
 
     @property
     def execution_permitted(self) -> bool:
+        """Permit optimization only after an identified short capability probe."""
         if self.software_admission is not DiagnosticSoftwareAdmission.ADMITTED:
             return False
         if self.runtime_viability is not RuntimeViability.VIABLE:
+            return False
+        if self.runtime_phase is not RuntimePhase.SHORT_CAPABILITY_PROBE:
             return False
         allowed = set(self.allowed_unqualified_findings)
         return all(
@@ -401,6 +427,9 @@ class NativeDiagnosticAssessment:
             ],
             "software_admission": self.software_admission.value,
             "runtime_viability": self.runtime_viability.value,
+            "runtime_phase": (
+                None if self.runtime_phase is None else self.runtime_phase.value
+            ),
             "physical_qualification": self.physical_qualification.value,
             "explicit_opt_in": self.explicit_opt_in,
             "allowed_unqualified_findings": sorted(
@@ -420,6 +449,7 @@ def assess_native_diagnostic(
     *,
     policy: NativeDiagnosticPolicy | None = None,
     runtime_viability: RuntimeViability = RuntimeViability.NOT_ATTEMPTED,
+    runtime_phase: RuntimePhase | None = None,
     runtime_evidence_sha256: str | None = None,
     native_runtime_sha256: str | None = None,
 ) -> NativeDiagnosticAssessment:
@@ -431,12 +461,14 @@ def assess_native_diagnostic(
         raise TypeError("findings must be a tuple of typed native diagnostic findings")
     if any(finding.source_sha256 != source_sha256 for finding in findings):
         raise ValueError("finding source differs from assessment source")
+    if not isinstance(policy, NativeDiagnosticPolicy) and policy is not None:
+        raise TypeError("policy must be a NativeDiagnosticPolicy or unavailable")
     if policy is not None and policy.source_sha256 != source_sha256:
         raise ValueError("diagnostic policy source differs from assessment source")
     if not isinstance(runtime_viability, RuntimeViability):
         raise TypeError("runtime viability must be a RuntimeViability")
-    if not isinstance(policy, NativeDiagnosticPolicy) and policy is not None:
-        raise TypeError("policy must be a NativeDiagnosticPolicy or unavailable")
+    if runtime_phase is not None and not isinstance(runtime_phase, RuntimePhase):
+        raise TypeError("runtime phase must be a RuntimePhase or unavailable")
     allowed = policy.allowed_unqualified_findings if policy else ()
     software_admission = (
         DiagnosticSoftwareAdmission.BLOCKED
@@ -457,6 +489,7 @@ def assess_native_diagnostic(
         software_admission=software_admission,
         runtime_viability=runtime_viability,
         physical_qualification=physical_qualification,
+        runtime_phase=runtime_phase,
         allowed_unqualified_findings=allowed,
         policy_sha256=None if policy is None else policy.identity_sha256,
         native_runtime_sha256=native_runtime_sha256,
@@ -473,6 +506,7 @@ __all__ = [
     "NativeDiagnosticPolicy",
     "PhysicalQualification",
     "QualificationEffect",
+    "RuntimePhase",
     "RuntimeViability",
     "assess_native_diagnostic",
 ]
