@@ -20,7 +20,6 @@ available -- it never invents a zero position.
 from __future__ import annotations
 
 from dataclasses import dataclass, replace
-import json
 import logging
 import math
 from typing import Any
@@ -31,6 +30,7 @@ from src.shared.python.model_appearance.ball import (
     BALL_RADIUS_M,
     resolve_ball_visual,
 )
+from src.tools.native_viewer_export.club_pose import ClubPoseModel
 from src.tools.native_viewer_export.core import (
     ExportSettings,
     SwingInput,
@@ -116,33 +116,15 @@ def _bundle_ball_centre(swing: SwingInput) -> np.ndarray | None:
 def _address_face(swing: SwingInput) -> tuple[np.ndarray, np.ndarray, float] | str:
     """World face centre, face normal and ground height at ``swing.q[0]``."""
     try:
-        from src.engines.physics_engines.mujoco.python.overlay_source import (
-            MujocoOverlaySource,
-        )
+        model = ClubPoseModel(swing.bundle.spec_bytes)
     except ImportError as exc:
         return f"mujoco is not available for the address ball: {exc}"
-    from src.shared.python.model_appearance.club_assembly import (
-        assembly_from_spec,
-        clubface_centre,
-        clubface_vector,
-    )
-
-    spec = json.loads(swing.bundle.spec_bytes)
-    club = assembly_from_spec(spec)
-    frame = next((f for f in spec["frames"] if f["name"] == "Clubhead"), None)
-    if club is None or frame is None:
-        return "spec has no club body"
-    source = MujocoOverlaySource(swing.bundle.spec_bytes)
+    except ValueError as exc:
+        return str(exc)
     names = swing.bundle.coordinate_order
     coords = dict(zip(names, map(float, swing.q[0]), strict=True))
-    # world pose of the spec club-body frame = site pose @ inverse(frame placement)
-    body = source.frame_poses(coords)["Clubhead"] @ np.linalg.inv(
-        np.asarray(frame["placement"], dtype=float)
-    )
-    centre = body[:3, :3] @ clubface_centre(club) + body[:3, 3]
-    normal = body[:3, :3] @ clubface_vector(club)
-    ground = float(spec["contact"]["ground"].get("height_m") or 0.0)
-    return centre, normal, ground
+    face = model.face_world(coords)
+    return face.centre_m, face.normal, model.ground_height_m
 
 
 def address_ball(swing: SwingInput, impact_time_s: float | None) -> BallPlacement | str:
