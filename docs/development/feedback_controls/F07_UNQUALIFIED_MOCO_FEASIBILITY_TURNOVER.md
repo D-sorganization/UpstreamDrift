@@ -132,10 +132,47 @@ bytes were restored and those explicit provenance inputs were excluded from
 Prettier. Numerical values, native source XML, fixtures and acceptance rules
 were not changed by this formatter repair.
 
+## Synthetic Mesh-Refinement Replay Checkpoint
+
+The bounded synthetic ladder is documented in canonical chapter 13 and in the
+separate [`F07 Native Moco Complexity Ladder Turnover`](F07_NATIVE_MOCO_COMPLEXITY_LADDER_TURNOVER.md).
+The 10-interval, 0.01-second solve converged, but independent fresh replay
+failed speed, activation and fiber-length limits; its coordinate endpoint
+remained within tolerance. A 20-interval solve also converged, with 41 nodes,
+but its integrated replay stopped at the 30-second deadline before recording
+state errors. Two earlier retained-input diagnostics also timed out before an
+audit. One later corrected no-optimizer diagnostic loaded the exact source,
+request, solution and controls and completed fresh replay under the same
+deadline. It failed the existing speed, activation, and fiber-length limits
+while passing the coordinate endpoint predicate; its full audit records
+timewise errors and sampled peak RSS 210,214,912 bytes. Saved control values
+matched exactly at sampled knots, but that does not establish continuous
+control equivalence or a cause for the replay discrepancy. No successful
+replay or scientific qualification follows from these synthetic runs.
+
+At common mesh times, optimized q traces differ by at most
+$5.66\times10^{-11}$ rad, while flexor commands differ by up to $0.03523$.
+This confirms the refined solve selected a materially different control trace;
+it does not explain the earlier 10-mesh replay error. Native replay diagnostics
+remain bounded by the existing 30-second deadline, unchanged state tolerances,
+and the source-hashed cold state. No capture, muscle physiology, full-body
+feasibility, or 17-variant/six-ecosystem parity is established. The canonical
+calculation inventory remains empty and the scientific goal remains open.
+
+The later 21-interval synthetic child optimizer converged, but strict post-solve
+clock auditing rejected 9 of 43 saved timestamps at one float64 ULP. A separate
+no-optimizer diagnostic replayed its saved controls at the actual saved clock.
+The controls matched exactly at recorded samples and endpoint checks passed;
+the state audit failed only activation (`5.078110452592238e-5` at
+`0.0007500000000000001 s`, unchanged limit `1e-8`). Coordinate, speed and fiber
+limits passed. This diagnostic does not repair the child grid rejection or
+establish the cause of the activation error. Exact inputs and the replay audit
+are recorded in the linked ladder turnover; the scientific result remains
+unqualified.
+
 The subsequent full CI unit suite found two additional byte-bound specification
 files that had been reformatted in inherited history. Both parsed JSON objects
-were identical to main checkpoint `9e5f87c4dd31fc3137fc204d98337633fa5c4855`.
-Restore its exact `spec_driver.json` and `spec_iron7.json` bytes after checking
-their SHA-256 values against the existing provenance, and explicitly exclude
-both from Prettier. Preserve the original run-document hashes and numerical
-contents; no acceptance or provenance record is rewritten.
+matched main checkpoint `9e5f87c4dd31fc3137fc204d98337633fa5c4855`; their exact
+bytes were restored from that checkpoint and both paths were excluded from
+Prettier. This preserved the original run-document hashes and numerical
+contents without rewriting acceptance or provenance records.

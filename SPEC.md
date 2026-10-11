@@ -8,6 +8,36 @@ mandatory. No supplied limits can be overridden, and independent excitation
 replay grants no muscle-matching qualification. Chapter55 and F07 unqualified
 feasibility turnover record TDD, native execution and remaining full-capture gates.
 
+## Bounded Synthetic Native Moco Solve and Replay
+
+The source-bound two-muscle synthetic Moco ladder keeps native control limits,
+complete named cold state, solver settings, serialized arrays and fresh replay
+inputs in the request/evidence chain. The 10-interval OpenSim 4.6 solve
+converged, but independent replay failed speed, activation and fiber-length
+limits. A 20-interval solve converged with 41 saved nodes, but integrated replay
+and two earlier retained-input diagnostics stopped at the fixed 30-second wall
+deadline before state errors were recorded. A later, separately authorized
+retained-input replay finished and failed the speed, activation and fiber-length
+limits while passing the coordinate endpoint predicate. Its timewise audit
+records peak errors of `1.0189e-6` rad/s, `1.1532e-4` activation and
+`1.2169e-6` m; sampled peak RSS was 210,214,912 bytes. Applied control samples
+exactly matched saved knots, but this does not prove equality of the continuous
+control law. Solver convergence is distinct from replay acceptance. The common-knot
+optimized coordinates agree closely while controls differ materially, so the
+mesh comparison does not establish the cause of replay-state error. The completed
+offline activation analysis finds small reconstructed Hermite-Simpson residuals,
+while optimized flexor activation differs from fresh replay by up to `1.1532e-4`.
+Fresh replay agrees with an independent segmented scalar PWL integration within
+`2.5751e-8`. Source XML omits activation constants, so the analysis uses OpenSim
+4.6 source defaults rather than installed-binary readback. This narrows the
+finding to a discrete optimized-state versus continuous-replay difference
+without identifying its cause. Chapter 13 and the current
+`F07_NATIVE_MOCO_COMPLEXITY_LADDER_TURNOVER.md` summary link to its two
+historical appendices, which retain exact equations, acceptance limits,
+source/request hashes, failure statuses and output evidence.
+This synthetic diagnostic does not qualify full-body muscle feasibility,
+physiology, capture matching, production replay or all-variant/ecosystem parity.
+
 ## Native Wrapped-Path Source Closure (#12234)
 
 The opt-in wrapped-path declaration binds exact native wrap geometry, PathWrap
@@ -11224,3 +11254,7 @@ poses. Chapter54 and `F07_GENERIC_SHOULDER_LAMINA_TURNOVER.md` retain exact
 hashes, exclusions and reproduction. Tools #5503 and #12207 are pending;
 physiology, native force/work over a chart, contact/grip, head/markers,
 private full-horizon matching and all17/six-engine qualification remain open.
+
+## Manufactured Native Diagnostics Evidence (#12275)
+
+The hash-bound evidence package at `docs/development/feedback_controls/experiments/manufactured_native_diagnostics_20261011/` preserves compact probe/test snapshots, exact receipts, and supervisor metadata for synthetic MuJoCo, OpenSim, Pinocchio, and Drake observations. It includes recorded failures and does not copy raw private captures, model binaries, or vendor runtimes. The OpenSim 4.6 property probe observed activation/deactivation constants and minimum activation for exactly two named synthetic muscles; short feedback replay and same-pose geometry/acceleration observations remain narrowly scoped. See the package README and manifest for source, runtime, and byte identities. No production model/variant is qualified; supported contact, calibration, physiology, capture matching, complete muscular replay, and six-ecosystem parity remain open.
