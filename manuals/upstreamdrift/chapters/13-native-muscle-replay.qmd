@@ -115,3 +115,78 @@ model-owned state minima and every contact/force policy field. The combined
 actual OpenSim4.6 suite passes106 cases; two extra-geometry tests are inapplicable
 to SmoothSphereHalfSpace and are skipped explicitly. These synthetic probes do
 not qualify full-body anatomy, capture matching or production contact.
+
+## Bounded Synthetic Moco Solve and Independent Replay
+
+The development-only Moco ladder in
+`tests/opensim/native_moco_ladder_worker.py` uses a source-hashed synthetic
+OpenSim model, not a golf capture. Its ten named initial states include the
+base coordinate $q=0.3$ rad, dependent coordinate $2q=0.6$ rad, fixed anchor
+$0.2$ rad, zero coordinate speeds, activation $0.05$ for each of two Millard
+muscles, and their native fiber lengths $0.09541832200700395$ m and
+$0.08545580283920036$ m. Muscle command bounds are read from the loaded source
+(`min_control=0.01`, `max_control=1.0`) and bound into the request. A fixed
+0.05 excitation forward integration creates a feasible trajectory guess; it
+does not prescribe the subsequent optimized solution.
+The exact source-model SHA-256 is
+`6a098517bdba09b19b3eb99e4da7e795f27d10be8f42c0fca04fee20ce67e143`; the
+native runs used OpenSim 4.6-2026-06-22-85aaf64 with Python 3.12.10. The
+retained runtime fingerprint covers the Python extensions and Moco DLL only;
+it is not a closed hash of all transitive runtime libraries.
+
+For horizon $T=0.01$ s, the optimization holds the cold initial state and
+requires the base coordinate to reach
+$q_f=0.30000558574001657$ rad, with coordinate bounds $[0.2,0.4]$ rad. It
+minimizes the native Moco `effort` control goal. The request fixes
+Hermite-Simpson transcription, midpoint control interpolation enabled,
+parallelism 0, maximum 300 iterations, convergence tolerance $10^{-6}$ and
+constraint tolerance $10^{-7}$. Mesh refinement from 10 to 20 intervals
+changes the transcription mesh (21 versus 41 exported nodes); it retains the
+same horizon, target, source, state, controls policy and tolerances. The
+resulting time-only controls are reloaded from storage and applied to a fresh
+native model using piecewise-linear interpolation.
+
+Before interpreting a solve, source, provider, state, control and request
+identities are bound; solver settings must match their native readback. The
+serialized optimized time/state/control arrays must match the in-memory arrays
+within eight representable float64 values per element, with exact endpoint
+clock and strict clock/control shape checks. The observed solution export was
+within three ULP. Independent replay checks all ten named states at saved
+times, requires the initial state to match exactly, and requires both optimized
+and replayed endpoints to reach the target in the positive direction. Maximum
+optimized-to-replayed absolute errors must remain below $2\times10^{-7}$ rad
+for coordinates, $10^{-7}$ rad/s for speeds, $10^{-8}$ for activations, and
+$10^{-7}$ m for fiber lengths. A Moco solver status alone is never replay
+acceptance; worker states distinguish solve failure, wall or memory stop,
+incomplete evidence, replay rejection, and fully audited replay.
+
+At 10 intervals, OpenSim 4.6 `Solve_Succeeded` in 82 iterations with objective
+$4.9211583953665505\times10^{-6}$. The independent replay passed the endpoint
+check but failed the speed, activation and fiber-length limits: maxima were
+$4.278119184863939\times10^{-6}$ rad/s at 0.01 s,
+$4.2278841340708667\times10^{-4}$ at 0.001 s, and
+$5.394625915713935\times10^{-6}$ m at 0.01 s. Coordinate error was
+$1.524035136979407\times10^{-8}$ rad, within its limit. This is an explicitly
+failed replay, not a successful model match.
+
+At 20 intervals, the optimizer also returned `Solve_Succeeded` in 122
+iterations, objective $4.1654698156426359\times10^{-6}$, and endpoint
+$0.3000055857400166$ rad. The worker reached its 30-second supervisor deadline
+during the integrated replay and wrote no replay audit. A separate bounded
+no-optimizer replay loaded the exact retained solution and controls, entered
+the fresh native replay call, and also reached its 30-second deadline before
+writing state errors. Its sampled peak RSS was not recorded because the
+one-off supervisor wrapper failed to serialize its timeout field. Both owned
+worker trees were reaped; this is an incomplete diagnostic, not evidence that
+mesh-20 replay passed or failed its numerical thresholds.
+
+The 10- and 20-interval optimized coordinate traces differ by at most
+$5.66\times10^{-11}$ rad at common time knots, while flexor controls differ by
+up to $0.03523$ at those knots. The refinements therefore produce distinct
+optimized controls; this comparison does not identify the cause of the
+replay-state errors. The exact request, saved arrays, failed replay audit,
+timeouts, implementation hashes and reproduction details are retained in
+`docs/development/feedback_controls/F07_NATIVE_MOCO_COMPLEXITY_LADDER_TURNOVER.md`.
+These bounded synthetic runs establish neither full-body muscle feasibility
+nor physiology, capture matching, production replay, OpenSim muscle
+qualification, or 17-variant/six-ecosystem parity. All remain unqualified.

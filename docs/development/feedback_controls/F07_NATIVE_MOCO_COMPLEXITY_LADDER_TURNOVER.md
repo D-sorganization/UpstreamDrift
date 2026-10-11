@@ -561,3 +561,35 @@ The supervisor terminated and verified cleanup of its owned process tree. A wrap
 | `diagnostic_retained_replay_a5a0fcdb/supervisor_result.json`                | Recorded after timeout; sampled peak RSS unavailable               |
 
 The diagnostic worker now fsyncs its stage before/after imports, saved-input loading, native replay, and audit writing. Its contract test checks durable initial stage output and a distinct worker-output child under the supervisor log directory. This instrumentation does not extend the deadline or change replay acceptance.
+
+## Read-Only Comparison of Saved 10- and 20-Interval Solutions
+
+The source-bound 10-interval and 20-interval solution files cover the same
+0–0.01 s horizon, with 21 nodes at 0.5 ms and 41 nodes at 0.25 ms. At their
+common 10-interval times, clock values differ by at most
+$1.74\times10^{-18}$ s. The base-coordinate values differ by at most
+$5.66\times10^{-11}$ rad and dependent-coordinate values by
+$1.07\times10^{-10}$ rad. Base and follower speed differences are at most
+$3.23\times10^{-8}$ and $3.84\times10^{-8}$ rad/s; muscle-state differences
+at common times are at most $1.36\times10^{-4}$ activation and
+$2.93\times10^{-7}$ m fiber length.
+
+The saved control traces differ more. Flexor commands differ by up to
+0.0352284 at common knots; ranges are 0.01000508–0.08944408 at 10 intervals
+and 0.01000253–0.10660435 at 20 intervals. Extensor traces differ by up to
+$5.2244\times10^{-5}$, with ranges 0.01001806–0.01006777 and
+0.01000010–0.01001552. Both remain within the source-derived [0.01, 1.0]
+bounds. The 10-interval replay has a retained error audit and fails speed,
+activation and fiber-length limits. The 20-interval run has no replay audit;
+its separate replay timeout supplies no state-error values. This comparison
+shows the refined optimization selected a different control trace, but does not
+identify why the 10-interval replay disagreed or predict a 20-interval replay
+result.
+
+The corrected diagnostic manifest binds worker source SHA-256
+`cb5adcb83548bc261e7e672194ac643d551c5810c6245d4601a6f821d27d11a1` and the
+unchanged mesh-20 source/request/solution/control hashes listed above. The
+supervisor wrapper mistakenly read `_WorkerTimeout.reason` instead of its
+`stop_reason`, after process-tree termination had completed. Thus the durable
+worker stage and wall-timeout reason are known, but the wrapper did not persist
+the sampled peak RSS. No replay acceptance or qualification is inferred.

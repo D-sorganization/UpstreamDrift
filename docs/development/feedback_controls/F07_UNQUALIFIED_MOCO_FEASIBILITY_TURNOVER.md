@@ -131,3 +131,27 @@ files. Their parsed content was verified identical, then their exact committed
 bytes were restored and those explicit provenance inputs were excluded from
 Prettier. Numerical values, native source XML, fixtures and acceptance rules
 were not changed by this formatter repair.
+
+## Synthetic Mesh-Refinement Replay Checkpoint
+
+The bounded synthetic ladder is documented in canonical chapter 13 and in the
+separate [`F07 Native Moco Complexity Ladder Turnover`](F07_NATIVE_MOCO_COMPLEXITY_LADDER_TURNOVER.md).
+The 10-interval, 0.01-second solve converged, but independent fresh replay
+failed speed, activation and fiber-length limits; its coordinate endpoint
+remained within tolerance. A 20-interval solve also converged, with 41 nodes,
+but its integrated replay stopped at the 30-second deadline before recording
+state errors. One retained-input no-optimizer diagnostic loaded and hash-checked
+the same source, request, solution and controls, entered the fresh native replay
+call, and reached the same wall deadline without an audit. Its supervisor
+terminated the owned process tree, but a wrapper bookkeeping error prevented
+recording sampled peak RSS. Do not infer replay success, failure magnitudes or a
+causal discretization defect from this incomplete diagnostic.
+
+At common mesh times, optimized q traces differ by at most
+$5.66\times10^{-11}$ rad, while flexor commands differ by up to $0.03523$.
+This confirms the refined solve selected a materially different control trace;
+it does not explain the earlier 10-mesh replay error. Native replay diagnostics
+remain bounded by the existing 30-second deadline, unchanged state tolerances,
+and the source-hashed cold state. No capture, muscle physiology, full-body
+feasibility, or 17-variant/six-ecosystem parity is established. The canonical
+calculation inventory remains empty and the scientific goal remains open.

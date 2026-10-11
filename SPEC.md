@@ -8,6 +8,24 @@ mandatory. No supplied limits can be overridden, and independent excitation
 replay grants no muscle-matching qualification. Chapter55 and F07 unqualified
 feasibility turnover record TDD, native execution and remaining full-capture gates.
 
+## Bounded Synthetic Native Moco Solve and Replay
+
+The source-bound two-muscle synthetic Moco ladder keeps native control limits,
+complete named cold state, solver settings, serialized arrays and fresh replay
+inputs in the request/evidence chain. The 10-interval OpenSim 4.6 solve
+converged, but independent replay failed speed, activation and fiber-length
+limits. A 20-interval solve converged with 41 saved nodes, but integrated replay
+and a separate retained-input replay both stopped at the fixed 30-second wall
+deadline before state errors were recorded. The separate supervisor could not
+persist sampled peak RSS; the stage receipt proves the native replay call had
+begun. Solver convergence is distinct from replay acceptance. The common-knot
+optimized coordinates agree closely while controls differ materially, so the
+mesh comparison does not establish the cause of replay-state error. Chapter 13
+and `F07_NATIVE_MOCO_COMPLEXITY_LADDER_TURNOVER.md` retain exact equations,
+acceptance limits, source/request hashes, failure statuses and output evidence.
+This synthetic diagnostic does not qualify full-body muscle feasibility,
+physiology, capture matching, production replay or all-variant/ecosystem parity.
+
 ## Native Wrapped-Path Source Closure (#12234)
 
 The opt-in wrapped-path declaration binds exact native wrap geometry, PathWrap
