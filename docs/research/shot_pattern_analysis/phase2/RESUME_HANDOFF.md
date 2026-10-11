@@ -1,6 +1,15 @@
 # Shot Pattern Study: Agent Resume Handoff
 
-## User-Requested Stop
+## Current Resumed State
+
+The user resumed on October 10 after usage reset. The goal is active. Sol owns
+`validation/supplement_v6_final_graphics_review_v2`, Luna owns vector review v2,
+and Astra reviews the narrative. Root restarted frozen report construction with
+fresh evidence in `validation/final_report_production_v7`; inspect its terminal
+receipt before using the generated report. No simulations are being repeated.
+The stop checkpoint below remains historical evidence.
+
+## Prior User-Requested Stop
 
 Goal pursuit is paused at the user's request to conserve credits. No completion,
 publication acceptance, remote push, or new PR is claimed. Resume only when asked.
