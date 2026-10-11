@@ -39,7 +39,7 @@
 
 - Preserve frozen science, baseline graphics, peer records, and armed Phase 1 PR state.
 - Do not claim player calibration, isolated causal curvature benefit, per-round strokes gained, or successful compilation in the built-in LaTeX editor.
-- PR #12278 remains unmerged. Integration branch `codex/shot-pattern-refinement-integration` merged remote `aecd90783b` at `c69fc7eefe`. Exact main DRY baseline restored (#12299); focused49-file scan is clean, full repository scan remains outstanding. Architecture corrections removed17 of67 new exceptions;50 remain (#12302). Current39-page report compiles from14 tracked hash-verified figures. AffineDrift publication passes local content checks but canonical pre-PR is blocked by inherited development-log limits (77 active >75). Follow `phase2/validation/refinement_v3/progress.json`; do not rerun frozen simulations.
+- PR #12278 remains unmerged. Integration branch `codex/shot-pattern-refinement-integration` merged remote `aecd90783b` at `c69fc7eefe`. Exact main DRY baseline restored (#12299); focused49-file scan is clean, full repository scan remains outstanding. Architecture corrections removed28 of67 new exceptions;39 remain (#12302). A further flight-panel argument violation is fixed with exact pixel parity. Current39-page report compiles from14 tracked hash-verified figures. AffineDrift publication passes local content checks but canonical pre-PR is blocked by inherited development-log limits (77 active >75). Follow `phase2/validation/refinement_v3/progress.json`; do not rerun frozen simulations.
 - Keep empirical validation #11984 deferred and compiler blocker #12120 open; close implementation issues only with qualifying merged evidence.
 
 

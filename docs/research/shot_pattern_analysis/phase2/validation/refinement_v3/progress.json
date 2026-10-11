@@ -56,13 +56,14 @@
   "affine_checks": "Quarto1.8.26 render; title case672 sources; render coverage253 URLs; article links/full site gate; 9 assets match; headless browser review; canonical consistency tests pass.",
   "local_delivery": "fd5506da87f5e619a550fb8cc871a0e8195b6fb98965a99809e3238a0f01508b",
   "architecture_issue": 12302,
-  "integration_work": "Numerical statistics, contact kernel, graphics/report orchestration, CLI, preview and validation refactors committed. Agents continue delivery adapters, scoring orchestration and report-size correction.",
+  "integration_work": "Committed statistics, impact/delivery adapters, scoring orchestration, approach state preparation, desktop layout/CLI requests, flight-panel layout and native rasterization decompositions. Active agents: report narrative/per-club split, paired social context, lean/sensitivity orchestration.",
   "focused_dry": "49 committed shot-pattern/kernel source files at19b7d6d: zero findings. Not a full repository gate.",
-  "architecture": "17 of67 new architecture exceptions removed; 50 remain under issue12302. Statistics parity batch committed57b53abc29.",
+  "architecture": "28 of67 new architecture exceptions removed;39 remain under issue12302. Additional flight-panel11-parameter violation fixed with6-parameter layout interface, without an exception.",
   "performance": "Renderer vectorization committed e8a81e53fd;26 tests pass with original1ms limit unchanged (#12303).",
   "affinedrift_commit": "5fae3163493ca7ade3139b2da18ace2e3deac1c0",
-  "integration_head": "57b53abc29",
+  "integration_head": "3202ce2246 followed by native rasterization checkpoint",
   "upstream_merged_head": "aecd90783beab50cc091def25f13bbfdaeeb7834",
   "integration_report": "Fresh local Tectonic compile from integration sources plus14 tracked hash-verified figures succeeded:39 pages, no warnings; /tmp/shot-integration-report/shot_pattern_analysis.pdf SHA256 f589bbb54253666fbda5daaca3f651952a78db2665e660fea7b69da486f9799b. Desktop accepted version unchanged.",
-  "post_merge_checks": "16 statistics/restoration/handoff tests pass; statistics Ruff check and format pass. Earlier Astra statistics suites34 and14 passed;7 numeric fixtures and16 errors exact."
+  "post_merge_checks": "16 statistics/restoration/handoff checks;13 approach-scoring tests;50 adapter tests plus9 final checks;22 presentation/replay/layout tests;77 GUI-focused tests;20 native rasterization tests all passed. Relevant Ruff and rasterizer mypy pass. Full unchanged repository gates remain pending.",
+  "flight_layout_parity": "Exact RGBA hashes/axis text/ranges/line counts across4 cases; committed receipt flight_panel_layout_parity.json. Accepted PDF remains unchanged."
 }
