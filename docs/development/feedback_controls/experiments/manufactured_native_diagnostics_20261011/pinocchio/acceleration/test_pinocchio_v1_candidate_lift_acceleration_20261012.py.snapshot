@@ -1,0 +1,214 @@
+"""Pure call-order tests for the one-call Pinocchio acceleration diagnostic."""
+
+from __future__ import annotations
+
+import pytest
+
+from pinocchio_v1_candidate_lift_acceleration_20261012 import (
+    MUJOCO_REFERENCE_SOURCE_HASHES,
+    call_one_acceleration,
+    validate_mujoco_reference,
+)
+
+
+ORDER = tuple(f"coordinate_{index}" for index in range(41))
+
+
+def _closure() -> dict[str, object]:
+    return {
+        "pose_residual_minus_log6_c1Mc2_local_frame_m_rad": [0.0] * 6,
+        "rate_residual_native_constraint_jacobian_times_named_rates": [0.0] * 6,
+        "native_rate_jacobian": {"shape": [6, 41], "rank": 6},
+    }
+
+
+def _mujoco_reference() -> dict[str, object]:
+    return {
+        "native_engine": "MuJoCo",
+        "acceleration_call_count": 1,
+        "execution_scope": "one VectorPlant.acceleration call; no projection, integration, callback, or optimizer",
+        "initial_state": {
+            "coordinate_order": list(ORDER),
+            "qpos": [0.0] * 41,
+            "qvel": [0.0] * 41,
+            "effort": [0.0] * 41,
+        },
+        "zero_effort_acceleration": [0.0] * 41,
+        "source": {
+            "source_hashes_after": {
+                f"/exact/source/{path}": digest
+                for path, digest in MUJOCO_REFERENCE_SOURCE_HASHES.items()
+            }
+        },
+    }
+
+
+class CountedOwner:
+    def __init__(self, result: object = None) -> None:
+        self.calls = 0
+        self.result = result
+
+    def accelerations(self, coordinates, rates, efforts):
+        self.calls += 1
+        assert tuple(coordinates) == ORDER
+        assert tuple(rates) == ORDER
+        assert tuple(efforts) == ORDER
+        assert all(value == 0.0 for value in rates.values())
+        assert all(value == 0.0 for value in efforts.values())
+        if self.result is None:
+            return dict.fromkeys(ORDER, 0.0)
+        return self.result
+
+
+def test_valid_closed_zero_rate_state_calls_native_acceleration_exactly_once() -> None:
+    owner = CountedOwner()
+    result = call_one_acceleration(
+        owner,
+        dict.fromkeys(ORDER, 0.0),
+        dict.fromkeys(ORDER, 0.0),
+        ORDER,
+        _closure(),
+    )
+    assert owner.calls == 1
+    assert result["status"] == "one_native_acceleration_observed"
+    assert result["attempted_acceleration_calls"] == 1
+    assert result["all_accelerations_finite"] is True
+    assert len(result["acceleration_named"]) == 41
+
+
+@pytest.mark.parametrize(
+    "change, message",
+    [
+        (
+            lambda c: c["pose_residual_minus_log6_c1Mc2_local_frame_m_rad"].__setitem__(
+                0, 1e-4
+            ),
+            "closure guard",
+        ),
+        (
+            lambda c: c[
+                "rate_residual_native_constraint_jacobian_times_named_rates"
+            ].__setitem__(0, 1e-4),
+            "closure guard",
+        ),
+        (lambda c: c["native_rate_jacobian"].update(rank=5), "rank six"),
+    ],
+)
+def test_invalid_pre_acceleration_geometry_never_calls_native_dynamics(
+    change, message
+) -> None:
+    owner = CountedOwner()
+    geometry = _closure()
+    change(geometry)
+    with pytest.raises(ValueError, match=message):
+        call_one_acceleration(
+            owner,
+            dict.fromkeys(ORDER, 0.0),
+            dict.fromkeys(ORDER, 0.0),
+            ORDER,
+            geometry,
+        )
+    assert owner.calls == 0
+
+
+def test_nonzero_rates_or_wrong_source_order_never_call_native_dynamics() -> None:
+    owner = CountedOwner()
+    rates = dict.fromkeys(ORDER, 0.0)
+    rates[ORDER[-1]] = 1e-12
+    with pytest.raises(ValueError, match="zero-rate"):
+        call_one_acceleration(
+            owner, dict.fromkeys(ORDER, 0.0), rates, ORDER, _closure()
+        )
+    with pytest.raises(ValueError, match="source coordinate order"):
+        call_one_acceleration(
+            owner,
+            dict(reversed(tuple(dict.fromkeys(ORDER, 0.0).items()))),
+            dict.fromkeys(ORDER, 0.0),
+            ORDER,
+            _closure(),
+        )
+    assert owner.calls == 0
+
+
+def test_native_nonfinite_result_is_retained_as_one_failed_attempt() -> None:
+    owner = CountedOwner(dict.fromkeys(ORDER, float("nan")))
+    result = call_one_acceleration(
+        owner,
+        dict.fromkeys(ORDER, 0.0),
+        dict.fromkeys(ORDER, 0.0),
+        ORDER,
+        _closure(),
+    )
+    assert owner.calls == 1
+    assert result["status"] == "native_acceleration_failed"
+    assert result["attempted_acceleration_calls"] == 1
+    assert result["error_type"] == "FloatingPointError"
+
+
+def test_wrong_native_acceleration_shape_is_retained_after_exactly_one_call() -> None:
+    owner = CountedOwner(dict.fromkeys(ORDER[:-1], 0.0))
+    result = call_one_acceleration(
+        owner,
+        dict.fromkeys(ORDER, 0.0),
+        dict.fromkeys(ORDER, 0.0),
+        ORDER,
+        _closure(),
+    )
+    assert owner.calls == 1
+    assert result["status"] == "native_acceleration_failed"
+    assert result["attempted_acceleration_calls"] == 1
+
+
+def test_native_qv_mutation_is_retained_as_failed_single_call() -> None:
+    class MutatingOwner(CountedOwner):
+        def accelerations(self, coordinates, rates, efforts):
+            self.calls += 1
+            coordinates[ORDER[0]] = 1.0
+            return dict.fromkeys(ORDER, 0.0)
+
+    owner = MutatingOwner()
+    result = call_one_acceleration(
+        owner,
+        dict.fromkeys(ORDER, 0.0),
+        dict.fromkeys(ORDER, 0.0),
+        ORDER,
+        _closure(),
+    )
+    assert owner.calls == 1
+    assert result["status"] == "native_acceleration_failed"
+    assert result["error_type"] == "ValueError"
+
+
+def test_mujoco_reference_requires_exact_source_state_and_kkt_runner_identity() -> None:
+    q = dict.fromkeys(ORDER, 0.0)
+    result = validate_mujoco_reference(_mujoco_reference(), ORDER, q)
+    assert result.shape == (41,)
+    altered = _mujoco_reference()
+    altered["source"]["source_hashes_after"][
+        "/exact/source/docs/development/feedback_controls_planning/"
+        "run_mujoco_v1_zero_effort_acceleration_20261012.py"
+    ] = "0" * 64
+    with pytest.raises(ValueError, match="source identity differs"):
+        validate_mujoco_reference(altered, ORDER, q)
+
+
+def test_geometry_gate_uses_both_translation_rotation_vector_components() -> None:
+    owner = CountedOwner()
+    geometry = _closure()
+    geometry["pose_residual_minus_log6_c1Mc2_local_frame_m_rad"] = [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        2e-9,
+    ]
+    with pytest.raises(ValueError, match="closure guard"):
+        call_one_acceleration(
+            owner,
+            dict.fromkeys(ORDER, 0.0),
+            dict.fromkeys(ORDER, 0.0),
+            ORDER,
+            geometry,
+        )
+    assert owner.calls == 0
