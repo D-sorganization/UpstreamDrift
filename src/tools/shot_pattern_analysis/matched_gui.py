@@ -10,6 +10,7 @@ from typing import Any, Mapping
 from PyQt6 import QtCore, QtGui, QtWidgets
 
 from src.tools.async_action import AsyncActionBar, WorkerContext
+from .preview import scale_previews
 from .matched_config import MatchedConfig, matched_preset
 from .noise import NOISE_FIELDS, NoiseSpec
 
@@ -941,18 +942,7 @@ class MatchedStudyWidget(QtWidgets.QWidget):
         self._scale_previews()
 
     def _scale_previews(self) -> None:
-        from PyQt6.QtGui import QPixmap
-
-        for label in (self.preview, self.overhead_preview):
-            source = label.property("sourcePixmap")
-            if isinstance(source, QPixmap) and not source.isNull():
-                label.setPixmap(
-                    source.scaled(
-                        label.size(),
-                        QtCore.Qt.AspectRatioMode.KeepAspectRatio,
-                        QtCore.Qt.TransformationMode.SmoothTransformation,
-                    )
-                )
+        scale_previews((self.preview, self.overhead_preview))
 
     def delete_when_idle(self) -> None:
         self.action_bar.finished.connect(self.deleteLater)

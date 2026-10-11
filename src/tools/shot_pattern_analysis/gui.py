@@ -15,6 +15,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 from src.shared.python.core.process_safety import managed_popen
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.tools.async_action import AsyncActionBar, WorkerContext
+from .preview import scale_previews
 from src.tools.shot_pattern_analysis.presets import CLUB_PRESETS, get_club_preset
 
 logger = get_logger(__name__)
@@ -606,16 +607,7 @@ class MainWidget(QtWidgets.QWidget):
         self._scale_previews()
 
     def _scale_previews(self) -> None:
-        for label in self.figure_labels.values():
-            source = label.property("sourcePixmap")
-            if isinstance(source, QtGui.QPixmap) and not source.isNull():
-                label.setPixmap(
-                    source.scaled(
-                        label.size(),
-                        QtCore.Qt.AspectRatioMode.KeepAspectRatio,
-                        QtCore.Qt.TransformationMode.SmoothTransformation,
-                    )
-                )
+        scale_previews(self.figure_labels.values())
 
     def is_dirty(self) -> bool:
         return False

@@ -1043,3 +1043,35 @@ def test_new_study_lifecycle_does_not_present_previous_sg_as_current(
         assert "Previous Study Draw" not in widget.scoring_label.text()
     finally:
         widget.cleanup()
+
+
+def test_shared_preview_scaling_preserves_source_and_handles_empty(qapp):
+    from PyQt6 import QtCore, QtGui, QtWidgets
+
+    from src.tools.shot_pattern_analysis.preview import scale_previews
+
+    source = QtGui.QPixmap(400, 200)
+    source.fill(QtGui.QColor("blue"))
+    source_key = source.cacheKey()
+    populated, absent, null = (QtWidgets.QLabel() for _ in range(3))
+    populated.resize(100, 80)
+    populated.setProperty("sourcePixmap", source)
+    absent.setText("No Image")
+    null.setProperty("sourcePixmap", QtGui.QPixmap())
+    null.setText("Null Image")
+    scale_previews([populated, absent, null])
+    expected = source.scaled(
+        populated.size(),
+        QtCore.Qt.AspectRatioMode.KeepAspectRatio,
+        QtCore.Qt.TransformationMode.SmoothTransformation,
+    )
+    assert populated.pixmap().toImage() == expected.toImage()
+    assert populated.property("sourcePixmap").cacheKey() == source_key
+    assert populated.pixmap().size() == QtCore.QSize(100, 50)
+    assert absent.text() == "No Image"
+    assert null.text() == "Null Image"
+    populated.resize(200, 180)
+    scale_previews([populated])
+    assert populated.pixmap().size() == QtCore.QSize(200, 100)
+    assert populated.property("sourcePixmap").cacheKey() == source_key
+    scale_previews([])
