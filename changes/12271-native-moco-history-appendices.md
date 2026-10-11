@@ -1,5 +1,5 @@
 ---
-issue: 12244
+issue: 12271
 summary: "Split native Moco ladder history into budget-compliant linked appendices"
 dl_state: "in_review"
 next_step: "Preserve source-bound failures and strict replay limits; do not infer production or physical qualification from synthetic solver results."

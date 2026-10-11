@@ -1232,11 +1232,12 @@ Full-clock private preflight retains unavailable passive admission and blocked
 independent replay. #12231 addresses strict visual asset closure; wrapped/chart,
 support/grip, captured matching and parity gates remain open.
 
-The synthetic refinement and corrected retained-input replay completed, but
-the replay remains outside its speed, activation and fiber-length limits. The
-21-interval child separately failed strict planned-clock validation at 9 of 43
-values by one ULP; the saved-clock diagnostic does not repair it. Offline
-activation analysis is diagnostic only and does not identify cause. Exact
+The earlier 20-interval replay failed its speed, activation and fiber-length
+limits. Separately, the 21-interval child failed strict planned-clock validation
+at 9 of 43 values by one ULP. A later replay on those saved timestamps failed
+only the activation limit (`5.078110452592238e-5` versus `1e-8`); coordinate,
+speed, fiber-length and endpoint limits passed. This diagnostic does not repair
+the clock rejection or identify the activation discrepancy's cause. Exact
 attempts, hashes, limits and failures remain in the historical appendices
 linked from `F07_NATIVE_MOCO_COMPLEXITY_LADDER_TURNOVER.md`.
 The agent-context catalog is unchanged because its `vendor/ud-tools` junction
