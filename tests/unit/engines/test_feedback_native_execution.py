@@ -359,8 +359,8 @@ def test_full_body_rk4_receipt_accepts_qv_only_and_remains_unqualified(
         np.zeros((3, 1)),
         np.asarray(bundle.input_history.values[:-1]),
         np.asarray(bundle.input_history.values[:-1]),
-        np.zeros(1),
-        np.zeros(1),
+        np.zeros(6),
+        np.zeros(6),
         np.zeros(2),
         bundle.applied_input_sha256,
         bundle.policy_sha256,
@@ -372,6 +372,15 @@ def test_full_body_rk4_receipt_accepts_qv_only_and_remains_unqualified(
     assert receipt.state_reset_allowed is False
     assert receipt.state_reset_count is None
     assert receipt.full_state and receipt.full_horizon
+    with pytest.raises(
+        ValueError, match="generalized efforts differ from applied frozen effort"
+    ):
+        validate_native_replay_output(
+            row,
+            full_binding,
+            bundle,
+            replace(output, generalized_efforts=np.zeros((2, 1))),
+        )
     output.pose_closure_residuals[0] = 0.25
     changed_closure_receipt = validate_native_replay_output(
         row, full_binding, bundle, output
@@ -382,6 +391,24 @@ def test_full_body_rk4_receipt_accepts_qv_only_and_remains_unqualified(
         ValueError, match="closure observations have incomplete dimensions"
     ):
         validate_native_replay_output(row, full_binding, bundle, malformed_closure)
+    with pytest.raises(
+        ValueError, match="closure observations have incomplete dimensions"
+    ):
+        validate_native_replay_output(
+            row,
+            full_binding,
+            bundle,
+            replace(output, initial_pose_closure_residual=np.zeros(5)),
+        )
+    with pytest.raises(
+        ValueError, match="closure observations have incomplete dimensions"
+    ):
+        validate_native_replay_output(
+            row,
+            full_binding,
+            bundle,
+            replace(output, initial_rate_closure_residual=np.zeros(7)),
+        )
 
 
 def test_existing_mujoco_provider_cannot_use_full_body_qv_only_state(

@@ -31,7 +31,7 @@ class _Plant:
     def closure_residuals(
         self, q: np.ndarray, v: np.ndarray
     ) -> tuple[np.ndarray, np.ndarray]:
-        return self.closure_pose_residual(q), np.array([v[-1]])
+        return np.full(6, q[-1]), np.full(6, v[-1])
 
     def closure_rate_matrix(self, q: np.ndarray) -> np.ndarray:
         return np.ones((1, len(q)))
@@ -43,7 +43,7 @@ def test_validate_generalized_history_rejects_nonzero_root_before_integration() 
     )
 
     values = np.zeros((2, 7))
-    values[0, 2] = 1.0
+    values[-1, 0] = 1.0
     with pytest.raises(ValueError, match="root generalized efforts must be zero"):
         validate_generalized_effort_history(
             _Plant.coordinate_order, np.array([0.0, 0.01]), values
@@ -74,7 +74,32 @@ def test_replay_uses_fixed_zoh_rk4_without_projection_or_state_feedback() -> Non
     assert all(call[2][-1] == 1.0 for call in plant.calls)
     np.testing.assert_array_equal(output.qpos[0], q0)
     np.testing.assert_array_equal(output.qvel[0], v0)
-    assert output.initial_pose_closure_residual.tolist() == [0.0]
+    assert output.initial_pose_closure_residual.shape == (6,)
+    assert output.initial_rate_closure_residual.shape == (6,)
+
+
+@pytest.mark.parametrize("pose_size, rate_size", [(5, 6), (7, 6), (6, 5), (6, 7)])
+def test_replay_rejects_incomplete_dual_grip_weld_observations(
+    pose_size: int, rate_size: int
+) -> None:
+    from src.engines.physics_engines.mujoco.python.native_full_body_replay import (
+        integrate_full_body_history,
+    )
+
+    class IncompleteClosurePlant(_Plant):
+        def closure_residuals(
+            self, q: np.ndarray, v: np.ndarray
+        ) -> tuple[np.ndarray, np.ndarray]:
+            return np.zeros(pose_size), np.zeros(rate_size)
+
+    with pytest.raises(ValueError, match="dual-grip weld closure observations"):
+        integrate_full_body_history(
+            IncompleteClosurePlant(),
+            np.zeros(7),
+            np.zeros(7),
+            np.array([0.0, 0.01]),
+            np.zeros((2, 7)),
+        )
 
 
 def test_bundle_builder_uses_t01_generalized_effort_and_complete_qv(
@@ -232,6 +257,93 @@ def test_bundle_builder_uses_t01_generalized_effort_and_complete_qv(
             contracts,
         )
 
+    def rebuild_bundle(*, channels, input_kind, interpolation, timebase_id):
+        return contracts.build_experiment_replay_bundle(
+            bundle.experiment_id,
+            bundle.model,
+            bundle.capabilities,
+            tuple((item.component_id, item.values) for item in bundle.initial_state),
+            channels,
+            input_kind,
+            interpolation,
+            bundle.input_history.time_seconds,
+            bundle.input_history.values,
+            bundle.policy,
+            timebase_id=timebase_id,
+        )
+
+    monkeypatch.setattr(
+        native_full_body_replay,
+        "VectorPlant",
+        lambda *_args, **_kwargs: pytest.fail(
+            "invalid replay must fail before native model construction"
+        ),
+    )
+    wrong_target = (
+        contracts.InputChannel(
+            "TranslationInputX", "other-target", "N", "TranslationInputX"
+        ),
+        *bundle.input_history.channels[1:],
+    )
+    wrong_unit = (
+        contracts.InputChannel(
+            "TranslationInputX", "TranslationInputX", "N*m", "TranslationInputX"
+        ),
+        *bundle.input_history.channels[1:],
+    )
+    invalid_public_bundles = (
+        (
+            rebuild_bundle(
+                channels=wrong_unit,
+                input_kind=contracts.ActuationInputKind.GENERALIZED_EFFORT,
+                interpolation=contracts.InputInterpolation.ZERO_ORDER_HOLD,
+                timebase_id="simulation_relative",
+            ),
+            "exact source primitive mapping",
+        ),
+        (
+            rebuild_bundle(
+                channels=wrong_target,
+                input_kind=contracts.ActuationInputKind.GENERALIZED_EFFORT,
+                interpolation=contracts.InputInterpolation.ZERO_ORDER_HOLD,
+                timebase_id="simulation_relative",
+            ),
+            "exact source primitive mapping",
+        ),
+        (
+            rebuild_bundle(
+                channels=tuple(
+                    contracts.InputChannel(name, name, "N*m", name)
+                    for name in coordinate_order
+                ),
+                input_kind=contracts.ActuationInputKind.ACTUATOR_TORQUE,
+                interpolation=contracts.InputInterpolation.ZERO_ORDER_HOLD,
+                timebase_id="simulation_relative",
+            ),
+            "generalized-effort input",
+        ),
+    )
+    for invalid_bundle, message in invalid_public_bundles:
+        with pytest.raises(ValueError, match=message):
+            native_full_body_replay.replay_native_full_body_bundle(
+                invalid_bundle, spec_path
+            )
+
+    with pytest.raises(ValueError, match="torque and effort histories require"):
+        rebuild_bundle(
+            channels=bundle.input_history.channels,
+            input_kind=contracts.ActuationInputKind.GENERALIZED_EFFORT,
+            interpolation=contracts.InputInterpolation.LINEAR,
+            timebase_id="simulation_relative",
+        )
+    with pytest.raises(ValueError, match="timebase_id must be"):
+        rebuild_bundle(
+            channels=bundle.input_history.channels,
+            input_kind=contracts.ActuationInputKind.GENERALIZED_EFFORT,
+            interpolation=contracts.InputInterpolation.ZERO_ORDER_HOLD,
+            timebase_id="wall_clock",
+        )
+
     invalid_spec = json.loads(spec_path.read_text(encoding="utf-8"))
     invalid_spec["joints"][0]["primitives"][-1]["primitive"] = "Punknown"
     spec_path.write_text(json.dumps(invalid_spec), encoding="utf-8")
@@ -246,3 +358,27 @@ def test_bundle_builder_uses_t01_generalized_effort_and_complete_qv(
             variant_id=model.variant_id,
             experiment_id="opaque:test-invalid-coordinate-units",
         )
+
+    for malformed_primitives in (
+        invalid_spec["joints"][0]["primitives"][:-1],
+        [
+            *invalid_spec["joints"][0]["primitives"][:-1],
+            invalid_spec["joints"][0]["primitives"][0],
+        ],
+    ):
+        malformed_spec = {
+            "coordinate_order": coordinate_order,
+            "joints": [{"primitives": malformed_primitives}],
+        }
+        spec_path.write_text(json.dumps(malformed_spec), encoding="utf-8")
+        with pytest.raises(ValueError, match="one primitive mapping"):
+            native_full_body_replay.build_native_full_body_bundle(
+                spec_path,
+                np.zeros(7),
+                np.zeros(7),
+                np.array([0.0, 0.01, 0.02]),
+                efforts,
+                model_id=model.model_id,
+                variant_id=model.variant_id,
+                experiment_id="opaque:test-invalid-primitive-mapping",
+            )

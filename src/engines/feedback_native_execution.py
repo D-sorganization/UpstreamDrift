@@ -536,6 +536,7 @@ def _validate_native_output_state(
         raise ValueError("native qpos and qvel dimensions must be positive")
     state_component = {item.component_id: item.values for item in bundle.initial_state}
     from src.engines.physics_engines.mujoco.python.native_full_body_replay import (
+        DUAL_GRIP_WELD_CLOSURE_DIMENSION,
         NativeFullBodyReplay,
     )
 
@@ -556,14 +557,19 @@ def _validate_native_output_state(
         )
         step_residuals = np.asarray(output.pose_closure_residuals, dtype=np.float64)
         if (
-            pose_residual.ndim != 1
-            or pose_residual.size == 0
-            or rate_residual.ndim != 1
-            or rate_residual.size == 0
+            pose_residual.shape != (DUAL_GRIP_WELD_CLOSURE_DIMENSION,)
+            or rate_residual.shape != (DUAL_GRIP_WELD_CLOSURE_DIMENSION,)
             or step_residuals.shape != (len(times) - 1,)
         ):
             raise ValueError(
                 "full-body closure observations have incomplete dimensions"
+            )
+        generalized_efforts = np.asarray(output.generalized_efforts, dtype=np.float64)
+        if generalized_efforts.shape != inputs.shape or not np.array_equal(
+            generalized_efforts, inputs
+        ):
+            raise ValueError(
+                "full-body generalized efforts differ from applied frozen effort"
             )
         auxiliary_name = ""
         auxiliary: NDArray[np.float64] = np.empty((0, 0), dtype=np.float64)

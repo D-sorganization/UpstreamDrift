@@ -30,6 +30,7 @@ Array: TypeAlias = NDArray[np.float64]
 PROVIDER_ID = "mujoco-full-body-generalized-rk4"
 PROVIDER_VERSION = "1.0.0"
 _SUBSTEPS = 8
+DUAL_GRIP_WELD_CLOSURE_DIMENSION = 6
 
 
 @dataclass(frozen=True)
@@ -164,6 +165,12 @@ def integrate_full_body_history(
     if not np.isfinite(q).all() or not np.isfinite(v).all():
         raise ValueError("initial position and velocity state must be finite")
     initial_pose, initial_rate = plant.closure_residuals(q, v)
+    if np.asarray(initial_pose).shape != (
+        DUAL_GRIP_WELD_CLOSURE_DIMENSION,
+    ) or np.asarray(initial_rate).shape != (DUAL_GRIP_WELD_CLOSURE_DIMENSION,):
+        raise ValueError(
+            "initial dual-grip weld closure observations must have six components"
+        )
     if not np.isfinite(initial_pose).all() or not np.isfinite(initial_rate).all():
         raise ValueError("initial closure observation must be finite")
     rollout = open_loop(
@@ -198,13 +205,6 @@ def integrate_full_body_history(
         or not np.isfinite(rollout.pose_drift).all()
     ):
         raise ValueError("integrator output contains incomplete closure magnitudes")
-    if (
-        np.asarray(initial_pose).ndim != 1
-        or np.asarray(initial_pose).size == 0
-        or np.asarray(initial_rate).ndim != 1
-        or np.asarray(initial_rate).size == 0
-    ):
-        raise ValueError("initial closure observations must be nonempty vectors")
     return NativeFullBodyReplay(
         np.asarray(time_seconds, dtype=np.float64).copy(),
         rollout.q,
@@ -326,7 +326,10 @@ def _identity(
     contact_digest = hashlib.sha256(b"full-body-own-contact-and-weld-v1\0")
     contact_digest.update(spec_bytes)
     for source in (full_body_model, native_model, contact_law):
-        contact_digest.update(Path(source.__file__).read_bytes())
+        source_path = source.__file__
+        if not source_path:
+            raise RuntimeError("a contact-policy source module has no file path")
+        contact_digest.update(Path(source_path).read_bytes())
     contact_sha = contact_digest.hexdigest()
     policy = contracts.ReplayExecutionPolicy(
         replay_mode=contracts.ReplayMode.NATIVE_OWN_CONTACT,
