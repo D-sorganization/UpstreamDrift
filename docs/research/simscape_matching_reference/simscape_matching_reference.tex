@@ -5710,11 +5710,12 @@ drift apart. The hand-side frames are the committed address calibration
 
 An earlier draft of this slice placed the lead hand 0.015 m below the butt,
 with a lead \texttt{WeldConstraint} and a trail \texttt{WeldJoint} on a club
-whose origin was the butt. It was superseded when the OSV-9 club landed.
-Restoring a 0.015 m lead position would move both inverse-kinematics grip
-targets 0.017 m toward the butt and needs \texttt{msk\_club\_calibration} to be
-rerun for both models and both clubs; it awaits owner review. Reproduce:
-\texttt{python3 scripts/build\_humanoid\_osim.py}.
+whose origin was the butt. It was superseded when the OSV-9 club landed. The
+spec-derived 0.032 m offset for the lead hand was accepted by the owner
+(2026-10-11) and is resolved; reverting to a 0.015 m lead position would move
+both inverse-kinematics grip targets 0.017 m toward the butt and requires
+\texttt{msk\_club\_calibration} to be rerun for both models and both clubs.
+Reproduce: \texttt{python3 scripts/build\_humanoid\_osim.py}.
 
 \subsection{Closure Residual on the Canned Swing}
 Residual $=\lVert p_a-p_b\rVert$ of the two grip frames the closure ties, per
@@ -5739,6 +5740,76 @@ MyoSuite & unavailable & unavailable \\
 \end{tabular}
 \caption{Maximum Closure Residual Over the Canned Swing}
 \end{table}
+
+\subsection{Curled-Finger Grip Hand Mesh (Visual Only)}
+\texttt{src/shared/python/model\_appearance/grip\_hand\_mesh.py}
+(\texttt{build\_grip\_hand\_mesh}) bakes one rigid hand per grip from a
+parametric finger-segment generator: a rounded curved palm block, four
+fingers of three capsule phalanges and a two-capsule thumb. It reads the hand
+position, V azimuth, thumb azimuth and grip style from \texttt{grip\_pose}
+and takes the grip radius $R$ as an input, so the same hand wraps the driver,
+iron and wedge grips. No engine attaches it yet; that is the next slice.
+
+\paragraph{Frame.} The mesh is expressed in a hand-grip frame that is rigid in
+the hand body: origin on the grip axis at the hand centre ($d_L$ or $d_T$
+below the butt), $z$ along $g$ (butt toward head), $x$ at azimuth $0$ ($-n$)
+and $y$ at azimuth 90 deg ($-t$). The grip is the cylinder $x^2+y^2=R^2$.
+
+\paragraph{Wrapping.} A phalanx of length $L_k$ and radius $r$ is a capsule
+whose axis is tangent to the circle of radius $\rho=R+c+r$ about the grip axis,
+with $c$ the pad clearance. The proximal tangent point is the phalanx
+midpoint, $a_0=L_0/2$; each later phalanx starts at the joint, so
+$a_{k+1}=b_k=L_k-a_k$. Consecutive tangent azimuths differ by
+$2\arctan(b_k/\rho)$, which puts most of the flexion at the proximal
+interphalangeal joint (84 deg for the default index finger). Every phalanx
+therefore comes no closer to the grip than $c$, at its tangent point; the
+joints stand off further. The knuckles sit 110 deg from the V in the curl
+direction. Lead fingers curl toward decreasing azimuth and trail fingers
+toward increasing azimuth, so the two hands are mirror images about their V
+azimuths. The thumb lies along the shaft toward the head at the
+\texttt{grip\_pose} thumb azimuth. The palm block sweeps from the V to the
+knuckles with its inner face $1.5$~mm off the grip.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lll}
+\hline
+Parameter & Default & Basis \\
+\hline
+Pad clearance $c$ & 1.0 mm & Inside the [0, 3] mm acceptance band \\
+Finger radii (index, middle, ring, little) & 8.0, 8.2, 7.8, 6.8 mm & Nominal adult; stack fits below the butt \\
+Index phalanges & 40, 24, 19 mm & Nominal adult \\
+Middle phalanges & 45, 28, 20 mm & Nominal adult \\
+Ring phalanges & 42, 27, 20 mm & Nominal adult \\
+Little phalanges & 34, 20, 18 mm & Nominal adult \\
+Thumb radius, segment stations & 9.5 mm; $-12$, 20, 46 mm & Nominal adult \\
+Palm thickness, clearance & 18 mm, 1.5 mm & Visual \\
+Knuckle azimuth from the V & 110 deg & Visual \\
+\hline
+\end{tabular}
+\caption{Grip Hand Mesh Generator Parameters}
+\end{table}
+
+\paragraph{Measured Clearance.} On the vertices and dense barycentric samples
+of every triangle, against the analytic cylinder, the minimum distance from
+each on-grip finger, the thumb and the palm to the grip surface is 1.0~mm
+(fingers and thumb) and 1.49~mm (palm) at $R=12.7$, 13.8, 14.0 and 14.5~mm,
+for both hands; no surface point lies inside the grip. Every shell is closed
+and consistently wound. Reproduce:
+\texttt{python3 -m pytest tests/unit/model\_appearance/test\_grip\_hand\_mesh.py}.
+
+\paragraph{Limitations.} The hand is visual only and rigid; it carries no
+mass, inertia or contact. Finger dimensions are nominal, not fitted to a
+golfer. The mesh is a set of overlapping closed shells, not a boolean union,
+so it renders as one hand but is not a single manifold. For overlap and
+interlock the trail little finger is moved over (or half between) the lead
+index and middle fingers as a separate straight-curl finger; it is flagged
+off-grip, excluded from the grip clearance, and may touch the lead fingers.
+Contact between the two hands is not modelled: the tip of the lead thumb can
+meet the edge of the trail palm, where the trail life line should cover it.
+The Shadow hand assets under the MuJoCo Grip Modelling tab were not used; the
+MuJoCo Menagerie Shadow hand is stated to be Apache-2.0 in \#11728, and that
+licence still has to be confirmed and recorded before any asset-based variant.
 
 \subsection{Limitations and Open Items}
 \begin{itemize}
