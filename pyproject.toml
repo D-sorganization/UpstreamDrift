@@ -691,7 +691,6 @@ testpaths = [
     "src/shared/python/data_processing/tests",
     "src/shared/python/humanoid_character_builder/tests",
     "src/shared/python/model_generation/tests",
-    "src/shared/python/movement_optimizer/tests",
     "src/shared/python/plot_engine/tests",
     "src/shared/python/programmatic_pid/tests",
     "src/shared/python/sidekick/process_calculators/scrubber/tests",

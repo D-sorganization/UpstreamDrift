@@ -31,6 +31,7 @@ import importlib
 import importlib.util
 import sys
 import types
+import warnings
 from collections.abc import Sequence
 from importlib.abc import Loader, MetaPathFinder
 from importlib.machinery import ModuleSpec
@@ -40,6 +41,7 @@ __all__ = [
     "REDIRECTED_ROOTS",
     "SeamRedirectFinder",
     "SeamResolutionError",
+    "TOP_LEVEL_REDIRECTS",
     "extend_shared_python_path",
     "install",
     "installed_tools_distribution",
@@ -78,6 +80,17 @@ REDIRECTED_ROOTS: dict[str, Path | None] = {
     "theme": _UD_SHARED_ROOT / "theme",
     "ui": _UD_SHARED_ROOT / "ui",
 }
+
+
+# root -> canonical *top-level* Tools package. Tools keeps these outside
+# ``shared/python`` (``vendor/ud-tools/src/<name>``), so the ``shared.python``
+# seam guards never compared the UD copy; the copy is deleted and the legacy
+# spelling warns before binding to the pinned package.
+TOP_LEVEL_REDIRECTS: dict[str, str] = {
+    # Retired 2026-10-10: the UD copy had drifted in 112 files (#12267).
+    "movement_optimizer": "movement_optimizer",
+}
+_TOP_LEVEL_ISSUE = {"movement_optimizer": "#12267"}
 
 
 class SeamResolutionError(ImportError):
@@ -220,7 +233,10 @@ class SeamRedirectFinder(MetaPathFinder):
         if not fullname.startswith(_LEGACY_PREFIX):
             return None
         remainder = fullname[len(_LEGACY_PREFIX) :]
-        root = remainder.split(".", 1)[0]
+        root, _, rest = remainder.partition(".")
+        top_level = TOP_LEVEL_REDIRECTS.get(root)
+        if top_level is not None:
+            return root, f"{top_level}.{rest}" if rest else top_level
         if root not in REDIRECTED_ROOTS:
             return None
         return root, _CANONICAL_PREFIX + remainder
@@ -241,7 +257,9 @@ class SeamRedirectFinder(MetaPathFinder):
                 # nosemgrep: python.lang.security.audit.non-literal-import.non-literal-import
                 module = importlib.import_module(canonical_name)
             except ModuleNotFoundError as exc:
-                if exc.name in {"shared", "shared.python", _CANONICAL_PREFIX + root}:
+                roots_missing = {"shared", "shared.python", _CANONICAL_PREFIX + root}
+                roots_missing.add(TOP_LEVEL_REDIRECTS.get(root, ""))
+                if exc.name in roots_missing:
                     raise SeamResolutionError(
                         f"{fullname} now resolves to the pinned Tools package "
                         f"{canonical_name}, which is not importable "
@@ -273,6 +291,8 @@ class SeamRedirectFinder(MetaPathFinder):
             return None
         root, canonical_name = resolved
         _ensure_canonical_on_path()
+        if root in TOP_LEVEL_REDIRECTS:
+            _warn_top_level(fullname, root, canonical_name)
         module = self._import_canonical(fullname, root, canonical_name)
         if module is None:
             return None
@@ -284,6 +304,32 @@ class SeamRedirectFinder(MetaPathFinder):
             spec.submodule_search_locations = list(search)
         spec.has_location = spec.origin is not None
         return spec
+
+
+def _warn_top_level(fullname: str, root: str, canonical_name: str) -> None:
+    """Warn about a retired top-level spelling and make the pinned root findable.
+
+    ``_ensure_canonical_on_path`` is a no-op once ``shared`` is a regular
+    package, which says nothing about top-level Tools packages. The vendor
+    ``src`` root is appended (never prepended) so it cannot outrank a package
+    that is already importable.
+    """
+    if "." not in fullname[len(_LEGACY_PREFIX) :]:
+        warnings.warn(
+            f"{fullname} is retired; import {canonical_name} (pinned Tools "
+            f"package) instead ({_TOP_LEVEL_ISSUE.get(root, 'UD #9406')}).",
+            DeprecationWarning,
+            stacklevel=3,
+        )
+    vendor_src = str(_VENDOR_ROOT / "src")
+    top_level = TOP_LEVEL_REDIRECTS[root]
+    if (
+        importlib.util.find_spec(top_level) is None
+        and (_VENDOR_ROOT / "src" / top_level).is_dir()
+        and vendor_src not in sys.path
+    ):
+        sys.path.append(vendor_src)
+        importlib.invalidate_caches()
 
 
 def _extend_split_path(root: str, module: types.ModuleType) -> None:
