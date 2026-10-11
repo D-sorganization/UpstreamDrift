@@ -69,6 +69,37 @@ def _face_loft_covariance(diagnostics: Mapping[str, Any]) -> float:
     return _finite(covariance[face][loft], "face-loft covariance")
 
 
+def _low_support_pattern(
+    nominal: Mapping[str, Any],
+    supported: int,
+    attempted: int,
+    interval: tuple[float, ...],
+    delivered_rows: Mapping[str, Iterable[Mapping[str, Any]]] | None,
+    name: str,
+) -> dict[str, Any]:
+    """Report sparse endpoints without claiming estimable spread."""
+    pattern: dict[str, Any] = {
+        "status": "Insufficient Supported Shots",
+        "supported_n": supported,
+        "attempted_n": attempted,
+        "supported_fraction_ci95": interval,
+        "nominal_face_deg": _finite(nominal["face_deg"], "nominal face"),
+        "nominal_path_deg": _finite(nominal["path_deg"], "nominal path"),
+        "nominal_speed_mps": _finite(nominal["speed_mps"], "nominal speed"),
+    }
+    if delivered_rows is not None:
+        if name not in delivered_rows:
+            raise ValueError(f"missing delivered rows for {name}")
+        values = list(delivered_rows[name])
+        if len(values) != supported:
+            raise ValueError(
+                "delivered geometry population differs from supported endpoints"
+            )
+        if values:
+            pattern.update(_delivered_means(values))
+    return pattern
+
+
 def describe_cell(
     cell: Mapping[str, Any],
     *,
@@ -116,26 +147,9 @@ def describe_cell(
             raise ValueError("invalid support interval")
         nominal = cell["nominals"][name]
         if supported < 2:
-            low_support: dict[str, Any] = {
-                "status": "Insufficient Supported Shots",
-                "supported_n": supported,
-                "attempted_n": attempted,
-                "supported_fraction_ci95": interval,
-                "nominal_face_deg": _finite(nominal["face_deg"], "nominal face"),
-                "nominal_path_deg": _finite(nominal["path_deg"], "nominal path"),
-                "nominal_speed_mps": _finite(nominal["speed_mps"], "nominal speed"),
-            }
-            if delivered_rows is not None:
-                if name not in delivered_rows:
-                    raise ValueError(f"missing delivered rows for {name}")
-                values = list(delivered_rows[name])
-                if len(values) != supported:
-                    raise ValueError(
-                        "delivered geometry population differs from supported endpoints"
-                    )
-                if values:
-                    low_support.update(_delivered_means(values))
-            result["patterns"][name] = low_support
+            result["patterns"][name] = _low_support_pattern(
+                nominal, supported, attempted, interval, delivered_rows, name
+            )
             continue
         statistics = item["statistics"]
         quadrants = statistics["quadrant_fractions"]

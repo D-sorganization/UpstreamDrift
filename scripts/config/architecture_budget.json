@@ -1489,15 +1489,6 @@
       "expires_on": "2026-12-31"
     },
     {
-      "path": "src/tools/shot_pattern_analysis/matched_interpretation.py",
-      "symbol": "describe_cell",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - describe_cell exceeds function-lines budget (110 > 100).",
-      "expires_on": "2026-12-31"
-    },
-    {
       "path": "src/tools/shot_pattern_analysis/matched_lean_control.py",
       "symbol": "analyze_explicit_source_pair",
       "rule": "function-lines",
@@ -1621,15 +1612,6 @@
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 12278,
       "reason": "Issue #12278: shot pattern analysis integration - _save_dispersion exceeds function-lines budget (121 > 100).",
-      "expires_on": "2026-12-31"
-    },
-    {
-      "path": "src/tools/shot_pattern_analysis/scenario_scoring.py",
-      "symbol": "score_corrected_bundle",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - score_corrected_bundle exceeds function-lines budget (142 > 100).",
       "expires_on": "2026-12-31"
     },
     {

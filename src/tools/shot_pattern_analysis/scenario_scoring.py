@@ -93,16 +93,10 @@ def score_course_endpoints(
     }
 
 
-def score_corrected_bundle(output_dir: Path) -> Path:
-    """Score a completed corrected-club bundle without new flight simulation."""
-    output_dir = Path(output_dir)
-    summary_path = output_dir / "summary.json"
-    summary = json.loads(summary_path.read_text())
-    club_id = summary["config"]["club_id"]
-    target = float(summary["target_x_m"])
-    seed = int(summary["config"]["seed"])
-    endpoints = load_pattern_endpoints(output_dir / "shots.csv")
-
+def _add_sensitivities(
+    report: dict, endpoints: dict, *, club_id: str, target: float, seed: int
+) -> None:
+    """Add supported course-geometry sensitivity results to a scored report."""
     def sensitivity(**changes: float) -> dict:
         try:
             return score_course_endpoints(
@@ -122,50 +116,64 @@ def score_corrected_bundle(output_dir: Path) -> Path:
             "api_evaluated_states": scenario["api_evaluated_states"],
         }
 
+    if club_id == "driver":
+        report["hole_distance_sensitivity_m"] = {
+            f"{hole:g}": compact(
+                report if hole == 400.0 else sensitivity(hole_distance_m=hole)
+            )
+            for hole in (350.0, 400.0, 450.0)
+        }
+        report["fairway_width_sensitivity_m"] = {
+            f"{2 * half:g}": compact(
+                report if half == 15.0 else sensitivity(fairway_half_width_m=half)
+            )
+            for half in (10.0, 15.0, 20.0)
+        }
+    else:
+        report["green_radius_sensitivity_m"] = {
+            f"{radius:g}": compact(
+                report if radius == 15.0 else sensitivity(green_radius_m=radius)
+            )
+            for radius in (10.0, 15.0, 20.0)
+        }
+    sensitivity_reports = (
+        [
+            item
+            for key, item in report["hole_distance_sensitivity_m"].items()
+            if key != "400"
+        ]
+        + [
+            item
+            for key, item in report["fairway_width_sensitivity_m"].items()
+            if key != "30"
+        ]
+        if club_id == "driver"
+        else [
+            item
+            for key, item in report["green_radius_sensitivity_m"].items()
+            if key != "15"
+        ]
+    )
+    report["total_api_evaluated_states"] = report["api_evaluated_states"] + sum(
+        item.get("api_evaluated_states", 0) for item in sensitivity_reports
+    )
+
+
+def score_corrected_bundle(output_dir: Path) -> Path:
+    """Score a completed corrected-club bundle without new flight simulation."""
+    output_dir = Path(output_dir)
+    summary_path = output_dir / "summary.json"
+    summary = json.loads(summary_path.read_text())
+    club_id = summary["config"]["club_id"]
+    target = float(summary["target_x_m"])
+    seed = int(summary["config"]["seed"])
+    endpoints = load_pattern_endpoints(output_dir / "shots.csv")
     try:
         report = score_course_endpoints(
             endpoints, club_id=club_id, target_x_m=target, seed=seed
         )
-        if club_id == "driver":
-            report["hole_distance_sensitivity_m"] = {
-                f"{hole:g}": compact(
-                    report if hole == 400.0 else sensitivity(hole_distance_m=hole)
-                )
-                for hole in (350.0, 400.0, 450.0)
-            }
-            report["fairway_width_sensitivity_m"] = {
-                f"{2 * half:g}": compact(
-                    report if half == 15.0 else sensitivity(fairway_half_width_m=half)
-                )
-                for half in (10.0, 15.0, 20.0)
-            }
-        else:
-            report["green_radius_sensitivity_m"] = {
-                f"{radius:g}": compact(
-                    report if radius == 15.0 else sensitivity(green_radius_m=radius)
-                )
-                for radius in (10.0, 15.0, 20.0)
-            }
-        sensitivity_reports = (
-            [
-                item
-                for key, item in report["hole_distance_sensitivity_m"].items()
-                if key != "400"
-            ]
-            + [
-                item
-                for key, item in report["fairway_width_sensitivity_m"].items()
-                if key != "30"
-            ]
-            if club_id == "driver"
-            else [
-                item
-                for key, item in report["green_radius_sensitivity_m"].items()
-                if key != "15"
-            ]
-        )
-        report["total_api_evaluated_states"] = report["api_evaluated_states"] + sum(
-            item.get("api_evaluated_states", 0) for item in sensitivity_reports
+        _add_sensitivities(
+            report, endpoints, club_id=club_id, target=target, seed=seed
         )
     except ValueError as exc:
         report = {"status": "unavailable", "reason": str(exc), "club_id": club_id}

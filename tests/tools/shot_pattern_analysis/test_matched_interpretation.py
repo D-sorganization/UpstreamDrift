@@ -1,5 +1,7 @@
 """Evidence-bound interpretation of saved matched-shot results."""
 
+import inspect
+
 import pytest
 
 from src.tools.shot_pattern_analysis.matched_interpretation import (
@@ -15,6 +17,10 @@ from src.tools.shot_pattern_analysis.matched_interpretation import (
 )
 
 pytestmark = pytest.mark.unit
+
+
+def test_describe_cell_respects_function_budget():
+    assert len(inspect.getsourcelines(describe_cell)[0]) <= 100
 
 
 def _cell(status="completed", supported_n=9_000):

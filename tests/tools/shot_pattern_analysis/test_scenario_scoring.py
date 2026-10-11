@@ -5,6 +5,7 @@ from __future__ import annotations
 import pytest
 import csv
 import json
+import inspect
 
 from src.tools.shot_pattern_analysis.scenario_scoring import (
     score_corrected_bundle,
@@ -20,6 +21,10 @@ def _endpoints() -> dict[str, list[tuple[int, float, float]]]:
         "Draw": [(0, 201.0, 0.0), (1, 201.0, 10.0)],
         "Fade": [(0, 199.0, 0.0), (1, 199.0, 30.0)],
     }
+
+
+def test_score_bundle_respects_function_budget() -> None:
+    assert len(inspect.getsourcelines(score_corrected_bundle)[0]) <= 100
 
 
 def test_driver_tee_uses_fairway_corridor_and_source_api_knots() -> None:
