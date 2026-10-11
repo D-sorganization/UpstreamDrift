@@ -340,6 +340,9 @@ def cmd_moco_native(args: argparse.Namespace) -> int:
         args.output_dir,
         constrained_cold_start=request.constrained_cold_start,
         mixed_actuation=request.mixed_actuation,
+        wrapped_path_declaration=request.wrapped_path_declaration,
+        native_mechanics_profile=request.native_mechanics_profile,
+        contact_declaration=request.contact_declaration,
     )
     score_native_moco_replay(
         request, prepared, solved, exported, native, args.output_dir
