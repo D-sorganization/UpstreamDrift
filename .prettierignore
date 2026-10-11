@@ -61,3 +61,5 @@ docs/development/full_body_models/evidence/foot_progression/osv4_final/capture_o
 # #12187: byte-bound native neck-tracking receipt from #12154.
 docs/development/full_body_models/evidence/head_gaze/fd_neck_tracking.json
 
+# Preserve the byte-bound native closed-loop receipt serialization.
+docs/development/full_body_models/evidence/head_gaze/fd_neck_closed_loop.json

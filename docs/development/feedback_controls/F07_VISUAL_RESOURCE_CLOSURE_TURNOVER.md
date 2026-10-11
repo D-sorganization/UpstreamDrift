@@ -39,6 +39,17 @@ are not native acceptance evidence.
 
 ## Current Status
 
-Implementation is in review on `fix/12231-source-bound-visual-assets`. The
-source and fixture tests are being validated against OpenSim 4.6; repository
-hooks and CI remain outstanding. Issue #12231 remains open until merge.
+Draft PR #12232 remains in review on `fix/12231-source-bound-visual-assets`.
+The current integration includes a normal merge of main and regenerated
+agent-context views. OpenSim 4.6 regression validation passed 36 tests with
+zero skips across `test_native_muscle_bundle.py` and
+`tests/unit/engines/test_native_replay_contracts.py`; the ledger unit suite
+passed 11 tests. All five central pre-PR gates passed before the final receipt
+formatter exclusion.
+
+A normal pre-push hook exposed a formatter rewrite of the existing native
+`fd_neck_closed_loop.json` receipt. JSON semantic equality was verified and
+its exact committed bytes restored. The explicit Prettier exclusion preserves
+its byte-bound provenance and ledger freshness. Normal commit/push hooks and
+remote CI must pass on the final head before merge. Issue #12231 remains open
+until merge; this contract supplies no full-capture or physical qualification.
