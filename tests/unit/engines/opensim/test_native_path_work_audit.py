@@ -12,6 +12,8 @@ from src.engines.physics_engines.opensim.python.tour_matching.native_path_work_a
     audit_native_path_work,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def _identity(source: bytes = b"owned native model") -> NativePathWorkIdentity:
     return NativePathWorkIdentity(
