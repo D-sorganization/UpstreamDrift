@@ -14,10 +14,11 @@ from collections.abc import Mapping
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import TYPE_CHECKING, Any
+from pyexpat import ExpatError
 
 import numpy as np
-from defusedxml import ElementTree as SafeET
 from defusedxml.common import DefusedXmlException
+from defusedxml.expatbuilder import parseString as safe_parse_string
 from numpy.typing import NDArray
 
 from src.engines.native_replay_contracts import (
@@ -125,23 +126,61 @@ def _validate_self_contained_source(
     visual_resources: tuple[native_visual_resources.SourceVisualResource, ...] = (),
 ) -> None:
     """Require an inline model and an exact source-owned visual resource list."""
-    references = native_visual_resources.discover_visual_meshes(raw)
-    expected = tuple(
-        sorted(
-            (
-                item.relative_path,
-                item.component_path,
+    try:
+        document = safe_parse_string(
+            raw,
+            namespaces=False,
+            forbid_dtd=True,
+            forbid_entities=True,
+            forbid_external=True,
+        )
+    except (ExpatError, DefusedXmlException) as error:
+        raise ValueError("native source XML must be self-contained") from error
+    root = document.documentElement
+    models = [
+        child for child in root.childNodes if getattr(child, "tagName", None) == "Model"
+    ]
+    if root.tagName != "OpenSimDocument" or len(models) != 1:
+        raise ValueError("native source must contain one inline OpenSim Model")
+    elements = (root, *root.getElementsByTagName("*"))
+    for element in elements:
+        # This parser deliberately disables namespace processing because
+        # OpenSim uses C++-qualified component names such as
+        # ``HuntCrossleyForce::ContactParametersSet``. Resource checks still
+        # inspect the local portion of a literal prefixed name so a namespace
+        # prefix cannot hide an external reference from this gate.
+        tag = element.tagName.rsplit(":", 1)[-1].lower()
+        if tag in {"file", "filename", "file_name"} or tag.endswith("_file"):
+            if not visual_resources or tag != "mesh_file":
+                raise ValueError(
+                    "external source resources need a separate identity policy"
+                )
+        if any(
+            element.attributes.item(index).name.rsplit(":", 1)[-1].lower()
+            in {"file", "filename", "href"}
+            for index in range(element.attributes.length)
+        ):
+            raise ValueError(
+                "external source references need a separate identity policy"
             )
-            for item in visual_resources
+    if visual_resources:
+        references = native_visual_resources.discover_visual_meshes(raw)
+        expected = tuple(
+            sorted(
+                (
+                    item.relative_path,
+                    item.component_path,
+                )
+                for item in visual_resources
+            )
         )
-    )
-    actual = tuple(
-        sorted((item.relative_path, item.component_path) for item in references)
-    )
-    if actual != expected:
-        raise ValueError(
-            "external source resources need an exact source-bound visual closure"
+        actual = tuple(
+            sorted((item.relative_path, item.component_path) for item in references)
         )
+        if actual != expected:
+            raise ValueError(
+                "external source resources need an exact source-bound visual closure"
+            )
 
 
 def _prepare(
@@ -178,7 +217,11 @@ def _prepare(
     return model, state, names, muscle_names, options
 
 
-def _coordinate_units(model: Any) -> dict[str, str]:
+def _coordinate_units(
+    model: Any,
+    *,
+    native_mechanics_profile: Any | None = None,
+) -> dict[str, str]:
     import opensim as osim
 
     units = {}
@@ -191,11 +234,45 @@ def _coordinate_units(model: Any) -> dict[str, str]:
         elif motion == osim.Coordinate.Translational:
             unit = "m"
         else:
-            raise ValueError("coordinate motion units need another native policy")
+            custom_unit = _custom_joint_coordinate_unit(
+                model, coordinate, native_mechanics_profile, osim
+            )
+            if custom_unit is None:
+                raise ValueError("coordinate motion units need another native policy")
+            unit = custom_unit
         prefix = coordinate.getAbsolutePathString()
         units[prefix + "/value"] = unit
         units[prefix + "/speed"] = unit + "/s"
     return units
+
+
+def _custom_joint_coordinate_unit(
+    model: Any, coordinate: Any, profile: Any | None, osim: Any
+) -> str | None:
+    if profile is None:
+        return None
+    delegated_paths = {
+        item.absolute_path
+        for item in profile.components
+        if item.concrete_class == "CustomJoint"
+    }
+    coordinate_path = coordinate.getAbsolutePathString()
+    units: set[str] = set()
+    joints = model.getJointSet()
+    for index in range(joints.getSize()):
+        joint = osim.CustomJoint.safeDownCast(joints.get(index))
+        if joint is None or joint.getAbsolutePathString() not in delegated_paths:
+            continue
+        transform = joint.getSpatialTransform()
+        for axis_index in range(6):
+            axis = transform.getTransformAxis(axis_index)
+            names = axis.getCoordinateNames()
+            if any(
+                str(names.getValue(name_index)) == coordinate.getName()
+                for name_index in range(names.size())
+            ):
+                units.add("rad" if axis_index < 3 else "m")
+    return next(iter(units)) if len(units) == 1 else None
 
 
 def _state_specs(
@@ -203,8 +280,9 @@ def _state_specs(
     names: tuple[str, ...],
     options: Mapping[str, tuple[float, ...]],
     contracts: Any,
+    native_mechanics_profile: Any | None = None,
 ) -> tuple[Any, ...]:
-    units = _coordinate_units(model)
+    units = _coordinate_units(model, native_mechanics_profile=native_mechanics_profile)
     roles = {
         "value": contracts.StateComponentRole.POSITION,
         "speed": contracts.StateComponentRole.VELOCITY,
@@ -246,6 +324,7 @@ def _identity(
     muscles: tuple[str, ...],
     options: Mapping[str, tuple[float, ...]],
     contracts: Any,
+    native_mechanics_profile: Any | None = None,
     visual_resources: tuple[native_visual_resources.SourceVisualResource, ...] = (),
 ) -> Any:
     import opensim as osim
@@ -284,7 +363,7 @@ def _identity(
         contracts.InitialStateSchema(
             "opensim-native-continuous-and-registered-options",
             _VERSION,
-            _state_specs(model, names, options, contracts),
+            _state_specs(model, names, options, contracts, native_mechanics_profile),
         ),
         muscles,
         hashlib.sha256(model.dump().encode()).hexdigest(),

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 import hashlib
 import json
 from pathlib import Path
@@ -22,6 +22,12 @@ from .native_moco_runner import (
     _sha,
     _require_current_inputs,
     _solution_names,
+)
+from .native_diagnostic_contract import (
+    NativeDiagnosticAssessment,
+    RuntimePhase,
+    RuntimeViability,
+    native_diagnostic_assessment_from_json_dict,
 )
 from .native_muscle_bundle import (
     build_native_muscle_replay_bundle,
@@ -54,6 +60,9 @@ class NativeMocoExport:
     output_times: NDArray[np.float64]
     wall_seconds: float
     cpu_seconds: float
+    diagnostic_assessment: NativeDiagnosticAssessment | None = None
+    native_mechanics_profile_sha256: str | None = None
+    contact_declaration_sha256: str | None = None
 
 
 @dataclass(frozen=True)
@@ -72,6 +81,7 @@ class NativeMocoScore:
     wall_seconds: float
     cpu_seconds: float
     qualification: str = "synthetic-or-exploratory-executed-match-only"
+    diagnostic_assessment: NativeDiagnosticAssessment | None = None
 
 
 def _solution(
@@ -210,6 +220,9 @@ def export_native_moco_bundle(
             output,
             controls,
             experiment_id="offline-native-moco-constrained-independent-replay",
+            wrapped_path_declaration=request.wrapped_path_declaration,
+            native_mechanics_profile=request.native_mechanics_profile,
+            contact_declaration=request.contact_declaration,
         )
     contracts = native_replay_contract_types()
     payload = contracts.dumps_experiment_replay_bundle(bundle)
@@ -227,6 +240,13 @@ def export_native_moco_bundle(
         output,
         time.perf_counter() - wall,
         time.process_time() - cpu,
+        solved.diagnostic_assessment,
+        None
+        if request.native_mechanics_profile is None
+        else request.native_mechanics_profile.profile_sha256,
+        None
+        if request.contact_declaration is None
+        else request.contact_declaration.declaration_sha256,
     )
     (directory / "export.json").write_text(
         json.dumps(
@@ -244,45 +264,15 @@ def export_native_moco_bundle(
     return receipt
 
 
-def replay_native_moco_bundle(
+def _persist_native_replay(
     exported: NativeMocoExport,
-    model_path: Path,
-    output_dir: Path,
-    *,
-    constrained_cold_start: DeclaredColdStart | None = None,
-    mixed_actuation: MixedActuationProfile | None = None,
-) -> Any:
-    """Execute the saved T01 inputs on a fresh model, without a reference API."""
-    directory = Path(output_dir)
-    bundle_path = directory / "native_replay_bundle.json"
-    if _sha(bundle_path) != exported.bundle_sha256:
-        raise ValueError("Saved T01 input changed before independent replay")
-    contracts = native_replay_contract_types()
-    bundle = contracts.load_experiment_replay_bundle(
-        bundle_path.read_text(encoding="utf-8")
-    )
-    if _sha(Path(model_path)) != bundle.model.source_model_sha256:
-        raise ValueError("Native model changed before independent replay")
-    wall = time.perf_counter()
-    cpu = time.process_time()
-    result: NativeMuscleReplayResult | ConstrainedMuscleReplay | NativeMixedReplayResult
-    if mixed_actuation is not None:
-        result = replay_native_mixed_bundle(
-            bundle,
-            model_path,
-            mixed_actuation,
-            constrained_cold_start=constrained_cold_start,
-        )
-    elif constrained_cold_start is None:
-        if bundle.model.variant_id != "reviewed-cold-start-muscles":
-            raise ValueError("constrained replay requires its declared cold start")
-        result = replay_native_muscle_bundle(bundle, model_path)
-    else:
-        from .native_constrained_muscle import replay_constrained_muscle_bundle
-
-        if constrained_cold_start.model_path != Path(model_path).resolve():
-            raise ValueError("constrained replay model path differs")
-        result = replay_constrained_muscle_bundle(bundle, constrained_cold_start)
+    result: NativeMuscleReplayResult
+    | ConstrainedMuscleReplay
+    | NativeMixedReplayResult,
+    directory: Path,
+    wall: float,
+    cpu: float,
+) -> None:
     if not np.array_equal(result.times, exported.output_times):
         raise ValueError("Native execution did not retain the frozen output clock")
     evidence = directory / "native_replay.npz"
@@ -325,16 +315,28 @@ def replay_native_moco_bundle(
             applied_excitations=result.applied_excitations,
         )
     np.savez(evidence, **arrays)
+    if exported.diagnostic_assessment is None:
+        raise ValueError("Native export lost its typed diagnostic assessment")
+    replay_assessment = replace(
+        exported.diagnostic_assessment,
+        runtime_viability=RuntimeViability.VIABLE,
+        runtime_phase=RuntimePhase.FULL_REPLAY,
+        runtime_window_seconds=(float(result.times[0]), float(result.times[-1])),
+        runtime_evidence_sha256=_sha(evidence),
+    )
     (directory / "replay.json").write_text(
         json.dumps(
             {
                 "bundle_sha256": exported.bundle_sha256,
+                "native_mechanics_profile_sha256": exported.native_mechanics_profile_sha256,
+                "contact_declaration_sha256": exported.contact_declaration_sha256,
                 "native_output_sha256": _sha(evidence),
                 "state_count": len(result.state_names),
                 "sample_count": len(result.times),
                 "wall_seconds": time.perf_counter() - wall,
                 "cpu_seconds": time.process_time() - cpu,
                 "qualification": "independent-native-input-reproduction-only",
+                "diagnostic_assessment": replay_assessment.to_json_dict(),
             },
             indent=2,
             allow_nan=False,
@@ -342,6 +344,69 @@ def replay_native_moco_bundle(
         + "\n",
         encoding="utf-8",
     )
+
+
+def replay_native_moco_bundle(
+    exported: NativeMocoExport,
+    model_path: Path,
+    output_dir: Path,
+    *,
+    constrained_cold_start: DeclaredColdStart | None = None,
+    mixed_actuation: MixedActuationProfile | None = None,
+    wrapped_path_declaration: Any | None = None,
+    native_mechanics_profile: Any | None = None,
+    contact_declaration: Any | None = None,
+) -> Any:
+    """Execute the saved T01 inputs on a fresh model, without a reference API."""
+    directory = Path(output_dir)
+    bundle_path = directory / "native_replay_bundle.json"
+    if _sha(bundle_path) != exported.bundle_sha256:
+        raise ValueError("Saved T01 input changed before independent replay")
+    contracts = native_replay_contract_types()
+    bundle = contracts.load_experiment_replay_bundle(
+        bundle_path.read_text(encoding="utf-8")
+    )
+    if _sha(Path(model_path)) != bundle.model.source_model_sha256:
+        raise ValueError("Native model changed before independent replay")
+    profile_sha256 = (
+        None
+        if native_mechanics_profile is None
+        else native_mechanics_profile.profile_sha256
+    )
+    if profile_sha256 != exported.native_mechanics_profile_sha256:
+        raise ValueError("Native mechanics profile changed before independent replay")
+    contact_sha256 = (
+        None if contact_declaration is None else contact_declaration.declaration_sha256
+    )
+    if contact_sha256 != exported.contact_declaration_sha256:
+        raise ValueError("Native contact declaration changed before independent replay")
+    wall = time.perf_counter()
+    cpu = time.process_time()
+    result: NativeMuscleReplayResult | ConstrainedMuscleReplay | NativeMixedReplayResult
+    if mixed_actuation is not None:
+        result = replay_native_mixed_bundle(
+            bundle,
+            model_path,
+            mixed_actuation,
+            constrained_cold_start=constrained_cold_start,
+        )
+    elif constrained_cold_start is None:
+        if bundle.model.variant_id != "reviewed-cold-start-muscles":
+            raise ValueError("constrained replay requires its declared cold start")
+        result = replay_native_muscle_bundle(bundle, model_path)
+    else:
+        from .native_constrained_muscle import replay_constrained_muscle_bundle
+
+        if constrained_cold_start.model_path != Path(model_path).resolve():
+            raise ValueError("constrained replay model path differs")
+        result = replay_constrained_muscle_bundle(
+            bundle,
+            constrained_cold_start,
+            wrapped_path_declaration=wrapped_path_declaration,
+            native_mechanics_profile=native_mechanics_profile,
+            contact_declaration=contact_declaration,
+        )
+    _persist_native_replay(exported, result, directory, wall, cpu)
     return result
 
 
@@ -436,6 +501,17 @@ def score_native_moco_replay(
     objective = solved.objective
     if objective is None or not np.isfinite(objective):
         raise ValueError("Saved native solution has no finite objective")
+    replay_receipt = json.loads((directory / "replay.json").read_text(encoding="utf-8"))
+    replay_assessment = native_diagnostic_assessment_from_json_dict(
+        replay_receipt["diagnostic_assessment"]
+    )
+    if (
+        replay_assessment.request_sha256 != request.identity_sha256
+        or replay_assessment.source_sha256 != request.model_sha256
+    ):
+        raise ValueError(
+            "Native replay diagnostic assessment is bound to another request"
+        )
     result = NativeMocoScore(
         rmse,
         int(capture.valid.sum()),
@@ -448,6 +524,7 @@ def score_native_moco_replay(
         geometry_sha,
         time.perf_counter() - wall,
         time.process_time() - cpu,
+        diagnostic_assessment=replay_assessment,
     )
     (directory / "score.json").write_text(
         json.dumps(asdict(result), indent=2, allow_nan=False) + "\n",
