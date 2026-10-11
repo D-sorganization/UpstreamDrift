@@ -25,7 +25,9 @@
       "reason": "Stopped before final summary because dependency checkout was empty; not acceptance"
     },
     {
-      "reason": "Inherited runtime had Deprecated3.0.0 despite locked1.3.1; mypy failed parsing third-party Python3.12 syntax with target3.11. Stopped affected tests before final summary. A separate environment now installs exact Deprecated1.3.1 and wrapt2.2.1."
+      "reason": "Inherited runtime had Deprecated3.0.0 despite locked1.3.1; mypy failed parsing third-party Python3.12 syntax with target3.11. Stopped affected tests before final summary. A separate environment now installs exact Deprecated1.3.1 and wrapt2.2.1.",
+      "receipt": "incomplete-runtime-mismatch.txt.gz",
+      "receipt_sha256": "440baeeb1cb697716f1a1573c8a9e83efd25c07434fe6e56eccc809e14ca0078"
     }
   ],
   "current_validation": "Locked-environment canonical mypy gate running; complete pre-PR remains pending after latest remote reconciliation.",
