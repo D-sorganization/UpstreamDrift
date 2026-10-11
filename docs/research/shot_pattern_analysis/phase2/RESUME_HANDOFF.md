@@ -15,13 +15,22 @@ Sol owns supplemental PNG review v2 and coverage reconciliation. All 56 lean
 pairs have scoped approval (336 PNGs); curve and shaft-SD batches continue.
 Root curve000-retry/048/096 receipts are complete. Sol confirmed a legend/title glyph
 collision in academic density curve index149. The complete saved-SVG scan found
-14 affected academic density pairs (nine curve, five shaft-SD), tracked in #12243; a selective,
-separately qualified repair is in progress. Do not infer blanket v6
+14 pairs with actual glyph intersections; a broader 2 pt clearance check selected
+43 density pairs. Astra additionally held shaft-SD indices 21/23 for lower
+Fade title/colorbar occlusion. Issue #12243 covers the measured, selective
+layout repair; its final scope remains under review. Do not infer blanket v6
 acceptance. Frozen producer sources and numerical outputs remain unchanged.
 Luna owns native PDF/SVG checks with two progressing workers. Root has reviewed
-50 of 70 assigned native paths; 20–29 and 50–59 await rasters. Luna has reviewed
+all 70 assigned native paths; the last receipt is
+`root_visual_review_20_29_50_59.json` (SHA256
+`9438ad0ff479bd24aba8c00f7351a05d58c21d8bae17520d601fc9debb8da701`).
+These are native-format comparisons, superseded for assets changed by the layout repair.
+Luna has reviewed
 102 of 102 assigned paths. Review-only Sharp 0.35.5 transition is qualified.
-Full vector acceptance and graphics coverage remain pending.
+All 2,024 SVG renders completed with exit 0; PDF/structural checks are still
+progressing. Full vector acceptance and graphics coverage remain pending.
+Root shaft-SD 048 PNG review is complete with no scoped defects.
+Delivery integration contains study commit `9f9ad03ac8` at merge `3270a6e214`.
 
 The strict loader receipt in `validation/supplement_v6_final_graphics_review_v2`
 binds 384 pairs, 26 unique cells, 6,456 assets, and unchanged numerical inputs.
