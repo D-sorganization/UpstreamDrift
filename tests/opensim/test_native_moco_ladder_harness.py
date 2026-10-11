@@ -783,6 +783,122 @@ def test_forward_witness_has_exact_saved_clock_and_nonzero_endpoint(
         _validate_actual_solver_settings(refined_request)
 
 
+def test_custom_mesh_does_not_misreport_uniform_interval_getter() -> None:
+    from tests.opensim.native_moco_ladder_worker import (
+        _actual_solver_settings,
+        _configure_solver,
+        _validate_actual_solver_settings,
+    )
+
+    points = [0.0, 0.25, 0.5, 0.75, 1.0]
+
+    class FakeCustomMeshSolver:
+        def __init__(self) -> None:
+            self.mesh = None
+            self.uniform_intervals = 100
+
+        def setMesh(self, values: list[float]) -> None:
+            self.mesh = list(values)
+
+        def set_num_mesh_intervals(self, _value: int) -> None:
+            raise AssertionError("custom mesh must not mutate uniform interval count")
+
+        def get_num_mesh_intervals(self) -> int:
+            return self.uniform_intervals
+
+        def set_transcription_scheme(self, _value: str) -> None:
+            pass
+
+        def get_transcription_scheme(self) -> str:
+            return "hermite-simpson"
+
+        def set_interpolate_control_mesh_interior_points(self, _value: bool) -> None:
+            pass
+
+        def get_interpolate_control_mesh_interior_points(self) -> bool:
+            return True
+
+        def set_parallel(self, _value: int) -> None:
+            pass
+
+        def get_parallel(self) -> int:
+            return 0
+
+        def set_optim_max_iterations(self, _value: int) -> None:
+            pass
+
+        def set_optim_convergence_tolerance(self, _value: float) -> None:
+            pass
+
+        def set_optim_constraint_tolerance(self, _value: float) -> None:
+            pass
+
+    solver = FakeCustomMeshSolver()
+    _configure_solver(solver, 4, normalized_mesh_points=points)
+    assert solver.mesh == points
+    with pytest.raises(ValueError, match="interval count differs"):
+        _configure_solver(solver, 5, normalized_mesh_points=points)
+    settings = _actual_solver_settings(solver, points)
+    assert settings == {
+        "transcription_scheme": "hermite-simpson",
+        "interpolate_control_mesh_interior_points": True,
+        "parallel": 0,
+        "set_mesh_requested_normalized_points": points,
+        "set_mesh_requested_interval_count": 4,
+        "uniform_mesh_interval_getter_ignored": 100,
+    }
+    request = {
+        "mesh_intervals": 4,
+        "transcription_scheme": "hermite-simpson",
+        "interpolate_control_mesh_interior_points": True,
+        "parallel": 0,
+        "mesh_refinement": {"normalized_mesh_points": points},
+        "actual_solver_settings": settings,
+    }
+    _validate_actual_solver_settings(request)
+    request["actual_solver_settings"]["set_mesh_requested_normalized_points"] = [
+        0.0,
+        0.5,
+        1.0,
+    ]
+    with pytest.raises(ValueError, match="differ from the bound request"):
+        _validate_actual_solver_settings(request)
+
+
+def test_preparation_witness_evidence_uses_persisted_witness_keys(
+    tmp_path: Path,
+) -> None:
+    from tests.opensim.native_moco_ladder_worker import (
+        _preparation_witness_evidence,
+        _sha256,
+    )
+
+    state_path = tmp_path / "witness_states.sto"
+    control_path = tmp_path / "witness_time_only_controls.sto"
+    state_path.write_bytes(b"states")
+    control_path.write_bytes(b"controls")
+    witness = {
+        "state_path": state_path,
+        "control_path": control_path,
+        "states_sha256": _sha256(state_path),
+        "controls_sha256": _sha256(control_path),
+        "source_sha256": "a" * 64,
+        "initial_q": 0.3,
+        "target_q": 0.300005,
+        "times": (0.0, 0.001, 0.01),
+        "controls": {"flexor": (0.05, 0.05, 0.05)},
+    }
+    evidence = _preparation_witness_evidence(witness)
+    assert evidence["target_q"] == 0.300005
+    assert evidence["time_count"] == 3
+    assert evidence["states_sha256"] == witness["states_sha256"]
+    assert evidence["controls_sha256"] == witness["controls_sha256"]
+    assert evidence["control_channels"] == ["flexor"]
+    witness["state_path"] = tmp_path / "missing.sto"
+    with pytest.raises(ValueError, match="witness files differ"):
+        _preparation_witness_evidence(witness)
+
+
 def test_ladder_stops_after_first_worker_failure(tmp_path: Path) -> None:
     invocations: list[str] = []
 

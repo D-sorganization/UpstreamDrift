@@ -1142,6 +1142,8 @@ def _configure_solver(
         from tests.opensim.native_moco_refinement import validate_normalized_mesh
 
         points = validate_normalized_mesh(normalized_mesh_points)
+        if len(points) - 1 != mesh_intervals:
+            raise ValueError("custom mesh interval count differs from its request")
         setter = getattr(solver, "setMesh", None)
         if not callable(setter):
             raise RuntimeError("installed Moco solver does not expose setMesh")
@@ -1160,16 +1162,46 @@ def _actual_solver_settings(
     solver: Any, normalized_mesh_points: list[float] | None = None
 ) -> dict[str, Any]:
     result = {
-        "mesh_intervals": int(solver.get_num_mesh_intervals()),
         "transcription_scheme": str(solver.get_transcription_scheme()),
         "interpolate_control_mesh_interior_points": bool(
             solver.get_interpolate_control_mesh_interior_points()
         ),
         "parallel": int(solver.get_parallel()),
     }
-    if normalized_mesh_points is not None:
-        result["requested_normalized_mesh_points"] = list(normalized_mesh_points)
+    if normalized_mesh_points is None:
+        result["mesh_intervals"] = int(solver.get_num_mesh_intervals())
+    else:
+        # OpenSim's uniform-count getter does not report the custom setMesh grid.
+        result["uniform_mesh_interval_getter_ignored"] = int(
+            solver.get_num_mesh_intervals()
+        )
+        result["set_mesh_requested_normalized_points"] = list(normalized_mesh_points)
+        result["set_mesh_requested_interval_count"] = len(normalized_mesh_points) - 1
     return result
+
+
+def _preparation_witness_evidence(witness: dict[str, Any]) -> dict[str, Any]:
+    """Return source-bound fields produced by the fixed-excitation witness."""
+    state_path = Path(witness["state_path"])
+    control_path = Path(witness["control_path"])
+    if (
+        not state_path.is_file()
+        or not control_path.is_file()
+        or _sha256(state_path) != witness["states_sha256"]
+        or _sha256(control_path) != witness["controls_sha256"]
+    ):
+        raise ValueError("prepared witness files differ from their recorded hashes")
+    return {
+        "source_sha256": witness["source_sha256"],
+        "initial_q": float(witness["initial_q"]),
+        "target_q": float(witness["target_q"]),
+        "state_path": str(state_path),
+        "control_path": str(control_path),
+        "states_sha256": witness["states_sha256"],
+        "controls_sha256": witness["controls_sha256"],
+        "time_count": int(len(witness["times"])),
+        "control_channels": sorted(witness["controls"]),
+    }
 
 
 def _validate_actual_solver_settings(config: dict[str, Any]) -> None:
@@ -1183,10 +1215,27 @@ def _validate_actual_solver_settings(config: dict[str, Any]) -> None:
     }
     refinement = config.get("mesh_refinement")
     if isinstance(refinement, dict):
-        expected["requested_normalized_mesh_points"] = refinement[
+        expected.pop("mesh_intervals")
+        expected["set_mesh_requested_normalized_points"] = refinement[
             "normalized_mesh_points"
         ]
-    if config.get("actual_solver_settings") != expected:
+        expected["set_mesh_requested_interval_count"] = config["mesh_intervals"]
+        actual = config.get("actual_solver_settings")
+        if (
+            not isinstance(actual, dict)
+            or isinstance(actual.get("uniform_mesh_interval_getter_ignored"), bool)
+            or not isinstance(actual.get("uniform_mesh_interval_getter_ignored"), int)
+            or actual["uniform_mesh_interval_getter_ignored"] < 0
+        ):
+            raise ValueError("custom mesh diagnostic getter is malformed")
+        comparable = {
+            key: value
+            for key, value in actual.items()
+            if key != "uniform_mesh_interval_getter_ignored"
+        }
+    else:
+        comparable = config.get("actual_solver_settings")
+    if comparable != expected:
         raise ValueError("native solver settings differ from the bound request")
 
 
