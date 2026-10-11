@@ -321,9 +321,7 @@ def verifier_pin(tmp_path):
         "source_commit": commit,
         "python_executable": sys.executable,
         "python_sha256": sha(Path(sys.executable)),
-        "source_sha256": {
-            str(p.relative_to(root)): sha(p) for p in package.glob("*.py")
-        },
+        "source_sha256": {str(p.relative_to(root)): sha(p) for p in root.rglob("*.py")},
         "execution": {"native": "pinned"},
     }
 
