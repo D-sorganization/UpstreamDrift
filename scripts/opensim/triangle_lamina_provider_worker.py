@@ -33,9 +33,13 @@ def _provider_identity(tools_src: Path) -> dict[str, str]:
         "representation": root
         / "shared/python/humanoid_character_builder/mesh/inertia_calculator.py",
     }
+    triangle_file = triangle.__file__
+    representation_file = representation.__file__
+    if triangle_file is None or representation_file is None:
+        raise ValueError("pinned Tools provider import has no source file")
     actual = {
-        "provider": Path(triangle.__file__).resolve(),
-        "representation": Path(representation.__file__).resolve(),
+        "provider": Path(triangle_file).resolve(),
+        "representation": Path(representation_file).resolve(),
     }
     for label, path in actual.items():
         if path != expected[label].resolve():
