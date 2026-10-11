@@ -41,6 +41,7 @@ from .native_mechanics_profile import (
 )
 from .native_contact_policy import (
     NativeContactExecutionDeclaration,
+    native_contact_provider_sha256,
     validate_native_contact_execution,
 )
 
@@ -354,6 +355,7 @@ def _bundle_for(
             + Path(__file__).with_name("native_mechanics_profile.py").read_bytes()
             + Path(__file__).with_name("native_muscle_bundle.py").read_bytes()
             + Path(__file__).with_name("native_contact_policy.py").read_bytes()
+            + (Path(__file__).parents[1] / "opensim_force_torque.py").read_bytes()
         ).hexdigest()
         identity = replace(
             identity,
@@ -382,6 +384,9 @@ def _bundle_for(
                 if native_mechanics_profile is not None
                 else None,
                 contact_declaration.declaration_sha256
+                if contact_declaration is not None
+                else None,
+                native_contact_provider_sha256()
                 if contact_declaration is not None
                 else None,
             ),

@@ -23,6 +23,12 @@ def _is_sha(value: str) -> bool:
     return len(value) == 64 and all(char in "0123456789abcdef" for char in value)
 
 
+def native_contact_provider_sha256() -> str:
+    """Bind the shared sampler and its OpenSim wrench implementation bytes."""
+    sampler_source = Path(__file__).parents[1] / "opensim_force_torque.py"
+    return _sha(Path(__file__).read_bytes() + sampler_source.read_bytes())
+
+
 def _force_identities(model: Any) -> tuple[NativeContactForceIdentity, ...]:
     rows = []
     forces = model.getForceSet()
@@ -224,6 +230,7 @@ __all__ = [
     "NativeContactGeometryIdentity",
     "contact_sampler",
     "declare_native_contact_execution",
+    "native_contact_provider_sha256",
     "sample_native_contacts",
     "validate_native_contact_execution",
 ]

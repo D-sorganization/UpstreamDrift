@@ -13,7 +13,9 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
-def _contact_source(tmp_path: Path) -> tuple[Path, Any, Any, Any]:
+def _contact_source(
+    tmp_path: Path, contact_kind: str = "smooth"
+) -> tuple[Path, Any, Any, Any]:
     from tests.opensim.test_native_constrained_muscle import _source
 
     osim = pytest.importorskip("opensim")
@@ -32,14 +34,23 @@ def _contact_source(tmp_path: Path) -> tuple[Path, Any, Any, Any]:
     )
     model.addContactGeometry(floor)
     model.addContactGeometry(sphere)
-    contact = osim.SmoothSphereHalfSpaceForce()
-    contact.connectSocket_sphere(sphere)
-    contact.connectSocket_half_space(floor)
-    contact.set_stiffness(1e5)
-    contact.set_dissipation(1.0)
-    contact.set_constant_contact_force(1e-12)
-    contact.set_hertz_smoothing(5e4)
-    contact.set_hunt_crossley_smoothing(50)
+    if contact_kind == "smooth":
+        contact = osim.SmoothSphereHalfSpaceForce()
+        contact.connectSocket_sphere(sphere)
+        contact.connectSocket_half_space(floor)
+        contact.set_stiffness(1e5)
+        contact.set_dissipation(1.0)
+        contact.set_constant_contact_force(1e-12)
+        contact.set_hertz_smoothing(5e4)
+        contact.set_hunt_crossley_smoothing(50)
+    elif contact_kind == "hunt_crossley":
+        contact = osim.HuntCrossleyForce()
+        contact.addGeometry("floor")
+        contact.addGeometry("base_contact")
+        contact.setStiffness(1e5)
+        contact.setDissipation(1.0)
+    else:
+        raise ValueError("unknown test contact kind")
     contact.setName("base_contact_force")
     model.addForce(contact)
     model.finalizeConnections()
@@ -164,3 +175,71 @@ def test_contact_source_mutation_invalidates_declaration(tmp_path: Path) -> None
         validate_native_contact_execution(
             mutated, declaration, cold_start.source_sha256
         )
+
+
+def test_contact_provider_implementation_identity_is_part_of_policy(
+    tmp_path: Path,
+) -> None:
+    from src.engines.physics_engines.opensim.python.tour_matching.native_prepared_state import (
+        _admission_identity,
+    )
+    from src.engines.physics_engines.opensim.python.tour_matching.native_contact_policy import (
+        declare_native_contact_execution,
+        native_contact_provider_sha256,
+    )
+
+    path, cold_start, _model, _osim = _contact_source(tmp_path)
+    declaration = declare_native_contact_execution(path, cold_start.source_sha256)
+    provider_sha = native_contact_provider_sha256()
+    first = _admission_identity(
+        cold_start,
+        "a" * 64,
+        contact_declaration_sha256=declaration.declaration_sha256,
+        native_contact_provider_sha256=provider_sha,
+    )
+    changed = _admission_identity(
+        cold_start,
+        "a" * 64,
+        contact_declaration_sha256=declaration.declaration_sha256,
+        native_contact_provider_sha256="b" * 64,
+    )
+    assert provider_sha != "b" * 64
+    assert first != changed
+
+
+def test_contact_declaration_rejects_wrong_source_identity(tmp_path: Path) -> None:
+    from src.engines.physics_engines.opensim.python.tour_matching.native_contact_policy import (
+        declare_native_contact_execution,
+        validate_native_contact_execution,
+    )
+
+    path, cold_start, model, _osim = _contact_source(tmp_path)
+    declaration = declare_native_contact_execution(path, cold_start.source_sha256)
+    with pytest.raises(ValueError, match="source identity differs"):
+        validate_native_contact_execution(model, declaration, "0" * 64)
+
+
+@pytest.mark.parametrize(
+    ("contact_kind", "expected_class"),
+    [
+        ("smooth", "SmoothSphereHalfSpaceForce"),
+        ("hunt_crossley", "HuntCrossleyForce"),
+    ],
+)
+def test_supported_contact_laws_bind_force_and_geometry_closure(
+    tmp_path: Path, contact_kind: str, expected_class: str
+) -> None:
+    from src.engines.physics_engines.opensim.python.tour_matching.native_contact_policy import (
+        declare_native_contact_execution,
+        validate_native_contact_execution,
+    )
+
+    path, cold_start, model, _osim = _contact_source(tmp_path, contact_kind)
+    declaration = declare_native_contact_execution(path, cold_start.source_sha256)
+    assert len(declaration.forces) == 1
+    assert declaration.forces[0].concrete_class == expected_class
+    assert {item.concrete_class for item in declaration.geometries} == {
+        "ContactHalfSpace",
+        "ContactSphere",
+    }
+    validate_native_contact_execution(model, declaration, cold_start.source_sha256)
