@@ -536,41 +536,11 @@ def _validate_native_output_state(
         raise ValueError("native qpos and qvel dimensions must be positive")
     state_component = {item.component_id: item.values for item in bundle.initial_state}
     from src.engines.physics_engines.mujoco.python.native_full_body_replay import (
-        DUAL_GRIP_WELD_CLOSURE_DIMENSION,
         NativeFullBodyReplay,
     )
 
     if isinstance(output, NativeFullBodyReplay):
-        if (
-            tuple(state_component) != ("qpos", "qvel")
-            or bundle.model.state_schema.schema_id != "mujoco-full-body-qv"
-            or bundle.model.state_schema.version != "1.0.0"
-        ):
-            raise ValueError("full-body replay requires complete qpos and qvel only")
-        if hasattr(output, "integration_states") or hasattr(output, "discrete_states"):
-            raise ValueError("full-body RK4 replay has no hidden integration state")
-        pose_residual = np.asarray(
-            output.initial_pose_closure_residual, dtype=np.float64
-        )
-        rate_residual = np.asarray(
-            output.initial_rate_closure_residual, dtype=np.float64
-        )
-        step_residuals = np.asarray(output.pose_closure_residuals, dtype=np.float64)
-        if (
-            pose_residual.shape != (DUAL_GRIP_WELD_CLOSURE_DIMENSION,)
-            or rate_residual.shape != (DUAL_GRIP_WELD_CLOSURE_DIMENSION,)
-            or step_residuals.shape != (len(times) - 1,)
-        ):
-            raise ValueError(
-                "full-body closure observations have incomplete dimensions"
-            )
-        generalized_efforts = np.asarray(output.generalized_efforts, dtype=np.float64)
-        if generalized_efforts.shape != inputs.shape or not np.array_equal(
-            generalized_efforts, inputs
-        ):
-            raise ValueError(
-                "full-body generalized efforts differ from applied frozen effort"
-            )
+        _validate_full_body_output_state(output, bundle, inputs, times)
         auxiliary_name = ""
         auxiliary: NDArray[np.float64] = np.empty((0, 0), dtype=np.float64)
     elif row.engine == "myosuite":
@@ -626,32 +596,94 @@ def _validate_native_output_state(
             )
         auxiliary = np.asarray(getattr(output, auxiliary_field), dtype=np.float64)
     if row.engine != "pinocchio" and not isinstance(output, NativeFullBodyReplay):
-        if (
-            auxiliary.ndim != 2
-            or auxiliary.shape[0] != len(times)
-            or auxiliary.shape[1] <= 0
-        ):
-            raise ValueError(
-                "native output lacks full integration initialization state"
-            )
-        if auxiliary.shape[1] != len(state_component.get(auxiliary_name, ())):
-            raise ValueError(
-                "native output auxiliary state differs from T01 state schema"
-            )
+        _validate_native_auxiliary_state(
+            auxiliary, auxiliary_name, state_component, len(times)
+        )
+    _validate_native_output_initial_state(
+        row.engine,
+        isinstance(output, NativeFullBodyReplay),
+        state_component,
+        auxiliary_name,
+        auxiliary,
+        qpos,
+        qvel,
+    )
+
+
+def _validate_native_output_initial_state(
+    engine: str,
+    full_body_output: bool,
+    state_component: dict[str, Any],
+    auxiliary_name: str,
+    auxiliary: NDArray[np.float64],
+    qpos: NDArray[np.float64],
+    qvel: NDArray[np.float64],
+) -> None:
     if not np.array_equal(
         qpos[0], state_component.get("qpos", ())
     ) or not np.array_equal(qvel[0], state_component.get("qvel", ())):
-        raise ValueError(
-            "native output initial physical state differs from frozen bundle"
-        )
+        raise ValueError("native output initial physical state differs from bundle")
+    if engine != "pinocchio" and not full_body_output:
+        if not np.array_equal(auxiliary[0], state_component.get(auxiliary_name, ())):
+            raise ValueError(
+                "native output initial numerical state differs from bundle"
+            )
+
+
+def _validate_native_auxiliary_state(
+    auxiliary: NDArray[np.float64],
+    auxiliary_name: str,
+    state_component: dict[str, Any],
+    horizon_length: int,
+) -> None:
     if (
-        row.engine != "pinocchio"
-        and not isinstance(output, NativeFullBodyReplay)
-        and not np.array_equal(auxiliary[0], state_component.get(auxiliary_name, ()))
+        auxiliary.ndim != 2
+        or auxiliary.shape[0] != horizon_length
+        or auxiliary.shape[1] <= 0
     ):
+        raise ValueError("native output lacks full integration initialization state")
+    if auxiliary.shape[1] != len(state_component.get(auxiliary_name, ())):
+        raise ValueError("native output auxiliary state differs from T01 state schema")
+
+
+def _validate_full_body_output_state(
+    output: NativeFullBodyReplay,
+    bundle: Any,
+    inputs: NDArray[np.float64],
+    times: NDArray[np.float64],
+) -> None:
+    """Validate full-body replay completeness and both frozen effort reports."""
+    from src.engines.physics_engines.mujoco.python.native_full_body_replay import (
+        DUAL_GRIP_WELD_CLOSURE_DIMENSION,
+    )
+
+    state_ids = tuple(item.component_id for item in bundle.initial_state)
+    schema = bundle.model.state_schema
+    if (
+        state_ids != ("qpos", "qvel")
+        or schema.schema_id != "mujoco-full-body-qv"
+        or schema.version != "1.0.0"
+    ):
+        raise ValueError("full-body replay requires complete qpos and qvel only")
+    if hasattr(output, "integration_states") or hasattr(output, "discrete_states"):
+        raise ValueError("full-body RK4 replay has no hidden integration state")
+    pose = np.asarray(output.initial_pose_closure_residual, dtype=np.float64)
+    rate = np.asarray(output.initial_rate_closure_residual, dtype=np.float64)
+    steps = np.asarray(output.pose_closure_residuals, dtype=np.float64)
+    if (
+        pose.shape != (DUAL_GRIP_WELD_CLOSURE_DIMENSION,)
+        or rate.shape != (DUAL_GRIP_WELD_CLOSURE_DIMENSION,)
+        or steps.shape != (len(times) - 1,)
+    ):
+        raise ValueError("full-body closure observations have incomplete dimensions")
+    generalized = np.asarray(output.generalized_efforts, dtype=np.float64)
+    if generalized.shape != inputs.shape or not np.array_equal(generalized, inputs):
         raise ValueError(
-            "native output initial numerical state differs from frozen bundle"
+            "full-body generalized efforts differ from applied frozen effort"
         )
+    applied = np.asarray(output.applied_generalized_efforts, dtype=np.float64)
+    if applied.shape != inputs.shape or not np.array_equal(applied, inputs):
+        raise ValueError("full-body applied efforts differ from applied frozen effort")
 
 
 def _native_execution_receipt(
