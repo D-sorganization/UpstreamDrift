@@ -49,6 +49,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1134 | `src/engines/physics_engines/opensim/python/tour_matching/native_moco_preparation.py` |
 | 1134 | `src/shared/python/shadow_tracker/segmentation.py` |
 | 1134 | `src/tools/model_explorer/model_library.py` |
+| 1133 | `src/engines/feedback_native_execution.py` |
 | 1133 | `src/shared/python/motion_matching/full_body_ik.py` |
 | 1128 | `src/tools/starting_pose_matcher/gui_main_widget.py` |
 | 1118 | `src/motion_capture/rig/__main__.py` |
@@ -81,7 +82,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1020 | `src/tools/bunker_shot_gui/render3d_vtk.py` |
 | 1019 | `src/shared/python/optimization/casadi_backend.py` |
 | 1017 | `src/shared/python/shadow_tracker/contracts.py` |
-| 1016 | `src/engines/feedback_native_execution.py` |
 | 1015 | `src/shared/python/motion_matching/gs3dx_variants.py` |
 | 1012 | `src/shared/python/config/model_source_providers.py` |
 | 1007 | `src/launchers/launcher_ui_setup.py` |
@@ -184,6 +184,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 822 | `src/tools/capture_rig/layout_editor.py` |
 | 819 | `src/shared/python/model_generation/converters/simscape/simscape_converter.py` |
 | 819 | `src/shared/python/motion_matching/club_only/ui_integration.py` |
+| 815 | `src/engines/physics_engines/mujoco/python/native_full_body_replay.py` |
 | 813 | `src/engines/physics_engines/drake/python/src/drake_golf_model.py` |
 | 813 | `src/robotics/control/whole_body/wbc_controller.py` |
 | 813 | `src/shared/python/gui_pkg/help_system.py` |
