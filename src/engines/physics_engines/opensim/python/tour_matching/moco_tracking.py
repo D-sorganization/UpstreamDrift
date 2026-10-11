@@ -246,6 +246,17 @@ def _write_sanitized_trc(
         f.writelines(out_lines)
 
 
+def _configure_finite_difference_scheme(solver: Any, scheme: str) -> None:
+    """Set the requested finite-difference scheme and verify native readback."""
+    solver.set_optim_finite_difference_scheme(scheme)
+    actual_scheme = solver.get_optim_finite_difference_scheme()
+    if actual_scheme != scheme:
+        raise RuntimeError(
+            "OpenSim CasADi solver did not retain requested finite-difference "
+            f"scheme {scheme!r}; read back {actual_scheme!r}"
+        )
+
+
 @precondition(
     lambda model_path, trc_path, states_guess_path, config, initial_bindings=None, marker_weights=None: (
         isinstance(config, MocoTrackingConfig)
@@ -328,14 +339,7 @@ def build_moco_study(
     solver.set_optim_max_iterations(config.optim_max_iterations)
     solver.set_optim_convergence_tolerance(config.optim_convergence_tolerance)
     solver.set_optim_constraint_tolerance(config.optim_constraint_tolerance)
-    solver.set_optim_finite_difference_scheme(config.optim_finite_difference_scheme)
-    actual_scheme = solver.get_optim_finite_difference_scheme()
-    if actual_scheme != config.optim_finite_difference_scheme:
-        raise RuntimeError(
-            "OpenSim CasADi solver did not retain requested finite-difference "
-            f"scheme {config.optim_finite_difference_scheme!r}; read back "
-            f"{actual_scheme!r}"
-        )
+    _configure_finite_difference_scheme(solver, config.optim_finite_difference_scheme)
     _notify_progress(progress_callback, "solver-configured")
 
     # Seed with IK initial guess trajectory
