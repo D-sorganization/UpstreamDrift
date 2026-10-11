@@ -2,6 +2,7 @@
 
 import pytest
 from src.tools.shot_pattern_analysis.matched_matrix import (
+    MatrixSelection,
     matched_matrix_cells,
     noise_profile,
     validate_final_acceptance,
@@ -66,7 +67,10 @@ def test_selected_matrix_plan_only_contains_requested_cells_and_resume_is_exact(
     )
     selected = ("shaft_only", "combined2")
     result = module.run_matched_matrix(
-        tmp_path, profiles=selected, shard_index=72, shard_count=73
+        tmp_path,
+        selection=MatrixSelection(profiles=selected),
+        shard_index=72,
+        shard_count=73,
     )
     assert result == []
     plan = json.loads((tmp_path / "matrix_plan.json").read_text())
@@ -75,7 +79,7 @@ def test_selected_matrix_plan_only_contains_requested_cells_and_resume_is_exact(
     assert (
         module.run_matched_matrix(
             tmp_path,
-            profiles=("combined2", "shaft_only"),
+            selection=MatrixSelection(profiles=("combined2", "shaft_only")),
             shard_index=72,
             shard_count=73,
         )
@@ -83,7 +87,10 @@ def test_selected_matrix_plan_only_contains_requested_cells_and_resume_is_exact(
     )
     with pytest.raises(RuntimeError, match="plan differs"):
         module.run_matched_matrix(
-            tmp_path, profiles=("shaft_only",), shard_index=72, shard_count=73
+            tmp_path,
+            selection=MatrixSelection(profiles=("shaft_only",)),
+            shard_index=72,
+            shard_count=73,
         )
 
 
@@ -116,9 +123,11 @@ def test_explicit_bounded_cell_subset_is_source_recorded_and_immutable(
     )
     module.run_matched_matrix(
         tmp_path,
-        selected_cell_names=names,
-        match_face_bounds_deg=(-6.0, 6.0),
-        supplement_protocol="pw-strong-curve-common-face/1",
+        selection=MatrixSelection(
+            selected_cell_names=names,
+            match_face_bounds_deg=(-6.0, 6.0),
+            supplement_protocol="pw-strong-curve-common-face/1",
+        ),
         shard_index=2,
         shard_count=3,
     )
@@ -130,9 +139,11 @@ def test_explicit_bounded_cell_subset_is_source_recorded_and_immutable(
     with pytest.raises(RuntimeError, match="plan differs"):
         module.run_matched_matrix(
             tmp_path,
-            selected_cell_names=names,
-            match_face_bounds_deg=(-6.0, 6.1),
-            supplement_protocol="pw-strong-curve-common-face/1",
+            selection=MatrixSelection(
+                selected_cell_names=names,
+                match_face_bounds_deg=(-6.0, 6.1),
+                supplement_protocol="pw-strong-curve-common-face/1",
+            ),
             shard_index=2,
             shard_count=3,
         )
@@ -170,9 +181,9 @@ def test_cli_explicit_bounds_and_cell_selection_are_forwarded(tmp_path, monkeypa
         ],
     )
     module.main()
-    assert captured[0]["match_face_bounds_deg"] == (-6.0, 6.0)
-    assert captured[0]["match_speed_factors"] == (0.75, 1.25)
-    assert captured[0]["selected_cell_names"] == (
+    assert captured[0]["selection"].match_face_bounds_deg == (-6.0, 6.0)
+    assert captured[0]["selection"].match_speed_factors == (0.75, 1.25)
+    assert captured[0]["selection"].selected_cell_names == (
         "pitching_wedge_lean0_curve2_rotation1_shaft_only",
     )
 
@@ -208,7 +219,7 @@ def test_final_custom_bounds_or_cell_selection_require_reviewed_supplement_proto
                 stage="final",
                 n_shots=10000,
                 acceptance=tmp_path / "generic.json",
-                **override,
+                selection=MatrixSelection(**override),
             )
 
 
@@ -226,7 +237,7 @@ def test_cli_profiles_are_forwarded(tmp_path, monkeypatch):
         ["matched-matrix", str(tmp_path), "--profiles", "shaft_only", "combined2"],
     )
     module.main()
-    assert captured[0]["profiles"] == ("shaft_only", "combined2")
+    assert captured[0]["selection"].profiles == ("shaft_only", "combined2")
 
 
 def test_final_run_requires_source_bound_accepted_review(tmp_path):

@@ -1426,48 +1426,12 @@
       "expires_on": "2026-12-31"
     },
     {
-      "path": "src/tools/shot_pattern_analysis/matched_matrix.py",
-      "symbol": "run_matched_matrix",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - run_matched_matrix exceeds function-lines budget (127 > 100).",
-      "expires_on": "2026-12-31"
-    },
-    {
-      "path": "src/tools/shot_pattern_analysis/matched_matrix.py",
-      "symbol": "run_matched_matrix",
-      "rule": "parameters",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - run_matched_matrix exceeds parameters budget (13 > 8).",
-      "expires_on": "2026-12-31"
-    },
-    {
       "path": "src/tools/shot_pattern_analysis/matched_supplement_pipeline.py",
       "symbol": "build_final_supplement_report",
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 12278,
       "reason": "Issue #12278: shot pattern analysis integration - build_final_supplement_report exceeds function-lines budget (236 > 100).",
-      "expires_on": "2026-12-31"
-    },
-    {
-      "path": "src/tools/shot_pattern_analysis/matched_supplement_report.py",
-      "symbol": "_validate_cell_config",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - _validate_cell_config exceeds function-lines budget (103 > 100).",
-      "expires_on": "2026-12-31"
-    },
-    {
-      "path": "src/tools/shot_pattern_analysis/matched_supplement_report.py",
-      "symbol": "load_supplement_sources",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - load_supplement_sources exceeds function-lines budget (207 > 100).",
       "expires_on": "2026-12-31"
     }
   ]

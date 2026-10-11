@@ -12,7 +12,7 @@ import hashlib
 import json
 from pathlib import Path
 
-from .matched_matrix import matched_matrix_cells, run_matched_matrix
+from .matched_matrix import MatrixSelection, matched_matrix_cells, run_matched_matrix
 from .matrix_cli import add_matrix_arguments
 
 
@@ -187,12 +187,14 @@ def run_supplement_matrix(
         shard_index=shard_index,
         shard_count=shard_count,
         figures=figures,
-        common_targets=targets,
-        profiles=spec.profiles,
-        selected_cell_names=supplement_cell_names(protocol),
-        match_face_bounds_deg=FACE_BOUNDS_DEG,
-        match_speed_factors=spec.speed_factors,
-        supplement_protocol=spec.label,
+        selection=MatrixSelection(
+            common_targets=targets,
+            profiles=spec.profiles,
+            selected_cell_names=supplement_cell_names(protocol),
+            match_face_bounds_deg=FACE_BOUNDS_DEG,
+            match_speed_factors=spec.speed_factors,
+            supplement_protocol=spec.label,
+        ),
     )
 
 

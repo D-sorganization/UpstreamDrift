@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
+from dataclasses import replace
 import hashlib
 import json
 
@@ -48,21 +49,27 @@ def test_supplement_runner_reuses_matrix_pipeline_and_separates_speed_protocol(
     matched_supplement.run_supplement_matrix(
         "driver_control_speed", tmp_path / "speed", n_shots=32
     )
-    assert [len(item[1]["selected_cell_names"]) for item in captured] == [18, 4, 4]
-    assert all(item[1]["match_face_bounds_deg"] == (-6.0, 6.0) for item in captured)
-    assert [item[1]["match_speed_factors"] for item in captured] == [
+    assert [len(item[1]["selection"].selected_cell_names) for item in captured] == [
+        18,
+        4,
+        4,
+    ]
+    assert all(
+        item[1]["selection"].match_face_bounds_deg == (-6.0, 6.0) for item in captured
+    )
+    assert [item[1]["selection"].match_speed_factors for item in captured] == [
         (0.75, 1.25),
         (0.75, 1.25),
         (0.75, 1.30),
     ]
-    assert captured[0][1]["common_targets"] is None
-    assert captured[1][1]["common_targets"] == {
+    assert captured[0][1]["selection"].common_targets is None
+    assert captured[1][1]["selection"].common_targets == {
         "pitching_wedge": pytest.approx(77.40247724866299)
     }
-    assert captured[2][1]["common_targets"] == {
+    assert captured[2][1]["selection"].common_targets == {
         "driver": pytest.approx(178.94875782337786)
     }
-    assert len({item[1]["supplement_protocol"] for item in captured}) == 3
+    assert len({item[1]["selection"].supplement_protocol for item in captured}) == 3
     with pytest.raises(ValueError, match="protocol"):
         matched_supplement.supplement_cell_names("unknown")
 
@@ -192,16 +199,23 @@ def test_matrix_final_path_enforces_supplement_review_before_any_cell(
         "figures": "none",
         "shard_index": 18,
         "shard_count": 19,
-        "selected_cell_names": matched_supplement.supplement_cell_names(
-            "pw_primary_face"
+        "selection": matrix.MatrixSelection(
+            selected_cell_names=matched_supplement.supplement_cell_names(
+                "pw_primary_face"
+            ),
+            match_face_bounds_deg=(-6.0, 6.0),
+            match_speed_factors=(0.75, 1.25),
+            supplement_protocol="pw-primary-face-bounds/1",
         ),
-        "match_face_bounds_deg": (-6.0, 6.0),
-        "match_speed_factors": (0.75, 1.25),
-        "supplement_protocol": "pw-primary-face-bounds/1",
     }
     assert matrix.run_matched_matrix(tmp_path / "accepted", **options) == []
     with pytest.raises(ValueError, match="requested cells"):
         matrix.run_matched_matrix(
             tmp_path / "rejected",
-            **{**options, "match_face_bounds_deg": (-5.0, 6.0)},
+            **{
+                **options,
+                "selection": replace(
+                    options["selection"], match_face_bounds_deg=(-5.0, 6.0)
+                ),
+            },
         )

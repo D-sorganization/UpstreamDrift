@@ -6,7 +6,7 @@ import argparse
 import hashlib
 import json
 import logging
-from dataclasses import asdict, replace
+from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 
 import numpy as np
@@ -192,6 +192,74 @@ def validate_final_acceptance(path: Path | None, execution: dict) -> None:
             raise ValueError(f"acceptance evidence missing or changed: {name}")
 
 
+@dataclass(frozen=True)
+class MatrixSelection:
+    """Scientific cell selection and its declared supplement protocol."""
+
+    common_targets: dict[str, float] | None = None
+    profiles: tuple[str, ...] | None = None
+    selected_cell_names: tuple[str, ...] | None = None
+    match_face_bounds_deg: tuple[float, float] | None = None
+    match_speed_factors: tuple[float, float] = (0.75, 1.25)
+    supplement_protocol: str | None = None
+
+
+def _validate_matrix_selection(
+    stage: str,
+    figures: str,
+    shard_index: int,
+    shard_count: int,
+    selection: MatrixSelection,
+) -> None:
+    if stage not in ("pilot", "final") or figures not in ("none", "selected", "all"):
+        raise ValueError("invalid matrix stage or figure selection")
+    if not isinstance(shard_count, int) or not 0 <= shard_index < shard_count:
+        raise ValueError("shard index must be inside a positive shard count")
+    if selection.supplement_protocol is not None and (
+        not selection.supplement_protocol.strip()
+        or selection.selected_cell_names is None
+    ):
+        raise ValueError("supplement protocol requires selected cell names")
+    if (
+        stage == "final"
+        and selection.supplement_protocol is None
+        and (
+            selection.selected_cell_names is not None
+            or selection.match_face_bounds_deg is not None
+            or selection.match_speed_factors != (0.75, 1.25)
+        )
+    ):
+        raise ValueError(
+            "final custom bounds or cell selection require a supplement protocol"
+        )
+
+
+def _publish_matrix_plan(
+    output_root: Path,
+    cells: tuple[tuple[str, ExperimentConfig], ...],
+    stage: str,
+    execution: dict,
+    selection: MatrixSelection,
+) -> None:
+    output_root.mkdir(parents=True, exist_ok=True)
+    plan = {
+        "schema": "matched-shot-matrix/1",
+        "stage": stage,
+        "execution": execution,
+        "cells": {name: asdict(request) for name, request in cells},
+    }
+    if selection.supplement_protocol is not None:
+        plan["supplement_protocol"] = selection.supplement_protocol
+        plan["selected_cell_names"] = [name for name, _ in cells]
+    plan = json.loads(json.dumps(plan))
+    plan_path = output_root / "matrix_plan.json"
+    if plan_path.exists():
+        if json.loads(plan_path.read_text()) != plan:
+            raise RuntimeError("existing matrix plan differs; use a new output root")
+    else:
+        plan_path.write_text(json.dumps(plan, indent=2) + "\n")
+
+
 def run_matched_matrix(
     output_root: Path,
     *,
@@ -201,34 +269,10 @@ def run_matched_matrix(
     shard_index: int = 0,
     shard_count: int = 1,
     figures: str = "selected",
-    common_targets: dict[str, float] | None = None,
-    profiles: tuple[str, ...] | None = None,
-    selected_cell_names: tuple[str, ...] | None = None,
-    match_face_bounds_deg: tuple[float, float] | None = None,
-    match_speed_factors: tuple[float, float] = (0.75, 1.25),
-    supplement_protocol: str | None = None,
+    selection: MatrixSelection = MatrixSelection(),
 ) -> list[dict]:
     """Publish immutable cells; resume verifies data, inputs, and execution sources."""
-    if stage not in ("pilot", "final") or figures not in ("none", "selected", "all"):
-        raise ValueError("invalid matrix stage or figure selection")
-    if not isinstance(shard_count, int) or not 0 <= shard_index < shard_count:
-        raise ValueError("shard index must be inside a positive shard count")
-    if supplement_protocol is not None and (
-        not supplement_protocol.strip() or selected_cell_names is None
-    ):
-        raise ValueError("supplement protocol requires selected cell names")
-    if (
-        stage == "final"
-        and supplement_protocol is None
-        and (
-            selected_cell_names is not None
-            or match_face_bounds_deg is not None
-            or match_speed_factors != (0.75, 1.25)
-        )
-    ):
-        raise ValueError(
-            "final custom bounds or cell selection require a supplement protocol"
-        )
+    _validate_matrix_selection(stage, figures, shard_index, shard_count, selection)
     execution = matched_source_snapshot()
     if stage == "final":
         if n_shots != 10000:
@@ -240,39 +284,23 @@ def run_matched_matrix(
         )
     cells = matched_matrix_cells(
         n_shots=n_shots,
-        common_targets=common_targets,
-        profiles=profiles,
-        selected_cell_names=selected_cell_names,
-        match_face_bounds_deg=match_face_bounds_deg,
-        match_speed_factors=match_speed_factors,
+        common_targets=selection.common_targets,
+        profiles=selection.profiles,
+        selected_cell_names=selection.selected_cell_names,
+        match_face_bounds_deg=selection.match_face_bounds_deg,
+        match_speed_factors=selection.match_speed_factors,
     )
-    if stage == "final" and supplement_protocol is not None:
+    if stage == "final" and selection.supplement_protocol is not None:
         from .matched_supplement import validate_supplement_acceptance
 
         validate_supplement_acceptance(
             acceptance,
-            supplement_protocol,
+            selection.supplement_protocol,
             execution,
             {name: asdict(request) for name, request in cells},
         )
     output_root = Path(output_root)
-    output_root.mkdir(parents=True, exist_ok=True)
-    plan = {
-        "schema": "matched-shot-matrix/1",
-        "stage": stage,
-        "execution": execution,
-        "cells": {name: asdict(request) for name, request in cells},
-    }
-    if supplement_protocol is not None:
-        plan["supplement_protocol"] = supplement_protocol
-        plan["selected_cell_names"] = [name for name, _ in cells]
-    plan = json.loads(json.dumps(plan))
-    plan_path = output_root / "matrix_plan.json"
-    if plan_path.exists():
-        if json.loads(plan_path.read_text()) != plan:
-            raise RuntimeError("existing matrix plan differs; use a new output root")
-    else:
-        plan_path.write_text(json.dumps(plan, indent=2) + "\n")
+    _publish_matrix_plan(output_root, cells, stage, execution, selection)
     results = []
     for index, (name, request) in enumerate(cells):
         if index % shard_count != shard_index:
@@ -374,14 +402,16 @@ def main() -> None:
         shard_index=args.shard_index,
         shard_count=args.shard_count,
         figures=args.figures,
-        common_targets=targets,
-        profiles=tuple(args.profiles) if args.profiles else None,
-        selected_cell_names=tuple(selection) if selection is not None else None,
-        match_face_bounds_deg=tuple(args.face_bounds_deg)
-        if args.face_bounds_deg
-        else None,
-        match_speed_factors=tuple(args.speed_factors),
-        supplement_protocol=args.supplement_protocol,
+        selection=MatrixSelection(
+            common_targets=targets,
+            profiles=tuple(args.profiles) if args.profiles else None,
+            selected_cell_names=tuple(selection) if selection is not None else None,
+            match_face_bounds_deg=tuple(args.face_bounds_deg)
+            if args.face_bounds_deg
+            else None,
+            match_speed_factors=tuple(args.speed_factors),
+            supplement_protocol=args.supplement_protocol,
+        ),
     )
 
 

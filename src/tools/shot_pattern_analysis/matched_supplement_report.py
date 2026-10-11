@@ -110,6 +110,44 @@ def _inventory_entries(
     return by_cell, aliases
 
 
+def _validate_match_bounds(
+    name: str, entry: dict[str, Any], config: dict[str, Any]
+) -> tuple[list, list[float]]:
+    """Validate declared face limits and convert speed bounds to factors."""
+    bounds = entry["face_bounds_deg"]
+    actual_bounds = config.get("match_face_bounds_deg")
+    if (
+        not isinstance(actual_bounds, list)
+        or len(actual_bounds) != 2
+        or any(
+            not math.isclose(
+                float(a), float(b), rel_tol=0.0, abs_tol=_NUMERIC_TOLERANCE
+            )
+            for a, b in zip(actual_bounds, bounds, strict=True)
+        )
+    ):
+        raise ValueError(
+            f"supplement face bounds differ from the declared inventory: {name}"
+        )
+    speed = config.get("match_speed_factors")
+    club_speed = float(config["club"]["club_speed_mps"])
+    expected_speed = [float(value) / club_speed for value in entry["speed_bounds_mps"]]
+    if (
+        not isinstance(speed, list)
+        or len(speed) != 2
+        or any(
+            not math.isclose(
+                float(a), float(b), rel_tol=0.0, abs_tol=_NUMERIC_TOLERANCE
+            )
+            for a, b in zip(speed, expected_speed, strict=True)
+        )
+    ):
+        raise ValueError(
+            f"supplement speed bounds differ from the declared inventory: {name}"
+        )
+    return bounds, expected_speed
+
+
 def _validate_cell_config(
     name: str, entry: dict[str, Any], config: dict[str, Any]
 ) -> None:
@@ -156,37 +194,7 @@ def _validate_cell_config(
             )
     else:
         _close(config["target_x_m"], float(entry["target_x_m"]), label=f"{name} target")
-    bounds = entry["face_bounds_deg"]
-    actual_bounds = config.get("match_face_bounds_deg")
-    if (
-        not isinstance(actual_bounds, list)
-        or len(actual_bounds) != 2
-        or any(
-            not math.isclose(
-                float(a), float(b), rel_tol=0.0, abs_tol=_NUMERIC_TOLERANCE
-            )
-            for a, b in zip(actual_bounds, bounds, strict=True)
-        )
-    ):
-        raise ValueError(
-            f"supplement face bounds differ from the declared inventory: {name}"
-        )
-    speed = config.get("match_speed_factors")
-    club_speed = float(config["club"]["club_speed_mps"])
-    expected_speed = [float(value) / club_speed for value in entry["speed_bounds_mps"]]
-    if (
-        not isinstance(speed, list)
-        or len(speed) != 2
-        or any(
-            not math.isclose(
-                float(a), float(b), rel_tol=0.0, abs_tol=_NUMERIC_TOLERANCE
-            )
-            for a, b in zip(speed, expected_speed, strict=True)
-        )
-    ):
-        raise ValueError(
-            f"supplement speed bounds differ from the declared inventory: {name}"
-        )
+    bounds, expected_speed = _validate_match_bounds(name, entry, config)
     expected_lean = 0.0 if entry["protocol"] == "pw_within_lean_face" else 5.0
     _close(lean, expected_lean, label=f"{name} lean")
     expected_club = (
@@ -271,102 +279,49 @@ def _verify_actual_nominal_target(
     )
 
 
-def load_supplement_sources(
-    protocol_roots: dict[str, Path], inventory_path: Path, *, stage: str = "final"
-) -> dict[str, Any]:
-    """Load and bind the three supplemental matrix roots to their exact inventory.
-
-    The original primary/control matrix reports are deliberately not merged or
-    mutated by this loader. Four control aliases are references to unique
-    supplemental primary cells and never create a second run or receipt.
-    """
-    inventory_path = Path(inventory_path)
-    if stage not in {"pilot", "final"}:
-        raise ValueError("supplement stage must be pilot or final")
-    inventory_hash = _sha256(inventory_path)
-    inventory = json.loads(inventory_path.read_text(encoding="utf-8"))
-    expected_by_cell, aliases = _inventory_entries(inventory)
-    expected_plan_hashes = inventory.get("protocol_plan_sha256")
-    if not isinstance(expected_plan_hashes, dict):
-        raise ValueError("supplement inventory lacks predeclaration plan hashes")
-    for relative, expected_hash in expected_plan_hashes.items():
-        path = inventory_path.parent / relative
-        if not path.is_file() or _sha256(path) != expected_hash:
-            raise ValueError(
-                f"supplement predeclaration source hash mismatch: {relative}"
-            )
-    if set(protocol_roots) != set(_PROTOCOL_BY_ID):
+def _load_protocol_plan(
+    root: Path,
+    protocol_id: str,
+    stage: str,
+    expected_names: set[str],
+    expected_by_cell: dict[str, dict],
+) -> Path:
+    """Validate the complete declared plan before loading any result rows."""
+    plan_path = root / "matrix_plan.json"
+    if not plan_path.is_file():
+        raise ValueError(f"supplement matrix plan is missing: {protocol_id}")
+    plan = json.loads(plan_path.read_text(encoding="utf-8"))
+    if plan.get("supplement_protocol") != protocol_id:
+        raise ValueError(f"supplement protocol ID mismatch: {protocol_id}")
+    if plan.get("stage") != stage:
         raise ValueError(
-            "supplement source roots must cover the three versioned protocol IDs"
+            f"supplement stage mismatch: expected {stage}, found {plan.get('stage')}"
         )
-    reports: dict[str, Any] = {}
-    unique_cells: list[dict[str, Any]] = []
-    shared_execution: dict[str, Any] | None = None
-    expected_by_protocol: dict[str, set[str]] = {
-        _PROTOCOLS[category]: {
-            name
-            for name, entry in expected_by_cell.items()
-            if entry["protocol"] == category
-        }
-        for category in _PROTOCOLS
-    }
-    for protocol_id, root_value in protocol_roots.items():
-        root = Path(root_value).resolve()
-        plan_path = root / "matrix_plan.json"
-        if not plan_path.is_file():
-            raise ValueError(f"supplement matrix plan is missing: {protocol_id}")
-        plan = json.loads(plan_path.read_text(encoding="utf-8"))
-        if plan.get("supplement_protocol") != protocol_id:
-            raise ValueError(f"supplement protocol ID mismatch: {protocol_id}")
-        if plan.get("stage") != stage:
-            raise ValueError(
-                f"supplement stage mismatch: expected {stage}, found {plan.get('stage')}"
-            )
-        expected_names = expected_by_protocol[protocol_id]
-        selected = plan.get("selected_cell_names")
-        cells = plan.get("cells")
-        if not isinstance(selected, list) or len(selected) != len(set(selected)):
-            raise ValueError(
-                f"supplement plan has duplicate selected cell names: {protocol_id}"
-            )
-        if (
-            not isinstance(cells, dict)
-            or set(cells) != expected_names
-            or set(selected) != expected_names
-        ):
-            raise ValueError(
-                f"supplement selected cell inventory differs: {protocol_id}"
-            )
-        for name in expected_names:
-            entry = dict(expected_by_cell[name])
-            entry["n_shots"] = 32 if stage == "pilot" else 10_000
-            _validate_cell_config(name, entry, cells[name])
-        report = load_matrix_report(root, require_complete=True)
-        if shared_execution is None:
-            shared_execution = report["execution"]
-        elif report["execution"] != shared_execution:
-            raise ValueError("supplement protocols do not share one execution snapshot")
-        if report["plan_sha256"] != _sha256(plan_path):
-            raise ValueError(f"supplement report plan hash mismatch: {protocol_id}")
-        report_cells = {cell["cell"]: cell for cell in report["cells"]}
-        if set(report_cells) != expected_names:
-            raise ValueError(
-                f"loaded supplement cells differ from inventory: {protocol_id}"
-            )
-        protocol_cells = []
-        for name in sorted(expected_names):
-            ref = _cell_reference(root, report, report_cells[name], protocol_id)
-            if ref["source_cell_manifest_sha256"] is None:
-                raise ValueError(f"supplement cell has no manifest hash: {name}")
-            protocol_cells.append(ref)
-            unique_cells.append(ref)
-        reports[protocol_id] = {
-            "source_root": str(root),
-            "plan_sha256": report["plan_sha256"],
-            "report_source_sha256": report["report_source_sha256"],
-            "cells": protocol_cells,
-        }
+    selected = plan.get("selected_cell_names")
+    cells = plan.get("cells")
+    if not isinstance(selected, list) or len(selected) != len(set(selected)):
+        raise ValueError(
+            f"supplement plan has duplicate selected cell names: {protocol_id}"
+        )
+    if (
+        not isinstance(cells, dict)
+        or set(cells) != expected_names
+        or set(selected) != expected_names
+    ):
+        raise ValueError(f"supplement selected cell inventory differs: {protocol_id}")
+    for name in expected_names:
+        entry = dict(expected_by_cell[name])
+        entry["n_shots"] = 32 if stage == "pilot" else 10_000
+        _validate_cell_config(name, entry, cells[name])
+    return plan_path
 
+
+def _source_alias_rows(
+    unique_cells: list[dict[str, Any]],
+    inventory: dict[str, Any],
+    aliases: dict[str, str],
+) -> list[dict[str, Any]]:
+    """Resolve each control alias to its unique, target-verified source."""
     refs_by_name = {ref["cell"]: ref for ref in unique_cells}
     fixed_target_by_zero_name = {
         entry["cell"].replace("_lean5_", "_lean0_"): float(entry["target_x_m"])
@@ -419,6 +374,16 @@ def load_supplement_sources(
                 "source_csv_sha256": source["source_csv_sha256"],
             }
         )
+    return alias_rows
+
+
+def _recheck_supplement_sources(
+    reports: dict[str, Any],
+    unique_cells: list[dict[str, Any]],
+    inventory_path: Path,
+    inventory_hash: str,
+) -> None:
+    """Reject any source mutation occurring while results are aggregated."""
     # Recheck every source byte after aggregation so no artifact can change
     # while the report is being assembled.
     for protocol_id, report in reports.items():
@@ -440,6 +405,91 @@ def load_supplement_sources(
             )
     if _sha256(inventory_path) != inventory_hash:
         raise ValueError("supplement inventory changed during aggregation")
+
+
+def _validated_supplement_inventory(
+    protocol_roots: dict[str, Path], inventory_path: Path, stage: str
+) -> tuple[str, dict[str, Any], dict[str, dict], dict[str, str]]:
+    """Bind inventory and predeclarations before opening protocol results."""
+    if stage not in {"pilot", "final"}:
+        raise ValueError("supplement stage must be pilot or final")
+    inventory_hash = _sha256(inventory_path)
+    inventory = json.loads(inventory_path.read_text(encoding="utf-8"))
+    expected_by_cell, aliases = _inventory_entries(inventory)
+    expected_plan_hashes = inventory.get("protocol_plan_sha256")
+    if not isinstance(expected_plan_hashes, dict):
+        raise ValueError("supplement inventory lacks predeclaration plan hashes")
+    for relative, expected_hash in expected_plan_hashes.items():
+        path = inventory_path.parent / relative
+        if not path.is_file() or _sha256(path) != expected_hash:
+            raise ValueError(
+                f"supplement predeclaration source hash mismatch: {relative}"
+            )
+    if set(protocol_roots) != set(_PROTOCOL_BY_ID):
+        raise ValueError(
+            "supplement source roots must cover the three versioned protocol IDs"
+        )
+    return inventory_hash, inventory, expected_by_cell, aliases
+
+
+def load_supplement_sources(
+    protocol_roots: dict[str, Path], inventory_path: Path, *, stage: str = "final"
+) -> dict[str, Any]:
+    """Load and bind the three supplemental matrix roots to their exact inventory.
+
+    The original primary/control matrix reports are deliberately not merged or
+    mutated by this loader. Four control aliases are references to unique
+    supplemental primary cells and never create a second run or receipt.
+    """
+    inventory_path = Path(inventory_path)
+    inventory_hash, inventory, expected_by_cell, aliases = (
+        _validated_supplement_inventory(protocol_roots, inventory_path, stage)
+    )
+    reports: dict[str, Any] = {}
+    unique_cells: list[dict[str, Any]] = []
+    shared_execution: dict[str, Any] | None = None
+    expected_by_protocol: dict[str, set[str]] = {
+        _PROTOCOLS[category]: {
+            name
+            for name, entry in expected_by_cell.items()
+            if entry["protocol"] == category
+        }
+        for category in _PROTOCOLS
+    }
+    for protocol_id, root_value in protocol_roots.items():
+        root = Path(root_value).resolve()
+        expected_names = expected_by_protocol[protocol_id]
+        plan_path = _load_protocol_plan(
+            root, protocol_id, stage, expected_names, expected_by_cell
+        )
+        report = load_matrix_report(root, require_complete=True)
+        if shared_execution is None:
+            shared_execution = report["execution"]
+        elif report["execution"] != shared_execution:
+            raise ValueError("supplement protocols do not share one execution snapshot")
+        if report["plan_sha256"] != _sha256(plan_path):
+            raise ValueError(f"supplement report plan hash mismatch: {protocol_id}")
+        report_cells = {cell["cell"]: cell for cell in report["cells"]}
+        if set(report_cells) != expected_names:
+            raise ValueError(
+                f"loaded supplement cells differ from inventory: {protocol_id}"
+            )
+        protocol_cells = []
+        for name in sorted(expected_names):
+            ref = _cell_reference(root, report, report_cells[name], protocol_id)
+            if ref["source_cell_manifest_sha256"] is None:
+                raise ValueError(f"supplement cell has no manifest hash: {name}")
+            protocol_cells.append(ref)
+            unique_cells.append(ref)
+        reports[protocol_id] = {
+            "source_root": str(root),
+            "plan_sha256": report["plan_sha256"],
+            "report_source_sha256": report["report_source_sha256"],
+            "cells": protocol_cells,
+        }
+
+    alias_rows = _source_alias_rows(unique_cells, inventory, aliases)
+    _recheck_supplement_sources(reports, unique_cells, inventory_path, inventory_hash)
     counts = {protocol: len(reports[protocol]["cells"]) for protocol in _PROTOCOL_BY_ID}
     return {
         "schema": "matched-supplement-report/1",
