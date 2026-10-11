@@ -8,6 +8,32 @@ mandatory. No supplied limits can be overridden, and independent excitation
 replay grants no muscle-matching qualification. Chapter55 and F07 unqualified
 feasibility turnover record TDD, native execution and remaining full-capture gates.
 
+## Native Wrapped-Path Source Closure (#12234)
+
+The opt-in wrapped-path declaration binds exact native wrap geometry, PathWrap
+ownership and target links, and ConditionalPathPoint coordinate ranges to the
+complete source hash. Fresh native source comparison is required before
+constrained replay. The strict default continues to reject wrapped components.
+Route observation is source-bound and read-only; unproven global transitions
+and guide-work bounds remain unqualified and require diagnostic opt-in. This
+does not admit nonlinear path functions, generalized joints, contact, or
+physiological claims. Chapter 57 records the closure profile and fixtures;
+runner-level typed finding aggregation depends on the shared Chapter 56 API.
+
+## Native Contact Source Closure (#12244)
+
+Constrained contact replay requires an exact-source declaration for supported
+HuntCrossley or Smooth sphere/half-space contact, including serialized force
+and geometry component identities. The contact policy hash covers both the
+declaration/sampler and the executed `opensim_force_torque.py` wrench provider.
+The default remains rejecting. OpenSim 4.6 tests verify both force/geometry
+closures and finite constrained Smooth-contact wrench output; strict XML
+validation currently rejects the generated HuntCrossley fixture before replay.
+This does not authorize capture contact or establish support, grip, physical
+qualification, or full-horizon replay. Request-level integration remains
+pending. See provisional Chapter 58 and
+`docs/development/feedback_controls/F07_NATIVE_CONTACT_SOURCE_CLOSURE_TURNOVER.md`.
+
 ## Native Path-Work Consistency Diagnostic (F07, #11856)
 
 The original single-pin diagnostic in `scripts/diagnostics/native_path_work.py`

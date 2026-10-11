@@ -1,0 +1,53 @@
+---
+title: "Native Wrapped Path Diagnostic"
+format: gfm
+---
+
+# Purpose
+
+This note documents the opt-in source declaration for native wrapped muscle
+paths. It enables exact-source replay and route observation for a narrow set of
+OpenSim components. It does not certify anatomy, physiological plausibility,
+global path worklessness, or an independently supported physical endpoint.
+
+# Closed Source Profile
+
+The declaration binds the complete model SHA-256 and records each native
+`WrapCylinder`, `WrapEllipsoid`, or `WrapSphere`, including its absolute path,
+parent frame, transform, active flag, quadrant, shape dimensions, and serialized
+component hash. Each `PathWrap` must resolve to one of those exact objects and
+records its owner, target name and path, method, range, and serialized hash.
+Each `ConditionalPathPoint` records its owning path, exact coordinate path,
+active range, and serialized hash.
+
+The native source is reloaded and compared against the declaration before the
+constrained replay can proceed. A changed source, unresolved target, unsupported
+shape or method, invalid range, or mismatched component identity is an
+execution blocker. The legacy path still rejects wrapped components unless the
+caller supplies this explicit declaration.
+
+# Native Observation and Qualification
+
+Route and conditional-point observations reuse the maintained native
+reference-state observer. They report what the SDK evaluates for a declared
+state and do not infer behavior outside observed states. A route transition or
+missing global workless/guide-work budget proof remains unqualified; it must be
+represented as a separate qualification finding and requires the diagnostic
+opt-in. Nonfinite geometry or inconsistent native route evaluation blocks the
+attempt.
+
+This profile does not admit SimmSpline or other nonlinear MovingPathPoint
+functions, generalized CustomJoint functions, contact components, or arbitrary
+force components. Those require separate typed source closure and native
+replay evidence. It also does not impose physiological thresholds.
+
+# Validation
+
+The focused test module is `tests/opensim/test_native_wrapped_path.py`. It
+checks all three supported shapes with active native wrapping, exact-source
+mutation rejection, PathWrap target closure, conditional path-point state on
+both sides of its range, unchanged default rejection, and declared replay.
+
+Run it with the repository's pinned OpenSim 4.6 environment. For solver tests,
+set `CASADIPATH` to the environment's `site-packages/opensim` directory and
+limit `OMP_NUM_THREADS`, `OPENBLAS_NUM_THREADS`, and `MKL_NUM_THREADS` to `1`.
