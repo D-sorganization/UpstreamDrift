@@ -1,3 +1,9 @@
+# Active: Per-Capture Grip Refit on the Fixed Clusters, #12221
+
+- Branch `claude/12221-grip-refit`, stacked on #12265. Landed: refit tooling (`grip_fit.weighted_frames`, `compose_rotation_deg`, `apply_grip_rotation`, `scripts/set_spec_grip_rotation.py`), the per-capture fit receipts `fit_grip_rotation_receipt_driver.json` / `_iron7.json`, and the evidence. Documents are NOT changed.
+- Fixture flags with the cluster fixed: driver speed −1.9 %, face gap 0.56°; 7-iron −1.9 %, 0.62°; no wrist on its bound at address. The refit is invalid with the cluster free (static trial moves the capture face). Calc record: "Per-Capture Grip Rotation on the Fixed Clusters".
+- Open: owner decision on `--fix-club-markers` default; then apply with `scripts/set_spec_grip_rotation.py` and regenerate receipts; #12266 blocks the driver fixture export.
+
 # Active: Measured Driver Club Cluster, #12221
 
 - Branch `claude/12221-driver-cluster`, stacked on `claude/12221-fixed-triad`. `evidence/club_markers/driver.json` (from the calibrated `anthro_driver_seeds` receipt at `1bef553457`) is now in the driver document. `anthro_driver`, `anthro_driver_seeds` and `anthro_driver_drake`, the OpenSim driver export, the inventory hashes and the tutorial hash `4ee2c43d` are regenerated.
