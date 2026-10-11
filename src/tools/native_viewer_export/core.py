@@ -682,7 +682,7 @@ def export_swing(
     counts: dict[str, int] = {}
     glyph_counts: list[int] = []
     outcome = (
-        impact_card_for(swing, impact_time_s(swing, settings))
+        impact_card_for(swing, impact_time_s(swing, settings), swing.ball)
         if settings.impact_card and settings.hud
         else None
     )
