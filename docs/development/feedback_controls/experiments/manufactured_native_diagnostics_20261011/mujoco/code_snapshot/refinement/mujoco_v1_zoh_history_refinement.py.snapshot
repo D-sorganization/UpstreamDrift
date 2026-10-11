@@ -1,0 +1,143 @@
+"""Contracts for same-history 8-vs-16-substep diagnostic refinement."""
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Any, Callable
+
+import numpy as np
+
+ROOT_COORDINATES = (
+    "TranslationInputX", "TranslationInputY", "TranslationInputZ",
+    "HipInputX", "HipInputY", "HipInputZ",
+)
+STEPS = 10
+DT_SECONDS = 1e-3
+ORDINARY_SUBSTEPS = 8
+REFINEMENT_SUBSTEPS = 16
+TORSO_COORDINATE = "TorsoInput"
+EFFORT_LIMIT_NM = 1e-5
+
+
+def expected_acceleration_counts(steps: int, substeps: int) -> dict[str, int]:
+    if type(steps) is not int or steps < 1 or type(substeps) is not int or substeps < 1:
+        raise ValueError("steps and substeps must be positive integers")
+    direct = steps * substeps * 4
+    hidden_closure = steps + 1
+    return {
+        "rk4_derivative_acceleration_calls": direct,
+        "closure_pose_rate_observations": 1,
+        "closure_pose_only_observations": steps,
+        "hidden_closure_acceleration_calls": hidden_closure,
+        "total_engine_acceleration_calls": direct + hidden_closure,
+    }
+
+
+def validate_clock_and_held_history(
+    coordinate_order: tuple[str, ...], times: Any, efforts: Any, *, steps: int = STEPS, dt_s: float = DT_SECONDS
+) -> tuple[np.ndarray, np.ndarray]:
+    names = tuple(coordinate_order)
+    time_values = np.asarray(times, dtype=np.float64)
+    effort_values = np.asarray(efforts, dtype=np.float64)
+    if names[:6] != ROOT_COORDINATES or len(names) != len(set(names)):
+        raise ValueError("source coordinate order must contain the six roots first and unique names")
+    if TORSO_COORDINATE not in names:
+        raise ValueError("source coordinate order lacks the declared diagnostic channel")
+    expected_times = np.arange(steps + 1, dtype=np.float64) * dt_s
+    if time_values.shape != expected_times.shape or not np.array_equal(time_values, expected_times):
+        raise ValueError("frozen history differs from the declared fixed common clock")
+    if effort_values.shape != (steps + 1, len(names)) or not np.isfinite(effort_values).all():
+        raise ValueError("frozen history must contain finite full-coordinate efforts and sentinel")
+    if np.any(effort_values[:, :6] != 0.0):
+        raise ValueError("all six source root efforts must stay exactly zero")
+    target = names.index(TORSO_COORDINATE)
+    other = np.arange(len(names)) != target
+    if np.any(effort_values[:, other] != 0.0) or np.any(np.abs(effort_values[:, target]) > EFFORT_LIMIT_NM):
+        raise ValueError("frozen history exceeds the one-channel declared effort envelope")
+    if not np.array_equal(effort_values[-1], effort_values[-2]):
+        raise ValueError("frozen history terminal held-effort sentinel changed")
+    return time_values, effort_values
+
+
+@dataclass(frozen=True)
+class RefinementObservation:
+    """A direct 16-substep integration of an already frozen effort history."""
+
+    result: Any
+    call_counts: dict[str, int]
+    callback_call_count_before: int
+    callback_call_count_after: int
+    held_effort_sha256: str
+
+
+def refine_same_frozen_history(
+    integrate_history: Callable[..., Any],
+    plant: Any,
+    *,
+    q0: Any,
+    v0: Any,
+    times: Any,
+    frozen_efforts: Any,
+    input_sha256: str,
+    refinement_policy_sha256: str,
+    controller_calls: list[Any],
+    coordinate_order: tuple[str, ...],
+    steps: int = STEPS,
+    dt_s: float = DT_SECONDS,
+) -> RefinementObservation:
+    """Run no controller: pass exactly the frozen T01 interval table to RK4."""
+    from hashlib import sha256
+
+    time_values, effort_values = validate_clock_and_held_history(
+        coordinate_order, times, frozen_efforts, steps=steps, dt_s=dt_s
+    )
+    before = len(controller_calls)
+    result = integrate_history(
+        plant,
+        np.asarray(q0, dtype=np.float64).copy(),
+        np.asarray(v0, dtype=np.float64).copy(),
+        time_values.copy(),
+        effort_values.copy(),
+        substeps=REFINEMENT_SUBSTEPS,
+        input_sha256=input_sha256,
+        policy_sha256=refinement_policy_sha256,
+    )
+    after = len(controller_calls)
+    if after != before:
+        raise AssertionError("controller was invoked during frozen-history refinement")
+    if not np.array_equal(np.asarray(result.time_seconds), time_values):
+        raise AssertionError("refinement changed the frozen common time grid")
+    if not np.array_equal(np.asarray(result.applied_generalized_efforts), effort_values[:-1]):
+        raise AssertionError("refinement did not apply the exact frozen T01 interval efforts")
+    q = np.asarray(result.qpos, dtype=np.float64)
+    v = np.asarray(result.qvel, dtype=np.float64)
+    if q.shape != (steps + 1, len(coordinate_order)) or v.shape != q.shape:
+        raise AssertionError("refinement output must cover complete q/v history")
+    if not np.isfinite(q).all() or not np.isfinite(v).all():
+        raise AssertionError("refinement output has nonfinite q/v")
+    return RefinementObservation(
+        result=result,
+        call_counts=expected_acceleration_counts(steps, REFINEMENT_SUBSTEPS),
+        callback_call_count_before=before,
+        callback_call_count_after=after,
+        held_effort_sha256=sha256(effort_values.tobytes(order="C")).hexdigest(),
+    )
+
+
+def state_difference_payload(
+    coordinate_order: tuple[str, ...], ordinary_q: Any, ordinary_v: Any, refined_q: Any, refined_v: Any
+) -> dict[str, Any]:
+    names = tuple(coordinate_order)
+    oq, ov, rq, rv = (np.asarray(x, dtype=np.float64) for x in (ordinary_q, ordinary_v, refined_q, refined_v))
+    expected = (oq.shape[0], len(names))
+    if any(x.shape != expected for x in (oq, ov, rq, rv)) or oq.shape != ov.shape:
+        raise ValueError("both trajectories must have equal full-state dimensions")
+    if not all(np.isfinite(x).all() for x in (oq, ov, rq, rv)):
+        raise ValueError("trajectory comparison requires finite state")
+    dq, dv = rq - oq, rv - ov
+    return {
+        "coordinate_order": list(names),
+        "q_difference_refinement_minus_ordinary": dq.tolist(),
+        "v_difference_refinement_minus_ordinary": dv.tolist(),
+        "terminal_abs_q_difference_by_coordinate": dict(zip(names, np.abs(dq[-1]).tolist(), strict=True)),
+        "terminal_abs_v_difference_by_coordinate": dict(zip(names, np.abs(dv[-1]).tolist(), strict=True)),
+    }

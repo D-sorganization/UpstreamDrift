@@ -178,11 +178,13 @@ def test_attach_club_contracts() -> None:
         mc.spec_path("putter")
 
 
-def test_calibration_closes_both_hands_on_the_grip() -> None:
+@pytest.mark.parametrize("club", mc.CLUBS)
+def test_calibration_closes_both_hands_on_the_grip(club: str) -> None:
     for name in MODELS:
-        report = mc.load_calibration(name).report
-        for side, gap in report["hand_grip_point_gap_m"].items():
-            assert gap <= GRIP_GAP_TOL_M, (name, side, gap)
+        calibration = mc.load_calibration(name, club)
+        assert calibration.club == club
+        for side, gap in calibration.report["hand_grip_point_gap_m"].items():
+            assert gap <= GRIP_GAP_TOL_M, (name, club, side, gap)
 
 
 def _build_into(tmp_path: Path, grip_model: str) -> Path:

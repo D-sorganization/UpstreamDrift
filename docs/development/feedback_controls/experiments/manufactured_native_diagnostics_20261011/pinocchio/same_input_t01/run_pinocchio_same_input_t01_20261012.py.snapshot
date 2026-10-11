@@ -1,0 +1,514 @@
+"""Prepare/run one pinned-source Pinocchio replay of the retained T01 table.
+
+The runner is external diagnostic tooling. Its native mode is deliberately
+source- and input-bound; unit tests exercise the same preflight/dispatch with
+an instrumented fake plant and never import a physics engine.
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import importlib
+import json
+import os
+import sys
+from pathlib import Path
+from typing import Any, Callable
+
+import numpy as np
+
+SOURCE_COMMIT = "9e5f87c4dd31fc3137fc204d98337633fa5c4855"
+SOURCE_SETUP = "pinocchio_fullbody_source_assembly_20261012.py"
+SOURCE_SETUP_SHA256 = "2d619a9540920cf7093af61a1cbc8cdf865b0ca7cc56c968c631e2f879c78cb3"
+PLANT_PATH = "src/shared/python/motion_matching/same_input/plant.py"
+INTEGRATOR_PATH = "src/shared/python/motion_matching/same_input/integrator.py"
+ADAPTER_PATH = "src/engines/physics_engines/pinocchio/python/native_model.py"
+EXPECTED = {
+    "bundle": "e4a93dce80da2539b07f3a6c5f8f664389d77a55491e2b1f35002ca8782180a4",
+    "observation": "6f8a369f2721a1ac3307a9b7172c7c2ead643f8f2e871e6289bc704c3d0d8acb",
+    "facade": "e183d4d7b27799bd8790baa7e1c99d0aebeca9b709e0ec04554b8848059e1774",
+    "source": {
+        "src/shared/python/motion_matching/same_input/plant.py": "ff61ed1b6b98b85d7f4f118d44b470c5e9e4e744423c0052f926f6bf1a0826c5",
+        "src/shared/python/motion_matching/same_input/integrator.py": "3fe57c6ebb939013b30b5b97bad6097821d8052eea21079b13a874b36c0c4bf9",
+        "src/shared/python/motion_matching/same_input/closure.py": "77983f2018216d514d36d47d56d8f9c061f46ec69372189042c2ea4d3ad9679e",
+        "src/engines/physics_engines/pinocchio/python/native_model.py": "782402d13c152c7bdd0bee76d7b084e3bef8a697cb5c5b0805021d0fd81c8a92",
+        "src/shared/python/motion_matching/contact_law.py": "1edc287e4d4d12a58558f6fc62f4bd9d291908f4dcade4232bb6644883dbe43c",
+        "docs/development/full_body_models/full_body_spec_v1.json": "09cff1393a48b7f44e2ceaac9132473c64a33f9f853823c5e7d7fef80802e6b3",
+    },
+}
+BUNDLE_DIR = "mujoco_v1_zoh_history_refinement_20261011_root_attempt1"
+FACADE_PATH = "src/shared/python/motion_matching/same_input/__init__.py"
+POLICY = {
+    "engine": "pinocchio",
+    "engine_version": "3.8.0",
+    "source_commit": SOURCE_COMMIT,
+    "vendor_tools_commit": "86d0f28b1cc5acf61185e07e320c816c2d005512",
+    "source_manifest_sha256": "c5ec40129d3b28368142eadfb33e8e1464f7c6e4d4505dd5a6d2f86870d4f569",
+    "bundle_sha256": EXPECTED["bundle"],
+    "observation_sha256": EXPECTED["observation"],
+    "spec_sha256": EXPECTED["source"][
+        "docs/development/full_body_models/full_body_spec_v1.json"
+    ],
+    "facade_sha256": EXPECTED["facade"],
+    "source_setup_sha256": SOURCE_SETUP_SHA256,
+    "input_policy": "zero_order_hold_saved_rows_0_through_9",
+    "integrator": "public_open_loop_classical_rk4",
+    "macro_step_seconds": 0.001,
+    "substeps": 8,
+    "project": False,
+    "stop_on_failure": False,
+    "initial_closure_observation": "one_zero_effort_native_observation",
+    "controller": False,
+    "state_reset": False,
+    "state_projection": False,
+    "thread_caps": {
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+    },
+}
+POLICY_SHA256 = hashlib.sha256(
+    json.dumps(POLICY, sort_keys=True, separators=(",", ":")).encode()
+).hexdigest()
+
+
+def sha256(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+def verify_module_origin(
+    module_file: Path, source_root: Path, relative_path: str
+) -> None:
+    """Require an imported module to resolve to its reviewed source path."""
+    expected_path = (source_root / relative_path).resolve()
+    if module_file.resolve() != expected_path:
+        raise ValueError(f"module origin mismatch for {relative_path}: {module_file}")
+
+
+def prepare_output_file(output: Path) -> None:
+    """Match the watchdog contract: parent exists and the receipt is fresh."""
+    if not output.parent.is_dir():
+        raise ValueError("watchdog must create the output parent directory first")
+    if output.exists():
+        raise ValueError("refusing to overwrite an existing output receipt")
+
+
+def _finite_array(value: Any, shape: tuple[int, ...], label: str) -> np.ndarray:
+    array = np.asarray(value, dtype=np.float64)
+    if array.shape != shape or not np.isfinite(array).all():
+        raise ValueError(
+            f"{label} must be finite with shape {shape}; got {array.shape}"
+        )
+    return array
+
+
+def validate_artifacts(
+    bundle_bytes: bytes,
+    observation_bytes: bytes,
+    spec_bytes: bytes,
+    source_root: Path,
+    facade_path: Path | None = None,
+) -> dict[str, Any]:
+    """Fail-closed exact-input/source preflight; safe to run without SDK imports."""
+    if sha256(bundle_bytes) != EXPECTED["bundle"]:
+        raise ValueError("frozen bundle digest mismatch")
+    if sha256(observation_bytes) != EXPECTED["observation"]:
+        raise ValueError("retained observation digest mismatch")
+    if (
+        sha256(spec_bytes)
+        != EXPECTED["source"][
+            "docs/development/full_body_models/full_body_spec_v1.json"
+        ]
+    ):
+        raise ValueError("full-body spec digest mismatch")
+    manifest = source_root / "manifest.json"
+    if not manifest.is_file():
+        raise ValueError("source archive manifest missing")
+    manifest_bytes = manifest.read_bytes()
+    if (
+        sha256(manifest_bytes)
+        != "c5ec40129d3b28368142eadfb33e8e1464f7c6e4d4505dd5a6d2f86870d4f569"
+    ):
+        raise ValueError("source archive manifest digest mismatch")
+    if facade_path is None:
+        facade_path = source_root / FACADE_PATH
+    if sha256(facade_path.read_bytes()) != EXPECTED["facade"]:
+        raise ValueError("permitted lazy facade overlay digest mismatch")
+    for relative, expected in EXPECTED["source"].items():
+        path = source_root / relative
+        if not path.is_file() or sha256(path.read_bytes()) != expected:
+            raise ValueError(f"pinned source digest mismatch: {relative}")
+
+    bundle = json.loads(bundle_bytes)
+    observation = json.loads(observation_bytes)
+    spec = json.loads(spec_bytes)
+    return validate_payload(bundle, observation, spec)
+
+
+def validate_payload(
+    bundle: dict[str, Any], observation: dict[str, Any], spec: dict[str, Any]
+) -> dict[str, Any]:
+    """Validate the frozen state, channel order, clock, and held input table."""
+    channels = tuple(c["channel_id"] for c in bundle["input_history"]["channels"])
+    coordinates = tuple(spec["coordinate_order"])
+    if (
+        channels != coordinates
+        or tuple(bundle["model"]["ordered_input_channel_ids"]) != coordinates
+    ):
+        raise ValueError("input channels, model inventory, and spec order differ")
+    if (
+        bundle["model"]["source_model_sha256"]
+        != EXPECTED["source"][
+            "docs/development/full_body_models/full_body_spec_v1.json"
+        ]
+    ):
+        raise ValueError("bundle source model identity differs from pinned spec")
+    if bundle["input_history"]["interpolation"] != "zero_order_hold":
+        raise ValueError("input history is not zero-order hold")
+    if (
+        bundle["policy"]["step_size_seconds"] != 0.001
+        or bundle["policy"]["integration_method"]
+        != "python-classical-rk4-8-substeps-over-engine-accelerations"
+    ):
+        raise ValueError("frozen policy differs from retained T01 integration policy")
+    times = _finite_array(bundle["input_history"]["time_seconds"], (11,), "clock")
+    expected_times = np.arange(11, dtype=np.float64) * 0.001
+    if not np.array_equal(times, expected_times):
+        raise ValueError("saved clock is not the exact 11-sample 1 ms grid")
+    q0_record, v0_record = bundle["initial_state"]
+    if q0_record["component_id"] != "qpos" or v0_record["component_id"] != "qvel":
+        raise ValueError("initial state components/order are unexpected")
+    q0 = _finite_array(q0_record["values"], (41,), "q0")
+    v0 = _finite_array(v0_record["values"], (41,), "v0")
+    rows = _finite_array(bundle["input_history"]["values"], (11, 41), "input rows")
+    if np.any(rows[:10, :6] != 0.0):
+        raise ValueError("root efforts must remain exactly zero")
+    ordinary = observation["ordinary_record"]
+    applied = _finite_array(
+        ordinary["applied_generalized_efforts"], (10, 41), "retained applied inputs"
+    )
+    if not np.array_equal(rows[:10], applied) or not np.array_equal(
+        rows[10], applied[-1]
+    ):
+        raise ValueError("saved input rows do not match retained ZOH history/endpoint")
+    clock = observation["clock"]
+    if clock["steps"] != 10 or clock["dt_seconds"] != 0.001:
+        raise ValueError("retained observation clock metadata differs from T01")
+    ref_times = np.arange(clock["steps"] + 1, dtype=np.float64) * clock["dt_seconds"]
+    if not np.array_equal(times, ref_times):
+        raise ValueError("bundle and retained observation clocks differ")
+    ref_q = _finite_array(ordinary["qpos"], (11, 41), "retained qpos")
+    ref_v = _finite_array(ordinary["qvel"], (11, 41), "retained qvel")
+    if not np.array_equal(q0, ref_q[0]) or not np.array_equal(v0, ref_v[0]):
+        raise ValueError("bundle initial state differs from retained trajectory")
+    call_counts = ordinary["call_counts"]
+    expected_counts = {
+        "rk4_derivative_acceleration_calls": 320,
+        "closure_pose_only_observations": 10,
+        "closure_pose_rate_observations": 1,
+        "hidden_closure_acceleration_calls": 11,
+        "total_engine_acceleration_calls": 331,
+    }
+    if call_counts != expected_counts:
+        raise ValueError(
+            "retained call ledger differs from exact T01 public-path contract"
+        )
+    return {
+        "bundle": bundle,
+        "observation": observation,
+        "spec": spec,
+        "times": times,
+        "q0": q0,
+        "v0": v0,
+        "efforts": rows[:10],
+        "reference_q": ref_q,
+        "reference_v": ref_v,
+        "channels": channels,
+    }
+
+
+def execute_validated(
+    data: dict[str, Any],
+    *,
+    plant_factory: Callable[[bytes], Any],
+    open_loop: Callable[..., Any],
+    policy_factory: Callable[..., Any],
+    spec_bytes: bytes,
+) -> dict[str, Any]:
+    """Use the shared public trajectory path; injected callables enable pure tests."""
+    plant = plant_factory(spec_bytes)
+    if tuple(plant.coordinate_order) != data["channels"]:
+        raise ValueError("constructed Pinocchio plant order differs from frozen inputs")
+    initial_pose, initial_rate = plant.closure_residuals(data["q0"], data["v0"])
+    initial_pose = _finite_array(initial_pose, (6,), "initial pose residual")
+    initial_rate = _finite_array(initial_rate, (6,), "initial rate residual")
+    rollout = open_loop(
+        plant,
+        data["q0"].copy(),
+        data["v0"].copy(),
+        data["efforts"].copy(),
+        dt_s=0.001,
+        policy=policy_factory(substeps=8, project=False, stop_on_failure=False),
+    )
+    if getattr(rollout, "failure", None) is not None:
+        raise RuntimeError(f"open-loop rollout stopped: {rollout.failure}")
+    if getattr(rollout, "ball_impact", None) is not None:
+        raise ValueError("unexpected external-impact result in the frozen T01 replay")
+    times = _finite_array(rollout.time_s, (11,), "Pinocchio output clock")
+    q = _finite_array(rollout.q, (11, 41), "Pinocchio q output")
+    v = _finite_array(rollout.v, (11, 41), "Pinocchio v output")
+    _finite_array(rollout.pose_drift, (10,), "macro endpoint pose diagnostics")
+    if not np.array_equal(q[0], data["q0"]) or not np.array_equal(v[0], data["v0"]):
+        raise ValueError("open-loop output changed the frozen initial state")
+    if not np.array_equal(times, data["times"]):
+        raise ValueError("Pinocchio macro output clock differs from frozen T01 clock")
+    if not np.array_equal(rollout.efforts, data["efforts"]):
+        raise ValueError("integrator did not apply each frozen ZOH row exactly once")
+    return {
+        "times": times.tolist(),
+        "q": q.tolist(),
+        "v": v.tolist(),
+        "initial_pose_residual": initial_pose.tolist(),
+        "initial_rate_residual": initial_rate.tolist(),
+        "max_abs_q_difference_vs_mujoco": float(
+            np.max(np.abs(q - data["reference_q"]))
+        ),
+        "max_abs_v_difference_vs_mujoco": float(
+            np.max(np.abs(v - data["reference_v"]))
+        ),
+        "call_ledger_source_derived": {
+            "rk4_stage_accelerations": 320,
+            "endpoint_closure_observation_accelerations": 10,
+            "initial_closure_observation_acceleration": 1,
+            "total_adapter_accelerations": 331,
+        },
+        "projection": False,
+        "controller": False,
+        "state_reset": False,
+        "qualification": "none; descriptive same-input trajectory only",
+        "policy_sha256": POLICY_SHA256,
+        "policy": POLICY,
+    }
+
+
+def _native_call(
+    data: dict[str, Any], spec_bytes: bytes, source_root: Path, source_setup: Any
+) -> dict[str, Any]:
+    pin, _model_type, _projection, import_details = source_setup.import_native_support(
+        source_root
+    )
+    pin_version = str(getattr(pin, "__version__", "unknown"))
+    if pin_version != "3.8.0":
+        raise RuntimeError(f"expected Pinocchio 3.8.0, found {pin_version}")
+    pin_origin = Path(pin.__file__).resolve()
+    if not pin_origin.is_relative_to(Path(sys.prefix).resolve()):
+        raise ValueError(
+            f"Pinocchio package resolved outside the selected venv: {pin_origin}"
+        )
+    from src.shared.python.motion_matching.same_input.integrator import (
+        StepPolicy,
+        open_loop,
+    )
+    from src.shared.python.motion_matching.same_input.plant import VectorPlant
+
+    verify_module_origin(
+        Path(sys.modules[VectorPlant.__module__].__file__), source_root, PLANT_PATH
+    )
+    verify_module_origin(
+        Path(sys.modules[open_loop.__module__].__file__), source_root, INTEGRATOR_PATH
+    )
+    native_model_module = sys.modules[
+        "src.engines.physics_engines.pinocchio.python.native_model"
+    ]
+    verify_module_origin(Path(native_model_module.__file__), source_root, ADAPTER_PATH)
+
+    def build_pinned_plant(exact_spec: bytes) -> Any:
+        plant = VectorPlant("pinocchio", exact_spec, kkt_regularization=0.0)
+        adapter_module = sys.modules[type(plant._adapter).__module__]
+        verify_module_origin(Path(adapter_module.__file__), source_root, ADAPTER_PATH)
+        return plant
+
+    result = execute_validated(
+        data,
+        plant_factory=build_pinned_plant,
+        open_loop=open_loop,
+        policy_factory=StepPolicy,
+        spec_bytes=spec_bytes,
+    )
+    result["pinocchio_runtime"] = {
+        "version": pin_version,
+        "module_origin": str(pin_origin),
+        "import_details": import_details,
+    }
+    return result
+
+
+def _require_serial_thread_caps() -> None:
+    for name in (
+        "OMP_NUM_THREADS",
+        "OPENBLAS_NUM_THREADS",
+        "MKL_NUM_THREADS",
+        "NUMEXPR_NUM_THREADS",
+        "BLIS_NUM_THREADS",
+        "VECLIB_MAXIMUM_THREADS",
+    ):
+        if os.environ.get(name) != "1":
+            raise RuntimeError(f"required bounded thread cap is missing: {name}=1")
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--repo-root", type=Path, required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    input_root = Path(
+        "/home/dieterolson/native_engine_parity_telemetry_20261012/"
+        "pinocchio_same_input_t01_inputs"
+    )
+    parser.add_argument(
+        "--bundle", type=Path, default=input_root / "frozen-t01-bundle.json"
+    )
+    parser.add_argument(
+        "--observation", type=Path, default=input_root / "native-observation.json"
+    )
+    parser.add_argument(
+        "--spec",
+        type=Path,
+        default=Path("docs/development/full_body_models/full_body_spec_v1.json"),
+    )
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = build_parser().parse_args(argv)
+    output = args.output.resolve()
+    prepare_output_file(output)
+    source_root = args.repo_root.resolve()
+    setup_path = Path(__file__).with_name(SOURCE_SETUP)
+    bundle_path = args.bundle.resolve()
+    observation_path = args.observation.resolve()
+    spec_path = args.spec if args.spec.is_absolute() else source_root / args.spec
+    spec_path = spec_path.resolve()
+    source_setup: Any | None = None
+    source_hashes_before: dict[str, str] | None = None
+    artifacts_before: dict[str, str] | None = None
+    try:
+        _require_serial_thread_caps()
+        if sha256(setup_path.read_bytes()) != SOURCE_SETUP_SHA256:
+            raise RuntimeError("source bootstrap helper digest mismatch")
+        source_setup = importlib.import_module(Path(SOURCE_SETUP).stem)
+        if Path(source_setup.__file__).resolve() != setup_path.resolve():
+            raise RuntimeError("source bootstrap helper import origin mismatch")
+        source_hashes_before = source_setup.verify_sources(source_root)
+        bundle_bytes = bundle_path.read_bytes()
+        observation_bytes = observation_path.read_bytes()
+        spec_bytes = spec_path.read_bytes()
+        artifacts_before = {
+            "bundle": sha256(bundle_bytes),
+            "observation": sha256(observation_bytes),
+            "spec": sha256(spec_bytes),
+            "source_setup": sha256(setup_path.read_bytes()),
+            "runner": sha256(Path(__file__).read_bytes()),
+        }
+        data = validate_artifacts(
+            bundle_bytes, observation_bytes, spec_bytes, source_root
+        )
+        result = _native_call(data, spec_bytes, source_root, source_setup)
+        source_hashes_after = source_setup.verify_sources(source_root)
+        artifacts_after = {
+            "bundle": sha256(bundle_path.read_bytes()),
+            "observation": sha256(observation_path.read_bytes()),
+            "spec": sha256(spec_path.read_bytes()),
+            "source_setup": sha256(setup_path.read_bytes()),
+            "runner": sha256(Path(__file__).read_bytes()),
+        }
+        unchanged = (
+            source_hashes_before == source_hashes_after
+            and artifacts_before == artifacts_after
+        )
+        result.update(
+            {
+                "status": "comparison_complete" if unchanged else "provenance_changed",
+                "source_commit": SOURCE_COMMIT,
+                "bundle_sha256": artifacts_before["bundle"],
+                "observation_sha256": artifacts_before["observation"],
+                "spec_sha256": artifacts_before["spec"],
+                "artifacts_before": artifacts_before,
+                "artifacts_after": artifacts_after,
+                "source_hashes_before": source_hashes_before,
+                "source_hashes_after": source_hashes_after,
+                "source_unchanged": unchanged,
+                "source_manifest_sha256": "c5ec40129d3b28368142eadfb33e8e1464f7c6e4d4505dd5a6d2f86870d4f569",
+                "source_sha256": EXPECTED["source"],
+                "facade_overlay_sha256": EXPECTED["facade"],
+                "source_setup_sha256": SOURCE_SETUP_SHA256,
+                "policy_sha256": POLICY_SHA256,
+            }
+        )
+        output.write_text(
+            json.dumps(result, sort_keys=True, indent=2) + "\n", encoding="utf-8"
+        )
+        return 0 if unchanged else 1
+    except Exception as exc:
+        source_hashes_after: dict[str, str] | None = None
+        artifacts_after: dict[str, str] | None = None
+        provenance_unchanged: bool | None = None
+        postcheck_error: str | None = None
+        if source_setup is not None:
+            try:
+                source_hashes_after = source_setup.verify_sources(source_root)
+            except Exception as audit_exc:
+                postcheck_error = str(audit_exc)[:300]
+                source_hashes_after = {
+                    str(relative): (
+                        sha256((source_root / relative).read_bytes())
+                        if (source_root / relative).is_file()
+                        else "missing"
+                    )
+                    for relative in source_setup.EXPECTED
+                }
+            try:
+                artifacts_after = {
+                    "bundle": sha256(bundle_path.read_bytes()),
+                    "observation": sha256(observation_path.read_bytes()),
+                    "spec": sha256(spec_path.read_bytes()),
+                    "source_setup": sha256(setup_path.read_bytes()),
+                    "runner": sha256(Path(__file__).read_bytes()),
+                }
+            except Exception as artifact_exc:
+                artifacts_after = {"postcheck_error": str(artifact_exc)[:300]}
+                postcheck_error = postcheck_error or str(artifact_exc)[:300]
+            if source_hashes_before is not None and artifacts_before is not None:
+                provenance_unchanged = (
+                    source_hashes_before == source_hashes_after
+                    and artifacts_before == artifacts_after
+                )
+        failure = {
+            "status": (
+                "provenance_changed"
+                if provenance_unchanged is False
+                else "postcheck_failed"
+                if postcheck_error is not None
+                else "diagnostic_failed"
+            ),
+            "phase": "preflight_or_execution",
+            "exception_type": type(exc).__name__,
+            "message": str(exc)[:500],
+            "source_commit": SOURCE_COMMIT,
+            "policy_sha256": POLICY_SHA256,
+            "source_hashes_before": source_hashes_before,
+            "source_hashes_after": source_hashes_after,
+            "artifacts_before": artifacts_before,
+            "artifacts_after": artifacts_after,
+            "source_unchanged": provenance_unchanged,
+            "postcheck_error": postcheck_error,
+        }
+        output.write_text(
+            json.dumps(failure, sort_keys=True, indent=2) + "\n", encoding="utf-8"
+        )
+        return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
