@@ -781,11 +781,12 @@ class Lane:
         spec_bytes: bytes,
         seeds: dict[str, tuple[str, Sequence[float]]],
         q_seed: np.ndarray,
+        fixed_bodies: Sequence[str] = (),
     ) -> tuple[dict[str, tuple[str, tuple[float, float, float]]], Any, Any]:
         """Alternating static trial: neutral address fit and marker placement."""
         from src.shared.python.motion_matching.pipeline.address import static_trial
 
-        return static_trial(self, spec_bytes, seeds, q_seed)
+        return static_trial(self, spec_bytes, seeds, q_seed, fixed_bodies)
 
     def static_offsets(
         self,
