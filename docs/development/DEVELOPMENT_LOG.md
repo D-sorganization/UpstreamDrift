@@ -3260,3 +3260,8 @@ qualification remain open. The context catalog could not be refreshed here:
 its `vendor/ud-tools` junction escapes this checkout to the frozen
 `feedback-drake-native-11838` donor, and the context CLI correctly rejects that
 path. See the #12244 change fragment, chapter 13 and F07 ladder turnover.
+
+The follow-up recomputes and compares the full plan before solver setup and
+builds the post-solve mesh audit from the seeded grid in the child request.
+Pure JSON-reload and tampering regressions pass; there is still no native child
+solve or replay evidence.

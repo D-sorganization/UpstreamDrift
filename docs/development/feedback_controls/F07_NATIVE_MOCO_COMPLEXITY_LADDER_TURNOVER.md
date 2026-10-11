@@ -758,3 +758,10 @@ claimed. A smaller local activation indicator is not a guarantee of convergence
 or replay acceptance and does not qualify fiber lengths, kinematics, or
 physiology. Any later child still has to pass the unchanged independent replay
 checks and receive a separate review before execution.
+
+The post-solve grid audit reads the seeded grid from the child request,
+leaving the retained plan identity immutable. Before solver setup, the worker
+recomputes and compares the complete canonical plan, including source hashes,
+child mesh and preserved contract; changing a plan field while keeping its
+attempt ID is rejected. Pure regressions cover JSON reload, plan tampering and
+the distinction between plan data and request-only seed data.

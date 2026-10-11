@@ -146,11 +146,7 @@ def run_saved_replay_diagnostic(source_run: Path, output: Path) -> None:
 def _validate_refinement_request(
     refinement: dict[str, Any], staged_source_sha256: str, child_config: dict[str, Any]
 ) -> None:
-    parent = Path(refinement["parent_directory"])
-    analysis = Path(refinement["analysis_path"])
-    checked = build_refinement_plan(parent, analysis)
-    if checked["attempt_id"] != refinement.get("attempt_id"):
-        raise ValueError("refinement plan no longer matches its retained evidence")
+    _validate_refinement_plan(refinement)
     if staged_source_sha256 != refinement["parent_hashes"].get("source_osim"):
         raise ValueError("refinement child source differs from parent source bytes")
     parent_request = refinement["parent_request"]
@@ -166,6 +162,55 @@ def _validate_refinement_request(
         != preserved["objective"]
     ):
         raise ValueError("refinement objective differs from retained parent")
+
+
+def _validate_refinement_plan(refinement: dict[str, Any]) -> None:
+    parent = Path(refinement["parent_directory"])
+    analysis = Path(refinement["analysis_path"])
+    checked = build_refinement_plan(parent, analysis)
+    try:
+        checked_json = json.dumps(checked, sort_keys=True, allow_nan=False)
+        supplied_json = json.dumps(refinement, sort_keys=True, allow_nan=False)
+    except (TypeError, ValueError) as exc:
+        raise ValueError("refinement plan is not canonical JSON data") from exc
+    if checked_json != supplied_json:
+        raise ValueError("refinement plan no longer matches its retained evidence")
+
+
+def _build_mesh_grid_audit(
+    refinement: dict[str, Any],
+    child_request_refinement: dict[str, Any],
+    solution_grid: Any,
+) -> dict[str, Any]:
+    if any(
+        child_request_refinement.get(key) != refinement.get(key)
+        for key in ("attempt_id", "parent_hashes", "normalized_mesh_points")
+    ):
+        raise ValueError("child request changed the retained refinement plan")
+    seed_grid = child_request_refinement.get("native_guess_time_grid_seconds")
+    if not isinstance(seed_grid, list) or not seed_grid:
+        raise ValueError("child request omitted its seeded native guess grid")
+    expected_grid = np.asarray(
+        child_hs_grid(
+            refinement["normalized_mesh_points"],
+            refinement["parent_request"]["horizon_seconds"],
+        ),
+        dtype=np.float64,
+    )
+    actual_grid = np.asarray(solution_grid, dtype=np.float64)
+    if not np.array_equal(np.asarray(seed_grid, dtype=np.float64), expected_grid):
+        raise ValueError("native seed grid differs from the planned HS grid")
+    return {
+        "schema": "native-moco-refinement-solution-grid-v1",
+        "attempt_id": refinement["attempt_id"],
+        "parent_hashes": refinement["parent_hashes"],
+        "planned_normalized_mesh_points": refinement["normalized_mesh_points"],
+        "planned_time_grid_seconds": expected_grid.tolist(),
+        "seed_time_grid_seconds": seed_grid,
+        "solution_time_grid_seconds": actual_grid.tolist(),
+        "exact_solution_grid_match": bool(np.array_equal(actual_grid, expected_grid)),
+        "physical_qualification": "unqualified",
+    }
 
 
 def _set_parent_solution_guess(
@@ -1278,25 +1323,11 @@ def _solve_and_export(
     mesh_grid_audit_path = None
     if prepared.get("refinement") is not None:
         refinement = prepared["refinement"]
-        expected_grid = np.asarray(
-            child_hs_grid(
-                refinement["normalized_mesh_points"],
-                refinement["parent_request"]["horizon_seconds"],
-            ),
-            dtype=np.float64,
-        )
+        child_request_refinement = prepared["config"].get("mesh_refinement")
+        if not isinstance(child_request_refinement, dict):
+            raise ValueError("child request omitted its refinement grid binding")
+        grid_audit = _build_mesh_grid_audit(refinement, child_request_refinement, grid)
         mesh_grid_audit_path = output / "mesh_grid_audit.json"
-        grid_audit = {
-            "schema": "native-moco-refinement-solution-grid-v1",
-            "attempt_id": refinement["attempt_id"],
-            "parent_hashes": refinement["parent_hashes"],
-            "planned_normalized_mesh_points": refinement["normalized_mesh_points"],
-            "planned_time_grid_seconds": expected_grid.tolist(),
-            "seed_time_grid_seconds": refinement["native_guess_time_grid_seconds"],
-            "solution_time_grid_seconds": grid.tolist(),
-            "exact_solution_grid_match": bool(np.array_equal(grid, expected_grid)),
-            "physical_qualification": "unqualified",
-        }
         _write_json(mesh_grid_audit_path, grid_audit)
         if not grid_audit["exact_solution_grid_match"]:
             raise ValueError("optimized trajectory differs from the planned HS grid")

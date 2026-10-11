@@ -142,6 +142,42 @@ def test_bounded_refinement_marks_one_parent_cell_and_preserves_contract(
     report_path.write_text(json.dumps(report), encoding="utf-8")
 
     plan = build_refinement_plan(parent, report_path)
+    from tests.opensim.native_moco_ladder_worker import (
+        _validate_refinement_request,
+    )
+
+    _validate_refinement_request(
+        plan, request["source_sha256"], plan["preserved_contract"]
+    )
+    reloaded_plan = json.loads(json.dumps(plan))
+    _validate_refinement_request(
+        reloaded_plan, request["source_sha256"], plan["preserved_contract"]
+    )
+    for field, mutate in (
+        (
+            "normalized_mesh_points",
+            lambda changed: changed.__setitem__(
+                "normalized_mesh_points", [0.0, 0.05, 1.0]
+            ),
+        ),
+        (
+            "parent_hashes",
+            lambda changed: changed["parent_hashes"].__setitem__(
+                "source_osim", "0" * 64
+            ),
+        ),
+        (
+            "preserved_contract",
+            lambda changed: changed["preserved_contract"].__setitem__("target_q", 99.0),
+        ),
+    ):
+        changed = json.loads(json.dumps(plan))
+        mutate(changed)
+        assert changed["attempt_id"] == plan["attempt_id"], field
+        with pytest.raises(ValueError, match="plan no longer matches"):
+            _validate_refinement_request(
+                changed, request["source_sha256"], plan["preserved_contract"]
+            )
     assert plan["flagged_parent_cells"] == [0]
     assert plan["normalized_mesh_points"][:4] == (0.0, 0.025, 0.05, 0.1)
     assert len(plan["normalized_mesh_points"]) - 1 == 21
@@ -201,6 +237,33 @@ def test_refinement_mesh_and_piecewise_linear_control_contracts() -> None:
     for invalid in ([0.0, 1.0, 0.5], [0.0, float("nan"), 1.0], [0.1, 1.0]):
         with pytest.raises(ValueError):
             validate_normalized_mesh(invalid)
+
+
+def test_refinement_grid_audit_reads_seed_grid_from_child_request() -> None:
+    from tests.opensim.native_moco_ladder_worker import _build_mesh_grid_audit
+    from tests.opensim.native_moco_refinement import child_hs_grid
+
+    plan = {
+        "attempt_id": "attempt",
+        "parent_hashes": {"source_osim": "a" * 64},
+        "normalized_mesh_points": [0.0, 0.5, 1.0],
+        "parent_request": {"horizon_seconds": 0.01},
+    }
+    grid = child_hs_grid(plan["normalized_mesh_points"], 0.01)
+    child_request = {
+        "attempt_id": "attempt",
+        "parent_hashes": plan["parent_hashes"],
+        "normalized_mesh_points": plan["normalized_mesh_points"],
+        "native_guess_time_grid_seconds": list(grid),
+    }
+    audit = _build_mesh_grid_audit(plan, child_request, grid)
+    assert audit["seed_time_grid_seconds"] == list(grid)
+    assert audit["exact_solution_grid_match"] is True
+    assert "native_guess_time_grid_seconds" not in plan
+    changed_request = dict(child_request)
+    changed_request["normalized_mesh_points"] = [0.0, 0.25, 1.0]
+    with pytest.raises(ValueError, match="changed the retained refinement plan"):
+        _build_mesh_grid_audit(plan, changed_request, grid)
 
 
 def test_committed_activation_analysis_reproduces_retained_parent_bindings(
