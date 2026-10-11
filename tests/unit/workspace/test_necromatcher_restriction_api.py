@@ -4,6 +4,8 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+
+pytestmark = pytest.mark.unit
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 

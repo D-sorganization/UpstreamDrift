@@ -2,6 +2,8 @@
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 from src.shared.python.estimation import SolverBackend, SolverTelemetry
 
 

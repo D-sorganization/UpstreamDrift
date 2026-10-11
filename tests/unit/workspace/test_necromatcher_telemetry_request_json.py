@@ -1,5 +1,6 @@
 """Live typed queue recipes bind to their exact stored JSON without coercion."""
 
+from contextlib import nullcontext
 from copy import deepcopy
 from dataclasses import asdict
 import hashlib
@@ -7,6 +8,8 @@ import json
 from types import SimpleNamespace
 
 import pytest
+
+pytestmark = pytest.mark.unit
 
 from src.shared.python.motion_matching.historical_fit import ImageFitConfig
 from src.shared.python.motion_matching.constraint_kinematics import ConstraintOptions
@@ -116,13 +119,14 @@ def test_parent_worker_result_reaches_rejected_publication_with_live_tuples(
         nfev=3, njev=2, solver_elapsed_s=0.1, termination_reason="gtol"
     )
     fit = {
+        "provenance": {},
         "evidence": {
             "original_fit": {
                 "optimizer_ran": True,
                 "solver_telemetry": measured.to_record(),
             },
             "rejection_reasons": ["research_only"],
-        }
+        },
     }
 
     def child(request_path, *_):
@@ -133,9 +137,11 @@ def test_parent_worker_result_reaches_rejected_publication_with_live_tuples(
     monkeypatch.setattr(jobs, "_execute_worker", child)
     published = []
     library = SimpleNamespace(
+        authenticated_read=nullcontext,
         load_asset=lambda _: SimpleNamespace(
             metadata={"hash": request["source_fit_hash"]}
         ),
+        load_fit=lambda _: {},
         add_fit=lambda *args: published.append(args),
     )
     spec = SimpleNamespace(

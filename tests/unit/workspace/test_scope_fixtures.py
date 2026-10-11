@@ -5,6 +5,10 @@ import json
 from pathlib import Path
 from fractions import Fraction
 
+import pytest
+
+pytestmark = pytest.mark.unit
+
 from src.shared.python.shadow_tracker.ingestion import compute_frame_hash
 from src.shared.python.shadow_tracker.source_records import (
     FrameIdentity,

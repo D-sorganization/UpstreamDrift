@@ -6,6 +6,8 @@ from types import SimpleNamespace
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 from src.shared.python.workspace import necromatcher_fit_worker as worker
 from src.shared.python.workspace import necromatcher_fit_telemetry as telemetry
 

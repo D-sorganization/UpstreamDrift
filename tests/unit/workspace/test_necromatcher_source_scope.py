@@ -6,6 +6,8 @@ import os
 import subprocess
 import sys
 import pytest
+
+pytestmark = pytest.mark.unit
 from tests.unit.workspace.test_scope_fixtures import (
     fixture_capture,
     fixture_review_artifact,
