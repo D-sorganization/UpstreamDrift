@@ -1,0 +1,41 @@
+{
+  "arrays": {
+    "controls": {
+      "in_memory_sha256": "3094ce0b870bc8030d58a66c7c4a3ce130d071002e46c25afa64a4503fdb2d74",
+      "max_absolute_error": 6.938893903907228e-18,
+      "max_ulp_error": 3,
+      "persisted_sha256": "5302b2b560d8011f68dba9e7e242bc1f7d1e5e4e9687b027dfa75af44c90bf43"
+    },
+    "states": {
+      "in_memory_sha256": "b9c369652a1133fa0fce907807c99776a3a419ccdb93b4468d710ba4ab087863",
+      "max_absolute_error": 5.551115123125783e-17,
+      "max_ulp_error": 3,
+      "persisted_sha256": "68533116ae4322744cf95547509cd9608bb523f34f6ab5b4afcfae8ce7320161"
+    },
+    "time": {
+      "in_memory_sha256": "d8d74c633897002455f9b5afcb0e6dcf5ad6f3f203aa0e01e995f9ab250a09b4",
+      "max_absolute_error": 8.673617379884035e-19,
+      "max_ulp_error": 1,
+      "persisted_sha256": "7bab173c911d2ef87ae934ae2a6e313bf14379a3ec773918b229e25b485367c7"
+    }
+  },
+  "control_names": [
+    "/forceset/flexor",
+    "/forceset/extensor"
+  ],
+  "maximum_allowed_ulps": 8,
+  "maximum_ulp_error": 3,
+  "schema": "synthetic-solution-sto-roundtrip-v1",
+  "state_names": [
+    "/jointset/base/q/value",
+    "/jointset/follower/dependent/value",
+    "/jointset/anchor/fixed/value",
+    "/jointset/base/q/speed",
+    "/jointset/follower/dependent/speed",
+    "/jointset/anchor/fixed/speed",
+    "/forceset/flexor/activation",
+    "/forceset/flexor/fiber_length",
+    "/forceset/extensor/activation",
+    "/forceset/extensor/fiber_length"
+  ]
+}
