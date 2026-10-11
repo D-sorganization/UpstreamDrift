@@ -21,7 +21,20 @@ the 0.1x impact-window clip) of one clip kind and engine:
 - **Clip set:** 60 MP4s per club: 3 kinds × 4 engines × 2 views (1 close-up view for `club_forces`) × (1x, 0.5x, 0.1x impact window). Checked with cv2: every clip is 60 fps at 1920×1080, with 109, 218 and 241 frames respectively.
 - **Impact card on these bundles:** clubhead 91.4 mph for the driver and 72.2 mph for the 7-iron.
 - **Rendered before #12292:** Impact Location still shows the older unavailable reason.
-- **MyoSuite:** not in these grabs. The `ud-sim` image lacks `myosuite.envs.env_base`, and MyoSuite clips render on brick with its own venv.
+- **MyoSuite:** not in the four-engine grabs above. The `ud-sim` image lacks `myosuite.envs.env_base`, so MyoSuite was rendered separately (see below).
 - **Full clips:** on brick under `~/Videos/Parity Audit/forces_and_impact/s41_gcv19_{driver,iron}/` (not committed).
+
+## MyoSuite
+
+Rendered on brick with the MyoSuite venv (`NATIVE_VIEWER_MYOSUITE_PYTHON`) from main after #12292, using the same bundles. Each strip shows the impact frame of `grf/` face-on, `club_forces/` hands close-up and `clean/` down-the-line.
+
+| Club | Grab |
+|---|---|
+| Driver (capture-A) | [gcv19_showcase_driver_myosuite_impact.png](gcv19_showcase_driver_myosuite_impact.png) |
+| 7-iron (capture-B) | [gcv19_showcase_iron_myosuite_impact.png](gcv19_showcase_iron_myosuite_impact.png) |
+
+- **Clip set:** 15 MP4s per club (5 kind-view pairs × 1x, 0.5x and 0.1x), all 60 fps at 1920×1080 by cv2.
+- **Impact card:** the driver card reads Impact Location unavailable, because the ball contact is off the face (toe −70 mm). That is #12292's off-face reason, not a strike location.
+- **Full clips:** on brick under `~/Videos/Parity Audit/forces_and_impact/s42_gcv19_{driver,iron}_myosuite/` (not committed).
 
 A rendered clip is presentation evidence only. It is not physical acceptance of the replay.
