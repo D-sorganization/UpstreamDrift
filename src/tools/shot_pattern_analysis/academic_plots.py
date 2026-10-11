@@ -220,7 +220,7 @@ def _save_formats(figure: Any, output_stem: Path, *, dpi: int) -> dict[str, Path
     return outputs
 
 
-def _matplotlib():
+def _matplotlib() -> Any:
     try:
         import matplotlib
     except (ImportError, OSError) as exc:
@@ -753,10 +753,10 @@ def write_overhead_trajectory_figure(
     lows = np.minimum(np.min(all_points, axis=0), (0.0, 0.0))
     highs = np.maximum(np.max(all_points, axis=0), (float(target_x_m), 0.0))
     spans = highs - lows
-    for axis in range(2):
-        padding = max(float(spans[axis]) * 0.05, 0.25)
-        lows[axis] -= padding
-        highs[axis] += padding
+    for dim_idx in range(2):
+        padding = max(float(spans[dim_idx]) * 0.05, 0.25)
+        lows[dim_idx] -= padding
+        highs[dim_idx] += padding
 
     plt = _matplotlib()
     names = list(trajectories)
@@ -776,7 +776,8 @@ def write_overhead_trajectory_figure(
         right=0.98,
         wspace=0.15,
     )
-    for axis, name in zip(axes[0], names, strict=True):
+    axes_row: Sequence[Any] = axes[0]
+    for axis, name in zip(axes_row, names, strict=True):
         color = _COLORS.get(name, "#286090")
         for trajectory in trajectories[name]:
             axis.plot(
