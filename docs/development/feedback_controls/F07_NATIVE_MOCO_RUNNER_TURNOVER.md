@@ -191,8 +191,10 @@ coordinate limits and any declared chart; absent optional charts do not block
 otherwise valid source domains. CPP active ranges remain regime switches, not
 optimizer-wide bounds. Progress events remain atomically written and
 identity-bound. This integration adds no model-specific qualification,
-optimizer result, or physiological evidence. All 17 production rows remain
-unqualified; the broader F07 evidence and blockers above remain in force.
+optimizer result, or physiological evidence. All 17 registered model/variant
+rows remain
+unqualified, including the three legacy demo rows; the broader F07 evidence and
+blockers above remain in force.
 
 On the supported Python 3.12 QA environment, the combined affected selection
 passed 74 tests with 53 SDK-dependent skips because OpenSim was unavailable.
