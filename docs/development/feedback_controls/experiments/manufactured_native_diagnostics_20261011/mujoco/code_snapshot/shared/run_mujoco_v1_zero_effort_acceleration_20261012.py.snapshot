@@ -1,0 +1,244 @@
+"""One exact-source zero-effort acceleration gate; explicit execution only."""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import sys
+from pathlib import Path
+from typing import Any
+
+import numpy as np
+
+from mujoco_v1_candidate_lift_geometry import observe_source_geometry
+from mujoco_v1_zero_effort_acceleration import execute_zero_effort_gate
+
+REPO = Path(r"C:/Users/diete/Repositories/Worktrees/feedback-moco-state-binding-11791")
+PLANNING = Path(r"C:/Users/diete/Repositories/docs/development/feedback_controls_planning")
+SPEC = REPO / "docs/development/full_body_models/full_body_spec_v1.json"
+CANDIDATE = REPO / "docs/development/full_body_models/evidence/native_candidates/returned81_candidate.json"
+SEED_RECEIPT = PLANNING / "mujoco_v1_candidate_lift_20261011_root_attempt2/native-observation.json"
+EXPECTED = {
+    "spec": "09cff1393a48b7f44e2ceaac9132473c64a33f9f853823c5e7d7fef80802e6b3",
+    "candidate": "2caa3ce94e596dd61d50172229ad04a98c5235be6388566b4376be4ba41e2fcf",
+    "seed": "9986c0791134234f3d3b4e19b2784b48d3758965f1f5fbac23261211f5922ac3",
+}
+EXPECTED_MODULES = (
+    "src.engines.physics_engines.mujoco.python.full_body_ik",
+    "src.engines.physics_engines.mujoco.python.full_body_model",
+    "src.engines.physics_engines.mujoco.python.full_body_mjcf",
+    "src.engines.physics_engines.mujoco.python.native_model",
+    "src.shared.python.motion_matching.contact_law",
+    "src.shared.python.motion_matching.constraint_kinematics",
+    "src.shared.python.motion_matching.full_body_ik",
+    "src.shared.python.motion_matching.same_input.plant",
+)
+SOURCE_FILES = (
+    SPEC,
+    CANDIDATE,
+    SEED_RECEIPT,
+    PLANNING / "mujoco_v1_candidate_lift_geometry.py",
+    PLANNING / "mujoco_v1_zero_effort_acceleration.py",
+    PLANNING / "run_mujoco_v1_zero_effort_acceleration_20261012.py",
+    *(REPO / rel for rel in (
+        "src/engines/physics_engines/mujoco/python/full_body_ik.py",
+        "src/engines/physics_engines/mujoco/python/full_body_model.py",
+        "src/engines/physics_engines/mujoco/python/full_body_mjcf.py",
+        "src/engines/physics_engines/mujoco/python/native_model.py",
+        "src/shared/python/motion_matching/contact_law.py",
+        "src/shared/python/motion_matching/constraint_kinematics.py",
+        "src/shared/python/motion_matching/full_body_ik.py",
+        "src/shared/python/motion_matching/same_input/__init__.py",
+        "src/shared/python/motion_matching/same_input/plant.py",
+        "src/shared/python/motion_matching/same_input/integrator.py",
+        "src/engines/physics_engines/mujoco/python/native_full_body_replay.py",
+    )),
+)
+
+
+def sha256_bytes(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+def sha256_file(path: Path) -> str:
+    return sha256_bytes(path.read_bytes())
+
+
+def file_hashes() -> dict[str, str]:
+    return {str(path.resolve()): sha256_file(path) for path in SOURCE_FILES}
+
+
+def _imports() -> tuple[Any, Any, Any, Any]:
+    from src.engines.physics_engines.mujoco.python.full_body_ik import (
+        FullBodyMarkerKinematics,
+    )
+    from src.engines.physics_engines.mujoco.python.full_body_model import (
+        NativeMujocoFullBodyModel,
+    )
+    from src.shared.python.motion_matching.constraint_kinematics import (
+        ConstraintOptions,
+    )
+    from src.shared.python.motion_matching.same_input import VectorPlant
+
+    return FullBodyMarkerKinematics, NativeMujocoFullBodyModel, ConstraintOptions, VectorPlant
+
+
+def _module_provenance() -> list[dict[str, str]]:
+    return _module_provenance_from(sys.modules, EXPECTED_MODULES, REPO, sha256_file)
+
+
+def _module_provenance_from(
+    modules: Any,
+    expected_modules: tuple[str, ...],
+    repo: Path,
+    hash_file: Any,
+) -> list[dict[str, str]]:
+    records = []
+    for name in expected_modules:
+        module = modules.get(name)
+        origin = getattr(module, "__file__", None)
+        if not origin or not Path(origin).is_file():
+            raise RuntimeError(f"required native module has no source origin: {name}")
+        path = Path(origin).resolve(strict=True)
+        if repo.resolve() not in path.parents:
+            raise RuntimeError(f"native module resolved outside the frozen checkout: {name}")
+        records.append({"module": name, "origin": str(path), "sha256": hash_file(path)})
+    return records
+
+
+def _verify_seed_and_source() -> tuple[bytes, dict[str, Any], tuple[str, ...], np.ndarray, np.ndarray]:
+    spec_bytes = SPEC.read_bytes()
+    candidate_bytes = CANDIDATE.read_bytes()
+    seed_bytes = SEED_RECEIPT.read_bytes()
+    for label, data in (("spec", spec_bytes), ("candidate", candidate_bytes), ("seed", seed_bytes)):
+        if sha256_bytes(data) != EXPECTED[label]:
+            raise ValueError(f"frozen {label} digest mismatch")
+    spec = json.loads(spec_bytes)
+    candidate = json.loads(candidate_bytes)
+    seed = json.loads(seed_bytes)
+    names = tuple(spec["coordinate_order"])
+    candidate_names = tuple(candidate["coordinate_names"])
+    if len(names) != 41 or len(set(names)) != 41 or len(candidate_names) != 27:
+        raise ValueError("frozen source/candidate dimensions differ from the reviewed 41/27 contract")
+    if candidate_names != names[:27]:
+        raise ValueError("candidate names do not match the exact source coordinate prefix")
+    q0 = np.asarray(seed["after_shift"]["q"], dtype=np.float64)
+    v0 = np.asarray(seed["full_rate_vector"], dtype=np.float64)
+    if q0.shape != (41,) or v0.shape != (41,) or not np.isfinite(q0).all() or not np.array_equal(v0, np.zeros(41)):
+        raise ValueError("attempt-2 seed does not contain complete finite q and zero v")
+    if seed["source"]["spec_sha256"] != EXPECTED["spec"] or seed["source"]["candidate_sha256"] != EXPECTED["candidate"]:
+        raise ValueError("attempt-2 observation source identities differ from pinned bytes")
+    lower = seed["native_qpos0_lower_defaults"]
+    if set(lower) != set(names[27:]) or any(float(lower[name]) != q0[index] for index, name in enumerate(names) if index >= 27):
+        raise ValueError("attempt-2 lower state differs from compiled source defaults")
+    return spec_bytes, seed, names, q0, v0
+
+
+class _CountedPlant:
+    def __init__(self, plant: Any) -> None:
+        self.plant = plant
+        self.coordinate_order = tuple(plant.coordinate_order)
+        self.calls = 0
+
+    def acceleration(self, q: np.ndarray, v: np.ndarray, tau: np.ndarray) -> np.ndarray:
+        self.calls += 1
+        return self.plant.acceleration(q, v, tau)
+
+
+def _pre_acceleration_observation(
+    spec_bytes: bytes,
+    names: tuple[str, ...],
+    q0: np.ndarray,
+    v0: np.ndarray,
+) -> dict[str, object]:
+    FullBodyMarkerKinematics, NativeMujocoFullBodyModel, ConstraintOptions, _ = _imports()
+    native = NativeMujocoFullBodyModel(spec_bytes)
+    native.kkt_regularization = 0.0
+    spec = json.loads(spec_bytes)
+    attachments = {
+        label: (entry["body"], entry["offset_m"])
+        for label, entry in spec["marker_attachments"].items()
+        if isinstance(entry.get("offset_m"), list) and len(entry["offset_m"]) == 3
+    }
+    if not attachments:
+        raise ValueError("exact source lacks finite marker attachments for closure observation")
+    facade = FullBodyMarkerKinematics(native, attachments)
+    options = ConstraintOptions(native.ground_plane, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, ())
+    return observe_source_geometry(native, facade, q0, names, v0, options)
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--execute-native", action="store_true", help="execute one zero-effort acceleration only")
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args()
+    if not args.execute_native:
+        parser.error("preparation only; reviewed execution must pass --execute-native")
+    if args.output.exists():
+        parser.error("output path must be fresh; no overwrite or retry")
+    before = file_hashes()
+    spec_bytes, seed, names, q0, v0 = _verify_seed_and_source()
+    _, _, _, VectorPlant = _imports()
+    # Validate the actually imported acceleration owners before native model
+    # construction or dynamics. The integrator remains source-hash-bound above
+    # but is intentionally not imported for this phase.
+    modules = _module_provenance()
+    geometry = _pre_acceleration_observation(spec_bytes, names, q0, v0)
+    plant = VectorPlant("mujoco", spec_bytes, kkt_regularization=0.0)
+    counted = _CountedPlant(plant)
+    result = execute_zero_effort_gate(
+        counted,
+        names,
+        q0,
+        v0,
+        lambda _q, _v: geometry,
+        closure_tolerance=1e-9,
+    )
+    if counted.calls != 1 or result["acceleration_call_count"] != 1:
+        raise AssertionError("exactly one zero-effort acceleration call is required")
+    after = file_hashes()
+    if before != after:
+        raise RuntimeError("source, candidate, seed, or implementation changed during probe")
+    contact = geometry["spheres"]
+    payload = {
+        "schema_version": 1,
+        "qualification": "manufactured_zero_effort_acceleration_unqualified",
+        "native_engine": "MuJoCo",
+        "source": {
+            "spec_sha256": EXPECTED["spec"],
+            "candidate_sha256": EXPECTED["candidate"],
+            "geometry_seed_sha256": EXPECTED["seed"],
+            "source_hashes_before": before,
+            "source_hashes_after": after,
+            "loaded_module_hashes": modules,
+        },
+        "initial_state": {
+            "coordinate_order": list(names),
+            "qpos": np.asarray(result["q0"]).tolist(),
+            "qvel": np.asarray(result["v0"]).tolist(),
+            "effort": np.asarray(result["effort"]).tolist(),
+        },
+        "pre_acceleration_gate": {
+            "pose_residual_m_rad": np.asarray(result["weld_pose_residual_m_rad"]).tolist(),
+            "rate_residual_m_s_rad_s": np.asarray(result["weld_rate_residual_m_s_rad_s"]).tolist(),
+            "jacobian_rank": result["jacobian_rank"],
+            "required_rank": 6,
+            "max_abs_pose_or_rate_residual": float(max(np.max(np.abs(result["weld_pose_residual_m_rad"])), np.max(np.abs(result["weld_rate_residual_m_s_rad_s"])))),
+            "declared_closure_gate_m_rad": 1e-9,
+            "sphere_contact_geometry": contact,
+            "support_equilibrium_claim": False,
+        },
+        "zero_effort_acceleration": np.asarray(result["acceleration"]).tolist(),
+        "acceleration_call_count": counted.calls,
+        "execution_scope": "one VectorPlant.acceleration call; no projection, integration, callback, or optimizer",
+        "source_state_qualification": "manufactured candidate lift plus compiled source-default lower coordinates; not captured or physiologically qualified",
+        "support_contact_interpretation": "source-defined floor geometry and contact samples only; no supported-equilibrium inference",
+    }
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    print(json.dumps({"output": str(args.output), "output_sha256": sha256_file(args.output), "acceleration_call_count": counted.calls, "jacobian_rank": result["jacobian_rank"]}, sort_keys=True))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
