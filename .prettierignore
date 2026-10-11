@@ -64,6 +64,8 @@ docs/development/full_body_models/evidence/foot_progression/osv4_final/capture_o
 # #12187: byte-bound native neck-tracking receipt from #12154.
 docs/development/full_body_models/evidence/head_gaze/fd_neck_tracking.json
 
+# Preserve the byte-bound native closed-loop receipt serialization.
+docs/development/full_body_models/evidence/head_gaze/fd_neck_closed_loop.json
 # #12191/#12198: canonical ground-support evidence retains its recorded hashes.
 docs/development/full_body_models/evidence/ground_support/anthro_driver/receipt.json
 docs/development/full_body_models/evidence/ground_support/anthro_iron/receipt.json
@@ -79,10 +81,13 @@ docs/development/full_body_models/evidence/ground_support/anthro_driver_drake/fu
 docs/development/full_body_models/evidence/ground_support/anthro_driver_drake/full_body_spec_hipcal_scaled.json
 docs/development/full_body_models/evidence/ground_support/anthro_driver_drake/receipt.json
 
-# Preserve the byte-bound native closed-loop receipt serialization.
-docs/development/full_body_models/evidence/head_gaze/fd_neck_closed_loop.json
-
-# Preserve canonical model/calibration fixture provenance from main #12202.
+# Preserve canonical model/calibration fixture provenance from main #12202/#12222.
 tests/fixtures/club_face/address_poses.json
 tests/fixtures/club_face/provenance.json
 src/engines/physics_engines/opensim/models/msk_club_grip_calibration.json
+
+# Preserve generated register and source-bound canonical club fixture specifications.
+docs/development/monolith_refactor_register.md
+tests/fixtures/club_face/spec_driver.json
+tests/fixtures/club_face/spec_iron7.json
+docs/development/full_body_models/evidence/head_gaze/fd_neck_closed_loop.json
