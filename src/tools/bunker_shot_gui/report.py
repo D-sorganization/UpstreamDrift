@@ -11,6 +11,9 @@ and every report opens by saying so.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
+from typing import cast
+
 import numpy as np
 
 from bunkershot3d.solvers import EnvelopeStatus, FidelityTier, ValidityVerdict
@@ -647,16 +650,17 @@ def playability_text(playability: PlayabilityOutcome) -> str:
         "  carry [m], rows = attack angle (deg), columns = firmness (kg/cm^2)",
         "        " + " ".join(f"{v:>6.2f} " for v in playability.firmness_kg_per_cm2),
     ]
+    carry_grid = cast(Sequence[Sequence[float]], playability.carry_m)
     for angle, row, flags in zip(
         playability.attack_angle_deg,
-        playability.carry_m,
+        carry_grid,
         window.in_window,
         strict=True,
     ):
         cells = " ".join(
             ("   ---" if not np.isfinite(value) else f"{value:>6.2f}")
             + ("*" if flag else " ")
-            for value, flag in zip(list(row), flags, strict=True)
+            for value, flag in zip(row, flags, strict=True)
         )
         lines.append(f"  {angle:>5.1f} {cells}")
     lines.extend(("  (* inside the window, --- refused)", ""))
