@@ -3,49 +3,41 @@
 ## Active Study and Current Status
 
 - **User-Requested Resume**: Goal pursuit is active after the usage reset. Start with [Resume Handoff](docs/research/shot_pattern_analysis/phase2/RESUME_HANDOFF.md).
-- **Matched Delivery Study — Phase Two**: This integration includes study checkpoint `e941f1a746`. Read [Turnover](docs/research/shot_pattern_analysis/phase2/TURNOVER.md) and the newer receipts in the study checkout for subsequent progress. Final acceptance is pending.
-- **Simulation and Exporter State**: All simulation data and v6 exports are complete. Frozen report construction v8 completed from presentation checkout `4023111d2a`; preserve that checkout and its environment. Narrative acceptance remains pending.
-- **Graphics Qualification**: Original primary/control graphics are accepted. All 56 supplemental shaft-lean pairs have scoped PNG approval (336 images). Other PNG comparisons, full vector review, remote delivery, and ready PR remain pending. PDF v9 has all 30 pages visually reviewed and text preservation verified; pagination regression repair #12242 passes nine tests. A newly confirmed academic density legend/title collision is being scoped by Sol before selective repair. A TDD repair corrects curve-caption count parsing in the review harness without altering the frozen producer.
-- **Integration Branch Status**: Branch `codex/shot-pattern-main-integration` contains reviewed local merge `7bdb71016c` of exact `main` `fa7ee92f5cddd753099d7418fc974b142b7ebb54` into `2953c52b37001a8a3893e07943fb3cf2b6c38b45`; model registries are preserved. Final publication and pre-PR gates remain pending.
-- **Validation Evidence**: Root has independently executed 282 provider/scoring/GUI/report/contact tests (all pass), and Astra 71 launcher boundary tests pass (review recorded after fingerprint verification; context render/check/evaluate pass). Do not rely on terminal merge worker report.
-- **External Blockers**: LaTeX editor compiler pre-parse bundle download failure (#12120) remains an external unresolved blocker.
+- **Matched Delivery Study — Phase Two**: All 10.44 million attempted simulation rows are complete. Do not rerun simulations. Read [Scientific Report](docs/research/shot_pattern_analysis/phase2/REPORT.md) and [Design](docs/research/shot_pattern_analysis/phase2/DESIGN.md).
+- **Scientific Acceptance**: Astra accepted the report after 406 numeric/count checks and 52 source-hash checks. These are geometric, model-conditional results; no measured player benefit or universal best shot shape is established.
+- **Report PDF**: All 30 pages of PDF v9 were visually reviewed; body text is preserved and nine pagination regression tests pass (#12242).
+- **Graphics**: All assigned baseline PNG reviews are complete. The 49 density-layout replacements (#12243) have root/Sol/Astra PNG acceptance and native PDF/SVG review. Sol is consolidating exact coverage; Luna is packaging the accepted child publication and verifying a fresh restoration.
+- **Native Formats**: All 2,024 PDF and 2,024 SVG baseline renders completed. The 1,122 PDF bounding-box warnings were checked against painted pixels: 10,842 probes, minimum 6.4952 pt visible-ink clearance, no clipped edge ink. The renderer's final summary failed serialization; a separate successful finalizer preserved that distinction.
+- **Integration**: Branch `codex/shot-pattern-main-integration` contains study checkpoint `242c9c7074`, density repair `44c774fff6`, fragment `4efe168c3a`, and precondition guard `a221007665`. Further review evidence is being merged before final gates.
+- **External Blocker**: Built-in LaTeX compiler fails before parsing because its Tectonic bundle cannot be fetched (#12120). The standalone article is preserved; the report PDF does not establish right-panel compilation.
 
-## In-Flight Branch Stacking and Integration Dependencies
+## In-Flight Branch Stacking and Dependencies
 
-- **Phase 1 PR #11941**: Armed on branch `codex/shot-pattern-analysis`; do not touch it.
-- **Integration Dependencies**: The resolved Tools pin is `86d0f28b1cc5acf61185e07e320c816c2d005512`; separate source-projection and runtime checks cover the study integration boundary.
-- **Historical Science / Presentation Pin**: Historical science and frozen presentation retain the old `3678409` pin; no installs, receipt refreshes, or reruns.
-- **Precondition Guard**: Guard `c7a2f41fc8` remains isolated on branch `codex/shot-pattern-protocol-preconditions` until the frozen final report is completed.
+- **Phase 1 PR #11941**: Previously armed on `codex/shot-pattern-analysis`; do not touch its state.
+- **Tools Pin**: Delivery uses `86d0f28b1cc5acf61185e07e320c816c2d005512`; source-projection and runtime checks cover the integration boundary.
+- **Frozen Producer**: Presentation commit `4023111d2aaf8b20449a36f8691a295f4a94ceff` retains historical Tools pin `3678409`. Do not install, refresh receipts, or rerun it.
+- **Artifact Routing**: Package `supplement_report_v2_layout_repair` but restore it as `supplement_report_v1` in the reader publication tree, preserving accepted report links and keeping the original study baseline intact.
 
 ## Must-Read Architecture Pointers
 
-- [docs/architecture/C4.md](docs/architecture/C4.md) — System context, container definitions, and architecture change log.
-- [docs/agents/shared-infrastructure.md](docs/agents/shared-infrastructure.md) — Shared physics/FK modules, theme tokens, and embeddable tool contracts.
-- [docs/research/shot_pattern_analysis/phase2/TURNOVER.md](docs/research/shot_pattern_analysis/phase2/TURNOVER.md) — Canonical Phase Two study turnover, execution receipts, and provenance logs.
-- [CLAUDE.md](CLAUDE.md) and [AGENTS.md](AGENTS.md) — Repository governance, title-case rules, and the strict 150-line root handoff policy.
+- [Architecture Map](docs/architecture/C4.md) and [Shared Infrastructure](docs/agents/shared-infrastructure.md).
+- [Resume Handoff](docs/research/shot_pattern_analysis/phase2/RESUME_HANDOFF.md), [Turnover](docs/research/shot_pattern_analysis/phase2/TURNOVER.md), and [Artifact Delivery Plan](docs/research/shot_pattern_analysis/phase2/review_followups/ARTIFACT_DELIVERY_PLAN.md).
+- [CLAUDE.md](CLAUDE.md) and [AGENTS.md](AGENTS.md) govern integration, issue closure, and PR delivery.
 
 ## Verification Gates and Commands
 
-- `python scripts/check_document_title_case.py AGENT_HANDOFF.md docs/agents/handoffs/shot-pattern-integration-peer-records.md`
-- `python -m src.tools.check_markdown_links AGENT_HANDOFF.md docs/agents/handoffs/shot-pattern-integration-peer-records.md`
-- Use the exact scoped 282-test commands in `phase2/validation/main_integration_independent_runtime_v1/` and the 71-test boundary receipt in `phase2/validation/launcher_boundary_independent_review_v1/` (under the study research directory; included in this integration).
-- Before delivery, run `python -m scripts.pre_pr` with Repository_Management first on `PYTHONPATH`; preserve all reported blockers.
+- `python scripts/check_document_title_case.py AGENT_HANDOFF.md`
+- `python -m src.tools.check_markdown_links AGENT_HANDOFF.md`
+- Root's 282 provider/scoring/GUI/report/contact tests and Astra's 71 launcher-boundary tests passed; exact receipts live under `phase2/validation/`.
+- Run canonical `python -m scripts.pre_pr` with Repository_Management first on `PYTHONPATH`; preserve failures and resolve owned regressions without bypasses.
+- Verify archive manifests and every restored member before publication. Upload success alone is insufficient.
 
-## Do-Not List
+## Do-Not List and Next Steps
 
-- Do not touch armed Phase 1 PR #11941 on branch `codex/shot-pattern-analysis`.
-- Do not disturb active report/review workers; use their current durable launcher and terminal receipts rather than historical PIDs.
-- Do not integrate guard `c7a2f41fc8` until the frozen final report is fully completed.
-- Do not run installs, receipt refreshes, or reruns against historical science/frozen presentation pinned at `3678409`.
-- Do not infer peer work completion, discard peer records, or claim independent validation for imported peer records.
-- Do not invent final acceptance for Phase Two.
-
-## Short-Term Roadmap and Next Steps
-
-- Finish scientific narrative acceptance and supplemental PNG/vector reviews, including the confirmed legend collision; retain actual terminal receipts.
-- Complete supplemental graphic review, report composition, and remote asset delivery.
-- Bring forward final publication updates after study checkpoint `e941f1a746`.
-- Retain completed root/Astra integration evidence; complete publication and final gates before a ready PR.
+- Preserve frozen science, baseline graphics, peer records, and armed Phase 1 PR state.
+- Do not claim player calibration, isolated causal curvature benefit, per-round strokes gained, or successful LaTeX compilation.
+- Finish coverage receipt integration, bundle restoration, final gates, and the ready PR; publish and verify remote assets against their trusted manifests.
+- Keep empirical validation #11984 deferred and compiler blocker #12120 open; close implementation issues only with qualifying merged evidence.
 
 ## Imported Peer Handoff Records Index
 

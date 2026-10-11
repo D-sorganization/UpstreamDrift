@@ -1,141 +1,109 @@
 # Shot Pattern Study: Agent Resume Handoff
 
-## Current Resumed State
+## Current State
 
 The goal is active after the user resumed. All 10.44 million attempted simulation
-rows and v6 exports are complete; do not rerun simulations. Frozen report v8
-finished successfully from presentation commit `4023111d2a`; REPORT.md SHA256
+rows are complete. Do not rerun simulations. The scientific report, all assigned
+baseline PNG reviews, and the 49 selective density-layout replacement reviews
+are complete within their recorded scopes. Exact aggregate coverage, final
+integration gates, and remote delivery are being finalized.
+
+Astra accepted the narrative after 406 numeric/count checks and 52 bound-source
+hash checks: `validation/final_narrative_independent_review_v8/review.json`.
+The unchanged `REPORT.md` SHA256 is
 `ff281f76ee649c44c88afda58701329e7898e8964f9efb6d8aeec73dcd77d79b`.
-Astra accepted the scientific narrative after 406 independent numeric/count checks and rehashing all 52 bound sources; see `validation/final_narrative_independent_review_v8/`. Root reviewed every
-page of the 30-page PDF v9 after repairing two orphan headings (#12242); all nine
-PDF tests pass and extracted body tokens are preserved. Its visual receipt is
-`validation/final_report_pdf_v9/visual_review.json`.
+All 30 pages of report PDF v9 were visually reviewed; nine pagination tests pass
+and body tokens match v8. See `validation/final_report_pdf_v9/visual_review.json`.
+This report PDF is separate from the built-in LaTeX editor preview.
 
-Sol owns supplemental PNG review v2 and coverage reconciliation. All 56 lean
-pairs have scoped approval (336 PNGs); curve and shaft-SD batches continue.
-Root curve000-retry/048/096 receipts are complete. Sol confirmed a legend/title glyph
-collision in academic density curve index149. The complete saved-SVG scan found
-14 pairs with actual glyph intersections; a broader 2 pt clearance check selected
-43 density pairs. Astra additionally held shaft-SD indices 21/23 for lower
-Fade title/colorbar occlusion. Issue #12243 covers the measured, selective
-layout repair; its final scope is 49 unique density triples (147 assets), rendered into `supplement_report_v2_layout_repair` from repair commit `5a1fdbfe51`. Do not infer blanket v6
-acceptance. Frozen producer sources and numerical outputs remain unchanged.
-Luna completed both native PDF/SVG workers with exit 0. Root has reviewed
-all 70 assigned native paths; the last receipt is
-`root_visual_review_20_29_50_59.json` (SHA256
-`9438ad0ff479bd24aba8c00f7351a05d58c21d8bae17520d601fc9debb8da701`).
-These are native-format comparisons, superseded for assets changed by the layout repair.
-Luna has reviewed
-102 of 102 assigned paths. Review-only Sharp 0.35.5 transition is qualified.
-All 2,024 SVG and 2,024 PDF renders completed; 4,048 structural checks pass. The 1,122 PDF text-box overflow flags remain pending painted-glyph boundary review; successful parsing/rendering alone does not clear them. Full vector acceptance and graphics coverage remain pending.
-Root shaft-SD 048 PNG review is complete with no scoped defects. Root 072/084 reviews each accepted 70 PNGs and held two academic density PNGs; all contacts and four originals per batch were inspected and hashes rechecked. Astra completed 012/024/036/060 and is reviewing 096/curve156.
-Delivery integration contains study commit `9f9ad03ac8` at merge `3270a6e214`.
-
-The strict loader receipt in `validation/supplement_v6_final_graphics_review_v2`
-binds 384 pairs, 26 unique cells, 6,456 assets, and unchanged numerical inputs.
-The caption-count harness repair is tracked in #12160. The new PDF repair issue
-#12242 was created through AGY Gemini 3.8 and independently verified by root.
-LaTeX editor pre-parse Tectonic bundle-fetch panic #12120 remains external and
-unresolved after a fresh built-in compile of the status-corrected article; see
-`validation/latex_compile_resume_v9/receipt.json`. No new remote push, release, or phase-two PR is claimed.
-
-Sections describing the prior stop below are historical checkpoint context;
-current receipts and this section supersede their running/pending statements.
-
-## Prior User-Requested Stop
-
-Goal pursuit is paused at the user's request to conserve credits. No completion,
-publication acceptance, remote push, or new PR is claimed. Resume only when asked.
-All checked report/review processes have stopped; no monitoring is scheduled.
-This document supersedes historical live-process descriptions in Turnover.
-
-## Checkouts and Saved State
+## Checkouts and Ownership
 
 All checkouts are under `/home/dieterolson/.codex/worktrees/`:
 
-| Role | Checkout | Branch and Checkpoint |
+| Role | Checkout | Branch / Checkpoint |
 | --- | --- | --- |
-| Study and Data | `shot-pattern-analysis/UpstreamDrift` | `codex/shot-pattern-matched-delivery`; use latest local commit after `2584d3fa13` |
-| Delivery Integration | `shot-pattern-main-integration/UpstreamDrift` | `codex/shot-pattern-main-integration`; integration checkpoint `89fe6d3efa`, plus stop documentation |
+| Study, Data, and Review Receipts | `shot-pattern-analysis/UpstreamDrift` | `codex/shot-pattern-matched-delivery`; after `242c9c7074`, Sol owns final evidence consolidation |
+| Delivery Integration | `shot-pattern-main-integration/UpstreamDrift` | `codex/shot-pattern-main-integration`; `4efe168c3a` plus current delivery documentation |
 | Frozen Producer | `shot-pattern-presentation/UpstreamDrift` | `codex/shot-pattern-density-gutter`; `4023111d2aaf8b20449a36f8691a295f4a94ceff` |
-| Qualified Pending Guard | `shot-pattern-bounds/UpstreamDrift` | `codex/shot-pattern-protocol-preconditions`; `c7a2f41fc8` |
+| Selective Layout Repair | `shot-pattern-layout-gutter/UpstreamDrift` | `codex/shot-pattern-layout-gutter`; `f7b3ade771`, source repair `5a1fdbfe51` |
 
-Study commits after `dd2c235a0a` still need integration into the delivery branch.
-Do not touch armed phase-one PR #11941. Phase two is local and unpublished.
+Luna owns native-format receipts, archive restoration, and delivery preparation.
+Root owns current handoff documentation and final coordination. Astra's scientific
+and assigned graphic reviews are complete. Do not mutate the armed Phase 1 PR
+#11941. Preserve the frozen producer and its historical Tools pin `3678409`.
+Delivery uses Tools `86d0f28b1cc5acf61185e07e320c816c2d005512` and already includes
+precondition guard `a221007665`, PDF repair `2110d4a59b`, and density repair
+`44c774fff6`. No pending guard cherry-pick is needed.
 
-## Completed Evidence
+## Graphics Acceptance and Provenance
 
-All 10.44 million attempted simulation rows are complete. Do not rerun simulations.
-V6 exporter completed with exit 0 at 2026-10-10T21:46:30.187679+00:00;
-see `validation/supplement_rendering_revision_v6/exit.json`.
-Its pipeline receipt SHA256 is
-`035c65b249937a639d0ddfd5bd5df3aef8b46aaae351b98a4c6ae9e29e0b064a`.
-Sol reported a successful strict public-loader exit with 384 ordered comparisons,
-26 unique cells and 6,456 assets (2,408 PNG, 2,024 PDF, 2,024 SVG).
-Loader session 85362 exited 0, but no durable loader receipt was written; its
-returned object was truncated. This reported check is not a substitute for a
-source-bound saved receipt on resumption and is not visual acceptance.
-Original primary/control graphics and vector checks are accepted within their
-recorded scope. Integration has actual root evidence for 282 passing tests and
-Astra evidence for 71 launcher-boundary tests. Rejected AGY test claims are not evidence.
+Review evidence lives in `validation/supplement_v6_final_graphics_review_v2/`.
+The original v6 publication has 384 ordered pairs, 26 unique cells, and 6,456
+assets. Baseline PNG holds concern 49 academic density triples; these are
+replaced in `supplement_report_v2_layout_repair`, leaving all numerical outputs
+unchanged. Issue #12243 records the layout repair.
 
-## Interrupted Work and Exact Resume Points
+- `layout_child_reconciliation_receipt.json`: exactly 147 graphic files changed;
+  6,309 other assets and seven numerical report files are unchanged.
+- `layout_child_strict_loader_receipt.json`: all 6,456 assets and 384 pairs pass.
+- `layout_child_clearance_receipt.json`: all 384 density SVGs pass the measured
+  legend/title and title/colorbar clearance checks.
+- Root's 19 curve PNGs, Sol's 15 shaft PNGs, and Astra's 15 shaft PNGs have
+  separate actual visual reviews. Native-format review covers all 49 changed
+  PDFs and 49 changed SVGs against their replacement PNGs.
 
-The first of 36 graphics batches, `across_lean_000`, generated an inventory and
-contact sheets but was stopped before terminal qualification. Preserve its partial
-outputs; no visual approval follows. Exact bytes and hashes are committed in
-`validation/user_requested_stop_20261010_final/partial_graphics_review.zip` and
-`checkpoint.json`. Continue using a fresh review directory after reading
-`validation/v6_output_review_harness_v1/FINAL_REVIEW_PLAN.md` and `VECTOR_REVIEW_PLAN.md`.
+Original native checks live in `validation/supplement_v6_vector_review_v2/`.
+All 2,024 PDFs and 2,024 SVGs rendered. The 1,122 PDF bounding-box warnings were
+checked using 10,842 painted-ink edge probes: minimum visible clearance 6.4952 pt,
+no ink in the outer 2 pt bands, and no render failures. The renderer completed
+all rows but exited 1 while serializing its summary; a separate finalizer exited
+0. `bbox_painted_ink_boundary_review.json` preserves this distinction and hashes.
+Do not infer acceptance from a successful render alone.
 
-Final report construction was intentionally stopped with SIGTERM (actual exit -15).
-`validation/final_report_production_v6/` contains its exact command, frozen checkout,
-start/exit receipts, logs, prior scaffold and explicit user-stop receipt.
-`REPORT.md` is still the prior scaffold. Resume construction under frozen
-PRESENTATION 4023111d2a in a fresh evidence directory; do not overwrite this stop record.
-The report uses primary `final_v1`, control `control_final_v1`, supplement
-`supplement_report_v1`, and their final figure directories, all under this phase2 folder.
+## Artifact Delivery
 
-Supplement vector review has not started. Empty output directories convey no evidence.
-All 4,048 vectors need qualified inspection and the predeclared selection/raster review.
-Use `validation/v6_vector_selection_plan_v1/` and qualified vector helpers.
-The original runtime uses `dependencies/bin/override/pdftoppm` v26.05.0,
-Node v24.19.0 and Sharp v0.35.4 under
-`/home/dieterolson/.cache/codex-runtimes/codex-primary-runtime/`.
-Validation Python is `/tmp/shot-pattern-validation-venv-20261009/bin/python`.
-Do not install or alter the frozen runtime/source bindings.
+Use [Artifact Delivery Plan](review_followups/ARTIFACT_DELIVERY_PLAN.md).
+Accepted primary/control bundles are under `/tmp/shot-pattern-publication-bundles-v1/`.
+The child supplemental bundle is `/tmp/shot-pattern-delivery-resume/supplement-v2`:
+six ZIPs, each at most 500,000,000 bytes; manifest SHA256
+`5d776ea73d9564812431416a01c2661a3f9335de1554ef111d24673b23125f74`.
+Fresh local restorations verified all 690 primary, 548 control, and 6,465
+supplement files by inventory, size, and hash. This is offline evidence, not
+remote delivery. Its receipt is
+`/tmp/shot-pattern-delivery-resume/local_fresh_restoration_receipt_v2.json`.
 
-## Remaining Acceptance and Delivery
+The reader publication tree must map the repaired child directory to
+`supplement_report_v1/`, matching the unchanged report's existing links. All 98
+unique supplemental report links resolve in the child. Keep the original study
+baseline separate and intact. Remote upload must be followed by a fresh download,
+trusted manifest comparison, and full archive/member verification.
 
-1. Finish all 36 review batches, exact coverage reconciliation, vector checks and
-   actual visual acceptance. Contacts and successful rendering alone are insufficient.
-2. Finish frozen report construction and inspect all assembled PDF pages and claims
-   against `review_followups/FINAL_NARRATIVE_ACCEPTANCE.md`.
-3. Preserve geometric-only assumptions, conditional scoring, common-support
-   populations and limitations. No universal curvature or empirical player benefit
-   has been established. Empirical validation #11984 remains deferred.
-4. Build and verify supplemental graphics bundles; original primary/control local
-   bundles exist in `/tmp/shot-pattern-publication-bundles-v1`. Follow committed
-   `review_followups/ARTIFACT_DELIVERY_PLAN.md` for unique release filenames and
-   actual remote download/restoration. Nothing has been uploaded this resume.
-5. Only after frozen report verification, integrate qualified guard `c7a2f41fc8`
-   and remaining study commits into isolated delivery integration.
-6. Update change fragments/handoff, run canonical RM `python -m scripts.pre_pr`,
-   resolve owned failures, push and open a ready PR; attach and arm it through
-   `scripts/automerge_guard.py`. Do not bypass hooks/protection or change peer PRs.
+## Remaining Gates and Blockers
 
-## Preserved Local Artifacts and Compiler Blocker
+1. Integrate Sol's final evidence/coverage commit into delivery, preserving its
+   current root handoff and peer index. Never reset delivery to the older study tree.
+2. Commit current documentation and final archive receipts. Run canonical RM
+   `python -m scripts.pre_pr` with Repository_Management first on `PYTHONPATH`.
+   Resolve owned regressions; record unrelated repository failures truthfully.
+3. Push the delivery branch, publish and verify the immutable artifact release,
+   and open/attach a ready PR with a Handoff section and change fragments. Arm
+   only through `scripts/automerge_guard.py`; never bypass hooks or protection.
+4. Built-in LaTeX compilation remains blocked before source parsing by Tectonic's
+   unavailable bundle fetch (#12120). Latest evidence:
+   `validation/latex_compile_resume_v9/receipt.json`. Keep the existing article
+   open; no alternate LaTeX PDF proves that the right-panel compiler works.
 
-Large final graphics remain locally in `final_figures_v1`, `control_final_figures_v1`
-and `supplement_report_v1`, deliberately outside Git for verified bundle transport.
-The partial contact directory also remains locally and has a committed exact-byte
-archive. Do not clean these worktrees or `/tmp`, run `git add -A`, or archive the
-worktrees before durable artifact delivery. Code and handoff/evidence changes are
-committed; final graphics are not remotely backed up.
+## Scientific Limits and Reproduction
 
-The user-open `../shot_pattern_analysis.tex` is preserved in place. Its numerical
-source repair passed 577 checks, but the built-in compiler fails before parsing
-at Tectonic `src/config.rs:154` fetching an uncached TeX bundle. Issue #12120 remains
-open. No compiled article acceptance or replacement PDF is claimed. Leave the
-editor open. See [Turnover](TURNOVER.md) for detailed scientific and integration
-receipts; older live-process statements are historical, not resume instructions.
+Read [Report](REPORT.md), [Design](DESIGN.md), [Reproduction](REPRODUCING.md), and
+[Turnover](TURNOVER.md). Results are geometric/model-conditional, not measured
+player data. Primitive shaft-twist SD differs from delivered-face SD. Matching
+nominal landing points changes speed/face/path; it does not isolate a causal
+curvature effect. Individual, common-three, and common-six support populations
+are different. Scoring uses assumed course geometry and a historical baseline;
+no per-round or universal best-pattern claim is justified. Empirical validation
+#11984 remains deferred. Unsupported cases remain visible.
+
+Historical stop and intermediate execution details are preserved in git and
+Turnover; this document gives current state only. No new remote push, release,
+or Phase Two PR is claimed until its own delivery receipt exists.
