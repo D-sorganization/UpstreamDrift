@@ -1,0 +1,577 @@
+{
+  "scope": "PNG visual component review only; not whole publication or vector acceptance",
+  "status": "accepted",
+  "reviewer": "root",
+  "utc": "2026-10-11T01:30:41.408657+00:00",
+  "batch_inventory_sha256": "3299c1c13e62aa8b66ff3c42af1baf840576be7f518643f22917e04bf15f5abf",
+  "command_receipt_sha256": "63092551eff7c1ef33f4b1b207f8176bc499fa0fac0410d50795f65b352f0d4d",
+  "all_assets_rehashed": 192,
+  "inspected_contacts": [
+    {
+      "path": "contact_096_1.jpg",
+      "sha256": "63e501507726ad4b7039ff99fd5ac370b7bb78c5b2761ab5c29b0a478333d469"
+    },
+    {
+      "path": "contact_096_2.jpg",
+      "sha256": "febdf382f02779c055f55cbbb318e68f3203e10e868a61d1f50d28268bf623ff"
+    },
+    {
+      "path": "contact_096_3.jpg",
+      "sha256": "7ec63c85c94cbb8bb1563dd4236c5968190a1ac075f913d73fd1eaabf3107ded"
+    },
+    {
+      "path": "contact_097_1.jpg",
+      "sha256": "87046449c4579a3a108fbff6a6f01dca1348bb37a23e542b8c44a08182994048"
+    },
+    {
+      "path": "contact_097_2.jpg",
+      "sha256": "0d8f661b5f00af437ddab89519d59b77497055a04886f1c149a7e6e586ee9427"
+    },
+    {
+      "path": "contact_097_3.jpg",
+      "sha256": "e1be55e69a73b91bed6e4a8541c518638dc68c89559aee9807cdde6f24c879a7"
+    },
+    {
+      "path": "contact_098_1.jpg",
+      "sha256": "9ea280919e723519d6223da7a7a632db0917404b3dcc5b42ebd0211f584665f2"
+    },
+    {
+      "path": "contact_098_2.jpg",
+      "sha256": "91dcb372c467e69fd9e89fd9acf013ccfe2f1cd1a588416e8887a13e123dd2ff"
+    },
+    {
+      "path": "contact_098_3.jpg",
+      "sha256": "21f56220310ead215c08d9ef61a9ee89573d7f9df86aa3f0d36b9151ec76ee65"
+    },
+    {
+      "path": "contact_099_1.jpg",
+      "sha256": "de50844f549e3fcb7e848801de4b33ed031c1b401263da5077e115090d2e4d99"
+    },
+    {
+      "path": "contact_099_2.jpg",
+      "sha256": "29fe6d9d719e7003191b91db1c76549a1bcfd027845ba0433acd8c0f9fc43343"
+    },
+    {
+      "path": "contact_099_3.jpg",
+      "sha256": "8bc4ce9f8f514b3669c38dd09878e948ece3f2fd05187c51e3d059f9f80693d8"
+    },
+    {
+      "path": "contact_100_1.jpg",
+      "sha256": "08f083c70c1a42e2d4c33ba8c40ae8826cde3eb5e870e018f35216dc071a41c3"
+    },
+    {
+      "path": "contact_100_2.jpg",
+      "sha256": "3c604bcf038f02ef6f578d2e7873b45674f38e2288a7fa4006f64bd227fa9a90"
+    },
+    {
+      "path": "contact_100_3.jpg",
+      "sha256": "16634bda157ef8db64b77d3091506ccc643556562b6915729adf9900e6c5eb34"
+    },
+    {
+      "path": "contact_101_1.jpg",
+      "sha256": "d86c38d6f0dc4afde977d1e2bc8a1ff0fe5d64984c44b582eb762778b382500f"
+    },
+    {
+      "path": "contact_101_2.jpg",
+      "sha256": "da012cd294aebba116b55d4b33a29d5d08285a6237300bb7c3eb3a21bd88ae31"
+    },
+    {
+      "path": "contact_101_3.jpg",
+      "sha256": "7d36ad45f2b88390fc64164e60a34c5d1156ee9cdfbdcbc69e616c15035a19ff"
+    },
+    {
+      "path": "contact_102_1.jpg",
+      "sha256": "8400abe2ff37e226f580a75ce97ca091279f6f42fa5146d6d870a78d0241d52c"
+    },
+    {
+      "path": "contact_102_2.jpg",
+      "sha256": "1d6713a7aae1bf22570285ff98d56fe0e8efe17991a8eea26e687b107fc2fcc5"
+    },
+    {
+      "path": "contact_102_3.jpg",
+      "sha256": "cbf4a9e9473e6c5aaee320534c6d7cb4cc8f76623bc09cd0248bb098acf6ccf6"
+    },
+    {
+      "path": "contact_103_1.jpg",
+      "sha256": "128c744aad3814588740e0de496b94df580c4cf9211561eef68a6e9e1226039e"
+    },
+    {
+      "path": "contact_103_2.jpg",
+      "sha256": "1daaf235944448e13e062599a7ef08c188210b8789a68ec6bbe1b99d43e754f7"
+    },
+    {
+      "path": "contact_103_3.jpg",
+      "sha256": "eedceec829d9ffbd72208dd116b183c76165c53afd2c4f2385fbc1771759112f"
+    },
+    {
+      "path": "contact_104_1.jpg",
+      "sha256": "8eab19f49d7765486124f9ff8832a6855eecbbae48246b89d9d13954bf235e2b"
+    },
+    {
+      "path": "contact_104_2.jpg",
+      "sha256": "5ebed535886659f36b6ad8469509f31e2380db8d316f805dd86d821608dc4c90"
+    },
+    {
+      "path": "contact_104_3.jpg",
+      "sha256": "3785d7701753d76cb59a37dfcc15bed8d63b0a64dc82a20baaa3bbe72d3c4c36"
+    },
+    {
+      "path": "contact_105_1.jpg",
+      "sha256": "ce36ea71f4185c28624705913d52c5e9e76c3ea1ef7382fbccd74fee59e11e2b"
+    },
+    {
+      "path": "contact_105_2.jpg",
+      "sha256": "3f5d5360af663271f76adc80f98e5874693e11af8701d9441cdeb8a6446a53fb"
+    },
+    {
+      "path": "contact_105_3.jpg",
+      "sha256": "c6dc349492cb3339485da3422b31bf8bef86e59e83ac80161cd45e5f71207fe4"
+    },
+    {
+      "path": "contact_106_1.jpg",
+      "sha256": "ec85aa618d07021be17be9369851fbda5c32ec421d482a0a1002895d69b05418"
+    },
+    {
+      "path": "contact_106_2.jpg",
+      "sha256": "980854b0e6dc679161af20b98b02d28091185bc2ba7e8ef135f2a9d267a2122d"
+    },
+    {
+      "path": "contact_106_3.jpg",
+      "sha256": "f9b0e2aa7ec89dc5588465ce44ac650e63f65d2af1bf7a37f6f31b462f69fbfc"
+    },
+    {
+      "path": "contact_107_1.jpg",
+      "sha256": "69c954c848e503c9b379ad313f241668da1699271518f592009798a29843c617"
+    },
+    {
+      "path": "contact_107_2.jpg",
+      "sha256": "2344b0bf17d358302432793cd208d81a752881242517a2f1c14d3d0d6e3a852e"
+    },
+    {
+      "path": "contact_107_3.jpg",
+      "sha256": "af28793451042b470a2acffb35a1960ce765376998c42e51fd453626e75ecc8e"
+    }
+  ],
+  "full_size_originals_viewed": [
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_fa_5ab5fdecf1_density.png",
+      "sha256": "4bcd7bc6748ffed1549b5949e217aec1eb86957a78f8089bbfc588872170a25c"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_fa_5ab5fdecf1_overhead_social.png",
+      "sha256": "e873860a305a196126f61f26ec1918d871d8d62e9359ee6843e5230cc292dffd"
+    }
+  ],
+  "records": [
+    {
+      "index": 96,
+      "sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean5_curve1_rotation1_combined1",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "689ed799d13925400c30f607e386b76786916344fac39ba5e16b2389f7435ed6",
+          "source_csv_sha256": "6a8a92c2cfec7ab2274816e33f1b7befb6c1c8c9108cc2282318be0859bdb831"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean5_curve2_rotation1_combined1",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "9e614a91fd861ee69b19d2de5e0fd414c6d8ebec70db5374a6c6e5751257820f",
+          "source_csv_sha256": "c92bae6b5f31bd00983aee8cefa9fb90f0058d083d26632cd910c550b043c7e9"
+        }
+      ],
+      "target_x_m": 90.42961880334346,
+      "common_supported_n": 9999,
+      "png_paths": [
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined1_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined1_90p430m_31e9cf6b89_density_straight_social.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined1_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined1_90p430m_31e9cf6b89_density_draw_social.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined1_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined1_90p430m_31e9cf6b89_density_fade_social.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined1_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined1_90p430m_31e9cf6b89_density.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined1_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined1_90p430m_31e9cf6b89_overhead.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined1_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined1_90p430m_31e9cf6b89_overhead_social.png"
+      ],
+      "decision": "accepted; all three contact sheets actually viewed"
+    },
+    {
+      "index": 97,
+      "sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean5_curve1_rotation1_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "09d828ebb76bfad208bd496c646fc33c5489974bc1f9f06b4af125e0770f2ff7",
+          "source_csv_sha256": "afc28c0d060c59959090215ec4c80b7b04c59241a0781294ba1f5dafed53f4db"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean5_curve2_rotation1_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "54dd648b22afe8ade65c01e571b28596b23080ce1a16034a105183c35b7727b7",
+          "source_csv_sha256": "08ef53cab37566d4e211cc56a7d0c520a995bb6341dd7bf54c144b2818fe2ced"
+        }
+      ],
+      "target_x_m": 90.42961880334346,
+      "common_supported_n": 9999,
+      "png_paths": [
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined2_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined2_90p430m_392e02d30c_density_straight_social.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined2_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined2_90p430m_392e02d30c_density_draw_social.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined2_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined2_90p430m_392e02d30c_density_fade_social.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined2_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined2_90p430m_392e02d30c_density.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined2_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined2_90p430m_392e02d30c_overhead.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined2_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined2_90p430m_392e02d30c_overhead_social.png"
+      ],
+      "decision": "accepted; all three contact sheets actually viewed"
+    },
+    {
+      "index": 98,
+      "sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean5_curve1_rotation1_cov_facepath_negative",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "8d9e4ee63d4c12bfc0db4a94af94430350d0aa1471c000a71e7b8f218546b392",
+          "source_csv_sha256": "26aba46271e3453f5e638c291ff0679f3994c9fc1fb4fc261eb8f4c29bb1bed2"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean5_curve2_rotation1_cov_facepath_negative",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "0c5c89edd25ab1fbd8ed8d4d2607f0c870de4eb541cd1b59b1cc64d66d601e9a",
+          "source_csv_sha256": "59511e81a1232585e47437f9d026745ad21d18748deda5bb55b556695b0a08dc"
+        }
+      ],
+      "target_x_m": 90.42961880334346,
+      "common_supported_n": 10000,
+      "png_paths": [
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_cov_fa_24333b0ee3_density_straight_social.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_cov_fa_24333b0ee3_density_draw_social.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_cov_fa_24333b0ee3_density_fade_social.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_cov_fa_24333b0ee3_density.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_cov_fa_24333b0ee3_overhead.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_cov_fa_24333b0ee3_overhead_social.png"
+      ],
+      "decision": "accepted; all three contact sheets actually viewed"
+    },
+    {
+      "index": 99,
+      "sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean5_curve1_rotation1_cov_facepath_positive",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "79e200b2fcf1239715a2fccbe3c89396ac55f6db347a115ca76e0adbc845862a",
+          "source_csv_sha256": "1ccfe3ffad7324669801a8f8f525d25e1bddb78fc4a9ce6df42db78b1b45d756"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean5_curve2_rotation1_cov_facepath_positive",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "3694b33d2583643d1622fc4404e6f0e0fba175616630803f3520d30db777025e",
+          "source_csv_sha256": "2761215f26a17d09a56ee556f7b9bcddda79f54f65e7ece11f6e75a784358ddd"
+        }
+      ],
+      "target_x_m": 90.42961880334346,
+      "common_supported_n": 9999,
+      "png_paths": [
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_cov_fa_d45136e0ab_density_straight_social.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_cov_fa_d45136e0ab_density_draw_social.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_cov_fa_d45136e0ab_density_fade_social.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_cov_fa_d45136e0ab_density.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_cov_fa_d45136e0ab_overhead.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_cov_fa_d45136e0ab_overhead_social.png"
+      ],
+      "decision": "accepted; all three contact sheets actually viewed"
+    },
+    {
+      "index": 100,
+      "sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean5_curve1_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "636b8030ba8ee0cd73fb70e0aaa063bb967b0c203d24d62b26089bbbbd6d8465",
+          "source_csv_sha256": "e9b53c452d207dff0683398adebad2380599eb032e19f75d0c1a83326fbd4d83"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean5_curve2_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "a6e8d48e48e254796e4f29366eb8de88ee4dd1624f62689656cd4af3dad6470f",
+          "source_csv_sha256": "1db1a57cbf46d18336e8dbb0a77f18b84d2825d61f362d643fd81c6bb361f702"
+        }
+      ],
+      "target_x_m": 90.42961880334346,
+      "common_supported_n": 10000,
+      "png_paths": [
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_only_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_shaft_only_90p430_86dbbf9b27_density_straight_social.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_only_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_shaft_only_90p430_86dbbf9b27_density_draw_social.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_only_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_shaft_only_90p430_86dbbf9b27_density_fade_social.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_only_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_shaft_only_90p430_86dbbf9b27_density.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_only_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_shaft_only_90p430_86dbbf9b27_overhead.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_only_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_shaft_only_90p430_86dbbf9b27_overhead_social.png"
+      ],
+      "decision": "accepted; all three contact sheets actually viewed"
+    },
+    {
+      "index": 101,
+      "sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean5_curve1_rotation1_shaft_path",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "38618b1e6d88d9fe98df54393e67fb0a0d6dbff7e1e7301270bc032569c1275e",
+          "source_csv_sha256": "c01a9271d15817f21a2875371f1d9629c4948de498b7b4ed8e2c31bb94b98b5a"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean5_curve2_rotation1_shaft_path",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "a492b732bca54cf49c6ae37f82a52defdf628510625f529c546890a546cf69d4",
+          "source_csv_sha256": "7ec57c55af33540305c66360a5962a84963cdf621a971e91ef41df8a863d6c74"
+        }
+      ],
+      "target_x_m": 90.42961880334346,
+      "common_supported_n": 10000,
+      "png_paths": [
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_path_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_shaft_path_90p430_902fdae1ae_density_straight_social.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_path_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_shaft_path_90p430_902fdae1ae_density_draw_social.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_path_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_shaft_path_90p430_902fdae1ae_density_fade_social.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_path_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_shaft_path_90p430_902fdae1ae_density.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_path_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_shaft_path_90p430_902fdae1ae_overhead.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_path_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_shaft_path_90p430_902fdae1ae_overhead_social.png"
+      ],
+      "decision": "accepted; all three contact sheets actually viewed"
+    },
+    {
+      "index": 102,
+      "sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean5_curve1_rotation1_shaft_speed1",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "84e669f91e6e5f1b48dd9708e07986357c2f87146709c749cee94c601cf5d77f",
+          "source_csv_sha256": "f9d22fbed65fb212cc7e18c6aa4170c9bc7daab77f400a34a8e23cf94d601853"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean5_curve2_rotation1_shaft_speed1",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "8ce46601f568374e85798659678acd3df6751247833f585c643175ed7be3431a",
+          "source_csv_sha256": "214f8e94670ea0c69ad6cf35f1bcd9f6c8d83b012eb1b5194337adfe22617d3a"
+        }
+      ],
+      "target_x_m": 90.42961880334346,
+      "common_supported_n": 10000,
+      "png_paths": [
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed1_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_shaft_speed1_90_5da10b0e80_density_straight_social.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed1_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_shaft_speed1_90_5da10b0e80_density_draw_social.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed1_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_shaft_speed1_90_5da10b0e80_density_fade_social.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed1_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_shaft_speed1_90_5da10b0e80_density.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed1_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_shaft_speed1_90_5da10b0e80_overhead.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed1_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_shaft_speed1_90_5da10b0e80_overhead_social.png"
+      ],
+      "decision": "accepted; all three contact sheets actually viewed"
+    },
+    {
+      "index": 103,
+      "sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean5_curve1_rotation1_shaft_speed2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "00d313fd357b02686e3b135708e1b93a131e211a88d6d0c84b0297af836795a6",
+          "source_csv_sha256": "5e2d4f9b602a8e23e0b0c022209ce91cce0a30a4267393fe4af36d60741f67e4"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean5_curve2_rotation1_shaft_speed2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "dfa571c2701cfd6fde6455571b4d0b23f74494229fdf20a3546cd114840482e1",
+          "source_csv_sha256": "54a789cc9c212ba65cfba2b366a10d738f0f9d733108a743b39cff7aba57d463"
+        }
+      ],
+      "target_x_m": 90.42961880334346,
+      "common_supported_n": 10000,
+      "png_paths": [
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed2_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_shaft_speed2_90_8450b75abe_density_straight_social.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed2_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_shaft_speed2_90_8450b75abe_density_draw_social.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed2_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_shaft_speed2_90_8450b75abe_density_fade_social.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed2_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_shaft_speed2_90_8450b75abe_density.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed2_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_shaft_speed2_90_8450b75abe_overhead.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed2_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_shaft_speed2_90_8450b75abe_overhead_social.png"
+      ],
+      "decision": "accepted; all three contact sheets actually viewed"
+    },
+    {
+      "index": 104,
+      "sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean5_curve1_rotation1_shaft_strike",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "1d47778a9603e5f7e3462fe5a706792c099b3b3aa0e36c08ce04c7d26356786c",
+          "source_csv_sha256": "6582ad5606d7472282c48540c7e1a35af43bfaa37b7ded4552ba647787676a79"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean5_curve2_rotation1_shaft_strike",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "81c4bbab8529edc946d06a22577c3dc3879b54af3542d0dabe602b8dd3af8c9d",
+          "source_csv_sha256": "ec37484b558ec617457256c05c5fbd74761d033d7dde5a1de13976ec1330592a"
+        }
+      ],
+      "target_x_m": 90.42961880334346,
+      "common_supported_n": 9999,
+      "png_paths": [
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_strike_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_shaft_strike_90_5c4f11267d_density_straight_social.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_strike_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_shaft_strike_90_5c4f11267d_density_draw_social.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_strike_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_shaft_strike_90_5c4f11267d_density_fade_social.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_strike_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_shaft_strike_90_5c4f11267d_density.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_strike_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_shaft_strike_90_5c4f11267d_overhead.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_strike_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation1_shaft_strike_90_5c4f11267d_overhead_social.png"
+      ],
+      "decision": "accepted; all three contact sheets actually viewed"
+    },
+    {
+      "index": 105,
+      "sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean5_curve1_rotation2_combined1",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "fedd46555ae4d0f53f3ea29d61cc3dead6a1d9d093adf4ca59d7d3ad7ab80d67",
+          "source_csv_sha256": "addd5458b440ed24bb8ab3113a4f01c657cca10e859cd5b8fbf46d1007463744"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean5_curve2_rotation2_combined1",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "5c8c7ea6b118c7f95b89a50c41be6a35f34106f5802c50b7439d4bc63317f97e",
+          "source_csv_sha256": "f707dbfb498e1b5a6b8c700a7acbb162cde8d12989841b9ce10a49c3176aee46"
+        }
+      ],
+      "target_x_m": 90.42961880334346,
+      "common_supported_n": 9999,
+      "png_paths": [
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined1_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined1_90p430m_2bb4c6e9cb_density_straight_social.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined1_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined1_90p430m_2bb4c6e9cb_density_draw_social.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined1_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined1_90p430m_2bb4c6e9cb_density_fade_social.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined1_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined1_90p430m_2bb4c6e9cb_density.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined1_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined1_90p430m_2bb4c6e9cb_overhead.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined1_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined1_90p430m_2bb4c6e9cb_overhead_social.png"
+      ],
+      "decision": "accepted; all three contact sheets actually viewed"
+    },
+    {
+      "index": 106,
+      "sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean5_curve1_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "40899a1597015491fa8090cc8e8b2e221c0b9e45d0534a68e7f7ea007d1ff954",
+          "source_csv_sha256": "db5e9a3c453c800a6d66983419134cf4e2bdfa425fa322d4e1eabd5e35ed5c62"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "2901538bfd186c7ede9984cb5892b1352b601620e14eb21b5721236c4e1e0403",
+          "source_csv_sha256": "87d8cce8021009395968efb2f3afa2e700b7e4db4fb73d04878663ac26e19e4d"
+        }
+      ],
+      "target_x_m": 90.42961880334346,
+      "common_supported_n": 9999,
+      "png_paths": [
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined2_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined2_90p430m_867db1e95f_density_straight_social.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined2_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined2_90p430m_867db1e95f_density_draw_social.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined2_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined2_90p430m_867db1e95f_density_fade_social.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined2_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined2_90p430m_867db1e95f_density.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined2_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined2_90p430m_867db1e95f_overhead.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined2_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined2_90p430m_867db1e95f_overhead_social.png"
+      ],
+      "decision": "accepted; all three contact sheets actually viewed"
+    },
+    {
+      "index": 107,
+      "sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean5_curve1_rotation2_cov_facepath_negative",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "18a2ba47833ec8dd40314a6058e235420abb46a8d86ac4b094ce37cfc672a82c",
+          "source_csv_sha256": "d95d90a0500d76f68a6be1115bcbb35e15953265048ad1bf0181fd86a6b84a9f"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean5_curve2_rotation2_cov_facepath_negative",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "f64fa93bbb7ee65ac22a6e7c084d285593438f4e25d2822f5ecb1112a8f9ddcb",
+          "source_csv_sha256": "033bc90f8d9e0a9ddda3ceffff1ae00a71aef335602e7dd6377fa60b2afe67b3"
+        }
+      ],
+      "target_x_m": 90.42961880334346,
+      "common_supported_n": 10000,
+      "png_paths": [
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_fa_5ab5fdecf1_density_straight_social.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_fa_5ab5fdecf1_density_draw_social.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_fa_5ab5fdecf1_density_fade_social.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_fa_5ab5fdecf1_density.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_fa_5ab5fdecf1_overhead.png",
+        "figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_fa_5ab5fdecf1_overhead_social.png"
+      ],
+      "decision": "accepted; all three contact sheets actually viewed"
+    }
+  ],
+  "findings": [],
+  "notes": "All 36 contacts/72 PNGs viewed. Labels, counts, axes, captions and legends readable; covariance academic legend is close to panel titles but does not overlap. No simulation or producer changes."
+}

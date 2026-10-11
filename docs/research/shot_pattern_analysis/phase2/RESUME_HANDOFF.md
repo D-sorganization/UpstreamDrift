@@ -2,23 +2,37 @@
 
 ## Current Resumed State
 
-The user resumed on October 10 after usage reset. The goal is active. Sol owns
-`validation/supplement_v6_final_graphics_review_v2`, Luna owns vector review v2,
-and Astra reviews the narrative. Root restarted frozen report construction with
-fresh evidence in `validation/final_report_production_v8`; inspect its terminal
-receipt before using the generated report. No simulations are being repeated.
-The stop checkpoint below remains historical evidence.
-V7 and the initial v2 batch runner terminated with tool exit 143, without an
-intentional stop or established cause. Preserved receipts document this. V8 uses
-a detached wrapper. All five across-lean batches now have actual exit-0 receipts
-and scoped visual approval for 336 PNGs (56 pairs). Strict loader receipt
-`validation/supplement_v6_final_graphics_review_v2/strict_loader_receipt.json`
-binds all 6,456 assets and unchanged numeric inputs. The original first curve
-batch failed a caption-parsing check; Sol repaired the harness with TDD and
-started a fresh curve retry. Frozen producer sources are unchanged. Luna runs
-disjoint native PDF and SVG checks; current Sharp 0.35.5 is explicitly qualified
-as a review-only runtime transition by 18 passing integration tests. Full vector
-and remaining PNG acceptance are pending.
+The goal is active after the user resumed. All 10.44 million attempted simulation
+rows and v6 exports are complete; do not rerun simulations. Frozen report v8
+finished successfully from presentation commit `4023111d2a`; REPORT.md SHA256
+`ff281f76ee649c44c88afda58701329e7898e8964f9efb6d8aeec73dcd77d79b`.
+Astra accepted the scientific narrative after 406 independent numeric/count checks and rehashing all 52 bound sources; see `validation/final_narrative_independent_review_v8/`. Root reviewed every
+page of the 30-page PDF v9 after repairing two orphan headings (#12242); all nine
+PDF tests pass and extracted body tokens are preserved. Its visual receipt is
+`validation/final_report_pdf_v9/visual_review.json`.
+
+Sol owns supplemental PNG review v2 and coverage reconciliation. All 56 lean
+pairs have scoped approval (336 PNGs); curve and shaft-SD batches continue.
+Root curve000-retry/048/096 receipts are complete. Sol confirmed a legend/title glyph
+collision in academic density curve index149. The complete saved-SVG scan found
+14 affected academic density pairs (nine curve, five shaft-SD), tracked in #12243; a selective,
+separately qualified repair is in progress. Do not infer blanket v6
+acceptance. Frozen producer sources and numerical outputs remain unchanged.
+Luna owns native PDF/SVG checks with two progressing workers. Root has reviewed
+50 of 70 assigned native paths; 20–29 and 50–59 await rasters. Luna has reviewed
+102 of 102 assigned paths. Review-only Sharp 0.35.5 transition is qualified.
+Full vector acceptance and graphics coverage remain pending.
+
+The strict loader receipt in `validation/supplement_v6_final_graphics_review_v2`
+binds 384 pairs, 26 unique cells, 6,456 assets, and unchanged numerical inputs.
+The caption-count harness repair is tracked in #12160. The new PDF repair issue
+#12242 was created through AGY Gemini 3.8 and independently verified by root.
+LaTeX editor pre-parse Tectonic bundle-fetch panic #12120 remains external and
+unresolved after a fresh built-in compile of the status-corrected article; see
+`validation/latex_compile_resume_v9/receipt.json`. No new remote push, release, or phase-two PR is claimed.
+
+Sections describing the prior stop below are historical checkpoint context;
+current receipts and this section supersede their running/pending statements.
 
 ## Prior User-Requested Stop
 
