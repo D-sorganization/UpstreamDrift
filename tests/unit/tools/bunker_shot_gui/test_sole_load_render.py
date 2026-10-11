@@ -1,9 +1,8 @@
 """Drawing the sole load field and the contact patch (issues #8705, #8707).
 
 The drawing is tested without Qt. ADR-0027's viewport layer offers MeshCat,
-Rerun and VTK; none is installed here, so the workbench takes the documented
-degraded path and draws a matplotlib figure instead of a 3-D scene. That
-fallback is a *stated* condition, checked below, not a silent substitution.
+Rerun and VTK; provider availability is simulated explicitly so the fallback
+and installed-provider cases stay deterministic across developer machines.
 
 The honesty properties are the load-bearing ones:
 
@@ -22,6 +21,8 @@ import pytest
 
 from matplotlib.figure import Figure
 
+from src.shared.python.visualization import select_viewport_provider
+from src.tools.bunker_shot_gui import render as render_module
 from src.tools.bunker_shot_gui.field import (
     ContactPatch,
     LoadComponent,
@@ -61,19 +62,45 @@ def _texts(figure: Figure) -> list[str]:
 class TestTheViewportDegradesOutLoud:
     """ADR-0027 picks the renderer; the workbench states what it got."""
 
-    def test_no_three_dimensional_provider_is_installed_here(self) -> None:
+    @pytest.fixture
+    def no_provider(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Model every optional provider as unavailable, regardless of host."""
+        monkeypatch.setattr(
+            render_module,
+            "select_viewport_provider",
+            lambda: select_viewport_provider(import_checker=lambda _module: False),
+        )
+
+    def test_no_three_dimensional_provider_is_available(self, no_provider: None) -> None:
         fallback = viewport_fallback()
         assert isinstance(fallback, ViewportFallback)
         assert fallback.provider is None
         assert fallback.degraded
 
-    def test_the_reason_names_what_is_missing(self) -> None:
+    def test_the_reason_names_what_is_missing(self, no_provider: None) -> None:
         reason = viewport_fallback().reason
         assert reason
         assert "meshcat" in reason.lower()
 
-    def test_the_fallback_names_the_renderer_actually_used(self) -> None:
+    def test_the_fallback_names_the_renderer_actually_used(
+        self, no_provider: None
+    ) -> None:
         assert viewport_fallback().renderer == "matplotlib"
+
+    def test_an_available_meshcat_provider_is_reported(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.setattr(
+            render_module,
+            "select_viewport_provider",
+            lambda: select_viewport_provider(
+                import_checker=lambda module: module == "meshcat"
+            ),
+        )
+        fallback = viewport_fallback()
+        assert fallback.provider == "MeshCat"
+        assert not fallback.degraded
+        assert fallback.reason == ""
 
 
 class TestTheStampIsInTheFrame:
