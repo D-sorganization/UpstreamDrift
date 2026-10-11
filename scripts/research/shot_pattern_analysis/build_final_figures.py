@@ -29,6 +29,15 @@ _CLUB_NAMES = {
     "pitching_wedge": "Pitching Wedge",
 }
 
+from scripts.research.shot_pattern_analysis.final_figure_ledgers import (
+    _club_config,
+    _write_availability_ledger,
+    _write_comparison_ledger,
+    _write_facebook_comparison_ledger,
+    _write_facebook_overhead_ledger,
+    _write_facebook_pattern_density_ledger,
+)
+
 from src.tools.shot_pattern_analysis.matched_report import (
     load_individually_supported_endpoints,
 )
@@ -57,13 +66,6 @@ def _detail_profile(standard_deviations: list[float]) -> str | None:
     ):
         return "combined2"
     return None
-
-
-def _club_config(cell: dict[str, Any]) -> dict[str, Any]:
-    config = cell.get("config")
-    if not isinstance(config, dict) or not isinstance(config.get("club"), dict):
-        raise ValueError(f"cell {cell.get('cell')} has no club configuration")
-    return config["club"]
 
 
 def _facebook_key(cell: dict[str, Any]) -> tuple[Any, ...]:
@@ -370,6 +372,7 @@ def _render_cell_figures(
     presentation: Literal["academic", "social"],
 ) -> list[Path]:
     from src.tools.shot_pattern_analysis.academic_plots import (
+        FigureOptions,
         write_academic_dispersion_figure,
         write_overhead_trajectory_figure,
     )
@@ -403,8 +406,7 @@ def _render_cell_figures(
         scenario=scenario,
         metadata=metadata,
         target_point_m=(target_x, 0.0),
-        presentation=presentation,
-        dpi=dpi,
+        options=FigureOptions(presentation=presentation, dpi=dpi),
     )
     paths.extend(density_paths.values())
 
@@ -417,8 +419,7 @@ def _render_cell_figures(
         target_x_m=float(raw["target_x_m"]),
         scenario=scenario,
         metadata=metadata,
-        presentation=presentation,
-        dpi=dpi,
+        options=FigureOptions(presentation=presentation, dpi=dpi),
     )
     paths.extend(overhead_paths.values())
     return paths
@@ -455,71 +456,16 @@ def _render_social_detail(
     )
 
 
-def _render_density_comparison(
+def _comparison_caption(
     pair: dict[str, Any],
-    source_root: Path,
-    output_root: Path,
-    *,
-    dpi: int,
+    first: dict[str, Any],
+    second: dict[str, Any],
+    target_x_values: list[Any],
+    valid_counts: dict[str, int],
+    total_counts: dict[str, int],
     preview: bool,
-) -> tuple[dict[str, Any], list[Path]]:
-    from src.tools.shot_pattern_analysis.academic_plots import (
-        write_academic_dispersion_figure,
-    )
-
-    first, second = pair["cells"]
-    row: dict[str, Any] = {
-        "comparison": pair["comparison"],
-        "pattern": pair["pattern"],
-        "club": pair["club_id"],
-        "profile": pair["profile"],
-        "first_cell": first["cell"] if first else "",
-        "second_cell": second["cell"] if second else "",
-        "first_condition": pair["first_label"],
-        "second_condition": pair["second_label"],
-        "status": "unavailable",
-        "reason": "",
-        "target_x_m": "",
-        "png": "",
-        "pdf": "",
-        "svg": "",
-    }
-    for candidate in (first, second):
-        if candidate is None:
-            row["reason"] = "comparison condition missing from planned matrix"
-            return row, []
-        if candidate.get("status") != "completed":
-            row["reason"] = str(candidate.get("reason") or candidate.get("status"))
-            return row, []
-    target_x_values = [first.get("target_x_m"), second.get("target_x_m")]
-    if any(
-        not isinstance(value, (int, float)) or not math.isfinite(value)
-        for value in target_x_values
-    ):
-        row["reason"] = "matched target unavailable"
-        return row, []
-    if not math.isclose(
-        float(target_x_values[0]), float(target_x_values[1]), abs_tol=1e-9
-    ):
-        row["reason"] = "comparison cells do not share a common target"
-        return row, []
-
-    labels = (
-        f"{pair['pattern']} | {pair['first_label']}",
-        f"{pair['pattern']} | {pair['second_label']}",
-    )
-    points_by_label: dict[str, list[list[float]]] = {}
-    valid_counts: dict[str, int] = {}
-    total_counts: dict[str, int] = {}
-    for cell, label in zip((first, second), labels, strict=True):
-        points, totals = _supported_points(source_root / cell["cell"])
-        points_by_label[label] = points[pair["pattern"]]
-        valid_counts[label] = len(points[pair["pattern"]])
-        total_counts[label] = totals[pair["pattern"]]
-    if any(not points_by_label[label] for label in labels):
-        row["reason"] = "no supported airborne endpoints for comparison pattern"
-        return row, []
-
+) -> tuple[dict[str, Any], str]:
+    """Build the matched-control caption and source-bound plot metadata."""
     first_config = first["config"]
     club = _club_config(first)
     residuals = [
@@ -587,6 +533,78 @@ def _render_density_comparison(
         f"{pair['pattern']} • {comparison_condition} • "
         f"{fixed_control} • {profile_label}"
     )
+    return metadata, scenario
+
+
+def _render_density_comparison(
+    pair: dict[str, Any],
+    source_root: Path,
+    output_root: Path,
+    *,
+    dpi: int,
+    preview: bool,
+) -> tuple[dict[str, Any], list[Path]]:
+    from src.tools.shot_pattern_analysis.academic_plots import (
+        FigureOptions,
+        write_academic_dispersion_figure,
+    )
+
+    first, second = pair["cells"]
+    row: dict[str, Any] = {
+        "comparison": pair["comparison"],
+        "pattern": pair["pattern"],
+        "club": pair["club_id"],
+        "profile": pair["profile"],
+        "first_cell": first["cell"] if first else "",
+        "second_cell": second["cell"] if second else "",
+        "first_condition": pair["first_label"],
+        "second_condition": pair["second_label"],
+        "status": "unavailable",
+        "reason": "",
+        "target_x_m": "",
+        "png": "",
+        "pdf": "",
+        "svg": "",
+    }
+    for candidate in (first, second):
+        if candidate is None:
+            row["reason"] = "comparison condition missing from planned matrix"
+            return row, []
+        if candidate.get("status") != "completed":
+            row["reason"] = str(candidate.get("reason") or candidate.get("status"))
+            return row, []
+    target_x_values = [first.get("target_x_m"), second.get("target_x_m")]
+    if any(
+        not isinstance(value, (int, float)) or not math.isfinite(value)
+        for value in target_x_values
+    ):
+        row["reason"] = "matched target unavailable"
+        return row, []
+    if not math.isclose(
+        float(target_x_values[0]), float(target_x_values[1]), abs_tol=1e-9
+    ):
+        row["reason"] = "comparison cells do not share a common target"
+        return row, []
+
+    labels = (
+        f"{pair['pattern']} | {pair['first_label']}",
+        f"{pair['pattern']} | {pair['second_label']}",
+    )
+    points_by_label: dict[str, list[list[float]]] = {}
+    valid_counts: dict[str, int] = {}
+    total_counts: dict[str, int] = {}
+    for cell, label in zip((first, second), labels, strict=True):
+        points, totals = _supported_points(source_root / cell["cell"])
+        points_by_label[label] = points[pair["pattern"]]
+        valid_counts[label] = len(points[pair["pattern"]])
+        total_counts[label] = totals[pair["pattern"]]
+    if any(not points_by_label[label] for label in labels):
+        row["reason"] = "no supported airborne endpoints for comparison pattern"
+        return row, []
+
+    metadata, scenario = _comparison_caption(
+        pair, first, second, target_x_values, valid_counts, total_counts, preview
+    )
     stem = (
         output_root
         / "social"
@@ -602,8 +620,7 @@ def _render_density_comparison(
         scenario=scenario,
         metadata=metadata,
         target_point_m=(float(target_x_values[0]), 0.0),
-        presentation="social",
-        dpi=dpi,
+        options=FigureOptions(presentation="social", dpi=dpi),
     )
     row["status"] = "completed"
     row["target_x_m"] = float(target_x_values[0])
@@ -622,206 +639,16 @@ def _write_ledgers(
     rendered_cells: set[str],
     comparison_rows: list[dict[str, Any]],
 ) -> tuple[Path, Path, Path, Path]:
-    availability = output_root / "availability.csv"
-    with availability.open("w", encoding="utf-8", newline="") as stream:
-        writer = csv.DictWriter(
-            stream,
-            fieldnames=(
-                "cell",
-                "status",
-                "reason",
-                "club",
-                "lean_deg",
-                "curve_scale",
-                "shaft_rotation_sd_deg",
-            ),
-        )
-        writer.writeheader()
-        for cell in cells:
-            config = cell["config"]
-            noise = config.get("noise", {}).get("standard_deviations", [])
-            writer.writerow(
-                {
-                    "cell": cell["cell"],
-                    "status": cell["status"],
-                    "reason": cell.get("reason", ""),
-                    "club": _club_config(cell).get("club_id"),
-                    "lean_deg": _club_config(cell).get("shaft_lean_deg"),
-                    "curve_scale": config.get("curve_scale"),
-                    "shaft_rotation_sd_deg": noise[0] if noise else "",
-                }
-            )
-
-    social_density = output_root / "facebook_ready.csv"
-    with social_density.open("w", encoding="utf-8", newline="") as stream:
-        writer = csv.DictWriter(
-            stream,
-            fieldnames=(
-                "comparison",
-                "pattern",
-                "club",
-                "profile",
-                "first_cell",
-                "second_cell",
-                "first_condition",
-                "second_condition",
-                "status",
-                "reason",
-                "target_x_m",
-                "nominal_lean_deg",
-                "png",
-            ),
-        )
-        writer.writeheader()
-        for row in comparison_rows:
-            writer.writerow(
-                {
-                    field: (
-                        0
-                        if field == "nominal_lean_deg"
-                        else row.get("club", row.get("club_id", ""))
-                        if field == "club"
-                        else row.get(field, "")
-                    )
-                    for field in (
-                        "comparison",
-                        "pattern",
-                        "club",
-                        "profile",
-                        "first_cell",
-                        "second_cell",
-                        "first_condition",
-                        "second_condition",
-                        "status",
-                        "reason",
-                        "target_x_m",
-                        "nominal_lean_deg",
-                        "png",
-                    )
-                }
-            )
-
-    social_overhead = output_root / "facebook_overhead.csv"
-    social_pattern_density = output_root / "facebook_pattern_density.csv"
+    availability = _write_availability_ledger(cells, output_root)
+    social_density = _write_facebook_comparison_ledger(comparison_rows, output_root)
     selected_social = _facebook_selection(cells)
-    with social_pattern_density.open("w", encoding="utf-8", newline="") as stream:
-        writer = csv.DictWriter(
-            stream,
-            fieldnames=(
-                "cell",
-                "status",
-                "reason",
-                "club",
-                "lean_deg",
-                "curve_scale",
-                "shaft_rotation_sd_deg",
-                "selection_note",
-                "png_density",
-            ),
-        )
-        writer.writeheader()
-        for cell in selected_social:
-            config = cell["config"]
-            club = _club_config(cell)
-            noise = config.get("noise", {}).get("standard_deviations", [])
-            density_source = (
-                output_root / "social" / "details" / cell["cell"] / "density.png"
-            )
-            completed = (
-                cell.get("status") == "completed"
-                and cell["cell"] in rendered_cells
-                and density_source.is_file()
-            )
-            writer.writerow(
-                {
-                    "cell": cell["cell"],
-                    "status": cell["status"],
-                    "reason": cell.get("reason", ""),
-                    "club": club.get("club_id"),
-                    "lean_deg": club.get("shaft_lean_deg"),
-                    "curve_scale": config.get("curve_scale"),
-                    "shaft_rotation_sd_deg": noise[0] if noise else "",
-                    "selection_note": cell["selection_note"],
-                    "png_density": density_source.relative_to(output_root).as_posix()
-                    if completed
-                    else "",
-                }
-            )
-    with social_overhead.open("w", encoding="utf-8", newline="") as stream:
-        writer = csv.DictWriter(
-            stream,
-            fieldnames=(
-                "cell",
-                "status",
-                "reason",
-                "club",
-                "lean_deg",
-                "curve_scale",
-                "shaft_rotation_sd_deg",
-                "selection_note",
-                "png_overhead",
-            ),
-        )
-        writer.writeheader()
-        for cell in selected_social:
-            config = cell["config"]
-            noise = config.get("noise", {}).get("standard_deviations", [])
-            completed = (
-                cell.get("status") == "completed" and cell["cell"] in rendered_cells
-            )
-            overhead_source = (
-                output_root / "social" / "details" / cell["cell"] / "overhead.png"
-            )
-            completed = completed and overhead_source.is_file()
-            writer.writerow(
-                {
-                    "cell": cell["cell"],
-                    "status": cell["status"],
-                    "reason": cell.get("reason", ""),
-                    "club": _club_config(cell).get("club_id"),
-                    "lean_deg": _club_config(cell).get("shaft_lean_deg"),
-                    "curve_scale": config.get("curve_scale"),
-                    "shaft_rotation_sd_deg": noise[0] if noise else "",
-                    "selection_note": cell["selection_note"],
-                    "png_overhead": overhead_source.relative_to(output_root).as_posix()
-                    if completed
-                    else "",
-                }
-            )
-    return availability, social_density, social_overhead, social_pattern_density
-
-
-def _write_comparison_ledger(rows: list[dict[str, Any]], output_root: Path) -> Path:
-    path = output_root / "comparison_availability.csv"
-    fields = (
-        "comparison",
-        "pattern",
-        "club",
-        "profile",
-        "first_cell",
-        "second_cell",
-        "first_condition",
-        "second_condition",
-        "status",
-        "reason",
-        "target_x_m",
-        "png",
-        "pdf",
-        "svg",
+    social_pattern_density = _write_facebook_pattern_density_ledger(
+        selected_social, output_root, rendered_cells
     )
-    with path.open("w", encoding="utf-8", newline="") as stream:
-        writer = csv.DictWriter(stream, fieldnames=fields)
-        writer.writeheader()
-        for row in rows:
-            writer.writerow(
-                {
-                    field: row.get("club", row.get("club_id", ""))
-                    if field == "club"
-                    else row.get(field, "")
-                    for field in fields
-                }
-            )
-    return path
+    social_overhead = _write_facebook_overhead_ledger(
+        selected_social, output_root, rendered_cells
+    )
+    return availability, social_density, social_overhead, social_pattern_density
 
 
 def _validate_final_protocol(report: dict[str, Any], output_name: str) -> None:
@@ -857,19 +684,14 @@ def _assert_inputs_unchanged(
             raise RuntimeError(f"figure source changed during rendering: {key}")
 
 
-def build_final_figures(
+def _prepare_output(
     source_root: Path,
     output_root: Path,
-    *,
-    preview: bool = False,
-    selected_cells: tuple[str, ...] = (),
-    dpi: int = 180,
-) -> Path:
-    """Render source-bound figures and a provenance manifest for one report."""
+    preview: bool,
+    selected_cells: tuple[str, ...],
+) -> tuple[Path, Path, dict[str, Any], str]:
+    """Validate the source and output contract before publishing any file."""
     from src.tools.shot_pattern_analysis.matched_report import load_matrix_report
-    from src.tools.shot_pattern_analysis.matched_report_plots import (
-        export_matched_matrix_heatmaps,
-    )
 
     source_root = Path(source_root).resolve()
     output_root = Path(output_root).resolve()
@@ -900,8 +722,21 @@ def build_final_figures(
     if output_root.exists() and any(output_root.iterdir()):
         raise FileExistsError(f"figure output directory is not empty: {output_root}")
     output_root.mkdir(parents=True, exist_ok=True)
+    return source_root, output_root, report, stage
 
-    cells = report["cells"]
+
+def _render_detail_sets(
+    cells: list[dict[str, Any]],
+    selected_cells: tuple[str, ...],
+    source_root: Path,
+    output_root: Path,
+    dpi: int,
+    preview: bool,
+) -> tuple[
+    list[dict[str, Any]], list[dict[str, Any]], set[str], list[Path], list[Path]
+]:
+    """Render selected academic details and their social counterparts."""
+
     if selected_cells:
         unknown = set(selected_cells) - {cell["cell"] for cell in cells}
         if unknown:
@@ -932,7 +767,24 @@ def build_final_figures(
                     cell, source_root, output_root, dpi=dpi, preview=preview
                 )
             )
+    return (
+        detail_candidates,
+        detail_cells,
+        detail_ids,
+        detail_paths,
+        social_detail_paths,
+    )
 
+
+def _render_comparisons(
+    cells: list[dict[str, Any]],
+    detail_candidates: list[dict[str, Any]],
+    source_root: Path,
+    output_root: Path,
+    dpi: int,
+    preview: bool,
+) -> tuple[list[dict[str, Any]], list[Path], Path]:
+    """Render paired endpoint comparisons and their availability ledger."""
     comparison_pairs = _comparison_pair_specs(cells)
     if preview:
         comparison_keys = {_comparison_group_key(cell) for cell in detail_candidates}
@@ -952,6 +804,21 @@ def build_final_figures(
         comparison_rows.append(row)
         comparison_paths.extend(paths)
     comparison_ledger = _write_comparison_ledger(comparison_rows, output_root)
+    return comparison_rows, comparison_paths, comparison_ledger
+
+
+def _render_matrices(
+    cells: list[dict[str, Any]],
+    detail_candidates: list[dict[str, Any]],
+    source_root: Path,
+    output_root: Path,
+    dpi: int,
+    preview: bool,
+) -> tuple[dict[tuple[str, ...], list[dict[str, Any]]], list[Path]]:
+    """Render each saved stratum with the original source labels and order."""
+    from src.tools.shot_pattern_analysis.matched_report_plots import (
+        export_matched_matrix_heatmaps,
+    )
 
     groups: dict[tuple[str, ...], list[dict[str, Any]]] = defaultdict(list)
     for cell in cells:
@@ -975,14 +842,16 @@ def build_final_figures(
             formats=("png",),
         )
         matrix_paths.extend(matrix_exports.values())
-    availability, social_density, social_overhead, social_pattern_density = (
-        _write_ledgers(
-            cells,
-            output_root,
-            detail_ids,
-            comparison_rows,
-        )
-    )
+    return groups, matrix_paths
+
+
+def _social_export_counts(
+    output_root: Path,
+    comparison_rows: list[dict[str, Any]],
+    social_overhead: Path,
+    social_pattern_density: Path,
+) -> tuple[int, int, int]:
+    """Count only actual exported social images for the manifest."""
     social_density_count = sum(
         row["status"] == "completed"
         and bool(row.get("png"))
@@ -1001,20 +870,68 @@ def build_final_figures(
             and (output_root / str(row["png_density"])).is_file()
             for row in csv.DictReader(stream)
         )
+    return social_density_count, social_overhead_count, social_pattern_density_count
 
-    source_files = {
+
+def _plot_source_hashes() -> dict[str, str]:
+    """Bind the figure manifest to the exact producer source bytes."""
+    root = _repository_root()
+    return {
         "matched_report.py": _sha256(
-            _repository_root() / "src/tools/shot_pattern_analysis/matched_report.py"
+            root / "src/tools/shot_pattern_analysis/matched_report.py"
         ),
         "academic_plots.py": _sha256(
-            _repository_root() / "src/tools/shot_pattern_analysis/academic_plots.py"
+            root / "src/tools/shot_pattern_analysis/academic_plots.py"
         ),
         "matched_report_plots.py": _sha256(
-            _repository_root()
-            / "src/tools/shot_pattern_analysis/matched_report_plots.py"
+            root / "src/tools/shot_pattern_analysis/matched_report_plots.py"
         ),
         "build_final_figures.py": _sha256(Path(__file__)),
+        "final_figure_ledgers.py": _sha256(
+            Path(__file__).with_name("final_figure_ledgers.py")
+        ),
     }
+
+
+def build_final_figures(
+    source_root: Path,
+    output_root: Path,
+    *,
+    preview: bool = False,
+    selected_cells: tuple[str, ...] = (),
+    dpi: int = 180,
+) -> Path:
+    """Render source-bound figures and a provenance manifest for one report."""
+    source_root, output_root, report, stage = _prepare_output(
+        source_root, output_root, preview, selected_cells
+    )
+    cells = report["cells"]
+    detail_candidates, detail_cells, detail_ids, detail_paths, social_detail_paths = (
+        _render_detail_sets(
+            cells, selected_cells, source_root, output_root, dpi, preview
+        )
+    )
+    comparison_rows, comparison_paths, comparison_ledger = _render_comparisons(
+        cells, detail_candidates, source_root, output_root, dpi, preview
+    )
+    groups, matrix_paths = _render_matrices(
+        cells, detail_candidates, source_root, output_root, dpi, preview
+    )
+    availability, social_density, social_overhead, social_pattern_density = (
+        _write_ledgers(
+            cells,
+            output_root,
+            detail_ids,
+            comparison_rows,
+        )
+    )
+    social_density_count, social_overhead_count, social_pattern_density_count = (
+        _social_export_counts(
+            output_root, comparison_rows, social_overhead, social_pattern_density
+        )
+    )
+
+    source_files = _plot_source_hashes()
     output_files = [
         *detail_paths,
         *social_detail_paths,

@@ -3,12 +3,192 @@
 from __future__ import annotations
 
 import csv
+import hashlib
+import inspect
 import json
+from pathlib import Path
 from typing import Any
 
 import pytest
 
 pytestmark = pytest.mark.unit
+
+
+def test_final_figure_orchestrators_fit_function_budget() -> None:
+    from scripts.research.shot_pattern_analysis import build_final_figures as builder
+
+    for function in (
+        builder._render_density_comparison,
+        builder._write_ledgers,
+        builder.build_final_figures,
+    ):
+        assert len(inspect.getsourcelines(function)[0]) <= 100
+
+
+def test_final_ledgers_match_pre_extraction_bytes(tmp_path: Path) -> None:
+    from scripts.research.shot_pattern_analysis import build_final_figures as builder
+
+    def cell(name: str, club: str, lean: float, status: str) -> dict[str, Any]:
+        return {
+            "cell": name,
+            "status": status,
+            "reason": "unsupported" if status == "unavailable" else "",
+            "config": {
+                "club": {"club_id": club, "shaft_lean_deg": lean},
+                "noise": {"standard_deviations": [1.0, 0, 0, 0, 0, 0, 0]},
+                "curve_scale": 1.0,
+            },
+        }
+
+    cells = [
+        cell("driver_lean0", "driver", 0.0, "completed"),
+        cell("pw_lean0", "pitching_wedge", 0.0, "unavailable"),
+        cell("pw_lean5", "pitching_wedge", 5.0, "completed"),
+    ]
+    rows = [
+        {
+            "comparison": "shaft_rotation_sd",
+            "pattern": "Draw",
+            "club": "driver",
+            "profile": "shaft_only",
+            "first_cell": "a",
+            "second_cell": "b",
+            "first_condition": "SD 1°",
+            "second_condition": "SD 2°",
+            "status": "completed",
+            "reason": "",
+            "target_x_m": 180.0,
+            "png": "pair.png",
+        },
+        {
+            "comparison": "curve_scale",
+            "pattern": "Fade",
+            "club": "pitching_wedge",
+            "profile": "shaft_only",
+            "first_cell": "c",
+            "second_cell": "",
+            "first_condition": "Curve ×1",
+            "second_condition": "Curve ×2",
+            "status": "unavailable",
+            "reason": "missing",
+            "target_x_m": "",
+            "png": "",
+        },
+    ]
+    for name in ("driver_lean0", "pw_lean5"):
+        social = tmp_path / "social" / "details" / name
+        social.mkdir(parents=True)
+        for plot in ("density", "overhead"):
+            (social / f"{plot}.png").write_bytes(b"published")
+
+    builder._write_ledgers(cells, tmp_path, {"driver_lean0", "pw_lean5"}, rows)
+    expected = {
+        "availability.csv": "f6f8c7733f7ad5e1462f1de35f8b30746d65666787388dd7213292713048ad0f",
+        "facebook_ready.csv": "8c24dfa1db26c30fccb165ff97a92f1c8526ab5d4d11763fdf2a36cd75e1b62c",
+        "facebook_overhead.csv": "570fddcdb5b930f1a21656dd4c2a4cb6e50c4ce295b7f134e2fe23dd36702f35",
+        "facebook_pattern_density.csv": "c13562ecd03138c239e733ef2bdb7c642e2d92191f0dd3e00c59e14044bef4c4",
+    }
+    assert {
+        name: hashlib.sha256((tmp_path / name).read_bytes()).hexdigest()
+        for name in expected
+    } == expected
+
+
+def test_final_builder_calls_native_figure_options_for_detail_and_pair(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Issue #12309: all three native writers accept the current option bundle."""
+    from scripts.research.shot_pattern_analysis import build_final_figures as builder
+    import src.tools.shot_pattern_analysis.academic_plots as plots
+
+    native_captions: list[str] = []
+
+    def capture_native_figure(figure, stem, *, dpi):
+        assert dpi == 90
+        native_captions.extend(text.get_text() for text in figure.texts)
+        stem.parent.mkdir(parents=True, exist_ok=True)
+        outputs = {
+            extension: stem.with_suffix(f".{extension}")
+            for extension in ("png", "pdf", "svg")
+        }
+        for path in outputs.values():
+            path.write_bytes(b"native writer reached export")
+        return outputs
+
+    monkeypatch.setattr(plots, "_save_formats", capture_native_figure)
+
+    cells = [
+        {
+            "cell": f"driver_sd{sd}",
+            "status": "completed",
+            "target_x_m": 180.0,
+            "config": {
+                "club": {"club_id": "driver", "shaft_lean_deg": 0.0},
+                "noise": {"standard_deviations": [sd, 0, 0, 0, 0, 0, 0]},
+                "curve_scale": 1.0,
+                "n_shots": 20,
+                "seed": 4,
+            },
+            "nominals": {},
+        }
+        for sd in (1.0, 2.0)
+    ]
+    source = tmp_path / "source"
+    source_cell = source / cells[0]["cell"]
+    source_cell.mkdir(parents=True)
+    trajectories = {
+        name: [[[0.0, 0.0], [90.0, offset], [180.0, 2 * offset]]]
+        for name, offset in (("Straight", 0.0), ("Draw", 2.0), ("Fade", -2.0))
+    }
+    (source_cell / "flight_samples.json").write_text(
+        json.dumps({"target_x_m": 180.0, "trajectories": trajectories}),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(
+        builder,
+        "_supported_points",
+        lambda _path: (
+            {
+                name: [
+                    [180.0 + 0.05 * index, offset + 0.02 * index] for index in range(20)
+                ]
+                for name, offset in (("Straight", 0.0), ("Draw", 2.0), ("Fade", -2.0))
+            },
+            dict.fromkeys(("Straight", "Draw", "Fade"), 20),
+        ),
+    )
+    detail = builder._render_cell_figures(
+        cells[0],
+        source,
+        tmp_path / "out",
+        dpi=90,
+        preview=False,
+        presentation="academic",
+    )
+    social = builder._render_cell_figures(
+        cells[0],
+        source,
+        tmp_path / "out",
+        dpi=90,
+        preview=False,
+        presentation="social",
+    )
+    pair = next(
+        item
+        for item in builder._comparison_pair_specs(cells)
+        if item["comparison"] == "shaft_rotation_sd" and item["pattern"] == "Draw"
+    )
+    row, compared = builder._render_density_comparison(
+        pair, source, tmp_path / "out", dpi=90, preview=False
+    )
+    assert len(detail) == len(social) == 6
+    assert len(compared) == 3
+    assert row["status"] == "completed"
+    assert all(
+        path.is_file() and path.stat().st_size > 0
+        for path in [*detail, *social, *compared]
+    )
+    assert any("Draw" in text for text in native_captions)
 
 
 def _api():
@@ -218,7 +398,7 @@ def test_direct_density_comparison_uses_social_layout_and_index_path(
 
     def fake_plot(_points, stem, **kwargs):
         observed["stem"] = stem
-        observed["presentation"] = kwargs["presentation"]
+        observed["presentation"] = kwargs["options"].presentation
         observed["social_club"] = kwargs["metadata"]["social_club"]
         return {"png": stem.with_suffix(".png")}
 
@@ -347,6 +527,12 @@ def test_pilot_preview_writes_separate_manifest_and_facebook_pngs(
 
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     assert manifest["kind"] == "pilot_preview"
+    assert (
+        manifest["plot_source_sha256"]["final_figure_ledgers.py"]
+        == hashlib.sha256(
+            Path(builder.__file__).with_name("final_figure_ledgers.py").read_bytes()
+        ).hexdigest()
+    )
     assert manifest["rendered_detail_cells"] == [cell["cell"]]
     assert observed["scenario"] == cell["cell"]
     assert "PILOT PREVIEW" in observed["selection_label"]

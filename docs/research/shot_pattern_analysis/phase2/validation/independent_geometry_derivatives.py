@@ -18,12 +18,8 @@ from src.tools.shot_pattern_analysis.matched_export import matched_source_snapsh
 from src.tools.shot_pattern_analysis.matched_physics import MatchedShotPhysics
 
 
-def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--pilot", type=Path, required=True)
-    parser.add_argument("--output", type=Path, required=True)
-    args = parser.parse_args()
-    before = matched_source_snapshot()
+def _geometry_checks() -> list[dict[str, Any]]:
+    """Evaluate the original ordered analytic/central-difference grid."""
     geometry: list[dict[str, Any]] = []
     for club, lean, face in itertools.product(
         ("driver", "seven_iron", "pitching_wedge"), (0.0, 5.0, 10.0), (-3.0, 0.0, 3.0)
@@ -54,6 +50,11 @@ def main():
                 "finite_differences": ratios,
             }
         )
+    return geometry
+
+
+def _carry_sensitivities(pilot: Path) -> tuple[list[dict], dict[str, str]]:
+    """Replay fixed saved nominals in the original dt/epsilon evaluation order."""
     physics = MatchedShotPhysics()
     carry = []
     sources = {}
@@ -61,7 +62,7 @@ def main():
         ("driver", "seven_iron", "pitching_wedge"), (0, 5, 10), (1, 2)
     ):
         key = f"{club}_lean{lean}_curve{curve}_rotation1_shaft_only"
-        path = args.pilot / key / "summary.json"
+        path = pilot / key / "summary.json"
         data = json.loads(path.read_text())
         sources[key] = hashlib.sha256(path.read_bytes()).hexdigest()
         if data["status"] != "completed":
@@ -109,6 +110,17 @@ def main():
                     "derivatives": derivatives,
                 }
             )
+    return carry, sources
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--pilot", type=Path, required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args()
+    before = matched_source_snapshot()
+    geometry = _geometry_checks()
+    carry, sources = _carry_sensitivities(args.pilot)
     maximum = max(
         abs(check[field] - row["analytical_" + field])
         for row in geometry

@@ -25,25 +25,10 @@ def sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def main() -> None:
-    phase = Path("docs/research/shot_pattern_analysis/phase2")
-    validation = phase / "validation"
-    output = validation / "supplement_independent_preflight_review.json"
-    assert not output.exists()
-    inputs_path = validation / "supplement_refinement_inputs_v1.json"
-    refinement_path = validation / "supplement_refinement_v1.json"
-    execution = matched_source_snapshot()
-    files = [
-        inputs_path,
-        refinement_path,
-        phase / "source_transition_supplement.json",
-        validation / "supplement_pilot_aliases.json",
-        validation / "supplement_composition.json",
-        validation / "SUPPLEMENT_COMPOSITION_TESTS.txt",
-        Path(__file__),
-    ]
-    inputs, nominals = load_qualified_nominals(inputs_path)
-    assert inputs["execution"] == execution and len(nominals) == 9
+def _review_pilots(
+    inputs: dict, execution: dict, validation: Path, phase: Path, files: list[Path]
+) -> tuple[int, dict]:
+    """Check source-bound pilot manifests and retain original protocol order."""
     audited_rows = 0
     protocols = {}
     for protocol, entry in inputs["pilots"].items():
@@ -78,12 +63,17 @@ def main() -> None:
         audited_rows += sum(c["rows"] for c in audit["cells"].values())
         files.extend([plan_path, audit_path])
         protocols[protocol] = review
-    assert audited_rows == 2496
-    alias_review = validate_control_aliases(
-        validation / "supplement_pilot_aliases.json", "pilot", phase
-    )
-    assert alias_review["verified_aliases"] == 4 and alias_review["new_executions"] == 0
-    refinement = json.loads(refinement_path.read_text())
+    return audited_rows, protocols
+
+
+def _review_refinement(
+    refinement: dict,
+    inputs_path: Path,
+    execution: dict,
+    validation: Path,
+    nominals: list[dict],
+) -> tuple[dict, float, int]:
+    """Validate saved refinement comparisons in their recorded reduction order."""
     assert refinement["execution"] == execution and refinement["inputs_sha256"] == sha(
         inputs_path
     )
@@ -127,6 +117,40 @@ def main() -> None:
             delta = math.dist(row["runs"][4]["endpoint_m"], [row["target_x_m"], 0])
             assert delta == row["nominal_fine_residual_m"] and delta <= 0.05
             fine_residual = max(fine_residual, delta)
+    return maxima, fine_residual, unsupported
+
+
+def main() -> None:
+    phase = Path("docs/research/shot_pattern_analysis/phase2")
+    validation = phase / "validation"
+    output = validation / "supplement_independent_preflight_review.json"
+    assert not output.exists()
+    inputs_path = validation / "supplement_refinement_inputs_v1.json"
+    refinement_path = validation / "supplement_refinement_v1.json"
+    execution = matched_source_snapshot()
+    files = [
+        inputs_path,
+        refinement_path,
+        phase / "source_transition_supplement.json",
+        validation / "supplement_pilot_aliases.json",
+        validation / "supplement_composition.json",
+        validation / "SUPPLEMENT_COMPOSITION_TESTS.txt",
+        Path(__file__),
+    ]
+    inputs, nominals = load_qualified_nominals(inputs_path)
+    assert inputs["execution"] == execution and len(nominals) == 9
+    audited_rows, protocols = _review_pilots(
+        inputs, execution, validation, phase, files
+    )
+    assert audited_rows == 2496
+    alias_review = validate_control_aliases(
+        validation / "supplement_pilot_aliases.json", "pilot", phase
+    )
+    assert alias_review["verified_aliases"] == 4 and alias_review["new_executions"] == 0
+    refinement = json.loads(refinement_path.read_text())
+    maxima, fine_residual, unsupported = _review_refinement(
+        refinement, inputs_path, execution, validation, nominals
+    )
     composition = json.loads((validation / "supplement_composition.json").read_text())
     assert composition["tests"]["passed"] == 97
     assert (

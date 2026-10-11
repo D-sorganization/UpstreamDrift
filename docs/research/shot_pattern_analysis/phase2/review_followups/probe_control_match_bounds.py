@@ -10,7 +10,7 @@ from typing import Any
 
 import numpy as np
 from scipy.optimize import least_squares
-from src.tools.shot_pattern_analysis.matched_config import matched_preset
+from src.tools.shot_pattern_analysis.matched_config import MatchedConfig, matched_preset
 from src.tools.shot_pattern_analysis.matched_export import matched_source_snapshot
 from src.tools.shot_pattern_analysis.matched_physics import MatchedShotPhysics
 from src.tools.shot_pattern_analysis.nominal_matching import (
@@ -18,6 +18,51 @@ from src.tools.shot_pattern_analysis.nominal_matching import (
     NominalMatchError,
     match_nominal_landing,
 )
+
+
+def _diagnostic_multistart(
+    physics: MatchedShotPhysics,
+    config: MatchedConfig,
+    reference: MatchedConfig,
+    bounds: MatchBounds,
+    ftp: float,
+    target: float,
+) -> list[dict[str, Any]]:
+    """Probe the same bounded solver starts through the public physics adapter."""
+
+    # Diagnostic solver exposes active bounds; all physics uses the public adapter.
+    def residual(candidate, ftp=ftp, config=config, target=target):
+        face, speed = candidate
+        shot = physics.simulate(
+            face_deg=float(face),
+            path_deg=float(face - ftp),
+            config=replace(config, club_speed_mps=float(speed)),
+        )
+        return np.array([shot.carry_x_m - target, shot.carry_y_m])
+
+    diagnostics = []
+    for initial_face in (-5.0, 0.0, 5.0):
+        fit = least_squares(
+            residual,
+            [initial_face, reference.club_speed_mps],
+            bounds=([-6, bounds.speed_min_mps], [6, bounds.speed_max_mps]),
+            max_nfev=80,
+            xtol=1e-11,
+            ftol=1e-11,
+            gtol=1e-11,
+        )
+        diagnostics.append(
+            {
+                "success": bool(fit.success),
+                "face_deg": float(fit.x[0]),
+                "speed_mps": float(fit.x[1]),
+                "residual_xy_m": residual(fit.x).tolist(),
+                "active_mask": fit.active_mask.tolist(),
+                "optimality": float(fit.optimality),
+                "n_evaluations": int(fit.nfev),
+            }
+        )
+    return diagnostics
 
 
 def main() -> None:
@@ -72,38 +117,9 @@ def main() -> None:
                     ),
                 )
             except NominalMatchError as exc:
-                # Diagnostic solver exposes active bounds; all physics uses the public adapter.
-                def residual(candidate, ftp=ftp, config=config, target=target):
-                    face, speed = candidate
-                    shot = physics.simulate(
-                        face_deg=float(face),
-                        path_deg=float(face - ftp),
-                        config=replace(config, club_speed_mps=float(speed)),
-                    )
-                    return np.array([shot.carry_x_m - target, shot.carry_y_m])
-
-                diagnostics = []
-                for initial_face in (-5.0, 0.0, 5.0):
-                    fit = least_squares(
-                        residual,
-                        [initial_face, reference.club_speed_mps],
-                        bounds=([-6, bounds.speed_min_mps], [6, bounds.speed_max_mps]),
-                        max_nfev=80,
-                        xtol=1e-11,
-                        ftol=1e-11,
-                        gtol=1e-11,
-                    )
-                    diagnostics.append(
-                        {
-                            "success": bool(fit.success),
-                            "face_deg": float(fit.x[0]),
-                            "speed_mps": float(fit.x[1]),
-                            "residual_xy_m": residual(fit.x).tolist(),
-                            "active_mask": fit.active_mask.tolist(),
-                            "optimality": float(fit.optimality),
-                            "n_evaluations": int(fit.nfev),
-                        }
-                    )
+                diagnostics = _diagnostic_multistart(
+                    physics, config, reference, bounds, ftp, target
+                )
                 row.update(
                     status="bounded_failure",
                     error=str(exc),
