@@ -6,10 +6,10 @@ the 0.1x impact-window clip) of one clip kind and engine:
 - Rows: `grf/` face-on, `club_forces/` hands close-up, `clean/` down-the-line.
 - Columns: MuJoCo, Drake MeshCat, Pinocchio MeshCat, OpenSim.
 
-| Club | Grab |
-|---|---|
+| Club               | Grab                                                                 |
+| ------------------ | -------------------------------------------------------------------- |
 | Driver (capture-A) | [gcv19_showcase_driver_impact.png](gcv19_showcase_driver_impact.png) |
-| 7-iron (capture-B) | [gcv19_showcase_iron_impact.png](gcv19_showcase_iron_impact.png) |
+| 7-iron (capture-B) | [gcv19_showcase_iron_impact.png](gcv19_showcase_iron_impact.png)     |
 
 ## Provenance
 
