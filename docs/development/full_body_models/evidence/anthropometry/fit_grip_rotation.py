@@ -12,9 +12,22 @@ reports the residual per run. Writes ``fit_grip_rotation_receipt.json`` next
 to this script. The fitted angles are the builder's ``--lead-grip-rotation``
 and ``--trail-grip-rotation`` (defaults ``GRIP_ROTATION_DEG``). Runs must be
 matched with the same grip rotation, since the fit is relative to it; the
-receipt records the document's value.
+receipt records the document's value and, per side, ``total_deg``: the
+document's rotation composed with the fitted correction, which is what
+``scripts/set_spec_grip_rotation.py`` sets on a committed document.
+
+By default every frame counts equally. ``--window-frames N`` with
+``--window-weight W`` counts the N frames before each run's impact frame
+(``receipt.json`` ``ik.impact_split.frame`` of the run) W more times, and
+``--address-frames N`` with ``--address-weight W`` does the same for the first
+N frames; the receipt records these settings under ``objective`` and, per run
+and side, the cock angle at address and its minimum over the last window
+before and after the fit. The grip rotation depends on the capture, so fit
+each capture on its own, with its own ``--receipt``.
 
     python fit_grip_rotation.py --run <run_a> --run <run_b>
+    python fit_grip_rotation.py --run <run> --receipt fit_<capture>.json \
+        --window-frames 20 --window-weight 4 --address-frames 5 --address-weight 4
 """
 
 from __future__ import annotations
@@ -42,6 +55,8 @@ SIDES = {
     "lead": ("Spherical Solid", "Clubface Vector", ("LFInput", "LWInputX", "LWInputY")),
     "trail": ("Spherical Solid1", "RHandStandoff", ("RFInput", "RWInputX", "RWInputY")),
 }
+#: The document's ``subject.grip_rotation_deg`` key of each side.
+SIDE_KEYS = {"lead": "L", "trail": "R"}
 
 
 def _body(document: dict, suffix: str) -> str:
@@ -100,6 +115,36 @@ def _per_run(
     }
 
 
+def _cock_deg(stack: np.ndarray, base: np.ndarray, rotation_deg: tuple) -> np.ndarray:
+    turned = stack @ grip_fit.grip_rotation(rotation_deg)
+    return np.degrees(grip_fit.wrist_angles(turned, base))[:, 1]
+
+
+def _cock_report(
+    stack: np.ndarray,
+    base: np.ndarray,
+    rotation_deg: tuple,
+    impact: int | None,
+    window: int,
+) -> dict:
+    """Cock angle at address (frame 0) and its minimum over the ``window``
+    frames before impact, without (before) and with (after) the fitted turn."""
+    out: dict = {}
+    for label, turn in (("before", (0.0, 0.0, 0.0)), ("after", rotation_deg)):
+        cock = _cock_deg(stack, base, turn)
+        out[f"address_{label}"] = round(float(cock[0]), 1)
+        if impact is not None and window > 0:
+            out[f"window_min_{label}"] = round(
+                float(cock[impact - window : impact].min()), 1
+            )
+    return out
+
+
+def _impact_frame(run: Path) -> int:
+    receipt = json.loads((run / "receipt.json").read_text())
+    return int(receipt["ik"]["impact_split"]["frame"])
+
+
 def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     log = logging.getLogger("grip_fit")
@@ -108,7 +153,15 @@ def main() -> None:
     parser.add_argument(
         "--receipt", type=Path, default=HERE / "fit_grip_rotation_receipt.json"
     )
+    for option in (
+        "window-frames",
+        "window-weight",
+        "address-frames",
+        "address-weight",
+    ):
+        parser.add_argument(f"--{option}", type=int, default=0)
     args = parser.parse_args()
+    windowed = args.window_frames * args.window_weight > 0
     runs: dict[str, dict] = {}
     for run in args.run:
         document = json.loads((run / "full_body_spec_hipcal_scaled.json").read_text())
@@ -116,13 +169,24 @@ def main() -> None:
         runs[run.name] = {
             "document": document,
             "q": q,
+            "impact": _impact_frame(run) if windowed else None,
             "sides": relative_rotations(document, q),
         }
     first = next(iter(runs.values()))["document"]
     ranges = first["coordinate_ranges_deg"]
     receipt: dict = {
+        "objective": {
+            "window_frames": args.window_frames,
+            "window_weight": args.window_weight,
+            "address_frames": args.address_frames,
+            "address_weight": args.address_weight,
+        },
         "runs": {
-            run.name: {"path": str(run), "frames": int(len(runs[run.name]["q"]))}
+            run.name: {
+                "path": str(run),
+                "frames": int(len(runs[run.name]["q"])),
+                "impact_frame": runs[run.name]["impact"],
+            }
             for run in args.run
         },
         "document_grip_rotation_deg": first.get("subject", {}).get("grip_rotation_deg"),
@@ -143,13 +207,39 @@ def main() -> None:
             receipt["runs"][name][f"{side}_frames_on_far_euler_branch"] = int(
                 (np.abs(matched[:, 1]) > np.pi / 2).sum()
             )
-            stacks.append(stack)
+            stacks.append(
+                grip_fit.weighted_frames(
+                    stack,
+                    r["impact"],
+                    window_frames=args.window_frames,
+                    window_weight=args.window_weight,
+                    address_frames=args.address_frames,
+                    address_weight=args.address_weight,
+                )
+            )
         fit = grip_fit.fit_grip_rotation(
             np.concatenate(stacks), base, [ranges[c] for c in coords]
         )
+        held = (receipt["document_grip_rotation_deg"] or {}).get(SIDE_KEYS[side])
         receipt["sides"][side] = {
             "coordinates": list(coords),
             **fit.as_document(),
+            "total_deg": None
+            if held is None
+            else [
+                round(v, 3)
+                for v in grip_fit.compose_rotation_deg(held, fit.rotation_deg)
+            ],
+            "per_run_cock_deg": {
+                name: _cock_report(
+                    r["sides"][side][0],
+                    base,
+                    fit.rotation_deg,
+                    r["impact"],
+                    args.window_frames,
+                )
+                for name, r in runs.items()
+            },
             "per_run_after": {
                 name: _per_run(
                     r["sides"][side][0],
