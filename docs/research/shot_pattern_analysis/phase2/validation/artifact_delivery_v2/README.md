@@ -1,4 +1,4 @@
-# Phase-Two Artifact Delivery Evidence v2
+# Phase-Two Artifact Delivery Evidence V2
 
 This directory records local bundle construction, offline restoration, exact release staging, and the cell PNG hash bridge. It does not claim a GitHub release or remote download.
 
