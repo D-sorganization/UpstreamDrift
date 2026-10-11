@@ -28,8 +28,7 @@ The observer does not change request bytes, model/source, mesh, bounds,
 objective, optimizer settings, dynamics, integration accuracy, or solver-call
 count. The optimizing stage proves entry into the study solve API only. It
 does not prove CasADi/IPOPT preprocessing finished, an IPOPT iteration began,
-or that the solve returned. Timeouts and getter errors remain measurements or
-unknowns; they are not convergence, feasibility, or qualification claims.
+or that the solve returned. Timeouts remain measurements or unknowns. Expected RuntimeError/ValueError getter failures are retained as error receipts; unexpected exceptions propagate so the observer does not hide programming failures. None of these outcomes is a convergence, feasibility, or qualification claim.
 All 17 required production model/variant rows across six ecosystems remain
 unqualified.
 
@@ -38,8 +37,7 @@ unqualified.
 The focused unit tests use a fake study and solver to verify the unchanged
 stage order, the post-set_parallel(0) getter timing, request/source identity,
 atomic replacement, and durable optimizing state when study.solve() raises.
-Additional cases preserve getter missing/error/nonfinite/non-scalar results
-and verify a failed serialization leaves the prior complete snapshot intact.
+Additional cases preserve getter missing/error/nonfinite/non-scalar results, verify unexpected descriptor and getter exceptions propagate, and confirm failed serialization leaves the prior complete snapshot intact.
 No OpenSim SDK import, model construction, native solve, or native execution was
 performed for this instrumentation change.
 

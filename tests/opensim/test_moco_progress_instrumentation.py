@@ -214,6 +214,37 @@ def test_solver_progress_getters_preserve_missing_error_and_nonfinite() -> None:
     assert "value" not in result["object"]
 
 
+class _UnexpectedSolverProgressError(Exception):
+    pass
+
+
+def test_solver_progress_propagates_unexpected_descriptor_exception() -> None:
+    class GetterFailure:
+        @property
+        def get_unexpected(self) -> Any:
+            raise _UnexpectedSolverProgressError("unexpected descriptor failure")
+
+    with pytest.raises(
+        _UnexpectedSolverProgressError, match="unexpected descriptor failure"
+    ):
+        native_moco_runner._solver_progress_properties(
+            GetterFailure(), {"unexpected": "get_unexpected"}
+        )
+
+
+def test_solver_progress_propagates_unexpected_getter_exception() -> None:
+    class GetterFailure:
+        def get_unexpected(self) -> float:
+            raise _UnexpectedSolverProgressError("unexpected getter failure")
+
+    with pytest.raises(
+        _UnexpectedSolverProgressError, match="unexpected getter failure"
+    ):
+        native_moco_runner._solver_progress_properties(
+            GetterFailure(), {"unexpected": "get_unexpected"}
+        )
+
+
 def test_solver_progress_error_record_is_same_for_descriptor_and_call_errors() -> None:
     class GetterFailures:
         @property
