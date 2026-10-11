@@ -127,3 +127,5 @@ UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
 {{< include chapters/57-native-wrapped-path-closure.qmd >}}
 
 {{< include chapters/58-native-contact-source-closure.qmd >}}
+
+{{< include chapters/59-native-structural-weld-admission.qmd >}}
