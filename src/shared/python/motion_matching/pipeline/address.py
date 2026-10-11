@@ -211,14 +211,38 @@ def best_address(
     return best
 
 
+def club_fixed_bodies(fix_club_markers: bool) -> tuple[str, ...]:
+    """Bodies whose seed markers the static trial keeps (``--fix-club-markers``).
+
+    With the flag the club cluster (``club_markers.CLUB_MARKER_BODY``) stays at
+    the document's per-club offsets, so the static trial cannot absorb a grip
+    rotation into the club markers and move the capture's measured face (#12221).
+    """
+    from src.shared.python.motion_matching.execution.club_markers import (
+        CLUB_MARKER_BODY,
+    )
+
+    return (CLUB_MARKER_BODY,) if fix_club_markers else ()
+
+
 def static_offsets(
-    lane: Lane, kin: FullBodyMarkerKinematics, q: np.ndarray, seeds: dict
+    lane: Lane,
+    kin: FullBodyMarkerKinematics,
+    q: np.ndarray,
+    seeds: dict,
+    fixed_bodies: Sequence[str] = (),
 ) -> dict:
     """Static-trial placement of every seed marker at pose ``q`` over the
-    first ``STATIC_FRAMES`` frames (bodies as in ``seeds``)."""
+    first ``STATIC_FRAMES`` frames (bodies as in ``seeds``).
+
+    Markers on ``fixed_bodies`` keep their seed offsets.
+    """
     frames = list(range(STATIC_FRAMES))
     seen = {
-        label for label in seeds if lane.valid[frames, lane.labels.index(label)].any()
+        label
+        for label in seeds
+        if seeds[label][0] not in fixed_bodies
+        and lane.valid[frames, lane.labels.index(label)].any()
     }
     cols = [lane.labels.index(m) for m in seen]
     capture = TourCapture(
@@ -234,10 +258,15 @@ def static_offsets(
 
 
 def static_trial(
-    lane: Lane, spec_bytes: bytes, seeds: dict, q_seed: np.ndarray
+    lane: Lane,
+    spec_bytes: bytes,
+    seeds: dict,
+    q_seed: np.ndarray,
+    fixed_bodies: Sequence[str] = (),
 ) -> tuple[dict, Any, FullBodyMarkerKinematics]:
     """Alternating static trial: neutral address fit, placement of every
-    marker at that pose, and again with the placed markers."""
+    marker at that pose (except those on ``fixed_bodies``), and again with
+    the placed markers."""
     placed = dict(seeds)
     q = q_seed
     neutral = None
@@ -245,7 +274,7 @@ def static_trial(
     for weight in ELBOW_PIT_WEIGHTS_NEUTRAL:
         adapter, kin = lane.kinematics(spec_bytes, placed)
         neutral = best_address(lane, kin, q, neutral=True, pit_weight=weight)
-        placed = static_offsets(lane, kin, neutral.q, placed)
+        placed = static_offsets(lane, kin, neutral.q, placed, fixed_bodies)
         q = neutral.q
     adapter, kin = lane.kinematics(spec_bytes, placed)
     if neutral is None or kin is None:
@@ -636,6 +665,7 @@ class AddressStageInputs:
     hipcal_path: Path | None = None
     static_seeds: bool = False
     fit_closure: bool = False
+    fix_club_markers: bool = False
     log: logging.Logger | None = None
 
 
@@ -657,10 +687,12 @@ def solve_address_stage(inputs: AddressStageInputs) -> AddressStageResult:
     """Solve the address stage: seed offsets, static trial, and closure fitting.
 
     Preconditions:
-    - ``fit_closure`` requires ``static_seeds``.
+    - ``fit_closure`` and ``fix_club_markers`` require ``static_seeds``.
     """
     if inputs.fit_closure and not inputs.static_seeds:
         raise ValueError("--fit-closure needs --static-seeds")
+    if inputs.fix_club_markers and not inputs.static_seeds:
+        raise ValueError("--fix-club-markers needs --static-seeds")
 
     from src.shared.python.motion_matching.pipeline.address_feet import (
         record_foot_progression,
@@ -695,7 +727,10 @@ def solve_address_stage(inputs: AddressStageInputs) -> AddressStageResult:
 
     if inputs.static_seeds:
         placed, neutral, kin = lane.static_trial(
-            hip_bytes, {**fixed, **seeds_all}, q_seed
+            hip_bytes,
+            {**fixed, **seeds_all},
+            q_seed,
+            club_fixed_bodies(inputs.fix_club_markers),
         )
         adapter = kin.adapter
         fixed = {label: placed[label] for label in fixed}
@@ -708,6 +743,10 @@ def solve_address_stage(inputs: AddressStageInputs) -> AddressStageResult:
             "marker_rms_m": address.marker_rms_m,
             "posture": posture_summary(kin, address.q),
         }
+        if inputs.fix_club_markers:  # recorded only when set: default receipts stay
+            address_report["static_trial"]["fixed_marker_bodies"] = list(
+                club_fixed_bodies(True)
+            )
         if log:
             log.info(
                 "static trial: neutral fit %.1f mm, address with static seeds %.1f mm",
