@@ -36,11 +36,11 @@ available for the fleet-wide inventory script in this run)
 
 ## Findings and Actions
 
-| Finding | Action |
-| --- | --- |
-| `docs/codemap/README.md`, `docs/codemap/agents.md` referenced the retired in-tree codemap copy and a dead `PYTHONPATH=src` fallback | Fixed in this PR — both now point at `vendor/ud-tools/src` and link #9406 |
+| Finding                                                                                                                                                                                     | Action                                                                             |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `docs/codemap/README.md`, `docs/codemap/agents.md` referenced the retired in-tree codemap copy and a dead `PYTHONPATH=src` fallback                                                         | Fixed in this PR — both now point at `vendor/ud-tools/src` and link #9406          |
 | `codemap_tools.py`'s `_try_local_api()` fallback imports the same module path as `_try_tools_api()` and can never diverge from it; its docstring still describes a live two-path resolution | Logged, not fixed (behavior change, out of cartographer lane) — see suggestion log |
-| `PROJECT_MAP.md` §1 tile count (11) vs. the generated manifest (58 records) | Logged only — the doc already redirects to the current atlas |
+| `PROJECT_MAP.md` §1 tile count (11) vs. the generated manifest (58 records)                                                                                                                 | Logged only — the doc already redirects to the current atlas                       |
 
 Full detail: [`cartographer-suggestions.md`](../cartographer-suggestions.md).
 

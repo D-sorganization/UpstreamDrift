@@ -5507,6 +5507,90 @@ the OpenSim exports, dependent hashes and the club-face fixtures (the driver
 fixture export is blocked by the trail-shoulder singularity, \#12266). No bound,
 tolerance or filter constant changed.
 
+\paragraph{Adoption of the Per-Capture Grip Rotation for the Driver (Issue \#12221).}
+The fitted driver rotation was applied to the committed driver document
+(\texttt{scripts/set\_spec\_grip\_rotation.py}, receipt
+\texttt{fit\_grip\_rotation\_receipt\_driver.json}), and the three driver
+ground-support receipts, the driver OpenSim export and the driver club-face fixture
+were regenerated on ControlTower \texttt{ud-sim} (commits \texttt{8d42b60dce} and
+\texttt{e44573633b}, identical documents). The calibrated driver commands now add
+\texttt{--fix-club-markers}, since the fit is valid only with the measured cluster
+held fixed. Address / IK / dynamics marker RMS (mm), before $\to$ after:
+
+\begin{center}
+\begin{tabular}{lrr}
+\hline
+Receipt & Before & After \\
+\hline
+Driver, \texttt{--static-seeds} & 7.5 / 30.5 / 82.6 & 11.0 / 30.3 / 82.0 \\
+Driver, Drake engine & 7.2 / 30.7 / 77.8 & 11.0 / 30.3 / 86.3 \\
+Driver, nominal & 41.7 / 46.1 / 73.6 & 50.9 / 46.5 / 71.9 \\
+\hline
+\end{tabular}
+\end{center}
+All three keep 0 IK range-of-motion flags. The Drake driver dynamics replay worsened
+($77.8 \to 86.3$~mm), and the nominal driver reference-ZMP outside fraction over
+1--1.5~s went from 140/180 to 158/180 frames.
+
+Control. The same commit with the old document and the cluster held fixed
+reproduces the earlier control exactly (driver 7.7 / 29.4 / 105.9~mm), so the grip
+refit, not code drift, explains the change against the cluster-fixed baseline:
+dynamics $105.9 \to 82.0$~mm.
+
+Sensitivity. The experiment document behind Result C differed from the applied
+document only by receipt rounding (about $10^{-5}$ in each wrist
+\texttt{child\_to\_follower} entry), yet its dynamics were 79.3~mm against 82.0~mm
+here, while address and IK agree within 0.3~mm. The tracking replay is therefore
+sensitive at the 3--15~mm level to tiny parameter changes. The fit is one per
+capture and is not independently validated.
+
+\paragraph{Driver Club-Face Fixture (Issue \#12221).}
+The driver club-face fixture (\texttt{tests/fixtures/club\_face}) was regenerated at
+\texttt{9fe74740a5} on ControlTower. The same-input export no longer stops at the
+trail-shoulder singularity (\#12266) on this document.
+
+\begin{center}
+\begin{tabular}{lrr}
+\hline
+Quantity & Before & After \\
+\hline
+Impact speed (model / capture, m/s) & --- & 50.02 / 51.32 \\
+Impact speed error (\%) & $-5.1$ & $-2.5$ \\
+Peak early (ms) & 1.8 & 4.4 \\
+Post-impact speed drop (\%) & $-43.2$ & $-4.5$ \\
+Face at address, model / capture (deg) & --- & 5.44 / 5.50 \\
+Face at impact, model / capture (deg) & --- & 16.88 / 14.96 \\
+\hline
+\end{tabular}
+\end{center}
+The fixture meets GCV-20 (3~\%, 5~ms, 10~\%) and OSV-10 (5~deg).
+The Rajagopal driver grip calibration reads this fixture's address pose, so it was
+re-run (grip gaps 0.03 and 0.2~mm) and the club of both musculoskeletal models
+rebuilt. Driven by this fixture, the OpenSim bushing grip exceeds its full-swing
+bounds only in the 6~ms ball-impact window (2.62~deg against 2~deg, 51.3~N
+against 50~N; the previous fixture peaked at 1.81~deg and 34.5~N at the same
+instant). The bounds are unchanged; the two driver cases carry a strict xfail
+and the decision is recorded on issue \#12272.
+
+The 7-iron is not adopted. Its refit meets GCV-20 and OSV-10 on the tracked swing
+($-1.9$~\%, $-0.2$~ms, impact face 2.59 against 3.21~deg), but its club-face fixture
+comes from the same-input export (open-loop replay of the recorded efforts at
+1~kHz), which gives $-5.0$~\%, peak $-5.1$~ms and an 8.71~deg impact face against
+the capture's 3.21~deg (a 5.50~deg gap; the top-of-backswing gap is 5.09~deg), both
+beyond the 5~deg limit. The committed 7-iron fixture gives $-3.9$~\%, $-3.9$~ms and
+2.83~deg, and the OSV-10 face tests run forward kinematics on the current document,
+so adopting the refit would turn eight passing face tests red. The 7-iron document,
+OpenSim export and receipts are unchanged, and
+\texttt{fit\_grip\_rotation\_receipt\_iron7.json} stays committed for a follow-up.
+
+Reproduce (ControlTower \texttt{ud-sim}, repository root):
+\begin{verbatim}
+python3 -m src.shared.python.motion_matching.pipeline.cli \
+  --spec docs/development/full_body_models/full_body_spec_anthro_driver.json \
+  --capture driver --static-seeds --fix-club-markers --out <dir>
+python3 -m scripts.regenerate_club_face_fixtures --work <dir> --capture driver
+\end{verbatim}
+
 Reproduce, once per capture (receipts \texttt{fit\_grip\_rotation\_receipt\_<club>.json}
 under \texttt{evidence/anthropometry/}):
 \begin{verbatim}
@@ -5834,12 +5918,11 @@ drift apart. The hand-side frames are the committed address calibration
 
 An earlier draft of this slice placed the lead hand 0.015 m below the butt,
 with a lead \texttt{WeldConstraint} and a trail \texttt{WeldJoint} on a club
-whose origin was the butt. It was superseded when the OSV-9 club landed. The
-spec-derived 0.032 m offset for the lead hand was accepted by the owner
-(2026-10-11) and is resolved; reverting to a 0.015 m lead position would move
-both inverse-kinematics grip targets 0.017 m toward the butt and requires
-\texttt{msk\_club\_calibration} to be rerun for both models and both clubs.
-Reproduce: \texttt{python3 scripts/build\_humanoid\_osim.py}.
+whose origin was the butt. It was superseded when the OSV-9 club landed.
+Restoring a 0.015 m lead position would move both inverse-kinematics grip
+targets 0.017 m toward the butt and needs \texttt{msk\_club\_calibration} to be
+rerun for both models and both clubs; it awaits owner review. Reproduce:
+\texttt{python3 scripts/build\_humanoid\_osim.py}.
 
 \subsection{Closure Residual on the Canned Swing}
 Residual $=\lVert p_a-p_b\rVert$ of the two grip frames the closure ties, per
@@ -5864,76 +5947,6 @@ MyoSuite & unavailable & unavailable \\
 \end{tabular}
 \caption{Maximum Closure Residual Over the Canned Swing}
 \end{table}
-
-\subsection{Curled-Finger Grip Hand Mesh (Visual Only)}
-\texttt{src/shared/python/model\_appearance/grip\_hand\_mesh.py}
-(\texttt{build\_grip\_hand\_mesh}) bakes one rigid hand per grip from a
-parametric finger-segment generator: a rounded curved palm block, four
-fingers of three capsule phalanges and a two-capsule thumb. It reads the hand
-position, V azimuth, thumb azimuth and grip style from \texttt{grip\_pose}
-and takes the grip radius $R$ as an input, so the same hand wraps the driver,
-iron and wedge grips. No engine attaches it yet; that is the next slice.
-
-\paragraph{Frame.} The mesh is expressed in a hand-grip frame that is rigid in
-the hand body: origin on the grip axis at the hand centre ($d_L$ or $d_T$
-below the butt), $z$ along $g$ (butt toward head), $x$ at azimuth $0$ ($-n$)
-and $y$ at azimuth 90 deg ($-t$). The grip is the cylinder $x^2+y^2=R^2$.
-
-\paragraph{Wrapping.} A phalanx of length $L_k$ and radius $r$ is a capsule
-whose axis is tangent to the circle of radius $\rho=R+c+r$ about the grip axis,
-with $c$ the pad clearance. The proximal tangent point is the phalanx
-midpoint, $a_0=L_0/2$; each later phalanx starts at the joint, so
-$a_{k+1}=b_k=L_k-a_k$. Consecutive tangent azimuths differ by
-$2\arctan(b_k/\rho)$, which puts most of the flexion at the proximal
-interphalangeal joint (84 deg for the default index finger). Every phalanx
-therefore comes no closer to the grip than $c$, at its tangent point; the
-joints stand off further. The knuckles sit 110 deg from the V in the curl
-direction. Lead fingers curl toward decreasing azimuth and trail fingers
-toward increasing azimuth, so the two hands are mirror images about their V
-azimuths. The thumb lies along the shaft toward the head at the
-\texttt{grip\_pose} thumb azimuth. The palm block sweeps from the V to the
-knuckles with its inner face $1.5$~mm off the grip.
-
-\begin{table}[h]
-\centering
-\begin{tabular}{lll}
-\hline
-Parameter & Default & Basis \\
-\hline
-Pad clearance $c$ & 1.0 mm & Inside the [0, 3] mm acceptance band \\
-Finger radii (index, middle, ring, little) & 8.0, 8.2, 7.8, 6.8 mm & Nominal adult; stack fits below the butt \\
-Index phalanges & 40, 24, 19 mm & Nominal adult \\
-Middle phalanges & 45, 28, 20 mm & Nominal adult \\
-Ring phalanges & 42, 27, 20 mm & Nominal adult \\
-Little phalanges & 34, 20, 18 mm & Nominal adult \\
-Thumb radius, segment stations & 9.5 mm; $-12$, 20, 46 mm & Nominal adult \\
-Palm thickness, clearance & 18 mm, 1.5 mm & Visual \\
-Knuckle azimuth from the V & 110 deg & Visual \\
-\hline
-\end{tabular}
-\caption{Grip Hand Mesh Generator Parameters}
-\end{table}
-
-\paragraph{Measured Clearance.} On the vertices and dense barycentric samples
-of every triangle, against the analytic cylinder, the minimum distance from
-each on-grip finger, the thumb and the palm to the grip surface is 1.0~mm
-(fingers and thumb) and 1.49~mm (palm) at $R=12.7$, 13.8, 14.0 and 14.5~mm,
-for both hands; no surface point lies inside the grip. Every shell is closed
-and consistently wound. Reproduce:
-\texttt{python3 -m pytest tests/unit/model\_appearance/test\_grip\_hand\_mesh.py}.
-
-\paragraph{Limitations.} The hand is visual only and rigid; it carries no
-mass, inertia or contact. Finger dimensions are nominal, not fitted to a
-golfer. The mesh is a set of overlapping closed shells, not a boolean union,
-so it renders as one hand but is not a single manifold. For overlap and
-interlock the trail little finger is moved over (or half between) the lead
-index and middle fingers as a separate straight-curl finger; it is flagged
-off-grip, excluded from the grip clearance, and may touch the lead fingers.
-Contact between the two hands is not modelled: the tip of the lead thumb can
-meet the edge of the trail palm, where the trail life line should cover it.
-The Shadow hand assets under the MuJoCo Grip Modelling tab were not used; the
-MuJoCo Menagerie Shadow hand is stated to be Apache-2.0 in \#11728, and that
-licence still has to be confirmed and recorded before any asset-based variant.
 
 \subsection{Limitations and Open Items}
 \begin{itemize}
