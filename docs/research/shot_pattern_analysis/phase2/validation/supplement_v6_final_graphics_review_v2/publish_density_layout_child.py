@@ -10,9 +10,8 @@ from __future__ import annotations
 import hashlib
 import json
 import os
-from pathlib import Path
 import sys
-
+from pathlib import Path
 
 ANALYSIS_ROOT = Path(__file__).resolve().parents[6]
 PHASE2 = ANALYSIS_ROOT / "docs/research/shot_pattern_analysis/phase2"
@@ -36,7 +35,9 @@ def write_json(path: Path, value: object) -> None:
 def main() -> int:
     if not BASELINE.is_dir() or not CHILD.is_dir():
         raise FileNotFoundError("baseline and copied child publication must exist")
-    if not (REPAIR_SOURCE / "src/tools/shot_pattern_analysis/matched_supplement_figures.py").is_file():
+    if not (
+        REPAIR_SOURCE / "src/tools/shot_pattern_analysis/matched_supplement_figures.py"
+    ).is_file():
         raise FileNotFoundError("isolated repair source is missing")
     sys.path.insert(0, str(REPAIR_SOURCE))
     from src.tools.shot_pattern_analysis.matched_figure_identity import (
@@ -48,9 +49,7 @@ def main() -> int:
 
     scope_path = EVIDENCE / "density_layout_repair_scope.json"
     scope = json.loads(scope_path.read_text())
-    targets = {
-        Path(item["svg_path"]).name: item for item in scope["affected"]
-    }
+    targets = {Path(item["svg_path"]).name: item for item in scope["affected"]}
     if len(targets) != 49:
         raise ValueError("measured scope must contain exactly 49 unique triples")
     pipeline_path = BASELINE / "REPORT_SUPPLEMENT_PIPELINE.json"
@@ -74,8 +73,12 @@ def main() -> int:
         (BASELINE / "REPORT_SUPPLEMENT_COMPARISONS.json").read_text()
     )["comparisons"]
     roots = {
-        "original_primary/1": Path(pipeline["original_sources"]["original_primary"]["root"]),
-        "original_control/1": Path(pipeline["original_sources"]["original_control"]["root"]),
+        "original_primary/1": Path(
+            pipeline["original_sources"]["original_primary"]["root"]
+        ),
+        "original_control/1": Path(
+            pipeline["original_sources"]["original_control"]["root"]
+        ),
     }
     plans = {
         protocol: json.loads((root / "matrix_plan.json").read_text())["cells"]
@@ -178,13 +181,24 @@ def main() -> int:
         "repair_source_commit": "5a1fdbfe51",
         "baseline_pipeline_sha256": sha(pipeline_path),
         "child_pipeline_sha256": sha(CHILD / "REPORT_SUPPLEMENT_PIPELINE.json"),
-        "baseline_figure_ledger_sha256": sha(BASELINE / "REPORT_SUPPLEMENT_FIGURES.json"),
+        "baseline_figure_ledger_sha256": sha(
+            BASELINE / "REPORT_SUPPLEMENT_FIGURES.json"
+        ),
         "child_figure_ledger_sha256": ledger_sha,
         "replacements": repairs,
     }
     receipt_path = EVIDENCE / "layout_repair_child_publication_receipt.json"
     write_json(receipt_path, receipt)
-    print(json.dumps({"receipt": str(receipt_path), "sha256": sha(receipt_path), "replacements": len(repairs)}))
+    sys.stdout.write(
+        json.dumps(
+            {
+                "receipt": str(receipt_path),
+                "sha256": sha(receipt_path),
+                "replacements": len(repairs),
+            }
+        )
+        + "\n"
+    )
     return 0
 
 

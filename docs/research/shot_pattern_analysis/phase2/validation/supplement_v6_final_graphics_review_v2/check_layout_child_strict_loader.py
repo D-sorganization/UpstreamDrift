@@ -4,15 +4,16 @@ from __future__ import annotations
 
 import hashlib
 import json
-from pathlib import Path
 import sys
 import time
-
+from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 PHASE = HERE.parents[1]
 CHILD = PHASE / "supplement_report_v2_layout_repair"
-PRODUCER = Path("/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift")
+PRODUCER = Path(
+    "/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift"
+)
 
 
 def sha(path: Path) -> str:
@@ -42,7 +43,10 @@ def main() -> int:
     }
     target = HERE / "layout_child_strict_loader_receipt.json"
     target.write_text(json.dumps(receipt, sort_keys=True, indent=2) + "\n")
-    print(json.dumps({"receipt": str(target), "sha256": sha(target), "verdict": "pass"}))
+    sys.stdout.write(
+        json.dumps({"receipt": str(target), "sha256": sha(target), "verdict": "pass"})
+        + "\n"
+    )
     return 0
 
 

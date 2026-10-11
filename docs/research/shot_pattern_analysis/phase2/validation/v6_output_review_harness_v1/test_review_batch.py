@@ -37,8 +37,14 @@ def test_curve_labels_adjacent_to_correct_counts_pass():
         "comparison_kind": "curve_strength",
         "common_supported_n": 10000,
         "sources": [
-            {"protocol_id": "original_control/1", "cell": "driver_lean0_curve1_rotation1_combined1"},
-            {"protocol_id": "original_control/1", "cell": "driver_lean0_curve2_rotation1_combined1"},
+            {
+                "protocol_id": "original_control/1",
+                "cell": "driver_lean0_curve1_rotation1_combined1",
+            },
+            {
+                "protocol_id": "original_control/1",
+                "cell": "driver_lean0_curve2_rotation1_combined1",
+            },
         ],
     }
     caption = TEXT.replace(

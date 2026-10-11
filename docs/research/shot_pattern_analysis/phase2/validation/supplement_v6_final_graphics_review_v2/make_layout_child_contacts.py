@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import hashlib
 import json
+import sys
 from pathlib import Path
 
 from PIL import Image, ImageDraw
-
 
 HERE = Path(__file__).resolve().parent
 PHASE = HERE.parents[1]
@@ -37,7 +37,10 @@ def main() -> int:
             before = im.convert("RGB")
         with Image.open(child) as im:
             after = im.convert("RGB")
-        if min(before.width, after.width) < 4000 or min(before.height, after.height) < 2400:
+        if (
+            min(before.width, after.width) < 4000
+            or min(before.height, after.height) < 2400
+        ):
             raise ValueError(f"unexpected image geometry at index {index}")
         # Preserve source images; these are marked review contacts only.
         board = Image.new("RGB", (2300, 2240), "white")
@@ -50,8 +53,12 @@ def main() -> int:
             # Native-pixel crops expose legend/title and Fade/colorbar clearance.
             board.paste(image.crop((0, 0, 1100, 700)), (x, 710))
             right_start = int(image.width * 0.57)
-            board.paste(image.crop((right_start, 940, right_start + 1100, 1740)), (x, 1420))
-        reviewer = next(name for start, stop, name in REVIEWERS if start <= index < stop)
+            board.paste(
+                image.crop((right_start, 940, right_start + 1100, 1740)), (x, 1420)
+            )
+        reviewer = next(
+            name for start, stop, name in REVIEWERS if start <= index < stop
+        )
         contact = OUT / f"{index:02d}_{reviewer}.jpg"
         board.save(contact, quality=94, subsampling=0)
         inventory.append(
@@ -81,7 +88,16 @@ def main() -> int:
     }
     target = OUT / "inventory.json"
     target.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
-    print(json.dumps({"inventory": str(target), "sha256": sha(target), "contact_count": len(inventory)}))
+    sys.stdout.write(
+        json.dumps(
+            {
+                "inventory": str(target),
+                "sha256": sha(target),
+                "contact_count": len(inventory),
+            }
+        )
+        + "\n"
+    )
     return 0
 
 

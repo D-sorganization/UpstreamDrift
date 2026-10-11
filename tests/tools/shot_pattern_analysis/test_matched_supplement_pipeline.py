@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
-import json
-import pytest
 import csv
 import gzip
+import json
+
+import pytest
 
 pytestmark = pytest.mark.unit
 
@@ -279,6 +280,7 @@ def test_unavailable_source_manifest_and_summary_are_rechecked_after_load(
     tmp_path, monkeypatch
 ):
     import hashlib
+
     from src.tools.shot_pattern_analysis import matched_supplement_pipeline as pipeline
 
     root = tmp_path / "matrix"
@@ -338,6 +340,7 @@ def test_verified_supplement_loader_rejects_changed_report_artifacts(
     tmp_path, monkeypatch
 ):
     import hashlib
+
     from src.tools.shot_pattern_analysis import matched_supplement_pipeline as pipeline
 
     output = tmp_path / "supplement"
@@ -440,6 +443,7 @@ def test_source_snapshot_covers_unavailable_summary_manifest_and_executed_config
     tmp_path,
 ):
     import hashlib
+
     from src.tools.shot_pattern_analysis.matched_supplement_pipeline import (
         _assert_source_cell_hashes,
         _source_cell_hashes,
@@ -495,8 +499,8 @@ def test_cell_figure_ledger_keeps_density_and_overhead_exports_distinct(
 ):
     import json
 
-    from src.tools.shot_pattern_analysis import matched_supplement_pipeline as module
     from src.tools.shot_pattern_analysis import matched_supplement_figures as figures
+    from src.tools.shot_pattern_analysis import matched_supplement_pipeline as module
 
     root = tmp_path / "source"
     cell = "pitching_wedge_lean0_curve2_rotation1_shaft_only"
@@ -824,7 +828,6 @@ def test_pair_density_and_overhead_render_shared_condition_panels(
     except (ImportError, OSError) as exc:
         pytest.skip(f"matplotlib/Pillow not loadable: {exc}")
     import numpy as np
-
     from src.tools.shot_pattern_analysis.matched_supplement_figures import (
         _write_pair_density_figure,
         _write_pair_overhead_figure,
@@ -930,6 +933,7 @@ def test_default_markdown_uses_shared_precision_for_all_interval_columns():
 def test_pipeline_provenance_binds_shared_numeric_formatter():
     import hashlib
     from pathlib import Path
+
     from src.tools.shot_pattern_analysis import matched_formatting
     from src.tools.shot_pattern_analysis.matched_supplement_pipeline import (
         _report_source_hashes,
@@ -940,6 +944,7 @@ def test_pipeline_provenance_binds_shared_numeric_formatter():
         _report_source_hashes()["matched_formatting.py"]
         == hashlib.sha256(path.read_bytes()).hexdigest()
     )
+
 
 @pytest.mark.slow
 def test_pair_density_long_caption_keeps_legend_clear_of_panel_titles(
@@ -982,7 +987,9 @@ def test_pair_density_long_caption_keeps_legend_clear_of_panel_titles(
     second = _ref("b", "seven_iron", 5, 2, 1, target=139.903)
     rng = np.random.default_rng(3)
     point_sets = {
-        f"{pattern} · {condition}": (rng.normal(size=(40, 2)) + np.array([139.903, 0.0])).tolist()
+        f"{pattern} · {condition}": (
+            rng.normal(size=(40, 2)) + np.array([139.903, 0.0])
+        ).tolist()
         for pattern in ("Straight", "Draw", "Fade")
         for condition in ("Curve ×1", "Curve ×2")
     }
@@ -1026,6 +1033,7 @@ def test_pair_density_long_caption_keeps_legend_clear_of_panel_titles(
         assert panel_path.get_extents().y0 - legend_path.get_extents().y1 >= 2.0
     assert measured_gutters_pt and min(measured_gutters_pt) >= 12.0
 
+
 @pytest.mark.slow
 def test_pair_density_narrow_downrange_keeps_fade_title_clear_of_colorbar(tmp_path):
     """A narrow downrange cloud must leave its lower Fade title fully visible."""
@@ -1049,8 +1057,7 @@ def test_pair_density_narrow_downrange_keeps_fade_title_clear_of_colorbar(tmp_pa
     rng = np.random.default_rng(21)
     point_sets = {
         f"{pattern} · {condition}": (
-            rng.normal(size=(40, 2)) * np.array([1.0, 8.0])
-            + np.array([target, 0.0])
+            rng.normal(size=(40, 2)) * np.array([1.0, 8.0]) + np.array([target, 0.0])
         ).tolist()
         for pattern in ("Straight", "Draw", "Fade")
         for condition in ("Rotation SD 1°", "Rotation SD 2°")

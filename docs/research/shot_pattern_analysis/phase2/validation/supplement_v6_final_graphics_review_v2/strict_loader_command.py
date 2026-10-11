@@ -1,3 +1,5 @@
+import sys
+
 """Save a compact receipt for the frozen public supplement loader."""
 
 import hashlib
@@ -33,11 +35,11 @@ comparisons = result["comparisons"]["comparisons"]
 cells = result["report"]["unique_cells"]
 figures = result["figure_ledger"]["figures"]
 paths = [row["relative_path"] for row in figures if row.get("status") != "unavailable"]
-numeric_path = phase / "validation/protocol_name_recovery_v6/expected_numeric_hashes.json"
+numeric_path = (
+    phase / "validation/protocol_name_recovery_v6/expected_numeric_hashes.json"
+)
 expected = json.loads(numeric_path.read_text())
-actual_numeric = {
-    name: sha(phase / "supplement_report_v1" / name) for name in expected
-}
+actual_numeric = {name: sha(phase / "supplement_report_v1" / name) for name in expected}
 if actual_numeric != expected:
     raise ValueError("seven numerical hashes differ from committed reference")
 if not (
@@ -75,4 +77,14 @@ receipt = {
     "input_sha256": terminal["input_sha256"],
 }
 (output / "strict_loader_receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")
-print(json.dumps({"status": "passed", "pairs": len(comparisons), "cells": len(cells), "assets": len(figures)}))
+sys.stdout.write(
+    json.dumps(
+        {
+            "status": "passed",
+            "pairs": len(comparisons),
+            "cells": len(cells),
+            "assets": len(figures),
+        }
+    )
+    + "\n"
+)
