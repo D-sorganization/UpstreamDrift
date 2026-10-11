@@ -4,10 +4,10 @@
 
 Issue #12244 adds a typed exact-source closure for the existing native sphere/
 half-space contact path used by constrained muscle replay. It reuses
-`OpenSimForceTorqueSource` and the shared wrench sampler. It does not add
-contact to the exact 557-muscle private source or authorize capture contact.
-LunaTools owns request/runner serialization and lifecycle wiring; this branch
-contains provider and constrained replay support only.
+`OpenSimForceTorqueSource` and the shared wrench sampler. The #12236 request
+integration serializes and revalidates the declaration through preparation,
+export identity, and fresh replay. It does not add contact to the exact
+557-muscle private source or authorize capture contact.
 
 ## Identity and Admission
 
@@ -27,20 +27,22 @@ OpenSim force/torque implementation rather than defining another law.
 
 ## Validation and Limits
 
-OpenSim 4.6 focused checks: 73 passed and 2 skipped in the combined contact,
-legacy muscle replay, and mechanics-profile slice. The dedicated contact file
-passes 8 tests. Both declared force types and sphere/half-space component
-closures are exercised. Smooth contact builds and freshly replays through the
-constrained path with finite native wrench samples. Legacy native replay
-continues to exercise both laws through the shared sampler. Undeclared contact
-is rejected for both laws; the generated HuntCrossley fixture also hits the
-strict self-contained XML rejection before component-level constrained replay.
+OpenSim 4.6 focused contact checks pass 16 tests. Both declared force types
+and sphere/half-space component closures are exercised. Smooth and
+Hunt-Crossley contact each build and freshly replay through the constrained
+path with finite native wrench samples. A Hunt-Crossley `NativeMocoRequest`
+passes the runner's component audit only with the exact declaration; a
+mutated force digest blocks. JSON digest and unknown-field negatives pass.
+Legacy native replay continues to exercise both laws through the shared
+sampler. Undeclared contact is rejected for both laws.
 The skipped cases are inapplicable legacy extra-geometry checks.
 
-Commit `316b011324` adds provider-implementation identity and Chapter 58;
-`b48f7b053b` adds both-law default rejection coverage and clarifies the
-HuntCrossley limitation. Normal hooks passed on both commits. The parent-
-relative central gate is still pending.
+The provider/parser merge `c6824895092e81c4859bc0c8a6cbc273cde22ca6` retains
+the native C++-qualified XML parser fix and its security regressions. The
+request/export/replay integration is committed in `7f47f3aaf1`; the normal
+merge commit is `3a18a64c2c`. Full Moco solve/export/replay success remains
+unproven for the complex source profile, and no optimizer qualification is
+claimed by the bounded native capability probe.
 
 No test establishes calibrated capture contact, human support or grip,
 physiological validity, full-body Moco solve, full-horizon replay, or

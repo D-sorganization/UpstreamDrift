@@ -463,117 +463,13 @@ class NativeDiagnosticAssessment:
     def __post_init__(self) -> None:
         _require_sha256(self.request_sha256, "request SHA-256")
         _require_sha256(self.source_sha256, "assessment source SHA-256")
-        if not isinstance(self.findings, tuple) or any(
-            not isinstance(finding, NativeDiagnosticFinding)
-            for finding in self.findings
-        ):
-            raise TypeError("assessment findings must be typed native findings")
-        if any(
-            finding.source_sha256 != self.source_sha256 for finding in self.findings
-        ):
-            raise ValueError("diagnostic finding source differs from assessment source")
-        if not isinstance(self.allowed_unqualified_findings, tuple) or any(
-            not isinstance(code, DiagnosticCode) or code not in _OPT_IN_CODES
-            for code in self.allowed_unqualified_findings
-        ):
-            raise ValueError("assessment opt-in codes must be qualification-only")
-        if len(set(self.allowed_unqualified_findings)) != len(
-            self.allowed_unqualified_findings
-        ):
-            raise ValueError("assessment opt-in contains duplicate finding codes")
-        if bool(self.allowed_unqualified_findings) != (self.policy_sha256 is not None):
-            raise ValueError("assessment opt-in codes and policy identity differ")
-        if self.policy_sha256 is not None:
-            _require_sha256(self.policy_sha256, "diagnostic policy SHA-256")
         if not isinstance(self.runtime_viability, RuntimeViability):
             raise TypeError("runtime viability must be a RuntimeViability")
-        if self.runtime_phase is not None and not isinstance(
-            self.runtime_phase, RuntimePhase
-        ):
-            raise TypeError("runtime phase must be a RuntimePhase or unavailable")
         if not isinstance(self.physical_qualification, PhysicalQualification):
             raise TypeError("physical qualification must be a PhysicalQualification")
-        if self.native_runtime_sha256 is not None:
-            _require_sha256(self.native_runtime_sha256, "native runtime SHA-256")
-        if self.blocker_receipt_sha256 is not None:
-            _require_sha256(self.blocker_receipt_sha256, "blocker receipt SHA-256")
-        if not isinstance(self.qualification_provenance_references, tuple):
-            raise TypeError("qualification provenance references must be typed pairs")
-        provenance = dict(self.qualification_provenance_references)
-        for digest, references in self.qualification_provenance_references:
-            _require_sha256(digest, "qualification provenance evidence SHA-256")
-            if (
-                not isinstance(references, tuple)
-                or not references
-                or any(
-                    not isinstance(reference, str) or not reference.strip()
-                    for reference in references
-                )
-            ):
-                raise ValueError("qualification provenance references must be nonblank")
-        for finding in self.findings:
-            if (
-                finding.code
-                in {
-                    DiagnosticCode.SOURCE_CONDITIONAL_ANATOMICAL_HYPOTHESIS,
-                    DiagnosticCode.SUPPORT_CONTACT_GRIP_UNQUALIFIED,
-                    DiagnosticCode.MARKER_REGISTRATION_PROVISIONAL,
-                }
-                and finding.evidence_sha256 not in provenance
-            ):
-                raise ValueError(
-                    "qualification finding is missing its provenance reference"
-                )
-        if self.runtime_viability is RuntimeViability.NOT_ATTEMPTED:
-            if (
-                self.runtime_evidence_sha256 is not None
-                or self.native_runtime_sha256 is not None
-                or self.runtime_phase is not None
-                or self.runtime_window_seconds is not None
-            ):
-                raise ValueError("unattempted runtime cannot carry execution evidence")
-        else:
-            if self.runtime_evidence_sha256 is None:
-                raise ValueError(
-                    "attempted runtime requires source-bound probe evidence"
-                )
-            if self.native_runtime_sha256 is None:
-                raise ValueError("attempted runtime requires native runtime identity")
-            if self.runtime_phase is None:
-                raise ValueError("attempted runtime requires an explicit phase")
-            if (
-                not isinstance(self.runtime_window_seconds, tuple)
-                or len(self.runtime_window_seconds) != 2
-                or any(
-                    isinstance(value, bool)
-                    or not isinstance(value, (float, int))
-                    or not math.isfinite(value)
-                    for value in self.runtime_window_seconds
-                )
-                or self.runtime_window_seconds[1] <= self.runtime_window_seconds[0]
-            ):
-                raise ValueError(
-                    "attempted runtime requires an exact finite time window"
-                )
-            _require_sha256(self.runtime_evidence_sha256, "runtime evidence SHA-256")
-        expected_admission = (
-            DiagnosticSoftwareAdmission.BLOCKED
-            if any(f.execution_effect is ExecutionEffect.BLOCK for f in self.findings)
-            else DiagnosticSoftwareAdmission.ADMITTED
-        )
-        if self.software_admission is not expected_admission:
-            raise ValueError("software admission differs from typed findings")
-        unqualified = any(
-            finding.qualification_effect is QualificationEffect.UNQUALIFIED
-            for finding in self.findings
-        )
-        expected_qualification = (
-            PhysicalQualification.UNQUALIFIED
-            if unqualified
-            else PhysicalQualification.NOT_ESTABLISHED
-        )
-        if self.physical_qualification is not expected_qualification:
-            raise ValueError("diagnostics cannot promote physical qualification")
+        _validate_assessment_findings_and_provenance(self)
+        _validate_assessment_runtime(self)
+        _validate_assessment_dispositions(self)
 
     @property
     def execution_permitted(self) -> bool:
@@ -635,6 +531,222 @@ class NativeDiagnosticAssessment:
         }
 
 
+@dataclass(frozen=True)
+class NativeDiagnosticRuntimeEvidence:
+    """One indivisible runtime attempt identity carried by an assessment."""
+
+    viability: RuntimeViability = RuntimeViability.NOT_ATTEMPTED
+    phase: RuntimePhase | None = None
+    window_seconds: tuple[float, float] | None = None
+    native_runtime_sha256: str | None = None
+    evidence_sha256: str | None = None
+
+
+def _validate_assessment_findings_and_provenance(
+    assessment: NativeDiagnosticAssessment,
+) -> None:
+    if not isinstance(assessment.findings, tuple) or any(
+        not isinstance(finding, NativeDiagnosticFinding)
+        for finding in assessment.findings
+    ):
+        raise TypeError("assessment findings must be typed native findings")
+    if any(f.source_sha256 != assessment.source_sha256 for f in assessment.findings):
+        raise ValueError("diagnostic finding source differs from assessment source")
+    allowed = assessment.allowed_unqualified_findings
+    if not isinstance(allowed, tuple) or any(
+        not isinstance(code, DiagnosticCode) or code not in _OPT_IN_CODES
+        for code in allowed
+    ):
+        raise ValueError("assessment opt-in codes must be qualification-only")
+    if len(set(allowed)) != len(allowed):
+        raise ValueError("assessment opt-in contains duplicate finding codes")
+    if bool(allowed) != (assessment.policy_sha256 is not None):
+        raise ValueError("assessment opt-in codes and policy identity differ")
+    if assessment.policy_sha256 is not None:
+        _require_sha256(assessment.policy_sha256, "diagnostic policy SHA-256")
+    if assessment.blocker_receipt_sha256 is not None:
+        _require_sha256(assessment.blocker_receipt_sha256, "blocker receipt SHA-256")
+    references = assessment.qualification_provenance_references
+    if not isinstance(references, tuple):
+        raise TypeError("qualification provenance references must be typed pairs")
+    provenance = dict(references)
+    for digest, values in references:
+        _require_sha256(digest, "qualification provenance evidence SHA-256")
+        if (
+            not isinstance(values, tuple)
+            or not values
+            or any(not isinstance(value, str) or not value.strip() for value in values)
+        ):
+            raise ValueError("qualification provenance references must be nonblank")
+    provenance_codes = {
+        DiagnosticCode.SOURCE_CONDITIONAL_ANATOMICAL_HYPOTHESIS,
+        DiagnosticCode.SUPPORT_CONTACT_GRIP_UNQUALIFIED,
+        DiagnosticCode.MARKER_REGISTRATION_PROVISIONAL,
+    }
+    if any(
+        finding.code in provenance_codes and finding.evidence_sha256 not in provenance
+        for finding in assessment.findings
+    ):
+        raise ValueError("qualification finding is missing its provenance reference")
+
+
+def _validate_assessment_runtime(assessment: NativeDiagnosticAssessment) -> None:
+    if assessment.runtime_phase is not None and not isinstance(
+        assessment.runtime_phase, RuntimePhase
+    ):
+        raise TypeError("runtime phase must be a RuntimePhase or unavailable")
+    for name, digest in (
+        ("native runtime SHA-256", assessment.native_runtime_sha256),
+        ("runtime evidence SHA-256", assessment.runtime_evidence_sha256),
+    ):
+        if digest is not None:
+            _require_sha256(digest, name)
+    if assessment.runtime_viability is RuntimeViability.NOT_ATTEMPTED:
+        if any(
+            value is not None
+            for value in (
+                assessment.runtime_evidence_sha256,
+                assessment.native_runtime_sha256,
+                assessment.runtime_phase,
+                assessment.runtime_window_seconds,
+            )
+        ):
+            raise ValueError("unattempted runtime cannot carry execution evidence")
+        return
+    if assessment.runtime_evidence_sha256 is None:
+        raise ValueError("attempted runtime requires source-bound probe evidence")
+    if assessment.native_runtime_sha256 is None:
+        raise ValueError("attempted runtime requires native runtime identity")
+    if assessment.runtime_phase is None:
+        raise ValueError("attempted runtime requires an explicit phase")
+    window = assessment.runtime_window_seconds
+    if window is None:
+        if assessment.runtime_viability is not RuntimeViability.FAILED:
+            raise ValueError("attempted runtime requires a valid observed time window")
+        return
+    if (
+        not isinstance(window, tuple)
+        or len(window) != 2
+        or any(
+            isinstance(value, bool)
+            or not isinstance(value, (float, int))
+            or not math.isfinite(value)
+            for value in window
+        )
+        or (
+            assessment.runtime_viability is RuntimeViability.VIABLE
+            and window[1] <= window[0]
+        )
+        or (
+            assessment.runtime_viability is RuntimeViability.FAILED
+            and window[1] < window[0]
+        )
+    ):
+        raise ValueError("attempted runtime requires a valid observed time window")
+
+
+def _validate_assessment_dispositions(
+    assessment: NativeDiagnosticAssessment,
+) -> None:
+    expected_admission = (
+        DiagnosticSoftwareAdmission.BLOCKED
+        if any(f.execution_effect is ExecutionEffect.BLOCK for f in assessment.findings)
+        else DiagnosticSoftwareAdmission.ADMITTED
+    )
+    if assessment.software_admission is not expected_admission:
+        raise ValueError("software admission differs from typed findings")
+    expected_qualification = (
+        PhysicalQualification.UNQUALIFIED
+        if any(
+            finding.qualification_effect is QualificationEffect.UNQUALIFIED
+            for finding in assessment.findings
+        )
+        else PhysicalQualification.NOT_ESTABLISHED
+    )
+    if assessment.physical_qualification is not expected_qualification:
+        raise ValueError("diagnostics cannot promote physical qualification")
+
+
+def _decode_assessment_findings(
+    raw_findings: object,
+) -> tuple[NativeDiagnosticFinding, ...]:
+    if not isinstance(raw_findings, list):
+        raise ValueError("serialized assessment findings must be an array")
+    findings: list[NativeDiagnosticFinding] = []
+    fields = {
+        "code",
+        "source_sha256",
+        "component_path",
+        "evidence_sha256",
+        "execution_effect",
+        "qualification_effect",
+    }
+    for raw in raw_findings:
+        if not isinstance(raw, dict) or set(raw) != fields:
+            raise ValueError("serialized assessment finding fields are invalid")
+        code = raw["code"]
+        source = raw["source_sha256"]
+        path = raw["component_path"]
+        evidence = raw["evidence_sha256"]
+        execution = raw["execution_effect"]
+        qualification = raw["qualification_effect"]
+        if (
+            not isinstance(code, str)
+            or not isinstance(source, str)
+            or (path is not None and not isinstance(path, str))
+            or not isinstance(evidence, str)
+            or not isinstance(execution, str)
+            or not isinstance(qualification, str)
+        ):
+            raise ValueError("serialized assessment finding types are invalid")
+        findings.append(
+            NativeDiagnosticFinding(
+                DiagnosticCode(code),
+                source,
+                path,
+                evidence,
+                ExecutionEffect(execution),
+                QualificationEffect(qualification),
+            )
+        )
+    return tuple(findings)
+
+
+def _decode_qualification_provenance(
+    raw_refs: object,
+) -> tuple[tuple[str, tuple[str, ...]], ...]:
+    if not isinstance(raw_refs, list):
+        raise ValueError("serialized qualification provenance must be an array")
+    items: list[tuple[str, tuple[str, ...]]] = []
+    for item in raw_refs:
+        if not isinstance(item, dict) or set(item) != {"evidence_sha256", "references"}:
+            raise ValueError("serialized qualification provenance entry is malformed")
+        digest, references = item["evidence_sha256"], item["references"]
+        if (
+            not isinstance(digest, str)
+            or not isinstance(references, list)
+            or any(not isinstance(reference, str) for reference in references)
+        ):
+            raise ValueError("serialized qualification provenance types are invalid")
+        items.append((digest, tuple(references)))
+    return tuple(items)
+
+
+def _decode_runtime_window(raw_window: object) -> tuple[float, float] | None:
+    if raw_window is None:
+        return None
+    if (
+        not isinstance(raw_window, list)
+        or len(raw_window) != 2
+        or any(
+            isinstance(value, bool) or not isinstance(value, (int, float))
+            for value in raw_window
+        )
+    ):
+        raise ValueError("serialized assessment runtime window is invalid")
+    return float(raw_window[0]), float(raw_window[1])
+
+
 def native_diagnostic_assessment_from_json_dict(
     payload: dict[str, object],
 ) -> NativeDiagnosticAssessment:
@@ -662,53 +774,64 @@ def native_diagnostic_assessment_from_json_dict(
         raise ValueError(
             "serialized native assessment fields are incomplete or unknown"
         )
-    if not isinstance(payload["findings"], list):
-        raise ValueError("serialized assessment findings must be an array")
-    findings: list[NativeDiagnosticFinding] = []
-    for raw in payload["findings"]:
-        if not isinstance(raw, dict):
-            raise ValueError("serialized assessment finding must be an object")
-        findings.append(
-            NativeDiagnosticFinding(
-                code=DiagnosticCode(raw["code"]),
-                source_sha256=raw["source_sha256"],
-                component_path=raw["component_path"],
-                evidence_sha256=raw["evidence_sha256"],
-                execution_effect=ExecutionEffect(raw["execution_effect"]),
-                qualification_effect=QualificationEffect(raw["qualification_effect"]),
-            )
-        )
-    raw_refs = payload["qualification_provenance_references"]
-    if not isinstance(raw_refs, list):
-        raise ValueError("serialized qualification provenance must be an array")
-    provenance = tuple(
-        (item["evidence_sha256"], tuple(item["references"]))
-        for item in raw_refs
-        if isinstance(item, dict) and set(item) == {"evidence_sha256", "references"}
+
+    def required_string(name: str) -> str:
+        value = payload[name]
+        if not isinstance(value, str):
+            raise ValueError(f"serialized assessment {name} must be a string")
+        return value
+
+    def optional_string(name: str) -> str | None:
+        value = payload[name]
+        if value is not None and not isinstance(value, str):
+            raise ValueError(f"serialized assessment {name} must be a string")
+        return value
+
+    request_sha256 = required_string("request_sha256")
+    source_sha256 = required_string("source_sha256")
+    admission = required_string("software_admission")
+    viability = required_string("runtime_viability")
+    qualification = required_string("physical_qualification")
+    runtime_phase = payload["runtime_phase"]
+    if runtime_phase is not None and not isinstance(runtime_phase, str):
+        raise ValueError("serialized assessment runtime phase must be a string")
+    policy_sha256 = optional_string("policy_sha256")
+    native_runtime_sha256 = optional_string("native_runtime_sha256")
+    runtime_evidence_sha256 = optional_string("runtime_evidence_sha256")
+    blocker_receipt_sha256 = optional_string("blocker_receipt_sha256")
+    findings = _decode_assessment_findings(payload["findings"])
+    provenance = _decode_qualification_provenance(
+        payload["qualification_provenance_references"]
     )
-    if len(provenance) != len(raw_refs):
-        raise ValueError("serialized qualification provenance entry is malformed")
-    window = payload["runtime_window_seconds"]
-    return NativeDiagnosticAssessment(
-        request_sha256=payload["request_sha256"],
-        source_sha256=payload["source_sha256"],
-        findings=tuple(findings),
-        software_admission=DiagnosticSoftwareAdmission(payload["software_admission"]),
-        runtime_viability=RuntimeViability(payload["runtime_viability"]),
-        physical_qualification=PhysicalQualification(payload["physical_qualification"]),
-        runtime_phase=None
-        if payload["runtime_phase"] is None
-        else RuntimePhase(payload["runtime_phase"]),
-        runtime_window_seconds=None if window is None else tuple(window),
-        allowed_unqualified_findings=tuple(
-            DiagnosticCode(code) for code in payload["allowed_unqualified_findings"]
-        ),
-        policy_sha256=payload["policy_sha256"],
-        native_runtime_sha256=payload["native_runtime_sha256"],
-        runtime_evidence_sha256=payload["runtime_evidence_sha256"],
-        blocker_receipt_sha256=payload["blocker_receipt_sha256"],
+    runtime_window = _decode_runtime_window(payload["runtime_window_seconds"])
+    allowed = payload["allowed_unqualified_findings"]
+    if not isinstance(allowed, list) or any(
+        not isinstance(code, str) for code in allowed
+    ):
+        raise ValueError("serialized assessment opt-in codes must be strings")
+    allowed_codes = tuple(DiagnosticCode(code) for code in allowed)
+    assessment = NativeDiagnosticAssessment(
+        request_sha256=request_sha256,
+        source_sha256=source_sha256,
+        findings=findings,
+        software_admission=DiagnosticSoftwareAdmission(admission),
+        runtime_viability=RuntimeViability(viability),
+        physical_qualification=PhysicalQualification(qualification),
+        runtime_phase=None if runtime_phase is None else RuntimePhase(runtime_phase),
+        runtime_window_seconds=runtime_window,
+        allowed_unqualified_findings=allowed_codes,
+        policy_sha256=policy_sha256,
+        native_runtime_sha256=native_runtime_sha256,
+        runtime_evidence_sha256=runtime_evidence_sha256,
+        blocker_receipt_sha256=blocker_receipt_sha256,
         qualification_provenance_references=provenance,
     )
+    if (
+        payload["explicit_opt_in"] is not assessment.explicit_opt_in
+        or payload["execution_permitted"] is not assessment.execution_permitted
+    ):
+        raise ValueError("serialized assessment dispositions differ from its findings")
+    return assessment
 
 
 def assess_native_diagnostic(
@@ -717,11 +840,7 @@ def assess_native_diagnostic(
     findings: tuple[NativeDiagnosticFinding, ...],
     *,
     policy: NativeDiagnosticPolicy | None = None,
-    runtime_viability: RuntimeViability = RuntimeViability.NOT_ATTEMPTED,
-    runtime_phase: RuntimePhase | None = None,
-    runtime_window_seconds: tuple[float, float] | None = None,
-    runtime_evidence_sha256: str | None = None,
-    native_runtime_sha256: str | None = None,
+    runtime: NativeDiagnosticRuntimeEvidence = NativeDiagnosticRuntimeEvidence(),
     blocker_receipt_sha256: str | None = None,
     qualification_provenance_references: tuple[tuple[str, tuple[str, ...]], ...] = (),
 ) -> NativeDiagnosticAssessment:
@@ -737,10 +856,8 @@ def assess_native_diagnostic(
         raise TypeError("policy must be a NativeDiagnosticPolicy or unavailable")
     if policy is not None and policy.source_sha256 != source_sha256:
         raise ValueError("diagnostic policy source differs from assessment source")
-    if not isinstance(runtime_viability, RuntimeViability):
-        raise TypeError("runtime viability must be a RuntimeViability")
-    if runtime_phase is not None and not isinstance(runtime_phase, RuntimePhase):
-        raise TypeError("runtime phase must be a RuntimePhase or unavailable")
+    if not isinstance(runtime, NativeDiagnosticRuntimeEvidence):
+        raise TypeError("runtime must be NativeDiagnosticRuntimeEvidence")
     allowed = policy.allowed_unqualified_findings if policy else ()
     software_admission = (
         DiagnosticSoftwareAdmission.BLOCKED
@@ -759,14 +876,14 @@ def assess_native_diagnostic(
         source_sha256=source_sha256,
         findings=findings,
         software_admission=software_admission,
-        runtime_viability=runtime_viability,
+        runtime_viability=runtime.viability,
         physical_qualification=physical_qualification,
-        runtime_phase=runtime_phase,
-        runtime_window_seconds=runtime_window_seconds,
+        runtime_phase=runtime.phase,
+        runtime_window_seconds=runtime.window_seconds,
         allowed_unqualified_findings=allowed,
         policy_sha256=None if policy is None else policy.identity_sha256,
-        native_runtime_sha256=native_runtime_sha256,
-        runtime_evidence_sha256=runtime_evidence_sha256,
+        native_runtime_sha256=runtime.native_runtime_sha256,
+        runtime_evidence_sha256=runtime.evidence_sha256,
         blocker_receipt_sha256=blocker_receipt_sha256,
         qualification_provenance_references=qualification_provenance_references,
     )
@@ -779,6 +896,7 @@ __all__ = [
     "NativeDiagnosticAssessment",
     "NativeDiagnosticFinding",
     "NativeDiagnosticPolicy",
+    "NativeDiagnosticRuntimeEvidence",
     "NativeQualificationContext",
     "PhysicalQualification",
     "QualificationEffect",

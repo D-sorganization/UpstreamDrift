@@ -145,9 +145,11 @@ class WrappedPathDeclaration:
             paths = [item.path for item in values]
             if len(paths) != len(set(paths)):
                 raise ValueError(f"duplicate {label} path in wrapped declaration")
-        if not self.wrap_objects or not self.path_wraps:
+        if not (self.wrap_objects or self.path_wraps or self.conditional_points):
+            raise ValueError("wrapped declaration needs at least one path component")
+        if bool(self.wrap_objects) != bool(self.path_wraps):
             raise ValueError(
-                "wrapped declaration needs wrap objects and PathWrap links"
+                "wrap objects and PathWrap links must be declared together"
             )
         object_paths = {item.path for item in self.wrap_objects}
         if any(item.wrap_object_path not in object_paths for item in self.path_wraps):
@@ -291,7 +293,11 @@ def _observe_declared_wrapped_route(
             evidence,
             "BLOCK",
             "NONE",
-            declaration.path_wraps[0].owner_path,
+            (
+                declaration.path_wraps[0].owner_path
+                if declaration.path_wraps
+                else declaration.conditional_points[0].owner_path
+            ),
         )
     observation = audited.reference_observation
     finding = _diagnostic_finding(
@@ -351,7 +357,10 @@ def _closed_wrap_findings(
             "UNQUALIFIED",
             owner_path,
         )
-        for owner_path in sorted({item.owner_path for item in declaration.path_wraps})
+        for owner_path in sorted(
+            {item.owner_path for item in declaration.path_wraps}
+            | {item.owner_path for item in declaration.conditional_points}
+        )
     )
     return findings
 

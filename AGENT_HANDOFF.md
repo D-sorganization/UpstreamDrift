@@ -7,10 +7,8 @@ path remains default-reject unless the caller supplies the declaration. Native
 reference observation reports the evaluated route without changing it. It
 does not prove global worklessness or guide-work bounds and makes no
 physiological claim. Eleven OpenSim 4.6 wrapped-path fixtures pass; the
-existing coupled Moco solver fixture passes when `CASADIPATH` and single-thread
-BLAS variables point to the pinned SDK runtime. The shared Chapter 56 typed
-findings/request integration is pending and is a merge dependency before this
-lane is publishable. See provisional Chapter 57 and
+shared Chapter 56 typed findings/request integration is present in the
+current feature history. See provisional Chapter 57 and
 `docs/development/native_wrapped_path_diagnostic.qmd`.
 
 # Native Contact Source Closure Handoff — #12244
@@ -21,10 +19,18 @@ constrained replay identity. OpenSim 4.6 tests cover Smooth and HuntCrossley
 force identities, sphere/half-space geometry closure, source mutation, changed
 provider digest, default rejection, and finite constrained Smooth wrench
 sampling. HuntCrossley constrained replay remains untested because strict
-self-contained XML validation rejects its generated fixture. Request/runner
-integration is pending with its owner; no capture contact, support/grip, or
-physical qualification is claimed. See provisional Chapter 58 and
+self-contained XML validation previously rejected its generated fixture;
+the parser fix and new source audit tests now pass. Request/runner serialization,
+preparation closure, export identity, and fresh-replay digest checks are
+integrated. No capture contact, support/grip, or physical qualification is
+claimed. See provisional Chapter 58 and
 `docs/development/feedback_controls/F07_NATIVE_CONTACT_SOURCE_CLOSURE_TURNOVER.md`.
+
+# Active: Club-Face Fixtures on the Current Spec, #12117
+
+- Branch `claude/12117-club-face-fixtures`. Fixtures from `657c811bcd` (#12145 sources; input receipts value-identical to main's #12166 receipts). Feet now flat (3.2–3.8 cm), address face follows the capture (5.43 / −5.41° vs 5.50 / −5.35°).
+- `club_face.impact_frame` now enforces the 0.15 m ball radius on the peak-speed frame (the driver replay peaks 0.351 m short of the ball). OSV-8 and OSV-9 address-face tests compare with the capture's address face (2° unchanged). OSV-9 MSK grip calibration and both `golf_humanoid*.osim` regenerated (control reproduces main byte for byte). Calc record: `simscape_matching_reference.tex`, "Fixtures Regenerated on the Current Spec".
+- Strict xfails: 7-iron impact face 10.97 vs 3.21° (#12221, club-in-hand rotation); GCV-20 speed −6.1 / −10.2 % (#11767). Toe-out miss filed as #12222.
 
 # Active: Drake and MuJoCo IK Parity, Weld Rotation Row — #12039
 
@@ -46,6 +52,12 @@ calibration/human-prior tests now pass 25 cases. Chapter 51 gives reproduction
 and numerical tolerances. Values are preserved on success. Native source
 admission and optimizer enforcement are separate integration work; physical
 source provenance, matching and all-model qualification remain open.
+
+# Active: Closed-Loop Gaze Neck, #11729
+
+- OSV-3d. Branch `claude/osv-3d-gaze-closed-loop` (PR #12194; builds on the merged #12154). `--fd-neck gaze-closed`: `GazeNeckFeedback` is a kkt `reference_hook(t, q, q_t, v_t)` (`tracking_controller.py`) that re-solves the neck on the simulated state once per capture frame and adds the correction and its rate to the neck position/velocity targets. Receipt: `dynamics.head_gaze.feedback`.
+- Result (`evidence/head_gaze/fd_neck_closed_loop.json`): release-window RMS 17.2→1.7 deg (driver), 8.6→1.2 deg (7-iron); driver hold window 1.1→2.9 deg (ball-impact torso transient). Position-only first version lagged (hold 4.8 deg); the rate term is required.
+- Open: MyoSuite/OpenSim neck actuation and other engines, a gaze schedule that lets the head turn with the torso (neck still at range on 93/69 updates).
 
 # Active: Forward-Dynamics Gaze Neck, #11729
 
@@ -81,7 +93,6 @@ source provenance, matching and all-model qualification remain open.
 
 - Branch `claude/osv-2-grip-pose` (PR #12032), merged with main after OSV-9 (#11795). `model_appearance/grip_pose.py` is the club-agnostic grip definition; its lead (3.2 cm below the butt) and trail (10.82 cm) positions mirror the generated-spec `GripInterface`, the single source, and `tests/opensim/test_grip_closure_both_hands.py` fails on drift. `club_geometry`, `address.py` and the MyoSuite scene sites import it. The Rajagopal models keep the OSV-9 topology (lead `WeldJoint hand_l_to_club`, trail `WeldConstraint hand_r_to_club`); `msk_club_grip_calibration.json` is untouched.
 - Canned-swing closure residual (`python3 -m scripts.grip_closure_report --output r.json`): MuJoCo, Drake (ControlTower), Pinocchio, OpenSim full-body weld <= 1.8e-7 m; MyoSuite unavailable. Open: owner review of a 1.5 cm lead position (needs `msk_club_calibration` rerun for both models and clubs), finger meshes, stills and clips (slice 2), no `golf_humanoid` swing residual.
-  > > > > > > > origin/main
 
 # Active: Gaze Weight Selection, #11729
 
@@ -1136,6 +1147,26 @@ one optional provider skip. Canonical calculation is chapter48; turnover is
 The calculation registry remains empty and release blocked; full-body
 anatomy, calibration, physiology, contact/grip, capture horizon, production
 variants and six-engine parity remain unresolved.
+
+## OpenSim Mixed Replay Marker Scoring (#12195)
+
+Issue #12195 adds `native_mixed_marker_observation.py` on the constrained
+mixed replay seam. It consumes an exact frozen T01 bundle and runs the
+maintained fresh native replay once. For marker FK it restores the full
+ordered named state and exact replay clock, then evaluates explicit
+PhysicalFrame/local-offset bindings through the existing no-assembly native
+observer. Existing position alignment/scoring retains the separate measured
+clock and rejects extrapolation. The actual OpenSim 4.6 constrained-mixed
+module reports 12 passed, including source-mismatch and out-of-horizon
+negatives. Two portable contract tests protect the unqualified status.
+
+The result and receipt digest are diagnostic records only, explicitly
+unqualified; they are not an authenticated native execution receipt or F01
+admission. Bindings remain caller-declared and no calibration is inferred.
+Private-capture fit, anatomy, resource closure, physiology, contact, production
+variants and six-engine parity remain open. Canonical chapter49 and turnover
+are `manuals/upstreamdrift/chapters/49-native-opensim-mixed-marker-observation.qmd`
+and `docs/development/feedback_controls/F09Q-OPENSIM-MIXED-MARKER-SCORING.md`.
 
 ## F07 Exact 557-Muscle Excitation Diagnostic (#12182)
 

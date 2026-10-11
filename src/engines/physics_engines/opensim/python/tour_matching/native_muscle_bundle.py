@@ -13,10 +13,11 @@ from collections.abc import Mapping
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import TYPE_CHECKING, Any
+from pyexpat import ExpatError
 
 import numpy as np
-from defusedxml import ElementTree as SafeET
 from defusedxml.common import DefusedXmlException
+from defusedxml.expatbuilder import parseString as safe_parse_string
 from numpy.typing import NDArray
 
 from src.engines.native_replay_contracts import (
@@ -109,18 +110,38 @@ def _audit_components(model: Any) -> None:
 def _validate_self_contained_source(raw: bytes) -> None:
     """Require one inline model so frozen source bytes cover its dependencies."""
     try:
-        root = SafeET.fromstring(raw, forbid_dtd=True, forbid_entities=True)
-    except (SafeET.ParseError, DefusedXmlException) as error:
+        document = safe_parse_string(
+            raw,
+            namespaces=False,
+            forbid_dtd=True,
+            forbid_entities=True,
+            forbid_external=True,
+        )
+    except (ExpatError, DefusedXmlException) as error:
         raise ValueError("native source XML must be self-contained") from error
-    if root.tag != "OpenSimDocument" or len(root.findall("Model")) != 1:
+    root = document.documentElement
+    models = [
+        child for child in root.childNodes if getattr(child, "tagName", None) == "Model"
+    ]
+    if root.tagName != "OpenSimDocument" or len(models) != 1:
         raise ValueError("native source must contain one inline OpenSim Model")
-    for element in root.iter():
-        tag = element.tag.lower()
+    elements = (root, *root.getElementsByTagName("*"))
+    for element in elements:
+        # This parser deliberately disables namespace processing because
+        # OpenSim uses C++-qualified component names such as
+        # ``HuntCrossleyForce::ContactParametersSet``. Resource checks still
+        # inspect the local portion of a literal prefixed name so a namespace
+        # prefix cannot hide an external reference from this gate.
+        tag = element.tagName.rsplit(":", 1)[-1].lower()
         if tag in {"file", "filename", "file_name"} or tag.endswith("_file"):
             raise ValueError(
                 "external source resources need a separate identity policy"
             )
-        if any(name.lower() in {"file", "filename", "href"} for name in element.attrib):
+        if any(
+            element.attributes.item(index).name.rsplit(":", 1)[-1].lower()
+            in {"file", "filename", "href"}
+            for index in range(element.attributes.length)
+        ):
             raise ValueError(
                 "external source references need a separate identity policy"
             )
@@ -171,11 +192,12 @@ def _coordinate_units(
         elif motion == osim.Coordinate.Translational:
             unit = "m"
         else:
-            unit = _custom_joint_coordinate_unit(
+            custom_unit = _custom_joint_coordinate_unit(
                 model, coordinate, native_mechanics_profile, osim
             )
-            if unit is None:
+            if custom_unit is None:
                 raise ValueError("coordinate motion units need another native policy")
+            unit = custom_unit
         prefix = coordinate.getAbsolutePathString()
         units[prefix + "/value"] = unit
         units[prefix + "/speed"] = unit + "/s"

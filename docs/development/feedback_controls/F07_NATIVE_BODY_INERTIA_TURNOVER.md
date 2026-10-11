@@ -81,3 +81,24 @@ Native revalidation passed 32 fixture cases and the separately supplied exact
 skipped native cases, so its skips are not used as native evidence. All five
 central gates passed with `MYPYPATH` set to the repository root, preserving
 canonical `src.*` package identity rather than duplicate root/src imports.
+
+## Main and Provider Integration (2026-10-11)
+
+Main commit `9b93fb2a41` and the consumer provider-source revalidation commit
+`7e5d8c70c3` were integrated through normal merges. All five central pre-PR
+gates passed at integration commit `6f947c6215`; its 42 native/provider skips
+are not native execution evidence. The separate OpenSim 4.6 provider test
+result remains nine passing cases against the explicitly named development
+provider, pending revalidation against the merged Tools gitlink.
+
+Concurrent remote commit `c6fb6a0c98` preserves the new main evidence and a
+formatter-only neck receipt update. Integrate that history normally and
+regenerate the 149-row ledger from the actual combined artifacts. The complete
+ledger unit suite then passed 11 tests. This update changes publication
+provenance; it does not establish new motion-matching or replay acceptance.
+
+Tools PR #5510 is queued for protected merge; do not push its queued branch.
+The consumer remains unarmed until that provider has merged and the actual
+merged gitlink has passed native revalidation. The generalized native
+diagnostic execution contract is tracked separately in #12236, with wrapped
+path source closure in #12234 and guide-work observations in #12233.

@@ -63,6 +63,32 @@ def _reference(path: Path) -> ReferenceStateDeclaration:
     )
 
 
+def _conditional_only_source(tmp_path: Path):
+    from dataclasses import replace
+
+    from tests.opensim.test_native_constrained_muscle import _source
+
+    path, cold_start = _source(tmp_path, locked=False)
+    tree = ET.parse(path)
+    points = tree.find(
+        ".//Millard2012EquilibriumMuscle[@name='flexor']//PathPointSet/objects"
+    )
+    assert points is not None
+    conditional = ET.fromstring(
+        """<ConditionalPathPoint name="range_conditional">
+          <socket_parent_frame>/bodyset/base</socket_parent_frame>
+          <location>0.02 0 0</location>
+          <socket_coordinate>/jointset/base/q</socket_coordinate>
+          <range>0.2 0.4</range>
+        </ConditionalPathPoint>"""
+    )
+    points.insert(1, conditional)
+    tree.write(path, encoding="utf-8", xml_declaration=True)
+    return path, replace(
+        cold_start, source_sha256=hashlib.sha256(path.read_bytes()).hexdigest()
+    )
+
+
 @pytest.mark.parametrize("shape", ["WrapCylinder", "WrapEllipsoid", "WrapSphere"])
 def test_typed_declaration_closes_supported_wrap_shape_and_native_route(
     tmp_path: Path, shape: str
@@ -130,6 +156,150 @@ def test_wrapped_declaration_rejects_pathwrap_target_outside_closed_objects(
                 ),
             ),
         )
+
+
+def test_declaration_rejects_empty_or_orphan_wrap_component_sets(
+    tmp_path: Path,
+) -> None:
+    path = _wrapped_source(tmp_path)
+    declaration = declare_wrapped_path_source(path)
+    with pytest.raises(ValueError, match="at least one path component"):
+        type(declaration)(
+            declaration.schema_version,
+            declaration.source_sha256,
+            (),
+            (),
+            (),
+        )
+    with pytest.raises(ValueError, match="wrap objects and PathWrap links"):
+        replace(declaration, path_wraps=())
+    with pytest.raises(ValueError, match="wrap objects and PathWrap links"):
+        replace(declaration, wrap_objects=())
+
+
+def test_conditional_only_source_declaration_and_fresh_native_replay(
+    tmp_path: Path,
+) -> None:
+    from tests.opensim.test_native_constrained_muscle import _controls
+
+    from src.engines.physics_engines.opensim.python.tour_matching.native_constrained_muscle import (
+        build_constrained_muscle_bundle,
+        replay_constrained_muscle_bundle,
+    )
+
+    path, cold_start = _conditional_only_source(tmp_path)
+    source = path.read_bytes()
+    declaration = declare_wrapped_path_source(path)
+    assert declaration.wrap_objects == ()
+    assert declaration.path_wraps == ()
+    assert len(declaration.conditional_points) == 1
+    assert declaration.conditional_points[0].coordinate_path == "/jointset/base/q"
+
+    missing_audit = audit_native_wrapped_path_source(
+        path, declaration.source_sha256, None
+    )
+    assert missing_audit.findings
+    assert all(
+        finding.code.value == "wrapped_path_declaration_required"
+        for finding in missing_audit.findings
+    )
+    grid = np.array([0.0, 0.001, 0.002])
+    with pytest.raises(
+        ValueError,
+        match="unreviewed constrained muscle component: ConditionalPathPoint",
+    ):
+        build_constrained_muscle_bundle(cold_start, grid, _controls(grid, 0.3))
+
+    audit = audit_native_wrapped_path_source(
+        path,
+        declaration.source_sha256,
+        declaration,
+        _reference(path),
+    )
+    by_code = {finding.code.value: finding for finding in audit.findings}
+    assert by_code["wrapped_path_source_closed"].execution_effect.name == "PROCEED"
+    assert (
+        by_code["wrapped_path_transition_unqualified"].execution_effect.name
+        == "REQUIRES_OPT_IN"
+    )
+    assert (
+        by_code["wrapped_path_transition_unqualified"].qualification_effect.name
+        == "UNQUALIFIED"
+    )
+
+    bundle = build_constrained_muscle_bundle(
+        cold_start,
+        grid,
+        _controls(grid, 0.3),
+        wrapped_path_declaration=declaration,
+    )
+    replay = replay_constrained_muscle_bundle(
+        bundle,
+        cold_start,
+        wrapped_path_declaration=declaration,
+    )
+    assert replay.states.shape == (len(grid), len(cold_start.named_state))
+    assert np.isfinite(replay.states).all()
+    assert np.isfinite(replay.muscle_forces_n).all()
+    assert path.read_bytes() == source
+
+
+def test_conditional_declaration_does_not_admit_unsupported_wrap_shapes(
+    tmp_path: Path,
+) -> None:
+    from dataclasses import replace
+
+    import opensim as osim
+
+    from tests.opensim.test_native_constrained_muscle import _controls, _source
+
+    from src.engines.physics_engines.opensim.python.tour_matching.native_constrained_muscle import (
+        build_constrained_muscle_bundle,
+    )
+
+    path, cold_start = _source(tmp_path, locked=False)
+    model = osim.Model(str(path))
+    torus = osim.WrapTorus()
+    torus.setName("unreviewed_torus")
+    model.getGround().addWrapObject(torus)
+    model.finalizeConnections()
+    model.printToXML(str(path))
+    changed = replace(
+        cold_start, source_sha256=hashlib.sha256(path.read_bytes()).hexdigest()
+    )
+    grid = np.array([0.0, 0.001])
+    with pytest.raises(
+        ValueError, match="unreviewed constrained muscle component: WrapTorus"
+    ):
+        build_constrained_muscle_bundle(changed, grid, _controls(grid, 0.3))
+
+
+@pytest.mark.parametrize("mutation", ["source", "dump", "coordinate", "range"])
+def test_conditional_only_declaration_rejects_identity_mutations(
+    tmp_path: Path, mutation: str
+) -> None:
+    from dataclasses import replace
+
+    import opensim as osim
+
+    path, _ = _conditional_only_source(tmp_path)
+    declaration = declare_wrapped_path_source(path)
+    point = declaration.conditional_points[0]
+    if mutation == "source":
+        changed = replace(declaration, source_sha256="f" * 64)
+    elif mutation == "dump":
+        changed_point = replace(point, serialized_sha256="0" * 64)
+        changed = replace(declaration, conditional_points=(changed_point,))
+    elif mutation == "coordinate":
+        changed_point = replace(point, coordinate_path="/jointset/other/q")
+        changed = replace(declaration, conditional_points=(changed_point,))
+    else:
+        changed_point = replace(point, active_range=(0.15, 0.45))
+        changed = replace(declaration, conditional_points=(changed_point,))
+    model = osim.Model(str(path))
+    model.finalizeConnections()
+    with pytest.raises(ValueError, match="source identity|differs from native source"):
+        validate_wrapped_path_declaration(model, changed, declaration.source_sha256)
 
 
 def test_wrap_component_identity_requires_hex_sha256(tmp_path: Path) -> None:
