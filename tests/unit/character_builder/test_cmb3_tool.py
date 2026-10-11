@@ -41,7 +41,7 @@ def test_core_summary_mentions_hash_and_limits() -> None:
     assert "Spec SHA-256" in text and "Limitations" in text
 
 
-@pytest.mark.parametrize("fmt", ["spec", "urdf", "mjcf", "osim"])
+@pytest.mark.parametrize("fmt", ["spec", "urdf", "mjcf", "osim", "gltf"])
 def test_core_export_writes_file(tmp_path: Path, fmt: str) -> None:
     path = _model()("junior").export(fmt, tmp_path)
     assert path.is_file() and path.stat().st_size > 1000
