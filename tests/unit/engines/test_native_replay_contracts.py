@@ -4,6 +4,8 @@ import pytest
 
 from src.engines.native_replay_contracts import require_sha256_digest
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.mark.parametrize("value", ["a" * 64, "0123456789abcdef" * 4])
 def test_require_sha256_digest_accepts_lowercase_hex(value: str) -> None:
