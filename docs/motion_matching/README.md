@@ -47,6 +47,11 @@ preview tool.
   Add a new shape to the bundled default library; manifest schema and
   procedural-generation script.
 
+### Force Redistribution
+
+- [Convergence result contract](../design/force_redistribution_convergence.md)
+  Distinguishes candidate feasibility from optimizer convergence.
+
 ### API reference
 
 - [`body_part_viz`](../api/body_part_viz.md) — public API surface for
