@@ -254,7 +254,8 @@ def _native_path_optimizer_blockers(
         return ["native-moco-path-optimizer-domain-invalid"]
     blockers = []
     for coordinate_path, domain in domains.items():
-        optimizer_bounds = request.bindings.state_bounds.get(coordinate_path + "/value")
+        state_bounds = request.bindings.state_bounds
+        optimizer_bounds = state_bounds.get(coordinate_path + "/value")
         try:
             invalid = (
                 not isinstance(optimizer_bounds, tuple)
