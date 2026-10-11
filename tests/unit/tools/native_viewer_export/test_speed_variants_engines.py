@@ -78,7 +78,7 @@ class _Backend:
     def unavailable_reason(self) -> None:
         return None
 
-    def render(self, swing, settings, indices, overlay):
+    def render(self, swing, settings, indices, overlay, ball=None):
         for _ in indices:
             yield {
                 v: np.zeros((settings.height, settings.width, 3), np.uint8)

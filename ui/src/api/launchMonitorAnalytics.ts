@@ -10,11 +10,15 @@
 import { apiFetch } from "./fetch";
 import type {
   AnalyzePayloadV2,
+  ComparisonPayloadV2,
   DispersionPayloadV2,
+  FilterRulePayload,
   FlexibleAnalysisPayload,
   LaunchMonitorAnalysisResultV2,
+  ModelPayloadV2,
   MultivariatePayloadV2,
   RelationshipsPayloadV2,
+  TreatmentPayloadV2,
 } from "./generated/types";
 
 const BASE = "/api/tools/launch-monitor-analytics";
@@ -364,6 +368,201 @@ export async function analyzeMultivariateV2(
 ): Promise<MultivariateResponse> {
   const payload: MultivariatePayloadV2 = { records, metrics };
   return apiFetch<MultivariateResponse>(`${BASE}/v2/multivariate`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+/**
+ * One monitor's descriptive statistics from `MonitorComparisonResult.summaries`
+ * (`MonitorSummary` in `shared.python.launch_monitor.comparison`; JSON-safe —
+ * NaN/infinite floats become `null`, never `0`).
+ */
+export interface MonitorSummaryPayload {
+  monitor: string;
+  sample_count: number;
+  mean: number | null;
+  standard_deviation: number | null;
+  median: number | null;
+}
+
+/**
+ * One reference/comparator pair from `MonitorComparisonResult.pairwise`
+ * (`PairwiseMonitorComparison`). An unmatched pair (`matched: false`) reports
+ * every agreement field but `mean_bias` as `null` and carries a non-null
+ * `warning`; a matched pair's `warning` is `null`.
+ */
+export interface PairwiseComparisonPayload {
+  reference: string;
+  comparator: string;
+  matched: boolean;
+  sample_count: number;
+  mean_bias: number | null;
+  standard_deviation_bias: number | null;
+  lower_limit: number | null;
+  upper_limit: number | null;
+  slope: number | null;
+  intercept: number | null;
+  correlation: number | null;
+  warning: string | null;
+}
+
+/** Response body for `POST /v2/comparison` (`analyze_comparison_v2`). */
+export interface ComparisonResponse {
+  metric: string;
+  match_column: string | null;
+  reference_monitor: string | null;
+  summaries: MonitorSummaryPayload[];
+  pairwise: PairwiseComparisonPayload[];
+}
+
+/**
+ * Run the PyQt Monitor Comparison tab's matched/unmatched monitor-behavior
+ * analysis over caller-supplied inline records, via the same
+ * `compare_monitors` contract the desktop tab calls
+ * (`src/tools/launch_monitor_analytics/gui.py` `_compute_comparison`).
+ * `matchColumn: null` mirrors the "(unmatched)" combo item
+ * (`_read_comparison_params`); `referenceMonitor: null` mirrors the combo's
+ * blank state (`currentText() or None`).
+ */
+export async function compareMonitorsV2(
+  records: Record<string, unknown>[],
+  metric: string,
+  matchColumn: string | null = null,
+  referenceMonitor: string | null = null,
+): Promise<ComparisonResponse> {
+  const payload: ComparisonPayloadV2 = {
+    records,
+    metric,
+    match_column: matchColumn,
+    reference_monitor: referenceMonitor,
+  };
+  return apiFetch<ComparisonResponse>(`${BASE}/v2/comparison`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+/** Model-recipe choices accepted by `ModelPayloadV2.model`; same five choices as the desktop `model_type` combo. */
+export type PredictiveModelName = ModelPayloadV2["model"];
+
+/** Grouped-holdout candidates accepted by `ModelPayloadV2.group_column`. */
+export type ModelGroupColumn = NonNullable<ModelPayloadV2["group_column"]>;
+
+/**
+ * One held-out prediction row from `PredictiveModelResult.predictions`
+ * (JSON-safe via `_frame_to_records`: NaN/infinite floats become `null`).
+ */
+export interface ModelPredictionRow {
+  row_index: number | null;
+  actual: number | null;
+  predicted: number | null;
+  residual: number | null;
+}
+
+/** Response body for `POST /v2/model` (`_model_result_to_dict`). */
+export interface ModelResponse {
+  model: string;
+  target: string;
+  features: string[];
+  metrics: Record<string, number | null>;
+  coefficients: Record<string, number | null> | null;
+  random_seed: number;
+  train_count: number;
+  test_count: number;
+  predictions: ModelPredictionRow[];
+}
+
+/**
+ * Fit the PyQt Models tab's reproducible predictive model over caller-supplied
+ * inline records, via the same `fit_predictive_model` contract the desktop
+ * tab calls (`src/tools/launch_monitor_analytics/gui.py` `_compute_model`).
+ * A model whose optional dependency is missing (e.g. `mlp` without
+ * scikit-learn) rejects with the API's 503 `detail` message, which already
+ * names the model unavailable — see `fit_model_v2`.
+ */
+export async function fitModelV2(
+  records: Record<string, unknown>[],
+  target: string,
+  features: string[],
+  model: PredictiveModelName = "linear",
+  randomSeed = 42,
+  groupColumn: ModelGroupColumn | null = null,
+): Promise<ModelResponse> {
+  const payload: ModelPayloadV2 = {
+    records,
+    target,
+    features,
+    model,
+    random_seed: randomSeed,
+    group_column: groupColumn,
+  };
+  return apiFetch<ModelResponse>(`${BASE}/v2/model`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+/** Filter operators accepted by `FilterRulePayload.operator`; same eight choices as the desktop filter table's operator combo. */
+export type FilterOperator = FilterRulePayload["operator"];
+
+/** JSON-safe scalar for one treated-row cell — never a misleading `0` for an unavailable float. */
+export type TreatmentValue = string | number | null;
+
+/** One row-level data-quality flag from `TreatmentResult.flags`. */
+export interface TreatmentFlag {
+  row_index: number | string;
+  flag_type: string;
+  metric: string | null;
+}
+
+/**
+ * One audit action from `TreatmentResult.audit_log`. The shape varies by
+ * `action` (`derive_metric`, `filter`, `flag`, `exclude_flagged`) — see
+ * `_audit_log_to_json_safe` — so this type names only the common discriminant.
+ */
+export interface TreatmentAuditAction {
+  action: string;
+  [key: string]: unknown;
+}
+
+/** Response body for `POST /v2/treatment` (`_treatment_result_to_dict`). */
+export interface TreatmentResponse {
+  data: Record<string, TreatmentValue>[];
+  flags: TreatmentFlag[];
+  audit_log: TreatmentAuditAction[];
+  shot_count: number;
+  flag_count: number;
+}
+
+/** Widget-derived treatment recipe, mirroring `_read_treatment_config`. */
+export interface TreatmentConfigRequest {
+  requiredMetrics: string[];
+  outlierMetrics: string[];
+  robustZThreshold: number;
+  excludeFlagged: boolean;
+  filters: FilterRulePayload[];
+}
+
+/**
+ * Apply the PyQt Data Treatment tab's reproducible quality-flagging recipe
+ * over caller-supplied inline records, via the same `apply_treatment`
+ * contract the desktop tab calls (`src/tools/launch_monitor_analytics/gui.py`
+ * `_compute_treatment`). The input `records` are never mutated.
+ */
+export async function applyTreatmentV2(
+  records: Record<string, unknown>[],
+  config: TreatmentConfigRequest,
+): Promise<TreatmentResponse> {
+  const payload: TreatmentPayloadV2 = {
+    records,
+    required_metrics: config.requiredMetrics,
+    outlier_metrics: config.outlierMetrics,
+    robust_z_threshold: config.robustZThreshold,
+    exclude_flagged: config.excludeFlagged,
+    filters: config.filters,
+  };
+  return apiFetch<TreatmentResponse>(`${BASE}/v2/treatment`, {
     method: "POST",
     body: JSON.stringify(payload),
   });

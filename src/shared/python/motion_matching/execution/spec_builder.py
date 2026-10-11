@@ -13,6 +13,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 import hashlib
 import json
+import math
 from pathlib import Path
 from typing import Any
 
@@ -439,12 +440,47 @@ def marker_seeds(
     return {label: seeds[label] for label in tracked_labels()}
 
 
+def scale_leg_mass(
+    bodies: Mapping[str, dict[str, Any]], leg_mass_kg: float
+) -> dict[str, dict[str, Any]]:
+    """Scale the ``read_osim`` leg bodies to a total of ``leg_mass_kg`` (#12199).
+
+    Every leg body's mass and inertia take one factor, so the Rajagopal mass
+    distribution, centres of mass and geometry are kept (uniform density
+    scaling). Other bodies are returned unchanged.
+
+    Raises:
+        ValueError: ``leg_mass_kg`` is not a positive finite number.
+    """
+    if not np.isfinite(leg_mass_kg) or leg_mass_kg <= 0:
+        raise ValueError(f"leg mass must be positive and finite, got {leg_mass_kg}")
+    legs = {f"{name}_{side}" for name in LEG_BODIES for side in ("r", "l")}
+    # fsum is correctly rounded: builtin sum differs on 3.11 and 3.12+.
+    factor = leg_mass_kg / math.fsum(bodies[name]["mass"] for name in legs)
+    return {
+        name: (
+            {**body, "mass": body["mass"] * factor, "inertia": body["inertia"] * factor}
+            if name in legs
+            else body
+        )
+        for name, body in bodies.items()
+    }
+
+
+def _body_mass_without_club(document: Mapping[str, Any]) -> float:
+    solids = math.fsum(s["mass_kg"] for b in document["bodies"] for s in b["solids"])
+    return float(solids - document["club"]["total_mass_kg"])
+
+
 def _build_aligned_leg_extension(
     osim_path: Path,
     stature_m: float,
     hip_frame: dict[str, Any],
+    leg_mass_kg: float | None = None,
 ) -> tuple[Any, list[str], float]:
     bodies, joints = read_osim(osim_path)
+    if leg_mass_kg is not None:
+        bodies = scale_leg_mass(bodies, leg_mass_kg)
     rotation, hip_half = pelvis_alignment_for(stature_m)
     hips = np.array(
         [joints["hip_r"]["parent_translation"], joints["hip_l"]["parent_translation"]]
@@ -602,6 +638,33 @@ def _write_outputs(
     return spec_path, receipt_path
 
 
+def _annotate_document(document: dict[str, Any], upper: dict[str, Any]) -> None:
+    """Copy the subject, anthropometry, ranges and visual hints into ``document``."""
+    document["subject"] = upper["subject"]
+    document["de_leva_table_sha256"] = de_leva_table_sha256()
+    document["anthropometry"] = {
+        "table": "de_leva_1996_male",
+        "de_leva_table_sha256": de_leva_table_sha256(),
+        "segments": de_leva_table_dict(),
+    }
+    document["coordinate_ranges_deg"] = {
+        **upper["coordinate_ranges_deg"],
+        **as_document(
+            {k: v for k, v in HUMAN_RANGES_DEG.items() if k[-2:] in ("_r", "_l")}
+        ),
+    }
+    document["address_seed_deg"] = upper["address_seed_deg"]
+    document["club"] = upper["club"]
+    document["visual_hints"] = upper["visual_hints"]
+    document["visual_hints"]["capsule_radius_m"].update(
+        {
+            f"{segment}_{side}": LEG_VISUAL_RADIUS_M[segment]
+            for segment in LEG_VISUAL_RADIUS_M
+            for side in ("r", "l")
+        }
+    )
+
+
 @dataclass(frozen=True)
 class AnthropometricDocument:
     """A composed candidate document plus the values its receipt records."""
@@ -631,6 +694,13 @@ def compose_anthropometric_document(
     the club's ``Clubhead`` marker file (``assets.get_club_markers``); a
     non-driver club without one raises ``ValueError``. Postcondition: the
     document passed ``validate_full_body_spec`` inside ``derive_full_body_spec``.
+
+    ``match_subject_mass`` (kwarg, default ``False``) scales the Rajagopal
+    legs with :func:`scale_leg_mass` so that the body mass without the club
+    equals ``mass_kg`` (#12199); the legs carry what the upper body does not.
+    It raises ``ValueError`` when the upper body alone reaches ``mass_kg``.
+    Without it the legs keep the reference Rajagopal masses, which the
+    capture reference builds and their receipts pin.
     """
     trunk_scale = float(kwargs.get("trunk_scale", 1.0))
     arm_scale = float(kwargs.get("arm_scale", 1.0))
@@ -656,8 +726,13 @@ def compose_anthropometric_document(
     )
 
     hip_frame = next(f for f in upper["frames"] if f["name"] == "Hip")
+    leg_mass_kg = (
+        mass_kg - _body_mass_without_club(upper)
+        if kwargs.get("match_subject_mass", False)
+        else None
+    )
     extension, notes, hip_half = _build_aligned_leg_extension(
-        osim_path, stature_m, hip_frame
+        osim_path, stature_m, hip_frame, leg_mass_kg
     )
     contact = _create_contact_spec()
     club_offsets, club_markers_path = _club_marker_offsets(
@@ -669,6 +744,11 @@ def compose_anthropometric_document(
         if club_markers_path
         else ""
     )
+    if leg_mass_kg is not None:
+        club_note += (
+            f"; Rajagopal legs scaled to {leg_mass_kg:.3f} kg so the body "
+            "without the club matches the subject mass (#12199)"
+        )
 
     document = derive_full_body_spec(
         upper,
@@ -681,29 +761,7 @@ def compose_anthropometric_document(
             "marker offsets are anatomical seeds to be calibrated" + club_note
         ),
     )
-    document["subject"] = upper["subject"]
-    document["de_leva_table_sha256"] = de_leva_table_sha256()
-    document["anthropometry"] = {
-        "table": "de_leva_1996_male",
-        "de_leva_table_sha256": de_leva_table_sha256(),
-        "segments": de_leva_table_dict(),
-    }
-    document["coordinate_ranges_deg"] = {
-        **upper["coordinate_ranges_deg"],
-        **as_document(
-            {k: v for k, v in HUMAN_RANGES_DEG.items() if k[-2:] in ("_r", "_l")}
-        ),
-    }
-    document["address_seed_deg"] = upper["address_seed_deg"]
-    document["club"] = upper["club"]
-    document["visual_hints"] = upper["visual_hints"]
-    document["visual_hints"]["capsule_radius_m"].update(
-        {
-            f"{segment}_{side}": LEG_VISUAL_RADIUS_M[segment]
-            for segment in LEG_VISUAL_RADIUS_M
-            for side in ("r", "l")
-        }
-    )
+    _annotate_document(document, upper)
     return AnthropometricDocument(
         document=document,
         subject=upper["subject"],
