@@ -13,6 +13,19 @@ findings/request integration is pending and is a merge dependency before this
 lane is publishable. See provisional Chapter 57 and
 `docs/development/native_wrapped_path_diagnostic.qmd`.
 
+# Native Contact Source Closure Handoff — #12244
+
+Commits `316b011324` and `b48f7b053b` bind the exact-source contact declaration,
+shared sampler, and `opensim_force_torque.py` implementation digest into
+constrained replay identity. OpenSim 4.6 tests cover Smooth and HuntCrossley
+force identities, sphere/half-space geometry closure, source mutation, changed
+provider digest, default rejection, and finite constrained Smooth wrench
+sampling. HuntCrossley constrained replay remains untested because strict
+self-contained XML validation rejects its generated fixture. Request/runner
+integration is pending with its owner; no capture contact, support/grip, or
+physical qualification is claimed. See provisional Chapter 58 and
+`docs/development/feedback_controls/F07_NATIVE_CONTACT_SOURCE_CLOSURE_TURNOVER.md`.
+
 # Active: Drake and MuJoCo IK Parity, Weld Rotation Row — #12039
 
 - Branch `claude/12039-drake-address-parity`. Drake's dual-grip weld rotation row was the small-angle vee with Jacobian `J_a - J_b` (up to 0.84 off finite differences); MuJoCo's is the principal log with its exact Jacobian. Both now use `full_body_ik._closure_rotation_row`; Drake `closure_error` reports the principal angle. Tests: `tests/unit/motion_matching/test_drake_mujoco_ik_parity.py`.
