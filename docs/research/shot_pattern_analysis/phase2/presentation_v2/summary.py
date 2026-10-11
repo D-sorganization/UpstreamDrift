@@ -141,3 +141,53 @@ def render_summary(tex: Path, out: Path, save_figure, colors: dict[str, str]) ->
     path = out / "summary"
     save_figure(fig, path)
     return path
+
+
+def render_social_summary(tex: Path, destination: Path, colors: dict[str, str]) -> Path:
+    """Save a Facebook preview PNG after checking its ranges against the report."""
+    _verify_ranges(tex)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    fig, ax = plt.subplots(figsize=(12.0, 6.3), dpi=100)
+    _plot_ranges(fig, ax, colors)
+    fig.text(
+        0.055,
+        0.95,
+        "No Universal Winning Shot Shape",
+        ha="left",
+        va="top",
+        fontsize=25,
+        fontweight="bold",
+        color="#153a52",
+    )
+    fig.text(
+        0.058,
+        0.87,
+        "Selected Relative SG Ranges Across Eight Zero-Lean Conditions per Club",
+        ha="left",
+        va="top",
+        fontsize=13,
+        color="#34465a",
+    )
+    fig.text(
+        0.055,
+        0.075,
+        "GEOMETRIC SIMULATION  ·  CONDITIONAL SG  ·  NOT PLAYER DATA",
+        ha="left",
+        va="center",
+        fontsize=13,
+        fontweight="bold",
+        color="#153a52",
+    )
+    fig.text(
+        0.055,
+        0.035,
+        "Ranges are descriptive, not pooled intervals or per-round gains.",
+        ha="left",
+        va="center",
+        fontsize=10,
+        color="#536577",
+    )
+    fig.subplots_adjust(left=0.25, right=0.97, top=0.78, bottom=0.22)
+    fig.savefig(destination, dpi=100, facecolor="white")
+    plt.close(fig)
+    return destination

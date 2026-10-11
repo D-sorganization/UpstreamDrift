@@ -17,7 +17,28 @@
       "original": "phase2/final_figures_v1/details/driver_lean0_curve1_rotation1_combined2/overhead.pdf",
       "replacement": "presentation_v2/driver_baseline_flight_paths.pdf",
       "sources": {
-        "final_v1/driver_lean0_curve1_rotation1_combined2/flight_samples.json": "e1783bde8253090ee9ff04e085ece3962ed2f7dd015093d044fc43ca6545d152"
+        "supplemental_traces_v3/receipt.json": "56303c5c40f1172f52ee5a275ad14f8997add547bcb3b0a92d6a6eb10c79af45",
+        "supplemental_traces_v3/trajectories.json": "93fb01c874c007f4af7badc6603d887bddd90a02aaa5a4e1d478f26ad73dbdcd",
+        "final_v1/driver_lean0_curve1_rotation1_combined2/shots.csv.gz": "cf076fb9349171dab46a68313936681a29869ae1c5f850673c51eba34ae9a484",
+        "final_v1/driver_lean0_curve1_rotation1_combined2/flight_samples.json": "e1783bde8253090ee9ff04e085ece3962ed2f7dd015093d044fc43ca6545d152",
+        "final_v1/driver_lean0_curve1_rotation1_combined2/summary.json": "7bf03b58d7349b32112e3961747f882662ffa83a1f22f913d2d29a9a9f1dd373",
+        "final_v1/driver_lean0_curve1_rotation1_combined2/run_start.json": "ddc9b5ca1b9ca16ea8a33beb2908ca45d42c23acbb81596421c30bfb26fe8800",
+        "final_v1/seven_iron_lean0_curve1_rotation1_combined2/shots.csv.gz": "63a36dfe3709520f999a0b715c7c1a146c2ebf994ec914bd14a5d0efa81f77a9",
+        "final_v1/seven_iron_lean0_curve1_rotation1_combined2/flight_samples.json": "021fe3df425c463ed2d7ed59aa6651886558fc5cc3b8b4b7c3c9a3d226af29c2",
+        "final_v1/seven_iron_lean0_curve1_rotation1_combined2/summary.json": "e590a55c6d3fadb01c78ea7daca1f2b4628b3fa26713357ba601aa2be15af5f9",
+        "final_v1/seven_iron_lean0_curve1_rotation1_combined2/run_start.json": "da15f91595bb85563ed5ba271a075b5423c15f364cd99d0ddc8844b8665767e1",
+        "final_v1/pitching_wedge_lean0_curve1_rotation1_combined2/shots.csv.gz": "3cd45d5c7f835e72911362e092b38ce4ff01c9d75eb4281dc6dd87bb6b4ffc5e",
+        "final_v1/pitching_wedge_lean0_curve1_rotation1_combined2/flight_samples.json": "d27c46735c3566a816d8d056cf5082e9e40f2fcfd2949a205f159e1d2ae2e34d",
+        "final_v1/pitching_wedge_lean0_curve1_rotation1_combined2/summary.json": "e8264d9d5df4c7f8314644037c6e885888d62daa182e295ff551fd77d9ec58c5",
+        "final_v1/pitching_wedge_lean0_curve1_rotation1_combined2/run_start.json": "f184709e053b823d309d3a35f17ba8bb5c3148df8601155c421d6b9bb6259b0f",
+        "control_final_v1/driver_lean0_curve1_rotation2_combined2/shots.csv.gz": "c6f0a2f0ecbeeadda676333f2e7abffc89f940ec829e3a6f176643452405ea4d",
+        "control_final_v1/driver_lean0_curve1_rotation2_combined2/flight_samples.json": "f1304903884a12c61fdf4471600d310a885214375d14c2695cfc77babca5cb2a",
+        "control_final_v1/driver_lean0_curve1_rotation2_combined2/summary.json": "f99a696d92f27f5a4ebc14278b8d7a729f9802e63b0552c7c7e6c59649c63dc3",
+        "control_final_v1/driver_lean0_curve1_rotation2_combined2/run_start.json": "2e1ed11d94dade6f3f493a6512ecc3fe5dc8838da1dad4e468d0493648d5f2e9",
+        "control_final_v1/driver_lean5_curve1_rotation2_combined2/shots.csv.gz": "2e1f1ea6c2a4325e80534333934497dbf1d8295479b806d7103a85d27966599b",
+        "control_final_v1/driver_lean5_curve1_rotation2_combined2/flight_samples.json": "36bfd66305683d0397900e8e9746294d342d867521a3b81a7d92b9cd0d4e3c41",
+        "control_final_v1/driver_lean5_curve1_rotation2_combined2/summary.json": "d1c22c9934c73ddc9bd7ba2c9aeb5d28ffe80949efe12f85739676e5ca487864",
+        "control_final_v1/driver_lean5_curve1_rotation2_combined2/run_start.json": "3ece099f3ad273117eb2f2a19ec6a106be8a3e29e86706d724b8cfd6b81649fa"
       }
     },
     {
@@ -31,7 +52,28 @@
       "original": "phase2/final_figures_v1/details/seven_iron_lean0_curve1_rotation1_combined2/overhead.pdf",
       "replacement": "presentation_v2/seven_iron_baseline_flight_paths.pdf",
       "sources": {
-        "final_v1/seven_iron_lean0_curve1_rotation1_combined2/flight_samples.json": "021fe3df425c463ed2d7ed59aa6651886558fc5cc3b8b4b7c3c9a3d226af29c2"
+        "supplemental_traces_v3/receipt.json": "56303c5c40f1172f52ee5a275ad14f8997add547bcb3b0a92d6a6eb10c79af45",
+        "supplemental_traces_v3/trajectories.json": "93fb01c874c007f4af7badc6603d887bddd90a02aaa5a4e1d478f26ad73dbdcd",
+        "final_v1/driver_lean0_curve1_rotation1_combined2/shots.csv.gz": "cf076fb9349171dab46a68313936681a29869ae1c5f850673c51eba34ae9a484",
+        "final_v1/driver_lean0_curve1_rotation1_combined2/flight_samples.json": "e1783bde8253090ee9ff04e085ece3962ed2f7dd015093d044fc43ca6545d152",
+        "final_v1/driver_lean0_curve1_rotation1_combined2/summary.json": "7bf03b58d7349b32112e3961747f882662ffa83a1f22f913d2d29a9a9f1dd373",
+        "final_v1/driver_lean0_curve1_rotation1_combined2/run_start.json": "ddc9b5ca1b9ca16ea8a33beb2908ca45d42c23acbb81596421c30bfb26fe8800",
+        "final_v1/seven_iron_lean0_curve1_rotation1_combined2/shots.csv.gz": "63a36dfe3709520f999a0b715c7c1a146c2ebf994ec914bd14a5d0efa81f77a9",
+        "final_v1/seven_iron_lean0_curve1_rotation1_combined2/flight_samples.json": "021fe3df425c463ed2d7ed59aa6651886558fc5cc3b8b4b7c3c9a3d226af29c2",
+        "final_v1/seven_iron_lean0_curve1_rotation1_combined2/summary.json": "e590a55c6d3fadb01c78ea7daca1f2b4628b3fa26713357ba601aa2be15af5f9",
+        "final_v1/seven_iron_lean0_curve1_rotation1_combined2/run_start.json": "da15f91595bb85563ed5ba271a075b5423c15f364cd99d0ddc8844b8665767e1",
+        "final_v1/pitching_wedge_lean0_curve1_rotation1_combined2/shots.csv.gz": "3cd45d5c7f835e72911362e092b38ce4ff01c9d75eb4281dc6dd87bb6b4ffc5e",
+        "final_v1/pitching_wedge_lean0_curve1_rotation1_combined2/flight_samples.json": "d27c46735c3566a816d8d056cf5082e9e40f2fcfd2949a205f159e1d2ae2e34d",
+        "final_v1/pitching_wedge_lean0_curve1_rotation1_combined2/summary.json": "e8264d9d5df4c7f8314644037c6e885888d62daa182e295ff551fd77d9ec58c5",
+        "final_v1/pitching_wedge_lean0_curve1_rotation1_combined2/run_start.json": "f184709e053b823d309d3a35f17ba8bb5c3148df8601155c421d6b9bb6259b0f",
+        "control_final_v1/driver_lean0_curve1_rotation2_combined2/shots.csv.gz": "c6f0a2f0ecbeeadda676333f2e7abffc89f940ec829e3a6f176643452405ea4d",
+        "control_final_v1/driver_lean0_curve1_rotation2_combined2/flight_samples.json": "f1304903884a12c61fdf4471600d310a885214375d14c2695cfc77babca5cb2a",
+        "control_final_v1/driver_lean0_curve1_rotation2_combined2/summary.json": "f99a696d92f27f5a4ebc14278b8d7a729f9802e63b0552c7c7e6c59649c63dc3",
+        "control_final_v1/driver_lean0_curve1_rotation2_combined2/run_start.json": "2e1ed11d94dade6f3f493a6512ecc3fe5dc8838da1dad4e468d0493648d5f2e9",
+        "control_final_v1/driver_lean5_curve1_rotation2_combined2/shots.csv.gz": "2e1f1ea6c2a4325e80534333934497dbf1d8295479b806d7103a85d27966599b",
+        "control_final_v1/driver_lean5_curve1_rotation2_combined2/flight_samples.json": "36bfd66305683d0397900e8e9746294d342d867521a3b81a7d92b9cd0d4e3c41",
+        "control_final_v1/driver_lean5_curve1_rotation2_combined2/summary.json": "d1c22c9934c73ddc9bd7ba2c9aeb5d28ffe80949efe12f85739676e5ca487864",
+        "control_final_v1/driver_lean5_curve1_rotation2_combined2/run_start.json": "3ece099f3ad273117eb2f2a19ec6a106be8a3e29e86706d724b8cfd6b81649fa"
       }
     },
     {
@@ -45,7 +87,28 @@
       "original": "phase2/final_figures_v1/details/pitching_wedge_lean0_curve1_rotation1_combined2/overhead.pdf",
       "replacement": "presentation_v2/pitching_wedge_baseline_flight_paths.pdf",
       "sources": {
-        "final_v1/pitching_wedge_lean0_curve1_rotation1_combined2/flight_samples.json": "d27c46735c3566a816d8d056cf5082e9e40f2fcfd2949a205f159e1d2ae2e34d"
+        "supplemental_traces_v3/receipt.json": "56303c5c40f1172f52ee5a275ad14f8997add547bcb3b0a92d6a6eb10c79af45",
+        "supplemental_traces_v3/trajectories.json": "93fb01c874c007f4af7badc6603d887bddd90a02aaa5a4e1d478f26ad73dbdcd",
+        "final_v1/driver_lean0_curve1_rotation1_combined2/shots.csv.gz": "cf076fb9349171dab46a68313936681a29869ae1c5f850673c51eba34ae9a484",
+        "final_v1/driver_lean0_curve1_rotation1_combined2/flight_samples.json": "e1783bde8253090ee9ff04e085ece3962ed2f7dd015093d044fc43ca6545d152",
+        "final_v1/driver_lean0_curve1_rotation1_combined2/summary.json": "7bf03b58d7349b32112e3961747f882662ffa83a1f22f913d2d29a9a9f1dd373",
+        "final_v1/driver_lean0_curve1_rotation1_combined2/run_start.json": "ddc9b5ca1b9ca16ea8a33beb2908ca45d42c23acbb81596421c30bfb26fe8800",
+        "final_v1/seven_iron_lean0_curve1_rotation1_combined2/shots.csv.gz": "63a36dfe3709520f999a0b715c7c1a146c2ebf994ec914bd14a5d0efa81f77a9",
+        "final_v1/seven_iron_lean0_curve1_rotation1_combined2/flight_samples.json": "021fe3df425c463ed2d7ed59aa6651886558fc5cc3b8b4b7c3c9a3d226af29c2",
+        "final_v1/seven_iron_lean0_curve1_rotation1_combined2/summary.json": "e590a55c6d3fadb01c78ea7daca1f2b4628b3fa26713357ba601aa2be15af5f9",
+        "final_v1/seven_iron_lean0_curve1_rotation1_combined2/run_start.json": "da15f91595bb85563ed5ba271a075b5423c15f364cd99d0ddc8844b8665767e1",
+        "final_v1/pitching_wedge_lean0_curve1_rotation1_combined2/shots.csv.gz": "3cd45d5c7f835e72911362e092b38ce4ff01c9d75eb4281dc6dd87bb6b4ffc5e",
+        "final_v1/pitching_wedge_lean0_curve1_rotation1_combined2/flight_samples.json": "d27c46735c3566a816d8d056cf5082e9e40f2fcfd2949a205f159e1d2ae2e34d",
+        "final_v1/pitching_wedge_lean0_curve1_rotation1_combined2/summary.json": "e8264d9d5df4c7f8314644037c6e885888d62daa182e295ff551fd77d9ec58c5",
+        "final_v1/pitching_wedge_lean0_curve1_rotation1_combined2/run_start.json": "f184709e053b823d309d3a35f17ba8bb5c3148df8601155c421d6b9bb6259b0f",
+        "control_final_v1/driver_lean0_curve1_rotation2_combined2/shots.csv.gz": "c6f0a2f0ecbeeadda676333f2e7abffc89f940ec829e3a6f176643452405ea4d",
+        "control_final_v1/driver_lean0_curve1_rotation2_combined2/flight_samples.json": "f1304903884a12c61fdf4471600d310a885214375d14c2695cfc77babca5cb2a",
+        "control_final_v1/driver_lean0_curve1_rotation2_combined2/summary.json": "f99a696d92f27f5a4ebc14278b8d7a729f9802e63b0552c7c7e6c59649c63dc3",
+        "control_final_v1/driver_lean0_curve1_rotation2_combined2/run_start.json": "2e1ed11d94dade6f3f493a6512ecc3fe5dc8838da1dad4e468d0493648d5f2e9",
+        "control_final_v1/driver_lean5_curve1_rotation2_combined2/shots.csv.gz": "2e1f1ea6c2a4325e80534333934497dbf1d8295479b806d7103a85d27966599b",
+        "control_final_v1/driver_lean5_curve1_rotation2_combined2/flight_samples.json": "36bfd66305683d0397900e8e9746294d342d867521a3b81a7d92b9cd0d4e3c41",
+        "control_final_v1/driver_lean5_curve1_rotation2_combined2/summary.json": "d1c22c9934c73ddc9bd7ba2c9aeb5d28ffe80949efe12f85739676e5ca487864",
+        "control_final_v1/driver_lean5_curve1_rotation2_combined2/run_start.json": "3ece099f3ad273117eb2f2a19ec6a106be8a3e29e86706d724b8cfd6b81649fa"
       }
     },
     {
@@ -106,8 +169,28 @@
       "original": "phase2/supplement_report_v2_layout_repair/figures/comparisons/across_lean_original_control_1_driver_lean0_curve1_rotation2_combined2_vs_original_control_1_driver_lean5_curve1_rotation2_combined2_178p949m_e5c0a1a1e9_overhead.pdf",
       "replacement": "presentation_v2/driver_across_lean_flight_paths.pdf",
       "sources": {
+        "supplemental_traces_v3/receipt.json": "56303c5c40f1172f52ee5a275ad14f8997add547bcb3b0a92d6a6eb10c79af45",
+        "supplemental_traces_v3/trajectories.json": "93fb01c874c007f4af7badc6603d887bddd90a02aaa5a4e1d478f26ad73dbdcd",
+        "final_v1/driver_lean0_curve1_rotation1_combined2/shots.csv.gz": "cf076fb9349171dab46a68313936681a29869ae1c5f850673c51eba34ae9a484",
+        "final_v1/driver_lean0_curve1_rotation1_combined2/flight_samples.json": "e1783bde8253090ee9ff04e085ece3962ed2f7dd015093d044fc43ca6545d152",
+        "final_v1/driver_lean0_curve1_rotation1_combined2/summary.json": "7bf03b58d7349b32112e3961747f882662ffa83a1f22f913d2d29a9a9f1dd373",
+        "final_v1/driver_lean0_curve1_rotation1_combined2/run_start.json": "ddc9b5ca1b9ca16ea8a33beb2908ca45d42c23acbb81596421c30bfb26fe8800",
+        "final_v1/seven_iron_lean0_curve1_rotation1_combined2/shots.csv.gz": "63a36dfe3709520f999a0b715c7c1a146c2ebf994ec914bd14a5d0efa81f77a9",
+        "final_v1/seven_iron_lean0_curve1_rotation1_combined2/flight_samples.json": "021fe3df425c463ed2d7ed59aa6651886558fc5cc3b8b4b7c3c9a3d226af29c2",
+        "final_v1/seven_iron_lean0_curve1_rotation1_combined2/summary.json": "e590a55c6d3fadb01c78ea7daca1f2b4628b3fa26713357ba601aa2be15af5f9",
+        "final_v1/seven_iron_lean0_curve1_rotation1_combined2/run_start.json": "da15f91595bb85563ed5ba271a075b5423c15f364cd99d0ddc8844b8665767e1",
+        "final_v1/pitching_wedge_lean0_curve1_rotation1_combined2/shots.csv.gz": "3cd45d5c7f835e72911362e092b38ce4ff01c9d75eb4281dc6dd87bb6b4ffc5e",
+        "final_v1/pitching_wedge_lean0_curve1_rotation1_combined2/flight_samples.json": "d27c46735c3566a816d8d056cf5082e9e40f2fcfd2949a205f159e1d2ae2e34d",
+        "final_v1/pitching_wedge_lean0_curve1_rotation1_combined2/summary.json": "e8264d9d5df4c7f8314644037c6e885888d62daa182e295ff551fd77d9ec58c5",
+        "final_v1/pitching_wedge_lean0_curve1_rotation1_combined2/run_start.json": "f184709e053b823d309d3a35f17ba8bb5c3148df8601155c421d6b9bb6259b0f",
+        "control_final_v1/driver_lean0_curve1_rotation2_combined2/shots.csv.gz": "c6f0a2f0ecbeeadda676333f2e7abffc89f940ec829e3a6f176643452405ea4d",
         "control_final_v1/driver_lean0_curve1_rotation2_combined2/flight_samples.json": "f1304903884a12c61fdf4471600d310a885214375d14c2695cfc77babca5cb2a",
-        "control_final_v1/driver_lean5_curve1_rotation2_combined2/flight_samples.json": "36bfd66305683d0397900e8e9746294d342d867521a3b81a7d92b9cd0d4e3c41"
+        "control_final_v1/driver_lean0_curve1_rotation2_combined2/summary.json": "f99a696d92f27f5a4ebc14278b8d7a729f9802e63b0552c7c7e6c59649c63dc3",
+        "control_final_v1/driver_lean0_curve1_rotation2_combined2/run_start.json": "2e1ed11d94dade6f3f493a6512ecc3fe5dc8838da1dad4e468d0493648d5f2e9",
+        "control_final_v1/driver_lean5_curve1_rotation2_combined2/shots.csv.gz": "2e1f1ea6c2a4325e80534333934497dbf1d8295479b806d7103a85d27966599b",
+        "control_final_v1/driver_lean5_curve1_rotation2_combined2/flight_samples.json": "36bfd66305683d0397900e8e9746294d342d867521a3b81a7d92b9cd0d4e3c41",
+        "control_final_v1/driver_lean5_curve1_rotation2_combined2/summary.json": "d1c22c9934c73ddc9bd7ba2c9aeb5d28ffe80949efe12f85739676e5ca487864",
+        "control_final_v1/driver_lean5_curve1_rotation2_combined2/run_start.json": "3ece099f3ad273117eb2f2a19ec6a106be8a3e29e86706d724b8cfd6b81649fa"
       },
       "comparison_receipt": "c46738a38bb35ab86ba2163260e31a225aca07c807e021225d3c38fd09f0cf46"
     }
@@ -115,7 +198,11 @@
   "graphical_summary": "presentation_v2/summary.pdf",
   "summary_numbers_source": "shot_pattern_analysis.tex: Selected Relative-SG Ranges and Pointwise Interval Directions",
   "presentation_source_sha256": {
-    "render.py": "0c74994d7f1f43eeb44e77b6c970331f1caf9feeb573e9e1f05a7741adcecab8",
-    "summary.py": "9351b009d71b5b2d152e2c6c07b2c5fe620580e5a058eda469487aae21190b7a"
-  }
+    "render.py": "2b79a72f7760144baf72e6248defe009bf1b94b66c463bd5599346c6047e39e5",
+    "summary.py": "f1102f9372a679325b36d55abdad94c6061f7d96927a602aeea7180608e1ef80",
+    "sources.py": "648e25e486d8616915fb73781475cf545952dd977440e3629c3252e414736a69",
+    "flight_panel.py": "e11fb9bbd1b1c603a05573f49337b804c0300e3f51184fe4998ddbaa083a2d94",
+    "supplemental.py": "b49af370ee1d88aa612c12b7253abdc0f354cd241ea828162e21d49f4e4cd176"
+  },
+  "supplemental_replay_receipt_sha256": "56303c5c40f1172f52ee5a275ad14f8997add547bcb3b0a92d6a6eb10c79af45"
 }

@@ -139,7 +139,7 @@ invalid outcomes are still retained in the experiment inventory.
 \begin{figure}[p]\centering
 \includegraphics[width=0.98\linewidth,height=0.78\textheight,keepaspectratio]{\detokenize{phase2/presentation_v2/driver_baseline_flight_paths.pdf}}
 \caption{Driver: Illustrative Flight Paths}
-\begin{minipage}{0.97\linewidth}\small Driver Straight, Draw, and Fade Endpoints at a Matched 178.9 m Target. Six saved flight paths per pattern illustrate the supported airborne populations (10,000/10,000 supported per pattern for this configuration); axes are in metres. The zero-error nominal endpoints were matched before input variation. Flight curves are saved illustrative samples, not the full simulated population or a paired path-by-path experiment. Read the lateral magnification stated in the plot.\end{minipage}
+\begin{minipage}{0.97\linewidth}\small Driver Straight, Draw, and Fade Endpoints at a Matched 178.9 m Target. One hundred verified replay paths per pattern illustrate the supported airborne populations (10,000/10,000 supported per pattern for this configuration); axes are in metres. The zero-error nominal endpoints were matched before input variation. Flight curves use common supported shot IDs, not the full simulated population. Read the lateral magnification stated in the plot.\end{minipage}
 \end{figure}\end{landscape}
 
 \clearpage\begin{landscape}
@@ -153,7 +153,7 @@ invalid outcomes are still retained in the experiment inventory.
 \begin{figure}[p]\centering
 \includegraphics[width=0.98\linewidth,height=0.78\textheight,keepaspectratio]{\detokenize{phase2/presentation_v2/seven_iron_baseline_flight_paths.pdf}}
 \caption{Seven Iron: Illustrative Flight Paths}
-\begin{minipage}{0.97\linewidth}\small 7-Iron Straight, Draw, and Fade Endpoints at a Matched 127.9 m Target. Six saved flight paths per pattern illustrate the supported airborne populations (9,996/10,000 supported per pattern for this configuration); axes are in metres. The zero-error nominal endpoints were matched before input variation. Flight curves are saved illustrative samples, not the full simulated population or a paired path-by-path experiment. Read the lateral magnification stated in the plot.\end{minipage}
+\begin{minipage}{0.97\linewidth}\small 7-Iron Straight, Draw, and Fade Endpoints at a Matched 127.9 m Target. One hundred verified replay paths per pattern illustrate the supported airborne populations (9,996/10,000 supported per pattern for this configuration); axes are in metres. The zero-error nominal endpoints were matched before input variation. Flight curves use common supported shot IDs, not the full simulated population. Read the lateral magnification stated in the plot.\end{minipage}
 \end{figure}\end{landscape}
 
 \clearpage\begin{landscape}
@@ -167,7 +167,7 @@ invalid outcomes are still retained in the experiment inventory.
 \begin{figure}[p]\centering
 \includegraphics[width=0.98\linewidth,height=0.78\textheight,keepaspectratio]{\detokenize{phase2/presentation_v2/pitching_wedge_baseline_flight_paths.pdf}}
 \caption{Pitching Wedge: Illustrative Flight Paths}
-\begin{minipage}{0.97\linewidth}\small Pitching Wedge Straight, Draw, and Fade Endpoints at a Matched 77.4 m Target. Six saved flight paths per pattern illustrate the supported airborne populations (9,999/10,000 supported per pattern for this configuration); axes are in metres. The zero-error nominal endpoints were matched before input variation. Flight curves are saved illustrative samples, not the full simulated population or a paired path-by-path experiment. Read the lateral magnification stated in the plot.\end{minipage}
+\begin{minipage}{0.97\linewidth}\small Pitching Wedge Straight, Draw, and Fade Endpoints at a Matched 77.4 m Target. One hundred verified replay paths per pattern illustrate the supported airborne populations (9,999/10,000 supported per pattern for this configuration); axes are in metres. The zero-error nominal endpoints were matched before input variation. Flight curves use common supported shot IDs, not the full simulated population. Read the lateral magnification stated in the plot.\end{minipage}
 \end{figure}\end{landscape}
 
 \clearpage\begin{landscape}
@@ -216,7 +216,7 @@ invalid outcomes are still retained in the experiment inventory.
 \begin{figure}[p]\centering
 \includegraphics[width=0.98\linewidth,height=0.78\textheight,keepaspectratio]{\detokenize{phase2/presentation_v2/driver_across_lean_flight_paths.pdf}}
 \caption{Driver: Forward-Lean Comparison}
-\begin{minipage}{0.97\linewidth}\small Driver Landing-Location Shift Across Nominal Shaft Lean. Thirty-six saved flight paths (six per pattern at each lean) illustrate 0\textdegree{} with 5\textdegree{} lean while curve scale ($\times$1) and shaft-rotation noise SD (2\textdegree{}) stay fixed. Straight, Draw, and Fade are matched at a 178.9 m nominal target; the separate paired endpoint and scoring analysis uses 9,940 indices supported in all six populations (of 10,000 attempts per population). The plotted carry and lateral coordinates are in metres; this model perturbation is descriptive rather than an independently validated causal mechanism. Flight curves are saved illustrative samples, not the full simulated population or a paired path-by-path experiment. Read the lateral magnification stated in the plot.\end{minipage}
+\begin{minipage}{0.97\linewidth}\small Driver Landing-Location Shift Across Nominal Shaft Lean. Six hundred verified replay flight paths (100 per pattern at each lean), plus dashed nominal references, illustrate 0\textdegree{} with 5\textdegree{} lean while curve scale ($\times$1) and shaft-rotation noise SD (2\textdegree{}) stay fixed. Straight, Draw, and Fade are matched at a 178.9 m nominal target; the separate paired endpoint and scoring analysis uses 9,940 indices supported in all six populations (of 10,000 attempts per population). The plotted carry and lateral coordinates are in metres; this model perturbation is descriptive rather than an independently validated causal mechanism. Flight curves use common supported shot IDs, not the full simulated population. Read the lateral magnification stated in the plot.\end{minipage}
 \end{figure}\end{landscape}
 \clearpage\section{Model, Methods, and Numerical Results}
 The current phase-two study supersedes the aimed, fixed-delivery comparisons
@@ -588,6 +588,7 @@ intervals quantify sampling variation for those simulated populations only. They
 in club properties, contact law, flight physics, human delivery distributions,
 course geometry, or the scoring benchmark.
 
+\Needspace{13\baselineskip}
 Let $A_{kc}$ be the supported shot-index set for pattern $k$ in condition $c$,
 $A_{3c}=\bigcap_{k\in\{S,D,F\}}A_{kc}$, and
 $A_6=A_{3c_1}\cap A_{3c_2}$. With endpoint scores
@@ -643,10 +644,37 @@ precision; these regions depend on the grid and are not smooth population
 density estimates or confidence regions for a mean. No Gaussian width or KDE
 is imposed on singular or nearly one-dimensional samples.
 
-The equations above follow the preserved study adapters and shared kernels:
-\texttt{matched\_physics.py}, \texttt{nominal\_matching.py},
-\texttt{noise.py}, \texttt{incremental\_contact\_kernel.py}, and
-\path{aerodynamics.rs} and \path{ball_flight.rs}. Their execution identities
+\textbf{Supplemental Flight-Trace Replay.} For the three baseline plates and
+Driver lean comparison, 100 distinct shot IDs are chosen at evenly spaced ranks
+of the support intersection across all five displayed cells and three patterns.
+IDs 0--4 are reserved for verification. Exact saved delivery inputs are replayed
+through the original impact and flight pathway; no statistical outcomes are
+resampled or replaced. Before accepting additional traces, each cell's nominal
+path and first five sampled paths must reproduce all 41 saved coordinates to
+$10^{-6}$ m absolute tolerance. Selected shots must reproduce saved carry,
+launch and delivered geometry (normally $10^{-6}$ in their stated units;
+spin rate $10^{-5}$ rpm). Runtime, native binary and physics-source identities
+must match the recorded execution. The separate replay receipt records all
+input hashes, common IDs, tolerances and output hash. These are illustrative
+replays conditional on common support, not another independent experiment;
+all original numerical summaries and manifests remain unchanged.
+
+The equations above follow these preserved study adapters and shared kernels:
+\begin{center}\small
+\begin{tabular}{ll}
+\toprule
+Stage & Implementation\\
+\midrule
+Nominal Matching & \texttt{nominal\_matching.py}\\
+Delivery and Face Geometry & \texttt{matched\_physics.py}\\
+Primitive Sampling & \texttt{noise.py}\\
+Incremental Contact & \texttt{incremental\_contact\_kernel.py}\\
+Aerodynamic Forces & \texttt{aerodynamics.rs}\\
+Flight Integration & \texttt{ball\_flight.rs}\\
+\bottomrule
+\end{tabular}
+\end{center}
+Their execution identities
 are recorded in the \href{phase2/source_transition_supplement.json}{Accepted
 Source Transition}; the saved-data workflow retains those identities separately
 from later reporting changes. The local parabolic face, contact law, force

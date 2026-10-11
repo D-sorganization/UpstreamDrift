@@ -10,9 +10,15 @@ import csv
 import gzip
 import hashlib
 import json
+import argparse
 from pathlib import Path
 
 from .summary import render_summary
+from .flight_panel import plot_flight_panel
+from .supplemental import SupplementalBundle, load_supplemental
+from .sources import cell_dir as _cell_dir
+from .sources import orient_points
+from .sources import selected_pair as _selected_pair
 
 import matplotlib
 
@@ -32,19 +38,6 @@ CLUBS = {
 }
 
 
-def orient_points(saved: object) -> np.ndarray:
-    """Return a fresh N×2 [lateral, downrange] array from finite saved metres."""
-    points = np.asarray(saved, dtype=float)
-    if (
-        points.ndim != 2
-        or points.shape[1] != 2
-        or not len(points)
-        or not np.isfinite(points).all()
-    ):
-        raise ValueError("saved points must be a nonempty finite N×2 coordinate array")
-    return points[:, [1, 0]].copy()
-
-
 def _sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -52,26 +45,6 @@ def _sha(path: Path) -> str:
 def _source(path: Path) -> str:
     """Use stable study-relative source names in the reproducibility mapping."""
     return str(path.relative_to(PHASE))
-
-
-def _cell_dir(protocol: str, cell: str) -> Path:
-    roots = {
-        "original_primary/1": PHASE / "final_v1",
-        "original_control/1": PHASE / "control_final_v1",
-        "pw-primary-face-bounds/1": PHASE / "supplement_final_v1/pw_primary_face",
-    }
-    if protocol not in roots:
-        raise ValueError(f"unmapped source protocol: {protocol}")
-    result = roots[protocol] / cell
-    if not result.is_dir():
-        raise ValueError(f"saved source missing: {result}")
-    manifest = json.loads((result / "manifest.json").read_text())
-    for name in ("shots.csv.gz", "flight_samples.json"):
-        if _sha(result / name) != manifest["files_sha256"][name]:
-            raise ValueError(
-                f"saved source hash differs from manifest: {result / name}"
-            )
-    return result
 
 
 def _endpoints(directory: Path) -> dict[str, dict[int, np.ndarray]]:
@@ -208,39 +181,9 @@ def _density_plate(
     _save(figure, destination)
 
 
-def _flight_plate(
-    groups: list[tuple[str, list]],
-    target: float,
-    title: str,
-    note: str,
-    destination: Path,
-    *,
-    rows: int = 1,
+def _annotate_flight_plate(
+    fig: plt.Figure, title: str, note: str, supplemental: bool
 ) -> None:
-    fig, axes = plt.subplots(rows, 3, figsize=(10.5, 7.0 if rows == 1 else 8.7))
-    axes = np.asarray(axes).reshape(rows, 3)
-    oriented = [
-        (label, [orient_points(path) for path in paths]) for label, paths in groups
-    ]
-    all_x = np.concatenate([p[:, 0] for _, paths in oriented for p in paths])
-    xhalf = max(np.max(np.abs(all_x)) * 1.10, 1.0)
-    ymax = max(np.max(p[:, 1]) for _, paths in oriented for p in paths) * 1.06
-    for index, (label, paths) in enumerate(oriented):
-        ax = axes.flat[index]
-        pattern = label.split(" · ")[0]
-        for path in paths:
-            ax.plot(path[:, 0], path[:, 1], color=COLORS[pattern], lw=1.0, alpha=0.55)
-            ax.plot(path[-1, 0], path[-1, 1], "o", color=COLORS[pattern], ms=2.4)
-        ax.plot(0, target, "+", color="#c51f30", ms=10, mew=1.7)
-        ax.axvline(0, color="#536577", lw=0.6)
-        ax.set_xlim(-xhalf, xhalf)
-        ax.set_ylim(0, ymax)
-        ax.set_title(label, fontsize=13)
-        if index // 3 == rows - 1:
-            ax.set_xlabel("Lateral Position (m; Right Positive)", fontsize=11)
-        if index % 3 == 0:
-            ax.set_ylabel("Downrange Distance (m)", fontsize=11)
-        ax.grid(alpha=0.16)
     fig.text(0.05, 0.985, title, ha="left", va="top", fontsize=19, fontweight="bold")
     fig.text(0.05, 0.905, note, va="top", fontsize=11)
     fig.text(
@@ -250,13 +193,52 @@ def _flight_plate(
         fontsize=10,
         color="#34465a",
     )
-    fig.text(
-        0.05,
-        0.012,
-        "Saved Illustrative Flight Paths; Not the Full Population or a Paired Path-by-Path Experiment.",
-        fontsize=9,
-        color="#536577",
+    footer = (
+        "Dashed = Zero-Error Nominal; 100 Replayed Supported Shots per Pattern; Common Shot IDs Across Conditions."
+        if supplemental
+        else "Saved Illustrative Flight Paths; Not the Full Population or a Paired Path-by-Path Experiment."
     )
+    fig.text(0.05, 0.012, footer, fontsize=9, color="#536577")
+
+
+def _flight_plate(
+    groups: list[tuple[str, list]],
+    target: float,
+    title: str,
+    note: str,
+    destination: Path,
+    *,
+    rows: int = 1,
+    supplemental: bool = False,
+    nominal_paths: list[list] | None = None,
+) -> None:
+    fig, axes = plt.subplots(rows, 3, figsize=(10.5, 7.0 if rows == 1 else 8.7))
+    axes = np.asarray(axes).reshape(rows, 3)
+    oriented = [
+        (label, [orient_points(path) for path in paths]) for label, paths in groups
+    ]
+    if supplemental and (nominal_paths is None or len(nominal_paths) != len(groups)):
+        raise ValueError("supplemental panels require one nominal path per panel")
+    nominals = [orient_points(path) for path in nominal_paths or []]
+    all_paths = [p for _, paths in oriented for p in paths] + nominals
+    all_x = np.concatenate([p[:, 0] for p in all_paths])
+    xhalf = max(np.max(np.abs(all_x)) * 1.10, 1.0)
+    ymax = max(np.max(p[:, 1]) for p in all_paths) * 1.06
+    for index, (label, paths) in enumerate(oriented):
+        plot_flight_panel(
+            axes.flat[index],
+            label,
+            paths,
+            target,
+            xhalf,
+            ymax,
+            index,
+            rows,
+            supplemental,
+            COLORS,
+            nominals[index] if supplemental else None,
+        )
+    _annotate_flight_plate(fig, title, note, supplemental)
     fig.subplots_adjust(
         left=0.07,
         right=0.99,
@@ -280,29 +262,25 @@ def _save(fig: plt.Figure, stem: Path) -> None:
     plt.close(fig)
 
 
-def _selected_pair(comparisons: list[dict], club: str, kind: str) -> dict:
-    prefix = (
-        f"{club}_lean0_curve1_rotation{'2' if kind == 'across_lean' else '1'}_combined2"
+def _baseline_density(
+    shots: dict[str, dict[int, np.ndarray]],
+    target: float,
+    label: str,
+    destination: Path,
+) -> None:
+    counts = [len(shots[p]) for p in PATTERNS]
+    _density_plate(
+        [(p, np.stack(list(shots[p].values()))) for p in PATTERNS],
+        target,
+        f"{label}: Endpoint Dispersion",
+        f"Matched Target {target:.1f} m · Supported {min(counts):,}–{max(counts):,}/10,000 per Pattern · Shared Axes and Density Scale",
+        destination,
     )
-    matches = [
-        row
-        for row in comparisons
-        if row["comparison_kind"] == kind
-        and row["sources"][0]["cell"] == prefix
-        and (
-            kind != "across_lean"
-            or row["sources"][1]["cell"].startswith(f"{club}_lean5")
-        )
-    ]
-    if len(matches) != 1 or matches[0]["status"] not in (
-        "available",
-        "conditional_only",
-    ):
-        raise ValueError(f"expected one available {club} {kind} source pair")
-    return matches[0]
 
 
-def _render_baselines(mapping: list[dict], old: list[str]) -> None:
+def _render_baselines(
+    mapping: list[dict], old: list[str], supplemental: SupplementalBundle | None = None
+) -> None:
     for club in CLUBS:
         cell = f"{club}_lean0_curve1_rotation1_combined2"
         directory = _cell_dir("original_primary/1", cell)
@@ -310,16 +288,9 @@ def _render_baselines(mapping: list[dict], old: list[str]) -> None:
         flight_path = directory / "flight_samples.json"
         flights = json.loads(flight_path.read_text())
         target = float(flights["target_x_m"])
-        counts = [len(shots[p]) for p in PATTERNS]
         label = CLUBS[club]
         density_stem = OUT / f"{club}_baseline_density"
-        _density_plate(
-            [(p, np.stack(list(shots[p].values()))) for p in PATTERNS],
-            target,
-            f"{label}: Endpoint Dispersion",
-            f"Matched Target {target:.1f} m · Supported {min(counts):,}–{max(counts):,}/10,000 per Pattern · Shared Axes and Density Scale",
-            density_stem,
-        )
+        _baseline_density(shots, target, label, density_stem)
         mapping.append(
             {
                 "original": old[len(mapping)],
@@ -332,18 +303,34 @@ def _render_baselines(mapping: list[dict], old: list[str]) -> None:
             }
         )
         overhead_stem = OUT / f"{club}_baseline_flight_paths"
+        paths = (
+            supplemental.trajectories[club] if supplemental else flights["trajectories"]
+        )
         _flight_plate(
-            [(p, flights["trajectories"][p]) for p in PATTERNS],
+            [(p, paths[p]) for p in PATTERNS],
             target,
             f"{label}: Illustrative Flight Paths",
-            f"Matched Target {target:.1f} m · Six Saved Paths per Pattern · Zero-Lean Combined-Noise Condition",
+            f"Matched Target {target:.1f} m · {'100 Replayed Shots' if supplemental else 'Six Saved Paths'} per Pattern · Zero-Lean Combined-Noise Condition",
             overhead_stem,
+            supplemental=supplemental is not None,
+            nominal_paths=(
+                [flights["trajectories"][p][0] for p in PATTERNS]
+                if supplemental
+                else None
+            ),
         )
         mapping.append(
             {
                 "original": old[len(mapping)],
                 "replacement": str(overhead_stem.relative_to(PHASE)) + ".pdf",
-                "sources": {_source(flight_path): _sha(flight_path)},
+                "sources": (
+                    {
+                        _source(Path(path)): digest
+                        for path, digest in supplemental.sources.items()
+                    }
+                    if supplemental
+                    else {_source(flight_path): _sha(flight_path)}
+                ),
             }
         )
 
@@ -400,7 +387,11 @@ def _render_comparisons(
 
 
 def _render_lean_comparison(
-    mapping: list[dict], old: list[str], comparisons: list[dict], report_path: Path
+    mapping: list[dict],
+    old: list[str],
+    comparisons: list[dict],
+    report_path: Path,
+    supplemental: SupplementalBundle | None = None,
 ) -> None:
     pair = _selected_pair(comparisons, "driver", "across_lean")
     dirs = [
@@ -409,7 +400,12 @@ def _render_lean_comparison(
     ]
     flights = [json.loads((d / "flight_samples.json").read_text()) for d in dirs]
     groups = [
-        (f"{p} · Lean {lean}°", flight["trajectories"][p])
+        (
+            f"{p} · Lean {lean}°",
+            supplemental.trajectories[f"driver_lean{lean}"][p]
+            if supplemental
+            else flight["trajectories"][p],
+        )
         for lean, flight in zip((0, 5), flights, strict=True)
         for p in PATTERNS
     ]
@@ -418,36 +414,52 @@ def _render_lean_comparison(
         groups,
         float(pair["target_x_m"]),
         "Driver: Forward-Lean Comparison",
-        "Lean 0° Versus 5° · Shaft-Rotation SD 2° · Curve ×1 · Six Saved Paths per Pattern and Condition",
+        f"Lean 0° Versus 5° · Shaft-Rotation SD 2° · Curve ×1 · {'100 Replayed Shots' if supplemental else 'Six Saved Paths'} per Pattern and Condition",
         stem,
         rows=2,
+        supplemental=supplemental is not None,
+        nominal_paths=(
+            [flight["trajectories"][p][0] for flight in flights for p in PATTERNS]
+            if supplemental
+            else None
+        ),
     )
     mapping.append(
         {
             "original": old[len(mapping)],
             "replacement": str(stem.relative_to(PHASE)) + ".pdf",
-            "sources": {
-                _source(d / "flight_samples.json"): _sha(d / "flight_samples.json")
-                for d in dirs
-            },
+            "sources": (
+                {
+                    _source(Path(path)): digest
+                    for path, digest in supplemental.sources.items()
+                }
+                if supplemental
+                else {
+                    _source(d / "flight_samples.json"): _sha(d / "flight_samples.json")
+                    for d in dirs
+                }
+            ),
             "comparison_receipt": _sha(report_path),
         }
     )
 
 
-def render() -> dict:
+def render(*, supplemental_dir: Path | None = None) -> dict:
     """Render exactly 13 replacement plates and one summary; return source-bound mapping."""
     old = json.loads((OUT / "original_paths.json").read_text())
     if len(old) != 13:
         raise ValueError(f"expected 13 embedded source figures, found {len(old)}")
+    supplemental = (
+        load_supplemental(supplemental_dir) if supplemental_dir is not None else None
+    )
     mapping: list[dict] = []
-    _render_baselines(mapping, old)
+    _render_baselines(mapping, old, supplemental)
     report_path = PHASE / "supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.json"
     comparisons = json.loads(report_path.read_text())["comparisons"]
     _render_comparisons(mapping, old, comparisons, report_path)
-    _render_lean_comparison(mapping, old, comparisons, report_path)
+    _render_lean_comparison(mapping, old, comparisons, report_path, supplemental)
     summary = render_summary(TEX, OUT, _save, COLORS)
-    result = {
+    result: dict = {
         "schema": "shot-pattern-presentation-v2/1",
         "display_axes": {"x": "lateral_m_right_positive", "y": "downrange_m"},
         "coordinate_source": "saved [downrange_m, lateral_m] without translation or aim correction",
@@ -457,11 +469,24 @@ def render() -> dict:
         "presentation_source_sha256": {
             "render.py": _sha(Path(__file__)),
             "summary.py": _sha(OUT / "summary.py"),
+            "sources.py": _sha(OUT / "sources.py"),
+            "flight_panel.py": _sha(OUT / "flight_panel.py"),
         },
     }
+    if supplemental and supplemental_dir is not None:
+        result["supplemental_replay_receipt_sha256"] = supplemental.sources[
+            str(Path(supplemental_dir).resolve() / "receipt.json")
+        ]
+        result["presentation_source_sha256"]["supplemental.py"] = _sha(
+            OUT / "supplemental.py"
+        )
     (OUT / "mapping.json").write_text(json.dumps(result, indent=2) + "\n")
     return result
 
 
 if __name__ == "__main__":
-    render()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--supplemental", type=Path, help="verified supplemental replay directory"
+    )
+    render(supplemental_dir=parser.parse_args().supplemental)

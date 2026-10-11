@@ -1,0 +1,36 @@
+{
+  "status": "active",
+  "integration_worktree": "/home/dieterolson/.codex/worktrees/shot-pattern-refinement-integration/UpstreamDrift",
+  "integration_base": "3172c3986afd17f49589814b45efc3685ea8e046",
+  "integration_branch": "codex/shot-pattern-refinement-integration",
+  "methods_commit": "e5ba4018ac",
+  "methods_review": "Final39page review completed; stale Figure14 caption corrected and page17 re-reviewed. All other page text unchanged.",
+  "replay": "Accepted 100 common IDs per pattern in5cells; separate supplemental_traces_v3 receipt and trajectories; original data unchanged",
+  "replay_sha256": "93fb01c874c007f4af7badc6603d887bddd90a02aaa5a4e1d478f26ad73dbdcd",
+  "affinedrift_worktree": "/home/dieterolson/.codex/worktrees/shot-pattern-affinedrift-publication",
+  "affinedrift_issue": 5004,
+  "affinedrift_status": "QMD draft and navigation/resources prepared; assets and validation pending",
+  "upstream_status": "PR12278 unmerged. Restored approved DRY baseline leaves14 fingerprint groups in6 semantic families; refactors active.67 new architecture allowances audited as unresolved.",
+  "live_processes": {},
+  "next": [
+    "Commit reviewed presentation/replay sources and local delivery receipts",
+    "Complete integration refactors and unchanged validation gates",
+    "Populate and render AffineDrift article with reviewed assets",
+    "Push/merge safely; verify public report and social preview"
+  ],
+  "upstream_dry_issue": 12299,
+  "checks": "21 presentation/replay tests and2 social tests pass; mypy on5sources passes; Ruff passed after duplicate provenancekey removal",
+  "quarto": {
+    "version": "1.8.26",
+    "path": "/tmp/shot-pattern-quarto-1.8.26/opt/quarto/bin/quarto",
+    "sha256": "60451a42095dd60bc23ad529b39ca81017da688aab029bec9b5565818fc55cf8"
+  },
+  "integration_commits": [
+    "bb1292a246",
+    "b15aa53c45",
+    "242ce075c6",
+    "0ef05631ea"
+  ],
+  "affine_checks": "Rendercoverage253URLs passes and titlecase672sources passes; final localassets/page render stillpending",
+  "local_delivery": "fd5506da87f5e619a550fb8cc871a0e8195b6fb98965a99809e3238a0f01508b"
+}

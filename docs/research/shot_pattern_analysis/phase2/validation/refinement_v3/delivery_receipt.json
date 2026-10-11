@@ -1,0 +1,22 @@
+{
+  "status": "reviewed_local_delivery",
+  "report_sha256": "fd5506da87f5e619a550fb8cc871a0e8195b6fb98965a99809e3238a0f01508b",
+  "report_pages": 39,
+  "source_sha256": "99582319359e5957d538580005ec61656592cccabcab3518d8260620597a0ac2",
+  "review": {
+    "root": "All39pages layout/contact review; individual density/flight/summary graphics; corrected Figure14 page17 inspected at1600px",
+    "astra": "Methods18\u201324, summary1\u20134, baseline5\u201310, lean17 reviewed on ac258301ef7482c3d584c46eae38faed604119f4a36a4071839c30c6ae1f7290; only blocker was stale Figure14 caption, corrected",
+    "final_text_diff_pages": [
+      17
+    ]
+  },
+  "compile": {
+    "local": "Tectonic exit0, no warnings",
+    "editor": "Fails before parsing: uncached bundle fetch Rust panic #12120"
+  },
+  "outputs": {
+    "/home/dieterolson/Desktop/Shot Pattern Analysis - Illustrated Research Report.pdf": "fd5506da87f5e619a550fb8cc871a0e8195b6fb98965a99809e3238a0f01508b",
+    "/home/dieterolson/Desktop/Shot Pattern Analysis - One Page Summary.pdf": "438d1c64d534b25309e99b4b49a73138139e903744b1336be05065fa56c9af0b"
+  },
+  "limitations": "Local report delivery only; PR/integration gates and revised public publication remain incomplete."
+}
