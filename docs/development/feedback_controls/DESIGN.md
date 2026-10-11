@@ -169,6 +169,18 @@ is software-path evidence, not a private capture, production anatomy/physics
 qualification, or release. See canonical chapter48 and
 `F07_CONSTRAINED_MIXED_MOCO_TURNOVER.md`.
 
+## OpenSim Mixed Replay Marker Observation (#12195)
+
+The opt-in marker bridge validates a frozen T01 mixed bundle and performs one
+fresh native replay before observing positions. It restores every complete
+named state and the exact sample time, then uses model-owned PhysicalFrame
+stations with explicit ordered local offsets. It does not assemble or
+integrate during observation. The existing scorer aligns only 3-D positions
+to the retained measured clock and rejects extrapolation. The result remains
+diagnostic and unqualified; attachment calibration, physiology, contact,
+private capture, production variants, and all-engine parity remain open. See
+chapter49 and `F09Q-OPENSIM-MIXED-MARKER-SCORING.md`.
+
 ## Exact-Source 557-Muscle Replay Boundary (#12182)
 
 An opt-in version-three profile freezes the exact BUET–Hamner derived model

@@ -545,6 +545,39 @@ mechanical prepared-state paths. See chapter48 and
 `F07_CONSTRAINED_MIXED_MOCO_TURNOVER.md`; the registry still contains zero
 approved calculations and release remains blocked.
 
+## F09Q OpenSim Mixed Replay Marker Scoring (#12195)
+
+The exact T01 mixed bundle is freshly replayed once, then every complete named
+native state and exact time is restored for model-owned OpenSim marker FK.
+Ordered PhysicalFrame paths and local station offsets are caller supplied;
+no coordinate-only reconstruction, assembly, or hidden integration is used.
+The existing observation aligner retains the measured clock/missingness mask
+and rejects extrapolation before computing canonical metrics. The OpenSim 4.6
+affected constrained-mixed module completed with 12 passes, including the
+synthetic integration and source/horizon negatives. Two portable tests reject
+qualification promotion through construction or `dataclasses.replace`.
+Marker/alignment arrays are bytes-backed. This is diagnostic, unqualified
+output, not an execution receipt, approved calibration, F01 admission, capture
+fit, or scientific validation. See chapter49 and
+`docs/development/feedback_controls/F09Q-OPENSIM-MIXED-MARKER-SCORING.md`.
+
+## F09R Drake Native Replay Import Isolation (#12203)
+
+The Drake engine and Drake-Python facades now defer implementation imports,
+so importing the native replay adapter no longer requires unrelated Drake
+simulation or wrench-processing dependencies. A clean subprocess regression
+blocks pydrake and bunkershot3d imports while loading the source-checkout
+adapter. The existing Drake 1.57.0 native synthetic replay tests pass 11/11
+with only the repository root on `PYTHONPATH`. This establishes neither an
+installed-wheel import path nor additional engine or scientific qualification.
+
+CI run 38082402009 exposed a standard-library exception difference:
+`dataclasses.replace` raises `ValueError` on Python 3.11 and `TypeError` on
+Python 3.13 for an `init=False` field. The regression accepts both runtime
+exceptions while requiring the `init=False` diagnostic. The affected test
+file passes on Python 3.11.17 and 3.13.5. The initial full unit run completed
+23,846 tests with this single failure before the test-only correction.
+
 ## F07 Exact 557-Muscle Diagnostic Replay (#12182)
 
 The exact derived BUET–Hamner source now has a separate v3 excitation replay
