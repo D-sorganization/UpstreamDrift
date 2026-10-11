@@ -1870,12 +1870,33 @@ def test_bound_retained_replay_records_provenance_changes_and_failed_result(
         }
 
     monkeypatch.setattr(harness, "run_retained_replay_diagnostic", fail_after_mutation)
+    worker_environment = {
+        "CASADIPATH": str(runtime),
+        "PYTHONPATH": str(repo_root),
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "BLIS_NUM_THREADS": "1",
+    }
+    with pytest.raises(ValueError, match="runtime binding"):
+        harness.run_bound_solution_replay_diagnostic(
+            failed_run,
+            snapshot,
+            tmp_path / "invalid_environment",
+            worker_python=sys.executable,
+            worker_environment={**worker_environment, "CASADIPATH": "different-sdk"},
+            casadi_path=runtime,
+            repo_root=repo_root,
+        )
+    assert not (tmp_path / "invalid_environment").exists()
     result = harness.run_bound_solution_replay_diagnostic(
         failed_run,
         snapshot,
         tmp_path / "diagnostic",
         worker_python=sys.executable,
-        worker_environment={"CASADIPATH": "sdk"},
+        worker_environment=worker_environment,
         casadi_path=runtime,
         repo_root=repo_root,
     )

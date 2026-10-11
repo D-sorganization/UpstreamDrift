@@ -1350,6 +1350,7 @@ def run_bound_solution_replay_diagnostic(
     """Run retained controls with before/after evidence and mutation checks."""
     if output_root.exists():
         raise FileExistsError(output_root)
+    _validate_bound_replay_environment(worker_environment, casadi_path, repo_root)
     before = _solution_replay_provenance(
         failed_run, snapshot, worker_python, casadi_path, repo_root
     )
@@ -1394,6 +1395,25 @@ def run_bound_solution_replay_diagnostic(
     }
     atomic_write_json(output_root / "supervisor_result.json", receipt)
     return receipt
+
+
+def _validate_bound_replay_environment(
+    environment: dict[str, str], casadi_path: Path, repo_root: Path
+) -> None:
+    thread_variables = (
+        "OMP_NUM_THREADS",
+        "OPENBLAS_NUM_THREADS",
+        "MKL_NUM_THREADS",
+        "NUMEXPR_NUM_THREADS",
+        "VECLIB_MAXIMUM_THREADS",
+        "BLIS_NUM_THREADS",
+    )
+    if (
+        Path(environment.get("CASADIPATH", "")).resolve() != casadi_path.resolve()
+        or Path(environment.get("PYTHONPATH", "")).resolve() != repo_root.resolve()
+        or any(environment.get(name) != "1" for name in thread_variables)
+    ):
+        raise ValueError("retained replay environment differs from its runtime binding")
 
 
 def _solution_replay_provenance(
