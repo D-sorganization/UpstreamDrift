@@ -46,3 +46,64 @@ def test_track_swing_contracts(tmp_path) -> None:  # noqa: ANN001
         mt.track_swing(mc.MODELS_DIR / "golf_humanoid.osim", np.zeros(3))
     with pytest.raises(FileNotFoundError):
         mt.track_swing(tmp_path / "missing.osim", np.zeros((1, 44)))
+
+
+def _foot_track(rows: int, heel_lift_m: list[float]):  # noqa: ANN202
+    """Static address feet (square stance) with a per-row right-heel lift."""
+    from src.engines.physics_engines.opensim.python import msk_turn_targets as tt
+
+    ankle = {"l": np.array([0.0, -0.2, 0.08]), "r": np.array([0.0, 0.2, 0.08])}
+    axis = {s: np.array([-1.0, 0.0, 0.0]) for s in "lr"}
+    lateral = {"l": np.array([0.0, -1.0, 0.0]), "r": np.array([0.0, 1.0, 0.0])}
+    feet = tt.PlantedFeet(ankle, axis, lateral, 1)
+    tile = lambda v: np.tile(v, (rows, 1))  # noqa: E731
+    zero = np.zeros(rows)
+    return tt.FootTrack(
+        address=feet,
+        ankle={s: tile(ankle[s]) for s in "lr"},
+        axis={s: tile(axis[s]) for s in "lr"},
+        lateral={s: tile(lateral[s]) for s in "lr"},
+        heel_dz_m={"l": zero, "r": np.array(heel_lift_m)},
+        toe_dz_m={"l": zero, "r": zero},
+    )
+
+
+def test_track_swing_rejects_misaligned_foot_track() -> None:
+    from src.engines.physics_engines.opensim.python import msk_club_tracking as mt
+
+    with pytest.raises(ValueError, match="feet has 3 entries for 2 rows"):
+        mt.track_swing(
+            mc.MODELS_DIR / "golf_humanoid.osim",
+            np.zeros((2, 44)),
+            feet=_foot_track(3, [0.0, 0.0, 0.0]),
+        )
+
+
+def test_foot_track_lifts_the_tracked_trail_heel() -> None:
+    """A per-row heel lift moves the tracked trail calcaneus; static feet do not."""
+    pytest.importorskip("opensim")
+    pytest.importorskip("scipy")
+    from src.engines.physics_engines.opensim.python import msk_club_calibration as cal
+    from src.engines.physics_engines.opensim.python import msk_club_tracking as mt
+
+    model = mc.MODELS_DIR / "golf_humanoid.osim"
+    rows = np.load(SWING)["q"][[0, 0]]
+    lift = 0.08
+    moving = mt.track_swing(model, rows, feet=_foot_track(2, [0.0, lift]))
+    flat = mt.track_swing(model, rows, feet=_foot_track(2, [0.0, 0.0]))
+
+    def calcn_y(frames) -> list[float]:  # noqa: ANN001
+        import tempfile
+        from pathlib import Path
+
+        with tempfile.TemporaryDirectory() as tmp:
+            probe = cal.PoseProbe(cal.skeleton_without_club(model, Path(tmp)))
+            heights = []
+            for frame in frames:
+                probe.set(frame.q)
+                heights.append(float(probe.body("calcn_r")[1, 3]))
+        return heights
+
+    rise = np.diff(calcn_y(moving))[0]
+    assert rise > 0.5 * lift
+    assert abs(np.diff(calcn_y(flat))[0]) < 0.01
