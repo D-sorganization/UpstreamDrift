@@ -298,7 +298,6 @@ def _prepare_density_inputs(
 
 def _new_density_canvas(names, region_masses, presentation):
     plt = _matplotlib()
-    from matplotlib import ticker
     from matplotlib.backends.backend_agg import FigureCanvasAgg
     from matplotlib.lines import Line2D
 
