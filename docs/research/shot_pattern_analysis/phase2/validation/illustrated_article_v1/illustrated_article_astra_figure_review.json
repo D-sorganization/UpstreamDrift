@@ -1,0 +1,60 @@
+{
+  "scope": "Illustrated Article Figure Plates Only",
+  "pdf_sha256": "d9fd43fc7e6b5094ac8c5b2e2c2338f7862c3c32d92da8a31f884fd7a17bd290",
+  "pdf_pages_reviewed": [
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17
+  ],
+  "figure_numbers_reviewed": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13
+  ],
+  "page_sha256": {
+    "final_pages/page-05.png": "e96eaa0179ad5e95eaf997360686904f6cf7159161389eee31d2512bddd737c8",
+    "final_pages/page-06.png": "cb29192629323eafd3576cac30fde5b8b2b8f98b6339ea11d6d7b2eebc67caae",
+    "final_pages/page-07.png": "8c41d4f13ce69974d5c194a76d8a5d202dda3dc447b3ee78711cbdfac3ec7092",
+    "final_pages/page-08.png": "2eeb9bf7de1f9179bf9a62841c65cb9664911150e12fcc5bb48f5c513f4e3e0e",
+    "final_pages/page-09.png": "954d8b283fe8d1247580898561184a03c4bab410375d62056eddbe3cfd6c2d9c",
+    "final_pages/page-10.png": "2372822f0485a1b056c403213db8e70434792003c60757b3822bd6858cb88675",
+    "final_pages/page-11.png": "674fb76de452231d2dbad4c394115bc807231b4a33f5b60206ac3c9fb8c7fb1e",
+    "final_pages/page-12.png": "7f29649fc0f938e6e0eb13c8ac0d928d932449e70bd00817e453b6c5357def43",
+    "final_pages/page-13.png": "dc8f816fd0201e4378ff78d168649a09b9b93a4e767fc1633206a90e37faa441",
+    "final_pages/page-14.png": "3556f14d99af6762ceb5ba8c61760cd2f0fc8ed7afea64a1ce8304e2b389f638",
+    "final_pages/page-15.png": "3bc28a78b0bddd8db42962b29fd8ba5d6ace6e6e91c363de9373c766159c1576",
+    "final_pages/page-16.png": "2e08a5c8a39d078764b4ef548611767b1a2a9e42281ee3dd3455cc1655c3c5d4",
+    "final_pages/page-17.png": "08c32db4ddd65e07f86b5b339c5dc2aa41035d58e947f4da1539ca0fa65fb93a"
+  },
+  "accepted": true,
+  "observations": [
+    "All13 page images actually viewed at1500px; figures and captions remain within the page with no clipping, missing glyphs or new overlap observed.",
+    "Axes, contours, legends, colorbars and caption text readable; dense embedded provenance metadata is smaller than the main figure labels and can be zoomed in the vector PDF.",
+    "Corrected captions distinguish six saved paths perpattern from supported populations, and36lean paths from9940common-six indices.",
+    "Withinfigure scales and lateral magnification disclosures retained."
+  ],
+  "limitations": [
+    "Cover, contents and otherpages are outside this review.",
+    "Root is revising cover/TOC; this receipt binds the priorPDF and will need finalpage reconciliation."
+  ]
+}
