@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import os
 import tempfile
 from dataclasses import fields
@@ -18,7 +19,6 @@ from typing import Any
 
 import numpy as np
 
-from src.shared.python.motion_matching.ledger import find_repo_root
 from src.shared.python.physics import SwingState
 from src.shared.python.physics.flight_trajectory_export import FLIGHT_FRAME_ID
 from src.shared.python.shadow_tracker import check_sha256
@@ -166,21 +166,74 @@ def _state_record(state: SwingState) -> dict[str, Any]:
 
 
 def _trajectory_pin(raw: bytes) -> dict[str, Any]:
-    """Admit the same buffer through the canonical public viewer wire reader."""
-    from src.launchers.tools_repo_path import ensure_tools_importable
-
-    ensure_tools_importable(
-        find_repo_root(Path(__file__)), os.environ.get("TOOLS_REPO_PATH")
-    )
-    from shared.python.swing_sim.flight_interchange import (
-        ball_flight_trajectory_from_json,
-    )
-
-    trajectory = ball_flight_trajectory_from_json(raw.decode("utf-8"))
-    if trajectory.frame_id != FLIGHT_FRAME_ID:
+    """Validate canonical ball flight trajectory wire format and return hash/size."""
+    try:
+        data = json.loads(raw.decode("utf-8"))
+    except Exception as exc:
+        raise ValueError(f"Trajectory wire is not valid JSON: {exc}") from exc
+    if not isinstance(data, dict):
+        raise ValueError("Ball flight trajectory must be a JSON object")
+    required_fields = {
+        "channels",
+        "format",
+        "frame_id",
+        "provenance",
+        "samples",
+        "source_id",
+    }
+    if set(data) != required_fields:
+        missing = required_fields - set(data)
+        unknown = set(data) - required_fields
+        raise ValueError(
+            f"Invalid trajectory fields: missing={sorted(missing)}, unknown={sorted(unknown)}"
+        )
+    if data["format"] != "swing_sim.ball_flight_trajectory/1":
+        raise ValueError(f"Unsupported trajectory format: {data['format']}")
+    if data["frame_id"] != FLIGHT_FRAME_ID:
         raise ValueError(
             "Trajectory and extraction must use the canonical flight frame"
         )
+    if not isinstance(data["channels"], list) or not all(
+        isinstance(c, str) for c in data["channels"]
+    ):
+        raise ValueError("Trajectory channels must be a list of strings")
+    prov = data["provenance"]
+    if not isinstance(prov, dict) or set(prov) != {
+        "model_family",
+        "model_name",
+        "parameter_digest",
+    }:
+        raise ValueError("Invalid trajectory provenance block")
+    samples = data["samples"]
+    if not isinstance(samples, list) or len(samples) < 2:
+        raise ValueError("Trajectory samples must be a list of at least 2 samples")
+    last_t = -1.0
+    for s in samples:
+        if not isinstance(s, dict) or "time_s" not in s or "position_m" not in s:
+            raise ValueError("Trajectory sample missing required keys")
+        t = s["time_s"]
+        if (
+            isinstance(t, bool)
+            or not isinstance(t, (int, float))
+            or t < 0
+            or t <= last_t
+        ):
+            raise ValueError(
+                "Trajectory sample times must be non-negative and strictly increasing"
+            )
+        last_t = float(t)
+        pos = s["position_m"]
+        if (
+            not isinstance(pos, (list, tuple))
+            or len(pos) != 3
+            or not all(
+                isinstance(x, (int, float))
+                and math.isfinite(x)
+                and not isinstance(x, bool)
+                for x in pos
+            )
+        ):
+            raise ValueError("Trajectory sample position_m must be a finite 3-vector")
     return {"sha256": hashlib.sha256(raw).hexdigest(), "size_bytes": len(raw)}
 
 

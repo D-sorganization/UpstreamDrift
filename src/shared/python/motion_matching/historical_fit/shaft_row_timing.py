@@ -7,6 +7,7 @@ the canonical capture, decoded pixels, source clock and native motion first.
 from __future__ import annotations
 
 from dataclasses import dataclass
+import math
 from numbers import Real
 import re
 from typing import TYPE_CHECKING
@@ -28,7 +29,7 @@ def _finite_real(value: object) -> bool:
     return (
         isinstance(value, Real)
         and not isinstance(value, bool)
-        and bool(np.isfinite(value))
+        and bool(math.isfinite(float(value)))
     )
 
 
@@ -122,6 +123,7 @@ class RowTimedShaftAssessment(ImageResidualAssessment):
         rms = float(np.sqrt(np.mean(np.square(observed)))) if observed else None
         if (rms is None) != (self.raw_rms_pixels is None) or (
             rms is not None
+            and self.raw_rms_pixels is not None
             and not np.isclose(rms, self.raw_rms_pixels, rtol=1e-12, atol=1e-12)
         ):
             raise ValueError("Raw RMS differs from all unweighted observed endpoints")

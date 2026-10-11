@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import asdict, dataclass, field
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, cast
 import time
 
 import numpy as np
@@ -570,7 +570,7 @@ def _solve_with_telemetry(
 ) -> tuple[OptimizeResult, SolverTelemetry]:
     """Measure the backend call alone; fixed decisions never call a solver."""
     if not x0.size:
-        result = OptimizeResult(
+        result = cast(Any, OptimizeResult)(
             x=x0, success=True, nfev=0, message="All decisions explicitly fixed"
         )
         return result, SolverTelemetry(
@@ -584,7 +584,7 @@ def _solve_with_telemetry(
         x0,
         jac=jacobian if jacobian is not None else "2-point",
         bounds=bounds,
-        method=method,
+        method=cast(Literal["trf", "dogbox", "lm"], method),
         max_nfev=problem.options.max_iterations,
         xtol=problem.options.xtol,
         ftol=problem.options.ftol,

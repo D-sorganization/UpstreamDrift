@@ -53,7 +53,10 @@ def _windows_error_functions() -> (
     import ctypes
     from ctypes import wintypes
 
-    kernel = ctypes.WinDLL("kernel32", use_last_error=False)
+    win_dll = getattr(ctypes, "WinDLL", None)
+    if win_dll is None:
+        return None
+    kernel = win_dll("kernel32", use_last_error=False)
     setter, getter = kernel.SetLastError, kernel.GetLastError
     setter.argtypes, setter.restype = [wintypes.DWORD], None
     getter.argtypes, getter.restype = [], wintypes.DWORD
@@ -79,7 +82,7 @@ def _read_attempt(
             and getattr(exc, "winerror", None) is None
             and native_code in _WINDOWS_SHARING_ERRORS
         ):
-            exc.winerror = native_code
+            exc.winerror = native_code  # type: ignore[attr-defined]
         raise
 
 

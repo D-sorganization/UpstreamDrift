@@ -126,6 +126,7 @@ class ShaftAxisAssessment(ImageResidualAssessment):
         expected = float(np.sqrt(np.mean(np.square(observed)))) if observed else None
         if (expected is None) != (self.raw_rms_pixels is None) or (
             expected is not None
+            and self.raw_rms_pixels is not None
             and not np.isclose(expected, self.raw_rms_pixels, rtol=1e-12, atol=1e-12)
         ):
             raise ValueError("Raw shaft RMS differs from unweighted pixel diagnostics")

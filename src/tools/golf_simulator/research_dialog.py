@@ -31,6 +31,14 @@ from src.shared.python.workspace import ResearchImpactShot
 class ResearchGolfDialog(QDialog):
     """Use actual local service controls; no external destination or simulated GUI tokens."""
 
+    connect_button: QPushButton
+    prepare_button: QPushButton
+    arm_button: QPushButton
+    submit_button: QPushButton
+    disarm_button: QPushButton
+    cancel_button: QPushButton
+    recall_button: QPushButton
+
     def __init__(self, parent: QWidget | None, admitted: ResearchImpactShot) -> None:
         if not isinstance(admitted, ResearchImpactShot):
             raise TypeError(

@@ -238,9 +238,15 @@ def _post_impact(record: Any) -> PostImpactState:
     values = {
         key: finite_array(record[key], shape, key) for key, shape in shapes.items()
     }
-    for name in ("contact_duration", "energy_transfer"):
-        values[name] = values[name].item()
-    return PostImpactState(**values)
+    return PostImpactState(
+        ball_velocity=values["ball_velocity"],
+        ball_angular_velocity=values["ball_angular_velocity"],
+        clubhead_velocity=values["clubhead_velocity"],
+        clubhead_angular_velocity=values["clubhead_angular_velocity"],
+        contact_duration=float(values["contact_duration"].item()),
+        energy_transfer=float(values["energy_transfer"].item()),
+        impact_location=values["impact_location"],
+    )
 
 
 def _target_impact(record: Any, aim: AimContext) -> PostImpactState:
@@ -251,7 +257,7 @@ def _target_impact(record: Any, aim: AimContext) -> PostImpactState:
     transform = Transform6DOF(
         rotation=finite_array(aim.source_to_target_rotation, (3, 3), "Aim rotation")
     )
-    vectors = {
+    vectors: dict[str, Any] = {
         name: transform.transform_vector(getattr(source, name))
         for name in (
             "ball_velocity",

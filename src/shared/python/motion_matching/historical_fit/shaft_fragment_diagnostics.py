@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 from dataclasses import dataclass
+import math
 from numbers import Real
 from typing import Any
 import numpy as np
@@ -19,7 +20,7 @@ def _number(value: Any) -> float:
     if (
         isinstance(value, (bool, np.bool_))
         or not isinstance(value, Real)
-        or not np.isfinite(value)
+        or not math.isfinite(float(value))
     ):
         raise ValueError("Finite real numbers excluding bool required")
     return float(value)

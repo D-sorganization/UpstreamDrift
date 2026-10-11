@@ -348,7 +348,9 @@ def _record(library: NecromatcherLibrary, pin: ResearchAuditPin) -> dict[str, An
     clock = _clock(fit["frames"])
     if clock["frame_count"] != audit["source_frame_count"]:
         raise ValueError("Audited source frame count differs from canonical fit")
-    restart = run.get("fresh_strict_restart", run.get("initial_restart_and_images"))
+    restart: dict[str, Any] = (
+        run.get("fresh_strict_restart") or run.get("initial_restart_and_images") or {}
+    )
     targets = run["targets"].get("fixed_historical_V10_targets", run["targets"])
     _research_flags(targets, ("scientific_acceptance",))
     input_binding = {
