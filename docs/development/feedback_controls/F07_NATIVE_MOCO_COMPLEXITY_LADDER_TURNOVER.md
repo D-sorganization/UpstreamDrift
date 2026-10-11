@@ -199,3 +199,61 @@ binade boundaries. Pure tests cover positive and negative power-of-two
 crossings, the 8-step acceptance/9-step rejection boundary, and subnormals.
 This correction has not been applied to the retained solve or used for another
 optimizer run; the earlier failed run remains immutable evidence.
+
+## Bounded Run at Exact-ULP Checkpoint `a1a2767e612188c6994952bb7b6aff655d78f7cd`
+
+One serial run was authorized at this exact committed checkpoint with the
+existing 30-second per-rung wall limit, solver parallelism 0, native thread
+limits 1, sampled 1 GiB process-tree RSS threshold, and stop-on-first-nonpass.
+The Python 3.13.5 supervisor used psutil 7.0.0; its isolated worker used
+Python 3.12.10 and OpenSim `4.6-2026-06-22-85aaf64`. The `plain` solve
+succeeded in 5.149 seconds wall / 5.063 seconds CPU after 51 iterations, with
+objective `3.175796576239704e-6`. The optimized base-coordinate endpoint was
+`0.3000055857400166` rad for the requested `0.300005` rad target.
+
+The corrected persisted-trajectory audit passed before replay. Exact ordered
+float64 distances were 1 ULP for time, 2 for states, and 3 for controls; their
+maximum absolute errors were respectively `8.673617379884035e-19` seconds,
+`5.551115123125783e-17`, and `6.938893903907228e-18`. All are within the
+predeclared 8-ULP maximum. Saved controls matched the persisted solution's
+clock and control values exactly, and the exact 0 and 0.01 second endpoint
+checks passed. The independent fresh native replay ran, but failed the
+unchanged per-unit state agreement limits: maximum coordinate error was
+`1.5042460832503934e-8` rad (limit `2e-7`), speed error
+`4.243097622228572e-6` rad/s (limit `1e-7`), activation error
+`4.2118714943707725e-4` (limit `1e-8`), and fiber-length error
+`5.393972289921556e-6` m (limit `1e-7`). The replay endpoint was not retained
+because state comparison failed before endpoint validation. No success receipt
+was written, no later rung launched, and no retry was made. The supervisor
+recorded peak sampled worker-tree RSS of 227,803,136 bytes and returned after
+9.936 seconds; a post-run process scan found no remaining ladder worker.
+
+The round-trip array identities and errors were:
+
+| Array    |      Max absolute error | Max ULP | In-memory SHA-256                                                  | Persisted SHA-256                                                  |
+| -------- | ----------------------: | ------: | ------------------------------------------------------------------ | ------------------------------------------------------------------ |
+| Time     | `8.673617379884035e-19` |       1 | `7162018ce4581b12cc5188c7dced3235df6f0a7a8392156d3783408a28cc189c` | `65b6042fb2ab0a5d3d5d256e77bf58d47efbabd4861c20cc2dcf0f7c9247fdb9` |
+| States   | `5.551115123125783e-17` |       2 | `7dfd03b88dac2a24e6cbf6204ef51573dbcc9b8a38e006dda56bef3c75c29b78` | `01ed31a109026c7c45af14186d6b8483a96e33da1a06a4ad54e10406ef3157a2` |
+| Controls | `6.938893903907228e-18` |       3 | `1ab4ed66df04af4dd7f0b319d2392774fd20d6b2b4d445d8e4491df26256e772` | `0059dc7ca34b5d5f11d7e8e226e480f4d7efd2b99535829447a357c7d30cd3c9` |
+
+This run confirms a successful synthetic solve and bounded STO round-trip,
+but not successful fresh replay. It provides no physiological, captured-swing,
+or production-readiness qualification. All run files remain locally retained
+under `experiments/native_moco_ladder_a1a2767e61/plain/`:
+
+| Artifact                                 | SHA-256                                                            |
+| ---------------------------------------- | ------------------------------------------------------------------ |
+| `request.json`                           | `85023064b3e1ca8c8c03c73ded091fdff19633284b61337ae35129b8f2b0536e` |
+| `progress.json`                          | `502a61d373a3f800877cbe3a1686f6cd7b0612010068f7ec6262c4c41bcdb5cc` |
+| `solution_serialization_audit.json`      | `c178a5366a235e9db88415b135e5b216c951852c678bd49d94dfaaeabe42ab38` |
+| `solution.sto`                           | `9c96137a20e5ac014ed5e90685967e7fb85a6e563cc870986e02a4367aaac851` |
+| `time_only_controls.sto`                 | `b5c65c34067a17e5964bf4e82d1e34268c7c40d747597657a2c98a70737ceb95` |
+| `source.osim`                            | `6a098517bdba09b19b3eb99e4da7e795f27d10be8f42c0fca04fee20ce67e143` |
+| `worker.stderr.log`                      | `d2ad61fb9f2d516bbbff5266800e1ad8270cce4f3ee20289b9d51c9903fe8772` |
+| `worker.stdout.log`                      | `48ba1cd5a89ded9433c6adb4075087403f7bfb85933a240ec1e60a20d4436f73` |
+| `witness/witness_states.sto`             | `8524ace75d72795445b7a8bb7095cf63f41af9709452afee5285398c779f5f10` |
+| `witness/witness_time_only_controls.sto` | `db0c14e4fbfb1fe9678fcb5df75b6e027ee1462922ff6dff0134dd6fde6f3e72` |
+
+The executed worker and harness source hashes were
+`b1a95f9aae245d6d04a9b4b91aae07fd29a3f43543797c0ca83eb8e2f137fe43` and
+`62ed9de2d82713ed36be87decfc83a4a3e63c9f2886ad4573e85d9fd0ed77a07`.
