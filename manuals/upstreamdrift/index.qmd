@@ -113,3 +113,5 @@ UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
 {{< include chapters/55-unqualified-moco-feasibility.qmd >}}
 
 {{< include chapters/24-native-path-work.qmd >}}
+
+{{< include chapters/49-native-opensim-mixed-marker-observation.qmd >}}
