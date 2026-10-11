@@ -9,6 +9,7 @@ from src.shared.python.motion_matching.force_nullspace import (
     ForceNullSpace,
     FrictionCone,
     redistribute_forces,
+    redistribute_trajectory,
 )
 
 pytestmark = pytest.mark.unit
@@ -47,6 +48,7 @@ def test_minimum_effort_matches_analytical_load_sharing():
     assert result.feasible
     np.testing.assert_allclose(result.forces, [9.6, 2.4], atol=1e-7)
     assert result.equality_error < 1e-9
+    assert result.converged
 
 
 def test_hard_zero_trail_infeasible_is_not_repaired_or_successful():
@@ -172,6 +174,56 @@ def test_solver_success_does_not_override_constraint_audit(monkeypatch):
         space, np.ones(2), ForceConstraints(np.zeros(2), np.full(2, 20.0))
     )
     assert result.converged and not result.feasible
+
+
+@pytest.mark.parametrize("status", [8, 9])
+def test_non_success_slsqp_status_is_not_converged_for_forces(
+    monkeypatch: pytest.MonkeyPatch, status: int
+) -> None:
+    from types import SimpleNamespace
+    from src.shared.python.motion_matching import force_nullspace
+
+    monkeypatch.setattr(
+        force_nullspace,
+        "minimize",
+        lambda *a, **kw: SimpleNamespace(
+            x=np.array([0.0]), success=False, status=status, message="stopped"
+        ),
+    )
+    space = ForceNullSpace.from_balance(np.ones((1, 2)), np.array([12.0]))
+    result = redistribute_forces(
+        space, np.ones(2), ForceConstraints(np.zeros(2), np.full(2, 20.0))
+    )
+
+    assert result.feasible
+    assert not result.converged
+
+
+@pytest.mark.parametrize("status", [8, 9])
+def test_non_success_slsqp_status_is_not_converged_for_trajectory(
+    monkeypatch: pytest.MonkeyPatch, status: int
+) -> None:
+    from types import SimpleNamespace
+    from src.shared.python.motion_matching import force_nullspace
+
+    monkeypatch.setattr(
+        force_nullspace,
+        "minimize",
+        lambda *a, **kw: SimpleNamespace(
+            x=np.zeros(2), success=False, status=status, message="stopped"
+        ),
+    )
+    space = ForceNullSpace.from_balance(np.ones((1, 2)), np.array([12.0]))
+    constraints = ForceConstraints(np.zeros(2), np.full(2, 20.0))
+    result = redistribute_trajectory(
+        [space, space],
+        np.ones(2),
+        [constraints, constraints],
+        np.array([0.0, 1.0]),
+    )
+
+    assert result.feasible
+    assert not result.converged
 
 
 def test_zero_matrix_has_full_nullity():
